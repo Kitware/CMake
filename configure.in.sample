@@ -1,0 +1,617 @@
+# Process this file with autoconf to produce a configure script.
+AC_INIT()
+
+AC_CONFIG_HEADER(itkConfigure.h)
+
+CMAKE_CONFIG_DIR=`pwd`
+AC_SUBST(CMAKE_CONFIG_DIR)
+
+#
+# check for some programs we use
+#
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+AC_PATH_XTRA
+
+
+# get byte swapping info
+AC_C_BIGENDIAN
+if test $ac_cv_c_bigendian = yes; then
+  AC_DEFINE(CMAKE_WORDS_BIGENDIAN)
+fi
+
+
+# some stuff Tcl uses
+#
+AC_CHECK_HEADER(limits.h, HAVE_LIMITS_H=-DHAVE_LIMITS_H,HAVE_LIMITS_H="")
+AC_SUBST(HAVE_LIMITS_H)
+AC_HAVE_HEADERS(unistd.h, HAVE_UNISTD_H=-DHAVE_UNISTD_H,HAVE_UNISTD_H="")
+AC_SUBST(HAVE_UNISTD_H)
+
+# Step 1: set the variable "system" to hold the name and version number
+# for the system.  This can usually be done via the "uname" command, but
+# there are a few systems, like Next, where this doesn't work.
+
+AC_MSG_CHECKING([system version (for dynamic loading)])
+if test -f /usr/lib/NextStep/software_version; then
+  system=NEXTSTEP-`awk '/3/,/3/' /usr/lib/NextStep/software_version`
+else
+    system=`uname -s`-`uname -r`
+    if test "$?" -ne 0 ; then
+	AC_MSG_RESULT([unknown (can't find uname command)])
+	system=unknown
+    else
+	# Special check for weird MP-RAS system (uname returns weird
+	# results, and the version is kept in special file).
+    
+	if test -r /etc/.relid -a "X`uname -n`" = "X`uname -s`" ; then
+	    system=MP-RAS-`awk '{print $3}' /etc/.relid'`
+	fi
+	AC_MSG_RESULT($system)
+    fi
+fi
+
+
+
+#
+# use shared libs
+#
+AC_ARG_WITH(shared,
+         [  --with-shared           create shared libraries],
+         [CMAKE_shared_ok=$withval], [CMAKE_shared_ok=no])
+
+INSTALL_TARGET="install"
+
+
+
+AC_SUBST(INSTALL_TARGET)
+
+BUILD_TOOLKITS=""
+CLEAN_TOOLKITS=""
+DEPEND_TOOLKITS=""
+INSTALL_TOOLKITS=""
+
+# --with-kits goes here
+AC_SUBST(BUILD_TOOLKITS)
+AC_SUBST(INSTALL_TOOLKITS)
+AC_SUBST(DEPEND_TOOLKITS)
+AC_SUBST(CLEAN_TOOLKITS)
+
+
+# option for handling BSD style makefile includes
+#
+AC_ARG_WITH(bsdmake,
+         [  --with-bsdmake          uses bsd style makefile includes],
+	 if test "$withval" = yes; then
+         MAKEINCLUDE=".include"
+         MAKEQUOTE='"'
+         fi,
+         MAKEINCLUDE="include"
+         MAKEQUOTE='')
+AC_SUBST(MAKEINCLUDE)
+AC_SUBST(MAKEQUOTE)
+
+
+
+# the following is an excerpt from the tcl7.5b2 configure.in
+#--------------------------------------------------------------------
+#	The statements below define a collection of symbols related to
+#	dynamic loading and shared libraries:
+#
+#	SHLIB_CFLAGS -	Flags to pass to cc when compiling the components
+#			of a shared library (may request position-independent
+#			code, among other things).
+#	SHLIB_LD_LIBS -	Dependent libraries for the linker to scan when
+#			creating shared libraries.  This symbol typically
+#			goes at the end of the "ld" commands that build
+#			shared libraries. The value of the symbol if
+#			"${LIBS}" if all of the dependent libraries should
+#			be specified when creating a shared library.  If
+#			dependent libraries should not be specified (as on
+#			SunOS 4.x, where they cause the link to fail, or in
+#			general if Tcl and Tk aren't themselves shared
+#			libraries), then this symbol has an empty string
+#			as its value.
+#	SHLIB_SUFFIX -	Suffix to use for the name of the shared library.  An
+#			empty string means we don't know how to use shared
+#			libraries on this platform.
+#	CMAKE_SHLIB_BUILD_FLAGS -
+#                       Flags to use when building a shared library.	
+#	CMAKE_SHLIB_LINK_FLAGS -	
+#                       Flags to pass to the compiler when linking object
+#			files into an executable application binary such
+#			as tclsh.
+#--------------------------------------------------------------------
+
+
+# Step 2: check for existence of -ldl library.  This is needed because
+# Linux can use either -ldl or -ldld for dynamic loading.
+
+AC_CHECK_LIB(dl, dlopen, have_dl=yes, have_dl=no)
+
+# Step 4: set configuration options based on system name and version.
+
+fullSrcDir=`cd $srcdir; pwd`
+AC_SUBST(fullSrcDir)
+case $system in
+    AIX-*)
+	# AIX: can't link shared library extensions unless Tcl and Tk are
+	# also shared libraries.
+	SHLIB_CFLAGS=""
+	SHLIB_LD_LIBS='${LIBS}'
+	SHLIB_SUFFIX="..o"
+	DL_LIBS=""
+        AC_CHECK_LIB(ld,printf, DL_LIBS="-lld")
+	CMAKE_SHLIB_LINK_FLAGS=""
+	;;
+    HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
+	SHLIB_CFLAGS="+z"
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".sl"
+	DL_LIBS="-ldld"
+	CMAKE_SHLIB_BUILD_FLAGS='+Z -Wl,-E -Wl,-b'
+	CMAKE_SHLIB_LINK_FLAGS='-Wl,+s -Wl,+b,${LIB_RUNTIME_DIR}'
+        if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
+  	  CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-E -Wl,-b'
+	  CMAKE_SHLIB_LINK_FLAGS='-Wl,+s -Wl,+b,${LIB_RUNTIME_DIR}'
+        fi
+	;;
+    IRIX-5.*)
+	SHLIB_CFLAGS=""
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS=""
+	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
+	;;
+    IRIX-6* | IRIX64-6* | IRIX-64-6*)
+	SHLIB_CFLAGS=""
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS=""
+	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
+	;;
+    Linux*)
+	SHLIB_CFLAGS="-fPIC"
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	CMAKE_SHLIB_BUILD_FLAGS="-shared"
+	if test "$have_dl" = yes; then
+	    DL_LIBS="-ldl"
+	    CMAKE_SHLIB_LINK_FLAGS="-rdynamic"
+	else
+	    AC_CHECK_HEADER(dld.h, [
+		DL_LIBS="-ldld"
+		CMAKE_SHLIB_LINK_FLAGS=""])
+	fi
+	;;
+    CYGWIN_NT*)
+        DL_LIBS="-lgdi32"
+        ;;
+    MP-RAS-02*)
+	SHLIB_CFLAGS="-K PIC"
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS="-ldl"
+	CMAKE_SHLIB_LINK_FLAGS=""
+	;;
+    MP-RAS-*)
+	SHLIB_CFLAGS="-K PIC"
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS="-ldl"
+	CMAKE_SHLIB_LINK_FLAGS="-Wl,-Bexport"
+	;;
+    NetBSD-*|FreeBSD-*)
+	# Not available on all versions:  check for include file.
+	if test -f /usr/include/dlfcn.h; then
+	    SHLIB_CFLAGS="-fpic"
+	    SHLIB_LD_LIBS=""
+	    SHLIB_SUFFIX=".so"
+	    DL_LIBS=""
+	    CMAKE_SHLIB_LINK_FLAGS="-shared"
+	else
+	    SHLIB_CFLAGS=""
+	    SHLIB_LD_LIBS=""
+	    SHLIB_SUFFIX="..o"
+	    DL_LIBS=""
+	    CMAKE_SHLIB_LINK_FLAGS=""
+	fi
+	;;
+    NEXTSTEP-*)
+	SHLIB_CFLAGS=""
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS=""
+	;;
+    OSF1-1.[012])
+	# OSF/1 1.[012] from OSF, and derivatives, including Paragon OSF/1
+	SHLIB_CFLAGS=""
+	# Hack: make package name same as library name
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS=""
+	;;
+    OSF1-1.*)
+	# OSF/1 1.3 from OSF using ELF, and derivatives, including AD2
+	SHLIB_CFLAGS="-fpic"
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS=""
+	;;
+    OSF1-V*)
+        # Digital OSF/1
+	SHLIB_CFLAGS=""
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS=""
+	CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-expect_unresolved,"*"'
+	CMAKE_SHLIB_LINK_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
+	;;
+    RISCos-*)
+	SHLIB_CFLAGS="-G 0"
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX="..o"
+	DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS="-Wl,-D,08000000"
+	;;
+    SCO_SV-3.2*)
+        # Note, dlopen is available only on SCO 3.2.5 and greater.  However,
+        # this test works, since "uname -s" was non-standard in 3.2.4 and
+        # below.
+	SHLIB_CFLAGS="-Kpic -belf"
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS="-belf -Wl,-Bexport"
+	;;
+     SINIX*5.4*)
+	SHLIB_CFLAGS="-K PIC"
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS="-ldl"
+	CMAKE_SHLIB_LINK_FLAGS=""
+	;;
+    SunOS-4*)
+	SHLIB_CFLAGS="-PIC"
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS="-ldl"
+	CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-r -nostdlib'
+	CMAKE_SHLIB_LINK_FLAGS='-Wl,-L${LIB_RUNTIME_DIR}'
+	;;
+    SunOS-5*)
+	SHLIB_CFLAGS="-KPIC"
+	SHLIB_LD_LIBS='${LIBS}'
+	SHLIB_SUFFIX=".so"
+	DL_LIBS="-ldl"
+	CMAKE_SHLIB_BUILD_FLAGS='-G'
+	CMAKE_SHLIB_LINK_FLAGS='-R ${LIB_RUNTIME_DIR}'
+        if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
+	  CMAKE_SHLIB_BUILD_FLAGS='-Wl,-G'
+	  CMAKE_SHLIB_LINK_FLAGS='-Wl,-R,${LIB_RUNTIME_DIR}'
+        fi
+	;;
+    ULTRIX-4.*)
+	SHLIB_CFLAGS="-G 0"
+	SHLIB_SUFFIX="..o"
+	SHLIB_LD_LIBS=""
+	DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS="-Wl,-D,08000000"
+	;;
+    UNIX_SV*)
+	SHLIB_CFLAGS="-K PIC"
+	SHLIB_LD_LIBS=""
+	SHLIB_SUFFIX=".so"
+	DL_LIBS="-ldl"
+	CMAKE_SHLIB_LINK_FLAGS="-Wl,-Bexport"
+	;;
+esac
+export SHLIB_SUFFIX
+
+# If we're running gcc, then change the C flags for compiling shared
+# libraries to the right flags for gcc, instead of those for the
+# standard manufacturer compiler.
+if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
+  SHLIB_CFLAGS="-fPIC"
+fi
+
+if test "$CMAKE_shared_ok" = "yes"; then
+    CMAKE_SHLIB_CFLAGS="${SHLIB_CFLAGS}"
+    CMAKE_LD_SEARCH_FLAGS="${LD_SEARCH_FLAGS}"
+    CMAKE_TCL_SHLIB_TARGET="CMAKEtcl"
+    RANLIB=":"
+    TOOLKIT_DEPENDS=""
+    CMAKE_LIB_EXT="${SHLIB_SUFFIX}"
+else
+    CMAKE_LIB_EXT=".a"
+    SHLIB_LD_LIBS=""
+    CMAKE_SHLIB_CFLAGS=""
+    CMAKE_LD_SEARCH_FLAGS=""
+fi
+export CMAKE_LIB_EXT
+
+AC_SUBST(CMAKE_TCL_SHLIB_TARGET)
+
+
+AC_SUBST(TOOLKIT_DEPENDS)
+
+AC_SUBST(CMAKE_SHLIB_LINK_FLAGS)
+AC_SUBST(CMAKE_SHLIB_BUILD_FLAGS)
+
+AC_SUBST(CMAKE_SHLIB_CFLAGS)
+AC_SUBST(CMAKE_LIB_EXT)
+AC_SUBST(DL_LIBS)
+AC_SUBST(SHLIB_LD_LIBS)
+AC_SUBST(SHLIB_SUFFIX)
+
+
+#--------------------------------------------------------------------
+#	Include sys/select.h if it exists and if it supplies things
+#	that appear to be useful and aren't already in sys/types.h.
+#	This appears to be true only on the RS/6000 under AIX.  Some
+#	systems like OSF/1 have a sys/select.h that's of no use, and
+#	other systems like SCO UNIX have a sys/select.h that's
+#	pernicious.  If "fd_set" isn't defined anywhere then set a
+#	special flag.
+#--------------------------------------------------------------------
+
+AC_MSG_CHECKING([fd_set and sys/select])
+AC_TRY_COMPILE([#include <sys/types.h>],
+	[fd_set readMask, writeMask;], tk_ok=yes, tk_ok=no)
+if test $tk_ok = no; then
+    AC_HEADER_EGREP(fd_mask, sys/select.h, tk_ok=yes)
+    if test $tk_ok = yes; then
+	AC_DEFINE(HAVE_SYS_SELECT_H)
+    fi
+fi
+AC_MSG_RESULT($tk_ok)
+if test $tk_ok = no; then
+    AC_DEFINE(NO_FD_SET)
+fi
+
+
+##########################
+##			##
+## Check thread support ##
+##			##
+##########################
+# initialize thread vars
+THREAD_LIBS=""
+THREAD_FLAGS=""
+use_sproc=no
+CMAKE_USE_SPROC=0
+CMAKE_USE_PTHREADS=0
+CMAKE_HP_PTHREADS=0
+
+##########################
+##                      ##
+##      sproc           ##
+##                      ##
+##########################
+# check for sproc
+force_sproc=no
+AC_ARG_WITH(sproc,
+         [  --with-sproc           use sproc instead of pthreads if possible],
+         if test "$withval" = yes; then
+         force_sproc=yes
+         fi,)
+
+
+
+AC_CHECK_HEADERS(sys/prctl.h, [use_sproc=yes])
+if test "$use_sproc" = "yes"; then
+case $system in
+    Linux* | IRIX64-6.5 | IRIX-6.5) 
+        if test "$force_sproc" = "yes"; then
+           CMAKE_USE_SPROC=1
+        else
+	  use_sproc=no
+    	fi
+	;;
+    IRIX*)
+	CMAKE_USE_SPROC=1
+	;;
+esac
+fi
+use_pthreads=no
+AC_CHECK_HEADERS(pthread.h, [use_pthreads=yes])
+if test "$use_pthreads" = "yes"; then
+  if test "$use_sproc" = "no"; then
+    AC_CHECK_LIB(pthreads, pthread_create, THREAD_LIBS="-lpthreads")
+    AC_CHECK_LIB(pthread, pthread_create, THREAD_LIBS="-lpthread")
+# Work around Solaris 5.6 and 5.7 bug:
+    if test "`uname -s -r`" = "SunOS 5.6"; then
+      AC_CHECK_LIB(thread, thr_create, THREAD_LIBS="$THREAD_LIBS -lthread")
+    fi
+    if test "`uname -s -r`" = "SunOS 5.7"; then
+      AC_CHECK_LIB(thread, thr_create, THREAD_LIBS="$THREAD_LIBS -lthread")
+    fi
+	CMAKE_USE_PTHREADS=1
+  fi
+fi
+
+# on an HP with pthread we need to use -lcma
+# on dec alphas we have had problems as well
+if test "$use_pthreads" = "yes"; then
+case $system in
+    HP-UX-*.10.*)
+	THREAD_LIBS="-lcma"
+	CMAKE_USE_PTHREADS=1 
+	CMAKE_HP_PTHREADS=1
+	;;
+    OSF1-V*)
+	CMAKE_USE_PTHREADS=0
+        THREAD_LIBS=""
+        ;;
+    FreeBSD*)
+	CMAKE_USE_PTHREADS=0
+	THREAD_LIBS=""
+	;;
+esac
+fi
+
+
+if test $CMAKE_USE_SPROC = 1; then
+AC_DEFINE(CMAKE_USE_SPROC)
+fi
+if test $CMAKE_USE_PTHREADS = 1; then
+AC_DEFINE(CMAKE_USE_PTHREADS)
+fi
+if test $CMAKE_HP_PTHREADS = 1; then
+AC_DEFINE(CMAKE_HP_PTHREADS)
+fi
+
+AC_SUBST(THREAD_LIBS)
+
+
+
+# on hp use -Aa for ansi
+if test $ac_cv_prog_gxx = no; then
+case $system in
+    HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
+        echo $ac_n "checking whether ${CC} accepts -Aa""... $ac_c" 1>&6
+        echo 'void f(){}' > conftest.c
+        if test -z "`${CC} -Aa -c conftest.cc 2>&1`"; then
+          echo "$ac_t""yes" 1>&6
+          ANSI_CFLAGS="-Aa"
+        else
+          echo "$ac_t""no" 1>&6
+        fi
+        rm -f conftest*
+	;;
+esac
+fi
+AC_SUBST(ANSI_CFLAGS)
+
+# if we are not running g++ then we might need some other flags
+# to get the templates compiled correctly
+CMAKE_TEMPLATE_FLAGS=""
+if test $ac_cv_prog_gxx = no; then
+    echo $ac_n "checking whether ${CXX} accepts -ptused -no_prelink""... $ac_c" 1>&6
+  echo 'void f(){}' > conftest.cc
+  if test -z "`${CXX} -ptused -no_prelink -c conftest.cc 2>&1`"; then
+    echo "$ac_t""yes" 1>&6
+    CMAKE_TEMPLATE_FLAGS="-ptused -no_prelink"
+  else
+    echo "$ac_t""no" 1>&6
+  fi
+  rm -f conftest*
+  echo $ac_n "checking whether ${CXX} accepts -instances=semiexplicit""... $ac_c" 1>&6
+  echo 'void f(){}' > conftest.cc
+  if test -z "`${CXX} -instances=static -c conftest.cc 2>&1`"; then
+    echo "$ac_t""yes" 1>&6
+    CMAKE_TEMPLATE_FLAGS="-instances=static"
+  else
+    echo "$ac_t""no" 1>&6
+  fi
+fi
+AC_SUBST(CMAKE_TEMPLATE_FLAGS)
+
+if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
+  SHLIB_CFLAGS="-fPIC"
+fi
+
+if test -f $CMAKE_CONFIG_DIR/CMakeLocal.make.in; then
+   echo "create CMakeLocal.make from $CMAKE_CONFIG_DIR/CMakeLocal.make.in"
+   rm -f local.make
+   cp $CMAKE_CONFIG_DIR/local.make.in local.make
+else
+   echo "no $CMAKE_CONFIG_DIR/CMakeLocal.make.in creating an empty CMakeLocal.make file"
+   rm -f CMakeLocal.make
+   touch CMakeLocal.make
+fi
+
+AC_SUBST(EXTRA_GCC_FLAG)
+
+
+# run any sub directory cofigure scripts here
+
+AC_CONFIG_SUBDIRS(Code/Insight3DParty/vxl/vcl)
+
+# *****************************************
+# 
+#  This next section extracts the sub-directories from 
+#  the CMakeLists.txt file in the current directory,
+#  and any sub directories recursivley 
+#
+
+echo "Searching CMakeLists.txt files for all sub directories"
+# the result of a the directories found is stored in allDirs
+allDirs=
+# start looking in the current directory .
+searchDirs=$srcdir
+# loop until the flag dirHasListsFile is set to falls
+dirHasListsFile=:
+while $dirHasListsFile; do
+    # reset the varible used to store the full paths to the directory
+    # outside the for loop
+    fullPathDirs=
+    # loop over all directorirs in the current searchDirs varible
+    for currentDir in $searchDirs;do
+	# look for a CMakeLists.txt file in the current directory
+	if test -e$currentDir/CMakeLists.txt; then
+	    # extract the SUBDIRS varible from the CMakeLists.txt file
+	    dirsInListsFile=`cat $currentDir/CMakeLists.txt | sed -e :a -e '/SUBDIRS.*\\\\$/N; s/\\\\\\n//; ta' | grep SUBDIRS | sed -e "s/SUBDIRS//g; s/(//g;s/)//g" `
+	    # add the current directory to any sub dirs found
+	    # in the above search of CMakeLists.txt
+	    for subdir in $dirsInListsFile;do
+		fullPathDirs="$fullPathDirs $currentDir/$subdir"
+		allDirs="$allDirs $currentDir/$subdir"
+	    done
+	fi
+    done
+    # now get ready to search any directories found in the above for loop
+    searchDirs=$fullPathDirs
+    # check to see if searchDirs is emtpy
+    if test "x$searchDirs" = x; then
+	dirHasListsFile=false
+    fi
+done  # continue while loop until dirHasListsFile=false
+
+if test "x$srcdir" = x.; then
+    allDirs=`echo $allDirs | sed -e "s|\./||g"`
+else
+    allDirs=`echo $allDirs | sed -e "s|$srcdir/||g"`
+fi
+SUBDIR_MAKEFILES=`echo $allDirs | sed -e 's|\\([[A-Za-z0-9_/]][[A-Za-z0-9_/]]*\\)|\1/Makefile:CMake/MakefileTemplate.in|g'`
+
+SUBDIR_CMAKE_TARGETS=`echo $allDirs | sed -e 's|\\([[A-Za-z0-9_/]][[A-Za-z0-9_/]]*\\)|\1/CMakeTargets.make:CMake/CMakeTargets.make.in|g'`
+
+#
+# *****************************************
+#  end of extract SUBDIRS out of CMakeLists.txt files
+# 
+
+
+# output to the top level Makefile, which must be present
+# create the toplevel CMakeTargets.make file
+# Create all the make file fragments in CMake
+# Create the Makefile in CMake/Source
+# Create all the Makefiles and CMakeTargets.make files for
+# sub directories found in CMakeLists.txt files
+
+AC_OUTPUT(
+Makefile:CMake/MakefileTemplate.in
+CMakeTargets.make:CMake/CMakeTargets.make.in 
+CMake/CMakeSimpleRules.make 
+CMake/CMakeMaster.make 
+CMake/CMakeVariables.make
+CMake/CMakeRules.make 
+CMake/Source/CMakeTargets.make:CMake/dummy.in 
+CMake/Source/Makefile
+$SUBDIR_MAKEFILES
+$SUBDIR_CMAKE_TARGETS
+)
+
+
+
+# force a rebuild of rulesgen which will rebuild CMakeTargets.make
+# this has to be done because configure generates empty CMakeTargets.make files
+# for makes other than gnu.
+rm -f CMake/Source/CMakeBuildTargets
+rm -f CMake/Source/CMakeBuildTargets.exe
