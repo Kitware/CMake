@@ -83,7 +83,7 @@
 #endif
 
 #ifdef __DECCXX_VER
-# if __DECCXX_VER <= 60390002
+# if __DECCXX_VER <= 60390008 
 #  define CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
 # endif
 #endif
