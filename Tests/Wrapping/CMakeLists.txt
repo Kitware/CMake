@@ -123,6 +123,10 @@ CONFIGURE_FILE(
 #
 # Mangled Mesa
 #
+CONFIGURE_FILE(
+  ${Wrapping_SOURCE_DIR}/dummy
+  ${Wrapping_BINARY_DIR}/gl.h
+  COPYONLY IMMEDIATE)
 USE_MANGLED_MESA (${Wrapping_BINARY_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
 
 #
