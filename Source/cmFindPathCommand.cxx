@@ -59,7 +59,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
   if(cacheValue)
     {
     cmCacheManager::CacheEntry* e = 
-      cmCacheManager::GetInstance()->GetCacheEntry(args[0].c_str());
+      m_Makefile->GetCacheManager()->GetCacheEntry(args[0].c_str());
     if(e)
       {
       helpString = e->m_HelpString;

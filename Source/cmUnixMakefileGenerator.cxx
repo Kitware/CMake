@@ -2202,3 +2202,40 @@ void cmUnixMakefileGenerator::EnableLanguage(const char* lang)
     m_Makefile->AddDefinition("RUN_CONFIGURE", true);
     }
 }
+
+int cmUnixMakefileGenerator::TryCompile(const char *srcdir, 
+                                        const char *bindir,
+                                        const char *)
+{
+  // now build the test
+  std::string makeCommand = m_Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
+  if(makeCommand.size() == 0)
+    {
+    cmSystemTools::Error(
+      "Generator cannot find the appropriate make command.");
+    return 1;
+    }
+  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
+
+  /**
+   * Run an executable command and put the stdout in output.
+   */
+  std::string output;
+
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  cmSystemTools::ChangeDirectory(bindir);
+
+  // now build
+  makeCommand += " all";
+  
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output))
+    {
+    cmSystemTools::Error("Generator: execution of make failed.");
+    // return to the original directory
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    return 1;
+    }
+  cmSystemTools::ChangeDirectory(cwd.c_str());
+  return 0;
+}
+

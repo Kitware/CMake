@@ -738,4 +738,3 @@ std::string cmNMakeMakefileGenerator::LowerCasePath(const char* path)
 {
   return cmSystemTools::LowerCase(path);
 }
-

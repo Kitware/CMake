@@ -30,6 +30,7 @@
 // CMakeSetupDialog dialog
 
 class CMakeCommandLineInfo;
+class cmake;
 
 class CMakeSetupDialog : public CDialog
 {
@@ -37,6 +38,9 @@ class CMakeSetupDialog : public CDialog
 public:
   CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo, 
                    CWnd* pParent = NULL);	
+  // return the cmake that is currently being used
+  cmake *GetCMakeInstance() {
+    return m_CMakeInstance; }
 protected:
   //! Load cache file from m_WhereBuild and display in GUI editor
   void LoadCacheFromDiskToGUI();
@@ -119,8 +123,9 @@ protected:
   DECLARE_MESSAGE_MAP()
     
     int m_oldCX;
-    int m_oldCY;
+  int m_oldCY;
   float m_deltaXRemainder;
+  cmake *m_CMakeInstance;
 };
 
 //{{AFX_INSERT_LOCATION}}

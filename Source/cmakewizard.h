@@ -31,7 +31,8 @@ public:
   /**
    * Prompt the User for a new value for key, the answer is put in entry.
    */
-  virtual void AskUser(const char* key, cmCacheManager::CacheEntry & entry);
+  virtual void AskUser(const char* key, cmCacheManager::CacheEntry & entry,
+                       cmCacheManager *cm);
   ///! Show a message to wait for cmake to run.
   virtual void ShowMessage(const char*);
   

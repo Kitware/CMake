@@ -50,27 +50,6 @@ cmCacheManager::CacheEntryType cmCacheManager::StringToType(const char* s)
   return STRING;
 }
 
-void cmCacheManager::DeleteInstance()
-{
-  delete cmCacheManager::GetInstance();
-  cmCacheManager::s_Instance = 0;
-}
-
-    
-
-cmCacheManager* cmCacheManager::s_Instance = 0;
-
-cmCacheManager* cmCacheManager::GetInstance()
-{
-  if(!cmCacheManager::s_Instance)
-    {
-    cmCacheManager::s_Instance = new cmCacheManager;
-    }
-  return cmCacheManager::s_Instance;
-}
-
-
-
 bool cmCacheManager::LoadCache(cmMakefile* mf)
 {
   return this->LoadCache(mf->GetHomeOutputDirectory());
@@ -523,8 +502,7 @@ bool cmCacheManager::IsAdvanced(const char* key)
 {
   std::string advancedVar = key;
   advancedVar += "-ADVANCED";
-  const char* value = 
-    cmCacheManager::GetInstance()->GetCacheValue(advancedVar.c_str());
+  const char* value = this->GetCacheValue(advancedVar.c_str());
   if(value)
     {
     return cmSystemTools::IsOn(value);

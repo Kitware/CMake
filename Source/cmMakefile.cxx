@@ -25,6 +25,7 @@
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
+#include "cmake.h"
 #include <stdio.h>  // required for sprintf
 
 // default is not to be building executables
@@ -48,6 +49,7 @@ cmMakefile::cmMakefile()
   
   m_DefineFlags = " ";
   m_MakefileGenerator = 0;
+  m_CacheManager = 0;
   this->AddSourceGroup("", "^.*$");
   this->AddSourceGroup("Source Files", "\\.(cpp|C|c|cxx|rc|def|r|odl|idl|hpj|bat)$");
   this->AddSourceGroup("Header Files", "\\.(h|hh|hpp|hxx|hm|inl)$");
@@ -57,24 +59,20 @@ cmMakefile::cmMakefile()
 
 unsigned int cmMakefile::GetCacheMajorVersion()
 {
-  if(!cmCacheManager::GetInstance()->
-     GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"))
+  if(!this->m_CacheManager->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"))
     {
     return 0;
     }
-  return atoi(cmCacheManager::GetInstance()->
-              GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"));
+  return atoi(this->m_CacheManager->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"));
 }
 
 unsigned int cmMakefile::GetCacheMinorVersion()
 {
-  if(!cmCacheManager::GetInstance()->
-     GetCacheValue("Cmake_Cache_MINOR_VERSION"))
+  if(!this->m_CacheManager->GetCacheValue("Cmake_Cache_MINOR_VERSION"))
     {
     return 0;
     }
-  return atoi(cmCacheManager::GetInstance()->
-              GetCacheValue("CMAKE_CACHE_MINOR_VERSION"));
+  return atoi(this->m_CacheManager->GetCacheValue("CMAKE_CACHE_MINOR_VERSION"));
 }
 
 
@@ -464,10 +462,10 @@ void cmMakefile::AddCustomCommand(const char* source,
     m_Targets[target].GetCustomCommands().push_back(cc);
     std::string cacheCommand = command;
     this->ExpandVariablesInString(cacheCommand);
-    if(cmCacheManager::GetInstance()->GetCacheValue(cacheCommand.c_str()))
+    if(this->m_CacheManager->GetCacheValue(cacheCommand.c_str()))
       {
       m_Targets[target].AddUtility(
-        cmCacheManager::GetInstance()->GetCacheValue(cacheCommand.c_str()));
+        this->m_CacheManager->GetCacheValue(cacheCommand.c_str()));
       }
     }
 }
@@ -598,7 +596,7 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
                                     const char* doc,
                                     cmCacheManager::CacheEntryType type)
 {
-  cmCacheManager::GetInstance()->AddCacheEntry(name, value, doc, type);
+  this->m_CacheManager->AddCacheEntry(name, value, doc, type);
   this->AddDefinition(name, value);
 }
 
@@ -620,7 +618,7 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 
 void cmMakefile::AddCacheDefinition(const char* name, bool value, const char* doc)
 {
-  cmCacheManager::GetInstance()->AddCacheEntry(name, value, doc);
+  this->m_CacheManager->AddCacheEntry(name, value, doc);
   this->AddDefinition(name, value);
 }
 
@@ -673,7 +671,7 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   // hence useless.
   std::string depname = lname;
   depname += "_LIB_DEPENDS";
-  cmCacheManager::GetInstance()->
+  this->m_CacheManager->
     AddCacheEntry(depname.c_str(), "",
                   "Dependencies for target", cmCacheManager::STATIC);
 
@@ -686,7 +684,7 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   // Add an entry into the cache 
   std::string libPath = lname;
   libPath += "_CMAKE_PATH";
-  cmCacheManager::GetInstance()->
+  this->m_CacheManager->
     AddCacheEntry(libPath.c_str(),
                   this->GetCurrentOutputDirectory(),
                   "Path to a library", cmCacheManager::INTERNAL);
@@ -697,28 +695,26 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   switch (shared)
     {
     case 0:
-      cmCacheManager::GetInstance()->
-	AddCacheEntry(ltname.c_str(),
-		      "STATIC",
+      this->m_CacheManager->AddCacheEntry(ltname.c_str(),"STATIC",
 		      "Whether a library is static, shared or module.",
 		      cmCacheManager::INTERNAL);
       break;
     case 1:
-      cmCacheManager::GetInstance()->
+      this->m_CacheManager->
 	AddCacheEntry(ltname.c_str(),
 		      "SHARED",
 		      "Whether a library is static, shared or module.",
 		      cmCacheManager::INTERNAL);
       break;
     case 2:
-      cmCacheManager::GetInstance()->
+      this->m_CacheManager->
 	AddCacheEntry(ltname.c_str(),
 		      "MODULE",
 		      "Whether a library is static, shared or module.",
 		      cmCacheManager::INTERNAL);
       break;
     default:
-      cmCacheManager::GetInstance()->
+      this->m_CacheManager->
 	AddCacheEntry(ltname.c_str(),
 		      "STATIC",
 		      "Whether a library is static, shared or module.",
@@ -755,7 +751,7 @@ void cmMakefile::AddExecutable(const char *exeName,
   // Add an entry into the cache 
   std::string exePath = exeName;
   exePath += "_CMAKE_PATH";
-  cmCacheManager::GetInstance()->
+  this->m_CacheManager->
     AddCacheEntry(exePath.c_str(),
                   this->GetCurrentOutputDirectory(),
                   "Path to an executable", cmCacheManager::INTERNAL);
@@ -908,7 +904,7 @@ const char* cmMakefile::GetDefinition(const char* name) const
     {
     return (*pos).second.c_str();
     }
-  return cmCacheManager::GetInstance()->GetCacheValue(name);
+  return this->m_CacheManager->GetCacheValue(name);
 }
 
 int cmMakefile::DumpDocumentationToFile(std::ostream& f)
@@ -1157,6 +1153,7 @@ cmMakefile::FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>& makefiles)
       {
       cmMakefile* mf = new cmMakefile;
       mf->SetMakefileGenerator(m_MakefileGenerator->CreateObject());
+      mf->SetCacheManager(this->m_CacheManager);
       makefiles.push_back(mf);
       // initialize new makefile
       mf->SetHomeOutputDirectory(this->GetHomeOutputDirectory());
@@ -1436,3 +1433,64 @@ void cmMakefile::ExpandSourceListArguments(
     }
   cmSystemTools::ExpandListArguments(tmpArgs, newargs);
 }
+
+int cmMakefile::TryCompile(const char *srcdir, const char *bindir, 
+                           const char *projectName)
+{
+  if (!m_MakefileGenerator)
+    {
+    cmSystemTools::Error("Internal CMake error, Attempt to call Try Compile without the generator being set");
+    return 1;
+    }
+  
+  // does the binary directory exist ? If not create it...
+  if (!cmSystemTools::FileIsDirectory(bindir))
+    {
+    cmSystemTools::MakeDirectory(bindir);
+    }
+  
+  // change to the tests directory and run cmake
+  // use the cmake object instead of calling cmake
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  cmSystemTools::ChangeDirectory(bindir);
+  
+  std::vector<std::string> args;
+  
+  // make sure the same generator is used
+  // use this program as the cmake to be run, it should not
+  // be run that way but the cmake object requires a vailid path
+  std::string cmakeCommand = this->GetDefinition("CMAKE_COMMAND");
+  args.push_back(cmakeCommand.c_str());
+  args.push_back(srcdir);
+  
+  std::string generator = "-G";
+  generator += this->GetDefinition("CMAKE_GENERATOR");
+  args.push_back(generator);
+  
+  cmake cm;
+  if (cm.Generate(args) != 0)
+    {
+    cmSystemTools::Error(
+      "Internal CMake error, TryCompile execution of cmake failed");
+    // return to the original directory
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    return 1;
+    }
+
+  cmake cm2;
+  if (cm2.Generate(args) != 0)
+    {
+    cmSystemTools::Error(
+      "Internal CMake error, TryCompile execution of cmake failed");
+    // return to the original directory
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    return 1;
+    }
+
+  // finally call the generator to actually build the resulting project
+  m_MakefileGenerator->TryCompile(srcdir,bindir,projectName);
+  cmSystemTools::ChangeDirectory(cwd.c_str());
+
+  return 0;
+}
+

@@ -52,8 +52,8 @@ public:
    * was used to write the currently loaded cache, note
    * this method will not work before the cache is loaded.
    */
-  static unsigned int GetCacheMajorVersion();
-  static unsigned int GetCacheMinorVersion();
+  unsigned int GetCacheMajorVersion();
+  unsigned int GetCacheMinorVersion();
   
   /**
    * Construct an empty makefile.
@@ -84,6 +84,13 @@ public:
     { m_FunctionBlockers.remove(fb);}
   void RemoveFunctionBlocker(const char *name, const std::vector<std::string> &args);
   
+  /**
+   * Try running cmake and building a file. This is used for dynalically
+   * loaded commands, not as part of the usual build process.
+   */
+  int TryCompile(const char *srcdir, const char *bindir, 
+                 const char *projectName);
+    
   /**
    * Specify the makefile generator. This is platform/compiler
    * dependent, although the interface is through a generic
@@ -508,7 +515,18 @@ public:
   ///! Enable support for the named language, if null then all languages are enabled.
   void EnableLanguage(const char* );
 
+  /**
+   * Set/Get the name of the parent directories CMakeLists file
+   * given a current CMakeLists file name
+   */
+  void SetCacheManager(cmCacheManager *cm) {
+    this->m_CacheManager = cm; }
+  cmCacheManager *GetCacheManager() {
+    return m_CacheManager; }
+
 protected:
+  cmCacheManager *m_CacheManager;
+  
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
   

@@ -2,11 +2,13 @@
 //
 
 #include "stdafx.h"
-#include "PropertyList.h"
+#include "shellapi.h"
+#include "CMakeSetup.h"
+#include "CMakeSetupDialog.h"
 #include "PathDialog.h"
 #include "../cmCacheManager.h"
 #include "../cmSystemTools.h"
-
+#include "../cmake.h"
 #define IDC_PROPCMBBOX   712
 #define IDC_PROPEDITBOX  713
 #define IDC_PROPBTNCTRL  714
@@ -655,7 +657,7 @@ void CPropertyList::OnDelete()
     return;
     }
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
-  cmCacheManager::GetInstance()->RemoveCacheEntry(pItem->m_propName);
+  m_CMakeSetupDialog->GetCMakeInstance()->GetCacheManager()->RemoveCacheEntry(pItem->m_propName);
   m_PropertyItems.erase(pItem);
   delete pItem; 
   this->DeleteString(m_curSel);
@@ -680,7 +682,8 @@ void CPropertyList::RemoveAll()
   for(int i =0; i < c; ++i)
     {
     CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(0);
-    cmCacheManager::GetInstance()->RemoveCacheEntry(pItem->m_propName);
+    m_CMakeSetupDialog->GetCMakeInstance()->GetCacheManager()
+      ->RemoveCacheEntry(pItem->m_propName);
     m_PropertyItems.erase(pItem);
     delete pItem;
     this->DeleteString(0);

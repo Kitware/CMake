@@ -20,6 +20,7 @@
 
 
 #include "../cmStandardIncludes.h"
+class CMakeSetupDialog;
 
 /////////////////////////////////////////////////////////////////////////////
 //CPropertyList Items
@@ -34,6 +35,7 @@ public:
   CString m_cmbItems;
   bool m_NewValue;
   bool m_Removed;
+  
 public:
   CPropertyItem(CString propName, CString curValue,
                 CString helpString,
@@ -70,6 +72,7 @@ public:
   
 // Attributes
 public:
+  CMakeSetupDialog *m_CMakeSetupDialog;
 
 // Operations
 public:

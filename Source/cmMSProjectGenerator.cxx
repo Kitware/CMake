@@ -75,3 +75,51 @@ void cmMSProjectGenerator::EnableLanguage(const char*)
     }
 }
 
+int cmMSProjectGenerator::TryCompile(const char *srcdir, 
+                                     const char *bindir,
+                                     const char *projectName)
+{
+  // now build the test
+  std::string makeCommand = m_Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
+  if(makeCommand.size() == 0)
+    {
+    cmSystemTools::Error(
+      "Generator cannot find the appropriate make command.");
+    return 1;
+    }
+  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
+  std::string lowerCaseCommand = makeCommand;
+  cmSystemTools::LowerCase(lowerCaseCommand);
+
+  /**
+   * Run an executable command and put the stdout in output.
+   */
+  std::string output;
+
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  cmSystemTools::ChangeDirectory(bindir);
+
+  // if there are spaces in the makeCommand, assume a full path
+  // and convert it to a path with no spaces in it as the
+  // RunCommand does not like spaces
+#if defined(_WIN32) && !defined(__CYGWIN__)      
+  if(makeCommand.find(' ') != std::string::npos)
+    {
+    cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
+    }
+#endif
+  makeCommand += " ";
+  makeCommand += projectName;
+  makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";
+  
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output))
+    {
+    cmSystemTools::Error("Generator: execution of msdev failed.");
+    // return to the original directory
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    return 1;
+    }
+  cmSystemTools::ChangeDirectory(cwd.c_str());
+  return 0;
+}
+

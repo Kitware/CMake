@@ -32,13 +32,15 @@ void cmSetClientData(void *info, void *cd)
   ((cmLoadedCommandInfo *)info)->ClientData = cd;
 }
 
-unsigned int cmGetCacheMajorVersion(void *)
+unsigned int cmGetCacheMajorVersion(void *arg)
 {
-  return cmMakefile::GetCacheMajorVersion();
+  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  return mf->GetCacheMajorVersion();
 }
-unsigned int cmGetCacheMinorVersion(void *)
+unsigned int cmGetCacheMinorVersion(void *arg)
 {
-  return cmMakefile::GetCacheMinorVersion();
+  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  return mf->GetCacheMinorVersion();
 }
 
 unsigned int cmGetMajorVersion(void *)

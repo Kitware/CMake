@@ -69,9 +69,6 @@ public:
    * can be different than just a path input
    */
   static CacheEntryType StringToType(const char*);
-  ///! Singleton pattern get instance of the cmCacheManager.
-  static cmCacheManager* GetInstance();
-  static void DeleteInstance();
   
   ///! Load a cache for given makefile.  Loads from ouput home.
   bool LoadCache(cmMakefile*); 
@@ -122,7 +119,6 @@ protected:
 private:
   static void OutputHelpString(std::ofstream& fout, 
                                const std::string& helpString);
-  static cmCacheManager* s_Instance;
   CacheEntryMap m_Cache;
   // Only cmake and cmMakefile should be able to add cache values
   // the commands should never use the cmCacheManager directly

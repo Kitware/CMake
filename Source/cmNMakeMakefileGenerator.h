@@ -42,6 +42,7 @@ public:
 
   ///! figure out about the current system information
   virtual void EnableLanguage(const char*); 
+
 protected:
   std::string ShortPath(const char* path);
   std::string ShortPathCommand(const char* command);

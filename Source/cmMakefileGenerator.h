@@ -31,15 +31,13 @@ class cmClassFile;
 class cmMakefileGenerator
 {
 public:
-  ///! Create a named generator
-  static cmMakefileGenerator* CreateGenerator(const char* name);
-  ///! Register a generator
-  static void RegisterGenerator(cmMakefileGenerator*);
-  ///! delete all registered generators, useful for clean up
-  static void UnRegisterGenerators();
-  ///! Get the names of the current registered generators
-  static void GetRegisteredGenerators(std::vector<std::string>& names);
-  
+  /**
+   * Try running cmake and building a file. This is used for dynalically
+   * loaded commands, not as part of the usual build process.
+   */
+  virtual int TryCompile(const char *srcdir, const char *bindir,
+                         const char *projectName) = 0;
+
   ///! Get the name for the generator.
   virtual const char* GetName() = 0;
 
@@ -82,7 +80,6 @@ public:
 protected:
   cmMakefile* m_Makefile;
 private:
-  static std::map<cmStdString, cmMakefileGenerator*> s_RegisteredGenerators;
   static std::map<cmStdString, bool> s_LanguageEnabled;
 };
 

@@ -172,6 +172,14 @@ protected:
       return std::string(path);
     }
   
+  /**
+   * Try running cmake and building a file. This is used for dynalically
+   * loaded commands, not as part of the usual build process. For the
+   * generator, it can assume that cmake has been run on the srcdir/bindir
+   * and it just needs to be compiled.  
+   */
+  virtual int TryCompile(const char *srcdir, const char *bindir,
+                         const char *projectName);
   
 protected:
   std::string m_ExecutableOutputPath;

@@ -80,7 +80,7 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& argsIn)
       {
       break;
       }
-    cmCacheManager::GetInstance()->LoadCache(args[i].c_str(), false,
+    m_Makefile->GetCacheManager()->LoadCache(args[i].c_str(), false,
 					     excludes, includes);
     }
 

@@ -47,7 +47,7 @@ void cmVariableRequiresCommand::FinalPass()
       requirementsMet = false;
       notSet += m_Arguments[i];
       notSet += "\n";
-      if(cmCacheManager::GetInstance()->IsAdvanced(m_Arguments[i].c_str()))
+      if(m_Makefile->GetCacheManager()->IsAdvanced(m_Arguments[i].c_str()))
         {
         hasAdvanced = true;
         }

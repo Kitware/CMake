@@ -14,7 +14,9 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-
+// This class represents a cmake invocation. It is the top level class when
+// running cmake. Most cmake based GUIS should primarily create an instance
+// of this class and communicate with it.
 
 #include "cmMakefile.h"
 #include "cmStandardIncludes.h"
@@ -62,6 +64,21 @@ class cmake
    */
   cmake();
   ~cmake();
+
+  ///! Create a named generator
+  cmMakefileGenerator* CreateGenerator(const char* name);
+  ///! Register a generator
+  void RegisterGenerator(cmMakefileGenerator*);
+  ///! Get the names of the current registered generators
+  void GetRegisteredGenerators(std::vector<std::string>& names);
+
+  ///! get the cmCachemManager used by this invocation of cmake
+  cmCacheManager *GetCacheManager() {
+    return &m_CacheManager; }
+  
+protected:
+  std::map<cmStdString, cmMakefileGenerator*> m_RegisteredGenerators;
+  cmCacheManager m_CacheManager;
 private:
   bool m_Verbose;
   bool m_Local;

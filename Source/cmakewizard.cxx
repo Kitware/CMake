@@ -24,7 +24,8 @@ cmakewizard::cmakewizard()
 }
 
   
-void cmakewizard::AskUser(const char* key, cmCacheManager::CacheEntry & entry)
+void cmakewizard::AskUser(const char* key, cmCacheManager::CacheEntry & entry,
+                          cmCacheManager *cacheManager)
 {
   std::cout << "Variable Name: " << key << "\n";
   std::cout << "Description:   " << entry.m_HelpString << "\n";
@@ -35,8 +36,7 @@ void cmakewizard::AskUser(const char* key, cmCacheManager::CacheEntry & entry)
   std::cin.getline(buffer, sizeof(buffer));
   if(buffer[0])
     {
-    cmCacheManager::CacheEntry *entry = 
-      cmCacheManager::GetInstance()->GetCacheEntry(key);
+    cmCacheManager::CacheEntry *entry = cacheManager->GetCacheEntry(key);
     if(entry)
       {
       entry->m_Value = buffer;
@@ -101,7 +101,7 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
     make.Generate(args);
     this->ShowMessage("\n");
     // load the cache from disk
-    cmCacheManager *cachem = cmCacheManager::GetInstance();
+    cmCacheManager *cachem = make.GetCacheManager();
     cachem->
       LoadCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
     cmCacheManager::CacheIterator i = cachem->NewIterator();
@@ -120,25 +120,24 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
         cmCacheManager::CacheEntry& e = askedCache.find(key)->second;
         if(e.m_Value != ce.m_Value)
           {
-          if(m_ShowAdvanced || !cmCacheManager::GetInstance()->IsAdvanced(key.c_str()))
+          if(m_ShowAdvanced || !cachem->IsAdvanced(key.c_str()))
             {
-            this->AskUser(key.c_str(), ce);
+            this->AskUser(key.c_str(), ce, cachem);
             asked = true;
             }
           }
         }
       else
         {    
-        if(m_ShowAdvanced || !cmCacheManager::GetInstance()->IsAdvanced(key.c_str()))
+        if(m_ShowAdvanced || !cachem->IsAdvanced(key.c_str()))
           {
-          this->AskUser(key.c_str(), ce);
+          this->AskUser(key.c_str(), ce, cachem);
           asked = true;
           }
         }
       askedCache[key] = i.GetEntry();
       }
-    cmCacheManager::GetInstance()->
-      SaveCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    cachem->SaveCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
     }
   while(asked);
   this->ShowMessage("CMake complete, run make to build project.\n");

@@ -65,7 +65,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
   if(cacheValue)
     {
     cmCacheManager::CacheEntry* e = 
-      cmCacheManager::GetInstance()->GetCacheEntry(args[0].c_str());
+      m_Makefile->GetCacheManager()->GetCacheEntry(args[0].c_str());
     if(e)
       {
       doc = e->m_HelpString;

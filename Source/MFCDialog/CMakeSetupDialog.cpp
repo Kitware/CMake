@@ -110,6 +110,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
 {
   cmSystemTools::SetErrorCallback(MFCMessageCallback);
   m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\StartPath";
+  m_CacheEntriesList.m_CMakeSetupDialog = this;
   
   //{{AFX_DATA_INIT(CMakeSetupDialog)
   // Get the parameters from the command line info
@@ -145,6 +146,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
 
   m_oldCX = -1;
   m_deltaXRemainder = 0;
+  m_CMakeInstance = 0;
 }
 
 void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
@@ -243,9 +245,9 @@ BOOL CMakeSetupDialog::OnInitDialog()
   SetIcon(m_hIcon, FALSE);		// Set small icon
   // Load source and build dirs from registry
   this->LoadFromRegistry();
-  cmake m; // force a register of generators
+  this->m_CMakeInstance = new cmake;
   std::vector<std::string> names;
-  cmMakefileGenerator::GetRegisteredGenerators(names);
+  this->m_CMakeInstance->GetRegisteredGenerators(names);
   for(std::vector<std::string>::iterator i = names.begin();
       i != names.end(); ++i)
     {
@@ -558,11 +560,16 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
   this->UpdateData();
   // always save the current gui values to disk
   this->SaveCacheFromGUI();
+  // free the old cmake and create a new one here
+  if (this->m_CMakeInstance)
+    {
+    delete this->m_CMakeInstance;
+    this->m_CMakeInstance = 0;
+    }
+  this->m_CMakeInstance = new cmake;
   // Make sure we are working from the cache on disk
   this->LoadCacheFromDiskToGUI(); 
   m_OKButton.EnableWindow(false);
-  // create a cmake object
-  cmake make;
   // create the arguments for the cmake object
   std::vector<std::string> args;
   args.push_back((const char*)m_PathToExecutable);
@@ -577,7 +584,7 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
   arg += m_GeneratorChoiceString;
   args.push_back(arg);
   // run the generate process
-  if(make.Generate(args, generateProjectFiles) != 0)
+  if(this->m_CMakeInstance->Generate(args, generateProjectFiles) != 0)
     {
     cmSystemTools::Error(
       "Error in generation process, project files may be invalid");
@@ -643,14 +650,14 @@ void CMakeSetupDialog::OnChangeWhereBuild()
   std::string cache_file = path;
   cache_file += "/CMakeCache.txt";
 
-  cmCacheManager *cache = cmCacheManager::GetInstance();
+  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
 
   if (cmSystemTools::FileExists(cache_file.c_str()) &&
-      cache->LoadCache(path.c_str()) &&
-      cache->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
+      cachem->LoadCache(path.c_str()) &&
+      cachem->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
     {
     path = ConvertToWindowsPath(
-      cache->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str());
+      cachem->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str());
     this->m_WhereSource = path.c_str();
     this->m_WhereSourceControl.SetWindowText(this->m_WhereSource);
     this->OnChangeWhereSource();
@@ -666,6 +673,7 @@ void CMakeSetupDialog::OnChangeWhereBuild()
 // copy from the cache manager to the cache edit list box
 void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 { 
+  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
   size_t size = m_CacheEntriesList.GetItems().size();
   bool reverseOrder = false;
   // if there are already entries in the cache, then
@@ -683,7 +691,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
     CPropertyItem* item = *i;
     item->m_NewValue = false;
     }
-  for(cmCacheManager::CacheIterator i = cmCacheManager::GetInstance()->NewIterator();
+  for(cmCacheManager::CacheIterator i = cachem->NewIterator();
       !i.IsAtEnd(); i.Next())
     {
     const char* key = i.GetName();
@@ -700,7 +708,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 
     if(!m_AdvancedValues)
       {
-      if(cmCacheManager::GetInstance()->IsAdvanced(key))
+      if(cachem->IsAdvanced(key))
         {
 	m_CacheEntriesList.RemoveProperty(key);
         continue;
@@ -758,7 +766,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
       }
     }
   m_OKButton.EnableWindow(false);
-  if(cmCacheManager::GetInstance()->GetSize() > 0 && !cmSystemTools::GetErrorOccuredFlag())
+  if(cachem->GetSize() > 0 && !cmSystemTools::GetErrorOccuredFlag())
     {
     bool enable = true;
     items = m_CacheEntriesList.GetItems();
@@ -787,13 +795,13 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 // copy from the list box to the cache manager
 void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
 { 
+  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
   std::set<CPropertyItem*> items = m_CacheEntriesList.GetItems();
   for(std::set<CPropertyItem*>::iterator i = items.begin();
       i != items.end(); ++i)
     {
     CPropertyItem* item = *i; 
-    cmCacheManager::CacheEntry *entry = 
-      cmCacheManager::GetInstance()->GetCacheEntry(
+    cmCacheManager::CacheEntry *entry = cachem->GetCacheEntry(
         (const char*)item->m_propName);
     if (entry)
       {
@@ -820,14 +828,15 @@ void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
 //! Load cache file from m_WhereBuild and display in GUI editor
 void CMakeSetupDialog::LoadCacheFromDiskToGUI()
 {
+  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
   if(m_WhereBuild != "")
     {
-    cmCacheManager::GetInstance()->LoadCache(m_WhereBuild);
+    cachem->LoadCache(m_WhereBuild);
     this->FillCacheGUIFromCacheManager();
-    if(cmCacheManager::GetInstance()->GetCacheEntry("CMAKE_GENERATOR"))
+    if(cachem->GetCacheEntry("CMAKE_GENERATOR"))
       {
       std::string curGen = 
-        cmCacheManager::GetInstance()->GetCacheEntry("CMAKE_GENERATOR")->m_Value;
+        cachem->GetCacheEntry("CMAKE_GENERATOR")->m_Value;
       if(m_GeneratorChoiceString != curGen.c_str())
         {
         m_GeneratorChoiceString = curGen.c_str();
@@ -840,10 +849,11 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
 //! Save GUI values to cmCacheManager and then save to disk.
 void CMakeSetupDialog::SaveCacheFromGUI()
 {
+  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
   this->FillCacheManagerFromCacheGUI();
   if(m_WhereBuild != "")
     {
-    cmCacheManager::GetInstance()->SaveCache(m_WhereBuild);
+    cachem->SaveCache(m_WhereBuild);
     }
 }
 
@@ -958,7 +968,6 @@ void CMakeSetupDialog::OnOk()
   cmSystemTools::EnableMessages();
   m_CacheEntriesList.ClearDirty();
   this->RunCMake(true);
-  cmMakefileGenerator::UnRegisterGenerators();
   if (!(::GetKeyState(VK_SHIFT) & 0x1000))
     {
     CDialog::OnOK();
@@ -1111,12 +1120,13 @@ void CMakeSetupDialog::OnHelpButton()
 
 void CMakeSetupDialog::ShowAdvancedValues()
 {
-  for(cmCacheManager::CacheIterator i = cmCacheManager::GetInstance()->NewIterator();
+  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
+  for(cmCacheManager::CacheIterator i = cachem->NewIterator();
       !i.IsAtEnd(); i.Next())
     {
     const char* key = i.GetName();
     const cmCacheManager::CacheEntry& value = i.GetEntry();
-    if(!cmCacheManager::GetInstance()->IsAdvanced(key))
+    if(!cachem->IsAdvanced(key))
       {
       continue;
       }
@@ -1175,12 +1185,14 @@ void CMakeSetupDialog::ShowAdvancedValues()
 
 void CMakeSetupDialog::RemoveAdvancedValues()
 {
-  for(cmCacheManager::CacheIterator i = cmCacheManager::GetInstance()->NewIterator();
+  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
+  
+  for(cmCacheManager::CacheIterator i = cachem->NewIterator();
       !i.IsAtEnd(); i.Next())
     {
     const char* key = i.GetName();
     const cmCacheManager::CacheEntry& value = i.GetEntry();
-    if(cmCacheManager::GetInstance()->IsAdvanced(key))
+    if(cachem->IsAdvanced(key))
       {
       m_CacheEntriesList.RemoveProperty(key);
       }
@@ -1229,17 +1241,17 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* buffer)
   std::string cache_file = path;
   cache_file += "/CMakeCache.txt";
 
-  cmCacheManager *cache = cmCacheManager::GetInstance();
+  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
 
   if (cmSystemTools::FileExists(cache_file.c_str()) &&
-      cache->LoadCache(path.c_str()) &&
-      cache->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
+      cachem->LoadCache(path.c_str()) &&
+      cachem->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
     {
     path = ConvertToWindowsPath(path.c_str());
     this->m_WhereBuild = path.c_str();
 
     path = ConvertToWindowsPath(
-      cache->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str());
+      cachem->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str());
     this->m_WhereSource = path.c_str();
     }
   else

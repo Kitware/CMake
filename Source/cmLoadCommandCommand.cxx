@@ -152,7 +152,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
   
   // the file must exist
   std::string fullPath = cmDynamicLoader::LibPrefix();
-  fullPath += argsIn[0] + cmDynamicLoader::LibExtension();
+  fullPath += "cm" + argsIn[0] + cmDynamicLoader::LibExtension();
 
   std::vector<std::string> args;
   cmSystemTools::ExpandListArguments(argsIn, args);
