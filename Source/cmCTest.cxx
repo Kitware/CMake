@@ -5186,6 +5186,43 @@ inline int GetNextNumber(std::string const& in,
     }
 }
 
+// get the next number in a string with numbers separated by ,
+// pos is the start of the search and pos2 is the end of the search
+// pos becomes pos2 after a call to GetNextNumber.   
+// -1 is returned at the end of the list.
+inline int GetNextRealNumber(std::string const& in, 
+                             double& val,
+                             std::string::size_type& pos,
+                             std::string::size_type& pos2)
+{
+  pos2 = in.find(',', pos);
+  if(pos2 != in.npos)
+    {
+    if(pos2-pos == 0)
+      {
+      val = -1;
+      }
+    else
+      {
+      val = atof(in.substr(pos, pos2-pos).c_str());
+      }
+    pos = pos2+1;
+    return 1;
+    }
+  else
+    {
+    if(in.size()-pos == 0)
+      {
+       val = -1;
+      }
+    else
+      {
+      val = atof(in.substr(pos, in.size()-pos).c_str());
+      }
+    return 0;
+    }
+}
+
                          
 void cmCTest::SetTestsToRunInformation(const char* in)
 {
@@ -5211,7 +5248,7 @@ void cmCTest::ExpandTestsToRunInformation(int numTests)
   
   int start;
   int end = -1;
-  int stride = -1;
+  double stride = -1;
   std::string::size_type pos = 0;
   std::string::size_type pos2;
   // read start
@@ -5221,7 +5258,7 @@ void cmCTest::ExpandTestsToRunInformation(int numTests)
     if(GetNextNumber(this->TestsToRunString, end, pos, pos2))
       {
       // read stride
-      if(GetNextNumber(this->TestsToRunString, stride, pos, pos2))
+      if(GetNextRealNumber(this->TestsToRunString, stride, pos, pos2))
         {
         int val =0;
         // now read specific numbers
@@ -5253,11 +5290,13 @@ void cmCTest::ExpandTestsToRunInformation(int numTests)
     }
 
   // if we have a range then add it
-  if(end != -1 && start != -1)
+  if(end != -1 && start != -1 && stride > 0)
     {
-    for(int i =start; i <= end; i+= stride)
+    int i = 0;
+    while (i*stride + start <= end)
       {
-      m_TestsToRun.push_back(i);
+      m_TestsToRun.push_back(static_cast<int>(i*stride+start));
+      ++i;
       }
     }
 
