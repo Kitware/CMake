@@ -16,7 +16,7 @@ SET(JAVA_BIN_PATH
   /usr/share/java/bin
   /usr/local/bin
   /usr/local/java/bin
-  /usr/java/j2sdk1.4.2_04/
+  /usr/java/j2sdk1.4.2_04
   )
 FIND_PROGRAM(JAVA_RUNTIME
   NAMES java
