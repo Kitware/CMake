@@ -469,7 +469,6 @@ void CMakeSetupDialog::OnChangeWhereBuild()
     {
     m_CacheEntriesList.RemoveAll();
     }
-  
 }
 
 void CMakeSetupDialog::OnChangeWhereSource() 
@@ -483,6 +482,22 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
   if(m_WhereBuild != "")
     {
     cmCacheManager::GetInstance()->LoadCache(m_WhereBuild);
+    
+    // Make sure the internal "CMAKE" cache entry is set.
+    const char* cacheValue = cmCacheManager::GetInstance()->GetCacheValue("CMAKE");
+    if(!cacheValue)
+      {
+	// Find our own exectuable.
+	std::string cMakeCMD = "\""+cmSystemTools::GetProgramPath(_pgmptr);
+	cMakeCMD += "/CMakeSetupCMD.exe\"";
+
+	// Save the value in the cache
+	cmCacheManager::GetInstance()->AddCacheEntry("CMAKE",
+						     cMakeCMD.c_str(),
+						     "Path to CMake executable.",
+						     cmCacheManager::INTERNAL);
+      }
+    
     this->FillCacheGUIFromCacheManager();
     }
 }

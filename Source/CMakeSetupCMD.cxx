@@ -104,6 +104,20 @@ int main(int ac, char** av)
   makefile.SetMakefileGenerator(pg);
   makefile.MakeStartDirectoriesCurrent();
   cmCacheManager::GetInstance()->LoadCache(&makefile);
+
+  // Make sure the internal "CMAKE" cache entry is set.
+  const char* cacheValue = cmCacheManager::GetInstance()->GetCacheValue("CMAKE");
+  if(!cacheValue)
+    {
+    // Find our own exectuable.
+    std::string cMakeSelf = "\""+cmSystemTools::FindProgram(av[0])+"\"";
+    // Save the value in the cache
+    cmCacheManager::GetInstance()->AddCacheEntry("CMAKE",
+                                                 cMakeSelf.c_str(),
+                                                 "Path to CMake executable.",
+                                                 cmCacheManager::INTERNAL);
+    }
+  
   cmCacheManager::GetInstance()->DefineCache(&makefile);
   makefile.ReadListFile(av[1]);
   makefile.GenerateMakefile();
