@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmWhileCommand.h"
+#include "cmIfCommand.h"
 
 bool cmWhileFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf) 

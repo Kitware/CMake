@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 1.5)
 SET(SRCS
   cmCacheManager.cxx
   cmCacheManager.h
+  cmBootstrapCommands.cxx
   cmCommands.cxx
   cmCommands.h
   cmCustomCommand.cxx

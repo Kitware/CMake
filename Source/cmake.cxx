@@ -1409,6 +1409,7 @@ int cmake::DumpDocumentationToFile(std::ostream& f)
 void cmake::AddDefaultCommands()
 {
   std::list<cmCommand*> commands;
+  GetBootstrapCommands(commands);
   GetPredefinedCommands(commands);
   for(std::list<cmCommand*>::iterator i = commands.begin();
       i != commands.end(); ++i)
