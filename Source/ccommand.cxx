@@ -102,7 +102,7 @@ int main(int ac, char** av)
 
       double clocks_per_sec = (double)CLOCKS_PER_SEC;
       std::cout << "Elapsed time: " 
-                << (time_finish - time_start) << " s. (time)"
+                << (time_t)(time_finish - time_start) << " s. (time)"
                 << ", " 
                 << (double)(clock_finish - clock_start) / clocks_per_sec 
                 << " s. (clock)"
