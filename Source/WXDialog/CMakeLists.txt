@@ -28,6 +28,5 @@ IF ( CMAKE_WX_CAN_COMPILE )
 ELSE ( CMAKE_WX_CAN_COMPILE )
 
   MESSAGE("Cannot find wxWindows libraries and/or header files")
-  MESSAGE("OLib: ${WXWINDOWS_LIBRARY} Inc: ${WXWINDOWS_INCLUDE_PATH} Flags: ${CMAKE_WX_CXX_FLAGS}")
 
 ENDIF ( CMAKE_WX_CAN_COMPILE )
