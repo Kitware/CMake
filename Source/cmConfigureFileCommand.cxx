@@ -51,11 +51,27 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string>& args)
   m_InputFile = args[0];
   m_OuputFile = args[1];
   m_CopyOnly = false;
+  m_EscapeQuotes = false;
   if(args.size() >= 3)
     {
     if(args[2] == "COPYONLY")
       {
       m_CopyOnly  = true;
+      }
+    if(args[2] == "ESCAPE_QUOTES")
+      {
+      m_EscapeQuotes  = true;
+      }
+    }
+  if(args.size() >= 4)
+    {  
+    if(args[3] == "COPYONLY")
+      {
+      m_CopyOnly  = true;
+      }
+    if(args[3] == "ESCAPE_QUOTES")
+      {
+      m_EscapeQuotes  = true;
       }
     }
   return true;
@@ -102,7 +118,7 @@ void cmConfigureFileCommand::FinalPass()
       inLine = buffer;
       if(!m_CopyOnly)
         {
-        m_Makefile->ExpandVariablesInString(inLine);
+        m_Makefile->ExpandVariablesInString(inLine, m_EscapeQuotes);
         m_Makefile->RemoveVariablesInString(inLine);
         // look for special cmakedefine symbol and handle it
         // is the symbol defined
