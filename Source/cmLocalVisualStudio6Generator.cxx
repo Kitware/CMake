@@ -596,7 +596,7 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
 // look for custom rules on a target and collect them together
 std::string 
 cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target, 
-                               const char *libName)
+                                                 const char * /* libName */)
 {
   std::string customRuleCode = "";
 
