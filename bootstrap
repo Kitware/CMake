@@ -617,12 +617,12 @@ done
 for a in ${KWSYS_C_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/kwsys/${a}.c"`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
-  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -I`cmake_escape \"${cmake_bootstrap_dir}/cmsys\"` -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
 for a in ${KWSYS_CXX_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/kwsys/${a}.cxx"`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
-  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -I`cmake_escape \"${cmake_bootstrap_dir}/cmsys\"` -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
 
 # Write prefix to Bootstrap.cmk/InitialConfigureFlags.cmake
