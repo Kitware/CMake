@@ -20,6 +20,7 @@
 
 #include <map>
 #include <set>
+#include <queue>
 #include <stdlib.h> // required for atof
 
 
@@ -34,6 +35,109 @@ void cmTarget::SetType(TargetType type)
   }
 }
 
+
+void cmTarget::TraceVSDependencies(std::string projFile, 
+                                   cmMakefile *makefile)
+{ 
+  // get the classes from the source lists then add them to the groups
+  std::vector<cmSourceFile*> & classes = this->GetSourceFiles();
+  // use a deck to keep track of processed source files
+  std::queue<std::string> srcFilesToProcess;
+  std::set<std::string> srcFilesQueued;
+  std::string name;
+  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
+      i != classes.end(); ++i)
+    {
+    std::string name = (*i)->GetSourceName();
+    if ((*i)->GetSourceExtension() != "rule")
+      {
+      name += ".";
+      name += (*i)->GetSourceExtension();
+      }
+    srcFilesToProcess.push(name);
+    srcFilesQueued.insert(name);
+    }
+  // add in the project file itself
+  srcFilesToProcess.push(projFile);
+  srcFilesQueued.insert(projFile);
+  // add in the library depends for cusotm targets
+  if (this->GetType() == cmTarget::UTILITY)
+    {
+    for (std::vector<cmCustomCommand>::iterator ic = 
+           this->GetPostBuildCommands().begin();
+         ic != this->GetPostBuildCommands().end(); ++ic)
+      {
+      cmCustomCommand &c = *ic;
+      for (std::vector<std::string>::iterator i = c.GetDepends().begin();
+           i != c.GetDepends().end(); ++i)
+        {
+        srcFilesToProcess.push(*i);
+        srcFilesQueued.insert(name);
+        }
+      }
+    }
+  while (!srcFilesToProcess.empty())
+    {
+    // is this source the output of a custom command
+    cmSourceFile* outsf = 
+      makefile->GetSourceFileWithOutput(srcFilesToProcess.front().c_str());
+    if (outsf)
+      {
+      // is it not already in the target?
+      if (std::find(classes.begin(),classes.end(),outsf) == classes.end())
+        {
+        // then add the source to this target and add it to the queue
+        classes.push_back(outsf);
+        std::string name = outsf->GetSourceName();
+        if (outsf->GetSourceExtension() != "rule")
+          {
+          name += ".";
+          name += outsf->GetSourceExtension();
+          }
+        std::string temp = 
+          cmSystemTools::GetFilenamePath(outsf->GetFullPath());
+        temp += "/";
+        temp += name;
+        // if it hasn't been processed
+        if (srcFilesQueued.find(temp) == srcFilesQueued.end())
+          {
+          srcFilesToProcess.push(temp);
+          srcFilesQueued.insert(temp);
+          }
+        }
+      // add its dependencies to the list to check
+      unsigned int i;
+      for (i = 0; i < outsf->GetCustomCommand()->GetDepends().size(); ++i)
+        {
+        std::string dep = cmSystemTools::GetFilenameName(
+          outsf->GetCustomCommand()->GetDepends()[i]);
+        if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
+          {
+          dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
+          }
+        // watch for target dependencies,
+        std::string libPath = dep + "_CMAKE_PATH";
+        const char* cacheValue = makefile->GetDefinition(libPath.c_str());
+        if (cacheValue)
+          {
+          // add the depend as a utility on the target
+          this->AddUtility(dep.c_str());
+          }
+        else
+          {
+          if (srcFilesQueued.find(outsf->GetCustomCommand()->GetDepends()[i]) 
+          == srcFilesQueued.end())
+            {
+            srcFilesToProcess.push(outsf->GetCustomCommand()->GetDepends()[i]);
+            srcFilesQueued.insert(outsf->GetCustomCommand()->GetDepends()[i]);
+            }
+          }
+        }
+      }
+    // finished with this SF move to the next
+    srcFilesToProcess.pop();
+    }
+}
 
 void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
 {

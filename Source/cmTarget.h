@@ -142,6 +142,12 @@ public:
   const char *GetProperty(const char *prop) const;
   bool GetPropertyAsBool(const char *prop) const;
 
+  /**
+   * Trace through the source files in this target and add al source files
+   * that they depend on, used by the visual studio generators
+   */
+  void TraceVSDependencies(std::string projName, cmMakefile *mf);  
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -195,7 +201,6 @@ private:
    */
   void GatherDependencies( const cmMakefile& mf, const std::string& lib,
                            DependencyMap& dep_map ); 
-
 
 private:
   std::vector<cmCustomCommand> m_PreBuildCommands;
