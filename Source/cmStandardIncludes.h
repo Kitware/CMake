@@ -54,6 +54,7 @@
 
 #ifdef CMAKE_NO_STD_NAMESPACE
 #define std 
+# define for if (false) { } else for
 #endif
 
 

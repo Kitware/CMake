@@ -43,9 +43,9 @@ bool cmSystemTools::s_ErrorOccured = false;
 void cmSystemTools::GetPath(std::vector<std::string>& path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  char* pathSep = ";";
+  const char* pathSep = ";";
 #else
-  char* pathSep = ":";
+  const char* pathSep = ":";
 #endif
   std::string pathEnv = getenv("PATH");
   std::string::size_type start =0;
