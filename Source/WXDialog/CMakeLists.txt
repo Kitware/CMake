@@ -37,7 +37,7 @@ IF ( CMAKE_WX_CAN_COMPILE )
     SET(APPLE_GUI_BUNDLE_VERSION "1.7.0")
     SET(APPLE_GUI_ICON "CMakeIcon.icns")
     SET(APPLE_GUI_COPYRIGHT "Copyright 2002 Kitware Inc.")
-    CONFIGURE_FILE(${CMAKE_ROOT}/Templates/AppleInfo.plist
+    CONFIGURE_FILE(${CMake_SOURCE_DIR}/Templates/AppleInfo.plist
                    ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/Info.plist)
     CONFIGURE_FILE(${CMake_SOURCE_DIR}/Source/WXDialog/CMakeIcon.icns
                    ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/Resources/CMakeIcon.icns COPYONLY)
