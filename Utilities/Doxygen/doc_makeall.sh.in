@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------
 # Doxygen documentation batch
-# modified by S. Barre (Time-stamp: <2002-02-13 18:32:04 barre>
+# modified by S. Barre (Time-stamp: <2002-02-13 18:49:35 barre>
 # -------------------------------------------------------------------------
 
 # Path to several tools (_PROG to avoid the typical GZIP env var pb)
@@ -185,8 +185,6 @@ if test "x@VTK_SOURCE_DIR@" != "x" ; then
         --html "$OUTPUT_DIRECTORY/html"
   fi
 fi 
-
-exit 0;
 
 # ----------------------------------------------------------------------------
 # Create the CHM HTML HELP doc.
