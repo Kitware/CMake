@@ -23,6 +23,8 @@
 #                for backward compatability.  Use ITK_USE_FILE instead.
 #
 
+SET(ITK_DIR_STRING "directory containing ITKConfig.cmake.  This is either the root of the build tree, or PREFIX/lib/InsightToolkit for an installation.")
+
 # Search only if the location is not already known.
 IF(NOT ITK_DIR)
   # Get the system search path as a list.
@@ -64,7 +66,7 @@ IF(NOT ITK_DIR)
     [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild10]
 
     # Help the user find it if we cannot.
-    DOC "The directory containing ITKConfig.cmake.  This is either the root of the build tree, or PREFIX/lib/InsightToolkit for an installation."
+    DOC "The ${ITK_DIR_STRING}"
   )
 ENDIF(NOT ITK_DIR)
 
@@ -78,4 +80,7 @@ IF(ITK_DIR)
   SET(USE_ITK_FILE ${ITK_USE_FILE})
 ELSE(ITK_DIR)
   SET(ITK_FOUND 0)
+  IF(ITK_FIND_REQUIRED)
+    MESSAGE(FATAL_ERROR "Please set ITK_DIR to the ${ITK_DIR_STRING}")
+  ENDIF(ITK_FIND_REQUIRED)
 ENDIF(ITK_DIR)
