@@ -448,6 +448,11 @@ void CPropertyList::OnCheckBox()
 
 void CPropertyList::OnButton()
 {
+  if(m_PropertyItems.size() == 0)
+    {
+    return;
+    }
+  
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
 
   // The dialogs might change the working directory.  Save it.
@@ -665,7 +670,8 @@ void CPropertyList::OnRButtonUp( UINT nFlags, CPoint point )
 }
 
 void CPropertyList::RemoveProperty(const char* name)
-{
+{ 
+  this->HideControls();
   for(int i =0; i < this->GetCount(); ++i)
     {
     CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(i);
