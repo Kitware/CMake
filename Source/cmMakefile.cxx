@@ -64,6 +64,13 @@ cmMakefile::cmMakefile()
   this->AddDefaultCommands();
   this->AddDefaultDefinitions();
   cmCacheManager::GetInstance()->DefineCache(this);
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  const char* cacheValue
+    = cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
+  std::string fpath = cacheValue;
+  fpath += "/Templates/CMakeWindowsSystemConfig.cmake";
+  this->ReadListFile(NULL,fpath.c_str());
+#endif
 }
 
 void cmMakefile::AddDefaultCommands()
@@ -854,11 +861,6 @@ void cmMakefile::SetHomeDirectory(const char* dir)
   m_cmHomeDirectory = dir;
   cmSystemTools::ConvertToUnixSlashes(m_cmHomeDirectory);
   this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  std::string fpath = dir;
-  fpath += "/CMake/CMakeWindowsSystemConfig.cmake";
-  this->ReadListFile(NULL,fpath.c_str());
-#endif
 }
 
 void cmMakefile::SetHomeOutputDirectory(const char* lib)

@@ -126,18 +126,14 @@ int main(int ac, char** av)
   mf.MakeStartDirectoriesCurrent();
   cmCacheManager::GetInstance()->LoadCache(&mf);
   
-  // Make sure the internal "CMAKE" cache entry is set.
-  const char* cacheValue = cmCacheManager::GetInstance()->GetCacheValue("CMAKE");
-  if(!cacheValue)
-    {
-    // Find our own exectuable.
-    std::string cMakeSelf = cmSystemTools::FindProgram(av[0]);
-    // Save the value in the cache
-    cmCacheManager::GetInstance()->AddCacheEntry("CMAKE",
-                                                 cMakeSelf.c_str(),
-                                                 "Path to CMake executable.",
-                                                 cmCacheManager::INTERNAL);
-    }
+  // Find our own exectuable.
+  std::string cMakeSelf = cmSystemTools::FindProgram(av[0]);
+  // Save the value in the cache
+  cmCacheManager::GetInstance()->AddCacheEntry("CMAKE_COMMAND",
+                                               cMakeSelf.c_str(),
+                                               "Path to CMake executable.",
+                                               cmCacheManager::INTERNAL);
+  mf.SetCMakeInstallDirectory(cmSystemTools::FindProgram(av[0]));
   
   // Transfer the cache into the makefile's definitions.
   cmCacheManager::GetInstance()->DefineCache(&mf);

@@ -78,7 +78,7 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   cMakeLists += "CMakeLists.txt";
   cMakeLists = cmSystemTools::EscapeSpaces(cMakeLists.c_str());
 
-  std::string command = "${CMAKE} "+cMakeLists;
+  std::string command = "${CMAKE_COMMAND} "+cMakeLists;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   command += " -DSP";
 #endif

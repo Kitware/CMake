@@ -755,7 +755,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "THREAD_LIBS          = @CMAKE_THREAD_LIBS@\n"
     "\n"
     "# set up the path to the rulesgen program\n"
-    "CMAKE = ${CMAKE_BINARY_DIR}/CMake/Source/CMakeBuildTargets\n"
+    "CMAKE_COMMAND = ${CMAKE_BINARY_DIR}/CMake/Source/CMakeBuildTargets\n"
     "\n"
     "\n"
     "\n";
@@ -791,11 +791,11 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "${CMAKE_CXX} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  this->OutputMakeRule(fout, 
                        "Default build rule",
                        "all",
-                       "Makefile cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE}",
+                       "Makefile cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE_COMMAND}",
                        0);
   this->OutputMakeRule(fout, 
                        "rule to build cmake from source",
-                       "${CMAKE}", "${CMAKE_SOURCE_DIR}/CMake/Source/*.cxx "
+                       "${CMAKE_COMMAND}", "${CMAKE_SOURCE_DIR}/CMake/Source/*.cxx "
                        "${CMAKE_SOURCE_DIR}/CMake/Source/*.h",
                        "cd ${CMAKE_BINARY_DIR}/CMake/Source; "
                        "${MAKE} CMakeBuildTargets");
@@ -807,29 +807,29 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   this->OutputMakeRule(fout, 
                        "Rule to build the Makefile",
                        "Makefile",
-                       "${CMAKE} ${CMAKE_MAKEFILE_SOURCES} ",
-                       "${CMAKE} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
+                       "${CMAKE_COMMAND} ${CMAKE_MAKEFILE_SOURCES} ",
+                       "${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
                        "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");  
   this->OutputMakeRule(fout, 
                        "Rule to build the cmake.depends",
                        "cmake.depends",
-                       "${CMAKE} ${CMAKE_MAKEFILE_SOURCES} ",
-                       "${CMAKE} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
+                       "${CMAKE_COMMAND} ${CMAKE_MAKEFILE_SOURCES} ",
+                       "${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
                        "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
   this->OutputMakeRule(fout, 
                        "Rule to force the build of cmake.depends",
                        "depend",
                        "${SUBDIR_DEPEND}",
-                       "${CMAKE} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
+                       "${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
                        "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");  
   this->OutputMakeRule(fout, 
                        "Rebuild the cache",
                        "rebuild_cache",
                        "${CMAKE_BINARY_DIR}/CMakeCache.txt",
-                       "${CMAKE} ${CMAKE_SOURCE_DIR}/CMakeLists.txt "
+                       "${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}/CMakeLists.txt "
                        "-MakeCache -S${CMAKE_SOURCE_DIR} -O${CMAKE_BINARY_DIR} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
   

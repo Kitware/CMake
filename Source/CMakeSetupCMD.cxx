@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmMakefile.h"
 #include "cmMSProjectGenerator.h"
 #include "cmCacheManager.h"
-
+#include "windows.h"
 
 // this is the command line version of CMakeSetup.
 // It is called from Visual Studio when a CMakeLists.txt
@@ -90,6 +90,20 @@ int main(int ac, char** av)
     return -1;
     }
   std::string arg = av[2];
+
+  // set the cmake install directory
+  char fname[1024];
+  ::GetModuleFileName(NULL,fname,1023);
+  std::string root = cmSystemTools::GetProgramPath(fname);
+  std::string::size_type slashPos = root.rfind("/");
+  if(slashPos != std::string::npos)      
+    {
+    root = root.substr(0, slashPos);
+    }
+  cmCacheManager::GetInstance()->AddCacheEntry
+    ("CMAKE_ROOT", root.c_str(),
+     "Path to CMake installation.", cmCacheManager::INTERNAL);
+
   cmMakefile makefile;
   SetArgs(makefile, ac, av);
   cmMSProjectGenerator* pg = new cmMSProjectGenerator;
@@ -105,18 +119,14 @@ int main(int ac, char** av)
   makefile.MakeStartDirectoriesCurrent();
   cmCacheManager::GetInstance()->LoadCache(&makefile);
 
-  // Make sure the internal "CMAKE" cache entry is set.
-  const char* cacheValue = cmCacheManager::GetInstance()->GetCacheValue("CMAKE");
-  if(!cacheValue)
-    {
-    // Find our own exectuable.
-    std::string cMakeSelf = "\""+cmSystemTools::FindProgram(av[0])+"\"";
-    // Save the value in the cache
-    cmCacheManager::GetInstance()->AddCacheEntry("CMAKE",
-                                                 cMakeSelf.c_str(),
-                                                 "Path to CMake executable.",
-                                                 cmCacheManager::INTERNAL);
-    }
+  // Make sure the internal "CMAKE_COMMAND" cache entry is set.
+  // Find our own exectuable.
+  std::string cMakeSelf = "\""+cmSystemTools::FindProgram(av[0])+"\"";
+  // Save the value in the cache
+  cmCacheManager::GetInstance()->AddCacheEntry("CMAKE_COMMAND",
+                                               cMakeSelf.c_str(),
+                                               "Path to CMake executable.",
+                                               cmCacheManager::INTERNAL);
   
   cmCacheManager::GetInstance()->DefineCache(&makefile);
   makefile.ReadListFile(av[1]);

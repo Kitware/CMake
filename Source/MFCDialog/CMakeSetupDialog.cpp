@@ -66,36 +66,14 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 CMakeSetupDialog::CMakeSetupDialog(CWnd* pParent /*=NULL*/)
   : CDialog(CMakeSetupDialog::IDD, pParent)
 {
-  CString startPath = _pgmptr;
-  startPath.Replace('\\', '_');
-  startPath.Replace(':', '_');
-  startPath.Replace(".EXE", "");
-  startPath.Replace(".exe", "");
-  m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\";
-  // _pgmptr should be the directory from which cmake was run from
-  // use it as the unique key for the dialog
-  m_RegistryKey += startPath;
+  m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\StartPath";
   
   //{{AFX_DATA_INIT(CMakeSetupDialog)
   m_WhereSource = _T("");
   m_WhereBuild = _T("");
-	//}}AFX_DATA_INIT
+  //}}AFX_DATA_INIT
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-  // Guess the initial source directory based on the location
-  // of this program, it should be in CMake/Source/
-  startPath = _pgmptr;
-  int removePos = startPath.Find("\\CMake\\Source");
-  if(removePos == -1)
-    {
-    removePos = startPath.Find("/CMake/Source");
-    }
-  if(removePos != -1)
-    {
-    startPath = startPath.Left(removePos);
-    }
-  m_WhereSource = startPath;
-  m_WhereBuild = startPath;
   this->LoadFromRegistry();
   m_BuildPathChanged = false;
 }
@@ -209,7 +187,7 @@ HCURSOR CMakeSetupDialog::OnQueryDragIcon()
 void CMakeSetupDialog::OnBrowseWhereSource() 
 {
   this->UpdateData();
-  Browse(m_WhereSource, "Enter Path to Insight Source");
+  Browse(m_WhereSource, "Enter Path to Source");
   this->UpdateData(false);
 }
 
@@ -241,7 +219,7 @@ bool CMakeSetupDialog::Browse(CString &result, const char *title)
 void CMakeSetupDialog::OnBrowseWhereBuild() 
 {
   this->UpdateData();
-  Browse(m_WhereBuild, "Enter Path to Insight Build");
+  Browse(m_WhereBuild, "Enter Path to Build");
   this->UpdateData(false);
 }
 
@@ -265,7 +243,6 @@ void CMakeSetupDialog::SaveToRegistry()
     RegSetValueEx(hKey, _T("WhereBuild"), 0, REG_SZ, 
 		  (CONST BYTE *)(const char *)m_WhereBuild, 
 		  m_WhereBuild.GetLength());
-    
     }
   RegCloseKey(hKey);
 }
@@ -307,9 +284,8 @@ void CMakeSetupDialog::LoadFromRegistry()
   else
     {
     // save some values
-    this->ReadRegistryValue(hKey, &(m_WhereSource),"WhereSource","C:\\Insight");
-    this->ReadRegistryValue(hKey, &(m_WhereBuild),"WhereBuild",
-			    "C:\\Insight");
+    this->ReadRegistryValue(hKey, &(m_WhereSource),"WhereSource","C:\\");
+    this->ReadRegistryValue(hKey, &(m_WhereBuild),"WhereBuild","C:\\");
     }
   RegCloseKey(hKey);
 }
@@ -341,10 +317,10 @@ void CMakeSetupDialog::OnBuildProjects()
     // current GUI values to the cache
     this->SaveCacheFromGUI();
     }
-  // Create a makefile object
-  cmMakefile makefile;
   // Make sure we are working from the cache on disk
   this->LoadCacheFromDiskToGUI();
+  // Create a makefile object
+  cmMakefile makefile;
   makefile.SetMakefileGenerator(new cmMSProjectGenerator);
   makefile.SetHomeDirectory(m_WhereSource);
   makefile.SetStartOutputDirectory(m_WhereBuild);
@@ -482,21 +458,26 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
     {
     cmCacheManager::GetInstance()->LoadCache(m_WhereBuild);
     
-    // Make sure the internal "CMAKE" cache entry is set.
-    const char* cacheValue = cmCacheManager::GetInstance()->GetCacheValue("CMAKE");
-    if(!cacheValue)
+    // Find our own exectuable.
+    char fname[1024];
+    ::GetModuleFileName(NULL,fname,1023);
+    std::string root = cmSystemTools::GetProgramPath(fname);
+    std::string::size_type slashPos = root.rfind("/");
+    if(slashPos != std::string::npos)      
       {
-	// Find our own exectuable.
-	std::string cMakeCMD = "\""+cmSystemTools::GetProgramPath(_pgmptr);
-	cMakeCMD += "/CMakeSetupCMD.exe\"";
-
-	// Save the value in the cache
-	cmCacheManager::GetInstance()->AddCacheEntry("CMAKE",
-						     cMakeCMD.c_str(),
-						     "Path to CMake executable.",
-						     cmCacheManager::INTERNAL);
+      root = root.substr(0, slashPos);
       }
+    cmCacheManager::GetInstance()->AddCacheEntry
+      ("CMAKE_ROOT", root.c_str(),
+       "Path to CMake installation.", cmCacheManager::INTERNAL);
+    std::string cMakeCMD = "\""+cmSystemTools::GetProgramPath(fname);
+    cMakeCMD += "/CMakeSetupCMD.exe\"";
     
+    // Save the value in the cache
+    cmCacheManager::GetInstance()->AddCacheEntry("CMAKE_COMMAND",
+                                                 cMakeCMD.c_str(),
+                                                 "Path to CMake executable.",
+                                                 cmCacheManager::INTERNAL);
     this->FillCacheGUIFromCacheManager();
     }
 }

@@ -137,7 +137,7 @@ void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   makefileIn += m_Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt\"";
-  std::string dsprule = "${CMAKE} ";
+  std::string dsprule = "${CMAKE_COMMAND} ";
   dsprule += makefileIn;
   dsprule += " -DSP -H\"";
   dsprule += m_Makefile->GetHomeDirectory();
@@ -360,18 +360,18 @@ void cmDSPMakefile::WriteDSPEndGroup(std::ostream& fout)
 
 void cmDSPMakefile::SetBuildType(BuildType b, const char *libName)
 {
-  std::string root= m_Makefile->GetHomeDirectory();
+  std::string root= cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
   const char *def= m_Makefile->GetDefinition( "MSPROJECT_TEMPLATE_DIRECTORY");
 
   if( def)
     {
-      root = def;
+    root = def;
     }
   else
     {
-      root += "/CMake/Source";
+    root += "/Templates";
     }
-
+  
   switch(b)
     {
     case STATIC_LIBRARY:
