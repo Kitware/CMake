@@ -3703,6 +3703,11 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       m_BuildTarget = args[i];
       }
+    if(arg.find("--build-run-dir",0) == 0 && i < args.size() - 1)
+      {
+      i++;
+      m_BuildRunDir = args[i];
+      }
     if(arg.find("--build-two-config",0) == 0 && i < args.size() - 1)
       {
       m_BuildTwoConfig = true;
@@ -4050,6 +4055,11 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     *outstring += output;
     }
   
+  if(m_TestCommand.size() == 0)
+    {
+    return retVal;
+    }
+  
 // now run the compiled test if we can find it
   // See if the executable exists as written.
   std::vector<std::string> failed;
@@ -4149,7 +4159,12 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   testCommand.push_back(0);
   std::string outs;
   int retval = 0;
-  out << "Running test executable: " << fullPath << "\n";
+  out << "Running test executable: " << fullPath << "\n"; 
+  // run the test from the m_BuildRunDir if set
+  if(m_BuildRunDir.size())
+    {
+    cmSystemTools::ChangeDirectory(m_BuildRunDir.c_str());
+    }
   this->RunTest(testCommand, &outs, &retval);
   out << outs << "\n";
   if(outstring)

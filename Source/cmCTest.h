@@ -298,6 +298,7 @@ private:
   std::string              m_CTestSelf;
   std::string              m_SourceDir;
   std::string              m_BinaryDir;
+  std::string              m_BuildRunDir;
   std::string              m_BuildGenerator;
   std::string              m_BuildMakeProgram;
   std::string              m_BuildProject;
