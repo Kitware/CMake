@@ -327,6 +327,13 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
     cMakeRoot += "/share/CMake";
     modules = cMakeRoot +  "/Modules/FindVTK.cmake";
     }
+  if(!cmSystemTools::FileExists(modules.c_str()))
+    {
+    // next try exe
+    cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
+    // is there no Modules direcory there?
+    modules = cMakeRoot + "/Modules/FindVTK.cmake"; 
+    }
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // couldn't find modules
@@ -339,7 +346,58 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
     ("CMAKE_ROOT", cMakeRoot.c_str(),
      "Path to CMake installation.", cmCacheManager::INTERNAL);
 }
- 
+
+
+void cmake::HandleBootstrap(cmMakefile& mf, const std::string& args0)
+{
+  if (cmSystemTools::GetFilenameNameWithoutExtension(args0) == 
+      "bootstrap")
+    {
+    int done = 0;
+    
+    while (!done)
+      {
+      int choice = 0;
+      std::cout << 
+        "\n\nPlease select the tool you wish to use to build CMake."
+        "\nPlease note that selecting a tool here will not limit"
+        "\nwhat tools the resulting CMake executable supports.\n\n";
+      std::vector<std::string> names;
+      cmMakefileGenerator::GetRegisteredGenerators(names);
+      int count = 1;
+      for(std::vector<std::string>::iterator i =names.begin();
+          i != names.end(); ++i, ++count)
+        {
+        std::cout << "\t" << count << ") " << i->c_str() << "\n";
+        }
+      std::cin >> choice;
+      if (choice > 0 && choice < count)
+        {
+        done = 1;
+        cmMakefileGenerator* gen = 
+          cmMakefileGenerator::CreateGenerator(names[choice-1].c_str());
+        if(!gen)
+          {
+          cmSystemTools::Error("Could not create named generator ",
+                               names[choice-1].c_str());
+          }
+        else
+          {
+          mf.SetMakefileGenerator(gen);
+          mf.AddDefinition("CMAKE_BOOTSTRAP","1");
+          std::cout << 
+            "\n\nThank You. CMake will now generate the appropriate files for\nbeing built with " << names[choice-1].c_str() << "\n\n";
+          }
+        }
+      else
+        {
+        std::cout << "Please make a selection between 1 and " << 
+          count -1 << "\n";
+        }
+      }
+    }
+}
+
 int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
 {
   if(args.size() == 1 && !cmSystemTools::FileExists("CMakeLists.txt"))
@@ -390,6 +448,11 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
   
   // extract command line arguments that might add cache entries
   this->SetCacheArgs(mf, args);
+
+  // handle bootstraping command
+  this->HandleBootstrap(mf,args[0]);
+  
+    
   // no generator specified on the command line
   if(!mf.GetMakefileGenerator())
     {
