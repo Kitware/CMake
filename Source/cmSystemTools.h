@@ -139,6 +139,11 @@ public:
   static void Error(const char* m, const char* m2=0,
                     const char* m3=0, const char* m4=0);
 
+  /**
+   * Display a message.
+   */
+  static void Message(const char* m, const char* title=0);
+
   ///! Return true if there was an error at any point.
   static bool GetErrorOccuredFlag() 
     {

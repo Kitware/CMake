@@ -542,14 +542,16 @@ void cmSystemTools::Error(const char* m1, const char* m2,
     message += m4;
     }
   cmSystemTools::s_ErrorOccured = true;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  ::MessageBox(0, message.c_str(), 0, MB_OK);
-  std::cerr << message.c_str() << std::endl;
-#else
-  std::cerr << message.c_str() << std::endl;
-#endif
+  cmSystemTools::Message(message.c_str(),"Error");
 }
 
+void cmSystemTools::Message(const char* m1, const char *title)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  ::MessageBox(0, m1, title, MB_OK);
+#endif
+  std::cerr << m1 << std::endl;
+}
 
 
 void cmSystemTools::CopyFileIfDifferent(const char* source,
