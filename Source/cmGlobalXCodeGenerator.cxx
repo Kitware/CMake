@@ -1209,10 +1209,9 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     }
   
   // write utility dependencies.
-  std::set<cmStdString>::const_iterator i, end;
-  i = cmtarget->GetUtilities().begin();
-  end = cmtarget->GetUtilities().end();
-  for(;i!= end; ++i)
+  for(std::set<cmStdString>::const_iterator i
+        = cmtarget->GetUtilities().begin();
+      i != cmtarget->GetUtilities().end(); ++i)
     {
     cmTarget* t = this->FindTarget(i->c_str());
     cmXCodeObject* dptarget = this->FindXCodeTarget(t);
