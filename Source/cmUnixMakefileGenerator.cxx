@@ -95,7 +95,7 @@ void cmUnixMakefileGenerator::GenerateMakefile()
     // Generate depends 
     cmMakeDepend md;
     md.SetMakefile(m_Makefile);
-    md.GenerateDependInformation();
+    md.GenerateMakefileDependencies();
     this->ProcessDepends(md);
     // output the makefile fragment
     this->OutputMakefile("Makefile"); 
@@ -124,15 +124,15 @@ void cmUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)
         // Now add the real dependencies for the file.
         if (info)
           {
-          for( cmDependInformation::IndexSet::const_iterator indx = 
-                 info->m_IndexSet.begin();
-               indx != info->m_IndexSet.end(); ++indx)
+          for(cmDependInformation::DependencySet::const_iterator d = 
+                info->m_DependencySet.begin();
+              d != info->m_DependencySet.end(); ++d)
             {
             // Make sure the full path is given.  If not, the dependency was
             // not found.
-            if(md.GetDependInformation()[*indx]->m_FullPath != "")
+            if((*d)->m_FullPath != "")
               {
-              i->GetDepends().push_back(md.GetDependInformation()[*indx]->m_FullPath);
+              i->GetDepends().push_back((*d)->m_FullPath);
               }
             }
           }

@@ -46,15 +46,15 @@ class cmLBDepend : public cmMakeDepend
   /**
    * Compute the depend information for this class.
    */
-  void DependWalk(cmDependInformation* info, const char* file);
+  virtual void DependWalk(cmDependInformation* info);
 };
 
-void cmLBDepend::DependWalk(cmDependInformation* info, const char* file)
+void cmLBDepend::DependWalk(cmDependInformation* info)
 {
-  std::ifstream fin(file);
+  std::ifstream fin(info->m_FullPath.c_str());
   if(!fin)
     {
-    cmSystemTools::Error("error can not open ", file);
+    cmSystemTools::Error("error can not open ", info->m_FullPath.c_str());
     return;
     }
   
@@ -98,7 +98,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info, const char* file)
           std::string message = "Skipping ";
           message += includeFile;
           message += " for file ";
-          message += file;
+          message += info->m_FullPath.c_str();
 	  cmSystemTools::Error(message.c_str(), 0);
 	  }
 	continue;
@@ -208,28 +208,27 @@ void cmOutputRequiredFilesCommand::FinalPass()
   // compute the list of files
   cmLBDepend md;
   md.SetMakefile(m_Makefile);
-  md.GenerateDependInformation();
 
   // always expand the first argument
   m_Makefile->ExpandVariablesInString(m_File);
   m_Makefile->ExpandVariablesInString(m_OutputFile);
 
   // find the depends for a file
-  const cmDependInformation *info = md.GetDependInformationForSourceFile(m_File.c_str());
+  const cmDependInformation *info = md.FindDependencies(m_File.c_str());
   if (info)
     {
     // write them out
     FILE *fout = fopen(m_OutputFile.c_str(),"w");
-    for( cmDependInformation::IndexSet::const_iterator indx = 
-           info->m_IndexSet.begin();
-         indx != info->m_IndexSet.end(); ++indx)
+    for(cmDependInformation::DependencySet::const_iterator d = 
+          info->m_DependencySet.begin();
+        d != info->m_DependencySet.end(); ++d)
       {
-      std::string tmp = md.GetDependInformation()[*indx]->m_FullPath;
+      std::string tmp = (*d)->m_FullPath;
       std::string::size_type pos = tmp.rfind('.');
       if(pos != std::string::npos && tmp.substr(pos) == ".cxx")
         {
         tmp = tmp.substr(0, pos);
-        fprintf(fout,"%s\n",md.GetDependInformation()[*indx]->m_FullPath.c_str());
+        fprintf(fout,"%s\n",(*d)->m_FullPath.c_str());
         }
       }
     fclose(fout);
