@@ -433,8 +433,7 @@ int cmake::AddCMakePaths(const char *arg0)
      "Path to CMake installation.", cmCacheManager::INTERNAL);
 
 #ifdef _WIN32
-  std::string path = cmSystemTools::GetFilenamePath(cMakeSelf);
-  std::string comspec = path + "\\cmw9xcom";
+  std::string comspec = "cmw9xcom.exe";
   cmSystemTools::SetWindows9xComspecSubstitute(comspec.c_str());
 #endif
   return 1;
