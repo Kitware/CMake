@@ -42,6 +42,8 @@
 #include <unistd.h>
 #endif
 
+#include <sys/stat.h>
+
 
 bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;
@@ -1204,4 +1206,38 @@ bool cmSystemTools::PutEnv(const char* value)
   // be deleted on exit
   localEnvironment.push_back(envVar);
   return ret == 0;
+}
+
+bool cmSystemTools::GetPermissions(const char* file, mode_t& mode)
+{
+  if ( !file )
+    {
+    return false;
+    }
+
+  struct stat st;
+  if ( stat(file, &st) < 0 )
+    {
+    return false;
+    }
+  mode = st.st_mode;
+  return true;
+}
+
+bool cmSystemTools::SetPermissions(const char* file, mode_t mode)
+{
+  if ( !file )
+    {
+    return false;
+    }
+  if ( !cmSystemTools::FileExists(file) )
+    {
+    return false;
+    }
+  if ( chmod(file, mode) < 0 )
+    {
+    return false;
+    }
+
+  return true;
 }
