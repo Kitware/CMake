@@ -438,6 +438,18 @@ std::string cmSystemTools::LowerCase(const std::string& s)
   return n;
 }
 
+// Return a lower case string 
+std::string cmSystemTools::UpperCase(const std::string& s)
+{
+  std::string n;
+  n.resize(s.size());
+  for (size_t i = 0; i < s.size(); i++)
+    {
+    n[i] = toupper(s[i]);
+    }
+  return n;
+}
+
 
 // convert windows slashes to unix slashes \ with /
 const char *cmSystemTools::ConvertToUnixSlashes(std::string& path)

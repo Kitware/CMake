@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmMSProjectGenerator.h"
 #include "cmBorlandMakefileGenerator.h"
+#include "cmNMakeMakefileGenerator.h"
 #else
 #include "cmUnixMakefileGenerator.h"
 #endif
@@ -54,6 +55,7 @@ cmake::cmake()
   m_Verbose = false;
 #if defined(_WIN32) && !defined(__CYGWIN__)  
   cmMakefileGenerator::RegisterGenerator(new cmMSProjectGenerator);
+//  cmMakefileGenerator::RegisterGenerator(new cmNMakeMakefileGenerator);
   cmMakefileGenerator::RegisterGenerator(new cmBorlandMakefileGenerator);
 #else
   cmMakefileGenerator::RegisterGenerator(new cmUnixMakefileGenerator);
@@ -72,7 +74,7 @@ void cmake::Usage(const char* program)
   for(std::vector<std::string>::iterator i =names.begin();
       i != names.end(); ++i)
     {
-    std::cerr << i->c_str() << " ";
+    std::cerr << "\"" << i->c_str() << "\" ";
     }
   std::cerr << ")\n";
 }

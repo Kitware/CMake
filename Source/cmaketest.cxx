@@ -40,6 +40,7 @@ int main (int argc, char *argv[])
   cmSystemTools::ChangeDirectory(binaryDirectory);
   cmake cm;
   std::vector<std::string> args;
+  // make sure the same generator is used
   // use this program as the cmake to be run, it should not
   // be run that way but the cmake object requires a vailid path
   std::string cmakeCommand = CMAKE_COMMAND;
@@ -53,6 +54,10 @@ int main (int argc, char *argv[])
     }
   args.push_back(cmakeCommand.c_str());
   args.push_back(sourceDirectory);
+  std::string generator = "-G";
+  generator += CMAKE_GENERATOR;
+  args.push_back(generator);
+
   if (cm.Generate(args) != 0)
     {
     std::cerr << "Error: cmake execution failed\n";
@@ -63,26 +68,33 @@ int main (int argc, char *argv[])
   cmListFileCache::GetInstance()->ClearCache();
   // now build the test
   std::string makeCommand = MAKEPROGRAM;
-#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__BORLANDC__)
-  // if there are spaces in the makeCommand, assume a full path
-  // and convert it to a path with no spaces in it as the
-  // RunCommand does not like spaces
-  if(makeCommand.find(' ') != std::string::npos)
+  std::string lowerCaseCommand = makeCommand;
+  cmSystemTools::LowerCase(lowerCaseCommand);
+  // if msdev is the make program then do the following
+  if(lowerCaseCommand.find("msdev") != std::string::npos)
     {
-    char *buffer = new char[makeCommand.size()+1];
-    if(GetShortPathName(makeCommand.c_str(), buffer, 
-                        makeCommand.size()+1) != 0)
+    // if there are spaces in the makeCommand, assume a full path
+    // and convert it to a path with no spaces in it as the
+    // RunCommand does not like spaces
+    if(makeCommand.find(' ') != std::string::npos)
       {
-      makeCommand = buffer;
-      delete [] buffer;
+      char *buffer = new char[makeCommand.size()+1];
+      if(GetShortPathName(makeCommand.c_str(), buffer, 
+                          makeCommand.size()+1) != 0)
+        {
+        makeCommand = buffer;
+        delete [] buffer;
+        }
       }
+    makeCommand += " ";
+    makeCommand += executableName;
+    makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";
     }
-  makeCommand += " ";
-  makeCommand += executableName;
-  makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";
-#else
-  makeCommand += " all";
-#endif  
+  else
+    {
+    // assume a make sytle program
+    makeCommand += " all";
+    }
   if (!cmSystemTools::RunCommand(makeCommand.c_str(), output))
     {
     std::cerr << "Error: " << makeCommand.c_str() <<  "  execution failed\n";

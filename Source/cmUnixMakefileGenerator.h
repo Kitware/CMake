@@ -156,11 +156,12 @@ protected:
   void SetStaticLibraryExtension(const char* e) {m_StaticLibraryExtension = e;}
   void SetSharedLibraryExtension(const char* e) {m_SharedLibraryExtension = e;}
   void SetLibraryPrefix(const char* e) { m_LibraryPrefix = e;}
+protected:
+  std::string m_ExecutableOutputPath;
+  std::string m_LibraryOutputPath;
 private:
   bool m_CacheOnly;
   bool m_Recurse;
-  std::string m_ExecutableOutputPath;
-  std::string m_LibraryOutputPath;
   std::string m_ObjectFileExtension;
   std::string m_ExecutableExtension;
   std::string m_StaticLibraryExtension;
