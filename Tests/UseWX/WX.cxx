@@ -51,7 +51,7 @@ bool MyApp::OnInit()
 
     //Testing if link to wx debug library
 #ifdef __WXDEBUG__
-    std::cout << "If you read this you're in debug mode." << std::endl;
+    printf("If you read this you're in debug mode.\n");
 #endif  //__WXDEBUG__
 
     wxChar ch = wxT('*');
