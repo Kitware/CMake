@@ -51,7 +51,9 @@ bool cmAddDefinitionsCommand::InitialPass(std::vector<std::string>& args)
   for(std::vector<std::string>::iterator i = args.begin();
       i != args.end(); ++i)
     {
-    m_Makefile->AddDefineFlag((*i).c_str());
+    std::string str = *i;
+    m_Makefile->ExpandVariablesInString(str);
+    m_Makefile->AddDefineFlag(str.c_str());
     }
   return true;
 }
