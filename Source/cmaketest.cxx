@@ -124,6 +124,7 @@ int main (int argc, char *argv[])
   cmSystemTools::LowerCase(lowerCaseCommand);
 
   // if msdev is the make program then do the following
+  // MSDEV 6.0
   if(lowerCaseCommand.find("msdev") != std::string::npos)
     {
     // if there are spaces in the makeCommand, assume a full path
@@ -145,6 +146,24 @@ int main (int argc, char *argv[])
     makeCommand += projectName;
     makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";
     }
+  // MSDEV 7.0 .NET
+  else if (lowerCaseCommand.find("devenv") != std::string::npos)
+    {
+    if(makeCommand.find(' ') != std::string::npos)
+      {
+      char *buffer = new char[makeCommand.size()+1];
+      if(GetShortPathName(makeCommand.c_str(), buffer, 
+                          makeCommand.size()+1) != 0)
+        {
+        makeCommand = buffer;
+        }
+      delete [] buffer;\
+      }
+    makeCommand += " ";
+    makeCommand += projectName;
+    makeCommand += ".sln /rebuild Debug /project ALL_BUILD";
+    }
+  // command line make program
   else
     {
     // assume a make sytle program

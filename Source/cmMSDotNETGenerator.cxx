@@ -27,9 +27,9 @@
 cmMSDotNETGenerator::cmMSDotNETGenerator()
 {
   m_Configurations.push_back("Debug");
-  m_Configurations.push_back("Release");
-  m_Configurations.push_back("MinSizeRel");
-  m_Configurations.push_back("RelWithDebInfo");
+//  m_Configurations.push_back("Release");
+//  m_Configurations.push_back("MinSizeRel");
+//  m_Configurations.push_back("RelWithDebInfo");
   // default to building a sln project file
   BuildProjOn();
 }
@@ -42,34 +42,6 @@ void cmMSDotNETGenerator::GenerateMakefile()
     }
   else
     {
-    m_LibraryOutputPath = "";
-    if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
-      {
-      m_LibraryOutputPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
-      }
-    if(m_LibraryOutputPath.size())
-      {
-      // make sure there is a trailing slash
-      if(m_LibraryOutputPath[m_LibraryOutputPath.size()-1] != '/')
-        {
-        m_LibraryOutputPath += "/";
-        }
-      m_LibraryOutputPath = cmSystemTools::HandleNetworkPaths(m_LibraryOutputPath.c_str());
-      }
-    m_ExecutableOutputPath = "";
-    if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
-      {
-      m_ExecutableOutputPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-      }
-    if(m_ExecutableOutputPath.size())
-      {
-      // make sure there is a trailing slash
-      if(m_ExecutableOutputPath[m_ExecutableOutputPath.size()-1] != '/')
-        {
-        m_ExecutableOutputPath += "/";
-        }
-      }
-    m_ExecutableOutputPath = cmSystemTools::HandleNetworkPaths(m_ExecutableOutputPath.c_str());
     this->OutputVCProjFile();
     }
 }
@@ -248,12 +220,16 @@ void cmMSDotNETGenerator::WriteSLNFile(std::ostream& fout)
       }
     }
   fout << "Global\n"
-       << "\tGlobalSection(SolutionConfiguration) = preSolution\n"
-       << "\t\tConfigName.0 = Debug\n"
-       << "\t\tConfigName.1 = MinSizeRel\n"
-       << "\t\tConfigName.2 = Release\n"
-       << "\t\tConfigName.3 = RelWithDebInfo\n"
-       << "\tEndGlobalSection\n"
+       << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
+  
+  int c = 0;
+  for(std::vector<std::string>::iterator i = m_Configurations.begin();
+      i != m_Configurations.end(); ++i)
+    {
+    fout << "\t\tConfigName." << c << " = " << *i << "\n";
+    c++;
+    }
+  fout << "\tEndGlobalSection\n"
        << "\tGlobalSection(ProjectDependencies) = postSolution\n";
   // loop over again and compute the depends
   for(k = allListFiles.begin(); k != allListFiles.end(); ++k)
@@ -396,15 +372,14 @@ void cmMSDotNETGenerator::WriteProjectDepends(std::ostream& fout,
 void cmMSDotNETGenerator::WriteProjectConfigurations(std::ostream& fout, const char* name)
 {
   std::string guid = this->CreateGUID(name);
-  fout << "\t\t{" << guid << "}.Debug.ActiveCfg = Debug|Win32\n"
-       << "\t\t{" << guid << "}.Debug.Build.0 = Debug|Win32\n"
-       << "\t\t{" << guid << "}.MinSizeRel.ActiveCfg = Debug|Win32\n"
-       << "\t\t{" << guid << "}.MinSizeRel.Build.0 = Debug|Win32\n"
-       << "\t\t{" << guid << "}.Release.ActiveCfg = Debug|Win32\n"
-       << "\t\t{" << guid << "}.Release.Build.0 = Debug|Win32\n"
-       << "\t\t{" << guid << "}.RelWithDebInfo.ActiveCfg = Debug|Win32\n"
-       << "\t\t{" << guid << "}.RelWithDebInfo.Build.0 = Debug|Win32\n";
+  for(std::vector<std::string>::iterator i = m_Configurations.begin();
+      i != m_Configurations.end(); ++i)
+    {
+    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << *i << "|Win32\n"
+         << "\t\t{" << guid << "}." << *i << ".Build.0 = " << *i << "|Win32\n";
+    }
 }
+
 
 
 // Write a dsp file into the SLN file,
@@ -497,8 +472,36 @@ void cmMSDotNETGenerator::OutputVCProjFile()
                            m_Makefile->GetStartOutputDirectory());
       }
     }
-
-  // Setup /I and /LIBPATH options for the resulting VCProj file
+  
+  m_LibraryOutputPath = "";
+  if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    {
+    m_LibraryOutputPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+    }
+  if(m_LibraryOutputPath.size())
+    {
+    // make sure there is a trailing slash
+    if(m_LibraryOutputPath[m_LibraryOutputPath.size()-1] != '/')
+      {
+      m_LibraryOutputPath += "/";
+      }
+    m_LibraryOutputPath = cmSystemTools::HandleNetworkPaths(m_LibraryOutputPath.c_str());
+    }
+  m_ExecutableOutputPath = "";
+  if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+    {
+    m_ExecutableOutputPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    }
+  if(m_ExecutableOutputPath.size())
+    {
+    // make sure there is a trailing slash
+    if(m_ExecutableOutputPath[m_ExecutableOutputPath.size()-1] != '/')
+      {
+      m_ExecutableOutputPath += "/";
+      }
+    }
+  m_ExecutableOutputPath = cmSystemTools::HandleNetworkPaths(m_ExecutableOutputPath.c_str());
+  
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
@@ -645,9 +648,38 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
     }
   fout << "\t\t<Configuration\n"
        << "\t\t\tName=\"" << configName << "|Win32\"\n"
-       << "\t\t\tOutputDirectory=\"" << m_LibraryOutputPath << configName << "\"\n"
-       << "\t\t\tIntermediateDirectory=\".\\" << configName << "\"\n"
-       << "\t\t\tConfigurationType=\"4\"\n"
+       << "\t\t\tOutputDirectory=\"";
+  // This is an internal type to Visual Studio, it seems that:
+  // 4 == static library
+  // 2 == dll
+  // 1 == executable
+  // 10 == utility 
+  const char* configType = "10";
+  switch(target.GetType())
+    { 
+    case cmTarget::STATIC_LIBRARY:
+      configType = "4";
+      fout << m_LibraryOutputPath << configName << "\"\n";
+      break;
+    case cmTarget::SHARED_LIBRARY:
+    case cmTarget::MODULE_LIBRARY:
+      fout << m_LibraryOutputPath << configName << "\"\n";
+      configType = "2";
+      break;
+    case cmTarget::EXECUTABLE: 
+    case cmTarget::WIN32_EXECUTABLE:  
+      fout << m_ExecutableOutputPath << configName << "\"\n";
+      configType = "1";
+      break; 
+    case cmTarget::UTILITY:
+      configType = "10";
+    default:
+      fout << configName << "\"\n";
+      break;
+    }
+  
+  fout << "\t\t\tIntermediateDirectory=\".\\" << configName << "\"\n"
+       << "\t\t\tConfigurationType=\"" << configType << "\"\n"
        << "\t\t\tUseOfMFC=\"" << mfcFlag << "\"\n"
        << "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"FALSE\"\n"
        << "\t\t\tCharacterSet=\"2\">\n";
@@ -656,32 +688,6 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
        << "\t\t\t\tAdditionalOptions=\"" << 
     m_Makefile->GetDefinition("CMAKE_CXX_FLAGS") << "\"\n";
   
-  
-  if(strcmp(configName, "Debug") == 0)
-    {
-    fout << "\t\t\t\tOptimization=\"0\"\n"
-         << "\t\t\t\tPreprocessorDefinitions=\"WIN32;_DEBUG;_WINDOWS";
-    }
-  else if(strcmp(configName, "Release") == 0)
-    {
-    fout << "\t\t\t\tOptimization=\"2\"\n"
-         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
-         << "\t\t\t\tPreprocessorDefinitions=\"WIN32;NDEBUG;_WINDOWS";
-    }
-  else if(strcmp(configName, "MinSizeRel") == 0)
-    {
-    fout << "\t\t\t\tOptimization=\"1\"\n"
-         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
-         << "\t\t\t\tPreprocessorDefinitions=\"WIN32;NDEBUG;_WINDOWS";
-    }
-  else if(strcmp(configName, "RelWithDebInfo") == 0)
-    {
-    fout << "\t\t\t\tOptimization=\"2\"\n"
-         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
-         << "\t\t\t\tPreprocessorDefinitions=\"WIN32;NDEBUG;_WINDOWS";
-    }
-  this->OutputDefineFlags(fout);
-  fout << "\"\n";
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i = includes.begin();
@@ -694,8 +700,37 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
     fout << ";&quot;" << *i << "&quot;";
     }
   fout << "\"\n";
+  
+  if(strcmp(configName, "Debug") == 0)
+    {
+    fout << "\t\t\t\tOptimization=\"0\"\n"
+         << "\t\t\t\tRuntimeLibrary=\"3\"\n"
+         << "\t\t\t\tPreprocessorDefinitions=\"WIN32,_DEBUG,_WINDOWS";
+    }
+  else if(strcmp(configName, "Release") == 0)
+    {
+    fout << "\t\t\t\tOptimization=\"2\"\n"
+         << "\t\t\t\tRuntimeLibrary=\"0\"\n"
+         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
+         << "\t\t\t\tPreprocessorDefinitions=\"WIN32,NDEBUG,_WINDOWS";
+    }
+  else if(strcmp(configName, "MinSizeRel") == 0)
+    {
+    fout << "\t\t\t\tOptimization=\"1\"\n"
+         << "\t\t\t\tRuntimeLibrary=\"0\"\n"
+         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
+         << "\t\t\t\tPreprocessorDefinitions=\"WIN32,NDEBUG,_WINDOWS";
+    }
+  else if(strcmp(configName, "RelWithDebInfo") == 0)
+    {
+    fout << "\t\t\t\tOptimization=\"2\"\n"
+         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
+         << "\t\t\t\tPreprocessorDefinitions=\"WIN32,NDEBUG,_WINDOWS";
+    }
+  this->OutputDefineFlags(fout);
+  fout << "\"\n";
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
-  fout << "\t\t\t\tObjectFile=\"" << configName << "\"\n";
+  fout << "\t\t\t\tObjectFile=\"" << configName << "\\\"\n";
   fout << "\t\t\t\tProgramDataBaseFileName=\"" << configName << "\"\n";
   fout << "\t\t\t\tWarningLevel=\"3\"\n";
   fout << "\t\t\t\tDetect64BitPortabilityProblems=\"TRUE\"\n"
@@ -720,7 +755,7 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
     case cmTarget::STATIC_LIBRARY:
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLibrarianTool\"\n"
-           << "\t\t\t\t\tOutputFile=\"" << m_ExecutableOutputPath << configName 
+           << "\t\t\t\t\tOutputFile=\"" << m_LibraryOutputPath << configName 
            << "/" << libName << ".lib\"/>\n";
       break;
     case cmTarget::SHARED_LIBRARY:
@@ -733,11 +768,11 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
            << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
       this->OutputLibraries(fout, configName, libName, target);
       fout << "\"\n";
-      fout << "\t\t\t\tOutputFile=\"" << m_LibraryOutputPath <<
+      fout << "\t\t\t\tOutputFile=\"" << m_ExecutableOutputPath <<
         configName << "/" << libName << ".exe\"\n";
       fout << "\t\t\t\tLinkIncremental=\"1\"\n";
       fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
-      fout << "AdditionalLibraryDirectories=\"";
+      fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
       this->OutputLibraryDirectories(fout, configName, libName, target);
       fout << "\"\n";
       fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath << libName << ".pdb\"\n";
@@ -745,6 +780,22 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t\tStackReserveSize=\"10000000\"/>\n";
       break;
     case cmTarget::WIN32_EXECUTABLE:
+      fout << "\t\t\t<Tool\n"
+           << "\t\t\t\tName=\"VCLinkerTool\"\n"
+           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386\"\n"
+           << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
+      this->OutputLibraries(fout, configName, libName, target);
+      fout << "\"\n";
+      fout << "\t\t\t\tOutputFile=\"" << m_ExecutableOutputPath <<
+        configName << "/" << libName << ".exe\"\n";
+      fout << "\t\t\t\tLinkIncremental=\"1\"\n";
+      fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
+      fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
+      this->OutputLibraryDirectories(fout, configName, libName, target);
+      fout << "\"\n";
+      fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath << libName << ".pdb\"\n";
+      fout << "\t\t\t\tSubSystem=\"2\"\n";
+      fout << "\t\t\t\tStackReserveSize=\"10000000\"/>\n";
       break;
     case cmTarget::UTILITY:
       break;
@@ -756,7 +807,18 @@ void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
                                                    const char* libName,
                                                    const cmTarget &target)
 {
-  fout << m_LibraryOutputPath << "$(INTDIR)," << m_LibraryOutputPath;
+  bool hasone = false;
+  if(m_LibraryOutputPath.size())
+    {
+    hasone = true;
+    fout << m_LibraryOutputPath << "$(INTDIR)," << m_LibraryOutputPath;
+    }
+  if(m_ExecutableOutputPath.size())
+    {
+    hasone = true;
+    fout << m_ExecutableOutputPath << "$(INTDIR)," << m_ExecutableOutputPath;
+    }
+    
   std::set<std::string> pathEmitted;
   std::vector<std::string>::iterator i;
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
@@ -769,10 +831,14 @@ void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
       }
     if(pathEmitted.insert(lpath).second)
       {
-      fout << "," << lpath;
+      if(hasone)
+        {
+        fout << ",";
+        }
+      fout << lpath;
+      hasone = true;
       }
     }
-  
 }
 
 void cmMSDotNETGenerator::OutputLibraries(std::ostream& fout,
@@ -817,7 +883,7 @@ void cmMSDotNETGenerator::OutputDefineFlags(std::ostream& fout)
       define = defs.substr(pos+2);
       done = true;
       }
-    fout << define << ";";
+    fout << define << ",";
     if(!done)
       {
       pos = defs.find("-D", nextpos);
@@ -902,10 +968,11 @@ void cmMSDotNETGenerator::WriteVCProjFile(std::ostream& fout,
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
         fout << "\t\t\t<File\n";
-        
+        std::string d = source;
+        cmSystemTools::ConvertToWindowsSlashes(d);
         // Tell MS-Dev what the source is.  If the compiler knows how to
         // build it, then it will.
-        fout << "\t\t\t\tRelativePath=\"" << cmSystemTools::EscapeSpaces(source.c_str()) << "\">\n";
+        fout << "\t\t\t\tRelativePath=\"" << cmSystemTools::EscapeSpaces(d.c_str()) << "\">\n";
         if (!commands.empty())
           {
           cmSourceGroup::CommandFiles totalCommand;
@@ -961,6 +1028,11 @@ void cmMSDotNETGenerator::WriteCustomRule(std::ostream& fout,
       }
     fout << "\"\n";
     fout << "\t\t\t\t\tOutputs=\"";
+    if(outputs.size() == 0)
+      {
+      fout << source << "_force";
+      }
+    
     bool first = true;
     // Write a rule for every output generated by this command.
     for(std::set<std::string>::const_iterator output = outputs.begin();
