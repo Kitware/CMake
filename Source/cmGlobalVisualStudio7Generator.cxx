@@ -167,7 +167,8 @@ void cmGlobalVisualStudio7Generator::SetupTests()
     // If the file doesn't exist, then ENABLE_TESTING hasn't been run
     if (cmSystemTools::FileExists(fname.c_str()))
       {
-      std::vector<std::string> srcs;
+      const char* no_output = 0;
+      std::vector<std::string> no_depends;
       std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
       for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
         {
@@ -176,7 +177,8 @@ void cmGlobalVisualStudio7Generator::SetupTests()
         if(gen.size())
           {
           gen[0]->GetMakefile()->
-            AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-C $(IntDir)",false,srcs);
+            AddUtilityCommand("RUN_TESTS", false, no_output, no_depends,
+                              ctest.c_str(), "-C", "$(IntDir)");
           }
         }
       }
@@ -254,8 +256,9 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
 void cmGlobalVisualStudio7Generator::Generate()
 {
   // add a special target that depends on ALL projects for easy build
-  // of Debug only
-  std::vector<std::string> srcs;
+  // of one configuration only.
+  const char* no_output = 0;
+  std::vector<std::string> no_depends;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
     {
@@ -264,12 +267,14 @@ void cmGlobalVisualStudio7Generator::Generate()
     if(gen.size())
       {
       gen[0]->GetMakefile()->
-        AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false,srcs);
+        AddUtilityCommand("ALL_BUILD", false, no_output, no_depends,
+                          "echo", "Build all projects");
       std::string cmake_command = 
         m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
       gen[0]->GetMakefile()->
-        AddUtilityCommand("INSTALL", cmake_command.c_str(),
-          "-DBUILD_TYPE=$(IntDir) -P cmake_install.cmake",false,srcs);
+        AddUtilityCommand("INSTALL", false, no_output, no_depends,
+                          cmake_command.c_str(),
+                          "-DBUILD_TYPE=$(IntDir)", "-P", "cmake_install.cmake");
       }
     }
   
@@ -394,11 +399,10 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-        
-        std::string project_name = cc.GetCommand();
-        std::string location = cc.GetArguments();
-        this->WriteExternalProject(fout, project_name.c_str(), 
-                                   location.c_str(), cc.GetDepends());
+        const cmCustomCommandLines& cmds = cc.GetCommandLines();
+        std::string project = cmds[0][0];
+        std::string location = cmds[0][1];
+        this->WriteExternalProject(fout, project.c_str(), location.c_str(), cc.GetDepends());
         }
       else 
         {
@@ -481,7 +485,8 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
        if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
          {
          cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-         std::string name = cc.GetCommand();
+         const cmCustomCommandLines& cmds = cc.GetCommandLines();
+         std::string name = cmds[0][0];
          std::vector<std::string> depends = cc.GetDepends();
          std::vector<std::string>::iterator iter;
          int depcount = 0;
@@ -522,7 +527,8 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
       if(strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-        std::string name = cc.GetCommand();
+        const cmCustomCommandLines& cmds = cc.GetCommandLines();
+        std::string name = cmds[0][0];
         this->WriteProjectConfigurations(fout, name.c_str(), l->second.IsInAll());
         }
       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)

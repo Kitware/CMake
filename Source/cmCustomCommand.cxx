@@ -9,74 +9,59 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
 #include "cmCustomCommand.h"
-#include "cmMakefile.h"
 
-/**
- * The constructor
- */
-cmCustomCommand::cmCustomCommand(const char *command,
-                                 const char* arguments,
-                                 std::vector<std::string> dep,
-                                 const char *out):
-  m_Command(command),
-  m_Arguments(arguments),
-  m_Depends(dep)
-{
-  if (out)
-    {
-    m_Output = out;
-    }
-}
-
-cmCustomCommand::cmCustomCommand(const char *command,
-                                 const char* arguments):
-  m_Command(command),
-  m_Arguments(arguments)
+//----------------------------------------------------------------------------
+cmCustomCommand::cmCustomCommand()
 {
 }
 
-/**
- * Copy constructor.
- */
+//----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
-  m_Command(r.m_Command),
-  m_Arguments(r.m_Arguments),
-  m_Comment(r.m_Comment),
   m_Output(r.m_Output),
-  m_Depends(r.m_Depends)
+  m_Depends(r.m_Depends),
+  m_CommandLines(r.m_CommandLines),
+  m_Comment(r.m_Comment)
 {
 }
 
-void cmCustomCommand::ExpandVariables(const cmMakefile &mf)
+//----------------------------------------------------------------------------
+cmCustomCommand::cmCustomCommand(const char* output,
+                                 const std::vector<std::string>& depends,
+                                 const cmCustomCommandLines& commandLines,
+                                 const char* comment):
+  m_Output(output?output:""),
+  m_Depends(depends),
+  m_CommandLines(commandLines),
+  m_Comment(comment?comment:"")
 {
-  mf.ExpandVariablesInString(m_Command);
-  mf.ExpandVariablesInString(m_Arguments);
-  mf.ExpandVariablesInString(m_Output);
-
-  for (std::vector<std::string>::iterator i = m_Depends.begin();
-       i != m_Depends.end(); ++i)
-    {
-    mf.ExpandVariablesInString(*i);
-    }
 }
 
-
-bool cmCustomCommand::IsEquivalent(const char* command,
-                                   const char* args)
+//----------------------------------------------------------------------------
+const char* cmCustomCommand::GetOutput() const
 {
-  if(m_Command != command)
-    {
-    return false;
-    }
-  if(m_Arguments != args)
-    {
-    return false;
-    }
-  return true;
+  return m_Output.c_str();
+}
+
+//----------------------------------------------------------------------------
+const std::vector<std::string>& cmCustomCommand::GetDepends() const
+{
+  return m_Depends;
+}
+
+//----------------------------------------------------------------------------
+const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
+{
+  return m_CommandLines;
+}
+
+//----------------------------------------------------------------------------
+const char* cmCustomCommand::GetComment() const
+{
+  return m_Comment.c_str();
 }

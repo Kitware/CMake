@@ -19,52 +19,88 @@
 // cmAddCustomTargetCommand
 bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
 {
-  bool all = false;
-  
   if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
 
-  // all target option
-  std::string arguments;
-  std::vector<std::string>::const_iterator s = args.begin();
-  ++s; // move past args[0] as it is already to be used
-  if (args.size() >= 2)
+  // Accumulate one command line at a time.
+  cmCustomCommandLine currentLine;
+
+  // Save all command lines.
+  cmCustomCommandLines commandLines;
+
+  // Accumulate dependencies.
+  std::vector<std::string> depends;
+
+  // Keep track of parser state.
+  enum tdoing {
+    doing_command,
+    doing_depends
+  };
+  tdoing doing = doing_command;
+
+  // Look for the ALL option.
+  bool all = false;
+  unsigned int start = 1;
+  if(args.size() > 1)
     {
-    if (args[1] == "ALL")
+    if(args[1] == "ALL")
       {
       all = true;
-      ++s; // skip all 
+      start = 2;
       }
     }
-  std::string command;
-  if(s != args.end() && *s != "DEPENDS")
+
+  // Parse the rest of the arguments.
+  for(unsigned int j = start; j < args.size(); ++j)
     {
-    command = *s;
-    ++s;
+    std::string const& copy = args[j];
+
+    if(copy == "DEPENDS")
+      {
+      doing = doing_depends;
+      }
+    else if(copy == "COMMAND")
+      {
+      doing = doing_command;
+
+      // Save the current command before starting the next command.
+      if(!currentLine.empty())
+        {
+        commandLines.push_back(currentLine);
+        currentLine.clear();
+        }
+      }
+    else
+      {
+      switch (doing)
+        {
+        case doing_command:
+          currentLine.push_back(copy);
+          break;
+        case doing_depends:
+          depends.push_back(copy);
+          break;
+        default:
+          this->SetError("Wrong syntax. Unknown type of argument.");
+          return false;
+        }
+      }
     }
-  for (;s != args.end() && *s != "DEPENDS"; ++s)
+
+  // Store the last command line finished.
+  if(!currentLine.empty())
     {
-    arguments += cmSystemTools::EscapeSpaces(s->c_str());
-    arguments += " ";
+    commandLines.push_back(currentLine);
+    currentLine.clear();
     }
-  std::vector<std::string> depends;
-  // skip depends keyword
-  if (s != args.end())
-    {
-    ++s;
-    }
-  while (s != args.end()) 
-    {
-    depends.push_back(*s);  
-    ++s;
-    }
-  m_Makefile->AddUtilityCommand(args[0].c_str(), 
-                                command.c_str(),
-                                arguments.c_str(), all, depends);
+
+  // Add the utility target to the makefile.
+  const char* no_output = 0;
+  m_Makefile->AddUtilityCommand(args[0].c_str(), all, no_output, depends,
+                                commandLines);
 
   return true;
 }
-

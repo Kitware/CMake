@@ -670,7 +670,7 @@ cmLocalUnixMakefileGenerator2
   if(m_CustomRuleFiles.find(ruleFileName) != m_CustomRuleFiles.end())
     {
     cmSystemTools::Error("An output was found with multiple rules on how to build it for output: ",
-                         cc.GetOutput().c_str());
+                         cc.GetOutput());
     return;
     }
   m_CustomRuleFiles.insert(ruleFileName);
@@ -704,15 +704,15 @@ cmLocalUnixMakefileGenerator2
 
   // Write the rule.
   const char* comment = 0;
-  if(cc.GetComment().size())
+  if(cc.GetComment() && *cc.GetComment())
     {
-    comment = cc.GetComment().c_str();
+    comment = cc.GetComment();
     }
   std::string preEcho = "Generating ";
   preEcho += customName;
   preEcho += "...";
   this->WriteMakeRule(ruleFileStream, comment, preEcho.c_str(),
-                      cc.GetOutput().c_str(), depends, commands);
+                      cc.GetOutput(), depends, commands);
 
   // Write the clean rule for this custom command.
   std::string cleanTarget = customName;
@@ -720,7 +720,7 @@ cmLocalUnixMakefileGenerator2
   commands.clear();
   depends.clear();
   std::vector<std::string> cleanFiles;
-  cleanFiles.push_back(cc.GetOutput().c_str());
+  cleanFiles.push_back(cc.GetOutput());
   this->AppendCleanCommand(commands, cleanFiles);
   this->WriteMakeRule(ruleFileStream,
                       "Clean the output of this custom command.", 0,
@@ -2282,18 +2282,18 @@ cmLocalUnixMakefileGenerator2
   // the custom file.  Otherwise, we will use just the filename
   // portion.
   std::string customName;
-  if(cmSystemTools::FileIsFullPath(cc.GetOutput().c_str()) &&
-     (cc.GetOutput().find(m_Makefile->GetStartOutputDirectory()) == 0))
+  if(cmSystemTools::FileIsFullPath(cc.GetOutput()) &&
+     (std::string(cc.GetOutput()).find(m_Makefile->GetStartOutputDirectory()) == 0))
     {
     // Use the relative path but convert it to a valid file name.
     customName =
       cmSystemTools::RelativePath(m_Makefile->GetStartOutputDirectory(),
-                                  cc.GetOutput().c_str());
+                                  cc.GetOutput());
     cmSystemTools::ReplaceString(customName, "/", "_");
     }
   else
     {
-    customName = cmSystemTools::GetFilenameName(cc.GetOutput().c_str());
+    customName = cmSystemTools::GetFilenameName(cc.GetOutput());
     }
   return customName;
 }
@@ -2734,16 +2734,22 @@ cmLocalUnixMakefileGenerator2
 {
   // TODO: Convert outputs/dependencies (arguments?) to relative paths.
 
-  // Build the command line in a single string.
-  std::string cmd = cc.GetCommand();
-  cmSystemTools::ReplaceString(cmd, "/./", "/");
-  cmd = this->ConvertToRelativeOutputPath(cmd.c_str());
-  if(cc.GetArguments().size() > 0)
+  // Add each command line to the set of commands.
+  for(cmCustomCommandLines::const_iterator cl = cc.GetCommandLines().begin();
+      cl != cc.GetCommandLines().end(); ++cl)
     {
-    cmd += " ";
-    cmd += cc.GetArguments();
+    // Build the command line in a single string.
+    const cmCustomCommandLine& commandLine = *cl;
+    std::string cmd = commandLine[0];
+    cmSystemTools::ReplaceString(cmd, "/./", "/");
+    cmd = this->ConvertToRelativeOutputPath(cmd.c_str());
+    for(unsigned int j=1; j < commandLine.size(); ++j)
+      {
+      cmd += " ";
+      cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
+      }
+    commands.push_back(cmd);
     }
-  commands.push_back(cmd);
 }
 
 //----------------------------------------------------------------------------

@@ -63,9 +63,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_CUSTOM_TARGET(Name [ALL] [ command arg arg arg ... ]\n"
+      "  ADD_CUSTOM_TARGET(Name [ALL] [command1 [args1...]]\n"
+      "                    [COMMAND command2 [args2...] ...]\n"
       "                    [DEPENDS depend depend depend ... ])\n"
-      "Adds a target with the given name that executes the given command "
+      "Adds a target with the given name that executes the given commands "
       "every time the target is built.  If the ALL option is specified "
       "it indicates that this target should be added to the default build "
       "target so that it will be run every time.  "

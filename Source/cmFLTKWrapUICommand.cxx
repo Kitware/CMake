@@ -29,7 +29,8 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
 
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
-  std::string fluid_exe = "${FLTK_FLUID_EXECUTABLE}";
+  const char* fluid_exe =
+    m_Makefile->GetRequiredDefinition("FLTK_FLUID_EXECUTABLE");
 
   // get parameter for the command
   m_Target              = args[0];  // Target that will use the generated files
@@ -66,28 +67,28 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
       std::string cxxres = outputDirectory.c_str();
       cxxres += "/" + srcName;
       cxxres += ".cxx";
-      
-      std::vector<std::string> cxxargs;
-      cxxargs.push_back("-c"); // instructs Fluid to run in command line
-      cxxargs.push_back("-h"); // optionally rename .h files
-      cxxargs.push_back(hname);
-      cxxargs.push_back("-o"); // optionally rename .cxx files
-      cxxargs.push_back(cxxres);
-      cxxargs.push_back(origname);// name of the GUI fluid file
-      
+
+      cmCustomCommandLine commandLine;
+      commandLine.push_back(fluid_exe);
+      commandLine.push_back("-c"); // instructs Fluid to run in command line
+      commandLine.push_back("-h"); // optionally rename .h files
+      commandLine.push_back(hname);
+      commandLine.push_back("-o"); // optionally rename .cxx files
+      commandLine.push_back(cxxres);
+      commandLine.push_back(origname);// name of the GUI fluid file
+      cmCustomCommandLines commandLines;
+      commandLines.push_back(commandLine);
+
       // Add command for generating the .h and .cxx files
+      const char* no_main_dependency = 0;
+      const char* no_comment = 0;
       m_Makefile->AddCustomCommandToOutput(cxxres.c_str(),
-                                           fluid_exe.c_str(),
-                                           cxxargs,
-                                           0,
-                                           depends);
-      
+                                           depends, no_main_dependency,
+                                           commandLines, no_comment);
       m_Makefile->AddCustomCommandToOutput(hname.c_str(),
-                                           fluid_exe.c_str(),
-                                           cxxargs,
-                                           0,
-                                           depends);
-                                           
+                                           depends, no_main_dependency,
+                                           commandLines, no_comment);
+
       cmSourceFile *sf = m_Makefile->GetSource(cxxres.c_str());
       sf->GetDepends().push_back(hname);
       sf->GetDepends().push_back(origname);

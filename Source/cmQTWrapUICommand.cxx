@@ -125,25 +125,15 @@ void cmQTWrapUICommand::FinalPass()
   // first we add the rules for all the .ui to .h and .cxx files
   size_t lastHeadersClass = m_WrapHeadersClasses.size();
   std::vector<std::string> depends;
-  std::string uic_exe = "${QT_UIC_EXECUTABLE}";
-  std::string moc_exe = "${QT_MOC_EXECUTABLE}";
-
+  const char* uic_exe = m_Makefile->GetRequiredDefinition("QT_UIC_EXECUTABLE");
+  const char* moc_exe = m_Makefile->GetRequiredDefinition("QT_MOC_EXECUTABLE");
 
   // wrap all the .h files
   depends.push_back(uic_exe);
 
-  const char * GENERATED_QT_FILES_value=
-      m_Makefile->GetDefinition("GENERATED_QT_FILES");
-  std::string ui_list("");
-  if (GENERATED_QT_FILES_value!=0)
-    {
-    ui_list=ui_list+GENERATED_QT_FILES_value;
-    } 
-
   for(size_t classNum = 0; classNum < lastHeadersClass; classNum++)
     {
     // set up .ui to .h and .cxx command
-
     std::string hres = m_Makefile->GetCurrentOutputDirectory();
     hres += "/";
     hres += m_WrapHeadersClasses[classNum].GetSourceName() + "." +
@@ -159,52 +149,58 @@ void cmQTWrapUICommand::FinalPass()
     mocres += m_WrapMocClasses[classNum].GetSourceName() + "." +
         m_WrapMocClasses[classNum].GetSourceExtension();
 
-    ui_list = ui_list + " " + hres + " " + cxxres + " " + mocres;
-    
-    std::vector<std::string> hargs;
-    hargs.push_back("-o");
-    hargs.push_back(hres);
-    hargs.push_back(m_WrapUserInterface[classNum]);
+    cmCustomCommandLine hCommand;
+    hCommand.push_back(uic_exe);
+    hCommand.push_back("-o");
+    hCommand.push_back(hres);
+    hCommand.push_back(m_WrapUserInterface[classNum]);
+    cmCustomCommandLines hCommandLines;
+    hCommandLines.push_back(hCommand);
 
-    std::vector<std::string> cxxargs;
-    cxxargs.push_back("-impl");
-    cxxargs.push_back(hres);
-    cxxargs.push_back("-o");
-    cxxargs.push_back(cxxres);
-    cxxargs.push_back(m_WrapUserInterface[classNum]);
+    cmCustomCommandLine cxxCommand;
+    cxxCommand.push_back(uic_exe);
+    cxxCommand.push_back("-impl");
+    cxxCommand.push_back(hres);
+    cxxCommand.push_back("-o");
+    cxxCommand.push_back(cxxres);
+    cxxCommand.push_back(m_WrapUserInterface[classNum]);
+    cmCustomCommandLines cxxCommandLines;
+    cxxCommandLines.push_back(cxxCommand);
 
     std::vector<std::string> mocargs;
-    mocargs.push_back("-o");
-    mocargs.push_back(mocres);
-    mocargs.push_back(hres);
+    cmCustomCommandLine mocCommand;
+    mocCommand.push_back(moc_exe);
+    mocCommand.push_back("-o");
+    mocCommand.push_back(mocres);
+    mocCommand.push_back(hres);
+    cmCustomCommandLines mocCommandLines;
+    mocCommandLines.push_back(mocCommand);
 
     depends.clear();
     depends.push_back(m_WrapUserInterface[classNum]);
-    m_Makefile->AddCustomCommandToOutput(
-      hres.c_str(),
-      uic_exe.c_str(), hargs, 0,
-      depends);
+    const char* no_main_dependency = 0;
+    const char* no_comment = 0;
+    m_Makefile->AddCustomCommandToOutput(hres.c_str(),
+                                         depends,
+                                         no_main_dependency,
+                                         hCommandLines,
+                                         no_comment);
 
     depends.push_back(hres);
 
-    m_Makefile->AddCustomCommandToOutput(
-      cxxres.c_str(),
-      uic_exe.c_str(), cxxargs, 0, depends);
-
-
+    m_Makefile->AddCustomCommandToOutput(cxxres.c_str(),
+                                         depends,
+                                         no_main_dependency,
+                                         cxxCommandLines,
+                                         no_comment);
 
     depends.clear();
     depends.push_back(hres);
 
-    m_Makefile->AddCustomCommandToOutput(
-      mocres.c_str(),
-      moc_exe.c_str(), mocargs, 0, depends);
-
+    m_Makefile->AddCustomCommandToOutput(mocres.c_str(),
+                                         depends,
+                                         no_main_dependency,
+                                         mocCommandLines,
+                                         no_comment);
     }
-
-  m_Makefile->AddDefinition("GENERATED_QT_FILES",ui_list.c_str());
-
 }
-
-
-

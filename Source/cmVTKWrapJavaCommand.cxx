@@ -49,7 +49,7 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   
   // Prepare java dependency file
-  std::string resultDirectory = "${VTK_JAVA_HOME}";
+  const char* resultDirectory = m_Makefile->GetRequiredDefinition("VTK_JAVA_HOME");
   std::string res = m_Makefile->GetCurrentOutputDirectory();
   std::string depFileName = res + "/JavaDependencies.cmake";
   std::ofstream depFile(depFileName.c_str());
@@ -88,7 +88,10 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& argsIn)
       sourceListValue += newName + ".cxx";
 
       // Write file to java dependency file
-      std::string jafaFile = resultDirectory + "/" + srcName + ".java";
+      std::string jafaFile = resultDirectory;
+      jafaFile += "/";
+      jafaFile += srcName;
+      jafaFile += ".java";
       depFile << "  " << jafaFile << std::endl;
       }
     }
@@ -107,18 +110,15 @@ void cmVTKWrapJavaCommand::FinalPass()
   std::vector<std::string> depends;
   std::vector<std::string> depends2;
   std::vector<std::string> alldepends;  
-  std::vector<std::string> empty;
-  std::string wjava = "${VTK_WRAP_JAVA_EXE}";
-  std::string pjava = "${VTK_PARSE_JAVA_EXE}";
-  std::string hints = "${VTK_WRAP_HINTS}";
-  std::string resultDirectory = "${VTK_JAVA_HOME}";
-
-  m_Makefile->ExpandVariablesInString(hints);
+  const char* wjava = m_Makefile->GetRequiredDefinition("VTK_WRAP_JAVA_EXE");
+  const char* pjava = m_Makefile->GetRequiredDefinition("VTK_PARSE_JAVA_EXE");
+  const char* hints = m_Makefile->GetDefinition("VTK_WRAP_HINTS");
+  const char* resultDirectory = m_Makefile->GetRequiredDefinition("VTK_JAVA_HOME");
 
   // wrap all the .h files
   depends.push_back(wjava);
   depends2.push_back(pjava);
-  if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+  if(hints)
     {
     depends.push_back(hints);
     depends2.push_back(hints);
@@ -131,45 +131,57 @@ void cmVTKWrapJavaCommand::FinalPass()
     std::string res = m_Makefile->GetCurrentOutputDirectory();
     res += "/";
     res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
-    std::string res2 = resultDirectory + "/" + 
-      m_OriginalNames[classNum] + ".java";
+    std::string res2 = resultDirectory;
+    res2 += "/";
+    res2 += m_OriginalNames[classNum];
+    res2 += ".java";
     
-    std::vector<std::string> args;
-    args.push_back(m_WrapHeaders[classNum]);
-    if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+    cmCustomCommandLine commandLineW;
+    commandLineW.push_back(wjava);
+    commandLineW.push_back(m_WrapHeaders[classNum]);
+    if(hints)
       {
-      args.push_back(hints);
+      commandLineW.push_back(hints);
       }
-    args.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
-    args.push_back(res);
+    commandLineW.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
+    commandLineW.push_back(res);
 
-    m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 wjava.c_str(), args, depends, 
-                                 res.c_str(), m_LibraryName.c_str());
+    cmCustomCommandLines commandLines;
+    commandLines.push_back(commandLineW);
+    std::vector<std::string> outputs;
+    outputs.push_back(res);
+    const char* no_comment = 0;
+    m_Makefile->AddCustomCommandOldStyle(m_LibraryName.c_str(),
+                                         outputs,
+                                         depends,
+                                         m_WrapHeaders[classNum].c_str(),
+                                         commandLines,
+                                         no_comment);
 
-    std::vector<std::string> args2;
-    args2.push_back(m_WrapHeaders[classNum]);
-    if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+    cmCustomCommandLine commandLineP;
+    commandLineP.push_back(pjava);
+    commandLineP.push_back(m_WrapHeaders[classNum]);
+    if(hints)
       {
-      args2.push_back(hints);
+      commandLineP.push_back(hints);
       }
-    args2.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
-    args2.push_back(res2);
+    commandLineP.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
+    commandLineP.push_back(res2);
 
-    m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 pjava.c_str(), args2, depends2, 
-                                 res2.c_str(), m_LibraryName.c_str());
+    cmCustomCommandLines commandLines2;
+    commandLines2.push_back(commandLineP);
+    std::vector<std::string> outputs2;
+    outputs2.push_back(res2);
+    m_Makefile->AddCustomCommandOldStyle(m_LibraryName.c_str(),
+                                         outputs2,
+                                         depends2,
+                                         m_WrapHeaders[classNum].c_str(),
+                                         commandLines2,
+                                         no_comment);
     alldepends.push_back(res2);
     }
 
+  const char* no_output = 0;
   m_Makefile->AddUtilityCommand((m_LibraryName+"JavaClasses").c_str(),
-                                "",
-                                "",
-                                true,
-                                alldepends,
-                                empty);
-  
+                                true, no_output, alldepends, "");
 }
-
-
-

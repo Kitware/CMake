@@ -663,8 +663,6 @@ std::string cmLocalUnixMakefileGenerator::CreatePreBuildRules(
          target.GetPreBuildCommands().begin(); 
        cr != target.GetPreBuildCommands().end(); ++cr)
     {
-    cmCustomCommand cc(*cr);
-    cc.ExpandVariables(*m_Makefile);
     if(initNext)
       {
       customRuleCode += "\n\t";
@@ -673,8 +671,7 @@ std::string cmLocalUnixMakefileGenerator::CreatePreBuildRules(
       {
       initNext = true;
       }
-    std::string command = this->ConvertToRelativeOutputPath(cc.GetCommand().c_str());
-    customRuleCode += command + " " + cc.GetArguments();
+    customRuleCode += this->ConstructScript(cr->GetCommandLines(), "\n\t");
     }
   return customRuleCode;
 }
@@ -688,8 +685,6 @@ std::string cmLocalUnixMakefileGenerator::CreatePreLinkRules(
          target.GetPreLinkCommands().begin(); 
        cr != target.GetPreLinkCommands().end(); ++cr)
     {
-    cmCustomCommand cc(*cr);
-    cc.ExpandVariables(*m_Makefile);
     if(initNext)
       {
       customRuleCode += "\n\t";
@@ -698,8 +693,7 @@ std::string cmLocalUnixMakefileGenerator::CreatePreLinkRules(
       {
       initNext = true;
       }
-    std::string command = this->ConvertToRelativeOutputPath(cc.GetCommand().c_str());
-    customRuleCode += command + " " + cc.GetArguments();
+    customRuleCode += this->ConstructScript(cr->GetCommandLines(), "\n\t");
     }
   return customRuleCode;
 }
@@ -713,8 +707,6 @@ std::string cmLocalUnixMakefileGenerator::CreatePostBuildRules(
          target.GetPostBuildCommands().begin(); 
        cr != target.GetPostBuildCommands().end(); ++cr)
     {
-    cmCustomCommand cc(*cr);
-    cc.ExpandVariables(*m_Makefile);
     if(initNext)
       {
       customRuleCode += "\n\t";
@@ -723,8 +715,7 @@ std::string cmLocalUnixMakefileGenerator::CreatePostBuildRules(
       {
       initNext = true;
       }
-    std::string command = this->ConvertToRelativeOutputPath(cc.GetCommand().c_str());
-    customRuleCode += command + " " + cc.GetArguments();
+    customRuleCode += this->ConstructScript(cr->GetCommandLines(), "\n\t");
     }
   return customRuleCode;
 }
@@ -2025,12 +2016,24 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       // escape spaces and convert to native slashes path for
       // the command
       std::string comment = c->GetComment();
-      std::string command = c->GetCommand();
-      cmSystemTools::ReplaceString(command, "/./", "/");
-      command = this->ConvertToRelativeOutputPath(command.c_str());
-      command += " ";
-      // now add the arguments
-      command += c->GetArguments();
+      std::vector<std::string> commands;
+
+      // Add each command line to the set of commands.
+      for(cmCustomCommandLines::const_iterator cl = c->GetCommandLines().begin();
+          cl != c->GetCommandLines().end(); ++cl)
+        {
+        // Build the command line in a single string.
+        const cmCustomCommandLine& commandLine = *cl;
+        std::string cmd = commandLine[0];
+        cmSystemTools::ReplaceString(cmd, "/./", "/");
+        cmd = this->ConvertToRelativeOutputPath(cmd.c_str());
+        for(unsigned int j=1; j < commandLine.size(); ++j)
+          {
+          cmd += " ";
+          cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
+          }
+        commands.push_back(cmd);
+        }
       std::vector<std::string> depends;
       // Collect out all the dependencies for this rule.
       for(std::vector<std::string>::const_iterator d =
@@ -2066,15 +2069,15 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
         {
         this->OutputMakeRule(fout,
                              (comment.size()?comment.c_str():"Custom command"),
-                             c->GetOutput().c_str(),
+                             c->GetOutput(),
                              depends,
-                             command.c_str());
+                             commands);
         processedOutputs.insert(c->GetOutput());
         }
       else
         {
         cmSystemTools::Error("An output was found with multiple rules on how to build it for output: ",
-                             c->GetOutput().c_str());
+                             c->GetOutput());
         }
       }
     }

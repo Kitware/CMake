@@ -496,276 +496,251 @@ void cmMakefile::ConfigureFinalPass()
     }
 }
 
-
-// this is the old style signature, we convert to new style
-void cmMakefile::AddCustomCommand(const char* source,
-                                  const char* command,
-                                  const std::vector<std::string>& commandArgs,
-                                  const std::vector<std::string>& depends,
-                                  const std::vector<std::string>& outputs,
-                                  const char *target,
-                                  const char *comment) 
+//----------------------------------------------------------------------------
+void
+cmMakefile::AddCustomCommandToTarget(const char* target,
+                                     const std::vector<std::string>& depends,
+                                     const cmCustomCommandLines& commandLines,
+                                     cmTarget::CustomCommandType type,
+                                     const char* comment)
 {
-  if (strcmp(source,target))
+  // Find the target to which to add the custom command.
+  cmTargets::iterator ti = m_Targets.find(target);
+  if(ti != m_Targets.end())
     {
-    // what a pain, for backwards compatibility we will try to
-    // convert this to an output based rule... so for each output..
-    for(std::vector<std::string>::const_iterator d = outputs.begin();
-        d != outputs.end(); ++d)
+    // Add the command to the appropriate build step for the target.
+    const char* no_output = 0;
+    cmCustomCommand cc(no_output, depends, commandLines, comment);
+    switch(type)
       {
-      // if this looks like a real file then use is as the main depend
-      cmsys::RegularExpression SourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
-      if (SourceFiles.find(source))
+      case cmTarget::PRE_BUILD:
+        ti->second.GetPreBuildCommands().push_back(cc);
+        break;
+      case cmTarget::PRE_LINK:
+        ti->second.GetPreLinkCommands().push_back(cc);
+        break;
+      case cmTarget::POST_BUILD:
+        ti->second.GetPostBuildCommands().push_back(cc);
+        break;
+      }
+
+    // Add dependencies on commands CMake knows how to build.
+    for(cmCustomCommandLines::const_iterator cli = commandLines.begin();
+        cli != commandLines.end(); ++cli)
+      {
+      std::string cacheCommand = *cli->begin();
+      if(const char* knownTarget =
+         this->GetCacheManager()->GetCacheValue(cacheCommand.c_str()))
         {
-        this->AddCustomCommandToOutput(d->c_str(), command, commandArgs, 
-                                       source, depends, comment);
-        }
-      // otherwise do not use a main depend
-      else
-        {
-        std::vector<std::string> depends2 = depends;
-        depends2.push_back(source);
-        this->AddCustomCommandToOutput(d->c_str(), command, commandArgs, 
-                                       0, depends2, comment);
-        }
-      
-      // add the output to the target?
-      std::string sname = *d;
-      sname += ".rule";
-      this->ExpandVariablesInString(sname);
-      // if the rule was added to the source, 
-      // then add the source to the target
-      if (!this->GetSource(sname.c_str()))
-        {
-        if (m_Targets.find(target) != m_Targets.end())
-          {
-          m_Targets[target].GetSourceLists().push_back(source);
-          }
-        else
-          {
-          cmSystemTools::Error("Attempt to add a custom rule to a target that does not exist yet for target ", target);
-          return;
-          }
+        ti->second.AddUtility(knownTarget);
         }
       }
-    }
-  else
-    {
-    this->AddCustomCommandToTarget(target, command, commandArgs, 
-                                   cmTarget::POST_BUILD, comment, depends);
     }
 }
 
-void cmMakefile::AddCustomCommand(const char* source,
-                                  const char* command,
-                                  const std::vector<std::string>& commandArgs,
-                                  const std::vector<std::string>& depends,
-                                  const char* output, 
-                                  const char *target) 
+//----------------------------------------------------------------------------
+void
+cmMakefile::AddCustomCommandToOutput(const char* output,
+                                     const std::vector<std::string>& depends,
+                                     const char* main_dependency,
+                                     const cmCustomCommandLines& commandLines,
+                                     const char* comment,
+                                     bool replace)
 {
-  std::vector<std::string> outputs;
-  outputs.push_back(output);
-  this->AddCustomCommand(source, command, commandArgs, depends, 
-                         outputs, target);
-}
-
-void cmMakefile::
-AddCustomCommandToOutput(const char* outputIn,
-                         const char* inCommand,
-                         const std::vector<std::string>& commandArgs,
-                         const char *main_dependency,
-                         const std::vector<std::string>& depends,
-                         const char *comment,
-                         bool replace)
-{
-  std::string expandC;
-  std::string combinedArgs;
-  std::string command = inCommand;
-  
-  // process the command's string
-  this->ExpandVariablesInString(command);
-  command = cmSystemTools::EscapeSpaces(command.c_str());  
-  
-  unsigned int i;
-  bool escapeSpaces = true;
-  for (i = 0; i < commandArgs.size(); ++i)
+  // Choose a source file on which to store the custom command.
+  cmSourceFile* file = 0;
+  if(main_dependency && main_dependency[0])
     {
-    expandC = commandArgs[i].c_str();
-    // This is a hack to fix a problem with cmCustomCommand
-    // The cmCustomCommand should store the arguments as a vector
-    // and not a string, and the cmAddCustomTargetCommand should
-    // not EscapeSpaces.
-    if(expandC == "This is really a single argument do not escape spaces")
+    // The main dependency was specified.  Use it unless a different
+    // custom command already used it.
+    file = this->GetSource(main_dependency);
+    if(file && file->GetCustomCommand() && !replace)
       {
-      escapeSpaces = false;
-      }
-    else
-      {
-      this->ExpandVariablesInString(expandC);
-      if(escapeSpaces)
+      // The main dependency already has a custom command.
+      if(commandLines == file->GetCustomCommand()->GetCommandLines())
         {
-        combinedArgs += cmSystemTools::EscapeSpaces(expandC.c_str());
-        }
-      else
-        {
-        combinedArgs += expandC;
-        }
-      combinedArgs += " ";
-      }
-    }
-  cmSourceFile *file = 0;
-
-  // setup the output name and make sure we expand any variables
-  std::string output = outputIn;
-  this->ExpandVariablesInString(output);  
-  std::string outName = output;
-  outName += ".rule";
-
-  // setup the main dependency name and expand vars of course
-  std::string mainDepend;
-  if (main_dependency && main_dependency[0] != '\0')
-    {
-    mainDepend = main_dependency;
-    this->ExpandVariablesInString(mainDepend);
-    }
-
-  // OK this rule will be placed on a generated output file unless the main
-  // depednency was specified.
-  if (main_dependency && main_dependency[0] != '\0')
-    {
-    file = this->GetSource(mainDepend.c_str());
-    if (file && file->GetCustomCommand() && !replace)
-      {  
-      cmCustomCommand* cc = file->GetCustomCommand();
-      // if the command and args are the same
-      // as the command already there, then silently skip
-      // this add command
-      if(cc->IsEquivalent(command.c_str(), combinedArgs.c_str()))
-        {
+        // The existing custom command is identical.  Silently ignore
+        // the duplicate.
         return;
         }
-      // generate a source instead
-      file = 0;
+      else
+        {
+        // The existing custom command is different.  We need to
+        // generate a rule file for this new command.
+        file = 0;
+        }
       }
     else
       {
-      file = this->GetOrCreateSource(mainDepend.c_str());
+      // The main dependency does not have a custom command or we are
+      // allowed to replace it.  Use it to store the command.
+      file = this->GetOrCreateSource(main_dependency);
       }
     }
 
-  if (!file)
+  // Generate a rule file if the main dependency is not available.
+  if(!file)
     {
+    // Construct a rule file associated with the output produced.
+    std::string outName = output;
+    outName += ".rule";
+
+    // Check if the rule file already exists.
     file = this->GetSource(outName.c_str());
-    if (file && file->GetCustomCommand() && !replace)
+    if(file && file->GetCustomCommand() && !replace)
       {
-      cmCustomCommand* cc = file->GetCustomCommand();
-      // if the command and args are the same
-      // as the command already there, then silently skip
-      // this add command
-      if(cc->IsEquivalent(command.c_str(), combinedArgs.c_str()))
+      // The rule file already exists.
+      if(commandLines != file->GetCustomCommand()->GetCommandLines())
         {
-        return;
+        cmSystemTools::Error("Attempt to add a custom rule to output \"",
+                             output, "\" which already has a custom rule.");
         }
-      // produce error if two different commands are given to produce
-      // the same output
-      cmSystemTools::Error("Attempt to add a custom rule to an output that already"
-                           " has a custom rule. For output: ",  outputIn);
       return;
       }
-    // create a cmSourceFile for the output
+
+    // Create a cmSourceFile for the rule file.
     file = this->GetOrCreateSource(outName.c_str(), true);
-    if(file)
-      {
-      // always mark as generated
-      file->SetProperty("GENERATED","1");
-      }
     }
-  
-  // always create the output and mark it generated
-  if(cmSourceFile *out = this->GetOrCreateSource(output.c_str(), true))
+
+  // Always create the output and mark it generated.
+  if(cmSourceFile* out = this->GetOrCreateSource(output, true))
     {
-    out->SetProperty("GENERATED","1");
+    out->SetProperty("GENERATED", "1");
     }
-  
+
+  // Construct a complete list of dependencies.
   std::vector<std::string> depends2(depends);
-  if (main_dependency && main_dependency[0] != '\0')
+  if(main_dependency && main_dependency[0])
     {
-    depends2.push_back(mainDepend.c_str());
+    depends2.push_back(main_dependency);
     }
-  cmCustomCommand *cc = 
-    new cmCustomCommand(command.c_str(),combinedArgs.c_str(),depends2, 
-                        output.c_str());
-  if ( comment && comment[0] )
-    {
-    cc->SetComment(comment);
-    }
+
+  // Attach the custom command to the file.
   if(file)
     {
+    cmCustomCommand* cc =
+      new cmCustomCommand(output, depends2, commandLines, comment);
     file->SetCustomCommand(cc);
     }
 }
 
-void cmMakefile::
-AddCustomCommandToTarget(const char* target, const char* command,
-                         const std::vector<std::string>& commandArgs,
-                         cmTarget::CustomCommandType type,
-                         const char *comment) 
+//----------------------------------------------------------------------------
+void
+cmMakefile::AddCustomCommandOldStyle(const char* target,
+                                     const std::vector<std::string>& outputs,
+                                     const std::vector<std::string>& depends,
+                                     const char* source,
+                                     const cmCustomCommandLines& commandLines,
+                                     const char* comment)
 {
-  std::vector<std::string> empty;
-  this->AddCustomCommandToTarget(target,command,commandArgs,type,
-                                 comment, empty);
-}
-
-void cmMakefile::
-AddCustomCommandToTarget(const char* target, const char* command,
-                         const std::vector<std::string>& commandArgs,
-                         cmTarget::CustomCommandType type,
-                         const char *comment,  
-                         const std::vector<std::string>& depends)
-{
-  // find the target, 
-  if (m_Targets.find(target) != m_Targets.end())
+  // Translate the old-style signature to one of the new-style
+  // signatures.
+  if(strcmp(source, target) == 0)
     {
-    std::string expandC = command;
-    this->ExpandVariablesInString(expandC);
-    std::string c = cmSystemTools::EscapeSpaces(expandC.c_str());
-    
-    std::string combinedArgs;
-    unsigned int i;
-    
-    for (i = 0; i < commandArgs.size(); ++i)
+    // In the old-style signature if the source and target were the
+    // same then it added a post-build rule to the target.  Preserve
+    // this behavior.
+    this->AddCustomCommandToTarget(target, depends, commandLines,
+                                   cmTarget::POST_BUILD, comment);
+    return;
+    }
+
+  // Each output must get its own copy of this rule.
+  cmsys::RegularExpression sourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|"
+                                       "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
+                                       "hm|hpp|hxx|in|txx|inl)$");
+  for(std::vector<std::string>::const_iterator oi = outputs.begin();
+      oi != outputs.end(); ++oi)
+    {
+    // Get the name of this output.
+    const char* output = oi->c_str();
+
+    // Choose whether to use a main dependency.
+    if(sourceFiles.find(source))
       {
-      expandC = commandArgs[i].c_str();
-      this->ExpandVariablesInString(expandC);
-      combinedArgs += cmSystemTools::EscapeSpaces(expandC.c_str());
-      combinedArgs += " ";
+      // The source looks like a real file.  Use it as the main dependency.
+      this->AddCustomCommandToOutput(output, depends, source,
+                                     commandLines, comment);
       }
-    
-    cmCustomCommand cc(c.c_str(),combinedArgs.c_str(),depends,0);
-    if ( comment && comment[0] )
+    else
       {
-      cc.SetComment(comment);
+      // The source may not be a real file.  Do not use a main dependency.
+      const char* no_main_dependency = 0;
+      std::vector<std::string> depends2 = depends;
+      depends2.push_back(source);
+      this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
+                                     commandLines, comment);
       }
-    switch (type)
+
+    // If the rule was added to the source (and not a .rule file),
+    // then add the source to the target to make sure the rule is
+    // included.
+    std::string sname = output;
+    sname += ".rule";
+    if(!this->GetSource(sname.c_str()))
       {
-      case cmTarget::PRE_BUILD:
-        m_Targets[target].GetPreBuildCommands().push_back(cc);
-        break;
-      case cmTarget::PRE_LINK:
-        m_Targets[target].GetPreLinkCommands().push_back(cc);
-        break;
-      case cmTarget::POST_BUILD:
-        m_Targets[target].GetPostBuildCommands().push_back(cc);
-        break;
-      }
-    std::string cacheCommand = command;
-    this->ExpandVariablesInString(cacheCommand);
-    if(this->GetCacheManager()->GetCacheValue(cacheCommand.c_str()))
-      {
-      m_Targets[target].AddUtility(
-        this->GetCacheManager()->GetCacheValue(cacheCommand.c_str()));
+      if (m_Targets.find(target) != m_Targets.end())
+        {
+        m_Targets[target].GetSourceLists().push_back(source);
+        }
+      else
+        {
+        cmSystemTools::Error("Attempt to add a custom rule to a target "
+                             "that does not exist yet for target ", target);
+        return;
+        }
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
+                                   const char* output,
+                                   const std::vector<std::string>& depends,
+                                   const char* command,
+                                   const char* arg1,
+                                   const char* arg2,
+                                   const char* arg3)
+{
+  // Construct the command line for the custom command.
+  cmCustomCommandLine commandLine;
+  commandLine.push_back(command);
+  if(arg1)
+    {
+    commandLine.push_back(arg1);
+    }
+  if(arg2)
+    {
+    commandLine.push_back(arg2);
+    }
+  if(arg3)
+    {
+    commandLine.push_back(arg3);
+    }
+  cmCustomCommandLines commandLines;
+  commandLines.push_back(commandLine);
+
+  // Call the real signature of this method.
+  this->AddUtilityCommand(utilityName, all, output, depends, commandLines);
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
+                                   const char* output,
+                                   const std::vector<std::string>& depends,
+                                   const cmCustomCommandLines& commandLines)
+{
+  // Create a target instance for this utility.
+  cmTarget target;
+  target.SetType(cmTarget::UTILITY, utilityName);
+  target.SetInAll(all);
+
+  // Store the custom command in the target.
+  cmCustomCommand cc(output, depends, commandLines, 0);
+  target.GetPostBuildCommands().push_back(cc);
+
+  // Add the target to the set of targets.
+  m_Targets.insert(cmTargets::value_type(utilityName, target));
 }
 
 void cmMakefile::AddDefineFlag(const char* flag)
@@ -1128,48 +1103,6 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
   return &it->second;
 }
 
-
-void cmMakefile::AddUtilityCommand(const char* utilityName,
-                                   const char* command,
-                                   const char* arguments,
-                                   bool all,
-                                   const std::vector<std::string> &depends)
-{
-  std::vector<std::string> empty;
-  this->AddUtilityCommand(utilityName,command,arguments,all,
-                          depends, empty);
-}
-
-void cmMakefile::AddUtilityCommand(const char* utilityName,
-                                   const char* command,
-                                   const char* arguments,
-                                   bool all,
-                                   const std::vector<std::string> &dep,
-                                   const std::vector<std::string> &out)
-{
-  cmTarget target;
-  target.SetType(cmTarget::UTILITY, utilityName);
-  target.SetInAll(all);
-  if (out.size() > 1)
-    {
-    cmSystemTools::Error(
-      "Utility targets can only have one output. For utilityNamed: ",
-      utilityName);
-    return;
-    }
-  if (out.size())
-    {
-    cmCustomCommand cc(command, arguments, dep, out[0].c_str());
-    target.GetPostBuildCommands().push_back(cc);
-    }
-  else
-    {
-    cmCustomCommand cc(command, arguments, dep, (const char *)0);
-    target.GetPostBuildCommands().push_back(cc);
-    }
-  m_Targets.insert(cmTargets::value_type(utilityName,target));
-}
-
 cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
 {
   std::string name = cname;
@@ -1320,42 +1253,6 @@ void cmMakefile::ExpandVariables()
       l != m_LinkLibraries.end(); ++l)
     {
     this->ExpandVariablesInString(l->first);
-    }
-}
-
-void cmMakefile::ExpandVariablesInCustomCommands()
-{
-  // do source files
-  for(std::vector<cmSourceFile*>::iterator i = m_SourceFiles.begin();
-      i != m_SourceFiles.end(); ++i)
-    {
-    cmCustomCommand *cc = (*i)->GetCustomCommand();
-    if (cc)
-      {
-      cc->ExpandVariables(*this);
-      }
-    }
-  
-  // now do targets
-  std::vector<cmCustomCommand>::iterator ic;
-  for (cmTargets::iterator l = m_Targets.begin();
-       l != m_Targets.end(); l++)
-    {
-    for (ic = l->second.GetPreBuildCommands().begin();
-         ic != l->second.GetPreBuildCommands().end(); ++ic)
-      {
-      ic->ExpandVariables(*this);
-      }
-    for (ic = l->second.GetPreLinkCommands().begin();
-         ic != l->second.GetPreLinkCommands().end(); ++ic)
-      {
-      ic->ExpandVariables(*this);
-      }
-    for (ic = l->second.GetPostBuildCommands().begin();
-         ic != l->second.GetPostBuildCommands().end(); ++ic)
-      {
-      ic->ExpandVariables(*this);
-      }
     }
 }
 

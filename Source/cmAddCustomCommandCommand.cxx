@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmAddCustomCommandCommand.h"
+
 #include "cmTarget.h"
 
 // cmAddCustomCommandCommand
@@ -30,8 +31,14 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       return false;
     }
 
-  std::string source, command, target, comment, output, main_dependency;
-  std::vector<std::string> command_args, depends, outputs;
+  std::string source, target, comment, output, main_dependency;
+  std::vector<std::string> depends, outputs;
+
+  // Accumulate one command line at a time.
+  cmCustomCommandLine currentLine;
+
+  // Save all command lines.
+  cmCustomCommandLines commandLines;
 
   cmTarget::CustomCommandType cctype = cmTarget::POST_BUILD;
   
@@ -39,7 +46,6 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
     doing_source,
     doing_command,
     doing_target,
-    doing_args,
     doing_depends,
     doing_main_dependency,
     doing_output,
@@ -61,6 +67,13 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
     else if(copy == "COMMAND")
       {
       doing = doing_command;
+
+      // Save the current command before starting the next command.
+      if(!currentLine.empty())
+        {
+        commandLines.push_back(currentLine);
+        currentLine.clear();
+        }
       }
     else if(copy == "PRE_BUILD")
       {
@@ -80,7 +93,7 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       }
     else if(copy == "ARGS")
       {
-      doing = doing_args;
+      // Ignore this old keyword.
       }
     else if (copy == "DEPENDS")
       {
@@ -116,13 +129,10 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
           main_dependency = copy;
           break;
         case doing_command:
-          command = copy;
+          currentLine.push_back(copy);
           break;
         case doing_target:
           target = copy;
-          break;
-        case doing_args:
-          command_args.push_back(copy);
           break;
         case doing_depends:
           depends.push_back(copy);
@@ -140,58 +150,49 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       }
     }
 
-  /* At this point we could complain about the lack of arguments.
-     For the moment, let's say that COMMAND, TARGET are always 
-     required.
-  */
-  if (output.empty() && target.empty())
+  // Store the last command line finished.
+  if(!currentLine.empty())
+    {
+    commandLines.push_back(currentLine);
+    currentLine.clear();
+    }
+
+  // At this point we could complain about the lack of arguments.  For
+  // the moment, let's say that COMMAND, TARGET are always required.
+  if(output.empty() && target.empty())
     {
     this->SetError("Wrong syntax. A TARGET or OUTPUT must be specified.");
     return false;
     }
 
-  if (source.empty() 
-      && !target.empty() 
-      && !output.empty())
+  if(source.empty() && !target.empty() && !output.empty())
     {
     this->SetError("Wrong syntax. A TARGET and OUTPUT can not both be specified.");
     return false;
     }
-  
-  // If source is empty, use the target 
+
+  // Choose which mode of the command to use.
   if(source.empty() && output.empty())
     {
-    m_Makefile->AddCustomCommandToTarget(target.c_str(), 
-                                         command.c_str(), 
-                                         command_args, 
-                                         cctype,
+    // Source is empty, use the target.
+    std::vector<std::string> no_depends;
+    m_Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
+                                         commandLines, cctype,
                                          comment.c_str());
-    return true;
     }
-
-  // If target is empty, use the output
-  if(target.empty())
+  else if(target.empty())
     {
-    m_Makefile->AddCustomCommandToOutput(output.c_str(), 
-                                         command.c_str(), 
-                                         command_args, 
+    // Target is empty, use the output.
+    m_Makefile->AddCustomCommandToOutput(output.c_str(), depends,
                                          main_dependency.c_str(),
-                                         depends, 
-                                         comment.c_str());
-    return true;
+                                         commandLines, comment.c_str());
     }
-
-  // otherwise backwards compatiblity mode
-  m_Makefile->AddCustomCommand(source.c_str(), 
-                               command.c_str(), 
-                               command_args, 
-                               depends, 
-                               outputs, 
-                               target.c_str(),
-                               comment.c_str());
-  
+  else
+    {
+    // Use the old-style mode for backward compatibility.
+    m_Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
+                                         source.c_str(), commandLines,
+                                         comment.c_str());
+    }
   return true;
 }
-
-
-

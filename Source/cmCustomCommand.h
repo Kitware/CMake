@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -18,7 +18,6 @@
 #define cmCustomCommand_h
 
 #include "cmStandardIncludes.h"
-class cmMakefile;
 
 /** \class cmCustomCommand
  * \brief A class to encapsulate a custom command
@@ -28,57 +27,33 @@ class cmMakefile;
 class cmCustomCommand
 {
 public:
-  cmCustomCommand(const char *command,
-                  const char* arguments,
-                  std::vector<std::string> dep,
-                  const char *out);
-  cmCustomCommand(const char *command,
-                  const char* arguments);
-  cmCustomCommand() {};
+  /** Default and copy constructors for STL containers.  */
+  cmCustomCommand();
   cmCustomCommand(const cmCustomCommand& r);
-  
-  /**
-   * Use the cmMakefile's Expand commands to expand any variables in
-   * this objects members.
-   */
-  void ExpandVariables(const cmMakefile &);
 
-  ///! Return the command to execute with arguments
-  std::string GetCommandAndArguments() const
-    {return m_Command + " " + m_Arguments;}
-  
-  ///! Return the command to execute
-  const std::string &GetCommand() const {return m_Command;}
-  void SetCommand(const char *cmd) {m_Command = cmd;}
+  /** Main constructor specifies all information for the command.  */
+  cmCustomCommand(const char* output,
+                  const std::vector<std::string>& depends,
+                  const cmCustomCommandLines& commandLines,
+                  const char* comment);
 
-  ///! Return the output
-  const std::string &GetOutput() const {return m_Output;}
-  void SetOutput(const char *cm) {m_Output = cm;}
+  /** Get the output file produced by the command.  */
+  const char* GetOutput() const;
 
-  ///! Return the comment
-  const std::string &GetComment() const {return m_Comment;}
-  void SetComment(const char *cm) {m_Comment = cm;}
+  /** Get the vector that holds the list of dependencies.  */
+  const std::vector<std::string>& GetDepends() const;
 
-  ///! Return the commands arguments
-  const std::string &GetArguments() const {return m_Arguments;}
-  void SetArguments(const char *arg) {m_Arguments = arg;}
-  
-  /**
-   * Return the vector that holds the list of dependencies
-   */
-  const std::vector<std::string> &GetDepends() const {return m_Depends;}
-  std::vector<std::string> &GetDepends() {return m_Depends;}
-  
-  ///! Return true if the command and args are equal to the ones here.
-  bool IsEquivalent(const char* command,
-                    const char* args);
+  /** Get the list of command lines.  */
+  const cmCustomCommandLines& GetCommandLines() const;
+
+  /** Get the comment string for the command.  */
+  const char* GetComment() const;
+
 private:
-  std::string m_Command;
-  std::string m_Arguments;
-  std::string m_Comment;
   std::string m_Output;
   std::vector<std::string> m_Depends;
+  cmCustomCommandLines m_CommandLines;
+  std::string m_Comment;
 };
-
 
 #endif

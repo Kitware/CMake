@@ -105,6 +105,9 @@ public:
   
 
 protected:
+  /** Construct a script from the given list of command lines.  */
+  std::string ConstructScript(const cmCustomCommandLines& commandLines,
+                              const char* newline = "\n");
 
   ///! Fill out these strings for the given target.  Libraries to link, flags, and linkflags.
   void GetTargetFlags(std::string& linkLibs, 

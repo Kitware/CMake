@@ -102,14 +102,12 @@ void cmVTKWrapPythonCommand::FinalPass()
   // first we add the rules for all the .h to Python.cxx files
   size_t lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
-  std::string wpython = "${VTK_WRAP_PYTHON_EXE}";
-  std::string hints = "${VTK_WRAP_HINTS}";
-
-  m_Makefile->ExpandVariablesInString(hints);
+  const char* wpython = m_Makefile->GetRequiredDefinition("VTK_WRAP_PYTHON_EXE");
+  const char* hints = m_Makefile->GetDefinition("VTK_WRAP_HINTS");
 
   // wrap all the .h files
   depends.push_back(wpython);
-  if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+  if(hints)
     {
     depends.push_back(hints);
     }
@@ -119,18 +117,27 @@ void cmVTKWrapPythonCommand::FinalPass()
     std::string res = m_Makefile->GetCurrentOutputDirectory();
     res += "/";
     res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
-    std::vector<std::string> args;
-    args.push_back(m_WrapHeaders[classNum]);
-    if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+    cmCustomCommandLine commandLine;
+    commandLine.push_back(wpython);
+    commandLine.push_back(m_WrapHeaders[classNum]);
+    if(hints)
       {
-      args.push_back(hints);
+      commandLine.push_back(hints);
       }
-    args.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
-    args.push_back(res);
+    commandLine.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
+    commandLine.push_back(res);
 
-    m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 wpython.c_str(), args, depends, 
-                                 res.c_str(), m_LibraryName.c_str());
+    cmCustomCommandLines commandLines;
+    commandLines.push_back(commandLine);
+    std::vector<std::string> outputs;
+    outputs.push_back(res);
+    const char* no_comment = 0;
+    m_Makefile->AddCustomCommandOldStyle(m_LibraryName.c_str(),
+                                         outputs,
+                                         depends,
+                                         m_WrapHeaders[classNum].c_str(),
+                                         commandLines,
+                                         no_comment);
     }
 }
 

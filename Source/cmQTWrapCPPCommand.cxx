@@ -99,18 +99,10 @@ void cmQTWrapCPPCommand::FinalPass()
   // first we add the rules for all the .h to Moc files
   size_t lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
-  std::string moc_exe = "${QT_MOC_EXECUTABLE}";
+  const char* moc_exe = m_Makefile->GetRequiredDefinition("QT_MOC_EXECUTABLE");
 
   // wrap all the .h files
   depends.push_back(moc_exe);
-
-  const char * GENERATED_QT_FILES_value=
-      m_Makefile->GetDefinition("GENERATED_QT_FILES"); 
-  std::string moc_list("");
-  if (GENERATED_QT_FILES_value!=0)
-    {
-    moc_list=moc_list+GENERATED_QT_FILES_value;
-    }
 
   for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
@@ -122,28 +114,23 @@ void cmQTWrapCPPCommand::FinalPass()
     res += "/";
     res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
 
-    moc_list = moc_list + " " + res;
-    
-    std::vector<std::string> args;
-    args.push_back("-o");
-    args.push_back(res);
-    args.push_back(m_WrapHeaders[classNum]);
+    cmCustomCommandLine commandLine;
+    commandLine.push_back(moc_exe);
+    commandLine.push_back("-o");
+    commandLine.push_back(res);
+    commandLine.push_back(m_WrapHeaders[classNum]);
+
+    cmCustomCommandLines commandLines;
+    commandLines.push_back(commandLine);
 
     std::vector<std::string> realdepends = depends;
     realdepends.push_back(m_WrapHeaders[classNum]);
 
-    m_Makefile->AddCustomCommandToOutput(
-      res.c_str(),
-      moc_exe.c_str(),
-      args,
-      0,
-      realdepends,
-      "QT Wrapped File",
-      0);
+    const char* no_main_dependency = 0;
+    m_Makefile->AddCustomCommandToOutput(res.c_str(),
+                                         realdepends,
+                                         no_main_dependency,
+                                         commandLines,
+                                         "QT Wrapped File");
     }
-
-  m_Makefile->AddDefinition("GENERATED_QT_FILES",moc_list.c_str());
 }
-
-
-

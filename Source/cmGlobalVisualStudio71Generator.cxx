@@ -120,11 +120,10 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-        
-        std::string project = cc.GetCommand();
-        std::string location = cc.GetArguments();
-        this->WriteExternalProject(fout, project.c_str(), 
-                                   location.c_str(), cc.GetDepends());
+        const cmCustomCommandLines& cmds = cc.GetCommandLines();
+        std::string project = cmds[0][0];
+        std::string location = cmds[0][1];
+        this->WriteExternalProject(fout, project.c_str(), location.c_str(), cc.GetDepends());
         }
       else 
         {
@@ -204,8 +203,8 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-        std::string project = cc.GetCommand();
-
+        const cmCustomCommandLines& cmds = cc.GetCommandLines();
+        std::string project = cmds[0][0];
         this->WriteProjectConfigurations(fout, project.c_str(), l->second.IsInAll());
         }
       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)

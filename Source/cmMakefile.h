@@ -130,47 +130,26 @@ public:
    * Print the object state to std::cout.
    */
   void Print() const;
-  
-  /**
-   * Add a custom command to the build.
-   */
-  void AddCustomCommandToOutput(const char* output,
-                                const char* command,
-                                const std::vector<std::string>& commandArgs,
-                                const char *main_dependency,
-                                const std::vector<std::string>& depends,
-                                const char *comment = 0,
-                                bool replace = false);
-  void AddCustomCommandToTarget(const char* target,
-                                const char* command,
-                                const std::vector<std::string>& commandArgs,
-                                cmTarget::CustomCommandType type,
-                                const char *comment = 0);
-  void AddCustomCommandToTarget(const char* target,
-                                const char* command,
-                                const std::vector<std::string>& commandArgs,
-                                cmTarget::CustomCommandType type,
-                                const char *comment,
-                                const std::vector<std::string>& depends);
-  
-  /**
-   * Add a custom command to the build.
-   */
-  void AddCustomCommand(const char* source,
-                        const char* command,
-                        const std::vector<std::string>& commandArgs,
-                        const std::vector<std::string>& depends,
-                        const std::vector<std::string>& outputs,
-                        const char *target,
-                        const char *comment = 0);
 
-  void AddCustomCommand(const char* source,
-                        const char* command,
-                        const std::vector<std::string>& commandArgs,
-                        const std::vector<std::string>& depends,
-                        const char* output,
-                        const char* target);
-  
+  /** Add a custom command to the build.  */
+  void AddCustomCommandToTarget(const char* target,
+                                const std::vector<std::string>& depends,
+                                const cmCustomCommandLines& commandLines,
+                                cmTarget::CustomCommandType type,
+                                const char* comment);
+  void AddCustomCommandToOutput(const char* output,
+                                const std::vector<std::string>& depends,
+                                const char* main_dependency,
+                                const cmCustomCommandLines& commandLines,
+                                const char* comment,
+                                bool replace = false);
+  void AddCustomCommandOldStyle(const char* target,
+                                const std::vector<std::string>& outputs,
+                                const std::vector<std::string>& depends,
+                                const char* source,
+                                const cmCustomCommandLines& commandLines,
+                                const char* comment);
+
   /**
    * Add a define flag to the build.
    */
@@ -184,20 +163,20 @@ public:
                      const std::vector<std::string> &srcs);
 
   /**
-   * Add a utility to the build.  A utiltity target is
-   * a command that is run every time a target is built.
+   * Add a utility to the build.  A utiltity target is a command that
+   * is run every time the target is built.
    */
-  void AddUtilityCommand(const char* utilityName,
+  void AddUtilityCommand(const char* utilityName, bool all,
+                         const char* output,
+                         const std::vector<std::string>& depends,
                          const char* command,
-                         const char* arguments,
-                         bool all,
-                         const std::vector<std::string> &depends);
-  void AddUtilityCommand(const char* utilityName,
-                         const char* command,
-                         const char* arguments,
-                         bool all,
-                         const std::vector<std::string> &depends,
-                         const std::vector<std::string> &outputs);
+                         const char* arg1=0,
+                         const char* arg2=0,
+                         const char* arg3=0);
+  void AddUtilityCommand(const char* utilityName, bool all,
+                         const char* output,
+                         const std::vector<std::string>& depends,
+                         const cmCustomCommandLines& commandLines);
 
   /**
    * Add a link library to the build.
@@ -577,7 +556,6 @@ public:
    * Expand variables in the makefiles ivars such as link directories etc
    */
   void ExpandVariables();  
-  void ExpandVariablesInCustomCommands();
 
   /**
    * Replace variables and #cmakedefine lines in the given string.

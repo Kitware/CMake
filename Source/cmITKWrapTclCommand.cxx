@@ -104,23 +104,24 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
     {
     depends.push_back(command);
     }
-  
-  std::vector<std::string> commandArgs;
-  commandArgs.push_back(inFile);
-  commandArgs.push_back("-tcl");  
+
+  cmCustomCommandLine commandLine;
+  commandLine.push_back(command);
+  commandLine.push_back(inFile);
+  commandLine.push_back("-tcl");  
   std::string tmp = tclFile+".cxx";
-  commandArgs.push_back(tmp);
+  commandLine.push_back(tmp);
 #if !defined(_WIN32) || defined(__CYGWIN__)
   tmp = "${CMAKE_CXX_COMPILER}";
   m_Makefile->ExpandVariablesInString(tmp);
   if(tmp.length() > 0)
     {
-    commandArgs.push_back("--gccxml-compiler");
-    commandArgs.push_back(tmp);
+    commandLine.push_back("--gccxml-compiler");
+    commandLine.push_back(tmp);
     tmp = "${CMAKE_CXX_FLAGS}";
     m_Makefile->ExpandVariablesInString(tmp);
-    commandArgs.push_back("--gccxml-cxxflags");
-    commandArgs.push_back(tmp);
+    commandLine.push_back("--gccxml-cxxflags");
+    commandLine.push_back(tmp);
     }
 #else
   const char* genName = m_Makefile->GetDefinition("CMAKE_GENERATOR");
@@ -129,44 +130,44 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
     std::string gen = genName;
     if(gen == "Visual Studio 6")
       {
-      commandArgs.push_back("--gccxml-compiler");
-      commandArgs.push_back("msvc6");
+      commandLine.push_back("--gccxml-compiler");
+      commandLine.push_back("msvc6");
       tmp = "${CMAKE_CXX_FLAGS}";
       m_Makefile->ExpandVariablesInString(tmp);
-      commandArgs.push_back("--gccxml-cxxflags");
-      commandArgs.push_back(tmp);
+      commandLine.push_back("--gccxml-cxxflags");
+      commandLine.push_back(tmp);
       }
     else if(gen == "Visual Studio 7")
       {
-      commandArgs.push_back("--gccxml-compiler");
-      commandArgs.push_back("msvc7");
+      commandLine.push_back("--gccxml-compiler");
+      commandLine.push_back("msvc7");
       tmp = "${CMAKE_CXX_FLAGS}";
       m_Makefile->ExpandVariablesInString(tmp);
-      commandArgs.push_back("--gccxml-cxxflags");
-      commandArgs.push_back(tmp);
+      commandLine.push_back("--gccxml-cxxflags");
+      commandLine.push_back(tmp);
       }
     else if(gen == "NMake Makefiles")
       {
       tmp = "${CMAKE_CXX_COMPILER}";
       m_Makefile->ExpandVariablesInString(tmp);
-      commandArgs.push_back("--gccxml-compiler");
-      commandArgs.push_back(tmp);
+      commandLine.push_back("--gccxml-compiler");
+      commandLine.push_back(tmp);
       tmp = "${CMAKE_CXX_FLAGS}";
       m_Makefile->ExpandVariablesInString(tmp);
-      commandArgs.push_back("--gccxml-cxxflags");
-      commandArgs.push_back(tmp);      
+      commandLine.push_back("--gccxml-cxxflags");
+      commandLine.push_back(tmp);      
       }
     }
 #endif
   const char* gccxml = m_Makefile->GetDefinition("ITK_GCCXML_EXECUTABLE");
   if(gccxml)
     {
-    commandArgs.push_back("--gccxml");
-    commandArgs.push_back(gccxml);
+    commandLine.push_back("--gccxml");
+    commandLine.push_back(gccxml);
     }
   tmp = "-I";
   tmp += m_Makefile->GetStartDirectory();
-  commandArgs.push_back(tmp);
+  commandLine.push_back(tmp);
   const std::vector<std::string>& includes = 
     m_Makefile->GetIncludeDirectories();
   for(std::vector<std::string>::const_iterator i = includes.begin();
@@ -175,7 +176,7 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
     tmp = "-I";
     tmp += i->c_str();
     m_Makefile->ExpandVariablesInString(tmp);
-    commandArgs.push_back(tmp);
+    commandLine.push_back(tmp);
     }
   
   // Get the dependencies.
@@ -198,11 +199,12 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
   file.GetDepends().push_back("CableTclFacility/ctCalls.h");
   m_Makefile->AddSource(file);
 
-  m_Makefile->AddCustomCommandToOutput(output.c_str(),
-                                       command.c_str(),
-                                       commandArgs, 
-                                       inFile.c_str(),
-                                       depends);
+  const char* no_comment = 0;
+  cmCustomCommandLines commandLines;
+  commandLines.push_back(commandLine);
+  m_Makefile->AddCustomCommandToOutput(output.c_str(), depends,
+                                       inFile.c_str(), commandLines,
+                                       no_comment);
   
   // Add the generated source to the package's source list.
   m_Target->GetSourceLists().push_back(output);

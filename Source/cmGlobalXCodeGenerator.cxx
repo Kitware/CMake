@@ -207,16 +207,18 @@ void
 cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root, 
                                         std::vector<cmLocalGenerator*>& gens)
 {
-  std::vector<std::string> srcs; // dummy list 
   cmMakefile* mf = root->GetMakefile();
   // Add ALL_BUILD
-  mf->AddUtilityCommand("ALL_BUILD", "echo", 
-                        "\"Build all projects\"",false,srcs);
+  const char* no_output = 0;
+  std::vector<std::string> no_depends;
+  mf->AddUtilityCommand("ALL_BUILD", false, no_output, no_depends,
+                        "echo", "Build all projects");
   cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
   // ADD install
   std::string cmake_command = mf->GetRequiredDefinition("CMAKE_COMMAND");
-  mf->AddUtilityCommand("install", cmake_command.c_str(),
-                        "-P cmake_install.cmake",false,srcs);
+  mf->AddUtilityCommand("install", false, no_output, no_depends,
+                        cmake_command.c_str(),
+                        "-P", "cmake_install.cmake");
   // Add RUN_TESTS target if testing has been enabled
   std::string fname;
   fname = mf->GetStartOutputDirectory();
@@ -226,11 +228,9 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     {
     std::string ctest_command = 
       mf->GetRequiredDefinition("CMAKE_CTEST_COMMAND");
-    mf->AddUtilityCommand("RUN_TESTS", ctest_command.c_str(), "",false,srcs);
+    mf->AddUtilityCommand("RUN_TESTS", false, no_output, no_depends,
+                          ctest_command.c_str());
     }
-  // Add install 
-  mf->AddUtilityCommand("install", cmake_command.c_str(),
-                        "-P cmake_install.cmake", false, srcs);
   // Add XCODE depend helper 
   std::string dir = mf->GetCurrentOutputDirectory();
   m_CurrentXCodeHackMakefile = dir;
@@ -242,9 +242,8 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   makecommand += " -f ";
   makecommand += this->ConvertToRelativeOutputPath(
     m_CurrentXCodeHackMakefile.c_str());
-  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", makecommand.c_str(), 
-                        "",
-                        false,srcs);
+  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false, no_output, no_depends,
+                        makecommand.c_str());
   // now make the allbuild depend on all the non-utility targets
   // in the project
   for(std::vector<cmLocalGenerator*>::iterator i = gens.begin();
@@ -656,12 +655,12 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       i != commands.end(); ++i)
     {
     cmCustomCommand const& cc = *i; 
-    if(cc.GetCommand().size())
+    if(!cc.GetCommandLines().empty())
       {
-      if(cc.GetOutput().size())
+      if(cc.GetOutput()[0])
         {
         makefileStream << "\\\n\t"  << this->
-          ConvertToRelativeOutputPath(cc.GetOutput().c_str());
+          ConvertToRelativeOutputPath(cc.GetOutput());
         }
       else
         {
@@ -677,15 +676,15 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       i != commands.end(); ++i)
     {
     cmCustomCommand const& cc = *i; 
-    if(cc.GetCommand().size())
+    if(!cc.GetCommandLines().empty())
       {
       
       makefileStream << "\n#" << "Custom command rule: " << 
         cc.GetComment() << "\n";
-      if(cc.GetOutput().size())
+      if(cc.GetOutput()[0])
         {
         makefileStream << this
-          ->ConvertToRelativeOutputPath(cc.GetOutput().c_str()) << ": ";
+          ->ConvertToRelativeOutputPath(cc.GetOutput()) << ": ";
         }
       else
         {
@@ -707,8 +706,23 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
           }
         }
       makefileStream << "\n";
-      makefileStream << "\t" << cc.GetCommand() << " " 
-                     << cc.GetArguments() << "\n";
+
+      // Add each command line to the set of commands.
+      for(cmCustomCommandLines::const_iterator cl = cc.GetCommandLines().begin();
+          cl != cc.GetCommandLines().end(); ++cl)
+        {
+        // Build the command line in a single string.
+        const cmCustomCommandLine& commandLine = *cl;
+        std::string cmd = commandLine[0];
+        cmSystemTools::ReplaceString(cmd, "/./", "/");
+        cmd = this->ConvertToRelativeOutputPath(cmd.c_str());
+        for(unsigned int j=1; j < commandLine.size(); ++j)
+          {
+          cmd += " ";
+          cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
+          }
+        makefileStream << "\t" << cmd.c_str() << "\n";
+        }
       }
     }
   std::string cdir = m_CurrentMakefile->GetCurrentOutputDirectory();

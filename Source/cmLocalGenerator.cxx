@@ -509,6 +509,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
       sourceAndDeps.push_back(this->ConvertToRelativeOutputPath(i->c_str()));
       }
     } 
+#if 0
   std::string command;
   std::string args;
   cmSystemTools::SplitProgramFromArgs(commands[0].c_str(), command, args);
@@ -520,6 +521,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
                                        source.GetFullPath().c_str(),
                                        sourceAndDeps,
                                        "build from source");
+#endif
 }
 
 void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
@@ -577,13 +579,16 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
                             0, // target so name,
                             linkFlags.c_str() // link flags
     );
+#if 0
   std::string command;
   std::string args;
   cmSystemTools::SplitProgramFromArgs(rule.c_str(), command, args);
   // Just like ADD_CUSTOM_TARGET(foo ALL DEPENDS a.o b.o)
   // Add a custom command for generating each .o file
-  cmCustomCommand cc(command.c_str(), args.c_str(), objVector, targetName.c_str());
+  cmCustomCommand cc(command.c_str(), args.c_str(), objVector,
+                     targetName.c_str(), 0);
   target.GetPostBuildCommands().push_back(cc);
+#endif
 }
 
   
@@ -1342,3 +1347,31 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
     }
 }
 
+//----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
+                                  const char* newline)
+{
+  // Store the script in a string.
+  std::string script;
+
+  // Write each command on a single line.
+  for(cmCustomCommandLines::const_iterator cl = commandLines.begin();
+      cl != commandLines.end(); ++cl)
+    {
+    // Start with the command name.
+    const cmCustomCommandLine& commandLine = *cl;
+    script += this->ConvertToRelativeOutputPath(commandLine[0].c_str());
+
+    // Add the arguments.
+    for(unsigned int j=1;j < commandLine.size(); ++j)
+      {
+      script += " ";
+      script += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
+      }
+
+    // End the line.
+    script += newline;
+    }
+  return script;
+}

@@ -89,9 +89,6 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
   // clear project names
   m_CreatedProjectNames.clear();
 
-  // expand vars for custom commands
-  m_Makefile->ExpandVariablesInCustomCommands();  
-
   // build any targets
   cmTargets &tgts = m_Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); 
@@ -142,11 +139,10 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   makefileIn = this->ConvertToRelativeOutputPath(makefileIn.c_str());
-  std::string dsprule = "${CMAKE_COMMAND}";
-  m_Makefile->ExpandVariablesInString(dsprule);
-  dsprule = this->ConvertToRelativeOutputPath(dsprule.c_str());
-  std::vector<std::string> argv;
-  argv.push_back(makefileIn);
+  const char* dsprule = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
+  cmCustomCommandLine commandLine;
+  commandLine.push_back(dsprule);
+  commandLine.push_back(makefileIn);
   makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
@@ -154,11 +150,11 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
   args = "-H";
   args +=
     this->ConvertToRelativeOutputPath(m_Makefile->GetHomeDirectory());
-  argv.push_back(args);
+  commandLine.push_back(args);
   args = "-B";
   args += 
     this->ConvertToRelativeOutputPath(m_Makefile->GetHomeOutputDirectory());
-  argv.push_back(args);
+  commandLine.push_back(args);
   
   std::string configFile = 
     m_Makefile->GetRequiredDefinition("CMAKE_ROOT");
@@ -177,9 +173,12 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
     {
     listFiles.push_back(configFile);
     }
-  m_Makefile->AddCustomCommandToOutput(dspname.c_str(), dsprule.c_str(), 
-                                       argv, makefileIn.c_str(), listFiles,
-                                       NULL, true);
+
+  cmCustomCommandLines commandLines;
+  commandLines.push_back(commandLine);
+  const char* no_comment = 0;
+  m_Makefile->AddCustomCommandToOutput(dspname.c_str(), listFiles, makefileIn.c_str(),
+                                       commandLines, no_comment, true);
 }
 
 
@@ -1031,18 +1030,14 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
         fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
         if (command)
           {
-          std::string totalCommandStr;
-          totalCommandStr = 
-            this->ConvertToRelativeOutputPath(command->GetCommand().c_str()); 
-          totalCommandStr += " ";
-          totalCommandStr += command->GetArguments();
-          totalCommandStr += "\n";
-          const char* comment = command->GetComment().c_str();
+          // Construct the entire set of commands in one string.
+          std::string script = this->ConstructScript(command->GetCommandLines());
+          const char* comment = command->GetComment();
           const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
-          this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
+          this->WriteCustomRule(fout, source.c_str(), script.c_str(),
                                 (*comment?comment:"Custom Rule"),
                                 command->GetDepends(),
-                                command->GetOutput().c_str(), flags);
+                                command->GetOutput(), flags);
           }
         else if(compileFlags.size() || additionalDeps.length())
           {
@@ -1210,17 +1205,13 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
          target.GetPreBuildCommands().begin(); 
        cr != target.GetPreBuildCommands().end(); ++cr)
     {
-    cmCustomCommand cc(*cr);
-    cc.ExpandVariables(*m_Makefile);
     if(!init)
       {
       fout << "\nCommandLine=\"";
       init = true;
       }
-    std::string args = cc.GetArguments();
-    cmSystemTools::ReplaceString(args, "\"", "&quot;");
-    fout << this->ConvertToXMLOutputPath(cc.GetCommand().c_str()) << " " << 
-      args << "\n";
+    std::string script = this->ConstructScript(cr->GetCommandLines());
+    fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)
     {
@@ -1235,17 +1226,13 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
          target.GetPreLinkCommands().begin(); 
        cr != target.GetPreLinkCommands().end(); ++cr)
     {
-    cmCustomCommand cc(*cr);
-    cc.ExpandVariables(*m_Makefile);
     if(!init)
       {
       fout << "\nCommandLine=\"";
       init = true;
       }
-    std::string args = cc.GetArguments();
-    cmSystemTools::ReplaceString(args, "\"", "&quot;");
-    fout << this->ConvertToXMLOutputPath(cc.GetCommand().c_str()) << " " << 
-      args << "\n";
+    std::string script = this->ConstructScript(cr->GetCommandLines());
+    fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)
     {
@@ -1260,17 +1247,13 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
          target.GetPostBuildCommands().begin(); 
        cr != target.GetPostBuildCommands().end(); ++cr)
     {
-    cmCustomCommand cc(*cr);
-    cc.ExpandVariables(*m_Makefile);
     if(!init)
       {
       fout << "\nCommandLine=\"";
       init = true;
       }
-    std::string args = cc.GetArguments();
-    cmSystemTools::ReplaceString(args, "\"", "&quot;");
-    fout << this->ConvertToXMLOutputPath(cc.GetCommand().c_str()) << " " << 
-      args << "\n";
+    std::string script = this->ConstructScript(cr->GetCommandLines());
+    fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)
     {
@@ -1364,7 +1347,8 @@ void cmLocalVisualStudio7Generator::ConfigureFinalPass()
     if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
       {
       cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-      std::string project_name = cc.GetCommand();
+      const cmCustomCommandLines& cmds = cc.GetCommandLines();
+      std::string project_name = cmds[0][0];
       gg->CreateGUID(project_name.c_str());
       }
     else

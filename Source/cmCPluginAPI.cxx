@@ -203,20 +203,44 @@ void cmAddUtilityCommand(void *arg, const char* utilityName,
                          int numOutputs,
                          const char **outputs)
 {
-  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  // Get the makefile instance.  Perform an extra variable expansion
+  // now because the API caller expects it.
+  cmMakefile* mf = static_cast<cmMakefile*>(arg);
+
+  // Construct the command line for the command.
+  cmCustomCommandLine commandLine;
+  std::string expand = command;
+  commandLine.push_back(mf->ExpandVariablesInString(expand));
+  if(arguments && arguments[0])
+    {
+    // TODO: Parse arguments!
+    expand = arguments;
+    commandLine.push_back(mf->ExpandVariablesInString(expand));
+    }
+  cmCustomCommandLines commandLines;
+  commandLines.push_back(commandLine);
+
+  // Accumulate the list of dependencies.
   std::vector<std::string> depends2;
-  int i;
-  for (i = 0; i < numDepends; ++i)
+  for(int i = 0; i < numDepends; ++i)
     {
-    depends2.push_back(depends[i]);
+    expand = depends[i];
+    depends2.push_back(mf->ExpandVariablesInString(expand));
     }
-  std::vector<std::string> outputs2;
-  for (i = 0; i < numOutputs; ++i)
+
+  // Only one output is allowed.
+  const char* output = 0;
+  std::string outputStr;
+  if(numOutputs > 0)
     {
-    outputs2.push_back(outputs[i]);
+    expand = outputs[0];
+    outputStr = mf->ExpandVariablesInString(expand);
+    output = outputStr.c_str();
     }
-  mf->AddUtilityCommand(utilityName,command,arguments, (all ? true : false),
-                        depends2, outputs2);
+
+  // Pass the call to the makefile instance.
+  mf->AddUtilityCommand(utilityName, (all ? true : false),
+                        output, depends2, commandLines);
 }
 void cmAddCustomCommand(void *arg, const char* source,
                         const char* command,
@@ -225,24 +249,42 @@ void cmAddCustomCommand(void *arg, const char* source,
                         int numOutputs, const char **outputs,
                         const char *target)
 {
-  cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  int i;
-  std::vector<std::string> args2;
-  for (i = 0; i < numArgs; ++i)
+  // Get the makefile instance.  Perform an extra variable expansion
+  // now because the API caller expects it.
+  cmMakefile* mf = static_cast<cmMakefile*>(arg);
+
+  // Construct the command line for the command.
+  cmCustomCommandLine commandLine;
+  std::string expand = command;
+  commandLine.push_back(mf->ExpandVariablesInString(expand));
+  for(int i=0; i < numArgs; ++i)
     {
-    args2.push_back(args[i]);
+    expand = args[i];
+    commandLine.push_back(mf->ExpandVariablesInString(expand));
     }
+  cmCustomCommandLines commandLines;
+  commandLines.push_back(commandLine);
+
+  // Accumulate the list of dependencies.
   std::vector<std::string> depends2;
-  for (i = 0; i < numDepends; ++i)
+  for(int i = 0; i < numDepends; ++i)
     {
-    depends2.push_back(depends[i]);
+    expand = depends[i];
+    depends2.push_back(mf->ExpandVariablesInString(expand));
     }
+
+  // Accumulate the list of outputs.
   std::vector<std::string> outputs2;
-  for (i = 0; i < numOutputs; ++i)
+  for(int i = 0; i < numOutputs; ++i)
     {
-    outputs2.push_back(outputs[i]);
+    expand = outputs[i];
+    outputs2.push_back(mf->ExpandVariablesInString(expand));
     }
-  mf->AddCustomCommand(source, command, args2, depends2, outputs2, target);
+
+  // Pass the call to the makefile instance.
+  const char* no_comment = 0;
+  mf->AddCustomCommandOldStyle(target, outputs2, depends2, source,
+                               commandLines, no_comment);
 }
 
 void cmAddCustomCommandToOutput(void *arg, const char* output,
@@ -251,20 +293,34 @@ void cmAddCustomCommandToOutput(void *arg, const char* output,
                                 const char* main_dependency,
                                 int numDepends, const char **depends)
 {
-  cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  int i;
-  std::vector<std::string> args2;
-  for (i = 0; i < numArgs; ++i)
+  // Get the makefile instance.  Perform an extra variable expansion
+  // now because the API caller expects it.
+  cmMakefile* mf = static_cast<cmMakefile*>(arg);
+
+  // Construct the command line for the command.
+  cmCustomCommandLine commandLine;
+  std::string expand = command;
+  commandLine.push_back(mf->ExpandVariablesInString(expand));
+  for(int i=0; i < numArgs; ++i)
     {
-    args2.push_back(args[i]);
+    expand = args[i];
+    commandLine.push_back(mf->ExpandVariablesInString(expand));
     }
+  cmCustomCommandLines commandLines;
+  commandLines.push_back(commandLine);
+
+  // Accumulate the list of dependencies.
   std::vector<std::string> depends2;
-  for (i = 0; i < numDepends; ++i)
+  for(int i = 0; i < numDepends; ++i)
     {
-    depends2.push_back(depends[i]);
+    expand = depends[i];
+    depends2.push_back(mf->ExpandVariablesInString(expand));
     }
-  mf->AddCustomCommandToOutput(output, command, args2, main_dependency,
-                               depends2);
+
+  // Pass the call to the makefile instance.
+  const char* no_comment = 0;
+  mf->AddCustomCommandToOutput(output, depends2, main_dependency,
+                               commandLines, no_comment);
 }
 
 void cmAddCustomCommandToTarget(void *arg, const char* target,
@@ -272,28 +328,42 @@ void cmAddCustomCommandToTarget(void *arg, const char* target,
                                 int numArgs, const char **args,
                                 int commandType)
 {
-  cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  int i;
-  std::vector<std::string> args2;
-  for (i = 0; i < numArgs; ++i)
+  // Get the makefile instance.
+  cmMakefile* mf = static_cast<cmMakefile*>(arg);
+
+  // Construct the command line for the command.  Perform an extra
+  // variable expansion now because the API caller expects it.
+  cmCustomCommandLine commandLine;
+  std::string expand = command;
+  commandLine.push_back(mf->ExpandVariablesInString(expand));
+  for(int i=0; i < numArgs; ++i)
     {
-    args2.push_back(args[i]);
+    expand = args[i];
+    commandLine.push_back(mf->ExpandVariablesInString(expand));
     }
+  cmCustomCommandLines commandLines;
+  commandLines.push_back(commandLine);
+
+  // Select the command type.
+  cmTarget::CustomCommandType cctype = cmTarget::POST_BUILD;
   switch (commandType)
     {
     case CM_PRE_BUILD:
-      mf->AddCustomCommandToTarget(target, command, args2, 
-                                   cmTarget::PRE_BUILD);
+      cctype = cmTarget::PRE_BUILD;
       break;
     case CM_PRE_LINK:
-      mf->AddCustomCommandToTarget(target, command, args2, 
-                                   cmTarget::PRE_LINK);
+      cctype = cmTarget::PRE_LINK;
       break;
     case CM_POST_BUILD:
-      mf->AddCustomCommandToTarget(target, command, args2, 
-                                   cmTarget::POST_BUILD);
+      cctype = cmTarget::POST_BUILD;
       break;
     }
+
+  // Pass the call to the makefile instance.
+  std::vector<std::string> no_depends;
+  const char* no_comment = 0;
+  mf->AddCustomCommandToTarget(target, no_depends, commandLines,
+                               cctype, no_comment);
 }
 
 void cmAddLinkLibraryForTarget(void *arg, const char *tgt, const char*value, 

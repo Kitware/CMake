@@ -144,35 +144,42 @@ void cmVTKWrapTclCommand::FinalPass()
   // first we add the rules for all the .h to Tcl.cxx files
   size_t lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
-  std::string wtcl = "${VTK_WRAP_TCL_EXE}";
-  std::string hints = "${VTK_WRAP_HINTS}";
-  
-  m_Makefile->ExpandVariablesInString(hints);
+  const char* wtcl = m_Makefile->GetRequiredDefinition("VTK_WRAP_TCL_EXE");
+  const char* hints = m_Makefile->GetDefinition("VTK_WRAP_HINTS");
 
   // wrap all the .h files
   depends.push_back(wtcl);
-  if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+  if(hints)
     {
     depends.push_back(hints);
     }
   for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum]);
-    std::vector<std::string> args;
-    args.push_back(m_WrapHeaders[classNum]);
-    if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+    cmCustomCommandLine commandLine;
+    commandLine.push_back(wtcl);
+    commandLine.push_back(m_WrapHeaders[classNum]);
+    if(hints)
       {
-      args.push_back(hints);
+      commandLine.push_back(hints);
       }
-    args.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
+    commandLine.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
     std::string res = m_Makefile->GetCurrentOutputDirectory();
     res += "/";
     res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
-    args.push_back(res);
-    
-    m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 wtcl.c_str(), args, depends, 
-                                 res.c_str(), m_LibraryName.c_str());
+    commandLine.push_back(res);
+
+    cmCustomCommandLines commandLines;
+    commandLines.push_back(commandLine);
+    std::vector<std::string> outputs;
+    outputs.push_back(res);
+    const char* no_comment = 0;
+    m_Makefile->AddCustomCommandOldStyle(m_LibraryName.c_str(),
+                                         outputs,
+                                         depends,
+                                         m_WrapHeaders[classNum].c_str(),
+                                         commandLines,
+                                         no_comment);
     }
 }
 
