@@ -878,8 +878,9 @@ for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_
 done
 
 # Generate dependencies for cmBootstrapCommands.cxx
-cmBootstrapCommandsDepsDir=`cmake_escape "${cmake_source_dir}/Source/"`
-cmBootstrapCommandsDeps=`grep "#include.*cm[^.]*.cxx" "${cmake_source_dir}/Source/cmBootstrapCommands.cxx" | sed "s/.* \"\(.*\)\"/\1/" | awk "{ print \"${cmBootstrapCommandsDepsDir}\" \\$1}"`
+for file in `grep "#include.*cm[^.]*.cxx" "${cmake_source_dir}/Source/cmBootstrapCommands.cxx" | sed "s/.* \"\(.*\)\"/\1/"`; do
+  cmBootstrapCommandsDeps="${cmBootstrapCommandsDeps} `cmake_escape "${cmake_source_dir}/Source/$file"`"
+done
 cmBootstrapCommandsDeps=`echo $cmBootstrapCommandsDeps`
 
 if [ "x${cmake_ansi_cxx_flags}" != "x" ]; then
