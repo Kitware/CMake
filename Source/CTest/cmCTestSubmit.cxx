@@ -100,6 +100,7 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
   CURL *curl;
   CURLcode res;
   FILE* ftpfile;
+  char error_buffer[1024];
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
@@ -158,7 +159,9 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
       ::curl_easy_setopt(curl, CURLOPT_INFILE, ftpfile);
 
       // and give the size of the upload (optional)
-      ::curl_easy_setopt(curl, CURLOPT_INFILESIZE, st.st_size);
+      ::curl_easy_setopt(curl, CURLOPT_INFILESIZE, static_cast<long>(st.st_size));
+
+      ::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer);
 
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
@@ -166,6 +169,7 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
       if ( res )
         {
         std::cout << "  Error when uploading file: " << local_file.c_str() << std::endl;
+        std::cout << "  Error message was: " << error_buffer << std::endl;
         ::curl_easy_cleanup(curl);
         ::curl_global_cleanup(); 
         return false;
@@ -275,7 +279,7 @@ bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix,
       ::curl_easy_setopt(curl, CURLOPT_INFILE, ftpfile);
 
       // and give the size of the upload (optional)
-      ::curl_easy_setopt(curl, CURLOPT_INFILESIZE, st.st_size);
+      ::curl_easy_setopt(curl, CURLOPT_INFILESIZE, static_cast<long>(st.st_size));
 
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
