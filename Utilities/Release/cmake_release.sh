@@ -377,8 +377,9 @@ cygwin_source_tarball()
     [ -d "cmake-${VERSION}" ] || checkout || return 1
     echo "Creating cygwin source tarball ..." &&
     (
-        rm -rf cmake-${VERSION}.tar.bz2 &&
-        tar cvjf cmake-${VERSION}.tar.bz2 cmake-${VERSION}
+        mkdir -p Cygwin &&
+        rm -rf Cygwin/cmake-${VERSION}.tar.bz2 &&
+        tar cvjf Cygwin/cmake-${VERSION}.tar.bz2 cmake-${VERSION}
     ) >Logs/cygwin_source_tarball.log 2>&1 || error_log Logs/cygwin_source_tarball.log
 }
 
@@ -390,10 +391,11 @@ cygwin_source_patch()
     [ -d "cmake-${VERSION}" ] || checkout || return 1
     echo "Creating source patch for cygwin ..." &&
     (
-        rm -rf Patched &&
-        mkdir -p Patched &&
-        (tar c cmake-${VERSION} | (cd Patched; tar x)) &&
-        cd Patched &&
+        mkdir -p Cygwin &&
+        rm -rf Cygwin/Patched &&
+        mkdir -p Cygwin/Patched &&
+        (tar c cmake-${VERSION} | (cd Cygwin/Patched; tar x)) &&
+        cd Cygwin/Patched &&
         mkdir -p cmake-${VERSION}/CYGWIN-PATCHES &&
         (
             CYGVERSION=`uname -r`
@@ -451,7 +453,7 @@ EOF
         ) &&
         dos2unix cmake-${VERSION}/CYGWIN-PATCHES/setup.hint &&
         cp cmake-${VERSION}/CYGWIN-PATCHES/setup.hint ../setup.hint &&
-        (diff -urN "../cmake-${VERSION}" "cmake-${VERSION}" > "../cmake-${VERSION}-${RELEASE}.patch"; [ "$?" = "1" ])
+        (diff -urN "../../cmake-${VERSION}" "cmake-${VERSION}" > "../cmake-${VERSION}-${RELEASE}.patch"; [ "$?" = "1" ])
     ) >Logs/cygwin_source_patch.log 2>&1 || error_log Logs/cygwin_source_patch.log
 }
 
@@ -462,8 +464,9 @@ cygwin_package_script()
     utilities || return 1
     echo "Creating cygwin packaging script ..." &&
     (
-        cp ReleaseUtilities/cygwin-package.sh.in cmake-${VERSION}-${RELEASE}.sh &&
-        chmod u+x cmake-${VERSION}-${RELEASE}.sh
+        mkdir -p Cygwin &&
+        cp ReleaseUtilities/cygwin-package.sh.in Cygwin/cmake-${VERSION}-${RELEASE}.sh &&
+        chmod u+x Cygwin/cmake-${VERSION}-${RELEASE}.sh
     ) >Logs/cygwin_package_script.log 2>&1 || error_log Logs/cygwin_package_script.log
 }
 
@@ -472,14 +475,14 @@ cygwin_package()
 {
     [ -z "${DONE_cygwin_package}" ] || return 0 ; DONE_cygwin_package="yes"
     config || return 1
-    [ -f "cmake-${VERSION}.tar.bz2" ] || cygwin_source_tarball || return 1
-    [ -f "cmake-${VERSION}-${RELEASE}.patch" ] || cygwin_source_patch || return 1
-    [ -f "cmake-${VERSION}-${RELEASE}.sh" ] || cygwin_package_script || return 1
+    [ -f "Cygwin/cmake-${VERSION}.tar.bz2" ] || cygwin_source_tarball || return 1
+    [ -f "Cygwin/cmake-${VERSION}-${RELEASE}.patch" ] || cygwin_source_patch || return 1
+    [ -f "Cygwin/cmake-${VERSION}-${RELEASE}.sh" ] || cygwin_package_script || return 1
     echo "Running cygwin packaging script ..." &&
     (
-        rm -rf Package &&
-        mkdir -p Package &&
-        cd Package &&
+        rm -rf Cygwin/Package &&
+        mkdir -p Cygwin/Package &&
+        cd Cygwin/Package &&
         cp ../setup.hint . &&
         cp ../cmake-${VERSION}.tar.bz2 . &&
         cp ../cmake-${VERSION}-${RELEASE}.patch . &&
