@@ -229,7 +229,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   this->OutputMakeVariables(fout);
   this->OutputMakeFlags(fout);
   this->OutputTargetRules(fout);
-  this->OutputDependencies(fout);
+  this->OutputDependLibs(fout);
   this->OutputTargets(fout);
   this->OutputSubDirectoryRules(fout);
   std::string dependName = m_Makefile->GetStartOutputDirectory();
@@ -339,7 +339,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       fout << "${" << l->first << "_SRC_OBJS} ";
       }
     }
-  fout << "\n";
+  fout << "\n\n";
 }
 
 
@@ -534,7 +534,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << "# rules for a shared library\n";
       fout << "#\n";
       fout << m_LibraryOutputPath << "lib" << l->first << "$(SHLIB_SUFFIX):  ${" << 
-        l->first << "_SRC_OBJS} \n";
+        l->first << "_SRC_OBJS} ${" << l->first << "_DEPEND_LIBS} \n";
       fout << "\trm -f lib" << l->first << "$(SHLIB_SUFFIX)\n";
       fout << "\t$(CMAKE_CXX_COMPILER)  ${CMAKE_SHLIB_LINK_FLAGS} "
         "${CMAKE_SHLIB_BUILD_FLAGS} ${CMAKE_CXXFLAGS} -o \\\n";
@@ -550,7 +550,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << "# rules for a shared module library\n";
       fout << "#\n";
       fout << m_LibraryOutputPath << "lib" << l->first << "$(MODULE_SUFFIX):  ${" << 
-        l->first << "_SRC_OBJS} \n";
+        l->first << "_SRC_OBJS} ${" << l->first << "_DEPEND_LIBS} \n";
       fout << "\trm -f lib" << l->first << "$(MODULE_SUFFIX)\n";
       fout << "\t$(CMAKE_CXX_COMPILER)  ${CMAKE_MODULE_LINK_FLAGS} "
         "${CMAKE_MODULE_BUILD_FLAGS} ${CMAKE_CXXFLAGS} -o \\\n";
@@ -564,7 +564,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
              || (l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
       {
       fout << m_ExecutableOutputPath << l->first << ": ${" << 
-        l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
+        l->first << "_SRC_OBJS} ${" << l->first << "_DEPEND_LIBS}\n";
       fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_CXXFLAGS} "
            << "${" << l->first << "_SRC_OBJS} ";
       this->OutputLinkLibraries(fout, NULL,l->second);
@@ -574,93 +574,90 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 }
 
 
-// output the list of libraries that the executables 
-// in this makefile will depend on.
-void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
+// For each target that is an executable or shared library, generate
+// the "<name>_DEPEND_LIBS" variable listing its library dependencies.
+void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
 {
-  // Each dependency should only be emitted once.
-  std::set<std::string> emitted;
-
-  fout << "CMAKE_DEPEND_LIBS = ";
-  cmTarget::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
-  cmTarget::LinkLibraries::const_iterator lib2;
-  // Search the list of libraries that will be linked into
-  // the executable
-  emitted.clear();
-  for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)
+  // Build a set of libraries that will be linked into any target in
+  // this directory.
+  std::set<std::string> used;
+  
+  // for each target
+  const cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
     {
-    if( ! emitted.insert(lib2->first).second ) continue;
-
-    const char* cacheValue
-      = m_Makefile->GetDefinition(lib2->first.c_str());
-    if(cacheValue )
+    // Each dependency should only be emitted once per target.
+    std::set<std::string> emitted;
+    if ((l->second.GetType() == cmTarget::SHARED_LIBRARY)
+        || (l->second.GetType() == cmTarget::MODULE_LIBRARY)
+        || (l->second.GetType() == cmTarget::EXECUTABLE)
+        || (l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
       {
-      // if there is a cache value then this is a library that cmake
-      // knows how to build, so we can depend on it
-      std::string libpath;
-      if (strcmp(m_Makefile->GetCurrentOutputDirectory(), cacheValue) != 0)
+      fout << l->first << "_DEPEND_LIBS = ";
+      
+      // A library should not depend on itself!
+      emitted.insert(l->first);
+      
+      // First look at all makefile level link libraries.
+      const cmTarget::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
+      for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
+          lib != libs.end(); ++lib)
         {
-        // if the library is not in the current directory, then get the full
-        // path to it
-        libpath = cacheValue;
-        if(m_LibraryOutputPath.size())
+        // Record that this library was used.
+        used.insert(lib->first);
+
+        // Don't emit the same library twice for this target.
+        if(emitted.insert(lib->first).second)
           {
-          libpath = m_LibraryOutputPath;
-          libpath += "lib";
+          // Output this dependency.
+          this->OutputLibDepend(fout, lib->first.c_str());
           }
-        else
+        }
+      
+      // Now, look at all link libraries specific to this target.
+      const cmTarget::LinkLibraries& tlibs = l->second.GetLinkLibraries();
+      for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+          lib != tlibs.end(); ++lib)
+        {
+        // Record that this library was used.
+        used.insert(lib->first);
+
+        // Don't emit the same library twice for this target.
+        if(emitted.insert(lib->first).second)
           {
-          libpath += "/lib";
+          // Output this dependency.
+          this->OutputLibDepend(fout, lib->first.c_str());
           }
         }
-      else
-        {
-        // library is in current Makefile so use lib as a prefix
-        libpath = m_LibraryOutputPath;
-        libpath += "lib";
-        }
-      // add the library name
-      libpath += lib2->first;
-      // add the correct extension
-      std::string ltname = lib2->first+"_LIBRARY_TYPE";
-      const char* libType
-        = m_Makefile->GetDefinition(ltname.c_str());
-      if(libType && std::string(libType) == "SHARED")
-        {
-        libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
-        }
-      else if (libType && std::string(libType) == "MODULE")
-	{
-	libpath += m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
-	}
-      else
-        {
-        libpath += ".a";
-        }
-      fout << libpath << " ";
+      
+      fout << "\n";
       }
     }
-  fout << "\n\n";
-  emitted.clear();
-  for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)
+
+  fout << "\n";
+  
+  // Loop over the libraries used and make sure there is a rule to
+  // build them in this makefile.  If the library is in another
+  // directory, add a rule to jump to that directory and make sure it
+  // exists.
+  for(std::set<std::string>::const_iterator lib = used.begin();
+      lib != used.end(); ++lib)
     {
     // loop over the list of directories that the libraries might
     // be in, looking for an ADD_LIBRARY(lib...) line. This would
     // be stored in the cache
-    if( ! emitted.insert(lib2->first).second ) continue;
-
-    const char* cacheValue
-      = m_Makefile->GetDefinition(lib2->first.c_str());
+    const char* cacheValue = m_Makefile->GetDefinition(lib->c_str());
     // if cache and not the current directory add a rule, to
     // jump into the directory and build for the first time
     if(cacheValue 
        && (strcmp(m_Makefile->GetCurrentOutputDirectory(), cacheValue) != 0))
       {
       std::string library = "lib";
-      library += lib2->first; 
+      library += *lib;
       std::string libpath = cacheValue;
       // add the correct extension
-      std::string ltname = lib2->first+"_LIBRARY_TYPE";
+      std::string ltname = *lib+"_LIBRARY_TYPE";
       const char* libType
         = m_Makefile->GetDefinition(ltname.c_str());
       if(libType && std::string(libType) == "SHARED")
@@ -689,6 +686,58 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
            << ":\n\tcd " << cacheValue 
            << "; ${MAKE} " << m_LibraryOutputPath << library.c_str() << "\n\n";
       }
+    }
+}
+
+void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
+                                              const char* name)
+{
+  const char* cacheValue = m_Makefile->GetDefinition(name);
+  if(cacheValue )
+    {
+    // if there is a cache value, then this is a library that cmake
+    // knows how to build, so we can depend on it
+    std::string libpath;
+    if (strcmp(m_Makefile->GetCurrentOutputDirectory(), cacheValue) != 0)
+      {
+      // if the library is not in the current directory, then get the full
+      // path to it
+      libpath = cacheValue;
+      if(m_LibraryOutputPath.size())
+        {
+        libpath = m_LibraryOutputPath;
+        libpath += "lib";
+        }
+      else
+        {
+        libpath += "/lib";
+        }
+      }
+    else
+      {
+      // library is in current Makefile so use lib as a prefix
+      libpath = m_LibraryOutputPath;
+      libpath += "lib";
+      }
+    // add the library name
+    libpath += name;
+    // add the correct extension
+    std::string ltname = name;
+    ltname += "_LIBRARY_TYPE";
+    const char* libType = m_Makefile->GetDefinition(ltname.c_str());
+    if(libType && std::string(libType) == "SHARED")
+      {
+      libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+      }
+    else if (libType && std::string(libType) == "MODULE")
+          {
+          libpath += m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+          }
+    else
+      {
+      libpath += ".a";
+      }
+    fout << libpath << " ";
     }
 }
 

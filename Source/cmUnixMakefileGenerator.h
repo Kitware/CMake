@@ -101,7 +101,8 @@ private:
   void OutputTargets(std::ostream&);
   void OutputSubDirectoryRules(std::ostream&);
   void OutputDependInformation(std::ostream&);
-  void OutputDependencies(std::ostream&);
+  void OutputDependLibs(std::ostream&);
+  void OutputLibDepend(std::ostream&, const char*);
   void OutputCustomRules(std::ostream&);
   void OutputMakeVariables(std::ostream&);
   void OutputMakeRules(std::ostream&);
