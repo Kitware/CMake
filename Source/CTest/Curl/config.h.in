@@ -32,9 +32,6 @@
 /* Define if you have the inet_ntoa_r function declared. */
 #cmakedefine HAVE_INET_NTOA_R_DECL	${HAVE_INET_NTOA_R_DECL}
 
-/* Define if you have the getservbyname function.  */
-#cmakedefine HAVE_GETSERVBYNAME         ${HAVE_GETSERVBYNAME}
-
 /* Define if you need the _REENTRANT define for some functions */
 #cmakedefine NEED_REENTRANT             ${NEED_REENTRANT}
 
@@ -492,12 +489,6 @@
 
 /* Define to `int' if <sys/types.h> does not define. */
 #cmakedefine ssize_t	${ssize_t}
-
-/* Define if you don't have vprintf but do have _doprnt.  */
-#cmakedefine HAVE_DOPRNT ${HAVE_DOPRNT}
-
-/* Define to 1 if you have the vprintf function.  */
-#cmakedefine HAVE_VPRINTF ${HAVE_VPRINTF}
 
 /* The number of bytes in a long double.  */
 #cmakedefine SIZEOF_LONG_DOUBLE ${SIZEOF_LONG_DOUBLE}
