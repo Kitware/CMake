@@ -75,10 +75,12 @@ typedef unsigned long timeout_t;
 #include <direct.h>  /* for _chdir() */
 
 
+/*
 __inline BOOL setenv(const char* name, const char* value, int i) 
 {
   return (SetEnvironmentVariable(name, value) != 0) ? TRUE : FALSE;
 }
+*/
 #endif
 
 #endif
