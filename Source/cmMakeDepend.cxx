@@ -36,7 +36,7 @@ cmMakeDepend::~cmMakeDepend()
 
 
 // Set the makefile that depends will be made from.
-// The pointer is kept so the cmClassFile array can
+// The pointer is kept so the cmSourceFile array can
 // be updated with the depend information in the cmMakefile.
 
 void cmMakeDepend::SetMakefile(cmMakefile* makefile)
@@ -95,7 +95,7 @@ void cmMakeDepend::DoDepends()
     this->Depend(info);
     ++j;
     }
-  // Now update the depend information for each cmClassFile
+  // Now update the depend information for each cmSourceFile
   // in the cmMakefile m_Makefile
   for(DependArray::iterator i = m_DependInformation.begin();
       i != m_DependInformation.end(); ++i)
@@ -127,7 +127,7 @@ void cmMakeDepend::Depend(cmDependInformation* info)
   // If the file exists, use it to find dependency information.
   if(cmSystemTools::FileExists(path))
     {
-    // The cmClassFile may have had hints for dependencies.  Delete any that
+    // The cmSourceFile may have had hints for dependencies.  Delete any that
     // exist since we can find the dependencies for real.
     if(info->m_ClassFileIndex != 0)
       {
@@ -142,11 +142,11 @@ void cmMakeDepend::Depend(cmDependInformation* info)
     return;
     }
   
-  // The file doesn't exist.  See if the cmClassFile for it has any files
+  // The file doesn't exist.  See if the cmSourceFile for it has any files
   // specified as dependency hints.
   if(info->m_ClassFileIndex != 0)
     {
-    // Get the cmClassFile corresponding to this.
+    // Get the cmSourceFile corresponding to this.
     cmSourceFile& cFile = *(info->m_ClassFileIndex);
     // See if there are any hints for finding dependencies for the missing
     // file.
@@ -161,7 +161,7 @@ void cmMakeDepend::Depend(cmDependInformation* info)
         this->AddDependency(info, file->c_str());
         }
       
-      // Erase the dependency hints from the cmClassFile.  They will be
+      // Erase the dependency hints from the cmSourceFile.  They will be
       // put in again as real dependencies later.
       cFile.GetDepends().erase(cFile.GetDepends().begin(), 
                                cFile.GetDepends().end());
@@ -319,7 +319,7 @@ std::string cmMakeDepend::FullPath(const char* fname)
       return path;
       }
     }
-  
+
   return std::string(fname);
 }
 
