@@ -738,7 +738,10 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         linkLibs += libPathFlag;
         if(outputRuntime)
           {
-          runtimeDirs.push_back( cmSystemTools::CollapseFullPath(libpath.c_str()));
+          std::string rpath = "\"`cd \"$(PWD)/";
+          rpath += libpath;
+          rpath += "\";pwd`\"";
+          runtimeDirs.push_back( rpath );
           }
         }
       linkLibs += libpath;
