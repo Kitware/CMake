@@ -231,6 +231,40 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
     {
     this->AddDSPBuildRule();
     }
+
+  // for utility targets need custom command since post build doesn't
+  // do anything (Visual Studio 7 seems to do this correctly without 
+  // the hack)
+  if (target.GetType() == cmTarget::UTILITY && 
+      target.GetPostBuildCommands().size())
+    {
+    int count = 1;
+    for (std::vector<cmCustomCommand>::const_iterator cr = 
+           target.GetPostBuildCommands().begin(); 
+         cr != target.GetPostBuildCommands().end(); ++cr)
+      {
+      cmCustomCommand cc(*cr);
+      cc.ExpandVariables(*m_Makefile);
+      char *output = new char [
+        strlen(m_Makefile->GetStartOutputDirectory()) + 
+        strlen(libName) + 30];
+      sprintf(output,"%s/%s_force_%i",
+              m_Makefile->GetStartOutputDirectory(),
+              libName, count);
+      std::vector<std::string> args;
+      args.push_back(cc.GetArguments());
+      m_Makefile->AddCustomCommandToOutput(output, 
+                                           cc.GetCommand().c_str(), 
+                                           args, 
+                                           0, 
+                                           cc.GetDepends());
+      cmSourceFile* outsf = 
+        m_Makefile->GetSourceFileWithOutput(output);
+      target.GetSourceFiles().push_back(outsf);
+      count++;
+      delete [] output;
+      }
+    }
   
   // trace the visual studio dependencies
   std::string name = libName;
@@ -280,6 +314,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   // Write the DSP file's header.
   this->WriteDSPHeader(fout, libName, target, sourceGroups);
   
+
   // Loop through every source group.
   for(std::vector<cmSourceGroup>::const_iterator sg = sourceGroups.begin();
       sg != sourceGroups.end(); ++sg)
@@ -560,7 +595,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
 {
   std::string customRuleCode = "";
 
-  if (target.GetType() > cmTarget::UTILITY)
+  if (target.GetType() >= cmTarget::UTILITY)
     {
     return customRuleCode;
     }
