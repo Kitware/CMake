@@ -969,7 +969,7 @@ bool cmSystemTools::FilesDiffer(const char* source,
     return true;
     }
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
   std::ifstream finSource(source, std::ios::binary | std::ios::in);
   std::ifstream finDestination(destination, std::ios::binary | std::ios::in);
 #else
@@ -1016,11 +1016,11 @@ void cmSystemTools::cmCopyFile(const char* source,
   const int bufferSize = 4096;
   char buffer[bufferSize];
 
-  std::ifstream fin(source,
-#ifdef _WIN32
-                    std::ios::binary |
+#if defined(_WIN32) || defined(__CYGWIN__)
+  std::ifstream fin(source, std::ios::binary | std::ios::in);
+#else
+  std::ifstream fin(source);
 #endif
-                    std::ios::in);
   if(!fin)
     {
     cmSystemTools::Error("CopyFile failed to open input file \"",
@@ -1051,11 +1051,11 @@ void cmSystemTools::cmCopyFile(const char* source,
   destination_dir = cmSystemTools::GetFilenamePath(destination_dir);
   cmSystemTools::MakeDirectory(destination_dir.c_str());
 
-  std::ofstream fout(dest,
-#ifdef _WIN32
-                     std::ios::binary |
+#if defined(_WIN32) || defined(__CYGWIN__)
+  std::ofstream fout(dest, std::ios::binary | std::ios::out | std::ios::trunc);
+#else
+  std::ofstream fout(dest, std::ios::out | std::ios::trunc);
 #endif
-                     std::ios::out | std::ios::trunc);
   if(!fout)
     {
     cmSystemTools::Error("CopyFile failed to open output file \"",
