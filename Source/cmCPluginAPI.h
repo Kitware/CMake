@@ -57,6 +57,8 @@ typedef struct
   void  (*SetClientData) (void *info, void *cd);
   /* when an error occurs, call this function to set the error string */
   void  (*SetError) (void *info, const char *err);
+  /* display status information */
+  void  (*DisplaySatus) (void *info, const char *message);
   
   /*=========================================================================
   The following functions all directly map to methods in the cmMakefile

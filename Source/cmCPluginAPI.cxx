@@ -536,6 +536,12 @@ void cmRemoveFile(const char *name)
   cmSystemTools::RemoveFile(name);
 }
 
+void cmDisplayStatus(void *arg, const char* message)
+{
+  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  return mf->DisplayStatus(message, -1);
+}
+
 void cmFree(void *data)
 {
   free(data);
@@ -550,6 +556,7 @@ cmCAPI cmStaticCAPI =
   cmFreeArguments,
   cmSetClientData,
   cmSetError,
+  cmDisplayStatus,
   cmAddCacheDefinition,
   cmAddCustomCommand,
   cmAddDefineFlag,
