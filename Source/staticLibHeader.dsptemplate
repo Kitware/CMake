@@ -31,7 +31,6 @@ CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE 
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Static Library")
-!MESSAGE 
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release MinSize" (based on "Win32 (x86) Static Library")
 # Begin Project
 # PROP AllowPerConfigDependencies 0

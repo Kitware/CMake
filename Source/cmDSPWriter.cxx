@@ -54,36 +54,25 @@ void cmDSPMakefile::OutputDSPFile()
   std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
   for(i = libs.begin(); i != libs.end(); ++i)
     {
-    m_DebugLibraryOptions += " ";
-    m_DebugLibraryOptions += *i;
-    m_DebugLibraryOptions += ".lib ";
+    m_LibraryOptions += " ";
+    m_LibraryOptions += *i;
+    m_LibraryOptions += ".lib ";
     }
   std::vector<std::string>& libswin32 = m_Makefile->GetLinkLibrariesWin32();
   for(i = libswin32.begin(); i != libswin32.end(); ++i)
     {
-    m_DebugLibraryOptions += " ";
-    m_DebugLibraryOptions += *i;
-    m_DebugLibraryOptions += ".lib ";
+    m_LibraryOptions += " ";
+    m_LibraryOptions += *i;
+    m_LibraryOptions += ".lib ";
     }
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
-    m_DebugLibraryOptions += " /LIBPATH:\"";
-    m_DebugLibraryOptions += *i;
-    if(i->find("Debug") == std::string::npos)
-      {
-      if(i->find("Release") == std::string::npos)
-	{
-	m_DebugLibraryOptions += "/$(OUTDIR)\" ";
-	}
-      }
+    m_LibraryOptions += " /LIBPATH:\"";
+    m_LibraryOptions += *i;
+    m_LibraryOptions += "/$(OUTDIR)\" ";
     }
-  m_DebugLibraryOptions += "/STACK:10000000 ";
-  // add any extra define flags 
-  m_ReleaseLibraryOptions = m_DebugLibraryOptions;
-  m_DebugDLLLibraryOptions = m_DebugLibraryOptions;
-  m_ReleaseDLLLibraryOptions = m_DebugDLLLibraryOptions;
-  m_ReleaseMinSizeLibraryOptions = m_ReleaseLibraryOptions;
+  m_LibraryOptions += "/STACK:10000000 ";
   
   // Create the DSP or set of DSP's for libraries and executables
   if(strlen(m_Makefile->GetLibraryName()) != 0)
@@ -317,16 +306,8 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout)
     {
       fin.getline(buffer, 2048);
       std::string line = buffer;
-      cmSystemTools::ReplaceString(line, "CM_RELEASE_LIBRARIES",
-                                    m_ReleaseLibraryOptions.c_str());
-      cmSystemTools::ReplaceString(line, "CM_RELEASEMINSIZE_LIBRARIES",
-                                   m_ReleaseMinSizeLibraryOptions.c_str());
-      cmSystemTools::ReplaceString(line, "CM_DEBUG_LIBRARIES",
-                                    m_DebugLibraryOptions.c_str());
-      cmSystemTools::ReplaceString(line, "CM_RELEASEDLL_LIBRARIES",
-                                    m_ReleaseDLLLibraryOptions.c_str());
-      cmSystemTools::ReplaceString(line, "CM_DEBUGDLL_LIBRARIES",
-                                    m_DebugDLLLibraryOptions.c_str());
+      cmSystemTools::ReplaceString(line, "CM_LIBRARIES",
+                                    m_LibraryOptions.c_str());
       cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                     m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", 
@@ -418,3 +399,5 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout, const char* path)
        << path << "\n";
   fout << "# End Source File\n";
 }
+
+

@@ -86,11 +86,7 @@ private:
                        std::vector<std::string>& depends);
 
   std::string m_IncludeOptions;
-  std::string m_DebugLibraryOptions;
-  std::string m_ReleaseLibraryOptions;
-  std::string m_ReleaseMinSizeLibraryOptions;
-  std::string m_DebugDLLLibraryOptions;
-  std::string m_ReleaseDLLLibraryOptions;
+  std::string m_LibraryOptions;
   cmMakefile* m_Makefile;
   BuildType m_BuildType;
   std::vector<std::string> m_Configurations;
