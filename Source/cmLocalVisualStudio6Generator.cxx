@@ -34,7 +34,11 @@ cmLocalVisualStudio6Generator::~cmLocalVisualStudio6Generator()
 
 
 void cmLocalVisualStudio6Generator::Generate(bool /* fromTheTop */)
-{
+{ 
+  std::set<cmStdString> lang;
+  lang.insert("C");
+  lang.insert("CXX");
+  this->CreateCustomTargetsAndCommands(lang);
   this->OutputDSPFile();
 }
 

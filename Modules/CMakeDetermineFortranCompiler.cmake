@@ -48,7 +48,7 @@ IF(NOT CMAKE_Fortran_COMPILER)
     # CMake/Source/CMakeLists.txt, IF YOU CHANGE THIS LIST,
     # PLEASE UPDATE THAT FILE AS WELL!
     SET(CMAKE_Fortran_COMPILER_LIST ifort ifc efc f95 pgf95
-          lf95 xlf95 fort gfortran f90  pgf90   xlf90   epcf90 f77  fort77 frt pgf77  xlf  fl32 af77 g77  )
+          lf95 xlf95 fort gfortran f90  pgf90   xlf90   epcf90 fort77 frt pgf77  xlf  fl32 af77 g77 f77  )
     FIND_PROGRAM(CMAKE_Fortran_COMPILER_FULLPATH NAMES ${CMAKE_Fortran_COMPILER_LIST} )
     GET_FILENAME_COMPONENT(CMAKE_Fortran_COMPILER_INIT
       ${CMAKE_Fortran_COMPILER_FULLPATH} NAME)

@@ -769,10 +769,7 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg) const
     }
   if(languages.size() == 0)
     {
-    std::string m = "Error Target: ";
-    m += m_Name + " contains no source files with an enabled languages.";
-    cmSystemTools::Error(m.c_str());
-    return "(NullLanguage)";
+    return 0;
     }
   if(languages.size() == 1)
     {
@@ -808,4 +805,72 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg) const
     }
   const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", prefLang);
   return this->GetProperty("LINKER_LANGUAGE");
+}
+
+const char* cmTarget::GetCreateRuleVariable()
+{
+  switch(this->GetType())
+    { 
+    case cmTarget::STATIC_LIBRARY:
+      return "_CREATE_STATIC_LIBRARY";
+      break;
+    case cmTarget::SHARED_LIBRARY:
+      return "_CREATE_SHARED_LIBRARY";
+      break;
+    case cmTarget::MODULE_LIBRARY:
+      return "_CREATE_SHARED_MODULE";
+      break; 
+    case cmTarget::EXECUTABLE:
+      return "_LINK_EXECUTABLE";
+      break; 
+    }
+  return "";
+}
+
+
+const char* cmTarget::GetSuffixVariable() const
+{
+  switch(this->GetType())
+    {
+    case cmTarget::STATIC_LIBRARY:
+      return "CMAKE_STATIC_LIBRARY_SUFFIX";
+      break;
+    case cmTarget::SHARED_LIBRARY:
+      return "CMAKE_SHARED_LIBRARY_SUFFIX";
+      break;
+    case cmTarget::MODULE_LIBRARY:
+      return "CMAKE_SHARED_MODULE_SUFFIX";
+      break;
+    case cmTarget::EXECUTABLE:
+      return cmSystemTools::GetExecutableExtension();
+    case cmTarget::UTILITY:
+    case cmTarget::INSTALL_FILES:
+    case cmTarget::INSTALL_PROGRAMS:
+      break;
+    }
+  return "";
+}
+
+
+const char* cmTarget::GetPrefixVariable() const
+{
+  switch(this->GetType())
+    {
+    case cmTarget::STATIC_LIBRARY:
+      return "CMAKE_STATIC_LIBRARY_PREFIX";
+      break;
+    case cmTarget::SHARED_LIBRARY:
+      return "CMAKE_SHARED_LIBRARY_PREFIX";
+      break;
+    case cmTarget::MODULE_LIBRARY:
+      return "CMAKE_SHARED_MODULE_PREFIX";
+      break;
+    case cmTarget::EXECUTABLE:
+      return cmSystemTools::GetExecutableExtension();
+    case cmTarget::UTILITY:
+    case cmTarget::INSTALL_FILES:
+    case cmTarget::INSTALL_PROGRAMS:
+      break;
+    }
+  return "";
 }

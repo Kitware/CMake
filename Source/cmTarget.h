@@ -55,9 +55,9 @@ public:
   /**
    * Indicate whether the target is part of the all target
    */
-  bool IsInAll() const { return m_InAll; }
-  bool GetInAll() const { return m_InAll; }
-  void SetInAll(bool f) { m_InAll = f; }
+  bool IsInAll() const { return this->GetPropertyAsBool("IN_ALL"); }
+  bool GetInAll() const { return this->GetPropertyAsBool("IN_ALL"); }
+  void SetInAll(bool f) { this->SetProperty("IN_ALL", (f) ?  "TRUE" : "FALSE"); }
 
   /**
    * Get the list of the custom commands for this target
@@ -157,6 +157,14 @@ public:
 
   ///! Return the prefered linker language for this target
   const char* GetLinkerLanguage(cmGlobalGenerator*) const;
+  
+  ///! Return the rule variable used to create this type of target, 
+  //  need to add CMAKE_(LANG) for full name.
+  const char* GetCreateRuleVariable();
+  ///! Return the name of the variable to look up the target suffix
+  const char* GetSuffixVariable() const;
+  ///! Return the name of the variable to look up the target suffix
+  const char* GetPrefixVariable() const;
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -223,7 +231,6 @@ private:
   LinkLibraries m_LinkLibraries;
   LinkLibraries m_PrevLinkedLibraries;
   std::vector<std::string> m_LinkDirectories;
-  bool m_InAll;
   std::string m_InstallPath;
   std::string m_RuntimeInstallPath;
   std::set<cmStdString> m_Utilities;

@@ -34,6 +34,10 @@ cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
 
 void cmLocalVisualStudio7Generator::Generate(bool /* fromTheTop */)
 {
+  std::set<cmStdString> lang;
+  lang.insert("C");
+  lang.insert("CXX");
+  this->CreateCustomTargetsAndCommands(lang);
   this->OutputVCProjFile();
 }
 

@@ -95,7 +95,6 @@ protected:
   virtual void ProcessDepends(const cmMakeDepend &md);
   virtual void OutputMakefile(const char* file, bool withDepends);
   virtual void OutputTargetRules(std::ostream& fout);
-  virtual void OutputLinkLibraries(std::ostream&, const char* name, const cmTarget &);
   void OutputLibraryRule(std::ostream& fout,  
                          const char* name, 
                          const cmTarget &t,
@@ -103,18 +102,7 @@ protected:
                          const char* comment,
                          const char* linkFlags
     );
-  void ExpandRuleVariables(std::string& string,
-                           const char* language,
-                           const char* objects=0,
-                           const char* target=0,
-                           const char* linkLibs=0,
-                           const char* source=0,
-                           const char* object =0,
-                           const char* flags = 0,
-                           const char* objectsquoted = 0,
-                           const char* targetBase = 0,
-                           const char* targetSOName = 0,
-                           const char* linkFlags = 0);
+ 
   virtual void OutputSharedLibraryRule(std::ostream&, const char* name,
                                        const cmTarget &);
   virtual void OutputModuleLibraryRule(std::ostream&, const char* name, 
@@ -211,15 +199,9 @@ protected:
   ///! if the OS is case insensitive then return a lower case of the path.
   virtual std::string LowerCasePath(const char* path);
 
-  ///! for existing files convert to output path and short path if spaces
-  std::string ConvertToOutputForExisting(const char*);
-
   /** Convert path to a format vaild for the left or right side of a
       target: dependencies line in a makefile.  */
   virtual std::string ConvertToMakeTarget(const char*);
-
-  /** Get the full name of the target's file, without path.  */
-  std::string GetFullTargetName(const char* n, const cmTarget& t);
 
   /** Get the base name of the target's file, without path or extension.  */
   std::string GetBaseTargetName(const char* n, const cmTarget& t);
@@ -240,20 +222,15 @@ protected:
    */
   std::string& CreateSafeUniqueObjectFileName(const char* sin);
 
-  const char* GetIncludeFlags(const char* lang);
 protected:
   int m_MakefileVariableSize;
   std::map<cmStdString, cmStdString> m_MakeVariableMap;
   std::map<cmStdString, cmStdString> m_ShortMakeVariableMap;
   std::map<cmStdString, cmStdString> m_UniqueObjectNamesMap;
-  std::map<cmStdString, cmStdString> m_LanguageToIncludeFlags;
-  bool m_IgnoreLibPrefix;
   std::string m_IncludeDirective;
   std::string m_MakeSilentFlag;
   std::string m_ExecutableOutputPath;
   std::string m_LibraryOutputPath;
-  bool m_WindowsShell;
-  bool m_UseRelativePaths;
   bool m_PassMakeflags;
 private:
 };

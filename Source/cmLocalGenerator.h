@@ -22,6 +22,8 @@
 class cmMakefile;
 class cmGlobalGenerator;
 class cmTarget;
+class cmSourceFile;
+
 
 /** \class cmLocalGenerator
  * \brief Create required build files for a directory.
@@ -92,6 +94,46 @@ public:
   void SetParent(cmLocalGenerator* g) { m_Parent = g;}
 
 protected:
+  ///! Fill out these strings for the given target.  Libraries to link, flags, and linkflags.
+  void GetTargetFlags(std::string& linkLibs, 
+                      std::string& flags,
+                      std::string& linkFlags,
+                      cmTarget&target);
+  
+  ///! put all the libraries for a target on into the given stream
+  virtual void OutputLinkLibraries(std::ostream&, const char* name, const cmTarget &);
+
+  ///! Get the include flags for the current makefile and language
+  const char* GetIncludeFlags(const char* lang); 
+  ///! for existing files convert to output path and short path if spaces
+  std::string ConvertToOutputForExisting(const char* p);
+  
+  // Expand rule variables in CMake of the type found in language rules
+  void ExpandRuleVariables(std::string& string,
+                           const char* language,
+                           const char* objects=0,
+                           const char* target=0,
+                           const char* linkLibs=0,
+                           const char* source=0,
+                           const char* object =0,
+                           const char* flags = 0,
+                           const char* objectsquoted = 0,
+                           const char* targetBase = 0,
+                           const char* targetSOName = 0,
+                           const char* linkFlags = 0);
+  ///! Convert a target to a utility target for unsupported languages of a generator
+  void AddBuildTargetRule(const char* llang, cmTarget& target);
+  ///! add a custom command to build a .o file that is part of a target 
+  void AddCustomCommandToCreateObject(const char* ofname, 
+                                      const char* lang, 
+                                      cmSourceFile& source,
+                                      cmTarget& target);
+  // Create Custom Targets and commands for unsupported languages
+  // The set passed in should contain the languages supported by the
+  // generator directly.  Any targets containing files that are not
+  // of the types listed will be compiled as custom commands and added
+  // to a custom target.
+  void CreateCustomTargetsAndCommands(std::set<cmStdString> const&);
   virtual void AddInstallRule(std::ostream& fout, const char* dest, int type, 
     const char* files, bool optional = false, const char* properties = 0);
   
@@ -107,6 +149,10 @@ protected:
   std::string m_HomeOutputDirectoryNoSlash;
   bool m_ExcludeFromAll;
   cmLocalGenerator* m_Parent;
+  std::map<cmStdString, cmStdString> m_LanguageToIncludeFlags;
+  bool m_WindowsShell;
+  bool m_UseRelativePaths;
+  bool m_IgnoreLibPrefix;
 };
 
 #endif
