@@ -51,17 +51,21 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   std::vector<std::string>::const_iterator s = args.begin();
+
+  std::string exename = *s;
+  m_Makefile->ExpandVariablesInString(exename);
+
   ++s;
   if (*s == "WIN32")
     {
     ++s;
     std::vector<std::string> srclists(s, args.end());
-    m_Makefile->AddExecutable(args[0].c_str(),srclists, true); 
+    m_Makefile->AddExecutable(exename.c_str(),srclists, true); 
     }
   else
     {
     std::vector<std::string> srclists(s, args.end());
-    m_Makefile->AddExecutable(args[0].c_str(),srclists, false); 
+    m_Makefile->AddExecutable(exename.c_str(),srclists, false); 
     }
   
   return true;

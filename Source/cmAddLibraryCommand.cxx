@@ -49,12 +49,16 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   // Library type defaults to value of BUILD_SHARED_LIBS, if it exists,
   // otherwise it defaults to static library.
   int shared = !cmSystemTools::IsOff(m_Makefile->GetDefinition("BUILD_SHARED_LIBS"));
   
   std::vector<std::string>::const_iterator s = args.begin();
+
+  std::string libname = *s;
+  m_Makefile->ExpandVariablesInString(libname);
+
   ++s;
   
   // If the second argument is "SHARED" or "STATIC", then it controls
@@ -81,8 +85,8 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
   std::vector<std::string> srclists(s, args.end());  
-  
-  m_Makefile->AddLibrary(args[0].c_str(), shared, srclists);
+
+  m_Makefile->AddLibrary(libname.c_str(), shared, srclists);
   
   return true;
 }
