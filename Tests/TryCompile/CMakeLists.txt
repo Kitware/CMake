@@ -1,9 +1,9 @@
-PROJECT(TryCompileTest)
+PROJECT(TryCompile)
 
 # try to compile a file that should compile
 TRY_COMPILE(SHOULD_PASS
-    ${TryCompileTest_BINARY_DIR}/CMakeTmp  
-    ${TryCompileTest_SOURCE_DIR}/pass.c
+    ${TryCompile_BINARY_DIR}/CMakeTmp  
+    ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(NOT SHOULD_PASS)
   MESSAGE(SEND_ERROR "should pass failed ")
@@ -12,8 +12,8 @@ MESSAGE( "output from TRY_COMPILE ${TRY_OUT} ")
 
 # try to compile a file that should not compile
 TRY_COMPILE(SHOULD_FAIL
-    ${TryCompileTest_BINARY_DIR}/CMakeTmp  
-    ${TryCompileTest_SOURCE_DIR}/fail.c
+    ${TryCompile_BINARY_DIR}/CMakeTmp  
+    ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(SHOULD_FAIL)
    MESSAGE(SEND_ERROR "Should fail passed")
@@ -22,8 +22,8 @@ MESSAGE("output from TRY_COMPILE ${TRY_OUT} ")
 
 # try to compile a file that should compile
 TRY_COMPILE(SHOULD_PASS
-    ${TryCompileTest_BINARY_DIR}/CMakeTmp  
-    ${TryCompileTest_SOURCE_DIR}/pass.c
+    ${TryCompile_BINARY_DIR}/CMakeTmp  
+    ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(NOT SHOULD_PASS)
   MESSAGE(SEND_ERROR "should pass failed ")
@@ -32,8 +32,8 @@ MESSAGE("output from TRY_COMPILE ${TRY_OUT} ")
 
 # try to compile a file that should not compile
 TRY_COMPILE(SHOULD_FAIL
-    ${TryCompileTest_BINARY_DIR}/CMakeTmp 
-    ${TryCompileTest_SOURCE_DIR}/fail.c
+    ${TryCompile_BINARY_DIR}/CMakeTmp 
+    ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(SHOULD_FAIL)
    MESSAGE(SEND_ERROR "Should fail passed")
@@ -51,3 +51,4 @@ ELSE(NOT SHOULD_FAIL)
 ENDIF(NOT SHOULD_FAIL)
 
  
+ADD_EXECUTABLE(TryCompile pass.c)

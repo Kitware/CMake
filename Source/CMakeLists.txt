@@ -136,6 +136,11 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/SystemInformation 
       DumpInformation)
 
+    ADD_TEST(TryCompile ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/TryCompile
+      ${CMake_BINARY_DIR}/Tests/TryCompile 
+      TryCompile)
+
     ADD_TEST(simple ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Simple 
       ${CMake_BINARY_DIR}/Tests/Simple 
