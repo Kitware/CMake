@@ -1,16 +1,17 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0010 
+version 1.0009 
 header_name {.h} 
-code_name {.cpp} 
+code_name {.cxx} 
 gridx 5 
 gridy 5 
 snap 3
 class CMakeSetupGUI {open
 } {
-  Function {CMakeSetupGUI()} {} {
+  Function {CMakeSetupGUI()} {open
+  } {
     Fl_Window dialogWindow {
       label CMakeSetupDialog open
-      xywh {542 411 563 363} resizable visible
+      xywh {401 125 563 363} resizable visible
     } {
       Fl_Input sourcePathTextInput {
         label {Where is the source code: }
@@ -20,7 +21,7 @@ class CMakeSetupGUI {open
       Fl_Button {} {
         label {Browse...}
         callback {BrowseForSourcePath();}
-        xywh {426 14 65 22} labelsize 11
+        xywh {426 14 65 22} shortcut 0x80073 labelsize 11
       }
       Fl_Input binaryPathTextInput {
         label {Where do you want to build the binaries: }
@@ -30,28 +31,27 @@ class CMakeSetupGUI {open
       Fl_Button {} {
         label {Browse...}
         callback {BrowseForBinaryPath();}
-        xywh {426 50 65 22} labelsize 11
+        xywh {426 50 65 22} shortcut 0x80062 labelsize 11
       }
       Fl_Button {} {
         label Close
         callback {Close()}
-        xywh {345 331 77 23} labelsize 11
+        xywh {345 331 77 23} shortcut 0x80071 labelsize 11
       }
       Fl_Button {} {
         label {Build Project Files}
         callback {BuildProjectFiles();}
-        xywh {123 332 101 23} labelsize 11
+        xywh {123 332 101 23} shortcut 0x8006d labelsize 11
       }
-      Fl_Group {} {open selected
-        xywh {25 80 515 222} box ENGRAVED_FRAME labelsize 11 align 0 resizable
+      Fl_Group {} {open
+        xywh {25 80 515 222} box ENGRAVED_BOX labelsize 11 align 0 resizable
       } {
-        Fl_Scroll {} {
+        Fl_Scroll cacheValuesScroll {
           label {Cache Values} open
-          xywh {40 98 485 190} type VERTICAL_ALWAYS box DOWN_BOX labelsize 11 align 5
+          xywh {40 98 485 190} type BOTH_ALWAYS box DOWN_FRAME labelsize 11 align 5 when 1 resizable
         } {
-          Fl_Pack propertyListPack {open
+          Fl_Pack propertyListPack {selected
             xywh {40 99 485 185} resizable
-            code0 {InsertProperties();}
           } {}
         }
       }
@@ -75,7 +75,5 @@ class CMakeSetupGUI {open
   Function {SetBinaryPath(const char *)} {return_type {virtual void}
   } {}
   Function {SetSourcePath(const char *)} {return_type {virtual void}
-  } {}
-  Function {InsertProperties(void)} {open return_type {virtual void}
   } {}
 } 

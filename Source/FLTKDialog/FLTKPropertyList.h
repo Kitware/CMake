@@ -11,7 +11,7 @@ using std::string;
 
 /////////////////////////////////////////////////////////////////////////////
 //PropertyList Items
-class PropertyItem
+class PropertyItem 
 {
 // Attributes
 public:
