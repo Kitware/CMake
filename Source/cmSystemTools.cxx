@@ -1435,9 +1435,13 @@ bool WindowsRunCommand(const char* command, const char* dir,
  
           //read the stdout pipe 
           memset(buf, 0, sizeof(buf));
-          std::cout << buf << std::flush; 
+          output += buf;
+          if (verbose)
+            {
+            std::cout << buf << std::flush; 
+            }
           }
- 
+        output += "\n";          
         }
       else 
         {
