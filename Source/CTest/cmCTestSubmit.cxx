@@ -27,6 +27,7 @@ cmCTestSubmit::cmCTestSubmit() : m_HTTPProxy(), m_FTPProxy()
   m_Verbose = false;
   m_HTTPProxy = "";
   m_HTTPProxyType = 0;
+  m_HTTPProxyAuth = "";
   if ( getenv("HTTP_PROXY") )
     {
     m_HTTPProxyType = 1;
@@ -52,6 +53,15 @@ cmCTestSubmit::cmCTestSubmit() : m_HTTPProxy(), m_FTPProxy()
         {
         m_HTTPProxyType = 3;
         }
+      }
+    if ( getenv("HTTP_PROXY_USER") )
+      {
+      m_HTTPProxyAuth = getenv("HTTP_PROXY_USER");
+      }
+    if ( getenv("HTTP_PROXY_PASSWD") )
+      {
+      m_HTTPProxyAuth += ":";
+      m_HTTPProxyAuth += getenv("HTTP_PROXY_PASSWD");
       }
     }
   m_FTPProxy = "";
@@ -223,7 +233,12 @@ bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix,
           curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
           break;
         default:
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);           
+          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+          if (m_HTTPProxyAuth.size() > 0)
+            {
+            curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD,
+              m_HTTPProxyAuth.c_str());
+            }
           }
         }
 
@@ -349,6 +364,11 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
           break;
         default:
           curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);           
+          if (m_HTTPProxyAuth.size() > 0)
+            {
+            curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD,
+              m_HTTPProxyAuth.c_str());
+            }
           }
         }
 

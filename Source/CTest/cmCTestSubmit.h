@@ -64,6 +64,7 @@ public:
 private:
   cmStdString   m_HTTPProxy;
   int           m_HTTPProxyType;
+  cmStdString   m_HTTPProxyAuth;
   cmStdString   m_FTPProxy;
   int           m_FTPProxyType;
   bool          m_Verbose;
