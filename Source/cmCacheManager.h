@@ -71,6 +71,7 @@ public:
   static CacheEntryType StringToType(const char*);
   ///! Singleton pattern get instance of the cmCacheManager.
   CM_EXPORT static cmCacheManager* GetInstance();
+  CM_EXPORT static void DeleteInstance();
   
   ///! Load a cache for given makefile.  Loads from ouput home.
   CM_EXPORT bool LoadCache(cmMakefile*); 

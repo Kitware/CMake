@@ -41,6 +41,11 @@ cmake::cmake()
 #endif
 }
 
+cmake::~cmake()
+{
+}
+
+
 void cmake::Usage(const char* program)
 {
   cmStringStream errorStream;

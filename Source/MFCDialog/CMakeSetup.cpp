@@ -7,6 +7,7 @@
 #include "CMakeCommandLineInfo.h" 
 #include "../cmListFileCache.h"
 #include "../cmMakefileGenerator.h"
+#include "../cmCacheManager.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -78,6 +79,7 @@ BOOL CMakeSetup::InitInstance()
   // clean up globals 
   cmListFileCache::GetInstance()->ClearCache(); 
   cmMakefileGenerator::UnRegisterGenerators();
+  cmCacheManager::DeleteInstance();
   // Since the dialog has been closed, return FALSE so that we exit the
   //  application, rather than start the application's message pump.
   return FALSE;

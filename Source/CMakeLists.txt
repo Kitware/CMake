@@ -53,7 +53,8 @@ INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source)
 ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
 
 IF (WIN32)
-  SET(SRCS ${SRCS}
+  IF(NOT UNIX)
+    SET(SRCS ${SRCS}
                     cmDSWWriter.cxx 
                     cmDSPWriter.cxx 
                     cmMSProjectGenerator.cxx
@@ -67,7 +68,6 @@ IF (WIN32)
                     cmNMakeMakefileGenerator.h
                     cmMSDotNETGenerator.h
                     )
-  IF(NOT UNIX)
     IF(  NOT BORLAND )
       LINK_LIBRARIES( rpcrt4.lib )
       SUBDIRS(MFCDialog)

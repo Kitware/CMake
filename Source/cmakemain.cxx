@@ -17,6 +17,7 @@
 #include "cmakewizard.h"
 #include "cmake.h"
 #include "cmMakefileGenerator.h"
+#include "cmCacheManager.h"
 
 int main(int ac, char** av)
 {
@@ -52,10 +53,12 @@ int main(int ac, char** av)
     cmakewizard wizard;
     wizard.RunWizard(args); 
     cmMakefileGenerator::UnRegisterGenerators();
+    cmCacheManager::DeleteInstance();
     return 0;
     }
   cmake cm;
   int ret = cm.Generate(args);
   cmMakefileGenerator::UnRegisterGenerators();
+  cmCacheManager::DeleteInstance();
   return ret;  
 }

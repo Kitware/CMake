@@ -61,7 +61,7 @@ class CM_EXPORT cmake
    * constructor
    */
   cmake();
-
+  ~cmake();
 private:
   bool m_Verbose;
   bool m_Local;
