@@ -56,7 +56,10 @@ FOREACH(var
 ENDFOREACH(var)
 
 EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E chdir ${CMAKE_CURRENT_SOURCE_DIR} \"${CMAKE_COMMAND} -E echo \\\"Hello World\\\"\"")
-EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E time \"${CMAKE_COMMAND} -E echo \\\"Hello World\\\"\"")
+EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E time \"${CMAKE_COMMAND} -N -L ${StringFileTest_SOURCE_DIR}\"")
+EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E time \"${CMAKE_COMMAND} -N -LA ${StringFileTest_SOURCE_DIR}\"")
+EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E time \"${CMAKE_COMMAND} -N -LH ${StringFileTest_SOURCE_DIR}\"")
+EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E time \"${CMAKE_COMMAND} -N -LAH ${StringFileTest_SOURCE_DIR}\"")
 
 # Write include file to a file
 STRING(REGEX REPLACE "includefile" "${file}" outfile "${infile}")
