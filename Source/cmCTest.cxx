@@ -3886,6 +3886,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   if (cm.Run(args) != 0)
     {
     std::cerr << "Error: cmake execution failed\n";
+    std::cerr << cmakeOutString << "\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
@@ -3895,6 +3896,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     if (cm.Run(args) != 0)
       {
       std::cerr << "Error: cmake execution failed\n";
+      std::cerr << cmakeOutString << "\n";
       // return to the original directory
       cmSystemTools::ChangeDirectory(cwd.c_str());
       return 1;
