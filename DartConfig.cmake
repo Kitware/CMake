@@ -1,8 +1,8 @@
 # Dart server to submit results (used by client)
 SET (DROP_SITE "public.kitware.com")
 SET (DROP_LOCATION "/incoming")
-SET (DROP_SITE_USER "anonymous")
-SET (DROP_SITE_PASSWORD "cmake-tester@somewhere.com")
+SET (DROP_SITE_USER "ftpuser")
+SET (DROP_SITE_PASSWORD "public")
 SET (TRIGGER_SITE 
        "http://${DROP_SITE}/cgi-bin/Submit-CMake-TestingResults.pl")
 
