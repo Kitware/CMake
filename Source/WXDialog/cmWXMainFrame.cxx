@@ -214,6 +214,8 @@ cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
                       (wxObjectEventFunction) &cmMainFrame::OnBinarySelected );
   this->ConnectEvent( this->m_PathBinary, wxEVT_COMMAND_TEXT_UPDATED,
                       (wxObjectEventFunction) &cmMainFrame::OnBinaryUpdated );
+  this->ConnectEvent( this->m_PathBinary, wxEVT_COMMAND_TEXT_ENTER,
+                      (wxObjectEventFunction) &cmMainFrame::OnBinaryAccepted );
   this->ConnectEvent( this->m_GeneratorMenu, wxEVT_COMMAND_COMBOBOX_SELECTED,
                       (wxObjectEventFunction) &cmMainFrame::OnGeneratorSelected );
   this->ConnectEvent( this->m_GeneratorMenu, wxEVT_COMMAND_TEXT_UPDATED,
@@ -1189,6 +1191,11 @@ void cmMainFrame::ClearCache()
 
   items->erase(items->begin(), items->end());
 
+}
+
+void cmMainFrame::OnBinaryAccepted(wxCommandEvent& event)
+{
+  std::cout << "Pressed enter in binary field" << std::endl;
 }
 
 void cmMainFrame::OnBinarySelected(wxCommandEvent&)

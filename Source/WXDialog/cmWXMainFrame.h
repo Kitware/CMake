@@ -60,6 +60,7 @@ public:
   void OnBrowseBinary(wxCommandEvent& event);
   void OnBinarySelected(wxCommandEvent& event);
   void OnBinaryUpdated(wxCommandEvent& event);
+  void OnBinaryAccepted(wxCommandEvent& event);
   void OnShowAdvancedValues(wxCommandEvent& event);
   void OnResize(wxSizeEvent& event);
   void OnPropertyChanged(wxEvent& event);
