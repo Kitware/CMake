@@ -209,7 +209,6 @@ static CURLcode bindlocal(struct connectdata *conn,
   if (strlen(data->set.device)<255) {
     struct sockaddr_in sa;
     struct Curl_dns_entry *h=NULL;
-    size_t size;
     char myhost[256] = "";
     in_addr_t in;
 
