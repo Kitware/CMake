@@ -321,7 +321,6 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
          cmSystemTools::GetFilenameName(filename)) == "cmakelists.txt")
       {
       requireProjectCommand = true;
-      std::cerr << "Require project command " << filename << "\n";
       }
     }
       

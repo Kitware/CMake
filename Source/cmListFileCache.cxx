@@ -128,7 +128,6 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
       project.m_Name = "PROJECT";
       project.m_Arguments.push_back("Project");
       inFile.m_Functions.push_back(project);
-      std::cerr << "adding project command to file " << path << "\n";
       }
     }
   m_ListFileCache[path] = inFile;
