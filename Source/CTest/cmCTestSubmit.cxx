@@ -568,17 +568,14 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
   xmlrpc_env_init(&env);
 
   /* Call the famous server at UserLand. */
-  std::cout << "RemotePrefix: " << remoteprefix.c_str() << std::endl;
-  std::cout << "RemoteURL: " << url.c_str() << std::endl;
-  std::cout << "Files: " << files.size() << std::endl;
+  std::cout << "  Submitting to: " << url.c_str() << " (" << remoteprefix.c_str() << ")" << std::endl;
   std::vector<cmStdString>::const_iterator it;
-  int cnt = 32;
   for ( it = files.begin(); it != files.end(); ++it )
     {
     xmlrpc_value *result;
 
     std::string local_file = localprefix + "/" + *it;
-    std::cout << "Submit file: " << local_file.c_str() << std::endl;
+    std::cout << "  Submit file: " << local_file.c_str() << std::endl;
     struct stat st;
     if ( ::stat(local_file.c_str(), &st) )
       {
@@ -610,7 +607,7 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
 
     if ( env.fault_occurred )
       {
-      std::cerr << "XML-RPC Fault: " << env.fault_string << " (" << env.fault_code << ")" << std::endl;
+      std::cerr << " Submission problem: " << env.fault_string << " (" << env.fault_code << ")" << std::endl;
       xmlrpc_env_clean(&env);
       xmlrpc_client_cleanup();
       return 0;
@@ -621,14 +618,12 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
     xmlrpc_parse_value(&env, result, "s", &state_name);
     if ( env.fault_occurred )
       {
-      std::cerr << "XML-RPC Fault: " << env.fault_string << " (" << env.fault_code << ")" << std::endl;
+      std::cerr << "  Submission problem: " << env.fault_string << " (" << env.fault_code << ")" << std::endl;
       xmlrpc_DECREF(result);
       xmlrpc_env_clean(&env);
       xmlrpc_client_cleanup();
       return 0;
       }
-
-    printf("%d: %s\n", cnt, state_name);
 
     /* Dispose of our result value. */
     xmlrpc_DECREF(result);
