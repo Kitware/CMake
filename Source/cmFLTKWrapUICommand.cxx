@@ -44,7 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmFLTKWrapUICommand
 bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 4 )
+  std::cout << "args.size()=" << args.size() << std::endl;
+  if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
@@ -69,53 +70,46 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
   std::string cdir = m_Makefile->GetCurrentDirectory();
 
   // keep the library name
-  m_LibraryName = args[0];
-  m_HeaderList = args[1];
-  m_SourceList = args[2];
+  m_GUISourceList       = args[0];  // Source List of the GUI source files 
+  m_GeneratedSourceList = args[1];  // Source List to insert the generated .cxx files
+
+  cmMakefile::SourceMap &GUISources = m_Makefile->GetSources();
  
-  // get the list of classes for this library
-  cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
-
-
-  for(std::vector<std::string>::const_iterator j = (args.begin() + 3);
-      j != args.end(); ++j)
-    {  
-    cmMakefile::SourceMap::iterator l = Classes.find(*j);
-    if (l == Classes.end())
+  // get the list of GUI files from which .cxx and .h will be generated 
+  cmMakefile::SourceMap::iterator l = GUISources.find( m_GUISourceList );
+  if (l == GUISources.end())
+    {
+    this->SetError("bad source list passed to FLTKWrapUICommand");
+    return false;
+    }
+  for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
+      i != l->second.end(); i++)
+    {
+    cmSourceFile &curr = *i;
+    // if we should use the source GUI 
+    // to generate .cxx and .h files
+    if (!curr.GetWrapExclude())
       {
-      this->SetError("bad source list passed to FLTKWrapUICommand");
-      return false;
-      }
-    for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
-        i != l->second.end(); i++)
-      {
-      cmSourceFile &curr = *i;
-      // if we should wrap the class
-      if (!curr.GetWrapExclude())
-        {
-        cmSourceFile header_file;
-        cmSourceFile source_file;
-        header_file.SetName(curr.GetSourceName().c_str(), 
-                    m_Makefile->GetCurrentOutputDirectory(),
-                     "h",false);
-        source_file.SetName(curr.GetSourceName().c_str(), 
-                    m_Makefile->GetCurrentOutputDirectory(),
-                     "cxx",false);
-        std::string origname = cdir + "/" + curr.GetSourceName() + "." +
-            curr.GetSourceExtension();
-        std::string hname = header_file.GetFullPath();
-        m_WrapUserInterface.push_back(origname);
-        // add starting depends
-        source_file.GetDepends().push_back(hname);
-        source_file.GetDepends().push_back(origname);
-        header_file.GetDepends().push_back(origname);
-        m_WrapHeadersClasses.push_back(header_file);
-        m_WrapSourcesClasses.push_back(source_file);
-        m_Makefile->AddSource(header_file,
-            m_HeaderList.c_str());
-        m_Makefile->AddSource(source_file,
-            m_SourceList.c_str());
-        }
+      cmSourceFile header_file;
+      cmSourceFile source_file;
+      header_file.SetName(curr.GetSourceName().c_str(), 
+                  m_Makefile->GetCurrentOutputDirectory(),
+                   "h",false);
+      source_file.SetName(curr.GetSourceName().c_str(), 
+                  m_Makefile->GetCurrentOutputDirectory(),
+                   "cxx",false);
+      std::string origname = cdir + "/" + curr.GetSourceName() + "." +
+          curr.GetSourceExtension();
+      std::string hname = header_file.GetFullPath();
+      m_WrapUserInterface.push_back(origname);
+      // add starting depends
+      source_file.GetDepends().push_back(hname);
+      source_file.GetDepends().push_back(origname);
+      header_file.GetDepends().push_back(origname);
+      m_GeneratedHeadersClasses.push_back(header_file);
+      m_GeneratedSourcesClasses.push_back(source_file);
+      m_Makefile->AddSource(source_file,
+                            m_GeneratedSourceList.c_str());
       }
     }
   
@@ -126,7 +120,7 @@ void cmFLTKWrapUICommand::FinalPass()
 {
 
   // first we add the rules for all the .fl to .h and .cxx files
-  int lastHeadersClass = m_WrapHeadersClasses.size();
+  int lastHeadersClass = m_GeneratedHeadersClasses.size();
   std::vector<std::string> depends;
   std::string fluid_exe = "${FLTK_FLUID_EXE}";
 
@@ -134,27 +128,26 @@ void cmFLTKWrapUICommand::FinalPass()
   // wrap all the .h files
   depends.push_back(fluid_exe);
 
-  const char * GENERATED_FLTK_FILES_value=
-      m_Makefile->GetDefinition("GENERATED_FLTK_FILES");
+  const char * FLUID_GENERATED_FILES_value=
+      m_Makefile->GetDefinition("FLUID_GENERATED_FILES");
   std::string ui_list("");
-  if (GENERATED_FLTK_FILES_value!=0)
+  if (FLUID_GENERATED_FILES_value!=0)
     {
-    ui_list=ui_list+GENERATED_FLTK_FILES_value;
+    ui_list=ui_list+FLUID_GENERATED_FILES_value;
     } 
 
   for(int classNum = 0; classNum < lastHeadersClass; classNum++)
     {
     // set up .fl to .h and .cxx command
-
     std::string hres = m_Makefile->GetCurrentOutputDirectory();
     hres += "/";
-    hres += m_WrapHeadersClasses[classNum].GetSourceName() + "." +
-        m_WrapHeadersClasses[classNum].GetSourceExtension();
+    hres += m_GeneratedHeadersClasses[classNum].GetSourceName() + "." +
+        m_GeneratedHeadersClasses[classNum].GetSourceExtension();
 
     std::string cxxres = m_Makefile->GetCurrentOutputDirectory();
     cxxres += "/";
-    cxxres += m_WrapSourcesClasses[classNum].GetSourceName() + "." +
-        m_WrapSourcesClasses[classNum].GetSourceExtension();
+    cxxres += m_GeneratedSourcesClasses[classNum].GetSourceName() + "." +
+        m_GeneratedSourcesClasses[classNum].GetSourceExtension();
 
     ui_list = ui_list + " " + hres + " " + cxxres;
     
@@ -169,11 +162,11 @@ void cmFLTKWrapUICommand::FinalPass()
 
     m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
                                  fluid_exe.c_str(), cxxargs, depends, 
-                                 cxxres.c_str(), m_LibraryName.c_str());
+                                 cxxres.c_str(), m_GeneratedSourceList.c_str());
 
     }
 
-  m_Makefile->AddDefinition("GENERATED_FLTK_FILES",ui_list.c_str());
+  m_Makefile->AddDefinition("FLUID_GENERATED_FILES",ui_list.c_str());
 
 }
 
