@@ -98,6 +98,10 @@ public:
     {
       cmSystemTools::s_FatalErrorOccured = true;
     }
+  static void SetErrorOccured()
+    {
+      cmSystemTools::s_ErrorOccured = true;
+    }
  ///! Return true if there was an error at any point.
   static bool GetFatalErrorOccured() 
     {

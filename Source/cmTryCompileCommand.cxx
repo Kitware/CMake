@@ -217,10 +217,17 @@ int cmTryCompileCommand::CoreTryCompileCode(
       }
     }
   
+  bool erroroc = cmSystemTools::GetErrorOccuredFlag();
+  cmSystemTools::ResetErrorOccuredFlag();
   std::string output;
   // actually do the try compile now that everything is setup
   int res = mf->TryCompile(sourceDirectory, binaryDirectory,
                            projectName, targetName, &cmakeFlags, &output);
+  
+  if ( erroroc )
+    {
+    cmSystemTools::SetErrorOccured();
+    }
   
   // set the result var to the return value to indicate success or failure
   mf->AddCacheDefinition(argv[0].c_str(), (res == 0 ? "TRUE" : "FALSE"),
