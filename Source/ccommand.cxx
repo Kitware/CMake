@@ -93,10 +93,12 @@ int main(int ac, char** av)
       time(&time_start);
       clock_start = clock();
       
-      cmSystemTools::RunCommand(command.c_str(), output, 0, false);
+      cmSystemTools::RunCommand(command.c_str(), output, 0, true);
 
       clock_finish = clock();
       time(&time_finish);
+
+      std::cout << output.c_str();
 
       double clocks_per_sec = (double)CLOCKS_PER_SEC;
       std::cout << "Elapsed time: " 
