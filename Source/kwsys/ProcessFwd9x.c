@@ -21,6 +21,9 @@ PURPOSE.  See the above copyright notices for more information.
   Win32 implementation file for details.
 */
 
+#ifdef _MSC_VER
+#pragma warning (push, 1)
+#endif
 #include <windows.h>
 #include <stdio.h>
 
@@ -121,7 +124,7 @@ int main()
   if(waitResult == WAIT_OBJECT_0)
     {
     /* We were asked to kill the child.  */
-    TerminateProcess(pi.hProcess, -1);
+    TerminateProcess(pi.hProcess, 255);
     WaitForSingleObject(pi.hProcess, INFINITE);
     CloseHandle(pi.hProcess);
     return 1;

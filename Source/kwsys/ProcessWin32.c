@@ -35,10 +35,18 @@ Q190351 and Q150956.
 
 */
 
+#ifdef _MSC_VER
+#pragma warning (push, 1)
+#endif
 #include <windows.h> /* Windows API */
 #include <string.h>  /* strlen, strdup */
 #include <stdio.h>   /* sprintf */
 #include <io.h>      /* _unlink */
+#ifdef _MSC_VER
+#pragma warning (pop)
+#pragma warning (disable: 4514)
+#pragma warning (disable: 4706)
+#endif
 
 /* The number of pipes for the child's output.  The standard stdout
    and stderr pipes are the first two.  One more pipe is used on Win9x
@@ -63,7 +71,7 @@ static void kwsysProcessCleanupHandle(PHANDLE h);
 static void kwsysProcessCleanup(kwsysProcess* cp, int error);
 static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
                                       kwsysProcessTime* timeoutTime);
-static int kwsysProcessGetTimeoutLeft(kwsysProcess* cp, kwsysProcessTime* timeoutTime,
+static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
                                       kwsysProcessTime* timeoutLength);
 static kwsysProcessTime kwsysProcessTimeGetCurrent();
 static DWORD kwsysProcessTimeToDWORD(kwsysProcessTime t);
@@ -156,7 +164,7 @@ struct kwsysProcess_s
   int ExitException;
   
   /* The process exit code.  */
-  int ExitCode;
+  DWORD ExitCode;
   
   /* The process return code, if any.  */
   int ExitValue;
@@ -744,7 +752,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
   int pipeId = 0;
   DWORD w;
   HANDLE events[2];
-  
+
   /* Make sure we are executing a process.  */
   if(cp->State != kwsysProcess_State_Executing || cp->Killed ||
      cp->TimeoutExpired)
@@ -758,10 +766,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
   events[1] = cp->ProcessInformation.hProcess;
   
   /* Record the time at which user timeout period starts.  */
-  if(userTimeout)
-    {
-    userStartTime = kwsysProcessTimeGetCurrent();
-    }
+  userStartTime = kwsysProcessTimeGetCurrent();
   
   /* Calculate the time at which a timeout will expire, and whether it
      is the user or process timeout.  */
@@ -779,7 +784,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
       }
     
     /* Setup a timeout if required.  */
-    if(kwsysProcessGetTimeoutLeft(cp, &timeoutTime, &timeoutLength))
+    if(kwsysProcessGetTimeoutLeft(&timeoutTime, &timeoutLength))
       {
       /* Timeout has already expired.  */
       expired = 1;
@@ -1082,7 +1087,7 @@ void kwsysProcess_Kill(kwsysProcess* cp)
   else
     {
     /* Not Windows 9x.  Just terminate the child.  */
-    TerminateProcess(cp->ProcessInformation.hProcess, -1);
+    TerminateProcess(cp->ProcessInformation.hProcess, 255);
     }
 }
 
@@ -1225,7 +1230,7 @@ int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
 /*--------------------------------------------------------------------------*/
 /* Get the length of time before the given timeout time arrives.
    Returns 1 if the time has already arrived, and 0 otherwise.  */
-int kwsysProcessGetTimeoutLeft(kwsysProcess* cp, kwsysProcessTime* timeoutTime,
+int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
                                kwsysProcessTime* timeoutLength)
 {
   if(timeoutTime->QuadPart < 0)

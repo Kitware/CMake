@@ -62,9 +62,9 @@ static const unsigned char kwsysBase64DecodeTable[256] =
 };
 
 /*--------------------------------------------------------------------------*/
-static unsigned char kwsysBase64EncodeChar(unsigned char c)
+static unsigned char kwsysBase64EncodeChar(int c)
 {
-  return kwsysBase64EncodeTable[c];
+  return kwsysBase64EncodeTable[(unsigned char)c];
 }
 
 /*--------------------------------------------------------------------------*/
@@ -176,9 +176,9 @@ int kwsysBase64_Decode3(const unsigned char *src, unsigned char *dest)
   
   /* Decode the 3 bytes */
 
-  dest[0] = ((d0 << 2) & 0xFC) | ((d1 >> 4) & 0x03);
-  dest[1] = ((d1 << 4) & 0xF0) | ((d2 >> 2) & 0x0F);
-  dest[2] = ((d2 << 6) & 0xC0) | ((d3 >> 0) & 0x3F);
+  dest[0] = (unsigned char)(((d0 << 2) & 0xFC) | ((d1 >> 4) & 0x03));
+  dest[1] = (unsigned char)(((d1 << 4) & 0xF0) | ((d2 >> 2) & 0x0F));
+  dest[2] = (unsigned char)(((d2 << 6) & 0xC0) | ((d3 >> 0) & 0x3F));
   
   /* Return the number of bytes actually decoded */
 
