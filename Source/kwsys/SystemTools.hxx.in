@@ -273,6 +273,11 @@ public:
   static kwsys_stl::string
   JoinPath(const kwsys_stl::vector<kwsys_stl::string>& components);
 
+  /**
+   * Compare a path or components of a path.
+   */
+  static bool ComparePath(const char* c1, const char* c2);
+
   ///! return path of a full filename (no trailing slashes).
   static kwsys_stl::string GetFilenamePath(const kwsys_stl::string&);
 

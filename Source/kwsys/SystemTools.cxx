@@ -1833,6 +1833,16 @@ SystemTools::JoinPath(const kwsys_stl::vector<kwsys_stl::string>& components)
   return result;
 }
 
+//----------------------------------------------------------------------------
+bool SystemTools::ComparePath(const char* c1, const char* c2)
+{
+#if defined(_WIN32) || defined(__APPLE__)
+  return SystemTools::Strucmp(c1, c2) == 0;
+#else
+  return strcmp(c1, c2) == 0;
+#endif
+}
+
 bool SystemTools::Split(const char* str, kwsys_stl::vector<kwsys_stl::string>& lines)
 {
   kwsys_stl::string data(str);
