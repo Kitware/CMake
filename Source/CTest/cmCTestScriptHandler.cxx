@@ -788,10 +788,10 @@ bool cmCTestScriptHandler::EmptyBinaryDirectory(const char *sname)
   // try to avoid deleting directories that we shouldn't
   std::string check = sname;
   check += "/CMakeCache.txt";
-  if (cmSystemTools::FileExists(check.c_str()))
+  if(cmSystemTools::FileExists(check.c_str()) &&
+     !cmSystemTools::RemoveADirectory(sname))
     {
-    cmSystemTools::RemoveADirectory(sname);
-    return true;
+    return false;
     }
-  return false;
+  return true;
 }
