@@ -970,8 +970,10 @@ bool cmSystemTools::FilesDiffer(const char* source,
     }
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-  std::ifstream finSource(source, std::ios::binary | std::ios::in);
-  std::ifstream finDestination(destination, std::ios::binary | std::ios::in);
+  std::ifstream finSource(source, 
+                          std::ios::binary | std::ios::in);
+  std::ifstream finDestination(destination, 
+                               std::ios::binary | std::ios::in);
 #else
   std::ifstream finSource(source);
   std::ifstream finDestination(destination);
@@ -982,7 +984,19 @@ bool cmSystemTools::FilesDiffer(const char* source,
     }
 
   char* source_buf = new char[statSource.st_size];
+  if (!source_buf)
+    {
+    cmSystemTools::Error("FilesDiffer failed to allocate memory for source!");
+    return false;
+    }
+
   char* dest_buf = new char[statSource.st_size];
+  if (!dest_buf)
+    {
+    cmSystemTools::Error("FilesDiffer failed to allocate memory for dest!");
+    delete [] source_buf;
+    return false;
+    }
 
   finSource.read(source_buf, statSource.st_size);
   finDestination.read(dest_buf, statSource.st_size);
@@ -990,11 +1004,16 @@ bool cmSystemTools::FilesDiffer(const char* source,
   if(statSource.st_size != finSource.gcount() ||
      statSource.st_size != finDestination.gcount())
     {
-    cmSystemTools::Error("FilesDiffer failed reading files!");
-    delete [] dest_buf;
+    char msg[256];
+    sprintf(msg, "FilesDiffer failed to read files (allocated: %lu, source: %lu, dest: %lu)", statSource.st_size, finSource.gcount(), finDestination.gcount());
+    cmSystemTools::Error(msg);
     delete [] source_buf;
+    delete [] dest_buf;
     return false;
     }
+
+  finSource.close();
+  finDestination.close();
 
   int ret = memcmp((const void*)source_buf, 
                    (const void*)dest_buf, 
@@ -1016,8 +1035,32 @@ void cmSystemTools::cmCopyFile(const char* source,
   const int bufferSize = 4096;
   char buffer[bufferSize];
 
+  // If destination is a directory, try to create a file with the same
+  // name as the source in that directory.
+
+  std::string new_destination;
+  if(cmSystemTools::FileExists(destination) &&
+     cmSystemTools::FileIsDirectory(destination))
+    {
+    new_destination = destination;
+    cmSystemTools::ConvertToUnixSlashes(new_destination);
+    new_destination += '/';
+    std::string source_name = source;
+    new_destination += cmSystemTools::GetFilenameName(source_name);
+    destination = new_destination.c_str();
+    }
+
+  // Create destination directory
+
+  std::string destination_dir = destination;
+  destination_dir = cmSystemTools::GetFilenamePath(destination_dir);
+  cmSystemTools::MakeDirectory(destination_dir.c_str());
+
+  // Open files
+
 #if defined(_WIN32) || defined(__CYGWIN__)
-  std::ifstream fin(source, std::ios::binary | std::ios::in);
+  std::ifstream fin(source, 
+                    std::ios::binary | std::ios::in);
 #else
   std::ifstream fin(source);
 #endif
@@ -1028,38 +1071,17 @@ void cmSystemTools::cmCopyFile(const char* source,
     return;
     }
 
-  // If destination is a directory, try to create a file with the same
-  // name as the source in that directory.
-
-  const char* dest = destination;
-  
-  std::string new_destination;
-  if(cmSystemTools::FileExists(destination) &&
-     cmSystemTools::FileIsDirectory(destination))
-    {
-    new_destination = destination;
-    cmSystemTools::ConvertToUnixSlashes(new_destination);
-    new_destination += '/';
-    std::string source_name = source;
-    new_destination += cmSystemTools::GetFilenameName(source_name);
-    dest = new_destination.c_str();
-    }
-
-  // Create destination directory
-
-  std::string destination_dir = dest;
-  destination_dir = cmSystemTools::GetFilenamePath(destination_dir);
-  cmSystemTools::MakeDirectory(destination_dir.c_str());
-
 #if defined(_WIN32) || defined(__CYGWIN__)
-  std::ofstream fout(dest, std::ios::binary | std::ios::out | std::ios::trunc);
+  std::ofstream fout(destination, 
+                     std::ios::binary | std::ios::out | std::ios::trunc);
 #else
-  std::ofstream fout(dest, std::ios::out | std::ios::trunc);
+  std::ofstream fout(destination, 
+                     std::ios::out | std::ios::trunc);
 #endif
   if(!fout)
     {
     cmSystemTools::Error("CopyFile failed to open output file \"",
-                         dest, "\"");
+                         destination, "\"");
     return;
     }
   
@@ -1075,6 +1097,25 @@ void cmSystemTools::cmCopyFile(const char* source,
       {
       fout.write(buffer, fin.gcount());
       }
+    }
+
+  fin.close();
+  fout.close();
+
+  // More checks
+
+  struct stat statSource, statDestination;
+  if (stat(source, &statSource) != 0 ||
+      stat(destination, &statDestination) != 0)
+    {
+    cmSystemTools::Error("CopyFile failed to copy files!");
+    }
+
+  if (statSource.st_size != statDestination.st_size)
+    {
+    char msg[256];
+    sprintf(msg, "CopyFile failed to copy files (sizes differ, source: %lu, dest: %lu)", statSource.st_size, statDestination.st_size);
+    cmSystemTools::Error(msg);
     }
 }
 
