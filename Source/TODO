@@ -1,5 +1,6 @@
-link flags
-.def file in link shared 
+HP cc is used to link execuables
+ld is used to link shared libraries built with c, the rpath is shared
+if ld, you have to remove the -Wl,+b and just have a +b
 
 
 CMAKE_CXX_FLAGS are used to link executables
