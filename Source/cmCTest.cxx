@@ -3731,7 +3731,7 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
     ctestRoot = new char [cmSystemTools::GetFilenamePath(srcDir).size()+1];
     strcpy(ctestRoot,cmSystemTools::GetFilenamePath(srcDir).c_str());
     }
-  
+
   // now that we have done most of the error checking finally run the
   // dashboard, we may be asked to repeatedly run this dashboard, such as
   // for a continuous
@@ -3786,6 +3786,8 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
   return returnValue;
 }
 
+// this function (and the one above it) is too long and will soon be
+// refactored into a seperate class for processing the -S functionality.
 int cmCTest::RunConfigurationDashboard(cmMakefile *mf, 
                                        const char *srcDir, const char *binDir,
                                        const char *ctestRoot,
@@ -3800,6 +3802,26 @@ int cmCTest::RunConfigurationDashboard(cmMakefile *mf,
   int retVal = 0;
   bool res; 
 
+  // make sure the src directory is there, if it isn't then we might be able
+  // to check it out from cvs
+  if (!cmSystemTools::FileExists(srcDir) && cvsCheckOut)
+    {
+    // we must now checkout the src dir
+    output = "";
+    if ( m_Verbose )
+      {
+      std::cerr << "Run cvs: " << cvsCheckOut << std::endl;
+      }
+    res = cmSystemTools::RunSingleCommand(cvsCheckOut, &output, 
+                                          &retVal, ctestRoot,
+                                          m_Verbose, 0 /*m_TimeOut*/);
+    if (!res || retVal != 0)
+      {
+      cmSystemTools::Error("Unable to perform cvs checkout ");    
+      return 6;
+      }
+    }
+  
   // compute the backup names
   std::string backupSrcDir = srcDir;
   backupSrcDir += "_CMakeBackup";
