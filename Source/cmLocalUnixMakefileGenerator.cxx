@@ -1951,7 +1951,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       cmCustomCommand *c = (*i)->GetCustomCommand();
       // escape spaces and convert to native slashes path for
       // the command
-      const char* comment = c->GetComment().c_str();
+      std::string comment = c->GetComment();
       std::string command = c->GetCommand();
       cmSystemTools::ReplaceString(command, "/./", "/");
       command = cmSystemTools::ConvertToOutputPath(command.c_str());
@@ -1993,7 +1993,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       if (processedOutputs.find(c->GetOutput()) == processedOutputs.end())
         {
         this->OutputMakeRule(fout,
-                             (*comment?comment:"Custom command"),
+                             (comment.size()?comment.c_str():"Custom command"),
                              c->GetOutput().c_str(),
                              depends.c_str(),
                              command.c_str());
