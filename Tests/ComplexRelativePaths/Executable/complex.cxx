@@ -136,6 +136,7 @@ int main()
   cmFailed("CMake CMAKE_CXX_FLAGS is not being passed to the compiler!");
 #else
   cmPassed("CMake CMAKE_CXX_FLAGS is being passed to the compiler.");
+#endif
   // ----------------------------------------------------------------------
   // Test ADD_DEFINITIONS
 

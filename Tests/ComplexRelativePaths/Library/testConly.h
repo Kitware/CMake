@@ -5,7 +5,7 @@
 #  define CMakeTest_EXPORT __declspec(dllimport)
 #endif
 #else
-// unix needs nothing
+/* unix needs nothing */
 #define CMakeTest_EXPORT
 #endif
 
