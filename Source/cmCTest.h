@@ -21,6 +21,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmListFileCache.h"
+#include <time.h>
 
 class cmMakefile;
 class cmCTestBuildHandler;
