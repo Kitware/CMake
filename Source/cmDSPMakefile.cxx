@@ -393,10 +393,10 @@ void cmDSPMakefile::SetBuildType(BuildType b, const char *libName)
       m_DSPFooterTemplate += "/EXEFooter.dsptemplate";
       break;
     case WIN32_EXECUTABLE:
-      m_DSPHeaderTemplate = m_Makefile->GetHomeDirectory();
-      m_DSPHeaderTemplate += "/CMake/Source/EXEWinHeader.dsptemplate";
-      m_DSPFooterTemplate = m_Makefile->GetHomeDirectory();
-      m_DSPFooterTemplate += "/CMake/Source/EXEFooter.dsptemplate";
+      m_DSPHeaderTemplate = root;
+      m_DSPHeaderTemplate += "/EXEWinHeader.dsptemplate";
+      m_DSPFooterTemplate = root;
+      m_DSPFooterTemplate += "/EXEFooter.dsptemplate";
       break;
     case UTILITY:
       m_DSPHeaderTemplate = root;
