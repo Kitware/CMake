@@ -511,13 +511,14 @@ public:
    * expanded to match autoconf style expansions.
    */
   const char *ExpandVariablesInString(std::string& source) const;
-  const char *ExpandVariablesInString(std::string& source, bool escapeQuotes) const;
+  const char *ExpandVariablesInString(std::string& source, bool escapeQuotes,
+                                      bool atOnly = false) const;
 
   /**
    * Remove any remaining variables in the string. Anything with ${var} or
    * @var@ will be removed.  
    */
-  void RemoveVariablesInString(std::string& source) const;
+  void RemoveVariablesInString(std::string& source, bool atOnly = false) const;
 
   /**
    * Expand variables in the makefiles ivars such as link directories etc

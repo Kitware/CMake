@@ -77,7 +77,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "CONFIGURE_FILE(InputFile OutputFile [COPYONLY] [ESCAPE_QUOTES] [IMMEDIATE])\n"
+        "CONFIGURE_FILE(InputFile OutputFile [COPYONLY] [ESCAPE_QUOTES] [IMMEDIATE] [@ONLY])\n"
 	"The Input and Ouput files have to have full paths.\n"
 	"They can also use variables like CMAKE_BINARY_DIR,CMAKE_SOURCE_DIR. "
         "This command replaces any variables in the input file with their "
@@ -87,7 +87,9 @@ public:
         "passed in then any substitued quotes will be C style escaped. "
         "If IMMEDIATE is specified, then the file will be configured with "
         "the current values of CMake variables instead of waiting until the "
-        "end of CMakeLists processing.";
+        "end of CMakeLists processing.  If @ONLY is present, only variables "
+        "of the form @var@ will be replaces and ${var} will be ignored. "
+        "This is useful for configuring tcl scripts that use ${var}.";
     }
 
   virtual void FinalPass();
@@ -99,6 +101,7 @@ private:
   bool m_CopyOnly;
   bool m_EscapeQuotes;
   bool m_Immediate;
+  bool m_AtOnly;
 };
 
 

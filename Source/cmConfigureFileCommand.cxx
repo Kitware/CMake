@@ -53,6 +53,7 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args)
   m_CopyOnly = false;
   m_EscapeQuotes = false;
   m_Immediate = false;
+  m_AtOnly = false;
   for(unsigned int i=2;i < args.size();++i)
     {
     if(args[i] == "COPYONLY")
@@ -62,6 +63,10 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args)
     else if(args[i] == "ESCAPE_QUOTES")
       {
       m_EscapeQuotes = true;
+      }
+    else if(args[i] == "@ONLY")
+      {
+      m_AtOnly = true;
       }
     else if(args[i] == "IMMEDIATE")
       {
@@ -136,8 +141,8 @@ void cmConfigureFileCommand::ConfigureFile()
       if(fin)
         {
         inLine = buffer;
-        m_Makefile->ExpandVariablesInString(inLine, m_EscapeQuotes);
-        m_Makefile->RemoveVariablesInString(inLine);
+        m_Makefile->ExpandVariablesInString(inLine, m_EscapeQuotes, m_AtOnly);
+        m_Makefile->RemoveVariablesInString(inLine, m_AtOnly);
         // look for special cmakedefine symbol and handle it
         // is the symbol defined
         if (cmdefine.find(inLine))

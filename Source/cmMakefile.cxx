@@ -884,7 +884,8 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source) const
 }
 
 const char *cmMakefile::ExpandVariablesInString(std::string& source,
-                                         bool escapeQuotes) const
+                                                bool escapeQuotes,
+                                                bool atOnly) const
 {
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
   // in the m_Definitions map, if not found in the map, nothing is expanded.
@@ -892,7 +893,15 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   // the current environment variables.
 
   // start by look for $ or @ in the string
-  std::string::size_type markerPos = source.find_first_of("$@");
+  std::string::size_type markerPos;
+  if(atOnly)
+    {
+    markerPos = source.find_first_of("@");
+    }
+  else
+    {
+    markerPos = source.find_first_of("$@");
+    }
   // if not found, or found as the last character, then leave quickly as
   // nothing needs to be expanded
   if((markerPos == std::string::npos) || (markerPos >= source.size()-1))
@@ -910,7 +919,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
     result += source.substr(currentPos, markerPos - currentPos);
     char endVariableMarker;     // what is the end of the variable @ or }
     int markerStartSize = 1;    // size of the start marker 1 or 2 or 5
-    if(source[markerPos] == '$')
+    if(!atOnly && source[markerPos] == '$')
       {
       // ${var} case
       if(source[markerPos+1] == '{')
@@ -1017,27 +1026,40 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
         currentPos = endVariablePos+1;
         }
       }
-    markerPos = source.find_first_of("$@", currentPos);
+    if(atOnly)
+      {
+      markerPos = source.find_first_of("@", currentPos);
+      }
+    else
+      {
+      markerPos = source.find_first_of("$@", currentPos);
+      }
     }
   result += source.substr(currentPos); // pick up the rest of the string
   source = result;
   return source.c_str();
 }
 
-void cmMakefile::RemoveVariablesInString(std::string& source) const
+void cmMakefile::RemoveVariablesInString(std::string& source,
+                                         bool atOnly) const
 {
-  cmRegularExpression var("(\\${[A-Za-z_0-9]*})");
-  while (var.find(source))
+  if(!atOnly)
     {
-    source.erase(var.start(),var.end() - var.start());
+    cmRegularExpression var("(\\${[A-Za-z_0-9]*})");
+    while (var.find(source))
+      {
+      source.erase(var.start(),var.end() - var.start());
+      }
     }
-
-  cmRegularExpression varb("(\\$ENV{[A-Za-z_0-9]*})");
-  while (varb.find(source))
+  
+  if(!atOnly)
     {
-    source.erase(varb.start(),varb.end() - varb.start());
+    cmRegularExpression varb("(\\$ENV{[A-Za-z_0-9]*})");
+    while (varb.find(source))
+      {
+      source.erase(varb.start(),varb.end() - varb.start());
+      }
     }
-
   cmRegularExpression var2("(@[A-Za-z_0-9]*@)");
   while (var2.find(source))
     {
