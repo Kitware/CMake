@@ -37,7 +37,7 @@ void Ask(const char* key, cmCacheManager::CacheEntry & entry)
 }
 
 
-main(int ac, char** av)
+int main(int ac, char** av)
 {
   std::vector<std::string> args;
   for(int j=0; j < ac; ++j)
@@ -105,4 +105,5 @@ main(int ac, char** av)
     }
   while(asked);
   std::cout << "CMake complete, run make to build project.\n";
+  return 0;
 }

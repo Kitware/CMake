@@ -315,14 +315,14 @@ void cmBorlandMakefileGenerator2::OutputSharedLibraryRule(std::ostream& fout,
   command += "-e";
   command += cmSystemTools::EscapeSpaces(dllpath.c_str());
   command += " ";
-  // then list of object files
-  command += " $(" + std::string(name) + "_SRC_OBJS) ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   linklibs << std::ends;
   // then the linker options -L and libraries (any other order will fail!)
   command += linklibs.str();
   delete [] linklibs.str();
+  // then list of object files
+  command += " $(" + std::string(name) + "_SRC_OBJS) ";
   std::string command2 = "implib -w ";
   command2 += libpath + " " + dllpath;
   const std::vector<cmSourceFile>& sources = t.GetSourceFiles();
