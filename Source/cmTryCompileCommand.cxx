@@ -33,7 +33,8 @@ int cmTryCompileCommand::CoreTryCompileCode(
   std::string tmpString;
 
   // do we have a srcfile signature
-  if (argv.size() == 3 || argv[3] == "CMAKE_FLAGS" || argv[3] == "COMPILE_DEFINITIONS")
+  if (argv.size() == 3 || argv[3] == "CMAKE_FLAGS" || argv[3] == "COMPILE_DEFINITIONS" ||
+      argv[3] == "OUTPUT_VARIABLE")
     {
     srcFileSignature = true;
     }
@@ -44,11 +45,29 @@ int cmTryCompileCommand::CoreTryCompileCode(
     {
     if (argv[i] == "CMAKE_FLAGS")
       {
-      for (; i < argv.size() && argv[i] != "COMPILE_DEFINITIONS"; 
+      for (; i < argv.size() && argv[i] != "COMPILE_DEFINITIONS" && 
+             argv[i] != "OUTPUT_VARIABLE"; 
            ++i)
         {
         cmakeFlags.push_back(argv[i]);
         }
+      break;
+      }
+    }
+
+  // look for OUTPUT_VARIABLE and store them
+  std::string outputVariable;
+  for (i = 3; i < argv.size(); ++i)
+    {
+    if (argv[i] == "OUTPUT_VARIABLE")
+      {
+      if ( argv.size() <= (i+1) )
+        {
+        cmSystemTools::Error(
+          "OUTPUT_VARIABLE specified but there is no variable");
+        return -1;
+        }
+      outputVariable = argv[i+1];
       break;
       }
     }
@@ -66,7 +85,8 @@ int cmTryCompileCommand::CoreTryCompileCode(
           "COMPILE_FLAGS specified on a srcdir type TRY_COMPILE");
         return -1;
         }
-      for (i = i + 1; i < argv.size() && argv[i] != "CMAKE_FLAGS"; 
+      for (i = i + 1; i < argv.size() && argv[i] != "CMAKE_FLAGS" && 
+             argv[i] != "OUTPUT_VARIABLE"; 
            ++i)
         {
         compileFlags.push_back(argv[i]);
@@ -144,12 +164,18 @@ int cmTryCompileCommand::CoreTryCompileCode(
       }
     }
   
+  std::string output;
   // actually do the try compile now that everything is setup
   int res = mf->TryCompile(sourceDirectory, binaryDirectory,
-                           projectName, targetName, &cmakeFlags);
+                           projectName, targetName, &cmakeFlags, &output);
   
   // set the result var to the return value to indicate success or failure
   mf->AddDefinition(argv[0].c_str(), (res == 0 ? "TRUE" : "FALSE"));
+
+  if ( outputVariable.size() > 0 )
+    {
+    mf->AddDefinition(outputVariable.c_str(), output.c_str());
+    }
   
   // if They specified clean then we clean up what we can
   if (srcFileSignature && clean)

@@ -141,7 +141,8 @@ void cmGlobalGenerator::LocalGenerate()
 }
 
 int cmGlobalGenerator::TryCompile(const char *, const char *bindir, 
-                                  const char *, const char *target)
+                                  const char *, const char *target,
+                                  std::string *output)
 {
   // now build the test
   std::string makeCommand = 
@@ -157,7 +158,6 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
   /**
    * Run an executable command and put the stdout in output.
    */
-  std::string output;
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(bindir);
   
@@ -172,7 +172,8 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     makeCommand += " all";
     }
   int retVal;
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output, retVal, 0, false))
+  
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal, 0, false))
     {
     cmSystemTools::Error("Generator: execution of make failed.");
     // return to the original directory

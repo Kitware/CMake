@@ -1340,7 +1340,8 @@ void cmMakefile::ExpandSourceListArguments(
 
 int cmMakefile::TryCompile(const char *srcdir, const char *bindir, 
                            const char *projectName, const char *targetName,
-                           const std::vector<std::string> *cmakeArgs)
+                           const std::vector<std::string> *cmakeArgs,
+                           std::string *output)
 {
   // does the binary directory exist ? If not create it...
   if (!cmSystemTools::FileIsDirectory(bindir))
@@ -1409,7 +1410,8 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   int ret = 
     m_LocalGenerator->GetGlobalGenerator()->TryCompile(srcdir,bindir,
                                                        projectName, 
-                                                       targetName);
+                                                       targetName,
+                                                       output);
 
   cmSystemTools::ChangeDirectory(cwd.c_str());
   return ret;
