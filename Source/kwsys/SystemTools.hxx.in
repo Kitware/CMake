@@ -177,6 +177,17 @@ public:
   static kwsys_stl::string AddSpaceBetweenCapitalizedWords(
     const kwsys_stl::string&);
 
+  /** 
+   * Append two or more strings and produce new one.
+   * Programmer must 'delete []' the resulting string, which was allocated 
+   * with 'new'. 
+   * Return 0 if inputs are empty or there was an error
+   */
+  static char* AppendStrings(
+    const char* str1, const char* str2);
+  static char* AppendStrings(
+    const char* str1, const char* str2, const char* str3);
+
   /** -----------------------------------------------------------------
    *               Filename Manipulation Routines
    *  -----------------------------------------------------------------

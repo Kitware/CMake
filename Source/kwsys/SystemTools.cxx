@@ -841,6 +841,55 @@ kwsys_stl::string SystemTools::AddSpaceBetweenCapitalizedWords(
   return n;
 }
 
+char* SystemTools::AppendStrings(const char* str1, const char* str2)
+{
+  if (!str1)
+    {
+    return SystemTools::DuplicateString(str2);
+    }
+  if (!str2)
+    {
+    return SystemTools::DuplicateString(str1);
+    }
+  size_t len1 = strlen(str1);
+  char *newstr = new char[len1 + strlen(str2) + 1];
+  if (!newstr)
+    {
+    return 0;
+    }
+  strcpy(newstr, str1);
+  strcat(newstr + len1, str2);
+  return newstr;
+}
+
+char* SystemTools::AppendStrings(
+  const char* str1, const char* str2, const char* str3)
+{
+  if (!str1)
+    {
+    return SystemTools::AppendStrings(str2, str3);
+    }
+  if (!str2)
+    {
+    return SystemTools::AppendStrings(str1, str3);
+    }
+  if (!str3)
+    {
+    return SystemTools::AppendStrings(str1, str2);
+    }
+
+  size_t len1 = strlen(str1), len2 = strlen(str2);
+  char *newstr = new char[len1 + len2 + strlen(str3) + 1];
+  if (!newstr)
+    {
+    return 0;
+    }
+  strcpy(newstr, str1);
+  strcat(newstr + len1, str2);
+  strcat(newstr + len1 + len2, str3);
+  return newstr;
+}
+
 // Return a lower case string 
 kwsys_stl::string SystemTools::LowerCase(const kwsys_stl::string& s)
 {
