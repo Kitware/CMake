@@ -27,7 +27,7 @@ bool cmUnixDefinesCommand::Invoke(std::vector<std::string>& args)
 {
   if(args.size() < 1 )
     {
-    this->SetError("Win32Defines called with incorrect number of arguments");
+    this->SetError("called with incorrect number of arguments");
     return false;
     }
   for(std::vector<std::string>::iterator i = args.begin();
