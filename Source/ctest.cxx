@@ -143,6 +143,10 @@ bool ctest::SetTest(const char* ttype)
     {
     m_Tests[ctest::UPDATE_TEST] = 1;
     }
+  else if ( cmSystemTools::LowerCase(ttype) == "configure" )
+    {
+    m_Tests[ctest::CONFIGURE_TEST] = 1;
+    }
   else if ( cmSystemTools::LowerCase(ttype) == "build" )
     {
     m_Tests[ctest::BUILD_TEST] = 1;
@@ -281,7 +285,7 @@ void ctest::UpdateDirectory()
     }
 
   std::string sourceDirectory = m_DartConfiguration["SourceDirectory"];
-  if ( cvsOptions.size() == 0 )
+  if ( sourceDirectory.size() == 0 )
     {
     std::cerr << "Cannot find SourceDirectory  key in the DartConfiguration.tcl" << std::endl;
     return;
@@ -293,7 +297,34 @@ void ctest::UpdateDirectory()
   int retVal;
   bool res = cmSystemTools::RunCommand(command.c_str(), output, 
                                        retVal, sourceDirectory.c_str(),
-                                       true);
+                                       m_Verbose);
+  if (! res || retVal )
+    {
+    std::cerr << "Error(s) when updating the project" << std::endl;
+    }
+}
+
+void ctest::ConfigureDirectory()
+{
+  std::string cCommand = m_DartConfiguration["ConfigureCommand"];
+  if ( cCommand.size() == 0 )
+    {
+    std::cerr << "Cannot find ConfigureCommand key in the DartConfiguration.tcl" << std::endl;
+    return;
+    }
+
+  std::string buildDirectory = m_DartConfiguration["BuildDirectory"];
+  if ( buildDirectory.size() == 0 )
+    {
+    std::cerr << "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl;
+    return;
+    }
+
+  std::string output;
+  int retVal;
+  bool res = cmSystemTools::RunCommand(cCommand.c_str(), output, 
+                                       retVal, buildDirectory.c_str(),
+                                       m_Verbose);
   if (! res || retVal )
     {
     std::cerr << "Error(s) when updating the project" << std::endl;
@@ -308,10 +339,18 @@ void ctest::BuildDirectory()
     std::cerr << "Cannot find MakeCommand key in the DartConfiguration.tcl" << std::endl;
     return;
     }
+  std::string buildDirectory = m_DartConfiguration["BuildDirectory"];
+  if ( buildDirectory.size() == 0 )
+    {
+    std::cerr << "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl;
+    return;
+    }
+
   std::string output;
   int retVal;
   bool res = cmSystemTools::RunCommand(makeCommand.c_str(), output, 
-                                       retVal, 0, true);
+                                       retVal, buildDirectory.c_str(), 
+                                       m_Verbose);
   if (! res || retVal )
     {
     std::cerr << "Error(s) when building project" << std::endl;
@@ -576,6 +615,10 @@ int ctest::ProcessTests()
   if ( m_Tests[UPDATE_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateDirectory();
+    }
+  if ( m_Tests[CONFIGURE_TEST] || m_Tests[ALL_TEST] )
+    {
+    this->ConfigureDirectory();
     }
   if ( m_Tests[BUILD_TEST] || m_Tests[ALL_TEST] )
     {

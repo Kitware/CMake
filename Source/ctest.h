@@ -50,6 +50,11 @@ public:
   void UpdateDirectory();
 
   /**
+   * Do configure the project
+   */
+  void ConfigureDirectory();
+
+  /**
    * Run the test for a directory and any subdirectories
    */
   void ProcessDirectory(std::vector<std::string> &passed, 
@@ -90,6 +95,7 @@ private:
   enum {
     FIRST_TEST    = 0,
     UPDATE_TEST,
+    CONFIGURE_TEST,
     BUILD_TEST,
     TEST_TEST,
     COVERAGE_TEST,
