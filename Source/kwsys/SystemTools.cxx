@@ -692,7 +692,6 @@ void SystemTools::ConvertToUnixSlashes(kwsys_std::string& path)
     }
   
   // if there is a /tmp_mnt in a path get rid of it!
-  // stupid sgi's 
   if(path.find("/tmp_mnt") == 0)
     {
     path = path.substr(8);
@@ -1301,6 +1300,11 @@ kwsys_std::string SystemTools::CollapseFullPath(const char* in_relative,
   else
     {
     newDir = SystemTools::GetCurrentWorkingDirectory();
+    }
+  // if there is a /tmp_mnt in a path get rid of it!
+  if(newDir.find("/tmp_mnt") == 0)
+    {
+    newDir = newDir.substr(8);
     }
 #endif
   
