@@ -42,7 +42,8 @@ void cmGlobalVisualStudio6Generator::EnableLanguage(const char*,
 int cmGlobalVisualStudio6Generator::TryCompile(const char *, 
                                                const char *bindir, 
                                                const char *projectName,
-                                               const char *targetName)
+                                               const char *targetName,
+                                               std::string *output)
 {
   // now build the test
   std::string makeCommand = 
@@ -60,8 +61,6 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
   /**
    * Run an executable command and put the stdout in output.
    */
-  std::string output;
-
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(bindir);
 
@@ -88,7 +87,7 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
   makeCommand += " - Debug\"";
   
   int retVal;
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output, retVal))
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal))
     {
     cmSystemTools::Error("Generator: execution of msdev failed.");
     // return to the original directory

@@ -48,7 +48,8 @@ public:
    * loaded commands, not as part of the usual build process.
    */
   virtual int TryCompile(const char *srcdir, const char *bindir,
-                         const char *projectName, const char *targetName);
+                         const char *projectName, const char *targetName,
+                         std::string *output);
 
   /**
    * Generate the all required files for building this project/tree. This
