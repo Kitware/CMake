@@ -633,6 +633,8 @@ void CMakeSetupDialog::OnChangeWhereSource()
 // callback for changing the build directory
 void CMakeSetupDialog::OnChangeWhereBuild() 
 {
+  this->UpdateData();
+
   // The build dir has changed, check if there is a cache, and 
   // grab the source dir from it
 
@@ -654,7 +656,6 @@ void CMakeSetupDialog::OnChangeWhereBuild()
     this->OnChangeWhereSource();
     }
 
-  this->UpdateData();
   m_CacheEntriesList.RemoveAll();
   m_CacheEntriesList.ShowWindow(SW_SHOW);
   this->LoadCacheFromDiskToGUI();
