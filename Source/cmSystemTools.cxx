@@ -176,7 +176,7 @@ void cmSystemTools::ReplaceString(std::string& source,
     }
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
 
 // Get the data of key value.
 // Example : 
@@ -255,7 +255,7 @@ bool ReadAValue(std::string &res, const char *key)
 // write the result into source.
 void cmSystemTools::ExpandRegistryValues(std::string& source)
 {
-#if _WIN32  
+#if defined(_WIN32) && !defined(__CYGWIN__)
   cmRegularExpression regEntry("\\[(HKEY[A-Za-z0-9_~\\:\\-\\(\\)\\.]*)\\]");
   
   // check for black line or comment
