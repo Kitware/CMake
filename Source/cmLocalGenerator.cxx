@@ -145,7 +145,6 @@ void cmLocalGenerator::GenerateInstallRules()
           std::string libname = libOutPath;
           libname += cmSystemTools::GetFilenameWithoutExtension(fname);
           libname += ".lib";
-          std::cout << "This is dll: " << libname << std::endl;
           files = libname.c_str();
           this->AddInstallRule(fout, dest, cmTarget::STATIC_LIBRARY, files, true);
           std::string dlldest = prefix + l->second.GetRuntimeInstallPath();
