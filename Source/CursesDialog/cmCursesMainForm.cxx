@@ -665,8 +665,10 @@ int cmCursesMainForm::Configure()
     cmSystemTools::ResetErrorOccuredFlag();
     int xx,yy;
     getmaxyx(stdscr, yy, xx);
-    cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(m_Errors,
-                                                                "Errors occurred during the last pass.");
+    cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
+      m_Errors,
+      cmSystemTools::GetErrorOccuredFlag() ? "Errors occurred during the last pass." :
+                                             "CMake produced the following output.");
     CurrentForm = msgs;
     msgs->Render(1,1,xx,yy);
     msgs->HandleInput();
