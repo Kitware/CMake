@@ -44,7 +44,12 @@ static std::string CleanString(std::string str)
 static std::string CurrentTime()
 {
   time_t currenttime = time(0);
-  return ::CleanString(ctime(&currenttime));
+  struct tm* t = localtime(&currenttime);
+  //return ::CleanString(ctime(&currenttime));
+  char current_time[1024];
+  strftime(current_time, 1000, "%a %b %e %T %Z %Y", t);
+  //std::cout << "Current_Time: " << current_time << std::endl;
+  return ::CleanString(current_time);
 }
 
 static const char* cmCTestErrorMatches[] = {
@@ -1399,7 +1404,15 @@ int cmCTest::SubmitResults()
       m_DartConfiguration["DropSitePassword"] + "@" + 
       m_DartConfiguration["DropSite"] + 
       m_DartConfiguration["DropLocation"];
-    submit.SubmitUsingFTP(m_ToplevelPath+"/Testing/CDart", files, prefix, url);
+    if ( !submit.SubmitUsingFTP(m_ToplevelPath+"/Testing/CDart", files, prefix, url) )
+      {
+      return 0;
+      }
+    if ( !submit.TriggerUsingHTTP(files, prefix, m_DartConfiguration["TriggerSite"]) )
+      {
+      return 0;
+      }
+    return 1;
     }
   else
     {
