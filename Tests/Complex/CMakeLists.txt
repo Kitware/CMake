@@ -1,6 +1,7 @@
 #
 # A more complex test case
 #
+SET(CMAKE_BACKWARDS_COMPATIBILITY 1.2)
 PROJECT (Complex)
 
 #
