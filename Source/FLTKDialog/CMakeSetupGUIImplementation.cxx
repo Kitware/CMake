@@ -456,10 +456,7 @@ CMakeSetupGUIImplementation
                                        fltk::PropertyList::EDIT,"");
         break;
       case cmCacheManager::INTERNAL:
-        m_CacheEntriesList.AddProperty(key,
-                                       value.m_Value.c_str(),
-                                       value.m_HelpString.c_str(),
-                                       fltk::PropertyList::EDIT,"");
+        // These entries should not be seen by the user
         break;
       }
 
