@@ -101,8 +101,8 @@ static const cmDocumentationEntry cmDocumentationSeeAlso[] =
 int main (int argc, char *argv[])
 {
   cmSystemTools::EnableMSVCDebugHook();
-  cmSystemTools::PutEnv("DART_TEST_FROM_DART");
-  cmSystemTools::PutEnv("DASHBOARD_TEST_FROM_CTEST");
+  cmSystemTools::PutEnv("DART_TEST_FROM_DART=1");
+  cmSystemTools::PutEnv("DASHBOARD_TEST_FROM_CTEST=1");
   int nocwd = 0;
 
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
