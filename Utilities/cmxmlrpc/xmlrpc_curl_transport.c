@@ -134,6 +134,7 @@ initWindowsStuff(xmlrpc_env * const envP) {
     wVersionRequested = MAKEWORD(1, 1);
     
     err = WSAStartup(wVersionRequested, &wsaData);
+    (void)err;
     if (LOBYTE(wsaData.wVersion) != 1 || 
         HIBYTE( wsaData.wVersion) != 1) {
         /* Tell the user that we couldn't find a useable */ 
@@ -597,6 +598,7 @@ finishRpc(struct list_head * const headerP,
 #endif
         
         rpcP->threadExists = FALSE;
+        (void)result;
     }
 
     XMLRPC_MEMBLOCK_FREE(char, rpcP->responseXmlP);
