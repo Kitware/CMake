@@ -23,7 +23,7 @@
 
 cmCTestSubmit::cmCTestSubmit() : m_HTTPProxy(), m_FTPProxy()
 {
-  std::cout << "Setup proxy" << endl;
+  std::cout << "Setup proxy" << std::endl;
   m_HTTPProxy = "";
   m_HTTPProxyType = 0;
   if ( getenv("HTTP_PROXY") )

@@ -436,7 +436,7 @@
 #cmakedefine PACKAGE            "${PACKAGE}"
 
 /* Define to the address where bug reports for this package should be sent. */
-#cmakedefine PACKAGE_BUGREPORT          ${PACKAGE_BUGREPORT}
+#cmakedefine PACKAGE_BUGREPORT          "${PACKAGE_BUGREPORT}"
 
 /* Define to the full name of this package. */
 #cmakedefine PACKAGE_NAME               "${PACKAGE_NAME}"
