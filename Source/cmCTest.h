@@ -20,6 +20,7 @@
 
 
 #include "cmStandardIncludes.h"
+#include "cmListFileCache.h"
 
 class cmMakefile;
 
@@ -96,8 +97,7 @@ public:
    */
   void ProcessDirectory(tm_VectorOfStrings &passed, 
                         tm_VectorOfStrings &failed,
-                        bool memcheck,
-                        std::ostream* logfile);
+                        bool memcheck);
 
   /**
    * Find the executable for a test
@@ -243,6 +243,15 @@ private:
     std::string m_PostContext;
   };
 
+  typedef std::vector<cmListFileArgument> tm_VectorOfListFileArgs;
+  struct cmCTestTestProperties
+    {
+    cmStdString Name;
+    cmStdString Directory;
+    tm_VectorOfListFileArgs Args;
+    };
+  typedef std::vector<cmCTestTestProperties> tm_ListOfTests;
+
   // Some structures needed for cvs update
   struct StringPair : 
     public std::pair<std::string, std::string>{};
@@ -336,6 +345,11 @@ private:
   tm_VectorOfStrings       m_CustomPostMemCheck;
 
   int ExecuteCommands(tm_VectorOfStrings& vec);
+
+  /**
+   * Get the list of tests in directory and subdirectories.
+   */
+  void cmCTest::GetListOfTests(tm_ListOfTests* testlist, bool memcheck);
 
   //! Reread the configuration file
   void UpdateCTestConfiguration();
