@@ -72,6 +72,7 @@ IF (WIN32)
                     cmGlobalNMakeMakefileGenerator.cxx
                     cmGlobalVisualStudio6Generator.cxx
                     cmLocalVisualStudio6Generator.cxx
+                    cmGlobalVisualStudio71Generator.cxx
                     cmGlobalVisualStudio7Generator.cxx
                     cmLocalVisualStudio7Generator.cxx
                     cmGlobalBorlandMakefileGenerator.h

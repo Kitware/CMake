@@ -530,27 +530,7 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& ,
                                const char* ,
                                const std::vector<std::string>& )
 {
-  cmSystemTools::Error("WriteExternalProject not implemented");
-//  fout << "#########################################################"
-//     "######################\n\n";
-//   fout << "Project: \"" << name << "\"=" 
-//        << location << " - Package Owner=<4>\n\n";
-//   fout << "Package=<5>\n{{{\n}}}\n\n";
-//   fout << "Package=<4>\n";
-//   fout << "{{{\n";
-
-  
-//   std::vector<std::string>::const_iterator i, end;
-//   // write dependencies.
-//   i = dependencies.begin();
-//   end = dependencies.end();
-//   for(;i!= end; ++i)
-//   {
-//     fout << "Begin Project Dependency\n";
-//     fout << "Project_Dep_Name " << *i << "\n";
-//     fout << "End Project Dependency\n";
-//   }
-//   fout << "}}}\n\n";
+  cmSystemTools::Error("WriteExternalProject not implemented for Visual Studio 7");
 }
 
 

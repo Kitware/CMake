@@ -76,22 +76,24 @@ public:
    */
   std::vector<std::string> *GetConfigurations();
       
-private:
-  void SetupTests();
-  void GenerateConfigurations(cmMakefile* mf);
-  void WriteSLNFile(std::ostream& fout);
-  void WriteSLNHeader(std::ostream& fout);
-  void WriteProject(std::ostream& fout, 
-                    const char* name, const char* path,
-                    const cmTarget &t);
-  void WriteProjectDepends(std::ostream& fout, 
+protected:
+  virtual void WriteSLNFile(std::ostream& fout);
+  virtual void WriteProject(std::ostream& fout, 
+                            const char* name, const char* path,
+                            const cmTarget &t);
+  virtual void WriteProjectDepends(std::ostream& fout, 
                            const char* name, const char* path,
                            const cmTarget &t);
-  void WriteProjectConfigurations(std::ostream& fout, const char* name, bool in_all);
+  virtual void WriteProjectConfigurations(std::ostream& fout, const char* name, bool in_all);
+  virtual void WriteSLNFooter(std::ostream& fout);
+  virtual void WriteSLNHeader(std::ostream& fout);
+
+  void SetupTests();
+  void GenerateConfigurations(cmMakefile* mf);
+
   void WriteExternalProject(std::ostream& fout, 
                             const char* name, const char* path,
                             const std::vector<std::string>& dependencies);
-  void WriteSLNFooter(std::ostream& fout);
   std::string CreateGUID(const char* name);
 
   std::vector<std::string> m_Configurations;

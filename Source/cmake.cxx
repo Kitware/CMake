@@ -27,6 +27,7 @@
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmGlobalVisualStudio6Generator.h"
 #include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudio71Generator.h"
 #include "cmGlobalBorlandMakefileGenerator.h"
 #include "cmGlobalNMakeMakefileGenerator.h"
 #include "cmWin32ProcessExecution.h"
@@ -652,6 +653,7 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   names.push_back(cmGlobalVisualStudio6Generator::GetActualName());
   names.push_back(cmGlobalVisualStudio7Generator::GetActualName());
+  names.push_back(cmGlobalVisualStudio71Generator::GetActualName());
   names.push_back(cmGlobalBorlandMakefileGenerator::GetActualName());
   names.push_back(cmGlobalNMakeMakefileGenerator::GetActualName());
 #else
@@ -679,6 +681,11 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
   if (!strcmp(name,cmGlobalVisualStudio7Generator::GetActualName()))
     {
     ret = new cmGlobalVisualStudio7Generator;
+    ret->SetCMakeInstance(this);
+    } 
+  if (!strcmp(name,cmGlobalVisualStudio71Generator::GetActualName()))
+    {
+    ret = new cmGlobalVisualStudio71Generator;
     ret->SetCMakeInstance(this);
     } 
   if (!strcmp(name,cmGlobalBorlandMakefileGenerator::GetActualName()))

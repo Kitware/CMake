@@ -64,6 +64,7 @@ public:
     {
     return m_CreatedProjectNames;
     }
+  void SetVersion71() {m_Version71 = true;}
 
 private:
   void OutputVCProjFile();
@@ -121,32 +122,7 @@ private:
   std::string m_LibraryOutputPath;
   std::string m_ExecutableOutputPath;
   std::string m_ModuleDefinitionFile;
-
-  /*
-  std::string m_DSPHeaderTemplate;
-  std::string m_DSPFooterTemplate;
-  void WriteDSPBeginGroup(std::ostream& fout, 
-                          const char* group,
-                          const char* filter);
-  void WriteDSPEndGroup(std::ostream& fout);
-
-
-  void WriteCustomRule(std::ostream& fout,
-                       const char* source,
-                       const char* command,
-                       const std::set<std::string>& depends,
-                       const std::set<std::string>& outputs,
-                       const char* flags);
-
-  std::string CreateTargetRules(const cmTarget &target, 
-                                const char *libName);
-  std::string CombineCommands(const cmSourceGroup::Commands &commands,
-                              cmSourceGroup::CommandFiles &totalCommand,
-                              const char *source);
-
-  std::string m_IncludeOptions;
-  std::vector<std::string> m_Configurations;
-  */
+  bool m_Version71;
 };
 
 #endif

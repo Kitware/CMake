@@ -24,6 +24,7 @@
 
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
 {
+  m_Version71 = false;
 }
 
 cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
@@ -995,9 +996,17 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
 {
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
        << "<VisualStudioProject\n"
-       << "\tProjectType=\"Visual C++\"\n"
-       << "\tVersion=\"7.00\"\n"
-       << "\tName=\"" << libName << "\"\n"
+       << "\tProjectType=\"Visual C++\"\n";
+  if(m_Version71)
+    {
+    fout << "\tVersion=\"7.10\"\n";
+    }
+  else
+    {
+    fout << "\tVersion=\"7.00\"\n";
+    }
+  
+  fout << "\tName=\"" << libName << "\"\n"
        << "\tSccProjectName=\"\"\n"
        << "\tSccLocalPath=\"\"\n"
        << "\tKeyword=\"Win32Proj\">\n"
