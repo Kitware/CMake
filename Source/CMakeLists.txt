@@ -10,6 +10,8 @@ cmRegularExpression.cxx
 cmSourceFile.cxx
 cmSystemTools.cxx
 cmDirectory.cxx
+cmDynamicLoader.cxx
+cmCPluginAPI.cxx
 cmCommands.cxx
 cmTarget.cxx
 cmCustomCommand.cxx
@@ -24,6 +26,7 @@ cmMakefileGenerator.h
 cmRegularExpression.h
 cmSourceFile.h
 cmSystemTools.h
+cmDynamicLoader.h
 cmDirectory.h
 cmCommands.h
 cmTarget.h
@@ -72,15 +75,23 @@ SET(SRCS ${SRCS} cmUnixMakefileGenerator.cxx cmUnixMakefileGenerator.h)
 
 
 # create a library used by the command line and the GUI
-ADD_LIBRARY(CMakeLib ${SRCS})
+IF (WIN32)
+  ADD_LIBRARY(CMakeLib SHARED ${SRCS})
+ELSE (WIN32)
+  ADD_LIBRARY(CMakeLib ${SRCS})
+ENDIF (WIN32)
+
 # always link in the library
-LINK_LIBRARIES(CMakeLib)
 # the library is found here
 LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source)
 
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
-ADD_EXECUTABLE(ctest ctest.cxx cmSystemTools.cxx cmRegularExpression.cxx)
+ADD_EXECUTABLE(ctest ctest.cxx)
+
+TARGET_LINK_LIBRARIES(cmake CMakeLib)
+TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
+TARGET_LINK_LIBRARIES(ctest CMakeLib)
 
 IF (UNIX)
   INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
@@ -98,8 +109,11 @@ CONFIGURE_FILE(
   ${CMake_SOURCE_DIR}/Source/cmaketest.h.in 
   ${CMake_BINARY_DIR}/Source/cmaketest.h ESCAPE_QUOTES)
 
-ADD_EXECUTABLE(cmaketest cmaketest.cxx cmSystemTools.cxx)
+ADD_EXECUTABLE(cmaketest cmaketest.cxx)
+TARGET_LINK_LIBRARIES(cmaketest CMakeLib)
 
+#ADD_LIBRARY(TEST_PLUGIN SHARED cmSimpleCommandPlugin.c)
+#TARGET_LINK_LIBRARIES(TEST_PLUGIN CMakeLib)
 
 IF(BUILD_TESTING)
     ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/Source/DumpDocumentation

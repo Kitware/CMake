@@ -27,7 +27,7 @@ class cmMakefile;
  * cmSystemTools is a class that provides helper functions
  * for the CMake build system.
  */
-class cmSystemTools
+class CM_EXPORT cmSystemTools
 {
 public:
   /**

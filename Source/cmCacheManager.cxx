@@ -536,3 +536,18 @@ bool cmCacheManager::IsAdvanced(const char* key)
     }
   return false;
 }
+
+bool cmCacheManager::CacheIterator::IsAtEnd() 
+{
+  return position == m_Container.m_Cache.end();
+}
+
+void cmCacheManager::CacheIterator::Begin() 
+{
+  position = m_Container.m_Cache.begin(); 
+}
+
+void cmCacheManager::CacheIterator::Next() 
+{
+  ++position; 
+}

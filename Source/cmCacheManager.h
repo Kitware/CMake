@@ -36,7 +36,30 @@ public:
     std::string m_HelpString;
     CacheEntryType m_Type;
   };
-public:
+  class CacheIterator
+  {
+  public:
+    CM_EXPORT void Begin();
+    CM_EXPORT bool IsAtEnd();
+    CM_EXPORT void Next();
+    const char *GetName() {
+      return position->first.c_str(); } 
+    CacheEntry const &GetEntry() {
+      return position->second; }
+    cmCacheManager const &m_Container;
+    std::map<cmStdString, CacheEntry>::const_iterator position;
+    CacheIterator(cmCacheManager const &foo) : m_Container(foo) {
+      this->Begin();
+    }
+  };
+  friend class cmCacheManager::CacheIterator;
+  
+  ///! return an iterator to iterate through the cache map
+  cmCacheManager::CacheIterator NewIterator() 
+    {
+      return CacheIterator(*this);
+    } 
+  
   typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
   /**
    * Types for the cache entries.  These are useful as
@@ -47,35 +70,36 @@ public:
    */
   static CacheEntryType StringToType(const char*);
   ///! Singleton pattern get instance of the cmCacheManager.
-  static cmCacheManager* GetInstance();
+  CM_EXPORT static cmCacheManager* GetInstance();
   
   ///! Load a cache for given makefile.  Loads from ouput home.
-  bool LoadCache(cmMakefile*); 
+  CM_EXPORT bool LoadCache(cmMakefile*); 
   ///! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
-  bool LoadCache(const char* path);
-  bool LoadCache(const char* path, bool internal);
-  bool LoadCache(const char* path, bool internal, 
+  CM_EXPORT bool LoadCache(const char* path);
+  CM_EXPORT bool LoadCache(const char* path, bool internal);
+  CM_EXPORT bool LoadCache(const char* path, bool internal, 
 		 std::set<std::string>& excludes,
 		 std::set<std::string>& includes);
 
   ///! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
-  bool SaveCache(cmMakefile*) ;
+  CM_EXPORT bool SaveCache(cmMakefile*) ;
   ///! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
-  bool SaveCache(const char* path) ;
+  CM_EXPORT bool SaveCache(const char* path) ;
 
   ///! Print the cache to a stream
   void PrintCache(std::ostream&) const;
   
-  ///! Get the cache map ivar.
-  const CacheEntryMap &GetCacheMap() const { return m_Cache; }
-
   ///! Get a cache entry object for a key
-  CacheEntry *GetCacheEntry(const char *key);
+  CM_EXPORT CacheEntry *GetCacheEntry(const char *key);
   
-  bool IsAdvanced(const char* key);
+  CM_EXPORT bool IsAdvanced(const char* key);
   
   ///! Remove an entry from the cache
-  void RemoveCacheEntry(const char* key);
+  CM_EXPORT void RemoveCacheEntry(const char* key);
+  
+  ///! Get the number of entries in the cache
+  CM_EXPORT int GetSize() {
+    return m_Cache.size(); }
   
   ///! Break up a line like VAR:type="value" into var, type and value
   static bool ParseEntry(const char* entry, 
