@@ -1773,7 +1773,6 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
             fprintf(stderr,"   Passed\n");
             if (output != "")
               {
-              std::cout << "Before dart check" << std::endl;
               if (dartStuff.find(output.c_str()))
                 {
                 std::string dartString = dartStuff.match(1);
