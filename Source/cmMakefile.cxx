@@ -520,7 +520,7 @@ void cmMakefile::AddCustomCommand(const char* source,
 
 void cmMakefile::
 AddCustomCommandToOutput(const char* output,
-                         const char* command,
+                         const char* inCommand,
                          const std::vector<std::string>& commandArgs,
                          const char *main_dependency,
                          const std::vector<std::string>& depends,
@@ -529,6 +529,12 @@ AddCustomCommandToOutput(const char* output,
 {
   std::string expandC;
   std::string combinedArgs;
+  std::string command = inCommand;
+  
+  // process the command's string
+  this->ExpandVariablesInString(command);
+  command = cmSystemTools::EscapeSpaces(command.c_str());  
+  
   unsigned int i;
   for (i = 0; i < commandArgs.size(); ++i)
     {
@@ -563,7 +569,7 @@ AddCustomCommandToOutput(const char* output,
       // if the command and args are the same
       // as the command already there, then silently skip
       // this add command
-      if(cc->IsEquivalent(command, combinedArgs.c_str()))
+      if(cc->IsEquivalent(command.c_str(), combinedArgs.c_str()))
         {
         return;
         }
@@ -585,7 +591,7 @@ AddCustomCommandToOutput(const char* output,
       // if the command and args are the same
       // as the command already there, then silently skip
       // this add command
-      if(cc->IsEquivalent(command, combinedArgs.c_str()))
+      if(cc->IsEquivalent(command.c_str(), combinedArgs.c_str()))
         {
         return;
         }
@@ -605,19 +611,13 @@ AddCustomCommandToOutput(const char* output,
   cmSourceFile *out = this->GetOrCreateSource(output, true);
   out->SetProperty("GENERATED","1");
   
-  // process the command
-  expandC = command;
-  this->ExpandVariablesInString(expandC);
-  std::string c = cmSystemTools::EscapeSpaces(expandC.c_str());
-  
-
   std::vector<std::string> depends2(depends);
   if (main_dependency && main_dependency[0] != '\0')
     {
     depends2.push_back(mainDepend.c_str());
     }
   cmCustomCommand *cc = 
-    new cmCustomCommand(c.c_str(),combinedArgs.c_str(),depends2, output);
+    new cmCustomCommand(command.c_str(),combinedArgs.c_str(),depends2, output);
   if ( comment && comment[0] )
     {
     cc->SetComment(comment);
