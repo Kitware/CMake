@@ -30,6 +30,30 @@ int main() { return 0; }
 int main() { return 0; }
 #endif
 
+#ifdef TEST_KWSYS_STL_STRING_HAVE_OSTREAM
+# if KWSYS_STL_HAVE_STD
+#  define kwsys_stl std
+# else
+#  define kwsys_stl
+# endif
+# include <iostream.h>
+# include <string>
+void f(ostream& os, const kwsys_stl::string& s) { os << s; }
+int main() { return 0; }
+#endif
+
+#ifdef TEST_KWSYS_STL_STRING_HAVE_ISTREAM
+# if KWSYS_STL_HAVE_STD
+#  define kwsys_stl std
+# else
+#  define kwsys_stl
+# endif
+# include <iostream.h>
+# include <string>
+void f(istream& is, kwsys_stl::string& s) { is >> s; }
+int main() { return 0; }
+#endif
+
 #ifdef TEST_KWSYS_STAT_HAS_ST_MTIM
 #include <sys/types.h>
 #include <sys/stat.h>
