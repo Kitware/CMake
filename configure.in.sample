@@ -1,6 +1,8 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT()
 
+AC_CONFIG_HEADER(CMake/Source/cmConfigure.h)
+
 CMAKE_CONFIG_DIR=`pwd`
 AC_SUBST(CMAKE_CONFIG_DIR)
 
@@ -211,7 +213,7 @@ case $system in
 	    SHLIB_LD_LIBS=""
 	    SHLIB_SUFFIX=".so"
 	    DL_LIBS=""
-	    CMAKE_SHLIB_BUILD_FLAGS="-shared"
+	    CMAKE_SHLIB_LINK_FLAGS="-shared"
 	else
 	    SHLIB_CFLAGS=""
 	    SHLIB_LD_LIBS=""
@@ -463,15 +465,9 @@ esac
 fi
 
 
-if test $CMAKE_USE_SPROC = 1; then
-AC_DEFINE(CMAKE_USE_SPROC)
-fi
-if test $CMAKE_USE_PTHREADS = 1; then
-AC_DEFINE(CMAKE_USE_PTHREADS)
-fi
-if test $CMAKE_HP_PTHREADS = 1; then
-AC_DEFINE(CMAKE_HP_PTHREADS)
-fi
+AC_SUBST(CMAKE_USE_SPROC)
+AC_SUBST(CMAKE_USE_PTHREADS)
+AC_SUBST(CMAKE_HP_PTHREADS)
 
 AC_SUBST(THREAD_LIBS)
 
@@ -570,43 +566,17 @@ fi
 
 AC_SUBST(EXTRA_GCC_FLAG)
 
+# find make to use to build cmake, prefer gmake
+AC_PATH_PROGS(RUNMAKE, gmake make)
 
-
-# output to the top level Makefile, which must be present
-# create the toplevel CMakeTargets.make file
-# Create all the make file fragments in CMake
-# Create the Makefile in CMake/Source
-
-# Testing system configuration
-AC_PATH_PROGS(MAKECOMMAND, gmake make)
-AC_PATH_PROGS(CVSCOMMAND, cvs )
-AC_PATH_PROGS(GREPCOMMAND, grep )
-AC_PATH_PROGS(COMPRESSIONCOMMAND, gzip compress zip )
-AC_PATH_PROGS(TCLSHCOMMAND, cygtclsh80 tclsh tclsh82 tclsh8.2 tclsh80 tclsh8.2 )
-AC_PATH_PROGS(GUNZIPCOMMAND, gunzip )
-
-AC_SUBST(MAKECOMMAND)
-AC_SUBST(CVSCOMMAND)
-AC_SUBST(GREPCOMMAND)
-AC_SUBST(GUNZIPCOMMAND)
-AC_SUBST(COMPRESSIONCOMMAND)
-AC_SUBST(TCLSHCOMMAND)
-
-# Make java optional
-AC_PATH_PROGS(JAVACOMMAND, java, jre )
-AC_SUBST(JAVACOMMAND)
-
-# AC_PROG_JAVA
-# AC_PROG_JAVAC
-# AC_PROG_JAR
 
 # generate output files.
 # create mkdir files just to make some of the directories
 
 AC_OUTPUT(
+CMakeSystemConfig.cmake:CMake/CMakeSystemConfig.cmake.in
 Makefile:CMake/CMakeTopMakefileTemplate.in
 CMakeTargets.make:CMake/CMakeTargets.make.in 
-CMakeSystemConfig.cmake:CMake/CMakeSystemConfig.cmake.in
 CMake/CMakeSimpleRules.make 
 CMake/CMakeMaster.make 
 CMake/CMakeVariables.make
@@ -615,20 +585,21 @@ CMake/Source/CMakeTargets.make:CMake/dummy.in
 CMake/Source/Makefile
 )
 
-
 # build the CMakeBuildTargets program
-(cd CMake/Source; $MAKECOMMAND CMakeBuildTargets)
-# if there is no cache file then create one
-if test ! -f $CMAKE_CONFIG_DIR/CMakeCache.txt; then
-        echo  CMake/Source/CMakeBuildTargets ${fullSrcDir}/CMakeLists.txt -MakeCache -S${fullSrcDir} -O${CMAKE_CONFIG_DIR} -H${fullSrcDir} -B${CMAKE_CONFIG_DIR}
-        CMake/Source/CMakeBuildTargets ${fullSrcDir}/CMakeLists.txt -MakeCache -S${fullSrcDir} -O${CMAKE_CONFIG_DIR} -H${fullSrcDir} -B${CMAKE_CONFIG_DIR}
-fi
+(cd CMake/Source; $RUNMAKE CMakeBuildTargets)
+
+# run CMakeBuildTargets in make cache mode so the
+# cache file can have the most recent changes from configure
+# in it.
+echo  CMake/Source/CMakeBuildTargets ${fullSrcDir}/CMakeLists.txt -MakeCache -S${fullSrcDir} -O${CMAKE_CONFIG_DIR} -H${fullSrcDir} -B${CMAKE_CONFIG_DIR}
+CMake/Source/CMakeBuildTargets ${fullSrcDir}/CMakeLists.txt -MakeCache -S${fullSrcDir} -O${CMAKE_CONFIG_DIR} -H${fullSrcDir} -B${CMAKE_CONFIG_DIR} -DRUN_CONFIGURE
+
 echo CMakeCache.txt location: ${CMAKE_CONFIG_DIR}/CMakeCache.txt
 
-
 # force a rebuild of CMakeBuildTargets which will rebuild CMakeTargets.make
-# this has to be done because configure generates empty CMakeTargets.make files
+# this has to be done because CMakeBuildTargets -MakeCache generates stub CMakeTargets.make files
 # and make programs other than gnu do not like to include make file fragments
 # that do not exist, even if they know how to create them.
 rm -f CMake/Source/CMakeBuildTargets
 rm -f CMake/Source/CMakeBuildTargets.exe
+
