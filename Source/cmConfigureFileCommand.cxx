@@ -161,6 +161,10 @@ void cmConfigureFileCommand::ConfigureFile()
             fout << "/* " << inLine << " */\n";
             }
           }
+        else
+          {
+          fout << inLine << "\n";
+          }
         }
       }
     // close the files before attempting to copy
