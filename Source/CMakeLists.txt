@@ -239,7 +239,7 @@ IF(BUILD_TESTING)
     --test-command   conly)
 
   SET(SimpleInstallInstallDir 
-    "${CMake_BINARY_DIR}/Tests/SimpleInstall/Install Directory")
+    "${CMake_BINARY_DIR}/Tests/SimpleInstall/InstallDirectory")
   ADD_TEST(SimpleInstall ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/SimpleInstall"

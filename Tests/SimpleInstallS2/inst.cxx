@@ -17,6 +17,6 @@ int main ()
     printf("Problem with lib2\n");
     return 1;
     }
-  printf("Foo: %s\n", foo);
+  printf("The value of Foo: %s\n", foo);
   return SomeFunctionInFoo()-5;
 }
