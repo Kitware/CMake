@@ -37,7 +37,7 @@
  #undef _XOPEN_SOURCE_EXTENDED
 #endif
 
-// AIX seems to define this
+/* AIX seems to define this */
 #undef lines
 #undef columns
 
