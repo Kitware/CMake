@@ -496,12 +496,12 @@ void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
     }
 }
 
-void cmGlobalXCodeGenerator::AddLinkTarget(cmXCodeObject* target,
-                                           cmXCodeObject* dependTarget)
+void cmGlobalXCodeGenerator::AddLinkTarget(cmXCodeObject* ,
+                                           cmXCodeObject* )
 {
 }
 
-void cmGlobalXCodeGenerator::AddLinkFlag(cmXCodeObject* target,
+void cmGlobalXCodeGenerator::AddLinkFlag(cmXCodeObject* ,
                                          const char*)
 {
 }
