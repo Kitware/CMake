@@ -153,42 +153,47 @@ void cmGlobalVisualStudio7Generator::SetupTests()
 void cmGlobalVisualStudio7Generator::GenerateConfigurations()
 {
   // process the configurations
-  std::string configTypes = 
-    m_CMakeInstance->GetCacheDefinition("CMAKE_CONFIGURATION_TYPES");
-  std::string::size_type start = 0;
-  std::string::size_type endpos = 0;
-  while(endpos != std::string::npos)
+  const char* ct 
+    = m_CMakeInstance->GetCacheDefinition("CMAKE_CONFIGURATION_TYPES");
+  if ( ct )
     {
-    endpos = configTypes.find(' ', start);
-    std::string config;
-    std::string::size_type len;
-    if(endpos != std::string::npos)
+    std::string configTypes = ct;
+    
+    std::string::size_type start = 0;
+    std::string::size_type endpos = 0;
+    while(endpos != std::string::npos)
       {
-      len = endpos - start;
-      }
-    else
-      {
-      len = configTypes.size() - start;
-      }
-    config = configTypes.substr(start, len);
-    if(config == "Debug" || config == "Release" ||
-       config == "MinSizeRel" || config == "RelWithDebInfo")
-      {
-      // only add unique configurations
-      if(std::find(m_Configurations.begin(),
-                   m_Configurations.end(), config) == m_Configurations.end())
+      endpos = configTypes.find(' ', start);
+      std::string config;
+      std::string::size_type len;
+      if(endpos != std::string::npos)
         {
-        m_Configurations.push_back(config);
+        len = endpos - start;
         }
+      else
+        {
+        len = configTypes.size() - start;
+        }
+      config = configTypes.substr(start, len);
+      if(config == "Debug" || config == "Release" ||
+         config == "MinSizeRel" || config == "RelWithDebInfo")
+        {
+        // only add unique configurations
+        if(std::find(m_Configurations.begin(),
+                     m_Configurations.end(), config) == m_Configurations.end())
+          {
+          m_Configurations.push_back(config);
+          }
+        }
+      else
+        {
+        cmSystemTools::Error(
+          "Invalid configuration type in CMAKE_CONFIGURATION_TYPES: ",
+          config.c_str(),
+          " (Valid types are Debug,Release,MinSizeRel,RelWithDebInfo)");
+        }
+      start = endpos+1;
       }
-    else
-      {
-      cmSystemTools::Error(
-        "Invalid configuration type in CMAKE_CONFIGURATION_TYPES: ",
-        config.c_str(),
-        " (Valid types are Debug,Release,MinSizeRel,RelWithDebInfo)");
-      }
-    start = endpos+1;
     }
   if(m_Configurations.size() == 0)
     {

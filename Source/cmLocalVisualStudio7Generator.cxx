@@ -329,7 +329,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"" << configName << "\\\"\n";
-  fout << "\t\t\t\tWarningLevel=\"" << m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL") << "\"\n";
+  if ( m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL") )
+    {
+    fout << "\t\t\t\tWarningLevel=\"" << m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL") << "\"\n";
+    }
   fout << "\t\t\t\tDetect64BitPortabilityProblems=\"TRUE\"\n"
        << "\t\t\t\tDebugInformationFormat=\"3\"";
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool

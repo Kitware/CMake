@@ -775,47 +775,50 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
 
   while(fin)
     {
-      fin.getline(buffer, 2048);
-      std::string line = buffer;
-      const char* mfcFlag = m_Makefile->GetDefinition("CMAKE_MFC_FLAG");
-      if(!mfcFlag)
-        {
-        mfcFlag = "0";
-        }
-      cmSystemTools::ReplaceString(line, "CMAKE_CUSTOM_RULE_CODE",
-                                   customRuleCode.c_str());
-      cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
-                                   mfcFlag);
-      cmSystemTools::ReplaceString(line, "CM_LIBRARIES",
-                                   libOptions.c_str());
-      cmSystemTools::ReplaceString(line, "CM_DEBUG_LIBRARIES",
-                                   libDebugOptions.c_str());
-      cmSystemTools::ReplaceString(line, "CM_OPTIMIZED_LIBRARIES",
-                                   libOptimizedOptions.c_str());
+    fin.getline(buffer, 2048);
+    std::string line = buffer;
+    const char* mfcFlag = m_Makefile->GetDefinition("CMAKE_MFC_FLAG");
+    if(!mfcFlag)
+      {
+      mfcFlag = "0";
+      }
+    cmSystemTools::ReplaceString(line, "CMAKE_CUSTOM_RULE_CODE",
+                                 customRuleCode.c_str());
+    cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
+                                 mfcFlag);
+    cmSystemTools::ReplaceString(line, "CM_LIBRARIES",
+                                 libOptions.c_str());
+    cmSystemTools::ReplaceString(line, "CM_DEBUG_LIBRARIES",
+                                 libDebugOptions.c_str());
+    cmSystemTools::ReplaceString(line, "CM_OPTIMIZED_LIBRARIES",
+                                 libOptimizedOptions.c_str());
 
-      cmSystemTools::ReplaceString(line, "CM_MULTILINE_LIBRARIES",
-                                   libMultiLineOptions.c_str());
-      cmSystemTools::ReplaceString(line, "CM_MULTILINE_DEBUG_LIBRARIES",
-                                   libMultiLineDebugOptions.c_str());
-      cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIMIZED_LIBRARIES",
-                                   libMultiLineOptimizedOptions.c_str());
+    cmSystemTools::ReplaceString(line, "CM_MULTILINE_LIBRARIES",
+                                 libMultiLineOptions.c_str());
+    cmSystemTools::ReplaceString(line, "CM_MULTILINE_DEBUG_LIBRARIES",
+                                 libMultiLineDebugOptions.c_str());
+    cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIMIZED_LIBRARIES",
+                                 libMultiLineOptimizedOptions.c_str());
 
-      cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
-                                   m_IncludeOptions.c_str());
-      cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
-      // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH 
-      // are already quoted in the template file,
-      // we need to remove the quotes here, we still need
-      // to convert to output path for unix to win32 conversion
-      cmSystemTools::ReplaceString(line, "LIBRARY_OUTPUT_PATH",
-                                   removeQuotes(
-                                     cmSystemTools::ConvertToOutputPath(libPath.c_str())).c_str());
-      cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATH",
-                                   removeQuotes(
-                                     cmSystemTools::ConvertToOutputPath(exePath.c_str())).c_str());
-      cmSystemTools::ReplaceString(line, 
-                                   "EXTRA_DEFINES", 
-                                   m_Makefile->GetDefineFlags());
+    cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
+                                 m_IncludeOptions.c_str());
+    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
+    // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH 
+    // are already quoted in the template file,
+    // we need to remove the quotes here, we still need
+    // to convert to output path for unix to win32 conversion
+    cmSystemTools::ReplaceString(line, "LIBRARY_OUTPUT_PATH",
+                                 removeQuotes(
+                                   cmSystemTools::ConvertToOutputPath(libPath.c_str())).c_str());
+    cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATH",
+                                 removeQuotes(
+                                   cmSystemTools::ConvertToOutputPath(exePath.c_str())).c_str());
+    cmSystemTools::ReplaceString(line, 
+                                 "EXTRA_DEFINES", 
+                                 m_Makefile->GetDefineFlags());
+    cmGlobalGenerator* gen = this->GetGlobalGenerator();
+    if ( gen->GetLanguageEnabled("C") ||gen->GetLanguageEnabled("CXX") )
+      {
       std::string flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELEASE");
       flags += " -DCMAKE_INTDIR=\\\"Release\\\"";
       cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE", flags.c_str());
@@ -831,8 +834,8 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS",
                                    m_Makefile->
                                    GetDefinition("CMAKE_CXX_FLAGS"));
-      
-      fout << line.c_str() << std::endl;
+      }
+    fout << line.c_str() << std::endl;
     }
 }
 
