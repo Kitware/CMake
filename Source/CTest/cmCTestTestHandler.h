@@ -42,9 +42,16 @@ public:
    * If verbose then more informaiton is printed out
    */
   void SetVerbose(bool val) { m_Verbose = val; }
-  
-  void PopulateCustomVectors(cmMakefile *mf);
 
+  /*
+   * When both -R and -I are used should te resulting test list be the
+   * intersection or the union of the lists. By default it is the
+   * intersection.
+   */
+  void SetUseUnion(bool val) { m_UseUnion = val; }
+
+  void PopulateCustomVectors(cmMakefile *mf);
+  
   ///! Control the use of the regular expresisons, call these methods to turn
   ///them on
   void UseIncludeRegExp();
@@ -58,7 +65,7 @@ public:
   void SetTestsToRunInformation(const char*);
 
   typedef std::vector<cmListFileArgument> tm_VectorOfListFileArgs;
-
+  
 private:
 
   enum { // Memory checkers
@@ -152,13 +159,14 @@ private:
   void ProcessDirectory(std::vector<cmStdString> &passed, 
                         std::vector<cmStdString> &failed,
                         bool memcheck);
-
+  
   struct cmCTestTestProperties
-    {
+  {
     cmStdString m_Name;
     cmStdString m_Directory;
     tm_VectorOfListFileArgs m_Args;
-    };
+    bool m_IsInBasedOnREOptions;
+  };
 
   typedef std::vector<cmCTestTestProperties> tm_ListOfTests;
   /**
@@ -205,7 +213,7 @@ private:
                                    std::string& log, int* results);
 
   std::string TestsToRunString;
-  
+  bool m_UseUnion;
 };
 
 #endif

@@ -193,7 +193,8 @@ cmCTestTestHandler::cmCTestTestHandler()
 {
   m_Verbose = false; 
   m_CTest = 0;
-
+  m_UseUnion = false;
+  
   m_UseIncludeRegExp       = false;
   m_UseExcludeRegExp       = false;
   m_UseExcludeRegExpFirst  = false;
@@ -381,15 +382,36 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       << std::endl;
     }
 
-  // expand the test list
-  this->ExpandTestsToRunInformation((int)tmsize);
+  // how many tests are in based on RegExp?
+  int inREcnt = 0;
+  tm_ListOfTests::iterator it;
+  for ( it = testlist.begin(); it != testlist.end(); it ++ )
+    {
+    if (it->m_IsInBasedOnREOptions)
+      {
+      inREcnt ++;
+      }
+    }
+  // expand the test list based on the union flag
+  if (m_UseUnion)
+    {
+    this->ExpandTestsToRunInformation((int)tmsize);
+    }
+  else
+    {
+    this->ExpandTestsToRunInformation(inREcnt);
+    }
   
   int cnt = 0;
-  tm_ListOfTests::iterator it;
+  inREcnt = 0;
   std::string last_directory = "";
   for ( it = testlist.begin(); it != testlist.end(); it ++ )
     {
     cnt ++;
+    if (it->m_IsInBasedOnREOptions)
+      {
+      inREcnt++;
+      }
     const std::string& testname = it->m_Name;
     tm_VectorOfListFileArgs& args = it->m_Args;
     cmCTestTestResult cres;
@@ -408,30 +430,41 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       }
     cres.m_Name = testname;
     cres.m_Path = it->m_Directory.c_str();
-    if(m_TestsToRun.size() && 
-       std::find(m_TestsToRun.begin(), m_TestsToRun.end(), cnt) == m_TestsToRun.end())
+    
+    if (m_UseUnion)
       {
-      continue;
+      // if it is not in the list and not in the regexp then skip
+      if ((m_TestsToRun.size() && 
+           std::find(m_TestsToRun.begin(), m_TestsToRun.end(), cnt) 
+           == m_TestsToRun.end()) && !it->m_IsInBasedOnREOptions)
+        {
+        continue;
+        }
       }
+    else
+      {
+      // is this test in the list of tests to run? If not then skip it
+      if ((m_TestsToRun.size() && 
+           std::find(m_TestsToRun.begin(), m_TestsToRun.end(), inREcnt) 
+           == m_TestsToRun.end()) || !it->m_IsInBasedOnREOptions)
+        {
+        continue;
+        }
+      }
+    
+    std::cerr.width(3);
+    std::cerr << cnt << "/";
+    std::cerr.width(3);
+    std::cerr << tmsize << " Testing ";
+    std::string outname = testname;
+    outname.resize(30, ' ');
 
     if ( m_CTest->GetShowOnly() )
       {
-      std::cerr.width(3);
-      std::cerr << cnt << "/";
-      std::cerr.width(3);
-      std::cerr << tmsize << " Testing ";
-      std::string outname = testname;
-      outname.resize(30, ' ');
       std::cerr << outname.c_str() << "\n";
-     }
+      }
     else
       {
-      std::cerr.width(3);
-      std::cerr << cnt << "/";
-      std::cerr.width(3);
-      std::cerr << tmsize << " Testing ";
-      std::string outname = testname;
-      outname.resize(30, ' ');
       std::cerr << outname.c_str();
       std::cerr.flush();
       }
@@ -1121,22 +1154,21 @@ void cmCTestTestHandler::GetListOfTests(tm_ListOfTests* testlist,
           }
         }
 
-
-      if (this->m_UseIncludeRegExp && !ireg.find(testname.c_str()))
-        {
-        continue;
-        }
-      if (this->m_UseExcludeRegExp &&
-        !this->m_UseExcludeRegExpFirst &&
-        ereg.find(testname.c_str()))
-        {
-        continue;
-        }
-
       cmCTestTestProperties test;
       test.m_Name = testname;
       test.m_Args = args;
       test.m_Directory = cmSystemTools::GetCurrentWorkingDirectory();
+      test.m_IsInBasedOnREOptions = true;
+      if (this->m_UseIncludeRegExp && !ireg.find(testname.c_str()))
+        {
+        test.m_IsInBasedOnREOptions = false;
+        }
+      else if (this->m_UseExcludeRegExp &&
+               !this->m_UseExcludeRegExpFirst &&
+               ereg.find(testname.c_str()))
+        {
+        test.m_IsInBasedOnREOptions = false;
+        }
       testlist->push_back(test);
       }
     }
@@ -1244,12 +1276,6 @@ void cmCTestTestHandler::ExpandTestsToRunInformation(int numTests)
   std::vector<int>::iterator new_end = 
     std::unique(m_TestsToRun.begin(), m_TestsToRun.end());
   m_TestsToRun.erase(new_end, m_TestsToRun.end());
-  std::cout << "Running tests: ";
-  for(unsigned int i =0; i < m_TestsToRun.size(); ++i)
-    {
-    std::cout << m_TestsToRun[i] << " ";
-    }
-  std::cout << "\n";
 }
 
 #define SPACE_REGEX "[ \t\r\n]"

@@ -1453,6 +1453,10 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       this->TestHandler->SetTestsToRunInformation(args[i].c_str());
       }
+    if(arg.find("-U",0) == 0)
+      {
+      this->TestHandler->SetUseUnion(true);
+      }
     if(arg.find("-R",0) == 0 && i < args.size() - 1)
       {
       this->TestHandler->UseIncludeRegExp();
