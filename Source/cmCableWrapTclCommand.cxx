@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 #include "cmTarget.h"
 #include "cmGeneratedFileStream.h"
-
+#include "cmMakeDepend.h"
 
 cmCableWrapTclCommand::cmCableWrapTclCommand():
   m_CableClassSet(NULL)
@@ -256,6 +256,26 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
   std::string command = this->GetGccXmlFromCache();
   std::vector<std::string> depends;
   depends.push_back(command);
+
+  // Get the dependencies of the file.
+  cmMakeDepend md;
+  md.SetMakefile(m_Makefile);
+  const cmDependInformation* dependInfo =
+    md.FindDependencies(classCxxName.c_str());
+  if(dependInfo)
+    {
+    for(cmDependInformation::DependencySet::const_iterator d = 
+          dependInfo->m_DependencySet.begin();
+        d != dependInfo->m_DependencySet.end(); ++d)
+      {
+      // Make sure the full path is given.  If not, the dependency was
+      // not found.
+      if((*d)->m_FullPath != "")
+        {
+        depends.push_back((*d)->m_FullPath);
+        }
+      }
+    }
   
   std::string commandArgs = this->GetGccXmlFlagsFromCache();
   commandArgs += " ";
