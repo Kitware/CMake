@@ -24,21 +24,6 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
                                                    cmMakefile *mf)
 {
   bool isLocal = m_CMakeInstance->GetLocal();
-  const char* majv = mf->GetDefinition("CMAKE_CACHE_MAJOR_VERSION");
-  const char* minv = mf->GetDefinition("CMAKE_CACHE_MINOR_VERSION");
-  const char* relv = mf->GetDefinition("CMAKE_CACHE_RELEASE_VERSION");
-  bool cacheSameCMake = false;
-  if(majv && atoi(majv) == cmMakefile::GetMajorVersion()
-     && minv && atoi(minv) == cmMakefile::GetMinorVersion()
-     && relv && (strcmp(relv, cmMakefile::GetReleaseVersion()) == 0))
-    {
-    cacheSameCMake = true;
-    }
-  if(!cacheSameCMake)
-    {
-    isLocal = false;
-    }
-
   // if no lang specified use CXX
   if(!lang )
     {

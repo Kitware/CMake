@@ -805,6 +805,21 @@ int cmake::Configure()
   return 0;
 }
 
+bool cmake::CacheVersionMatches()
+{
+  const char* majv = m_CacheManager->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION");
+  const char* minv = m_CacheManager->GetCacheValue("CMAKE_CACHE_MINOR_VERSION");
+  const char* relv = m_CacheManager->GetCacheValue("CMAKE_CACHE_RELEASE_VERSION");
+  bool cacheSameCMake = false;
+  if(majv && atoi(majv) == cmMakefile::GetMajorVersion()
+     && minv && atoi(minv) == cmMakefile::GetMinorVersion()
+     && relv && (strcmp(relv, cmMakefile::GetReleaseVersion()) == 0))
+    {
+    cacheSameCMake = true;
+    }
+  return cacheSameCMake;
+}
+
 // handle a command line invocation
 int cmake::Run(const std::vector<std::string>& args)
 {
@@ -840,20 +855,32 @@ int cmake::Run(const std::vector<std::string>& args)
   
   // Add any cache args
   this->SetCacheArgs(args);
-  
-  // if we are local do the local thing, otherwise do global
+ 
+  int ret = 0;
+  // if not local or the cmake version has changed
+  // since the last run of cmake, run a global generate
+  if(!m_Local || !this->CacheVersionMatches())
+    {
+    bool saveLocalFlag = m_Local;
+    m_Local = false;
+    ret = this->Configure();
+    if (ret)
+      {
+      return ret;
+      }
+    ret = this->Generate();
+    if(ret)
+      {
+      return ret;
+      }
+    m_Local = saveLocalFlag;
+    }
+  // if we are local do the local thing
   if (m_Local)
     {
-    return this->LocalGenerate();
+    ret = this->LocalGenerate();
     }
-
-  // otherwise global
-  int ret = this->Configure();
-  if (ret)
-    {
-    return ret;
-    }
-  return this->Generate();
+  return ret;
 }
 
 int cmake::Generate()
