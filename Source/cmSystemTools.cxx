@@ -1785,32 +1785,63 @@ void cmSystemTools::ExpandListArguments(std::vector<std::string> const& argument
   std::vector<std::string>::const_iterator i;
   for(i = arguments.begin();i != arguments.end(); ++i)
     {
-    if(i->find(';') != std::string::npos)
+    // if there are no ; in the name then just copy the current string
+    if(i->find(';') == std::string::npos)
       {
-      std::string::size_type start = 0;
-      std::string::size_type endpos = 0;
-      while(endpos != std::string::npos)
-        {
-        endpos = i->find(';', start); 
-        std::string::size_type len;
-        if(endpos != std::string::npos)
-          {
-          len = endpos - start;
-          }
-        else
-          {
-          len = i->size()-start;
-          }
-        if (len > 0)
-          {
-          newargs.push_back(i->substr(start, len));
-          }
-        start = endpos+1;
-        }
+      newargs.push_back(*i);
       }
     else
       {
-      newargs.push_back(*i);
+      std::string::size_type start = 0;
+      std::string::size_type endpos = 0;
+      const std::string::size_type size = i->size();
+      // break up ; separated sections of the string into separate strings
+      while(endpos != size)
+        {
+        endpos = i->find(';', start); 
+        if(endpos == std::string::npos)
+          {
+          endpos = i->size();
+          }
+        std::string::size_type len = endpos - start;
+        if (len > 0)
+          {
+          // check for a closing ] after the start position
+          if(i->find('[', start) == std::string::npos)
+            {
+            // if there is no [ in the string then keep it
+            newargs.push_back(i->substr(start, len));
+            }
+          else
+            {
+            int opencount = 0;
+            int closecount = 0;
+            for(std::string::size_type j = start; j < endpos; ++j)
+              {
+              if(i->at(j) == '[')
+                {
+                ++opencount;
+                }
+              else if (i->at(j) == ']')
+                {
+                ++closecount;
+                }
+              }
+            if(opencount != closecount)
+              {
+              // skip this one
+              endpos = i->find(';', endpos+1);  
+              if(endpos == std::string::npos)
+                {
+                endpos = i->size();
+                }
+              len = endpos - start;
+              }
+            newargs.push_back(i->substr(start, len));
+            }
+          }
+        start = endpos+1;
+        }
       }
     }
 }
