@@ -70,6 +70,7 @@ public:
       "  FILE(APPEND filename \"message to write\"... )\n"
       "  FILE(READ filename variable)\n"
       "  FILE(GLOB variable [globbing expressions]...)\n"
+      "  FILE(GLOB_RECURSE variable [globbing expressions]...)\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
       "if it does not exists.\n"
@@ -84,6 +85,11 @@ public:
       "   *.cxx      - match all files with extension cxx\n"
       "   *.vt?      - match all files with extension vta, vtb, ... vtz\n"
       "   f[3-5].txt - match files f3.txt, f4.txt, f5.txt\n"
+      "GLOB_RECURSE will generate similar list as the regular GLOB, except "
+      "it will traverse all the subdirectories of the matched directory and "
+      "match the files.\n"
+      "Example of recursive globbing:\n"
+      "   /dir/*.py  - match all python files /dir and subdirectories\n"
       "MAKE_DIRECTORY will create a directory at the specified location"; 
     }
   
@@ -92,7 +98,7 @@ public:
 protected:
   bool HandleWriteCommand(std::vector<std::string> const& args, bool append);
   bool HandleReadCommand(std::vector<std::string> const& args);
-  bool HandleGlobCommand(std::vector<std::string> const& args);
+  bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse);
   bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);
 };
 

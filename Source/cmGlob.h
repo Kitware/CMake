@@ -38,10 +38,20 @@ public:
   //! Return the list of files that matched.
   std::vector<std::string>& GetFiles();
 
+  //! Set recurse to true to match subdirectories.
+  void RecurseOn() { this->SetRecurse(true); }
+  void RecurseOff() { this->SetRecurse(false); }
+  void SetRecurse(bool i) { m_Recurse = i; }
+  bool GetRecurse() { return m_Recurse; }
+
 protected:
   //! Process directory
   void ProcessDirectory(std::string::size_type start, 
     const std::string& dir, bool dir_only);
+
+  //! Process last directory, but only when recurse flags is on. That is
+  // effectively like saying: /path/to/file/**/file
+  void RecurseDirectory(const std::string& dir, bool dir_only);
 
   //! Escape all non-alphanumeric characters in pattern.
   void Escape(int ch, char* buffer);
@@ -55,6 +65,7 @@ protected:
   void AddExpression(const char* expr);
 
   cmGlobInternal* m_Internals;
+  bool m_Recurse;
 };
 
 

@@ -41,7 +41,11 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
     }
   else if ( subCommand == "GLOB" )
     {
-    return this->HandleGlobCommand(args);
+    return this->HandleGlobCommand(args, false);
+    }
+  else if ( subCommand == "GLOB_RECURSE" )
+    {
+    return this->HandleGlobCommand(args, true);
     }
   else if ( subCommand == "MAKE_DIRECTORY" )
     {
@@ -135,7 +139,8 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args)
+bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
+  bool recurse)
 {
   if ( args.size() < 2 )
     {
@@ -150,6 +155,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args)
   std::string variable = *i;
   i++;
   cmGlob g;
+  g.SetRecurse(recurse);
   std::string output = "";
   bool first = true;
   for ( ; i != args.end(); ++i )

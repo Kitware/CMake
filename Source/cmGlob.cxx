@@ -32,6 +32,7 @@ public:
 cmGlob::cmGlob()
 {
   m_Internals = new cmGlobInternal;
+  m_Recurse = false;
 }
 
 cmGlob::~cmGlob()
@@ -137,8 +138,7 @@ std::string cmGlob::ConvertExpression(const std::string& expr)
   return res + "$";
 }
 
-void cmGlob::ProcessDirectory(std::string::size_type start, 
-  const std::string& dir, bool dir_only)
+void cmGlob::RecurseDirectory(const std::string& dir, bool dir_only)
 {
   cmsys::Directory d;
   if ( !d.Load(dir.c_str()) )
@@ -147,7 +147,44 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
     }
   unsigned long cc;
   std::string fullname;
+  for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
+    {
+    if ( strcmp(d.GetFile(cc), ".") == 0 ||
+      strcmp(d.GetFile(cc), "..") == 0  )
+      {
+      continue;
+      }
+    fullname = dir + "/" + d.GetFile(cc);
+    if ( !dir_only || !cmsys::SystemTools::FileIsDirectory(fullname.c_str()) )
+      {
+      if ( m_Internals->Expressions[m_Internals->Expressions.size()-1].find(d.GetFile(cc)) )
+        {
+        m_Internals->Files.push_back(fullname);
+        }
+      }
+    if ( cmsys::SystemTools::FileIsDirectory(fullname.c_str()) )
+      {
+      this->RecurseDirectory(fullname, dir_only);
+      }
+    }
+}
+
+void cmGlob::ProcessDirectory(std::string::size_type start, 
+  const std::string& dir, bool dir_only)
+{
   bool last = ( start == m_Internals->Expressions.size()-1 );
+  if ( last && m_Recurse )
+    {
+    this->RecurseDirectory(dir, dir_only);
+    return;
+    }
+  cmsys::Directory d;
+  if ( !d.Load(dir.c_str()) )
+    {
+    return;
+    }
+  unsigned long cc;
+  std::string fullname;
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
     {
     if ( strcmp(d.GetFile(cc), ".") == 0 ||
