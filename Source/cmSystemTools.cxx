@@ -436,7 +436,7 @@ const char *cmSystemTools::ConvertToWindowsSlashes(std::string& path)
   return path.c_str();
 }
 
-// convert Unix slashes / to Windows slashes \ and cleanup double \\
+// convert Unix slashes to Windows slashes and cleanup double slashes
 const char *cmSystemTools::ConvertToWindowsSlashesAndCleanUp(std::string& path)
 {
   cmSystemTools::ConvertToWindowsSlashes(path);
