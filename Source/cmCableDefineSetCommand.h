@@ -69,11 +69,14 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABLE_DEFINE_SET(name_of_set [[tag1]:]memeber1 [[tag2]:]member2 ...)\n"
+      "CABLE_DEFINE_SET(name_of_set [[tag1]:]memeber1 [[tag2]:]member2 ...\n"
+      "                 [SOURCE_FILES source1 source2 ...]] )\n"
       "Generates a Set definition in the CABLE configuration.  The sets are\n"
       "referenced in other CABLE commands by a '$' immediately followed by\n"
       "the set name (ex. $SetName).  If a the \"tag:\" syntax is not used,\n"
-      "an attempt is made to auto-generate a meaningful tag.\n";
+      "an attempt is made to auto-generate a meaningful tag.  If the\n"
+      "SOURCE_FILES keyword is given, all arguments after it refer to header\n"
+      "files to be included in any package referencing the set.\n";
     }
 
   cmTypeMacro(cmCableDefineSetCommand, cmCableCommand);
@@ -82,6 +85,7 @@ private:
   void WriteConfiguration() const;
   bool AddElement(const std::string&);
   bool GenerateTag(const std::string&, std::string&);
+  bool AddSourceFile(const std::string&);
 private:  
   typedef std::pair<std::string, std::string>  Element;
   typedef std::vector<Element>  Elements;
@@ -95,6 +99,16 @@ private:
    * The elements to be defined in the set (before $ expansion).
    */
   Elements  m_Elements;
+  
+  /**
+   * The source headers associated with this set.
+   */
+  std::vector<std::string> m_SourceHeaders;
+  
+  /**
+   * The instantiation sources associated with this set.
+   */
+  std::vector<std::string> m_InstantiationSources;
 };
 
 

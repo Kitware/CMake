@@ -36,13 +36,27 @@ bool cmCableDefineSetCommand::Invoke(std::vector<std::string>& args)
   // The first argument is the name of the set.
   m_SetName = *arg++;
   
-  // The rest of the arguments are the elements to be placed in the set.
-  for(; arg != args.end(); ++arg)
+  // All arguments until a "SOURCE_FILES" are the elements to be placed in
+  // the set.
+  for(; (arg != args.end()) && (*arg != "SOURCE_FILES"); ++arg)
     {
     // If the element cannot be added, return an error.
     // This can occur when a tag is not specified and can't be generated.
     if(!this->AddElement(*arg))
       { return false; }
+    }
+
+  // If we are not at the end, the "SOURCE_FILES" keyword has been
+  // encountered.
+  if(arg != args.end())
+    {
+    // The rest of the arguments are source files to be included in
+    // any package which references the set.
+    for(++arg; arg != args.end(); ++arg)
+      {
+      if(!this->AddSourceFile(*arg))
+        { return false; }
+      }
     }
   
   // Write this command's configuration output.
@@ -65,6 +79,17 @@ void cmCableDefineSetCommand::WriteConfiguration() const
   
   // Output the code.
   os << indent << "<Set name=\"" << m_SetName.c_str() << "\">" << std::endl;
+  for(std::vector<std::string>::const_iterator e = m_SourceHeaders.begin();
+      e != m_SourceHeaders.end(); ++e)
+    {
+    os << indent << "  <File name=\"" << e->c_str() << "\"/>" << std::endl;
+    }
+  for(std::vector<std::string>::const_iterator e = m_InstantiationSources.begin();
+      e != m_InstantiationSources.end(); ++e)
+    {
+    os << indent << "  <File name=\"" << e->c_str()
+       << "\" purpose=\"instantiate\"/>" << std::endl;
+    }
   for(Elements::const_iterator e = m_Elements.begin();
       e != m_Elements.end(); ++e)
     {
@@ -215,5 +240,61 @@ cmCableDefineSetCommand::GenerateTag(const std::string& element,
 
   tag = "";
   
+  return false;
+}
+
+
+/**
+ * Add a source file associated with this set.  Any package referencing
+ * this set will automatically include this source file.
+ */
+bool cmCableDefineSetCommand::AddSourceFile(const std::string& file)
+{
+  // We must locate the file in the include path so that we can detect
+  // its extension, and whether there is more than one to find.
+  std::string header = file+".h";
+  m_Makefile->ExpandVariablesInString(header);
+
+  // See if the file just exists here.  The compiler's search path will
+  // locate it.
+  if(cmSystemTools::FileExists(header.c_str()))
+    {
+    m_SourceHeaders.push_back(header);
+    // See if there is a matching .txx as well.
+    std::string txx = file+".txx";
+    m_Makefile->ExpandVariablesInString(txx);
+    if(cmSystemTools::FileExists(txx.c_str()))
+      {
+      m_InstantiationSources.push_back(txx);
+      }
+    return true;
+    }
+  
+  // We must look for the file in the include search path.
+  const std::vector<std::string>& includeDirectories =
+    m_Makefile->GetIncludeDirectories();
+  
+  for(std::vector<std::string>::const_iterator dir = includeDirectories.begin();
+      dir != includeDirectories.end(); ++dir)
+    {
+    std::string path = *dir + "/" + header;
+    m_Makefile->ExpandVariablesInString(path);
+    if(cmSystemTools::FileExists(path.c_str()))
+      {
+      m_SourceHeaders.push_back(path);
+      // See if there is a matching .txx as well.
+      std::string txx = *dir + "/" + file + ".txx";
+      m_Makefile->ExpandVariablesInString(txx);
+      if(cmSystemTools::FileExists(txx.c_str()))
+        {
+        m_InstantiationSources.push_back(txx);
+        }
+      return true;
+      }
+    }
+
+  // We couldn't locate the source file.  Report the error.
+  std::string err = "couldn't find source file " + header;
+  this->SetError(err.c_str());
   return false;
 }
