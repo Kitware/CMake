@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------
 # Doxygen documentation batch
-# modified by S. Barre (Time-stamp: <2002-02-13 18:19:54 barre>
+# modified by S. Barre (Time-stamp: <2002-02-13 18:32:04 barre>
 # -------------------------------------------------------------------------
 
 # Path to several tools (_PROG to avoid the typical GZIP env var pb)
@@ -109,7 +109,7 @@ export ALLOW_ERASE_OUTPUT_DIRECTORY=ON
 #   RESULTING_HTML_HELP_FILE=$DOXTEMP/vtk4.chm
 #
 export COMPILE_HTML_HELP=@DOCUMENTATION_HTML_HELP@
-export RESULTING_HTML_HELP_FILE="$DOXTEMP/$PROJECT_NAME.chm"
+export RESULTING_HTML_HELP_FILE="$DOXTEMP/cmake.chm"
 
 # CREATE_HTML_TARZ_ARCHIVE RESULTING_HTML_TARZ_ARCHIVE_FILE:
 # Create a compressed (gzip) tar archive of the html directory (located
@@ -123,7 +123,7 @@ export RESULTING_HTML_HELP_FILE="$DOXTEMP/$PROJECT_NAME.chm"
 #   RESULTING_HTML_TARZ_ARCHIVE_FILE=$DOXTEMP/$PROJECT_NAME-html.tar.gz
 #
 export CREATE_HTML_TARZ_ARCHIVE=@DOCUMENTATION_HTML_TARZ@
-export RESULTING_HTML_TARZ_ARCHIVE_FILE="$DOXTEMP/$PROJECT_NAME-html.tar.gz"
+export RESULTING_HTML_TARZ_ARCHIVE_FILE="$DOXTEMP/cmake-html.tar.gz"
 
 # ----------------------------------------------------------------------------
 # Build the contributors list.
