@@ -216,7 +216,6 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
   this->WriteDSWHeader(fout);
   
   // Get the home directory with the trailing slash
-#undef GetCurrentDirectory
   std::string homedir = root->GetMakefile()->GetCurrentDirectory();
   homedir += "/";
     

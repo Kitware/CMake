@@ -14,12 +14,12 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
+#include "windows.h" // this must be first to define GetCurrentDirectory
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmake.h"
-#include "windows.h"
 
 
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator()
@@ -316,7 +316,6 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
   this->WriteSLNHeader(fout);
   
   // Get the home directory with the trailing slash
-#undef GetCurrentDirectory
   std::string homedir = root->GetMakefile()->GetCurrentDirectory();
   homedir += "/";
   bool doneAllBuild = false;
