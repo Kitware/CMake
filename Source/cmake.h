@@ -19,7 +19,7 @@
 #include "cmMakefile.h"
 #include "cmStandardIncludes.h"
 
-class CM_EXPORT cmake
+class cmake
 {
  public:
 

@@ -36,9 +36,9 @@ public:
   ///! Register a generator
   static void RegisterGenerator(cmMakefileGenerator*);
   ///! delete all registered generators, useful for clean up
-  CM_EXPORT static void UnRegisterGenerators();
+  static void UnRegisterGenerators();
   ///! Get the names of the current registered generators
-  CM_EXPORT static void GetRegisteredGenerators(std::vector<std::string>& names);
+  static void GetRegisteredGenerators(std::vector<std::string>& names);
   
   ///! Get the name for the generator.
   virtual const char* GetName() = 0;

@@ -37,17 +37,17 @@ public:
    * in that directory. 0 is returned if the directory can not be 
    * opened, 1 if it is opened.   
    */
-  CM_EXPORT bool Load(const char* dir);
+  bool Load(const char* dir);
 
   /**
    * Return the number of files in the current directory.
    */
-  CM_EXPORT size_t GetNumberOfFiles() { return m_Files.size();}
+  size_t GetNumberOfFiles() { return m_Files.size();}
 
   /**
    * Return the file at the given index, the indexing is 0 based
    */
-  CM_EXPORT const char* GetFile(size_t );
+  const char* GetFile(size_t );
 
 private:
   std::vector<std::string> m_Files; // Array of Files

@@ -39,9 +39,9 @@ public:
   class CacheIterator
   {
   public:
-    CM_EXPORT void Begin();
-    CM_EXPORT bool IsAtEnd();
-    CM_EXPORT void Next();
+    void Begin();
+    bool IsAtEnd();
+    void Next();
     const char *GetName() {
       return position->first.c_str(); } 
     CacheEntry const &GetEntry() {
@@ -70,36 +70,36 @@ public:
    */
   static CacheEntryType StringToType(const char*);
   ///! Singleton pattern get instance of the cmCacheManager.
-  CM_EXPORT static cmCacheManager* GetInstance();
-  CM_EXPORT static void DeleteInstance();
+  static cmCacheManager* GetInstance();
+  static void DeleteInstance();
   
   ///! Load a cache for given makefile.  Loads from ouput home.
-  CM_EXPORT bool LoadCache(cmMakefile*); 
+  bool LoadCache(cmMakefile*); 
   ///! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
-  CM_EXPORT bool LoadCache(const char* path);
-  CM_EXPORT bool LoadCache(const char* path, bool internal);
-  CM_EXPORT bool LoadCache(const char* path, bool internal, 
+  bool LoadCache(const char* path);
+  bool LoadCache(const char* path, bool internal);
+  bool LoadCache(const char* path, bool internal, 
 		 std::set<std::string>& excludes,
 		 std::set<std::string>& includes);
 
   ///! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
-  CM_EXPORT bool SaveCache(cmMakefile*) ;
+  bool SaveCache(cmMakefile*) ;
   ///! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
-  CM_EXPORT bool SaveCache(const char* path) ;
+  bool SaveCache(const char* path) ;
 
   ///! Print the cache to a stream
   void PrintCache(std::ostream&) const;
   
   ///! Get a cache entry object for a key
-  CM_EXPORT CacheEntry *GetCacheEntry(const char *key);
+  CacheEntry *GetCacheEntry(const char *key);
   
-  CM_EXPORT bool IsAdvanced(const char* key);
+  bool IsAdvanced(const char* key);
   
   ///! Remove an entry from the cache
-  CM_EXPORT void RemoveCacheEntry(const char* key);
+  void RemoveCacheEntry(const char* key);
   
   ///! Get the number of entries in the cache
-  CM_EXPORT int GetSize() {
+  int GetSize() {
     return static_cast<int>(m_Cache.size()); }
   
   ///! Break up a line like VAR:type="value" into var, type and value

@@ -35,22 +35,6 @@
 #endif
 
 /*=========================================================================*/
-/* CM_EXPORT is used by CMake and not by plugins */
-/*=========================================================================*/
-#ifndef CM_EXPORT
-#ifdef _WIN32
-#ifdef CMakeLib_EXPORTS
-  #define CM_EXPORT  __declspec( dllexport )
-#else
-  #define CM_EXPORT  __declspec( dllimport )
-#endif
-#else
-#define CM_EXPORT 
-#endif
-#endif
-
-
-/*=========================================================================*/
 /* define the different types of cache entries, see cmCacheManager.h for more
    information */
 /*=========================================================================*/#define CM_CACHE_BOOL 0
@@ -99,15 +83,15 @@ extern "C" {
   /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
      information is passed from the InitialPass to FInalPass for commands
      that need a FinalPass and need information from the InitialPass */
-  extern CM_EXPORT void *cmGetClientData(void *info);
+  extern void *cmGetClientData(void *info);
   /* return the summed size in characters of all the arguments */
-  extern CM_EXPORT int cmGetTotalArgumentSize(int argc, char **argv);
+  extern int cmGetTotalArgumentSize(int argc, char **argv);
   /* free all the memory associated with an argc, argv pair */
-  extern CM_EXPORT void cmFreeArguments(int argc, char **argv);
+  extern void cmFreeArguments(int argc, char **argv);
   /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
      information is passed from the InitialPass to FInalPass for commands
      that need a FinalPass and need information from the InitialPass */
-  extern CM_EXPORT void cmSetClientData(void *info, void *cd);
+  extern void cmSetClientData(void *info, void *cd);
 
   /*=========================================================================*/
   /* The following functions all directly map to methods in the cmMakefile
@@ -115,11 +99,11 @@ extern "C" {
      of these methods take the void * makefile pointer as their first
      argument. */
   /*=========================================================================*/
-  extern CM_EXPORT void cmAddCacheDefinition(void *mf, const char* name, 
+  extern void cmAddCacheDefinition(void *mf, const char* name, 
                                              const char* value, 
                                              const char* doc,
                                              int cachetype);
-  extern CM_EXPORT void cmAddCustomCommand(void *mf, const char* source,
+  extern void cmAddCustomCommand(void *mf, const char* source,
                                            const char* command,
                                            int numArgs,
                                            const char **args,
@@ -128,53 +112,53 @@ extern "C" {
                                            int numOutputs,
                                            const char **outputs,
                                            const char *target);
-  extern CM_EXPORT void cmAddDefineFlag(void *mf, const char* definition);
-  extern CM_EXPORT void cmAddDefinition(void *mf, const char* name, 
+  extern void cmAddDefineFlag(void *mf, const char* definition);
+  extern void cmAddDefinition(void *mf, const char* name, 
                                         const char* value);
-  extern CM_EXPORT void cmAddExecutable(void *mf, const char *exename, 
+  extern void cmAddExecutable(void *mf, const char *exename, 
                                         int numSrcs, const char **srcs, 
                                         int win32);
-  extern CM_EXPORT void cmAddLibrary(void *mf, const char *libname, 
+  extern void cmAddLibrary(void *mf, const char *libname, 
                                      int shared, int numSrcs, 
                                      const char **srcs);
-  extern CM_EXPORT void cmAddLinkDirectoryForTarget(void *mf,
+  extern void cmAddLinkDirectoryForTarget(void *mf,
                                                     const char *tgt, 
                                                     const char* d);
-  extern CM_EXPORT void cmAddLinkLibraryForTarget(void *mf,
+  extern void cmAddLinkLibraryForTarget(void *mf,
                                                   const char *tgt, 
                                                   const char *libname, 
                                                   int libtype);
-  extern CM_EXPORT void cmAddUtilityCommand(void *mf, const char* utilityName,
+  extern void cmAddUtilityCommand(void *mf, const char* utilityName,
                                             const char *command,
                                             const char *arguments,
                                             int all, int numDepends,
                                             const char **depends,
                                             int numOutputs,
                                             const char **outputs);
-  extern CM_EXPORT int cmCommandExists(void *mf, const char* name);
-  extern CM_EXPORT void cmExecuteCommand(void *mf, const char *name, 
+  extern int cmCommandExists(void *mf, const char* name);
+  extern void cmExecuteCommand(void *mf, const char *name, 
                                          int numArgs, const char **args);
-  extern CM_EXPORT 
+  extern 
   void cmExpandSourceListArguments(void *mf,int argc, const char **argv,
                                    int *resArgc, char ***resArgv,
                                    unsigned int startArgumentIndex);
-  extern CM_EXPORT char *cmExpandVariablesInString(void *mf,
+  extern char *cmExpandVariablesInString(void *mf,
                                                    const char *source, 
                                                    int escapeQuotes,
                                                    int atOnly);
-  extern CM_EXPORT unsigned int cmGetCacheMajorVersion(void *mf);
-  extern CM_EXPORT unsigned int cmGetCacheMinorVersion(void *mf);
-  extern CM_EXPORT const char*  cmGetCurrentDirectory(void *mf);
-  extern CM_EXPORT const char*  cmGetCurrentOutputDirectory(void *mf);
-  extern CM_EXPORT const char*  cmGetDefinition(void *mf, const char *def);
-  extern CM_EXPORT const char*  cmGetHomeDirectory(void *mf);
-  extern CM_EXPORT const char*  cmGetHomeOutputDirectory(void *mf);
-  extern CM_EXPORT unsigned int cmGetMajorVersion(void *mf);
-  extern CM_EXPORT unsigned int cmGetMinorVersion(void *mf);
-  extern CM_EXPORT const char*  cmGetProjectName(void *mf);
-  extern CM_EXPORT const char*  cmGetStartDirectory(void *mf);
-  extern CM_EXPORT const char*  cmGetStartOutputDirectory(void *mf);
-  extern CM_EXPORT int cmIsOn(void *mf, const char* name);
+  extern unsigned int cmGetCacheMajorVersion(void *mf);
+  extern unsigned int cmGetCacheMinorVersion(void *mf);
+  extern const char*  cmGetCurrentDirectory(void *mf);
+  extern const char*  cmGetCurrentOutputDirectory(void *mf);
+  extern const char*  cmGetDefinition(void *mf, const char *def);
+  extern const char*  cmGetHomeDirectory(void *mf);
+  extern const char*  cmGetHomeOutputDirectory(void *mf);
+  extern unsigned int cmGetMajorVersion(void *mf);
+  extern unsigned int cmGetMinorVersion(void *mf);
+  extern const char*  cmGetProjectName(void *mf);
+  extern const char*  cmGetStartDirectory(void *mf);
+  extern const char*  cmGetStartOutputDirectory(void *mf);
+  extern int cmIsOn(void *mf, const char* name);
   
   
   /*=========================================================================*/
@@ -182,25 +166,25 @@ extern "C" {
   cmSourceFiles. Please see cmSourceFile.h for additional information on many
   of these methods. Some of these methods are in cmMakefile.h. */
   /*=========================================================================*/
-  extern CM_EXPORT void *cmAddSource(void *mf, void *sf); 
-  extern CM_EXPORT void *cmCreateSourceFile();
-  extern CM_EXPORT void *cmGetSource(void *mf, const char* sourceName);
-  extern CM_EXPORT void  cmSourceFileAddDepend(void *sf, const char *depend);
-  extern CM_EXPORT const char *cmSourceFileGetProperty(void *sf, 
+  extern void *cmAddSource(void *mf, void *sf); 
+  extern void *cmCreateSourceFile();
+  extern void *cmGetSource(void *mf, const char* sourceName);
+  extern void  cmSourceFileAddDepend(void *sf, const char *depend);
+  extern const char *cmSourceFileGetProperty(void *sf, 
                                                        const char *prop);
-  extern CM_EXPORT int cmSourceFileGetPropertyAsBool(void *sf, 
+  extern int cmSourceFileGetPropertyAsBool(void *sf, 
                                                      const char *prop);
-  extern CM_EXPORT const char *cmSourceFileGetSourceName(void *sf);
-  extern CM_EXPORT 
+  extern const char *cmSourceFileGetSourceName(void *sf);
+  extern 
   void cmSourceFileSetName(void *sf, const char* name, const char* dir,
                            int numSourceExtensions,
                            const char **sourceExtensions,
                            int numHeaderExtensions,
                            const char **headerExtensions);
-  extern CM_EXPORT 
+  extern 
   void cmSourceFileSetName2(void *sf, const char* name, const char* dir, 
                             const char *ext, int headerFileOnly);
-  extern CM_EXPORT void cmSourceFileSetProperty(void *sf, const char *prop, 
+  extern void cmSourceFileSetProperty(void *sf, const char *prop, 
                                                 const char *value);
   
   
@@ -208,10 +192,10 @@ extern "C" {
   /* the following methods are from cmSystemTools.h see that file for
      specific documentaiton on each method. */
   /*=========================================================================*/
-  extern CM_EXPORT char *cmCapitalized(const char *);
-  extern CM_EXPORT void cmCopyFileIfDifferent(const char *f1, const char *f2);
-  extern CM_EXPORT char *cmGetFilenameWithoutExtension(const char *);
-  extern CM_EXPORT void cmRemoveFile(const char *f1);
+  extern char *cmCapitalized(const char *);
+  extern void cmCopyFileIfDifferent(const char *f1, const char *f2);
+  extern char *cmGetFilenameWithoutExtension(const char *);
+  extern void cmRemoveFile(const char *f1);
   
 #ifdef  __cplusplus
 }

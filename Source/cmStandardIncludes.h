@@ -21,17 +21,6 @@
 #ifndef cmStandardIncludes_h
 #define cmStandardIncludes_h
 
-/* CM_EXPORT is used by the plugin API */
-#ifdef _WIN32
-#ifdef CMakeLib_EXPORTS
-  #define CM_EXPORT  __declspec( dllexport )
-#else
-  #define CM_EXPORT  __declspec( dllimport )
-#endif
-#else
-#define CM_EXPORT 
-#endif
-
 // include configure generated  header to define
 // CMAKE_NO_ANSI_STREAM_HEADERS and CMAKE_NO_STD_NAMESPACE
 #if defined(CMAKE_HAS_AUTOCONF) || defined(CMAKE_BUILD_WITH_CMAKE)

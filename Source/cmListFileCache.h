@@ -45,8 +45,8 @@ struct cmListFile
 class cmListFileCache
 {
 public:
-  static CM_EXPORT cmListFileCache* GetInstance();
-  static CM_EXPORT void ClearCache();
+  static cmListFileCache* GetInstance();
+  static void ClearCache();
 
 
   /** Return the cached version of the given file.
