@@ -27,6 +27,7 @@
 
 #include "cmStandardIncludes.h"
 #include "windows.h"
+#include "stdio.h"
 
 class cmMakefile;
 
