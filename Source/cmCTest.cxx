@@ -25,6 +25,7 @@
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
+#include <cmsys/Base64.h>
 
 #include <stdlib.h> // required for atoi
 #include <stdio.h>
@@ -871,13 +872,14 @@ int cmCTest::ConfigureDirectory()
       }
     std::string start_time = ::CurrentTime();
 
-    res = cmSystemTools::RunSingleCommand(cCommand.c_str(), &output, 
-      &retVal, buildDirectory.c_str(),
-      m_Verbose, m_TimeOut);
     std::ofstream ofs;
-    if ( this->OpenOutputFile("Temporary", "LastConfigure.log", ofs) )
+    this->OpenOutputFile("Temporary", "LastConfigure.log", ofs);
+    res = this->RunMakeCommand(cCommand.c_str(), &output, 
+      &retVal, buildDirectory.c_str(),
+      m_Verbose, m_TimeOut, ofs);
+
+    if ( ofs )
       {
-      ofs << output;
       ofs.close();
       }
     
@@ -1034,6 +1036,9 @@ int cmCTest::BuildDirectory()
     }
   std::vector<cmCTestBuildErrorWarning> errorsWarnings;
 
+  int errors = 0;
+  int warnings = 0;
+
   std::vector<int>::size_type kk;
   cmCTestBuildErrorWarning errorwarning;
   for ( kk =0; kk < markedLines.size(); kk ++ )
@@ -1078,8 +1083,19 @@ int cmCTest::BuildDirectory()
         errorwarning.m_PostContext += lines[jj] + "\n";
         }
       errorsWarnings.push_back(errorwarning);
+      if ( errorwarning.m_Error )
+        {
+        errors ++;
+        }
+      else
+        {
+        warnings ++;
+        }
       }
     }
+
+  std::cout << "   " << errors << " Compiler errors" << std::endl;
+  std::cout << "   " << warnings << " Compiler warnings" << std::endl;
 
   if( !this->OpenOutputFile(m_CurrentTag, "Build.xml", ofs) )
     {
@@ -2132,12 +2148,13 @@ bool cmCTest::RunMakeCommand(const char* command, std::string* output,
   
   std::string::size_type tick = 0;
   std::string::size_type tick_len = 1024;
+  std::string::size_type tick_line_len = 50;
 
   char* data;
   int length;
   if ( !verbose )
     {
-    std::cout << "   Each . represents 1024 bytes of output" << std::endl;
+    std::cout << "   Each . represents " << tick_len << " bytes of output" << std::endl;
     std::cout << "    " << std::flush;
     }
   while(cmsysProcess_WaitForData(cp, (cmsysProcess_Pipe_STDOUT |
@@ -2151,6 +2168,12 @@ bool cmCTest::RunMakeCommand(const char* command, std::string* output,
         {
         tick ++;
         std::cout << "." << std::flush;
+        if ( tick % tick_line_len == 0 && tick > 0 )
+          {
+          std::cout << "  Size: ";
+          std::cout << int((output->size() / 1024.0) + 1) << "K" << std::endl;
+          std::cout << "    " << std::flush;
+          }
         }
       }
     if(verbose)
@@ -2164,8 +2187,7 @@ bool cmCTest::RunMakeCommand(const char* command, std::string* output,
       }
     }
   std::cout << " Size of output: ";
-  std::cout.precision(2);
-  std::cout << (output->size() / 1024.0) << "K" << std::endl;
+  std::cout << int(output->size() / 1024.0) << "K" << std::endl;
   
   cmsysProcess_WaitForExit(cp, 0);
   
