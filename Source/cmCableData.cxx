@@ -28,9 +28,11 @@ cmCableData::cmCableData(const cmCableCommand* owner,
   m_Indentation(0),
   m_Package(NULL),
   m_PackageNamespaceDepth(0),
-  m_PackageClassIndex(-1)
+  m_PackageClassIndex(-1),
+  m_OutputFileName(configurationFile),
+  m_OutputFile(m_OutputFileName.c_str())
 {
-  this->OpenOutputFile(configurationFile);
+  this->InitializeOutputFile();
 }
 
 
@@ -48,20 +50,18 @@ cmCableData::~cmCableData()
 
 
 /**
- * Open the configuration output file with the given name.  This
- * writes the configuration header.
+ * Write the configuration header to the output file.
  */
-void cmCableData::OpenOutputFile(const std::string& name)
+void cmCableData::InitializeOutputFile()
 {
-  m_OutputFile.open(name.c_str());
-  
   if(m_OutputFile)
     {
     this->WriteConfigurationHeader();
     }
   else
     {
-    cmSystemTools::Error("Unable to open CABLE config file: ", name.c_str());
+    cmSystemTools::Error("Unable to open CABLE config file: ",
+                         m_OutputFileName.c_str());
     }
 }
 
