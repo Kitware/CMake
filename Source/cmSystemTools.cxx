@@ -484,6 +484,18 @@ const char *cmSystemTools::ConvertToWindowsSlashesAndCleanUp(std::string& path)
   return path.c_str();
 }
 
+inline void CleanText(char* s)
+{
+  while(*s != 0)
+    {
+      if(*s == '\r')
+	{
+	  *s = ' ';
+	}
+      s++;
+    }
+}
+
 bool cmSystemTools::ParseFunction(std::ifstream& fin,
                                   std::string& name,
                                   std::vector<std::string>& arguments,
@@ -497,9 +509,9 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
     {
     return false;
     }
-  
   if(fin.getline(inbuffer, BUFFER_SIZE ) )
     {
+    CleanText(&inbuffer[0]);
     cmRegularExpression blankLine("^[ \t]*$");
     cmRegularExpression comment("^[ \t]*#.*$");
     cmRegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t]*$");
@@ -534,6 +546,7 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
         // read lines until the end paren is found
         if(fin.getline(inbuffer, BUFFER_SIZE ) )
           {
+          CleanText(&inbuffer[0]);
           // Check for comment lines and ignore them.
           if(blankLine.find(inbuffer) || comment.find(inbuffer))
             { continue; }
