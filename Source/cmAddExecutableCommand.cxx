@@ -83,6 +83,8 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
 
     func.m_Arguments.push_back(cmListFileArgument(f1, true));
     func.m_Arguments.push_back(cmListFileArgument(f2, true));
+    func.m_Arguments.push_back(cmListFileArgument("IMMEDIATE", true));
+    m_Makefile->AddDefinition("MACOSX_BUNDLE_EXECUTABLE_NAME", exename.c_str());
     m_Makefile->ExecuteCommand(func);
 #endif
     }
