@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                  const cmMakefile &mf) const
+                  cmMakefile &mf)
 {
   if (!strcmp(name,"ELSE") || !strcmp(name,"ENDIF"))
     {
@@ -63,13 +63,13 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
 
 bool cmIfFunctionBlocker::
 ShouldRemove(const char *name, const std::vector<std::string> &args, 
-             const cmMakefile &mf) const
+             cmMakefile &mf) 
 {
   return !this->IsFunctionBlocked(name,args,mf);
 }
 
 void cmIfFunctionBlocker::
-ScopeEnded(const cmMakefile &mf) const
+ScopeEnded(cmMakefile &mf)
 {
   cmSystemTools::Error("The end of a CMakeLists file was reached with an IF statement that was not closed properly. Within the directory: ", 
                        mf.GetCurrentDirectory(),

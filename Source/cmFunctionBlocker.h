@@ -56,7 +56,7 @@ public:
    * should a function be blocked
    */
   virtual bool IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                                 const cmMakefile &mf) const = 0;
+                                 cmMakefile &mf) = 0;
 
   /**
    * should this function blocker be removed, useful when one function adds a
@@ -64,14 +64,14 @@ public:
    */
   virtual bool ShouldRemove(const char *name, 
                             const std::vector<std::string> &args, 
-                            const cmMakefile &mf) const {return false;}
+                            cmMakefile &mf) {return false;}
 
   /**
    * When the end of a CMakeList file is reached this method is called.  It
    * is not called on the end of an INCLUDE cmake file, just at the end of a
    * regular CMakeList file 
    */
-  virtual void ScopeEnded(const cmMakefile &mf) const {}
+  virtual void ScopeEnded(cmMakefile &mf) {}
 
   virtual ~cmFunctionBlocker() {}
 };

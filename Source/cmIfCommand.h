@@ -57,11 +57,11 @@ public:
   virtual ~cmIfFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const char *name, 
                                  const std::vector<std::string> &args, 
-                                 const cmMakefile &mf) const;
+                                 cmMakefile &mf);
   virtual bool ShouldRemove(const char *name, 
                             const std::vector<std::string> &args, 
-                            const cmMakefile &mf) const;
-  virtual void ScopeEnded(const cmMakefile &mf) const;
+                            cmMakefile &mf);
+  virtual void ScopeEnded(cmMakefile &mf);
   
   std::string m_Define;
   bool m_Not;

@@ -217,6 +217,52 @@ void cmMakefile::Print() const
     }
 }
 
+
+      
+void cmMakefile::ExecuteCommand(std::string &name,
+                                std::vector<std::string> &arguments)
+{
+  RegisteredCommandsMap::iterator pos = m_Commands.find(name);
+  if(pos != m_Commands.end())
+    {
+    cmCommand* rm = (*pos).second;
+    cmCommand* usedCommand = rm->Clone();
+    usedCommand->SetMakefile(this);
+    bool keepCommand = false;
+    if(usedCommand->GetEnabled())
+      {
+      // if not running in inherit mode or
+      // if the command is inherited then InitialPass it.
+      if(!m_Inheriting || usedCommand->IsInherited())
+        {
+        if(!usedCommand->InitialPass(arguments))
+          {
+          cmSystemTools::Error(usedCommand->GetName(),
+                               ": Error : \n",
+                               usedCommand->GetError(),
+                               m_cmCurrentDirectory.c_str());
+          }
+        else
+          {
+          // use the command
+          keepCommand = true;
+          m_UsedCommands.push_back(usedCommand);
+          }
+        }
+      }
+    // if the Cloned command was not used 
+    // then delete it
+    if(!keepCommand)
+      {
+      delete usedCommand;
+      }
+    }
+  else
+    {
+    cmSystemTools::Error("unknown CMake command ", name.c_str());
+    }
+}
+
 // Parse the given CMakeLists.txt file into a list of classes.
 // Reads in current CMakeLists file and all parent CMakeLists files
 // executing all inherited commands in the parents
@@ -273,7 +319,7 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   //
   //   this might, or might not be true, irrespective if we are
   //   off looking at an external makefile.
-  bool inheriting = (m_cmCurrentDirectory != m_cmStartDirectory);
+  m_Inheriting = (m_cmCurrentDirectory != m_cmStartDirectory);
                     
   // Now read the input file
   const char *filenametoread= filename;
@@ -299,45 +345,7 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
     if(cmSystemTools::ParseFunction(fin, name, arguments) &&
        !this->IsFunctionBlocked(name.c_str(),arguments))
       {
-      RegisteredCommandsMap::iterator pos = m_Commands.find(name);
-      if(pos != m_Commands.end())
-        {
-        cmCommand* rm = (*pos).second;
-        cmCommand* usedCommand = rm->Clone();
-        usedCommand->SetMakefile(this);
-        bool keepCommand = false;
-        if(usedCommand->GetEnabled())
-          {
-          // if not running in inherit mode or
-          // if the command is inherited then InitialPass it.
-          if(!inheriting || usedCommand->IsInherited())
-            {
-            if(!usedCommand->InitialPass(arguments))
-              {
-              cmSystemTools::Error(usedCommand->GetName(),
-                                   ": Error : \n",
-                                   usedCommand->GetError(),
-                                   m_cmCurrentDirectory.c_str());
-              }
-            else
-              {
-              // use the command
-              keepCommand = true;
-              m_UsedCommands.push_back(usedCommand);
-              }
-            }
-          }
-        // if the Cloned command was not used 
-        // then delete it
-        if(!keepCommand)
-          {
-          delete usedCommand;
-          }
-        }
-      else
-        {
-        cmSystemTools::Error("unknown CMake command ", name.c_str(), filename);
-        }
+      this->ExecuteCommand(name,arguments);
       }
     }
 
@@ -923,7 +931,7 @@ cmMakefile::FindSourceGroup(const char* source,
 
 
 bool cmMakefile::IsFunctionBlocked(const char *name,
-                                   std::vector<std::string> &args) const
+                                   std::vector<std::string> &args)
 {
   // loop over all function blockers to see if any block this command
   std::set<cmFunctionBlocker *>::const_iterator pos;

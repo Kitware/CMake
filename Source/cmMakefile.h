@@ -493,6 +493,13 @@ public:
   void RegisterData(const char*, cmData*);
   cmData* LookupData(const char*) const;
   
+  /**
+   * execute a single CMake command
+   */
+  void cmMakefile::ExecuteCommand(std::string &name,
+                                  std::vector<std::string> &args);
+  
+    
 protected:
   std::string m_Prefix;
   std::vector<std::string> m_AuxSourceDirectories; // 
@@ -531,7 +538,7 @@ protected:
   RegisteredCommandsMap m_Commands;
   std::vector<cmCommand*> m_UsedCommands;
   cmMakefileGenerator* m_MakefileGenerator;
-  bool IsFunctionBlocked(const char *name, std::vector<std::string> &args) const;
+  bool IsFunctionBlocked(const char *name, std::vector<std::string> &args);
   
 private:
   /**
@@ -550,6 +557,7 @@ private:
   
   typedef std::map<std::string, cmData*> DataMap;
   DataMap m_DataMap;
+  bool m_Inheriting;
 };
 
 
