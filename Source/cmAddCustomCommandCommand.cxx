@@ -19,13 +19,9 @@
 // cmAddCustomCommandCommand
 bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args)
 {
-  /* No control on the number of arguments for now since everything can
-     be optional in that implementation. Should be fixed but this command
-     is so flexible that too much constraint could prevent user to achieve
-     a particular task.
-     Let's complain at the end of this function about the lack of a particular
+  /* Let's complain at the end of this function about the lack of a particular
      arg. For the moment, let's say that SOURCE, COMMAND, TARGET are always 
-     required
+     required.
   */
   if (args.size() < 6)
     {
