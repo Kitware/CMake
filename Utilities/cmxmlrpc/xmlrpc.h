@@ -472,7 +472,7 @@ xmlrpc_array_append_item (xmlrpc_env*   const env,
 void
 xmlrpc_array_read_item(xmlrpc_env *         const envP,
                        const xmlrpc_value * const arrayP,
-                       unsigned int         const index,
+                       unsigned int         const xmIndex,
                        xmlrpc_value **      const valuePP);
 
 /* Get an item from an XML-RPC array.
@@ -482,7 +482,7 @@ xmlrpc_array_read_item(xmlrpc_env *         const envP,
 xmlrpc_value * 
 xmlrpc_array_get_item(xmlrpc_env *         const env,
                       const xmlrpc_value * const array,
-                      int                  const index);
+                      int                  const xmIndex);
 
 /* Not implemented--we don't need it yet.
 extern 
@@ -609,7 +609,7 @@ xmlrpc_struct_set_value_v(xmlrpc_env *   const env,
 void 
 xmlrpc_struct_read_member(xmlrpc_env *    const envP,
                           xmlrpc_value *  const structP,
-                          unsigned int    const index,
+                          unsigned int    const xmIndex,
                           xmlrpc_value ** const keyvalP,
                           xmlrpc_value ** const valueP);
 
@@ -622,7 +622,7 @@ xmlrpc_struct_read_member(xmlrpc_env *    const envP,
 void
 xmlrpc_struct_get_key_and_value(xmlrpc_env *    const env,
                                 xmlrpc_value *  const strct,
-                                int             const index,
+                                int             const xmIndex,
                                 xmlrpc_value ** const out_keyval,
                                 xmlrpc_value ** const out_value);
 

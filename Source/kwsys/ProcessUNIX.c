@@ -83,7 +83,7 @@ typedef struct kwsysProcessCreateInformation_s
 static int kwsysProcessInitialize(kwsysProcess* cp);
 static void kwsysProcessCleanup(kwsysProcess* cp, int error);
 static void kwsysProcessCleanupDescriptor(int* pfd);
-static int kwsysProcessCreate(kwsysProcess* cp, int index,
+static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
                               kwsysProcessCreateInformation* si, int* readEnd);
 static int kwsysProcessSetupOutputPipeFile(int* p, const char* name);
 static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
@@ -397,14 +397,14 @@ int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
 }
 
 /*--------------------------------------------------------------------------*/
-int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, const char* file)
+int kwsysProcess_SetPipeFile(kwsysProcess* cp, int prPipe, const char* file)
 {
   char** pfile;
   if(!cp)
     {
     return 0;
     }
-  switch(pipe)
+  switch(prPipe)
     {
     case kwsysProcess_Pipe_STDIN: pfile = &cp->PipeFileSTDIN; break;
     case kwsysProcess_Pipe_STDOUT: pfile = &cp->PipeFileSTDOUT; break;
@@ -429,20 +429,20 @@ int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, const char* file)
   /* If we are redirecting the pipe, do not share it.  */
   if(*pfile)
     {
-    kwsysProcess_SetPipeShared(cp, pipe, 0);
+    kwsysProcess_SetPipeShared(cp, prPipe, 0);
     }
   return 1;
 }
 
 /*--------------------------------------------------------------------------*/
-void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe, int shared)
+void kwsysProcess_SetPipeShared(kwsysProcess* cp, int prPipe, int shared)
 {
   if(!cp)
     {
     return;
     }
 
-  switch(pipe)
+  switch(prPipe)
     {
     case kwsysProcess_Pipe_STDIN: cp->PipeSharedSTDIN = shared?1:0; break;
     case kwsysProcess_Pipe_STDOUT: cp->PipeSharedSTDOUT = shared?1:0; break;
@@ -453,7 +453,7 @@ void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe, int shared)
   /* If we are sharing the pipe, do not redirect it to a file.  */
   if(shared)
     {
-    kwsysProcess_SetPipeFile(cp, pipe, 0);
+    kwsysProcess_SetPipeFile(cp, prPipe, 0);
     }
 }
 
@@ -954,7 +954,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
 {
   int result = 0;
   int status = 0;
-  int pipe = 0;
+  int prPipe = 0;
 
   /* Make sure we are executing a process.  */
   if(!cp || cp->State != kwsysProcess_State_Executing)
@@ -963,9 +963,9 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
     }
 
   /* Wait for all the pipes to close.  Ignore all data.  */
-  while((pipe = kwsysProcess_WaitForData(cp, 0, 0, userTimeout)) > 0)
+  while((prPipe = kwsysProcess_WaitForData(cp, 0, 0, userTimeout)) > 0)
     {
-    if(pipe == kwsysProcess_Pipe_Timeout)
+    if(prPipe == kwsysProcess_Pipe_Timeout)
       {
       return 0;
       }
@@ -1215,11 +1215,11 @@ static void kwsysProcessCleanupDescriptor(int* pfd)
 }
 
 /*--------------------------------------------------------------------------*/
-static int kwsysProcessCreate(kwsysProcess* cp, int index,
+static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
                               kwsysProcessCreateInformation* si, int* readEnd)
 {
   /* Setup the process's stdin.  */
-  if(index > 0)
+  if(prIndex > 0)
     {
     si->StdIn = *readEnd;
     *readEnd = 0;
@@ -1269,7 +1269,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
 
   /* Replace the stdout pipe with a file if requested.  In this case
      the select call will report that stdout is closed immediately.  */
-  if(index == cp->NumberOfCommands-1 && cp->PipeFileSTDOUT)
+  if(prIndex == cp->NumberOfCommands-1 && cp->PipeFileSTDOUT)
     {
     if(!kwsysProcessSetupOutputPipeFile(&si->StdOut, cp->PipeFileSTDOUT))
       {
@@ -1280,7 +1280,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
   /* Replace the stdout pipe with the parent's if requested.  In this
      case the select call will report that stderr is closed
      immediately.  */
-  if(index == cp->NumberOfCommands-1 && cp->PipeSharedSTDOUT)
+  if(prIndex == cp->NumberOfCommands-1 && cp->PipeSharedSTDOUT)
     {
     kwsysProcessCleanupDescriptor(&si->StdOut);
     si->StdOut = 1;
@@ -1299,13 +1299,13 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
     }
 
   /* Fork off a child process.  */
-  cp->ForkPIDs[index] = kwsysProcessFork(cp, si);
-  if(cp->ForkPIDs[index] < 0)
+  cp->ForkPIDs[prIndex] = kwsysProcessFork(cp, si);
+  if(cp->ForkPIDs[prIndex] < 0)
     {
     return 0;
     }
 
-  if(cp->ForkPIDs[index] == 0)
+  if(cp->ForkPIDs[prIndex] == 0)
     {
     /* Close the read end of the error reporting pipe.  */
     close(si->ErrorPipe[0]);
@@ -1340,7 +1340,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
     kwsysProcessRestoreDefaultSignalHandlers();
 
     /* Execute the real process.  If successful, this does not return.  */
-    execvp(cp->Commands[index][0], cp->Commands[index]);
+    execvp(cp->Commands[prIndex][0], cp->Commands[prIndex]);
 
     /* Failure.  Report error to parent and terminate.  */
     kwsysProcessChildErrorExit(si->ErrorPipe[1]);
@@ -1378,7 +1378,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
   }
 
   /* Successfully created this child process.  */
-  if(index > 0 || si->StdIn > 0)
+  if(prIndex > 0 || si->StdIn > 0)
     {
     /* The parent process does not need the input pipe read end.  */
     kwsysProcessCleanupDescriptor(&si->StdIn);

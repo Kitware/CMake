@@ -368,12 +368,12 @@ performCurlTransaction(xmlrpc_env *      const envP,
             "HTTP POST request.  curl_easy_perform() says: %s", 
             curlTransactionP->curlError);
     else {
-        CURLcode res;
+        CURLcode crRes;
         long http_result;
-        res = curl_easy_getinfo(curlSessionP, CURLINFO_HTTP_CODE, 
+        crRes = curl_easy_getinfo(curlSessionP, CURLINFO_HTTP_CODE, 
                                 &http_result);
 
-        if (res != CURLE_OK)
+        if (crRes != CURLE_OK)
             xmlrpc_env_set_fault_formatted(
                 envP, XMLRPC_INTERNAL_ERROR, 
                 "Curl performed the HTTP POST request, but was "

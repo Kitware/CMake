@@ -110,7 +110,7 @@ get_child_by_name (xmlrpc_env *env, xml_element *parent, char *name)
 */
 
 static xmlrpc_int32
-xmlrpc_atoi(xmlrpc_env *env, char *str, size_t strlen,
+xmlrpc_atoi(xmlrpc_env *env, char *str, size_t stringLength,
             xmlrpc_int32 min, xmlrpc_int32 max)
 {
     long i;
@@ -128,7 +128,7 @@ xmlrpc_atoi(xmlrpc_env *env, char *str, size_t strlen,
                  "\"%s\" must not contain whitespace", str);
 
     /* Convert the value. */
-    end = str + strlen;
+    end = str + stringLength;
     errno = 0;
     i = strtol(str, &end, 10);
 
@@ -145,7 +145,7 @@ xmlrpc_atoi(xmlrpc_env *env, char *str, size_t strlen,
                      "\"%s\" must be in range %d to %d", str, min, max);
 
     /* Check for unused characters. */
-    if (end != str + strlen)
+    if (end != str + stringLength)
         XMLRPC_FAIL1(env, XMLRPC_PARSE_ERROR,
                      "\"%s\" contained trailing data", str);
     
@@ -159,7 +159,7 @@ xmlrpc_atoi(xmlrpc_env *env, char *str, size_t strlen,
 
 
 static double
-xmlrpc_atod(xmlrpc_env *env, char *str, size_t strlen)
+xmlrpc_atod(xmlrpc_env *env, char *str, size_t stringLength)
 {
     double d;
     char *end;
@@ -176,7 +176,7 @@ xmlrpc_atod(xmlrpc_env *env, char *str, size_t strlen)
                      "\"%s\" must not contain whitespace", str);
     
     /* Convert the value. */
-    end = str + strlen;
+    end = str + stringLength;
     errno = 0;
     d = strtod(str, &end);
     
@@ -188,7 +188,7 @@ xmlrpc_atod(xmlrpc_env *env, char *str, size_t strlen)
                      str, strerror(errno), errno);
     
     /* Check for unused characters. */
-    if (end != str + strlen)
+    if (end != str + stringLength)
         XMLRPC_FAIL1(env, XMLRPC_PARSE_ERROR,
                      "\"%s\" contained trailing data", str);
 

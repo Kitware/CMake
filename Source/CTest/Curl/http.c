@@ -1410,8 +1410,8 @@ CURLcode Curl_http(struct connectdata *conn)
        uses the encoded host name! */
     if(conn->host.dispname != conn->host.name) {
       char *url = data->change.url;
-      char *ptr = strstr(url, conn->host.dispname);
-      if(ptr) {
+      char *iPtr = strstr(url, conn->host.dispname);
+      if(iPtr) {
         /* This is where the display name starts in the URL, now replace this
            part with the encoded name. TODO: This method of replacing the host
            name is rather crude as I believe there's a slight risk that the
@@ -1426,13 +1426,13 @@ CURLcode Curl_http(struct connectdata *conn)
         newurl = malloc(urllen + newlen - currlen + 1);
         if(newurl) {
           /* copy the part before the host name */
-          memcpy(newurl, url, ptr - url);
+          memcpy(newurl, url, iPtr - url);
           /* append the new host name instead of the old */
-          memcpy(newurl + (ptr - url), conn->host.name, newlen);
+          memcpy(newurl + (iPtr - url), conn->host.name, newlen);
           /* append the piece after the host name */
-          memcpy(newurl + newlen + (ptr - url),
-                 ptr + currlen, /* copy the trailing zero byte too */
-                 urllen - (ptr-url) - currlen + 1);
+          memcpy(newurl + newlen + (iPtr - url),
+                 iPtr + currlen, /* copy the trailing zero byte too */
+                 urllen - (iPtr-url) - currlen + 1);
           if(data->change.url_alloc)
             free(data->change.url);
           data->change.url = newurl;

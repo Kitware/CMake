@@ -30,10 +30,10 @@ xmlrpc_abort_if_array_bad(xmlrpc_value * const arrayP) {
         if (contents == NULL)
             abort();
         else {
-            unsigned int index;
+            unsigned int xmIndex;
             
-            for (index = 0; index < arraySize; ++index) {
-                xmlrpc_value * const itemP = contents[index];
+            for (xmIndex = 0; xmIndex < arraySize; ++xmIndex) {
+                xmlrpc_value * const itemP = contents[xmIndex];
                 if (itemP == NULL)
                     abort();
                 else if (itemP->_refcount < 1)
@@ -56,13 +56,13 @@ xmlrpc_destroyArrayContents(xmlrpc_value * const arrayP) {
     xmlrpc_value ** const contents = 
         XMLRPC_MEMBLOCK_CONTENTS(xmlrpc_value*, &arrayP->_block);
 
-    unsigned int index;
+    unsigned int xmIndex;
     
     XMLRPC_ASSERT_ARRAY_OK(arrayP);
 
     /* Release our reference to each item in the array */
-    for (index = 0; index < arraySize; ++index) {
-        xmlrpc_value * const itemP = contents[index];
+    for (xmIndex = 0; xmIndex < arraySize; ++xmIndex) {
+        xmlrpc_value * const itemP = contents[xmIndex];
         xmlrpc_DECREF(itemP);
     }
     XMLRPC_MEMBLOCK_CLEAN(xmlrpc_value *, &arrayP->_block);
@@ -125,7 +125,7 @@ xmlrpc_array_append_item(xmlrpc_env *   const envP,
 void
 xmlrpc_array_read_item(xmlrpc_env *         const envP,
                        const xmlrpc_value * const arrayP,
-                       unsigned int         const index,
+                       unsigned int         const xmIndex,
                        xmlrpc_value **      const valuePP) {
 
     XMLRPC_ASSERT_ENV_OK(envP);
@@ -142,12 +142,12 @@ xmlrpc_array_read_item(xmlrpc_env *         const envP,
         size_t const size = 
             XMLRPC_MEMBLOCK_SIZE(xmlrpc_value *, &arrayP->_block);
 
-        if (index >= size)
+        if (xmIndex >= size)
             xmlrpc_env_set_fault_formatted(
                 envP, XMLRPC_INDEX_ERROR, "Array index %u is beyond end "
-                "of %u-item array", index, (unsigned int)size);
+                "of %u-item array", xmIndex, (unsigned int)size);
         else {
-            *valuePP = contents[index];
+            *valuePP = contents[xmIndex];
             xmlrpc_INCREF(*valuePP);
         }
     }
@@ -158,15 +158,15 @@ xmlrpc_array_read_item(xmlrpc_env *         const envP,
 xmlrpc_value * 
 xmlrpc_array_get_item(xmlrpc_env *         const envP,
                       const xmlrpc_value * const arrayP,
-                      int                  const index) {
+                      int                  const xmIndex) {
 
     xmlrpc_value * valueP;
 
-    if (index < 0)
+    if (xmIndex < 0)
         xmlrpc_env_set_fault_formatted(
             envP, XMLRPC_INDEX_ERROR, "Index %d is negative.");
     else {
-        xmlrpc_array_read_item(envP, arrayP, index, &valueP);
+        xmlrpc_array_read_item(envP, arrayP, xmIndex, &valueP);
 
         if (!envP->fault_occurred)
             xmlrpc_DECREF(valueP);

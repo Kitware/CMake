@@ -320,12 +320,12 @@ CURLcode Curl_file(struct connectdata *conn)
 #ifdef HAVE_STRFTIME
     if(fstated) {
       struct tm *tm;
-      time_t clock = (time_t)statbuf.st_mtime;
+      time_t cuClock = (time_t)statbuf.st_mtime;
 #ifdef HAVE_GMTIME_R
       struct tm buffer;
-      tm = (struct tm *)gmtime_r(&clock, &buffer);
+      tm = (struct tm *)gmtime_r(&cuClock, &buffer);
 #else
-      tm = gmtime(&clock);
+      tm = gmtime(&cuClock);
 #endif
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
       strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S GMT\r\n",

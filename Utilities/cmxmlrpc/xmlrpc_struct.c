@@ -216,22 +216,22 @@ xmlrpc_struct_has_key_n(xmlrpc_env   * const envP,
                         xmlrpc_value * const strctP,
                         const char *   const key, 
                         size_t         const key_len) {
-    int index;
+    int xmIndex;
 
     /* Suppress a compiler warning about uninitialized variables. */
-    index = 0;
+    xmIndex = 0;
 
     XMLRPC_ASSERT_ENV_OK(envP);
     XMLRPC_ASSERT_VALUE_OK(strctP);
     XMLRPC_ASSERT(key != NULL);
     
     XMLRPC_TYPE_CHECK(envP, strctP, XMLRPC_TYPE_STRUCT);
-    index = find_member(strctP, key, key_len);
+    xmIndex = find_member(strctP, key, key_len);
 
  cleanup:
     if (envP->fault_occurred)
         return 0;
-    return (index >= 0);
+    return (xmIndex >= 0);
 }
 
 
@@ -266,16 +266,16 @@ xmlrpc_struct_find_value(xmlrpc_env *    const envP,
             envP, XMLRPC_TYPE_ERROR, "Value is not a struct.  It is type #%d",
             structP->_type);
     else {
-        int index;
+        int xmIndex;
 
         /* Get our member index. */
-        index = find_member(structP, key, strlen(key));
-        if (index < 0)
+        xmIndex = find_member(structP, key, strlen(key));
+        if (xmIndex < 0)
             *valuePP = NULL;
         else {
             _struct_member * const members =
                 XMLRPC_MEMBLOCK_CONTENTS(_struct_member, &structP->_block);
-            *valuePP = members[index].value;
+            *valuePP = members[xmIndex].value;
             
             XMLRPC_ASSERT_VALUE_OK(*valuePP);
             
@@ -310,18 +310,18 @@ xmlrpc_struct_find_value_v(xmlrpc_env *    const envP,
                 "It is type #%d",
                 keyP->_type);
         else {
-            int index;
+            int xmIndex;
 
             /* Get our member index. */
-            index = find_member(structP, 
+            xmIndex = find_member(structP, 
                                 XMLRPC_MEMBLOCK_CONTENTS(char, &keyP->_block),
                                 XMLRPC_MEMBLOCK_SIZE(char, &keyP->_block)-1);
-            if (index < 0)
+            if (xmIndex < 0)
                 *valuePP = NULL;
             else {
                 _struct_member * const members =
                     XMLRPC_MEMBLOCK_CONTENTS(_struct_member, &structP->_block);
-                *valuePP = members[index].value;
+                *valuePP = members[xmIndex].value;
                 
                 XMLRPC_ASSERT_VALUE_OK(*valuePP);
                 
@@ -487,7 +487,7 @@ xmlrpc_struct_set_value_v(xmlrpc_env *   const envP,
 
     char *key;
     size_t key_len;
-    int index;
+    int xmIndex;
     _struct_member *members, *member, new_member;
     xmlrpc_value *old_value;
 
@@ -501,14 +501,14 @@ xmlrpc_struct_set_value_v(xmlrpc_env *   const envP,
 
     key = XMLRPC_MEMBLOCK_CONTENTS(char, &keyvalP->_block);
     key_len = XMLRPC_MEMBLOCK_SIZE(char, &keyvalP->_block) - 1;
-    index = find_member(strctP, key, key_len);
+    xmIndex = find_member(strctP, key, key_len);
 
-    if (index >= 0) {
+    if (xmIndex >= 0) {
         /* Change the value of an existing member. (But be careful--the
         ** original and new values might be the same object, so watch
         ** the order of INCREF and DECREF calls!) */
         members = XMLRPC_MEMBLOCK_CONTENTS(_struct_member, &strctP->_block);
-        member = &members[index];
+        member = &members[xmIndex];
 
         /* Juggle our references. */
         old_value = member->value;
@@ -540,7 +540,7 @@ cleanup:
 void 
 xmlrpc_struct_read_member(xmlrpc_env *    const envP,
                           xmlrpc_value *  const structP,
-                          unsigned int    const index,
+                          unsigned int    const xmIndex,
                           xmlrpc_value ** const keyvalP,
                           xmlrpc_value ** const valueP) {
 
@@ -559,12 +559,12 @@ xmlrpc_struct_read_member(xmlrpc_env *    const envP,
         size_t const size = 
             XMLRPC_MEMBLOCK_SIZE(_struct_member, &structP->_block);
 
-        if (index >= size)
+        if (xmIndex >= size)
             xmlrpc_env_set_fault_formatted(
                 envP, XMLRPC_INDEX_ERROR, "Index %u is beyond the end of "
-                "the %u-member structure", index, (unsigned int)size);
+                "the %u-member structure", xmIndex, (unsigned int)size);
         else {
-            _struct_member * const memberP = &members[index];
+            _struct_member * const memberP = &members[xmIndex];
             *keyvalP = memberP->key;
             xmlrpc_INCREF(memberP->key);
             *valueP = memberP->value;
@@ -578,7 +578,7 @@ xmlrpc_struct_read_member(xmlrpc_env *    const envP,
 void 
 xmlrpc_struct_get_key_and_value(xmlrpc_env *    const envP,
                                 xmlrpc_value *  const structP,
-                                int             const index,
+                                int             const xmIndex,
                                 xmlrpc_value ** const keyvalP,
                                 xmlrpc_value ** const valueP) {
 /*----------------------------------------------------------------------------
@@ -592,11 +592,11 @@ xmlrpc_struct_get_key_and_value(xmlrpc_env *    const envP,
     XMLRPC_ASSERT_PTR_OK(keyvalP);
     XMLRPC_ASSERT_PTR_OK(valueP);
 
-    if (index < 0)
+    if (xmIndex < 0)
         xmlrpc_env_set_fault_formatted(
             envP, XMLRPC_INDEX_ERROR, "Index %d is negative.");
     else {
-        xmlrpc_struct_read_member(envP, structP, index, keyvalP, valueP);
+        xmlrpc_struct_read_member(envP, structP, xmIndex, keyvalP, valueP);
         if (!envP->fault_occurred) {
             xmlrpc_DECREF(*keyvalP);
             xmlrpc_DECREF(*valueP);
