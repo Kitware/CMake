@@ -57,11 +57,15 @@ protected:
   void RemoveAdvancedValues();
   // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
-        enum { IDD = IDD_CMakeSetupDialog_DIALOG };
-        CButton m_HelpButton;
-        CComboBox       m_GeneratorChoice;
-        CButton m_OKButton;
-        CButton m_CancelButton;
+  enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+  CButton       m_AdvancedValuesControl;
+  CStatic       m_BuildForLabel;
+  CButton       m_BrowseSource;
+  CButton       m_BrowseBuild;
+  CButton m_HelpButton;
+  CComboBox       m_GeneratorChoice;
+  CButton m_OKButton;
+  CButton m_CancelButton;
   CString       m_WhereSource;
   CString       m_WhereBuild;
   CButton       m_ListFrame;
@@ -72,9 +76,9 @@ protected:
   CStatic       m_MouseHelp;
   CStatic       m_VersionDisplay;
   CButton       m_Configure;
-        CString m_GeneratorChoiceString;
-        BOOL    m_AdvancedValues;
-        //}}AFX_DATA
+  CString m_GeneratorChoiceString;
+  BOOL    m_AdvancedValues;
+  //}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
   //{{AFX_VIRTUAL(CMakeSetupDialog)

@@ -127,6 +127,8 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   m_CacheEntriesList.m_CMakeSetupDialog = this;
   
   //{{AFX_DATA_INIT(CMakeSetupDialog)
+	//}}AFX_DATA_INIT
+
   // Get the parameters from the command line info
   // If an unknown parameter is found, try to interpret it too, since it
   // is likely to be a file dropped on the shortcut :)
@@ -145,7 +147,6 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
     this->m_GeneratorChoiceString = _T("");
     this->ChangeDirectoriesFromFile((LPCTSTR)cmdInfo.m_LastUnknownParameter);
     }
-  //}}AFX_DATA_INIT
 
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -169,6 +170,10 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
 {
   CDialog::DoDataExchange(pDX);
   //{{AFX_DATA_MAP(CMakeSetupDialog)
+	DDX_Control(pDX, IDC_AdvancedValues, m_AdvancedValuesControl);
+	DDX_Control(pDX, IDC_BuildForLabel, m_BuildForLabel);
+	DDX_Control(pDX, IDC_BROWSE_SOURCE, m_BrowseSource);
+	DDX_Control(pDX, IDC_BROWSE_BUILD, m_BrowseBuild);
 	DDX_Control(pDX, IDC_HELP_BUTTON, m_HelpButton);
 	DDX_Control(pDX, IDC_Generator, m_GeneratorChoice);
 	DDX_Control(pDX, IDC_OK, m_OKButton);
@@ -880,7 +885,6 @@ void CMakeSetupDialog::SaveCacheFromGUI()
 }
 
 
-
 void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy) 
 {
   if (nType == SIZE_MINIMIZED)
@@ -910,6 +914,47 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
     {
     // get the original sizes/positions
     CRect cRect;
+    m_AdvancedValuesControl.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_AdvancedValuesControl.SetWindowPos(&wndTop, cRect.left + deltax, 
+                                 cRect.top, 
+                                 0, 0,
+                                 SWP_NOSIZE | SWP_NOZORDER);
+    m_BuildForLabel.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_BuildForLabel.SetWindowPos(&wndTop, cRect.left + deltax, 
+                                 cRect.top, 
+                                 0, 0,
+                                 SWP_NOSIZE | SWP_NOZORDER);
+    m_GeneratorChoice.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_GeneratorChoice.SetWindowPos(&wndTop, cRect.left + deltax, 
+                                   cRect.top, 
+                                   0, 0,
+                                   SWP_NOSIZE | SWP_NOZORDER);
+    m_BrowseSource.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_BrowseSource.SetWindowPos(&wndTop, cRect.left + deltax, 
+                                cRect.top, 
+                                0, 0,
+                                 SWP_NOSIZE | SWP_NOZORDER);
+    m_BrowseBuild.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_BrowseBuild.SetWindowPos(&wndTop, cRect.left + deltax, 
+                                 cRect.top, 
+                                 0, 0,
+                                 SWP_NOSIZE | SWP_NOZORDER);
+    
+    m_WhereSourceControl.GetWindowRect(&cRect);
+    m_WhereSourceControl.SetWindowPos(&wndTop, cRect.left, cRect.top, 
+                                      cRect.Width() + deltax, 
+                                      cRect.Height() + deltay, 
+                                      SWP_NOMOVE | SWP_NOZORDER);
+    m_WhereBuildControl.GetWindowRect(&cRect);
+    m_WhereBuildControl.SetWindowPos(&wndTop, cRect.left, cRect.top, 
+                                      cRect.Width() + deltax, 
+                                      cRect.Height() + deltay, 
+                                      SWP_NOMOVE | SWP_NOZORDER);
     m_ListFrame.GetWindowRect(&cRect);
     m_ListFrame.SetWindowPos(&wndTop, cRect.left, cRect.top, 
                              cRect.Width() + deltax, 

@@ -1,4 +1,4 @@
-// Microsoft Visual C++ generated resource script.
+//Microsoft Developer Studio generated resource script.
 //
 #include "resource.h"
 
@@ -27,18 +27,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -66,15 +66,15 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\CMakeSetupDialog.ico"
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\CMakeSetupDialog.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOG  0, 0, 235, 55
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About CMakeSetup"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -86,18 +86,18 @@ BEGIN
 END
 
 IDD_CMakeSetupDialog_DIALOG DIALOGEX 0, 0, 446, 241
-STYLE DS_SETFONT | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | 
-    WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "CMakeSetupDialog"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     COMBOBOX        IDC_WhereSource,96,6,169,66,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Browse...",IDC_BUTTON2,267,6,34,13
+    PUSHBUTTON      "Browse...",IDC_BROWSE_SOURCE,267,6,34,13
     COMBOBOX        IDC_WhereBuild,96,26,169,68,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Browse...",IDC_BUTTON3,267,25,34,13
+    PUSHBUTTON      "Browse...",IDC_BROWSE_BUILD,267,25,34,13
     DEFPUSHBUTTON   "Configure",IDC_BuildProjects,110,223,51,15
     PUSHBUTTON      "Cancel",IDCANCEL,222,223,51,15
     LISTBOX         IDC_LIST2,15,53,419,126,LBS_OWNERDRAWVARIABLE | 
@@ -110,17 +110,17 @@ BEGIN
                     IDC_MouseHelpCaption,112,190,243,27
     LTEXT           "Static",IDC_CMAKE_VERSION,3,227,92,13,SS_CENTERIMAGE
     PUSHBUTTON      "OK",IDC_OK,166,223,51,15
-    COMBOBOX        IDC_Generator,339,7,103,50,CBS_DROPDOWN | CBS_SORT | 
+    COMBOBOX        IDC_Generator,340,7,102,50,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Build For:",IDC_GeneratorLabel,305,9,31,9
     PUSHBUTTON      "Help",IDC_HELP_BUTTON,278,223,51,15
     CONTROL         "Show Advanced Values",IDC_AdvancedValues,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,305,28,98,9
     RTEXT           "Static",IDC_PROGRESS,341,226,100,12,SS_CENTERIMAGE
+    LTEXT           "Build For:",IDC_BuildForLabel,305,8,28,11
 END
 
-IDD_CMAKE_HELP_DIALOG DIALOG  0, 0, 365, 183
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_CMAKE_HELP_DIALOG DIALOG DISCARDABLE  0, 0, 365, 183
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "CMake Help"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -130,6 +130,7 @@ BEGIN
 END
 
 
+#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -152,13 +153,13 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "FileDescription", "CMakeSetup MFC Application"
-            VALUE "FileVersion", "1, 0, 0, 1"
-            VALUE "InternalName", "CMakeSetup"
-            VALUE "LegalCopyright", "Copyright (C) 2000"
-            VALUE "OriginalFilename", "CMakeSetup.EXE"
-            VALUE "ProductName", "CMakeSetup Application"
-            VALUE "ProductVersion", "1, 0, 0, 1"
+            VALUE "FileDescription", "CMakeSetup MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "CMakeSetup\0"
+            VALUE "LegalCopyright", "Copyright (C) 2000\0"
+            VALUE "OriginalFilename", "CMakeSetup.EXE\0"
+            VALUE "ProductName", "CMakeSetup Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -167,6 +168,8 @@ BEGIN
     END
 END
 
+#endif    // !_MAC
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -174,7 +177,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO MOVEABLE PURE 
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
@@ -206,7 +209,7 @@ END
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_ABOUTBOX            "&About CMakeSetup..."
     IDS_CREATESHORTCUT      "&Create shortcut"
