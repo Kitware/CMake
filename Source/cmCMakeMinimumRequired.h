@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Determine the command line that will build this project.";
+    return "Set the minimum required version of cmake for a project.";
     }
   
   /**
@@ -67,8 +67,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CMAKE_MINIMUM_REQUIRED(NAME MAKECOMMAND)\n"
-      "Within CMAKE set NAME to the command that will build this project from the command line using MAKECOMMAND.";
+      "CMAKE_MINIMUM_REQUIRED(VERSION versionNumber)\n"
+      "Let cmake know that the project requires a certain version of a cmake, or newer.  CMake will also try to backwards compatible to the version of cmake specified, if a newer version of cmake is running.";
     }
   
   cmTypeMacro(cmCMakeMinimumRequired, cmCommand);
