@@ -59,7 +59,7 @@ public:
         "This command replaces any variables in the input file with their "
         "values as determined by CMake. If a variables in not defined, it "
         "will be replaced with nothing.  If COPYONLY is passed in, then "
-        "then no varible expansion will take place. If ESCAPE_QUOTES is "
+        "then no variable expansion will take place. If ESCAPE_QUOTES is "
         "passed in then any substitued quotes will be C style escaped. "
         "If IMMEDIATE is specified, then the file will be configured with "
         "the current values of CMake variables instead of waiting until the "

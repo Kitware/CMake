@@ -103,7 +103,7 @@ void cmConfigureFileCommand::ConfigureFile()
       return;
       }
 
-    // now copy input to output and expand varibles in the
+    // now copy input to output and expand variables in the
     // input file at the same time
     const int bufSize = 4096;
     char buffer[bufSize];

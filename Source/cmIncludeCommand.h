@@ -61,7 +61,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Basically identical to a C #include \"somthing\" command.";
+    return "Basically identical to a C #include \"something\" command.";
     }
   
   /**

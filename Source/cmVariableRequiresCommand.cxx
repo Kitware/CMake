@@ -31,12 +31,12 @@ bool cmVariableRequiresCommand::InitialPass(std::vector<std::string> const& args
 
 void cmVariableRequiresCommand::FinalPass()
 {
-  std::string testVarible = m_Arguments[0]; 
-  if(!m_Makefile->IsOn(testVarible.c_str()))
+  std::string testVariable = m_Arguments[0]; 
+  if(!m_Makefile->IsOn(testVariable.c_str()))
     {
     return;
     }
-  std::string resultVarible = m_Arguments[1];
+  std::string resultVariable = m_Arguments[1];
   bool requirementsMet = true;
   std::string notSet;
   bool hasAdvanced = false;
@@ -55,22 +55,22 @@ void cmVariableRequiresCommand::FinalPass()
         }
       }
     }
-  const char* reqVar = m_Makefile->GetDefinition(resultVarible.c_str());
+  const char* reqVar = m_Makefile->GetDefinition(resultVariable.c_str());
   // if reqVar is unset, then set it to requirementsMet 
   // if reqVar is set to true, but requirementsMet is false , then
   // set reqVar to false.
   if(!reqVar || (!requirementsMet && m_Makefile->IsOn(reqVar)))
     {
-    m_Makefile->AddDefinition(resultVarible.c_str(), requirementsMet);
+    m_Makefile->AddDefinition(resultVariable.c_str(), requirementsMet);
     }
 
   if(!requirementsMet)
     {
     std::string message = "Variable assertion failed:\n";
-    message += testVarible + " Requires that the following unset varibles are set:\n";
+    message += testVariable + " Requires that the following unset variables are set:\n";
     message += notSet;
     message += "\nPlease set them, or set ";
-    message += testVarible + " to false, and re-configure.\n";
+    message += testVariable + " to false, and re-configure.\n";
     if(hasAdvanced)
       {
       message += "One or more of the required variables is advanced.  To set the variable, you must turn on advanced mode in cmake.";

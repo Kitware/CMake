@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Mark a cmake varible as advanced.";
+    return "Mark a cmake variable as advanced.";
     }
   
   /**

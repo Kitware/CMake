@@ -2737,13 +2737,13 @@ cmLocalUnixMakefileGenerator::CreateMakeVariable(const char* s, const char* s2)
       }
     if(ni == 1000)
       {
-      cmSystemTools::Error("Borland makefile varible length too long");
+      cmSystemTools::Error("Borland makefile variable length too long");
       return unmodified;
       }
     // once an unused variable is found 
     m_ShortMakeVariableMap[ret] = "1";
     }
-  // always make an entry into the unmodified to varible map
+  // always make an entry into the unmodified to variable map
   m_MakeVariableMap[unmodified] = ret;
   return ret;
 

@@ -64,13 +64,13 @@ public:
     return
       "VARIABLE_REQUIRES(TEST_VARIABLE RESULT_VARIABLE "
       "REQUIRED_VARIABLE1 REQUIRED_VARIABLE2 ...) "
-      "The first argument (TEST_VARIABLE) is the name of the varible to be "
-      "tested, if that varible is false nothing else is done. If "
+      "The first argument (TEST_VARIABLE) is the name of the variable to be "
+      "tested, if that variable is false nothing else is done. If "
       "TEST_VARIABLE is true, then "
       "the next arguemnt (RESULT_VARIABLE) is a vairable that is set to true "
       "if all the "
       "required variables are set." 
-      "The rest of the arguments are varibles that must be true or not "
+      "The rest of the arguments are variables that must be true or not "
       "set to NOTFOUND to avoid an error.  ";
     }
   
