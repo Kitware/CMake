@@ -428,7 +428,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
       Curl_tvdiff(Curl_tvnow(), conn->now)/1000; /* spent time */
     if(timeout <=0 ) {
       failf(data, "Transfer aborted due to timeout");
-      return -SELECT_TIMEOUT; /* already too little time */
+      return (CURLcode)-SELECT_TIMEOUT; /* already too little time */
     }
   }
 

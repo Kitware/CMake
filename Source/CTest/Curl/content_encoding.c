@@ -91,20 +91,20 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
                                  DSIZ - z->avail_out);
       /* if !CURLE_OK, clean up, return */
       if (result) {              
-        return exit_zlib(z, &k->zlib_init, result);
+        return exit_zlib(z, &k->zlib_init, (CURLcode)result);
       }
 
       /* Done?; clean up, return */
       if (status == Z_STREAM_END) {
         if (inflateEnd(z) == Z_OK)
-          return exit_zlib(z, &k->zlib_init, result);
+          return exit_zlib(z, &k->zlib_init, (CURLcode)result);
         else
           return exit_zlib(z, &k->zlib_init, process_zlib_error(data, z));
       }
 
       /* Done with these bytes, exit */
       if (status == Z_OK && z->avail_in == 0 && z->avail_out > 0) 
-        return result;
+        return (CURLcode)result;
     }
     else {                      /* Error; exit loop, handle below */
       return exit_zlib(z, &k->zlib_init, process_zlib_error(data, z));

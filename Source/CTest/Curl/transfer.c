@@ -246,7 +246,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         if(0>result)
           break; /* get out of loop */
         if(result>0)
-          return result;
+          return (CURLcode)result;
 
         if ((k->bytecount == 0) && (k->writebytecount == 0))
           Curl_pgrsTime(data, TIMER_STARTTRANSFER);
@@ -426,7 +426,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                                          data->state.headerbuff,
                                          headerlen);
               if(result)
-                return result;
+                return (CURLcode)result;
 
               data->info.header_size += headerlen;
               conn->headerbytecount += headerlen;
@@ -723,7 +723,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             result = Curl_client_write(data, k->writetype, k->p,
                                        k->hbuflen);
             if(result)
-              return result;
+              return (CURLcode)result;
 
             data->info.header_size += k->hbuflen;
             conn->headerbytecount += k->hbuflen;
@@ -906,7 +906,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             k->badheader = HEADER_NORMAL; /* taken care of now */
 
             if(result)
-              return result;
+              return (CURLcode)result;
           }
 
         } /* if (! header and data to read ) */
@@ -997,7 +997,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                             conn->upload_present,  /* buffer size */
                             &bytes_written);       /* actually send away */
         if(result)
-          return result;
+          return (CURLcode)result;
         else if(conn->upload_present != bytes_written) {
           /* we only wrote a part of the buffer (if anything), deal with it! */
 
@@ -1063,7 +1063,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   else
     result = Curl_speedcheck (data, k->now);
   if (result)
-    return result;
+    return (CURLcode)result;
     
   if (data->set.timeout &&
       ((Curl_tvdiff(k->now, k->start)/1000) >= data->set.timeout)) {

@@ -150,6 +150,8 @@ CURLcode Curl_file(struct connectdata *conn)
   struct timeval now = start;
   int fd;
 
+  (void)now;
+
   /* get the fd from the connection phase */
   fd = conn->proto.file->fd;
 

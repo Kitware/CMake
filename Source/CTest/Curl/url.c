@@ -476,7 +476,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Parse the $HOME/.netrc file
      */
-    data->set.use_netrc = va_arg(param, long);
+    data->set.use_netrc = (enum CURL_NETRC_OPTION)va_arg(param, long);
     break;
   case CURLOPT_FOLLOWLOCATION:
     /*
@@ -513,7 +513,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Set HTTP time condition. This must be one of the defines in the
      * curl/curl.h header file.
      */
-    data->set.timecondition = va_arg(param, long);
+    data->set.timecondition = (curl_TimeCond)va_arg(param, long);
     break;
   case CURLOPT_TIMEVALUE:
     /*
@@ -1086,7 +1086,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Set proxy type. HTTP/SOCKS4/SOCKS5
      */
-    data->set.proxytype = va_arg(param, long);
+    data->set.proxytype = (curl_proxytype)va_arg(param, long);
     break;
 
   case CURLOPT_PRIVATE:
@@ -1409,7 +1409,7 @@ static int handleSock5Proxy(
     return 1;
   }
 
-  result=Curl_read(conn, sock, (char *)socksreq, 2, &actualread);
+  result=(CURLcode)Curl_read(conn, sock, (char *)socksreq, 2, &actualread);
   if ((result != CURLE_OK) || (actualread != 2)) {
     failf(conn->data, "Unable to receive initial SOCKS5 response.");
     return 1;
@@ -1452,7 +1452,7 @@ static int handleSock5Proxy(
       return 1;
     }
 
-    result=Curl_read(conn, sock, (char *)socksreq, 2, &actualread);
+    result=(CURLcode)Curl_read(conn, sock, (char *)socksreq, 2, &actualread);
     if ((result != CURLE_OK) || (actualread != 2)) {
       failf(conn->data, "Unable to receive SOCKS5 sub-negotiation response.");
       return 1;
@@ -1542,7 +1542,7 @@ static int handleSock5Proxy(
       return 1;
     }
 
-    result = Curl_read(conn, sock, (char *)socksreq, packetsize, &actualread);
+    result = (CURLcode)Curl_read(conn, sock, (char *)socksreq, packetsize, &actualread);
     if ((result != CURLE_OK) || (actualread != packetsize)) {
       failf(conn->data, "Failed to receive SOCKS5 connect request ack.");
       return 1;

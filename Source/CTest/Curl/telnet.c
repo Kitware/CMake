@@ -1068,7 +1068,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
 
   tn = (struct TELNET *)conn->proto.telnet;
 
-  code = check_telnet_options(conn);
+  code = (CURLcode)check_telnet_options(conn);
   if(code)
     return code;
 
