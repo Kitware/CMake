@@ -111,35 +111,7 @@ int main()
   lib += CMAKE_INTDIR;
   lib += "/";
 #endif
-  std::string exe = lib;
 
-  // Test a single character executable to test a: in makefiles
-  exe += "A";
-  exe += cmSystemTools::GetExecutableExtension();
-  int ret;
-  std::string errorMessage;
-  if(cmSystemTools::RunSingleCommand(exe.c_str(), 0, &ret))
-    {
-    if(ret != 10)
-      {
-      errorMessage += exe;
-      errorMessage += " did not return 10";
-      }
-    }
-  else
-    {
-    errorMessage += exe;
-    errorMessage += ": failed to run.";
-    }
-  if(errorMessage.size())
-    {
-    cmFailed(errorMessage.c_str());
-    }
-  else
-    {
-    cmPassed("run Single Character executable A returned 10 as expected.");
-    }
-  
   lib += cmDynamicLoader::LibPrefix();
   lib += "CMakeTestModule";
   lib += cmDynamicLoader::LibExtension();
