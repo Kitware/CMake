@@ -869,7 +869,8 @@ void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
       {
       libpath += m_StaticLibraryExtension;
       }
-    fout << cmSystemTools::EscapeSpaces(libpath.c_str()) << " ";
+    fout << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(libpath.c_str()).c_str())
+         << " ";
     }
 }
 
