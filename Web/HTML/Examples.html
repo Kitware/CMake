@@ -15,8 +15,57 @@ vlink="#000000" alink="#000000">
     <td width="550" valign="top" bgcolor="#FFFFFF">
     <div align="left">
     <font size=5>The following example </font> demonstrates some key ideas
-    of CMake.
+    of CMake. (You may wish to download this
+    <a href="/CMake/HTML/cmakeExample.tar.gz">example code</a> and try it
+    out for yourself.)
+    <p>
+    There are three directories involved. The top level directory has two
+    subdirectories called ./Demo and ./Hello. In the directory ./Hello, a
+    library is built. In the directory ./Demo, an executable is built by
+    linking to the library. A total of three CMakeList.txt files are 
+    created: one for each directory.
+    <p>
+    The first, top-level directory contains the following CMakeLists.txt file.
+    <pre>
+# The name of our project is "HELLO".  CMakeLists files in this project can
+# refer to the root source directory of the project as ${HELLO_SOURCE_DIR} and
+# to the root binary directory of the project as ${HELLO_BINARY_DIR}.
+PROJECT(HELLO)
 
+# Recurse into the "Hello" and "Demo" subdirectories.  This does not actually
+# cause another cmake executable to run.  The same process will walk through
+# the project's entire directory structure.
+SUBDIRS(Hello Demo)
+    </pre>
+    Then for each subdirectory listed in the SUBDIRS command, CMakeLists.txt 
+    files are created. In the ./Hello directory, the following CMakeLists.txt
+    file is created:
+    <pre>
+# Create a library called "Hello" which includes the source file "hello.cxx".
+# The extension is already found.  Any number of sources could be listed here.
+ADD_LIBRARY(Hello hello)
+    </pre>
+    Finally, in the ./Demo directory, the third and final CMakeLists.txt file
+    is created:
+    <pre>
+# Make sure the compiler can find include files from our Hello library.
+INCLUDE_DIRECTORIES(${HELLO_SOURCE_DIR}/Hello)
+
+# Make sure the linker can find the Hello library once it is built.
+LINK_DIRECTORIES(${HELLO_BINARY_DIR}/Hello)
+
+# Add executable called "helloDemo" that is built from the source files
+# "demo.cxx" and "demo_b.cxx".  The extensions are automatically found.
+ADD_EXECUTABLE(helloDemo demo demo_b)
+
+# Link the executable to the Hello library.
+TARGET_LINK_LIBRARIES(helloDemo Hello)
+    </pre>
+    CMake when executed in the top-level directory will process the 
+    CMakeLists.txt file and then descend into the listed subdirectories.
+    Variables, include paths, library paths, etc. are inherited. Depending
+    on the system, makefiles (Unix) or workspaces/projects (MSVC) will be 
+    built. These can then be used in the usual way to build the code.
     </div>
     </td>
 </tr>
