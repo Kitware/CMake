@@ -86,9 +86,15 @@ CMakeSetupGUI::CMakeSetupGUI() {
         o->box(FL_DOWN_BOX);
         o->labelsize(11);
         o->align(FL_ALIGN_TOP_LEFT);
+        { Fl_Pack* o = propertyListPack = new Fl_Pack(40, 99, 485, 185);
+          InsertProperties();
+          o->end();
+          Fl_Group::current()->resizable(o);
+        }
         o->end();
       }
       o->end();
+      Fl_Group::current()->resizable(o);
     }
     { Fl_Box* o = new Fl_Box(141, 305, 275, 25, "Right click on cache entries for additional options");
       o->labelsize(11);
@@ -119,4 +125,7 @@ void CMakeSetupGUI::SetBinaryPath(const char *) {
 }
 
 void CMakeSetupGUI::SetSourcePath(const char *) {
+}
+
+void CMakeSetupGUI::InsertProperties(void) {
 }

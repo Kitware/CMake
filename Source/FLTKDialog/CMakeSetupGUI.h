@@ -8,6 +8,7 @@
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Scroll.H>
+#include <FL/Fl_Pack.H>
 #include <FL/Fl_Box.H>
 
 class CMakeSetupGUI {
@@ -32,6 +33,7 @@ private:
   inline void cb_Build_i(Fl_Button*, void*);
   static void cb_Build(Fl_Button*, void*);
 public:
+  Fl_Pack *propertyListPack;
   ~CMakeSetupGUI();
   virtual void Close(void);
   virtual void BuildProjectFiles(void);
@@ -40,5 +42,6 @@ public:
   virtual void Show(void);
   virtual void SetBinaryPath(const char *);
   virtual void SetSourcePath(const char *);
+  virtual void InsertProperties(void);
 };
 #endif
