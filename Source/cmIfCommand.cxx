@@ -136,7 +136,9 @@ bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
 
   if (args.size() == 2 && (args[0] == "EXISTS"))
     {
-    if(!cmSystemTools::FileExists(args[1].c_str()))
+    std::string tmp = args[1];
+    m_Makefile->ExpandVariablesInString(tmp);
+    if(!cmSystemTools::FileExists(tmp.c_str()))
       {
       f = new cmIfFunctionBlocker();
       }
