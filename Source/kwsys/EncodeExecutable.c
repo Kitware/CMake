@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
   fprintf(ofp, "#include <stdio.h>\n\n");
   
   /* Split file up in 1024-byte chunks.  */
-  while((n = fread(buffer, 1, 1024, ifp)) > 0)
+  while((n = (int)fread(buffer, 1, 1024, ifp)) > 0)
     {
     fprintf(ofp, "static unsigned char kwsysEncodedArray%s_%d[%d] = {\n", 
             argv[4], count++, n);
