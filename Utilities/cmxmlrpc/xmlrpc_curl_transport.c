@@ -437,8 +437,8 @@ performCurlTransaction(xmlrpc_env *      const envP,
     if (res != CURLE_OK)
         xmlrpc_env_set_fault_formatted(
             envP, XMLRPC_NETWORK_ERROR, "Curl failed to perform "
-            "HTTP POST request.  curl_easy_perform() says: %s", 
-            curlTransactionP->curlError);
+            "HTTP POST request.  curl_easy_perform() says: %s (%d)", 
+            curlTransactionP->curlError, res);
     else {
         CURLcode crRes;
         long http_result;
