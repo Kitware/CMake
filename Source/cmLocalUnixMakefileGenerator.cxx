@@ -811,7 +811,7 @@ void cmLocalUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
       depends +=  " \\\n";
       replaceVars = *d;
       m_Makefile->ExpandVariablesInString(replaceVars);
-      depends += this->ConvertToOutputPath(replaceVars.c_str());
+      depends += cmSystemTools::ConvertToOutputPath(replaceVars.c_str());
       }
     }
   this->OutputMakeRule(fout, comment.c_str(), name,
