@@ -35,6 +35,8 @@
 #include <stdlib.h>
 #include <sys/param.h>
 #include <sys/wait.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #endif
 
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__))
@@ -1846,6 +1848,38 @@ bool SystemTools::GetLineFromStream(kwsys_ios::istream& is, kwsys_stl::string& l
   return haveData;
 }
 
+int SystemTools::GetTerminalWidth()
+{
+  int width = -1;
+#ifndef _WIN32
+  struct winsize ws;
+  char *columns; /* Unix98 environment variable */
+  if(ioctl(1, TIOCGWINSZ, &ws) != -1 && ws.ws_col>0 && ws.ws_row>0)
+    {
+    width = ws.ws_col;
+    }
+  if(!isatty(STDOUT_FILENO))
+    {
+    width = -1;
+    }
+  columns = getenv("COLUMNS");
+  if(columns && *columns)
+    {
+    long t;
+    char *endptr;
+    t = strtol(columns, &endptr, 0);
+    if(endptr && !*endptr && (t>0) && (t<1000))
+      {
+      width = (int)t;
+      }
+    }
+  if ( width < 9 )
+    {
+    width = -1;
+    }
+#endif
+  return width;
+}
 } // namespace KWSYS_NAMESPACE
 
 #if defined(_MSC_VER) && defined(_DEBUG)

@@ -276,6 +276,13 @@ public:
    */
   static bool GetLineFromStream(kwsys_ios::istream& istr, kwsys_stl::string& line,
                                 bool* has_newline=0);
+
+  /**
+   * Get the width of the terminal window. The code may or may not work, so
+   * make sure you have some resonable defaults prepared if the code returns
+   * some bogus size.
+   */
+  static int GetTerminalWidth();
   
 protected:
   // these two functions can be called from ConvertToOutputPath
