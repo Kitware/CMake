@@ -401,6 +401,7 @@ bool SystemTools::ReadRegistryValue(const char *key, kwsys_stl::string &value)
       if (dwType == REG_SZ)
         {
         value = data;
+        RegCloseKey(hKey);
         return true;
         }
       }
@@ -564,6 +565,7 @@ bool SystemTools::DeleteRegistryValue(const char *key)
     if(RegDeleteValue(hKey, 
                       (LPTSTR)valuename.c_str()) == ERROR_SUCCESS)
       {
+      RegCloseKey(hKey);
       return true;
       }
     }

@@ -490,7 +490,6 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
   SECURITY_ATTRIBUTES saAttr;
   BOOL fSuccess;
   int fd1, fd2, fd3;
-  //FILE *f1, *f2, *f3;
 
   saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
   saAttr.bInheritHandle = TRUE;
@@ -570,42 +569,30 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
         case _O_WRONLY | _O_TEXT:
           /* Case for writing to child Stdin in text mode. */
           fd1 = _open_osfhandle(TO_INTPTR(hChildStdinWrDup), mode);
-          //f1 = _fdopen(fd1, "w");
           /* We don't care about these pipes anymore,
              so close them. */
-          CloseHandle(hChildStdoutRdDup);
-          CloseHandle(hChildStderrRdDup);
           break;
 
         case _O_RDONLY | _O_TEXT:
           /* Case for reading from child Stdout in text mode. */
           fd1 = _open_osfhandle(TO_INTPTR(hChildStdoutRdDup), mode);
-          //f1 = _fdopen(fd1, "r");
           /* We don't care about these pipes anymore,
              so close them. */
-          CloseHandle(hChildStdinWrDup);
-          CloseHandle(hChildStderrRdDup);
           break;
 
         case _O_RDONLY | _O_BINARY:
           /* Case for readinig from child Stdout in
              binary mode. */
           fd1 = _open_osfhandle(TO_INTPTR(hChildStdoutRdDup), mode);
-          //f1 = _fdopen(fd1, "rb");
           /* We don't care about these pipes anymore,
              so close them. */
-          CloseHandle(hChildStdinWrDup);
-          CloseHandle(hChildStderrRdDup);
           break;
 
         case _O_WRONLY | _O_BINARY:
           /* Case for writing to child Stdin in binary mode. */
           fd1 = _open_osfhandle(TO_INTPTR(hChildStdinWrDup), mode);
-          //f1 = _fdopen(fd1, "wb");
           /* We don't care about these pipes anymore,
              so close them. */
-          CloseHandle(hChildStdoutRdDup);
-          CloseHandle(hChildStderrRdDup);
           break;
         }
       break;
@@ -614,60 +601,17 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     case POPEN_4: 
       if ( 1 ) 
         {
-        // Comment this out. Maybe we will need it in the future.
-        // file IO access to the process might be cool.
-        //char *m1,  *m2;
-        
-        //if (mode && _O_TEXT) 
-        //  {
-        //  m1 = "r";
-        //  m2 = "w";
-        //  } 
-        //else 
-        //  {
-        //  m1 = "rb";
-        //  m2 = "wb";
-        //  }
-
         fd1 = _open_osfhandle(TO_INTPTR(hChildStdinWrDup), mode);
-        //f1 = _fdopen(fd1, m2);
         fd2 = _open_osfhandle(TO_INTPTR(hChildStdoutRdDup), mode);
-        //f2 = _fdopen(fd2, m1);
-
-        if (n != 4)
-          {
-          CloseHandle(hChildStderrRdDup);
-          }
-
         break;
         }
         
     case POPEN_3:
       if ( 1) 
         {
-        // Comment this out. Maybe we will need it in the future.
-        // file IO access to the process might be cool.
-        //char *m1, *m2;
-      
-        //if (mode && _O_TEXT) 
-        //  {
-        //  m1 = "r";
-        //  m2 = "w";
-        //  } 
-        //else 
-        //  {
-        //  m1 = "rb";
-        //  m2 = "wb";
-        //  }
-
-
         fd1 = _open_osfhandle(TO_INTPTR(hChildStdinWrDup), mode);
-        //f1 = _fdopen(fd1, m2);
         fd2 = _open_osfhandle(TO_INTPTR(hChildStdoutRdDup), mode);
-        //f2 = _fdopen(fd2, m1);
         fd3 = _open_osfhandle(TO_INTPTR(hChildStderrRdDup), mode);
-        //f3 = _fdopen(fd3, m1);        
-
         break;
         }
     }
@@ -720,7 +664,21 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     m_Output += "CloseHandleError\n";
     return false;
     }
-          
+  if(!CloseHandle(hChildStdoutRdDup))
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
+  if(!CloseHandle(hChildStderrRdDup))
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
+  if(!CloseHandle(hChildStdinWrDup))
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
   if (!CloseHandle(hChildStdoutWr))
     {
     m_Output += "CloseHandleError\n";
