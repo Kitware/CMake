@@ -192,5 +192,16 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
       }
     }
   ret = cmSystemTools::ConvertToOutputPath(ret.c_str());
+  if(ret.size() > 2 &&
+     (ret[0] == '.') &&
+     ( (ret[1] == '/') || ret[1] == '\\'))
+    {
+    std::string upath = ret;
+    cmSystemTools::ConvertToUnixSlashes(upath);
+    if(upath.find(2, '/') == upath.npos)
+      {
+      ret = ret.substr(2, ret.size()-2);
+      }
+    }
   return ret;
 }
