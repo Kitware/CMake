@@ -67,6 +67,13 @@ bool cmCableWrapTclCommand::InitialPass(std::vector<std::string>& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+
+  // First, we want to expand all CMAKE variables in all arguments.
+  for(std::vector<std::string>::iterator a = args.begin();
+      a != args.end(); ++a)
+    {
+    m_Makefile->ExpandVariablesInString(*a);
+    }
   
   // Prepare to iterate through the arguments.
   std::vector<std::string>::const_iterator arg = args.begin();
@@ -167,7 +174,7 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   for(cmCableClassSet::CableClassMap::const_iterator
         c = m_CableClassSet->Begin(); c != m_CableClassSet->End(); ++c, ++index)
     {
-    this->GenerateCableClassFiles(c->first.c_str(), c->second, index);
+    this->GenerateCableClassFiles(c->first.c_str(), *(c->second), index);
     }
   
 }
@@ -204,7 +211,14 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
         "  <Header name=\"" << source->c_str() << "\"/>\n";
       }
     classConfig <<
-      "  <Class name=\"_wrap_::wrapper::Wrapper\"/>\n"
+      "  <Class name=\"_wrap_::wrapper::Wrapper\">\n";
+    if(c.GetTag() != "")
+      {
+      classConfig <<
+        "    <AlternateName name=\"" << c.GetTag().c_str() << "\"/>\n";
+      }
+    classConfig <<
+      "  </Class>\n"
       "</CableConfiguration>\n";
   
     classConfig.close();

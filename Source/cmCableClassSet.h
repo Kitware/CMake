@@ -53,14 +53,23 @@ class cmCableClass
 {
 public:
   typedef std::set<std::string> Sources;
+  cmCableClass() {}
+  cmCableClass(const std::string& tag): m_Tag(tag) {}
   
   void AddSources(const Sources& sources);
   void AddSource(const char*);
 
   Sources::const_iterator SourcesBegin() const { return m_Sources.begin(); }
   Sources::const_iterator SourcesEnd() const { return m_Sources.end(); }
+
+  const std::string& GetTag() const { return m_Tag; }
   
-private:
+private:  
+  /**
+   * The tag name of this class.
+   */
+  std::string m_Tag;
+  
   /**
    * Store the set of source files (headers) needed to define this class.
    */
@@ -75,22 +84,21 @@ class cmCableClassSet: public cmData
 {
 public:
   cmCableClassSet(const char* name): cmData(name) {}
-  virtual ~cmCableClassSet() {}
+  virtual ~cmCableClassSet();
 
   /**
    * The set is stored internally as a map from class name to cmCableClass
    * instance.
    */
-  typedef std::map<std::string, cmCableClass> CableClassMap;
+  typedef std::map<std::string, cmCableClass*> CableClassMap;
   
-  void AddClass(const char*, const cmCableClass&);
+  void AddClass(const char*, cmCableClass*);
   void AddSource(const char* name);
   unsigned int Size() const;
   CableClassMap::const_iterator Begin() const;
   CableClassMap::const_iterator End() const;
 
   void ParseAndAddElement(const char*, cmMakefile*);
-  void AddCableClassSet(const cmCableClassSet&, const cmCableClass::Sources&);
   
 private:
   /**
