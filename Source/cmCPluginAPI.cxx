@@ -453,6 +453,14 @@ char *cmGetFilenameWithoutExtension(const char *name)
   return result;
 }
 
+char *cmGetFilenamePath(const char *name)
+{
+  std::string sres = cmSystemTools::GetFilenamePath(name);
+  char *result = (char *)malloc(sres.size()+1);  
+  strcpy(result,sres.c_str());
+  return result;
+}
+
 char *cmCapitalized(const char *name)
 {
   std::string sres = cmSystemTools::Capitalized(name);
@@ -522,6 +530,7 @@ cmCAPI cmStaticCAPI =
   cmCapitalized,
   cmCopyFileIfDifferent,
   cmGetFilenameWithoutExtension,
+  cmGetFilenamePath,
   cmRemoveFile,
 };
 

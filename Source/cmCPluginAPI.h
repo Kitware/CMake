@@ -137,6 +137,7 @@ typedef struct
   char  *(*Capitalized)(const char *);
   void   (*CopyFileIfDifferent)(const char *f1, const char *f2);
   char  *(*GetFilenameWithoutExtension)(const char *);
+  char  *(*GetFilenamePath)(const char *);
   void   (*RemoveFile)(const char *f1);
   
   /* this is the end of the C function stub API structure */ 
