@@ -327,7 +327,7 @@ void cmSystemTools::Error(const char* m1, const char* m2)
     {
     message += m2;
     }
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
   ::MessageBox(0, message.c_str(), 0, MB_OK);
   std::cerr << message.c_str() << std::endl;
 #else
