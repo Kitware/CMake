@@ -52,12 +52,13 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
   homedir += "/";
   bool doneAllBuild = false;
   bool doneRunTests = false;
+  bool doneInstall  = false;
   
   // For each cmMakefile, create a VCProj for it, and
   // add it to this SLN file
   unsigned int i;
   for(i = 0; i < generators.size(); ++i)
-    {  
+    {
     if(this->IsExcluded(root, generators[i]))
       {
       continue;
@@ -132,7 +133,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
         {
         if ((l->second.GetType() != cmTarget::INSTALL_FILES)
             && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
-          {        
+          {
           bool skip = false;
           if(l->first == "ALL_BUILD" )
             {
@@ -143,6 +144,17 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
             else
               {
               doneAllBuild = true;
+              }
+            }
+          if(l->first == "INSTALL")
+            {
+            if(doneInstall)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneInstall = true;
               }
             }
           if(l->first == "RUN_TESTS")
@@ -160,7 +172,6 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
             {
             this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
             }
-          
           ++si;
           }
         }
