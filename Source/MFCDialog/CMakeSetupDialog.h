@@ -31,8 +31,11 @@ protected:
   enum { IDD = IDD_CMakeSetupDialog_DIALOG };
   cmMakefile    m_Makefile;
   bool          m_InitMakefile;
+  bool          m_GUIInitialized;
   CString	m_WhereSource;
   CString	m_WhereBuild;
+  CString	m_WhereSourceLast;
+  CString	m_WhereBuildLast;
   CPropertyList m_CacheEntriesList;
   //}}AFX_DATA
   

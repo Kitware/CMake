@@ -96,6 +96,7 @@ CMakeSetupDialog::CMakeSetupDialog(CWnd* pParent /*=NULL*/)
   m_WhereSource = startPath;
   this->LoadFromRegistry();
   m_InitMakefile = false;
+  m_GUIInitialized = false;
   this->InitMakefile();
   
 }
@@ -104,7 +105,13 @@ void CMakeSetupDialog::InitMakefile()
 {
   if(m_InitMakefile)
     {
-    return;
+    // if no change in source or build then
+    // do not re-init the m_Makefile
+    if(m_WhereSource == m_WhereSourceLast
+       && m_WhereBuild == m_WhereBuildLast)
+      {
+      return;
+      }
     }
   if(m_WhereBuild == "")
     {
@@ -114,6 +121,10 @@ void CMakeSetupDialog::InitMakefile()
     {
     return;
     }
+  // save the values for these so we can detect
+  // when the GUI has changed them
+  m_WhereBuildLast = m_WhereBuild;
+  m_WhereSourceLast = m_WhereSource;
   m_InitMakefile = true;
   // set up the cmMakefile member
   m_Makefile.SetMakefileGenerator(new cmMSProjectGenerator);
@@ -128,6 +139,11 @@ void CMakeSetupDialog::InitMakefile()
   m_Makefile.MakeStartDirectoriesCurrent();
   // Create a string for the cache file
   cmCacheManager::GetInstance()->LoadCache(&m_Makefile);
+  // if the GUI is already up, then reset it to the loaded cache
+  if(m_GUIInitialized)
+    {
+    this->FillCacheEditorFromCacheManager();
+    }
 }
 
 void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
@@ -187,6 +203,7 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
     {
     this->FillCacheEditorFromCacheManager();
     }
+  m_GUIInitialized = true;
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -365,9 +382,11 @@ void CMakeSetupDialog::LoadFromRegistry()
 
 void CMakeSetupDialog::OnBuildProjects() 
 {
+  ::SetCursor(LoadCursor(NULL, IDC_WAIT));
   // get all the info from the screen
   this->UpdateData();
-  ::SetCursor(LoadCursor(NULL, IDC_WAIT));
+  // re-init the m_Makefile
+  this->InitMakefile();
   // copy the GUI cache values into the cache manager
   this->FillCacheManagerFromCacheEditor();
   CString makefileIn = m_WhereSource;
@@ -438,16 +457,17 @@ void CMakeSetupDialog::FillCacheManagerFromCacheEditor()
   for(std::list<CPropertyItem*>::iterator i = items.begin();
       i != items.end(); ++i)
     {
+    CPropertyItem* item = *i; 
     // check to see if the editor has removed the cache entry
-    if((*i)->m_Removed)
+    if(item->m_Removed)
       {
       cmCacheManager::GetInstance()->RemoveCacheEntry((*i)->m_propName);
       }
     else
       {
       cmCacheManager::CacheEntryMap::iterator p = 
-        cache.find((const char*)(*i)->m_propName);
-      (*p).second.m_Value = (*i)->m_curValue;
+        cache.find((const char*)item->m_propName);
+      (*p).second.m_Value = item->m_curValue;
       }
     }
 }

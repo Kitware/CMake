@@ -144,10 +144,8 @@ int CPropertyList::AddProperty(const char* name,
       }
     }
   // if it is not found, then create a new one
-  int nIndex = AddString(_T(""));
   pItem = new CPropertyItem(name, value, type, comboItems);
-  SetItemDataPtr(nIndex,pItem);
-  return nIndex;
+  return this->AddPropItem(pItem);
 }
 
 int CPropertyList::OnCreate(LPCREATESTRUCT lpCreateStruct) 
