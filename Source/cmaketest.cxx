@@ -29,6 +29,7 @@ int do_cmaketest(int ac, char** av);
 
 int main(int ac, char** av)
 {
+  cmSystemTools::EnableMSVCDebugHook();
   int ret = do_cmaketest(ac, av);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDynamicLoader::FlushCache();

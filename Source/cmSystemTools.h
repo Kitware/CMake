@@ -356,6 +356,12 @@ public:
    */
   static void SetRunCommandHideConsole(bool v){s_RunCommandHideConsole = v;}
   static bool GetRunCommandHideConsole(){ return s_RunCommandHideConsole;}
+  
+  /** When building DEBUG with MSVC, this enables a hook that prevents
+   * error dialogs from popping up if the program is being run from
+   * DART.
+   */
+  static void EnableMSVCDebugHook();
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**

@@ -25,6 +25,7 @@ void updateProgress(const char *msg, float prog, void *cd);
 
 int main(int ac, char** av)
 {
+  cmSystemTools::EnableMSVCDebugHook();
   int ret = do_cmake(ac, av);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDynamicLoader::FlushCache();

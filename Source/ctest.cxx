@@ -1422,6 +1422,7 @@ int ctest::ProcessTests()
 // this is a test driver program for cmake.
 int main (int argc, char *argv[])
 {
+  cmSystemTools::EnableMSVCDebugHook();
   ctest inst;
   
   // look at the args

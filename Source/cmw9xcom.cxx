@@ -20,6 +20,7 @@
 // this is a test driver program for cmake.
 int main (int argc, char *argv[])
 {
+  cmSystemTools::EnableMSVCDebugHook();
   if ( argc <= 1 )
     {
     std::cerr << "Usage: " << argv[0] << " executable" << std::endl;

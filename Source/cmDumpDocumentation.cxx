@@ -21,6 +21,7 @@
 
 int main(int ac, char** av)
 {
+  cmSystemTools::EnableMSVCDebugHook();
   cmake cmi;
   const char* outname = "cmake.html";
   if(ac > 1)
