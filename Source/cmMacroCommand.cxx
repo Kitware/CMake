@@ -107,6 +107,45 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
           }
         for (unsigned int j = 1; j < m_Args.size(); ++j)
           {
+          variable = "${ARGV}";
+          std::vector<std::string>::iterator eit;
+          std::string var = "";
+          for ( eit = expandedArguments.begin();
+            eit != expandedArguments.end();
+            ++ eit )
+            {
+            if ( var.size() > 0 )
+              {
+              var += ";";
+              }
+            var += *eit;
+            }
+          cmSystemTools::ReplaceString(tmps, variable.c_str(),var.c_str());
+          }
+        for (unsigned int j = 1; j < m_Args.size(); ++j)
+          {
+          variable = "${ARGN}";
+          std::vector<std::string>::iterator eit;
+          std::string var = "";
+          std::vector<std::string>::size_type cnt = 0;
+          for ( eit = expandedArguments.begin();
+            eit != expandedArguments.end();
+            ++ eit )
+            {
+            if ( cnt >= m_Args.size()-1 )
+              {
+              if ( var.size() > 0 )
+                {
+                var += ";";
+                }
+              var += *eit;
+              }
+            cnt ++;
+            }
+          cmSystemTools::ReplaceString(tmps, variable.c_str(),var.c_str());
+          }
+        for (unsigned int j = 1; j < m_Args.size(); ++j)
+          {
           // since this could be slow, first check if there is an ARGV
           // only then do the inner loop. PS std::string sucks
           char argvName[60];

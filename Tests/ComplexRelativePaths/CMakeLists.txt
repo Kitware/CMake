@@ -29,6 +29,21 @@ ENDMACRO(TEST_ARGC)
 # invoke the macro
 TEST_ARGC(-DCMAKE_ARGV1 -DCMAKE_ARGV2 -DCMAKE_ARGV3 -DCMAKE_ARGV4)
 
+MACRO(TEST_VAR_ARG fa)
+  IF("${ARGV}" MATCHES "^1;2;3$")
+    MESSAGE(STATUS "ARGV works")
+  ELSE("${ARGV}" MATCHES "^1;2;3$")
+    MESSAGE(FATAL_ERROR "ARGV does not work; got \"${ARGV}\" instead of \"1;2;3\"")
+  ENDIF("${ARGV}" MATCHES "^1;2;3$")
+  IF("${ARGN}" MATCHES "^2;3$")
+    MESSAGE(STATUS "ARGN works")
+  ELSE("${ARGN}" MATCHES "^2;3$")
+    MESSAGE(FATAL_ERROR "ARGV does not work; got \"${ARGN}\" instead of \"2;3\"")
+  ENDIF("${ARGN}" MATCHES "^2;3$")
+ENDMACRO(TEST_VAR_ARG)
+
+TEST_VAR_ARG(1 2 3)
+
 #
 # Use the ansi CXX compile flag for building cmake
 #
