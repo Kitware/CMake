@@ -18,7 +18,7 @@ ELSE (WIN32)
     # this variable is used in a IF test. So let's set it to the OpenGL
     # framework. It does not harm to duplicate the OpenGL framework and it
     # might even help in case OPENGL_LIBRARY is not set.
-    SET(GLU_LIBRARY "-framework Carbon -framework AGL -framework OpenGL" CACHE STRING "GLU library for OSX")
+    SET(GLU_LIBRARY "-framework AGL -framework OpenGL" CACHE STRING "GLU library for OSX")
   ELSE (APPLE)
     FIND_PATH(GLU_INCLUDE_PATH GL/glu.h
       ${OPENGL_INCLUDE_PATH}

@@ -14,7 +14,7 @@ IF (WIN32)
   ENDIF(BORLAND)
 ELSE (WIN32)
   IF (APPLE)
-    SET(OPENGL_LIBRARY "-framework Carbon -framework AGL -framework OpenGL" CACHE STRING "OpenGL library for OSX")
+    SET(OPENGL_LIBRARY "-framework AGL -framework OpenGL" CACHE STRING "OpenGL library for OSX")
   ELSE (APPLE)
      FIND_PATH(OPENGL_INCLUDE_PATH GL/gl.h 
        /usr/include 
