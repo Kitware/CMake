@@ -169,6 +169,11 @@ struct kwsysProcess_s
   char* PipeFileSTDOUT;
   char* PipeFileSTDERR;
 
+  /* Whether each pipe is shared with the parent process.  */
+  int PipeSharedSTDIN;
+  int PipeSharedSTDOUT;
+  int PipeSharedSTDERR;
+
   /* The real working directory of this process.  */
   int RealWorkingDirectoryLength;
   char* RealWorkingDirectory;
@@ -184,7 +189,13 @@ kwsysProcess* kwsysProcess_New()
     return 0;
     }
   memset(cp, 0, sizeof(kwsysProcess));
+
+  /* Share stdin with the parent process by default.  */
+  cp->PipeSharedSTDIN = 1;
+
+  /* Set initial status.  */
   cp->State = kwsysProcess_State_Starting;
+
   return cp;
 }
 
@@ -393,7 +404,36 @@ int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, const char* file)
       }
     strcpy(*pfile, file);
     }
+
+  /* If we are redirecting the pipe, do not share it.  */
+  if(*pfile)
+    {
+    kwsysProcess_SetPipeShared(cp, pipe, 0);
+    }
   return 1;
+}
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe, int shared)
+{
+  if(!cp)
+    {
+    return;
+    }
+
+  switch(pipe)
+    {
+    case kwsysProcess_Pipe_STDIN: cp->PipeSharedSTDIN = shared?1:0; break;
+    case kwsysProcess_Pipe_STDOUT: cp->PipeSharedSTDOUT = shared?1:0; break;
+    case kwsysProcess_Pipe_STDERR: cp->PipeSharedSTDERR = shared?1:0; break;
+    default: return;
+    }
+
+  /* If we are sharing the pipe, do not redirect it to a file.  */
+  if(shared)
+    {
+    kwsysProcess_SetPipeFile(cp, pipe, 0);
+    }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -545,6 +585,14 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       }
     }
 
+  /* Replace the stderr pipe with the parent's if requested.  In this
+     case the select call will report that stderr is closed
+     immediately.  */
+  if(cp->PipeSharedSTDERR)
+    {
+    kwsysProcessCleanupDescriptor(&si.StdErr);
+    si.StdErr = 2;
+    }
 
   /* The timeout period starts now.  */
   cp->StartTime = kwsysProcessTimeGetCurrent();
@@ -553,7 +601,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
   /* Create the pipeline of processes.  */
   {
-  int readEnd = 0;
+  int readEnd = -1;
   for(i=0; i < cp->NumberOfCommands; ++i)
     {
     if(!kwsysProcessCreate(cp, i, &si, &readEnd))
@@ -562,13 +610,19 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
       /* Release resources that may have been allocated for this
          process before an error occurred.  */
-      if(i > 0 || si.StdIn > 0)
+      kwsysProcessCleanupDescriptor(&readEnd);
+      if(si.StdIn != 0)
         {
         kwsysProcessCleanupDescriptor(&si.StdIn);
         }
-      kwsysProcessCleanupDescriptor(&readEnd);
-      kwsysProcessCleanupDescriptor(&si.StdOut);
-      kwsysProcessCleanupDescriptor(&si.StdErr);
+      if(si.StdOut != 1)
+        {
+        kwsysProcessCleanupDescriptor(&si.StdOut);
+        }
+      if(si.StdErr != 2)
+        {
+        kwsysProcessCleanupDescriptor(&si.StdErr);
+        }
       kwsysProcessCleanupDescriptor(&si.TermPipe);
       kwsysProcessCleanupDescriptor(&si.ErrorPipe[0]);
       kwsysProcessCleanupDescriptor(&si.ErrorPipe[1]);
@@ -1106,9 +1160,13 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
       return 0;
       }
     }
-  else
+  else if(cp->PipeSharedSTDIN)
     {
     si->StdIn = 0;
+    }
+  else
+    {
+    si->StdIn = -1;
     }
 
   /* Setup the process's stdout.  */
@@ -1140,6 +1198,15 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
       }
     }
 
+  /* Replace the stdout pipe with the parent's if requested.  In this
+     case the select call will report that stderr is closed
+     immediately.  */
+  if(index == cp->NumberOfCommands-1 && cp->PipeSharedSTDOUT)
+    {
+    kwsysProcessCleanupDescriptor(&si->StdOut);
+    si->StdOut = 1;
+    }
+
   /* Create the error reporting pipe.  */
   if(pipe(si->ErrorPipe) < 0)
     {
@@ -1165,12 +1232,22 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
     close(si->ErrorPipe[0]);
 
     /* Setup the stdin, stdout, and stderr pipes.  */
-    if(index > 0 || si->StdIn > 0)
+    if(si->StdIn > 0)
       {
       dup2(si->StdIn, 0);
       }
-    dup2(si->StdOut, 1);
-    dup2(si->StdErr, 2);
+    else if(si->StdIn < 0)
+      {
+      close(0);
+      }
+    if(si->StdOut != 1)
+      {
+      dup2(si->StdOut, 1);
+      }
+    if(si->StdErr != 2)
+      {
+      dup2(si->StdErr, 2);
+      }
 
     /* Clear the close-on-exec flag for stdin, stdout, and stderr.
        Also clear it for the termination pipe.  All other pipe handles

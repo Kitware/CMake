@@ -31,6 +31,7 @@
 #define kwsysProcess_SetTimeout          kwsys(Process_SetTimeout)
 #define kwsysProcess_SetWorkingDirectory kwsys(Process_SetWorkingDirectory)
 #define kwsysProcess_SetPipeFile         kwsys(Process_SetPipeFile)
+#define kwsysProcess_SetPipeShared       kwsys(Process_SetPipeShared)
 #define kwsysProcess_Option_HideWindow   kwsys(Process_Option_HideWindow)
 #define kwsysProcess_GetOption           kwsys(Process_GetOption)
 #define kwsysProcess_SetOption           kwsys(Process_SetOption)
@@ -128,6 +129,14 @@ kwsysEXPORT int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp,
  */
 kwsysEXPORT int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe,
                                          const char* file);
+
+/**
+ * Set whether the given pipe in the child is shared with the parent
+ * process.  The default is no for Pipe_STDOUT and Pipe_STDERR and yes
+ * for Pipe_STDIN.
+ */
+kwsysEXPORT void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe,
+                                            int shared);
 
 /**
  * Get/Set a platform-specific option.  Possible options are:
@@ -301,6 +310,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_SetTimeout
 # undef kwsysProcess_SetWorkingDirectory
 # undef kwsysProcess_SetPipeFile
+# undef kwsysProcess_SetPipeShared
 # undef kwsysProcess_Option_HideWindow
 # undef kwsysProcess_GetOption
 # undef kwsysProcess_SetOption

@@ -184,6 +184,11 @@ struct kwsysProcess_s
   char* PipeFileSTDOUT;
   char* PipeFileSTDERR;
 
+  /* Whether each pipe is shared with the parent process.  */
+  int PipeSharedSTDIN;
+  int PipeSharedSTDOUT;
+  int PipeSharedSTDERR;
+
   /* Handle to automatically delete the Win9x forwarding executable.  */
   HANDLE Win9xHandle;
 
@@ -263,6 +268,9 @@ kwsysProcess* kwsysProcess_New()
     return 0;
     }
   ZeroMemory(cp, sizeof(*cp));
+
+  /* Share stdin with the parent process by default.  */
+  cp->PipeSharedSTDIN = 1;
 
   /* Set initial status.  */
   cp->State = kwsysProcess_State_Starting;
@@ -805,7 +813,37 @@ int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, const char* file)
       }
     strcpy(*pfile, file);
     }
+
+  /* If we are redirecting the pipe, do not share it.  */
+  if(*pfile)
+    {
+    kwsysProcess_SetPipeShared(cp, pipe, 0);
+    }
+
   return 1;
+}
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe, int shared)
+{
+  if(!cp)
+    {
+    return;
+    }
+
+  switch(pipe)
+    {
+    case kwsysProcess_Pipe_STDIN: cp->PipeSharedSTDIN = shared?1:0; break;
+    case kwsysProcess_Pipe_STDOUT: cp->PipeSharedSTDOUT = shared?1:0; break;
+    case kwsysProcess_Pipe_STDERR: cp->PipeSharedSTDERR = shared?1:0; break;
+    default: return;
+    }
+
+  /* If we are sharing the pipe, do not redirect it to a file.  */
+  if(shared)
+    {
+    kwsysProcess_SetPipeFile(cp, pipe, 0);
+    }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -973,6 +1011,15 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       }
     }
 
+  /* Replace the stderr pipe with the parent process's if requested.
+     In this case the pipe thread will still run but never report
+     data.  */
+  if(cp->PipeSharedSTDERR)
+    {
+    kwsysProcessCleanupHandle(&si.StartupInfo.hStdError);
+    si.StartupInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+    }
+
   /* Create the pipeline of processes.  */
   {
   HANDLE readEnd = 0;
@@ -989,12 +1036,18 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       /* Release resources that may have been allocated for this
          process before an error occurred.  */
       kwsysProcessCleanupHandle(&readEnd);
-      if(i > 0)
+      if(si.StartupInfo.hStdInput != GetStdHandle(STD_INPUT_HANDLE))
         {
         kwsysProcessCleanupHandle(&si.StartupInfo.hStdInput);
         }
-      kwsysProcessCleanupHandle(&si.StartupInfo.hStdOutput);
-      kwsysProcessCleanupHandle(&si.StartupInfo.hStdError);
+      if(si.StartupInfo.hStdOutput != GetStdHandle(STD_OUTPUT_HANDLE))
+        {
+        kwsysProcessCleanupHandle(&si.StartupInfo.hStdOutput);
+        }
+      if(si.StartupInfo.hStdOutput != GetStdHandle(STD_ERROR_HANDLE))
+        {
+        kwsysProcessCleanupHandle(&si.StartupInfo.hStdError);
+        }
       kwsysProcessCleanupHandle(&si.ErrorPipeRead);
       kwsysProcessCleanupHandle(&si.ErrorPipeWrite);
       return;
@@ -1533,9 +1586,13 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
       }
     si->StartupInfo.hStdInput = fin;
     }
-  else
+  else if(cp->PipeSharedSTDIN)
     {
     si->StartupInfo.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    }
+  else
+    {
+    si->StartupInfo.hStdInput = INVALID_HANDLE_VALUE;
     }
 
   /* Setup the process's stdout.  */
@@ -1576,6 +1633,15 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
       {
       return 0;
       }
+    }
+
+  /* Replace the stdout pipe with the parent process's if requested.
+     In this case the pipe thread will still run but never report
+     data.  */
+  if(index == cp->NumberOfCommands-1 && cp->PipeSharedSTDOUT)
+    {
+    kwsysProcessCleanupHandle(&si->StartupInfo.hStdOutput);
+    si->StartupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
     }
 
   /* Create the child process.  */
@@ -1678,8 +1744,11 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     kwsysProcessCleanupHandle(&si->StartupInfo.hStdInput);
     }
 
-  /* The parent process does not need the inhertied pipe write end.  */
-  kwsysProcessCleanupHandle(&si->StartupInfo.hStdOutput);
+  if(si->StartupInfo.hStdOutput != GetStdHandle(STD_OUTPUT_HANDLE))
+    {
+    /* The parent process does not need the inhertied pipe write end.  */
+    kwsysProcessCleanupHandle(&si->StartupInfo.hStdOutput);
+    }
 
   return 1;
 }
