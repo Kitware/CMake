@@ -1181,9 +1181,9 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
  */
 std::string cmSystemTools::CollapseFullPath(const char* in_name)
 {
-#ifdef _WIN32
   std::string dir, file;
   cmSystemTools::SplitProgramPath(in_name, dir, file);
+#ifdef _WIN32
   // Ultra-hack warning:
   // This changes to the target directory, saves the working directory,
   // and then changes back to the original working directory.
@@ -1205,8 +1205,8 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
   char resolved_name[5024];
 #  endif
 # endif
-  realpath(in_name, resolved_name);
-  return resolved_name;
+  realpath(dir.c_str(), resolved_name);
+  return dir + "/" + file;
 #endif
 }
 
