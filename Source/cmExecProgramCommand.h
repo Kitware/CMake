@@ -64,11 +64,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "EXEC_PROGRAM(Executable [Directory to run in] [ARGS arguments to executable] [OUTPUT_VARIABLE var])"
+      "EXEC_PROGRAM(Executable [Directory to run in] [ARGS arguments to executable] [OUTPUT_VARIABLE var] [RETURN_VALUE var])"
       "The executable is run in the optionally specified Directory.  The executable "
       "can include arguments if it is double quoted, but it is better to use the "
       "optional ARGS argument to specify arguments to the program.   This is because "
-      "cmake will then be able to escape spaces in the Executable path.";
+      "cmake will then be able to escape spaces in the Executable path.  An optiona "
+      "argument OUPUT_VARIABLE specifies a variable to which the output will be set. "
+      "To capture the return value of the execution, use RETURN_VALUE variable.";
     }
   
   cmTypeMacro(cmExecProgramCommand, cmCommand);

@@ -28,8 +28,10 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
   std::string arguments;
   bool doingargs = false;
   int count = 0;
-  std::string variable;
-  bool havevariable = false;
+  std::string output_variable;
+  bool haveoutput_variable = false;
+  std::string return_variable;
+  bool havereturn_variable = false;
   std::string e_command;
   for(size_t i=0; i < args.size(); ++i)
     {
@@ -37,28 +39,48 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
       {
       count++;
       doingargs = false;
-      havevariable = true;
+      havereturn_variable = false;
+      haveoutput_variable = true;
       }    
-    else if ( havevariable )
+    else if ( haveoutput_variable )
       {
-      if ( variable.size() > 0 )
+      if ( output_variable.size() > 0 )
         {
         this->SetError("called with incorrect number of arguments");
         return false;
         }
-      variable = args[i];
+      output_variable = args[i];
       count ++;
+      }
+    else if(args[i] == "RETURN_VALUE")
+      {
+      count++;
+      doingargs = false;
+      haveoutput_variable = false;
+      havereturn_variable = true;
+      }    
+    else if ( havereturn_variable )
+      {
+      if ( return_variable.size() > 0 )
+        {
+        this->SetError("called with incorrect number of arguments");
+        return false;
+        }
+      return_variable = args[i];
+      count ++;
+      }
+    else if(args[i] == "ARGS")
+      {
+      count++;
+      havereturn_variable = false;
+      haveoutput_variable = false;
+      doingargs = true;
       }
     else if(doingargs)
       {
       arguments += args[i];
       arguments += " ";
       count++;
-      }
-    else if(args[i] == "ARGS")
-      {
-      count++;
-      doingargs = true;
       }
     }
 
@@ -73,24 +95,32 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
     {
     command = args[0];
     }
+  int retVal = 0;
   std::string output;
   if(args.size() - count == 2)
     {
     cmSystemTools::MakeDirectory(args[1].c_str());
-    cmSystemTools::RunCommand(command.c_str(), output, 
+    cmSystemTools::RunCommand(command.c_str(), output, retVal,
                               cmSystemTools::ConvertToOutputPath(args[1].c_str()).c_str());
     }
   else
     {
-    cmSystemTools::RunCommand(command.c_str(), output);
+    cmSystemTools::RunCommand(command.c_str(), output, retVal);
     }
 
-  if ( variable.size() > 0 )
+  if ( output_variable.size() > 0 )
     {    
     std::string::size_type first = output.find_first_not_of(" \n\t\r");
     std::string::size_type last = output.find_last_not_of(" \n\t\r");
     std::string coutput = std::string(output, first, last);
-    m_Makefile->AddDefinition(variable.c_str(), coutput.c_str());
+    m_Makefile->AddDefinition(output_variable.c_str(), coutput.c_str());
+    }
+
+  if ( return_variable.size() > 0 )
+    {
+    char buffer[100];
+    sprintf(buffer, "%d", retVal);
+    m_Makefile->AddDefinition(return_variable.c_str(), buffer);
     }
   
   return true;
