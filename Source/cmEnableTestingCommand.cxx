@@ -49,7 +49,7 @@ void cmEnableTestingCommand::FinalPass()
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
-  fname += "CMakeTestfile.txt";
+  fname += "DartTestfile.txt";
   
   cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory());
 

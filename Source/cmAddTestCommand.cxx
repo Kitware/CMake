@@ -76,7 +76,7 @@ void cmAddTestCommand::FinalPass()
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
-  fname += "CMakeTestfile.txt";
+  fname += "DartTestfile.txt";
   
   // Open the output Testfile
   std::ofstream fout(fname.c_str(), std::ios::app);
