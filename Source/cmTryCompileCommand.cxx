@@ -152,10 +152,25 @@ int cmTryCompileCommand::CoreTryCompileCode(
                            "; TRY_COMPILE only works for C and CXX files");
       return -1;
       }
-
+    const char* cflags = mf->GetDefinition("CMAKE_C_FLAGS"); 
     fprintf(fout, "SET(CMAKE_VERBOSE_MAKEFILE 1)\n");
-    fprintf(fout, "SET(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS} ${COMPILE_DEFINITIONS}\")\n");
-    fprintf(fout, "SET(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS} ${COMPILE_DEFINITIONS}\")\n");
+    fprintf(fout, "SET(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS}");
+    if(cflags)
+      {
+      fprintf(fout, " %s ", cflags);
+      }
+    fprintf(fout, " ${COMPILE_DEFINITIONS}\")\n");
+    // CXX specific flags
+    if(format == cmSystemTools::CXX_FILE_FORMAT )
+      {
+      const char* cxxflags = mf->GetDefinition("CMAKE_CXX_FLAGS");
+      fprintf(fout, "SET(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS} ");
+      if(cxxflags)
+        {
+        fprintf(fout, " %s ", cxxflags);
+        }
+      fprintf(fout, " ${COMPILE_DEFINITIONS}\")\n");
+      }
     fprintf(fout, "INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES})\n");
     fprintf(fout, "LINK_DIRECTORIES(${LINK_DIRECTORIES})\n");
     // handle any compile flags we need to pass on

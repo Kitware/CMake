@@ -15,7 +15,6 @@ MACRO(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
     TRY_COMPILE(${VARIABLE}
                ${CMAKE_BINARY_DIR}
                ${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFile.cxx
-               CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CMAKE_ANSI_CXXFLAGS}
                OUTPUT_VARIABLE OUTPUT)
     IF(${VARIABLE})
       MESSAGE(STATUS "Checking for CXX include file ${INCLUDE} -- found")
