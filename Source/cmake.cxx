@@ -44,7 +44,7 @@
 
 
 void cmNeedBackwardsCompatibility(const std::string& variable, 
-                                  int access_type, void* client_data)
+                                  int access_type, void* )
 {
   if (access_type == cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS)
     {
