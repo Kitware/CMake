@@ -233,6 +233,8 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   std::string dir = this->ConvertToRelativeOutputPath(
     mf->GetCurrentOutputDirectory());
   m_CurrentXCodeHackMakefile = dir;
+  m_CurrentXCodeHackMakefile += "/CMakeScripts";
+  cmSystemTools::MakeDirectory(m_CurrentXCodeHackMakefile.c_str());
   m_CurrentXCodeHackMakefile += "/XCODE_DEPEND_HELPER.make";
   std::string makecommand = "make -C ";
   makecommand += dir;
@@ -326,8 +328,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 {
   std::string flags;
   // Add flags from source file properties.
-  m_CurrentLocalGenerator
-    ->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
+  lg->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
 
   cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
   m_SourcesGroupChildren->AddObject(fileRef);
@@ -628,8 +629,10 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                                 const & commands,
                                                 const char* name)
 {
-  std::string makefile = m_CurrentMakefile->GetCurrentOutputDirectory();
-  cmSystemTools::MakeDirectory(makefile.c_str());
+  std::string dir = m_CurrentMakefile->GetCurrentOutputDirectory();
+  dir += "/CMakeScripts";
+  cmSystemTools::MakeDirectory(dir.c_str());
+  std::string makefile = dir;
   makefile += "/";
   makefile += target.GetName();
   makefile += "_";
@@ -706,11 +709,10 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                      << cc.GetArguments() << "\n";
       }
     }
-  
-  std::string dir = this->ConvertToRelativeOutputPath(
-    m_CurrentMakefile->GetCurrentOutputDirectory());
+  std::string cdir = m_CurrentMakefile->GetCurrentOutputDirectory();
+  cdir = this->ConvertToRelativeOutputPath(cdir.c_str());
   std::string makecmd = "make -C ";
-  makecmd += dir;
+  makecmd += cdir;
   makecmd += " -f ";
   makecmd += makefile;
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd.c_str()));
