@@ -35,6 +35,11 @@
 #include <math.h>
 #include <float.h>
 
+// needed for sleep
+#if !defined(_WIN32)
+# include <unistd.h>
+#endif
+
 #include <memory> // auto_ptr
 
 #define SAFEDIV(x,y) (((y)!=0)?((x)/(y)):(0))
