@@ -164,6 +164,10 @@ int main (int argc, char *argv[])
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
+  fullPath = cmSystemTools::EscapeSpaces(fullPath.c_str());
+#if defined(_WIN32) && !defined(__CYGWIN__)      
+  cmSystemTools::ConvertToWindowsSlashes(fullPath);
+#endif
   if (!cmSystemTools::RunCommand(fullPath.c_str(), output))
     {
     std::cerr << "Error: " << fullPath.c_str() << "  execution failed\n";
