@@ -282,7 +282,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(cmLocalGenerator* root)
   for(std::vector<std::string>::const_iterator i = lfiles.begin();
       i !=  lfiles.end(); ++i)
     {
-    makefileStream << "\\\n" << *i;
+    makefileStream << "\\\n" << this->ConvertToRelativeForMake(i->c_str());
     }
   std::string cmake = mf->GetRequiredDefinition("CMAKE_COMMAND");
   makefileStream << "\n\t" << this->ConvertToRelativeForMake(cmake.c_str()) 
