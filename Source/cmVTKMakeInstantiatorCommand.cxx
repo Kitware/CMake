@@ -52,78 +52,108 @@ cmVTKMakeInstantiatorCommand
     return false;
     }
   
-  std::string libName = args[0];
-  std::string srcListName = args[1];
-  m_ExportMacro = args[2];
+  m_ClassName = args[0];
+  m_Makefile->ExpandVariablesInString(m_ClassName);
+  
+  std::string outSourceList = args[1];
+  m_Makefile->ExpandVariablesInString(outSourceList);
+  
+  std::vector<cmStdString> inSourceLists;
+  m_ExportMacro = "-";
   unsigned int groupSize = 10;
   
   // Find the path of the files to be generated.
   std::string filePath = m_Makefile->GetCurrentOutputDirectory();
   std::string headerPath = filePath;
   
-  if(args.size() > 3)
+  for(unsigned int i=2;i < args.size();++i)
     {
-    for(unsigned int i=3;i < args.size();++i)
+    if(args[i] == "GROUP_SIZE")
       {
-      if(args[i] == "GROUP_SIZE")
+      if(++i < args.size())
         {
-        if(++i < args.size())
-          {
-          groupSize = atoi(args[i].c_str());
-          }
-        else
-          {
-          this->SetError("GROUP_SIZE option used without value.");
-          return false;
-          }
+        std::string gSize = args[i].c_str();
+        m_Makefile->ExpandVariablesInString(gSize);
+        groupSize = atoi(gSize.c_str());
         }
-      else if(args[i] == "HEADER_LOCATION")
+      else
         {
-        if(++i < args.size())
-          {
-          headerPath = args[i];
-          m_Makefile->ExpandVariablesInString(headerPath);
-          }
-        else
-          {
-          this->SetError("HEADER_LOCATION option used without value.");
-          return false;
-          }
+        this->SetError("GROUP_SIZE option used without value.");
+        return false;
         }
+      }
+    else if(args[i] == "HEADER_LOCATION")
+      {
+      if(++i < args.size())
+        {
+        headerPath = args[i];
+        m_Makefile->ExpandVariablesInString(headerPath);
+        }
+      else
+        {
+        this->SetError("HEADER_LOCATION option used without value.");
+        return false;
+        }
+      }
+    else if(args[i] == "EXPORT_MACRO")
+      {
+      if(++i < args.size())
+        {
+        m_ExportMacro = args[i];
+        m_Makefile->ExpandVariablesInString(m_ExportMacro);
+        }
+      else
+        {
+        this->SetError("EXPORT_MACRO option used without value.");
+        return false;
+        }
+      }
+    // If not an option, it must be another input source list name.
+    else
+      {
+      std::string s = args[i];
+      m_Makefile->ExpandVariablesInString(s);
+      inSourceLists.push_back(s);
       }
     }
   
-  m_Makefile->ExpandVariablesInString(srcListName);  
-  
-  // Find the source list specified.
-  cmMakefile::SourceMap::iterator srcListIter =
-    m_Makefile->GetSources().find(srcListName);
-  
-  if(srcListIter == m_Makefile->GetSources().end())
+  if(m_ExportMacro == "-")
     {
-    std::string errStr = "No source list named " + srcListName;
-    this->SetError(errStr.c_str());
+    this->SetError("No EXPORT_MACRO option given.");
     return false;
     }
   
-  m_ClassName = libName+"Instantiator";
-  
-  std::vector<cmSourceFile>& srcList = srcListIter->second;
-
-  // Collect the names of the classes.
-  for(std::vector<cmSourceFile>::iterator src = srcList.begin();
-      src != srcList.end();++src)
+  for(std::vector<cmStdString>::const_iterator s = inSourceLists.begin();
+      s != inSourceLists.end(); ++s)
     {
-    // Wrap-excluded and abstract classes do not have a New() method.
-    // vtkIndent and vtkTimeStamp are special cases and are not
-    // vtkObject subclasses.
-    if(!src->GetWrapExclude() && !src->GetIsAnAbstractClass()
-       && (src->GetSourceName() != "vtkIndent")
-       && (src->GetSourceName() != "vtkTimeStamp"))
+    // Find the source list specified.
+    cmMakefile::SourceMap::iterator srcListIter =
+      m_Makefile->GetSources().find(*s);
+    
+    if(srcListIter == m_Makefile->GetSources().end())
       {
-      m_Classes.push_back(src->GetSourceName());
+      std::string errStr = "No source list named " + *s;
+      this->SetError(errStr.c_str());
+      return false;
       }
-    }
+    
+    std::vector<cmSourceFile>& srcList = srcListIter->second;
+    
+    // Collect the names of the classes.
+    for(std::vector<cmSourceFile>::iterator src = srcList.begin();
+        src != srcList.end();++src)
+      {
+      // Wrap-excluded and abstract classes do not have a New() method.
+      // vtkIndent and vtkTimeStamp are special cases and are not
+      // vtkObject subclasses.
+      if(!src->GetWrapExclude() && !src->GetIsAnAbstractClass()
+         && (src->GetSourceName() != "vtkIndent")
+         && (src->GetSourceName() != "vtkTimeStamp"))
+        {
+        m_Classes.push_back(src->GetSourceName());
+        }
+      }
+    }    
   
   // Generate the header with the class declaration.
   {
@@ -157,7 +187,7 @@ cmVTKMakeInstantiatorCommand
   file.SetName(fileName.c_str(), filePath.c_str(),
                m_Makefile->GetSourceExtensions(),
                m_Makefile->GetHeaderExtensions());
-  m_Makefile->AddSource(file, srcListName.c_str());  
+  m_Makefile->AddSource(file, outSourceList.c_str());
   }
 
   unsigned int numClasses = m_Classes.size();
@@ -190,8 +220,8 @@ cmVTKMakeInstantiatorCommand
     file.SetIsAnAbstractClass(false);
     file.SetName(fileName.c_str(), filePath.c_str(),
                  m_Makefile->GetSourceExtensions(),
-                 m_Makefile->GetHeaderExtensions());    
-    m_Makefile->AddSource(file, srcListName.c_str());
+                 m_Makefile->GetHeaderExtensions());
+    m_Makefile->AddSource(file, outSourceList.c_str());
     }
 
   return true;

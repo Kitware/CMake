@@ -69,24 +69,24 @@ public:
   /** Succinct documentation.  */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Setup a library's classes to be created by vtkInstantiator";
+    return "Register classes for creation by vtkInstantiator";
     }
   
   /** More documentation.  */
   virtual const char* GetFullDocumentation()
     {
     return
-      "VTK_MAKE_INSTANTIATOR(libName srcList exportMacro\n"
+      "VTK_MAKE_INSTANTIATOR(className outSourceList\n"
+      "                      src-list1 [src-list2 ..]\n"
+      "                      EXPORT_MACRO exportMacro\n"
       "                      [HEADER_LOCATION dir] [GROUP_SIZE groupSize])\n"
-      "Generates a new class for the given library to allow its other\n"
-      "classes to be created by vtkInstantiator.  Functions to create\n"
-      "classes listed in srcList are registered with vtkInstantiator, and\n"
-      "the new class containing this code is added to the srcList for\n"
-      "inclusion in the library.  The libName argument is used to generate\n"
-      "the filename and name of the class used to register the functions\n"
-      "when the library is loaded.  The exportMacro is the name of the\n"
-      "DLL export macro to use in the class definition\n"
-      "(ex. VTK_COMMON_EXPORT).\n"
+      "Generates a new class with the given name and adds its files to the\n"
+      "given outSourceList.  It registers the classes from the other given\n"
+      "source lists with vtkInstantiator when it is loaded.  The output\n"
+      "source list should be added to the library with the classes it\n"
+      "registers.\n"
+      "The EXPORT_MACRO argument must be given and followed by the export\n"
+      "macro to use when generating the class (ex. VTK_COMMON_EXPORT).\n"
       "The HEADER_LOCATION option must be followed by a path.  It specifies\n"
       "the directory in which to place the generated class's header file.\n"
       "The generated class implementation files always go in the build\n"
