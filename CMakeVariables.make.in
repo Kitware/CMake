@@ -54,6 +54,7 @@ JAVAC         = @JAVAC@
 JAR           = @JAR@
 JAVADOC       = @JAVADOC@
 
+TCLSH         = @TCLSHCOMMAND@
 
 X_EXTRA_LIBS  = @X_EXTRA_LIBS@
 X_PRE_LIBS    = @X_PRE_LIBS@
