@@ -23,8 +23,37 @@ ADD_LIBRARY(CMakeTestLibrary LibrarySources)
 #
 # Create shared library
 #
+
+# test SET_SOURCE_FILES_PROPERTIES 
+SET_SOURCE_FILES_PROPERTIES(nonexisting_file2 GENERATED ABSTRACT WRAP_EXCLUDE FLAGS "-foo -bar")
+GET_SOURCE_FILE_PROPERTY(ISABS nonexisting_file2 ABSTRACT)
+GET_SOURCE_FILE_PROPERTY(WRAPEX nonexisting_file2 WRAP_EXCLUDE)
+GET_SOURCE_FILE_PROPERTY(FLAGS nonexisting_file2 FLAGS)
+MESSAGE("ISABS = ${ISABS}   WRAPEX =   ${WRAPEX}   FLAGS = ${FLAGS}")
+# to force a failed test add a source file that does not exist with
+# the name of the failed test
+IF(NOT ISABS)
+  SOURCE_FILES(ISABS IS_ABSTRACT_FailTest)
+ENDIF(NOT ISABS)
+
+IF(NOT WRAPEX)
+  SOURCE_FILES(WRAPEX IS_WRAP_EXCLUDE_FailTest)
+ENDIF(NOT WRAPEX)
+
+IF(FLAGS MATCHES "-foo -bar")
+   MESSAGE("Flags are set correctly ")
+ELSE(FLAGS MATCHES "-foo -bar")
+  SOURCE_FILES(WRAPEX FLAGS_FailTest)
+ENDIF(FLAGS MATCHES "-foo -bar")
+
+  
+
+SOURCE_FILES(SharedLibrarySources nonexisting_file2)
+SOURCE_FILES_REMOVE(SharedLibrarySources GENERATED nonexisting_file2)
+
+
+SET_SOURCE_FILES_PROPERTIES(fileFlags FLAGS "-DEXTRA_FLAG" )
 SOURCE_FILES(SharedLibrarySources sharedFile fileFlags)
-SOURCE_FILES_FLAGS("-DEXTRA_FLAG" fileFlags )
 ADD_LIBRARY(CMakeTestLibraryShared SHARED SharedLibrarySources)
 
 #
@@ -56,7 +85,7 @@ ADD_DEPENDENCIES(custom_target1 create_file)
 # Extra coverage
 #
 ABSTRACT_FILES(
-  ExtraSources/file1.cxx
+  file2
 )
 
 INSTALL_FILES(/tmp .h ${Complex_BINARY_DIR}/cmTestConfigure.h)
