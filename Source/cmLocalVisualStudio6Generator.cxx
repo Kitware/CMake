@@ -289,6 +289,10 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
         {
         std::string dep = cmSystemTools::GetFilenameName(
           outsf->GetCustomCommand()->GetDepends()[i]);
+        if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
+          {
+          dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
+          }
         // watch for target dependencies,
         std::string libPath = dep + "_CMAKE_PATH";
         const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
