@@ -1,3 +1,5 @@
+#ifdef CMAKE_HAS_X
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
@@ -36,3 +38,11 @@ char **argv;
 }
 
 
+#else
+
+int main()
+{
+  return 0;
+}
+
+#endif
