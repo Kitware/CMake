@@ -49,7 +49,8 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+  std::string arg0 = args[0];
+  m_Makefile->ExpandVariablesInString(arg0);
   if (args.size() >= 2)
     {
     std::string message;
@@ -59,11 +60,12 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
       {
       message += *i;
       }
-    cmSystemTools::Message(args[0].c_str(), message.c_str());
+    m_Makefile->ExpandVariablesInString(message);
+    cmSystemTools::Message(arg0.c_str(), message.c_str());
     }
   else
     {
-    cmSystemTools::Message(args[0].c_str());
+    cmSystemTools::Message(arg0.c_str());
     }
   
   return true;
