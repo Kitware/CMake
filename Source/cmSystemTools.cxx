@@ -314,7 +314,7 @@ bool cmSystemTools::FileExists(const char* filename)
 
 // Return a capitalized string (i.e the first letter is uppercased, all other
 // are lowercased)
-std::string cmSystemTools::Capitalized(std::string& s)
+std::string cmSystemTools::Capitalized(const std::string& s)
 {
   std::string n;
   n.resize(s.size());
@@ -874,8 +874,9 @@ std::string cmSystemTools::GetProgramPath(const char* in_name)
 }
 
 /**
- * Given the path to a program executable, get the directory part of the path with the
- * file stripped off.  If there is no directory part, the empty string is returned.
+ * Given the path to a program executable, get the directory part of the path
+ * with the file stripped off.  If there is no directory part, the empty
+ * string is returned.
  */
 void cmSystemTools::SplitProgramPath(const char* in_name,
 				     std::string& dir,
@@ -932,5 +933,83 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
   std::string newPath = newDir+"/"+file;
   
   return newPath;
+}
+
+/**
+ * Return path of a full filename (no trailing slashes).
+ * Warning: returned path is converted to Unix slashes format.
+ */
+std::string cmSystemTools::GetFilenamePath(const std::string& filename)
+{
+  std::string fn = filename;
+  cmSystemTools::ConvertToUnixSlashes(fn);
+  
+  std::string::size_type slash_pos = fn.rfind("/");
+  if(slash_pos != std::string::npos)
+    {
+    return fn.substr(0, slash_pos);
+    }
+  else
+    {
+    return "";
+    }
+}
+
+
+/**
+ * Return file name of a full filename (i.e. file name without path).
+ */
+std::string cmSystemTools::GetFilenameName(const std::string& filename)
+{
+  std::string fn = filename;
+  cmSystemTools::ConvertToUnixSlashes(fn);
+  
+  std::string::size_type slash_pos = fn.rfind("/");
+  if(slash_pos != std::string::npos)
+    {
+    return fn.substr(slash_pos + 1);
+    }
+  else
+    {
+    return filename;
+    }
+}
+
+
+/**
+ * Return file extension of a full filename (dot included).
+ * Warning: this is the longest extension (for example: .tar.gz)
+ */
+std::string cmSystemTools::GetFilenameExtension(const std::string& filename)
+{
+  std::string name = cmSystemTools::GetFilenameName(filename);
+  std::string::size_type dot_pos = name.find(".");
+  if(dot_pos != std::string::npos)
+    {
+    return name.substr(dot_pos);
+    }
+  else
+    {
+    return "";
+    }
+}
+
+
+/**
+ * Return file name without extension of a full filename (i.e. without path).
+ * Warning: it considers the longest extension (for example: .tar.gz)
+ */
+std::string cmSystemTools::GetFilenameNameWithoutExtension(const std::string& filename)
+{
+  std::string name = cmSystemTools::GetFilenameName(filename);
+  std::string::size_type dot_pos = name.find(".");
+  if(dot_pos != std::string::npos)
+    {
+    return name.substr(0, dot_pos);
+    }
+  else
+    {
+    return name;
+    }
 }
 

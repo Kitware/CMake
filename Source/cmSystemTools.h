@@ -82,7 +82,7 @@ public:
    * Return a capitalized string (i.e the first letter is uppercased, all other
    * are lowercased).
    */
-  static std::string Capitalized(std::string&);
+  static std::string Capitalized(const std::string&);
   
   /**
    * Replace Windows file system slashes with Unix-style slashes.
@@ -180,15 +180,32 @@ public:
   ///! Find an executable in the system PATH, with optional extra paths.
   static std::string FindProgram(const char* name,
 				 const std::vector<std::string>& path= std::vector<std::string>());
+
   ///! Find a library in the system PATH, with optional extra paths.
   static std::string FindLibrary(const char* name,
 				 const std::vector<std::string>& path);
+
   ///! return true if the file is a directory.
   static bool FileIsDirectory(const char* name);
+
   static std::string GetCurrentWorkingDirectory();
   static std::string GetProgramPath(const char*);
-  static void SplitProgramPath(const char* in_name, std::string& dir, std::string& file);
+  static void SplitProgramPath(const char* in_name, 
+                               std::string& dir, 
+                               std::string& file);
   static std::string CollapseFullPath(const char*);
+
+  ///! return path of a full filename (no trailing slashes).
+  static std::string GetFilenamePath(const std::string&);
+  
+  ///! return file name of a full filename (i.e. file name without path).
+  static std::string GetFilenameName(const std::string&);
+  
+  ///! return file extension of a full filename (dot included).
+  static std::string GetFilenameExtension(const std::string&);
+  
+  ///! return file name without extension of a full filename.
+  static std::string GetFilenameNameWithoutExtension(const std::string&);
   
   static long int ModifiedTime(const char* filename);
 
