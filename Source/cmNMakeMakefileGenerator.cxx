@@ -529,7 +529,7 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   command += " " + output_executable_file_flag + 
     this->ConvertToOutputPath(path.c_str());
 
-  command += " $(CMAKE_C_LINK_EXECUTABLE_FLAG) ";
+  command += " $(CMAKE_C_LINK_EXECUTABLE_FLAG) $(CMAKE_LINKER_FLAGS) ";
   if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
     {
     command +=  " /subsystem:windows ";
