@@ -22,9 +22,16 @@
 #include "cmWXCommandLineInfo.h"
 #include "cmake.h"
 
+#ifdef __linux__
+#include "CMakeIcon.xpm"
+#endif
+
 cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
   : wxFrame((wxFrame*)NULL, cmMainFrame::ID_MainFrame, title, wxDefaultPosition, size)
 {
+#ifdef __linux__
+  this->SetIcon( wxICON(CMakeIcon) );
+#endif
 
   cmSystemTools::SetErrorCallback(cmMainFrame::MessageCallback, this);
   this->m_Clean            = true;
