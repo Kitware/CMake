@@ -2494,6 +2494,23 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   std::map<cmStdString, cmStdString> implicitIncludes;
+
+  // CMake versions below 2.0 would add the source tree to the -I path
+  // automatically.  Preserve compatibility.
+  const char* versionValue =
+    this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  if(versionValue)
+    {
+    int major = 0;
+    int minor = 0;
+    if(sscanf(versionValue, "%d.%d", &major, &minor) == 2 && major < 2)
+      {
+      fout << "-I"
+           << this->ConvertToOutputForExisting(m_Makefile->GetStartDirectory())
+           << " ";
+      }
+    }
+
   implicitIncludes["/usr/include"] = "/usr/include";
   if(m_Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))
     {
