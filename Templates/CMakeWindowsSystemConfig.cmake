@@ -25,6 +25,15 @@ SET (CMAKE_USE_WIN32_THREADS 1 CACHE BOOL
 SET (CMAKE_MAKE_PROGRAM "msdev" CACHE STRING 
      "Program used to build from dsp files.")
 
+# We will hardcode them for now. Make sure to fix that in the future
+SET (CMAKE_SIZEOF_INT       4   CACHE INTERNAL "Size of int data type")
+SET (CMAKE_SIZEOF_LONG      4   CACHE INTERNAL "Size of long data type")
+SET (CMAKE_SIZEOF_VOID_P    4   CACHE INTERNAL "Size of void* data type")
+SET (CMAKE_SIZEOF_CHAR      1   CACHE INTERNAL "Size of char data type")
+SET (CMAKE_SIZEOF_SHORT     2   CACHE INTERNAL "Size of short data type")
+SET (CMAKE_SIZEOF_FLOAT     4   CACHE INTERNAL "Size of float data type")
+SET (CMAKE_SIZEOF_DOUBLE    8   CACHE INTERNAL "Size of double data type")
+
 # The following variables are advanced 
 
 MARK_AS_ADVANCED(
@@ -39,3 +48,5 @@ CMAKE_CXX_FLAGS_DEBUG
 CMAKE_USE_WIN32_THREADS
 CMAKE_MAKE_PROGRAM
 )
+
+
