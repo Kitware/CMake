@@ -107,7 +107,12 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       {
       if(!m_Classes[i].m_AbstractClass && !m_Classes[i].m_HeaderFileOnly)
 	{ 
-        fout << m_Classes[i].m_ClassName << " \\\n";
+        fout << m_Classes[i].m_ClassName;
+	if(i < m_Classes.size()-1)
+	  {
+	    fout << " \\";
+	  }
+	fout << "\n";
 	}
       }
     fout << "\n";
@@ -152,6 +157,8 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       {
       std::string subdir = FixDirectoryName(m_SubDirectories[i].c_str());
       fout << "build_" << subdir.c_str() << ":\n";
+      fout << "\tcd " << m_SubDirectories[i].c_str()
+	   << "; ${MAKE} -${MAKEFLAGS} CMakeTargets.make\n";
       fout << "\tcd " << m_SubDirectories[i].c_str()
 	   << "; ${MAKE} -${MAKEFLAGS} all\n\n";
 

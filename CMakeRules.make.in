@@ -1,21 +1,12 @@
-# set up make suffixes
-
-.SUFFIXES: .cxx .java .class
-
-#------------------------------------------------------------------------------
-# rules for building .o files from source files
-
-.c.o:
-	${CC} ${CC_FLAGS} -c $< -o $@
-.cxx.o:
-	${CXX} ${CXX_FLAGS} -c $< -o $@
+# include simple rules for building .o files
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_OBJ_DIR@/CMake/CMakeSimpleRules.make@MAKEQUOTE@
 
 #
-# Makefile for Visualization Toolkit sources. 
+# Makefile for 
 # 
 #------------------------------------------------------------------------------
 #
-all: ${OBJ_SUB_DIRS} ${EXECUTABLES} ${SUBDIR_BUILD} ${BUILD_LIB_FILE} ${LOCAL_BUILD_TARGETS} 
+all: CMakeTargets.make ${OBJ_SUB_DIRS} ${EXECUTABLES} ${SUBDIR_BUILD} ${BUILD_LIB_FILE} ${LOCAL_BUILD_TARGETS} ${CMAKE} 
 
 #------------------------------------------------------------------------------
 
@@ -27,7 +18,7 @@ depend: ${CMAKE}
 
 
 clean: ${SUBDIR_CLEAN}
-	rm -f ${SRC_OBJ} ${ITK_EXECUTABLES} 
+	rm -f ${SRC_OBJ} ${EXECUTABLES} 
 
 CMakeTargets.make: ${CMAKE} ${srcdir}/CMakeLists.txt
 	${CMAKE} ${srcdir}/CMakeLists.txt -S${srcdir} -I${srcdir} ${INCLUDE_FLAGS}
