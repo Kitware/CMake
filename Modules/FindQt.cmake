@@ -33,10 +33,12 @@ IF(QT_INCLUDE_DIR)
   
   #extract the version string from qglobal.h
   FILE(READ ${QT_INCLUDE_DIR}/qglobal.h QGLOBAL_H)
-  STRING(REGEX REPLACE ".*#define[\\t\\ ]+QT_VERSION_STR[\\t\\ ]+\"([0-9]+\\.[0-9]+\\.[0-9]+)\".*" "\\1" qt_version_str "${QGLOBAL_H}")
+  STRING(REGEX MATCH "#define[\t ]+QT_VERSION_STR[\t ]+\"([0-9]+.[0-9]+.[0-9]+)\"" QGLOBAL_H "${QGLOBAL_H}")
+  STRING(REGEX REPLACE ".*\"([0-9]+.[0-9]+.[0-9]+)\".*" "\\1" QGLOBAL_H "${QGLOBAL_H}")
+
   # Under windows the qt library (MSVC) has the format qt-mtXYZ where XYZ is the
   # version X.Y.Z, so we need to remove the dots from version
-  STRING(REGEX REPLACE "\\." "" qt_version_str_lib "${qt_version_str}")
+  STRING(REGEX REPLACE "\\." "" qt_version_str_lib "${QGLOBAL_H}")
 ELSE(QT_INCLUDE_DIR)
   MESSAGE(STATUS "Did not find Qt headers (qglobal.h)")
 ENDIF(QT_INCLUDE_DIR)
