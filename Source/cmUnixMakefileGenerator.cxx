@@ -56,7 +56,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   this->OutputMakeFlags(fout);
   this->OutputVerbatim(fout);
   this->OutputTargetRules(fout);
-  this->OutputLinkLibs(fout);
+  this->OutputDependencies(fout);
   this->OutputTargets(fout);
   this->OutputSubDirectoryRules(fout);
   this->OutputObjectDepends(fout);
@@ -102,8 +102,14 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
     }
 }
 
-// Output the rules for any targets
-void cmUnixMakefileGenerator::OutputLinkLibs(std::ostream& fout)
+
+/**
+ * Output the linking rules on a command line.  For executables,
+ * targetLibrary should be a NULL pointer.  For libraries, it should point
+ * to the name of the library.  This will not link a library against itself.
+ */
+void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
+                                                  const char* targetLibrary)
 {
   // collect all the flags needed for linking libraries
   std::string linkLibs;        
@@ -124,6 +130,8 @@ void cmUnixMakefileGenerator::OutputLinkLibs(std::ostream& fout)
   std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
   for(j = libs.begin(); j != libs.end(); ++j)
     {
+    // Don't link the library against itself!
+    if(targetLibrary && (*j == targetLibrary)) continue;
     std::string::size_type pos = (*j).find("-l");
     if((pos == std::string::npos || pos > 0)
        && (*j).find("${") == std::string::npos)
@@ -133,9 +141,13 @@ void cmUnixMakefileGenerator::OutputLinkLibs(std::ostream& fout)
     librariesLinked += *j;
     librariesLinked += " ";
     }
-  // Add these in twice so order does not matter
   linkLibs += librariesLinked;
-  linkLibs += librariesLinked;
+
+  if(!targetLibrary)
+    {
+    // For executables, add these a second time so order does not matter
+    linkLibs += librariesLinked;
+    }
   
   std::vector<std::string>& libsUnix = m_Makefile->GetLinkLibrariesUnix();
   for(j = libsUnix.begin(); j != libsUnix.end(); ++j)
@@ -144,13 +156,9 @@ void cmUnixMakefileGenerator::OutputLinkLibs(std::ostream& fout)
     linkLibs += " ";
     }
   linkLibs += " ${LOCAL_LINK_FLAGS} ";
-  fout << "CMAKE_LINK_LIBS = " << linkLibs << "\n\n";
-  // create and output a varible in the makefile that
-  // each executable will depend on.  This will have all the
-  // libraries that the executable uses
-  fout << "CMAKE_DEPEND_LIBS = ";
-  this->OutputDependencies(fout);
+  fout << linkLibs;
 }
+
 
 void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 {
@@ -177,15 +185,18 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << "\t$(CXX) ${CXX_FLAGS} ${CMAKE_SHLIB_BUILD_FLAGS} -o \\\n";
       fout << "\t  lib" << l->first << "$(SHLIB_SUFFIX) \\\n";
       fout << "\t  ${KIT_OBJ} ${" << l->first << 
-        "_SRC_OBJS} ${CMAKE_LINK_LIBS}\n\n";
+        "_SRC_OBJS} ";
+      this->OutputLinkLibraries(fout, l->first.c_str());
+      fout << "\n\n";
       }
     else
       {
       fout << l->first << ": ${" << 
         l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
       fout << "\t${CXX}  ${CXX_FLAGS} ${" << 
-        l->first << "_SRC_OBJS} ${CMAKE_LINK_LIBS} -o " 
-           << l->first << "\n\n";
+        l->first << "_SRC_OBJS} ";
+      this->OutputLinkLibraries(fout, NULL);
+      fout << " -o " << l->first << "\n\n";
       }
     }
 }
@@ -195,6 +206,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 // in this makefile will depend on.
 void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
 {
+  fout << "CMAKE_DEPEND_LIBS = ";
   std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   std::vector<std::string>::iterator dir, lib;
