@@ -153,6 +153,9 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
     flags = nonblock;
     return ioctl(sockfd, FIONBIO, &flags);
     }
+#ifdef SETBLOCK
+# undef SETBLOCK
+#endif
 #define SETBLOCK 2
 #endif
 
@@ -167,6 +170,9 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
 #ifdef HAVE_IOCTLSOCKET_CASE
   /* presumably for Amiga */
   return IoctlSocket(sockfd, FIONBIO, (long)nonblock);
+#ifdef SETBLOCK
+# undef SETBLOCK
+#endif
 #define SETBLOCK 4
 #endif
 
@@ -174,6 +180,9 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
   /* BeOS */
   long b = nonblock ? 1 : 0;
   return setsockopt(sockfd, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
+#ifdef SETBLOCK
+# undef SETBLOCK
+#endif
 #define SETBLOCK 5
 #endif
 
@@ -181,6 +190,9 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
   (void)nonblock;
   (void)sockfd;
   return 0; /* returns success */
+#ifdef SETBLOCK
+# undef SETBLOCK
+#endif
 #define SETBLOCK 6
 #endif
 
