@@ -65,8 +65,16 @@ ShouldRemove(const char *name, const std::vector<std::string> &args,
 void cmIfFunctionBlocker::
 ScopeEnded(cmMakefile &mf)
 {
-  cmSystemTools::Error("The end of a CMakeLists file was reached with an IF statement that was not closed properly. Within the directory: ", 
-                       mf.GetCurrentDirectory());
+  std::string errmsg = "The end of a CMakeLists file was reached with an IF statement that was not closed properly.\nWithin the directory: ";
+  errmsg += mf.GetCurrentDirectory();
+  errmsg += "\nThe arguments are: ";
+  for(std::vector<std::string>::const_iterator j = m_Args.begin();
+      j != m_Args.end(); ++j)
+    {   
+    errmsg += *j;
+    errmsg += " ";
+    }
+  cmSystemTools::Error(errmsg.c_str());
 }
 
 bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
