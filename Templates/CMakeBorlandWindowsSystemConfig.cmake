@@ -84,7 +84,7 @@ SET (CMAKE_SHLIB_SUFFIX ".dll" CACHE STRING
 SET (CMAKE_MODULE_SUFFIX ".dll" CACHE STRING 
      "Module library suffix.")
 
-FIND_PROGRAM(CMAKE_MAKE_PROGRAM make ${BCB_BIN_PATH})
+FIND_PROGRAM(CMAKE_MAKE_PROGRAM make NAMES bmake ${BCB_BIN_PATH})
 
 # We will hardcode them for now. Make sure to fix that in the future
 SET (CMAKE_SIZEOF_INT       4   CACHE INTERNAL "Size of int data type")
