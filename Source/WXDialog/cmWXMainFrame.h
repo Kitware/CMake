@@ -33,6 +33,7 @@ class wxScrolledWindow;
 class wxSizer;
 class wxStaticBox;
 class wxStaticText;
+class wxApp;
 
 /** \class cmMainFrame
  * \brief GUI for CMake with wxWindows toolkit
@@ -82,11 +83,16 @@ public:
   void ConnectEventTo(wxWindow*, wxEventType, wxObjectEventFunction);
 
   //! Callback for the error message.
-  static void MessageCallback(const char* m, const char* title, bool& nomore, void* cd);
+  static void MessageCallback(const char* m, const char* title, 
+                              bool& nomore, void* cd);
+  static void ProgressCallback(const char* m, float prog, void* clientData);
   void DisplayMessage(const char* m, const char* title, bool& nomore);
 
   //! Retrieve the current build directory.
   const std::string& GetBuildDir() { return this->m_WhereBuild; }
+  
+  //! Set the application for progress
+  void SetApplication(wxApp* app) { m_Application = app; }
 
 private:
   //! Load cache file from m_WhereBuild and display in GUI editor
@@ -220,6 +226,8 @@ private:
   CacheMapType*                           m_CacheEntries;
   cmake*                                  m_CMakeInstance;
   wxTimer*                                m_ExitTimer;
+
+  wxApp*                                  m_Application;
 
   enum Events {
     ID_MainFrame,

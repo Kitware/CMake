@@ -146,10 +146,11 @@ bool wxCMakeSetup::OnInit()
   cm.SetValidArguments("ABGHQ");
   cm.ParseCommandLine(wxApp::argc, wxApp::argv);
 
-  this->SetVendorName("Andy");
+  this->SetVendorName("Kitware");
   this->SetAppName("CMakeSetup");
 
   cmMainFrame *frame = new cmMainFrame("CMake", wxSize(200, 100));
+  frame->SetApplication(this);
   frame->Initialize(&cm);
   //wxFrame *frame = new testFrame("CMake", wxSize(200, 100));
   //wxFrame *frame = new testFrame1("Frame", wxSize(200, 100));

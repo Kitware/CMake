@@ -239,6 +239,7 @@ cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
   this->Connect(cmCacheProperty::Menu_Popup_Help, wxEVT_COMMAND_MENU_SELECTED,
                 (wxObjectEventFunction) &cmMainFrame::OnPopupMenuHelp);
 
+  this->m_CMakeInstance->SetProgressCallback(&cmMainFrame::ProgressCallback, this);
 }
 
 cmMainFrame::~cmMainFrame()
@@ -277,6 +278,27 @@ void cmMainFrame::MessageCallback(const char* m, const char* title, bool& nomore
       }    
     }
 
+}
+
+void cmMainFrame::ProgressCallback(const char* m, float prog,
+                                   void* clientData)
+{
+
+  if ( clientData )
+    {
+    cmMainFrame* self = static_cast<cmMainFrame*>( clientData );
+    char tmp[1024];
+    if (prog >= 0)
+      {
+      sprintf(tmp,"%s %i%%",m,(int)(100*prog));
+      }
+    else
+      {
+      sprintf(tmp,"%s",m);    
+      }
+    self->SetStatusText(tmp);
+    wxYield();
+    }
 }
 
 void cmMainFrame::DisplayMessage(const char* m, const char* title, bool& nomore)
@@ -829,6 +851,7 @@ void cmMainFrame::RunCMake(bool generateProjectFiles)
       cmSystemTools::Error(
         "Error in configuration process, project files may be invalid");
       }
+
     // update the GUI with any new values in the caused by the
     // generation process
     this->LoadCacheFromDiskToGUI();
@@ -1438,6 +1461,7 @@ void cmMainFrame::CursorBusy(bool s)
     {
     this->m_CursorChanged = true;
     }
+  wxYield();
 }
 
 void cmMainFrame::CursorNormal(bool s)
@@ -1447,6 +1471,7 @@ void cmMainFrame::CursorNormal(bool s)
     {
     this->m_CursorChanged = false;
     }
+  wxYield();
 }
 
 void cmMainFrame::OnSourceUpdated(wxCommandEvent& event)
