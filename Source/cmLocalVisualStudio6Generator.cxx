@@ -531,7 +531,6 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
   // reset m_Configurations
   m_Configurations.erase(m_Configurations.begin(), m_Configurations.end());
   // now add all the configurations possible
-  char buffer[2048];
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
@@ -841,7 +840,6 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     {
     cmSystemTools::Error("Error Reading ", m_DSPHeaderTemplate.c_str());
     }
-  char buffer[2048];
 
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))

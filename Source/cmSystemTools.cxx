@@ -1291,8 +1291,6 @@ bool RunCommandViaSystem(const char* command,
 {  
   std::cout << "@@ " << command << std::endl;
 
-  const int BUFFER_SIZE = 4096;
-  char buffer[BUFFER_SIZE];
   std::string commandInDir;
   if(dir)
     {

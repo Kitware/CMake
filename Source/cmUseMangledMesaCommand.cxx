@@ -89,8 +89,6 @@ CopyAndFullPathMesaHeader(const char* source,
     }
   // now copy input to output and expand variables in the
   // input file at the same time
-  const int bufSize = 4096;
-  char buffer[bufSize];
   std::string inLine;  
   // regular expression for any #include line
   cmRegularExpression includeLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
