@@ -280,12 +280,20 @@ void ctest::UpdateDirectory()
     return;
     }
 
+  std::string sourceDirectory = m_DartConfiguration["SourceDirectory"];
+  if ( cvsOptions.size() == 0 )
+    {
+    std::cerr << "Cannot find SourceDirectory  key in the DartConfiguration.tcl" << std::endl;
+    return;
+    }
+
   std::string command = cvsCommand + " update " + cvsOptions;
 
   std::string output;
   int retVal;
   bool res = cmSystemTools::RunCommand(command.c_str(), output, 
-                                       retVal, 0, true);
+                                       retVal, sourceDirectory.c_str(),
+                                       true);
   if (! res || retVal )
     {
     std::cerr << "Error(s) when updating the project" << std::endl;
