@@ -270,7 +270,13 @@ bool ReadAValue(std::string &res, const char *key)
 void cmSystemTools::ExpandRegistryValues(std::string& source)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  cmRegularExpression regEntry("\\[(HKEY[A-Za-z0-9_~\\:\\-\\(\\)\\.\\; ]*)\\]");
+  // Regular expression to match anything inside [...] that begins in HKEY.
+  // Note that there is a special rule for regular expressions to match a
+  // close square-bracket inside a list delimited by square brackets.
+  // The "[^]]" part of this expression will match any character except
+  // a close square-bracket.  The ']' character must be the first in the
+  // list of characters inside the [^...] block of the expression.
+  cmRegularExpression regEntry("\\[(HKEY[^]]*)\\]");
   
   // check for black line or comment
   while (regEntry.find(source))
