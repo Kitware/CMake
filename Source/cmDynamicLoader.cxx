@@ -44,7 +44,6 @@ cmDynamicLoaderCache* cmDynamicLoaderCache::Instance = 0;
 
 cmDynamicLoaderCache::~cmDynamicLoaderCache()
 {
-  this->FlushCache();
 }
 
 void cmDynamicLoaderCache::CacheFile(const char* path, const cmLibHandle& p)
@@ -71,13 +70,16 @@ bool cmDynamicLoaderCache::GetCacheFile(const char* path, cmLibHandle& p)
 bool cmDynamicLoaderCache::FlushCache(const char* path)
 {
   std::map<std::string, cmLibHandle>::iterator it = m_CacheMap.find(path);
+  bool ret = false;
   if ( it != m_CacheMap.end() )
     {
     cmDynamicLoader::CloseLibrary(it->second);
     m_CacheMap.erase(it);
-    return true;
+    ret = true;
     }
-  return false;
+  delete cmDynamicLoaderCache::Instance;
+  cmDynamicLoaderCache::Instance = 0;
+  return ret;
 }
 
 void cmDynamicLoaderCache::FlushCache()

@@ -17,8 +17,20 @@
 #include "cmakewizard.h"
 #include "cmake.h"
 #include "cmCacheManager.h"
+#include "cmDynamicLoader.h"
+#include "cmListFileCache.h"
+
+int do_cmake(int ac, char** av);
 
 int main(int ac, char** av)
+{
+  int ret = do_cmake(ac, av);
+  cmDynamicLoader::FlushCache();
+  cmListFileCache::GetInstance()->ClearCache(); 
+  return ret;
+}
+
+int do_cmake(int ac, char** av)
 {
   bool wiz = false;
   bool command = false;
@@ -54,6 +66,5 @@ int main(int ac, char** av)
     return 0;
     }
   cmake cm;
-  int ret = cm.Run(args);
-  return ret;  
+  return cm.Run(args); 
 }
