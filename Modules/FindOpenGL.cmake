@@ -13,6 +13,14 @@
 # OPENGL_glu_LIBRARY  - Path to GLU Library
 #
 
+# On OSX default to using the framework version of opengl
+# People will have to change the cache values of OPENGL_glu_LIBRARY and OPENGL_gl_LIBRARY
+# to use OpenGL with X11 on OSX
+IF (APPLE)
+  SET (OPENGL_gl_LIBRARY "-framework OpenGL" CACHE STRING "OpenGL lib for OSX")
+  SET (OPENGL_glu_LIBRARY "-framework AGL" CACHE STRING "AGL lib for OSX")
+ENDIF (APPLE)
+
 IF (WIN32)
   IF (CYGWIN)
 
@@ -132,17 +140,6 @@ ENDIF(OPENGL_gl_LIBRARY)
 SET(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 
 
-# On OSX, OpenGL is always there - this will need refining for those 
-# using OpenGL with X11
-
-IF (APPLE)
-  SET (OPENGL_FOUND "YES")
-  SET (OPENGL_GLU_FOUND "YES")
-  SET (OPENGL_LIBRARIES "-framework AGL -framework OpenGL" CACHE STRING "OpenGL lib for OSX")
-  SET (OPENGL_LIBRARY "${OPENGL_LIBRARIES}" CACHE STRING "OpenGL lib for OSX (for CMake 1.4)")
-  SET (OPENGL_gl_LIBRARY "-framework OpenGL" CACHE STRING "OpenGL lib for OSX")
-  SET (OPENGL_glu_LIBRARY "-framework AGL" CACHE STRING "AGL lib for OSX")
-ENDIF (APPLE)
 
 MARK_AS_ADVANCED(
   OPENGL_INCLUDE_DIR
