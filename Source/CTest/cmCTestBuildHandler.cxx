@@ -163,6 +163,7 @@ cmCTestBuildHandler::cmCTestBuildHandler()
       {
       r.m_FileIndex = cmCTestWarningErrorFileLine[cc].m_FileIndex;
       r.m_LineIndex = cmCTestWarningErrorFileLine[cc].m_LineIndex;
+      m_ErrorWarningFileLineRegex.push_back(r);
       }
     else
       {
