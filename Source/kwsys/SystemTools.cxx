@@ -1828,14 +1828,18 @@ bool SystemTools::GetShortPath(const char* path, kwsys_stl::string& shortPath)
 }
 
 void SystemTools::SplitProgramFromArgs(const char* path, 
-                                         kwsys_stl::string& program, kwsys_stl::string& args)
+                                       kwsys_stl::string& program, kwsys_stl::string& args)
 {
+  // see if this is a full path to a program
+  // if so then set program to path and args to nothing
   if(SystemTools::FileExists(path))
     {
     program = path;
     args = "";
     return;
     }
+  // Try to find the program in the path, note the program
+  // may have spaces in its name so we have to look for it 
   kwsys_stl::vector<kwsys_stl::string> e;
   kwsys_stl::string findProg = SystemTools::FindProgram(path, e);
   if(findProg.size())
@@ -1844,32 +1848,48 @@ void SystemTools::SplitProgramFromArgs(const char* path,
     args = "";
     return;
     }
+
+  // Now try and peel off space separated chunks from the end of the string
+  // so the largest path possible is found allowing for spaces in the path
   kwsys_stl::string dir = path;
   kwsys_stl::string::size_type spacePos = dir.rfind(' ');
-  if(spacePos == kwsys_stl::string::npos)
-    {
-    program = "";
-    args = "";
-    return;
-    }
   while(spacePos != kwsys_stl::string::npos)
     {
     kwsys_stl::string tryProg = dir.substr(0, spacePos);
+    // See if the file exists
     if(SystemTools::FileExists(tryProg.c_str()))
       {
       program = tryProg;
+      // remove trailing spaces from program
+      kwsys_stl::string::size_type pos = program.size()-1;
+      while(program[pos] == ' ')
+        {
+        program.erase(pos);
+        pos--;
+        }
       args = dir.substr(spacePos, dir.size()-spacePos);
       return;
-      } 
+      }
+    // Now try and find the the program in the path 
     findProg = SystemTools::FindProgram(tryProg.c_str(), e);
     if(findProg.size())
       {
       program = findProg;
+      // remove trailing spaces from program
+      kwsys_stl::string::size_type pos = program.size()-1;
+      while(program[pos] == ' ')
+        {
+        program.erase(pos);
+        pos--;
+        }
       args = dir.substr(spacePos, dir.size()-spacePos);
       return;
       }
-    spacePos = dir.rfind(' ', spacePos--);
+    // move past the space for the next search
+    spacePos--;
+    spacePos = dir.rfind(' ', spacePos);
     }
+
   program = "";
   args = "";
 }
