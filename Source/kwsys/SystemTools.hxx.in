@@ -84,11 +84,6 @@ public:
   static bool DeleteRegistryValue(const char *key);
 
   /**
-   * Look for and replace registry values in a string
-   */
-  static void ExpandRegistryValues(kwsys_std::string& source);
-
-  /**
    * Return a capitalized string (i.e the first letter is uppercased,
    * all other are lowercased).
    */
@@ -114,15 +109,6 @@ public:
    */
   static void ConvertToUnixSlashes(kwsys_std::string& path);
   
-  /**
-   * Platform independent escape spaces, unix uses backslash,
-   * windows double quotes the string.
-   */
-  static kwsys_std::string EscapeSpaces(const char* str);
-
-  /** Escape quotes in a string.  */
-  static kwsys_std::string EscapeQuotes(const char* str);
-
   /**
    * For windows this calles ConvertToWindowsOutputPath and for unix
    * it calls ConvertToUnixOutputPath
@@ -180,21 +166,6 @@ public:
   
   ///! return true if the file is a directory.
   static bool FileIsDirectory(const char* name);
-  static void Glob(const char *directory, const char *regexp,
-                   kwsys_std::vector<kwsys_std::string>& files);
-  static void GlobDirs(const char *fullPath, kwsys_std::vector<kwsys_std::string>& files);
-
-  /**
-   * Try to find a list of files that match the "simple" globbing
-   * expression. At this point in time the globbing expressions have
-   * to be in form: /directory/partial_file_name*. The * character has
-   * to be at the end of the string and it does not support ?
-   * []... The optional argument type specifies what kind of files you
-   * want to find. 0 means all files, -1 means directories, 1 means
-   * files only. This method returns true if search was succesfull.
-   */
-  static bool SimpleGlob(const kwsys_std::string& glob, kwsys_std::vector<kwsys_std::string>& files, 
-                         int type = 0);
   
   static kwsys_std::string GetCurrentWorkingDirectory();
   
@@ -230,8 +201,11 @@ public:
   static void SplitProgramFromArgs(const char* path, 
                                    kwsys_std::string& program, kwsys_std::string& args);
   
-  ///! return file extension of a full filename (dot included).
+  ///! return longest file extension of a full filename (dot included).
   static kwsys_std::string GetFilenameExtension(const kwsys_std::string&);
+  
+  ///! return shortest file extension of a full filename (dot included).
+  static kwsys_std::string GetFilenameLastExtension(const kwsys_std::string& filename);
   
   ///! return file name without extension of a full filename.
   static kwsys_std::string GetFilenameWithoutExtension(const kwsys_std::string&);
