@@ -1191,7 +1191,7 @@ void cmMainFrame::ClearCache()
 
 }
 
-void cmMainFrame::OnBinarySelected(wxCommandEvent& e)
+void cmMainFrame::OnBinarySelected(wxCommandEvent&)
 {
   if ( this->BuildDirectoryChanged() )
     {
@@ -1424,7 +1424,7 @@ void cmMainFrame::OnSourceUpdated(wxCommandEvent& event)
   this->OnSourceSelected(event);
 }
 
-void cmMainFrame::OnBinaryUpdated(wxCommandEvent& event)
+void cmMainFrame::OnBinaryUpdated(wxCommandEvent&)
 {
   if ( this->BuildDirectoryChanged() )
     {
