@@ -19,7 +19,7 @@
 std::string cmVersion::GetReleaseVersion()
 {
 #if CMake_VERSION_MINOR & 1
-  std::string cver = "Date: 2005-03-18 07:34:50 +0000";
+  std::string cver = "Date: 2005-03-19 07:38:05 +0000";
   std::string res = "";
   std::string::size_type cc, len = cver.size();
   bool aftercol = false;
