@@ -33,10 +33,16 @@ private:
   static void cb_binaryPathTextInput(Fl_Input*, void*);
   inline void cb_Browse1_i(Fl_Button*, void*);
   static void cb_Browse1(Fl_Button*, void*);
-  inline void cb_Close_i(Fl_Button*, void*);
-  static void cb_Close(Fl_Button*, void*);
-  inline void cb_Build_i(Fl_Button*, void*);
-  static void cb_Build(Fl_Button*, void*);
+public:
+  Fl_Button *m_CancelButton;
+private:
+  inline void cb_m_CancelButton_i(Fl_Button*, void*);
+  static void cb_m_CancelButton(Fl_Button*, void*);
+public:
+  Fl_Button *m_ConfigureButton;
+private:
+  inline void cb_m_ConfigureButton_i(Fl_Button*, void*);
+  static void cb_m_ConfigureButton(Fl_Button*, void*);
 public:
   Fl_Scroll *cacheValuesScroll;
   Fl_Pack *propertyListPack;
@@ -56,9 +62,13 @@ private:
   inline void cb_recentBinaryDirectoriesBrowser_i(Fl_Browser*, void*);
   static void cb_recentBinaryDirectoriesBrowser(Fl_Browser*, void*);
 public:
+  Fl_Button *m_OKButton;
+private:
+  inline void cb_m_OKButton_i(Fl_Button*, void*);
+  static void cb_m_OKButton(Fl_Button*, void*);
+public:
   ~CMakeSetupGUI();
   virtual void Close(void);
-  virtual void BuildProjectFiles(void);
   virtual void BrowseForSourcePath(void);
   virtual void BrowseForBinaryPath(void);
   virtual void Show(void);
@@ -68,5 +78,8 @@ public:
   virtual void ShowRecentSourceDirectories(void);
   virtual void SelectOneRecentBinaryDirectory(void);
   virtual void SelectOneRecentSourceDirectory(void);
+  virtual void ClickOnConfigure(void);
+  virtual void ClickOnOK(void);
+  virtual void ClickOnCancel(void);
 };
 #endif

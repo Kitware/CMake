@@ -57,6 +57,10 @@ PropertyItemRow
   m_NameButton->box( FL_DOWN_BOX );
   m_NameButton->size( secondColumn, rowHeight );
   m_NameButton->callback( NameButtonCallback, (void *)m_PropertyItem );
+  if( m_PropertyItem->m_NewValue ) 
+    {
+    m_NameButton->color(FL_RED);
+    }
     
   switch( m_PropertyItem->m_nItemType )
   {
@@ -272,6 +276,9 @@ CheckButtonCallback( Fl_Widget * widget, void * data)
     button->label(" OFF ");
     pItem->m_curValue = "OFF";
   }
+
+  pItem->m_Dirty = true;
+    
   button->redraw();
   
   FillCacheManagerFromCacheGUI();
@@ -288,6 +295,8 @@ InputTextCallback(   Fl_Widget * widget, void * data)
   PropertyItem * item   = (PropertyItem *)data;
   
   item->m_curValue      = input->value();
+
+  item->m_Dirty = true;
 
   FillCacheManagerFromCacheGUI();
 
@@ -320,6 +329,8 @@ ColorSelectionCallback(   Fl_Widget * widget, void * data)
     colorIndex = FL_FREE_COLOR;
   }
 
+  propertyItem->m_Dirty = true;
+
   colorButton->redraw();
  
   FillCacheManagerFromCacheGUI();
@@ -347,6 +358,8 @@ BrowsePathCallback(   Fl_Widget * widget, void * data)
     propertyItem->m_curValue = newpath;
     inputText->value( newpath );
   }
+
+  propertyItem->m_Dirty = true;
 
   FillCacheManagerFromCacheGUI();
 

@@ -7,8 +7,10 @@
 #include "../cmMakefile.h"
 #include <iostream>
 #include "FLTKPropertyList.h"
+#include "FLTKPropertyItemRow.h"
 #include "FL/fl_draw.H"
 #include "../cmake.h"
+#include "../cmMakefileGenerator.h"
 
 
 
@@ -308,24 +310,32 @@ CMakeSetupGUIImplementation
  */
 void
 CMakeSetupGUIImplementation
-::BuildProjectFiles( void )
+::RunCMake( bool generateProjectFiles )
 {
 
-  // Take and verify the source path from the GUI
-  if( !SetSourcePath( sourcePathTextInput->value() ) )
-  { 
-    return;
-  }
-  
-  // Take and verify the binary path from the GUI
-  if( !SetBinaryPath( binaryPathTextInput->value() ) )
-  {
-    return;
-  }
-  
+  if(!cmSystemTools::FileExists( m_WhereBuild.c_str() ))
+    {
+    std::string message =
+      "Build directory does not exist, should I create it?\n\n"
+      "Directory: ";
+    message += m_WhereBuild;
+    int userWantToCreateDirectory =
+      fl_ask(message.c_str());
+    if( userWantToCreateDirectory )
+      {
+      cmSystemTools::MakeDirectory( m_WhereBuild.c_str() );
+      }
+    else
+      {
+      fl_alert("Build Project aborted, nothing done.");
+      return;
+      }
+    }
 
+  
   // set the wait cursor
   fl_cursor(FL_CURSOR_WAIT,FL_BLACK,FL_WHITE);
+
 
   // save the current GUI values to the cache
   this->SaveCacheFromGUI();
@@ -348,11 +358,15 @@ CMakeSetupGUIImplementation
   arg = "-B";
   arg += m_WhereBuild;
   args.push_back(arg);
+  arg = "-G";
+  arg += m_GeneratorChoiceString;
+  args.push_back(arg);
   // run the generate process
-  if(make.Generate(args) != 0)
+  if(make.Generate(args, generateProjectFiles) != 0)
     {
     cmSystemTools::Error(
       "Error in generation process, project files may be invalid");
+    cmSystemTools::ResetErrorOccuredFlag();
     }
   // update the GUI with any new values in the caused by the
   // generation process
@@ -411,14 +425,40 @@ void
 CMakeSetupGUIImplementation
 ::FillCacheGUIFromCacheManager( void )
 {
+  int size = m_CacheEntriesList.GetItems().size();
+  bool reverseOrder = false;
+  // if there are already entries in the cache, then
+  // put the new ones in the top, so they show up first
+  if(size)
+    {
+    reverseOrder = true;
+    }
 
-  // Prepare to add rows to the scroll
-  m_CacheEntriesList.RemoveAll();
+  // all the current values are not new any more
+  std::set<fltk::PropertyItem*> items = m_CacheEntriesList.GetItems();
+  for(std::set<fltk::PropertyItem*>::iterator i = items.begin();
+      i != items.end(); ++i)
+    {
+    fltk::PropertyItem* item = *i;
+    item->m_NewValue = false;
+    }
+  // Prepare to add rows to the FLTK scroll/pack
   propertyListPack->clear();
   propertyListPack->begin();
 
   const cmCacheManager::CacheEntryMap &cache =
     cmCacheManager::GetInstance()->GetCacheMap();
+  if(cache.size() == 0)
+    {
+    m_OKButton->deactivate();
+    }
+  else
+    {
+    m_OKButton->activate();
+    }
+
+
+
   for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
       i != cache.end(); ++i)
     {
@@ -433,39 +473,56 @@ CMakeSetupGUIImplementation
           m_CacheEntriesList.AddProperty(key,
                                          "ON",
                                          value.m_HelpString.c_str(),
-                                         fltk::PropertyList::CHECKBOX,"");
+                                         fltk::PropertyList::CHECKBOX,"",
+                                         reverseOrder);
           }
         else
           {
           m_CacheEntriesList.AddProperty(key,
                                          "OFF",
                                          value.m_HelpString.c_str(),
-                                         fltk::PropertyList::CHECKBOX,"");
+                                         fltk::PropertyList::CHECKBOX,"",
+                                         reverseOrder);
           }
         break;
       case cmCacheManager::PATH:
         m_CacheEntriesList.AddProperty(key, 
                                        value.m_Value.c_str(),
                                        value.m_HelpString.c_str(),
-                                       fltk::PropertyList::PATH,"");
+                                       fltk::PropertyList::PATH,"",
+                                       reverseOrder);
         break;
       case cmCacheManager::FILEPATH:
         m_CacheEntriesList.AddProperty(key, 
                                        value.m_Value.c_str(),
                                        value.m_HelpString.c_str(),
-                                       fltk::PropertyList::FILE,"");
+                                       fltk::PropertyList::FILE,"",
+                                       reverseOrder);
         break;
       case cmCacheManager::STRING:
         m_CacheEntriesList.AddProperty(key,
                                        value.m_Value.c_str(),
                                        value.m_HelpString.c_str(),
-                                       fltk::PropertyList::EDIT,"");
+                                       fltk::PropertyList::EDIT,"",
+                                       reverseOrder);
         break;
       case cmCacheManager::INTERNAL:
         // These entries should not be seen by the user
+        m_CacheEntriesList.RemoveProperty(key);
         break;
       }
 
+    }
+
+  // Add the old entry to the end of the pack
+  for(std::set<fltk::PropertyItem*>::iterator i = items.begin();
+      i != items.end(); ++i)
+    {
+    fltk::PropertyItem* item = *i;
+    if( !(item->m_NewValue) )
+      {
+      new fltk::PropertyItemRow( item ); // GUI of the old property row
+      }
     }
 
   propertyListPack->end();
@@ -513,6 +570,10 @@ CMakeSetupGUIImplementation
       if (entry)
         {
         entry->m_Value = item->m_curValue;
+        }
+      if( item->m_Dirty )
+        {
+        m_CacheEntriesList.SetDirty();
         }
     }
 
@@ -643,7 +704,10 @@ void
 CMakeSetupGUIImplementation
 ::ShowRecentBinaryDirectories( void )
 {
-  recentBinaryDirectoriesBrowser->Fl_Widget::show();
+  if( recentBinaryDirectoriesBrowser->size() )
+    {
+    recentBinaryDirectoriesBrowser->Fl_Widget::show();
+    }
 }
 
 
@@ -654,7 +718,10 @@ void
 CMakeSetupGUIImplementation
 ::ShowRecentSourceDirectories( void )
 {
-  recentSourceDirectoriesBrowser->Fl_Widget::show();
+  if( recentSourceDirectoriesBrowser->size() )
+    {
+    recentSourceDirectoriesBrowser->Fl_Widget::show();
+    }
 }
 
 
@@ -713,6 +780,63 @@ CMakeSetupGUIImplementation
   // Update Recent source directories
   // insert is only done if the directory doesn't exist
   m_RecentSourceDirectories.insert( m_WhereSource );
+
+}
+
+
+
+
+
+/**
+ * Clicked on Configure Button
+ */
+void
+CMakeSetupGUIImplementation
+::ClickOnConfigure( void )
+{
+  this->RunCMake(false);
+}
+
+
+
+
+/**
+ * Clicked on OK Button
+ */
+void
+CMakeSetupGUIImplementation
+::ClickOnOK( void )
+{
+  m_CacheEntriesList.ClearDirty();
+  this->RunCMake(true);
+  cmMakefileGenerator::UnRegisterGenerators();
+  this->Close();
+}
+
+
+
+
+/**
+ * Clicked on Cancel Button
+ */
+void
+CMakeSetupGUIImplementation
+::ClickOnCancel( void )
+{
+  if(m_CacheEntriesList.IsDirty())
+    {
+    int userWantsExitEvenThoughOptionsHaveChanged = 
+      fl_ask("You have changed options but not rebuilt, \n"
+		  "are you sure you want to exit?");
+    if( userWantsExitEvenThoughOptionsHaveChanged )
+      {
+      this->Close();
+      }
+    }
+  else
+    {
+    this->Close();
+    }
 
 }
 

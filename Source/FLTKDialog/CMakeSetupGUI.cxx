@@ -38,18 +38,18 @@ void CMakeSetupGUI::cb_Browse1(Fl_Button* o, void* v) {
   ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_Browse1_i(o,v);
 }
 
-inline void CMakeSetupGUI::cb_Close_i(Fl_Button*, void*) {
-  Close();
+inline void CMakeSetupGUI::cb_m_CancelButton_i(Fl_Button*, void*) {
+  ClickOnCancel();
 }
-void CMakeSetupGUI::cb_Close(Fl_Button* o, void* v) {
-  ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_Close_i(o,v);
+void CMakeSetupGUI::cb_m_CancelButton(Fl_Button* o, void* v) {
+  ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_m_CancelButton_i(o,v);
 }
 
-inline void CMakeSetupGUI::cb_Build_i(Fl_Button*, void*) {
-  BuildProjectFiles();
+inline void CMakeSetupGUI::cb_m_ConfigureButton_i(Fl_Button*, void*) {
+  ClickOnConfigure();
 }
-void CMakeSetupGUI::cb_Build(Fl_Button* o, void* v) {
-  ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_Build_i(o,v);
+void CMakeSetupGUI::cb_m_ConfigureButton(Fl_Button* o, void* v) {
+  ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_m_ConfigureButton_i(o,v);
 }
 
 inline void CMakeSetupGUI::cb_2_i(Fl_Button*, void*) {
@@ -80,9 +80,16 @@ void CMakeSetupGUI::cb_recentBinaryDirectoriesBrowser(Fl_Browser* o, void* v) {
   ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_recentBinaryDirectoriesBrowser_i(o,v);
 }
 
+inline void CMakeSetupGUI::cb_m_OKButton_i(Fl_Button*, void*) {
+  ClickOnOK();
+}
+void CMakeSetupGUI::cb_m_OKButton(Fl_Button* o, void* v) {
+  ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_m_OKButton_i(o,v);
+}
+
 CMakeSetupGUI::CMakeSetupGUI() {
   Fl_Window* w;
-  { Fl_Window* o = dialogWindow = new Fl_Window(563, 363, "CMakeSetupDialog");
+  { Fl_Window* o = dialogWindow = new Fl_Window(562, 373, "CMakeSetupDialog");
     w = o;
     o->callback((Fl_Callback*)cb_dialogWindow, (void*)(this));
     { Fl_Input* o = sourcePathTextInput = new Fl_Input(219, 15, 200, 20, "Where is the source code: ");
@@ -107,15 +114,15 @@ CMakeSetupGUI::CMakeSetupGUI() {
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_Browse1);
     }
-    { Fl_Button* o = new Fl_Button(345, 331, 77, 23, "Close");
+    { Fl_Button* o = m_CancelButton = new Fl_Button(435, 331, 77, 23, "Quit");
       o->shortcut(0x80071);
       o->labelsize(11);
-      o->callback((Fl_Callback*)cb_Close);
+      o->callback((Fl_Callback*)cb_m_CancelButton);
     }
-    { Fl_Button* o = new Fl_Button(123, 332, 101, 23, "Build Project Files");
+    { Fl_Button* o = m_ConfigureButton = new Fl_Button(50, 332, 120, 23, "Configure Only");
       o->shortcut(0x8006d);
       o->labelsize(11);
-      o->callback((Fl_Callback*)cb_Build);
+      o->callback((Fl_Callback*)cb_m_ConfigureButton);
     }
     { Fl_Group* o = new Fl_Group(25, 80, 515, 222);
       o->box(FL_ENGRAVED_BOX);
@@ -137,7 +144,7 @@ CMakeSetupGUI::CMakeSetupGUI() {
       o->end();
       Fl_Group::current()->resizable(o);
     }
-    { Fl_Box* o = new Fl_Box(141, 305, 275, 25, "Right click on cache entries for additional options");
+    { Fl_Box* o = new Fl_Box(160, 305, 275, 25, "Right click on cache entries for additional options");
       o->labelsize(11);
     }
     { Fl_Button* o = new Fl_Button(420, 15, 22, 21, "@#2>");
@@ -160,6 +167,11 @@ CMakeSetupGUI::CMakeSetupGUI() {
       o->callback((Fl_Callback*)cb_recentBinaryDirectoriesBrowser);
       o->hide();
     }
+    { Fl_Button* o = m_OKButton = new Fl_Button(210, 332, 190, 23, "Configure and Generate Makefiles");
+      o->shortcut(0x8006d);
+      o->labelsize(11);
+      o->callback((Fl_Callback*)cb_m_OKButton);
+    }
     o->end();
   }
 }
@@ -168,9 +180,6 @@ CMakeSetupGUI::~CMakeSetupGUI() {
 }
 
 void CMakeSetupGUI::Close(void) {
-}
-
-void CMakeSetupGUI::BuildProjectFiles(void) {
 }
 
 void CMakeSetupGUI::BrowseForSourcePath(void) {
@@ -198,4 +207,13 @@ void CMakeSetupGUI::SelectOneRecentBinaryDirectory(void) {
 }
 
 void CMakeSetupGUI::SelectOneRecentSourceDirectory(void) {
+}
+
+void CMakeSetupGUI::ClickOnConfigure(void) {
+}
+
+void CMakeSetupGUI::ClickOnOK(void) {
+}
+
+void CMakeSetupGUI::ClickOnCancel(void) {
 }

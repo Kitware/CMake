@@ -21,6 +21,7 @@ PropertyList::PropertyList( CMakeSetupGUIImplementation * cmakeSetup )
 {
   m_CMakeSetup = cmakeSetup;
   PropertyItemRow::SetCMakeSetupGUI( cmakeSetup );
+  m_Dirty = false;
 }
 
 
@@ -39,28 +40,40 @@ PropertyList::~PropertyList()
 
 int PropertyList::AddItem( std::string txt)
 {
-  int nIndex =0;// = AddString(txt);
+  int nIndex =0;
   return nIndex;
 }
 
-int PropertyList::AddPropItem(PropertyItem* pItem)
+
+
+int PropertyList::AddPropItem(PropertyItem* pItem, bool reverseOrder)
 {
 
-  int nIndex =0; //= AddString(_T(""));
-  // SetItemDataPtr(nIndex,pItem);
+  int nIndex =0; 
+  if(reverseOrder)
+    {
+    nIndex = 0;
+    }
+  else
+    {
+    nIndex = m_PropertyItems.size();
+    }
 
-  new PropertyItemRow( pItem ); // GUI of the property row
+  new PropertyItemRow( pItem ); // GUI of the new property row
 
   m_PropertyItems.insert(pItem);
 
   return nIndex;
 }
 
+
+
 int PropertyList::AddProperty(const char* name,
                                const char* value,
                                const char* helpString,
                                int type,
-                               const char* comboItems)
+                               const char* comboItems,
+                               bool reverseOrder)
 { 
 
   PropertyItem* pItem = 0;
@@ -84,9 +97,23 @@ int PropertyList::AddProperty(const char* name,
     {
     pItem = new PropertyItem(name, value, helpString, type, comboItems);
     }
-  return this->AddPropItem(pItem);
+  return this->AddPropItem(pItem,reverseOrder);
 }
 
+
+void PropertyList::RemoveProperty(const char* name)
+{
+  for(int i =0; i < this->GetCount(); ++i)
+    {
+    PropertyItem* pItem = (PropertyItem*) GetItemDataPtr(i);
+    if(pItem->m_propName == name)
+      {
+      m_PropertyItems.erase(pItem);
+      delete pItem; 
+      return;
+      }
+    }
+}
 
 
 
@@ -99,7 +126,6 @@ void PropertyList::RemoveAll()
     cmCacheManager::GetInstance()->RemoveCacheEntry(pItem->m_propName.c_str());
     m_PropertyItems.erase(pItem);
     delete pItem;
-    // this->DeleteString(0);
     }
   Invalidate();
 }
@@ -127,6 +153,13 @@ PropertyItem * PropertyList::GetItem(int index)
     return *it;
 }
 
+void
+PropertyList
+::InvalidateList(void)
+{
+  Invalidate();
+  m_Dirty = true;
+}
 
 
 } // end fltk namespace

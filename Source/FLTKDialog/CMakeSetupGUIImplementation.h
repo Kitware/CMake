@@ -24,7 +24,6 @@ public:
   virtual void Close( void );
   virtual void Show( void );
   virtual void UpdateData( bool option );
-  virtual void BuildProjectFiles( void );
   virtual void BrowseForBinaryPath( void );
   virtual void BrowseForSourcePath( void );
   virtual bool SetBinaryPath( const char * path );
@@ -41,6 +40,10 @@ public:
   virtual void SelectOneRecentSourceDirectory(void);
   virtual void SelectOneRecentBinaryDirectory(void);
   virtual void UpdateListOfRecentDirectories(void);
+  virtual void ClickOnConfigure(void);
+  virtual void ClickOnOK(void);
+  virtual void ClickOnCancel(void);
+  virtual void RunCMake( bool generateProjectFiles );
 
 private:  
   virtual bool VerifyBinaryPath( const std::string & path ) const;
@@ -52,6 +55,7 @@ private:
   std::string          m_WhereBuild;
   std::string          m_WhereSource;
   std::string          m_PathToExecutable;
+  std::string	         m_GeneratorChoiceString;
   bool                 m_BuildPathChanged;
   
   std::set< std::string > m_RecentBinaryDirectories;
