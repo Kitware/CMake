@@ -10,12 +10,8 @@ TARGET_LINK_LIBRARIES(complex ${COMPLEX_LIBS})
 # Link to CMake lib
 #
 FIND_LIBRARY(CMAKE_LIB
-             CMakeLib 
-             ${Complex_BINARY_DIR}/../../Source
-             ${Complex_BINARY_DIR}/../../Source/Debug
-             ${Complex_BINARY_DIR}/../../Source/Release
-             ${Complex_BINARY_DIR}/../../Source/MinSizeRel
-             ${Complex_BINARY_DIR}/../../Source/RelWithDebInfo)
+              CMakeLib 
+              ${Wrapping_BINARY_DIR}/../../Source/${CMAKE_CFG_INTDIR})
 
 # Specify the same one for debug/optimized to increase coverage
 TARGET_LINK_LIBRARIES(complex 

@@ -28,11 +28,7 @@ ENDIF (EXECUTABLE_OUTPUT_PATH)
 #
 FIND_LIBRARY (CMAKE_LIB
               CMakeLib 
-              ${Wrapping_BINARY_DIR}/../../Source
-              ${Wrapping_BINARY_DIR}/../../Source/Debug
-              ${Wrapping_BINARY_DIR}/../../Source/Release
-              ${Wrapping_BINARY_DIR}/../../Source/MinSizeRel
-              ${Wrapping_BINARY_DIR}/../../Source/RelWithDebInfo)
+              ${Wrapping_BINARY_DIR}/../../Source/${CMAKE_CFG_INTDIR})
 
 LINK_LIBRARIES (${CMAKE_LIB})
 
@@ -127,7 +123,7 @@ CONFIGURE_FILE(
 #
 # Mangled Mesa
 #
-USE_MANGLED_MESA (${Wrapping_SOURCE_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
+USE_MANGLED_MESA (${Wrapping_BINARY_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
 
 #
 # Instantiator

@@ -28,11 +28,7 @@ ENDIF (EXECUTABLE_OUTPUT_PATH)
 #
 FIND_LIBRARY(CMAKE_LIB
              CMakeLib 
-             ${Testing_BINARY_DIR}/../../Source
-             ${Testing_BINARY_DIR}/../../Source/Debug
-             ${Testing_BINARY_DIR}/../../Source/Release
-             ${Testing_BINARY_DIR}/../../Source/MinSizeRel
-             ${Testing_BINARY_DIR}/../../Source/RelWithDebInfo)
+             ${Wrapping_BINARY_DIR}/../../Source/${CMAKE_CFG_INTDIR})
 
 # Specify the same one for debug/optimized to increase coverage
 LINK_LIBRARIES(${CMAKE_LIB}
