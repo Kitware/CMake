@@ -54,9 +54,7 @@ class cmCableClass
 public:
   typedef std::set<std::string> Sources;
   
-  template <typename InputIterator>
-  void AddSources(InputIterator first, InputIterator last)
-    { for(InputIterator i = first; i != last; ++i) { m_Sources.insert(*i); } }
+  void AddSources(const Sources& sources);
   void AddSource(const char*);
 
   Sources::const_iterator SourcesBegin() const { return m_Sources.begin(); }

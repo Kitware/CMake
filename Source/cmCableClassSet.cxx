@@ -44,6 +44,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * Add to the set of required sources to define the class.
  */
+void cmCableClass::AddSources(const Sources& sources)
+{
+  for(Sources::const_iterator s = sources.begin(); s != sources.end(); ++s)
+    {
+    m_Sources.insert(*s);
+    }
+}
+
+
+/**
+ * Add to the set of required sources to define the class.
+ */
 void cmCableClass::AddSource(const char* source)
 {
   m_Sources.insert(source);
@@ -178,7 +190,7 @@ void cmCableClassSet::ParseAndAddElement(const char* element,
   else
     {
     cmCableClass cableClass;
-    cableClass.AddSources(sources.begin(), sources.end());
+    cableClass.AddSources(sources);
     this->AddClass(className.c_str(), cableClass);
     }
 }
@@ -194,7 +206,7 @@ void cmCableClassSet::AddCableClassSet(const cmCableClassSet& set,
   for(CableClassMap::const_iterator c = set.Begin(); c != set.End(); ++c)
     {
     cmCableClass cableClass = c->second;
-    cableClass.AddSources(sources.begin(), sources.end());
+    cableClass.AddSources(sources);
     this->AddClass(c->first.c_str(), cableClass);
     }
 }
