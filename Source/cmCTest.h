@@ -23,6 +23,7 @@
 #include "cmListFileCache.h"
 
 class cmMakefile;
+class cmCTestScriptHandler;
 
 class cmCTest
 {
@@ -32,17 +33,6 @@ public:
 
   ///! Process Command line arguments
   int Run(std::vector<std::string>const&, std::string* output = 0);
-  
-  /**
-   * Run a dashboard using a specified confiuration script
-   */
-  int RunConfigurationScript();
-  int RunConfigurationScript(const std::string& script);
-  int RunConfigurationDashboard(cmMakefile *mf, 
-                                const char *srcDir, const char *binDir,
-                                const char *ctestRoot,
-                                bool backup, const char *cvsCheckOut,
-                                const char *ctestCmd);
   
   /**
    * Initialize and finalize testing
@@ -124,10 +114,11 @@ public:
   static int GetTestModelFromString(const char* str);
 
   /**
-   * constructor
+   * constructor and destructor
    */
   cmCTest();
-
+  ~cmCTest();
+  
   //! Set the notes files to be created.
   void SetNotesFiles(const char* notes);
 
@@ -146,7 +137,6 @@ public:
   bool m_ForceNewCTestProcess;
 
   bool m_RunConfigurationScript;
-  tm_VectorOfStrings m_ConfigurationScripts;
 
   enum {
     EXPERIMENTAL,
@@ -154,13 +144,21 @@ public:
     CONTINUOUS
   };
 
+  // provide some more detailed info on the return code for ctest
+  enum {
+    UPDATE_ERRORS = 0x01,
+    CONFIGURE_ERRORS = 0x02,
+    BUILD_ERRORS = 0x04,
+    TEST_ERRORS = 0x08,
+    MEMORY_ERRORS = 0x10
+  };
+
   int GenerateNotesFile(const char* files);
 
-  void RestoreBackupDirectories(bool backup, 
-                                const char *srcDir, const char *binDir,
-                                const char *backupSrc, const char *backupBin);
-
 private:
+  // this is a helper class than handles running test scripts
+  cmCTestScriptHandler *ScriptHandler;
+  
   void SetTestsToRunInformation(const char*);
   void ExpandTestsToRunInformation(int numPossibleTests);
   std::string TestsToRunString;

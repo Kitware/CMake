@@ -109,7 +109,8 @@ ENDIF(CMAKE_BUILD_MFC_DIALOG)
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 
-SET(CMTEST_SRCS ctest.cxx cmCTest.cxx)
+SET(CMTEST_SRCS ctest.cxx cmCTest.cxx ctest/cmCTestScriptHandler.cxx)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Source/CTest)
 
 IF (UNIX)
   TARGET_LINK_LIBRARIES(CMakeLib ${CMAKE_DL_LIBS})
@@ -127,7 +128,6 @@ IF(CMAKE_BUILD_WITH_CURL)
   ADD_DEFINITIONS(-DHAVE_CURL)
   INCLUDE_DIRECTORIES(
     ${CMAKE_SOURCE_DIR}/Source/CTest/Curl
-    ${CMAKE_SOURCE_DIR}/Source/CTest
     )
 ENDIF(CMAKE_BUILD_WITH_CURL)
 
