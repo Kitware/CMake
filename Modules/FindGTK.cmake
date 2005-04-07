@@ -33,6 +33,7 @@ IF(UNIX)
     /usr/local/include
     /usr/openwin/share/include
     /usr/local/include/glib12
+    /usr/lib64/glib/include
     /usr/lib/glib/include
     /usr/local/lib/glib/include
     /opt/gnome/include
@@ -45,6 +46,7 @@ IF(UNIX)
     /usr/openwin/share/include
     /usr/include/gtk-1.2
     /usr/local/include/glib12
+    /usr/lib64/glib/include
     /usr/lib/glib/include
     /usr/include/glib-1.2
     /usr/local/include/glib-1.2
@@ -60,9 +62,11 @@ IF(UNIX)
   )
 
   FIND_LIBRARY( GTK_gtkgl_LIBRARY gtkgl
+    /usr/lib64
     /usr/lib
     /usr/local/lib
     /usr/openwin/lib
+    /usr/X11R6/lib64
     /usr/X11R6/lib
     /opt/gnome/lib
   )
@@ -73,54 +77,66 @@ IF(UNIX)
 
   FIND_LIBRARY( GTK_gtk_LIBRARY
     NAMES  gtk gtk12
-    PATHS /usr/lib
+    PATHS /usr/lib64
+          /usr/lib
           /usr/local/lib
           /usr/openwin/lib
+          /usr/X11R6/lib64
           /usr/X11R6/lib
           /opt/gnome/lib
   )
 
   FIND_LIBRARY( GTK_gdk_LIBRARY
     NAMES  gdk gdk12
-    PATHS  /usr/lib
+    PATHS  /usr/lib64
+           /usr/lib
            /usr/local/lib
            /usr/openwin/lib
+           /usr/X11R6/lib64
            /usr/X11R6/lib
            /opt/gnome/lib
   )
 
   FIND_LIBRARY( GTK_gmodule_LIBRARY
     NAMES  gmodule gmodule12
-    PATHS  /usr/lib
+    PATHS  /usr/lib64
+           /usr/lib
            /usr/local/lib
            /usr/openwin/lib
+           /usr/X11R6/lib64
            /usr/X11R6/lib
            /opt/gnome/lib
   )
 
   FIND_LIBRARY( GTK_glib_LIBRARY
     NAMES  glib glib12
-    PATHS  /usr/lib
+    PATHS  /usr/lib64
+           /usr/lib
            /usr/local/lib
            /usr/openwin/lib
+           /usr/X11R6/lib64
            /usr/X11R6/lib
            /opt/gnome/lib
   )
 
   FIND_LIBRARY( GTK_Xi_LIBRARY 
     NAMES Xi 
-    PATHS /usr/lib 
+    PATHS /usr/lib64
+          /usr/lib 
     /usr/local/lib 
     /usr/openwin/lib 
+    /usr/X11R6/lib64
     /usr/X11R6/lib 
     /opt/gnome/lib 
     ) 
 
   FIND_LIBRARY( GTK_gthread_LIBRARY
     NAMES  gthread gthread12
-    PATHS  /usr/lib
+    PATHS  /usr/lib64
+           /usr/lib
            /usr/local/lib
            /usr/openwin/lib
+           /usr/X11R6/lib64
            /usr/X11R6/lib
            /opt/gnome/lib
   )

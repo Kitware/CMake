@@ -15,6 +15,7 @@ FIND_PATH(JPEG_INCLUDE_DIR jpeglib.h
 )
 
 FIND_LIBRARY(JPEG_LIBRARY jpeg
+/usr/lib64
 /usr/lib
 /usr/local/lib
 )

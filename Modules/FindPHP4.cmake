@@ -16,6 +16,7 @@ SET(PHP4_POSSIBLE_INCLUDE_PATHS
   )
 
 SET(PHP4_POSSIBLE_LIB_PATHS
+  /usr/lib64
   /usr/lib
   )
 

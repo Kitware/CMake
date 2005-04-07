@@ -24,7 +24,10 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   $ENV{QTDIR}/include
   /usr/local/qt/include
   /usr/local/include
+  /usr/lib64/qt/include
   /usr/lib/qt/include
+  /usr/lib64/qt-3.3/include
+  /usr/lib/qt-3.3/include
   /usr/include/qt
   /usr/include
   /usr/share/qt3/include
@@ -52,7 +55,10 @@ IF (QT_MT_REQUIRED)
         $ENV{QTDIR}/lib
         /usr/local/qt/lib
         /usr/local/lib
+        /usr/lib64/qt/lib
         /usr/lib/qt/lib
+        /usr/lib64/qt-3.3/lib
+        /usr/lib/qt-3.3/lib
         /usr/lib
         /usr/share/qt3/lib
         C:/Progra~1/qt/lib
@@ -65,7 +71,10 @@ ELSE (QT_MT_REQUIRED)
     $ENV{QTDIR}/lib
     /usr/local/qt/lib
     /usr/local/lib
+    /usr/lib64/qt/lib
     /usr/lib/qt/lib
+    /usr/lib64/qt-3.3/lib
+    /usr/lib/qt-3.3/lib
     /usr/lib
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
@@ -93,7 +102,10 @@ FIND_PROGRAM(QT_MOC_EXECUTABLE
   PATHS
   $ENV{QTDIR}/bin 
   /usr/local/qt/bin
+  /usr/lib64/qt/bin
   /usr/lib/qt/bin
+  /usr/lib64/qt-3.3/bin
+  /usr/lib/qt-3.3/bin
   /usr/share/qt3/bin
   C:/Progra~1/qt/bin
   )
@@ -106,7 +118,10 @@ ENDIF(QT_MOC_EXECUTABLE)
 FIND_PROGRAM(QT_UIC_EXECUTABLE uic
   $ENV{QTDIR}/bin 
   /usr/local/qt/bin
+  /usr/lib64/qt/bin
   /usr/lib/qt/bin
+  /usr/lib64/qt-3.3/bin
+  /usr/lib/qt-3.3/bin
   /usr/share/qt3/bin
   C:/Progra~1/qt/bin
 )

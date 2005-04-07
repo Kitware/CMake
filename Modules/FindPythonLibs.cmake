@@ -40,6 +40,8 @@ FIND_LIBRARY(PYTHON_LIBRARY
         python16 python1.6 python1.6.dll
         python15 python1.5 python1.5.dll
   PATHS
+  /usr/lib64/python2.4/config
+  /usr/lib64/python2.3/config
   /usr/lib/python2.4/config
   /usr/lib/python2.3/config
   /usr/lib/python2.2/config
@@ -47,6 +49,7 @@ FIND_LIBRARY(PYTHON_LIBRARY
   /usr/lib/python2.0/config
   /usr/lib/python1.6/config
   /usr/lib/python1.5/config
+  /usr/lib64
   /usr/lib
   /usr/local/lib
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs

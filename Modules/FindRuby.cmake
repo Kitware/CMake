@@ -12,6 +12,7 @@ SET(RUBY_POSSIBLE_INCLUDE_PATHS
   )
 
 SET(RUBY_POSSIBLE_LIB_PATHS
+  /usr/lib64
   /usr/lib
   )
 

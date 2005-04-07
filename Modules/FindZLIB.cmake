@@ -11,6 +11,7 @@ FIND_PATH(ZLIB_INCLUDE_DIR zlib.h
 )
 
 FIND_LIBRARY(ZLIB_LIBRARY z
+  /usr/lib64
   /usr/lib
   /usr/local/lib
 )

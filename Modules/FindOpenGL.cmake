@@ -30,11 +30,13 @@ IF (WIN32)
     )
 
     FIND_LIBRARY(OPENGL_gl_LIBRARY opengl32
+      /usr/lib64
       /usr/lib
       /usr/lib/w32api
     )
 
     FIND_LIBRARY(OPENGL_glu_LIBRARY glu32
+      /usr/lib64
       /usr/lib
       /usr/lib/w32api
     )
@@ -81,10 +83,12 @@ ELSE (WIN32)
 
   FIND_LIBRARY(OPENGL_gl_LIBRARY
     NAMES GL MesaGL
-    PATHS /usr/lib
+    PATHS /usr/lib64
+          /usr/lib
           /usr/local/lib
           /opt/graphics/OpenGL/lib
           /usr/openwin/lib
+          /usr/X11R6/lib64
           /usr/X11R6/lib
           /usr/shlib
   )
@@ -106,10 +110,12 @@ ELSE (WIN32)
   FIND_LIBRARY(OPENGL_glu_LIBRARY
     NAMES GLU MesaGLU
     PATHS ${OPENGL_gl_LIBRARY}
+          /usr/lib64
           /usr/lib
           /usr/local/lib
           /opt/graphics/OpenGL/lib
           /usr/openwin/lib
+          /usr/X11R6/lib64
           /usr/X11R6/lib
           /usr/shlib
   )

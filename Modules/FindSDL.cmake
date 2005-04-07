@@ -15,6 +15,7 @@ IF (UNIX)
 
   FIND_LIBRARY(SDL_LIBRARY SDL
     $ENV{SDLDIR}/lib
+    /usr/lib64
     /usr/lib
     /usr/local/lib
   )
@@ -29,5 +30,5 @@ ENDIF (UNIX)
 
 SET( SDL_FOUND "NO" )
 IF(SDL_LIBRARY)
-	SET( SDL_FOUND "YES" )
+  SET( SDL_FOUND "YES" )
 ENDIF(SDL_LIBRARY)

@@ -17,6 +17,7 @@ SET(JAVA_BIN_PATH
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
   /usr/bin
+  /usr/lib64/java/bin
   /usr/lib/java/bin
   /usr/share/java/bin
   /usr/local/bin
