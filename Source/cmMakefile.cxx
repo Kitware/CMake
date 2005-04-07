@@ -2200,7 +2200,7 @@ std::string cmMakefile::FindLibrary(const char* name,
         std::string s = *i;
         std::string s2 = *i;
         cmSystemTools::ReplaceString(s, "lib/", "lib64/");
-        if(cmSystemTools::FileIsDirectory(s.c_str()))
+        if((s != *i) && cmSystemTools::FileIsDirectory(s.c_str()))
           {
           path64.push_back(s);
           }
