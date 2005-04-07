@@ -21,7 +21,6 @@ IF (UNIX)
   FIND_LIBRARY(AVIFILE_AVIPLAY_LIBRARY aviplay
     /usr/local/avifile/lib
     /usr/local/lib
-    /usr/lib64
     /usr/lib
   )
 

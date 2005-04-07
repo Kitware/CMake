@@ -20,11 +20,9 @@ IF (WIN32)
 
     FIND_LIBRARY( GLUT_glut_LIBRARY glut32
       ${OPENGL_LIBRARY_DIR}
-      /usr/lib64
       /usr/lib
       /usr/lib/w32api
       /usr/local/lib
-      /usr/X11R6/lib64
       /usr/X11R6/lib
     )
 
@@ -66,29 +64,23 @@ ELSE (WIN32)
     )
 
     FIND_LIBRARY( GLUT_glut_LIBRARY glut
-      /usr/lib64
       /usr/lib
       /usr/local/lib
       /usr/openwin/lib
-      /usr/X11R6/lib64
       /usr/X11R6/lib
     )
 
     FIND_LIBRARY( GLUT_Xi_LIBRARY Xi
-      /usr/lib64
       /usr/lib
       /usr/local/lib
       /usr/openwin/lib
-      /usr/X11R6/lib64
       /usr/X11R6/lib
     )
 
     FIND_LIBRARY( GLUT_Xmu_LIBRARY Xmu
-      /usr/lib64
       /usr/lib
       /usr/local/lib
       /usr/openwin/lib
-      /usr/X11R6/lib64
       /usr/X11R6/lib
     )
 

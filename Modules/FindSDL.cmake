@@ -15,7 +15,6 @@ IF (UNIX)
 
   FIND_LIBRARY(SDL_LIBRARY SDL
     $ENV{SDLDIR}/lib
-    /usr/lib64
     /usr/lib
     /usr/local/lib
   )

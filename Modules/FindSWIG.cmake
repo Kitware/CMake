@@ -2,13 +2,11 @@ SET(SWIG_FOUND FOOBAR)
 FIND_PATH(SWIG_DIR
   SWIGConfig.cmake
   /usr/share/swig1.3
-  /usr/lib64/swig1.3
   /usr/lib/swig1.3
   /usr/local/share/swig1.3)
 FIND_PATH(SWIG_DIR
   swig.swg
   /usr/share/swig1.3
-  /usr/lib64/swig1.3
   /usr/lib/swig1.3
   /usr/local/share/swig1.3)
 IF(EXISTS ${SWIG_DIR})

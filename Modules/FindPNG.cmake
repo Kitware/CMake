@@ -23,9 +23,8 @@ IF(ZLIB_FOUND)
   )
 
   FIND_LIBRARY(PNG_LIBRARY png
-  /usr/local/lib
-  /usr/lib64
   /usr/lib
+  /usr/local/lib
   )
 
   IF (PNG_LIBRARY)

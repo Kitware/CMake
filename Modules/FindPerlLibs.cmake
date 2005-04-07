@@ -13,11 +13,9 @@ SET(PERL_POSSIBLE_INCLUDE_PATHS
   /usr/lib/perl/5.8.1/CORE
   /usr/lib/perl/5.8.0/CORE
   /usr/lib/perl/5.8/CORE
-  /usr/lib64/perl5/5.8.3/x86_64-linux-thread-multi/CORE
   )
 
 SET(PERL_POSSIBLE_LIB_PATHS
-  /usr/lib64
   /usr/lib
   )
 

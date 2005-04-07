@@ -18,14 +18,12 @@ FIND_PATH(MPEG2_INCLUDE_DIR mpeg2.h
 
 FIND_LIBRARY(MPEG2_mpeg2_LIBRARY mpeg2
   /usr/local/lib
-  /usr/lib64
   /usr/lib
   /usr/local/livid/mpeg2dec/libmpeg2/.libs
 )
 
 FIND_LIBRARY( MPEG2_vo_LIBRARY vo
   /usr/local/lib
-  /usr/lib64
   /usr/lib
   /usr/local/livid/mpeg2dec/libvo/.libs
 )

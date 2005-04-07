@@ -15,7 +15,6 @@ FIND_PATH(TIFF_INCLUDE_DIR tiff.h
 )
 
 FIND_LIBRARY(TIFF_LIBRARY tiff
-  /usr/lib64
   /usr/lib
   /usr/local/lib
 )

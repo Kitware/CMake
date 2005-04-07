@@ -20,11 +20,9 @@ IF (UNIX)
   )
 
   SET(X11_LIB_SEARCH_PATH
-    /usr/X11R6/lib64
     /usr/X11R6/lib
     /usr/local/lib 
     /usr/openwin/lib 
-    /usr/lib64
     /usr/lib 
   )
 

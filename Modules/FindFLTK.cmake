@@ -73,26 +73,25 @@ IF(FLTK_INCLUDE_DIR)
            PATHS /usr/lib /usr/local/lib
            /usr/local/lib/fltk
            /usr/local/fltk/lib
-           /usr/X11R6/lib64
            /usr/X11R6/lib ${FLTK_INCLUDE_DIR}/lib
       )
   ENDIF(FLTK_VERSION_1.0.11)
   IF(FLTK_VERSION_1.1)
     FIND_LIBRARY(FLTK_BASE_LIBRARY  NAMES fltk fltkd
       PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib
-      /usr/X11R6/lib64 /usr/X11R6/lib  ${FLTK_INCLUDE_DIR}/lib
+      /usr/X11R6/lib  ${FLTK_INCLUDE_DIR}/lib
     )
     FIND_LIBRARY(FLTK_GL_LIBRARY NAMES fltkgl fltkgld fltk_gl
       PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib
-      /usr/X11R6/lib64 /usr/X11R6/lib ${FLTK_INCLUDE_DIR}/lib
+      /usr/X11R6/lib ${FLTK_INCLUDE_DIR}/lib
     )
     FIND_LIBRARY(FLTK_FORMS_LIBRARY NAMES fltkforms fltkformsd fltk_forms
       PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib
-      /usr/X11R6/lib64 /usr/X11R6/lib  ${FLTK_INCLUDE_DIR}/lib
+      /usr/X11R6/lib  ${FLTK_INCLUDE_DIR}/lib
     )
     FIND_LIBRARY(FLTK_IMAGES_LIBRARY NAMES fltkimages fltkimagesd fltk_images
       PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib
-      /usr/X11R6/lib64 /usr/X11R6/lib  ${FLTK_INCLUDE_DIR}/lib
+      /usr/X11R6/lib  ${FLTK_INCLUDE_DIR}/lib
     )
   ENDIF(FLTK_VERSION_1.1)
   SET( FLTK_LIBRARIES 
