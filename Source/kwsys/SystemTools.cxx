@@ -2247,7 +2247,11 @@ kwsys_stl::string SystemTools::GetActualCaseForPath(const char* p)
     return path;
     }
   char buffer[MAX_PATH+1];
-  ::GetLongPathName(path.c_str(), buffer, MAX_PATH+1);
+  int len = ::GetLongPathName(path.c_str(), buffer, MAX_PATH+1);
+  if(len == 0 || len > MAX_PATH+1)
+    {
+    return path;
+    }
   return buffer;
 #endif  
 }
