@@ -1313,19 +1313,18 @@ cmLocalUnixMakefileGenerator2
     {
     if(!(*i)->GetExcludeAll())
       {
-      // Construct the name of the subdirectory relative to this
-      // directory.
-      std::string subdir =
-        this->ConvertToRelativePath((*i)->GetMakefile()->GetStartOutputDirectory());
-
       // Add the subdirectory rule either for pre-order or post-order.
       if((*i)->GetMakefile()->GetPreOrder())
         {
-        this->WriteSubdirRule(makefileStream, pass, subdir.c_str(), lastPre);
+        this->WriteSubdirRule(makefileStream, pass,
+                              (*i)->GetMakefile()->GetStartOutputDirectory(),
+                              lastPre);
         }
       else
         {
-        this->WriteSubdirRule(makefileStream, pass, subdir.c_str(), lastPost);
+        this->WriteSubdirRule(makefileStream, pass,
+                              (*i)->GetMakefile()->GetStartOutputDirectory(),
+                              lastPost);
         }
       }
     }
@@ -2230,10 +2229,13 @@ std::string
 cmLocalUnixMakefileGenerator2
 ::GetSubdirTargetName(const char* pass, const char* subdir)
 {
+  // Convert the subdirectory name to a relative path to keep it short.
+  std::string reldir = this->ConvertToRelativePath(subdir);
+
   // Convert the subdirectory name to a valid make target name.
   std::string s = pass;
   s += "_";
-  s += subdir;
+  s += reldir;
 
   // Replace "../" with 3 underscores.  This allows one .. at the beginning.
   size_t pos = s.find("../");
