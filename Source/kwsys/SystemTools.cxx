@@ -2228,8 +2228,28 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
   // Update the translation table with this potentially new path.
   SystemTools::AddTranslationPath(newPath.c_str(), in_path);
   SystemTools::CheckTranslationPath(newPath);
+#ifdef _WIN32
+  newPath = SystemTools::GetActualCaseForPath(newPath.c_str());
+#endif
   // Return the reconstructed path.
   return newPath;
+}
+
+//----------------------------------------------------------------------------
+kwsys_stl::string SystemTools::GetActualCaseForPath(const char* p)
+{
+#ifndef _WIN32
+  return p;
+#else
+  std::string path;
+  if(!SystemTools::GetShortPath(p, path))
+    {
+    return path;
+    }
+  char buffer[MAX_PATH+1];
+  ::GetLongPathName(path.c_str(), buffer, MAX_PATH+1);
+  return buffer;
+#endif  
 }
 
 //----------------------------------------------------------------------------

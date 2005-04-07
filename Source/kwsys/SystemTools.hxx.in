@@ -242,6 +242,14 @@ public:
   static const char* GetExecutableExtension();
 
   /**
+   *  Given a path that exists on a windows machine, return the
+   *  actuall case of the path as it was created.  If the file
+   *  does not exist path is returned unchanged.  This does nothing
+   *  on unix but return path.
+   */
+  static kwsys_stl::string GetActualCaseForPath(const char* path);
+
+  /**
    * Given the path to a program executable, get the directory part of
    * the path with the file stripped off.  If there is no directory
    * part, the empty string is returned.

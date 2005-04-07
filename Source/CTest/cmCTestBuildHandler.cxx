@@ -463,7 +463,11 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
   // only report the first 50 warnings and first 50 errors
   unsigned short numErrorsAllowed = 50;
   unsigned short numWarningsAllowed = 50;
-
+  std::string srcdir = m_CTest->GetDartConfiguration("SourceDirectory");
+  // make sure the source dir is in the correct case on windows
+  // via a call to collapse full path.
+  srcdir = cmSystemTools::CollapseFullPath(srcdir.c_str());
+  srcdir += "/";
   for ( it = ew.begin(); 
         it != ew.end() && (numErrorsAllowed || numWarningsAllowed); it++ )
     {
@@ -491,6 +495,24 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
         if ( re->find(cm->m_Text.c_str() ) )
           {
           cm->m_SourceFile = re->match(rit->m_FileIndex);
+          // At this point we need to make m_SourceFile relative to 
+          // the source root of the project, so cvs links will work
+          cmSystemTools::ConvertToUnixSlashes(cm->m_SourceFile);
+          if(cm->m_SourceFile.find("/.../") != cm->m_SourceFile.npos)
+            {
+            cmSystemTools::ReplaceString(cm->m_SourceFile, "/.../", "");
+            std::string::size_type p = cm->m_SourceFile.find("/");
+            if(p != cm->m_SourceFile.npos)
+              {
+              cm->m_SourceFile = cm->m_SourceFile.substr(p+1, cm->m_SourceFile.size()-p);
+              }
+            }
+          else
+            {
+            // make sure it is a full path with the correct case
+            cm->m_SourceFile = cmSystemTools::CollapseFullPath(cm->m_SourceFile.c_str());
+            cmSystemTools::ReplaceString(cm->m_SourceFile, srcdir.c_str(), "");
+            }
           cm->m_LineNumber = atoi(re->match(rit->m_LineIndex).c_str());
           break;
           }
