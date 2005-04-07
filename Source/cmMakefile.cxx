@@ -2191,16 +2191,29 @@ std::string cmMakefile::FindLibrary(const char* name,
     std::vector<std::string> path64;
     if(size == 8)
       {
-      // add a 64 to the name of all the search paths
+      // Convert each search path to possible 32- and 64-bit versions
+      // of the names.  Check for the existence of each one here to
+      // avoid repeating the check for every file search.
       for(std::vector<std::string>::iterator i = path.begin(); 
           i != path.end(); ++i)
         {
         std::string s = *i;
-        s += "64";
-        path64.push_back(s);
+        std::string s2 = *i;
+        cmSystemTools::ReplaceString(s, "lib/", "lib64/");
+        if(cmSystemTools::FileIsDirectory(s.c_str()))
+          {
+          path64.push_back(s);
+          }
+        s2 += "64";
+        if(cmSystemTools::FileIsDirectory(s2.c_str()))
+          {
+          path64.push_back(s2);
+          }
+        if(cmSystemTools::FileIsDirectory(i->c_str()))
+          {
+          path64.push_back(*i);
+          }
         }
-      // now append the regular names
-      path64.insert(path64.end(), path.begin(), path.end());
       // now look for the library in the 64 bit path
       return cmSystemTools::FindLibrary(name, path64);
       }
