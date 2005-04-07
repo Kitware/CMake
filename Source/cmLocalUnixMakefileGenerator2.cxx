@@ -1313,18 +1313,19 @@ cmLocalUnixMakefileGenerator2
     {
     if(!(*i)->GetExcludeAll())
       {
+      // Construct the name of the subdirectory relative to this
+      // directory.
+      std::string subdir =
+        this->ConvertToRelativePath((*i)->GetMakefile()->GetStartOutputDirectory());
+
       // Add the subdirectory rule either for pre-order or post-order.
       if((*i)->GetMakefile()->GetPreOrder())
         {
-        this->WriteSubdirRule(makefileStream, pass, 
-                              (*i)->GetMakefile()->GetStartOutputDirectory(), 
-                              lastPre);
+        this->WriteSubdirRule(makefileStream, pass, subdir.c_str(), lastPre);
         }
       else
         {
-        this->WriteSubdirRule(makefileStream, pass, 
-                              (*i)->GetMakefile()->GetStartOutputDirectory(), 
-                              lastPost);
+        this->WriteSubdirRule(makefileStream, pass, subdir.c_str(), lastPost);
         }
       }
     }
