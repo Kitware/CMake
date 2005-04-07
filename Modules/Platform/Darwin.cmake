@@ -12,9 +12,11 @@ IF("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
     "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS} -flat_namespace -undefined suppress")
 ENDIF("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
 
-# Enable shared library versioning.
-SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
-SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-install_name")
+IF(NOT XCODE)
+# Enable shar   ed library versioning.
+  SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
+  SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-install_name")
+ENDIF(NOT XCODE)
 
 # OSX does not really implement an rpath, but it does allow a path to
 # be specified in the soname field of a dylib.
