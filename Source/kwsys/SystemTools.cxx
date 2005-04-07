@@ -2244,13 +2244,13 @@ kwsys_stl::string SystemTools::GetActualCaseForPath(const char* p)
   std::string path;
   if(!SystemTools::GetShortPath(p, path))
     {
-    return path;
+    return p;
     }
   char buffer[MAX_PATH+1];
   int len = ::GetLongPathName(path.c_str(), buffer, MAX_PATH+1);
   if(len == 0 || len > MAX_PATH+1)
     {
-    return path;
+    return p;
     }
   return buffer;
 #endif  
