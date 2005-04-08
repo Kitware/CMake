@@ -1,7 +1,7 @@
 #include "cmOrderLinkDirectories.h"
 #include "cmSystemTools.h"
 #include "cmsys/RegularExpression.hxx"
-
+#include <ctype.h>
 
 
 //-------------------------------------------------------------------
@@ -79,6 +79,29 @@ void cmOrderLinkDirectories::FindIndividualLibraryOrders()
 }
 
 //-------------------------------------------------------------------
+std::string cmOrderLinkDirectories::NoCaseExpression(const char* str)
+{
+  std::string ret;
+  const char* s = str;
+  while(*s)
+    {
+    if(*s == '.')
+      {
+      ret += *s;
+      }
+    else
+      {
+      ret += "[";
+      ret += tolower(*s);
+      ret += toupper(*s);
+      ret += "]";
+      }
+    s++;
+    }
+  return ret;
+}
+    
+//-------------------------------------------------------------------
 void cmOrderLinkDirectories::CreateRegularExpressions()
 {
   cmStdString libext = "(";
@@ -92,7 +115,11 @@ void cmOrderLinkDirectories::CreateRegularExpressions()
       }
     first = false;
     libext += "\\";
+#ifndef _WIN32    
     libext += *i;
+#else
+    libext += this->NoCaseExpression(i->c_str());
+#endif
     }
   libext += ").*";
   cmStdString reg("(.*)");

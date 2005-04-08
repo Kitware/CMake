@@ -98,6 +98,7 @@ private:
                 std::map<cmStdString, std::vector<cmStdString> >& m);
   void OrderPaths(std::vector<cmStdString>& paths);
   bool FindPathNotInDirectoryToAfterList(cmStdString& path);
+  std::string NoCaseExpression(const char* str);
 private:
   // map from library to directories that it is in other than its full path
   std::map<cmStdString, std::vector<cmStdString> > m_LibraryToDirectories;
