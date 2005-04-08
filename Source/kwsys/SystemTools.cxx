@@ -46,6 +46,11 @@
 
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__))
 #include <io.h>
+// This is to get GetLongPathName which is not really only
+// in windows > 0x0500, but there is a bug in the mingw winbase.h file
+#ifdef __MINGW32__
+#define WINVER  0x0500
+#endif
 #include <windows.h>
 #include <direct.h>
 #define _unlink unlink
