@@ -23,6 +23,7 @@
 # pragma warning (disable: 4786)
 #endif
 
+
 #include <ctype.h>
 #include <errno.h>
 #ifdef __QNX__
@@ -44,13 +45,9 @@
 #include <termios.h>
 #endif
 
+
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__))
 #include <io.h>
-// This is to get GetLongPathName which is not really only
-// in windows > 0x0500, but there is a bug in the mingw winbase.h file
-#ifdef __MINGW32__
-#define WINVER  0x0500
-#endif
 #include <windows.h>
 #include <direct.h>
 #define _unlink unlink
@@ -2240,24 +2237,101 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
   return newPath;
 }
 
+
+// OK, some fun stuff to get the actual case of a given path.
+// Basically, you just need to call ShortPath, then GetLongPathName,
+// However, GetLongPathName is not implemented on windows NT and 95,
+// so we have to simulate it on those versions
+#ifdef _WIN32
+int OldWindowsGetLongPath(kwsys_stl::string const& shortPath,
+                          kwsys_stl::string& longPath  )
+{
+  kwsys_stl::string::size_type iFound = shortPath.rfind('/');
+  if (iFound > 1  && iFound != shortPath.npos)
+    {
+    // recurse to peel off components
+    //
+    if (OldWindowsGetLongPath(shortPath.substr(0, iFound), longPath) > 0)
+      {
+      longPath += '/';
+      if (shortPath[1] != '/')
+        {
+        WIN32_FIND_DATA findData;
+
+        // append the long component name to the path
+        //
+        if (INVALID_HANDLE_VALUE != ::FindFirstFile
+            (shortPath.c_str(), &findData))
+          {
+          longPath += findData.cFileName;
+          }
+        else
+          {
+          // if FindFirstFile fails, return the error code
+          //
+          longPath = "";
+          return 0;
+          }
+        }
+      }
+    }
+  else
+    {
+    longPath = shortPath;
+    }
+  return longPath.size();
+}
+
+
+int PortableGetLongPathName(const char* pathIn,
+                            kwsys_stl::string & longPath)
+{ 
+  kwsys_stl::string shortPath;
+  if(!SystemTools::GetShortPath(pathIn, shortPath))
+    {
+    return 0;
+    }
+  HMODULE lh = LoadLibrary("Kernel32.dll");
+  if(lh)
+    {
+    FARPROC proc =  GetProcAddress(lh, "GetLongPathNameA");
+    if(proc)
+      {
+      typedef  DWORD (WINAPI * GetLongFunctionPtr) (LPCSTR,LPSTR,DWORD); 
+      GetLongFunctionPtr func = (GetLongFunctionPtr)proc;
+      char buffer[MAX_PATH+1];
+      int len = (*func)(shortPath.c_str(), buffer, MAX_PATH+1);
+      if(len == 0 || len > MAX_PATH+1)
+        {
+        return 0;
+        }
+      longPath = buffer;
+      return len;
+      }
+    }
+  return OldWindowsGetLongPath(shortPath.c_str(), longPath);
+}
+#endif
+
+
 //----------------------------------------------------------------------------
 kwsys_stl::string SystemTools::GetActualCaseForPath(const char* p)
 {
 #ifndef _WIN32
   return p;
 #else
-  std::string path;
-  if(!SystemTools::GetShortPath(p, path))
+  kwsys_stl::string shortPath;
+  if(!SystemTools::GetShortPath(p, shortPath))
     {
     return p;
     }
-  char buffer[MAX_PATH+1];
-  int len = ::GetLongPathName(path.c_str(), buffer, MAX_PATH+1);
+  kwsys_stl::string longPath;
+  int len = PortableGetLongPathName(shortPath.c_str(), longPath);
   if(len == 0 || len > MAX_PATH+1)
     {
     return p;
     }
-  return buffer;
+  return longPath;
 #endif  
 }
 
