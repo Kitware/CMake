@@ -73,7 +73,9 @@ void cmDepends::Check()
   std::string oldcwd = ".";
   if(m_Directory != ".")
     {
-    oldcwd = cmSystemTools::GetCurrentWorkingDirectory();
+    // Get the CWD but do not call CollapseFullPath because
+    // we only need it to cd back, and the form does not matter
+    oldcwd = cmSystemTools::GetCurrentWorkingDirectory(false);
     cmSystemTools::ChangeDirectory(m_Directory.c_str());
     }
 
