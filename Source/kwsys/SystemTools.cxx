@@ -1258,7 +1258,11 @@ kwsys_stl::string SystemTools::ConvertToOutputPath(const char* path)
 // remove double slashes not at the start
 kwsys_stl::string SystemTools::ConvertToWindowsOutputPath(const char* path)
 {  
-  kwsys_stl::string ret = path;
+  kwsys_stl::string ret;
+  // make it big enough for all of path and double quotes
+  ret.reserve(strlen(path)+3);
+  // put path into the string
+  ret.insert(0,path);
   kwsys_stl::string::size_type pos = 0;
   // first convert all of the slashes
   while((pos = ret.find('/', pos)) != kwsys_stl::string::npos)
@@ -1289,12 +1293,11 @@ kwsys_stl::string SystemTools::ConvertToWindowsOutputPath(const char* path)
     }
   // now double quote the path if it has spaces in it
   // and is not already double quoted
-  if(ret.find(" ") != kwsys_stl::string::npos
+  if(ret.find(' ') != kwsys_stl::string::npos
      && ret[0] != '\"')
     {
-    kwsys_stl::string result;
-    result = "\"" + ret + "\"";
-    ret = result;
+    ret.insert(0, 1, '\"');
+    ret.append(1, '\"');
     }
   return ret;
 }
@@ -1970,7 +1973,7 @@ int SystemTools::ChangeDirectory(const char *dir)
   return Chdir(dir);
 }
 
-kwsys_stl::string SystemTools::GetCurrentWorkingDirectory()
+kwsys_stl::string SystemTools::GetCurrentWorkingDirectory(bool collapse)
 {
   char buf[2048];
   const char* cwd = Getcwd(buf, 2048);
@@ -1979,8 +1982,11 @@ kwsys_stl::string SystemTools::GetCurrentWorkingDirectory()
     {
     path = cwd;
     }
-
-  return SystemTools::CollapseFullPath(path.c_str());
+  if(collapse)
+    {
+    return SystemTools::CollapseFullPath(path.c_str());
+    }
+  return path;
 }
 
 kwsys_stl::string SystemTools::GetProgramPath(const char* in_name)
@@ -2303,11 +2309,14 @@ int PortableGetLongPathName(const char* pathIn,
       int len = (*func)(shortPath.c_str(), buffer, MAX_PATH+1);
       if(len == 0 || len > MAX_PATH+1)
         {
+        FreeLibrary(lh);
         return 0;
         }
       longPath = buffer;
+      FreeLibrary(lh);
       return len;
       }
+    FreeLibrary(lh);
     }
   return OldWindowsGetLongPath(shortPath.c_str(), longPath);
 }

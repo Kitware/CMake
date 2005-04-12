@@ -580,7 +580,7 @@ public:
   /**
    * Get current working directory CWD
    */
-  static kwsys_stl::string GetCurrentWorkingDirectory();
+  static kwsys_stl::string GetCurrentWorkingDirectory(bool collapse =true);
 
   /**
    * Change directory the the directory specified
@@ -668,7 +668,6 @@ private:
    * Each time 'dir' will be found it will be replace by 'refdir'
    */
   static SystemToolsTranslationMap *TranslationMap;
-  
   friend class SystemToolsManager;
 };
 
