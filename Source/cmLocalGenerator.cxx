@@ -21,6 +21,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
 #include "cmOrderLinkDirectories.h"
+#include <ctype.h> // for isalpha
 
 cmLocalGenerator::cmLocalGenerator()
 {
