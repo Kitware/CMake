@@ -1355,7 +1355,8 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 bool escapeQuotes,
                                                 bool atOnly,
                                                 const char* filename,
-                                                long line) const
+                                                long line,
+                                                bool removeEmpty) const
 {
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
   // with GetDefinition(), if not found in the map, nothing is expanded.
@@ -1491,7 +1492,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
         if (!found)
           {
           // if no definition is found then add the var back
-          if(endVariableMarker == '@')
+          if(!removeEmpty && endVariableMarker == '@')
             {
             result += "@";
             result += var;
@@ -2311,8 +2312,8 @@ void cmMakefile::ConfigureString(const std::string& input,
     }
 
   // Perform variable replacements.
-  this->ExpandVariablesInString(output, escapeQuotes, atOnly);
-  this->RemoveVariablesInString(output, atOnly);
+  this->ExpandVariablesInString(output, escapeQuotes, atOnly, 0, -1, true);
+//  this->RemoveVariablesInString(output, atOnly);
 }
 
 int cmMakefile::ConfigureFile(const char* infile, const char* outfile, 

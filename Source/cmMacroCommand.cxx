@@ -119,6 +119,14 @@ bool cmMacroHelperCommand::InvokeInitialPass
     newLFF.m_Name = m_Functions[c].m_Name;
     newLFF.m_FilePath = m_Functions[c].m_FilePath;
     newLFF.m_Line = m_Functions[c].m_Line;
+    const char* def =
+      m_Makefile->GetDefinition("CMAKE_MACRO_REPORT_DEFINITION_LOCATION"); 
+    bool macroReportLocation = false;
+    if(def && !cmSystemTools::IsOff(def))
+      {
+      macroReportLocation = true;
+      }
+    
     // for each argument of the current function
     for (std::vector<cmListFileArgument>::const_iterator k = 
            m_Functions[c].m_Arguments.begin();
@@ -194,9 +202,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
       
       arg.Value = tmps;
       arg.Quoted = k->Quoted;
-      const char* def =
-        m_Makefile->GetDefinition("CMAKE_MACRO_REPORT_DEFINITION_LOCATION");
-      if(def && !cmSystemTools::IsOff(def))
+      if(macroReportLocation)
         {
         // Report the location of the argument where the macro was
         // defined.

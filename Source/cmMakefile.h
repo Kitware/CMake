@@ -542,7 +542,8 @@ public:
   const char *ExpandVariablesInString(std::string& source, bool escapeQuotes,
                                       bool atOnly = false,
                                       const char* filename = 0,
-                                      long line = -1) const;
+                                      long line = -1,
+                                      bool removeEmpty = false) const;
 
   /**
    * Remove any remaining variables in the string. Anything with ${var} or

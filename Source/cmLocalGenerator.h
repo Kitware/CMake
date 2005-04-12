@@ -162,6 +162,20 @@ protected:
                            const char* targetBase = 0,
                            const char* targetSOName = 0,
                            const char* linkFlags = 0);
+  // Expand rule variables in a single string
+  std::string ExpandRuleVariable(std::string const& variable,
+                                 const char* lang,
+                                 const char* objects,
+                                 const char* target,
+                                 const char* linkLibs,
+                                 const char* source,
+                                 const char* object,
+                                 const char* flags,
+                                 const char* objectsquoted,
+                                 const char* targetBase,
+                                 const char* targetSOName,
+                                 const char* linkFlags);
+  
   ///! Convert a target to a utility target for unsupported languages of a generator
   void AddBuildTargetRule(const char* llang, cmTarget& target);
   ///! add a custom command to build a .o file that is part of a target 

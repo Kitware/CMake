@@ -592,11 +592,6 @@ void cmLocalGenerator::CreateCustomTargetsAndCommands(std::set<cmStdString> cons
 }
 
 
-struct RuleVariables
-{
-  const char* variable;
-};
-
 
 // List of variables that are replaced when
 // rules are expanced.  These variables are
@@ -605,6 +600,7 @@ struct RuleVariables
 // languages.
 static const char* ruleReplaceVars[] =
 {
+  "CMAKE_${LANG}_COMPILER",
   "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
   "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
   "CMAKE_SHARED_MODULE_${LANG}_FLAGS", 
@@ -612,7 +608,6 @@ static const char* ruleReplaceVars[] =
   "CMAKE_${LANG}_LINK_FLAGS",
   "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
   "CMAKE_${LANG}_ARCHIVE",
-  "CMAKE_${LANG}_COMPILER",
   "CMAKE_AR",
   "CMAKE_CURRENT_SOURCE_DIR",
   "CMAKE_CURRENT_BINARY_DIR",
@@ -620,9 +615,165 @@ static const char* ruleReplaceVars[] =
   0
 };
 
+std::string
+cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
+                                     const char* lang,
+                                     const char* objects,
+                                     const char* target,
+                                     const char* linkLibs,
+                                     const char* source,
+                                     const char* object,
+                                     const char* flags,
+                                     const char* objectsquoted,
+                                     const char* targetBase,
+                                     const char* targetSOName,
+                                     const char* linkFlags)
+{
+  if(linkFlags)
+    {
+    if(variable == "LINK_FLAGS")
+      {
+      return linkFlags;
+      }
+    }
+  if(flags)
+    {
+    if(variable == "FLAGS")
+      {
+      return flags;
+      }
+    }
+    
+  if(source)
+    {
+    if(variable == "SOURCE")
+      {
+      return source;
+      }
+    }
+  if(object)
+    {
+    if(variable == "OBJECT")
+      {
+      return object;
+      }
+    }
+  if(objects)
+    {
+    if(variable == "OBJECTS")
+      {
+      return objects;
+      }
+    }
+  if(objectsquoted)
+    {
+    if(variable == "OBJECTS_QUOTED")
+      {
+      return objectsquoted;
+      }
+    }
+  if(target)
+    { 
+    if(variable == "TARGET_QUOTED")
+      {
+      std::string targetQuoted = target;
+      if(targetQuoted.size() && targetQuoted[0] != '\"')
+        {
+        targetQuoted = '\"';
+        targetQuoted += target;
+        targetQuoted += '\"';
+        return targetQuoted;
+        }
+      }
+    if(variable == "TARGET")
+      {
+      return target;
+      }
+    }
+  if(targetBase)
+    {
+    if(variable == "TARGET_BASE.lib" || variable == "TARGET_BASE.dll")
+      {
+      // special case for quoted paths with spaces 
+      // if you see <TARGET_BASE>.lib then put the .lib inside
+      // the quotes, same for .dll
+      if((strlen(targetBase) > 1) && targetBase[0] == '\"')
+        {
+        std::string base = targetBase;
+        base[base.size()-1] = '.';
+        std::string baseLib = base + "lib\"";
+        std::string baseDll = base + "dll\"";
+        if(variable == "TARGET_BASE.lib" )
+          {
+          return baseLib;
+          }
+        if(variable == "TARGET_BASE.dll" )
+          {
+          return baseDll;
+          }
+        }
+      }
+    if(variable == "TARGET_BASE")
+      {
+      return targetBase;
+      }
+    }
+  if(targetSOName)
+    {
+    if(variable == "TARGET_SONAME")
+      {
+      if(lang)
+        {
+        std::string name = "CMAKE_SHARED_LIBRARY_SONAME_";
+        name += lang;
+        name += "_FLAG";
+        if(m_Makefile->GetDefinition(name.c_str()))
+          {
+          return targetSOName;
+          }
+        }
+      return "";
+      }
+    }
+  if(linkLibs)
+    {
+    if(variable == "LINK_LIBRARIES")
+      {
+      return linkLibs;
+      }
+    }
+  std::vector<std::string> enabledLanguages;
+  m_GlobalGenerator->GetEnabledLanguages(enabledLanguages);
+  // loop over language specific replace variables
+  int pos = 0;
+  while(ruleReplaceVars[pos])
+    {
+    for(std::vector<std::string>::iterator i = enabledLanguages.begin();   
+        i != enabledLanguages.end(); ++i)   
+      { 
+      lang = i->c_str();
+      std::string actualReplace = ruleReplaceVars[pos];
+      if(actualReplace.find("${LANG}") != actualReplace.npos)
+        {
+        cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
+        }
+      if(actualReplace == variable)
+        {
+        std::string replace = m_Makefile->GetSafeDefinition(variable.c_str());
+        // if the variable is not a FLAG then treat it like a path
+        if(variable.find("_FLAG") == variable.npos)
+          {
+          return this->ConvertToOutputForExisting(replace.c_str());
+          }
+        return replace;
+        }
+      }
+    pos++;
+    }
+  return variable;
+}
 
 
- 
 void 
 cmLocalGenerator::ExpandRuleVariables(std::string& s,
                                       const char* lang,
@@ -639,113 +790,49 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
 {
   std::vector<std::string> enabledLanguages;
   m_GlobalGenerator->GetEnabledLanguages(enabledLanguages);
-
-  if(linkFlags)
+  std::string::size_type start = s.find('<');
+  // no variables to expand
+  if(start == s.npos)
     {
-    cmSystemTools::ReplaceString(s, "<LINK_FLAGS>", linkFlags);
+    return;
     }
-  if(flags)
+  std::string::size_type pos = 0;
+  std::string expandedInput;
+  while(start != s.npos && start < s.size()-2)
     {
-    cmSystemTools::ReplaceString(s, "<FLAGS>", flags);
-    }
-    
-  if(source)
-    {
-    cmSystemTools::ReplaceString(s, "<SOURCE>", source);
-    }
-  if(object)
-    {
-    cmSystemTools::ReplaceString(s, "<OBJECT>", object);
-    }
-  if(objects)
-    {
-    cmSystemTools::ReplaceString(s, "<OBJECTS>", objects);
-    }
-  if(objectsquoted)
-    {
-    cmSystemTools::ReplaceString(s, "<OBJECTS_QUOTED>", objectsquoted);
-    }
-  if(target)
-    { 
-    std::string targetQuoted = target;
-    if(targetQuoted.size() && targetQuoted[0] != '\"')
+    std::string::size_type end = s.find('>', start);
+    // if we find a < with no > we are done
+    if(end == s.npos)
       {
-      targetQuoted = '\"';
-      targetQuoted += target;
-      targetQuoted += '\"';
+      return;
       }
-    cmSystemTools::ReplaceString(s, "<TARGET_QUOTED>", targetQuoted.c_str());
-    cmSystemTools::ReplaceString(s, "<TARGET>", target);
-    }
-  if(targetBase)
-    {
-    // special case for quoted paths with spaces 
-    // if you see <TARGET_BASE>.lib then put the .lib inside
-    // the quotes, same for .dll
-    if((strlen(targetBase) > 1) && targetBase[0] == '\"')
+    char c = s[start+1];
+    // if the next char after the < is not A-Za-z then
+    // skip it and try to find the next < in the string
+    if(!isalpha(c))
       {
-      std::string base = targetBase;
-      base[base.size()-1] = '.';
-      std::string baseLib = base + "lib\"";
-      std::string baseDll = base + "dll\"";
-      cmSystemTools::ReplaceString(s, "<TARGET_BASE>.lib", baseLib.c_str());
-      cmSystemTools::ReplaceString(s, "<TARGET_BASE>.dll", baseDll.c_str());
+      start = s.find('<', start+1);
       }
-    cmSystemTools::ReplaceString(s, "<TARGET_BASE>", targetBase);
-    }
-  if(targetSOName)
-    {
-    bool replaced = false;
-    if(lang)
+    else
       {
-      std::string name = "CMAKE_SHARED_LIBRARY_SONAME_";
-      name += lang;
-      name += "_FLAG";
-      if(m_Makefile->GetDefinition(name.c_str()))
-        {
-        replaced = true;
-        cmSystemTools::ReplaceString(s, "<TARGET_SONAME>", targetSOName);
-        }
-      }
-    if(!replaced)
-      {
-      cmSystemTools::ReplaceString(s, "<TARGET_SONAME>", "");
+      // extract the var
+      std::string var = s.substr(start+1,  end - start-1);
+      std::string replace = this->ExpandRuleVariable(var, lang, objects,
+                                                     target, linkLibs,
+                                                     source, object, flags,
+                                                     objectsquoted, 
+                                                     targetBase, targetSOName,
+                                                     linkFlags);
+      expandedInput += s.substr(pos, start-pos);
+      expandedInput += replace;
+      // move to next one
+      start = s.find('<', start+var.size()+2);
+      pos = end+1;
       }
     }
-  if(linkLibs)
-    {
-    cmSystemTools::ReplaceString(s, "<LINK_LIBRARIES>", linkLibs);
-    }
-  
-  // loop over language specific replace variables
-  int pos = 0;
-  while(ruleReplaceVars[pos])
-    {
-    for(std::vector<std::string>::iterator i = enabledLanguages.begin();   
-        i != enabledLanguages.end(); ++i)   
-      { 
-      lang = i->c_str();
-      std::string replace = "<";
-      replace += ruleReplaceVars[pos];
-      replace += ">";
-      std::string replaceWith = ruleReplaceVars[pos];
-      std::string actualReplace = replace;
-      cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
-      std::string actualReplaceWith = replaceWith;
-      cmSystemTools::ReplaceString(actualReplaceWith, "${LANG}", lang);
-      replace = m_Makefile->GetSafeDefinition(actualReplaceWith.c_str());
-      // if the variable is not a FLAG then treat it like a path
-      if(actualReplaceWith.find("_FLAG") == actualReplaceWith.npos)
-        {
-        replace = this->ConvertToOutputForExisting(replace.c_str());
-        }
-      if(actualReplace.size())
-        {
-        cmSystemTools::ReplaceString(s, actualReplace.c_str(), replace.c_str());
-        }
-      }
-    pos++;
-    }
+  // add the rest of the input
+  expandedInput += s.substr(pos, s.size()-pos);
+  s = expandedInput;
 }
 
 

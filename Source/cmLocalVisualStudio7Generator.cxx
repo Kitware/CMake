@@ -540,19 +540,30 @@ void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
   std::string& flags)
 {
   std::string replace;
+  std::string option;
   while(flagTable->IDEName)
     {
-    std::string regex = "((/|-)";
-    regex += flagTable->commandFlag;
-    regex += ")";
-    cmsys::RegularExpression reg(regex.c_str());
-    while(reg.find(flags))
+    option.reserve(strlen(flagTable->commandFlag+2));
+    // first do the - version
+    option.insert(0, 1, '-');
+    option.append(flagTable->commandFlag);
+    while(flags.find(option) != flags.npos)
       {
       // replace the flag 
-      cmSystemTools::ReplaceString(flags, reg.match(1).c_str(), "");
+      cmSystemTools::ReplaceString(flags, option.c_str(), "");
       // now put value into flag map
       flagMap[flagTable->IDEName] = flagTable->value;
       }
+    // now do the / version
+    option[0] = '/';
+    while(flags.find(option) != flags.npos)
+      {
+      // replace the flag 
+      cmSystemTools::ReplaceString(flags, option.c_str(), "");
+      // now put value into flag map
+      flagMap[flagTable->IDEName] = flagTable->value;
+      }
+    // move to next flag
     flagTable++;
     }
 }
