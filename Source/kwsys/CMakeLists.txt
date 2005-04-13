@@ -179,6 +179,8 @@ SET(KWSYS_PLATFORM_CXX_TEST_DEFINES
   -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD})
 KWSYS_PLATFORM_CXX_TEST(KWSYS_STL_STRING_HAVE_NEQ_CHAR
   "Checking whether stl string has operator!= for char*" DIRECT)
+KWSYS_PLATFORM_CXX_TEST(KWSYS_STL_HAS_ALLOCATOR_REBIND
+  "Checking for rebind member of stl allocator" DIRECT)
 IF(KWSYS_IOS_USE_ANSI)
   # ANSI streams always have string operators.
   SET(KWSYS_STL_STRING_HAVE_OSTREAM 1)
@@ -191,6 +193,13 @@ ELSE(KWSYS_IOS_USE_ANSI)
     "Checking whether stl string has istream operator>>" DIRECT)
 ENDIF(KWSYS_IOS_USE_ANSI)
 SET(KWSYS_PLATFORM_CXX_TEST_DEFINES)
+
+KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS
+  "Checking whether \"<>\" is needed for template friends" INVERT)
+KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_MEMBER_TEMPLATES
+  "Checking for member template support" DIRECT)
+KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_FULL_SPECIALIZATION
+  "Checking for standard template specialization syntax" DIRECT)
 
 IF(UNIX)
   KWSYS_PLATFORM_CXX_TEST(KWSYS_STAT_HAS_ST_MTIM
@@ -229,7 +238,7 @@ INCLUDE_DIRECTORIES(${KWSYS_HEADER_ROOT})
 # give standard names by which they may be included.
 SET(KWSYS_STL_HEADER_EXTRA_string 1)
 FOREACH(header algorithm deque iterator list map numeric queue set stack string
-               utility vector)
+               utility vector memory functional)
   # Configure the header wrapper.
   SET(KWSYS_STL_HEADER "${header}")
   IF(KWSYS_STL_HEADER_EXTRA_${header})
@@ -277,7 +286,7 @@ ENDFOREACH(header)
 # selected components.  Initialize with required components.
 SET(KWSYS_CLASSES)
 SET(KWSYS_H_FILES Configure SharedForward)
-SET(KWSYS_HXX_FILES Configure)
+SET(KWSYS_HXX_FILES Configure hashtable hash_fun hash_map hash_set)
 
 # Enforce component dependencies.
 IF(KWSYS_USE_SystemTools)
@@ -456,10 +465,12 @@ ENDIF(KWSYS_USE_Process)
 # Setup testing if not being built as part of another project.
 IF(KWSYS_STANDALONE)
   ADD_EXECUTABLE(testIOS testIOS.cxx)
+  ADD_EXECUTABLE(testhash testhash.cxx)
   ADD_EXECUTABLE(testProcess testProcess.c)
   ADD_EXECUTABLE(test1 test1.cxx)
   ADD_EXECUTABLE(testCommandLineArguments testCommandLineArguments.cxx)
   TARGET_LINK_LIBRARIES(testIOS ${KWSYS_NAMESPACE})
+  TARGET_LINK_LIBRARIES(testhash ${KWSYS_NAMESPACE})
   TARGET_LINK_LIBRARIES(testProcess ${KWSYS_NAMESPACE}_c)
   TARGET_LINK_LIBRARIES(test1 ${KWSYS_NAMESPACE})
   TARGET_LINK_LIBRARIES(testCommandLineArguments ${KWSYS_NAMESPACE})
