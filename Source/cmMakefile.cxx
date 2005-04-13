@@ -1769,8 +1769,7 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
   for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {
-    if (cmSystemTools::GetFilenameWithoutLastExtension((*i)->GetFullPath()) 
-        == sname &&
+    if ((*i)->GetSourceNameWithoutLastExtension() == sname &&
         cmSystemTools::GetFilenamePath((*i)->GetFullPath()) == path &&
         (ext.size() == 0 || (ext == (*i)->GetSourceExtension())))
       {

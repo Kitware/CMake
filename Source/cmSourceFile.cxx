@@ -29,6 +29,7 @@ void cmSourceFile::SetName(const char* name, const char* dir,
 {
 
   this->SetProperty("HEADER_FILE_ONLY","1");
+  m_SourceNameWithoutLastExtension = "";
 
 
   m_SourceName = name;
@@ -142,6 +143,7 @@ void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
                            bool hfo)
 {
   this->SetProperty("HEADER_FILE_ONLY",(hfo ? "1" : "0"));
+  m_SourceNameWithoutLastExtension = "";
   m_SourceName = name;
   std::string pathname = dir;
   if(pathname != "")
@@ -209,4 +211,13 @@ void cmSourceFile::SetCustomCommand(cmCustomCommand* cc)
     delete m_CustomCommand;
     }
   m_CustomCommand = cc;
+}
+
+const std::string& cmSourceFile::GetSourceNameWithoutLastExtension()
+{
+  if ( m_SourceNameWithoutLastExtension.empty() )
+    {
+    m_SourceNameWithoutLastExtension = cmSystemTools::GetFilenameWithoutLastExtension(m_FullPath);
+    }
+  return m_SourceNameWithoutLastExtension;
 }

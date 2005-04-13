@@ -101,6 +101,11 @@ public:
   const std::vector<std::string> &GetDepends() const {return m_Depends;}
   std::vector<std::string> &GetDepends() {return m_Depends;}
 
+  /**
+   * Get the source name without last extension
+   */
+  const std::string& GetSourceNameWithoutLastExtension();
+
 private:
   std::map<cmStdString,cmStdString> m_Properties;
   cmCustomCommand *m_CustomCommand;
@@ -108,6 +113,7 @@ private:
   std::string m_SourceName;
   std::string m_SourceExtension;
   std::vector<std::string> m_Depends;
+  std::string m_SourceNameWithoutLastExtension;
 };
 
 #endif
