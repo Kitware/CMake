@@ -1,7 +1,28 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(hash_map.hxx)
 #include KWSYS_HEADER(hash_set.hxx)
 #include KWSYS_HEADER(ios/iostream)
+
+// Work-around CMake dependency scanning limitation.  This must
+// duplicate the above list of headers.
+#if 0
+# include "hash_map.hxx.in"
+# include "hash_set.hxx.in"
+# include "kwsys_ios_iostream.h.in"
+#endif
 
 #if defined(_MSC_VER)
 # pragma warning (disable:4786)

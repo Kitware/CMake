@@ -16,6 +16,14 @@
 #include KWSYS_HEADER(Process.h)
 #include KWSYS_HEADER(ios/iostream)
 
+// Work-around CMake dependency scanning limitation.  This must
+// duplicate the above list of headers.
+#if 0
+# include "Directory.hxx.in"
+# include "Process.h.in"
+# include "kwsys_ios_iostream.h.in"
+#endif
+
 int main()
 {
   kwsys::Directory();

@@ -13,6 +13,13 @@
 =========================================================================*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Process.h)
+
+/* Work-around CMake dependency scanning limitation.  This must
+   duplicate the above list of headers.  */
+#if 0
+# include "Process.h.in"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

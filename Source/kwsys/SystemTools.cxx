@@ -19,6 +19,16 @@
 #include KWSYS_HEADER(ios/fstream)
 #include KWSYS_HEADER(ios/sstream)
 
+// Work-around CMake dependency scanning limitation.  This must
+// duplicate the above list of headers.
+#if 0
+# include "SystemTools.hxx.in"
+# include "Directory.hxx.in"
+# include "kwsys_ios_iostream.h.in"
+# include "kwsys_ios_fstream.h.in"
+# include "kwsys_ios_sstream.h.in"
+#endif
+
 #ifdef _MSC_VER
 # pragma warning (disable: 4786)
 #endif

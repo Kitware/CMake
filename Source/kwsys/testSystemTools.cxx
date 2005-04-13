@@ -15,6 +15,13 @@
 #include KWSYS_HEADER(SystemTools.hxx)
 #include KWSYS_HEADER(ios/iostream)
 
+// Work-around CMake dependency scanning limitation.  This must
+// duplicate the above list of headers.
+#if 0
+# include "SystemTools.hxx.in"
+# include "kwsys_ios_iostream.h.in"
+#endif
+
 const char* toUnixPaths[][2] = 
 {
     { "/usr/local/bin/passwd", "/usr/local/bin/passwd" },

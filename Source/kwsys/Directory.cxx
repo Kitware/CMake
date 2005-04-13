@@ -19,6 +19,15 @@
 #include KWSYS_HEADER(stl/string)
 #include KWSYS_HEADER(stl/vector)
 
+// Work-around CMake dependency scanning limitation.  This must
+// duplicate the above list of headers.
+#if 0
+# include "Directory.hxx.in"
+# include "Configure.hxx.in"
+# include "kwsys_stl.hxx.in"
+# include "kwsys_stl_string.hxx.in"
+#endif
+
 namespace KWSYS_NAMESPACE
 {
 

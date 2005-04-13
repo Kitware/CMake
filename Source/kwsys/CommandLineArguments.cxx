@@ -22,6 +22,16 @@
 #include KWSYS_HEADER(ios/sstream)
 #include KWSYS_HEADER(ios/iostream)
 
+// Work-around CMake dependency scanning limitation.  This must
+// duplicate the above list of headers.
+#if 0
+# include "CommandLineArguments.hxx.in"
+# include "Configure.hxx.in"
+# include "kwsys_stl.hxx.in"
+# include "kwsys_ios_sstream.h.in"
+# include "kwsys_ios_iostream.h.in"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
