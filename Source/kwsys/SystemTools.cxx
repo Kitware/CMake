@@ -1296,8 +1296,8 @@ kwsys_stl::string SystemTools::ConvertToWindowsOutputPath(const char* path)
   if(ret.find(' ') != kwsys_stl::string::npos
      && ret[0] != '\"')
     {
-    ret.insert(static_cast<unsigned int>(0),
-               static_cast<unsigned int>(1), '\"');
+    ret.insert(static_cast<kwsys_stl::string::size_type>(0),
+               static_cast<kwsys_stl::string::size_type>(1), '\"');
     ret.append(1, '\"');
     }
   return ret;

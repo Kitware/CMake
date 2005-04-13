@@ -545,8 +545,8 @@ void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
     {
     option.reserve(strlen(flagTable->commandFlag+2));
     // first do the - version
-    option.insert(static_cast<unsigned int>(0), 
-                  static_cast<unsigned int>(1), 
+    option.insert(static_cast<std::string::size_type>(0), 
+                  static_cast<std::string::size_type>(1), 
                   '-');
     option.append(flagTable->commandFlag);
     while(flags.find(option) != flags.npos)
