@@ -54,9 +54,11 @@ int main(/*int argc, char* argv*/)
     {
     CheckConvertToUnixSlashes(toUnixPaths[cc][0], toUnixPaths[cc][1]);
     }
+
+  // Special check for ~
+  kwsys_stl::string output;
+  if(kwsys::SystemTools::GetEnv("HOME", output))
     {
-    // Special check for ~
-    kwsys_stl::string output = kwsys::SystemTools::GetEnv("HOME");
     output += "/foo bar/lala";
     CheckConvertToUnixSlashes("~/foo bar/lala", output);
     }
