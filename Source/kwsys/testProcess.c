@@ -106,7 +106,7 @@ int test5(int argc, const char* argv[])
 }
 
 #define TEST6_SIZE (4096*2)
-int test6(int argc, const char* argv[])
+void test6(int argc, const char* argv[])
 {
   int i;
   char runaway[TEST6_SIZE+1];
@@ -123,7 +123,6 @@ int test6(int argc, const char* argv[])
     fwrite(runaway, 1, TEST6_SIZE+1, stdout);
     fflush(stdout);
     }
-  return 0;
 }
 
 
@@ -261,7 +260,7 @@ int main(int argc, const char* argv[])
       case 3: return test3(argc, argv);
       case 4: return test4(argc, argv);
       case 5: return test5(argc, argv);
-      case 6: return test6(argc, argv);
+      case 6: test6(argc, argv); return 0;
       }
     fprintf(stderr, "Invalid test number %d.\n", n);
     return 1;
