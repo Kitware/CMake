@@ -1171,47 +1171,62 @@ int SystemTools::EstimateFormatLength(const char *format, va_list ap)
 void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
 {
   kwsys_stl::string::size_type pos = 0;
-  while((pos = path.find('\\', pos)) != kwsys_stl::string::npos)
+  const char* pathCString = path.c_str();
+  bool hasDoubleSlash = false;
+
+  const char* pos0 = pathCString;
+  const char* pos1 = pathCString+1;
+  for ( pos = 0; *pos0; ++ pos )
     {
     // make sure we don't convert an escaped space to a unix slash
-    if(pos < path.size()-1)
+    if ( *pos0 == '\\' && *pos1 != ' ' )
       {
-      if(path[pos+1] != ' ')
-        {
-        path[pos] = '/';
-        }
+      path[pos] = '/';
       }
-    pos++;
-    }
-  // Remove all // from the path just like most unix shells
-  int start_find;
 
+    // Also, reuse the loop to check for slash followed by another slash
+    if ( !hasDoubleSlash && *pos1 &&
+      *pos1 == '/' && *(pos1+1) == '/' )
+      {
 #ifdef _WIN32
-  // However, on windows if the first characters are both slashes,
-  // then keep them that way, so that network paths can be handled.
-  start_find = 1;
+      // However, on windows if the first characters are both slashes,
+      // then keep them that way, so that network paths can be handled.
+      if ( pos > 0)
+        {
+        hasDoubleSlash = true;
+        }
 #else
-  start_find = 0;
+      hasDoubleSlash = true;
 #endif
+      }
 
-  while((pos = path.find("//", start_find)) != kwsys_stl::string::npos)
+    pos0 ++;
+    pos1 ++;
+    }
+
+  if ( hasDoubleSlash )
     {
     SystemTools::ReplaceString(path, "//", "/");
     }
   
   // remove any trailing slash
-  if(path.size() > 1 && path[path.size()-1] == '/')
+  if(!path.empty())
     {
-    path = path.substr(0, path.size()-1);
-    }
-
-  // if there is a tilda ~ then replace it with HOME
-  if(path.find("~") == 0)
-    {
-    if (getenv("HOME"))
+    // if there is a tilda ~ then replace it with HOME
+    if(*pathCString == '~')
       {
-      path = kwsys_stl::string(getenv("HOME")) + path.substr(1);
+      const char* homeEnv = SystemTools::GetEnv("HOME");
+      if (homeEnv)
+        {
+        path.replace(0,1,homeEnv);
+        }
       }
+
+    if (*(pathCString+(path.size()-1)) == '/')
+      {
+      path = path.substr(0, path.size()-1);
+      }
+
     }
 }
 
@@ -2491,13 +2506,14 @@ kwsys_stl::string SystemTools::GetFilenamePath(const kwsys_stl::string& filename
  */
 kwsys_stl::string SystemTools::GetFilenameName(const kwsys_stl::string& filename)
 {
-  kwsys_stl::string fn = filename;
-  SystemTools::ConvertToUnixSlashes(fn);
-  
-  kwsys_stl::string::size_type slash_pos = fn.rfind("/");
+#if defined(_WIN32)
+    kwsys_stl::string::size_type slash_pos = filename.find_last_of("/\\", 0, slash_pos);
+#else
+  kwsys_stl::string::size_type slash_pos = filename.find_last_of("/");
+#endif
   if(slash_pos != kwsys_stl::string::npos)
     {
-    return fn.substr(slash_pos + 1);
+    return filename.substr(slash_pos + 1);
     }
   else
     {
