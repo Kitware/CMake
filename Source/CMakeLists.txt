@@ -651,7 +651,7 @@ IF(BUILD_TESTING)
     --build-generator ${CMAKE_GENERATOR}
     --build-makeprogram ${MAKEPROGRAM}
     --build-project kwsys
-    --test-command  test1
+    --test-command  testIOS
     )
 
   IF (WIN32)
