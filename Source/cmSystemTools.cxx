@@ -952,7 +952,6 @@ void cmSystemTools::ExpandList(std::vector<std::string> const& arguments,
 void cmSystemTools::ExpandListArgument(const std::string& arg,
                                        std::vector<std::string>& newargs)
 {
-  std::string newarg;
   // If argument is empty, it is an empty list.
   if(arg.length() == 0)
     {
@@ -964,6 +963,7 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
     newargs.push_back(arg);
     return;
     }
+  std::vector<char> newArgVec;
   // Break the string at non-escaped semicolons not nested in [].
   int squareNesting = 0;
   for(const char* c = arg.c_str(); *c; ++c)
@@ -977,26 +977,26 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
         ++c;
         if(*c == ';')
           {
-          newarg += ';';
+          newArgVec.push_back(*c);
           }
         else
           {
-          newarg += '\\';
+          newArgVec.push_back('\\');
           if(*c)
             {
-            newarg += *c;
+            newArgVec.push_back(*c);
             }
           }
         } break;
       case '[':
         {
         ++squareNesting;
-        newarg += '[';
+        newArgVec.push_back(*c);
         } break;
       case ']':
         {
         --squareNesting;
-        newarg += ']';
+        newArgVec.push_back(*c);
         } break;
       case ';':
         {
@@ -1004,29 +1004,31 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
         // brackets.
         if(squareNesting == 0)
           {
-          if(newarg.length())
+          if ( newArgVec.size() )
             {
-            // Add an argument if the string is not empty.
-            newargs.push_back(newarg);
-            newarg = "";
+            // Add the last argument if the string is not empty.
+            newArgVec.push_back(0);
+            newargs.push_back(&*newArgVec.begin());
+            newArgVec.clear();
             }
           }
         else
           {
-          newarg += ';';
+          newArgVec.push_back(*c);
           }
         } break;
       default:
         {
         // Just append this character.
-        newarg += *c;
+        newArgVec.push_back(*c);
         } break;
       }
     }
-  if(newarg.length())
+  if ( newArgVec.size() )
     {
     // Add the last argument if the string is not empty.
-    newargs.push_back(newarg);
+    newArgVec.push_back(0);
+    newargs.push_back(&*newArgVec.begin());
     }
 }
 
