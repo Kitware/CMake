@@ -145,27 +145,30 @@ int cmTryCompileCommand::CoreTryCompileCode(
       cmSystemTools::ReportLastSystemError("");
       return -1;
       }
-    
+
     std::string source = argv[2];
-    const char* lang = mf->GetCMakeInstance()->GetGlobalGenerator()->GetLanguageFromExtension(
-      cmSystemTools::GetFilenameExtension(source).c_str());
+    std::string ext = cmSystemTools::GetFilenameExtension(source);
+    const char* lang = (mf->GetCMakeInstance()->GetGlobalGenerator()
+                        ->GetLanguageFromExtension(ext.c_str()));
     if(lang)
       {
       fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE %s)\n", lang);
       }
     else
       {
+      cmOStringStream err;
+      err << "Unknown extension \"" << ext << "\" for file \""
+          << source << "\".  TRY_COMPILE only works for enabled languages.\n"
+          << "Currently enabled languages are:";
       std::vector<std::string> langs;
       mf->GetCMakeInstance()->GetGlobalGenerator()->GetEnabledLanguages(langs);
-      std::string msg = "TRY_COMPILE only works for enabled languages files,"
-        "\nCurrently enabled languages are:\n";
       for(std::vector<std::string>::iterator l = langs.begin();
           l != langs.end(); ++l)
         {
-        msg += *l;
-        msg += " ";
+        err << " " << *l;
         }
-      cmSystemTools::Error("Unknown file format for file: ", source.c_str(), msg.c_str());
+      err << "\nSee PROJECT command for help enabling other languages.";
+      cmSystemTools::Error(err.str().c_str());
       return -1;
       }
     std::string langFlags = "CMAKE_";
