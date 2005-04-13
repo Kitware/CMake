@@ -122,6 +122,19 @@ int main()
 }
 #endif
 
+#ifdef TEST_KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT
+#include <memory>
+void f(kwsys_stl::allocator<char> const& a)
+{
+  a.max_size(sizeof(int));
+};
+int main()
+{
+  f(kwsys_stl::allocator<char>());
+  return 0;
+}
+#endif
+
 #ifdef TEST_KWSYS_STAT_HAS_ST_MTIM
 #include <sys/types.h>
 #include <sys/stat.h>

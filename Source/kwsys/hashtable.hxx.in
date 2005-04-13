@@ -119,11 +119,18 @@ public:
       alloc_.deallocate(static_cast<alloc_pointer>(static_cast<void*>(p)), n*chunk());
       }
     }
+#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT
+  size_type max_size(size_type s) const throw()
+    {
+    return alloc_.max_size(s);
+    }
+#else
   size_type max_size() const throw()
     {
     size_type n = alloc_.max_size() / chunk();
     return n>0? n:1;
     }
+#endif
   void construct(pointer p, const value_type& val) { new (p) value_type(val); }
   void destroy(pointer p) { (void)p; p->~value_type(); }
 private:

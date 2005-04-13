@@ -204,6 +204,7 @@ cmake_kwsys_config_replace_string ()
                 s/@KWSYS_STL_STRING_HAVE_OSTREAM@/${KWSYS_STL_STRING_HAVE_OSTREAM}/g;
                 s/@KWSYS_STL_STRING_HAVE_NEQ_CHAR@/${KWSYS_STL_STRING_HAVE_NEQ_CHAR}/g;
                 s/@KWSYS_STL_HAS_ALLOCATOR_REBIND@/${KWSYS_STL_HAS_ALLOCATOR_REBIND}/g;
+                s/@KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT@/${KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT}/g;
                 s/@KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS@/${KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS}/g;
                 s/@KWSYS_CXX_HAS_MEMBER_TEMPLATES@/${KWSYS_CXX_HAS_MEMBER_TEMPLATES}/g;
                 s/@KWSYS_CXX_HAS_FULL_SPECIALIZATION@/${KWSYS_CXX_HAS_FULL_SPECIALIZATION}/g;
@@ -716,6 +717,7 @@ KWSYS_STL_HAVE_STD=0
 KWSYS_STAT_HAS_ST_MTIM=0
 KWSYS_STL_STRING_HAVE_NEQ_CHAR=0
 KWSYS_STL_HAS_ALLOCATOR_REBIND=0
+KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT=0
 KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS=0
 KWSYS_CXX_HAS_MEMBER_TEMPLATES=0
 KWSYS_CXX_HAS_FULL_SPECIALIZATION=0
@@ -798,6 +800,15 @@ if cmake_try_run "${cmake_cxx_compiler}" \
   echo "${cmake_cxx_compiler} has allocator<>::rebind<>"
 else
   echo "${cmake_cxx_compiler} does not have allocator<>::rebind<>"
+fi
+
+if cmake_try_run "${cmake_cxx_compiler}" \
+  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
+  "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
+  KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT=1
+  echo "${cmake_cxx_compiler} has non-standard allocator<>::max_size argument"
+else
+  echo "${cmake_cxx_compiler} does not have non-standard allocator<>::max_size argument"
 fi
 
 if cmake_try_run "${cmake_cxx_compiler}" \

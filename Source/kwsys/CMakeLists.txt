@@ -184,6 +184,8 @@ KWSYS_PLATFORM_CXX_TEST(KWSYS_STL_STRING_HAVE_NEQ_CHAR
   "Checking whether stl string has operator!= for char*" DIRECT)
 KWSYS_PLATFORM_CXX_TEST(KWSYS_STL_HAS_ALLOCATOR_REBIND
   "Checking for rebind member of stl allocator" DIRECT)
+KWSYS_PLATFORM_CXX_TEST(KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT
+  "Checking for non-standard argument to stl allocator<>::max_size" DIRECT)
 IF(KWSYS_IOS_USE_ANSI)
   # ANSI streams always have string operators.
   SET(KWSYS_STL_STRING_HAVE_OSTREAM 1)
