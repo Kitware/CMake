@@ -101,7 +101,11 @@ public:
     {
     if(n)
       {
-      return static_cast<pointer>(static_cast<void*>(alloc_.allocate(n*chunk(), hint)));
+      typedef kwsys_stl::allocator<void>::pointer void_pointer;
+      return
+        static_cast<pointer>(
+          static_cast<void*>(
+            alloc_.allocate(n*chunk(), const_cast<void_pointer>(hint))));
       }
     else
       {
