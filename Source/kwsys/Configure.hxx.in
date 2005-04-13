@@ -105,6 +105,7 @@
 # if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
 #  define kwsys_stl @KWSYS_NAMESPACE@_stl
 #  define kwsys_ios @KWSYS_NAMESPACE@_ios
+#  define kwsys     @KWSYS_NAMESPACE@
 # endif
 # define KWSYS_NAME_IS_KWSYS            @KWSYS_NAMESPACE@_NAME_IS_KWSYS
 # define KWSYS_STL_HAVE_STD             @KWSYS_NAMESPACE@_STL_HAVE_STD

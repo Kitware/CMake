@@ -11,9 +11,10 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include <kwsys/Directory.hxx>
-#include <kwsys/Process.h>
-#include <kwsys/ios/iostream>
+#include "kwsysPrivate.h"
+#include KWSYS_HEADER(Directory.hxx)
+#include KWSYS_HEADER(Process.h)
+#include KWSYS_HEADER(ios/iostream)
 
 int main()
 {

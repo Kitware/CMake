@@ -70,6 +70,9 @@
 IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_NAMESPACE "kwsys")
   SET(KWSYS_STANDALONE 1)
+ENDIF(NOT KWSYS_NAMESPACE)
+
+IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_ENABLE_C 1)
 
   # Enable all components.
@@ -79,7 +82,7 @@ IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_USE_RegularExpression 1)
   SET(KWSYS_USE_SystemTools 1)
   SET(KWSYS_USE_CommandLineArguments 1)
-ENDIF(NOT KWSYS_NAMESPACE)
+ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
 #-----------------------------------------------------------------------------
 # The project name is that of the specified namespace.
@@ -87,7 +90,7 @@ PROJECT(${KWSYS_NAMESPACE})
 
 # Enable testing if building standalone.
 IF(KWSYS_STANDALONE)
-  INCLUDE(${CMAKE_ROOT}/Modules/Dart.cmake)
+  INCLUDE(Dart)
   MARK_AS_ADVANCED(BUILD_TESTING DART_ROOT TCL_TCLSH)
   IF(BUILD_TESTING)
     ENABLE_TESTING()
@@ -300,16 +303,6 @@ FOREACH(c Directory RegularExpression SystemTools CommandLineArguments)
   ENDIF(KWSYS_USE_${c})
 ENDFOREACH(c)
 
-IF(KWSYS_USE_CommandLineArguments)
-  IF(NOT ParaView_SOURCE_DIR)
-    IF(NOT CMake_SOURCE_DIR)
-      IF(NOT KWSYS_STANDALONE)
-        MESSAGE("Command Line Arguments is experimental code for now")
-      ENDIF(NOT KWSYS_STANDALONE)
-    ENDIF(NOT CMake_SOURCE_DIR)
-  ENDIF(NOT ParaView_SOURCE_DIR)
-ENDIF(KWSYS_USE_CommandLineArguments)
-
 # Add selected C components.
 FOREACH(c Process Base64)
   IF(KWSYS_USE_${c})
@@ -463,17 +456,25 @@ ENDIF(KWSYS_USE_Process)
 
 #-----------------------------------------------------------------------------
 # Setup testing if not being built as part of another project.
-IF(KWSYS_STANDALONE)
-  ADD_EXECUTABLE(testIOS testIOS.cxx)
-  ADD_EXECUTABLE(testhash testhash.cxx)
-  ADD_EXECUTABLE(testProcess testProcess.c)
-  ADD_EXECUTABLE(test1 test1.cxx)
-  ADD_EXECUTABLE(testCommandLineArguments testCommandLineArguments.cxx)
-  TARGET_LINK_LIBRARIES(testIOS ${KWSYS_NAMESPACE})
-  TARGET_LINK_LIBRARIES(testhash ${KWSYS_NAMESPACE})
-  TARGET_LINK_LIBRARIES(testProcess ${KWSYS_NAMESPACE}_c)
-  TARGET_LINK_LIBRARIES(test1 ${KWSYS_NAMESPACE})
-  TARGET_LINK_LIBRARIES(testCommandLineArguments ${KWSYS_NAMESPACE})
+IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
+  # C++ tests
+  FOREACH(test
+      testSystemTools
+      testIOS
+      testhash
+      test1
+      testCommandLineArguments
+      )
+    ADD_EXECUTABLE(${test} ${test}.cxx)
+    TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE})
+  ENDFOREACH(test)
+  # C tests
+  FOREACH(test
+      testProcess
+      )
+    ADD_EXECUTABLE(${test} ${test}.c)
+    TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE}_c)
+  ENDFOREACH(test)
 
   SET(EXEC_DIR "${CMAKE_CURRENT_BINARY_DIR}")
   IF(EXECUTABLE_OUTPUT_PATH)
@@ -481,11 +482,13 @@ IF(KWSYS_STANDALONE)
   ENDIF(EXECUTABLE_OUTPUT_PATH)
 
   IF(BUILD_TESTING)
-    ADD_TEST(testProcess-1 ${EXEC_DIR}/testProcess 1)
-    ADD_TEST(testProcess-2 ${EXEC_DIR}/testProcess 2)
-    ADD_TEST(testProcess-3 ${EXEC_DIR}/testProcess 3)
-    ADD_TEST(testProcess-4 ${EXEC_DIR}/testProcess 4)
-    ADD_TEST(testProcess-5 ${EXEC_DIR}/testProcess 5)
-    ADD_TEST(testProcess-6 ${EXEC_DIR}/testProcess 6)
+    ADD_TEST(kwsys-testSystemTools ${EXEC_DIR}/testSystemTools)
+    ADD_TEST(kwsys-testProcess-1 ${EXEC_DIR}/testProcess 1)
+    ADD_TEST(kwsys-testProcess-2 ${EXEC_DIR}/testProcess 2)
+    ADD_TEST(kwsys-testProcess-3 ${EXEC_DIR}/testProcess 3)
+    ADD_TEST(kwsys-testProcess-4 ${EXEC_DIR}/testProcess 4)
+    ADD_TEST(kwsys-testProcess-5 ${EXEC_DIR}/testProcess 5)
+    ADD_TEST(kwsys-testProcess-6 ${EXEC_DIR}/testProcess 6)
+    ADD_TEST(kwsys-hash ${EXEC_DIR}/testhash)
   ENDIF(BUILD_TESTING)
-ENDIF(KWSYS_STANDALONE)
+ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)

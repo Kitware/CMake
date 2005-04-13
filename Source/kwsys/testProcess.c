@@ -11,7 +11,8 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include <kwsys/Process.h>
+#include "kwsysPrivate.h"
+#include KWSYS_HEADER(Process.h)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -11,9 +11,10 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include <kwsys/CommandLineArguments.hxx>
+#include "kwsysPrivate.h"
 
-#include <kwsys/ios/iostream>
+#include KWSYS_HEADER(CommandLineArguments.hxx)
+#include KWSYS_HEADER(ios/iostream)
 
 void* random_ptr = (void*)0x123;
 

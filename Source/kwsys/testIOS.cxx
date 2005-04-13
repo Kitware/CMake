@@ -1,6 +1,7 @@
-#include <kwsys/stl/vector>
-#include <kwsys/ios/sstream>
-#include <kwsys/ios/iostream>
+#include "kwsysPrivate.h"
+#include KWSYS_HEADER(stl/vector)
+#include KWSYS_HEADER(ios/sstream)
+#include KWSYS_HEADER(ios/iostream)
 
 int main()
 {

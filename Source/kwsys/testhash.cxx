@@ -1,7 +1,7 @@
-#include <kwsys/hash_map.hxx>
-#include <kwsys/hash_set.hxx>
-
-#include <kwsys/ios/iostream>
+#include "kwsysPrivate.h"
+#include KWSYS_HEADER(hash_map.hxx)
+#include KWSYS_HEADER(hash_set.hxx)
+#include KWSYS_HEADER(ios/iostream)
 
 #if defined(_MSC_VER)
 # pragma warning (disable:4786)
