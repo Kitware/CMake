@@ -464,7 +464,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       testSystemTools
       testIOS
       testhash
-      test1
       testCommandLineArguments
       )
     ADD_EXECUTABLE(${test} ${test}.cxx)
