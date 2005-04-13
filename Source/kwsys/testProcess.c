@@ -61,6 +61,10 @@ int test3(int argc, const char* argv[])
 
 int test4(int argc, const char* argv[])
 {
+#if defined(_WIN32)
+  /* Avoid error diagnostic popups since we are crashing on purpose.  */
+  SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+#endif
   (void)argc; (void)argv;
   fprintf(stdout, "Output before crash on stdout from crash test.\n");
   fprintf(stderr, "Output before crash on stderr from crash test.\n");  
