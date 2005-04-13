@@ -86,14 +86,15 @@ template <class U>
 class A
 {
 public:
-  U* ptr;
-  template <class V> U m(V* p) { return *ptr = *p; }
+  U u;
+  A(): u(0) {}
+  template <class V> V m(V* p) { return *p = u; }
 };
 
 int main()
 {
-  A<int> a;
-  short s = 0;
+  A<short> a;
+  int s = 1;
   return a.m(&s);
 }
 #endif
