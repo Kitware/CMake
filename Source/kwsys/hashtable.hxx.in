@@ -292,7 +292,8 @@ public:
   allocator_type get_allocator() const { return _M_node_allocator; }
 private:
   typedef typename _Alloc::template rebind<_Node>::other _M_node_allocator_type;
-  typedef kwsys_stl::vector<_Node*,_Alloc> _M_buckets_type;
+  typedef typename _Alloc::template rebind<_Node*>::other _M_node_ptr_allocator_type;
+  typedef kwsys_stl::vector<_Node*,_M_node_ptr_allocator_type> _M_buckets_type;
 #else
 public:
   typedef hash_allocator<_Val, _Alloc> allocator_type;
