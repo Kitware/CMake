@@ -146,6 +146,9 @@ void cmGeneratedFileStreamBase::Open(const char* name)
 
   // Make sure the temporary file that will be used is not present.
   cmSystemTools::RemoveFile(m_TempName.c_str());
+
+  std::string dir = cmSystemTools::GetFilenamePath(m_TempName);
+  cmSystemTools::MakeDirectory(dir.c_str());
 }
 
 //----------------------------------------------------------------------------
