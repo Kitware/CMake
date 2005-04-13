@@ -117,7 +117,7 @@ void f(const T&, const Alloc&)
 };
 int main()
 {
-  f(0, std::allocator<char>());
+  f(0, kwsys_stl::allocator<char>());
   return 0;
 }
 #endif
