@@ -207,10 +207,14 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
 
     // Next if one wasn't found then assume it is a single class
     // check to see if it is an existing source file
-    if (!done && mf.GetSource(temps.c_str()))
+    if (!done)
       {
-      m_SourceFiles.push_back(mf.GetSource(temps.c_str()));
-      done = 1;
+      cmSourceFile* sourceFile = mf.GetSource(temps.c_str());
+      if ( sourceFile )
+        {
+        m_SourceFiles.push_back(sourceFile);
+        done = 1;
+        }
       }
 
     // if it wasn't a source file listed with the makefile
