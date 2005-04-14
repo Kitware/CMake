@@ -426,14 +426,8 @@ public:
 
   const_iterator end() const { return const_iterator(0, this); }
 
-#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES
-  template <class _Vl, class _Ky, class _HF, class _Ex, class _Eq, class _Al>
-  friend bool operator== (const hashtable<_Vl, _Ky, _HF, _Ex, _Eq, _Al>&,
-                          const hashtable<_Vl, _Ky, _HF, _Ex, _Eq, _Al>&);
-#else
   friend bool operator==@KWSYS_NAMESPACE@_CXX_NULL_TEMPLATE_ARGS(const hashtable&,
                                                                  const hashtable&);
-#endif
 
 public:
 

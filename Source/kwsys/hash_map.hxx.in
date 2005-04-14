@@ -181,15 +181,8 @@ public:
   bool empty() const { return _M_ht.empty(); }
   void swap(hash_map& __hs) { _M_ht.swap(__hs._M_ht); }
 
-#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES
-  template <class _K1, class _T1, class _HF, class _EqK, class _Al>
-  friend bool operator== (const hash_map<_K1, _T1, _HF, _EqK, _Al>&,
-                          const hash_map<_K1, _T1, _HF, _EqK, _Al>&);
-#else
   friend bool operator==@KWSYS_NAMESPACE@_CXX_NULL_TEMPLATE_ARGS(const hash_map&,
                                                                  const hash_map&);
-#endif
-
 
   iterator begin() { return _M_ht.begin(); }
   iterator end() { return _M_ht.end(); }
@@ -382,14 +375,8 @@ public:
   bool empty() const { return _M_ht.empty(); }
   void swap(hash_multimap& __hs) { _M_ht.swap(__hs._M_ht); }
 
-#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES
-  template <class _K1, class _T1, class _HF, class _EqK, class _Al>
-  friend bool operator== (const hash_multimap<_K1, _T1, _HF, _EqK, _Al>&,
-                          const hash_multimap<_K1, _T1, _HF, _EqK, _Al>&);
-#else
   friend bool operator==@KWSYS_NAMESPACE@_CXX_NULL_TEMPLATE_ARGS(const hash_multimap&,
                                                                  const hash_multimap&);
-#endif
 
   iterator begin() { return _M_ht.begin(); }
   iterator end() { return _M_ht.end(); }
