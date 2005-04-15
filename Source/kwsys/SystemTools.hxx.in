@@ -628,6 +628,12 @@ public:
    */
   static void Delay(unsigned int msec);
 
+  /** 
+   * Get the operating system name and version
+   * This is implemented for Win32 only for the moment
+   */
+  static kwsys_stl::string GetOperatingSystemNameAndVersion();
+
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**
