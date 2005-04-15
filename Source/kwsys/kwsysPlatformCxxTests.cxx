@@ -151,7 +151,7 @@ int main() { return 0; }
 
 #ifdef TEST_KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE
 #include <memory>
-void f(kwsys_stl::allocator const&) {}
+void f(kwsys_stl::allocator::size_type const&) {}
 int main() { return 0; }
 #endif
 
