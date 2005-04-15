@@ -652,8 +652,8 @@ int cmCTest::SubmitResults()
       ofs << "  Problems when triggering via HTTP" << std::endl;
       return 0;
       }
-    std::cout << "  Submission successfull" << std::endl;
-    ofs << "  Submission succesfull" << std::endl;
+    std::cout << "  Submission successful" << std::endl;
+    ofs << "  Submission successful" << std::endl;
     return 1;
     }
   else if ( m_DartConfiguration["DropMethod"] == "http" )
@@ -683,8 +683,8 @@ int cmCTest::SubmitResults()
       ofs << "  Problems when triggering via HTTP" << std::endl;
       return 0;
       }
-    std::cout << "  Submission successfull" << std::endl;
-    ofs << "  Submission succesfull" << std::endl;
+    std::cout << "  Submission successful" << std::endl;
+    ofs << "  Submission successful" << std::endl;
     return 1;
     }
   else if ( m_DartConfiguration["DropMethod"] == "xmlrpc" )
@@ -699,8 +699,8 @@ int cmCTest::SubmitResults()
       ofs << "  Problems when submitting via XML-RPC" << std::endl;
       return 0;
       }
-    std::cout << "  Submission successfull" << std::endl;
-    ofs << "  Submission succesfull" << std::endl;
+    std::cout << "  Submission successful" << std::endl;
+    ofs << "  Submission successful" << std::endl;
     return 1;
     }
   else if ( m_DartConfiguration["DropMethod"] == "scp" )
@@ -719,8 +719,8 @@ int cmCTest::SubmitResults()
       ofs << "  Problems when submitting via SCP" << std::endl;
       return 0;
       }
-    std::cout << "  Submission successfull" << std::endl;
-    ofs << "  Submission succesfull" << std::endl;
+    std::cout << "  Submission successful" << std::endl;
+    ofs << "  Submission successful" << std::endl;
     }
   else
     {
