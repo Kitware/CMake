@@ -54,6 +54,12 @@
 # pragma warning (disable:4786)
 #endif
 
+#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_NONTEMPLATE
+# define @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(T) kwsys_stl::allocator
+#else
+# define @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(T) kwsys_stl::allocator< T >
+#endif
+
 namespace @KWSYS_NAMESPACE@
 {
 
@@ -72,8 +78,13 @@ class hash_allocator: public hash_allocator_base
 private:
   // Store the real allocator privately.
   typedef Alloc alloc_type;
+#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_NONTEMPLATE
+  typedef char alloc_value_type;
+  typedef void* alloc_pointer;
+#else
   typedef typename alloc_type::value_type alloc_value_type;
   typedef typename alloc_type::pointer alloc_pointer;
+#endif
   alloc_type alloc_;
 
 public:
@@ -97,11 +108,17 @@ public:
 # endif
   pointer address(reference x) const { return &x; }
   const_pointer address(const_reference x) const { return &x; }
-  pointer allocate(size_type n=1, kwsys_stl::allocator<void>::const_pointer hint = 0)
+#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_NONTEMPLATE
+  typedef void* void_pointer;
+  typedef const void* const_void_pointer;
+#else
+  typedef kwsys_stl::allocator<void>::pointer void_pointer;
+  typedef kwsys_stl::allocator<void>::const_pointer const_void_pointer;
+#endif
+  pointer allocate(size_type n=1, const_void_pointer hint = 0)
     {
     if(n)
       {
-      typedef kwsys_stl::allocator<void>::pointer void_pointer;
       return
         static_cast<pointer>(
           static_cast<void*>(
@@ -116,7 +133,12 @@ public:
     {
     if(n)
       {
-      alloc_.deallocate(static_cast<alloc_pointer>(static_cast<void*>(p)), n*chunk());
+#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_NONTEMPLATE
+      alloc_.deallocate(static_cast<alloc_pointer>(static_cast<void*>(p)));
+#else
+      alloc_.deallocate(static_cast<alloc_pointer>(static_cast<void*>(p)),
+                        n*chunk());
+#endif
       }
     }
 #if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT
@@ -151,7 +173,7 @@ struct _Hashtable_node
 
 template <class _Val, class _Key, class _HashFcn,
           class _ExtractKey, class _EqualKey,
-          class _Alloc = kwsys_stl::allocator<char> >
+          class _Alloc = @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(char) >
 class hashtable;
 
 template <class _Val, class _Key, class _HashFcn,
@@ -459,21 +481,31 @@ public:
   kwsys_stl::pair<iterator, bool> insert_unique_noresize(const value_type& __obj);
   iterator insert_equal_noresize(const value_type& __obj);
 
-#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES
+#if @KWSYS_NAMESPACE@_STL_HAS_ITERATOR_TRAITS
+# define @KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY(T,I) \
+  typename kwsys_stl::iterator_traits< T >::iterator_category()
+#elif @KWSYS_NAMESPACE@_STL_HAS_ITERATOR_CATEGORY
+# define @KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY(T,I) \
+  kwsys_stl::iterator_category( I )
+#elif @KWSYS_NAMESPACE@_STL_HAS___ITERATOR_CATEGORY
+# define @KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY(T,I) \
+  kwsys_stl::__iterator_category( I )
+#endif
+
+#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES && \
+    defined(@KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY)
   template <class _InputIterator>
   void insert_unique(_InputIterator __f, _InputIterator __l)
   {
-    typedef typename kwsys_stl::iterator_traits<_InputIterator>::iterator_category
-      iterator_category;
-    insert_unique(__f, __l, iterator_category());
+    insert_unique(__f, __l,
+      @KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY(_InputIterator, __f));
   }
 
   template <class _InputIterator>
   void insert_equal(_InputIterator __f, _InputIterator __l)
   {
-    typedef typename kwsys_stl::iterator_traits<_InputIterator>::iterator_category
-      iterator_category;
-    insert_equal(__f, __l, iterator_category());
+    insert_equal(__f, __l,
+      @KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY(_InputIterator, __f));
   }
 
   template <class _InputIterator>

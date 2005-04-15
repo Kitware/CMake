@@ -71,7 +71,7 @@ struct hash_select1st:
 template <class _Key, class _Tp,
           class _HashFcn  = hash<_Key>,
           class _EqualKey = kwsys_stl::equal_to<_Key>,
-          class _Alloc =  kwsys_stl::allocator<char> >
+          class _Alloc = @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(char) >
 class hash_map;
 
 template <class _Key, class _Tp, class _HashFn, class _EqKey, class _Alloc>
@@ -263,7 +263,7 @@ swap(hash_map<_Key,_Tp,_HashFcn,_EqlKey,_Alloc>& __hm1,
 template <class _Key, class _Tp,
           class _HashFcn  = hash<_Key>,
           class _EqualKey = kwsys_stl::equal_to<_Key>,
-          class _Alloc =  kwsys_stl::allocator<char> >
+          class _Alloc = @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(char) >
 class hash_multimap;
 
 template <class _Key, class _Tp, class _HF, class _EqKey, class _Alloc>
