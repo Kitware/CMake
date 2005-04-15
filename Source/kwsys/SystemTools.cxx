@@ -1180,13 +1180,12 @@ int SystemTools::EstimateFormatLength(const char *format, va_list ap)
 // convert windows slashes to unix slashes 
 void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
 {
-  kwsys_stl::string::size_type pos = 0;
   const char* pathCString = path.c_str();
   bool hasDoubleSlash = false;
 
   const char* pos0 = pathCString;
   const char* pos1 = pathCString+1;
-  for ( pos = 0; *pos0; ++ pos )
+  for (kwsys_stl::string::size_type pos = 0; *pos0; ++ pos )
     {
     // make sure we don't convert an escaped space to a unix slash
     if ( *pos0 == '\\' && *pos1 != ' ' )
@@ -1246,7 +1245,7 @@ kwsys_stl::string SystemTools::ConvertToUnixOutputPath(const char* path)
   kwsys_stl::string ret = path;
   
   // remove // except at the beginning might be a cygwin drive
-  kwsys_stl::string::size_type pos = 1;
+  kwsys_stl::string::size_type pos;
   while((pos = ret.find("//", pos)) != kwsys_stl::string::npos)
     {
     ret.erase(pos, 1);
