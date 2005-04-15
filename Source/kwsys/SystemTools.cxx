@@ -1245,7 +1245,7 @@ kwsys_stl::string SystemTools::ConvertToUnixOutputPath(const char* path)
   kwsys_stl::string ret = path;
   
   // remove // except at the beginning might be a cygwin drive
-  kwsys_stl::string::size_type pos;
+  kwsys_stl::string::size_type pos=0;
   while((pos = ret.find("//", pos)) != kwsys_stl::string::npos)
     {
     ret.erase(pos, 1);
