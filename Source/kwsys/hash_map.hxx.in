@@ -60,9 +60,9 @@ namespace @KWSYS_NAMESPACE@
 // select1st is an extension: it is not part of the standard.
 template <class T1, class T2>
 struct hash_select1st:
-    public kwsys_stl::unary_function<kwsys_stl::pair<T1, T2>, T1>
+    public @KWSYS_NAMESPACE@_stl::unary_function<@KWSYS_NAMESPACE@_stl::pair<T1, T2>, T1>
 {
-  const T1& operator()(const kwsys_stl::pair<T1, T2>& __x) const
+  const T1& operator()(const @KWSYS_NAMESPACE@_stl::pair<T1, T2>& __x) const
     { return __x.first; }
 };
 
@@ -70,7 +70,7 @@ struct hash_select1st:
 
 template <class _Key, class _Tp,
           class _HashFcn  = hash<_Key>,
-          class _EqualKey = kwsys_stl::equal_to<_Key>,
+          class _EqualKey = @KWSYS_NAMESPACE@_stl::equal_to<_Key>,
           class _Alloc = @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(char) >
 class hash_map;
 
@@ -83,7 +83,7 @@ template <class _Key, class _Tp, class _HashFcn, class _EqualKey,
 class hash_map
 {
 private:
-  typedef hashtable<kwsys_stl::pair<const _Key,_Tp>,_Key,_HashFcn,
+  typedef hashtable<@KWSYS_NAMESPACE@_stl::pair<const _Key,_Tp>,_Key,_HashFcn,
                     hash_select1st<const _Key,_Tp>,_EqualKey,_Alloc> _Ht;
   _Ht _M_ht;
 
@@ -191,7 +191,7 @@ public:
   const_iterator end() const { return _M_ht.end(); }
 
 public:
-  kwsys_stl::pair<iterator,bool> insert(const value_type& __obj)
+  @KWSYS_NAMESPACE@_stl::pair<iterator,bool> insert(const value_type& __obj)
     { return _M_ht.insert_unique(__obj); }
 #if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES
   template <class _InputIterator>
@@ -204,7 +204,7 @@ public:
   void insert(const_iterator __f, const_iterator __l)
     { _M_ht.insert_unique(__f, __l); }
 #endif
-  kwsys_stl::pair<iterator,bool> insert_noresize(const value_type& __obj)
+  @KWSYS_NAMESPACE@_stl::pair<iterator,bool> insert_noresize(const value_type& __obj)
     { return _M_ht.insert_unique_noresize(__obj); }
 
   iterator find(const key_type& __key) { return _M_ht.find(__key); }
@@ -217,9 +217,9 @@ public:
 
   size_type count(const key_type& __key) const { return _M_ht.count(__key); }
 
-  kwsys_stl::pair<iterator, iterator> equal_range(const key_type& __key)
+  @KWSYS_NAMESPACE@_stl::pair<iterator, iterator> equal_range(const key_type& __key)
     { return _M_ht.equal_range(__key); }
-  kwsys_stl::pair<const_iterator, const_iterator>
+  @KWSYS_NAMESPACE@_stl::pair<const_iterator, const_iterator>
   equal_range(const key_type& __key) const
     { return _M_ht.equal_range(__key); }
 
@@ -262,7 +262,7 @@ swap(hash_map<_Key,_Tp,_HashFcn,_EqlKey,_Alloc>& __hm1,
 
 template <class _Key, class _Tp,
           class _HashFcn  = hash<_Key>,
-          class _EqualKey = kwsys_stl::equal_to<_Key>,
+          class _EqualKey = @KWSYS_NAMESPACE@_stl::equal_to<_Key>,
           class _Alloc = @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(char) >
 class hash_multimap;
 
@@ -276,7 +276,7 @@ template <class _Key, class _Tp, class _HashFcn, class _EqualKey,
 class hash_multimap
 {
 private:
-  typedef hashtable<kwsys_stl::pair<const _Key, _Tp>, _Key, _HashFcn,
+  typedef hashtable<@KWSYS_NAMESPACE@_stl::pair<const _Key, _Tp>, _Key, _HashFcn,
                     hash_select1st<const _Key, _Tp>, _EqualKey, _Alloc>
           _Ht;
   _Ht _M_ht;
@@ -407,9 +407,9 @@ public:
 
   size_type count(const key_type& __key) const { return _M_ht.count(__key); }
 
-  kwsys_stl::pair<iterator, iterator> equal_range(const key_type& __key)
+  @KWSYS_NAMESPACE@_stl::pair<iterator, iterator> equal_range(const key_type& __key)
     { return _M_ht.equal_range(__key); }
-  kwsys_stl::pair<const_iterator, const_iterator>
+  @KWSYS_NAMESPACE@_stl::pair<const_iterator, const_iterator>
   equal_range(const key_type& __key) const
     { return _M_ht.equal_range(__key); }
 
