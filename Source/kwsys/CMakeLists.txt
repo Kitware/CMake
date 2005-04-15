@@ -352,17 +352,17 @@ SET(KWSYS_CXX_SRCS)
 
 # Add the proper sources for this platform's Process implementation.
 IF(KWSYS_USE_Process)
-  IF(WIN32)
+  IF(NOT UNIX)
     # Use the Windows implementation.  We need the encoded forwarding executable.
     SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessWin32.c
       ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c)
     SET_SOURCE_FILES_PROPERTIES(
       ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
       PROPERTIES GENERATED 1)
-  ELSE(WIN32)
+  ELSE(NOT UNIX)
     # Use the UNIX implementation.
     SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessUNIX.c)
-  ENDIF(WIN32)
+  ENDIF(NOT UNIX)
 ENDIF(KWSYS_USE_Process)
 
 # Add sources for Base64 encoding.
@@ -444,7 +444,7 @@ ADD_DEFINITIONS("-DKWSYS_NAMESPACE=${KWSYS_NAMESPACE}")
 # file and build it into the library.  Win9x platforms reproduce the
 # executable into a temporary directory when it is needed.
 IF(KWSYS_USE_Process)
-  IF(WIN32)
+  IF(NOT UNIX)
     # Build the forwarding executable itself and a program that will
     # encode it into a C file.
     ADD_EXECUTABLE(${KWSYS_NAMESPACE}ProcessFwd9x ProcessFwd9x.c)
@@ -485,7 +485,7 @@ IF(KWSYS_USE_Process)
     # Make sure build occurs in proper order.
     ADD_DEPENDENCIES(${KWSYS_NAMESPACE} ${KWSYS_NAMESPACE}ProcessFwd9x
                      ${KWSYS_NAMESPACE}EncodeExecutable)
-  ENDIF(WIN32)
+  ENDIF(NOT UNIX)
 ENDIF(KWSYS_USE_Process)
 
 #-----------------------------------------------------------------------------
