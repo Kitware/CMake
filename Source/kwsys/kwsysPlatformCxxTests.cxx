@@ -59,6 +59,12 @@ bool f(const kwsys_stl::string& s) { return s != ""; }
 int main() { return 0; }
 #endif
 
+#ifdef TEST_KWSYS_CXX_HAS_CSTDDEF
+#include <cstddef>
+void f(size_t) {}
+int main() { return 0; }
+#endif
+
 #ifdef TEST_KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS
 template <class T> class A;
 template <class T> int f(A<T>&);

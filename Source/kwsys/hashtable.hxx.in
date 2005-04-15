@@ -41,6 +41,7 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
+#include <@KWSYS_NAMESPACE@/cstddef>        // size_t
 #include <@KWSYS_NAMESPACE@/stl/algorithm>  // lower_bound
 #include <@KWSYS_NAMESPACE@/stl/functional> // unary_function
 #include <@KWSYS_NAMESPACE@/stl/iterator>   // iterator_traits

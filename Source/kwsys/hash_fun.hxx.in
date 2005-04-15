@@ -41,6 +41,8 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
+#include <@KWSYS_NAMESPACE@/cstddef>        // size_t
+
 namespace @KWSYS_NAMESPACE@
 {
 

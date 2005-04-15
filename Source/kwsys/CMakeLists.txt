@@ -178,6 +178,9 @@ ELSE(KWSYS_IOS_USE_SSTREAM)
   ENDIF(KWSYS_IOS_USE_STRSTREAM_H)
 ENDIF(KWSYS_IOS_USE_SSTREAM)
 
+KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_CSTDDEF
+  "Checking whether header cstddef is available" DIRECT)
+
 SET(KWSYS_PLATFORM_CXX_TEST_DEFINES
   -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD})
 KWSYS_PLATFORM_CXX_TEST(KWSYS_STL_STRING_HAVE_NEQ_CHAR
@@ -293,6 +296,11 @@ FOREACH(header algorithm deque iterator list map numeric queue set stack string
       FILES ${KWSYS_HEADER_DIR}/stl/${header})
   ENDIF(KWSYS_HEADER_INSTALL_DIR)
 ENDFOREACH(header)
+
+# Provide cstddef header.
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_cstddef.hxx.in
+               ${KWSYS_HEADER_DIR}/cstddef
+               @ONLY IMMEDIATE)
 
 #-----------------------------------------------------------------------------
 # Create streams header wrappers to give standard names by which they
