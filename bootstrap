@@ -208,6 +208,7 @@ cmake_kwsys_config_replace_string ()
                 s/@KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS@/${KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS}/g;
                 s/@KWSYS_CXX_HAS_MEMBER_TEMPLATES@/${KWSYS_CXX_HAS_MEMBER_TEMPLATES}/g;
                 s/@KWSYS_CXX_HAS_FULL_SPECIALIZATION@/${KWSYS_CXX_HAS_FULL_SPECIALIZATION}/g;
+                s/@KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP@/${KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP}/g;
                 s/@KWSYS_STAT_HAS_ST_MTIM@/${KWSYS_STAT_HAS_ST_MTIM}/g;}" >> "${OUTFILE}.tmp"
     if [ -f "${OUTFILE}.tmp" ]; then
       if diff "${OUTFILE}" "${OUTFILE}.tmp" > /dev/null 2> /dev/null ; then
@@ -721,6 +722,7 @@ KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT=0
 KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS=0
 KWSYS_CXX_HAS_MEMBER_TEMPLATES=0
 KWSYS_CXX_HAS_FULL_SPECIALIZATION=0
+KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP=0
 
 # Hardcode these kwsys features.  They work on all known UNIX compilers anyway.
 KWSYS_STL_STRING_HAVE_ISTREAM=1
@@ -836,6 +838,15 @@ if cmake_try_run "${cmake_cxx_compiler}" \
   echo "${cmake_cxx_compiler} has standard template specialization syntax"
 else
   echo "${cmake_cxx_compiler} does not have standard template specialization syntax"
+fi
+
+if cmake_try_run "${cmake_cxx_compiler}" \
+  "${cmake_cxx_flags} -DTEST_KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP" \
+  "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
+  KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP=1
+  echo "${cmake_cxx_compiler} has argument dependent lookup"
+else
+  echo "${cmake_cxx_compiler} does not have argument dependent lookup"
 fi
 
 if cmake_try_run "${cmake_cxx_compiler}" \

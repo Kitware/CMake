@@ -108,6 +108,20 @@ template <> struct A<int*>
 int main() { return A<int*>::f(); }
 #endif
 
+#ifdef TEST_KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP
+namespace N
+{
+  class A {};
+  int f(A*) { return 0; }
+}
+void f(void*);
+int main()
+{
+  N::A* a = 0;
+  return f(a);
+}
+#endif
+
 #ifdef TEST_KWSYS_STL_HAS_ALLOCATOR_REBIND
 #include <memory>
 template <class T, class Alloc>

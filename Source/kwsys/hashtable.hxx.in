@@ -1087,6 +1087,14 @@ void hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>
 
 } // namespace @KWSYS_NAMESPACE@
 
+// Normally the comparison operators should be found in the @KWSYS_NAMESPACE@
+// namespace by argument dependent lookup.  For compilers that do not
+// support it we must bring them into the global namespace now.
+#if !@KWSYS_NAMESPACE@_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP
+using @KWSYS_NAMESPACE@::operator==;
+using @KWSYS_NAMESPACE@::operator!=;
+#endif
+
 #if defined(_MSC_VER)
 # pragma warning (pop)
 #endif
