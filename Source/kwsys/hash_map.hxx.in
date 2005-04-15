@@ -58,10 +58,11 @@ namespace @KWSYS_NAMESPACE@
 {
 
 // select1st is an extension: it is not part of the standard.
-template <class _Pair>
-struct _Select1st : public kwsys_stl::unary_function<_Pair, typename _Pair::first_type>
+template <class T1, class T2>
+struct hash_select1st:
+    public kwsys_stl::unary_function<kwsys_stl::pair<T1, T2>, T1>
 {
-  const typename _Pair::first_type& operator()(const _Pair& __x) const
+  const T1& operator()(const kwsys_stl::pair<T1, T2>& __x) const
     { return __x.first; }
 };
 
@@ -83,7 +84,7 @@ class hash_map
 {
 private:
   typedef hashtable<kwsys_stl::pair<const _Key,_Tp>,_Key,_HashFcn,
-                    _Select1st<kwsys_stl::pair<const _Key,_Tp> >,_EqualKey,_Alloc> _Ht;
+                    hash_select1st<const _Key,_Tp>,_EqualKey,_Alloc> _Ht;
   _Ht _M_ht;
 
 public:
@@ -276,7 +277,7 @@ class hash_multimap
 {
 private:
   typedef hashtable<kwsys_stl::pair<const _Key, _Tp>, _Key, _HashFcn,
-                    _Select1st<kwsys_stl::pair<const _Key, _Tp> >, _EqualKey, _Alloc>
+                    hash_select1st<const _Key, _Tp>, _EqualKey, _Alloc>
           _Ht;
   _Ht _M_ht;
 
