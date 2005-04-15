@@ -282,25 +282,32 @@ void cmTryCompileCommand::CleanupFiles(const char* binDir)
   cmsys::Directory dir;
   dir.Load(binDir);
   size_t fileNum;
+  std::set<cmStdString> deletedFiles;
   for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
     {
     if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&
         strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".."))
       {
-      std::string fullPath = binDir;
-      fullPath += "/";
-      fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
-      if(cmSystemTools::FileIsDirectory(fullPath.c_str()))
+      
+      if(deletedFiles.find( dir.GetFile(static_cast<unsigned long>(fileNum))) 
+         == deletedFiles.end())
         {
-        cmTryCompileCommand::CleanupFiles(fullPath.c_str());
-        }
-      else
-        {
-        if(!cmSystemTools::RemoveFile(fullPath.c_str()))
+        deletedFiles.insert(dir.GetFile(static_cast<unsigned long>(fileNum)));
+        std::string fullPath = binDir;
+        fullPath += "/";
+        fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+        if(cmSystemTools::FileIsDirectory(fullPath.c_str()))
           {
-          std::string m = "Remove failed on file: ";
-          m += fullPath;
-          cmSystemTools::ReportLastSystemError(m.c_str());
+          cmTryCompileCommand::CleanupFiles(fullPath.c_str());
+          }
+        else
+          {
+          if(!cmSystemTools::RemoveFile(fullPath.c_str()))
+            {
+            std::string m = "Remove failed on file: ";
+            m += fullPath;
+            cmSystemTools::ReportLastSystemError(m.c_str());
+            }
           }
         }
       }
