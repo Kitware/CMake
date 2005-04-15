@@ -130,19 +130,22 @@ int main()
 
 #ifdef TEST_KWSYS_STL_HAS_ITERATOR_TRAITS
 #include <iterator>
-void f(kwsys_stl::iterator_traits<int*>::iterator_category const&) {}
+#include <list>
+void f(kwsys_stl::iterator_traits<kwsys_stl::list<int>::iterator>::iterator_category const&) {}
 int main() { return 0; }
 #endif
 
 #ifdef TEST_KWSYS_STL_HAS_ITERATOR_CATEGORY
 #include <iterator>
-void f(int* x) { kwsys_stl::iterator_category(x); }
+#include <list>
+void f(kwsys_stl::list<int>::iterator x) { kwsys_stl::iterator_category(x); }
 int main() { return 0; }
 #endif
 
 #ifdef TEST_KWSYS_STL_HAS___ITERATOR_CATEGORY
 #include <iterator>
-void f(int* x) { kwsys_stl::__iterator_category(x); }
+#include <list>
+void f(kwsys_stl::list<int>::iterator x) { kwsys_stl::__iterator_category(x); }
 int main() { return 0; }
 #endif
 
