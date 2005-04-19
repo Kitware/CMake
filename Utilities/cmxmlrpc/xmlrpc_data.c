@@ -409,7 +409,7 @@ mkDouble(xmlrpc_env *    const envP,
 #ifdef HAVE_UNICODE_WCHAR
 #define MAKE_WCS_BLOCK_NULL(val) ((val)->_wcs_block = NULL)
 #else
-#define MAKE_WCS_BLOCK_NULL(val) while (0) do {};
+#define MAKE_WCS_BLOCK_NULL(val) do {} while(0)
 #endif
 
 
