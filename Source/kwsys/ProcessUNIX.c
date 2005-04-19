@@ -905,7 +905,6 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
       kwsysProcess_Kill(cp);
       cp->Killed = 0;
       cp->SelectError = 1;
-      cp->PipesLeft = 0;
       }
     }
 
@@ -943,7 +942,6 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
       kwsysProcess_Kill(cp);
       cp->Killed = 0;
       cp->TimeoutExpired = 1;
-      cp->PipesLeft = 0;
       return kwsysProcess_Pipe_None;
       }
     }
@@ -1076,6 +1074,13 @@ void kwsysProcess_Kill(kwsysProcess* cp)
       kwsysProcessKill(cp->ForkPIDs[i]);
       }
     }
+
+  /* Close all the pipe read ends.  */
+  for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
+    {
+    kwsysProcessCleanupDescriptor(&cp->PipeReadEnds[i]);
+    }
+  cp->PipesLeft = 0;
 }
 
 /*--------------------------------------------------------------------------*/
