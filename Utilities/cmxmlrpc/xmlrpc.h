@@ -29,6 +29,26 @@
 
 #include <stddef.h>
 #include <stdarg.h>
+#ifdef __cplusplus
+#ifndef va_list
+/*
+ Some compilers move va_list into the std:: namespace and there is no way to
+ tell that this has been done. Playing with things being included before or
+ after stdarg.h does not solve things because we do not have control over what
+ the user does.
+ This hack solves this problem by moving va_list to our own namespace that is
+ local for forms.
+*/
+namespace std {} /* Required for platforms that do not have std:: */
+namespace xmlrpc_VA_LIST
+{
+  using namespace std;
+  typedef va_list hack_va_list;
+}
+#define va_list xmlrpc_VA_LIST::hack_va_list
+#endif /* va_list */
+#endif /* __cplusplus */
+
 #include <xmlrpc_config.h>
 
 #ifdef HAVE_UNICODE_WCHAR
