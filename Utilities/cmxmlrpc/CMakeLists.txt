@@ -93,9 +93,14 @@ SET(xmlrpc_SRCS
   xmlrpc_struct.c
   xmlrpc_strutil.c
   xmlrpc_support.c
-  xmlrpc_utf8.c
   casprintf.c
   )
+IF(HAVE_UNICODE_WCHAR)
+  SET(xmlrpc_SRCS
+    ${xmlrpc_SRCS}
+    xmlrpc_utf8.c
+    )
+ENDIF(HAVE_UNICODE_WCHAR)
 IF(WIN32)
   SET(xmlrpc_SRCS ${xmlrpc_SRCS}
     win32_pthreads.c
