@@ -21,6 +21,7 @@
 #if 0
 # include "hash_map.hxx.in"
 # include "hash_set.hxx.in"
+# include "hashtable.hxx.in"
 # include "kwsys_ios_iostream.h.in"
 #endif
 
