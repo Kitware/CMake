@@ -55,10 +55,20 @@
 # pragma warning (disable:4786)
 #endif
 
-#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_NONTEMPLATE
+#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_TEMPLATE
+# define @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(T) @KWSYS_NAMESPACE@_stl::allocator< T >
+#elif @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_NONTEMPLATE
 # define @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(T) @KWSYS_NAMESPACE@_stl::allocator
 #else
-# define @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(T) @KWSYS_NAMESPACE@_stl::allocator< T >
+# define @KWSYS_NAMESPACE@_HASH_DEFAULT_ALLOCATOR(T) @KWSYS_NAMESPACE@_stl::alloc
+#endif
+
+#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_OBJECTS
+# define @KWSYS_NAMESPACE@_HASH_BUCKETS_INIT(__a) _M_buckets(__a)
+# define @KWSYS_NAMESPACE@_HASH_BUCKETS_GET_ALLOCATOR(__b) , __b.get_allocator()
+#else
+# define @KWSYS_NAMESPACE@_HASH_BUCKETS_INIT(__a) _M_buckets()
+# define @KWSYS_NAMESPACE@_HASH_BUCKETS_GET_ALLOCATOR(__b)
 #endif
 
 namespace @KWSYS_NAMESPACE@
@@ -68,30 +78,131 @@ namespace @KWSYS_NAMESPACE@
 // Define an allocator adaptor for platforms that do not provide an
 // allocator with the rebind member.
 #if !@KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_REBIND
+
+// Utility functions to convert item counts.
+inline size_t hash_sizeof(void*) { return sizeof(char); }
+inline size_t hash_sizeof(const void*) { return sizeof(char); }
+template <class TPtr> inline size_t hash_sizeof(TPtr p) { return sizeof(p); }
+template <class POut, class PIn, class TSize>
+inline TSize hash_allocator_n(POut out, PIn in, TSize n)
+{
+  return n*(hash_sizeof(out)/hash_sizeof(in) +
+            (hash_sizeof(out)%hash_sizeof(in)>0));
+}
+
+// Define an allocation method to use the native allocator with
+// the proper signature.  The following signatures of the allocate
+// method are used on various STL implementations:
+//   pointer allocate(size_type, const void* hint)
+//   pointer allocate(size_type)
+//   static pointer allocate(size_type, const void* hint)
+//   static pointer allocate(size_type)
+// Where pointer might be a real type or void*.
+// This set of overloads decodes the signature for a particular STL.
+// The extra three int/long arguments will favor certain signatures
+// over others in the case that multiple are present to avoid
+// ambiguity errors.
+template <class TAlloc, class PIn, class TSize, class THint, class POut>
+inline void hash_allocate(TAlloc* a, PIn (TAlloc::*allocate)(TSize, THint),
+                          TSize n_out, const void* hint, POut& out,
+                          int, int, int)
+{
+  TSize n_in = hash_allocator_n(POut(), PIn(), n_out);
+  void* vout = (a->*allocate)(n_in, const_cast<THint>(hint));
+  out = static_cast<POut>(vout);
+}
+
+template <class TAlloc, class PIn, class TSize, class POut>
+inline void hash_allocate(TAlloc* a, PIn (TAlloc::*allocate)(TSize),
+                          TSize n_out, const void*, POut& out,
+                          int, int, long)
+{
+  TSize n_in = hash_allocator_n(POut(), PIn(), n_out);
+  void* vout = (a->*allocate)(n_in);
+  out = static_cast<POut>(vout);
+}
+
+template <class PIn, class TSize, class THint, class POut>
+inline void hash_allocate(void*, PIn (*allocate)(TSize, THint),
+                          TSize n_out, const void* hint, POut& out,
+                          int, long, long)
+{
+  TSize n_in = hash_allocator_n(POut(), PIn(), n_out);
+  void* vout = allocate(n_in, const_cast<THint>(hint));
+  out = static_cast<POut>(vout);
+}
+
+template <class PIn, class TSize, class POut>
+inline void hash_allocate(void*, PIn (*allocate)(TSize),
+                          TSize n_out, const void*, POut& out,
+                          long, long, long)
+{
+  TSize n_in = hash_allocator_n(POut(), PIn(), n_out);
+  void* vout = allocate(n_in);
+  out = static_cast<POut>(vout);
+}
+
+// Define a deallocation method to use the native allocator with
+// the proper signature.  The following signatures of the deallocate
+// method are used on various STL implementations:
+//   void deallocate(pointer, size_type)
+//   void deallocate(pointer)
+//   static void deallocate(pointer, size_type)
+//   static void deallocate(pointer)
+// Where pointer might be a real type or void*.
+// This set of overloads decodes the signature for a particular STL.
+// The extra three int/long arguments will favor certain signatures
+// over others in the case that multiple are present to avoid
+// ambiguity errors.
+template <class TAlloc, class PIn, class TSize>
+inline void hash_deallocate(TAlloc* a, void (TAlloc::*deallocate)(PIn, TSize),
+                            void* p, TSize n, int, int, int)
+{
+  (a->*deallocate)(static_cast<PIn>(p), n);
+}
+
+template <class TAlloc, class PIn, class TSize>
+inline void hash_deallocate(TAlloc* a, void (TAlloc::*deallocate)(PIn),
+                            void* p, TSize, int, int, long)
+{
+  (a->*deallocate)(static_cast<PIn>(p));
+}
+
+template <class PIn, class TSize>
+inline void hash_deallocate(void*, void (*deallocate)(PIn, TSize),
+                            void* p, TSize n, int, long, long)
+{
+  deallocate(static_cast<PIn>(p), n);
+}
+
+template <class PIn, class TSize>
+inline void hash_deallocate(void*, void (*deallocate)(PIn),
+                            void* p, TSize, long, long, long)
+{
+  deallocate(static_cast<PIn>(p));
+}
+
+// Define the comparison operators in terms of a base type to avoid
+// needing templated versions.
 class hash_allocator_base {};
 bool operator==(const hash_allocator_base&,
                 const hash_allocator_base&) throw() { return true; }
 bool operator!=(const hash_allocator_base&,
                 const hash_allocator_base&) throw() { return false; }
+
+// Define the allocator template.
 template <class T, class Alloc>
 class hash_allocator: public hash_allocator_base
 {
 private:
   // Store the real allocator privately.
   typedef Alloc alloc_type;
-#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_NONTEMPLATE
-  typedef char alloc_value_type;
-  typedef void* alloc_pointer;
-#else
-  typedef typename alloc_type::value_type alloc_value_type;
-  typedef typename alloc_type::pointer alloc_pointer;
-#endif
   alloc_type alloc_;
 
 public:
   // Standard allocator interface.
-  typedef typename alloc_type::size_type size_type;
-  typedef typename alloc_type::difference_type difference_type;
+  typedef size_t size_type;
+  typedef ptrdiff_t difference_type;
   typedef T* pointer;
   typedef const T* const_pointer;
   typedef T& reference;
@@ -109,21 +220,15 @@ public:
 # endif
   pointer address(reference x) const { return &x; }
   const_pointer address(const_reference x) const { return &x; }
-#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_NONTEMPLATE
   typedef void* void_pointer;
   typedef const void* const_void_pointer;
-#else
-  typedef @KWSYS_NAMESPACE@_stl::allocator<void>::pointer void_pointer;
-  typedef @KWSYS_NAMESPACE@_stl::allocator<void>::const_pointer const_void_pointer;
-#endif
   pointer allocate(size_type n=1, const_void_pointer hint = 0)
     {
     if(n)
       {
-      return
-        static_cast<pointer>(
-          static_cast<void*>(
-            alloc_.allocate(n*chunk(), const_cast<void_pointer>(hint))));
+      pointer p;
+      hash_allocate(&alloc_, &alloc_type::allocate, n, hint, p, 1, 1, 1);
+      return p;
       }
     else
       {
@@ -134,12 +239,7 @@ public:
     {
     if(n)
       {
-#if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_NONTEMPLATE
-      alloc_.deallocate(static_cast<alloc_pointer>(static_cast<void*>(p)));
-#else
-      alloc_.deallocate(static_cast<alloc_pointer>(static_cast<void*>(p)),
-                        n*chunk());
-#endif
+      hash_deallocate(&alloc_, &alloc_type::deallocate, p, n, 1, 1, 1);
       }
     }
 #if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT
@@ -150,18 +250,12 @@ public:
 #else
   size_type max_size() const throw()
     {
-    size_type n = alloc_.max_size() / chunk();
+    size_type n = alloc_.max_size() / sizeof(value_type);
     return n>0? n:1;
     }
 #endif
   void construct(pointer p, const value_type& val) { new (p) value_type(val); }
   void destroy(pointer p) { (void)p; p->~value_type(); }
-private:
-  // Returns the number of the real allocator's allocation units
-  // needed to allocate one unit for this allocator.
-  static size_type chunk()
-    { return (sizeof(value_type)/sizeof(alloc_value_type)+
-              (sizeof(value_type)%sizeof(alloc_value_type)>0)); }
 };
 #endif
 
@@ -334,7 +428,11 @@ public:
   allocator_type get_allocator() const { return allocator_type(); }
 private:
   typedef hash_allocator<_Node, _Alloc> _M_node_allocator_type;
+# if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_OBJECTS
   typedef hash_allocator<_Node*, _Alloc> _M_node_ptr_allocator_type;
+# else
+  typedef _Alloc _M_node_ptr_allocator_type;
+# endif
   typedef @KWSYS_NAMESPACE@_stl::vector<_Node*,_M_node_ptr_allocator_type> _M_buckets_type;
 #endif
 
@@ -371,7 +469,7 @@ public:
       _M_hash(__hf),
       _M_equals(__eql),
       _M_get_key(__ext),
-      _M_buckets(__a),
+      @KWSYS_NAMESPACE@_HASH_BUCKETS_INIT(__a),
       _M_num_elements(0)
   {
     _M_initialize_buckets(__n);
@@ -385,7 +483,7 @@ public:
       _M_hash(__hf),
       _M_equals(__eql),
       _M_get_key(_ExtractKey()),
-      _M_buckets(__a),
+      @KWSYS_NAMESPACE@_HASH_BUCKETS_INIT(__a),
       _M_num_elements(0)
   {
     _M_initialize_buckets(__n);
@@ -396,7 +494,7 @@ public:
       _M_hash(__ht._M_hash),
       _M_equals(__ht._M_equals),
       _M_get_key(__ht._M_get_key),
-      _M_buckets(__ht.get_allocator()),
+      @KWSYS_NAMESPACE@_HASH_BUCKETS_INIT(__ht.get_allocator()),
       _M_num_elements(0)
   {
     _M_copy_from(__ht);
@@ -1010,8 +1108,9 @@ void hashtable<_Val,_Key,_HF,_Ex,_Eq,_All>
   if (__num_elements_hint > __old_n) {
     const size_type __n = _M_next_size(__num_elements_hint);
     if (__n > __old_n) {
-      _M_buckets_type __tmp(__n, (_Node*)(0),
-                                 _M_buckets.get_allocator());
+      _M_buckets_type __tmp(
+        __n, (_Node*)(0)
+        @KWSYS_NAMESPACE@_HASH_BUCKETS_GET_ALLOCATOR(_M_buckets));
       try {
         for (size_type __bucket = 0; __bucket < __old_n; ++__bucket) {
           _Node* __first = _M_buckets[__bucket];

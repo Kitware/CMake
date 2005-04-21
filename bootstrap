@@ -206,9 +206,11 @@ cmake_kwsys_config_replace_string ()
                 s/@KWSYS_STL_HAS_ITERATOR_TRAITS@/${KWSYS_STL_HAS_ITERATOR_TRAITS}/g;
                 s/@KWSYS_STL_HAS_ITERATOR_CATEGORY@/${KWSYS_STL_HAS_ITERATOR_CATEGORY}/g;
                 s/@KWSYS_STL_HAS___ITERATOR_CATEGORY@/${KWSYS_STL_HAS___ITERATOR_CATEGORY}/g;
+                s/@KWSYS_STL_HAS_ALLOCATOR_TEMPLATE@/${KWSYS_STL_HAS_ALLOCATOR_TEMPLATE}/g;
                 s/@KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE@/${KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE}/g;
                 s/@KWSYS_STL_HAS_ALLOCATOR_REBIND@/${KWSYS_STL_HAS_ALLOCATOR_REBIND}/g;
                 s/@KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT@/${KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT}/g;
+                s/@KWSYS_STL_HAS_ALLOCATOR_OBJECTS@/${KWSYS_STL_HAS_ALLOCATOR_OBJECTS}/g;
                 s/@KWSYS_CXX_HAS_CSTDDEF@/${KWSYS_CXX_HAS_CSTDDEF}/g;
                 s/@KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS@/${KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS}/g;
                 s/@KWSYS_CXX_HAS_MEMBER_TEMPLATES@/${KWSYS_CXX_HAS_MEMBER_TEMPLATES}/g;
@@ -725,9 +727,11 @@ KWSYS_STL_STRING_HAVE_NEQ_CHAR=0
 KWSYS_STL_HAS_ITERATOR_TRAITS=0
 KWSYS_STL_HAS_ITERATOR_CATEGORY=0
 KWSYS_STL_HAS___ITERATOR_CATEGORY=0
+KWSYS_STL_HAS_ALLOCATOR_TEMPLATE=0
 KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE=0
 KWSYS_STL_HAS_ALLOCATOR_REBIND=0
 KWSYS_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT=0
+KWSYS_STL_HAS_ALLOCATOR_OBJECTS=0
 KWSYS_CXX_HAS_CSTDDEF=0
 KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS=0
 KWSYS_CXX_HAS_MEMBER_TEMPLATES=0
@@ -836,15 +840,15 @@ if [ "x${KWSYS_STL_HAS_ITERATOR_TRAITS}" = "x0" ]; then
 fi
 
 if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
+  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_TEMPLATE -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
   "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE=1
-  echo "${cmake_cxx_compiler} has old non-template allocator"
+  KWSYS_STL_HAS_ALLOCATOR_TEMPLATE=1
+  echo "${cmake_cxx_compiler} has standard template allocator"
 else
-  echo "${cmake_cxx_compiler} does not have old non-template allocator"
+  echo "${cmake_cxx_compiler} does not have standard template allocator"
 fi
 
-if [ "x${KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE}" = "x0" ]; then
+if [ "x${KWSYS_STL_HAS_ALLOCATOR_TEMPLATE}" = "x1" ]; then
   if cmake_try_run "${cmake_cxx_compiler}" \
     "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_REBIND -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
     "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
@@ -862,6 +866,24 @@ if [ "x${KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE}" = "x0" ]; then
   else
     echo "${cmake_cxx_compiler} does not have non-standard allocator<>::max_size argument"
   fi
+else
+  if cmake_try_run "${cmake_cxx_compiler}" \
+    "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
+    "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
+    KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE=1
+    echo "${cmake_cxx_compiler} has old non-template allocator"
+  else
+    echo "${cmake_cxx_compiler} does not have old non-template allocator"
+  fi
+fi
+
+if cmake_try_run "${cmake_cxx_compiler}" \
+  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAS_ALLOCATOR_OBJECTS -DKWSYS_STL_HAVE_STD=${KWSYS_STL_HAVE_STD}" \
+  "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
+  KWSYS_STL_HAS_ALLOCATOR_OBJECTS=1
+  echo "${cmake_cxx_compiler} has stl containers supporting allocator objects"
+else
+  echo "${cmake_cxx_compiler} does not have stl containers supporting allocator objects"
 fi
 
 if cmake_try_run "${cmake_cxx_compiler}" \

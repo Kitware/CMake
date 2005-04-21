@@ -149,6 +149,20 @@ void f(kwsys_stl::list<int>::iterator x) { kwsys_stl::__iterator_category(x); }
 int main() { return 0; }
 #endif
 
+#ifdef TEST_KWSYS_STL_HAS_ALLOCATOR_TEMPLATE
+#include <memory>
+template <class Alloc>
+void f(const Alloc&)
+{
+  typedef typename Alloc::size_type alloc_size_type;
+};
+int main()
+{
+  f(kwsys_stl::allocator<char>());
+  return 0;
+}
+#endif
+
 #ifdef TEST_KWSYS_STL_HAS_ALLOCATOR_NONTEMPLATE
 #include <memory>
 void f(kwsys_stl::allocator::size_type const&) {}
@@ -178,6 +192,19 @@ void f(kwsys_stl::allocator<char> const& a)
 int main()
 {
   f(kwsys_stl::allocator<char>());
+  return 0;
+}
+#endif
+
+#ifdef TEST_KWSYS_STL_HAS_ALLOCATOR_OBJECTS
+#include <vector>
+void f(kwsys_stl::vector<int> const& v1)
+{
+  kwsys_stl::vector<int>(1, 1, v1.get_allocator());
+};
+int main()
+{
+  f(kwsys_stl::vector<int>());
   return 0;
 }
 #endif
