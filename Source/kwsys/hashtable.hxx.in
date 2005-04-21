@@ -82,7 +82,7 @@ namespace @KWSYS_NAMESPACE@
 // Utility functions to convert item counts.
 inline size_t hash_sizeof(void*) { return sizeof(char); }
 inline size_t hash_sizeof(const void*) { return sizeof(char); }
-template <class TPtr> inline size_t hash_sizeof(TPtr p) { return sizeof(p); }
+template <class TPtr> inline size_t hash_sizeof(TPtr p) { return sizeof(*p); }
 template <class POut, class PIn, class TSize>
 inline TSize hash_allocator_n(POut out, PIn in, TSize n)
 {
@@ -154,33 +154,55 @@ inline void hash_allocate(void*, PIn (*allocate)(TSize),
 // The extra three int/long arguments will favor certain signatures
 // over others in the case that multiple are present to avoid
 // ambiguity errors.
-template <class TAlloc, class PIn, class TSize>
+template <class TAlloc, class PIn, class TSize, class PInReal, class POut>
 inline void hash_deallocate(TAlloc* a, void (TAlloc::*deallocate)(PIn, TSize),
-                            void* p, TSize n, int, int, int)
+                            PInReal, POut p, TSize n_out, int, int, int)
 {
-  (a->*deallocate)(static_cast<PIn>(p), n);
+  TSize n_in = hash_allocator_n(POut(), PInReal(), n_out);
+  void* vout = p;
+  (a->*deallocate)(static_cast<PIn>(vout), n_in);
 }
 
-template <class TAlloc, class PIn, class TSize>
+template <class TAlloc, class PIn, class TSize, class PInReal, class POut>
 inline void hash_deallocate(TAlloc* a, void (TAlloc::*deallocate)(PIn),
-                            void* p, TSize, int, int, long)
+                            PInReal, POut p, TSize, int, int, long)
 {
-  (a->*deallocate)(static_cast<PIn>(p));
+  void* vout = p;
+  (a->*deallocate)(static_cast<PIn>(vout));
 }
 
-template <class PIn, class TSize>
+template <class PIn, class TSize, class PInReal, class POut>
 inline void hash_deallocate(void*, void (*deallocate)(PIn, TSize),
-                            void* p, TSize n, int, long, long)
+                            PInReal, POut p, TSize n_out, int, long, long)
 {
-  deallocate(static_cast<PIn>(p), n);
+  TSize n_in = hash_allocator_n(POut(), PInReal(), n_out);
+  void* vout = p;
+  deallocate(static_cast<PIn>(vout), n_in);
 }
 
-template <class PIn, class TSize>
+template <class PIn, class TSize, class PInReal, class POut>
 inline void hash_deallocate(void*, void (*deallocate)(PIn),
-                            void* p, TSize, long, long, long)
+                            PInReal, POut p, TSize, long, long, long)
 {
-  deallocate(static_cast<PIn>(p));
+  void* vout = p;
+  deallocate(static_cast<PIn>(vout));
 }
+
+// Use the same four overloads as hash_allocate to decode the type
+// really used for allocation.  This is passed as PInReal to the
+// deallocate functions so that hash_allocator_n has the proper size.
+template <class TAlloc, class PIn, class TSize, class THint>
+inline PIn hash_allocate_type(PIn (TAlloc::*)(TSize, THint),
+                              int, int, int) { return 0; }
+template <class TAlloc, class PIn, class TSize>
+inline PIn hash_allocate_type(PIn (TAlloc::*)(TSize),
+                              int, int, long) { return 0; }
+template <class PIn, class TSize, class THint>
+inline PIn hash_allocate_type(PIn (*)(TSize, THint),
+                              int, long, long) { return 0; }
+template <class PIn, class TSize>
+inline PIn hash_allocate_type(PIn (*)(TSize),
+                              long, long, long) { return 0; }
 
 // Define the comparison operators in terms of a base type to avoid
 // needing templated versions.
@@ -239,7 +261,9 @@ public:
     {
     if(n)
       {
-      hash_deallocate(&alloc_, &alloc_type::deallocate, p, n, 1, 1, 1);
+      hash_deallocate(&alloc_, &alloc_type::deallocate,
+                      hash_allocate_type(&alloc_type::allocate, 1, 1, 1),
+                      p, n, 1, 1, 1);
       }
     }
 #if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_MAX_SIZE_ARGUMENT
