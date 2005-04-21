@@ -25,7 +25,7 @@
 
 // Required for va_list
 #include <stdarg.h>
-#ifndef va_list
+#if @KWSYS_NAMESPACE@_STL_HAVE_STD && !defined(va_list)
 // Some compilers move va_list into the std:: namespace and there is no way to
 // tell that this has been done. Playing with things being included before or
 // after stdarg.h does not solve things because we do not have control over
