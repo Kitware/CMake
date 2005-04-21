@@ -1160,7 +1160,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
         {
         kwsysProcessCleanupHandle(&si.StartupInfo.hStdOutput);
         }
-      if(si.StartupInfo.hStdOutput != GetStdHandle(STD_ERROR_HANDLE))
+      if(si.StartupInfo.hStdError != GetStdHandle(STD_ERROR_HANDLE))
         {
         kwsysProcessCleanupHandle(&si.StartupInfo.hStdError);
         }
@@ -1176,7 +1176,10 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
   /* Close the inherited handles to the stderr pipe shared by all
      processes in the pipeline.  */
-  kwsysProcessCleanupHandle(&si.StartupInfo.hStdError);
+  if(si.StartupInfo.hStdError != GetStdHandle(STD_ERROR_HANDLE))
+    {
+    kwsysProcessCleanupHandle(&si.StartupInfo.hStdError);
+    }
 
   /* Restore the working directory.  */
   if(cp->RealWorkingDirectory)

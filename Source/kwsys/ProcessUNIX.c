@@ -689,7 +689,10 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   }
 
   /* The parent process does not need the output pipe write ends.  */
-  kwsysProcessCleanupDescriptor(&si.StdErr);
+  if(si.StdErr != 2)
+    {
+    kwsysProcessCleanupDescriptor(&si.StdErr);
+    }
   kwsysProcessCleanupDescriptor(&si.TermPipe);
 
   /* Restore the working directory. */
@@ -1395,7 +1398,10 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
     }
 
   /* The parent process does not need the output pipe write ends.  */
-  kwsysProcessCleanupDescriptor(&si->StdOut);
+  if(si->StdOut != 1)
+    {
+    kwsysProcessCleanupDescriptor(&si->StdOut);
+    }
 
   return 1;
 }
