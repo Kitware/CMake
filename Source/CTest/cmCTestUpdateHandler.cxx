@@ -204,6 +204,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   int count = 0;
   int updateType = e_CVS;
   std::string::size_type cc, kk;
+  bool updateProducedError = false;
 
 
   // Get source dir
@@ -390,6 +391,10 @@ int cmCTestUpdateHandler::ProcessHandler()
       ofs << goutput << std::endl;; 
       }
     }
+  if ( !res || retVal )
+    {
+    updateProducedError = true;
+    }
 
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     << "<Update mode=\"Client\" Generator=\"ctest-"
@@ -401,15 +406,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     << m_CTest->GetTestModelString() << "</BuildStamp>" << std::endl;
   os << "\t<StartDateTime>" << start_time << "</StartDateTime>\n"
     << "\t<UpdateCommand>" << m_CTest->MakeXMLSafe(command)
-    << "</UpdateCommand>\n"
-    << "\t<UpdateReturnStatus>";
-  if ( !res || retVal )
-    {
-    os << "Update error: ";
-    os << m_CTest->MakeXMLSafe(goutput);
-    std::cerr << "Update with command: " << command << " failed" << std::endl;
-    }
-  os << "</UpdateReturnStatus>" << std::endl;
+    << "</UpdateCommand>\n";
 
   // Even though it failed, we may have some useful information. Try to continue...
   std::vector<cmStdString> lines;
@@ -806,8 +803,21 @@ int cmCTestUpdateHandler::ProcessHandler()
   os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
     << "<ElapsedMinutes>" << 
     static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0 
-    << "</ElapsedMinutes>"
-    << "</Update>" << std::endl;
+    << "</ElapsedMinutes>\n"
+    << "\t<UpdateReturnStatus>";
+  if ( num_modified > 0 || num_conflicting > 0 )
+    {
+    os << "Update error: There are modified or conflicting files in the repository";
+    std::cerr << "   There are modified or conflicting files in the repository" << std::endl;
+    }
+  if ( !res || retVal )
+    {
+    os << "Update error: ";
+    os << m_CTest->MakeXMLSafe(goutput);
+    std::cerr << "   Update with command: " << command << " failed" << std::endl;
+    }
+  os << "</UpdateReturnStatus>" << std::endl;
+  os << "</Update>" << std::endl;
 
   if ( ofs )
     {
