@@ -615,8 +615,7 @@ public:
   @KWSYS_NAMESPACE@_stl::__iterator_category( I )
 #endif
 
-#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES && \
-    defined(@KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY)
+#if @KWSYS_NAMESPACE@_CXX_HAS_MEMBER_TEMPLATES && defined(@KWSYS_NAMESPACE@_HASH_ITERATOR_CATEGORY)
   template <class _InputIterator>
   void insert_unique(_InputIterator __f, _InputIterator __l)
   {

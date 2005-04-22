@@ -24,9 +24,7 @@
 // to avoid conflicts with other libraries.  User code can test for
 // this definition by checking the macro
 // @KWSYS_NAMESPACE@_STL_STRING_ISTREAM_DEFINED
-#if !@KWSYS_NAMESPACE@_STL_STRING_HAVE_ISTREAM && \
-    !defined(@KWSYS_NAMESPACE@_STL_STRING_NO_ISTREAM) && \
-    !defined(KWSYS_STL_STRING_ISTREAM_DEFINED)
+#if !@KWSYS_NAMESPACE@_STL_STRING_HAVE_ISTREAM && !defined(@KWSYS_NAMESPACE@_STL_STRING_NO_ISTREAM) && !defined(KWSYS_STL_STRING_ISTREAM_DEFINED)
 # define KWSYS_STL_STRING_ISTREAM_DEFINED
 # define @KWSYS_NAMESPACE@_STL_STRING_ISTREAM_DEFINED
 # include <ctype.h> // isspace
@@ -83,9 +81,7 @@ operator>>(@KWSYS_NAMESPACE@_ios::istream& is,
 // to avoid conflicts with other libraries.  User code can test for
 // this definition by checking the macro
 // @KWSYS_NAMESPACE@_STL_STRING_OSTREAM_DEFINED
-#if !@KWSYS_NAMESPACE@_STL_STRING_HAVE_OSTREAM && \
-    !defined(@KWSYS_NAMESPACE@_STL_STRING_NO_OSTREAM) && \
-    !defined(KWSYS_STL_STRING_OSTREAM_DEFINED)
+#if !@KWSYS_NAMESPACE@_STL_STRING_HAVE_OSTREAM && !defined(@KWSYS_NAMESPACE@_STL_STRING_NO_OSTREAM) && !defined(KWSYS_STL_STRING_OSTREAM_DEFINED)
 # define KWSYS_STL_STRING_OSTREAM_DEFINED
 # define @KWSYS_NAMESPACE@_STL_STRING_OSTREAM_DEFINED
 # include <@KWSYS_NAMESPACE@/ios/iostream>
@@ -104,9 +100,7 @@ operator<<(@KWSYS_NAMESPACE@_ios::ostream& os,
 // to avoid conflicts with other libraries.  User code can test for
 // this definition by checking the macro
 // @KWSYS_NAMESPACE@_STL_STRING_NEQ_CHAR_DEFINED
-#if !@KWSYS_NAMESPACE@_STL_STRING_HAVE_NEQ_CHAR && \
-    !defined(@KWSYS_NAMESPACE@_STL_STRING_NO_NEQ_CHAR) && \
-    !defined(KWSYS_STL_STRING_NEQ_CHAR_DEFINED)
+#if !@KWSYS_NAMESPACE@_STL_STRING_HAVE_NEQ_CHAR && !defined(@KWSYS_NAMESPACE@_STL_STRING_NO_NEQ_CHAR) && !defined(KWSYS_STL_STRING_NEQ_CHAR_DEFINED)
 # define KWSYS_STL_STRING_NEQ_CHAR_DEFINED
 # define @KWSYS_NAMESPACE@_STL_STRING_NEQ_CHAR_DEFINED
 inline bool operator!=(@KWSYS_NAMESPACE@_stl::string const& s, const char* c)
