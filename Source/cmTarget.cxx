@@ -974,3 +974,108 @@ cmTarget::GetBaseNameInternal(cmMakefile* mf, TargetType type) const
   name += this->GetName();
   return name;
 }
+
+void cmTarget::GetLibraryNames(cmMakefile* mf,
+                               std::string& name,
+                               std::string& soName,
+                               std::string& realName,
+                               std::string& baseName) const
+{
+  // Get the names based on the real type of the library.
+  this->GetLibraryNamesInternal(mf, name, soName, realName, this->GetType());
+
+  // The library name without extension.
+  baseName = this->GetBaseName(mf);
+}
+
+void cmTarget::GetLibraryCleanNames(cmMakefile* mf,
+                                    std::string& staticName,
+                                    std::string& sharedName,
+                                    std::string& sharedSOName,
+                                    std::string& sharedRealName) const
+{
+  // Get the name as if this were a static library.
+  std::string soName;
+  std::string realName;
+  this->GetLibraryNamesInternal(mf, staticName, soName, realName,
+                                cmTarget::STATIC_LIBRARY);
+
+  // Get the names as if this were a shared library.
+  if(this->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    // Since the real type is static then the user either specified
+    // STATIC or did not specify a type.  In the former case the
+    // shared library will never be present.  In the latter case the
+    // type will never be MODULE.  Either way the only names that
+    // might have to be cleaned are the shared library names.
+    this->GetLibraryNamesInternal(mf, sharedName, sharedSOName,
+                                  sharedRealName, cmTarget::SHARED_LIBRARY);
+    }
+  else
+    {
+    // Use the name of the real type of the library (shared or module).
+    this->GetLibraryNamesInternal(mf, sharedName, sharedSOName,
+                                  sharedRealName, this->GetType());
+    }
+}
+
+void cmTarget::GetLibraryNamesInternal(cmMakefile* mf,
+                                       std::string& name,
+                                       std::string& soName,
+                                       std::string& realName,
+                                       TargetType type) const
+{
+  // Construct the name of the soname flag variable for this language.
+  const char* ll =
+    this->GetLinkerLanguage(
+      mf->GetLocalGenerator()->GetGlobalGenerator());
+  std::string sonameFlag = "CMAKE_SHARED_LIBRARY_SONAME";
+  if(ll)
+    {
+    sonameFlag += "_";
+    sonameFlag += ll;
+    }
+  sonameFlag += "_FLAG";
+
+  // Check for library version properties.
+  const char* version = this->GetProperty("VERSION");
+  const char* soversion = this->GetProperty("SOVERSION");
+  if((type != cmTarget::SHARED_LIBRARY && type != cmTarget::MODULE_LIBRARY) ||
+     !mf->GetDefinition(sonameFlag.c_str()))
+    {
+    // Versioning is supported only for shared libraries and modules,
+    // and then only when the platform supports an soname flag.
+    version = 0;
+    soversion = 0;
+    }
+  if(version && !soversion)
+    {
+    // The soversion must be set if the library version is set.  Use
+    // the library version as the soversion.
+    soversion = version;
+    }
+
+  // The library name.
+  name = this->GetFullNameInternal(mf, type);
+
+  // The library's soname.
+  soName = name;
+  if(soversion)
+    {
+    soName += ".";
+    soName += soversion;
+    }
+
+  // The library's real name on disk.
+  realName = name;
+  if(version)
+    {
+    realName += ".";
+    realName += version;
+    }
+  else if(soversion)
+    {
+    realName += ".";
+    realName += soversion;
+    }
+}

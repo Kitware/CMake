@@ -168,13 +168,30 @@ public:
   ///! Return the name of the variable to look up the target suffix
   const char* GetPrefixVariable() const;
 
-  // Get the full name of the target according to the settings in the
-  // given makefile.
+  /** Get the full name of the target according to the settings in the
+      given makefile.  */
   std::string GetFullName(cmMakefile* mf) const;
 
-  // Get the baes name (no suffix) of the target according to the
-  // settings in the given makefile.
+  /** Get the base name (no suffix) of the target according to the
+      settings in the given makefile.  */
   std::string GetBaseName(cmMakefile* mf) const;
+
+  /** Get the names of the library needed to generate a build rule
+      that takes into account shared library version numbers.  This
+      should be called only on a library target.  */
+  void GetLibraryNames(cmMakefile* mf, std::string& name,
+                       std::string& soName, std::string& realName,
+                       std::string& baseName) const;
+
+  /** Get the names of the library used to remove existing copies of
+      the library from the build tree either before linking or during
+      a clean step.  This should be called only on a library
+      target.  */
+  void GetLibraryCleanNames(cmMakefile* mf,
+                            std::string& staticName,
+                            std::string& sharedName,
+                            std::string& sharedSOName,
+                            std::string& sharedRealName) const;
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -233,7 +250,11 @@ private:
   const char* GetPrefixVariableInternal(TargetType type) const;
   std::string GetFullNameInternal(cmMakefile* mf, TargetType type) const;
   std::string GetBaseNameInternal(cmMakefile* mf, TargetType type) const;
-  
+  void GetLibraryNamesInternal(cmMakefile* mf,
+                               std::string& name,
+                               std::string& soName,
+                               std::string& realName,
+                               TargetType type) const;
 private:
   std::string m_Name;
   std::vector<cmCustomCommand> m_PreBuildCommands;

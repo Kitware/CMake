@@ -1857,9 +1857,9 @@ cmLocalUnixMakefileGenerator2
   std::string targetNameSO;
   std::string targetNameReal;
   std::string targetNameBase;
-  this->GetLibraryNames(target,
-                        targetName, targetNameSO,
-                        targetNameReal, targetNameBase);
+  target.GetLibraryNames(m_Makefile,
+                         targetName, targetNameSO,
+                         targetNameReal, targetNameBase);
 
   // Construct the full path version of the names.
   std::string outpath = m_LibraryOutputPath;
@@ -1897,18 +1897,42 @@ cmLocalUnixMakefileGenerator2
   buildEcho += targetOutPath.c_str();
   this->AppendEcho(commands, buildEcho.c_str());
 
-  // Add a command to remove any existing files for this library.
+  // Construct a list of files associated with this library that may
+  // need to be cleaned.
   std::vector<std::string> cleanFiles;
-  cleanFiles.push_back(targetFullPathReal);
-  if(targetOutPathSO != targetOutPathReal)
+  {
+  std::string cleanStaticName;
+  std::string cleanSharedName;
+  std::string cleanSharedSOName;
+  std::string cleanSharedRealName;
+  target.GetLibraryCleanNames(m_Makefile,
+                              cleanStaticName,
+                              cleanSharedName,
+                              cleanSharedSOName,
+                              cleanSharedRealName);
+  std::string cleanFullStaticName = outpath + cleanStaticName;
+  std::string cleanFullSharedName = outpath + cleanSharedName;
+  std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
+  std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
+  cleanFiles.push_back(cleanFullStaticName);
+  if(cleanSharedRealName != cleanStaticName)
     {
-    cleanFiles.push_back(targetFullPathSO);
+    cleanFiles.push_back(cleanFullSharedRealName);
     }
-  if(targetOutPath != targetOutPathSO &&
-     targetOutPath != targetOutPathReal)
+  if(cleanSharedSOName != cleanStaticName &&
+     cleanSharedSOName != cleanSharedRealName)
     {
-    cleanFiles.push_back(targetFullPath);
+    cleanFiles.push_back(cleanFullSharedSOName);
     }
+  if(cleanSharedName != cleanStaticName &&
+     cleanSharedName != cleanSharedSOName &&
+     cleanSharedName != cleanSharedRealName)
+    {
+    cleanFiles.push_back(cleanFullSharedName);
+    }
+  }
+
+  // Add a command to remove any existing files for this library.
   this->AppendCleanCommand(commands, cleanFiles);
 
   // Add the pre-build and pre-link rules.
@@ -2773,60 +2797,6 @@ cmLocalUnixMakefileGenerator2::SamePath(const char* path1, const char* path2)
 #else
   return false;
 #endif
-}
-
-//----------------------------------------------------------------------------
-void cmLocalUnixMakefileGenerator2::GetLibraryNames(const cmTarget& t,
-                                                    std::string& name,
-                                                    std::string& soName,
-                                                    std::string& realName,
-                                                    std::string& baseName)
-{
-  // Check for library version properties.
-  const char* version = t.GetProperty("VERSION");
-  const char* soversion = t.GetProperty("SOVERSION");
-  if((t.GetType() != cmTarget::SHARED_LIBRARY &&
-      t.GetType() != cmTarget::MODULE_LIBRARY) ||
-     !m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
-    {
-    // Versioning is supported only for shared libraries and modules,
-    // and then only when the platform supports an soname flag.
-    version = 0;
-    soversion = 0;
-    }
-  if(version && !soversion)
-    {
-    // The soversion must be set if the library version is set.  Use
-    // the library version as the soversion.
-    soversion = version;
-    }
-
-  // The library name.
-  name = t.GetFullName(m_Makefile);
-
-  // The library's soname.
-  soName = name;
-  if(soversion)
-    {
-    soName += ".";
-    soName += soversion;
-    }
-
-  // The library's real name on disk.
-  realName = name;
-  if(version)
-    {
-    realName += ".";
-    realName += version;
-    }
-  else if(soversion)
-    {
-    realName += ".";
-    realName += soversion;
-    }
-
-  // The library name without extension.
-  baseName = t.GetBaseName(m_Makefile);
 }
 
 //----------------------------------------------------------------------------

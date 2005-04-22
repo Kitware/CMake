@@ -221,9 +221,6 @@ protected:
 
   //==========================================================================
   bool SamePath(const char* path1, const char* path2);
-  void GetLibraryNames(const cmTarget& t,
-                       std::string& name, std::string& soName,
-                       std::string& realName, std::string& baseName);
   std::string ConvertToMakeTarget(const char* tgt);
   std::string& CreateSafeUniqueObjectFileName(const char* sin);
   std::string CreateMakeVariable(const char* sin, const char* s2in);
