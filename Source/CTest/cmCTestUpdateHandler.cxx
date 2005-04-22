@@ -204,7 +204,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   int count = 0;
   int updateType = e_CVS;
   std::string::size_type cc, kk;
-  bool updateProducedError = false;
+  //bool updateProducedError = false;
 
 
   // Get source dir
@@ -393,7 +393,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     }
   if ( !res || retVal )
     {
-    updateProducedError = true;
+    //updateProducedError = true;
     }
 
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
