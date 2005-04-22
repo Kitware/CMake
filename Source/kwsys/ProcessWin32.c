@@ -1607,6 +1607,8 @@ DWORD WINAPI kwsysProcessPipeThreadWake(LPVOID ptd)
 */
 void kwsysProcessPipeThreadWakePipe(kwsysProcess* cp, kwsysProcessPipeData* td)
 {
+  (void)cp;
+
   /* Wait for a possible wake command. */
   WaitForSingleObject(td->Waker.Go, INFINITE);
 
@@ -2507,7 +2509,7 @@ static void kwsysProcess_List__Delete_NT4(kwsysProcess_List* self)
 static int kwsysProcess_List__Update_NT4(kwsysProcess_List* self)
 {
   self->CurrentInfo = 0;
-  while(1)
+  for(;;)
     {
     /* Query number 5 is for system process list.  */
     NTSTATUS status =
