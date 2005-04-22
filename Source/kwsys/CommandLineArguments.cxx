@@ -465,7 +465,7 @@ const char* CommandLineArguments::GetHelp(const char* arg)
   // Since several arguments may point to the same argument, find the one this
   // one point to if this one is pointing to another argument.
   CommandLineArgumentsCallbackStructure *cs = &(it->second);
-  while ( 1 )
+  for(;;)
     {
     CommandLineArguments::Internal::CallbacksMap::iterator hit 
       = this->Internals->Callbacks.find(cs->Help);
