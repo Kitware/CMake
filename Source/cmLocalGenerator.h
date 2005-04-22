@@ -69,9 +69,6 @@ public:
 
   ///! Set the Global Generator, done on creation by the GlobalGenerator
   void SetGlobalGenerator(cmGlobalGenerator *gg);
-  
-  /** Get the full name of the target's file, without path.  */
-  std::string GetFullTargetName(const char* n, const cmTarget& t);
 
   /**
    * Convert the given remote path to a relative path with respect to

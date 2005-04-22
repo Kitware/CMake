@@ -167,6 +167,14 @@ public:
   const char* GetSuffixVariable() const;
   ///! Return the name of the variable to look up the target suffix
   const char* GetPrefixVariable() const;
+
+  // Get the full name of the target according to the settings in the
+  // given makefile.
+  std::string GetFullName(cmMakefile* mf) const;
+
+  // Get the baes name (no suffix) of the target according to the
+  // settings in the given makefile.
+  std::string GetBaseName(cmMakefile* mf) const;
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -221,6 +229,10 @@ private:
   void GatherDependencies( const cmMakefile& mf, const std::string& lib,
                            DependencyMap& dep_map ); 
 
+  const char* GetSuffixVariableInternal(TargetType type) const;
+  const char* GetPrefixVariableInternal(TargetType type) const;
+  std::string GetFullNameInternal(cmMakefile* mf, TargetType type) const;
+  std::string GetBaseNameInternal(cmMakefile* mf, TargetType type) const;
   
 private:
   std::string m_Name;

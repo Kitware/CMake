@@ -17,6 +17,7 @@
 #include "cmTarget.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include <map>
 #include <set>
@@ -831,10 +832,14 @@ const char* cmTarget::GetCreateRuleVariable()
   return "";
 }
 
-
 const char* cmTarget::GetSuffixVariable() const
 {
-  switch(this->GetType())
+  return this->GetSuffixVariableInternal(this->GetType());
+}
+
+const char* cmTarget::GetSuffixVariableInternal(TargetType type) const
+{
+  switch(type)
     {
     case cmTarget::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_SUFFIX";
@@ -855,7 +860,12 @@ const char* cmTarget::GetSuffixVariable() const
 
 const char* cmTarget::GetPrefixVariable() const
 {
-  switch(this->GetType())
+  return this->GetPrefixVariableInternal(this->GetType());
+}
+
+const char* cmTarget::GetPrefixVariableInternal(TargetType type) const
+{
+  switch(type)
     {
     case cmTarget::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_PREFIX";
@@ -871,4 +881,96 @@ const char* cmTarget::GetPrefixVariable() const
       break;
     }
   return "";
+}
+
+std::string cmTarget::GetFullName(cmMakefile* mf) const
+{
+  return this->GetFullNameInternal(mf, this->GetType());
+}
+
+std::string cmTarget::GetFullNameInternal(cmMakefile* mf,
+                                          TargetType type) const
+{
+  const char* targetPrefix = this->GetProperty("PREFIX");
+  const char* targetSuffix = this->GetProperty("SUFFIX");
+  if(!targetSuffix && this->GetType() == cmTarget::EXECUTABLE)
+    {
+    targetSuffix = cmSystemTools::GetExecutableExtension();
+    }
+  const char* prefixVar = this->GetPrefixVariableInternal(type);
+  const char* suffixVar = this->GetSuffixVariableInternal(type);
+  const char* ll =
+    this->GetLinkerLanguage(
+      mf->GetLocalGenerator()->GetGlobalGenerator());
+  // first try language specific suffix
+  if(ll)
+    {
+    if(!targetSuffix)
+      {
+      std::string langSuff = suffixVar + std::string("_") + ll;
+      targetSuffix = mf->GetDefinition(langSuff.c_str());
+      }
+    if(!targetPrefix)
+      {
+      std::string langPrefix = prefixVar + std::string("_") + ll;
+      targetPrefix = mf->GetDefinition(langPrefix.c_str());
+      }
+    }
+
+  // if there is no prefix on the target use the cmake definition
+  if(!targetPrefix && prefixVar)
+    {
+    targetPrefix = mf->GetSafeDefinition(prefixVar);
+    }
+  // if there is no suffix on the target use the cmake definition
+  if(!targetSuffix && suffixVar)
+    {
+    targetSuffix = mf->GetSafeDefinition(suffixVar);
+    }
+  std::string name = targetPrefix?targetPrefix:"";
+  name += this->GetName();
+  name += targetSuffix?targetSuffix:"";
+  return name;
+}
+
+std::string cmTarget::GetBaseName(cmMakefile* mf) const
+{
+  return this->GetBaseNameInternal(mf, this->GetType());
+}
+
+std::string
+cmTarget::GetBaseNameInternal(cmMakefile* mf, TargetType type) const
+{
+  std::string pathPrefix = "";
+#ifdef __APPLE__
+  if(this->GetPropertyAsBool("MACOSX_BUNDLE"))
+    {
+    pathPrefix = this->GetName();
+    pathPrefix += ".app/Contents/MacOS/";
+    }
+#endif
+  const char* targetPrefix = this->GetProperty("PREFIX");
+  const char* prefixVar = this->GetPrefixVariableInternal(type);
+  // if there is no prefix on the target use the cmake definition
+  if(!targetPrefix && prefixVar)
+    {
+    // first check for a language specific suffix var
+    const char* ll =
+      this->GetLinkerLanguage(
+        mf->GetLocalGenerator()->GetGlobalGenerator());
+    if(ll)
+      {
+      std::string langPrefix = prefixVar + std::string("_") + ll;
+      targetPrefix = mf->GetDefinition(langPrefix.c_str());
+      }
+    // if there not a language specific suffix then use the general one
+    if(!targetPrefix)
+      {
+      targetPrefix = mf->GetSafeDefinition(prefixVar);
+      }
+    }
+  std::string name = pathPrefix;
+  name += targetPrefix?targetPrefix:"";
+  name += this->GetName();
+  return name;
 }

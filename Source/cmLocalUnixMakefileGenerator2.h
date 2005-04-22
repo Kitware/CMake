@@ -221,7 +221,6 @@ protected:
 
   //==========================================================================
   bool SamePath(const char* path1, const char* path2);
-  std::string GetBaseTargetName(const cmTarget& t);
   void GetLibraryNames(const cmTarget& t,
                        std::string& name, std::string& soName,
                        std::string& realName, std::string& baseName);

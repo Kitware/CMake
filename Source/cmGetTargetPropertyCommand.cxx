@@ -64,8 +64,7 @@ bool cmGetTargetPropertyCommand::InitialPass(
         target_location += "/";
         }
 
-      cmLocalGenerator* lg = m_Makefile->GetLocalGenerator();
-      target_location += lg->GetFullTargetName(targetName, target);
+      target_location += target.GetFullName(m_Makefile);
       m_Makefile->AddDefinition(var, target_location.c_str());
       return true;
       }

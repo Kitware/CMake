@@ -1478,7 +1478,7 @@ cmLocalUnixMakefileGenerator2
                         const char* targetOutPath)
 {
   // Add a rule to build the target by name.
-  std::string localName = this->GetFullTargetName(target.GetName(), target);
+  std::string localName = target.GetFullName(m_Makefile);
   localName = this->ConvertToRelativeOutputPath(localName.c_str());
   this->WriteConvenienceRule(ruleFileStream, targetOutPath,
                              localName.c_str());
@@ -2776,42 +2776,6 @@ cmLocalUnixMakefileGenerator2::SamePath(const char* path1, const char* path2)
 }
 
 //----------------------------------------------------------------------------
-std::string
-cmLocalUnixMakefileGenerator2::GetBaseTargetName(const cmTarget& t)
-{
-  std::string pathPrefix = "";
-#ifdef __APPLE__
-  if ( t.GetPropertyAsBool("MACOSX_BUNDLE") )
-    {
-    pathPrefix = t.GetName();
-    pathPrefix += ".app/Contents/MacOS/";
-    }
-#endif
-
-  const char* targetPrefix = t.GetProperty("PREFIX");
-  const char* prefixVar = t.GetPrefixVariable();
-  // if there is no prefix on the target use the cmake definition
-  if(!targetPrefix && prefixVar)
-    {
-    // first check for a language specific suffix var
-    const char* ll = t.GetLinkerLanguage(this->GetGlobalGenerator());
-    if(ll)
-      {
-      std::string langPrefix = prefixVar + std::string("_") + ll;
-      targetPrefix = m_Makefile->GetDefinition(langPrefix.c_str());
-      }
-    // if there not a language specific suffix then use the general one
-    if(!targetPrefix)
-      {
-      targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
-      }
-    }
-  std::string name = pathPrefix + (targetPrefix?targetPrefix:"");
-  name += t.GetName();
-  return name;
-}
-
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator2::GetLibraryNames(const cmTarget& t,
                                                     std::string& name,
                                                     std::string& soName,
@@ -2838,7 +2802,7 @@ void cmLocalUnixMakefileGenerator2::GetLibraryNames(const cmTarget& t,
     }
 
   // The library name.
-  name = this->GetFullTargetName(t.GetName(), t);
+  name = t.GetFullName(m_Makefile);
 
   // The library's soname.
   soName = name;
@@ -2862,7 +2826,7 @@ void cmLocalUnixMakefileGenerator2::GetLibraryNames(const cmTarget& t,
     }
 
   // The library name without extension.
-  baseName = this->GetBaseTargetName(t);
+  baseName = t.GetBaseName(m_Makefile);
 }
 
 //----------------------------------------------------------------------------

@@ -212,7 +212,7 @@ void cmLocalGenerator::GenerateInstallRules()
       case cmTarget::STATIC_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
         fname = libOutPath;
-        fname += this->GetFullTargetName(l->first.c_str(), l->second);
+        fname += l->second.GetFullName(m_Makefile);
         files = fname.c_str();
         this->AddInstallRule(fout, dest, type, files);
         break;
@@ -220,7 +220,7 @@ void cmLocalGenerator::GenerateInstallRules()
         {
         // Special code to handle DLL
         fname = libOutPath;
-        fname += this->GetFullTargetName(l->first.c_str(), l->second);
+        fname += l->second.GetFullName(m_Makefile);
         std::string ext = cmSystemTools::GetFilenameExtension(fname);
         ext = cmSystemTools::LowerCase(ext);
         if ( ext == ".dll" )
@@ -263,7 +263,7 @@ void cmLocalGenerator::GenerateInstallRules()
         break;
       case cmTarget::EXECUTABLE:
         fname = exeOutPath;
-        fname += this->GetFullTargetName(l->first.c_str(), l->second);
+        fname += l->second.GetFullName(m_Makefile);
         files = fname.c_str();
         this->AddInstallRule(fout, dest, type, files);
         break;
@@ -380,49 +380,6 @@ void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest,
     << " FILES \"" << sfiles.c_str() << "\")\n";
 }
 
-std::string cmLocalGenerator::GetFullTargetName(const char* n,
-  const cmTarget& t)
-{
-  const char* targetPrefix = t.GetProperty("PREFIX");
-  const char* targetSuffix = t.GetProperty("SUFFIX");
-  if(!targetSuffix && t.GetType() == cmTarget::EXECUTABLE)
-    {
-    targetSuffix = cmSystemTools::GetExecutableExtension();
-    }
-  const char* prefixVar = t.GetPrefixVariable();
-  const char* suffixVar = t.GetSuffixVariable();
-  const char* ll = t.GetLinkerLanguage(this->GetGlobalGenerator());
-  // first try language specific suffix
-  if(ll)
-    {
-    if(!targetSuffix)
-      {
-      std::string langSuff = suffixVar + std::string("_") + ll;
-      targetSuffix = m_Makefile->GetDefinition(langSuff.c_str());
-      }
-    if(!targetPrefix)
-      {
-      std::string langPrefix = prefixVar + std::string("_") + ll;
-      targetPrefix = m_Makefile->GetDefinition(langPrefix.c_str());
-      }
-    }
-  
-  // if there is no prefix on the target use the cmake definition
-  if(!targetPrefix && prefixVar)
-    { 
-    targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
-    }
-  // if there is no suffix on the target use the cmake definition
-  if(!targetSuffix && suffixVar)
-    {
-    targetSuffix = m_Makefile->GetSafeDefinition(suffixVar);
-    }
-  std::string name = targetPrefix?targetPrefix:"";
-  name += n;
-  name += targetSuffix?targetSuffix:"";
-  return name;
-}
-
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname, 
                                                       const char* lang, 
                                                       cmSourceFile& source,
@@ -519,7 +476,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   std::string createRule = "CMAKE_";
   createRule += llang;
   createRule += target.GetCreateRuleVariable();
-  std::string targetName = this->GetFullTargetName(target.GetName(), target);
+  std::string targetName = target.GetFullName(m_Makefile);
   // Executable :
   // Shared Library:
   // Static Library:
