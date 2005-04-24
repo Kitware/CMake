@@ -36,7 +36,11 @@ bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args)
   // also expand any CMake variables
 
   std::vector<cmStdString> arguments;
-  arguments.assign(args.begin() + 2, args.end());
+  std::vector<std::string>::const_iterator it;
+  for ( it = args.begin() + 2; it != args.end(); ++ it )
+    {
+    arguments.push_back(*it);
+    }
 
   cmTest* test = m_Makefile->CreateTest(args[0].c_str());
   test->SetCommand(args[1].c_str());
