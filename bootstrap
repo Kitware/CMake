@@ -53,6 +53,7 @@ CMAKE_CXX_SOURCES="\
   cmBootstrapCommands \
   cmCommands \
   cmTarget \
+  cmTest \
   cmCustomCommand \
   cmCacheManager \
   cmListFileCache \

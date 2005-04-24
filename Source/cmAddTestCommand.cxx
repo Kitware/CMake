@@ -16,6 +16,9 @@
 =========================================================================*/
 #include "cmAddTestCommand.h"
 
+#include "cmTest.h"
+
+
 // cmExecutableCommand
 bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -32,67 +35,12 @@ bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args)
   // store the arguments for the final pass
   // also expand any CMake variables
 
-  m_Args = args;
+  std::vector<cmStdString> arguments;
+  arguments.assign(args.begin() + 2, args.end());
+
+  cmTest* test = m_Makefile->CreateTest(args[0].c_str());
+  test->SetCommand(args[1].c_str());
+  test->SetArguments(arguments);
+
   return true;
 }
-
-// we append to the file in the final pass because Enable Testing command
-// creates the file in the final pass.
-void cmAddTestCommand::FinalPass()
-{
-  // Create a full path filename for output Testfile
-  std::string fname;
-  fname = m_Makefile->GetStartOutputDirectory();
-  fname += "/";
-  if ( m_Makefile->IsSet("CTEST_NEW_FORMAT") )
-    {
-    fname += "CTestTestfile.cmake";
-    }
-  else
-    {
-    fname += "DartTestfile.txt";
-    }
-  
-
-  // If the file doesn't exist, then ENABLE_TESTING hasn't been run
-  if (cmSystemTools::FileExists(fname.c_str()))
-    {
-    // Open the output Testfile
-    std::ofstream fout(fname.c_str(), std::ios::app);
-    if (!fout)
-      {
-        cmSystemTools::Error("Error Writing ", fname.c_str());
-        return;
-      }
-
-    std::vector<std::string>::iterator it;
-
-    // for each arg in the test
-    fout << "ADD_TEST(";
-    it = m_Args.begin();
-    fout << (*it).c_str();
-    ++it;
-    for (; it != m_Args.end(); ++it)
-      {
-      // Just double-quote all arguments so they are re-parsed
-      // correctly by the test system.
-      fout << " \"";
-      for(std::string::iterator c = it->begin(); c != it->end(); ++c)
-        {
-        // Escape quotes within arguments.  We should escape
-        // backslashes too but we cannot because it makes the result
-        // inconsistent with previous behavior of this command.
-        if((*c == '"'))
-          {
-          fout << '\\';
-          }
-        fout << *c;
-        }
-      fout << "\"";
-      }
-    fout << ")" << std::endl;
-    fout.close();
-    }
-  return;
-}
-

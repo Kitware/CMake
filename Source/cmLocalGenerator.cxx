@@ -21,6 +21,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
 #include "cmOrderLinkDirectories.h"
+#include "cmTest.h"
 #include <ctype.h> // for isalpha
 
 cmLocalGenerator::cmLocalGenerator()
@@ -83,13 +84,93 @@ void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
     gg->GetCMakeInstance()->GetHomeDirectory());
   m_Makefile->SetHomeOutputDirectory(
     gg->GetCMakeInstance()->GetHomeOutputDirectory());
-
 }
-
 
 void cmLocalGenerator::ConfigureFinalPass()
 {
   m_Makefile->ConfigureFinalPass();
+}
+
+void cmLocalGenerator::GenerateTestFiles()
+{
+  if ( !m_Makefile->IsOn("CMAKE_TESTING_ENABLED") )
+    {
+    return;
+    }
+  std::string file = m_Makefile->GetStartOutputDirectory();
+  file += "/";
+  if ( m_Makefile->IsSet("CTEST_NEW_FORMAT") )
+    {
+    file += "CTestTestfile.cmake";
+    }
+  else
+    {
+    file += "DartTestfile.txt";
+    }
+  cmGeneratedFileStream fout(file.c_str());
+  fout.SetCopyIfDifferent(true);
+
+  fout << "# CMake generated Testfile for " << std::endl
+    << "# Source directory: " << m_Makefile->GetStartDirectory() << std::endl
+    << "# Build directory: " << m_Makefile->GetStartOutputDirectory() << std::endl
+    << "# " << std::endl
+    << "# This file replicates the SUBDIRS() and ADD_TEST() commands from the source" << std::endl
+    << "# tree CMakeLists.txt file, skipping any SUBDIRS() or ADD_TEST() commands" << std::endl
+    << "# that are excluded by CMake control structures, i.e. IF() commands." << std::endl
+    << "#" << std::endl
+    << "# The next line is critical for Dart to work" << std::endl
+    << "# Duh :-)" << std::endl << std::endl;
+
+
+  const std::vector<cmTest*> *tests = m_Makefile->GetTests();
+  std::vector<cmTest*>::const_iterator it;
+  for ( it = tests->begin(); it != tests->end(); ++ it )
+    {
+    cmTest* test = *it;
+    fout << "ADD_TEST(";
+    fout << test->GetName() << " \"" << test->GetCommand() << "\"";
+
+    std::vector<cmStdString>::iterator it;
+    for (it = test->GetArguments().begin();
+      it != test->GetArguments().end(); ++it)
+      {
+      // Just double-quote all arguments so they are re-parsed
+      // correctly by the test system.
+      fout << " \"";
+      for(std::string::iterator c = it->begin(); c != it->end(); ++c)
+        {
+        // Escape quotes within arguments.  We should escape
+        // backslashes too but we cannot because it makes the result
+        // inconsistent with previous behavior of this command.
+        if((*c == '"'))
+          {
+          fout << '\\';
+          }
+        fout << *c;
+        }
+      fout << "\"";
+      }
+    fout << ")" << std::endl;
+
+    }
+  if ( this->Children.size())
+    {
+    fout << "SUBDIRS(";
+    size_t i;
+    std::string outDir = m_Makefile->GetStartOutputDirectory();
+    outDir += "/";
+    for(i = 0; i < this->Children.size(); ++i)
+      {
+      std::string binP = this->Children[i]->GetMakefile()->GetStartOutputDirectory();
+      cmSystemTools::ReplaceString(binP, outDir.c_str(), "");
+      if ( i > 0 )
+        {
+        fout << " ";
+        }
+      fout << binP.c_str();
+      }
+    fout << ")" << std::endl << std::endl;;
+    }
 }
 
 void cmLocalGenerator::GenerateInstallRules()

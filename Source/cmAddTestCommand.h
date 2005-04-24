@@ -42,12 +42,6 @@ public:
   virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
-   * This is called at the end after all the information
-   * specified by the command is accumulated. 
-   */
-  virtual void FinalPass();
-
-  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() { return "ADD_TEST";}
@@ -79,7 +73,7 @@ public:
   cmTypeMacro(cmAddTestCommand, cmCommand);
 
 private:
-  std::vector<std::string> m_Args;
+  std::string m_Test;
 };
 
 

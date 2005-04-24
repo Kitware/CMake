@@ -71,6 +71,8 @@ SET(SRCS
   cmSystemTools.h
   cmTarget.cxx
   cmTarget.h
+  cmTest.cxx
+  cmTest.h
   cmVariableWatch.cxx
   cmVariableWatch.h
   cmVersion.cxx

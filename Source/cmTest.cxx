@@ -14,13 +14,38 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include "cmEnableTestingCommand.h"
-#include "cmLocalGenerator.h"
+#include "cmTest.h"
+#include "cmSystemTools.h"
 
-// we do this in the final pass so that we now the subdirs have all 
-// been defined
-bool cmEnableTestingCommand::InitialPass(std::vector<std::string> const&)
+
+cmTest::cmTest() 
 {
-  m_Makefile->AddDefinition("CMAKE_TESTING_ENABLED","1");
-  return true;
 }
+
+cmTest::~cmTest()
+{
+}
+
+void cmTest::SetName(const char* name)
+{
+  if ( !name )
+    {
+    name = "";
+    }
+  m_Name = name;
+}
+
+void cmTest::SetCommand(const char* command)
+{
+  if ( !command )
+    {
+    command = "";
+    }
+  m_Command = command;
+}
+
+void cmTest::SetArguments(const std::vector<cmStdString>& args)
+{
+  m_Args = args;
+}
+

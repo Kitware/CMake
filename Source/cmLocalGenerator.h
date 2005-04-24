@@ -59,6 +59,12 @@ public:
    */
   virtual void GenerateInstallRules();
 
+  /**
+   * Generate the test files for tests.
+   */
+  virtual void GenerateTestFiles();
+  
+
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {
     return this->m_Makefile; };
@@ -188,7 +194,7 @@ protected:
   void CreateCustomTargetsAndCommands(std::set<cmStdString> const&);
   virtual void AddInstallRule(std::ostream& fout, const char* dest, int type, 
     const char* files, bool optional = false, const char* properties = 0);
-  
+
   cmMakefile *m_Makefile;
   cmGlobalGenerator *m_GlobalGenerator;
   // members used for relative path function ConvertToMakefilePath

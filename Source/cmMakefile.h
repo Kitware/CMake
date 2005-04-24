@@ -31,6 +31,7 @@ class cmCommand;
 class cmLocalGenerator;
 class cmMakeDepend;
 class cmSourceFile;
+class cmTest;
 class cmVariableWatch;
 class cmake;
 
@@ -642,6 +643,15 @@ public:
    */
   void AddMacro(const char* name, const char* signature);
 
+  ///! Add a new cmTest to the list of tests for this makefile.
+  cmTest* CreateTest(const char* testName);
+
+  /** Get a cmTest pointer for a given test name, if the name is
+   *  not found, then a null pointer is returned.
+   */
+  cmTest* GetTest(const char* testName) const;
+  const std::vector<cmTest*> *GetTests() const;
+
   /**
    * Get a list of macros as a ; separated string
    */
@@ -685,6 +695,9 @@ protected:
   // libraries, classes, and executables
   cmTargets m_Targets;
   std::vector<cmSourceFile*> m_SourceFiles;
+
+  // Tests
+  std::vector<cmTest*> m_Tests;
 
   // The include and link-library paths.  These may have order
   // dependency, so they must be vectors (not set).

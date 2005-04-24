@@ -24,6 +24,7 @@
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
+#include "cmTest.h"
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #  include "cmVariableWatch.h"
 #endif
@@ -123,6 +124,11 @@ cmMakefile::~cmMakefile()
 {
   for(std::vector<cmSourceFile*>::iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
+    {
+    delete *i;
+    }
+  for(std::vector<cmTest*>::iterator i = m_Tests.begin();
+      i != m_Tests.end(); ++i)
     {
     delete *i;
     }
@@ -2465,3 +2471,43 @@ cmTarget* cmMakefile::FindTarget(const char* name)
     }
   return 0;
 }
+
+cmTest* cmMakefile::CreateTest(const char* testName)
+{
+  if ( !testName )
+    {
+    return 0;
+    }
+  cmTest* test = this->GetTest(testName);
+  if ( test )
+    {
+    return test;
+    }
+  test = new cmTest;
+  test->SetName(testName);
+  m_Tests.push_back(test);
+  return test;
+}
+
+cmTest* cmMakefile::GetTest(const char* testName) const
+{
+  if ( !testName )
+    {
+    return 0;
+    }
+  std::vector<cmTest*>::const_iterator it;
+  for ( it = m_Tests.begin(); it != m_Tests.end(); ++ it )
+    {
+    if ( strcmp((*it)->GetName(), testName) == 0 )
+      {
+      return *it;
+      }
+    }
+  return 0;
+}
+
+const std::vector<cmTest*> *cmMakefile::GetTests() const
+{
+  return &m_Tests;
+}
+
