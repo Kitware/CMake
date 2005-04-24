@@ -1230,7 +1230,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
-    if(arg.find("--dart-config",0) == 0 && i < args.size() - 1)
+    if(arg.find("--ctest-config",0) == 0 && i < args.size() - 1)
       {
       i++;
       this->m_CTestConfigFile= args[i];
