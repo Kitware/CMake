@@ -316,6 +316,10 @@ int cmCTestUpdateHandler::ProcessHandler()
   int retVal = 0;
   bool res = true;
 
+
+  //
+  // Get initial repository information if that is possible. With subversion, this will check the current revision.
+  //
   if ( !command.empty() )
     {
     if ( m_Verbose )
@@ -357,17 +361,9 @@ int cmCTestUpdateHandler::ProcessHandler()
     }
 
 
-  command = "";
-  switch( updateType )
-    {
-  case cmCTestUpdateHandler::e_CVS:
-    command = updateCommand + " -z3 update " + updateOptions +
-      " " + extra_update_opts;
-    break;
-  case cmCTestUpdateHandler::e_SVN:
-    command = updateCommand + " update " + updateOptions +
-      " " + extra_update_opts;
-    }
+  //
+  // Now update repository and remember what files were updated
+  // 
   cmGeneratedFileStream os; 
   if ( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Update.xml", os, true) )
     {
@@ -382,9 +378,31 @@ int cmCTestUpdateHandler::ProcessHandler()
     }
   if ( !m_CTest->GetShowOnly() )
     {
-    res = cmSystemTools::RunSingleCommand(command.c_str(), &goutput, 
-      &retVal, sourceDirectory,
-      m_Verbose, 0 /*m_TimeOut*/);
+    command = "";
+    switch( updateType )
+      {
+    case cmCTestUpdateHandler::e_CVS:
+      command = updateCommand + " -z3 update " + updateOptions +
+        " " + extra_update_opts;
+      res = cmSystemTools::RunSingleCommand(command.c_str(), &goutput, 
+        &retVal, sourceDirectory,
+        m_Verbose, 0 /*m_TimeOut*/);
+      break;
+    case cmCTestUpdateHandler::e_SVN:
+        {
+        std::string partialOutput;
+        command = updateCommand + " update " + updateOptions +
+          " " + extra_update_opts;
+        res = cmSystemTools::RunSingleCommand(command.c_str(), &partialOutput, 
+          &retVal, sourceDirectory,
+          m_Verbose, 0 /*m_TimeOut*/);
+        command = updateCommand + " status";
+        res = cmSystemTools::RunSingleCommand(command.c_str(), &partialOutput, 
+          &retVal, sourceDirectory,
+          m_Verbose, 0 /*m_TimeOut*/);
+        goutput += partialOutput;
+        }
+      }
     if ( ofs )
       {
       ofs << "--- Update repository ---" << std::endl;
@@ -467,46 +485,51 @@ int cmCTestUpdateHandler::ProcessHandler()
       std::string upChar = file_update_line.match(1);
       std::string upFile = file_update_line.match(2);
       char mod = upChar[0];
+      bool modifiedOrConflict = false;
       if ( mod != 'M' && mod != 'C' && mod != 'G' )
         {
         count ++;
+        modifiedOrConflict = true;
         }
       const char* file = upFile.c_str();
       //std::cout << "Line" << cc << ": " << mod << " - " << file << std::endl;
 
-      std::string logcommand;
-      switch ( updateType )
-        {
-      case cmCTestUpdateHandler::e_CVS:
-        logcommand = updateCommand + " -z3 log -N \"" + file + "\"";
-        break;
-      case cmCTestUpdateHandler::e_SVN:
-        if ( svn_latest_revision > 0 && svn_latest_revision > svn_current_revision )
-          {
-          cmOStringStream logCommandStream;
-          logCommandStream << updateCommand << " log -r " << svn_current_revision << ":" << svn_latest_revision
-            << " --xml \"" << file << "\"";
-          logcommand = logCommandStream.str();
-          }
-        else
-          {
-          logcommand = updateCommand + " status  --verbose \"" + file + "\"";
-          svn_use_status = 1;
-          }
-        break;
-        }
-      //std::cout << "Do log: " << logcommand << std::endl;
       std::string output;
-      if ( m_Verbose )
+      if ( modifiedOrConflict )
         {
-        std::cout << "* Get file update information: " << logcommand.c_str() << std::endl;
-        }
-      res = cmSystemTools::RunSingleCommand(logcommand.c_str(), &output, 
-        &retVal, sourceDirectory,
-        m_Verbose, 0 /*m_TimeOut*/);
-      if ( ofs )
-        {
-        ofs << output << std::endl;
+        std::string logcommand;
+        switch ( updateType )
+          {
+        case cmCTestUpdateHandler::e_CVS:
+          logcommand = updateCommand + " -z3 log -N \"" + file + "\"";
+          break;
+        case cmCTestUpdateHandler::e_SVN:
+          if ( svn_latest_revision > 0 && svn_latest_revision > svn_current_revision )
+            {
+            cmOStringStream logCommandStream;
+            logCommandStream << updateCommand << " log -r " << svn_current_revision << ":" << svn_latest_revision
+              << " --xml \"" << file << "\"";
+            logcommand = logCommandStream.str();
+            }
+          else
+            {
+            logcommand = updateCommand + " status  --verbose \"" + file + "\"";
+            svn_use_status = 1;
+            }
+          break;
+          }
+        //std::cout << "Do log: " << logcommand << std::endl;
+        if ( m_Verbose )
+          {
+          std::cout << "* Get file update information: " << logcommand.c_str() << std::endl;
+          }
+        res = cmSystemTools::RunSingleCommand(logcommand.c_str(), &output, 
+          &retVal, sourceDirectory,
+          m_Verbose, 0 /*m_TimeOut*/);
+        if ( ofs )
+          {
+          ofs << output << std::endl;
+          }
         }
       if ( res && retVal == 0)
         {
@@ -647,10 +670,12 @@ int cmCTestUpdateHandler::ProcessHandler()
         if ( mod == 'M' )
           {
           comment1 = "Locally modified file\n";
+          sauthor1 = "Local User";
           }
         if ( mod == 'C' )
           {
           comment1 = "Conflict while updating\n";
+          sauthor1 = "Local User";
           }
         std::string path = cmSystemTools::GetFilenamePath(file);
         std::string fname = cmSystemTools::GetFilenameName(file);
