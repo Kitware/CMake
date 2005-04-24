@@ -204,7 +204,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   int count = 0;
   int updateType = e_CVS;
   std::string::size_type cc, kk;
-  //bool updateProducedError = false;
+  bool updateProducedError = false;
 
 
   // Get source dir
@@ -393,7 +393,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     }
   if ( !res || retVal )
     {
-    //updateProducedError = true;
+    updateProducedError = true;
     }
 
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -810,7 +810,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     os << "Update error: There are modified or conflicting files in the repository";
     std::cerr << "   There are modified or conflicting files in the repository" << std::endl;
     }
-  if ( !res || retVal )
+  if ( updateProducedError )
     {
     os << "Update error: ";
     os << m_CTest->MakeXMLSafe(goutput);
