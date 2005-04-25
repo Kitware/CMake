@@ -130,14 +130,14 @@ void cmLocalGenerator::GenerateTestFiles()
     fout << "ADD_TEST(";
     fout << test->GetName() << " \"" << test->GetCommand() << "\"";
 
-    std::vector<cmStdString>::iterator it;
-    for (it = test->GetArguments().begin();
-      it != test->GetArguments().end(); ++it)
+    std::vector<cmStdString>::iterator argit;
+    for (argit = test->GetArguments().begin();
+      argit != test->GetArguments().end(); ++argit)
       {
       // Just double-quote all arguments so they are re-parsed
       // correctly by the test system.
       fout << " \"";
-      for(std::string::iterator c = it->begin(); c != it->end(); ++c)
+      for(std::string::iterator c = argit->begin(); c != argit->end(); ++c)
         {
         // Escape quotes within arguments.  We should escape
         // backslashes too but we cannot because it makes the result
