@@ -47,6 +47,8 @@
 #pragma warning ( disable : 985 )
 #endif
 
+#include <stdarg.h> // Work-around for SGI MIPSpro 7.4.2m header bug
+
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
 #  include <fstream>
 #  include <iostream>
