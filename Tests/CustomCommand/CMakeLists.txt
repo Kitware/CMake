@@ -67,17 +67,36 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.dvi
 
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.h
   DEPENDS ${PROJECT_BINARY_DIR}/doc1.dvi
+  COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1.dvi to doc1temp.h."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1.dvi
                                    ${PROJECT_BINARY_DIR}/doc1temp.h
+  COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1temp.h to doc1.h."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1temp.h
                                    ${PROJECT_BINARY_DIR}/doc1.h
+  COMMAND ${CMAKE_COMMAND} -E echo " Removing doc1temp.h."
+  COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_BINARY_DIR}/doc1temp.h
   )
 
+# Add a custom target to drive generation of doc1.h.
 ADD_CUSTOM_TARGET(TDocument ALL
-  COMMAND ${CMAKE_COMMAND} -E echo "Copying doc1.h to doc2.h."
+  COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1.h to doc2.h."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1.h
                                    ${PROJECT_BINARY_DIR}/doc2.h
   DEPENDS ${PROJECT_BINARY_DIR}/doc1.h
+  )
+
+# Setup a pre- and post-build pair that will fail if not run in the
+# proper order.
+ADD_CUSTOM_COMMAND(
+  TARGET TDocument PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E echo " Writing doc1pre.txt."
+  COMMAND ${CMAKE_COMMAND} -E echo "Dummy" > ${PROJECT_BINARY_DIR}/doc1pre.txt
+  )
+ADD_CUSTOM_COMMAND(
+  TARGET TDocument POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1pre.txt to doc2post.txt."
+  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1pre.txt
+                                   ${PROJECT_BINARY_DIR}/doc2post.txt
   )
 
 ################################################################
