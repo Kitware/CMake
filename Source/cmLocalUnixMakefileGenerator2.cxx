@@ -789,8 +789,10 @@ cmLocalUnixMakefileGenerator2
   std::vector<std::string> commands;
   std::vector<std::string> depends;
 
-  // Utility targets store their rules in post-build commands.
+  // Utility targets store their rules in pre- and post-build commands.
+  this->AppendCustomDepends(depends, target.GetPreBuildCommands());
   this->AppendCustomDepends(depends, target.GetPostBuildCommands());
+  this->AppendCustomCommands(commands, target.GetPreBuildCommands());
   this->AppendCustomCommands(commands, target.GetPostBuildCommands());
 
   // Add dependencies on targets that must be built first.
