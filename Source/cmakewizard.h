@@ -22,7 +22,7 @@ class cmakewizard
 {
 public:
   cmakewizard();
-  ~cmakewizard() {}
+  virtual ~cmakewizard() {}
   /** 
    * Prompt the user to see if they want to see advanced entries.
    */
