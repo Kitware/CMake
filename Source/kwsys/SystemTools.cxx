@@ -1222,6 +1222,7 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
   if(!path.empty())
     {
     // if there is a tilda ~ then replace it with HOME
+    pathCString = path.c_str();
     if(*pathCString == '~')
       {
       const char* homeEnv = SystemTools::GetEnv("HOME");
@@ -1231,6 +1232,7 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
         }
       }
 
+    pathCString = path.c_str();
     if (*(pathCString+(path.size()-1)) == '/')
       {
       path = path.substr(0, path.size()-1);
