@@ -87,6 +87,9 @@ private:
                        const std::vector<std::string>& depends,
                        const char* output,
                        const char* flags);
+  void AddUtilityCommandHack(cmTarget& target, int count,
+                             std::vector<std::string>& depends,
+                             const cmCustomCommandLines& commandLines);
 
   std::string CreateTargetRules(const cmTarget &target, 
                                 const char *libName);
