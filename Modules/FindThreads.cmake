@@ -7,11 +7,12 @@
 # CMAKE_HP_PTHREADS_INIT             - are we using hp pthreads
 
 INCLUDE (CheckIncludeFile)
+INCLUDE (CheckIncludeFiles)
 INCLUDE (CheckLibraryExists)
 
 # Do we have sproc?
 IF(CMAKE_SYSTEM MATCHES IRIX)
-  CHECK_INCLUDE_FILE("sys/prctl.h"  CMAKE_HAVE_SPROC_H)
+  CHECK_INCLUDE_FILES("sys/types.h;sys/prctl.h"  CMAKE_HAVE_SPROC_H)
 ENDIF(CMAKE_SYSTEM MATCHES IRIX)
 
 IF(CMAKE_HAVE_SPROC_H)
