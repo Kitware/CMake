@@ -77,12 +77,6 @@ CONFIGURE_FILE(
   "${CMAKE_CURRENT_BINARY_DIR}/xmlrpc_amconfig.h"
   )
 
-# DISABLING UNTIL A TRY-COMPILE CAN DETERMINE IF IT IS SAFE
-# See internal_stdio_core.h.in for explanation.
-#CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/internal_stdio_core.h.in
-#               ${CMAKE_CURRENT_BINARY_DIR}/internal/stdio_core.h
-#               @ONLY IMMEDIATE)
-
 SET(xmlrpc_SRCS
   #XmlRpcCpp.cpp
   xmlrpc_array.c
