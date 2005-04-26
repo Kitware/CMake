@@ -393,7 +393,7 @@ int cmCTestUpdateHandler::ProcessHandler()
         std::string partialOutput;
         command = updateCommand + " update " + updateOptions +
           " " + extra_update_opts;
-        res = cmSystemTools::RunSingleCommand(command.c_str(), &partialOutput, 
+        bool res1 = cmSystemTools::RunSingleCommand(command.c_str(), &partialOutput, 
           &retVal, sourceDirectory,
           m_Verbose, 0 /*m_TimeOut*/);
         command = updateCommand + " status";
@@ -401,6 +401,7 @@ int cmCTestUpdateHandler::ProcessHandler()
           &retVal, sourceDirectory,
           m_Verbose, 0 /*m_TimeOut*/);
         goutput += partialOutput;
+        res = res && res1;
         }
       }
     if ( ofs )
