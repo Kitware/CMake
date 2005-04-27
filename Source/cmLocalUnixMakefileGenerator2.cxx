@@ -1079,7 +1079,7 @@ cmLocalUnixMakefileGenerator2
 
   // Write special "install" target to run cmake_install.cmake script.
   {
-  std::vector<std::string> no_depends;
+  std::vector<std::string> depends;
   std::vector<std::string> commands;
   std::string cmd;
   if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
@@ -1096,9 +1096,16 @@ cmLocalUnixMakefileGenerator2
     }
   cmd += " -P cmake_install.cmake";
   commands.push_back(cmd);
+  const char* noall =
+    m_Makefile->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
+  if(!noall || cmSystemTools::IsOff(noall))
+    {
+    // Drive the build before installing.
+    depends.push_back("all");
+    }
   this->WriteMakeRule(makefileStream,
                       "Special rule to run installation script.",
-                      "install", no_depends, commands);
+                      "install", depends, commands);
   }
 
   // Write special "rebuild_cache" target to re-run cmake.
