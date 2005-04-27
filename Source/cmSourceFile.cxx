@@ -31,27 +31,15 @@ void cmSourceFile::SetName(const char* name, const char* dir,
   this->SetProperty("HEADER_FILE_ONLY","1");
   m_SourceNameWithoutLastExtension = "";
 
-
+  // Save the original name given.
   m_SourceName = name;
 
-  std::string pathname = dir;
-
-  // the name might include the full path already, so
-  // check for this case
-  if (name &&  (name[0] == '/' || 
-                (name[0] != '\0' && name[1] == ':')))
-    {
-    pathname = "";
-    }
-  if(pathname != "")
-    {
-    pathname += "/";
-    }
-
+  // Convert the name to a full path in case the given name is a
+  // relative path.
+  std::string pathname = cmSystemTools::CollapseFullPath(name, dir);
 
   // First try and see whether the listed file can be found
   // as is without extensions added on.
-  pathname += name;
   std::string hname = pathname;
   if(cmSystemTools::FileExists(hname.c_str()))
     {
@@ -138,26 +126,19 @@ void cmSourceFile::SetName(const char* name, const char* dir,
                        errorMsg.c_str());
 }
 
-
 void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
                            bool hfo)
 {
   this->SetProperty("HEADER_FILE_ONLY",(hfo ? "1" : "0"));
   m_SourceNameWithoutLastExtension = "";
   m_SourceName = name;
-  std::string pathname = dir;
-  if(pathname != "")
-    {
-    pathname += "/";
-    }
-  
-  pathname += m_SourceName;
+  std::string fname = m_SourceName;
   if(ext && strlen(ext))
     {
-    pathname += ".";
-    pathname += ext;
+    fname += ".";
+    fname += ext;
     }
-  m_FullPath = pathname;
+  m_FullPath = cmSystemTools::CollapseFullPath(fname.c_str(), dir);
   m_SourceExtension = ext;
   return;
 }
