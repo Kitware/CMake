@@ -453,7 +453,21 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
        else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
                 && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
-        this->WriteProjectDepends(fout, si->c_str(), dir.c_str(),l->second);
+        // Make the INSTALL target depend on ALL_BUILD unless the
+        // project says to not do so.
+        const char* extra_depend = 0;
+        if(l->first == "INSTALL")
+          {
+          const char* noall =
+            root->GetMakefile()
+            ->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
+          if(!noall || cmSystemTools::IsOff(noall))
+            {
+            extra_depend = "ALL_BUILD";
+            }
+          }
+        this->WriteProjectDepends(fout, si->c_str(), dir.c_str(), l->second,
+                                  extra_depend);
         ++si;
         }
       }
@@ -519,11 +533,13 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 
 // the libraries it uses are also done here
-void cmGlobalVisualStudio7Generator::WriteProjectDepends(std::ostream& fout, 
-                                      const char* dspname,
-                                      const char* ,
-                                      const cmTarget& target
-  )
+void
+cmGlobalVisualStudio7Generator
+::WriteProjectDepends(std::ostream& fout,
+                      const char* dspname,
+                      const char*,
+                      const cmTarget& target,
+                      const char* extra_depend)
 {
   int depcount = 0;
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
@@ -557,6 +573,18 @@ void cmGlobalVisualStudio7Generator::WriteProjectDepends(std::ostream& fout,
           depcount++;
           }
         }
+      }
+    }
+
+  // Add the extra dependency if requested.
+  if(extra_depend)
+    {
+    std::string guid = this->GetGUID(extra_depend);
+    if(!guid.empty())
+      {
+      fout << "\t\t{" << this->GetGUID(dspname) << "}." << depcount << " = {"
+           << guid << "}\n";
+      depcount++;
       }
     }
 

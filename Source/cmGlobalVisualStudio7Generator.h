@@ -92,7 +92,7 @@ protected:
                             const cmTarget &t);
   virtual void WriteProjectDepends(std::ostream& fout, 
                            const char* name, const char* path,
-                           const cmTarget &t);
+                           const cmTarget &t, const char* extra_depend);
   virtual void WriteProjectConfigurations(std::ostream& fout, const char* name, bool in_all);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);

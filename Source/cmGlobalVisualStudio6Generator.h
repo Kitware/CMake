@@ -82,7 +82,7 @@ private:
   void WriteDSWHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout, 
                     const char* name, const char* path,
-                    const cmTarget &t);
+                    const cmTarget &t, const char* extra_depend);
   void WriteExternalProject(std::ostream& fout, 
                             const char* name, const char* path,
                             const std::vector<std::string>& dependencies);
