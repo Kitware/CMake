@@ -54,11 +54,8 @@ public:
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
    */
-  virtual int Build(const char *srcdir, const char *bindir,
-                    const char *projectName, const char *targetName,
-                    std::string *output, 
-                    const char *makeProgram,
-                    const char *config, bool clean);
+  virtual std::string GenerateBuildCommand(const char* makeProgram,
+    const char *projectName, const char *targetName, const char* config);
 
   /**
    * Generate the all required files for building this project/tree. This

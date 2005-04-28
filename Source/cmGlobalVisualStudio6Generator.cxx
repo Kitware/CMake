@@ -67,23 +67,16 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
     }
 }
 
-int cmGlobalVisualStudio6Generator::Build(
-  const char *, 
-  const char *bindir, 
-  const char *projectName,
-  const char *targetName,
-  std::string *output,
-  const char *makeCommandCSTR,
-  const char *config,
-  bool clean)
+std::string cmGlobalVisualStudio6Generator::GenerateBuildCommand(const char* makeProgram, const char *projectName, const char *targetName,
+                    const char* config)
 {
   // now build the test
   std::vector<std::string> mp;
   mp.push_back("[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup;VsCommonDir]/MSDev98/Bin");
   cmSystemTools::ExpandRegistryValues(mp[0]);
-  std::string originalCommand = makeCommandCSTR;
+  std::string originalCommand = makeProgram;
   std::string makeCommand = 
-    cmSystemTools::FindProgram(makeCommandCSTR, mp);
+    cmSystemTools::FindProgram(makeProgram, mp);
   if(makeCommand.size() == 0)
     {
     std::string e = "Generator cannot find Visual Studio 6 msdev program \"";
@@ -91,15 +84,10 @@ int cmGlobalVisualStudio6Generator::Build(
     e += "\" specified by CMAKE_MAKE_PROGRAM cache entry.  ";
     e += "Please fix the setting.";
     cmSystemTools::Error(e.c_str());
-    return 1;
+    return "";
     }
   makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
 
-  /**
-   * Run an executable command and put the stdout in output.
-   */
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir);
   // if there are spaces in the makeCommand, assume a full path
   // and convert it to a path with no spaces in it as the
   // RunSingleCommand does not like spaces
@@ -112,6 +100,12 @@ int cmGlobalVisualStudio6Generator::Build(
   makeCommand += " ";
   makeCommand += projectName;
   makeCommand += ".dsw /MAKE \"";
+  bool clean = false;
+  if ( targetName && strcmp(targetName, "clean") == 0 )
+    {
+    clean = true;
+    targetName = "ALL_BUILD";
+    }
   if (targetName && strlen(targetName))
     {
     makeCommand += targetName;
@@ -131,30 +125,13 @@ int cmGlobalVisualStudio6Generator::Build(
     }
   if(clean)
     {
-    makeCommand += "\" /REBUILD";
+    makeCommand += "\" /CLEAN";
     }
   else
     {
     makeCommand += "\" /BUILD";
     }
-  int retVal;
-  int timeout = cmGlobalGenerator::s_TryCompileTimeout;
-  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
-      &retVal, 0, false, timeout))
-    {
-    std::string e = "Error executing make program \"";
-    e += originalCommand;
-    e += "\" specified by CMAKE_MAKE_PROGRAM cache entry.  ";
-    e += "The command string used was \"";
-    e += makeCommand.c_str();
-    e += "\".";
-    cmSystemTools::Error(e.c_str());
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
-    return 1;
-    }
-  cmSystemTools::ChangeDirectory(cwd.c_str());
-  return retVal;
+  return makeCommand;
 }
 
 ///! Create a local generator appropriate to this Global Generator

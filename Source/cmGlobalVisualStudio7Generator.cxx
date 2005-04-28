@@ -43,27 +43,13 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }
 
-int cmGlobalVisualStudio7Generator::Build(
-  const char *, 
-  const char *bindir, 
-  const char *projectName,
-  const char *targetName,
-  std::string *output,
-  const char *makeCommandCSTR,
-  const char *config,
-  bool clean)
+std::string cmGlobalVisualStudio7Generator::GenerateBuildCommand(const char* makeProgram, const char *projectName, const char *targetName, const char* config)
 {
   // now build the test
   std::string makeCommand = 
-    cmSystemTools::ConvertToOutputPath(makeCommandCSTR);
+    cmSystemTools::ConvertToOutputPath(makeProgram);
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
-
-  /**
-   * Run an executable command and put the stdout in output.
-   */
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir);
 
   // if there are spaces in the makeCommand, assume a full path
   // and convert it to a path with no spaces in it as the
@@ -77,9 +63,15 @@ int cmGlobalVisualStudio7Generator::Build(
   makeCommand += " ";
   makeCommand += projectName;
   makeCommand += ".sln ";
+  bool clean = false;
+  if ( targetName && strcmp(targetName, "clean") == 0 )
+    {
+    clean = true;
+    targetName = "ALL_BUILD";
+    }
   if(clean)
     {
-    makeCommand += "/rebuild ";
+    makeCommand += "/clean";
     }
   else
     {
@@ -104,20 +96,7 @@ int cmGlobalVisualStudio7Generator::Build(
     {
     makeCommand += "ALL_BUILD";
     }
-  
-  int retVal;
-  int timeout = cmGlobalGenerator::s_TryCompileTimeout;
-  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, &retVal, 
-      0, false, timeout))
-    {
-    cmSystemTools::Error("Generator: execution of devenv failed.");
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
-    return 1;
-    }
-  *output += makeCommand;
-  cmSystemTools::ChangeDirectory(cwd.c_str());
-  return retVal;
+  return makeCommand;
 }
 
 ///! Create a local generator appropriate to this Global Generator
