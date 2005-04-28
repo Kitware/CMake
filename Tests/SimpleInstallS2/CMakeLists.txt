@@ -4,6 +4,10 @@ SET(CMAKE_VERBOSE_MAKEFILE 1)
 SET(EXECUTABLE_OUTPUT_PATH "${TestSimpleInstall_BINARY_DIR}/ExecPath")
 SET(LIBRARY_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}")
 
+# Skip the dependency that causes a build when installing.  This
+# avoids infinite loops when the post-build rule below installs.
+SET(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY 1)
+
 SET(CMAKE_DEBUG_POSTFIX "_test_debug_postfix")
 
 SET(EXTRA_INSTALL_FLAGS)
