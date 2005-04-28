@@ -98,6 +98,8 @@ public:
                     std::string *output, 
                     const char *makeProgram, const char *config,
                     bool clean);
+  virtual std::string GenerateBuildCommand(const char* makeProgram, const char *projectName, const char *targetName,
+                    const char* config);
 
   ///! Set the CMake instance
   void SetCMakeInstance(cmake *cm) {

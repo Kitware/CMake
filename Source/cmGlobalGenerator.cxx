@@ -649,33 +649,49 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
                      newTarget.c_str(),
                      output,makeCommand.c_str(),config,false);
 }
+
+std::string cmGlobalGenerator::GenerateBuildCommand(const char* makeProgram,
+  const char *projectName, const char *targetName, const char* config)
+{
+  // Project name and config are not used yet.
+  (void)projectName;
+  (void)config;
+
+  std::string makeCommand = makeProgram;
+  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
+  makeCommand += " ";
+  // Since we have full control over the invocation of nmake, let us
+  // make it quiet.
+  if ( strcmp(this->GetName(), "NMake Makefiles") == 0 )
+    {
+    makeCommand += "/NOLOGO ";
+    }
+  if ( targetName )
+    {
+    makeCommand += targetName;
+    }
+  else
+    {
+    makeCommand += "all";
+    }
+  return makeCommand;
+}
   
 int cmGlobalGenerator::Build(
   const char *, const char *bindir, 
-  const char *, const char *target,
+  const char *projectName, const char *target,
   std::string *output, 
   const char *makeCommandCSTR,
-  const char * /* config */,
+  const char *config,
   bool clean)
 {
   *output += "\nTesting TryCompileWithoutMakefile\n";
   
-  // now build the test
-  std::string makeCommand = makeCommandCSTR;
-  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
-
   /**
    * Run an executable command and put the stdout in output.
    */
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(bindir);
-
-  // Since we have full control over the invocation of nmake, let us
-  // make it quiet.
-  if ( strcmp(this->GetName(), "NMake Makefiles") == 0 )
-    {
-    makeCommand += " /NOLOGO ";
-    }
 
   int retVal;
   int timeout = cmGlobalGenerator::s_TryCompileTimeout;
@@ -685,7 +701,7 @@ int cmGlobalGenerator::Build(
   // should we do a clean first?
   if (clean)
     {
-    std::string cleanCommand = makeCommand + " clean";
+    std::string cleanCommand = this->GenerateBuildCommand(makeCommandCSTR, projectName, "clean", config);
     if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), output, 
                                          &retVal, 0, false, timeout))
       {
@@ -703,15 +719,7 @@ int cmGlobalGenerator::Build(
     }
   
   // now build
-  if (target && strlen(target))
-    {
-    makeCommand += " ";
-    makeCommand += target;
-    }
-  else
-    {
-    makeCommand += " all";
-    }
+  std::string makeCommand = this->GenerateBuildCommand(makeCommandCSTR, projectName, target, config);
 
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
                                        &retVal, 0, false, timeout))
