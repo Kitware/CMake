@@ -51,42 +51,39 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 }
 
 //----------------------------------------------------------------------------
-int cmGlobalXCodeGenerator::Build(
-  const char *, 
-  const char *bindir, 
-  const char *projectName,
-  const char *targetName,
-  std::string *output,
-  const char *makeCommandCSTR,
-  const char *,
-  bool clean)
+std::string cmGlobalXCodeGenerator::GenerateBuildCommand(const char* makeProgram,
+  const char *projectName, const char *targetName, const char* config)
 {
   // now build the test
-  if(makeCommandCSTR == 0 || !strlen(makeCommandCSTR))
+  if(makeProgram == 0 || !strlen(makeProgram))
     {
     cmSystemTools::Error(
       "Generator cannot find the appropriate make command.");
-    return 1;
+    return "";
     }
   std::string makeCommand = 
-    cmSystemTools::ConvertToOutputPath(makeCommandCSTR);
+    cmSystemTools::ConvertToOutputPath(makeProgram);
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
-
-  /**
-   * Run an executable command and put the stdout in output.
-   */
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir);
 
   makeCommand += " -project ";
   makeCommand += projectName;
   makeCommand += ".xcode";
+  bool clean = false;
+  if ( targetName && strcmp(targetName, "clean") == 0 )
+    {
+    clean = true;
+    targetName = "ALL_BUILD";
+    }
   if(clean)
     {
-    makeCommand += " clean ";
+    makeCommand += " clean";
     }
-  makeCommand += " build -target ";
+  else
+    {
+  makeCommand += " build";
+    }
+  makeCommand += " -target ";
   if (targetName && strlen(targetName))
     {
     makeCommand += targetName;
@@ -96,18 +93,7 @@ int cmGlobalXCodeGenerator::Build(
     makeCommand += "ALL_BUILD";
     }
   makeCommand += " -buildstyle Development ";
-  int retVal;
-  int timeout = cmGlobalGenerator::s_TryCompileTimeout;
-  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, &retVal, 
-                                       0, false, timeout))
-    {
-    cmSystemTools::Error("Generator: execution of xcodebuild failed.");
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
-    return 1;
-    }
-  cmSystemTools::ChangeDirectory(cwd.c_str());
-  return retVal;
+  return makeCommand;
 }
 
 //----------------------------------------------------------------------------
