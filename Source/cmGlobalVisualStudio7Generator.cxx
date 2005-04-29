@@ -197,9 +197,20 @@ void cmGlobalVisualStudio7Generator::Generate()
         AddUtilityCommand("INSTALL", false, no_output, no_depends,
                           cmake_command.c_str(),
                           "-DBUILD_TYPE=$(IntDir)", "-P", "cmake_install.cmake");
+
+      // Make the INSTALL target depend on ALL_BUILD unless the
+      // project says to not do so.
+      const char* noall =
+        gen[0]->GetMakefile()
+        ->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
+      if(!noall || cmSystemTools::IsOff(noall))
+        {
+        cmTarget* install = gen[0]->GetMakefile()->FindTarget("INSTALL");
+        install->AddUtility("ALL_BUILD");
+        }
       }
     }
-  
+
   // add the Run Tests command
   this->SetupTests();
   
@@ -432,21 +443,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
        else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
                 && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
-        // Make the INSTALL target depend on ALL_BUILD unless the
-        // project says to not do so.
-        const char* extra_depend = 0;
-        if(l->first == "INSTALL")
-          {
-          const char* noall =
-            root->GetMakefile()
-            ->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-          if(!noall || cmSystemTools::IsOff(noall))
-            {
-            extra_depend = "ALL_BUILD";
-            }
-          }
-        this->WriteProjectDepends(fout, si->c_str(), dir.c_str(), l->second,
-                                  extra_depend);
+        this->WriteProjectDepends(fout, si->c_str(), dir.c_str(), l->second);
         ++si;
         }
       }
@@ -517,8 +514,7 @@ cmGlobalVisualStudio7Generator
 ::WriteProjectDepends(std::ostream& fout,
                       const char* dspname,
                       const char*,
-                      const cmTarget& target,
-                      const char* extra_depend)
+                      const cmTarget& target)
 {
   int depcount = 0;
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
@@ -552,18 +548,6 @@ cmGlobalVisualStudio7Generator
           depcount++;
           }
         }
-      }
-    }
-
-  // Add the extra dependency if requested.
-  if(extra_depend)
-    {
-    std::string guid = this->GetGUID(extra_depend);
-    if(!guid.empty())
-      {
-      fout << "\t\t{" << this->GetGUID(dspname) << "}." << depcount << " = {"
-           << guid << "}\n";
-      depcount++;
       }
     }
 

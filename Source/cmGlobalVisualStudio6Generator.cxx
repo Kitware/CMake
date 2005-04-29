@@ -165,6 +165,17 @@ void cmGlobalVisualStudio6Generator::Generate()
         AddUtilityCommand("INSTALL", false, no_output, no_depends,
                           cmake_command.c_str(),
                           "-DBUILD_TYPE=$(IntDir)", "-P", "cmake_install.cmake");
+
+      // Make the INSTALL target depend on ALL_BUILD unless the
+      // project says to not do so.
+      const char* noall =
+        gen[0]->GetMakefile()
+        ->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
+      if(!noall || cmSystemTools::IsOff(noall))
+        {
+        cmTarget* install = gen[0]->GetMakefile()->FindTarget("INSTALL");
+        install->AddUtility("ALL_BUILD");
+        }
       }
     }
   
@@ -267,7 +278,6 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
         if ((l->second.GetType() != cmTarget::INSTALL_FILES)
             && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
           {
-          const char* extra_depend = 0;
           bool skip = false;
           // skip ALL_BUILD and RUN_TESTS if they have already been added
           if(l->first == "ALL_BUILD" )
@@ -291,16 +301,6 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
               {
               doneInstall = true;
               }
-
-            // Make the INSTALL target depend on ALL_BUILD unless the
-            // project says to not do so.
-            const char* noall =
-              root->GetMakefile()
-              ->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-            if(!noall || cmSystemTools::IsOff(noall))
-              {
-              extra_depend = "ALL_BUILD";
-              }
             }
           if(l->first == "RUN_TESTS")
             {
@@ -315,8 +315,7 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
             }
           if(!skip)
             {
-            this->WriteProject(fout, si->c_str(), dir.c_str(),l->second,
-                               extra_depend);
+            this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
             }
           ++si;
           }
@@ -366,8 +365,7 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile()
 void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout, 
                                                   const char* dspname,
                                                   const char* dir,
-                                                  const cmTarget& target,
-                                                  const char* extra_depend)
+                                                  const cmTarget& target)
 {
   fout << "#########################################################"
     "######################\n\n";
@@ -399,14 +397,6 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
           }
         }
       }
-    }
-
-  // Add an extra dependency if specified.
-  if(extra_depend)
-    {
-    fout << "Begin Project Dependency\n";
-    fout << "Project_Dep_Name " << extra_depend << "\n";
-    fout << "End Project Dependency\n";
     }
 
   std::set<cmStdString>::const_iterator i, end;

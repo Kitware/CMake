@@ -130,7 +130,6 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
         if ((l->second.GetType() != cmTarget::INSTALL_FILES)
             && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
           {
-          const char* extra_depend = 0;
           bool skip = false;
           if(l->first == "ALL_BUILD" )
             {
@@ -153,15 +152,6 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
               {
               doneInstall = true;
               }
-            // Make the INSTALL target depend on ALL_BUILD unless the
-            // project says to not do so.
-            const char* noall =
-              root->GetMakefile()
-              ->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-            if(!noall || cmSystemTools::IsOff(noall))
-              {
-              extra_depend = "ALL_BUILD";
-              }
             }
           if(l->first == "RUN_TESTS")
             {
@@ -176,8 +166,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
             }
           if(!skip)
             {
-            this->WriteProject(fout, si->c_str(), dir.c_str(),l->second,
-                               extra_depend);
+            this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
             }
           ++si;
           }
@@ -240,8 +229,7 @@ void
 cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
                                               const char* dspname,
                                               const char* dir,
-                                              const cmTarget& t,
-                                              const char* extra_depend)
+                                              const cmTarget& t)
 {
   std::string d = cmSystemTools::ConvertToOutputPath(dir);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
@@ -249,7 +237,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
        << d << "\\" << dspname << ".vcproj\", \"{"
        << this->GetGUID(dspname) << "}\"\n";
   fout << "\tProjectSection(ProjectDependencies) = postProject\n";
-  this->WriteProjectDepends(fout, dspname, dir, t, extra_depend);
+  this->WriteProjectDepends(fout, dspname, dir, t);
   fout << "\tEndProjectSection\n";
   
   fout <<"EndProject\n";
@@ -265,8 +253,7 @@ cmGlobalVisualStudio71Generator
 ::WriteProjectDepends(std::ostream& fout,
                       const char* dspname,
                       const char*,
-                      const cmTarget& target,
-                      const char* extra_depend)
+                      const cmTarget& target)
 {
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
   if (target.GetType() != cmTarget::STATIC_LIBRARY)
@@ -289,13 +276,6 @@ cmGlobalVisualStudio71Generator
           }
         }
       }
-    }
-
-  // Add the extra dependency if requested.
-  if(extra_depend)
-    {
-    fout << "\t\t{" << this->GetGUID(extra_depend) << "} = {"
-         << this->GetGUID(extra_depend) << "}\n";
     }
 
   std::set<cmStdString>::const_iterator i, end;
