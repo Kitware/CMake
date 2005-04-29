@@ -651,7 +651,8 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
 }
 
 std::string cmGlobalGenerator::GenerateBuildCommand(const char* makeProgram,
-  const char *projectName, const char *targetName, const char* config)
+  const char *projectName, const char *targetName, const char* config,
+  bool ignoreErrors)
 {
   // Project name and config are not used yet.
   (void)projectName;
@@ -659,20 +660,20 @@ std::string cmGlobalGenerator::GenerateBuildCommand(const char* makeProgram,
 
   std::string makeCommand = makeProgram;
   makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
-  makeCommand += " ";
   // Since we have full control over the invocation of nmake, let us
   // make it quiet.
   if ( strcmp(this->GetName(), "NMake Makefiles") == 0 )
     {
-    makeCommand += "/NOLOGO ";
+    makeCommand += " /NOLOGO ";
+    }
+  if ( ignoreErrors )
+    {
+    makeCommand += " -i";
     }
   if ( targetName )
     {
+    makeCommand += " ";
     makeCommand += targetName;
-    }
-  else
-    {
-    makeCommand += "all";
     }
   return makeCommand;
 }
@@ -701,7 +702,7 @@ int cmGlobalGenerator::Build(
   // should we do a clean first?
   if (clean)
     {
-    std::string cleanCommand = this->GenerateBuildCommand(makeCommandCSTR, projectName, "clean", config);
+    std::string cleanCommand = this->GenerateBuildCommand(makeCommandCSTR, projectName, "clean", config, false);
     if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), output, 
                                          &retVal, 0, false, timeout))
       {
@@ -719,7 +720,7 @@ int cmGlobalGenerator::Build(
     }
   
   // now build
-  std::string makeCommand = this->GenerateBuildCommand(makeCommandCSTR, projectName, target, config);
+  std::string makeCommand = this->GenerateBuildCommand(makeCommandCSTR, projectName, target, config, false);
 
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
                                        &retVal, 0, false, timeout))

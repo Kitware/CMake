@@ -67,9 +67,12 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
     }
 }
 
-std::string cmGlobalVisualStudio6Generator::GenerateBuildCommand(const char* makeProgram, const char *projectName, const char *targetName,
-                    const char* config)
+std::string cmGlobalVisualStudio6Generator::GenerateBuildCommand(const char* makeProgram,
+  const char *projectName, const char *targetName, const char* config, bool ignoreErrors)
 {
+  // Ingoring errors is not implemented in visual studio 6
+  (void) ignoreErrors;
+
   // now build the test
   std::vector<std::string> mp;
   mp.push_back("[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup;VsCommonDir]/MSDev98/Bin");

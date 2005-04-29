@@ -54,7 +54,8 @@ public:
    * loaded commands, not as part of the usual build process.
    */
   virtual std::string GenerateBuildCommand(const char* makeProgram,
-    const char *projectName, const char *targetName, const char* config);
+    const char *projectName, const char *targetName, const char* config,
+    bool ignoreErrors);
 
   /**
    * Generate the all required files for building this project/tree. This

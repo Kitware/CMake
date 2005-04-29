@@ -43,8 +43,12 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }
 
-std::string cmGlobalVisualStudio7Generator::GenerateBuildCommand(const char* makeProgram, const char *projectName, const char *targetName, const char* config)
+std::string cmGlobalVisualStudio7Generator::GenerateBuildCommand(const char* makeProgram,
+  const char *projectName, const char *targetName, const char* config, bool ignoreErrors)
 {
+  // Ingoring errors is not implemented in visual studio 6
+  (void) ignoreErrors;
+
   // now build the test
   std::string makeCommand = 
     cmSystemTools::ConvertToOutputPath(makeProgram);
