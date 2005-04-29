@@ -16,6 +16,9 @@
 =========================================================================*/
 #include "cmBuildCommand.h"
 
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
+
 // cmBuildCommand
 bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -27,12 +30,10 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
   const char* define = args[0].c_str();
   const char* cacheValue
     = m_Makefile->GetDefinition(define);
-  if(cacheValue)
-    {
-    return true;
-    }
   std::string makecommand;
   std::string makeprogram = args[1];
+  std::string makecmd = m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->GenerateBuildCommand(
+    makeprogram.c_str(), m_Makefile->GetProjectName(), 0, "Release", true);
   if(makeprogram.find("msdev") != std::string::npos ||
      makeprogram.find("MSDEV") != std::string::npos )
     {
@@ -61,6 +62,11 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
     {
     makecommand = makeprogram;
     makecommand += " -i";
+    }
+  std::cerr << "-- Compare: " << makecommand.c_str() << " and " << makecmd.c_str() << ": " << (makecmd == makecommand) << std::endl;
+  if(cacheValue)
+    {
+    return true;
     }
   m_Makefile->AddCacheDefinition(define,
                                  makecommand.c_str(),
