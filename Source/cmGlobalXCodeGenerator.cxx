@@ -184,7 +184,15 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   std::string cmake_command = mf->GetRequiredDefinition("CMAKE_COMMAND");
   mf->AddUtilityCommand("install", false, no_output, no_depends,
                         cmake_command.c_str(),
-                        "-P", "cmake_install.cmake");
+                        "-P", "cmake_install.cmake"); 
+  const char* noall =
+    mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
+  if(!noall || cmSystemTools::IsOff(noall))
+    {
+    cmTarget* install = mf->FindTarget("install");
+    install->AddUtility("ALL_BUILD");
+    }
+  
   // Add RUN_TESTS target if testing has been enabled
   std::string fname;
   fname = mf->GetStartOutputDirectory();
