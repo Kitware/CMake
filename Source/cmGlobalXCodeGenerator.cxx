@@ -57,6 +57,7 @@ std::string cmGlobalXCodeGenerator::GenerateBuildCommand(const char* makeProgram
 {
   // Config is not used yet
   (void) config;
+  (void) ignoreErrors;
 
   // now build the test
   if(makeProgram == 0 || !strlen(makeProgram))
