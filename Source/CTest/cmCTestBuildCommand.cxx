@@ -18,6 +18,8 @@
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmake.h"
+#include "cmGlobalGenerator.h"
 
 bool cmCTestBuildCommand::InitialPass(
   std::vector<std::string> const& args)
@@ -38,6 +40,43 @@ bool cmCTestBuildCommand::InitialPass(
     this->SetError("internal CTest error. Cannot instantiate build handler");
     return false;
     }
+ 
+  const char* ctestBuildCommand = m_Makefile->GetDefinition("CTEST_BUILD_COMMAND");
+  if ( ctestBuildCommand && *ctestBuildCommand )
+    {
+    m_CTest->SetDartConfiguration("MakeCommand", ctestBuildCommand);
+    }
+  else
+    {
+    const char* cmakeGeneratorName = m_Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
+    const char* cmakeProjectName = m_Makefile->GetDefinition("CTEST_PROJECT_NAME");
+    const char* cmakeBuildConfiguration = m_Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
+    if ( cmakeGeneratorName && *cmakeGeneratorName &&
+      cmakeProjectName && *cmakeProjectName )
+      {
+      if ( !cmakeBuildConfiguration )
+        {
+        cmakeBuildConfiguration = "Release";
+        }
+      cmGlobalGenerator* gen = 
+        m_Makefile->GetCMakeInstance()->CreateGlobalGenerator(cmakeGeneratorName);
+      gen->FindMakeProgram(m_Makefile);
+      const char* cmakeMakeProgram = m_Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
+      std::cout << "CMake Make program is: " << cmakeMakeProgram << std::endl;
+      std::string buildCommand = gen->GenerateBuildCommand(cmakeMakeProgram, cmakeProjectName,
+        0, cmakeBuildConfiguration, true);
+
+      m_CTest->SetDartConfiguration("MakeCommand", buildCommand.c_str());
+      }
+    else
+      {
+      cmOStringStream ostr;
+      ostr << "CTEST_BUILD_COMMAND or CTEST_CMAKE_GENERATOR not specified. Please specify the CTEST_CMAKE_GENERATOR if this is a CMake project, or specify the CTEST_BUILD_COMMAND for cmake or any other project.";
+      this->SetError(ostr.str().c_str());
+      return false;
+      }
+    }
+  
   int res = handler->ProcessHandler();
   cmOStringStream str;
   str << res;

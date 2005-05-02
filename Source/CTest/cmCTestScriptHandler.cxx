@@ -202,6 +202,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     delete m_LocalGenerator;
     }
   m_CMake = new cmake;
+  m_CMake->AddCMakePaths(m_CTest->GetCTestExecutable());
   m_GlobalGenerator = new cmGlobalGenerator;
   m_GlobalGenerator->SetCMakeInstance(m_CMake);
 
