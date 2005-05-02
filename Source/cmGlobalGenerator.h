@@ -98,8 +98,9 @@ public:
                     std::string *output, 
                     const char *makeProgram, const char *config,
                     bool clean);
-  virtual std::string GenerateBuildCommand(const char* makeProgram, const char *projectName, const char *targetName,
-                    const char* config, bool ignoreErrors);
+  virtual std::string GenerateBuildCommand(const char* makeProgram,
+    const char *projectName, const char *targetName,
+    const char* config, bool ignoreErrors);
 
   ///! Set the CMake instance
   void SetCMakeInstance(cmake *cm) {
@@ -137,11 +138,15 @@ public:
   std::string ConvertToRelativePath(const std::vector<std::string>& local,
                                     const char* remote);
 
+  /*
+   * Determine what program to use for building the project.
+   */
+  void FindMakeProgram(cmMakefile*);
+
 protected:
   // Fill the m_ProjectMap, this must be called after m_LocalGenerators has been populated.
   void FillProjectMap();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
-  void FindMakeProgram(cmMakefile*);
 
   void ConfigureRelativePaths();
   void SetupTests();
