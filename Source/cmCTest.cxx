@@ -227,6 +227,7 @@ cmCTest::cmCTest()
   m_BuildNoClean           = false;
   m_BuildTwoConfig         = false;
   m_Verbose                = false;
+  m_ExtraVerbose           = false;
   m_ProduceXML             = false;
   m_ShowOnly               = false;
   m_RunConfigurationScript = false;
@@ -343,7 +344,7 @@ int cmCTest::Initialize(const char* binary_dir)
       if ( m_TestModel == cmCTest::NIGHTLY )
         {
         lctime = cmCTest::GetNightlyTime(m_DartConfiguration["NightlyStartTime"],
-          m_Verbose,
+          m_ExtraVerbose,
           m_TomorrowTag);
         }
       char datestring[100];
@@ -627,7 +628,7 @@ int cmCTest::SubmitResults()
   std::cout << "Submit files (using " << m_DartConfiguration["DropMethod"] << ")"
     << std::endl;
   cmCTestSubmit submit;
-  submit.SetVerbose(m_Verbose);
+  submit.SetVerbose(m_ExtraVerbose);
   submit.SetLogFile(&ofs);
   if ( m_DartConfiguration["DropMethod"] == "" ||
     m_DartConfiguration["DropMethod"] ==  "ftp" )
@@ -1048,7 +1049,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       }
     cmSystemTools::ChangeDirectory(oldpath.c_str());
     
-    if(m_Verbose)
+    if(m_ExtraVerbose)
       {
       std::cout << "Internal cmCTest object used to run test.\n";
       std::cout <<  *output << "\n";
@@ -1079,7 +1080,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       {
       tempOutput.insert(tempOutput.end(), data, data+length);
       }
-    if ( m_Verbose )
+    if ( m_ExtraVerbose )
       {
       std::cout.write(data, length);
       std::cout.flush();
@@ -1096,7 +1097,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     {
     output->append(&*tempOutput.begin(), tempOutput.size());
     }
-  if ( m_Verbose )
+  if ( m_ExtraVerbose )
     {
     std::cout << "-- Process completed" << std::endl;
     }
@@ -1113,7 +1114,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     std::string outerr = "\n*** Exception executing: ";
     outerr += cmsysProcess_GetExceptionString(cp);
     *output += outerr;
-    if ( m_Verbose )
+    if ( m_ExtraVerbose )
       {
       std::cout << outerr.c_str() << "\n";
       std::cout.flush();
@@ -1124,7 +1125,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     std::string outerr = "\n*** ERROR executing: ";
     outerr += cmsysProcess_GetErrorString(cp);
     *output += outerr;
-    if ( m_Verbose )
+    if ( m_ExtraVerbose )
       {
       std::cout << outerr.c_str() << "\n";
       std::cout.flush();
@@ -1246,11 +1247,11 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if( arg.find("-V",0) == 0 || arg.find("--verbose",0) == 0 )
       {
       this->m_Verbose = true;
-      cmCTest::t_TestingHandlers::iterator it;
-      for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
-        {
-        it->second->SetVerbose(this->m_Verbose);
-        }
+      }
+    if( arg.find("-VV",0) == 0 || arg.find("--extra-verbose",0) == 0 )
+      {
+      this->m_ExtraVerbose = true;
+      this->m_Verbose = true;
       }
 
     if( arg.find("-N",0) == 0 || arg.find("--show-only",0) == 0 )
@@ -1670,10 +1671,22 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     // call process directory
     if (this->m_RunConfigurationScript)
       {
+      cmCTest::t_TestingHandlers::iterator it;
+      for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
+        {
+        it->second->SetVerbose(this->m_ExtraVerbose);
+        }
+      this->GetHandler("script")->SetVerbose(m_Verbose);
       res = this->GetHandler("script")->ProcessHandler();
       }
     else
       {
+      m_Verbose = m_ExtraVerbose;
+      cmCTest::t_TestingHandlers::iterator it;
+      for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
+        {
+        it->second->SetVerbose(this->m_Verbose);
+        }
       if ( !this->Initialize(cmSystemTools::GetCurrentWorkingDirectory().c_str()) )
         {
         res = 12;
@@ -2200,6 +2213,20 @@ std::string cmCTest::GetDartConfiguration(const char *name)
   return m_DartConfiguration[name];
 }
 
+void cmCTest::SetDartConfiguration(const char *name, const char* value)
+{
+  if ( !name )
+    {
+    return;
+    }
+  if ( !value )
+    {
+    m_DartConfiguration.erase(name);
+    return;
+    }
+  m_DartConfiguration[name] = value;
+}
+
   
 std::string cmCTest::GetCurrentTag()
 {
@@ -2229,4 +2256,16 @@ void cmCTest::SetProduceXML(bool v)
 bool cmCTest::GetProduceXML()
 {
   return m_ProduceXML;
+}
+
+bool cmCTest::SetDartConfigurationFromCMakeVariable(cmMakefile* mf, const char* dconfig, const char* cmake_var)
+{
+  const char* ctvar;
+  ctvar = mf->GetDefinition(cmake_var);
+  if ( !ctvar )
+    {
+    return false;
+    }
+  this->SetDartConfiguration(dconfig, ctvar);
+  return true;
 }

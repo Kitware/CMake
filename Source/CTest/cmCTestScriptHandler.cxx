@@ -42,6 +42,8 @@
 # include <unistd.h>
 #endif
 
+#include "cmCTestBuildCommand.h"
+#include "cmCTestConfigureCommand.h"
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
 #include "cmCTestRunScriptCommand.h"
 #include "cmCTestSleepCommand.h"
@@ -220,8 +222,10 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   // add any ctest specific commands, probably should have common superclass
   // for ctest commands to clean this up. If a couple more commands are
   // created with the same format lets do that - ken
-  this->AddCTestCommand(new cmCTestRunScriptCommand);
+  this->AddCTestCommand(new cmCTestBuildCommand);
+  this->AddCTestCommand(new cmCTestConfigureCommand);
   this->AddCTestCommand(new cmCTestEmptyBinaryDirectoryCommand);
+  this->AddCTestCommand(new cmCTestRunScriptCommand);
   this->AddCTestCommand(new cmCTestSleepCommand);
   this->AddCTestCommand(new cmCTestStartCommand);
   this->AddCTestCommand(new cmCTestUpdateCommand);
@@ -372,6 +376,7 @@ int cmCTestScriptHandler::RunConfigurationScript(const std::string& total_script
   return result;
 }
 
+//----------------------------------------------------------------------
 int cmCTestScriptHandler::RunCurrentScript()
 {
   int result;

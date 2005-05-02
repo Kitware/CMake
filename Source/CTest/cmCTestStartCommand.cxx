@@ -17,6 +17,8 @@
 #include "cmCTestStartCommand.h"
 
 #include "cmCTest.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
 
 bool cmCTestStartCommand::InitialPass(
   std::vector<std::string> const& args)
@@ -64,6 +66,27 @@ bool cmCTestStartCommand::InitialPass(
     }
   std::cout << "Run dashboard with model " << smodel 
     << " for src dir: " << src_dir << " and binary dir: " << bld_dir << std::endl;
+
+  std::string fname = src_dir;
+  fname += "/CTestConfig.cmake";
+  cmSystemTools::ConvertToUnixSlashes(fname);
+  if ( cmSystemTools::FileExists(fname.c_str()) )
+    {
+    std::cout << "   Reading ctest configuration file: " << fname.c_str() << std::endl;
+    bool readit = m_Makefile->ReadListFile(m_Makefile->GetCurrentListFile(), 
+      fname.c_str() );
+    if(!readit)
+      {
+      std::string m = "Could not find include file: ";
+      m += fname;
+      this->SetError(m.c_str());
+      return false;
+      }
+    }
+
+  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME");
+  m_CTest->SetDartConfiguration("SourceDirectory", src_dir);
+  m_CTest->SetDartConfiguration("BuildDirectory", bld_dir); 
 
   int model = m_CTest->GetTestModelFromString(smodel);
   m_CTest->SetTestModel(model);

@@ -101,6 +101,7 @@ public:
   static int GetTestModelFromString(const char* str);
   static std::string CleanString(const std::string& str);
   std::string GetDartConfiguration(const char *name);
+  void SetDartConfiguration(const char *name, const char* value);
   
   /**
    * constructor and destructor
@@ -192,9 +193,15 @@ public:
    */
   cmCTestGenericHandler* GetHandler(const char* handler);
 
+  /*
+   * Set the CTest variable from CMake variable
+   */
+  bool SetDartConfigurationFromCMakeVariable(cmMakefile* mf, const char* dconfig, const char* cmake_var);
+
 private:
   std::string m_ConfigType;
   bool m_Verbose;
+  bool m_ExtraVerbose;
   bool m_ProduceXML;
 
   bool m_ForceNewCTestProcess;

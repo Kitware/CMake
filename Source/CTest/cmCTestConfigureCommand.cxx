@@ -14,12 +14,12 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include "cmCTestUpdateCommand.h"
+#include "cmCTestConfigureCommand.h"
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 
-bool cmCTestUpdateCommand::InitialPass(
+bool cmCTestConfigureCommand::InitialPass(
   std::vector<std::string> const& args)
 {
   if (args.size() != 2)
@@ -28,19 +28,18 @@ bool cmCTestUpdateCommand::InitialPass(
     return false;
     }
 
-  const char* source_dir = args[0].c_str();
+  const char* build_dir = args[0].c_str();
   const char* res_var = args[1].c_str();
 
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "CVSCommand", "CTEST_CVS_COMMAND");
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "SVNCommand", "CTEST_SVN_COMMAND");
+  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "ConfigureCommand", "CTEST_CONFIGURE_COMMAND");
+  m_CTest->SetDartConfiguration("BuildDirectory", build_dir);
 
-  cmCTestGenericHandler* handler = m_CTest->GetHandler("update");
+  cmCTestGenericHandler* handler = m_CTest->GetHandler("configure");
   if ( !handler )
     {
-    this->SetError("internal CTest error. Cannot instantiate update handler");
+    this->SetError("internal CTest error. Cannot instantiate configure handler");
     return false;
     }
-  handler->SetOption("SourceDirectory", source_dir);
   int res = handler->ProcessHandler();
   cmOStringStream str;
   str << res;
