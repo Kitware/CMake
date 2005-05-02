@@ -256,6 +256,11 @@ class cmake
   bool HasWrittenFile(const char* file);
   void CleanupWrittenFiles();
 
+  /**
+   * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
+   */
+  int AddCMakePaths(const char *arg0);
+
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString, CreateGeneratorFunctionType> RegisteredGeneratorsMap;
@@ -283,11 +288,6 @@ protected:
    * Returns 1 if CMake should rerun and 0 otherwise.
    */
   int CheckBuildSystem();
-
-  /**
-   * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
-   */
-  int AddCMakePaths(const char *arg0);
 
   void SetDirectoriesFromFile(const char* arg);
   
