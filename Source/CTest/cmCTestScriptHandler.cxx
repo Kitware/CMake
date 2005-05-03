@@ -49,6 +49,8 @@
 #include "cmCTestSleepCommand.h"
 #include "cmCTestStartCommand.h"
 #include "cmCTestUpdateCommand.h"
+#include "cmCTestTestCommand.h"
+#include "cmCTestSubmitCommand.h"
 
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
 
@@ -229,6 +231,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->AddCTestCommand(new cmCTestRunScriptCommand);
   this->AddCTestCommand(new cmCTestSleepCommand);
   this->AddCTestCommand(new cmCTestStartCommand);
+  this->AddCTestCommand(new cmCTestSubmitCommand);
+  this->AddCTestCommand(new cmCTestTestCommand);
   this->AddCTestCommand(new cmCTestUpdateCommand);
   
   // add the script arg if defined

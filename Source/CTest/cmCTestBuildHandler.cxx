@@ -197,13 +197,13 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 int cmCTestBuildHandler::ProcessHandler()
 {
   std::cout << "Build project" << std::endl;
-  std::string makeCommand = m_CTest->GetDartConfiguration("MakeCommand");
+  const std::string &makeCommand = m_CTest->GetDartConfiguration("MakeCommand");
   if ( makeCommand.size() == 0 )
     {
     std::cerr << "Cannot find MakeCommand key in the DartConfiguration.tcl" << std::endl;
     return -1;
     }
-  std::string buildDirectory = m_CTest->GetDartConfiguration("BuildDirectory");
+  const std::string &buildDirectory = m_CTest->GetDartConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
     {
     std::cerr << "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl;

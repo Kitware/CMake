@@ -14,32 +14,32 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#ifndef cmCTestSubmit_h
-#define cmCTestSubmit_h
+#ifndef cmCTestSubmitHandler_h
+#define cmCTestSubmitHandler_h
 
-#include "cmStandardIncludes.h"
+#include "cmCTestGenericHandler.h"
 
-/** \class cmCTestSubmit
+/** \class cmCTestSubmitHandler
  * \brief Helper class for CTest
  *
  * Submit testing results
  * 
  */
-class cmCTestSubmit
+class cmCTestSubmitHandler : public cmCTestGenericHandler
 {
 public:
-  cmCTestSubmit();
-  ~cmCTestSubmit() { m_LogFile = 0; }
+  cmCTestSubmitHandler();
+  ~cmCTestSubmitHandler() { m_LogFile = 0; }
 
-  /**
-   * Set verbosity of send
+  /*
+   * The main entry point for this class
    */
-  void SetVerbose(bool i) { m_Verbose = i; }
-  void VerboseOn() { this->SetVerbose(1); }
-  void VerboseOff() { this->SetVerbose(0); }
+  int ProcessHandler();
 
-  void SetLogFile(std::ostream* ost) { m_LogFile = ost; }
   
+private:
+  void SetLogFile(std::ostream* ost) { m_LogFile = ost; }
+
   /**
    * Submit file using various ways
    */
@@ -66,13 +66,13 @@ public:
                        const cmStdString& remoteprefix, 
                        const cmStdString& url);
 
-private:
+  std::string GetSubmitResultsPrefix();
+
   cmStdString   m_HTTPProxy;
   int           m_HTTPProxyType;
   cmStdString   m_HTTPProxyAuth;
   cmStdString   m_FTPProxy;
   int           m_FTPProxyType;
-  bool          m_Verbose;
   std::ostream* m_LogFile;
 };
 

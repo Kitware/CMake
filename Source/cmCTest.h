@@ -71,12 +71,6 @@ public:
    */
   int TestDirectory(bool memcheck);
 
-  /**
-   * Do submit testing results
-   */
-  int SubmitResults();
-  std::string GetSubmitResultsPrefix();
-
   ///! what is the configuraiton type, e.g. Debug, Release etc.
   std::string GetConfigType();
   
@@ -166,12 +160,13 @@ public:
 
   // provide some more detailed info on the return code for ctest
   enum {
-    UPDATE_ERRORS = 0x01,
+    UPDATE_ERRORS    = 0x01,
     CONFIGURE_ERRORS = 0x02,
-    BUILD_ERRORS = 0x04,
-    TEST_ERRORS = 0x08,
-    MEMORY_ERRORS = 0x10,
-    COVERAGE_ERRORS = 0x20
+    BUILD_ERRORS     = 0x04,
+    TEST_ERRORS      = 0x08,
+    MEMORY_ERRORS    = 0x10,
+    COVERAGE_ERRORS  = 0x20,
+    SUBMIT_ERRORS    = 0x40
   };
 
   ///! Are we producing XML
@@ -198,6 +193,8 @@ public:
    */
   bool SetDartConfigurationFromCMakeVariable(cmMakefile* mf, const char* dconfig, const char* cmake_var);
 
+  //! Make string safe to be send as an URL
+  static std::string MakeURLSafe(const std::string&);
 private:
   std::string m_ConfigType;
   bool m_Verbose;
@@ -210,8 +207,6 @@ private:
 
   int GenerateNotesFile(const char* files);
 
-  static std::string MakeURLSafe(const std::string&);
-  
   // these are helper classes
   typedef std::map<cmStdString,cmCTestGenericHandler*> t_TestingHandlers;
   t_TestingHandlers m_TestingHandlers;

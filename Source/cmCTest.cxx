@@ -33,8 +33,8 @@
 #include "cmCTestScriptHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmCTestUpdateHandler.h"
+#include "cmCTestSubmitHandler.h"
 
-#include "cmCTestSubmit.h"
 #include "cmVersion.h"
 
 #include <cmsys/RegularExpression.hxx>
@@ -250,6 +250,7 @@ cmCTest::cmCTest()
   m_TestingHandlers["update"]    = new cmCTestUpdateHandler;
   m_TestingHandlers["configure"] = new cmCTestConfigureHandler;
   m_TestingHandlers["memcheck"]  = new cmCTestMemCheckHandler;
+  m_TestingHandlers["submit"]    = new cmCTestSubmitHandler;
 
   cmCTest::t_TestingHandlers::iterator it;
   for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
@@ -575,177 +576,11 @@ bool cmCTest::AddIfExists(tm_VectorOfStrings& files, const char* file)
   return true;
 }
 
-int cmCTest::SubmitResults()
-{
-  cmGeneratedFileStream ofs;
-  this->OpenOutputFile("Temporary", "LastSubmit.log", ofs);
-
-  cmCTest::tm_VectorOfStrings files;
-  std::string prefix = this->GetSubmitResultsPrefix();
-  // TODO:
-  // Check if test is enabled
-  this->AddIfExists(files, "Update.xml");
-  this->AddIfExists(files, "Configure.xml");
-  this->AddIfExists(files, "Build.xml");
-  this->AddIfExists(files, "Test.xml");
-  if ( this->AddIfExists(files, "Coverage.xml") )
-    {
-    cmCTest::tm_VectorOfStrings gfiles;
-    std::string gpath = m_BinaryDir + "/Testing/" + m_CurrentTag;
-    std::string::size_type glen = gpath.size() + 1;
-    gpath = gpath + "/CoverageLog*";
-    //std::cout << "Globbing for: " << gpath.c_str() << std::endl;
-    if ( cmSystemTools::SimpleGlob(gpath, gfiles, 1) )
-      {
-      size_t cc;
-      for ( cc = 0; cc < gfiles.size(); cc ++ )
-        {
-        gfiles[cc] = gfiles[cc].substr(glen);
-        //std::cout << "Glob file: " << gfiles[cc].c_str() << std::endl;
-        files.push_back(gfiles[cc]);
-        }
-      }
-    else
-      {
-      std::cerr << "Problem globbing" << std::endl;
-      }
-    }
-  this->AddIfExists(files, "DynamicAnalysis.xml");
-  this->AddIfExists(files, "Purify.xml");
-  this->AddIfExists(files, "Notes.xml");
-
-  if ( ofs )
-    {
-    ofs << "Upload files:" << std::endl;
-    int cnt = 0;
-    cmCTest::tm_VectorOfStrings::iterator it;
-    for ( it = files.begin(); it != files.end(); ++ it )
-      {
-      ofs << cnt << "\t" << it->c_str() << std::endl;
-      cnt ++;
-      }
-    }
-  std::cout << "Submit files (using " << m_DartConfiguration["DropMethod"] << ")"
-    << std::endl;
-  cmCTestSubmit submit;
-  submit.SetVerbose(m_ExtraVerbose);
-  submit.SetLogFile(&ofs);
-  if ( m_DartConfiguration["DropMethod"] == "" ||
-    m_DartConfiguration["DropMethod"] ==  "ftp" )
-    {
-    ofs << "Using drop method: FTP" << std::endl;
-    std::cout << "  Using FTP submit method" << std::endl;
-    std::string url = "ftp://";
-    url += cmCTest::MakeURLSafe(m_DartConfiguration["DropSiteUser"]) + ":" + 
-      cmCTest::MakeURLSafe(m_DartConfiguration["DropSitePassword"]) + "@" + 
-      m_DartConfiguration["DropSite"] + 
-      cmCTest::MakeURLSafe(m_DartConfiguration["DropLocation"]);
-    if ( !submit.SubmitUsingFTP(m_BinaryDir+"/Testing/"+m_CurrentTag, 
-        files, prefix, url) )
-      {
-      std::cerr << "  Problems when submitting via FTP" << std::endl;
-      ofs << "  Problems when submitting via FTP" << std::endl;
-      return 0;
-      }
-    if ( !submit.TriggerUsingHTTP(files, prefix, m_DartConfiguration["TriggerSite"]) )
-      {
-      std::cerr << "  Problems when triggering via HTTP" << std::endl;
-      ofs << "  Problems when triggering via HTTP" << std::endl;
-      return 0;
-      }
-    std::cout << "  Submission successful" << std::endl;
-    ofs << "  Submission successful" << std::endl;
-    return 1;
-    }
-  else if ( m_DartConfiguration["DropMethod"] == "http" )
-    {
-    ofs << "Using drop method: HTTP" << std::endl;
-    std::cout << "  Using HTTP submit method" << std::endl;
-    std::string url = "http://";
-    if ( m_DartConfiguration["DropSiteUser"].size() > 0 )
-      {
-      url += m_DartConfiguration["DropSiteUser"];
-      if ( m_DartConfiguration["DropSitePassword"].size() > 0 )
-        {
-        url += ":" + m_DartConfiguration["DropSitePassword"];
-        }
-      url += "@";
-      }
-    url += m_DartConfiguration["DropSite"] + m_DartConfiguration["DropLocation"];
-    if ( !submit.SubmitUsingHTTP(m_BinaryDir+"/Testing/"+m_CurrentTag, files, prefix, url) )
-      {
-      std::cerr << "  Problems when submitting via HTTP" << std::endl;
-      ofs << "  Problems when submitting via HTTP" << std::endl;
-      return 0;
-      }
-    if ( !submit.TriggerUsingHTTP(files, prefix, m_DartConfiguration["TriggerSite"]) )
-      {
-      std::cerr << "  Problems when triggering via HTTP" << std::endl;
-      ofs << "  Problems when triggering via HTTP" << std::endl;
-      return 0;
-      }
-    std::cout << "  Submission successful" << std::endl;
-    ofs << "  Submission successful" << std::endl;
-    return 1;
-    }
-  else if ( m_DartConfiguration["DropMethod"] == "xmlrpc" )
-    {
-    ofs << "Using drop method: XML-RPC" << std::endl;
-    std::cout << "  Using XML-RPC submit method" << std::endl;
-    std::string url = m_DartConfiguration["DropSite"];
-    prefix = m_DartConfiguration["DropLocation"];
-    if ( !submit.SubmitUsingXMLRPC(m_BinaryDir+"/Testing/"+m_CurrentTag, files, prefix, url) )
-      {
-      std::cerr << "  Problems when submitting via XML-RPC" << std::endl;
-      ofs << "  Problems when submitting via XML-RPC" << std::endl;
-      return 0;
-      }
-    std::cout << "  Submission successful" << std::endl;
-    ofs << "  Submission successful" << std::endl;
-    return 1;
-    }
-  else if ( m_DartConfiguration["DropMethod"] == "scp" )
-    {
-    std::string url;
-    if ( m_DartConfiguration["DropSiteUser"].size() > 0 )
-      {
-      url += m_DartConfiguration["DropSiteUser"] + "@";
-      }
-    url += m_DartConfiguration["DropSite"] + ":" + m_DartConfiguration["DropLocation"];
-    
-    if ( !submit.SubmitUsingSCP(m_DartConfiguration["ScpCommand"],
-        m_BinaryDir+"/Testing/"+m_CurrentTag, files, prefix, url) )
-      {
-      std::cerr << "  Problems when submitting via SCP" << std::endl;
-      ofs << "  Problems when submitting via SCP" << std::endl;
-      return 0;
-      }
-    std::cout << "  Submission successful" << std::endl;
-    ofs << "  Submission successful" << std::endl;
-    }
-  else
-    {
-    std::cout << "   Unknown submission method: \"" << m_DartConfiguration["DropMethod"] << "\"" << std::endl;
-    return 0;
-    }
-
-  return 0;
-}
-
 bool cmCTest::CTestFileExists(const std::string& filename)
 {
   std::string testingDir = m_BinaryDir + "/Testing/" + m_CurrentTag + "/" +
     filename;
   return cmSystemTools::FileExists(testingDir.c_str());
-}
-
-std::string cmCTest::GetSubmitResultsPrefix()
-{
-  std::string name = m_DartConfiguration["Site"] +
-    "___" + m_DartConfiguration["BuildName"] +
-    "___" + m_CurrentTag + "-" +
-    this->GetTestModelString() + "___XML___";
-  return name;
 }
 
 cmCTestGenericHandler* cmCTest::GetHandler(const char* handler)
@@ -872,7 +707,10 @@ int cmCTest::ProcessTests()
   if ( m_Tests[SUBMIT_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    this->SubmitResults();
+    if (this->GetHandler("submit")->ProcessHandler() < 0)
+      {
+      res |= cmCTest::SUBMIT_ERRORS;
+      }
     }
   return res;
 }

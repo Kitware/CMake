@@ -163,7 +163,9 @@ SET(CMTEST_SRCS cmCTest.cxx
   CTest/cmCTestScriptHandler.cxx
   CTest/cmCTestSleepCommand.cxx
   CTest/cmCTestStartCommand.cxx
-  CTest/cmCTestSubmit.cxx
+  CTest/cmCTestSubmitCommand.cxx
+  CTest/cmCTestSubmitHandler.cxx
+  CTest/cmCTestTestCommand.cxx
   CTest/cmCTestTestHandler.cxx
   CTest/cmCTestUpdateCommand.cxx
   CTest/cmCTestUpdateHandler.cxx
