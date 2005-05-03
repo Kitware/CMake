@@ -19,6 +19,10 @@
 
 #include "cmLocalGenerator.h"
 
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma set woff 1375 /* base class destructor not virtual */
+#endif
+
 class cmCustomCommand;
 class cmDependInformation;
 class cmDepends;
@@ -277,5 +281,9 @@ private:
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> m_ObjectFiles;
 };
+
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma reset woff 1375 /* base class destructor not virtual */
+#endif
 
 #endif

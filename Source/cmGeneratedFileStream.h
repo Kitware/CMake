@@ -19,6 +19,10 @@
 
 #include "cmStandardIncludes.h"
 
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma set woff 1375 /* base class destructor not virtual */
+#endif
+
 // This is the first base class of cmGeneratedFileStream.  It will be
 // created before and destroyed after the ofstream portion and can
 // therefore be used to manage the temporary file.
@@ -127,5 +131,9 @@ public:
    */
   void SetCompression(bool compression);
 };
+
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma reset woff 1375 /* base class destructor not virtual */
+#endif
 
 #endif

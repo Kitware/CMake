@@ -29,6 +29,10 @@
 # pragma warning (disable:4786)
 #endif
 
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma set woff 1468 /* inline function cannot be explicitly instantiated */
+#endif
+
 template class kwsys::hash_map<const char*, int>;
 template class kwsys::hash_set<int>;
 

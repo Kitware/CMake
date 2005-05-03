@@ -181,6 +181,10 @@ inline bool operator==(std::string const& a, const char* b)
 { return (a==std::string(b)); }
 # endif  // end CM_SGI_CC_720
 
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma set woff 1375 /* base class destructor not virtual */
+#endif
+
 // use this class to shrink the size of symbols in .o files
 // std::string is really basic_string<....lots of stuff....>
 // when combined with a map or set, the symbols can be > 2000 chars!
@@ -305,5 +309,9 @@ public:
   typedef Superclass::iterator iterator;
   typedef Superclass::const_iterator const_iterator;
 };
+
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma reset woff 1375 /* base class destructor not virtual */
+#endif
 
 #endif

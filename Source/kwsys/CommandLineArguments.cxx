@@ -40,6 +40,10 @@
 # pragma warning (disable: 4786)
 #endif
 
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma set woff 1375 /* base class destructor not virtual */
+#endif
+
 namespace KWSYS_NAMESPACE
 {
 

@@ -45,6 +45,9 @@
 
 #include <sys/stat.h>
 
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma set woff 1375 /* base class destructor not virtual */
+#endif
 
 bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;

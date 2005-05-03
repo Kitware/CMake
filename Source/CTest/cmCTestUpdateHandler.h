@@ -22,6 +22,10 @@
 #include "cmCTestGenericHandler.h"
 #include "cmListFileCache.h"
 
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma set woff 1375 /* base class destructor not virtual */
+#endif
+
 /** \class cmCTestUpdateHandler
  * \brief A class that handles ctest -S invocations
  *
@@ -53,5 +57,9 @@ private:
   // Determine the type of version control
   int DetermineType(const char* cmd, const char* type);
 };
+
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma reset woff 1375 /* base class destructor not virtual */
+#endif
 
 #endif
