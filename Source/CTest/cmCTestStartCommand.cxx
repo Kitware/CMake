@@ -85,13 +85,17 @@ bool cmCTestStartCommand::InitialPass(
     }
 
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "Site", "CTEST_SITE");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "BuildName", "CTEST_BUILD_NAME");
   m_CTest->SetCTestConfiguration("SourceDirectory", src_dir);
   m_CTest->SetCTestConfiguration("BuildDirectory", bld_dir); 
+
+  m_Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", "OFF");
 
   int model = m_CTest->GetTestModelFromString(smodel);
   m_CTest->SetTestModel(model);
   m_CTest->SetProduceXML(true);
-  if ( !m_CTest->Initialize(bld_dir) )
+  if ( !m_CTest->Initialize(bld_dir, true) )
     {
     return false;
     }

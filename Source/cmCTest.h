@@ -39,7 +39,7 @@ public:
   /**
    * Initialize and finalize testing
    */
-  int Initialize(const char* binary_dir);
+  int Initialize(const char* binary_dir, bool new_tag = false);
   void Finalize();
 
   /**

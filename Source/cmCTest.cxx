@@ -269,7 +269,7 @@ cmCTest::~cmCTest()
     }
 }
 
-int cmCTest::Initialize(const char* binary_dir)
+int cmCTest::Initialize(const char* binary_dir, bool new_tag)
 {
   if(!m_InteractiveDebugMode)
     {
@@ -338,7 +338,7 @@ int cmCTest::Initialize(const char* binary_dir)
         }
       tfin.close();
       }
-    if ( tag.size() == 0 || m_Tests[cmCTest::START_TEST] || m_Tests[ALL_TEST])
+    if ( tag.size() == 0 || new_tag || m_Tests[cmCTest::START_TEST] || m_Tests[ALL_TEST])
       {
       //std::cout << "TestModel: " << this->GetTestModelString() << std::endl;
       //std::cout << "TestModel: " << m_TestModel << std::endl;
