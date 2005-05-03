@@ -155,7 +155,7 @@ template <class Alloc>
 void f(const Alloc&)
 {
   typedef typename Alloc::size_type alloc_size_type;
-};
+}
 int main()
 {
   f(kwsys_stl::allocator<char>());
@@ -175,7 +175,7 @@ template <class T, class Alloc>
 void f(const T&, const Alloc&)
 {
   typedef typename Alloc::template rebind<T>::other alloc_type;
-};
+}
 int main()
 {
   f(0, kwsys_stl::allocator<char>());
@@ -188,7 +188,7 @@ int main()
 void f(kwsys_stl::allocator<char> const& a)
 {
   a.max_size(sizeof(int));
-};
+}
 int main()
 {
   f(kwsys_stl::allocator<char>());
@@ -201,7 +201,7 @@ int main()
 void f(kwsys_stl::vector<int> const& v1)
 {
   kwsys_stl::vector<int>(1, 1, v1.get_allocator());
-};
+}
 int main()
 {
   f(kwsys_stl::vector<int>());
