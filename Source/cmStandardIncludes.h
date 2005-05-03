@@ -49,6 +49,25 @@
 
 #include <stdarg.h> // Work-around for SGI MIPSpro 7.4.2m header bug
 
+// This is a hack to prevent warnings about these functions being
+// declared but not referenced.
+#if defined(__sgi) && !defined(__GNUC__)
+# include <sys/termios.h>
+class cmStandardIncludesHack
+{
+public:
+  enum
+  {
+    Ref1 = sizeof(cfgetospeed(0)),
+    Ref2 = sizeof(cfgetispeed(0)),
+    Ref3 = sizeof(tcgetattr(0, 0)),
+    Ref4 = sizeof(tcsetattr(0, 0, 0)),
+    Ref5 = sizeof(cfsetospeed(0,0)),
+    Ref6 = sizeof(cfsetispeed(0,0))
+  };
+};
+#endif
+
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
 #  include <fstream>
 #  include <iostream>
