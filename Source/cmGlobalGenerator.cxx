@@ -659,7 +659,6 @@ std::string cmGlobalGenerator::GenerateBuildCommand(const char* makeProgram,
   (void)config;
 
   std::string makeCommand = makeProgram;
-  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
   // Since we have full control over the invocation of nmake, let us
   // make it quiet.
   if ( strcmp(this->GetName(), "NMake Makefiles") == 0 )
