@@ -632,6 +632,8 @@ Modify cmDependsFortranLexer.cxx:
   - remove TABs
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, cmDependsFortran_yyalloc, cmDependsFortran_yyrealloc, cmDependsFortran_yyfree
+  - remove all YY_BREAK lines occurring right after return statements
+  - change while ( 1 ) to for(;;)
 
 Modify cmDependsFortranLexer.h:
   - remove TABs
@@ -934,7 +936,7 @@ YY_DECL
                 cmDependsFortran_yy_load_buffer_state(yyscanner );
                 }
 
-        while ( 1 )             /* loops until end-of-file is reached */
+        for(;;)             /* loops until end-of-file is reached */
                 {
                 yy_cp = yyg->yy_c_buf_p;
 
@@ -1015,7 +1017,6 @@ YY_RULE_SETUP
   yylvalp->string = strdup(cmDependsFortranParser_StringEnd(yyextra));
   return STRING;
 }
-        YY_BREAK
 case 5:
 /* rule 5 can match eol */
 #line 115 "cmDependsFortranLexer.in.l"
@@ -1040,7 +1041,6 @@ YY_RULE_SETUP
   BEGIN(INITIAL);
   return UNTERMINATED_STRING;
 }
-        YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 125 "cmDependsFortranLexer.in.l"
@@ -1053,38 +1053,31 @@ case 10:
 YY_RULE_SETUP
 #line 129 "cmDependsFortranLexer.in.l"
 { return EOSTMT; } /* Treat comments like */
-        YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
 #line 130 "cmDependsFortranLexer.in.l"
 { return EOSTMT; } /* empty lines */
-        YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 132 "cmDependsFortranLexer.in.l"
 { return CPP_INCLUDE; }
-        YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 133 "cmDependsFortranLexer.in.l"
 { return F90PPR_INCLUDE; }
-        YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 134 "cmDependsFortranLexer.in.l"
 { return COCO_INCLUDE; }
-        YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 135 "cmDependsFortranLexer.in.l"
 { return F_INCLUDE; }
-        YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 136 "cmDependsFortranLexer.in.l"
 { return USE; }
-        YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 138 "cmDependsFortranLexer.in.l"
@@ -1118,82 +1111,66 @@ case 21:
 YY_RULE_SETUP
 #line 153 "cmDependsFortranLexer.in.l"
 { return CPP_DEFINE; }
-        YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 154 "cmDependsFortranLexer.in.l"
 { return F90PPR_DEFINE; }
-        YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 156 "cmDependsFortranLexer.in.l"
 { return CPP_UNDEF; }
-        YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 157 "cmDependsFortranLexer.in.l"
 { return F90PPR_UNDEF; }
-        YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 159 "cmDependsFortranLexer.in.l"
 { return CPP_IFDEF; }
-        YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 160 "cmDependsFortranLexer.in.l"
 { return CPP_IFNDEF; }
-        YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 161 "cmDependsFortranLexer.in.l"
 { return CPP_IF; }
-        YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 162 "cmDependsFortranLexer.in.l"
 { return CPP_ELIF; }
-        YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 163 "cmDependsFortranLexer.in.l"
 { return CPP_ELSE; }
-        YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 164 "cmDependsFortranLexer.in.l"
 { return CPP_ENDIF; }
-        YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 166 "cmDependsFortranLexer.in.l"
 { return F90PPR_IFDEF; }
-        YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 167 "cmDependsFortranLexer.in.l"
 { return F90PPR_IFNDEF; }
-        YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 168 "cmDependsFortranLexer.in.l"
 { return F90PPR_IF; }
-        YY_BREAK
 case 34:
 YY_RULE_SETUP
 #line 169 "cmDependsFortranLexer.in.l"
 { return F90PPR_ELIF; }
-        YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 170 "cmDependsFortranLexer.in.l"
 { return F90PPR_ELSE; }
-        YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 171 "cmDependsFortranLexer.in.l"
 { return F90PPR_ENDIF; }
-        YY_BREAK
 case 37:
 /* rule 37 can match eol */
 #line 174 "cmDependsFortranLexer.in.l"
@@ -1207,13 +1184,11 @@ case 39:
 YY_RULE_SETUP
 #line 177 "cmDependsFortranLexer.in.l"
 { yylvalp->string = strdup(yytext); return WORD; }
-        YY_BREAK
 case 40:
 /* rule 40 can match eol */
 YY_RULE_SETUP
 #line 179 "cmDependsFortranLexer.in.l"
 { return EOSTMT; }
-        YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 181 "cmDependsFortranLexer.in.l"
@@ -1223,7 +1198,6 @@ case 42:
 YY_RULE_SETUP
 #line 183 "cmDependsFortranLexer.in.l"
 { return *yytext; }
-        YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(free_fmt):
 case YY_STATE_EOF(fixed_fmt):

@@ -28,6 +28,7 @@ Modify cmDependsJavaLexer.cxx:
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, yyalloc, yyrealloc, yyfree
   - remove all YY_BREAK lines occurring right after return statements
+  - change while ( 1 ) to for(;;)
 
 Modify cmDependsJavaLexer.h:
   - remove TABs
