@@ -848,7 +848,7 @@ void cmCursesMainForm::HandleInput()
 
   char debugMessage[128];
 
-  while(1)
+  for(;;)
     {
     this->UpdateStatusBar();
     this->PrintKeys();

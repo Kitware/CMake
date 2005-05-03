@@ -174,7 +174,7 @@ void cmCursesLongMessageForm::HandleInput()
 
   char debugMessage[128];
 
-  while(1)
+  for(;;)
     {
     int key = getch();
 
