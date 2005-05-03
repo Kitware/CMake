@@ -296,7 +296,28 @@ int main(int argc, const char* argv[])
     double timeouts[6] = {10, 10, 10, 10, 30, 10};
     int r;
     const char* cmd[4];
+#ifdef _WIN32
+    char* argv0 = 0;
+    if(n == 0 && (argv0 = strdup(argv[0])))
+      {
+      /* Try converting to forward slashes to see if it works.  */
+      char* c;
+      for(c=argv0; *c; ++c)
+        {
+        if(*c == '\\')
+          {
+          *c = '/';
+          }
+        }
+      cmd[0] = argv0;
+      }
+    else
+      {
+      cmd[0] = argv[0];
+      }
+#else
     cmd[0] = argv[0];
+#endif
     cmd[1] = "run";
     cmd[2] = argv[1];
     cmd[3] = 0;
@@ -310,6 +331,9 @@ int main(int argc, const char* argv[])
     fprintf(stderr, "Output on stderr after test %d.\n", n);
     fflush(stdout);
     fflush(stderr);
+#if _WIN32
+    if(argv0) { free(argv0); }
+#endif
     return r;
     }
   else
