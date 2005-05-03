@@ -54,6 +54,7 @@ Modify cmDependsJavaLexer.h:
 
 /* Disable features we do not need. */
 #define YY_NEVER_INTERACTIVE 1
+#undef ECHO /* SGI termios defines this differently. */
 #define ECHO
 
 /* Replace the lexer input function.  */
