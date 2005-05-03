@@ -31,7 +31,7 @@ bool cmCTestTestCommand::InitialPass(
   const char* build_dir = args[0].c_str();
   const char* res_var = args[1].c_str();
 
-  m_CTest->SetDartConfiguration("BuildDirectory", build_dir);
+  m_CTest->SetCTestConfiguration("BuildDirectory", build_dir);
 
   cmCTestGenericHandler* handler = m_CTest->GetHandler("test");
   if ( !handler )

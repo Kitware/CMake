@@ -37,7 +37,7 @@ cmCTestConfigureHandler::cmCTestConfigureHandler()
 int cmCTestConfigureHandler::ProcessHandler()
 {
   std::cout << "Configure project" << std::endl;
-  std::string cCommand = m_CTest->GetDartConfiguration("ConfigureCommand");
+  std::string cCommand = m_CTest->GetCTestConfiguration("ConfigureCommand");
   if ( cCommand.size() == 0 )
     {
     std::cerr << "Cannot find ConfigureCommand key in the DartConfiguration.tcl" 
@@ -45,7 +45,7 @@ int cmCTestConfigureHandler::ProcessHandler()
     return -1;
     }
 
-  std::string buildDirectory = m_CTest->GetDartConfiguration("BuildDirectory");
+  std::string buildDirectory = m_CTest->GetCTestConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
     {
     std::cerr << "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl;

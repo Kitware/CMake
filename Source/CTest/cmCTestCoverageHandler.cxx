@@ -158,9 +158,9 @@ int cmCTestCoverageHandler::ProcessHandler()
 {
   int error = 0;
 
-  std::string sourceDir = m_CTest->GetDartConfiguration("SourceDirectory");
-  std::string binaryDir = m_CTest->GetDartConfiguration("BuildDirectory");
-  std::string gcovCommand = m_CTest->GetDartConfiguration("CoverageCommand");
+  std::string sourceDir = m_CTest->GetCTestConfiguration("SourceDirectory");
+  std::string binaryDir = m_CTest->GetCTestConfiguration("BuildDirectory");
+  std::string gcovCommand = m_CTest->GetCTestConfiguration("CoverageCommand");
 
   cmSystemTools::ConvertToUnixSlashes(sourceDir);
   cmSystemTools::ConvertToUnixSlashes(binaryDir);

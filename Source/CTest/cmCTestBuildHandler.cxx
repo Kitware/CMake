@@ -197,13 +197,13 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 int cmCTestBuildHandler::ProcessHandler()
 {
   std::cout << "Build project" << std::endl;
-  const std::string &makeCommand = m_CTest->GetDartConfiguration("MakeCommand");
+  const std::string &makeCommand = m_CTest->GetCTestConfiguration("MakeCommand");
   if ( makeCommand.size() == 0 )
     {
     std::cerr << "Cannot find MakeCommand key in the DartConfiguration.tcl" << std::endl;
     return -1;
     }
-  const std::string &buildDirectory = m_CTest->GetDartConfiguration("BuildDirectory");
+  const std::string &buildDirectory = m_CTest->GetCTestConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
     {
     std::cerr << "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl;
@@ -239,11 +239,11 @@ int cmCTestBuildHandler::ProcessHandler()
     }
 
   std::vector<cmStdString>::size_type cc;
-  if ( m_CTest->GetDartConfiguration("SourceDirectory").size() > 20 ||
-    m_CTest->GetDartConfiguration("BuildDirectory").size() > 20 )
+  if ( m_CTest->GetCTestConfiguration("SourceDirectory").size() > 20 ||
+    m_CTest->GetCTestConfiguration("BuildDirectory").size() > 20 )
     {
-    std::string srcdir = m_CTest->GetDartConfiguration("SourceDirectory") + "/";
-    std::string bindir = m_CTest->GetDartConfiguration("BuildDirectory") + "/";
+    std::string srcdir = m_CTest->GetCTestConfiguration("SourceDirectory") + "/";
+    std::string bindir = m_CTest->GetCTestConfiguration("BuildDirectory") + "/";
     std::string srcdirrep;
     std::string bindirrep;
     for ( cc = srcdir.size()-2; cc > 0; cc -- )
@@ -456,7 +456,7 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
   os << "<Build>\n"
      << "\t<StartDateTime>" << m_StartBuild << "</StartDateTime>\n"
      << "<BuildCommand>" 
-     << m_CTest->MakeXMLSafe(m_CTest->GetDartConfiguration("MakeCommand"))
+     << m_CTest->MakeXMLSafe(m_CTest->GetCTestConfiguration("MakeCommand"))
      << "</BuildCommand>" << std::endl;
     
   std::vector<cmCTestBuildErrorWarning>::iterator it;
@@ -464,7 +464,7 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
   // only report the first 50 warnings and first 50 errors
   unsigned short numErrorsAllowed = 50;
   unsigned short numWarningsAllowed = 50;
-  std::string srcdir = m_CTest->GetDartConfiguration("SourceDirectory");
+  std::string srcdir = m_CTest->GetCTestConfiguration("SourceDirectory");
   // make sure the source dir is in the correct case on windows
   // via a call to collapse full path.
   srcdir = cmSystemTools::CollapseFullPath(srcdir.c_str());

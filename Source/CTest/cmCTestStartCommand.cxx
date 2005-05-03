@@ -84,9 +84,9 @@ bool cmCTestStartCommand::InitialPass(
       }
     }
 
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME");
-  m_CTest->SetDartConfiguration("SourceDirectory", src_dir);
-  m_CTest->SetDartConfiguration("BuildDirectory", bld_dir); 
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME");
+  m_CTest->SetCTestConfiguration("SourceDirectory", src_dir);
+  m_CTest->SetCTestConfiguration("BuildDirectory", bld_dir); 
 
   int model = m_CTest->GetTestModelFromString(smodel);
   m_CTest->SetTestModel(model);

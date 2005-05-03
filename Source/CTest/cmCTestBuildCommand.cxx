@@ -33,7 +33,7 @@ bool cmCTestBuildCommand::InitialPass(
   const char* build_dir = args[0].c_str();
   const char* res_var = args[1].c_str();
 
-  m_CTest->SetDartConfiguration("BuildDirectory", build_dir);
+  m_CTest->SetCTestConfiguration("BuildDirectory", build_dir);
   cmCTestGenericHandler* handler = m_CTest->GetHandler("build");
   if ( !handler )
     {
@@ -44,7 +44,7 @@ bool cmCTestBuildCommand::InitialPass(
   const char* ctestBuildCommand = m_Makefile->GetDefinition("CTEST_BUILD_COMMAND");
   if ( ctestBuildCommand && *ctestBuildCommand )
     {
-    m_CTest->SetDartConfiguration("MakeCommand", ctestBuildCommand);
+    m_CTest->SetCTestConfiguration("MakeCommand", ctestBuildCommand);
     }
   else
     {
@@ -66,7 +66,7 @@ bool cmCTestBuildCommand::InitialPass(
       std::string buildCommand = gen->GenerateBuildCommand(cmakeMakeProgram, cmakeProjectName,
         0, cmakeBuildConfiguration, true);
 
-      m_CTest->SetDartConfiguration("MakeCommand", buildCommand.c_str());
+      m_CTest->SetCTestConfiguration("MakeCommand", buildCommand.c_str());
       }
     else
       {

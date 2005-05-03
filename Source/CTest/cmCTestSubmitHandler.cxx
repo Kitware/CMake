@@ -645,7 +645,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
 //----------------------------------------------------------------------------
 int cmCTestSubmitHandler::ProcessHandler()
 {
-  const std::string &buildDirectory = m_CTest->GetDartConfiguration("BuildDirectory");
+  const std::string &buildDirectory = m_CTest->GetCTestConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
     {
     std::cerr << "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl;
@@ -700,19 +700,19 @@ int cmCTestSubmitHandler::ProcessHandler()
       cnt ++;
       }
     }
-  std::cout << "Submit files (using " << m_CTest->GetDartConfiguration("DropMethod") << ")"
+  std::cout << "Submit files (using " << m_CTest->GetCTestConfiguration("DropMethod") << ")"
     << std::endl;
   this->SetLogFile(&ofs);
-  if ( m_CTest->GetDartConfiguration("DropMethod") == "" ||
-    m_CTest->GetDartConfiguration("DropMethod") ==  "ftp" )
+  if ( m_CTest->GetCTestConfiguration("DropMethod") == "" ||
+    m_CTest->GetCTestConfiguration("DropMethod") ==  "ftp" )
     {
     ofs << "Using drop method: FTP" << std::endl;
     std::cout << "  Using FTP submit method" << std::endl;
     std::string url = "ftp://";
-    url += cmCTest::MakeURLSafe(m_CTest->GetDartConfiguration("DropSiteUser")) + ":" + 
-      cmCTest::MakeURLSafe(m_CTest->GetDartConfiguration("DropSitePassword")) + "@" + 
-      m_CTest->GetDartConfiguration("DropSite") + 
-      cmCTest::MakeURLSafe(m_CTest->GetDartConfiguration("DropLocation"));
+    url += cmCTest::MakeURLSafe(m_CTest->GetCTestConfiguration("DropSiteUser")) + ":" + 
+      cmCTest::MakeURLSafe(m_CTest->GetCTestConfiguration("DropSitePassword")) + "@" + 
+      m_CTest->GetCTestConfiguration("DropSite") + 
+      cmCTest::MakeURLSafe(m_CTest->GetCTestConfiguration("DropLocation"));
     if ( !this->SubmitUsingFTP(buildDirectory+"/Testing/"+m_CTest->GetCurrentTag(), 
         files, prefix, url) )
       {
@@ -720,7 +720,7 @@ int cmCTestSubmitHandler::ProcessHandler()
       ofs << "  Problems when submitting via FTP" << std::endl;
       return -1;
       }
-    if ( !this->TriggerUsingHTTP(files, prefix, m_CTest->GetDartConfiguration("TriggerSite")) )
+    if ( !this->TriggerUsingHTTP(files, prefix, m_CTest->GetCTestConfiguration("TriggerSite")) )
       {
       std::cerr << "  Problems when triggering via HTTP" << std::endl;
       ofs << "  Problems when triggering via HTTP" << std::endl;
@@ -730,28 +730,28 @@ int cmCTestSubmitHandler::ProcessHandler()
     ofs << "  Submission successful" << std::endl;
     return 0;
     }
-  else if ( m_CTest->GetDartConfiguration("DropMethod") == "http" )
+  else if ( m_CTest->GetCTestConfiguration("DropMethod") == "http" )
     {
     ofs << "Using drop method: HTTP" << std::endl;
     std::cout << "  Using HTTP submit method" << std::endl;
     std::string url = "http://";
-    if ( m_CTest->GetDartConfiguration("DropSiteUser").size() > 0 )
+    if ( m_CTest->GetCTestConfiguration("DropSiteUser").size() > 0 )
       {
-      url += m_CTest->GetDartConfiguration("DropSiteUser");
-      if ( m_CTest->GetDartConfiguration("DropSitePassword").size() > 0 )
+      url += m_CTest->GetCTestConfiguration("DropSiteUser");
+      if ( m_CTest->GetCTestConfiguration("DropSitePassword").size() > 0 )
         {
-        url += ":" + m_CTest->GetDartConfiguration("DropSitePassword");
+        url += ":" + m_CTest->GetCTestConfiguration("DropSitePassword");
         }
       url += "@";
       }
-    url += m_CTest->GetDartConfiguration("DropSite") + m_CTest->GetDartConfiguration("DropLocation");
+    url += m_CTest->GetCTestConfiguration("DropSite") + m_CTest->GetCTestConfiguration("DropLocation");
     if ( !this->SubmitUsingHTTP(buildDirectory +"/Testing/"+m_CTest->GetCurrentTag(), files, prefix, url) )
       {
       std::cerr << "  Problems when submitting via HTTP" << std::endl;
       ofs << "  Problems when submitting via HTTP" << std::endl;
       return -1;
       }
-    if ( !this->TriggerUsingHTTP(files, prefix, m_CTest->GetDartConfiguration("TriggerSite")) )
+    if ( !this->TriggerUsingHTTP(files, prefix, m_CTest->GetCTestConfiguration("TriggerSite")) )
       {
       std::cerr << "  Problems when triggering via HTTP" << std::endl;
       ofs << "  Problems when triggering via HTTP" << std::endl;
@@ -761,12 +761,12 @@ int cmCTestSubmitHandler::ProcessHandler()
     ofs << "  Submission successful" << std::endl;
     return 0;
     }
-  else if ( m_CTest->GetDartConfiguration("DropMethod") == "xmlrpc" )
+  else if ( m_CTest->GetCTestConfiguration("DropMethod") == "xmlrpc" )
     {
     ofs << "Using drop method: XML-RPC" << std::endl;
     std::cout << "  Using XML-RPC submit method" << std::endl;
-    std::string url = m_CTest->GetDartConfiguration("DropSite");
-    prefix = m_CTest->GetDartConfiguration("DropLocation");
+    std::string url = m_CTest->GetCTestConfiguration("DropSite");
+    prefix = m_CTest->GetCTestConfiguration("DropLocation");
     if ( !this->SubmitUsingXMLRPC(buildDirectory+"/Testing/"+m_CTest->GetCurrentTag(), files, prefix, url) )
       {
       std::cerr << "  Problems when submitting via XML-RPC" << std::endl;
@@ -777,16 +777,16 @@ int cmCTestSubmitHandler::ProcessHandler()
     ofs << "  Submission successful" << std::endl;
     return 0;
     }
-  else if ( m_CTest->GetDartConfiguration("DropMethod") == "scp" )
+  else if ( m_CTest->GetCTestConfiguration("DropMethod") == "scp" )
     {
     std::string url;
-    if ( m_CTest->GetDartConfiguration("DropSiteUser").size() > 0 )
+    if ( m_CTest->GetCTestConfiguration("DropSiteUser").size() > 0 )
       {
-      url += m_CTest->GetDartConfiguration("DropSiteUser") + "@";
+      url += m_CTest->GetCTestConfiguration("DropSiteUser") + "@";
       }
-    url += m_CTest->GetDartConfiguration("DropSite") + ":" + m_CTest->GetDartConfiguration("DropLocation");
+    url += m_CTest->GetCTestConfiguration("DropSite") + ":" + m_CTest->GetCTestConfiguration("DropLocation");
 
-    if ( !this->SubmitUsingSCP(m_CTest->GetDartConfiguration("ScpCommand"),
+    if ( !this->SubmitUsingSCP(m_CTest->GetCTestConfiguration("ScpCommand"),
         buildDirectory+"/Testing/"+m_CTest->GetCurrentTag(), files, prefix, url) )
       {
       std::cerr << "  Problems when submitting via SCP" << std::endl;
@@ -796,15 +796,15 @@ int cmCTestSubmitHandler::ProcessHandler()
     std::cout << "  Submission successful" << std::endl;
     ofs << "  Submission successful" << std::endl;
     }
-  std::cout << "   Unknown submission method: \"" << m_CTest->GetDartConfiguration("DropMethod") << "\"" << std::endl;
+  std::cout << "   Unknown submission method: \"" << m_CTest->GetCTestConfiguration("DropMethod") << "\"" << std::endl;
   return -1;
 }
 
 //----------------------------------------------------------------------------
 std::string cmCTestSubmitHandler::GetSubmitResultsPrefix()
 {
-  std::string name = m_CTest->GetDartConfiguration("Site") +
-    "___" + m_CTest->GetDartConfiguration("BuildName") +
+  std::string name = m_CTest->GetCTestConfiguration("Site") +
+    "___" + m_CTest->GetCTestConfiguration("BuildName") +
     "___" + m_CTest->GetCurrentTag() + "-" +
     m_CTest->GetTestModelString() + "___XML___";
   return name;

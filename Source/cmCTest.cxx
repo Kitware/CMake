@@ -344,7 +344,7 @@ int cmCTest::Initialize(const char* binary_dir)
       //std::cout << "TestModel: " << m_TestModel << std::endl;
       if ( m_TestModel == cmCTest::NIGHTLY )
         {
-        lctime = cmCTest::GetNightlyTime(m_DartConfiguration["NightlyStartTime"],
+        lctime = cmCTest::GetNightlyTime(m_CTestConfiguration["NightlyStartTime"],
           m_ExtraVerbose,
           m_TomorrowTag);
         }
@@ -424,13 +424,13 @@ bool cmCTest::UpdateCTestConfiguration()
       }
     std::string key = line.substr(0, cpos);
     std::string value = cmCTest::CleanString(line.substr(cpos+1, line.npos));
-    m_DartConfiguration[key] = value;
+    m_CTestConfiguration[key] = value;
     }
   fin.close();
   if ( m_ProduceXML )
     {
-    m_TimeOut = atoi(m_DartConfiguration["TimeOut"].c_str());
-    m_CompressXMLFiles = cmSystemTools::IsOn(m_DartConfiguration["CompressSubmission"].c_str());
+    m_TimeOut = atoi(m_CTestConfiguration["TimeOut"].c_str());
+    m_CompressXMLFiles = cmSystemTools::IsOn(m_CTestConfiguration["CompressSubmission"].c_str());
     }
   return true;
 }
@@ -621,7 +621,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[UPDATE_TEST] || m_Tests[ALL_TEST] )
     {
     cmCTestGenericHandler* uphandler = this->GetHandler("update");
-    uphandler->SetOption("SourceDirectory", this->GetDartConfiguration("SourceDirectory").c_str());
+    uphandler->SetOption("SourceDirectory", this->GetCTestConfiguration("SourceDirectory").c_str());
     update_count = uphandler->ProcessHandler(); 
     if ( update_count < 0 )
       {
@@ -977,10 +977,10 @@ int cmCTest::RunTest(std::vector<const char*> argv,
 void cmCTest::StartXML(std::ostream& ostr)
 {
   ostr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    << "<Site BuildName=\"" << m_DartConfiguration["BuildName"]
+    << "<Site BuildName=\"" << m_CTestConfiguration["BuildName"]
     << "\" BuildStamp=\"" << m_CurrentTag << "-"
     << this->GetTestModelString() << "\" Name=\""
-    << m_DartConfiguration["Site"] << "\" Generator=\"ctest"
+    << m_CTestConfiguration["Site"] << "\" Generator=\"ctest"
     << cmVersion::GetCMakeVersion()
     << "\">" << std::endl;
 }
@@ -990,14 +990,14 @@ void cmCTest::EndXML(std::ostream& ostr)
   ostr << "</Site>" << std::endl;
 }
 
-int cmCTest::GenerateDartNotesOutput(std::ostream& os, const cmCTest::tm_VectorOfStrings& files)
+int cmCTest::GenerateCTestNotesOutput(std::ostream& os, const cmCTest::tm_VectorOfStrings& files)
 {
   cmCTest::tm_VectorOfStrings::const_iterator it;
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     << "<?xml-stylesheet type=\"text/xsl\" href=\"Dart/Source/Server/XSL/Build.xsl <file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
-    << "<Site BuildName=\"" << m_DartConfiguration["BuildName"] << "\" BuildStamp=\"" 
+    << "<Site BuildName=\"" << m_CTestConfiguration["BuildName"] << "\" BuildStamp=\"" 
     << m_CurrentTag << "-" << this->GetTestModelString() << "\" Name=\"" 
-    << m_DartConfiguration["Site"] << "\" Generator=\"ctest"
+    << m_CTestConfiguration["Site"] << "\" Generator=\"ctest"
     << cmVersion::GetCMakeVersion()
     << "\">\n"
     << "<Notes>" << std::endl;
@@ -1056,7 +1056,7 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
     return 1;
     }
 
-  this->GenerateDartNotesOutput(ofs, files);
+  this->GenerateCTestNotesOutput(ofs, files);
   return 0;
 }
 
@@ -1995,8 +1995,8 @@ void cmCTest::PopulateCustomInteger(cmMakefile* mf, const char* def, int& val)
 
 std::string cmCTest::GetShortPathToFile(const char* cfname)
 {
-  const std::string& sourceDir = this->GetDartConfiguration("SourceDirectory");
-  const std::string& buildDir = this->GetDartConfiguration("BuildDirectory");
+  const std::string& sourceDir = this->GetCTestConfiguration("SourceDirectory");
+  const std::string& buildDir = this->GetCTestConfiguration("BuildDirectory");
   std::string fname = cmSystemTools::CollapseFullPath(cfname);
 
   // Find relative paths to both directories
@@ -2046,12 +2046,12 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
   return path;
 }
 
-std::string cmCTest::GetDartConfiguration(const char *name)
+std::string cmCTest::GetCTestConfiguration(const char *name)
 {
-  return m_DartConfiguration[name];
+  return m_CTestConfiguration[name];
 }
 
-void cmCTest::SetDartConfiguration(const char *name, const char* value)
+void cmCTest::SetCTestConfiguration(const char *name, const char* value)
 {
   if ( !name )
     {
@@ -2059,10 +2059,10 @@ void cmCTest::SetDartConfiguration(const char *name, const char* value)
     }
   if ( !value )
     {
-    m_DartConfiguration.erase(name);
+    m_CTestConfiguration.erase(name);
     return;
     }
-  m_DartConfiguration[name] = value;
+  m_CTestConfiguration[name] = value;
 }
 
   
@@ -2096,7 +2096,7 @@ bool cmCTest::GetProduceXML()
   return m_ProduceXML;
 }
 
-bool cmCTest::SetDartConfigurationFromCMakeVariable(cmMakefile* mf, const char* dconfig, const char* cmake_var)
+bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf, const char* dconfig, const char* cmake_var)
 {
   const char* ctvar;
   ctvar = mf->GetDefinition(cmake_var);
@@ -2104,6 +2104,6 @@ bool cmCTest::SetDartConfigurationFromCMakeVariable(cmMakefile* mf, const char* 
     {
     return false;
     }
-  this->SetDartConfiguration(dconfig, ctvar);
+  this->SetCTestConfiguration(dconfig, ctvar);
   return true;
 }

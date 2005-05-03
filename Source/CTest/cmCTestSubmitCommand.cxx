@@ -30,13 +30,13 @@ bool cmCTestSubmitCommand::InitialPass(
 
   const char* res_var = args[0].c_str();
 
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "DropMethod", "CTEST_DROP_METHOD");
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "DropSite", "CTEST_DROP_SITE");
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "DropLocation", "CTEST_DROP_LOCATION");
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "DropSiteUser", "CTEST_DROP_SITE_USER");
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "DropSitePassword", "CTEST_DROP_SITE_PASSWORD");
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "TriggerSite", "CTEST_TRIGGER_SITE");
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "ScpCommand", "CTEST_SCP_COMMAND");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropMethod", "CTEST_DROP_METHOD");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropSite", "CTEST_DROP_SITE");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropLocation", "CTEST_DROP_LOCATION");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropSiteUser", "CTEST_DROP_SITE_USER");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropSitePassword", "CTEST_DROP_SITE_PASSWORD");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "TriggerSite", "CTEST_TRIGGER_SITE");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "ScpCommand", "CTEST_SCP_COMMAND");
 
   cmCTestGenericHandler* handler = m_CTest->GetHandler("submit");
   if ( !handler )

@@ -94,8 +94,8 @@ public:
   std::string GetTestModelString();
   static int GetTestModelFromString(const char* str);
   static std::string CleanString(const std::string& str);
-  std::string GetDartConfiguration(const char *name);
-  void SetDartConfiguration(const char *name, const char* value);
+  std::string GetCTestConfiguration(const char *name);
+  void SetCTestConfiguration(const char *name, const char* value);
   
   /**
    * constructor and destructor
@@ -191,7 +191,7 @@ public:
   /*
    * Set the CTest variable from CMake variable
    */
-  bool SetDartConfigurationFromCMakeVariable(cmMakefile* mf, const char* dconfig, const char* cmake_var);
+  bool SetCTestConfigurationFromCMakeVariable(cmMakefile* mf, const char* dconfig, const char* cmake_var);
 
   //! Make string safe to be send as an URL
   static std::string MakeURLSafe(const std::string&);
@@ -229,10 +229,10 @@ private:
   };
   
   //! Map of configuration properties
-  typedef std::map<cmStdString, cmStdString> tm_DartConfigurationMap;
+  typedef std::map<cmStdString, cmStdString> tm_CTestConfigurationMap;
 
   std::string             m_CTestConfigFile;
-  tm_DartConfigurationMap m_DartConfiguration;
+  tm_CTestConfigurationMap m_CTestConfiguration;
   int                     m_Tests[LAST_TEST];
   
   std::string             m_CurrentTag;
@@ -279,7 +279,7 @@ private:
   bool UpdateCTestConfiguration();
 
   //! Create not from files.
-  int GenerateDartNotesOutput(std::ostream& os, const tm_VectorOfStrings& files);
+  int GenerateCTestNotesOutput(std::ostream& os, const tm_VectorOfStrings& files);
 
   ///! Run CMake and build a test and then run it as a single test.
   int RunCMakeAndTest(std::string* output);

@@ -31,8 +31,8 @@ bool cmCTestUpdateCommand::InitialPass(
   const char* source_dir = args[0].c_str();
   const char* res_var = args[1].c_str();
 
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "CVSCommand", "CTEST_CVS_COMMAND");
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "SVNCommand", "CTEST_SVN_COMMAND");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "CVSCommand", "CTEST_CVS_COMMAND");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "SVNCommand", "CTEST_SVN_COMMAND");
 
   cmCTestGenericHandler* handler = m_CTest->GetHandler("update");
   if ( !handler )

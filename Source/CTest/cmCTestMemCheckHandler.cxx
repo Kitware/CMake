@@ -279,20 +279,20 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
 bool cmCTestMemCheckHandler::InitializeMemoryChecking()
 {
   // Setup the command
-  if ( cmSystemTools::FileExists(m_CTest->GetDartConfiguration("MemoryCheckCommand").c_str()) )
+  if ( cmSystemTools::FileExists(m_CTest->GetCTestConfiguration("MemoryCheckCommand").c_str()) )
     {
     m_MemoryTester 
-      = cmSystemTools::ConvertToOutputPath(m_CTest->GetDartConfiguration("MemoryCheckCommand").c_str());
+      = cmSystemTools::ConvertToOutputPath(m_CTest->GetCTestConfiguration("MemoryCheckCommand").c_str());
     }
-  else if ( cmSystemTools::FileExists(m_CTest->GetDartConfiguration("PurifyCommand").c_str()) )
+  else if ( cmSystemTools::FileExists(m_CTest->GetCTestConfiguration("PurifyCommand").c_str()) )
     {
     m_MemoryTester 
-      = cmSystemTools::ConvertToOutputPath(m_CTest->GetDartConfiguration("PurifyCommand").c_str());
+      = cmSystemTools::ConvertToOutputPath(m_CTest->GetCTestConfiguration("PurifyCommand").c_str());
     }
-  else if ( cmSystemTools::FileExists(m_CTest->GetDartConfiguration("ValgrindCommand").c_str()) )
+  else if ( cmSystemTools::FileExists(m_CTest->GetCTestConfiguration("ValgrindCommand").c_str()) )
     {
     m_MemoryTester 
-      = cmSystemTools::ConvertToOutputPath(m_CTest->GetDartConfiguration("ValgrindCommand").c_str());
+      = cmSystemTools::ConvertToOutputPath(m_CTest->GetCTestConfiguration("ValgrindCommand").c_str());
     }
   else
     {
@@ -307,13 +307,13 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     }
 
   // Setup the options
-  if ( m_CTest->GetDartConfiguration("MemoryCheckCommandOptions").size() )
+  if ( m_CTest->GetCTestConfiguration("MemoryCheckCommandOptions").size() )
     {
-    m_MemoryTesterOptions = m_CTest->GetDartConfiguration("MemoryCheckCommandOptions");
+    m_MemoryTesterOptions = m_CTest->GetCTestConfiguration("MemoryCheckCommandOptions");
     }
-  else if ( m_CTest->GetDartConfiguration("ValgrindCommandOptions").size() )
+  else if ( m_CTest->GetCTestConfiguration("ValgrindCommandOptions").size() )
     {
-    m_MemoryTesterOptions = m_CTest->GetDartConfiguration("ValgrindCommandOptions");
+    m_MemoryTesterOptions = m_CTest->GetCTestConfiguration("ValgrindCommandOptions");
     }
 
   m_MemoryTesterOutputFile = m_CTest->GetBinaryDir() + "/Testing/Temporary/MemoryChecker.log";
@@ -326,15 +326,15 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       {
       m_MemoryTesterOptions = "-q --skin=memcheck --leak-check=yes --show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=100";
       }
-    if ( m_CTest->GetDartConfiguration("MemoryCheckSuppressionFile").size() )
+    if ( m_CTest->GetCTestConfiguration("MemoryCheckSuppressionFile").size() )
       {
-      if ( !cmSystemTools::FileExists(m_CTest->GetDartConfiguration("MemoryCheckSuppressionFile").c_str()) )
+      if ( !cmSystemTools::FileExists(m_CTest->GetCTestConfiguration("MemoryCheckSuppressionFile").c_str()) )
         {
         std::cerr << "Cannot find memory checker suppression file: " 
-          << m_CTest->GetDartConfiguration("MemoryCheckSuppressionFile").c_str() << std::endl;
+          << m_CTest->GetCTestConfiguration("MemoryCheckSuppressionFile").c_str() << std::endl;
         return false;
         }
-      m_MemoryTesterOptions += " --suppressions=" + cmSystemTools::EscapeSpaces(m_CTest->GetDartConfiguration("MemoryCheckSuppressionFile").c_str()) + "";
+      m_MemoryTesterOptions += " --suppressions=" + cmSystemTools::EscapeSpaces(m_CTest->GetCTestConfiguration("MemoryCheckSuppressionFile").c_str()) + "";
       }
     }
   else if ( m_MemoryTester.find("purify") != std::string::npos )

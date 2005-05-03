@@ -31,8 +31,8 @@ bool cmCTestConfigureCommand::InitialPass(
   const char* build_dir = args[0].c_str();
   const char* res_var = args[1].c_str();
 
-  m_CTest->SetDartConfigurationFromCMakeVariable(m_Makefile, "ConfigureCommand", "CTEST_CONFIGURE_COMMAND");
-  m_CTest->SetDartConfiguration("BuildDirectory", build_dir);
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "ConfigureCommand", "CTEST_CONFIGURE_COMMAND");
+  m_CTest->SetCTestConfiguration("BuildDirectory", build_dir);
 
   cmCTestGenericHandler* handler = m_CTest->GetHandler("configure");
   if ( !handler )
