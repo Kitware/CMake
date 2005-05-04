@@ -288,6 +288,8 @@ int cmCTestUpdateHandler::ProcessHandler()
       }
     }
 
+  updateCommand = "\"" + updateCommand + "\"";
+
   // First, check what the current state of repository is
   std::string command = "";
   switch( updateType )
