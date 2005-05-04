@@ -658,7 +658,8 @@ std::string cmGlobalGenerator::GenerateBuildCommand(const char* makeProgram,
   (void)projectName;
   (void)config;
 
-  std::string makeCommand = makeProgram;
+  std::string makeCommand = cmSystemTools::ConvertToUnixOutputPath(makeProgram);
+
   // Since we have full control over the invocation of nmake, let us
   // make it quiet.
   if ( strcmp(this->GetName(), "NMake Makefiles") == 0 )
@@ -725,10 +726,12 @@ int cmGlobalGenerator::Build(
                                        &retVal, 0, false, timeout))
     {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
-    cmSystemTools::Error("Generator: execution of make failed.");
+    cmSystemTools::Error("Generator: execution of make failed. Make command was: ",
+      makeCommand.c_str());
     if (output)
       {
-      *output += "\nGenerator: execution of make failed.\n";
+      *output += "\nGenerator: execution of make failed. Make command was: " +
+        makeCommand + "\n";
       }
     
     // return to the original directory
