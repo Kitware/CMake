@@ -189,6 +189,7 @@ public:
    * Return false only if the last line stored had no newline
    */
   static bool Split(const char* s, kwsys_stl::vector<kwsys_stl::string>& l);
+  static bool Split(const char* s, kwsys_stl::vector<kwsys_stl::string>& l, char separator);
   
   /** 
    * Return string with space added between capitalized words

@@ -2466,6 +2466,31 @@ bool SystemTools::ComparePath(const char* c1, const char* c2)
 #endif
 }
 
+//----------------------------------------------------------------------------
+bool SystemTools::Split(const char* str, kwsys_stl::vector<kwsys_stl::string>& lines, char separator)
+{
+  kwsys_stl::string data(str);
+  kwsys_stl::string::size_type lpos = 0;
+  while(lpos < data.length())
+    {
+    kwsys_stl::string::size_type rpos = data.find_first_of(separator, lpos);
+    if(rpos == kwsys_stl::string::npos)
+      {
+      // Line ends at end of string without a newline.
+      lines.push_back(data.substr(lpos));
+      return false;
+      }
+    else
+      {
+      // Line ends in a "\n", remove the character.
+      lines.push_back(data.substr(lpos, rpos-lpos));
+      }
+    lpos = rpos+1;
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
 bool SystemTools::Split(const char* str, kwsys_stl::vector<kwsys_stl::string>& lines)
 {
   kwsys_stl::string data(str);
