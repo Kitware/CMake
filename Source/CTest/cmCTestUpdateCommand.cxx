@@ -22,14 +22,49 @@
 bool cmCTestUpdateCommand::InitialPass(
   std::vector<std::string> const& args)
 {
-  if (args.size() != 2)
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
+  const char* source_dir = 0;
+  const char* res_var = 0;
 
-  const char* source_dir = args[0].c_str();
-  const char* res_var = args[1].c_str();
+  bool havereturn_variable = false;
+  bool havesource = false;
+  for(size_t i=0; i < args.size(); ++i)
+    {
+    if ( havereturn_variable )
+      {
+      res_var = args[i].c_str();
+      havereturn_variable = false;
+      }
+    else if ( havesource )
+      {
+      source_dir = args[i].c_str();
+      havesource = false;
+      }
+    else if(args[i] == "RETURN_VALUE")
+      {
+      if ( res_var )
+        {
+        this->SetError("called with incorrect number of arguments. RETURN_VALUE specified twice.");
+        return false;
+        }
+      havereturn_variable = true;
+      }    
+    else if(args[i] == "SOURCE")
+      {
+      if ( source_dir )
+        {
+        this->SetError("called with incorrect number of arguments. SOURCE specified twice.");
+        return false;
+        }
+      havesource = true;
+      }
+    else
+      {
+      cmOStringStream str;
+      str << "called with incorrect number of arguments. Extra argument is: " << args[i].c_str() << ".";
+      this->SetError(str.str().c_str());
+      return false;
+      }
+    }
 
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "CVSCommand", "CTEST_CVS_COMMAND");
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "SVNCommand", "CTEST_SVN_COMMAND");
@@ -40,11 +75,17 @@ bool cmCTestUpdateCommand::InitialPass(
     this->SetError("internal CTest error. Cannot instantiate update handler");
     return false;
     }
-  handler->SetOption("SourceDirectory", source_dir);
+  if ( source_dir )
+    {
+    handler->SetOption("SourceDirectory", source_dir);
+    }
   int res = handler->ProcessHandler();
-  cmOStringStream str;
-  str << res;
-  m_Makefile->AddDefinition(res_var, str.str().c_str());
+  if ( res_var )
+    {
+    cmOStringStream str;
+    str << res;
+    m_Makefile->AddDefinition(res_var, str.str().c_str());
+    }
   return true;
 }
 

@@ -66,7 +66,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_SUBMIT(res)\n"
+      "  CTEST_SUBMIT([RETURN_VALUE res])\n"
       "Submits the test results for the project.";
     }
 

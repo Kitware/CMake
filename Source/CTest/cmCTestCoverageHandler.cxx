@@ -165,8 +165,8 @@ int cmCTestCoverageHandler::ProcessHandler()
   cmSystemTools::ConvertToUnixSlashes(sourceDir);
   cmSystemTools::ConvertToUnixSlashes(binaryDir);
 
-  std::string asfGlob = sourceDir + "/*";
-  std::string abfGlob = binaryDir + "/*";
+  //std::string asfGlob = sourceDir + "/*";
+  //std::string abfGlob = binaryDir + "/*";
   std::string daGlob = binaryDir + "/*.da";
   std::string gcovOutputRex = "[0-9]+\\.[0-9]+% of [0-9]+ (source |)lines executed in file (.*)$";
   std::string gcovOutputRex2 = "^Creating (.*\\.gcov)\\.";
@@ -347,8 +347,8 @@ int cmCTestCoverageHandler::ProcessHandler()
   int cnt = 0;
   long total_tested = 0;
   long total_untested = 0;
-  std::string fullSourceDir = sourceDir + "/";
-  std::string fullBinaryDir = binaryDir + "/";
+  //std::string fullSourceDir = sourceDir + "/";
+  //std::string fullBinaryDir = binaryDir + "/";
   for ( fileIterator = totalCoverage.begin();
     fileIterator != totalCoverage.end();
     ++fileIterator )

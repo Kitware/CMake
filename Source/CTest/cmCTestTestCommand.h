@@ -66,7 +66,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_TEST(build_dir res)\n"
+      "  CTEST_TEST([BUILD build_dir] [RETURN_VALUE res])\n"
       "Tests the given build directory and stores results in Test.xml. The "
       "second argument is a variable that will hold value.";
     }

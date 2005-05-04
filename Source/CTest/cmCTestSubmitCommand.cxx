@@ -22,13 +22,33 @@
 bool cmCTestSubmitCommand::InitialPass(
   std::vector<std::string> const& args)
 {
-  if (args.size() != 1)
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
+  const char* res_var = 0;
 
-  const char* res_var = args[0].c_str();
+  bool havereturn_variable = false;
+  for(size_t i=0; i < args.size(); ++i)
+    {
+    if ( havereturn_variable )
+      {
+      res_var = args[i].c_str();
+      havereturn_variable = false;
+      }
+    else if(args[i] == "RETURN_VALUE")
+      {
+      if ( res_var )
+        {
+        this->SetError("called with incorrect number of arguments. RETURN_VALUE specified twice.");
+        return false;
+        }
+      havereturn_variable = true;
+      }    
+    else
+      {
+      cmOStringStream str;
+      str << "called with incorrect number of arguments. Extra argument is: " << args[i].c_str() << ".";
+      this->SetError(str.str().c_str());
+      return false;
+      }
+    }
 
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropMethod", "CTEST_DROP_METHOD");
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropSite", "CTEST_DROP_SITE");
@@ -45,9 +65,12 @@ bool cmCTestSubmitCommand::InitialPass(
     return false;
     }
   int res = handler->ProcessHandler();
-  cmOStringStream str;
-  str << res;
-  m_Makefile->AddDefinition(res_var, str.str().c_str());
+  if ( res_var )
+    {
+    cmOStringStream str;
+    str << res;
+    m_Makefile->AddDefinition(res_var, str.str().c_str());
+    }
   return true;
 }
 

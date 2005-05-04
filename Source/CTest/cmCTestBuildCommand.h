@@ -66,7 +66,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_BUILD(build_dir res)\n"
+      "  CTEST_BUILD([BUILD build_dir] [RETURN_VALUE res])\n"
       "Builds the given build directory and stores results in Build.xml.";
     }
 

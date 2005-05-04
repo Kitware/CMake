@@ -66,7 +66,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_CONFIGURE(build_dir res)\n"
+      "  CTEST_CONFIGURE(BUILD build_dir RETURN_VALUE res)\n"
       "Configures the given build directory and stores results in Configure.xml. The "
       "second argument is a variable that will hold return value.";
     }
