@@ -321,6 +321,13 @@ int main(int argc, const char* argv[])
     cmd[1] = "run";
     cmd[2] = argv[1];
     cmd[3] = 0;
+#if defined(__QNX__)
+    if(n == 6)
+      {
+      printf("This test is disabled on QNX for now.\n");
+      return 1;
+      }
+#endif
     fprintf(stdout, "Output on stdout before test %d.\n", n);
     fprintf(stderr, "Output on stderr before test %d.\n", n);
     fflush(stdout);
