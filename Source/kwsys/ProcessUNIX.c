@@ -765,7 +765,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
   kwsysProcessTime* timeout = 0;
   kwsysProcessTime timeoutLength;
   kwsysProcessTime timeoutTime;
-  kwsysProcessTime userStartTime;
+  kwsysProcessTime userStartTime = {0, 0};
   int user = 0;
   int expired = 0;
   int pipeId = kwsysProcess_Pipe_None;
