@@ -232,7 +232,7 @@ public:
   typedef T value_type;
 
   hash_allocator() throw(): alloc_() {}
-  hash_allocator(const hash_allocator_base& a) throw() : alloc_() {}
+  hash_allocator(const hash_allocator_base&) throw() : alloc_() {}
   hash_allocator(const hash_allocator& a) throw() : alloc_(a.alloc_) {}
   hash_allocator(const alloc_type& a) throw() : alloc_(a) {}
   ~hash_allocator() throw() {}
