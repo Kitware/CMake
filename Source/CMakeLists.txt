@@ -731,6 +731,11 @@ IF(BUILD_TESTING)
     ADD_TEST(CTestTest ${CMAKE_CTEST_COMMAND}
       -S "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" -V
       )
+    CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest2/test.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
+    ADD_TEST(CTestTest2 ${CMAKE_CTEST_COMMAND}
+      -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
+      )
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
 
   IF("${CMAKE_GENERATOR}" MATCHES XCode)
