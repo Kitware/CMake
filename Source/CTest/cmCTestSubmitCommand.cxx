@@ -50,12 +50,35 @@ bool cmCTestSubmitCommand::InitialPass(
       }
     }
 
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropMethod", "CTEST_DROP_METHOD");
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropSite", "CTEST_DROP_SITE");
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropLocation", "CTEST_DROP_LOCATION");
+  const char* ctestDropMethod   = m_Makefile->GetDefinition("CTEST_DROP_METHOD");
+  const char* ctestDropSite     = m_Makefile->GetDefinition("CTEST_DROP_SITE");
+  const char* ctestDropLocation = m_Makefile->GetDefinition("CTEST_DROP_LOCATION");
+  const char* ctestTriggerSite  = m_Makefile->GetDefinition("CTEST_TRIGGER_SITE");
+
+  if ( !ctestDropMethod )
+    {
+    ctestDropMethod = "http";
+    }
+  if ( !ctestDropSite )
+    {
+    ctestDropSite = "public.kitware.com";
+    }
+  if ( !ctestDropLocation )
+    {
+    ctestDropLocation = "/cgi-bin/HTTPUploadDartFile.cgi";
+    }
+  if ( !ctestTriggerSite )
+    {
+    ctestTriggerSite = "http://public.kitware.com/cgi-bin/Submit-Random-TestingResults.cgi";
+    }
+
+  m_CTest->SetCTestConfiguration("DropMethod",   ctestDropMethod);
+  m_CTest->SetCTestConfiguration("DropSite",     ctestDropSite);
+  m_CTest->SetCTestConfiguration("DropLocation", ctestDropLocation);
+  m_CTest->SetCTestConfiguration("TriggerSite",  ctestTriggerSite);
+
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropSiteUser", "CTEST_DROP_SITE_USER");
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropSitePassword", "CTEST_DROP_SITE_PASSWORD");
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "TriggerSite", "CTEST_TRIGGER_SITE");
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "ScpCommand", "CTEST_SCP_COMMAND");
 
   cmCTestGenericHandler* handler = m_CTest->GetHandler("submit");
