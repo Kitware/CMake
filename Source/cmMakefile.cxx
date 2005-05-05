@@ -389,6 +389,10 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
   for(size_t i =0; i < numberFunctions; ++i)
     {
     this->ExecuteCommand(lf->m_Functions[i]);
+    if ( cmSystemTools::GetFatalErrorOccured() )
+      {
+      return false;
+      }
     }
 
   // send scope ended to and function blockers
