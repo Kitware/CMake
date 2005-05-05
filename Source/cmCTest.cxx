@@ -1519,7 +1519,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       }
     else
       {
-      m_Verbose = m_ExtraVerbose;
+      m_ExtraVerbose = m_Verbose;
       cmCTest::t_TestingHandlers::iterator it;
       for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
         {
