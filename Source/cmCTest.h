@@ -151,6 +151,7 @@ public:
 
   //! Get the path to CTest
   const char* GetCTestExecutable() { return m_CTestSelf.c_str(); }
+  const char* GetCMakeExecutable() { return m_CMakeSelf.c_str(); }
 
   enum {
     EXPERIMENTAL,
