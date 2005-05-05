@@ -75,7 +75,7 @@ std::string cmGlobalVisualStudio7Generator::GenerateBuildCommand(const char* mak
     }
   if(clean)
     {
-    makeCommand += "/clean";
+    makeCommand += "/clean ";
     }
   else
     {
