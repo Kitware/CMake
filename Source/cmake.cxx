@@ -1617,7 +1617,7 @@ int cmake::CheckBuildSystem()
   // We do not need to rerun CMake.  Check dependency integrity.  Use
   // the make system's VERBOSE environment variable to enable verbose
   // output.
-  bool verbose = cmSystemTools::GetEnv("VERBOSE");
+  bool verbose = cmSystemTools::GetEnv("VERBOSE") != 0;
   cmLocalUnixMakefileGenerator2::CheckDependencies(mf, verbose);
 
   // No need to rerun.
