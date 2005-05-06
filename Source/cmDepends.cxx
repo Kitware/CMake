@@ -22,11 +22,12 @@
 #include <assert.h>
 
 //----------------------------------------------------------------------------
-cmDepends::cmDepends(const char* dir, const char* targetFile):
+cmDepends::cmDepends(const char* dir, const char* targetFile, bool verbose):
   m_Directory(dir),
   m_TargetFile(targetFile),
   m_DependsMakeFile(dir),
-  m_DependsMarkFile(dir)
+  m_DependsMarkFile(dir),
+  m_Verbose(verbose)
 {
   // Construct the path to the make and mark files.  Append
   // appropriate extensions to their names.
@@ -97,6 +98,14 @@ void cmDepends::Check()
 //----------------------------------------------------------------------------
 void cmDepends::Clear()
 {
+  // Print verbose output.
+  if(m_Verbose)
+    {
+    cmOStringStream msg;
+    msg << "Clearing dependencies for \"" << m_TargetFile << "\"." << std::endl;
+    cmSystemTools::Stdout(msg.str().c_str());
+    }
+
   // Remove the dependency mark file to be sure dependencies will be
   // regenerated.
   cmSystemTools::RemoveFile(m_DependsMarkFile.c_str());

@@ -27,7 +27,7 @@ class cmDependsFortran: public cmDepends
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
-  cmDependsFortran(const char* dir, const char* targetFile);
+  cmDependsFortran(const char* dir, const char* targetFile, bool verbose);
 
   /** Scanning need to know the build directory name, the relative
       path from the build directory to the target file, the source

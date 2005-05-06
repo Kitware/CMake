@@ -31,7 +31,7 @@ class cmDepends
 public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
-  cmDepends(const char* dir, const char* targetFile);
+  cmDepends(const char* dir, const char* targetFile, bool verbose);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDepends();
@@ -73,6 +73,9 @@ protected:
 
   // The name of the .depends file marking when dependencies were generated.
   std::string m_DependsMarkFile;
+
+  // Flag for verbose output.
+  bool m_Verbose;
 
 private:
   cmDepends(cmDepends const&); // Purposely not implemented.

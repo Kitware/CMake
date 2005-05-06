@@ -19,8 +19,8 @@
 #include "cmSystemTools.h"
 
 //----------------------------------------------------------------------------
-cmDependsC::cmDependsC(const char* dir, const char* targetFile):
-  cmDepends(dir, targetFile),
+cmDependsC::cmDependsC(const char* dir, const char* targetFile, bool verbose):
+  cmDepends(dir, targetFile, verbose),
   m_SourceFile(),
   m_IncludePath(0),
   m_IncludeRegexLine(),
@@ -34,7 +34,7 @@ cmDependsC::cmDependsC(const char* dir, const char* targetFile,
                        const char* sourceFile,
                        std::vector<std::string> const& includes,
                        const char* scanRegex, const char* complainRegex):
-  cmDepends(dir, targetFile),
+  cmDepends(dir, targetFile, false),
   m_SourceFile(sourceFile),
   m_IncludePath(&includes),
   m_IncludeRegexLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)([\">])"),
@@ -231,11 +231,44 @@ bool cmDependsC::CheckDependencies(std::istream& is)
 
     // Dependencies must be regenerated if the dependee does not exist
     // or if the depender exists and is older than the dependee.
-    int result = 0;
-    if(!cmSystemTools::FileExists(dependee.c_str()) ||
-       (cmSystemTools::FileExists(depender.c_str()) &&
-         (!cmSystemTools::FileTimeCompare(depender.c_str(), dependee.c_str(),
-                                          &result) || result < 0)))
+    bool regenerate = false;
+    if(!cmSystemTools::FileExists(dependee.c_str()))
+      {
+      // The dependee does not exist.
+      regenerate = true;
+
+      // Print verbose output.
+      if(m_Verbose)
+        {
+        cmOStringStream msg;
+        msg << "Dependee \"" << dependee
+            << "\" does not exist for depender \""
+            << depender << "\"." << std::endl;
+        cmSystemTools::Stdout(msg.str().c_str());
+        }
+      }
+    else if(cmSystemTools::FileExists(depender.c_str()))
+      {
+      // The dependee and depender both exist.  Compare file times.
+      int result = 0;
+      if((!cmSystemTools::FileTimeCompare(depender.c_str(), dependee.c_str(),
+                                          &result) || result < 0))
+        {
+        // The depender is older than the dependee.
+        regenerate = true;
+
+        // Print verbose output.
+        if(m_Verbose)
+          {
+          cmOStringStream msg;
+          msg << "Dependee \"" << dependee
+              << "\" is newer than depender \""
+              << depender << "\"." << std::endl;
+          cmSystemTools::Stdout(msg.str().c_str());
+          }
+        }
+      }
+    if(regenerate)
       {
       // Dependencies must be regenerated.
       okay = false;

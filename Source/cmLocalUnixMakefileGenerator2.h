@@ -97,7 +97,7 @@ public:
   static bool ScanDependencies(std::vector<std::string> const& args);
 
   /** Called from command-line hook to check dependencies.  */
-  static void CheckDependencies(cmMakefile* mf);
+  static void CheckDependencies(cmMakefile* mf, bool verbose);
 
 protected:
 
@@ -235,7 +235,8 @@ protected:
 
   static cmDepends* GetDependsChecker(const std::string& lang,
                                       const char* dir,
-                                      const char* objFile);
+                                      const char* objFile,
+                                      bool verbose);
 
 private:
   // Map from target name to build directory containing it for

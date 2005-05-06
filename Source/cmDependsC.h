@@ -29,7 +29,7 @@ class cmDependsC: public cmDepends
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
-  cmDependsC(const char* dir, const char* targetFile);
+  cmDependsC(const char* dir, const char* targetFile, bool verbose);
 
   /** Scanning need to know the build directory name, the relative
       path from the build directory to the target file, the source
