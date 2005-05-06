@@ -19,6 +19,9 @@
 
 #include "cmGlobalGenerator.h"
 
+class cmGeneratedFileStream;
+class cmLocalUnixMakefileGenerator3;
+
 /** \class cmGlobalUnixMakefileGenerator3
  * \brief Write a Unix makefiles.
  *
@@ -60,8 +63,15 @@ protected:
   void WriteDependMakefile();
   void WriteBuildMakefile();
   void WriteCleanMakefile();
-  void WriteSupportMakefiles();
-  
+  void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream);
+  void WriteAllRules(cmLocalUnixMakefileGenerator3 *lg, 
+                     std::ostream& makefileStream);
+
+  /** used to create a recursive make call */
+  std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);
+
+  void WriteConvenienceRules(std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3 *);
+
 };
 
 #endif
