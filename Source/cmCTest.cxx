@@ -236,6 +236,7 @@ cmCTest::cmCTest()
   m_TimeOut                = 0;
   m_CompressXMLFiles       = false;
   m_CTestConfigFile        = "";
+  m_SuppressUpdatingCTestConfiguration = false;
   int cc; 
   for ( cc=0; cc < cmCTest::LAST_TEST; cc ++ )
     {
@@ -373,6 +374,10 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag)
 
 bool cmCTest::UpdateCTestConfiguration()
 {
+  if ( m_SuppressUpdatingCTestConfiguration )
+    {
+    return true;
+    }
   std::string fileName = m_CTestConfigFile;
   if ( fileName.empty() )
     {
@@ -1032,6 +1037,19 @@ int cmCTest::GenerateCTestNotesOutput(std::ostream& os, const cmCTest::tm_Vector
   return 1;
 }
 
+int cmCTest::GenerateNotesFile(const std::vector<cmStdString> &files)
+{
+  cmGeneratedFileStream ofs;
+  if ( !this->OpenOutputFile(m_CurrentTag, "Notes.xml", ofs) )
+    {
+    std::cerr << "Cannot open notes file" << std::endl;
+    return 1;
+    }
+
+  this->GenerateCTestNotesOutput(ofs, files);
+  return 0;
+}
+
 int cmCTest::GenerateNotesFile(const char* cfiles)
 {
   if ( !cfiles )
@@ -1049,15 +1067,7 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
     return 1;
     }
 
-  cmGeneratedFileStream ofs;
-  if ( !this->OpenOutputFile(m_CurrentTag, "Notes.xml", ofs) )
-    {
-    std::cerr << "Cannot open notes file" << std::endl;
-    return 1;
-    }
-
-  this->GenerateCTestNotesOutput(ofs, files);
-  return 0;
+  return this->GenerateNotesFile(files);
 }
 
 int cmCTest::Run(std::vector<std::string>const& args, std::string* output)

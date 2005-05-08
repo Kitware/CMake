@@ -196,6 +196,16 @@ public:
 
   //! Make string safe to be send as an URL
   static std::string MakeURLSafe(const std::string&);
+
+  //! Should ctect configuration be updated. When using new style ctest script,
+  //  this should be true.
+  void SetSuppressUpdatingCTestConfiguration(bool val)
+    {
+    m_SuppressUpdatingCTestConfiguration = val;
+    }
+
+  //! Create XML file that contains all the notes specified
+  int GenerateNotesFile(const std::vector<cmStdString> &files);
 private:
   std::string m_ConfigType;
   bool m_Verbose;
@@ -291,6 +301,7 @@ private:
   ///! Find the running cmake
   void FindRunningCMake(const char* arg0);
 
+  bool                      m_SuppressUpdatingCTestConfiguration;
 };
 
 #endif
