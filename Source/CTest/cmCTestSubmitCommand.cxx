@@ -81,6 +81,22 @@ bool cmCTestSubmitCommand::InitialPass(
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "DropSitePassword", "CTEST_DROP_SITE_PASSWORD");
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "ScpCommand", "CTEST_SCP_COMMAND");
 
+  const char* notesFilesVariable = m_Makefile->GetDefinition("CTEST_NOTES_FILES");
+  if (notesFilesVariable)
+    {
+    std::vector<std::string> notesFiles;
+    std::vector<cmStdString> newNotesFiles;
+    cmSystemTools::ExpandListArgument(notesFilesVariable,notesFiles);
+    std::vector<std::string>::iterator it;
+    for ( it = notesFiles.begin(); 
+      it != notesFiles.end();
+      ++ it )
+      {
+      newNotesFiles.push_back(*it);
+      }
+    m_CTest->GenerateNotesFile(newNotesFiles);
+    }
+
   cmCTestGenericHandler* handler = m_CTest->GetHandler("submit");
   if ( !handler )
     {
