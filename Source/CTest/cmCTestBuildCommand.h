@@ -19,6 +19,8 @@
 
 #include "cmCTestCommand.h"
 
+class cmGlobalGenerator;
+
 /** \class cmCTestBuild
  * \brief Run a ctest script
  *
@@ -28,7 +30,8 @@ class cmCTestBuildCommand : public cmCTestCommand
 {
 public:
 
-  cmCTestBuildCommand() {}
+  cmCTestBuildCommand();
+  ~cmCTestBuildCommand();
   
   /**
    * This is a virtual constructor for the command.
@@ -71,6 +74,8 @@ public:
     }
 
   cmTypeMacro(cmCTestBuildCommand, cmCTestCommand);
+
+  cmGlobalGenerator* m_GlobalGenerator;
 };
 
 

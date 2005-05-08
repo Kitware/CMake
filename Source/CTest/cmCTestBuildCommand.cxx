@@ -21,6 +21,24 @@
 #include "cmake.h"
 #include "cmGlobalGenerator.h"
 
+
+//----------------------------------------------------------------------------
+cmCTestBuildCommand::cmCTestBuildCommand()
+{
+  m_GlobalGenerator = 0;
+}
+
+//----------------------------------------------------------------------------
+cmCTestBuildCommand::~cmCTestBuildCommand()
+{
+  if ( m_GlobalGenerator )
+    {
+    delete m_GlobalGenerator;
+    m_GlobalGenerator = 0;
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmCTestBuildCommand::InitialPass(
   std::vector<std::string> const& args)
 {
@@ -97,13 +115,24 @@ bool cmCTestBuildCommand::InitialPass(
         {
         cmakeBuildConfiguration = "Release";
         }
-      cmGlobalGenerator* gen = 
-        m_Makefile->GetCMakeInstance()->CreateGlobalGenerator(cmakeGeneratorName);
-      gen->FindMakeProgram(m_Makefile);
+      if ( m_GlobalGenerator )
+        {
+        if ( strcmp(m_GlobalGenerator->GetName(), cmakeGeneratorName) != 0 )
+          {
+          delete m_GlobalGenerator;
+          m_GlobalGenerator = 0;
+          }
+        }
+      if ( !m_GlobalGenerator )
+        {
+        m_GlobalGenerator = 
+          m_Makefile->GetCMakeInstance()->CreateGlobalGenerator(cmakeGeneratorName);
+        }
+      m_GlobalGenerator->FindMakeProgram(m_Makefile);
       const char* cmakeMakeProgram = m_Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
-      std::string buildCommand = gen->GenerateBuildCommand(cmakeMakeProgram, cmakeProjectName,
-        0, cmakeBuildConfiguration, true);
-
+      std::string buildCommand
+        = m_GlobalGenerator->GenerateBuildCommand(cmakeMakeProgram, cmakeProjectName,
+          0, cmakeBuildConfiguration, true);
       m_CTest->SetCTestConfiguration("MakeCommand", buildCommand.c_str());
       }
     else
