@@ -91,6 +91,7 @@ bool cmCTestStartCommand::InitialPass(
   m_CTest->SetCTestConfiguration("BuildDirectory", bld_dir); 
 
   m_Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", "OFF");
+  m_CTest->SetSuppressUpdatingCTestConfiguration(true);
 
   int model = m_CTest->GetTestModelFromString(smodel);
   m_CTest->SetTestModel(model);
