@@ -155,6 +155,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
     this->WriteConvenienceRules(makefileStream,lg);
     }
+
+  lg->WriteSpecialTargetsBottom(makefileStream);
 }
 
 
@@ -476,33 +478,6 @@ void cmGlobalUnixMakefileGenerator3
   commands.clear();
   commands.push_back(this->GetRecursiveMakeCall("clean.make",0));
   lg->WriteMakeRule(makefileStream, "default clean target", "clean", depends, commands);
-
-
-  // Write special "cmake_check_build_system" target to run cmake with
-  // the --check-build-system flag.
-  // Build command to run CMake to check if anything needs regenerating.
-  std::string cmakefileName = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  cmakefileName += "/Makefile.cmake";
-  std::string runRule = this->GetCMakeInstance()->GetCacheDefinition("CMAKE_COMMAND");
-  runRule += " -H";
-  runRule += this->GetCMakeInstance()->GetHomeDirectory();
-  runRule += " -B";
-  runRule += this->GetCMakeInstance()->GetHomeOutputDirectory();
-  runRule += " --check-build-system ";
-  runRule += lg->ConvertToRelativeOutputPath(cmakefileName.c_str());
-
-  std::vector<std::string> no_depends;
-  commands.clear();
-  commands.push_back(runRule);
-  lg->WriteMakeRule(makefileStream,
-                    "Special rule to run CMake to check the build system "
-                    "integrity.\n"
-                    "No rule that depends on this can have "
-                    "commands that come from listfiles\n"
-                    "because they might be regenerated.",
-                    "cmake_check_build_system",
-                    no_depends,
-                    commands);
 }
 
 
