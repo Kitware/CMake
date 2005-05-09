@@ -868,7 +868,7 @@ cmLocalUnixMakefileGenerator3
   std::auto_ptr<cmDepends>
     checker(this->GetDependsChecker(lang,
                                     m_Makefile->GetStartOutputDirectory(),
-                                    objFile));
+                                    objFile, false));
   if(checker.get())
     {
     // Save the make and mark file names.
@@ -2713,20 +2713,21 @@ cmLocalUnixMakefileGenerator3
 cmDepends*
 cmLocalUnixMakefileGenerator3::GetDependsChecker(const std::string& lang,
                                                  const char* dir,
-                                                 const char* objFile)
+                                                 const char* objFile,
+                                                 bool verbose)
 {
   if(lang == "C" || lang == "CXX" || lang == "RC")
     {
-    return new cmDependsC(dir, objFile);
+    return new cmDependsC(dir, objFile, verbose);
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   else if(lang == "Fortran")
     {
-    return new cmDependsFortran(dir, objFile);
+    return new cmDependsFortran(dir, objFile, verbose);
     }
   else if(lang == "Java")
     {
-    return new cmDependsJava(dir, objFile);
+    return new cmDependsJava(dir, objFile, verbose);
     }
 #endif
   return 0;
@@ -2834,7 +2835,8 @@ cmLocalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
-void cmLocalUnixMakefileGenerator3::CheckDependencies(cmMakefile* mf)
+void cmLocalUnixMakefileGenerator3::CheckDependencies(cmMakefile* mf, 
+                                                      bool verbose)
 {
   // Get the list of languages that may have sources to check.
   const char* langDef = mf->GetDefinition("CMAKE_DEPENDS_LANGUAGES");
@@ -2863,7 +2865,7 @@ void cmLocalUnixMakefileGenerator3::CheckDependencies(cmMakefile* mf)
         // Construct a checker for the given language.
         std::auto_ptr<cmDepends>
           checker(cmLocalUnixMakefileGenerator3
-                  ::GetDependsChecker(*l, ".", f->c_str()));
+                  ::GetDependsChecker(*l, ".", f->c_str(), verbose));
         if(checker.get())
           {
           checker->Check();

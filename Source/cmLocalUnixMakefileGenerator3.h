@@ -119,7 +119,7 @@ public:
   static bool ScanDependencies(std::vector<std::string> const& args);
 
   /** Called from command-line hook to check dependencies.  */
-  static void CheckDependencies(cmMakefile* mf);
+  static void CheckDependencies(cmMakefile* mf, bool verbose);
   
   /** write some extra rules suahc as make test etc */
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
@@ -200,7 +200,8 @@ protected:
   // return the appropriate depends checker
   static cmDepends* GetDependsChecker(const std::string& lang,
                                       const char* dir,
-                                      const char* objFile);
+                                      const char* objFile,
+                                      bool verbose);
   
   
   void GenerateCustomRuleFile(const cmCustomCommand& cc);
