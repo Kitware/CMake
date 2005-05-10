@@ -130,6 +130,12 @@ public:
    * Set whether compression is done.
    */
   void SetCompression(bool compression);
+
+  /**
+   * Set name of the file that will hold the actual output. This method allows
+   * the output file to be changed during the use of cmGeneratedFileStream.
+   */
+  void SetName(const char* fname);
 };
 
 #if defined(__sgi) && !defined(__GNUC__)

@@ -162,7 +162,8 @@ void cmGeneratedFileStreamBase::Close()
 
   // Only consider replacing the destination file if no error
   // occurred.
-  if(m_Okay &&
+  if(!m_Name.empty() &&
+    m_Okay &&
     (!m_CopyIfDifferent ||
      cmSystemTools::FilesDiffer(m_TempName.c_str(), resname.c_str())))
     {
@@ -276,4 +277,15 @@ int cmGeneratedFileStreamBase::RenameFile(const char* oldname,
   /* On UNIX we have an OS-provided call to do this atomically.  */
   return rename(oldname, newname) == 0;
 #endif
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratedFileStream::SetName(const char* fname)
+{
+  if ( !fname )
+    {
+    m_Name = "";
+    return;
+    }
+  m_Name = fname;
 }
