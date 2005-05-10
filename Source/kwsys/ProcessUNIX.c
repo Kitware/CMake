@@ -73,7 +73,16 @@ do.
 /* The maximum amount to read from a pipe at a time.  */
 #define KWSYSPE_PIPE_BUFFER_SIZE 1024
 
-typedef struct timeval kwsysProcessTime;
+/* Keep track of times using a signed representation.  Switch to the
+   native (possibly unsigned) representation only when calling native
+   functions.  */
+typedef struct timeval kwsysProcessTimeNative;
+typedef struct kwsysProcessTime_s kwsysProcessTime;
+struct kwsysProcessTime_s
+{
+  long tv_sec;
+  long tv_usec;
+};
 
 typedef struct kwsysProcessCreateInformation_s
 {
@@ -94,7 +103,7 @@ static int kwsysProcessSetupOutputPipeFile(int* p, const char* name);
 static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
                                       kwsysProcessTime* timeoutTime);
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
-                                      kwsysProcessTime* timeoutLength);
+                                      kwsysProcessTimeNative* timeoutLength);
 static kwsysProcessTime kwsysProcessTimeGetCurrent(void);
 static double kwsysProcessTimeToDouble(kwsysProcessTime t);
 static kwsysProcessTime kwsysProcessTimeFromDouble(double d);
@@ -762,8 +771,8 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
 {
   int i;
   int max = -1;
-  kwsysProcessTime* timeout = 0;
-  kwsysProcessTime timeoutLength;
+  kwsysProcessTimeNative* timeout = 0;
+  kwsysProcessTimeNative timeoutLength;
   kwsysProcessTime timeoutTime;
   kwsysProcessTime userStartTime = {0, 0};
   int user = 0;
@@ -1473,7 +1482,7 @@ static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
 /* Get the length of time before the given timeout time arrives.
    Returns 1 if the time has already arrived, and 0 otherwise.  */
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
-                                      kwsysProcessTime* timeoutLength)
+                                      kwsysProcessTimeNative* timeoutLength)
 {
   if(timeoutTime->tv_sec < 0)
     {
@@ -1484,8 +1493,9 @@ static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
     {
     /* Calculate the remaining time.  */
     kwsysProcessTime currentTime = kwsysProcessTimeGetCurrent();
-    *timeoutLength = kwsysProcessTimeSubtract(*timeoutTime, currentTime);
-    if(timeoutLength->tv_sec < 0)
+    kwsysProcessTime timeLeft = kwsysProcessTimeSubtract(*timeoutTime,
+                                                         currentTime);
+    if(timeLeft.tv_sec < 0)
       {
       /* Timeout has already expired.  */
       return 1;
@@ -1493,6 +1503,8 @@ static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
     else
       {
       /* There is some time left.  */
+      timeoutLength->tv_sec = timeLeft.tv_sec;
+      timeoutLength->tv_usec = timeLeft.tv_usec;
       return 0;
       }
     }
@@ -1502,7 +1514,10 @@ static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
 static kwsysProcessTime kwsysProcessTimeGetCurrent(void)
 {
   kwsysProcessTime current;
-  gettimeofday(&current, 0);
+  kwsysProcessTimeNative current_native;
+  gettimeofday(&current_native, 0);
+  current.tv_sec = (long)current_native.tv_sec;
+  current.tv_usec = (long)current_native.tv_usec;
   return current;
 }
 
