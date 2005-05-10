@@ -50,6 +50,11 @@ protected:
   // Method to scan a single file.
   void Scan(std::istream& is, const char* directory);
 
+  // Method to parse a single dependency line.
+  bool ParseDependency(const char* line, std::string& depender,
+                       std::string& dependee);
+  const char* ParseFileName(const char* in, std::string& name);
+
   // The source file from which to start scanning.
   std::string m_SourceFile;
 

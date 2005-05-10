@@ -18,6 +18,8 @@
 
 #include "cmSystemTools.h"
 
+#include <ctype.h> // isspace
+
 //----------------------------------------------------------------------------
 cmDependsC::cmDependsC(const char* dir, const char* targetFile, bool verbose):
   cmDepends(dir, targetFile, verbose),
@@ -181,52 +183,10 @@ bool cmDependsC::CheckDependencies(std::istream& is)
   std::string dependee;
   while(cmSystemTools::GetLineFromStream(is, line))
     {
-    // Skip empty lines and comments.
-    std::string::size_type pos = line.find_first_not_of(" \t\r\n");
-    if(pos == std::string::npos || line[pos] == '#')
+    // Parse the dependency line.
+    if(!this->ParseDependency(line.c_str(), depender, dependee))
       {
       continue;
-      }
-
-    // Strip leading whitespace.
-    if(pos > 0)
-      {
-      line = line.substr(pos);
-      }
-
-    // Skip lines too short to have a dependency.
-    if(line.size() < 3)
-      {
-      continue;
-      }
-
-    // Find the colon on the line.  Skip the first two characters to
-    // avoid finding the colon in a drive letter on Windows.  Ignore
-    // the line if a colon cannot be found.
-    if((pos = line.find(':', 2)) == std::string::npos)
-      {
-      continue;
-      }
-
-    // Split the line into depender and dependee.
-    depender = line.substr(0, pos);
-    dependee = line.substr(pos+1);
-
-    // Strip whitespace from the dependee.
-    if((pos = dependee.find_first_not_of(" \t\r\n")) != std::string::npos &&
-       pos > 0)
-      {
-      dependee = dependee.substr(pos);
-      }
-    if((pos = dependee.find_last_not_of(" \t\r\n")) != std::string::npos)
-      {
-      dependee = dependee.substr(0, pos+1);
-      }
-
-    // Strip whitespace from the depender.
-    if((pos = depender.find_last_not_of(" \t\r\n")) != std::string::npos)
-      {
-      depender = depender.substr(0, pos+1);
       }
 
     // Dependencies must be regenerated if the dependee does not exist
@@ -318,4 +278,63 @@ void cmDependsC::Scan(std::istream& is, const char* directory)
         }
       }
     }
+}
+
+//----------------------------------------------------------------------------
+bool cmDependsC::ParseDependency(const char* line, std::string& depender,
+                                 std::string& dependee)
+{
+  // Start with empty names.
+  depender = "";
+  dependee = "";
+
+  // Get the left-hand-side of the dependency.
+  const char* c = this->ParseFileName(line, depender);
+
+  // Skip the ':' separator.
+  for(;c && *c && isspace(*c);++c);
+  if(!c || !*c || *c != ':')
+    {
+    return false;
+    }
+  ++c;
+
+  // Get the right-hand-side of the dependency.
+  return this->ParseFileName(c, dependee)?true:false;
+}
+
+//----------------------------------------------------------------------------
+const char* cmDependsC::ParseFileName(const char* in, std::string& name)
+{
+  // Skip leading whitespace.
+  const char* c = in;
+  for(;c && *c && isspace(*c);++c);
+
+  // If this is an empty line or a comment line return failure.
+  if(!c || !*c || *c == '#')
+    {
+    return 0;
+    }
+
+  // Parse the possibly quoted file name.
+  bool quoted = false;
+  for(;*c && (quoted ||
+              ((*c != ':' || name.size() == 1) && !isspace(*c))); ++c)
+    {
+    if(*c == '"')
+      {
+      quoted = !quoted;
+      }
+    else if(!quoted && *c == '\\' && isspace(*(c+1)))
+      {
+      name += *(++c);
+      }
+    else
+      {
+      name += *c;
+      }
+    }
+
+  // Return the ending position.
+  return c;
 }
