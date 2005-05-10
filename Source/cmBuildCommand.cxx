@@ -30,10 +30,12 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
   const char* define = args[0].c_str();
   const char* cacheValue
     = m_Makefile->GetDefinition(define);
-  std::string makecommand;
   std::string makeprogram = args[1];
-  std::string makecmd = m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->GenerateBuildCommand(
+  std::string makecommand
+    = m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->GenerateBuildCommand(
     makeprogram.c_str(), m_Makefile->GetProjectName(), 0, "Release", true);
+#if 0
+  std::string makecommand;
   if(makeprogram.find("msdev") != std::string::npos ||
      makeprogram.find("MSDEV") != std::string::npos )
     {
@@ -64,6 +66,7 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
     makecommand += " -i";
     }
   std::cerr << "-- Compare: " << makecommand.c_str() << " and " << makecmd.c_str() << ": " << (makecmd == makecommand) << std::endl;
+#endif
   if(cacheValue)
     {
     return true;
