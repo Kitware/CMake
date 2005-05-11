@@ -29,14 +29,15 @@ class cmDependsC: public cmDepends
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
-  cmDependsC(const char* dir, const char* targetFile, bool verbose);
+  cmDependsC();
 
   /** Scanning need to know the build directory name, the relative
       path from the build directory to the target file, the source
       file from which to start scanning, and the include file search
-      path.  It also uses the include file regular expressions.  */
-  cmDependsC(const char* dir, const char* targetFile,
-             const char* sourceFile, std::vector<std::string> const& includes,
+      path.  It also uses the include file regular expressions.  
+      This is a good example of why constructors should not take arguments.
+  */
+  cmDependsC(const char* sourceFile, std::vector<std::string> const& includes,
              const char* scanRegex, const char* complainRegex);
 
   /** Virtual destructor to cleanup subclasses properly.  */

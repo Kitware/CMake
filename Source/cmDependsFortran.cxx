@@ -76,19 +76,15 @@ struct cmDependsFortranParser_s
 };
 
 //----------------------------------------------------------------------------
-cmDependsFortran::cmDependsFortran(const char* dir, const char* targetFile,
-                                   bool verbose):
-  cmDepends(dir, targetFile, verbose),
+cmDependsFortran::cmDependsFortran():
   m_SourceFile(),
   m_IncludePath(0)
 {
 }
 
 //----------------------------------------------------------------------------
-cmDependsFortran::cmDependsFortran(const char* dir, const char* targetFile,
-                                   const char* sourceFile,
+cmDependsFortran::cmDependsFortran(const char* sourceFile,
                                    std::vector<std::string> const& includes):
-  cmDepends(dir, targetFile, false),
   m_SourceFile(sourceFile),
   m_IncludePath(&includes)
 {

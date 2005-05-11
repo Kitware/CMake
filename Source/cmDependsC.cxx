@@ -21,22 +21,15 @@
 #include <ctype.h> // isspace
 
 //----------------------------------------------------------------------------
-cmDependsC::cmDependsC(const char* dir, const char* targetFile, bool verbose):
-  cmDepends(dir, targetFile, verbose),
-  m_SourceFile(),
-  m_IncludePath(0),
-  m_IncludeRegexLine(),
-  m_IncludeRegexScan(),
-  m_IncludeRegexComplain()
+cmDependsC::cmDependsC()
 {
 }
 
 //----------------------------------------------------------------------------
-cmDependsC::cmDependsC(const char* dir, const char* targetFile,
-                       const char* sourceFile,
+// yummy look at all those constructor arguments
+cmDependsC::cmDependsC(const char* sourceFile,
                        std::vector<std::string> const& includes,
                        const char* scanRegex, const char* complainRegex):
-  cmDepends(dir, targetFile, false),
   m_SourceFile(sourceFile),
   m_IncludePath(&includes),
   m_IncludeRegexLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)([\">])"),

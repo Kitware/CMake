@@ -3102,21 +3102,27 @@ cmLocalUnixMakefileGenerator2::GetDependsChecker(const std::string& lang,
                                                  const char* objFile,
                                                  bool verbose)
 {
+  cmDepends *ret = 0;
   if(lang == "C" || lang == "CXX" || lang == "RC")
     {
-    return new cmDependsC(dir, objFile, verbose);
+    ret = new cmDependsC();
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   else if(lang == "Fortran")
     {
-    return new cmDependsFortran(dir, objFile, verbose);
+    ret = new cmDependsFortran();
     }
   else if(lang == "Java")
     {
-    return new cmDependsJava(dir, objFile, verbose);
+    ret = new cmDependsJava();
     }
 #endif
-  return 0;
+  if (ret)
+    {
+    ret->SetTargetFile(dir, objFile, ".depends",".depends.make");
+    ret->SetVerbose(verbose);
+    }
+  return ret;
 }
 
 //----------------------------------------------------------------------------
@@ -3201,19 +3207,22 @@ cmLocalUnixMakefileGenerator2
   if(lang == "C" || lang == "CXX" || lang == "RC")
     {
     // TODO: Handle RC (resource files) dependencies correctly.
-    cmDependsC scanner(".", objFile, srcFile, includes,
+    cmDependsC scanner(srcFile, includes,
                        includeRegexScan.c_str(), includeRegexComplain.c_str());
+    scanner.SetTargetFile(".",objFile,".depends",".depends.make");
     return scanner.Write();
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   else if(lang == "Fortran")
     {
-    cmDependsFortran scanner(".", objFile, srcFile, includes);
+    cmDependsFortran scanner(srcFile, includes);
+    scanner.SetTargetFile(".",objFile,".depends",".depends.make");
     return scanner.Write();
     }
   else if(lang == "Java")
     {
-    cmDependsJava scanner(".", objFile, srcFile);
+    cmDependsJava scanner(srcFile);
+    scanner.SetTargetFile(".",objFile,".depends",".depends.make");
     return scanner.Write();
     }
 #endif

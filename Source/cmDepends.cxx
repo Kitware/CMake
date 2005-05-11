@@ -22,27 +22,34 @@
 #include <assert.h>
 
 //----------------------------------------------------------------------------
-cmDepends::cmDepends(const char* dir, const char* targetFile, bool verbose):
-  m_Directory(dir),
-  m_TargetFile(targetFile),
-  m_DependsMakeFile(dir),
-  m_DependsMarkFile(dir),
-  m_Verbose(verbose)
+cmDepends::cmDepends()
 {
-  // Construct the path to the make and mark files.  Append
-  // appropriate extensions to their names.
-  m_DependsMakeFile += "/";
-  m_DependsMarkFile += "/";
-  m_DependsMakeFile += m_TargetFile;
-  m_DependsMarkFile += m_TargetFile;
-  m_DependsMakeFile += ".depends.make";
-  m_DependsMarkFile += ".depends";
+  m_Verbose = false;
 }
 
 //----------------------------------------------------------------------------
 cmDepends::~cmDepends()
 {
 }
+
+void cmDepends::SetTargetFile(const char* dir, const char* targetFile, 
+                              const char *markExt, const char *makeExt)
+{
+  m_Directory = dir;
+  m_TargetFile = targetFile;
+  
+  // Construct the path to the make and mark files.  Append
+  // appropriate extensions to their names.
+  m_DependsMarkFile = dir;
+  m_DependsMakeFile = dir;
+  m_DependsMakeFile += "/";
+  m_DependsMarkFile += "/";
+  m_DependsMakeFile += m_TargetFile;
+  m_DependsMarkFile += m_TargetFile;
+  m_DependsMakeFile += makeExt;
+  m_DependsMarkFile += markExt;
+}
+
 
 //----------------------------------------------------------------------------
 bool cmDepends::Write()

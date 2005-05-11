@@ -20,17 +20,13 @@
 #include "cmSystemTools.h"
 
 //----------------------------------------------------------------------------
-cmDependsJava::cmDependsJava(const char* dir, const char* targetFile,
-                             bool verbose):
-  cmDepends(dir, targetFile, verbose),
+cmDependsJava::cmDependsJava():
   m_SourceFile()
 {
 }
 
 //----------------------------------------------------------------------------
-cmDependsJava::cmDependsJava(const char* dir, const char* targetFile,
-                                   const char* sourceFile):
-  cmDepends(dir, targetFile, false),
+cmDependsJava::cmDependsJava(const char* sourceFile):
   m_SourceFile(sourceFile)
 {
 }

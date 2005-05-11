@@ -31,8 +31,15 @@ class cmDepends
 public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
-  cmDepends(const char* dir, const char* targetFile, bool verbose);
+  cmDepends();
+  
+  /** set the name directory and extensions of the target file to scan */
+  void SetTargetFile(const char* dir, const char* targetFile, 
+                     const char *markExt, const char *makeExt);
 
+  /** should this be verbose in its output */
+  void SetVerbose(bool verb) { m_Verbose = verb; }
+    
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDepends();
 

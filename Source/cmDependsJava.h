@@ -27,13 +27,12 @@ class cmDependsJava: public cmDepends
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
-  cmDependsJava(const char* dir, const char* targetFile, bool verbose);
+  cmDependsJava();
 
   /** Scanning need to know the build directory name, the relative
       path from the build directory to the target file and the source
       file to scan.  */
-  cmDependsJava(const char* dir, const char* targetFile,
-                const char* sourceFile);
+  cmDependsJava(const char* sourceFile);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsJava();
