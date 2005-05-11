@@ -67,9 +67,6 @@ protected:
   void WriteAllRules(cmLocalUnixMakefileGenerator3 *lg, 
                      std::ostream& makefileStream);
 
-  /** used to create a recursive make call */
-  std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);
-
   void WriteConvenienceRules(std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3 *);
 
 };

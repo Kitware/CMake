@@ -332,7 +332,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDependMakefile()
   
   // Write the do not edit header.
   lg->WriteDisclaimer(makefileStream);
-  lg->WriteMakeVariables(makefileStream);
+  //lg->WriteMakeVariables(makefileStream);
 
   // add the generic dependency
   std::vector<std::string> depends;
@@ -354,7 +354,8 @@ void cmGlobalUnixMakefileGenerator3::WriteDependMakefile()
       static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
     if (!lg2->GetExcludeAll())
       {
-      lg2->WriteTargetIncludes(makefileStream,"depend.make","depend");
+      lg2->WriteMainTargetIncludes(makefileStream,"depend.make","depend");
+      lg2->WriteMainTargetRules(makefileStream,"depend.make","depend");
       }
     }
 }
@@ -406,7 +407,9 @@ void cmGlobalUnixMakefileGenerator3::WriteBuildMakefile()
       }
     if (!exclude)
       {
-      lg2->WriteTargetIncludes(makefileStream,"build.make","build");
+      lg2->WriteMainTargetIncludes(makefileStream,"build.make","build");
+      lg2->WriteMainTargetRules(makefileStream,"build.make","build");
+      lg2->WriteMainTargetRules(makefileStream,"build.make","requires");
       }
     }
 }
@@ -444,7 +447,8 @@ void cmGlobalUnixMakefileGenerator3::WriteCleanMakefile()
     {
     cmLocalUnixMakefileGenerator3 *lg2 = 
       static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-    lg2->WriteTargetIncludes(makefileStream,"clean.make","clean");
+    lg2->WriteMainTargetIncludes(makefileStream,"clean.make","clean");
+    lg2->WriteMainTargetRules(makefileStream,"clean.make","clean");
     // add the directory based rules
     lg2->WriteLocalCleanRule(makefileStream);
     }
@@ -468,56 +472,19 @@ void cmGlobalUnixMakefileGenerator3
   // Check the build system in this directory.
   depends.push_back("cmake_check_build_system");
 
-  commands.push_back(this->GetRecursiveMakeCall("depend.make",0));
-  commands.push_back(this->GetRecursiveMakeCall("build.make",0));
+  commands.push_back(lg->GetRecursiveMakeCall("depend.make",0));
+  commands.push_back(lg->GetRecursiveMakeCall("depend.make","requires"));
+  commands.push_back(lg->GetRecursiveMakeCall("build.make",0));
 
   // Write the rule.
   lg->WriteMakeRule(makefileStream, "The main all target", "all", depends, commands);
 
   // write the clean
   commands.clear();
-  commands.push_back(this->GetRecursiveMakeCall("clean.make",0));
+  commands.push_back(lg->GetRecursiveMakeCall("clean.make",0));
   lg->WriteMakeRule(makefileStream, "default clean target", "clean", depends, commands);
 }
 
-
-//----------------------------------------------------------------------------
-std::string
-cmGlobalUnixMakefileGenerator3
-::GetRecursiveMakeCall(const char *Makefile, const char* tgt)
-{
-  cmLocalUnixMakefileGenerator3 *lg = 
-    static_cast<cmLocalUnixMakefileGenerator3*>(m_LocalGenerators[0]);
-  
-  // Call make on the given file.
-  std::string cmd;
-  cmd += "$(MAKE) -f ";
-  cmd += Makefile;
-  cmd += " ";
-  
-  // Pass down verbosity level.
-  if(lg->GetMakeSilentFlag().size())
-    {
-    cmd += lg->GetMakeSilentFlag();
-    cmd += " ";
-    }
-
-  // Most unix makes will pass the command line flags to make down to
-  // sub-invoked makes via an environment variable.  However, some
-  // makes do not support that, so you have to pass the flags
-  // explicitly.
-  if(lg->GetPassMakeflags())
-    {
-    cmd += "-$(MAKEFLAGS) ";
-    }
-
-  // Add the target.
-  if (tgt && tgt[0] != '\0')
-    {
-    cmd += tgt;
-    }
-  return cmd;
-}
 
 //----------------------------------------------------------------------------
 void
@@ -548,10 +515,13 @@ cmGlobalUnixMakefileGenerator3
       commands.clear();
       makeTargetName = localName;
       makeTargetName += "/depend";
-      commands.push_back(this->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
+      commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
+      makeTargetName = localName;
+      makeTargetName += "/requires";
+      commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
       makeTargetName = localName;
       makeTargetName += "/build";
-      commands.push_back(this->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
+      commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
 
       // Write the rule.
       lg->WriteMakeRule(ruleFileStream, "Convenience name for target.",

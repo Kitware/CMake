@@ -77,6 +77,9 @@ public:
   void SetMakeSilentFlag(const char* s) { m_MakeSilentFlag = s; }
   std::string &GetMakeSilentFlag() { return m_MakeSilentFlag; }
 
+  /** used to create a recursive make call */
+  std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);
+
   
   
   
@@ -124,11 +127,12 @@ public:
   /** write some extra rules suahc as make test etc */
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
 
+  void WriteMainTargetIncludes(std::ostream& makefileStream,const char *file,
+                               const char *rule);
+  void WriteMainTargetRules(std::ostream& makefileStream,const char *file,
+                            const char *rule);
   
   
-  
-  void WriteTargetIncludes(std::ostream& makefileStream,const char *file,
-                           const char *rule);
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
   std::string ConvertToRelativeOutputPath(const char* p);
   std::string GetRelativeTargetDirectory(const cmTarget& target);
@@ -143,6 +147,13 @@ public:
   
 protected:
 
+  // write the target rules for the local Makefile into the stream
+  void WriteLocalMakefileTargets(std::ostream& ruleFileStream,
+                                 std::vector<std::string>& all_depends);
+  
+  // create the cd to home commands
+  void CreateJumpCommand(std::vector<std::string>& commands, std::string & localName);
+  
   // these two methods just compute reasonable values for m_LibraryOutputPath and
   // m_ExecutableOutputPath
   void ConfigureOutputPaths();
@@ -244,7 +255,7 @@ protected:
                         const char* extraLinkFlags,
                         const std::vector<std::string>& provides_requires);
   
-  
+  void WriteLocalMakefile();
   
   
   
@@ -268,7 +279,10 @@ protected:
                             const std::vector<std::string>& files,
                             const std::vector<std::string>& objects,
                             const std::vector<std::string>& external_objects);
-
+  void WriteTargetRequiresRule(std::ostream& ruleFileStream,
+                               const cmTarget& target,
+                               const std::vector<std::string>& provides_requires);
+  
   std::string GetTargetDirectory(const cmTarget& target);
   std::string GetSubdirTargetName(const char* pass, const char* subdir);
   std::string GetObjectFileName(const cmTarget& target,
