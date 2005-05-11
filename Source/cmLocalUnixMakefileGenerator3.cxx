@@ -1105,33 +1105,68 @@ void cmLocalUnixMakefileGenerator3::WriteMainTargetIncludes(std::ostream& makefi
 
 void cmLocalUnixMakefileGenerator3::WriteMainTargetRules(std::ostream& makefileStream,
                                                          const char *file, 
-                                                         const char *rule)
+                                                         const char *rule, 
+                                                         bool inAll)
 {
+  std::vector<std::string> all_tgts;
   std::vector<std::string> depends;
   std::vector<std::string> no_commands;
 
-  for (cmTargets::const_iterator l = m_Makefile->GetTargets().begin();
-       l != m_Makefile->GetTargets().end(); l++)
+  if (inAll)
     {
-    if((l->second.GetType() == cmTarget::EXECUTABLE) ||
-       (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-       (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-       (l->second.GetType() == cmTarget::MODULE_LIBRARY) || 
-       (l->second.GetType() == cmTarget::UTILITY && !strcmp(rule,"build")))
+    for (cmTargets::const_iterator l = m_Makefile->GetTargets().begin();
+         l != m_Makefile->GetTargets().end(); l++)
       {
-      // Add this to the list of depends rules in this directory.
-      if(l->second.IsInAll())
+      if((l->second.GetType() == cmTarget::EXECUTABLE) ||
+         (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+         (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+         (l->second.GetType() == cmTarget::MODULE_LIBRARY) || 
+         (l->second.GetType() == cmTarget::UTILITY && !strcmp(rule,"build")))
         {
-        // add the dependency
+        // Add this to the list of depends rules in this directory.
         std::string tname = this->GetRelativeTargetDirectory(l->second);
         tname += "/";
         tname += rule;
-        depends.clear();
-        depends.push_back(tname);
-        this->WriteMakeRule(makefileStream, 0,
-                            rule, depends, no_commands);
+        all_tgts.push_back(tname);
+        if(l->second.IsInAll())
+          {
+          // add the dependency
+          depends.clear();
+          depends.push_back(tname);
+          this->WriteMakeRule(makefileStream, 0,
+                              rule, depends, no_commands);
+          }
         }
       }
+    }
+  
+  // not for the top gen
+  if (this->GetParent())
+    {
+    // write the directory rule add in the subdirs
+    std::vector<cmLocalGenerator *> subdirs = this->GetChildren();
+    std::string dir;
+    
+    // for each subdir add the directory depend
+    std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
+    for (; sdi != subdirs.end(); ++sdi)
+      {
+      cmLocalUnixMakefileGenerator3 * lg = 
+        static_cast<cmLocalUnixMakefileGenerator3 *>(*sdi);
+      dir = lg->GetMakefile()->GetStartOutputDirectory();
+      dir += "/";
+      dir += rule;
+      dir = m_GlobalGenerator->ConvertToHomeRelativeOutputPath(dir.c_str());
+      all_tgts.push_back(dir);
+      }
+    
+    dir = m_Makefile->GetStartOutputDirectory();
+    dir += "/";
+    dir += rule;
+    dir = m_GlobalGenerator->ConvertToHomeRelativeOutputPath(dir.c_str());
+    
+    this->WriteMakeRule(makefileStream, 0,
+                        dir.c_str(), all_tgts, no_commands);
     }
 }
 
@@ -2952,25 +2987,22 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 
   this->WriteMakeVariables(ruleFileStream);
   
-  std::vector<std::string> all_depends;
   std::vector<std::string> depends;
   std::vector<std::string> commands;
 
   // Write the empty all rule.
+  std::string dir = m_Makefile->GetStartOutputDirectory();
+  dir += "/directory";
+  dir = m_GlobalGenerator->ConvertToHomeRelativeOutputPath(dir.c_str());
+  this->CreateJumpCommand(commands,dir);
   this->WriteMakeRule(ruleFileStream, "The main all target", "all", depends, commands);
 
   // recursively write our targets
-  this->WriteLocalMakefileTargets(ruleFileStream, all_depends);
-
-  // write out the all rule depends
-  commands.clear();
-  this->WriteMakeRule(ruleFileStream, "The main all target", "all", all_depends, commands);
-  
+  this->WriteLocalMakefileTargets(ruleFileStream);
 }
 
 void cmLocalUnixMakefileGenerator3
-::WriteLocalMakefileTargets(std::ostream& ruleFileStream,
-                            std::vector<std::string>& all_depends)
+::WriteLocalMakefileTargets(std::ostream& ruleFileStream)
 {
   std::vector<std::string> depends;
   std::vector<std::string> commands;
@@ -2990,7 +3022,6 @@ void cmLocalUnixMakefileGenerator3
       localName = this->GetRelativeTargetDirectory(t->second);
       commands.clear();
       depends.clear();
-      all_depends.push_back(localName);
       
       this->CreateJumpCommand(commands,localName);
       this->WriteMakeRule(ruleFileStream, "Convenience name for target.",
@@ -3005,18 +3036,6 @@ void cmLocalUnixMakefileGenerator3
                           t->second.GetName(), depends, commands);
         }
       }
-    }
-
-  // for all children recurse
-  std::vector<cmLocalGenerator *> subdirs = this->GetChildren();
-  
-  // for each subdir recurse
-  std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
-  for (; sdi != subdirs.end(); ++sdi)
-    {
-    cmLocalUnixMakefileGenerator3 * lg = 
-      static_cast<cmLocalUnixMakefileGenerator3 *>(*sdi);
-    lg->WriteLocalMakefileTargets(ruleFileStream,all_depends);
     }
 }
 
@@ -3136,7 +3155,9 @@ cmLocalUnixMakefileGenerator3
   // Add the target.
   if (tgt && tgt[0] != '\0')
     {
-    cmd += tgt;
+    std::string tgt2 = m_GlobalGenerator->ConvertToHomeRelativeOutputPath(tgt);
+    tgt2 = this->ConvertToMakeTarget(tgt2.c_str());
+    cmd += tgt2;
     }
   return cmd;
 }

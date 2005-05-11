@@ -156,6 +156,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
     this->WriteConvenienceRules(makefileStream,lg);
     }
 
+  lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
   lg->WriteSpecialTargetsBottom(makefileStream);
 }
 
@@ -352,11 +353,20 @@ void cmGlobalUnixMakefileGenerator3::WriteDependMakefile()
     {
     cmLocalUnixMakefileGenerator3 *lg2 = 
       static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-    if (!lg2->GetExcludeAll())
+    // are any parents excluded
+    bool exclude = false;
+    cmLocalGenerator *lg3 = lg2;
+    while (lg3)
       {
-      lg2->WriteMainTargetIncludes(makefileStream,"depend.make","depend");
-      lg2->WriteMainTargetRules(makefileStream,"depend.make","depend");
+      if (lg3->GetExcludeAll())
+        {
+        exclude = true;
+        break;
+        }
+      lg3 = lg3->GetParent();
       }
+    lg2->WriteMainTargetIncludes(makefileStream,"depend.make","depend");
+    lg2->WriteMainTargetRules(makefileStream,"depend.make","depend",!exclude);
     }
 }
 
@@ -405,12 +415,9 @@ void cmGlobalUnixMakefileGenerator3::WriteBuildMakefile()
         }
       lg3 = lg3->GetParent();
       }
-    if (!exclude)
-      {
-      lg2->WriteMainTargetIncludes(makefileStream,"build.make","build");
-      lg2->WriteMainTargetRules(makefileStream,"build.make","build");
-      lg2->WriteMainTargetRules(makefileStream,"build.make","requires");
-      }
+    lg2->WriteMainTargetIncludes(makefileStream,"build.make","build");
+    lg2->WriteMainTargetRules(makefileStream,"build.make","build",!exclude);
+    lg2->WriteMainTargetRules(makefileStream,"build.make","requires",!exclude);
     }
 }
 
@@ -448,7 +455,7 @@ void cmGlobalUnixMakefileGenerator3::WriteCleanMakefile()
     cmLocalUnixMakefileGenerator3 *lg2 = 
       static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
     lg2->WriteMainTargetIncludes(makefileStream,"clean.make","clean");
-    lg2->WriteMainTargetRules(makefileStream,"clean.make","clean");
+    lg2->WriteMainTargetRules(makefileStream,"clean.make","clean",true);
     // add the directory based rules
     lg2->WriteLocalCleanRule(makefileStream);
     }
@@ -494,14 +501,33 @@ cmGlobalUnixMakefileGenerator3
   std::vector<std::string> depends;  
   std::vector<std::string> tgt_depends;
   std::vector<std::string> commands;
-
-  depends.push_back("cmake_check_build_system");
-  
-  // for each target
-  // Generate the rule files for each target.
-  const cmTargets& targets = lg->GetMakefile()->GetTargets();
   std::string localName;
   std::string makeTargetName;
+
+  depends.push_back("cmake_check_build_system");
+  std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
+  dir = this->ConvertToHomeRelativeOutputPath(dir.c_str());
+  localName = dir;
+  localName += "/directory";
+  
+  // write the directory rule
+  commands.clear();
+  makeTargetName = dir;
+  makeTargetName += "/depend";
+  commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
+  makeTargetName = dir;
+  makeTargetName += "/requires";
+  commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
+  makeTargetName = dir;
+  makeTargetName += "/build";
+  commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
+  
+  // Write the rule.
+  lg->WriteMakeRule(ruleFileStream, "Convenience name for target.",
+                    localName.c_str(), depends, commands);
+  
+  // for each target Generate the rule files for each target.
+  const cmTargets& targets = lg->GetMakefile()->GetTargets();
   for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
     {
     if((t->second.GetType() == cmTarget::EXECUTABLE) ||

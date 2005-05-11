@@ -130,7 +130,7 @@ public:
   void WriteMainTargetIncludes(std::ostream& makefileStream,const char *file,
                                const char *rule);
   void WriteMainTargetRules(std::ostream& makefileStream,const char *file,
-                            const char *rule);
+                            const char *rule, bool inAll);
   
   
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
@@ -148,8 +148,7 @@ public:
 protected:
 
   // write the target rules for the local Makefile into the stream
-  void WriteLocalMakefileTargets(std::ostream& ruleFileStream,
-                                 std::vector<std::string>& all_depends);
+  void WriteLocalMakefileTargets(std::ostream& ruleFileStream);
   
   // create the cd to home commands
   void CreateJumpCommand(std::vector<std::string>& commands, std::string & localName);
