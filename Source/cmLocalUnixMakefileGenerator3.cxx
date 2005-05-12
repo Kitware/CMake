@@ -1110,7 +1110,7 @@ void cmLocalUnixMakefileGenerator3::WriteMainTargetIncludes(std::ostream& makefi
 }
 
 void cmLocalUnixMakefileGenerator3::WriteMainTargetRules(std::ostream& makefileStream,
-                                                         const char *file, 
+                                                         const char * /* file */, 
                                                          const char *rule, 
                                                          bool inAll)
 {
