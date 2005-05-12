@@ -573,9 +573,9 @@ void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
 
 
 void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
-                                          const char* configName,
-                                          const char *libName,
-                                          const cmTarget &target)
+                                                    const char* configName,
+                                                    const char *libName,
+                                                    const cmTarget &target)
 { 
   std::string temp;
   std::string debugPostfix = "";
@@ -586,17 +586,27 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }  
   
   std::string extraLinkOptions;
+  std::string flagVar;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
-    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
+    flagVar = "CMAKE_EXE_LINKER_FLAGS";
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    flagVar = "CMAKE_SHARED_LINKER_FLAGS";
     }
   if(target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    flagVar  = "CMAKE_MODULE_LINKER_FLAGS";
+    }
+  extraLinkOptions = m_Makefile->GetRequiredDefinition(flagVar.c_str());
+  // Now add _DEBUG, _RELEASE, etc version of flagVar
+  if(configName)
+    {
+    flagVar += "_";
+    flagVar += cmSystemTools::UpperCase(std::string(configName));
+    extraLinkOptions += " ";
+    extraLinkOptions += m_Makefile->GetRequiredDefinition(flagVar.c_str());
     }
   
   const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
