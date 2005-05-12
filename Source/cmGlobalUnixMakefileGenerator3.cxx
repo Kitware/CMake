@@ -187,6 +187,11 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   // Write the do not edit header.
   lg->WriteDisclaimer(cmakefileStream);
 
+  // Save the generator name
+  cmakefileStream
+    << "# The generator used is:\n"
+    << "SET(CMAKE_DEPENDS_GENERATOR \"" << this->GetName() << "\")\n\n";
+
   // for each cmMakefile get its list of dependencies
   unsigned int i;
   std::vector<std::string> lfiles;

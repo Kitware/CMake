@@ -94,10 +94,10 @@ public:
   virtual void Generate();
 
   /** Called from command-line hook to scan dependencies.  */
-  static bool ScanDependencies(std::vector<std::string> const& args);
+  virtual bool ScanDependencies(std::vector<std::string> const& args);
 
   /** Called from command-line hook to check dependencies.  */
-  static void CheckDependencies(cmMakefile* mf, bool verbose);
+  virtual void CheckDependencies(cmMakefile* mf, bool verbose);
 
 protected:
 

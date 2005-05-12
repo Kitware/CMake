@@ -535,7 +535,9 @@ cmLocalUnixMakefileGenerator2
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
   // definitions when scanning for dependencies.
-  depCmd << "$(CMAKE_COMMAND) -E cmake_depends " << lang << " "
+  depCmd << "$(CMAKE_COMMAND) -E cmake_depends \"" 
+         << m_GlobalGenerator->GetName() << "\" "
+         << lang << " "
          << this->ConvertToRelativeOutputPath(obj.c_str()) << " "
          << this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
   commands.push_back(depCmd.str());
@@ -3131,17 +3133,17 @@ cmLocalUnixMakefileGenerator2
 ::ScanDependencies(std::vector<std::string> const& args)
 {
   // Format of arguments is:
-  // $(CMAKE_COMMAND), cmake_depends, <lang>, <obj>, <src>
+  // $(CMAKE_COMMAND), cmake_depends, GeneratorName, <lang>, <obj>, <src>
   // The caller has ensured that all required arguments exist.
 
   // The language for which we are scanning dependencies.
-  std::string const& lang = args[2];
+  std::string const& lang = args[3];
 
   // The file to which to write dependencies.
-  const char* objFile = args[3].c_str();
+  const char* objFile = args[4].c_str();
 
   // The source file at which to start the scan.
-  const char* srcFile = args[4].c_str();
+  const char* srcFile = args[5].c_str();
 
   // Read the directory information file.
   cmake cm;

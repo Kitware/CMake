@@ -17,14 +17,14 @@
 #ifndef cmGlobalNMakeMakefileGenerator_h
 #define cmGlobalNMakeMakefileGenerator_h
 
-#include "cmGlobalUNIXMakefileGenerator.h"
+#include "cmGlobalUNIXMakefileGenerator3.h"
 
 /** \class cmGlobalNMakeMakefileGenerator
  * \brief Write a NMake makefiles.
  *
  * cmGlobalNMakeMakefileGenerator manages nmake build process for a tree
  */
-class cmGlobalNMakeMakefileGenerator : public cmGlobalUnixMakefileGenerator
+class cmGlobalNMakeMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalNMakeMakefileGenerator();

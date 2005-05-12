@@ -28,8 +28,6 @@
 # include "cmVersion.h"
 #endif
 
-#include "cmLocalUnixMakefileGenerator2.h" // For -E cmake_depends callback.
-
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
 #if !defined(_WIN32)
@@ -52,6 +50,7 @@
 #else
 #endif
 #include "cmGlobalUnixMakefileGenerator.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 
 #ifdef CMAKE_USE_KDEVELOP
 # include "cmGlobalKdevelopGenerator.h"
@@ -827,9 +826,18 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       }
 
     // Internal CMake dependency scanning support.
-    else if (args[1] == "cmake_depends" && args.size() >= 5)
+    else if (args[1] == "cmake_depends" && args.size() >= 6)
       {
-      return cmLocalUnixMakefileGenerator2::ScanDependencies(args)? 0 : 1;
+      cmake cm;
+      cmGlobalGenerator *ggd = cm.CreateGlobalGenerator(args[2].c_str());
+      ggd->SetCMakeInstance(&cm);
+      if (ggd)
+        {
+        std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
+        lgd->SetGlobalGenerator(ggd);
+        return lgd->ScanDependencies(args)? 0 : 1;
+        }
+      return 1;
       }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -1103,7 +1111,7 @@ int cmake::Configure()
         }
       this->SetGlobalGenerator(gen);
 #else
-      this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator);
+      this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator2);
 #endif
       }
     if(!m_GlobalGenerator)
@@ -1419,6 +1427,8 @@ void cmake::AddDefaultGenerators()
 #endif
   m_Generators[cmGlobalUnixMakefileGenerator::GetActualName()] =
     &cmGlobalUnixMakefileGenerator::New;
+  m_Generators[cmGlobalUnixMakefileGenerator3::GetActualName()] =
+    &cmGlobalUnixMakefileGenerator3::New;
 #ifdef CMAKE_USE_XCODE
   m_Generators[cmGlobalXCodeGenerator::GetActualName()] =
     &cmGlobalXCodeGenerator::New;
@@ -1618,7 +1628,20 @@ int cmake::CheckBuildSystem()
   // the make system's VERBOSE environment variable to enable verbose
   // output.
   bool verbose = cmSystemTools::GetEnv("VERBOSE") != 0;
-  cmLocalUnixMakefileGenerator2::CheckDependencies(mf, verbose);
+
+  // compute depends based on the generator specified
+  const char* genName = mf->GetDefinition("CMAKE_DEPENDS_GENERATOR");
+  if (!genName || genName[0] == '\0')
+    {
+    genName = "Unix Makefiles";
+    }
+  cmGlobalGenerator *ggd = this->CreateGlobalGenerator(genName);
+  if (ggd)
+    {
+    std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
+    lgd->SetGlobalGenerator(ggd);
+    lgd->CheckDependencies(mf, verbose);
+    }
 
   // No need to rerun.
   return 0;

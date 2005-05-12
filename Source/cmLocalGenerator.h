@@ -134,6 +134,12 @@ public:
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char* p);
   
+  /** Called from command-line hook to check dependencies.  */
+  virtual void CheckDependencies(cmMakefile* /* mf */, bool /* verbose */) {};
+
+  /** Called from command-line hook to scan dependencies.  */
+  virtual bool ScanDependencies(std::vector<std::string> const& /* args */) {return true;};
+
 protected:
   /** Construct a script from the given list of command lines.  */
   std::string ConstructScript(const cmCustomCommandLines& commandLines,

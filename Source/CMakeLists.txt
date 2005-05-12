@@ -52,12 +52,15 @@ SET(SRCS
   cmGlobalGenerator.h
   cmGlobalUnixMakefileGenerator.cxx
   cmGlobalUnixMakefileGenerator.h
+  cmGlobalUnixMakefileGenerator3.cxx
+  cmGlobalUnixMakefileGenerator3.h
   cmListFileCache.cxx
   cmListFileCache.h
   cmListFileLexer.c
   cmLocalGenerator.cxx
   cmLocalGenerator.h
   cmLocalUnixMakefileGenerator2.cxx
+  cmLocalUnixMakefileGenerator3.cxx
   cmMakeDepend.cxx
   cmMakeDepend.h
   cmMakefile.cxx

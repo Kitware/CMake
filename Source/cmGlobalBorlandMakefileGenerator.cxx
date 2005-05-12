@@ -15,7 +15,7 @@
 
 =========================================================================*/
 #include "cmGlobalBorlandMakefileGenerator.h"
-#include "cmLocalUnixMakefileGenerator2.h"
+#include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmake.h"
 
@@ -33,14 +33,13 @@ void cmGlobalBorlandMakefileGenerator::EnableLanguage(std::vector<std::string>co
   mf->AddDefinition("BORLAND", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "bcc32");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "bcc32"); 
-  this->cmGlobalUnixMakefileGenerator::EnableLanguage(l, mf);
+  this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf);
 }
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
 {
-  cmLocalUnixMakefileGenerator2* lg = new cmLocalUnixMakefileGenerator2;
-  lg->SetEmptyCommand("@REM Borland Make needs a command here.");
+  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
   lg->SetEchoNeedsQuote(false);
   lg->SetIncludeDirective("!include");
   lg->SetWindowsShell(true);

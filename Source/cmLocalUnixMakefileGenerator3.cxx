@@ -489,7 +489,9 @@ cmLocalUnixMakefileGenerator3
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
   // definitions when scanning for dependencies.
-  depCmd << "$(CMAKE_COMMAND) -E cmake_depends " << lang << " "
+  depCmd << "$(CMAKE_COMMAND) -E cmake_depends \"" 
+         << m_GlobalGenerator->GetName() << "\" "
+         << lang << " "
          << relativeObj.c_str() << " "
          << m_GlobalGenerator->ConvertToHomeRelativeOutputPath
     (source.GetFullPath().c_str());
@@ -576,8 +578,12 @@ cmLocalUnixMakefileGenerator3
   this->AppendFlags(flags, this->GetIncludeFlags(lang));
 
   // Get the output paths for source and object files.
-  std::string sourceFile =
-    this->ConvertToOptionallyRelativeOutputPath(source.GetFullPath().c_str());
+  std::string sourceFile = source.GetFullPath();
+  if(m_UseRelativePaths)
+    {
+    sourceFile = m_GlobalGenerator->ConvertToHomeRelativePath(sourceFile.c_str());
+    }
+  sourceFile = cmSystemTools::ConvertToOutputPath(sourceFile.c_str());
   std::string objectFile =
     this->ConvertToRelativeOutputPath(obj.c_str());
 
@@ -2844,21 +2850,27 @@ cmLocalUnixMakefileGenerator3::GetDependsChecker(const std::string& lang,
                                                  const char* objFile,
                                                  bool verbose)
 {
+  cmDepends *ret = 0;
   if(lang == "C" || lang == "CXX" || lang == "RC")
     {
-    return new cmDependsC(dir, objFile, verbose);
+    ret = new cmDependsC();
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   else if(lang == "Fortran")
     {
-    return new cmDependsFortran(dir, objFile, verbose);
+    ret = new cmDependsFortran();
     }
   else if(lang == "Java")
     {
-    return new cmDependsJava(dir, objFile, verbose);
+    ret = new cmDependsJava();
     }
 #endif
-  return 0;
+  if (ret)
+    {
+    ret->SetTargetFile(dir, objFile, ".depend",".build.depend.make");
+    ret->SetVerbose(verbose);
+    }
+  return ret;
 }
 
 //----------------------------------------------------------------------------
@@ -2867,17 +2879,17 @@ cmLocalUnixMakefileGenerator3
 ::ScanDependencies(std::vector<std::string> const& args)
 {
   // Format of arguments is:
-  // $(CMAKE_COMMAND), cmake_depends, <lang>, <obj>, <src>
+  // $(CMAKE_COMMAND), cmake_depends, GeneratorName, <lang>, <obj>, <src>
   // The caller has ensured that all required arguments exist.
 
   // The language for which we are scanning dependencies.
-  std::string const& lang = args[2];
+  std::string const& lang = args[3];
 
   // The file to which to write dependencies.
-  const char* objFile = args[3].c_str();
+  const char* objFile = args[4].c_str();
 
   // The source file at which to start the scan.
-  const char* srcFile = args[4].c_str();
+  const char* srcFile = args[5].c_str();
 
   // Read the directory information file.
   cmake cm;
@@ -2943,19 +2955,22 @@ cmLocalUnixMakefileGenerator3
   if(lang == "C" || lang == "CXX" || lang == "RC")
     {
     // TODO: Handle RC (resource files) dependencies correctly.
-    cmDependsC scanner(".", objFile, srcFile, includes,
+    cmDependsC scanner(srcFile, includes,
                        includeRegexScan.c_str(), includeRegexComplain.c_str());
+    scanner.SetTargetFile(".",objFile,".depend",".build.depend.make");
     return scanner.Write();
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   else if(lang == "Fortran")
     {
-    cmDependsFortran scanner(".", objFile, srcFile, includes);
+    cmDependsFortran scanner(srcFile, includes);
+    scanner.SetTargetFile(".",objFile,".depend",".build.depend.make");
     return scanner.Write();
     }
   else if(lang == "Java")
     {
-    cmDependsJava scanner(".", objFile, srcFile);
+    cmDependsJava scanner(srcFile);
+    scanner.SetTargetFile(".",objFile,".depend",".build.depend.make");
     return scanner.Write();
     }
 #endif

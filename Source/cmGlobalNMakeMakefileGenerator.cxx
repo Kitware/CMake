@@ -15,7 +15,7 @@
 
 =========================================================================*/
 #include "cmGlobalNMakeMakefileGenerator.h"
-#include "cmLocalUnixMakefileGenerator2.h"
+#include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 
 cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
@@ -30,13 +30,13 @@ void cmGlobalNMakeMakefileGenerator::EnableLanguage(std::vector<std::string>cons
   // pick a default 
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
-  this->cmGlobalUnixMakefileGenerator::EnableLanguage(l, mf);
+  this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf);
 }
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalNMakeMakefileGenerator::CreateLocalGenerator()
 {
-  cmLocalUnixMakefileGenerator2* lg = new cmLocalUnixMakefileGenerator2;
+  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
   lg->SetEchoNeedsQuote(false);
   lg->SetWindowsShell(true);
   lg->SetMakeSilentFlag("/nologo");
