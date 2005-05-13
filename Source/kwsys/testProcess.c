@@ -325,6 +325,12 @@ int main(int argc, const char* argv[])
     fprintf(stderr, "Output on stderr before test %d.\n", n);
     fflush(stdout);
     fflush(stderr);
+#if defined(__FreeBSD__)
+    if(n == 4)
+      {
+      putenv("TEST_PROCESS_4=1");
+      }
+#endif
     r = runChild(cmd, states[n-1], exceptions[n-1], values[n-1], 0,
                  outputs[n-1], delays[n-1], timeouts[n-1]);
     fprintf(stdout, "Output on stdout after test %d.\n", n);

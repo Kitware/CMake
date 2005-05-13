@@ -895,6 +895,15 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
       break;
       }
 
+#if defined(__FreeBSD__)
+    if(timeout && getenv("TEST_PROCESS_4"))
+      {
+      fprintf(stderr, "select with timeout %ld %ld\n",
+              timeout->tv_sec, timeout->tv_usec);
+      fflush(stderr);
+      }
+#endif
+
     /* Run select to block until data are available.  Repeat call
        until it is not interrupted.  */
     while(((numReady = select(max+1, &cp->PipeSet, 0, 0, timeout)) < 0) &&
