@@ -933,16 +933,14 @@ cmGlobalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
   // The local path should never have a trailing slash.
   assert(local.size() > 0 && !(local[local.size()-1] == ""));
 
-  // If the path is already relative or relative paths are disabled
-  // then just return the path.
-  if(m_RelativePathTop.size() == 0 ||
-     !cmSystemTools::FileIsFullPath(in_remote))
+  // If the path is already relative then just return the path.
+  if(!cmSystemTools::FileIsFullPath(in_remote))
     {
     return in_remote;
     }
 
-  // If the path does not begin with the minimum relative path prefix
-  // then do not convert it.
+  // if the path does not contain all of the relative top path then return
+  // because it is going too far out of the tree
   std::string original = in_remote;
   if(original.size() < m_RelativePathTop.size() ||
      !cmSystemTools::ComparePath(
@@ -963,6 +961,12 @@ cmGlobalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
                                    local[common].c_str()))
     {
     ++common;
+    }
+
+  // if nothiong is in common the return
+  if (common == 0)
+    {
+    return in_remote;
     }
 
   // If the entire path is in common then just return a ".".
