@@ -491,12 +491,6 @@ void cmGlobalGenerator::ClearEnabledLanguages()
 
 void cmGlobalGenerator::Configure()
 {
-  // Setup the current output directory components for use by
-  // ConvertToRelativePath.
-  std::string outdir =
-    cmSystemTools::CollapseFullPath(m_CMakeInstance->GetHomeOutputDirectory());
-  cmSystemTools::SplitPath(outdir.c_str(), m_HomeOutputDirectoryComponents);
-
   // Delete any existing cmLocalGenerators
   unsigned int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
@@ -1094,19 +1088,3 @@ void cmGlobalGenerator::SetupTests()
       }
     }
 }
-
-
-//----------------------------------------------------------------------------
-std::string cmGlobalGenerator::ConvertToHomeRelativePath(const char* remote)
-{
-  return (this->ConvertToRelativePath(m_HomeOutputDirectoryComponents,remote));
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmGlobalGenerator::ConvertToHomeRelativeOutputPath(const char* remote)
-{
-  return cmSystemTools::ConvertToOutputPath
-    (this->ConvertToRelativePath(m_HomeOutputDirectoryComponents,remote).c_str());
-}
-

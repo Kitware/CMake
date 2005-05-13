@@ -193,9 +193,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     << "SET(CMAKE_DEPENDS_GENERATOR \"" << this->GetName() << "\")\n\n";
 
   // for each cmMakefile get its list of dependencies
-  unsigned int i;
   std::vector<std::string> lfiles;
-  for (i = 0; i < m_LocalGenerators.size(); ++i)
+  for (unsigned int i = 0; i < m_LocalGenerators.size(); ++i)
     {
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
   
@@ -244,13 +243,13 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
 
   // add in all the directory information files
   std::string tmpStr;
-  for (i = 0; i < m_LocalGenerators.size(); ++i)
+  for (unsigned int i = 0; i < m_LocalGenerators.size(); ++i)
     {
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
     tmpStr = lg->GetMakefile()->GetStartOutputDirectory();
     tmpStr += "/CMakeDirectoryInformation.cmake";
-    cmakefileStream 
-      << "  \"" << this->ConvertToHomeRelativePath(tmpStr.c_str()).c_str() << "\"\n";
+    cmakefileStream << "  \"" << 
+      lg->Convert(tmpStr.c_str(),cmLocalGenerator::HOME_OUTPUT).c_str() << "\"\n";
     }
   cmakefileStream << "  )\n\n";
 
@@ -309,8 +308,8 @@ void cmGlobalUnixMakefileGenerator3
             iCheckSet.begin();
           csIter != iCheckSet.end(); ++csIter)
         {
-        cmakefileStream
-          << "  \"" << this->ConvertToHomeRelativePath(csIter->c_str()).c_str() << "\"\n";
+        cmakefileStream << "  \"" << 
+          lg->Convert(csIter->c_str(),cmLocalGenerator::HOME_OUTPUT).c_str() << "\"\n";
         }
       }
     cmakefileStream << "  )\n";
@@ -511,7 +510,7 @@ cmGlobalUnixMakefileGenerator3
 
   depends.push_back("cmake_check_build_system");
   std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
-  dir = this->ConvertToHomeRelativeOutputPath(dir.c_str());
+  dir = lg->Convert(dir.c_str(),cmLocalGenerator::HOME_OUTPUT,cmLocalGenerator::MAKEFILE);
   localName = dir;
   localName += "/directory";
   

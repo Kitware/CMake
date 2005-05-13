@@ -63,10 +63,20 @@ void cmLocalGenerator::Configure()
     }  
   
   // Setup the current output directory components for use by
-  // ConvertToRelativePath.
-  std::string outdir =
-    cmSystemTools::CollapseFullPath(m_Makefile->GetCurrentOutputDirectory());
-  cmSystemTools::SplitPath(outdir.c_str(), m_CurrentOutputDirectoryComponents);
+  // Convert
+  std::string outdir; 
+  outdir =
+    cmSystemTools::CollapseFullPath(m_Makefile->GetHomeDirectory());
+  cmSystemTools::SplitPath(outdir.c_str(), m_HomeDirectoryComponents);
+  outdir =
+    cmSystemTools::CollapseFullPath(m_Makefile->GetStartDirectory());
+  cmSystemTools::SplitPath(outdir.c_str(), m_StartDirectoryComponents);
+  outdir =
+    cmSystemTools::CollapseFullPath(m_Makefile->GetHomeOutputDirectory());
+  cmSystemTools::SplitPath(outdir.c_str(), m_HomeOutputDirectoryComponents);
+  outdir =
+    cmSystemTools::CollapseFullPath(m_Makefile->GetStartOutputDirectory());
+  cmSystemTools::SplitPath(outdir.c_str(), m_StartOutputDirectoryComponents);
 
   // Check whether relative paths should be used for optionally
   // relative paths.
@@ -466,8 +476,10 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
                                                       cmSourceFile& source,
                                                       cmTarget& )
 { 
-  std::string objectFile = this->ConvertToRelativeOutputPath(ofname);
-  std::string sourceFile = this->ConvertToOptionallyRelativeOutputPath(source.GetFullPath().c_str());
+  // std::string objectFile = this->ConvertToRelativeOutputPath(ofname);
+  std::string objectFile = this->Convert(ofname,START_OUTPUT,SHELL);
+  std::string sourceFile = 
+    this->Convert(source.GetFullPath().c_str(),START_OUTPUT,SHELL,true);
   std::string varString = "CMAKE_";
   varString += lang;
   varString += "_COMPILE_OBJECT";
@@ -509,7 +521,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
     for(std::vector<std::string>::iterator i = depends.begin();
         i != depends.end(); ++i)
       {
-      sourceAndDeps.push_back(this->ConvertToRelativeOutputPath(i->c_str()));
+      sourceAndDeps.push_back(this->Convert(i->c_str(),START_OUTPUT,SHELL));
       }
     } 
 #if 0
@@ -549,7 +561,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
         ofname += (*i)->GetSourceName() + outExt;
         objVector.push_back(ofname);
         this->AddCustomCommandToCreateObject(ofname.c_str(), llang, *(*i), target);
-        objs += this->ConvertToRelativeOutputPath(ofname.c_str());
+        objs += this->Convert(ofname.c_str(),START_OUTPUT,MAKEFILE);
         objs += " ";
         }
       }
@@ -878,7 +890,7 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
 std::string 
 cmLocalGenerator::ConvertToOutputForExisting(const char* p)
 {
-  std::string ret = this->ConvertToOptionallyRelativeOutputPath(p);
+  std::string ret = this->Convert(p, START_OUTPUT, SHELL, true);
   // if there are spaces in the path, then get the short path version
   // if there is one
   if(ret.find(' ') != std::string::npos)
@@ -887,7 +899,7 @@ cmLocalGenerator::ConvertToOutputForExisting(const char* p)
       {
       if(!cmSystemTools::GetShortPath(ret.c_str(), ret))
         {
-        ret = this->ConvertToOptionallyRelativeOutputPath(p);
+        ret = this->Convert(p,START_OUTPUT,MAKEFILE,true);
         }
       }
     }
@@ -1063,7 +1075,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           if((*i)->GetSourceExtension() == "def")
             {
             linkFlags += m_Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-            linkFlags += this->ConvertToRelativeOutputPath((*i)->GetFullPath().c_str());
+            linkFlags += this->Convert((*i)->GetFullPath().c_str(),START_OUTPUT,MAKEFILE);
             linkFlags += " ";
             }
           }
@@ -1407,7 +1419,7 @@ cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
     {
     // Start with the command name.
     const cmCustomCommandLine& commandLine = *cl;
-    script += this->ConvertToRelativeOutputPath(commandLine[0].c_str());
+    script += this->Convert(commandLine[0].c_str(),START_OUTPUT,SHELL);
 
     // Add the arguments.
     for(unsigned int j=1;j < commandLine.size(); ++j)
@@ -1425,9 +1437,7 @@ cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::ConvertToRelativePath(const char* remote)
 {
-  return (m_GlobalGenerator
-          ->ConvertToRelativePath(m_CurrentOutputDirectoryComponents,
-                                  remote));
+  return this->Convert(remote,START_OUTPUT);
 }
 
 //----------------------------------------------------------------------------
@@ -1444,23 +1454,60 @@ cmLocalGenerator::ConvertToRelativeOutputPath(const char* remote)
 std::string
 cmLocalGenerator::ConvertToOptionallyRelativePath(const char* remote)
 {
-  if(m_UseRelativePaths)
-    {
-    return this->ConvertToRelativePath(remote);
-    }
-  else
-    {
-    return remote;
-    }
+  return this->Convert(remote, START_OUTPUT, UNCHANGED, true);
 }
 
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToOptionallyRelativeOutputPath(const char* remote)
 {
-  // Convert the path to a relative path.
-  std::string relative = this->ConvertToOptionallyRelativePath(remote);
+  return this->Convert(remote, START_OUTPUT, SHELL, true);
+}
 
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::Convert(const char* source, 
+                                      RelativeRoot relative,
+                                      OutputFormat output,
+                                      bool optional)
+{
+  // Convert the path to a relative path.
+  std::string result = source;
+
+  if (!optional || m_UseRelativePaths)
+    {
+    switch (relative)
+      {
+      case HOME:
+        //result = cmSystemTools::CollapseFullPath(result.c_str());
+        result = m_GlobalGenerator->
+          ConvertToRelativePath(m_HomeDirectoryComponents, result.c_str());
+        break;
+      case START:
+        //result = cmSystemTools::CollapseFullPath(result.c_str());
+        result = m_GlobalGenerator->
+          ConvertToRelativePath(m_StartDirectoryComponents, result.c_str());
+        break;
+      case HOME_OUTPUT:
+        //result = cmSystemTools::CollapseFullPath(result.c_str());
+        result = m_GlobalGenerator->
+          ConvertToRelativePath(m_HomeOutputDirectoryComponents, result.c_str());
+        break;
+      case START_OUTPUT:
+        //result = cmSystemTools::CollapseFullPath(result.c_str());
+        result = m_GlobalGenerator->
+          ConvertToRelativePath(m_StartOutputDirectoryComponents, result.c_str());
+        break;
+      case FULL:
+        result = cmSystemTools::CollapseFullPath(result.c_str());
+        break;
+      }
+    }
+  
   // Now convert it to an output path.
-  return cmSystemTools::ConvertToOutputPath(relative.c_str());
+  if (output == MAKEFILE || output == SHELL)
+    {
+    result = cmSystemTools::ConvertToOutputPath(result.c_str());
+    }
+  
+  return result;
 }

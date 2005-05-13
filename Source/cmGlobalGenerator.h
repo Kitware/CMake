@@ -138,20 +138,6 @@ public:
   std::string ConvertToRelativePath(const std::vector<std::string>& local,
                                     const char* remote);
 
-  /**
-   * Convert the given remote path to a relative path with respect to
-   * this generator's output directory.  The remote path must use
-   * forward slashes and not already be escaped or quoted.
-   */
-  std::string ConvertToHomeRelativePath(const char* remote);
-
-  /**
-   * Convert to an output path that is relative to the output
-   * directory.  The remote path must use forward slashes and not
-   * already be escaped or quoted.
-   */
-  std::string ConvertToHomeRelativeOutputPath(const char* remote);
-
   /*
    * Determine what program to use for building the project.
    */
@@ -165,8 +151,6 @@ protected:
   void ConfigureRelativePaths();
   void SetupTests();
   
-  std::vector<std::string> m_HomeOutputDirectoryComponents;
-
   bool m_ForceUnixPaths;
   cmStdString m_FindMakeProgramFile;
   cmStdString m_ConfiguredFilesPath;

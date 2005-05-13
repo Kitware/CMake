@@ -134,7 +134,6 @@ public:
   
   
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
-  std::string ConvertToRelativeOutputPath(const char* p);
   std::string GetRelativeTargetDirectory(const cmTarget& target);
   void WriteLocalCleanRule(std::ostream& makefileStream);
 

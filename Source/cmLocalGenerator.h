@@ -76,6 +76,27 @@ public:
   ///! Set the Global Generator, done on creation by the GlobalGenerator
   void SetGlobalGenerator(cmGlobalGenerator *gg);
 
+  /** 
+   * Convert something to something else. This is a centralized coversion
+   * routine used by the generators to handle relative paths and the like.
+   * The flags determine what is actually done. 
+   *
+   * relative: treat the argument as a directory and convert it to make it
+   * relative or full or unchanged. If relative (HOME, START etc) then that
+   * specifies what it should be relative to.
+   *
+   * output: make the result suitable for output to a...
+   *
+   * optional: should any relative path operation be controlled by the rel
+   * path setting
+   */
+  enum RelativeRoot { NONE, FULL, HOME, START, HOME_OUTPUT, START_OUTPUT };
+  enum OutputFormat { UNCHANGED, MAKEFILE, SHELL };
+  std::string Convert(const char* source, 
+                      RelativeRoot relative, 
+                      OutputFormat output = UNCHANGED,
+                      bool optional = false);
+  
   /**
    * Convert the given remote path to a relative path with respect to
    * this generator's output directory.  The remote path must use
@@ -206,7 +227,10 @@ protected:
   // members used for relative path function ConvertToMakefilePath
   std::string m_RelativePathToSourceDir;
   std::string m_RelativePathToBinaryDir;
-  std::vector<std::string> m_CurrentOutputDirectoryComponents;
+  std::vector<std::string> m_HomeDirectoryComponents;
+  std::vector<std::string> m_StartDirectoryComponents;
+  std::vector<std::string> m_HomeOutputDirectoryComponents;
+  std::vector<std::string> m_StartOutputDirectoryComponents;
   bool m_ExcludeFromAll;
   cmLocalGenerator* m_Parent;
   std::vector<cmLocalGenerator*> Children;
