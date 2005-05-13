@@ -1500,6 +1500,8 @@ std::string cmLocalGenerator::Convert(const char* source,
       case FULL:
         result = cmSystemTools::CollapseFullPath(result.c_str());
         break;
+      case NONE:
+        break;
       }
     }
   
