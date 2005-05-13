@@ -643,27 +643,6 @@ cmLocalUnixMakefileGenerator3
     // Add this to the set of provides-requires objects on the target.
     provides_requires.push_back(objectRequires);
     }
-
-  // If the language needs provides-requires mode, create the
-  // corresponding targets.
-  if(strcmp(lang, "Fortran") == 0)
-    {
-    std::string objectRequires = obj;
-    std::string objectProvides = obj;
-    objectRequires += ".requires";
-    objectProvides += ".provides";
-    
-    // Add the provides target to build the object file.
-    std::vector<std::string> no_commands;
-    std::vector<std::string> p_depends;
-    p_depends.push_back(obj);
-    this->WriteMakeRule(ruleFileStream, 0,
-                        objectProvides.c_str(), p_depends, no_commands);
-    
-    // Add this to the set of provides-requires objects on the target.
-    provides_requires.push_back(objectRequires);
-    }
-
 }
 
 //----------------------------------------------------------------------------
