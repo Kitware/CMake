@@ -139,6 +139,13 @@ static const char kwsys_shared_forward_path_sep[2] = {KWSYS_SHARED_FORWARD_PATH_
 # define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY_PATH"
 #endif
 
+/* FreeBSD */
+#if defined(__FreeBSD__)
+# define KWSYS_SHARED_FORWARD_LDD "ldd"
+# define KWSYS_SHARED_FORWARD_LDD_N 1
+# define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY_PATH"
+#endif
+
 /* OSX */
 #if defined(__APPLE__)
 # define KWSYS_SHARED_FORWARD_LDD "otool", "-L"
