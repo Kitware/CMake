@@ -509,26 +509,29 @@ cmGlobalUnixMakefileGenerator3
   std::string makeTargetName;
 
   depends.push_back("cmake_check_build_system");
-  std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
-  dir = lg->Convert(dir.c_str(),cmLocalGenerator::HOME_OUTPUT,cmLocalGenerator::MAKEFILE);
-  localName = dir;
-  localName += "/directory";
-  
-  // write the directory rule
-  commands.clear();
-  makeTargetName = dir;
-  makeTargetName += "/depend";
-  commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
-  makeTargetName = dir;
-  makeTargetName += "/requires";
-  commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
-  makeTargetName = dir;
-  makeTargetName += "/build";
-  commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
-  
-  // Write the rule.
-  lg->WriteMakeRule(ruleFileStream, "Convenience name for target.",
-                    localName.c_str(), depends, commands);
+  if (lg->GetParent())
+    {
+    std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
+    dir = lg->Convert(dir.c_str(),cmLocalGenerator::HOME_OUTPUT,cmLocalGenerator::MAKEFILE);
+    localName = dir;
+    localName += "/directory";
+    
+    // write the directory rule
+    commands.clear();
+    makeTargetName = dir;
+    makeTargetName += "/depend";
+    commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
+    makeTargetName = dir;
+    makeTargetName += "/requires";
+    commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
+    makeTargetName = dir;
+    makeTargetName += "/build";
+    commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
+    
+    // Write the rule.
+    lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
+                      localName.c_str(), depends, commands);
+    }
   
   // for each target Generate the rule files for each target.
   const cmTargets& targets = lg->GetMakefile()->GetTargets();
