@@ -185,6 +185,15 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     os << "\t@touch " << m_TargetFile.c_str() << ".provides\n";
     }
 
+  // if it provides something then connect the requires rule to the build rule
+  if(!parser.Provides.empty())
+    {
+    os << m_TargetFile.c_str() << ".requires: " << m_TargetFile.c_str()
+       << ".requires.build" << std::endl;
+    // provide empty build rule for old gen for now, TODO remove later
+    os << m_TargetFile.c_str() << ".requires.build:" << std::endl;    
+    }
+  
   /*
   // TODO:
   What about .mod files provided in another directory and found with a

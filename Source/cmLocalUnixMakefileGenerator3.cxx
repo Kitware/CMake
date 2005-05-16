@@ -625,15 +625,20 @@ cmLocalUnixMakefileGenerator3
 
   // If the language needs provides-requires mode, create the
   // corresponding targets.
+  std::string objectRequires = obj;
+  objectRequires += ".requires";
+  std::vector<std::string> no_commands;
+
+  // always provide an empty requires target
+  this->WriteMakeRule(ruleFileStream, 0,
+                      objectRequires.c_str(), no_commands, no_commands);
+  
   if(strcmp(lang, "Fortran") == 0)
     {
-    std::string objectRequires = obj;
     std::string objectProvides = obj;
-    objectRequires += ".requires";
     objectProvides += ".provides";
     {
     // Add the provides target to build the object file.
-    std::vector<std::string> no_commands;
     std::vector<std::string> p_depends;
     p_depends.push_back(obj);
     this->WriteMakeRule(ruleFileStream, 0,
@@ -642,7 +647,18 @@ cmLocalUnixMakefileGenerator3
 
     // Add this to the set of provides-requires objects on the target.
     provides_requires.push_back(objectRequires);
+    {
+    // Add the requires.build target to recursively build the provides
+    // target after needed information is up to date.
+    std::vector<std::string> no_depends;
+    std::vector<std::string> r_commands;
+    r_commands.push_back(this->GetRecursiveMakeCall("Makefile",objectProvides.c_str()));
+    objectRequires += ".build";
+    this->WriteMakeRule(ruleFileStream, 0,
+                        objectRequires.c_str(), no_depends, r_commands);
     }
+    }
+
 }
 
 //----------------------------------------------------------------------------
