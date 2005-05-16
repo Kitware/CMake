@@ -171,10 +171,13 @@ private:
   std::map<cmStdString, cmStdString> m_ExtensionToLanguage;
   std::map<cmStdString, cmStdString> m_LanguageToLinkerPreference; 
 
-  // The prefix required of a path to be converted to a relative path.
-  // No sequence of ../.. will ever go past this path.  This is the
-  // longest common path between the top level source and build trees.
-  std::string m_RelativePathTop;
+  // The paths to the tops of the source and binary trees used for
+  // relative path computation.  A path must be either in the source
+  // tree or the build tree to be converted to a relative path.  The
+  // ConfigureRelativePaths method may set these to be empty when
+  // using relative paths is unsafe.
+  std::string m_RelativePathTopSource;
+  std::string m_RelativePathTopBinary;
 };
 
 #endif

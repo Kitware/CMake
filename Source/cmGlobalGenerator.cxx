@@ -889,36 +889,20 @@ cmTarget* cmGlobalGenerator::FindTarget(const char* project,
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::ConfigureRelativePaths()
 {
-  // Identify the longest shared path component between the source
-  // directory and the build directory.
-  std::vector<std::string> source;
-  std::vector<std::string> binary;
-  cmSystemTools::SplitPath(m_CMakeInstance->GetHomeDirectory(), source);
-  cmSystemTools::SplitPath(m_CMakeInstance->GetHomeOutputDirectory(), binary);
-  unsigned int common=0;
-  while(common < source.size() && common < binary.size() &&
-        cmSystemTools::ComparePath(source[common].c_str(),
-                                   binary[common].c_str()))
+  // The current working directory on Windows cannot be a network
+  // path.  Therefore relative paths cannot work when the build tree
+  // is a network path.
+  std::string source = m_CMakeInstance->GetHomeDirectory();
+  std::string binary = m_CMakeInstance->GetHomeOutputDirectory();
+  if(binary.size() < 2 || binary.substr(0, 2) != "//")
     {
-    ++common;
-    }
-
-  // Require more than just the root portion of the path to be in
-  // common before allowing relative paths.  Also disallow relative
-  // paths if the build tree is a network path.  The current working
-  // directory on Windows cannot be a network path.  Therefore
-  // relative paths cannot work with network paths.
-  if(common > 1 && source[0] != "//")
-    {
-    // Build the minimum prefix required of a path to be converted to
-    // a relative path.
-    source.erase(source.begin()+common, source.end());
-    m_RelativePathTop = cmSystemTools::JoinPath(source);
+    m_RelativePathTopSource = source;
+    m_RelativePathTopBinary = binary;
     }
   else
     {
-    // Disable relative paths.
-    m_RelativePathTop = "";
+    m_RelativePathTopSource = "";
+    m_RelativePathTopBinary = "";
     }
 }
 
@@ -939,13 +923,16 @@ cmGlobalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
     return in_remote;
     }
 
-  // if the path does not contain all of the relative top path then return
-  // because it is going too far out of the tree
+  // Skip conversion if the path is not in the source or binary tree.
   std::string original = in_remote;
-  if(original.size() < m_RelativePathTop.size() ||
-     !cmSystemTools::ComparePath(
-       original.substr(0, m_RelativePathTop.size()).c_str(),
-       m_RelativePathTop.c_str()))
+  if((original.size() < m_RelativePathTopSource.size() ||
+      !cmSystemTools::ComparePath(
+        original.substr(0, m_RelativePathTopSource.size()).c_str(),
+        m_RelativePathTopSource.c_str())) &&
+     (original.size() < m_RelativePathTopBinary.size() ||
+      !cmSystemTools::ComparePath(
+        original.substr(0, m_RelativePathTopBinary.size()).c_str(),
+        m_RelativePathTopBinary.c_str())))
     {
     return in_remote;
     }
@@ -963,8 +950,8 @@ cmGlobalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
     ++common;
     }
 
-  // if nothiong is in common the return
-  if (common == 0)
+  // If no part of the path is in common then return the full path.
+  if(common == 0)
     {
     return in_remote;
     }
