@@ -181,8 +181,7 @@ protected:
   // create the rule files for an object
   void WriteObjectRuleFiles(const cmTarget& target,
                             const cmSourceFile& source,
-                            std::vector<std::string>& objects,
-                            std::vector<std::string>& provides_requires);
+                            std::vector<std::string>& objects);
 
   // write the build rule for an object
   void WriteObjectBuildFile(std::string &obj,
@@ -190,8 +189,7 @@ protected:
                             const cmTarget& target, 
                             const cmSourceFile& source,
                             std::vector<std::string>& depends,
-                            std::string &depMakeFile,
-                            std::vector<std::string>& provides_requires);
+                            std::string &depMakeFile);
   
   // write the depend.make file for an object
   void WriteObjectDependRules(std::ostream& ruleFileStream,
@@ -221,28 +219,24 @@ protected:
                               const char* ruleFileName,
                               const cmTarget& target,
                               const std::vector<std::string>& objects,
-                              const std::vector<std::string>& external_objects,
-                              const std::vector<std::string>& provides_requires);
+                              const std::vector<std::string>& external_objects);
   void WriteSharedLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
                               const cmTarget& target,
                               const std::vector<std::string>& objects,
-                              const std::vector<std::string>& external_objects,
-                              const std::vector<std::string>& provides_requires);
+                              const std::vector<std::string>& external_objects);
   void WriteModuleLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
                               const cmTarget& target,
                               const std::vector<std::string>& objects,
-                              const std::vector<std::string>& external_objects,
-                              const std::vector<std::string>& provides_requires);
+                              const std::vector<std::string>& external_objects);
 
   // the main code for writing the Executable target rules
   void WriteExecutableRule(std::ostream& ruleFileStream,
                            const char* ruleFileName,
                            const cmTarget& target,
                            const std::vector<std::string>& objects,
-                           const std::vector<std::string>& external_objects,
-                           const std::vector<std::string>& provides_requires);
+                           const std::vector<std::string>& external_objects);
 
   // the main method for writing library rules
   void WriteLibraryRule(std::ostream& ruleFileStream,
@@ -251,8 +245,7 @@ protected:
                         const std::vector<std::string>& objects,
                         const std::vector<std::string>& external_objects,
                         const char* linkRuleVar,
-                        const char* extraLinkFlags,
-                        const std::vector<std::string>& provides_requires);
+                        const char* extraLinkFlags);
   
   void WriteLocalMakefile();
   

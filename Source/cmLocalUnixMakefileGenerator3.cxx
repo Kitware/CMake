@@ -334,7 +334,6 @@ cmLocalUnixMakefileGenerator3
   // files for this target.
   std::vector<std::string> objects;
   std::vector<std::string> external_objects;
-  std::vector<std::string> provides_requires;
   const std::vector<cmSourceFile*>& sources = target.GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
@@ -345,7 +344,7 @@ cmLocalUnixMakefileGenerator3
       if(!m_GlobalGenerator->IgnoreFile((*source)->GetSourceExtension().c_str()))
         {
         // Generate this object file's rule file.
-        this->WriteObjectRuleFiles(target, *(*source), objects,provides_requires);
+        this->WriteObjectRuleFiles(target, *(*source), objects);
         }
       else if((*source)->GetPropertyAsBool("EXTERNAL_OBJECT"))
         {
@@ -402,23 +401,19 @@ cmLocalUnixMakefileGenerator3
     {
     case cmTarget::STATIC_LIBRARY:
       this->WriteStaticLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects, external_objects,
-                                   provides_requires);
+                                   target, objects, external_objects);
       break;
     case cmTarget::SHARED_LIBRARY:
       this->WriteSharedLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects, external_objects,
-                                   provides_requires);
+                                   target, objects, external_objects);
       break;
     case cmTarget::MODULE_LIBRARY:
       this->WriteModuleLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects, external_objects,
-                                   provides_requires);
+                                   target, objects, external_objects);
       break;
     case cmTarget::EXECUTABLE:
       this->WriteExecutableRule(ruleFileStream, ruleFileName.c_str(),
-                                target, objects, external_objects,
-                                provides_requires);
+                                target, objects, external_objects);
       break;
     default:
       break;
@@ -435,7 +430,6 @@ cmLocalUnixMakefileGenerator3
                          std::vector<std::string>& depends,
                          std::string& depMakeFile)
 {
-  // TODO: what the heck is this?
   // Generate the build-time dependencies file for this object file.
   std::string depMarkFile;
   if(!this->GenerateDependsMakeFile(lang, obj.c_str(),
@@ -499,8 +493,7 @@ cmLocalUnixMakefileGenerator3
                        const cmTarget& target, 
                        const cmSourceFile& source,
                        std::vector<std::string>& depends,
-                       std::string &depMakeFile,
-                       std::vector<std::string>& provides_requires)
+                       std::string &depMakeFile)
 {
   // Open the rule file for writing.  This should be copy-if-different
   // because the rules may depend on this file itself.
@@ -651,8 +644,6 @@ cmLocalUnixMakefileGenerator3
     this->WriteMakeRule(ruleFileStream, 0,
                         objectProvides.c_str(), p_depends, no_commands);
 
-    // Add this to the set of provides-requires objects on the target.
-    provides_requires.push_back(objectRequires);
     {
     // Add the requires.build target to recursively build the provides
     // target after needed information is up to date.
@@ -671,8 +662,7 @@ cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::WriteObjectRuleFiles(const cmTarget& target, const cmSourceFile& source,
-                       std::vector<std::string>& objects,
-                       std::vector<std::string>& provides_requires)
+                       std::vector<std::string>& objects)
 {
   // Identify the language of the source file.
   const char* lang = this->GetSourceFileLanguage(source);
@@ -720,8 +710,7 @@ cmLocalUnixMakefileGenerator3
   std::string depMakeFile;
   
   // generate the build rule file
-  this->WriteObjectBuildFile(obj, lang, target, source, depends, depMakeFile, 
-                             provides_requires);
+  this->WriteObjectBuildFile(obj, lang, target, source, depends, depMakeFile);
   
   // The object file should be checked for dependency integrity.
   m_CheckDependFiles[lang].insert(relativeObj);
@@ -881,9 +870,9 @@ cmLocalUnixMakefileGenerator3
     depMakeFile = checker->GetMakeFileName();
     depMarkFile = checker->GetMarkFileName();
 
-    
-    // Todo is this required???
-    // Check the dependencies.
+    // Check the dependencies. Ths is required because we need at least an
+    // empty foo.obj.depends.make for make to include, so at cmake time the
+    // ::Check() method will generate that if it does not exist
     checker->Check();
     
     return true;
@@ -1466,8 +1455,7 @@ cmLocalUnixMakefileGenerator3
                       const char* ruleFileName,
                       const cmTarget& target,
                       const std::vector<std::string>& objects,
-                      const std::vector<std::string>& external_objects,
-                      const std::vector<std::string>& provides_requires)
+                      const std::vector<std::string>& external_objects)
 {
   // Write the dependency generation rule.
   this->WriteTargetDependRule(ruleFileStream, target, objects);
@@ -1647,8 +1635,7 @@ cmLocalUnixMakefileGenerator3
                          const char* ruleFileName,
                          const cmTarget& target,
                          const std::vector<std::string>& objects,
-                         const std::vector<std::string>& external_objects,
-                         const std::vector<std::string>& provides_requires)
+                         const std::vector<std::string>& external_objects)
 {
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -1660,8 +1647,7 @@ cmLocalUnixMakefileGenerator3
   this->AppendFlags(extraFlags, target.GetProperty("STATIC_LIBRARY_FLAGS"));
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target,
                          objects, external_objects,
-                         linkRuleVar.c_str(), extraFlags.c_str(),
-                         provides_requires);
+                         linkRuleVar.c_str(), extraFlags.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -1671,8 +1657,7 @@ cmLocalUnixMakefileGenerator3
                          const char* ruleFileName,
                          const cmTarget& target,
                          const std::vector<std::string>& objects,
-                         const std::vector<std::string>& external_objects,
-                         const std::vector<std::string>& provides_requires)
+                         const std::vector<std::string>& external_objects)
 {
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -1700,8 +1685,7 @@ cmLocalUnixMakefileGenerator3
     }
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target,
                          objects, external_objects,
-                         linkRuleVar.c_str(), extraFlags.c_str(),
-                         provides_requires);
+                         linkRuleVar.c_str(), extraFlags.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -1711,8 +1695,7 @@ cmLocalUnixMakefileGenerator3
                          const char* ruleFileName,
                          const cmTarget& target,
                          const std::vector<std::string>& objects,
-                         const std::vector<std::string>& external_objects,
-                         const std::vector<std::string>& provides_requires)
+                         const std::vector<std::string>& external_objects)
 {
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -1726,8 +1709,7 @@ cmLocalUnixMakefileGenerator3
   // TODO: .def files should be supported here also.
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target,
                          objects, external_objects,
-                         linkRuleVar.c_str(), extraFlags.c_str(),
-                         provides_requires);
+                         linkRuleVar.c_str(), extraFlags.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -1739,8 +1721,7 @@ cmLocalUnixMakefileGenerator3
                    const std::vector<std::string>& objects,
                    const std::vector<std::string>& external_objects,
                    const char* linkRuleVar,
-                   const char* extraFlags,
-                   const std::vector<std::string>& provides_requires)
+                   const char* extraFlags)
 {
   // Write the dependency generation rule.
   this->WriteTargetDependRule(ruleFileStream, target, objects);
