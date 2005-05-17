@@ -101,7 +101,6 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->WriteMainCMakefile();
 
   // now write the support Makefiles
-  this->WriteDependMakefile();
   this->WriteBuildMakefile();
   this->WriteCleanMakefile();
 }
@@ -316,64 +315,6 @@ void cmGlobalUnixMakefileGenerator3
     }
 }
 
-void cmGlobalUnixMakefileGenerator3::WriteDependMakefile()
-{
-  unsigned int i;
-  
-  // Open the output file.  This should not be copy-if-different
-  // because the check-build-system step compares the makefile time to
-  // see if the build system must be regenerated.
-  std::string makefileName = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  makefileName += "/depend.make";
-  cmGeneratedFileStream makefileStream(makefileName.c_str());
-  if(!makefileStream)
-    {
-    return;
-    }
-  
-  // get a local generator for some useful methods
-  cmLocalUnixMakefileGenerator3 *lg = 
-    static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
-  
-  // Write the do not edit header.
-  lg->WriteDisclaimer(makefileStream);
-  //lg->WriteMakeVariables(makefileStream);
-
-  // add the generic dependency
-  std::vector<std::string> depends;
-  std::vector<std::string> no_commands;
-  lg->WriteMakeRule(makefileStream, 0, "depend", depends, no_commands);
-
-  // include the build rules
-  makefileStream
-    << "# Include make rules for build targets\n";
-  makefileStream
-    << lg->GetIncludeDirective() << " "
-    << lg->ConvertToOutputForExisting("build.make").c_str()
-    << "\n\n";
-
-  // include all the target depends
-  for (i = 0; i < m_LocalGenerators.size(); ++i)
-    {
-    cmLocalUnixMakefileGenerator3 *lg2 = 
-      static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-    // are any parents excluded
-    bool exclude = false;
-    cmLocalGenerator *lg3 = lg2;
-    while (lg3)
-      {
-      if (lg3->GetExcludeAll())
-        {
-        exclude = true;
-        break;
-        }
-      lg3 = lg3->GetParent();
-      }
-    lg2->WriteMainTargetIncludes(makefileStream,"depend.make","depend");
-    lg2->WriteMainTargetRules(makefileStream,"depend.make","depend",!exclude);
-    }
-}
-
 void cmGlobalUnixMakefileGenerator3::WriteBuildMakefile()
 {
   unsigned int i;
@@ -401,6 +342,8 @@ void cmGlobalUnixMakefileGenerator3::WriteBuildMakefile()
   std::vector<std::string> depends;
   std::vector<std::string> no_commands;
   lg->WriteMakeRule(makefileStream, 0, "build", depends, no_commands);
+  lg->WriteMakeRule(makefileStream, 0, "depend", depends, no_commands);
+  lg->WriteMakeRule(makefileStream, 0, "requires", depends, no_commands);
 
   // include all the target depends
   for (i = 0; i < m_LocalGenerators.size(); ++i)
@@ -420,8 +363,9 @@ void cmGlobalUnixMakefileGenerator3::WriteBuildMakefile()
       lg3 = lg3->GetParent();
       }
     lg2->WriteMainTargetIncludes(makefileStream,"build.make","build");
-    lg2->WriteMainTargetRules(makefileStream,"build.make","build",!exclude);
+    lg2->WriteMainTargetRules(makefileStream,"build.make","depend",!exclude);
     lg2->WriteMainTargetRules(makefileStream,"build.make","requires",!exclude);
+    lg2->WriteMainTargetRules(makefileStream,"build.make","build",!exclude);
     }
 }
 
@@ -483,8 +427,8 @@ void cmGlobalUnixMakefileGenerator3
   // Check the build system in this directory.
   depends.push_back("cmake_check_build_system");
 
-  commands.push_back(lg->GetRecursiveMakeCall("depend.make",0));
-  commands.push_back(lg->GetRecursiveMakeCall("depend.make","requires"));
+  commands.push_back(lg->GetRecursiveMakeCall("build.make","depend"));
+  commands.push_back(lg->GetRecursiveMakeCall("build.make","requires"));
   commands.push_back(lg->GetRecursiveMakeCall("build.make",0));
 
   // Write the rule.
@@ -520,10 +464,10 @@ cmGlobalUnixMakefileGenerator3
     commands.clear();
     makeTargetName = dir;
     makeTargetName += "/depend";
-    commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
+    commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
     makeTargetName = dir;
     makeTargetName += "/requires";
-    commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
+    commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
     makeTargetName = dir;
     makeTargetName += "/build";
     commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
@@ -548,10 +492,10 @@ cmGlobalUnixMakefileGenerator3
       commands.clear();
       makeTargetName = localName;
       makeTargetName += "/depend";
-      commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
+      commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
       makeTargetName = localName;
       makeTargetName += "/requires";
-      commands.push_back(lg->GetRecursiveMakeCall("depend.make",makeTargetName.c_str()));
+      commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
       makeTargetName = localName;
       makeTargetName += "/build";
       commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));

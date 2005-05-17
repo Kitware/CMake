@@ -194,12 +194,13 @@ protected:
                             std::vector<std::string>& provides_requires);
   
   // write the depend.make file for an object
-  void WriteObjectDependFile(std::string& obj,
-                             const char *lang,
-                             const cmSourceFile& source,
-                             std::vector<std::string>& depends,
-                             std::string& depMarkFile);
-
+  void WriteObjectDependRules(std::ostream& ruleFileStream,
+                              std::string& obj,
+                              const char *lang,
+                              const cmSourceFile& source,
+                              std::vector<std::string>& depends,
+                              std::string& depMarkFile);
+  
   // this is used only by WriteObjectDependFile
   bool GenerateDependsMakeFile(const std::string& lang,
                                const char* objFile,
@@ -269,7 +270,7 @@ protected:
                             const std::vector<std::string>& external_objects,
                             std::string& variableName,
                             std::string& variableNameExternal);
-  void WriteTargetDependRule(const char* ruleFileName,
+  void WriteTargetDependRule(std::ostream& ruleFileStream,
                              const cmTarget& target,
                              const std::vector<std::string>& objects);
   void WriteTargetCleanRule(const char *ruleFileName,
@@ -279,7 +280,7 @@ protected:
                             const std::vector<std::string>& external_objects);
   void WriteTargetRequiresRule(std::ostream& ruleFileStream,
                                const cmTarget& target,
-                               const std::vector<std::string>& provides_requires);
+                               const std::vector<std::string>& objects);
   
   std::string GetTargetDirectory(const cmTarget& target);
   std::string GetSubdirTargetName(const char* pass, const char* subdir);

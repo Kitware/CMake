@@ -60,7 +60,6 @@ public:
 protected:
   void WriteMainMakefile();
   void WriteMainCMakefile();
-  void WriteDependMakefile();
   void WriteBuildMakefile();
   void WriteCleanMakefile();
   void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream);
