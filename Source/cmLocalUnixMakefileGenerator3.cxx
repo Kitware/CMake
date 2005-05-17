@@ -621,18 +621,35 @@ cmLocalUnixMakefileGenerator3
   // always provide an empty requires target
   this->WriteMakeRule(ruleFileStream, 0,
                       objectRequires.c_str(), no_commands, no_commands);
+
+  // write a build rule to recursively build what this obj provides
+  std::string objectProvides = relativeObj;
+  objectProvides += ".provides";
+  std::string temp = relativeObj;
+  temp += ".provides.build";
+  std::vector<std::string> r_commands;
+  r_commands.push_back(this->GetRecursiveMakeCall("build.make",temp.c_str()));
+  std::vector<std::string> p_depends;
+  p_depends.push_back(objectRequires);
+  this->WriteMakeRule(ruleFileStream, 0,
+                      objectProvides.c_str(), p_depends, r_commands);
   
+  // write the provides.build rule dependency on the obj file
+  p_depends.clear();
+  p_depends.push_back(relativeObj);
+  this->WriteMakeRule(ruleFileStream, 0,
+                      temp.c_str(), p_depends, no_commands);
+  
+#if 0
   if(strcmp(lang, "Fortran") == 0)
     {
     std::string objectProvides = obj;
     objectProvides += ".provides";
-    {
     // Add the provides target to build the object file.
     std::vector<std::string> p_depends;
     p_depends.push_back(obj);
     this->WriteMakeRule(ruleFileStream, 0,
                         objectProvides.c_str(), p_depends, no_commands);
-    }
 
     // Add this to the set of provides-requires objects on the target.
     provides_requires.push_back(objectRequires);
@@ -647,7 +664,7 @@ cmLocalUnixMakefileGenerator3
                         objectRequires.c_str(), no_depends, r_commands);
     }
     }
-
+#endif
 }
 
 //----------------------------------------------------------------------------
