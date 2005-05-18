@@ -107,8 +107,11 @@ void cmTarget::TraceVSDependencies(std::string projFile,
     }
   
   // add in the project file itself
-  srcFilesToProcess.push(projFile);
-  srcFilesQueued.insert(projFile);
+  if (projFile.size())
+    {
+    srcFilesToProcess.push(projFile);
+    srcFilesQueued.insert(projFile);
+    }
   // add in the library depends for custom targets
   if (this->GetType() == cmTarget::UTILITY)
     {

@@ -152,7 +152,19 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-    this->WriteConvenienceRules(makefileStream,lg);
+    // are any parents excluded
+    bool exclude = false;
+    cmLocalGenerator *lg3 = lg;
+    while (lg3)
+      {
+      if (lg3->GetExcludeAll())
+        {
+        exclude = true;
+        break;
+        }
+      lg3 = lg3->GetParent();
+      }
+    this->WriteConvenienceRules(makefileStream,lg,exclude);
     }
 
   lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
@@ -427,15 +439,17 @@ void cmGlobalUnixMakefileGenerator3
   // Check the build system in this directory.
   depends.push_back("cmake_check_build_system");
 
-  commands.push_back(lg->GetRecursiveMakeCall("build.make","depend"));
-  commands.push_back(lg->GetRecursiveMakeCall("build.make","requires"));
-  commands.push_back(lg->GetRecursiveMakeCall("build.make",0));
+  commands.push_back(lg->GetRecursiveMakeCall("Makefile","all/all"));
 
   // Write the rule.
   lg->WriteMakeRule(makefileStream, "The main all target", "all", depends, commands);
 
-  // write the clean
+  // Write and empty all/all:
   commands.clear();
+  lg->WriteMakeRule(makefileStream, "The main recursive all target", "all/all", 
+                    commands, commands);
+
+  // write the clean
   commands.push_back(lg->GetRecursiveMakeCall("clean.make",0));
   lg->WriteMakeRule(makefileStream, "default clean target", "clean", depends, commands);
 }
@@ -444,10 +458,11 @@ void cmGlobalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
-::WriteConvenienceRules(std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3 *lg)
+::WriteConvenienceRules(std::ostream& ruleFileStream, 
+                        cmLocalUnixMakefileGenerator3 *lg,
+                        bool exclude)
 {
   std::vector<std::string> depends;  
-  std::vector<std::string> tgt_depends;
   std::vector<std::string> commands;
   std::string localName;
   std::string makeTargetName;
@@ -484,37 +499,129 @@ cmGlobalUnixMakefileGenerator3
     if((t->second.GetType() == cmTarget::EXECUTABLE) ||
        (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
        (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
+       (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+       (t->second.GetType() == cmTarget::UTILITY))
       {
       // Add a rule to build the target by name.
       localName = lg->GetRelativeTargetDirectory(t->second);
-
+      
       commands.clear();
-      makeTargetName = localName;
-      makeTargetName += "/depend";
-      commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
-      makeTargetName = localName;
-      makeTargetName += "/requires";
-      commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
+      if (t->second.GetType() != cmTarget::UTILITY)
+        {
+        makeTargetName = localName;
+        makeTargetName += "/depend";
+        commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
+        makeTargetName = localName;
+        makeTargetName += "/requires";
+        commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
+        }
       makeTargetName = localName;
       makeTargetName += "/build";
       commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
 
       // Write the rule.
-      lg->WriteMakeRule(ruleFileStream, "Convenience name for target.",
+      localName += "/all";
+      depends.clear();
+      this->AppendGlobalTargetDepends(depends,t->second);
+      lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName.c_str(), depends, commands);
-      
-      // Add a target with the canonical name (no prefix, suffix or path).
-      if(localName != t->second.GetName())
+
+      // add the all/all dependency
+      if (!exclude && t->second.IsInAll())
         {
+        depends.clear();
+        depends.push_back(localName);
         commands.clear();
-        tgt_depends.clear();
-        tgt_depends.push_back(localName);
-        lg->WriteMakeRule(ruleFileStream, "Convenience name for target.",
-                          t->second.GetName(), tgt_depends, commands);
+        lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
+                          "all/all", depends, commands);
         }
+      
+      // Write the rule.
+      commands.clear();
+      commands.push_back(lg->GetRecursiveMakeCall("Makefile",localName.c_str()));
+      depends.clear();
+      depends.push_back("cmake_check_build_system");
+      localName = lg->GetRelativeTargetDirectory(t->second);
+      lg->WriteMakeRule(ruleFileStream, "Build rule for subir invocation for target.",
+                        localName.c_str(), depends, commands);
+
+      // Add a target with the canonical name (no prefix, suffix or path).
+      commands.clear();
+      depends.clear();
+      depends.push_back(localName);
+      lg->WriteMakeRule(ruleFileStream, "Convenience name for target.",
+                        t->second.GetName(), depends, commands);
       }
     }
 }
 
 
+
+//----------------------------------------------------------------------------
+void
+cmGlobalUnixMakefileGenerator3
+::AppendGlobalTargetDepends(std::vector<std::string>& depends,
+                            const cmTarget& target)
+{
+  // Keep track of dependencies already listed.
+  std::set<cmStdString> emitted;
+
+  // A target should not depend on itself.
+  emitted.insert(target.GetName());
+  
+  // Loop over all library dependencies but not for static libs
+  if (target.GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    const cmTarget::LinkLibraries& tlibs = target.GetLinkLibraries();
+    for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+        lib != tlibs.end(); ++lib)
+      {
+      // Don't emit the same library twice for this target.
+      if(emitted.insert(lib->first).second)
+        {
+        // Add this dependency.
+        this->AppendAnyGlobalDepend(depends, lib->first.c_str());
+        }
+      }
+    }
+  
+  // Loop over all utility dependencies.
+  const std::set<cmStdString>& tutils = target.GetUtilities();
+  for(std::set<cmStdString>::const_iterator util = tutils.begin();
+      util != tutils.end(); ++util)
+    {
+    // Don't emit the same utility twice for this target.
+    if(emitted.insert(*util).second)
+      {
+      // Add this dependency.
+      this->AppendAnyGlobalDepend(depends, util->c_str());
+      }
+    }
+}
+
+
+//----------------------------------------------------------------------------
+void
+cmGlobalUnixMakefileGenerator3
+::AppendAnyGlobalDepend(std::vector<std::string>& depends, const char* name)
+{
+  cmTarget *result = 0;
+  
+  // search each local generator until a match is found
+  unsigned int i;
+  for (i = 0; i < m_LocalGenerators.size(); ++i)
+    {
+    // search all targets
+    result = m_LocalGenerators[i]->GetMakefile()->FindTarget(name);
+    // if a match was found then ...
+    if (result)
+      {
+      cmLocalUnixMakefileGenerator3 *lg3 = 
+        static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
+      std::string tgtName = lg3->GetRelativeTargetDirectory(*result);
+      tgtName += "/all";
+      depends.push_back(tgtName);
+      return;
+      }
+    }
+}

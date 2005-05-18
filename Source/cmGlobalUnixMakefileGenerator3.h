@@ -66,7 +66,14 @@ protected:
   void WriteAllRules(cmLocalUnixMakefileGenerator3 *lg, 
                      std::ostream& makefileStream);
 
-  void WriteConvenienceRules(std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3 *);
+  void WriteConvenienceRules(std::ostream& ruleFileStream, 
+                             cmLocalUnixMakefileGenerator3 *,
+                             bool exclude);
+
+  void AppendGlobalTargetDepends(std::vector<std::string>& depends,
+                                 const cmTarget& target);
+  void AppendAnyGlobalDepend(std::vector<std::string>& depends, const char* name);
+
 
 };
 

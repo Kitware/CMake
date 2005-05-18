@@ -61,18 +61,21 @@ void cmLocalUnixMakefileGenerator3::Generate()
   this->ConfigureOutputPaths();
 
   // Generate the rule files for each target.
-  const cmTargets& targets = m_Makefile->GetTargets();
-  for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+  cmTargets& targets = m_Makefile->GetTargets();
+  std::string empty;
+  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
     if((t->second.GetType() == cmTarget::EXECUTABLE) ||
        (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
        (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
        (t->second.GetType() == cmTarget::MODULE_LIBRARY))
       {
+      t->second.TraceVSDependencies(empty, m_Makefile);
       this->WriteTargetRuleFiles(t->second);
       }
     else if(t->second.GetType() == cmTarget::UTILITY)
       {
+      t->second.TraceVSDependencies(empty, m_Makefile);
       this->WriteUtilityRuleFiles(t->second);
       }
     }
@@ -2327,7 +2330,6 @@ cmLocalUnixMakefileGenerator3
   if(dir && *dir)
     {
     // This is a CMake target somewhere in this project.
-
     // Get the type of the library.  If it does not have a type then
     // it is an executable.
     std::string typeVar = name;

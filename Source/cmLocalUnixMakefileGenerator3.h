@@ -144,6 +144,12 @@ public:
   std::map<cmStdString, IntegrityCheckSet> &GetIntegrityCheckSet() 
   { return m_CheckDependFiles;}
   
+  void AppendTargetDepends(std::vector<std::string>& depends,
+                           const cmTarget& target);
+
+  void AppendGlobalTargetDepends(std::vector<std::string>& depends,
+                                 const cmTarget& target);
+
 protected:
 
   // write the target rules for the local Makefile into the stream
@@ -282,8 +288,6 @@ protected:
   const char* GetSourceFileLanguage(const cmSourceFile& source);
   std::string ConvertToQuotedOutputPath(const char* p);
 
-  void AppendTargetDepends(std::vector<std::string>& depends,
-                           const cmTarget& target);
   void AppendAnyDepend(std::vector<std::string>& depends, const char* name,
                        bool assume_unknown_is_file=false);
   void AppendRuleDepend(std::vector<std::string>& depends,
