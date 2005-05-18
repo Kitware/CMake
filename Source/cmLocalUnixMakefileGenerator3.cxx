@@ -612,20 +612,23 @@ cmLocalUnixMakefileGenerator3
   // corresponding targets.
   std::string objectRequires = relativeObj;
   objectRequires += ".requires";
+  std::string temp = relativeObj;
+  temp += ".depend";
   std::vector<std::string> no_commands;
-
+  std::vector<std::string> p_depends;
+  p_depends.push_back(temp);
   // always provide an empty requires target
   this->WriteMakeRule(ruleFileStream, 0,
-                      objectRequires.c_str(), no_commands, no_commands);
+                      objectRequires.c_str(), p_depends, no_commands);
 
   // write a build rule to recursively build what this obj provides
   std::string objectProvides = relativeObj;
   objectProvides += ".provides";
-  std::string temp = relativeObj;
+  temp = relativeObj;
   temp += ".provides.build";
   std::vector<std::string> r_commands;
   r_commands.push_back(this->GetRecursiveMakeCall("build.make",temp.c_str()));
-  std::vector<std::string> p_depends;
+  p_depends.clear();
   p_depends.push_back(objectRequires);
   this->WriteMakeRule(ruleFileStream, 0,
                       objectProvides.c_str(), p_depends, r_commands);
