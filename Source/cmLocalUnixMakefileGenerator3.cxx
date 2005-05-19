@@ -386,12 +386,12 @@ cmLocalUnixMakefileGenerator3
   if (m_CustomRuleFiles.size())
     {
     // do the include
-    std::string dir = m_Makefile->GetStartOutputDirectory();
-    dir += "/CMakeCustomRules.dir/build.make";
-    dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
+    std::string dir2 = m_Makefile->GetStartOutputDirectory();
+    dir2 += "/CMakeCustomRules.dir/build.make";
+    dir2 = this->Convert(dir2.c_str(),HOME_OUTPUT,MAKEFILE);
     ruleFileStream
       << m_IncludeDirective << " "
-      << this->ConvertToOutputForExisting(dir.c_str()).c_str()
+      << this->ConvertToOutputForExisting(dir2.c_str()).c_str()
       << "\n";
     }
 
@@ -847,12 +847,12 @@ cmLocalUnixMakefileGenerator3
   if (m_CustomRuleFiles.size())
     {
     // do the include
-    std::string dir = m_Makefile->GetStartOutputDirectory();
-    dir += "/CMakeCustomRules.dir/build.make";
-    dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
+    std::string dir2 = m_Makefile->GetStartOutputDirectory();
+    dir2 += "/CMakeCustomRules.dir/build.make";
+    dir2 = this->Convert(dir2.c_str(),HOME_OUTPUT,MAKEFILE);
     ruleFileStream
       << m_IncludeDirective << " "
-      << this->ConvertToOutputForExisting(dir.c_str()).c_str()
+      << this->ConvertToOutputForExisting(dir2.c_str()).c_str()
       << "\n";
     }
 
