@@ -73,12 +73,23 @@ ENDIF(CMAKE_GENERATOR MATCHES  "Visual Studio 8")
 IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
   IF(NOT CMAKE_VC_COMPILER_TESTS_RUN)
     SET(CMAKE_VC_COMPILER_TESTS 1)
+    SET(testNmakeCLVersionFile
+      "${CMAKE_ROOT}/Modules/CMakeTestNMakeCLVersion.c")
+    STRING(REGEX REPLACE "/" "\\\\" testNmakeCLVersionFile "${testNmakeCLVersionFile}")
+    MESSAGE(STATUS "Check for CL compiler version")
     EXEC_PROGRAM(${CMAKE_C_COMPILER} 
-      ARGS /nologo -EP \"${CMAKE_ROOT}/Modules/CMakeTestNMakeCLVersion.c\" 
+      ARGS /nologo -EP \"${testNmakeCLVersionFile}\" 
       OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 
       RETURN_VALUE CMAKE_COMPILER_RETURN
       )
     IF(NOT CMAKE_COMPILER_RETURN)
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log 
+        "Determining the version of compiler passed with the following output:\n"
+        "${CMAKE_COMPILER_OUTPUT}\n\n")
+      STRING(REGEX REPLACE "\n" " " compilerVersion "${CMAKE_COMPILER_OUTPUT}")
+      STRING(REGEX REPLACE ".*VERSION=(.*)" "\\1"
+        compilerVersion "${compilerVersion}")
+      MESSAGE(STATUS "Check for CL compiler version - ${compilerVersion}")
       IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[3-9][0-9][0-9].*" )
         SET(CMAKE_COMPILER_SUPPORTS_PDBTYPE 0)
       ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[3-9][0-9][0-9].*" )
@@ -89,20 +100,37 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
       ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
         SET(CMAKE_COMPILER_2005 0)
       ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
+    ELSE(NOT CMAKE_COMPILER_RETURN)
+      MESSAGE(STATUS "Check for CL compiler version - failed")
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
+        "Determining the version of compiler failed with the following output:\n"
+        "${CMAKE_COMPILER_OUTPUT}\n\n")
     ENDIF(NOT CMAKE_COMPILER_RETURN)
     # try to figure out if we are running the free command line
     # tools from Microsoft.  These tools do not provide debug libraries,
     # so the link flags used have to be different.
     MAKE_DIRECTORY("${CMAKE_BINARY_DIR}/CMakeTmp2")
+    SET(testForFreeVCFile
+      "${CMAKE_ROOT}/Modules/CMakeTestForFreeVC.cxx")
+    STRING(REGEX REPLACE "/" "\\\\" testForFreeVCFile "${testForFreeVCFile}")
+    MESSAGE(STATUS "Check if this is a free VC compiler")
     EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}/CMakeTmp2
       ARGS /nologo /MD /EHsc
-      \"${CMAKE_ROOT}/Modules/CMakeTestForFreeVC.cxx\"
+      \"${testForFreeVCFile}"
       OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 
       RETURN_VALUE CMAKE_COMPILER_RETURN
       )
     IF(CMAKE_COMPILER_RETURN)
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
+        "Determining if this is a free VC compiler failed with the following output:\n"
+        "${CMAKE_COMPILER_OUTPUT}\n\n")
+      MESSAGE(STATUS "Check if this is a free VC compiler - yes")
       SET(CMAKE_USING_VC_FREE_TOOLS 1)
     ELSE(CMAKE_COMPILER_RETURN)
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log 
+        "Determining if this is a free VC compiler passed with the following output:\n"
+        "${CMAKE_COMPILER_OUTPUT}\n\n")
+      MESSAGE(STATUS "Check if this is a free VC compiler - no")
       SET(CMAKE_USING_VC_FREE_TOOLS 0)
     ENDIF(CMAKE_COMPILER_RETURN)
   ENDIF(NOT CMAKE_VC_COMPILER_TESTS_RUN)
