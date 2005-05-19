@@ -101,7 +101,11 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->WriteMainCMakefile();
 
   // now write the support Makefiles
-  this->WriteBuildMakefile();
+
+  // we no longr use the build makefile, TODO remove this code and the code
+  // it makes use of later on 
+  // this->WriteBuildMakefile();
+
   this->WriteCleanMakefile();
 }
 
@@ -504,20 +508,25 @@ cmGlobalUnixMakefileGenerator3
       {
       // Add a rule to build the target by name.
       localName = lg->GetRelativeTargetDirectory(t->second);
+      std::string makefileName = localName;
+      makefileName += "/build.make";
       
       commands.clear();
       if (t->second.GetType() != cmTarget::UTILITY)
         {
         makeTargetName = localName;
         makeTargetName += "/depend";
-        commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
+        commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
+                                                    makeTargetName.c_str()));
         makeTargetName = localName;
         makeTargetName += "/requires";
-        commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
+        commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
+                                                    makeTargetName.c_str()));
         }
       makeTargetName = localName;
       makeTargetName += "/build";
-      commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
+      commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
+                                                  makeTargetName.c_str()));
 
       // Write the rule.
       localName += "/all";

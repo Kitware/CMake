@@ -60,6 +60,11 @@ void cmLocalUnixMakefileGenerator3::Generate()
   // Setup our configuration variables for this directory.
   this->ConfigureOutputPaths();
 
+  // write the custom commands, this must happen before writing the targets,
+  // but... it may be that it needs to happen after the TraveVSDependencies
+  // call
+  this->WriteCustomCommands();
+
   // Generate the rule files for each target.
   cmTargets& targets = m_Makefile->GetTargets();
   std::string empty;
@@ -79,8 +84,6 @@ void cmLocalUnixMakefileGenerator3::Generate()
       this->WriteUtilityRuleFiles(t->second);
       }
     }
-
-  this->WriteCustomCommands();
 
   // write the local Makefile
   this->WriteLocalMakefile();
@@ -376,6 +379,21 @@ cmLocalUnixMakefileGenerator3
     return;
     }
   this->WriteDisclaimer(ruleFileStream);
+
+  this->WriteMakeVariables(ruleFileStream);
+  
+  // include the custom commands rules
+  if (m_CustomRuleFiles.size())
+    {
+    // do the include
+    std::string dir = m_Makefile->GetStartOutputDirectory();
+    dir += "/CMakeCustomRules.dir/build.make";
+    dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
+    ruleFileStream
+      << m_IncludeDirective << " "
+      << this->ConvertToOutputForExisting(dir.c_str()).c_str()
+      << "\n";
+    }
 
   // Include the rule file for each object.
   std::string relPath = this->GetHomeRelativeOutputPath();
@@ -821,8 +839,22 @@ cmLocalUnixMakefileGenerator3
     return;
     }
   this->WriteDisclaimer(ruleFileStream);
+  this->WriteMakeVariables(ruleFileStream);
   ruleFileStream
     << "# Utility rule file for " << target.GetName() << ".\n\n";
+
+  // include the custom commands rules
+  if (m_CustomRuleFiles.size())
+    {
+    // do the include
+    std::string dir = m_Makefile->GetStartOutputDirectory();
+    dir += "/CMakeCustomRules.dir/build.make";
+    dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
+    ruleFileStream
+      << m_IncludeDirective << " "
+      << this->ConvertToOutputForExisting(dir.c_str()).c_str()
+      << "\n";
+    }
 
   // Collect the commands and dependencies.
   std::vector<std::string> commands;
@@ -2300,6 +2332,12 @@ cmLocalUnixMakefileGenerator3
     }
 
   // Loop over all utility dependencies.
+
+  // Ken --- we trust that the parent build system handled the utility
+  // targets, really we trust that it also handled the libs but there is no
+  // harm in listing the libs as depends, if the libs are not present they
+  // cannot be built (the rules are not there) but at least it will squak
+#if 0
   const std::set<cmStdString>& tutils = target.GetUtilities();
   for(std::set<cmStdString>::const_iterator util = tutils.begin();
       util != tutils.end(); ++util)
@@ -2311,6 +2349,7 @@ cmLocalUnixMakefileGenerator3
       this->AppendAnyDepend(depends, util->c_str());
       }
     }
+#endif
 }
 
 //----------------------------------------------------------------------------
