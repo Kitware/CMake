@@ -2916,7 +2916,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 {
-  // only write the locla Makefile if we are not at the top
+  // only write the local Makefile if we are not at the top
   if (!m_Parent)
     {
     return;
@@ -2943,7 +2943,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 
   // Write the empty all rule.
   std::string dir = m_Makefile->GetStartOutputDirectory();
-  dir += "/directory";
+  dir += "/directorystart";
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
   this->CreateJumpCommand(commands,dir);
   this->WriteMakeRule(ruleFileStream, "The main all target", "all", depends, commands);

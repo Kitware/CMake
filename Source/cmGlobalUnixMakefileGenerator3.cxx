@@ -470,30 +470,67 @@ cmGlobalUnixMakefileGenerator3
   std::vector<std::string> commands;
   std::string localName;
   std::string makeTargetName;
-
+  
   depends.push_back("cmake_check_build_system");
   if (lg->GetParent())
     {
     std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
     dir = lg->Convert(dir.c_str(),cmLocalGenerator::HOME_OUTPUT,cmLocalGenerator::MAKEFILE);
     localName = dir;
-    localName += "/directory";
+    localName += "/directorystart";
+    makeTargetName = dir;
+    makeTargetName += "/directory";
+    
+    std::vector<std::string> all_tgts;
+    
+    // for all of out targets
+    for (cmTargets::const_iterator l = lg->GetMakefile()->GetTargets().begin();
+         l != lg->GetMakefile()->GetTargets().end(); l++)
+      {
+      if((l->second.GetType() == cmTarget::EXECUTABLE) ||
+         (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+         (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+         (l->second.GetType() == cmTarget::MODULE_LIBRARY) || 
+         (l->second.GetType() == cmTarget::UTILITY))
+        {
+        // Add this to the list of depends rules in this directory.
+        if(l->second.IsInAll())
+          {
+          std::string tname = lg->GetRelativeTargetDirectory(l->second);
+          tname += "/all";
+          all_tgts.push_back(tname);
+          }
+        }
+      }
+  
+    // write the directory rule add in the subdirs
+    std::vector<cmLocalGenerator *> subdirs = lg->GetChildren();
+    
+    // for each subdir add the directory depend
+    std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
+    for (; sdi != subdirs.end(); ++sdi)
+      {
+      cmLocalUnixMakefileGenerator3 * lg = 
+        static_cast<cmLocalUnixMakefileGenerator3 *>(*sdi);
+      dir = lg->GetMakefile()->GetStartOutputDirectory();
+      dir += "/directory";
+      dir = lg->Convert(dir.c_str(),cmLocalGenerator::HOME_OUTPUT,
+                        cmLocalGenerator::MAKEFILE);
+      all_tgts.push_back(dir);
+      }
     
     // write the directory rule
     commands.clear();
-    makeTargetName = dir;
-    makeTargetName += "/depend";
-    commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
-    makeTargetName = dir;
-    makeTargetName += "/requires";
-    commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
-    makeTargetName = dir;
-    makeTargetName += "/build";
-    commands.push_back(lg->GetRecursiveMakeCall("build.make",makeTargetName.c_str()));
+    commands.push_back(lg->GetRecursiveMakeCall("Makefile",makeTargetName.c_str()));
     
     // Write the rule.
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
                       localName.c_str(), depends, commands);
+
+    // Write the rule.
+    commands.clear();
+    lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
+                      makeTargetName.c_str(), all_tgts, commands);
     }
   
   // for each target Generate the rule files for each target.
