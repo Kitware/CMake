@@ -510,12 +510,12 @@ cmGlobalUnixMakefileGenerator3
     std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
     for (; sdi != subdirs.end(); ++sdi)
       {
-      cmLocalUnixMakefileGenerator3 * lg = 
+      cmLocalUnixMakefileGenerator3 * lg2 = 
         static_cast<cmLocalUnixMakefileGenerator3 *>(*sdi);
-      dir = lg->GetMakefile()->GetStartOutputDirectory();
+      dir = lg2->GetMakefile()->GetStartOutputDirectory();
       dir += "/directory";
-      dir = lg->Convert(dir.c_str(),cmLocalGenerator::HOME_OUTPUT,
-                        cmLocalGenerator::MAKEFILE);
+      dir = lg2->Convert(dir.c_str(),cmLocalGenerator::HOME_OUTPUT,
+                         cmLocalGenerator::MAKEFILE);
       all_tgts.push_back(dir);
       }
     
