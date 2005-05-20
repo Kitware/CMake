@@ -101,11 +101,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->WriteMainCMakefile();
 
   // now write the support Makefiles
-
-  // we no longr use the build makefile, TODO remove this code and the code
-  // it makes use of later on 
   this->WriteBuildMakefile();
-
   this->WriteCleanMakefile();
 }
 
