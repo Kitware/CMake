@@ -2527,24 +2527,27 @@ cmLocalUnixMakefileGenerator3
     // Build the command line in a single string.
     const cmCustomCommandLine& commandLine = *cl;
     std::string cmd = commandLine[0];
-    cmSystemTools::ReplaceString(cmd, "/./", "/");
-    cmd = this->Convert(cmd.c_str(),START_OUTPUT);
-    if(cmd.find("/") == cmd.npos &&
-       commandLine[0].find("/") != cmd.npos)
+    if (cmd.size())
       {
-      // Add a leading "./" for executables in the current directory.
-      cmd = "./" + cmd;
+      cmSystemTools::ReplaceString(cmd, "/./", "/");
+      cmd = this->Convert(cmd.c_str(),START_OUTPUT);
+      if(cmd.find("/") == cmd.npos &&
+         commandLine[0].find("/") != cmd.npos)
+        {
+        // Add a leading "./" for executables in the current directory.
+        cmd = "./" + cmd;
+        }
+      cmd = this->Convert(cmd.c_str(),NONE,SHELL);
+      for(unsigned int j=1; j < commandLine.size(); ++j)
+        {
+        cmd += " ";
+        cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
+        }
+      
+      commands1.push_back(cmd);
       }
-    cmd = this->Convert(cmd.c_str(),NONE,SHELL);
-    for(unsigned int j=1; j < commandLine.size(); ++j)
-      {
-      cmd += " ";
-      cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
-      }
-    
-    commands1.push_back(cmd);
     }
-
+  
   // stick this group of commands into a cd of the proper path
   // Build the jump-and-build command list.
   if(m_WindowsShell)
