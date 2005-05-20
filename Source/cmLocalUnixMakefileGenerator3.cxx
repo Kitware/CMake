@@ -645,7 +645,10 @@ cmLocalUnixMakefileGenerator3
   temp = relativeObj;
   temp += ".provides.build";
   std::vector<std::string> r_commands;
-  r_commands.push_back(this->GetRecursiveMakeCall("build.make",temp.c_str()));
+  std::string tgtMakefileName = this->GetRelativeTargetDirectory(target);
+  tgtMakefileName += "/build.make";
+  r_commands.push_back(this->GetRecursiveMakeCall(tgtMakefileName.c_str(),
+                                                  temp.c_str()));
   p_depends.clear();
   p_depends.push_back(objectRequires);
   this->WriteMakeRule(ruleFileStream, 0,
@@ -2514,6 +2517,8 @@ cmLocalUnixMakefileGenerator3
                       const cmCustomCommand& cc)
 {
   // TODO: Convert outputs/dependencies (arguments?) to relative paths.
+  
+  std::vector<std::string> commands1;
 
   // Add each command line to the set of commands.
   for(cmCustomCommandLines::const_iterator cl = cc.GetCommandLines().begin();
@@ -2523,7 +2528,7 @@ cmLocalUnixMakefileGenerator3
     const cmCustomCommandLine& commandLine = *cl;
     std::string cmd = commandLine[0];
     cmSystemTools::ReplaceString(cmd, "/./", "/");
-    cmd = this->Convert(cmd.c_str(),HOME_OUTPUT);
+    cmd = this->Convert(cmd.c_str(),START_OUTPUT);
     if(cmd.find("/") == cmd.npos &&
        commandLine[0].find("/") != cmd.npos)
       {
@@ -2536,6 +2541,45 @@ cmLocalUnixMakefileGenerator3
       cmd += " ";
       cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
       }
+    
+    commands1.push_back(cmd);
+    }
+
+  // stick this group of commands into a cd of the proper path
+  // Build the jump-and-build command list.
+  if(m_WindowsShell)
+    {
+    // On Windows we must perform each step separately and then jump
+    // back because the shell keeps the working directory between
+    // commands.
+    std::string cmd = "cd ";
+    cmd += this->ConvertToOutputForExisting(m_Makefile->GetStartOutputDirectory());
+    commands.push_back(cmd);
+
+    // push back the custom commands
+    commands.insert(commands.end(), commands1.begin(), commands1.end());
+    
+    // Jump back to the home directory.
+    cmd = "cd ";
+    cmd += this->ConvertToOutputForExisting(m_Makefile->GetHomeOutputDirectory());
+    commands.push_back(cmd);
+    }
+  else
+    {
+    // On UNIX we must construct a single shell command to jump and
+    // build because make resets the directory between each command.
+    std::string cmd = "cd ";
+    cmd += this->ConvertToOutputForExisting(m_Makefile->GetStartOutputDirectory());
+    
+    // add the commands
+    unsigned int i;
+    for (i = 0; i < commands1.size(); ++i)
+      {
+      cmd += " && ";
+      cmd += commands1[i];
+      }
+    
+    // Add the command as a single line.
     commands.push_back(cmd);
     }
 }

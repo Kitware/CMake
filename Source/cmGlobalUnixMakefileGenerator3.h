@@ -65,7 +65,8 @@ protected:
   void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream);
   void WriteAllRules(cmLocalUnixMakefileGenerator3 *lg, 
                      std::ostream& makefileStream);
-
+  void WriteHelpRule(std::ostream& ruleFileStream);
+  
   void WriteConvenienceRules(std::ostream& ruleFileStream, 
                              cmLocalUnixMakefileGenerator3 *,
                              bool exclude);

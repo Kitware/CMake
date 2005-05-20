@@ -101,7 +101,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->WriteMainCMakefile();
 
   // now write the support Makefiles
-  this->WriteBuildMakefile();
+  //this->WriteBuildMakefile();
   this->WriteCleanMakefile();
 }
 
@@ -167,6 +167,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
     this->WriteConvenienceRules(makefileStream,lg,exclude);
     }
 
+  this->WriteHelpRule(makefileStream);
   lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
   lg->WriteSpecialTargetsBottom(makefileStream);
 }
@@ -667,3 +668,52 @@ cmGlobalUnixMakefileGenerator3
       }
     }
 }
+
+//----------------------------------------------------------------------------
+void
+cmGlobalUnixMakefileGenerator3::WriteHelpRule(std::ostream& ruleFileStream)
+{
+  cmLocalUnixMakefileGenerator3 *lg = 
+    static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
+
+  // add the help target
+  std::string path;
+  std::vector<std::string> no_depends;
+  std::vector<std::string> commands;
+  lg->AppendEcho(commands,
+                 "The following are some of the valid targets for this Makefile:");
+  lg->AppendEcho(commands,"... all (the default if no target is provided)");
+  lg->AppendEcho(commands,"... clean");
+  lg->AppendEcho(commands,"... depend");
+  lg->AppendEcho(commands,"... install");
+  lg->AppendEcho(commands,"... rebuild_cache");
+  
+  // for each local generator
+  unsigned int i;
+  for (i = 0; i < m_LocalGenerators.size(); ++i)
+    {
+    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
+
+  
+    // for each target Generate the rule files for each target.
+    const cmTargets& targets = lg->GetMakefile()->GetTargets();
+    for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+      {
+      if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+         (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+         (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+         (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+         (t->second.GetType() == cmTarget::UTILITY))
+        {
+        path = "... ";
+        path += t->second.GetName();
+        lg->AppendEcho(commands,path.c_str());
+        }
+      }
+    }
+  lg->WriteMakeRule(ruleFileStream, "Help Target",
+                    "help:",
+                    no_depends, commands);
+  ruleFileStream << "\n\n";
+}
+

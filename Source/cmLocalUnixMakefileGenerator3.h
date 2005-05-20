@@ -150,6 +150,9 @@ public:
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  const cmTarget& target);
 
+  void AppendEcho(std::vector<std::string>& commands,
+                  const char* text);
+
 protected:
 
   // write the target rules for the local Makefile into the stream
@@ -302,8 +305,6 @@ protected:
                            const cmCustomCommand& cc);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files);
-  void AppendEcho(std::vector<std::string>& commands,
-                  const char* text);
 
   //==========================================================================
   bool SamePath(const char* path1, const char* path2);
