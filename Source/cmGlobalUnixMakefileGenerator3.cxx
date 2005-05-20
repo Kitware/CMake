@@ -104,7 +104,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
 
   // we no longr use the build makefile, TODO remove this code and the code
   // it makes use of later on 
-  // this->WriteBuildMakefile();
+  this->WriteBuildMakefile();
 
   this->WriteCleanMakefile();
 }
@@ -651,7 +651,7 @@ void
 cmGlobalUnixMakefileGenerator3
 ::AppendAnyGlobalDepend(std::vector<std::string>& depends, const char* name)
 {
-  cmTarget *result = 0;
+  cmTarget *result;
   
   // search each local generator until a match is found
   unsigned int i;
