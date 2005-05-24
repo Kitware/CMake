@@ -11,6 +11,9 @@ SET(CMAKE_SYSTEM_AND_Fortran_COMPILER_INFO_FILE
   ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}.cmake)
 INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
 
+# Fortran needs cmake to do a requires step during its build process to 
+# catch any modules
+SET(CMAKE_NEEDS_REQUIRES_STEP_Fortran_FLAG 1)
 
 # Create a set of shared library variable specific to Fortran
 # For 90% of the systems, these are the same flags as the C versions
