@@ -1082,20 +1082,6 @@ void cmLocalUnixMakefileGenerator3::WriteMainTargetIncludes(std::ostream& makefi
   std::vector<std::string> depends;
   std::vector<std::string> no_commands;
 
-  // if this is the build rules also include the custom commands if there
-  // were any
-  if (!strcmp(rule,"build") && m_CustomRuleFiles.size())
-    {
-    // do the include
-    std::string dir = m_Makefile->GetStartOutputDirectory();
-    dir += "/CMakeCustomRules.dir/build.make";
-    dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
-    makefileStream
-      << m_IncludeDirective << " "
-      << this->ConvertToOutputForExisting(dir.c_str()).c_str()
-      << "\n";
-    }
-
   // if this is the clean rules also include the custom commands if there
   // were any
   const char* clean_no_custom = m_Makefile->GetProperty("CLEAN_NO_CUSTOM");

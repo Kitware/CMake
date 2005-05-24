@@ -75,6 +75,8 @@ protected:
                                  const cmTarget& target);
   void AppendAnyGlobalDepend(std::vector<std::string>& depends, const char* name);
 
+  // does this generator need a requires step for any of its targets
+  bool NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg);
 
 };
 

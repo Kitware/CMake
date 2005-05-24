@@ -532,6 +532,7 @@ cmGlobalUnixMakefileGenerator3
   
   // for each target Generate the rule files for each target.
   const cmTargets& targets = lg->GetMakefile()->GetTargets();
+  bool needRequiresStep = this->NeedRequiresStep(lg);
   for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
     {
     if((t->second.GetType() == cmTarget::EXECUTABLE) ||
@@ -552,10 +553,15 @@ cmGlobalUnixMakefileGenerator3
         makeTargetName += "/depend";
         commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
                                                     makeTargetName.c_str()));
-        makeTargetName = localName;
-        makeTargetName += "/requires";
-        commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
-                                                    makeTargetName.c_str()));
+        
+        // add requires if we need it for this generator
+        if (needRequiresStep)
+          {
+          makeTargetName = localName;
+          makeTargetName += "/requires";
+          commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
+                                                      makeTargetName.c_str()));
+          }
         }
       makeTargetName = localName;
       makeTargetName += "/build";
@@ -717,3 +723,24 @@ cmGlobalUnixMakefileGenerator3::WriteHelpRule(std::ostream& ruleFileStream)
   ruleFileStream << "\n\n";
 }
 
+
+bool cmGlobalUnixMakefileGenerator3
+::NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg)
+{
+  std::map<cmStdString,cmLocalUnixMakefileGenerator3::IntegrityCheckSet>& 
+    checkSet = lg->GetIntegrityCheckSet();
+  for(std::map<cmStdString, 
+        cmLocalUnixMakefileGenerator3::IntegrityCheckSet>::const_iterator
+        l = checkSet.begin(); l != checkSet.end(); ++l)
+    {
+    std::string name = "CMAKE_NEEDS_REQUIRES_STEP_";
+    name += l->first;
+    name += "_FLAG";
+    if(lg->GetMakefile()->GetDefinition(name.c_str()))
+      {
+      return true;
+      }
+    }
+  
+  return false;
+}
