@@ -61,7 +61,6 @@ protected:
   void WriteMainMakefile();
   void WriteMainCMakefile();
   void WriteBuildMakefile();
-  void WriteCleanMakefile();
   void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream);
   void WriteAllRules(cmLocalUnixMakefileGenerator3 *lg, 
                      std::ostream& makefileStream);

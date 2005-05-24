@@ -135,7 +135,6 @@ public:
   
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
   std::string GetRelativeTargetDirectory(const cmTarget& target);
-  void WriteLocalCleanRule(std::ostream& makefileStream);
 
   // List the files for which to check dependency integrity.  Each
   // language has its own list because integrity may be checked
@@ -172,7 +171,8 @@ protected:
 
   // this is responsible for writing all of the rules for all this
   // directories custom commands (but not utility targets)
-  void WriteCustomCommands();
+  void WriteCustomCommands(const cmTarget &target,std::ostream& os,
+                           std::vector<std::string>& cleanFiles);
   
   // this method Writes the Directory informaiton files
   void WriteDirectoryInformationFile();
@@ -221,31 +221,38 @@ protected:
                                       bool verbose);
   
   
-  void GenerateCustomRuleFile(const cmCustomCommand& cc);
+  std::string GenerateCustomRuleFile(const cmCustomCommand& cc, 
+                                     const char *dir);
   
   // these three make some simple changes and then call WriteLibraryRule
   void WriteStaticLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
                               const cmTarget& target,
                               const std::vector<std::string>& objects,
-                              const std::vector<std::string>& external_objects);
+                              const std::vector<std::string>& external_objects,
+                              std::vector<std::string>& cleanFiles);
+  
   void WriteSharedLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
                               const cmTarget& target,
                               const std::vector<std::string>& objects,
-                              const std::vector<std::string>& external_objects);
+                              const std::vector<std::string>& external_objects,
+                              std::vector<std::string>& cleanFiles);
+  
   void WriteModuleLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
                               const cmTarget& target,
                               const std::vector<std::string>& objects,
-                              const std::vector<std::string>& external_objects);
+                              const std::vector<std::string>& external_objects,
+                              std::vector<std::string>& cleanFiles);
 
   // the main code for writing the Executable target rules
   void WriteExecutableRule(std::ostream& ruleFileStream,
                            const char* ruleFileName,
                            const cmTarget& target,
                            const std::vector<std::string>& objects,
-                           const std::vector<std::string>& external_objects);
+                           const std::vector<std::string>& external_objects,
+                           std::vector<std::string>& cleanFiles);
 
   // the main method for writing library rules
   void WriteLibraryRule(std::ostream& ruleFileStream,
@@ -254,7 +261,8 @@ protected:
                         const std::vector<std::string>& objects,
                         const std::vector<std::string>& external_objects,
                         const char* linkRuleVar,
-                        const char* extraLinkFlags);
+                        const char* extraLinkFlags,
+                        std::vector<std::string>& cleanFiles);
   
   void WriteLocalMakefile();
   
@@ -275,11 +283,9 @@ protected:
   void WriteTargetDependRule(std::ostream& ruleFileStream,
                              const cmTarget& target,
                              const std::vector<std::string>& objects);
-  void WriteTargetCleanRule(const char *ruleFileName,
+  void WriteTargetCleanRule(std::ostream& ruleFileStream,
                             const cmTarget& target,
-                            const std::vector<std::string>& files,
-                            const std::vector<std::string>& objects,
-                            const std::vector<std::string>& external_objects);
+                            const std::vector<std::string>& files);
   void WriteTargetRequiresRule(std::ostream& ruleFileStream,
                                const cmTarget& target,
                                const std::vector<std::string>& objects);
@@ -331,9 +337,6 @@ private:
 
   // Flag for whether echo command needs quotes.
   bool m_EchoNeedsQuote;
-
-  // Set of custom rule files that have been generated.
-  std::set<cmStdString> m_CustomRuleFiles;
 
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> m_ObjectFiles;

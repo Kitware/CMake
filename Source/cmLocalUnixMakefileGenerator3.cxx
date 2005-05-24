@@ -60,11 +60,6 @@ void cmLocalUnixMakefileGenerator3::Generate()
   // Setup our configuration variables for this directory.
   this->ConfigureOutputPaths();
 
-  // write the custom commands, this must happen before writing the targets,
-  // but... it may be that it needs to happen after the TraveVSDependencies
-  // call
-  this->WriteCustomCommands();
-
   // Generate the rule files for each target.
   cmTargets& targets = m_Makefile->GetTargets();
   std::string empty;
@@ -141,88 +136,38 @@ void cmLocalUnixMakefileGenerator3::FormatOutputPath(std::string& path,
 }
 
 
-void cmLocalUnixMakefileGenerator3::WriteCustomCommands()
+void cmLocalUnixMakefileGenerator3
+::WriteCustomCommands(const cmTarget &target,std::ostream& ruleFileStream,
+                      std::vector<std::string>& cleanFiles)
 {
+  std::string tgtDir = m_Makefile->GetStartOutputDirectory();
+  tgtDir += "/";
+  tgtDir += this->GetTargetDirectory(target);
+
+  // add custom commands to the clean rules?
+  const char* clean_no_custom = m_Makefile->GetProperty("CLEAN_NO_CUSTOM");
+  bool clean = cmSystemTools::IsOff(clean_no_custom);
+  
   // Generate the rule files for each custom command.
-  const std::vector<cmSourceFile*>& sources = m_Makefile->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
-      i != sources.end(); ++i)
-    {
-    if(const cmCustomCommand* cc = (*i)->GetCustomCommand())
-      {
-      this->GenerateCustomRuleFile(*cc);
-      }
-    }
-
-  // generate the includes
-  std::string ruleFileName = "CMakeCustomRules.dir/build.make";
-  
-  // Open the rule file.  This should be copy-if-different because the
-  // rules may depend on this file itself.
-  std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
-  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
-  ruleFileStream.SetCopyIfDifferent(true);
-  if(!ruleFileStream)
-    {
-    return;
-    }
-  this->WriteDisclaimer(ruleFileStream);
-
-  std::string relPath = this->GetHomeRelativeOutputPath();
+  // get the classes from the source lists then add them to the groups
+  const std::vector<cmSourceFile*> &classes = target.GetSourceFiles();
   std::string objTarget;
-  for(std::set<cmStdString>::const_iterator i = m_CustomRuleFiles.begin();
-      i != m_CustomRuleFiles.end(); ++i)
-    {
-    objTarget = relPath;
-    objTarget += *i;
-    ruleFileStream
-      << m_IncludeDirective << " "
-      << this->ConvertToOutputForExisting(objTarget.c_str()).c_str()
-      << "\n";
-    }
-
-  // now do the clean
-  ruleFileName = "CMakeCustomRules.dir/clean.make";
-  
-  // Open the rule file.  This should be copy-if-different because the
-  // rules may depend on this file itself.
-  ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
-  cmGeneratedFileStream ruleFileStream2(ruleFileNameFull.c_str());
-  ruleFileStream2.SetCopyIfDifferent(true);
-  if(!ruleFileStream2)
-    {
-    return;
-    }
-  this->WriteDisclaimer(ruleFileStream2);
-
-  std::vector<std::string> cleanFiles;
-  for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
-      i != sources.end(); ++i)
+  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
+      i != classes.end(); i++)
     {
     if(const cmCustomCommand* cc = (*i)->GetCustomCommand())
       {
-      cleanFiles.push_back(cc->GetOutput());
+      objTarget = this->GenerateCustomRuleFile(*cc,tgtDir.c_str());
+      if (clean)
+        {
+        cleanFiles.push_back
+          (this->Convert(cc->GetOutput(),HOME_OUTPUT,SHELL));
+        }
+      ruleFileStream
+        << m_IncludeDirective << " "
+        << this->ConvertToOutputForExisting(objTarget.c_str()).c_str()
+        << "\n";
       }
-    }
-  if (cleanFiles.size())
-    {
-    std::vector<std::string> commands;
-    std::vector<std::string> depends;
-    this->AppendCleanCommand(commands, cleanFiles);
-    std::string dir = m_Makefile->GetStartOutputDirectory();
-    dir += "/CMakeCustomRules.dir/clean";
-    //dir = cmSystemTools::RelativePath(m_Makefile->GetHomeOutputDirectory(), dir.c_str());
-    //dir = cmSystemTools::ConvertToOutputPath(dir.c_str());
-    dir = this->Convert(dir.c_str(),HOME_OUTPUT,SHELL,false);
-    this->WriteMakeRule(ruleFileStream2,
-                        "Clean the output of this custom command.",
-                        dir.c_str(), depends, commands);
-    // do the include
-    commands.clear();
-    depends.push_back(dir);
-    this->WriteMakeRule(ruleFileStream2,
-                        "Clean the output of this custom command.",
-                        "clean", depends, commands);
     }
 }
 
@@ -382,18 +327,15 @@ cmLocalUnixMakefileGenerator3
 
   this->WriteMakeVariables(ruleFileStream);
   
-  // include the custom commands rules
-  if (m_CustomRuleFiles.size())
+  // write the custom commands for this target
+  std::vector<std::string> cleanFiles;
+  // Look for files registered for cleaning in this directory.
+  if(const char* additional_clean_files =
+     m_Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES"))
     {
-    // do the include
-    std::string dir2 = m_Makefile->GetStartOutputDirectory();
-    dir2 += "/CMakeCustomRules.dir/build.make";
-    dir2 = this->Convert(dir2.c_str(),HOME_OUTPUT,MAKEFILE);
-    ruleFileStream
-      << m_IncludeDirective << " "
-      << this->ConvertToOutputForExisting(dir2.c_str()).c_str()
-      << "\n";
-    }
+    cmSystemTools::ExpandListArgument(additional_clean_files, cleanFiles);
+    }  
+  this->WriteCustomCommands(target,ruleFileStream,cleanFiles);
 
   // Include the rule file for each object.
   std::string relPath = this->GetHomeRelativeOutputPath();
@@ -422,23 +364,33 @@ cmLocalUnixMakefileGenerator3
     {
     case cmTarget::STATIC_LIBRARY:
       this->WriteStaticLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects, external_objects);
+                                   target, objects, external_objects,
+                                   cleanFiles);
       break;
     case cmTarget::SHARED_LIBRARY:
       this->WriteSharedLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects, external_objects);
+                                   target, objects, external_objects, 
+                                   cleanFiles);
       break;
     case cmTarget::MODULE_LIBRARY:
       this->WriteModuleLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects, external_objects);
+                                   target, objects, external_objects, 
+                                   cleanFiles);
       break;
     case cmTarget::EXECUTABLE:
       this->WriteExecutableRule(ruleFileStream, ruleFileName.c_str(),
-                                target, objects, external_objects);
+                                target, objects, external_objects,
+                                cleanFiles);
       break;
     default:
       break;
     }
+
+  // Write the requires target.
+  this->WriteTargetRequiresRule(ruleFileStream, target, objects);
+
+  // Write clean target
+  this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
 }
 
 //----------------------------------------------------------------------------
@@ -745,14 +697,10 @@ cmLocalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
-void
+std::string 
 cmLocalUnixMakefileGenerator3
-::GenerateCustomRuleFile(const cmCustomCommand& cc)
+::GenerateCustomRuleFile(const cmCustomCommand& cc, const char *dir)
 {
-  // Create a directory for custom rule files.
-  std::string dir = "CMakeCustomRules.dir";
-  cmSystemTools::MakeDirectory(this->ConvertToFullPath(dir).c_str());
-
   // Convert the output name to a relative path if possible.
   std::string output = this->Convert(cc.GetOutput(),START_OUTPUT);
 
@@ -768,27 +716,16 @@ cmLocalUnixMakefileGenerator3
   ruleFileName += customName;
   ruleFileName += ".build.make";
 
-  // If this is a duplicate rule produce an error.
-  if(m_CustomRuleFiles.find(ruleFileName) != m_CustomRuleFiles.end())
-    {
-    cmSystemTools::Error("An output was found with multiple rules on how to build it for output: ",
-                         cc.GetOutput());
-    return;
-    }
-  m_CustomRuleFiles.insert(ruleFileName);
-
   // what is the relative path to the rule file
-  std::string relRuleFile = this->GetHomeRelativeOutputPath();
-  relRuleFile += ruleFileName;
+  std::string relRuleFile = this->Convert(ruleFileName.c_str(),HOME_OUTPUT);
   
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
-  std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
-  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
+  cmGeneratedFileStream ruleFileStream(ruleFileName.c_str());
   ruleFileStream.SetCopyIfDifferent(true);
   if(!ruleFileStream)
     {
-    return;
+    return relRuleFile;
     }
   this->WriteDisclaimer(ruleFileStream);
   ruleFileStream
@@ -800,7 +737,7 @@ cmLocalUnixMakefileGenerator3
   preEcho += output;
   this->AppendEcho(commands, preEcho.c_str());
   this->AppendCustomCommand(commands, cc);
-
+  
   // Collect the dependencies.
   std::vector<std::string> depends;
   this->AppendCustomDepend(depends, cc);
@@ -817,6 +754,7 @@ cmLocalUnixMakefileGenerator3
   this->WriteMakeRule(ruleFileStream, comment,
                       cc.GetOutput(), depends, commands);
 
+  return relRuleFile;
 }
 
 //----------------------------------------------------------------------------
@@ -846,18 +784,14 @@ cmLocalUnixMakefileGenerator3
   ruleFileStream
     << "# Utility rule file for " << target.GetName() << ".\n\n";
 
-  // include the custom commands rules
-  if (m_CustomRuleFiles.size())
+  // write the custom commands for this target
+  std::vector<std::string> cleanFiles;
+  if(const char* additional_clean_files =
+     m_Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES"))
     {
-    // do the include
-    std::string dir2 = m_Makefile->GetStartOutputDirectory();
-    dir2 += "/CMakeCustomRules.dir/build.make";
-    dir2 = this->Convert(dir2.c_str(),HOME_OUTPUT,MAKEFILE);
-    ruleFileStream
-      << m_IncludeDirective << " "
-      << this->ConvertToOutputForExisting(dir2.c_str()).c_str()
-      << "\n";
-    }
+    cmSystemTools::ExpandListArgument(additional_clean_files, cleanFiles);
+    }  
+  this->WriteCustomCommands(target,ruleFileStream, cleanFiles);
 
   // Collect the commands and dependencies.
   std::vector<std::string> commands;
@@ -892,6 +826,9 @@ cmLocalUnixMakefileGenerator3
     this->Convert(buildTargetRuleName.c_str(),HOME_OUTPUT,MAKEFILE);
   this->WriteConvenienceRule(ruleFileStream, target.GetName(),
                              buildTargetRuleName.c_str());
+
+  // Write clean target
+  this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
 }
 
 //----------------------------------------------------------------------------
@@ -1082,21 +1019,6 @@ void cmLocalUnixMakefileGenerator3::WriteMainTargetIncludes(std::ostream& makefi
   std::vector<std::string> depends;
   std::vector<std::string> no_commands;
 
-  // if this is the clean rules also include the custom commands if there
-  // were any
-  const char* clean_no_custom = m_Makefile->GetProperty("CLEAN_NO_CUSTOM");
-  if (!strcmp(rule,"clean") && cmSystemTools::IsOff(clean_no_custom))
-    {
-    // do the include
-    std::string dir = m_Makefile->GetStartOutputDirectory();
-    dir += "/CMakeCustomRules.dir/clean.make";
-    dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
-    makefileStream
-      << m_IncludeDirective << " "
-      << this->ConvertToOutputForExisting(dir.c_str()).c_str()
-      << "\n";
-    }
-  
   for (cmTargets::const_iterator l = m_Makefile->GetTargets().begin();
        l != m_Makefile->GetTargets().end(); l++)
     {
@@ -1184,41 +1106,6 @@ void cmLocalUnixMakefileGenerator3::WriteMainTargetRules(std::ostream& makefileS
                         dir.c_str(), all_tgts, no_commands);
     }
 }
-
-//----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator3
-::WriteLocalCleanRule(std::ostream& makefileStream)
-{
-  // Collect a list of extra files to clean in this directory.
-  std::vector<std::string> files;
-
-  // Look for files registered for cleaning in this directory.
-  if(const char* additional_clean_files =
-     m_Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES"))
-    {
-    cmSystemTools::ExpandListArgument(additional_clean_files, files);
-    }
-
-  // Write the local clean rule for this directory.
-  if(!files.empty())
-    {
-    // Have extra files to clean.  Write the action to remove them.
-    std::string cleanTarget = this->GetHomeRelativeOutputPath();
-    cleanTarget += "clean.local";
-    std::vector<std::string> no_depends;
-    std::vector<std::string> commands;
-    this->AppendCleanCommand(commands, files);
-    this->WriteMakeRule(makefileStream,
-                        "Clean extra files in this directory.",
-                        cleanTarget.c_str(), no_depends, commands);
-    commands.clear();
-    no_depends.push_back(cleanTarget);
-    this->WriteMakeRule(makefileStream, 0,
-                        "clean", no_depends, commands);
-    }
-}
-
 
 //----------------------------------------------------------------------------
 void
@@ -1482,7 +1369,8 @@ cmLocalUnixMakefileGenerator3
                       const char* ruleFileName,
                       const cmTarget& target,
                       const std::vector<std::string>& objects,
-                      const std::vector<std::string>& external_objects)
+                      const std::vector<std::string>& external_objects,
+                      std::vector<std::string>& cleanFiles)
 {
   // Write the dependency generation rule.
   this->WriteTargetDependRule(ruleFileStream, target, objects);
@@ -1509,8 +1397,6 @@ cmLocalUnixMakefileGenerator3
   objTarget = relPath;
   objTarget += ruleFileName;
   this->AppendRuleDepend(depends, objTarget.c_str());
-
-  std::vector<std::string> cleanFiles;
 
   // Construct the full path to the executable that will be generated.
   std::string targetFullPath = m_ExecutableOutputPath;
@@ -1646,13 +1532,8 @@ cmLocalUnixMakefileGenerator3
   this->WriteConvenienceRule(ruleFileStream, targetFullPath.c_str(),
                              buildTargetRuleName.c_str());
 
-  // Write clean target
   cleanFiles.push_back(cleanObjs);
   cleanFiles.push_back(targetOutPath.c_str());
-  this->WriteTargetCleanRule(ruleFileName, target, cleanFiles, objects, external_objects);
-
-  // Write the driving make target.
-  this->WriteTargetRequiresRule(ruleFileStream, target, objects);
 }
 
 //----------------------------------------------------------------------------
@@ -1662,7 +1543,8 @@ cmLocalUnixMakefileGenerator3
                          const char* ruleFileName,
                          const cmTarget& target,
                          const std::vector<std::string>& objects,
-                         const std::vector<std::string>& external_objects)
+                         const std::vector<std::string>& external_objects,
+                         std::vector<std::string>& cleanFiles)
 {
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -1674,7 +1556,7 @@ cmLocalUnixMakefileGenerator3
   this->AppendFlags(extraFlags, target.GetProperty("STATIC_LIBRARY_FLAGS"));
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target,
                          objects, external_objects,
-                         linkRuleVar.c_str(), extraFlags.c_str());
+                         linkRuleVar.c_str(), extraFlags.c_str(),cleanFiles);
 }
 
 //----------------------------------------------------------------------------
@@ -1684,7 +1566,8 @@ cmLocalUnixMakefileGenerator3
                          const char* ruleFileName,
                          const cmTarget& target,
                          const std::vector<std::string>& objects,
-                         const std::vector<std::string>& external_objects)
+                         const std::vector<std::string>& external_objects,
+                         std::vector<std::string>& cleanFiles)
 {
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -1712,7 +1595,7 @@ cmLocalUnixMakefileGenerator3
     }
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target,
                          objects, external_objects,
-                         linkRuleVar.c_str(), extraFlags.c_str());
+                         linkRuleVar.c_str(), extraFlags.c_str(), cleanFiles);
 }
 
 //----------------------------------------------------------------------------
@@ -1722,7 +1605,8 @@ cmLocalUnixMakefileGenerator3
                          const char* ruleFileName,
                          const cmTarget& target,
                          const std::vector<std::string>& objects,
-                         const std::vector<std::string>& external_objects)
+                         const std::vector<std::string>& external_objects,
+                         std::vector<std::string>& cleanFiles)
 {
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -1736,7 +1620,7 @@ cmLocalUnixMakefileGenerator3
   // TODO: .def files should be supported here also.
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target,
                          objects, external_objects,
-                         linkRuleVar.c_str(), extraFlags.c_str());
+                         linkRuleVar.c_str(), extraFlags.c_str(), cleanFiles);
 }
 
 //----------------------------------------------------------------------------
@@ -1748,7 +1632,8 @@ cmLocalUnixMakefileGenerator3
                    const std::vector<std::string>& objects,
                    const std::vector<std::string>& external_objects,
                    const char* linkRuleVar,
-                   const char* extraFlags)
+                   const char* extraFlags,
+                   std::vector<std::string>& cleanFiles)
 {
   // Write the dependency generation rule.
   this->WriteTargetDependRule(ruleFileStream, target, objects);
@@ -1777,8 +1662,6 @@ cmLocalUnixMakefileGenerator3
   objTarget = relPath;
   objTarget += ruleFileName;
   this->AppendRuleDepend(depends, objTarget.c_str());
-
-  std::vector<std::string> cleanFiles;
 
   // from here up is the same for exe or lib
 
@@ -1964,13 +1847,8 @@ cmLocalUnixMakefileGenerator3
   this->WriteConvenienceRule(ruleFileStream, targetFullPath.c_str(),
                              buildTargetRuleName.c_str());
 
-  // Write clean target
   cleanFiles.push_back(cleanObjs);
   cleanFiles.push_back(targetOutPath.c_str());
-  this->WriteTargetCleanRule(ruleFileName, target, cleanFiles, objects, external_objects);
-
-  // Write the driving make target.
-  this->WriteTargetRequiresRule(ruleFileStream, target, objects);
 }
 
 //----------------------------------------------------------------------------
@@ -2058,32 +1936,10 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::WriteTargetCleanRule(const char *ruleFileName,
+::WriteTargetCleanRule(std::ostream& ruleFileStream,
                        const cmTarget& target,
-                       const std::vector<std::string>& files,
-                       const std::vector<std::string>& objects,
-                       const std::vector<std::string>& external_objects)
+                       const std::vector<std::string>& files)
 {
-  std::string dir = cmSystemTools::GetFilenamePath(ruleFileName);
-  std::string cleanFileName = dir;
-  cleanFileName += "/clean.make";
-  
-  // Open the rule file.  This should be copy-if-different because the
-  // rules may depend on this file itself.
-  std::string ruleFileNameFull = this->ConvertToFullPath(cleanFileName);
-  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
-  ruleFileStream.SetCopyIfDifferent(true);
-  if(!ruleFileStream)
-    {
-    return;
-    }
-  this->WriteDisclaimer(ruleFileStream);
-
-  std::string variableName;
-  std::string variableNameExternal;
-  this->WriteObjectsVariable(ruleFileStream, target, objects, external_objects,
-                             variableName, variableNameExternal);
-  
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
 

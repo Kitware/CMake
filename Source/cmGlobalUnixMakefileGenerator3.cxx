@@ -102,7 +102,6 @@ void cmGlobalUnixMakefileGenerator3::Generate()
 
   // now write the support Makefiles
   //this->WriteBuildMakefile();
-  this->WriteCleanMakefile();
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
@@ -382,46 +381,6 @@ void cmGlobalUnixMakefileGenerator3::WriteBuildMakefile()
     }
 }
 
-void cmGlobalUnixMakefileGenerator3::WriteCleanMakefile()
-{
-  unsigned int i;
-  
-  // Open the output file.  This should not be copy-if-different
-  // because the check-build-system step compares the makefile time to
-  // see if the build system must be regenerated.
-  std::string makefileName = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  makefileName += "/clean.make";
-  cmGeneratedFileStream makefileStream(makefileName.c_str());
-  if(!makefileStream)
-    {
-    return;
-    }
-  
-  // get a local generator for some useful methods
-  cmLocalUnixMakefileGenerator3 *lg = 
-    static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
-  
-  // Write the do not edit header.
-  lg->WriteDisclaimer(makefileStream);
-  lg->WriteMakeVariables(makefileStream);
-
-  // add the generic dependency
-  std::vector<std::string> depends;
-  std::vector<std::string> no_commands;
-  lg->WriteMakeRule(makefileStream, 0, "clean", depends, no_commands);
-
-  // include all the target depends
-  for (i = 0; i < m_LocalGenerators.size(); ++i)
-    {
-    cmLocalUnixMakefileGenerator3 *lg2 = 
-      static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-    lg2->WriteMainTargetIncludes(makefileStream,"clean.make","clean");
-    lg2->WriteMainTargetRules(makefileStream,"clean.make","clean",true);
-    // add the directory based rules
-    lg2->WriteLocalCleanRule(makefileStream);
-    }
-  
-}
 
 //----------------------------------------------------------------------------
 void cmGlobalUnixMakefileGenerator3
@@ -451,8 +410,8 @@ void cmGlobalUnixMakefileGenerator3
                     commands, commands);
 
   // write the clean
-  commands.push_back(lg->GetRecursiveMakeCall("clean.make",0));
-  lg->WriteMakeRule(makefileStream, "default clean target", "clean", depends, commands);
+  lg->WriteMakeRule(makefileStream, "The main clean target", "clean", 
+                    commands, commands);
 }
 
 
@@ -600,6 +559,20 @@ cmGlobalUnixMakefileGenerator3
       depends.push_back(localName);
       lg->WriteMakeRule(ruleFileStream, "Convenience name for target.",
                         t->second.GetName(), depends, commands);
+      
+      // add the clean rule
+      makeTargetName = localName;
+      makeTargetName += "/clean";
+      depends.clear();
+      commands.clear();
+      commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
+                                                  makeTargetName.c_str()));
+      lg->WriteMakeRule(ruleFileStream, "clean rule for target.",
+                        makeTargetName.c_str(), depends, commands);
+      commands.clear();
+      depends.push_back(makeTargetName);
+      lg->WriteMakeRule(ruleFileStream, "clean rule for target.",
+                        "clean", depends, commands);
       }
     }
 }
