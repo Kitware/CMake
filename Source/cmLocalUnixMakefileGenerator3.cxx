@@ -1738,6 +1738,7 @@ cmLocalUnixMakefileGenerator3
 
   // Construct a list of files associated with this library that may
   // need to be cleaned.
+  std::vector<std::string> libCleanFiles;
   {
   std::string cleanStaticName;
   std::string cleanSharedName;
@@ -1752,27 +1753,30 @@ cmLocalUnixMakefileGenerator3
   std::string cleanFullSharedName = outpath + cleanSharedName;
   std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
   std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
-  cleanFiles.push_back(cleanFullStaticName);
+  libCleanFiles.push_back(cleanFullStaticName);
   if(cleanSharedRealName != cleanStaticName)
     {
-    cleanFiles.push_back(cleanFullSharedRealName);
+    libCleanFiles.push_back(cleanFullSharedRealName);
     }
   if(cleanSharedSOName != cleanStaticName &&
      cleanSharedSOName != cleanSharedRealName)
     {
-    cleanFiles.push_back(cleanFullSharedSOName);
+    libCleanFiles.push_back(cleanFullSharedSOName);
     }
   if(cleanSharedName != cleanStaticName &&
      cleanSharedName != cleanSharedSOName &&
      cleanSharedName != cleanSharedRealName)
     {
-    cleanFiles.push_back(cleanFullSharedName);
+    libCleanFiles.push_back(cleanFullSharedName);
     }
   }
 
   // Add a command to remove any existing files for this library.
-  this->AppendCleanCommand(commands, cleanFiles);
+  this->AppendCleanCommand(commands, libCleanFiles);
 
+  // add the libCleanFiles to to taoal cleanFiles
+  cleanFiles.insert(cleanFiles.end(),libCleanFiles.begin(),libCleanFiles.end());
+    
   // Add the pre-build and pre-link rules.
   this->AppendCustomCommands(commands, target.GetPreBuildCommands());
   this->AppendCustomCommands(commands, target.GetPreLinkCommands());
