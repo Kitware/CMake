@@ -840,7 +840,7 @@ cmLocalUnixMakefileGenerator3
   // Construct a checker for the given language.
   std::auto_ptr<cmDepends>
     checker(this->GetDependsChecker(lang,
-                                    m_Makefile->GetHomeOutputDirectory(),
+                                    m_Makefile->GetStartOutputDirectory(),
                                     objFile, false));
   if(checker.get())
     {
