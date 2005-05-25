@@ -2697,6 +2697,7 @@ cmLocalUnixMakefileGenerator3::GetDependsChecker(const std::string& lang,
   if (ret)
     {
     ret->SetTargetFile(dir, objFile, ".depend",".build.depend.make");
+    ret->SetCompileDirectory(m_Makefile->GetHomeOutputDirectory());
     ret->SetVerbose(verbose);
     }
   return ret;
@@ -2958,8 +2959,7 @@ void cmLocalUnixMakefileGenerator3::CheckDependencies(cmMakefile* mf,
         {
         // Construct a checker for the given language.
         std::auto_ptr<cmDepends>
-          checker(cmLocalUnixMakefileGenerator3
-                  ::GetDependsChecker(*l, ".", f->c_str(), verbose));
+          checker(this->GetDependsChecker(*l, ".", f->c_str(), verbose));
         if(checker.get())
           {
           checker->Check();

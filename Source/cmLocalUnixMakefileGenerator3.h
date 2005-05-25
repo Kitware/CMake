@@ -215,10 +215,10 @@ protected:
                                std::string& depMarkFile);
 
   // return the appropriate depends checker
-  static cmDepends* GetDependsChecker(const std::string& lang,
-                                      const char* dir,
-                                      const char* objFile,
-                                      bool verbose);
+  cmDepends* GetDependsChecker(const std::string& lang,
+                               const char* dir,
+                               const char* objFile,
+                               bool verbose);
   
   
   std::string GenerateCustomRuleFile(const cmCustomCommand& cc, 

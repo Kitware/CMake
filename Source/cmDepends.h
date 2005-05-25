@@ -37,6 +37,9 @@ public:
   void SetTargetFile(const char* dir, const char* targetFile, 
                      const char *markExt, const char *makeExt);
 
+  /** at what level will the compile be done from */
+  void SetCompileDirectory(const char *dir) {m_CompileDirectory = dir;};
+    
   /** should this be verbose in its output */
   void SetVerbose(bool verb) { m_Verbose = verb; }
     
@@ -71,6 +74,7 @@ protected:
 
   // The directory in which the build rule for the target file is executed.
   std::string m_Directory;
+  std::string m_CompileDirectory;
 
   // The name of the target file for which dependencies are maintained.
   std::string m_TargetFile;

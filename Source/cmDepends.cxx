@@ -48,6 +48,11 @@ void cmDepends::SetTargetFile(const char* dir, const char* targetFile,
   m_DependsMarkFile += m_TargetFile;
   m_DependsMakeFile += makeExt;
   m_DependsMarkFile += markExt;
+
+  if (!m_CompileDirectory.size())
+    {
+    m_CompileDirectory = dir;
+    }
 }
 
 
@@ -79,12 +84,12 @@ void cmDepends::Check()
 {
   // Dependency checks must be done in proper working directory.
   std::string oldcwd = ".";
-  if(m_Directory != ".")
+  if(m_CompileDirectory != ".")
     {
     // Get the CWD but do not call CollapseFullPath because
     // we only need it to cd back, and the form does not matter
     oldcwd = cmSystemTools::GetCurrentWorkingDirectory(false);
-    cmSystemTools::ChangeDirectory(m_Directory.c_str());
+    cmSystemTools::ChangeDirectory(m_CompileDirectory.c_str());
     }
 
   // Check whether dependencies must be regenerated.
