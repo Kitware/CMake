@@ -140,11 +140,13 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     // Require only modules not provided in the same source.
     if(parser.Provides.find(*i) == parser.Provides.end())
       {
+      // since we require some things add them to our list of requirements
+      os << m_TargetFile.c_str() << ".requires: " << i->c_str() << ".mod.proxy"
+         << std::endl;
+#if 0
       // Always use lower case for the mod stamp file name.
       std::string m = cmSystemTools::LowerCase(*i);
       os << m_TargetFile.c_str() << ": " << m.c_str() << ".mod.stamp"
-         << std::endl;
-      os << m_TargetFile.c_str() << ".requires: " << i->c_str() << ".mod.proxy"
          << std::endl;
       os << i->c_str() << ".mod.proxy:" << std::endl;
       std::string stampName = m_Directory;
@@ -157,6 +159,7 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
         stamp << "# Dummy stamp file in case nothing provides it."
               << std::endl;
         }
+#endif
       }
     }
 
@@ -165,13 +168,13 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
       i != parser.Provides.end(); ++i)
     {
     os << i->c_str() << ".mod.proxy: " << m_TargetFile.c_str()
-       << ".requires" << std::endl;
+       << ".provides" << std::endl;
     }
-
+  
   // If any modules are provided then they must be converted to stamp files.
   if(!parser.Provides.empty())
     {
-    os << m_TargetFile.c_str() << ".provides:\n";
+    os << m_TargetFile.c_str() << ".provides.build:\n";
     for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
         i != parser.Provides.end(); ++i)
       {
@@ -182,9 +185,10 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
       os << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
          << i->c_str() << " " << m.c_str() << ".mod.stamp\n";
       }
-    os << "\t@touch " << m_TargetFile.c_str() << ".provides\n";
+    os << "\t@touch " << m_TargetFile.c_str() << ".provides.build\n";
     }
 
+#if 0
   // if it provides something then connect the requires rule to the build rule
   if(!parser.Provides.empty())
     {
@@ -193,6 +197,7 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     // provide empty build rule for old gen for now, TODO remove later
     os << m_TargetFile.c_str() << ".requires.build:" << std::endl;    
     }
+#endif
   
   /*
   // TODO:
