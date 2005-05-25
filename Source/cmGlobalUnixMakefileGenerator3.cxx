@@ -477,7 +477,8 @@ cmGlobalUnixMakefileGenerator3
     
     // write the directory rule
     commands.clear();
-    commands.push_back(lg->GetRecursiveMakeCall("Makefile",makeTargetName.c_str()));
+    commands.push_back
+      (lg->GetRecursiveMakeCall("Makefile",makeTargetName.c_str()));
     
     // Write the rule.
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
@@ -488,7 +489,56 @@ cmGlobalUnixMakefileGenerator3
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
                       makeTargetName.c_str(), all_tgts, commands);
     }
+
+  // now do the clean targets
+  if (lg->GetParent())
+    {
+    std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
+    dir = lg->Convert(dir.c_str(),cmLocalGenerator::HOME_OUTPUT,cmLocalGenerator::MAKEFILE);
+    makeTargetName = dir;
+    makeTargetName += "/clean";
+    
+    std::vector<std::string> all_tgts;
+    
+    // for all of out targets
+    for (cmTargets::const_iterator l = lg->GetMakefile()->GetTargets().begin();
+         l != lg->GetMakefile()->GetTargets().end(); l++)
+      {
+      if((l->second.GetType() == cmTarget::EXECUTABLE) ||
+         (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+         (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+         (l->second.GetType() == cmTarget::MODULE_LIBRARY) || 
+         (l->second.GetType() == cmTarget::UTILITY))
+        {
+        // Add this to the list of depends rules in this directory.
+        std::string tname = lg->GetRelativeTargetDirectory(l->second);
+        tname += "/clean";
+        all_tgts.push_back(tname);
+        }
+      }
   
+    // write the directory rule add in the subdirs
+    std::vector<cmLocalGenerator *> subdirs = lg->GetChildren();
+    
+    // for each subdir add the directory depend
+    std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
+    for (; sdi != subdirs.end(); ++sdi)
+      {
+      cmLocalUnixMakefileGenerator3 * lg2 = 
+        static_cast<cmLocalUnixMakefileGenerator3 *>(*sdi);
+      dir = lg2->GetMakefile()->GetStartOutputDirectory();
+      dir += "/clean";
+      dir = lg2->Convert(dir.c_str(),cmLocalGenerator::HOME_OUTPUT,
+                         cmLocalGenerator::MAKEFILE);
+      all_tgts.push_back(dir);
+      }
+    
+    // write the directory clean rule
+    commands.clear();
+    lg->WriteMakeRule(ruleFileStream, "Convenience name for directory clean.",
+                      makeTargetName.c_str(), all_tgts, commands);
+    }
+
   // for each target Generate the rule files for each target.
   const cmTargets& targets = lg->GetMakefile()->GetTargets();
   bool needRequiresStep = this->NeedRequiresStep(lg);

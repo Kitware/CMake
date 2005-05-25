@@ -611,30 +611,6 @@ cmLocalUnixMakefileGenerator3
   p_depends.push_back(relativeObj);
   this->WriteMakeRule(ruleFileStream, 0,
                       temp.c_str(), p_depends, no_commands);
-  
-#if 0
-  if(strcmp(lang, "Fortran") == 0)
-    {
-    std::string objectProvides = obj;
-    objectProvides += ".provides";
-    // Add the provides target to build the object file.
-    std::vector<std::string> p_depends;
-    p_depends.push_back(obj);
-    this->WriteMakeRule(ruleFileStream, 0,
-                        objectProvides.c_str(), p_depends, no_commands);
-
-    {
-    // Add the requires.build target to recursively build the provides
-    // target after needed information is up to date.
-    std::vector<std::string> no_depends;
-    std::vector<std::string> r_commands;
-    r_commands.push_back(this->GetRecursiveMakeCall("Makefile",objectProvides.c_str()));
-    objectRequires += ".build";
-    this->WriteMakeRule(ruleFileStream, 0,
-                        objectRequires.c_str(), no_depends, r_commands);
-    }
-    }
-#endif
 }
 
 //----------------------------------------------------------------------------
@@ -2835,12 +2811,20 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   std::vector<std::string> depends;
   std::vector<std::string> commands;
 
-  // Write the empty all rule.
+  // Write the all rule.
   std::string dir = m_Makefile->GetStartOutputDirectory();
   dir += "/directorystart";
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
   this->CreateJumpCommand(commands,dir);
   this->WriteMakeRule(ruleFileStream, "The main all target", "all", depends, commands);
+
+  // Write the clean rule.
+  dir = m_Makefile->GetStartOutputDirectory();
+  dir += "/clean";
+  dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
+  commands.clear();
+  this->CreateJumpCommand(commands,dir);
+  this->WriteMakeRule(ruleFileStream, "The main clean target", "clean", depends, commands);
 
   // recursively write our targets
   this->WriteLocalMakefileTargets(ruleFileStream);
