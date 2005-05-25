@@ -1111,7 +1111,7 @@ int cmake::Configure()
         }
       this->SetGlobalGenerator(gen);
 #else
-      this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator);
+      this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator3);
 #endif
       }
     if(!m_GlobalGenerator)

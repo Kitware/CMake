@@ -36,7 +36,7 @@ public:
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalUnixMakefileGenerator3::GetActualName();}
-  static const char* GetActualName() {return "Unix Makefiles 3";}
+  static const char* GetActualName() {return "Unix Makefiles";}
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
