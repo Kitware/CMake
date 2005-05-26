@@ -564,7 +564,8 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
 {
   xmlrpc_env env;
   std::string ctestVersion = cmVersion::GetCMakeVersion();
-  const char *state_name;
+
+  cmStdString realURL = url + "/" + remoteprefix + "/Command/";
 
   /* Start up our XML-RPC client library. */
   xmlrpc_client_init(XMLRPC_CLIENT_NO_FLAGS, "CTest", ctestVersion.c_str());
@@ -573,7 +574,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
   xmlrpc_env_init(&env);
 
   /* Call the famous server at UserLand. */
-  std::cout << "  Submitting to: " << url.c_str() << " (" << remoteprefix.c_str() << ")" << std::endl;
+  std::cout << "  Submitting to: " << realURL.c_str() << " (" << remoteprefix.c_str() << ")" << std::endl;
   std::vector<cmStdString>::const_iterator it;
   for ( it = files.begin(); it != files.end(); ++it )
     {
@@ -603,8 +604,8 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
       }
     fclose(fp);
 
-    std::string remoteCommand = remoteprefix + ".put";
-    result = xmlrpc_client_call(&env, url.c_str(),
+    std::string remoteCommand = "Submit.put";
+    result = xmlrpc_client_call(&env, realURL.c_str(),
       remoteCommand.c_str(),
       "(6)", fileBuffer, (xmlrpc_int32)fileSize );
 
@@ -613,18 +614,6 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
     if ( env.fault_occurred )
       {
       std::cerr << " Submission problem: " << env.fault_string << " (" << env.fault_code << ")" << std::endl;
-      xmlrpc_env_clean(&env);
-      xmlrpc_client_cleanup();
-      return false;
-      }
-
-
-    /* Get our state name and print it out. */
-    xmlrpc_parse_value(&env, result, "s", &state_name);
-    if ( env.fault_occurred )
-      {
-      std::cerr << "  Submission problem: " << env.fault_string << " (" << env.fault_code << ")" << std::endl;
-      xmlrpc_DECREF(result);
       xmlrpc_env_clean(&env);
       xmlrpc_client_cleanup();
       return false;
