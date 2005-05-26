@@ -1269,8 +1269,9 @@ int CMakeSetupDialog::CreateShortcut()
       }
     
     // Ensure that the string consists of ANSI characters.
-    WORD wsz[MAX_PATH]; 
-    MultiByteToWideChar(CP_ACP, 0, link_name, -1, wsz, MAX_PATH);
+    WORD wszAr[MAX_PATH]; 
+    LPWSTR wsz = (LPWSTR)wszAr;
+    MultiByteToWideChar(CP_ACP, 0, link_name, -1, (LPWSTR)(wsz), MAX_PATH);
 
     // Save the shortcut via the IPersistFile::Save member function.
     hres = ppf->Save(wsz, TRUE);
