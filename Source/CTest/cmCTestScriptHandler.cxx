@@ -23,6 +23,7 @@
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmGeneratedFileStream.h"
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
@@ -115,7 +116,6 @@ cmCTestScriptHandler::~cmCTestScriptHandler()
     {
     delete m_CMake;
     }
-  m_CMake = 0;
 }
 
 
@@ -642,7 +642,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     {
     std::string cacheFile = m_BinaryDir;
     cacheFile += "/CMakeCache.txt";
-    std::ofstream fout(cacheFile.c_str());
+    cmGeneratedFileStream fout(cacheFile.c_str());
     if(!fout)
       {
       this->RestoreBackupDirectories();
@@ -690,7 +690,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         std::cerr << "Write CMake output to file: " << cmakeOutputFile.c_str()
           << std::endl;
         }
-      std::ofstream fout(cmakeOutputFile.c_str());
+      cmGeneratedFileStream fout(cmakeOutputFile.c_str());
       if ( fout )
         {
         fout << output.c_str();
