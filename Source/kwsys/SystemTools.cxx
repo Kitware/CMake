@@ -3203,7 +3203,7 @@ void SystemTools::ConvertWindowsCommandLineToUnixArguments(
 
   // Grab the args
 
-  size_t pos = 0;
+  size_t pos;
   int argc_idx = 1;
 
   for (i = 0; i < cmd_line_len; i++)
