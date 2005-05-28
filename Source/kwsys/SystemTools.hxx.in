@@ -410,6 +410,12 @@ public:
    */
   static bool IsSubDirectory(const char* fileOrDir, const char* dir);
 
+  /**
+   * Convert the path to a string that can be used in a unix makefile.
+   * double slashes are removed, and spaces are escaped.
+   */
+  static kwsys_stl::string ConvertToUnixOutputPath(const char*);
+
   /** -----------------------------------------------------------------
    *               File Manipulation Routines
    *  -----------------------------------------------------------------
@@ -655,11 +661,14 @@ public:
   static kwsys_stl::string GetOperatingSystemNameAndVersion();
 
   /**
-   * Convert the path to a string that can be used in a unix makefile.
-   * double slashes are removed, and spaces are escaped.
+   * Convert windows-style arguments given as a command-line string
+   * into more traditional argc/argv arguments.
+   * Note that argv[0] will be assigned the executable name using
+   * the ::GetModuleFileName function.
    */
-  static kwsys_stl::string ConvertToUnixOutputPath(const char*);
-
+  static void ConvertWindowsCommandLineToUnixArguments(
+    const char *cmd_line, int *argc, char ***argv);
+  
 protected:
   // these two functions can be called from ConvertToOutputPath
   
