@@ -71,9 +71,11 @@ public:
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
 #  include <fstream>
 #  include <iostream>
+#  include <iomanip>
 #else
 #  include <fstream.h>
 #  include <iostream.h>
+#  include <iomanip.h>
 #endif
 
 #if !defined(CMAKE_NO_ANSI_STRING_STREAM)
@@ -169,6 +171,12 @@ using ::ofstream;
 using ::endl;
 using ::ends;
 using ::flush;
+using ::dec;
+using ::hex;
+using ::setw;
+using ::setiosflags;
+using ::setfill;
+using ::setprecision;
 }
 // The string class is missing these operators so add them
 #if !defined(cmsys_STL_STRING_NEQ_CHAR_DEFINED)
