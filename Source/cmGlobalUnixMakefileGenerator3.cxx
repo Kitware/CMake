@@ -687,7 +687,7 @@ void
 cmGlobalUnixMakefileGenerator3
 ::WriteConvenienceRules(std::ostream& ruleFileStream, 
                         cmLocalUnixMakefileGenerator3 *lg,
-                        bool exclude)
+                        bool /* exclude */)
 {
   // Keep track of targets already listed.
   std::set<cmStdString> emitted;
@@ -704,7 +704,6 @@ cmGlobalUnixMakefileGenerator3
 
   // for each target Generate the rule files for each target.
   const cmTargets& targets = lg->GetMakefile()->GetTargets();
-  bool needRequiresStep = this->NeedRequiresStep(lg);
   for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
     {
     if((t->second.GetType() == cmTarget::EXECUTABLE) ||
