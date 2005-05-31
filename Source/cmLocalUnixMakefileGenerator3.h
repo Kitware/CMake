@@ -127,12 +127,6 @@ public:
   /** write some extra rules suahc as make test etc */
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
 
-  void WriteMainTargetIncludes(std::ostream& makefileStream,const char *file,
-                               const char *rule);
-  void WriteMainTargetRules(std::ostream& makefileStream,const char *file,
-                            const char *rule, bool inAll);
-  
-  
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
   std::string GetRelativeTargetDirectory(const cmTarget& target);
 

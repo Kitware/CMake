@@ -60,7 +60,6 @@ public:
 protected:
   void WriteMainMakefile();
   void WriteMainCMakefile();
-  void WriteBuildMakefile();
   void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream);
   void WriteAllRules(cmLocalUnixMakefileGenerator3 *lg, 
                      std::ostream& makefileStream);
@@ -69,6 +68,8 @@ protected:
   void WriteConvenienceRules(std::ostream& ruleFileStream, 
                              cmLocalUnixMakefileGenerator3 *,
                              bool exclude);
+  void WriteDirectoryRules(std::ostream& ruleFileStream, 
+                           cmLocalUnixMakefileGenerator3 *lg);
 
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  const cmTarget& target);

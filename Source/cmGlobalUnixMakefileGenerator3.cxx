@@ -99,9 +99,6 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   // write the main makefile
   this->WriteMainMakefile();
   this->WriteMainCMakefile();
-
-  // now write the support Makefiles
-  //this->WriteBuildMakefile();
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
@@ -327,61 +324,6 @@ void cmGlobalUnixMakefileGenerator3
     }
 }
 
-void cmGlobalUnixMakefileGenerator3::WriteBuildMakefile()
-{
-  unsigned int i;
-  
-  // Open the output file.  This should not be copy-if-different
-  // because the check-build-system step compares the makefile time to
-  // see if the build system must be regenerated.
-  std::string makefileName = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  makefileName += "/build.make";
-  cmGeneratedFileStream makefileStream(makefileName.c_str());
-  if(!makefileStream)
-    {
-    return;
-    }
-  
-  // get a local generator for some useful methods
-  cmLocalUnixMakefileGenerator3 *lg = 
-    static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
-  
-  // Write the do not edit header.
-  lg->WriteDisclaimer(makefileStream);
-  lg->WriteMakeVariables(makefileStream);
-
-  // add the generic dependency
-  std::vector<std::string> depends;
-  std::vector<std::string> no_commands;
-  lg->WriteMakeRule(makefileStream, 0, "build", depends, no_commands);
-  lg->WriteMakeRule(makefileStream, 0, "depend", depends, no_commands);
-  lg->WriteMakeRule(makefileStream, 0, "requires", depends, no_commands);
-
-  // include all the target depends
-  for (i = 0; i < m_LocalGenerators.size(); ++i)
-    {
-    cmLocalUnixMakefileGenerator3 *lg2 = 
-      static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-    // are any parents excluded
-    bool exclude = false;
-    cmLocalGenerator *lg3 = lg2;
-    while (lg3)
-      {
-      if (lg3->GetExcludeAll())
-        {
-        exclude = true;
-        break;
-        }
-      lg3 = lg3->GetParent();
-      }
-    lg2->WriteMainTargetIncludes(makefileStream,"build.make","build");
-    lg2->WriteMainTargetRules(makefileStream,"build.make","depend",!exclude);
-    lg2->WriteMainTargetRules(makefileStream,"build.make","requires",!exclude);
-    lg2->WriteMainTargetRules(makefileStream,"build.make","build",!exclude);
-    }
-}
-
-
 //----------------------------------------------------------------------------
 void cmGlobalUnixMakefileGenerator3
 ::WriteAllRules(cmLocalUnixMakefileGenerator3 *lg, 
@@ -418,20 +360,25 @@ void cmGlobalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
-::WriteConvenienceRules(std::ostream& ruleFileStream, 
-                        cmLocalUnixMakefileGenerator3 *lg,
-                        bool exclude)
+::WriteDirectoryRules(std::ostream& ruleFileStream, 
+                      cmLocalUnixMakefileGenerator3 *lg)
 {
   std::vector<std::string> depends;  
   std::vector<std::string> commands;
   std::string localName;
   std::string makeTargetName;
-  
+
   depends.push_back("cmake_check_build_system");
   if (lg->GetParent())
     {
     std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
     dir = lg->Convert(dir.c_str(),cmLocalGenerator::HOME_OUTPUT,cmLocalGenerator::MAKEFILE);
+
+    lg->WriteDivider(ruleFileStream);
+    ruleFileStream
+      << "# Directory level rules for directory "
+      << dir << "\n\n";
+    
     localName = dir;
     localName += "/directorystart";
     makeTargetName = dir;
@@ -538,6 +485,24 @@ cmGlobalUnixMakefileGenerator3
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory clean.",
                       makeTargetName.c_str(), all_tgts, commands);
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmGlobalUnixMakefileGenerator3
+::WriteConvenienceRules(std::ostream& ruleFileStream, 
+                        cmLocalUnixMakefileGenerator3 *lg,
+                        bool exclude)
+{
+  std::vector<std::string> depends;  
+  std::vector<std::string> commands;
+  std::string localName;
+  std::string makeTargetName;
+
+  // write the directory level rules for this local gen
+  this->WriteDirectoryRules(ruleFileStream,lg);
+  
+  depends.push_back("cmake_check_build_system");
 
   // for each target Generate the rule files for each target.
   const cmTargets& targets = lg->GetMakefile()->GetTargets();
@@ -554,6 +519,11 @@ cmGlobalUnixMakefileGenerator3
       localName = lg->GetRelativeTargetDirectory(t->second);
       std::string makefileName = localName;
       makefileName += "/build.make";
+      
+      lg->WriteDivider(ruleFileStream);
+      ruleFileStream
+        << "# Target rules for target "
+        << localName << "\n\n";
       
       commands.clear();
       if (t->second.GetType() != cmTarget::UTILITY)
