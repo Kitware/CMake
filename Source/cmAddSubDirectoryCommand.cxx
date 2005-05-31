@@ -30,7 +30,6 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
   std::string srcArg;
   
   bool intoplevel = true;
-  bool preorder = false;
 
   // process the rest of the arguments looking for optional args
   std::vector<std::string>::const_iterator i = args.begin();
@@ -40,11 +39,6 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
     if(*i == "EXCLUDE_FROM_ALL")
       {
       intoplevel = false;
-      continue;
-      }
-    else if(*i == "PREORDER")
-      {
-      preorder = true;
       continue;
       }
     else if (!srcArg.size())
@@ -89,7 +83,7 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   m_Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
-                              intoplevel, preorder, true);
+                              intoplevel, false, true);
 
   return true;
 }

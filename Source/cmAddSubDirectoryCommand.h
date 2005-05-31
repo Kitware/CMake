@@ -63,7 +63,7 @@ public:
     {
     return
       "  ADD_SUBDIRECTORY(binary_dir [source_dir]\n"
-      "                   [EXCLUDE_FROM_ALL] [PREORDER])\n"
+      "                   [EXCLUDE_FROM_ALL])\n"
       "Add a subdirectory to the build. The binary_dir specifies the "
       "directory in which to store the build files. If it is a relative "
       "path it will be evaluated with respect to the current output "
@@ -76,12 +76,6 @@ public:
       "The CMakeLists.txt file in the specified source directory will "
       "be processed immediately by CMake before processing in the current "
       "input file continues beyond this command.\n"
-
-      "The PREORDER flag tells recursive makefile generators to build "
-      "targets in the subdirectory before those in the current directory. "
-      "If this flag is not specified then the targets in the current "
-      "directory are always built first. The PREORDER flag has no meaning "
-      "for global build system generators.\n"
 
       "If the EXCLUDE_FROM_ALL argument is provided then this subdirectory "
       "will not be included in build by default. Users will have to "
