@@ -46,7 +46,7 @@ bool cmCTestCoverageHandler::StartLogFile(cmGeneratedFileStream& covLogFile, int
   if (!m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), 
       covLogFilename, covLogFile, true))
     {
-    cmCTestLog(m_CTest, ERROR, "Cannot open log file: " << covLogFilename << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open log file: " << covLogFilename << std::endl);
     return false;
     }
   std::string local_start_time = m_CTest->CurrentTime();
@@ -183,7 +183,7 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   if ( files.size() == 0 )
     {
-    cmCTestLog(m_CTest, ERROR, " Cannot find any coverage files." << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, " Cannot find any coverage files." << std::endl);
     // No coverage files is a valid thing, so the exit code is 0
     return 0;
     }
@@ -210,13 +210,13 @@ int cmCTestCoverageHandler::ProcessHandler()
       false, 0 /*m_TimeOut*/);
     if ( ! res )
       {
-      cmCTestLog(m_CTest, ERROR, "Problem running coverage on file: " << it->c_str() << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem running coverage on file: " << it->c_str() << std::endl);
       error ++;
       continue;
       }
     if ( retVal != 0 )
       {
-      cmCTestLog(m_CTest, ERROR, "Coverage command returned: " << retVal << " while processing: " << it->c_str() << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Coverage command returned: " << retVal << " while processing: " << it->c_str() << std::endl);
       }
     std::vector<cmStdString> lines;
     std::vector<cmStdString>::iterator line;
@@ -245,10 +245,10 @@ int cmCTestCoverageHandler::ProcessHandler()
           }
         if ( cfile.empty() )
           {
-          cmCTestLog(m_CTest, ERROR, "Something went wrong" << std::endl);
-          cmCTestLog(m_CTest, ERROR, "File: [" << file << "]" << std::endl);
-          cmCTestLog(m_CTest, ERROR, "s: [" << file.substr(0, sourceDir.size()) << "]" << std::endl);
-          cmCTestLog(m_CTest, ERROR, "b: [" << file.substr(0, binaryDir.size()) << "]" << std::endl);
+          cmCTestLog(m_CTest, ERROR_MESSAGE, "Something went wrong" << std::endl);
+          cmCTestLog(m_CTest, ERROR_MESSAGE, "File: [" << file << "]" << std::endl);
+          cmCTestLog(m_CTest, ERROR_MESSAGE, "s: [" << file.substr(0, sourceDir.size()) << "]" << std::endl);
+          cmCTestLog(m_CTest, ERROR_MESSAGE, "b: [" << file.substr(0, binaryDir.size()) << "]" << std::endl);
           }
         }
       else if ( re2.find(line->c_str() ) )
@@ -261,7 +261,7 @@ int cmCTestCoverageHandler::ProcessHandler()
           std::ifstream ifile(fname.c_str());
           if ( ! ifile )
             {
-            cmCTestLog(m_CTest, ERROR, "Cannot open file: " << fname << std::endl);
+            cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open file: " << fname << std::endl);
             }
           else
             {
@@ -298,7 +298,7 @@ int cmCTestCoverageHandler::ProcessHandler()
         }
       else
         {
-        cmCTestLog(m_CTest, ERROR, "Unknown line: " << line->c_str() << std::endl);
+        cmCTestLog(m_CTest, ERROR_MESSAGE, "Unknown line: " << line->c_str() << std::endl);
         error ++;
         }
       }
@@ -310,7 +310,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   if (!m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), 
       "Coverage.xml", covSumFile, true))
     {
-    cmCTestLog(m_CTest, ERROR, "Cannot open coverage summary file: Coverage.xml" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open coverage summary file: Coverage.xml" << std::endl);
 
     return -1;
     }
@@ -348,13 +348,13 @@ int cmCTestCoverageHandler::ProcessHandler()
     const std::string fullFileName = fileIterator->first;
     const std::string fileName = cmSystemTools::GetFilenameName(fullFileName.c_str());
     std::string fullFilePath = cmSystemTools::GetFilenamePath(fullFileName.c_str());
-    cmCTestLog(m_CTest, ERROR, "Process file: " << fullFileName << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Process file: " << fullFileName << std::endl);
 
     cmSystemTools::ConvertToUnixSlashes(fullFilePath);
 
     if ( !cmSystemTools::FileExists(fullFileName.c_str()) )
       {
-      cmCTestLog(m_CTest, ERROR, "Cannot find file: " << fullFileName.c_str() << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot find file: " << fullFileName.c_str() << std::endl);
       continue;
       }
 
@@ -363,7 +363,7 @@ int cmCTestCoverageHandler::ProcessHandler()
         sourceDir.c_str(), binaryDir.c_str());
     if ( !shouldIDoCoverage )
       {
-      cmCTestLog(m_CTest, ERROR, ".NoDartCoverage found, so skip coverage check for: "
+      cmCTestLog(m_CTest, ERROR_MESSAGE, ".NoDartCoverage found, so skip coverage check for: "
         << fullFileName.c_str()
         << std::endl);
       continue;
@@ -379,7 +379,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     std::ifstream ifs(fullFileName.c_str());
     if ( !ifs)
       {
-      cmCTestLog(m_CTest, ERROR, "Cannot open source file: " << fullFileName.c_str() << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open source file: " << fullFileName.c_str() << std::endl);
       error ++;
       continue;
       }
@@ -393,7 +393,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       {
       if ( !cmSystemTools::GetLineFromStream(ifs, line) )
         {
-        cmCTestLog(m_CTest, ERROR, "Problem reading source file: " << fullFileName.c_str() << " line:" << cc << std::endl);
+        cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem reading source file: " << fullFileName.c_str() << " line:" << cc << std::endl);
         error ++;
         break;
         }
@@ -410,7 +410,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       }
     if ( cmSystemTools::GetLineFromStream(ifs, line) )
       {
-      cmCTestLog(m_CTest, ERROR, "Looks like there are more lines in the file: " << line << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Looks like there are more lines in the file: " << line << std::endl);
       }
     float cper = 0;
     float cmet = 0;

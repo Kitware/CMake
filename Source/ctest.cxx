@@ -168,7 +168,7 @@ int main (int argc, char *argv[])
 
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
     {
-    cmCTestLog(&inst, ERROR, "Current working directory cannot be established." << std::endl);
+    cmCTestLog(&inst, ERROR_MESSAGE, "Current working directory cannot be established." << std::endl);
     nocwd = 1;
     }
 
@@ -182,7 +182,7 @@ int main (int argc, char *argv[])
     {
     if(argc == 1)
       {
-      cmCTestLog(&inst, ERROR, "*********************************" << std::endl
+      cmCTestLog(&inst, ERROR_MESSAGE, "*********************************" << std::endl
         << "No test configuration file found!" << std::endl
         << "*********************************" << std::endl);
       }

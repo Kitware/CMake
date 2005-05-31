@@ -171,7 +171,7 @@ cmCTestBuildHandler::cmCTestBuildHandler()
       }
     else
       {
-      cmCTestLog(m_CTest, ERROR, "Problem Compiling regular expression: "
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem Compiling regular expression: "
        << cmCTestWarningErrorFileLine[cc].m_RegularExpressionString << std::endl);
       }
     }
@@ -200,13 +200,13 @@ int cmCTestBuildHandler::ProcessHandler()
   const std::string &makeCommand = m_CTest->GetCTestConfiguration("MakeCommand");
   if ( makeCommand.size() == 0 )
     {
-    cmCTestLog(m_CTest, ERROR, "Cannot find MakeCommand key in the DartConfiguration.tcl" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot find MakeCommand key in the DartConfiguration.tcl" << std::endl);
     return -1;
     }
   const std::string &buildDirectory = m_CTest->GetCTestConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
     {
-    cmCTestLog(m_CTest, ERROR, "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl);
     return -1;
     }
 
@@ -214,7 +214,7 @@ int cmCTestBuildHandler::ProcessHandler()
   double elapsed_time_start = cmSystemTools::GetTime();
   if ( !m_CTest->OpenOutputFile("Temporary", "LastBuild.log", ofs) )
     {
-    cmCTestLog(m_CTest, ERROR, "Cannot create LastBuild.log file" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create LastBuild.log file" << std::endl);
     }
 
   m_StartBuild = m_CTest->CurrentTime();
@@ -234,7 +234,7 @@ int cmCTestBuildHandler::ProcessHandler()
   double elapsed_build_time = cmSystemTools::GetTime() - elapsed_time_start;
   if (res != cmsysProcess_State_Exited || retVal )
     {
-    cmCTestLog(m_CTest, ERROR, "Error(s) when building project" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Error(s) when building project" << std::endl);
     }
 
   std::vector<cmStdString>::size_type cc;
@@ -437,7 +437,7 @@ int cmCTestBuildHandler::ProcessHandler()
   cmGeneratedFileStream xofs;
   if( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Build.xml", xofs, true) )
     {
-    cmCTestLog(m_CTest, ERROR, "Cannot create build XML file" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create build XML file" << std::endl);
     return -1;
     }
   this->GenerateDartBuildOutput(xofs, errorsWarnings, elapsed_build_time);

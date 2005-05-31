@@ -204,7 +204,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   const char* sourceDirectory = this->GetOption("SourceDirectory");
   if ( !sourceDirectory )
     {
-    cmCTestLog(m_CTest, ERROR, "Cannot find SourceDirectory  key in the DartConfiguration.tcl" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot find SourceDirectory  key in the DartConfiguration.tcl" << std::endl);
     return -1;
     }
 
@@ -220,7 +220,7 @@ int cmCTestUpdateHandler::ProcessHandler()
       updateCommand = m_CTest->GetCTestConfiguration("SVNCommand");
       if ( updateCommand.empty() )
         {
-        cmCTestLog(m_CTest, ERROR, "Cannot find CVSCommand, SVNCommand, or UpdateCommand key in the DartConfiguration.tcl" << std::endl);
+        cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot find CVSCommand, SVNCommand, or UpdateCommand key in the DartConfiguration.tcl" << std::endl);
         return -1;
         }
       else
@@ -359,7 +359,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   cmGeneratedFileStream os; 
   if ( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Update.xml", os, true) )
     {
-    cmCTestLog(m_CTest, ERROR, "Cannot open log file" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open log file" << std::endl);
     }
   std::string start_time = m_CTest->CurrentTime();
   double elapsed_time_start = cmSystemTools::GetTime();
@@ -597,11 +597,11 @@ int cmCTestUpdateHandler::ProcessHandler()
             srevision1 = str.str();
             if (!svn_status_line_regex.find(output))
               {
-              cmCTestLog(m_CTest, ERROR, "Bad output from SVN status command: " << output << std::endl);
+              cmCTestLog(m_CTest, ERROR_MESSAGE, "Bad output from SVN status command: " << output << std::endl);
               }
             else if ( svn_status_line_regex.match(4) != file )
               {
-              cmCTestLog(m_CTest, ERROR, "Bad output from SVN status command. The file name returned: \"" << svn_status_line_regex.match(4) << "\" was different than the file specified: \"" << file << "\"" << std::endl);
+              cmCTestLog(m_CTest, ERROR_MESSAGE, "Bad output from SVN status command. The file name returned: \"" << svn_status_line_regex.match(4) << "\" was different than the file specified: \"" << file << "\"" << std::endl);
               }
             else
               {
@@ -811,13 +811,13 @@ int cmCTestUpdateHandler::ProcessHandler()
   if ( num_modified > 0 || num_conflicting > 0 )
     {
     os << "Update error: There are modified or conflicting files in the repository";
-    cmCTestLog(m_CTest, ERROR, "   There are modified or conflicting files in the repository" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "   There are modified or conflicting files in the repository" << std::endl);
     }
   if ( updateProducedError )
     {
     os << "Update error: ";
     os << m_CTest->MakeXMLSafe(goutput);
-    cmCTestLog(m_CTest, ERROR, "   Update with command: " << command << " failed" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "   Update with command: " << command << " failed" << std::endl);
     }
   os << "</UpdateReturnStatus>" << std::endl;
   os << "</Update>" << std::endl;
@@ -829,8 +829,8 @@ int cmCTestUpdateHandler::ProcessHandler()
 
   if (! res || retVal )
     {
-    cmCTestLog(m_CTest, ERROR, "Error(s) when updating the project" << std::endl);
-    cmCTestLog(m_CTest, ERROR, "Output: " << goutput << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Error(s) when updating the project" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Output: " << goutput << std::endl);
     return -1;
     }
   return count;

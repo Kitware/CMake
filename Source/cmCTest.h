@@ -232,7 +232,7 @@ public:
     HANDLER_OUTPUT,
     HANDLER_VERBOSE_OUTPUT,
     WARNING,
-    ERROR,
+    ERROR_MESSAGE,
     OTHER
   };
 

@@ -585,7 +585,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     {
     if ( !cmCTestScriptHandler::EmptyBinaryDirectory(m_BinaryDir.c_str()) )
       {
-      cmCTestLog(m_CTest, ERROR, "Problem removing the binary directory" << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem removing the binary directory" << std::endl);
       }
     }
   
@@ -684,7 +684,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         }
       else
         {
-        cmCTestLog(m_CTest, ERROR, "Cannot open CMake output file: "
+        cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open CMake output file: "
           << cmakeOutputFile.c_str() << " for writing" << std::endl);
         }
       }
@@ -717,11 +717,11 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
       this->RestoreBackupDirectories();
       if (cmakeFailed)
         {
-        cmCTestLog(m_CTest, ERROR, "Unable to run cmake:" << std::endl
+        cmCTestLog(m_CTest, ERROR_MESSAGE, "Unable to run cmake:" << std::endl
           << cmakeFailedOuput.c_str() << std::endl);
         return 10;
         }
-      cmCTestLog(m_CTest, ERROR, "Unable to run ctest:" << std::endl
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Unable to run ctest:" << std::endl
         << output.c_str() << std::endl);
       if (!res)
         {

@@ -277,7 +277,7 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag)
       {
       if ( !cmSystemTools::FileIsDirectory(testingDir.c_str()) )
         {
-        cmCTestLog(this, ERROR, "File " << testingDir << " is in the place of the testing directory"
+        cmCTestLog(this, ERROR_MESSAGE, "File " << testingDir << " is in the place of the testing directory"
                   << std::endl);
         return 0;
         }
@@ -286,7 +286,7 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag)
       {
       if ( !cmSystemTools::MakeDirectory(testingDir.c_str()) )
         {
-        cmCTestLog(this, ERROR, "Cannot create directory " << testingDir
+        cmCTestLog(this, ERROR_MESSAGE, "Cannot create directory " << testingDir
                   << std::endl);
         return 0;
         }
@@ -373,7 +373,7 @@ bool cmCTest::UpdateCTestConfiguration()
     }
   if ( !cmSystemTools::FileExists(fileName.c_str()) )
     {
-    cmCTestLog(this, ERROR, "Cannot find file: " << fileName.c_str() << std::endl);
+    cmCTestLog(this, ERROR_MESSAGE, "Cannot find file: " << fileName.c_str() << std::endl);
     return false;
     }
   // parse the dart test file
@@ -485,7 +485,7 @@ bool cmCTest::SetTest(const char* ttype, bool report)
     {
     if ( report )
       {
-      cmCTestLog(this, ERROR, "Don't know about test \"" << ttype << "\" yet..." << std::endl);
+      cmCTestLog(this, ERROR_MESSAGE, "Don't know about test \"" << ttype << "\" yet..." << std::endl);
       }
     return false;
     }
@@ -511,7 +511,7 @@ bool cmCTest::OpenOutputFile(const std::string& path,
     {
     if ( !cmSystemTools::FileIsDirectory(testingDir.c_str()) )
       {
-      cmCTestLog(this, ERROR, "File " << testingDir 
+      cmCTestLog(this, ERROR_MESSAGE, "File " << testingDir 
                 << " is in the place of the testing directory"
                 << std::endl);
       return false;
@@ -521,7 +521,7 @@ bool cmCTest::OpenOutputFile(const std::string& path,
     {
     if ( !cmSystemTools::MakeDirectory(testingDir.c_str()) )
       {
-      cmCTestLog(this, ERROR, "Cannot create directory " << testingDir
+      cmCTestLog(this, ERROR_MESSAGE, "Cannot create directory " << testingDir
                 << std::endl);
       return false;
       }
@@ -530,7 +530,7 @@ bool cmCTest::OpenOutputFile(const std::string& path,
   stream.Open(filename.c_str());
   if( !stream )
     {
-    cmCTestLog(this, ERROR, "Problem opening file: " << filename << std::endl);
+    cmCTestLog(this, ERROR_MESSAGE, "Problem opening file: " << filename << std::endl);
     return false;
     }
   if ( compress )
@@ -981,7 +981,7 @@ int cmCTest::GenerateCTestNotesOutput(std::ostream& os, const cmCTest::tm_Vector
     else
       {
       os << "Problem reading file: " << it->c_str() << std::endl;
-      cmCTestLog(this, ERROR, "Problem reading file: " << it->c_str() << " while creating notes" << std::endl);
+      cmCTestLog(this, ERROR_MESSAGE, "Problem reading file: " << it->c_str() << " while creating notes" << std::endl);
       }
     os << "</Text>\n"
       << "</Note>" << std::endl;
@@ -996,7 +996,7 @@ int cmCTest::GenerateNotesFile(const std::vector<cmStdString> &files)
   cmGeneratedFileStream ofs;
   if ( !this->OpenOutputFile(m_CurrentTag, "Notes.xml", ofs) )
     {
-    cmCTestLog(this, ERROR, "Cannot open notes file" << std::endl);
+    cmCTestLog(this, ERROR_MESSAGE, "Cannot open notes file" << std::endl);
     return 1;
     }
 
@@ -1276,8 +1276,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       else
         {
         performSomeTest = false;
-        cmCTestLog(this, ERROR, "CTest -D called with incorrect option: " << targ << std::endl);
-        cmCTestLog(this, ERROR, "Available options are:" << std::endl
+        cmCTestLog(this, ERROR_MESSAGE, "CTest -D called with incorrect option: " << targ << std::endl);
+        cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
           << "  " << ctestExec << " -D Continuous" << std::endl
           << "  " << ctestExec << " -D Continuous(Start|Update|Configure|Build)" << std::endl
           << "  " << ctestExec << " -D Continuous(Test|Coverage|MemCheck|Submit)" << std::endl
@@ -1299,8 +1299,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       if ( !this->SetTest(args[i].c_str(), false) )
         {
         performSomeTest = false;
-        cmCTestLog(this, ERROR, "CTest -T called with incorrect option: " << args[i].c_str() << std::endl);
-        cmCTestLog(this, ERROR, "Available options are:" << std::endl
+        cmCTestLog(this, ERROR_MESSAGE, "CTest -T called with incorrect option: " << args[i].c_str() << std::endl);
+        cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
           << "  " << ctestExec << " -T all" << std::endl
           << "  " << ctestExec << " -T start" << std::endl
           << "  " << ctestExec << " -T update" << std::endl
@@ -1334,8 +1334,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       else
         {
         performSomeTest = false;
-        cmCTestLog(this, ERROR, "CTest -M called with incorrect option: " << str.c_str() << std::endl);
-        cmCTestLog(this, ERROR, "Available options are:" << std::endl
+        cmCTestLog(this, ERROR_MESSAGE, "CTest -M called with incorrect option: " << str.c_str() << std::endl);
+        cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
           << "  " << ctestExec << " -M Continuous" << std::endl
           << "  " << ctestExec << " -M Experimental" << std::endl
           << "  " << ctestExec << " -M Nightly" << std::endl);
@@ -1388,7 +1388,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         }
       else
         {
-        cmCTestLog(this, ERROR, "--build-and-test must have source and binary dir" << std::endl);
+        cmCTestLog(this, ERROR_MESSAGE, "--build-and-test must have source and binary dir" << std::endl);
         }
       }
     if(arg.find("--build-target",0) == 0 && i < args.size() - 1)
@@ -1630,7 +1630,7 @@ int cmCTest::RunCMake(std::string* outstring, cmOStringStream &out,
       }
     else
       {
-      cmCTestLog(this, ERROR, out.str() << std::endl);
+      cmCTestLog(this, ERROR_MESSAGE, out.str() << std::endl);
       }
     return 1;
     }
@@ -1649,7 +1649,7 @@ int cmCTest::RunCMake(std::string* outstring, cmOStringStream &out,
         }
       else
         {
-        cmCTestLog(this, ERROR, out.str() << std::endl);
+        cmCTestLog(this, ERROR_MESSAGE, out.str() << std::endl);
         }
       return 1;
       }
@@ -1838,7 +1838,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       }
     else
       {
-      cmCTestLog(this, ERROR, out.str());
+      cmCTestLog(this, ERROR_MESSAGE, out.str());
       }
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
@@ -1916,7 +1916,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
       (!lg->GetMakefile()->ReadListFile(0, fname.c_str()) ||
        cmSystemTools::GetErrorOccuredFlag() ) )
       {
-      cmCTestLog(this, ERROR, "Problem reading custom configuration" << std::endl);
+      cmCTestLog(this, ERROR_MESSAGE, "Problem reading custom configuration" << std::endl);
       }
     dirs.erase(dirs.end()-1, dirs.end());
     cmSystemTools::SimpleGlob(rexpr, ndirs, -1);
@@ -2102,7 +2102,7 @@ static const char* cmCTestStringLogType[] =
   "HANDLER_OUTPUT",
   "HANDLER_VERBOSE_OUTPUT",
   "WARNING",
-  "ERROR",
+  "ERROR_MESSAGE",
   0
 };
 
@@ -2176,7 +2176,7 @@ void cmCTest::Log(int logType, const char* msg)
       std::cerr << msg;
       std::cerr.flush();
       break;
-    case ERROR:
+    case ERROR_MESSAGE:
       std::cerr << msg;
       std::cerr.flush();
       break;

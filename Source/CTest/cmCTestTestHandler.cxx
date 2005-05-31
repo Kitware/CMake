@@ -177,7 +177,7 @@ int cmCTestTestHandler::PreProcessHandler()
 {
   if ( !this->ExecuteCommands(m_CustomPreTest) )
     {
-    cmCTestLog(m_CTest, ERROR, "Problem executing pre-test command(s)." << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem executing pre-test command(s)." << std::endl);
     return 0;
     }
   return 1;
@@ -188,7 +188,7 @@ int cmCTestTestHandler::PostProcessHandler()
 {
   if ( !this->ExecuteCommands(m_CustomPostTest) )
     {
-    cmCTestLog(m_CTest, ERROR, "Problem executing post-test command(s)." << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem executing post-test command(s)." << std::endl);
     return 0;
     }
   return 1;
@@ -236,7 +236,7 @@ int cmCTestTestHandler::ProcessHandler()
     {
     if ( !m_CTest->GetShowOnly() )
       {
-      cmCTestLog(m_CTest, ERROR, "No tests were found!!!" << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "No tests were found!!!" << std::endl);
       }
     }
   else
@@ -266,7 +266,7 @@ int cmCTestTestHandler::ProcessHandler()
       {
       cmGeneratedFileStream ofs;
 
-      cmCTestLog(m_CTest, ERROR, std::endl << "The following tests FAILED:" << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, std::endl << "The following tests FAILED:" << std::endl);
       m_CTest->OpenOutputFile("Temporary", "LastTestsFailed.log", ofs);
 
       std::vector<cmCTestTestHandler::cmCTestTestResult>::iterator ftit;
@@ -291,7 +291,7 @@ int cmCTestTestHandler::ProcessHandler()
     if( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), 
         (m_MemCheck ? "DynamicAnalysis.xml" : "Test.xml"), xmlfile, true) )
       {
-      cmCTestLog(m_CTest, ERROR, "Cannot create " << (m_MemCheck ? "memory check" : "testing")
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create " << (m_MemCheck ? "memory check" : "testing")
         << " XML file" << std::endl);
       return 1;
       }
@@ -428,7 +428,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     // continue if we did not find the executable
     if (testCommand == "")
       {
-      cmCTestLog(m_CTest, ERROR, "Unable to find executable: "
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Unable to find executable: "
         << args[1].Value.c_str() << std::endl);
       if ( !m_CTest->GetShowOnly() )
         {
@@ -705,7 +705,7 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<cmStdString>& vec)
     if ( !cmSystemTools::RunSingleCommand(it->c_str(), 0, &retVal, 0, true /*m_Verbose*/) || 
       retVal != 0 )
       {
-      cmCTestLog(m_CTest, ERROR, "Problem running command: " << *it << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem running command: " << *it << std::endl);
       return 0;
       }
     }

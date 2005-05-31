@@ -39,7 +39,7 @@ int cmCTestConfigureHandler::ProcessHandler()
   std::string cCommand = m_CTest->GetCTestConfiguration("ConfigureCommand");
   if ( cCommand.size() == 0 )
     {
-    cmCTestLog(m_CTest, ERROR, "Cannot find ConfigureCommand key in the DartConfiguration.tcl" 
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot find ConfigureCommand key in the DartConfiguration.tcl" 
               << std::endl);
     return -1;
     }
@@ -47,7 +47,7 @@ int cmCTestConfigureHandler::ProcessHandler()
   std::string buildDirectory = m_CTest->GetCTestConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
     {
-    cmCTestLog(m_CTest, ERROR, "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl);
     return -1;
     }
 
@@ -60,7 +60,7 @@ int cmCTestConfigureHandler::ProcessHandler()
     cmGeneratedFileStream os; 
     if ( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Configure.xml", os, true) )
       {
-      cmCTestLog(m_CTest, ERROR, "Cannot open configure file" << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open configure file" << std::endl);
       return 1;
       }
     std::string start_time = m_CTest->CurrentTime();
@@ -105,7 +105,7 @@ int cmCTestConfigureHandler::ProcessHandler()
     }
   if (! res || retVal )
     {
-    cmCTestLog(m_CTest, ERROR, "Error(s) when updating the project" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Error(s) when updating the project" << std::endl);
     return -1;
     }
   return 0;

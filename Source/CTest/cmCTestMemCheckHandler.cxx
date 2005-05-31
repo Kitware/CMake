@@ -100,7 +100,7 @@ int cmCTestMemCheckHandler::PreProcessHandler()
 
   if ( !this->ExecuteCommands(m_CustomPreMemCheck) )
     {
-    cmCTestLog(m_CTest, ERROR, "Problem executing pre-memcheck command(s)." << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem executing pre-memcheck command(s)." << std::endl);
     return 0;
     }
   return 1;
@@ -111,7 +111,7 @@ int cmCTestMemCheckHandler::PostProcessHandler()
 {
   if ( !this->ExecuteCommands(m_CustomPostMemCheck) )
     {
-    cmCTestLog(m_CTest, ERROR, "Problem executing post-memcheck command(s)." << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem executing post-memcheck command(s)." << std::endl);
     return 0;
     }
   return 1;
@@ -296,7 +296,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     }
   else
     {
-    cmCTestLog(m_CTest, ERROR, "Memory checker (MemoryCheckCommand) not set, or cannot find the specified program." 
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Memory checker (MemoryCheckCommand) not set, or cannot find the specified program." 
       << std::endl);
     return false;
     }
@@ -330,7 +330,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       {
       if ( !cmSystemTools::FileExists(m_CTest->GetCTestConfiguration("MemoryCheckSuppressionFile").c_str()) )
         {
-        cmCTestLog(m_CTest, ERROR, "Cannot find memory checker suppression file: " 
+        cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot find memory checker suppression file: " 
           << m_CTest->GetCTestConfiguration("MemoryCheckSuppressionFile").c_str() << std::endl);
         return false;
         }
@@ -349,12 +349,12 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
   else if ( m_MemoryTester.find("boundschecker") != std::string::npos )
     {
     m_MemoryTesterStyle = cmCTestMemCheckHandler::BOUNDS_CHECKER;
-    cmCTestLog(m_CTest, ERROR, "Bounds checker not yet implemented" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Bounds checker not yet implemented" << std::endl);
     return false;
     }
   else
     {
-    cmCTestLog(m_CTest, ERROR, "Do not understand memory checker: " << m_MemoryTester.c_str() << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Do not understand memory checker: " << m_MemoryTester.c_str() << std::endl);
     return false;
     }
 
@@ -409,7 +409,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
   if ( !cmSystemTools::FileExists(m_MemoryTesterOutputFile.c_str()) )
     {
     log = "Cannot find Purify output file: " + m_MemoryTesterOutputFile;
-    cmCTestLog(m_CTest, ERROR, log.c_str() << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, log.c_str() << std::endl);
     return false;
     }
 
@@ -417,7 +417,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
   if ( !ifs )
     {
     log = "Cannot read Purify output file: " + m_MemoryTesterOutputFile;
-    cmCTestLog(m_CTest, ERROR, log.c_str() << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, log.c_str() << std::endl);
     return false;
     }
 
@@ -445,7 +445,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
         }
       if ( cc == cmCTestMemCheckHandler::NO_MEMORY_FAULT )
         {
-        cmCTestLog(m_CTest, ERROR, "Unknown Purify memory fault: " << pfW.match(1) << std::endl);
+        cmCTestLog(m_CTest, ERROR_MESSAGE, "Unknown Purify memory fault: " << pfW.match(1) << std::endl);
         ostr << "*** Unknown Purify memory fault: " << pfW.match(1) << std::endl;
         }
       }
