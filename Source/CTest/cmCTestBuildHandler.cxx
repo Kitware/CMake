@@ -171,8 +171,8 @@ cmCTestBuildHandler::cmCTestBuildHandler()
       }
     else
       {
-      std::cout << "Problem Compiling regular expression: "
-       << cmCTestWarningErrorFileLine[cc].m_RegularExpressionString << std::endl;
+      cmCTestLog(m_CTest, ERROR, "Problem Compiling regular expression: "
+       << cmCTestWarningErrorFileLine[cc].m_RegularExpressionString << std::endl);
       }
     }
 }
@@ -196,17 +196,17 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 //functions and commented...
 int cmCTestBuildHandler::ProcessHandler()
 {
-  std::cout << "Build project" << std::endl;
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "Build project" << std::endl);
   const std::string &makeCommand = m_CTest->GetCTestConfiguration("MakeCommand");
   if ( makeCommand.size() == 0 )
     {
-    std::cerr << "Cannot find MakeCommand key in the DartConfiguration.tcl" << std::endl;
+    cmCTestLog(m_CTest, ERROR, "Cannot find MakeCommand key in the DartConfiguration.tcl" << std::endl);
     return -1;
     }
   const std::string &buildDirectory = m_CTest->GetCTestConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
     {
-    std::cerr << "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl;
+    cmCTestLog(m_CTest, ERROR, "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl);
     return -1;
     }
 
@@ -214,7 +214,7 @@ int cmCTestBuildHandler::ProcessHandler()
   double elapsed_time_start = cmSystemTools::GetTime();
   if ( !m_CTest->OpenOutputFile("Temporary", "LastBuild.log", ofs) )
     {
-    std::cerr << "Cannot create LastBuild.log file" << std::endl;    
+    cmCTestLog(m_CTest, ERROR, "Cannot create LastBuild.log file" << std::endl);
     }
 
   m_StartBuild = m_CTest->CurrentTime();
@@ -224,18 +224,17 @@ int cmCTestBuildHandler::ProcessHandler()
   if ( !m_CTest->GetShowOnly() )
     {
     res = m_CTest->RunMakeCommand(makeCommand.c_str(), &output, 
-      &retVal, buildDirectory.c_str(), 
-      m_Verbose, 0, ofs);
+      &retVal, buildDirectory.c_str(), 0, ofs);
     }
   else
     {
-    std::cout << "Build with command: " << makeCommand << std::endl;
+    cmCTestLog(m_CTest, DEBUG, "Build with command: " << makeCommand << std::endl);
     }
   m_EndBuild = m_CTest->CurrentTime();
   double elapsed_build_time = cmSystemTools::GetTime() - elapsed_time_start;
   if (res != cmsysProcess_State_Exited || retVal )
     {
-    std::cerr << "Error(s) when building project" << std::endl;
+    cmCTestLog(m_CTest, ERROR, "Error(s) when building project" << std::endl);
     }
 
   std::vector<cmStdString>::size_type cc;
@@ -382,13 +381,13 @@ int cmCTestBuildHandler::ProcessHandler()
     bool found = false;
     if ( markedLines[kk] == 1 )
       {
-      //std::cout << "Error: " << lines[kk] << std::endl;
+      cmCTestLog(m_CTest, DEBUG, "Error: " << lines[kk] << std::endl);
       errorwarning.m_Error = true;
       found = true;
       }
     else if ( markedLines[kk] > 1 )
       {
-      //std::cout << "Warning: " << lines[kk] << std::endl;
+      cmCTestLog(m_CTest, DEBUG, "Warning: " << lines[kk] << std::endl);
       errorwarning.m_Error = false;
       found = true;
       }
@@ -433,13 +432,12 @@ int cmCTestBuildHandler::ProcessHandler()
       }
     }
 
-  std::cout << "   " << errors << " Compiler errors" << std::endl;
-  std::cout << "   " << warnings << " Compiler warnings" << std::endl;
-
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   " << errors << " Compiler errors" << std::endl);
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   " << warnings << " Compiler warnings" << std::endl);
   cmGeneratedFileStream xofs;
   if( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Build.xml", xofs, true) )
     {
-    std::cerr << "Cannot create build XML file" << std::endl;
+    cmCTestLog(m_CTest, ERROR, "Cannot create build XML file" << std::endl);
     return -1;
     }
   this->GenerateDartBuildOutput(xofs, errorsWarnings, elapsed_build_time);

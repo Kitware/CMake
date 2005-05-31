@@ -19,7 +19,7 @@
 
 cmCTestGenericHandler::cmCTestGenericHandler()
 {
-  m_Verbose = false;
+  m_HandlerVerbose = false;
   m_CTest = 0;
 }
 

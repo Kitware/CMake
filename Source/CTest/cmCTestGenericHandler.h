@@ -34,7 +34,7 @@ public:
   /**
    * If verbose then more informaiton is printed out
    */
-  void SetVerbose(bool val) { m_Verbose = val; }
+  void SetVerbose(bool val) { m_HandlerVerbose = val; }
 
   /**
    * Populate internals from CTest custom scripts
@@ -51,6 +51,7 @@ public:
    * Set the CTest instance
    */
   void SetCTestInstance(cmCTest* ctest) { m_CTest = ctest; }
+  cmCTest* GetCTestInstance() { return m_CTest; }
 
   /**
    * Construct handler
@@ -64,7 +65,7 @@ public:
   const char* GetOption(const char* op);
 
 protected:
-  bool m_Verbose;
+  bool m_HandlerVerbose;
   cmCTest *m_CTest;
   t_StringToString m_Options;
 };

@@ -80,7 +80,6 @@ IsFunctionBlocked(const cmListFileFunction& , cmMakefile &)
 //----------------------------------------------------------------------
 cmCTestScriptHandler::cmCTestScriptHandler()
 {
-  m_Verbose = false; 
   m_Backup = false; 
   m_EmptyBinDir = false;
   m_EmptyBinDirOnce = false;
@@ -463,13 +462,10 @@ int cmCTestScriptHandler::CheckOutSourceDir()
     {
     // we must now checkout the src dir
     output = "";
-    if ( m_Verbose )
-      {
-      std::cerr << "Run cvs: " << m_CVSCheckOut << std::endl;
-      }
+    cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Run cvs: " << m_CVSCheckOut << std::endl);
     res = cmSystemTools::RunSingleCommand(m_CVSCheckOut.c_str(), &output, 
                                           &retVal, m_CTestRoot.c_str(),
-                                          m_Verbose, 0 /*m_TimeOut*/);
+                                          m_HandlerVerbose, 0 /*m_TimeOut*/);
     if (!res || retVal != 0)
       {
       cmSystemTools::Error("Unable to perform cvs checkout:\n", 
@@ -543,13 +539,10 @@ int cmCTestScriptHandler::PerformExtraUpdates()
       fullCommand += cvsArgs[1];
       output = "";
       retVal = 0;
-      if ( m_Verbose )
-        {
-        std::cerr << "Run CVS: " << fullCommand.c_str() << std::endl;
-        }
+      cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Run CVS: " << fullCommand.c_str() << std::endl);
       res = cmSystemTools::RunSingleCommand(fullCommand.c_str(), &output, 
         &retVal, cvsArgs[0].c_str(),
-        m_Verbose, 0 /*m_TimeOut*/);
+        m_HandlerVerbose, 0 /*m_TimeOut*/);
       if (!res || retVal != 0)
         {
         cmSystemTools::Error("Unable to perform extra cvs updates:\n", 
@@ -592,7 +585,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     {
     if ( !cmCTestScriptHandler::EmptyBinaryDirectory(m_BinaryDir.c_str()) )
       {
-      std::cerr << "Problem removing the binary directory" << std::endl;
+      cmCTestLog(m_CTest, ERROR, "Problem removing the binary directory" << std::endl);
       }
     }
   
@@ -669,13 +662,10 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     output = "";
     command += "\"";
     retVal = 0;
-    if ( m_Verbose )
-      {
-      std::cerr << "Run cmake command: " << command.c_str() << std::endl;
-      }
+    cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Run cmake command: " << command.c_str() << std::endl);
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
       &retVal, m_BinaryDir.c_str(),
-      m_Verbose, 0 /*m_TimeOut*/);
+      m_HandlerVerbose, 0 /*m_TimeOut*/);
 
     if ( !m_CMOutFile.empty() )
       {
@@ -685,11 +675,8 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         cmakeOutputFile = m_BinaryDir + "/" + cmakeOutputFile;
         }
 
-      if ( m_Verbose )
-        {
-        std::cerr << "Write CMake output to file: " << cmakeOutputFile.c_str()
-          << std::endl;
-        }
+      cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Write CMake output to file: " << cmakeOutputFile.c_str()
+        << std::endl);
       cmGeneratedFileStream fout(cmakeOutputFile.c_str());
       if ( fout )
         {
@@ -697,8 +684,8 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         }
       else
         {
-        cmSystemTools::Error("Cannot open CMake output file: ",
-          cmakeOutputFile.c_str(), " for writing");
+        cmCTestLog(m_CTest, ERROR, "Cannot open CMake output file: "
+          << cmakeOutputFile.c_str() << " for writing" << std::endl);
         }
       }
     if (!res || retVal != 0)
@@ -718,13 +705,10 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     command = ctestCommands[i];
     output = "";
     retVal = 0;
-    if ( m_Verbose )
-      {
-      std::cerr << "Run ctest command: " << command.c_str() << std::endl;
-      }
+    cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Run ctest command: " << command.c_str() << std::endl);
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
                                           &retVal, m_BinaryDir.c_str(),
-                                          m_Verbose, 0 /*m_TimeOut*/);
+                                          m_HandlerVerbose, 0 /*m_TimeOut*/);
     
     // did something critical fail in ctest
     if (!res || cmakeFailed ||
@@ -733,11 +717,12 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
       this->RestoreBackupDirectories();
       if (cmakeFailed)
         {
-        cmSystemTools::Error("Unable to run cmake:\n", 
-                             cmakeFailedOuput.c_str());    
+        cmCTestLog(m_CTest, ERROR, "Unable to run cmake:" << std::endl
+          << cmakeFailedOuput.c_str() << std::endl);
         return 10;
         }
-      cmSystemTools::Error("Unable to run ctest:\n", output.c_str());    
+      cmCTestLog(m_CTest, ERROR, "Unable to run ctest:" << std::endl
+        << output.c_str() << std::endl);
       if (!res)
         {
         return 11;

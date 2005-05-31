@@ -59,6 +59,12 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"-V,--verbose", "Enable verbose output from tests.",
    "Test output is normally suppressed and only summary information is "
    "displayed.  This option will show all test output."},
+  {"-Q,--quiet", "Make ctest quiet.",
+    "This option will suppress all the output. The output log file will still be "
+    "generated if the --output-log is specified. Options such as --verbose, "
+    "--extra-verbose, and --debug are ignored if --quiet is specified."},
+  {"-O <file>, --output-log <file>", "Output to log file",
+   "This option tells ctest to write all its output to a log file."},
   {"-N,--show-only", "Disable actual execution of tests.",
    "This option tells ctest to list the tests that would be run but not "
    "actually run them.  Useful in conjunction with the -R and -E options."},
@@ -158,10 +164,11 @@ int main (int argc, char *argv[])
 {
   cmSystemTools::EnableMSVCDebugHook();
   int nocwd = 0;
+  cmCTest inst;
 
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
     {
-    std::cerr << "Current working directory cannot be established." << std::endl;
+    cmCTestLog(&inst, ERROR, "Current working directory cannot be established." << std::endl);
     nocwd = 1;
     }
 
@@ -175,9 +182,9 @@ int main (int argc, char *argv[])
     {
     if(argc == 1)
       {
-      std::cout << "*********************************" << std::endl;
-      std::cout << "No test configuration file found!" << std::endl;
-      std::cout << "*********************************" << std::endl;
+      cmCTestLog(&inst, ERROR, "*********************************" << std::endl
+        << "No test configuration file found!" << std::endl
+        << "*********************************" << std::endl);
       }
     cmDocumentation doc;
     if(doc.CheckOptions(argc, argv) || nocwd)
@@ -189,7 +196,11 @@ int main (int argc, char *argv[])
       doc.SetDescriptionSection(cmDocumentationDescription);
       doc.SetOptionsSection(cmDocumentationOptions);
       doc.SetSeeAlsoList(cmDocumentationSeeAlso);
+#ifdef cout
+#  undef cout
+#endif
       return doc.PrintRequestedDocumentation(std::cout)? 0:1;
+#define cout no_cout_use_cmCTestLog
       }
     }
   
@@ -198,7 +209,6 @@ int main (int argc, char *argv[])
   std::string comspec = "cmw9xcom.exe";
   cmSystemTools::SetWindows9xComspecSubstitute(comspec.c_str());
 #endif
-  cmCTest inst;
   // copy the args to a vector
   std::vector<std::string> args;
   for(int i =0; i < argc; ++i)
@@ -208,7 +218,7 @@ int main (int argc, char *argv[])
   // run ctest
   std::string output;
   int res = inst.Run(args,&output);
-  std::cout << output;
+  cmCTestLog(&inst, OUTPUT, output);
   cmListFileCache::ClearCache();
 
   return res;

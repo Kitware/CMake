@@ -18,7 +18,6 @@
 #ifndef cmCTest_h
 #define cmCTest_h
 
-
 #include "cmStandardIncludes.h"
 #include "cmListFileCache.h"
 #include <time.h>
@@ -27,6 +26,23 @@ class cmake;
 class cmMakefile;
 class cmCTestGenericHandler;
 class cmGeneratedFileStream;
+
+#define cmCTestLog(ctSelf, logType, msg) \
+  do { \
+  cmOStringStream cmCTestLog_msg; \
+  cmCTestLog_msg << msg; \
+  (ctSelf)->Log(cmCTest::logType, cmCTestLog_msg.str().c_str());\
+  } while ( 0 )
+
+#ifdef cerr
+#  undef cerr
+#endif
+#define cerr no_cerr_use_cmCTestLog
+
+#ifdef cout
+#  undef cout
+#endif
+#define cout no_cout_use_cmCTestLog
 
 class cmCTest
 {
@@ -57,9 +73,8 @@ public:
   /*
    * A utility function that returns the nightly time
    */
-  static struct tm* GetNightlyTime(std::string str, 
-                                   bool verbose, 
-                                   bool tomorrowtag);
+  struct tm* GetNightlyTime(std::string str, 
+    bool tomorrowtag);
   
   /*
    * Is the tomorrow tag set?
@@ -134,7 +149,7 @@ public:
   //! Run command specialized for make and configure. Returns process status
   // and retVal is return value or exception.
   int RunMakeCommand(const char* command, std::string* output,
-    int* retVal, const char* dir, bool verbose, int timeout, 
+    int* retVal, const char* dir, int timeout, 
     std::ofstream& ofs);
 
   /*
@@ -206,6 +221,24 @@ public:
 
   //! Create XML file that contains all the notes specified
   int GenerateNotesFile(const std::vector<cmStdString> &files);
+
+  //! Set the output log file name
+  void SetOutputLogFileName(const char* name);
+
+  //! Various log types
+  enum {
+    DEBUG = 0,
+    OUTPUT,
+    HANDLER_OUTPUT,
+    HANDLER_VERBOSE_OUTPUT,
+    WARNING,
+    ERROR,
+    OTHER
+  };
+
+  //! Add log to the output
+  void Log(int logType, const char* msg);
+
 private:
   std::string m_ConfigType;
   bool m_Verbose;
@@ -302,6 +335,29 @@ private:
   void FindRunningCMake(const char* arg0);
 
   bool                      m_SuppressUpdatingCTestConfiguration;
+
+  bool m_Debug;
+  bool m_Quiet;
+
+  
+  cmGeneratedFileStream* m_OutputLogFile;
+  int                    m_OutputLogFileLastTag;
 };
+
+class cmCTestLogWrite
+{
+public:
+  cmCTestLogWrite(const char* data, size_t length) : Data(data), Length(length) {}
+
+  const char* Data;
+  size_t Length;
+};
+
+inline std::ostream& operator<< (std::ostream& os, const cmCTestLogWrite& c)
+{
+  os.write(c.Data, c.Length);
+  os.flush();
+  return os;
+}
 
 #endif
