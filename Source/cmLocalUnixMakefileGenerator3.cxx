@@ -2782,11 +2782,13 @@ void cmLocalUnixMakefileGenerator3::CreateJumpCommand(std::vector<std::string>& 
     // back because the shell keeps the working directory between
     // commands.
     std::string cmd = "cd ";
-    cmd += this->ConvertToOutputForExisting(m_Makefile->GetHomeOutputDirectory());
+    cmd += this->ConvertToOutputForExisting
+      (m_Makefile->GetHomeOutputDirectory());
     commands.push_back(cmd);
     
     // Build the target for this pass.
-    commands.push_back(this->GetRecursiveMakeCall("Makefile",localName.c_str()));
+    commands.push_back(this->GetRecursiveMakeCall
+                       ("Makefile2",localName.c_str()));
     
     // Change back to the starting directory.  Any trailing slash must be
     // removed to avoid problems with Borland Make.
@@ -2811,7 +2813,7 @@ void cmLocalUnixMakefileGenerator3::CreateJumpCommand(std::vector<std::string>& 
     
     // Build the target for this pass.
     cmd += " && ";
-    cmd += this->GetRecursiveMakeCall("Makefile",localName.c_str());
+    cmd += this->GetRecursiveMakeCall("Makefile2",localName.c_str());
     
     // Add the command as a single line.
     commands.push_back(cmd);
