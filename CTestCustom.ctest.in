@@ -12,7 +12,9 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "stl_deque.h:479"
   "Utilities/cmzlib/"      
   "Source/CTest/Curl"      
-  "Utilities/cmexpat/"      
+  "Utilities/cmexpat/"
+  "is not used for resolving any symbol"
+  "remark\\(1209"      
   )
 
 
