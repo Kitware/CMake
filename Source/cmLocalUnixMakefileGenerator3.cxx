@@ -55,6 +55,13 @@ cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3()
 }
 
 //----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator3::Configure()
+{
+  this->ComputeHomeRelativeOutputPath();
+  this->cmLocalGenerator::Configure();
+}
+
+//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::Generate()
 {
   // Setup our configuration variables for this directory.
@@ -259,17 +266,21 @@ void cmLocalUnixMakefileGenerator3::WriteDisclaimer(std::ostream& os)
     << cmMakefile::GetMinorVersion() << "\n\n";
 }
 
-std::string cmLocalUnixMakefileGenerator3::GetHomeRelativeOutputPath()
+void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
 {
   // Include the rule file for each object.
-  std::string relPath = 
+  m_HomeRelativeOutputPath = 
     cmSystemTools::RelativePath(m_Makefile->GetHomeOutputDirectory(),
                                 m_Makefile->GetStartOutputDirectory());
-  if (relPath.size())
+  if (m_HomeRelativeOutputPath.size())
     {
-    relPath += "/";
+    m_HomeRelativeOutputPath += "/";
     }
-  return relPath;
+}
+
+const std::string &cmLocalUnixMakefileGenerator3::GetHomeRelativeOutputPath()
+{
+  return m_HomeRelativeOutputPath;
 }
 
 //----------------------------------------------------------------------------

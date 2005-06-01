@@ -43,12 +43,18 @@ public:
    */
   virtual void Generate();
 
+  /**
+   * Process the CMakeLists files for this directory to fill in the
+   * m_Makefile ivar 
+   */
+  virtual void Configure();
+
   /** creates the common disclainer text at the top of each makefile */
   void WriteDisclaimer(std::ostream& os);
 
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory
-  std::string GetHomeRelativeOutputPath();
+  const std::string &GetHomeRelativeOutputPath();
 
   // Write out a make rule 
   void WriteMakeRule(std::ostream& os,
@@ -312,6 +318,7 @@ protected:
   std::string CreateMakeVariable(const char* sin, const char* s2in);
   //==========================================================================
 
+  void ComputeHomeRelativeOutputPath();
 
 private:
   std::map<cmStdString, IntegrityCheckSet> m_CheckDependFiles;
@@ -332,6 +339,8 @@ private:
   // Flag for whether echo command needs quotes.
   bool m_EchoNeedsQuote;
 
+  std::string m_HomeRelativeOutputPath;
+  
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> m_ObjectFiles;
 };
