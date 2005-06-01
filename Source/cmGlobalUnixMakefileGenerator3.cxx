@@ -152,18 +152,6 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-    // are any parents excluded
-    bool exclude = false;
-    cmLocalGenerator *lg3 = lg;
-    while (lg3)
-      {
-      if (lg3->GetExcludeAll())
-        {
-        exclude = true;
-        break;
-        }
-      lg3 = lg3->GetParent();
-      }
     this->WriteConvenienceRules(makefileStream,lg,emittedTargets);
     }
 
