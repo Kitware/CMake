@@ -1414,7 +1414,7 @@ cmLocalUnixMakefileGenerator3
                              buildTargetRuleName.c_str());
 
   cleanFiles.push_back(cleanObjs);
-  cleanFiles.push_back(targetOutPath.c_str());
+  cleanFiles.push_back(targetFullPath.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -1655,9 +1655,6 @@ cmLocalUnixMakefileGenerator3
   // Add a command to remove any existing files for this library.
   this->AppendCleanCommand(commands, libCleanFiles);
 
-  // add the libCleanFiles to to taoal cleanFiles
-  cleanFiles.insert(cleanFiles.end(),libCleanFiles.begin(),libCleanFiles.end());
-    
   // Add the pre-build and pre-link rules.
   this->AppendCustomCommands(commands, target.GetPreBuildCommands());
   this->AppendCustomCommands(commands, target.GetPreLinkCommands());
@@ -1732,8 +1729,9 @@ cmLocalUnixMakefileGenerator3
   this->WriteConvenienceRule(ruleFileStream, targetFullPath.c_str(),
                              buildTargetRuleName.c_str());
 
+  // Clean all the possible library names and symlinks and object files.
+  cleanFiles.insert(cleanFiles.end(),libCleanFiles.begin(),libCleanFiles.end());
   cleanFiles.push_back(cleanObjs);
-  cleanFiles.push_back(targetOutPath.c_str());
 }
 
 //----------------------------------------------------------------------------
