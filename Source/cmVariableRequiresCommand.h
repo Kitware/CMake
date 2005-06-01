@@ -40,8 +40,6 @@ public:
    */
   virtual bool InitialPass(std::vector<std::string> const& args);
   
-  ///! 
-  virtual void FinalPass();
   /**
    * The name of the command as specified in CMakeList.txt.
    */
@@ -77,7 +75,6 @@ public:
   cmTypeMacro(cmVariableRequiresCommand, cmCommand);
 private:
   std::string m_ErrorMessage;
-  std::vector<std::string> m_Arguments;
   bool m_RequirementsMet;
 };
 

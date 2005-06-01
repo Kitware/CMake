@@ -25,30 +25,25 @@ bool cmVariableRequiresCommand::InitialPass(std::vector<std::string> const& args
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  m_Arguments = args;
-  return true;
-}
 
-void cmVariableRequiresCommand::FinalPass()
-{
-  std::string testVariable = m_Arguments[0]; 
+  std::string testVariable = args[0]; 
   if(!m_Makefile->IsOn(testVariable.c_str()))
     {
-    return;
+    return true;
     }
-  std::string resultVariable = m_Arguments[1];
+  std::string resultVariable = args[1];
   bool requirementsMet = true;
   std::string notSet;
   bool hasAdvanced = false;
-  for(unsigned int i = 2; i < m_Arguments.size(); ++i)
+  for(unsigned int i = 2; i < args.size(); ++i)
     {
-    if(!m_Makefile->IsOn(m_Arguments[i].c_str()))
+    if(!m_Makefile->IsOn(args[i].c_str()))
       {
       requirementsMet = false;
-      notSet += m_Arguments[i];
+      notSet += args[i];
       notSet += "\n";
       cmCacheManager::CacheIterator it = 
-        m_Makefile->GetCacheManager()->GetCacheIterator(m_Arguments[i].c_str());
+        m_Makefile->GetCacheManager()->GetCacheIterator(args[i].c_str());
       if(!it.IsAtEnd() && it.GetPropertyAsBool("ADVANCED"))
         {
         hasAdvanced = true;
@@ -77,4 +72,6 @@ void cmVariableRequiresCommand::FinalPass()
       }
     cmSystemTools::Error(message.c_str());
     }
+
+  return true;
 }
