@@ -155,7 +155,11 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
     this->WriteConvenienceRules(makefileStream,lg,emittedTargets);
     }
 
-  this->WriteHelpRule(makefileStream);
+  // add a help target as long as there isn;t a real target named help
+  if(emittedTargets.insert("help").second)
+    {
+    this->WriteHelpRule(makefileStream);
+    }
   lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
   lg->WriteSpecialTargetsBottom(makefileStream);
 }
