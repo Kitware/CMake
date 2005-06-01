@@ -167,7 +167,6 @@ void cmQTWrapUICommand::FinalPass()
     cmCustomCommandLines cxxCommandLines;
     cxxCommandLines.push_back(cxxCommand);
 
-    std::vector<std::string> mocargs;
     cmCustomCommandLine mocCommand;
     mocCommand.push_back(moc_exe);
     mocCommand.push_back("-o");
