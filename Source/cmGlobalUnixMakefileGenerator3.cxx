@@ -694,7 +694,6 @@ cmGlobalUnixMakefileGenerator3
 
   std::vector<std::string> depends;  
   std::vector<std::string> commands;
-  std::string localName;
 
   // write the directory level rules for this local gen
   //this->WriteDirectoryRules(ruleFileStream,lg);
