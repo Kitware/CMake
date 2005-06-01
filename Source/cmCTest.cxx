@@ -1465,6 +1465,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
 
   if(cmakeAndTest)
     {
+    m_Verbose = true;
     cmSystemTools::ResetErrorOccuredFlag();
     cmListFileCache::ClearCache();
     int retv = this->RunCMakeAndTest(output);
