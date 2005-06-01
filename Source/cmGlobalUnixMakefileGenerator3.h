@@ -95,7 +95,7 @@ protected:
   
   void WriteConvenienceRules(std::ostream& ruleFileStream, 
                              cmLocalUnixMakefileGenerator3 *,
-                             bool exclude);
+                             std::set<cmStdString> &emitted);
   void WriteConvenienceRules2(std::ostream& ruleFileStream, 
                               cmLocalUnixMakefileGenerator3 *,
                               bool exclude);

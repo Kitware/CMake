@@ -144,6 +144,9 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
 
   this->WriteAllRules(lg,makefileStream);
   
+  // Keep track of targets already listed.
+  std::set<cmStdString> emittedTargets;
+
   // write the target convenience rules
   unsigned int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
@@ -161,7 +164,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
         }
       lg3 = lg3->GetParent();
       }
-    this->WriteConvenienceRules(makefileStream,lg,exclude);
+    this->WriteConvenienceRules(makefileStream,lg,emittedTargets);
     }
 
   this->WriteHelpRule(makefileStream);
@@ -687,11 +690,8 @@ void
 cmGlobalUnixMakefileGenerator3
 ::WriteConvenienceRules(std::ostream& ruleFileStream, 
                         cmLocalUnixMakefileGenerator3 *lg,
-                        bool /* exclude */)
+                        std::set<cmStdString> &emitted)
 {
-  // Keep track of targets already listed.
-  std::set<cmStdString> emitted;
-
   std::vector<std::string> depends;  
   std::vector<std::string> commands;
 
@@ -936,26 +936,31 @@ cmGlobalUnixMakefileGenerator3::WriteHelpRule(std::ostream& ruleFileStream)
   lg->AppendEcho(commands,"... install");
   lg->AppendEcho(commands,"... rebuild_cache");
   
+  // Keep track of targets already listed.
+  std::set<cmStdString> emittedTargets;
+
   // for each local generator
   unsigned int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-
   
     // for each target Generate the rule files for each target.
     const cmTargets& targets = lg->GetMakefile()->GetTargets();
     for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
       {
       if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-         (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-         (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-         (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
-         (t->second.GetType() == cmTarget::UTILITY))
+        (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+        (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+        (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+        (t->second.GetType() == cmTarget::UTILITY))
         {
-        path = "... ";
-        path += t->second.GetName();
-        lg->AppendEcho(commands,path.c_str());
+        if(emittedTargets.insert(t->second.GetName()).second)
+          {
+          path = "... ";
+          path += t->second.GetName();
+          lg->AppendEcho(commands,path.c_str());
+          }
         }
       }
     }
