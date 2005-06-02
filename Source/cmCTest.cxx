@@ -219,7 +219,10 @@ cmCTest::cmCTest()
   m_TimeOut                = 0;
   m_CompressXMLFiles       = false;
   m_CTestConfigFile        = "";
+  m_OutputLogFile          = 0;
+  m_OutputLogFileLastTag   = -1;
   m_SuppressUpdatingCTestConfiguration = false;
+
   int cc; 
   for ( cc=0; cc < cmCTest::LAST_TEST; cc ++ )
     {
@@ -241,8 +244,6 @@ cmCTest::cmCTest()
     {
     it->second->SetCTestInstance(this);
     }
-  m_OutputLogFile = 0;
-  m_OutputLogFileLastTag = -1;
 }
 
 cmCTest::~cmCTest() 

@@ -62,79 +62,9 @@ cmCTestSubmitHandler::cmCTestSubmitHandler() : m_HTTPProxy(), m_FTPProxy()
   m_HTTPProxy = "";
   m_HTTPProxyType = 0;
   m_HTTPProxyAuth = "";
-  if ( getenv("HTTP_PROXY") )
-    {
-    m_HTTPProxyType = 1;
-    m_HTTPProxy = getenv("HTTP_PROXY");
-    if ( getenv("HTTP_PROXY_PORT") )
-      {
-      m_HTTPProxy += ":";
-      m_HTTPProxy += getenv("HTTP_PROXY_PORT");
-      }
-    if ( getenv("HTTP_PROXY_TYPE") )
-      {
-      cmStdString type = getenv("HTTP_PROXY_TYPE");
-      // HTTP/SOCKS4/SOCKS5
-      if ( type == "HTTP" )
-        {
-        m_HTTPProxyType = 1;
-        }
-      else if ( type == "SOCKS4" )
-        {
-        m_HTTPProxyType = 2;
-        }
-      else if ( type == "SOCKS5" )
-        {
-        m_HTTPProxyType = 3;
-        }
-      }
-    if ( getenv("HTTP_PROXY_USER") )
-      {
-      m_HTTPProxyAuth = getenv("HTTP_PROXY_USER");
-      }
-    if ( getenv("HTTP_PROXY_PASSWD") )
-      {
-      m_HTTPProxyAuth += ":";
-      m_HTTPProxyAuth += getenv("HTTP_PROXY_PASSWD");
-      }
-    }
+
   m_FTPProxy = "";
   m_FTPProxyType = 0;
-  if ( getenv("FTP_PROXY") )
-    {
-    m_FTPProxyType = 1;
-    m_FTPProxy = getenv("FTP_PROXY");
-    if ( getenv("FTP_PROXY_PORT") )
-      {
-      m_FTPProxy += ":";
-      m_FTPProxy += getenv("FTP_PROXY_PORT");
-      }
-    if ( getenv("FTP_PROXY_TYPE") )
-      {
-      cmStdString type = getenv("FTP_PROXY_TYPE");
-      // HTTP/SOCKS4/SOCKS5
-      if ( type == "HTTP" )
-        {
-        m_FTPProxyType = 1;
-        }
-      else if ( type == "SOCKS4" )
-        {
-        m_FTPProxyType = 2;
-        }
-      else if ( type == "SOCKS5" )
-        {
-        m_FTPProxyType = 3;
-        }
-      }
-    }
-  if ( m_HTTPProxy.size() > 0 )
-    {
-    cmCTestLog(m_CTest, HANDLER_OUTPUT, "  Use HTTP Proxy: " << m_HTTPProxy << std::endl);
-    }
-  if ( m_FTPProxy.size() > 0 )
-    {
-    cmCTestLog(m_CTest, HANDLER_OUTPUT, "  Use FTP Proxy: " << m_FTPProxy << std::endl);
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -690,6 +620,79 @@ int cmCTestSubmitHandler::ProcessHandler()
     return -1;
     }
 
+  if ( getenv("HTTP_PROXY") )
+    {
+    m_HTTPProxyType = 1;
+    m_HTTPProxy = getenv("HTTP_PROXY");
+    if ( getenv("HTTP_PROXY_PORT") )
+      {
+      m_HTTPProxy += ":";
+      m_HTTPProxy += getenv("HTTP_PROXY_PORT");
+      }
+    if ( getenv("HTTP_PROXY_TYPE") )
+      {
+      cmStdString type = getenv("HTTP_PROXY_TYPE");
+      // HTTP/SOCKS4/SOCKS5
+      if ( type == "HTTP" )
+        {
+        m_HTTPProxyType = 1;
+        }
+      else if ( type == "SOCKS4" )
+        {
+        m_HTTPProxyType = 2;
+        }
+      else if ( type == "SOCKS5" )
+        {
+        m_HTTPProxyType = 3;
+        }
+      }
+    if ( getenv("HTTP_PROXY_USER") )
+      {
+      m_HTTPProxyAuth = getenv("HTTP_PROXY_USER");
+      }
+    if ( getenv("HTTP_PROXY_PASSWD") )
+      {
+      m_HTTPProxyAuth += ":";
+      m_HTTPProxyAuth += getenv("HTTP_PROXY_PASSWD");
+      }
+    }
+
+  if ( getenv("FTP_PROXY") )
+    {
+    m_FTPProxyType = 1;
+    m_FTPProxy = getenv("FTP_PROXY");
+    if ( getenv("FTP_PROXY_PORT") )
+      {
+      m_FTPProxy += ":";
+      m_FTPProxy += getenv("FTP_PROXY_PORT");
+      }
+    if ( getenv("FTP_PROXY_TYPE") )
+      {
+      cmStdString type = getenv("FTP_PROXY_TYPE");
+      // HTTP/SOCKS4/SOCKS5
+      if ( type == "HTTP" )
+        {
+        m_FTPProxyType = 1;
+        }
+      else if ( type == "SOCKS4" )
+        {
+        m_FTPProxyType = 2;
+        }
+      else if ( type == "SOCKS5" )
+        {
+        m_FTPProxyType = 3;
+        }
+      }
+    }
+
+  if ( m_HTTPProxy.size() > 0 )
+    {
+    cmCTestLog(m_CTest, HANDLER_OUTPUT, "  Use HTTP Proxy: " << m_HTTPProxy << std::endl);
+    }
+  if ( m_FTPProxy.size() > 0 )
+    {
+    cmCTestLog(m_CTest, HANDLER_OUTPUT, "  Use FTP Proxy: " << m_FTPProxy << std::endl);
+    }
   cmGeneratedFileStream ofs;
   m_CTest->OpenOutputFile("Temporary", "LastSubmit.log", ofs);
 
