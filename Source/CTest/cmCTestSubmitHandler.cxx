@@ -47,6 +47,15 @@ cmCTestSubmitHandlerWriteMemoryCallback(void *ptr, size_t size, size_t nmemb, vo
   return realsize;
 }
 
+static size_t
+cmCTestSubmitHandlerCurlDebugCallback(CURL *, curl_infotype, char *chPtr, size_t size, void *data)
+{
+  cmCTestSubmitHandlerVectorOfChar *vec = static_cast<cmCTestSubmitHandlerVectorOfChar*>(data);
+  vec->insert(vec->end(), chPtr, chPtr + size);
+
+  return size;
+}
+
 //----------------------------------------------------------------------------
 cmCTestSubmitHandler::cmCTestSubmitHandler() : m_HTTPProxy(), m_FTPProxy()
 {
@@ -184,11 +193,8 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
       cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "  Upload file: " << local_file.c_str() << " to " 
         << upload_as.c_str() << std::endl);
 
-      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
-      if ( m_HandlerVerbose )
-        {
-        ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-        }
+      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+
       // specify target
       ::curl_easy_setopt(curl,CURLOPT_URL, upload_as.c_str());
 
@@ -203,16 +209,21 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
 
       // specify handler for output
       ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cmCTestSubmitHandlerWriteMemoryCallback);
+      ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cmCTestSubmitHandlerCurlDebugCallback);
 
       /* we pass our 'chunk' struct to the callback function */
       cmCTestSubmitHandlerVectorOfChar chunk;
+      cmCTestSubmitHandlerVectorOfChar chunkDebug;
       ::curl_easy_setopt(curl, CURLOPT_FILE, (void *)&chunk);
+      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void *)&chunkDebug);
 
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
 
-      cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "CURL output: ["
+      cmCTestLog(m_CTest, DEBUG, "CURL output: ["
         << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]" << std::endl);
+      cmCTestLog(m_CTest, DEBUG, "CURL debug output: ["
+        << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]" << std::endl);
 
       fclose(ftpfile);
       if ( res )
@@ -286,12 +297,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       curl_easy_setopt(curl, CURLOPT_UPLOAD, 1) ;
 
       /* HTTP PUT please */
-      curl_easy_setopt(curl, CURLOPT_PUT, 1);
-      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
-      if ( m_HandlerVerbose )
-        {
-        ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-        }
+      ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
+      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
       cmStdString local_file = localprefix + "/" + files[cc];
       cmStdString remote_file = remoteprefix + files[cc];
@@ -351,16 +358,21 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
 
       // specify handler for output
       ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cmCTestSubmitHandlerWriteMemoryCallback);
+      ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cmCTestSubmitHandlerCurlDebugCallback);
 
       /* we pass our 'chunk' struct to the callback function */
       cmCTestSubmitHandlerVectorOfChar chunk;
+      cmCTestSubmitHandlerVectorOfChar chunkDebug;
       ::curl_easy_setopt(curl, CURLOPT_FILE, (void *)&chunk);
+      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void *)&chunkDebug);
 
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
 
-      cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "CURL output: ["
+      cmCTestLog(m_CTest, DEBUG, "CURL output: ["
         << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]" << std::endl);
+      cmCTestLog(m_CTest, DEBUG, "CURL debug output: ["
+        << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]" << std::endl);
 
       fclose(ftpfile);
       if ( res )
@@ -425,21 +437,20 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::vector<cmStdString>& file
           }
         }
 
-      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
-      if ( m_HandlerVerbose )
-        {
-        ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-        }
+      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
       // and give curl the buffer for errors
       ::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer);
 
       // specify handler for output
       ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cmCTestSubmitHandlerWriteMemoryCallback);
+      ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cmCTestSubmitHandlerCurlDebugCallback);
 
       /* we pass our 'chunk' struct to the callback function */
       cmCTestSubmitHandlerVectorOfChar chunk;
+      cmCTestSubmitHandlerVectorOfChar chunkDebug;
       ::curl_easy_setopt(curl, CURLOPT_FILE, (void *)&chunk);
+      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void *)&chunkDebug);
 
       cmStdString file = remoteprefix + files[cc];
       cmStdString ofile = "";
@@ -485,8 +496,10 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::vector<cmStdString>& file
         return false;
         }
 
-      cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "CURL output: ["
+      cmCTestLog(m_CTest, DEBUG, "CURL output: ["
         << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]" << std::endl);
+      cmCTestLog(m_CTest, DEBUG, "CURL debug output: ["
+        << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]" << std::endl);
 
       // always cleanup
       ::curl_easy_cleanup(curl);
