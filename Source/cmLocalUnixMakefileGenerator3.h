@@ -158,7 +158,9 @@ protected:
   void WriteLocalMakefileTargets(std::ostream& ruleFileStream);
   
   // create the cd to home commands
-  void CreateJumpCommand(std::vector<std::string>& commands, std::string & localName);
+  void CreateJumpCommand(std::vector<std::string>& commands, 
+                         const char *MakefileName,
+                         std::string & localName);
   
   // these two methods just compute reasonable values for m_LibraryOutputPath and
   // m_ExecutableOutputPath
@@ -343,6 +345,8 @@ private:
   
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> m_ObjectFiles;
+
+  std::map<cmStdString,std::vector<const cmTarget *> > m_LocalObjectFiles;
 };
 
 #endif

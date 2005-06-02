@@ -681,6 +681,8 @@ cmLocalUnixMakefileGenerator3
   // The object file should be checked for dependency integrity.
   m_CheckDependFiles[lang].insert(relativeObj);
 
+  // add this to the list of objects for this local generator
+  m_LocalObjectFiles[cmSystemTools::GetFilenameName(obj)].push_back(&target);
 }
 
 //----------------------------------------------------------------------------
@@ -2729,7 +2731,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   std::string dir = m_Makefile->GetStartOutputDirectory();
   dir += "/directorystart";
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
-  this->CreateJumpCommand(commands,dir);
+  this->CreateJumpCommand(commands,"Makefile2",dir);
   this->WriteMakeRule(ruleFileStream, "The main all target", "all", depends, commands);
 
   // Write the clean rule.
@@ -2737,11 +2739,35 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   dir += "/clean";
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
   commands.clear();
-  this->CreateJumpCommand(commands,dir);
+  this->CreateJumpCommand(commands,"Makefile2",dir);
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean", depends, commands);
 
-  // recursively write our targets
+  // recursively write our targets, and while doing it collect up the object
+  // file rules
   this->WriteLocalMakefileTargets(ruleFileStream);
+  
+  // now write out the object rules
+  // for each object file name
+  for (std::map<cmStdString,std::vector<const cmTarget *> >::iterator lo = 
+         m_LocalObjectFiles.begin();
+       lo != m_LocalObjectFiles.end(); ++lo)
+    {
+    commands.clear();
+    // for each target using the object file
+    for (std::vector<const cmTarget *>::iterator to = 
+           lo->second.begin(); to != lo->second.end(); ++to)
+      {
+      std::string tgtMakefileName = this->GetRelativeTargetDirectory(**to);
+      std::string targetName = tgtMakefileName;
+      tgtMakefileName += "/build.make";
+      targetName += "/";
+      targetName += lo->first.c_str();
+      this->CreateJumpCommand(commands,tgtMakefileName.c_str(),targetName);
+      }
+    this->WriteMakeRule(ruleFileStream, 
+                        "target for object file", 
+                        lo->first.c_str(), depends, commands);
+    }
 }
 
 void cmLocalUnixMakefileGenerator3
@@ -2766,7 +2792,7 @@ void cmLocalUnixMakefileGenerator3
       commands.clear();
       depends.clear();
       
-      this->CreateJumpCommand(commands,localName);
+      this->CreateJumpCommand(commands,"Makefile2",localName);
       this->WriteMakeRule(ruleFileStream, "Convenience name for target.",
                           localName.c_str(), depends, commands);
 
@@ -2782,8 +2808,10 @@ void cmLocalUnixMakefileGenerator3
     }
 }
 
-void cmLocalUnixMakefileGenerator3::CreateJumpCommand(std::vector<std::string>& commands,
-                                                      std::string& localName)
+void cmLocalUnixMakefileGenerator3
+::CreateJumpCommand(std::vector<std::string>& commands,
+                    const char *MakefileName, 
+                    std::string& localName)
 {
   if(m_WindowsShell)
     {
@@ -2797,7 +2825,7 @@ void cmLocalUnixMakefileGenerator3::CreateJumpCommand(std::vector<std::string>& 
     
     // Build the target for this pass.
     commands.push_back(this->GetRecursiveMakeCall
-                       ("Makefile2",localName.c_str()));
+                       (MakefileName,localName.c_str()));
     
     // Change back to the starting directory.  Any trailing slash must be
     // removed to avoid problems with Borland Make.
@@ -2822,7 +2850,7 @@ void cmLocalUnixMakefileGenerator3::CreateJumpCommand(std::vector<std::string>& 
     
     // Build the target for this pass.
     cmd += " && ";
-    cmd += this->GetRecursiveMakeCall("Makefile2",localName.c_str());
+    cmd += this->GetRecursiveMakeCall(MakefileName,localName.c_str());
     
     // Add the command as a single line.
     commands.push_back(cmd);
