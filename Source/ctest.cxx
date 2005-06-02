@@ -59,6 +59,9 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"-V,--verbose", "Enable verbose output from tests.",
    "Test output is normally suppressed and only summary information is "
    "displayed.  This option will show all test output."},
+  {"--debug", "Displaying more verbose internals of CTest.",
+    "This feature will result in large number of output that is mostly useful "
+    "for debugging dashboard problems."},
   {"-Q,--quiet", "Make ctest quiet.",
     "This option will suppress all the output. The output log file will still be "
     "generated if the --output-log is specified. Options such as --verbose, "

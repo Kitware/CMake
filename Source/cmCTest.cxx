@@ -1047,6 +1047,10 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       cmSystemTools::ReplaceString(this->m_ConfigType, ".\\", "");
       }
 
+    if( arg.find("--debug",0) == 0 )
+      {
+      this->m_Debug = true;
+      }
     if( arg.find("-Q",0) == 0 || arg.find("--quiet",0) == 0 )
       {
       this->m_Quiet = true;
