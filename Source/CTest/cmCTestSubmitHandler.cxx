@@ -625,7 +625,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
       }
 
     size_t fileSize = st.st_size;
-    FILE* fp = fopen(local_file.c_str(), "r");
+    FILE* fp = fopen(local_file.c_str(), "rb");
     if ( !fp )
       {
       return false;
