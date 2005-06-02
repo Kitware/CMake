@@ -16,7 +16,6 @@
 =========================================================================*/
 #include "cmCommands.h"
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmAbstractFilesCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmEndWhileCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
@@ -60,7 +59,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   )
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  commands.push_back(new cmAbstractFilesCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmEnableLanguageCommand);
   commands.push_back(new cmEndWhileCommand);
