@@ -91,9 +91,7 @@ ADD_DEPENDENCIES(custom_target1 create_file)
 #
 # Extra coverage
 #
-ABSTRACT_FILES(
-  file2
-)
+SET_SOURCE_FILES_PROPERTIES(file2 PROPERTIES ABSTRACT 1)
 
 INSTALL_FILES(/tmp .h ${Complex_BINARY_DIR}/cmTestConfigure.h)
 INSTALL_FILES(/tmp .cxx ${Complex_BINARY_DIR}/cmTestConfigure.h)
