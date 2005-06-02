@@ -664,10 +664,10 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length, size_t& ti
         errorwarning.m_PostContext = "";
 
         // Copy pre-context to report
-        std::deque<cmStdString>::iterator it;
-        for ( it = m_PreContext.begin(); it != m_PreContext.end(); ++it )
+        std::deque<cmStdString>::iterator pcit;
+        for ( pcit = m_PreContext.begin(); pcit != m_PreContext.end(); ++pcit )
           {
-          errorwarning.m_PreContext += *it + "\n";
+          errorwarning.m_PreContext += *pcit + "\n";
           }
         m_PreContext.clear();
 
