@@ -121,6 +121,12 @@ private:
   int                                   m_TotalErrors;
   int                                   m_TotalWarnings;
   char                                  m_LastTickChar;
+
+  bool                                  m_ErrorQuotaReached;
+  bool                                  m_WarningQuotaReached;
+
+  int                                   m_MaxErrors;
+  int                                   m_MaxWarnings;
 };
 
 #endif

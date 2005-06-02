@@ -161,6 +161,10 @@ cmCTestBuildHandler::cmCTestBuildHandler()
 {
   m_MaxPreContext = 6;
   m_MaxPostContext = 6;
+
+  m_MaxErrors = 50;
+  m_MaxWarnings = 50;
+
   int cc;
   for ( cc = 0; cmCTestWarningErrorFileLine[cc].m_RegularExpressionString; ++ cc )
     {
@@ -341,8 +345,12 @@ int cmCTestBuildHandler::ProcessHandler()
     }
 
   // Display message about number of errors and warnings
-  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   " << m_TotalErrors << " Compiler errors" << std::endl);
-  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   " << m_TotalWarnings << " Compiler warnings" << std::endl);
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   " << m_TotalErrors
+    << (m_TotalErrors >= m_MaxErrors ? " or more" : "")
+    << " Compiler errors" << std::endl);
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   " << m_TotalWarnings
+    << (m_TotalWarnings >= m_MaxWarnings ? " or more" : "")
+    << " Compiler warnings" << std::endl);
 
   // Generate XML output
   cmGeneratedFileStream xofs;
@@ -371,8 +379,8 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
   std::vector<cmCTestBuildErrorWarning>::iterator it;
   
   // only report the first 50 warnings and first 50 errors
-  unsigned short numErrorsAllowed = 50;
-  unsigned short numWarningsAllowed = 50;
+  unsigned short numErrorsAllowed = m_MaxErrors;
+  unsigned short numWarningsAllowed = m_MaxWarnings;
   std::string srcdir = m_CTest->GetCTestConfiguration("SourceDirectory");
   // make sure the source dir is in the correct case on windows
   // via a call to collapse full path.
@@ -512,6 +520,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
   m_TotalWarnings = 0;
   m_BuildOutputLogSize = 0;
   m_LastTickChar = '.';
+  m_WarningQuotaReached = false;
+  m_ErrorQuotaReached = false;
 
   // For every chunk of data
   while(cmsysProcess_WaitForData(cp, &data, &length, 0))
@@ -576,7 +586,11 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length, size_t& ti
 {
 #undef cerr
   const std::string::size_type tick_line_len = 50;
-  m_BuildProcessingQueue.insert(m_BuildProcessingQueue.end(), data, data+length);
+  const char* ptr;
+  for ( ptr = data; ptr < data+length; ptr ++ )
+    {
+    m_BuildProcessingQueue.push_back(*ptr);
+    }
   m_BuildOutputLogSize += length;
 
   // until there are any lines left in the buffer
@@ -593,12 +607,27 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length, size_t& ti
         break;
         }
       }
+
+    // Once certain number of errors or warnings reached, ignore future errors or warnings.
+    if ( m_TotalWarnings >= m_MaxWarnings )
+      {
+      m_WarningQuotaReached = true;
+      }
+    if ( m_TotalErrors >= m_MaxErrors )
+      {
+      m_ErrorQuotaReached = true;
+      }
+
     // If the end of line was found
     if ( it != m_BuildProcessingQueue.end() )
       {
       // Create a contiguous array for the line
       m_CurrentProcessingLine.clear();
-      m_CurrentProcessingLine.insert(m_CurrentProcessingLine.end(), m_BuildProcessingQueue.begin(), it);
+      t_BuildProcessingQueueType::iterator cit;
+      for ( cit = m_BuildProcessingQueue.begin(); cit != it; ++cit )
+        {
+        m_CurrentProcessingLine.push_back(*cit);
+        }
       m_CurrentProcessingLine.push_back(0);
       const char* line = &*m_CurrentProcessingLine.begin();
 
@@ -715,46 +744,53 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
   int errorLine = 0;
 
   // Check for regular expressions
-  // Errors 
-  for ( it = m_ErrorMatchRegex.begin(); it != m_ErrorMatchRegex.end(); ++ it )
+  
+  if ( !m_ErrorQuotaReached )
     {
-    if ( it->find(data) )
+    // Errors 
+    for ( it = m_ErrorMatchRegex.begin(); it != m_ErrorMatchRegex.end(); ++ it )
       {
-      errorLine = 1;
-      cmCTestLog(m_CTest, DEBUG, "  Error Line: " << data << std::endl);
-      break;
+      if ( it->find(data) )
+        {
+        errorLine = 1;
+        cmCTestLog(m_CTest, DEBUG, "  Error Line: " << data << std::endl);
+        break;
+        }
+      }
+    // Error exceptions 
+    for ( it = m_ErrorExceptionRegex.begin(); it != m_ErrorExceptionRegex.end(); ++ it )
+      {
+      if ( it->find(data) )
+        {
+        errorLine = 0;
+        cmCTestLog(m_CTest, DEBUG, "  Not an error Line: " << data << std::endl);
+        break;
+        }
       }
     }
-  // Warnings
-  for ( it = m_WarningMatchRegex.begin(); it != m_WarningMatchRegex.end(); ++ it )
+  if ( !m_WarningQuotaReached )
     {
-    if ( it->find(data) )
+    // Warnings
+    for ( it = m_WarningMatchRegex.begin(); it != m_WarningMatchRegex.end(); ++ it )
       {
-      warningLine = 1;
-      cmCTestLog(m_CTest, DEBUG, "  Warning Line: " << data << std::endl);
-      break;
-      }    
-    }
+      if ( it->find(data) )
+        {
+        warningLine = 1;
+        cmCTestLog(m_CTest, DEBUG, "  Warning Line: " << data << std::endl);
+        break;
+        }    
+      }
 
-  // Error exceptions 
-  for ( it = m_ErrorExceptionRegex.begin(); it != m_ErrorExceptionRegex.end(); ++ it )
-    {
-    if ( it->find(data) )
+    // Warning exceptions
+    for ( it = m_WarningExceptionRegex.begin(); it != m_WarningExceptionRegex.end(); ++ it )
       {
-      errorLine = 0;
-      cmCTestLog(m_CTest, DEBUG, "  Not an error Line: " << data << std::endl);
-      break;
+      if ( it->find(data) )
+        {
+        warningLine = 0;
+        cmCTestLog(m_CTest, DEBUG, "  Not a warning Line: " << data << std::endl);
+        break;
+        }    
       }
-    }
-  // Warning exceptions
-  for ( it = m_WarningExceptionRegex.begin(); it != m_WarningExceptionRegex.end(); ++ it )
-    {
-    if ( it->find(data) )
-      {
-      warningLine = 0;
-      cmCTestLog(m_CTest, DEBUG, "  Not a warning Line: " << data << std::endl);
-      break;
-      }    
     }
   if ( errorLine )
     {
