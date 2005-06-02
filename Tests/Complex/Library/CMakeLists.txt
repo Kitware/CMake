@@ -13,13 +13,13 @@ ADD_EXECUTABLE(create_file create_file.cxx)
 # SOURCE_FILES_REMOVE is used for Coverage. empty.h is included for coverage
 #
 AUX_SOURCE_DIRECTORY(ExtraSources LibrarySources)
-SOURCE_FILES(LibrarySources 
+SET(LibrarySources ${LibrarySources}
   file2 
   empty 
   create_file.cxx 
   GENERATED 
   nonexisting_file)
-SOURCE_FILES_REMOVE(LibrarySources create_file.cxx GENERATED nonexisting_file) 
+REMOVE(LibrarySources create_file.cxx GENERATED nonexisting_file) 
 ADD_LIBRARY(CMakeTestLibrary ${LibrarySources})
 
 IF(WIN32)
@@ -40,7 +40,7 @@ ENDIF(WIN32)
 #
 # Create shared library
 #
-SOURCE_FILES(SharedLibrarySources sharedFile)
+SET(SharedLibrarySources sharedFile)
 ADD_LIBRARY(CMakeTestLibraryShared SHARED ${SharedLibrarySources})
 ADD_LIBRARY(CMakeTestModule MODULE moduleFile.c)
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
