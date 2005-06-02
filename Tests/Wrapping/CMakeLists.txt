@@ -46,9 +46,7 @@ SET (SRCS
   vtkIncluded.cxx
   )
 
-WRAP_EXCLUDE_FILES (
-  vtkExcluded
-  )
+SET_SOURCE_FILES_PROPERTIES(vtkExcluded PROPERTIES WRAP_EXCLUDE 1)
 
 #
 # Specify (empty) VTK hint files
