@@ -32,8 +32,6 @@
 #include "cmRemoveCommand.cxx"
 #include "cmSetDirectoryPropertiesCommand.cxx"
 #include "cmSetTargetPropertiesCommand.cxx"
-#include "cmSourceFilesCommand.cxx"
-#include "cmSourceFilesRemoveCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
 #include "cmVTKMakeInstantiatorCommand.cxx"
 #include "cmVTKWrapJavaCommand.cxx"
@@ -44,7 +42,6 @@
 #include "cmUseMangledMesaCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
 #include "cmWhileCommand.cxx"
-#include "cmWrapExcludeFilesCommand.cxx"
 
 // This one must be last because it includes windows.h and
 // windows.h #defines GetCurrentDirectory which is a member
@@ -76,8 +73,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmRemoveCommand);
   commands.push_back(new cmSetDirectoryPropertiesCommand);
   commands.push_back(new cmSetTargetPropertiesCommand);
-  commands.push_back(new cmSourceFilesCommand);
-  commands.push_back(new cmSourceFilesRemoveCommand);
   commands.push_back(new cmSourceGroupCommand);
   commands.push_back(new cmVTKMakeInstantiatorCommand);
   commands.push_back(new cmVTKWrapJavaCommand);
@@ -88,6 +83,5 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmUseMangledMesaCommand);
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmWhileCommand);
-  commands.push_back(new cmWrapExcludeFilesCommand);
 #endif
 }
