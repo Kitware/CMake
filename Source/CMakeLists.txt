@@ -156,6 +156,7 @@ INCLUDE_DIRECTORIES(
 SET(CMTEST_SRCS cmCTest.cxx 
   CTest/cmCTestBuildCommand.cxx
   CTest/cmCTestBuildHandler.cxx
+  CTest/cmCTestBuildAndTestHandler.cxx
   CTest/cmCTestConfigureCommand.cxx
   CTest/cmCTestConfigureHandler.cxx
   CTest/cmCTestCoverageHandler.cxx

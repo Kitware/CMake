@@ -88,6 +88,7 @@ public:
 
   ///! what is the configuraiton type, e.g. Debug, Release etc.
   std::string GetConfigType();
+  double GetTimeOut() { return m_TimeOut; }
   
   /**
    * Check if CTest file exists
@@ -289,22 +290,10 @@ private:
   int                     m_CompatibilityMode;
 
   // information for the --build-and-test options
-  std::string              m_ExecutableDirectory;
   std::string              m_CMakeSelf;
   std::string              m_CTestSelf;
-  std::string              m_SourceDir;
   std::string              m_BinaryDir;
-  std::string              m_BuildRunDir;
-  std::string              m_BuildGenerator;
-  std::string              m_BuildMakeProgram;
-  std::string              m_BuildProject;
-  std::string              m_BuildTarget;
-  std::vector<std::string> m_BuildOptions;
-  std::string              m_TestCommand;
-  std::vector<std::string> m_TestCommandArgs;
-  bool                     m_BuildTwoConfig;
-  bool                     m_BuildNoClean;
-  bool                     m_BuildNoCMake;
+
   std::string              m_NotesFiles;
   
 
@@ -325,12 +314,6 @@ private:
   //! Create not from files.
   int GenerateCTestNotesOutput(std::ostream& os, const tm_VectorOfStrings& files);
 
-  ///! Run CMake and build a test and then run it as a single test.
-  int RunCMakeAndTest(std::string* output);
-  int RunCMake(std::string* outstring, cmOStringStream &out, 
-               std::string &cmakeOutString,
-               std::string &cwd, cmake *cm);
-  
   ///! Find the running cmake
   void FindRunningCMake(const char* arg0);
 

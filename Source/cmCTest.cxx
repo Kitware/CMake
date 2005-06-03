@@ -27,6 +27,7 @@
 #include "cmGeneratedFileStream.h"
 
 #include "cmCTestBuildHandler.h"
+#include "cmCTestBuildAndTestHandler.h"
 #include "cmCTestConfigureHandler.h"
 #include "cmCTestCoverageHandler.h"
 #include "cmCTestMemCheckHandler.h"
@@ -49,6 +50,7 @@
 #define DEBUGOUT std::cout << __LINE__ << " "; std::cout
 #define DEBUGERR std::cerr << __LINE__ << " "; std::cerr
 
+//----------------------------------------------------------------------
 struct tm* cmCTest::GetNightlyTime(std::string str, 
                                    bool tomorrowtag)
 {
@@ -97,6 +99,7 @@ struct tm* cmCTest::GetNightlyTime(std::string str,
   return lctime;
 }
 
+//----------------------------------------------------------------------
 std::string cmCTest::CleanString(const std::string& str)
 {
   std::string::size_type spos = str.find_first_not_of(" \n\t\r\f\v");
@@ -112,6 +115,7 @@ std::string cmCTest::CleanString(const std::string& str)
   return str.substr(spos, epos);
 }
 
+//----------------------------------------------------------------------
 std::string cmCTest::CurrentTime()
 {
   time_t currenttime = time(0);
@@ -131,6 +135,7 @@ std::string cmCTest::CurrentTime()
 }
 
 
+//----------------------------------------------------------------------
 std::string cmCTest::MakeXMLSafe(const std::string& str)
 {
   cmOStringStream ost;
@@ -174,6 +179,7 @@ std::string cmCTest::MakeXMLSafe(const std::string& str)
   return ost.str();
 }
 
+//----------------------------------------------------------------------
 std::string cmCTest::MakeURLSafe(const std::string& str)
 {
   cmOStringStream ost;
@@ -200,13 +206,11 @@ std::string cmCTest::MakeURLSafe(const std::string& str)
   return ost.str();
 }
 
+//----------------------------------------------------------------------
 cmCTest::cmCTest() 
 { 
   m_ForceNewCTestProcess   = false;
   m_TomorrowTag            = false;
-  m_BuildNoCMake           = false;
-  m_BuildNoClean           = false;
-  m_BuildTwoConfig         = false;
   m_Verbose                = false;
   m_Debug                  = false;
   m_Quiet                  = false;
@@ -231,6 +235,7 @@ cmCTest::cmCTest()
   m_ShortDateFormat        = true;
 
   m_TestingHandlers["build"]     = new cmCTestBuildHandler;
+  m_TestingHandlers["buildtest"] = new cmCTestBuildAndTestHandler;
   m_TestingHandlers["coverage"]  = new cmCTestCoverageHandler;
   m_TestingHandlers["script"]    = new cmCTestScriptHandler;
   m_TestingHandlers["test"]      = new cmCTestTestHandler;
@@ -246,6 +251,7 @@ cmCTest::cmCTest()
     }
 }
 
+//----------------------------------------------------------------------
 cmCTest::~cmCTest() 
 { 
   cmCTest::t_TestingHandlers::iterator it;
@@ -257,6 +263,7 @@ cmCTest::~cmCTest()
   this->SetOutputLogFileName(0);
 }
 
+//----------------------------------------------------------------------
 int cmCTest::Initialize(const char* binary_dir, bool new_tag)
 {
   if(!m_InteractiveDebugMode)
@@ -357,6 +364,7 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag)
   return 1;
 }
 
+//----------------------------------------------------------------------
 bool cmCTest::UpdateCTestConfiguration()
 {
   if ( m_SuppressUpdatingCTestConfiguration )
@@ -425,6 +433,7 @@ bool cmCTest::UpdateCTestConfiguration()
   return true;
 }
 
+//----------------------------------------------------------------------
 void cmCTest::BlockTestErrorDiagnostics()
 {
   cmSystemTools::PutEnv("DART_TEST_FROM_DART=1");
@@ -434,12 +443,14 @@ void cmCTest::BlockTestErrorDiagnostics()
 #endif
 }
 
+//----------------------------------------------------------------------
 void cmCTest::SetTestModel(int mode)
 {
   m_InteractiveDebugMode = false;
   m_TestModel = mode;
 }
 
+//----------------------------------------------------------------------
 bool cmCTest::SetTest(const char* ttype, bool report)
 {
   if ( cmSystemTools::LowerCase(ttype) == "all" )
@@ -493,12 +504,12 @@ bool cmCTest::SetTest(const char* ttype, bool report)
   return true;
 }
 
+//----------------------------------------------------------------------
 void cmCTest::Finalize()
 {
 }
 
- 
-
+//----------------------------------------------------------------------
 bool cmCTest::OpenOutputFile(const std::string& path, 
                      const std::string& name, cmGeneratedFileStream& stream,
                      bool compress)
@@ -544,6 +555,7 @@ bool cmCTest::OpenOutputFile(const std::string& path,
   return true;
 }
 
+//----------------------------------------------------------------------
 bool cmCTest::AddIfExists(tm_VectorOfStrings& files, const char* file)
 {
   if ( this->CTestFileExists(file) )
@@ -566,6 +578,7 @@ bool cmCTest::AddIfExists(tm_VectorOfStrings& files, const char* file)
   return true;
 }
 
+//----------------------------------------------------------------------
 bool cmCTest::CTestFileExists(const std::string& filename)
 {
   std::string testingDir = m_BinaryDir + "/Testing/" + m_CurrentTag + "/" +
@@ -573,6 +586,7 @@ bool cmCTest::CTestFileExists(const std::string& filename)
   return cmSystemTools::FileExists(testingDir.c_str());
 }
 
+//----------------------------------------------------------------------
 cmCTestGenericHandler* cmCTest::GetHandler(const char* handler)
 {
   cmCTest::t_TestingHandlers::iterator it = m_TestingHandlers.find(handler);
@@ -583,6 +597,7 @@ cmCTestGenericHandler* cmCTest::GetHandler(const char* handler)
   return it->second;
 }
 
+//----------------------------------------------------------------------
 int cmCTest::ExecuteHandler(const char* shandler)
 {
   cmCTestGenericHandler* handler = this->GetHandler(shandler);
@@ -593,6 +608,7 @@ int cmCTest::ExecuteHandler(const char* shandler)
   return handler->ProcessHandler(); 
 }
 
+//----------------------------------------------------------------------
 int cmCTest::ProcessTests()
 {
   int res = 0;
@@ -705,6 +721,7 @@ int cmCTest::ProcessTests()
   return res;
 }
 
+//----------------------------------------------------------------------
 std::string cmCTest::GetTestModelString()
 {
   switch ( m_TestModel )
@@ -717,6 +734,7 @@ std::string cmCTest::GetTestModelString()
   return "Experimental";
 }
 
+//----------------------------------------------------------------------
 int cmCTest::GetTestModelFromString(const char* str)
 {
   if ( !str )
@@ -735,6 +753,7 @@ int cmCTest::GetTestModelFromString(const char* str)
   return cmCTest::EXPERIMENTAL;
 }
 
+//----------------------------------------------------------------------
 int cmCTest::RunMakeCommand(const char* command, std::string* output,
   int* retVal, const char* dir, int timeout, std::ofstream& ofs)
 {
@@ -835,6 +854,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
   return result;
 }
 
+//----------------------------------------------------------------------
 int cmCTest::RunTest(std::vector<const char*> argv, 
                      std::string* output, int *retVal,
                      std::ostream* log)
@@ -934,6 +954,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
   return result;
 }
 
+//----------------------------------------------------------------------
 void cmCTest::StartXML(std::ostream& ostr)
 {
   ostr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -945,11 +966,13 @@ void cmCTest::StartXML(std::ostream& ostr)
     << "\">" << std::endl;
 }
 
+//----------------------------------------------------------------------
 void cmCTest::EndXML(std::ostream& ostr)
 {
   ostr << "</Site>" << std::endl;
 }
 
+//----------------------------------------------------------------------
 int cmCTest::GenerateCTestNotesOutput(std::ostream& os, const cmCTest::tm_VectorOfStrings& files)
 {
   cmCTest::tm_VectorOfStrings::const_iterator it;
@@ -992,6 +1015,7 @@ int cmCTest::GenerateCTestNotesOutput(std::ostream& os, const cmCTest::tm_Vector
   return 1;
 }
 
+//----------------------------------------------------------------------
 int cmCTest::GenerateNotesFile(const std::vector<cmStdString> &files)
 {
   cmGeneratedFileStream ofs;
@@ -1005,6 +1029,7 @@ int cmCTest::GenerateNotesFile(const std::vector<cmStdString> &files)
   return 0;
 }
 
+//----------------------------------------------------------------------
 int cmCTest::GenerateNotesFile(const char* cfiles)
 {
   if ( !cfiles )
@@ -1025,13 +1050,14 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
   return this->GenerateNotesFile(files);
 }
 
+//----------------------------------------------------------------------
 int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
 {
   this->FindRunningCMake(args[0].c_str());
   const char* ctestExec = "ctest";
   bool cmakeAndTest = false;
   bool performSomeTest = true;
-  for(unsigned int i=1; i < args.size(); ++i)
+  for(size_t i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
     if(arg.find("--ctest-config",0) == 0 && i < args.size() - 1)
@@ -1361,7 +1387,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;                                                    
       this->GetHandler("test")->SetOption("IncludeRegularExpression", args[i].c_str());
       }                                                       
-                                                              
+
     if(arg.find("-E",0) == 0 && i < args.size() - 1)          
       {                                                       
       i++;
@@ -1375,107 +1401,45 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       this->SetNotesFiles(args[i].c_str());
       }
-
     // --build-and-test options
     if(arg.find("--build-and-test",0) == 0 && i < args.size() - 1)
       {
       cmakeAndTest = true;
-      if(i+2 < args.size())
+      }
+    cmCTest::t_TestingHandlers::iterator it;
+    for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
+      {
+      if ( !it->second->ProcessCommandLineArguments(arg, i, args) )
         {
-        i++;
-        m_SourceDir = args[i];
-        i++;
-        m_BinaryDir = args[i];
-        // dir must exist before CollapseFullPath is called
-        cmSystemTools::MakeDirectory(m_BinaryDir.c_str());
-        m_BinaryDir = cmSystemTools::CollapseFullPath(m_BinaryDir.c_str());
-        m_SourceDir = cmSystemTools::CollapseFullPath(m_SourceDir.c_str());
-        }
-      else
-        {
-        cmCTestLog(this, ERROR_MESSAGE, "--build-and-test must have source and binary dir" << std::endl);
-        }
-      }
-    if(arg.find("--build-target",0) == 0 && i < args.size() - 1)
-      {
-      i++;
-      m_BuildTarget = args[i];
-      }
-    if(arg.find("--build-nocmake",0) == 0)
-      {
-      m_BuildNoCMake = true;
-      }
-    if(arg.find("--build-run-dir",0) == 0 && i < args.size() - 1)
-      {
-      i++;
-      m_BuildRunDir = args[i];
-      }
-    if(arg.find("--build-two-config",0) == 0)
-      {
-      m_BuildTwoConfig = true;
-      }
-    if(arg.find("--build-exe-dir",0) == 0 && i < args.size() - 1)
-      {
-      i++;
-      m_ExecutableDirectory = args[i];
-      }
-    if(arg.find("--build-generator",0) == 0 && i < args.size() - 1)
-      {
-      i++;
-      m_BuildGenerator = args[i];
-      }
-    if(arg.find("--build-project",0) == 0 && i < args.size() - 1)
-      {
-      i++;
-      m_BuildProject = args[i];
-      }
-    if(arg.find("--build-makeprogram",0) == 0 && i < args.size() - 1)
-      {
-      i++;
-      m_BuildMakeProgram = args[i];
-      }
-    if(arg.find("--build-noclean",0) == 0)
-      {
-      m_BuildNoClean = true;
-      }
-    if(arg.find("--build-options",0) == 0 && i < args.size() - 1)
-      {
-      ++i;
-      bool done = false;
-      while(i < args.size() && !done)
-        {
-        m_BuildOptions.push_back(args[i]);
-        if(i+1 < args.size() 
-          && (args[i+1] == "--build-target" || args[i+1] == "--test-command"))
-          {
-          done = true;
-          }
-        else
-          {
-          ++i;
-          }
-        }
-      }
-    if(arg.find("--test-command",0) == 0 && i < args.size() - 1)
-      {
-      ++i;
-      m_TestCommand = args[i];
-      while(i+1 < args.size())
-        {
-        ++i;
-        m_TestCommandArgs.push_back(args[i]);
+        cmCTestLog(this, ERROR_MESSAGE, "Problem parsing command line arguments within a handler");
+        return 0;
         }
       }
     }
 
+  // default to the build type of ctest itself
+  if(m_ConfigType.size() == 0)
+    {
+#ifdef  CMAKE_INTDIR
+    m_ConfigType = CMAKE_INTDIR;
+#endif
+    }
+
+
   if(cmakeAndTest)
     {
     m_Verbose = true;
+    cmCTestBuildAndTestHandler* handler = 
+      static_cast<cmCTestBuildAndTestHandler*>(this->GetHandler("buildtest"));
+    int retv = handler->ProcessHandler();
+    /*
     cmSystemTools::ResetErrorOccuredFlag();
     cmListFileCache::ClearCache();
     int retv = this->RunCMakeAndTest(output);
     cmSystemTools::ResetErrorOccuredFlag();
     cmListFileCache::ClearCache();
+    */
+    *output = handler->GetOutput();
 #ifdef CMAKE_BUILD_WITH_CMAKE
     cmDynamicLoader::FlushCache();
 #endif
@@ -1520,6 +1484,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
   return 1;
 }
 
+//----------------------------------------------------------------------
 void cmCTest::FindRunningCMake(const char* arg0)
 {
   // Find our own executable.
@@ -1587,311 +1552,7 @@ void cmCTest::FindRunningCMake(const char* arg0)
     }
 }
 
-void CMakeMessageCallback(const char* m, const char*, bool&, void* s)
-{
-  std::string* out = (std::string*)s;
-  *out += m;
-  *out += "\n";
-}
-
-void CMakeStdoutCallback(const char* m, int len, void* s)
-{
-  std::string* out = (std::string*)s;
-  out->append(m, len);
-}
-
-int cmCTest::RunCMake(std::string* outstring, cmOStringStream &out,
-                      std::string &cmakeOutString, std::string &cwd,
-                      cmake *cm)
-{
-  unsigned int k;
-  std::vector<std::string> args;
-  args.push_back(m_CMakeSelf);
-  args.push_back(m_SourceDir);
-  if(m_BuildGenerator.size())
-    {
-    std::string generator = "-G";
-    generator += m_BuildGenerator;
-    args.push_back(generator);
-    }
-  if ( m_ConfigType.size() > 0 )
-    {
-    std::string btype = "-DBUILD_TYPE:STRING=" + m_ConfigType;
-    args.push_back(btype);
-    }
-
-  for(k=0; k < m_BuildOptions.size(); ++k)
-    {
-    args.push_back(m_BuildOptions[k]);
-    }
-  if (cm->Run(args) != 0)
-    {
-    out << "Error: cmake execution failed\n";
-    out << cmakeOutString << "\n";
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
-    if(outstring)
-      {
-      *outstring = out.str();
-      }
-    else
-      {
-      cmCTestLog(this, ERROR_MESSAGE, out.str() << std::endl);
-      }
-    return 1;
-    }
-  // do another config?
-  if(m_BuildTwoConfig)
-    {
-    if (cm->Run(args) != 0)
-      {
-      out << "Error: cmake execution failed\n";
-      out << cmakeOutString << "\n";
-      // return to the original directory
-      cmSystemTools::ChangeDirectory(cwd.c_str());
-      if(outstring)
-        {
-        *outstring = out.str();
-        }
-      else
-        {
-        cmCTestLog(this, ERROR_MESSAGE, out.str() << std::endl);
-        }
-      return 1;
-      }
-    } 
-  return 0;
-}
-
-int cmCTest::RunCMakeAndTest(std::string* outstring)
-{  
-  unsigned int k;
-  std::string cmakeOutString;
-  cmSystemTools::SetErrorCallback(CMakeMessageCallback, &cmakeOutString);
-  cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
-  cmOStringStream out;
-  double timeout = m_TimeOut;
-  int retVal = 0;
-  
-  // if the generator and make program are not specified then it is an error
-  if (!m_BuildGenerator.size() || !m_BuildMakeProgram.size())
-    {
-    if(outstring)
-      {
-      *outstring =  
-        "--build-and-test requires that both the generator and makeprogram "
-        "be provided using the --build-generator and --build-makeprogram "
-        "command line options. ";
-      }
-    return 1;
-    }
-    
-  // default to the build type of ctest itself
-  if(m_ConfigType.size() == 0)
-    {
-#ifdef  CMAKE_INTDIR
-    m_ConfigType = CMAKE_INTDIR;
-#endif
-    }
-
-  // make sure the binary dir is there
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  out << "Internal cmake changing into directory: " << m_BinaryDir << "\n";  
-  if (!cmSystemTools::FileIsDirectory(m_BinaryDir.c_str()))
-    {
-    cmSystemTools::MakeDirectory(m_BinaryDir.c_str());
-    }
-  cmSystemTools::ChangeDirectory(m_BinaryDir.c_str());
-
-  // should we cmake?
-  cmake cm;
-  cm.SetGlobalGenerator(cm.CreateGlobalGenerator(m_BuildGenerator.c_str()));
-    
-  if(!m_BuildNoCMake)
-    {
-    // do the cmake step
-    if (this->RunCMake(outstring,out,cmakeOutString,cwd,&cm))
-      {
-      return 1;
-      }
-    }
-
-  // do the build
-  std::string output;
-  retVal = cm.GetGlobalGenerator()->Build(
-    m_SourceDir.c_str(), m_BinaryDir.c_str(),
-    m_BuildProject.c_str(), m_BuildTarget.c_str(),
-    &output, m_BuildMakeProgram.c_str(),
-    m_ConfigType.c_str(),!m_BuildNoClean);
-  
-  out << output;
-  if(outstring)
-    {
-    *outstring =  out.str();
-    }
-  
-  // if the build failed then return
-  if (retVal)
-    {
-    return 1;
-    }
-    
-  // if not test was specified then we are done
-  if (!m_TestCommand.size())
-    {
-    return 0;
-    }
-  
-  // now run the compiled test if we can find it
-  std::vector<std::string> attempted;
-  std::vector<std::string> failed;
-  std::string tempPath;
-  std::string filepath = 
-    cmSystemTools::GetFilenamePath(m_TestCommand);
-  std::string filename = 
-    cmSystemTools::GetFilenameName(m_TestCommand);
-  // if full path specified then search that first
-  if (filepath.size())
-    {
-    tempPath = filepath;
-    tempPath += "/";
-    tempPath += filename;
-    attempted.push_back(tempPath);
-    if(m_ConfigType.size())
-      {
-      tempPath = filepath;
-      tempPath += "/";
-      tempPath += m_ConfigType;
-      tempPath += "/";
-      tempPath += filename;
-      attempted.push_back(tempPath);
-      }
-    }
-  // otherwise search local dirs
-  else
-    {
-    attempted.push_back(filename);
-    if(m_ConfigType.size())
-      {
-      tempPath = m_ConfigType;
-      tempPath += "/";
-      tempPath += filename;
-      attempted.push_back(tempPath);
-      }
-    }
-  // if m_ExecutableDirectory is set try that as well
-  if (m_ExecutableDirectory.size())
-    {
-    tempPath = m_ExecutableDirectory;
-    tempPath += "/";
-    tempPath += m_TestCommand;
-    attempted.push_back(tempPath);
-    if(m_ConfigType.size())
-      {
-      tempPath = m_ExecutableDirectory;
-      tempPath += "/";
-      tempPath += m_ConfigType;
-      tempPath += "/";
-      tempPath += filename;
-      attempted.push_back(tempPath);
-      }
-    }
-
-  // store the final location in fullPath
-  std::string fullPath;
-  
-  // now look in the paths we specified above
-  for(unsigned int ai=0; 
-      ai < attempted.size() && fullPath.size() == 0; ++ai)
-    {
-    // first check without exe extension
-    if(cmSystemTools::FileExists(attempted[ai].c_str())
-       && !cmSystemTools::FileIsDirectory(attempted[ai].c_str()))
-      {
-      fullPath = cmSystemTools::CollapseFullPath(attempted[ai].c_str());
-      }
-    // then try with the exe extension
-    else
-      {
-      failed.push_back(attempted[ai].c_str());
-      tempPath = attempted[ai];
-      tempPath += cmSystemTools::GetExecutableExtension();
-      if(cmSystemTools::FileExists(tempPath.c_str())
-         && !cmSystemTools::FileIsDirectory(tempPath.c_str()))
-        {
-        fullPath = cmSystemTools::CollapseFullPath(tempPath.c_str());
-        }
-      else
-        {
-        failed.push_back(tempPath.c_str());
-        }
-      }
-    }
-
-  if(!cmSystemTools::FileExists(fullPath.c_str()))
-    {
-    out << "Could not find path to executable, perhaps it was not built: " <<
-      m_TestCommand << "\n";
-    out << "tried to find it in these places:\n";
-    out << fullPath.c_str() << "\n";
-    for(unsigned int i=0; i < failed.size(); ++i)
-      {
-      out << failed[i] << "\n";
-      }
-    if(outstring)
-      {
-      *outstring =  out.str();
-      }
-    else
-      {
-      cmCTestLog(this, ERROR_MESSAGE, out.str());
-      }
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
-    return 1;
-    }
-
-  std::vector<const char*> testCommand;
-  testCommand.push_back(fullPath.c_str());
-  for(k=0; k < m_TestCommandArgs.size(); ++k)
-    {
-    testCommand.push_back(m_TestCommandArgs[k].c_str());
-    }
-  testCommand.push_back(0);
-  std::string outs;
-  int retval = 0;
-  // run the test from the m_BuildRunDir if set
-  if(m_BuildRunDir.size())
-    {
-    out << "Run test in directory: " << m_BuildRunDir << "\n";
-    cmSystemTools::ChangeDirectory(m_BuildRunDir.c_str());
-    }
-  out << "Running test executable: " << fullPath << " ";
-  for(k=0; k < m_TestCommandArgs.size(); ++k)
-    {
-    out << m_TestCommandArgs[k] << " ";
-    }
-  out << "\n";
-  m_TimeOut = timeout;
-  int runTestRes = this->RunTest(testCommand, &outs, &retval, 0);
-  if(runTestRes != cmsysProcess_State_Exited || retval != 0)
-    {
-    out << "Failed to run test command: " << testCommand[0] << "\n";
-    retval = 1;
-    }
-
-  out << outs << "\n";
-  if(outstring)
-    {
-    *outstring = out.str();
-    }
-  else
-    {
-    cmCTestLog(this, OUTPUT, out.str() << std::endl);
-    }
-  return retval;
-}
-
+//----------------------------------------------------------------------
 void cmCTest::SetNotesFiles(const char* notes)
 {
   if ( !notes )
@@ -1901,6 +1562,7 @@ void cmCTest::SetNotesFiles(const char* notes)
   m_NotesFiles = notes;
 }
 
+//----------------------------------------------------------------------
 int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
 {
   tm_VectorOfStrings dirs;
@@ -1938,6 +1600,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
   return 1;
 }
 
+//----------------------------------------------------------------------
 void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def, tm_VectorOfStrings& vec)
 {
   if ( !def)
@@ -1959,6 +1622,7 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def, tm_VectorOfS
     }
 }
 
+//----------------------------------------------------------------------
 void cmCTest::PopulateCustomInteger(cmMakefile* mf, const char* def, int& val)
 {
   if ( !def)
@@ -1973,6 +1637,7 @@ void cmCTest::PopulateCustomInteger(cmMakefile* mf, const char* def, int& val)
   val = atoi(dval);
 }
 
+//----------------------------------------------------------------------
 std::string cmCTest::GetShortPathToFile(const char* cfname)
 {
   const std::string& sourceDir = this->GetCTestConfiguration("SourceDirectory");
@@ -2026,11 +1691,13 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
   return path;
 }
 
+//----------------------------------------------------------------------
 std::string cmCTest::GetCTestConfiguration(const char *name)
 {
   return m_CTestConfiguration[name];
 }
 
+//----------------------------------------------------------------------
 void cmCTest::SetCTestConfiguration(const char *name, const char* value)
 {
   if ( !name )
@@ -2046,36 +1713,43 @@ void cmCTest::SetCTestConfiguration(const char *name, const char* value)
 }
 
   
+//----------------------------------------------------------------------
 std::string cmCTest::GetCurrentTag()
 {
   return m_CurrentTag;
 }
 
+//----------------------------------------------------------------------
 std::string cmCTest::GetBinaryDir()
 {
   return m_BinaryDir;
 }
 
+//----------------------------------------------------------------------
 std::string cmCTest::GetConfigType()
 {
   return m_ConfigType;
 }
 
+//----------------------------------------------------------------------
 bool cmCTest::GetShowOnly()
 {
   return m_ShowOnly;
 }
 
+//----------------------------------------------------------------------
 void cmCTest::SetProduceXML(bool v)
 {
   m_ProduceXML = v;
 }
 
+//----------------------------------------------------------------------
 bool cmCTest::GetProduceXML()
 {
   return m_ProduceXML;
 }
 
+//----------------------------------------------------------------------
 bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf, const char* dconfig, const char* cmake_var)
 {
   const char* ctvar;
@@ -2088,6 +1762,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf, const char*
   return true;
 }
 
+//----------------------------------------------------------------------
 void cmCTest::SetOutputLogFileName(const char* name)
 {
   if ( m_OutputLogFile)
@@ -2101,6 +1776,7 @@ void cmCTest::SetOutputLogFileName(const char* name)
     }
 }
 
+//----------------------------------------------------------------------
 static const char* cmCTestStringLogType[] = 
 {
   "DEBUG",
@@ -2112,6 +1788,7 @@ static const char* cmCTestStringLogType[] =
   0
 };
 
+//----------------------------------------------------------------------
 #ifdef cerr
 #  undef cerr
 #endif
