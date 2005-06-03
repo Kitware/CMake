@@ -38,6 +38,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
     
     // what is the current value if any
     const char *currValue = getenv(varName);
+    delete [] varName;
 
     // will it be set to something, then set it
     if (args.size() > 1 && args[1].size())
