@@ -48,6 +48,13 @@ public:
   virtual int ProcessHandler() = 0;
 
   /**
+   * Process command line arguments that are applicable for the handler
+   */
+  virtual int ProcessCommandLineArguments(
+    const std::string& /*currentArg*/, size_t& /*idx*/,
+    const std::vector<std::string>& /*allArgs*/) { return 1; }
+
+  /**
    * Set the CTest instance
    */
   void SetCTestInstance(cmCTest* ctest) { m_CTest = ctest; }

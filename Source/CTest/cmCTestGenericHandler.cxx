@@ -17,16 +17,19 @@
 
 #include "cmCTestGenericHandler.h"
 
+//----------------------------------------------------------------------
 cmCTestGenericHandler::cmCTestGenericHandler()
 {
   m_HandlerVerbose = false;
   m_CTest = 0;
 }
 
+//----------------------------------------------------------------------
 cmCTestGenericHandler::~cmCTestGenericHandler()
 {
 }
 
+//----------------------------------------------------------------------
 void cmCTestGenericHandler::SetOption(const char* op, const char* value)
 {
   if ( !op )
@@ -47,6 +50,7 @@ void cmCTestGenericHandler::SetOption(const char* op, const char* value)
   m_Options[op] = value;
 }
 
+//----------------------------------------------------------------------
 const char* cmCTestGenericHandler::GetOption(const char* op)
 {
   cmCTestGenericHandler::t_StringToString::iterator remit 
