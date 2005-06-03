@@ -72,4 +72,10 @@ ELSE(THIS_SHOULD_BE_SET)
   MESSAGE("***************************")
   MESSAGE(FATAL_ERROR "PreLoad.cmake does not work.")
 ENDIF(THIS_SHOULD_BE_SET)
-  
+
+SET(ENV{TEST_ENVIRONMENT_VARIABLE} "Environment variable set")
+IF("$ENV{TEST_ENVIRONMENT_VARIABLE}" STREQUAL "Environment variable set")
+  MESSAGE(STATUS "Environment variable set to: $ENV{TEST_ENVIRONMENT_VARIABLE}")
+ELSE("$ENV{TEST_ENVIRONMENT_VARIABLE}" STREQUAL "Environment variable set")
+  MESSAGE(SEND_ERROR "Environment variable setting is broken")
+ENDIF("$ENV{TEST_ENVIRONMENT_VARIABLE}" STREQUAL "Environment variable set")
