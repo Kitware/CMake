@@ -26,7 +26,6 @@
 //----------------------------------------------------------------------
 cmCTestConfigureHandler::cmCTestConfigureHandler()
 {
-  m_CTest = 0;
 }
 
 
