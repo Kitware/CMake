@@ -16,7 +16,8 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "Source/CursesDialog/form"      
   "Utilities/cmexpat/"
   "is not used for resolving any symbol"
-  "remark\\(1209"      
+  "remark\\(1209"
+  "stl_deque.h:1051"
   )
 
 
