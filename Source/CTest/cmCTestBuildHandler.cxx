@@ -165,6 +165,8 @@ cmCTestBuildHandler::cmCTestBuildHandler()
   m_MaxErrors = 50;
   m_MaxWarnings = 50;
 
+  m_LastErrorOrWarning = m_ErrorsAndWarnings.end();
+
   int cc;
   for ( cc = 0; cmCTestWarningErrorFileLine[cc].m_RegularExpressionString; ++ cc )
     {
