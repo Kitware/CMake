@@ -30,6 +30,7 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   /usr/share/qt3/include
   C:/Progra~1/qt/include
   /usr/include/qt3
+  /usr/X11R6/include
   )
 
 IF(QT_INCLUDE_DIR)
@@ -56,6 +57,7 @@ IF (QT_MT_REQUIRED)
         /usr/lib
         /usr/share/qt3/lib
         C:/Progra~1/qt/lib
+        /usr/X11R6/lib
      )
 
 ELSE (QT_MT_REQUIRED)
@@ -69,6 +71,7 @@ ELSE (QT_MT_REQUIRED)
     /usr/lib
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
+    /usr/X11R6/lib
     )
 ENDIF (QT_MT_REQUIRED)
 
@@ -86,6 +89,7 @@ FIND_LIBRARY(QT_QASSISTANTCLIENT_LIBRARY
   /usr/lib
   /usr/share/qt3/lib
   C:/Progra~1/qt/lib
+  /usr/X11R6/lib
   )
 
 FIND_PROGRAM(QT_MOC_EXECUTABLE 
@@ -96,6 +100,7 @@ FIND_PROGRAM(QT_MOC_EXECUTABLE
   /usr/lib/qt/bin
   /usr/share/qt3/bin
   C:/Progra~1/qt/bin
+  /usr/X11R6/bin
   )
 
 IF(QT_MOC_EXECUTABLE)
@@ -109,6 +114,7 @@ FIND_PROGRAM(QT_UIC_EXECUTABLE uic
   /usr/lib/qt/bin
   /usr/share/qt3/bin
   C:/Progra~1/qt/bin
+  /usr/X11R6/bin
 )
 
 IF(QT_UIC_EXECUTABLE)
