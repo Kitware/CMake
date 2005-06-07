@@ -1348,11 +1348,6 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
 {
   const std::string& testname = args[0];
   if (this->m_UseExcludeRegExp &&
-    this->m_UseExcludeRegExpFirst )
-    {
-    abort();
-    }
-  if (this->m_UseExcludeRegExp &&
     this->m_UseExcludeRegExpFirst &&
     m_ExcludeTestsRegularExpression.find(testname.c_str()))
     {
