@@ -131,6 +131,11 @@ void cmLocalGenerator::GenerateTestFiles()
     << "# The next line is critical for Dart to work" << std::endl
     << "# Duh :-)" << std::endl << std::endl;
 
+  const char* testIncludeFile = m_Makefile->GetProperty("TEST_INCLUDE_FILE");
+  if ( testIncludeFile )
+    {
+    fout << "INCLUDE(\"" << testIncludeFile << "\")" << std::endl;
+    }
 
   const std::vector<cmTest*> *tests = m_Makefile->GetTests();
   std::vector<cmTest*>::const_iterator it;

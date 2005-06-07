@@ -520,6 +520,11 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   ENDIF(EXECUTABLE_OUTPUT_PATH)
 
   IF(BUILD_TESTING)
+    IF(CTEST_TEST_KWSYS)
+      CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/ExtraTest.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/ExtraTest.cmake")
+      SET_DIRECTORY_PROPERTIES(PROPERTIES TEST_INCLUDE_FILE "${CMAKE_CURRENT_BINARY_DIR}/ExtraTest.cmake")
+    ENDIF(CTEST_TEST_KWSYS)
     ADD_TEST(kwsys-testSystemTools ${EXEC_DIR}/testSystemTools)
     ADD_TEST(kwsys-testProcess-1 ${EXEC_DIR}/testProcess 1)
     ADD_TEST(kwsys-testProcess-2 ${EXEC_DIR}/testProcess 2)
