@@ -39,8 +39,8 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
   mf->AddDefinition("CMAKE_GENERATOR_Fortran", "ifort");
   
   // Create list of configurations requested by user's cache, if any.
-  this->GenerateConfigurations(mf);
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
+  this->GenerateConfigurations(mf);
 }
 
 std::string cmGlobalVisualStudio7Generator::GenerateBuildCommand(const char* makeProgram,
