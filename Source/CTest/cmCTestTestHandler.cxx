@@ -24,10 +24,149 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Base64.h>
 #include "cmMakefile.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmCommand.h"
 
 #include <stdlib.h> 
 #include <math.h>
 #include <float.h>
+
+#include <memory> // auto_ptr
+
+//----------------------------------------------------------------------
+class cmCTestSubdirCommand : public cmCommand
+{
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone() 
+    {
+    cmCTestSubdirCommand* c = new cmCTestSubdirCommand;
+    c->m_TestHandler = m_TestHandler;
+    return c;
+    }
+
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool InitialPass(std::vector<std::string> const& args);
+
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() { return "SUBDIRS";}
+
+  // Unused methods
+  virtual const char* GetTerseDocumentation() { return ""; }
+  virtual const char* GetFullDocumentation() { return ""; }
+
+  cmTypeMacro(cmCTestSubdirCommand, cmCommand);
+
+  cmCTestTestHandler* m_TestHandler;
+};
+
+//----------------------------------------------------------------------
+bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
+{
+  if(args.size() < 1 )
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+  std::vector<std::string>::const_iterator it;
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory(); 
+  for ( it = args.begin(); it != args.end(); ++ it )
+    {
+    std::string fname = cwd;
+    fname += "/";
+    fname += *it;
+ 
+    if ( !cmSystemTools::FileExists(fname.c_str()) )
+      {
+      std::string m = "Could not find directory: ";
+      m += fname;
+      this->SetError(m.c_str());
+      return false;
+      }
+    cmSystemTools::ChangeDirectory(fname.c_str());
+    const char* testFilename = 0;
+    if( cmSystemTools::FileExists("CTestTestfile.cmake") )
+      {
+      // does the CTestTestfile.cmake exist ?
+      testFilename = "CTestTestfile.cmake";
+      }
+    else if( cmSystemTools::FileExists("DartTestfile.txt") )
+      {
+      // does the DartTestfile.txt exist ?
+      testFilename = "DartTestfile.txt";
+      }
+    else
+      {
+      cmSystemTools::ChangeDirectory(cwd.c_str());
+      return false;
+      }
+    fname += "/";
+    fname += testFilename;
+    bool readit = m_Makefile->ReadListFile( m_Makefile->GetCurrentListFile(), fname.c_str());
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    if(!readit)
+      {
+      std::string m = "Could not find include file: ";
+      m += fname;
+      this->SetError(m.c_str());
+      return false;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------
+class cmCTestAddTestCommand : public cmCommand
+{
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone() 
+    {
+    cmCTestAddTestCommand* c = new cmCTestAddTestCommand;
+    c->m_TestHandler = m_TestHandler;
+    return c;
+    }
+
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool InitialPass(std::vector<std::string> const&);
+
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() { return "ADD_TEST";}
+
+  // Unused methods
+  virtual const char* GetTerseDocumentation() { return ""; }
+  virtual const char* GetFullDocumentation() { return ""; }
+
+  cmTypeMacro(cmCTestAddTestCommand, cmCommand);
+
+  cmCTestTestHandler* m_TestHandler;
+};
+
+//----------------------------------------------------------------------
+bool cmCTestAddTestCommand::InitialPass(std::vector<std::string> const& args)
+{
+  if ( args.size() < 2 )
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+  return m_TestHandler->AddTest(args);
+}
 
 //----------------------------------------------------------------------
 bool TryExecutable(const char *dir, const char *file,
@@ -316,9 +455,10 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
 {
   std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
   cmsys::RegularExpression dartStuff("(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
-  tm_ListOfTests testlist;
-  this->GetListOfTests(&testlist);
-  tm_ListOfTests::size_type tmsize = testlist.size();
+  m_TestList.clear();
+
+  this->GetListOfTests();
+  tm_ListOfTests::size_type tmsize = m_TestList.size();
 
   cmGeneratedFileStream ofs;
   cmGeneratedFileStream *olog = 0;
@@ -342,7 +482,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   // how many tests are in based on RegExp?
   int inREcnt = 0;
   tm_ListOfTests::iterator it;
-  for ( it = testlist.begin(); it != testlist.end(); it ++ )
+  for ( it = m_TestList.begin(); it != m_TestList.end(); it ++ )
     {
     if (it->m_IsInBasedOnREOptions)
       {
@@ -362,7 +502,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   int cnt = 0;
   inREcnt = 0;
   std::string last_directory = "";
-  for ( it = testlist.begin(); it != testlist.end(); it ++ )
+  for ( it = m_TestList.begin(); it != m_TestList.end(); it ++ )
     {
     cnt ++;
     if (it->m_IsInBasedOnREOptions)
@@ -370,7 +510,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       inREcnt++;
       }
     const std::string& testname = it->m_Name;
-    tm_VectorOfListFileArgs& args = it->m_Args;
+    std::vector<std::string>& args = it->m_Args;
     cmCTestTestResult cres;
     cres.m_Status = cmCTestTestHandler::NOT_RUN;
     cres.m_TestCount = cnt;
@@ -420,16 +560,16 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       cmCTestLog(m_CTest, HANDLER_OUTPUT, outname.c_str());
       }
     
-    cmCTestLog(m_CTest, DEBUG, "Testing " << args[0].Value.c_str() << " ... ");
+    cmCTestLog(m_CTest, DEBUG, "Testing " << args[0].c_str() << " ... ");
     // find the test executable
-    std::string actualCommand = this->FindTheExecutable(args[1].Value.c_str());
+    std::string actualCommand = this->FindTheExecutable(args[1].c_str());
     std::string testCommand = cmSystemTools::ConvertToOutputPath(actualCommand.c_str());
 
     // continue if we did not find the executable
     if (testCommand == "")
       {
       cmCTestLog(m_CTest, ERROR_MESSAGE, "Unable to find executable: "
-        << args[1].Value.c_str() << std::endl);
+        << args[1].c_str() << std::endl);
       if ( !m_CTest->GetShowOnly() )
         {
         cres.m_FullCommandLine = actualCommand;
@@ -440,7 +580,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       }
 
     // add the arguments
-    tm_VectorOfListFileArgs::const_iterator j = args.begin();
+    std::vector<std::string>::const_iterator j = args.begin();
     ++j;
     ++j;
     std::vector<const char*> arguments;
@@ -449,8 +589,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     for(;j != args.end(); ++j)
       {
       testCommand += " ";
-      testCommand += cmSystemTools::EscapeSpaces(j->Value.c_str());
-      arguments.push_back(j->Value.c_str());
+      testCommand += cmSystemTools::EscapeSpaces(j->c_str());
+      arguments.push_back(j->c_str());
       }
     arguments.push_back(0);
 
@@ -787,8 +927,34 @@ std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
 
 
 //----------------------------------------------------------------------
-void cmCTestTestHandler::GetListOfTests(tm_ListOfTests* testlist)
+void cmCTestTestHandler::GetListOfTests()
 {
+  if ( !m_IncludeRegExp.empty() )
+    {
+    m_IncludeTestsRegularExpression.compile(m_IncludeRegExp.c_str());
+    }
+  if ( !m_ExcludeRegExp.empty() )
+    {
+    m_ExcludeTestsRegularExpression.compile(m_ExcludeRegExp.c_str());
+    }
+  cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Constructing a list of tests" << std::endl);
+  cmake cm;
+  cmGlobalGenerator gg;
+  gg.SetCMakeInstance(&cm);
+  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  lg->SetGlobalGenerator(&gg);
+  cmMakefile *mf = lg->GetMakefile();
+
+  // Add handler for ADD_TEST
+  cmCTestAddTestCommand* newCom1 = new cmCTestAddTestCommand;
+  newCom1->m_TestHandler = this;
+  cm.AddCommand(newCom1);
+
+  // Add handler for SUBDIR 
+  cmCTestSubdirCommand* newCom2 = new cmCTestSubdirCommand;
+  newCom2->m_TestHandler = this;
+  cm.AddCommand(newCom2);
+
   const char* testFilename = 0;
   if( cmSystemTools::FileExists("CTestTestfile.cmake") )
     {
@@ -805,108 +971,15 @@ void cmCTestTestHandler::GetListOfTests(tm_ListOfTests* testlist)
     return;
     }
 
-  // parse the file
-  std::ifstream fin(testFilename);
-  if(!fin)
+  if ( !mf->ReadListFile(0, testFilename) )
     {
     return;
     }
-
-  cmsys::RegularExpression ireg(this->m_IncludeRegExp.c_str());
-  cmsys::RegularExpression ereg(this->m_ExcludeRegExp.c_str());
-
-  cmListFileCache cache;
-  cmListFile* listFile = cache.GetFileCache(testFilename, false);
-  for(std::vector<cmListFileFunction>::const_iterator f =
-    listFile->m_Functions.begin(); f != listFile->m_Functions.end(); ++f)
+  if ( cmSystemTools::GetErrorOccuredFlag() )
     {
-    const cmListFileFunction& lff = *f;
-    const std::string& name = lff.m_Name;
-    const tm_VectorOfListFileArgs& args = lff.m_Arguments;
-    if (name == "SUBDIRS")
-      {
-      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-      for(tm_VectorOfListFileArgs::const_iterator j = args.begin();
-        j != args.end(); ++j)
-        {
-        std::string nwd = cwd + "/";
-        nwd += j->Value;
-        if (cmSystemTools::FileIsDirectory(nwd.c_str()))
-          {
-          cmSystemTools::ChangeDirectory(nwd.c_str());
-          this->GetListOfTests(testlist);
-          }
-        }
-      // return to the original directory
-      cmSystemTools::ChangeDirectory(cwd.c_str());
-      }
-
-    if (name == "ADD_TEST")
-      {
-      const std::string& testname = args[0].Value;
-      if (this->m_UseExcludeRegExp &&
-        this->m_UseExcludeRegExpFirst &&
-        ereg.find(testname.c_str()))
-        {
-        continue;
-        }
-      if ( m_MemCheck )
-        {
-        std::vector<cmStdString>::iterator it;
-        bool found = false;
-        for ( it = m_CustomTestsIgnore.begin(); 
-          it != m_CustomTestsIgnore.end(); ++ it )
-          {
-          if ( *it == testname )
-            {
-            found = true;
-            break;
-            }
-          }
-        if ( found )
-          {
-          cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Ignore memcheck: " << *it << std::endl);
-          continue;
-          }
-        }
-      else
-        {
-        std::vector<cmStdString>::iterator it;
-        bool found = false;
-        for ( it = m_CustomTestsIgnore.begin(); 
-          it != m_CustomTestsIgnore.end(); ++ it )
-          {
-          if ( *it == testname )
-            {
-            found = true;
-            break;
-            }
-          }
-        if ( found )
-          {
-          cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Ignore test: " << *it << std::endl);
-          continue;
-          }
-        }
-
-      cmCTestTestProperties test;
-      test.m_Name = testname;
-      test.m_Args = args;
-      test.m_Directory = cmSystemTools::GetCurrentWorkingDirectory();
-      test.m_IsInBasedOnREOptions = true;
-      if (this->m_UseIncludeRegExp && !ireg.find(testname.c_str()))
-        {
-        test.m_IsInBasedOnREOptions = false;
-        }
-      else if (this->m_UseExcludeRegExp &&
-               !this->m_UseExcludeRegExpFirst &&
-               ereg.find(testname.c_str()))
-        {
-        test.m_IsInBasedOnREOptions = false;
-        }
-      testlist->push_back(test);
-      }
+    return;
     }
+  cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Done constructing a list of tests" << std::endl);
 }
 
 //----------------------------------------------------------------------
@@ -1267,6 +1340,79 @@ bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t remove_thre
       << remove_threshold << " characters." << std::endl;
     }
   output = ostr.str();
+  return true;
+}
+
+//----------------------------------------------------------------------
+bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
+{
+  const std::string& testname = args[0];
+  if (this->m_UseExcludeRegExp &&
+    this->m_UseExcludeRegExpFirst )
+    {
+    abort();
+    }
+  if (this->m_UseExcludeRegExp &&
+    this->m_UseExcludeRegExpFirst &&
+    m_ExcludeTestsRegularExpression.find(testname.c_str()))
+    {
+    return true;
+    }
+  if ( m_MemCheck )
+    {
+    std::vector<cmStdString>::iterator it;
+    bool found = false;
+    for ( it = m_CustomTestsIgnore.begin(); 
+      it != m_CustomTestsIgnore.end(); ++ it )
+      {
+      if ( *it == testname )
+        {
+        found = true;
+        break;
+        }
+      }
+    if ( found )
+      {
+      cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Ignore memcheck: " << *it << std::endl);
+      return true;
+      }
+    }
+  else
+    {
+    std::vector<cmStdString>::iterator it;
+    bool found = false;
+    for ( it = m_CustomTestsIgnore.begin(); 
+      it != m_CustomTestsIgnore.end(); ++ it )
+      {
+      if ( *it == testname )
+        {
+        found = true;
+        break;
+        }
+      }
+    if ( found )
+      {
+      cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Ignore test: " << *it << std::endl);
+      return true;
+      }
+    }
+
+  cmCTestTestProperties test;
+  test.m_Name = testname;
+  test.m_Args = args;
+  test.m_Directory = cmSystemTools::GetCurrentWorkingDirectory();
+  test.m_IsInBasedOnREOptions = true;
+  if (this->m_UseIncludeRegExp && !m_IncludeTestsRegularExpression.find(testname.c_str()))
+    {
+    test.m_IsInBasedOnREOptions = false;
+    }
+  else if (this->m_UseExcludeRegExp &&
+    !this->m_UseExcludeRegExpFirst &&
+    m_ExcludeTestsRegularExpression.find(testname.c_str()))
+    {
+    test.m_IsInBasedOnREOptions = false;
+    }
+  m_TestList.push_back(test);
   return true;
 }
 

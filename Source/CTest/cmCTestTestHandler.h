@@ -20,7 +20,7 @@
 
 
 #include "cmCTestGenericHandler.h"
-#include "cmListFileCache.h"
+#include <cmsys/RegularExpression.hxx>
 
 class cmMakefile;
 
@@ -62,6 +62,11 @@ public:
 
   cmCTestTestHandler();
 
+  /*
+   * Add the test to the list of tests to be executed
+   */
+  bool AddTest(const std::vector<std::string>& args);
+
   struct cmCTestTestResult
   {
     std::string m_Name;
@@ -76,14 +81,12 @@ public:
     int         m_TestCount;
   };
 
-  typedef std::vector<cmListFileArgument> tm_VectorOfListFileArgs;
-
 protected:
   struct cmCTestTestProperties
   {
     cmStdString m_Name;
     cmStdString m_Directory;
-    tm_VectorOfListFileArgs m_Args;
+    std::vector<std::string> m_Args;
     bool m_IsInBasedOnREOptions;
   };
 
@@ -134,7 +137,7 @@ private:
   /**
    * Get the list of tests in directory and subdirectories.
    */
-  void GetListOfTests(tm_ListOfTests* testlist);
+  void GetListOfTests();
 
   /**
    * Find the executable for a test
@@ -157,6 +160,8 @@ private:
   bool m_UseExcludeRegExpFirst;
   std::string m_IncludeRegExp;
   std::string m_ExcludeRegExp;
+  cmsys::RegularExpression m_IncludeTestsRegularExpression;
+  cmsys::RegularExpression m_ExcludeTestsRegularExpression;
 
   std::string GenerateRegressionImages(const std::string& xml);
 
@@ -165,6 +170,7 @@ private:
 
   std::string TestsToRunString;
   bool m_UseUnion;
+  tm_ListOfTests m_TestList;
 };
 
 #endif
