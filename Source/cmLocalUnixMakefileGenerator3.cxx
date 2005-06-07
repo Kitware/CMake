@@ -214,7 +214,7 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
       i != includeDirs.end(); ++i)
     {
     infoFileStream
-      << "  \"" << this->Convert(i->c_str(),START_OUTPUT).c_str() << "\"\n";
+      << "  \"" << this->Convert(i->c_str(),HOME_OUTPUT).c_str() << "\"\n";
     }
   infoFileStream
     << "  )\n";
@@ -453,8 +453,13 @@ cmLocalUnixMakefileGenerator3
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
   // definitions when scanning for dependencies.
-  depCmd << "$(CMAKE_COMMAND) -E cmake_depends \"" 
+  depCmd << "$(CMAKE_COMMAND) -E cmake_depends " 
+         << " \""
          << m_GlobalGenerator->GetName() << "\" "
+         << this->Convert(m_Makefile->GetHomeOutputDirectory(),FULL,SHELL)
+         << " "
+         << this->Convert(m_Makefile->GetStartOutputDirectory(),FULL,SHELL)
+         << " "
          << lang << " "
          << relativeObj.c_str() << " "
          << this->Convert(source.GetFullPath().c_str(),HOME_OUTPUT,SHELL);
@@ -2601,17 +2606,17 @@ cmLocalUnixMakefileGenerator3
 ::ScanDependencies(std::vector<std::string> const& args)
 {
   // Format of arguments is:
-  // $(CMAKE_COMMAND), cmake_depends, GeneratorName, <lang>, <obj>, <src>
+  // $(CMAKE_COMMAND), cmake_depends, home_output_dir, start_output_dir, GeneratorName, <lang>, <obj>, <src>
   // The caller has ensured that all required arguments exist.
 
   // The language for which we are scanning dependencies.
-  std::string const& lang = args[3];
+  std::string const& lang = args[5];
 
   // The file to which to write dependencies.
-  const char* objFile = args[4].c_str();
+  const char* objFile = args[6].c_str();
 
   // The source file at which to start the scan.
-  const char* srcFile = args[5].c_str();
+  const char* srcFile = args[7].c_str();
 
   // Read the directory information file.
   cmake cm;
@@ -2620,13 +2625,17 @@ cmLocalUnixMakefileGenerator3
   std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
   lg->SetGlobalGenerator(&gg);
   cmMakefile* mf = lg->GetMakefile();
+  mf->SetHomeOutputDirectory(args[3].c_str());
+  mf->SetStartOutputDirectory(args[4].c_str());  
   bool haveDirectoryInfo = false;
-  if(mf->ReadListFile(0, "CMakeDirectoryInformation.cmake") &&
+  std::string dirInfoFile = args[4];
+  dirInfoFile += "/CMakeDirectoryInformation.cmake";
+  if(mf->ReadListFile(0, dirInfoFile.c_str()) &&
      !cmSystemTools::GetErrorOccuredFlag())
     {
     haveDirectoryInfo = true;
     }
-
+  
   // Test whether we need to force Unix paths.
   if(haveDirectoryInfo)
     {
@@ -2638,6 +2647,11 @@ cmLocalUnixMakefileGenerator3
         }
       }
     }
+  else
+    {
+    cmSystemTools::Error("Directory Information file not found");
+    }
+  
 
   // Get the set of include directories.
   std::vector<std::string> includes;
