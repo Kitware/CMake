@@ -1448,7 +1448,10 @@ cmLocalUnixMakefileGenerator3
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
   std::string linkRuleVar = "CMAKE_";
-  linkRuleVar += linkLanguage;
+  if (linkLanguage)
+    {
+    linkRuleVar += linkLanguage;
+    }
   linkRuleVar += "_CREATE_STATIC_LIBRARY";
 
   std::string extraFlags;
@@ -1471,7 +1474,10 @@ cmLocalUnixMakefileGenerator3
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
   std::string linkRuleVar = "CMAKE_";
-  linkRuleVar += linkLanguage;
+  if (linkLanguage)
+    {
+    linkRuleVar += linkLanguage;
+    }
   linkRuleVar += "_CREATE_SHARED_LIBRARY";
 
   std::string extraFlags;
@@ -1510,7 +1516,10 @@ cmLocalUnixMakefileGenerator3
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
   std::string linkRuleVar = "CMAKE_";
-  linkRuleVar += linkLanguage;
+  if (linkLanguage)
+    {
+    linkRuleVar += linkLanguage;
+    }
   linkRuleVar += "_CREATE_SHARED_MODULE";
 
   std::string extraFlags;
