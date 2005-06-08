@@ -48,7 +48,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args)
     }
   bool readit = m_Makefile->ReadListFile( m_Makefile->GetCurrentListFile(), 
                                           fname.c_str() );
-  if(!optional && !readit)
+  if(!optional && !readit && !cmSystemTools::GetFatalErrorOccured())
     {
     std::string m = "Could not find include file: ";
     m += fname;
