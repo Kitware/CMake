@@ -144,7 +144,6 @@ SET (FLTK_SRCS
 SET (FLTK_WRAP_UI "On")
 SET (FLTK_FLUID_EXECUTABLE "echo")
 FLTK_WRAP_UI (wraplibFLTK ${FLTK_SRCS})
-ADD_LIBRARY (wraplibFLTK)
 CONFIGURE_FILE(
   ${Wrapping_SOURCE_DIR}/fltk1.fl
   ${Wrapping_BINARY_DIR}/fltk1.cxx
@@ -174,7 +173,6 @@ VTK_MAKE_INSTANTIATOR(vtkWraplibInstantiator
 #
 SET(CABLE "echo")
 SET(CABLE_INCLUDE_DIR ${Wrapping_SOURCE_DIR})
-ADD_LIBRARY(wrapITK)
 ITK_WRAP_TCL(wrapITK itkWrapperConfig.cxx)
 CONFIGURE_FILE(${Wrapping_SOURCE_DIR}/itkWrapperConfig.cxx
   ${Wrapping_BINARY_DIR}/itkWrapperConfig_tcl.cxx
