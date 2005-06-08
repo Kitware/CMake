@@ -49,7 +49,7 @@ YY_DECL;
 static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 
 #define YYDEBUG 1
-#define YYMAXDEPTH 1000000
+#define YYMAXDEPTH 10000000
 
 
 #define calCheckEmpty(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp);
@@ -77,11 +77,14 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 /* Tokens */
 %token cal_NCURLY
 %token cal_DCURLY
+%token cal_DOLLAR
+%token cal_LCURLY
 %token cal_RCURLY
 %token cal_NAME
 %token cal_SYMBOL
 %token cal_AT
 %token cal_ERROR
+%token cal_ATNAME
 
 /*-------------------------------------------------------------------------*/
 /* grammar */
@@ -98,11 +101,10 @@ Goal
 }
 
 Goal:
-String
 {
-  calElementStart(1);
-  calCheckEmpty(1);
-  $<str>$ = $<str>1;
+  calElementStart(0);
+  calCheckEmpty(0);
+  $<str>$ = 0;
 }
 |
 String Goal
@@ -178,6 +180,27 @@ Text
   $<str>$ = $<str>1;
 }
 |
+cal_AT
+{
+  calElementStart(1);
+  calCheckEmpty(1);
+  $<str>$ = $<str>1;
+}
+|
+cal_DOLLAR
+{
+  calElementStart(1);
+  calCheckEmpty(1);
+  $<str>$ = $<str>1;
+}
+|
+cal_LCURLY
+{
+  calElementStart(1);
+  calCheckEmpty(1);
+  $<str>$ = $<str>1;
+}
+|
 cal_RCURLY
 {
   calElementStart(1);
@@ -191,7 +214,7 @@ cal_NCURLY MultipleIds cal_RCURLY
   calElementStart(3);
   calCheckEmpty(3);
   $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1,$<str>2);
-  std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
+  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
 }
 |
 cal_DCURLY MultipleIds cal_RCURLY
@@ -199,14 +222,14 @@ cal_DCURLY MultipleIds cal_RCURLY
   calElementStart(3);
   calCheckEmpty(3);
   $<str>$ = yyGetParser->ExpandVariable($<str>2);
-  std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
+  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
 }
 |
-cal_AT cal_NAME cal_AT
+cal_ATNAME
 {
-  calElementStart(3);
-  calCheckEmpty(3);
-  $<str>$ = yyGetParser->ExpandVariable($<str>2);
+  calElementStart(1);
+  calCheckEmpty(1);
+  $<str>$ = yyGetParser->ExpandVariable($<str>1);
 }
 
 %%

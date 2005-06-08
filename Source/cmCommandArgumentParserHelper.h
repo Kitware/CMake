@@ -101,7 +101,7 @@ private:
   char m_EmptyVariable[1];
   const cmMakefile* m_Makefile;
   std::string m_Result;
-  std::string m_FileName;
+  const char* m_FileName;
   long m_FileLine;
 
   bool m_EscapeQuotes;
