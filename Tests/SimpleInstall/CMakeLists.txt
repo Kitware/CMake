@@ -43,7 +43,7 @@ IF(STAGE2)
   INSTALL_TARGETS(/bin SimpleInstallS2)
 ELSE(STAGE2)
   IF(CMAKE_GENERATOR MATCHES "Makefiles")
-    SUBDIRS(PREORDER TestSubDir)
+    ADD_SUBDIRECTORY(TestSubDir)
   ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
   
   # this is stage 1, so create libraries and modules and install everything

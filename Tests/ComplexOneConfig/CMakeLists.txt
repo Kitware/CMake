@@ -273,7 +273,8 @@ ENDIF(NOT STRING_REGEX_PASSED)
 #
 # Create the libs and the main exe
 #
-SUBDIRS(Library Executable)
+ADD_SUBDIRECTORY(Library)
+ADD_SUBDIRECTORY(Executable)
 SUBDIR_DEPENDS(Executable Library)
 EXPORT_LIBRARY_DEPENDENCIES(${Complex_BINARY_DIR}/ComplexLibraryDepends.cmake)
 INCLUDE(${Complex_BINARY_DIR}/ComplexLibraryDepends.cmake OPTIONAL)

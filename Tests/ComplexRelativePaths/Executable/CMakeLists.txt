@@ -65,7 +65,7 @@ ADD_CUSTOM_COMMAND(
 # has no side-effects on the current Makefile (duplicated source file
 # due to source list expansion done twice).
 #
-SUBDIRS(Temp)
+ADD_SUBDIRECTORY(Temp)
 
 #
 # Extra coverage.Not used.

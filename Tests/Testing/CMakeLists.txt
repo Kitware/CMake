@@ -48,7 +48,6 @@ ADD_EXECUTABLE(testing testing.cxx)
 ADD_TEST(testing ${Testing_BINARY_DIR}/bin/testing)
 
 #
-# Force subdirs
-# (coverage)
+# skip level test
 #
-SUBDIRS(Sub/Sub2)
+ADD_SUBDIRECTORY(Sub/Sub2)
