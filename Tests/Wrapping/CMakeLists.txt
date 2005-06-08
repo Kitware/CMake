@@ -58,7 +58,7 @@ FIND_FILE(VTK_WRAP_HINTS hints ${Wrapping_SOURCE_DIR})
 #
 SET (VTK_WRAP_TCL "On")
 SET (VTK_WRAP_TCL_EXE "${WRAP}")
-VTK_WRAP_TCL (wraplibTCL TCL_SRCS SRCS)
+VTK_WRAP_TCL (wraplibTCL TCL_SRCS ${SRCS})
 ADD_CUSTOM_TARGET(wraplibTCL ALL 
   ${CMAKE_COMMAND} -E echo "dummy target"  
   ) 
@@ -68,7 +68,7 @@ ADD_CUSTOM_TARGET(wraplibTCL ALL
 #
 SET (VTK_WRAP_PYTHON "On")
 SET (VTK_WRAP_PYTHON_EXE "${WRAP}")
-VTK_WRAP_PYTHON (wraplibPython Python_SRCS SRCS)
+VTK_WRAP_PYTHON (wraplibPython Python_SRCS ${SRCS})
 ADD_CUSTOM_TARGET(wraplibPython ALL 
   ${CMAKE_COMMAND} -E echo "dummy target"  
   ) 
@@ -84,7 +84,7 @@ SET (VTK_WRAP_JAVA "On")
 SET (VTK_WRAP_JAVA_EXE "${WRAP}")
 SET (VTK_PARSE_JAVA_EXE "${WRAP}")
 SET (VTK_JAVA_HOME "${Wrapping_BINARY_DIR}/java")
-VTK_WRAP_JAVA (wraplibJava Java_SRCS SRCS)
+VTK_WRAP_JAVA (wraplibJava Java_SRCS ${SRCS})
 CONFIGURE_FILE(
   ${Wrapping_SOURCE_DIR}/dummy
   ${VTK_JAVA_HOME}/vtkIncluded.java
@@ -143,7 +143,7 @@ SET (FLTK_SRCS
   )
 SET (FLTK_WRAP_UI "On")
 SET (FLTK_FLUID_EXECUTABLE "echo")
-FLTK_WRAP_UI (wraplibFLTK FLTK_SRCS)
+FLTK_WRAP_UI (wraplibFLTK ${FLTK_SRCS})
 ADD_LIBRARY (wraplibFLTK)
 CONFIGURE_FILE(
   ${Wrapping_SOURCE_DIR}/fltk1.fl
@@ -164,7 +164,7 @@ USE_MANGLED_MESA (${Wrapping_BINARY_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
 #
 VTK_MAKE_INSTANTIATOR(vtkWraplibInstantiator 
   Instantiator_SRCS
-  SRCS
+  ${SRCS}
   EXPORT_MACRO VTK_WRAPLIB_EXPORT
   HEADER_LOCATION ${Wrapping_BINARY_DIR}
   GROUP_SIZE 5)
