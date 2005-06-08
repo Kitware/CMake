@@ -49,6 +49,12 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
 
+  if (s == args.end())
+    {
+    this->SetError("called with incorrect number of arguments, no sources provided");
+    return false;
+    }
+
   std::vector<std::string> srclists(s, args.end());
   cmTarget* tgt = m_Makefile->AddExecutable(exename.c_str(), srclists); 
   if ( use_win32 )
