@@ -14,6 +14,7 @@
 #ifndef @KWSYS_NAMESPACE@_Configure_h
 #define @KWSYS_NAMESPACE@_Configure_h
 
+/* Setup the export macro.  */
 #if defined(_WIN32) && @KWSYS_BUILD_SHARED@
 # if defined(@KWSYS_NAMESPACE@_EXPORTS)
 #  define @KWSYS_NAMESPACE@_EXPORT __declspec(dllexport)
@@ -22,6 +23,13 @@
 # endif
 #else
 # define @KWSYS_NAMESPACE@_EXPORT
+#endif
+
+/* Disable useless warnings.  */
+#if !defined(@KWSYS_NAMESPACE@_NO_WARNING_DISABLE)
+# if defined(_MSC_VER)
+#  pragma warning (disable: 4514) /* Unreferenced inline function removed.  */
+# endif
 #endif
 
 #endif
