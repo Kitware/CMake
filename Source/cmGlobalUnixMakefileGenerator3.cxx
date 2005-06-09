@@ -704,7 +704,9 @@ cmGlobalUnixMakefileGenerator3
       {
       // Don't emit the same rule twice (e.g. two targets with the same
       // simple name)
-      if(emitted.insert(t->second.GetName()).second)
+      if(t->second.GetName() &&
+         strlen(t->second.GetName()) &&
+         emitted.insert(t->second.GetName()).second)
         {
         // Add a rule to build the target by name.
         lg->WriteDivider(ruleFileStream);
@@ -749,11 +751,13 @@ cmGlobalUnixMakefileGenerator3
   bool needRequiresStep = this->NeedRequiresStep(lg);
   for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-       (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
-       (t->second.GetType() == cmTarget::UTILITY))
+    if (((t->second.GetType() == cmTarget::EXECUTABLE) ||
+         (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+         (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+         (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+         (t->second.GetType() == cmTarget::UTILITY)) &&
+        t->second.GetName() &&
+        strlen(t->second.GetName()))  
       {
       // Add a rule to build the target by name.
       localName = lg->GetRelativeTargetDirectory(t->second);

@@ -864,7 +864,8 @@ cmLocalUnixMakefileGenerator3
   // Make sure there is a target.
   if(!target || !*target)
     {
-    cmSystemTools::Error("No target for WriteMakeRule!");
+    cmSystemTools::Error("No target for WriteMakeRule! called with comment: ",
+                         comment);
     return;
     }
 
