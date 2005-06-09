@@ -45,12 +45,10 @@ CMAKE_CXX_SOURCES="\
   cmLocalGenerator \
   cmSourceFile \
   cmSystemTools \
-  cmGlobalUnixMakefileGenerator \
   cmGlobalUnixMakefileGenerator3 \
   cmGlobalXCodeGenerator \
   cmLocalXCodeGenerator \
   cmXCodeObject \
-  cmLocalUnixMakefileGenerator2 \
   cmLocalUnixMakefileGenerator3 \
   cmBootstrapCommands \
   cmCommands \

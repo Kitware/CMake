@@ -49,7 +49,6 @@
 #  include "cmWin32ProcessExecution.h"
 #else
 #endif
-#include "cmGlobalUnixMakefileGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 
 #ifdef CMAKE_USE_KDEVELOP
@@ -1425,8 +1424,6 @@ void cmake::AddDefaultGenerators()
   m_Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
     &cmGlobalNMakeMakefileGenerator::New;
 #endif
-  m_Generators[cmGlobalUnixMakefileGenerator::GetActualName()] =
-    &cmGlobalUnixMakefileGenerator::New;
   m_Generators[cmGlobalUnixMakefileGenerator3::GetActualName()] =
     &cmGlobalUnixMakefileGenerator3::New;
 #ifdef CMAKE_USE_XCODE

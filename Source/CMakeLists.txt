@@ -50,8 +50,6 @@ SET(SRCS
   cmGlob.cxx
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
-  cmGlobalUnixMakefileGenerator.cxx
-  cmGlobalUnixMakefileGenerator.h
   cmGlobalUnixMakefileGenerator3.cxx
   cmGlobalUnixMakefileGenerator3.h
   cmListFileCache.cxx
@@ -59,7 +57,6 @@ SET(SRCS
   cmListFileLexer.c
   cmLocalGenerator.cxx
   cmLocalGenerator.h
-  cmLocalUnixMakefileGenerator2.cxx
   cmLocalUnixMakefileGenerator3.cxx
   cmMakeDepend.cxx
   cmMakeDepend.h
