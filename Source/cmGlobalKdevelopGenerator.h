@@ -18,20 +18,20 @@
 #ifndef cmGlobalKdevelopGenerator_h
 #define cmGlobalKdevelopGenerator_h
 
-#include "cmGlobalUnixMakefileGenerator.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 
 /** \class cmGlobalKdevelopGenerator
  * \brief Write Unix Makefiles accompanied by KDevelop3 project files.
  *
- * cmGlobalKdevelopGenerator produces a project file for KDevelop 3 (KDevelop > 3.1.1). 
- * The project is based on the "Custom Makefile based C/C++" project of KDevelop.
- * Such a project consists of Unix Makefiles in the build directory together
- * with a <your_project>.kdevelop project file, which contains the project settings
- * and a <your_project>.kdevelop.filelist file, which lists the source files relative
- * to the kdevelop project directory. The kdevelop project directory is the base 
- * source directory. 
+ * cmGlobalKdevelopGenerator produces a project file for KDevelop 3 (KDevelop
+ * > 3.1.1).  The project is based on the "Custom Makefile based C/C++"
+ * project of KDevelop.  Such a project consists of Unix Makefiles in the
+ * build directory together with a <your_project>.kdevelop project file,
+ * which contains the project settings and a <your_project>.kdevelop.filelist
+ * file, which lists the source files relative to the kdevelop project
+ * directory. The kdevelop project directory is the base source directory.
  */
-class cmGlobalKdevelopGenerator : public cmGlobalUnixMakefileGenerator
+class cmGlobalKdevelopGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalKdevelopGenerator();

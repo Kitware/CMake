@@ -28,7 +28,7 @@
 
 
 cmLocalKdevelopGenerator::cmLocalKdevelopGenerator()
-  :cmLocalUnixMakefileGenerator2()
+  :cmLocalUnixMakefileGenerator3()
 {
 }
 
