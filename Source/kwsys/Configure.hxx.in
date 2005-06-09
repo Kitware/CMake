@@ -14,6 +14,9 @@
 #ifndef @KWSYS_NAMESPACE@_Configure_hxx
 #define @KWSYS_NAMESPACE@_Configure_hxx
 
+/* Include C configuration.  */
+#include <@KWSYS_NAMESPACE@/Configure.h>
+
 /* Whether kwsys namespace is "kwsys".  */
 #define @KWSYS_NAMESPACE@_NAME_IS_KWSYS @KWSYS_NAME_IS_KWSYS@
 
