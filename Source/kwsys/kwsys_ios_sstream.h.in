@@ -76,6 +76,8 @@ public:
   static void IgnoreUnusedVariable(const ostringstream_cleanup&) {}
 protected:
   ostrstream& m_OStrStream;
+private:
+  void operator=(ostringstream_cleanup const&);
 };
 
 class ostringstream: public ostrstream
@@ -102,6 +104,11 @@ private:
   void operator=(const ostringstream&);
 };
 
+#if defined(_MSC_VER)
+# pragma warning (push)
+# pragma warning (disable: 4097) /* typedef-name used as synonym for class */
+#endif
+
 class istringstream: private kwsys_stl::string, public istrstream
 {
 public:
@@ -121,6 +128,10 @@ private:
   istringstream(const istringstream&);
   void operator=(const istringstream&);
 };
+
+#if defined(_MSC_VER)
+# pragma warning (pop)
+#endif
 
 } // namespace @KWSYS_NAMESPACE@_ios
 
