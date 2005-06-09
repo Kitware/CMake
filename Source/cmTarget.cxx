@@ -220,46 +220,6 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
         done = 1;
         }
       }
-
-    // if it wasn't a source file listed with the makefile
-    // see if it is a variable. This is for old CMake 1.2 compatability 
-    // where a source list would be passed into here, by making it
-    // a vector we need to possibly lookup the variable to maintain
-    // CMake 1.2 compatability.
-    const char* versionValue
-      = mf.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-    if (!done)
-      {
-      if (!versionValue || atof(versionValue) <= 1.2)
-        {
-        const char* varValue = 
-          mf.GetDefinition(temps.c_str());
-        // if the definition exists
-        if (varValue)
-          {
-          std::vector<std::string> args;
-          cmSystemTools::ExpandListArgument(varValue, args);
-          unsigned int i;
-          for (i = 0; i < args.size(); ++i)
-            {
-            if (mf.GetSource(args[i].c_str()))
-              {
-              m_SourceFiles.push_back(mf.GetSource(args[i].c_str()));
-              }
-            else
-              {
-              cmSourceFile file;
-              file.SetProperty("ABSTRACT","0");
-              file.SetName(args[i].c_str(), mf.GetCurrentDirectory(),
-                           mf.GetSourceExtensions(),
-                           mf.GetHeaderExtensions());
-              m_SourceFiles.push_back(mf.AddSource(file));
-              }
-            }
-          done = 1;
-          }
-        }
-      }
       
     // if we still are not done, try to create the SourceFile structure
     if (!done)
