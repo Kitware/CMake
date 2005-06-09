@@ -58,6 +58,11 @@
 #include <termios.h>
 #endif
 
+// Windows API.  Some parts used even on cygwin.
+#if defined(_WIN32)
+# include <windows.h>
+#endif
+
 // This is a hack to prevent warnings about these functions being
 // declared but not referenced.
 #if defined(__sgi) && !defined(__GNUC__)
@@ -82,7 +87,6 @@ public:
 
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__))
 #include <io.h>
-#include <windows.h>
 #include <direct.h>
 #define _unlink unlink
 inline int Mkdir(const char* dir)
