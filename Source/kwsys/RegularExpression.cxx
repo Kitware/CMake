@@ -426,7 +426,7 @@ static char* reg (int paren, int *flagp) {
         }
         parno = regnpar;
         regnpar++;
-        ret = regnode(OPEN + parno);
+        ret = regnode(static_cast<char>(OPEN + parno));
     }
     else
         ret = 0;
@@ -454,7 +454,7 @@ static char* reg (int paren, int *flagp) {
       }
 
     // Make a closing node, and hook it on the end.
-    ender = regnode((paren) ? CLOSE + parno : END);
+    ender = regnode(static_cast<char>((paren) ? CLOSE + parno : END));
     regtail(ret, ender);
 
     // Hook the tails of the branches to the closing node.
@@ -638,7 +638,7 @@ static char* regatom (int *flagp) {
                                return 0;
                             }
                             for (; rxpclass <= rxpclassend; rxpclass++)
-                                regc(rxpclass);
+                                regc(static_cast<unsigned char>(rxpclass));
                             regparse++;
                         }
                     }
@@ -801,8 +801,8 @@ static void regtail (char* p, const char* val) {
         offset = int(scan - val);
     else
         offset = int(val - scan);
-    *(scan + 1) = (offset >> 8) & 0377;
-    *(scan + 2) = offset & 0377;
+    *(scan + 1) = static_cast<char>((offset >> 8) & 0377);
+    *(scan + 2) = static_cast<char>(offset & 0377);
 }
 
 
