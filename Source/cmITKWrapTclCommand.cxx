@@ -61,6 +61,19 @@ cmITKWrapTclCommand::AddDependencies(cmDependInformation const *info,
 // cmITKWrapTclCommand
 bool cmITKWrapTclCommand::InitialPass(std::vector<std::string> const& args)
 {
+  // deprecated
+  const char* versionValue
+    = m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  if (atof(versionValue) > 2.2)
+    {
+    this->SetError("The ITK_WRAP_TCL command was deprecated in CMake version 2.2 and will be removed in later versions of CMake. You should modify your CMakeLists.txt files to use the MACRO command or use CMake 2.2 or earlier for this project.\n");
+    return false;
+    }
+  if (atof(versionValue) > 2.0)
+    {
+    cmSystemTools::Message("The ITK_WRAP_TCL command was deprecated in CMake version 2.2 and will be removed in later versions. You should modify your CMakeLists.txt files to use a MACRO or use CMake 2.2 or earlier.\n","Warning");
+    }
+
   if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
