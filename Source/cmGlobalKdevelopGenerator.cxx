@@ -55,7 +55,7 @@ void cmGlobalKdevelopGenerator::GetDocumentation(cmDocumentationEntry& entry) co
 
 void cmGlobalKdevelopGenerator::Generate()
 {
-  this->cmGlobalGenerator::Generate();
+  this->cmGlobalUnixMakefileGenerator3::Generate();
   // for each sub project in the project create 
   // a kdevelop project
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
