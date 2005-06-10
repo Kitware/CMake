@@ -391,7 +391,7 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
     this->ExecuteCommand(lf->m_Functions[i]);
     if ( cmSystemTools::GetFatalErrorOccured() )
       {
-      return false;
+      return true;
       }
     }
 
@@ -446,20 +446,17 @@ void cmMakefile::FinalPass()
 void cmMakefile::ConfigureFinalPass()
 {
   this->FinalPass();
-  const char* versionValue
-    = this->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-  bool oldVersion = (!versionValue || atof(versionValue) < 1.4);
-  // merge libraries
+  const char* oldValue
+    = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  if (oldValue && atof(oldValue) <= 1.2)
+    {
+    cmSystemTools::Error("You have requested backwards compatibility with CMake version 1.2 or earlier. This version of CMake only supports backwards compatibility with CMake 1.4 or later. For compatibility with 1.2 or earlier please use CMake 2.0");
+    }
   
   for (cmTargets::iterator l = m_Targets.begin();
        l != m_Targets.end(); l++)
     {
     l->second.GenerateSourceFilesFromSourceLists(*this);
-    // pick up any LINK_LIBRARIES that were added after the target
-    if(oldVersion)
-      {
-      this->AddGlobalLinkInformation(l->first.c_str(), l->second);
-      }
     l->second.AnalyzeLibDependencies(*this);
     }
 }
@@ -1955,32 +1952,12 @@ void cmMakefile::ExpandSourceListArguments(
   std::vector<std::string> const& arguments, 
   std::vector<std::string>& newargs, unsigned int start)
 {
-  // first figure out if we need to handle version 1.2 style source lists
-  int oldVersion = 1;
-  const char* versionValue
-    = this->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-  if (versionValue && atof(versionValue) > 1.2)
-    {
-    oldVersion = 0;
-    }
-  
   // now expand the args
   unsigned int i;
   for(i = 0; i < arguments.size(); ++i)
     {
-    // is the arg defined ?, if so use the def
-    const char *def = this->GetDefinition(arguments[i].c_str());
-    if (def && oldVersion && i >= start)
-      {
-      // Definition lookup could result in a list that needs to be
-      // expanded.
-      cmSystemTools::ExpandListArgument(def, newargs);
-      }
-    else
-      {
-      // List expansion will have been done already.
-      newargs.push_back(arguments[i]);
-      }
+    // List expansion will have been done already.
+    newargs.push_back(arguments[i]);
     }
 }
 
