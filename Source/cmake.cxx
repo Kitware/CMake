@@ -92,6 +92,8 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 cmake::cmake()
 {
   m_DebugTryCompile = false;
+  m_ClearBuildSystem = false;
+  
 #ifdef __APPLE__
   struct rlimit rlp;
   if(!getrlimit(RLIMIT_STACK, &rlp))
@@ -304,6 +306,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     else if((i < args.size()-1) && (arg.find("--check-build-system",0) == 0))
       {
       m_CheckBuildSystem = args[++i];
+      m_ClearBuildSystem = (atoi(args[++i].c_str()) > 0);
       }
     else if(arg.find("-V",0) == 0)
       {
@@ -1637,7 +1640,7 @@ int cmake::CheckBuildSystem()
     {
     std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
     lgd->SetGlobalGenerator(ggd);
-    lgd->CheckDependencies(mf, verbose);
+    lgd->CheckDependencies(mf, verbose, m_ClearBuildSystem);
     }
 
   // No need to rerun.

@@ -135,8 +135,10 @@ public:
   std::string ConvertToOutputForExisting(const char* p);
   
   /** Called from command-line hook to check dependencies.  */
-  virtual void CheckDependencies(cmMakefile* /* mf */, bool /* verbose */) {};
-
+  virtual void CheckDependencies(cmMakefile* /* mf */, 
+                                 bool /* verbose */,
+                                 bool /* clear */) {};
+  
   /** Called from command-line hook to scan dependencies.  */
   virtual bool ScanDependencies(std::vector<std::string> const& /* args */) {return true;};
 

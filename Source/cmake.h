@@ -303,6 +303,7 @@ private:
   std::string m_CXXEnvironment;
   std::string m_CCEnvironment;
   std::string m_CheckBuildSystem;
+  bool m_ClearBuildSystem;
   bool m_DebugTryCompile;
   
   void UpdateConversionPathTable();

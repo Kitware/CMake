@@ -128,7 +128,8 @@ public:
   virtual bool ScanDependencies(std::vector<std::string> const& args);
 
   /** Called from command-line hook to check dependencies.  */
-  virtual void CheckDependencies(cmMakefile* mf, bool verbose);
+  virtual void CheckDependencies(cmMakefile* mf, bool verbose,
+                                 bool clear);
   
   /** write some extra rules suahc as make test etc */
   void WriteSpecialTargetsTop(std::ostream& makefileStream);

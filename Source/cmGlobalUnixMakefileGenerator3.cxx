@@ -418,6 +418,22 @@ void cmGlobalUnixMakefileGenerator3
   commands.push_back(lg->GetRecursiveMakeCall("Makefile2","clean"));
   lg->WriteMakeRule(makefileStream, "The main clean target", "clean", 
                     depends, commands);
+
+  // write the depend rule, really a recompute depends rule
+  depends.clear();
+  commands.clear();
+  std::string cmakefileName = "Makefile.cmake";
+  std::string runRule =
+    "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
+  runRule += " --check-build-system ";
+  runRule += lg->Convert(cmakefileName.c_str(),cmLocalGenerator::NONE,
+                         cmLocalGenerator::SHELL);
+  runRule += " 1";
+  
+  commands.push_back(runRule);
+  lg->WriteMakeRule(makefileStream, "clear depends", 
+                    "depend", 
+                    depends, commands);
 }
 
 

@@ -1164,7 +1164,8 @@ cmLocalUnixMakefileGenerator3
     "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
   runRule += this->Convert(cmakefileName.c_str(),NONE,SHELL);
-
+  runRule += " 0";
+  
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
   commands.push_back(runRule);
@@ -2883,7 +2884,8 @@ void cmLocalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::CheckDependencies(cmMakefile* mf, 
-                                                      bool verbose)
+                                                      bool verbose,
+                                                      bool clear)
 {
   // Get the list of languages that may have sources to check.
   const char* langDef = mf->GetDefinition("CMAKE_DEPENDS_LANGUAGES");
@@ -2914,7 +2916,14 @@ void cmLocalUnixMakefileGenerator3::CheckDependencies(cmMakefile* mf,
           checker(this->GetDependsChecker(*l, ".", f->c_str(), verbose));
         if(checker.get())
           {
-          checker->Check();
+          if (clear)
+            {
+            checker->Clear();
+            }
+          else
+            {
+            checker->Check();
+            }
           }
         }
       }
