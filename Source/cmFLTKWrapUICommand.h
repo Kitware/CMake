@@ -71,7 +71,8 @@ public:
       "  FLTK_WRAP_UI(resultingLibraryName source1\n"
       "               source2 ... sourceN )\n"
       "Produce .h and .cxx files for all the .fl and .fld files listed.  "
-      "The resulting .h and .cxx files will be added to the specified "
+      "The resulting .h and .cxx files will be added to a variable named "
+      "resultingLibraryName_FLTK_UI_SRCS whcih should be added to your "
       "library.";
     }
   
