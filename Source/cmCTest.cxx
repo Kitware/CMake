@@ -753,10 +753,16 @@ int cmCTest::GetTestModelFromString(const char* str)
   return cmCTest::EXPERIMENTAL;
 }
 
+//######################################################################
+//######################################################################
+//######################################################################
+//######################################################################
+
 //----------------------------------------------------------------------
 int cmCTest::RunMakeCommand(const char* command, std::string* output,
   int* retVal, const char* dir, int timeout, std::ofstream& ofs)
 {
+  // First generate the command and arguments
   std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
 
   if(args.size() < 1)
@@ -777,6 +783,15 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
     *output = "";
     }
 
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Run command:");
+  std::vector<const char*>::iterator ait;
+  for ( ait = argv.begin(); ait != argv.end() && *ait; ++ ait )
+    {
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, " \"" << *ait << "\"");
+    }
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, std::endl);
+  
+  // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
   cmsysProcess_SetWorkingDirectory(cp, dir);
@@ -784,13 +799,15 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
   cmsysProcess_SetTimeout(cp, timeout);
   cmsysProcess_Execute(cp);
 
+  // Initialize tick's
   std::string::size_type tick = 0;
   std::string::size_type tick_len = 1024;
   std::string::size_type tick_line_len = 50;
 
   char* data;
   int length;
-  cmCTestLog(this, HANDLER_OUTPUT, "   Each . represents " << tick_len << " bytes of output" << std::endl
+  cmCTestLog(this, HANDLER_OUTPUT,
+    "   Each . represents " << tick_len << " bytes of output" << std::endl
     << "    " << std::flush);
   while(cmsysProcess_WaitForData(cp, &data, &length, 0))
     {
@@ -833,6 +850,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
   if(result == cmsysProcess_State_Exited)
     {
     *retVal = cmsysProcess_GetExitValue(cp);
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Command exited with the value: " << *retVal << std::endl);
     }
   else if(result == cmsysProcess_State_Exception)
     {
@@ -847,12 +865,18 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
     {
     *output += "\n*** ERROR executing: ";
     *output += cmsysProcess_GetErrorString(cp);
+    cmCTestLog(this, ERROR_MESSAGE, "There was an error: " << cmsysProcess_GetErrorString(cp) << std::endl);
     }
 
   cmsysProcess_Delete(cp);
 
   return result;
 }
+
+//######################################################################
+//######################################################################
+//######################################################################
+//######################################################################
 
 //----------------------------------------------------------------------
 int cmCTest::RunTest(std::vector<const char*> argv, 

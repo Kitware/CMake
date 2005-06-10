@@ -500,13 +500,13 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     }
   argv.push_back(0);
 
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Run command:");
+  cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Run command:");
   std::vector<const char*>::iterator ait;
-  for ( ait = argv.begin(); ait != argv.end(); ++ ait )
+  for ( ait = argv.begin(); ait != argv.end() && *ait; ++ ait )
     {
-    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, " \"" << *ait << "\"");
+    cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, " \"" << *ait << "\"");
     }
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, std::endl);
+  cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, std::endl);
   
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
@@ -589,7 +589,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     errorwarning.m_Error       = true;
     m_ErrorsAndWarnings.push_back(errorwarning);
     m_TotalErrors ++;
-    cmCTestLog(this, ERROR_MESSAGE, "There was an error: " << cmsysProcess_GetErrorString(cp) << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "There was an error: " << cmsysProcess_GetErrorString(cp) << std::endl);
     }
 
   cmsysProcess_Delete(cp);
