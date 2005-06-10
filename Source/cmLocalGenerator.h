@@ -98,27 +98,6 @@ public:
                       bool optional = false);
   
   /**
-   * Convert the given remote path to a relative path with respect to
-   * this generator's output directory.  The remote path must use
-   * forward slashes and not already be escaped or quoted.
-   */
-  std::string ConvertToRelativePath(const char* remote);
-
-  /**
-   * Convert to an output path that is relative to the current output
-   * directory.  The remote path must use forward slashes and not
-   * already be escaped or quoted.
-   */
-  std::string ConvertToRelativeOutputPath(const char* remote);
-
-  /**
-   * Calls ConvertToRelativePath conditionally on the cache option
-   * CMAKE_USE_RELATIVE_PATHS.  The remote path must use forward
-   * slashes and not already be escaped or quoted.
-   */
-  std::string ConvertToOptionallyRelativePath(const char* remote);
-
-  /**
    * Convert the given path to an output path that is optionally
    * relative based on the cache option CMAKE_USE_RELATIVE_PATHS.  The
    * remote path must use forward slashes and not already be escaped

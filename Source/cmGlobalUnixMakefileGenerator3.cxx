@@ -290,12 +290,14 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   cmakefileStream
     << "# The top level Makefile was generated from the following files:\n"
     << "SET(CMAKE_MAKEFILE_DEPENDS\n"
-    << "  \"" << lg->ConvertToRelativePath(cache.c_str()).c_str() << "\"\n";
+    << "  \"" << lg->Convert(cache.c_str(),
+                             cmLocalGenerator::START_OUTPUT).c_str() << "\"\n";
   for(std::vector<std::string>::const_iterator i = lfiles.begin();
       i !=  lfiles.end(); ++i)
     {
     cmakefileStream
-      << "  \"" << lg->ConvertToRelativePath(i->c_str()).c_str()
+      << "  \"" << lg->Convert(i->c_str(),
+                               cmLocalGenerator::START_OUTPUT).c_str()
       << "\"\n";
     }
   cmakefileStream
@@ -309,8 +311,10 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   cmakefileStream
     << "# The corresponding makefile is:\n"
     << "SET(CMAKE_MAKEFILE_OUTPUTS\n"
-    << "  \"" << lg->ConvertToRelativePath(makefileName.c_str()).c_str() << "\"\n"
-    << "  \"" << lg->ConvertToRelativePath(check.c_str()).c_str() << "\"\n";
+    << "  \"" << lg->Convert(makefileName.c_str(),
+                             cmLocalGenerator::START_OUTPUT).c_str() << "\"\n"
+    << "  \"" << lg->Convert(check.c_str(),
+                             cmLocalGenerator::START_OUTPUT).c_str() << "\"\n";
 
   // add in all the directory information files
   std::string tmpStr;

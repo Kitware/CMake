@@ -481,7 +481,6 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
                                                       cmSourceFile& source,
                                                       cmTarget& )
 { 
-  // std::string objectFile = this->ConvertToRelativeOutputPath(ofname);
   std::string objectFile = this->Convert(ofname,START_OUTPUT,SHELL);
   std::string sourceFile = 
     this->Convert(source.GetFullPath().c_str(),START_OUTPUT,SHELL,true);
@@ -1437,29 +1436,6 @@ cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
     script += newline;
     }
   return script;
-}
-
-//----------------------------------------------------------------------------
-std::string cmLocalGenerator::ConvertToRelativePath(const char* remote)
-{
-  return this->Convert(remote,START_OUTPUT);
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmLocalGenerator::ConvertToRelativeOutputPath(const char* remote)
-{
-  // TODO: Make this behave like its documentation...always convert.
-  // This involves identifying all calls to it that should be calls to
-  // the optional one.
-  return this->ConvertToOptionallyRelativeOutputPath(remote);
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmLocalGenerator::ConvertToOptionallyRelativePath(const char* remote)
-{
-  return this->Convert(remote, START_OUTPUT, UNCHANGED, true);
 }
 
 //----------------------------------------------------------------------------
