@@ -1950,7 +1950,7 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang)
 
 void cmMakefile::ExpandSourceListArguments(
   std::vector<std::string> const& arguments, 
-  std::vector<std::string>& newargs, unsigned int start)
+  std::vector<std::string>& newargs, unsigned int /* start */)
 {
   // now expand the args
   unsigned int i;
