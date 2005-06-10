@@ -475,6 +475,11 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
   m_CTest->EndXML(os);
 }
 
+//######################################################################
+//######################################################################
+//######################################################################
+//######################################################################
+
 //----------------------------------------------------------------------
 int cmCTestBuildHandler::RunMakeCommand(const char* command,
   int* retVal, const char* dir, int timeout, std::ofstream& ofs)
@@ -495,6 +500,14 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     }
   argv.push_back(0);
 
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Run command:");
+  std::vector<const char*>::iterator ait;
+  for ( ait = argv.begin(); ait != argv.end(); ++ ait )
+    {
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, " \"" << *ait << "\"");
+    }
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, std::endl);
+  
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
@@ -553,6 +566,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
   if(result == cmsysProcess_State_Exited)
     {
     *retVal = cmsysProcess_GetExitValue(cp);
+    cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Command exited with the value: " << *retVal << std::endl);
     }
   else if(result == cmsysProcess_State_Exception)
     {
@@ -575,12 +589,18 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     errorwarning.m_Error       = true;
     m_ErrorsAndWarnings.push_back(errorwarning);
     m_TotalErrors ++;
+    cmCTestLog(this, ERROR_MESSAGE, "There was an error: " << cmsysProcess_GetErrorString(cp) << std::endl);
     }
 
   cmsysProcess_Delete(cp);
 
   return result;
 }
+
+//######################################################################
+//######################################################################
+//######################################################################
+//######################################################################
 
 //----------------------------------------------------------------------
 void cmCTestBuildHandler::ProcessBuffer(const char* data, int length, size_t& tick, size_t tick_len, 

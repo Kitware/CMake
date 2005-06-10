@@ -66,6 +66,7 @@ int cmCTestConfigureHandler::ProcessHandler()
 
     cmGeneratedFileStream ofs;
     m_CTest->OpenOutputFile("Temporary", "LastConfigure.log", ofs);
+    cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Configure with command: " << cCommand.c_str() << std::endl);
     res = m_CTest->RunMakeCommand(cCommand.c_str(), &output, 
       &retVal, buildDirectory.c_str(),
       0, ofs);
