@@ -220,6 +220,12 @@ public:
    */
   static int EstimateFormatLength(const char *format, va_list ap);
 
+  /**
+   * Escape specific characters in 'str'.
+   */
+  static kwsys_stl::string EscapeChars(
+    const char *str, const char *chars_to_escape, char escape_char = '\\');
+  
   /** -----------------------------------------------------------------
    *               Filename Manipulation Routines
    *  -----------------------------------------------------------------

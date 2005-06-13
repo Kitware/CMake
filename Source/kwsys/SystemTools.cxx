@@ -1205,6 +1205,41 @@ int SystemTools::EstimateFormatLength(const char *format, va_list ap)
   return length;
 }
 
+kwsys_stl::string SystemTools::EscapeChars(
+  const char *str, 
+  const char *chars_to_escape, 
+  char escape_char)
+{
+  kwsys_stl::string n;
+  if (str)
+    {
+    if (!chars_to_escape | !*chars_to_escape)
+      {
+      n.append(str);
+      }
+    else
+      {
+      n.reserve(strlen(str));
+      while (*str)
+        {
+        const char *ptr = chars_to_escape;
+        while (*ptr)
+          {
+          if (*str == *ptr)
+            {
+            n += escape_char;
+            break;
+            }
+          ++ptr;
+          }
+        n += *str;
+        ++str;
+        }
+      }
+    }
+  return n;
+}
+
 // convert windows slashes to unix slashes 
 void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
 {
