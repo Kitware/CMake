@@ -53,8 +53,6 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 //#define YYINITDEPTH 10000
 
 
-#define calCheckEmpty(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp);
-#define calElementStart(cnt) yyGetParser->PrepareElement(&yyval)
 /* Disable some warnings in the generated code.  */
 #ifdef __BORLANDC__
 # pragma warn -8004 /* Variable assigned a value that is not used.  */
@@ -96,8 +94,6 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 Start:
 GoalWithOptionalBackSlash
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetResult($<str>1);
 }
@@ -105,139 +101,102 @@ GoalWithOptionalBackSlash
 GoalWithOptionalBackSlash:
 Goal
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 |
 Goal cal_BSLASH
 {
-  calElementStart(2);
-  calCheckEmpty(2);
   $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
 }
 
 Goal:
 {
-  calElementStart(0);
-  calCheckEmpty(0);
   $<str>$ = 0;
 }
 |
 String Goal
 {
-  calElementStart(2);
-  calCheckEmpty(2);
   $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
 }
 
 String:
 OuterText
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 |
 Variable
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 
 OuterText:
 cal_NAME
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 |
 cal_AT
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 |
 cal_DOLLAR
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 |
 cal_LCURLY
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 |
 cal_RCURLY
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 |
 cal_SYMBOL
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 
 Variable:
 cal_NCURLY MultipleIds cal_RCURLY
 {
-  calElementStart(3);
-  calCheckEmpty(3);
   $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1,$<str>2);
   //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
 }
 |
 cal_DCURLY MultipleIds cal_RCURLY
 {
-  calElementStart(3);
-  calCheckEmpty(3);
   $<str>$ = yyGetParser->ExpandVariable($<str>2);
   //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
 }
 |
 cal_ATNAME
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = yyGetParser->ExpandVariable($<str>1);
 }
 
 MultipleIds:
 {
-  calElementStart(0);
-  calCheckEmpty(0);
+  $<str>$ = 0;
 }
 |
 ID MultipleIds
 {
-  calElementStart(2);
-  calCheckEmpty(2);
   $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
 }
 
 ID:
 cal_NAME
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 |
 Variable
 {
-  calElementStart(1);
-  calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
 

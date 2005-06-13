@@ -147,8 +147,6 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 //#define YYINITDEPTH 10000
 
 
-#define calCheckEmpty(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp);
-#define calElementStart(cnt) yyGetParser->PrepareElement(&yyval)
 /* Disable some warnings in the generated code.  */
 #ifdef __BORLANDC__
 # pragma warn -8004 /* Variable assigned a value that is not used.  */
@@ -364,9 +362,9 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    97,    97,   106,   113,   121,   127,   135,   142,   150,
-     157,   164,   171,   178,   185,   193,   201,   209,   217,   222,
-     230,   237
+       0,    95,    95,   102,   107,   113,   117,   123,   128,   134,
+     139,   144,   149,   154,   159,   165,   171,   177,   183,   187,
+     193,   198
 };
 #endif
 
@@ -1080,8 +1078,6 @@ yyreduce:
         case 2:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = 0;
   yyGetParser->SetResult(yyvsp[0].str);
 }
@@ -1090,8 +1086,6 @@ yyreduce:
   case 3:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
@@ -1099,8 +1093,6 @@ yyreduce:
   case 4:
 
     {
-  calElementStart(2);
-  calCheckEmpty(2);
   yyval.str = yyGetParser->CombineUnions(yyvsp[-1].str, yyvsp[0].str);
 }
     break;
@@ -1108,8 +1100,6 @@ yyreduce:
   case 5:
 
     {
-  calElementStart(0);
-  calCheckEmpty(0);
   yyval.str = 0;
 }
     break;
@@ -1117,8 +1107,6 @@ yyreduce:
   case 6:
 
     {
-  calElementStart(2);
-  calCheckEmpty(2);
   yyval.str = yyGetParser->CombineUnions(yyvsp[-1].str, yyvsp[0].str);
 }
     break;
@@ -1126,8 +1114,6 @@ yyreduce:
   case 7:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
@@ -1135,8 +1121,6 @@ yyreduce:
   case 8:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
@@ -1144,8 +1128,6 @@ yyreduce:
   case 9:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
@@ -1153,8 +1135,6 @@ yyreduce:
   case 10:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
@@ -1162,8 +1142,6 @@ yyreduce:
   case 11:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
@@ -1171,8 +1149,6 @@ yyreduce:
   case 12:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
@@ -1180,8 +1156,6 @@ yyreduce:
   case 13:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
@@ -1189,8 +1163,6 @@ yyreduce:
   case 14:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
@@ -1198,8 +1170,6 @@ yyreduce:
   case 15:
 
     {
-  calElementStart(3);
-  calCheckEmpty(3);
   yyval.str = yyGetParser->ExpandSpecialVariable(yyvsp[-2].str,yyvsp[-1].str);
   //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
 }
@@ -1208,8 +1178,6 @@ yyreduce:
   case 16:
 
     {
-  calElementStart(3);
-  calCheckEmpty(3);
   yyval.str = yyGetParser->ExpandVariable(yyvsp[-1].str);
   //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
 }
@@ -1218,8 +1186,6 @@ yyreduce:
   case 17:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyGetParser->ExpandVariable(yyvsp[0].str);
 }
     break;
@@ -1227,16 +1193,13 @@ yyreduce:
   case 18:
 
     {
-  calElementStart(0);
-  calCheckEmpty(0);
+  yyval.str = 0;
 }
     break;
 
   case 19:
 
     {
-  calElementStart(2);
-  calCheckEmpty(2);
   yyval.str = yyGetParser->CombineUnions(yyvsp[-1].str, yyvsp[0].str);
 }
     break;
@@ -1244,8 +1207,6 @@ yyreduce:
   case 20:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
@@ -1253,8 +1214,6 @@ yyreduce:
   case 21:
 
     {
-  calElementStart(1);
-  calCheckEmpty(1);
   yyval.str = yyvsp[0].str;
 }
     break;
