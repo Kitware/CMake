@@ -30,7 +30,19 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args)
   m_OuputFile = args[1];
   m_CopyOnly = false;
   m_EscapeQuotes = false;
+
+  
+  // for CMake 2.0 and earlier CONFIGURE_FILE defaults to the FinalPass,
+  // after 2.0 it only does InitialPass
   m_Immediate = false;
+  const char* versionValue
+    = m_Makefile->GetRequiredDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  if (atof(versionValue) > 2.0)
+    {
+    m_Immediate = true;
+    }
+
+  
   m_AtOnly = false;
   for(unsigned int i=2;i < args.size();++i)
     {

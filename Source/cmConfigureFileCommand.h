@@ -58,8 +58,7 @@ public:
     {
       return
         "  CONFIGURE_FILE(InputFile OutputFile\n"
-        "                 [COPYONLY] [ESCAPE_QUOTES]\n"
-        "                 [IMMEDIATE] [@ONLY])\n"
+        "                 [COPYONLY] [ESCAPE_QUOTES] [@ONLY])\n"
         "The Input and Ouput files have to have full paths.  "
         "This command replaces any variables in the input file referenced as "
         "${VAR} or @VAR@ with their values as determined by CMake.  If a "
@@ -67,9 +66,8 @@ public:
         "If COPYONLY is specified, then then no variable expansion will take "
         "place.  If ESCAPE_QUOTES is specified in then any substitued quotes "
         "will be C-style escaped.  "
-        "If IMMEDIATE is specified, then the file will be configured with "
-        "the current values of CMake variables instead of waiting until the "
-        "end of CMakeLists processing.  If @ONLY is specified, only variables "
+        "The file will be configured with the current values of CMake "
+        "variables. If @ONLY is specified, only variables "
         "of the form @VAR@ will be replaces and ${VAR} will be ignored.  "
         "This is useful for configuring tcl scripts that use ${VAR}.";
     }
