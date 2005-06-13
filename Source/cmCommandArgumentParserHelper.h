@@ -77,6 +77,16 @@ public:
   void SetLineFile(long line, const char* file);
   void SetEscapeQuotes(bool b) { m_EscapeQuotes = b; }
 
+  const char* GetError() { return m_Error.c_str(); }
+
+  char m_EmptyVariable[1];
+  char m_DCURLYVariable[3];
+  char m_RCURLYVariable[3];
+  char m_ATVariable[3];
+  char m_DOLLARVariable[3];
+  char m_LCURLYVariable[3];
+  char m_BSLASHVariable[3];
+
 private:
   cmStdString::size_type InputBufferPos;
   cmStdString InputBuffer;
@@ -98,13 +108,15 @@ private:
   void CleanupParser();
 
   std::set<char*> m_Variables;
-  char m_EmptyVariable[1];
   const cmMakefile* m_Makefile;
   std::string m_Result;
   const char* m_FileName;
   long m_FileLine;
 
   bool m_EscapeQuotes;
+
+  std::string m_Error;
+
 };
 
 #endif
