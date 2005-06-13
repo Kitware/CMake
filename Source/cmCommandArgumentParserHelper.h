@@ -64,7 +64,7 @@ public:
   const char* GetCurrentCombine() { return this->CurrentCombine.c_str(); }
   void UpdateCombine(const char* str1, const char* str2);
   void Append(const char* str);
-  char* CombineUnions(const char* in1, const char* in2);
+  char* CombineUnions(char* in1, char* in2);
 
   char* ExpandSpecialVariable(const char* key, const char* var);
   char* ExpandVariable(const char* var);

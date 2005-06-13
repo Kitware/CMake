@@ -157,27 +157,20 @@ void cmCommandArgumentParserHelper::Print(const char* place, const char* str)
     }
 }
 
-char* cmCommandArgumentParserHelper::CombineUnions(const char* in1, const char* in2)
+char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
 {
-  int len = 1;
-  if ( in1 )
+  if ( !in1 )
     {
-    len += strlen(in1);
+    return in2;
     }
-  if ( in2 )
+  else if ( !in2 )
     {
-    len += strlen(in2);
+    return in1;
     }
+  int len = strlen(in1) + strlen(in2) + 1;
   char* out = new char [ len ];
-  out[0] = 0;
-  if ( in1 )
-    {
-    strcat(out, in1);
-    }
-  if ( in2 )
-    {
-    strcat(out, in2);
-    }
+  strcpy(out, in1);
+  strcat(out, in2);
   return *(m_Variables.insert(out).first);
 }
 
