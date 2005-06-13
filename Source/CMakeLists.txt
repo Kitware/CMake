@@ -17,6 +17,55 @@ INCLUDE_DIRECTORIES(
 # let cmake know it is supposed to use it
 ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
 
+OPTION(CMAKE_REGENERATE_YACCLEX
+  "Regenerate YACC and LEXX files" OFF)
+MARK_AS_ADVANCED(CMAKE_REGENERATE_YACCLEX)
+IF(CMAKE_REGENERATE_YACCLEX)
+  FIND_PROGRAM(YACC_EXECUTABLE
+    NAMES yacc bison
+    PATHS /usr/bin
+    DOC "Yacc or Bison executable")
+  FIND_PROGRAM(FLEX_EXECUTABLE
+    NAMES flex
+    PATHS /usr/bin
+    DOC "Flex executable")
+  MARK_AS_ADVANCED(YACC_EXECUTABLE FLEX_EXECUTABLE)
+  IF(YACC_EXECUTABLE)
+    SET(BISON_FLAGS)
+    IF(YACC_EXECUTABLE MATCHES "bison")
+      SET(BISON_FLAGS "--yacc")
+    ENDIF(YACC_EXECUTABLE MATCHES "bison")
+    SET(yacc_files)
+    FOREACH(name cmCommandArgument)
+      SET(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Parser.y")
+      SET(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Parser.cxx")
+      SET(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}ParserTokens.h")
+      ADD_CUSTOM_COMMAND(
+        OUTPUT "${dst}"
+        DEPENDS "${src}"
+        COMMAND ${YACC_EXECUTABLE}
+        ARGS --name-prefix=${name}_yy --defines="${hdr}" -o"${dst}" "${src}")
+      SET(yacc_files ${yacc_files} "${dst}")
+    ENDFOREACH(name)
+    ADD_CUSTOM_TARGET(RerunYacc DEPENDS ${yacc_files})
+  ENDIF(YACC_EXECUTABLE)
+  IF(FLEX_EXECUTABLE)
+    SET(lex_files)
+    FOREACH(name cmCommandArgument)
+      SET(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Lexer.in.l")
+      SET(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.cxx")
+      SET(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.h")
+      ADD_CUSTOM_COMMAND(
+        OUTPUT "${dst}"
+        DEPENDS "${src}"
+        COMMAND ${FLEX_EXECUTABLE}
+        ARGS --prefix=${name}_yy --header-file="${hdr}" -o"${dst}" "${src}")
+      SET(lex_files ${lex_files} "${dst}")
+    ENDFOREACH(name)
+    ADD_CUSTOM_TARGET(RerunLex DEPENDS ${lex_files})
+  ENDIF(FLEX_EXECUTABLE)
+
+ENDIF(CMAKE_REGENERATE_YACCLEX)
 #
 # Sources for CMakeLib
 #
@@ -26,6 +75,9 @@ SET(SRCS
   cmCacheManager.h
   cmCommands.cxx
   cmCommands.h
+  cmCommandArgumentLexer.cxx
+  cmCommandArgumentParser.cxx
+  cmCommandArgumentParserHelper.cxx
   cmCustomCommand.cxx
   cmCustomCommand.h
   cmDepends.cxx

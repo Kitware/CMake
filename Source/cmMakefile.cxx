@@ -24,6 +24,7 @@
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
+#include "cmCommandArgumentParserHelper.h"
 #include "cmTest.h"
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #  include "cmVariableWatch.h"
@@ -1365,10 +1366,58 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 long line,
                                                 bool removeEmpty) const
 {
+  if ( source.empty() || source.find_first_of("$@") == source.npos)
+    {
+    return source.c_str();
+    }
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
   // with GetDefinition(), if not found in the map, nothing is expanded.
   // It also supports the $ENV{VAR} syntax where VAR is looked up in
   // the current environment variables.
+  
+  bool notParsed = true;
+  if ( !atOnly )
+    {
+    cmCommandArgumentParserHelper parser;
+    parser.SetMakefile(this);
+    parser.SetLineFile(line, filename);
+    parser.SetEscapeQuotes(escapeQuotes);
+    int res = parser.ParseString(source.c_str(), 0);
+    if ( res )
+      {
+      source = parser.GetResult();
+      notParsed = false;
+      }
+    else
+      {
+      cmOStringStream error;
+      error << "Syntax error in cmake code at\n"
+        << filename << ":" << line << ":\n"
+        << parser.GetError() << ", when parsing string \"" << source.c_str() << "\"";
+      const char* versionValue
+        = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+      int major = 0;
+      int minor = 0;
+      if ( versionValue )
+        {
+        sscanf(versionValue, "%d.%d", &major, &minor);
+        }
+      if ( major < 2 || major == 2 && minor < 1 )
+        {
+        cmSystemTools::Error(error.str().c_str());
+        cmSystemTools::SetFatalErrorOccured();
+        return source.c_str();
+        }
+      else
+        {
+        cmSystemTools::Message(error.str().c_str());
+        }
+      //std::cerr << "[" << source.c_str() << "] results in: [" << parser.GetResult() << "]" << std::endl;
+      }
+    }
+
+  if ( notParsed )
+    {
 
   // start by look for $ or @ in the string
   std::string::size_type markerPos;
@@ -1521,6 +1570,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
     }
   result += source.substr(currentPos); // pick up the rest of the string
   source = result;
+      }
   return source.c_str();
 }
 
