@@ -49,7 +49,8 @@ YY_DECL;
 static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 
 #define YYDEBUG 1
-#define YYMAXDEPTH 10000000
+//#define YYMAXDEPTH 100000
+//#define YYINITDEPTH 10000
 
 
 #define calCheckEmpty(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp);
@@ -81,6 +82,7 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 %token cal_LCURLY
 %token cal_RCURLY
 %token cal_NAME
+%token cal_BSLASH
 %token cal_SYMBOL
 %token cal_AT
 %token cal_ERROR
@@ -92,12 +94,27 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 
 
 Start:
-Goal
+GoalWithOptionalBackSlash
 {
   calElementStart(1);
   calCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetResult($<str>1);
+}
+
+GoalWithOptionalBackSlash:
+Goal
+{
+  calElementStart(1);
+  calCheckEmpty(1);
+  $<str>$ = $<str>1;
+}
+|
+Goal cal_BSLASH
+{
+  calElementStart(2);
+  calCheckEmpty(2);
+  $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
 }
 
 Goal:
@@ -115,7 +132,7 @@ String Goal
 }
 
 String:
-TextWithRCurly
+OuterText
 {
   calElementStart(1);
   calCheckEmpty(1);
@@ -129,51 +146,8 @@ Variable
   $<str>$ = $<str>1;
 }
 
-MultipleIds:
-{
-  calElementStart(0);
-  calCheckEmpty(0);
-}
-|
-ID MultipleIds
-{
-  calElementStart(2);
-  calCheckEmpty(2);
-  $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
-}
-
-ID:
-Text
-{
-  calElementStart(1);
-  calCheckEmpty(1);
-  $<str>$ = $<str>1;
-}
-|
-Variable
-{
-  calElementStart(1);
-  calCheckEmpty(1);
-  $<str>$ = $<str>1;
-}
-
-Text:
+OuterText:
 cal_NAME
-{
-  calElementStart(1);
-  calCheckEmpty(1);
-  $<str>$ = $<str>1;
-}
-|
-cal_SYMBOL
-{
-  calElementStart(1);
-  calCheckEmpty(1);
-  $<str>$ = $<str>1;
-}
-
-TextWithRCurly:
-Text
 {
   calElementStart(1);
   calCheckEmpty(1);
@@ -207,6 +181,13 @@ cal_RCURLY
   calCheckEmpty(1);
   $<str>$ = $<str>1;
 }
+|
+cal_SYMBOL
+{
+  calElementStart(1);
+  calCheckEmpty(1);
+  $<str>$ = $<str>1;
+}
 
 Variable:
 cal_NCURLY MultipleIds cal_RCURLY
@@ -231,6 +212,35 @@ cal_ATNAME
   calCheckEmpty(1);
   $<str>$ = yyGetParser->ExpandVariable($<str>1);
 }
+
+MultipleIds:
+{
+  calElementStart(0);
+  calCheckEmpty(0);
+}
+|
+ID MultipleIds
+{
+  calElementStart(2);
+  calCheckEmpty(2);
+  $<str>$ = yyGetParser->CombineUnions($<str>1, $<str>2);
+}
+
+ID:
+cal_NAME
+{
+  calElementStart(1);
+  calCheckEmpty(1);
+  $<str>$ = $<str>1;
+}
+|
+Variable
+{
+  calElementStart(1);
+  calCheckEmpty(1);
+  $<str>$ = $<str>1;
+}
+
 
 %%
 /* End of grammar */
