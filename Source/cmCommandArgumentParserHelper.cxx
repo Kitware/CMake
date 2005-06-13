@@ -99,7 +99,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     return this->AddString(ostr.str().c_str());
     } 
   const char* value = m_Makefile->GetDefinition(var);
-  if (m_EscapeQuotes)
+  if (m_EscapeQuotes && value)
     {
     return this->AddString(cmSystemTools::EscapeQuotes(value).c_str());
     }
