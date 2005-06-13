@@ -99,47 +99,53 @@ Modify cmCommandArgumentLexer.h:
 
 "${" {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
-  yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  yylvalp->str = yyextra->m_DCURLYVariable;
   return cal_DCURLY;
 }
 
 "}" {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
-  yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  yylvalp->str = yyextra->m_RCURLYVariable;
   return cal_RCURLY;
 }
 
 "@" {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
-  yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  yylvalp->str = yyextra->m_ATVariable;
   return cal_AT;
 }
 
-[A-Za-z0-9_]+ { 
+[A-Za-z0-9_.]+ { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   return cal_NAME; 
 }
 
-[^A-Za-z0-9_${}\\@]+|\\. { 
+[^\${}\\@]+|\\. { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   return cal_SYMBOL; 
 }
 
 "$" {
-  yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  yylvalp->str = yyextra->m_DOLLARVariable;
   return cal_DOLLAR; 
 }
 
 "{" {
-  yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  yylvalp->str = yyextra->m_LCURLYVariable;
   return cal_LCURLY; 
 }
 
-.|\n {
-  //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
-  return cal_ERROR;
+"\\" {
+  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  yylvalp->str = yyextra->m_BSLASHVariable;
+  return cal_BSLASH; 
 }
 
 %%
