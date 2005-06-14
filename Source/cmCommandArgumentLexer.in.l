@@ -85,13 +85,13 @@ Modify cmCommandArgumentLexer.h:
 
 %%
 
-\$[A-Za-z0-9_]+\{ { 
+\$[A-Za-z0-9/_.-]+\{ { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
   return cal_NCURLY; 
 } 
 
-@[A-Za-z0-9_]+@ { 
+@[A-Za-z0-9/_.-]+@ { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
   return cal_ATNAME; 
@@ -118,7 +118,7 @@ Modify cmCommandArgumentLexer.h:
   return cal_AT;
 }
 
-[A-Za-z0-9_.]+ { 
+[A-Za-z0-9/_.-]+ { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   return cal_NAME; 

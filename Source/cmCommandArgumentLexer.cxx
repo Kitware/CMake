@@ -179,8 +179,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
     } \
   while ( 0 )
 
-#define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
-
 /* The following is because we cannot portably get our hands on size_t
  * (without autoconf's help, which isn't available because we want
  * flex-generated scanners to compile on their own).
@@ -364,16 +362,16 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    3,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    4,    1,    5,    5,    5,
-        5,    5,    5,    5,    5,    5,    5,    1,    1,    1,
-        1,    1,    1,    6,    5,    5,    5,    5,    5,    5,
-        5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
-        5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
-        1,    7,    1,    1,    5,    1,    5,    5,    5,    5,
+        1,    1,    1,    1,    4,    4,    4,    4,    4,    4,
+        4,    4,    4,    4,    4,    4,    4,    1,    1,    1,
+        1,    1,    1,    5,    4,    4,    4,    4,    4,    4,
+        4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
+        4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
+        1,    6,    1,    1,    4,    1,    4,    4,    4,    4,
 
-        5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
-        5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
-        5,    5,    8,    1,    9,    1,    1,    1,    1,    1,
+        4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
+        4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
+        4,    4,    7,    1,    8,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -390,16 +388,16 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[10] =
+static yyconst flex_int32_t yy_meta[9] =
     {   0,
-        1,    2,    3,    1,    1,    3,    3,    3,    3
+        1,    2,    3,    1,    3,    3,    3,    3
     } ;
 
 static yyconst flex_int16_t yy_base[22] =
     {   0,
-        0,    0,   21,    0,    5,   10,    7,    0,   23,   23,
-        0,    3,   23,    0,   11,   23,   23,   23,   23,   17,
-       19
+        0,    0,   20,    0,    5,   14,    7,    0,   21,   21,
+        0,    3,   21,    0,    9,   21,   21,   21,   21,   14,
+       16
     } ;
 
 static yyconst flex_int16_t yy_def[22] =
@@ -409,20 +407,18 @@ static yyconst flex_int16_t yy_def[22] =
        19
     } ;
 
-static yyconst flex_int16_t yy_nxt[33] =
+static yyconst flex_int16_t yy_nxt[30] =
     {   0,
-        4,    4,    5,    6,    6,    7,    8,    9,   10,   12,
-       17,   15,   13,   14,   14,   15,   18,   11,   11,   16,
-       19,   16,    3,   19,   19,   19,   19,   19,   19,   19,
-       19,   19
+        4,    4,    5,    6,    7,    8,    9,   10,   12,   17,
+       15,   13,   15,   18,   11,   11,   16,   14,   16,   19,
+        3,   19,   19,   19,   19,   19,   19,   19,   19
     } ;
 
-static yyconst flex_int16_t yy_chk[33] =
+static yyconst flex_int16_t yy_chk[30] =
     {   0,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    5,
-       12,    7,    5,    6,    6,   15,   15,   20,   20,   21,
-        3,   21,   19,   19,   19,   19,   19,   19,   19,   19,
-       19,   19
+        1,    1,    1,    1,    1,    1,    1,    1,    5,   12,
+        7,    5,   15,   15,   20,   20,   21,    6,   21,    3,
+       19,   19,   19,   19,   19,   19,   19,   19,   19
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -787,7 +783,7 @@ yy_match:
       yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
       ++yy_cp;
       }
-    while ( yy_base[yy_current_state] != 23 );
+    while ( yy_base[yy_current_state] != 21 );
 
 yy_find_action:
     yy_act = yy_accept[yy_current_state];
