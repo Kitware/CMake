@@ -43,7 +43,6 @@ public:
   ~cmCommandArgumentParserHelper();
 
   int ParseString(const char* str, int verb);
-  int ParseFile(const char* file);
 
   // For the lexer:
   void AllocateParserType(cmCommandArgumentParserHelper::ParserType* pt, 
@@ -53,17 +52,6 @@ public:
   void Error(const char* str);
 
   // For yacc
-  void AddClassFound(const char* sclass);
-  void PrepareElement(ParserType* opt);
-  void DeallocateParserType(char** pt);
-  void CheckEmpty(int line, int cnt, ParserType* pt);
-  void StartClass(const char* cls);
-  void EndClass();
-  void AddPackagesImport(const char* sclass);
-  void SetCurrentCombine(const char* cmb) { this->CurrentCombine = cmb; }
-  const char* GetCurrentCombine() { return this->CurrentCombine.c_str(); }
-  void UpdateCombine(const char* str1, const char* str2);
-  void Append(const char* str);
   char* CombineUnions(char* in1, char* in2);
 
   char* ExpandSpecialVariable(const char* key, const char* var);
@@ -95,11 +83,6 @@ private:
   int UnionsAvailable;
   int Verbose;
 
-  std::vector<char*> Allocates;
-  std::string CurrentCombine;
-
-  void PrintClasses();
-
   void Print(const char* place, const char* str);
   void SafePrintMissing(const char* str, int line, int cnt);
 
@@ -107,16 +90,13 @@ private:
 
   void CleanupParser();
 
-  std::set<char*> m_Variables;
+  std::vector<char*> m_Variables;
   const cmMakefile* m_Makefile;
   std::string m_Result;
   const char* m_FileName;
   long m_FileLine;
-
   bool m_EscapeQuotes;
-
   std::string m_Error;
-
 };
 
 #endif

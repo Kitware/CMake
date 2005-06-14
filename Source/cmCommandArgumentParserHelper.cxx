@@ -57,7 +57,8 @@ char* cmCommandArgumentParserHelper::AddString(const char* str)
     }
   char* stVal = new char[strlen(str)+1];
   strcpy(stVal, str);
-  return *(m_Variables.insert(stVal).first);
+  m_Variables.push_back(stVal);
+  return stVal;
 }
 
 char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key, const char* var)
@@ -106,57 +107,6 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
   return this->AddString(value);
 }
 
-void cmCommandArgumentParserHelper::DeallocateParserType(char** pt)
-{
-  if (!pt)
-    {
-    return;
-    }
-  if (!*pt)
-    {
-    //*pt = 0;
-    return;
-    }
-  // std::cout << (void*) *pt << " " << *pt << " this->DeallocateParserType" << std::endl;
-  //delete [] *pt;
-  *pt = 0;
-  this->UnionsAvailable --;
-}
-
-void cmCommandArgumentParserHelper::SafePrintMissing(const char* str, int line, int cnt)
-{
-  if ( this->Verbose )
-    {
-    if ( str )
-      {
-      //std::cout << (void*) str << " JPSafePrintMissing" << std::endl;
-      std::cout << line << " String " << cnt << " exists: ";
-      unsigned int cc;
-      for ( cc = 0; cc < strlen(str); cc ++ )
-        {
-        unsigned char ch = str[cc];
-        if ( ch >= 32 && ch <= 126 )
-          {
-          std::cout << (char)ch;
-          }
-        else
-          {
-          std::cout << "<" << (int)ch << ">";
-          break;
-          }
-        }
-      std::cout << "- " << strlen(str) << std::endl;
-      }
-    }
-}
-void cmCommandArgumentParserHelper::Print(const char* place, const char* str)
-{
-  if ( this->Verbose )
-    {
-    std::cout << "[" << place << "=" << str << "]" << std::endl;
-    }
-}
-
 char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
 {
   if ( !in1 )
@@ -171,25 +121,8 @@ char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
   char* out = new char [ len ];
   strcpy(out, in1);
   strcat(out, in2);
-  return *(m_Variables.insert(out).first);
-}
-
-void cmCommandArgumentParserHelper::CheckEmpty(int line, int cnt, cmCommandArgumentParserHelper::ParserType* pt)
-{
-  int cc;
-  int kk = -cnt + 1;
-  for ( cc = 1; cc <= cnt; cc ++)
-    {
-    cmCommandArgumentParserHelper::ParserType* cpt = pt + kk;
-    this->SafePrintMissing(cpt->str, line, cc);
-    kk ++;
-    }
-}
-
-void cmCommandArgumentParserHelper::PrepareElement(cmCommandArgumentParserHelper::ParserType* me)
-{
-  // Inititalize self
-  me->str = 0;
+  m_Variables.push_back(out);
+  return out;
 }
 
 void cmCommandArgumentParserHelper::AllocateParserType(cmCommandArgumentParserHelper::ParserType* pt, 
@@ -208,7 +141,7 @@ void cmCommandArgumentParserHelper::AllocateParserType(cmCommandArgumentParserHe
   pt->str = new char[ len + 1 ];
   strncpy(pt->str, str, len);
   pt->str[len] = 0;
-  this->Allocates.push_back(pt->str);
+  m_Variables.push_back(pt->str);
   // std::cout << (void*) pt->str << " " << pt->str << " JPAllocateParserType" << std::endl;
 }
 
@@ -250,22 +183,13 @@ int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
 
 void cmCommandArgumentParserHelper::CleanupParser()
 {
-  std::vector<char*>::iterator it;
-  for ( it = this->Allocates.begin(); 
-    it != this->Allocates.end();
-    ++ it )
-    {
-    delete [] *it;
-    }
-  std::set<char*>::iterator sit;
+  std::vector<char*>::iterator sit;
   for ( sit = m_Variables.begin();
     sit != m_Variables.end();
     ++ sit )
     {
     delete [] *sit;
     }
-  this->Allocates.erase(this->Allocates.begin(), 
-    this->Allocates.end());
   m_Variables.erase(m_Variables.begin(), m_Variables.end());
 }
 
@@ -293,6 +217,7 @@ int cmCommandArgumentParserHelper::LexInput(char* buf, int maxlen)
     return( 0 );
     }
 }
+
 void cmCommandArgumentParserHelper::Error(const char* str)
 {
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
@@ -310,42 +235,6 @@ void cmCommandArgumentParserHelper::Error(const char* str)
   std::cerr << "]" << std::endl;
   */
   m_Error = ostr.str();
-}
-
-void cmCommandArgumentParserHelper::UpdateCombine(const char* str1, const char* str2)
-{
-  if ( this->CurrentCombine == "" && str1 != 0)
-    {
-    this->CurrentCombine = str1;
-    }
-  this->CurrentCombine += ".";
-  this->CurrentCombine += str2;
-}
-
-int cmCommandArgumentParserHelper::ParseFile(const char* file)
-{
-  if ( !cmSystemTools::FileExists(file))
-    {
-    return 0;
-    }
-  std::ifstream ifs(file);
-  if ( !ifs )
-    {
-    return 0;
-    }
-
-  cmStdString fullfile = "";
-  cmStdString line;
-  while ( cmSystemTools::GetLineFromStream(ifs, line) )
-    {
-    fullfile += line + "\n";
-    }
-  return this->ParseString(fullfile.c_str(), 0);
-}
-
-void cmCommandArgumentParserHelper::Append(const char* str)
-{
-  std::cout << "Append[" << str << "]" << std::endl;
 }
 
 void cmCommandArgumentParserHelper::SetMakefile(const cmMakefile* mf)
