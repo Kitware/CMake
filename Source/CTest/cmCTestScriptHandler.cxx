@@ -45,13 +45,15 @@
 
 #include "cmCTestBuildCommand.h"
 #include "cmCTestConfigureCommand.h"
+#include "cmCTestCoverageCommand.h"
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
+#include "cmCTestMemCheckCommand.h"
 #include "cmCTestRunScriptCommand.h"
 #include "cmCTestSleepCommand.h"
 #include "cmCTestStartCommand.h"
-#include "cmCTestUpdateCommand.h"
-#include "cmCTestTestCommand.h"
 #include "cmCTestSubmitCommand.h"
+#include "cmCTestTestCommand.h"
+#include "cmCTestUpdateCommand.h"
 
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
 
@@ -228,7 +230,9 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   // created with the same format lets do that - ken
   this->AddCTestCommand(new cmCTestBuildCommand);
   this->AddCTestCommand(new cmCTestConfigureCommand);
+  this->AddCTestCommand(new cmCTestCoverageCommand);
   this->AddCTestCommand(new cmCTestEmptyBinaryDirectoryCommand);
+  this->AddCTestCommand(new cmCTestMemCheckCommand);
   this->AddCTestCommand(new cmCTestRunScriptCommand);
   this->AddCTestCommand(new cmCTestSleepCommand);
   this->AddCTestCommand(new cmCTestStartCommand);

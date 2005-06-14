@@ -203,14 +203,16 @@ INCLUDE_DIRECTORIES(
 # Sources for CTestLib
 #
 SET(CMTEST_SRCS cmCTest.cxx 
+  CTest/cmCTestBuildAndTestHandler.cxx
   CTest/cmCTestBuildCommand.cxx
   CTest/cmCTestBuildHandler.cxx
-  CTest/cmCTestBuildAndTestHandler.cxx
   CTest/cmCTestConfigureCommand.cxx
   CTest/cmCTestConfigureHandler.cxx
+  CTest/cmCTestCoverageCommand.cxx
   CTest/cmCTestCoverageHandler.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx
+  CTest/cmCTestMemCheckCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx
   CTest/cmCTestRunScriptCommand.cxx
   CTest/cmCTestScriptHandler.cxx
