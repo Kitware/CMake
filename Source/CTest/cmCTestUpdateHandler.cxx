@@ -308,6 +308,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   int svn_use_status = 0;
 
   std::string goutput;
+  std::string errors;
   int retVal = 0;
   bool res = true;
 
@@ -320,9 +321,13 @@ int cmCTestUpdateHandler::ProcessHandler()
       cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "* Get repository information: " << command.c_str() << std::endl);
     if ( !m_CTest->GetShowOnly() )
       {
-      res = cmSystemTools::RunSingleCommand(command.c_str(), &goutput, 
-        &retVal, sourceDirectory,
-        m_HandlerVerbose, 0 /*m_TimeOut*/);
+      ofs << "* Get repository information" << std::endl;
+      ofs << "  Command: " << command.c_str() << std::endl;
+      res = m_CTest->RunCommand(command.c_str(), &goutput, &errors,
+        &retVal, sourceDirectory, 0 /*m_TimeOut*/);
+
+      ofs << "  Output: " << goutput.c_str() << std::endl;
+      ofs << "  Errors: " << errors.c_str() << std::endl;
       if ( ofs )
         {
         ofs << "--- Update information ---" << std::endl;
@@ -373,22 +378,31 @@ int cmCTestUpdateHandler::ProcessHandler()
     case cmCTestUpdateHandler::e_CVS:
       command = updateCommand + " -z3 update " + updateOptions +
         " " + extra_update_opts;
-      res = cmSystemTools::RunSingleCommand(command.c_str(), &goutput, 
-        &retVal, sourceDirectory,
-        m_HandlerVerbose, 0 /*m_TimeOut*/);
+      ofs << "* Update repository: " << std::endl;
+      ofs << "  Command: " << command.c_str() << std::endl;
+      res = m_CTest->RunCommand(command.c_str(), &goutput, &errors,
+        &retVal, sourceDirectory, 0 /*m_TimeOut*/);
+      ofs << "  Output: " << goutput.c_str() << std::endl;
+      ofs << "  Errors: " << errors.c_str() << std::endl;
       break;
     case cmCTestUpdateHandler::e_SVN:
         {
         std::string partialOutput;
         command = updateCommand + " update " + updateOptions +
           " " + extra_update_opts;
-        bool res1 = cmSystemTools::RunSingleCommand(command.c_str(), &partialOutput, 
-          &retVal, sourceDirectory,
-          m_HandlerVerbose, 0 /*m_TimeOut*/);
+        ofs << "* Update repository: " << std::endl;
+        ofs << "  Command: " << command.c_str() << std::endl;
+        bool res1 = m_CTest->RunCommand(command.c_str(), &partialOutput, &errors,
+          &retVal, sourceDirectory, 0 /*m_TimeOut*/);
+        ofs << "  Output: " << partialOutput.c_str() << std::endl;
+        ofs << "  Errors: " << errors.c_str() << std::endl;
         command = updateCommand + " status";
-        res = cmSystemTools::RunSingleCommand(command.c_str(), &partialOutput, 
-          &retVal, sourceDirectory,
-          m_HandlerVerbose, 0 /*m_TimeOut*/);
+        ofs << "* Status repository: " << std::endl;
+        ofs << "  Command: " << command.c_str() << std::endl;
+        res = m_CTest->RunCommand(command.c_str(), &partialOutput, &errors,
+          &retVal, sourceDirectory, 0 /*m_TimeOut*/);
+        ofs << "  Output: " << partialOutput.c_str() << std::endl;
+        ofs << "  Errors: " << errors.c_str() << std::endl;
         goutput += partialOutput;
         res = res && res1;
         }
@@ -505,9 +519,12 @@ int cmCTestUpdateHandler::ProcessHandler()
           }
         cmCTestLog(m_CTest, DEBUG, "Do log: " << logcommand << std::endl);
         cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "* Get file update information: " << logcommand.c_str() << std::endl);
-        res = cmSystemTools::RunSingleCommand(logcommand.c_str(), &output, 
-          &retVal, sourceDirectory,
-          m_HandlerVerbose, 0 /*m_TimeOut*/);
+        ofs << "* Get log information for file: " << file << std::endl;
+        ofs << "  Command: " << logcommand.c_str() << std::endl;
+        res = m_CTest->RunCommand(logcommand.c_str(), &output, &errors,
+          &retVal, sourceDirectory, 0 /*m_TimeOut*/);
+        ofs << "  Output: " << output.c_str() << std::endl;
+        ofs << "  Errors: " << errors.c_str() << std::endl;
         if ( ofs )
           {
           ofs << output << std::endl;

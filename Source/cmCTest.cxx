@@ -1786,6 +1786,113 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf, const char*
   return true;
 }
 
+bool cmCTest::RunCommand(
+  const char* command, 
+  std::string* stdOut,
+  std::string* stdErr,
+  int *retVal, 
+  const char* dir,
+  double timeout)
+{
+  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
+
+  if(args.size() < 1)
+    {
+    return false;
+    }
+  
+  std::vector<const char*> argv;
+  for(std::vector<cmStdString>::const_iterator a = args.begin();
+      a != args.end(); ++a)
+    {
+    argv.push_back(a->c_str());
+    }
+  argv.push_back(0);
+
+  *stdOut = "";
+  *stdErr = "";
+
+  cmsysProcess* cp = cmsysProcess_New();
+  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetWorkingDirectory(cp, dir);
+  if(cmSystemTools::GetRunCommandHideConsole())
+    {
+    cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
+    }
+  cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_Execute(cp);
+  
+  std::vector<char> tempOutput;
+  std::vector<char> tempError;
+  char* data;
+  int length;
+  int res;
+  bool done = false;
+  while(!done)
+    {
+    res = cmsysProcess_WaitForData(cp, &data, &length, 0);
+    switch ( res )
+      {
+    case cmsysProcess_Pipe_STDOUT:
+      tempOutput.insert(tempOutput.end(), data, data+length);
+      break;
+    case cmsysProcess_Pipe_STDERR:
+      tempError.insert(tempError.end(), data, data+length);
+      break;
+    default:
+      done = true;
+      }
+    if(m_ExtraVerbose)
+      {
+      cmSystemTools::Stdout(data, length);
+      }
+    }
+  
+  cmsysProcess_WaitForExit(cp, 0);
+  stdOut->append(&*tempOutput.begin(), tempOutput.size());
+  stdErr->append(&*tempError.begin(), tempError.size());
+  
+  bool result = true;
+  if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
+    {
+    if ( retVal )
+      {
+      *retVal = cmsysProcess_GetExitValue(cp);
+      }
+    else
+      {
+      if ( cmsysProcess_GetExitValue(cp) !=  0 )
+        {
+        result = false;
+        }
+      }
+    }
+  else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exception)
+    {
+    const char* exception_str = cmsysProcess_GetExceptionString(cp);
+    cmCTestLog(this, ERROR_MESSAGE, exception_str << std::endl);
+    stdErr->append(exception_str, strlen(exception_str));
+    result = false;
+    }
+  else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Error)
+    {
+    const char* error_str = cmsysProcess_GetErrorString(cp);
+    cmCTestLog(this, ERROR_MESSAGE, error_str << std::endl);
+    stdErr->append(error_str, strlen(error_str));
+    result = false;
+    }
+  else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Expired)
+    {
+    const char* error_str = "Process terminated due to timeout\n";
+    cmCTestLog(this, ERROR_MESSAGE, error_str << std::endl);
+    stdErr->append(error_str, strlen(error_str));
+    result = false;
+    }
+  
+  cmsysProcess_Delete(cp);
+  return result;
+}
+
 //----------------------------------------------------------------------
 void cmCTest::SetOutputLogFileName(const char* name)
 {

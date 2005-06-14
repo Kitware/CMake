@@ -140,7 +140,31 @@ public:
 
   ///! Should we only show what we would do?
   bool GetShowOnly();
-  
+
+   /**
+   * Run a single executable command and put the stdout and stderr 
+   * in output.
+   *
+   * If verbose is false, no user-viewable output from the program
+   * being run will be generated.
+   *
+   * If timeout is specified, the command will be terminated after
+   * timeout expires. Timeout is specified in seconds.
+   *
+   * Argument retVal should be a pointer to the location where the
+   * exit code will be stored. If the retVal is not specified and 
+   * the program exits with a code other than 0, then the this 
+   * function will return false.
+   *
+   * If the command has spaces in the path the caller MUST call
+   * cmSystemTools::ConvertToRunCommandPath on the command before passing
+   * it into this function or it will not work.  The command must be correctly
+   * escaped for this to with spaces.  
+   */
+  bool RunCommand(const char* command,
+    std::string* stdOut, std::string* stdErr,
+    int* retVal = 0, const char* dir = 0, double timeout = 0.0);
+ 
   //! Start CTest XML output file
   void StartXML(std::ostream& ostr);
 

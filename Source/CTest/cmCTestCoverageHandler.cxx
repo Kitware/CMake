@@ -155,6 +155,15 @@ int cmCTestCoverageHandler::ProcessHandler()
   std::string binaryDir = m_CTest->GetCTestConfiguration("BuildDirectory");
   std::string gcovCommand = m_CTest->GetCTestConfiguration("CoverageCommand");
 
+  cmGeneratedFileStream ofs;
+  double elapsed_time_start = cmSystemTools::GetTime();
+  if ( !m_CTest->OpenOutputFile("Temporary", "LastCoverage.log", ofs) )
+    {
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create LastCoverage.log file" << std::endl);
+    }
+
+  ofs << "Performing coverage: " << elapsed_time_start << std::endl;
+
   cmSystemTools::ConvertToUnixSlashes(sourceDir);
   cmSystemTools::ConvertToUnixSlashes(binaryDir);
 
@@ -165,7 +174,6 @@ int cmCTestCoverageHandler::ProcessHandler()
   std::string gcovOutputRex2 = "^Creating (.*\\.gcov)\\.";
 
   cmCTestLog(m_CTest, HANDLER_OUTPUT, "Performing coverage" << std::endl);
-  double elapsed_time_start = cmSystemTools::GetTime();
 
   std::string coverage_start_time = m_CTest->CurrentTime();
 
@@ -204,19 +212,26 @@ int cmCTestCoverageHandler::ProcessHandler()
     std::string command = "\"" + gcovCommand + "\" -l -o \"" + fileDir + "\" \"" + *it + "\"";
     cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, command.c_str() << std::endl);
     std::string output = "";
+    std::string errors = "";
     int retVal = 0;
-    int res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
-      &retVal, tempDir.c_str(),
-      false, 0 /*m_TimeOut*/);
+    ofs << "* Run coverage for: " << fileDir.c_str() << std::endl;
+    ofs << "  Command: " << command.c_str() << std::endl;
+    int res = m_CTest->RunCommand(command.c_str(), &output, &errors,
+      &retVal, tempDir.c_str(), 0 /*m_TimeOut*/);
+
+    ofs << "  Output: " << output.c_str() << std::endl;
+    ofs << "  Errors: " << errors.c_str() << std::endl;
     if ( ! res )
       {
       cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem running coverage on file: " << it->c_str() << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Command produced error: " << error << std::endl);
       error ++;
       continue;
       }
     if ( retVal != 0 )
       {
       cmCTestLog(m_CTest, ERROR_MESSAGE, "Coverage command returned: " << retVal << " while processing: " << it->c_str() << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Command produced error: " << error << std::endl);
       }
     std::vector<cmStdString> lines;
     std::vector<cmStdString>::iterator line;
@@ -232,7 +247,8 @@ int cmCTestCoverageHandler::ProcessHandler()
           file.substr(0, sourceDir.size()) == sourceDir &&
           file[sourceDir.size()] == '/' )
           {
-          cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "   produced s: " << file << std::endl);
+          cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "   produced s: " << file.c_str() << std::endl);
+          ofs << "  produced in source dir: " << file.c_str() << std::endl;
           cfile = file;
           }
         // Binary dir?
@@ -240,7 +256,8 @@ int cmCTestCoverageHandler::ProcessHandler()
           file.substr(0, binaryDir.size()) == binaryDir &&
           file[binaryDir.size()] == '/' )
           {
-          cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "   produce b: " << file << std::endl);
+          cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "   produce b: " << file.c_str() << std::endl);
+          ofs << "  produced in binary dir: " << file.c_str() << std::endl;
           cfile = file;
           }
         if ( cfile.empty() )
@@ -249,6 +266,9 @@ int cmCTestCoverageHandler::ProcessHandler()
           cmCTestLog(m_CTest, ERROR_MESSAGE, "File: [" << file << "]" << std::endl);
           cmCTestLog(m_CTest, ERROR_MESSAGE, "s: [" << file.substr(0, sourceDir.size()) << "]" << std::endl);
           cmCTestLog(m_CTest, ERROR_MESSAGE, "b: [" << file.substr(0, binaryDir.size()) << "]" << std::endl);
+          ofs << "  Something went wrong. Cannot find: " << file.c_str()
+            << " in source dir: " << sourceDir.c_str()
+            << " or binary dir: " << binaryDir.c_str() << std::endl;
           }
         }
       else if ( re2.find(line->c_str() ) )
@@ -258,6 +278,7 @@ int cmCTestCoverageHandler::ProcessHandler()
           {
           singleFileCoverageVector* vec = &totalCoverage[cfile];
           cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "   in file: " << fname << std::endl);
+          ofs << "  In file: " << fname << std::endl;
           std::ifstream ifile(fname.c_str());
           if ( ! ifile )
             {
@@ -299,6 +320,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       else
         {
         cmCTestLog(m_CTest, ERROR_MESSAGE, "Unknown line: " << line->c_str() << std::endl);
+        ofs << "  Unknown line: " << line->c_str() << std::endl;
         error ++;
         }
       }
@@ -475,6 +497,14 @@ int cmCTestCoverageHandler::ProcessHandler()
     << std::setiosflags(std::ios::fixed)
     << std::setprecision(2)
     << (percent_coverage) << "%" << std::endl);
+
+  ofs << "\tCovered LOC:         " << total_tested << std::endl
+    << "\tNot covered LOC:     " << total_untested << std::endl
+    << "\tTotal LOC:           " << total_lines << std::endl
+    << "\tPercentage Coverage: " 
+    << std::setiosflags(std::ios::fixed)
+    << std::setprecision(2)
+    << (percent_coverage) << "%" << std::endl;
 
   cmSystemTools::ChangeDirectory(currentDirectory.c_str());
 
