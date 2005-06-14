@@ -192,6 +192,7 @@ class cmake
    * Add a command to this cmake instance
    */
   void AddCommand(cmCommand* );
+  void RenameCommand(const char* oldName, const char* newName);
 
   /**
    * Get a command by its name

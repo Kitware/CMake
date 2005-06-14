@@ -173,6 +173,20 @@ cmCommand *cmake::GetCommand(const char *name)
   return rm;
 }
 
+void cmake::RenameCommand(const char*oldName, const char* newName)
+{
+  // if the command already exists, free the old one
+  RegisteredCommandsMap::iterator pos = m_Commands.find(oldName);
+  if ( pos == m_Commands.end() )
+    {
+    return;
+    }
+
+  m_Commands.insert(RegisteredCommandsMap::value_type(newName, pos->second));
+  pos = m_Commands.find(oldName);
+  m_Commands.erase(pos);
+}
+
 void cmake::AddCommand(cmCommand* wg)
 {
   std::string name = wg->GetName();

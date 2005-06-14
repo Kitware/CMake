@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmMacroCommand.h"
 
+#include "cmake.h"
+
 // define the class for macro commands
 class cmMacroHelperCommand : public cmCommand
 {
@@ -37,6 +39,11 @@ public:
     return newC;
   }
   
+  /**
+   * This determines if the command is invoked when in script mode.
+   */
+  virtual bool IsScriptable() { return true; }
+
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
@@ -265,6 +272,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       cmMacroHelperCommand *f = new cmMacroHelperCommand();
       f->m_Args = this->m_Args;
       f->m_Functions = this->m_Functions;
+      std::string newName = "_" + this->m_Args[0];
+      mf.GetCMakeInstance()->RenameCommand(this->m_Args[0].c_str(), newName.c_str());
       mf.AddCommand(f);
       
       // remove the function blocker now that the macro is defined
