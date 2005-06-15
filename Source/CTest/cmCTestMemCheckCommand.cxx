@@ -71,6 +71,13 @@ bool cmCTestMemCheckCommand::InitialPass(
     m_CTest->SetCTestConfiguration("BuildDirectory", build_dir);
     }
 
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+    "MemoryCheckCommand", "CTEST_MEMORYCHECK_COMMAND");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+    "MemoryCheckCommandOptions", "CTEST_MEMORYCHECK_COMMAND_OPTIONS");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+    "MemoryCheckSuppressionFile", "CTEST_MEMORYCHECK_SUPPRESSIONS_FILE");
+
   cmCTestGenericHandler* handler = m_CTest->GetHandler("memcheck");
   if ( !handler )
     {

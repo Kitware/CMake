@@ -324,7 +324,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     m_MemoryTesterStyle = cmCTestMemCheckHandler::VALGRIND;
     if ( !m_MemoryTesterOptions.size() )
       {
-      m_MemoryTesterOptions = "-q --skin=memcheck --leak-check=yes --show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=100";
+      m_MemoryTesterOptions = "-q --tool=memcheck --leak-check=yes --show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=100";
       }
     if ( m_CTest->GetCTestConfiguration("MemoryCheckSuppressionFile").size() )
       {
