@@ -49,6 +49,7 @@ public:
    */
   void SetMakefile(cmMakefile*m) 
     {m_Makefile = m; }
+  cmMakefile* GetMakefile() { return m_Makefile; }
 
   /**
    * This is called by the cmMakefile when the command is first
@@ -162,13 +163,17 @@ public:
   virtual bool IsA(const char *type)
     { return cmCommand::IsTypeOf(type); }
 
-protected:
+  /**
+   * Set the error message
+   */
   void SetError(const char* e)
     {
     m_Error = this->GetName();
     m_Error += " ";
     m_Error += e;
     }
+
+protected:
   cmMakefile* m_Makefile;
 
 private:
