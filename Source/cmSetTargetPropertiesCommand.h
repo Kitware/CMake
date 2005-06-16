@@ -65,6 +65,8 @@ public:
         "sources.  PRE_INSTALL_SCRIPT specifies CMake script that is run "
         "prior to installing the target. POST_INSTALL_SCRIPT specifies "
         "CMake script that is run after target is installed. "
+        "The OUTPUT_NAME can be used to set an output name that is "
+        "used in place of the target name when creating executables."
         "If not set here then it is set to target_EXPORTS by default "
         "(with some substitutions if target is not a valid C identifier).  "
         "You can use and prop value pair you want and extract it later with "

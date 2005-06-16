@@ -1314,7 +1314,16 @@ cmLocalUnixMakefileGenerator3
     targetFullPath += ".app/Contents/MacOS/";
     }
 #endif
-  targetFullPath += target.GetName();
+
+  // do we have a different executable name?
+  if (target.GetProperty("OUTPUT_NAME"))
+    {
+    targetFullPath += target.GetProperty("OUTPUT_NAME");
+    }
+  else
+    {
+    targetFullPath += target.GetName();
+    }
   targetFullPath += cmSystemTools::GetExecutableExtension();
 
   // Convert to the output path to use in constructing commands.

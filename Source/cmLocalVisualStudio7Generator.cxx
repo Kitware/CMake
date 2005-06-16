@@ -726,7 +726,16 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       temp = m_ExecutableOutputPath;
       temp += configName;
       temp += "/";
-      temp += libName;
+
+      // do we have a different executable name?
+      if (target.GetProperty("OUTPUT_NAME"))
+        {
+        temp += target.GetProperty("OUTPUT_NAME");
+        }
+      else
+        {
+        temp += libName;
+        }      
       temp += ".exe";
       fout << "\t\t\t\tOutputFile=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();

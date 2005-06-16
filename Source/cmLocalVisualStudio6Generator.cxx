@@ -739,9 +739,11 @@ inline std::string removeQuotes(const std::string& s)
 }
 
   
-void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const char *libName,
-                                   const cmTarget &target, 
-                                 std::vector<cmSourceGroup> &)
+void cmLocalVisualStudio6Generator
+::WriteDSPHeader(std::ostream& fout, 
+                 const char *libName,
+                 const cmTarget &target, 
+                 std::vector<cmSourceGroup> &)
 {
   std::set<std::string> pathEmitted;
   
@@ -948,7 +950,16 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
-    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
+    extraLinkOptions = 
+      m_Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
+
+    // if the executable has an output name then add the appropriate flag
+    if (target.GetProperty("OUTPUT_NAME"))
+      {
+      libMultiLineOptions += "# ADD LINK32 /out:";
+      libMultiLineOptions += target.GetProperty("OUTPUT_NAME");
+      libMultiLineOptions += " \n";
+      }
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
