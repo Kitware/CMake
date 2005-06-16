@@ -106,7 +106,7 @@ public:
   /**
    * The class name of the command.
    */
-  virtual const char* GetClassName() = 0;
+  virtual const char* GetNameOfClass() = 0;
 
   /**
    * Succinct documentation.
@@ -188,7 +188,7 @@ private:
 
 // All subclasses of cmCommand should invoke this macro.
 #define cmTypeMacro(thisClass,superclass) \
-virtual const char* GetClassName() { return #thisClass; } \
+virtual const char* GetNameOfClass() { return #thisClass; } \
 typedef superclass Superclass; \
 static bool IsTypeOf(const char *type) \
 { \
