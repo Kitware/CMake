@@ -173,7 +173,8 @@ public:
                          const char* command,
                          const char* arg1=0,
                          const char* arg2=0,
-                         const char* arg3=0);
+                         const char* arg3=0,
+                         const char* arg4=0);
   void AddUtilityCommand(const char* utilityName, bool all,
                          const char* output,
                          const std::vector<std::string>& depends,

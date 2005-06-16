@@ -666,7 +666,8 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
                                    const char* command,
                                    const char* arg1,
                                    const char* arg2,
-                                   const char* arg3)
+                                   const char* arg3,
+                                   const char* arg4)
 {
   // Construct the command line for the custom command.
   cmCustomCommandLine commandLine;
@@ -682,6 +683,10 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   if(arg3)
     {
     commandLine.push_back(arg3);
+    }
+  if(arg4)
+    {
+    commandLine.push_back(arg4);
     }
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
