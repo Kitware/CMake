@@ -241,7 +241,8 @@ void cmOrderLinkDirectories::SetLinkInformation(const cmTarget& target,
       continue;
       }
     // Don't link the library against itself!
-    if(targetLibrary && (lib->first == targetLibrary))
+    if(targetLibrary && (lib->first == targetLibrary) && 
+       target.GetType() != cmTarget::EXECUTABLE)
       {
       continue;
       }  
