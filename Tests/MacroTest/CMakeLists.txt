@@ -1,0 +1,48 @@
+# a simple C only test case
+PROJECT (littleMacroTest C)
+
+MACRO(FAILED testname)
+  MESSAGE(SEND_ERROR "${testname} failed ${ARGN}")
+ENDMACRO(FAILED)
+
+MACRO(PASS testname)
+  MESSAGE("${testname} passed ${ARGN}")
+ENDMACRO(PASS)
+
+# test ARGC
+MACRO(weird_name)
+  IF("${ARGC}" EQUAL "3")
+    PASS("ARGC")
+  ELSE("${ARGC}" EQUAL "3")
+    FAILED("ARGC" "Got: ${ARGC}")
+  ENDIF("${ARGC}" EQUAL "3")
+ENDMACRO(weird_name)
+WeIrD_nAmE(a1 a2 a3)
+
+# test ARGN
+MACRO(test_argn_macro argument)
+  IF("${ARGN}" EQUAL "3")
+    PASS("ARGN")
+  ELSE("${ARGN}" EQUAL "3")
+    FAILED("ARGN" "Got: ${ARGN}")
+  ENDIF("${ARGN}" EQUAL "3")
+ENDMACRO(test_argn_macro)
+Test_Argn_Macro(ignored 3)
+
+# case test
+MACRO(strange_macro m)
+  SET("${m}" strange_macro)
+ENDMACRO(strange_macro m)
+STRANGE_MACRO(var)
+set(second_var "second_var")
+IF("${var}" EQUAL "strange_macro" AND "${second_var}" EQUAL "second_var")
+  PASS("Case Test" "(${var} ${second_var})")
+ELSE("${var}" EQUAL "strange_macro" AND "${second_var}" EQUAL "second_var")
+  FAILED("Case test" "(${var} ${second_var})")
+ENDIF("${var}" EQUAL "strange_macro" AND "${second_var}" EQUAL "second_var")
+
+# test backing up command
+MACRO(ADD_EXECUTABLE exec)
+  _ADD_EXECUTABLE("mini${exec}" ${ARGN})
+ENDMACRO(ADD_EXECUTABLE)
+ADD_EXECUTABLE(MacroTest macroTest.c)
