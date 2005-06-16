@@ -2083,6 +2083,7 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg)
       cmCTestLogOutputFileLine(std::cerr);
       std::cerr << msg;
       std::cerr.flush();
+      cmSystemTools::SetErrorOccured();
       break;
     default:
       cmCTestLogOutputFileLine(std::cout);
