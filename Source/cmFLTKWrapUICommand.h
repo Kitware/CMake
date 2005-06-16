@@ -27,6 +27,8 @@
 class cmFLTKWrapUICommand : public cmCommand
 {
 public:
+  cmTypeMacro(cmFLTKWrapUICommand, cmCommand);
+
   /**
    * This is a virtual constructor for the command.
    */

@@ -30,6 +30,8 @@
 class cmVTKWrapTclCommand : public cmCommand
 {
 public:
+  cmTypeMacro(cmVTKWrapTclCommand, cmCommand);
+
   /**
    * This is a virtual constructor for the command.
    */

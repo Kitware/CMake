@@ -30,6 +30,8 @@
 class cmUseMangledMesaCommand : public cmCommand
 {
 public:
+  cmTypeMacro(cmUseMangledMesaCommand, cmCommand);
+
   /**
    * This is a virtual constructor for the command.
    */

@@ -29,6 +29,8 @@
 class cmVTKWrapJavaCommand : public cmCommand
 {
 public:
+  cmTypeMacro(cmVTKWrapJavaCommand, cmCommand);
+
   /**
    * This is a virtual constructor for the command.
    */

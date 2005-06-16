@@ -29,6 +29,8 @@
 class cmVTKWrapPythonCommand : public cmCommand
 {
 public:
+  cmTypeMacro(cmVTKWrapPythonCommand, cmCommand);
+
   /**
    * This is a virtual constructor for the command.
    */
