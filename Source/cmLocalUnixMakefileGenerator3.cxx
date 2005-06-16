@@ -1046,6 +1046,7 @@ cmLocalUnixMakefileGenerator3
       ctest += "ctest";
       ctest += cmSystemTools::GetExecutableExtension();
       ctest = this->Convert(ctest.c_str(),START_OUTPUT,SHELL);
+      ctest += " --force-new-ctest-process";
       }
     else
       {
@@ -1061,9 +1062,8 @@ cmLocalUnixMakefileGenerator3
     std::vector<std::string> no_depends;
     std::vector<std::string> commands;
     this->AppendEcho(commands, "Running tests...");
-    std::string cmd = ctest;
-    cmd += " $(ARGS)";
-    commands.push_back(cmd);
+    ctest += " $(ARGS)";
+    commands.push_back(ctest);
     this->WriteMakeRule(makefileStream,
                         "Special rule to drive testing with ctest.",
                         "test", no_depends, commands);
