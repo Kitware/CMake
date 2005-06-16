@@ -358,6 +358,17 @@ IF(BUILD_TESTING)
     --build-two-config
     --test-command simple)
 
+#  ADD_TEST(SameName  ${CMAKE_CTEST_COMMAND}
+#    --build-and-test 
+#    "${CMake_SOURCE_DIR}/Tests/SameName"
+#    "${CMake_BINARY_DIR}/Tests/SameName"
+#    --build-generator ${CMAKE_GENERATOR}
+#    --build-project SameName
+#    --build-makeprogram ${MAKEPROGRAM}
+#    --build-two-config
+#    --test-command   
+#    "${CMake_BINARY_DIR}/Tests/SameName/Exe1/mytest2")
+
   ADD_TEST(OutOfSource ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/OutOfSource"
