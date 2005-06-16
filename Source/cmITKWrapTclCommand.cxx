@@ -81,7 +81,7 @@ bool cmITKWrapTclCommand::InitialPass(std::vector<std::string> const& args)
     }
   // keep the target name
   m_TargetName = args[0];
-  m_Target = &m_Makefile->GetTargets()[m_TargetName.c_str()];
+  m_Target = &m_Makefile->GetTargets().find(m_TargetName)->second;
   
   // Prepare the dependency generator.
   m_MakeDepend->SetMakefile(m_Makefile);
