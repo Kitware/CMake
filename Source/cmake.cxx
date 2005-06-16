@@ -157,15 +157,41 @@ cmake::~cmake()
 #endif
 }
 
+void cmake::CleanupCommandsAndMacros()
+{
+  std::vector<cmCommand*> commands;
+  for(RegisteredCommandsMap::iterator j = m_Commands.begin();
+      j != m_Commands.end(); ++j)
+    {
+    if ( !j->second->IsA("cmMacroHelperCommand") )
+      {
+      commands.push_back(j->second);
+      }
+    else
+      {
+      delete j->second;
+      }
+    }
+  m_Commands.erase(m_Commands.begin(), m_Commands.end());
+  std::vector<cmCommand*>::iterator it;
+  for ( it = commands.begin(); it != commands.end();
+    ++ it )
+    {
+    m_Commands[cmSystemTools::LowerCase((*it)->GetName())] = *it;
+    }
+}
+
 bool cmake::CommandExists(const char* name) const
 {
-  return (m_Commands.find(name) != m_Commands.end());
+  std::string sName = cmSystemTools::LowerCase(name);
+  return (m_Commands.find(sName) != m_Commands.end());
 }
 
 cmCommand *cmake::GetCommand(const char *name) 
 {
   cmCommand* rm = 0;
-  RegisteredCommandsMap::iterator pos = m_Commands.find(name);
+  std::string sName = cmSystemTools::LowerCase(name);
+  RegisteredCommandsMap::iterator pos = m_Commands.find(sName);
   if (pos != m_Commands.end())
     {
     rm = (*pos).second;
@@ -176,20 +202,29 @@ cmCommand *cmake::GetCommand(const char *name)
 void cmake::RenameCommand(const char*oldName, const char* newName)
 {
   // if the command already exists, free the old one
-  RegisteredCommandsMap::iterator pos = m_Commands.find(oldName);
+  std::string sOldName = cmSystemTools::LowerCase(oldName);
+  std::string sNewName = cmSystemTools::LowerCase(newName);
+  RegisteredCommandsMap::iterator pos = m_Commands.find(sOldName);
   if ( pos == m_Commands.end() )
     {
     return;
     }
+  cmCommand* cmd = pos->second;
 
-  m_Commands.insert(RegisteredCommandsMap::value_type(newName, pos->second));
-  pos = m_Commands.find(oldName);
+  pos = m_Commands.find(sNewName);
+  if (pos != m_Commands.end())
+    {
+    delete pos->second;
+    m_Commands.erase(pos);
+    }
+  m_Commands.insert(RegisteredCommandsMap::value_type(sNewName, cmd));
+  pos = m_Commands.find(sOldName);
   m_Commands.erase(pos);
 }
 
 void cmake::AddCommand(cmCommand* wg)
 {
-  std::string name = wg->GetName();
+  std::string name = cmSystemTools::LowerCase(wg->GetName());
   // if the command already exists, free the old one
   RegisteredCommandsMap::iterator pos = m_Commands.find(name);
   if (pos != m_Commands.end())
@@ -1041,6 +1076,7 @@ int cmake::Configure()
 {
   // Construct right now our path conversion table before it's too late:
   this->UpdateConversionPathTable();
+  this->CleanupCommandsAndMacros();
 
   int res = 0;
   if ( !m_ScriptMode )
