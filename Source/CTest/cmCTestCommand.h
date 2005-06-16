@@ -39,7 +39,6 @@ public:
   cmCTestScriptHandler *m_CTestScriptHandler;
   
   cmTypeMacro(cmCTestCommand, cmCommand);
-
 };
 
 

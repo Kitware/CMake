@@ -7,7 +7,7 @@ SET(CTEST_BUILD_NAME                    "KWSys-@BUILDNAME@-CTest2")
 
 SET(CTEST_SOURCE_DIRECTORY              "@CMake_SOURCE_DIR@/Source/kwsys")
 SET(CTEST_BINARY_DIRECTORY              "@CMake_BINARY_DIR@/Tests/CTestTest2/kwsysBin")
-SET(CTEST_CVS_COMMAND                   "@CVS@")
+SET(CTEST_CVS_COMMAND                   "@CVSCOMMAND@")
 SET(CTEST_CMAKE_GENERATOR               "@CMAKE_GENERATOR@")
 SET(CTEST_BUILD_CONFIGURATION           "Release")
 SET(CTEST_MEMORYCHECK_COMMAND           "@MEMORYCHECK_COMMAND@")

@@ -69,16 +69,41 @@ bool cmCTestUpdateCommand::InitialPass(
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "CVSCommand", "CTEST_CVS_COMMAND");
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "SVNCommand", "CTEST_SVN_COMMAND");
 
+  const char* initialCheckoutCommand = m_Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
+  if ( !initialCheckoutCommand )
+    {
+    initialCheckoutCommand = m_Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
+    }
+
   cmCTestGenericHandler* handler = m_CTest->GetHandler("update");
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate update handler");
     return false;
     }
-  if ( source_dir )
+  handler->SetCommand(this);
+  if ( !source_dir )
     {
-    handler->SetOption("SourceDirectory", source_dir);
+    this->SetError("source directory not specified. Please use SOURCE tag");
+    return false;
     }
+  if ( initialCheckoutCommand )
+    {
+    handler->SetOption("InitialCheckout", initialCheckoutCommand);
+    }
+  if ( (!cmSystemTools::FileExists(source_dir) || !cmSystemTools::FileIsDirectory(source_dir))
+    && !initialCheckoutCommand )
+    {
+    cmOStringStream str;
+    str << "cannot find source directory: " << source_dir << ".";
+    if ( !cmSystemTools::FileExists(source_dir) )
+      {
+      str << " Looks like it is not checked out yet. Please specify CTEST_CHECKOUT_COMMAND.";
+      }
+    this->SetError(str.str().c_str());
+    return false;
+    }
+  handler->SetOption("SourceDirectory", source_dir);
   int res = handler->ProcessHandler();
   if ( res_var )
     {

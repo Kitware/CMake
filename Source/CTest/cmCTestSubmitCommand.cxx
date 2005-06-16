@@ -70,6 +70,7 @@ bool cmCTestSubmitCommand::InitialPass(
   if ( !ctestTriggerSite )
     {
     ctestTriggerSite = "http://public.kitware.com/cgi-bin/Submit-Random-TestingResults.cgi";
+    cmCTestLog(m_CTest, HANDLER_OUTPUT, "* Use default trigger site: " << ctestTriggerSite << std::endl;);
     }
 
   m_CTest->SetCTestConfiguration("DropMethod",   ctestDropMethod);

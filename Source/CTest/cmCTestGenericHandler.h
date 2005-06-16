@@ -23,6 +23,7 @@
 
 class cmCTest;
 class cmMakefile;
+class cmCTestCommand;
 
 /** \class cmCTestGenericHandler
  * \brief A superclass of all CTest Handlers
@@ -71,10 +72,17 @@ public:
   void SetOption(const char* op, const char* value);
   const char* GetOption(const char* op);
 
+  void SetCommand(cmCTestCommand* command)
+    {
+    m_Command = command;
+    }
+
 protected:
   bool m_HandlerVerbose;
   cmCTest *m_CTest;
   t_StringToString m_Options;
+
+  cmCTestCommand* m_Command;
 };
 
 #endif

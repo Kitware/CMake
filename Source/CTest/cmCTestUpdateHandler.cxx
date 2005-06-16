@@ -198,7 +198,11 @@ int cmCTestUpdateHandler::ProcessHandler()
   int updateType = e_CVS;
   std::string::size_type cc, kk;
   bool updateProducedError = false;
+  std::string goutput;
+  std::string errors;
 
+  std::string checkoutErrorMessages;
+  int retVal = 0;
 
   // Get source dir
   const char* sourceDirectory = this->GetOption("SourceDirectory");
@@ -208,7 +212,50 @@ int cmCTestUpdateHandler::ProcessHandler()
     return -1;
     }
 
-  cmCTestLog(m_CTest, HANDLER_OUTPUT, "Updating the repository: " << sourceDirectory << std::endl);
+  cmGeneratedFileStream ofs;
+  if ( !m_CTest->GetShowOnly() )
+    {
+    m_CTest->OpenOutputFile("Temporary", "LastUpdate.log", ofs);
+    }
+
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "Updating the repository" << std::endl);
+
+  const char* initialCheckoutCommand = this->GetOption("InitialCheckout");
+  if ( initialCheckoutCommand )
+    {
+    cmCTestLog(m_CTest, HANDLER_OUTPUT, "   First perform the initil checkout: " << initialCheckoutCommand << std::endl);
+    cmStdString parent = cmSystemTools::GetParentDirectory(sourceDirectory);
+    if ( parent.empty() )
+      {
+      cmCTestLog(m_CTest, ERROR_MESSAGE,
+        "Something went wrong when trying to determine the parent directory of " << sourceDirectory << std::endl);
+      return -1;
+      }
+    cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Perform checkout in directory: " << parent.c_str() << std::endl);
+    if ( !cmSystemTools::MakeDirectory(parent.c_str()) )
+      {
+      cmCTestLog(m_CTest, ERROR_MESSAGE,
+        "Cannot create parent directory: " << parent.c_str() << " of the source directory: " << sourceDirectory << std::endl);
+      return -1;
+      }
+    ofs << "* Run initial checkout" << std::endl;
+    ofs << "  Command: " << initialCheckoutCommand << std::endl;
+    cmCTestLog(m_CTest, DEBUG, "   Before: " << initialCheckoutCommand << std::endl);
+    bool retic = m_CTest->RunCommand(initialCheckoutCommand, &goutput, &errors, &retVal, parent.c_str(), 0 /* Timeout */);
+    cmCTestLog(m_CTest, DEBUG, "   After: " << initialCheckoutCommand << std::endl);
+    ofs << "  Output: " << goutput.c_str() << std::endl;
+    ofs << "  Errors: " << errors.c_str() << std::endl;
+    if ( !retic || retVal )
+      {
+      cmOStringStream ostr;
+      ostr << "Problem running initial checkout Output [" << goutput << "] Errors [" << errors << "]";
+      cmCTestLog(m_CTest, HANDLER_OUTPUT, ostr.str().c_str() << std::endl);
+      checkoutErrorMessages += ostr.str();
+      updateProducedError = true;
+      }
+    m_CTest->InitializeFromCommand(m_Command);
+    }
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Updating the repository: " << sourceDirectory << std::endl);
 
   // Get update command
   std::string updateCommand = m_CTest->GetCTestConfiguration("UpdateCommand");
@@ -295,21 +342,12 @@ int cmCTestUpdateHandler::ProcessHandler()
     break;
     }
 
-  cmGeneratedFileStream ofs;
-  if ( !m_CTest->GetShowOnly() )
-    {
-    m_CTest->OpenOutputFile("Temporary", "LastUpdate.log", ofs);
-    }
-
   // CVS variables
   // SVN variables
   int svn_current_revision = 0;
   int svn_latest_revision = 0;
   int svn_use_status = 0;
 
-  std::string goutput;
-  std::string errors;
-  int retVal = 0;
   bool res = true;
 
 
@@ -416,6 +454,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   if ( !res || retVal )
     {
     updateProducedError = true;
+    checkoutErrorMessages += " " + goutput;
     }
 
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -833,7 +872,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   if ( updateProducedError )
     {
     os << "Update error: ";
-    os << m_CTest->MakeXMLSafe(goutput);
+    os << m_CTest->MakeXMLSafe(checkoutErrorMessages);
     cmCTestLog(m_CTest, ERROR_MESSAGE, "   Update with command: " << command << " failed" << std::endl);
     }
   os << "</UpdateReturnStatus>" << std::endl;

@@ -802,7 +802,13 @@ IF(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
     ADD_TEST(CTestTest2 ${CMAKE_CTEST_COMMAND}
       -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTest/testOutput.log"
+      --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
+      )
+    CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest3/test.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" @ONLY ESCAPE_QUOTES)
+    ADD_TEST(CTestTest3 ${CMAKE_CTEST_COMMAND}
+      -S "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" -V
+      --output-log "${CMake_BINARY_DIR}/Tests/CTestTest3/testOutput.log"
       )
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
 

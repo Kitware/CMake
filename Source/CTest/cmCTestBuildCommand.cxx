@@ -138,7 +138,7 @@ bool cmCTestBuildCommand::InitialPass(
     else
       {
       cmOStringStream ostr;
-      ostr << "CTEST_BUILD_COMMAND or CTEST_CMAKE_GENERATOR not specified. Please specify the CTEST_CMAKE_GENERATOR if this is a CMake project, or specify the CTEST_BUILD_COMMAND for cmake or any other project.";
+      ostr << "CTEST_BUILD_COMMAND or CTEST_CMAKE_GENERATOR not specified. Please specify the CTEST_CMAKE_GENERATOR and CTEST_PROJECT_NAME if this is a CMake project, or specify the CTEST_BUILD_COMMAND for cmake or any other project.";
       this->SetError(ostr.str().c_str());
       return false;
       }

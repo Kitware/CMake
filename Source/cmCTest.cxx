@@ -25,6 +25,7 @@
 #include "cmGlob.h"
 #include "cmDynamicLoader.h"
 #include "cmGeneratedFileStream.h"
+#include "cmCTestCommand.h"
 
 #include "cmCTestBuildHandler.h"
 #include "cmCTestBuildAndTestHandler.h"
@@ -213,6 +214,7 @@ cmCTest::cmCTest()
   m_TomorrowTag            = false;
   m_Verbose                = false;
   m_Debug                  = false;
+  m_ShowLineNumbers        = false;
   m_Quiet                  = false;
   m_ExtraVerbose           = false;
   m_ProduceXML             = false;
@@ -264,7 +266,7 @@ cmCTest::~cmCTest()
 }
 
 //----------------------------------------------------------------------
-int cmCTest::Initialize(const char* binary_dir, bool new_tag)
+int cmCTest::Initialize(const char* binary_dir, bool new_tag, bool verbose_tag)
 {
   if(!m_InteractiveDebugMode)
     {
@@ -273,11 +275,25 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag)
   
   m_BinaryDir = binary_dir;
   cmSystemTools::ConvertToUnixSlashes(m_BinaryDir);
+
+  this->UpdateCTestConfiguration();
+
+  if ( m_ProduceXML )
+    {
+    cmCTestLog(this, DEBUG, "Produce XML is on" << std::endl);
+    if ( this->GetCTestConfiguration("NightlyStartTime").empty() )
+      {
+      cmCTestLog(this, DEBUG, "No nightly start time" << std::endl);
+      return 0;
+      }
+    }
+
   if ( !this->ReadCustomConfigurationFileTree(m_BinaryDir.c_str()) )
     {
+    cmCTestLog(this, DEBUG, "Cannot find custom configuration file tree" << std::endl);
     return 0;
     }
-  this->UpdateCTestConfiguration();
+
   if ( m_ProduceXML )
     {
     std::string testingDir = m_BinaryDir + "/Testing";
@@ -356,13 +372,71 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag)
         ofs << this->GetTestModelString() << std::endl;
         }
       ofs.close();
-      cmCTestLog(this, OUTPUT, "Create new tag: " << tag << " - " 
-        << this->GetTestModelString() << std::endl);
+      if ( verbose_tag )
+        {
+        cmCTestLog(this, OUTPUT, "Create new tag: " << tag << " - " 
+          << this->GetTestModelString() << std::endl);
+        }
       }
     m_CurrentTag = tag;
     }
   return 1;
 }
+
+//----------------------------------------------------------------------
+bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
+{
+  if ( !first && !m_CurrentTag.empty() )
+    {
+    return true;
+    }
+
+  const char* src_dir = this->GetCTestConfiguration("SourceDirectory").c_str();
+  const char* bld_dir = this->GetCTestConfiguration("BuildDirectory").c_str();
+
+  cmMakefile* mf = command->GetMakefile();
+  std::string fname = src_dir;
+  fname += "/CTestConfig.cmake";
+  cmSystemTools::ConvertToUnixSlashes(fname);
+  if ( cmSystemTools::FileExists(fname.c_str()) )
+    {
+    cmCTestLog(this, OUTPUT, "   Reading ctest configuration file: " << fname.c_str() << std::endl);
+    bool readit = mf->ReadListFile(mf->GetCurrentListFile(), 
+      fname.c_str() );
+    if(!readit)
+      {
+      std::string m = "Could not find include file: ";
+      m += fname;
+      command->SetError(m.c_str());
+      return false;
+      }
+    }
+  else if ( !first )
+    {
+    cmCTestLog(this, WARNING, "Cannot locate CTest configuration: " << fname.c_str() << std::endl);
+    }
+  else
+    {
+    cmCTestLog(this, HANDLER_OUTPUT, "   Cannot locate CTest configuration: " << fname.c_str() << std::endl
+      << "   Delay the initialization of CTest" << std::endl);
+    }
+
+  this->SetCTestConfigurationFromCMakeVariable(mf, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME");
+  this->SetCTestConfigurationFromCMakeVariable(mf, "Site", "CTEST_SITE");
+  this->SetCTestConfigurationFromCMakeVariable(mf, "BuildName", "CTEST_BUILD_NAME");
+
+  if ( !this->Initialize(bld_dir, true, false) )
+    {
+    if ( this->GetCTestConfiguration("NightlyStartTime").empty() && first)
+      {
+      return true;
+      }
+    return false;
+    }
+  cmCTestLog(this, OUTPUT, "   Use " << this->GetTestModelString() << " tag: " << this->GetCurrentTag() << std::endl);
+  return true;
+}
+
 
 //----------------------------------------------------------------------
 bool cmCTest::UpdateCTestConfiguration()
@@ -1100,6 +1174,10 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if( arg.find("--debug",0) == 0 )
       {
       this->m_Debug = true;
+      }
+    if( arg.find("--show-line-numbers",0) == 0 )
+      {
+      this->m_ShowLineNumbers = true;
       }
     if( arg.find("-Q",0) == 0 || arg.find("--quiet",0) == 0 )
       {
@@ -1842,7 +1920,7 @@ bool cmCTest::RunCommand(
     default:
       done = true;
       }
-    if(m_ExtraVerbose)
+    if ( (res == cmsysProcess_Pipe_STDOUT || res == cmsysProcess_Pipe_STDERR) && m_ExtraVerbose )
       {
       cmSystemTools::Stdout(data, length);
       }
@@ -1927,7 +2005,13 @@ static const char* cmCTestStringLogType[] =
 #  undef cout
 #endif
 
-void cmCTest::Log(int logType, const char* msg)
+#define cmCTestLogOutputFileLine(stream) \
+  if ( m_ShowLineNumbers ) \
+    { \
+    (stream) << std::endl << file << ":" << line << " "; \
+    }
+
+void cmCTest::Log(int logType, const char* file, int line, const char* msg)
 {
   if ( !msg || !*msg )
     {
@@ -1940,6 +2024,7 @@ void cmCTest::Log(int logType, const char* msg)
     if ( logType == cmCTest::HANDLER_VERBOSE_OUTPUT && !m_Debug && !m_ExtraVerbose ) { display = false; }
     if ( display )
       {
+      cmCTestLogOutputFileLine(*m_OutputLogFile);
       if ( logType != m_OutputLogFileLastTag )
         {
         *m_OutputLogFile << "[";
@@ -1968,6 +2053,7 @@ void cmCTest::Log(int logType, const char* msg)
     case DEBUG:
       if ( m_Debug )
         {
+        cmCTestLogOutputFileLine(std::cout);
         std::cout << msg;
         std::cout.flush();
         }
@@ -1975,6 +2061,7 @@ void cmCTest::Log(int logType, const char* msg)
     case OUTPUT: case HANDLER_OUTPUT:
       if ( m_Debug || m_Verbose )
         {
+        cmCTestLogOutputFileLine(std::cout);
         std::cout << msg;
         std::cout.flush();
         }
@@ -1982,19 +2069,23 @@ void cmCTest::Log(int logType, const char* msg)
     case HANDLER_VERBOSE_OUTPUT:
       if ( m_Debug || m_ExtraVerbose )
         {
+        cmCTestLogOutputFileLine(std::cout);
         std::cout << msg;
         std::cout.flush();
         }
       break;
     case WARNING:
+      cmCTestLogOutputFileLine(std::cerr);
       std::cerr << msg;
       std::cerr.flush();
       break;
     case ERROR_MESSAGE:
+      cmCTestLogOutputFileLine(std::cerr);
       std::cerr << msg;
       std::cerr.flush();
       break;
     default:
+      cmCTestLogOutputFileLine(std::cout);
       std::cout << msg;
       std::cout.flush();
       }

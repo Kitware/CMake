@@ -26,12 +26,13 @@ class cmake;
 class cmMakefile;
 class cmCTestGenericHandler;
 class cmGeneratedFileStream;
+class cmCTestCommand;
 
 #define cmCTestLog(ctSelf, logType, msg) \
   do { \
   cmOStringStream cmCTestLog_msg; \
   cmCTestLog_msg << msg; \
-  (ctSelf)->Log(cmCTest::logType, cmCTestLog_msg.str().c_str());\
+  (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__, cmCTestLog_msg.str().c_str());\
   } while ( 0 )
 
 #ifdef cerr
@@ -55,7 +56,8 @@ public:
   /**
    * Initialize and finalize testing
    */
-  int Initialize(const char* binary_dir, bool new_tag = false);
+  int Initialize(const char* binary_dir, bool new_tag = false, bool verbose_tag = true);
+  bool InitializeFromCommand(cmCTestCommand* command, bool first = false);
   void Finalize();
 
   /**
@@ -262,7 +264,7 @@ public:
   };
 
   //! Add log to the output
-  void Log(int logType, const char* msg);
+  void Log(int logType, const char* file, int line, const char* msg);
 
 private:
   std::string m_ConfigType;
@@ -344,6 +346,7 @@ private:
   bool                      m_SuppressUpdatingCTestConfiguration;
 
   bool m_Debug;
+  bool m_ShowLineNumbers;
   bool m_Quiet;
 
   
