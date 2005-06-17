@@ -267,7 +267,9 @@ kwsysEXPORT void kwsysProcess_Disown(kwsysProcess* cp);
  *            return after reading data, the time elapsed is subtracted
  *            from the timeout value.  If this timeout expires, the
  *            value is set to 0.  A NULL pointer passed for this argument
- *            indicates no timeout for the call.
+ *            indicates no timeout for the call.  A negative or zero
+ *            value passed for this argument may be used for polling
+ *            and will always return immediately.
  *
  * Return value will be one of:
  *
