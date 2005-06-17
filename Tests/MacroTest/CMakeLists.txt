@@ -1,6 +1,8 @@
 # a simple C only test case
 PROJECT (littleMacroTest C)
 
+SET(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
+
 MACRO(FAILED testname)
   MESSAGE(SEND_ERROR "${testname} failed ${ARGN}")
 ENDMACRO(FAILED)
