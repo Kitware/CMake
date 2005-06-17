@@ -101,6 +101,7 @@ static void kwsysProcessCleanErrorMessage(kwsysProcess* cp);
 static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
                                       kwsysProcessTime* timeoutTime);
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
+                                      double* userTimeout,
                                       kwsysProcessTime* timeoutLength);
 static kwsysProcessTime kwsysProcessTimeGetCurrent();
 static DWORD kwsysProcessTimeToDWORD(kwsysProcessTime t);
@@ -1300,7 +1301,8 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
       }
 
     /* Setup a timeout if required.  */
-    if(kwsysProcessGetTimeoutLeft(&timeoutTime, &timeoutLength))
+    if(kwsysProcessGetTimeoutLeft(&timeoutTime, user?userTimeout:0,
+                                  &timeoutLength))
       {
       /* Timeout has already expired.  */
       expired = 1;
@@ -2122,7 +2124,8 @@ int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
     kwsysProcessTime userTimeoutLength = kwsysProcessTimeFromDouble(*userTimeout);
     kwsysProcessTime userTimeoutTime = kwsysProcessTimeAdd(currentTime,
                                                            userTimeoutLength);
-    if(kwsysProcessTimeLess(userTimeoutTime, *timeoutTime))
+    if(timeoutTime->QuadPart < 0 ||
+       kwsysProcessTimeLess(userTimeoutTime, *timeoutTime))
       {
       *timeoutTime = userTimeoutTime;
       return 1;
@@ -2135,6 +2138,7 @@ int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
 /* Get the length of time before the given timeout time arrives.
    Returns 1 if the time has already arrived, and 0 otherwise.  */
 int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
+                               double* userTimeout,
                                kwsysProcessTime* timeoutLength)
 {
   if(timeoutTime->QuadPart < 0)
@@ -2147,6 +2151,13 @@ int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
     /* Calculate the remaining time.  */
     kwsysProcessTime currentTime = kwsysProcessTimeGetCurrent();
     *timeoutLength = kwsysProcessTimeSubtract(*timeoutTime, currentTime);
+
+    if(timeoutLength->QuadPart < 0 && userTimeout && *userTimeout <= 0)
+      {
+      /* Caller has explicitly requested a zero timeout.  */
+      timeoutLength->QuadPart = 0;
+      }
+
     if(timeoutLength->QuadPart < 0)
       {
       /* Timeout has already expired.  */
