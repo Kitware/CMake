@@ -973,6 +973,7 @@ void cmCTestTestHandler::GetListOfTests()
   std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
   lg->SetGlobalGenerator(&gg);
   cmMakefile *mf = lg->GetMakefile();
+  mf->AddDefinition("CTEST_CONFIGURATION_TYPE", m_CTest->GetConfigType().c_str());
 
   // Add handler for ADD_TEST
   cmCTestAddTestCommand* newCom1 = new cmCTestAddTestCommand;
