@@ -31,10 +31,13 @@ class cmMakefile;
 class cmCTestMemCheckHandler : public cmCTestTestHandler
 {
 public:
+  cmTypeMacro(cmCTestMemCheckHandler, cmCTestTestHandler);
+
   void PopulateCustomVectors(cmMakefile *mf);
   
   cmCTestMemCheckHandler();
 
+  void Initialize();
 protected:
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();

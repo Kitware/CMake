@@ -66,6 +66,7 @@ class cmCTestCommand;
 class cmCTestScriptHandler : public cmCTestGenericHandler
 {
 public:
+  cmTypeMacro(cmCTestScriptHandler, cmCTestGenericHandler);
 
   /**
    * Add a script to run
@@ -97,6 +98,7 @@ public:
   cmCTestScriptHandler();
   ~cmCTestScriptHandler();
   
+  void Initialize();
 private:
   // reads in a script
   int ReadInScript(const std::string& total_script_arg);

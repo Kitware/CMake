@@ -17,6 +17,7 @@
 #ifndef cmCommand_h
 #define cmCommand_h
 
+#include "cmObject.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 
@@ -30,9 +31,11 @@
  * to support such features as enable/disable, inheritance, 
  * documentation, and construction.
  */
-class cmCommand
+class cmCommand : public cmObject
 {
 public:
+  cmTypeMacro(cmCommand, cmObject);
+
   /**
    * Construct the command. By default it is enabled with no makefile.
    */
@@ -104,11 +107,6 @@ public:
   virtual const char* GetName() = 0;
 
   /**
-   * The class name of the command.
-   */
-  virtual const char* GetNameOfClass() = 0;
-
-  /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() = 0;
@@ -156,19 +154,6 @@ public:
     }
 
   /**
-   * Returns true if this class is the given class, or a subclass of it.
-   */
-  static bool IsTypeOf(const char *type)
-    { return !strcmp("cmCommand", type); }
-  
-  /**
-   * Returns true if this object is an instance of the given class or
-   * a subclass of it.
-   */
-  virtual bool IsA(const char *type)
-    { return cmCommand::IsTypeOf(type); }
-
-  /**
    * Set the error message
    */
   void SetError(const char* e)
@@ -185,31 +170,5 @@ private:
   bool m_Enabled;
   std::string m_Error;
 };
-
-// All subclasses of cmCommand should invoke this macro.
-#define cmTypeMacro(thisClass,superclass) \
-virtual const char* GetNameOfClass() { return #thisClass; } \
-typedef superclass Superclass; \
-static bool IsTypeOf(const char *type) \
-{ \
-  if ( !strcmp(#thisClass,type) ) \
-    { \
-    return true; \
-    } \
-  return Superclass::IsTypeOf(type); \
-} \
-virtual bool IsA(const char *type) \
-{ \
-  return thisClass::IsTypeOf(type); \
-} \
-static thisClass* SafeDownCast(cmCommand *c) \
-{ \
-  if ( c && c->IsA(#thisClass) ) \
-    { \
-    return (thisClass *)c; \
-    } \
-  return 0;\
-}
-
 
 #endif

@@ -33,6 +33,7 @@
 class cmCTestUpdateHandler : public cmCTestGenericHandler
 {
 public:
+  cmTypeMacro(cmCTestUpdateHandler, cmCTestGenericHandler);
 
   /*
    * The main entry point for this class
@@ -42,9 +43,16 @@ public:
   cmCTestUpdateHandler();
 
   enum {
+    e_UNKNOWN = 0,
     e_CVS,
-    e_SVN
+    e_SVN,
+    e_LAST
   };
+
+  /**
+   * Initialize handler
+   */
+  virtual void Initialize();
   
 private:
   // Some structures needed for update

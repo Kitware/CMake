@@ -28,6 +28,10 @@ cmCTestConfigureHandler::cmCTestConfigureHandler()
 {
 }
 
+//----------------------------------------------------------------------
+void cmCTestConfigureHandler::Initialize()
+{
+}
 
 //----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller

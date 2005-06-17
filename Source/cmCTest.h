@@ -114,6 +114,7 @@ public:
   static std::string CleanString(const std::string& str);
   std::string GetCTestConfiguration(const char *name);
   void SetCTestConfiguration(const char *name, const char* value);
+  void EmptyCTestConfiguration();
   
   /**
    * constructor and destructor

@@ -31,6 +31,7 @@ class cmGeneratedFileStream;
 class cmCTestCoverageHandler : public cmCTestGenericHandler
 {
 public:
+  cmTypeMacro(cmCTestCoverageHandler, cmCTestGenericHandler);
 
   /*
    * The main entry point for this class
@@ -39,6 +40,8 @@ public:
   
   cmCTestCoverageHandler();
   
+  virtual void Initialize();
+
 private:
   bool ShouldIDoCoverage(const char* file, const char* srcDir,
     const char* binDir);

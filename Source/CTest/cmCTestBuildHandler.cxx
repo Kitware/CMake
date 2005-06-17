@@ -186,6 +186,64 @@ cmCTestBuildHandler::cmCTestBuildHandler()
     }
 }
 
+//----------------------------------------------------------------------
+void cmCTestBuildHandler::Initialize()
+{
+  m_StartBuild = "";
+  m_EndBuild = "";
+  m_CustomErrorMatches.clear();
+  m_CustomErrorExceptions.clear();
+  m_CustomWarningMatches.clear();
+  m_CustomWarningExceptions.clear();
+  m_ErrorWarningFileLineRegex.clear();
+
+  m_ErrorMatchRegex.clear();
+  m_ErrorExceptionRegex.clear();
+  m_WarningMatchRegex.clear();
+  m_WarningExceptionRegex.clear();
+  m_BuildProcessingQueue.clear();
+  m_BuildProcessingQueueLocation = m_BuildProcessingQueue.end();
+  m_BuildOutputLogSize = 0;
+  m_CurrentProcessingLine.clear();
+
+  m_SimplifySourceDir = "";
+  m_SimplifyBuildDir = "";
+  m_OutputLineCounter = 0;
+  m_ErrorsAndWarnings.clear();
+  m_LastErrorOrWarning = m_ErrorsAndWarnings.end();
+  m_PostContextCount = 0;
+  m_MaxPreContext = 6;
+  m_MaxPostContext = 6;
+  m_PreContext.clear();
+
+  m_TotalErrors = 0;
+  m_TotalWarnings = 0;
+  m_LastTickChar = 0;
+
+  m_ErrorQuotaReached = false;
+  m_WarningQuotaReached = false;
+
+  m_MaxErrors = 50;
+  m_MaxWarnings = 50;
+
+  int cc;
+  for ( cc = 0; cmCTestWarningErrorFileLine[cc].m_RegularExpressionString; ++ cc )
+    {
+    cmCTestBuildHandler::cmCTestCompileErrorWarningRex r;
+    if ( r.m_RegularExpression.compile(
+        cmCTestWarningErrorFileLine[cc].m_RegularExpressionString) )
+      {
+      r.m_FileIndex = cmCTestWarningErrorFileLine[cc].m_FileIndex;
+      r.m_LineIndex = cmCTestWarningErrorFileLine[cc].m_LineIndex;
+      m_ErrorWarningFileLineRegex.push_back(r);
+      }
+    else
+      {
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem Compiling regular expression: "
+       << cmCTestWarningErrorFileLine[cc].m_RegularExpressionString << std::endl);
+      }
+    }
+}
 
 //----------------------------------------------------------------------
 void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)

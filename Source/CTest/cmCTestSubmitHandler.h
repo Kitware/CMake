@@ -28,6 +28,8 @@
 class cmCTestSubmitHandler : public cmCTestGenericHandler
 {
 public:
+  cmTypeMacro(cmCTestSubmitHandler, cmCTestGenericHandler);
+
   cmCTestSubmitHandler();
   ~cmCTestSubmitHandler() { m_LogFile = 0; }
 
@@ -36,6 +38,7 @@ public:
    */
   int ProcessHandler();
 
+  void Initialize();
   
 private:
   void SetLogFile(std::ostream* ost) { m_LogFile = ost; }

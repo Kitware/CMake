@@ -64,6 +64,7 @@ bool cmCTestStartCommand::InitialPass(
     this->SetError("binary directory not specified. Specify binary directory as an argument or set CTEST_BINARY_DIRECTORY");
     return false;
     }
+  m_CTest->EmptyCTestConfiguration();
   m_CTest->SetCTestConfiguration("SourceDirectory", src_dir);
   m_CTest->SetCTestConfiguration("BuildDirectory", bld_dir); 
 

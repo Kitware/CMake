@@ -66,6 +66,7 @@ bool cmCTestUpdateCommand::InitialPass(
       }
     }
 
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "UpdateCommand", "CTEST_UPDATE_COMMAND");
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "CVSCommand", "CTEST_CVS_COMMAND");
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "SVNCommand", "CTEST_SVN_COMMAND");
 

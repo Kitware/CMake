@@ -31,6 +31,7 @@ class cmake;
 class cmCTestBuildAndTestHandler : public cmCTestGenericHandler
 {
 public:
+  cmTypeMacro(cmCTestBuildAndTestHandler, cmCTestGenericHandler);
 
   /*
    * The main entry point for this class
@@ -48,6 +49,8 @@ public:
   const char* GetOutput();
   
   cmCTestBuildAndTestHandler();
+
+  virtual void Initialize();
 
 protected:
   ///! Run CMake and build a test and then run it as a single test.

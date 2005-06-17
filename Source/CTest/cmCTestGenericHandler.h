@@ -19,7 +19,7 @@
 #define cmCTestGenericHandler_h
 
 
-#include "cmStandardIncludes.h"
+#include "cmObject.h"
 
 class cmCTest;
 class cmMakefile;
@@ -29,7 +29,7 @@ class cmCTestCommand;
  * \brief A superclass of all CTest Handlers
  *
  */
-class cmCTestGenericHandler
+class cmCTestGenericHandler : public cmObject
 {
 public:
   /**
@@ -54,6 +54,11 @@ public:
   virtual int ProcessCommandLineArguments(
     const std::string& /*currentArg*/, size_t& /*idx*/,
     const std::vector<std::string>& /*allArgs*/) { return 1; }
+
+  /**
+   * Initialize handler
+   */
+  virtual void Initialize() = 0;
 
   /**
    * Set the CTest instance

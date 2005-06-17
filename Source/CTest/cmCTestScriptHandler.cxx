@@ -97,6 +97,49 @@ cmCTestScriptHandler::cmCTestScriptHandler()
   m_ContinuousDuration = -1;
 }
 
+//----------------------------------------------------------------------
+void cmCTestScriptHandler::Initialize()
+{
+  m_Backup = false;
+  m_EmptyBinDir = false;
+  m_EmptyBinDirOnce = false;
+  
+  m_SourceDir = "";
+  m_BinaryDir = "";
+  m_BackupSourceDir = "";
+  m_BackupBinaryDir = "";
+  m_CTestRoot = "";
+  m_CVSCheckOut = "";
+  m_CTestCmd = "";
+  m_CVSCmd = "";
+  m_CTestEnv = "";
+  m_InitCache = "";
+  m_CMakeCmd = "";
+  m_CMOutFile = "";
+  m_ExtraUpdates.clear();
+
+  m_MinimumInterval = 20*60;
+  m_ContinuousDuration = -1;
+
+  // what time in seconds did this script start running
+  m_ScriptStartTime = 0;
+  
+  m_Makefile = 0;
+  if (m_LocalGenerator)
+    {
+    delete m_LocalGenerator;
+    }
+  m_LocalGenerator = 0;
+  if (m_GlobalGenerator)
+    {
+    delete m_GlobalGenerator;
+    }
+  m_GlobalGenerator = 0;
+  if (m_CMake)
+    {
+    delete m_CMake;
+    }
+}
 
 //----------------------------------------------------------------------
 cmCTestScriptHandler::~cmCTestScriptHandler()

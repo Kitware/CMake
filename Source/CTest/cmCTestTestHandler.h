@@ -31,6 +31,7 @@ class cmMakefile;
 class cmCTestTestHandler : public cmCTestGenericHandler
 {
 public:
+  cmTypeMacro(cmCTestTestHandler, cmCTestGenericHandler);
 
   /**
    * The main entry point for this class
@@ -80,6 +81,8 @@ public:
     std::string m_RegressionImages;
     int         m_TestCount;
   };
+
+  void Initialize();
 
 protected:
   struct cmCTestTestProperties

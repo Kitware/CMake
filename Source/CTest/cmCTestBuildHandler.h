@@ -33,6 +33,7 @@ class cmMakefile;
 class cmCTestBuildHandler : public cmCTestGenericHandler
 {
 public:
+  cmTypeMacro(cmCTestBuildHandler, cmCTestGenericHandler);
 
   /*
    * The main entry point for this class
@@ -43,6 +44,11 @@ public:
   
   void PopulateCustomVectors(cmMakefile *mf);
 
+  /**
+   * Initialize handler
+   */
+  virtual void Initialize();
+  
 private:
   //! Run command specialized for make and configure. Returns process status
   // and retVal is return value or exception.

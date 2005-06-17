@@ -294,6 +294,35 @@ cmCTestTestHandler::cmCTestTestHandler()
 }
 
 //----------------------------------------------------------------------
+void cmCTestTestHandler::Initialize()
+{
+  m_ElapsedTestingTime = -1;
+
+  m_TestResults.clear();
+
+  m_CustomTestsIgnore.clear();
+  m_StartTest = "";
+  m_EndTest = "";
+
+  m_CustomPreTest.clear();
+  m_CustomPostTest.clear();
+  m_CustomMaximumPassedTestOutputSize = 1 * 1024;
+  m_CustomMaximumFailedTestOutputSize = 300 * 1024;
+
+  m_TestsToRun.clear();
+
+  m_UseIncludeRegExp = false;
+  m_UseExcludeRegExp = false;
+  m_UseExcludeRegExpFirst = false;
+  m_IncludeRegExp = "";
+  m_ExcludeRegExp = "";
+
+  TestsToRunString = "";
+  m_UseUnion = false;
+  m_TestList.clear();
+}
+
+//----------------------------------------------------------------------
 void cmCTestTestHandler::PopulateCustomVectors(cmMakefile *mf)
 {
   cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_PRE_TEST", 

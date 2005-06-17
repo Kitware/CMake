@@ -91,6 +91,23 @@ cmCTestMemCheckHandler::cmCTestMemCheckHandler()
 }
 
 //----------------------------------------------------------------------
+void cmCTestMemCheckHandler::Initialize()
+{
+  this->Superclass::Initialize();
+  m_MemoryTester = "";
+  m_MemoryTesterOptionsParsed.clear();
+  m_MemoryTesterOptions = "";
+  m_MemoryTesterStyle = UNKNOWN;
+  m_MemoryTesterOutputFile = "";
+  int cc;
+  for ( cc = 0; cc < NO_MEMORY_FAULT; cc ++ )
+    {
+    m_MemoryTesterGlobalResults[cc] = 0;
+    }
+
+}
+
+//----------------------------------------------------------------------
 int cmCTestMemCheckHandler::PreProcessHandler()
 {
   if ( !this->InitializeMemoryChecking() )

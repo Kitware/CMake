@@ -323,4 +323,31 @@ public:
 # pragma reset woff 1375 /* base class destructor not virtual */
 #endif
 
+// All subclasses of cmCommand or cmCTestGenericHandler should invoke this macro.
+#define cmTypeMacro(thisClass,superclass) \
+virtual const char* GetNameOfClass() { return #thisClass; } \
+typedef superclass Superclass; \
+static bool IsTypeOf(const char *type) \
+{ \
+  if ( !strcmp(#thisClass,type) ) \
+    { \
+    return true; \
+    } \
+  return Superclass::IsTypeOf(type); \
+} \
+virtual bool IsA(const char *type) \
+{ \
+  return thisClass::IsTypeOf(type); \
+} \
+static thisClass* SafeDownCast(cmObject *c) \
+{ \
+  if ( c && c->IsA(#thisClass) ) \
+    { \
+    return (thisClass *)c; \
+    } \
+  return 0;\
+}
+
+
+
 #endif

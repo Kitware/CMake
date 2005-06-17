@@ -39,6 +39,23 @@
 #include <float.h>
 
 //----------------------------------------------------------------------
+static const char* cmCTestUpdateHandlerUpdateStrings[] =
+{
+  "Unknown",
+  "CVS",
+  "SVN"
+};
+
+static const char* cmCTestUpdateHandlerUpdateToString(int type)
+{
+  if ( type < cmCTestUpdateHandler::e_UNKNOWN || type >= cmCTestUpdateHandler::e_LAST )
+    {
+    return cmCTestUpdateHandlerUpdateStrings[cmCTestUpdateHandler::e_UNKNOWN];
+    }
+  return cmCTestUpdateHandlerUpdateStrings[type];
+}
+
+//----------------------------------------------------------------------
 //**********************************************************************
 class cmCTestUpdateHandlerSVNXMLParser : public cmXMLParser
 {
@@ -156,14 +173,20 @@ private:
 //----------------------------------------------------------------------
 cmCTestUpdateHandler::cmCTestUpdateHandler()
 {
-  m_CTest = 0;
+}
+
+//----------------------------------------------------------------------
+void cmCTestUpdateHandler::Initialize()
+{
 }
 
 //----------------------------------------------------------------------
 int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
 {
+  cmCTestLog(m_CTest, DEBUG, "Determine update type from command: " << cmd << " and type: " << type << std::endl);
   if ( type && *type )
     {
+    cmCTestLog(m_CTest, DEBUG, "Type specified: " << type << std::endl);
     std::string stype = cmSystemTools::LowerCase(type);
     if ( stype.find("cvs") != std::string::npos )
       {
@@ -176,6 +199,7 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
     }
   else
     {
+    cmCTestLog(m_CTest, DEBUG, "Type not specified, check command: " << cmd << std::endl);
     std::string stype = cmSystemTools::LowerCase(cmd);
     if ( stype.find("cvs") != std::string::npos )
       {
@@ -186,7 +210,20 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
       return cmCTestUpdateHandler::e_SVN;
       }
     }
-  return cmCTestUpdateHandler::e_CVS;
+  std::string sourceDirectory = this->GetOption("SourceDirectory");
+  cmCTestLog(m_CTest, DEBUG, "Check directory: " << sourceDirectory.c_str() << std::endl);
+  sourceDirectory += "/.svn";
+  if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
+    {
+    return cmCTestUpdateHandler::e_SVN;
+    }
+  sourceDirectory = this->GetOption("SourceDirectory");
+  sourceDirectory += "/CVS";
+  if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
+    {
+    return cmCTestUpdateHandler::e_CVS;
+    }
+  return cmCTestUpdateHandler::e_UNKNOWN;
 }
 
 //----------------------------------------------------------------------
@@ -284,6 +321,8 @@ int cmCTestUpdateHandler::ProcessHandler()
     {
     updateType = this->DetermineType(updateCommand.c_str(), m_CTest->GetCTestConfiguration("UpdateType").c_str());
     }
+
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Use " << cmCTestUpdateHandlerUpdateToString(updateType) << " repository type" << std::endl;);
 
   // And update options
   std::string updateOptions = m_CTest->GetCTestConfiguration("UpdateOptions");
@@ -434,6 +473,7 @@ int cmCTestUpdateHandler::ProcessHandler()
           &retVal, sourceDirectory, 0 /*m_TimeOut*/);
         ofs << "  Output: " << partialOutput.c_str() << std::endl;
         ofs << "  Errors: " << errors.c_str() << std::endl;
+        goutput = partialOutput;
         command = updateCommand + " status";
         ofs << "* Status repository: " << std::endl;
         ofs << "  Command: " << command.c_str() << std::endl;
@@ -443,6 +483,7 @@ int cmCTestUpdateHandler::ProcessHandler()
         ofs << "  Errors: " << errors.c_str() << std::endl;
         goutput += partialOutput;
         res = res && res1;
+        ofs << "  Total output of update: " << goutput.c_str() << std::endl;
         }
       }
     if ( ofs )
@@ -467,7 +508,9 @@ int cmCTestUpdateHandler::ProcessHandler()
     << m_CTest->GetTestModelString() << "</BuildStamp>" << std::endl;
   os << "\t<StartDateTime>" << start_time << "</StartDateTime>\n"
     << "\t<UpdateCommand>" << m_CTest->MakeXMLSafe(command)
-    << "</UpdateCommand>\n";
+    << "</UpdateCommand>\n"
+    << "\t<UpdateType>" << m_CTest->MakeXMLSafe(cmCTestUpdateHandlerUpdateToString(updateType))
+    << "</UpdateType>\n";
 
   // Even though it failed, we may have some useful information. Try to continue...
   std::vector<cmStdString> lines;
@@ -503,7 +546,11 @@ int cmCTestUpdateHandler::ProcessHandler()
         }
       }
     }
-  if ( updateType == cmCTestUpdateHandler::e_SVN )
+  if ( svn_latest_revision <= 0 )
+    {
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem determining the current revision of the repository from output:" << std::endl << goutput.c_str() << std::endl);
+    }
+  else if ( updateType == cmCTestUpdateHandler::e_SVN )
     {
     cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Current revision of repository is: " << svn_latest_revision << std::endl);
     }

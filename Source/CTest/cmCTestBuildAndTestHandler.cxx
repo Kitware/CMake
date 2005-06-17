@@ -32,6 +32,11 @@ cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 }
 
 //----------------------------------------------------------------------
+void cmCTestBuildAndTestHandler::Initialize()
+{
+}
+
+//----------------------------------------------------------------------
 const char* cmCTestBuildAndTestHandler::GetOutput()
 {
   return m_Output.c_str();

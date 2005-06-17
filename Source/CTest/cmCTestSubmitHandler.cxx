@@ -68,6 +68,17 @@ cmCTestSubmitHandler::cmCTestSubmitHandler() : m_HTTPProxy(), m_FTPProxy()
 }
 
 //----------------------------------------------------------------------------
+void cmCTestSubmitHandler::Initialize()
+{
+  m_HTTPProxy = "";
+  m_HTTPProxyType = 0;
+  m_HTTPProxyAuth = "";
+  m_FTPProxy = "";
+  m_FTPProxyType = 0;
+  m_LogFile = 0;
+}
+
+//----------------------------------------------------------------------------
 bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix, 
   const std::vector<cmStdString>& files,
   const cmStdString& remoteprefix, 

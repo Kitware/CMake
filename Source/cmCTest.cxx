@@ -1800,6 +1800,12 @@ std::string cmCTest::GetCTestConfiguration(const char *name)
 }
 
 //----------------------------------------------------------------------
+void cmCTest::EmptyCTestConfiguration()
+{
+  m_CTestConfiguration.clear();
+}
+
+//----------------------------------------------------------------------
 void cmCTest::SetCTestConfiguration(const char *name, const char* value)
 {
   if ( !name )
