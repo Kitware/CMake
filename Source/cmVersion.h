@@ -32,6 +32,7 @@ public:
    */
   static unsigned int GetMajorVersion() { return CMake_VERSION_MAJOR; }
   static unsigned int GetMinorVersion() { return CMake_VERSION_MINOR; }
+  static unsigned int GetPatchVersion() { return CMake_VERSION_PATCH; }
   static std::string GetReleaseVersion();
   static std::string GetCMakeVersion();
 };

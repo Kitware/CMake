@@ -30,8 +30,18 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args)
     }
   float version = float(m_Makefile->GetMajorVersion());
   version += (float(m_Makefile->GetMinorVersion()) * (float).1);
+  version += (float(m_Makefile->GetPatchVersion()) * (float).01);
   float reqVersion = 0;
-  sscanf(args[1].c_str(), "%f", &reqVersion);
+  int major=0;
+  int minor=0;
+  int patch=0;
+
+  int res=sscanf(args[1].c_str(), "%d.%d.%d", &major, &minor, &patch);
+  if (res==3)
+     reqVersion=float(major)+0.1*float(minor)+0.01*float(patch);
+  else if (res==2)
+     reqVersion=float(major)+0.1*float(minor);
+
   if(reqVersion > version)
     {
     cmOStringStream str;
