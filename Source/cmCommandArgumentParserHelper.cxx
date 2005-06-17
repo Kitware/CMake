@@ -22,7 +22,7 @@
 #include "cmMakefile.h"
 
 int cmCommandArgument_yyparse( yyscan_t yyscanner );
-
+//
 cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
 {
   m_FileLine = -1;
@@ -35,6 +35,8 @@ cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
   strcpy(m_DOLLARVariable, "$");
   strcpy(m_LCURLYVariable, "{");
   strcpy(m_BSLASHVariable, "\\");
+
+  m_NoEscapeMode = false;
 }
 
 
@@ -143,6 +145,53 @@ void cmCommandArgumentParserHelper::AllocateParserType(cmCommandArgumentParserHe
   pt->str[len] = 0;
   m_Variables.push_back(pt->str);
   // std::cout << (void*) pt->str << " " << pt->str << " JPAllocateParserType" << std::endl;
+}
+
+bool cmCommandArgumentParserHelper::HandleEscapeSymbol(cmCommandArgumentParserHelper::ParserType* pt, char symbol)
+{
+  if ( m_NoEscapeMode )
+    {
+    char buffer[3];
+    buffer[0] = '\\';
+    buffer[1] = symbol;
+    buffer[2] = 0;
+    this->AllocateParserType(pt, buffer, 2);
+    return true;
+    }
+  switch ( symbol )
+    {
+  case '\\':
+  case '"':
+  case ' ':
+  case '#':
+  case '(':
+  case ')':
+  case '$':
+  case '^':
+  case ';':
+    this->AllocateParserType(pt, &symbol, 1);
+    break;
+  case 't':
+    this->AllocateParserType(pt, "\t", 1);
+    break;
+  case 'n':
+    this->AllocateParserType(pt, "\n", 1);
+    break;
+  case 'r':
+    this->AllocateParserType(pt, "\r", 1);
+    break;
+  case '0':
+    this->AllocateParserType(pt, "\0", 1);
+    break;
+  default:
+    char buffer[2];
+    buffer[0] = symbol;
+    buffer[1] = 0;
+    cmSystemTools::Error("Invalid escape sequence \\", buffer);
+    abort();
+    return false;
+    }
+  return true;
 }
 
 int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)

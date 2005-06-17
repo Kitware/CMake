@@ -543,6 +543,7 @@ public:
    */
   const char *ExpandVariablesInString(std::string& source) const;
   const char *ExpandVariablesInString(std::string& source, bool escapeQuotes,
+                                      bool noEscapes,
                                       bool atOnly = false,
                                       const char* filename = 0,
                                       long line = -1,

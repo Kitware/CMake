@@ -247,13 +247,13 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
     else if(token->type == cmListFileLexer_Token_Identifier ||
             token->type == cmListFileLexer_Token_ArgumentUnquoted)
       {
-      cmListFileArgument a(cmSystemTools::RemoveEscapes(token->text),
+      cmListFileArgument a(token->text,
                            false, filename, token->line);
       function.m_Arguments.push_back(a);
       }
     else if(token->type == cmListFileLexer_Token_ArgumentQuoted)
       {
-      cmListFileArgument a(cmSystemTools::RemoveEscapes(token->text),
+      cmListFileArgument a(token->text,
                            true, filename, token->line);
       function.m_Arguments.push_back(a);
       }

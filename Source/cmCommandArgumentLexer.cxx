@@ -341,8 +341,8 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
   *yy_cp = '\0'; \
   yyg->yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 11
-#define YY_END_OF_BUFFER 12
+#define YY_NUM_RULES 12
+#define YY_END_OF_BUFFER 13
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -352,8 +352,8 @@ struct yy_trans_info
   };
 static yyconst flex_int16_t yy_accept[20] =
     {   0,
-        0,    0,   12,    7,    8,    6,    5,   10,    9,    4,
-        7,    0,    3,    6,    0,    7,    1,    2,    0
+        0,    0,   13,    8,    9,    6,    5,   11,   10,    4,
+        8,    0,    3,    6,    0,    7,    1,    2,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -859,7 +859,17 @@ YY_RULE_SETUP
   return cal_NAME; 
 }
 case 7:
-/* rule 7 can match eol */
+YY_RULE_SETUP
+
+{
+  if ( !yyextra->HandleEscapeSymbol(yylvalp, *(yytext+1)) )
+    {
+    return cal_ERROR;
+    }
+  return cal_SYMBOL; 
+}
+case 8:
+/* rule 8 can match eol */
 YY_RULE_SETUP
 
 { 
@@ -867,7 +877,7 @@ YY_RULE_SETUP
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   return cal_SYMBOL; 
 }
-case 8:
+case 9:
 YY_RULE_SETUP
 
 {
@@ -875,7 +885,7 @@ YY_RULE_SETUP
   yylvalp->str = yyextra->m_DOLLARVariable;
   return cal_DOLLAR; 
 }
-case 9:
+case 10:
 YY_RULE_SETUP
 
 {
@@ -883,7 +893,7 @@ YY_RULE_SETUP
   yylvalp->str = yyextra->m_LCURLYVariable;
   return cal_LCURLY; 
 }
-case 10:
+case 11:
 YY_RULE_SETUP
 
 {
@@ -891,7 +901,7 @@ YY_RULE_SETUP
   yylvalp->str = yyextra->m_BSLASHVariable;
   return cal_BSLASH; 
 }
-case 11:
+case 12:
 YY_RULE_SETUP
 
 ECHO;
@@ -1219,7 +1229,6 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
   return yy_is_jam ? 0 : yy_current_state;
 }
-
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus

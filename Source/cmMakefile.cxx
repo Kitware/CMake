@@ -1361,17 +1361,18 @@ std::vector<std::string> cmMakefile::GetDefinitions(int cacheonly /* = 0 */) con
 
 const char *cmMakefile::ExpandVariablesInString(std::string& source) const
 {
-  return this->ExpandVariablesInString(source, false);
+  return this->ExpandVariablesInString(source, false, false);
 }
 
 const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 bool escapeQuotes,
+                                                bool noEscapes,
                                                 bool atOnly,
                                                 const char* filename,
                                                 long line,
                                                 bool removeEmpty) const
 {
-  if ( source.empty() || source.find_first_of("$@") == source.npos)
+  if ( source.empty() || source.find_first_of("$@\\") == source.npos)
     {
     return source.c_str();
     }
@@ -1387,6 +1388,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
     parser.SetMakefile(this);
     parser.SetLineFile(line, filename);
     parser.SetEscapeQuotes(escapeQuotes);
+    parser.SetNoEscapeMode(noEscapes);
     int res = parser.ParseString(source.c_str(), 0);
     if ( res )
       {
@@ -1703,7 +1705,7 @@ void cmMakefile::ExpandArguments(
     {
     // Expand the variables in the argument.
     value = i->Value;
-    this->ExpandVariablesInString(value, false, false, i->FilePath, i->Line);
+    this->ExpandVariablesInString(value, false, false, false, i->FilePath, i->Line);
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
@@ -2353,7 +2355,7 @@ void cmMakefile::ConfigureString(const std::string& input,
     }
 
   // Perform variable replacements.
-  this->ExpandVariablesInString(output, escapeQuotes, atOnly, 0, -1, true);
+  this->ExpandVariablesInString(output, escapeQuotes, true, atOnly, 0, -1, true);
 //  this->RemoveVariablesInString(output, atOnly);
 }
 

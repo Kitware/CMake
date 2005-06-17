@@ -124,7 +124,15 @@ Modify cmCommandArgumentLexer.h:
   return cal_NAME; 
 }
 
-[^\${}\\@]+|\\. { 
+\\. {
+  if ( !yyextra->HandleEscapeSymbol(yylvalp, *(yytext+1)) )
+    {
+    return cal_ERROR;
+    }
+  return cal_SYMBOL; 
+}
+
+[^\${}\\@]+ { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   return cal_SYMBOL; 

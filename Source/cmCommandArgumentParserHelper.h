@@ -47,6 +47,7 @@ public:
   // For the lexer:
   void AllocateParserType(cmCommandArgumentParserHelper::ParserType* pt, 
     const char* str, int len = 0);
+  bool HandleEscapeSymbol(cmCommandArgumentParserHelper::ParserType* pt, char symbol);
 
   int LexInput(char* buf, int maxlen);
   void Error(const char* str);
@@ -64,6 +65,7 @@ public:
 
   void SetLineFile(long line, const char* file);
   void SetEscapeQuotes(bool b) { m_EscapeQuotes = b; }
+  void SetNoEscapeMode(bool b) { m_NoEscapeMode = b; }
 
   const char* GetError() { return m_Error.c_str(); }
 
@@ -97,6 +99,7 @@ private:
   long m_FileLine;
   bool m_EscapeQuotes;
   std::string m_Error;
+  bool m_NoEscapeMode;
 };
 
 #endif
