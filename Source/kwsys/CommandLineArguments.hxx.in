@@ -113,7 +113,7 @@ public:
 
   /**
    * Initialize internal data structure and pass arguments one by one. This is
-   * convinience method for use from scripting languages where argc and argv
+   * convenience method for use from scripting languages where argc and argv
    * are not available.
    */
   void Initialize();
