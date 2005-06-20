@@ -92,7 +92,7 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
       return false;
       }
     cmSystemTools::ChangeDirectory(fname.c_str());
-    const char* testFilename = 0;
+    const char* testFilename;
     if( cmSystemTools::FileExists("CTestTestfile.cmake") )
       {
       // does the CTestTestfile.cmake exist ?
@@ -985,7 +985,7 @@ void cmCTestTestHandler::GetListOfTests()
   newCom2->m_TestHandler = this;
   cm.AddCommand(newCom2);
 
-  const char* testFilename = 0;
+  const char* testFilename;
   if( cmSystemTools::FileExists("CTestTestfile.cmake") )
     {
     // does the CTestTestfile.cmake exist ?
