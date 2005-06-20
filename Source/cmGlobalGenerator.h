@@ -143,6 +143,9 @@ public:
    */
   void FindMakeProgram(cmMakefile*);
 
+  ///! Find a target by name by searching the local generators.
+  cmTarget* FindTarget(const char* project, const char* name);
+
 protected:
   // Fill the m_ProjectMap, this must be called after m_LocalGenerators has been populated.
   void FillProjectMap();
@@ -159,8 +162,6 @@ protected:
   // map from project name to vector of local generators in that project
   std::map<cmStdString, std::vector<cmLocalGenerator*> > m_ProjectMap;
 
-  ///! Find a target by name by searching the local generators.
-  cmTarget* FindTarget(const char* project, const char* name);
 private:
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator 

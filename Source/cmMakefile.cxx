@@ -1079,7 +1079,8 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
   this->AddGlobalLinkInformation(lname, target);
-  m_Targets.insert(cmTargets::value_type(lname,target));
+  cmTargets::iterator it = 
+    m_Targets.insert(cmTargets::value_type(lname,target)).first;
 
   // Add an entry into the cache 
   std::string libPath = lname;
@@ -1088,7 +1089,27 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     AddCacheEntry(libPath.c_str(),
                   this->GetCurrentOutputDirectory(),
                   "Path to a library", cmCacheManager::INTERNAL);
-
+  
+  // set the LOCATION property of the target
+  std::string target_location;
+  target_location = this->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
+  if ( target_location.size() == 0 )
+    {
+    target_location += this->GetCurrentOutputDirectory();
+    }
+  if ( target_location.size() > 0 )
+    {
+    target_location += "/";
+    }
+  const char* cfgid = this->GetDefinition("CMAKE_CFG_INTDIR");
+  if ( cfgid && strcmp(cfgid, ".") != 0 )
+    {
+    target_location += cfgid;
+    target_location += "/";
+    }  
+  target_location += target.GetFullName(this);
+  target.SetProperty("LOCATION",target_location.c_str());
+  
   // Add an entry into the cache
   std::string ltname = lname;
   ltname += "_LIBRARY_TYPE";
@@ -1133,6 +1154,26 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
   cmTargets::iterator it = 
     m_Targets.insert(cmTargets::value_type(exeName,target)).first;
   
+  // set the LOCATION property of the target
+  std::string target_location;
+  target_location = this->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+  if ( target_location.size() == 0 )
+    {
+    target_location += this->GetCurrentOutputDirectory();
+    }
+  if ( target_location.size() > 0 )
+    {
+    target_location += "/";
+    }
+  const char* cfgid = this->GetDefinition("CMAKE_CFG_INTDIR");
+  if ( cfgid && strcmp(cfgid, ".") != 0 )
+    {
+    target_location += cfgid;
+    target_location += "/";
+    }  
+  target_location += target.GetFullName(this);
+  it->second.SetProperty("LOCATION",target_location.c_str());
+
   // Add an entry into the cache 
   std::string exePath = exeName;
   exePath += "_CMAKE_PATH";
