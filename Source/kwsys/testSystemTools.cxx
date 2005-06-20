@@ -27,6 +27,7 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
+//----------------------------------------------------------------------------
 const char* toUnixPaths[][2] = 
 {
     { "/usr/local/bin/passwd", "/usr/local/bin/passwd" },
@@ -47,24 +48,57 @@ const char* toUnixPaths[][2] =
     {0, 0}
 };
 
-bool CheckConvertToUnixSlashes(kwsys_stl::string input, kwsys_stl::string output)
+bool CheckConvertToUnixSlashes(kwsys_stl::string input, 
+                               kwsys_stl::string output)
 {
   kwsys_stl::string result = input;
   kwsys::SystemTools::ConvertToUnixSlashes(result);
   if ( result != output )
     {
-    kwsys_ios::cerr << "Problem with ConvertToUnixSlashes - input: " << input.c_str() << " output: " << result.c_str() << " expected: " << output.c_str() << kwsys_ios::endl;
+    kwsys_ios::cerr 
+      << "Problem with ConvertToUnixSlashes - input: " << input.c_str() 
+      << " output: " << result.c_str() << " expected: " << output.c_str() 
+      << kwsys_ios::endl;
     return false;
     }
   return true;
 }
 
+//----------------------------------------------------------------------------
+const char* checkEscapeChars[][4] = 
+{
+  { "1 foo 2 bar 2", "12", "\\", "\\1 foo \\2 bar \\2"},
+  { " {} ", "{}", "#", " #{#} "},
+  {0, 0, 0, 0}
+};
+
+bool CheckEscapeChars(kwsys_stl::string input, 
+                      const char *chars_to_escape, 
+                      char escape_char, 
+                      kwsys_stl::string output)
+{
+  kwsys_stl::string result = kwsys::SystemTools::EscapeChars(
+    input.c_str(), chars_to_escape, escape_char);
+  if (result != output)
+    {
+    kwsys_ios::cerr 
+      << "Problem with CheckEscapeChars - input: " << input.c_str() 
+      << " output: " << result.c_str() << " expected: " << output.c_str() 
+      << kwsys_ios::endl;
+    return false;
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
 int main(/*int argc, char* argv*/)
 {
+  bool res = true;
+
   int cc;
   for ( cc = 0; toUnixPaths[cc][0]; cc ++ )
     {
-    CheckConvertToUnixSlashes(toUnixPaths[cc][0], toUnixPaths[cc][1]);
+    res &= CheckConvertToUnixSlashes(toUnixPaths[cc][0], toUnixPaths[cc][1]);
     }
 
   // Special check for ~
@@ -72,7 +106,14 @@ int main(/*int argc, char* argv*/)
   if(kwsys::SystemTools::GetEnv("HOME", output))
     {
     output += "/foo bar/lala";
-    CheckConvertToUnixSlashes("~/foo bar/lala", output);
+    res &= CheckConvertToUnixSlashes("~/foo bar/lala", output);
     }
-  return 0;
+
+  for (cc = 0; checkEscapeChars[cc][0]; cc ++ )
+    {
+    res &= CheckEscapeChars(checkEscapeChars[cc][0], checkEscapeChars[cc][1], 
+                            *checkEscapeChars[cc][2], checkEscapeChars[cc][3]);
+    }
+
+  return res ? 0 : 1;
 }
