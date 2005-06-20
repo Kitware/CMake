@@ -13,7 +13,7 @@ IF("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
 ENDIF("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
 
 IF(NOT XCODE)
-# Enable shar   ed library versioning.
+# Enable shared library versioning.
   SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
   SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-install_name")
 ENDIF(NOT XCODE)
