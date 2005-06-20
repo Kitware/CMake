@@ -10,9 +10,9 @@ MACRO(TEST_BIG_ENDIAN VARIABLE)
       ${CMAKE_BINARY_DIR}
       ${CMAKE_ROOT}/Modules/TestBigEndian.c
       OUTPUT_VARIABLE OUTPUT)
-    IF(${VARIABLE} STREQUAL "FAILED_TO_RUN")
+    IF("${VARIABLE}" STREQUAL "FAILED_TO_RUN")
       MESSAGE(SEND_ERROR "TestBigEndian Failed to run with output: ${OUTPUT}")
-    ENDIF(${VARIABLE} STREQUAL "FAILED_TO_RUN")
+    ENDIF("${VARIABLE}" STREQUAL "FAILED_TO_RUN")
     MESSAGE(STATUS "Check if the system is big endian")
     IF(HAVE_${VARIABLE})
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
