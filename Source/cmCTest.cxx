@@ -679,6 +679,7 @@ int cmCTest::ExecuteHandler(const char* shandler)
     {
     return -1;
     }
+  handler->Initialize();
   return handler->ProcessHandler(); 
 }
 
