@@ -1108,7 +1108,7 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     target_location += "/";
     }  
   target_location += target.GetFullName(this);
-  target.SetProperty("LOCATION",target_location.c_str());
+  it->second.SetProperty("LOCATION",target_location.c_str());
   
   // Add an entry into the cache
   std::string ltname = lname;
