@@ -141,7 +141,7 @@ int test7(int argc, const char* argv[])
 #if defined(_WIN32)
   Sleep(1000);
 #else
-  usleep(1000000);
+  sleep(1);
 #endif
   fprintf(stdout, "Output on stdout after sleep.\n");
   fprintf(stderr, "Output on stderr after sleep.\n");
