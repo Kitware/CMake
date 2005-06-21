@@ -190,7 +190,6 @@ bool cmCommandArgumentParserHelper::HandleEscapeSymbol(cmCommandArgumentParserHe
     buffer[0] = symbol;
     buffer[1] = 0;
     cmSystemTools::Error("Invalid escape sequence \\", buffer);
-    abort();
     return false;
     }
   return true;
