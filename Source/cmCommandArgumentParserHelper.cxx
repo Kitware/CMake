@@ -168,8 +168,10 @@ bool cmCommandArgumentParserHelper::HandleEscapeSymbol(cmCommandArgumentParserHe
   case ')':
   case '$':
   case '^':
-  case ';':
     this->AllocateParserType(pt, &symbol, 1);
+    break;
+  case ';':
+    this->AllocateParserType(pt, "\\;", 2);
     break;
   case 't':
     this->AllocateParserType(pt, "\t", 1);
