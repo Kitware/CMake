@@ -92,6 +92,22 @@ void cmLocalUnixMakefileGenerator3::Generate()
   
   // Write the cmake file with information for this directory.
   this->WriteDirectoryInformationFile();
+
+  // all custom commands used?
+  const std::vector<cmSourceFile*> &srcs = m_Makefile->GetSourceFiles();
+  std::vector<cmSourceFile*>::const_iterator sit = srcs.begin();
+  for (;sit != srcs.end(); ++sit)
+    {
+    if ((*sit)->GetCustomCommand() && !(*sit)->GetCustomCommand()->IsUsed())
+      {
+      cmOStringStream err;
+      err << "Warning: Custom command for source file "
+          << (*sit)->GetSourceName().c_str() << "."
+          << (*sit)->GetSourceExtension().c_str()
+          << " was not used.";
+      cmSystemTools::Message(err.str().c_str(), "Warning");
+      }
+    }
 }
 
 
@@ -162,8 +178,9 @@ void cmLocalUnixMakefileGenerator3
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
-    if(const cmCustomCommand* cc = (*i)->GetCustomCommand())
+    if(cmCustomCommand* cc = (*i)->GetCustomCommand())
       {
+      cc->Used();
       objTarget = this->GenerateCustomRuleFile(*cc,tgtDir.c_str());
       if (clean)
         {
