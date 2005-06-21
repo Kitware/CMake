@@ -2840,6 +2840,7 @@ void cmLocalUnixMakefileGenerator3
       {
       // Add a rule to build the target by name.
       localName = this->GetRelativeTargetDirectory(t->second);
+      localName += "/rule";
       commands.clear();
       depends.clear();
       

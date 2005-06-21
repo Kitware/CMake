@@ -835,6 +835,7 @@ cmGlobalUnixMakefileGenerator3
       depends.clear();
       depends.push_back("cmake_check_build_system");
       localName = lg->GetRelativeTargetDirectory(t->second);
+      localName += "/rule";
       lg->WriteMakeRule(ruleFileStream, 
                         "Build rule for subdir invocation for target.",
                         localName.c_str(), depends, commands);
@@ -847,6 +848,7 @@ cmGlobalUnixMakefileGenerator3
                         t->second.GetName(), depends, commands);
 
       // add the clean rule
+      localName = lg->GetRelativeTargetDirectory(t->second);
       makeTargetName = localName;
       makeTargetName += "/clean";
       depends.clear();
