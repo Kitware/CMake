@@ -34,7 +34,11 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
     if(!expandedArguments.empty() && (expandedArguments[0] == m_Args[0]))
       {
       // store the old value
-      const char *oldDef = mf.GetDefinition(m_Args[0].c_str());
+      std::string oldDef;
+      if (mf.GetDefinition(m_Args[0].c_str()))
+        {
+        oldDef = mf.GetDefinition(m_Args[0].c_str());
+        }
       m_Executing = true;
       std::vector<std::string>::const_iterator j = m_Args.begin();
       ++j;
@@ -52,7 +56,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
           }
         }
       // restore the variable to its prior value
-      mf.AddDefinition(m_Args[0].c_str(),oldDef);
+      mf.AddDefinition(m_Args[0].c_str(),oldDef.c_str());
       mf.RemoveFunctionBlocker(lff);
       return true;
       }
