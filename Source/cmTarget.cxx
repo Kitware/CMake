@@ -693,6 +693,12 @@ void cmTarget::SetProperty(const char* prop, const char* value)
 
 void cmTarget::UpdateLocation()
 {
+  // make sure we have a makefile
+  if (!m_Makefile)
+    {
+    return;
+    }
+  
   // set the LOCATION property of the target
   std::string target_location;
   switch( this->GetType() )
@@ -712,7 +718,7 @@ void cmTarget::UpdateLocation()
     }
   if ( target_location.size() == 0 )
     {
-    target_location += m_Makefile->GetCurrentOutputDirectory();
+    target_location += m_Makefile->GetStartOutputDirectory();
     }
   if ( target_location.size() > 0 )
     {
