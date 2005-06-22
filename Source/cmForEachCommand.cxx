@@ -33,6 +33,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
     mf.ExpandArguments(lff.m_Arguments, expandedArguments);
     if(!expandedArguments.empty() && (expandedArguments[0] == m_Args[0]))
       {
+      // store the old value
+      const char *oldDef = mf.GetDefinition(m_Args[0].c_str());
       m_Executing = true;
       std::string variable = "${";
       variable += m_Args[0];
@@ -44,29 +46,16 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       cmListFileArgument arg;
       for( ; j != m_Args.end(); ++j)
         {   
+        // set the variable to the loop value
+        mf.AddDefinition(m_Args[0].c_str(),j->c_str());
         // Invoke all the functions that were collected in the block.
         for(unsigned int c = 0; c < m_Functions.size(); ++c)
           {
-          // Replace the loop variable and then invoke the command.
-          cmListFileFunction newLFF;
-          newLFF.m_Name = m_Functions[c].m_Name;
-          newLFF.m_FilePath = m_Functions[c].m_FilePath;
-          newLFF.m_Line = m_Functions[c].m_Line;
-          for (std::vector<cmListFileArgument>::const_iterator k = 
-                 m_Functions[c].m_Arguments.begin();
-               k != m_Functions[c].m_Arguments.end(); ++k)
-            {
-            tmps = k->Value;
-            cmSystemTools::ReplaceString(tmps, variable.c_str(), j->c_str());
-            arg.Value = tmps;
-            arg.Quoted = k->Quoted;
-            arg.FilePath = k->FilePath;
-            arg.Line = k->Line;
-            newLFF.m_Arguments.push_back(arg);
-            }
-          mf.ExecuteCommand(newLFF);
+          mf.ExecuteCommand(m_Functions[c]);
           }
         }
+      // restore the variable to its prior value
+      mf.AddDefinition(m_Args[0].c_str(),oldDef);
       mf.RemoveFunctionBlocker(lff);
       return true;
       }
