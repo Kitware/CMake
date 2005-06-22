@@ -36,9 +36,6 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       // store the old value
       const char *oldDef = mf.GetDefinition(m_Args[0].c_str());
       m_Executing = true;
-      std::string variable = "${";
-      variable += m_Args[0];
-      variable += "}"; 
       std::vector<std::string>::const_iterator j = m_Args.begin();
       ++j;
       
