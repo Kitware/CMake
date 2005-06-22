@@ -247,9 +247,8 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
           unsigned int j;
           for(j = 0; j < generators.size(); ++j)
             {
-            const cmTargets &atgts = 
-              generators[j]->GetMakefile()->GetTargets();
-            for(cmTargets::const_iterator al = atgts.begin();
+            cmTargets &atgts = generators[j]->GetMakefile()->GetTargets();
+            for(cmTargets::iterator al = atgts.begin();
                 al != atgts.end(); ++al)
               {
               if (al->second.IsInAll())
@@ -368,7 +367,7 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile()
 void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout, 
                                                   const char* dspname,
                                                   const char* dir,
-                                                  const cmTarget& target)
+                                                  cmTarget& target)
 {
   fout << "#########################################################"
     "######################\n\n";

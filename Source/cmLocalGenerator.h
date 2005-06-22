@@ -154,7 +154,7 @@ protected:
                       cmTarget&target);
   
   ///! put all the libraries for a target on into the given stream
-  virtual void OutputLinkLibraries(std::ostream&, const char* name, const cmTarget &);
+  virtual void OutputLinkLibraries(std::ostream&, const char* name,cmTarget &);
 
 
   /** Get the include flags for the current makefile and language.  */

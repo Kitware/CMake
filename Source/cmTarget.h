@@ -41,7 +41,7 @@ public:
   /**
    * Return the type of target.
    */
-  TargetType GetType() const
+  TargetType GetType()
     {
       return m_TargetType;
     }
@@ -52,43 +52,36 @@ public:
   void SetType(TargetType f, const char* name);
 
   ///! Set/Get the name of the target
-  const char* GetName() const {return m_Name.c_str();}
+  const char* GetName() {return m_Name.c_str();}
 
   /**
    * Indicate whether the target is part of the all target
    */
-  bool IsInAll() const { return this->GetPropertyAsBool("IN_ALL"); }
-  bool GetInAll() const { return this->GetPropertyAsBool("IN_ALL"); }
-  void SetInAll(bool f) { this->SetProperty("IN_ALL", (f) ?  "TRUE" : "FALSE"); }
+  bool IsInAll() { return this->GetPropertyAsBool("IN_ALL"); }
+  bool GetInAll() { return this->GetPropertyAsBool("IN_ALL"); }
+  void SetInAll(bool f) { this->SetProperty("IN_ALL", (f) ?"TRUE" : "FALSE"); }
+
+  ///! Set the cmMakefile that owns this target
+  void SetMakefile(cmMakefile *mf) { m_Makefile = mf; };
 
   /**
    * Get the list of the custom commands for this target
    */
-  const std::vector<cmCustomCommand> &GetPreBuildCommands() const 
-    {return m_PreBuildCommands;}
   std::vector<cmCustomCommand> &GetPreBuildCommands() 
     {return m_PreBuildCommands;}
-  const std::vector<cmCustomCommand> &GetPreLinkCommands() const 
-    {return m_PreLinkCommands;}
   std::vector<cmCustomCommand> &GetPreLinkCommands() 
     {return m_PreLinkCommands;}
-  const std::vector<cmCustomCommand> &GetPostBuildCommands() const 
-    {return m_PostBuildCommands;}
   std::vector<cmCustomCommand> &GetPostBuildCommands() 
     {return m_PostBuildCommands;}
 
   /**
    * Get the list of the source lists used by this target
    */
-  const std::vector<std::string> &GetSourceLists() const 
-    {return m_SourceLists;}
   std::vector<std::string> &GetSourceLists() {return m_SourceLists;}
   
   /**
    * Get the list of the source files used by this target
    */
-  const std::vector<cmSourceFile*> &GetSourceFiles() const 
-    {return m_SourceFiles;}
   std::vector<cmSourceFile*> &GetSourceFiles() {return m_SourceFiles;}
 
   /**
@@ -96,7 +89,7 @@ public:
    */
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
   typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
-  const LinkLibraries &GetLinkLibraries() const {return m_LinkLibraries;}
+  const LinkLibraries &GetLinkLibraries() {return m_LinkLibraries;}
 
   /**
    * Clear the dependency information recorded for this target, if any.
@@ -112,7 +105,8 @@ public:
 
   void MergeLinkLibraries( cmMakefile& mf, const char* selfname, const LinkLibraries& libs );
 
-  const std::vector<std::string>& GetLinkDirectories() const {return m_LinkDirectories;}
+  const std::vector<std::string>& GetLinkDirectories() 
+  {return m_LinkDirectories;}
   
   void AddLinkDirectory(const char* d);
 
@@ -120,14 +114,14 @@ public:
    * Set the path where this target should be installed. This is relative to
    * INSTALL_PREFIX
    */
-  std::string GetInstallPath() const {return m_InstallPath;}
+  std::string GetInstallPath() {return m_InstallPath;}
   void SetInstallPath(const char *name) {m_InstallPath = name;}
   
   /**
    * Set the path where this target (if it has a runtime part) should be
    * installed. This is relative to INSTALL_PREFIX
    */
-  std::string GetRuntimeInstallPath() const {return m_RuntimeInstallPath;}
+  std::string GetRuntimeInstallPath() {return m_RuntimeInstallPath;}
   void SetRuntimeInstallPath(const char *name) {m_RuntimeInstallPath = name;}
   
   /**
@@ -142,14 +136,14 @@ public:
    */
   void AddUtility(const char* u) { m_Utilities.insert(u);}
   ///! Get the utilities used by this target
-  std::set<cmStdString>const& GetUtilities() const { return m_Utilities; }
+  std::set<cmStdString>const& GetUtilities() { return m_Utilities; }
 
   void AnalyzeLibDependencies( const cmMakefile& mf );
 
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);
-  const char *GetProperty(const char *prop) const;
-  bool GetPropertyAsBool(const char *prop) const;
+  const char *GetProperty(const char *prop);
+  bool GetPropertyAsBool(const char *prop);
 
   /**
    * Trace through the source files in this target and add al source files
@@ -158,30 +152,30 @@ public:
   void TraceVSDependencies(std::string projName, cmMakefile *mf);  
 
   ///! Return the prefered linker language for this target
-  const char* GetLinkerLanguage(cmGlobalGenerator*) const;
+  const char* GetLinkerLanguage(cmGlobalGenerator*);
   
   ///! Return the rule variable used to create this type of target, 
   //  need to add CMAKE_(LANG) for full name.
   const char* GetCreateRuleVariable();
   ///! Return the name of the variable to look up the target suffix
-  const char* GetSuffixVariable() const;
+  const char* GetSuffixVariable();
   ///! Return the name of the variable to look up the target suffix
-  const char* GetPrefixVariable() const;
+  const char* GetPrefixVariable();
 
   /** Get the full name of the target according to the settings in the
       given makefile.  */
-  std::string GetFullName(cmMakefile* mf) const;
+  std::string GetFullName(cmMakefile* mf);
 
   /** Get the base name (no suffix) of the target according to the
       settings in the given makefile.  */
-  std::string GetBaseName(cmMakefile* mf) const;
+  std::string GetBaseName(cmMakefile* mf);
 
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
       should be called only on a library target.  */
   void GetLibraryNames(cmMakefile* mf, std::string& name,
                        std::string& soName, std::string& realName,
-                       std::string& baseName) const;
+                       std::string& baseName);
 
   /** Get the names of the library used to remove existing copies of
       the library from the build tree either before linking or during
@@ -191,7 +185,7 @@ public:
                             std::string& staticName,
                             std::string& sharedName,
                             std::string& sharedSOName,
-                            std::string& sharedRealName) const;
+                            std::string& sharedRealName);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -216,14 +210,14 @@ private:
    */
   void InsertDependency( DependencyMap& depMap,
                          const cmStdString& lib,
-                         const cmStdString& dep ) const;
+                         const cmStdString& dep );
 
   /*
    * Deletes \a dep from the dependency list of \a lib.
    */
   void DeleteDependency( DependencyMap& depMap,
                          const cmStdString& lib,
-                         const cmStdString& dep ) const;
+                         const cmStdString& dep );
 
   /**
    * Emits the library \a lib and all its dependencies into link_line.
@@ -237,7 +231,7 @@ private:
              const DependencyMap& dep_map,
              std::set<cmStdString>& emitted,
              std::set<cmStdString>& visited,
-             std::vector<std::string>& link_line ) const;
+             std::vector<std::string>& link_line );
 
   /**
    * Finds the dependencies for \a lib and inserts them into \a
@@ -246,15 +240,19 @@ private:
   void GatherDependencies( const cmMakefile& mf, const std::string& lib,
                            DependencyMap& dep_map ); 
 
-  const char* GetSuffixVariableInternal(TargetType type) const;
-  const char* GetPrefixVariableInternal(TargetType type) const;
-  std::string GetFullNameInternal(cmMakefile* mf, TargetType type) const;
-  std::string GetBaseNameInternal(cmMakefile* mf, TargetType type) const;
+  const char* GetSuffixVariableInternal(TargetType type);
+  const char* GetPrefixVariableInternal(TargetType type);
+  std::string GetFullNameInternal(cmMakefile* mf, TargetType type);
+  std::string GetBaseNameInternal(cmMakefile* mf, TargetType type);
   void GetLibraryNamesInternal(cmMakefile* mf,
                                std::string& name,
                                std::string& soName,
                                std::string& realName,
-                               TargetType type) const;
+                               TargetType type);
+
+  // update the value of the LOCATION var
+  void UpdateLocation();
+  
 private:
   std::string m_Name;
   std::vector<cmCustomCommand> m_PreBuildCommands;
@@ -271,6 +269,9 @@ private:
   std::set<cmStdString> m_Utilities;
   bool m_RecordDependencies; 
   std::map<cmStdString,cmStdString> m_Properties;
+  
+  // the Makefile that owns this target
+  cmMakefile *m_Makefile;
 };
 
 typedef std::map<cmStdString,cmTarget> cmTargets;

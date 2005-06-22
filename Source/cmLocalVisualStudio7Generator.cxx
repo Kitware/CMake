@@ -183,7 +183,7 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
 
 void cmLocalVisualStudio7Generator::WriteConfigurations(std::ostream& fout, 
                                                         const char *libName,
-                                                        const cmTarget &target)
+                                                        cmTarget &target)
 {
   std::vector<std::string> *configs = 
     static_cast<cmGlobalVisualStudio7Generator *>(m_GlobalGenerator)->GetConfigurations();
@@ -287,7 +287,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout, 
                                              const char* configName,
                                              const char *libName,
-                                             const cmTarget &target)
+                                             cmTarget &target)
 { 
   // create a map of xml tags to the values they should have in the output
   // for example, "BufferSecurityCheck" = "TRUE"
@@ -576,7 +576,7 @@ void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
 void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                                           const char* configName,
                                           const char *libName,
-                                          const cmTarget &target)
+                                          cmTarget &target)
 { 
   std::string temp;
   std::string debugPostfix = "";
@@ -794,7 +794,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
 }
 
 void cmLocalVisualStudio7Generator::OutputModuleDefinitionFile(std::ostream& fout,
-                                                     const cmTarget &target)
+                                                     cmTarget &target)
 {
   std::vector<cmSourceFile*> const& classes = target.GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
@@ -814,7 +814,7 @@ void cmLocalVisualStudio7Generator::OutputModuleDefinitionFile(std::ostream& fou
 void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
                                                    const char*,
                                                    const char*,
-                                                   const cmTarget &tgt)
+                                                   cmTarget &tgt)
 { 
   bool hasone = false;
   if(m_LibraryOutputPath.size())
@@ -867,7 +867,7 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
 void cmLocalVisualStudio7Generator::OutputLibraries(std::ostream& fout,
                                           const char* configName,
                                           const char* libName,
-                                          const cmTarget &target)
+                                          cmTarget &target)
 {
   const cmTarget::LinkLibraries& libs = target.GetLinkLibraries();
   cmTarget::LinkLibraries::const_iterator j;
@@ -1224,8 +1224,8 @@ void cmLocalVisualStudio7Generator::WriteVCProjEndGroup(std::ostream& fout)
 
 // look for custom rules on a target and collect them together
 void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
-                                                      const cmTarget &target, 
-                                                      const char * /* libName */)
+                                                      cmTarget &target, 
+                                                      const char * /*libName*/)
 {
   if (target.GetType() > cmTarget::UTILITY)
     {
@@ -1299,7 +1299,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
 void 
 cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout, 
                                                  const char *libName,
-                                                 const cmTarget &, 
+                                                 cmTarget &, 
                                                  std::vector<cmSourceGroup> &)
 {
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"

@@ -312,9 +312,8 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
           unsigned int j;
           for(j = 0; j < generators.size(); ++j)
             {
-            const cmTargets &atgts = 
-              generators[j]->GetMakefile()->GetTargets();
-            for(cmTargets::const_iterator al = atgts.begin();
+            cmTargets &atgts = generators[j]->GetMakefile()->GetTargets();
+            for(cmTargets::iterator al = atgts.begin();
                 al != atgts.end(); ++al)
               {
               if (al->second.IsInAll())
@@ -498,8 +497,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
 // the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout, 
                                const char* dspname,
-                               const char* dir,
-                               const cmTarget&)
+                               const char* dir, cmTarget&)
 {
   std::string d = cmSystemTools::ConvertToOutputPath(dir);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
@@ -517,8 +515,7 @@ void
 cmGlobalVisualStudio7Generator
 ::WriteProjectDepends(std::ostream& fout,
                       const char* dspname,
-                      const char*,
-                      const cmTarget& target)
+                      const char*, cmTarget& target)
 {
   int depcount = 0;
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 

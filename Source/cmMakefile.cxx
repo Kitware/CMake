@@ -179,13 +179,13 @@ void cmMakefile::PrintStringVector(const char* s, const std::vector<std::pair<cm
 
 
 // call print on all the classes in the makefile
-void cmMakefile::Print() const
+void cmMakefile::Print()
 {
   // print the class lists
   std::cout << "classes:\n";
 
   std::cout << " m_Targets: ";
-  for (cmTargets::const_iterator l = m_Targets.begin();
+  for (cmTargets::iterator l = m_Targets.begin();
        l != m_Targets.end(); l++)
     {
     std::cout << l->first << std::endl;
@@ -1078,10 +1078,10 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   target.ClearDependencyInformation( *this, lname );
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
+  target.SetMakefile(this);
   this->AddGlobalLinkInformation(lname, target);
-  cmTargets::iterator it = 
-    m_Targets.insert(cmTargets::value_type(lname,target)).first;
-
+  m_Targets.insert(cmTargets::value_type(lname,target));
+  
   // Add an entry into the cache 
   std::string libPath = lname;
   libPath += "_CMAKE_PATH";
@@ -1089,26 +1089,6 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     AddCacheEntry(libPath.c_str(),
                   this->GetCurrentOutputDirectory(),
                   "Path to a library", cmCacheManager::INTERNAL);
-  
-  // set the LOCATION property of the target
-  std::string target_location;
-  target_location = this->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
-  if ( target_location.size() == 0 )
-    {
-    target_location += this->GetCurrentOutputDirectory();
-    }
-  if ( target_location.size() > 0 )
-    {
-    target_location += "/";
-    }
-  const char* cfgid = this->GetDefinition("CMAKE_CFG_INTDIR");
-  if ( cfgid && strcmp(cfgid, ".") != 0 )
-    {
-    target_location += cfgid;
-    target_location += "/";
-    }  
-  target_location += target.GetFullName(this);
-  it->second.SetProperty("LOCATION",target_location.c_str());
   
   // Add an entry into the cache
   std::string ltname = lname;
@@ -1150,30 +1130,11 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
   target.SetType(cmTarget::EXECUTABLE, exeName);
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
+  target.SetMakefile(this);
   this->AddGlobalLinkInformation(exeName, target);
   cmTargets::iterator it = 
     m_Targets.insert(cmTargets::value_type(exeName,target)).first;
   
-  // set the LOCATION property of the target
-  std::string target_location;
-  target_location = this->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-  if ( target_location.size() == 0 )
-    {
-    target_location += this->GetCurrentOutputDirectory();
-    }
-  if ( target_location.size() > 0 )
-    {
-    target_location += "/";
-    }
-  const char* cfgid = this->GetDefinition("CMAKE_CFG_INTDIR");
-  if ( cfgid && strcmp(cfgid, ".") != 0 )
-    {
-    target_location += cfgid;
-    target_location += "/";
-    }  
-  target_location += target.GetFullName(this);
-  it->second.SetProperty("LOCATION",target_location.c_str());
-
   // Add an entry into the cache 
   std::string exePath = exeName;
   exePath += "_CMAKE_PATH";

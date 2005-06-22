@@ -47,11 +47,9 @@ protected:
                             cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteProject(std::ostream& fout, 
-                            const char* name, const char* path,
-                            const cmTarget &t);
+                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectDepends(std::ostream& fout, 
-                           const char* name, const char* path,
-                           const cmTarget &t);
+                           const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(std::ostream& fout, const char* name, bool in_all);
   virtual void WriteExternalProject(std::ostream& fout, const char* name, const char* path,
                                     const std::vector<std::string>& depends);

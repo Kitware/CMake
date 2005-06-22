@@ -214,7 +214,7 @@ void cmOrderLinkDirectories::OrderPaths(std::vector<cmStdString>&
 }
 
 //-------------------------------------------------------------------
-void cmOrderLinkDirectories::SetLinkInformation(const cmTarget& target,
+void cmOrderLinkDirectories::SetLinkInformation(cmTarget& target,
                                                 cmTarget::LinkLibraryType 
                                                 linktype,
                                                 const char* targetLibrary)

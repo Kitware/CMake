@@ -79,8 +79,7 @@ private:
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout, 
-                    const char* name, const char* path,
-                    const cmTarget &t);
+                    const char* name, const char* path, cmTarget &t);
   void WriteExternalProject(std::ostream& fout, 
                             const char* name, const char* path,
                             const std::vector<std::string>& dependencies);

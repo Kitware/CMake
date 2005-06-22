@@ -554,14 +554,14 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 
 void cmTarget::InsertDependency( DependencyMap& depMap,
                                  const cmStdString& lib,
-                                 const cmStdString& dep ) const
+                                 const cmStdString& dep ) 
 {
   depMap[lib].push_back(dep);
 }
 
 void cmTarget::DeleteDependency( DependencyMap& depMap,
                                  const cmStdString& lib,
-                                 const cmStdString& dep ) const
+                                 const cmStdString& dep ) 
 {
   // Make sure there is an entry in the map for lib. If so, delete all
   // dependencies to dep. There may be repeated entries because of
@@ -582,7 +582,7 @@ void cmTarget::Emit( const std::string& lib,
                      const DependencyMap& dep_map,
                      std::set<cmStdString>& emitted,
                      std::set<cmStdString>& visited,
-                     std::vector<std::string>& link_line ) const
+                     std::vector<std::string>& link_line )
 {
   // It's already been emitted
   if( emitted.find(lib) != emitted.end() )
@@ -691,8 +691,52 @@ void cmTarget::SetProperty(const char* prop, const char* value)
   m_Properties[prop] = value;
 }
 
-const char *cmTarget::GetProperty(const char* prop) const
+void cmTarget::UpdateLocation()
 {
+  // set the LOCATION property of the target
+  std::string target_location;
+  switch( this->GetType() )
+    {
+    case cmTarget::STATIC_LIBRARY:
+    case cmTarget::MODULE_LIBRARY:
+    case cmTarget::SHARED_LIBRARY:
+      target_location = 
+        m_Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
+      break;
+    case cmTarget::EXECUTABLE:
+      target_location = 
+        m_Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+      break;
+    default:
+      return;
+    }
+  if ( target_location.size() == 0 )
+    {
+    target_location += m_Makefile->GetCurrentOutputDirectory();
+    }
+  if ( target_location.size() > 0 )
+    {
+    target_location += "/";
+    }
+  const char* cfgid = m_Makefile->GetDefinition("CMAKE_CFG_INTDIR");
+  if ( cfgid && strcmp(cfgid, ".") != 0 )
+    {
+    target_location += cfgid;
+    target_location += "/";
+    }  
+  target_location += this->GetFullName(m_Makefile);
+  this->SetProperty("LOCATION",target_location.c_str());
+}
+
+const char *cmTarget::GetProperty(const char* prop)
+{
+  // watch for special "computed" properties that are dependent on other
+  // properties or variables, always recompute them
+  if (!strcmp(prop,"LOCATION"))
+    {
+    this->UpdateLocation();
+    }
+  
   std::map<cmStdString,cmStdString>::const_iterator i = 
     m_Properties.find(prop);
   if (i != m_Properties.end())
@@ -702,7 +746,7 @@ const char *cmTarget::GetProperty(const char* prop) const
   return 0;
 }
 
-bool cmTarget::GetPropertyAsBool(const char* prop) const
+bool cmTarget::GetPropertyAsBool(const char* prop)
 {
   std::map<cmStdString,cmStdString>::const_iterator i = 
     m_Properties.find(prop);
@@ -713,7 +757,7 @@ bool cmTarget::GetPropertyAsBool(const char* prop) const
   return false;
 }
 
-const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg) const
+const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
 {
   if(this->GetProperty("HAS_CXX"))
     {
@@ -795,12 +839,12 @@ const char* cmTarget::GetCreateRuleVariable()
   return "";
 }
 
-const char* cmTarget::GetSuffixVariable() const
+const char* cmTarget::GetSuffixVariable() 
 {
   return this->GetSuffixVariableInternal(this->GetType());
 }
 
-const char* cmTarget::GetSuffixVariableInternal(TargetType type) const
+const char* cmTarget::GetSuffixVariableInternal(TargetType type) 
 {
   switch(type)
     {
@@ -821,12 +865,12 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type) const
 }
 
 
-const char* cmTarget::GetPrefixVariable() const
+const char* cmTarget::GetPrefixVariable() 
 {
   return this->GetPrefixVariableInternal(this->GetType());
 }
 
-const char* cmTarget::GetPrefixVariableInternal(TargetType type) const
+const char* cmTarget::GetPrefixVariableInternal(TargetType type) 
 {
   switch(type)
     {
@@ -846,13 +890,13 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type) const
   return "";
 }
 
-std::string cmTarget::GetFullName(cmMakefile* mf) const
+std::string cmTarget::GetFullName(cmMakefile* mf) 
 {
   return this->GetFullNameInternal(mf, this->GetType());
 }
 
 std::string cmTarget::GetFullNameInternal(cmMakefile* mf,
-                                          TargetType type) const
+                                          TargetType type) 
 {
   const char* targetPrefix = this->GetProperty("PREFIX");
   const char* targetSuffix = this->GetProperty("SUFFIX");
@@ -896,13 +940,13 @@ std::string cmTarget::GetFullNameInternal(cmMakefile* mf,
   return name;
 }
 
-std::string cmTarget::GetBaseName(cmMakefile* mf) const
+std::string cmTarget::GetBaseName(cmMakefile* mf) 
 {
   return this->GetBaseNameInternal(mf, this->GetType());
 }
 
 std::string
-cmTarget::GetBaseNameInternal(cmMakefile* mf, TargetType type) const
+cmTarget::GetBaseNameInternal(cmMakefile* mf, TargetType type) 
 {
   std::string pathPrefix = "";
 #ifdef __APPLE__
@@ -942,7 +986,7 @@ void cmTarget::GetLibraryNames(cmMakefile* mf,
                                std::string& name,
                                std::string& soName,
                                std::string& realName,
-                               std::string& baseName) const
+                               std::string& baseName) 
 {
   // Get the names based on the real type of the library.
   this->GetLibraryNamesInternal(mf, name, soName, realName, this->GetType());
@@ -955,7 +999,7 @@ void cmTarget::GetLibraryCleanNames(cmMakefile* mf,
                                     std::string& staticName,
                                     std::string& sharedName,
                                     std::string& sharedSOName,
-                                    std::string& sharedRealName) const
+                                    std::string& sharedRealName) 
 {
   // Get the name as if this were a static library.
   std::string soName;
@@ -986,7 +1030,7 @@ void cmTarget::GetLibraryNamesInternal(cmMakefile* mf,
                                        std::string& name,
                                        std::string& soName,
                                        std::string& realName,
-                                       TargetType type) const
+                                       TargetType type) 
 {
   // Construct the name of the soname flag variable for this language.
   const char* ll =

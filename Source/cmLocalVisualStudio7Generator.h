@@ -69,41 +69,36 @@ private:
                                    std::string& flags);
   void OutputVCProjFile();
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
-                         const cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
+                         cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteVCProjFooter(std::ostream& fout);
   void CreateSingleVCProj(const char *lname, cmTarget &tgt);
   void WriteVCProjFile(std::ostream& fout, const char *libName, 
                        cmTarget &tgt);
   void AddVCProjBuildRule();
   void WriteConfigurations(std::ostream& fout,
-                           const char *libName,
-                           const cmTarget &tgt);
+                           const char *libName, cmTarget &tgt);
   void WriteConfiguration(std::ostream& fout,
                           const char* configName,
-                          const char* libName,
-                          const cmTarget &tgt); 
+                          const char* libName, cmTarget &tgt); 
   std::string EscapeForXML(const char* s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
   void OutputDefineFlags(const char* flags,
                          std::ostream& fout);
-  void OutputTargetRules(std::ostream& fout,
-                         const cmTarget &target, 
+  void OutputTargetRules(std::ostream& fout, cmTarget &target, 
                          const char *libName);
   void OutputBuildTool(std::ostream& fout, const char* configName,
-                       const char* libname, const cmTarget& t);
+                       const char* libname, cmTarget& t);
   void OutputLibraries(std::ostream& fout,
                        const char* configName,
                        const char* libName,
-                       const cmTarget &target);
+                       cmTarget &target);
   void OutputLibraryDirectories(std::ostream& fout,
                                 const char* configName,
-                                const char* libName,
-                                const cmTarget &target);
-  void OutputModuleDefinitionFile(std::ostream& fout,
-                                  const cmTarget &target);
+                                const char* libName, cmTarget &target);
+  void OutputModuleDefinitionFile(std::ostream& fout, cmTarget &target);
   void WriteProjectStart(std::ostream& fout, const char *libName,
-                         const cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
+                         cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteVCProjBeginGroup(std::ostream& fout, 
                           const char* group,
                           const char* filter);

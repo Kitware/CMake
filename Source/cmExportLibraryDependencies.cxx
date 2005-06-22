@@ -91,7 +91,7 @@ void cmExportLibraryDependenciesCommand::FinalPass()
     cmTargets &tgts = gen->GetMakefile()->GetTargets();  
     std::vector<std::string> depends;
     const char *defType;
-    for(cmTargets::const_iterator l = tgts.begin();
+    for(cmTargets::iterator l = tgts.begin();
         l != tgts.end(); ++l)
       {
       if ((l->second.GetType() != cmTarget::INSTALL_FILES)

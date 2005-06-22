@@ -160,7 +160,7 @@ void cmLocalUnixMakefileGenerator3::FormatOutputPath(std::string& path,
 
 
 void cmLocalUnixMakefileGenerator3
-::WriteCustomCommands(const cmTarget &target,std::ostream& ruleFileStream,
+::WriteCustomCommands(cmTarget &target,std::ostream& ruleFileStream,
                       std::vector<std::string>& cleanFiles)
 {
   std::string tgtDir = m_Makefile->GetStartOutputDirectory();
@@ -303,7 +303,7 @@ const std::string &cmLocalUnixMakefileGenerator3::GetHomeRelativeOutputPath()
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::WriteTargetRuleFiles(const cmTarget& target)
+::WriteTargetRuleFiles(cmTarget& target)
 {
   // Create a directory for this target.
   std::string dir = this->GetTargetDirectory(target);
@@ -496,7 +496,7 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteObjectBuildFile(std::string &obj,
                        const char *lang, 
-                       const cmTarget& target, 
+                       cmTarget& target, 
                        const cmSourceFile& source,
                        std::vector<std::string>& depends,
                        std::string &depMakeFile)
@@ -649,7 +649,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::WriteObjectRuleFiles(const cmTarget& target, const cmSourceFile& source,
+::WriteObjectRuleFiles(cmTarget& target, const cmSourceFile& source,
                        std::vector<std::string>& objects)
 {
   // Identify the language of the source file.
@@ -771,7 +771,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::WriteUtilityRuleFiles(const cmTarget& target)
+::WriteUtilityRuleFiles(cmTarget& target)
 {
   // Create a directory for this target.
   std::string dir = this->GetTargetDirectory(target);
@@ -1253,7 +1253,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::WriteTargetRequiresRule(std::ostream& ruleFileStream, const cmTarget& target,
+::WriteTargetRequiresRule(std::ostream& ruleFileStream, cmTarget& target,
                           const std::vector<std::string>& objects)
 {
   std::vector<std::string> depends;
@@ -1285,7 +1285,7 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteExecutableRule(std::ostream& ruleFileStream,
                       const char* ruleFileName,
-                      const cmTarget& target,
+                      cmTarget& target,
                       const std::vector<std::string>& objects,
                       const std::vector<std::string>& external_objects,
                       std::vector<std::string>& cleanFiles)
@@ -1468,7 +1468,7 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteStaticLibraryRule(std::ostream& ruleFileStream,
                          const char* ruleFileName,
-                         const cmTarget& target,
+                         cmTarget& target,
                          const std::vector<std::string>& objects,
                          const std::vector<std::string>& external_objects,
                          std::vector<std::string>& cleanFiles)
@@ -1494,7 +1494,7 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteSharedLibraryRule(std::ostream& ruleFileStream,
                          const char* ruleFileName,
-                         const cmTarget& target,
+                         cmTarget& target,
                          const std::vector<std::string>& objects,
                          const std::vector<std::string>& external_objects,
                          std::vector<std::string>& cleanFiles)
@@ -1536,7 +1536,7 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteModuleLibraryRule(std::ostream& ruleFileStream,
                          const char* ruleFileName,
-                         const cmTarget& target,
+                         cmTarget& target,
                          const std::vector<std::string>& objects,
                          const std::vector<std::string>& external_objects,
                          std::vector<std::string>& cleanFiles)
@@ -1564,7 +1564,7 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteLibraryRule(std::ostream& ruleFileStream,
                    const char* ruleFileName,
-                   const cmTarget& target,
+                   cmTarget& target,
                    const std::vector<std::string>& objects,
                    const std::vector<std::string>& external_objects,
                    const char* linkRuleVar,
@@ -1793,7 +1793,7 @@ cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::WriteObjectsVariable(std::ostream& ruleFileStream,
-                       const cmTarget& target,
+                       cmTarget& target,
                        const std::vector<std::string>& objects,
                        const std::vector<std::string>& external_objects,
                        std::string& variableName,
@@ -1844,7 +1844,7 @@ cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::WriteTargetDependRule(std::ostream& ruleFileStream,
-                        const cmTarget& target,
+                        cmTarget& target,
                         const std::vector<std::string>& objects)
 {
   std::vector<std::string> depends;
@@ -1875,7 +1875,7 @@ cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::WriteTargetCleanRule(std::ostream& ruleFileStream,
-                       const cmTarget& target,
+                       cmTarget& target,
                        const std::vector<std::string>& files)
 {
   std::vector<std::string> no_depends;
@@ -1922,7 +1922,7 @@ cmLocalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalUnixMakefileGenerator3::GetTargetDirectory(const cmTarget& target)
+cmLocalUnixMakefileGenerator3::GetTargetDirectory(cmTarget& target)
 {
   std::string dir = target.GetName();
   dir += ".dir";
@@ -1931,7 +1931,7 @@ cmLocalUnixMakefileGenerator3::GetTargetDirectory(const cmTarget& target)
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(const cmTarget& target)
+cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(cmTarget& target)
 {
   std::string dir = m_Makefile->GetStartOutputDirectory();
   dir += "/";
@@ -1978,7 +1978,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::GetObjectFileName(const cmTarget& target,
+::GetObjectFileName(cmTarget& target,
                     const cmSourceFile& source)
 {
   // If the full path to the source file includes this directory,
@@ -2087,7 +2087,7 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p)
 void
 cmLocalUnixMakefileGenerator3
 ::AppendTargetDepends(std::vector<std::string>& depends,
-                      const cmTarget& target)
+                      cmTarget& target)
 {
   // Do not bother with dependencies for static libraries.
   if(target.GetType() == cmTarget::STATIC_LIBRARY)
@@ -2799,13 +2799,13 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   
   // now write out the object rules
   // for each object file name
-  for (std::map<cmStdString,std::vector<const cmTarget *> >::iterator lo = 
+  for (std::map<cmStdString,std::vector<cmTarget *> >::iterator lo = 
          m_LocalObjectFiles.begin();
        lo != m_LocalObjectFiles.end(); ++lo)
     {
     commands.clear();
     // for each target using the object file
-    for (std::vector<const cmTarget *>::iterator to = 
+    for (std::vector<cmTarget *>::iterator to = 
            lo->second.begin(); to != lo->second.end(); ++to)
       {
       std::string tgtMakefileName = this->GetRelativeTargetDirectory(**to);
@@ -2829,9 +2829,9 @@ void cmLocalUnixMakefileGenerator3
 
   // for each target we just provide a rule to cd up to the top and do a make
   // on the target
-  const cmTargets& targets = m_Makefile->GetTargets();
+  cmTargets& targets = m_Makefile->GetTargets();
   std::string localName;
-  for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
     if((t->second.GetType() == cmTarget::EXECUTABLE) ||
        (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||

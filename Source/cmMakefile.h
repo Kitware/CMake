@@ -131,7 +131,7 @@ public:
   /**
    * Print the object state to std::cout.
    */
-  void Print() const;
+  void Print();
 
   /** Add a custom command to the build.  */
   void AddCustomCommandToTarget(const char* target,
@@ -417,7 +417,6 @@ public:
    * Get the list of targets
    */
   cmTargets &GetTargets() { return m_Targets; }
-  const cmTargets &GetTargets() const { return m_Targets; }
 
   cmTarget* FindTarget(const char* name);
 

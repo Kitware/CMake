@@ -106,7 +106,7 @@ protected:
                             cmLocalUnixMakefileGenerator3 *lg);
 
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
-                                 const cmTarget& target);
+                                 cmTarget& target);
   void AppendAnyGlobalDepend(std::vector<std::string>& depends, 
                              const char* name);
 

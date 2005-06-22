@@ -531,9 +531,9 @@ void cmGlobalGenerator::Configure()
     {
     manager = m_LocalGenerators[i]->GetMakefile()->GetCacheManager();
     m_LocalGenerators[i]->ConfigureFinalPass();
-    cmTargets const& targets = 
+    cmTargets & targets = 
       m_LocalGenerators[i]->GetMakefile()->GetTargets(); 
-    for (cmTargets::const_iterator l = targets.begin();
+    for (cmTargets::iterator l = targets.begin();
          l != targets.end(); l++)
       {
       cmTarget::LinkLibraries libs = l->second.GetLinkLibraries();

@@ -562,7 +562,7 @@ void cmLocalVisualStudio6Generator::WriteDSPEndGroup(std::ostream& fout)
 
 void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
                                                  const char* libName,
-                                                 const cmTarget& target)
+                                                 cmTarget& target)
 {
   std::string root= m_Makefile->GetRequiredDefinition("CMAKE_ROOT");
   const char *def= m_Makefile->GetDefinition( "MSPROJECT_TEMPLATE_DIRECTORY");
@@ -640,7 +640,7 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
 
 // look for custom rules on a target and collect them together
 std::string 
-cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target, 
+cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target, 
                                                  const char * /* libName */)
 {
   std::string customRuleCode = "";
@@ -741,8 +741,7 @@ inline std::string removeQuotes(const std::string& s)
   
 void cmLocalVisualStudio6Generator
 ::WriteDSPHeader(std::ostream& fout, 
-                 const char *libName,
-                 const cmTarget &target, 
+                 const char *libName, cmTarget &target, 
                  std::vector<cmSourceGroup> &)
 {
   std::set<std::string> pathEmitted;

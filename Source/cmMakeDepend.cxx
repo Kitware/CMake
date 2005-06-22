@@ -49,7 +49,7 @@ cmMakeDepend::~cmMakeDepend()
 // The pointer is kept so the cmSourceFile array can
 // be updated with the depend information in the cmMakefile.
 
-void cmMakeDepend::SetMakefile(const cmMakefile* makefile)
+void cmMakeDepend::SetMakefile(cmMakefile* makefile)
 {
   m_Makefile = makefile;
 
@@ -264,8 +264,8 @@ cmDependInformation* cmMakeDepend::GetDependInformation(const char* file,
 void cmMakeDepend::GenerateMakefileDependencies()
 {
   // Now create cmDependInformation objects for files in the directory
-  const cmTargets &tgts = m_Makefile->GetTargets();
-  for(cmTargets::const_iterator l = tgts.begin(); 
+  cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
     const std::vector<cmSourceFile*> &classes = l->second.GetSourceFiles();

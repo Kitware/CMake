@@ -51,7 +51,7 @@ public:
   /**
    * Specify the type of the build: static, dll, or executable.
    */
-  void SetBuildType(BuildType, const char* libName, const cmTarget&);
+  void SetBuildType(BuildType, const char* libName, cmTarget&);
 
   /**
    * Return array of created DSP names in a STL vector.
@@ -76,7 +76,7 @@ private:
   void WriteDSPEndGroup(std::ostream& fout);
 
   void WriteDSPHeader(std::ostream& fout, const char *libName,
-                      const cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
+                      cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
 
   void WriteDSPFooter(std::ostream& fout);
   void AddDSPBuildRule();
@@ -91,7 +91,7 @@ private:
                              std::vector<std::string>& depends,
                              const cmCustomCommandLines& commandLines);
 
-  std::string CreateTargetRules(const cmTarget &target, 
+  std::string CreateTargetRules(cmTarget &target, 
                                 const char *libName);
   std::string m_IncludeOptions;
   std::vector<std::string> m_Configurations;

@@ -78,7 +78,7 @@ void cmGlobalKdevelopGenerator::Generate()
     //run from kdevelop for now just pick the first executable found
     std::string executable;
     cmTargets& targets=mf->GetTargets();
-    for (cmTargets::const_iterator ti = targets.begin();
+    for (cmTargets::iterator ti = targets.begin();
          ti != targets.end(); ti++)
       {
       if (ti->second.GetType()==cmTarget::EXECUTABLE)
@@ -134,7 +134,7 @@ bool cmGlobalKdevelopGenerator
   
     //get all sources
     cmTargets& targets=makefile->GetTargets();
-    for (cmTargets::const_iterator ti = targets.begin();
+    for (cmTargets::iterator ti = targets.begin();
          ti != targets.end(); ti++)
       {
       const std::vector<cmSourceFile*>& sources=ti->second.GetSourceFiles();

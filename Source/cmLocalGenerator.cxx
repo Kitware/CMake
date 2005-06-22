@@ -190,7 +190,7 @@ void cmLocalGenerator::GenerateTestFiles()
 
 void cmLocalGenerator::GenerateInstallRules()
 {
-  const cmTargets &tgts = m_Makefile->GetTargets();
+  cmTargets &tgts = m_Makefile->GetTargets();
   const char* prefix
     = m_Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -283,7 +283,7 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 
   std::string destination;
-  for(cmTargets::const_iterator l = tgts.begin(); 
+  for(cmTargets::iterator l = tgts.begin(); 
     l != tgts.end(); l++)
     {
     const char* preinstall = l->second.GetProperty("PRE_INSTALL_SCRIPT");
@@ -1164,8 +1164,8 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
  * to the name of the library.  This will not link a library against itself.
  */
 void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
-                                                  const char* targetLibrary,
-                                                  const cmTarget &tgt)
+                                           const char* targetLibrary,
+                                           cmTarget &tgt)
 {
   // Try to emit each search path once
   std::set<cmStdString> emitted;

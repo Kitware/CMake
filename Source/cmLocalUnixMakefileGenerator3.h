@@ -135,7 +135,7 @@ public:
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
 
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
-  std::string GetRelativeTargetDirectory(const cmTarget& target);
+  std::string GetRelativeTargetDirectory(cmTarget& target);
 
   // List the files for which to check dependency integrity.  Each
   // language has its own list because integrity may be checked
@@ -145,10 +145,10 @@ public:
   { return m_CheckDependFiles;}
   
   void AppendTargetDepends(std::vector<std::string>& depends,
-                           const cmTarget& target);
+                           cmTarget& target);
 
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
-                                 const cmTarget& target);
+                                 cmTarget& target);
 
   void AppendEcho(std::vector<std::string>& commands,
                   const char* text);
@@ -174,7 +174,7 @@ protected:
 
   // this is responsible for writing all of the rules for all this
   // directories custom commands (but not utility targets)
-  void WriteCustomCommands(const cmTarget &target,std::ostream& os,
+  void WriteCustomCommands(cmTarget &target,std::ostream& os,
                            std::vector<std::string>& cleanFiles);
   
   // this method Writes the Directory informaiton files
@@ -187,18 +187,18 @@ protected:
   void WriteCMakeArgument(std::ostream& os, const char* s);
 
   // write out all the rules for this target
-  void WriteTargetRuleFiles(const cmTarget& target);
-  void WriteUtilityRuleFiles(const cmTarget& target);
+  void WriteTargetRuleFiles(cmTarget& target);
+  void WriteUtilityRuleFiles(cmTarget& target);
   
   // create the rule files for an object
-  void WriteObjectRuleFiles(const cmTarget& target,
+  void WriteObjectRuleFiles(cmTarget& target,
                             const cmSourceFile& source,
                             std::vector<std::string>& objects);
 
   // write the build rule for an object
   void WriteObjectBuildFile(std::string &obj,
                             const char *lang, 
-                            const cmTarget& target, 
+                            cmTarget& target, 
                             const cmSourceFile& source,
                             std::vector<std::string>& depends,
                             std::string &depMakeFile);
@@ -230,21 +230,21 @@ protected:
   // these three make some simple changes and then call WriteLibraryRule
   void WriteStaticLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
-                              const cmTarget& target,
+                              cmTarget& target,
                               const std::vector<std::string>& objects,
                               const std::vector<std::string>& external_objects,
                               std::vector<std::string>& cleanFiles);
   
   void WriteSharedLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
-                              const cmTarget& target,
+                              cmTarget& target,
                               const std::vector<std::string>& objects,
                               const std::vector<std::string>& external_objects,
                               std::vector<std::string>& cleanFiles);
   
   void WriteModuleLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
-                              const cmTarget& target,
+                              cmTarget& target,
                               const std::vector<std::string>& objects,
                               const std::vector<std::string>& external_objects,
                               std::vector<std::string>& cleanFiles);
@@ -252,7 +252,7 @@ protected:
   // the main code for writing the Executable target rules
   void WriteExecutableRule(std::ostream& ruleFileStream,
                            const char* ruleFileName,
-                           const cmTarget& target,
+                           cmTarget& target,
                            const std::vector<std::string>& objects,
                            const std::vector<std::string>& external_objects,
                            std::vector<std::string>& cleanFiles);
@@ -260,7 +260,7 @@ protected:
   // the main method for writing library rules
   void WriteLibraryRule(std::ostream& ruleFileStream,
                         const char* ruleFileName,
-                        const cmTarget& target,
+                        cmTarget& target,
                         const std::vector<std::string>& objects,
                         const std::vector<std::string>& external_objects,
                         const char* linkRuleVar,
@@ -278,24 +278,24 @@ protected:
                             const char* realTarget,
                             const char* helpTarget);
   void WriteObjectsVariable(std::ostream& ruleFileStream,
-                            const cmTarget& target,
+                            cmTarget& target,
                             const std::vector<std::string>& objects,
                             const std::vector<std::string>& external_objects,
                             std::string& variableName,
                             std::string& variableNameExternal);
   void WriteTargetDependRule(std::ostream& ruleFileStream,
-                             const cmTarget& target,
+                             cmTarget& target,
                              const std::vector<std::string>& objects);
   void WriteTargetCleanRule(std::ostream& ruleFileStream,
-                            const cmTarget& target,
+                            cmTarget& target,
                             const std::vector<std::string>& files);
   void WriteTargetRequiresRule(std::ostream& ruleFileStream,
-                               const cmTarget& target,
+                               cmTarget& target,
                                const std::vector<std::string>& objects);
   
-  std::string GetTargetDirectory(const cmTarget& target);
+  std::string GetTargetDirectory(cmTarget& target);
   std::string GetSubdirTargetName(const char* pass, const char* subdir);
-  std::string GetObjectFileName(const cmTarget& target,
+  std::string GetObjectFileName(cmTarget& target,
                                 const cmSourceFile& source);
   const char* GetSourceFileLanguage(const cmSourceFile& source);
   std::string ConvertToQuotedOutputPath(const char* p);
@@ -347,7 +347,7 @@ private:
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> m_ObjectFiles;
 
-  std::map<cmStdString,std::vector<const cmTarget *> > m_LocalObjectFiles;
+  std::map<cmStdString,std::vector<cmTarget *> > m_LocalObjectFiles;
 };
 
 #endif

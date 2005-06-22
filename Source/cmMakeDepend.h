@@ -94,7 +94,7 @@ public:
   /** 
    * Set the makefile that is used as a source of classes.
    */
-  virtual void SetMakefile(const cmMakefile* makefile); 
+  virtual void SetMakefile(cmMakefile* makefile); 
 
   /** 
    * Get the depend info struct for a source file
@@ -153,7 +153,7 @@ protected:
    */
   std::string FullPath(const char *filename, const char *extraPath);
 
-  const cmMakefile* m_Makefile;
+  cmMakefile* m_Makefile;
   bool m_Verbose;
   cmsys::RegularExpression m_IncludeFileRegularExpression;
   cmsys::RegularExpression m_ComplainFileRegularExpression;

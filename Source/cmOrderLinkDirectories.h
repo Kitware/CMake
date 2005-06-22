@@ -49,7 +49,7 @@ class cmOrderLinkDirectories
 public:
   cmOrderLinkDirectories();
   ///! set link information from the target
-  void SetLinkInformation(const cmTarget&, cmTarget::LinkLibraryType,
+  void SetLinkInformation(cmTarget&, cmTarget::LinkLibraryType,
                           const char* targetLibrary);
   ///! Compute the best order for -L paths from GetLinkLibraries
   bool DetermineLibraryPathOrder();

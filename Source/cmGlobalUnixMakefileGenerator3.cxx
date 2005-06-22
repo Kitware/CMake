@@ -467,7 +467,7 @@ cmGlobalUnixMakefileGenerator3
     std::vector<std::string> all_tgts;
     
     // for all of out targets
-    for (cmTargets::const_iterator l = lg->GetMakefile()->GetTargets().begin();
+    for (cmTargets::iterator l = lg->GetMakefile()->GetTargets().begin();
          l != lg->GetMakefile()->GetTargets().end(); l++)
       {
       if((l->second.GetType() == cmTarget::EXECUTABLE) ||
@@ -528,7 +528,7 @@ cmGlobalUnixMakefileGenerator3
     std::vector<std::string> all_tgts;
     
     // for all of out targets
-    for (cmTargets::const_iterator l = lg->GetMakefile()->GetTargets().begin();
+    for (cmTargets::iterator l = lg->GetMakefile()->GetTargets().begin();
          l != lg->GetMakefile()->GetTargets().end(); l++)
       {
       if((l->second.GetType() == cmTarget::EXECUTABLE) ||
@@ -597,7 +597,7 @@ cmGlobalUnixMakefileGenerator3
     std::vector<std::string> all_tgts;
     
     // for all of out targets
-    for (cmTargets::const_iterator l = lg->GetMakefile()->GetTargets().begin();
+    for (cmTargets::iterator l = lg->GetMakefile()->GetTargets().begin();
          l != lg->GetMakefile()->GetTargets().end(); l++)
       {
       if((l->second.GetType() == cmTarget::EXECUTABLE) ||
@@ -658,7 +658,7 @@ cmGlobalUnixMakefileGenerator3
     std::vector<std::string> all_tgts;
     
     // for all of out targets
-    for (cmTargets::const_iterator l = lg->GetMakefile()->GetTargets().begin();
+    for (cmTargets::iterator l = lg->GetMakefile()->GetTargets().begin();
          l != lg->GetMakefile()->GetTargets().end(); l++)
       {
       if((l->second.GetType() == cmTarget::EXECUTABLE) ||
@@ -713,8 +713,8 @@ cmGlobalUnixMakefileGenerator3
   depends.push_back("cmake_check_build_system");
 
   // for each target Generate the rule files for each target.
-  const cmTargets& targets = lg->GetMakefile()->GetTargets();
-  for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+  cmTargets& targets = lg->GetMakefile()->GetTargets();
+  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
     if((t->second.GetType() == cmTarget::EXECUTABLE) ||
        (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
@@ -767,9 +767,9 @@ cmGlobalUnixMakefileGenerator3
   depends.push_back("cmake_check_build_system");
 
   // for each target Generate the rule files for each target.
-  const cmTargets& targets = lg->GetMakefile()->GetTargets();
+  cmTargets& targets = lg->GetMakefile()->GetTargets();
   bool needRequiresStep = this->NeedRequiresStep(lg);
-  for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
     if (((t->second.GetType() == cmTarget::EXECUTABLE) ||
          (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
@@ -870,7 +870,7 @@ cmGlobalUnixMakefileGenerator3
 void
 cmGlobalUnixMakefileGenerator3
 ::AppendGlobalTargetDepends(std::vector<std::string>& depends,
-                            const cmTarget& target)
+                            cmTarget& target)
 {
   // Keep track of dependencies already listed.
   std::set<cmStdString> emitted;
@@ -964,8 +964,8 @@ cmGlobalUnixMakefileGenerator3::WriteHelpRule(std::ostream& ruleFileStream)
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
   
     // for each target Generate the rule files for each target.
-    const cmTargets& targets = lg->GetMakefile()->GetTargets();
-    for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+    cmTargets& targets = lg->GetMakefile()->GetTargets();
+    for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
       {
       if((t->second.GetType() == cmTarget::EXECUTABLE) ||
         (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
