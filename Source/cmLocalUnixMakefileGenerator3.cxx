@@ -1460,7 +1460,8 @@ cmLocalUnixMakefileGenerator3
                              buildTargetRuleName.c_str());
 
   cleanFiles.push_back(cleanObjs);
-  cleanFiles.push_back(targetFullPath.c_str());
+  cleanFiles.push_back
+    (this->Convert(targetFullPath.c_str(),HOME_OUTPUT,MAKEFILE));
 }
 
 //----------------------------------------------------------------------------
@@ -1689,24 +1690,28 @@ cmLocalUnixMakefileGenerator3
   std::string cleanFullSharedName = outpath + cleanSharedName;
   std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
   std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
-  libCleanFiles.push_back(cleanFullStaticName);
+  libCleanFiles.push_back
+    (this->Convert(cleanFullStaticName.c_str(),HOME_OUTPUT,MAKEFILE));
   if(cleanSharedRealName != cleanStaticName)
     {
-    libCleanFiles.push_back(cleanFullSharedRealName);
+    libCleanFiles.push_back
+      (this->Convert(cleanFullSharedRealName.c_str(),HOME_OUTPUT,MAKEFILE));
     }
   if(cleanSharedSOName != cleanStaticName &&
      cleanSharedSOName != cleanSharedRealName)
     {
-    libCleanFiles.push_back(cleanFullSharedSOName);
+    libCleanFiles.push_back
+      (this->Convert(cleanFullSharedSOName.c_str(),HOME_OUTPUT,MAKEFILE));
     }
   if(cleanSharedName != cleanStaticName &&
      cleanSharedName != cleanSharedSOName &&
      cleanSharedName != cleanSharedRealName)
     {
-    libCleanFiles.push_back(cleanFullSharedName);
+    libCleanFiles.push_back
+      (this->Convert(cleanFullSharedName.c_str(),HOME_OUTPUT,MAKEFILE));
     }
   }
-
+  
   // Add a command to remove any existing files for this library.
   this->AppendCleanCommand(commands, libCleanFiles);
 
