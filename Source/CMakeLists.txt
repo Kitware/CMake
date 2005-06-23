@@ -212,6 +212,7 @@ SET(CMTEST_SRCS cmCTest.cxx
   CTest/cmCTestCoverageHandler.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx
+  CTest/cmCTestHandlerCommand.cxx
   CTest/cmCTestMemCheckCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx
   CTest/cmCTestRunScriptCommand.cxx

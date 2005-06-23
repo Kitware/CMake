@@ -228,6 +228,7 @@ cmCTest::cmCTest()
   m_OutputLogFile          = 0;
   m_OutputLogFileLastTag   = -1;
   m_SuppressUpdatingCTestConfiguration = false;
+  m_DartVersion            = 1;
 
   int cc; 
   for ( cc=0; cc < cmCTest::LAST_TEST; cc ++ )
@@ -280,6 +281,10 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag, bool verbose_tag)
 
   if ( m_ProduceXML )
     {
+    cmCTestLog(this, OUTPUT,
+      "   Site: " << this->GetCTestConfiguration("Site") << std::endl
+      << "   Build name: " << this->GetCTestConfiguration("BuildName") << std::endl
+      );
     cmCTestLog(this, DEBUG, "Produce XML is on" << std::endl);
     if ( this->GetCTestConfiguration("NightlyStartTime").empty() )
       {
@@ -393,6 +398,8 @@ bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
 
   const char* src_dir = this->GetCTestConfiguration("SourceDirectory").c_str();
   const char* bld_dir = this->GetCTestConfiguration("BuildDirectory").c_str();
+  m_DartVersion = 1;
+  m_SubmitFiles.clear();
 
   cmMakefile* mf = command->GetMakefile();
   std::string fname = src_dir;
@@ -424,6 +431,16 @@ bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
   this->SetCTestConfigurationFromCMakeVariable(mf, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME");
   this->SetCTestConfigurationFromCMakeVariable(mf, "Site", "CTEST_SITE");
   this->SetCTestConfigurationFromCMakeVariable(mf, "BuildName", "CTEST_BUILD_NAME");
+  const char* dartVersion = mf->GetDefinition("CTEST_DART_SERVER_VERSION");
+  if ( dartVersion )
+    {
+    m_DartVersion = atoi(dartVersion);
+    if ( m_DartVersion < 0 )
+      {
+      cmCTestLog(this, ERROR_MESSAGE, "Invalid Dart server version: " << dartVersion << ". Please specify the version number." << std::endl);
+      return false;
+      }
+    }
 
   if ( !this->Initialize(bld_dir, true, false) )
     {
@@ -630,11 +647,11 @@ bool cmCTest::OpenOutputFile(const std::string& path,
 }
 
 //----------------------------------------------------------------------
-bool cmCTest::AddIfExists(tm_VectorOfStrings& files, const char* file)
+bool cmCTest::AddIfExists(tm_SetOfStrings& files, const char* file)
 {
   if ( this->CTestFileExists(file) )
     {
-    files.push_back(file);
+    files.insert(file);
     }
   else
     {
@@ -642,7 +659,7 @@ bool cmCTest::AddIfExists(tm_VectorOfStrings& files, const char* file)
     name += ".gz";
     if ( this->CTestFileExists(name.c_str()) )
       {
-      files.push_back(name.c_str());
+      files.insert(name.c_str());
       }
     else
       {
@@ -658,6 +675,18 @@ bool cmCTest::CTestFileExists(const std::string& filename)
   std::string testingDir = m_BinaryDir + "/Testing/" + m_CurrentTag + "/" +
     filename;
   return cmSystemTools::FileExists(testingDir.c_str());
+}
+
+//----------------------------------------------------------------------
+cmCTestGenericHandler* cmCTest::GetInitializedHandler(const char* handler)
+{
+  cmCTest::t_TestingHandlers::iterator it = m_TestingHandlers.find(handler);
+  if ( it == m_TestingHandlers.end() )
+    {
+    return 0;
+    }
+  it->second->Initialize();
+  return it->second;
 }
 
 //----------------------------------------------------------------------
@@ -1856,6 +1885,12 @@ void cmCTest::SetProduceXML(bool v)
 bool cmCTest::GetProduceXML()
 {
   return m_ProduceXML;
+}
+
+//----------------------------------------------------------------------
+void cmCTest::AddSubmitFile(const char* name)
+{
+  m_SubmitFiles.insert(name);
 }
 
 //----------------------------------------------------------------------

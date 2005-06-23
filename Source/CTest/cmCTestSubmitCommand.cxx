@@ -98,7 +98,7 @@ bool cmCTestSubmitCommand::InitialPass(
     m_CTest->GenerateNotesFile(newNotesFiles);
     }
 
-  cmCTestGenericHandler* handler = m_CTest->GetHandler("submit");
+  cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("submit");
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate submit handler");

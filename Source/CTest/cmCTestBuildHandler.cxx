@@ -189,6 +189,7 @@ cmCTestBuildHandler::cmCTestBuildHandler()
 //----------------------------------------------------------------------
 void cmCTestBuildHandler::Initialize()
 {
+  this->Superclass::Initialize();
   m_StartBuild = "";
   m_EndBuild = "";
   m_CustomErrorMatches.clear();
@@ -282,9 +283,9 @@ int cmCTestBuildHandler::ProcessHandler()
   // Create a last build log
   cmGeneratedFileStream ofs;
   double elapsed_time_start = cmSystemTools::GetTime();
-  if ( !m_CTest->OpenOutputFile("Temporary", "LastBuild.log", ofs) )
+  if ( !this->StartLogFile("Build", ofs) )
     {
-    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create LastBuild.log file" << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create build log file" << std::endl);
     }
 
   // Create lists of regular expression strings for errors, error exceptions,
@@ -414,7 +415,7 @@ int cmCTestBuildHandler::ProcessHandler()
 
   // Generate XML output
   cmGeneratedFileStream xofs;
-  if( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Build.xml", xofs, true) )
+  if( !this->StartResultingXML("Build", xofs))
     {
     cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create build XML file" << std::endl);
     return -1;

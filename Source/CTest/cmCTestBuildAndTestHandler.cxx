@@ -34,6 +34,7 @@ cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 //----------------------------------------------------------------------
 void cmCTestBuildAndTestHandler::Initialize()
 {
+  this->Superclass::Initialize();
 }
 
 //----------------------------------------------------------------------

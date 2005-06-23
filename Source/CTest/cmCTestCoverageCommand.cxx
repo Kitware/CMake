@@ -74,7 +74,7 @@ bool cmCTestCoverageCommand::InitialPass(
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
     "CoverageCommand", "CTEST_COVERAGE_COMMAND");
 
-  cmCTestGenericHandler* handler = m_CTest->GetHandler("coverage");
+  cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("coverage");
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate test handler");

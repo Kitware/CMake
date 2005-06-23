@@ -68,8 +68,9 @@ bool cmCTestStartCommand::InitialPass(
   m_CTest->SetCTestConfiguration("SourceDirectory", src_dir);
   m_CTest->SetCTestConfiguration("BuildDirectory", bld_dir); 
 
-  cmCTestLog(m_CTest, OUTPUT, "Run dashboard with model " << smodel << std::endl
-    << "   Source directory: " << src_dir << std::endl << "   Build directory: " << bld_dir << std::endl);
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "Run dashboard with model " << smodel << std::endl
+    << "   Source directory: " << src_dir << std::endl
+    << "   Build directory: " << bld_dir << std::endl);
 
   m_Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", "OFF");
   m_CTest->SetSuppressUpdatingCTestConfiguration(true);

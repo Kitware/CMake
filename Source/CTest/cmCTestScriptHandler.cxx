@@ -100,6 +100,7 @@ cmCTestScriptHandler::cmCTestScriptHandler()
 //----------------------------------------------------------------------
 void cmCTestScriptHandler::Initialize()
 {
+  this->Superclass::Initialize();
   m_Backup = false;
   m_EmptyBinDir = false;
   m_EmptyBinDirOnce = false;

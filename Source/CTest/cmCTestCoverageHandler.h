@@ -45,8 +45,8 @@ public:
 private:
   bool ShouldIDoCoverage(const char* file, const char* srcDir,
     const char* binDir);
-  bool StartLogFile(cmGeneratedFileStream& ostr, int logFileCount);
-  void EndLogFile(cmGeneratedFileStream& ostr, int logFileCount);
+  bool StartCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
+  void EndCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
 
   struct cmCTestCoverage
     {

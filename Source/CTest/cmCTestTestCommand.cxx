@@ -19,75 +19,42 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 
-bool cmCTestTestCommand::InitialPass(
-  std::vector<std::string> const& args)
+cmCTestTestCommand::cmCTestTestCommand()
 {
-  const char* build_dir = 0;
-  const char* res_var = 0;
-
-  bool havereturn_variable = false;
-  bool havesource = false;
-  for(size_t i=0; i < args.size(); ++i)
-    {
-    if ( havereturn_variable )
-      {
-      res_var = args[i].c_str();
-      havereturn_variable = false;
-      }
-    else if ( havesource )
-      {
-      build_dir = args[i].c_str();
-      havesource = false;
-      }
-    else if(args[i] == "RETURN_VALUE")
-      {
-      if ( res_var )
-        {
-        this->SetError("called with incorrect number of arguments. RETURN_VALUE specified twice.");
-        return false;
-        }
-      havereturn_variable = true;
-      }    
-    else if(args[i] == "BUILD")
-      {
-      if ( build_dir )
-        {
-        this->SetError("called with incorrect number of arguments. BUILD specified twice.");
-        return false;
-        }
-      havesource = true;
-      }
-    else
-      {
-      cmOStringStream str;
-      str << "called with incorrect number of arguments. Extra argument is: " << args[i].c_str() << ".";
-      this->SetError(str.str().c_str());
-      return false;
-      }
-    }
-
-  if ( build_dir )
-    {
-    m_CTest->SetCTestConfiguration("BuildDirectory", build_dir);
-    }
-
-  cmCTestGenericHandler* handler = m_CTest->GetHandler("test");
-  if ( !handler )
-    {
-    this->SetError("internal CTest error. Cannot instantiate test handler");
-    return false;
-    }
-  std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(m_CTest->GetCTestConfiguration("BuildDirectory").c_str());
-  int res = handler->ProcessHandler();
-  if ( res_var )
-    {
-    cmOStringStream str;
-    str << res;
-    m_Makefile->AddDefinition(res_var, str.str().c_str());
-    }
-  cmSystemTools::ChangeDirectory(current_dir.c_str());
-  return true;
+  m_Arguments[ctt_START] = "START";
+  m_Arguments[ctt_END] = "END";
+  m_Arguments[ctt_STRIDE] = "STRIDE";
+  m_Arguments[ctt_LAST] = 0;
+  m_Last = ctt_LAST;
 }
 
+cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
+{
+  cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("test");
+  if ( m_Values[ctt_START] || m_Values[ctt_END] || m_Values[ctt_STRIDE] )
+    {
+    cmOStringStream testsToRunString;
+    if ( m_Values[ctt_START] )
+      {
+      testsToRunString << m_Values[ctt_START];
+      }
+    testsToRunString << ",";
+    if ( m_Values[ctt_END] )
+      {
+      testsToRunString << m_Values[ctt_END];
+      }
+    testsToRunString << ",";
+    if ( m_Values[ctt_STRIDE] )
+      {
+      testsToRunString << m_Values[ctt_STRIDE];
+      }
+    handler->SetOption("TestsToRunInformation", testsToRunString.str().c_str());
+    }
+  return handler;
+}
+
+cmCTestGenericHandler* cmCTestTestCommand::InitializeActualHandler()
+{
+  return m_CTest->GetInitializedHandler("test");
+}
 

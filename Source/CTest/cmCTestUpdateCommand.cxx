@@ -76,7 +76,7 @@ bool cmCTestUpdateCommand::InitialPass(
     initialCheckoutCommand = m_Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
     }
 
-  cmCTestGenericHandler* handler = m_CTest->GetHandler("update");
+  cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("update");
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate update handler");

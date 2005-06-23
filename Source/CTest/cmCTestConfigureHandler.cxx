@@ -31,6 +31,7 @@ cmCTestConfigureHandler::cmCTestConfigureHandler()
 //----------------------------------------------------------------------
 void cmCTestConfigureHandler::Initialize()
 {
+  this->Superclass::Initialize();
 }
 
 //----------------------------------------------------------------------
@@ -61,7 +62,7 @@ int cmCTestConfigureHandler::ProcessHandler()
   if ( !m_CTest->GetShowOnly() )
     {
     cmGeneratedFileStream os; 
-    if ( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Configure.xml", os, true) )
+    if ( !this->StartResultingXML("Configure", os) )
       {
       cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open configure file" << std::endl);
       return 1;
@@ -69,7 +70,7 @@ int cmCTestConfigureHandler::ProcessHandler()
     std::string start_time = m_CTest->CurrentTime();
 
     cmGeneratedFileStream ofs;
-    m_CTest->OpenOutputFile("Temporary", "LastConfigure.log", ofs);
+    this->StartLogFile("Configure", ofs);
     cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Configure with command: " << cCommand.c_str() << std::endl);
     res = m_CTest->RunMakeCommand(cCommand.c_str(), &output, 
       &retVal, buildDirectory.c_str(),

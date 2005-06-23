@@ -296,6 +296,8 @@ cmCTestTestHandler::cmCTestTestHandler()
 //----------------------------------------------------------------------
 void cmCTestTestHandler::Initialize()
 {
+  this->Superclass::Initialize();
+
   m_ElapsedTestingTime = -1;
 
   m_TestResults.clear();
@@ -435,7 +437,7 @@ int cmCTestTestHandler::ProcessHandler()
       cmGeneratedFileStream ofs;
 
       cmCTestLog(m_CTest, ERROR_MESSAGE, std::endl << "The following tests FAILED:" << std::endl);
-      m_CTest->OpenOutputFile("Temporary", "LastTestsFailed.log", ofs);
+      this->StartLogFile("TestsFailed", ofs);
 
       std::vector<cmCTestTestHandler::cmCTestTestResult>::iterator ftit;
       for(ftit = m_TestResults.begin();
@@ -456,8 +458,7 @@ int cmCTestTestHandler::ProcessHandler()
   if ( m_CTest->GetProduceXML() )
     {
     cmGeneratedFileStream xmlfile;
-    if( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), 
-        (m_MemCheck ? "DynamicAnalysis.xml" : "Test.xml"), xmlfile, true) )
+    if( !this->StartResultingXML((m_MemCheck ? "DynamicAnalysis" : "Test"), xmlfile) )
       {
       cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create " << (m_MemCheck ? "memory check" : "testing")
         << " XML file" << std::endl);
@@ -492,8 +493,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   cmGeneratedFileStream ofs;
   cmGeneratedFileStream *olog = 0;
   if ( !m_CTest->GetShowOnly() && tmsize > 0 && 
-    m_CTest->OpenOutputFile("Temporary", 
-      (m_MemCheck?"LastMemCheck.log":"LastTest.log"), ofs) )
+    this->StartResultingXML((m_MemCheck?"MemCheck":"Test"), ofs) )
     {
     olog = &ofs;
     }

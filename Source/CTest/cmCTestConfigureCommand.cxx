@@ -132,7 +132,7 @@ bool cmCTestConfigureCommand::InitialPass(
       }
     }
 
-  cmCTestGenericHandler* handler = m_CTest->GetHandler("configure");
+  cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("configure");
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate configure handler");

@@ -70,6 +70,7 @@ cmCTestSubmitHandler::cmCTestSubmitHandler() : m_HTTPProxy(), m_FTPProxy()
 //----------------------------------------------------------------------------
 void cmCTestSubmitHandler::Initialize()
 {
+  this->Superclass::Initialize();
   m_HTTPProxy = "";
   m_HTTPProxyType = 0;
   m_HTTPProxyAuth = "";
@@ -80,7 +81,7 @@ void cmCTestSubmitHandler::Initialize()
 
 //----------------------------------------------------------------------------
 bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix, 
-  const std::vector<cmStdString>& files,
+  const std::set<cmStdString>& files,
   const cmStdString& remoteprefix, 
   const cmStdString& url)
 {
@@ -92,8 +93,8 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  cmStdString::size_type cc;
-  for ( cc = 0; cc < files.size(); cc ++ )
+  cmCTest::tm_SetOfStrings::iterator file;
+  for ( file = files.begin(); file != files.end(); ++file )
     {
     /* get a curl handle */
     curl = curl_easy_init();
@@ -119,12 +120,15 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
       // enable uploading
       ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1) ;
 
-      cmStdString local_file = localprefix + "/" + files[cc];
-      cmStdString upload_as = url + "/" + remoteprefix + files[cc];
+      cmStdString local_file = localprefix + "/" + *file;
+      cmStdString upload_as = url + "/" + remoteprefix + *file;
 
       struct stat st;
       if ( ::stat(local_file.c_str(), &st) )
         {
+        cmCTestLog(m_CTest, ERROR_MESSAGE, "   Cannot find file: " << local_file.c_str() << std::endl);
+        ::curl_easy_cleanup(curl);
+        ::curl_global_cleanup(); 
         return false;
         }
 
@@ -192,7 +196,7 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
 //----------------------------------------------------------------------------
 // Uploading files is simpler
 bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix, 
-  const std::vector<cmStdString>& files,
+  const std::set<cmStdString>& files,
   const cmStdString& remoteprefix, 
   const cmStdString& url)
 {
@@ -204,8 +208,9 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  cmStdString::size_type cc, kk;
-  for ( cc = 0; cc < files.size(); cc ++ )
+  cmStdString::size_type kk;
+  cmCTest::tm_SetOfStrings::iterator file;
+  for ( file = files.begin(); file != files.end(); ++file )
     {
     /* get a curl handle */
     curl = curl_easy_init();
@@ -241,8 +246,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
       ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
-      cmStdString local_file = localprefix + "/" + files[cc];
-      cmStdString remote_file = remoteprefix + files[cc];
+      cmStdString local_file = localprefix + "/" + *file;
+      cmStdString remote_file = remoteprefix + *file;
 
       *m_LogFile << "\tUpload file: " << local_file.c_str() << " to "
           << remote_file.c_str() << std::endl;
@@ -277,6 +282,9 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       struct stat st;
       if ( ::stat(local_file.c_str(), &st) )
         {
+        cmCTestLog(m_CTest, ERROR_MESSAGE, "   Cannot find file: " << local_file.c_str() << std::endl);
+        ::curl_easy_cleanup(curl);
+        ::curl_global_cleanup(); 
         return false;
         }
 
@@ -339,7 +347,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
 }
 
 //----------------------------------------------------------------------------
-bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::vector<cmStdString>& files,
+bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<cmStdString>& files,
   const cmStdString& remoteprefix, 
   const cmStdString& url)
 {
@@ -349,8 +357,8 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::vector<cmStdString>& file
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  cmStdString::size_type cc, kk;
-  for ( cc = 0; cc < files.size(); cc ++ )
+  cmCTest::tm_SetOfStrings::iterator file;
+  for ( file = files.begin(); file != files.end(); ++file )
     {
     /* get a curl handle */
     curl = curl_easy_init();
@@ -393,11 +401,12 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::vector<cmStdString>& file
       ::curl_easy_setopt(curl, CURLOPT_FILE, (void *)&chunk);
       ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void *)&chunkDebug);
 
-      cmStdString file = remoteprefix + files[cc];
+      cmStdString rfile = remoteprefix + *file;
       cmStdString ofile = "";
-      for ( kk = 0; kk < file.size(); kk ++ )
+      cmStdString::iterator kk;
+      for ( kk = rfile.begin(); kk < rfile.end(); ++ kk)
         {
-        char c = file[kk];
+        char c = *kk;
         char hex[4] = { 0, 0, 0, 0 };
         hex[0] = c;
         switch ( c )
@@ -456,7 +465,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::vector<cmStdString>& file
 bool cmCTestSubmitHandler::SubmitUsingSCP(
   const cmStdString& scp_command, 
   const cmStdString& localprefix, 
-  const std::vector<cmStdString>& files,
+  const std::set<cmStdString>& files,
   const cmStdString& remoteprefix, 
   const cmStdString& url)
 {
@@ -477,19 +486,17 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(
 
   int problems = 0;
 
-  std::vector<cmStdString>::const_iterator it;
-  for ( it = files.begin();
-    it != files.end();
-    it ++ )
+  cmCTest::tm_SetOfStrings::iterator file;
+  for ( file = files.begin(); file != files.end(); ++file )
     {
     int retVal;
 
     std::string lfname = localprefix;
     cmSystemTools::ConvertToUnixSlashes(lfname);
-    lfname += "/" + *it;
+    lfname += "/" + *file;
     lfname = cmSystemTools::ConvertToOutputPath(lfname.c_str());
     argv[1] = lfname.c_str();
-    std::string rfname = url + "/" + remoteprefix + *it;
+    std::string rfname = url + "/" + remoteprefix + *file;
     argv[2] = rfname.c_str();
     cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Execute \"" << argv[0] << "\" \"" << argv[1] << "\" \"" 
       << argv[2] << "\"" << std::endl);
@@ -548,7 +555,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(
 
 //----------------------------------------------------------------------------
 bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix, 
-  const std::vector<cmStdString>& files,
+  const std::set<cmStdString>& files,
   const cmStdString& remoteprefix, 
   const cmStdString& url)
 {
@@ -565,12 +572,12 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
 
   /* Call the famous server at UserLand. */
   cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Submitting to: " << realURL.c_str() << " (" << remoteprefix.c_str() << ")" << std::endl);
-  std::vector<cmStdString>::const_iterator it;
-  for ( it = files.begin(); it != files.end(); ++it )
+  cmCTest::tm_SetOfStrings::iterator file;
+  for ( file = files.begin(); file != files.end(); ++file )
     {
     xmlrpc_value *result;
 
-    std::string local_file = localprefix + "/" + *it;
+    std::string local_file = localprefix + "/" + *file;
     cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Submit file: " << local_file.c_str() << std::endl);
     struct stat st;
     if ( ::stat(local_file.c_str(), &st) )
@@ -705,9 +712,9 @@ int cmCTestSubmitHandler::ProcessHandler()
     cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Use FTP Proxy: " << m_FTPProxy << std::endl);
     }
   cmGeneratedFileStream ofs;
-  m_CTest->OpenOutputFile("Temporary", "LastSubmit.log", ofs);
+  this->StartLogFile("Submit", ofs);
 
-  cmCTest::tm_VectorOfStrings files;
+  cmCTest::tm_SetOfStrings files;
   std::string prefix = this->GetSubmitResultsPrefix();
   // TODO:
   // Check if test is enabled
@@ -729,7 +736,7 @@ int cmCTestSubmitHandler::ProcessHandler()
         {
         gfiles[cc] = gfiles[cc].substr(glen);
         cmCTestLog(m_CTest, DEBUG, "Glob file: " << gfiles[cc].c_str() << std::endl);
-        files.push_back(gfiles[cc]);
+        files.insert(gfiles[cc]);
         }
       }
     else
@@ -741,11 +748,19 @@ int cmCTestSubmitHandler::ProcessHandler()
   m_CTest->AddIfExists(files, "Purify.xml");
   m_CTest->AddIfExists(files, "Notes.xml");
 
+  cmCTest::tm_SetOfStrings::iterator it;
+  for ( it = m_CTest->GetSubmitFiles()->begin();
+   it != m_CTest->GetSubmitFiles()->end();
+   ++ it )
+    {
+    files.insert(files.end(), *it);
+    }
+
   if ( ofs )
     {
     ofs << "Upload files:" << std::endl;
     int cnt = 0;
-    cmCTest::tm_VectorOfStrings::iterator it;
+    cmCTest::tm_SetOfStrings::iterator it;
     for ( it = files.begin(); it != files.end(); ++ it )
       {
       ofs << cnt << "\t" << it->c_str() << std::endl;

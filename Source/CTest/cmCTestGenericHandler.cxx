@@ -17,11 +17,14 @@
 
 #include "cmCTestGenericHandler.h"
 
+#include "cmCTest.h"
+
 //----------------------------------------------------------------------
 cmCTestGenericHandler::cmCTestGenericHandler()
 {
   m_HandlerVerbose = false;
   m_CTest = 0;
+  m_SubmitIndex = 0;
 }
 
 //----------------------------------------------------------------------
@@ -51,6 +54,12 @@ void cmCTestGenericHandler::SetOption(const char* op, const char* value)
 }
 
 //----------------------------------------------------------------------
+void cmCTestGenericHandler::Initialize()
+{
+  m_Options.clear();
+}
+
+//----------------------------------------------------------------------
 const char* cmCTestGenericHandler::GetOption(const char* op)
 {
   cmCTestGenericHandler::t_StringToString::iterator remit 
@@ -60,5 +69,53 @@ const char* cmCTestGenericHandler::GetOption(const char* op)
     return 0;
     }
   return remit->second.c_str();
+}
+
+//----------------------------------------------------------------------
+bool cmCTestGenericHandler::StartResultingXML(const char* name, cmGeneratedFileStream& xofs)
+{
+  if ( !name )
+    {
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create resulting XML file without providing the name" << std::endl;);
+    return false;
+    }
+  cmOStringStream ostr;
+  ostr << name;
+  if ( m_SubmitIndex > 0 )
+    {
+    ostr << "_" << m_SubmitIndex;
+    }
+  ostr << ".xml";
+  if( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), ostr.str().c_str(), xofs, true) )
+    {
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create resulting XML file: " << ostr.str().c_str() << std::endl);
+    return false;
+    }
+  m_CTest->AddSubmitFile(ostr.str().c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------
+bool cmCTestGenericHandler::StartLogFile(const char* name, cmGeneratedFileStream& xofs)
+{
+  if ( !name )
+    {
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create log file without providing the name" << std::endl;);
+    return false;
+    }
+  cmOStringStream ostr;
+  ostr << "Last" << name;
+  if ( m_SubmitIndex > 0 )
+    {
+    ostr << "_" << m_SubmitIndex;
+    }
+  ostr << "_" << m_CTest->GetCurrentTag();
+  ostr << ".log";
+  if( !m_CTest->OpenOutputFile("Temporary", ostr.str().c_str(), xofs) )
+    {
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot create log file: " << ostr.str().c_str() << std::endl);
+    return false;
+    }
+  return true;
 }
 

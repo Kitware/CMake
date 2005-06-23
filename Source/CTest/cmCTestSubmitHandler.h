@@ -47,25 +47,25 @@ private:
    * Submit file using various ways
    */
   bool SubmitUsingFTP(const cmStdString& localprefix, 
-                      const std::vector<cmStdString>& files,
+                      const std::set<cmStdString>& files,
                       const cmStdString& remoteprefix, 
                       const cmStdString& url);
   bool SubmitUsingHTTP(const cmStdString& localprefix, 
-                       const std::vector<cmStdString>& files,
+                       const std::set<cmStdString>& files,
                        const cmStdString& remoteprefix, 
                        const cmStdString& url);
   bool SubmitUsingSCP(const cmStdString& scp_command,
                       const cmStdString& localprefix, 
-                      const std::vector<cmStdString>& files,
+                      const std::set<cmStdString>& files,
                       const cmStdString& remoteprefix, 
                       const cmStdString& url);
 
-  bool TriggerUsingHTTP(const std::vector<cmStdString>& files,
+  bool TriggerUsingHTTP(const std::set<cmStdString>& files,
                         const cmStdString& remoteprefix, 
                         const cmStdString& url);
 
   bool SubmitUsingXMLRPC(const cmStdString& localprefix, 
-                       const std::vector<cmStdString>& files,
+                       const std::set<cmStdString>& files,
                        const cmStdString& remoteprefix, 
                        const cmStdString& url);
 

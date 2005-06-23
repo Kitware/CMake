@@ -91,7 +91,7 @@ bool cmCTestBuildCommand::InitialPass(
     m_CTest->SetCTestConfiguration("BuildDirectory", build_dir);
     }
 
-  cmCTestGenericHandler* handler = m_CTest->GetHandler("build");
+  cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("build");
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate build handler");

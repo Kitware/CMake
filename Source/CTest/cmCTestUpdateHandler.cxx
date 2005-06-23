@@ -178,6 +178,7 @@ cmCTestUpdateHandler::cmCTestUpdateHandler()
 //----------------------------------------------------------------------
 void cmCTestUpdateHandler::Initialize()
 {
+  this->Superclass::Initialize();
 }
 
 //----------------------------------------------------------------------
@@ -252,7 +253,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   cmGeneratedFileStream ofs;
   if ( !m_CTest->GetShowOnly() )
     {
-    m_CTest->OpenOutputFile("Temporary", "LastUpdate.log", ofs);
+    this->StartLogFile("Update", ofs);
     }
 
   cmCTestLog(m_CTest, HANDLER_OUTPUT, "Updating the repository" << std::endl);
@@ -439,7 +440,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   // Now update repository and remember what files were updated
   // 
   cmGeneratedFileStream os; 
-  if ( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Update.xml", os, true) )
+  if ( !this->StartResultingXML("Update", os) )
     {
     cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open log file" << std::endl);
     }

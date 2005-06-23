@@ -17,18 +17,20 @@
 #ifndef cmCTestTestCommand_h
 #define cmCTestTestCommand_h
 
-#include "cmCTestCommand.h"
+#include "cmCTestHandlerCommand.h"
+
+class cmCTestGenericHandler;
 
 /** \class cmCTestTest
  * \brief Run a ctest script
  *
  * cmCTestTestCommand defineds the command to test the project.
  */
-class cmCTestTestCommand : public cmCTestCommand
+class cmCTestTestCommand : public cmCTestHandlerCommand
 {
 public:
 
-  cmCTestTestCommand() {}
+  cmCTestTestCommand();
   
   /**
    * This is a virtual constructor for the command.
@@ -40,12 +42,6 @@ public:
     ni->m_CTestScriptHandler = this->m_CTestScriptHandler;
     return ni;
     }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -71,8 +67,20 @@ public:
       "second argument is a variable that will hold value.";
     }
 
-  cmTypeMacro(cmCTestTestCommand, cmCTestCommand);
+  cmTypeMacro(cmCTestTestCommand, cmCTestHandlerCommand);
 
+protected:
+  cmCTestGenericHandler* InitializeActualHandler();
+  cmCTestGenericHandler* InitializeHandler();
+
+  enum {
+    ctt_BUILD = ct_LAST,
+    ctt_RETURN_VALUE,
+    ctt_START,
+    ctt_END,
+    ctt_STRIDE,
+    ctt_LAST
+  };
 };
 
 

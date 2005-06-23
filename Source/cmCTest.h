@@ -49,6 +49,7 @@ class cmCTest
 {
 public:
   typedef std::vector<cmStdString> tm_VectorOfStrings;
+  typedef std::set<cmStdString> tm_SetOfStrings;
 
   ///! Process Command line arguments
   int Run(std::vector<std::string>const&, std::string* output = 0);
@@ -96,7 +97,7 @@ public:
    * Check if CTest file exists
    */
   bool CTestFileExists(const std::string& filename);
-  bool AddIfExists(tm_VectorOfStrings& files, const char* file);
+  bool AddIfExists(tm_SetOfStrings& files, const char* file);
 
   /**
    * Set the cmake test
@@ -231,6 +232,7 @@ public:
    * Get the handler object
    */
   cmCTestGenericHandler* GetHandler(const char* handler);
+  cmCTestGenericHandler* GetInitializedHandler(const char* handler);
 
   /*
    * Set the CTest variable from CMake variable
@@ -266,6 +268,13 @@ public:
 
   //! Add log to the output
   void Log(int logType, const char* file, int line, const char* msg);
+
+  //! Get the version of dart server
+  int GetDartVersion() { return m_DartVersion; }
+
+  //! Add file to be submitted
+  void AddSubmitFile(const char* name);
+  tm_SetOfStrings* GetSubmitFiles() { return &m_SubmitFiles; }
 
 private:
   std::string m_ConfigType;
@@ -349,6 +358,10 @@ private:
   bool m_Debug;
   bool m_ShowLineNumbers;
   bool m_Quiet;
+
+  int  m_DartVersion;
+
+  std::set<cmStdString> m_SubmitFiles;
 
   
   cmGeneratedFileStream* m_OutputLogFile;

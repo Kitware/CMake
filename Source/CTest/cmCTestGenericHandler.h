@@ -24,6 +24,7 @@
 class cmCTest;
 class cmMakefile;
 class cmCTestCommand;
+class cmGeneratedFileStream;
 
 /** \class cmCTestGenericHandler
  * \brief A superclass of all CTest Handlers
@@ -58,7 +59,7 @@ public:
   /**
    * Initialize handler
    */
-  virtual void Initialize() = 0;
+  virtual void Initialize();
 
   /**
    * Set the CTest instance
@@ -82,12 +83,19 @@ public:
     m_Command = command;
     }
 
+  void SetSubmitIndex(int idx) { m_SubmitIndex = idx; }
+  int GetSubmitIndex() { return m_SubmitIndex; }
+
 protected:
+  bool StartResultingXML(const char* name, cmGeneratedFileStream& xofs);
+  bool StartLogFile(const char* name, cmGeneratedFileStream& xofs);
+  
   bool m_HandlerVerbose;
   cmCTest *m_CTest;
   t_StringToString m_Options;
 
   cmCTestCommand* m_Command;
+  int m_SubmitIndex;
 };
 
 #endif

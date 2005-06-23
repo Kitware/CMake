@@ -17,14 +17,16 @@
 #ifndef cmCTestMemCheckCommand_h
 #define cmCTestMemCheckCommand_h
 
-#include "cmCTestCommand.h"
+#include "cmCTestTestCommand.h"
+
+class cmCTestGenericHandler;
 
 /** \class cmCTestMemCheck
  * \brief Run a ctest script
  *
  * cmCTestMemCheckCommand defineds the command to test the project.
  */
-class cmCTestMemCheckCommand : public cmCTestCommand
+class cmCTestMemCheckCommand : public cmCTestTestCommand
 {
 public:
 
@@ -40,12 +42,6 @@ public:
     ni->m_CTestScriptHandler = this->m_CTestScriptHandler;
     return ni;
     }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -72,8 +68,10 @@ public:
       "will hold value.";
     }
 
-  cmTypeMacro(cmCTestMemCheckCommand, cmCTestCommand);
+  cmTypeMacro(cmCTestMemCheckCommand, cmCTestTestCommand);
 
+protected:
+  cmCTestGenericHandler* InitializeActualHandler();
 };
 
 
