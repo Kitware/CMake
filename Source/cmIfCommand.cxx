@@ -25,19 +25,20 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
   const char* name = lff.m_Name.c_str();
   const std::vector<cmListFileArgument>& args = lff.m_Arguments;
   // always let if statements through
-  if (!strcmp(name,"IF"))
+  if (cmSystemTools::LowerCase(lff.m_Name) == "if")
     {
     return false;
     }
   
   // watch for our ELSE or ENDIF
-  if (!strcmp(name,"ELSE") || !strcmp(name,"ENDIF"))
+  if (cmSystemTools::LowerCase(lff.m_Name) == "else" || 
+      cmSystemTools::LowerCase(lff.m_Name) == "endif")
     {
     if (args == m_Args)
       {
       // if it was an else statement then we should change state
       // and block this Else Command
-      if (!strcmp(name,"ELSE"))
+      if (cmSystemTools::LowerCase(lff.m_Name) == "else")
         {
         m_IsBlocking = !m_IsBlocking;
         return true;
@@ -72,7 +73,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
                                        cmMakefile&)
 {
-  if (lff.m_Name == "ENDIF")
+  if (cmSystemTools::LowerCase(lff.m_Name) == "endif")
     {
     if (lff.m_Arguments == m_Args)
       {

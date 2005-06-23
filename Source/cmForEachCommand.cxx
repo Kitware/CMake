@@ -27,7 +27,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
     }
   
   // at end of for each execute recorded commands
-  if (lff.m_Name == "ENDFOREACH")
+  if (cmSystemTools::LowerCase(lff.m_Name) == "endforeach")
     {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.m_Arguments, expandedArguments);
@@ -72,7 +72,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 bool cmForEachFunctionBlocker::
 ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
 {
-  if(lff.m_Name == "ENDFOREACH")
+  if(cmSystemTools::LowerCase(lff.m_Name) == "endforeach")
     {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.m_Arguments, expandedArguments);

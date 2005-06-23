@@ -28,7 +28,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
     }
   
   // at end of for each execute recorded commands
-  if (lff.m_Name == "ENDWHILE")
+  if (cmSystemTools::LowerCase(lff.m_Name) == "endwhile")
     {
     char* errorString = 0;
     
@@ -64,7 +64,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 bool cmWhileFunctionBlocker::
 ShouldRemove(const cmListFileFunction& lff, cmMakefile& )
 {
-  if(lff.m_Name == "ENDWHILE")
+  if(cmSystemTools::LowerCase(lff.m_Name) == "endwhile")
     {
     if (lff.m_Arguments == m_Args)
       {
