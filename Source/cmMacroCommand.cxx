@@ -112,7 +112,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
   // declare varuiables for ARGV ARGN but do not compute until needed
   std::string argvDef;
   std::string argnDef;
-  bool argvDefInitialized = false;
 
   // save the current definitions of all vars that we will be setting
   std::string oldARGC;
@@ -143,7 +142,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
       }
     argvDef += *eit;
     oldARGVArgs.push_back(std::string());
-    sprintf(argvName,"ARGV%i",cnt);
+    sprintf(argvName,"ARGV%i",static_cast<int>(cnt));
     if (m_Makefile->GetDefinition(argvName))
       {
       oldARGVArgs[cnt] = m_Makefile->GetDefinition(argvName);
