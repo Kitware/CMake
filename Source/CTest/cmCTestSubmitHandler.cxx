@@ -93,7 +93,7 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  cmCTest::tm_SetOfStrings::iterator file;
+  cmCTest::tm_SetOfStrings::const_iterator file;
   for ( file = files.begin(); file != files.end(); ++file )
     {
     /* get a curl handle */
@@ -209,7 +209,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
   ::curl_global_init(CURL_GLOBAL_ALL);
 
   cmStdString::size_type kk;
-  cmCTest::tm_SetOfStrings::iterator file;
+  cmCTest::tm_SetOfStrings::const_iterator file;
   for ( file = files.begin(); file != files.end(); ++file )
     {
     /* get a curl handle */
@@ -357,7 +357,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<cmStdString>& files,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  cmCTest::tm_SetOfStrings::iterator file;
+  cmCTest::tm_SetOfStrings::const_iterator file;
   for ( file = files.begin(); file != files.end(); ++file )
     {
     /* get a curl handle */
@@ -486,7 +486,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(
 
   int problems = 0;
 
-  cmCTest::tm_SetOfStrings::iterator file;
+  cmCTest::tm_SetOfStrings::const_iterator file;
   for ( file = files.begin(); file != files.end(); ++file )
     {
     int retVal;
@@ -572,7 +572,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
 
   /* Call the famous server at UserLand. */
   cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Submitting to: " << realURL.c_str() << " (" << remoteprefix.c_str() << ")" << std::endl);
-  cmCTest::tm_SetOfStrings::iterator file;
+  cmCTest::tm_SetOfStrings::const_iterator file;
   for ( file = files.begin(); file != files.end(); ++file )
     {
     xmlrpc_value *result;
