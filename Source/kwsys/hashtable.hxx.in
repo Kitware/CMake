@@ -379,10 +379,11 @@ struct _Hashtable_const_iterator {
 };
 
 // Note: assumes long is at least 32 bits.
-enum { _stl_num_primes = 28 };
+enum { _stl_num_primes = 31 };
 
 static const unsigned long _stl_prime_list[_stl_num_primes] =
 {
+  5ul,          11ul,         23ul,
   53ul,         97ul,         193ul,       389ul,       769ul,
   1543ul,       3079ul,       6151ul,      12289ul,     24593ul,
   49157ul,      98317ul,      196613ul,    393241ul,    786433ul,
