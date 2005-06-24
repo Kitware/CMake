@@ -883,6 +883,7 @@ int cmCTestSubmitHandler::ProcessHandler()
       }
     cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Submission successful" << std::endl);
     ofs << "   Submission successful" << std::endl;
+    return 0;
     }
   cmCTestLog(m_CTest, ERROR_MESSAGE, "   Unknown submission method: \"" << m_CTest->GetCTestConfiguration("DropMethod") << "\"" << std::endl);
   return -1;
