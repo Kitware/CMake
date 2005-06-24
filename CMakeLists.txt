@@ -74,9 +74,9 @@ SET(CURL_SPECIAL_ZLIB_H "cmzlib/zlib.h")
 
 #-----------------------------------------------------------------------------
 # Build Curl library for CTest.
-SUBDIRS(Source/CTest/Curl)
-SET(CMAKE_CURL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/Source/CTest/Curl")
-SET(CMAKE_CURL_LIBRARIES "Curl")
+SUBDIRS(Utilities/cmcurl)
+SET(CMAKE_CURL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/Utilities")
+SET(CMAKE_CURL_LIBRARIES "cmcurl")
 
 #-----------------------------------------------------------------------------
 # Build expat library for CMake and CTest.

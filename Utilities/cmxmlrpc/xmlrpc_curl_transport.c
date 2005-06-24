@@ -27,9 +27,9 @@
 #  include "xmlrpc_pthreads.h"
 #endif
 
-#include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
+#include <cmcurl/curl/curl.h>
+#include <cmcurl/curl/types.h>
+#include <cmcurl/curl/easy.h>
 
 #ifndef WIN32
 #  include <unistd.h>

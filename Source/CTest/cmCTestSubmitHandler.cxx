@@ -29,7 +29,7 @@ PURPOSE.  See the above copyright notices for more information.
 #include "xmlrpc_client.h"
 
 // For curl submission
-#include "CTest/Curl/curl/curl.h"
+#include "cmcurl/curl/curl.h"
 
 #include <sys/stat.h>
 
