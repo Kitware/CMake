@@ -1401,8 +1401,10 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
       {
       cmOStringStream error;
       error << "Syntax error in cmake code at\n"
-        << filename << ":" << line << ":\n"
-        << parser.GetError() << ", when parsing string \"" << source.c_str() << "\"";
+            << (filename?filename:"(no filename given)") 
+            << ":" << line << ":\n"
+            << parser.GetError() << ", when parsing string \"" 
+            << source.c_str() << "\"";
       const char* versionValue
         = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
       int major = 0;
