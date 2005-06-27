@@ -1,6 +1,12 @@
 # a simple test case
-PROJECT (simple)
-ADD_EXECUTABLE (simple simple.cxx)
-ADD_LIBRARY(simpleLib STATIC 
-   simpleLib.cxx simpleCLib.c simpleWe.cpp)
-TARGET_LINK_LIBRARIES(simple simpleLib)
+project (simple)
+
+add_executable (simple simple.cxx)
+
+add_library (simpleLib STATIC 
+  simpleLib.cxx 
+  simpleCLib.c 
+  simpleWe.cpp
+  )
+
+target_link_libraries (simple simpleLib)
