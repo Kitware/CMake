@@ -13,6 +13,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "Utilities/cmzlib/"      
   "Utilities/cmxmlrpc/"      
   "Source/CTest/Curl"      
+  "Utilities/cmcurl"      
   "Source/CursesDialog/form"      
   "Utilities/cmexpat/"
   "is not used for resolving any symbol"
