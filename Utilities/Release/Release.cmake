@@ -4,7 +4,7 @@
 # Search for system runtime libraries based on the platform.  This is
 # not complete because it is used only for the release process by the
 # developers.
-IF(CMAKE_GENERATOR MATCHES "^Visual Studio 7 .NET 2003$")
+IF(WIN32)
   STRING(REGEX REPLACE "\\\\" "/" SYSTEMROOT "$ENV{SYSTEMROOT}")
   FOREACH(lib
       "${SYSTEMROOT}/system32/msvcp71.dll"
@@ -15,7 +15,7 @@ IF(CMAKE_GENERATOR MATCHES "^Visual Studio 7 .NET 2003$")
         ${CMake_INSTALL_SYSTEM_RUNTIME_LIBS} ${lib})
     ENDIF(EXISTS ${lib})
   ENDFOREACH(lib)
-ENDIF(CMAKE_GENERATOR MATCHES "^Visual Studio 7 .NET 2003$")
+ENDIF(WIN32)
 
 # Include system runtime libraries in the installation if any are
 # specified by CMake_INSTALL_SYSTEM_RUNTIME_LIBS.
