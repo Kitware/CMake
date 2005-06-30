@@ -117,7 +117,7 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
     MESSAGE(STATUS "Check if this is a free VC compiler")
     EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}/CMakeTmp2
       ARGS /nologo /MD /EHsc
-      \"${testForFreeVCFile}"
+      \"${testForFreeVCFile}\"
       OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 
       RETURN_VALUE CMAKE_COMPILER_RETURN
       )
