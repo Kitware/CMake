@@ -12,6 +12,9 @@
 #define FOREACH_VAR2 "${FOREACH_VAR2}"
 #define FOREACH_CONCAT "${FOREACH_CONCAT}"
 
+// Test WHILE
+#define WHILE_VALUE ${while_var}
+
 // Test FIND_FILE, FIND_PATH and various GET_FILENAME_COMPONENT combinations
 
 #define FILENAME_VAR_PATH_NAME "${FILENAME_VAR_PATH_NAME}"

@@ -237,6 +237,11 @@ FOREACH(x "a")
   ENDIF(${x} MATCHES "a")
 ENDFOREACH(x)
 
+# test WHILE command
+SET (while_var 1)
+WHILE (while_var LESS 1000)
+  SET(while_var ${while_var}0)
+ENDWHILE(while_var LESS 1000)
 
 #
 # Configure file 

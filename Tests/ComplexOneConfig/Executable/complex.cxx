@@ -657,6 +657,18 @@ int main()
 #endif
 
   // ----------------------------------------------------------------------
+  // Test WHILE
+  
+  if(WHILE_VALUE != 1000)
+    {
+    cmFailed("WHILE command is not working");
+    }
+  else
+    {
+    cmPassed("WHILE command is working");
+    }
+
+  // ----------------------------------------------------------------------
   // Test FIND_FILE, FIND_PATH and various GET_FILENAME_COMPONENT combinations
 
 #ifndef FILENAME_VAR_PATH_NAME
