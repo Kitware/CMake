@@ -1,0 +1,22 @@
+Changes for new CMakeSetup dialog (v0.9)
+- Cancel button on progress dialog now cancels the process
+- Generator cannot be chosen anymore after there are cache items (this is pointless anyway)
+- Drop target on grid (a folder) will load this in the build path and load up the cache
+- Deletion of cache before something is generated, will ask the user if this is what he/she wants
+- Reloading of cache added, after deleting cache items (and it was a mistake, a reload can bring it back to previous state)
+- Added a search query. Typing a substring will narrow the search. When ENTER is pressed the substring is stored in the search query history for easy lookup
+- Added a message display window, that will show all messages for easy copy-pasting and reference. This also obsoleted the "stop reporting errors" option
+- A status percentage is shown in the task bar (when configuring, next to the configure window)
+- Added menu bar with most common options (reload cache, delete cache, options, about etc)
+- Added browse option in context menu on grid. Blue and green items are browsable (paths and files)
+- Added about dialog
+- Added options dialog (for future options)
+- OPTION cache items are now implemented as checkboxes instead of comboboxes. Easier to double click instead of figuring out if you want to go up or down for YES or NO
+- Added XP look to window (XP manifest)
+- Added progress dialog that shows configuration progress
+- Closing of dialog can be postponed by SHIFT (when option "close after generation is done" is selected)
+- Window position X, Y and size is remembered between sessions
+- Added most recent used list, with 5 last used build directories for easy lookup
+- Cache options for paths are colored blue, cache options for files are green, and the rest is black
+- NOTFOUND entries are made bold for easy recognition
+- The selected item is described in a seperate text box for easy reading instead of in the statusbar

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="windows-1252"?><TODOLIST FILEFORMAT="6" PROJECTNAME="CMakeSetup GUI project" NEXTUNIQUEID="110" FILEVERSION="123" LASTMODIFIED="2005-06-30"><TASK PRIORITYCOLOR="15732480" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38479.90427083" TEXTCOLOR="0" TITLE="v1.0b" PRIORITYWEBCOLOR="#000FF0" ID="1" HIGHESTPRIORITY="8" PERCENTDONE="0" POS="2"><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="5/30/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38502.62243056" TEXTCOLOR="0" TITLE="Interpret directory from dropped shortcut" COMMENTS="In DoInitFrame()
+
+	{
+		m_cmShowAdvanced-&gt;SetValue(false);
+		
+		// TODO: Interpret directory from dropped shortcut
+		//this-&gt;ChangeDirectoriesFromFile(cmdInfo-&gt;m_LastUnknownParameter.c_str());
+    }" PRIORITYWEBCOLOR="#000FF0" ID="94" PERCENTDONE="0" STARTDATE="38502.00000000" POS="2"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="5/30/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" ALLOCATEDBY="Andy" LASTMOD="38502.94655093" TEXTCOLOR="0" TITLE="Make sources consistent with formatting" COMMENTS="The second thing has to do with your coding standard. The indentation
+would be ok (even though it is different), as long as it would be
+consistent. Looks like you are using tabs sometimes, spaces some other
+times, so depending on what editor you use, the code looks
+different. As you notice, in CMake we always use two spaces indentation.
+
+Also, related to this is that your code has DOS new-lines on some lines
+but not on other. Inconsistent DOS new-lines sometimes confuse certain
+compilers." PRIORITYWEBCOLOR="#000FF0" ID="97" PERCENTDONE="100" STARTDATE="38502.00000000" DONEDATESTRING="6/2/2005" DONEDATE="38505.00000000" POS="7"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="5/30/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" ALLOCATEDBY="Andy" LASTMOD="38502.94726852" TEXTCOLOR="0" TITLE="A different popup window that also has an exit button" CATEGORY="Pending" COMMENTS="Oh, and another feature request, once you run generate, there is a
+popup
+that says generation complete. Could you put a exit button there too?" PRIORITYWEBCOLOR="#000FF0" ID="99" PERCENTDONE="0" STARTDATE="38502.00000000" POS="4"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="5/30/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" ALLOCATEDBY="Andy" LASTMOD="38502.94839120" TEXTCOLOR="0" TITLE="Add keyboard shortcuts to the GUI" COMMENTS="And, how difficult it is to add keyboard shortcuts to the gui? Could
+you
+duplicate ccmake's keyboard shortcuts in NG gui?
+
+C - configure
+G - generate &amp; exit
+/ - search
+up/down - change currently selected entry
+enter - edit currently selected entry
+esc - exit currently selected entrty edit
+h - help
+t - toggle advanced mode" PRIORITYWEBCOLOR="#000FF0" ID="100" PERCENTDONE="100" STARTDATE="38502.00000000" DONEDATESTRING="6/2/2005" DONEDATE="38505.00000000" POS="8"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="6/12/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38515.47285880" TEXTCOLOR="0" TITLE="Parse command line to automate test and configure" COMMENTS="&gt; I know you are probably getting tired of this, but I have another
+&gt; feature request. I would like to have a way to test the dialog from
+
+That's allright ;-)
+
+&gt; command line. I would like to do something like:
+&gt; 
+&gt; CMakeSetup --source /foo/bar/src --build /foo/bar/bin
+&gt; --run-configure-and-generate" PRIORITYWEBCOLOR="#000FF0" ID="103" PERCENTDONE="0" STARTDATE="38515.00000000" POS="3"/><TASK PRIORITYCOLOR="13435129" STARTDATESTRING="6/12/2005" TEXTWEBCOLOR="#000000" PRIORITY="8" LASTMOD="38515.47834491" TEXTCOLOR="0" TITLE="Add Licence header for every source" COMMENTS="Please just copy the header comment from another header like
+cmVersion.h 
+and put it at the top of all your sources.  If you want to add those 
+extra CVS $$ tokens please do so in a comment under this block so that 
+the copyright/license part stays consistent with the rest of the
+source." PRIORITYWEBCOLOR="#F900CD" ID="106" PERCENTDONE="100" STARTDATE="38515.00000000" DONEDATESTRING="6/30/2005" DONEDATE="38533.00000000" POS="5"/><TASK PRIORITYCOLOR="13435129" STARTDATESTRING="6/24/2005" TEXTWEBCOLOR="#000000" PRIORITY="8" LASTMOD="38527.95186343" TEXTCOLOR="0" TITLE="Implement command line options" COMMENTS="andy@andoria $ cmake
+--help                                                   ~
+cmake version 2.1-20050621
+Usage
+
+  cmake [options] &lt;path-to-source&gt;
+  cmake [options] &lt;path-to-existing-build&gt;
+
+Command-Line Options
+  -C&lt;initial-cache&gt;           = Pre-load cmake cache from given file.
+  -D&lt;var&gt;:&lt;type&gt;=&lt;value&gt;      = Create a cmake cache entry.
+  -G&lt;generator-name&gt;          = Specify a makefile generator.
+  -E                          = CMake command mode.
+  -i                          = Run in wizard mode.
+  -L[A][H]                    = List non-advanced cached variables.
+  -N                          = View mode only.
+  --help-command cmd [file]   = Print help for a single command and exit.
+  --help-command-list [file]  = List available listfile commands and exit.
+  --copyright [file]          = Print the CMake copyright and exit.
+  --help                      = Print usage information and exit.
+  --help-full [file]          = Print full help and exit.
+  --help-html [file]          = Print full help in HTML format.
+  --help-man [file]           = Print a UNIX man page and exit.
+  --version [file]            = Show program name/version banner and exit.
+
+I would add:
+
+  cmake [options] &lt;path to cmake cache&gt;
+
+       Andy" PRIORITYWEBCOLOR="#F900CD" ID="108" PERCENTDONE="0" STARTDATE="38527.00000000" POS="6"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="6/24/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38527.95687500" TEXTCOLOR="0" TITLE="Commit source to CVS" PRIORITYWEBCOLOR="#000FF0" ID="109" PERCENTDONE="0" STARTDATE="38527.00000000" POS="1"/></TASK><TASK PRIORITYCOLOR="15732480" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38479.90443287" TEXTCOLOR="0" TITLE="Next releases" PRIORITYWEBCOLOR="#000FF0" ID="2" HIGHESTPRIORITY="7" PERCENTDONE="0" POS="1"><TASK PRIORITYCOLOR="15732480" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38479.90533565" TEXTCOLOR="0" TITLE="Adjust build path to project path when selected, and append (build) when present" PRIORITYWEBCOLOR="#000FF0" ID="5" PERCENTDONE="0" POS="2"/><TASK PRIORITYCOLOR="15732480" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38480.40458333" TEXTCOLOR="0" TITLE="Most recent used file menu" PRIORITYWEBCOLOR="#000FF0" ID="7" PERCENTDONE="0" POS="9"/><TASK PRIORITYCOLOR="15732480" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38482.70638889" TEXTCOLOR="0" TITLE="New project based management for user options" COMMENTS="This can contain overridden options and extra injected options for e.g.
+
+SOME_PROJECT_VERSION = 1.06
+WX_USE_TREEVIEW = ON
+
+Also the build path can be static, or linked to a date or build increment" PRIORITYWEBCOLOR="#000FF0" ID="29" PERCENTDONE="0" POS="8"/><TASK PRIORITYCOLOR="15732480" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38482.70771991" TEXTCOLOR="0" TITLE="Write down log for exvery action performed" COMMENTS="When user selects something log this so the last known config can be traced back" PRIORITYWEBCOLOR="#000FF0" ID="31" PERCENTDONE="0" POS="6"/><TASK PRIORITYCOLOR="16122042" STARTDATESTRING="5/12/2005" TEXTWEBCOLOR="#000000" PRIORITY="7" LASTMOD="38486.63013889" TEXTCOLOR="0" TITLE="AUTOFILL option. For users frequently configuring, where some paths may be located, the user can create vars for it" COMMENTS="DART_TEST_PATH when e.g. specified in the AUTOFILL options, it will be filled with the proper paths automatically" PRIORITYWEBCOLOR="#BA00F6" ID="41" PERCENTDONE="0" STARTDATE="38484.00000000" POS="13"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="5/19/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38492.77642361" TEXTCOLOR="0" TITLE="Use a thread for configuring" COMMENTS="Is it possible to get the window to respond to events quickly during the configuration?  This has always plagued the old GUI.  Fixing it would require the window interface to run in a separate thread.  Does wxWidgets make this easy?" PRIORITYWEBCOLOR="#000FF0" ID="50" PERCENTDONE="0" STARTDATE="38491.00000000" POS="5"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="5/19/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38492.93082176" TEXTCOLOR="0" TITLE="Add a way to search the data properties" COMMENTS="Add a way to search the entries. CCMake does it the VI style, you
+&gt; press / and the string and it will find the variable with that name
+
+That sounds good. I like how Thunderbird does it. You have a little
+magnifying glass icon with a pulldown, where you can pick Subject,
+Sender, or any other field you want to search. In CMake's case, that
+would be &quot;Variable name&quot;, &quot;Variable value&quot;, &quot;Both&quot;. Then, once you type
+some text, the gui would eliminate all entries that do not match the
+search string." PRIORITYWEBCOLOR="#000FF0" ID="52" PERCENTDONE="0" STARTDATE="38491.00000000" POS="3"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="5/22/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38494.81545139" TEXTCOLOR="0" TITLE="Find search query with toggable uppercase and lowercase" PRIORITYWEBCOLOR="#000FF0" ID="58" PERCENTDONE="0" STARTDATE="38494.00000000" POS="7"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="5/23/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38495.92858796" TEXTCOLOR="0" TITLE="Show all NOT-FOUND items" COMMENTS="In the search query, have the following menu layout;
+
+Search in name
+Seach in value
+Search in both
+---
+Only show NOTFOUND" PRIORITYWEBCOLOR="#000FF0" ID="62" PERCENTDONE="0" STARTDATE="38495.00000000" POS="10"/><TASK PRIORITYCOLOR="10544896" STARTDATESTRING="5/23/2005" TEXTWEBCOLOR="#000000" PRIORITY="2" LASTMOD="38495.93019676" TEXTCOLOR="0" TITLE="Make flags parser" COMMENTS="Make a parser that can parse all the flags that are given in the various CMAKE_??_FLAGS entries, and determine based on the compiler that is selected what the compiler options are." PRIORITYWEBCOLOR="#00E7A0" ID="63" PERCENTDONE="0" STARTDATE="38495.00000000" POS="1"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="5/28/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38500.54894676" TEXTCOLOR="0" TITLE="Grid enhancements" PRIORITYWEBCOLOR="#000FF0" ID="90" HIGHESTPRIORITY="6" PERCENTDONE="0" STARTDATE="38500.00000000" POS="11"><TASK PRIORITYCOLOR="15925332" TEXTWEBCOLOR="#000000" PRIORITY="6" LASTMOD="38482.46628472" TEXTCOLOR="0" TITLE="Implement sorting of grid items when adding with AddPropItem" PRIORITYWEBCOLOR="#5400F3" ID="25" PERCENTDONE="0" POS="1"/><TASK PRIORITYCOLOR="15925332" TEXTWEBCOLOR="#000000" PRIORITY="6" LASTMOD="38482.58564815" TEXTCOLOR="0" TITLE="Implement wxGridTableBase for property grid, to better relate client data to wxPropertyItem" PRIORITYWEBCOLOR="#5400F3" ID="27" PERCENTDONE="0" POS="2"/></TASK><TASK PRIORITYCOLOR="16122042" STARTDATESTRING="5/30/2005" TEXTWEBCOLOR="#000000" PRIORITY="7" LASTMOD="38502.88064815" TEXTCOLOR="0" TITLE="Remove most recent changed list and replace it with wxFileHistory!!!" PRIORITYWEBCOLOR="#BA00F6" ID="96" PERCENTDONE="0" STARTDATE="38502.00000000" POS="12"/><TASK PRIORITYCOLOR="15732480" STARTDATESTRING="6/12/2005" TEXTWEBCOLOR="#000000" PRIORITY="5" LASTMOD="38515.47637731" TEXTCOLOR="0" TITLE="Use commandline info to set WXWIDGETS values / CMAKE values" COMMENTS="&gt; This would run configure followed by generate and exit. By doing
+&gt; that we
+&gt; would get some coverage of it. If you feel ambitious, then you could
+&gt; even try to set widget values etc.
+
+Nice idea :-) I will add it to the todo list to see what I can do." PRIORITYWEBCOLOR="#000FF0" ID="105" PERCENTDONE="0" STARTDATE="38515.00000000" POS="4"/></TASK></TODOLIST>

@@ -1,0 +1,12 @@
+#ifndef APSTUDIO_INVOKED
+#include "wx/msw/wx.rc"
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+DID_AAAAAAA             ICON                    "NGDialog.ico"
