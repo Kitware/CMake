@@ -2780,6 +2780,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 
   this->WriteMakeVariables(ruleFileStream);
   
+  this->WriteSpecialTargetsTop(ruleFileStream);
+  
   std::vector<std::string> depends;
   std::vector<std::string> commands;
 
@@ -2824,6 +2826,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
                         "target for object file", 
                         lo->first.c_str(), depends, commands);
     }
+
+  this->WriteHelpRule(ruleFileStream);
 }
 
 void cmLocalUnixMakefileGenerator3
@@ -2999,3 +3003,44 @@ cmLocalUnixMakefileGenerator3
   return cmd;
 }
 
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator3::WriteHelpRule(std::ostream& ruleFileStream)
+{
+  // add the help target
+  std::string path;
+  std::vector<std::string> no_depends;
+  std::vector<std::string> commands;
+  this->AppendEcho(commands,
+                 "The following are some of the valid targets for this Makefile:");
+  this->AppendEcho(commands,"... all (the default if no target is provided)");
+  this->AppendEcho(commands,"... clean");
+  this->AppendEcho(commands,"... install");
+  this->AppendEcho(commands,"... rebuild_cache");
+  
+  // Keep track of targets already listed.
+  std::set<cmStdString> emittedTargets;
+
+  // for each target Generate the rule files for each target.
+  cmTargets& targets = this->GetMakefile()->GetTargets();
+  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
+    {
+    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+       (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+       (t->second.GetType() == cmTarget::UTILITY))
+      {
+      if(emittedTargets.insert(t->second.GetName()).second)
+        {
+        path = "... ";
+        path += t->second.GetName();
+        this->AppendEcho(commands,path.c_str());
+        }
+      }
+    }
+  this->WriteMakeRule(ruleFileStream, "Help Target",
+                      "help:",
+                      no_depends, commands);
+  ruleFileStream << "\n\n";
+}

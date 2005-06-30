@@ -157,6 +157,9 @@ protected:
 
   // write the target rules for the local Makefile into the stream
   void WriteLocalMakefileTargets(std::ostream& ruleFileStream);
+
+  // write the local help rule
+  void WriteHelpRule(std::ostream& ruleFileStream);
   
   // create the cd to home commands
   void CreateJumpCommand(std::vector<std::string>& commands, 
