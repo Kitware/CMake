@@ -51,11 +51,19 @@ IF(WIN32)
     ${PROJECT_BINARY_DIR}/Utilities/Release/${PROJECT_NAME}.nsi 
     IMMEDIATE @ONLY)
   CONFIGURE_FILE(
-    ${PROJECT_SOURCE_DIR}/Utilities/Release/Win32Release.sh.in
-    ${PROJECT_BINARY_DIR}/Utilities/Release/Win32Release.sh 
-    IMMEDIATE @ONLY)
-  CONFIGURE_FILE(
     ${PROJECT_SOURCE_DIR}/Utilities/Release/cmake_release.sh.in
     ${PROJECT_BINARY_DIR}/Utilities/Release/cmake_release.sh 
     IMMEDIATE @ONLY)
+  CONFIGURE_FILE(
+    ${PROJECT_SOURCE_DIR}/Utilities/Release/MakeRelease.cmake.in
+    ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
+    IMMEDIATE @ONLY)
 ENDIF(WIN32)
+
+IF (NSIS_MAKENSIS AND WINZIP_WZZIP)
+  # build the NSI
+  ADD_CUSTOM_TARGET( release
+    ${CMAKE_COMMAND} -P 
+    ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
+    )
+ENDIF (NSIS_MAKENSIS AND WINZIP_WZZIP)

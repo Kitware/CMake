@@ -23,7 +23,7 @@
 
   ;Name and file
   Name "CMake ${VERSION}"
-  OutFile "cmake-${VERSION}.${PATCH}-win32.exe"
+  OutFile "@PROJECT_BINARY_DIR@\cmake-${VERSION}.${PATCH}-win32.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\CMake ${VERSION}"
