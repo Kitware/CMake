@@ -743,6 +743,36 @@ const char *cmTarget::GetProperty(const char* prop)
     this->UpdateLocation();
     }
   
+  // the type property returns what type the target is
+  if (!strcmp(prop,"TYPE"))
+    {
+    switch( this->GetType() )
+      {
+      case cmTarget::STATIC_LIBRARY:
+        return "STATIC_LIBRARY";
+        break;
+      case cmTarget::MODULE_LIBRARY:
+        return "MODULE_LIBRARY";
+        break;
+      case cmTarget::SHARED_LIBRARY:
+        return "SHARED_LIBRARY";
+        break;
+      case cmTarget::EXECUTABLE:
+        return "EXECUTABLE";
+        break;
+      case cmTarget::UTILITY:
+        return "UTILITY";
+        break;
+      case cmTarget::INSTALL_FILES:
+        return "INSTALL_FILES";
+        break;
+      case cmTarget::INSTALL_PROGRAMS:
+        return "INSTALL_PROGRAMS";
+        break;
+      }
+    return 0;
+    }
+      
   std::map<cmStdString,cmStdString>::const_iterator i = 
     m_Properties.find(prop);
   if (i != m_Properties.end())
