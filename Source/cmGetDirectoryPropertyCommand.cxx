@@ -53,6 +53,10 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     {
     m_Makefile->GetListOfMacros(output);
     }
+  else if ( args[1] == "DEFINITIONS" )
+    {
+    output=m_Makefile->GetDefineFlags();
+    }
   else if ( args[1] == "INCLUDE_DIRECTORIES" )
     {
     std::vector<std::string>::iterator it;

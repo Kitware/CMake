@@ -57,7 +57,7 @@ public:
         "stored in the variable VAR. If the property is not found,"
         "CMake will report an error. The properties include: VARIABLES, "
         "CACHE_VARIABLES, COMMANDS, MACROS, INCLUDE_DIRECTORIES, "
-        "LINK_DIRECTORIES, and INCLUDE_REGULAR_EXPRESSION.";
+        "LINK_DIRECTORIES, DEFINITIONS and INCLUDE_REGULAR_EXPRESSION.";
     }
   
   cmTypeMacro(cmGetDirectoryPropertyCommand, cmCommand);
