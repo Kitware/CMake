@@ -65,6 +65,8 @@
 #  include <sys/resource.h>
 #endif
 
+#include <sys/stat.h> // struct stat
+
 #include <memory> // auto_ptr
 
 void cmNeedBackwardsCompatibility(const std::string& variable, 
@@ -1107,6 +1109,9 @@ int cmake::Configure()
        cmCacheManager::STRING);
     }  
   
+  this->TruncateOutputLog("CMakeOutput.log");
+  this->TruncateOutputLog("CMakeError.log");
+
   // no generator specified on the command line
   if(!m_GlobalGenerator)
     {
@@ -1696,3 +1701,29 @@ int cmake::CheckBuildSystem()
   // No need to rerun.
   return 0;
 }
+
+//----------------------------------------------------------------------------
+void cmake::TruncateOutputLog(const char* fname)
+{
+  std::string fullPath = this->GetHomeOutputDirectory();
+  fullPath += "/";
+  fullPath += fname;
+  struct stat st;
+  if ( ::stat(fullPath.c_str(), &st) )
+    {
+    return;
+    }
+  if ( !m_CacheManager->GetCacheValue("CMAKE_CACHEFILE_DIR") )
+    {
+    cmSystemTools::RemoveFile(fullPath.c_str());
+    return;
+    }
+  size_t fsize = st.st_size;
+  const size_t maxFileSize = 50 * 1024;
+  if ( fsize < maxFileSize )
+    {
+    //TODO: truncate file
+    return;
+    }
+}
+

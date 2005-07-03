@@ -283,6 +283,10 @@ protected:
   bool CacheVersionMatches();
   ///! read in a cmake list file to initialize the cache
   void ReadListFile(const char *path);
+
+  ///! Check if CMAKE_CACHEFILE_DIR is set. If it is not, delete the log file.
+  ///  If it is set, truncate it to 50kb
+  void TruncateOutputLog(const char* fname);
   
   /**
    * Method called to check build system integrity at build time.
