@@ -167,23 +167,6 @@ cmCTestBuildHandler::cmCTestBuildHandler()
 
   m_LastErrorOrWarning = m_ErrorsAndWarnings.end();
 
-  int cc;
-  for ( cc = 0; cmCTestWarningErrorFileLine[cc].m_RegularExpressionString; ++ cc )
-    {
-    cmCTestBuildHandler::cmCTestCompileErrorWarningRex r;
-    if ( r.m_RegularExpression.compile(
-        cmCTestWarningErrorFileLine[cc].m_RegularExpressionString) )
-      {
-      r.m_FileIndex = cmCTestWarningErrorFileLine[cc].m_FileIndex;
-      r.m_LineIndex = cmCTestWarningErrorFileLine[cc].m_LineIndex;
-      m_ErrorWarningFileLineRegex.push_back(r);
-      }
-    else
-      {
-      cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem Compiling regular expression: "
-       << cmCTestWarningErrorFileLine[cc].m_RegularExpressionString << std::endl);
-      }
-    }
 }
 
 //----------------------------------------------------------------------
@@ -226,24 +209,6 @@ void cmCTestBuildHandler::Initialize()
 
   m_MaxErrors = 50;
   m_MaxWarnings = 50;
-
-  int cc;
-  for ( cc = 0; cmCTestWarningErrorFileLine[cc].m_RegularExpressionString; ++ cc )
-    {
-    cmCTestBuildHandler::cmCTestCompileErrorWarningRex r;
-    if ( r.m_RegularExpression.compile(
-        cmCTestWarningErrorFileLine[cc].m_RegularExpressionString) )
-      {
-      r.m_FileIndex = cmCTestWarningErrorFileLine[cc].m_FileIndex;
-      r.m_LineIndex = cmCTestWarningErrorFileLine[cc].m_LineIndex;
-      m_ErrorWarningFileLineRegex.push_back(r);
-      }
-    else
-      {
-      cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem Compiling regular expression: "
-       << cmCTestWarningErrorFileLine[cc].m_RegularExpressionString << std::endl);
-      }
-    }
 }
 
 //----------------------------------------------------------------------
@@ -265,6 +230,24 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 int cmCTestBuildHandler::ProcessHandler()
 {
   cmCTestLog(m_CTest, HANDLER_OUTPUT, "Build project" << std::endl);
+
+  int entry;
+  for ( entry = 0; cmCTestWarningErrorFileLine[entry].m_RegularExpressionString; ++ entry )
+    {
+    cmCTestBuildHandler::cmCTestCompileErrorWarningRex r;
+    if ( r.m_RegularExpression.compile(
+        cmCTestWarningErrorFileLine[entry].m_RegularExpressionString) )
+      {
+      r.m_FileIndex = cmCTestWarningErrorFileLine[entry].m_FileIndex;
+      r.m_LineIndex = cmCTestWarningErrorFileLine[entry].m_LineIndex;
+      m_ErrorWarningFileLineRegex.push_back(r);
+      }
+    else
+      {
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem Compiling regular expression: "
+       << cmCTestWarningErrorFileLine[entry].m_RegularExpressionString << std::endl);
+      }
+    }
 
   // Determine build command and build directory
   const std::string &makeCommand = m_CTest->GetCTestConfiguration("MakeCommand");
