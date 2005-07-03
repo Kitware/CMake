@@ -86,10 +86,8 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
  
     if ( !cmSystemTools::FileExists(fname.c_str()) )
       {
-      std::string m = "Could not find directory: ";
-      m += fname;
-      this->SetError(m.c_str());
-      return false;
+      // No subdirectory? So what...
+      continue;
       }
     cmSystemTools::ChangeDirectory(fname.c_str());
     const char* testFilename;
@@ -105,8 +103,8 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
       }
     else
       {
-      cmSystemTools::ChangeDirectory(cwd.c_str());
-      return false;
+      // No DartTestfile.txt? Who cares...
+      continue;
       }
     fname += "/";
     fname += testFilename;
@@ -291,6 +289,8 @@ cmCTestTestHandler::cmCTestTestHandler()
   m_CustomMaximumFailedTestOutputSize = 300 * 1024;
   
   m_MemCheck = false;
+
+  m_DartStuff.compile("(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
 }
 
 //----------------------------------------------------------------------
@@ -484,7 +484,6 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
                                           std::vector<cmStdString> &failed)
 {
   std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmsys::RegularExpression dartStuff("(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
   m_TestList.clear();
 
   this->GetListOfTests();
@@ -737,11 +736,11 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
           }
         failed.push_back(testname);
         }
-      if (output != "")
+      if (!output.empty() && output.find("<DartMeasurement") != output.npos)
         {
-        if (dartStuff.find(output.c_str()))
+        if (m_DartStuff.find(output.c_str()))
           {
-          std::string dartString = dartStuff.match(1);
+          std::string dartString = m_DartStuff.match(1);
           cmSystemTools::ReplaceString(output, dartString.c_str(),"");
           cres.m_RegressionImages = this->GenerateRegressionImages(dartString);
           }

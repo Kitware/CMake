@@ -174,6 +174,7 @@ private:
   std::string TestsToRunString;
   bool m_UseUnion;
   tm_ListOfTests m_TestList;
+  cmsys::RegularExpression m_DartStuff;
 };
 
 #endif
