@@ -195,7 +195,7 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   if ( files.size() == 0 )
     {
-    cmCTestLog(m_CTest, ERROR_MESSAGE, " Cannot find any coverage files." << std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "   Cannot find any coverage files." << std::endl);
     // No coverage files is a valid thing, so the exit code is 0
     return 0;
     }
