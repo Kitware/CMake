@@ -1109,9 +1109,6 @@ int cmake::Configure()
        cmCacheManager::STRING);
     }  
   
-  this->TruncateOutputLog("CMakeOutput.log");
-  this->TruncateOutputLog("CMakeError.log");
-
   // no generator specified on the command line
   if(!m_GlobalGenerator)
     {
@@ -1210,6 +1207,13 @@ int cmake::Configure()
     }
   
   this->CleanupWrittenFiles();
+
+  // Truncate log files
+  if (!m_InTryCompile)
+    {
+    this->TruncateOutputLog("CMakeOutput.log");
+    this->TruncateOutputLog("CMakeError.log");
+    }
 
   // actually do the configure
   m_GlobalGenerator->Configure();
