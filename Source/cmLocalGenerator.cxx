@@ -1182,7 +1182,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     {
     cmakeBuildType = cmTarget::DEBUG;
     }
-  if(buildType.size())
+  else if(buildType.size())
     {
     cmakeBuildType = cmTarget::OPTIMIZED;
     }
