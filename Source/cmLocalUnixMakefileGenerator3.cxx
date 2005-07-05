@@ -992,15 +992,16 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# The CMake executable.\n"
     << "CMAKE_COMMAND = "
-    << this->Convert(cmakecommand.c_str(),HOME_OUTPUT,MAKEFILE).c_str() << "\n"
+    << this->Convert(cmakecommand.c_str(),START_OUTPUT,MAKEFILE).c_str() 
+    << "\n"
     << "\n";
   makefileStream
     << "# The command to remove a file.\n"
     << "RM = "
-    << this->Convert(cmakecommand.c_str(),HOME_OUTPUT,SHELL).c_str()
+    << this->Convert(cmakecommand.c_str(),START_OUTPUT,SHELL).c_str()
     << " -E remove -f\n"
     << "\n";
-
+  
   if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
     {
     makefileStream
@@ -1014,12 +1015,13 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# The top-level source directory on which CMake was run.\n"
     << "CMAKE_SOURCE_DIR = "
-    << this->Convert(m_Makefile->GetHomeDirectory(), HOME_OUTPUT, SHELL)
+    << this->Convert(m_Makefile->GetHomeDirectory(), START_OUTPUT, SHELL)
     << "\n"
     << "\n";
   makefileStream
     << "# The top-level build directory on which CMake was run.\n"
-    << "CMAKE_BINARY_DIR = ."
+    << "CMAKE_BINARY_DIR = "
+    << this->Convert(m_Makefile->GetHomeOutputDirectory(), START_OUTPUT, SHELL)
     << "\n"
     << "\n";
 }
@@ -2800,7 +2802,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   this->CreateJumpCommand(commands,"Makefile2",dir);
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean", depends, commands);
 
-  // recursively write our targets, and while doing it collect up the object
+  // write our targets, and while doing it collect up the object
   // file rules
   this->WriteLocalMakefileTargets(ruleFileStream);
   
@@ -2845,7 +2847,8 @@ void cmLocalUnixMakefileGenerator3
     if((t->second.GetType() == cmTarget::EXECUTABLE) ||
        (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
        (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
+       (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+       (t->second.GetType() == cmTarget::UTILITY))
       {
       // Add a rule to build the target by name.
       localName = this->GetRelativeTargetDirectory(t->second);
