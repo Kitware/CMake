@@ -25,6 +25,8 @@ FIND_PATH( DCMTK_ofstd_INCLUDE_DIR ofstdinc.h
 
 FIND_LIBRARY( DCMTK_ofstd_LIBRARY ofstd
   ${DCMTK_DIR}/ofstd/libsrc
+  ${DCMTK_DIR}/ofstd/libsrc/Release
+  ${DCMTK_DIR}/ofstd/libsrc/Debug
   ${DCMTK_DIR}/ofstd/Release
   ${DCMTK_DIR}/ofstd/Debug
   ${DCMTK_DIR}/lib
@@ -38,6 +40,8 @@ FIND_PATH( DCMTK_dcmdata_INCLUDE_DIR dctypes.h
 
 FIND_LIBRARY( DCMTK_dcmdata_LIBRARY dcmdata
   ${DCMTK_DIR}/dcmdata/libsrc
+  ${DCMTK_DIR}/dcmdata/libsrc/Release
+  ${DCMTK_DIR}/dcmdata/libsrc/Debug
   ${DCMTK_DIR}/dcmdata/Release
   ${DCMTK_DIR}/dcmdata/Debug
   ${DCMTK_DIR}/lib
@@ -51,9 +55,23 @@ FIND_PATH( DCMTK_dcmimgle_INCLUDE_DIR dcmimage.h
 
 FIND_LIBRARY( DCMTK_dcmimgle_LIBRARY dcmimgle
   ${DCMTK_DIR}/dcmimgle/libsrc
+  ${DCMTK_DIR}/dcmimgle/libsrc/Release
+  ${DCMTK_DIR}/dcmimgle/libsrc/Debug
   ${DCMTK_DIR}/dcmimgle/Release
   ${DCMTK_DIR}/dcmimgle/Debug
   ${DCMTK_DIR}/lib
+)
+
+FIND_LIBRARY(DCMTK_imagedb_LIBRARY imagedb 
+${DCMTK_DIR}/imagectn/libsrc/Release
+${DCMTK_DIR}/imagectn/libsrc/
+${DCMTK_DIR}/imagectn/libsrc/Debug
+)
+
+FIND_LIBRARY(DCMTK_dcmnet_LIBRARY dcmnet 
+${DCMTK_DIR}/dcmnet/libsrc/Release
+${DCMTK_DIR}/dcmnet/libsrc/Debug
+${DCMTK_DIR}/dcmnet/libsrc/
 )
 
 
@@ -79,6 +97,20 @@ IF( DCMTK_dcmimgle_LIBRARY )
     ${DCMTK_ofstd_LIBRARY}
     ${DCMTK_config_LIBRARY}
   )
+
+  IF(DCMTK_imagedb_LIBRARY)
+   SET( DCMTK_LIBRARIES
+   ${DCMTK_LIBRARIES}
+   ${DCMTK_imagedb_LIBRARY}
+   )
+  ENDIF(DCMTK_imagedb_LIBRARY)
+
+  IF(DCMTK_dcmnet_LIBRARY)
+   SET( DCMTK_LIBRARIES
+   ${DCMTK_LIBRARIES}
+   ${DCMTK_dcmnet_LIBRARY}
+   )
+  ENDIF(DCMTK_dcmnet_LIBRARY)
 
   IF( WIN32 )
     SET( DCMTK_LIBRARIES ${DCMTK_LIBRARIES} netapi32 )
