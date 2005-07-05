@@ -13,30 +13,39 @@ SET (SCPID "kitware@public.kitware.com")
 # CVSROOT setting used to check out CMake.
 SET (CVSROOT ":pserver:anoncvs@www.cmake.org:/cvsroot/CMake")
 
-# build the NSI
-EXEC_PROGRAM("@NSIS_MAKENSIS@" 
-  ARGS "@PROJECT_BINARY_DIR@/Utilities/Release/@PROJECT_NAME@.nsi"
-)
+#########################################################################
+# build the NSI if requested
+#########################################################################
+IF (BUILD_NSIW)
+  EXEC_PROGRAM("@NSIS_MAKENSIS@" 
+    ARGS "@PROJECT_BINARY_DIR@/Utilities/Release/@PROJECT_NAME@.nsi"
+    )
+  # copy the NSI to the FTP site
+  EXEC_PROGRAM(scp 
+    ARGS cmake-${VERSION}-win32.exe
+    ${SCPID}:/projects/FTP/pub/cmake/v@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@
+    )
+ENDIF (BUILD_NSIW)
 
-# copy the NSI to the FTP site
-EXEC_PROGRAM(scp 
-  ARGS cmake-${VERSION}-win32.exe
-  ${SCPID}:/projects/FTP/pub/cmake/v@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@
-  )
+#########################################################################
+# tag the tree if requested
+#########################################################################
+IF (TAG_TREE)
+  EXEC_PROGRAM(cvs "@PROJECT_SOURCE_DIR@"
+    ARGS tag -F ${TAG})
+ENDIF (TAG_TREE)  
 
-# tag the tree
-EXEC_PROGRAM(cvs "@PROJECT_SOURCE_DIR@"
-  ARGS tag -F ${TAG})
-
+#########################################################################
 # build the winzip src file and copy it over
-EXEC_PROGRAM(rm C:/
-  ARGS -rf @PROJECT_NAME@
-)
-EXEC_PROGRAM(cvs C:/
-  ARGS -d ${CVSROOT} export -r ${TAG} @PROJECT_NAME@)
-EXEC_PROGRAM("@WINZIP_WZZIP@" "C:/@PROJECT_NAME@"
-  ARGS -r -P cmake-${VERSION}.zip)
-EXEC_PROGRAM(scp "C:/@PROJECT_NAME@"
-  ARGS cmake-${VERSION}.zip 
-  ${SCPID}:/projects/FTP/pub/cmake/v@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@
-  )
+#########################################################################
+IF (BUILD_WINZIP)
+  EXEC_PROGRAM(rm C:/ ARGS -rf @PROJECT_NAME@ )
+  EXEC_PROGRAM(cvs C:/
+    ARGS -d ${CVSROOT} export -r ${TAG} @PROJECT_NAME@)
+  EXEC_PROGRAM("@WINZIP_WZZIP@" "C:/@PROJECT_NAME@"
+    ARGS -r -P cmake-${VERSION}.zip)
+  EXEC_PROGRAM(scp "C:/@PROJECT_NAME@"
+    ARGS cmake-${VERSION}.zip 
+    ${SCPID}:/projects/FTP/pub/cmake/v@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@
+    )
+ENDIF (BUILD_WINZIP)

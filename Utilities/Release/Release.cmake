@@ -63,7 +63,15 @@ ENDIF(WIN32)
 IF (NSIS_MAKENSIS AND WINZIP_WZZIP)
   # build the NSI
   ADD_CUSTOM_TARGET( release
-    ${CMAKE_COMMAND} -P 
-    ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
+    ${CMAKE_COMMAND} -DBUILD_NSIW=1 -DTAG_TREE=1 -DBUILD_WINZIP=1
+    -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
+    )
+  ADD_CUSTOM_TARGET( release_nsiw
+    ${CMAKE_COMMAND} -DBUILD_NSIW=1 
+    -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
+    )
+  ADD_CUSTOM_TARGET( release_winzip
+    ${CMAKE_COMMAND} -DBUILD_WINZIP=1 
+    -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
     )
 ENDIF (NSIS_MAKENSIS AND WINZIP_WZZIP)
