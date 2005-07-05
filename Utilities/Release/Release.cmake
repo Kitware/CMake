@@ -70,6 +70,10 @@ IF (NSIS_MAKENSIS AND WINZIP_WZZIP)
     ${CMAKE_COMMAND} -DBUILD_NSIW=1 
     -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
     )
+  ADD_CUSTOM_TARGET( release_tag
+    ${CMAKE_COMMAND} -DTAG_TREE=1 
+    -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
+    )
   ADD_CUSTOM_TARGET( release_winzip
     ${CMAKE_COMMAND} -DBUILD_WINZIP=1 
     -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
