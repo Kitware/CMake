@@ -54,11 +54,12 @@ IF(WIN32)
     ${PROJECT_SOURCE_DIR}/Utilities/Release/cmake_release.sh.in
     ${PROJECT_BINARY_DIR}/Utilities/Release/cmake_release.sh 
     IMMEDIATE @ONLY)
-  CONFIGURE_FILE(
-    ${PROJECT_SOURCE_DIR}/Utilities/Release/MakeRelease.cmake.in
-    ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
-    IMMEDIATE @ONLY)
 ENDIF(WIN32)
+
+CONFIGURE_FILE(
+  ${PROJECT_SOURCE_DIR}/Utilities/Release/MakeRelease.cmake.in
+  ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
+  IMMEDIATE @ONLY)
 
 IF (NSIS_MAKENSIS AND WINZIP_WZZIP)
   # build the NSI
@@ -70,12 +71,17 @@ IF (NSIS_MAKENSIS AND WINZIP_WZZIP)
     ${CMAKE_COMMAND} -DBUILD_NSIW=1 
     -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
     )
-  ADD_CUSTOM_TARGET( release_tag
-    ${CMAKE_COMMAND} -DTAG_TREE=1 
-    -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
-    )
   ADD_CUSTOM_TARGET( release_winzip
     ${CMAKE_COMMAND} -DBUILD_WINZIP=1 
     -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
     )
 ENDIF (NSIS_MAKENSIS AND WINZIP_WZZIP)
+
+ADD_CUSTOM_TARGET( release_tag
+  ${CMAKE_COMMAND} -DTAG_TREE=1 
+  -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
+  )
+ADD_CUSTOM_TARGET( release_tar
+  ${CMAKE_COMMAND} -DBUILD_TAR=1 
+  -P ${PROJECT_BINARY_DIR}/Utilities/Release/MakeRelease.cmake
+  )

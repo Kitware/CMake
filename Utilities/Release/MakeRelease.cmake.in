@@ -49,3 +49,20 @@ IF (BUILD_WINZIP)
     ${SCPID}:/projects/FTP/pub/cmake/v@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@
     )
 ENDIF (BUILD_WINZIP)
+
+#########################################################################
+# build the src tar file and copy it over
+#########################################################################
+IF (BUILD_TAR)
+  EXEC_PROGRAM(rm $ENV{HOME} ARGS -rf @PROJECT_NAME@ )
+  EXEC_PROGRAM(cvs $ENV{HOME}
+    ARGS -d ${CVSROOT} export -r ${TAG} @PROJECT_NAME@)
+  EXEC_PROGRAM(tar $ENV{HOME}
+    ARGS -cvf cmake-${VERSION}.tar CMake)
+  EXEC_PROGRAM(gzip $ENV{HOME}
+    ARGS -f -9 cmake-${VERSION}.tar)
+  EXEC_PROGRAM(scp $ENV{HOME}
+    ARGS cmake-${VERSION}.tar.gz 
+    ${SCPID}:/projects/FTP/pub/cmake/v@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@
+    )
+ENDIF (BUILD_TAR)
