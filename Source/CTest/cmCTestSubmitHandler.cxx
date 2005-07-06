@@ -502,15 +502,19 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(
       << argv[2] << "\"" << std::endl);
     *m_LogFile << "Execute \"" << argv[0] << "\" \"" << argv[1] << "\" \"" 
       << argv[2] << "\"" << std::endl;
+
     cmsysProcess_SetCommand(cp, &*argv.begin());
     cmsysProcess_Execute(cp);
     char* data;
     int length;
+
     while(cmsysProcess_WaitForData(cp, &data, &length, 0))
       {
       cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, cmCTestLogWrite(data, length));
       }
+
     cmsysProcess_WaitForExit(cp, 0);
+
     int result = cmsysProcess_GetState(cp);
 
     if(result == cmsysProcess_State_Exited)
@@ -868,23 +872,32 @@ int cmCTestSubmitHandler::ProcessHandler()
   else if ( m_CTest->GetCTestConfiguration("DropMethod") == "scp" )
     {
     std::string url;
+    std::string oldWorkingDirectory;
     if ( m_CTest->GetCTestConfiguration("DropSiteUser").size() > 0 )
       {
       url += m_CTest->GetCTestConfiguration("DropSiteUser") + "@";
       }
     url += m_CTest->GetCTestConfiguration("DropSite") + ":" + m_CTest->GetCTestConfiguration("DropLocation");
 
+    // change to the build directory so that we can uses a relative path
+    // on windows since scp dosn't support "c:" a drive in the path
+    oldWorkingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
+    cmSystemTools::ChangeDirectory(buildDirectory.c_str());
+
     if ( !this->SubmitUsingSCP(m_CTest->GetCTestConfiguration("ScpCommand"),
-        buildDirectory+"/Testing/"+m_CTest->GetCurrentTag(), files, prefix, url) )
+        "Testing/"+m_CTest->GetCurrentTag(), files, prefix, url) )
       {
+      cmSystemTools::ChangeDirectory(oldWorkingDirectory.c_str());
       cmCTestLog(m_CTest, ERROR_MESSAGE, "   Problems when submitting via SCP" << std::endl);
       ofs << "   Problems when submitting via SCP" << std::endl;
       return -1;
       }
+    cmSystemTools::ChangeDirectory(oldWorkingDirectory.c_str());
     cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Submission successful" << std::endl);
     ofs << "   Submission successful" << std::endl;
     return 0;
     }
+
   cmCTestLog(m_CTest, ERROR_MESSAGE, "   Unknown submission method: \"" << m_CTest->GetCTestConfiguration("DropMethod") << "\"" << std::endl);
   return -1;
 }
