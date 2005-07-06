@@ -353,7 +353,7 @@ cmLocalUnixMakefileGenerator3
     }
   this->WriteDisclaimer(ruleFileStream);
 
-  this->WriteMakeVariables(ruleFileStream);
+  this->WriteMakeVariables(ruleFileStream, HOME_OUTPUT);
   
   // write the custom commands for this target
   std::vector<std::string> cleanFiles;
@@ -791,7 +791,7 @@ cmLocalUnixMakefileGenerator3
     return;
     }
   this->WriteDisclaimer(ruleFileStream);
-  this->WriteMakeVariables(ruleFileStream);
+  this->WriteMakeVariables(ruleFileStream, HOME_OUTPUT);
   ruleFileStream
     << "# Utility rule file for " << target.GetName() << ".\n\n";
 
@@ -955,7 +955,7 @@ void cmLocalUnixMakefileGenerator3::WriteDivider(std::ostream& os)
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::WriteMakeVariables(std::ostream& makefileStream)
+::WriteMakeVariables(std::ostream& makefileStream, RelativeRoot root)
 {
   this->WriteDivider(makefileStream);
   makefileStream
@@ -992,13 +992,13 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# The CMake executable.\n"
     << "CMAKE_COMMAND = "
-    << this->Convert(cmakecommand.c_str(),START_OUTPUT,MAKEFILE).c_str() 
+    << this->Convert(cmakecommand.c_str(), root, MAKEFILE).c_str() 
     << "\n"
     << "\n";
   makefileStream
     << "# The command to remove a file.\n"
     << "RM = "
-    << this->Convert(cmakecommand.c_str(),START_OUTPUT,SHELL).c_str()
+    << this->Convert(cmakecommand.c_str(),root,SHELL).c_str()
     << " -E remove -f\n"
     << "\n";
   
@@ -1015,13 +1015,13 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# The top-level source directory on which CMake was run.\n"
     << "CMAKE_SOURCE_DIR = "
-    << this->Convert(m_Makefile->GetHomeDirectory(), START_OUTPUT, SHELL)
+    << this->Convert(m_Makefile->GetHomeDirectory(), root, SHELL)
     << "\n"
     << "\n";
   makefileStream
     << "# The top-level build directory on which CMake was run.\n"
     << "CMAKE_BINARY_DIR = "
-    << this->Convert(m_Makefile->GetHomeOutputDirectory(), START_OUTPUT, SHELL)
+    << this->Convert(m_Makefile->GetHomeOutputDirectory(), root, SHELL)
     << "\n"
     << "\n";
 }
@@ -2780,7 +2780,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
     }
   this->WriteDisclaimer(ruleFileStream);
 
-  this->WriteMakeVariables(ruleFileStream);
+  this->WriteMakeVariables(ruleFileStream, START_OUTPUT);
   
   this->WriteSpecialTargetsTop(ruleFileStream);
   
