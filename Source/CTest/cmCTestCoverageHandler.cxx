@@ -442,9 +442,9 @@ int cmCTestCoverageHandler::ProcessHandler()
 
             // Read the line number starting at the 10th character of the gcov output line
             std::string lineNumber = nl.substr(10, 5);
-            int line = atoi(lineNumber.c_str());
+            int lineIdx = atoi(lineNumber.c_str());
 
-            (*vec)[line] += cov;
+            (*vec)[lineIdx] += cov;
             }
           }
         actualSourceFile = "";
