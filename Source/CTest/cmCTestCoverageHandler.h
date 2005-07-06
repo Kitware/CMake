@@ -60,6 +60,27 @@ private:
       m_Lines.clear();
       m_Show = false;
       }
+    cmCTestCoverage(const cmCTestCoverage& rhs) :
+      m_AbsolutePath(rhs.m_AbsolutePath),
+      m_FullPath(rhs.m_FullPath),
+      m_Covered(rhs.m_Covered),
+      m_Tested(rhs.m_Tested),
+      m_UnTested(rhs.m_UnTested),
+      m_Lines(rhs.m_Lines),
+      m_Show(rhs.m_Show)
+      {
+      }
+    cmCTestCoverage& operator=(const cmCTestCoverage& rhs)
+      {
+      m_AbsolutePath = rhs.m_AbsolutePath;
+      m_FullPath = rhs.m_FullPath;
+      m_Covered = rhs.m_Covered;
+      m_Tested = rhs.m_Tested;
+      m_UnTested = rhs.m_UnTested;
+      m_Lines = rhs.m_Lines;
+      m_Show = rhs.m_Show;
+      return *this;
+      }
     std::string      m_AbsolutePath;
     std::string      m_FullPath;
     bool             m_Covered;
