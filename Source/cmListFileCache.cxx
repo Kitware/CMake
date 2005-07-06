@@ -179,7 +179,7 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
           = inFile.m_Functions.begin();
         i != inFile.m_Functions.end(); ++i)
       {
-      if(i->m_Name == "PROJECT")
+      if(cmSystemTools::LowerCase(i->m_Name) == "project")
         {
         hasProject = true;
         break;
