@@ -1,5 +1,5 @@
 # a simple test case
-project (simple)
+project (Simple)
 
 add_executable (simple simple.cxx)
 
