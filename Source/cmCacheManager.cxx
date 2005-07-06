@@ -334,7 +334,7 @@ bool cmCacheManager::SaveCache(const char* path)
     cmSystemTools::ReportLastSystemError("");
     return false;
     }
-  // before writting the cache, update the version numbers
+  // before writing the cache, update the version numbers
   // to the 
   char temp[1024];
   sprintf(temp, "%d", cmMakefile::GetMinorVersion());

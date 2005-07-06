@@ -75,7 +75,7 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args)
     {
     std::string error = "Internal CMake error when trying to open file: ";
     error += fileName.c_str();
-    error += " for writting.";
+    error += " for writing.";
     this->SetError(error.c_str());
     return false;
     }
