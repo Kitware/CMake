@@ -1431,7 +1431,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
     }
 
   /* When the last pipe closes in WaitForData, the loop terminates
-     without releaseing the pipe's thread.  Release it now.  */
+     without releasing the pipe's thread.  Release it now.  */
   if(cp->CurrentIndex < KWSYSPE_PIPE_COUNT)
     {
     ReleaseSemaphore(cp->Pipe[cp->CurrentIndex].Reader.Go, 1, 0);
@@ -2076,6 +2076,7 @@ void kwsysProcessCleanup(kwsysProcess* cp, int error)
     {
     kwsysProcessCleanupHandle(&cp->Pipe[i].Write);
     kwsysProcessCleanupHandle(&cp->Pipe[i].Read);
+    cp->Pipe[i].Closed = 0;
     }
 }
 
