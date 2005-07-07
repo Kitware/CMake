@@ -2259,10 +2259,14 @@ std::string cmMakefile::FindLibrary(const char* name,
           }
         }
       // now look for the library in the 64 bit path
-      return cmSystemTools::FindLibrary(name, path64);
+      std::string tmp = cmSystemTools::FindLibrary(name, path64);
+      cmSystemTools::ConvertToUnixSlashes(tmp);
+      return tmp;
       }
     }
-  return cmSystemTools::FindLibrary(name, path);
+  std::string tmp = cmSystemTools::FindLibrary(name, path);
+  cmSystemTools::ConvertToUnixSlashes(tmp);
+  return tmp;
 }
 
 std::string cmMakefile::GetModulesFile(const char* filename)
