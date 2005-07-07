@@ -139,6 +139,7 @@ void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
     fname += ext;
     }
   m_FullPath = cmSystemTools::CollapseFullPath(fname.c_str(), dir);
+  cmSystemTools::ConvertToUnixSlashes(m_FullPath);
   m_SourceExtension = ext;
   return;
 }
