@@ -88,7 +88,14 @@ void cmConfigureFileCommand::FinalPass()
 
 int cmConfigureFileCommand::ConfigureFile()
 {
-  return m_Makefile->ConfigureFile(m_InputFile.c_str(),
+  std::string inFile = m_InputFile;
+  if (!cmSystemTools::FileIsFullPath(inFile.c_str()))
+    {
+    inFile = m_Makefile->GetStartDirectory();
+    inFile += "/";
+    inFile += m_InputFile;
+    }
+  return m_Makefile->ConfigureFile(inFile.c_str(),
     m_OuputFile.c_str(),
     m_CopyOnly,
     m_AtOnly,
