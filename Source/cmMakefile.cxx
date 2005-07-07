@@ -191,14 +191,10 @@ void cmMakefile::Print()
     std::cout << l->first << std::endl;
     }
 
-  std::cout << " m_CurrentOutputDirectory; " << 
-    m_CurrentOutputDirectory.c_str() << std::endl;
   std::cout << " m_StartOutputDirectory; " << 
     m_StartOutputDirectory.c_str() << std::endl;
   std::cout << " m_HomeOutputDirectory; " << 
     m_HomeOutputDirectory.c_str() << std::endl;
-  std::cout << " m_cmCurrentDirectory; " << 
-    m_cmCurrentDirectory.c_str() << std::endl;
   std::cout << " m_cmStartDirectory; " << 
     m_cmStartDirectory.c_str() << std::endl;
   std::cout << " m_cmHomeDirectory; " << 
@@ -328,13 +324,13 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
     {
     external_abs =
       cmSystemTools::CollapseFullPath(external_in,
-                                      m_cmCurrentDirectory.c_str());
+                                      m_cmStartDirectory.c_str());
     external = external_abs.c_str();
     if (filename_in)
       {
       filename_abs =
         cmSystemTools::CollapseFullPath(filename_in,
-                                        m_cmCurrentDirectory.c_str());
+                                        m_cmStartDirectory.c_str());
       filename = filename_abs.c_str();
       }
     }
@@ -368,7 +364,7 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
   // one, then cmake will provide one via the 
   // cmListFileCache class.
   bool requireProjectCommand = false;
-  if(!external && m_cmCurrentDirectory == m_cmHomeDirectory)
+  if(!external && m_cmStartDirectory == m_cmHomeDirectory)
     {
     if(cmSystemTools::LowerCase(
          cmSystemTools::GetFilenameName(filename)) == "cmakelists.txt")
