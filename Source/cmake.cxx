@@ -536,6 +536,7 @@ int cmake::AddCMakePaths(const char *arg0)
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
   failures.push_back(cMakeSelf);
   cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
+  cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
 #ifdef CMAKE_BUILD_DIR
