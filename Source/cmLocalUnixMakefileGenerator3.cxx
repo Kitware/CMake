@@ -1931,7 +1931,13 @@ cmLocalUnixMakefileGenerator3
 std::string
 cmLocalUnixMakefileGenerator3::GetTargetDirectory(cmTarget& target)
 {
-  std::string dir = target.GetName();
+  std::string dir;
+  // Put a prefix on the name if one is given by the CMake code.
+  if(const char* prefix = m_Makefile->GetDefinition("CMAKE_TARGET_DIR_PREFIX"))
+    {
+    dir += prefix;
+    }
+  dir += target.GetName();
   dir += ".dir";
   const char* hideDirs=m_Makefile->GetDefinition("CMAKE_HIDE_TARGET_DIRS");
   if (hideDirs && !cmSystemTools::IsOff(hideDirs))
