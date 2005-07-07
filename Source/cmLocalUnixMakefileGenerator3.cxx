@@ -1933,6 +1933,11 @@ cmLocalUnixMakefileGenerator3::GetTargetDirectory(cmTarget& target)
 {
   std::string dir = target.GetName();
   dir += ".dir";
+  const char* hideDirs=m_Makefile->GetDefinition("CMAKE_HIDE_TARGET_DIRS");
+  if (hideDirs && !cmSystemTools::IsOff(hideDirs))
+    {
+    dir = "." + dir;
+    }
   return dir;
 }
 
