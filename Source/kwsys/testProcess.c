@@ -291,7 +291,7 @@ int runChild(const char* cmd[], int state, int exception, int value,
              int share, int output, int delay, double timeout,
              int poll, int repeat)
 {
-  int result;
+  int result = 1;
   kwsysProcess* kp = kwsysProcess_New();
   if(!kp)
     {
