@@ -117,36 +117,53 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       }
     else
       {
+      std::string filename;
       switch (doing)
         {
         case doing_source:
-          source = copy;
-          break;
         case doing_output:
-          output = copy;
-          break;
-        case doing_main_dependency:
-          main_dependency = copy;
-          break;
-        case doing_command:
-          currentLine.push_back(copy);
-          break;
-        case doing_target:
-          target = copy;
-          break;
-        case doing_depends:
-          depends.push_back(copy);
-          break;
         case doing_outputs:
-          outputs.push_back(copy);
-          break;
-        case doing_comment:
-          comment = copy;
+          if (!cmSystemTools::FileIsFullPath(copy.c_str()))
+            {
+            filename = m_Makefile->GetStartDirectory();
+            filename += "/";
+            }
+          filename += copy;
           break;
         default:
-          this->SetError("Wrong syntax. Unknown type of argument.");
-          return false;
+          break;
         }
+
+       switch (doing)
+         {
+         case doing_source:
+           source = filename;
+           break;
+         case doing_output:
+           output = filename;
+           break;
+         case doing_main_dependency:
+           main_dependency = copy;
+           break;
+         case doing_command:
+           currentLine.push_back(copy);
+           break;
+         case doing_target:
+           target = copy;
+           break;
+         case doing_depends:
+           depends.push_back(copy);
+           break;
+         case doing_outputs:
+           outputs.push_back(filename);
+           break;
+         case doing_comment:
+           comment = copy;
+           break;
+         default:
+           this->SetError("Wrong syntax. Unknown type of argument.");
+           return false;
+         }
       }
     }
 
