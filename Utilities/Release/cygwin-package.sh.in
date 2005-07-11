@@ -44,7 +44,8 @@ conf()
 BUILD_TESTING:BOOL=ON
 EOF
   ) &&
-  ${SOURCE_DIR}/configure --prefix=${PREFIX}
+  ${SOURCE_DIR}/bootstrap --prefix=${PREFIX} --datadir=/share/${PKG}-${VER} \
+                          --docdir=/share/doc/${PKG}-${VER} --mandir=/share/man
   )
 }
 
@@ -62,18 +63,17 @@ install()
   (
   cd ${BINARY_DIR} &&
   make install DESTDIR="${INSTALL_DIR}" &&
-  mkdir -p ${INSTALL_DIR}${PREFIX}/doc/Cygwin &&
-  mkdir -p ${INSTALL_DIR}${PREFIX}/doc/${PKG}-${VER} &&
-  cp ${SOURCE_DIR}/CMake.pdf     ${INSTALL_DIR}${PREFIX}/doc/${PKG}-${VER} &&
-  cp ${SOURCE_DIR}/CMake.rtf     ${INSTALL_DIR}${PREFIX}/doc/${PKG}-${VER} &&
-  cp ${SOURCE_DIR}/Copyright.txt ${INSTALL_DIR}${PREFIX}/doc/${PKG}-${VER} &&
+  mkdir -p ${INSTALL_DIR}${PREFIX}/share/doc/Cygwin &&
+  mkdir -p ${INSTALL_DIR}${PREFIX}/share/doc/${PKG}-${VER} &&
+  cp ${SOURCE_DIR}/CMake.pdf     ${INSTALL_DIR}${PREFIX}/share/doc/${PKG}-${VER} &&
+  cp ${SOURCE_DIR}/CMake.rtf     ${INSTALL_DIR}${PREFIX}/share/doc/${PKG}-${VER} &&
   cp ${SOURCE_DIR}/CYGWIN-PATCHES/cmake.README \
-     ${INSTALL_DIR}${PREFIX}/doc/Cygwin/${FULLPKG}.README &&
-  touch ${INSTALL_DIR}${PREFIX}/doc/${PKG}-${VER}/MANIFEST &&
+     ${INSTALL_DIR}${PREFIX}/share/doc/Cygwin/${FULLPKG}.README &&
+  touch ${INSTALL_DIR}${PREFIX}/share/doc/${PKG}-${VER}/MANIFEST &&
   cd ${INSTALL_DIR} &&
   FILES=`/usr/bin/find .${PREFIX} -type f |sed 's/^\.\//\//'` &&
 (
-cat >> ${INSTALL_DIR}${PREFIX}/doc/${PKG}-${VER}/MANIFEST <<EOF
+cat >> ${INSTALL_DIR}${PREFIX}/share/doc/${PKG}-${VER}/MANIFEST <<EOF
 ${FILES}
 EOF
 )

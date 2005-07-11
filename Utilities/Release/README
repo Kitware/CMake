@@ -1,0 +1,58 @@
+1. Update Version information
+  - change version in CMakeLists.txt
+  - build on windows, and do a make; make install; make release
+    - this changes cmake_release.sh
+  * for major release edit   Source/cmCPluginAPI.h 
+
+2. tag the release 
+cvs co -r CMake-2-0  # checkout current release branch
+cvs tag CMake-2-0-3  # tag with minor version number
+
+NOTES from Brad:
+
+The release scripts are located in CMake and ParaView under the Utilities/Release directory.  It is important to run the script obtained by checking out a copy of the corresponding release branch from CVS. Here is a summary of how to use them:
+
+
+The release_dispatch.sh script has a list of machine names at the top. When run, this script will automatically ssh to these machines to build the releases.  Run it like this:
+
+
+./release_dispatch.sh clean
+./release_dispatch.sh binary
+./release_dispatch.sh logs
+
+
+The first line will ssh to all the machines and wipe out any existing release build.  The second will ssh to the machines and start the release scripts with output going to a log file.  The third line will bring up a whole bunch of xterm windows each showing the log from one of the machines.  Therefore you should run this from a prompt with access to an X display.  Alternatively you can just look at the log files manually.
+
+
+After the logs report the job is complete, then the binaries should be sitting on the local machine in the same directory as the scripts.  You can run
+
+
+./cmake_release.sh remote_source localhost
+
+
+to get the source tarballs.  Then run
+
+
+./cmake_release.sh upload
+
+
+to upload the files to public in the proper FTP directory.
+
+
+For shannara, the home directory does not have enough disk space to build ParaView.  After the "clean" step, you should manually log into the machine and do
+
+
+rm -rf /disk2/ParaViewReleaseRoot
+ln -s /disk2/ParaViewReleaseRoot ~/
+
+
+For the aix build, you need to manually login to the box and checkout a copy of the Utilities/Release directory.  Then run the release script by hand:
+
+
+./cmake_release.sh binary_tarball
+./paraview_release.sh binary_tarball
+
+
+Then in the release root directory there will be a Tarballs subdirectory with the binaries.
+
+

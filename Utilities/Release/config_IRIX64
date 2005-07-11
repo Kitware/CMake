@@ -21,4 +21,7 @@ INSTALL_DIR="Install-${PLATFORM}"
 write_cache()
 {
 write_standard_cache
+    cat >> CMakeCache.txt <<EOF
+HAVE_LIBCRYPTO:INTERNAL=0
+EOF
 }

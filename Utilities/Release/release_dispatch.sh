@@ -4,7 +4,7 @@ MACHINES=""
 MACHINES="${MACHINES} naboo"
 MACHINES="${MACHINES} shannara"
 MACHINES="${MACHINES} krondor"
-MACHINES="${MACHINES} rapture"
+MACHINES="${MACHINES} muse"
 MACHINES="${MACHINES} destiny"
 
 run()
