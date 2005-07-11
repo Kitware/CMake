@@ -546,14 +546,14 @@ int cmCTestUpdateHandler::ProcessHandler()
         svn_latest_revision = atoi(svn_latest_revision_regex.match(2).c_str());
         }
       }
-    }
-  if ( svn_latest_revision <= 0 )
-    {
-    cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem determining the current revision of the repository from output:" << std::endl << goutput.c_str() << std::endl);
-    }
-  else if ( updateType == cmCTestUpdateHandler::e_SVN )
-    {
-    cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Current revision of repository is: " << svn_latest_revision << std::endl);
+    if ( svn_latest_revision <= 0 )
+      {
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem determining the current revision of the repository from output:" << std::endl << goutput.c_str() << std::endl);
+      }
+    else
+      {
+      cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Current revision of repository is: " << svn_latest_revision << std::endl);
+      }
     }
 
   cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Gathering version information (each . represents one updated file):" << std::endl);
