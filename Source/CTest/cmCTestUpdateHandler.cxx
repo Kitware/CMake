@@ -333,6 +333,10 @@ int cmCTestUpdateHandler::ProcessHandler()
       {
     case cmCTestUpdateHandler::e_CVS:
       updateOptions = m_CTest->GetCTestConfiguration("CVSUpdateOptions");
+      if ( updateOptions.empty() )
+        {
+        updateOptions = "-dP";
+        }
       break;
     case cmCTestUpdateHandler::e_SVN:
       updateOptions = m_CTest->GetCTestConfiguration("SVNUpdateOptions");
