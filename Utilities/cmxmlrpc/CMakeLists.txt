@@ -114,7 +114,7 @@ IF(HAVE_PTHREADS)
 ENDIF(HAVE_PTHREADS)
 
 ADD_EXECUTABLE(xrtest synch_client.c)
-TARGET_LINK_LIBRARIES(xrtest cmXMLRPC)
+TARGET_LINK_LIBRARIES(xrtest cmXMLRPC ${CMAKE_DL_LIBS})
 
 # comment out test since it doesn pass and Andy doesn;t seem to be fixing it,
 # for now assume that XMLRPC is not production quality code - Ken
