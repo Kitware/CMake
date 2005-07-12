@@ -2044,7 +2044,11 @@ kwsys_stl::string SystemTools
 bool SystemTools::FileIsDirectory(const char* name)
 {  
   struct stat fs;
+#if _WIN32
   if(stat(name, &fs) == 0)
+#else
+  if(lstat(name, &fs) == 0)
+#endif
     {
 #if _WIN32
     return ((fs.st_mode & _S_IFDIR) != 0);
