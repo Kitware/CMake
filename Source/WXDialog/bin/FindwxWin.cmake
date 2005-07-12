@@ -420,10 +420,12 @@ ELSE( WIN32 )
         # just in case `gtk-config --cflags`does not work
         # SET( WXWINDOWS_INCLUDE_DIR ${WXWINDOWS_INCLUDE_DIR}  /usr/include/gtk-2.0 /usr/include/gtk-2.0/include /usr/lib/gtk-2.0/include /usr/include/glib-2.0 /usr/lib/glib-2.0/include /usr/include/pango-1.0 /usr/include/atk-1.0 )
         # What about FindGTK.cmake? and what if somebody uses wxMotif?
-        SET( CMAKE_WX_CXX_FLAGS "${CMAKE_WX_CXX_FLAGS} `gtk-config --cflags`" )
-        #find Xwindows
-        INCLUDE( ${CMAKE_ROOT}/Modules/FindX11.cmake )
-        SET( WXWINDOWS_INCLUDE_DIR ${WXWINDOWS_INCLUDE_DIR}  ${X11_INCLUDE_DIR} )
+        IF(NOT APPLE)
+          SET( CMAKE_WX_CXX_FLAGS "${CMAKE_WX_CXX_FLAGS} `gtk-config --cflags`" )
+          #find Xwindows
+          INCLUDE( ${CMAKE_ROOT}/Modules/FindX11.cmake )
+          SET( WXWINDOWS_INCLUDE_DIR ${WXWINDOWS_INCLUDE_DIR}  ${X11_INCLUDE_DIR} )
+        ENDIF(NOT APPLE)
     ENDIF( CYGWIN OR MINGW )
    
 ENDIF( WIN32 )
