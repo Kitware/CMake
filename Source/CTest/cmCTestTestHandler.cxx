@@ -80,6 +80,7 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory(); 
   for ( it = args.begin(); it != args.end(); ++ it )
     {
+    cmSystemTools::ChangeDirectory(cwd.c_str());
     std::string fname = cwd;
     fname += "/";
     fname += *it;
