@@ -398,8 +398,8 @@ bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
     return true;
     }
 
-  const char* src_dir = this->GetCTestConfiguration("SourceDirectory").c_str();
-  const char* bld_dir = this->GetCTestConfiguration("BuildDirectory").c_str();
+  std::string src_dir = this->GetCTestConfiguration("SourceDirectory").c_str();
+  std::string bld_dir = this->GetCTestConfiguration("BuildDirectory").c_str();
   m_DartVersion = 1;
   m_SubmitFiles.clear();
 
@@ -444,7 +444,7 @@ bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
       }
     }
 
-  if ( !this->Initialize(bld_dir, true, false) )
+  if ( !this->Initialize(bld_dir.c_str(), true, false) )
     {
     if ( this->GetCTestConfiguration("NightlyStartTime").empty() && first)
       {
