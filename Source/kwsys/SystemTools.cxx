@@ -1827,7 +1827,8 @@ bool SystemTools::RemoveADirectory(const char* source)
       kwsys_stl::string fullPath = source;
       fullPath += "/";
       fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
-      if(SystemTools::FileIsDirectory(fullPath.c_str()))
+      if(SystemTools::FileIsDirectory(fullPath.c_str()) &&
+        !SystemTools::FileIsSymlink(fullPath.c_str()))
         {
         if (!SystemTools::RemoveADirectory(fullPath.c_str()))
           {
@@ -2044,11 +2045,7 @@ kwsys_stl::string SystemTools
 bool SystemTools::FileIsDirectory(const char* name)
 {  
   struct stat fs;
-#if _WIN32
   if(stat(name, &fs) == 0)
-#else
-  if(lstat(name, &fs) == 0)
-#endif
     {
 #if _WIN32
     return ((fs.st_mode & _S_IFDIR) != 0);
@@ -2060,6 +2057,23 @@ bool SystemTools::FileIsDirectory(const char* name)
     {
     return false;
     }
+}
+
+bool SystemTools::FileIsSymlink(const char* name)
+{  
+#if _WIN32
+  return false;
+#else
+  struct stat fs;
+  if(lstat(name, &fs) == 0)
+    {
+    return S_ISLNK(fs.st_mode);
+    }
+  else
+    {
+    return false;
+    }
+#endif
 }
 
 int SystemTools::ChangeDirectory(const char *dir)

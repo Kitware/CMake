@@ -502,6 +502,11 @@ public:
   static bool FileIsDirectory(const char* name);
   
   /**
+   * Return true if the file is a symlink
+   */
+  static bool FileIsSymlink(const char* name);
+  
+  /**
    * return true if the file has a given signature (first set of bytes)
    */
   static bool FileHasSignature(
