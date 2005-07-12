@@ -2,8 +2,8 @@
 
 MACHINES=""
 MACHINES="${MACHINES} naboo"
-MACHINES="${MACHINES} shannara"
-MACHINES="${MACHINES} krondor"
+MACHINES="${MACHINES} dashsun1"
+MACHINES="${MACHINES} midworld"
 MACHINES="${MACHINES} muse"
 MACHINES="${MACHINES} destiny"
 

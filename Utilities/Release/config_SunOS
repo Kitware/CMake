@@ -3,7 +3,6 @@ CURSES_LIBRARY="/usr/lib/libcurses.a"
 FORM_LIBRARY="/usr/lib/libform.a"
 CC="cc"
 CXX="CC"
-
 # Write entries into the cache file before building cmake.
 write_cache()
 {
