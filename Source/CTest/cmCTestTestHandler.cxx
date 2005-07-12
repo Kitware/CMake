@@ -105,6 +105,7 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
     else
       {
       // No DartTestfile.txt? Who cares...
+      cmSystemTools::ChangeDirectory(cwd.c_str());
       continue;
       }
     fname += "/";
