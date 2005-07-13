@@ -724,10 +724,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     this->OutputLibraries(fout, configName, libName, target);
     fout << "\"\n";
     temp = m_ExecutableOutputPath;
-          
-    if (!m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH_OVERRIDE"))
-      temp += configName;
-
+    temp += configName;
     temp += "/";
 
     // do we have a different executable name?
@@ -740,8 +737,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       temp += libName;
       }      
           
-    temp += debugPostfix;
-
     temp += ".exe";
     fout << "\t\t\t\tOutputFile=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
     for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
