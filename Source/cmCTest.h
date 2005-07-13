@@ -92,6 +92,7 @@ public:
   ///! what is the configuraiton type, e.g. Debug, Release etc.
   std::string GetConfigType();
   double GetTimeOut() { return m_TimeOut; }
+  void SetTimeOut(double t) { m_TimeOut = t; }
   
   /**
    * Check if CTest file exists

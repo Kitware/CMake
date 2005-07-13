@@ -30,6 +30,18 @@ cmCTestTestCommand::cmCTestTestCommand()
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 {
+  const char* ctestTimeout = m_Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
+  double timeout = m_CTest->GetTimeOut();
+  if ( ctestTimeout )
+    {
+    timeout = atof(ctestTimeout);
+    }
+  else
+    {
+    // By default use timeout of 10 minutes
+    timeout = 600;
+    }
+  m_CTest->SetTimeOut(timeout);
   cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("test");
   if ( m_Values[ctt_START] || m_Values[ctt_END] || m_Values[ctt_STRIDE] )
     {
