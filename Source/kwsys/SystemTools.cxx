@@ -2062,6 +2062,7 @@ bool SystemTools::FileIsDirectory(const char* name)
 bool SystemTools::FileIsSymlink(const char* name)
 {  
 #if _WIN32
+  (void)name;
   return false;
 #else
   struct stat fs;
