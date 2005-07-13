@@ -901,14 +901,39 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       break;
       }
     case cmTarget::EXECUTABLE:
+      {
+      std::string symRoot;
       if(m_ExecutableOutputPath.size())
+        {
+        std::string path = m_ExecutableOutputPath;
+        if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
+          {
+          path += target.GetName();
+          path += ".app/Contents/MacOS/";
+          }
+        symRoot = path;
+        }
+      fileType = "compiled.mach-o.executable";
+      if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
+        {
+        if(symRoot.size() == 0)
+          {
+          symRoot = target.GetName();
+          symRoot += ".app/Contents/MacOS/";
+          }
+        productType = "com.apple.product-type.tool";
+        }
+      else
+        {
+        productType = "com.apple.product-type.tool";
+        }
+      if(symRoot.size())
         {
         buildSettings->AddAttribute("SYMROOT", 
                                     this->CreateString
-                                    (m_ExecutableOutputPath.c_str()));
+                                    (symRoot.c_str()));
         }
-      fileType = "compiled.mach-o.executable";
-      productType = "com.apple.product-type.tool";
+      }
       break;
     case cmTarget::UTILITY:
       
@@ -1139,7 +1164,7 @@ void cmGlobalXCodeGenerator::AddLinkLibrary(cmXCodeObject* target,
   cmXCodeObject* ldflags = settings->GetObject("OTHER_LDFLAGS");
   std::string link = ldflags->GetString();
   cmSystemTools::ReplaceString(link, "\"", "");
-  cmsys::RegularExpression reg("^([ \t]*\\-[lWRB])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
+  cmsys::RegularExpression reg("^([ \t]*\\-[lLWRB])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
   // if the library is not already in the form required by the compiler
   // add a -l infront of the name
   link += " ";
