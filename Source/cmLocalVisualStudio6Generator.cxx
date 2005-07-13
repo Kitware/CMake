@@ -982,23 +982,27 @@ void cmLocalVisualStudio6Generator
       }
     else
       {
-
       libMultiLineOptions += "# ADD LINK32 /out:\"";
 
       if(exePath != "")
+        {
         libMultiLineOptions += exePath + "/" + libName + ".exe";
+        }
       else
+        {
         libMultiLineOptions += std::string(libName) + ".exe";
-                  
+        }
       libMultiLineOptions += "\"\n";
-        
-        
       libMultiLineOptionsForDebug += "# ADD LINK32 /out:\"";
-
       if(exePath != "")
-        libMultiLineOptionsForDebug += exePath + "/" + libName + "D.exe";
+        {
+        libMultiLineOptionsForDebug += exePath + "$(INTDIR)/" + libName + "D.exe";
+        }
       else
-        libMultiLineOptionsForDebug += std::string(libName) + "D.exe";
+        {
+        libMultiLineOptionsForDebug += std::string("$(INTDIR)/")
+          + std::string(libName) + "D.exe";
+        }
         
       libMultiLineOptionsForDebug += "\"\n";
       }
