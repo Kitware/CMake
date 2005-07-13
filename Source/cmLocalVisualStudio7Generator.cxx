@@ -285,9 +285,9 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
 
   
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout, 
-                                             const char* configName,
-                                             const char *libName,
-                                             cmTarget &target)
+                                                       const char* configName,
+                                                       const char *libName,
+                                                       cmTarget &target)
 { 
   // create a map of xml tags to the values they should have in the output
   // for example, "BufferSecurityCheck" = "TRUE"
@@ -386,7 +386,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     flags += flagsDebug;
     pre = "WIN32,_DEBUG,_WINDOWS"; 
     std::string libpath = m_LibraryOutputPath + 
-        "$(OutDir)/" + libName + debugPostfix + ".pdb";
+      "$(OutDir)/" + libName + debugPostfix + ".pdb";
     programDatabase = "\t\t\t\tProgramDatabaseFileName=\"";
     programDatabase += libpath;
     programDatabase += "\"";
@@ -416,7 +416,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     pre = "WIN32,_WINDOWS";
     flags += flagsDebugRel;
     std::string libpath = m_LibraryOutputPath + 
-        "$(OutDir)/" + libName + debugPostfix + ".pdb";
+      "$(OutDir)/" + libName + debugPostfix + ".pdb";
     programDatabase = "\t\t\t\tProgramDatabaseFileName=\"";
     programDatabase += libpath;
     programDatabase += "\"";
@@ -508,7 +508,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\t\t\t\tObjectFile=\"" << configName << "\\\"\n";
   if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
     {
-     fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
+    fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
     }
   
   if(programDatabase.size())
@@ -574,9 +574,9 @@ void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
 
 
 void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
-                                          const char* configName,
-                                          const char *libName,
-                                          cmTarget &target)
+                                                    const char* configName,
+                                                    const char *libName,
+                                                    cmTarget &target)
 { 
   std::string temp;
   std::string debugPostfix = "";
@@ -616,185 +616,191 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     {
     case cmTarget::STATIC_LIBRARY:
     {
-      std::string libpath = m_LibraryOutputPath + 
-        "$(OutDir)/" + libName + debugPostfix + ".lib";
-      fout << "\t\t\t<Tool\n"
-           << "\t\t\t\tName=\"VCLibrarianTool\"\n";
-      if(const char* libflags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
-        {
-        fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
-        }
-      fout << "\t\t\t\tOutputFile=\"" 
-           << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << ".\"/>\n";
-      break;
+    std::string libpath = m_LibraryOutputPath + 
+      "$(OutDir)/" + libName + debugPostfix + ".lib";
+    fout << "\t\t\t<Tool\n"
+         << "\t\t\t\tName=\"VCLibrarianTool\"\n";
+    if(const char* libflags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
+      {
+      fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
+      }
+    fout << "\t\t\t\tOutputFile=\"" 
+         << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << ".\"/>\n";
+    break;
     }
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
+    {
+    fout << "\t\t\t<Tool\n"
+         << "\t\t\t\tName=\"VCLinkerTool\"\n"
+         << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
+    if(extraLinkOptions.size())
       {
-      fout << "\t\t\t<Tool\n"
-           << "\t\t\t\tName=\"VCLinkerTool\"\n"
-           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
-      if(extraLinkOptions.size())
-        {
-        fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
-          extraLinkOptions.c_str()).c_str();
-        }
-      fout << "\"\n"
-           << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
-      this->OutputLibraries(fout, configName, libName, target);
-      fout << "\"\n";
-      temp = m_LibraryOutputPath;
-      temp += configName;
-      temp += "/";
-      temp += libName;
-      temp += debugPostfix;
-      temp += ".dll";
-      fout << "\t\t\t\tOutputFile=\"" 
-           << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
-      for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
-          i != flagMap.end(); ++i)
-        {
-        fout << "\t\t\t\t" << i->first << "=\"" << i->second << "\"\n";
-        }
-      
-      if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
-        {
-        fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
-        }
-      else
-        {
-        fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
-        }
-      
-      fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
-      this->OutputLibraryDirectories(fout, configName, libName, target);
-      fout << "\"\n";
-      this->OutputModuleDefinitionFile(fout, target);
-      temp = m_LibraryOutputPath;
-      temp += "$(OutDir)/";
-      temp += libName;
-      temp += debugPostfix;
-      temp += ".pdb";
-      fout << "\t\t\t\tProgramDatabaseFile=\"" << 
-        this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
-      if(strcmp(configName, "Debug") == 0
-         || strcmp(configName, "RelWithDebInfo") == 0)
-        {
-        fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
-        }
-      const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
-      if(!linkLanguage)
-        {
-        cmSystemTools::Error("CMake can not determine linker language for target:",
-                             target.GetName());
-        return;
-        }
-      std::string stackVar = "CMAKE_";
-      stackVar += linkLanguage;
-      stackVar += "_STACK_SIZE";
-      const char* stackVal = m_Makefile->GetDefinition(stackVar.c_str());
-      if(stackVal)
-        {
-        fout << "\t\t\t\tStackReserveSize=\"" << stackVal  << "\"\n";
-        }
-      temp = m_LibraryOutputPath;
-      temp += configName;
-      temp += "/";
-      temp += libName;
-      temp += debugPostfix;
-      temp += ".lib";
-      fout << "\t\t\t\tImportLibrary=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
+      fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
+        extraLinkOptions.c_str()).c_str();
       }
-      break;
+    fout << "\"\n"
+         << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
+    this->OutputLibraries(fout, configName, libName, target);
+    fout << "\"\n";
+    temp = m_LibraryOutputPath;
+    temp += configName;
+    temp += "/";
+    temp += libName;
+    temp += debugPostfix;
+    temp += ".dll";
+    fout << "\t\t\t\tOutputFile=\"" 
+         << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
+    for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
+        i != flagMap.end(); ++i)
+      {
+      fout << "\t\t\t\t" << i->first << "=\"" << i->second << "\"\n";
+      }
+      
+    if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+      {
+      fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
+      }
+    else
+      {
+      fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
+      }
+      
+    fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
+    this->OutputLibraryDirectories(fout, configName, libName, target);
+    fout << "\"\n";
+    this->OutputModuleDefinitionFile(fout, target);
+    temp = m_LibraryOutputPath;
+    temp += "$(OutDir)/";
+    temp += libName;
+    temp += debugPostfix;
+    temp += ".pdb";
+    fout << "\t\t\t\tProgramDatabaseFile=\"" << 
+      this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
+    if(strcmp(configName, "Debug") == 0
+       || strcmp(configName, "RelWithDebInfo") == 0)
+      {
+      fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
+      }
+    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+    if(!linkLanguage)
+      {
+      cmSystemTools::Error("CMake can not determine linker language for target:",
+                           target.GetName());
+      return;
+      }
+    std::string stackVar = "CMAKE_";
+    stackVar += linkLanguage;
+    stackVar += "_STACK_SIZE";
+    const char* stackVal = m_Makefile->GetDefinition(stackVar.c_str());
+    if(stackVal)
+      {
+      fout << "\t\t\t\tStackReserveSize=\"" << stackVal  << "\"\n";
+      }
+    temp = m_LibraryOutputPath;
+    temp += configName;
+    temp += "/";
+    temp += libName;
+    temp += debugPostfix;
+    temp += ".lib";
+    fout << "\t\t\t\tImportLibrary=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
+    }
+    break;
     case cmTarget::EXECUTABLE:
-      {
+    {
     
-      fout << "\t\t\t<Tool\n"
-           << "\t\t\t\tName=\"VCLinkerTool\"\n"
-           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386"; 
-      if(extraLinkOptions.size())
-        {
-        fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
-          extraLinkOptions.c_str()).c_str();
-        }
-      fout << "\"\n"
-           << "\t\t\t\tAdditionalDependencies=\""
-           << m_Makefile->GetRequiredDefinition("CMAKE_STANDARD_LIBRARIES") 
-           << " ";
-      this->OutputLibraries(fout, configName, libName, target);
-      fout << "\"\n";
-      temp = m_ExecutableOutputPath;
-      temp += configName;
-      temp += "/";
-
-      // do we have a different executable name?
-      if (target.GetProperty("OUTPUT_NAME"))
-        {
-        temp += target.GetProperty("OUTPUT_NAME");
-        }
-      else
-        {
-        temp += libName;
-        }      
-      temp += ".exe";
-      fout << "\t\t\t\tOutputFile=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
-      for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
-          i != flagMap.end(); ++i)
-        {
-        fout << "\t\t\t\t" << i->first << "=\"" << i->second << "\"\n";
-        }
-      if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
-        {
-        fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
-        }
-      else
-        {
-        fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
-        }
-        
-      fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
-      this->OutputLibraryDirectories(fout, configName, libName, target);
-      fout << "\"\n";
-      fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath 
-           << "$(OutDir)\\" << libName << ".pdb\"\n";
-      if(strcmp(configName, "Debug") == 0 
-         || strcmp(configName, "RelWithDebInfo") == 0)
-        {
-        fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
-        }
-      if ( target.GetPropertyAsBool("WIN32_EXECUTABLE") )
-        {
-        fout << "\t\t\t\tSubSystem=\"2\"\n";
-        }
-      else
-        {      
-        fout << "\t\t\t\tSubSystem=\"1\"\n";
-        } 
-      const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator()); 
-      if(!linkLanguage)
-        {
-        cmSystemTools::Error("CMake can not determine linker language for target:",
-                             target.GetName());
-        return;
-        }
-     std::string stackVar = "CMAKE_";
-      stackVar += linkLanguage;
-      stackVar += "_STACK_SIZE";
-      const char* stackVal = m_Makefile->GetDefinition(stackVar.c_str());
-      if(stackVal)
-        {
-        fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"";
-        }
-      fout << "/>\n";
-      break;
+    fout << "\t\t\t<Tool\n"
+         << "\t\t\t\tName=\"VCLinkerTool\"\n"
+         << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386"; 
+    if(extraLinkOptions.size())
+      {
+      fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
+        extraLinkOptions.c_str()).c_str();
       }
+    fout << "\"\n"
+         << "\t\t\t\tAdditionalDependencies=\""
+         << m_Makefile->GetRequiredDefinition("CMAKE_STANDARD_LIBRARIES") 
+         << " ";
+    this->OutputLibraries(fout, configName, libName, target);
+    fout << "\"\n";
+    temp = m_ExecutableOutputPath;
+          
+    if (!m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH_OVERRIDE"))
+      temp += configName;
+
+    temp += "/";
+
+    // do we have a different executable name?
+    if (target.GetProperty("OUTPUT_NAME"))
+      {
+      temp += target.GetProperty("OUTPUT_NAME");
+      }
+    else
+      {
+      temp += libName;
+      }      
+          
+    temp += debugPostfix;
+
+    temp += ".exe";
+    fout << "\t\t\t\tOutputFile=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
+    for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
+        i != flagMap.end(); ++i)
+      {
+      fout << "\t\t\t\t" << i->first << "=\"" << i->second << "\"\n";
+      }
+    if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+      {
+      fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
+      }
+    else
+      {
+      fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
+      }
+        
+    fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
+    this->OutputLibraryDirectories(fout, configName, libName, target);
+    fout << "\"\n";
+    fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath 
+         << "$(OutDir)\\" << libName << ".pdb\"\n";
+    if(strcmp(configName, "Debug") == 0 
+       || strcmp(configName, "RelWithDebInfo") == 0)
+      {
+      fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
+      }
+    if ( target.GetPropertyAsBool("WIN32_EXECUTABLE") )
+      {
+      fout << "\t\t\t\tSubSystem=\"2\"\n";
+      }
+    else
+      {      
+      fout << "\t\t\t\tSubSystem=\"1\"\n";
+      } 
+    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator()); 
+    if(!linkLanguage)
+      {
+      cmSystemTools::Error("CMake can not determine linker language for target:",
+                           target.GetName());
+      return;
+      }
+    std::string stackVar = "CMAKE_";
+    stackVar += linkLanguage;
+    stackVar += "_STACK_SIZE";
+    const char* stackVal = m_Makefile->GetDefinition(stackVar.c_str());
+    if(stackVal)
+      {
+      fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"";
+      }
+    fout << "/>\n";
+    break;
+    }
     case cmTarget::UTILITY:
       break;
     }
 }
 
 void cmLocalVisualStudio7Generator::OutputModuleDefinitionFile(std::ostream& fout,
-                                                     cmTarget &target)
+                                                               cmTarget &target)
 {
   std::vector<cmSourceFile*> const& classes = target.GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
@@ -812,9 +818,9 @@ void cmLocalVisualStudio7Generator::OutputModuleDefinitionFile(std::ostream& fou
 }
 
 void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
-                                                   const char*,
-                                                   const char*,
-                                                   cmTarget &tgt)
+                                                             const char*,
+                                                             const char*,
+                                                             cmTarget &tgt)
 { 
   bool hasone = false;
   if(m_LibraryOutputPath.size())
@@ -865,9 +871,9 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
 }
 
 void cmLocalVisualStudio7Generator::OutputLibraries(std::ostream& fout,
-                                          const char* configName,
-                                          const char* libName,
-                                          cmTarget &target)
+                                                    const char* configName,
+                                                    const char* libName,
+                                                    cmTarget &target)
 {
   const cmTarget::LinkLibraries& libs = target.GetLinkLibraries();
   cmTarget::LinkLibraries::const_iterator j;
@@ -988,135 +994,149 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
 
 
   // Loop through every source group.
-  for(std::vector<cmSourceGroup>::const_iterator sg = sourceGroups.begin();
-      sg != sourceGroups.end(); ++sg)
+  for(unsigned int i = 0; i < sourceGroups.size(); ++i)
     {
-    const std::vector<const cmSourceFile *> &sourceFiles = 
-      sg->GetSourceFiles();
-    // If the group is empty, don't write it at all.
-    if(sourceFiles.empty())
-      { 
-      continue; 
-      }
-    
-    // If the group has a name, write the header.
-    std::string name = sg->GetName();
-    if(name != "")
-      {
-      this->WriteVCProjBeginGroup(fout, name.c_str(), "");
-      }
-    
-    // Loop through each source in the source group.
-    for(std::vector<const cmSourceFile *>::const_iterator sf =
-          sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
-      {
-      std::string source = (*sf)->GetFullPath();
-      const cmCustomCommand *command = (*sf)->GetCustomCommand();
-      std::string compileFlags;
-      std::string additionalDeps;
+    cmSourceGroup sg = sourceGroups[i];
+    this->WriteGroup(&sg, target, fout, libName, configs);
+    }
 
-      // Check for extra compiler flags.
-      const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
-      if(cflags)
-        {
-        compileFlags = cflags;
-        }
-      const char* lang = 
-        m_GlobalGenerator->GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
-      if(lang && strcmp(lang, "CXX") == 0)
-        {
-        // force a C++ file type
-        compileFlags += " /TP ";
-        }
-      // Check for extra object-file dependencies.
-      const char* deps = (*sf)->GetProperty("OBJECT_DEPENDS");
-      if(deps)
-        {
-        std::vector<std::string> depends;
-        cmSystemTools::ExpandListArgument(deps, depends);
-        if(!depends.empty())
-          {
-          std::vector<std::string>::iterator i = depends.begin();
-          additionalDeps = this->ConvertToXMLOutputPath(i->c_str());
-          for(++i;i != depends.end(); ++i)
-            {
-            additionalDeps += ";";
-            additionalDeps += this->ConvertToXMLOutputPath(i->c_str());
-            }
-          }
-        }
-      if (source != libName || target.GetType() == cmTarget::UTILITY)
-        {
-        fout << "\t\t\t<File\n";
-        std::string d = this->ConvertToXMLOutputPathSingle(source.c_str());
-        // Tell MS-Dev what the source is.  If the compiler knows how to
-        // build it, then it will.
-        fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
-        if (command)
-          {
-          // Construct the entire set of commands in one string.
-          std::string script = this->ConstructScript(command->GetCommandLines());
-          const char* comment = command->GetComment();
-          const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
-          this->WriteCustomRule(fout, source.c_str(), script.c_str(),
-                                (*comment?comment:"Custom Rule"),
-                                command->GetDepends(),
-                                command->GetOutput(), flags);
-          }
-        else if(compileFlags.size() || additionalDeps.length())
-          {
-          const char* aCompilerTool = "VCCLCompilerTool";
-          std::string ext = (*sf)->GetSourceExtension();
-          ext = cmSystemTools::LowerCase(ext);
-          if(ext == "idl")
-            {
-            aCompilerTool = "VCMIDLTool";
-            }
-          if(ext == "rc")
-            {
-            aCompilerTool = "VCResourceCompilerTool";
-            }
-          if(ext == "def")
-            {
-            aCompilerTool = "VCCustomBuildTool";
-            }
-          for(std::vector<std::string>::iterator i = configs->begin(); 
-              i != configs->end(); ++i)
-            {
-            fout << "\t\t\t\t<FileConfiguration\n"
-                 << "\t\t\t\t\tName=\""  << *i << "|Win32\">\n"
-                 << "\t\t\t\t\t<Tool\n"
-                 << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
-            if(compileFlags.size())
-              {
-              fout << "\t\t\t\t\tAdditionalOptions=\""
-                   << this->EscapeForXML(compileFlags.c_str()) << "\"\n";
-              }
-            if(additionalDeps.length())
-              {
-              fout << "\t\t\t\t\tAdditionalDependencies=\""
-                   << additionalDeps.c_str() << "\"\n";
-              }
-            fout << "\t\t\t\t\t/>\n"
-                 << "\t\t\t\t</FileConfiguration>\n";
-            }
-          }
-        fout << "\t\t\t</File>\n";
-        }
-      }
+  //}
     
-    // If the group has a name, write the footer.
-    if(name != "")
-      {
-      this->WriteVCProjEndGroup(fout);
-      }
-    }  
   fout << "\t</Files>\n";
 
   // Write the VCProj file's footer.
   this->WriteVCProjFooter(fout);
 }
 
+void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget target, std::ostream &fout, const char *libName, std::vector<std::string> *configs)
+{
+  const std::vector<const cmSourceFile *> &sourceFiles = 
+    sg->GetSourceFiles();
+  // If the group is empty, don't write it at all.
+  if(sourceFiles.empty())
+    { 
+    return; 
+    }
+    
+  // If the group has a name, write the header.
+  std::string name = sg->GetName();
+  if(name != "")
+    {
+    this->WriteVCProjBeginGroup(fout, name.c_str(), "");
+    }
+    
+  // Loop through each source in the source group.
+  for(std::vector<const cmSourceFile *>::const_iterator sf =
+        sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
+    {
+    std::string source = (*sf)->GetFullPath();
+    const cmCustomCommand *command = (*sf)->GetCustomCommand();
+    std::string compileFlags;
+    std::string additionalDeps;
+
+    // Check for extra compiler flags.
+    const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
+    if(cflags)
+      {
+      compileFlags = cflags;
+      }
+    const char* lang = 
+      m_GlobalGenerator->GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
+    if(lang && strcmp(lang, "CXX") == 0)
+      {
+      // force a C++ file type
+      compileFlags += " /TP ";
+      }
+    // Check for extra object-file dependencies.
+    const char* deps = (*sf)->GetProperty("OBJECT_DEPENDS");
+    if(deps)
+      {
+      std::vector<std::string> depends;
+      cmSystemTools::ExpandListArgument(deps, depends);
+      if(!depends.empty())
+        {
+        std::vector<std::string>::iterator i = depends.begin();
+        additionalDeps = this->ConvertToXMLOutputPath(i->c_str());
+        for(++i;i != depends.end(); ++i)
+          {
+          additionalDeps += ";";
+          additionalDeps += this->ConvertToXMLOutputPath(i->c_str());
+          }
+        }
+      }
+    if (source != libName || target.GetType() == cmTarget::UTILITY)
+      {
+      fout << "\t\t\t<File\n";
+      std::string d = this->ConvertToXMLOutputPathSingle(source.c_str());
+      // Tell MS-Dev what the source is.  If the compiler knows how to
+      // build it, then it will.
+      fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
+      if (command)
+        {
+        // Construct the entire set of commands in one string.
+        std::string script = this->ConstructScript(command->GetCommandLines());
+        const char* comment = command->GetComment();
+        const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
+        this->WriteCustomRule(fout, source.c_str(), script.c_str(),
+                              (*comment?comment:"Custom Rule"),
+                              command->GetDepends(),
+                              command->GetOutput(), flags);
+        }
+      else if(compileFlags.size() || additionalDeps.length())
+        {
+        const char* aCompilerTool = "VCCLCompilerTool";
+        std::string ext = (*sf)->GetSourceExtension();
+        ext = cmSystemTools::LowerCase(ext);
+        if(ext == "idl")
+          {
+          aCompilerTool = "VCMIDLTool";
+          }
+        if(ext == "rc")
+          {
+          aCompilerTool = "VCResourceCompilerTool";
+          }
+        if(ext == "def")
+          {
+          aCompilerTool = "VCCustomBuildTool";
+          }
+        for(std::vector<std::string>::iterator i = configs->begin(); 
+            i != configs->end(); ++i)
+          {
+          fout << "\t\t\t\t<FileConfiguration\n"
+               << "\t\t\t\t\tName=\""  << *i << "|Win32\">\n"
+               << "\t\t\t\t\t<Tool\n"
+               << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
+          if(compileFlags.size())
+            {
+            fout << "\t\t\t\t\tAdditionalOptions=\""
+                 << this->EscapeForXML(compileFlags.c_str()) << "\"\n";
+            }
+          if(additionalDeps.length())
+            {
+            fout << "\t\t\t\t\tAdditionalDependencies=\""
+                 << additionalDeps.c_str() << "\"\n";
+            }
+          fout << "\t\t\t\t\t/>\n"
+               << "\t\t\t\t</FileConfiguration>\n";
+          }
+        }
+      fout << "\t\t\t</File>\n";
+      }
+    }
+        
+  std::vector<cmSourceGroup> children  = sg->GetGroupChildren();
+
+  for(unsigned int i=0;i<children.size();++i)
+    {
+    this->WriteGroup(&children[i], target, fout, libName, configs);
+    }
+  
+  // If the group has a name, write the footer.
+  if(name != "")
+    {
+    this->WriteVCProjEndGroup(fout);
+    }
+}  
 
 void cmLocalVisualStudio7Generator::
 WriteCustomRule(std::ostream& fout,
@@ -1172,7 +1192,7 @@ WriteCustomRule(std::ostream& fout,
           }
         if(exePath.size())
           {
-           libPath = exePath;
+          libPath = exePath;
           }
         else
           {
@@ -1207,8 +1227,8 @@ WriteCustomRule(std::ostream& fout,
 
 
 void cmLocalVisualStudio7Generator::WriteVCProjBeginGroup(std::ostream& fout, 
-                                        const char* group,
-                                        const char* )
+                                                          const char* group,
+                                                          const char* )
 {
   fout << "\t\t<Filter\n"
        << "\t\t\tName=\"" << group << "\"\n"

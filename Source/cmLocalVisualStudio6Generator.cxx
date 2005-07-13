@@ -207,8 +207,8 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule()
 
 
 void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout, 
-                                 const char *libName,
-                                 cmTarget &target)
+                                                 const char *libName,
+                                                 cmTarget &target)
 {
   // if we should add regen rule then...
   const char *suppRegenRule = 
@@ -316,110 +316,127 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   for(std::vector<cmSourceGroup>::const_iterator sg = sourceGroups.begin();
       sg != sourceGroups.end(); ++sg)
     {
-    const std::vector<const cmSourceFile *> &sourceFiles = 
-      sg->GetSourceFiles();
-    // If the group is empty, don't write it at all.
-    if(sourceFiles.empty())
-      { 
-      continue; 
-      }
-    
-    // If the group has a name, write the header.
-    std::string name = sg->GetName();
-    if(name != "")
-      {
-      this->WriteDSPBeginGroup(fout, name.c_str(), "");
-      }
-    
-    // Loop through each source in the source group.
-    for(std::vector<const cmSourceFile *>::const_iterator sf =
-          sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
-      {
-      std::string source = (*sf)->GetFullPath();
-      const cmCustomCommand *command = 
-        (*sf)->GetCustomCommand();
-      std::string compileFlags;
-      std::vector<std::string> depends;
-      const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
-      if(cflags)
-        {
-        compileFlags = cflags;
-        }
-      const char* lang = 
-        m_GlobalGenerator->GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
-      if(lang && strcmp(lang, "CXX") == 0)
-        {
-        // force a C++ file type
-        compileFlags += " /TP ";
-        }
-      
-      // Check for extra object-file dependencies.
-      const char* dependsValue = (*sf)->GetProperty("OBJECT_DEPENDS");
-      if(dependsValue)
-        {
-        cmSystemTools::ExpandListArgument(dependsValue, depends);
-        }
-      if (source != libName || target.GetType() == cmTarget::UTILITY)
-        {
-        fout << "# Begin Source File\n\n";
-        
-        // Tell MS-Dev what the source is.  If the compiler knows how to
-        // build it, then it will.
-        fout << "SOURCE=" << 
-          this->ConvertToOptionallyRelativeOutputPath(source.c_str()) << "\n\n";
-        if(!depends.empty())
-          {
-          // Write out the dependencies for the rule.
-          fout << "USERDEP__HACK=";
-          for(std::vector<std::string>::const_iterator d = depends.begin();
-              d != depends.end(); ++d)
-            { 
-            fout << "\\\n\t" << 
-              this->ConvertToOptionallyRelativeOutputPath(d->c_str());
-            }
-          fout << "\n";
-          }
-        if (command)
-          {
-          std::string script =
-            this->ConstructScript(command->GetCommandLines(), "\\\n\t");
-          const char* comment = command->GetComment();
-          const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
-          this->WriteCustomRule(fout, source.c_str(), script.c_str(), 
-                                (*comment?comment:"Custom Rule"),
-                                command->GetDepends(), 
-                                command->GetOutput(), flags);
-          }
-        else if(compileFlags.size())
-          {
-          for(std::vector<std::string>::iterator i
-                = m_Configurations.begin(); i != m_Configurations.end(); ++i)
-            { 
-            if (i == m_Configurations.begin())
-              {
-              fout << "!IF  \"$(CFG)\" == " << i->c_str() << std::endl;
-              }
-            else 
-              {
-              fout << "!ELSEIF  \"$(CFG)\" == " << i->c_str() << std::endl;
-              }
-            fout << "\n# ADD CPP " << compileFlags << "\n\n";
-            } 
-          fout << "!ENDIF\n\n";
-          }
-        fout << "# End Source File\n";
-        }
-      }
-    
-    // If the group has a name, write the footer.
-    if(name != "")
-      {
-      this->WriteDSPEndGroup(fout);
-      }
+    this->WriteGroup(&(*sg), target, fout, libName);
     }  
 
   // Write the DSP file's footer.
   this->WriteDSPFooter(fout);
+}
+
+void cmLocalVisualStudio6Generator::WriteGroup(const cmSourceGroup *sg, cmTarget target, std::ostream &fout, const char *libName)
+{
+  const std::vector<const cmSourceFile *> &sourceFiles = 
+    sg->GetSourceFiles();
+  // If the group is empty, don't write it at all.
+        
+  if(sourceFiles.empty())
+    { 
+    return; 
+    }
+    
+  // If the group has a name, write the header.
+  std::string name = sg->GetName();
+  if(name != "")
+    {
+    this->WriteDSPBeginGroup(fout, name.c_str(), "");
+    }
+    
+  // Loop through each source in the source group.
+  for(std::vector<const cmSourceFile *>::const_iterator sf =
+        sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
+    {
+    std::string source = (*sf)->GetFullPath();
+    const cmCustomCommand *command = 
+      (*sf)->GetCustomCommand();
+    std::string compileFlags;
+    std::vector<std::string> depends;
+    const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
+    if(cflags)
+      {
+      compileFlags = cflags;
+      }
+    const char* lang = 
+      m_GlobalGenerator->GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
+    if(lang && strcmp(lang, "CXX") == 0)
+      {
+      // force a C++ file type
+      compileFlags += " /TP ";
+      }
+      
+    // Check for extra object-file dependencies.
+    const char* dependsValue = (*sf)->GetProperty("OBJECT_DEPENDS");
+    if(dependsValue)
+      {
+      cmSystemTools::ExpandListArgument(dependsValue, depends);
+      }
+    if (source != libName || target.GetType() == cmTarget::UTILITY)
+      {
+      fout << "# Begin Source File\n\n";
+        
+      // Tell MS-Dev what the source is.  If the compiler knows how to
+      // build it, then it will.
+      fout << "SOURCE=" << 
+        this->ConvertToOptionallyRelativeOutputPath(source.c_str()) << "\n\n";
+      if(!depends.empty())
+        {
+        // Write out the dependencies for the rule.
+        fout << "USERDEP__HACK=";
+        for(std::vector<std::string>::const_iterator d = depends.begin();
+            d != depends.end(); ++d)
+          { 
+          fout << "\\\n\t" << 
+            this->ConvertToOptionallyRelativeOutputPath(d->c_str());
+          }
+        fout << "\n";
+        }
+      if (command)
+        {
+        std::string script =
+          this->ConstructScript(command->GetCommandLines(), "\\\n\t");
+        const char* comment = command->GetComment();
+        const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
+        this->WriteCustomRule(fout, source.c_str(), script.c_str(), 
+                              (*comment?comment:"Custom Rule"),
+                              command->GetDepends(), 
+                              command->GetOutput(), flags);
+        }
+      else if(compileFlags.size())
+        {
+        for(std::vector<std::string>::iterator i
+              = m_Configurations.begin(); i != m_Configurations.end(); ++i)
+          { 
+          if (i == m_Configurations.begin())
+            {
+            fout << "!IF  \"$(CFG)\" == " << i->c_str() << std::endl;
+            }
+          else 
+            {
+            fout << "!ELSEIF  \"$(CFG)\" == " << i->c_str() << std::endl;
+            }
+          fout << "\n# ADD CPP " << compileFlags << "\n\n";
+          } 
+        fout << "!ENDIF\n\n";
+        }
+      fout << "# End Source File\n";
+      }
+    }
+
+  std::vector<cmSourceGroup> children  = sg->GetGroupChildren();
+
+  for(unsigned int i=0;i<children.size();++i)
+    {
+    this->WriteGroup(&children[i], target, fout, libName);
+    }
+
+
+
+    
+  // If the group has a name, write the footer.
+  if(name != "")
+    {
+    this->WriteDSPEndGroup(fout);
+    }
+
 }
 
 
@@ -458,13 +475,13 @@ cmLocalVisualStudio6Generator
 }
 
 void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
-                                  const char* source,
-                                  const char* command,
-                                  const char* comment,
-                                  const std::vector<std::string>& depends,
-                                  const char *output,
-                                  const char* flags
-                                  )
+                                                    const char* source,
+                                                    const char* command,
+                                                    const char* comment,
+                                                    const std::vector<std::string>& depends,
+                                                    const char *output,
+                                                    const char* flags
+  )
 {
   std::vector<std::string>::iterator i;
   for(i = m_Configurations.begin(); i != m_Configurations.end(); ++i)
@@ -544,8 +561,8 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
 
 
 void cmLocalVisualStudio6Generator::WriteDSPBeginGroup(std::ostream& fout, 
-                                        const char* group,
-                                        const char* filter)
+                                                       const char* group,
+                                                       const char* filter)
 {
   fout << "# Begin Group \"" << group << "\"\n"
     "# PROP Default_Filter \"" << filter << "\"\n";
@@ -763,9 +780,11 @@ void cmLocalVisualStudio6Generator
     libPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
     }
   std::string exePath = "";
+  std::string exePathDebug = "";
   if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
     {
     exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    
     }
   if(libPath.size())
     {
@@ -952,12 +971,36 @@ void cmLocalVisualStudio6Generator
     extraLinkOptions = 
       m_Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
 
+        
     // if the executable has an output name then add the appropriate flag
     if (target.GetProperty("OUTPUT_NAME"))
       {
+      std::string outputname = target.GetProperty("OUTPUT_NAME");
       libMultiLineOptions += "# ADD LINK32 /out:";
-      libMultiLineOptions += target.GetProperty("OUTPUT_NAME");
+      libMultiLineOptions += outputname;
       libMultiLineOptions += " \n";
+      }
+    else
+      {
+
+      libMultiLineOptions += "# ADD LINK32 /out:\"";
+
+      if(exePath != "")
+        libMultiLineOptions += exePath + "/" + libName + ".exe";
+      else
+        libMultiLineOptions += std::string(libName) + ".exe";
+                  
+      libMultiLineOptions += "\"\n";
+        
+        
+      libMultiLineOptionsForDebug += "# ADD LINK32 /out:\"";
+
+      if(exePath != "")
+        libMultiLineOptionsForDebug += exePath + "/" + libName + "D.exe";
+      else
+        libMultiLineOptionsForDebug += std::string(libName) + "D.exe";
+        
+      libMultiLineOptionsForDebug += "\"\n";
       }
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
@@ -1087,16 +1130,35 @@ void cmLocalVisualStudio6Generator
     cmSystemTools::ReplaceString(line, "LIBRARY_OUTPUT_PATH",
                                  removeQuotes(
                                    this->ConvertToOptionallyRelativeOutputPath(libPath.c_str())).c_str());
-    cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATH",
-                                 removeQuotes(
-                                   this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
+
+
+    if (!m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH_OVERRIDE") || exePath == "")
+      {
+      cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATH",
+                                   removeQuotes(
+                                     this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
+      } else
+        {
+        cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATHRelease",
+                                     removeQuotes(
+                                       this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
+        cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATHDebug",
+                                     removeQuotes(
+                                       this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
+        cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATHMinSizeRel",
+                                     removeQuotes(
+                                       this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
+        cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATHRelWithDebInfo",
+                                     removeQuotes(
+                                       this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
+        }
     cmSystemTools::ReplaceString(line, 
                                  "EXTRA_DEFINES", 
                                  m_Makefile->GetDefineFlags());
     const char* debugPostfix
       = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
     cmSystemTools::ReplaceString(line, "DEBUG_POSTFIX", 
-      debugPostfix?debugPostfix:"");
+                                 debugPostfix?debugPostfix:"");
     // store flags for each configuration
     std::string flags = " ";
     std::string flagsRelease = " ";

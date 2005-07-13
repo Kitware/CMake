@@ -162,7 +162,7 @@ public:
    * Add an executable to the build.
    */
   cmTarget* AddExecutable(const char *exename, 
-                     const std::vector<std::string> &srcs);
+                          const std::vector<std::string> &srcs);
 
   /**
    * Add a utility to the build.  A utiltity target is a command that
@@ -200,15 +200,15 @@ public:
    */
   std::vector<std::string>& GetLinkDirectories()
     {
-    return m_LinkDirectories;
+      return m_LinkDirectories;
     }
   const std::vector<std::string>& GetLinkDirectories() const
     {
-    return m_LinkDirectories;
+      return m_LinkDirectories;
     }
   void SetLinkDirectories(const std::vector<std::string>& vec)
     {
-    m_LinkDirectories = vec;
+      m_LinkDirectories = vec;
     }
 
   /**
@@ -268,7 +268,7 @@ public:
    */
   const char* GetProjectName()
     {
-    return m_ProjectName.c_str();
+      return m_ProjectName.c_str();
     }
   
   /**
@@ -280,7 +280,7 @@ public:
   /**
    * Add a source group for consideration when adding a new source.
    */
-  void AddSourceGroup(const char* name, const char* regex=0);
+  void AddSourceGroup(const char* name, const char* regex=0, const char* parent=0);
   
   /**
    * Add an auxiliary directory to the build.
@@ -310,12 +310,12 @@ public:
   void SetHomeDirectory(const char* dir);
   const char* GetHomeDirectory() const
     {
-    return m_cmHomeDirectory.c_str();
+      return m_cmHomeDirectory.c_str();
     }
   void SetHomeOutputDirectory(const char* lib);
   const char* GetHomeOutputDirectory() const
     {
-    return m_HomeOutputDirectory.c_str();
+      return m_HomeOutputDirectory.c_str();
     }
   //@}
   
@@ -394,7 +394,7 @@ public:
     }
   const char* GetComplainRegularExpression()
     {
-    return m_ComplainFileRegularExpression.c_str();
+      return m_ComplainFileRegularExpression.c_str();
     }
 
   /**
@@ -409,15 +409,15 @@ public:
    */
   std::vector<std::string>& GetIncludeDirectories()
     { 
-    return m_IncludeDirectories;
+      return m_IncludeDirectories;
     }
   const std::vector<std::string>& GetIncludeDirectories() const
     { 
-    return m_IncludeDirectories;
+      return m_IncludeDirectories;
     }
   void SetIncludeDirectories(const std::vector<std::string>& vec)
     {
-    m_IncludeDirectories = vec;
+      m_IncludeDirectories = vec;
     }
 
   /** Expand out any arguements in the vector that have ; separated
@@ -554,7 +554,7 @@ public:
    * Copy file but change lines acording to ConfigureString
    */
   int ConfigureFile(const char* infile, const char* outfile, 
-    bool copyonly, bool atOnly, bool escapeQuotes);
+                    bool copyonly, bool atOnly, bool escapeQuotes);
 
   /**
    * find what source group this source is in

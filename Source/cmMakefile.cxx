@@ -241,8 +241,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
       {
       cmOStringStream error;
       error << "Error in cmake code at\n"
-        << lff.m_FilePath << ":" << lff.m_Line << ":\n"
-        << rm->GetError();
+            << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+            << rm->GetError();
       cmSystemTools::Error(error.str().c_str());
       return false;
       }
@@ -250,8 +250,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
     usedCommand->SetMakefile(this);
     bool keepCommand = false;
     if(usedCommand->GetEnabled() && !cmSystemTools::GetFatalErrorOccured()  &&
-      (!this->GetCMakeInstance()->GetScriptMode() || 
-       usedCommand->IsScriptable()))
+       (!this->GetCMakeInstance()->GetScriptMode() || 
+        usedCommand->IsScriptable()))
       {
       if(!usedCommand->InvokeInitialPass(lff.m_Arguments))
         {
@@ -277,8 +277,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
       {
       cmOStringStream error;
       error << "Error in cmake code at\n"
-        << lff.m_FilePath << ":" << lff.m_Line << ":\n"
-        << "Command " << usedCommand->GetName() << " not scriptable" << std::endl;
+            << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+            << "Command " << usedCommand->GetName() << " not scriptable" << std::endl;
       cmSystemTools::Error(error.str().c_str());
       result = false;
       cmSystemTools::SetFatalErrorOccured();
@@ -367,7 +367,7 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
   if(!external && m_cmStartDirectory == m_cmHomeDirectory)
     {
     if(cmSystemTools::LowerCase(
-         cmSystemTools::GetFilenameName(filename)) == "cmakelists.txt")
+      cmSystemTools::GetFilenameName(filename)) == "cmakelists.txt")
       {
       requireProjectCommand = true;
       }
@@ -418,7 +418,7 @@ void cmMakefile::AddCommand(cmCommand* wg)
   this->GetCMakeInstance()->AddCommand(wg);
 }
 
-  // Set the make file 
+// Set the make file 
 void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
 {
   m_LocalGenerator = lg;
@@ -439,7 +439,7 @@ void cmMakefile::FinalPass()
 
 }
 
-  // Generate the output file
+// Generate the output file
 void cmMakefile::ConfigureFinalPass()
 {
   this->FinalPass();
@@ -725,7 +725,7 @@ void cmMakefile::RemoveDefineFlag(const char* flag)
 void cmMakefile::AddLinkLibrary(const char* lib, cmTarget::LinkLibraryType llt)
 {
   m_LinkLibraries.push_back(
-          std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt));
+    std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt));
 }
 
 void cmMakefile::AddLinkLibraryForTarget(const char *target,
@@ -892,7 +892,7 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
   // order dependency of the include path.
   std::vector<std::string>::iterator i = 
     std::find(m_IncludeDirectories.begin(),
-               m_IncludeDirectories.end(), inc);
+              m_IncludeDirectories.end(), inc);
   if(i == m_IncludeDirectories.end())
     {
     if (before)
@@ -945,7 +945,7 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
   cmCacheManager::CacheIterator it = 
     this->GetCacheManager()->GetCacheIterator(name);
   if(!it.IsAtEnd() && (it.GetType() == cmCacheManager::UNINITIALIZED) &&
-    it.Initialized())
+     it.Initialized())
     {
     val = it.GetValue();
     if ( type == cmCacheManager::PATH || type == cmCacheManager::FILEPATH )
@@ -1002,7 +1002,7 @@ void cmMakefile::AddCacheDefinition(const char* name, bool value, const char* do
   cmCacheManager::CacheIterator it = 
     this->GetCacheManager()->GetCacheIterator(name);
   if(!it.IsAtEnd() && (it.GetType() == cmCacheManager::UNINITIALIZED) &&
-    it.Initialized())
+     it.Initialized())
     {
     val = it.GetValueAsBool();
     }
@@ -1093,8 +1093,8 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     {
     case 0:
       this->GetCacheManager()->AddCacheEntry(ltname.c_str(),"STATIC",
-                      "Whether a library is static, shared or module.",
-                      cmCacheManager::INTERNAL);
+                                             "Whether a library is static, shared or module.",
+                                             cmCacheManager::INTERNAL);
       break;
     case 1:
       this->GetCacheManager()->
@@ -1120,7 +1120,7 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
 }
 
 cmTarget* cmMakefile::AddExecutable(const char *exeName, 
-                               const std::vector<std::string> &srcs)
+                                    const std::vector<std::string> &srcs)
 {
   cmTarget target;
   target.SetType(cmTarget::EXECUTABLE, exeName);
@@ -1180,30 +1180,88 @@ cmSourceGroup* cmMakefile::GetSourceGroup(const char* name)
     if(sgName == name)
       {
       return &(*sg);
+      } 
+    else
+      {
+      cmSourceGroup *target = sg->lookupChild(name);
+
+      if(target)
+        {
+        return target;
+        }
       }
     }
   return 0;
 }
 
-void cmMakefile::AddSourceGroup(const char* name, const char* regex)
+void cmMakefile::AddSourceGroup(const char* name, const char* regex, const char *parent)
 {
   // First see if the group exists.  If so, replace its regular expression.
-  for(std::vector<cmSourceGroup>::iterator sg = m_SourceGroups.begin();
-      sg != m_SourceGroups.end(); ++sg)
+  for(unsigned int i=0;i<m_SourceGroups.size();++i)
     {
+    cmSourceGroup *sg = &m_SourceGroups[i];
+                                
     std::string sgName = sg->GetName();
-    if(sgName == name)
+    if(!parent)
       {
-      if ( regex )
+      if(sgName == name)
         {
-        // We only want to set the regular expression.  If there are already
-        // source files in the group, we don't want to remove them.
-        sg->SetGroupRegex(regex);
+        if ( regex )
+          {
+          // We only want to set the regular expression.  If there are already
+          // source files in the group, we don't want to remove them.
+          sg->SetGroupRegex(regex);
+          }
+        return;
         }
-      return;
+      }
+    else
+      {
+      if(sgName == parent)
+        {
+        cmSourceGroup *localtarget = sg->lookupChild(name);
+        if(localtarget)
+          {
+          if ( regex )
+            {
+            // We only want to set the regular expression.  If there are already
+            // source files in the group, we don't want to remove them.
+            localtarget->SetGroupRegex(regex);
+            }
+          } 
+        else
+          {
+          sg->AddChild(cmSourceGroup(name, regex));
+          }
+        return;
+        } 
+      else 
+        {
+        cmSourceGroup *localtarget = sg->lookupChild(parent);
+
+        if(localtarget)
+          {
+          cmSourceGroup *addtarget = localtarget->lookupChild(name);
+                                                        
+          if(addtarget)
+            {
+            if ( regex )
+              {
+              // We only want to set the regular expression.  If there are already
+              // source files in the group, we don't want to remove them.
+              addtarget->SetGroupRegex(regex);
+              }
+            } 
+          else
+            {
+            localtarget->AddChild(cmSourceGroup(name, regex));
+            }
+          return;
+          } 
+        }
       }
     }
-  
+                
   // The group doesn't exist.  Add it.
   m_SourceGroups.push_back(cmSourceGroup(name, regex));
 }
@@ -1221,12 +1279,12 @@ void cmMakefile::ExpandVariables()
 {
   // Now expand variables in the include and link strings
   for(std::vector<std::string>::iterator d = m_IncludeDirectories.begin();
-        d != m_IncludeDirectories.end(); ++d)
+      d != m_IncludeDirectories.end(); ++d)
     {
     this->ExpandVariablesInString(*d);
     }
   for(std::vector<std::string>::iterator d = m_LinkDirectories.begin();
-        d != m_LinkDirectories.end(); ++d)
+      d != m_LinkDirectories.end(); ++d)
     {
     this->ExpandVariablesInString(*d);
     }
@@ -1426,158 +1484,158 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   if ( notParsed )
     {
 
-  // start by look for $ or @ in the string
-  std::string::size_type markerPos;
-  if(atOnly)
-    {
-    markerPos = source.find_first_of("@");
-    }
-  else
-    {
-    markerPos = source.find_first_of("$@");
-    }
-  // if not found, or found as the last character, then leave quickly as
-  // nothing needs to be expanded
-  if((markerPos == std::string::npos) || (markerPos >= source.size()-1))
-    {
-    return source.c_str();
-    }
-  // current position
-  std::string::size_type currentPos =0; // start at 0
-  std::string result; // string with replacements
-  // go until the the end of the string
-  while((markerPos != std::string::npos) && (markerPos < source.size()-1))
-    {
-    // grab string from currentPos to the start of the variable
-    // and add it to the result
-    result += source.substr(currentPos, markerPos - currentPos);
-    char endVariableMarker;     // what is the end of the variable @ or }
-    int markerStartSize = 1;    // size of the start marker 1 or 2 or 5
-    if(!atOnly && source[markerPos] == '$')
-      {
-      // ${var} case
-      if(source[markerPos+1] == '{')
-        {
-        endVariableMarker = '}';
-        markerStartSize = 2;
-        }
-      // $ENV{var} case
-      else if(markerPos+4 < source.size() &&
-              source[markerPos+4] == '{' &&
-              !source.substr(markerPos+1, 3).compare("ENV"))
-        {
-        endVariableMarker = '}';
-        markerStartSize = 5;
-        }
-      else
-        {
-        // bogus $ with no { so add $ to result and move on
-        result += '$'; // add bogus $ back into string
-        currentPos = markerPos+1; // move on
-        endVariableMarker = ' '; // set end var to space so we can tell bogus
-        }
-      }
-    else
-      {
-      // @VAR case
-      endVariableMarker = '@';
-      }
-    // if it was a valid variable (started with @ or ${ or $ENV{ )
-    if(endVariableMarker != ' ')
-      {
-      markerPos += markerStartSize; // move past marker
-      // find the end variable marker starting at the markerPos
-      std::string::size_type endVariablePos =
-        source.find(endVariableMarker, markerPos);
-      if(endVariablePos == std::string::npos)
-        {
-        // no end marker found so add the bogus start
-        if(endVariableMarker == '@')
-          {
-          result += '@';
-          }
-        else
-          {
-          result += (markerStartSize == 5 ? "$ENV{" : "${");
-          }
-        currentPos = markerPos;
-        }
-      else
-        {
-        // good variable remove it
-        std::string var = source.substr(markerPos, endVariablePos - markerPos);
-        bool found = false;
-        if (markerStartSize == 5) // $ENV{
-          {
-          char *ptr = getenv(var.c_str());
-          if (ptr)
-            {
-            if (escapeQuotes)
-              {
-              result += cmSystemTools::EscapeQuotes(ptr);
-              }
-            else
-              {
-              result += ptr;
-              }
-            found = true;
-            }
-          }
-        else
-          {
-          const char* lookup = this->GetDefinition(var.c_str());
-          if(lookup)
-            {
-            if (escapeQuotes)
-              {
-              result += cmSystemTools::EscapeQuotes(lookup);
-              }
-            else
-              {
-              result += lookup;
-              }
-            found = true;
-            }
-          else if(filename && (var == "CMAKE_CURRENT_LIST_FILE"))
-            {
-            result += filename;
-            found = true;
-            }
-          else if(line >= 0 && (var == "CMAKE_CURRENT_LIST_LINE"))
-            {
-            cmOStringStream ostr;
-            ostr << line;
-            result += ostr.str();
-            found = true;
-            }
-          }
-        // if found add to result, if not, then it gets blanked
-        if (!found)
-          {
-          // if no definition is found then add the var back
-          if(!removeEmpty && endVariableMarker == '@')
-            {
-            result += "@";
-            result += var;
-            result += "@";
-            }
-          }
-        // lookup var, and replace it
-        currentPos = endVariablePos+1;
-        }
-      }
+    // start by look for $ or @ in the string
+    std::string::size_type markerPos;
     if(atOnly)
       {
-      markerPos = source.find_first_of("@", currentPos);
+      markerPos = source.find_first_of("@");
       }
     else
       {
-      markerPos = source.find_first_of("$@", currentPos);
+      markerPos = source.find_first_of("$@");
       }
+    // if not found, or found as the last character, then leave quickly as
+    // nothing needs to be expanded
+    if((markerPos == std::string::npos) || (markerPos >= source.size()-1))
+      {
+      return source.c_str();
+      }
+    // current position
+    std::string::size_type currentPos =0; // start at 0
+    std::string result; // string with replacements
+    // go until the the end of the string
+    while((markerPos != std::string::npos) && (markerPos < source.size()-1))
+      {
+      // grab string from currentPos to the start of the variable
+      // and add it to the result
+      result += source.substr(currentPos, markerPos - currentPos);
+      char endVariableMarker;     // what is the end of the variable @ or }
+      int markerStartSize = 1;    // size of the start marker 1 or 2 or 5
+      if(!atOnly && source[markerPos] == '$')
+        {
+        // ${var} case
+        if(source[markerPos+1] == '{')
+          {
+          endVariableMarker = '}';
+          markerStartSize = 2;
+          }
+        // $ENV{var} case
+        else if(markerPos+4 < source.size() &&
+                source[markerPos+4] == '{' &&
+                !source.substr(markerPos+1, 3).compare("ENV"))
+          {
+          endVariableMarker = '}';
+          markerStartSize = 5;
+          }
+        else
+          {
+          // bogus $ with no { so add $ to result and move on
+          result += '$'; // add bogus $ back into string
+          currentPos = markerPos+1; // move on
+          endVariableMarker = ' '; // set end var to space so we can tell bogus
+          }
+        }
+      else
+        {
+        // @VAR case
+        endVariableMarker = '@';
+        }
+      // if it was a valid variable (started with @ or ${ or $ENV{ )
+      if(endVariableMarker != ' ')
+        {
+        markerPos += markerStartSize; // move past marker
+        // find the end variable marker starting at the markerPos
+        std::string::size_type endVariablePos =
+          source.find(endVariableMarker, markerPos);
+        if(endVariablePos == std::string::npos)
+          {
+          // no end marker found so add the bogus start
+          if(endVariableMarker == '@')
+            {
+            result += '@';
+            }
+          else
+            {
+            result += (markerStartSize == 5 ? "$ENV{" : "${");
+            }
+          currentPos = markerPos;
+          }
+        else
+          {
+          // good variable remove it
+          std::string var = source.substr(markerPos, endVariablePos - markerPos);
+          bool found = false;
+          if (markerStartSize == 5) // $ENV{
+            {
+            char *ptr = getenv(var.c_str());
+            if (ptr)
+              {
+              if (escapeQuotes)
+                {
+                result += cmSystemTools::EscapeQuotes(ptr);
+                }
+              else
+                {
+                result += ptr;
+                }
+              found = true;
+              }
+            }
+          else
+            {
+            const char* lookup = this->GetDefinition(var.c_str());
+            if(lookup)
+              {
+              if (escapeQuotes)
+                {
+                result += cmSystemTools::EscapeQuotes(lookup);
+                }
+              else
+                {
+                result += lookup;
+                }
+              found = true;
+              }
+            else if(filename && (var == "CMAKE_CURRENT_LIST_FILE"))
+              {
+              result += filename;
+              found = true;
+              }
+            else if(line >= 0 && (var == "CMAKE_CURRENT_LIST_LINE"))
+              {
+              cmOStringStream ostr;
+              ostr << line;
+              result += ostr.str();
+              found = true;
+              }
+            }
+          // if found add to result, if not, then it gets blanked
+          if (!found)
+            {
+            // if no definition is found then add the var back
+            if(!removeEmpty && endVariableMarker == '@')
+              {
+              result += "@";
+              result += var;
+              result += "@";
+              }
+            }
+          // lookup var, and replace it
+          currentPos = endVariablePos+1;
+          }
+        }
+      if(atOnly)
+        {
+        markerPos = source.find_first_of("@", currentPos);
+        }
+      else
+        {
+        markerPos = source.find_first_of("$@", currentPos);
+        }
+      }
+    result += source.substr(currentPos); // pick up the rest of the string
+    source = result;
     }
-  result += source.substr(currentPos); // pick up the rest of the string
-  source = result;
-      }
   return source.c_str();
 }
 
@@ -1651,9 +1709,10 @@ cmMakefile::FindSourceGroup(const char* source,
   for(std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
       sg != groups.rend(); ++sg)
     {
-    if(sg->MatchesFiles(source))
+    cmSourceGroup *result = sg->MatchChildrenFiles(source);
+    if(result)
       {
-      return *sg;
+      return *result;
       }
     }
   
@@ -1661,12 +1720,14 @@ cmMakefile::FindSourceGroup(const char* source,
   for(std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
       sg != groups.rend(); ++sg)
     {
-    if(sg->MatchesRegex(source))
+    cmSourceGroup *result = sg->MatchChildrenRegex(source);
+    if(result)
       {
-      return *sg;
+      return *result;
       }
     }
-  
+
+                
   // Shouldn't get here, but just in case, return the default group.
   return groups.front();
 }
@@ -1914,12 +1975,12 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
         if ( cmSystemTools::GetFilenameLastExtension(srcTreeFile.c_str()).size() == 0)
           {
           if (cmSystemTools::DoesFileExistWithExtensions(
-                srcTreeFile.c_str(), this->GetSourceExtensions()))
+            srcTreeFile.c_str(), this->GetSourceExtensions()))
             {
             src = srcTreeFile;
             }
           else if (cmSystemTools::DoesFileExistWithExtensions(
-                     srcTreeFile.c_str(), this->GetHeaderExtensions()))
+            srcTreeFile.c_str(), this->GetHeaderExtensions()))
             {
             src = srcTreeFile;
             }
@@ -2288,7 +2349,7 @@ std::string cmMakefile::GetModulesFile(const char* filename)
     }
   //std::string  Look through the possible module directories.
   for(std::vector<std::string>::iterator i = modulePath.begin();
-    i != modulePath.end(); ++i)
+      i != modulePath.end(); ++i)
     {
     std::string itempl = *i;
     cmSystemTools::ConvertToUnixSlashes(itempl);
@@ -2364,7 +2425,7 @@ void cmMakefile::ConfigureString(const std::string& input,
 }
 
 int cmMakefile::ConfigureFile(const char* infile, const char* outfile, 
-  bool copyonly, bool atOnly, bool escapeQuotes)
+                              bool copyonly, bool atOnly, bool escapeQuotes)
 {
   int res = 1;
   if ( !cmSystemTools::FileExists(infile) )
@@ -2388,7 +2449,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
   if(copyonly)
     {
     if ( !cmSystemTools::CopyFileIfDifferent(sinfile.c_str(),
-                                       soutfile.c_str()))
+                                             soutfile.c_str()))
       {
       return 0;
       }
@@ -2402,7 +2463,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
       {
       cmSystemTools::Error(
         "Could not open file for write in copy operation ", 
-                           tempOutputFile.c_str());
+        tempOutputFile.c_str());
       cmSystemTools::ReportLastSystemError("");
       return 0;
       }
@@ -2428,7 +2489,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     fin.close();
     fout.close();
     if ( !cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
-      soutfile.c_str()) )
+                                             soutfile.c_str()) )
       {
       res = 0;
       }
@@ -2451,8 +2512,8 @@ bool cmMakefile::CheckInfiniteLoops()
 {
   std::vector<std::string>::iterator it;
   for ( it = m_ListFiles.begin();
-    it != m_ListFiles.end();
-    ++ it )
+        it != m_ListFiles.end();
+        ++ it )
     {
     if ( this->HasWrittenFile(it->c_str()) )
       {

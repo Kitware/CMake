@@ -111,6 +111,8 @@ private:
                        const char* output,
                        const char* extraFlags);
 
+  void WriteGroup(const cmSourceGroup *sg, cmTarget target, std::ostream &fout, const char *libName, std::vector<std::string> *configs);
+
   std::vector<std::string> m_CreatedProjectNames;
   std::string m_LibraryOutputPath;
   std::string m_ExecutableOutputPath;

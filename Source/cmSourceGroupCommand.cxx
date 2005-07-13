@@ -16,6 +16,50 @@
 =========================================================================*/
 #include "cmSourceGroupCommand.h"
 
+inline std::vector<std::string> tokenize(const std::string& str,
+                                         const std::string& sep, 
+                                         bool skipEmptyTokens)
+{
+  std::vector<std::string> tokens;
+  std::string::size_type tokstart,tokend;
+
+  if (skipEmptyTokens) 
+    {
+    tokend=0;
+    }
+  else 
+    {
+    tokend=std::string::npos;
+    }
+        
+  do
+    {
+    if (skipEmptyTokens)
+      {
+      tokstart=str.find_first_not_of(sep,tokend);
+      }
+    else 
+      {
+      tokstart=tokend+1;
+      }
+    if (tokstart==std::string::npos) 
+      {
+      break;    // no more tokens
+      }
+    tokend=str.find_first_of(sep,tokstart);
+    if (tokend==std::string::npos)
+      {
+      tokens.push_back(str.substr(tokstart));
+      }
+    else
+      {
+      tokens.push_back(str.substr(tokstart,tokend-tokstart));
+      }
+    } while (tokend!=std::string::npos);
+        
+  return tokens;
+}
+
 // cmSourceGroupCommand
 bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -24,18 +68,32 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }  
-  
-  // Get the source group with the given name.
-  cmSourceGroup* sg = m_Makefile->GetSourceGroup(args[0].c_str());
-  if(!sg)
+
+  std::string delimiter = "\\";
+
+  if(m_Makefile->GetDefinition("SOURCE_GROUP_DELIMITER"))
+    delimiter = m_Makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
+
+  std::vector<std::string> folders = tokenize(args[0], delimiter, true);
+ 
+  const char *parent = NULL;
+ 
+  cmSourceGroup* sg = NULL;
+        
+  for(unsigned int i=0;i<folders.size();++i)
     {
-    m_Makefile->AddSourceGroup(args[0].c_str(), 0);
-    sg = m_Makefile->GetSourceGroup(args[0].c_str());
+    sg = m_Makefile->GetSourceGroup(folders[i].c_str());
+    if(!sg)
+      {
+      m_Makefile->AddSourceGroup(folders[i].c_str(), 0, parent);
+      }
+    sg = m_Makefile->GetSourceGroup(folders[i].c_str());
+    parent = folders[i].c_str();
     }
-  
+
   // If only two arguments are given, the pre-1.8 version of the
   // command is being invoked.
-  if(args.size() == 2 && args[1] != "FILES")
+  if(args.size() == 2  && args[1] != "FILES")
     {
     sg->SetGroupRegex(args[1].c_str());
     return true;

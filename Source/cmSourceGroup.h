@@ -47,6 +47,16 @@ public:
    * Add a file name to the explicit list of files for this group.
    */
   void AddGroupFile(const char* name);
+
+  /**
+   * Add child to this sourcegroup
+   */
+  void AddChild(cmSourceGroup child);
+
+  /**
+   * Looks up child and returns it
+   */
+  cmSourceGroup *lookupChild(const char *name);
   
   /**
    * Get the name of this group.
@@ -62,6 +72,16 @@ public:
    * Check if the given name matches this group's explicit file list.
    */
   bool MatchesFiles(const char* name);
+
+  /**
+   * Check if the given name matches this group's explicit file list in children.
+   */
+  cmSourceGroup *MatchChildrenFiles(const char *name);
+
+  /**
+   * Check if the given name matches this group's regex in children.
+   */
+  cmSourceGroup *MatchChildrenRegex(const char *name);
   
   /**  
    * Assign the given source file to this group.  Used only by
@@ -76,6 +96,7 @@ public:
   const std::vector<const cmSourceFile*>& GetSourceFiles() const;
   std::vector<const cmSourceFile*>& GetSourceFiles();
   
+  std::vector<cmSourceGroup> GetGroupChildren() const;
 private:
   /**
    * The name of the source group.
@@ -97,6 +118,8 @@ private:
    * this group.
    */
   std::vector<const cmSourceFile*> m_SourceFiles;
+
+  std::vector<cmSourceGroup> m_GroupChildren;
 };
 
 #endif
