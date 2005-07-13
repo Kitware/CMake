@@ -780,7 +780,6 @@ void cmLocalVisualStudio6Generator
     libPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
     }
   std::string exePath = "";
-  std::string exePathDebug = "";
   if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
     {
     exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
@@ -975,36 +974,9 @@ void cmLocalVisualStudio6Generator
     // if the executable has an output name then add the appropriate flag
     if (target.GetProperty("OUTPUT_NAME"))
       {
-      std::string outputname = target.GetProperty("OUTPUT_NAME");
       libMultiLineOptions += "# ADD LINK32 /out:";
-      libMultiLineOptions += outputname;
+      libMultiLineOptions += target.GetProperty("OUTPUT_NAME");
       libMultiLineOptions += " \n";
-      }
-    else
-      {
-      libMultiLineOptions += "# ADD LINK32 /out:\"";
-
-      if(exePath != "")
-        {
-        libMultiLineOptions += exePath + "/" + libName + ".exe";
-        }
-      else
-        {
-        libMultiLineOptions += std::string(libName) + ".exe";
-        }
-      libMultiLineOptions += "\"\n";
-      libMultiLineOptionsForDebug += "# ADD LINK32 /out:\"";
-      if(exePath != "")
-        {
-        libMultiLineOptionsForDebug += exePath + "$(INTDIR)/" + libName + "D.exe";
-        }
-      else
-        {
-        libMultiLineOptionsForDebug += std::string("$(INTDIR)/")
-          + std::string(libName) + "D.exe";
-        }
-        
-      libMultiLineOptionsForDebug += "\"\n";
       }
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
@@ -1114,7 +1086,6 @@ void cmLocalVisualStudio6Generator
                                  libDebugOptions.c_str());
     cmSystemTools::ReplaceString(line, "CM_OPTIMIZED_LIBRARIES",
                                  libOptimizedOptions.c_str());
-
     cmSystemTools::ReplaceString(line, "CM_MULTILINE_LIBRARIES_FOR_DEBUG",
                                  libMultiLineOptionsForDebug.c_str());
     cmSystemTools::ReplaceString(line, "CM_MULTILINE_LIBRARIES",
@@ -1130,32 +1101,15 @@ void cmLocalVisualStudio6Generator
     // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH 
     // are already quoted in the template file,
     // we need to remove the quotes here, we still need
-    // to convert to output path for unix to win32 conversion
+    // to convert to output path for unix to win32 conversion 
     cmSystemTools::ReplaceString(line, "LIBRARY_OUTPUT_PATH",
                                  removeQuotes(
                                    this->ConvertToOptionallyRelativeOutputPath(libPath.c_str())).c_str());
+    cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATH",
+                                 removeQuotes(
+                                   this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
 
 
-    if (!m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH_OVERRIDE") || exePath == "")
-      {
-      cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATH",
-                                   removeQuotes(
-                                     this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
-      } else
-        {
-        cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATHRelease",
-                                     removeQuotes(
-                                       this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
-        cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATHDebug",
-                                     removeQuotes(
-                                       this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
-        cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATHMinSizeRel",
-                                     removeQuotes(
-                                       this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
-        cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATHRelWithDebInfo",
-                                     removeQuotes(
-                                       this->ConvertToOptionallyRelativeOutputPath(exePath.c_str())).c_str());
-        }
     cmSystemTools::ReplaceString(line, 
                                  "EXTRA_DEFINES", 
                                  m_Makefile->GetDefineFlags());
