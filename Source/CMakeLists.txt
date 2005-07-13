@@ -792,6 +792,16 @@ IF(BUILD_TESTING)
   ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 
   IF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
+    ADD_TEST(BundleTest ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/BundleTest"
+      "${CMake_BINARY_DIR}/Tests/BundleTest"
+      --build-two-config
+      --build-generator ${CMAKE_GENERATOR}
+      --build-makeprogram ${MAKEPROGRAM}
+      --build-project BundleTest
+      --test-command  BundleTest.app/Contents/MacOS/BundleTest)
+    
     ADD_TEST(objc++ ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/Objc++"
@@ -890,7 +900,7 @@ IF(BUILD_TESTING)
       ENDIF(JNI_H) 
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
   ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
-
+    
   IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
     # Will be set if the wxwindows gui is on
     ADD_TEST(UseWX ${CMAKE_CTEST_COMMAND}
