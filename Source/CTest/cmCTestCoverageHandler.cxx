@@ -252,7 +252,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   std::set<std::string> missingFiles;
  
   std::string actualSourceFile = "";
-  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Performing coverage (each . represents one file):" << std::endl);
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Processing coverage (each . represents one file):" << std::endl);
   cmCTestLog(m_CTest, HANDLER_OUTPUT, "    ");
   int file_count = 0;
   for ( it = files.begin(); it != files.end(); ++ it )
@@ -558,13 +558,27 @@ int cmCTestCoverageHandler::ProcessHandler()
   long total_untested = 0;
   //std::string fullSourceDir = sourceDir + "/";
   //std::string fullBinaryDir = binaryDir + "/";
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, std::endl);
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Acumulating results (each . represents one file):" << std::endl);
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "    ");
+
+  std::vector<std::string> errorsWhileAccumulating;
+
+  file_count = 0;
   for ( fileIterator = totalCoverage.begin();
     fileIterator != totalCoverage.end();
     ++fileIterator )
     {
-    if ( cnt == 100 )
+    cmCTestLog(m_CTest, HANDLER_OUTPUT, "." << std::flush);
+    file_count ++;
+    if ( file_count % 50 == 0 )
       {
-      cnt = 0;
+      cmCTestLog(m_CTest, HANDLER_OUTPUT, " processed: " << file_count << " out of "
+        << totalCoverage.size() << std::endl);
+      cmCTestLog(m_CTest, HANDLER_OUTPUT, "    ");
+      }
+    if ( cnt % 100 == 0 )
+      {
       this->EndCoverageLogFile(covLogFile, logFileCount);
       logFileCount ++;
       if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
@@ -575,7 +589,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     const std::string fullFileName = fileIterator->first;
     const std::string fileName = cmSystemTools::GetFilenameName(fullFileName.c_str());
     std::string fullFilePath = cmSystemTools::GetFilenamePath(fullFileName.c_str());
-    cmCTestLog(m_CTest, ERROR_MESSAGE, "Process file: " << fullFileName << std::endl);
+    cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Process file: " << fullFileName << std::endl);
 
     cmSystemTools::ConvertToUnixSlashes(fullFilePath);
 
@@ -590,7 +604,7 @@ int cmCTestCoverageHandler::ProcessHandler()
         sourceDir.c_str(), binaryDir.c_str());
     if ( !shouldIDoCoverage )
       {
-      cmCTestLog(m_CTest, ERROR_MESSAGE, ".NoDartCoverage found, so skip coverage check for: "
+      cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, ".NoDartCoverage found, so skip coverage check for: "
         << fullFileName.c_str()
         << std::endl);
       continue;
@@ -606,7 +620,9 @@ int cmCTestCoverageHandler::ProcessHandler()
     std::ifstream ifs(fullFileName.c_str());
     if ( !ifs)
       {
-      cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open source file: " << fullFileName.c_str() << std::endl);
+      cmOStringStream ostr;
+      ostr <<  "Cannot open source file: " << fullFileName.c_str();
+      errorsWhileAccumulating.push_back(ostr.str());
       error ++;
       continue;
       }
@@ -620,7 +636,9 @@ int cmCTestCoverageHandler::ProcessHandler()
       {
       if ( !cmSystemTools::GetLineFromStream(ifs, line) )
         {
-        cmCTestLog(m_CTest, ERROR_MESSAGE, "Problem reading source file: " << fullFileName.c_str() << " line:" << cc << std::endl);
+        cmOStringStream ostr;
+        ostr << "Problem reading source file: " << fullFileName.c_str() << " line:" << cc;
+        errorsWhileAccumulating.push_back(ostr.str());
         error ++;
         break;
         }
@@ -637,7 +655,9 @@ int cmCTestCoverageHandler::ProcessHandler()
       }
     if ( cmSystemTools::GetLineFromStream(ifs, line) )
       {
-      cmCTestLog(m_CTest, ERROR_MESSAGE, "Looks like there are more lines in the file: " << line << std::endl);
+      cmOStringStream ostr;
+      ostr <<  "Looks like there are more lines in the file: " << line;
+      errorsWhileAccumulating.push_back(ostr.str());
       }
     float cper = 0;
     float cmet = 0;
@@ -670,6 +690,19 @@ int cmCTestCoverageHandler::ProcessHandler()
     cnt ++;
     }
   this->EndCoverageLogFile(covLogFile, logFileCount);
+
+  if ( errorsWhileAccumulating.size() > 0 )
+    {
+    cmCTestLog(m_CTest, ERROR_MESSAGE, std::endl);
+    cmCTestLog(m_CTest, ERROR_MESSAGE, "Error(s) while acumulating results:" << std::endl);
+    std::vector<std::string>::iterator erIt;
+    for ( erIt = errorsWhileAccumulating.begin();
+      erIt != errorsWhileAccumulating.end();
+      ++ erIt )
+      {
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "  " << erIt->c_str() << std::endl);
+      }
+    }
 
   int total_lines = total_tested + total_untested;
   float percent_coverage = 100 * SAFEDIV(static_cast<float>(total_tested),
@@ -723,6 +756,14 @@ int cmCTestCoverageHandler::ProcessHandler()
 //----------------------------------------------------------------------
 void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile *mf)
 {
+  cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, " Add coverage exclude regular expressions." << std::endl);
   cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_COVERAGE_EXCLUDE", 
                                 m_CustomCoverageExclude);
+  std::vector<cmStdString>::iterator it;
+  for ( it = m_CustomCoverageExclude.begin();
+    it != m_CustomCoverageExclude.end();
+    ++ it )
+    {
+    cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, " Add coverage exclude: " << it->c_str() << std::endl);
+    }
 }
