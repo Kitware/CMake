@@ -1373,6 +1373,36 @@ cmLocalUnixMakefileGenerator3
 
   // Add flags to create an executable.
   this->AddConfigVariableFlags(linkFlags, "CMAKE_EXE_LINKER_FLAGS");
+
+  
+  // Loop over all libraries and see if all are shared
+  const cmTarget::LinkLibraries& tlibs = target.GetLinkLibraries();
+  int AllShared = 2; // 0 = false, 1 = true, 2 = unknown
+  for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+      lib != tlibs.end(); ++lib)
+    {
+    // look up the target if there is one
+    cmTarget *libtgt = m_GlobalGenerator->FindTarget(0,lib->first.c_str());
+    if (libtgt)
+      {
+      if (libtgt->GetType() != cmTarget::SHARED_LIBRARY)
+        {
+        AllShared = 0;
+        }
+      else if (AllShared == 2)
+        {
+        AllShared = 1;
+        }
+      }
+    }
+  
+  // if all libs were shared then add the special borland flag for linking an
+  // executable to only shared libs
+  if(AllShared == 1)
+    {
+    this->AppendFlags
+      (linkFlags,m_Makefile->GetDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS"));
+    }
   if(target.GetPropertyAsBool("WIN32_EXECUTABLE"))
     {
     this->AppendFlags(linkFlags,
