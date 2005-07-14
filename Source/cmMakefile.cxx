@@ -1157,8 +1157,11 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
       {
       // is the output of the custom command match the source files name
       out = (*i)->GetCustomCommand()->GetOutput();
-      if (out.rfind(name) != out.npos &&
-          out.rfind(name) == out.size() - name.size())
+      std::string::size_type pos = out.rfind(name);
+      // If the output matches exactly
+      if (pos != out.npos &&
+          pos == out.size() - name.size() &&
+          (pos ==0 || out[pos-1] == '/'))
         {
         return *i;
         }
