@@ -226,10 +226,16 @@ int cmCTestCoverageHandler::ProcessHandler()
   totalCoverageMap totalCoverage;
  
   int gcovStyle = 0;
+
+  std::set<std::string> missingFiles;
  
   std::string actualSourceFile = "";
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Performing coverage (each . represents one file):" << std::endl);
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "    ");
+  int file_count = 0;
   for ( it = files.begin(); it != files.end(); ++ it )
     {
+    cmCTestLog(m_CTest, HANDLER_OUTPUT, "." << std::flush);
     std::string fileDir = cmSystemTools::GetFilenamePath(it->c_str());
     std::string command = "\"" + gcovCommand + "\" -l -o \"" + fileDir + "\" \"" + *it + "\"";
     cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, command.c_str() << std::endl);
@@ -417,10 +423,6 @@ int cmCTestCoverageHandler::ProcessHandler()
           while ( cmSystemTools::GetLineFromStream(ifile, nl) )
             {
             cnt ++;
-            if ( vec->size() <= static_cast<singleFileCoverageVector::size_type>(cnt) )
-              {
-              vec->push_back(-1);
-              }
  
             //TODO: Handle gcov 3.0 non-coverage lines
  
@@ -431,20 +433,34 @@ int cmCTestCoverageHandler::ProcessHandler()
               }
  
             // Skip unused lines
-            if ( nl[0] == '\t' || nl.size() < 12 )
+            if ( nl.size() < 12 )
               {
               continue;
               }
- 
+
             // Read the coverage count from the beginning of the gcov output line
             std::string prefix = nl.substr(0, 12);
             int cov = atoi(prefix.c_str());
-
             // Read the line number starting at the 10th character of the gcov output line
             std::string lineNumber = nl.substr(10, 5);
-            int lineIdx = atoi(lineNumber.c_str());
-
-            (*vec)[lineIdx] += cov;
+            int lineIdx = atoi(lineNumber.c_str())-1;
+            if ( lineIdx >= 0 )
+              {
+              while ( vec->size() <= static_cast<singleFileCoverageVector::size_type>(lineIdx) )
+                {
+                vec->push_back(-1);
+                }
+              // Initially all entries are -1 (not used). If we get coverage
+              // information, increment it to 0 first.
+              if ( (*vec)[lineIdx] < 0 )
+                {
+                if ( cov > 0 || prefix.find("#") != prefix.npos )
+                  {
+                  (*vec)[lineIdx] = 0;
+                  }
+                }
+              (*vec)[lineIdx] += cov;
+              }
             }
           }
         actualSourceFile = "";
@@ -472,15 +488,25 @@ int cmCTestCoverageHandler::ProcessHandler()
           }
         if ( actualSourceFile.empty() )
           {
-          cmCTestLog(m_CTest, ERROR_MESSAGE, "Something went wrong" << std::endl);
-          cmCTestLog(m_CTest, ERROR_MESSAGE, "File: [" << sourceFile.c_str() << "]" << std::endl);
-          cmCTestLog(m_CTest, ERROR_MESSAGE, "s: [" << sourceFile.substr(0, sourceDir.size()) << "]" << std::endl);
-          cmCTestLog(m_CTest, ERROR_MESSAGE, "b: [" << sourceFile.substr(0, binaryDir.size()) << "]" << std::endl);
-          ofs << "  Something went wrong. Cannot find: " << sourceFile.c_str()
-            << " in source dir: " << sourceDir.c_str()
-            << " or binary dir: " << binaryDir.c_str() << std::endl;
+          if ( missingFiles.find(actualSourceFile) == missingFiles.end() )
+            {
+            cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Something went wrong" << std::endl);
+            cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "File: [" << sourceFile.c_str() << "]" << std::endl);
+            cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "s: [" << sourceFile.substr(0, sourceDir.size()) << "]" << std::endl);
+            cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "b: [" << sourceFile.substr(0, binaryDir.size()) << "]" << std::endl);
+            ofs << "  Something went wrong. Cannot find: " << sourceFile.c_str()
+              << " in source dir: " << sourceDir.c_str()
+              << " or binary dir: " << binaryDir.c_str() << std::endl;
+            missingFiles.insert(actualSourceFile);
+            }
           }
         }
+      }
+    file_count ++;
+    if ( file_count % 50 == 0 )
+      {
+      cmCTestLog(m_CTest, HANDLER_OUTPUT, " processed: " << file_count << " out of " << files.size() << std::endl);
+      cmCTestLog(m_CTest, HANDLER_OUTPUT, "    ");
       }
     }
  
