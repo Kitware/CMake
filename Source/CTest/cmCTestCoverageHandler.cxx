@@ -40,6 +40,7 @@ cmCTestCoverageHandler::cmCTestCoverageHandler()
 void cmCTestCoverageHandler::Initialize()
 {
   this->Superclass::Initialize();
+  m_CustomCoverageExclude.empty();
 }
 
 //----------------------------------------------------------------------
@@ -77,6 +78,18 @@ void cmCTestCoverageHandler::EndCoverageLogFile(cmGeneratedFileStream& ostr, int
 bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file, const char* srcDir,
   const char* binDir)
 {
+  std::vector<cmsys::RegularExpression>::iterator sit;
+  for ( sit = m_CustomCoverageExcludeRegex.begin();
+    sit != m_CustomCoverageExcludeRegex.end(); ++ sit )
+    {
+    if ( sit->find(file) )
+      {
+      cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "  File " << file
+        << " is excluded in CTestCustom.ctest" << std::endl;);
+      return false;
+      }
+    }
+
   std::string fSrcDir = cmSystemTools::CollapseFullPath(srcDir);
   std::string fBinDir = cmSystemTools::CollapseFullPath(binDir);
   std::string fFile = cmSystemTools::CollapseFullPath(file);
@@ -218,6 +231,15 @@ int cmCTestCoverageHandler::ProcessHandler()
     cmCTestLog(m_CTest, ERROR_MESSAGE, " Cannot find any coverage files." << std::endl);
     // No coverage files is a valid thing, so the exit code is 0
     return 0;
+    }
+
+  m_CustomCoverageExcludeRegex.empty();
+  std::vector<cmStdString>::iterator rexIt;
+  for ( rexIt = m_CustomCoverageExclude.begin();
+    rexIt != m_CustomCoverageExclude.end();
+    ++ rexIt )
+    {
+    m_CustomCoverageExcludeRegex.push_back(cmsys::RegularExpression(rexIt->c_str()));
     }
  
   typedef std::vector<int> singleFileCoverageVector;
@@ -696,4 +718,11 @@ int cmCTestCoverageHandler::ProcessHandler()
     return -1;
     }
   return 0;
+}
+
+//----------------------------------------------------------------------
+void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile *mf)
+{
+  cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_COVERAGE_EXCLUDE", 
+                                m_CustomCoverageExclude);
 }

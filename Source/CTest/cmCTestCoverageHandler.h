@@ -22,6 +22,8 @@
 #include "cmCTestGenericHandler.h"
 #include "cmListFileCache.h"
 
+#include <cmsys/RegularExpression.hxx>
+
 class cmGeneratedFileStream;
 
 /** \class cmCTestCoverageHandler
@@ -42,6 +44,11 @@ public:
   
   virtual void Initialize();
 
+  /**
+   * This method is called when reading CTest custom file
+   */
+  void PopulateCustomVectors(cmMakefile *mf);
+  
 private:
   bool ShouldIDoCoverage(const char* file, const char* srcDir,
     const char* binDir);
@@ -89,6 +96,9 @@ private:
     std::vector<int> m_Lines;
     bool             m_Show;
     };
+
+  std::vector<cmStdString> m_CustomCoverageExclude;
+  std::vector<cmsys::RegularExpression> m_CustomCoverageExcludeRegex;
 
   typedef std::map<std::string, cmCTestCoverage> tm_CoverageMap;
 };
