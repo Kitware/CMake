@@ -1370,11 +1370,7 @@ cmLocalUnixMakefileGenerator3
   // Build a list of compiler flags and linker flags.
   std::string flags;
   std::string linkFlags;
-
-  // Add flags to create an executable.
-  this->AddConfigVariableFlags(linkFlags, "CMAKE_EXE_LINKER_FLAGS");
-
-  
+#if 0
   // Loop over all libraries and see if all are shared
   const cmTarget::LinkLibraries& tlibs = target.GetLinkLibraries();
   int AllShared = 2; // 0 = false, 1 = true, 2 = unknown
@@ -1395,7 +1391,6 @@ cmLocalUnixMakefileGenerator3
         }
       }
     }
-  
   // if all libs were shared then add the special borland flag for linking an
   // executable to only shared libs
   if(AllShared == 1)
@@ -1403,6 +1398,17 @@ cmLocalUnixMakefileGenerator3
     this->AppendFlags
       (linkFlags,m_Makefile->GetDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS"));
     }
+#endif 
+  // Add flags to deal with shared libraries.  Any library being
+  // linked in might be shared, so always use shared flags for an
+  // executable.
+  this->AddSharedFlags(linkFlags, linkLanguage, true);
+
+  // Add flags to create an executable.
+  this->AddConfigVariableFlags(linkFlags, "CMAKE_EXE_LINKER_FLAGS");
+
+
+
   if(target.GetPropertyAsBool("WIN32_EXECUTABLE"))
     {
     this->AppendFlags(linkFlags,
@@ -1416,11 +1422,6 @@ cmLocalUnixMakefileGenerator3
 
   // Add language-specific flags.
   this->AddLanguageFlags(flags, linkLanguage);
-
-  // Add flags to deal with shared libraries.  Any library being
-  // linked in might be shared, so always use shared flags for an
-  // executable.
-  this->AddSharedFlags(flags, linkLanguage, true);
 
   // Add target-specific linker flags.
   this->AppendFlags(linkFlags, target.GetProperty("LINK_FLAGS"));
