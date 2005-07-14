@@ -1716,7 +1716,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
   cmMakefile *mf = lg->GetMakefile();
 
   std::string rexpr = dir;
-  rexpr += "/*/CTestCustom.ctest";
+  rexpr += "/CTestCustom.ctest";
   cmGlob gl;
   gl.RecurseOn();
   gl.FindFiles(rexpr);
