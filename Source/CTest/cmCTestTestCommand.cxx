@@ -38,8 +38,11 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     }
   else
     {
-    // By default use timeout of 10 minutes
-    timeout = 600;
+    if ( timeout <= 0 )
+      {
+      // By default use timeout of 10 minutes
+      timeout = 600;
+      }
     }
   m_CTest->SetTimeOut(timeout);
   cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("test");
