@@ -372,12 +372,34 @@ IF( WIN32 )
 ELSE( WIN32 )
     
     FIND_PROGRAM( CMAKE_WX_CONFIG wx-config ../wx/bin ../../wx/bin )
-    SET( CMAKE_WX_CXX_FLAGS "`${CMAKE_WX_CONFIG} --cxxflags`" )
-    SET( WXWINDOWS_LIBRARIES "`${CMAKE_WX_CONFIG} --libs`" )
-
     IF(CMAKE_WX_CONFIG)
-        SET(WXWINDOWS_FOUND 1)
+      SET(WXWINDOWS_FOUND 1)
+      # run the config program to get cxxflags
+      EXEC_PROGRAM(${CMAKE_WX_CONFIG} ARGS --cxxflags OUTPUT_VARIABLE
+        CMAKE_WX_CXX_FLAGS RETURN_VALUE RET1)
+      # run the config program to get the libs
+      EXEC_PROGRAM(${CMAKE_WX_CONFIG} ARGS --libs OUTPUT_VARIABLE
+        WXWINDOWS_LIBRARIES_TMP RETURN_VALUE RET2)
+      # for libraries break things up into a ; separated variable
+      SEPARATE_ARGUMENTS(WXWINDOWS_LIBRARIES_TMP)
+      SET(LAST_FRAME 0)
+      # now put the stuff back into WXWINDOWS_LIBRARIES
+      # but combine all the -framework foo arguments back together
+      FOREACH(arg ${WXWINDOWS_LIBRARIES_TMP})
+        IF(${arg} MATCHES "-framework")
+          SET(LAST_FRAME 1)
+        ELSE(${arg} MATCHES "-framework")
+          # not a -framework argument
+          IF(${LAST_FRAME} EQUAL 1)
+            SET(WXWINDOWS_LIBRARIES ${WXWINDOWS_LIBRARIES} "-framework ${arg}")
+            SET(LAST_FRAME 0)
+          ELSE(${LAST_FRAME} EQUAL 1)
+            SET(WXWINDOWS_LIBRARIES ${WXWINDOWS_LIBRARIES} ${arg})
+          ENDIF(${LAST_FRAME} EQUAL 1)
+        ENDIF(${arg} MATCHES "-framework")
+      ENDFOREACH(arg)
     ENDIF(CMAKE_WX_CONFIG)
+
     
     ## extract linkdirs (-L) for rpath
     ## use regular expression to match wildcard equivalent "-L*<endchar>"

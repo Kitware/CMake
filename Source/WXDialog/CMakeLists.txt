@@ -83,8 +83,8 @@ IF(WXWIDGETS_FOUND)
     ENDIF(LINUX)
     
     # if the checkbox view functionality is not desired,
-    # exclude this part from the sample
-    
+    # exclude this part from the smple
+    SET(WXWIDGETS_LIBRARIES ${WXWIDGETS_LIBRARIES})
     TARGET_LINK_LIBRARIES(WXDialog ${WXWIDGETS_LIBRARIES} cmsys CMakeLib)
         
     # if UPX is found, make a target
