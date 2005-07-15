@@ -892,11 +892,7 @@ IF(BUILD_TESTING)
             --build-two-config 
             --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
             --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
-        ELSE("${JNI_FILE}" MATCHES "JDK1_2")
-          MESSAGE(STATUS "No Java Test because ${JNI_H} does not contain JDK1_2 define")
         ENDIF("${JNI_FILE}" MATCHES "JDK1_2")
-      ELSE(JNI_H) 
-        MESSAGE(STATUS "No Java Test because jni.h could not be found. tried:\n${JNIPATH}/../include and ${JNIPATH}/../java/include")
       ENDIF(JNI_H) 
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
   ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
