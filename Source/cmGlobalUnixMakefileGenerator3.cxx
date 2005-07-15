@@ -889,7 +889,7 @@ cmGlobalUnixMakefileGenerator3
       if(emitted.insert(lib->first).second)
         {
         // Add this dependency.
-        this->AppendAnyGlobalDepend(depends, lib->first.c_str());
+        this->AppendAnyGlobalDepend(depends, lib->first.c_str(), emitted);
         }
       }
     }
@@ -903,7 +903,7 @@ cmGlobalUnixMakefileGenerator3
     if(emitted.insert(*util).second)
       {
       // Add this dependency.
-      this->AppendAnyGlobalDepend(depends, util->c_str());
+      this->AppendAnyGlobalDepend(depends, util->c_str(), emitted);
       }
     }
 }
@@ -912,7 +912,8 @@ cmGlobalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
-::AppendAnyGlobalDepend(std::vector<std::string>& depends, const char* name)
+::AppendAnyGlobalDepend(std::vector<std::string>& depends, const char* name,
+                        std::set<cmStdString>& emitted)
 {
   cmTarget *result;
   
@@ -930,6 +931,21 @@ cmGlobalUnixMakefileGenerator3
       std::string tgtName = lg3->GetRelativeTargetDirectory(*result);
       tgtName += "/all";
       depends.push_back(tgtName);
+      if(result->GetType() == cmTarget::STATIC_LIBRARY)
+        {
+        const cmTarget::LinkLibraries& tlibs = result->GetLinkLibraries();
+        for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+            lib != tlibs.end(); ++lib)
+          {
+          // Don't emit the same library twice for this target.
+          if(emitted.insert(lib->first).second)
+            {
+            // Add this dependency.
+            this->AppendAnyGlobalDepend(depends, lib->first.c_str(),
+                                        emitted);
+            }
+          }
+        }
       return;
       }
     }

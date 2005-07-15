@@ -108,7 +108,7 @@ protected:
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  cmTarget& target);
   void AppendAnyGlobalDepend(std::vector<std::string>& depends, 
-                             const char* name);
+                             const char* name, std::set<cmStdString>& emitted);
 
   // does this generator need a requires step for any of its targets
   bool NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg);
