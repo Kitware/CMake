@@ -10,23 +10,20 @@ ENDIF(WIN32)
 MAKE_DIRECTORY(${CMake_BINARY_DIR}/Docs)
 
 # Add a documentation target.
-ADD_CUSTOM_TARGET(documentation ALL)
 SET(DOC_FILES "")
 
 # Generate documentation for "cmake" executable.
 SET(CMD ${CMD_DIR}/cmake${CMD_EXT})
 ADD_CUSTOM_COMMAND(
-  TARGET documentation
+  OUTPUT ${CMake_BINARY_DIR}/Docs/cmake.txt
   COMMAND ${CMD}
   ARGS --copyright ${CMake_BINARY_DIR}/Docs/Copyright.txt
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.txt
        --help-html ${CMake_BINARY_DIR}/Docs/cmake.html
        --help-man ${CMake_BINARY_DIR}/Docs/cmake.1
-  DEPENDS ${CMD}
-  SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
-  OUTPUTS ${CMake_BINARY_DIR}/Docs/cmake.txt
+  DEPENDS cmake
+  MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
   )
-ADD_DEPENDENCIES(documentation cmake)
 INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES ${CMake_BINARY_DIR}/Docs/cmake.1)
 INSTALL_FILES(${CMAKE_DOC_DIR} FILES
   ${CMake_BINARY_DIR}/Docs/Copyright.txt
@@ -38,16 +35,14 @@ SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt)
 # Generate documentation for "ctest" executable.
 SET(CMD ${CMD_DIR}/ctest${CMD_EXT})
 ADD_CUSTOM_COMMAND(
-  TARGET documentation
+  OUTPUT ${CMake_BINARY_DIR}/Docs/ctest.txt
   COMMAND ${CMD}
   ARGS --help-full ${CMake_BINARY_DIR}/Docs/ctest.txt
        --help-html ${CMake_BINARY_DIR}/Docs/ctest.html
        --help-man ${CMake_BINARY_DIR}/Docs/ctest.1
-  DEPENDS ${CMD}
-  SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
-  OUTPUTS ${CMake_BINARY_DIR}/Docs/ctest.txt
+  DEPENDS ctest
+  MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
   )
-ADD_DEPENDENCIES(documentation ctest)
 INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES ${CMake_BINARY_DIR}/Docs/ctest.1)
 INSTALL_FILES(${CMAKE_DOC_DIR} FILES
   ${CMake_BINARY_DIR}/Docs/ctest.txt
@@ -60,16 +55,14 @@ IF(UNIX)
   IF(CURSES_LIBRARY)
     SET(CMD ${CMD_DIR}/ccmake${CMD_EXT})
     ADD_CUSTOM_COMMAND(
-      TARGET documentation
+      OUTPUT ${CMake_BINARY_DIR}/Docs/ccmake.txt
       COMMAND ${CMD}
       ARGS --help-full ${CMake_BINARY_DIR}/Docs/ccmake.txt
            --help-html ${CMake_BINARY_DIR}/Docs/ccmake.html
            --help-man ${CMake_BINARY_DIR}/Docs/ccmake.1
-      DEPENDS ${CMD}
-      SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
-      OUTPUTS ${CMake_BINARY_DIR}/Docs/ccmake.txt
+      DEPENDS ccmake
+      MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
       )
-    ADD_DEPENDENCIES(documentation ccmake)
     INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
       ${CMake_BINARY_DIR}/Docs/ccmake.1
       )
@@ -84,16 +77,14 @@ ENDIF(UNIX)
 IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
   SET(CMD ${CMD_DIR}/CMakeSetup${CMD_EXT})
   ADD_CUSTOM_COMMAND(
-    TARGET documentation
+    OUTPUT ${CMake_BINARY_DIR}/Docs/CMakeSetup.txt
     COMMAND ${CMD}
     ARGS --help-full ${CMake_BINARY_DIR}/Docs/CMakeSetup.txt
-         --help-html ${CMake_BINARY_DIR}/Docs/CMakeSetup.html
-         --help-man ${CMake_BINARY_DIR}/Docs/CMakeSetup.1
-    DEPENDS ${CMD}
-    SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in
-    OUTPUTS ${CMake_BINARY_DIR}/Docs/CMakeSetup.txt
+    --help-html ${CMake_BINARY_DIR}/Docs/CMakeSetup.html
+    --help-man ${CMake_BINARY_DIR}/Docs/CMakeSetup.1
+    DEPENDS CMakeSetup
+    MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in
     )
-  ADD_DEPENDENCIES(documentation CMakeSetup)
   INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
     ${CMake_BINARY_DIR}/Docs/CMakeSetup.1
     )
@@ -105,8 +96,6 @@ IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
 ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO)
 
 # Drive documentation generation.
-ADD_CUSTOM_COMMAND(
-  TARGET documentation
-  SOURCE documentation
-  DEPENDS ${DOC_FILES}
+ADD_CUSTOM_TARGET(documentation ALL   
+  DEPENDS ${DOC_FILES} 
   )
