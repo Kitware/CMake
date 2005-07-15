@@ -44,7 +44,8 @@ ELSE (WIN32)
 
   IF (APPLE)
 # These values for Apple could probably do with improvement.
-    FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
+    FIND_PATH( GLUT_INCLUDE_DIR glut.h
+      /System/Library/Frameworks/GLUT.framework/Versions/A/Headers
       ${OPENGL_LIBRARY_DIR}
     )
     SET(GLUT_glut_LIBRARY "-framework Glut" CACHE STRING "GLUT library for OSX") 
