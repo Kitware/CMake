@@ -2133,7 +2133,6 @@ cmLocalUnixMakefileGenerator3
 ::AppendTargetDepends(std::vector<std::string>& depends,
                       cmTarget& target)
 {
-  // Do not bother with dependencies for static libraries.
   if(target.GetType() == cmTarget::STATIC_LIBRARY)
     {
     return;
@@ -2157,26 +2156,6 @@ cmLocalUnixMakefileGenerator3
       this->AppendAnyDepend(depends, lib->first.c_str());
       }
     }
-
-  // Loop over all utility dependencies.
-
-  // Ken --- we trust that the parent build system handled the utility
-  // targets, really we trust that it also handled the libs but there is no
-  // harm in listing the libs as depends, if the libs are not present they
-  // cannot be built (the rules are not there) but at least it will squak
-#if 0
-  const std::set<cmStdString>& tutils = target.GetUtilities();
-  for(std::set<cmStdString>::const_iterator util = tutils.begin();
-      util != tutils.end(); ++util)
-    {
-    // Don't emit the same utility twice for this target.
-    if(emitted.insert(*util).second)
-      {
-      // Add this dependency.
-      this->AppendAnyDepend(depends, util->c_str());
-      }
-    }
-#endif
 }
 
 //----------------------------------------------------------------------------
