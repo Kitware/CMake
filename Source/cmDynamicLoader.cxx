@@ -182,7 +182,7 @@ int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
   // we have to use lib because the macro may not...
   (void)lib;
 
-  NSUnLinkModule(lib, FALSE);
+  NSUnLinkModule((NSModule)lib, FALSE);
   return 1;
 }
 
