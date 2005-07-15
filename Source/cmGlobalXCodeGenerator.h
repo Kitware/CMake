@@ -39,7 +39,7 @@ public:
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalXCodeGenerator::GetActualName();}
-  static const char* GetActualName() {return "XCode";}
+  static const char* GetActualName() {return "Xcode15";}
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
