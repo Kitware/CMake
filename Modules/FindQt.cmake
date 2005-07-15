@@ -265,14 +265,12 @@ ENDIF(QT_MAX_VERSION)
 IF(QT_VERSION_SMALL_ENOUGH AND QT_VERSION_BIG_ENOUGH)
   # Call package for Qt3
   IF( QT_INST_MAJOR_VERSION LESS 4)
-    #BUG!!! should be FIND_PACKAGE(FindQt4.cmake) when part of CMake
-    INCLUDE(${CMAKE_INSTALL_PREFIX}/share/CMake/Modules/FindQt3.cmake)
+    FIND_PACKAGE(FindQt4.cmake)
   ENDIF( QT_INST_MAJOR_VERSION LESS 4)
   # Call package for Qt4
   IF( QT_INST_MAJOR_VERSION GREATER 3 )
     IF( QT_INST_MAJOR_VERSION LESS 5)
-      #BUG!!! should be FIND_PACKAGE(FindQt4.cmake) when part of CMake
-      INCLUDE(${CMAKE_INSTALL_PREFIX}/share/CMake/Modules/FindQt4.cmake)
+      FIND_PACKAGE(FindQt4.cmake)
     ELSE( QT_INST_MAJOR_VERSION LESS 5)
       IF( NOT Qt_FIND_QUIETLY AND Qt_FIND_REQUIRED) 
         MESSAGE(SEND_ERROR "Right now CMake supports only Qt-Versions less than 5.0.0")
