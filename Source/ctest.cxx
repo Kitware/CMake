@@ -52,13 +52,16 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationOptions[] =
 {
-  {"-C <config>", "Choose configuration to test.",
+  {"-C <cfg>, --build-config <cfg>", "Choose configuration to test.",
    "Some CMake-generated build trees can have multiple build configurations "
    "in the same tree.  This option can be used to specify which one should "
    "be tested.  Example configurations are \"Debug\" and \"Release\"."},
   {"-V,--verbose", "Enable verbose output from tests.",
    "Test output is normally suppressed and only summary information is "
    "displayed.  This option will show all test output."},
+  {"-VV,--extra-verbose", "Enable more verbose output from tests.",
+   "Test output is normally suppressed and only summary information is "
+   "displayed.  This option will show even more test output."},
   {"--debug", "Displaying more verbose internals of CTest.",
     "This feature will result in large number of output that is mostly useful "
     "for debugging dashboard problems."},
@@ -71,41 +74,41 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"-N,--show-only", "Disable actual execution of tests.",
    "This option tells ctest to list the tests that would be run but not "
    "actually run them.  Useful in conjunction with the -R and -E options."},
-  {"-R <regex>", "Run tests matching regular expression.",
+  {"-R <regex>, --tests-regex <regex>", "Run tests matching regular expression.",
    "This option tells ctest to run only the tests whose names match the "
    "given regular expression."},
-  {"-E <regex>", "Exclude tests matching regular expression.",
+  {"-E <regex>, --exclude-regex <regex>", "Exclude tests matching regular expression.",
    "This option tells ctest to NOT run the tests whose names match the "
    "given regular expression."},
-  {"-D <DashboardTest>", "Execute dashboard test",
+  {"-D <dashboard>, --dashboard <dashboard>", "Execute dashboard test",
    "This option tells ctest to perform act as a Dart client and perform "
-   "a dashboard test. All tests are ModeTest, where Mode can be Experimental, "
+   "a dashboard test. All tests are <Mode><Test>, where Mode can be Experimental, "
    "Nightly, and Continuous, and Test can be Start, Update, Configure, "
    "Build, Test, Coverage, and Submit."},
-  {"-M <TestModel>", "Sets the model for a dashboard",
+  {"-M <model>, --test-model <model>", "Sets the model for a dashboard",
    "This option tells ctest to act as a Dart client "
    "where the TestModel can be Experimental, "
    "Nightly, and Continuous. Combining -M and -T is similar to -D"},
-  {"-T <action>", "Sets the dashboard action to perform",
+  {"-T <action>, --test-action <action>", "Sets the dashboard action to perform",
    "This option tells ctest to act as a Dart client "
    "and perform some action such as start, build, test etc. "
    "Combining -M and -T is similar to -D"},
-  {"-S <ConfigScript>", "Execute a dashboard for a configuration",
+  {"-S <script>, --script <script>", "Execute a dashboard for a configuration",
    "This option tells ctest to load in a configuration script which sets "
    "a number of parameters such as the binary and source directories. Then "
    "ctest will do what is required to create and run a dashboard. This "
    "option basically sets up a dashboard and then runs ctest -D with the "
    "appropriate options."},
-  {"-A <Notes file>", "Add a notes file with submission",
+  {"-A <file>, --add-notes <file>", "Add a notes file with submission",
    "This option tells ctest to include a notes file when submitting dashboard. "},
-  {"-I [Start,End,Stride,test#,test#|Test file]", 
+  {"-I [Start,End,Stride,test#,test#|Test file], --tests-information", 
    "Run a specific number of tests by number.",
    "This option causes ctest to run tests starting at number Start, ending "
    "at number End, and incrementing by Stride. Any additional numbers after "
    "Stride are considered individual test numbers.  Start, End,or stride "
    "can be empty.  Optionally a file can be given that contains the same "
    "syntax as the command line."},
-  {"-U", "Take the Union of -I and -R",
+  {"-U, --union", "Take the Union of -I and -R",
    "When both -R and -I are specified by default the intersection of "
    "tests are run. By specifying -U the union of tests is run instead."},
   {"--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1.",
@@ -151,6 +154,17 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "This option tells CTest to use different initialization file instead of "
    "DartConfiguration.tcl. This way multiple initialization files can be used "
    "for example to submit to multiple dashboards." },
+  {"--overwrite", "Overwrite CTest configuration option.",
+   "By default ctest uses configuration options from configuration file. "
+   "This option will overwrite the configuration option." },
+  {"--force-new-ctest-process", "Run child CTest instances as new processes",
+   "By default CTest will run child CTest instances within the same process. "
+   "If this behavior is not desired, this argument will enforce new processes "
+   "for child CTest processes." },
+  {"--submit-index", "Submit individual dashboard tests with specific index",
+   "This option allows performing the same CTest action (such as test) multiple "
+   "times and submit all stages to the same dashboard (Dart2 required). "
+   "Each execution requires different index." },
   {0,0,0}
 };
 

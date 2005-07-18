@@ -250,6 +250,10 @@ public:
     m_SuppressUpdatingCTestConfiguration = val;
     }
 
+  //! Add overwrite to ctest configuration.
+  // The format is key=value
+  void AddCTestConfigurationOverwrite(const char* encstr);
+
   //! Create XML file that contains all the notes specified
   int GenerateNotesFile(const std::vector<cmStdString> &files);
 
@@ -315,6 +319,7 @@ private:
 
   std::string             m_CTestConfigFile;
   tm_CTestConfigurationMap m_CTestConfiguration;
+  tm_CTestConfigurationMap m_CTestConfigurationOverwrites;
   int                     m_Tests[LAST_TEST];
   
   std::string             m_CurrentTag;
@@ -354,6 +359,9 @@ private:
   ///! Find the running cmake
   void FindRunningCMake(const char* arg0);
 
+  //! Check if the argument is the one specified
+  bool CheckArgument(const std::string& arg, const char* varg1, const char* varg2 = 0);
+
   bool                      m_SuppressUpdatingCTestConfiguration;
 
   bool m_Debug;
@@ -364,6 +372,7 @@ private:
 
   std::set<cmStdString> m_SubmitFiles;
 
+  int m_SubmitIndex;
   
   cmGeneratedFileStream* m_OutputLogFile;
   int                    m_OutputLogFileLastTag;

@@ -28,25 +28,31 @@ IF(BUILD_TESTING)
   ELSE(EXISTS ${PROJECT_SOURCE_DIR}/DartConfig.cmake)
     # Dashboard is opened for submissions for a 24 hour period starting at
     # the specified NIGHTLY_START_TIME. Time is specified in 24 hour format.
-    SET (NIGHTLY_START_TIME "00:00:00 EDT")
+    MACRO(SET_IF_NOT_SET var val)
+      IF(NOT "${${var}}")
+        SET("${var}" "${val}")
+      ENDIF(NOT "${${var}}")
+    ENDMACRO(SET_IF_NOT_SET)
+
+    SET_IF_NOT_SET (NIGHTLY_START_TIME "00:00:00 EDT")
 
     # Dart server to submit results (used by client)
     # There should be an option to specify submit method, but I will leave it
     # commented until we decide what to do with it.
     # SET(DROP_METHOD "http" CACHE STRING "Set the CTest submit method. Valid options are http and ftp")
     IF(DROP_METHOD MATCHES http)
-      SET (DROP_SITE "public.kitware.com")
-      SET (DROP_LOCATION "/cgi-bin/HTTPUploadDartFile.cgi")
+      SET_IF_NOT_SET (DROP_SITE "public.kitware.com")
+      SET_IF_NOT_SET (DROP_LOCATION "/cgi-bin/HTTPUploadDartFile.cgi")
     ELSE(DROP_METHOD MATCHES http)
-      SET (DROP_SITE "public.kitware.com")
-      SET (DROP_LOCATION "/incoming")
-      SET (DROP_SITE_USER "anonymous")
-      SET (DROP_SITE_PASSWORD "random@ringworld")
-      SET (DROP_SITE_MODE "active")
+      SET_IF_NOT_SET (DROP_SITE "public.kitware.com")
+      SET_IF_NOT_SET (DROP_LOCATION "/incoming")
+      SET_IF_NOT_SET (DROP_SITE_USER "anonymous")
+      SET_IF_NOT_SET (DROP_SITE_PASSWORD "random@ringworld")
+      SET_IF_NOT_SET (DROP_SITE_MODE "active")
     ENDIF(DROP_METHOD MATCHES http)
 
-    SET (TRIGGER_SITE "http://${DROP_SITE}/cgi-bin/Submit-Random-TestingResults.cgi")
-    SET (COMPRESS_SUBMISSION ON)
+    SET_IF_NOT_SET (TRIGGER_SITE "http://${DROP_SITE}/cgi-bin/Submit-Random-TestingResults.cgi")
+    SET_IF_NOT_SET (COMPRESS_SUBMISSION ON)
 
     # Project Home Page
     SET (PROJECT_URL "http://www.kitware.com")
