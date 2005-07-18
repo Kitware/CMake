@@ -547,6 +547,11 @@ void cmDocumentation::PrintSectionUsage(std::ostream& os,
         {
         os << " ";
         }
+      if ( strlen(op->name) > strlen(this->TextIndent)-4 )
+        {
+        os << "\n";
+        os.write(this->TextIndent, strlen(this->TextIndent)-2);
+        }
       os << "= ";
       this->PrintColumn(os, op->brief);
       os << "\n";
