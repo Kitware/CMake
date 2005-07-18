@@ -257,6 +257,10 @@ public:
   //! Create XML file that contains all the notes specified
   int GenerateNotesFile(const std::vector<cmStdString> &files);
 
+  //! Submit extra files to the server
+  bool SubmitExtraFiles(const char* files);
+  bool SubmitExtraFiles(const std::vector<cmStdString> &files);
+
   //! Set the output log file name
   void SetOutputLogFileName(const char* name);
 

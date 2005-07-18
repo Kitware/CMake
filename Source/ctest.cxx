@@ -157,6 +157,8 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"--overwrite", "Overwrite CTest configuration option.",
    "By default ctest uses configuration options from configuration file. "
    "This option will overwrite the configuration option." },
+  {"--extra-submit <file>[;<file>]", "Submit extra files to the dashboard.",
+   "This option will submit extra files to the dashboard." },
   {"--force-new-ctest-process", "Run child CTest instances as new processes",
    "By default CTest will run child CTest instances within the same process. "
    "If this behavior is not desired, this argument will enforce new processes "

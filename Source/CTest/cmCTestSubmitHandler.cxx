@@ -120,8 +120,12 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
       // enable uploading
       ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1) ;
 
-      cmStdString local_file = localprefix + "/" + *file;
-      cmStdString upload_as = url + "/" + remoteprefix + *file;
+      cmStdString local_file = *file;
+      if ( !cmSystemTools::FileExists(local_file.c_str()) )
+        {
+        local_file = localprefix + "/" + *file;
+        }
+      cmStdString upload_as = url + "/" + remoteprefix + cmSystemTools::GetFilenameName(*file);
 
       struct stat st;
       if ( ::stat(local_file.c_str(), &st) )
@@ -246,8 +250,12 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
       ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
-      cmStdString local_file = localprefix + "/" + *file;
-      cmStdString remote_file = remoteprefix + *file;
+      cmStdString local_file = *file;
+      if ( !cmSystemTools::FileExists(local_file.c_str()) )
+        {
+        local_file = localprefix + "/" + *file;
+        }
+      cmStdString remote_file = remoteprefix + remoteprefix + cmSystemTools::GetFilenameName(*file);
 
       *m_LogFile << "\tUpload file: " << local_file.c_str() << " to "
           << remote_file.c_str() << std::endl;
@@ -401,7 +409,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<cmStdString>& files,
       ::curl_easy_setopt(curl, CURLOPT_FILE, (void *)&chunk);
       ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void *)&chunkDebug);
 
-      cmStdString rfile = remoteprefix + *file;
+      cmStdString rfile = remoteprefix + cmSystemTools::GetFilenameName(*file);
       cmStdString ofile = "";
       cmStdString::iterator kk;
       for ( kk = rfile.begin(); kk < rfile.end(); ++ kk)
@@ -581,7 +589,11 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
     {
     xmlrpc_value *result;
 
-    std::string local_file = localprefix + "/" + *file;
+    cmStdString local_file = *file;
+    if ( !cmSystemTools::FileExists(local_file.c_str()) )
+      {
+      local_file = localprefix + "/" + *file;
+      }
     cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Submit file: " << local_file.c_str() << std::endl);
     struct stat st;
     if ( ::stat(local_file.c_str(), &st) )

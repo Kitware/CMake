@@ -97,6 +97,25 @@ bool cmCTestSubmitCommand::InitialPass(
       }
     m_CTest->GenerateNotesFile(newNotesFiles);
     }
+  const char* extraFilesVariable = m_Makefile->GetDefinition("CTEST_EXTRA_SUBMIT_FILES");
+  if (extraFilesVariable)
+    {
+    std::vector<std::string> extraFiles;
+    std::vector<cmStdString> newExtraFiles;
+    cmSystemTools::ExpandListArgument(extraFilesVariable,extraFiles);
+    std::vector<std::string>::iterator it;
+    for ( it = extraFiles.begin(); 
+      it != extraFiles.end();
+      ++ it )
+      {
+      newExtraFiles.push_back(*it);
+      }
+    if ( !m_CTest->SubmitExtraFiles(newExtraFiles))
+      {
+      this->SetError("problem submitting extra files.");
+      return false;
+      }
+    }
 
   cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("submit");
   if ( !handler )

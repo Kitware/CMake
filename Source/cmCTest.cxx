@@ -1188,7 +1188,47 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
 }
 
 //----------------------------------------------------------------------
-bool cmCTest::CheckArgument(const std::string& arg, const char* varg1, const char* varg2 = 0)
+bool cmCTest::SubmitExtraFiles(const std::vector<cmStdString> &files)
+{
+  std::vector<cmStdString>::const_iterator it;
+  for ( it = files.begin();
+    it != files.end();
+    ++ it )
+    {
+    if ( !cmSystemTools::FileExists(it->c_str()) )
+      {
+      cmCTestLog(this, ERROR_MESSAGE, "Cannot find extra file: " << it->c_str() << " to submit."
+        << std::endl;);
+      return false;
+      }
+    this->AddSubmitFile(it->c_str());
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------
+bool cmCTest::SubmitExtraFiles(const char* cfiles)
+{
+  if ( !cfiles )
+    {
+    return 1;
+    }
+
+  std::vector<cmStdString> files;
+
+  cmCTestLog(this, OUTPUT, "Submit extra files" << std::endl);
+
+  files = cmSystemTools::SplitString(cfiles, ';');
+  if ( files.size() == 0 )
+    {
+    return 1;
+    }
+
+  return this->SubmitExtraFiles(files);
+}
+
+//----------------------------------------------------------------------
+bool cmCTest::CheckArgument(const std::string& arg, const char* varg1, const char* varg2)
 {
   cmOStringStream ostr;
   ostr << varg1;
@@ -1591,6 +1631,16 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       this->SetTest("Notes");
       i++;
       this->SetNotesFiles(args[i].c_str());
+      }
+    if(this->CheckArgument(arg, "--extra-submit") && i < args.size() - 1)
+      {
+      this->m_ProduceXML = true;
+      this->SetTest("Submit");
+      i++;
+      if ( !this->SubmitExtraFiles(args[i].c_str()) )
+        {
+        return 0;
+        }
       }
     // --build-and-test options
     if(this->CheckArgument(arg, "--build-and-test") && i < args.size() - 1)
