@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmGlobalXCodeGenerator.h"
+#include "cmGlobalXCode21Generator.h"
 #include "cmLocalXCodeGenerator.h"
 #include "cmMakefile.h"
 #include "cmXCodeObject.h"
@@ -22,6 +23,41 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
 #include "cmOrderLinkDirectories.h"
+#include "cmXMLParser.h"
+
+
+// parse the xml file storing the installed version of Xcode on
+// the machine
+class cmXcodeVersionParser : public cmXMLParser
+{
+public:
+  void StartElement(const char* name, const char** atts)
+    {
+      m_Data = "";
+    }
+  void EndElement(const char* name)
+    {
+      if(strcmp(name, "key") == 0)
+        {
+        m_Key = m_Data;
+        }
+      else if(strcmp(name, "string") == 0)
+        {
+        if(m_Key == "CFBundleShortVersionString")
+          {
+          m_Version = (int)(10.0 * atof(m_Data.c_str()));
+          }
+        }
+    }
+  void CharacterDataHandler(const char* data, int length)
+    {
+      m_Data.append(data, length);
+    }
+  int m_Version;
+  std::string m_Key;
+  std::string m_Data;
+};
+
 
 //TODO
 // add OSX application stuff
@@ -35,6 +71,26 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
   m_SourcesGroupChildren = 0;
   m_CurrentMakefile = 0;
   m_CurrentLocalGenerator = 0;
+  m_XcodeVersion = 15;
+}
+
+//----------------------------------------------------------------------------
+cmGlobalGenerator* cmGlobalXCodeGenerator::New()
+{ 
+  cmXcodeVersionParser parser;
+  parser.ParseFile("/Developer/Applications/Xcode.app/Contents/version.plist");
+  if(parser.m_Version == 15)
+    {
+    return new cmGlobalXCodeGenerator;
+    }
+  else if (parser.m_Version == 20)
+    {
+    cmSystemTools::Message("Xcode 2.0 not really supported by cmake, "
+                           "using Xcode 15 generator\n");
+    return new cmGlobalXCodeGenerator;
+    }
+  
+  return new cmGlobalXCode21Generator;
 }
 
 //----------------------------------------------------------------------------
@@ -43,7 +99,14 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
                                             cmMakefile * mf)
 { 
   mf->AddDefinition("XCODE","1");
-  mf->AddDefinition("CMAKE_CFG_INTDIR",".");
+  if(m_XcodeVersion == 15)
+    {
+    mf->AddDefinition("CMAKE_CFG_INTDIR",".");
+    }
+  else
+    {
+    mf->AddDefinition("CMAKE_CFG_INTDIR","$(CONFIGURATION)");
+    }
   mf->AddDefinition("CMAKE_GENERATOR_CC", "gcc");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
@@ -97,7 +160,14 @@ std::string cmGlobalXCodeGenerator::GenerateBuildCommand(const char* makeProgram
     {
     makeCommand += "ALL_BUILD";
     }
-  makeCommand += " -buildstyle Development ";
+  if(m_XcodeVersion == 15)
+    {
+    makeCommand += " -buildstyle Development ";
+    }
+  else
+    {
+    makeCommand += " -configuration Debug";
+    }
   return makeCommand;
 }
 
@@ -187,9 +257,20 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
   // ADD install
   std::string cmake_command = mf->GetRequiredDefinition("CMAKE_COMMAND");
-  mf->AddUtilityCommand("install", false, no_output, no_depends,
-                        cmake_command.c_str(),
-                        "-P", "cmake_install.cmake"); 
+  if(m_XcodeVersion == 15)
+    {
+    mf->AddUtilityCommand("install", false, no_output, no_depends,
+                          cmake_command.c_str(),
+                          "-P", "cmake_install.cmake"); 
+    }
+  else
+    { 
+    mf->AddUtilityCommand("install", false, no_output, no_depends,
+                          cmake_command.c_str(), 
+                          "-DBUILD_TYPE=$(CONFIGURATION)",
+                          "-P", "cmake_install.cmake"); 
+    }
+  
   const char* noall =
     mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
   if(!noall || cmSystemTools::IsOff(noall))
@@ -753,7 +834,6 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
           // if the depend is a target then make 
           // the target with the source that is a custom command
           // depend on the that target via a AddUtility call
-          std::cerr << "AddUtility " << target.GetName() << " " << *d << "\n";
           target.AddUtility(d->c_str());
           }
         }
@@ -828,6 +908,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   m_CurrentLocalGenerator->AppendFlags(flags,
                                        m_CurrentMakefile->GetDefineFlags());
   cmSystemTools::ReplaceString(flags, "\"", "\\\"");
+  if(m_XcodeVersion == 21)
+    {
+    flags += " -DCMAKE_INTDIR=\\\\\\\"$(CONFIGURATION)\\\\\\\" ";
+    }
   productName = target.GetName();
   
   switch(target.GetType())
@@ -1183,6 +1267,11 @@ std::string cmGlobalXCodeGenerator::GetTargetFullPath(cmTarget* target)
   cmXCodeObject* xtarget = this->FindXCodeTarget(target);
   cmXCodeObject* bset = xtarget->GetObject("buildSettings");
   cmXCodeObject* spath = bset->GetObject("SYMROOT");
+  if(m_XcodeVersion == 21)
+    {
+    libPath += "$(CONFIGURATION)/";
+    }
+  
   libPath = spath->GetString();
   libPath = libPath.substr(1, libPath.size()-2);
   if(target->GetType() == cmTarget::STATIC_LIBRARY)
@@ -1250,6 +1339,13 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     {
     if(libDir->size() && *libDir != "/usr/lib")
       {
+      if(m_XcodeVersion == 21)
+        {
+        // now add the same one but append $(CONFIGURATION) to it:
+        linkDirs += " ";
+        linkDirs += this->XCodeEscapePath(libDir->c_str());
+        linkDirs += "/$(CONFIGURATION)";
+        }
       linkDirs += " ";
       linkDirs += this->XCodeEscapePath(libDir->c_str());
       }

@@ -14,6 +14,8 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
+#include "cmGlobalXCode21Generator.h"
+
 cmGlobalXCode21Generator::cmGlobalXCode21Generator()
 {
   this->m_XcodeVersion = 21;

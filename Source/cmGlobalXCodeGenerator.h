@@ -34,12 +34,12 @@ class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
 public:
   cmGlobalXCodeGenerator();
-  static cmGlobalGenerator* New() { return new cmGlobalXCodeGenerator; }
+  static cmGlobalGenerator* New();
   
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalXCodeGenerator::GetActualName();}
-  static const char* GetActualName() {return "Xcode15";}
+  static const char* GetActualName() {return "Xcode";}
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
@@ -133,6 +133,8 @@ private:
                                   cmTarget& cmtarget,
                                   const std::vector<cmCustomCommand>&);
   void CreateReRunCMakeFile(cmLocalGenerator* root);
+protected:
+  int m_XcodeVersion;
 private:
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
