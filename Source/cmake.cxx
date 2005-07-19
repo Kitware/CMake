@@ -246,6 +246,10 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     if(arg.find("-D",0) == 0)
       {
       std::string entry = arg.substr(2);
+      if(entry.size() == 0)
+        {
+        entry = args[++i];
+        }
       std::string var, value;
       cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
       if(cmCacheManager::ParseEntry(entry.c_str(), var, value, type) ||
@@ -268,8 +272,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       std::string path = arg.substr(2);
       if ( path.size() == 0 )
         {
-        cmSystemTools::Error("No initial cache file provided.");
-        return false;
+        path = args[++i];
         }
       std::cerr << "loading initial cache file " << path.c_str() << "\n";
       this->ReadListFile(path.c_str());
@@ -384,6 +387,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     else if(arg.find("-G",0) == 0)
       {
       std::string value = arg.substr(2);
+      if(value.size() == 0)
+        {
+        value = args[++i];
+        }
       cmGlobalGenerator* gen = 
         this->CreateGlobalGenerator(value.c_str());
       if(!gen)
