@@ -23,8 +23,9 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
 #include "cmOrderLinkDirectories.h"
-#include "cmXMLParser.h"
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#include "cmXMLParser.h"
 
 // parse the xml file storing the installed version of Xcode on
 // the machine
@@ -57,6 +58,7 @@ public:
   std::string m_Key;
   std::string m_Data;
 };
+#endif
 
 
 //TODO
@@ -77,6 +79,7 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
 //----------------------------------------------------------------------------
 cmGlobalGenerator* cmGlobalXCodeGenerator::New()
 { 
+#if defined(CMAKE_BUILD_WITH_CMAKE)  
   cmXcodeVersionParser parser;
   parser.ParseFile("/Developer/Applications/Xcode.app/Contents/version.plist");
   if(parser.m_Version == 15)
@@ -91,6 +94,11 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
     }
   
   return new cmGlobalXCode21Generator;
+#else
+  std::cerr 
+    << "CMake should be built with cmake to use XCode, default to Xcode 1.5\n";
+  return new cmGlobalXCodeGenerator;
+#endif
 }
 
 //----------------------------------------------------------------------------
