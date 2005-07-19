@@ -85,11 +85,20 @@ public:
       "              <COMPILE_DEFINITIONS <flags> ...>\n"
       "              <OUTPUT_VARIABLE var>)\n"
       "Try compiling a srcfile.  Return the success or failure in RESULT_VAR.  "
-      "CMAKE_FLAGS can be used to pass -DVAR:TYPE=VALUE flags to cmake.  The "
+      "CMAKE_FLAGS can be used to pass -DVAR:TYPE=VALUE flags to cmake.  Some "
+      "extra flags that can be included are ,  "
+      "INCLUDE_DIRECTORIES, LINK_DIRECTORIES, and LINK_LIBRARIES.  "
       "COMPILE_DEFINITIONS are -Ddefinition that will be passed to the "
       "compile line. If srcfile is specified the files in bindir/CMakeTmp "
       "are cleaned automatically. If OUTPUT_VARIABLE is specified, then the "
-      "output from the build process is stored in the given variable.";
+      "output from the build process is stored in the given variable. "
+      "TRY_COMPILE creates a CMakeList.txt "
+      "file on the fly, and in that file it looks like this:  "
+      "    ADD_DEFINITIONS( <expanded COMPILE_DEFINITIONS from calling cmake>"
+      "    INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES})"
+      "    LINK_DIRECTORIES(${LINK_DIRECTORIES})"
+      "    ADD_EXECUTABLE(cmTryCompileExec sources)"
+      "    TARGET_LINK_LIBRARIES(cmTryCompileExec ${LINK_LIBRARIES})";
     }
   
   cmTypeMacro(cmTryCompileCommand, cmCommand);
