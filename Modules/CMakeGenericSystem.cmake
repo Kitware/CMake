@@ -24,8 +24,12 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 SET (CMAKE_SKIP_RPATH "NO" CACHE BOOL
      "If set, runtime paths are not added when using shared libraries.")
 
-   
-SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.") 
+SET(CMAKE_INIT_VALUE FALSE)
+MESSAGE("GENERATED ${CMAKE_GENERATOR}")
+IF(CMAKE_GENERATOR MATCHES "KDevelop3")
+  SET(CMAKE_INIT_VALUE TRUE)
+ENDIF(CMAKE_GENERATOR MATCHES "KDevelop3")
+SET(CMAKE_VERBOSE_MAKEFILE ${CMAKE_INIT_VALUE} CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.") 
 
 # Choose a default install prefix for this platform.
 IF(UNIX)
