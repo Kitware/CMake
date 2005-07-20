@@ -74,7 +74,7 @@ ENDIF(NOT CMAKE_SHARED_MODULE_RUNTIME_CXX_FLAG_SEP)
 # on the initial values computed in the platform/*.cmake files
 # use _INIT variables so that this only happens the first time
 # and you can set these flags in the cmake cache
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_ENV_INIT} $ENV{CXXFLAGS} ${CMAKE_CXX_FLAGS_INIT}" CACHE STRING
+SET (CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} ${CMAKE_CXX_FLAGS_INIT}" CACHE STRING
      "Flags used by the compiler during all build types.")
 
 

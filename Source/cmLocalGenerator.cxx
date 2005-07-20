@@ -833,6 +833,15 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       { 
       lang = i->c_str();
       std::string actualReplace = ruleReplaceVars[pos];
+      // If this is the compiler then look for the extra variable
+      // _COMPILER_ARG1 which must be the first argument to the compiler 
+      const char* compilerArg1 = 0;
+      if(actualReplace == "CMAKE_${LANG}_COMPILER")
+        {
+        std::string arg1 = actualReplace + "_ARG1";
+        cmSystemTools::ReplaceString(arg1, "${LANG}", lang);
+        compilerArg1 = m_Makefile->GetDefinition(arg1.c_str());
+        }
       if(actualReplace.find("${LANG}") != actualReplace.npos)
         {
         cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
@@ -843,7 +852,14 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         // if the variable is not a FLAG then treat it like a path
         if(variable.find("_FLAG") == variable.npos)
           {
-          return this->ConvertToOutputForExisting(replace.c_str());
+          std::string ret = this->ConvertToOutputForExisting(replace.c_str());
+          // if there is a required first argument to the compiler add it to the compiler string
+          if(compilerArg1)
+            {
+            ret += " ";
+            ret += compilerArg1;
+            }
+          return ret;
           }
         return replace;
         }
