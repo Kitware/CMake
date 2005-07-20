@@ -212,6 +212,7 @@ std::string cmCTest::MakeURLSafe(const std::string& str)
 //----------------------------------------------------------------------
 cmCTest::cmCTest() 
 { 
+  m_SubmitIndex            = 0;
   m_ForceNewCTestProcess   = false;
   m_TomorrowTag            = false;
   m_Verbose                = false;
