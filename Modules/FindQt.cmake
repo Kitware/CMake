@@ -23,6 +23,7 @@ IF(NOT QT_FOUND)
 ENDIF(NOT QT_FOUND)
 # if a project needs Qt it has to call FoundQt.cmake and NOT FoundQt3.cmake, FoundQt4.cmake etc. This gets checked in FoundQt4.cmake etc.
 SET(FOUNDQT_CALLED "YES")
+FIND_PROGRAM(QT_QMAKE qmake)
 
 # compatibility to CMakeList.txt files for Qt3 projects
 IF(NOT QT_MAX_VERSION)
@@ -39,10 +40,12 @@ ENDIF(NOT QT_MIN_VERSION)
 #       QT_GLOBAL_H_FILE
 #
 #######################################
-IF( NOT QT_QGLOBAL_H_FILE)
-  EXEC_PROGRAM( qmake
-    ARGS "-query QT_INSTALL_HEADERS" 
-    OUTPUT_VARIABLE qt_headers )
+IF( NOT QT_QGLOBAL_H_FILE) 
+  IF(QT_QMAKE)
+    EXEC_PROGRAM( qmake
+      ARGS "-query QT_INSTALL_HEADERS" 
+      OUTPUT_VARIABLE qt_headers )
+  ENDIF(QT_QMAKE)
   
   # Qt4-like search paths
   FIND_FILE( QT4_QGLOBAL_H_FILE qglobal.h

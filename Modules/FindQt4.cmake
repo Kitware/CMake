@@ -85,7 +85,6 @@
 IF(NOT FOUNDQT_CALLED)
   MESSAGE( FATAL_ERROR "Never call FoundQt4.cmake directly. Use FoundQt.cmake.")
 ENDIF(NOT FOUNDQT_CALLED)
-
 ########################################
 #
 #       Setting the INCLUDE-Variables
@@ -93,9 +92,11 @@ ENDIF(NOT FOUNDQT_CALLED)
 ########################################
 # Set QT_QT_INCLUDE_DIR by searching for qglobal.h
 IF(NOT QT_QT_INCLUDE_DIR)
-  EXEC_PROGRAM( qmake
-    ARGS "-query QT_INSTALL_HEADERS" 
-    OUTPUT_VARIABLE qt_headers )
+  IF(QT_QMAKE)
+    EXEC_PROGRAM( qmake
+      ARGS "-query QT_INSTALL_HEADERS" 
+      OUTPUT_VARIABLE qt_headers )
+  ENDIF(QT_QMAKE)
   FIND_PATH( QT_QT_INCLUDE_DIR qglobal.h
     ${qt_headers}/Qt
     $ENV{QTDIR}/include/Qt
@@ -270,10 +271,12 @@ SET( QT_INCLUDES
 #       Setting the LIBRARY-Variables
 #
 ########################################
-IF(NOT QT_QTCORE_LIBRARY)
-  EXEC_PROGRAM( qmake
-    ARGS "-query QT_INSTALL_LIBS" 
-    OUTPUT_VARIABLE qt_libs )
+IF(NOT QT_QTCORE_LIBRARY) 
+  IF(QT_QMAKE)
+    EXEC_PROGRAM( qmake
+      ARGS "-query QT_INSTALL_LIBS" 
+      OUTPUT_VARIABLE qt_libs )
+  ENDIF(QT_QMAKE)
   # Set QT_QTCORE_LIBRARY  by searching for a lib with "QtCore." as part of the filename
   FIND_LIBRARY(  QT_QTCORE_LIBRARY
     NAMES QtCore 
@@ -291,9 +294,11 @@ ENDIF(NOT QT_QTCORE_LIBRARY)
 
 # Set QT_QTCORE_LIBRARY_DEBUG by searching for a lib with "QtCore_debug" as part of the filename
 IF(NOT QT_QTCORE_LIBRARY_DEBUG)
-  EXEC_PROGRAM( qmake
-    ARGS "-query QT_INSTALL_LIBS" 
-    OUTPUT_VARIABLE qt_libs )
+  IF(QT_QMAKE)
+    EXEC_PROGRAM( qmake
+      ARGS "-query QT_INSTALL_LIBS" 
+      OUTPUT_VARIABLE qt_libs )
+  ENDIF(QT_QMAKE)
   FIND_LIBRARY(  QT_QTCORE_LIBRARY_DEBUG
     NAMES QtCore_debug
     PATHS 
@@ -648,10 +653,11 @@ ENDIF(NOT QT_LIBRARIES_TRYDEBUG)
 #
 #######################################
 IF(NOT QT_MOC_EXECUTABLE)
-  EXEC_PROGRAM( qmake
-    ARGS "-query QT_INSTALL_BINS" 
-    OUTPUT_VARIABLE qt_bins )
-  
+  IF(QT_QMAKE)
+    EXEC_PROGRAM( qmake
+      ARGS "-query QT_INSTALL_BINS" 
+      OUTPUT_VARIABLE qt_bins ) 
+  ENDIF(QT_QMAKE)
   FIND_PROGRAM(QT_MOC_EXECUTABLE 
     NAMES moc
     PATHS
@@ -673,9 +679,11 @@ ELSE(QT_MOC_EXECUTABLE)
 ENDIF(QT_MOC_EXECUTABLE)
 
 IF(NOT QT_UIC_EXECUTABLE )
-  EXEC_PROGRAM( qmake
-    ARGS "-query QT_INSTALL_BINS" 
-    OUTPUT_VARIABLE qt_bins )
+  IF(QT_QMAKE)
+    EXEC_PROGRAM( qmake
+      ARGS "-query QT_INSTALL_BINS" 
+      OUTPUT_VARIABLE qt_bins )
+  ENDIF(QT_QMAKE)
   FIND_PROGRAM(QT_UIC_EXECUTABLE 
     NAMES uic
     PATHS
@@ -697,9 +705,11 @@ ELSE(QT_UIC_EXECUTABLE)
 ENDIF(QT_UIC_EXECUTABLE)
 
 IF(NOT QT_RCC_EXECUTABLE)
-  EXEC_PROGRAM( qmake
-    ARGS "-query QT_INSTALL_BINS" 
-    OUTPUT_VARIABLE qt_bins )
+  IF(QT_QMAKE)
+    EXEC_PROGRAM( qmake
+      ARGS "-query QT_INSTALL_BINS" 
+      OUTPUT_VARIABLE qt_bins )
+  ENDIF(QT_QMAKE)
   FIND_PROGRAM(QT_RCC_EXECUTABLE 
     NAMES rcc
     PATHS
