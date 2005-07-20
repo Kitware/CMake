@@ -500,7 +500,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   FOREACH(test
       testSystemTools
       testIOS
-      testhash
+      testHashSTL
       testCommandLineArguments
       )
     ADD_EXECUTABLE(${test} ${test}.cxx)
@@ -533,6 +533,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     ADD_TEST(kwsys-testProcess-5 ${EXEC_DIR}/testProcess 5)
     ADD_TEST(kwsys-testProcess-6 ${EXEC_DIR}/testProcess 6)
     ADD_TEST(kwsys-testProcess-7 ${EXEC_DIR}/testProcess 7)
-    ADD_TEST(kwsys-testhash ${EXEC_DIR}/testhash)
+    ADD_TEST(kwsys-testHashSTL ${EXEC_DIR}/testHashSTL)
   ENDIF(BUILD_TESTING)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
