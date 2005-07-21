@@ -255,7 +255,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
         {
         local_file = localprefix + "/" + *file;
         }
-      cmStdString remote_file = remoteprefix + remoteprefix + cmSystemTools::GetFilenameName(*file);
+      cmStdString remote_file = remoteprefix + cmSystemTools::GetFilenameName(*file);
 
       *m_LogFile << "\tUpload file: " << local_file.c_str() << " to "
           << remote_file.c_str() << std::endl;
