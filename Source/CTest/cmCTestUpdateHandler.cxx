@@ -520,6 +520,9 @@ int cmCTestUpdateHandler::ProcessHandler()
   // Even though it failed, we may have some useful information. Try to continue...
   std::vector<cmStdString> lines;
   cmSystemTools::Split(goutput.c_str(), lines);
+  std::vector<cmStdString> errLines;
+  cmSystemTools::Split(errors.c_str(), errLines);
+  lines.insert(lines.end(), errLines.begin(), errLines.end());
 
   // CVS style regular expressions
   cmsys::RegularExpression cvs_date_author_regex("^date: +([^;]+); +author: +([^;]+); +state: +[^;]+;");
@@ -531,6 +534,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   cmsys::RegularExpression svn_status_line_regex("^ *([0-9]+)  *([0-9]+)  *([^ ]+)  *([^ ][^\t\r\n]*)[ \t\r\n]*$");
   cmsys::RegularExpression svn_latest_revision_regex("(Updated to|At) revision ([0-9]+)\\.");
 
+  cmsys::RegularExpression file_removed_line("cvs update: `(.*)' is no longer in the repository");
   cmsys::RegularExpression file_update_line("([A-Z])  *(.*)");
   std::string current_path = "<no-path>";
   bool first_file = true;
@@ -562,9 +566,15 @@ int cmCTestUpdateHandler::ProcessHandler()
 
   cmCTestLog(m_CTest, HANDLER_OUTPUT, "   Gathering version information (each . represents one updated file):" << std::endl);
   int file_count = 0;
+  std::string removed_line;
   for ( cc= 0 ; cc < lines.size(); cc ++ )
     {
     const char* line = lines[cc].c_str();
+    if ( file_removed_line.find(line) )
+      {
+      removed_line = "D " + file_removed_line.match(1);
+      line = removed_line.c_str();
+      }
     if ( file_update_line.find(line) )
       {
       if ( file_count == 0 )
@@ -575,6 +585,11 @@ int cmCTestUpdateHandler::ProcessHandler()
       std::string upChar = file_update_line.match(1);
       std::string upFile = file_update_line.match(2);
       char mod = upChar[0];
+      bool removed = false;
+      if ( mod != 'D' )
+        {
+        removed = true;
+        }
       bool modifiedOrConflict = false;
       if ( mod != 'M' && mod != 'C' && mod != 'G' )
         {
@@ -760,6 +775,10 @@ int cmCTestUpdateHandler::ProcessHandler()
           {
           comment1 = "Locally modified file\n";
           sauthor1 = "Local User";
+          }
+        if ( mod == 'R' )
+          {
+          comment1 = "Removed file\n";
           }
         if ( mod == 'C' )
           {
