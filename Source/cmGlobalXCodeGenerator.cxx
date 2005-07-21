@@ -32,7 +32,7 @@
 class cmXcodeVersionParser : public cmXMLParser
 {
 public:
-  void StartElement(const char* name, const char** atts)
+  void StartElement(const char* , const char** )
     {
       m_Data = "";
     }
