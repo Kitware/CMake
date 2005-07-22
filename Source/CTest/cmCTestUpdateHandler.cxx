@@ -585,11 +585,6 @@ int cmCTestUpdateHandler::ProcessHandler()
       std::string upChar = file_update_line.match(1);
       std::string upFile = file_update_line.match(2);
       char mod = upChar[0];
-      bool removed = false;
-      if ( mod != 'D' )
-        {
-        removed = true;
-        }
       bool modifiedOrConflict = false;
       if ( mod != 'M' && mod != 'C' && mod != 'G' )
         {
@@ -776,9 +771,9 @@ int cmCTestUpdateHandler::ProcessHandler()
           comment1 = "Locally modified file\n";
           sauthor1 = "Local User";
           }
-        if ( mod == 'R' )
+        if ( mod == 'D' )
           {
-          comment1 = "Removed file\n";
+          comment1 += " - Removed file\n";
           }
         if ( mod == 'C' )
           {
