@@ -889,7 +889,10 @@ void cmLocalVisualStudio7Generator::OutputLibraries(std::ostream& fout,
           debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
           }
         }
-      if(j->first.find(".lib") == std::string::npos)
+      // since windows is case insensitive then check for lower case .lib as
+      // at the end of the string, if not yet there add it.
+      std::string lowerCaseLib = cmSystemTools::LowerCase(j->first);
+      if(lowerCaseLib.rfind(".lib") != (lowerCaseLib.size()-4))
         {
         lib += debugPostfix + ".lib";
         }
