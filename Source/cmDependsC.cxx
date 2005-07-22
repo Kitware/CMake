@@ -311,8 +311,10 @@ const char* cmDependsC::ParseFileName(const char* in, std::string& name)
 
   // Parse the possibly quoted file name.
   bool quoted = false;
+  char* buf = new char[strlen(in)+1];
+  char* pos = buf;
   for(;*c && (quoted ||
-              ((*c != ':' || name.size() == 1) && !isspace(*c))); ++c)
+              ((*c != ':' || pos > buf+1) && !isspace(*c))); ++c)
     {
     if(*c == '"')
       {
@@ -320,14 +322,18 @@ const char* cmDependsC::ParseFileName(const char* in, std::string& name)
       }
     else if(!quoted && *c == '\\' && isspace(*(c+1)))
       {
-      name += *(++c);
+      *pos =  *(++c);
+      pos++;
       }
     else
       {
-      name += *c;
+      *pos = *c;
+      pos++;
       }
     }
-
+  *pos =0;
+  name += pos;
+  delete [] buf;
   // Return the ending position.
   return c;
 }
