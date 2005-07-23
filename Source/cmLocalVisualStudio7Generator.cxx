@@ -889,12 +889,7 @@ void cmLocalVisualStudio7Generator::OutputLibraries(std::ostream& fout,
           debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
           }
         }
-      // chop off the last 4 chars of the library string
-      std::string lowerCaseLibExt = j->first.substr(j->first.size()-4, 4);
-      // lower case the extension
-      lowerCaseLibExt = cmSystemTools::LowerCase(lowerCaseLibExt);
-      // now check to see if it was a .lib, if not then add a .lib
-      if(lowerCaseLibExt != ".lib")
+      if(j->first.find(".lib") == std::string::npos)
         {
         lib += debugPostfix + ".lib";
         }
