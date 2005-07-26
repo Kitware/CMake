@@ -62,10 +62,13 @@ void cmTarget::TraceVSDependencies(std::string projFile,
     // does this sourcefile have object depends on it?
     // If so then add them as well
     const char* additionalDeps = (*i)->GetProperty("OBJECT_DEPENDS");
-    if (additionalDeps)
+    std::vector<std::string> depends = (*i)->GetDepends();
+    if (additionalDeps || depends.size())
       {
-      std::vector<std::string> depends;
-      cmSystemTools::ExpandListArgument(additionalDeps, depends);
+      if(additionalDeps)
+        {
+        cmSystemTools::ExpandListArgument(additionalDeps, depends);
+        }
       for(std::vector<std::string>::iterator id = depends.begin();
           id != depends.end(); ++id)
         {
