@@ -82,6 +82,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_RegularExpression 1)
   SET(KWSYS_USE_SystemTools 1)
   SET(KWSYS_USE_CommandLineArguments 1)
+  SET(KWSYS_USE_FundamentalType 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
 #-----------------------------------------------------------------------------
@@ -243,6 +244,78 @@ IF(UNIX)
     "Checking whether struct stat has st_mtim member" DIRECT)
 ENDIF(UNIX)
 
+IF(KWSYS_USE_FundamentalType)
+  # Determine type sizes.
+  INCLUDE(CheckTypeSize)
+  CHECK_TYPE_SIZE("char"      KWSYS_SIZEOF_CHAR)
+  CHECK_TYPE_SIZE("short"     KWSYS_SIZEOF_SHORT)
+  CHECK_TYPE_SIZE("int"       KWSYS_SIZEOF_INT)
+  CHECK_TYPE_SIZE("long"      KWSYS_SIZEOF_LONG)
+  CHECK_TYPE_SIZE("long long" KWSYS_SIZEOF_LONG_LONG)
+  CHECK_TYPE_SIZE("__int64"   KWSYS_SIZEOF___INT64)
+  IF(NOT KWSYS_SIZEOF_LONG_LONG)
+    SET(KWSYS_SIZEOF_LONG_LONG 0)
+  ENDIF(NOT KWSYS_SIZEOF_LONG_LONG)
+  IF(NOT KWSYS_SIZEOF___INT64)
+    SET(KWSYS_SIZEOF___INT64 0)
+  ENDIF(NOT KWSYS_SIZEOF___INT64)
+
+  # Check uniqueness of types.
+  IF(KWSYS_SIZEOF___INT64)
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_SAME_LONG_AND___INT64
+      "Checking whether long and __int64 are the same type" DIRECT)
+    IF(KWSYS_SIZEOF_LONG_LONG)
+      KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_SAME_LONG_LONG_AND___INT64
+        "Checking whether long long and __int64 are the same type" DIRECT)
+    ENDIF(KWSYS_SIZEOF_LONG_LONG)
+  ENDIF(KWSYS_SIZEOF___INT64)
+
+  # Enable the "long long" type if it is available.  It is standard in
+  # C99 and C++03 but not in earlier standards.
+  IF(KWSYS_SIZEOF_LONG_LONG)
+    SET(KWSYS_USE_LONG_LONG 1)
+  ELSE(KWSYS_SIZEOF_LONG_LONG)
+    SET(KWSYS_USE_LONG_LONG 0)
+  ENDIF(KWSYS_SIZEOF_LONG_LONG)
+
+  # Enable the "__int64" type if it is available and unique.  It is not
+  # standard.
+  SET(KWSYS_USE___INT64 0)
+  IF(KWSYS_SIZEOF___INT64)
+    IF(NOT KWSYS_CXX_SAME_LONG_AND___INT64)
+      IF(NOT KWSYS_CXX_SAME_LONG_LONG_AND___INT64)
+        SET(KWSYS_USE___INT64 1)
+      ENDIF(NOT KWSYS_CXX_SAME_LONG_LONG_AND___INT64)
+    ENDIF(NOT KWSYS_CXX_SAME_LONG_AND___INT64)
+  ENDIF(KWSYS_SIZEOF___INT64)
+  IF(KWSYS_USE___INT64)
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_CAN_CONVERT_UI64_TO_DOUBLE
+      "Checking whether unsigned __int64 can convert to double" DIRECT)
+  ELSE(KWSYS_USE___INT64)
+    SET(KWSYS_CAN_CONVERT_UI64_TO_DOUBLE 1)
+  ENDIF(KWSYS_USE___INT64)
+
+  # Check signedness of "char" type.
+  IF("KWSYS_CHAR_IS_SIGNED" MATCHES "^KWSYS_CHAR_IS_SIGNED$")
+    MESSAGE(STATUS "Checking signedness of char")
+    TRY_RUN(KWSYS_CHAR_IS_SIGNED KWSYS_CHAR_IS_SIGNED_COMPILED
+      ${CMAKE_CURRENT_BINARY_DIR}
+      ${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformCxxTests.cxx
+      COMPILE_DEFINITIONS -DTEST_KWSYS_CHAR_IS_SIGNED)
+    IF(KWSYS_CHAR_IS_SIGNED_COMPILED)
+      IF(KWSYS_CHAR_IS_SIGNED)
+        MESSAGE(STATUS "Checking signedness of char -- signed")
+        SET(KWSYS_CHAR_IS_SIGNED 1 CACHE INTERNAL "Whether char is signed.")
+      ELSE(KWSYS_CHAR_IS_SIGNED)
+        MESSAGE(STATUS "Checking signedness of char -- unsigned")
+        SET(KWSYS_CHAR_IS_SIGNED 0 CACHE INTERNAL "Whether char is signed.")
+      ENDIF(KWSYS_CHAR_IS_SIGNED)
+    ELSE(KWSYS_CHAR_IS_SIGNED_COMPILED)
+      MESSAGE(FATAL_ERROR "Checking signedness of char -- failed")
+    ENDIF(KWSYS_CHAR_IS_SIGNED_COMPILED)
+  ENDIF("KWSYS_CHAR_IS_SIGNED" MATCHES "^KWSYS_CHAR_IS_SIGNED$")
+ENDIF(KWSYS_USE_FundamentalType)
+
 IF(KWSYS_NAMESPACE MATCHES "^kwsys$")
   SET(KWSYS_NAME_IS_KWSYS 1)
 ELSE(KWSYS_NAMESPACE MATCHES "^kwsys$")
@@ -343,7 +416,7 @@ FOREACH(c Directory RegularExpression SystemTools CommandLineArguments)
 ENDFOREACH(c)
 
 # Add selected C components.
-FOREACH(c Process Base64)
+FOREACH(c Process Base64 FundamentalType)
   IF(KWSYS_USE_${c})
     SET(KWSYS_H_FILES ${KWSYS_H_FILES} ${c})
   ENDIF(KWSYS_USE_${c})
