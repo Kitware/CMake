@@ -221,3 +221,47 @@ int main()
   return 0;
 }
 #endif
+
+#ifdef TEST_KWSYS_CXX_SAME_LONG_AND___INT64
+void function(long**) {}
+int main()
+{
+  __int64** p = 0;
+  function(p);
+  return 0;
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_SAME_LONG_LONG_AND___INT64
+void function(long long**) {}
+int main()
+{
+  __int64** p = 0;
+  function(p);
+  return 0;
+}
+#endif
+
+#ifdef TEST_KWSYS_CAN_CONVERT_UI64_TO_DOUBLE
+void function(double& l, unsigned __int64 const& r)
+{
+  l = static_cast<double>(r);
+}
+
+int main()
+{
+  double tTo = 0.0;
+  unsigned __int64 tFrom = 0;
+  function(tTo, tFrom);
+  return 0;
+}
+#endif
+
+#ifdef TEST_KWSYS_CHAR_IS_SIGNED
+/* Return 1 for char signed and 0 for char unsigned.  */
+int main()
+{
+  unsigned char uc = 255;
+  return (*reinterpret_cast<char*>(&uc) < 0)?1:0;
+}
+#endif
