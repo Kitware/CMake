@@ -2296,7 +2296,7 @@ cmLocalUnixMakefileGenerator3
       d != cc.GetDepends().end(); ++d)
     {
     // Add this dependency.
-    this->AppendAnyDepend(depends, d->c_str(), true);
+    this->AppendAnyDepend(depends, d->c_str());
     }
 }
 
