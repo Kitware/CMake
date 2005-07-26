@@ -14,6 +14,14 @@
 #ifndef @KWSYS_NAMESPACE@_Configure_h
 #define @KWSYS_NAMESPACE@_Configure_h
 
+/* If we are building a kwsys .c or .cxx file, let it use the kwsys
+   namespace.  When not building a kwsys source file these macros are
+   temporarily defined inside the headers that use them.  */
+#if defined(KWSYS_NAMESPACE)
+# define kwsys_ns(x) @KWSYS_NAMESPACE@##x
+# define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
+#endif
+
 /* Setup the export macro.  */
 #if defined(_WIN32) && @KWSYS_BUILD_SHARED@
 # if defined(@KWSYS_NAMESPACE@_EXPORTS)

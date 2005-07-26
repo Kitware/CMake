@@ -11,7 +11,6 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#define KWSYS_IN_BASE64_C
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Base64.h)
 

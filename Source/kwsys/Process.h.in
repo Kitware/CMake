@@ -20,8 +20,10 @@
    namespace.  These macros are used internally to kwsys only, and are
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
-#define kwsys_ns(x) @KWSYS_NAMESPACE@##x
-#define kwsysEXPORT                      @KWSYS_NAMESPACE@_EXPORT
+#if !defined(KWSYS_NAMESPACE)
+# define kwsys_ns(x) @KWSYS_NAMESPACE@##x
+# define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
+#endif
 #define kwsysProcess                     kwsys_ns(Process)
 #define kwsysProcess_s                   kwsys_ns(Process_s)
 #define kwsysProcess_New                 kwsys_ns(Process_New)

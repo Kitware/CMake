@@ -20,8 +20,10 @@
    namespace.  These macros are used internally to kwsys only, and are
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
-#define kwsys_ns(x) @KWSYS_NAMESPACE@##x
-#define kwsysEXPORT          @KWSYS_NAMESPACE@_EXPORT
+#if !defined(KWSYS_NAMESPACE)
+# define kwsys_ns(x) @KWSYS_NAMESPACE@##x
+# define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
+#endif
 #define kwsysBase64          kwsys_ns(Base64)
 #define kwsysBase64_Decode   kwsys_ns(Base64_Decode)
 #define kwsysBase64_Decode3  kwsys_ns(Base64_Decode3)
@@ -99,9 +101,9 @@ kwsysEXPORT unsigned long kwsysBase64_Decode(const unsigned char *input,
 } /* extern "C" */
 #endif
 
-/* If we are building Base64.c, let it use these macros.  Otherwise,
-   undefine them to keep the namespace clean.  */
-#if !defined(KWSYS_IN_BASE64_C)
+/* If we are building a kwsys .c or .cxx file, let it use these macros.
+   Otherwise, undefine them to keep the namespace clean.  */
+#if !defined(KWSYS_NAMESPACE)
 # undef kwsys_ns
 # undef kwsysEXPORT
 # undef kwsysBase64
