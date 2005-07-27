@@ -328,67 +328,34 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     }
   cmakefileStream << "  )\n\n";
 
-  this->WriteMainCMakefileLanguageRules(cmakefileStream);
+  this->WriteMainCMakefileLanguageRules(cmakefileStream, m_LocalGenerators);
 }
   
 void cmGlobalUnixMakefileGenerator3
-::WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream)
+::WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream,
+                                  std::vector<cmLocalGenerator *> &lGenerators)
 {
   cmLocalUnixMakefileGenerator3 *lg;
 
-  // now write all the language stuff
-  // Set the set of files to check for dependency integrity.
-  // loop over all of the local generators to collect this
-  std::set<cmStdString> checkSetLangs;
-  for (unsigned int i = 0; i < m_LocalGenerators.size(); ++i)
-    {
-    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-    std::map<cmStdString,cmLocalUnixMakefileGenerator3::IntegrityCheckSet>& checkSet = 
-      lg->GetIntegrityCheckSet();
-    for(std::map<cmStdString, 
-          cmLocalUnixMakefileGenerator3::IntegrityCheckSet>::const_iterator
-          l = checkSet.begin(); l != checkSet.end(); ++l)
-      {
-      checkSetLangs.insert(l->first);
-      }
-    }
-  
-  // list the languages
+  // now list all the target info files
   cmakefileStream
     << "# The set of files whose dependency integrity should be checked:\n";
   cmakefileStream
-    << "SET(CMAKE_DEPENDS_LANGUAGES\n";
-  for(std::set<cmStdString>::iterator
-        l = checkSetLangs.begin(); l != checkSetLangs.end(); ++l)
+    << "SET(CMAKE_DEPEND_INFO_FILES\n";
+  for (unsigned int i = 0; i < lGenerators.size(); ++i)
     {
-    cmakefileStream << "  \"" << l->c_str() << "\"\n";
+    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(lGenerators[i]);
+    // for all of out targets
+    for (cmTargets::iterator l = lg->GetMakefile()->GetTargets().begin();
+         l != lg->GetMakefile()->GetTargets().end(); l++)
+      {
+      std::string tname = lg->GetRelativeTargetDirectory(l->second);
+      tname += "/DependInfo.cmake";
+      cmSystemTools::ConvertToUnixSlashes(tname);
+      cmakefileStream << "  \"" << tname.c_str() << "\"\n";
+      }
     }
   cmakefileStream << "  )\n";
-  
-  // now list the files for each language
-  for(std::set<cmStdString>::iterator
-        l = checkSetLangs.begin(); l != checkSetLangs.end(); ++l)
-    {
-    cmakefileStream
-      << "SET(CMAKE_DEPENDS_CHECK_" << l->c_str() << "\n";
-    // now for each local gen get the checkset
-    for (unsigned int i = 0; i < m_LocalGenerators.size(); ++i)
-      {
-      lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-      // get the check set for this local gen and language
-      cmLocalUnixMakefileGenerator3::IntegrityCheckSet iCheckSet = 
-        lg->GetIntegrityCheckSet()[*l];
-      // for each file
-      for(cmLocalUnixMakefileGenerator3::IntegrityCheckSet::const_iterator csIter = 
-            iCheckSet.begin();
-          csIter != iCheckSet.end(); ++csIter)
-        {
-        cmakefileStream << "  \"" << 
-          lg->Convert(csIter->c_str(),cmLocalGenerator::HOME_OUTPUT).c_str() << "\"\n";
-        }
-      }
-    cmakefileStream << "  )\n";
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -768,7 +735,6 @@ cmGlobalUnixMakefileGenerator3
 
   // for each target Generate the rule files for each target.
   cmTargets& targets = lg->GetMakefile()->GetTargets();
-  bool needRequiresStep = this->NeedRequiresStep(lg);
   for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
     if (((t->second.GetType() == cmTarget::EXECUTABLE) ||
@@ -779,6 +745,8 @@ cmGlobalUnixMakefileGenerator3
         t->second.GetName() &&
         strlen(t->second.GetName()))  
       {
+      bool needRequiresStep = 
+        this->NeedRequiresStep(lg,t->second.GetName());
       // Add a rule to build the target by name.
       localName = lg->GetRelativeTargetDirectory(t->second);
       std::string makefileName = localName;
@@ -1006,10 +974,10 @@ cmGlobalUnixMakefileGenerator3::WriteHelpRule(std::ostream& ruleFileStream)
 
 
 bool cmGlobalUnixMakefileGenerator3
-::NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg)
+::NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg,const char *name)
 {
   std::map<cmStdString,cmLocalUnixMakefileGenerator3::IntegrityCheckSet>& 
-    checkSet = lg->GetIntegrityCheckSet();
+    checkSet = lg->GetIntegrityCheckSet()[name];
   for(std::map<cmStdString, 
         cmLocalUnixMakefileGenerator3::IntegrityCheckSet>::const_iterator
         l = checkSet.begin(); l != checkSet.end(); ++l)
@@ -1022,6 +990,5 @@ bool cmGlobalUnixMakefileGenerator3
       return true;
       }
     }
-  
   return false;
 }

@@ -20,14 +20,7 @@
 #include "cmSystemTools.h"
 
 //----------------------------------------------------------------------------
-cmDependsJava::cmDependsJava():
-  m_SourceFile()
-{
-}
-
-//----------------------------------------------------------------------------
-cmDependsJava::cmDependsJava(const char* sourceFile):
-  m_SourceFile(sourceFile)
+cmDependsJava::cmDependsJava()
 {
 }
 
@@ -37,10 +30,11 @@ cmDependsJava::~cmDependsJava()
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsJava::WriteDependencies(std::ostream&)
+bool cmDependsJava::WriteDependencies(const char *src, 
+                                      const char *file, std::ostream&)
 {
   // Make sure this is a scanning instance.
-  if(m_SourceFile == "")
+  if(!src || src[0] == '\0')
     {
     cmSystemTools::Error("Cannot scan dependencies without an source file.");
     return false;

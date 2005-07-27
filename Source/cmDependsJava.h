@@ -29,21 +29,14 @@ public:
       relative path from the build directory to the target file.  */
   cmDependsJava();
 
-  /** Scanning need to know the build directory name, the relative
-      path from the build directory to the target file and the source
-      file to scan.  */
-  cmDependsJava(const char* sourceFile);
-
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsJava();
 
 protected:
   // Implement writing/checking methods required by superclass.
-  virtual bool WriteDependencies(std::ostream& os);
+  virtual bool WriteDependencies(const char *src,
+                                 const char *file, std::ostream& os);
   virtual bool CheckDependencies(std::istream& is);
-
-  // The source file from which to start scanning.
-  std::string m_SourceFile;
 
 private:
   cmDependsJava(cmDependsJava const&); // Purposely not implemented.

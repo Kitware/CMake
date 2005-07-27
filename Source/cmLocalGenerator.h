@@ -97,6 +97,9 @@ public:
                       OutputFormat output = UNCHANGED,
                       bool optional = false);
   
+  ///! Call this prior to using Convert
+  void SetupPathConversions();
+  
   /**
    * Convert the given path to an output path that is optionally
    * relative based on the cache option CMAKE_USE_RELATIVE_PATHS.  The

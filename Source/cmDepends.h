@@ -33,10 +33,6 @@ public:
       path from the build directory to the target file.  */
   cmDepends();
   
-  /** set the name directory and extensions of the target file to scan */
-  void SetTargetFile(const char* dir, const char* targetFile, 
-                     const char *markExt, const char *makeExt);
-
   /** at what level will the compile be done from */
   void SetCompileDirectory(const char *dir) {m_CompileDirectory = dir;};
     
@@ -47,43 +43,29 @@ public:
   virtual ~cmDepends();
 
   /** Write dependencies for the target file.  */
-  bool Write();
-
+  bool Write(const char *src, const char *obj, std::ostream &os);
+  
   /** Check dependencies for the target file.  */
-  void Check();
+  void Check(const char *file);
 
   /** Clear dependencies for the target file so they will be regenerated.  */
-  void Clear();
-
-  /** Get the name of the dependency make file.  */
-  const char* GetMakeFileName();
-
-  /** Get the name of the dependency mark file.  */
-  const char* GetMarkFileName();
+  void Clear(const char *file);
 
 protected:
 
   // Write dependencies for the target file to the given stream.
   // Return true for success and false for failure.
-  virtual bool WriteDependencies(std::ostream& os)=0;
+  virtual bool WriteDependencies(const char *src, 
+                                 const char* obj, std::ostream& os)=0;
 
   // Check dependencies for the target file in the given stream.
   // Return false if dependencies must be regenerated and true
   // otherwise.
-  virtual bool CheckDependencies(std::istream& is)=0;
+  virtual bool CheckDependencies(std::istream& is) = 0;
 
   // The directory in which the build rule for the target file is executed.
   std::string m_Directory;
   std::string m_CompileDirectory;
-
-  // The name of the target file for which dependencies are maintained.
-  std::string m_TargetFile;
-
-  // The name of the .depends.make file corresponding to the target.
-  std::string m_DependsMakeFile;
-
-  // The name of the .depends file marking when dependencies were generated.
-  std::string m_DependsMarkFile;
 
   // Flag for verbose output.
   bool m_Verbose;

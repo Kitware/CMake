@@ -32,55 +32,14 @@ cmDepends::~cmDepends()
 {
 }
 
-void cmDepends::SetTargetFile(const char* dir, const char* targetFile, 
-                              const char *markExt, const char *makeExt)
-{
-  m_Directory = dir;
-  m_TargetFile = targetFile;
-  
-  // Construct the path to the make and mark files.  Append
-  // appropriate extensions to their names.
-  m_DependsMarkFile = dir;
-  m_DependsMakeFile = dir;
-  m_DependsMakeFile += "/";
-  m_DependsMarkFile += "/";
-  m_DependsMakeFile += m_TargetFile;
-  m_DependsMarkFile += m_TargetFile;
-  m_DependsMakeFile += makeExt;
-  m_DependsMarkFile += markExt;
-
-  if (!m_CompileDirectory.size())
-    {
-    m_CompileDirectory = dir;
-    }
-}
-
-
 //----------------------------------------------------------------------------
-bool cmDepends::Write()
+bool cmDepends::Write(const char *src, const char *obj, std::ostream &fout)
 {
-  // Dependency generation must always be done in the current working
-  // directory.
-  assert(m_Directory == ".");
-
-  // Try to generate dependencies for the target file.
-  cmGeneratedFileStream fout(m_DependsMakeFile.c_str());
-  fout << "# Dependencies for " << m_TargetFile.c_str() << std::endl;
-  if(this->WriteDependencies(fout) && fout)
-    {
-    // Dependencies were generated.  Touch the mark file.
-    std::ofstream fmark(m_DependsMarkFile.c_str());
-    fmark << "Dependencies updated for " << m_TargetFile.c_str() << std::endl;
-    return true;
-    }
-  else
-    {
-    return false;
-    }
+  return this->WriteDependencies(src, obj, fout);
 }
 
 //----------------------------------------------------------------------------
-void cmDepends::Check()
+void cmDepends::Check(const char *file)
 {
   // Dependency checks must be done in proper working directory.
   std::string oldcwd = ".";
@@ -93,11 +52,11 @@ void cmDepends::Check()
     }
 
   // Check whether dependencies must be regenerated.
-  std::ifstream fin(m_DependsMakeFile.c_str());
+  std::ifstream fin(file);
   if(!(fin && this->CheckDependencies(fin)))
     {
     // Clear all dependencies so they will be regenerated.
-    this->Clear();
+    this->Clear(file);
     }
 
   // Restore working directory.
@@ -108,37 +67,26 @@ void cmDepends::Check()
 }
 
 //----------------------------------------------------------------------------
-void cmDepends::Clear()
+void cmDepends::Clear(const char *file)
 {
   // Print verbose output.
   if(m_Verbose)
     {
     cmOStringStream msg;
-    msg << "Clearing dependencies for \"" << m_TargetFile << "\"." << std::endl;
+    msg << "Clearing dependencies in \"" << file << "\"." << std::endl;
     cmSystemTools::Stdout(msg.str().c_str());
     }
 
   // Remove the dependency mark file to be sure dependencies will be
   // regenerated.
-  cmSystemTools::RemoveFile(m_DependsMarkFile.c_str());
-
+  std::string markFile = file;
+  markFile += ".mark";
+  cmSystemTools::RemoveFile(markFile.c_str());
+  
   // Write an empty dependency file.
-  cmGeneratedFileStream depFileStream(m_DependsMakeFile.c_str());
+  cmGeneratedFileStream depFileStream(file);
   depFileStream
-    << "# Empty dependencies file for " << m_TargetFile.c_str() << ".\n"
+    << "# Empty dependencies file\n"
     << "# This may be replaced when dependencies are built." << std::endl;
 }
 
-//----------------------------------------------------------------------------
-const char* cmDepends::GetMakeFileName()
-{
-  // Skip over the directory part of the name.
-  return m_DependsMakeFile.c_str() + m_Directory.length() + 1;
-}
-
-//----------------------------------------------------------------------------
-const char* cmDepends::GetMarkFileName()
-{
-  // Skip over the directory part of the name.
-  return m_DependsMarkFile.c_str() + m_Directory.length() + 1;
-}

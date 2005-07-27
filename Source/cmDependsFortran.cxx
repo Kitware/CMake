@@ -77,15 +77,12 @@ struct cmDependsFortranParser_s
 
 //----------------------------------------------------------------------------
 cmDependsFortran::cmDependsFortran():
-  m_SourceFile(),
   m_IncludePath(0)
 {
 }
 
 //----------------------------------------------------------------------------
-cmDependsFortran::cmDependsFortran(const char* sourceFile,
-                                   std::vector<std::string> const& includes):
-  m_SourceFile(sourceFile),
+cmDependsFortran::cmDependsFortran(std::vector<std::string> const& includes):
   m_IncludePath(&includes)
 {
 }
@@ -96,12 +93,18 @@ cmDependsFortran::~cmDependsFortran()
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsFortran::WriteDependencies(std::ostream& os)
+bool cmDependsFortran::WriteDependencies(const char *src,
+                                         const char *obj, std::ostream& os)
 {
   // Make sure this is a scanning instance.
-  if(m_SourceFile == "")
+  if(!src || src[0] == '\0')
     {
     cmSystemTools::Error("Cannot scan dependencies without an source file.");
+    return false;
+    }
+  if(!obj || obj[0] == '\0')
+    {
+    cmSystemTools::Error("Cannot scan dependencies without an object file.");
     return false;
     }
   if(!m_IncludePath)
@@ -114,7 +117,7 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
   cmDependsFortranParser parser(this);
 
   // Push on the starting file.
-  cmDependsFortranParser_FilePush(&parser, m_SourceFile.c_str());
+  cmDependsFortranParser_FilePush(&parser, src);
 
   // Parse the translation unit.
   if(cmDependsFortran_yyparse(parser.Scanner) != 0)
@@ -127,7 +130,7 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
   for(std::set<cmStdString>::const_iterator i = parser.Includes.begin();
       i != parser.Includes.end(); ++i)
     {
-    os << m_TargetFile.c_str() << ": "
+    os << obj << ": "
        << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
        << std::endl;
     }
@@ -141,25 +144,8 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     if(parser.Provides.find(*i) == parser.Provides.end())
       {
       // since we require some things add them to our list of requirements
-      os << m_TargetFile.c_str() << ".requires: " << i->c_str() << ".mod.proxy"
+      os << obj << ".requires: " << i->c_str() << ".mod.proxy"
          << std::endl;
-#if 0
-      // Always use lower case for the mod stamp file name.
-      std::string m = cmSystemTools::LowerCase(*i);
-      os << m_TargetFile.c_str() << ": " << m.c_str() << ".mod.stamp"
-         << std::endl;
-      os << i->c_str() << ".mod.proxy:" << std::endl;
-      std::string stampName = m_Directory;
-      stampName += "/";
-      stampName += m;
-      stampName += ".mod.stamp";
-      if(!cmSystemTools::FileExists(stampName.c_str()))
-        {
-        std::ofstream stamp(stampName.c_str());
-        stamp << "# Dummy stamp file in case nothing provides it."
-              << std::endl;
-        }
-#endif
       }
     }
 
@@ -167,14 +153,14 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
   for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
       i != parser.Provides.end(); ++i)
     {
-    os << i->c_str() << ".mod.proxy: " << m_TargetFile.c_str()
+    os << i->c_str() << ".mod.proxy: " << obj
        << ".provides" << std::endl;
     }
   
   // If any modules are provided then they must be converted to stamp files.
   if(!parser.Provides.empty())
     {
-    os << m_TargetFile.c_str() << ".provides.build:\n";
+    os << obj << ".provides.build:\n";
     for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
         i != parser.Provides.end(); ++i)
       {
@@ -185,20 +171,9 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
       os << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
          << i->c_str() << " " << m.c_str() << ".mod.stamp\n";
       }
-    os << "\t@touch " << m_TargetFile.c_str() << ".provides.build\n";
+    os << "\t@touch " << obj << ".provides.build\n";
     }
 
-#if 0
-  // if it provides something then connect the requires rule to the build rule
-  if(!parser.Provides.empty())
-    {
-    os << m_TargetFile.c_str() << ".requires: " << m_TargetFile.c_str()
-       << ".requires.build" << std::endl;
-    // provide empty build rule for old gen for now, TODO remove later
-    os << m_TargetFile.c_str() << ".requires.build:" << std::endl;    
-    }
-#endif
-  
   /*
   // TODO:
   What about .mod files provided in another directory and found with a

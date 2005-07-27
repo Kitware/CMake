@@ -887,7 +887,7 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       }
 
     // Internal CMake dependency scanning support.
-    else if (args[1] == "cmake_depends" && args.size() >= 8)
+    else if (args[1] == "cmake_depends" && args.size() >= 6)
       {
       cmake cm;
       cmGlobalGenerator *ggd = cm.CreateGlobalGenerator(args[2].c_str());

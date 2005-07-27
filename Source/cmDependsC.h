@@ -30,22 +30,16 @@ public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
   cmDependsC();
-
-  /** Scanning need to know the build directory name, the relative
-      path from the build directory to the target file, the source
-      file from which to start scanning, and the include file search
-      path.  It also uses the include file regular expressions.  
-      This is a good example of why constructors should not take arguments.
-  */
-  cmDependsC(const char* sourceFile, std::vector<std::string> const& includes,
+  cmDependsC(std::vector<std::string> const& includes,
              const char* scanRegex, const char* complainRegex);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsC();
-
+  
 protected:
   // Implement writing/checking methods required by superclass.
-  virtual bool WriteDependencies(std::ostream& os);
+  virtual bool WriteDependencies(const char *src, 
+                                 const char *file, std::ostream& os);
   virtual bool CheckDependencies(std::istream& is);
 
   // Method to scan a single file.
@@ -55,9 +49,6 @@ protected:
   bool ParseDependency(const char* line, std::string& depender,
                        std::string& dependee);
   const char* ParseFileName(const char* in, std::string& name);
-
-  // The source file from which to start scanning.
-  std::string m_SourceFile;
 
   // The include file search path.
   std::vector<std::string> const* m_IncludePath;
@@ -69,7 +60,7 @@ protected:
   // recursively and which to complain about not finding.
   cmsys::RegularExpression m_IncludeRegexScan;
   cmsys::RegularExpression m_IncludeRegexComplain;
-
+  
   // Data structures for dependency graph walk.
   struct UnscannedEntry
   {

@@ -83,12 +83,15 @@ public:
    * requests that they Generate.  
    */
   virtual void Generate();
+  
+  
+  void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream,
+                                       std::vector<cmLocalGenerator *> &);
 
 protected:
   void WriteMainMakefile();
   void WriteMainMakefile2();
   void WriteMainCMakefile();
-  void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream);
   void WriteAllRules(cmLocalUnixMakefileGenerator3 *lg, 
                      std::ostream& makefileStream);
   void WriteHelpRule(std::ostream& ruleFileStream);
@@ -111,7 +114,7 @@ protected:
                              const char* name, std::set<cmStdString>& emitted);
 
   // does this generator need a requires step for any of its targets
-  bool NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg);
+  bool NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg, const char *);
 
 };
 

@@ -33,7 +33,7 @@ public:
       path from the build directory to the target file, the source
       file from which to start scanning, and the include file search
       path.  */
-  cmDependsFortran(const char* sourceFile, std::vector<std::string> const& includes);
+  cmDependsFortran(std::vector<std::string> const& includes);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsFortran();
@@ -51,7 +51,8 @@ public:
 
 protected:
   // Implement writing/checking methods required by superclass.
-  virtual bool WriteDependencies(std::ostream& os);
+  virtual bool WriteDependencies(const char *src,
+                                 const char *file, std::ostream& os);
   virtual bool CheckDependencies(std::istream& is);
 
   // The source file from which to start scanning.

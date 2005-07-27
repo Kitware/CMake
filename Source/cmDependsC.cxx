@@ -27,10 +27,8 @@ cmDependsC::cmDependsC()
 
 //----------------------------------------------------------------------------
 // yummy look at all those constructor arguments
-cmDependsC::cmDependsC(const char* sourceFile,
-                       std::vector<std::string> const& includes,
+cmDependsC::cmDependsC(std::vector<std::string> const& includes,
                        const char* scanRegex, const char* complainRegex):
-  m_SourceFile(sourceFile),
   m_IncludePath(&includes),
   m_IncludeRegexLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)([\">])"),
   m_IncludeRegexScan(scanRegex),
@@ -44,12 +42,18 @@ cmDependsC::~cmDependsC()
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsC::WriteDependencies(std::ostream& os)
+bool cmDependsC::WriteDependencies(const char *src, 
+                                   const char *obj, std::ostream& os)
 {
   // Make sure this is a scanning instance.
-  if(m_SourceFile == "")
+  if(!src || src[0] == '\0')
     {
-    cmSystemTools::Error("Cannot scan dependencies without an source file.");
+    cmSystemTools::Error("Cannot scan dependencies without a source file.");
+    return false;
+    }
+  if(!obj || obj[0] == '\0')
+    {
+    cmSystemTools::Error("Cannot scan dependencies without an object file.");
     return false;
     }
   if(!m_IncludePath)
@@ -61,10 +65,10 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
   // Walk the dependency graph starting with the source file.
   bool first = true;
   UnscannedEntry root;
-  root.FileName = m_SourceFile;
+  root.FileName = src;
   m_Unscanned.push(root);
   m_Encountered.clear();
-  m_Encountered.insert(m_SourceFile);
+  m_Encountered.insert(src);
   std::set<cmStdString> dependencies;
   std::set<cmStdString> scanned;
   while(!m_Unscanned.empty())
@@ -155,7 +159,7 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
   for(std::set<cmStdString>::iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
-    os << m_TargetFile.c_str() << ": "
+    os << obj << ": "
        << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
        << std::endl;
     }
@@ -313,8 +317,12 @@ const char* cmDependsC::ParseFileName(const char* in, std::string& name)
   bool quoted = false;
   char* buf = new char[strlen(in)+1];
   char* pos = buf;
+  
+  // for every character while we haven't hit the end of the string AND we
+  // are in a quoted string OR the current character isn't a : or the second
+  // character AND it isn't a space
   for(;*c && (quoted ||
-              ((*c != ':' || pos > buf+1) && !isspace(*c))); ++c)
+              ((*c != ':' || pos > buf) && !isspace(*c))); ++c)
     {
     if(*c == '"')
       {

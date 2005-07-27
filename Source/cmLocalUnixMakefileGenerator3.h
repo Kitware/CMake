@@ -140,8 +140,9 @@ public:
   // List the files for which to check dependency integrity.  Each
   // language has its own list because integrity may be checked
   // differently.
-  struct IntegrityCheckSet: public std::set<cmStdString> {};
-  std::map<cmStdString, IntegrityCheckSet> &GetIntegrityCheckSet() 
+  struct IntegrityCheckSet: public std::set<cmSourceFile *> {};
+  struct IntegrityCheckSetMap: public std::map<cmStdString, IntegrityCheckSet> {};
+  std::map<cmStdString, IntegrityCheckSetMap> &GetIntegrityCheckSet() 
   { return m_CheckDependFiles;}
   
   void AppendTargetDepends(std::vector<std::string>& depends,
@@ -155,6 +156,9 @@ public:
 
 protected:
 
+  // write the depend info 
+  void WriteDependLanguageInfo(std::ostream& cmakefileStream, cmTarget &tgt);
+  
   // write the target rules for the local Makefile into the stream
   void WriteLocalMakefileTargets(std::ostream& ruleFileStream);
 
@@ -195,22 +199,24 @@ protected:
   
   // create the rule files for an object
   void WriteObjectRuleFiles(cmTarget& target,
-                            const cmSourceFile& source,
-                            std::vector<std::string>& objects);
+                            cmSourceFile& source,
+                            std::vector<std::string>& objects,
+                            std::ostream &filestr);
 
   // write the build rule for an object
   void WriteObjectBuildFile(std::string &obj,
                             const char *lang, 
                             cmTarget& target, 
-                            const cmSourceFile& source,
+                            cmSourceFile& source,
                             std::vector<std::string>& depends,
-                            std::string &depMakeFile);
+                            std::string &depMakeFile,
+                            std::ostream &filestr);
   
   // write the depend.make file for an object
   void WriteObjectDependRules(std::ostream& ruleFileStream,
                               std::string& obj,
                               const char *lang,
-                              const cmSourceFile& source,
+                              cmSourceFile& source,
                               std::vector<std::string>& depends,
                               std::string& depMarkFile);
   
@@ -222,13 +228,12 @@ protected:
 
   // return the appropriate depends checker
   cmDepends* GetDependsChecker(const std::string& lang,
-                               const char* dir,
-                               const char* objFile,
                                bool verbose);
   
   
-  std::string GenerateCustomRuleFile(const cmCustomCommand& cc, 
-                                     const char *dir);
+  void GenerateCustomRuleFile(const cmCustomCommand& cc, 
+                              const char *dir,
+                              std::ostream &ruleStream);
   
   // these three make some simple changes and then call WriteLibraryRule
   void WriteStaticLibraryRule(std::ostream& ruleFileStream,
@@ -327,7 +332,7 @@ protected:
   void ComputeHomeRelativeOutputPath();
 
 private:
-  std::map<cmStdString, IntegrityCheckSet> m_CheckDependFiles;
+  std::map<cmStdString, IntegrityCheckSetMap> m_CheckDependFiles;
 
   //==========================================================================
   // Configuration settings.

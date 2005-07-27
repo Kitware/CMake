@@ -62,6 +62,17 @@ void cmLocalGenerator::Configure()
       }
     }  
   
+  this->SetupPathConversions();
+  
+  // Check whether relative paths should be used for optionally
+  // relative paths.
+  m_UseRelativePaths = m_Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
+
+  this->Configured = true;
+}
+
+void cmLocalGenerator::SetupPathConversions()
+{  
   // Setup the current output directory components for use by
   // Convert
   std::string outdir; 
@@ -76,14 +87,9 @@ void cmLocalGenerator::Configure()
   cmSystemTools::SplitPath(outdir.c_str(), m_HomeOutputDirectoryComponents);
   outdir =
     cmSystemTools::CollapseFullPath(m_Makefile->GetStartOutputDirectory());
-  cmSystemTools::SplitPath(outdir.c_str(), m_StartOutputDirectoryComponents);
-
-  // Check whether relative paths should be used for optionally
-  // relative paths.
-  m_UseRelativePaths = m_Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
-
-  this->Configured = true;
+cmSystemTools::SplitPath(outdir.c_str(), m_StartOutputDirectoryComponents);
 }
+
 
 void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
 {
