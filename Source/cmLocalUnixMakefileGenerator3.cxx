@@ -546,11 +546,8 @@ cmLocalUnixMakefileGenerator3
   // corresponding targets.
   std::string objectRequires = relativeObj;
   objectRequires += ".requires";
-  std::string temp = relativeObj;
-  temp += ".depend";
   std::vector<std::string> no_commands;
   std::vector<std::string> p_depends;
-  p_depends.push_back(temp);
   // always provide an empty requires target
   this->WriteMakeRule(ruleFileStream, 0,
                       objectRequires.c_str(), p_depends, no_commands);
@@ -558,7 +555,7 @@ cmLocalUnixMakefileGenerator3
   // write a build rule to recursively build what this obj provides
   std::string objectProvides = relativeObj;
   objectProvides += ".provides";
-  temp = relativeObj;
+  std::string temp = relativeObj;
   temp += ".provides.build";
   std::vector<std::string> r_commands;
   std::string tgtMakefileName = this->GetRelativeTargetDirectory(target);
@@ -755,12 +752,8 @@ cmLocalUnixMakefileGenerator3
   if(checker.get())
     {
     // Check the dependencies. Ths is required because we need at least an
-    // empty foo.obj.depends.make for make to include, so at cmake time the
+    // empty depends.make for make to include, so at cmake time the
     // ::Check() method will generate that if it does not exist
-
-    
-    // Todo: could just make sure that file exists, 
-    // use different method not check
     checker->Check(objFile);
     
     return true;
