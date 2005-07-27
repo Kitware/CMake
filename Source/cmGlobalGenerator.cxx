@@ -1058,9 +1058,17 @@ void cmGlobalGenerator::SetupTests()
       {
       fname += "DartTestfile.txt";
       }
-    
+
+    // Add run_test only if any tests are foun
+    long total_tests = 0;
+    unsigned int i;
+    for (i = 0; i < m_LocalGenerators.size(); ++i)
+      {
+      total_tests += m_LocalGenerators[i]->GetMakefile()->GetTests()->size();
+      }
+
     // If the file doesn't exist, then ENABLE_TESTING hasn't been run
-    if (cmSystemTools::FileExists(fname.c_str()))
+    if (total_tests > 0)
       {
       const char* no_output = 0;
       std::vector<std::string> no_depends;
