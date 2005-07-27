@@ -421,8 +421,15 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     programDatabase += libpath;
     programDatabase += "\"";
     }
-  
-  fout << "\t\t\tIntermediateDirectory=\".\\" << configName << "\"\n"
+
+  // The intermediate directory name consists of a directory for the
+  // target and a subdirectory for the configuration name.
+  std::string intermediateDir = this->GetTargetDirectory(target);
+  intermediateDir += "/";
+  intermediateDir += configName;
+  fout << "\t\t\tIntermediateDirectory=\""
+       << this->ConvertToXMLOutputPath(intermediateDir.c_str())
+       << "\"\n"
        << "\t\t\tConfigurationType=\"" << configType << "\"\n"
        << "\t\t\tUseOfMFC=\"" << mfcFlag << "\"\n"
        << "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"FALSE\"\n";
@@ -505,7 +512,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   this->OutputDefineFlags(defineFlags.c_str(), fout);
   fout << "\"\n";
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
-  fout << "\t\t\t\tObjectFile=\"" << configName << "\\\"\n";
+  fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
   if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
     {
     fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
@@ -822,7 +829,7 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
     {
     hasone = true;
     std::string temp = m_LibraryOutputPath;
-    temp += "$(INTDIR)";
+    temp += "$(OutDir)";
     
     fout << this->ConvertToXMLOutputPath(temp.c_str()) << "," << 
       this->ConvertToXMLOutputPath(m_LibraryOutputPath.c_str());
@@ -836,7 +843,7 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
       }
     hasone = true;
     std::string temp = m_ExecutableOutputPath;
-    temp += "$(INTDIR)"; 
+    temp += "$(OutDir)"; 
     fout << this->ConvertToXMLOutputPath(temp.c_str()) << "," << 
       this->ConvertToXMLOutputPath(m_ExecutableOutputPath.c_str());
     }
@@ -857,7 +864,7 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
         {
         fout << ",";
         }
-      std::string lpathi = lpath + "$(INTDIR)";
+      std::string lpathi = lpath + "$(OutDir)";
       fout << this->ConvertToXMLOutputPath(lpathi.c_str()) << "," << 
         this->ConvertToXMLOutputPath(lpath.c_str());
       hasone = true;
@@ -1204,7 +1211,7 @@ WriteCustomRule(std::ostream& fout,
           libPath = cacheValue;
           }
         libPath += "/";
-        libPath += "$(INTDIR)/";
+        libPath += "$(OutDir)/";
         libPath += dep;
         libPath += ".exe";
         fout << this->ConvertToXMLOutputPath(libPath.c_str())
@@ -1418,3 +1425,16 @@ void cmLocalVisualStudio7Generator::ConfigureFinalPass()
   
 }
 
+//----------------------------------------------------------------------------
+std::string cmLocalVisualStudio7Generator::GetTargetDirectory(cmTarget& target)
+{
+  std::string dir;
+  // Put a prefix on the name if one is given by the CMake code.
+  if(const char* prefix = m_Makefile->GetDefinition("CMAKE_TARGET_DIR_PREFIX"))
+    {
+    dir += prefix;
+    }
+  dir += target.GetName();
+  dir += ".dir";
+  return dir;
+}

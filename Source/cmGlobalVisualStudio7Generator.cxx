@@ -31,7 +31,7 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator()
 void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>const &  lang, 
                                                     cmMakefile *mf)
 {
-  mf->AddDefinition("CMAKE_CFG_INTDIR","$(IntDir)");
+  mf->AddDefinition("CMAKE_CFG_INTDIR","$(OutDir)");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
@@ -200,7 +200,7 @@ void cmGlobalVisualStudio7Generator::Generate()
       gen[0]->GetMakefile()->
         AddUtilityCommand("INSTALL", false, no_output, no_depends,
                           cmake_command.c_str(),
-                          "-DBUILD_TYPE=$(IntDir)", "-P", "cmake_install.cmake");
+                          "-DBUILD_TYPE=$(OutDir)", "-P", "cmake_install.cmake");
 
       // Make the INSTALL target depend on ALL_BUILD unless the
       // project says to not do so.
