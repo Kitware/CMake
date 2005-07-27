@@ -812,6 +812,10 @@ void cmMakefile::InitializeFromParent()
   
   // the initial project name
   this->m_ProjectName = parent->m_ProjectName;
+
+  // Copy include regular expressions.
+  this->m_IncludeFileRegularExpression = parent->m_IncludeFileRegularExpression;
+  this->m_ComplainFileRegularExpression = parent->m_ComplainFileRegularExpression;
 }
 
 void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
