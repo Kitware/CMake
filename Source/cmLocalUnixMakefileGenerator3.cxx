@@ -180,7 +180,7 @@ void cmLocalUnixMakefileGenerator3
     if(cmCustomCommand* cc = (*i)->GetCustomCommand())
       {
       cc->Used();
-      this->GenerateCustomRuleFile(*cc,tgtDir.c_str(),ruleFileStream);
+      this->GenerateCustomRuleFile(*cc,ruleFileStream);
       if (clean)
         {
         cleanFiles.push_back
@@ -640,7 +640,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::GenerateCustomRuleFile(const cmCustomCommand& cc, const char *dir,
+::GenerateCustomRuleFile(const cmCustomCommand& cc,
                          std::ostream &ruleFileStream)
 {
   // Convert the output name to a relative path if possible.
@@ -1786,8 +1786,6 @@ cmLocalUnixMakefileGenerator3
     {
     return;
     }
-  cmGlobalUnixMakefileGenerator3 *gg = 
-    static_cast<cmGlobalUnixMakefileGenerator3 *>(m_GlobalGenerator);
   this->WriteDependLanguageInfo(infoFileStream,target);
   
   // and now write the rule to use it

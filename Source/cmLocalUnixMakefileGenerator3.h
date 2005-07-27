@@ -225,7 +225,6 @@ protected:
   
   
   void GenerateCustomRuleFile(const cmCustomCommand& cc, 
-                              const char *dir,
                               std::ostream &ruleStream);
   
   // these three make some simple changes and then call WriteLibraryRule
