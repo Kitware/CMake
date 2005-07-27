@@ -31,11 +31,15 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
   std::string cacheEntry = *arg++;
   const char* cacheValue =
     m_Makefile->GetDefinition(cacheEntry.c_str());
-  // If it exists already, we are done.
-  // unless this is Major
-  if(cacheValue && 
-     (m_Makefile->GetCacheMajorVersion() != 0 
-      && m_Makefile->GetCacheMinorVersion() != 0 ))
+  // If it exists already and appears up to date then we are done.  If
+  // the string contains "(IntDir)" but that is not the
+  // CMAKE_CFG_INTDIR setting then the value is out of date.
+  const char* intDir = m_Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
+  if(cacheValue &&
+     (strstr(cacheValue, "(IntDir)") == 0 ||
+      intDir && strcmp(intDir, "$(IntDir)") == 0) &&
+     (m_Makefile->GetCacheMajorVersion() != 0 &&
+      m_Makefile->GetCacheMinorVersion() != 0 ))
     {
     return true;
     }
