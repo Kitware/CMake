@@ -1076,12 +1076,15 @@ void cmGlobalGenerator::SetupTests()
       for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
         {
         std::vector<cmLocalGenerator*>& gen = it->second;
-        // add the ALL_BUILD to the first local generator of each project
+        // add the RUN_TESTS to the first local generator of each project
         if(gen.size())
           {
-          gen[0]->GetMakefile()->
-            AddUtilityCommand("RUN_TESTS", false, no_output, no_depends,
-                              ctest.c_str(), "-C", "$(IntDir)");
+          cmMakefile* mf = gen[0]->GetMakefile();
+          if(const char* outDir = mf->GetDefinition("CMAKE_CFG_INTDIR"))
+            {
+            mf->AddUtilityCommand("RUN_TESTS", false, no_output, no_depends,
+                                ctest.c_str(), "-C", outDir);
+            }
           }
         }
       }
