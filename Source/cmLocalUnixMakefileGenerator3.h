@@ -285,8 +285,7 @@ protected:
                             std::string& variableName,
                             std::string& variableNameExternal);
   void WriteTargetDependRule(std::ostream& ruleFileStream,
-                             cmTarget& target,
-                             const std::vector<std::string>& objects);
+                             cmTarget& target);
   void WriteTargetCleanRule(std::ostream& ruleFileStream,
                             cmTarget& target,
                             const std::vector<std::string>& files);

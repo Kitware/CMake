@@ -1192,7 +1192,7 @@ cmLocalUnixMakefileGenerator3
                       std::vector<std::string>& cleanFiles)
 {
   // Write the dependency generation rule.
-  this->WriteTargetDependRule(ruleFileStream, target, objects);
+  this->WriteTargetDependRule(ruleFileStream, target);
 
   std::vector<std::string> commands;
 
@@ -1505,7 +1505,7 @@ cmLocalUnixMakefileGenerator3
                    std::vector<std::string>& cleanFiles)
 {
   // Write the dependency generation rule.
-  this->WriteTargetDependRule(ruleFileStream, target, objects);
+  this->WriteTargetDependRule(ruleFileStream, target);
 
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
@@ -1780,9 +1780,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::WriteTargetDependRule(std::ostream& ruleFileStream,
-                        cmTarget& target,
-                        const std::vector<std::string>& objects)
+::WriteTargetDependRule(std::ostream& ruleFileStream, cmTarget& target)
 {
   // must write the targets depend info file
   std::string dir = this->GetTargetDirectory(target);
@@ -1838,20 +1836,6 @@ cmLocalUnixMakefileGenerator3
   // Write the rule.
   this->WriteMakeRule(ruleFileStream, 0,
                       depMark.c_str(), depends, commands);
-
-#if 0
-  // This target drives dependency generation for all object files.
-  std::string relPath = this->GetHomeRelativeOutputPath();
-  std::string objTarget;
-  for(std::vector<std::string>::const_iterator obj = objects.begin();
-      obj != objects.end(); ++obj)
-    {
-    objTarget = relPath;
-    objTarget += *obj;
-    objTarget += ".depend";
-    depends.push_back(objTarget);
-    }
-#endif
 }
 
 //----------------------------------------------------------------------------
