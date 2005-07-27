@@ -209,7 +209,6 @@ protected:
                             cmTarget& target, 
                             cmSourceFile& source,
                             std::vector<std::string>& depends,
-                            std::string &depMakeFile,
                             std::ostream &filestr);
   
   // write the depend.make file for an object
@@ -217,14 +216,11 @@ protected:
                               std::string& obj,
                               const char *lang,
                               cmSourceFile& source,
-                              std::vector<std::string>& depends,
-                              std::string& depMarkFile);
+                              std::vector<std::string>& depends);
   
   // this is used only by WriteObjectDependFile
   bool GenerateDependsMakeFile(const std::string& lang,
-                               const char* objFile,
-                               std::string& depMakeFile,
-                               std::string& depMarkFile);
+                               const char* objFile);
 
   // return the appropriate depends checker
   cmDepends* GetDependsChecker(const std::string& lang,

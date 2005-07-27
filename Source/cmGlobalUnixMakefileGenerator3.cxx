@@ -982,10 +982,10 @@ bool cmGlobalUnixMakefileGenerator3
         cmLocalUnixMakefileGenerator3::IntegrityCheckSet>::const_iterator
         l = checkSet.begin(); l != checkSet.end(); ++l)
     {
-    std::string name = "CMAKE_NEEDS_REQUIRES_STEP_";
-    name += l->first;
-    name += "_FLAG";
-    if(lg->GetMakefile()->GetDefinition(name.c_str()))
+    std::string name2 = "CMAKE_NEEDS_REQUIRES_STEP_";
+    name2 += l->first;
+    name2 += "_FLAG";
+    if(lg->GetMakefile()->GetDefinition(name2.c_str()))
       {
       return true;
       }

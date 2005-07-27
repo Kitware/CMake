@@ -427,8 +427,7 @@ cmLocalUnixMakefileGenerator3
                          std::string &obj,
                          const char * lang,
                          cmSourceFile& source,
-                         std::vector<std::string>& depends,
-                         std::string& depMakeFile)
+                         std::vector<std::string>& depends)
 {
   // Create the list of dependencies known at cmake time.  These are
   // shared between the object file and dependency scanning rule.
@@ -454,7 +453,6 @@ cmLocalUnixMakefileGenerator3
                        cmTarget& target, 
                        cmSourceFile& source,
                        std::vector<std::string>& depends,
-                       std::string &depMakeFile,
                        std::ostream &ruleFileStream)
 {
   // Open the rule file for writing.  This should be copy-if-different
@@ -464,8 +462,7 @@ cmLocalUnixMakefileGenerator3
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
 
   // generate the depend scanning rule
-  this->WriteObjectDependRules(ruleFileStream, obj, lang, source, 
-                               depends, depMakeFile);
+  this->WriteObjectDependRules(ruleFileStream, obj, lang, source, depends);
 
   this->AppendRuleDepend(depends, ruleFileNameFull.c_str());
 
@@ -636,7 +633,7 @@ cmLocalUnixMakefileGenerator3
   std::string depMakeFile;
   
   // generate the build rule file
-  this->WriteObjectBuildFile(obj, lang, target, source, depends, depMakeFile,
+  this->WriteObjectBuildFile(obj, lang, target, source, depends,
                              ruleFileStream);
   
   // The object file should be checked for dependency integrity.
@@ -753,8 +750,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 bool
 cmLocalUnixMakefileGenerator3
-::GenerateDependsMakeFile(const std::string& lang, const char* objFile,
-                          std::string& depMakeFile, std::string& depMarkFile)
+::GenerateDependsMakeFile(const std::string& lang, const char* objFile)
 {
   // Construct a checker for the given language.
   std::auto_ptr<cmDepends>
