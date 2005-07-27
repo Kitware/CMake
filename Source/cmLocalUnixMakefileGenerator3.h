@@ -212,10 +212,7 @@ protected:
                             std::ostream &filestr);
   
   // write the depend.make file for an object
-  void WriteObjectDependRules(std::ostream& ruleFileStream,
-                              std::string& obj,
-                              const char *lang,
-                              cmSourceFile& source,
+  void WriteObjectDependRules(cmSourceFile& source,
                               std::vector<std::string>& depends);
   
   // this is used only by WriteObjectDependFile

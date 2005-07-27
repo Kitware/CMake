@@ -423,10 +423,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::WriteObjectDependRules(std::ostream& ruleFileStream,
-                         std::string &obj,
-                         const char * lang,
-                         cmSourceFile& source,
+::WriteObjectDependRules(cmSourceFile& source,
                          std::vector<std::string>& depends)
 {
   // Create the list of dependencies known at cmake time.  These are
@@ -462,7 +459,7 @@ cmLocalUnixMakefileGenerator3
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
 
   // generate the depend scanning rule
-  this->WriteObjectDependRules(ruleFileStream, obj, lang, source, depends);
+  this->WriteObjectDependRules(source, depends);
 
   this->AppendRuleDepend(depends, ruleFileNameFull.c_str());
 
