@@ -892,25 +892,33 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 {
   this->ConfigureOutputPaths();
   std::string flags;
+  std::string defFlags;
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
   if(shared)
     {
-    flags += "-D";
+    defFlags += "-D";
     if(const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
       {
-        flags += custom_export_name;
+        defFlags += custom_export_name;
       }
     else
       {
       std::string in = target.GetName();
       in += "_EXPORTS";
-      flags += cmSystemTools::MakeCindentifier(in.c_str());
+      defFlags += cmSystemTools::MakeCindentifier(in.c_str());
       }
     }
   const char* lang = target.GetLinkerLanguage(this);
+  std::string cflags;
   if(lang)
     {
+    // for c++ projects get the c flags as well
+    if(strcmp(lang, "CXX") == 0)
+      {
+      m_CurrentLocalGenerator->AddLanguageFlags(cflags, "C");
+      m_CurrentLocalGenerator->AddSharedFlags(cflags, lang, shared);
+      }
     // Add language-specific flags.
     m_CurrentLocalGenerator->AddLanguageFlags(flags, lang);
     
@@ -919,12 +927,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     }
 
   // Add define flags
-  m_CurrentLocalGenerator->AppendFlags(flags,
+  m_CurrentLocalGenerator->AppendFlags(defFlags,
                                        m_CurrentMakefile->GetDefineFlags());
+  cmSystemTools::ReplaceString(defFlags, "\"", "\\\"");
   cmSystemTools::ReplaceString(flags, "\"", "\\\"");
+  cmSystemTools::ReplaceString(cflags, "\"", "\\\"");
   if(m_XcodeVersion == 21)
     {
-    flags += " -DCMAKE_INTDIR=\\\\\\\"$(CONFIGURATION)\\\\\\\" ";
+    defFlags += " -DCMAKE_INTDIR=\\\\\\\"$(CONFIGURATION)\\\\\\\" ";
     }
   productName = target.GetName();
   
@@ -1063,8 +1073,25 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString(""));
   buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
                               this->CreateString(""));
-  buildSettings->AddAttribute("OTHER_CFLAGS", 
-                              this->CreateString(flags.c_str()));
+  if(lang && strcmp(lang, "CXX") == 0)
+    {
+    flags += " ";
+    flags += defFlags;
+    buildSettings->AddAttribute("OTHER_CPLUSPLUSFLAGS", 
+                                this->CreateString(flags.c_str()));
+    cflags += " ";
+    cflags += defFlags;
+    buildSettings->AddAttribute("OTHER_CFLAGS", 
+                                this->CreateString(cflags.c_str()));
+
+    }
+  else
+    {
+    flags += " ";
+    flags += defFlags;
+    buildSettings->AddAttribute("OTHER_CFLAGS", 
+                                this->CreateString(flags.c_str()));
+    }
   buildSettings->AddAttribute("OTHER_LDFLAGS",
                               this->CreateString(""));
   buildSettings->AddAttribute("OTHER_REZFLAGS", 
