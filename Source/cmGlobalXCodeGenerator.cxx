@@ -834,8 +834,14 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
         if(!this->FindTarget(m_CurrentProject.c_str(),
                              d->c_str()))
           {
-          makefileStream << "\\\n" << this
-            ->ConvertToRelativeForMake(d->c_str());
+          // if the depend is not a target but
+          // is a full path then use it, if not then
+          // just skip it
+          if(cmSystemTools::FileIsFullPath(d->c_str()))
+            {
+            makefileStream << "\\\n" << this
+              ->ConvertToRelativeForMake(d->c_str());
+            }
           }
         else
           {
