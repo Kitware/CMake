@@ -181,7 +181,7 @@ protected:
 
   // this is responsible for writing all of the rules for all this
   // directories custom commands (but not utility targets)
-  void WriteCustomCommands(cmTarget &target,std::ostream& os,
+  void WriteCustomCommands(std::ostream& os,
                            std::vector<std::string>& cleanFiles);
   
   // this method Writes the Directory informaiton files

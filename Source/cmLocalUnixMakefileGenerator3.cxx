@@ -144,7 +144,7 @@ void cmLocalUnixMakefileGenerator3::FormatOutputPath(std::string& path,
 
 
 void cmLocalUnixMakefileGenerator3
-::WriteCustomCommands(cmTarget &target,std::ostream& ruleFileStream,
+::WriteCustomCommands(std::ostream& ruleFileStream,
                       std::vector<std::string>& cleanFiles)
 {
   // add custom commands to the clean rules?
@@ -358,7 +358,7 @@ cmLocalUnixMakefileGenerator3
     {
     cmSystemTools::ExpandListArgument(additional_clean_files, cleanFiles);
     }  
-  this->WriteCustomCommands(target,ruleFileStream,cleanFiles);
+  this->WriteCustomCommands(ruleFileStream,cleanFiles);
 
   // Include the rule file for each object.
   std::string relPath = this->GetHomeRelativeOutputPath();
@@ -679,7 +679,7 @@ cmLocalUnixMakefileGenerator3
     {
     cmSystemTools::ExpandListArgument(additional_clean_files, cleanFiles);
     }  
-  this->WriteCustomCommands(target,ruleFileStream, cleanFiles);
+  this->WriteCustomCommands(ruleFileStream, cleanFiles);
 
   // Collect the commands and dependencies.
   std::vector<std::string> commands;
