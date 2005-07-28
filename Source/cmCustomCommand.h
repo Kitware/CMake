@@ -49,16 +49,11 @@ public:
   /** Get the comment string for the command.  */
   const char* GetComment() const;
 
-  /** set get the used status of the command */
-  void Used() { m_Used = true;};
-  bool IsUsed() { return m_Used;};
-  
 private:
   std::string m_Output;
   std::vector<std::string> m_Depends;
   cmCustomCommandLines m_CommandLines;
   std::string m_Comment;
-  bool m_Used;
 };
 
 #endif

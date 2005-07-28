@@ -92,22 +92,6 @@ void cmLocalUnixMakefileGenerator3::Generate()
   
   // Write the cmake file with information for this directory.
   this->WriteDirectoryInformationFile();
-
-  // all custom commands used?
-  const std::vector<cmSourceFile*> &srcs = m_Makefile->GetSourceFiles();
-  std::vector<cmSourceFile*>::const_iterator sit = srcs.begin();
-  for (;sit != srcs.end(); ++sit)
-    {
-    if ((*sit)->GetCustomCommand() && !(*sit)->GetCustomCommand()->IsUsed())
-      {
-      cmOStringStream err;
-      err << "Warning: Custom command for source file "
-          << (*sit)->GetSourceName().c_str() << "."
-          << (*sit)->GetSourceExtension().c_str()
-          << " was not used.";
-      cmSystemTools::Message(err.str().c_str(), "Warning");
-      }
-    }
 }
 
 
@@ -163,23 +147,17 @@ void cmLocalUnixMakefileGenerator3
 ::WriteCustomCommands(cmTarget &target,std::ostream& ruleFileStream,
                       std::vector<std::string>& cleanFiles)
 {
-  std::string tgtDir = m_Makefile->GetStartOutputDirectory();
-  tgtDir += "/";
-  tgtDir += this->GetTargetDirectory(target);
-
   // add custom commands to the clean rules?
   const char* clean_no_custom = m_Makefile->GetProperty("CLEAN_NO_CUSTOM");
   bool clean = cmSystemTools::IsOff(clean_no_custom);
   
   // Generate the rule files for each custom command.
-  // get the classes from the source lists then add them to the groups
-  const std::vector<cmSourceFile*> &classes = target.GetSourceFiles();
+  const std::vector<cmSourceFile*> &classes = m_Makefile->GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
     if(cmCustomCommand* cc = (*i)->GetCustomCommand())
       {
-      cc->Used();
       this->GenerateCustomRuleFile(*cc,ruleFileStream);
       if (clean)
         {
