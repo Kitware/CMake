@@ -2748,6 +2748,65 @@ bool SystemTools::FileHasSignature(const char *filename,
   return res;
 }
 
+SystemTools::FileTypeEnum 
+SystemTools::DetectFileType(const char *filename,
+                            unsigned long length, 
+                            double percent_bin)
+{
+  if (!filename || percent_bin < 0)
+    {
+    return SystemTools::FileTypeUnknown;
+    }
+
+  FILE *fp;
+  fp = fopen(filename, "rb");
+  if (!fp)
+    {
+    return SystemTools::FileTypeUnknown;
+    }
+
+  // Allocate buffer and read bytes
+
+  unsigned char *buffer = new unsigned char [length];
+  size_t read_length = fread(buffer, 1, length, fp);
+  fclose(fp);
+  if (read_length == 0)
+    {
+    return SystemTools::FileTypeUnknown;
+    }
+
+  // Loop over contents and count
+
+  size_t text_count = 0;
+ 
+  const unsigned char *ptr = buffer;
+  const unsigned char *buffer_end = buffer + read_length;
+
+  while (ptr != buffer_end)
+    {
+    if ((*ptr >= 0x20 && *ptr <= 0x7F) || 
+        *ptr == '\n' ||
+        *ptr == '\r' ||
+        *ptr == '\t')
+      {
+      text_count++;
+      }
+    ptr++;
+    }
+
+  delete [] buffer;
+
+  double current_percent_bin =  
+    ((double)(read_length - text_count) / (double)read_length);
+
+  if (current_percent_bin >= percent_bin)
+    {
+    return SystemTools::FileTypeBinary;
+    }
+
+  return SystemTools::FileTypeText;
+}
+
 bool SystemTools::LocateFileInDir(const char *filename, 
                                   const char *dir, 
                                   kwsys_stl::string& filename_found,

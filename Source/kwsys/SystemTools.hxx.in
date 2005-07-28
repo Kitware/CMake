@@ -507,10 +507,30 @@ public:
   static bool FileIsSymlink(const char* name);
   
   /**
-   * return true if the file has a given signature (first set of bytes)
+   * Return true if the file has a given signature (first set of bytes)
    */
   static bool FileHasSignature(
     const char* filename, const char *signature, long offset = 0);
+
+  /**
+   * Attempt to detect and return the type of a file.
+   * Up to 'length' bytes are read from the file, if more than 'percent_bin' %
+   * of the bytes are non-textual elements, the file is considered binary,
+   * otherwise textual. Textual elements are bytes in the ASCII [0x20, 0x7E]
+   * range, but also \n, \r, \t.
+   * The algorithm is simplistic, and should probably check for usual file
+   * extensions, 'magic' signature, unicode, etc.
+   */
+  enum FileTypeEnum 
+  { 
+    FileTypeUnknown,
+    FileTypeBinary,
+    FileTypeText
+  };
+  static SystemTools::FileTypeEnum DetectFileType(
+    const char* filename, 
+    unsigned long length = 256, 
+    double percent_bin = 0.05);
 
   /**
    * Try to locate the file 'filename' in the directory 'dir'.
