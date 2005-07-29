@@ -133,7 +133,10 @@ void cmFLTKWrapUICommand::FinalPass()
     }
   if (!found)
     {
-    cmSystemTools::Message("In CMake 2.2 the FLT_WRAP_UI command sets a variable to the list of source files that should be added to your executable or library. It appears that you have not added these source files to your target. You should change your CMakeLists.txt file to directly add the generated files to the target. For example FTLK_WRAP_UI(foo src1 src2 src3) will create a variable named foo_FLTK_UI_SRCS that contains the list of sources to add to your target when you call ADD_LIBRARY or ADD_EXECUTABLE. For now CMake 2.2 will add the sources to your target for you as was done in CMake 2.0 and earlier. In the future this may become an error.","Warning");
+    std::string msg = "In CMake 2.2 the FLTK_WRAP_UI command sets a variable to the list of source files that should be added to your executable or library. It appears that you have not added these source files to your target. You should change your CMakeLists.txt file to directly add the generated files to the target. For example FTLK_WRAP_UI(foo src1 src2 src3) will create a variable named foo_FLTK_UI_SRCS that contains the list of sources to add to your target when you call ADD_LIBRARY or ADD_EXECUTABLE. For now CMake 2.2 will add the sources to your target for you as was done in CMake 2.0 and earlier. In the future this may become an error. ";
+    msg += "The problem was found while processing the source directory: ";
+    msg += m_Makefile->GetStartDirectory();
+    cmSystemTools::Message(msg.c_str(),"Warning");
     // first we add the rules for all the .fl to .h and .cxx files
     size_t lastHeadersClass = m_GeneratedSourcesClasses.size();
     
