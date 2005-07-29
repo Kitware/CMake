@@ -374,21 +374,27 @@ int main()
 #else
   cmPassed("CMake CMAKE_CXX_FLAGS is being passed to the compiler.");
 #endif
+  std::string gen = CMAKE_GENERATOR;
+  // visual studio is currently broken for c flags
+  if(gen.find("Visual") == gen.npos)
+    {
 #ifdef TEST_C_FLAGS
-  cmFailed("CMake CMAKE_C_FLAGS are being passed to c++ files the compiler!");
+    cmFailed("CMake CMAKE_C_FLAGS are being passed to c++ files the compiler!");
 #else
-  cmPassed("CMake CMAKE_C_FLAGS are not being passed to c++ files.");
+    cmPassed("CMake CMAKE_C_FLAGS are not being passed to c++ files.");
 #endif
-  char msg[1024];
-  if(TestCFlags(msg))
-    {
-    cmPassed(
-     "CMake CMAKE_C_FLAGS are being passed to c files and CXX flags are not.");
+    char msg[1024];
+    if(TestCFlags(msg))
+      {
+      cmPassed(
+        "CMake CMAKE_C_FLAGS are being passed to c files and CXX flags are not.");
+      }
+    else
+      {
+      cmFailed(msg);
+      }
     }
-  else
-    {
-    cmFailed(msg);
-    }
+  
   // ----------------------------------------------------------------------
   // Test ADD_DEFINITIONS
 

@@ -70,3 +70,4 @@
 
 // Test SET CACHE FORCE
 #cmakedefine FORCE_TEST
+#define CMAKE_GENERATOR "${CMAKE_GENERATOR}"
