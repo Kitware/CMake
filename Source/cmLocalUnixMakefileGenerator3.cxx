@@ -3044,7 +3044,9 @@ void cmLocalUnixMakefileGenerator3
       {
       cmakefileStream << "  \"" << (*csIter)->GetFullPath() << "\"\n";
       // Get the full path name of the object file.
-      std::string obj = this->GetObjectFileName(target, **csIter);
+      std::string obj = m_Makefile->GetStartOutputDirectory();
+      obj += "/";
+      obj += this->GetObjectFileName(target, **csIter);
       cmakefileStream << "  \"" << 
         this->Convert(obj.c_str(),
                       cmLocalGenerator::FULL).c_str() << "\"\n";
