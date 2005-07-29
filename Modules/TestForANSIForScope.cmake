@@ -13,14 +13,14 @@ IF("CMAKE_ANSI_FOR_SCOPE" MATCHES "^CMAKE_ANSI_FOR_SCOPE$")
     MESSAGE(STATUS "Check for ANSI scope - found")
     SET (CMAKE_NO_ANSI_FOR_SCOPE 0 CACHE INTERNAL 
       "Does the compiler support ansi for scope.")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
       "Determining if the CXX compiler understands ansi for scopes passed with "
       "the following output:\n${OUTPUT}\n\n")
   ELSE (CMAKE_ANSI_FOR_SCOPE)
     MESSAGE(STATUS "Check for ANSI scope - not found")
     SET (CMAKE_NO_ANSI_FOR_SCOPE 1 CACHE INTERNAL 
       "Does the compiler support ansi for scope.")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log
+    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
       "Determining if the CXX compiler understands ansi for scopes failed with "
       "the following output:\n${OUTPUT}\n\n")
   ENDIF (CMAKE_ANSI_FOR_SCOPE)

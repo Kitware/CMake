@@ -15,21 +15,21 @@ MACRO(TEST_BIG_ENDIAN VARIABLE)
     ENDIF("${VARIABLE}" STREQUAL "FAILED_TO_RUN")
     MESSAGE(STATUS "Check if the system is big endian")
     IF(HAVE_${VARIABLE})
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
         "Determining the endianes of the system passed. The system is ")
       IF(${VARIABLE})
-        FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
+        FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
           "big endian")
         MESSAGE(STATUS "Check if the system is big endian - big endian")
       ELSE(${VARIABLE})
-        FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
+        FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
           "little endian")
         MESSAGE(STATUS "Check if the system is big endian - little endian")
       ENDIF(${VARIABLE})
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
         "Test produced following output:\n${OUTPUT}\n\n")
     ELSE(HAVE_${VARIABLE})
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
         "Determining the endianes of the system failed with the following output:\n${OUTPUT}\n\n")
       MESSAGE("Check if the system is big endian - failed")
     ENDIF(HAVE_${VARIABLE})

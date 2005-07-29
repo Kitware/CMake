@@ -171,7 +171,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   // see if the build system must be regenerated.
   std::string makefileName = 
     this->GetCMakeInstance()->GetHomeOutputDirectory();
-  makefileName += "/Makefile2";
+  makefileName += "/CMakeFiles/Makefile2";
   cmGeneratedFileStream makefileStream(makefileName.c_str());
   if(!makefileStream)
     {
@@ -240,7 +240,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   // see if the build system must be regenerated.
   std::string cmakefileName = 
     this->GetCMakeInstance()->GetHomeOutputDirectory();
-  cmakefileName += "/Makefile.cmake";
+  cmakefileName += "/CMakeFiles/Makefile.cmake";
   cmGeneratedFileStream cmakefileStream(cmakefileName.c_str());
   if(!cmakefileStream)
     {
@@ -305,7 +305,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
 
   // Build the path to the cache check file.
   std::string check = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  check += "/cmake.check_cache";
+  check += "/CMakeFiles/cmake.check_cache";
 
   // Set the corresponding makefile in the cmake file.
   cmakefileStream
@@ -322,7 +322,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     {
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
     tmpStr = lg->GetMakefile()->GetStartOutputDirectory();
-    tmpStr += "/CMakeDirectoryInformation.cmake";
+    tmpStr += "/CMakeFiles/CMakeDirectoryInformation.cmake";
     cmakefileStream << "  \"" << 
       lg->Convert(tmpStr.c_str(),cmLocalGenerator::HOME_OUTPUT).c_str() << "\"\n";
     }
@@ -374,7 +374,7 @@ void cmGlobalUnixMakefileGenerator3
 
   // Check the build system in this directory.
   depends.push_back("cmake_check_build_system");
-  commands.push_back(lg->GetRecursiveMakeCall("Makefile2","all"));
+  commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2","all"));
 
   // Write the rule.
   lg->WriteMakeRule(makefileStream, "The main all target", "all", depends, commands);
@@ -382,14 +382,14 @@ void cmGlobalUnixMakefileGenerator3
   // write the clean
   depends.clear();
   commands.clear();
-  commands.push_back(lg->GetRecursiveMakeCall("Makefile2","clean"));
+  commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2","clean"));
   lg->WriteMakeRule(makefileStream, "The main clean target", "clean", 
                     depends, commands);
 
   // write the depend rule, really a recompute depends rule
   depends.clear();
   commands.clear();
-  std::string cmakefileName = "Makefile.cmake";
+  std::string cmakefileName = "CMakeFiles/Makefile.cmake";
   std::string runRule =
     "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
@@ -472,7 +472,8 @@ cmGlobalUnixMakefileGenerator3
     // write the directory rule
     commands.clear();
     commands.push_back
-      (lg->GetRecursiveMakeCall("Makefile2",makeTargetName.c_str()));
+      (lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
+                                makeTargetName.c_str()));
     
     // Write the rule.
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
@@ -602,7 +603,8 @@ cmGlobalUnixMakefileGenerator3
     // write the directory rule
     commands.clear();
     commands.push_back
-      (lg->GetRecursiveMakeCall("Makefile2",makeTargetName.c_str()));
+      (lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
+                                makeTargetName.c_str()));
     
     // Write the rule.
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
@@ -703,7 +705,7 @@ cmGlobalUnixMakefileGenerator3
         
         // Write the rule.
         commands.clear();
-        commands.push_back(lg->GetRecursiveMakeCall("Makefile2",
+        commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
                                                     t->second.GetName()));
         depends.clear();
         depends.push_back("cmake_check_build_system");
@@ -798,7 +800,7 @@ cmGlobalUnixMakefileGenerator3
 
       // Write the rule.
       commands.clear();
-      commands.push_back(lg->GetRecursiveMakeCall("Makefile2",
+      commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
                                                   localName.c_str()));
       depends.clear();
       depends.push_back("cmake_check_build_system");

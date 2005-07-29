@@ -67,11 +67,11 @@ IF(NOT CMAKE_COMPILER_IS_GNUCC_RUN)
   IF(NOT CMAKE_COMPILER_RETURN)
     IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
       SET(CMAKE_COMPILER_IS_GNUCC 1)
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
         "Determining if the C compiler is GNU succeeded with "
         "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
     ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
         "Determining if the C compiler is GNU failed with "
         "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
     ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
@@ -87,7 +87,7 @@ ENDIF(NOT CMAKE_COMPILER_IS_GNUCC_RUN)
 
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in 
-               ${CMAKE_BINARY_DIR}/CMakeCCompiler.cmake IMMEDIATE)
+               ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCCompiler.cmake IMMEDIATE)
 MARK_AS_ADVANCED(CMAKE_AR)
 
 SET(CMAKE_C_COMPILER_ENV_VAR "CC")

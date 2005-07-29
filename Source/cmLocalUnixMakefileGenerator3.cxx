@@ -172,7 +172,7 @@ void cmLocalUnixMakefileGenerator3
 void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
 {
   std::string infoFileName = m_Makefile->GetStartOutputDirectory();
-  infoFileName += "/CMakeDirectoryInformation.cmake";
+  infoFileName += "/CMakeFiles/CMakeDirectoryInformation.cmake";
 
   // Open the output file.
   cmGeneratedFileStream infoFileStream(infoFileName.c_str());
@@ -1048,7 +1048,7 @@ cmLocalUnixMakefileGenerator3
   // the --check-build-system flag.
   {
   // Build command to run CMake to check if anything needs regenerating.
-  std::string cmakefileName = "Makefile.cmake";
+  std::string cmakefileName = "CMakeFiles/Makefile.cmake";
   std::string runRule =
     "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
@@ -1866,6 +1866,10 @@ cmLocalUnixMakefileGenerator3::GetTargetDirectory(cmTarget& target)
     {
     dir += prefix;
     }
+  else
+    {
+    dir = "CMakeFiles/";
+    }
   dir += target.GetName();
   dir += ".dir";
   return dir;
@@ -2579,7 +2583,7 @@ cmLocalUnixMakefileGenerator3
   
   bool haveDirectoryInfo = false;
   std::string dirInfoFile = args[4];
-  dirInfoFile += "/CMakeDirectoryInformation.cmake";
+  dirInfoFile += "/CMakeFiles/CMakeDirectoryInformation.cmake";
   if(mf->ReadListFile(0, dirInfoFile.c_str()) &&
      !cmSystemTools::GetErrorOccuredFlag())
     {
@@ -2754,7 +2758,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   std::string dir = m_Makefile->GetStartOutputDirectory();
   dir += "/directorystart";
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
-  this->CreateJumpCommand(commands,"Makefile2",dir);
+  this->CreateJumpCommand(commands,"CMakeFiles/Makefile2",dir);
   this->WriteMakeRule(ruleFileStream, "The main all target", "all", depends, commands);
 
   // Write the clean rule.
@@ -2762,7 +2766,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   dir += "/clean";
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
   commands.clear();
-  this->CreateJumpCommand(commands,"Makefile2",dir);
+  this->CreateJumpCommand(commands,"CMakeFiles/Makefile2",dir);
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean", depends, commands);
 
   // write our targets, and while doing it collect up the object
@@ -2819,7 +2823,7 @@ void cmLocalUnixMakefileGenerator3
       commands.clear();
       depends.clear();
       
-      this->CreateJumpCommand(commands,"Makefile2",localName);
+      this->CreateJumpCommand(commands,"CMakeFiles/Makefile2",localName);
       this->WriteMakeRule(ruleFileStream, "Convenience name for target.",
                           localName.c_str(), depends, commands);
 

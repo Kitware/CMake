@@ -70,10 +70,10 @@ IF(CMAKE_SYSTEM_VERSION)
 ENDIF(CMAKE_SYSTEM_VERSION)
 
 
-FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log 
+FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
   "The system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
 
 # configure variables set in this file for fast reload
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in 
-               ${CMAKE_BINARY_DIR}/CMakeSystem.cmake IMMEDIATE)
+               ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeSystem.cmake IMMEDIATE)
 

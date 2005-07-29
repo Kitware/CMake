@@ -28,14 +28,14 @@ MACRO(TRY_COMPILE_FROM_SOURCE SOURCE VAR)
     IF(${VAR})
       SET(${VAR} 1 CACHE INTERNAL "Test ${FUNCTION}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
-      WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeOutput.log
+      WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
         "Performing C SOURCE FILE Test ${VAR} succeded with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${src}\n" APPEND)
     ELSE(${VAR})
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
       SET(${VAR} "" CACHE INTERNAL "Test ${FUNCTION}")
-      WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeError.log
+      WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
         "Performing C SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${src}\n" APPEND)

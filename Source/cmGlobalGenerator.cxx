@@ -100,8 +100,9 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
 }
 
 // enable the given language
-void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
-                                       cmMakefile *mf)
+void 
+cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
+                                  cmMakefile *mf)
 {  
   if(languages.size() == 0)
     {
@@ -113,6 +114,8 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   mf->AddDefinition("RUN_CONFIGURE", true);
   bool needTestLanguage = false;
   std::string rootBin = mf->GetHomeOutputDirectory();
+  rootBin += "/CMakeFiles";
+  
   // If the configuration files path has been set,
   // then we are in a try compile and need to copy the enable language
   // files into the try compile directory
@@ -251,10 +254,12 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       std::string determineCompiler = "CMakeDetermine";
       determineCompiler += lang;
       determineCompiler += "Compiler.cmake";
-      std::string determineFile = mf->GetModulesFile(determineCompiler.c_str());
+      std::string determineFile = 
+        mf->GetModulesFile(determineCompiler.c_str());
       if(!mf->ReadListFile(0,determineFile.c_str()))
         {
-        cmSystemTools::Error("Could not find cmake module file:", determineFile.c_str());
+        cmSystemTools::Error("Could not find cmake module file:", 
+                             determineFile.c_str());
         }
       // Some generators like visual studio should not use the env variables
       // So the global generator can specify that in this variable
@@ -344,7 +349,8 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         std::string ifpath = mf->GetModulesFile(testLang.c_str());
         if(!mf->ReadListFile(0,ifpath.c_str()))
           {
-          cmSystemTools::Error("Could not find cmake module file:", ifpath.c_str());
+          cmSystemTools::Error("Could not find cmake module file:", 
+                               ifpath.c_str());
           }
         // **** Step 8, load backwards compatibility stuff for C and CXX
         // for old versions of CMake ListFiles C and CXX had some
@@ -785,8 +791,9 @@ cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
 
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
 {
-  this->SetConfiguredFilesPath(
-    gen->GetCMakeInstance()->GetHomeOutputDirectory());
+  std::string cfp = gen->GetCMakeInstance()->GetHomeOutputDirectory();
+  cfp += "/CMakeFiles";
+  this->SetConfiguredFilesPath(cfp.c_str());
   const char* make =
     gen->GetCMakeInstance()->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
   this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", make,

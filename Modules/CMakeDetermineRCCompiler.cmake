@@ -43,5 +43,5 @@ MARK_AS_ADVANCED(CMAKE_RC_COMPILER)
 
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeRCCompiler.cmake.in 
-               ${CMAKE_BINARY_DIR}/CMakeRCCompiler.cmake IMMEDIATE)
+               ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeRCCompiler.cmake IMMEDIATE)
 SET(CMAKE_RC_COMPILER_ENV_VAR "RC")

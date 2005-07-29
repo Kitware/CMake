@@ -557,6 +557,8 @@ bool cmCacheManager::SaveCache(const char* path)
                                      cacheFile.c_str());
   cmSystemTools::RemoveFile(tempFile.c_str());
   std::string checkCacheFile = path;
+  checkCacheFile += "/CMakeFiles";
+  cmSystemTools::MakeDirectory(checkCacheFile.c_str());
   checkCacheFile += "/cmake.check_cache";
   std::ofstream checkCache(checkCacheFile.c_str());
   if(!checkCache)

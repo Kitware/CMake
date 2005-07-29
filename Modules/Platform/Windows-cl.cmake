@@ -1,5 +1,5 @@
 # try to load any previously computed information for C on this platform
-INCLUDE( ${CMAKE_BINARY_DIR}/CMakeCPlatform.cmake OPTIONAL)
+INCLUDE( ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCPlatform.cmake OPTIONAL)
 
 SET(CMAKE_LIBRARY_PATH_FLAG "-LIBPATH:")
 SET(CMAKE_LINK_LIBRARY_FLAG "")
@@ -84,7 +84,7 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
       RETURN_VALUE CMAKE_COMPILER_RETURN
       )
     IF(NOT CMAKE_COMPILER_RETURN)
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
         "Determining the version of compiler passed with the following output:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
       STRING(REGEX REPLACE "\n" " " compilerVersion "${CMAKE_COMPILER_OUTPUT}")
@@ -103,7 +103,7 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
       ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
     ELSE(NOT CMAKE_COMPILER_RETURN)
       MESSAGE(STATUS "Check for CL compiler version - failed")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
         "Determining the version of compiler failed with the following output:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
     ENDIF(NOT CMAKE_COMPILER_RETURN)
@@ -122,13 +122,13 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
       RETURN_VALUE CMAKE_COMPILER_RETURN
       )
     IF(CMAKE_COMPILER_RETURN)
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
         "Determining if this is a free VC compiler failed with the following output:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
       MESSAGE(STATUS "Check if this is a free VC compiler - yes")
       SET(CMAKE_USING_VC_FREE_TOOLS 1)
     ELSE(CMAKE_COMPILER_RETURN)
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
         "Determining if this is a free VC compiler passed with the following output:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
       MESSAGE(STATUS "Check if this is a free VC compiler - no")
@@ -210,4 +210,4 @@ SET (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_EXE_LINKER_FLAGS_RELW
 
 # save computed information for this platform
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in 
-               ${CMAKE_BINARY_DIR}/CMakeCPlatform.cmake IMMEDIATE)
+               ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCPlatform.cmake IMMEDIATE)

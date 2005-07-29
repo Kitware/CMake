@@ -18,7 +18,7 @@ ENDIF(NOT CMAKE_Fortran_COMPILER_WORKS)
 
 IF(NOT CMAKE_Fortran_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working Fortran compiler: ${CMAKE_Fortran_COMPILER} -- broken")
-  FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log
+  FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
     "Determining if the Fortran compiler works failed with "
     "the following output:\n${OUTPUT}\n\n")
   MESSAGE(FATAL_ERROR "The Fortran compiler \"${CMAKE_Fortran_COMPILER}\" "
@@ -28,7 +28,7 @@ IF(NOT CMAKE_Fortran_COMPILER_WORKS)
 ELSE(NOT CMAKE_Fortran_COMPILER_WORKS)
   IF(FORTRAN_TEST_WAS_RUN)
     MESSAGE(STATUS "Check for working Fortran compiler: ${CMAKE_Fortran_COMPILER} -- works")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
       "Determining if the Fortran compiler works passed with "
       "the following output:\n${OUTPUT}\n\n")
   ENDIF(FORTRAN_TEST_WAS_RUN)
@@ -50,13 +50,13 @@ IF(CMAKE_Fortran_COMPILER_WORKS)
       OUTPUT_VARIABLE OUTPUT)
     IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
       MESSAGE(STATUS "Checking whether ${CMAKE_Fortran_COMPILER} supports Fortran 90 -- yes")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
         "Determining if the Fortran compiler supports Fortran 90 passed with "
         "the following output:\n${OUTPUT}\n\n")
       SET(CMAKE_Fortran_COMPILER_SUPPORTS_F90 1 CACHE INTERNAL "")
     ELSE(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
       MESSAGE(STATUS "Checking whether ${CMAKE_Fortran_COMPILER} supports Fortran 90 -- no")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
         "Determining if the Fortran compiler supports Fortran 90 failed with "
         "the following output:\n${OUTPUT}\n\n")
       SET(CMAKE_Fortran_COMPILER_SUPPORTS_F90 0 CACHE INTERNAL "")

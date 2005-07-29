@@ -18,7 +18,7 @@ ENDIF(NOT CMAKE_CXX_COMPILER_WORKS)
 
 IF(NOT CMAKE_CXX_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working CXX compiler: ${CMAKE_CXX_COMPILER} -- broken")
-  FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log
+  FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
     "Determining if the CXX compiler works failed with "
     "the following output:\n${OUTPUT}\n\n")
   MESSAGE(FATAL_ERROR "The C++ compiler \"${CMAKE_CXX_COMPILER}\" "
@@ -28,7 +28,7 @@ IF(NOT CMAKE_CXX_COMPILER_WORKS)
 ELSE(NOT CMAKE_CXX_COMPILER_WORKS)
   IF(CXX_TEST_WAS_RUN)
     MESSAGE(STATUS "Check for working CXX compiler: ${CMAKE_CXX_COMPILER} -- works")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
       "Determining if the CXX compiler works passed with "
       "the following output:\n${OUTPUT}\n\n")
   ENDIF(CXX_TEST_WAS_RUN)
