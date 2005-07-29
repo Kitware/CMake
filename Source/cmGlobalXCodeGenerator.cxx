@@ -86,7 +86,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
     {
     return new cmGlobalXCodeGenerator;
     }
-  else if (parser.m_Version >= 20)
+  else if (parser.m_Version == 20)
     {
     cmSystemTools::Message("Xcode 2.0 not really supported by cmake, "
                            "using Xcode 15 generator\n");
