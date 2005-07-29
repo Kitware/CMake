@@ -258,6 +258,8 @@ void TestCMGeneratedFileSTream()
   cmSystemTools::RemoveFile(file2tmp.c_str());
   cmSystemTools::RemoveFile(file3tmp.c_str());
 }
+// defined in testcflags.c
+extern "C" int TestCFlags(char* m);
 
 // ======================================================================
 
@@ -372,6 +374,21 @@ int main()
 #else
   cmPassed("CMake CMAKE_CXX_FLAGS is being passed to the compiler.");
 #endif
+#ifdef TEST_C_FLAGS
+  cmFailed("CMake CMAKE_C_FLAGS are being passed to c++ files the compiler!");
+#else
+  cmPassed("CMake CMAKE_C_FLAGS are not being passed to c++ files.");
+#endif
+  char msg[1024];
+  if(TestCFlags(msg))
+    {
+    cmPassed(
+     "CMake CMAKE_C_FLAGS are being passed to c files and CXX flags are not.");
+    }
+  else
+    {
+    cmFailed(msg);
+    }
   // ----------------------------------------------------------------------
   // Test ADD_DEFINITIONS
 

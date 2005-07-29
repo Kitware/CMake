@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 1.3)
 # Create exe. 
 #
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_CXX_FLAGS")
+SET(CMAKE_C_FLAGS "${CMAKE_C} -DTEST_C_FLAGS")
 
 # Link to CMake lib
 LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source)
@@ -14,7 +15,7 @@ SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared
 LINK_LIBRARIES(${COMPLEX_LIBS})
 
 ADD_EXECUTABLE(A A.cxx)
-ADD_EXECUTABLE(complex complex)
+ADD_EXECUTABLE(complex complex testcflags.c)
 ADD_EXECUTABLE(complex.file complex.file.cxx)
 TARGET_LINK_LIBRARIES(complex CMakeLib cmsys cmexpat cmzlib)
 IF (UNIX)
