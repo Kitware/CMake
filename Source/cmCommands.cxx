@@ -24,6 +24,7 @@
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"
 #include "cmGetTargetPropertyCommand.cxx"
+#include "cmGetTestPropertyCommand.cxx"
 #include "cmITKWrapTclCommand.cxx"
 #include "cmIncludeExternalMSProjectCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
@@ -32,6 +33,7 @@
 #include "cmRemoveCommand.cxx"
 #include "cmSetDirectoryPropertiesCommand.cxx"
 #include "cmSetTargetPropertiesCommand.cxx"
+#include "cmSetTestsPropertiesCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
 #include "cmVTKMakeInstantiatorCommand.cxx"
 #include "cmVTKWrapJavaCommand.cxx"
@@ -64,6 +66,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmGetCMakePropertyCommand);
   commands.push_back(new cmGetDirectoryPropertyCommand);
   commands.push_back(new cmGetTargetPropertyCommand);
+  commands.push_back(new cmGetTestPropertyCommand);
   commands.push_back(new cmITKWrapTclCommand);
   commands.push_back(new cmIncludeExternalMSProjectCommand);
   commands.push_back(new cmLinkLibrariesCommand);
@@ -73,6 +76,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmRemoveCommand);
   commands.push_back(new cmSetDirectoryPropertiesCommand);
   commands.push_back(new cmSetTargetPropertiesCommand);
+  commands.push_back(new cmSetTestsPropertiesCommand);
   commands.push_back(new cmSourceGroupCommand);
   commands.push_back(new cmVTKMakeInstantiatorCommand);
   commands.push_back(new cmVTKWrapJavaCommand);

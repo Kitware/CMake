@@ -637,6 +637,7 @@ public:
    */
   cmTest* GetTest(const char* testName) const;
   const std::vector<cmTest*> *GetTests() const;
+  std::vector<cmTest*> *GetTests();
 
   /**
    * Get a list of macros as a ; separated string

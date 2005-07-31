@@ -2621,3 +2621,8 @@ const std::vector<cmTest*> *cmMakefile::GetTests() const
   return &m_Tests;
 }
 
+std::vector<cmTest*> *cmMakefile::GetTests()
+{
+  return &m_Tests;
+}
+

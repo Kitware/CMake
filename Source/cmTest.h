@@ -34,11 +34,11 @@ public:
 
   ///! Set the test name
   void SetName(const char* name);
-  const char* GetName() { return m_Name.c_str(); }
+  const char* GetName() const { return m_Name.c_str(); }
   void SetCommand(const char* command);
-  const char* GetCommand() { return m_Command.c_str(); }
+  const char* GetCommand() const { return m_Command.c_str(); }
   void SetArguments(const std::vector<cmStdString>& args);
-  std::vector<cmStdString>& GetArguments()
+  const std::vector<cmStdString>& GetArguments() const
     {
     return m_Args;
     }
