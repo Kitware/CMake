@@ -1,5 +1,5 @@
 # a simple C only test case
-PROJECT (littleMacroTest C)
+PROJECT (littleMacroTest)
 
 SET(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
 
@@ -67,6 +67,21 @@ IF(SOME_CHECK)
   MESSAGE("CheckCSourceCompiles works")
 ELSE(SOME_CHECK)
   MESSAGE(FATAL_ERROR "CheckCSourceCompiles does not work")
+ENDIF(SOME_CHECK)
+
+INCLUDE(CheckCXXSourceCompiles)
+Check_CXX_Source_Compiles(
+"
+#include <stdio.h>
+int main(int ac, char*av[]){
+  if(ac > 1000){return *av[0];}
+  return 0;
+}"
+SOME_CHECK)
+IF(SOME_CHECK)
+  MESSAGE("CheckCXXSourceCompiles works")
+ELSE(SOME_CHECK)
+  MESSAGE(FATAL_ERROR "CheckCXXSourceCompiles does not work")
 ENDIF(SOME_CHECK)
 
 ADD_EXECUTABLE(MacroTest macroTest.c)
