@@ -57,7 +57,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
         {
         file.SetProperty("ABSTRACT",curr->GetProperty("ABSTRACT"));
         }
-      std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
+      std::string srcName = cmSystemTools::GetFilenameWithoutLastExtension(*j);
       std::string newName = "moc_" + srcName;
       file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
                    "cxx",false);
