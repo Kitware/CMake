@@ -192,8 +192,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
                 } \
         while ( 0 )
 
-#define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
-
 /* The following is because we cannot portably get our hands on size_t
  * (without autoconf's help, which isn't available because we want
  * flex-generated scanners to compile on their own).
@@ -365,12 +363,12 @@ struct yy_trans_info
         flex_int32_t yy_verify;
         flex_int32_t yy_nxt;
         };
-static yyconst flex_int16_t yy_accept[33] =
+static yyconst flex_int16_t yy_accept[39] =
     {   0,
         0,    0,    0,    0,   15,    6,   12,    1,    7,    2,
         6,    3,    4,    6,   13,    8,    9,   10,   11,    6,
-        6,    0,    2,    0,    5,    6,    8,    0,    0,    0,
-        0,    0
+        0,    6,    0,    2,    0,    5,    6,    8,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -407,56 +405,56 @@ static yyconst flex_int32_t yy_ec[256] =
 
 static yyconst flex_int32_t yy_meta[12] =
     {   0,
-        1,    2,    3,    4,    2,    1,    2,    5,    6,    6,
+        1,    1,    2,    3,    1,    1,    1,    4,    4,    4,
         1
     } ;
 
-static yyconst flex_int16_t yy_base[40] =
+static yyconst flex_int16_t yy_base[48] =
     {   0,
-        0,    0,    9,   18,   26,   24,   91,   91,   91,    0,
-       30,   91,   91,   35,    0,   14,   91,   91,   43,   17,
-       16,   46,    0,   11,    0,   11,    6,   52,    8,    7,
-        6,   91,   56,   62,   68,   74,   80,   82,   84
+        0,    0,    9,   18,   34,   29,   82,   82,   82,    0,
+       25,   82,   82,   32,    0,   20,   82,   82,   40,    0,
+       44,   21,    0,    0,   19,    0,    0,   15,   53,    0,
+       18,    0,   16,   15,   11,   10,    9,   82,   57,   61,
+       65,   69,   73,   12,   77,   11,   10
     } ;
 
-static yyconst flex_int16_t yy_def[40] =
+static yyconst flex_int16_t yy_def[48] =
     {   0,
-       32,    1,   33,   33,   32,   34,   32,   32,   32,   35,
-       34,   32,   32,   11,   36,   37,   32,   32,   37,   11,
-       11,   34,   35,   38,   14,   11,   37,   37,   39,   38,
-       39,    0,   32,   32,   32,   32,   32,   32,   32
+       38,    1,   39,   39,   38,   38,   38,   38,   38,   40,
+        6,   38,   38,    6,   41,   42,   38,   38,   42,    6,
+       38,    6,   43,   40,   44,   14,    6,   42,   42,   21,
+       21,   45,   46,   44,   47,   46,   47,    0,   38,   38,
+       38,   38,   38,   38,   38,   38,   38
     } ;
 
-static yyconst flex_int16_t yy_nxt[103] =
+static yyconst flex_int16_t yy_nxt[94] =
     {   0,
         6,    7,    8,    9,   10,   11,   12,   13,    6,   14,
-       15,   17,   18,   20,   26,   20,   28,   32,   26,   19,
-       17,   18,   29,   32,   28,   32,   32,   32,   19,   21,
-       32,   32,   32,   32,   22,   21,   24,   32,   32,   32,
-       22,   32,   32,   25,   25,   27,   27,   20,   32,   32,
-       20,   32,   20,   20,   27,   27,   16,   16,   16,   16,
-       16,   16,   20,   32,   32,   20,   32,   20,   23,   23,
-       32,   23,   23,   23,   26,   26,   32,   26,   26,   26,
-       27,   27,   32,   32,   27,   27,   30,   30,   31,   31,
-        5,   32,   32,   32,   32,   32,   32,   32,   32,   32,
+       15,   17,   18,   37,   36,   34,   30,   20,   30,   19,
+       17,   18,   27,   20,   35,   29,   27,   33,   19,   20,
+       29,   25,   21,   38,   22,   38,   38,   20,   20,   23,
+       26,   26,   28,   28,   30,   38,   38,   20,   38,   31,
+       38,   38,   30,   30,   32,   28,   28,   16,   16,   16,
+       16,   24,   38,   24,   24,   27,   38,   27,   27,   28,
+       38,   38,   28,   20,   38,   20,   20,   30,   38,   30,
+       30,    5,   38,   38,   38,   38,   38,   38,   38,   38,
+       38,   38,   38
 
-       32,   32
     } ;
 
-static yyconst flex_int16_t yy_chk[103] =
+static yyconst flex_int16_t yy_chk[94] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    3,    3,   31,   30,   29,   27,   26,   24,    3,
-        4,    4,   21,   20,   16,    5,    0,    0,    4,    6,
-        0,    0,    0,    0,    6,   11,   11,    0,    0,    0,
-       11,   14,    0,   14,   14,   19,   19,   22,    0,    0,
-       22,    0,   22,   22,   28,   28,   33,   33,   33,   33,
-       33,   33,   34,    0,    0,   34,    0,   34,   35,   35,
-        0,   35,   35,   35,   36,   36,    0,   36,   36,   36,
-       37,   37,    0,    0,   37,   37,   38,   38,   39,   39,
-       32,   32,   32,   32,   32,   32,   32,   32,   32,   32,
+        1,    3,    3,   47,   46,   44,   37,   36,   35,    3,
+        4,    4,   34,   33,   31,   28,   25,   22,    4,    6,
+       16,   11,    6,    5,    6,    0,    0,    6,    6,    6,
+       14,   14,   19,   19,   21,    0,    0,   21,    0,   21,
+        0,    0,   21,   21,   21,   29,   29,   39,   39,   39,
+       39,   40,    0,   40,   40,   41,    0,   41,   41,   42,
+        0,    0,   42,   43,    0,   43,   43,   45,    0,   45,
+       45,   38,   38,   38,   38,   38,   38,   38,   38,   38,
+       38,   38,   38
 
-       32,   32
     } ;
 
 /* Table of booleans, true if rule could match eol. */
@@ -562,7 +560,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 
 /*--------------------------------------------------------------------------*/
 
-#line 565 "cmListFileLexer.c"
+#line 566 "cmListFileLexer.c"
 
 #define INITIAL 0
 #define STRING 1
@@ -776,10 +774,10 @@ YY_DECL
         register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 99 "cmListFileLexer.in.l"
+#line 100 "cmListFileLexer.in.l"
 
 
-#line 784 "cmListFileLexer.c"
+#line 785 "cmListFileLexer.c"
 
         if ( yyg->yy_init )
                 {
@@ -832,13 +830,13 @@ yy_match:
                         while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                                 {
                                 yy_current_state = (int) yy_def[yy_current_state];
-                                if ( yy_current_state >= 33 )
+                                if ( yy_current_state >= 39 )
                                         yy_c = yy_meta[(unsigned int) yy_c];
                                 }
                         yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
                         ++yy_cp;
                         }
-                while ( yy_base[yy_current_state] != 91 );
+                while ( yy_base[yy_current_state] != 82 );
 
 yy_find_action:
                 yy_act = yy_accept[yy_current_state];
@@ -877,7 +875,7 @@ do_action:      /* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 101 "cmListFileLexer.in.l"
+#line 102 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Newline;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -887,14 +885,14 @@ YY_RULE_SETUP
 }
 case 2:
 YY_RULE_SETUP
-#line 109 "cmListFileLexer.in.l"
+#line 110 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
 }
         YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 113 "cmListFileLexer.in.l"
+#line 114 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ParenLeft;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -903,7 +901,7 @@ YY_RULE_SETUP
 }
 case 4:
 YY_RULE_SETUP
-#line 120 "cmListFileLexer.in.l"
+#line 121 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ParenRight;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -912,7 +910,7 @@ YY_RULE_SETUP
 }
 case 5:
 YY_RULE_SETUP
-#line 127 "cmListFileLexer.in.l"
+#line 128 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Identifier;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -921,7 +919,7 @@ YY_RULE_SETUP
 }
 case 6:
 YY_RULE_SETUP
-#line 134 "cmListFileLexer.in.l"
+#line 135 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -930,7 +928,7 @@ YY_RULE_SETUP
 }
 case 7:
 YY_RULE_SETUP
-#line 141 "cmListFileLexer.in.l"
+#line 142 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ArgumentQuoted;
   cmListFileLexerSetToken(lexer, "", 0);
@@ -941,7 +939,7 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 148 "cmListFileLexer.in.l"
+#line 149 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
@@ -950,7 +948,7 @@ YY_RULE_SETUP
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 153 "cmListFileLexer.in.l"
+#line 154 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   ++lexer->line;
@@ -959,7 +957,7 @@ YY_RULE_SETUP
         YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 159 "cmListFileLexer.in.l"
+#line 160 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
   BEGIN(INITIAL);
@@ -967,14 +965,14 @@ YY_RULE_SETUP
 }
 case 11:
 YY_RULE_SETUP
-#line 165 "cmListFileLexer.in.l"
+#line 166 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
 }
         YY_BREAK
 case YY_STATE_EOF(STRING):
-#line 170 "cmListFileLexer.in.l"
+#line 171 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_BadString;
   BEGIN(INITIAL);
@@ -982,14 +980,14 @@ case YY_STATE_EOF(STRING):
 }
 case 12:
 YY_RULE_SETUP
-#line 176 "cmListFileLexer.in.l"
+#line 177 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
 }
         YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 180 "cmListFileLexer.in.l"
+#line 181 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_BadCharacter;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -997,7 +995,7 @@ YY_RULE_SETUP
   return 1;
 }
 case YY_STATE_EOF(INITIAL):
-#line 187 "cmListFileLexer.in.l"
+#line 188 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_None;
   cmListFileLexerSetToken(lexer, 0, 0);
@@ -1005,10 +1003,10 @@ case YY_STATE_EOF(INITIAL):
 }
 case 14:
 YY_RULE_SETUP
-#line 193 "cmListFileLexer.in.l"
+#line 194 "cmListFileLexer.in.l"
 ECHO;
         YY_BREAK
-#line 1022 "cmListFileLexer.c"
+#line 1023 "cmListFileLexer.c"
 
         case YY_END_OF_BUFFER:
                 {
@@ -1292,7 +1290,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
                 while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                         {
                         yy_current_state = (int) yy_def[yy_current_state];
-                        if ( yy_current_state >= 33 )
+                        if ( yy_current_state >= 39 )
                                 yy_c = yy_meta[(unsigned int) yy_c];
                         }
                 yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1321,11 +1319,11 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
         while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                 {
                 yy_current_state = (int) yy_def[yy_current_state];
-                if ( yy_current_state >= 33 )
+                if ( yy_current_state >= 39 )
                         yy_c = yy_meta[(unsigned int) yy_c];
                 }
         yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-        yy_is_jam = (yy_current_state == 32);
+        yy_is_jam = (yy_current_state == 38);
 
         return yy_is_jam ? 0 : yy_current_state;
 }
@@ -2061,7 +2059,6 @@ void *cmListFileLexer_yyalloc (yy_size_t  size , yyscan_t yyscanner)
 
 void *cmListFileLexer_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
-        (void)yyscanner;
         /* The cast to (char *) in the following accommodates both
          * implementations that use char* generic pointers, and those
          * that use void* generic pointers.  It works with the latter
@@ -2069,6 +2066,7 @@ void *cmListFileLexer_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscann
          * any pointer type to void*, and deal with argument conversions
          * as though doing an assignment.
          */
+        (void)yyscanner;
         return (void *) realloc( (char *) ptr, size );
 }
 
@@ -2092,7 +2090,7 @@ void cmListFileLexer_yyfree (void * ptr , yyscan_t yyscanner)
 #undef YY_DECL_IS_OURS
 #undef YY_DECL
 #endif
-#line 193 "cmListFileLexer.in.l"
+#line 194 "cmListFileLexer.in.l"
 
 
 
