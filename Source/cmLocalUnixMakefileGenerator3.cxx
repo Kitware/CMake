@@ -304,6 +304,19 @@ cmLocalUnixMakefileGenerator3
   
   this->WriteMakeVariables(ruleFileStream, HOME_OUTPUT);
   
+  // Open the flags file.  This should be copy-if-different because the
+  // rules may depend on this file itself.
+  std::string flagFileName = dir;
+  flagFileName += "/flags.make";
+  std::string flagFileNameFull = this->ConvertToFullPath(flagFileName);
+  cmGeneratedFileStream flagFileStream(flagFileNameFull.c_str());
+  flagFileStream.SetCopyIfDifferent(true);
+  if(!flagFileStream)
+    {
+    return;
+    }
+  this->WriteDisclaimer(flagFileStream);
+
   // Include the dependencies for the target.
   std::string depPath = dir;
   depPath += "/depend.make";
@@ -340,7 +353,7 @@ cmLocalUnixMakefileGenerator3
         {
         // Generate this object file's rule file.
         this->WriteObjectRuleFiles(target, *(*source), objects, 
-                                   ruleFileStream);
+                                   ruleFileStream, flagFileStream);
         }
       else if((*source)->GetPropertyAsBool("EXTERNAL_OBJECT"))
         {
@@ -348,6 +361,46 @@ cmLocalUnixMakefileGenerator3
         external_objects.push_back((*source)->GetFullPath());
         }
       }
+    }
+  
+  // write language flags for target
+  std::map<cmStdString,cmLocalUnixMakefileGenerator3::IntegrityCheckSet>& 
+    checkSet = this->GetIntegrityCheckSet()[target.GetName()];
+  for(std::map<cmStdString, 
+        cmLocalUnixMakefileGenerator3::IntegrityCheckSet>::const_iterator
+        l = checkSet.begin(); l != checkSet.end(); ++l)
+    {
+    const char *lang = l->first.c_str();
+    std::string flags;
+    // Add the export symbol definition for shared library objects.
+    bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
+                   (target.GetType() == cmTarget::MODULE_LIBRARY));
+    if(shared)
+      {
+      flags += "-D";
+      if(const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
+        {
+        flags += custom_export_name;
+        }
+      else
+        {
+        std::string in = target.GetName();
+        in += "_EXPORTS";
+        flags += cmSystemTools::MakeCindentifier(in.c_str());
+        }
+      }
+    
+    // Add language-specific flags.
+    this->AddLanguageFlags(flags, lang);
+    
+    // Add shared-library flags if needed.
+    this->AddSharedFlags(flags, lang, shared);
+    
+    // Add include directory flags.
+    this->AppendFlags(flags, this->GetIncludeFlags(lang));
+    flagFileStream << lang << "_FLAGS = " << flags
+                   << "\n"
+                   << "\n";
     }
   
   // write the custom commands for this target
@@ -428,7 +481,8 @@ cmLocalUnixMakefileGenerator3
                        cmTarget& target, 
                        cmSourceFile& source,
                        std::vector<std::string>& depends,
-                       std::ostream &ruleFileStream)
+                       std::ostream &ruleFileStream,
+                       std::ostream &flagFileStream)
 {
   // Open the rule file for writing.  This should be copy-if-different
   // because the rules may depend on this file itself.
@@ -436,15 +490,32 @@ cmLocalUnixMakefileGenerator3
   ruleFileName += "/build.make";
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
 
+  std::string flagFileName = this->GetTargetDirectory(target);
+  flagFileName += "/flags.make";
+  std::string flagFileNameFull = this->ConvertToFullPath(flagFileName);
+  this->AppendRuleDepend(depends, flagFileNameFull.c_str());
+
   // generate the depend scanning rule
   this->WriteObjectDependRules(source, depends);
 
-  this->AppendRuleDepend(depends, ruleFileNameFull.c_str());
+  std::string relativeObj = this->GetHomeRelativeOutputPath();
+  relativeObj += obj;
 
   // Write the build rule.
   // Build the set of compiler flags.
   std::string flags;
 
+  // Add flags from source file properties.
+  if (source.GetProperty("COMPILE_FLAGS"))
+    {
+    this->AppendFlags(flags, source.GetProperty("COMPILE_FLAGS"));
+    flagFileStream << "# Custom flags.\n"
+                   << relativeObj << "_FLAGS = "
+                   << source.GetProperty("COMPILE_FLAGS")
+                   << "\n"
+                   << "\n";
+    }
+  
   // Add the export symbol definition for shared library objects.
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
@@ -463,9 +534,6 @@ cmLocalUnixMakefileGenerator3
       }
     }
 
-  // Add flags from source file properties.
-  this->AppendFlags(flags, source.GetProperty("COMPILE_FLAGS"));
-
   // Add language-specific flags.
   this->AddLanguageFlags(flags, lang);
 
@@ -474,6 +542,8 @@ cmLocalUnixMakefileGenerator3
 
   // Add include directory flags.
   this->AppendFlags(flags, this->GetIncludeFlags(lang));
+  
+  std::cerr << "Have total flags: " << flags << std::endl;
 
   // Get the output paths for source and object files.
   std::string sourceFile = source.GetFullPath();
@@ -485,8 +555,6 @@ cmLocalUnixMakefileGenerator3
   std::string objectFile = this->Convert(obj.c_str(),START_OUTPUT,SHELL);
 
   // Construct the build message.
-  std::string relativeObj = this->GetHomeRelativeOutputPath();
-  relativeObj += obj;
   std::vector<std::string> commands;
   std::string buildEcho = "Building ";
   buildEcho += lang;
@@ -557,7 +625,8 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteObjectRuleFiles(cmTarget& target, cmSourceFile& source,
                        std::vector<std::string>& objects, 
-                       std::ostream &ruleFileStream)
+                       std::ostream &ruleFileStream,
+                       std::ostream &flagFileStream)
 {
   // Identify the language of the source file.
   const char* lang = this->GetSourceFileLanguage(source);
@@ -606,7 +675,7 @@ cmLocalUnixMakefileGenerator3
   
   // generate the build rule file
   this->WriteObjectBuildFile(obj, lang, target, source, depends,
-                             ruleFileStream);
+                             ruleFileStream, flagFileStream);
   
   // The object file should be checked for dependency integrity.
   m_CheckDependFiles[target.GetName()][lang].insert(&source);
@@ -3006,7 +3075,7 @@ void cmLocalUnixMakefileGenerator3
 {
   // now write all the language stuff
   // Set the set of files to check for dependency integrity.
-   std::set<cmStdString> checkSetLangs;
+  std::set<cmStdString> checkSetLangs;
   std::map<cmStdString,cmLocalUnixMakefileGenerator3::IntegrityCheckSet>& 
     checkSet = this->GetIntegrityCheckSet()[target.GetName()];
   for(std::map<cmStdString, 

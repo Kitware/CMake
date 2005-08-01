@@ -201,7 +201,8 @@ protected:
   void WriteObjectRuleFiles(cmTarget& target,
                             cmSourceFile& source,
                             std::vector<std::string>& objects,
-                            std::ostream &filestr);
+                            std::ostream &filestr,
+                            std::ostream &flagstr);
 
   // write the build rule for an object
   void WriteObjectBuildFile(std::string &obj,
@@ -209,7 +210,8 @@ protected:
                             cmTarget& target, 
                             cmSourceFile& source,
                             std::vector<std::string>& depends,
-                            std::ostream &filestr);
+                            std::ostream &filestr,
+                            std::ostream &flagstr);
   
   // write the depend.make file for an object
   void WriteObjectDependRules(cmSourceFile& source,
