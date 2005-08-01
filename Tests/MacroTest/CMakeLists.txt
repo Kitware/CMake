@@ -47,4 +47,26 @@ ENDIF("${var}" EQUAL "strange_macro" AND "${second_var}" EQUAL "second_var")
 MACRO(ADD_EXECUTABLE exec)
   _ADD_EXECUTABLE("mini${exec}" ${ARGN})
 ENDMACRO(ADD_EXECUTABLE)
+
+INCLUDE(CheckCSourceCompiles)
+Check_C_Source_Compiles(
+"
+#include <stdio.h>
+#ifdef __CLASSIC_C__
+int main(){
+  int ac;
+  char*av[];
+#else
+int main(int ac, char*av[]){
+#endif
+  if(ac > 1000){return *av[0];}
+  return 0;
+}"
+SOME_CHECK)
+IF(SOME_CHECK)
+  MESSAGE("CheckCSourceCompiles works")
+ELSE(SOME_CHECK)
+  MESSAGE(FATAL_ERROR "CheckCSourceCompiles does not work")
+ENDIF(SOME_CHECK)
+
 ADD_EXECUTABLE(MacroTest macroTest.c)
