@@ -521,7 +521,7 @@ cmLocalUnixMakefileGenerator3
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
   if(shared)
     {
-    flags += "-D";
+    flags += " -D";
     if(const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
       {
       flags += custom_export_name;
@@ -543,8 +543,6 @@ cmLocalUnixMakefileGenerator3
   // Add include directory flags.
   this->AppendFlags(flags, this->GetIncludeFlags(lang));
   
-  std::cerr << "Have total flags: " << flags << std::endl;
-
   // Get the output paths for source and object files.
   std::string sourceFile = source.GetFullPath();
   if(m_UseRelativePaths)

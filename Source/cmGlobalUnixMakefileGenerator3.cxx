@@ -349,10 +349,16 @@ void cmGlobalUnixMakefileGenerator3
     for (cmTargets::iterator l = lg->GetMakefile()->GetTargets().begin();
          l != lg->GetMakefile()->GetTargets().end(); l++)
       {
-      std::string tname = lg->GetRelativeTargetDirectory(l->second);
-      tname += "/DependInfo.cmake";
-      cmSystemTools::ConvertToUnixSlashes(tname);
-      cmakefileStream << "  \"" << tname.c_str() << "\"\n";
+      if((l->second.GetType() == cmTarget::EXECUTABLE) ||
+         (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+         (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+         (l->second.GetType() == cmTarget::MODULE_LIBRARY) )
+        {
+        std::string tname = lg->GetRelativeTargetDirectory(l->second);
+        tname += "/DependInfo.cmake";
+        cmSystemTools::ConvertToUnixSlashes(tname);
+        cmakefileStream << "  \"" << tname.c_str() << "\"\n";
+        }
       }
     }
   cmakefileStream << "  )\n";
