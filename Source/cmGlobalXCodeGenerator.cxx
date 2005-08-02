@@ -176,6 +176,7 @@ std::string cmGlobalXCodeGenerator::GenerateBuildCommand(const char* makeProgram
     {
     makeCommand += " -configuration Debug";
     }
+  makeCommand += " OBJROOT=.";
   return makeCommand;
 }
 
