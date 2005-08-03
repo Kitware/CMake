@@ -51,7 +51,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add an dependency to a target";
+    return "Add a dependency between top-level targets.";
     }
   
   /**
@@ -62,10 +62,15 @@ public:
     return
       "  ADD_DEPENDENCIES(target-name depend-target1\n"
       "                   depend-target2 ...)\n"
-      "Add a dependency to a target.  This is only used to add dependencies "
-      "between targets that cannot be inferred from the library/executable "
-      "links that are specified.  Regular build dependencies are "
-      "handled automatically.";
+      "Make a top-level target depend on other top-level targets.  A "
+      "top-level target is one created by ADD_EXECUTABLE, ADD_LIBRARY, "
+      "or ADD_CUSTOM_TARGET.  Adding dependencies with this command "
+      "can be used to make sure one target is built before another target.  "
+      "See the DEPENDS option of ADD_CUSTOM_TARGET "
+      "and ADD_CUSTOM_COMMAND for adding file-level dependencies in custom "
+      "rules.  See the OBJECT_DEPENDS option in "
+      "SET_SOURCE_FILES_PROPERTIES to add file-level dependencies to object "
+      "files.";
     }
   
   cmTypeMacro(cmAddDependenciesCommand, cmCommand);
