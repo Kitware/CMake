@@ -186,7 +186,6 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   std::string asfGlob = sourceDir + "/*";
   std::string abfGlob = binaryDir + "/*";
-  std::string daGlob = binaryDir + "/*.da";
  
   
   // Style 1
@@ -222,8 +221,13 @@ int cmCTestCoverageHandler::ProcessHandler()
  
   cmGlob gl;
   gl.RecurseOn();
+  std::string daGlob = binaryDir + "/*.da";
   gl.FindFiles(daGlob);
   std::vector<std::string> files = gl.GetFiles();
+  daGlob = binaryDir + "/*.gcda";
+  gl.FindFiles(daGlob);
+  std::vector<std::string>& moreFiles = gl.GetFiles();
+  files.insert(files.end(), moreFiles.begin(), moreFiles.end());
   std::vector<std::string>::iterator it;
  
   if ( files.size() == 0 )
