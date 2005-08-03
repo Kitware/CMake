@@ -82,7 +82,7 @@ static const char* cmCTestErrorMatches[] = {
   "ld: fatal: ",
   "make: \\*\\*\\*.*Error",
   "\\*\\*\\* Error code",
-  "^Internal error:",
+  "nternal error:",
   "Makefile:[0-9]+: \\*\\*\\* .*  Stop\\.",
   0
 };
