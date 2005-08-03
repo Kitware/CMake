@@ -5,7 +5,7 @@
 #
 #  JAVA_AWT_LIB_PATH     = the path to where the jawt library is
 #  JAVA_INCLUDE_PATH     = the path to where jni.h can be found
-#  JAVA_AWT_INCLUDE_PATH = the path to where jni.h can be found
+#  JAVA_AWT_INCLUDE_PATH = the path to where jawt.h can be found
 # 
 
 SET(JAVA_AWT_LIBRARY_DIRECTORIES
