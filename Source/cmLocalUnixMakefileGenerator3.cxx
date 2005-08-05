@@ -304,7 +304,7 @@ cmLocalUnixMakefileGenerator3
     }
   this->WriteDisclaimer(ruleFileStream);
   
-  this->WriteMakeVariables(ruleFileStream, HOME_OUTPUT);
+  this->WriteMakeVariables(ruleFileStream);
   
   // Open the flags file.  This should be copy-if-different because the
   // rules may depend on this file itself.
@@ -738,7 +738,7 @@ cmLocalUnixMakefileGenerator3
     return;
     }
   this->WriteDisclaimer(ruleFileStream);
-  this->WriteMakeVariables(ruleFileStream, HOME_OUTPUT);
+  this->WriteMakeVariables(ruleFileStream);
   ruleFileStream
     << "# Utility rule file for " << target.GetName() << ".\n\n";
 
@@ -895,7 +895,7 @@ void cmLocalUnixMakefileGenerator3::WriteDivider(std::ostream& os)
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::WriteMakeVariables(std::ostream& makefileStream, RelativeRoot root)
+::WriteMakeVariables(std::ostream& makefileStream)
 {
   this->WriteDivider(makefileStream);
   makefileStream
@@ -2813,7 +2813,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
     }
   this->WriteDisclaimer(ruleFileStream);
 
-  this->WriteMakeVariables(ruleFileStream, START_OUTPUT);
+  this->WriteMakeVariables(ruleFileStream);
   
   this->WriteSpecialTargetsTop(ruleFileStream);
   

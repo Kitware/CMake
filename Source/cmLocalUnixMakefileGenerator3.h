@@ -64,7 +64,7 @@ public:
                      const std::vector<std::string>& commands);
   
   // write the main variables used by the makefiles
-  void WriteMakeVariables(std::ostream& makefileStream, RelativeRoot root);
+  void WriteMakeVariables(std::ostream& makefileStream);
 
   // write a  comment line #====... in the stream
   void WriteDivider(std::ostream& os);

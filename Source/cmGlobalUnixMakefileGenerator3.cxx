@@ -138,7 +138,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
                     depends,
                     no_commands);
 
-  lg->WriteMakeVariables(makefileStream, cmLocalGenerator::HOME_OUTPUT);
+  lg->WriteMakeVariables(makefileStream);
   
   lg->WriteSpecialTargetsTop(makefileStream);
 
@@ -205,7 +205,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
                     "The main recursive all target", "all", 
                     no_commands, no_commands);
 
-  lg->WriteMakeVariables(makefileStream,cmLocalGenerator::HOME_OUTPUT);
+  lg->WriteMakeVariables(makefileStream);
   
   // write the target convenience rules
   unsigned int i;
