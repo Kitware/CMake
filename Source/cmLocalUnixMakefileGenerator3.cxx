@@ -279,8 +279,10 @@ cmLocalUnixMakefileGenerator3
 ::WriteTargetRuleFiles(cmTarget& target)
 {
   // Create a directory for this target.
-  std::string dir = this->GetTargetDirectory(target);
-  cmSystemTools::MakeDirectory(this->ConvertToFullPath(dir).c_str());
+  std::string dir = m_Makefile->GetStartOutputDirectory();
+  dir += "/";
+  dir += this->GetTargetDirectory(target);
+  cmSystemTools::MakeDirectory(dir.c_str());
 
   // Generate the build-time dependencies file for this target.
   std::string depBase = dir;
@@ -293,7 +295,7 @@ cmLocalUnixMakefileGenerator3
 
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
-  std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
+  std::string ruleFileNameFull = ruleFileName;
   cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
   ruleFileStream.SetCopyIfDifferent(true);
   if(!ruleFileStream)
@@ -308,7 +310,7 @@ cmLocalUnixMakefileGenerator3
   // rules may depend on this file itself.
   std::string flagFileName = dir;
   flagFileName += "/flags.make";
-  std::string flagFileNameFull = this->ConvertToFullPath(flagFileName);
+  std::string flagFileNameFull = flagFileName;
   cmGeneratedFileStream flagFileStream(flagFileNameFull.c_str());
   flagFileStream.SetCopyIfDifferent(true);
   if(!flagFileStream)
@@ -320,8 +322,7 @@ cmLocalUnixMakefileGenerator3
   // Include the dependencies for the target.
   std::string depPath = dir;
   depPath += "/depend.make";
-  depPath = this->ConvertToFullPath(depPath.c_str());
-  depPath = this->Convert(depPath.c_str(),HOME_OUTPUT,MAKEFILE);
+  depPath = this->Convert(depPath.c_str(),FULL,MAKEFILE);
   ruleFileStream
     << "# Include any dependencies generated for this target.\n"
     << m_IncludeDirective << " "
@@ -486,7 +487,9 @@ cmLocalUnixMakefileGenerator3
 {
   // Open the rule file for writing.  This should be copy-if-different
   // because the rules may depend on this file itself.
-  std::string ruleFileName = this->GetTargetDirectory(target);
+  std::string ruleFileName = m_Makefile->GetStartOutputDirectory();
+  ruleFileName += "/";
+  ruleFileName += this->GetTargetDirectory(target);
   ruleFileName += "/build.make";
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
 
@@ -929,13 +932,13 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# The CMake executable.\n"
     << "CMAKE_COMMAND = "
-    << this->Convert(cmakecommand.c_str(), root, MAKEFILE).c_str() 
+    << this->Convert(cmakecommand.c_str(), FULL, MAKEFILE).c_str() 
     << "\n"
     << "\n";
   makefileStream
     << "# The command to remove a file.\n"
     << "RM = "
-    << this->Convert(cmakecommand.c_str(),root,SHELL).c_str()
+    << this->Convert(cmakecommand.c_str(),FULL,SHELL).c_str()
     << " -E remove -f\n"
     << "\n";
   
@@ -952,13 +955,13 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# The top-level source directory on which CMake was run.\n"
     << "CMAKE_SOURCE_DIR = "
-    << this->Convert(m_Makefile->GetHomeDirectory(), root, SHELL)
+    << this->Convert(m_Makefile->GetHomeDirectory(), FULL, SHELL)
     << "\n"
     << "\n";
   makefileStream
     << "# The top-level build directory on which CMake was run.\n"
     << "CMAKE_BINARY_DIR = "
-    << this->Convert(m_Makefile->GetHomeOutputDirectory(), root, SHELL)
+    << this->Convert(m_Makefile->GetHomeOutputDirectory(), FULL, SHELL)
     << "\n"
     << "\n";
 }
@@ -1251,9 +1254,7 @@ cmLocalUnixMakefileGenerator3
   this->AppendTargetDepends(depends, target);
 
   // Add a dependency on the rule file itself.
-  objTarget = relPath;
-  objTarget += ruleFileName;
-  this->AppendRuleDepend(depends, objTarget.c_str());
+  this->AppendRuleDepend(depends, ruleFileName);
 
   // Construct the full path to the executable that will be generated.
   std::string targetFullPath = m_ExecutableOutputPath;
@@ -1566,9 +1567,7 @@ cmLocalUnixMakefileGenerator3
   this->AppendTargetDepends(depends, target);
 
   // Add a dependency on the rule file itself.
-  objTarget = relPath;
-  objTarget += ruleFileName;
-  this->AppendRuleDepend(depends, objTarget.c_str());
+  this->AppendRuleDepend(depends, ruleFileName);
 
   // from here up is the same for exe or lib
 
