@@ -1347,7 +1347,14 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   // In script mode we terminate after running the script.
   if(m_ScriptMode)
     {
-    return 0;
+    if(cmSystemTools::GetErrorOccuredFlag())
+      {
+      return -1;
+      }
+    else
+      {
+      return 0;
+      }
     }
 
   this->PreLoadCMakeFiles();
