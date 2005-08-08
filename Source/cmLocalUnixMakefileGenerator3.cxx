@@ -930,8 +930,7 @@ cmLocalUnixMakefileGenerator3
     }
 
   std::string cmakecommand =
-    this->ConvertToOutputForExisting(
-      m_Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
+      m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   makefileStream
     << "# The CMake executable.\n"
     << "CMAKE_COMMAND = "
