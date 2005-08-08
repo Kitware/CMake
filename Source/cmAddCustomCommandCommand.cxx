@@ -142,7 +142,7 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
        switch (doing)
          {
          case doing_source:
-           source = filename;
+           source = copy;
            break;
          case doing_output:
            output = filename;
