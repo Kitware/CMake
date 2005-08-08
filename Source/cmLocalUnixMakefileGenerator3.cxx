@@ -329,6 +329,14 @@ cmLocalUnixMakefileGenerator3
     << depPath
     << "\n\n";
   
+  // Include the flags for the target.
+  flagFileName = this->Convert(flagFileName.c_str(), FULL, MAKEFILE);
+  ruleFileStream
+    << "# Include the compile flags for this target's objects.\n"
+    << m_IncludeDirective << " "
+    << flagFileName
+    << "\n\n";
+  
   // make sure the depend file exists
   depPath = dir;
   depPath += "/depend.make";
@@ -515,39 +523,18 @@ cmLocalUnixMakefileGenerator3
   if (source.GetProperty("COMPILE_FLAGS"))
     {
     this->AppendFlags(flags, source.GetProperty("COMPILE_FLAGS"));
-    flagFileStream << "# Custom flags.\n"
+    flagFileStream << "# Custom flags: "
                    << relativeObj << "_FLAGS = "
                    << source.GetProperty("COMPILE_FLAGS")
                    << "\n"
                    << "\n";
     }
   
-  // Add the export symbol definition for shared library objects.
-  bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
-                 (target.GetType() == cmTarget::MODULE_LIBRARY));
-  if(shared)
-    {
-    flags += " -D";
-    if(const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
-      {
-      flags += custom_export_name;
-      }
-    else
-      {
-      std::string in = target.GetName();
-      in += "_EXPORTS";
-      flags += cmSystemTools::MakeCindentifier(in.c_str());
-      }
-    }
-
   // Add language-specific flags.
-  this->AddLanguageFlags(flags, lang);
-
-  // Add shared-library flags if needed.
-  this->AddSharedFlags(flags, lang, shared);
-
-  // Add include directory flags.
-  this->AppendFlags(flags, this->GetIncludeFlags(lang));
+  std::string langFlags = "$(";
+  langFlags += lang;
+  langFlags += "_FLAGS)";
+  this->AppendFlags(flags, langFlags.c_str());
   
   // Get the output paths for source and object files.
   std::string sourceFile = source.GetFullPath();
