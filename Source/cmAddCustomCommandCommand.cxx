@@ -120,7 +120,6 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       std::string filename;
       switch (doing)
         {
-        case doing_source:
         case doing_output:
         case doing_outputs:
           if (!cmSystemTools::FileIsFullPath(copy.c_str()))
@@ -130,6 +129,12 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
             }
           filename += copy;
           break;
+        case doing_source:
+          // We do not want to convert the argument to SOURCE because
+          // that option is only available for backward compatibility.
+          // Old-style use of this command may use the SOURCE==TARGET
+          // trick which we must preserve.  If we convert the source
+          // to a full path then it will no longer equal the target.
         default:
           break;
         }
