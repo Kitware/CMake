@@ -48,7 +48,7 @@ public:
   std::string m_WhereSource;
   std::string m_WhereBuild;
   bool m_AdvancedValues;
-  std::string m_GeneratorChoiceString;
+  wxString m_GeneratorChoiceString;
   std::string m_LastUnknownParameter;
   std::string m_ExecutablePath;
   bool m_ExitAfterLoad;
@@ -59,6 +59,10 @@ protected:
 
   // Return boolean value of the string
   static int GetBoolValue(const std::string&);
+
+  // on windows the argument with spaces SUCKS! So we need to 
+  // incorporate it with quotes.
+  wxString GetStringParam(const char *pString);
 
   std::string m_ValidArguments;
 };

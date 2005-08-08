@@ -614,16 +614,7 @@ void CMakeSetupFrm::CreateControls()
 }
 
 void CMakeSetupFrm::DoInitFrame(cmCommandLineInfo &cm, const wxString &fn)
-{
-    // create accelerator table for some commands
-    // not very useful if the focus is on an edit ctrl all the time ;-)
-    //wxAcceleratorEntry entries[3];
-    //entries[0].Set(wxACCEL_NORMAL,  (int) 'c', ID_MENU_CONFIGURE);
-    //entries[1].Set(wxACCEL_NORMAL,  (int) 'g', ID_MENU_EXITGENERATE);
-    //entries[2].Set(wxACCEL_NORMAL,  (int) 't', ID_MENU_TOGGLE_ADVANCED);
-    //wxAcceleratorTable accel(3, entries);
-    //SetAcceleratorTable(accel);
-    
+{ 
     // path to where cmake.exe is
     // m_PathToExecutable = cm.GetPathToExecutable().c_str();
     m_PathToExecutable = fn;
@@ -669,8 +660,17 @@ void CMakeSetupFrm::DoInitFrame(cmCommandLineInfo &cm, const wxString &fn)
     // sync advanced option with grid
     m_cmOptions->SetShowAdvanced(m_cmShowAdvanced->GetValue());
 
+    // if we have a command line query that a generator 
+    // needs to be chosen instead of the default, take it
+    bool foundGivenGenerator = false;
+    if(!cm.m_GeneratorChoiceString.IsEmpty())
+    {
+        // set proper discovered generator
+        foundGivenGenerator = m_cmGeneratorChoice->SetStringSelection(cm.m_GeneratorChoiceString);  
+    }
+
     // if none selected, we will see if VS8, VS7 or VS6 is present
-    if(m_cmGeneratorChoice->GetValue().IsEmpty())
+    if(!foundGivenGenerator || m_cmGeneratorChoice->GetValue().IsEmpty())
     {
         std::string mp;
         mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path]";

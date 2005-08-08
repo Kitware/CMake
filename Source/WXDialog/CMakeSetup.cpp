@@ -91,7 +91,7 @@ bool CMakeSetupApp::OnInit()
 
     // parse command line params
     cmCommandLineInfo cm;
-    cm.SetValidArguments("ABGHQ");
+    cm.SetValidArguments("ABGHQG");
     cm.ParseCommandLine(wxApp::argc, wxApp::argv);
 
     // set vendor name and app for config
