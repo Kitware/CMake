@@ -330,6 +330,9 @@ cmLocalUnixMakefileGenerator3
     << "\n\n";
   
   // make sure the depend file exists
+  depPath = dir;
+  depPath += "/depend.make";
+  depPath = this->Convert(depPath.c_str(),FULL,UNCHANGED);
   if (!cmSystemTools::FileExists(depPath.c_str()))
     {
     // Write an empty dependency file.
