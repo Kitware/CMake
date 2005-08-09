@@ -322,7 +322,7 @@ cmLocalUnixMakefileGenerator3
   // Include the dependencies for the target.
   std::string depPath = dir;
   depPath += "/depend.make";
-  depPath = this->Convert(depPath.c_str(),FULL,MAKEFILE);
+  depPath = this->Convert(depPath.c_str(),HOME_OUTPUT,MAKEFILE);
   ruleFileStream
     << "# Include any dependencies generated for this target.\n"
     << m_IncludeDirective << " "
@@ -330,7 +330,7 @@ cmLocalUnixMakefileGenerator3
     << "\n\n";
   
   // Include the flags for the target.
-  flagFileName = this->Convert(flagFileName.c_str(), FULL, MAKEFILE);
+  flagFileName = this->Convert(flagFileName.c_str(), HOME_OUTPUT, MAKEFILE);
   ruleFileStream
     << "# Include the compile flags for this target's objects.\n"
     << m_IncludeDirective << " "
