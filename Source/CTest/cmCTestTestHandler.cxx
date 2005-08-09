@@ -169,6 +169,10 @@ bool cmCTestAddTestCommand::InitialPass(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------
+// Try to find an executable, if found fullPath will be set to the full path
+// of where it was found. The directory and filename to search for are passed
+// in as well an a subdir (typically used for configuraitons such as
+// Release/Debug/etc)
 bool TryExecutable(const char *dir, const char *file,
                    std::string *fullPath, const char *subdir)
 {
@@ -187,17 +191,23 @@ bool TryExecutable(const char *dir, const char *file,
     }
   
   tryPath += file;
+  
+  // find the file without an executable extension
   if(cmSystemTools::FileExists(tryPath.c_str()))
     {
     *fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
     return true;
     }
+
+  // if not found try it with the executable extension
   tryPath += cmSystemTools::GetExecutableExtension();
   if(cmSystemTools::FileExists(tryPath.c_str()))
     {
     *fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
     return true;
     }
+  
+  // not found at all, return false
   return false;
 }
 
@@ -884,6 +894,7 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<cmStdString>& vec)
 
 
 //----------------------------------------------------------------------
+// Find the appropriate executable to run for a test
 std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
 {
   std::string fullPath = "";
@@ -891,6 +902,7 @@ std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
   std::string file;
 
   cmSystemTools::SplitProgramPath(exe, dir, file);
+  // first try to find the executable given a config type subdir if there is one
   if(m_CTest->GetConfigType() != "" && 
     ::TryExecutable(dir.c_str(), file.c_str(), &fullPath, 
       m_CTest->GetConfigType().c_str()))
@@ -898,11 +910,13 @@ std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
     return fullPath;
     }
 
+  // next try the current directory as the subdir
   if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"."))
     {
     return fullPath;
     }
 
+  // try without the config subdir
   if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,""))
     {
     return fullPath;
@@ -932,8 +946,9 @@ std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
       }
     }
 
-  // if everything else failed, check the users path
-  if (dir != "")
+  // if everything else failed, check the users path, but only if a full path
+  // wasn;t specified
+  if (dir.size() == 0)
     {
     std::string path = cmSystemTools::FindProgram(file.c_str());
     if (path != "")
