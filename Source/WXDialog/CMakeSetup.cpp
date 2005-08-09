@@ -91,8 +91,11 @@ bool CMakeSetupApp::OnInit()
 
     // parse command line params
     cmCommandLineInfo cm;
-    cm.SetValidArguments("ABGHQG");
-    cm.ParseCommandLine(wxApp::argc, wxApp::argv);
+    if(!cm.ParseCommandLine(wxApp::argc, wxApp::argv))
+    {
+        printf("Error while parsing the command line\n");
+        return false;
+    }
 
     // set vendor name and app for config
     SetVendorName("Kitware");

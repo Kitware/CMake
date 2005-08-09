@@ -37,13 +37,13 @@
 
 cmCommandLineInfo::cmCommandLineInfo()
 {
-  this->m_WhereSource = "";
-  this->m_WhereBuild = "";
-  this->m_AdvancedValues = false;
-  m_GeneratorChoiceString.Empty();
-  this->m_LastUnknownParameter = "";
-  this->m_ValidArguments = "";
-  this->m_ExitAfterLoad = false;
+    m_WhereSource = "";
+    m_WhereBuild = "";
+    m_AdvancedValues = false;
+    m_GeneratorChoiceString.Empty();
+    m_LastUnknownParameter = "";
+    m_ValidArguments = "";
+    m_ExitAfterLoad = false;
 } 
 
 ///////////////////////////////////////////////////////////////
@@ -52,124 +52,113 @@ cmCommandLineInfo::~cmCommandLineInfo()
 }
 
 ///////////////////////////////////////////////////////////////
-void cmCommandLineInfo::ParseCommandLine(int argc, char* argv[])
+bool cmCommandLineInfo::ParseCommandLine(int argc, char* argv[])
 {
-    for ( int cc = 1; cc < argc; cc ++ )
+    bool result = true;
+    wxString cachePath;
+    
+    for ( int cc = 1; cc < argc && result; cc ++ )
     {
+        // skip (empty ???) params
         if ( strlen(argv[cc]) < 1 )
             continue;
 
-        std::string argument = argv[cc];
-        bool valid = ((argument.size() > 1) && (m_ValidArguments.find(argument[1]) == std::string::npos));
-        
-        ParseParam(argument, valid, (cc + 1 == argc));
+        // judge argument and parse
+        wxString argument(argv[cc]);
+        if((argument.Len() > 1) && argument.GetChar(0) == '-')
+            result = ParseArgument(argument.Mid(1));
+        else
+        {
+            // ok this is the last of the arguments, the rest of the string(s)
+            // we concatenate to the cache path or something else
+            if(cc > 1)
+                cachePath << " ";
+            cachePath << argument;
+        }
     }
   
-    m_ExecutablePath = cmSystemTools::GetFilenamePath(argv[0]);
+    m_ExecutablePath = cmSystemTools::GetFilenamePath(argv[0]).c_str();
+
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////
-int cmCommandLineInfo::GetBoolValue(const std::string& v) {
-  std::string value = cmSystemTools::LowerCase(v);
-  if (value == "1" || 
-      value == "on" || 
-      value == "true" || 
-      value == "yes")
+int cmCommandLineInfo::GetBoolValue(const wxString& v) {
+
+    wxString value = v.Lower();
+  
+    if (!value.Cmp("1") || 
+        !value.Cmp("on") || 
+        !value.Cmp("true") || 
+        !value.Cmp("yes"))
     {
-    return 1;
+        // true
+        return 1;
     }
-  else if (value == "0" || 
-           value == "off" || 
-           value == "false" || 
-           value == "no")
+    else if (!value.Cmp("0") || 
+             !value.Cmp("off") || 
+             !value.Cmp("false") || 
+             !value.Cmp("no"))
     {
-    return -1;
+        // false
+        return -1;
     }
-  return 0;
+
+    // not recognised
+    return 0;
 }
 
 ///////////////////////////////////////////////////////////////
 // Parse param
 
-void cmCommandLineInfo::ParseParam(const std::string& parameter, 
-                                   bool know_about, bool /*last*/)
-{
-    // this is the last parameter we know, so we assign this to be
-    // path to source or path to existing build
-    if(!know_about)
-        m_LastUnknownParameter = parameter;
-    else
-    {
-        std::string sParam(parameter.c_str(), 1, parameter.npos);
-        
-        // Single letter valued flag like /B=value or /B:value
-        std::string value;
-        if (sParam[1] == '=' || sParam[1] == ':')
-        {
-            value = std::string(parameter.c_str()+3);
-        }
-        else
-        {
-            value = std::string(parameter.c_str()+2);
-        }
-        int res;
+bool cmCommandLineInfo::ParseArgument(const wxString& sParam)
+{    
+    bool result = false;
     
+    if(sParam.Len() > 1)
+    {
+        wxString value = sParam.Mid(1);
         switch (sParam[0])
         {
-            case 'A':
-                res = cmCommandLineInfo::GetBoolValue(value);
-                if (res == 1)
-                {
-                    m_AdvancedValues = true;
-                }
-                else if (res == -1)
-                {
-                    m_AdvancedValues = false;
-                }
-                break;
-      
-            case 'B':
-                m_WhereBuild = value;
-                break;
-      
             case 'G':
-                m_GeneratorChoiceString = GetStringParam(value.c_str());
+                m_GeneratorChoiceString = GetStringParam(value);
+                result = true;
                 break;
-      
+        
             case 'Q':
                 m_ExitAfterLoad = true;
+                result = true;
                 break;
-            
-            case 'H':
-                m_WhereSource = value;
+
+            // unknown param
+            default:
                 break;
         }
     }
+
+    return result;
 }
 
 // When the string param given has string quotes around it
 // we remove them and we pass back the string. If not, we 
 // simply pass back the string as-is
-wxString cmCommandLineInfo::GetStringParam(const char *pString)
+wxString cmCommandLineInfo::GetStringParam(const wxString &str)
 {
-    wxCHECK(pString, wxEmptyString);
-
-    wxString str(pString);
-    str = str.Strip(wxString::both);
+    wxString mystr = str.Strip(wxString::both);
 
     // if we have only one (or no chars return the current string)
-    if(str.Len() < 2)
+    if(mystr.Len() < 2)
         return str;
 
     // if we have quotes
-    if(str.GetChar(0) == '\"' && str.Last() == '\"')
+    if(mystr.GetChar(0) == '\"' && mystr.Last() == '\"')
     {
         // when we only have 2 in size, return empty string
-        if(str.Len() == 2)
+        if(mystr.Len() == 2)
             return wxEmptyString;
 
         // now remove the outer and inner, and return
-        return str.Mid(1, str.Len()-1);
+        return mystr.Mid(1, mystr.Len()-1);
     }
 
     return str;

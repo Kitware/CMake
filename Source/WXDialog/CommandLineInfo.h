@@ -35,36 +35,33 @@ public:
   virtual ~cmCommandLineInfo();
 
   // Parse the command line
-  void ParseCommandLine(int argc, char* argv[]);
-
-  // Set the valid arguments
-  void SetValidArguments(const std::string& va) { this->m_ValidArguments = va; }
+  bool ParseCommandLine(int argc, char* argv[]);
 
   // Retrieve the path of executable
-  std::string GetPathToExecutable() { return this->m_ExecutablePath; }
+  wxString GetPathToExecutable() { return this->m_ExecutablePath; }
 
   // Attributes
 public:
-  std::string m_WhereSource;
-  std::string m_WhereBuild;
+  wxString m_WhereSource;
+  wxString m_WhereBuild;
   bool m_AdvancedValues;
   wxString m_GeneratorChoiceString;
-  std::string m_LastUnknownParameter;
-  std::string m_ExecutablePath;
+  wxString m_LastUnknownParameter;
+  wxString m_ExecutablePath;
   bool m_ExitAfterLoad;
 
-protected:
+private:
   // Parse one argument
-  void ParseParam(const std::string& parameter, bool know_about, bool last);
+  bool ParseArgument(const wxString& sParam);
 
   // Return boolean value of the string
-  static int GetBoolValue(const std::string&);
+  static int GetBoolValue(const wxString&);
 
   // on windows the argument with spaces SUCKS! So we need to 
   // incorporate it with quotes.
-  wxString GetStringParam(const char *pString);
+  wxString GetStringParam(const wxString &str);
 
-  std::string m_ValidArguments;
+  wxString m_ValidArguments;
 };
 
 #endif // !defined(CMAKECOMMANDLINEINFO_H)
