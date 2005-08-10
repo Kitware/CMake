@@ -64,9 +64,14 @@ public:
   // CMAKE_SHARED_LIBRARY_SUFFIX
   // CMAKE_LINK_LIBRARY_SUFFIX
   void AddLinkExtension(const char* e)
-  {
-    m_LinkExtensions.push_back(e);
-  }
+    {
+      m_LinkExtensions.push_back(e);
+    }
+  // should be set from CMAKE_STATIC_LIBRARY_PREFIX
+  void SetLinkPrefix(const char* s)
+    {
+      m_LinkPrefix = s;
+    }
   // Return any warnings if the exist
   std::string GetWarnings();
   // return a list of all full path libraries
@@ -120,6 +125,8 @@ private:
   std::set<cmStdString> m_LinkPathSet;
   // the names of link extensions
   std::vector<cmStdString> m_LinkExtensions;
+  // the names of link prefixes
+  cmStdString m_LinkPrefix;
   // set of directories that can not be put in the correct order
   std::set<cmStdString> m_ImposibleDirectories;
   // library regular expressions

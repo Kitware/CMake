@@ -1353,6 +1353,12 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     orderLibs.AddLinkExtension(ext.c_str());
     }
   ext = 
+    m_CurrentMakefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
+  if(ext.size())
+    {
+    orderLibs.SetLinkPrefix(ext.c_str());
+    }
+  ext = 
     m_CurrentMakefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
   if(ext.size())
     {

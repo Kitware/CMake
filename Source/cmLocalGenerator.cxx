@@ -1286,6 +1286,12 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     orderLibs.AddLinkExtension(ext.c_str());
     }
   ext = 
+    m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
+  if(ext.size())
+    {
+    orderLibs.SetLinkPrefix(ext.c_str());
+    }
+  ext = 
     m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
   if(ext.size())
     {

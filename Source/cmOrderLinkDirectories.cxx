@@ -115,17 +115,23 @@ void cmOrderLinkDirectories::CreateRegularExpressions()
       }
     first = false;
     libext += "\\";
-#ifndef _WIN32    
-    libext += *i;
-#else
+#if defined(_WIN32) && !defined(__CYGWIN__)
     libext += this->NoCaseExpression(i->c_str());
+#else
+    libext += *i;
 #endif
     }
   libext += ").*";
   cmStdString reg("(.*)");
   reg += libext;
   m_RemoveLibraryExtension.compile(reg.c_str());
-  reg = "^lib([^/]*)";
+  reg = "";
+  if(m_LinkPrefix.size())
+    {
+    reg = "^";
+    reg += m_LinkPrefix;
+    }
+  reg += "([^/]*)";
   reg += libext;
   m_ExtractBaseLibraryName.compile(reg.c_str());
   reg = "([^/]*)";

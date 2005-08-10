@@ -56,6 +56,7 @@ bool TestLibraryOrder(bool shouldFail)
   orderLibs.DebugOn();
   orderLibs.AddLinkExtension(".so");
   orderLibs.AddLinkExtension(".a");
+  orderLibs.SetLinkPrefix("lib");
   orderLibs.SetLinkInformation(target, cmTarget::GENERAL, "A");
   bool ret = orderLibs.DetermineLibraryPathOrder();
   orderLibs.GetLinkerInformation(sortedpaths, linkItems);
