@@ -73,7 +73,7 @@ ELSE(${SDL_INCLUDE_DIR} MATCHES ".framework")
   # seem to provide SDLmain for compatibility even though they don't
   # necessarily need it.
   FIND_LIBRARY(SDLMAIN_LIBRARY 
-    NAMES SDLmain
+    NAMES SDLmain SDLmain-1.1
     PATHS
     $ENV{SDLDIR}/lib
     /usr/lib

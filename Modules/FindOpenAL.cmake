@@ -38,9 +38,10 @@ IF(${OPENAL_INCLUDE_DIR} MATCHES ".framework")
   SET (OPENAL_LIBRARY "-framework OpenAL" CACHE STRING "OpenAL framework for OSX")
 ELSE(${OPENAL_INCLUDE_DIR} MATCHES ".framework")
   FIND_LIBRARY(OPENAL_LIBRARY 
-    NAMES openal al
+    NAMES openal al OpenAL32
     PATHS
     $ENV{OPENALDIR}/lib
+    $ENV{OPENALDIR}/libs
     /usr/lib
     /usr/local/lib
     /sw/lib

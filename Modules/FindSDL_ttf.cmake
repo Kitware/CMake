@@ -19,6 +19,7 @@ FIND_PATH(SDLTTF_INCLUDE_DIR SDL_ttf.h
   ~/Library/Frameworks/SDL_ttf.framework/Headers
   /Library/Frameworks/SDL_ttf.framework/Headers
   $ENV{SDLDIR}/include
+  $ENV{SDLTTFDIR}/include
   /usr/include/SDL
   /usr/include/SDL12
   /usr/include/SDL11
@@ -40,6 +41,7 @@ ELSE(${SDLTTF_INCLUDE_DIR} MATCHES ".framework")
     NAMES SDL_ttf
     PATHS
     $ENV{SDLDIR}/lib
+    $ENV{SDLTTFDIR}/lib
     /usr/lib
     /usr/local/lib
     /sw/lib

@@ -19,6 +19,7 @@ FIND_PATH(SDLIMAGE_INCLUDE_DIR SDL_image.h
   ~/Library/Frameworks/SDL_image.framework/Headers
   /Library/Frameworks/SDL_image.framework/Headers
   $ENV{SDLDIR}/include
+  $ENV{SDLIMAGEDIR}/include
   /usr/include/SDL
   /usr/include/SDL12
   /usr/include/SDL11
@@ -40,6 +41,7 @@ ELSE(${SDLIMAGE_INCLUDE_DIR} MATCHES ".framework")
     NAMES SDL_image
     PATHS
     $ENV{SDLDIR}/lib
+    $ENV{SDLIMAGEDIR}/lib
     /usr/lib
     /usr/local/lib
     /sw/lib

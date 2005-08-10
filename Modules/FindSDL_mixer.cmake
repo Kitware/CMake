@@ -19,6 +19,7 @@ FIND_PATH(SDLMIXER_INCLUDE_DIR SDL_mixer.h
   ~/Library/Frameworks/SDL_mixer.framework/Headers
   /Library/Frameworks/SDL_mixer.framework/Headers
   $ENV{SDLDIR}/include
+  $ENV{SDLMIXERDIR}/include
   /usr/include/SDL
   /usr/include/SDL12
   /usr/include/SDL11
@@ -40,6 +41,7 @@ ELSE(${SDLMIXER_INCLUDE_DIR} MATCHES ".framework")
     NAMES SDL_mixer
     PATHS
     $ENV{SDLDIR}/lib
+    $ENV{SDLMIXERDIR}/lib
     /usr/lib
     /usr/local/lib
     /sw/lib

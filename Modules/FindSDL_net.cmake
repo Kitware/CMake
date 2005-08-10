@@ -19,6 +19,7 @@ FIND_PATH(SDLNET_INCLUDE_DIR SDL_net.h
   ~/Library/Frameworks/SDL_net.framework/Headers
   /Library/Frameworks/SDL_net.framework/Headers
   $ENV{SDLDIR}/include
+  $ENV{SDLNETDIR}/include
   /usr/include/SDL
   /usr/include/SDL12
   /usr/include/SDL11
@@ -40,6 +41,7 @@ ELSE(${SDLNET_INCLUDE_DIR} MATCHES ".framework")
     NAMES SDL_net
     PATHS
     $ENV{SDLDIR}/lib
+    $ENV{SDLNET}/lib
     /usr/lib
     /usr/local/lib
     /sw/lib
