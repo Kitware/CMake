@@ -37,8 +37,8 @@
 
 cmCommandLineInfo::cmCommandLineInfo()
 {
-    m_WhereSource = "";
-    m_WhereBuild = "";
+    m_WhereSource = _("");
+    m_WhereBuild = _("");
     m_AdvancedValues = false;
     m_GeneratorChoiceString.Empty();
     m_LastUnknownParameter = "";
@@ -57,29 +57,40 @@ bool cmCommandLineInfo::ParseCommandLine(int argc, char* argv[])
     bool result = true;
     wxString cachePath;
     
-    for ( int cc = 1; cc < argc && result; cc ++ )
-    {
-        // skip (empty ???) params
-        if ( strlen(argv[cc]) < 1 )
-            continue;
+    // parse all commands
+    int cc = 1;
+    if(argc < cc)
+        return true;    // no command line options
 
-        // judge argument and parse
-        wxString argument(argv[cc]);
-        if((argument.Len() > 1) && argument.GetChar(0) == '-')
-            result = ParseArgument(argument.Mid(1));
+    while(cc < argc)
+    {
+        wxString arg = argv[cc];
+
+        // if we have a switch
+        if(arg.Len() > 1 && arg.GetChar(0) == '-')
+        {
+            int next_argc = ParseSwitch(argv, cc, argc);
+            if(next_argc > 0)
+                cc += next_argc;
+            else
+                return false; // sorry error while parsing
+        }
         else
         {
-            // ok this is the last of the arguments, the rest of the string(s)
-            // we concatenate to the cache path or something else
-            if(cc > 1)
-                cachePath << " ";
-            cachePath << argument;
+            // gather all what is left
+            for(int leftcc = cc; leftcc < argc; leftcc++)
+            {
+                if(cc != leftcc)
+                    m_WhereBuild << _(" ");
+                m_WhereBuild << argv[leftcc];
+            }
+            break;
         }
     }
-  
+
     m_ExecutablePath = cmSystemTools::GetFilenamePath(argv[0]).c_str();
 
-    return result;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -111,32 +122,47 @@ int cmCommandLineInfo::GetBoolValue(const wxString& v) {
 ///////////////////////////////////////////////////////////////
 // Parse param
 
-bool cmCommandLineInfo::ParseArgument(const wxString& sParam)
-{    
-    bool result = false;
+size_t cmCommandLineInfo::ParseSwitch(char **argv, int arg_index, int argc)
+{        
+    wxString param = argv[arg_index];
     
-    if(sParam.Len() > 1)
+    // we need this for a switch, at least 2
+    if(param.Len() > 1)
     {
-        wxString value = sParam.Mid(1);
-        switch (sParam[0])
+        // determine switch type
+        switch (param.GetChar(1))
         {
-            case 'G':
-                m_GeneratorChoiceString = GetStringParam(value);
-                result = true;
-                break;
-        
-            case 'Q':
-                m_ExitAfterLoad = true;
-                result = true;
-                break;
+        case 'G':
+            // when it's G<.....> we split else we take the 
+            // other argc
+            if(param.Len() > 2)
+            {
+                m_GeneratorChoiceString = GetStringParam(param.Mid(2));
+                return 1;   // one arg is passed
+            }
+            else
+            {
+                if((arg_index+1) < argc)
+                {
+                    m_GeneratorChoiceString = GetStringParam(wxString(argv[arg_index+1]));
+                    return 2;   // two args are passed
+                }
+            }
+            // no luck
+            return 0;
+    
+        case 'Q':
+            m_ExitAfterLoad = true;
+            return 1;
 
-            // unknown param
-            default:
-                break;
+        // unknown param
+        default:
+            break;
         }
     }
 
-    return result;
+    // error, unrecognised or too small arg
+    return 0;
 }
 
 // When the string param given has string quotes around it

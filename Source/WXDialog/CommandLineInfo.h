@@ -52,7 +52,7 @@ public:
 
 private:
   // Parse one argument
-  bool ParseArgument(const wxString& sParam);
+  size_t ParseSwitch(char **argv, int arg_index, int argc);
 
   // Return boolean value of the string
   static int GetBoolValue(const wxString&);
