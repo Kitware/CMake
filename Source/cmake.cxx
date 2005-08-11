@@ -1515,7 +1515,18 @@ void cmake::AddDefaultGenerators()
 
 int cmake::LoadCache()
 {
-  m_CacheManager->LoadCache(this->GetHomeOutputDirectory());
+  // could we not read the cache
+  if (!m_CacheManager->LoadCache(this->GetHomeOutputDirectory()))
+    {
+    // if it does exist, but isn;t readable then warn the user
+    std::string cacheFile = this->GetHomeOutputDirectory();
+    cacheFile += "/CMakeCache.txt";
+    if(cmSystemTools::FileExists(cacheFile.c_str()))
+      {
+      cmSystemTools::Error("There is a CMakeCache.txt file for the current binary tree but cmake does not have permission to read it. Please check the permissions of the directory you are trying to run CMake on.");
+      return -1;
+      }
+    }
 
   if (m_CMakeCommand.size() < 2)
     {

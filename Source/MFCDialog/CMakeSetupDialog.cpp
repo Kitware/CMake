@@ -745,19 +745,30 @@ void CMakeSetupDialog::OnChangeWhereBuild()
 
   cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
   cmCacheManager::CacheIterator it = cachem->NewIterator();
-  if (cmSystemTools::FileExists(cache_file.c_str()) &&
-      cachem->LoadCache(path.c_str()) &&
-      it.Find("CMAKE_HOME_DIRECTORY"))
+
+  m_GeneratorPicked = false;
+
+  // make sure we have a normal cache file, specifically if one exists make
+  // sure it can be read
+  if (cmSystemTools::FileExists(cache_file.c_str()))
     {
-    path = ConvertToWindowsPath(it.GetValue());
-    this->m_WhereSource = path.c_str();
-    this->m_WhereSourceControl.SetWindowText(this->m_WhereSource);
-    this->OnChangeWhereSource();
-    m_GeneratorPicked = true;
-    }
-  else
-    {
-    m_GeneratorPicked = false;
+    if (cachem->LoadCache(path.c_str()))
+      {
+      if (it.Find("CMAKE_HOME_DIRECTORY"))
+        {
+        path = ConvertToWindowsPath(it.GetValue());
+        this->m_WhereSource = path.c_str();
+        this->m_WhereSourceControl.SetWindowText(this->m_WhereSource);
+        this->OnChangeWhereSource();
+        m_GeneratorPicked = true;
+        }
+      }
+    else
+      {
+      //file exists but cqnnot be read
+      cmSystemTools::Error("There is a CMakeCache.txt file for the current binary tree but cmake does not have permission to read it. Please check the permissions of the directory you are trying to run CMake on.");
+      return;
+      }
     }
   
   m_CacheEntriesList.RemoveAll();
@@ -945,7 +956,17 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
   cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
   if(m_WhereBuild != "")
     {
-    cachem->LoadCache(m_WhereBuild);
+    if (!cachem->LoadCache(m_WhereBuild))
+      {
+      // if it does exist, but isn;t readable then warn the user
+      std::string cacheFile = m_WhereBuild;
+      cacheFile += "/CMakeCache.txt";
+      if(cmSystemTools::FileExists(cacheFile.c_str()))
+        {
+        cmSystemTools::Error("There is a CMakeCache.txt file for the current binary tree but cmake does not have permission to read it. Please check the permissions of the directory you are trying to run CMake on.");
+        return;
+        }
+      }
     cmCacheManager::CacheIterator itm = cachem->NewIterator();
     if ( itm.Find("CMAKE_HOME_DIRECTORY"))
       {
