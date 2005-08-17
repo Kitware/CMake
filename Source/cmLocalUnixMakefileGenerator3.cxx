@@ -2736,8 +2736,12 @@ cmLocalUnixMakefileGenerator3
     }
 
   // Sort for efficient lookup.
-  std::set<cmStdString> generatedFiles(generatedFilesVec.begin(),
-                                       generatedFilesVec.end());
+  std::set<cmStdString> generatedFiles;
+  for(std::vector<std::string>::iterator gfi = generatedFilesVec.begin();
+      gfi != generatedFilesVec.end(); ++gfi)
+    {
+    generatedFiles.insert(*gfi);
+    }
 
   // for each language we need to scan, scan it 
   const char *langStr = mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES");
