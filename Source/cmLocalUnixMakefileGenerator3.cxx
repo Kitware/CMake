@@ -602,14 +602,6 @@ cmLocalUnixMakefileGenerator3
                               flags.c_str());
     }
 
-  // Add dependencies known at CMake time.
-  std::string relativeObjDeps = relativeObj;
-  relativeObjDeps += "/depend";
-  this->WriteMakeRule(ruleFileStream, 0,
-                      relativeObjDeps.c_str(), depends, no_commands);
-  depends.clear();
-  depends.push_back(relativeObjDeps);
-
   // Make the target dependency scanning rule include cmake-time-known
   // dependencies.  The others are handled by the check-build-system
   // path.
