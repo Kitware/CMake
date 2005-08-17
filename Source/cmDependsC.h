@@ -31,7 +31,8 @@ public:
       relative path from the build directory to the target file.  */
   cmDependsC();
   cmDependsC(std::vector<std::string> const& includes,
-             const char* scanRegex, const char* complainRegex);
+             const char* scanRegex, const char* complainRegex,
+             std::set<cmStdString> const& generatedFiles);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsC();
@@ -50,6 +51,11 @@ protected:
                        std::string& dependee);
   const char* ParseFileName(const char* in, std::string& name);
 
+  // Method to test for the existence of a file.
+  bool FileExistsOrIsGenerated(const std::string& fname,
+                               std::set<cmStdString>& scanned,
+                               std::set<cmStdString>& dependencies);
+
   // The include file search path.
   std::vector<std::string> const* m_IncludePath;
 
@@ -60,7 +66,10 @@ protected:
   // recursively and which to complain about not finding.
   cmsys::RegularExpression m_IncludeRegexScan;
   cmsys::RegularExpression m_IncludeRegexComplain;
-  
+
+  // Set of generated files available.
+  std::set<cmStdString> const* m_GeneratedFiles;
+
   // Data structures for dependency graph walk.
   struct UnscannedEntry
   {

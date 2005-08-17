@@ -21,18 +21,21 @@
 #include <ctype.h> // isspace
 
 //----------------------------------------------------------------------------
-cmDependsC::cmDependsC()
+cmDependsC::cmDependsC():
+  m_IncludePath(0), m_GeneratedFiles(0)
 {
 }
 
 //----------------------------------------------------------------------------
 // yummy look at all those constructor arguments
 cmDependsC::cmDependsC(std::vector<std::string> const& includes,
-                       const char* scanRegex, const char* complainRegex):
+                       const char* scanRegex, const char* complainRegex,
+                       std::set<cmStdString> const& generatedFiles):
   m_IncludePath(&includes),
   m_IncludeRegexLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)([\">])"),
   m_IncludeRegexScan(scanRegex),
-  m_IncludeRegexComplain(complainRegex)
+  m_IncludeRegexComplain(complainRegex),
+  m_GeneratedFiles(&generatedFiles)
 {
 }
 
@@ -81,13 +84,15 @@ bool cmDependsC::WriteDependencies(const char *src,
     std::string fullName;
     if(first || cmSystemTools::FileIsFullPath(current.FileName.c_str()))
       {
-      if(cmSystemTools::FileExists(current.FileName.c_str()))
+      if(this->FileExistsOrIsGenerated(current.FileName, scanned,
+                                       dependencies))
         {
         fullName = current.FileName;
         }
       }
     else if(!current.QuotedLocation.empty() &&
-            cmSystemTools::FileExists(current.QuotedLocation.c_str()))
+            this->FileExistsOrIsGenerated(current.QuotedLocation, scanned,
+                                          dependencies))
       {
       // The include statement producing this entry was a double-quote
       // include and the included file is present in the directory of
@@ -113,7 +118,7 @@ bool cmDependsC::WriteDependencies(const char *src,
         temp += current.FileName;
 
         // Look for the file in this location.
-        if(cmSystemTools::FileExists(temp.c_str()))
+        if(this->FileExistsOrIsGenerated(temp, scanned, dependencies))
           {
           fullName = temp;
           break;
@@ -345,4 +350,29 @@ const char* cmDependsC::ParseFileName(const char* in, std::string& name)
   delete [] buf;
   // Return the ending position.
   return c;
+}
+
+//----------------------------------------------------------------------------
+bool cmDependsC::FileExistsOrIsGenerated(const std::string& fname,
+                                         std::set<cmStdString>& scanned,
+                                         std::set<cmStdString>& dependencies)
+{
+  // Check first for a generated file.
+  if(m_GeneratedFiles &&
+     m_GeneratedFiles->find(fname) != m_GeneratedFiles->end())
+    {
+    // If the file does not really exist yet pretend it has already
+    // been scanned.  When it exists later then dependencies will be
+    // rescanned.
+    if(!cmSystemTools::FileExists(fname.c_str()))
+      {
+      scanned.insert(fname);
+      dependencies.insert(fname);
+      }
+    return true;
+    }
+  else
+    {
+    return cmSystemTools::FileExists(fname.c_str());
+    }
 }
