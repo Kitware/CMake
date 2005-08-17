@@ -3672,37 +3672,35 @@ void SystemTools::ClassInitialize()
     char buf[2048];
     if(const char* cwd = Getcwd(buf, 2048))
       {
+      // The current working directory may be a logical path.  Find
+      // the shortest logical path that still produces the correct
+      // physical path.
+      kwsys_stl::string cwd_changed;
+      kwsys_stl::string pwd_changed;
+
+      // Test progressively shorter logical-to-physical mappings.
+      kwsys_stl::string pwd_str = pwd;
+      kwsys_stl::string cwd_str = cwd;
       kwsys_stl::string pwd_path;
       Realpath(pwd, pwd_path);
-      if(cwd == pwd_path && strcmp(cwd, pwd) != 0)
+      while(cwd_str == pwd_path && cwd_str != pwd_str)
         {
-        // The current working directory is a logical path.  Split
-        // both the logical and physical paths into their components.
-        kwsys_stl::vector<kwsys_stl::string> cwd_components;
-        kwsys_stl::vector<kwsys_stl::string> pwd_components;
-        SystemTools::SplitPath(cwd, cwd_components);
-        SystemTools::SplitPath(pwd, pwd_components);
+        // The current pair of paths is a working logical mapping.
+        cwd_changed = cwd_str;
+        pwd_changed = pwd_str;
 
-        // Remove the common ending of the paths to leave only the
-        // part that changes under the logical mapping.
-        kwsys_stl::vector<kwsys_stl::string>::iterator ic = cwd_components.end();
-        kwsys_stl::vector<kwsys_stl::string>::iterator ip = pwd_components.end();
-        for(;ip != pwd_components.begin() && ic != cwd_components.begin() &&
-              *(ip-1) == *(ic-1); --ip,--ic);
-        cwd_components.erase(ic, cwd_components.end());
-        pwd_components.erase(ip, pwd_components.end());
+        // Strip off one directory level and see if the logical
+        // mapping still works.
+        pwd_str = SystemTools::GetFilenamePath(pwd_str.c_str());
+        cwd_str = SystemTools::GetFilenamePath(cwd_str.c_str());
+        Realpath(pwd_str.c_str(), pwd_path);
+        }
 
-        // Reconstruct the string versions of the part of the path
-        // that changed.
-        kwsys_stl::string cwd_changed = SystemTools::JoinPath(cwd_components);
-        kwsys_stl::string pwd_changed = SystemTools::JoinPath(pwd_components);
-
-        // Add the translation to keep the logical path name.
-        if(!cwd_changed.empty() && !pwd_changed.empty())
-          {
-          SystemTools::AddTranslationPath(cwd_changed.c_str(),
-                                          pwd_changed.c_str());
-          }
+      // Add the translation to keep the logical path name.
+      if(!cwd_changed.empty() && !pwd_changed.empty())
+        {
+        SystemTools::AddTranslationPath(cwd_changed.c_str(),
+                                        pwd_changed.c_str());
         }
       }
     }
