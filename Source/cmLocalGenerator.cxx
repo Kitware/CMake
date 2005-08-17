@@ -369,6 +369,18 @@ void cmLocalGenerator::GenerateInstallRules()
         }
         break;
       case cmTarget::EXECUTABLE:
+        {
+        std::string properties;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+        const char* exe_version = 0;
+#else
+        const char* exe_version = l->second.GetProperty("VERSION");
+#endif
+        if(exe_version)
+          {
+          properties += " VERSION ";
+          properties += exe_version;
+          }
         if(l->second.GetPropertyAsBool("MACOSX_BUNDLE"))
           {
           fname = exeOutPath;
@@ -385,7 +397,8 @@ void cmLocalGenerator::GenerateInstallRules()
           pdest += ".app/Contents";
           bdest += ".app/Contents/MacOS";
           // first install the actual executable
-          this->AddInstallRule(fout, bdest.c_str(), type, files);
+          this->AddInstallRule(fout, bdest.c_str(), type, files,
+                               false, properties.c_str());
           files = plist.c_str();
           // now install the Info.plist file
           this->AddInstallRule(fout, pdest.c_str(), 
@@ -396,8 +409,10 @@ void cmLocalGenerator::GenerateInstallRules()
           fname = exeOutPath;
           fname += l->second.GetFullName(m_Makefile);
           files = fname.c_str();
-          this->AddInstallRule(fout, dest, type, files);
+          this->AddInstallRule(fout, dest, type, files, false,
+                               properties.c_str());
           }
+        }
         break;
       case cmTarget::INSTALL_FILES:
           {

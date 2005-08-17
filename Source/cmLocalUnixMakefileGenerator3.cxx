@@ -1279,35 +1279,34 @@ cmLocalUnixMakefileGenerator3
   // Add a dependency on the rule file itself.
   this->AppendRuleDepend(depends, ruleFileName);
 
-  // Construct the full path to the executable that will be generated.
-  std::string targetFullPath = m_ExecutableOutputPath;
-  if(targetFullPath.length() == 0)
+  // Get the name of the executable to generate.
+  std::string targetName;
+  std::string targetNameReal;
+  target.GetExecutableNames(m_Makefile, targetName, targetNameReal);
+
+  // Construct the full path version of the names.
+  std::string outpath = m_ExecutableOutputPath;
+  if(outpath.length() == 0)
     {
-    targetFullPath = m_Makefile->GetStartOutputDirectory();
-    targetFullPath += "/";
+    outpath = m_Makefile->GetStartOutputDirectory();
+    outpath += "/";
     }
 #ifdef __APPLE__
   if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
     {
     // Make bundle directories
-    targetFullPath += target.GetName();
-    targetFullPath += ".app/Contents/MacOS/";
+    outpath += target.GetName();
+    outpath += ".app/Contents/MacOS/";
     }
 #endif
-
-  // do we have a different executable name?
-  if (target.GetProperty("OUTPUT_NAME"))
-    {
-    targetFullPath += target.GetProperty("OUTPUT_NAME");
-    }
-  else
-    {
-    targetFullPath += target.GetName();
-    }
-  targetFullPath += cmSystemTools::GetExecutableExtension();
+  std::string targetFullPath = outpath + targetName;
+  std::string targetFullPathReal = outpath + targetNameReal;
 
   // Convert to the output path to use in constructing commands.
-  std::string targetOutPath = this->Convert(targetFullPath.c_str(),HOME_OUTPUT,MAKEFILE);
+  std::string targetOutPath =
+    this->Convert(targetFullPath.c_str(),HOME_OUTPUT,MAKEFILE);
+  std::string targetOutPathReal =
+    this->Convert(targetFullPathReal.c_str(),HOME_OUTPUT,MAKEFILE);
 
   // Get the language to use for linking this executable.
   const char* linkLanguage =
@@ -1387,6 +1386,27 @@ cmLocalUnixMakefileGenerator3
   // Add target-specific linker flags.
   this->AppendFlags(linkFlags, target.GetProperty("LINK_FLAGS"));
 
+  // Construct a list of files associated with this executable that
+  // may need to be cleaned.
+  std::vector<std::string> exeCleanFiles;
+  {
+  std::string cleanName;
+  std::string cleanRealName;
+  target.GetExecutableCleanNames(m_Makefile, cleanName,
+                                 cleanRealName);
+  std::string cleanFullName = outpath + cleanName;
+  std::string cleanFullRealName = outpath + cleanRealName;
+  exeCleanFiles.push_back
+    (this->Convert(cleanFullName.c_str(),HOME_OUTPUT,MAKEFILE));
+  if(cleanRealName != cleanName)
+    {
+    exeCleanFiles.push_back
+      (this->Convert(cleanFullRealName.c_str(),HOME_OUTPUT,MAKEFILE));
+    }
+  }
+  // Add a command to remove any existing files for this executable.
+  this->AppendCleanCommand(commands, exeCleanFiles);
+
   // Add the pre-build and pre-link rules.
   this->AppendCustomCommands(commands, target.GetPreBuildCommands());
   this->AppendCustomCommands(commands, target.GetPreLinkCommands());
@@ -1397,6 +1417,16 @@ cmLocalUnixMakefileGenerator3
   linkRuleVar += "_LINK_EXECUTABLE";
   std::string linkRule = m_Makefile->GetRequiredDefinition(linkRuleVar.c_str());
   cmSystemTools::ExpandListArgument(linkRule, commands);
+
+  // Add a rule to create necessary symlinks for the library.
+  if(targetOutPath != targetOutPathReal)
+    {
+    std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_executable ";
+    symlink += targetOutPathReal;
+    symlink += " ";
+    symlink += targetOutPath;
+    commands.push_back(symlink);
+    }
 
   // Add the post-build rules.
   this->AppendCustomCommands(commands, target.GetPostBuildCommands());
@@ -1427,7 +1457,7 @@ cmLocalUnixMakefileGenerator3
     this->ExpandRuleVariables(*i,
                               linkLanguage,
                               buildObjs.c_str(),
-                              targetOutPath.c_str(),
+                              targetOutPathReal.c_str(),
                               linklibs.str().c_str(),
                               0,
                               0,
@@ -1453,9 +1483,9 @@ cmLocalUnixMakefileGenerator3
   this->WriteConvenienceRule(ruleFileStream, targetFullPath.c_str(),
                              buildTargetRuleName.c_str());
 
+  // Clean all the possible executable names and symlinks and object files.
+  cleanFiles.insert(cleanFiles.end(),exeCleanFiles.begin(),exeCleanFiles.end());
   cleanFiles.push_back(cleanObjs);
-  cleanFiles.push_back
-    (this->Convert(targetFullPath.c_str(),HOME_OUTPUT,MAKEFILE));
 }
 
 //----------------------------------------------------------------------------

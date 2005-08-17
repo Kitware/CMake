@@ -186,6 +186,19 @@ public:
                             std::string& sharedName,
                             std::string& sharedSOName,
                             std::string& sharedRealName);
+
+  /** Get the names of the executable needed to generate a build rule
+      that takes into account executable version numbers.  This should
+      be called only on an executable target.  */
+  void GetExecutableNames(cmMakefile* mf, std::string& name,
+                          std::string& realName);
+
+  /** Get the names of the executable used to remove existing copies
+      of the executable from the build tree either before linking or
+      during a clean step.  This should be called only on an
+      executable target.  */
+  void GetExecutableCleanNames(cmMakefile* mf, std::string& name,
+                               std::string& realName);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -249,6 +262,10 @@ private:
                                std::string& soName,
                                std::string& realName,
                                TargetType type);
+  void GetExecutableNamesInternal(cmMakefile* mf,
+                                  std::string& name,
+                                  std::string& realName,
+                                  TargetType type);
 
   // update the value of the LOCATION var
   void UpdateLocation();

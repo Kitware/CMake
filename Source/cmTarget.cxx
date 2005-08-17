@@ -929,17 +929,17 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type)
   return "";
 }
 
-std::string cmTarget::GetFullName(cmMakefile* mf) 
+std::string cmTarget::GetFullName(cmMakefile* mf)
 {
   return this->GetFullNameInternal(mf, this->GetType());
 }
 
 std::string cmTarget::GetFullNameInternal(cmMakefile* mf,
-                                          TargetType type) 
+                                          TargetType type)
 {
   const char* targetPrefix = this->GetProperty("PREFIX");
   const char* targetSuffix = this->GetProperty("SUFFIX");
-  if(!targetSuffix && this->GetType() == cmTarget::EXECUTABLE)
+  if(!targetSuffix && type == cmTarget::EXECUTABLE)
     {
     targetSuffix = cmSystemTools::GetExecutableExtension();
     }
@@ -973,9 +973,26 @@ std::string cmTarget::GetFullNameInternal(cmMakefile* mf,
     {
     targetSuffix = mf->GetSafeDefinition(suffixVar);
     }
+
+  // Begin the final name with the prefix.
   std::string name = targetPrefix?targetPrefix:"";
-  name += this->GetName();
+
+  // Append the target name or property-specified name.  Support this
+  // only for executable targets.
+  const char* outname = this->GetProperty("OUTPUT_NAME");
+  if(outname && type == cmTarget::EXECUTABLE)
+    {
+    name += outname;
+    }
+  else
+    {
+    name += this->GetName();
+    }
+
+  // Append the suffix.
   name += targetSuffix?targetSuffix:"";
+
+  // Return the final name.
   return name;
 }
 
@@ -1123,5 +1140,51 @@ void cmTarget::GetLibraryNamesInternal(cmMakefile* mf,
     {
     realName += ".";
     realName += soversion;
+    }
+}
+
+void cmTarget::GetExecutableNames(cmMakefile* mf,
+                                  std::string& name,
+                                  std::string& realName)
+{
+  // Get the names based on the real type of the executable.
+  this->GetExecutableNamesInternal(mf, name, realName, this->GetType());
+}
+
+void cmTarget::GetExecutableCleanNames(cmMakefile* mf,
+                                       std::string& name,
+                                       std::string& realName)
+{
+  // Get the name and versioned name of this executable.
+  this->GetExecutableNamesInternal(mf, name, realName, cmTarget::EXECUTABLE);
+}
+
+void cmTarget::GetExecutableNamesInternal(cmMakefile* mf,
+                                          std::string& name,
+                                          std::string& realName,
+                                          TargetType type)
+{
+  // This versioning is supported only for executables and then only
+  // when the platform supports symbolic links.
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  const char* version = 0;
+#else
+  // Check for executable version properties.
+  const char* version = this->GetProperty("VERSION");
+  if(type != cmTarget::EXECUTABLE)
+    {
+    version = 0;
+    }
+#endif
+
+  // The executable name.
+  name = this->GetFullNameInternal(mf, type);
+
+  // The executable's real name on disk.
+  realName = name;
+  if(version)
+    {
+    realName += "-";
+    realName += version;
     }
 }

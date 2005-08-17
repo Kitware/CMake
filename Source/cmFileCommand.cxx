@@ -570,6 +570,9 @@ bool cmFileCommand::HandleInstallCommand(
             smanifest_files += soname.substr(destDirLength);
             }
           }
+
+        // Reconstruct the source file path taking into account the
+        // extra directory and possible new file name.
         cmOStringStream str;
         str << cmSystemTools::GetFilenamePath(ctarget) << "/";
         if ( extra_dir.size() > 0 )
@@ -581,14 +584,48 @@ bool cmFileCommand::HandleInstallCommand(
         }
       break;
     case cmTarget::EXECUTABLE:
+      {
+      // Handle executable versioning
+      const char* exe_version = 0;
+      if ( properties.find("VERSION") != properties.end() )
+        {
+        exe_version = properties["VERSION"];
+        }
+      if ( exe_version )
+        {
+        std::string exename = destfile;
+        std::string exename_nopath = fname;
+        exename_nopath += "-";
+        exename_nopath += exe_version;
+
+        fname += "-";
+        fname += exe_version;
+        destfile += "-";
+        destfile += exe_version;
+
+        cmSystemTools::RemoveFile(exename.c_str());
+
+        if (!cmSystemTools::CreateSymlink(exename_nopath.c_str(), exename.c_str()) )
+          {
+          std::string errstring = "error when creating symlink from: " + exename + " to " + exename_nopath;
+          this->SetError(errstring.c_str());
+          return false;
+          }
+        smanifest_files += ";";
+        smanifest_files += exename.substr(destDirLength);
+        }
+
+      // Reconstruct the source file path taking into account the
+      // extra directory and possible new file name.
+      cmOStringStream str;
+      str << cmSystemTools::GetFilenamePath(ctarget) << "/";
       if ( extra_dir.size() > 0 )
         {
-        cmOStringStream str;
-        str << cmSystemTools::GetFilenamePath(ctarget) 
-          << "/" << extra_dir << "/" 
-          << fname;
-        ctarget = str.str();
+        str << extra_dir << "/";
         }
+      str << fname;
+      ctarget = str.str();
+      }
       break;
       }
 
