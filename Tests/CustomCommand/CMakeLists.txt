@@ -77,6 +77,17 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.h
   COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_BINARY_DIR}/doc1temp.h
   )
 
+# Add custom command to generate foo.h.
+ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.h
+  DEPENDS ${PROJECT_SOURCE_DIR}/foo.h.in
+  COMMAND ${CMAKE_COMMAND} -E echo " Copying foo.h.in to foo.h."
+  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/foo.h.in
+                                   ${PROJECT_BINARY_DIR}/foo.h
+  )
+
+# Add the location of foo.h to the include path.
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
+
 # Add a custom target to drive generation of doc1.h.
 ADD_CUSTOM_TARGET(TDocument ALL
   COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1.h to doc2.h."
@@ -118,8 +129,13 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.c
   ${PROJECT_BINARY_DIR}/foo.c
   )
 
-SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/foo.c PROPERTIES
-  OBJECT_DEPENDS ${PROJECT_BINARY_DIR}/doc1.h)
+# This object dependency is removed to test the new
+# auto-object-depends feature.  If the feature is removed these lines
+# must be restored.
+#SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/foo.c PROPERTIES
+#  OBJECT_DEPENDS ${PROJECT_BINARY_DIR}/doc1.h)
+#SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/foo.c PROPERTIES
+#  OBJECT_DEPENDS ${PROJECT_BINARY_DIR}/foo.h)
 
 # add the library
 ADD_EXECUTABLE(CustomCommand 
