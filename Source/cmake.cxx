@@ -885,6 +885,26 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
         }
       return result;
       }
+    // Internal CMake versioned executable support.
+    else if (args[1] == "cmake_symlink_executable" && args.size() == 4)
+      {
+      int result = 0;
+      std::string realName = args[2];
+      std::string name = args[3];
+      if(name != realName)
+        {
+        std::string fname = cmSystemTools::GetFilenameName(realName);
+        if(cmSystemTools::FileExists(realName.c_str()))
+          {
+          cmSystemTools::RemoveFile(name.c_str());
+          }
+        if(!cmSystemTools::CreateSymlink(fname.c_str(), name.c_str()))
+          {
+          result = 1;
+          }
+        }
+      return result;
+      }
 
     // Internal CMake dependency scanning support.
     else if (args[1] == "cmake_depends" && args.size() >= 6)
