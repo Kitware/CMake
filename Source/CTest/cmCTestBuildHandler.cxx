@@ -80,6 +80,7 @@ static const char* cmCTestErrorMatches[] = {
   "make: Fatal error: ",
   "ld: 0711-993 Error occurred while writing to the output file:",
   "ld: fatal: ",
+  "final link failed:",
   "make: \\*\\*\\*.*Error",
   "\\*\\*\\* Error code",
   "nternal error:",
