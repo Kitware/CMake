@@ -482,6 +482,19 @@ bool cmSystemTools::RunSingleCommand(
     {
   while(cmsysProcess_WaitForData(cp, &data, &length, 0))
     {
+    if(output || verbose)
+      {
+      // Translate NULL characters in the output into valid text.
+      // Visual Studio 7 puts these characters in the output of its
+      // build process.
+      for(int i=0; i < length; ++i)
+        {
+        if(data[i] == '\0')
+          {
+          data[i] = ' ';
+          }
+        }
+      }
     if ( output )
       {
       tempOutput.insert(tempOutput.end(), data, data+length);
