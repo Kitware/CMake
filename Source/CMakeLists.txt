@@ -427,7 +427,7 @@ IF(BUILD_TESTING)
     --build-two-config
     --build-options
     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
-    --test-command   ${SimpleInstallInstallDir}/bin/SimpleInstall)
+    --test-command   ${SimpleInstallInstallDir}/bin/SimpleInstallExe)
   ADD_TEST(SimpleInstall-Stage2 ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/SimpleInstallS2"
