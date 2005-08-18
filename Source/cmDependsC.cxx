@@ -359,7 +359,8 @@ bool cmDependsC::FileExistsOrIsGenerated(const std::string& fname,
 {
   // Check first for a generated file.
   if(m_GeneratedFiles &&
-     m_GeneratedFiles->find(fname) != m_GeneratedFiles->end())
+     std::set<cmStdString>::const_iterator(m_GeneratedFiles->find(fname)) !=
+     m_GeneratedFiles->end())
     {
     // If the file does not really exist yet pretend it has already
     // been scanned.  When it exists later then dependencies will be
