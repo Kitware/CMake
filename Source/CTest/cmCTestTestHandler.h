@@ -175,6 +175,8 @@ private:
   bool m_UseUnion;
   tm_ListOfTests m_TestList;
   cmsys::RegularExpression m_DartStuff;
+
+  ostream* m_LogFile;
 };
 
 #endif
