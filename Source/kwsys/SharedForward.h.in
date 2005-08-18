@@ -38,11 +38,6 @@
    paths relative to the forwarding executable location or as full
    paths.  Include no trailing slash.  */
 
-/* This is not useful on Windows.  */
-#if defined(_WIN32)
-# error "@KWSYS_NAMESPACE@/SharedForward.h is useless on Windows."
-#endif
-
 /* Full path to the directory in which this executable is built.  Do
    not include a trailing slash.  */
 #if !defined(@KWSYS_NAMESPACE@_SHARED_FORWARD_DIR_BUILD)
@@ -108,16 +103,30 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# include <io.h>
+# include <windows.h>
+# include <process.h>
+#else
+# include <unistd.h>
+#endif
 
 /*--------------------------------------------------------------------------*/
 /* Configuration for this platform.  */
 
 /* The path separator for this platform.  */
-#define KWSYS_SHARED_FORWARD_PATH_SEP ':'
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# define KWSYS_SHARED_FORWARD_PATH_SEP ';'
+# define KWSYS_SHARED_FORWARD_PATH_SLASH '\\'
+#else
+# define KWSYS_SHARED_FORWARD_PATH_SEP ':'
+# define KWSYS_SHARED_FORWARD_PATH_SLASH '/'
+#endif
 static const char kwsys_shared_forward_path_sep[2] = {KWSYS_SHARED_FORWARD_PATH_SEP, 0};
+static const char kwsys_shared_forward_path_slash[2] = {KWSYS_SHARED_FORWARD_PATH_SLASH, 0};
 
 /* The maximum length of a file name.  */
 #if defined(PATH_MAX)
@@ -196,12 +205,78 @@ static const char kwsys_shared_forward_path_sep[2] = {KWSYS_SHARED_FORWARD_PATH_
 # endif
 #endif
 
+/* Windows */
+#if defined(_WIN32)
+# undef KWSYS_SHARED_FORWARD_OPTION_LDD
+# define KWSYS_SHARED_FORWARD_LDPATH "PATH"
+#endif
+
 /* Guess on this unknown system.  */
 #if !defined(KWSYS_SHARED_FORWARD_LDPATH)
 # define KWSYS_SHARED_FORWARD_LDD "ldd"
 # define KWSYS_SHARED_FORWARD_LDD_N 1
 # define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY_PATH"
 #endif
+
+/*--------------------------------------------------------------------------*/
+/* Function to convert a logical or relative path to a physical full path.  */
+static int kwsys_shared_forward_realpath(const char* in_path, char* out_path)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  /* Implementation for Windows.  */
+  DWORD n = GetFullPathName(in_path, KWSYS_SHARED_FORWARD_MAXPATH,
+                            out_path, 0);
+  return n > 0 && n <= KWSYS_SHARED_FORWARD_MAXPATH;
+#else
+  /* Implementation for UNIX.  */
+  return realpath(in_path, out_path) != 0;
+#endif
+}
+
+/*--------------------------------------------------------------------------*/
+/* Function to report a system error message.  */
+static void kwsys_shared_forward_strerror(char* message)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  /* Implementation for Windows.  */
+  DWORD original = GetLastError();
+  DWORD length = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
+                               FORMAT_MESSAGE_IGNORE_INSERTS, 0, original,
+                               MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                               message, KWSYS_SHARED_FORWARD_MAXPATH, 0);
+  if(length < 1 || length > KWSYS_SHARED_FORWARD_MAXPATH)
+    {
+    /* FormatMessage failed.  Use a default message.  */
+    _snprintf(message, KWSYS_SHARED_FORWARD_MAXPATH,
+              "Error 0x%X (FormatMessage failed with error 0x%X)",
+              original, GetLastError());
+    }
+#else
+  /* Implementation for UNIX.  */
+  strcpy(message, strerror(errno));
+#endif
+}
+
+/*--------------------------------------------------------------------------*/
+/* Functions to execute a child process.  */
+static void kwsys_shared_forward_execv(const char* cmd,
+                                       char* const argv[])
+{
+#if defined(_MSC_VER)
+  _execv(cmd, argv);
+#else
+  execv(cmd, argv);
+#endif
+}
+static void kwsys_shared_forward_execvp(const char* cmd,
+                                        char* const argv[])
+{
+#if defined(_MSC_VER)
+  _execvp(cmd, argv);
+#else
+  execvp(cmd, argv);
+#endif
+}
 
 /*--------------------------------------------------------------------------*/
 /* Function to get the directory containing the given file or directory.  */
@@ -212,7 +287,7 @@ static void kwsys_shared_forward_dirname(const char* begin, char* result)
   const char* end = begin + strlen(begin);
   for(;begin <= end && last_slash_index < 0; --end)
     {
-    if(*end == '/')
+    if(*end == '/' || *end == '\\')
       {
       last_slash_index = end-begin;
       }
@@ -224,16 +299,50 @@ static void kwsys_shared_forward_dirname(const char* begin, char* result)
     /* No slashes.  */
     strcpy(result, ".");
     }
-  else if(last_slash_index == 0)
+  else if(last_slash_index == 0 ||
+          (end-begin > 2 && begin[1] == ':' &&
+           last_slash_index == 2))
     {
     /* Only one leading slash.  */
-    strcpy(result, "/");
+    strcpy(result, kwsys_shared_forward_path_slash);
     }
+#if defined(_WIN32)
+  else if(last_slash_index == 2 && begin[1] == ':')
+    {
+    /* Only one leading drive letter and slash.  */
+    strncpy(result, begin, last_slash_index);
+    result[last_slash_index] = 0;
+    }
+#endif
   else
     {
     /* A non-leading slash.  */
     strncpy(result, begin, last_slash_index);
     result[last_slash_index] = 0;
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+/* Function to check if a file exists and is executable.  */
+static int kwsys_shared_forward_is_executable(const char* f)
+{
+#if defined(_MSC_VER)
+# define KWSYS_SHARED_FORWARD_ACCESS _access
+#else
+# define KWSYS_SHARED_FORWARD_ACCESS access
+#endif
+#if defined(X_OK)
+# define KWSYS_SHARED_FORWARD_ACCESS_OK X_OK
+#else
+# define KWSYS_SHARED_FORWARD_ACCESS_OK 04
+#endif
+  if(KWSYS_SHARED_FORWARD_ACCESS(f, KWSYS_SHARED_FORWARD_ACCESS_OK) == 0)
+    {
+    return 1;
+    }
+  else
+    {
+    return 0;
     }
 }
 
@@ -246,7 +355,7 @@ static int kwsys_shared_forward_self_path(const char* argv0, char* result)
   const char* p = argv0;
   for(;*p && !has_slash; ++p)
     {
-    if(*p == '/')
+    if(*p == '/' || *p == '\\')
       {
       has_slash = 1;
       }
@@ -281,18 +390,18 @@ static int kwsys_shared_forward_self_path(const char* argv0, char* result)
         {
         /* Determine the length without trailing slash.  */
         int length = last-first;
-        if(*(last-1) == '/')
+        if(*(last-1) == '/' || *(last-1) == '\\')
           {
           --length;
           }
 
         /* Construct the name of the executable in this location.  */
         strncpy(result, first, length);
-        result[length] = '/';
+        result[length] = KWSYS_SHARED_FORWARD_PATH_SLASH;
         strcpy(result+(length)+1, argv0);
 
-        /* Check if it exists.  */
-        if(access(result, X_OK) == 0)
+        /* Check if it exists and is executable.  */
+        if(kwsys_shared_forward_is_executable(result))
           {
           /* Found it.  */
           result[length] = 0;
@@ -323,19 +432,28 @@ static int kwsys_shared_forward_fullpath(const char* self_path,
     /* Already a full path.  */
     strcpy(result, in_path);
     }
+#if defined(_WIN32)
+  else if(in_path[0] && in_path[1] == ':')
+    {
+    /* Already a full path.  */
+    strcpy(result, in_path);
+    }
+#endif
   else
     {
     /* Relative to self path.  */
     char temp_path[KWSYS_SHARED_FORWARD_MAXPATH];
     strcpy(temp_path, self_path);
-    strcat(temp_path, "/");
+    strcat(temp_path, kwsys_shared_forward_path_slash);
     strcat(temp_path, in_path);
-    if(!realpath(temp_path, result))
+    if(!kwsys_shared_forward_realpath(temp_path, result))
       {
       if(desc)
         {
+        char msgbuf[KWSYS_SHARED_FORWARD_MAXPATH];
+        kwsys_shared_forward_strerror(msgbuf);
         fprintf(stderr, "Error converting %s \"%s\" to real path: %s\n",
-                desc, temp_path, strerror(errno));
+                desc, temp_path, msgbuf);
         }
       return 0;
       }
@@ -358,28 +476,55 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
   const char* exe_path;
 
   /* Get the real name of the build and self paths.  */
-  char build_path[KWSYS_SHARED_FORWARD_MAXPATH];
+#if defined(CMAKE_INTDIR)
+  char build_path[] = KWSYS_SHARED_FORWARD_DIR_BUILD "/" CMAKE_INTDIR;
+  char self_path_logical[KWSYS_SHARED_FORWARD_MAXPATH];
+#else
+  char build_path[] = KWSYS_SHARED_FORWARD_DIR_BUILD;
+  const char* self_path_logical = self_path;
+#endif
+  char build_path_real[KWSYS_SHARED_FORWARD_MAXPATH];
   char self_path_real[KWSYS_SHARED_FORWARD_MAXPATH];
-  if(!realpath(self_path, self_path_real))
+  if(!kwsys_shared_forward_realpath(self_path, self_path_real))
     {
+    char msgbuf[KWSYS_SHARED_FORWARD_MAXPATH];
+    kwsys_shared_forward_strerror(msgbuf);
     fprintf(stderr, "Error converting self path \"%s\" to real path: %s\n",
-            self_path, strerror(errno));
+            self_path, msgbuf);
     return 0;
     }
 
   /* Check whether we are running in the build tree or an install tree.  */
-  if(realpath(KWSYS_SHARED_FORWARD_DIR_BUILD, build_path) &&
-     strcmp(self_path_real, build_path) == 0)
+  if(kwsys_shared_forward_realpath(build_path, build_path_real) &&
+     strcmp(self_path_real, build_path_real) == 0)
     {
     /* Running in build tree.  Use the build path and exe.  */
     search_path = search_path_build;
+#if defined(_WIN32)
+    exe_path = KWSYS_SHARED_FORWARD_EXE_BUILD ".exe";
+#else
     exe_path = KWSYS_SHARED_FORWARD_EXE_BUILD;
+#endif
+
+#if defined(CMAKE_INTDIR)
+    /* Remove the configuration directory from self_path.  */
+    kwsys_shared_forward_dirname(self_path, self_path_logical);
+#endif
     }
   else
     {
     /* Running in install tree.  Use the install path and exe.  */
     search_path = search_path_install;
+#if defined(_WIN32)
+    exe_path = KWSYS_SHARED_FORWARD_EXE_INSTALL ".exe";
+#else
     exe_path = KWSYS_SHARED_FORWARD_EXE_INSTALL;
+#endif
+
+#if defined(CMAKE_INTDIR)
+    /* Use the original self path directory.  */
+    strcpy(self_path_logical, self_path);
+#endif
     }
 
   /* Construct the runtime search path.  */
@@ -394,7 +539,7 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
       }
 
     /* Add this path component.  */
-    if(!kwsys_shared_forward_fullpath(self_path, *dir,
+    if(!kwsys_shared_forward_fullpath(self_path_logical, *dir,
                                       ldpath+strlen(ldpath),
                                       "runtime path entry"))
       {
@@ -404,7 +549,7 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
   }
 
   /* Construct the executable location.  */
-  if(!kwsys_shared_forward_fullpath(self_path, exe_path, exe,
+  if(!kwsys_shared_forward_fullpath(self_path_logical, exe_path, exe,
                                     "executable file"))
     {
     return 0;
@@ -414,9 +559,11 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
 
 /*--------------------------------------------------------------------------*/
 /* Function to print why execution of a command line failed.  */
-static void kwsys_shared_forward_print_failure(char** argv, const char* msg)
+static void kwsys_shared_forward_print_failure(char** argv)
 {
+  char msg[KWSYS_SHARED_FORWARD_MAXPATH];
   char** arg = argv;
+  kwsys_shared_forward_strerror(msg);
   fprintf(stderr, "Error running");
   for(; *arg; ++arg)
     {
@@ -468,20 +615,20 @@ static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv)
         {
         char* ldd_argv[] = {KWSYS_SHARED_FORWARD_LDD, 0, 0};
         ldd_argv[KWSYS_SHARED_FORWARD_LDD_N] = exe;
-        execvp(ldd_argv[0], ldd_argv);
+        kwsys_shared_forward_execvp(ldd_argv[0], ldd_argv);
 
         /* Report why execution failed.  */
-        kwsys_shared_forward_print_failure(ldd_argv, strerror(errno));
+        kwsys_shared_forward_print_failure(ldd_argv);
         return 1;
         }
 #endif
 
       /* Replace this process with the real executable.  */
       argv[0] = exe;
-      execv(argv[0], argv);
+      kwsys_shared_forward_execv(argv[0], argv);
 
       /* Report why execution failed.  */
-      kwsys_shared_forward_print_failure(argv, strerror(errno));
+      kwsys_shared_forward_print_failure(argv);
       }
     else
       {
@@ -491,7 +638,7 @@ static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv)
   else
     {
     /* Could not find this executable.  */
-    fprintf(stderr, "Error locating executable \"%s\".", argv[0]);
+    fprintf(stderr, "Error locating executable \"%s\".\n", argv[0]);
     }
 
   /* Avoid unused argument warning.  */
