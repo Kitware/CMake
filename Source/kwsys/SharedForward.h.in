@@ -26,6 +26,11 @@
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_PATH_INSTALL "../lib/foo-1.2"
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_EXE_BUILD "foo-real"
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_EXE_INSTALL "../lib/foo-1.2/foo-real"
+  #define @KWSYS_NAMESPACE@_SHARED_FORWARD_OPTION_PRINT "--print"
+  #define @KWSYS_NAMESPACE@_SHARED_FORWARD_OPTION_LDD "--ldd"
+  #if defined(CMAKE_INTDIR)
+  # define @KWSYS_NAMESPACE@_SHARED_FORWARD_CONFIG_NAME CMAKE_INTDIR
+  #endif
   #include <@KWSYS_NAMESPACE@/SharedForward.h>
   int main(int argc, char** argv)
   {
@@ -77,6 +82,13 @@
 #endif
 #if !defined(KWSYS_SHARED_FORWARD_EXE_INSTALL)
 # define KWSYS_SHARED_FORWARD_EXE_INSTALL @KWSYS_NAMESPACE@_SHARED_FORWARD_EXE_INSTALL
+#endif
+
+/* The configuration name with which this executable was built (Debug/Release). */
+#if defined(@KWSYS_NAMESPACE@_SHARED_FORWARD_CONFIG_NAME)
+# define KWSYS_SHARED_FORWARD_CONFIG_NAME @KWSYS_NAMESPACE@_SHARED_FORWARD_CONFIG_NAME
+#else
+# undef KWSYS_SHARED_FORWARD_CONFIG_NAME
 #endif
 
 /* Create command line option to print environment setting and exit.  */
@@ -259,8 +271,7 @@ static void kwsys_shared_forward_strerror(char* message)
 
 /*--------------------------------------------------------------------------*/
 /* Functions to execute a child process.  */
-static void kwsys_shared_forward_execv(const char* cmd,
-                                       char* const argv[])
+static void kwsys_shared_forward_execv(const char* cmd, char* const argv[])
 {
 #if defined(_MSC_VER)
   _execv(cmd, argv);
@@ -268,8 +279,7 @@ static void kwsys_shared_forward_execv(const char* cmd,
   execv(cmd, argv);
 #endif
 }
-static void kwsys_shared_forward_execvp(const char* cmd,
-                                        char* const argv[])
+static void kwsys_shared_forward_execvp(const char* cmd, char* const argv[])
 {
 #if defined(_MSC_VER)
   _execvp(cmd, argv);
@@ -299,9 +309,7 @@ static void kwsys_shared_forward_dirname(const char* begin, char* result)
     /* No slashes.  */
     strcpy(result, ".");
     }
-  else if(last_slash_index == 0 ||
-          (end-begin > 2 && begin[1] == ':' &&
-           last_slash_index == 2))
+  else if(last_slash_index == 0)
     {
     /* Only one leading slash.  */
     strcpy(result, kwsys_shared_forward_path_slash);
@@ -311,7 +319,8 @@ static void kwsys_shared_forward_dirname(const char* begin, char* result)
     {
     /* Only one leading drive letter and slash.  */
     strncpy(result, begin, last_slash_index);
-    result[last_slash_index] = 0;
+    result[last_slash_index] = KWSYS_SHARED_FORWARD_PATH_SLASH;
+    result[last_slash_index+1] = 0;
     }
 #endif
   else
@@ -476,8 +485,8 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
   const char* exe_path;
 
   /* Get the real name of the build and self paths.  */
-#if defined(CMAKE_INTDIR)
-  char build_path[] = KWSYS_SHARED_FORWARD_DIR_BUILD "/" CMAKE_INTDIR;
+#if defined(KWSYS_SHARED_FORWARD_CONFIG_NAME)
+  char build_path[] = KWSYS_SHARED_FORWARD_DIR_BUILD "/" KWSYS_SHARED_FORWARD_CONFIG_NAME;
   char self_path_logical[KWSYS_SHARED_FORWARD_MAXPATH];
 #else
   char build_path[] = KWSYS_SHARED_FORWARD_DIR_BUILD;
@@ -506,7 +515,7 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
     exe_path = KWSYS_SHARED_FORWARD_EXE_BUILD;
 #endif
 
-#if defined(CMAKE_INTDIR)
+#if defined(KWSYS_SHARED_FORWARD_CONFIG_NAME)
     /* Remove the configuration directory from self_path.  */
     kwsys_shared_forward_dirname(self_path, self_path_logical);
 #endif
@@ -521,7 +530,7 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
     exe_path = KWSYS_SHARED_FORWARD_EXE_INSTALL;
 #endif
 
-#if defined(CMAKE_INTDIR)
+#if defined(KWSYS_SHARED_FORWARD_CONFIG_NAME)
     /* Use the original self path directory.  */
     strcpy(self_path_logical, self_path);
 #endif
