@@ -67,8 +67,11 @@ bool cmCTestUpdateCommand::InitialPass(
     }
 
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "UpdateCommand", "CTEST_UPDATE_COMMAND");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "UpdateOptions", "CTEST_UPDATE_OPTIONS");
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "CVSCommand", "CTEST_CVS_COMMAND");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "CVSUpdateOptions", "CTEST_CVS_UPDATE_OPTIONS");
   m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "SVNCommand", "CTEST_SVN_COMMAND");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "SVNUpdateOptions", "CTEST_SVN_UPDATE_OPTIONS");
 
   const char* initialCheckoutCommand = m_Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
   if ( !initialCheckoutCommand )
