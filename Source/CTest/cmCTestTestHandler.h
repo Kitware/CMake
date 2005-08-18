@@ -176,7 +176,7 @@ private:
   tm_ListOfTests m_TestList;
   cmsys::RegularExpression m_DartStuff;
 
-  ostream* m_LogFile;
+  std::ostream* m_LogFile;
 };
 
 #endif
