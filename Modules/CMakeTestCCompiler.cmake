@@ -33,6 +33,7 @@ ELSE(NOT CMAKE_C_COMPILER_WORKS)
       "the following output:\n${OUTPUT}\n\n") 
   ENDIF(C_TEST_WAS_RUN)
   INCLUDE (${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
-  CHECK_TYPE_SIZE("void *"  CMAKE_SIZEOF_VOID_P)
+  # Check the size of void*.  This used to be "void *" but icc expands the *.
+  CHECK_TYPE_SIZE("void*"  CMAKE_SIZEOF_VOID_P)
   SET(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
 ENDIF(NOT CMAKE_C_COMPILER_WORKS)
