@@ -964,20 +964,24 @@ void cmLocalVisualStudio6Generator
         }      
       }
     }
+  std::string outputName = "(OUTPUT_NAME is for executables only)";
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
     extraLinkOptions = 
       m_Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
 
-        
-    // if the executable has an output name then add the appropriate flag
-    if (target.GetProperty("OUTPUT_NAME"))
+    // Use the OUTPUT_NAME property if it was set.  This is supported
+    // only for executables.
+    if(const char* outName = target.GetProperty("OUTPUT_NAME"))
       {
-      libMultiLineOptions += "# ADD LINK32 /out:";
-      libMultiLineOptions += target.GetProperty("OUTPUT_NAME");
-      libMultiLineOptions += " \n";
+      outputName = outName;
       }
+    else
+      {
+      outputName = target.GetName();
+      }
+    outputName += ".exe";
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
@@ -1094,6 +1098,11 @@ void cmLocalVisualStudio6Generator
                                  libMultiLineDebugOptions.c_str());
     cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIMIZED_LIBRARIES",
                                  libMultiLineOptimizedOptions.c_str());
+
+    // Replace the template file text OUTPUT_NAME with the real output
+    // name that will be used.  Only the executable template should
+    // have this text.
+    cmSystemTools::ReplaceString(line, "OUTPUT_NAME", outputName.c_str());
 
     cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                  m_IncludeOptions.c_str());

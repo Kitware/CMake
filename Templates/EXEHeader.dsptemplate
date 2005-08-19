@@ -69,6 +69,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32  /nologo /subsystem:console /machine:I386 /IGNORE:4089
 # ADD LINK32  /nologo /subsystem:console /machine:I386 /IGNORE:4089
+# ADD LINK32 /out:"EXECUTABLE_OUTPUT_PATHRelease\OUTPUT_NAME"
 CM_MULTILINE_OPTIMIZED_LIBRARIES
 CM_MULTILINE_LIBRARIES
 
@@ -101,6 +102,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32  /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /IGNORE:4089
 # ADD LINK32 /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /IGNORE:4089
+# ADD LINK32 /out:"EXECUTABLE_OUTPUT_PATHDebug\OUTPUT_NAME"
 CM_MULTILINE_DEBUG_LIBRARIES
 CM_MULTILINE_LIBRARIES_FOR_DEBUG
 
@@ -130,6 +132,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:console /machine:I386 /IGNORE:4089
 # ADD LINK32 /nologo /subsystem:console /machine:I386 /IGNORE:4089
+# ADD LINK32 /out:"EXECUTABLE_OUTPUT_PATHMinSizeRel\OUTPUT_NAME"
 CM_MULTILINE_OPTIMIZED_LIBRARIES
 CM_MULTILINE_LIBRARIES
 
@@ -160,6 +163,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:console /debug /machine:I386 /IGNORE:4089
 # ADD LINK32  /nologo /subsystem:console /debug /machine:I386 /IGNORE:4089
+# ADD LINK32 /out:"EXECUTABLE_OUTPUT_PATHRelWithDebInfo\OUTPUT_NAME"
 CM_MULTILINE_OPTIMIZED_LIBRARIES
 CM_MULTILINE_LIBRARIES
 
