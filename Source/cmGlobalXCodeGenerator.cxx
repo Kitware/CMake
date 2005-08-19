@@ -1011,13 +1011,24 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       }
     case cmTarget::EXECUTABLE:
       {
+      const char* outname = target.GetProperty("OUTPUT_NAME");
+      std::string name;
+      if(outname)
+        {
+        productName = outname;
+        name = outname;
+        }
+      else
+        {
+        name = target.GetName();
+        }
       std::string symRoot;
       if(m_ExecutableOutputPath.size())
         {
         std::string path = m_ExecutableOutputPath;
         if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
           {
-          path += target.GetName();
+          path += name;
           path += ".app/Contents/MacOS/";
           }
         symRoot = path;
@@ -1026,8 +1037,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
         {
         if(symRoot.size() == 0)
-          {
-          symRoot = target.GetName();
+          { 
+          symRoot = name;
           symRoot += ".app/Contents/MacOS/";
           }
         productType = "com.apple.product-type.tool";
@@ -1111,6 +1122,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     pname = "lib";
     }
   pname += target.GetName();
+  if(target.GetType() == cmTarget::EXECUTABLE 
+     && target.GetProperty("OUTPUT_NAME") )
+    {
+    pname = target.GetProperty("OUTPUT_NAME");
+    }
+  
   buildSettings->AddAttribute("PRODUCT_NAME", 
                               this->CreateString(pname.c_str()));
 }
@@ -1153,8 +1170,8 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   target->AddAttribute("buildSettings", buildSettings);
   cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("dependencies", dependencies);
-  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
-  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
+  target->AddAttribute("name", this->CreateString(productName.c_str()));
+  target->AddAttribute("productName",this->CreateString(productName.c_str()));
   target->SetcmTarget(&cmtarget);
   return target;
 }
@@ -1180,8 +1197,8 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   target->AddAttribute("buildSettings", buildSettings);
   cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("dependencies", dependencies);
-  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
-  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
+  target->AddAttribute("name", this->CreateString(productName.c_str()));
+  target->AddAttribute("productName",this->CreateString(productName.c_str()));
 
   cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
   fileRef->AddAttribute("explicitFileType", 
