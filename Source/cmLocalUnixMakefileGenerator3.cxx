@@ -2830,26 +2830,26 @@ cmLocalUnixMakefileGenerator3
       }
 #endif
     
-    // for each file we need to scan
-    std::string srcLang = "CMAKE_DEPENDS_CHECK_";
-    srcLang += lang;
-    const char *srcStr = mf->GetSafeDefinition(srcLang.c_str());
-    std::vector<std::string> srcs;
-    cmSystemTools::ExpandListArgument(srcStr, srcs);
-    for (std::vector<std::string>::iterator si = 
-           srcs.begin(); si != srcs.end(); ++si)
-      {
-      std::string &src = *si;
-      ++si;
-      // make sure the object file is relative to home output
-      std::string obj = *si;
-      obj = lg->Convert(obj.c_str(),HOME_OUTPUT,MAKEFILE);
-      scanner->Write(src.c_str(),obj.c_str(),ruleFileStream);
-      }
-    
-    // free the scanner for this language
     if (scanner)
       {
+      // for each file we need to scan
+      std::string srcLang = "CMAKE_DEPENDS_CHECK_";
+      srcLang += lang;
+      const char *srcStr = mf->GetSafeDefinition(srcLang.c_str());
+      std::vector<std::string> srcs;
+      cmSystemTools::ExpandListArgument(srcStr, srcs);
+      for (std::vector<std::string>::iterator si = 
+        srcs.begin(); si != srcs.end(); ++si)
+        {
+        std::string &src = *si;
+        ++si;
+        // make sure the object file is relative to home output
+        std::string obj = *si;
+        obj = lg->Convert(obj.c_str(),HOME_OUTPUT,MAKEFILE);
+        scanner->Write(src.c_str(),obj.c_str(),ruleFileStream);
+        }
+
+      // free the scanner for this language
       delete scanner;
       }
     }
