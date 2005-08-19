@@ -714,6 +714,9 @@ void CMakeCommandUsage(const char* program)
     << "  write_regv key value    - write registry value\n"
     << "  delete_regv key         - delete registry value\n"
     << "  comspec                 - on windows 9x use this for RunCommand\n";
+#else
+  errorStream
+    << "  create_symlink old new  - create a symbolic link new -> old\n";
 #endif
 
   cmSystemTools::Error(errorStream.str().c_str());
@@ -850,6 +853,14 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
         }        
 
       return 1;
+      }
+
+    // Command to create a symbolic link.  Fails on platforms not
+    // supporting them.
+    else if (args[1] == "create_symlink" && args.size() == 4)
+      {
+      return cmSystemTools::CreateSymlink(args[2].c_str(),
+                                          args[3].c_str())? 0:1;
       }
 
     // Internal CMake shared library support.
