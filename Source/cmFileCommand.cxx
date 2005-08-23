@@ -648,7 +648,7 @@ bool cmFileCommand::HandleInstallCommand(
 #if defined(__APPLE_CC__)
             {
             std::string ranlib = "ranlib ";
-            ranlib += destfile;
+            ranlib += cmSystemTools::ConvertToOutputPath(destfile.c_str());
             if(!cmSystemTools::RunSingleCommand(ranlib.c_str()))
               {
               std::string err = "ranlib failed: ";
