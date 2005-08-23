@@ -48,7 +48,7 @@ ENDIF(QT_INCLUDE_DIR)
 
 IF (QT_MT_REQUIRED)
   FIND_LIBRARY(QT_QT_LIBRARY
-    NAMES qt-mt qt-mt${qt_version_str_lib} qt-mt230nc
+    NAMES qt-mt qt-mt${qt_version_str_lib} qt-mtedu${qt_version_str_lib} qt-mt230nc
     PATHS
     $ENV{QTDIR}/lib
     /usr/local/qt/lib
@@ -62,7 +62,7 @@ IF (QT_MT_REQUIRED)
 
 ELSE (QT_MT_REQUIRED)
   FIND_LIBRARY(QT_QT_LIBRARY
-    NAMES qt qt-${qt_version_str_lib} qt-mt qt-mt230nc
+    NAMES qt qt-${qt_version_str_lib} qt-edu${qt_version_str_lib} qt-mt qt-mt230nc
     PATHS
     $ENV{QTDIR}/lib
     /usr/local/qt/lib
