@@ -109,7 +109,7 @@ bool cmCTestGenericHandler::StartLogFile(const char* name, cmGeneratedFileStream
     {
     ostr << "_" << m_SubmitIndex;
     }
-  if ( *m_CTest->GetCurrentTag().c_str() )
+  if ( !m_CTest->GetCurrentTag().empty() )
     {
     ostr << "_" << m_CTest->GetCurrentTag();
     }
