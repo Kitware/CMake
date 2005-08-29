@@ -35,16 +35,19 @@ IF(UNIX)
   SET(CMAKE_INSTALL_PREFIX "/usr/local"
     CACHE PATH "Install path prefix, prepended onto install directories.")
 ELSE(UNIX)
-  IF("$ENV{SystemDrive}" MATCHES "^$")
-    SET(CMAKE_GENERIC_SYSTEM_DRIVE "C:")
-  ELSE("$ENV{SystemDrive}" MATCHES "^$")
-    SET(CMAKE_GENERIC_SYSTEM_DRIVE "$ENV{SystemDrive}")
-  ENDIF("$ENV{SystemDrive}" MATCHES "^$")
+  IF("$ENV{ProgramFiles}" MATCHES "^$")
+    IF("$ENV{SystemDrive}" MATCHES "^$")
+      SET(CMAKE_GENERIC_PROGRAM_FILES "C:/Program Files")
+    ELSE("$ENV{SystemDrive}" MATCHES "^$")
+      SET(CMAKE_GENERIC_PROGRAM_FILES "$ENV{SystemDrive}/Program Files")
+    ENDIF("$ENV{SystemDrive}" MATCHES "^$")
+  ELSE("$ENV{ProgramFiles}" MATCHES "^$")
+    SET(CMAKE_GENERIC_PROGRAM_FILES "$ENV{ProgramFiles}")
+  ENDIF("$ENV{ProgramFiles}" MATCHES "^$")
   SET(CMAKE_INSTALL_PREFIX
-    "${CMAKE_GENERIC_SYSTEM_DRIVE}/Program Files/${PROJECT_NAME}"
+    "${CMAKE_GENERIC_PROGRAM_FILES}/${PROJECT_NAME}"
     CACHE PATH "Install path prefix, prepended onto install directories.")
-  SET(CMAKE_GENERIC_SYSTEM_DRIVE)
-  MARK_AS_ADVANCED(CMAKE_INSTALL_PREFIX)
+  SET(CMAKE_GENERIC_PROGRAM_FILES)
 ENDIF(UNIX)
 
 MARK_AS_ADVANCED(
