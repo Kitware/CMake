@@ -91,11 +91,22 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         }
       else
         {
-        cmOStringStream emsg;
-        emsg << "Unable to find executable for TRY_RUN: tried \""
-             << command1 << "\" and \""
-             << command2 << "\".";
-        cmSystemTools::Error(emsg.str().c_str());
+        std::string command3 = binaryDirectory;
+        command3 += "/Development/cmTryCompileExec";
+        command3 += cmSystemTools::GetExecutableExtension();
+        if(cmSystemTools::FileExists(command3.c_str()))
+          {
+          fullPath = cmSystemTools::CollapseFullPath(command3.c_str());
+          }
+        else
+          {
+          cmOStringStream emsg;
+          emsg << "Unable to find executable for TRY_RUN: tried \""
+               << command1 << "\" and \""
+               << command2 << "\" and \""
+               << command3 << "\".";
+          cmSystemTools::Error(emsg.str().c_str());
+          }
         }
       }
     if (fullPath.size() > 1)

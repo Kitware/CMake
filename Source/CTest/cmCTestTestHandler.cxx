@@ -927,6 +927,16 @@ std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
   if ( m_CTest->GetConfigType() == "" )
     {
     // No config type, so try to guess it
+    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Deployment"))
+      {
+      return fullPath;
+      }
+
+    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Development"))
+      {
+      return fullPath;
+      }
+
     if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Release"))
       {
       return fullPath;

@@ -47,6 +47,7 @@ IF (COMPILE_OK)
   LOAD_COMMAND(CMAKE_TEST_COMMAND 
     ${LoadedCommand_BINARY_DIR}/CMakeCommands 
     ${LoadedCommand_BINARY_DIR}/CMakeCommands/Debug
+    ${LoadedCommand_BINARY_DIR}/CMakeCommands/Development
     )
   # if the command loaded, execute the command
   IF (COMMAND CMAKE_TEST_COMMAND)

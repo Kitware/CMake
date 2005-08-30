@@ -114,6 +114,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
   else
     {
     mf->AddDefinition("CMAKE_CFG_INTDIR","$(CONFIGURATION)");
+    mf->AddDefinition("CMAKE_CONFIGURATION_TYPES","Developement;Deployment");
     }
   mf->AddDefinition("CMAKE_GENERATOR_CC", "gcc");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
@@ -174,7 +175,7 @@ std::string cmGlobalXCodeGenerator::GenerateBuildCommand(const char* makeProgram
     }
   else
     {
-    makeCommand += " -configuration Debug";
+    makeCommand += " -configuration Development";
     }
   makeCommand += " OBJROOT=.";
   return makeCommand;
