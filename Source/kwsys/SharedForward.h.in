@@ -219,7 +219,10 @@ static const char kwsys_shared_forward_path_slash[2] = {KWSYS_SHARED_FORWARD_PAT
 
 /* Windows */
 #if defined(_WIN32)
-# undef KWSYS_SHARED_FORWARD_OPTION_LDD
+# if defined(__CYGWIN__)
+#  define KWSYS_SHARED_FORWARD_LDD "cygcheck"
+#  define KWSYS_SHARED_FORWARD_LDD_N 1
+# endif
 # define KWSYS_SHARED_FORWARD_LDPATH "PATH"
 #endif
 
@@ -622,6 +625,8 @@ static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv)
       /* Look for the ldd command line option.  */
       if(argc > 1 && strcmp(argv[1], KWSYS_SHARED_FORWARD_OPTION_LDD) == 0)
         {
+# if defined(KWSYS_SHARED_FORWARD_LDD)
+        /* Use the named ldd-like executable and arguments.  */
         char* ldd_argv[] = {KWSYS_SHARED_FORWARD_LDD, 0, 0};
         ldd_argv[KWSYS_SHARED_FORWARD_LDD_N] = exe;
         kwsys_shared_forward_execvp(ldd_argv[0], ldd_argv);
@@ -629,6 +634,11 @@ static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv)
         /* Report why execution failed.  */
         kwsys_shared_forward_print_failure(ldd_argv);
         return 1;
+# else
+        /* We have no ldd-like executable available on this platform.  */
+        fprintf(stderr, "No ldd-like tool is known to this executable.\n");
+        return 1;
+# endif
         }
 #endif
 
