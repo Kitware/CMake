@@ -37,6 +37,10 @@ void cmGlobalUnixMakefileGenerator3
   for(std::vector<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
+    if(*l == "NONE")
+      {
+      continue;
+      }
     const char* lang = l->c_str();
     std::string langComp = "CMAKE_";
     langComp += lang;
