@@ -15,12 +15,15 @@ public:
                  PBXShellScriptBuildPhase, PBXResourcesBuildPhase,
                  PBXApplicationReference, PBXExecutableFileReference, 
                  PBXLibraryReference, PBXToolTarget, PBXLibraryTarget, 
-                 PBXAggregateTarget,
+                 PBXAggregateTarget,XCBuildConfiguration,XCConfigurationList,
                  None
   };
   static const char* PBXTypeNames[];
   ~cmXCodeObject();
   cmXCodeObject(PBXType ptype, Type type);
+  Type GetType() { return m_Type;}
+  PBXType GetIsA() { return m_IsA;}
+
   void SetString(const char* s)
     {
       m_String = "\"";
@@ -62,6 +65,8 @@ public:
     }
   static void Indent(int level, std::ostream& out);
   void Print(std::ostream& out);
+  virtual void PrintComment(std::ostream&) {};
+
   static void PrintList(std::vector<cmXCodeObject*> const&, std::ostream& out);
   const char* GetId()
     {
@@ -116,7 +121,8 @@ public:
     {
       return m_DependLibraries;
     }
-private:
+  std::vector<cmXCodeObject*> const& GetObjectList() { return m_List;}
+protected:
   cmTarget* m_cmTarget;
   Type m_Type;
   cmStdString m_Id;

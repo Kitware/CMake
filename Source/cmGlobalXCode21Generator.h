@@ -29,6 +29,9 @@ class cmGlobalXCode21Generator : public cmGlobalXCodeGenerator
 public:
   cmGlobalXCode21Generator();
   static cmGlobalGenerator* New() { return new cmGlobalXCode21Generator; }
+  virtual void  WriteXCodePBXProj(std::ostream& fout,
+                                  cmLocalGenerator* root,
+                                  std::vector<cmLocalGenerator*>& generators);
 };
 
 #endif

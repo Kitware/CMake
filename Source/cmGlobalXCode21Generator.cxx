@@ -15,9 +15,31 @@
 
 =========================================================================*/
 #include "cmGlobalXCode21Generator.h"
+#include "cmXCode21Object.h"
 
 cmGlobalXCode21Generator::cmGlobalXCode21Generator()
 {
   this->m_XcodeVersion = 21;
 }
 
+//----------------------------------------------------------------------------
+void 
+cmGlobalXCode21Generator::WriteXCodePBXProj(std::ostream& fout,
+                                            cmLocalGenerator* ,
+                                            std::vector<cmLocalGenerator*>& )
+{
+  fout << "// !$*UTF8*$!\n";
+  fout << "{\n";
+  cmXCode21Object::Indent(1, fout);
+  fout << "archiveVersion = 1;\n";
+  cmXCode21Object::Indent(1, fout);
+  fout << "classes = {\n";
+  cmXCode21Object::Indent(1, fout);
+  fout << "};\n";
+  cmXCode21Object::Indent(1, fout);
+  fout << "objectVersion = 42;\n";
+  cmXCode21Object::PrintList(m_XCodeObjects, fout);
+  cmXCode21Object::Indent(1, fout);
+  fout << "rootObject = " << m_RootObject->GetId() << " /* Project object */;\n";
+  fout << "}\n";
+}

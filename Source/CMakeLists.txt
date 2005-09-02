@@ -147,6 +147,7 @@ ENDIF(UNIX)
 IF(APPLE)
   SET(SRCS ${SRCS}
     cmXCodeObject.cxx
+    cmXCode21Object.cxx
     cmGlobalXCodeGenerator.cxx
     cmGlobalXCodeGenerator.h
     cmGlobalXCode21Generator.cxx

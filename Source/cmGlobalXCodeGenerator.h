@@ -98,23 +98,28 @@ private:
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
   cmXCodeObject* CreateXCodeTarget(cmTarget& target,
                                    cmXCodeObject* buildPhases);
+  void AddConfigurations(cmXCodeObject* target,
+                         cmTarget& cmtarget);
+  void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr, 
+                                   const char* value);
   cmXCodeObject* CreateUtilityTarget(cmTarget& target);
   void AddDependAndLinkInformation(cmXCodeObject* target);
   void CreateBuildSettings(cmTarget& target,
                            cmXCodeObject* buildSettings,
                            std::string& fileType,
                            std::string& productType,
-                           std::string& projectName);
-  
+                           std::string& projectName,
+                           const char* buildType);
+  std::string ExtractFlag(const char* flag, std::string& flags);
   // delete all objects in the m_XCodeObjects vector.
   void ClearXCodeObjects();
   void CreateXCodeObjects(cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
   void OutputXCodeProject(cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
-  void  WriteXCodePBXProj(std::ostream& fout,
-                          cmLocalGenerator* root,
-                          std::vector<cmLocalGenerator*>& generators);
+  virtual void  WriteXCodePBXProj(std::ostream& fout,
+                                  cmLocalGenerator* root,
+                                  std::vector<cmLocalGenerator*>& generators);
   cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, 
                                        cmSourceFile* sf);
   void CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);
@@ -135,9 +140,9 @@ private:
   void CreateReRunCMakeFile(cmLocalGenerator* root);
 protected:
   int m_XcodeVersion;
-private:
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
+private:
   cmXCodeObject* m_MainGroupChildren;
   cmXCodeObject* m_SourcesGroupChildren;
   cmMakefile* m_CurrentMakefile;
