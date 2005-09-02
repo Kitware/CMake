@@ -807,8 +807,8 @@ IF(BUILD_TESTING)
     
     ADD_TEST(objc++ ${CMAKE_CTEST_COMMAND}
       --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/Objc++"
-      "${CMake_BINARY_DIR}/Tests/Objc++"
+      "${CMake_SOURCE_DIR}/Tests/ObjC++"
+      "${CMake_BINARY_DIR}/Tests/ObjC++"
       --build-generator ${CMAKE_GENERATOR}
       --build-makeprogram ${MAKEPROGRAM}
       --build-project  objc++
