@@ -52,6 +52,7 @@ CMAKE_CXX_SOURCES="\
   cmGlobalXCodeGenerator \
   cmLocalXCodeGenerator \
   cmXCodeObject \
+  cmXCode21Object \
   cmLocalUnixMakefileGenerator3 \
   cmBootstrapCommands \
   cmCommands \
