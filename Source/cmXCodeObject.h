@@ -19,7 +19,7 @@ public:
                  None
   };
   static const char* PBXTypeNames[];
-  ~cmXCodeObject();
+  virtual ~cmXCodeObject();
   cmXCodeObject(PBXType ptype, Type type);
   Type GetType() { return m_Type;}
   PBXType GetIsA() { return m_IsA;}

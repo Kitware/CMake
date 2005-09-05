@@ -1565,7 +1565,6 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       linkDirs += this->XCodeEscapePath(libDir->c_str());
       }
     }
-  cmXCodeObject* bset = target->GetObject("buildSettings");
   this->AppendBuildSettingAttribute(target, "LIBRARY_SEARCH_PATHS", linkDirs.c_str());
   // now add the link libraries
   for(std::vector<cmStdString>::iterator lib = linkItems.begin();
