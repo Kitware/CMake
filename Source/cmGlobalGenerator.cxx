@@ -373,6 +373,20 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
           }
         }
       }
+    } // end for each language
+  std::string projectCompatibility = mf->GetDefinition("CMAKE_ROOT");
+  projectCompatibility += "/Modules/";
+  projectCompatibility += mf->GetDefinition("PROJECT_NAME");
+  projectCompatibility += "Compatibility.cmake";
+  if(cmSystemTools::FileExists(projectCompatibility.c_str()))
+    {
+    mf->ReadListFile(0,projectCompatibility.c_str()); 
+    }
+  std::string userMakeRules = 
+    mf->GetSafeDefinition("CMAKE_USER_MAKE_RULES_OVERRIDE");
+  if(userMakeRules.size())
+    {
+    mf->ReadListFile(0,userMakeRules.c_str());
     }
 }
 
