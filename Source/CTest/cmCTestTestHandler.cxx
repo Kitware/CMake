@@ -27,6 +27,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmCommand.h"
+#include "cmSystemTools.h"
 
 #include <stdlib.h> 
 #include <math.h>
@@ -166,6 +167,46 @@ bool cmCTestAddTestCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
   return m_TestHandler->AddTest(args);
+}
+
+//----------------------------------------------------------------------
+class cmCTestSetTestsPropertiesCommand : public cmCommand
+{
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone() 
+    {
+    cmCTestSetTestsPropertiesCommand* c = new cmCTestSetTestsPropertiesCommand;
+    c->m_TestHandler = m_TestHandler;
+    return c;
+    }
+
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool InitialPass(std::vector<std::string> const&);
+
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() { return "SET_TESTS_PROPERTIES";}
+
+  // Unused methods
+  virtual const char* GetTerseDocumentation() { return ""; }
+  virtual const char* GetFullDocumentation() { return ""; }
+
+  cmTypeMacro(cmCTestSetTestsPropertiesCommand, cmCommand);
+
+  cmCTestTestHandler* m_TestHandler;
+};
+
+//----------------------------------------------------------------------
+bool cmCTestSetTestsPropertiesCommand::InitialPass(std::vector<std::string> const& args)
+{
+  return m_TestHandler->SetTestsProperties(args);
 }
 
 //----------------------------------------------------------------------
@@ -700,9 +741,18 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       {
       if (res == cmsysProcess_State_Exited && retVal == 0)
         {
-        cmCTestLog(m_CTest, HANDLER_OUTPUT,   "   Passed" << std::endl);
+        cmCTestLog(m_CTest, HANDLER_OUTPUT,   "   Passed");
         passed.push_back(testname);
-        cres.m_Status = cmCTestTestHandler::COMPLETED;
+        if ( it->m_WillFail )
+          {
+          cmCTestLog(m_CTest, HANDLER_OUTPUT,   " - But it should fail!");
+          cres.m_Status = cmCTestTestHandler::FAILED;
+          }
+        else
+          {
+          cres.m_Status = cmCTestTestHandler::COMPLETED;
+          }
+        cmCTestLog(m_CTest, HANDLER_OUTPUT, std::endl);
         }
       else
         {
@@ -746,7 +796,13 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
           }
         else
           {
-          cmCTestLog(m_CTest, HANDLER_OUTPUT, "***Failed" << std::endl);
+          cmCTestLog(m_CTest, HANDLER_OUTPUT, "***Failed");
+          if ( it->m_WillFail )
+            {
+            cres.m_Status = cmCTestTestHandler::COMPLETED;
+            cmCTestLog(m_CTest, HANDLER_OUTPUT, " - supposed to fail");
+            }
+          cmCTestLog(m_CTest, HANDLER_OUTPUT, std::endl);
           }
         failed.push_back(testname);
         }
@@ -1012,6 +1068,11 @@ void cmCTestTestHandler::GetListOfTests()
   cmCTestSubdirCommand* newCom2 = new cmCTestSubdirCommand;
   newCom2->m_TestHandler = this;
   cm.AddCommand(newCom2);
+
+  // Add handler for SET_SOURCE_FILES_PROPERTIES
+  cmCTestSetTestsPropertiesCommand* newCom3 = new cmCTestSetTestsPropertiesCommand;
+  newCom3->m_TestHandler = this;
+  cm.AddCommand(newCom3);
 
   const char* testFilename;
   if( cmSystemTools::FileExists("CTestTestfile.cmake") )
@@ -1402,6 +1463,54 @@ bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t remove_thre
 }
 
 //----------------------------------------------------------------------
+bool cmCTestTestHandler::SetTestsProperties(const std::vector<std::string>& args)
+{
+  std::vector<std::string>::const_iterator it;
+  std::vector<cmStdString> tests;
+  bool found = false;
+  for ( it = args.begin(); it != args.end(); ++ it )
+    {
+    if ( *it == "PROPERTIES" )
+      {
+      found = true;
+      break;
+      }
+    tests.push_back(*it);
+    }
+  if ( !found )
+    {
+    return false;
+    }
+  ++ it; // skip PROPERTIES
+  for ( ; it != args.end(); ++ it )
+    {
+    std::string key = *it;
+    ++ it;
+    if ( it == args.end() )
+      {
+      break;
+      }
+    std::string val = *it;
+    std::vector<cmStdString>::const_iterator tit;
+    for ( tit = tests.begin(); tit != tests.end(); ++ tit )
+      {
+      tm_ListOfTests::iterator rtit;
+      for ( rtit = m_TestList.begin(); rtit != m_TestList.end(); ++ rtit )
+        {
+        if ( *tit == rtit->m_Name )
+          {
+          if ( key == "WILL_FAIL" )
+            {
+            rtit->m_WillFail = cmSystemTools::IsOn(val.c_str());
+            }
+          }
+        }
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------
 bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
 {
   const std::string& testname = args[0];
@@ -1455,6 +1564,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.m_Args = args;
   test.m_Directory = cmSystemTools::GetCurrentWorkingDirectory();
   test.m_IsInBasedOnREOptions = true;
+  test.m_WillFail = false;
   if (this->m_UseIncludeRegExp && !m_IncludeTestsRegularExpression.find(testname.c_str()))
     {
     test.m_IsInBasedOnREOptions = false;

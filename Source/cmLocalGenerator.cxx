@@ -177,7 +177,17 @@ void cmLocalGenerator::GenerateTestFiles()
       fout << "\"";
       }
     fout << ")" << std::endl;
-
+    std::map<cmStdString,cmStdString>::const_iterator pit;
+    const std::map<cmStdString,cmStdString>* mpit = &test->GetProperties();
+    if ( mpit->size() )
+      {
+      fout << "SET_TESTS_PROPERTIES(" << test->GetName() << " PROPERTIES ";
+      for ( pit = mpit->begin(); pit != mpit->end(); ++ pit )
+        {
+        fout << " " << pit->first.c_str() << " \"" << pit->second.c_str() << "\"";
+        }
+      fout << ")" << std::endl;
+      }
     }
   if ( this->Children.size())
     {

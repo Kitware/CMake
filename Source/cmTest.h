@@ -52,6 +52,10 @@ public:
   void SetProperty(const char *prop, const char *value);
   const char *GetProperty(const char *prop) const;
   bool GetPropertyAsBool(const char *prop) const;
+  const std::map<cmStdString,cmStdString>& GetProperties() const
+    {
+    return m_Properties;
+    }
     
 private:
   std::map<cmStdString,cmStdString> m_Properties;

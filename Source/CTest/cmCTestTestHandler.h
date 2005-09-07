@@ -68,6 +68,11 @@ public:
    */
   bool AddTest(const std::vector<std::string>& args);
 
+  /*
+   * Set tests properties
+   */
+  bool SetTestsProperties(const std::vector<std::string>& args);
+
   struct cmCTestTestResult
   {
     std::string m_Name;
@@ -91,6 +96,7 @@ protected:
     cmStdString m_Directory;
     std::vector<std::string> m_Args;
     bool m_IsInBasedOnREOptions;
+    bool m_WillFail;
   };
 
 
