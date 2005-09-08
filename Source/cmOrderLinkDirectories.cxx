@@ -331,7 +331,7 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
 
 std::string cmOrderLinkDirectories::GetWarnings()
 {
-  std::string warning = "It is impossible to order the linker search path in such a way that libraries specified as full paths will be picked by the linker.\nDirectories and libraries involvied are:\n";
+  std::string warning = "It is impossible to order the linker search path in such a way that libraries specified as full paths will be picked by the linker.\nDirectories and libraries involved are:\n";
   for(std::set<cmStdString>::iterator i = m_ImposibleDirectories.begin();
       i != m_ImposibleDirectories.end(); ++i)
     {
