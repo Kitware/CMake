@@ -1413,35 +1413,52 @@ void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
     }
 }
 
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::AppendOrAddBuildSetting(cmXCodeObject* settings,
+                                                     const char* attribute,
+                                                     const char* value)
+{
+  if(settings)
+    {
+    cmXCodeObject* attr = settings->GetObject(attribute);
+    if(!attr)
+      {
+      settings->AddAttribute(attribute, this->CreateString(value));
+      }
+    else
+      {
+      std::string oldValue = attr->GetString();
+      cmSystemTools::ReplaceString(oldValue, "\"", "");
+      oldValue += " ";
+      oldValue += value;
+      attr->SetString(oldValue.c_str());
+      }
+    }
+}
+
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::AppendBuildSettingAttribute(cmXCodeObject* target,
                                                          const char* attribute,
                                                          const char* value)
 {
-  cmXCodeObject* configurationList = target->GetObject("buildConfigurationList")->GetObject();
-  cmXCodeObject* buildConfigs = configurationList->GetObject("buildConfigurations");
-  std::vector<cmXCodeObject*> list = buildConfigs->GetObjectList();
-  // each configuration and the target itself has a buildSettings in it 
-  list.push_back(target);
-  for(std::vector<cmXCodeObject*>::iterator i = list.begin(); i != list.end(); ++i)
+  if(m_XcodeVersion < 21)
     {
+    this->AppendOrAddBuildSetting(target->GetObject("buildSettings"),
+                                  attribute, value);
+    }
+  else
+    {
+    cmXCodeObject* configurationList = target->GetObject("buildConfigurationList")->GetObject();
+    cmXCodeObject* buildConfigs = configurationList->GetObject("buildConfigurations");
+    std::vector<cmXCodeObject*> list = buildConfigs->GetObjectList();
+    // each configuration and the target itself has a buildSettings in it 
+    list.push_back(target);
+    for(std::vector<cmXCodeObject*>::iterator i = list.begin(); i != list.end(); ++i)
+      {
       cmXCodeObject* settings = (*i)->GetObject("buildSettings");
-      if(settings)
-        {
-        cmXCodeObject* attr = settings->GetObject(attribute);
-        if(!attr)
-          {
-          settings->AddAttribute(attribute, this->CreateString(value));
-          }
-        else
-          {
-          std::string oldValue = attr->GetString();
-          cmSystemTools::ReplaceString(oldValue, "\"", "");
-          oldValue += " ";
-          oldValue += value;
-          attr->SetString(oldValue.c_str());
-          }
-        }
+      this->AppendOrAddBuildSetting(settings, attribute, value);
+      }
     }
 }
 

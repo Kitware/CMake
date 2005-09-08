@@ -100,6 +100,8 @@ private:
                                    cmXCodeObject* buildPhases);
   void AddConfigurations(cmXCodeObject* target,
                          cmTarget& cmtarget);
+  void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr, 
+                               const char* value);
   void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr, 
                                    const char* value);
   cmXCodeObject* CreateUtilityTarget(cmTarget& target);
