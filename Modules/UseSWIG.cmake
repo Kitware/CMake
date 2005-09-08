@@ -15,6 +15,8 @@
 # Set Source files propertis such as CPLUSPLUS and SWIG_FLAGS to specify
 # special behavior of SWIG. Also global CMAKE_SWIG_FLAGS can be used to add
 # special flags to all swig calls.
+# Another special variable is CMAKE_SWIG_OUTDIR, it allows one to specify 
+# where to write all the swig generated module (swig -outdir option)
 
 SET(SWIG_CXX_EXTENSION "cxx")
 SET(SWIG_EXTRA_LIBRARIES "")
@@ -133,19 +135,38 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   IF(SWIG_MODULE_${name}_EXTRA_FLAGS)
     SET(swig_extra_flags ${swig_extra_flags} ${SWIG_MODULE_${name}_EXTRA_FLAGS})
   ENDIF(SWIG_MODULE_${name}_EXTRA_FLAGS)
-  ADD_CUSTOM_COMMAND(
-    OUTPUT "${swig_generated_file_fullname}"
-    COMMAND "${SWIG_EXECUTABLE}"
-    ARGS "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
-    ${swig_source_file_flags}
-    ${CMAKE_SWIG_FLAGS}
-    ${swig_special_flags}
-    ${swig_extra_flags}
-    ${swig_include_dirs}
-    -o "${swig_generated_file_fullname}"
-    "${swig_source_file_fullname}"
-    MAIN_DEPENDENCY "${swig_source_file_fullname}"
-    COMMENT "Swig source") 
+  # If CMAKE_SWIG_OUTDIR was specified then pass it to -outdir
+  IF(CMAKE_SWIG_OUTDIR)
+    ADD_CUSTOM_COMMAND(
+      OUTPUT "${swig_generated_file_fullname}"
+      COMMAND "${SWIG_EXECUTABLE}"
+      ARGS "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
+      ${swig_source_file_flags}
+      ${CMAKE_SWIG_FLAGS}
+      -outdir ${CMAKE_SWIG_OUTDIR}
+      ${swig_special_flags}
+      ${swig_extra_flags}
+      ${swig_include_dirs}
+      -o "${swig_generated_file_fullname}"
+      "${swig_source_file_fullname}"
+      MAIN_DEPENDENCY "${swig_source_file_fullname}"
+      COMMENT "Swig source") 
+  ELSE(CMAKE_SWIG_OUTDIR)
+    ADD_CUSTOM_COMMAND(
+      OUTPUT "${swig_generated_file_fullname}"
+      COMMAND "${SWIG_EXECUTABLE}"
+      ARGS "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
+      ${swig_source_file_flags}
+      ${CMAKE_SWIG_FLAGS}
+      ${swig_outdir_flags}
+      ${swig_special_flags}
+      ${swig_extra_flags}
+      ${swig_include_dirs}
+      -o "${swig_generated_file_fullname}"
+      "${swig_source_file_fullname}"
+      MAIN_DEPENDENCY "${swig_source_file_fullname}"
+      COMMENT "Swig source") 
+  ENDIF(CMAKE_SWIG_OUTDIR)
   SET_SOURCE_FILES_PROPERTIES("${swig_generated_file_fullname}"
     PROPERTIES GENERATED 1)
   SET(${outfiles} "${swig_generated_file_fullname}")
@@ -192,3 +213,4 @@ MACRO(SWIG_LINK_LIBRARIES name)
     MESSAGE(SEND_ERROR "Cannot find Swig library \"${name}\".")
   ENDIF(SWIG_MODULE_${name}_REAL_NAME)
 ENDMACRO(SWIG_LINK_LIBRARIES name)
+
