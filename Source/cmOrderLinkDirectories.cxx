@@ -258,7 +258,7 @@ void cmOrderLinkDirectories::SetLinkInformation(cmTarget& target,
       continue;
       }
     if (lib->second == cmTarget::OPTIMIZED && 
-        linktype != cmTarget::OPTIMIZED)
+        (linktype != cmTarget::OPTIMIZED && linktype != cmTarget::GENERAL))
       {
       continue;
       }
