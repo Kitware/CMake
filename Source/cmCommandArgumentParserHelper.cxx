@@ -139,7 +139,6 @@ void cmCommandArgumentParserHelper::AllocateParserType(cmCommandArgumentParserHe
     {
     return;
     }
-  this->UnionsAvailable ++;
   pt->str = new char[ len + 1 ];
   strncpy(pt->str, str, len);
   pt->str[len] = 0;
