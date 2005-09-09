@@ -18,18 +18,41 @@
 
   !include "MUI.nsh"
 
+  ;Default installation folder
+  InstallDir "$PROGRAMFILES\CMake ${VERSION}"  
+
+;--------------------------------
+; determine admin versus local install
+Function .onInit
+
+  ClearErrors
+  UserInfo::GetName
+  IfErrors noLM
+  Pop $0
+  UserInfo::GetAccountType
+  Pop $1
+  StrCmp $1 "Admin" 0 +3
+    SetShellVarContext all
+    ;MessageBox MB_OK 'User "$0" is in the Admin group'
+    Goto done
+  StrCmp $1 "Power" 0 +3
+    SetShellVarContext all
+    ;MessageBox MB_OK 'User "$0" is in the Power Users group'
+    Goto done
+    
+    noLM:
+      ;Get installation folder from registry if available
+
+    done:
+FunctionEnd
+
+
 ;--------------------------------
 ;General
 
   ;Name and file
   Name "CMake ${VERSION}"
   OutFile "@PROJECT_BINARY_DIR@\cmake-${VERSION}.${PATCH}-win32.exe"
-
-  ;Default installation folder
-  InstallDir "$PROGRAMFILES\CMake ${VERSION}"
-  
-  ;Get installation folder from registry if available
-  InstallDirRegKey HKCU "Software\Kitware\CMake ${VERSION}" ""
 
 ;--------------------------------
 ;Interface Settings
@@ -96,14 +119,14 @@ Function AddToPath
     Goto AddToPath_done
  
   AddToPath_NT:
-    ReadRegStr $1 HKCU "Environment" "PATH"
+    ReadRegStr $1 SHCTX "Environment" "PATH"
     StrCpy $2 $1 1 -1 # copy last char
     StrCmp $2 ";" 0 +2 # if last char == ;
       StrCpy $1 $1 -1 # remove last char
     StrCmp $1 "" AddToPath_NTdoIt
       StrCpy $0 "$1;$0"
     AddToPath_NTdoIt:
-      WriteRegExpandStr HKCU "Environment" "PATH" $0
+      WriteRegExpandStr SHCTX "Environment" "PATH" $0
       SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
  
   AddToPath_done:
@@ -164,7 +187,7 @@ Function un.RemoveFromPath
       Goto unRemoveFromPath_done
  
   unRemoveFromPath_NT:
-    ReadRegStr $1 HKCU "Environment" "PATH"
+    ReadRegStr $1 SHCTX "Environment" "PATH"
     StrCpy $5 $1 1 -1 # copy last char
     StrCmp $5 ";" +2 # if last char != ;
       StrCpy $1 "$1;" # append ;
@@ -186,7 +209,7 @@ Function un.RemoveFromPath
       StrCmp $5 ";" 0 +2 # if last char == ;
         StrCpy $3 $3 -1 # remove last char
  
-      WriteRegExpandStr HKCU "Environment" "PATH" $3
+      WriteRegExpandStr SHCTX "Environment" "PATH" $3
       SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
  
   unRemoveFromPath_done:
@@ -289,7 +312,7 @@ FunctionEnd
   !insertmacro MUI_PAGE_INSTFILES
   
   ;Start Menu Folder Page Configuration
-  !define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU" 
+  !define MUI_STARTMENUPAGE_REGISTRY_ROOT "SHCTX" 
   !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\Kitware\CMake ${VERSION}" 
   !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
   !insertmacro MUI_PAGE_STARTMENU Application $STARTMENU_FOLDER
@@ -310,6 +333,9 @@ Section "Add to path"
   Call AddToPath
 SectionEnd
 
+Section
+SectionEnd
+
 Section "Dummy Section" SecDummy
 
   ;Use the entire tree produced by the INSTALL target.  Keep the
@@ -322,7 +348,7 @@ Section "Dummy Section" SecDummy
   @NSIS_EXTRA_COMMANDS@
 
   ;Store installation folder
-  WriteRegStr HKCU "Software\Kitware\CMake ${VERSION}" "" $INSTDIR
+  WriteRegStr SHCTX "Software\Kitware\CMake ${VERSION}" "" $INSTDIR
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -357,7 +383,7 @@ Section "Uninstall"
   RMDir "$INSTDIR"
 
   ; Remove the registry entries.
-  DeleteRegKey HKCU "Software\Kitware\CMake ${VERSION}"
+  DeleteRegKey SHCTX "Software\Kitware\CMake ${VERSION}"
 
   !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
     
@@ -376,7 +402,7 @@ Section "Uninstall"
     StrCmp $MUI_TEMP $SMPROGRAMS startMenuDeleteLoopDone startMenuDeleteLoop
   startMenuDeleteLoopDone:
 
-  DeleteRegKey /ifempty HKCU "Software\Kitware\CMake ${VERSION}"
+  DeleteRegKey /ifempty SHCTX "Software\Kitware\CMake ${VERSION}"
 
   Push $INSTDIR\bin
   Call un.RemoveFromPath
