@@ -45,6 +45,7 @@ CMAKE_CXX_SOURCES="\
   cmMakefile \
   cmGeneratedFileStream \
   cmGlobalGenerator \
+  cmGlob \
   cmLocalGenerator \
   cmSourceFile \
   cmSystemTools \
