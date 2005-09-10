@@ -41,7 +41,7 @@ ENDIF(GLOB_TEMP_VAR)
 SET(GLOB_TEMP_VAR)
 
 # now find qmake
-FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake PATHS $ENV{QTDIR}/bin)
+FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake PATHS "${QT_SEARCH_PATH}/bin" "$ENV{QTDIR}/bin")
 IF(QT_QMAKE_EXECUTABLE)
   EXEC_PROGRAM(${QMAKE_PATH} ARGS "-query QT_VERSION"
     OUTPUT_VARIABLE QTVERSION)
@@ -60,7 +60,8 @@ IF(QT_QMAKE_EXECUTABLE)
 ENDIF(QT_QMAKE_EXECUTABLE)
 
 FIND_FILE( QT4_QGLOBAL_H_FILE qglobal.h
-  "[HKEY_CURRENT_USER\Software\Trolltech\Qt3Versions\4.0.0;InstallDir]/include/Qt"
+  "${QT_SEARCH_PATH}/Qt/include"
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/include/Qt"
   ${qt_headers}/Qt
   $ENV{QTDIR}/include/Qt
   /usr/local/qt/include/Qt
@@ -68,16 +69,17 @@ FIND_FILE( QT4_QGLOBAL_H_FILE qglobal.h
   /usr/lib/qt/include/Qt
   /usr/include/Qt
   /usr/share/qt4/include/Qt
-  C:/Progra~1/qt/include/Qt )F
+  C:/Progra~1/qt/include/Qt )
 
 IF(QT4_QGLOBAL_H_FILE)
   SET(QT4_INSTALLED TRUE)
 ENDIF(QT4_QGLOBAL_H_FILE)
 
 FIND_FILE( QT3_QGLOBAL_H_FILE qglobal.h
-  "[HKEY_CURRENT_USER\Software\Trolltech\Qt3Versions\3.2.1;InstallDir]/include/Qt"
-  "[HKEY_CURRENT_USER\Software\Trolltech\Qt3Versions\3.2.0;InstallDir]/include/Qt"
-  "[HKEY_CURRENT_USER\Software\Trolltech\Qt3Versions\3.1.0;InstallDir]/include/Qt"
+  "${QT_SEARCH_PATH}/Qt/include" 
+ "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"
   C:/Qt/3.3.3Educational/include
   $ENV{QTDIR}/include
   /usr/include/qt3/Qt
@@ -95,14 +97,14 @@ ENDIF(QT3_QGLOBAL_H_FILE)
 
 IF(QT3_INSTALLED AND QT4_INSTALLED )
   # force user to pick if we have both
-  OPTION(DESIRED_QT_VERSION "Pick a version of QT to use" 0)
+  SET(DESIRED_QT_VERSION 0 CACHE STRING "Pick a version of QT to use: 3 or 4")
 ELSE(QT3_INSTALLED AND QT4_INSTALLED )
   # if only one found then pick that one
   IF(QT3_INSTALLED)
-    OPTION(DESIRED_QT_VERSION "Pick a version of QT to use" 3)
+    SET(DESIRED_QT_VERSION 3 CACHE STRING "Pick a version of QT to use: 3 or 4")
   ENDIF(QT3_INSTALLED)
   IF(QT4_INSTALLED)
-    OPTION(DESIRED_QT_VERSION "Pick a version of QT to use" 4)
+    SET(DESIRED_QT_VERSION 4 CACHE STRING "Pick a version of QT to use: 3 or 4")
   ENDIF(QT4_INSTALLED)
 ENDIF(QT3_INSTALLED AND QT4_INSTALLED )
 
@@ -120,6 +122,7 @@ ELSE(NOT QT3_INSTALLED AND NOT QT4_INSTALLED)
     MESSAGE(SEND_ERROR "Multiple versions of QT found please set DESIRED_QT_VERSION")
   ENDIF(NOT QT_FOUND AND NOT DESIRED_QT_VERSION)
   IF(NOT QT_FOUND AND DESIRED_QT_VERSION)
-    MESSAGE(SEND_ERROR "CMake was unable to find QT version: ${DESIRED_QT_VERSION}")
+    MESSAGE(SEND_ERROR "CMake was unable to find QT version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_FILE.")
   ENDIF(NOT QT_FOUND AND DESIRED_QT_VERSION)
 ENDIF(NOT QT3_INSTALLED AND NOT QT4_INSTALLED)
+MARK_AS_ADVANCED(QT3_QGLOBAL_H_FILE QT4_QGLOBAL_H_FILE QT_QMAKE_EXECUTABLE)

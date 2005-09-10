@@ -116,7 +116,10 @@ IF (WIN32)
 ENDIF(WIN32)
 
 # check for qmake
-FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake PATHS $ENV{QTDIR}/bin)
+FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake PATHS 
+  $ENV{QTDIR}/bin
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
+)
 
 # Set QT_LIBRARY_DIR
 IF(NOT QT_LIBRARY_DIR)
@@ -153,6 +156,7 @@ IF (NOT QT_HEADERS_DIR)
   ENDIF(QT_QMAKE_EXECUTABLE)
 ENDIF (NOT QT_HEADERS_DIR)
 FIND_PATH( QT_QT_INCLUDE_DIR qglobal.h
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/include/Qt"
   ${QT_HEADERS_DIR}/Qt
   ${QT_LIBRARY_DIR}/QtCore.framework/Headers
   $ENV{QTDIR}/include/Qt

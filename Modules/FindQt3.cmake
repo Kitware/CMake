@@ -21,6 +21,9 @@
 
 
 FIND_PATH(QT_INCLUDE_DIR qt.h
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"
   $ENV{QTDIR}/include
   /usr/local/qt/include
   /usr/local/include
@@ -50,6 +53,9 @@ IF (QT_MT_REQUIRED)
   FIND_LIBRARY(QT_QT_LIBRARY
     NAMES qt-mt qt-mt${qt_version_str_lib} qt-mtedu${qt_version_str_lib} qt-mt230nc
     PATHS
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/lib"
     $ENV{QTDIR}/lib
     /usr/local/qt/lib
     /usr/local/lib
