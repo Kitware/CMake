@@ -62,6 +62,7 @@ ENDIF(QT_QMAKE_EXECUTABLE)
 FIND_FILE( QT4_QGLOBAL_H_FILE qglobal.h
   "${QT_SEARCH_PATH}/Qt/include"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/include/Qt"
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/include/Qt"
   ${qt_headers}/Qt
   $ENV{QTDIR}/include/Qt
   /usr/local/qt/include/Qt
