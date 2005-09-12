@@ -52,7 +52,9 @@ ENDIF(QT_INCLUDE_DIR)
 FILE(GLOB GLOB_PATHS_LIB /usr/lib/qt-3*/lib/)
 IF (QT_MT_REQUIRED)
   FIND_LIBRARY(QT_QT_LIBRARY
-    NAMES qt-mt qt-mt${qt_version_str_lib} qt-mtedu${qt_version_str_lib} qt-mt230nc
+    NAMES
+    qt-mt qt-mt${qt_version_str_lib} qt-mtnc${qt_version_str_lib}
+    qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321
     PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
@@ -70,7 +72,10 @@ IF (QT_MT_REQUIRED)
 
 ELSE (QT_MT_REQUIRED)
   FIND_LIBRARY(QT_QT_LIBRARY
-    NAMES qt qt-${qt_version_str_lib} qt-edu${qt_version_str_lib} qt-mt qt-mt230nc
+    NAMES 
+    qt qt-${qt_version_str_lib} qt-edu${qt_version_str_lib} 
+    qt-mt qt-mt${qt_version_str_lib} qt-mtnc${qt_version_str_lib}
+    qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321
     PATHS
     "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
     "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
