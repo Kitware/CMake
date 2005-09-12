@@ -26,8 +26,8 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   // store the binpath
-  std::string binArg = args[0];
-  std::string srcArg;
+  std::string srcArg = args[0];
+  std::string binArg;
   
   bool intoplevel = true;
 
@@ -41,9 +41,9 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
       intoplevel = false;
       continue;
       }
-    else if (!srcArg.size())
+    else if (!binArg.size())
       {
-      srcArg = *i;
+      binArg = *i;
       }
     else
       {
@@ -52,19 +52,15 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
 
-  // if srcArg not provided use binArg
-  if (!srcArg.size())
-    {
-    srcArg = binArg;
-    }
-    
-  // now we have all the arguments
-  
-  // if they specified a relative path then compute the full
+  // check for relative arguments
+  bool relativeSource = true;
+  std::string binPath = binArg;
   std::string srcPath = std::string(m_Makefile->GetCurrentDirectory()) + 
     "/" + srcArg;
+  // if the path does not exist then the arg was relative
   if (!cmSystemTools::FileIsDirectory(srcPath.c_str()))
     {
+    relativeSource = false;
     srcPath = srcArg;
     if (!cmSystemTools::FileIsDirectory(srcPath.c_str()))
       {
@@ -75,13 +71,47 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
   
-  std::string binPath = binArg;
-  if (!cmSystemTools::FileIsFullPath(binPath.c_str()))
+  // at this point srcPath has the full path to the source directory
+  // now we need to compute the binPath if it was not provided
+  
+  // if the argument was provided then use it
+  if (binArg.size())
     {
-    binPath = std::string(m_Makefile->GetCurrentOutputDirectory()) + 
-      "/" + binArg.c_str();
+    if (!cmSystemTools::FileIsFullPath(binPath.c_str()))
+      {
+      binPath = std::string(m_Makefile->GetCurrentOutputDirectory()) + 
+        "/" + binArg.c_str();
+      }
+    }
+  // otherwise compute the binPath from the srcPath
+  else
+    {
+    // if the srcArg was relative then we just do the same for the binPath
+    if (relativeSource)
+      {
+      binPath = std::string(m_Makefile->GetCurrentOutputDirectory()) + 
+        "/" + srcArg;
+      }
+    // otherwise we try to remove the CurrentDirectory from the srcPath and
+    // replace it with the CurrentOutputDirectory. This may not really work
+    // because the source dir they provided may not be "in" the source
+    // tree. This is an error if this happens.
+    else
+      {
+      // try replacing the home dir with the home output dir
+      binPath = srcPath;
+      if (!cmSystemTools::FindLastString(binPath.c_str(), 
+                                         m_Makefile->GetHomeDirectory()))
+        {
+        this->SetError("A full source directory was specified that is not in the source tree but no binary directory was specified. If you specify an out of tree source directory then you must provide the binary directory as well.");   
+        return false;
+        }
+      cmSystemTools::ReplaceString(binPath,m_Makefile->GetHomeDirectory(), 
+                                   m_Makefile->GetHomeOutputDirectory());
+      }
     }
   
+  // now we have all the arguments
   m_Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
                               intoplevel, false, true);
 
