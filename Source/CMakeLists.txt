@@ -545,8 +545,8 @@ IF(BUILD_TESTING)
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --test-command wrapping
     )
-
-  INCLUDE (FindQt3)
+  # use the FindQt3.cmake from this cmake as it may not be in an older version of cmake
+  INCLUDE (${CMAKE_SOURCE_DIR}/Modules/FindQt3.cmake)
   MARK_AS_ADVANCED(
     QT_INCLUDE_PATH
     QT_MOC_EXE
