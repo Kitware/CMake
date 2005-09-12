@@ -115,10 +115,21 @@ IF (WIN32)
   SET(QT_DEFINITIONS -DQT_DLL)
 ENDIF(WIN32)
 
+FILE(GLOB GLOB_TEMP_VAR /usr/local/Trolltech/Qt-4*/)
+SET(GLOB_TEMP_VAR)
+IF(GLOB_TEMP_VAR)
+  SET(QT4_PATHS ${QT4_PATHS} ${GLOB_TEMP_VAR})
+ENDIF(GLOB_TEMP_VAR)
+SET(GLOB_TEMP_VAR)
+FILE(GLOB GLOB_TEMP_VAR /usr/local/qt-x11-commercial-4*/bin/)
+IF(GLOB_TEMP_VAR)
+  SET(QT4_PATHS ${QT4_PATHS} ${GLOB_TEMP_VAR})
+ENDIF(GLOB_TEMP_VAR)
 # check for qmake
 FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake PATHS 
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
   $ENV{QTDIR}/bin
+  ${QT4_PATHS}
 )
 IF(QT_QMAKE_EXECUTABLE)
   EXEC_PROGRAM(${QMAKE_PATH} ARGS "-query QT_VERSION"
@@ -162,8 +173,13 @@ IF(QT4_QMAKE_FOUND)
       SET(QT_HEADERS_DIR ${qt_headers} CACHE INTERNAL "")
     ENDIF(QT_QMAKE_EXECUTABLE)
   ENDIF (NOT QT_HEADERS_DIR)
+  FILE(GLOB GLOB_TEMP_VAR /usr/local/qt-x11-commercial-3*/include/Qt/)
+  SET(QT_PATH_INCLUDE ${GLOB_TEMP_VAR})
+  FILE(GLOB GLOB_TEMP_VAR /usr/local/Trolltech/Qt-4*/include/Qt/)
+  SET(QT_PATH_INCLUDE ${GLOB_TEMP_VAR})
   FIND_PATH( QT_QT_INCLUDE_DIR qglobal.h
     "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/include/Qt"
+    ${QT_PATH_INCLUDE}
     ${QT_HEADERS_DIR}/Qt
     ${QT_LIBRARY_DIR}/QtCore.framework/Headers
     $ENV{QTDIR}/include/Qt

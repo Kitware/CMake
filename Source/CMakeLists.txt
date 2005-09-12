@@ -546,7 +546,7 @@ IF(BUILD_TESTING)
     --test-command wrapping
     )
 
-  INCLUDE ( ${CMAKE_ROOT}/Modules/FindQt.cmake )
+  INCLUDE (FindQt3)
   MARK_AS_ADVANCED(
     QT_INCLUDE_PATH
     QT_MOC_EXE
