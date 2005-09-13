@@ -339,7 +339,7 @@ IF(QT4_QMAKE_FOUND)
       CACHE STRING "The QtNetwork library.")
     SET(QT_QTOPENGL_LIBRARY "-framework QtOpenGL"
       CACHE STRING "The QtOpenGL library.")
-    SET(QT_QTOPENGL_LIBRARY_GUI "-framework QtOpenGL"
+    SET(QT_QTOPENGL_LIBRARY_DEBUG "-framework QtOpenGL"
       CACHE STRING "The QtOpenGL library.")
     SET(QT_QTSQL_LIBRARY "-framework QtSql"
       CACHE STRING "The QtSql library.")
