@@ -1,6 +1,13 @@
-# a simple test case
-PROJECT (OutOfSource)
+# a simple test cas
+project (OutOfSource)
 
-ADD_SUBDIRECTORY(SubDir)
+add_subdirectory(SubDir)
 
-SET(KEN 1)
+get_directory_property(ANIMAL DIRECTORY OutOfSourceSubdir DEFINITION WEASELS)
+
+configure_file(
+  ${OutOfSource_SOURCE_DIR}/testdp.h.in
+  ${OutOfSource_BINARY_DIR}/SubDir/OutOfSourceSubdir/testdp.h
+  )
+
+set(KEN 1)
