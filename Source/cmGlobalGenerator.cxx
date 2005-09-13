@@ -888,6 +888,22 @@ void cmGlobalGenerator::FillProjectMap()
 }
 
 
+///! Find a local generator by its startdirectory
+cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(const char* start_dir)
+{
+  std::vector<cmLocalGenerator*>* gens = &m_LocalGenerators;
+  for(unsigned int i = 0; i < gens->size(); ++i)
+    {
+    std::string sd = (*gens)[i]->GetMakefile()->GetStartDirectory();
+    if (sd == start_dir)
+      {
+      return (*gens)[i];
+      }
+    }
+  return 0;
+}
+
+
 cmTarget* cmGlobalGenerator::FindTarget(const char* project, 
                                         const char* name)
 {

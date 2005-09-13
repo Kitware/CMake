@@ -146,6 +146,9 @@ public:
   ///! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const char* project, const char* name);
 
+  ///! Find a local generator by its startdirectory
+  cmLocalGenerator* FindLocalGenerator(const char* start_dir);
+
 protected:
   // Fill the m_ProjectMap, this must be called after m_LocalGenerators has been populated.
   void FillProjectMap();

@@ -29,17 +29,55 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     }
   
   std::vector<std::string>::size_type cc;
-  std::string variable = args[0];
+  std::vector<std::string>::const_iterator i = args.begin();
+  std::string variable = *i;
+  ++i;
   std::string output = "";
+    
+  // get the directory argument if there is one
+  cmMakefile *dir = m_Makefile;
+  if (*i == "DIRECTORY")
+    {
+    ++i;
+    if (i == args.end())
+      {
+      this->SetError
+        ("DIRECTORY argument provided without subsequent arguments");
+      return false;
+      }
+    std::string sd = *i;
+    // make sure the start dir is a full path
+    if (!cmSystemTools::FileIsFullPath(sd.c_str()))
+      {
+      sd = m_Makefile->GetStartDirectory();
+      sd += "/";
+      sd += *i;
+      }
+    // lookup the makefile from the directory name
+    cmLocalGenerator *lg = 
+      m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+      FindLocalGenerator(sd.c_str());
+    if (!lg)
+      {
+      this->SetError
+        ("DIRECTORY argument provided but requested directory not found. This could be because the directory argument was invalid or, it is valid but has not been processed yet.");
+      return false;
+      }
+    dir = lg->GetMakefile();
+    ++i;
+    }
 
-  if ( args[1] == "VARIABLES" || args[1] == "CACHE_VARIABLES" )
+  // OK, now we have the directory to process, we just get the requested
+  // information out of it
+  
+  if ( *i == "VARIABLES" || *i == "CACHE_VARIABLES" )
     {
     int cacheonly = 0;
-    if ( args[1] == "CACHE_VARIABLES" )
+    if ( *i == "CACHE_VARIABLES" )
       {
       cacheonly = 1;
       }
-    std::vector<std::string> vars = m_Makefile->GetDefinitions(cacheonly);
+    std::vector<std::string> vars = dir->GetDefinitions(cacheonly);
     for ( cc = 0; cc < vars.size(); cc ++ )
       {
       if ( cc > 0 )
@@ -49,21 +87,21 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
       output += vars[cc];
       }
     }
-  else if ( args[1] == "MACROS" )
+  else if ( *i == "MACROS" )
     {
-    m_Makefile->GetListOfMacros(output);
+    dir->GetListOfMacros(output);
     }
-  else if ( args[1] == "DEFINITIONS" )
+  else if ( *i == "DEFINITIONS" )
     {
-    output=m_Makefile->GetDefineFlags();
+    output = dir->GetDefineFlags();
     }
-  else if ( args[1] == "INCLUDE_DIRECTORIES" )
+  else if ( *i == "INCLUDE_DIRECTORIES" )
     {
     std::vector<std::string>::iterator it;
     int first = 1;
     cmOStringStream str;
-    for ( it = m_Makefile->GetIncludeDirectories().begin();
-      it != m_Makefile->GetIncludeDirectories().end();
+    for ( it = dir->GetIncludeDirectories().begin();
+      it != dir->GetIncludeDirectories().end();
       ++ it )
       {
       if ( !first )
@@ -75,17 +113,17 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
       }
     output = str.str();
     }
-  else if ( args[1] == "INCLUDE_REGULAR_EXPRESSION" )
+  else if ( *i == "INCLUDE_REGULAR_EXPRESSION" )
     {
-    output = m_Makefile->GetIncludeRegularExpression();
+    output = dir->GetIncludeRegularExpression();
     }
-  else if ( args[1] == "LINK_DIRECTORIES" )
+  else if ( *i == "LINK_DIRECTORIES" )
     {
     std::vector<std::string>::iterator it;
     int first = 1;
     cmOStringStream str;
-    for ( it = m_Makefile->GetLinkDirectories().begin();
-      it != m_Makefile->GetLinkDirectories().end();
+    for ( it = dir->GetLinkDirectories().begin();
+      it != dir->GetLinkDirectories().end();
       ++ it )
       {
       if ( !first )
@@ -96,10 +134,21 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
       first = 0;
       }
     output = str.str();
+    }
+  else if ( *i == "DEFINITION" )
+    {
+    ++i;
+    if (i == args.end())
+      {
+      this->SetError
+        ("A request for a variable definition was made without providing the name of the variable to get.");
+      return false;
+      }
+    output = dir->GetSafeDefinition(i->c_str());
     }
   else
     {
-    const char *prop = m_Makefile->GetProperty(args[1].c_str());
+    const char *prop = dir->GetProperty(i->c_str());
     if (prop)
       {
       m_Makefile->AddDefinition(variable.c_str(), prop);
