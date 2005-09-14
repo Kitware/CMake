@@ -47,7 +47,11 @@
 # QT_DEFINITIONS                Definitions to use when compiling code that
 #                               uses Qt.
 #
-# QT_INCLUDES                   List of paths to all include directories of Qt4
+# QT_INCLUDES                   List of paths to all include directories of 
+#                               Qt4 QT_INCLUDE_DIR, QT_QT_INCLUDE_DIR, and QT_QTGUI_INCLUDE_DIR are
+#                               always in this variable even if NOTFOUND, all other INCLUDE_DIRS are
+#                               only added if they are found.
+# 
 # QT_INCLUDE_DIR                Path to "include" of Qt4
 # QT_QT_INCLUDE_DIR             Path to "include/Qt" of Qt4
 # QT_QT3SUPPORT_INCLUDE_DIR     Path to "include/Qt3Support" of Qt
@@ -302,19 +306,26 @@ IF(QT4_QMAKE_FOUND)
   # Set QT_INCLUDES
   SET( QT_INCLUDES
     ${QT_INCLUDE_DIR} 
-    ${QT_QT_INCLUDE_DIR} 
-    ${QT_QT3SUPPORT_INCLUDE_DIR} 
-    ${QT_QTASSISTANT_INCLUDE_DIR} 
     ${QT_QTCORE_INCLUDE_DIR} 
-    ${QT_QTDESIGNER_INCLUDE_DIR} 
-    ${QT_QTDESIGNER_INCLUDE_DIR}/..
+    ${QT_QT_INCLUDE_DIR}     
     ${QT_QTGUI_INCLUDE_DIR} 
-    ${QT_QTMOTIF_INCLUDE_DIR} 
-    ${QT_QTNETWORK_INCLUDE_DIR} 
-    ${QT_QTNSPLUGIN_INCLUDE_DIR} 
-    ${QT_QTOPENGL_INCLUDE_DIR} 
-    ${QT_QTSQL_INCLUDE_DIR} 
-    ${QT_QTXML_INCLUDE_DIR} )
+    )
+  # append optional flags
+  MACRO(QT4_APPEND_INCLUDES_FLAG FLAG)
+    IF(${FLAG})
+      SET(QT_INCLUDES ${QT_INCLUDES} "${${FLAG}}")
+    ENDIF(${FLAG})
+  ENDMACRO(APPEND_INCLUDE_FLAG)
+  QT4_APPEND_INCLUDES_FLAG(QT_QT3SUPPORT_INCLUDE_DIR)
+  QT4_APPEND_INCLUDES_FLAG(QT_QTASSISTANT_INCLUDE_DIR)
+  QT4_APPEND_INCLUDES_FLAG(QT_QTDESIGNER_INCLUDE_DIR)
+  QT4_APPEND_INCLUDES_FLAG(QT_QTDESIGNER_INCLUDE_DIR)
+  QT4_APPEND_INCLUDES_FLAG(QT_QTMOTIF_INCLUDE_DIR) 
+  QT4_APPEND_INCLUDES_FLAG(QT_QTNETWORK_INCLUDE_DIR) 
+  QT4_APPEND_INCLUDES_FLAG(QT_QTNSPLUGIN_INCLUDE_DIR) 
+  QT4_APPEND_INCLUDES_FLAG(QT_QTOPENGL_INCLUDE_DIR) 
+  QT4_APPEND_INCLUDES_FLAG(QT_QTSQL_INCLUDE_DIR) 
+  QT4_APPEND_INCLUDES_FLAG(QT_QTXML_INCLUDE_DIR)
 
 
   ########################################
