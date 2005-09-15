@@ -501,7 +501,7 @@ int cmCTestCoverageHandler::ProcessHandler()
           {
           cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "   produced s: " << sourceFile.c_str() << std::endl);
           ofs << "  produced in source dir: " << sourceFile.c_str() << std::endl;
-          actualSourceFile = cmSystemTools::CollapseFullPath(sourceFile);
+          actualSourceFile = cmSystemTools::CollapseFullPath(sourceFile.c_str());
           }
         // Binary dir?
         if ( sourceFile.size() > binaryDir.size() &&
@@ -510,7 +510,7 @@ int cmCTestCoverageHandler::ProcessHandler()
           {
           cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "   produced b: " << sourceFile.c_str() << std::endl);
           ofs << "  produced in binary dir: " << sourceFile.c_str() << std::endl;
-          actualSourceFile = cmSystemTools::CollapseFullPath(sourceFile);
+          actualSourceFile = cmSystemTools::CollapseFullPath(sourceFile.c_str());
           }
         if ( actualSourceFile.empty() )
           {
