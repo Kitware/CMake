@@ -386,7 +386,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         // so that it will get tested the next time cmake is run
         if(!mf->IsOn(compilerWorks.c_str()))
           { 
-          std::string fpath = rootBin;
+          fpath = rootBin;
           fpath += "/CMake";
           fpath += lang;
           fpath += "Compiler.cmake";
