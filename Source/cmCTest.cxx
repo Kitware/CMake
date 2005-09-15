@@ -538,7 +538,7 @@ bool cmCTest::UpdateCTestConfiguration()
 void cmCTest::BlockTestErrorDiagnostics()
 {
   cmSystemTools::PutEnv("DART_TEST_FROM_DART=1");
-  cmSystemTools::PutEnv("DASHBOARD_TEST_FROM_CTEST=1");
+  cmSystemTools::PutEnv("DASHBOARD_TEST_FROM_CTEST=" CMake_VERSION);
 #if defined(_WIN32)
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX); 
 #endif
