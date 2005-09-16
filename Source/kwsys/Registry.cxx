@@ -437,7 +437,6 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
     char buffer[Registry_BUFFER_SIZE];
     while( !ifs->fail() )
       {
-      int found = 0;
       ifs->getline(buffer, Registry_BUFFER_SIZE);
       if ( ifs->fail() || ifs->eof() )
         {
@@ -463,7 +462,6 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
           this->EntriesMap[nkey] = this->DecodeValue(nvalue);
           m_Empty = 0;
           delete [] key;
-          found = 1;      
           break;
           }
         }
