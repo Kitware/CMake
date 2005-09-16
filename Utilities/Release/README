@@ -1,12 +1,9 @@
 1. Update Version information
   - change version in CMakeLists.txt
-  - build on windows, and do a make; make install; make release
+  - build on windows, and do a make; make install; make release // this step tags 
     - this changes cmake_release.sh
   * for major release edit   Source/cmCPluginAPI.h 
 
-2. tag the release 
-cvs co -r CMake-2-0  # checkout current release branch
-cvs tag CMake-2-0-3  # tag with minor version number
 
 NOTES from Brad:
 

@@ -14,6 +14,23 @@ SET (SCPID "kitware@public.kitware.com")
 SET (CVSROOT ":pserver:anoncvs@www.cmake.org:/cvsroot/CMake")
 
 #########################################################################
+# commit the configured release.sh file
+#########################################################################
+IF (COMMIT_UNIX_SCRIPT)
+  # first copy the file
+  EXEC_PROGRAM(${CMAKE_COMMAND} "@PROJECT_SOURCE_DIR@"
+    ARGS -E copy 
+    "@PROJECT_BINARY_DIR@/Utilities/Release/cmake_release.sh" 
+    "@PROJECT_SOURCE_DIR@/Utilities/Release"
+    )
+  # then commit it
+  EXEC_PROGRAM(cvs "@PROJECT_SOURCE_DIR@"
+    ARGS commit -m \"ENH: update revision numbers\" 
+    "@PROJECT_SOURCE_DIR@/Utilities/Release/cmake_release.sh" 
+    )
+ENDIF (COMMIT_UNIX_SCRIPT)
+
+#########################################################################
 # build the NSI if requested
 #########################################################################
 IF (BUILD_NSIW)
@@ -26,6 +43,7 @@ IF (BUILD_NSIW)
     ${SCPID}:/projects/FTP/pub/cmake/v@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@
     )
 ENDIF (BUILD_NSIW)
+
 
 #########################################################################
 # tag the tree if requested
