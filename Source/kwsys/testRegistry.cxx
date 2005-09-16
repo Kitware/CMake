@@ -53,14 +53,14 @@ int main(int, char**)
   IFT(reg.SetValue("TestSubkey",  "TestKey3", "Test Value 3"), res);
   IFT(reg.SetValue("TestSubkey2", "TestKey4", "Test Value 4"), res);
 
-  char buffer[1024];
-  IFT(reg.ReadValue("TestSubkey",  "TestKey1", buffer), res);
+  const char *buffer;
+  IFT(reg.ReadValue("TestSubkey",  "TestKey1", &buffer), res);
   CHE(buffer, "Test Value 1", res);
-  IFT(reg.ReadValue("TestSubkey1", "TestKey2", buffer), res);
+  IFT(reg.ReadValue("TestSubkey1", "TestKey2", &buffer), res);
   CHE(buffer, "Test Value 2", res);
-  IFT(reg.ReadValue("TestSubkey",  "TestKey3", buffer), res);
+  IFT(reg.ReadValue("TestSubkey",  "TestKey3", &buffer), res);
   CHE(buffer, "Test Value 3", res);
-  IFT(reg.ReadValue("TestSubkey2", "TestKey4", buffer), res);
+  IFT(reg.ReadValue("TestSubkey2", "TestKey4", &buffer), res);
   CHE(buffer, "Test Value 4", res);
  
   IFT(reg.SetValue("TestSubkey",  "TestKey1", "New Test Value 1"), res);
@@ -68,23 +68,32 @@ int main(int, char**)
   IFT(reg.SetValue("TestSubkey",  "TestKey3", "New Test Value 3"), res);
   IFT(reg.SetValue("TestSubkey2", "TestKey4", "New Test Value 4"), res);
 
-  IFT(reg.ReadValue("TestSubkey",  "TestKey1", buffer), res);
+  IFT(reg.ReadValue("TestSubkey",  "TestKey1", &buffer), res);
   CHE(buffer, "New Test Value 1", res);
-  IFT(reg.ReadValue("TestSubkey1", "TestKey2", buffer), res);
+  IFT(reg.ReadValue("TestSubkey1", "TestKey2", &buffer), res);
   CHE(buffer, "New Test Value 2", res);
-  IFT(reg.ReadValue("TestSubkey",  "TestKey3", buffer), res);
+  IFT(reg.ReadValue("TestSubkey",  "TestKey3", &buffer), res);
   CHE(buffer, "New Test Value 3", res);
-  IFT(reg.ReadValue("TestSubkey2", "TestKey4", buffer), res);
+  IFT(reg.ReadValue("TestSubkey2", "TestKey4", &buffer), res);
   CHE(buffer, "New Test Value 4", res);
 
   IFT( reg.DeleteValue("TestSubkey",  "TestKey1"), res);
-  IFNT(reg.ReadValue(  "TestSubkey",  "TestKey1", buffer), res);
+  IFNT(reg.ReadValue(  "TestSubkey",  "TestKey1", &buffer), res);
   IFT( reg.DeleteValue("TestSubkey1", "TestKey2"), res);
-  IFNT(reg.ReadValue(  "TestSubkey1", "TestKey2", buffer), res);
+  IFNT(reg.ReadValue(  "TestSubkey1", "TestKey2", &buffer), res);
   IFT( reg.DeleteValue("TestSubkey",  "TestKey3"), res);
-  IFNT(reg.ReadValue(  "TestSubkey",  "TestKey3", buffer), res);
+  IFNT(reg.ReadValue(  "TestSubkey",  "TestKey3", &buffer), res);
   IFT( reg.DeleteValue("TestSubkey2", "TestKey4"), res);
-  IFNT(reg.ReadValue(  "TestSubkey2", "TestKey5", buffer), res);  
+  IFNT(reg.ReadValue(  "TestSubkey2", "TestKey5", &buffer), res);  
+
+  const char* longStringWithNewLines = "Value with embedded CR and LF characters CR='\015' LF='\012' CRLF='\015\012'";
+  IFT(reg.SetValue("TestSubkeyWithVeryLongInFactSoLongItsHardToImagineAnybodyWouldReallyDoItLongName",  "TestKey1", longStringWithNewLines), res);
+  IFT(reg.ReadValue("TestSubkeyWithVeryLongInFactSoLongItsHardToImagineAnybodyWouldReallyDoItLongName", "TestKey1", &buffer), res);
+  CHE(buffer, longStringWithNewLines, res);
+
+  IFT(reg.SetValue("TestSubkeyWith = EqualSignChar",  "TestKey = 1", "Some value"), res);
+  IFT(reg.ReadValue("TestSubkeyWith = EqualSignChar",  "TestKey = 1", &buffer), res);
+  CHE(buffer, "Some value", res);
 
   if ( res )
     {

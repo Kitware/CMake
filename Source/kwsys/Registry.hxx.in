@@ -39,19 +39,19 @@ public:
 #ifdef _WIN32
     WIN32_REGISTRY,
 #endif
-    UNIX_REGISTRY
+    FILE_REGISTRY
     };
 
 #ifdef _WIN32
   Registry(RegistryType registryType = WIN32_REGISTRY);
 #else
-  Registry(RegistryType registryType = UNIX_REGISTRY);
+  Registry(RegistryType registryType = FILE_REGISTRY);
 #endif
 
   virtual ~Registry();
 
   //! Read a value from the registry.
-  bool ReadValue(const char *subkey, const char *key, char *value);
+  bool ReadValue(const char *subkey, const char *key, const char **value);
 
   //! Delete a key from the registry.
   bool DeleteKey(const char *subkey, const char *key);
