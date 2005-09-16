@@ -1,0 +1,110 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef @KWSYS_NAMESPACE@_Registry_hxx
+#define @KWSYS_NAMESPACE@_Registry_hxx
+
+#include <@KWSYS_NAMESPACE@/Configure.h>
+
+#include <@KWSYS_NAMESPACE@/stl/string>
+
+namespace @KWSYS_NAMESPACE@
+{
+
+class RegistryHelper;
+
+/** \class Registry
+ * \brief Portable registry class
+ *
+ * This class abstracts the storing of data that can be restored
+ * when the program executes again. On Win32 platform it is 
+ * implemented using the registry and on unix as a file in
+ * the user's home directory.
+ */
+class @KWSYS_NAMESPACE@_EXPORT Registry
+{
+public:
+  enum RegistryType
+    {
+#ifdef WIN32
+    WIN32_REGISTRY,
+#endif
+    UNIX_REGISTRY
+    };
+
+#ifdef WIN32
+  Registry(RegistryType registryType = WIN32_REGISTRY);
+#else
+  Registry(RegistryType registryType = UNIX_REGISTRY);
+#endif
+
+  virtual ~Registry();
+
+  //! Read a value from the registry.
+  bool ReadValue(const char *subkey, const char *key, char *value);
+
+  //! Delete a key from the registry.
+  bool DeleteKey(const char *subkey, const char *key);
+
+  //! Delete a value from a given key.
+  bool DeleteValue(const char *subkey, const char *key);
+
+  //! Set value in a given key.
+  bool SetValue(const char *subkey, const char *key, 
+               const char *value);
+
+  //! Open the registry at toplevel/subkey.
+  bool Open(const char *toplevel, const char *subkey, 
+           int readonly);
+  
+  //! Close the registry. 
+  bool Close();
+
+  //! Read from local or global scope. On Windows this mean from local machine
+  // or local user. On unix this will read from $HOME/.Projectrc or 
+  // /etc/Project
+  void GlobalScopeOn() { this->SetGlobalScope(1); }
+  void GlobalScopeOff() { this->SetGlobalScope(0); }
+  void SetGlobalScope(bool b) { m_GlobalScope = b; }
+  bool GetGlobalScope() { return m_GlobalScope; }
+  
+  // Set or get the toplevel registry key.
+  void SetTopLevel(const char* tl);
+  const char* GetTopLevel();
+
+  // Return true if registry opened
+  bool GetOpened() { return m_Opened; }
+
+  // Should the registry be locked?
+  bool GetLocked() { return m_Locked; }
+
+  enum {
+    READONLY,
+    READWRITE
+  };
+
+  // Return true if the character is space.
+  int IsSpace(char c);
+
+private:
+  RegistryHelper* Helper;
+
+  bool m_Opened;
+   
+  bool m_Locked;
+  bool m_GlobalScope;
+}; // End Class: Registry
+
+} // namespace @KWSYS_NAMESPACE@
+
+#endif

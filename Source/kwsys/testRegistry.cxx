@@ -1,0 +1,94 @@
+/*=========================================================================
+
+  Program:   ParaView
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc.
+  All rights reserved.
+  See Copyright.txt or http://www.paraview.org/HTML/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#include "kwsysPrivate.h"
+
+#include KWSYS_HEADER(Registry.hxx)
+#include KWSYS_HEADER(ios/iostream)
+
+// Work-around CMake dependency scanning limitation.  This must
+// duplicate the above list of headers.
+#if 0
+# include "Registry.hxx.in"
+# include "kwsys_ios_iostream.h.in"
+#endif
+
+#define IFT(x,res) if ( !x )                    \
+  {                                             \
+  res = 1;                                      \
+  kwsys_ios::cout << "Error in: " << #x << kwsys_ios::endl;           \
+  }
+#define IFNT(x,res) if ( x )                    \
+  {                                             \
+  res = 1;                                      \
+  kwsys_ios::cout << "Error in: " << #x << kwsys_ios::endl;           \
+  }
+
+#define CHE(x,y,res) if ( strcmp(x,y) )                 \
+  {                                                     \
+  res = 1;                                              \
+  kwsys_ios::cout << "Error, " << x << " != " << y << kwsys_ios::endl;        \
+  }
+
+int main(int, char**)
+{
+  int res = 0;
+  
+  kwsys::Registry reg;
+  reg.SetTopLevel("TestRegistry");
+  
+  IFT(reg.SetValue("TestSubkey",  "TestKey1", "Test Value 1"), res);
+  IFT(reg.SetValue("TestSubkey1", "TestKey2", "Test Value 2"), res);
+  IFT(reg.SetValue("TestSubkey",  "TestKey3", "Test Value 3"), res);
+  IFT(reg.SetValue("TestSubkey2", "TestKey4", "Test Value 4"), res);
+
+  char buffer[1024];
+  IFT(reg.ReadValue("TestSubkey",  "TestKey1", buffer), res);
+  CHE(buffer, "Test Value 1", res);
+  IFT(reg.ReadValue("TestSubkey1", "TestKey2", buffer), res);
+  CHE(buffer, "Test Value 2", res);
+  IFT(reg.ReadValue("TestSubkey",  "TestKey3", buffer), res);
+  CHE(buffer, "Test Value 3", res);
+  IFT(reg.ReadValue("TestSubkey2", "TestKey4", buffer), res);
+  CHE(buffer, "Test Value 4", res);
+ 
+  IFT(reg.SetValue("TestSubkey",  "TestKey1", "New Test Value 1"), res);
+  IFT(reg.SetValue("TestSubkey1", "TestKey2", "New Test Value 2"), res);
+  IFT(reg.SetValue("TestSubkey",  "TestKey3", "New Test Value 3"), res);
+  IFT(reg.SetValue("TestSubkey2", "TestKey4", "New Test Value 4"), res);
+
+  IFT(reg.ReadValue("TestSubkey",  "TestKey1", buffer), res);
+  CHE(buffer, "New Test Value 1", res);
+  IFT(reg.ReadValue("TestSubkey1", "TestKey2", buffer), res);
+  CHE(buffer, "New Test Value 2", res);
+  IFT(reg.ReadValue("TestSubkey",  "TestKey3", buffer), res);
+  CHE(buffer, "New Test Value 3", res);
+  IFT(reg.ReadValue("TestSubkey2", "TestKey4", buffer), res);
+  CHE(buffer, "New Test Value 4", res);
+
+  IFT( reg.DeleteValue("TestSubkey",  "TestKey1"), res);
+  IFNT(reg.ReadValue(  "TestSubkey",  "TestKey1", buffer), res);
+  IFT( reg.DeleteValue("TestSubkey1", "TestKey2"), res);
+  IFNT(reg.ReadValue(  "TestSubkey1", "TestKey2", buffer), res);
+  IFT( reg.DeleteValue("TestSubkey",  "TestKey3"), res);
+  IFNT(reg.ReadValue(  "TestSubkey",  "TestKey3", buffer), res);
+  IFT( reg.DeleteValue("TestSubkey2", "TestKey4"), res);
+  IFNT(reg.ReadValue(  "TestSubkey2", "TestKey5", buffer), res);  
+
+  if ( res )
+    {
+    kwsys_ios::cout << "Test failed" << kwsys_ios::endl;
+    }
+  return res;
+}
