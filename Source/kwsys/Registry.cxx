@@ -88,13 +88,10 @@ protected:
   bool m_SubKeySpecified;
 
   Registry::RegistryType m_RegistryType;
-
-
-  static const int BUFFER_SIZE;
 };
 
 //----------------------------------------------------------------------------
-const int RegistryHelper::BUFFER_SIZE = 8192;
+#define Registry_BUFFER_SIZE 8192
 
 //----------------------------------------------------------------------------
 Registry::Registry(Registry::RegistryType registryType)
@@ -427,11 +424,11 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
       }
 
     res = true;
-    char buffer[BUFFER_SIZE];
+    char buffer[Registry_BUFFER_SIZE];
     while( !ifs->fail() )
       {
       int found = 0;
-      ifs->getline(buffer, BUFFER_SIZE);
+      ifs->getline(buffer, Registry_BUFFER_SIZE);
       if ( ifs->fail() || ifs->eof() )
         {
         break;
@@ -547,7 +544,7 @@ bool RegistryHelper::ReadValue(const char *skey, char *value)
     int res = 1;
     DWORD dwType, dwSize;  
     dwType = REG_SZ;
-    dwSize = BUFFER_SIZE;
+    dwSize = Registry_BUFFER_SIZE;
     res = ( RegQueryValueEx(this->HKey, skey, NULL, &dwType, 
         (BYTE *)value, &dwSize) == ERROR_SUCCESS );
     return (res != 0);
