@@ -36,13 +36,13 @@ class @KWSYS_NAMESPACE@_EXPORT Registry
 public:
   enum RegistryType
     {
-#ifdef WIN32
+#ifdef _WIN32
     WIN32_REGISTRY,
 #endif
     UNIX_REGISTRY
     };
 
-#ifdef WIN32
+#ifdef _WIN32
   Registry(RegistryType registryType = WIN32_REGISTRY);
 #else
   Registry(RegistryType registryType = UNIX_REGISTRY);

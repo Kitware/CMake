@@ -25,16 +25,10 @@
 #include <ctype.h> // for isspace
 #include <stdio.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 # include <windows.h>
 #endif
 
-#ifdef KWSYS_IOS_USE_ANSI
-# define VTK_IOS_NOCREATE 
-#else
-# define VTK_IOS_NOCREATE | kwsys_ios::ios::nocreate
-#endif
-#define BUFFER_SIZE 8192
 
 namespace KWSYS_NAMESPACE
 {
@@ -79,7 +73,7 @@ protected:
   kwsys_stl::string m_TopLevel;  
   bool m_GlobalScope;
 
-#ifdef WIN32
+#ifdef _WIN32
   HKEY HKey;
 #endif
   // Strip trailing and ending spaces.
@@ -94,8 +88,13 @@ protected:
   bool m_SubKeySpecified;
 
   Registry::RegistryType m_RegistryType;
+
+
+  static const int BUFFER_SIZE;
 };
 
+//----------------------------------------------------------------------------
+const int RegistryHelper::BUFFER_SIZE = 8192;
 
 //----------------------------------------------------------------------------
 Registry::Registry(Registry::RegistryType registryType)
@@ -366,7 +365,7 @@ RegistryHelper::~RegistryHelper()
 bool RegistryHelper::Open(const char *toplevel, const char *subkey,
   int readonly)
 {  
-#ifdef WIN32
+#ifdef _WIN32
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     HKEY scope = HKEY_CURRENT_USER;
@@ -412,7 +411,11 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
       ofs.close();
       }
 
-    kwsys_ios::ifstream *ifs = new kwsys_ios::ifstream(str.str().c_str(), kwsys_ios::ios::in VTK_IOS_NOCREATE);
+    kwsys_ios::ifstream *ifs = new kwsys_ios::ifstream(str.str().c_str(), kwsys_ios::ios::in
+#ifndef KWSYS_IOS_USE_ANSI
+      | kwsys_ios::ios::nocreate
+#endif
+      );
     if ( !ifs )
       {
       return false;
@@ -469,14 +472,14 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
 //----------------------------------------------------------------------------
 bool RegistryHelper::Close()
 {
-#ifdef WIN32
+#ifdef _WIN32
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res;
     res = ( RegCloseKey(this->HKey) == ERROR_SUCCESS );    
     return (res != 0);
     }
-#else
+#endif
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
     {
     int res = 0;
@@ -533,7 +536,6 @@ bool RegistryHelper::Close()
     m_Empty = 1;
     return res;
     }
-#endif
   return false;
 }
 
@@ -541,7 +543,7 @@ bool RegistryHelper::Close()
 bool RegistryHelper::ReadValue(const char *skey, char *value)
 
 {
-#ifdef WIN32
+#ifdef _WIN32
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res = 1;
@@ -552,7 +554,7 @@ bool RegistryHelper::ReadValue(const char *skey, char *value)
         (BYTE *)value, &dwSize) == ERROR_SUCCESS );
     return (res != 0);
     }
-#else
+#endif
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
     {
     int res = 0;
@@ -571,42 +573,40 @@ bool RegistryHelper::ReadValue(const char *skey, char *value)
     delete [] key;
     return res;
     }
-#endif
   return false;
 }
 
 //----------------------------------------------------------------------------
 bool RegistryHelper::DeleteKey(const char* key)
 {
-#ifdef WIN32
+#ifdef _WIN32
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res = 1;
     res = ( RegDeleteKey( this->HKey, key ) == ERROR_SUCCESS );
     return (res != 0);
     }
-#else
+#endif
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
     {
     (void)key;
     int res = 0;
     return res;
     }
-#endif
   return false;
 }
 
 //----------------------------------------------------------------------------
 bool RegistryHelper::DeleteValue(const char *skey)
 {
-#ifdef WIN32
+#ifdef _WIN32
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res = 1;
     res = ( RegDeleteValue( this->HKey, skey ) == ERROR_SUCCESS );
     return (res != 0);
     }
-#else
+#endif
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
     {
     char *key = this->CreateKey( skey );
@@ -618,14 +618,13 @@ bool RegistryHelper::DeleteValue(const char *skey)
     delete [] key;
     return 1;
     }
-#endif
   return false;
 }
 
 //----------------------------------------------------------------------------
 bool RegistryHelper::SetValue(const char *skey, const char *value)
 {
-#ifdef WIN32
+#ifdef _WIN32
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res = 1;
@@ -635,7 +634,7 @@ bool RegistryHelper::SetValue(const char *skey, const char *value)
         len+1) == ERROR_SUCCESS );
     return (res != 0);
     }
-#else
+#endif
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
     {
     char *key = this->CreateKey( skey );
@@ -647,7 +646,6 @@ bool RegistryHelper::SetValue(const char *skey, const char *value)
     delete [] key;
     return 1;
     }
-#endif
   return false;
 }
 
