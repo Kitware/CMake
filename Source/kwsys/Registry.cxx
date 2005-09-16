@@ -525,7 +525,7 @@ bool RegistryHelper::Close()
         it != this->EntriesMap.end();
         ++ it )
         {
-        *ofs << it->first.c_str() << " = " << it->second.c_str()<< kwsys_ios::endl;
+        *ofs << it->first.c_str() << " = " << this->EncodeValue(it->second.c_str()).c_str() << kwsys_ios::endl;
         }
       }
     this->EntriesMap.erase(
@@ -660,7 +660,7 @@ bool RegistryHelper::SetValue(const char *skey, const char *value)
       {
       return 0;
       }
-    this->EntriesMap[key] = this->EncodeValue(value);
+    this->EntriesMap[key] = value;
     return 1;
     }
   return false;
@@ -744,7 +744,7 @@ kwsys_stl::string RegistryHelper::EncodeKey(const char* str)
     {
     switch ( *str )
       {
-    case '%': case '=': case '\n': case '\r': case '\t': case ' ':
+    case '%': case '=': case '\n': case '\r': case '\t':
       char buffer[4];
       sprintf(buffer, "%%%02X", *str);
       ostr << buffer;
