@@ -25,6 +25,10 @@
 #include <ctype.h> // for isspace
 #include <stdio.h>
 
+#ifdef WIN32
+# include <windows.h>
+#endif
+
 #ifdef KWSYS_IOS_USE_ANSI
 # define VTK_IOS_NOCREATE 
 #else
@@ -64,9 +68,16 @@ public:
   void SetTopLevel(const char* tl);
   const char* GetTopLevel() { return m_TopLevel.c_str(); }
 
+  //! Read from local or global scope. On Windows this mean from local machine
+  // or local user. On unix this will read from $HOME/.Projectrc or 
+  // /etc/Project
+  void SetGlobalScope(bool b);
+  bool GetGlobalScope();
+
 protected:
   bool m_Changed;
   kwsys_stl::string m_TopLevel;  
+  bool m_GlobalScope;
 
 #ifdef WIN32
   HKEY HKey;
@@ -91,7 +102,6 @@ Registry::Registry(Registry::RegistryType registryType)
 {
   m_Opened      = false;
   m_Locked      = false;
-  m_GlobalScope = false;
   this->Helper = 0;
   this->Helper = new RegistryHelper(registryType);
 }
@@ -106,6 +116,18 @@ Registry::~Registry()
                   << kwsys_ios::endl;
     }
   delete this->Helper;
+}
+
+//----------------------------------------------------------------------------
+void Registry::SetGlobalScope(bool b)
+{
+  this->Helper->SetGlobalScope(b);
+}
+
+//----------------------------------------------------------------------------
+bool Registry::GetGlobalScope()
+{
+  return this->Helper->GetGlobalScope();
 }
 
 //----------------------------------------------------------------------------
@@ -330,6 +352,7 @@ RegistryHelper::RegistryHelper(Registry::RegistryType registryType)
   m_SubKey  = "";
   m_SubKeySpecified = false;
   m_Empty       = true;
+  m_GlobalScope = false;
   m_RegistryType = registryType;
 }
 
@@ -344,7 +367,7 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
   int readonly)
 {  
 #ifdef WIN32
-  if ( m_RegistryType == Registry::RegistryType::WIN32)
+  if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     HKEY scope = HKEY_CURRENT_USER;
     if ( this->GetGlobalScope() )
@@ -352,32 +375,31 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
       scope = HKEY_LOCAL_MACHINE;
       }
     int res = 0;
-    ostrstream str;
+    kwsys_ios::ostringstream str;
     DWORD dwDummy;
-    str << "Software\\Kitware\\" << toplevel << "\\" << subkey << ends;
-    if ( readonly == vtkKWRegistryUtilities::READONLY )
+    str << "Software\\Kitware\\" << toplevel << "\\" << subkey;
+    if ( readonly == Registry::READONLY )
       {
-      res = ( RegOpenKeyEx(scope, str.str(), 
+      res = ( RegOpenKeyEx(scope, str.str().c_str(), 
           0, KEY_READ, &this->HKey) == ERROR_SUCCESS );
       }
     else
       {
-      res = ( RegCreateKeyEx(scope, str.str(),
+      res = ( RegCreateKeyEx(scope, str.str().c_str(),
           0, "", REG_OPTION_NON_VOLATILE, KEY_READ|KEY_WRITE, 
           NULL, &this->HKey, &dwDummy) == ERROR_SUCCESS );    
       }
-    str.rdbuf()->freeze(0);
-    return res;
+    return (res != 0);
     }
 #endif
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
     {
-    int res = 0;
+    bool res = false;
     int cc;
     kwsys_ios::ostringstream str;
     if ( !getenv("HOME") )
       {
-      return 0;
+      return false; 
       }
     str << getenv("HOME") << "/." << toplevel << "rc";
     if ( readonly == Registry::READWRITE )
@@ -385,7 +407,7 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
       kwsys_ios::ofstream ofs( str.str().c_str(), kwsys_ios::ios::out|kwsys_ios::ios::app );
       if ( ofs.fail() )
         {
-        return 0;
+        return false;
         }
       ofs.close();
       }
@@ -393,15 +415,15 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
     kwsys_ios::ifstream *ifs = new kwsys_ios::ifstream(str.str().c_str(), kwsys_ios::ios::in VTK_IOS_NOCREATE);
     if ( !ifs )
       {
-      return 0;
+      return false;
       }
     if ( ifs->fail())
       {
       delete ifs;
-      return 0;
+      return false;
       }
 
-    res = 1;
+    res = true;
     char buffer[BUFFER_SIZE];
     while( !ifs->fail() )
       {
@@ -448,11 +470,11 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
 bool RegistryHelper::Close()
 {
 #ifdef WIN32
-  if ( m_RegistryType == Registry::RegistryType::WIN32)
+  if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res;
     res = ( RegCloseKey(this->HKey) == ERROR_SUCCESS );    
-    return res;
+    return (res != 0);
     }
 #else
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
@@ -520,15 +542,15 @@ bool RegistryHelper::ReadValue(const char *skey, char *value)
 
 {
 #ifdef WIN32
-  if ( m_RegistryType == Registry::RegistryType::WIN32)
+  if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res = 1;
     DWORD dwType, dwSize;  
     dwType = REG_SZ;
     dwSize = BUFFER_SIZE;
-    res = ( RegQueryValueEx(this->HKey, key, NULL, &dwType, 
+    res = ( RegQueryValueEx(this->HKey, skey, NULL, &dwType, 
         (BYTE *)value, &dwSize) == ERROR_SUCCESS );
-    return res;
+    return (res != 0);
     }
 #else
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
@@ -557,11 +579,11 @@ bool RegistryHelper::ReadValue(const char *skey, char *value)
 bool RegistryHelper::DeleteKey(const char* key)
 {
 #ifdef WIN32
-  if ( m_RegistryType == Registry::RegistryType::WIN32)
+  if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res = 1;
     res = ( RegDeleteKey( this->HKey, key ) == ERROR_SUCCESS );
-    return res;
+    return (res != 0);
     }
 #else
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
@@ -578,11 +600,11 @@ bool RegistryHelper::DeleteKey(const char* key)
 bool RegistryHelper::DeleteValue(const char *skey)
 {
 #ifdef WIN32
-  if ( m_RegistryType == Registry::RegistryType::WIN32)
+  if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res = 1;
-    res = ( RegDeleteValue( this->HKey, key ) == ERROR_SUCCESS );
-    return res;
+    res = ( RegDeleteValue( this->HKey, skey ) == ERROR_SUCCESS );
+    return (res != 0);
     }
 #else
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
@@ -604,14 +626,14 @@ bool RegistryHelper::DeleteValue(const char *skey)
 bool RegistryHelper::SetValue(const char *skey, const char *value)
 {
 #ifdef WIN32
-  if ( m_RegistryType == Registry::RegistryType::WIN32)
+  if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res = 1;
     DWORD len = (DWORD)(value ? strlen(value) : 0);
-    res = ( RegSetValueEx(this->HKey, key, 0, REG_SZ, 
+    res = ( RegSetValueEx(this->HKey, skey, 0, REG_SZ, 
         (CONST BYTE *)(const char *)value, 
         len+1) == ERROR_SUCCESS );
-    return res;
+    return (res != 0);
     }
 #else
   if ( m_RegistryType == Registry::UNIX_REGISTRY )
@@ -686,6 +708,18 @@ char *RegistryHelper::Strip(char *str)
       }
     }
   return nstr;
+}
+
+//----------------------------------------------------------------------------
+void RegistryHelper::SetGlobalScope(bool b)
+{
+  m_GlobalScope = b;
+}
+
+//----------------------------------------------------------------------------
+bool RegistryHelper::GetGlobalScope()
+{
+  return m_GlobalScope;
 }
 
 } // namespace KWSYS_NAMESPACE

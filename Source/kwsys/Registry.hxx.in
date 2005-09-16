@@ -75,8 +75,8 @@ public:
   // /etc/Project
   void GlobalScopeOn() { this->SetGlobalScope(1); }
   void GlobalScopeOff() { this->SetGlobalScope(0); }
-  void SetGlobalScope(bool b) { m_GlobalScope = b; }
-  bool GetGlobalScope() { return m_GlobalScope; }
+  void SetGlobalScope(bool b);
+  bool GetGlobalScope();
   
   // Set or get the toplevel registry key.
   void SetTopLevel(const char* tl);
@@ -102,7 +102,6 @@ private:
   bool m_Opened;
    
   bool m_Locked;
-  bool m_GlobalScope;
 }; // End Class: Registry
 
 } // namespace @KWSYS_NAMESPACE@
