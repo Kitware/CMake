@@ -390,6 +390,10 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
           0, "", REG_OPTION_NON_VOLATILE, KEY_READ|KEY_WRITE, 
           NULL, &this->HKey, &dwDummy) == ERROR_SUCCESS );    
       }
+    if ( res != 0 )
+      {
+      this->SetSubKey( subkey );
+      }
     return (res != 0);
     }
 #endif
@@ -553,8 +557,8 @@ bool RegistryHelper::ReadValue(const char *skey, const char **value)
     int res = 1;
     DWORD dwType, dwSize;  
     dwType = REG_SZ;
-    dwSize = Registry_BUFFER_SIZE;
     char buffer[1024]; // Replace with RegQueryInfoKey
+    dwSize = sizeof(buffer);
     res = ( RegQueryValueEx(this->HKey, skey, NULL, &dwType, 
         (BYTE *)buffer, &dwSize) == ERROR_SUCCESS );
     if ( !res )
