@@ -45,7 +45,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
       }
     }
   m_CTest->SetTimeOut(timeout);
-  cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("test");
+  cmCTestGenericHandler* handler = this->InitializeActualHandler();
   if ( m_Values[ctt_START] || m_Values[ctt_END] || m_Values[ctt_STRIDE] )
     {
     cmOStringStream testsToRunString;
