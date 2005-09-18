@@ -63,6 +63,14 @@
 #  foosys::Directory directory;
 #
 
+# NOTE: This library is intended for internal use by Kitware-driven
+# projects.  In order to keep it simple no attempt will be made to
+# maintain backward compatibility when changes are made to KWSys.
+# When an incompatible change is made Kitware's projects that use
+# KWSys will be fixed, but no notification will necessarily be sent to
+# any outside mailing list and no documentation of the change will be
+# written.
+
 #-----------------------------------------------------------------------------
 # If a namespace is not specified, use "kwsys" and enable testing.
 # This should be the case only when kwsys is not included inside
