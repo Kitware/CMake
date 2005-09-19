@@ -70,7 +70,7 @@ public:
   cmTypeMacro(cmCTestTestCommand, cmCTestHandlerCommand);
 
 protected:
-  cmCTestGenericHandler* InitializeActualHandler();
+  virtual cmCTestGenericHandler* InitializeActualHandler();
   cmCTestGenericHandler* InitializeHandler();
 
   enum {
