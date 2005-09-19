@@ -132,7 +132,7 @@ MAKEVAR \$\([A-Za-z0-9_]*\)
   return 1;
 }
 
-({MAKEVAR}|[^ \t\r\n\(\)#\\\"]|\\.)({MAKEVAR}|[^ \t\r\n\(\)#\\\"]|\\.|\"({MAKEVAR}|[^ \t\r\n\(\)#\\\"]|\\.)*\")* {
+({MAKEVAR}|[^ \t\r\n\(\)#\\\"]|\\.)({MAKEVAR}|[^ \t\r\n\(\)#\\\"]|\\.|\"({MAKEVAR}|[^\r\n\(\)#\\\"]|\\.)*\")* {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
