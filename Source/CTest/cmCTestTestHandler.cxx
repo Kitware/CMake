@@ -629,7 +629,16 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       }
 
     cmCTestLog(m_CTest, HANDLER_OUTPUT, std::setw(3) << cnt << "/");
-    cmCTestLog(m_CTest, HANDLER_OUTPUT, std::setw(3) << tmsize << " Testing ");
+    cmCTestLog(m_CTest, HANDLER_OUTPUT, std::setw(3) << tmsize << " ");
+    if ( m_MemCheck )
+      {
+      cmCTestLog(m_CTest, HANDLER_OUTPUT, "Memory Check");
+      }
+    else
+      {
+      cmCTestLog(m_CTest, HANDLER_OUTPUT, "Testing");
+      }
+    cmCTestLog(m_CTest, HANDLER_OUTPUT, " ");
     std::string outname = testname;
     outname.resize(30, ' ');
     *m_LogFile << cnt << "/" << tmsize << " Testing: " << testname
