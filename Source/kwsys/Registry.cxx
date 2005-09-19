@@ -367,6 +367,11 @@ RegistryHelper::~RegistryHelper()
 bool RegistryHelper::Open(const char *toplevel, const char *subkey,
   int readonly)
 {  
+  this->EntriesMap.erase(
+    this->EntriesMap.begin(),
+    this->EntriesMap.end());
+  m_Empty = 1;
+
 #ifdef _WIN32
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
@@ -493,10 +498,6 @@ bool RegistryHelper::Close()
     {
     if ( !m_Changed )
       {
-      this->EntriesMap.erase(
-        this->EntriesMap.begin(),
-        this->EntriesMap.end());
-      m_Empty = 1;
       this->SetSubKey(0);
       return true;
       }
@@ -786,7 +787,7 @@ kwsys_stl::string RegistryHelper::DecodeValue(const char* str)
   kwsys_ios::ostringstream ostr;
   while ( *str )
     {
-    int val;
+    unsigned int val;
     switch ( *str )
       {
     case '%':
