@@ -748,10 +748,10 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
 
     if ( !m_CTest->GetShowOnly() )
       {
+      bool testFailed = false;
       if (res == cmsysProcess_State_Exited && retVal == 0)
         {
         cmCTestLog(m_CTest, HANDLER_OUTPUT,   "   Passed");
-        passed.push_back(testname);
         if ( it->m_WillFail )
           {
           cmCTestLog(m_CTest, HANDLER_OUTPUT,   " - But it should fail!");
@@ -765,6 +765,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
         }
       else
         {
+        testFailed = true;
         cres.m_Status = cmCTestTestHandler::FAILED;
         if ( res == cmsysProcess_State_Expired )
           {
@@ -810,10 +811,18 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
             {
             cres.m_Status = cmCTestTestHandler::COMPLETED;
             cmCTestLog(m_CTest, HANDLER_OUTPUT, " - supposed to fail");
+            testFailed = false;
             }
           cmCTestLog(m_CTest, HANDLER_OUTPUT, std::endl);
           }
+        }
+      if ( testFailed )
+        {
         failed.push_back(testname);
+        }
+      else
+        {
+        passed.push_back(testname);
         }
       if (!output.empty() && output.find("<DartMeasurement") != output.npos)
         {
