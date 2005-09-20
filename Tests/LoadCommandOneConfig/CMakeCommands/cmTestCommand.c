@@ -16,18 +16,20 @@ static int InitialPass(void *inf, void *mf, int argc, char *argv[])
 {
   char* file;
   char* str;
+  char *srcs;
   const char* cstr;
   char buffer[1024];
   void *source_file;
+  char *args[2];
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
-
+ 
   cmVTKWrapTclData *cdata = 
     (cmVTKWrapTclData *)malloc(sizeof(cmVTKWrapTclData));
   cdata->LibraryName = "BOO";
   cdata->Argc = argc;
   cdata->Argv = argv;
   info->CAPI->SetClientData(info,cdata);
-  
+
   /* Now check and see if the value has been stored in the cache */
   /* already, if so use that value and don't look for the program */
   if(!info->CAPI->IsOn(mf,"TEST_COMMAND_TEST1"))
@@ -109,12 +111,26 @@ static int InitialPass(void *inf, void *mf, int argc, char *argv[])
     info->CAPI->SetError(mf, "Property SOME_PROPERTY should not be defined");
     return 0;
     }
+  info->CAPI->SourceFileSetProperty(source_file, "SOME_PROPERTY2", "HERE");
   cstr = info->CAPI->SourceFileGetProperty(source_file, "ABSTRACT");
-  sprintf(buffer, "Shold be 0 (source file abstract property): [%p]", cstr);
+  sprintf(buffer, "Should be 0 (source file abstract property): [%p]", cstr);
   info->CAPI->DisplaySatus(mf, buffer);
 
   info->CAPI->DestroySourceFile(source_file);
 
+  srcs =  "LoadedCommand.cxx";
+  info->CAPI->AddExecutable(mf,"LoadedCommand",1, &srcs, 0);
+
+  args[0] = "TEST_EXEC";
+  args[1] = "TRUE";
+
+  /* code coverage */
+  if (info->CAPI->GetTotalArgumentSize(2,args) != 13)
+    {
+    return 0;
+    }
+  info->CAPI->ExecuteCommand(mf,"SET",2,args);
+  
   return 1;
 }
 
