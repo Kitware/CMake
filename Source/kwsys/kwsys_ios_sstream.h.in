@@ -59,6 +59,7 @@
 
 namespace @KWSYS_NAMESPACE@_ios
 {
+using @KWSYS_NAMESPACE@_ios_namespace::streambuf;
 using @KWSYS_NAMESPACE@_ios_namespace::ostream;
 using @KWSYS_NAMESPACE@_ios_namespace::istream;
 using @KWSYS_NAMESPACE@_ios_namespace::istrstream;
