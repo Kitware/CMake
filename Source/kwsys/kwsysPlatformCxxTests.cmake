@@ -7,11 +7,11 @@ MACRO(KWSYS_PLATFORM_CXX_TEST var description invert)
       COMPILE_DEFINITIONS -DTEST_${var} ${KWSYS_PLATFORM_CXX_TEST_DEFINES}
       OUTPUT_VARIABLE OUTPUT)
     IF(${var}_COMPILED)
-      WRITE_FILE(${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeOutput.log
-        "${description} compiled with the following output:\n${OUTPUT}\n\n" APPEND)
+      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeOutput.log
+        "${description} compiled with the following output:\n${OUTPUT}\n\n")
     ELSE(${var}_COMPILED)
-      WRITE_FILE(${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeError.log
-        "${description} failed to compile with the following output:\n${OUTPUT}\n\n" APPEND)
+      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeError.log
+        "${description} failed to compile with the following output:\n${OUTPUT}\n\n")
     ENDIF(${var}_COMPILED)
     IF(${invert} MATCHES INVERT)
       IF(${var}_COMPILED)
