@@ -74,6 +74,9 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "each variable."},
   {"-N", "View mode only.",
    "Only load the cache. Do not actually run configure and generate steps."},
+  {"-P <file>", "Process script mode.",
+   "Process the given cmake file as a script written in the CMake language.  "
+   "No configure or generate step is performed and the cache is not modified."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed."},
   {"--help-command-list [file]", "List available listfile commands and exit.",

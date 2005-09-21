@@ -318,13 +318,15 @@ private:
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE \
-  {"-C <initial-cache>", "Pre-load cmake cache from given file.", \
+  {"-C <initial-cache>", "Pre-load a script to populate the cache.", \
    "When cmake is first run in an empty build tree, it creates a " \
    "CMakeCache.txt file and populates it with customizable settings " \
    "for the project.  This option may be used to specify a file from " \
    "which to load cache entries before the first pass through " \
    "the project's cmake listfiles.  The loaded entries take priority " \
-   "over the project's default values."}, \
+   "over the project's default values.  The given file should be a CMake " \
+   "script containing SET commands that use the CACHE option, " \
+   "not a cache-format file."}, \
   {"-D <var>:<type>=<value>", "Create a cmake cache entry.", \
    "When cmake is first run in an empty build tree, it creates a " \
    "CMakeCache.txt file and populates it with customizable settings " \

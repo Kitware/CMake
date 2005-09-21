@@ -53,19 +53,19 @@ public:
     {
       return
         "  GET_TARGET_PROPERTY(VAR target property)\n"
-        "Get a property from a target.   The value of the property is " 
+        "Get a property from a target.   The value of the property is "
         "stored in the variable VAR.  If the property is not found, var "
-        "will be set to NOT_FOUND.  Use SET_TARGET_PROPERTIES to set "
+        "will be set to \"NOTFOUND\".  Use SET_TARGET_PROPERTIES to set "
         "property values.  Properties are usually used to control how "
-        "a target is built.  The read-only property \"LOCATION\" specifies "
+        "a target is built.\n"
+        "The read-only property \"LOCATION\" specifies "
         "the full path to the file on disk that will be created for the "
         "target.  This is very useful for executable targets to get "
         "the path to the executable file for use in a custom command. "
-        "the path to the executable file for use in a custom command.\n"
         "The read-only property \"TYPE\" returns which type the specified "
         "target has (EXECUTABLE, STATIC_LIBRARY, SHARED_LIBRARY, "
-        "MODULE_LIBRARY, UTILITY, INSTALL_FILES or INSTALL_PROGRAMS)."
-        "This command can get properties for any target so far created. "
+        "MODULE_LIBRARY, UTILITY, INSTALL_FILES or INSTALL_PROGRAMS). "
+        "This command can get properties for any target so far created.\n"
         "The targets do not need to be in the current CMakeLists.txt file.";
     }
   
