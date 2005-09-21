@@ -25,7 +25,6 @@
 #include "cmGetDirectoryPropertyCommand.cxx"
 #include "cmGetTargetPropertyCommand.cxx"
 #include "cmGetTestPropertyCommand.cxx"
-#include "cmITKWrapTclCommand.cxx"
 #include "cmIncludeExternalMSProjectCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmLoadCacheCommand.cxx"
@@ -67,7 +66,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmGetDirectoryPropertyCommand);
   commands.push_back(new cmGetTargetPropertyCommand);
   commands.push_back(new cmGetTestPropertyCommand);
-  commands.push_back(new cmITKWrapTclCommand);
   commands.push_back(new cmIncludeExternalMSProjectCommand);
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);
