@@ -138,19 +138,19 @@ bool Registry::Open(const char *toplevel,
   bool res = false;
   if ( m_Locked )
     {
-    return 0;
+    return res;
     }
   if ( m_Opened )
     {
     if ( !this->Close() )
       {
-      return false;
+      return res;
       }
     }
   if ( !toplevel || !*toplevel )
     {
     kwsys_ios::cerr << "Registry::Opened() Toplevel not defined" << kwsys_ios::endl;
-    return false;
+    return res;
     }
 
   if ( isspace(toplevel[0]) || 
@@ -158,7 +158,7 @@ bool Registry::Open(const char *toplevel,
     {
     kwsys_ios::cerr << "Toplevel has to start with letter or number and end"
       " with one" << kwsys_ios::endl;
-    return 0;
+    return res;
     }
 
   res = this->Helper->Open(toplevel, subkey, readonly);
@@ -203,14 +203,14 @@ bool Registry::ReadValue(const char *subkey,
   bool open = false;  
   if ( ! value )
     {
-    return false;
+    return res;
     }
   if ( !m_Opened )
     {
     if ( !this->Open(this->GetTopLevel(), subkey, 
         Registry::READONLY) )
       {
-      return false;
+      return res;
       }
     open = true;
     }
@@ -236,7 +236,7 @@ bool Registry::DeleteKey(const char *subkey, const char *key)
     if ( !this->Open(this->GetTopLevel(), subkey, 
         Registry::READWRITE) )
       {
-      return false;
+      return res;
       }
     open = true;
     }
@@ -267,7 +267,7 @@ bool Registry::DeleteValue(const char *subkey, const char *key)
     if ( !this->Open(this->GetTopLevel(), subkey, 
         Registry::READWRITE) )
       {
-      return false;
+      return res;
       }
     open = true;
     }
@@ -292,14 +292,14 @@ bool Registry::DeleteValue(const char *subkey, const char *key)
 bool Registry::SetValue(const char *subkey, const char *key, 
   const char *value)
 {
-  bool res = true;
+  bool res = false;
   bool open = false;
   if ( !m_Opened )
     {
     if ( !this->Open(this->GetTopLevel(), subkey, 
         Registry::READWRITE) )
       {
-      return false;
+      return res;
       }
     open = true;
     }
@@ -555,12 +555,11 @@ bool RegistryHelper::ReadValue(const char *skey, const char **value)
       {
       return false;
       }
-    int res = 1;
     DWORD dwType, dwSize;  
     dwType = REG_SZ;
     char buffer[1024]; // Replace with RegQueryInfoKey
     dwSize = sizeof(buffer);
-    res = ( RegQueryValueEx(this->HKey, skey, NULL, &dwType, 
+    int res = ( RegQueryValueEx(this->HKey, skey, NULL, &dwType, 
         (BYTE *)buffer, &dwSize) == ERROR_SUCCESS );
     if ( !res )
       {
@@ -600,8 +599,7 @@ bool RegistryHelper::DeleteKey(const char* skey)
 #ifdef _WIN32
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
-    int res = 1;
-    res = ( RegDeleteKey( this->HKey, skey ) == ERROR_SUCCESS );
+    int res = ( RegDeleteKey( this->HKey, skey ) == ERROR_SUCCESS );
     return (res != 0);
     }
 #endif
@@ -624,8 +622,7 @@ bool RegistryHelper::DeleteValue(const char *skey)
 #ifdef _WIN32
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
-    int res = 1;
-    res = ( RegDeleteValue( this->HKey, skey ) == ERROR_SUCCESS );
+    int res = ( RegDeleteValue( this->HKey, skey ) == ERROR_SUCCESS );
     return (res != 0);
     }
 #endif
@@ -648,9 +645,8 @@ bool RegistryHelper::SetValue(const char *skey, const char *value)
 #ifdef _WIN32
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
-    int res = 1;
     DWORD len = (DWORD)(value ? strlen(value) : 0);
-    res = ( RegSetValueEx(this->HKey, skey, 0, REG_SZ, 
+    int res = ( RegSetValueEx(this->HKey, skey, 0, REG_SZ, 
         (CONST BYTE *)(const char *)value, 
         len+1) == ERROR_SUCCESS );
     return (res != 0);
