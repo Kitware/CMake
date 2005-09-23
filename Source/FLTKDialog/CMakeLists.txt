@@ -1,0 +1,24 @@
+FIND_PACKAGE(FLTK)
+
+SET(SRCS
+CMakeSetupGUIImplementation.cxx
+FLTKDialog.cxx
+FLTKPropertyItemRow.cxx
+FLTKPropertyList.cxx
+)
+
+SET(FLTK_GUI_Files_SRCS
+CMakeSetupGUI.fl
+)
+
+
+LINK_LIBRARIES(${FLTK_LIBRARY})
+
+
+INCLUDE_DIRECTORIES(${FLTK_INCLUDE_PATH})
+
+FLTK_WRAP_UI(FLCMakeSetup ${FLTK_GUI_Files_SRCS})
+
+ADD_EXECUTABLE(FLCMakeSetup ${SRCS} ${FLCMakeSetup_FLTK_SRCS})
+TARGET_LINK_LIBRARIES(FLCMakeSetup CMakeLib)
+

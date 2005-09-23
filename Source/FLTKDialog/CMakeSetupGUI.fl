@@ -1,0 +1,116 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0009 
+header_name {.h} 
+code_name {.cxx} 
+gridx 5 
+gridy 5 
+snap 3
+class CMakeSetupGUI {open
+} {
+  Function {CMakeSetupGUI()} {open
+  } {
+    Fl_Window dialogWindow {
+      label CMakeSetupDialog
+      callback {recentSourceDirectoriesBrowser->hide();
+recentBinaryDirectoriesBrowser->hide();}
+      xywh {646 144 562 373} resizable visible
+    } {
+      Fl_Input sourcePathTextInput {
+        label {Where is the source code: }
+        callback {SetSourcePath( sourcePathTextInput->value() );}
+        xywh {219 15 200 20} labelsize 11 when 8 textsize 11
+      }
+      Fl_Button {} {
+        label {Browse...}
+        callback {BrowseForSourcePath();}
+        xywh {453 14 65 22} shortcut 0x80073 labelsize 11
+      }
+      Fl_Input binaryPathTextInput {
+        label {Where do you want to build the binaries: }
+        callback {SetBinaryPath( binaryPathTextInput->value() );}
+        xywh {219 50 200 20} labelsize 11 when 8 textsize 11
+      }
+      Fl_Button {} {
+        label {Browse...}
+        callback {BrowseForBinaryPath();}
+        xywh {453 49 65 22} shortcut 0x80062 labelsize 11
+      }
+      Fl_Button m_CancelButton {
+        label Cancel
+        callback {ClickOnCancel();}
+        xywh {390 332 100 23} shortcut 0x80071 labelsize 11
+      }
+      Fl_Button m_ConfigureButton {
+        label Configure
+        callback {ClickOnConfigure();}
+        xywh {105 332 100 23} shortcut 0x8006d labelsize 11
+      }
+      Fl_Group {} {
+        xywh {25 80 515 222} box ENGRAVED_BOX labelsize 11 align 0 resizable
+      } {
+        Fl_Scroll cacheValuesScroll {
+          label {Cache Values} open
+          xywh {40 98 485 190} type BOTH_ALWAYS box DOWN_FRAME labelsize 11 align 5 when 1 resizable
+        } {
+          Fl_Pack propertyListPack {
+            xywh {40 99 485 185} resizable
+          } {}
+        }
+      }
+      Fl_Box {} {
+        label {Right click on cache entries for additional options}
+        xywh {160 305 275 25} labelsize 11
+      }
+      Fl_Button {} {
+        label {@\#2>}
+        callback {ShowRecentSourceDirectories();}
+        xywh {420 15 22 21} labeltype SYMBOL_LABEL
+      }
+      Fl_Button {} {
+        label {@\#2>}
+        callback {ShowRecentBinaryDirectories();}
+        xywh {420 50 22 21} labeltype SYMBOL_LABEL
+      }
+      Fl_Browser recentSourceDirectoriesBrowser {
+        callback {SelectOneRecentSourceDirectory();}
+        xywh {15 35 535 115} type Hold box BORDER_BOX hide
+      }
+      Fl_Browser recentBinaryDirectoriesBrowser {
+        callback {SelectOneRecentBinaryDirectory();}
+        xywh {15 70 535 115} type Hold box BORDER_BOX hide
+      }
+      Fl_Button m_OKButton {
+        label OK
+        callback {ClickOnOK();} selected
+        xywh {250 332 100 23} shortcut 0x8006d labelsize 11
+      }
+    }
+  }
+  Function {~CMakeSetupGUI()} {} {}
+  Function {Close(void)} {return_type {virtual void}
+  } {}
+  Function {BrowseForSourcePath(void)} {return_type {virtual void}
+  } {}
+  Function {BrowseForBinaryPath(void)} {return_type {virtual void}
+  } {}
+  Function {Show(void)} {return_type {virtual void}
+  } {}
+  Function {SetBinaryPath(const char *)} {return_type {virtual void}
+  } { }
+  Function {SetSourcePath(const char *)} {return_type {virtual void}
+  } {  }
+  Function {ShowRecentBinaryDirectories(void)} {return_type {virtual void}
+  } {}
+  Function {ShowRecentSourceDirectories(void)} {return_type {virtual void}
+  } {}
+  Function {SelectOneRecentBinaryDirectory(void)} {return_type {virtual void}
+  } {}
+  Function {SelectOneRecentSourceDirectory(void)} {return_type {virtual void}
+  } {}
+  Function {ClickOnConfigure(void)} {return_type {virtual void}
+  } {}
+  Function {ClickOnOK(void)} {return_type {virtual void}
+  } {}
+  Function {ClickOnCancel(void)} {return_type {virtual void}
+  } {}
+} 
