@@ -11,23 +11,28 @@
 SET(JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
+  $ENV{JAVA_HOME}/jre/lib/i386
+  $ENV{JAVA_HOME}/jre/lib/amd64
   /usr/lib
   /usr/local/lib
   /usr/lib/java/jre/lib/i386
   /usr/local/lib/java/jre/lib/i386
   /usr/lib/j2sdk1.4-sun/jre/lib/i386
   /usr/lib/j2sdk1.5-sun/jre/lib/i386
+  /opt/sun-jdk-1.5.0.04/jre/lib/amd64
   )
 
 SET(JAVA_AWT_INCLUDE_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
+  $ENV{JAVA_HOME}/include
   /usr/include 
   /usr/local/include
   /usr/lib/java/include
   /usr/local/lib/java/include
   /usr/lib/j2sdk1.4-sun/include
   /usr/lib/j2sdk1.5-sun/include
+  /opt/sun-jdk-1.5.0.04/include
   )
 
 FOREACH(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")

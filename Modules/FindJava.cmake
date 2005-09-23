@@ -16,6 +16,7 @@ SET(JAVA_BIN_PATH
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5;JavaHome]/bin"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
+  $ENV{JAVA_HOME}/bin
   /usr/bin
   /usr/lib/java/bin
   /usr/share/java/bin
@@ -25,6 +26,7 @@ SET(JAVA_BIN_PATH
   /usr/lib/j2sdk1.4-sun/bin
   /usr/java/j2sdk1.4.2_09/bin
   /usr/lib/j2sdk1.5-sun/bin
+  /opt/sun-jdk-1.5.0.04/bin
   )
 FIND_PROGRAM(JAVA_RUNTIME
   NAMES java
