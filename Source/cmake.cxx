@@ -283,7 +283,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       std::string path = args[i];
       if ( path.size() == 0 )
         {
-        cmSystemTools::Error("No cmake scrpt provided.");
+        cmSystemTools::Error("No cmake script provided.");
         return false;
         }
       std::cerr << "Running cmake script file " << path.c_str() << "\n";
@@ -312,10 +312,17 @@ void cmake::ReadListFile(const char *path)
     {
     std::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
     lg->SetGlobalGenerator(gg);
+    lg->GetMakefile()->SetHomeOutputDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    lg->GetMakefile()->SetStartOutputDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    lg->GetMakefile()->SetHomeDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    lg->GetMakefile()->SetStartDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     if (!lg->GetMakefile()->ReadListFile(0, path))
       {
-      std::cerr << "Error in reading cmake initial cache file:"
-                << path << "\n";
+      std::cerr << "Error processing file:" << path << "\n";
       }
     }
   
