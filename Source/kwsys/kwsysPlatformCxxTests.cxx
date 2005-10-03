@@ -265,3 +265,90 @@ int main()
   return (*reinterpret_cast<char*>(&uc) < 0)?1:0;
 }
 #endif
+
+#ifdef TEST_KWSYS_CXX_TYPE_INFO
+/* Collect fundamental type information and save it to a CMake script.  */
+
+/* Include limits.h to get macros indicating long long and __int64.
+   Note that certain compilers need special macros to define these
+   macros in limits.h.  */
+#if defined(_MSC_VER) && !defined(_MSC_EXTENSIONS)
+# define _MSC_EXTENSIONS
+#endif
+#if defined(__GNUC__) && __GNUC__ < 3
+# define _GNU_SOURCE
+#endif
+#include <limits.h>
+
+#include <stdio.h>
+#include <string.h>
+
+/* Due to shell differences and limitations of ADD_DEFINITIONS the
+   KWSYS_CXX_TYPE_INFO_FILE macro will sometimes have double quotes
+   and sometimes not.  This macro will make sure the value is treated
+   as a double-quoted string.  */
+#define TO_STRING(x) TO_STRING0(x)
+#define TO_STRING0(x) TO_STRING1(x)
+#define TO_STRING1(x) #x
+
+void f() {}
+
+int main()
+{
+  /* Construct the output file name.  Some preprocessors will add an
+     extra level of double quotes, so strip them.  */
+  char fbuf[] = TO_STRING(KWSYS_CXX_TYPE_INFO_FILE);
+  char* fname = fbuf;
+  if(fname[0] == '"')
+    {
+    ++fname;
+    int len = static_cast<int>(strlen(fname));
+    if(len > 0 && fname[len-1] == '"')
+      {
+      fname[len-1] = 0;
+      }
+    }
+
+  /* Try to open the output file.  */
+  if(FILE* fout = fopen(fname, "w"))
+    {
+    /* Set the size of standard types.  */
+    fprintf(fout, "SET(KWSYS_SIZEOF_CHAR %d)\n", static_cast<int>(sizeof(char)));
+    fprintf(fout, "SET(KWSYS_SIZEOF_SHORT %d)\n", static_cast<int>(sizeof(short)));
+    fprintf(fout, "SET(KWSYS_SIZEOF_INT %d)\n", static_cast<int>(sizeof(int)));
+    fprintf(fout, "SET(KWSYS_SIZEOF_LONG %d)\n", static_cast<int>(sizeof(long)));
+
+    /* Set the size of some non-standard but common types.  */
+    /* Check for a limits.h macro for long long to see if the type exists.  */
+#if defined(LLONG_MAX) || defined(LONG_LONG_MAX) || defined(LONGLONG_MAX)
+    fprintf(fout, "SET(KWSYS_SIZEOF_LONG_LONG %d)\n", static_cast<int>(sizeof(long long)));
+#else
+    fprintf(fout, "SET(KWSYS_SIZEOF_LONG_LONG 0) # No long long available.\n");
+#endif
+    /* Check for a limits.h macro for __int64 to see if the type exists.  */
+#if defined(_I64_MIN)
+    fprintf(fout, "SET(KWSYS_SIZEOF___INT64 %d)\n", static_cast<int>(sizeof(__int64)));
+#else
+    fprintf(fout, "SET(KWSYS_SIZEOF___INT64 0) # No __int64 available.\n");
+#endif
+
+    /* Set the size of some pointer types.  */
+    fprintf(fout, "SET(KWSYS_SIZEOF_PDATA %d)\n", static_cast<int>(sizeof(void*)));
+    fprintf(fout, "SET(KWSYS_SIZEOF_PFUNC %d)\n", static_cast<int>(sizeof(&f)));
+
+    /* Set whether the native type "char" is signed or unsigned.  */
+    unsigned char uc = 255;
+    fprintf(fout, "SET(KWSYS_CHAR_IS_SIGNED %d)\n",
+            (*reinterpret_cast<char*>(&uc) < 0)?1:0);
+
+    fclose(fout);
+    return 0;
+    }
+  else
+    {
+    fprintf(stderr, "Failed to write fundamental type info to \"%s\".\n",
+            fname);
+    return 1;
+    }
+}
+#endif
