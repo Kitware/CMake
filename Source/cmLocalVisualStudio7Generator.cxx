@@ -946,8 +946,11 @@ void cmLocalVisualStudio7Generator::OutputDefineFlags(const char* flags,
       done = true;
       }
 
-    cmSystemTools::ReplaceString(define, "\"", "&quot;");
-    fout << define << ",";
+    // Double-quotes in the value of the definition must be escaped
+    // with a backslash.  The entire definition should be quoted in
+    // the generated xml attribute to avoid confusing the VS parser.
+    cmSystemTools::ReplaceString(define, "\"", "\\&quot;");
+    fout << "&quot;" << define << "&quot;,";
     if(!done)
       {
       pos = defs.find("-D", nextpos);
