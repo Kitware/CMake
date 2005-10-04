@@ -27,6 +27,8 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
+#include "testSystemTools.h"
+
 //----------------------------------------------------------------------------
 const char* toUnixPaths[][2] = 
 {
@@ -91,6 +93,32 @@ bool CheckEscapeChars(kwsys_stl::string input,
 }
 
 //----------------------------------------------------------------------------
+bool CheckDetectFileType()
+{
+  bool res = true;
+
+  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_EXE) != 
+      kwsys::SystemTools::FileTypeBinary)
+    {
+    kwsys_ios::cerr 
+      << "Problem with DetectFileType - failed to detect type of: " 
+      << TEST_SYSTEMTOOLS_EXE << kwsys_ios::endl;
+    res = false;
+    }
+
+  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_SRC) != 
+      kwsys::SystemTools::FileTypeText)
+    {
+    kwsys_ios::cerr 
+      << "Problem with DetectFileType - failed to detect type of: " 
+      << TEST_SYSTEMTOOLS_SRC << kwsys_ios::endl;
+    res = false;
+    }
+
+  return res;
+}
+
+//----------------------------------------------------------------------------
 int main(/*int argc, char* argv*/)
 {
   bool res = true;
@@ -114,6 +142,8 @@ int main(/*int argc, char* argv*/)
     res &= CheckEscapeChars(checkEscapeChars[cc][0], checkEscapeChars[cc][1], 
                             *checkEscapeChars[cc][2], checkEscapeChars[cc][3]);
     }
+
+  res &= CheckDetectFileType();
 
   return res ? 0 : 1;
 }
