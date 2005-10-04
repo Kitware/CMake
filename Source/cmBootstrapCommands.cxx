@@ -46,6 +46,7 @@
 #include "cmForEachCommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
 #include "cmGetSourceFilePropertyCommand.cxx"
+#include "cmGetTargetPropertyCommand.cxx"
 #include "cmIfCommand.cxx"
 #include "cmIncludeCommand.cxx"
 #include "cmIncludeDirectoryCommand.cxx"
@@ -103,6 +104,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmForEachCommand);
   commands.push_back(new cmGetFilenameComponentCommand);
   commands.push_back(new cmGetSourceFilePropertyCommand);
+  commands.push_back(new cmGetTargetPropertyCommand);
   commands.push_back(new cmIfCommand);
   commands.push_back(new cmIncludeCommand);
   commands.push_back(new cmIncludeDirectoryCommand);
