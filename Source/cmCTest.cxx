@@ -272,6 +272,7 @@ cmCTest::~cmCTest()
 //----------------------------------------------------------------------
 int cmCTest::Initialize(const char* binary_dir, bool new_tag, bool verbose_tag)
 {
+  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
   if(!m_InteractiveDebugMode)
     {
     this->BlockTestErrorDiagnostics();
@@ -282,8 +283,10 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag, bool verbose_tag)
 
   this->UpdateCTestConfiguration();
 
+  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
   if ( m_ProduceXML )
     {
+  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
     cmCTestLog(this, OUTPUT,
       "   Site: " << this->GetCTestConfiguration("Site") << std::endl
       << "   Build name: " << this->GetCTestConfiguration("BuildName") << std::endl
@@ -292,6 +295,7 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag, bool verbose_tag)
     if ( this->GetCTestConfiguration("NightlyStartTime").empty() )
       {
       cmCTestLog(this, DEBUG, "No nightly start time" << std::endl);
+  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
       return 0;
       }
     }
@@ -730,6 +734,8 @@ int cmCTest::ProcessTests()
   int cc;
   int update_count = 0;
 
+  cmCTestLog(this, OUTPUT, "Start processing tests" << std::endl);
+
   for ( cc = 0; cc < LAST_TEST; cc ++ )
     {
     if ( m_Tests[cc] )
@@ -831,6 +837,10 @@ int cmCTest::ProcessTests()
       {
       res |= cmCTest::SUBMIT_ERRORS;
       }
+    }
+  if ( res != 0 )
+    {
+    cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest" << std::endl);
     }
   return res;
 }
@@ -1712,9 +1722,12 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         it->second->SetVerbose(this->m_Verbose);
         it->second->SetSubmitIndex(m_SubmitIndex);
         }
+  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
       if ( !this->Initialize(cmSystemTools::GetCurrentWorkingDirectory().c_str()) )
         {
+  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
         res = 12;
+        cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard." << std::endl);
         }
       else
         {

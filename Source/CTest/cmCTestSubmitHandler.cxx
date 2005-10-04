@@ -598,6 +598,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
     struct stat st;
     if ( ::stat(local_file.c_str(), &st) )
       {
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "  Cannot find file: " << local_file.c_str() << std::endl);
       return false;
       }
 
@@ -605,6 +606,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
     FILE* fp = fopen(local_file.c_str(), "rb");
     if ( !fp )
       {
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "  Cannot open file: " << local_file.c_str() << std::endl);
       return false;
       }
 
@@ -613,6 +615,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
       {
       delete [] fileBuffer;
       fclose(fp);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, "  Cannot read file: " << local_file.c_str() << std::endl);
       return false;
       }
     fclose(fp);
