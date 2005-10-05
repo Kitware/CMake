@@ -97,21 +97,21 @@ bool CheckDetectFileType()
 {
   bool res = true;
 
-  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_EXE) != 
+  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_EXE_FILE) != 
       kwsys::SystemTools::FileTypeBinary)
     {
     kwsys_ios::cerr 
       << "Problem with DetectFileType - failed to detect type of: " 
-      << TEST_SYSTEMTOOLS_EXE << kwsys_ios::endl;
+      << TEST_SYSTEMTOOLS_EXE_FILE << kwsys_ios::endl;
     res = false;
     }
 
-  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_SRC) != 
+  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_SRC_FILE) != 
       kwsys::SystemTools::FileTypeText)
     {
     kwsys_ios::cerr 
       << "Problem with DetectFileType - failed to detect type of: " 
-      << TEST_SYSTEMTOOLS_SRC << kwsys_ios::endl;
+      << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
     res = false;
     }
 
