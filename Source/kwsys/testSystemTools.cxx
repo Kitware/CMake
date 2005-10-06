@@ -97,12 +97,12 @@ bool CheckDetectFileType()
 {
   bool res = true;
 
-  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_EXE_FILE) != 
+  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_BIN_FILE) != 
       kwsys::SystemTools::FileTypeBinary)
     {
     kwsys_ios::cerr 
       << "Problem with DetectFileType - failed to detect type of: " 
-      << TEST_SYSTEMTOOLS_EXE_FILE << kwsys_ios::endl;
+      << TEST_SYSTEMTOOLS_BIN_FILE << kwsys_ios::endl;
     res = false;
     }
 
