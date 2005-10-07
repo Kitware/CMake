@@ -226,6 +226,12 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
                                 m_CustomWarningMatches);
   cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_WARNING_EXCEPTION", 
                                 m_CustomWarningExceptions);
+  cmCTest::PopulateCustomInteger(mf, 
+                             "CTEST_CUSTOM_MAXIMUM_NUMBER_OF_ERRORS", 
+                             m_MaxErrors);
+  cmCTest::PopulateCustomInteger(mf, 
+                             "CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS", 
+                             m_MaxWarnings);
 }
 
 //----------------------------------------------------------------------
