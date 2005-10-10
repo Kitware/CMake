@@ -63,7 +63,8 @@ public:
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf) { m_Makefile = mf; };
-
+  cmMakefile *GetMakefile() { return m_Makefile;};
+  
   /**
    * Get the list of the custom commands for this target
    */

@@ -701,7 +701,8 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   cmTarget target;
   target.SetType(cmTarget::UTILITY, utilityName);
   target.SetInAll(all);
-
+  target.SetMakefile(this);
+  
   // Store the custom command in the target.
   cmCustomCommand cc(output, depends, commandLines, 0);
   target.GetPostBuildCommands().push_back(cc);

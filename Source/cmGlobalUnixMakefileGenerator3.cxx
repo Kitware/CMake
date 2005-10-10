@@ -869,7 +869,8 @@ cmGlobalUnixMakefileGenerator3
       if(emitted.insert(lib->first).second)
         {
         // Add this dependency.
-        this->AppendAnyGlobalDepend(depends, lib->first.c_str(), emitted);
+        this->AppendAnyGlobalDepend(depends, lib->first.c_str(), 
+                                    emitted, target);
         }
       }
     }
@@ -883,7 +884,7 @@ cmGlobalUnixMakefileGenerator3
     if(emitted.insert(*util).second)
       {
       // Add this dependency.
-      this->AppendAnyGlobalDepend(depends, util->c_str(), emitted);
+      this->AppendAnyGlobalDepend(depends, util->c_str(), emitted, target);
       }
     }
 }
@@ -893,41 +894,55 @@ cmGlobalUnixMakefileGenerator3
 void
 cmGlobalUnixMakefileGenerator3
 ::AppendAnyGlobalDepend(std::vector<std::string>& depends, const char* name,
-                        std::set<cmStdString>& emitted)
+                        std::set<cmStdString>& emitted, cmTarget &target)
 {
   cmTarget *result;
+  cmLocalUnixMakefileGenerator3 *lg3;
+ 
+  // first check the same dir as the current target
+  lg3 = static_cast<cmLocalUnixMakefileGenerator3 *>
+    (target.GetMakefile()->GetLocalGenerator());
+  result = target.GetMakefile()->FindTarget(name);
   
   // search each local generator until a match is found
-  unsigned int i;
-  for (i = 0; i < m_LocalGenerators.size(); ++i)
+  if (!result)
     {
-    // search all targets
-    result = m_LocalGenerators[i]->GetMakefile()->FindTarget(name);
-    // if a match was found then ...
-    if (result)
+    unsigned int i;
+    for (i = 0; i < m_LocalGenerators.size(); ++i)
       {
-      cmLocalUnixMakefileGenerator3 *lg3 = 
-        static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-      std::string tgtName = lg3->GetRelativeTargetDirectory(*result);
-      tgtName += "/all";
-      depends.push_back(tgtName);
-      if(result->GetType() == cmTarget::STATIC_LIBRARY)
+      // search all targets
+      result = m_LocalGenerators[i]->GetMakefile()->FindTarget(name);
+      if (result)
         {
-        const cmTarget::LinkLibraries& tlibs = result->GetLinkLibraries();
-        for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
-            lib != tlibs.end(); ++lib)
+        lg3 = static_cast<cmLocalUnixMakefileGenerator3 *>
+          (m_LocalGenerators[i]);
+        break;
+        }
+      }
+    }
+  
+  // if a match was found then ...
+  if (result)
+    {
+    std::string tgtName = lg3->GetRelativeTargetDirectory(*result);
+    tgtName += "/all";
+    depends.push_back(tgtName);
+    if(result->GetType() == cmTarget::STATIC_LIBRARY)
+      {
+      const cmTarget::LinkLibraries& tlibs = result->GetLinkLibraries();
+      for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+          lib != tlibs.end(); ++lib)
+        {
+        // Don't emit the same library twice for this target.
+        if(emitted.insert(lib->first).second)
           {
-          // Don't emit the same library twice for this target.
-          if(emitted.insert(lib->first).second)
-            {
-            // Add this dependency.
-            this->AppendAnyGlobalDepend(depends, lib->first.c_str(),
-                                        emitted);
-            }
+          // Add this dependency.
+          this->AppendAnyGlobalDepend(depends, lib->first.c_str(),
+                                      emitted, *result);
           }
         }
-      return;
       }
+    return;
     }
 }
 
