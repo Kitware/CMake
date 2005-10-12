@@ -24,13 +24,14 @@
 # include <cmsys/hash_map.hxx>
 #endif
 
-#include <ctype.h>
-#include <sys/stat.h>
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
 #  define cmFileTimeComparison_Type struct stat
+#  include <ctype.h>
+#  include <sys/stat.h>
 #else
 #  define cmFileTimeComparison_Type FILETIME
+#  include <windows.h>
 #endif
 
 class cmFileTimeComparisonInternal
@@ -75,7 +76,7 @@ bool cmFileTimeComparisonInternal::Stat(const char* fname, cmFileTimeComparison_
     }
 #else
   // Windows version.  Create file handles and get the modification times.
-  HANDLE hf1 = CreateFile(f1, GENERIC_READ, FILE_SHARE_READ,
+  HANDLE hf1 = CreateFile(fname, GENERIC_READ, FILE_SHARE_READ,
                           NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS,
                           NULL);
   if(hf1 == INVALID_HANDLE_VALUE)
