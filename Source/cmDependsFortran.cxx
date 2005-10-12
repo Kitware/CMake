@@ -93,8 +93,8 @@ cmDependsFortran::~cmDependsFortran()
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsFortran::WriteDependencies(const char *src,
-                                         const char *obj, std::ostream& os)
+bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
+  std::ostream& makeDepends, std::ostream& internalDepends)
 {
   // Make sure this is a scanning instance.
   if(!src || src[0] == '\0')
@@ -127,16 +127,19 @@ bool cmDependsFortran::WriteDependencies(const char *src,
     }
 
   // Write the include dependencies to the output stream.
+  internalDepends << obj << std::endl;
   for(std::set<cmStdString>::const_iterator i = parser.Includes.begin();
       i != parser.Includes.end(); ++i)
     {
-    os << obj << ": "
+    makeDepends << obj << ": "
        << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
        << std::endl;
+    internalDepends << " " << i->c_str() << std::endl;
     }
-  os << std::endl;
+  makeDepends << std::endl;
 
   // Write module requirements to the output stream.
+  internalDepends << obj << ".requires" << std::endl;
   for(std::set<cmStdString>::const_iterator i = parser.Requires.begin();
       i != parser.Requires.end(); ++i)
     {
@@ -144,23 +147,26 @@ bool cmDependsFortran::WriteDependencies(const char *src,
     if(parser.Provides.find(*i) == parser.Provides.end())
       {
       // since we require some things add them to our list of requirements
-      os << obj << ".requires: " << i->c_str() << ".mod.proxy"
+      makeDepends << obj << ".requires: " << i->c_str() << ".mod.proxy"
          << std::endl;
+      internalDepends << " " << i->c_str() << ".mod.proxy" << std::endl;
       }
     }
 
   // Write provided modules to the output stream.
+  internalDepends << obj << ".mod.proxy" << std::endl;
   for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
       i != parser.Provides.end(); ++i)
     {
-    os << i->c_str() << ".mod.proxy: " << obj
-       << ".provides" << std::endl;
+    makeDepends << i->c_str() << ".mod.proxy: " << obj
+      << ".provides" << std::endl;
+    internalDepends << " " << i->c_str() << ".provides" << std::endl;
     }
   
   // If any modules are provided then they must be converted to stamp files.
   if(!parser.Provides.empty())
     {
-    os << obj << ".provides.build:\n";
+    makeDepends << obj << ".provides.build:\n";
     for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
         i != parser.Provides.end(); ++i)
       {
@@ -168,10 +174,10 @@ bool cmDependsFortran::WriteDependencies(const char *src,
       // cmake_copy_f90_mod will call back to this class, which will
       // try various cases for the real mod file name.
       std::string m = cmSystemTools::LowerCase(*i);
-      os << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
+      makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
          << i->c_str() << " " << m.c_str() << ".mod.stamp\n";
       }
-    os << "\t@touch " << obj << ".provides.build\n";
+    makeDepends << "\t@touch " << obj << ".provides.build\n";
     }
 
   /*
@@ -228,13 +234,6 @@ bool cmDependsFortran::WriteDependencies(const char *src,
 
   */
 
-  return true;
-}
-
-//----------------------------------------------------------------------------
-bool cmDependsFortran::CheckDependencies(std::istream&)
-{
-  // TODO: Parse and check dependencies.
   return true;
 }
 

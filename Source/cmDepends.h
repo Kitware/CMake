@@ -19,6 +19,8 @@
 
 #include "cmStandardIncludes.h"
 
+class cmFileTimeComparison;
+
 /** \class cmDepends
  * \brief Dependency scanner superclass.
  *
@@ -43,25 +45,29 @@ public:
   virtual ~cmDepends();
 
   /** Write dependencies for the target file.  */
-  bool Write(const char *src, const char *obj, std::ostream &os);
+  bool Write(const char *src, const char *obj,
+    std::ostream &makeDepends, std::ostream &internalDepends);
   
   /** Check dependencies for the target file.  */
-  void Check(const char *file);
+  void Check(const char *makeFile, const char* internalFile);
 
   /** Clear dependencies for the target file so they will be regenerated.  */
   void Clear(const char *file);
+
+  /** Set the file comparison object */
+  void SetFileComparison(cmFileTimeComparison* fc) { m_FileComparison = fc; }
 
 protected:
 
   // Write dependencies for the target file to the given stream.
   // Return true for success and false for failure.
-  virtual bool WriteDependencies(const char *src, 
-                                 const char* obj, std::ostream& os)=0;
+  virtual bool WriteDependencies(const char *src, const char* obj,
+    std::ostream& makeDepends, std::ostream& internalDepends)=0;
 
   // Check dependencies for the target file in the given stream.
   // Return false if dependencies must be regenerated and true
   // otherwise.
-  virtual bool CheckDependencies(std::istream& is) = 0;
+  virtual bool CheckDependencies(std::istream& internalDepends);
 
   // The directory in which the build rule for the target file is executed.
   std::string m_Directory;
@@ -69,6 +75,11 @@ protected:
 
   // Flag for verbose output.
   bool m_Verbose;
+  cmFileTimeComparison* m_FileComparison;
+
+  size_t m_MaxPath;
+  char* m_Dependee;
+  char* m_Depender;
 
 private:
   cmDepends(cmDepends const&); // Purposely not implemented.

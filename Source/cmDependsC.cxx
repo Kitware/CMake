@@ -45,8 +45,8 @@ cmDependsC::~cmDependsC()
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsC::WriteDependencies(const char *src, 
-                                   const char *obj, std::ostream& os)
+bool cmDependsC::WriteDependencies(const char *src, const char *obj,
+  std::ostream& makeDepends, std::ostream& internalDepends)
 {
   // Make sure this is a scanning instance.
   if(!src || src[0] == '\0')
@@ -161,86 +161,18 @@ bool cmDependsC::WriteDependencies(const char *src,
     }
 
   // Write the dependencies to the output stream.
+  internalDepends << obj << std::endl;
   for(std::set<cmStdString>::iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
-    os << obj << ": "
+    makeDepends << obj << ": "
        << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
        << std::endl;
+    internalDepends << " " << i->c_str() << std::endl;
     }
-  os << std::endl;
+  makeDepends << std::endl;
 
   return true;
-}
-
-//----------------------------------------------------------------------------
-bool cmDependsC::CheckDependencies(std::istream& is)
-{
-  // Parse dependencies from the stream.  If any dependee is missing
-  // or newer than the depender then dependencies should be
-  // regenerated.
-  bool okay = true;
-  std::string line;
-  std::string depender;
-  std::string dependee;
-  while(cmSystemTools::GetLineFromStream(is, line))
-    {
-    // Parse the dependency line.
-    if(!this->ParseDependency(line.c_str(), depender, dependee))
-      {
-      continue;
-      }
-
-    // Dependencies must be regenerated if the dependee does not exist
-    // or if the depender exists and is older than the dependee.
-    bool regenerate = false;
-    if(!cmSystemTools::FileExists(dependee.c_str()))
-      {
-      // The dependee does not exist.
-      regenerate = true;
-
-      // Print verbose output.
-      if(m_Verbose)
-        {
-        cmOStringStream msg;
-        msg << "Dependee \"" << dependee
-            << "\" does not exist for depender \""
-            << depender << "\"." << std::endl;
-        cmSystemTools::Stdout(msg.str().c_str());
-        }
-      }
-    else if(cmSystemTools::FileExists(depender.c_str()))
-      {
-      // The dependee and depender both exist.  Compare file times.
-      int result = 0;
-      if((!cmSystemTools::FileTimeCompare(depender.c_str(), dependee.c_str(),
-                                          &result) || result < 0))
-        {
-        // The depender is older than the dependee.
-        regenerate = true;
-
-        // Print verbose output.
-        if(m_Verbose)
-          {
-          cmOStringStream msg;
-          msg << "Dependee \"" << dependee
-              << "\" is newer than depender \""
-              << depender << "\"." << std::endl;
-          cmSystemTools::Stdout(msg.str().c_str());
-          }
-        }
-      }
-    if(regenerate)
-      {
-      // Dependencies must be regenerated.
-      okay = false;
-
-      // Remove the depender to be sure it is rebuilt.
-      cmSystemTools::RemoveFile(depender.c_str());
-      }
-    }
-
-  return okay;
 }
 
 //----------------------------------------------------------------------------
@@ -280,76 +212,6 @@ void cmDependsC::Scan(std::istream& is, const char* directory)
         }
       }
     }
-}
-
-//----------------------------------------------------------------------------
-bool cmDependsC::ParseDependency(const char* line, std::string& depender,
-                                 std::string& dependee)
-{
-  // Start with empty names.
-  depender = "";
-  dependee = "";
-
-  // Get the left-hand-side of the dependency.
-  const char* c = this->ParseFileName(line, depender);
-
-  // Skip the ':' separator.
-  for(;c && *c && isspace(*c);++c);
-  if(!c || !*c || *c != ':')
-    {
-    return false;
-    }
-  ++c;
-
-  // Get the right-hand-side of the dependency.
-  return this->ParseFileName(c, dependee)?true:false;
-}
-
-//----------------------------------------------------------------------------
-const char* cmDependsC::ParseFileName(const char* in, std::string& name)
-{
-  // Skip leading whitespace.
-  const char* c = in;
-  for(;c && *c && isspace(*c);++c);
-
-  // If this is an empty line or a comment line return failure.
-  if(!c || !*c || *c == '#')
-    {
-    return 0;
-    }
-
-  // Parse the possibly quoted file name.
-  bool quoted = false;
-  char* buf = new char[strlen(in)+1];
-  char* pos = buf;
-  
-  // for every character while we haven't hit the end of the string AND we
-  // are in a quoted string OR the current character isn't a : or the second
-  // character AND it isn't a space
-  for(;*c && (quoted ||
-              ((*c != ':' || pos == buf+1) && !isspace(*c))); ++c)
-    {
-    if(*c == '"')
-      {
-      quoted = !quoted;
-      }
-    // handle unquoted escaped spaces
-    else if(!quoted && *c == '\\' && isspace(*(c+1)))
-      {
-      *pos =  *(++c);
-      pos++;
-      }
-    else
-      {
-      *pos = *c;
-      pos++;
-      }
-    }
-  *pos =0;
-  name += buf;
-  delete [] buf;
-  // Return the ending position.
-  return c;
 }
 
 //----------------------------------------------------------------------------

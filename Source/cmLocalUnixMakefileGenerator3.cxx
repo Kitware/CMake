@@ -826,7 +826,7 @@ cmLocalUnixMakefileGenerator3
     // Check the dependencies. Ths is required because we need at least an
     // empty depends.make for make to include, so at cmake time the
     // ::Check() method will generate that if it does not exist
-    checker->Check(objFile);
+    checker->Check(objFile, 0);
     
     return true;
     }
@@ -2673,6 +2673,7 @@ cmLocalUnixMakefileGenerator3::GetDependsChecker(const std::string& lang,
   if (ret)
     {
     ret->SetVerbose(verbose);
+    ret->SetFileComparison(m_GlobalGenerator->GetCMakeInstance()->GetFileComparison());
     }
   return ret;
 }
@@ -2734,18 +2735,28 @@ cmLocalUnixMakefileGenerator3
 
   // create the file stream for the depends file
   std::string dir = cmSystemTools::GetFilenamePath(infoFile);
-  dir += "/depend.make";
   
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
   std::string ruleFileNameFull = dir;
+  ruleFileNameFull += "/depend.make";
   cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
   ruleFileStream.SetCopyIfDifferent(true);
   if(!ruleFileStream)
     {
     return false;
     }
+  std::string internalRuleFileNameFull = dir;
+  internalRuleFileNameFull += "/depend.internal";
+  cmGeneratedFileStream internalRuleFileStream(internalRuleFileNameFull.c_str());
+  internalRuleFileStream.SetCopyIfDifferent(true);
+  if(!internalRuleFileStream)
+    {
+    return false;
+    }
+
   this->WriteDisclaimer(ruleFileStream);
+  this->WriteDisclaimer(internalRuleFileStream);
 
   // Get the set of generated files.
   std::vector<std::string> generatedFilesVec;
@@ -2832,6 +2843,7 @@ cmLocalUnixMakefileGenerator3
     
     if (scanner)
       {
+      scanner->SetFileComparison(m_GlobalGenerator->GetCMakeInstance()->GetFileComparison());
       // for each file we need to scan
       std::string srcLang = "CMAKE_DEPENDS_CHECK_";
       srcLang += lang;
@@ -2846,7 +2858,7 @@ cmLocalUnixMakefileGenerator3
         // make sure the object file is relative to home output
         std::string obj = *si;
         obj = lg->Convert(obj.c_str(),HOME_OUTPUT,MAKEFILE);
-        scanner->Write(src.c_str(),obj.c_str(),ruleFileStream);
+        scanner->Write(src.c_str(),obj.c_str(),ruleFileStream, internalRuleFileStream);
         }
 
       // free the scanner for this language
@@ -2855,8 +2867,8 @@ cmLocalUnixMakefileGenerator3
     }
 
   // dependencies were generated, so touch the mark file
-  dir += ".mark";
-  std::ofstream fmark(dir.c_str());
+  ruleFileNameFull += ".mark";
+  std::ofstream fmark(ruleFileNameFull.c_str());
   fmark << "Dependencies updated>" << std::endl;
   
   return true;
@@ -3043,19 +3055,22 @@ void cmLocalUnixMakefileGenerator3::CheckDependencies(cmMakefile* mf,
   // For each info file run the check
   cmDependsC checker;
   checker.SetVerbose(verbose);
+  checker.SetFileComparison(m_GlobalGenerator->GetCMakeInstance()->GetFileComparison());
   for(std::vector<std::string>::iterator l = files.begin();
       l != files.end(); ++l)
     {
     // either clear or check the files
-    std::string dependFile = cmSystemTools::GetFilenamePath(l->c_str());
-    dependFile += "/depend.make";
+    std::string dir = cmSystemTools::GetFilenamePath(l->c_str());
+    std::string internalDependFile = dir + "/depend.internal";
+    std::string dependFile = dir + "/depend.make";
     if (clear)
       {
+      checker.Clear(internalDependFile.c_str());
       checker.Clear(dependFile.c_str());
       }
     else
       {
-      checker.Check(dependFile.c_str());
+      checker.Check(dependFile.c_str(), internalDependFile.c_str());
       }
     }
 }

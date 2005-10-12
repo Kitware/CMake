@@ -34,9 +34,9 @@ public:
 
 protected:
   // Implement writing/checking methods required by superclass.
-  virtual bool WriteDependencies(const char *src,
-                                 const char *file, std::ostream& os);
-  virtual bool CheckDependencies(std::istream& is);
+  virtual bool WriteDependencies(const char *src, const char *file,
+    std::ostream& makeDepends, std::ostream& internalDepends);
+  virtual bool CheckDependencies(std::istream& internalDepends);
 
 private:
   cmDependsJava(cmDependsJava const&); // Purposely not implemented.

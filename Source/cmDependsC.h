@@ -38,18 +38,16 @@ public:
   virtual ~cmDependsC();
   
 protected:
+  typedef std::vector<char> t_CharBuffer;
+
   // Implement writing/checking methods required by superclass.
   virtual bool WriteDependencies(const char *src, 
-                                 const char *file, std::ostream& os);
-  virtual bool CheckDependencies(std::istream& is);
+                                 const char *file,
+                                 std::ostream& makeDepends,
+                                 std::ostream& internalDepends);
 
   // Method to scan a single file.
   void Scan(std::istream& is, const char* directory);
-
-  // Method to parse a single dependency line.
-  bool ParseDependency(const char* line, std::string& depender,
-                       std::string& dependee);
-  const char* ParseFileName(const char* in, std::string& name);
 
   // Method to test for the existence of a file.
   bool FileExistsOrIsGenerated(const std::string& fname,
@@ -78,6 +76,7 @@ protected:
   };
   std::set<cmStdString> m_Encountered;
   std::queue<UnscannedEntry> m_Unscanned;
+  t_CharBuffer m_Buffer;
 
 private:
   cmDependsC(cmDependsC const&); // Purposely not implemented.

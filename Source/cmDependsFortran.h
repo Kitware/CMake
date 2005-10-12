@@ -51,9 +51,9 @@ public:
 
 protected:
   // Implement writing/checking methods required by superclass.
-  virtual bool WriteDependencies(const char *src,
-                                 const char *file, std::ostream& os);
-  virtual bool CheckDependencies(std::istream& is);
+  virtual bool WriteDependencies(
+    const char *src, const char *file,
+    std::ostream& makeDepends, std::ostream& internalDepends);
 
   // The source file from which to start scanning.
   std::string m_SourceFile;

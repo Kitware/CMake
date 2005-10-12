@@ -30,8 +30,8 @@ cmDependsJava::~cmDependsJava()
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsJava::WriteDependencies(const char *src, 
-                                      const char *, std::ostream&)
+bool cmDependsJava::WriteDependencies(const char *src, const char *,
+  std::ostream&, std::ostream&)
 {
   // Make sure this is a scanning instance.
   if(!src || src[0] == '\0')
@@ -43,7 +43,6 @@ bool cmDependsJava::WriteDependencies(const char *src,
   return true;
 }
 
-//----------------------------------------------------------------------------
 bool cmDependsJava::CheckDependencies(std::istream&)
 {
   return true;
