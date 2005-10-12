@@ -473,6 +473,11 @@ public:
   static bool RemoveADirectory(const char* source);
 
   /**
+   * Get the maximum full file path length
+   */
+  static size_t GetMaximumFilePathLength();
+
+  /**
    * Find a file in the system PATH, with optional extra paths
    */
   static kwsys_stl::string FindFile(

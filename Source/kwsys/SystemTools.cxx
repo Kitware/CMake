@@ -89,6 +89,18 @@ public:
 #include <io.h>
 #include <direct.h>
 #define _unlink unlink
+#endif 
+
+/* The maximum length of a file name.  */
+#if defined(PATH_MAX)
+# define KWSYS_SYSTEMTOOLS_MAXPATH PATH_MAX
+#elif defined(MAXPATHLEN)
+# define KWSYS_SYSTEMTOOLS_MAXPATH MAXPATHLEN
+#else
+# define KWSYS_SYSTEMTOOLS_MAXPATH 16384
+#endif
+
+#if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__))
 inline int Mkdir(const char* dir)
 {
   return _mkdir(dir);
@@ -141,15 +153,7 @@ inline int Chdir(const char* dir)
 }
 inline void Realpath(const char *path, kwsys_stl::string & resolved_path)
 {
-# ifdef MAXPATHLEN
-  char resolved_name[MAXPATHLEN];
-# else
-#  ifdef PATH_MAX
-  char resolved_name[PATH_MAX];
-#  else
-  char resolved_name[5024];
-#  endif  //PATH_MAX
-# endif //MAXPATHLEN
+  char resolved_name[KWSYS_SYSTEMTOOLS_MAXPATH];
 
   realpath(path, resolved_name);
   resolved_path = resolved_name;
@@ -195,6 +199,7 @@ class SystemToolsTranslationMap :
     public kwsys_stl::map<kwsys_stl::string,kwsys_stl::string>
 {
 };
+
 
 double
 SystemTools::GetTime(void)
@@ -1846,6 +1851,13 @@ bool SystemTools::RemoveADirectory(const char* source)
     }
 
   return (Rmdir(source) == 0);
+}
+
+/**
+ */
+size_t SystemTools::GetMaximumFilePathLength()
+{
+  return KWSYS_SYSTEMTOOLS_MAXPATH;
 }
 
 /**
