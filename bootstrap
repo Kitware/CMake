@@ -49,6 +49,7 @@ CMAKE_CXX_SOURCES="\
   cmLocalGenerator \
   cmSourceFile \
   cmSystemTools \
+  cmFileTimeComparison \
   cmGlobalUnixMakefileGenerator3 \
   cmGlobalXCodeGenerator \
   cmLocalXCodeGenerator \

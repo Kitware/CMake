@@ -115,6 +115,8 @@ SET(SRCS
   cmMakefile.cxx
   cmMakefile.h
   cmOrderLinkDirectories.cxx
+  cmFileTimeComparison.cxx
+  cmFileTimeComparison.h
   cmSourceFile.cxx
   cmSourceFile.h
   cmSourceGroup.cxx
