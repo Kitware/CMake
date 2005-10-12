@@ -48,6 +48,7 @@ class cmCacheManager;
 class cmMakefile;
 class cmCommand;
 class cmVariableWatch;
+class cmFileTimeComparison;
 
 class cmake
 {
@@ -262,6 +263,11 @@ class cmake
    */
   int AddCMakePaths(const char *arg0);
 
+  /**
+   * Get the file comparison class
+   */
+  cmFileTimeComparison* GetFileComparison() { return m_FileComparison; }
+
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString, CreateGeneratorFunctionType> RegisteredGeneratorsMap;
@@ -313,6 +319,7 @@ private:
   std::string m_CheckBuildSystem;
   bool m_ClearBuildSystem;
   bool m_DebugTryCompile;
+  cmFileTimeComparison* m_FileComparison;
   
   void UpdateConversionPathTable();
 };

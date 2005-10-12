@@ -21,6 +21,7 @@
 #include "cmLocalGenerator.h"
 #include "cmCommands.h"
 #include "cmCommand.h"
+#include "cmFileTimeComparison.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
@@ -95,6 +96,7 @@ cmake::cmake()
 {
   m_DebugTryCompile = false;
   m_ClearBuildSystem = false;
+  m_FileComparison = new cmFileTimeComparison;
   
 #ifdef __APPLE__
   struct rlimit rlp;
@@ -157,6 +159,7 @@ cmake::~cmake()
 #ifdef CMAKE_BUILD_WITH_CMAKE
   delete m_VariableWatch;
 #endif
+  delete m_FileComparison;
 }
 
 void cmake::CleanupCommandsAndMacros()
@@ -1739,7 +1742,7 @@ int cmake::CheckBuildSystem()
         out != outputs.end(); ++out)
       {
       int result = 0;
-      if(!cmSystemTools::FileTimeCompare(out->c_str(), dep->c_str(), &result) ||
+      if(!m_FileComparison->FileTimeCompare(out->c_str(), dep->c_str(), &result) ||
          result < 0)
         {
         return 1;
