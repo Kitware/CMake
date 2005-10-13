@@ -97,6 +97,7 @@ static const char* cmCTestErrorExceptions[] = {
   "Makefile:",
   ":[ \\t]+Where:",
   "([^ :]+):([0-9]+): Warning",
+  "------ Build started: .* ------",
   0
 };
 
