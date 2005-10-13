@@ -65,7 +65,7 @@ bool cmFileTimeComparisonInternal::Stat(const char* fname, cmFileTimeComparison_
   if ( fit != this->Files.end() )
     {
     *st = fit->second;
-    return 0;
+    return true;
     }
 #endif
 #if !defined(_WIN32) || defined(__CYGWIN__)
@@ -114,7 +114,7 @@ bool cmFileTimeComparison::FileTimeCompare(const char* f1, const char* f2, int* 
 int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1, cmFileTimeComparison_Type* s2)
 {
 #if !defined(_WIN32) || defined(__CYGWIN__)
-# if KWSYS_STAT_HAS_ST_MTIM
+# if cmsys_STAT_HAS_ST_MTIM
   // Compare using nanosecond resolution.
   if(s1->st_mtim.tv_sec < s2->st_mtim.tv_sec)
     {
@@ -142,8 +142,8 @@ int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1, cmFileT
     {
     return 1;
     }
-  return 0;
 # endif
+  return 0;
 #else
   return (int)CompareFileTime(s1, s2);
 #endif

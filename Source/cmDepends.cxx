@@ -89,7 +89,6 @@ void cmDepends::Clear(const char *file)
   std::string markFile = file;
   markFile += ".mark";
   cmSystemTools::RemoveFile(markFile.c_str());
-  std::cout << "Remove mark file: " << markFile.c_str() << std::endl;
   
   // Write an empty dependency file.
   cmGeneratedFileStream depFileStream(file);
