@@ -9,6 +9,7 @@ int main(int, char*[])
   res += CheckMethod(rmvar, "CMake");
   res += CheckMethod(rmallvar, "CMake;cmake;CMake");
   res += CheckMethod(rrepvar, "People should use CMake and CMake");
+  res += CheckMethod(repvar, "People should use CMake");
   res += CheckMethod(nceqvar, "0");
   res += CheckMethod(ceqvar, "1");
   res += CheckMethod(cneqvar, "1");
@@ -20,6 +21,7 @@ int main(int, char*[])
   res += CheckMethod(savar, "Cmake");
   res += CheckMethod(tuvar, "CMAKE");
   res += CheckMethod(tlvar, "cmake");
+  res += CheckMethod(relpath, "../../X11R6/bin/xnest");
   
   return res;
 }

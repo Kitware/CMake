@@ -71,6 +71,9 @@ public:
       "  STRING(REGEX REPLACE <regular_expression>\n"
       "         <replace_expression> <output variable>\n"
       "         <input> [<input>...])\n"
+      "  STRING(REPLACE <match_expression>\n"
+      "         <replace_expression> <output variable>\n"
+      "         <input> [<input>...])\n"
       "  STRING(COMPARE EQUAL <string1> <string2> <output variable>)\n"
       "  STRING(COMPARE NOTEQUAL <string1> <string2> <output variable>)\n"
       "  STRING(COMPARE LESS <string1> <string2> <output variable>)\n"
@@ -86,6 +89,12 @@ public:
       "possible and store the matches in the output variable as a list.\n"
       "REGEX REPLACE will match the regular expression as many times as "
       "possible and substitute the replacement expression for the match "
+      "in the output.  The replace expression may refer to paren-delimited "
+      "subexpressions of the match using \\1, \\2, ..., \\9.  Note that "
+      "two backslashes (\\\\1) are required in CMake code to get a "
+      "backslash through argument parsing.\n"
+      "REPLACE will match the given expression "
+      "and substitute the replacement expression for the match "
       "in the output.  The replace expression may refer to paren-delimited "
       "subexpressions of the match using \\1, \\2, ..., \\9.  Note that "
       "two backslashes (\\\\1) are required in CMake code to get a "
@@ -108,6 +117,7 @@ protected:
   bool RegexReplace(std::vector<std::string> const& args);
   bool HandleToUpperLowerCommand(std::vector<std::string> const& args, bool toUpper);
   bool HandleCompareCommand(std::vector<std::string> const& args);
+  bool HandleReplaceCommand(std::vector<std::string> const& args);
   
   class RegexReplacement
   {

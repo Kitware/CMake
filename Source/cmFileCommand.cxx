@@ -58,6 +58,10 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleInstallCommand(args);
     }
+  else if ( subCommand == "RELATIVE_PATH" )
+    {
+    return this->HandleRelativePathCommand(args);
+    }
 
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
@@ -696,3 +700,38 @@ bool cmFileCommand::HandleInstallCommand(
 
   return true;
 }
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleRelativePathCommand(
+  std::vector<std::string> const& args)
+{
+  if(args.size() != 4 )
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+
+  const std::string& outVar = args[1];
+  const std::string& directoryName = args[2];
+  const std::string& fileName = args[3];
+
+  if(!cmSystemTools::FileIsFullPath(directoryName.c_str()))
+    {
+    std::string errstring = "RelativePath must be passed a full path to the directory: " + directoryName;
+    this->SetError(errstring.c_str());
+    return false;
+    }
+  if(!cmSystemTools::FileIsFullPath(fileName.c_str()))
+    {
+    std::string errstring = "RelativePath must be passed a full path to the directory: " + directoryName;
+    this->SetError(errstring.c_str());
+    return false;
+    }
+
+  std::string res = cmSystemTools::RelativePath(directoryName.c_str(), fileName.c_str());
+  m_Makefile->AddDefinition(outVar.c_str(),
+    res.c_str());
+  return true;
+}
+
+

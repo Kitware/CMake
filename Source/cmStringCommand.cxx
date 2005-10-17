@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmStringCommand.h"
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/SystemTools.hxx>
 
 #include <stdlib.h> // required for atoi
 #include <ctype.h>
@@ -32,6 +33,10 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
   if(subCommand == "REGEX")
     {
     return this->HandleRegexCommand(args);
+    }
+  else if(subCommand == "REPLACE")
+    {
+    return this->HandleReplaceCommand(args);
     }
   else if(subCommand == "TOLOWER")
     {
@@ -491,4 +496,29 @@ bool cmStringCommand::HandleCompareCommand(std::vector<std::string> const& args)
   std::string e = "sub-command COMPARE does not recognize mode "+mode;
   this->SetError(e.c_str());
   return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const& args)
+{
+  if(args.size() < 5)
+    {
+    this->SetError("sub-command REPLACE requires four arguments.");
+    return false;
+    }
+
+  const std::string& matchExpression = args[1];
+  const std::string& replaceExpression = args[2];
+  const std::string& variableName = args[3];
+
+  std::string input = args[4];
+  for(unsigned int i=5; i < args.size(); ++i)
+    {
+    input += args[i];
+    }
+
+  cmsys::SystemTools::ReplaceString(input, matchExpression.c_str(), replaceExpression.c_str());
+
+  m_Makefile->AddDefinition(variableName.c_str(), input.c_str());
+  return true;
 }

@@ -70,6 +70,7 @@ public:
       "  FILE(GLOB variable [globbing expressions]...)\n"
       "  FILE(GLOB_RECURSE variable [globbing expressions]...)\n"
       "  FILE(MAKE_DIRECTORY [directory]...)\n"
+      "  FILE(RELATIVE_PATH variable directory file)\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
       "if it does not exists.\n"
@@ -93,7 +94,8 @@ public:
       "match the files.\n"
       "Example of recursive globbing:\n"
       "   /dir/*.py  - match all python files /dir and subdirectories\n"
-      "MAKE_DIRECTORY will create a directory at the specified location"; 
+      "MAKE_DIRECTORY will create a directory at the specified location\n"
+      "RELATIVE_PATH will determine relative path from directory to the given file";
     }
   
   cmTypeMacro(cmFileCommand, cmCommand);
@@ -104,6 +106,7 @@ protected:
   bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse);
   bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);
   bool HandleInstallCommand(std::vector<std::string> const& args);
+  bool HandleRelativePathCommand(std::vector<std::string> const& args);
 };
 
 

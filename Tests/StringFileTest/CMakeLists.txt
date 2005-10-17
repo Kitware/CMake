@@ -20,6 +20,9 @@ STRING(COMPARE GREATER "max" "min" ncgvar)
 STRING(ASCII 67 109 97 107 101 savar)
 STRING(TOUPPER "CMake" tuvar)
 STRING(TOLOWER "CMake" tlvar)
+STRING(REPLACE "Autoconf" "CMake" repvar "People should use Autoconf")
+
+FILE(RELATIVE_PATH relpath "/usr/local/bin" "/usr/X11R6/bin/xnest")
 
 # Escaping test
 SET(var "\\ \" \  \t \n \r \# \( \) \0")
@@ -49,6 +52,8 @@ FOREACH(var
     rmvar
     rmallvar
     rrepvar
+    repvar
+    relpath
     nceqvar
     ceqvar
     cneqvar
