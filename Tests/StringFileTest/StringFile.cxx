@@ -10,7 +10,9 @@ int main(int, char*[])
   res += CheckMethod(rmallvar, "CMake;cmake;CMake");
   res += CheckMethod(rrepvar, "People should use CMake and CMake");
   res += CheckMethod(repvar, "People should use CMake");
+  res += CheckMethod(substringres, "Everybody should use CMake");
   res += CheckMethod(nceqvar, "0");
+  res += CheckMethod(lengthres, "26");
   res += CheckMethod(ceqvar, "1");
   res += CheckMethod(cneqvar, "1");
   res += CheckMethod(ncneqvar, "0");

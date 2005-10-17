@@ -83,6 +83,8 @@ public:
       "         [@ONLY] [ESCAPE_QUOTES])\n"
       "  STRING(TOUPPER <string1> <output variable>)\n"
       "  STRING(TOLOWER <string1> <output variable>)\n"
+      "  STRING(LENGTH <string> <output variable>)\n"
+      "  STRING(SUBSTRING <string> <begin> <end> <output variable>)\n"
       "REGEX MATCH will match the regular expression once and store the "
       "match in the output variable.\n"
       "REGEX MATCHALL will match the regular expression as many times as "
@@ -104,7 +106,9 @@ public:
       "ASCII will convert all numbers into corresponding ASCII characters.\n"
       "CONFIGURE will transform a string like CONFIGURE_FILE transforms "
       "a file.\n"
-      "TOUPPER/TOLOWER will convert string to upper/lower characters.";
+      "TOUPPER/TOLOWER will convert string to upper/lower characters.\n"
+      "LENGTH will return a given string's length.\n"
+      "SUBSTRING will return a substring of a given string.";
     }
   
   cmTypeMacro(cmStringCommand, cmCommand);
@@ -118,6 +122,8 @@ protected:
   bool HandleToUpperLowerCommand(std::vector<std::string> const& args, bool toUpper);
   bool HandleCompareCommand(std::vector<std::string> const& args);
   bool HandleReplaceCommand(std::vector<std::string> const& args);
+  bool HandleLengthCommand(std::vector<std::string> const& args);
+  bool HandleSubstringCommand(std::vector<std::string> const& args);
   
   class RegexReplacement
   {

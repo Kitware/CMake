@@ -58,6 +58,14 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleConfigureCommand(args);
     }
+  else if(subCommand == "LENGTH")
+    {
+    return this->HandleLengthCommand(args);
+    }
+  else if(subCommand == "SUBSTRING")
+    {
+    return this->HandleSubstringCommand(args);
+    }
   
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
@@ -520,5 +528,61 @@ bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const& args)
   cmsys::SystemTools::ReplaceString(input, matchExpression.c_str(), replaceExpression.c_str());
 
   m_Makefile->AddDefinition(variableName.c_str(), input.c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const& args)
+{
+  if(args.size() != 5)
+    {
+    this->SetError("sub-command REPLACE requires four arguments.");
+    return false;
+    }
+
+  const std::string& stringValue = args[1];
+  int begin = atoi(args[2].c_str());
+  int end = atoi(args[3].c_str());
+  const std::string& variableName = args[4];
+
+  size_t stringLength = stringValue.size();
+  int intStringLength = static_cast<int>(stringLength);
+  if ( begin < 0 || begin > intStringLength )
+    {
+    cmOStringStream ostr;
+    ostr << "begin index: " << begin << " is out of range 0 - " << stringLength;
+    this->SetError(ostr.str().c_str());
+    return false;
+    }
+  int leftOverLength = intStringLength - begin;
+  if ( end < 0 || end > intStringLength )
+    {
+    cmOStringStream ostr;
+    ostr << "end index: " << end << " is out of range " << 0 << " - " << leftOverLength;
+    this->SetError(ostr.str().c_str());
+    return false;
+    }
+
+  m_Makefile->AddDefinition(variableName.c_str(), stringValue.substr(begin, end).c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleLengthCommand(std::vector<std::string> const& args)
+{
+  if(args.size() != 3)
+    {
+    this->SetError("sub-command LENGTH requires two arguments.");
+    return false;
+    }
+
+  const std::string& stringValue = args[1];
+  const std::string& variableName = args[2];
+
+  size_t length = stringValue.size();
+  char buffer[1024];
+  sprintf(buffer, "%d", length);
+
+  m_Makefile->AddDefinition(variableName.c_str(), buffer);
   return true;
 }

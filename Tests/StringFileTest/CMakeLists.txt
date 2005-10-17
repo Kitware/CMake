@@ -22,6 +22,11 @@ STRING(TOUPPER "CMake" tuvar)
 STRING(TOLOWER "CMake" tlvar)
 STRING(REPLACE "Autoconf" "CMake" repvar "People should use Autoconf")
 
+STRING(SUBSTRING "People should use Autoconf" 7 10 substringres)
+SET(substringres "Everybody ${substringres} CMake")
+
+STRING(LENGTH ${substringres} lengthres)
+
 FILE(RELATIVE_PATH relpath "/usr/local/bin" "/usr/X11R6/bin/xnest")
 
 # Escaping test
@@ -54,6 +59,8 @@ FOREACH(var
     rrepvar
     repvar
     relpath
+    substringres
+    lengthres
     nceqvar
     ceqvar
     cneqvar
