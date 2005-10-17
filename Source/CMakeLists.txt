@@ -21,6 +21,7 @@ OPTION(CMAKE_REGENERATE_YACCLEX
   "Regenerate YACC and LEXX files" OFF)
 MARK_AS_ADVANCED(CMAKE_REGENERATE_YACCLEX)
 IF(CMAKE_REGENERATE_YACCLEX)
+  SET(parsersLexers cmCommandArgument cmExpr)
   FIND_PROGRAM(YACC_EXECUTABLE
     NAMES yacc bison
     PATHS /usr/bin
@@ -36,7 +37,7 @@ IF(CMAKE_REGENERATE_YACCLEX)
       SET(BISON_FLAGS "--yacc")
     ENDIF(YACC_EXECUTABLE MATCHES "bison")
     SET(yacc_files)
-    FOREACH(name cmCommandArgument)
+    FOREACH(name ${parsersLexers})
       SET(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Parser.y")
       SET(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Parser.cxx")
       SET(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}ParserTokens.h")
@@ -51,7 +52,7 @@ IF(CMAKE_REGENERATE_YACCLEX)
   ENDIF(YACC_EXECUTABLE)
   IF(FLEX_EXECUTABLE)
     SET(lex_files)
-    FOREACH(name cmCommandArgument)
+    FOREACH(name ${parsersLexers})
       SET(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Lexer.in.l")
       SET(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.cxx")
       SET(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.h")
@@ -98,6 +99,9 @@ SET(SRCS
   cmDocumentation.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
+  cmExprLexer.cxx
+  cmExprParser.cxx
+  cmExprParserHelper.cxx
   cmGeneratedFileStream.cxx
   cmGlob.cxx
   cmGlobalGenerator.cxx
@@ -345,6 +349,16 @@ IF(BUILD_TESTING)
     --build-project StringFileTest
     --build-makeprogram ${MAKEPROGRAM}
     --test-command StringFileTest)
+
+  ADD_TEST(MathTest ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/MathTest"
+    "${CMake_BINARY_DIR}/Tests/MathTest"
+    --build-two-config
+    --build-generator ${CMAKE_GENERATOR}
+    --build-project MathTest
+    --build-makeprogram ${MAKEPROGRAM}
+    --test-command MathTestExec)
 
   ADD_TEST(TryCompile ${CMAKE_CTEST_COMMAND}
     --build-and-test

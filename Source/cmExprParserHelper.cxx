@@ -1,0 +1,133 @@
+/*=========================================================================
+
+  Program:   CMake - Cross-Platform Makefile Generator
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even 
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#include "cmExprParserHelper.h"
+
+#include "cmSystemTools.h"
+#include "cmExprLexer.h"
+
+#include "cmMakefile.h"
+
+int cmExpr_yyparse( yyscan_t yyscanner );
+//
+cmExprParserHelper::cmExprParserHelper()
+{
+  m_FileLine = -1;
+  m_FileName = 0;
+}
+
+
+cmExprParserHelper::~cmExprParserHelper()
+{
+  this->CleanupParser();
+}
+
+void cmExprParserHelper::SetLineFile(long line, const char* file)
+{
+  m_FileLine = line;
+  m_FileName = file;
+}
+
+int cmExprParserHelper::ParseString(const char* str, int verb)
+{
+  if ( !str)
+    {
+    return 0;
+    }
+  //printf("Do some parsing: %s\n", str);
+
+  this->Verbose = verb;
+  this->InputBuffer = str;
+  this->InputBufferPos = 0;
+  this->CurrentLine = 0;
+  
+  m_Result = 0;
+
+  yyscan_t yyscanner;
+  cmExpr_yylex_init(&yyscanner);
+  cmExpr_yyset_extra(this, yyscanner);
+  int res = cmExpr_yyparse(yyscanner);
+  cmExpr_yylex_destroy(yyscanner);
+  if ( res != 0 )
+    {
+    //str << "CAL_Parser returned: " << res << std::endl;
+    //std::cerr << "When parsing: [" << str << "]" << std::endl;
+    return 0;
+    }
+
+  this->CleanupParser();
+
+  if ( Verbose )
+    {
+    std::cerr << "Expanding [" << str << "] produced: [" << m_Result << "]" << std::endl;
+    }
+  return 1;
+}
+
+void cmExprParserHelper::CleanupParser()
+{
+}
+
+int cmExprParserHelper::LexInput(char* buf, int maxlen)
+{
+  //std::cout << "JPLexInput ";
+  //std::cout.write(buf, maxlen);
+  //std::cout << std::endl;
+  if ( maxlen < 1 )
+    {
+    return 0;
+    }
+  if ( this->InputBufferPos < this->InputBuffer.size() )
+    {
+    buf[0] = this->InputBuffer[ this->InputBufferPos++ ];
+    if ( buf[0] == '\n' )
+      {
+      this->CurrentLine ++;
+      }
+    return(1);
+    }
+  else
+    {
+    buf[0] = '\n';
+    return( 0 );
+    }
+}
+
+void cmExprParserHelper::Error(const char* str)
+{
+  unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
+  //fprintf(stderr, "Argument Parser Error: %s (%lu / Line: %d)\n", str, pos, this->CurrentLine);
+  cmOStringStream ostr;
+  ostr << str << " (" << pos << ")";
+  /*
+  int cc;
+  std::cerr << "String: [";
+  for ( cc = 0; cc < 30 && *(this->InputBuffer.c_str() + this->InputBufferPos + cc);
+    cc ++ )
+    {
+    std::cerr << *(this->InputBuffer.c_str() + this->InputBufferPos + cc);
+    }
+  std::cerr << "]" << std::endl;
+  */
+  m_Error = ostr.str();
+}
+
+void cmExprParserHelper::SetResult(int value)
+{
+  m_Result = value;
+}
+
+

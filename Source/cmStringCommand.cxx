@@ -29,7 +29,7 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
   
-  std::string subCommand = args[0];
+  const std::string &subCommand = args[0];
   if(subCommand == "REGEX")
     {
     return this->HandleRegexCommand(args);
