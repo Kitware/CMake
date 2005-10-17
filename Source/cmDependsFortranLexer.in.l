@@ -31,7 +31,7 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex like this:
 
-  flex --prefix=cmDependsFortran_yy --header-file=cmDependsFortranLexer.h -ocmDependsFortranLexer.cxx cmDependsFortranLexer.in.l
+  flex -i --prefix=cmDependsFortran_yy --header-file=cmDependsFortranLexer.h -ocmDependsFortranLexer.cxx cmDependsFortranLexer.in.l
 
 Modify cmDependsFortranLexer.cxx:
   - remove TABs
