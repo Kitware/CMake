@@ -756,6 +756,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
           {
           cmCTestLog(m_CTest, HANDLER_OUTPUT,   " - But it should fail!");
           cres.m_Status = cmCTestTestHandler::FAILED;
+          testFailed = true;
           }
         else
           {
