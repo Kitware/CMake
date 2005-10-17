@@ -118,13 +118,24 @@ bitwisexor exp_AND bitwiseand
 {$<Number>$ = $<Number>1 & $<Number>3;}
 
 bitwiseand:
+shift
+{$<Number>$ = $<Number>1;}
+|
+bitwiseand exp_SHIFTLEFT shift
+{$<Number>$ = $<Number>1 << $<Number>3;}
+|
+bitwiseand exp_SHIFTRIGHT shift
+{$<Number>$ = $<Number>1 >> $<Number>3;}
+
+
+shift:
 term
 {$<Number>$ = $<Number>1;}
 |
-bitwiseand exp_PLUS term
+shift exp_PLUS term
 {$<Number>$ = $<Number>1 + $<Number>3;}
 |
-bitwiseand exp_MINUS term
+shift exp_MINUS term
 {$<Number>$ = $<Number>1 - $<Number>3;}
 
 term:
@@ -141,17 +152,6 @@ term exp_MOD factor
 {$<Number>$ = $<Number>1 % $<Number>3;}
 
 factor:
-shift
-{$<Number>$ = $<Number>1;}
-|
-factor exp_SHIFTLEFT shift
-{$<Number>$ = $<Number>1 << $<Number>3;}
-|
-factor exp_SHIFTRIGHT shift
-{$<Number>$ = $<Number>1 >> $<Number>3;}
-
-
-shift:
 exp_NUMBER
 {$<Number>$ = $<Number>1;}
 |
