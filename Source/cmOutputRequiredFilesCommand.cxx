@@ -27,7 +27,6 @@ class cmLBDepend : public cmMakeDepend
 
 void cmLBDepend::DependWalk(cmDependInformation* info)
 {
-  m_Verbose = true;
   std::ifstream fin(info->m_FullPath.c_str());
   if(!fin)
     {
