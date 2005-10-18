@@ -581,7 +581,7 @@ bool cmStringCommand::HandleLengthCommand(std::vector<std::string> const& args)
 
   size_t length = stringValue.size();
   char buffer[1024];
-  sprintf(buffer, "%d", length);
+  sprintf(buffer, "%d", static_cast<int>(length));
 
   m_Makefile->AddDefinition(variableName.c_str(), buffer);
   return true;
