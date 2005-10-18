@@ -75,11 +75,13 @@ KWSYS_C_SOURCES="\
 
 KWSYS_CXX_SOURCES="\
   Directory \
+  Glob \
   RegularExpression \
   SystemTools"
 
 KWSYS_FILES="\
   Directory.hxx \
+  Glob.hxx \
   Process.h \
   RegularExpression.hxx \
   SystemTools.hxx"
