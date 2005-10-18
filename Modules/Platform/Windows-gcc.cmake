@@ -7,6 +7,7 @@ SET(CMAKE_SHARED_MODULE_PREFIX "lib")          # lib
 SET(CMAKE_SHARED_MODULE_SUFFIX ".dll")          # .so
 SET(CMAKE_DL_LIBS "")
 SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic 
+SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "")            # -pic 
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")       # -shared
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")         # +s, flag for exe link to use shared lib
 SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "")       # -rpath
