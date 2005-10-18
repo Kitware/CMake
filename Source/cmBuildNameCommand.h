@@ -51,7 +51,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Depricated.  Use ${CMAKE_SYSTEM} and ${CMAKE_CXX_COMPILER} instead.";
+    return "Deprecated.  Use ${CMAKE_SYSTEM} and ${CMAKE_CXX_COMPILER} instead.";
     }
   
   /**
