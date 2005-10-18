@@ -20,7 +20,6 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
-#include "cmMakeDepend.h"
 #include "cmCacheManager.h"
 #include "cmGeneratedFileStream.h"
 #include "cmake.h"
