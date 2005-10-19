@@ -1814,11 +1814,9 @@ cmLocalUnixMakefileGenerator3
   for(std::vector<std::string>::const_iterator i = objects.begin();
       i != objects.end(); ++i)
     {
-    object.clear();
-    object += *i;
     ruleFileStream
       << " \\\n"
-      << this->ConvertToQuotedOutputPath(object.c_str());
+      << this->ConvertToQuotedOutputPath(i->c_str());
     }
   ruleFileStream
     << "\n";
