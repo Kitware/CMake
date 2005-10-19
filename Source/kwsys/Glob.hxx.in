@@ -40,10 +40,10 @@ public:
   ~Glob();
 
   //! Find all files that match the pattern.
-  bool FindFiles(const std::string& inexpr);
+  bool FindFiles(const kwsys_stl::string& inexpr);
 
   //! Return the list of files that matched.
-  std::vector<std::string>& GetFiles();
+  kwsys_stl::vector<kwsys_stl::string>& GetFiles();
 
   //! Set recurse to true to match subdirectories.
   void RecurseOn() { this->SetRecurse(true); }
@@ -53,13 +53,13 @@ public:
 
 protected:
   //! Process directory
-  void ProcessDirectory(std::string::size_type start, 
-    const std::string& dir, bool dir_only);
+  void ProcessDirectory(kwsys_stl::string::size_type start, 
+    const kwsys_stl::string& dir, bool dir_only);
 
   //! Process last directory, but only when recurse flags is on. That is
   // effectively like saying: /path/to/file/**/file
-  void RecurseDirectory(std::string::size_type start,
-    const std::string& dir, bool dir_only);
+  void RecurseDirectory(kwsys_stl::string::size_type start,
+    const kwsys_stl::string& dir, bool dir_only);
 
   //! Escape all non-alphanumeric characters in pattern.
   void Escape(int ch, char* buffer);
@@ -67,7 +67,7 @@ protected:
   //!
   // Translate a shell PATTERN to a regular expression.
   // There is no way to quote meta-characters.
-  std::string ConvertExpression(const std::string& expr);
+  kwsys_stl::string ConvertExpression(const kwsys_stl::string& expr);
 
   //! Add regular expression
   void AddExpression(const char* expr);

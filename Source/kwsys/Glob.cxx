@@ -52,9 +52,9 @@ namespace KWSYS_NAMESPACE
 class GlobInternals
 {
 public:
-  std::vector<std::string> Files;
-  std::vector<kwsys::RegularExpression> Expressions;
-  std::vector<std::string> TextExpressions;
+  kwsys_stl::vector<kwsys_stl::string> Files;
+  kwsys_stl::vector<kwsys::RegularExpression> Expressions;
+  kwsys_stl::vector<kwsys_stl::string> TextExpressions;
 };
 
 //----------------------------------------------------------------------------
@@ -92,20 +92,20 @@ void Glob::Escape(int ch, char* buffer)
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string>& Glob::GetFiles()
+kwsys_stl::vector<kwsys_stl::string>& Glob::GetFiles()
 {
   return m_Internals->Files;
 }
 
 //----------------------------------------------------------------------------
-std::string Glob::ConvertExpression(const std::string& expr)
+kwsys_stl::string Glob::ConvertExpression(const kwsys_stl::string& expr)
 {
   
-  std::string::size_type i = 0;
-  std::string::size_type n = expr.size();
+  kwsys_stl::string::size_type i = 0;
+  kwsys_stl::string::size_type n = expr.size();
 
-  std::string res = "^";
-  std::string stuff = "";
+  kwsys_stl::string res = "^";
+  kwsys_stl::string stuff = "";
 
   while ( i < n )
     {
@@ -121,7 +121,7 @@ std::string Glob::ConvertExpression(const std::string& expr)
       }
     else if ( c == '[' )
       {
-      std::string::size_type j = i;
+      kwsys_stl::string::size_type j = i;
       if ( j < n && ( expr[j] == '!' || expr[j] == '^' ) )
         {
         j = j+1;
@@ -141,7 +141,7 @@ std::string Glob::ConvertExpression(const std::string& expr)
       else
         {
         stuff = "";
-        std::string::size_type cc;
+        kwsys_stl::string::size_type cc;
         for ( cc = i; cc < j; cc ++ )
           {
           if ( expr[cc] == '\\' )
@@ -177,8 +177,8 @@ std::string Glob::ConvertExpression(const std::string& expr)
 }
 
 //----------------------------------------------------------------------------
-void Glob::RecurseDirectory(std::string::size_type start,
-  const std::string& dir, bool dir_only)
+void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
+  const kwsys_stl::string& dir, bool dir_only)
 {
   kwsys::Directory d;
   if ( !d.Load(dir.c_str()) )
@@ -186,9 +186,9 @@ void Glob::RecurseDirectory(std::string::size_type start,
     return;
     }
   unsigned long cc;
-  std::string fullname;
-  std::string realname;
-  std::string fname;
+  kwsys_stl::string fullname;
+  kwsys_stl::string realname;
+  kwsys_stl::string fname;
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
     {
     fname = d.GetFile(cc);
@@ -236,10 +236,10 @@ void Glob::RecurseDirectory(std::string::size_type start,
 }
 
 //----------------------------------------------------------------------------
-void Glob::ProcessDirectory(std::string::size_type start, 
-  const std::string& dir, bool dir_only)
+void Glob::ProcessDirectory(kwsys_stl::string::size_type start, 
+  const kwsys_stl::string& dir, bool dir_only)
 {
-  //std::cout << "ProcessDirectory: " << dir << std::endl;
+  //kwsys_ios::cout << "ProcessDirectory: " << dir << kwsys_ios::endl;
   bool last = ( start == m_Internals->Expressions.size()-1 );
   if ( last && m_Recurse )
     {
@@ -252,9 +252,9 @@ void Glob::ProcessDirectory(std::string::size_type start,
     return;
     }
   unsigned long cc;
-  std::string fullname;
-  std::string realname;
-  std::string fname;
+  kwsys_stl::string fullname;
+  kwsys_stl::string realname;
+  kwsys_stl::string fname;
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
     {
     fname = d.GetFile(cc);
@@ -287,9 +287,9 @@ void Glob::ProcessDirectory(std::string::size_type start,
       fullname = dir + "/" + fname;
       }
 
-    //std::cout << "Look at file: " << fname << std::endl;
-    //std::cout << "Match: " << m_Internals->TextExpressions[start].c_str() << std::endl;
-    //std::cout << "Full name: " << fullname << std::endl;
+    //kwsys_ios::cout << "Look at file: " << fname << kwsys_ios::endl;
+    //kwsys_ios::cout << "Match: " << m_Internals->TextExpressions[start].c_str() << kwsys_ios::endl;
+    //kwsys_ios::cout << "Full name: " << fullname << kwsys_ios::endl;
 
     if ( (!dir_only || !last) && !kwsys::SystemTools::FileIsDirectory(realname.c_str()) )
       {
@@ -311,11 +311,11 @@ void Glob::ProcessDirectory(std::string::size_type start,
 }
 
 //----------------------------------------------------------------------------
-bool Glob::FindFiles(const std::string& inexpr)
+bool Glob::FindFiles(const kwsys_stl::string& inexpr)
 {
-  std::string cexpr;
-  std::string::size_type cc;
-  std::string expr = inexpr;
+  kwsys_stl::string cexpr;
+  kwsys_stl::string::size_type cc;
+  kwsys_stl::string expr = inexpr;
 
   m_Internals->Expressions.clear();
   m_Internals->Files.clear();
@@ -325,7 +325,7 @@ bool Glob::FindFiles(const std::string& inexpr)
     expr = kwsys::SystemTools::GetCurrentWorkingDirectory();
     expr += "/" + inexpr;
     }
-  std::string fexpr = expr;
+  kwsys_stl::string fexpr = expr;
 
   int skip = 0;
   int last_slash = 0;
@@ -344,7 +344,7 @@ bool Glob::FindFiles(const std::string& inexpr)
     }
   if ( last_slash > 0 )
     {
-    //std::cout << "I can skip: " << fexpr.substr(0, last_slash) << std::endl;
+    //kwsys_ios::cout << "I can skip: " << fexpr.substr(0, last_slash) << kwsys_ios::endl;
     skip = last_slash;
     }
   if ( skip == 0 )
