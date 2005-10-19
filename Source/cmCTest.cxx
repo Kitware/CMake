@@ -1703,6 +1703,10 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     // call process directory
     if (this->m_RunConfigurationScript)
       {
+      if ( m_ExtraVerbose )
+        {
+        cmCTestLog(this, OUTPUT, "* Extra verbosity turned on" << std::endl);
+        }
       cmCTest::t_TestingHandlers::iterator it;
       for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
         {
@@ -1722,10 +1726,10 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         it->second->SetVerbose(this->m_Verbose);
         it->second->SetSubmitIndex(m_SubmitIndex);
         }
-  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+      cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
       if ( !this->Initialize(cmSystemTools::GetCurrentWorkingDirectory().c_str()) )
         {
-  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+        cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
         res = 12;
         cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard." << std::endl);
         }

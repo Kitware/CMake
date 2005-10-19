@@ -287,7 +287,7 @@ int cmCTestUpdateHandler::ProcessHandler()
       {
       cmOStringStream ostr;
       ostr << "Problem running initial checkout Output [" << goutput << "] Errors [" << errors << "]";
-      cmCTestLog(m_CTest, HANDLER_OUTPUT, ostr.str().c_str() << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE, ostr.str().c_str() << std::endl);
       checkoutErrorMessages += ostr.str();
       updateProducedError = true;
       }
