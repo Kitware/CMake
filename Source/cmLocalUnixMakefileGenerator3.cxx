@@ -1304,9 +1304,9 @@ cmLocalUnixMakefileGenerator3
 
   // Convert to the output path to use in constructing commands.
   std::string targetOutPath =
-    this->Convert(targetFullPath.c_str(),HOME_OUTPUT,MAKEFILE);
+    this->Convert(targetFullPath.c_str(),START_OUTPUT,MAKEFILE);
   std::string targetOutPathReal =
-    this->Convert(targetFullPathReal.c_str(),HOME_OUTPUT,MAKEFILE);
+    this->Convert(targetFullPathReal.c_str(),START_OUTPUT,MAKEFILE);
 
   // Get the language to use for linking this executable.
   const char* linkLanguage =
@@ -1330,35 +1330,7 @@ cmLocalUnixMakefileGenerator3
   // Build a list of compiler flags and linker flags.
   std::string flags;
   std::string linkFlags;
-#if 0
-  // Loop over all libraries and see if all are shared
-  const cmTarget::LinkLibraries& tlibs = target.GetLinkLibraries();
-  int AllShared = 2; // 0 = false, 1 = true, 2 = unknown
-  for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
-      lib != tlibs.end(); ++lib)
-    {
-    // look up the target if there is one
-    cmTarget *libtgt = m_GlobalGenerator->FindTarget(0,lib->first.c_str());
-    if (libtgt)
-      {
-      if (libtgt->GetType() != cmTarget::SHARED_LIBRARY)
-        {
-        AllShared = 0;
-        }
-      else if (AllShared == 2)
-        {
-        AllShared = 1;
-        }
-      }
-    }
-  // if all libs were shared then add the special borland flag for linking an
-  // executable to only shared libs
-  if(AllShared == 1)
-    {
-    this->AppendFlags
-      (linkFlags,m_Makefile->GetDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS"));
-    }
-#endif 
+
   // Add flags to deal with shared libraries.  Any library being
   // linked in might be shared, so always use shared flags for an
   // executable.
@@ -1366,7 +1338,6 @@ cmLocalUnixMakefileGenerator3
 
   // Add flags to create an executable.
   this->AddConfigVariableFlags(linkFlags, "CMAKE_EXE_LINKER_FLAGS");
-
 
 
   if(target.GetPropertyAsBool("WIN32_EXECUTABLE"))
@@ -1415,8 +1386,12 @@ cmLocalUnixMakefileGenerator3
   std::string linkRuleVar = "CMAKE_";
   linkRuleVar += linkLanguage;
   linkRuleVar += "_LINK_EXECUTABLE";
-  std::string linkRule = m_Makefile->GetRequiredDefinition(linkRuleVar.c_str());
-  cmSystemTools::ExpandListArgument(linkRule, commands);
+  std::string linkRule = 
+    m_Makefile->GetRequiredDefinition(linkRuleVar.c_str());
+  std::vector<std::string> commands1;
+  cmSystemTools::ExpandListArgument(linkRule, commands1);
+  this->CreateCDCommand(commands1);
+  commands.insert(commands.end(), commands1.begin(), commands1.end());
 
   // Add a rule to create necessary symlinks for the library.
   if(targetOutPath != targetOutPathReal)
@@ -1670,13 +1645,13 @@ cmLocalUnixMakefileGenerator3
   // Construct the output path version of the names for use in command
   // arguments.
   std::string targetOutPath = 
-    this->Convert(targetFullPath.c_str(),HOME_OUTPUT,MAKEFILE);
+    this->Convert(targetFullPath.c_str(),START_OUTPUT,MAKEFILE);
   std::string targetOutPathSO = 
-    this->Convert(targetFullPathSO.c_str(),HOME_OUTPUT,MAKEFILE);
+    this->Convert(targetFullPathSO.c_str(),START_OUTPUT,MAKEFILE);
   std::string targetOutPathReal = 
-    this->Convert(targetFullPathReal.c_str(),HOME_OUTPUT,MAKEFILE);
+    this->Convert(targetFullPathReal.c_str(),START_OUTPUT,MAKEFILE);
   std::string targetOutPathBase = 
-    this->Convert(targetFullPathBase.c_str(),HOME_OUTPUT,MAKEFILE);
+    this->Convert(targetFullPathBase.c_str(),START_OUTPUT,MAKEFILE);
 
   // Add the link message.
   std::string buildEcho = "Linking ";
@@ -1743,7 +1718,10 @@ cmLocalUnixMakefileGenerator3
 
   // Construct the main link rule.
   std::string linkRule = m_Makefile->GetRequiredDefinition(linkRuleVar);
-  cmSystemTools::ExpandListArgument(linkRule, commands);
+  std::vector<std::string> commands1;
+  cmSystemTools::ExpandListArgument(linkRule, commands1);
+  this->CreateCDCommand(commands1);
+  commands.insert(commands.end(), commands1.begin(), commands1.end());
 
   // Add a rule to create necessary symlinks for the library.
   if(targetOutPath != targetOutPathReal)
@@ -1832,12 +1810,11 @@ cmLocalUnixMakefileGenerator3
   ruleFileStream
     << "# Object files for target " << target.GetName() << "\n"
     << variableName.c_str() << " =";
-  std::string relPath = this->GetHomeRelativeOutputPath();
   std::string object;
   for(std::vector<std::string>::const_iterator i = objects.begin();
       i != objects.end(); ++i)
     {
-    object = relPath;
+    object.clear();
     object += *i;
     ruleFileStream
       << " \\\n"
@@ -1857,7 +1834,7 @@ cmLocalUnixMakefileGenerator3
   for(std::vector<std::string>::const_iterator i = external_objects.begin();
       i != external_objects.end(); ++i)
     {
-    object = this->Convert(i->c_str(),HOME_OUTPUT);
+    object = this->Convert(i->c_str(),START_OUTPUT);
     ruleFileStream
       << " \\\n"
       << this->ConvertToQuotedOutputPath(object.c_str());
@@ -2340,8 +2317,6 @@ cmLocalUnixMakefileGenerator3
 ::AppendCustomCommand(std::vector<std::string>& commands,
                       const cmCustomCommand& cc)
 {
-  // TODO: Convert outputs/dependencies (arguments?) to relative paths.
-  
   std::vector<std::string> commands1;
 
   // Add each command line to the set of commands.
@@ -2371,44 +2346,10 @@ cmLocalUnixMakefileGenerator3
       commands1.push_back(cmd);
       }
     }
-  
-  // stick this group of commands into a cd of the proper path
-  // Build the jump-and-build command list.
-  if(m_WindowsShell)
-    {
-    // On Windows we must perform each step separately and then jump
-    // back because the shell keeps the working directory between
-    // commands.
-    std::string cmd = "cd ";
-    cmd += this->ConvertToOutputForExisting(m_Makefile->GetStartOutputDirectory());
-    commands.push_back(cmd);
 
-    // push back the custom commands
-    commands.insert(commands.end(), commands1.begin(), commands1.end());
-    
-    // Jump back to the home directory.
-    cmd = "cd ";
-    cmd += this->ConvertToOutputForExisting(m_Makefile->GetHomeOutputDirectory());
-    commands.push_back(cmd);
-    }
-  else
-    {
-    // On UNIX we must construct a single shell command to jump and
-    // build because make resets the directory between each command.
-    std::string cmd = "cd ";
-    cmd += this->ConvertToOutputForExisting(m_Makefile->GetStartOutputDirectory());
-    
-    // add the commands
-    unsigned int i;
-    for (i = 0; i < commands1.size(); ++i)
-      {
-      cmd += " && ";
-      cmd += commands1[i];
-      }
-    
-    // Add the command as a single line.
-    commands.push_back(cmd);
-    }
+  // push back the custom commands
+  this->CreateCDCommand(commands1);
+  commands.insert(commands.end(), commands1.begin(), commands1.end());
 }
 
 //----------------------------------------------------------------------------
@@ -2990,9 +2931,7 @@ void cmLocalUnixMakefileGenerator3
 }
 
 void cmLocalUnixMakefileGenerator3
-::CreateJumpCommand(std::vector<std::string>& commands,
-                    const char *MakefileName, 
-                    std::string& localName)
+::CreateCDCommand(std::vector<std::string>& commands)
 {
   if(m_WindowsShell)
     {
@@ -3001,18 +2940,12 @@ void cmLocalUnixMakefileGenerator3
     // commands.
     std::string cmd = "cd ";
     cmd += this->ConvertToOutputForExisting
-      (m_Makefile->GetHomeOutputDirectory());
-    commands.push_back(cmd);
-    
-    // Build the target for this pass.
-    commands.push_back(this->GetRecursiveMakeCall
-                       (MakefileName,localName.c_str()));
+      (m_Makefile->GetStartOutputDirectory());
+    commands.insert(commands.begin(),cmd);
     
     // Change back to the starting directory.  Any trailing slash must be
     // removed to avoid problems with Borland Make.
-    std::string back =
-      cmSystemTools::RelativePath(m_Makefile->GetHomeOutputDirectory(),
-                                  m_Makefile->GetStartOutputDirectory());
+    std::string back = m_Makefile->GetHomeOutputDirectory();
     if(back.size() && back[back.size()-1] == '/')
       {
       back = back.substr(0, back.size()-1);
@@ -3026,16 +2959,28 @@ void cmLocalUnixMakefileGenerator3
     // On UNIX we must construct a single shell command to change
     // directory and build because make resets the directory between
     // each command.
-    std::string cmd = "cd ";
-    cmd += this->ConvertToOutputForExisting(m_Makefile->GetHomeOutputDirectory());
-    
-    // Build the target for this pass.
-    cmd += " && ";
-    cmd += this->GetRecursiveMakeCall(MakefileName,localName.c_str());
-    
-    // Add the command as a single line.
-    commands.push_back(cmd);
+    std::vector<std::string>::iterator i = commands.begin();
+    for (; i != commands.end(); ++i)
+      {
+      std::string cmd = "cd ";
+      cmd += this->ConvertToOutputForExisting(m_Makefile->GetStartOutputDirectory());
+      cmd += " && ";
+      cmd += *i;
+      *i = cmd;
+      }
     }
+}
+
+void cmLocalUnixMakefileGenerator3
+::CreateJumpCommand(std::vector<std::string>& commands,
+                    const char *MakefileName, 
+                    std::string& localName)
+{
+  // Build the target for this pass.
+  commands.push_back(this->GetRecursiveMakeCall
+                     (MakefileName,localName.c_str()));
+  
+  this->CreateCDCommand(commands);
 }
 
 //----------------------------------------------------------------------------

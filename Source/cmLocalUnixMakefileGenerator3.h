@@ -170,8 +170,11 @@ protected:
                          const char *MakefileName,
                          std::string & localName);
   
-  // these two methods just compute reasonable values for m_LibraryOutputPath and
-  // m_ExecutableOutputPath
+  // create a command that cds to the start dir then runs the commands
+  void CreateCDCommand(std::vector<std::string>& commands);
+
+  // these two methods just compute reasonable values for m_LibraryOutputPath
+  // and m_ExecutableOutputPath
   void ConfigureOutputPaths();
   void FormatOutputPath(std::string& path, const char* name);
 
