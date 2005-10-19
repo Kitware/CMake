@@ -592,6 +592,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     const std::string& testname = it->m_Name;
     std::vector<std::string>& args = it->m_Args;
     cmCTestTestResult cres;
+    cres.m_ExecutionTime = 0;
+    cres.m_ReturnValue = -1;
     cres.m_Status = cmCTestTestHandler::NOT_RUN;
     cres.m_TestCount = cnt;
 
