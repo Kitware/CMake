@@ -84,7 +84,7 @@ public:
       "  STRING(TOUPPER <string1> <output variable>)\n"
       "  STRING(TOLOWER <string1> <output variable>)\n"
       "  STRING(LENGTH <string> <output variable>)\n"
-      "  STRING(SUBSTRING <string> <begin> <end> <output variable>)\n"
+      "  STRING(SUBSTRING <string> <begin> <length> <output variable>)\n"
       "REGEX MATCH will match the regular expression once and store the "
       "match in the output variable.\n"
       "REGEX MATCHALL will match the regular expression as many times as "
