@@ -2875,19 +2875,22 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   // rules may depend on this file itself.
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
   cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
-  ruleFileStream.SetCopyIfDifferent(true);
   if(!ruleFileStream)
     {
     return;
+    }
+  // always write the top makefile
+  if (m_Parent)
+    {
+    ruleFileStream.SetCopyIfDifferent(true);
     }
   
   // write the all rules
   this->WriteLocalAllRules(ruleFileStream);
   
-  // Keep track of targets already listed.
+  // only write local targets unless at the top Keep track of targets already
+  // listed.
   std::set<cmStdString> emittedTargets;
-
-  // only write local targets unless at the top
   if (m_Parent)
     {
     // write our targets, and while doing it collect up the object
