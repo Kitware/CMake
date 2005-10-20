@@ -1742,7 +1742,8 @@ int cmake::CheckBuildSystem()
         out != outputs.end(); ++out)
       {
       int result = 0;
-      if(!m_FileComparison->FileTimeCompare(out->c_str(), dep->c_str(), &result) ||
+      if(!m_FileComparison->FileTimeCompare(out->c_str(), 
+                                            dep->c_str(), &result) ||
          result < 0)
         {
         return 1;
