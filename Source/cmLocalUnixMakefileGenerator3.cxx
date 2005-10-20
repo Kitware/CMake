@@ -1146,7 +1146,7 @@ cmLocalUnixMakefileGenerator3
     "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
   runRule += this->Convert(cmakefileName.c_str(),NONE,SHELL);
-  runRule += " 0";
+  runRule += " 1";
   
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
@@ -1523,7 +1523,7 @@ cmLocalUnixMakefileGenerator3
         extraFlags += " ";
         extraFlags += m_Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
         extraFlags += 
-          this->Convert((*i)->GetFullPath().c_str(),HOME_OUTPUT,MAKEFILE);
+          this->Convert((*i)->GetFullPath().c_str(),START_OUTPUT,MAKEFILE);
         }
       }
     }
