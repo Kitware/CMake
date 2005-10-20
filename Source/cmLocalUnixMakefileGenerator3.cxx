@@ -2835,6 +2835,7 @@ void cmLocalUnixMakefileGenerator3
   if (!m_Parent)
     {
     dir = "all";
+    depends.push_back("cmake_check_build_system");
     }
   this->CreateJumpCommand(commands,"CMakeFiles/Makefile2",dir);
   this->WriteMakeRule(ruleFileStream, "The main all target", "all", depends, commands);
@@ -2844,6 +2845,7 @@ void cmLocalUnixMakefileGenerator3
   dir += "/clean";
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
   commands.clear();
+  depends.clear();
   this->CreateJumpCommand(commands,"CMakeFiles/Makefile2",dir);
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean", depends, commands);
 
