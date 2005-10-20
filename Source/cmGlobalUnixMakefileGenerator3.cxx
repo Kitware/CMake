@@ -101,71 +101,8 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->cmGlobalGenerator::Generate();
 
   // write the main makefile
-  this->WriteMainMakefile();
   this->WriteMainMakefile2();
   this->WriteMainCMakefile();
-}
-
-void cmGlobalUnixMakefileGenerator3::WriteMainMakefile()
-{
-  // Open the output file.  This should not be copy-if-different
-  // because the check-build-system step compares the makefile time to
-  // see if the build system must be regenerated.
-  std::string makefileName = 
-    this->GetCMakeInstance()->GetHomeOutputDirectory();
-  makefileName += "/Makefile";
-  cmGeneratedFileStream makefileStream(makefileName.c_str());
-  if(!makefileStream)
-    {
-    return;
-    }
- 
-  // get a local generator for some useful methods
-  cmLocalUnixMakefileGenerator3 *lg = 
-    static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
-    
-  // Write the do not edit header.
-  lg->WriteDisclaimer(makefileStream);
-  
-  // Write the main entry point target.  This must be the VERY first
-  // target so that make with no arguments will run it.
-  // Just depend on the all target to drive the build.
-  std::vector<std::string> depends;
-  std::vector<std::string> no_commands;
-  depends.push_back("all");
-
-  // Write the rule.
-  lg->WriteMakeRule(makefileStream,
-                    "Default target executed when no arguments are "
-                    "given to make.",
-                    "default_target",
-                    depends,
-                    no_commands);
-
-  lg->WriteMakeVariables(makefileStream);
-  
-  lg->WriteSpecialTargetsTop(makefileStream);
-
-  this->WriteAllRules(lg,makefileStream);
-  
-  // Keep track of targets already listed.
-  std::set<cmStdString> emittedTargets;
-
-  // write the target convenience rules
-  unsigned int i;
-  for (i = 0; i < m_LocalGenerators.size(); ++i)
-    {
-    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-    this->WriteConvenienceRules(makefileStream,lg,emittedTargets);
-    }
-
-  // add a help target as long as there isn;t a real target named help
-  if(emittedTargets.insert("help").second)
-    {
-    this->WriteHelpRule(makefileStream);
-    }
-  lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
-  lg->WriteSpecialTargetsBottom(makefileStream);
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
@@ -366,51 +303,6 @@ void cmGlobalUnixMakefileGenerator3
       }
     }
   cmakefileStream << "  )\n";
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalUnixMakefileGenerator3
-::WriteAllRules(cmLocalUnixMakefileGenerator3 *lg, 
-                std::ostream& makefileStream)
-{
-  // Write section header.
-  lg->WriteDivider(makefileStream);
-  makefileStream
-    << "# Rules to build dependencies and targets.\n"
-    << "\n";
-
-  std::vector<std::string> depends;
-  std::vector<std::string> commands;
-
-  // Check the build system in this directory.
-  depends.push_back("cmake_check_build_system");
-  commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2","all"));
-
-  // Write the rule.
-  lg->WriteMakeRule(makefileStream, "The main all target", "all", depends, commands);
-
-  // write the clean
-  depends.clear();
-  commands.clear();
-  commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2","clean"));
-  lg->WriteMakeRule(makefileStream, "The main clean target", "clean", 
-                    depends, commands);
-
-  // write the depend rule, really a recompute depends rule
-  depends.clear();
-  commands.clear();
-  std::string cmakefileName = "CMakeFiles/Makefile.cmake";
-  std::string runRule =
-    "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
-  runRule += " --check-build-system ";
-  runRule += lg->Convert(cmakefileName.c_str(),cmLocalGenerator::NONE,
-                         cmLocalGenerator::SHELL);
-  runRule += " 1";
-  
-  commands.push_back(runRule);
-  lg->WriteMakeRule(makefileStream, "clear depends", 
-                    "depend", 
-                    depends, commands);
 }
 
 
@@ -680,48 +572,52 @@ cmGlobalUnixMakefileGenerator3
 void
 cmGlobalUnixMakefileGenerator3
 ::WriteConvenienceRules(std::ostream& ruleFileStream, 
-                        cmLocalUnixMakefileGenerator3 *lg,
                         std::set<cmStdString> &emitted)
 {
   std::vector<std::string> depends;  
   std::vector<std::string> commands;
 
-  // write the directory level rules for this local gen
-  //this->WriteDirectoryRules(ruleFileStream,lg);
-  
   depends.push_back("cmake_check_build_system");
-
-  // for each target Generate the rule files for each target.
-  cmTargets& targets = lg->GetMakefile()->GetTargets();
-  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
+  
+  // write the target convenience rules
+  unsigned int i;
+  cmLocalUnixMakefileGenerator3 *lg;
+  for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
-    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-       (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
-       (t->second.GetType() == cmTarget::UTILITY))
+    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
+
+    // for each target Generate the rule files for each target.
+    cmTargets& targets = lg->GetMakefile()->GetTargets();
+    for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
       {
-      // Don't emit the same rule twice (e.g. two targets with the same
-      // simple name)
-      if(t->second.GetName() &&
-         strlen(t->second.GetName()) &&
-         emitted.insert(t->second.GetName()).second)
+      if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+         (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+         (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+         (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+         (t->second.GetType() == cmTarget::UTILITY))
         {
-        // Add a rule to build the target by name.
-        lg->WriteDivider(ruleFileStream);
-        ruleFileStream
-          << "# Target rules for targets named "
-          << t->second.GetName() << "\n\n";
-        
-        // Write the rule.
-        commands.clear();
-        commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
-                                                    t->second.GetName()));
-        depends.clear();
-        depends.push_back("cmake_check_build_system");
-        lg->WriteMakeRule(ruleFileStream, 
-                          "Build rule for target.",
-                          t->second.GetName(), depends, commands);
+        // Don't emit the same rule twice (e.g. two targets with the same
+        // simple name)
+        if(t->second.GetName() &&
+           strlen(t->second.GetName()) &&
+           emitted.insert(t->second.GetName()).second)
+          {
+          // Add a rule to build the target by name.
+          lg->WriteDivider(ruleFileStream);
+          ruleFileStream
+            << "# Target rules for targets named "
+            << t->second.GetName() << "\n\n";
+          
+          // Write the rule.
+          commands.clear();
+          commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
+                                                      t->second.GetName()));
+          depends.clear();
+          depends.push_back("cmake_check_build_system");
+          lg->WriteMakeRule(ruleFileStream, 
+                            "Build rule for target.",
+                            t->second.GetName(), depends, commands);
+          }
         }
       }
     }
@@ -947,12 +843,9 @@ cmGlobalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
-void
-cmGlobalUnixMakefileGenerator3::WriteHelpRule(std::ostream& ruleFileStream)
+void cmGlobalUnixMakefileGenerator3::WriteHelpRule
+(std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3 *lg)
 {
-  cmLocalUnixMakefileGenerator3 *lg = 
-    static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
-
   // add the help target
   std::string path;
   std::vector<std::string> no_depends;
@@ -970,25 +863,30 @@ cmGlobalUnixMakefileGenerator3::WriteHelpRule(std::ostream& ruleFileStream)
 
   // for each local generator
   unsigned int i;
+  cmLocalUnixMakefileGenerator3 *lg2;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
-    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-  
-    // for each target Generate the rule files for each target.
-    cmTargets& targets = lg->GetMakefile()->GetTargets();
-    for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
+    lg2 = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
+    // for the passed in makefile or if this is the top Makefile wripte out
+    // the targets
+    if (lg2 == lg || !lg->GetParent())
       {
-      if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-        (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-        (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-        (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
-        (t->second.GetType() == cmTarget::UTILITY))
+      // for each target Generate the rule files for each target.
+      cmTargets& targets = lg->GetMakefile()->GetTargets();
+      for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
         {
-        if(emittedTargets.insert(t->second.GetName()).second)
+        if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+           (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+           (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+           (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+           (t->second.GetType() == cmTarget::UTILITY))
           {
-          path = "... ";
-          path += t->second.GetName();
-          lg->AppendEcho(commands,path.c_str());
+          if(emittedTargets.insert(t->second.GetName()).second)
+            {
+            path = "... ";
+            path += t->second.GetName();
+            lg->AppendEcho(commands,path.c_str());
+            }
           }
         }
       }

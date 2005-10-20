@@ -88,17 +88,18 @@ public:
   void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream,
                                        std::vector<cmLocalGenerator *> &);
 
+  // write out the help rule listing the valid targets
+  void WriteHelpRule(std::ostream& ruleFileStream,
+                     cmLocalUnixMakefileGenerator3 *);
+
+  // write the top lvel target rules
+  void WriteConvenienceRules(std::ostream& ruleFileStream, 
+                             std::set<cmStdString> &emitted);
+
 protected:
-  void WriteMainMakefile();
   void WriteMainMakefile2();
   void WriteMainCMakefile();
-  void WriteAllRules(cmLocalUnixMakefileGenerator3 *lg, 
-                     std::ostream& makefileStream);
-  void WriteHelpRule(std::ostream& ruleFileStream);
   
-  void WriteConvenienceRules(std::ostream& ruleFileStream, 
-                             cmLocalUnixMakefileGenerator3 *,
-                             std::set<cmStdString> &emitted);
   void WriteConvenienceRules2(std::ostream& ruleFileStream, 
                               cmLocalUnixMakefileGenerator3 *,
                               bool exclude);

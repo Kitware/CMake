@@ -154,13 +154,17 @@ public:
   void AppendEcho(std::vector<std::string>& commands,
                   const char* text);
 
+  // write the target rules for the local Makefile into the stream
+  void WriteLocalAllRules(std::ostream& ruleFileStream);
+
 protected:
 
   // write the depend info 
   void WriteDependLanguageInfo(std::ostream& cmakefileStream, cmTarget &tgt);
   
   // write the target rules for the local Makefile into the stream
-  void WriteLocalMakefileTargets(std::ostream& ruleFileStream);
+  void WriteLocalMakefileTargets(std::ostream& ruleFileStream,
+                                 std::set<cmStdString> &emitted);
 
   // write the local help rule
   void WriteHelpRule(std::ostream& ruleFileStream);
@@ -171,7 +175,8 @@ protected:
                          std::string & localName);
   
   // create a command that cds to the start dir then runs the commands
-  void CreateCDCommand(std::vector<std::string>& commands);
+  void CreateCDCommand(std::vector<std::string>& commands, 
+                       const char *targetDir, const char *returnDir);
 
   // these two methods just compute reasonable values for m_LibraryOutputPath
   // and m_ExecutableOutputPath
