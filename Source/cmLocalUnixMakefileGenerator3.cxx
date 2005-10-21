@@ -1146,7 +1146,7 @@ cmLocalUnixMakefileGenerator3
     "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
   runRule += this->Convert(cmakefileName.c_str(),NONE,SHELL);
-  runRule += " 1";
+  runRule += " 0";
   
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
