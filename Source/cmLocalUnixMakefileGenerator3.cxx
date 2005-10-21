@@ -1125,6 +1125,34 @@ cmLocalUnixMakefileGenerator3
                         no_depends,
                         commands);
     }
+
+  // Write special target to silence make output.  This must be after
+  // the default target in case VERBOSE is set (which changes the
+  // name).  The setting of CMAKE_VERBOSE_MAKEFILE to ON will cause a
+  // "VERBOSE=1" to be added as a make variable which will change the
+  // name of this special target.  This gives a make-time choice to
+  // the user.
+  std::vector<std::string> commands;
+  commands.clear();
+  std::vector<std::string> no_depends;
+  this->WriteMakeRule(makefileStream,
+                      "Suppress display of executed commands.",
+                      "$(VERBOSE).SILENT",
+                      no_depends,
+                      commands);
+
+  // Special target to cleanup operation of make tool.
+  std::vector<std::string> depends;
+  this->WriteMakeRule(makefileStream,
+                      "Disable implicit rules so canoncical targets will work.",
+                      ".SUFFIXES",
+                      depends,
+                      commands);
+  // Add a fake suffix to keep HP happy.  Must be max 32 chars for SGI make.
+  depends.push_back(".hpux_make_needs_suffix_list");
+  this->WriteMakeRule(makefileStream, 0,
+                      ".SUFFIXES", depends, commands);
+
 }
 
 //----------------------------------------------------------------------------
@@ -1164,30 +1192,6 @@ cmLocalUnixMakefileGenerator3
 
   std::vector<std::string> no_commands;
 
-  // Write special target to silence make output.  This must be after
-  // the default target in case VERBOSE is set (which changes the
-  // name).  The setting of CMAKE_VERBOSE_MAKEFILE to ON will cause a
-  // "VERBOSE=1" to be added as a make variable which will change the
-  // name of this special target.  This gives a make-time choice to
-  // the user.
-  std::vector<std::string> no_depends;
-  this->WriteMakeRule(makefileStream,
-                      "Suppress display of executed commands.",
-                      "$(VERBOSE).SILENT",
-                      no_depends,
-                      no_commands);
-
-  // Special target to cleanup operation of make tool.
-  std::vector<std::string> depends;
-  this->WriteMakeRule(makefileStream,
-                      "Disable implicit rules so canoncical targets will work.",
-                      ".SUFFIXES",
-                      depends,
-                      no_commands);
-  // Add a fake suffix to keep HP happy.  Must be max 32 chars for SGI make.
-  depends.push_back(".hpux_make_needs_suffix_list");
-  this->WriteMakeRule(makefileStream, 0,
-                      ".SUFFIXES", depends, no_commands);
 }
 
 
