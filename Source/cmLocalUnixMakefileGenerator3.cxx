@@ -1734,7 +1734,11 @@ cmLocalUnixMakefileGenerator3
     symlink += targetOutPathSO;
     symlink += " ";
     symlink += targetOutPath;
-    commands.push_back(symlink);
+    commands1.clear();
+    commands1.push_back(symlink);
+    this->CreateCDCommand(commands1,m_Makefile->GetStartOutputDirectory(),
+                          m_Makefile->GetHomeOutputDirectory());
+    commands.insert(commands.end(), commands1.begin(), commands1.end());
     }
 
   // Add the post-build rules.
