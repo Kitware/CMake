@@ -786,38 +786,20 @@ bool SystemTools::FileTimeCompare(const char* f1, const char* f2,
     }
 # endif
 #else
-  // Windows version.  Create file handles and get the modification times.
-  HANDLE hf1 = CreateFile(f1, GENERIC_READ, FILE_SHARE_READ,
-                          NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS,
-                          NULL);
-  if(hf1 == INVALID_HANDLE_VALUE)
+  // Windows version.  Get the modification time from extended file attributes.
+  WIN32_FILE_ATTRIBUTE_DATA f1d;
+  WIN32_FILE_ATTRIBUTE_DATA f2d;
+  if(!GetFileAttributesEx(f1, GetFileExInfoStandard, &f1d))
     {
     return false;
     }
-  FILETIME tf1;
-  if(!GetFileTime(hf1, 0, 0, &tf1))
-    {
-    CloseHandle(hf1);
-    return false;
-    }
-  CloseHandle(hf1);
-  HANDLE hf2 = CreateFile(f2, GENERIC_READ, FILE_SHARE_READ,
-                          NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS,
-                          NULL);
-  if(hf2 == INVALID_HANDLE_VALUE)
+  if(!GetFileAttributesEx(f2, GetFileExInfoStandard, &f2d))
     {
     return false;
     }
-  FILETIME tf2;
-  if(!GetFileTime(hf2, 0, 0, &tf2))
-    {
-    CloseHandle(hf2);
-    return false;
-    }
-  CloseHandle(hf2);
 
   // Compare the file times using resolution provided by system call.
-  *result = (int)CompareFileTime(&tf1, &tf2);
+  *result = (int)CompareFileTime(&f1d.ftLastWriteTime, &f2d.ftLastWriteTime);
 #endif
   return true;
 }
