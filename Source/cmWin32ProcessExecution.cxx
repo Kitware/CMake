@@ -791,7 +791,7 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
       }
     if (fserr.st_size > 0)
       {
-      char buffer[1023];
+      char buffer[1024];
       int len = read(m_pStdErr, buffer, 1023);
       buffer[len] = 0;
       if ( m_Verbose )
@@ -803,7 +803,7 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
       }
     if (fsout.st_size > 0)
       {
-      char buffer[1023];
+      char buffer[1024];
       int len = read(m_pStdOut, buffer, 1023);
       buffer[len] = 0;
       if ( m_Verbose )
