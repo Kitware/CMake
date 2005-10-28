@@ -16,35 +16,62 @@
 # People will have to manually change the cache values of 
 # SDLMIXER_LIBRARY to override this selection.
 FIND_PATH(SDLMIXER_INCLUDE_DIR SDL_mixer.h
+  $ENV{SDLMIXERDIR}/include
+  $ENV{SDLDIR}/include
   ~/Library/Frameworks/SDL_mixer.framework/Headers
   /Library/Frameworks/SDL_mixer.framework/Headers
-  $ENV{SDLDIR}/include
-  $ENV{SDLMIXERDIR}/include
+  /usr/local/include/SDL
   /usr/include/SDL
+  /usr/local/include/SDL12
+  /usr/local/include/SDL11 # FreeBSD ports
   /usr/include/SDL12
   /usr/include/SDL11
-  /usr/include
-  /usr/local/include/SDL
-  /usr/local/include/SDL12
-  /usr/local/include/SDL11
   /usr/local/include
+  /usr/include
+  /sw/include/SDL # Fink
   /sw/include
+  /opt/local/include/SDL # DarwinPorts
+  /opt/local/include
+  /opt/csw/include/SDL # Blastwave
+  /opt/csw/include 
+  /opt/include/SDL
+  /opt/include
   )
 # I'm not sure if I should do a special casing for Apple. It is 
 # unlikely that other Unix systems will find the framework path.
 # But if they do ([Next|Open|GNU]Step?), 
 # do they want the -framework option also?
 IF(${SDLMIXER_INCLUDE_DIR} MATCHES ".framework")
-  SET (SDLMIXER_LIBRARY "-framework SDL_mixer" CACHE STRING "SDL_mixer framework for OSX")
+  # Extract the path the framework resides in so we can use it for the -F flag
+  STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" SDLMIXER_FRAMEWORK_PATH_TEMP ${SDLMIXER_INCLUDE_DIR})
+  IF("${SDLMIXER_FRAMEWORK_PATH_TEMP}" STREQUAL "/Library/Frameworks"
+      OR "${SDLMIXER_FRAMEWORK_PATH_TEMP}" STREQUAL "/System/Library/Frameworks"
+      )
+    # String is in default search path, don't need to use -F
+    SET(SDLMIXER_LIBRARY "-framework SDL_mixer" CACHE STRING "SDL_mixer framework for OSX")
+  ELSE("${SDLMIXER_FRAMEWORK_PATH_TEMP}" STREQUAL "/Library/Frameworks"
+      OR "${SDLMIXER_FRAMEWORK_PATH_TEMP}" STREQUAL "/System/Library/Frameworks"
+      )
+    # String is not /Library/Frameworks, need to use -F
+    SET(SDLMIXER_LIBRARY "-F${SDLMIXER_FRAMEWORK_PATH_TEMP} -framework SDL_mixer" CACHE STRING "SDL_mixer framework for OSX")
+  ENDIF("${SDLMIXER_FRAMEWORK_PATH_TEMP}" STREQUAL "/Library/Frameworks"
+    OR "${SDLMIXER_FRAMEWORK_PATH_TEMP}" STREQUAL "/System/Library/Frameworks"
+    )
+  # Clear the temp variable so nobody can see it
+  SET(SDLMIXER_FRAMEWORK_PATH_TEMP "" CACHE INTERNAL "")
+
 ELSE(${SDLMIXER_INCLUDE_DIR} MATCHES ".framework")
   FIND_LIBRARY(SDLMIXER_LIBRARY 
     NAMES SDL_mixer
     PATHS
-    $ENV{SDLDIR}/lib
     $ENV{SDLMIXERDIR}/lib
-    /usr/lib
+    $ENV{SDLDIR}/lib
     /usr/local/lib
+    /usr/lib
     /sw/lib
+    /opt/local/lib
+    /opt/csw/lib
+    /opt/lib
     )
 ENDIF(${SDLMIXER_INCLUDE_DIR} MATCHES ".framework")
 

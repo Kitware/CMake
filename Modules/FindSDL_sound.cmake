@@ -6,10 +6,17 @@
 # This module defines
 # SDL_SOUND_INCLUDE_DIR, where to find SDL_sound.h
 # SDL_SOUND_FOUND, if false, do not try to link to SDL
-# SDL_SOUND_LIBRARIES, this contains the list of libraries that you need to link against
+# SDL_SOUND_LIBRARIES, this contains the list of libraries that you need 
+# to link against. This is a read-only variable and is marked INTERNAL.
+# SDL_SOUND_EXTRAS, this is an optional variable for you to add your own
+# flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
+# This is available mostly for cases this module failed to anticipate for
+# and you must add additional flags. This is marked as ADVANCED.
+
 #
 # This module also defines (but you shouldn't need to use directly)
-# SDL_SOUND_LIBRARY, the name of just the SDL_sound library you would link against.
+# SDL_SOUND_LIBRARY, the name of just the SDL_sound library you would link
+# against. Use SDL_SOUND_LIBRARIES for you link instructions and not this one.
 # And might define the following as needed
 # MIKMOD_LIBRARY
 # MODPLUG_LIBRARY
@@ -28,12 +35,14 @@
 # The reason is that SDL_sound can be compiled in a large variety of different ways
 # which are independent of platform. SDL_sound may dynamically link against other 3rd
 # party libraries to get additional codec support, such as Ogg Vorbis, SMPEG, ModPlug,
-# MikMod, FLAC, Speex, and potentially others. Some platforms or compilers seem to 
-# require that dependent libraries of libraries you use must also be explicitly 
+# MikMod, FLAC, Speex, and potentially others. 
+# Under some circumstances which I don't fully understand, 
+# there seems to be a requirement
+# that dependent libraries of libraries you use must also be explicitly 
 # linked against in order to successfully compile. SDL_sound does not currently 
 # have any system in place to know how it was compiled.
 # So this CMake module does the hard work in trying to discover which 3rd party 
-# libraries are required for building.
+# libraries are required for building (if any).
 # This module uses a brute force approach to create a test program that uses SDL_sound,
 # and then tries to build it. If the build fails, it parses the error output for 
 # known symbol names to figure out which libraries are needed.
@@ -46,34 +55,65 @@
 # SDL_LIBRARY to override this selection.
 #
 
+
+SET(SDL_SOUND_EXTRAS "" CACHE STRING "SDL_sound extra flags")
+MARK_AS_ADVANCED(SDL_SOUND_EXTRAS)
+
 # Find SDL_sound.h
 FIND_PATH(SDL_SOUND_INCLUDE_DIR SDL_sound.h
-  ~/Library/Frameworks/SDL_sound.framework/Headers
-  /Library/Frameworks/SDL_sound.framework/Headers
-  $ENV{SDLDIR}/include
   $ENV{SDLSOUNDDIR}/include
+  $ENV{SDLDIR}/include
+  ~/Library/Frameworks/SDL_sound.framework/Headers
+  /Library/Frameworks/SDL_sound.framework/Headers # OS X
+  /usr/local/include/SDL
   /usr/include/SDL
+  /usr/local/include/SDL12
+  /usr/local/include/SDL11 # FreeBSD ports
   /usr/include/SDL12
   /usr/include/SDL11
-  /usr/include
-  /usr/local/include/SDL
-  /usr/local/include/SDL12
-  /usr/local/include/SDL11
   /usr/local/include
+  /usr/include
+  /sw/include/SDL # Fink
   /sw/include
+  /opt/local/include/SDL # DarwinPorts
+  /opt/local/include
+  /opt/csw/include/SDL # Blastwave
+  /opt/csw/include 
+  /opt/include/SDL
+  /opt/include
   )
 # Find the SDL_sound library
 IF(${SDL_SOUND_INCLUDE_DIR} MATCHES ".framework")
-  SET (SDL_SOUND_LIBRARY "-framework SDL_sound" CACHE STRING "SDL_sound framework for OSX")
+  # Extract the path the framework resides in so we can use it for the -F flag
+  STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" SDL_SOUND_FRAMEWORK_PATH_TMP ${SDL_SOUND_INCLUDE_DIR})
+  IF("${SDL_SOUND_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+      OR "${SDL_SOUND_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+      )
+    # String is in default search path, don't need to use -F
+    SET (SDL_SOUND_LIBRARY "-framework SDL_sound" CACHE STRING "SDL_sound framework for OSX")
+  ELSE("${SDL_SOUND_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+      OR "${SDL_SOUND_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+      )
+    # String is not /Library/Frameworks, need to use -F
+    SET(SDL_SOUND_LIBRARY "-F${SDL_SOUND_FRAMEWORK_PATH_TMP} -framework SDL_sound" CACHE STRING "SDL_sound framework for OSX")
+  ENDIF("${SDL_SOUND_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+    OR "${SDL_SOUND_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+    )
+  # Clear the temp variable so nobody can see it
+  SET(SDL_SOUND_FRAMEWORK_PATH_TMP "" CACHE INTERNAL "")
+
 ELSE(${SDL_SOUND_INCLUDE_DIR} MATCHES ".framework")
   FIND_LIBRARY(SDL_SOUND_LIBRARY 
     NAMES SDL_sound
     PATHS
-    $ENV{SDLDIR}/lib
     $ENV{SDLSOUNDDIR}/lib
-    /usr/lib
+    $ENV{SDLDIR}/lib
     /usr/local/lib
+    /usr/lib
     /sw/lib
+    /opt/local/lib
+    /opt/csw/lib
+    /opt/lib
     )
 ENDIF(${SDL_SOUND_INCLUDE_DIR} MATCHES ".framework")
 
@@ -170,17 +210,37 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          /Library/Frameworks/libmikmod-coreaudio.framework
          )
        IF(TEMP_SDLSOUND_FIND_MIKMOD_FRAMEWORK)
-         SET(MIKMOD_LIBRARY "-framework libmikmod-coreaudio" CACHE STRING "MikMod framework for OSX")
+         # Extract the path the framework resides in so we can use it for the -F flag
+         STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" TEMP_SDLSOUND_MIKMOD_FRAMEWORK_PATH_TMP ${TEMP_SDLSOUND_FIND_MIKMOD_FRAMEWORK})
+         IF("${TEMP_SDLSOUND_MIKMOD_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_MIKMOD_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's in the default search path so I don't need to use -F
+           SET(MIKMOD_LIBRARY "-framework libmikmod-coreaudio" CACHE STRING "MikMod framework for OSX")
+         ELSE("${TEMP_SDLSOUND_MIKMOD_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_MIKMOD_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's not in the default search path so I need to use -F
+           SET(MIKMOD_LIBRARY "-F${TEMP_SDLSOUND_MIKMOD_FRAMEWORK_PATH_TMP} -framework libmikmod-coreaudio" CACHE STRING "MikMod framework for OSX")
+         ENDIF("${TEMP_SDLSOUND_MIKMOD_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+           OR "${TEMP_SDLSOUND_MIKMOD_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+           )
+         # Clear the temp variable so nobody can see it
+         SET(TEMP_SDLSOUND_MIKMOD_FRAMEWORK_PATH_TMP "" CACHE INTERNAL "")
+
        ELSE(TEMP_SDLSOUND_FIND_MIKMOD_FRAMEWORK)
          FIND_LIBRARY(MIKMOD_LIBRARY
            NAMES mikmod
            PATHS
            $ENV{MIKMODDIR}/lib
-           $ENV{SDLDIR}/lib
            $ENV{SDLSOUNDDIR}/lib
-           /usr/lib
+           $ENV{SDLDIR}/lib
            /usr/local/lib
+           /usr/lib
            /sw/lib
+           /opt/local/lib
+           /opt/csw/lib
+           /opt/lib
            )
        ENDIF(TEMP_SDLSOUND_FIND_MIKMOD_FRAMEWORK)
        # Clear the temp variable so nobody can see it
@@ -193,22 +253,43 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
      # Find ModPlug
      IF("${MY_OUTPUT}" MATCHES "MODPLUG_")
        FIND_FILE(TEMP_SDLSOUND_FIND_MODPLUG_FRAMEWORK 
-         libmikmod-coreaudio 
+         modplug
          ~/Library/Frameworks/modplug.framework
          /Library/Frameworks/modplug.framework
          )
        IF(TEMP_SDLSOUND_FIND_MODPLUG_FRAMEWORK)
-         SET(MIKMOD_LIBRARY "-framework modplug" CACHE STRING "MODPLUG framework for OSX")
+         # Extract the path the framework resides in so we can use it for the -F flag
+         STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" TEMP_SDLSOUND_MODPLUG_FRAMEWORK_PATH_TMP ${TEMP_SDLSOUND_FIND_MODPLUG_FRAMEWORK})
+         MESSAGE("HELLO")
+         IF("${TEMP_SDLSOUND_MODPLUG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_MODPLUG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's in the default search path so I don't need to use -F
+           SET(MODPLUG_LIBRARY "-framework modplug" CACHE STRING "MODPLUG framework for OSX")
+         ELSE("${TEMP_SDLSOUND_MODPLUG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_MODPLUG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's not in the default search path so I need to use -F
+           SET(MODPLUG_LIBRARY "-F${TEMP_SDLSOUND_MODPLUG_FRAMEWORK_PATH_TMP} -framework modplug" CACHE STRING "MODPLUG framework for OSX")
+         ENDIF("${TEMP_SDLSOUND_MODPLUG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+           OR "${TEMP_SDLSOUND_MODPLUG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+           )
+         # Clear the temp variable so nobody can see it
+         SET(TEMP_SDLSOUND_MODPLUG_FRAMEWORK_PATH_TMP "" CACHE INTERNAL "")
+         
        ELSE(TEMP_SDLSOUND_FIND_MODPLUG_FRAMEWORK)
          FIND_LIBRARY(MODPLUG_LIBRARY
            NAMES modplug
            PATHS
            $ENV{MODPLUGDIR}/lib
-           $ENV{SDLDIR}/lib
            $ENV{SDLSOUNDDIR}/lib
-           /usr/lib
+           $ENV{SDLDIR}/lib
            /usr/local/lib
+           /usr/lib
            /sw/lib
+           /opt/local/lib
+           /opt/csw/lib
+           /opt/lib
            )
        ENDIF(TEMP_SDLSOUND_FIND_MODPLUG_FRAMEWORK)
        # Clear the temp variable so nobody can see it
@@ -227,18 +308,38 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          /Library/Frameworks/Vorbis.framework
          )
        IF(TEMP_SDLSOUND_FIND_VORBIS_FRAMEWORK)
-         SET(VORBIS_LIBRARY "-framework Vorbis" CACHE STRING "Vorbis framework for OSX")
+         # Extract the path the framework resides in so we can use it for the -F flag
+         STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" TEMP_SDLSOUND_VORBIS_FRAMEWORK_PATH_TMP ${TEMP_SDLSOUND_FIND_VORBIS_FRAMEWORK})
+         IF("${TEMP_SDLSOUND_VORBIS_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_VORBIS_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's in the default search path so I don't need to use -F
+           SET(VORBIS_LIBRARY "-framework Vorbis" CACHE STRING "Vorbis framework for OSX")
+         ELSE("${TEMP_SDLSOUND_VORBIS_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_VORBIS_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's not in the default search path so I need to use -F
+           SET(VORBIS_LIBRARY "-F${TEMP_SDLSOUND_VORBIS_FRAMEWORK_PATH_TMP} -framework Vorbis" CACHE STRING "Vorbis framework for OSX")
+         ENDIF("${TEMP_SDLSOUND_VORBIS_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+           OR "${TEMP_SDLSOUND_VORBIS_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+           )
+         # Clear the temp variable so nobody can see it
+         SET(TEMP_SDLSOUND_VORBIS_FRAMEWORK_PATH_TMP "" CACHE INTERNAL "")
+
        ELSE(TEMP_SDLSOUND_FIND_VORBIS_FRAMEWORK)
          FIND_LIBRARY(VORBIS_LIBRARY
            NAMES vorbis Vorbis VORBIS
            PATHS
-           $ENV{OGGDIR}/lib
            $ENV{VORBISDIR}/lib
-           $ENV{SDLDIR}/lib
+           $ENV{OGGDIR}/lib
            $ENV{SDLSOUNDDIR}/lib
-           /usr/lib
+           $ENV{SDLDIR}/lib
            /usr/local/lib
+           /usr/lib
            /sw/lib
+           /opt/local/lib
+           /opt/csw/lib
+           /opt/lib
            )
        ENDIF(TEMP_SDLSOUND_FIND_VORBIS_FRAMEWORK)
        # Clear the temp variable so nobody can see it
@@ -253,18 +354,38 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          /Library/Frameworks/Ogg.framework
          )
        IF(TEMP_SDLSOUND_FIND_OGG_FRAMEWORK)
-         SET(OGG_LIBRARY "-framework Ogg" CACHE STRING "Ogg framework for OSX")
+         # Extract the path the framework resides in so we can use it for the -F flag
+         STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP ${TEMP_SDLSOUND_FIND_OGG_FRAMEWORK})
+         IF("${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's in the default search path so I don't need to use -F
+           SET(OGG_LIBRARY "-framework Ogg" CACHE STRING "Ogg framework for OSX")
+         ELSE("${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's not in the default search path so I need to use -F
+           SET(OGG_LIBRARY "-F${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP} -framework Ogg" CACHE STRING "Ogg framework for OSX")
+         ENDIF("${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+           OR "${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+           )
+         # Clear the temp variable so nobody can see it
+         SET(TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP "" CACHE INTERNAL "")
+
        ELSE(TEMP_SDLSOUND_FIND_OGG_FRAMEWORK)
          FIND_LIBRARY(OGG_LIBRARY
            NAMES ogg Ogg OGG
            PATHS
            $ENV{OGGDIR}/lib
            $ENV{VORBISDIR}/lib
-           $ENV{SDLDIR}/lib
            $ENV{SDLSOUNDDIR}/lib
-           /usr/lib
+           $ENV{SDLDIR}/lib
            /usr/local/lib
+           /usr/lib
            /sw/lib
+           /opt/local/lib
+           /opt/csw/lib
+           /opt/lib
            )
        ENDIF(TEMP_SDLSOUND_FIND_OGG_FRAMEWORK)
        # Clear the temp variable so nobody can see it
@@ -283,18 +404,37 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          /Library/Frameworks/smpeg.framework
          )
        IF(TEMP_SDLSOUND_FIND_SMPEG_FRAMEWORK)
-         SET(SMPEG_LIBRARY "-framework smpeg" CACHE STRING "SMPEG framework for OSX")
+         # Extract the path the framework resides in so we can use it for the -F flag
+         STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" TEMP_SDLSOUND_SMPEG_FRAMEWORK_PATH_TMP ${TEMP_SDLSOUND_FIND_SMPEG_FRAMEWORK})
+         IF("${TEMP_SDLSOUND_SMPEG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_SMPEG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's in the default search path so I don't need to use -F
+           SET(SMPEG_LIBRARY "-framework smpeg" CACHE STRING "SMPEG framework for OSX")
+         ELSE("${TEMP_SDLSOUND_SMPEG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_SMPEG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's not in the default search path so I need to use -F
+           SET(SMPEG_LIBRARY "-F${TEMP_SDLSOUND_SMPEG_FRAMEWORK_PATH_TMP} -framework smpeg" CACHE STRING "SMPEG framework for OSX")
+         ENDIF("${TEMP_SDLSOUND_SMPEG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+           OR "${TEMP_SDLSOUND_SMPEG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+           )
+         # Clear the temp variable so nobody can see it
+         SET(TEMP_SDLSOUND_SMPEG_FRAMEWORK_PATH_TMP "" CACHE INTERNAL "")
+
        ELSE(TEMP_SDLSOUND_FIND_SMPEG_FRAMEWORK)
          FIND_LIBRARY(SMPEG_LIBRARY
            NAMES smpeg SMPEG Smpeg SMpeg
            PATHS
            $ENV{SMPEGDIR}/lib
-           $ENV{SDLDIR}/lib
-           $ENV{SDLDIR}/lib
            $ENV{SDLSOUNDDIR}/lib
-           /usr/lib
+           $ENV{SDLDIR}/lib
            /usr/local/lib
+           /usr/lib
            /sw/lib
+           /opt/local/lib
+           /opt/csw/lib
+           /opt/lib
            )
        ENDIF(TEMP_SDLSOUND_FIND_SMPEG_FRAMEWORK)
        # Clear the temp variable so nobody can see it
@@ -313,17 +453,37 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          /Library/Frameworks/FLAC.framework
          )
        IF(TEMP_SDLSOUND_FIND_FLAC_FRAMEWORK)
-         SET(FLAC_LIBRARY "-framework FLAC" CACHE STRING "FLAC framework for OSX")
+         # Extract the path the framework resides in so we can use it for the -F flag
+         STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" TEMP_SDLSOUND_FLAC_FRAMEWORK_PATH_TMP ${TEMP_SDLSOUND_FIND_FLAC_FRAMEWORK})
+         IF("${TEMP_SDLSOUND_FLAC_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_FLAC_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's in the default search path so I don't need to use -F
+           SET(FLAC_LIBRARY "-framework FLAC" CACHE STRING "FLAC framework for OSX")
+         ELSE("${TEMP_SDLSOUND_FLAC_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_FLAC_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's not in the default search path so I need to use -F
+           SET(FLAC_LIBRARY "-F${TEMP_SDLSOUND_FLAC_FRAMEWORK_PATH_TMP} -framework FLAC" CACHE STRING "FLAC framework for OSX")
+         ENDIF("${TEMP_SDLSOUND_FLAC_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+           OR "${TEMP_SDLSOUND_FLAC_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+           )
+         # Clear the temp variable so nobody can see it
+         SET(TEMP_SDLSOUND_FLAC_FRAMEWORK_PATH_TMP "" CACHE INTERNAL "")
+
        ELSE(TEMP_SDLSOUND_FIND_FLAC_FRAMEWORK)
          FIND_LIBRARY(FLAC_LIBRARY
            NAMES flac FLAC
            PATHS
            $ENV{FLACDIR}/lib
-           $ENV{SDLDIR}/lib
            $ENV{SDLSOUNDDIR}/lib
-           /usr/lib
+           $ENV{SDLDIR}/lib
            /usr/local/lib
+           /usr/lib
            /sw/lib
+           /opt/local/lib
+           /opt/csw/lib
+           /opt/lib
            )
        ENDIF(TEMP_SDLSOUND_FIND_FLAC_FRAMEWORK)
        # Clear the temp variable so nobody can see it
@@ -345,17 +505,37 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          /Library/Frameworks/speex.framework
          )
        IF(TEMP_SDLSOUND_FIND_SPEEX_FRAMEWORK)
-         SET(FLAC_LIBRARY "-framework speex" CACHE STRING "SPEEX framework for OSX")
+         # Extract the path the framework resides in so we can use it for the -F flag
+         STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" TEMP_SDLSOUND_SPEEX_FRAMEWORK_PATH_TMP ${TEMP_SDLSOUND_FIND_SPEEX_FRAMEWORK})
+         IF("${TEMP_SDLSOUND_SPEEX_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_SPEEX_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's in the default search path so I don't need to use -F
+           SET(SPEEX_LIBRARY "-framework speex" CACHE STRING "SPEEX framework for OSX")
+         ELSE("${TEMP_SDLSOUND_SPEEX_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_SPEEX_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's not in the default search path so I need to use -F
+           SET(SPEEX_LIBRARY "-F${TEMP_SDLSOUND_SPEEX_FRAMEWORK_PATH_TMP} -framework speex" CACHE STRING "SPEEX framework for OSX")
+         ENDIF("${TEMP_SDLSOUND_SPEEX_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+           OR "${TEMP_SDLSOUND_SPEEX_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+           )
+         # Clear the temp variable so nobody can see it
+         SET(TEMP_SDLSOUND_SPEEX_FRAMEWORK_PATH_TMP "" CACHE INTERNAL "")
+
        ELSE(TEMP_SDLSOUND_FIND_SPEEX_FRAMEWORK)
          FIND_LIBRARY(SPEEX_LIBRARY
            NAMES speex SPEEX
            PATHS
            $ENV{SPEEXDIR}/lib
-           $ENV{SDLDIR}/lib
            $ENV{SDLSOUNDDIR}/lib
-           /usr/lib
+           $ENV{SDLDIR}/lib
            /usr/local/lib
+           /usr/lib
            /sw/lib
+           /opt/local/lib
+           /opt/csw/lib
+           /opt/lib
            )
        ENDIF(TEMP_SDLSOUND_FIND_SPEEX_FRAMEWORK)
        # Clear the temp variable so nobody can see it
@@ -369,7 +549,24 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          /Library/Frameworks/Ogg.framework
          )
        IF(TEMP_SDLSOUND_FIND_OGG_FRAMEWORK)
-         SET(OGG_LIBRARY "-framework Ogg" CACHE STRING "Ogg framework for OSX")
+         # Extract the path the framework resides in so we can use it for the -F flag
+         STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP ${TEMP_SDLSOUND_FIND_OGG_FRAMEWORK})
+         IF("${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's in the default search path so I don't need to use -F
+           SET(OGG_LIBRARY "-framework Ogg" CACHE STRING "Ogg framework for OSX")
+         ELSE("${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+             OR "${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+             )
+           # It's not in the default search path so I need to use -F
+           SET(OGG_LIBRARY "-F${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP} -framework Ogg" CACHE STRING "Ogg framework for OSX")
+         ENDIF("${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+           OR "${TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+           )
+         # Clear the temp variable so nobody can see it
+         SET(TEMP_SDLSOUND_OGG_FRAMEWORK_PATH_TMP "" CACHE INTERNAL "")
+         
        ELSE(TEMP_SDLSOUND_FIND_OGG_FRAMEWORK)
          FIND_LIBRARY(OGG_LIBRARY
            NAMES ogg Ogg OGG
@@ -377,11 +574,14 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            $ENV{OGGDIR}/lib
            $ENV{VORBISDIR}/lib
            $ENV{SPEEXDIR}/lib
-           $ENV{SDLDIR}/lib
            $ENV{SDLSOUNDDIR}/lib
-           /usr/lib
+           $ENV{SDLDIR}/lib
            /usr/local/lib
+           /usr/lib
            /sw/lib
+           /opt/local/lib
+           /opt/csw/lib
+           /opt/lib
            )
        ENDIF(TEMP_SDLSOUND_FIND_OGG_FRAMEWORK)
        # Clear the temp variable so nobody can see it
@@ -394,9 +594,12 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
      
      
    ELSE(NOT MY_RESULT)
-     SET(SDL_SOUND_LIBRARIES ${SDL_SOUND_LIBRARY} CACHE STRING "SDL_sound and dependent libraries")
+     SET(SDL_SOUND_LIBRARIES "${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARY}" CACHE INTERNAL "SDL_sound and dependent libraries")
    ENDIF(NOT MY_RESULT)
 
-   SET(SDL_SOUND_LIBRARIES ${SDL_SOUND_LIBRARIES_TMP} CACHE STRING "SDL_sound and dependent libraries")
+   SET(SDL_SOUND_LIBRARIES "${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARIES_TMP}" CACHE INTERNAL "SDL_sound and dependent libraries")
    SET(SDL_SOUND_FOUND "YES")
  ENDIF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
+
+ # MESSAGE("SDL_SOUND_LIBRARIES is ${SDL_SOUND_LIBRARIES}")
+

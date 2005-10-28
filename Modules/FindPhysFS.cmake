@@ -15,29 +15,55 @@
 # People will have to manually change the cache values of 
 # PHYSFS_LIBRARY to override this selection.
 FIND_PATH(PHYSFS_INCLUDE_DIR physfs.h
+  $ENV{PHYSFSDIR}/include
   ~/Library/Frameworks/PhysFS.framework/Headers
   /Library/Frameworks/PhysFS.framework/Headers
-  $ENV{PHYSFSDIR}/include
-  /usr/include
-  /usr/include/physfs
   /usr/local/include/physfs
+  /usr/local/include
+  /usr/include/physfs
+  /usr/include
+  /sw/include/physfs # Fink
   /sw/include
-  /sw/include/physfs
+  /opt/local/include/physfs # DarwinPorts
+  /opt/local/include
+  /opt/csw/include/physfs # Blastwave
+  /opt/csw/include
+  /opt/include/physfs
+  /opt/include
   )
 # I'm not sure if I should do a special casing for Apple. It is 
 # unlikely that other Unix systems will find the framework path.
 # But if they do ([Next|Open|GNU]Step?), 
 # do they want the -framework option also?
 IF(${PHYSFS_INCLUDE_DIR} MATCHES ".framework")
-  SET (PHYSFS_LIBRARY "-framework PhysFS" CACHE STRING "PhysFS framework for OSX")
+  STRING(REGEX REPLACE "(.*)/.*\\.framework/.*" "\\1" PHYSFS_FRAMEWORK_PATH_TMP ${PHYSFS_INCLUDE_DIR})
+  IF("${PHYSFS_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+      OR "${PHYSFS_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+      )
+    # String is in default search path, don't need to use -F
+    SET(PHYSFS_LIBRARY "-framework PhysFS" CACHE STRING "PhysFS framework for OSX")
+  ELSE("${PHYSFS_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+      OR "${PHYSFS_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+      )
+    # String is not /Library/Frameworks, need to use -F
+    SET(PHYSFS_LIBRARY "-F${PHYSFS_FRAMEWORK_PATH_TMP} -framework PhysFS" CACHE STRING "PhysFS framework for OSX")
+  ENDIF("${PHYSFS_FRAMEWORK_PATH_TMP}" STREQUAL "/Library/Frameworks"
+    OR "${PHYSFS_FRAMEWORK_PATH_TMP}" STREQUAL "/System/Library/Frameworks"
+    )
+  # Clear the temp variable so nobody can see it
+  SET(PHYSFS_FRAMEWORK_PATH_TMP "" CACHE INTERNAL "")
+
 ELSE(${PHYSFS_INCLUDE_DIR} MATCHES ".framework")
   FIND_LIBRARY(PHYSFS_LIBRARY 
     NAMES physfs PhysFS
     PATHS
     $ENV{PHYSFSDIR}/lib
-    /usr/lib
     /usr/local/lib
+    /usr/lib
     /sw/lib
+    /opt/local/lib
+    /opt/csw/lib
+    /opt/lib
     )
 ENDIF(${PHYSFS_INCLUDE_DIR} MATCHES ".framework")
 
