@@ -162,7 +162,7 @@ void cmLocalUnixMakefileGenerator3
       if (clean)
         {
         cleanFiles.push_back
-          (this->Convert(cc->GetOutput(),HOME_OUTPUT,SHELL));
+          (this->Convert(cc->GetOutput(),START_OUTPUT,SHELL));
         }
       }
     }
@@ -1372,11 +1372,11 @@ cmLocalUnixMakefileGenerator3
   std::string cleanFullName = outpath + cleanName;
   std::string cleanFullRealName = outpath + cleanRealName;
   exeCleanFiles.push_back
-    (this->Convert(cleanFullName.c_str(),HOME_OUTPUT,MAKEFILE));
+    (this->Convert(cleanFullName.c_str(),START_OUTPUT,MAKEFILE));
   if(cleanRealName != cleanName)
     {
     exeCleanFiles.push_back
-      (this->Convert(cleanFullRealName.c_str(),HOME_OUTPUT,MAKEFILE));
+      (this->Convert(cleanFullRealName.c_str(),START_OUTPUT,MAKEFILE));
     }
   }
   // Add a command to remove any existing files for this executable.
@@ -1693,24 +1693,24 @@ cmLocalUnixMakefileGenerator3
   std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
   std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
   libCleanFiles.push_back
-    (this->Convert(cleanFullStaticName.c_str(),HOME_OUTPUT,MAKEFILE));
+    (this->Convert(cleanFullStaticName.c_str(),START_OUTPUT,MAKEFILE));
   if(cleanSharedRealName != cleanStaticName)
     {
     libCleanFiles.push_back
-      (this->Convert(cleanFullSharedRealName.c_str(),HOME_OUTPUT,MAKEFILE));
+      (this->Convert(cleanFullSharedRealName.c_str(),START_OUTPUT,MAKEFILE));
     }
   if(cleanSharedSOName != cleanStaticName &&
      cleanSharedSOName != cleanSharedRealName)
     {
     libCleanFiles.push_back
-      (this->Convert(cleanFullSharedSOName.c_str(),HOME_OUTPUT,MAKEFILE));
+      (this->Convert(cleanFullSharedSOName.c_str(),START_OUTPUT,MAKEFILE));
     }
   if(cleanSharedName != cleanStaticName &&
      cleanSharedName != cleanSharedSOName &&
      cleanSharedName != cleanSharedRealName)
     {
     libCleanFiles.push_back
-      (this->Convert(cleanFullSharedName.c_str(),HOME_OUTPUT,MAKEFILE));
+      (this->Convert(cleanFullSharedName.c_str(),START_OUTPUT,MAKEFILE));
     }
   }
   
@@ -1927,7 +1927,8 @@ cmLocalUnixMakefileGenerator3
   
   // Construct the clean command.
   this->AppendCleanCommand(commands, files);
-
+  this->CreateCDCommand(commands,m_Makefile->GetStartOutputDirectory(),
+                        m_Makefile->GetHomeOutputDirectory());
   // Write the rule.
   this->WriteMakeRule(ruleFileStream, 0,
                       cleanTarget.c_str(), no_depends, commands);
