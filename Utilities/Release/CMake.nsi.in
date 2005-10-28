@@ -303,7 +303,7 @@ FunctionEnd
 ;--------------------------------
 ; Define some macro setting for the gui
 
-  !define MUI_HEADERIMAGE_BITMAP @PROJECT_SOURCE_DIR@\Utilities\Release\@PROJECT_NAME@Install.bmp
+  !define MUI_HEADERIMAGE_BITMAP "@PROJECT_SOURCE_DIR@\Utilities\Release\@PROJECT_NAME@Install.bmp"
 
 ;--------------------------------
 ;Pages

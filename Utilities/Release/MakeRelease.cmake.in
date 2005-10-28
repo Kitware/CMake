@@ -18,15 +18,15 @@ SET (CVSROOT ":pserver:anoncvs@www.cmake.org:/cvsroot/CMake")
 #########################################################################
 IF (COMMIT_UNIX_SCRIPT)
   # first copy the file
-  EXEC_PROGRAM(${CMAKE_COMMAND} "@PROJECT_SOURCE_DIR@"
+  EXEC_PROGRAM("@CMAKE_COMMAND@" "@PROJECT_SOURCE_DIR@"
     ARGS -E copy 
-    "@PROJECT_BINARY_DIR@/Utilities/Release/cmake_release.sh" 
-    "@PROJECT_SOURCE_DIR@/Utilities/Release"
+    "\"@PROJECT_BINARY_DIR@/Utilities/Release/cmake_release.sh\""
+    "\"@PROJECT_SOURCE_DIR@/Utilities/Release\""
     )
   # then commit it
   EXEC_PROGRAM(cvs "@PROJECT_SOURCE_DIR@"
-    ARGS commit -m \"ENH: update revision numbers\" 
-    "@PROJECT_SOURCE_DIR@/Utilities/Release/cmake_release.sh" 
+    ARGS commit -m "\"ENH: update revision numbers\""
+    "\"@PROJECT_SOURCE_DIR@/Utilities/Release/cmake_release.sh\"" 
     )
 ENDIF (COMMIT_UNIX_SCRIPT)
 
@@ -35,7 +35,7 @@ ENDIF (COMMIT_UNIX_SCRIPT)
 #########################################################################
 IF (BUILD_NSIW)
   EXEC_PROGRAM("@NSIS_MAKENSIS@" 
-    ARGS "@PROJECT_BINARY_DIR@/Utilities/Release/@PROJECT_NAME@.nsi"
+    ARGS "\"@PROJECT_BINARY_DIR@/Utilities/Release/@PROJECT_NAME@.nsi\""
     )
   # copy the NSI to the FTP site
   EXEC_PROGRAM(scp 
