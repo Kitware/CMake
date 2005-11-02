@@ -4,7 +4,8 @@
 # CHECK_INCLUDE_FILE - macro which checks the include file exists.
 # INCLUDE - name of include file
 # VARIABLE - variable to return result
-# OPTIONAL - a third argument can be extra flags which are passed to the compiler
+#
+# a third argument can be passed containing extra flags for the compiler
 #
 
 MACRO(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)

@@ -5,6 +5,9 @@
 # INCLUDE - list of files to include
 # VARIABLE - variable to return result
 #
+# If CMAKE_REQUIRED_FLAGS is set then those flags will be passed into the
+# compile of the program
+
 
 MACRO(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")

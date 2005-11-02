@@ -5,6 +5,10 @@
 # FUNCTION - the name of the function
 # VARIABLE - variable to store the result
 #
+# If CMAKE_REQUIRED_FLAGS is set then those flags will be passed into the
+# compile of the program likewise if CMAKE_REQUIRED_LIBRARIES is set then
+# those libraries will be linked against the test program
+
 
 MACRO(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")

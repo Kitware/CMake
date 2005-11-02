@@ -5,7 +5,9 @@
 # INCLUDE - name of include file
 # VARIABLE - variable to return result
 #
-
+# an optional third argument is the CFlags to add to the compile line 
+# or you can use CMAKE_REQUIRED_FLAGS
+#
 MACRO(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")
     SET(MACRO_CHECK_INCLUDE_FILE_FLAGS ${CMAKE_REQUIRED_FLAGS})
