@@ -2,7 +2,9 @@
 # Check if the function exists.
 #
 # CHECK_LIBRARY_EXISTS - macro which checks if the function exists
+# LIBRARY - the name of the library you are looking for
 # FUNCTION - the name of the function
+# LOCATION - location where the library should be found
 # VARIABLE - variable to store the result
 #
 # If CMAKE_REQUIRED_FLAGS is set then those flags will be passed into the
