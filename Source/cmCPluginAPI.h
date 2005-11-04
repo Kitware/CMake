@@ -212,7 +212,7 @@ Finally we define the key data structures and function prototypes
     unsigned long reserved1; /* Reserved for future use.  DO NOT USE.  */
     unsigned long reserved2; /* Reserved for future use.  DO NOT USE.  */
     cmCAPI *CAPI;
-    int m_Inherited;
+    int m_Inherited; /* this ivar is no longer used in CMake 2.2 or later */
     CM_INITIAL_PASS_FUNCTION InitialPass;
     CM_FINAL_PASS_FUNCTION FinalPass;
     CM_DESTRUCTOR_FUNCTION Destructor;
