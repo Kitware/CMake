@@ -39,7 +39,7 @@ MACRO(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
         "exists passed with the following output:\n"
         "${OUTPUT}\n\n")
     ELSE(${VARIABLE})
-      MESSAGE(STATUS "Looking for ${INCLUDE} - not found.")
+      MESSAGE(STATUS "Looking for ${INCLUDE} - not found")
       SET(${VARIABLE} "" CACHE INTERNAL "Have include ${INCLUDE}")
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
         "Determining if the include file ${INCLUDE} "
