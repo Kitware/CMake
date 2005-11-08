@@ -103,5 +103,9 @@ int main(int, char**)
     {
     kwsys_ios::cout << "Test failed" << kwsys_ios::endl;
     }
+  else
+    {
+    kwsys_ios::cout << "Test passed" << kwsys_ios::endl;
+    }
   return res;
 }
