@@ -184,7 +184,36 @@ void cmLocalGenerator::GenerateTestFiles()
       fout << "SET_TESTS_PROPERTIES(" << test->GetName() << " PROPERTIES ";
       for ( pit = mpit->begin(); pit != mpit->end(); ++ pit )
         {
-        fout << " " << pit->first.c_str() << " \"" << pit->second.c_str() << "\"";
+        fout << " " << pit->first.c_str() << " \"";
+        const char* value = pit->second.c_str();
+        for ( ; *value; ++ value )
+          {
+          switch ( *value )
+            {
+          case '\\':
+          case '"':
+          case ' ':
+          case '#':
+          case '(':
+          case ')':
+          case '$':
+          case '^':
+            fout << "\\" << *value;
+            break;
+          case '\t':
+            fout << "\\t";
+            break;
+          case '\n':
+            fout << "\\n";
+            break;
+          case '\r':
+            fout << "\\r";
+            break;
+          default:
+            fout << *value;
+            }
+          }
+        fout << "\"";
         }
       fout << ")" << std::endl;
       }

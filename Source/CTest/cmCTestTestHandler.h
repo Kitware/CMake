@@ -95,6 +95,8 @@ protected:
     cmStdString m_Name;
     cmStdString m_Directory;
     std::vector<std::string> m_Args;
+    std::vector<cmsys::RegularExpression> m_ErrorRegularExpressions;
+    std::vector<cmsys::RegularExpression> m_RequiredRegularExpressions;
     bool m_IsInBasedOnREOptions;
     bool m_WillFail;
   };

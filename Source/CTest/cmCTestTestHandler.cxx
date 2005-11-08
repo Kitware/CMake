@@ -751,7 +751,39 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     if ( !m_CTest->GetShowOnly() )
       {
       bool testFailed = false;
-      if (res == cmsysProcess_State_Exited && retVal == 0)
+      std::vector<cmsys::RegularExpression>::iterator passIt;
+      bool forceFail = false;
+      if ( it->m_RequiredRegularExpressions.size() > 0 )
+        {
+        bool found = false;
+        for ( passIt = it->m_RequiredRegularExpressions.begin();
+          passIt != it->m_RequiredRegularExpressions.end();
+          ++ passIt )
+          {
+          if ( passIt->find(output.c_str()) )
+            {
+            found = true;
+            }
+          }
+        if ( !found )
+          {
+          forceFail = true;
+          }
+        }
+      if ( it->m_ErrorRegularExpressions.size() > 0 )
+        {
+        for ( passIt = it->m_ErrorRegularExpressions.begin();
+          passIt != it->m_ErrorRegularExpressions.end();
+          ++ passIt )
+          {
+          if ( passIt->find(output.c_str()) )
+            {
+            forceFail = true;
+            }
+          }
+        }
+
+      if (res == cmsysProcess_State_Exited && retVal == 0 && !forceFail)
         {
         cmCTestLog(m_CTest, HANDLER_OUTPUT,   "   Passed");
         if ( it->m_WillFail )
@@ -769,6 +801,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       else
         {
         testFailed = true;
+
         cres.m_Status = cmCTestTestHandler::FAILED;
         if ( res == cmsysProcess_State_Expired )
           {
@@ -809,6 +842,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
           }
         else
           {
+          // Force fail will also be here?
           cmCTestLog(m_CTest, HANDLER_OUTPUT, "***Failed");
           if ( it->m_WillFail )
             {
@@ -1523,6 +1557,26 @@ bool cmCTestTestHandler::SetTestsProperties(const std::vector<std::string>& args
           if ( key == "WILL_FAIL" )
             {
             rtit->m_WillFail = cmSystemTools::IsOn(val.c_str());
+            }
+          if ( key == "ERROR_REGULAR_EXPRESSION" )
+            {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            std::vector<std::string>::iterator crit;
+            for ( crit = lval.begin(); crit != lval.end(); ++ crit )
+              {
+              rtit->m_ErrorRegularExpressions.push_back(cmsys::RegularExpression(crit->c_str()));
+              }
+            }
+          if ( key == "REQUIRED_REGULAR_EXPRESSION" )
+            {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            std::vector<std::string>::iterator crit;
+            for ( crit = lval.begin(); crit != lval.end(); ++ crit )
+              {
+              rtit->m_RequiredRegularExpressions.push_back(cmsys::RegularExpression(crit->c_str()));
+              }
             }
           }
         }
