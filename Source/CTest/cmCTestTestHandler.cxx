@@ -1558,7 +1558,7 @@ bool cmCTestTestHandler::SetTestsProperties(const std::vector<std::string>& args
             {
             rtit->m_WillFail = cmSystemTools::IsOn(val.c_str());
             }
-          if ( key == "ERROR_REGULAR_EXPRESSION" )
+          if ( key == "FAIL_REGULAR_EXPRESSION" )
             {
             std::vector<std::string> lval;
             cmSystemTools::ExpandListArgument(val.c_str(), lval);
@@ -1568,7 +1568,7 @@ bool cmCTestTestHandler::SetTestsProperties(const std::vector<std::string>& args
               rtit->m_ErrorRegularExpressions.push_back(cmsys::RegularExpression(crit->c_str()));
               }
             }
-          if ( key == "REQUIRED_REGULAR_EXPRESSION" )
+          if ( key == "PASS_REGULAR_EXPRESSION" )
             {
             std::vector<std::string> lval;
             cmSystemTools::ExpandListArgument(val.c_str(), lval);
