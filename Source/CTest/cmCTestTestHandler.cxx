@@ -783,7 +783,9 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
           }
         }
 
-      if (res == cmsysProcess_State_Exited && retVal == 0 && !forceFail)
+      if (res == cmsysProcess_State_Exited && 
+          (retVal == 0 || it->m_RequiredRegularExpressions.size()) && 
+          !forceFail)
         {
         cmCTestLog(m_CTest, HANDLER_OUTPUT,   "   Passed");
         if ( it->m_WillFail )
