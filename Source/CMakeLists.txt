@@ -540,6 +540,56 @@ IF(BUILD_TESTING)
     --test-command helloDemo
     )
 
+  ADD_TEST(TutorialStep1 ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/Tutorial/Step1"
+    "${CMake_BINARY_DIR}/Tests/Tutorial/Step1"
+    --build-two-config 
+    --build-generator ${CMAKE_GENERATOR}
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-project Tutorial
+    --test-command Tutorial 25.0)
+
+  ADD_TEST(TutorialStep2 ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/Tutorial/Step2"
+    "${CMake_BINARY_DIR}/Tests/Tutorial/Step2"
+    --build-two-config 
+    --build-generator ${CMAKE_GENERATOR}
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-project Tutorial
+    --test-command Tutorial 25.0)
+
+  ADD_TEST(TutorialStep3 ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/Tutorial/Step3"
+    "${CMake_BINARY_DIR}/Tests/Tutorial/Step3"
+    --build-two-config 
+    --build-generator ${CMAKE_GENERATOR}
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-project Tutorial
+    --test-command Tutorial 25.0)
+
+  ADD_TEST(TutorialStep4 ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/Tutorial/Step4"
+    "${CMake_BINARY_DIR}/Tests/Tutorial/Step4"
+    --build-two-config 
+    --build-generator ${CMAKE_GENERATOR}
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-project Tutorial
+    --test-command Tutorial 25.0)
+
+  ADD_TEST(TutorialStep5 ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/Tutorial/Step5"
+    "${CMake_BINARY_DIR}/Tests/Tutorial/Step5"
+    --build-two-config 
+    --build-generator ${CMAKE_GENERATOR}
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-project Tutorial
+    --test-command Tutorial 25.0)
+
   ADD_TEST(testing ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Testing"
