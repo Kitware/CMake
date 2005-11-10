@@ -9,15 +9,15 @@ include (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 check_function_exists (log HAVE_LOG)
 check_function_exists (exp HAVE_EXP)
 
+# should we use our own math functions
+option(USE_MYMATH "Use tutorial provided math implementation" ON)
+
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
   "${PROJECT_SOURCE_DIR}/TutorialConfig.h.in"
   "${PROJECT_BINARY_DIR}/TutorialConfig.h"
   )
-
-# should we use our own math functions
-option(USE_MYMATH "Use tutorial provided math implementation" ON)
 
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h

@@ -1,4 +1,4 @@
-# first we add the exetuable that generates the table
+# first we add the executable that generates the table
 add_executable(MakeTable MakeTable.cxx)
 
 # add the command to generate the source code
