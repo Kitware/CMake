@@ -36,4 +36,10 @@ ELSE(NOT CMAKE_C_COMPILER_WORKS)
   # Check the size of void*.  This used to be "void *" but icc expands the *.
   CHECK_TYPE_SIZE("void*"  CMAKE_SIZEOF_VOID_P)
   SET(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
+  # re-configure this file CMakeCCompiler.cmake so that it gets
+  # the value for CMAKE_SIZEOF_VOID_P
+  # configure variables set in this file for fast reload later on
+  CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in 
+    ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCCompiler.cmake IMMEDIATE)
 ENDIF(NOT CMAKE_C_COMPILER_WORKS)
+
