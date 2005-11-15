@@ -66,12 +66,15 @@ public:
         "${VAR} or @VAR@ with their values as determined by CMake.  If a "
         "variable is not defined, it will be replaced with nothing.  "
         "If COPYONLY is specified, then then no variable expansion will take "
-        "place.  If ESCAPE_QUOTES is specified in then any substitued quotes "
+        "place.  If ESCAPE_QUOTES is specified then any substitued quotes "
         "will be C-style escaped.  "
         "The file will be configured with the current values of CMake "
         "variables. If @ONLY is specified, only variables "
         "of the form @VAR@ will be replaces and ${VAR} will be ignored.  "
-        "This is useful for configuring tcl scripts that use ${VAR}.";
+        "This is useful for configuring scripts that use ${VAR}. "
+        "Any occurances of #cmakedefine VAR will be replaced with "
+        "either #define VAR or /* #undef VAR */ depending on "
+        "the setting of VAR in CMake";
     }
 
   virtual void FinalPass();
