@@ -53,8 +53,8 @@ public:
     {
     return
       "  GET_TEST_PROPERTY(test VAR property)\n"
-      "Get a property from the Test.  The value of the property is" 
-      "stored in the variable VAR. If the property is not found,"
+      "Get a property from the Test.  The value of the property is " 
+      "stored in the variable VAR. If the property is not found, "
       "CMake will report an error.";
     }
 
