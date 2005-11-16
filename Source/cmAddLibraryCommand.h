@@ -52,7 +52,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add an library to the project using the specified source files.";
+    return "Add a library to the project using the specified source files.";
     }
   
   /**
