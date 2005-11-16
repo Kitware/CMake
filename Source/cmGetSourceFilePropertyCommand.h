@@ -54,7 +54,7 @@ public:
       return
         "  GET_SOURCE_FILE_PROPERTY(VAR file property)\n"
         "Get a property from a source file.  The value of the property is "
-        "stored in the variable VAR.  If the property is not found, var "
+        "stored in the variable VAR.  If the property is not found, VAR "
         "will be set to \"NOTFOUND\".  Use SET_SOURCE_FILES_PROPERTIES to set "
         "property values.  Source file properties usually control how the "
         "file is built.";

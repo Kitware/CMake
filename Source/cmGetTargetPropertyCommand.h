@@ -54,7 +54,7 @@ public:
       return
         "  GET_TARGET_PROPERTY(VAR target property)\n"
         "Get a property from a target.   The value of the property is "
-        "stored in the variable VAR.  If the property is not found, var "
+        "stored in the variable VAR.  If the property is not found, VAR "
         "will be set to \"NOTFOUND\".  Use SET_TARGET_PROPERTIES to set "
         "property values.  Properties are usually used to control how "
         "a target is built.\n"
