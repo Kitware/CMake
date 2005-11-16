@@ -2487,6 +2487,10 @@ static int kwsysProcess_List_NextProcess(kwsysProcess_List* self)
 /*--------------------------------------------------------------------------*/
 static int kwsysProcess_List__New_NT4(kwsysProcess_List* self)
 {
+  /* Get a handle to the NT runtime module that should already be
+     loaded in this program.  This does not actually increment the
+     reference count to the module so we do not need to close the
+     handle.  */
   HANDLE hNT = GetModuleHandle("ntdll.dll");
   if(hNT)
     {
@@ -2494,7 +2498,6 @@ static int kwsysProcess_List__New_NT4(kwsysProcess_List* self)
     self->P_ZwQuerySystemInformation =
       ((ZwQuerySystemInformationType)
        GetProcAddress(hNT, "ZwQuerySystemInformation"));
-    CloseHandle(hNT);
     }
   if(!self->P_ZwQuerySystemInformation)
     {
@@ -2588,6 +2591,10 @@ static int kwsysProcess_List__GetParentId_NT4(kwsysProcess_List* self)
 /*--------------------------------------------------------------------------*/
 static int kwsysProcess_List__New_Snapshot(kwsysProcess_List* self)
 {
+  /* Get a handle to the Windows runtime module that should already be
+     loaded in this program.  This does not actually increment the
+     reference count to the module so we do not need to close the
+     handle.  */
   HANDLE hKernel = GetModuleHandle("kernel32.dll");
   if(hKernel)
     {
@@ -2600,7 +2607,6 @@ static int kwsysProcess_List__New_Snapshot(kwsysProcess_List* self)
     self->P_Process32Next =
       ((Process32NextType)
        GetProcAddress(hKernel, "Process32Next"));
-    CloseHandle(hKernel);
     }
   return (self->P_CreateToolhelp32Snapshot &&
           self->P_Process32First &&
