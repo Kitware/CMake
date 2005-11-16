@@ -65,7 +65,7 @@ public:
         "The read-only property \"TYPE\" returns which type the specified "
         "target has (EXECUTABLE, STATIC_LIBRARY, SHARED_LIBRARY, "
         "MODULE_LIBRARY, UTILITY, INSTALL_FILES or INSTALL_PROGRAMS). "
-        "This command can get properties for any target so far created.\n"
+        "This command can get properties for any target so far created. "
         "The targets do not need to be in the current CMakeLists.txt file.";
     }
   
