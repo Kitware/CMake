@@ -45,7 +45,6 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
    "CMake-generated build trees created for projects that use "
    "the ENABLE_TESTING and ADD_TEST commands have testing support.  "
    "This program will run the tests and report results.", 0},
-  CMAKE_STANDARD_INTRODUCTION,
   {0,0,0}
 };
 
