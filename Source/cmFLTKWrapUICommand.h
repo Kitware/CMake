@@ -74,7 +74,7 @@ public:
       "               source2 ... sourceN )\n"
       "Produce .h and .cxx files for all the .fl and .fld files listed.  "
       "The resulting .h and .cxx files will be added to a variable named "
-      "resultingLibraryName_FLTK_UI_SRCS whcih should be added to your "
+      "resultingLibraryName_FLTK_UI_SRCS which should be added to your "
       "library.";
     }
   
