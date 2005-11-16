@@ -73,10 +73,10 @@ public:
       "that depends on another project built in a different tree.  "
       "EXCLUDE option can be used to provide a list of entries to be "
       "excluded.  "
-      "INCLUDE_INTERNALS can be used to provide a list of internal entries"
-      "to be included.  Normally, no internal entries are brougt in.  Use "
+      "INCLUDE_INTERNALS can be used to provide a list of internal entries "
+      "to be included.  Normally, no internal entries are brought in.  Use "
       "of this form of the command is strongly discouraged, but it is "
-      "provided for backward compatability.";
+      "provided for backward compatibility.";
     }
   
   cmTypeMacro(cmLoadCacheCommand, cmCommand);

@@ -99,7 +99,7 @@ public:
       "the variable ARGC which will be set to the number of arguments "
       "passed into the function as well as ARGV0 ARGV1 ARGV2 ... which "
       "will have the actual values of the arguments passed in. This "
-      "fascilitates creating macros with optional arguments. Additionally "
+      "facilitates creating macros with optional arguments. Additionally "
       "ARGV holds the list of all arguments given to the macro and ARGN "
       "holds the list of argument pass the last expected argument.";
     }
