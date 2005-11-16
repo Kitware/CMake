@@ -803,7 +803,9 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
   while(cp->PipesLeft > 0)
     {
     /* Check for any open pipes with data reported ready by the last
-       call to select.  */
+       call to select.  According to "man select_tut" we must deal
+       with all descriptors reported by a call to select before
+       passing them to another select call.  */
     for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
       {
       if(cp->PipeReadEnds[i] >= 0 &&
