@@ -74,7 +74,7 @@ public:
       "are processed immediately as if they were written in place of the "
       "INCLUDE command.  If OPTIONAL is present, then no error "
       "is raised if the file does not exist.\n"
-      "If module is specified instead of file, the file with name "
+      "If a module is specified instead of a file, the file with name "
       "<modulename>.cmake is searched in the CMAKE_MODULE_PATH.";
     }
   

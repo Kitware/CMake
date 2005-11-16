@@ -107,7 +107,7 @@ public:
       "in the THEN section are invoked.  Otherwise, the commands in the "
       "ELSE section are invoked.  The ELSE section is optional.  Note that "
       "the same expression must be given to IF, ELSE, and ENDIF.  Long "
-      "exressions can be used and the order or precidence is that the "
+      "expressions can be used and the order or precedence is that the "
       "EXISTS, COMMAND, and DEFINED operators will be evaluated first. "
       "Then any EQUAL, LESS, GREATER, STRLESS, STRGREATER, STREQUAL, MATCHES "
       "will be evaluated. Then NOT operators and finally AND, OR operators "
