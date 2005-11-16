@@ -43,7 +43,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Get a property of the CMake.";
+    return "Get a property of the CMake instance.";
     }
   
   /**
@@ -53,10 +53,10 @@ public:
     {
       return
         "  GET_CMAKE_PROPERTY(VAR property)\n"
-        "Get a property from the CMake.  The value of the property is" 
-        "stored in the variable VAR. If the property is not found,"
-        "CMake will report an error. The properties include: VARIABLES, "
-        "CACHE_VARIABLES, COMMANDS, and MACROS.";
+        "Get a property from the CMake instance.  The value of the "
+        "property is stored in the variable VAR. If the property is "
+        "not found, CMake will report an error. Some supported properties "
+        "include: VARIABLES, CACHE_VARIABLES, COMMANDS, and MACROS.";
     }
   
   cmTypeMacro(cmGetCMakePropertyCommand, cmCommand);

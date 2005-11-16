@@ -53,8 +53,8 @@ public:
     {
       return
         "  GET_DIRECTORY_PROPERTY(VAR [DIRECTORY dir] property)\n"
-        "Get a property from the Directory.  The value of the property is" 
-        "stored in the variable VAR. If the property is not found,"
+        "Get a property from the Directory.  The value of the property is " 
+        "stored in the variable VAR. If the property is not found, "
         "CMake will report an error. The properties include: VARIABLES, "
         "CACHE_VARIABLES, COMMANDS, MACROS, INCLUDE_DIRECTORIES, "
         "LINK_DIRECTORIES, DEFINITIONS, INCLUDE_REGULAR_EXPRESSION and "
