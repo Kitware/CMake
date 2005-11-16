@@ -66,7 +66,7 @@ public:
     {
     return
       "  ENDIF(expression)\n"
-      "See IF command.";
+      "See the IF command.";
     }
   
   cmTypeMacro(cmEndIfCommand, cmCommand);

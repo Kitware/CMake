@@ -66,7 +66,7 @@ public:
     {
     return
       "  ELSE(expression)\n"
-      "See IF command.";
+      "See the IF command.";
     }
   
   cmTypeMacro(cmElseCommand, cmCommand);

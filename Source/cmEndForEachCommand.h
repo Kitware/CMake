@@ -72,7 +72,7 @@ public:
     {
     return
       "  ENDFOREACH(expression)\n"
-      "See FOREACH command.";
+      "See the FOREACH command.";
     }
   
   cmTypeMacro(cmEndForEachCommand, cmCommand);

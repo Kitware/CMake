@@ -64,7 +64,7 @@ public:
     {
     return
       "  ENABLE_LANGUAGE(languageName)\n"
-      " This command enables support for the named language in CMake.";
+      "This command enables support for the named language in CMake.";
     }
   
   cmTypeMacro(cmEnableLanguageCommand, cmCommand);

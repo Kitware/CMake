@@ -72,7 +72,7 @@ public:
     {
     return
       "  ENDWHILE(expression)\n"
-      "See WHILE command.";
+      "See the WHILE command.";
     }
   
   cmTypeMacro(cmEndWhileCommand, cmCommand);

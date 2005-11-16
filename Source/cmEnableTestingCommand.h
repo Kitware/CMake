@@ -70,9 +70,9 @@ public:
     return
       "  ENABLE_TESTING()\n"
       "Enables testing for this directory and below.  "
-      "See also the ADD_TEST command.  Note that Dart expects to find "
+      "See also the ADD_TEST command.  Note that ctest expects to find "
       "a test file in the build directory root.  Therefore, this command "
-      "should be in the source directory root too.";
+      "should be in the source directory root.";
     }
   
   cmTypeMacro(cmEnableTestingCommand, cmCommand);

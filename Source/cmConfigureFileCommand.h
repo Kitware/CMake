@@ -72,7 +72,7 @@ public:
         "variables. If @ONLY is specified, only variables "
         "of the form @VAR@ will be replaces and ${VAR} will be ignored.  "
         "This is useful for configuring scripts that use ${VAR}. "
-        "Any occurances of #cmakedefine VAR will be replaced with "
+        "Any occurrences of #cmakedefine VAR will be replaced with "
         "either #define VAR or /* #undef VAR */ depending on "
         "the setting of VAR in CMake";
     }
