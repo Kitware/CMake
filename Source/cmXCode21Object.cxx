@@ -1,14 +1,27 @@
 #include "cmXCode21Object.h"
+#include "cmSystemTools.h"
 
 cmXCode21Object::cmXCode21Object(PBXType ptype, Type type)
   :cmXCodeObject(ptype, type)
 {
+  m_Version = 21;
 }
 
 //----------------------------------------------------------------------------
 void cmXCode21Object::PrintComment(std::ostream& out)
 {
-  out << "/* */";
+  if(m_Comment.size() == 0)
+    {
+    cmXCodeObject* n = this->GetObject("name");
+    if(n)
+      {
+      m_Comment = n->GetString();
+      cmSystemTools::ReplaceString(m_Comment, "\"", "");
+      }
+    }
+  out << "/* ";
+  out << m_Comment;
+  out << " */";
 }
 
 
@@ -29,7 +42,7 @@ void cmXCode21Object::PrintList(std::vector<cmXCodeObject*> const& v, std::ostre
     {
     return;
     }
-  out << "/* Begin " <<  PBXTypeNames[t] << " section */\n";
+  out << "\n/* Begin " <<  PBXTypeNames[t] << " section */\n";
   for(std::vector<cmXCodeObject*>::const_iterator i = v.begin();
       i != v.end(); ++i)
     {
@@ -56,9 +69,9 @@ void cmXCode21Object::PrintList(std::vector<cmXCodeObject*> const& v, std::ostre
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXHeadersBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXNativeTarget);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXProject);
-  cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXSourcesBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXShellScriptBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXResourcesBuildPhase);
+  cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXSourcesBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXApplicationReference);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXExecutableFileReference);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXLibraryReference);

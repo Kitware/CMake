@@ -14,12 +14,14 @@ const char* cmXCodeObject::PBXTypeNames[] = {
 
 cmXCodeObject::~cmXCodeObject()
 {
+  m_Version = 15;
 }
 
 
 //----------------------------------------------------------------------------
 cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
 {
+  m_Version = 15;
   m_PBXTargetDependency = 0;
   m_cmTarget = 0;
   m_Object =0;
@@ -67,56 +69,84 @@ void cmXCodeObject::Indent(int level, std::ostream& out)
 //----------------------------------------------------------------------------
 void cmXCodeObject::Print(std::ostream& out)
 {
-  cmXCodeObject::Indent(2, out);
+  std::string separator = "\n";
+  int indentFactor = 1;
+  if(m_Version > 15 && (m_IsA == PBXFileReference || m_IsA == PBXBuildFile))
+    {
+    separator = " ";
+    indentFactor = 0;
+    }
+  cmXCodeObject::Indent(2*indentFactor, out);
   out << m_Id << " ";
-  this->PrintComment(out);
-  out << " = {\n";
+  if(!(this->m_IsA == PBXGroup && this->m_Comment.size() == 0))
+    {
+    this->PrintComment(out);
+    }
+  out << " = {";
+  if(separator == "\n")
+    {
+    out << separator;
+    }
   std::map<cmStdString, cmXCodeObject*>::iterator i;
+  cmXCodeObject::Indent(3*indentFactor, out);
+  out << "isa = " << PBXTypeNames[m_IsA]  << ";" << separator;
   for(i = m_ObjectAttributes.begin(); i != m_ObjectAttributes.end(); ++i)
     { 
     cmXCodeObject* object = i->second;
-    cmXCodeObject::Indent(3, out);
-    if(i->first == "isa")
+    if(i->first != "isa")
       { 
-      out << i->first << " = " << PBXTypeNames[m_IsA] << ";\n";
+      cmXCodeObject::Indent(3*indentFactor, out);
       }
-    else if(object->m_Type == OBJECT_LIST)
+    else
       {
-      out << i->first << " = (\n";
+      continue;
+      }
+    if(object->m_Type == OBJECT_LIST)
+      {
+      out << i->first << " = (" << separator;
       for(unsigned int k = 0; k < i->second->m_List.size(); k++)
         {
-        cmXCodeObject::Indent(4, out);
-        out << i->second->m_List[k]->m_Id << ",\n";
+        cmXCodeObject::Indent(4*indentFactor, out);
+        out << i->second->m_List[k]->m_Id << " ";
+        i->second->m_List[k]->PrintComment(out);
+        out << "," << separator;
         } 
-      cmXCodeObject::Indent(3, out);
-      out << ");\n";
+      cmXCodeObject::Indent(3*indentFactor, out);
+      out << ");" << separator;
       }
     else if(object->m_Type == ATTRIBUTE_GROUP)
       {
       std::map<cmStdString, cmXCodeObject*>::iterator j;
-      out << i->first << " = {\n";
+      out << i->first << " = {" << separator;
       for(j = object->m_ObjectAttributes.begin(); j != object->m_ObjectAttributes.end(); ++j)
         {
-        cmXCodeObject::Indent(4, out);
-        out << j->first << " = " << j->second->m_String << ";\n";
+        cmXCodeObject::Indent(4 *indentFactor, out);
+        out << j->first << " = " << j->second->m_String << ";";
+        out << separator;
         }
-      cmXCodeObject::Indent(3, out);
-      out << "};\n";
+      cmXCodeObject::Indent(3 *indentFactor, out);
+      out << "};" << separator;
       }
     else if(object->m_Type == OBJECT_REF)
       {
-      out << i->first << " = " << object->m_Object->m_Id << ";\n";
+      out << i->first << " = " << object->m_Object->m_Id;
+      if(object->m_Object->HasComment() && i->first != "remoteGlobalIDString")
+        {
+        out << " ";
+        object->m_Object->PrintComment(out);
+        }
+      out << ";" << separator;
       }
     else if(object->m_Type == STRING)
       {
-      out << i->first << " = " << object->m_String << ";\n";
+      out << i->first << " = " << object->m_String << ";" << separator;
       }
     else
       {
       out << "what is this?? " << i->first << "\n";
       }
     }
-  cmXCodeObject::Indent(2, out);
+  cmXCodeObject::Indent(2*indentFactor, out);
   out << "};\n";
 }
   
@@ -146,3 +176,27 @@ void cmXCodeObject::CopyAttributes(cmXCodeObject* copy)
   this->m_Object = copy->m_Object;
 }
 
+void cmXCodeObject::SetString(const char* s)
+{
+  std::string ss = s;
+  if(ss.size() == 0)
+    {
+    m_String = "\"\"";
+    return;
+    }
+  bool needQuote = false;
+  m_String = "";
+  if(ss.find_first_of(" <>.+") != ss.npos)
+    {
+    needQuote = true;
+    }
+  if(needQuote)
+    {
+    m_String = "\"";
+    }
+  m_String += s;
+  if(needQuote)
+    {
+    m_String += "\"";
+    }
+}

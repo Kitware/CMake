@@ -24,12 +24,7 @@ public:
   Type GetType() { return m_Type;}
   PBXType GetIsA() { return m_IsA;}
 
-  void SetString(const char* s)
-    {
-      m_String = "\"";
-      m_String += s;
-      m_String += "\"";
-    }
+  void SetString(const char* s);
   const char* GetString() 
     {
       return m_String.c_str();
@@ -80,6 +75,8 @@ public:
     {
       m_cmTarget = t;
     }
+  const char* GetComment() {return m_Comment.c_str();}
+  bool HasComment() { return (m_Comment.size() !=  0);}
   cmXCodeObject* GetObject(const char* name)
     {
       if(m_ObjectAttributes.count(name))
@@ -122,11 +119,14 @@ public:
       return m_DependLibraries;
     }
   std::vector<cmXCodeObject*> const& GetObjectList() { return m_List;}
+  void SetComment(const char* c) { m_Comment = c;}
 protected:
   cmTarget* m_cmTarget;
   Type m_Type;
   cmStdString m_Id;
   PBXType m_IsA;
+  int m_Version;
+  cmStdString m_Comment;
   cmStdString m_String;
   cmXCodeObject* m_Object;
   cmXCodeObject* m_PBXTargetDependency;
