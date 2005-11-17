@@ -136,6 +136,22 @@ bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
   return true;
 }
 
+void IncrementArguments(std::list<std::string> &newArgs,
+                        std::list<std::string>::iterator &argP1,
+                        std::list<std::string>::iterator &argP2)
+{
+  if (argP1  != newArgs.end())
+    {
+    argP1++;
+    argP2 = argP1;
+    if (argP1  != newArgs.end())
+      {
+      argP2++;
+      }
+    }
+}
+
+
 // order of operations, 
 // EXISTS COMMAND DEFINED 
 // MATCHES LESS GREATER EQUAL STRLESS STRGREATER STREQUAL 
@@ -207,9 +223,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
     while (arg != newArgs.end())
       {
       argP1 = arg;
-      argP1++;
-      argP2 = argP1;
-      argP2++;
+      IncrementArguments(newArgs,argP1,argP2);
       // does a file exist
       if (*arg == "EXISTS" && argP1  != newArgs.end())
         {
@@ -241,9 +255,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }
         newArgs.erase(argP1);
         argP1 = arg;
-        argP1++;
-        argP2 = argP1;
-        argP2++;
+        IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
       // is a variable defined
@@ -260,9 +272,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }
         newArgs.erase(argP1);
         argP1 = arg;
-        argP1++;
-        argP2 = argP1;
-        argP2++;
+        IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
       ++arg;
@@ -281,9 +291,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
     while (arg != newArgs.end())
       {
       argP1 = arg;
-      argP1++;
-      argP2 = argP1;
-      argP2++;
+      IncrementArguments(newArgs,argP1,argP2);
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
         *(argP1) == "MATCHES") 
         {
@@ -310,9 +318,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
-        argP1++;
-        argP2 = argP1;
-        argP2++;
+        IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
 
@@ -321,9 +327,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         *arg = "0";
         newArgs.erase(argP1);
         argP1 = arg;
-        argP1++;
-        argP2 = argP1;
-        argP2++;
+        IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
 
@@ -369,9 +373,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
-        argP1++;
-        argP2 = argP1;
-        argP2++;
+        IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
 
@@ -407,9 +409,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
-        argP1++;
-        argP2 = argP1;
-        argP2++;
+        IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
 
@@ -428,9 +428,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
     while (arg != newArgs.end())
       {
       argP1 = arg;
-      argP1++;
-      argP2 = argP1;
-      argP2++;
+      IncrementArguments(newArgs,argP1,argP2);
       if (argP1 != newArgs.end() && *arg == "NOT")
         {
         def = cmIfCommand::GetVariableOrNumber((argP1)->c_str(), makefile);
@@ -444,9 +442,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }
         newArgs.erase(argP1);
         argP1 = arg;
-        argP1++;
-        argP2 = argP1;
-        argP2++;
+        IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
       ++arg;
@@ -463,9 +459,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
     while (arg != newArgs.end())
       {
       argP1 = arg;
-      argP1++;
-      argP2 = argP1;
-      argP2++;
+      IncrementArguments(newArgs,argP1,argP2);
       if (argP1 != newArgs.end() && *(argP1) == "AND" && 
         argP2 != newArgs.end())
         {
@@ -482,9 +476,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
-        argP1++;
-        argP2 = argP1;
-        argP2++;
+        IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
 
@@ -504,9 +496,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
-        argP1++;
-        argP2 = argP1;
-        argP2++;
+        IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
 
