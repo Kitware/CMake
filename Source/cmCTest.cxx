@@ -1070,7 +1070,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     }
 
   cmsysProcess_WaitForExit(cp, 0);
-  if(output)
+  if(output && tempOutput.begin() != tempOutput.end())
     {
     output->append(&*tempOutput.begin(), tempOutput.size());
     }
