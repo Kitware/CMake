@@ -66,8 +66,8 @@ public:
       "advanced option is on.  "
       "If CLEAR is the first argument advanced variables are changed back "
       "to unadvanced.  "
-      "If FORCE is the first arguement, then the variable is made advanced.  "
-      "If neither FORCE or CLEAR is specified, new values will be marked as "
+      "If FORCE is the first argument, then the variable is made advanced.  "
+      "If neither FORCE nor CLEAR is specified, new values will be marked as "
       "advanced, but if the variable already has an advanced/non-advanced "
       "state, it will not be changed.";
     }
