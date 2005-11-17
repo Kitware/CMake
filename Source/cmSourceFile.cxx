@@ -70,6 +70,10 @@ void cmSourceFile::SetName(const char* name, const char* dir,
       this->SetProperty("HEADER_FILE_ONLY","0");
       }
     m_FullPath = hname;
+
+    // Mark this as an external object file if it has the proper
+    // extension.  THIS CODE IS DUPLICATED IN THE OTHER SetName METHOD.
+    // THESE METHODS SHOULD BE MERGED.
     if ( m_SourceExtension == "obj" || m_SourceExtension == "o" ||
       m_SourceExtension == "lo" )
       {
@@ -141,6 +145,15 @@ void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
   m_FullPath = cmSystemTools::CollapseFullPath(fname.c_str(), dir);
   cmSystemTools::ConvertToUnixSlashes(m_FullPath);
   m_SourceExtension = ext;
+
+  // Mark this as an external object file if it has the proper
+  // extension.  THIS CODE IS DUPLICATED IN THE OTHER SetName METHOD.
+  // THESE METHODS SHOULD BE MERGED.
+  if ( m_SourceExtension == "obj" || m_SourceExtension == "o" ||
+       m_SourceExtension == "lo" )
+    {
+    this->SetProperty("EXTERNAL_OBJECT", "1");
+    }
   return;
 }
 

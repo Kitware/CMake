@@ -41,5 +41,14 @@ ELSE(EXTERNAL_OBJECT)
   MESSAGE(FATAL_ERROR "Could not find ${EXTERNAL_OBJECT_NAME}.")
 ENDIF(EXTERNAL_OBJECT)
 
+# Test creation of external objects by custom commands.
+SET(CUSTOM_OBJECT
+  ${CMAKE_CURRENT_BINARY_DIR}/custom_object${CMAKE_C_OUTPUT_EXTENSION})
+ADD_CUSTOM_COMMAND(
+  OUTPUT ${CUSTOM_OBJECT}
+  COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_OBJECT} ${CUSTOM_OBJECT}
+  DEPENDS ${EXTERNAL_OBJECT}
+  )
+
 # Build an executable using the external object file.
-ADD_EXECUTABLE(executable executable.cxx ${EXTERNAL_OBJECT})
+ADD_EXECUTABLE(executable executable.cxx ${CUSTOM_OBJECT})

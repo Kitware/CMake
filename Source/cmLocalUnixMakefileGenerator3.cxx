@@ -398,6 +398,13 @@ cmLocalUnixMakefileGenerator3
         // This is an external object file.  Just add it.
         external_objects.push_back((*source)->GetFullPath());
         }
+      else
+        {
+        // We only get here if a source file is not an external object
+        // and has an extension that is listed as an ignored file type
+        // for this language.  No message or diagnosis should be
+        // given.
+        }
       }
     }
   
@@ -1283,6 +1290,14 @@ cmLocalUnixMakefileGenerator3
   // Add a dependency on the rule file itself.
   this->AppendRuleDepend(depends, ruleFileName);
 
+  for(std::vector<std::string>::const_iterator obj = external_objects.begin();
+      obj != external_objects.end(); ++obj)
+    {
+    depends.push_back(*obj);
+    }
+
+  // from here up is the same for exe or lib
+
   // Get the name of the executable to generate.
   std::string targetName;
   std::string targetNameReal;
@@ -1602,13 +1617,13 @@ cmLocalUnixMakefileGenerator3
   // Add a dependency on the rule file itself.
   this->AppendRuleDepend(depends, ruleFileName);
 
-  // from here up is the same for exe or lib
-
   for(std::vector<std::string>::const_iterator obj = external_objects.begin();
       obj != external_objects.end(); ++obj)
     {
     depends.push_back(*obj);
     }
+
+  // from here up is the same for exe or lib
 
   // Get the language to use for linking this library.
   const char* linkLanguage =
