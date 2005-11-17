@@ -73,7 +73,7 @@ public:
     return
       "  QT_WRAP_UI(resultingLibraryName HeadersDestName\n"
       "             SourcesDestName SourceLists ...)\n"
-      "Produce .h and .cxx files for all the .ui file listed "
+      "Produce .h and .cxx files for all the .ui files listed "
       "in the SourceLists.  "
       "The .h files will be added to the library using the HeadersDestName"
       "source list.  "
