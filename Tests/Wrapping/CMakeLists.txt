@@ -62,6 +62,7 @@ VTK_WRAP_TCL (wraplibTCL TCL_SRCS ${SRCS})
 ADD_CUSTOM_TARGET(wraplibTCL ALL 
   ${CMAKE_COMMAND} -E echo "dummy target"  
   ) 
+ADD_DEPENDENCIES(wraplibTCL Wrap)
 
 #
 # Wrap VTK -> Python
@@ -72,6 +73,7 @@ VTK_WRAP_PYTHON (wraplibPython Python_SRCS ${SRCS})
 ADD_CUSTOM_TARGET(wraplibPython ALL 
   ${CMAKE_COMMAND} -E echo "dummy target"  
   ) 
+ADD_DEPENDENCIES(wraplibPython Wrap)
 
 #
 # Wrap VTK -> Java
@@ -92,6 +94,7 @@ CONFIGURE_FILE(
 ADD_CUSTOM_TARGET(wraplibJava ALL 
   ${CMAKE_COMMAND} -E echo "dummy target"  
   ) 
+ADD_DEPENDENCIES(wraplibJava Wrap)
 
 #
 # QT Wrappers
