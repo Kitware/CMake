@@ -65,8 +65,8 @@ public:
       "The first argument (TEST_VARIABLE) is the name of the variable to be "
       "tested, if that variable is false nothing else is done. If "
       "TEST_VARIABLE is true, then "
-      "the next arguemnt (RESULT_VARIABLE) is a vairable that is set to true "
-      "if all the required variables are set." 
+      "the next argument (RESULT_VARIABLE) is a variable that is set to true "
+      "if all the required variables are set. " 
       "The rest of the arguments are variables that must be true or not "
       "set to NOTFOUND to avoid an error.  If any are not true, an error "
       "is reported.";

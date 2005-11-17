@@ -72,7 +72,7 @@ public:
       "but add some more functionality.\n"
       "NOTE 2: When using WRITE_FILE the produced file cannot be used as an "
       "input to CMake (CONFIGURE_FILE, source file ...) because it will "
-      "lead to infinite loop. Use CONFIGURE_FILE if you want to generate "
+      "lead to an infinite loop. Use CONFIGURE_FILE if you want to generate "
       "input files to CMake.";
     }
   
