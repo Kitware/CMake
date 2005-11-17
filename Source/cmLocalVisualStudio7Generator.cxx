@@ -1162,8 +1162,6 @@ WriteCustomRule(std::ostream& fout,
                 const char *output,
                 const char* compileFlags)
 {
-  std::string cmd = command;
-  cmSystemTools::ReplaceString(cmd, "\"", "&quot;");
   std::vector<std::string>::iterator i;
   std::vector<std::string> *configs = 
     static_cast<cmGlobalVisualStudio7Generator *>(m_GlobalGenerator)->GetConfigurations();
@@ -1183,7 +1181,8 @@ WriteCustomRule(std::ostream& fout,
          << "\t\t\t\t\tDescription=\"Building " << comment;
     fout << " " << output;
     fout << "\"\n"
-         << "\t\t\t\t\tCommandLine=\"" << cmd << "\n\"\n"
+         << "\t\t\t\t\tCommandLine=\""
+         << this->EscapeForXML(command) << "\"\n"
          << "\t\t\t\t\tAdditionalDependencies=\"";
     // Write out the dependencies for the rule.
     std::string temp;
@@ -1381,6 +1380,7 @@ std::string cmLocalVisualStudio7Generator::EscapeForXML(const char* s)
   cmSystemTools::ReplaceString(ret, "\"", "&quot;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
   cmSystemTools::ReplaceString(ret, ">", "&gt;");
+  cmSystemTools::ReplaceString(ret, "\n", "&#x0D;&#x0A;");
   return ret;
 }
 
