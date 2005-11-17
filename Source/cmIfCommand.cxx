@@ -136,19 +136,22 @@ bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
   return true;
 }
 
-void IncrementArguments(std::list<std::string> &newArgs,
-                        std::list<std::string>::iterator &argP1,
-                        std::list<std::string>::iterator &argP2)
+namespace 
 {
-  if (argP1  != newArgs.end())
-    {
-    argP1++;
-    argP2 = argP1;
+  void IncrementArguments(std::list<std::string> &newArgs,
+                          std::list<std::string>::iterator &argP1,
+                          std::list<std::string>::iterator &argP2)
+  {
     if (argP1  != newArgs.end())
       {
-      argP2++;
+      argP1++;
+      argP2 = argP1;
+      if (argP1  != newArgs.end())
+        {
+        argP2++;
+        }
       }
-    }
+  }
 }
 
 
