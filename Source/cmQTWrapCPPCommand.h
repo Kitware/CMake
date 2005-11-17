@@ -74,7 +74,7 @@ public:
     return
       "  QT_WRAP_CPP(resultingLibraryName DestName\n"
       "              SourceLists ...)\n"
-      "Produce moc files for all the .h file listed in the SourceLists.  "
+      "Produce moc files for all the .h files listed in the SourceLists.  "
       "The moc files will be added to the library using the DestName "
       "source list.";
     }

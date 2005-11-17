@@ -68,7 +68,7 @@ public:
       "          \"message to display\" ...)\n"
       "The arguments are messages to display.  If the first argument is "
       "SEND_ERROR then an error is raised.  If the first argument is "
-      "STATUS then the message is diaplyed in the progress line for the GUI.";
+      "STATUS then the message is displayed in the progress line for the GUI.";
     }
   
   cmTypeMacro(cmMessageCommand, cmCommand);
