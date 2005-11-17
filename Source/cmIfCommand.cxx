@@ -237,9 +237,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }
         newArgs.erase(argP1);
         argP1 = arg;
-        argP1++;
-        argP2 = argP1;
-        argP2++;
+        IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
       // does a command exist
