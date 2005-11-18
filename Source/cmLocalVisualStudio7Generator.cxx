@@ -254,6 +254,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   // boolean flags 
   {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE"},
   {"EnableFibreSafeOptimization", "GT", "OmitFramePointers", "TRUE"},
+  {"EnableFunctionLevelLinking", "Gy", "EnableFunctionLevelLinking", "TRUE"},
   {"EnableIntrinsicFunctions", "Oi", "EnableIntrinsicFunctions", "TRUE"},
   {"ExceptionHandling", "EHsc", "enable c++ exceptions", "TRUE"},
   {"ExceptionHandling", "GX", "enable c++ exceptions", "TRUE"},
@@ -264,6 +265,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"OptimizeForWindowsApplication", "GA", "Optimize for windows", "TRUE"},
   {"RuntimeTypeInfo", "GR", "Turn on Run time type information for c++", "TRUE"},
   {"SmallerTypeCheck", "RTCc", "smaller type check", "TRUE"},
+  {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "TRUE"},
   {"WarnAsError", "WX", "Treat warnings as errors", "TRUE"},
   {0,0,0,0 }
 };
@@ -513,11 +515,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\"\n";
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
-  if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
-    {
-    fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
-    }
-  
   if(programDatabase.size())
     {
     fout << programDatabase << "\n";
@@ -551,8 +548,9 @@ void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
   std::string option;
   while(flagTable->IDEName)
     {
-    option.reserve(strlen(flagTable->commandFlag+2));
+    option.reserve(strlen(flagTable->commandFlag)+2);
     // first do the - version
+    option.clear();
     option.insert(static_cast<std::string::size_type>(0), 
                   static_cast<std::string::size_type>(1), 
                   '-');
@@ -575,6 +573,18 @@ void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
       }
     // move to next flag
     flagTable++;
+    }
+
+  // If verbose makefiles have been requested and the /nologo option
+  // was not given explicitly in the flags we want to add an attribute
+  // to the generated project to disable logo suppression.  Otherwise
+  // the GUI default is to enable suppression.
+  if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+    {
+    if(flagMap.find("SuppressStartupBanner") == flagMap.end())
+      {
+      flagMap["SuppressStartupBanner"] = "FALSE";
+      }
     }
 }
 
@@ -663,16 +673,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\t" << i->first << "=\"" << i->second << "\"\n";
       }
-      
-    if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
-      {
-      fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
-      }
-    else
-      {
-      fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
-      }
-      
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
     this->OutputLibraryDirectories(fout, configName, libName, target);
     fout << "\"\n";
@@ -751,15 +751,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\t" << i->first << "=\"" << i->second << "\"\n";
       }
-    if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
-      {
-      fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
-      }
-    else
-      {
-      fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
-      }
-        
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
     this->OutputLibraryDirectories(fout, configName, libName, target);
     fout << "\"\n";
