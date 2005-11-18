@@ -186,7 +186,7 @@ void cmXCodeObject::SetString(const char* s)
     }
   bool needQuote = false;
   m_String = "";
-  if(ss.find_first_of(" <>.+") != ss.npos)
+  if(ss.find_first_of(" <>.+-=") != ss.npos)
     {
     needQuote = true;
     }
