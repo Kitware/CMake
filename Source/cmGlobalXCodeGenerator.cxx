@@ -1,17 +1,17 @@
 /*=========================================================================
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+Program:   CMake - Cross-Platform Makefile Generator
+Module:    $RCSfile$
+Language:  C++
+Date:      $Date$
+Version:   $Revision$
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
+Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-     PURPOSE.  See the above copyright notices for more information.
+This software is distributed WITHOUT ANY WARRANTY; without even 
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
 #include "cmGlobalXCodeGenerator.h"
@@ -93,8 +93,9 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
                            "using Xcode 15 generator\n");
     return new cmGlobalXCodeGenerator;
     }
-  
-  return new cmGlobalXCode21Generator;
+  cmGlobalXCodeGenerator* ret = new cmGlobalXCode21Generator;
+  ret->SetVersion(parser.m_Version);
+  return ret;
 #else
   std::cerr 
     << "CMake should be built with cmake to use XCode, default to Xcode 1.5\n";
@@ -116,12 +117,12 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
     {
     mf->AddDefinition("CMAKE_CFG_INTDIR","$(CONFIGURATION)");
     mf->AddCacheDefinition(
-                           "CMAKE_CONFIGURATION_TYPES",
-                           "Debug;Release;MinSizeRel;RelWithDebInfo",
-                           "Semicolon separated list of supported configuration types, "
-                           "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
-                           "anything else will be ignored.",
-                           cmCacheManager::STRING);
+      "CMAKE_CONFIGURATION_TYPES",
+      "Debug;Release;MinSizeRel;RelWithDebInfo",
+      "Semicolon separated list of supported configuration types, "
+      "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
+      "anything else will be ignored.",
+      cmCacheManager::STRING);
     }
   mf->AddDefinition("CMAKE_GENERATOR_CC", "gcc");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
@@ -131,8 +132,8 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 
 //----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::GenerateBuildCommand(const char* makeProgram,
-  const char *projectName, const char *targetName, const char* config,
-  bool ignoreErrors)
+                                                         const char *projectName, const char *targetName, const char* config,
+                                                         bool ignoreErrors)
 {
   // Config is not used yet
   (void) config;
@@ -170,7 +171,7 @@ std::string cmGlobalXCodeGenerator::GenerateBuildCommand(const char* makeProgram
     }
   else
     {
-  makeCommand += " build";
+    makeCommand += " build";
     }
   makeCommand += " -target ";
   if (targetName && strlen(targetName))
@@ -517,9 +518,6 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
                         this->CreateString(sourcecode.c_str()));
   std::string path = 
     this->ConvertToRelativeForXCode(sf->GetFullPath().c_str());
-//  std::string file = 
-//    cmSystemTools::RelativePath(m_CurrentMakefile->GetHomeDirectory(),
-//                                sf->GetFullPath().c_str());
   std::string dir;
   std::string file;
   cmSystemTools::SplitProgramPath(sf->GetFullPath().c_str(),
@@ -686,7 +684,7 @@ cmGlobalXCodeGenerator::CreateBuildPhase(const char* name,
   cmXCodeObject* buildPhase = 
     this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase);
   buildPhase->AddAttribute("buildActionMask",
-                                     this->CreateString("2147483647"));
+                           this->CreateString("2147483647"));
   cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   buildPhase->AddAttribute("files", buildFiles);
   buildPhase->AddAttribute("name", 
@@ -961,7 +959,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     defFlags += "-D";
     if(const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
       {
-        defFlags += custom_export_name;
+      defFlags += custom_export_name;
       }
     else
       {
@@ -998,7 +996,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   cmSystemTools::ReplaceString(defFlags, "\"", "\\\"");
   cmSystemTools::ReplaceString(flags, "\"", "\\\"");
   cmSystemTools::ReplaceString(cflags, "\"", "\\\"");
-  if(m_XcodeVersion == 21)
+  if(m_XcodeVersion > 15)
     {
     defFlags += " -DCMAKE_INTDIR=\\\\\\\"$(CONFIGURATION)\\\\\\\" ";
     }
@@ -1007,119 +1005,140 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
+    {
+    if(m_LibraryOutputPath.size())
       {
-      if(m_LibraryOutputPath.size())
-        {
-        buildSettings->AddAttribute("SYMROOT", 
-                                    this->CreateString
-                                    (m_LibraryOutputPath.c_str()));
-        }
-      productName += ".a";
-      std::string t = "lib";
-      t += productName;
-      productName = t;  
-      productType = "com.apple.product-type.library.static";
-      fileType = "archive.ar";
-      buildSettings->AddAttribute("LIBRARY_STYLE", 
-                                  this->CreateString("STATIC"));
-      break;
+      buildSettings->AddAttribute("SYMROOT", 
+                                  this->CreateString
+                                  (m_LibraryOutputPath.c_str()));
       }
+    productName += ".a";
+    std::string t = "lib";
+    t += productName;
+    productName = t;  
+    productType = "com.apple.product-type.library.static";
+    fileType = "archive.ar";
+    buildSettings->AddAttribute("LIBRARY_STYLE", 
+                                this->CreateString("STATIC"));
+    break;
+    }
     
     case cmTarget::MODULE_LIBRARY:
+    {
+    if(m_LibraryOutputPath.size())
       {
-      if(m_LibraryOutputPath.size())
-        {
-        buildSettings->AddAttribute("SYMROOT", 
-                                    this->CreateString
-                                    (m_LibraryOutputPath.c_str()));
-        }
+      buildSettings->AddAttribute("SYMROOT", 
+                                  this->CreateString
+                                  (m_LibraryOutputPath.c_str()));
+      }
       
-      buildSettings->AddAttribute("EXECUTABLE_PREFIX", 
-                                  this->CreateString("lib"));
-      buildSettings->AddAttribute("EXECUTABLE_EXTENSION", 
-                                  this->CreateString("so"));
-      buildSettings->AddAttribute("LIBRARY_STYLE", 
-                                  this->CreateString("BUNDLE"));
-      productName += ".so";
-      std::string t = "lib";
-      t += productName;
-      productName = t;
+    buildSettings->AddAttribute("EXECUTABLE_PREFIX", 
+                                this->CreateString("lib"));
+    buildSettings->AddAttribute("EXECUTABLE_EXTENSION", 
+                                this->CreateString("so"));
+    buildSettings->AddAttribute("LIBRARY_STYLE", 
+                                this->CreateString("BUNDLE"));
+    productName += ".so";
+    std::string t = "lib";
+    t += productName;
+    productName = t;
+    if(m_XcodeVersion >= 22)
+      {
+      buildSettings->AddAttribute("MACH_O_TYPE", 
+                                  this->CreateString("mh_bundle"));
+      buildSettings->AddAttribute("GCC_DYNAMIC_NO_PIC", 
+                                  this->CreateString("NO"));
+      buildSettings->AddAttribute("GCC_SYMBOLS_PRIVATE_EXTERN", 
+                                  this->CreateString("NO"));
+      buildSettings->AddAttribute("GCC_INLINES_ARE_PRIVATE_EXTERN", 
+                                  this->CreateString("NO"));
+      std::string outflag = "-o \\\"$(CONFIGURATION_BUILD_DIR)/";
+      outflag += productName;
+      outflag += "\\\"";
+      buildSettings->AddAttribute("OTHER_LDFLAGS",
+                                  this->CreateString(outflag.c_str()));
+      productType = "com.apple.product-type.tool";
+      fileType = "compiled.mach-o.executable";
+      }
+    else
+      {
       buildSettings->AddAttribute("OTHER_LDFLAGS",
                                   this->CreateString("-bundle"));
       productType = "com.apple.product-type.library.dynamic";
       fileType = "compiled.mach-o.dylib";
-      break;
       }
+    break;
+    }
     case cmTarget::SHARED_LIBRARY:
+    {
+    if(m_LibraryOutputPath.size())
       {
-      if(m_LibraryOutputPath.size())
-        {
-        buildSettings->AddAttribute("SYMROOT", 
-                                    this->CreateString
-                                    (m_LibraryOutputPath.c_str()));
-        }
-      buildSettings->AddAttribute("LIBRARY_STYLE", 
-                                  this->CreateString("DYNAMIC"));
-      productName += ".dylib";
-      std::string t = "lib";
-      t += productName;
-      productName = t;
-      buildSettings->AddAttribute("DYLIB_COMPATIBILITY_VERSION", 
-                                  this->CreateString("1"));
-      buildSettings->AddAttribute("DYLIB_CURRENT_VERSION", 
-                                  this->CreateString("1"));
-      buildSettings->AddAttribute("OTHER_LDFLAGS",
-                                  this->CreateString("-dynamiclib"));
-      productType = "com.apple.product-type.library.dynamic";
-      fileType = "compiled.mach-o.dylib";
-      break;
+      buildSettings->AddAttribute("SYMROOT", 
+                                  this->CreateString
+                                  (m_LibraryOutputPath.c_str()));
       }
+    buildSettings->AddAttribute("LIBRARY_STYLE", 
+                                this->CreateString("DYNAMIC"));
+    productName += ".dylib";
+    std::string t = "lib";
+    t += productName;
+    productName = t;
+    buildSettings->AddAttribute("DYLIB_COMPATIBILITY_VERSION", 
+                                this->CreateString("1"));
+    buildSettings->AddAttribute("DYLIB_CURRENT_VERSION", 
+                                this->CreateString("1"));
+    buildSettings->AddAttribute("OTHER_LDFLAGS",
+                                this->CreateString("-dynamiclib"));
+    productType = "com.apple.product-type.library.dynamic";
+    fileType = "compiled.mach-o.dylib";
+    break;
+    }
     case cmTarget::EXECUTABLE:
+    {
+    const char* outname = target.GetProperty("OUTPUT_NAME");
+    std::string name;
+    if(outname)
       {
-      const char* outname = target.GetProperty("OUTPUT_NAME");
-      std::string name;
-      if(outname)
-        {
-        productName = outname;
-        name = outname;
-        }
-      else
-        {
-        name = target.GetName();
-        }
-      std::string symRoot;
-      if(m_ExecutableOutputPath.size())
-        {
-        std::string path = m_ExecutableOutputPath;
-        if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
-          {
-          path += name;
-          path += ".app/Contents/MacOS/";
-          }
-        symRoot = path;
-        }
-      fileType = "compiled.mach-o.executable";
+      productName = outname;
+      name = outname;
+      }
+    else
+      {
+      name = target.GetName();
+      }
+    std::string symRoot;
+    if(m_ExecutableOutputPath.size())
+      {
+      std::string path = m_ExecutableOutputPath;
       if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
         {
-        if(symRoot.size() == 0)
-          { 
-          symRoot = name;
-          symRoot += ".app/Contents/MacOS/";
-          }
-        productType = "com.apple.product-type.tool";
+        path += name;
+        path += ".app/Contents/MacOS/";
         }
-      else
-        {
-        productType = "com.apple.product-type.tool";
-        }
-      if(symRoot.size())
-        {
-        buildSettings->AddAttribute("SYMROOT", 
-                                    this->CreateString
-                                    (symRoot.c_str()));
-        }
+      symRoot = path;
       }
-      break;
+    fileType = "compiled.mach-o.executable";
+    if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
+      {
+      if(symRoot.size() == 0)
+        { 
+        symRoot = name;
+        symRoot += ".app/Contents/MacOS/";
+        }
+      productType = "com.apple.product-type.tool";
+      }
+    else
+      {
+      productType = "com.apple.product-type.tool";
+      }
+    if(symRoot.size())
+      {
+      buildSettings->AddAttribute("SYMROOT", 
+                                  this->CreateString
+                                  (symRoot.c_str()));
+      }
+    }
+    break;
     case cmTarget::UTILITY:
       
       break;
@@ -1199,8 +1218,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     buildSettings->AddAttribute("OTHER_CFLAGS", 
                                 this->CreateString(flags.c_str()));
     }
-  buildSettings->AddAttribute("OTHER_LDFLAGS",
-                              this->CreateString(""));
+  if(!buildSettings->GetObject("OTHER_LDFLAGS"))
+    {
+    buildSettings->AddAttribute("OTHER_LDFLAGS", 
+                                this->CreateString(""));
+    }
   buildSettings->AddAttribute("OTHER_REZFLAGS", 
                               this->CreateString(""));
   buildSettings->AddAttribute("SECTORDER_FLAGS",
@@ -1234,7 +1256,7 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   cmXCodeObject* shellBuildPhase =
     this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase);
   shellBuildPhase->AddAttribute("buildActionMask", 
-                           this->CreateString("2147483647"));
+                                this->CreateString("2147483647"));
   cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   shellBuildPhase->AddAttribute("files", buildFiles);
   cmXCodeObject* inputPaths = this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -1242,12 +1264,12 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   cmXCodeObject* outputPaths = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   shellBuildPhase->AddAttribute("outputPaths", outputPaths);
   shellBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
-                                 this->CreateString("0"));
+                                this->CreateString("0"));
   shellBuildPhase->AddAttribute("shellPath",
-                                 this->CreateString("/bin/sh"));
+                                this->CreateString("/bin/sh"));
   shellBuildPhase->AddAttribute("shellScript",
-                                 this->CreateString(
-                                   "# shell script goes here\nexit 0"));
+                                this->CreateString(
+                                  "# shell script goes here\nexit 0"));
   cmXCodeObject* target = 
     this->CreateObject(cmXCodeObject::PBXAggregateTarget);
   target->SetComment(cmtarget.GetName());
@@ -1523,7 +1545,7 @@ std::string cmGlobalXCodeGenerator::GetTargetFullPath(cmTarget* target)
   cmXCodeObject* xtarget = this->FindXCodeTarget(target);
   cmXCodeObject* bset = xtarget->GetObject("buildSettings");
   cmXCodeObject* spath = bset->GetObject("SYMROOT");
-  if(m_XcodeVersion == 21)
+  if(m_XcodeVersion > 15)
     {
     libPath += "$(CONFIGURATION)/";
     }
@@ -1601,7 +1623,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     {
     if(libDir->size() && *libDir != "/usr/lib")
       {
-      if(m_XcodeVersion == 21)
+      if(m_XcodeVersion > 15)
         {
         // now add the same one but append $(CONFIGURATION) to it:
         linkDirs += " ";
@@ -1880,7 +1902,7 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
   configRelease->AddAttribute("buildSettings", buildSettings);
 
   m_RootObject->AddAttribute("buildConfigurationList", 
-                       this->CreateObjectReference(configlist));
+                             this->CreateObjectReference(configlist));
 
   std::vector<cmXCodeObject*> targets;
   for(std::vector<cmLocalGenerator*>::iterator i = generators.begin();

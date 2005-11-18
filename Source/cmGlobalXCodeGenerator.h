@@ -35,7 +35,8 @@ class cmGlobalXCodeGenerator : public cmGlobalGenerator
 public:
   cmGlobalXCodeGenerator();
   static cmGlobalGenerator* New();
-  
+
+  void SetVersion(int v) { m_XcodeVersion = v;}
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalXCodeGenerator::GetActualName();}
