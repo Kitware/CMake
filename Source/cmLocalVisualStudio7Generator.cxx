@@ -1321,7 +1321,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
 void 
 cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout, 
                                                  const char *libName,
-                                                 cmTarget &, 
+                                                 cmTarget & target, 
                                                  std::vector<cmSourceGroup> &)
 {
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
@@ -1342,11 +1342,20 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
       fout << "\tVersion=\"7.00\"\n";
       }
     }
-  
-  fout << "\tName=\"" << libName << "\"\n"
+  const char* projLabel = target.GetProperty("PROJECT_LABEL");
+  if(!projLabel)
+    {
+    projLabel = libName;
+    }
+  const char* keyword = target.GetProperty("VS_KEYWORD");
+  if(!keyword)
+    {
+    keyword = "Win32Proj";
+    }
+  fout << "\tName=\"" << projLabel << "\"\n"
        << "\tSccProjectName=\"\"\n"
        << "\tSccLocalPath=\"\"\n"
-       << "\tKeyword=\"Win32Proj\">\n"
+       << "\tKeyword=\"" << keyword << "\">\n"
        << "\t<Platforms>\n"
        << "\t\t<Platform\n\t\t\tName=\"Win32\"/>\n"
        << "\t</Platforms>\n";

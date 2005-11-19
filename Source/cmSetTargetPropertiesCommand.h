@@ -78,7 +78,11 @@ public:
         "used in place of the target name when creating executables. "
         "If not set here then it is set to target_EXPORTS by default "
         "(with some substitutions if the target is not a valid C "
-        "identifier).  You can use any prop value pair you want and "
+        "identifier).  PROJECT_LABEL can be used to change the name of "
+        "the target in an IDE like visual studio.  VS_KEYWORD can be set "
+        "to change the visual studio keyword, for example QT integration "
+        "works better if this is set to Qt4VSv1.0. "
+        "You can use any prop value pair you want and "
         "extract it later with the GET_TARGET_PROPERTY command.";
     }
   
