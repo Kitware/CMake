@@ -63,7 +63,7 @@ public:
       "  TRY_RUN(RUN_RESULT_VAR COMPILE_RESULT_VAR\n"
       "          bindir srcfile <CMAKE_FLAGS <Flags>>\n"
       "          <COMPILE_DEFINITIONS <flags>>\n"
-      "          <ARGUMENTS <arg1> <arg2>...>)\n"
+      "          <ARGS <arg1> <arg2>...>)\n"
       "Try compiling a srcfile.  Return the success or failure in "
       "COMPILE_RESULT_VAR.  Then if the compile succeeded, run the "
       "executable and return the result in RUN_RESULT_VAR. "
