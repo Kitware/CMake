@@ -129,6 +129,8 @@ private:
   cmStdString m_LinkPrefix;
   // set of directories that can not be put in the correct order
   std::set<cmStdString> m_ImposibleDirectories;
+  // Name of target
+  cmStdString m_TargetName;
   // library regular expressions
   cmsys::RegularExpression m_RemoveLibraryExtension;
   cmsys::RegularExpression m_ExtractBaseLibraryName;

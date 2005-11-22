@@ -225,6 +225,7 @@ void cmOrderLinkDirectories::SetLinkInformation(cmTarget& target,
                                                 linktype,
                                                 const char* targetLibrary)
 {
+  m_TargetName = target.GetName();
     // collect the search paths from the target into paths set
   const std::vector<std::string>& searchPaths = target.GetLinkDirectories();
   std::vector<cmStdString> empty;
@@ -279,6 +280,16 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
   std::vector<cmStdString> empty;
   for(unsigned int i=0; i < m_RawLinkItems.size(); ++i)
     {
+    if(cmSystemTools::FileIsDirectory(m_RawLinkItems[i].c_str()))
+      {
+      std::string message = "Warning: Ignoring path found in link libraries for target: ";
+      message += m_TargetName;
+      message += ", path is: ";
+      message += m_RawLinkItems[i];
+      message += ". Expected a library name or a full path to a library name.";
+      cmSystemTools::Message(message.c_str());
+      continue;
+      }
     if(cmSystemTools::FileIsFullPath(m_RawLinkItems[i].c_str()))
       {
       cmSystemTools::SplitProgramPath(m_RawLinkItems[i].c_str(),
