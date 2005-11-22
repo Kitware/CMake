@@ -51,7 +51,7 @@ class cmCTestCommand;
  *   CTEST_START_WITH_EMPTY_BINARY_DIRECTORY
  *   CTEST_START_WITH_EMPTY_BINARY_DIRECTORY_ONCE
  *   
- * In addition the follwing variables can be used. The number can be 1-10.
+ * In addition the following variables can be used. The number can be 1-10.
  *   CTEST_EXTRA_UPDATES_1
  *   CTEST_EXTRA_UPDATES_2
  *   ...
