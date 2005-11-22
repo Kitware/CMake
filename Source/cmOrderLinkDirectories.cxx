@@ -280,18 +280,18 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
   std::vector<cmStdString> empty;
   for(unsigned int i=0; i < m_RawLinkItems.size(); ++i)
     {
-    if(cmSystemTools::FileIsDirectory(m_RawLinkItems[i].c_str()))
-      {
-      std::string message = "Warning: Ignoring path found in link libraries for target: ";
-      message += m_TargetName;
-      message += ", path is: ";
-      message += m_RawLinkItems[i];
-      message += ". Expected a library name or a full path to a library name.";
-      cmSystemTools::Message(message.c_str());
-      continue;
-      }
     if(cmSystemTools::FileIsFullPath(m_RawLinkItems[i].c_str()))
       {
+      if(cmSystemTools::FileIsDirectory(m_RawLinkItems[i].c_str()))
+        {
+        std::string message = "Warning: Ignoring path found in link libraries for target: ";
+        message += m_TargetName;
+        message += ", path is: ";
+        message += m_RawLinkItems[i];
+        message += ". Expected a library name or a full path to a library name.";
+        cmSystemTools::Message(message.c_str());
+        continue;
+        }
       cmSystemTools::SplitProgramPath(m_RawLinkItems[i].c_str(),
                                       dir, file);
       m_DirectoryToAfterList[dir] = empty;
