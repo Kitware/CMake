@@ -1352,8 +1352,14 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     {
     keyword = "Win32Proj";
     }
-  fout << "\tName=\"" << projLabel << "\"\n"
-       << "\tSccProjectName=\"\"\n"
+  cmGlobalVisualStudio7Generator* gg =
+    static_cast<cmGlobalVisualStudio7Generator *>(m_GlobalGenerator);
+  fout << "\tName=\"" << projLabel << "\"\n";
+  if(m_Version == 8)
+    {
+    fout << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\"\n";
+    }
+  fout << "\tSccProjectName=\"\"\n"
        << "\tSccLocalPath=\"\"\n"
        << "\tKeyword=\"" << keyword << "\">\n"
        << "\t<Platforms>\n"

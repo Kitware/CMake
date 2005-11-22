@@ -43,6 +43,7 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 9.00\n";
+  fout << "# Visual Studio 2005\n";
 }
 
 //----------------------------------------------------------------------------

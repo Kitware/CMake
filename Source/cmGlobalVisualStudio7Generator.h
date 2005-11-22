@@ -74,13 +74,14 @@ public:
    */
   std::vector<std::string> *GetConfigurations();
   
-  ///! Create a GUID
+  ///! Create a GUID or get an existing one.
   void CreateGUID(const char* name);
+  std::string GetGUID(const char* name);
 
   ///! do configure step
   virtual void Configure();
+
 protected:
-  std::string GetGUID(const char* name); 
   virtual void OutputSLNFile(cmLocalGenerator* root, 
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
