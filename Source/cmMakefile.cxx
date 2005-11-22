@@ -1289,17 +1289,17 @@ void cmMakefile::ExpandVariables()
   for(std::vector<std::string>::iterator d = m_IncludeDirectories.begin();
       d != m_IncludeDirectories.end(); ++d)
     {
-    this->ExpandVariablesInString(*d);
+    this->ExpandVariablesInString(*d, true, true);
     }
   for(std::vector<std::string>::iterator d = m_LinkDirectories.begin();
       d != m_LinkDirectories.end(); ++d)
     {
-    this->ExpandVariablesInString(*d);
+    this->ExpandVariablesInString(*d, true, true);
     }
   for(cmTarget::LinkLibraries::iterator l = m_LinkLibraries.begin();
       l != m_LinkLibraries.end(); ++l)
     {
-    this->ExpandVariablesInString(l->first);
+    this->ExpandVariablesInString(l->first, true, true);
     }
 }
 

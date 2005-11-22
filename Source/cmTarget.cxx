@@ -240,7 +240,7 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
   LinkLibraries::iterator p = m_LinkLibraries.begin();
   for (;p != m_LinkLibraries.end(); ++p)
     {
-    mf.ExpandVariablesInString(p->first);
+    mf.ExpandVariablesInString(p->first, true, true);
     }
 }
 
