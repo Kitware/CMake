@@ -894,7 +894,6 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type)
     case cmTarget::MODULE_LIBRARY:
       return "CMAKE_SHARED_MODULE_SUFFIX";
     case cmTarget::EXECUTABLE:
-      return cmSystemTools::GetExecutableExtension();
     case cmTarget::UTILITY:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
@@ -920,7 +919,6 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type)
     case cmTarget::MODULE_LIBRARY:
       return "CMAKE_SHARED_MODULE_PREFIX";
     case cmTarget::EXECUTABLE:
-      return cmSystemTools::GetExecutableExtension();
     case cmTarget::UTILITY:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
@@ -951,12 +949,12 @@ std::string cmTarget::GetFullNameInternal(cmMakefile* mf,
   // first try language specific suffix
   if(ll)
     {
-    if(!targetSuffix)
+    if(!targetSuffix && suffixVar && *suffixVar)
       {
       std::string langSuff = suffixVar + std::string("_") + ll;
       targetSuffix = mf->GetDefinition(langSuff.c_str());
       }
-    if(!targetPrefix)
+    if(!targetPrefix && prefixVar && *prefixVar)
       {
       std::string langPrefix = prefixVar + std::string("_") + ll;
       targetPrefix = mf->GetDefinition(langPrefix.c_str());
