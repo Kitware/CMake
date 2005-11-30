@@ -310,6 +310,9 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
 //
 bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
 {
+  std::string currentFile = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
+
   // used to watch for blockers going out of scope
   // e.g. mismatched IF statement
   std::set<cmFunctionBlocker *> originalBlockers;
@@ -378,6 +381,7 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
                                                  requireProjectCommand);
   if(!lf)
     {
+    this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());
     return false;
     }
   // add this list file to the list of dependencies
@@ -388,6 +392,7 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
     this->ExecuteCommand(lf->m_Functions[i]);
     if ( cmSystemTools::GetFatalErrorOccured() )
       {
+      this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());
       return true;
       }
     }
@@ -409,6 +414,7 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
       }
     }
   
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());
   return true;
 }
 
