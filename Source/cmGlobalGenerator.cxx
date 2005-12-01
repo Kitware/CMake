@@ -719,8 +719,8 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
 }
 
 std::string cmGlobalGenerator::GenerateBuildCommand(const char* makeProgram,
-  const char *projectName, const char *targetName, const char* config,
-  bool ignoreErrors)
+  const char *projectName, const char* additionalOptions, const char *targetName,
+  const char* config, bool ignoreErrors)
 {
   // Project name and config are not used yet.
   (void)projectName;
@@ -737,6 +737,11 @@ std::string cmGlobalGenerator::GenerateBuildCommand(const char* makeProgram,
   if ( ignoreErrors )
     {
     makeCommand += " -i";
+    }
+  if ( additionalOptions )
+    {
+    makeCommand += " ";
+    makeCommand += additionalOptions;
     }
   if ( targetName )
     {
@@ -770,7 +775,8 @@ int cmGlobalGenerator::Build(
   // should we do a clean first?
   if (clean)
     {
-    std::string cleanCommand = this->GenerateBuildCommand(makeCommandCSTR, projectName, "clean", config, false);
+    std::string cleanCommand = this->GenerateBuildCommand(makeCommandCSTR, projectName,
+      0, "clean", config, false);
     if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), output, 
                                          &retVal, 0, false, timeout))
       {
@@ -788,7 +794,8 @@ int cmGlobalGenerator::Build(
     }
   
   // now build
-  std::string makeCommand = this->GenerateBuildCommand(makeCommandCSTR, projectName, target, config, false);
+  std::string makeCommand = this->GenerateBuildCommand(makeCommandCSTR, projectName,
+    0, target, config, false);
 
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
                                        &retVal, 0, false, timeout))

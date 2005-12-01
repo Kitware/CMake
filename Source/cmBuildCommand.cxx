@@ -33,40 +33,9 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
   std::string makeprogram = args[1];
   std::string makecommand
     = m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->GenerateBuildCommand(
-    makeprogram.c_str(), m_Makefile->GetProjectName(), 0, "Release", true);
-#if 0
-  std::string makecommand;
-  if(makeprogram.find("msdev") != std::string::npos ||
-     makeprogram.find("MSDEV") != std::string::npos )
-    {
-    makecommand = "\"";
-    makecommand += makeprogram;
-    makecommand += "\"";
-    makecommand += " ";
-    makecommand += m_Makefile->GetProjectName();
-    makecommand += ".dsw /MAKE \"ALL_BUILD - Release\" ";
-    }
-  else if (makeprogram.find("devenv") != std::string::npos ||
-           makeprogram.find("DEVENV") != std::string::npos )
-    {
-    makecommand = "\"";
-    makecommand += makeprogram;
-    makecommand += "\"";
-    makecommand += " ";
-    makecommand += m_Makefile->GetProjectName();
-    makecommand += ".sln /build Release /project ALL_BUILD";
-    }
-  else if (makeprogram.find("xcodebuild") != std::string::npos)
-    {
-    makecommand += makeprogram;
-    }
-  else
-    {
-    makecommand = makeprogram;
-    makecommand += " -i";
-    }
-  std::cerr << "-- Compare: " << makecommand.c_str() << " and " << makecmd.c_str() << ": " << (makecmd == makecommand) << std::endl;
-#endif
+    makeprogram.c_str(), m_Makefile->GetProjectName(), 0,
+    0, "Release", true);
+
   if(cacheValue)
     {
     return true;

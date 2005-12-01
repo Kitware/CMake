@@ -44,7 +44,8 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
 }
 
 std::string cmGlobalVisualStudio7Generator::GenerateBuildCommand(const char* makeProgram,
-  const char *projectName, const char *targetName, const char* config, bool ignoreErrors)
+  const char *projectName, const char* additionalOptions, const char *targetName,
+  const char* config, bool ignoreErrors)
 {
   // Ingoring errors is not implemented in visual studio 6
   (void) ignoreErrors;
@@ -99,6 +100,11 @@ std::string cmGlobalVisualStudio7Generator::GenerateBuildCommand(const char* mak
   else
     {
     makeCommand += "ALL_BUILD";
+    }
+  if ( additionalOptions )
+    {
+    makeCommand += " ";
+    makeCommand += additionalOptions;
     }
   return makeCommand;
 }

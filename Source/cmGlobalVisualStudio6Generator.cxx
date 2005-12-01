@@ -68,7 +68,8 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
 }
 
 std::string cmGlobalVisualStudio6Generator::GenerateBuildCommand(const char* makeProgram,
-  const char *projectName, const char *targetName, const char* config, bool ignoreErrors)
+  const char *projectName, const char* additionalOptions, const char *targetName,
+  const char* config, bool ignoreErrors)
 {
   // Ingoring errors is not implemented in visual studio 6
   (void) ignoreErrors;
@@ -133,6 +134,11 @@ std::string cmGlobalVisualStudio6Generator::GenerateBuildCommand(const char* mak
   else
     {
     makeCommand += "\" /BUILD";
+    }
+  if ( additionalOptions )
+    {
+    makeCommand += " ";
+    makeCommand += additionalOptions;
     }
   return makeCommand;
 }

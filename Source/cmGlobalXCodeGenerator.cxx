@@ -132,8 +132,8 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 
 //----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::GenerateBuildCommand(const char* makeProgram,
-                                                         const char *projectName, const char *targetName, const char* config,
-                                                         bool ignoreErrors)
+  const char *projectName, const char* additionalOptions, const char *targetName,
+  const char* config, bool ignoreErrors)
 {
   // Config is not used yet
   (void) config;
@@ -189,6 +189,11 @@ std::string cmGlobalXCodeGenerator::GenerateBuildCommand(const char* makeProgram
   else
     {
     makeCommand += " -configuration Debug";
+    }
+  if ( additionalOptions )
+    {
+    makeCommand += " ";
+    makeCommand += additionalOptions;
     }
   makeCommand += " OBJROOT=.";
   return makeCommand;

@@ -108,6 +108,7 @@ bool cmCTestBuildCommand::InitialPass(
     const char* cmakeGeneratorName = m_Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
     const char* cmakeProjectName = m_Makefile->GetDefinition("CTEST_PROJECT_NAME");
     const char* cmakeBuildConfiguration = m_Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
+    const char* cmakeBuildAdditionalFlags = m_Makefile->GetDefinition("CTEST_BUILD_FLAGS");
     if ( cmakeGeneratorName && *cmakeGeneratorName &&
       cmakeProjectName && *cmakeProjectName )
       {
@@ -132,7 +133,7 @@ bool cmCTestBuildCommand::InitialPass(
       const char* cmakeMakeProgram = m_Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
       std::string buildCommand
         = m_GlobalGenerator->GenerateBuildCommand(cmakeMakeProgram, cmakeProjectName,
-          0, cmakeBuildConfiguration, true);
+          cmakeBuildAdditionalFlags, 0, cmakeBuildConfiguration, true);
       m_CTest->SetCTestConfiguration("MakeCommand", buildCommand.c_str());
       }
     else

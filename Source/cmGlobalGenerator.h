@@ -99,7 +99,7 @@ public:
                     const char *makeProgram, const char *config,
                     bool clean);
   virtual std::string GenerateBuildCommand(const char* makeProgram,
-    const char *projectName, const char *targetName,
+    const char *projectName, const char* additionalOptions, const char *targetName,
     const char* config, bool ignoreErrors);
 
   ///! Set the CMake instance
