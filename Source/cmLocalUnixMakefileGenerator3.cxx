@@ -2790,11 +2790,15 @@ cmLocalUnixMakefileGenerator3
     cmDepends *scanner = 0;
     if(lang == "C" || lang == "CXX" || lang == "RC")
       {
+      std::string includeCacheFileName = dir;
+      includeCacheFileName += "/includecache.";
+      includeCacheFileName += lang;
+      
       // TODO: Handle RC (resource files) dependencies correctly.
       scanner = new cmDependsC(includes,
                                includeRegexScan.c_str(),
                                includeRegexComplain.c_str(),
-                               generatedFiles);
+                               generatedFiles, includeCacheFileName);
       }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")

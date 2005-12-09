@@ -32,7 +32,7 @@ public:
   cmDependsC();
   cmDependsC(std::vector<std::string> const& includes,
              const char* scanRegex, const char* complainRegex,
-             std::set<cmStdString> const& generatedFiles);
+             std::set<cmStdString> const& generatedFiles, const cmStdString& cachFileName);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsC();
@@ -47,7 +47,7 @@ protected:
                                  std::ostream& internalDepends);
 
   // Method to scan a single file.
-  void Scan(std::istream& is, const char* directory);
+  void Scan(std::istream& is, const char* directory, const cmStdString& fullName);
 
   // Method to test for the existence of a file.
   bool FileExistsOrIsGenerated(const std::string& fname,
@@ -74,10 +74,24 @@ protected:
     cmStdString FileName;
     cmStdString QuotedLocation;
   };
+
+  struct cmIncludeLines
+  {
+     cmIncludeLines():used(false) {}
+     std::list<UnscannedEntry> list;
+     bool used;
+  };
+
   std::set<cmStdString> m_Encountered;
   std::queue<UnscannedEntry> m_Unscanned;
   t_CharBuffer m_Buffer;
 
+  std::map<cmStdString, cmIncludeLines *> m_fileCache;
+
+  cmStdString m_cacheFileName;
+
+  void WriteCacheFile() const;
+  void ReadCacheFile();
 private:
   cmDependsC(cmDependsC const&); // Purposely not implemented.
   void operator=(cmDependsC const&); // Purposely not implemented.
