@@ -157,10 +157,11 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
       std::map<cmStdString, cmIncludeLines*>::iterator fileIt=m_fileCache.find(fullName);
       if (fileIt!=m_fileCache.end())
         {
-        fileIt->second->used=true;
+        fileIt->second->m_Used=true;
         dependencies.insert(fullName);
         for (std::list<UnscannedEntry>::const_iterator incIt=
-               fileIt->second->list.begin(); incIt!=fileIt->second->list.end(); ++incIt)
+               fileIt->second->m_UnscannedEntries.begin(); 
+             incIt!=fileIt->second->m_UnscannedEntries.end(); ++incIt)
           {
           if (m_Encountered.find(incIt->FileName) == m_Encountered.end())
             {
@@ -255,7 +256,7 @@ void cmDependsC::ReadCacheFile()
           {
           entry.QuotedLocation=line;
           }
-        cacheEntry->list.push_back(entry);
+        cacheEntry->m_UnscannedEntries.push_back(entry);
         }
       }
     }
@@ -277,12 +278,13 @@ void cmDependsC::WriteCacheFile() const
   for (std::map<cmStdString, cmIncludeLines*>::const_iterator fileIt=m_fileCache.begin(); 
        fileIt!=m_fileCache.end(); ++fileIt)
     {
-    if (fileIt->second->used)
+    if (fileIt->second->m_Used)
       {
       cacheOut<<fileIt->first.c_str()<<std::endl;
       
-      for (std::list<UnscannedEntry>::const_iterator incIt=fileIt->second->list.begin(); 
-           incIt!=fileIt->second->list.end(); ++incIt)
+      for (std::list<UnscannedEntry>::const_iterator
+             incIt=fileIt->second->m_UnscannedEntries.begin(); 
+           incIt!=fileIt->second->m_UnscannedEntries.end(); ++incIt)
         {
         cacheOut<<incIt->FileName.c_str()<<std::endl;
         if (incIt->QuotedLocation.empty())
@@ -303,7 +305,7 @@ void cmDependsC::WriteCacheFile() const
 void cmDependsC::Scan(std::istream& is, const char* directory, const cmStdString& fullName)
 {
   cmIncludeLines* newCacheEntry=new cmIncludeLines;
-  newCacheEntry->used=true;
+  newCacheEntry->m_Used=true;
   m_fileCache[fullName]=newCacheEntry;
   
   // Read one line at a time.
@@ -334,7 +336,7 @@ void cmDependsC::Scan(std::istream& is, const char* directory, const cmStdString
       // preprocessor-like implementation of this scanner is created.
       if (m_IncludeRegexScan.find(entry.FileName.c_str()))
         {
-        newCacheEntry->list.push_back(entry);
+        newCacheEntry->m_UnscannedEntries.push_back(entry);
         if(m_Encountered.find(entry.FileName) == m_Encountered.end())
           {
           m_Encountered.insert(entry.FileName);

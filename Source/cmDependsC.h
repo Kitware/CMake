@@ -77,9 +77,9 @@ protected:
 
   struct cmIncludeLines
   {
-     cmIncludeLines():used(false) {}
-     std::list<UnscannedEntry> list;
-     bool used;
+    cmIncludeLines(): m_Used(false) {}
+    std::list<UnscannedEntry> m_UnscannedEntries;
+    bool m_Used;
   };
 
   std::set<cmStdString> m_Encountered;
