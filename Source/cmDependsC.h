@@ -67,7 +67,7 @@ protected:
 
   // Set of generated files available.
   std::set<cmStdString> const* m_GeneratedFiles;
-
+public:
   // Data structures for dependency graph walk.
   struct UnscannedEntry
   {
@@ -81,7 +81,7 @@ protected:
     std::list<UnscannedEntry> m_UnscannedEntries;
     bool m_Used;
   };
-
+protected:
   std::set<cmStdString> m_Encountered;
   std::queue<UnscannedEntry> m_Unscanned;
   t_CharBuffer m_Buffer;
