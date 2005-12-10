@@ -14,10 +14,16 @@
 #ifndef @KWSYS_NAMESPACE@_Glob_hxx
 #define @KWSYS_NAMESPACE@_Glob_hxx
 
+#include <@KWSYS_NAMESPACE@/Configure.h>
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
+
 #include <@KWSYS_NAMESPACE@/stl/string>
 #include <@KWSYS_NAMESPACE@/stl/vector>
 
-#include <@KWSYS_NAMESPACE@/Configure.h>
+/* Define this macro temporarily to keep the code readable.  */
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# define kwsys_stl @KWSYS_NAMESPACE@_stl
+#endif
 
 namespace @KWSYS_NAMESPACE@
 {
