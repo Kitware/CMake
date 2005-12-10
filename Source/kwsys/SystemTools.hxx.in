@@ -493,6 +493,11 @@ public:
     const kwsys_stl::vector<kwsys_stl::string>& path = 
     kwsys_stl::vector<kwsys_stl::string>(),
     bool no_system_path = false);
+  static kwsys_stl::string FindProgram(
+    const kwsys_stl::vector<kwsys_stl::string>& names,
+    const kwsys_stl::vector<kwsys_stl::string>& path = 
+    kwsys_stl::vector<kwsys_stl::string>(),
+    bool no_system_path = false);
 
   /**
    * Find a library in the system PATH, with optional extra paths

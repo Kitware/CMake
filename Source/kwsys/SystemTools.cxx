@@ -1947,6 +1947,22 @@ kwsys_stl::string SystemTools::FindProgram(
   return "";
 }
 
+kwsys_stl::string SystemTools::FindProgram(
+  const kwsys_stl::vector<kwsys_stl::string>& names,
+  const kwsys_stl::vector<kwsys_stl::string>& path,
+  bool noSystemPath)
+{
+  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator it = names.begin();
+      it != names.end() ; ++it)
+    {
+    // Try to find the program.
+    std::string result = SystemTools::FindProgram(it->c_str(), 
+                                                  path, 
+                                                  noSystemPath);
+    return result;
+    }
+  return "";
+}
 
 /**
  * Find the library with the given name.  Searches the given path and then
