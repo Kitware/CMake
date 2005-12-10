@@ -170,6 +170,7 @@ public:
    * delete[] on it.
    */
   void GetRemainingArguments(int* argc, char*** argv);
+  void DeleteRemainingArguments(int argc, char*** argv);
 
   /**
    * Return string containing help. If the argument is specified, only return

@@ -359,6 +359,17 @@ void CommandLineArguments::GetRemainingArguments(int* argc, char*** argv)
 }
 
 //----------------------------------------------------------------------------
+void CommandLineArguments::DeleteRemainingArguments(int argc, char*** argv)
+{
+  int cc;
+  for ( cc = 0; cc < argc; ++ cc )
+    {
+    delete [] *argv[cc];
+    }
+  delete [] *argv;
+}
+
+//----------------------------------------------------------------------------
 void CommandLineArguments::AddCallback(const char* argument, ArgumentTypeEnum type, 
   CallbackType callback, void* call_data, const char* help)
 {
