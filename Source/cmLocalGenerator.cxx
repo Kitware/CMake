@@ -287,6 +287,11 @@ void cmLocalGenerator::GenerateInstallRules()
 
   fout << "# Install script for directory: " << m_Makefile->GetCurrentDirectory() 
     << std::endl << std::endl;
+  fout << "# Set the install prefix" << std::endl
+    << "IF(NOT CMAKE_INSTALL_PREFIX)" << std::endl
+    << "  SET(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
+    << "ENDIF(NOT CMAKE_INSTALL_PREFIX)" << std::endl
+    << std::endl;
 
   const char* cmakeDebugPosfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
   if ( cmakeDebugPosfix )
@@ -344,7 +349,7 @@ void cmLocalGenerator::GenerateInstallRules()
       }
     if (l->second.GetInstallPath() != "")
       {
-      destination = prefix + l->second.GetInstallPath();
+      destination = "${CMAKE_INSTALL_PREFIX}/" + l->second.GetInstallPath();
       cmSystemTools::ConvertToUnixSlashes(destination);
       const char* dest = destination.c_str();
       int type = l->second.GetType();
@@ -376,7 +381,7 @@ void cmLocalGenerator::GenerateInstallRules()
           libname += ".lib";
           files = libname.c_str();
           this->AddInstallRule(fout, dest, cmTarget::STATIC_LIBRARY, files, true);
-          std::string dlldest = prefix + l->second.GetRuntimeInstallPath();
+          std::string dlldest = "${CMAKE_INSTALL_PREFIX}/" + l->second.GetRuntimeInstallPath();
           files = fname.c_str();
           this->AddInstallRule(fout, dlldest.c_str(), type, files);
           }
