@@ -159,7 +159,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
         {
         fileIt->second->m_Used=true;
         dependencies.insert(fullName);
-        for (std::list<UnscannedEntry>::const_iterator incIt=
+        for (std::vector<UnscannedEntry>::const_iterator incIt=
                fileIt->second->m_UnscannedEntries.begin(); 
              incIt!=fileIt->second->m_UnscannedEntries.end(); ++incIt)
           {
@@ -282,7 +282,7 @@ void cmDependsC::WriteCacheFile() const
       {
       cacheOut<<fileIt->first.c_str()<<std::endl;
       
-      for (std::list<UnscannedEntry>::const_iterator
+      for (std::vector<UnscannedEntry>::const_iterator
              incIt=fileIt->second->m_UnscannedEntries.begin(); 
            incIt!=fileIt->second->m_UnscannedEntries.end(); ++incIt)
         {
