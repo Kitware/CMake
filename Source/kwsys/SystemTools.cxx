@@ -1956,7 +1956,7 @@ kwsys_stl::string SystemTools::FindProgram(
       it != names.end() ; ++it)
     {
     // Try to find the program.
-    std::string result = SystemTools::FindProgram(it->c_str(), 
+    kwsys_stl::string result = SystemTools::FindProgram(it->c_str(), 
                                                   path, 
                                                   noSystemPath);
     return result;
