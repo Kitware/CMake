@@ -1016,7 +1016,7 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
   const std::vector<const cmSourceFile *> &sourceFiles = 
     sg->GetSourceFiles();
   // If the group is empty, don't write it at all.
-  if(sourceFiles.empty())
+  if(sourceFiles.empty() && sg->GetGroupChildren().empty())
     { 
     return; 
     }
