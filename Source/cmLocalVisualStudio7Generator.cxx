@@ -1436,11 +1436,6 @@ void cmLocalVisualStudio7Generator::ConfigureFinalPass()
 std::string cmLocalVisualStudio7Generator::GetTargetDirectory(cmTarget& target)
 {
   std::string dir;
-  // Put a prefix on the name if one is given by the CMake code.
-  if(const char* prefix = m_Makefile->GetDefinition("CMAKE_TARGET_DIR_PREFIX"))
-    {
-    dir = prefix;
-    }
   dir += target.GetName();
   dir += ".dir";
   return dir;
