@@ -156,7 +156,7 @@ void cmGlobalVisualStudio8Generator::WriteSLNFile(
     std::vector<std::string> dspnames =
       static_cast<cmLocalVisualStudio7Generator*>(generators[i])
       ->GetCreatedProjectNames();
-    cmTargets &tgts = generators[i]->GetMakefile()->GetTargets();
+    cmTargets& tgts = mf->GetTargets();
     for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
       {
       if(l->first == CMAKE_CHECK_BUILD_SYSTEM_TARGET)
