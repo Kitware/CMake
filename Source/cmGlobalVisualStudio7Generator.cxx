@@ -274,6 +274,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
   std::string rootdir = root->GetMakefile()->GetStartOutputDirectory();
   rootdir += "/";
   bool doneAllBuild = false;
+  bool doneCheckBuild = false;
   bool doneRunTests = false;
   bool doneInstall  = false;
   
@@ -361,6 +362,17 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
             else
               {
               doneAllBuild = true;
+              }
+            }
+          if(l->first == CMAKE_CHECK_BUILD_SYSTEM_TARGET)
+            {
+            if(doneCheckBuild)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneCheckBuild = true;
               }
             }
           if(l->first == "INSTALL")

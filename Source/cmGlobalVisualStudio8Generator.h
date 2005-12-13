@@ -42,7 +42,15 @@ public:
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
+  /**
+   * Override Configure and Generate to add the build-system check
+   * target.
+   */
+  virtual void Configure();
+  virtual void Generate();
 protected:
+  virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
+                            std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNHeader(std::ostream& fout);
 };
 #endif

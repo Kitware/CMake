@@ -104,4 +104,6 @@ protected:
   std::map<cmStdString, cmStdString> m_GUIDMap;
 };
 
+#define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZeroTargetCheck"
+
 #endif

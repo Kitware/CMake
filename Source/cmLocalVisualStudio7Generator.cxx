@@ -959,7 +959,8 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   // if we should add regen rule then...
   const char *suppRegenRule = 
     m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
-  if (!cmSystemTools::IsOn(suppRegenRule))
+  if (!cmSystemTools::IsOn(suppRegenRule) &&
+      (strcmp(libName, CMAKE_CHECK_BUILD_SYSTEM_TARGET) != 0))
     {
     this->AddVCProjBuildRule();
     }
