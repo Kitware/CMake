@@ -1980,16 +1980,7 @@ cmLocalUnixMakefileGenerator3
 std::string
 cmLocalUnixMakefileGenerator3::GetTargetDirectory(cmTarget& target)
 {
-  std::string dir;
-  // Put a prefix on the name if one is given by the CMake code.
-  if(const char* prefix = m_Makefile->GetDefinition("CMAKE_TARGET_DIR_PREFIX"))
-    {
-    dir += prefix;
-    }
-  else
-    {
-    dir = "CMakeFiles/";
-    }
+  std::string dir = "CMakeFiles/";
   dir += target.GetName();
   dir += ".dir";
   return dir;
@@ -2881,6 +2872,8 @@ void cmLocalUnixMakefileGenerator3
   depends.clear();
   commands.clear();
   std::string cmakefileName = "CMakeFiles/Makefile.cmake";
+  this->Convert(cmakefileName.c_str(),HOME_OUTPUT,
+                cmLocalGenerator::MAKEFILE);  
   std::string runRule =
     "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
