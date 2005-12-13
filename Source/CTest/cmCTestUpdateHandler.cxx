@@ -944,11 +944,6 @@ int cmCTestUpdateHandler::ProcessHandler()
   os << "</UpdateReturnStatus>" << std::endl;
   os << "</Update>" << std::endl;
 
-  if ( ofs )
-    {
-    ofs.close();
-    }
-
   if (! res || retVal )
     {
     cmCTestLog(m_CTest, ERROR_MESSAGE, "Error(s) when updating the project" << std::endl);
