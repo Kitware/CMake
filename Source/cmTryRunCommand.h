@@ -63,13 +63,16 @@ public:
       "  TRY_RUN(RUN_RESULT_VAR COMPILE_RESULT_VAR\n"
       "          bindir srcfile <CMAKE_FLAGS <Flags>>\n"
       "          <COMPILE_DEFINITIONS <flags>>\n"
+      "          <OUTPUT_VARIABLE var>\n"
       "          <ARGS <arg1> <arg2>...>)\n"
       "Try compiling a srcfile.  Return the success or failure in "
       "COMPILE_RESULT_VAR.  Then if the compile succeeded, run the "
       "executable and return the result in RUN_RESULT_VAR. "
       "If the executable was built, but failed for to run for some "
       "reason, then RUN_RESULT_VAR will be set to FAILED_TO_RUN, and "
-      "the output will be in the COMPILE_RESULT_VAR.";
+      "the output will be in the COMPILE_RESULT_VAR. OUTPUT_VARIABLE "
+      "specifies the name of the variable to put all of the standard "
+      "output and standard error into.";
     }
   
   cmTypeMacro(cmTryRunCommand, cmCommand);
