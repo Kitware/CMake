@@ -26,6 +26,7 @@ CMakeCommandLineInfo::CMakeCommandLineInfo()
   char fname[4096];
   ::GetModuleFileName(0, fname, 4096);
   m_Argv0 = fname;
+  m_Argv.push_back(m_Argv0.c_str());
 } 
 
 CMakeCommandLineInfo::~CMakeCommandLineInfo()

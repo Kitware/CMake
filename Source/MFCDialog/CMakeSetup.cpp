@@ -94,17 +94,20 @@ BOOL CMakeSetup::InitInstance()
   //  the specific initialization routines you do not need.
 #if _MFC_VER <= 0x421
 #ifdef _AFXDLL
-  Enable3dControls();			// Call this when using MFC in a shared DLL
+  Enable3dControls();                   // Call this when using MFC in a shared DLL
 #else
-  Enable3dControlsStatic();	// Call this when linking to MFC statically
+  Enable3dControlsStatic();     // Call this when linking to MFC statically
 #endif
 #endif
   CMakeCommandLineInfo cmdInfo;
   ParseCommandLine(cmdInfo);
-  
-  // Check for documentation options.
+
+  // Check for documentation options.  If there are no arguments skip
+  // the check because the GUI should be displayed instead of showing
+  // usage in this case.
   cmDocumentation doc;
-  if(doc.CheckOptions(cmdInfo.GetArgC(), cmdInfo.GetArgV()))
+  if(cmdInfo.GetArgC() > 1 &&
+     doc.CheckOptions(cmdInfo.GetArgC(), cmdInfo.GetArgV()))
     {
     // Construct and print requested documentation.
     cmake hcm;
