@@ -2183,7 +2183,7 @@ cmLocalUnixMakefileGenerator3
   cmTarget* target = m_Makefile->FindTarget(name);
 
   // If no target was found in the current makefile search globally.
-  bool local = target;
+  bool local = target?true:false;
   if(!local)
     {
     target = m_GlobalGenerator->FindTarget(0, name);
