@@ -1096,38 +1096,6 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     AddCacheEntry(libPath.c_str(),
                   this->GetCurrentOutputDirectory(),
                   "Path to a library", cmCacheManager::INTERNAL);
-  
-  // Add an entry into the cache
-  std::string ltname = lname;
-  ltname += "_LIBRARY_TYPE";
-  switch (shared)
-    {
-    case 0:
-      this->GetCacheManager()->AddCacheEntry(ltname.c_str(),"STATIC",
-                                             "Whether a library is static, shared or module.",
-                                             cmCacheManager::INTERNAL);
-      break;
-    case 1:
-      this->GetCacheManager()->
-        AddCacheEntry(ltname.c_str(),
-                      "SHARED",
-                      "Whether a library is static, shared or module.",
-                      cmCacheManager::INTERNAL);
-      break;
-    case 2:
-      this->GetCacheManager()->
-        AddCacheEntry(ltname.c_str(),
-                      "MODULE",
-                      "Whether a library is static, shared or module.",
-                      cmCacheManager::INTERNAL);
-      break;
-    default:
-      this->GetCacheManager()->
-        AddCacheEntry(ltname.c_str(),
-                      "STATIC",
-                      "Whether a library is static, shared or module.",
-                      cmCacheManager::INTERNAL);
-    }
 }
 
 cmTarget* cmMakefile::AddExecutable(const char *exeName, 

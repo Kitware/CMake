@@ -733,7 +733,7 @@ void cmTarget::UpdateLocation()
     target_location += cfgid;
     target_location += "/";
     }  
-  target_location += this->GetFullName(m_Makefile);
+  target_location += this->GetFullName();
   this->SetProperty("LOCATION",target_location.c_str());
 }
 
@@ -927,13 +927,12 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type)
   return "";
 }
 
-std::string cmTarget::GetFullName(cmMakefile* mf)
+std::string cmTarget::GetFullName()
 {
-  return this->GetFullNameInternal(mf, this->GetType());
+  return this->GetFullNameInternal(this->GetType());
 }
 
-std::string cmTarget::GetFullNameInternal(cmMakefile* mf,
-                                          TargetType type)
+std::string cmTarget::GetFullNameInternal(TargetType type)
 {
   const char* targetPrefix = this->GetProperty("PREFIX");
   const char* targetSuffix = this->GetProperty("SUFFIX");
@@ -945,31 +944,31 @@ std::string cmTarget::GetFullNameInternal(cmMakefile* mf,
   const char* suffixVar = this->GetSuffixVariableInternal(type);
   const char* ll =
     this->GetLinkerLanguage(
-      mf->GetLocalGenerator()->GetGlobalGenerator());
+      m_Makefile->GetLocalGenerator()->GetGlobalGenerator());
   // first try language specific suffix
   if(ll)
     {
     if(!targetSuffix && suffixVar && *suffixVar)
       {
       std::string langSuff = suffixVar + std::string("_") + ll;
-      targetSuffix = mf->GetDefinition(langSuff.c_str());
+      targetSuffix = m_Makefile->GetDefinition(langSuff.c_str());
       }
     if(!targetPrefix && prefixVar && *prefixVar)
       {
       std::string langPrefix = prefixVar + std::string("_") + ll;
-      targetPrefix = mf->GetDefinition(langPrefix.c_str());
+      targetPrefix = m_Makefile->GetDefinition(langPrefix.c_str());
       }
     }
 
   // if there is no prefix on the target use the cmake definition
   if(!targetPrefix && prefixVar)
     {
-    targetPrefix = mf->GetSafeDefinition(prefixVar);
+    targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
     }
   // if there is no suffix on the target use the cmake definition
   if(!targetSuffix && suffixVar)
     {
-    targetSuffix = mf->GetSafeDefinition(suffixVar);
+    targetSuffix = m_Makefile->GetSafeDefinition(suffixVar);
     }
 
   // Begin the final name with the prefix.
@@ -994,13 +993,13 @@ std::string cmTarget::GetFullNameInternal(cmMakefile* mf,
   return name;
 }
 
-std::string cmTarget::GetBaseName(cmMakefile* mf) 
+std::string cmTarget::GetBaseName()
 {
-  return this->GetBaseNameInternal(mf, this->GetType());
+  return this->GetBaseNameInternal(this->GetType());
 }
 
 std::string
-cmTarget::GetBaseNameInternal(cmMakefile* mf, TargetType type) 
+cmTarget::GetBaseNameInternal(TargetType type) 
 {
   std::string pathPrefix = "";
 #ifdef __APPLE__
@@ -1018,16 +1017,16 @@ cmTarget::GetBaseNameInternal(cmMakefile* mf, TargetType type)
     // first check for a language specific suffix var
     const char* ll =
       this->GetLinkerLanguage(
-        mf->GetLocalGenerator()->GetGlobalGenerator());
+        m_Makefile->GetLocalGenerator()->GetGlobalGenerator());
     if(ll)
       {
       std::string langPrefix = prefixVar + std::string("_") + ll;
-      targetPrefix = mf->GetDefinition(langPrefix.c_str());
+      targetPrefix = m_Makefile->GetDefinition(langPrefix.c_str());
       }
     // if there not a language specific suffix then use the general one
     if(!targetPrefix)
       {
-      targetPrefix = mf->GetSafeDefinition(prefixVar);
+      targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
       }
     }
   std::string name = pathPrefix;
@@ -1036,21 +1035,19 @@ cmTarget::GetBaseNameInternal(cmMakefile* mf, TargetType type)
   return name;
 }
 
-void cmTarget::GetLibraryNames(cmMakefile* mf,
-                               std::string& name,
+void cmTarget::GetLibraryNames(std::string& name,
                                std::string& soName,
                                std::string& realName,
                                std::string& baseName) 
 {
   // Get the names based on the real type of the library.
-  this->GetLibraryNamesInternal(mf, name, soName, realName, this->GetType());
+  this->GetLibraryNamesInternal(name, soName, realName, this->GetType());
 
   // The library name without extension.
-  baseName = this->GetBaseName(mf);
+  baseName = this->GetBaseName();
 }
 
-void cmTarget::GetLibraryCleanNames(cmMakefile* mf,
-                                    std::string& staticName,
+void cmTarget::GetLibraryCleanNames(std::string& staticName,
                                     std::string& sharedName,
                                     std::string& sharedSOName,
                                     std::string& sharedRealName) 
@@ -1058,7 +1055,7 @@ void cmTarget::GetLibraryCleanNames(cmMakefile* mf,
   // Get the name as if this were a static library.
   std::string soName;
   std::string realName;
-  this->GetLibraryNamesInternal(mf, staticName, soName, realName,
+  this->GetLibraryNamesInternal(staticName, soName, realName,
                                 cmTarget::STATIC_LIBRARY);
 
   // Get the names as if this were a shared library.
@@ -1069,19 +1066,18 @@ void cmTarget::GetLibraryCleanNames(cmMakefile* mf,
     // shared library will never be present.  In the latter case the
     // type will never be MODULE.  Either way the only names that
     // might have to be cleaned are the shared library names.
-    this->GetLibraryNamesInternal(mf, sharedName, sharedSOName,
+    this->GetLibraryNamesInternal(sharedName, sharedSOName,
                                   sharedRealName, cmTarget::SHARED_LIBRARY);
     }
   else
     {
     // Use the name of the real type of the library (shared or module).
-    this->GetLibraryNamesInternal(mf, sharedName, sharedSOName,
+    this->GetLibraryNamesInternal(sharedName, sharedSOName,
                                   sharedRealName, this->GetType());
     }
 }
 
-void cmTarget::GetLibraryNamesInternal(cmMakefile* mf,
-                                       std::string& name,
+void cmTarget::GetLibraryNamesInternal(std::string& name,
                                        std::string& soName,
                                        std::string& realName,
                                        TargetType type) 
@@ -1089,7 +1085,7 @@ void cmTarget::GetLibraryNamesInternal(cmMakefile* mf,
   // Construct the name of the soname flag variable for this language.
   const char* ll =
     this->GetLinkerLanguage(
-      mf->GetLocalGenerator()->GetGlobalGenerator());
+      m_Makefile->GetLocalGenerator()->GetGlobalGenerator());
   std::string sonameFlag = "CMAKE_SHARED_LIBRARY_SONAME";
   if(ll)
     {
@@ -1102,7 +1098,7 @@ void cmTarget::GetLibraryNamesInternal(cmMakefile* mf,
   const char* version = this->GetProperty("VERSION");
   const char* soversion = this->GetProperty("SOVERSION");
   if((type != cmTarget::SHARED_LIBRARY && type != cmTarget::MODULE_LIBRARY) ||
-     !mf->GetDefinition(sonameFlag.c_str()))
+     !m_Makefile->GetDefinition(sonameFlag.c_str()))
     {
     // Versioning is supported only for shared libraries and modules,
     // and then only when the platform supports an soname flag.
@@ -1117,7 +1113,7 @@ void cmTarget::GetLibraryNamesInternal(cmMakefile* mf,
     }
 
   // The library name.
-  name = this->GetFullNameInternal(mf, type);
+  name = this->GetFullNameInternal(type);
 
   // The library's soname.
   soName = name;
@@ -1141,24 +1137,21 @@ void cmTarget::GetLibraryNamesInternal(cmMakefile* mf,
     }
 }
 
-void cmTarget::GetExecutableNames(cmMakefile* mf,
-                                  std::string& name,
+void cmTarget::GetExecutableNames(std::string& name,
                                   std::string& realName)
 {
   // Get the names based on the real type of the executable.
-  this->GetExecutableNamesInternal(mf, name, realName, this->GetType());
+  this->GetExecutableNamesInternal(name, realName, this->GetType());
 }
 
-void cmTarget::GetExecutableCleanNames(cmMakefile* mf,
-                                       std::string& name,
+void cmTarget::GetExecutableCleanNames(std::string& name,
                                        std::string& realName)
 {
   // Get the name and versioned name of this executable.
-  this->GetExecutableNamesInternal(mf, name, realName, cmTarget::EXECUTABLE);
+  this->GetExecutableNamesInternal(name, realName, cmTarget::EXECUTABLE);
 }
 
-void cmTarget::GetExecutableNamesInternal(cmMakefile* mf,
-                                          std::string& name,
+void cmTarget::GetExecutableNamesInternal(std::string& name,
                                           std::string& realName,
                                           TargetType type)
 {
@@ -1176,7 +1169,7 @@ void cmTarget::GetExecutableNamesInternal(cmMakefile* mf,
 #endif
 
   // The executable name.
-  name = this->GetFullNameInternal(mf, type);
+  name = this->GetFullNameInternal(type);
 
   // The executable's real name on disk.
   realName = name;

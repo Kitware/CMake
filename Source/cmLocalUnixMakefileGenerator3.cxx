@@ -1301,7 +1301,7 @@ cmLocalUnixMakefileGenerator3
   // Get the name of the executable to generate.
   std::string targetName;
   std::string targetNameReal;
-  target.GetExecutableNames(m_Makefile, targetName, targetNameReal);
+  target.GetExecutableNames(targetName, targetNameReal);
 
   // Construct the full path version of the names.
   std::string outpath = m_ExecutableOutputPath;
@@ -1382,8 +1382,7 @@ cmLocalUnixMakefileGenerator3
   {
   std::string cleanName;
   std::string cleanRealName;
-  target.GetExecutableCleanNames(m_Makefile, cleanName,
-                                 cleanRealName);
+  target.GetExecutableCleanNames(cleanName, cleanRealName);
   std::string cleanFullName = outpath + cleanName;
   std::string cleanFullRealName = outpath + cleanRealName;
   exeCleanFiles.push_back
@@ -1646,8 +1645,7 @@ cmLocalUnixMakefileGenerator3
   std::string targetNameSO;
   std::string targetNameReal;
   std::string targetNameBase;
-  target.GetLibraryNames(m_Makefile,
-                         targetName, targetNameSO,
+  target.GetLibraryNames(targetName, targetNameSO,
                          targetNameReal, targetNameBase);
 
   // Construct the full path version of the names.
@@ -1698,8 +1696,7 @@ cmLocalUnixMakefileGenerator3
   std::string cleanSharedName;
   std::string cleanSharedSOName;
   std::string cleanSharedRealName;
-  target.GetLibraryCleanNames(m_Makefile,
-                              cleanStaticName,
+  target.GetLibraryCleanNames(cleanStaticName,
                               cleanSharedName,
                               cleanSharedSOName,
                               cleanSharedRealName);
@@ -2178,85 +2175,52 @@ cmLocalUnixMakefileGenerator3
                   bool assume_unknown_is_file)
 {
   // There are a few cases for the name of the target:
-  //  - CMake target in this directory: depend on it.
-  //  - CMake target in another directory: depend and add jump-and-build.
+  //  - CMake target.
   //  - Full path to a file: depend on it.
-  //  - Other format (like -lm): do nothing.
+  //  - Other format (like -lm): do nothing unless assume_unknown_is_file is true.
 
-  // If it is an executable or library target there will be a
-  // definition for it.
-  std::string dirVar = name;
-  dirVar += "_CMAKE_PATH";
-  const char* dir = m_Makefile->GetDefinition(dirVar.c_str());
-  if(dir && *dir)
+  // Look for a CMake target in the current makefile.
+  cmTarget* target = m_Makefile->FindTarget(name);
+
+  // If no target was found in the current makefile search globally.
+  bool local = target;
+  if(!local)
     {
-    // This is a CMake target somewhere in this project.
-    // Get the type of the library.  If it does not have a type then
-    // it is an executable.
-    std::string typeVar = name;
-    typeVar += "_LIBRARY_TYPE";
-    const char* libType = m_Makefile->GetDefinition(typeVar.c_str());
-    
-    // Get the output path for this target type.
-    std::string tgtOutputPath;
-    if(libType)
-      {
-      tgtOutputPath = m_LibraryOutputPath;
-      }
-    else
-      {
-      tgtOutputPath = m_ExecutableOutputPath;
-      }
-
-    // Get the path to the target.
-    std::string tgtPath;
-    if(tgtOutputPath.size())
-      {
-      tgtPath = tgtOutputPath;
-      }
-    else
-      {
-      tgtPath = dir;
-      tgtPath += "/";
-      }
-
-    // Add the name of the targets's file.  This depends on the type
-    // of the target.
-    std::string prefix;
-    std::string suffix;
-    if(!libType)
-      {
-      suffix = cmSystemTools::GetExecutableExtension();
-      }
-    else if(strcmp(libType, "SHARED") == 0)
-      {
-      prefix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
-      suffix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
-      }
-    else if(strcmp(libType, "MODULE") == 0)
-      {
-      prefix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
-      suffix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
-      }
-    else if(strcmp(libType, "STATIC") == 0)
-      {
-      prefix = m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
-      suffix = m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
-      }
-    tgtPath += prefix;
-    tgtPath += name;
-    tgtPath += suffix;
-
-    // Add a dependency on the target.
-    depends.push_back(tgtPath.c_str());
+    target = m_GlobalGenerator->FindTarget(0, name);
     }
-  else if(m_Makefile->GetTargets().find(name) !=
-          m_Makefile->GetTargets().end())
+
+  // If a target was found then depend on it.
+  if(target)
     {
-    // This is a CMake target that is not an executable or library.
-    // It must be in this directory, so just depend on the name
-    // directly.
-    depends.push_back(name);
+    switch (target->GetType())
+      {
+      case cmTarget::EXECUTABLE:
+      case cmTarget::STATIC_LIBRARY:
+      case cmTarget::SHARED_LIBRARY:
+      case cmTarget::MODULE_LIBRARY:
+        {
+        // Get the location of the target's output file and depend on it.
+        if(const char* location = target->GetProperty("LOCATION"))
+          {
+          depends.push_back(location);
+          }
+        }
+        break;
+      case cmTarget::UTILITY:
+        {
+        if(local)
+          {
+          // This is a utility target in the current makefile.  Just
+          // depend on it directly.
+          depends.push_back(name);
+          }
+        }
+        break;
+      case cmTarget::INSTALL_FILES:
+      case cmTarget::INSTALL_PROGRAMS:
+        // Do not depend on install targets.
+        break;
+      }
     }
   else if(cmSystemTools::FileIsFullPath(name))
     {

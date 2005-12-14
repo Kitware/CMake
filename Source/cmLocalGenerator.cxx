@@ -363,7 +363,7 @@ void cmLocalGenerator::GenerateInstallRules()
       case cmTarget::STATIC_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
         fname = libOutPath;
-        fname += l->second.GetFullName(m_Makefile);
+        fname += l->second.GetFullName();
         files = fname.c_str();
         this->AddInstallRule(fout, dest, type, files);
         break;
@@ -371,7 +371,7 @@ void cmLocalGenerator::GenerateInstallRules()
         {
         // Special code to handle DLL
         fname = libOutPath;
-        fname += l->second.GetFullName(m_Makefile);
+        fname += l->second.GetFullName();
         std::string ext = cmSystemTools::GetFilenameExtension(fname);
         ext = cmSystemTools::LowerCase(ext);
         if ( ext == ".dll" )
@@ -428,7 +428,7 @@ void cmLocalGenerator::GenerateInstallRules()
         if(l->second.GetPropertyAsBool("MACOSX_BUNDLE"))
           {
           fname = exeOutPath;
-          fname += l->second.GetFullName(m_Makefile);
+          fname += l->second.GetFullName();
           std::string plist = fname;
           plist += ".app/Contents/Info.plist";
           fname += ".app/Contents/MacOS/";
@@ -451,7 +451,7 @@ void cmLocalGenerator::GenerateInstallRules()
         else
           {
           fname = exeOutPath;
-          fname += l->second.GetFullName(m_Makefile);
+          fname += l->second.GetFullName();
           files = fname.c_str();
           this->AddInstallRule(fout, dest, type, files, false,
                                properties.c_str());
@@ -668,7 +668,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   std::string createRule = "CMAKE_";
   createRule += llang;
   createRule += target.GetCreateRuleVariable();
-  std::string targetName = target.GetFullName(m_Makefile);
+  std::string targetName = target.GetFullName();
   // Executable :
   // Shared Library:
   // Static Library:

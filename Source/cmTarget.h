@@ -163,18 +163,18 @@ public:
   ///! Return the name of the variable to look up the target suffix
   const char* GetPrefixVariable();
 
-  /** Get the full name of the target according to the settings in the
-      given makefile.  */
-  std::string GetFullName(cmMakefile* mf);
+  /** Get the full name of the target according to the settings in its
+      makefile.  */
+  std::string GetFullName();
 
   /** Get the base name (no suffix) of the target according to the
-      settings in the given makefile.  */
-  std::string GetBaseName(cmMakefile* mf);
+      settings in its makefile.  */
+  std::string GetBaseName();
 
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
       should be called only on a library target.  */
-  void GetLibraryNames(cmMakefile* mf, std::string& name,
+  void GetLibraryNames(std::string& name,
                        std::string& soName, std::string& realName,
                        std::string& baseName);
 
@@ -182,8 +182,7 @@ public:
       the library from the build tree either before linking or during
       a clean step.  This should be called only on a library
       target.  */
-  void GetLibraryCleanNames(cmMakefile* mf,
-                            std::string& staticName,
+  void GetLibraryCleanNames(std::string& staticName,
                             std::string& sharedName,
                             std::string& sharedSOName,
                             std::string& sharedRealName);
@@ -191,15 +190,13 @@ public:
   /** Get the names of the executable needed to generate a build rule
       that takes into account executable version numbers.  This should
       be called only on an executable target.  */
-  void GetExecutableNames(cmMakefile* mf, std::string& name,
-                          std::string& realName);
+  void GetExecutableNames(std::string& name, std::string& realName);
 
   /** Get the names of the executable used to remove existing copies
       of the executable from the build tree either before linking or
       during a clean step.  This should be called only on an
       executable target.  */
-  void GetExecutableCleanNames(cmMakefile* mf, std::string& name,
-                               std::string& realName);
+  void GetExecutableCleanNames(std::string& name, std::string& realName);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -256,15 +253,13 @@ private:
 
   const char* GetSuffixVariableInternal(TargetType type);
   const char* GetPrefixVariableInternal(TargetType type);
-  std::string GetFullNameInternal(cmMakefile* mf, TargetType type);
-  std::string GetBaseNameInternal(cmMakefile* mf, TargetType type);
-  void GetLibraryNamesInternal(cmMakefile* mf,
-                               std::string& name,
+  std::string GetFullNameInternal(TargetType type);
+  std::string GetBaseNameInternal(TargetType type);
+  void GetLibraryNamesInternal(std::string& name,
                                std::string& soName,
                                std::string& realName,
                                TargetType type);
-  void GetExecutableNamesInternal(cmMakefile* mf,
-                                  std::string& name,
+  void GetExecutableNamesInternal(std::string& name,
                                   std::string& realName,
                                   TargetType type);
 
