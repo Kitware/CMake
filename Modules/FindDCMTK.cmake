@@ -1,11 +1,10 @@
-#
-# try to find DCMTK libraries
+# - find DCMTK libraries
 #
 
-# DCMTK_INCLUDE_DIR   - Directories to include to use DCMTK
-# DCMTK_LIBRARIES     - Files to link against to use DCMTK
-# DCMTK_FOUND         - If false, don't try to use DCMTK
-# DCMTK_DIR           - (optional) Source directory for DCMTK
+#  DCMTK_INCLUDE_DIR   - Directories to include to use DCMTK
+#  DCMTK_LIBRARIES     - Files to link against to use DCMTK
+#  DCMTK_FOUND         - If false, don't try to use DCMTK
+#  DCMTK_DIR           - (optional) Source directory for DCMTK
 #
 # DCMTK_DIR can be used to make it simpler to find the various include
 # directories and compiled libraries if you've just compiled it in the

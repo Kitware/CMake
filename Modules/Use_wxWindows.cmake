@@ -1,21 +1,16 @@
-## 
-## This convenience include finds if wxWindows is installed
-## and set the appropriate libs, incdirs, flags etc. 
-
-## author Jan Woetzel <jw -at- mip.informatik.uni-kiel.de> (07/2003)
-##
-## -----------------------------------------------------
-## USAGE: 
-##   just include Use_wxWindows.cmake 
-##   in your projects CMakeLists.txt
-## INCLUDE(Use_wxWindows)
-##
-##   if you are sure you need GL then
-## SET(WXWINDOWS_USE_GL 1)
-##   *before* you include this file.
-## 
-## -----------------------------------------------------
-
+# - Find wxWindows installation
+#
+# This convenience include finds if wxWindows is installed
+# and set the appropriate libs, incdirs, flags etc. 
+# INCLUDE_DIRECTORIES, LINK_DIRECTORIES and ADD_DEFINITIONS
+# are called.
+#
+# author Jan Woetzel <jw -at- mip.informatik.uni-kiel.de> (07/2003)
+#
+# if you are sure you need GL then
+#  SET(WXWINDOWS_USE_GL 1)
+# *before* you include this file.
+# 
 
 
 INCLUDE(FindwxWindows)

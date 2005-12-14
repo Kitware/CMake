@@ -1,5 +1,4 @@
-# 
-# this module looks for Cygwin
+# - this module looks for Cygwin
 #
 
 IF (WIN32)

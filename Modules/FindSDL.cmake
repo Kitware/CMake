@@ -1,14 +1,13 @@
-# Locate SDL library
+# - Locate SDL library
 # This module defines
-# SDL_LIBRARY, the name of the library to link against
-# SDL_FOUND, if false, do not try to link to SDL
-# SDL_INCLUDE_DIR, where to find SDL.h
+#  SDL_LIBRARY, the name of the library to link against
+#  SDL_FOUND, if false, do not try to link to SDL
+#  SDL_INCLUDE_DIR, where to find SDL.h
 #
 # Don't forget to include SDLmain.h and SDLmain.m your project for the 
 # OS X framework based version. (Other versions link to -lSDLmain which
 # this module will try to find on your behalf.) Also for OS X, this 
 # module will automatically add the -framework Cocoa on your behalf.
-#
 # $SDLDIR is an environment variable that would
 # correspond to the ./configure --prefix=$SDLDIR
 # used in building SDL.

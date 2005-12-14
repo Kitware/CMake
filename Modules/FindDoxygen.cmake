@@ -1,7 +1,4 @@
-# 
-# this module looks for Doxygen and the path to Graphiz's dot
-#
-
+# - this module looks for Doxygen and the path to Graphiz's dot
 # With the OS X GUI version, it likes to be installed to /Applications and
 # it contains the doxygen executable in the bundle. In the versions I've 
 # seen, it is located in Resources, but in general, more often binaries are 

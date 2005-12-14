@@ -1,7 +1,6 @@
-#
+# - Test for std:: namespace support
 # check if the compiler supports std:: on stl classes
-#
-# CMAKE_NO_STD_NAMESPACE - defined accoreding to the results
+#  CMAKE_NO_STD_NAMESPACE - defined according to the results
 #
 IF("CMAKE_STD_NAMESPACE" MATCHES "^CMAKE_STD_NAMESPACE$")
   MESSAGE(STATUS "Check for STD namespace")

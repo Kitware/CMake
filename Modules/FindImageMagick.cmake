@@ -1,4 +1,4 @@
-#
+# - Find Image Magick
 # This module finds if ImageMagick tools are installed and determines 
 # where the executables are. This code sets the following variables:
 #

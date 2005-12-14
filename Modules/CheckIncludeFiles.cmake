@@ -1,10 +1,10 @@
+# - Check if the files can be included
 #
-# Check if the files can be included
-#
-# CHECK_INCLUDE_FILES - macro which checks the include file exists.
-# INCLUDE - list of files to include
-# VARIABLE - variable to return result
-#
+# CHECK_INCLUDE_FILES(INCLUDE VARIABLE)
+# - macro which checks the include file exists.
+#  INCLUDE - list of files to include
+#  VARIABLE - variable to return result
+#   
 # If CMAKE_REQUIRED_FLAGS is set then those flags will be passed into the
 # compile of the program
 

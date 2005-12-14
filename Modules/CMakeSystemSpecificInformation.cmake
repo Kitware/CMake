@@ -1,3 +1,4 @@
+
 # This file is included by cmGlobalGenerator::EnableLanguage.
 # It is included after the compiler has been determined, so
 # we know things like the compiler name and if the compiler is gnu.

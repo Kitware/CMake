@@ -1,7 +1,7 @@
-#
+# - Define macro to determine endian type
 # Check if the system is big endian or little endian
-#
-# VARIABLE - variable to store the result to
+#  TEST_BIG_ENDIAN(VARIABLE)
+#  VARIABLE - variable to store the result to
 #
 
 MACRO(TEST_BIG_ENDIAN VARIABLE)

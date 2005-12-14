@@ -1,8 +1,8 @@
-#
+# - Find JNI java libraries.
 # This module finds if Java is installed and determines where the
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
-#
+#   
 #  JAVA_AWT_LIB_PATH     = the path to where the jawt library is
 #  JAVA_INCLUDE_PATH     = the path to where jni.h can be found
 #  JAVA_AWT_INCLUDE_PATH = the path to where jawt.h can be found

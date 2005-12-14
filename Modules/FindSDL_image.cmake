@@ -1,8 +1,8 @@
-# Locate SDL_image library
+# - Locate SDL_image library
 # This module defines
-# SDLIMAGE_LIBRARY, the name of the library to link against
-# SDLIMAGE_FOUND, if false, do not try to link to SDL
-# SDLIMAGE_INCLUDE_DIR, where to find SDL/SDL.h
+#  SDLIMAGE_LIBRARY, the name of the library to link against
+#  SDLIMAGE_FOUND, if false, do not try to link to SDL
+#  SDLIMAGE_INCLUDE_DIR, where to find SDL/SDL.h
 #
 # $SDLDIR is an environment variable that would
 # correspond to the ./configure --prefix=$SDLDIR

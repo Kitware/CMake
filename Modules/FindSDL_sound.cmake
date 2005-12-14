@@ -1,5 +1,4 @@
-# Locates the SDL_sound library
-
+# - Locates the SDL_sound library
 # This module depends on SDL being found and 
 # must be called AFTER FindSDL.cmake is called.
 
@@ -12,19 +11,18 @@
 # flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
 # This is available mostly for cases this module failed to anticipate for
 # and you must add additional flags. This is marked as ADVANCED.
-
 #
 # This module also defines (but you shouldn't need to use directly)
 # SDL_SOUND_LIBRARY, the name of just the SDL_sound library you would link
 # against. Use SDL_SOUND_LIBRARIES for you link instructions and not this one.
 # And might define the following as needed
-# MIKMOD_LIBRARY
-# MODPLUG_LIBRARY
-# OGG_LIBRARY
-# VORBIS_LIBRARY
-# SMPEG_LIBRARY
-# FLAC_LIBRARY
-# SPEEX_LIBRARY
+#  MIKMOD_LIBRARY
+#  MODPLUG_LIBRARY
+#  OGG_LIBRARY
+#  VORBIS_LIBRARY
+#  SMPEG_LIBRARY
+#  FLAC_LIBRARY
+#  SPEEX_LIBRARY
 #
 # Typically, you should not use these variables directly, and you should use 
 # SDL_SOUND_LIBRARIES which contains SDL_SOUND_LIBRARY and the other audio libraries 

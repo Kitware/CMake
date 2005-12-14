@@ -1,4 +1,4 @@
-#
+# - Find python interpreter
 # This module finds if Python interpreter is installed and determines where the
 # executables are. This code sets the following variables:
 #

@@ -1,3 +1,9 @@
+# - Find SWIG
+# This module finds an installed SWIG.  It sets the following variables:
+#  SWIG_FOUND - set to true if SWIG is found
+#  SWIG_DIR - the directory where swig is installed
+#  SWIG_EXECUTABLE - the path to the swig executable
+
 SET(SWIG_FOUND FOOBAR)
 FIND_PATH(SWIG_DIR
   SWIGConfig.cmake

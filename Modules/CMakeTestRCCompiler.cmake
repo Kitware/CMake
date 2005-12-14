@@ -1,3 +1,4 @@
+
 # This file is used by EnableLanguage in cmGlobalGenerator to
 # determine that that selected RC compiler can actually compile
 # and link the most basic of programs.   If not, a fatal error

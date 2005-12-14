@@ -1,23 +1,23 @@
-# Locate Qt include paths and libraries
+# - Locate Qt include paths and libraries
 
 # This module defines
-# QT_INCLUDE_DIR, where to find qt.h, etc.
-# QT_LIBRARIES, the libraries to link against to use Qt.
-# QT_DEFINITIONS, definitions to use when compiling code that uses Qt.
-# QT_FOUND, If false, don't try to use Qt.
+#  QT_INCLUDE_DIR, where to find qt.h, etc.
+#  QT_LIBRARIES, the libraries to link against to use Qt.
+#  QT_DEFINITIONS, definitions to use when compiling code that uses Qt.
+#  QT_FOUND, If false, don't try to use Qt.
 
-#if you need the multithreaded version of Qt, set QT_MT_REQUIRED to TRUE
+# if you need the multithreaded version of Qt, set QT_MT_REQUIRED to TRUE
 
 # also defined, but not for general use are
-# QT_MOC_EXECUTABLE, where to find the moc tool.
-# QT_UIC_EXECUTABLE, where to find the uic tool.
-# QT_QT_LIBRARY, where to find the Qt library.
-# QT_QTMAIN_LIBRARY, where to find the qtmain library. This is only required by Qt3 on Windows.
+#  QT_MOC_EXECUTABLE, where to find the moc tool.
+#  QT_UIC_EXECUTABLE, where to find the uic tool.
+#  QT_QT_LIBRARY, where to find the Qt library.
+#  QT_QTMAIN_LIBRARY, where to find the qtmain library. This is only required by Qt3 on Windows.
 
 # These are around for backwards compatibility 
 # they will be set
-# QT_WRAP_CPP, set true if QT_MOC_EXECUTABLE is found
-# QT_WRAP_UI set true if QT_UIC_EXECUTABLE is found
+#  QT_WRAP_CPP, set true if QT_MOC_EXECUTABLE is found
+#  QT_WRAP_UI set true if QT_UIC_EXECUTABLE is found
 
 FILE(GLOB GLOB_PATHS_BIN /usr/lib/qt-3*/bin/)
 FIND_PATH(QT_INCLUDE_DIR qt.h

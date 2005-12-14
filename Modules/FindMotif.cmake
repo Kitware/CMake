@@ -1,9 +1,8 @@
-# Try to find Motif (or lesstif)
-# Once done this will define
-#
-# MOTIF_FOUND        - system has MOTIF
-# MOTIF_INCLUDE_DIR  - where the Motif include directory can be found
-# MOTIF_LIBRARIES    - Link these to use Motif
+# - Try to find Motif (or lesstif)
+# Once done this will define:
+#  MOTIF_FOUND        - system has MOTIF
+#  MOTIF_INCLUDE_DIR  - where the Motif include directory can be found
+#  MOTIF_LIBRARIES    - Link these to use Motif
 
 SET(MOTIF_FOUND 0)
 IF(UNIX)

@@ -1,3 +1,4 @@
+
 # Nothing here yet
 IF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
   INCLUDE(CMakeVS7BackwardCompatibility)

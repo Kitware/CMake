@@ -1,3 +1,4 @@
+
 # this is a place holder if java needed flags for javac they would go here.
 IF(NOT CMAKE_Java_CREATE_STATIC_LIBRARY)
   SET(CMAKE_Java_CREATE_STATIC_LIBRARY

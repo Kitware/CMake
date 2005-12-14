@@ -1,9 +1,9 @@
-#
+# - Find zlib
 # Find the native ZLIB includes and library
 #
-# ZLIB_INCLUDE_DIR - where to find zlib.h, etc.
-# ZLIB_LIBRARIES   - List of fully qualified libraries to link against when using zlib.
-# ZLIB_FOUND       - Do not attempt to use zlib if "no" or undefined.
+#  ZLIB_INCLUDE_DIR - where to find zlib.h, etc.
+#  ZLIB_LIBRARIES   - List of libraries when using zlib.
+#  ZLIB_FOUND       - True if zlib found.
 
 FIND_PATH(ZLIB_INCLUDE_DIR zlib.h
   /usr/local/include

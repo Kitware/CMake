@@ -1,20 +1,21 @@
-# searches for all installed versions of QT.
+# - Searches for all installed versions of QT.
 # This should only be used if your project can work with multiple
 # versions of QT.  If not, you should just directly use FindQt4 or FindQt3.
-# 
-#  If multiple versions of QT are found on the machine, then
-#  The user must set the option DESIRED_QT_VERSION to the version
-#  they want to use.  If only one version of qt is found on the machine,
-#  then the DESIRED_QT_VERSION is set to that version and the 
-#  matching FindQt3 or FindQt4 module is included.
-#  Once the user sets DESIRED_QT_VERSION, then the FindQt3 or FindQt4 module
-#  is included.
+# If multiple versions of QT are found on the machine, then
+# The user must set the option DESIRED_QT_VERSION to the version
+# they want to use.  If only one version of qt is found on the machine,
+# then the DESIRED_QT_VERSION is set to that version and the 
+# matching FindQt3 or FindQt4 module is included.
+# Once the user sets DESIRED_QT_VERSION, then the FindQt3 or FindQt4 module
+# is included.
 #
-#  QT_REQUIRED if this is set to TRUE then if cmake can not find QT4 or QT3
-#              an error is raised and a message is sent to the user.
+#  QT_REQUIRED if this is set to TRUE then if CMake can not find 
+#              QT4 or QT3 an error is raised and a message is sent
+#              to the user.
 #  DESIRED_QT_VERSION OPTION is created
 #  QT4_INSTALLED is set to TRUE if qt4 is found.
 #  QT3_INSTALLED is set to TRUE if qt3 is found.
+
 
 # look for signs of qt3 installations
 FILE(GLOB GLOB_TEMP_VAR /usr/lib/qt-3*/bin/qmake)

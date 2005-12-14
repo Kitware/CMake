@@ -1,20 +1,17 @@
-#
-# Find the native FLTK includes and library
-#
+# - Find the native FLTK includes and library
 # The following settings are defined
-# FLTK_FLUID_EXECUTABLE, where to find the Fluid tool
-# FLTK_WRAP_UI, This allows the FLTK_WRAP_UI command to work.
-# FLTK_INCLUDE_DIR, where to find include files
-# FLTK_LIBRARIES, list of fltk libraries
-# FLTK_FOUND, Don't use FLTK if false.
-
+#  FLTK_FLUID_EXECUTABLE, where to find the Fluid tool
+#  FLTK_WRAP_UI, This allows the FLTK_WRAP_UI command to work.
+#  FLTK_INCLUDE_DIR, where to find include files
+#  FLTK_LIBRARIES, list of fltk libraries
+#  FLTK_FOUND, Don't use FLTK if false.
 # The following settings should not be used in general.
-# FLTK_BASE_LIBRARY    = the full path to fltk.lib
-# FLTK_GL_LIBRARY      = the full path to fltk_gl.lib
-# FLTK_FORMS_LIBRARY   = the full path to fltk_forms.lib
-# FLTK_IMAGES_LIBRARY  = the full path to fltk_images.lib
+#  FLTK_BASE_LIBRARY    = the full path to fltk.lib
+#  FLTK_GL_LIBRARY      = the full path to fltk_gl.lib
+#  FLTK_FORMS_LIBRARY   = the full path to fltk_forms.lib
+#  FLTK_IMAGES_LIBRARY  = the full path to fltk_images.lib
 
-# Platform dependent libraries required by FLTK
+#  Platform dependent libraries required by FLTK
 IF(WIN32)
   IF(NOT CYGWIN)
     IF(BORLAND)

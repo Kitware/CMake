@@ -1,17 +1,16 @@
-# Locate SDL_net library
+# - Locate SDL_net library
 # This module defines
-# SDLNET_LIBRARY, the name of the library to link against
-# SDLNET_FOUND, if false, do not try to link against
-# SDLNET_INCLUDE_DIR, where to find the headers
-#
+#  SDLNET_LIBRARY, the name of the library to link against
+#  SDLNET_FOUND, if false, do not try to link against
+#  SDLNET_INCLUDE_DIR, where to find the headers
+#  
 # $SDLDIR is an environment variable that would
 # correspond to the ./configure --prefix=$SDLDIR
 # used in building SDL.
-#
+#  
 # Created by Eric Wing. This was influenced by the FindSDL.cmake 
 # module, but with modifications to recognize OS X frameworks and 
 # additional Unix paths (FreeBSD, etc).
-
 # On OSX, this will prefer the Framework version (if found) over others.
 # People will have to manually change the cache values of 
 # SDLNET_LIBRARY to override this selection.

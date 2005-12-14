@@ -1,4 +1,4 @@
-# Find the GCC-XML front-end executable.
+# - Find the GCC-XML front-end executable.
 FIND_PROGRAM(GCCXML
   NAMES gccxml
         ../GCC_XML/gccxml

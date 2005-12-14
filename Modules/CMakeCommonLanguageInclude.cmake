@@ -1,3 +1,4 @@
+
 # this file has flags that are shared across languages and sets
 # cache values that can be initialized in the platform-compiler.cmake file
 # it may be included by more than one language.

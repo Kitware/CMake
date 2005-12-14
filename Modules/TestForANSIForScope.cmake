@@ -1,7 +1,6 @@
-#
-# check if the compiler supports std:: on stl classes
-#
-# CMAKE_NO_STD_NAMESPACE - defined accoreding to the results
+# - Check for ANSI for scope support
+# Check if the compiler supports std:: on stl classes.
+#  CMAKE_NO_STD_NAMESPACE - holds result
 #
 
 IF("CMAKE_ANSI_FOR_SCOPE" MATCHES "^CMAKE_ANSI_FOR_SCOPE$")

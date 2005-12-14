@@ -1,5 +1,4 @@
-# CTest.cmake
-#
+# - setup CTest
 # This file configures a project to use the CTest/Dart testing/dashboard process.
 #
 OPTION(BUILD_TESTING "Build the testing tree." ON)

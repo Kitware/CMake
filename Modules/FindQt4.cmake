@@ -1,115 +1,113 @@
-########################################################################
-#
-#       Locates Qt4 include paths and libraries
-#
-########################################################################
-
-# This module defines
-# QT_USE_FILE                   A CMake file that can be included to compile
-#                               Qt 4 applications and libraries.  By default,
-#                               the QtCore and QtGui libraries are loaded.
-#                               This behavior can be changed by setting one
-#                               or more of the following variables to true:
-#                                       QT_DONT_USE_QTCORE
-#                                       QT_DONT_USE_QTGUI
-#                                       QT_USE_QT3SUPPORT
-#                                       QT_USE_QTASSISTANT
-#                                       QT_USE_QTDESIGNER
-#                                       QT_USE_QTMOTIF
-#                                       QT_USE_QTNETWORK
-#                                       QT_USE_QTNSPLUGIN
-#                                       QT_USE_QTOPENGL
-#                                       QT_USE_QTSQL
-#                                       QT_USE_QTXML
-#                               All the libraries required are stored in a
-#                               variable called QT_LIBRARIES.  Add this variable
-#                               to your TARGET_LINK_LIBRARIES.
-#
-# macro QT4_WRAP_CPP(outfiles inputfile ... )
-# macro QT4_WRAP_UI(outfiles inputfile ... )
-# macro QT4_ADD_RESOURCE(outfiles inputfile ... )
-#
-# QT_FOUND                      If false, don't try to use Qt.
-# QT4_FOUND                     If false, don't try to use Qt 4.
-#
-# QT_QTCORE_FOUND               True if QtCore includes and library found.
-# QT_QTGUI_FOUND                True if QtGui includes and library found.
-# QT_QT3SUPPORT_FOUND           True if Qt3Support includes and library found.
-# QT_QTASSISTANT_FOUND          True if QtAssistant includes and library found.
-# QT_QTDESIGNER_FOUND           True if QtDesigner includes and library found.
-# QT_QTMOTIF_FOUND              True if QtMotif includes and library found.
-# QT_QTNETWORK_FOUND            True if QtNetwork includes and library found.
-# QT_QTNSPLUGIN_FOUND           True if QtNsPlugin includes and library found.
-# QT_QTOPENGL_FOUND             True if QtOpenGL includes and library found.
-# QT_QTSQL_FOUND                True if QtSql includes and library found.
-# QT_QTXML_FOUND                True if QtXml includes and library found.
-#
-# QT_DEFINITIONS                Definitions to use when compiling code that
-#                               uses Qt.
-#
-# QT_INCLUDES                   List of paths to all include directories of 
-#                               Qt4 QT_INCLUDE_DIR, QT_QT_INCLUDE_DIR, and QT_QTGUI_INCLUDE_DIR are
-#                               always in this variable even if NOTFOUND, all other INCLUDE_DIRS are
-#                               only added if they are found.
-# 
-# QT_INCLUDE_DIR                Path to "include" of Qt4
-# QT_QT_INCLUDE_DIR             Path to "include/Qt" of Qt4
-# QT_QT3SUPPORT_INCLUDE_DIR     Path to "include/Qt3Support" of Qt
-# QT_QTASSISTANT_INCLUDE_DIR    Path to "include/QtAssistant" of Qt4
-# QT_QTCORE_INCLUDE_DIR         Path to "include/QtCore" of Qt4        
-# QT_QTDESIGNER_INCLUDE_DIR     Path to "include/QtDesigner" of Qt4
-# QT_QTGUI_INCLUDE_DIR          Path to "include/QtGui" of Qt4
-# QT_QTMOTIF_INCLUDE_DIR        Path to "include/QtMotif" of Qt4
-# QT_QTNETWORK_INCLUDE_DIR      Path to "include/QtNetwork" of Qt4
-# QT_QTNSPLUGIN_INCLUDE_DIR     Path to "include/QtNsPlugin" of Qt4
-# QT_QTOPENGL_INCLUDE_DIR       Path to "include/QtOpenGL" of Qt4
-# QT_QTSQL_INCLUDE_DIR          Path to "include/QtSql" of Qt4
-# QT_QTXML_INCLUDE_DIR          Path to "include/QtXml" of Qt4
-#
-# QT_LIBRARY_DIR                Path to "lib" of Qt4
-#
-# QT_QT3SUPPORT_LIBRARY         Path+filename for Qt3Support library of Qt4
-# QT_QTASSISTANT_LIBRARY        Path+filename for QtAssistant library of Qt4
-# QT_QTCORE_LIBRARY             Path+filename for QtCore library of Qt4
-# QT_QTDESIGNER_LIBRARY         Path+filename for QtDesigner library of Qt4
-# QT_QTGUI_LIBRARY              Path+filename for QtGui library of Qt4
-# QT_QTMOTIF_LIBRARY            Path+filename for QtMotif library of Qt4
-# QT_QTNETWORK_LIBRARY          Path+filename for QtNetwork library of Qt4
-# QT_QTNSPLUGIN_LIBRARY         Path+filename for QtNsPlugin library of Qt4
-# QT_QTOPENGL_LIBRARY           Path+filename for QtOpenGL library of Qt4
-# QT_QTSQL_LIBRARY              Path+filename for QtSql library of Qt4
-# QT_QTXML_LIBRARY              Path+filename for QtXml library of Qt4
-#
-# QT_QT3SUPPORT_LIBRARY_DEBUG   Path+filename for Qt3Support_debug library of Qt
-# QT_QTASSISTANT_LIBRARY_DEBUG  Path+filename for QtAssistant_debug library
-#                               of Qt4
-# QT_QTCORE_LIBRARY_DEBUG       Path+filename for QtCore_debug library of Qt4  
-# QT_QTDESIGNER_LIBRARY_DEBUG   Path+filename for QtDesigner_debug library of Qt4
-# QT_QTGUI_LIBRARY_DEBUG        Path+filename for QtGui_debug library of Qt4
-# QT_QTMOTIF_LIBRARY_DEBUG      Path+filename for QtMotif_debug library of Qt4
-# QT_QTNETWORK_LIBRARY_DEBUG    Path+filename for QtNetwork_debug library of Qt4
-# QT_QTNSPLUGIN_LIBRARY_DEBUG   Path+filename for QtNsPlugin_debug library of Qt4
-# QT_QTOPENGL_LIBRARY_DEBUG     Path+filename for QtOpenGL_debug library of Qt4
-# QT_QTSQL_LIBRARY_DEBUG        Path+filename for QtSql_debug library of Qt4
-# QT_QTXML_LIBRARY_DEBUG        Path+filename for QtXml_debug library of Qt4
-#
+# - Find QT 4
+# This module can be used to find Qt4.
+# This module defines:
+#  QT_USE_FILE    A CMake file that can be included to compile
+#                 Qt 4 applications and libraries.  By default,
+#                 the QtCore and QtGui libraries are loaded.
+#                 This behavior can be changed by setting one
+#                 or more of the following variables to true:
+#                    QT_DONT_USE_QTCORE
+#                    QT_DONT_USE_QTGUI
+#                    QT_USE_QT3SUPPORT
+#                    QT_USE_QTASSISTANT
+#                    QT_USE_QTDESIGNER
+#                    QT_USE_QTMOTIF
+#                    QT_USE_QTNETWORK
+#                    QT_USE_QTNSPLUGIN
+#                    QT_USE_QTOPENGL
+#                    QT_USE_QTSQL
+#                    QT_USE_QTXML
+#                 All the libraries required are stored in a
+#                 variable called QT_LIBRARIES.  Add this 
+#                 variable to your TARGET_LINK_LIBRARIES.
+#  
+#  macro QT4_WRAP_CPP(outfiles inputfile ... )
+#  macro QT4_WRAP_UI(outfiles inputfile ... )
+#  macro QT4_ADD_RESOURCE(outfiles inputfile ... )
+#  
+#  QT_FOUND               If false, don't try to use Qt.
+#  QT4_FOUND              If false, don't try to use Qt 4.
+#                      
+#  QT_QTCORE_FOUND        True if QtCore was found.
+#  QT_QTGUI_FOUND         True if QtGui was found.
+#  QT_QT3SUPPORT_FOUND    True if Qt3Support was found.
+#  QT_QTASSISTANT_FOUND   True if QtAssistant was found.
+#  QT_QTDESIGNER_FOUND    True if QtDesigner was found.
+#  QT_QTMOTIF_FOUND       True if QtMotif was found.
+#  QT_QTNETWORK_FOUND     True if QtNetwork was found.
+#  QT_QTNSPLUGIN_FOUND    True if QtNsPlugin was found.
+#  QT_QTOPENGL_FOUND      True if QtOpenGL was found.
+#  QT_QTSQL_FOUND         True if QtSql was found.
+#  QT_QTXML_FOUND         True if QtXml was found.
+#                      
+#  QT_DEFINITIONS   Definitions to use when compiling code that
+#                   uses Qt.
+#                  
+#  QT_INCLUDES      List of paths to all include directories of 
+#                   Qt4 QT_INCLUDE_DIR, QT_QT_INCLUDE_DIR, 
+#                   and QT_QTGUI_INCLUDE_DIR are
+#                   always in this variable even if NOTFOUND,
+#                   all other INCLUDE_DIRS are
+#                   only added if they are found.
+#   
+#  QT_INCLUDE_DIR              Path to "include" of Qt4
+#  QT_QT_INCLUDE_DIR           Path to "include/Qt" 
+#  QT_QT3SUPPORT_INCLUDE_DIR   Path to "include/Qt3Support" 
+#  QT_QTASSISTANT_INCLUDE_DIR  Path to "include/QtAssistant" 
+#  QT_QTCORE_INCLUDE_DIR       Path to "include/QtCore"         
+#  QT_QTDESIGNER_INCLUDE_DIR   Path to "include/QtDesigner" 
+#  QT_QTGUI_INCLUDE_DIR        Path to "include/QtGui" 
+#  QT_QTMOTIF_INCLUDE_DIR      Path to "include/QtMotif" 
+#  QT_QTNETWORK_INCLUDE_DIR    Path to "include/QtNetwork" 
+#  QT_QTNSPLUGIN_INCLUDE_DIR   Path to "include/QtNsPlugin" 
+#  QT_QTOPENGL_INCLUDE_DIR     Path to "include/QtOpenGL" 
+#  QT_QTSQL_INCLUDE_DIR        Path to "include/QtSql" 
+#  QT_QTXML_INCLUDE_DIR        Path to "include/QtXml" 
+#                            
+#  QT_LIBRARY_DIR              Path to "lib" of Qt4
+#                            
+#  QT_QT3SUPPORT_LIBRARY       Fullpath to Qt3Support library 
+#  QT_QTASSISTANT_LIBRARY      Fullpath to QtAssistant library 
+#  QT_QTCORE_LIBRARY           Fullpath to QtCore library 
+#  QT_QTDESIGNER_LIBRARY       Fullpath to QtDesigner library 
+#  QT_QTGUI_LIBRARY            Fullpath to QtGui library 
+#  QT_QTMOTIF_LIBRARY          Fullpath to QtMotif library 
+#  QT_QTNETWORK_LIBRARY        Fullpath to QtNetwork library 
+#  QT_QTNSPLUGIN_LIBRARY       Fullpath to QtNsPlugin library 
+#  QT_QTOPENGL_LIBRARY         Fullpath to QtOpenGL library 
+#  QT_QTSQL_LIBRARY            Fullpath to QtSql library 
+#  QT_QTXML_LIBRARY            Fullpath to QtXml library 
+#  
+#  QT_QT3SUPPORT_LIBRARY_DEBUG  Fullpath to Qt3Support_debug library 
+#  QT_QTASSISTANT_LIBRARY_DEBUG Fullpath to QtAssistant_debug library
+#                               
+#  QT_QTCORE_LIBRARY_DEBUG      Fullpath to QtCore_debug   
+#  QT_QTDESIGNER_LIBRARY_DEBUG  Fullpath to QtDesigner_debug 
+#  QT_QTGUI_LIBRARY_DEBUG       Fullpath to QtGui_debug 
+#  QT_QTMOTIF_LIBRARY_DEBUG     Fullpath to QtMotif_debug 
+#  QT_QTNETWORK_LIBRARY_DEBUG   Fullpath to QtNetwork_debug 
+#  QT_QTNSPLUGIN_LIBRARY_DEBUG  Fullpath to QtNsPlugin_debug 
+#  QT_QTOPENGL_LIBRARY_DEBUG    Fullpath to QtOpenGL_debug 
+#  QT_QTSQL_LIBRARY_DEBUG       Fullpath to QtSql_debug 
+#  QT_QTXML_LIBRARY_DEBUG       Fullpath to QtXml_debug 
+#  
 # also defined, but not for general use are
-# QT_MOC_EXECUTABLE             Where to find the moc tool.
-# QT_UIC_EXECUTABLE             Where to find the uic tool.
-# QT_RCC_EXECUTABLE             Where to find the rcc tool
-#
+#  QT_MOC_EXECUTABLE          Where to find the moc tool.
+#  QT_UIC_EXECUTABLE          Where to find the uic tool.
+#  QT_RCC_EXECUTABLE          Where to find the rcc tool
+#  
 # These are around for backwards compatibility 
 # they will be set
-# QT_WRAP_CPP                   Set true if QT_MOC_EXECUTABLE is found
-# QT_WRAP_UI                    Set true if QT_UIC_EXECUTABLE is found
-#
-#
+#  QT_WRAP_CPP         Set true if QT_MOC_EXECUTABLE is found
+#  QT_WRAP_UI          Set true if QT_UIC_EXECUTABLE is found
+#  
 # These variables do _NOT_ have any effect anymore (compared to FindQt.cmake)
-# QT_MT_REQUIRED                Qt4 is now always multithreaded
-#
-# These variables are set to "" Because Qt structure changed (They make no sence in Qt4)
-# QT_QT_LIBRARY                 Qt-Library is now splitt into different parts
-# QT_QTMAIN_LIBRARY             Qt-Library is now splitt into different parts
+#  QT_MT_REQUIRED         Qt4 is now always multithreaded
+#  
+# These variables are set to "" Because Qt structure changed 
+# (They make no sence in Qt4)
+#  QT_QT_LIBRARY        Qt-Library is now splitt
+#  QT_QTMAIN_LIBRARY    Qt-Library is now splitt
 
 SET(QT_USE_FILE ${CMAKE_ROOT}/Modules/UseQt4.cmake)
 

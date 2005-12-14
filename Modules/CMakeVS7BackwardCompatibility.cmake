@@ -1,3 +1,4 @@
+
 # hard code these for fast backwards compatibility tests
 SET (CMAKE_SIZEOF_INT       4   CACHE INTERNAL "Size of int data type")
 SET (CMAKE_SIZEOF_LONG      4   CACHE INTERNAL "Size of long data type")

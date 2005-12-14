@@ -1,11 +1,11 @@
-# Dart.cmake
-#
+# - setup for using Dart.
 # This file configures a project to use the Dart testing/dashboard process.
 # It is broken into 3 sections.
+
 # 
-# Section #1: Locate programs on the client and determine site and build name
-# Section #2: Configure or copy Tcl scripts from the source tree to build tree
-# Section #3: Custom targets for performing dashboard builds.
+#  Section #1: Locate programs on the client and determine site and build name
+#  Section #2: Configure or copy Tcl scripts from the source tree to build tree
+#  Section #3: Custom targets for performing dashboard builds.
 #
 #
 OPTION(BUILD_TESTING "Build the testing tree." ON)

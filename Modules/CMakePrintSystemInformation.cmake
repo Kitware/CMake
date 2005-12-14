@@ -1,6 +1,7 @@
-# this file can be used for diagnostic purposes
-# just include it in a project to see various internal cmake
-# variables
+# - print system information
+# This file can be used for diagnostic purposes
+# just include it in a project to see various internal CMake
+# variables.
 
 MESSAGE("CMAKE_SYSTEM is ${CMAKE_SYSTEM} ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
 MESSAGE("CMAKE_SYSTEM file is ${CMAKE_SYSTEM_INFO_FILE}")

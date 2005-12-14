@@ -1,14 +1,12 @@
-#
-# Check if the variable exists.
-# # CHECK_VARIABLE_EXISTS - macro which checks if the variable exists
-# VAR - the name of the variable
-# VARIABLE - variable to store the result
-#
+# - Check if the variable exists.
+# CHECK_VARIABLE_EXISTS(VAR VARIABLE)
+# - macro which checks if the variable exists
+#  VAR - the name of the variable
+#  VARIABLE - variable to store the result
 # If CMAKE_REQUIRED_FLAGS is set then those flags will be passed into the
 # compile of the program likewise if CMAKE_REQUIRED_LIBRARIES is set then
-# those libraries will be linked against the test program
-#
-# only for C variables
+# those libraries will be linked against the test program.
+# This macro is only for C variables.
 #
 MACRO(CHECK_VARIABLE_EXISTS VAR VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")

@@ -1,8 +1,8 @@
-# 
+# - Find perl
 # this module looks for Perl
 #
-# PERL_EXECUTABLE - the full path to the Perl interpreter
-# PERL_FOUND      - If false, don't attempt to use perl.
+#  PERL_EXECUTABLE - the full path to the Perl interpreter
+#  PERL_FOUND      - If false, don't attempt to use perl.
 
 INCLUDE(FindCygwin)
 

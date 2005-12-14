@@ -18,6 +18,7 @@
 
 #include "cmSystemTools.h"
 #include "cmVersion.h"
+#include <cmsys/Directory.hxx>
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationStandardOptions[] =
@@ -47,6 +48,15 @@ static const cmDocumentationEntry cmDocumentationCommandsHeader[] =
 {
   {0,
    "The following commands are available in CMakeLists.txt code:", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationModulesHeader[] =
+{
+  {0,
+   "The following modules are provided with CMake. "
+   "They can be used with INCLUDE(ModuleName).", 0},
   {0,0,0}
 };
 
@@ -126,6 +136,16 @@ cmDocumentation::cmDocumentation()
 }
 
 //----------------------------------------------------------------------------
+cmDocumentation::~cmDocumentation()
+{
+  for(std::vector< char* >::iterator i = this->ModuleStrings.begin();
+      i != this->ModuleStrings.end(); ++i)
+    {
+    delete [] *i;
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmDocumentation::PrintCopyright(std::ostream& os)
 {
   for(const cmDocumentationEntry* op = cmDocumentationCopyright;
@@ -181,7 +201,9 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
     {
     case cmDocumentation::Usage:     return this->PrintDocumentationUsage(os);
     case cmDocumentation::Single:    return this->PrintDocumentationSingle(os);
+    case cmDocumentation::SingleModule:  return this->PrintDocumentationSingleModule(os);
     case cmDocumentation::List:      return this->PrintDocumentationList(os);
+    case cmDocumentation::ModuleList: return this->PrintModuleList(os);
     case cmDocumentation::Full:      return this->PrintDocumentationFull(os);
     case cmDocumentation::HTML:      return this->PrintDocumentationHTML(os);
     case cmDocumentation::Man:       return this->PrintDocumentationMan(os);
@@ -190,6 +212,121 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
     default: return false;
     }
 }
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::CreateModulesSection()
+{
+  this->ModulesSection.push_back(cmDocumentationModulesHeader[0]);
+#ifdef CMAKE_ROOT_DIR
+  std::string cmakeModules = CMAKE_ROOT_DIR;
+  cmakeModules += "/Modules";
+  cmsys::Directory dir;
+  dir.Load(cmakeModules.c_str());
+  for(unsigned int i = 0; i < dir.GetNumberOfFiles(); ++i)
+    {
+    std::string fname = dir.GetFile(i);
+    if(fname.length() > 6)
+      {
+      if(fname.substr(fname.length()-6, 6) == ".cmake")
+        {
+        std::string moduleName = fname.substr(0, fname.length()-6);
+        std::string path = cmakeModules;
+        path += "/";
+        path += fname;
+        this->CreateSingleModule(path.c_str(), moduleName.c_str());
+        }
+      }
+    } 
+#endif
+  cmDocumentationEntry e = { 0, 0, 0 };
+  this->ModulesSection.push_back(e);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::CreateSingleModule(const char* fname, const char* moduleName)
+{
+  std::ifstream fin(fname);
+  if(!fin)
+    {
+    std::cerr << "Internal error: can not open module." << fname << std::endl;
+    return false;
+    } 
+  std::string line;
+  std::string text;
+  std::string brief;
+  brief = " ";
+  bool newParagraph = true;
+  while ( fin && cmSystemTools::GetLineFromStream(fin, line) )
+    {
+    if(line.size() && line[0] == '#')
+      {
+      // blank line
+      if(line.size() <= 2)
+        {
+        text += "\n"; 
+        newParagraph = true;
+        }
+      else if(line[2] == '-') 
+        {
+        brief = line.c_str()+4;
+        }
+      else 
+        {
+        // two spaces
+        if(line[1] == ' ' && line[2] == ' ')
+          {
+          if(!newParagraph)
+            {
+            text += "\n";
+            newParagraph = true;
+            }
+          // Skip #, and leave space for preformatted
+          text += line.c_str()+1;
+          text += "\n";
+          }
+        else if(line[1] == ' ')
+          {
+          if(!newParagraph)
+            {
+            text += " ";
+            }
+          newParagraph = false;
+          // skip # and space
+          text += line.c_str()+2;
+          }
+        else
+          {
+          if(!newParagraph)
+            {
+            text += " ";
+            }
+          newParagraph = false;
+          // skip #
+          text += line.c_str()+1;
+          }
+        }
+      }
+    else
+      {
+      if(text.length() < 2)
+        {
+        return false;
+        }
+      char* pname = strcpy(new char[strlen(moduleName)+1], moduleName);
+      char* ptext = strcpy(new char[text.length()+1], text.c_str());
+      this->ModuleStrings.push_back(pname);
+      this->ModuleStrings.push_back(ptext);
+      char* pbrief = strcpy(new char[brief.length()+1], brief.c_str());
+      this->ModuleStrings.push_back(pbrief);
+      cmDocumentationEntry e = { pname, pbrief, ptext };
+      this->ModulesSection.push_back(e);
+      return false;
+      }
+    }
+  return true;
+}
+
 
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
@@ -300,9 +437,22 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
         i = i+1;
         }
       }
+    else if(strcmp(argv[i], "--help-module") == 0)
+      {
+      type = cmDocumentation::SingleModule;
+      if((i+1 < argc) && !this->IsOption(argv[i+1]))
+        {
+        this->SingleModuleName = argv[i+1];
+        i = i+1;
+        }
+      }
     else if(strcmp(argv[i], "--help-command-list") == 0)
       {
       type = cmDocumentation::List;
+      }
+    else if(strcmp(argv[i], "--help-module-list") == 0)
+      {
+      type = cmDocumentation::ModuleList;
       }
     else if(strcmp(argv[i], "--copyright") == 0)
       {
@@ -768,6 +918,10 @@ void cmDocumentation::PrintColumn(std::ostream& os, const char* text)
         column = static_cast<long>(r-l);
         newSentence = (*(r-1) == '.');
         }
+      else
+        {
+        column = 0;
+        }
       }
     
     // Move to beginning of next word.  Skip over whitespace.
@@ -835,6 +989,32 @@ bool cmDocumentation::PrintDocumentationSingle(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
+{
+  if(this->SingleModuleName.length() == 0)
+    {
+    os << "Argument --help-module needs a module name.\n";
+    return false;
+    }
+#ifdef CMAKE_ROOT_DIR
+  std::string cmakeModules = CMAKE_ROOT_DIR;
+  cmakeModules += "/Modules/";
+  cmakeModules += this->SingleModuleName;
+  cmakeModules += ".cmake";
+  if(cmSystemTools::FileExists(cmakeModules.c_str()))
+    {
+    this->CreateSingleModule(cmakeModules.c_str(), this->SingleModuleName.c_str());
+    this->PrintDocumentationCommand(os, &this->ModulesSection[0]);
+    return true;
+    }
+  // Argument was not a module.  Complain.
+  os << "Argument \"" << this->SingleModuleName.c_str()
+     << "\" to --help-module is not a CMake module.";
+#endif
+  return false;
+}
+
+//----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationList(std::ostream& os)
 {
   if(this->CommandsSection.empty())
@@ -843,6 +1023,26 @@ bool cmDocumentation::PrintDocumentationList(std::ostream& os)
     return false;
     }
   for(cmDocumentationEntry* entry = &this->CommandsSection[0];
+      entry->brief; ++entry)
+    {
+    if(entry->name)
+      {
+      os << entry->name << std::endl;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintModuleList(std::ostream& os)
+{
+  this->CreateModulesSection();
+  if(this->ModulesSection.empty())
+    {
+    os << "Internal error: modules list is empty." << std::endl;
+    return false;
+    }
+  for(cmDocumentationEntry* entry = &this->ModulesSection[0];
       entry->brief; ++entry)
     {
     if(entry->name)
@@ -951,6 +1151,11 @@ void cmDocumentation::CreateFullDocumentation()
     {
     this->AddSection("Listfile Commands", &this->CommandsSection[0]);
     }
+  this->CreateModulesSection();
+  if(!this->ModulesSection.empty())
+    {
+    this->AddSection("Standard CMake Modules", &this->ModulesSection[0]);
+    }
   this->AddSection("Copyright", cmDocumentationCopyright);
   this->AddSection("Mailing List", cmDocumentationMailingList);
 }
@@ -983,6 +1188,12 @@ void cmDocumentation::CreateManDocumentation()
     {
     this->AddSection("COMMANDS", &this->CommandsSection[0]);
     }
+  this->CreateModulesSection();
+  if(!this->ModulesSection.empty())
+    {
+    this->AddSection("MODULES", &this->ModulesSection[0]);
+    }
+
   this->AddSection("COPYRIGHT", cmDocumentationCopyright);
   this->AddSection("MAILING LIST", cmDocumentationMailingList);  
   if(!this->SeeAlsoSection.empty())

@@ -1,8 +1,8 @@
-# Locate PhysFS library
+# - Locate PhysFS library
 # This module defines
-# PHYSFS_LIBRARY, the name of the library to link against
-# PHYSFS_FOUND, if false, do not try to link to PHYSFS
-# PHYSFS_INCLUDE_DIR, where to find PHYSFS/PHYSFS.h
+#  PHYSFS_LIBRARY, the name of the library to link against
+#  PHYSFS_FOUND, if false, do not try to link to PHYSFS
+#  PHYSFS_INCLUDE_DIR, where to find PHYSFS/PHYSFS.h
 #
 # $PHYSFSDIR is an environment variable that would
 # correspond to the ./configure --prefix=$PHYSFSDIR

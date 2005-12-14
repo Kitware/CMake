@@ -1,7 +1,6 @@
-#
+# - Find MFC on Windows
 # Find the native MFC - i.e. decide if this is an MS VC box.
-#
-# MFC_FOUND       - Do not attempt to use MFC if "no" or undefined.
+#  MFC_FOUND - Do not attempt to use MFC if "no" or undefined.
 # You don't need to include anything or link anything to use it.
 
 # Assume no MFC support

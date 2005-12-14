@@ -1,3 +1,4 @@
+
 # determine the compiler to use for Java programs
 # NOTE, a generator may set CMAKE_Java_COMPILER before
 # loading this file to force a compiler.

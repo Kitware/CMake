@@ -1,7 +1,6 @@
-#
+# - Test for compiler support of ANSI stream headers iostream, etc.
 # check if we they have the standard ansi stream files (without the .h)
-#
-# CMAKE_NO_ANSI_STREAM_HEADERS - defined accoreding to the results
+#  CMAKE_NO_ANSI_STREAM_HEADERS - defined according to the results
 #
 INCLUDE(CheckIncludeFileCXX)
 

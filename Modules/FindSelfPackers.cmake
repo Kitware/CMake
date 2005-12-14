@@ -1,10 +1,9 @@
-# 
-# this module looks for some executable packers (i.e. softwares that
+# - Find upx
+# This module looks for some executable packers (i.e. softwares that
 # compress executables or shared libs into on-the-fly self-extracting
 # executables or shared libs.
-#
 # Examples:
-# UPX: http://wildsau.idv.uni-linz.ac.at/mfx/upx.html
+#  UPX: http://wildsau.idv.uni-linz.ac.at/mfx/upx.html
 
 INCLUDE(FindCygwin)
 

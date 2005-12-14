@@ -1,7 +1,7 @@
-#
+# - Find Latex
 # This module finds if Latex is installed and determines where the
 # executables are. This code sets the following variables:
-#
+#  
 #  LATEX_COMPILER        = the full path to the LaTeX compiler
 #  PDFLATEX_COMPILER     = the full path to the PdfLaTeX compiler
 #  BIBTEX_COMPILER       = the full path to the BibTeX compiler

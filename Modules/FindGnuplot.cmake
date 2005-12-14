@@ -1,5 +1,4 @@
-# 
-# this module looks for gnuplot
+# - this module looks for gnuplot
 #
 
 INCLUDE(FindCygwin)

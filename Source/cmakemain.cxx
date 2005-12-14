@@ -83,6 +83,12 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "The list contains all commands for which help may be obtained by using "
    "the --help-command argument followed by a command name.  If a file is "
    "specified, the help is written into it."},
+  {"--help-module module [file]", "Print help for a single module and exit.",
+   "Full documentation specific to the given module is displayed."},
+  {"--help-module-list [file]", "List available modules and exit.",
+   "The list contains all modules for which help may be obtained by using "
+   "the --help-module argument followed by a module name.  If a file is "
+   "specified, the help is written into it."},
   {0,0,0}
 };
 

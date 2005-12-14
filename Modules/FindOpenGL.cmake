@@ -1,17 +1,16 @@
-# Try to find OpenGL
+# - Try to find OpenGL
 # Once done this will define
-#
-# OPENGL_FOUND        - system has OpenGL and it should be used
-# OPENGL_XMESA_FOUND  - system has XMESA, and it should be used.
-# OPENGL_GLU_FOUND    - system has GLU and it should be used.
-# OPENGL_INCLUDE_DIR  - where the GL include directory can be found
-# OPENGL_LIBRARIES    - Link these to use OpenGL and GLU
-#
+#  
+#  OPENGL_FOUND        - system has OpenGL and it should be used
+#  OPENGL_XMESA_FOUND  - system has XMESA, and it should be used.
+#  OPENGL_GLU_FOUND    - system has GLU and it should be used.
+#  OPENGL_INCLUDE_DIR  - where the GL include directory can be found
+#  OPENGL_LIBRARIES    - Link these to use OpenGL and GLU
+#   
 # If you want to use just GL you can use these values
-# OPENGL_gl_LIBRARY   - Path to OpenGL Library
-# OPENGL_glu_LIBRARY  - Path to GLU Library
-#
-
+#  OPENGL_gl_LIBRARY   - Path to OpenGL Library
+#  OPENGL_glu_LIBRARY  - Path to GLU Library
+#  
 # On OSX default to using the framework version of opengl
 # People will have to change the cache values of OPENGL_glu_LIBRARY 
 # and OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX

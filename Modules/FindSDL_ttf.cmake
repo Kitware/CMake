@@ -1,17 +1,15 @@
-# Locate SDL_ttf library
+# - Locate SDL_ttf library
 # This module defines
-# SDLTTF_LIBRARY, the name of the library to link against
-# SDLTTF_FOUND, if false, do not try to link to SDL
-# SDLTTF_INCLUDE_DIR, where to find SDL/SDL.h
-#
+#  SDLTTF_LIBRARY, the name of the library to link against
+#  SDLTTF_FOUND, if false, do not try to link to SDL
+#  SDLTTF_INCLUDE_DIR, where to find SDL/SDL.h
+#   
 # $SDLDIR is an environment variable that would
 # correspond to the ./configure --prefix=$SDLDIR
 # used in building SDL.
-#
 # Created by Eric Wing. This was influenced by the FindSDL.cmake 
 # module, but with modifications to recognize OS X frameworks and 
 # additional Unix paths (FreeBSD, etc).
-
 # On OSX, this will prefer the Framework version (if found) over others.
 # People will have to manually change the cache values of 
 # SDLTTF_LIBRARY to override this selection.

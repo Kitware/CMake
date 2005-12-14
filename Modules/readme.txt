@@ -27,3 +27,31 @@ For tidiness's sake, try to keep as many options as possible out of the cache, l
 If you need other commands to do special things then it should still begin with XXX_. This gives a sort of namespace effect and keeps things tidy for the user. You should put comments describing all the exported settings, plus descriptions of any the users can use to control stuff.
 
 You really should also provide backwards compatibility any old settings that were actually in use. Make sure you comment them as deprecated, so that no-one starts using them.
+
+To correctly docuement a module, create a comment block at the top with # comments.  There are three types of comments that can be in the block:
+
+1. The brief description of the module, this is done by:
+# - a small description
+
+2. A paragraph of text.  This is done with all text that has a single
+space between the # and the text.  To create a new paragraph, just
+put a # with no text on the line.
+
+3. A verbatim line.  This is done with two spaces between the # and the text.
+
+For example:
+
+# - This is a cool module
+# This module does really cool stuff.
+# It can do even more than you think.
+# 
+# It even needs to paragraphs to tell you about it.
+# And it defines the following variables:
+#  VAR_COOL - this is greate isn't it?
+#  VAR_REALLY_COOL - cool right?
+#
+
+To have a .cmake file in this directory NOT show up in the
+modules documentation, you should start the file with a blank
+line.
+

@@ -1,9 +1,8 @@
-# 
-# This module looks for Microsoft HTML Help Compiler
+# - This module looks for Microsoft HTML Help Compiler
 # It defines:
-#   HTML_HELP_COMPILER     : full path to the HTML Help Compiler (hhc.exe)
-#   HTML_HELP_INCLUDE_PATH : include path to the HTML Help API (htmlhelp.h)
-#	  HTML_HELP_LIBRARY      : full path to the HTML Help library (htmlhelp.lib)
+#   HTML_HELP_COMPILER - path to the HTML Help Compiler (hhc.exe)
+#   HTML_HELP_INCLUDE_PATH - include path for HTML Help API (htmlhelp.h)
+#   HTML_HELP_LIBRARY - path to the HTML Help library (htmlhelp.lib)
 #
 
 IF (WIN32)

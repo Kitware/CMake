@@ -1,9 +1,10 @@
-#
+# - Test CXX compiler for a flag
 # Check if the CXX compiler accepts a flag
 #
-# CHECK_FUNCTION_EXISTS - macro which checks if the function exists
-# FLAG - the flags to try
-# VARIABLE - variable to store the result
+#  Macro CHECK_CXX_ACCEPTS_FLAG(FLAGS VARIABLE) -
+#     checks if the function exists
+#  FLAGS - the flags to try
+#  VARIABLE - variable to store the result
 #
 
 MACRO(CHECK_CXX_ACCEPTS_FLAG FLAGS  VARIABLE)

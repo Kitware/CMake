@@ -1,15 +1,14 @@
-# Locate OpenAL
+# - Locate OpenAL
 # This module defines
-# OPENAL_LIBRARY
-# OPENAL_FOUND, if false, do not try to link to OpenAL 
-# OPENAL_INCLUDE_DIR, where to find the headers
-#
+#  OPENAL_LIBRARY
+#  OPENAL_FOUND, if false, do not try to link to OpenAL 
+#  OPENAL_INCLUDE_DIR, where to find the headers
+#   
 # $OPENALDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OPENALDIR
 # used in building OpenAL.
-#
+#   
 # Created by Eric Wing. This was influenced by the FindSDL.cmake module.
-
 # On OSX, this will prefer the Framework version (if found) over others.
 # People will have to manually change the cache values of 
 # OPENAL_LIBRARY to override this selection.

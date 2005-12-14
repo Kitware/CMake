@@ -1,4 +1,10 @@
-#
+# - define a bunch of backwards compatibility varibles
+#  CMAKE_ANSI_CXXFLAGS - flag for ansi c++ 
+#  CMAKE_HAS_ANSI_STRING_STREAM - has <strstream>
+#  INCLUDE(TestForANSIStreamHeaders)
+#  INCLUDE(CheckIncludeFileCXX)
+#  INCLUDE(TestForSTDNamespace)
+#  INCLUDE(TestForANSIForScope)
 IF(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
   # check for some ANSI flags in the CXX compiler if it is not gnu
   IF(NOT CMAKE_COMPILER_IS_GNUCXX)

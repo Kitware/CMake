@@ -1,3 +1,5 @@
+#
+
 # This is an implementation detail for using VTK 4.0 with the
 # FindVTK.cmake module.  Do not include directly by name.  This should
 # be included only when FindVTK.cmake sets the VTK_USE_FILE variable

@@ -1,5 +1,4 @@
-#
-# Find the curses include file and library
+# - Find the curses include file and library
 #
 
 FIND_PATH(CURSES_INCLUDE_PATH 

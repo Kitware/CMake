@@ -1,5 +1,4 @@
-# DocumentationVTK.cmake
-#
+# - DocumentationVTK.cmake
 # This file provides support for the VTK documentation framework.
 # It relies on several tools (Doxygen, Perl, etc).
 

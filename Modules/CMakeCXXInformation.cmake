@@ -1,3 +1,4 @@
+
 # This file sets the basic flags for the C++ language in CMake.
 # It also loads the available platform file for the system-compiler
 # if it exists.

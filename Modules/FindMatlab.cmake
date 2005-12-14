@@ -1,12 +1,10 @@
-# 
-# this module looks for Matlab
-#
-# Define
-# MATLAB_INCLUDE_DIR points to the include path for mex.h, engine.h
-# MATLAB_LIBRARIES   list of libraries need: libmex.lib, libmx.lib and libeng.lib
-# MATLAB_MEX_LIBRARY point to libmex.lib
-# MATLAB_MX_LIBRARY  point to libmx.lib
-# MATLAB_ENG_LIBRARY point to libeng.lib
+# - this module looks for Matlab
+# Defines:
+#  MATLAB_INCLUDE_DIR points to the include path for mex.h, engine.h
+#  MATLAB_LIBRARIES   list of libraries need: libmex.lib, libmx.lib and libeng.lib
+#  MATLAB_MEX_LIBRARY point to libmex.lib
+#  MATLAB_MX_LIBRARY  point to libmx.lib
+#  MATLAB_ENG_LIBRARY point to libeng.lib
 
 
 SET(MATLAB_FOUND 0)

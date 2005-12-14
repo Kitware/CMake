@@ -1,12 +1,10 @@
-#
-# Check if the include file exists.
-#
-# CHECK_INCLUDE_FILE - macro which checks the include file exists.
-# INCLUDE - name of include file
-# VARIABLE - variable to return result
-#
-# an optional third argument is the CFlags to add to the compile line 
-# or you can use CMAKE_REQUIRED_FLAGS
+# - Check if the include file exists.
+#  CHECK_INCLUDE_FILE_CXX(INCLUDE VARIABLE) - macro which checks the include file exists.
+#  INCLUDE - name of include file
+#  VARIABLE - variable to return result
+#  
+# An optional third argument is the CFlags to add to the compile line 
+# or you can use CMAKE_REQUIRED_FLAGS.
 #
 MACRO(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")

@@ -1,20 +1,17 @@
-# Locate KDE include paths and libraries
+# - Locate KDE include paths and libraries
+#  KDE_INCLUDE_DIR
+#  KDE_LIB_DIR
+#  KDE_KDE_CONFIG
+#  KDE_DCOP_IDL
+#  KDE_VERSION
 
-# KDE_INCLUDE_DIR
-# KDE_LIB_DIR
-# KDE_KDE_CONFIG
-# KDE_DCOP_IDL
-# KDE_VERSION
-
-#the macro ADD_DCOP_SOURCES(src_headers dest_srcs)
+# the macro ADD_DCOP_SOURCES(src_headers dest_srcs)
 #
-#usage:
-#SET(MY_APP_SOURCES main.cpp kfoo.cpp)
-#SET(MY_DCOP_SOURCES kfooiface.h)
-#ADD_DCOP_SOURCES(MY_DCOP_SOURCES MY_APP_SOURCES)
-#and then it should work :-)
-
-#uses KDE_MIN_VERSION
+# usage:
+#  SET(MY_APP_SOURCES main.cpp kfoo.cpp)
+#  SET(MY_DCOP_SOURCES kfooiface.h)
+#  ADD_DCOP_SOURCES(MY_DCOP_SOURCES MY_APP_SOURCES)
+# uses KDE_MIN_VERSION
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.0.0) 
 
