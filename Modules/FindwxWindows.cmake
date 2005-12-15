@@ -3,15 +3,15 @@
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
 #  
-#  WXWINDOWS_FOUND        = system has WxWindows 
-#  WXWINDOWS_LIBRARIES    = full path to the wxWindows libraries
-#                          on Unix/Linux with additional linker
-#                          flags from "wx-config --libs"
-#  CMAKE_WXWINDOWS_CXX_FLAGS = Compiler flags for wxWindows,
-#                              essentially 
+#  WXWINDOWS_FOUND     = system has WxWindows 
+#  WXWINDOWS_LIBRARIES = path to the wxWindows libraries
+#                        on Unix/Linux with additional 
+#                        linker flags from 
+#                        "wx-config --libs"
+#  CMAKE_WXWINDOWS_CXX_FLAGS = Compiler flags for 
+#                              wxWindows, essentially 
 #                              "`wx-config --cxxflags`"
-#  WXWINDOWS_INCLUDE_DIR     = where to find "wx/wx.h" 
-#                              "wx/setup.h"
+#  WXWINDOWS_INCLUDE_DIR   = where to find "wx/wx.h" etc
 #  WXWINDOWS_LINK_DIRECTORIES = link directories
 #  WXWINDOWS_DEFINITIONS      = extra defines
 #  deprecated: 
@@ -20,18 +20,10 @@
 #   * CMAKE_WX_CXX_FLAGS
 #   * WXWINDOWS_INCLUDE_PATH
 #  
-#  USAGE: 
-#  for convenience include Use_wxWindows.cmake in your projects
-#     CMakeLists.txt: 
-#   
-#  if you need OpenGL support please
-#  SET(WXWINDOWS_USE_GL 1) 
-#   # in your CMakeLists.txt *before* you include this file.
-#   
-#   # just include Use_wxWindows.cmake 
-#   # in your projects CMakeLists.txt
-#  INCLUDE(Use_wxWindows)
-# 
+#  For convenience include Use_wxWindows.cmake in your project's
+#  CMakeLists.txt using INCLUDE(Use_wxWindows). If you need OpenGL support
+#  please SET(WXWINDOWS_USE_GL 1) in your CMakeLists.txt *before* you include
+#  this file.  
 
 
 # ------------------------------------------------------------------

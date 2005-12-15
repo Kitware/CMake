@@ -3,8 +3,8 @@
 # and libraries are. It also determines what the name of the library is. This
 # code sets the following variables:
 #
-#  RUBY_INCLUDE_PATH       = path to where object.h can be found
-#  RUBY_EXECUTABLE         = full path to the ruby binary
+#  RUBY_INCLUDE_PATH = path to where ruby.h can be found
+#  RUBY_EXECUTABLE   = full path to the ruby binary
 #
 
 SET(RUBY_POSSIBLE_INCLUDE_PATHS

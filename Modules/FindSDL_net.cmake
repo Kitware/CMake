@@ -1,6 +1,6 @@
-# - Locate SDL_net library
+# - Locate the SDL_net library
 # This module defines
-#  SDLNET_LIBRARY, the name of the library to link against
+#  SDLNET_LIBRARY, the library to link against
 #  SDLNET_FOUND, if false, do not try to link against
 #  SDLNET_INCLUDE_DIR, where to find the headers
 #  

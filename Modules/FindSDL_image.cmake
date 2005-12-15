@@ -1,6 +1,6 @@
 # - Locate SDL_image library
 # This module defines
-#  SDLIMAGE_LIBRARY, the name of the library to link against
+#  SDLIMAGE_LIBRARY, the library to link against
 #  SDLIMAGE_FOUND, if false, do not try to link to SDL
 #  SDLIMAGE_INCLUDE_DIR, where to find SDL/SDL.h
 #

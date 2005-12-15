@@ -1,10 +1,10 @@
 # - Try to find OpenGL
 # Once done this will define
 #  
-#  OPENGL_FOUND        - system has OpenGL and it should be used
-#  OPENGL_XMESA_FOUND  - system has XMESA, and it should be used.
-#  OPENGL_GLU_FOUND    - system has GLU and it should be used.
-#  OPENGL_INCLUDE_DIR  - where the GL include directory can be found
+#  OPENGL_FOUND        - system has OpenGL
+#  OPENGL_XMESA_FOUND  - system has XMESA
+#  OPENGL_GLU_FOUND    - system has GLU
+#  OPENGL_INCLUDE_DIR  - the GL include directory
 #  OPENGL_LIBRARIES    - Link these to use OpenGL and GLU
 #   
 # If you want to use just GL you can use these values

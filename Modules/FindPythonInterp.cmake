@@ -2,8 +2,8 @@
 # This module finds if Python interpreter is installed and determines where the
 # executables are. This code sets the following variables:
 #
-#  PYTHONINTERP_FOUND    - Set to true when Python executable is found
-#  PYTHON_EXECUTABLE     - The full path to the Python interpreter
+#  PYTHONINTERP_FOUND - Was the Python executable found
+#  PYTHON_EXECUTABLE  - path to the Python interpreter
 #
 
 FIND_PROGRAM(PYTHON_EXECUTABLE

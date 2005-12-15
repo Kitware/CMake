@@ -1,11 +1,10 @@
 # - Find QT 4
 # This module can be used to find Qt4.
-# This module defines:
-#  QT_USE_FILE    A CMake file that can be included to compile
-#                 Qt 4 applications and libraries.  By default,
-#                 the QtCore and QtGui libraries are loaded.
-#                 This behavior can be changed by setting one
-#                 or more of the following variables to true:
+# This module defines a number of key variables and macros. First is 
+# QT_USE_FILE which is the path to a CMake file that can be included to compile
+# Qt 4 applications and libraries.  By default, the QtCore and QtGui 
+# libraries are loaded. This behavior can be changed by setting one or more 
+# of the following variables to true:
 #                    QT_DONT_USE_QTCORE
 #                    QT_DONT_USE_QTGUI
 #                    QT_USE_QT3SUPPORT
@@ -17,16 +16,15 @@
 #                    QT_USE_QTOPENGL
 #                    QT_USE_QTSQL
 #                    QT_USE_QTXML
-#                 All the libraries required are stored in a
-#                 variable called QT_LIBRARIES.  Add this 
-#                 variable to your TARGET_LINK_LIBRARIES.
+# All the libraries required are stored in a variable called QT_LIBRARIES.  
+# Add this variable to your TARGET_LINK_LIBRARIES.
 #  
 #  macro QT4_WRAP_CPP(outfiles inputfile ... )
 #  macro QT4_WRAP_UI(outfiles inputfile ... )
 #  macro QT4_ADD_RESOURCE(outfiles inputfile ... )
 #  
-#  QT_FOUND               If false, don't try to use Qt.
-#  QT4_FOUND              If false, don't try to use Qt 4.
+#  QT_FOUND         If false, don't try to use Qt.
+#  QT4_FOUND        If false, don't try to use Qt 4.
 #                      
 #  QT_QTCORE_FOUND        True if QtCore was found.
 #  QT_QTGUI_FOUND         True if QtGui was found.
@@ -98,14 +96,14 @@
 #  
 # These are around for backwards compatibility 
 # they will be set
-#  QT_WRAP_CPP         Set true if QT_MOC_EXECUTABLE is found
-#  QT_WRAP_UI          Set true if QT_UIC_EXECUTABLE is found
+#  QT_WRAP_CPP  Set true if QT_MOC_EXECUTABLE is found
+#  QT_WRAP_UI   Set true if QT_UIC_EXECUTABLE is found
 #  
 # These variables do _NOT_ have any effect anymore (compared to FindQt.cmake)
 #  QT_MT_REQUIRED         Qt4 is now always multithreaded
 #  
 # These variables are set to "" Because Qt structure changed 
-# (They make no sence in Qt4)
+# (They make no sense in Qt4)
 #  QT_QT_LIBRARY        Qt-Library is now splitt
 #  QT_QTMAIN_LIBRARY    Qt-Library is now splitt
 

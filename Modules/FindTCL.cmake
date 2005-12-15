@@ -2,19 +2,19 @@
 # This module finds if TCL is installed and determines where the
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
-#  TCL_LIBRARY            = path to Tcl library (tcl tcl80)
-#  TCL_LIBRARY_DEBUG      = path to Tcl library (debug)
-#  TCL_STUB_LIBRARY       = path to Tcl stub library
-#  TCL_STUB_LIBRARY_DEBUG = path to Tcl stub library (debug)
-#  TCL_INCLUDE_PATH       = path to where tcl.h can be found
-#  TCL_TCLSH              = path to tclsh binary (tcl tcl80)
-#  TK_LIBRARY             = path to Tk library (tk tk80 etc)
-#  TK_LIBRARY_DEBUG       = path to Tk library (debug)
-#  TK_STUB_LIBRARY        = path to Tk stub library
-#  TK_STUB_LIBRARY_DEBUG  = path to Tk stub library (debug)
-#  TK_INCLUDE_PATH        = path to where tk.h can be found
-#  TK_INTERNAL_PATH       = path to where tkWinInt.h can be found
-#  TK_WISH                = full path to the wish (wish wish80)
+#  TCL_LIBRARY        = path to Tcl library (tcl tcl80)
+#  TCL_LIBRARY_DEBUG  = path to Tcl library (debug)
+#  TCL_STUB_LIBRARY   = path to Tcl stub library
+#  TCL_STUB_LIBRARY_DEBUG = path to debug stub library
+#  TCL_INCLUDE_PATH   = path to where tcl.h can be found
+#  TCL_TCLSH          = path to tclsh binary (tcl tcl80)
+#  TK_LIBRARY         = path to Tk library (tk tk80 etc)
+#  TK_LIBRARY_DEBUG   = path to Tk library (debug)
+#  TK_STUB_LIBRARY    = path to Tk stub library
+#  TK_STUB_LIBRARY_DEBUG = path to debug Tk stub library
+#  TK_INCLUDE_PATH    = path to where tk.h can be found
+#  TK_INTERNAL_PATH   = path to where tkWinInt.h is found
+#  TK_WISH            = full path to the wish executable
 
 INCLUDE(CMakeFindFrameworks)
 INCLUDE(FindTclsh)

@@ -1,6 +1,6 @@
 # - Locate PhysFS library
 # This module defines
-#  PHYSFS_LIBRARY, the name of the library to link against
+#  PHYSFS_LIBRARY, the name of the library to link with
 #  PHYSFS_FOUND, if false, do not try to link to PHYSFS
 #  PHYSFS_INCLUDE_DIR, where to find PHYSFS/PHYSFS.h
 #

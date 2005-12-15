@@ -1,6 +1,6 @@
-# - Locate SDL_mixer library
+# - Locate the SDL_mixer library
 # This module defines
-#  SDLMIXER_LIBRARY, the name of the library to link against
+#  SDLMIXER_LIBRARY, library to link against
 #  SDLMIXER_FOUND, if false, do not try to link to SDL
 #  SDLMIXER_INCLUDE_DIR, where to find SDL/SDL.h
 #

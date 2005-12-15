@@ -2,7 +2,7 @@
 # This module looks for MPI (Message Passing Interface) support
 # it will define the following values
 #  MPI_INCLUDE_PATH = where mpi.h can be found
-#  MPI_LIBRARY      = the library to link against (mpi mpich etc)
+#  MPI_LIBRARY    = the library to link in (mpi mpich etc)
 
 FIND_PATH(MPI_INCLUDE_PATH mpi.h 
           /usr/local/include 

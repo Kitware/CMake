@@ -1,10 +1,8 @@
 # - Find X11 installation
-# Try to find X11 on UNIX systems.
-#
-# The following values are defined
-#  X11_FOUND           - True if X11 is available
+# Try to find X11 on UNIX systems. The following values are defined
+#  X11_FOUND        - True if X11 is available
 #  X11_INCLUDE_DIR  - include directories to use X11
-#  X11_LIBRARIES          - link against these to use X11
+#  X11_LIBRARIES    - link against these to use X11
 
 IF (UNIX)
   SET(X11_FOUND 0)

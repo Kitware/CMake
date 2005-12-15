@@ -1,10 +1,10 @@
 # - This module determines the thread library of the system.
 # The following variables are set
-#  CMAKE_THREAD_LIBS_INIT       - the thread library (-lpthread )
-#  CMAKE_USE_SPROC_INIT         - are we using sproc?
-#  CMAKE_USE_WIN32_THREADS_INIT - are we using WIN32 threads
-#  CMAKE_USE_PTHREADS_INIT      - are we using pthreads
-#  CMAKE_HP_PTHREADS_INIT       - are we using hp pthreads
+#  CMAKE_THREAD_LIBS_INIT     - the thread library
+#  CMAKE_USE_SPROC_INIT       - are we using sproc?
+#  CMAKE_USE_WIN32_THREADS_INIT - using WIN32 threads?
+#  CMAKE_USE_PTHREADS_INIT    - are we using pthreads
+#  CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
 
 INCLUDE (CheckIncludeFile)
 INCLUDE (CheckIncludeFiles)

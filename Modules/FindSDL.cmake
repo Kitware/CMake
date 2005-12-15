@@ -1,6 +1,6 @@
-# - Locate SDL library
+# - Locate the SDL library
 # This module defines
-#  SDL_LIBRARY, the name of the library to link against
+#  SDL_LIBRARY, the library to link against
 #  SDL_FOUND, if false, do not try to link to SDL
 #  SDL_INCLUDE_DIR, where to find SDL.h
 #

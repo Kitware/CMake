@@ -3,9 +3,9 @@
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
 #
-#  PYTHON_LIBRARIES       = the full path to the library found
-#  PYTHON_INCLUDE_PATH    = the path to where Python.h can be found
-#  PYTHON_DEBUG_LIBRARIES = the full path to the debug library found
+#  PYTHON_LIBRARIES     = path to the python library
+#  PYTHON_INCLUDE_PATH  = path to where Python.h is found
+#  PYTHON_DEBUG_LIBRARIES = path to the debug library
 #
 
 INCLUDE(CMakeFindFrameworks)

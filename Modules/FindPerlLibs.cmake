@@ -3,8 +3,8 @@
 # and libraries are. It also determines what the name of the library is. This
 # code sets the following variables:
 #
-#  PERL_INCLUDE_PATH       = path to where object.h can be found
-#  PERL_EXECUTABLE         = full path to the perl binary
+#  PERL_INCLUDE_PATH = path to where perl.h is found
+#  PERL_EXECUTABLE   = full path to the perl binary
 #
 
 SET(PERL_POSSIBLE_INCLUDE_PATHS

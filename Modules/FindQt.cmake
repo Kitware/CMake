@@ -9,9 +9,10 @@
 # Once the user sets DESIRED_QT_VERSION, then the FindQt3 or FindQt4 module
 # is included.
 #
-#  QT_REQUIRED if this is set to TRUE then if CMake can not find 
-#              QT4 or QT3 an error is raised and a message is sent
-#              to the user.
+#  QT_REQUIRED if this is set to TRUE then if CMake can 
+#              not find QT4 or QT3 an error is raised 
+#              and a message is sent to the user.
+#
 #  DESIRED_QT_VERSION OPTION is created
 #  QT4_INSTALLED is set to TRUE if qt4 is found.
 #  QT3_INSTALLED is set to TRUE if qt3 is found.

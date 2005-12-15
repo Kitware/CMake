@@ -4,7 +4,6 @@
 # and set the appropriate libs, incdirs, flags etc. 
 # INCLUDE_DIRECTORIES, LINK_DIRECTORIES and ADD_DEFINITIONS
 # are called.
-#
 # author Jan Woetzel <jw -at- mip.informatik.uni-kiel.de> (07/2003)
 #
 # if you are sure you need GL then

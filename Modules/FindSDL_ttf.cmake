@@ -1,6 +1,6 @@
 # - Locate SDL_ttf library
 # This module defines
-#  SDLTTF_LIBRARY, the name of the library to link against
+#  SDLTTF_LIBRARY, the library to link against
 #  SDLTTF_FOUND, if false, do not try to link to SDL
 #  SDLTTF_INCLUDE_DIR, where to find SDL/SDL.h
 #   
