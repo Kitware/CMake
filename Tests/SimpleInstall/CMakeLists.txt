@@ -68,7 +68,7 @@ ELSE(STAGE2)
 
   INSTALL_TARGETS(/bin SimpleInstall)
   INSTALL_TARGETS(/lib test1 test2 test3 test4)
-  INSTALL_TARGETS(/include lib1.h lib2.h lib3.h)
+  INSTALL_FILES(/include FILES lib1.h lib2.h lib3.h)
 
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES OUTPUT_NAME SimpleInstallExe)
   # Disable VERSION test until it is implemented in the XCode generator.
