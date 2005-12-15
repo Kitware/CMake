@@ -309,8 +309,9 @@ bool cmDocumentation::CreateSingleModule(const char* fname, const char* moduleNa
       }
     else
       {
-      if(text.length() < 2)
+      if(text.length() < 2 && brief.length() == 0)
         {
+        std::cerr  << text << " " << brief << "\n";
         return false;
         }
       char* pname = strcpy(new char[strlen(moduleName)+1], moduleName);
@@ -321,7 +322,7 @@ bool cmDocumentation::CreateSingleModule(const char* fname, const char* moduleNa
       this->ModuleStrings.push_back(pbrief);
       cmDocumentationEntry e = { pname, pbrief, ptext };
       this->ModulesSection.push_back(e);
-      return false;
+      return true;
       }
     }
   return true;
@@ -1001,9 +1002,10 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
   cmakeModules += "/Modules/";
   cmakeModules += this->SingleModuleName;
   cmakeModules += ".cmake";
-  if(cmSystemTools::FileExists(cmakeModules.c_str()))
+  if(cmSystemTools::FileExists(cmakeModules.c_str())
+     && this->CreateSingleModule(cmakeModules.c_str(), 
+                                 this->SingleModuleName.c_str()))
     {
-    this->CreateSingleModule(cmakeModules.c_str(), this->SingleModuleName.c_str());
     this->PrintDocumentationCommand(os, &this->ModulesSection[0]);
     return true;
     }
