@@ -1,7 +1,7 @@
 # - Check if the variable exists.
-# CHECK_VARIABLE_EXISTS(VAR VARIABLE)
-# - macro which checks if the variable exists
-#  VAR - the name of the variable
+#  CHECK_VARIABLE_EXISTS(VAR VARIABLE)
+#  
+#  VAR      - the name of the variable
 #  VARIABLE - variable to store the result
 # If CMAKE_REQUIRED_FLAGS is set then those flags will be passed into the
 # compile of the program likewise if CMAKE_REQUIRED_LIBRARIES is set then

@@ -1,24 +1,24 @@
 # - Find an ITK installation or build tree.
+
 # When ITK is found, the ITKConfig.cmake file is sourced to setup the
 # location and configuration of ITK.  Please read this file, or
 # ITKConfig.cmake.in from the ITK source tree for the full list of
-# definitions.  Of particular interest is
+# definitions.  Of particular interest is ITK_USE_FILE, a CMake source file
+# that can be included to set the include directories, library directories,
+# and preprocessor macros.  In addition to the variables read from
+# ITKConfig.cmake, this find module also defines
+#  ITK_DIR  - The directory containing ITKConfig.cmake.  
+#             This is either the root of the build tree, 
+#             or the lib/InsightToolkit directory.  
+#             This is the only cache entry.
 #   
-#  ITK_USE_FILE  - A CMake source file that can be included
-#                  to set the include directories, library
-#                  directories, and preprocessor macros.
-# In addition to the variables read from ITKConfig.cmake, this find
-# module also defines
-#  ITK_DIR  - The directory containing ITKConfig.cmake.  This is 
-#             either the root of the build tree, or the 
-#             lib/InsightToolkit directory.  This is the only 
-#             cache entry.
-#   
-#  ITK_FOUND - Whether ITK was found.  If this is true, ITK_DIR is okay.
+#  ITK_FOUND - Whether ITK was found.  If this is true, 
+#              ITK_DIR is okay.
 #
 #  USE_ITK_FILE - The full path to the UseITK.cmake file.  
-#                 This is provided for backward compatability.  
-#                 Use ITK_USE_FILE instead.
+#                 This is provided for backward 
+#                 compatability.  Use ITK_USE_FILE
+#                 instead.
 
 
 SET(ITK_DIR_STRING "directory containing ITKConfig.cmake.  This is either the root of the build tree, or PREFIX/lib/InsightToolkit for an installation.")

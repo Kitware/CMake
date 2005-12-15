@@ -3,9 +3,9 @@
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
 #   
-#  JAVA_AWT_LIB_PATH     = the path to where the jawt library is
-#  JAVA_INCLUDE_PATH     = the path to where jni.h can be found
-#  JAVA_AWT_INCLUDE_PATH = the path to where jawt.h can be found
+#  JAVA_AWT_LIB_PATH     = the path to the jawt library
+#  JAVA_INCLUDE_PATH     = the include path to jni.h
+#  JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
 # 
 
 SET(JAVA_AWT_LIBRARY_DIRECTORIES

@@ -3,9 +3,9 @@
 # include files and libraries are. This code sets the following
 # variables:
 #
-#  JAVA_RUNTIME        = the full path to the Java runtime
-#  JAVA_COMPILE        = the full path to the Java compiler
-#  JAVA_ARCHIVE        = the full path to the Java archiver
+#  JAVA_RUNTIME    = the full path to the Java runtime
+#  JAVA_COMPILE    = the full path to the Java compiler
+#  JAVA_ARCHIVE    = the full path to the Java archiver
 #
 SET(JAVA_BIN_PATH
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\2.0;JavaHome]/bin"

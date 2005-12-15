@@ -1,11 +1,11 @@
 # - Check if the source code provided in the SOURCE argument compiles.
 # CHECK_CXX_SOURCE_COMPILES(SOURCE VAR)
 # - macro which checks if the source code compiles\
-#  SOURCE   - source code to try to compile
-#  VAR - variable to store size if the type exists.
+#  SOURCE - source code to try to compile
+#  VAR    - variable to store size if the type exists.
 # Checks the following optional VARIABLES (not arguments)
 #  CMAKE_REQUIRED_LIBRARIES - Link to extra libraries
-#  CMAKE_REQUIRED_FLAGS - Extra flags to C compiler
+#  CMAKE_REQUIRED_FLAGS     - Extra flags to C compiler
 #
 
 MACRO(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)

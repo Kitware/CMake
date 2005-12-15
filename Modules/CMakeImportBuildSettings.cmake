@@ -1,8 +1,8 @@
 # - import build settings from another project
-# CMAKE_IMPORT_BUILD_SETTINGS(SETTINGS_FILE) - macro defined to import the 
-# build settings from another project.  
-#  SETTINGS_FILE - a file created by the other project's call to the
-#  CMAKE_EXPORT_BUILD_SETTINGS macro, see CMakeExportBuildSettings.
+#  CMAKE_IMPORT_BUILD_SETTINGS(SETTINGS_FILE) 
+# macro defined to import the build settings from another project.  
+# SETTINGS_FILE is a file created by the other project's call to the
+# CMAKE_EXPORT_BUILD_SETTINGS macro, see CMakeExportBuildSettings.
 MACRO(CMAKE_IMPORT_BUILD_SETTINGS SETTINGS_FILE)
   IF(${SETTINGS_FILE} MATCHES ".+")
     # Load the settings.

@@ -1,8 +1,8 @@
 # - try to find GTK (and glib) and GTKGLArea
 #  GTK_INCLUDE_DIR   - Directories to include to use GTK
 #  GTK_LIBRARIES     - Files to link against to use GTK
-#  GTK_FOUND         - If false, don't try to use GTK
-#  GTK_GL_FOUND      - If false, don't try to use GTK's GL features
+#  GTK_FOUND         - GTK was found
+#  GTK_GL_FOUND      - GTK's GL features were found
 
 # don't even bother under WIN32
 IF(UNIX)

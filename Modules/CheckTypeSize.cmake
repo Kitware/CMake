@@ -1,5 +1,5 @@
 # - Check sizeof a type
-# CHECK_TYPE_SIZE(TYPE VARIABLE)
+#  CHECK_TYPE_SIZE(TYPE VARIABLE)
 # Check if the type exists and determine size of type.  if the type
 # exists, the size will be stored to the variable.
 #

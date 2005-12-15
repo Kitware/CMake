@@ -1,7 +1,7 @@
 # - Check if the function exists.
 # CHECK_LIBRARY_EXISTS (LIBRARY FUNCTION LOCATION VARIABLE)
-# - macro which checks if the function exists
-#  LIBRARY - the name of the library you are looking for
+#
+#  LIBRARY  - the name of the library you are looking for
 #  FUNCTION - the name of the function
 #  LOCATION - location where the library should be found
 #  VARIABLE - variable to store the result

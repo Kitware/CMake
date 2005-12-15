@@ -1,6 +1,7 @@
 # - Check if the include file exists.
-#  CHECK_INCLUDE_FILE_CXX(INCLUDE VARIABLE) - macro which checks the include file exists.
-#  INCLUDE - name of include file
+#  CHECK_INCLUDE_FILE_CXX(INCLUDE VARIABLE)
+#
+#  INCLUDE  - name of include file
 #  VARIABLE - variable to return result
 #  
 # An optional third argument is the CFlags to add to the compile line 

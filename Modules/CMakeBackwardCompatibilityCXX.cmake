@@ -1,4 +1,4 @@
-# - define a bunch of backwards compatibility varibles
+# - define a bunch of backwards compatibility variables
 #  CMAKE_ANSI_CXXFLAGS - flag for ansi c++ 
 #  CMAKE_HAS_ANSI_STRING_STREAM - has <strstream>
 #  INCLUDE(TestForANSIStreamHeaders)

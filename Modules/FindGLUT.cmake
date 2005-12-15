@@ -1,6 +1,6 @@
 # - try to find glut library and include files
 #  GLUT_INCLUDE_DIR, where to find GL/glut.h, etc.
-#  GLUT_LIBRARIES, the libraries to link against to use GLUT.
+#  GLUT_LIBRARIES, the libraries to link against
 #  GLUT_FOUND, If false, do not try to use GLUT.
 # Also defined, but not for general use are:
 #  GLUT_glut_LIBRARY = the full path to the glut library.
