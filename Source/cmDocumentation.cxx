@@ -309,9 +309,8 @@ bool cmDocumentation::CreateSingleModule(const char* fname, const char* moduleNa
       }
     else
       {
-      if(text.length() < 2 && brief.length() == 0)
+      if(text.length() < 2 && brief.length() == 1)
         {
-        std::cerr  << text << " " << brief << "\n";
         return false;
         }
       char* pname = strcpy(new char[strlen(moduleName)+1], moduleName);
