@@ -1959,7 +1959,10 @@ kwsys_stl::string SystemTools::FindProgram(
     kwsys_stl::string result = SystemTools::FindProgram(it->c_str(), 
                                                   path, 
                                                   noSystemPath);
-    return result;
+    if ( !result.empty() )
+      {
+      return result;
+      }
     }
   return "";
 }
