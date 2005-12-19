@@ -229,6 +229,14 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       tempPath += "/";
       tempPath += filename;
       attempted.push_back(tempPath);
+      // If the file is an OSX bundle then the configtyp
+      // will be at the start of the path
+      tempPath = m_CTest->GetConfigType();
+      tempPath += "/";
+      tempPath += filepath;
+      tempPath += "/";
+      tempPath += filename;
+      attempted.push_back(tempPath);
       }
     }
   // otherwise search local dirs

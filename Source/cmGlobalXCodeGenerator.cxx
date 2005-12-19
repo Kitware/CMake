@@ -1003,10 +1003,36 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   cmSystemTools::ReplaceString(cflags, "\"", "\\\"");
   if(m_XcodeVersion > 15)
     {
-    defFlags += " -DCMAKE_INTDIR=\\\\\\\"$(CONFIGURATION)\\\\\\\" ";
+    buildSettings->
+      AddAttribute("GCC_PREPROCESSOR_DEFINITIONS", 
+                   this->CreateString("CMAKE_INTDIR=\\\\\\\"$(CONFIGURATION)\\\\\\\""));
+    
     }
   productName = target.GetName();
+  std::string extraLinkOptions;
+  if(target.GetType() == cmTarget::EXECUTABLE)
+    {
+    extraLinkOptions = 
+      m_CurrentMakefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
+    }
+  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    extraLinkOptions = 
+      m_CurrentMakefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    }
+  if(target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    extraLinkOptions = 
+      m_CurrentMakefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    }
   
+  const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
+  if(targetLinkFlags)
+    {
+    extraLinkOptions += " ";
+    extraLinkOptions += targetLinkFlags;
+    }
+
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
@@ -1060,15 +1086,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       std::string outflag = "-o \\\"$(CONFIGURATION_BUILD_DIR)/";
       outflag += productName;
       outflag += "\\\"";
-      buildSettings->AddAttribute("OTHER_LDFLAGS",
-                                  this->CreateString(outflag.c_str()));
+      extraLinkOptions += " ";
+      extraLinkOptions += outflag;
       productType = "com.apple.product-type.tool";
       fileType = "compiled.mach-o.executable";
       }
     else
       {
-      buildSettings->AddAttribute("OTHER_LDFLAGS",
-                                  this->CreateString("-bundle"));
+      extraLinkOptions += " -bundle";
       productType = "com.apple.product-type.library.dynamic";
       fileType = "compiled.mach-o.dylib";
       }
@@ -1092,8 +1117,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                 this->CreateString("1"));
     buildSettings->AddAttribute("DYLIB_CURRENT_VERSION", 
                                 this->CreateString("1"));
-    buildSettings->AddAttribute("OTHER_LDFLAGS",
-                                this->CreateString("-dynamiclib"));
+    extraLinkOptions += " -dynamiclib";
     productType = "com.apple.product-type.library.dynamic";
     fileType = "compiled.mach-o.dylib";
     break;
@@ -1115,22 +1139,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     if(m_ExecutableOutputPath.size())
       {
       std::string path = m_ExecutableOutputPath;
-      if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
-        {
-        path += name;
-        path += ".app/Contents/MacOS/";
-        }
       symRoot = path;
       }
     fileType = "compiled.mach-o.executable";
     if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
       {
-      if(symRoot.size() == 0)
-        { 
-        symRoot = name;
-        symRoot += ".app/Contents/MacOS/";
-        }
-      productType = "com.apple.product-type.tool";
+      productType = "com.apple.product-type.application";
       }
     else
       {
@@ -1223,11 +1237,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     buildSettings->AddAttribute("OTHER_CFLAGS", 
                                 this->CreateString(flags.c_str()));
     }
-  if(!buildSettings->GetObject("OTHER_LDFLAGS"))
-    {
-    buildSettings->AddAttribute("OTHER_LDFLAGS", 
-                                this->CreateString(""));
-    }
+  buildSettings->AddAttribute("OTHER_LDFLAGS", 
+                              this->CreateString(extraLinkOptions.c_str()));
+
   buildSettings->AddAttribute("OTHER_REZFLAGS", 
                               this->CreateString(""));
   buildSettings->AddAttribute("SECTORDER_FLAGS",
