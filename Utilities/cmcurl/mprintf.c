@@ -1134,7 +1134,7 @@ int curl_msprintf(char *buffer, const char *format, ...)
   return retcode;
 }
 
-#ifndef WIN32 /* not needed on win32 */
+#if !defined( WIN32) || defined(__UCLIBC__) /* not needed on win32 */
 extern int fputc(int, FILE *);
 #endif
 
