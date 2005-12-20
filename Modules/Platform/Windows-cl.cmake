@@ -156,7 +156,7 @@ IF(CMAKE_COMPILER_2005)
   SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
   SET (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
   SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
-  SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
+  SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  comdlg32.lib advapi32.lib " CACHE STRING 
       "Libraries linked by defalut with all applications.")
 ELSE(CMAKE_COMPILER_2005)
   IF(CMAKE_USING_VC_FREE_TOOLS)
@@ -186,7 +186,7 @@ ELSE(CMAKE_COMPILER_2005)
     SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
     SET (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
     SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
-    SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
+    SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
       "Libraries linked by defalut with all applications.")
   ENDIF(CMAKE_USING_VC_FREE_TOOLS)
 ENDIF(CMAKE_COMPILER_2005)
