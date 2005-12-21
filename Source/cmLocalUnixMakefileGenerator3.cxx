@@ -1464,7 +1464,19 @@ cmLocalUnixMakefileGenerator3
 
   // Write the build rule.
   this->WriteMakeRule(ruleFileStream, 0,
-                      targetFullPath.c_str(), depends, commands);
+                      targetFullPathReal.c_str(), depends, commands);
+
+  // The symlink name for the target should depend on the real target
+  // so if the target version changes it rebuilds and recreates the
+  // symlink.
+  if(targetFullPath != targetFullPathReal)
+    {
+    depends.clear();
+    commands.clear();
+    depends.push_back(targetFullPathReal.c_str());
+    this->WriteMakeRule(ruleFileStream, 0,
+                        targetFullPath.c_str(), depends, commands);
+    }
 
   // Write convenience targets.
   std::string dir = m_Makefile->GetStartOutputDirectory();
@@ -1794,11 +1806,29 @@ cmLocalUnixMakefileGenerator3
                               linkFlags.c_str());
     }
 
-  // from here down is the same for exe or lib
-  
   // Write the build rule.
-  this->WriteMakeRule(ruleFileStream, 0, 
-                     targetFullPath.c_str(), depends, commands);
+  this->WriteMakeRule(ruleFileStream, 0,
+                      targetFullPathReal.c_str(), depends, commands);
+
+  // The symlink names for the target should depend on the real target
+  // so if the target version changes it rebuilds and recreates the
+  // symlinks.
+  if(targetFullPathSO != targetFullPathReal)
+    {
+    depends.clear();
+    commands.clear();
+    depends.push_back(targetFullPathReal.c_str());
+    this->WriteMakeRule(ruleFileStream, 0,
+                        targetFullPathSO.c_str(), depends, commands);
+    }
+  if(targetFullPath != targetFullPathSO)
+    {
+    depends.clear();
+    commands.clear();
+    depends.push_back(targetFullPathSO.c_str());
+    this->WriteMakeRule(ruleFileStream, 0,
+                        targetFullPath.c_str(), depends, commands);
+    }
 
   // Write convenience targets.
   std::string dir = m_Makefile->GetStartOutputDirectory();
