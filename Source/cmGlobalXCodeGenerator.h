@@ -142,6 +142,8 @@ private:
                                   const std::vector<cmCustomCommand>&);
   void CreateReRunCMakeFile(cmLocalGenerator* root);
 protected:
+  std::string AddConfigDir(const char* d);
+
   int m_XcodeVersion;
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
