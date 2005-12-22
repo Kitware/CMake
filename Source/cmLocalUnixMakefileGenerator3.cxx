@@ -47,6 +47,8 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   m_IgnoreLibPrefix = false;
   m_PassMakeflags = false;
   m_EchoNeedsQuote = true;
+  m_DefineWindowsNULL = false;
+  m_UnixCD = true;
 }
 
 //----------------------------------------------------------------------------
@@ -329,7 +331,7 @@ cmLocalUnixMakefileGenerator3
     return;
     }
   this->WriteDisclaimer(ruleFileStream);
-  
+  this->WriteSpecialTargetsTop(ruleFileStream);
   this->WriteMakeVariables(ruleFileStream);
   
   // Open the flags file.  This should be copy-if-different because the
@@ -932,7 +934,7 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# Set environment variables for the build.\n"
     << "\n";
-  if(m_WindowsShell)
+  if(m_DefineWindowsNULL)
     {
     makefileStream
       << "!IF \"$(OS)\" == \"Windows_NT\"\n"
@@ -941,12 +943,17 @@ cmLocalUnixMakefileGenerator3
       << "NULL=nul\n"
       << "!ENDIF\n";
     }
+  if(m_WindowsShell)
+    {
+     makefileStream
+       << "SHELL = C:\\WINDOWS\\system32\\cmd.exe\n";
+    }
   else
     {
-    makefileStream
-      << "# The shell in which to execute make rules.\n"
-      << "SHELL = /bin/sh\n"
-      << "\n";
+      makefileStream
+        << "# The shell in which to execute make rules.\n"
+        << "SHELL = /bin/sh\n"
+        << "\n";
     }
 
   if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
@@ -962,7 +969,7 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# The CMake executable.\n"
     << "CMAKE_COMMAND = "
-    << this->Convert(cmakecommand.c_str(), FULL, MAKEFILE).c_str() 
+    << this->Convert(cmakecommand.c_str(), FULL, SHELL).c_str() 
     << "\n"
     << "\n";
   makefileStream
@@ -1392,10 +1399,15 @@ cmLocalUnixMakefileGenerator3
     exeCleanFiles.push_back
       (this->Convert(cleanFullRealName.c_str(),START_OUTPUT,MAKEFILE));
     }
-  }
-  // Add a command to remove any existing files for this executable.
-  this->AppendCleanCommand(commands, exeCleanFiles);
+  } 
 
+  // Add a command to remove any existing files for this executable.
+  std::vector<std::string> commands1;
+  this->AppendCleanCommand(commands1, exeCleanFiles);
+  this->CreateCDCommand(commands1,m_Makefile->GetStartOutputDirectory(),
+                        m_Makefile->GetHomeOutputDirectory()); 
+  commands.insert(commands.end(), commands1.begin(), commands1.end());
+  commands1.clear();
   // Add the pre-build and pre-link rules.
   this->AppendCustomCommands(commands, target.GetPreBuildCommands());
   this->AppendCustomCommands(commands, target.GetPreLinkCommands());
@@ -1406,7 +1418,6 @@ cmLocalUnixMakefileGenerator3
   linkRuleVar += "_LINK_EXECUTABLE";
   std::string linkRule = 
     m_Makefile->GetRequiredDefinition(linkRuleVar.c_str());
-  std::vector<std::string> commands1;
   cmSystemTools::ExpandListArgument(linkRule, commands1);
   this->CreateCDCommand(commands1,m_Makefile->GetStartOutputDirectory(),
                         m_Makefile->GetHomeOutputDirectory());
@@ -1737,17 +1748,19 @@ cmLocalUnixMakefileGenerator3
       (this->Convert(cleanFullSharedName.c_str(),START_OUTPUT,MAKEFILE));
     }
   }
-  
   // Add a command to remove any existing files for this library.
-  this->AppendCleanCommand(commands, libCleanFiles);
-
+  std::vector<std::string> commands1;
+  this->AppendCleanCommand(commands1, libCleanFiles);
+  this->CreateCDCommand(commands1,m_Makefile->GetStartOutputDirectory(),
+                        m_Makefile->GetHomeOutputDirectory());
+  commands.insert(commands.end(), commands1.begin(), commands1.end());
+  commands1.clear();
   // Add the pre-build and pre-link rules.
   this->AppendCustomCommands(commands, target.GetPreBuildCommands());
   this->AppendCustomCommands(commands, target.GetPreLinkCommands());
 
   // Construct the main link rule.
   std::string linkRule = m_Makefile->GetRequiredDefinition(linkRuleVar);
-  std::vector<std::string> commands1;
   cmSystemTools::ExpandListArgument(linkRule, commands1);
   this->CreateCDCommand(commands1,m_Makefile->GetStartOutputDirectory(),
                         m_Makefile->GetHomeOutputDirectory());
@@ -2349,7 +2362,16 @@ cmLocalUnixMakefileGenerator3
       for(unsigned int j=1; j < commandLine.size(); ++j)
         {
         cmd += " ";
+        bool forceOn =  cmSystemTools::GetForceUnixPaths();
+        if(forceOn && m_WindowsShell)
+          {
+          cmSystemTools::SetForceUnixPaths(false);
+          }
         cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
+        if(forceOn && m_WindowsShell)
+          {
+          cmSystemTools::SetForceUnixPaths(true);
+          }
         }
       
       commands1.push_back(cmd);
@@ -3015,7 +3037,7 @@ void cmLocalUnixMakefileGenerator3
     return;
     }
   
-  if(m_WindowsShell)
+  if(!m_UnixCD)
     {
     // On Windows we must perform each step separately and then change
     // back because the shell keeps the working directory between

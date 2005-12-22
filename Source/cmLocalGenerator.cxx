@@ -1604,10 +1604,26 @@ std::string cmLocalGenerator::Convert(const char* source,
     }
   
   // Now convert it to an output path.
-  if (output == MAKEFILE || output == SHELL)
+  if (output == MAKEFILE)
     {
     result = cmSystemTools::ConvertToOutputPath(result.c_str());
     }
-  
+  if( output == SHELL)
+    {
+    // for shell commands if force unix is on, but m_WindowsShell
+    // is true, then turn off force unix paths for the output path
+    // so that the path is windows style and will work with windows
+    // cmd.exe.
+    bool forceOn =  cmSystemTools::GetForceUnixPaths();
+    if(forceOn && m_WindowsShell)
+      {
+      cmSystemTools::SetForceUnixPaths(false);
+      }
+    result = cmSystemTools::ConvertToOutputPath(result.c_str());
+    if(forceOn && m_WindowsShell)
+      {
+      cmSystemTools::SetForceUnixPaths(true);
+      }
+    }
   return result;
 }

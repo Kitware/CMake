@@ -103,6 +103,19 @@ public:
   void SetWindowsShell(bool v)  {m_WindowsShell = v;}
 
   /**
+   * If set to true, then NULL is set to nil for non Windows_NT.
+   * This uses make syntax used by nmake and borland.
+   * The default is false.
+   */
+  void SetDefineWindowsNULL(bool v)  {m_DefineWindowsNULL = v;}
+
+  /**
+   * If set to true, cd dir && command is used to 
+   * run commands in a different directory.
+   */
+  void SetUnixCD(bool v)  {m_UnixCD = v;}
+
+  /**
    * Set the string used to include one makefile into another default
    * is include.
    */
@@ -345,6 +358,8 @@ private:
   std::string m_MakeSilentFlag;
   std::string m_ExecutableOutputPath;
   std::string m_LibraryOutputPath;
+  bool m_DefineWindowsNULL;
+  bool m_UnixCD;
   bool m_PassMakeflags;
   //==========================================================================
 

@@ -220,6 +220,7 @@ protected:
   std::vector<cmLocalGenerator*> Children;
   std::map<cmStdString, cmStdString> m_LanguageToIncludeFlags;
   bool m_WindowsShell;
+  bool m_ForceUnixPath;
   bool m_UseRelativePaths;
   bool m_IgnoreLibPrefix;
   bool Configured;

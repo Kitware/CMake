@@ -47,6 +47,8 @@
 #  endif
 #  include "cmGlobalBorlandMakefileGenerator.h"
 #  include "cmGlobalNMakeMakefileGenerator.h"
+#  include "cmGlobalMSYSMakefileGenerator.h"
+#  include "cmGlobalMinGWMakefileGenerator.h"
 #  include "cmWin32ProcessExecution.h"
 #else
 #endif
@@ -932,9 +934,9 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       {
       cmake cm;
       cmGlobalGenerator *ggd = cm.CreateGlobalGenerator(args[2].c_str());
-      ggd->SetCMakeInstance(&cm);
       if (ggd)
         {
+        ggd->SetCMakeInstance(&cm);
         std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
         lgd->SetGlobalGenerator(ggd);
         return lgd->ScanDependencies(args)? 0 : 2;
@@ -1541,6 +1543,10 @@ void cmake::AddDefaultGenerators()
     &cmGlobalBorlandMakefileGenerator::New;
   m_Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
     &cmGlobalNMakeMakefileGenerator::New;
+  m_Generators[cmGlobalMSYSMakefileGenerator::GetActualName()] =
+    &cmGlobalMSYSMakefileGenerator::New;
+  m_Generators[cmGlobalMinGWMakefileGenerator::GetActualName()] =
+    &cmGlobalMinGWMakefileGenerator::New;
 #endif
   m_Generators[cmGlobalUnixMakefileGenerator3::GetActualName()] =
     &cmGlobalUnixMakefileGenerator3::New;

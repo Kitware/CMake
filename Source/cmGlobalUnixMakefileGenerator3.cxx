@@ -51,27 +51,31 @@ void cmGlobalUnixMakefileGenerator3
       cmSystemTools::Error(langComp.c_str(), " not set, after EnableLanguage");
       continue;
       }
-    const char* cc = mf->GetRequiredDefinition(langComp.c_str());
-    path = cmSystemTools::FindProgram(cc);
-    if(path.size() == 0)
+    const char* name = mf->GetRequiredDefinition(langComp.c_str());
+    if(!cmSystemTools::FileIsFullPath(name))
+      {
+      path = cmSystemTools::FindProgram(name);
+      }
+    else
+      {
+      path = name;
+      }
+    if(path.size() == 0 || !cmSystemTools::FileExists(path.c_str()))
       {
       std::string message = "your ";
       message += lang;
-      message += " compiler: ";
-      if(cc)
-        {
-        message +=  cc;
-        }
-      else
-        {
-        message += "(NULL)";
-        }
-      message += " was not found in your path.   "
-        "For CMake to correctly use try compile commands, the compiler must "
-        "be in your path.   Please add the compiler to your PATH environment,"
-        " and re-run CMake.";
-        cmSystemTools::Error(message.c_str());
+      message += " compiler: \"";
+      message +=  name;
+      message += "\" was not found.   Please set ";
+      message += langComp;
+      message += " to a valid compiler path or name.";
+      cmSystemTools::Error(message.c_str());
+      path = name;
       }
+    std::string doc = lang;
+    doc += " compiler.";
+    mf->AddCacheDefinition(langComp.c_str(), path.c_str(),
+                           doc.c_str(), cmCacheManager::FILEPATH);
     }
 }
 
@@ -125,7 +129,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     
   // Write the do not edit header.
   lg->WriteDisclaimer(makefileStream);
-  
+  // Write out the "special" stuff
+  lg->WriteSpecialTargetsTop(makefileStream);
   // Write the main entry point target.  This must be the VERY first
   // target so that make with no arguments will run it.
   // Just depend on the all target to drive the build.

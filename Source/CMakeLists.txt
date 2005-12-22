@@ -168,6 +168,8 @@ IF (WIN32)
     SET(SRCS ${SRCS}
       cmGlobalBorlandMakefileGenerator.cxx
       cmGlobalNMakeMakefileGenerator.cxx
+      cmGlobalMSYSMakefileGenerator.cxx
+      cmGlobalMinGWMakefileGenerator.cxx
       cmGlobalVisualStudio6Generator.cxx
       cmLocalVisualStudio6Generator.cxx
       cmGlobalBorlandMakefileGenerator.h

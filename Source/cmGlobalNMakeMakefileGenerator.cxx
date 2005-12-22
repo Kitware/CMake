@@ -38,11 +38,13 @@ cmLocalGenerator *cmGlobalNMakeMakefileGenerator::CreateLocalGenerator()
 {
   cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
   lg->SetEchoNeedsQuote(false);
+  lg->SetDefineWindowsNULL(true);
   lg->SetWindowsShell(true);
   lg->SetMakeSilentFlag("/nologo");
   lg->SetGlobalGenerator(this);
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(true);
+  lg->SetUnixCD(false);
   return lg;
 }
 
