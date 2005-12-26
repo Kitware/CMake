@@ -1545,7 +1545,7 @@ void cmGlobalXCodeGenerator::AddLinkLibrary(cmXCodeObject* target,
   
   // if the library is not a full path then add it with a -l flag
   // to the settings of the target
-  cmsys::RegularExpression reg("^([ \t]*\\-[lLWRB])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
+  cmsys::RegularExpression reg("^([ \t]*\\-[lLWRBF])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
   // if the library is not already in the form required by the compiler
   // add a -l infront of the name
   std::string link;

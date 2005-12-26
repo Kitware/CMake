@@ -2215,6 +2215,11 @@ std::string cmMakefile::FindLibrary(const char* name,
   cmSystemTools::GetPath(path, "CMAKE_LIBRARY_PATH");
   cmSystemTools::GetPath(path, "LIB");
   cmSystemTools::GetPath(path);
+  bool supportFrameworks = false;
+  if(this->GetDefinition("APPLE"))
+    {
+    supportFrameworks = true;
+    }
   // now add the path
   path.insert(path.end(), userPaths.begin(), userPaths.end());
   // Add some lib directories specific to compilers, depending on the
@@ -2269,6 +2274,13 @@ std::string cmMakefile::FindLibrary(const char* name,
           cmSystemTools::GetFilenamePath(bcb_bin_path) + "/Lib";
         path.push_back(lib_path);
         }
+      }
+    else if(supportFrameworks)
+      {
+      path.push_back("~/Library/Frameworks");
+      path.push_back("/Library/Frameworks");
+      path.push_back("/System/Library/Frameworks");
+      path.push_back("/Network/Library/Frameworks");
       }
     }
   if(m_LocalGenerator->GetGlobalGenerator()->GetLanguageEnabled("C"))

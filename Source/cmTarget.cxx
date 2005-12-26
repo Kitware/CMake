@@ -301,9 +301,28 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf, const char* target )
 void cmTarget::AddLinkLibrary(const std::string& lib, 
                               LinkLibraryType llt)
 {
+  this->AddFramework(lib.c_str(), llt);
   m_LinkLibraries.push_back( std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt) );
 }
 
+bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
+{
+  if(cmSystemTools::IsPathToFramework(libname.c_str()))
+    {
+    std::string frameworkDir = libname;
+    frameworkDir += "/../";
+    frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
+    std::vector<std::string>::iterator i = 
+      std::find(m_Frameworks.begin(),
+                m_Frameworks.end(), frameworkDir);
+    if(i == m_Frameworks.end())
+      {
+      m_Frameworks.push_back(frameworkDir);
+      }
+    return true;
+    }
+  return false;
+}
 void cmTarget::AddLinkLibrary(cmMakefile& mf,
                               const char *target, const char* lib, 
                               LinkLibraryType llt)
@@ -313,7 +332,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     {
     return;
     }
-
+  this->AddFramework(lib, llt);
   m_LinkLibraries.push_back( std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt) );
 
   if(llt != cmTarget::GENERAL)

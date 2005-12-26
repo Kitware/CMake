@@ -1411,7 +1411,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     {
     cmStdString& linkItem = *lib;
     // check to see if the link item has a -l already
-    cmsys::RegularExpression reg("^([ \t]*\\-[lLWRB])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
+    cmsys::RegularExpression reg("^([ \t]*\\-[lLWRBF])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
     if(!reg.find(linkItem))
       {
       librariesLinked += libLinkFlag;

@@ -79,6 +79,9 @@ public:
    * Get the list of the source lists used by this target
    */
   std::vector<std::string> &GetSourceLists() {return m_SourceLists;}
+
+  ///! Return the list of frameworks being linked to this target
+  std::vector<std::string> &GetFrameworks() {return m_Frameworks;}
   
   /**
    * Get the list of the source files used by this target
@@ -97,6 +100,8 @@ public:
    */
   void ClearDependencyInformation(cmMakefile& mf, const char* target);
 
+  // Check to see if a library is a framework and treat it different on Mac
+  bool AddFramework(const std::string& lib, LinkLibraryType llt);
   void AddLinkLibrary(cmMakefile& mf,
                       const char *target, const char* lib, 
                       LinkLibraryType llt);
@@ -276,6 +281,7 @@ private:
   std::vector<cmSourceFile*> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
   LinkLibraries m_PrevLinkedLibraries;
+  std::vector<std::string> m_Frameworks;
   std::vector<std::string> m_LinkDirectories;
   std::string m_InstallPath;
   std::string m_RuntimeInstallPath;

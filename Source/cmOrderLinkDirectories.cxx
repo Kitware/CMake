@@ -104,6 +104,7 @@ std::string cmOrderLinkDirectories::NoCaseExpression(const char* str)
 //-------------------------------------------------------------------
 void cmOrderLinkDirectories::CreateRegularExpressions()
 {
+  m_SplitFramework.compile("(.*)/(.*)\\.framework$");
   cmStdString libext = "(";
   bool first = true;
   for(std::vector<cmStdString>::iterator i = m_LinkExtensions.begin();
@@ -278,29 +279,53 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
   cmStdString dir;
   cmStdString file;
   std::vector<cmStdString> empty;
+  bool framework = false;
   for(unsigned int i=0; i < m_RawLinkItems.size(); ++i)
     {
     if(cmSystemTools::FileIsFullPath(m_RawLinkItems[i].c_str()))
       {
       if(cmSystemTools::FileIsDirectory(m_RawLinkItems[i].c_str()))
         {
-        std::string message = "Warning: Ignoring path found in link libraries for target: ";
-        message += m_TargetName;
-        message += ", path is: ";
-        message += m_RawLinkItems[i];
-        message += ". Expected a library name or a full path to a library name.";
-        cmSystemTools::Message(message.c_str());
-        continue;
+        if(cmSystemTools::IsPathToFramework(m_RawLinkItems[i].c_str()))
+          {
+          m_SplitFramework.find(m_RawLinkItems[i]);
+          cmStdString path = m_SplitFramework.match(1);
+          // Add the -F path if we have not yet done so
+          if(m_EmittedFrameworkPaths.insert(path).second)
+            {
+            std::string fpath = "-F";
+            fpath += cmSystemTools::ConvertToOutputPath(path.c_str());
+            m_LinkItems.push_back(fpath);
+            }
+          // now add the -framework option
+          std::string frame = "-framework ";
+          frame += m_SplitFramework.match(2);
+          m_LinkItems.push_back(frame);
+          framework = true;
+          }
+        else
+          {
+          std::string message = "Warning: Ignoring path found in link libraries for target: ";
+          message += m_TargetName;
+          message += ", path is: ";
+          message += m_RawLinkItems[i];
+          message += ". Expected a library name or a full path to a library name.";
+          cmSystemTools::Message(message.c_str());
+          continue;
+          }
         }
-      cmSystemTools::SplitProgramPath(m_RawLinkItems[i].c_str(),
-                                      dir, file);
-      m_DirectoryToAfterList[dir] = empty;
-      m_LinkPathSet.insert(dir);
-      aLib.FullPath = m_RawLinkItems[i];
-      aLib.File = file;
-      aLib.Path = dir;
-      m_FullPathLibraries[aLib.FullPath] = aLib;
-      m_LinkItems.push_back(file);
+      if(!framework)
+        {
+        cmSystemTools::SplitProgramPath(m_RawLinkItems[i].c_str(),
+                                        dir, file);
+        m_DirectoryToAfterList[dir] = empty;
+        m_LinkPathSet.insert(dir);
+        aLib.FullPath = m_RawLinkItems[i];
+        aLib.File = file;
+        aLib.Path = dir;
+        m_FullPathLibraries[aLib.FullPath] = aLib;
+        m_LinkItems.push_back(file);
+        }
       }
     else
       {

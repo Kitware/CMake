@@ -171,7 +171,9 @@ public:
   void WriteLocalAllRules(std::ostream& ruleFileStream);
 
 protected:
-
+  // Return the a string with -F flags on apple
+  std::string GetFrameworkFlags(cmTarget&);
+  
   // write the depend info 
   void WriteDependLanguageInfo(std::ostream& cmakefileStream, cmTarget &tgt);
   

@@ -121,6 +121,8 @@ private:
   std::vector<cmStdString> m_RawLinkItems;
   // This vector holds the sorted -L paths
   std::vector<cmStdString> m_SortedSearchPaths;
+  // This vector holds the -F paths
+  std::set<cmStdString> m_EmittedFrameworkPaths;
   // This is the set of -L paths unsorted, but unique
   std::set<cmStdString> m_LinkPathSet;
   // the names of link extensions
@@ -135,6 +137,7 @@ private:
   cmsys::RegularExpression m_RemoveLibraryExtension;
   cmsys::RegularExpression m_ExtractBaseLibraryName;
   cmsys::RegularExpression m_ExtractBaseLibraryNameNoPrefix;
+  cmsys::RegularExpression m_SplitFramework;
   bool m_Debug;
 };
 

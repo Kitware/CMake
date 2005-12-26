@@ -1345,3 +1345,16 @@ bool cmSystemTools::PutEnv(const char* value)
   localEnvironment.push_back(envVar);
   return ret == 0;
 }
+
+bool cmSystemTools::IsPathToFramework(const char* path)
+{
+  if(cmSystemTools::FileIsFullPath(path))
+    {
+    std::string libname = path;
+    if(libname.find(".framework") == libname.size()+1-sizeof(".framework"))
+      {
+      return true;
+      }
+    }
+  return false;
+}

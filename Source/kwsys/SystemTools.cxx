@@ -1992,6 +1992,17 @@ kwsys_stl::string SystemTools
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
+#if defined(__APPLE__)
+    tryPath = *p;
+    tryPath += "/";
+    tryPath += name;
+    tryPath += ".framework";
+    if(SystemTools::FileExists(tryPath.c_str())
+       && SystemTools::FileIsDirectory(tryPath.c_str()))
+      {
+      return SystemTools::CollapseFullPath(tryPath.c_str());
+      }
+#endif
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
     tryPath = *p;
     tryPath += "/";

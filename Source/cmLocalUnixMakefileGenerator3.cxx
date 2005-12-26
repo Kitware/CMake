@@ -445,6 +445,9 @@ cmLocalUnixMakefileGenerator3
     
     // Add include directory flags.
     this->AppendFlags(flags, this->GetIncludeFlags(lang));
+    // Add include directory flags.
+    this->AppendFlags(flags, this->GetFrameworkFlags(target).c_str());
+
     flagFileStream << lang << "_FLAGS = " << flags
                    << "\n"
                    << "\n";
@@ -496,6 +499,27 @@ cmLocalUnixMakefileGenerator3
 
   // Write clean target
   this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
+}
+
+//----------------------------------------------------------------------------
+std::string 
+cmLocalUnixMakefileGenerator3
+::GetFrameworkFlags(cmTarget& target)
+{
+#ifndef __APPLE__
+  return std::string();
+#else
+  std::string flags;
+  std::vector<std::string>& frameworks = target.GetFrameworks();
+  for(std::vector<std::string>::iterator i = frameworks.begin();
+      i != frameworks.end(); ++i)
+    {
+    flags += "-F";
+    flags += this->ConvertToOutputForExisting(i->c_str());
+    flags += " ";
+    }
+  return flags;
+#endif
 }
 
 //----------------------------------------------------------------------------

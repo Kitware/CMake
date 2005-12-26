@@ -131,6 +131,8 @@ public:
 
   ///! Return true if value is NOTFOUND or ends in -NOTFOUND.
   static bool IsNOTFOUND(const char* value);
+  ///! Return true if the path is a framework
+  static bool IsPathToFramework(const char* value);
   
   static bool DoesFileExistWithExtensions(
     const char *name,
