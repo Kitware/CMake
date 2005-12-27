@@ -70,6 +70,8 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
     cmSystemTools::GlobDirs(args[j].c_str(), path);
     }
 
+  cmSystemTools::GetPath(path, "CMAKE_LIBRARY_PATH");
+
   // add the standard path
   cmSystemTools::GetPath(path);
   for(unsigned int k=0; k < path.size(); k++)
@@ -88,7 +90,7 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
       }
     }
 #if defined (__APPLE__)
-  cmStdString fpath = this->FindHeaderInFrameworks(args[0].c_str(), args[1].c_str());
+  cmStdString fpath = this->FindHeaderInFrameworks(path, args[0].c_str(), args[1].c_str());
   if(fpath.size())
     {
     m_Makefile->AddCacheDefinition(args[0].c_str(),
@@ -106,8 +108,10 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
   return true;
 }
 
-cmStdString cmFindFileCommand::FindHeaderInFrameworks(const char* defineVar,
-                                                      const char* file)
+cmStdString cmFindFileCommand::FindHeaderInFrameworks(
+  std::vector<std::string> path,
+  const char* defineVar,
+  const char* file)
 {
 #ifndef __APPLE__
   return cmStdString("");
@@ -130,12 +134,11 @@ cmStdString cmFindFileCommand::FindHeaderInFrameworks(const char* defineVar,
       frameWorkName = "";
       }
     }
-  std::vector<cmStdString> path;
   path.push_back("~/Library/Frameworks");
   path.push_back("/Library/Frameworks");
   path.push_back("/System/Library/Frameworks");
   path.push_back("/Network/Library/Frameworks");
-  for(  std::vector<cmStdString>::iterator i = path.begin();
+  for(  std::vector<std::string>::iterator i = path.begin();
         i != path.end(); ++i)
     {
     if(frameWorkName.size())

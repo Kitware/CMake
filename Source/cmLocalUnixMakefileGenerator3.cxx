@@ -513,14 +513,34 @@ cmLocalUnixMakefileGenerator3
 #ifndef __APPLE__
   return std::string();
 #else
+  std::set<cmStdString> emitted;
+  std::vector<std::string> includes;
+  this->GetIncludeDirectories(includes);
+  std::vector<std::string>::iterator i;
+  // check all include directories for frameworks as this
+  // will already have added a -F for the framework
+  for(i = includes.begin(); i != includes.end(); ++i)
+    {
+    if(cmSystemTools::IsPathToFramework(i->c_str()))
+      {
+      std::string frameworkDir = *i;
+      frameworkDir += "/../";
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
+      emitted.insert(frameworkDir);
+      }
+    }
+
   std::string flags;
   std::vector<std::string>& frameworks = target.GetFrameworks();
-  for(std::vector<std::string>::iterator i = frameworks.begin();
+  for(i = frameworks.begin();
       i != frameworks.end(); ++i)
     {
-    flags += "-F";
-    flags += this->ConvertToOutputForExisting(i->c_str());
-    flags += " ";
+    if(emitted.insert(*i).second)
+      {
+      flags += "-F";
+      flags += this->ConvertToOutputForExisting(i->c_str());
+      flags += " ";
+      }
     }
   return flags;
 #endif
