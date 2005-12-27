@@ -1241,34 +1241,7 @@ bool cmCTest::SubmitExtraFiles(const char* cfiles)
 //----------------------------------------------------------------------
 bool cmCTest::CheckArgument(const std::string& arg, const char* varg1, const char* varg2)
 {
-  cmOStringStream ostr;
-  ostr << varg1;
-  if ( varg2 )
-    {
-    ostr << ", " << varg2;
-    }
-
-  size_t minlen = arg.size();
-  size_t lenvarg = strlen(varg1);
-  if ( lenvarg < minlen )
-    {
-    minlen = lenvarg;
-    }
-  if ( strncmp(arg.c_str(), varg1, minlen) == 0 )
-    {
-    return true;
-    }
-  if ( ! varg2 )
-    {
-    return false;
-    }
-  minlen = arg.size();
-  lenvarg = strlen(varg2);
-  if ( lenvarg < minlen )
-    {
-    minlen = lenvarg;
-    }
-  if ( strncmp(arg.c_str(), varg2, minlen) == 0 )
+  if ( varg1 && arg == varg1 || varg2 && arg == varg2 )
     {
     return true;
     }
