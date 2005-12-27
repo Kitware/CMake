@@ -504,7 +504,11 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 std::string 
 cmLocalUnixMakefileGenerator3
-::GetFrameworkFlags(cmTarget& target)
+::GetFrameworkFlags(cmTarget& 
+#ifdef __APPLE__                    
+                    target
+#endif
+  )
 {
 #ifndef __APPLE__
   return std::string();
