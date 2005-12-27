@@ -1173,11 +1173,45 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::vector<std::string>& includes =
     m_CurrentMakefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i = includes.begin();
+  std::string fdirs;
+  std::set<cmStdString> emitted;
   for(;i != includes.end(); ++i)
     {
-    std::string incpath = 
-      this->XCodeEscapePath(i->c_str());
-    dirs += incpath + " ";
+    if(cmSystemTools::IsPathToFramework(i->c_str()))
+      {
+      std::string frameworkDir = *i;
+      frameworkDir += "/../";
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
+      if(emitted.insert(frameworkDir).second)
+        {
+        fdirs += this->XCodeEscapePath(frameworkDir.c_str());
+        fdirs += " ";
+        }
+      }
+    else
+      {
+      std::string incpath = 
+        this->XCodeEscapePath(i->c_str());
+      dirs += incpath + " ";
+      }
+    }
+  std::vector<std::string>& frameworks = target.GetFrameworks();
+  if(frameworks.size())
+    {
+    for(std::vector<std::string>::iterator i = frameworks.begin();
+        i != frameworks.end(); ++i)
+      {
+      if(emitted.insert(*i).second)
+        {
+        fdirs += this->XCodeEscapePath(i->c_str());
+        fdirs += " ";
+        }
+      }
+    }
+  if(fdirs.size())
+    {
+    buildSettings->AddAttribute("FRAMEWORK_SEARCH_PATHS", 
+                                this->CreateString(fdirs.c_str()));
     }
   if(dirs.size())
     {

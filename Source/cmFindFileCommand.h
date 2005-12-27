@@ -79,7 +79,7 @@ public:
       "different extensions on different platforms, FIND_PROGRAM "
       "should be used instead of FIND_FILE when looking for them.";
     }
-  
+  cmStdString FindHeaderInFrameworks(const char* var, const char* file);
   cmTypeMacro(cmFindFileCommand, cmCommand);
 };
 

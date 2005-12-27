@@ -1055,8 +1055,22 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     repeatFlag = false;
     }
   bool flagUsed = false;
+  std::set<cmStdString> emitted;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
+#ifdef __APPLE__
+    if(cmSystemTools::IsPathToFramework(i->c_str()))
+      {
+      std::string frameworkDir = *i;
+      frameworkDir += "/../";
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
+      if(emitted.insert(frameworkDir).second)
+        {
+        includeFlags << "-F" << this->ConvertToOutputForExisting(frameworkDir.c_str()) << " ";
+        }
+      continue;
+      }
+#endif
     std::string include = *i;
     if(!flagUsed || repeatFlag)
       {
