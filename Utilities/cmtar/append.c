@@ -231,7 +231,7 @@ tar_append_regfile(TAR *t, char *realname)
   int i, j;
   size_t size;
 
-  filefd = open(realname, O_RDONLY);
+  filefd = open(realname, O_RDONLY | O_BINARY);
   if (filefd == -1)
   {
 #ifdef DEBUG

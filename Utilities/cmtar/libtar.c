@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #include <libtar/compat.h>
 #include <io.h>
 #else
