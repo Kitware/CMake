@@ -1361,6 +1361,7 @@ bool cmSystemTools::IsPathToFramework(const char* path)
 
 #include <libtar/libtar.h>
 #include <memory> // auto_ptr
+#include <fcntl.h>
 
 bool cmSystemTools::CreateTar(const char* outFileName, const std::vector<cmStdString>& files)
 {
