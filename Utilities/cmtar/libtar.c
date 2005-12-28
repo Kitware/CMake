@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
-#ifdef _MSC_VER
+#if !defined(_WIN32) || defined(__CYGWIN__)
 #include <libtar/compat.h>
 #include <io.h>
 #else
@@ -86,7 +86,7 @@ gzopen_frontend(char *pathname, int oflags, int mode)
   if (fd == -1)
     return -1;
 
-#ifndef _MSC_VER
+#if !defined(_WIN32) || defined(__CYGWIN__)
   if ((oflags & O_CREAT) && fchmod(fd, mode))
     return -1;
 #endif
@@ -291,12 +291,12 @@ main(int argc, char *argv[])
   int c;
   int mode = 0;
   libtar_list_t *l;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
    int optind;
 #endif
   progname = basename(argv[0]);
 
-#ifndef _WIN32
+#if !defined(_WIN32) || defined(__CYGWIN__)
   while ((c = getopt(argc, argv, "cC:gtvVxz")) != -1)
     switch (c)
     {
