@@ -17,7 +17,7 @@
 #ifndef _MSC_VER
 #include <sys/param.h>
 #else
-#include <compat.h>
+#include <libtar/compat.h>
 #endif
 
 #ifndef WIN32

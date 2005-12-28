@@ -34,7 +34,7 @@ static char rcsid[] = "$OpenBSD: basename.c,v 1.4 1999/05/30 17:10:30 espie Exp 
 #include <errno.h>
 #include <string.h>
 //#include <sys/param.h>
-#include <compat.h>
+#include <libtar/compat.h>
 
 char *
 openbsd_basename(path)

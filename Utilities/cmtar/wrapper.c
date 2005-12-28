@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <libtar/compat.h>
 #ifdef _MSC_VER
-#include <filesystem.h>
+#include <libtarint/filesystem.h>
 #else
 #include <sys/param.h>
 #include <dirent.h>

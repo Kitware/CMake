@@ -40,7 +40,7 @@
  *
  **************************************************************/
 
-#include <config.h>
+#include <libtar/config.h>
 
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)
 

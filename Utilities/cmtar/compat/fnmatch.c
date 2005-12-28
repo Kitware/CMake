@@ -49,7 +49,7 @@ static char rcsid[] = "$OpenBSD: fnmatch.c,v 1.6 1998/03/19 00:29:59 millert Exp
  * Compares a filename or pathname to a pattern.
  */
 
-#include <config.h>
+#include <libtar/config.h>
 
 #include <stdio.h>
 
@@ -61,7 +61,7 @@ static char rcsid[] = "$OpenBSD: fnmatch.c,v 1.6 1998/03/19 00:29:59 millert Exp
 # include <ctype.h>
 #endif
 
-#include <compat.h>
+#include <libtar/compat.h>
 
 
 #define  EOS  '\0'
