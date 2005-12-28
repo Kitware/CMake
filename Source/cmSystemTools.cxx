@@ -1359,12 +1359,15 @@ bool cmSystemTools::IsPathToFramework(const char* path)
   return false;
 }
 
-#include <libtar/libtar.h>
-#include <memory> // auto_ptr
-#include <fcntl.h>
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#  include <libtar/libtar.h>
+#  include <memory> // auto_ptr
+#  include <fcntl.h>
+#endif
 
 bool cmSystemTools::CreateTar(const char* outFileName, const std::vector<cmStdString>& files)
 {
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   TAR *t;
   char buf[TAR_MAXPATHLEN];
   char pathname[TAR_MAXPATHLEN];
@@ -1413,4 +1416,7 @@ bool cmSystemTools::CreateTar(const char* outFileName, const std::vector<cmStdSt
     return false;
     }
   return true;
+#else
+  return false;
+#endif
 }
