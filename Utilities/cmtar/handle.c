@@ -56,6 +56,7 @@ static int
 tar_init(TAR **t, char *pathname, tartype_t *type,
    int oflags, int mode, int options)
 {
+  (void)mode;
   if ((oflags & O_ACCMODE) == O_RDWR)
   {
     errno = EINVAL;

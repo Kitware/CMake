@@ -313,11 +313,13 @@ char *strsep(register char **, register const char *);
 #define S_ISFIFO(m)  (((m)&S_IFFIFO)==S_IFFIFO)
 #endif
 
-#if defined(PATH_MAX)
-# define TAR_MAXPATHLEN PATH_MAX
-#elif defined(MAXPATHLEN)
-# define TAR_MAXPATHLEN MAXPATHLEN
-#else
-# define TAR_MAXPATHLEN 16384
+#if !defined(TAR_MAXPATHLEN)
+# if defined(PATH_MAX)
+#  define TAR_MAXPATHLEN PATH_MAX
+# elif defined(MAXPATHLEN)
+#  define TAR_MAXPATHLEN MAXPATHLEN
+# else
+#  define TAR_MAXPATHLEN 16384
+# endif
 #endif
 

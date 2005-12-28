@@ -45,9 +45,6 @@
 /* Define if your system has a working snprintf */
 #cmakedefine HAVE_SNPRINTF @HAVE_SNPRINTF@
 
-/* Define to 1 if the system has the type `socklen_t'. */
-#cmakedefine HAVE_SOCKLEN_T @HAVE_SOCKLEN_T@
-
 /* Define to 1 if you have the <stdint.h> header file. */
 #cmakedefine HAVE_STDINT_H @HAVE_STDINT_H@
 
@@ -182,9 +179,6 @@
 
 /* Define to `int' if <sys/types.h> does not define. */
 #cmakedefine ssize_t @size_t@
-
-/* Define to `unsigned long' if not defined in system header files. */
-#cmakedefine socklen_t @socklen_t@
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #cmakedefine uid_t @uid_t@
