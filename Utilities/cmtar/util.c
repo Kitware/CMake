@@ -20,7 +20,7 @@
 # include <string.h>
 #endif
 
-#ifdef _MSC_VER
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #include <direct.h>
 #else
 #include <sys/param.h>
@@ -30,7 +30,7 @@
 int
 path_hashfunc(char *key, int numbuckets)
 {
-  char buf[MAXPATHLEN];
+  char buf[TAR_MAXPATHLEN];
   char *p;
 
   strcpy(buf, key);
@@ -82,7 +82,7 @@ ino_hash(ino_t *inode)
 int
 mkdirhier(char *path)
 {
-  char src[MAXPATHLEN], dst[MAXPATHLEN] = "";
+  char src[TAR_MAXPATHLEN], dst[TAR_MAXPATHLEN] = "";
   char *dirp, *nextp = src;
   int retval = 1;
 
@@ -103,10 +103,10 @@ mkdirhier(char *path)
     if (dst[0] != '\0')
       strcat(dst, "/");
     strcat(dst, dirp);
-#ifndef _MSC_VER
-    if (mkdir(dst, 0777) == -1)
-#else
+#if defined(_WIN32) && !defined(__CYGWIN__)
     if (mkdir(dst) == -1)
+#else
+    if (mkdir(dst, 0777) == -1)
 #endif
     {
       if (errno != EEXIST)

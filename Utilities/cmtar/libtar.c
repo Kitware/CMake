@@ -113,7 +113,7 @@ create(char *tarfile, char *rootdir, libtar_list_t *l)
 {
   TAR *t;
   char *pathname;
-  char buf[MAXPATHLEN];
+  char buf[TAR_MAXPATHLEN];
   libtar_listptr_t lp;
 
   if (tar_open(&t, tarfile,

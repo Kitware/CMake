@@ -14,10 +14,10 @@
 
 #include <stdio.h>
 
-#ifndef _MSC_VER
-#include <sys/param.h>
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# include <libtar/compat.h>
 #else
-#include <libtar/compat.h>
+# include <sys/param.h>
 #endif
 
 #ifndef WIN32
@@ -34,7 +34,7 @@
 char *
 th_get_pathname(TAR *t)
 {
-  char filename[MAXPATHLEN];
+  char filename[TAR_MAXPATHLEN];
 
   if (t->th_buf.gnu_longname)
     return t->th_buf.gnu_longname;

@@ -34,7 +34,22 @@
 
 const char libtar_version[] = PACKAGE_VERSION;
 
+#define libtar_symbol(name, ret, args, callargs) \
+  static ret libtar_##name args \
+  { \
+    return name callargs; \
+  }
+
+#if defined(__BORLANDC__)
+libtar_symbol(open, int, (const char* pathname, int flags, mode_t mode), (pathname, flags, mode));
+libtar_symbol(close, int, (int fd), (fd));
+libtar_symbol(read, ssize_t, (int fd, void* buf, size_t count), (fd, buf, count));
+libtar_symbol(write, ssize_t, (int fd, void* buf, size_t count), (fd, buf, count));
+
+static tartype_t default_type = { libtar_open, libtar_close, libtar_read, libtar_write };
+#else
 static tartype_t default_type = { open, close, read, write };
+#endif
 
 
 static int

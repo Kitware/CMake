@@ -1,8 +1,8 @@
 #ifndef _FILESYSTEM_H_
 #define _FILESYSTEM_H_
 
-#ifdef _MSC_VER
 #include <io.h>
+#include <libtarint/internal.h>
 
 struct _KWDIR
 {
@@ -15,12 +15,9 @@ struct _KWDIR
   int EOD; //end of directory
 
 };
-#ifndef MAXPATHLEN
-#define MAXPATHLEN _MAX_PATH
-#endif
 typedef struct _KWDIRENTRY
 {
-  char d_name[MAXPATHLEN];
+  char d_name[TAR_MAXPATHLEN];
 }kwDirEntry;
 
 typedef struct _KWDIR kwDirectory;
@@ -31,5 +28,3 @@ int kwCloseDir(kwDirectory * dir);
 
 #endif //MSC
 
-
-#endif

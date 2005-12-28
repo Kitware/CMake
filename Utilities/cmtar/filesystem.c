@@ -3,7 +3,6 @@
 
 // First microsoft compilers
 
-#ifdef _MSC_VER
 #include <windows.h>
 #include <io.h>
 #include <ctype.h>
@@ -61,7 +60,7 @@ kwDirEntry * kwReadDir(kwDirectory * dir)
     return NULL;
     }
   entry = (kwDirEntry*)malloc(sizeof(kwDirEntry));
-  strncpy(entry->d_name,dir->Entry.name,MAXPATHLEN-1);
+  strncpy(entry->d_name,dir->Entry.name,TAR_MAXPATHLEN-1);
   if(_findnext(dir->SrchHandle, &dir->Entry) == -1)
     {
       dir->EOD=1;
@@ -79,4 +78,3 @@ int kwCloseDir(kwDirectory * dir)
   if(r==-1) return 0;
   return 1;
 }
-#endif

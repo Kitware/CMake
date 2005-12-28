@@ -290,7 +290,6 @@ SET(libtar_SRC
   output.c
   util.c
   wrapper.c
-  filesystem.c filesystem.h
   internal.h
   ${LIBTAR_BINARY_DIR}/libtar/config.h
   config.h.in
@@ -304,6 +303,11 @@ SET(libtar_SRC
 #  compat/strmode.c 
 #  compat/strsep.c 
 )
+IF(NOT UNIX)
+  SET(libtar_SRC
+    ${libtar_SRC}
+    filesystem.c filesystem.h)
+ENDIF(NOT UNIX)
 
 IF(NOT HAVE_STRLCPY)
 SET(libtar_SRC ${libtar_SRC} compat/strlcpy.c)

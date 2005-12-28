@@ -17,14 +17,20 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
-#ifdef _MSC_VER
-#include <sys/utime.h>
-#include <io.h>
-#include <direct.h>
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# ifdef _MSC_VER
+#  include <sys/utime.h>
+# else
+#  include <utime.h>
+# endif
+# include <io.h>
+# include <direct.h>
 #else
-#include <utime.h>
-#include <sys/param.h>
+# include <utime.h>
+# include <sys/param.h>
 #endif
+
 #ifdef STDC_HEADERS
 # include <stdlib.h>
 # include <string.h>
@@ -41,8 +47,8 @@
 
 struct linkname
 {
-  char ln_save[MAXPATHLEN];
-  char ln_real[MAXPATHLEN];
+  char ln_save[TAR_MAXPATHLEN];
+  char ln_real[TAR_MAXPATHLEN];
 };
 typedef struct linkname linkname_t;
 

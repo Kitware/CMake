@@ -33,14 +33,14 @@ static char rcsid[] = "$OpenBSD: dirname.c,v 1.4 1999/05/30 17:10:30 espie Exp $
 
 #include <errno.h>
 #include <string.h>
-//#include <sys/param.h>
 #include <libtar/compat.h>
+#include <libtarint/internal.h>
 
 char *
 openbsd_dirname(path)
   const char *path;
 {
-  static char bname[MAXPATHLEN];
+  static char bname[TAR_MAXPATHLEN];
   register const char *endp;
 
   /* Empty or NULL string gets treated as "." */
