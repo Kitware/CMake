@@ -231,7 +231,11 @@ tar_append_regfile(TAR *t, char *realname)
   int i, j;
   size_t size;
 
+#ifdef _WIN32
   filefd = open(realname, O_RDONLY | O_BINARY);
+#else
+  filefd = open(realname, O_RDONLY);
+#endif
   if (filefd == -1)
   {
 #ifdef DEBUG
