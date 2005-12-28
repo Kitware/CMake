@@ -219,6 +219,7 @@ list(char *tarfile)
     fprintf(stderr, "tar_close(): %s\n", strerror(errno));
     return -1;
   }
+  (void)i;
 
   return 0;
 }
