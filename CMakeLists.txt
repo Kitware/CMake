@@ -86,7 +86,7 @@ SET(CMAKE_CURL_LIBRARIES "cmcurl")
 #-----------------------------------------------------------------------------
 # Build Curl library for CTest.
 SUBDIRS(Utilities/cmtar)
-SET(CMAKE_TAR_INCLUDES "${CMAKE_CURRENT_BINARY_DIR}/Utilities")
+SET(CMAKE_TAR_INCLUDES "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmtar")
 SET(CMAKE_TAR_LIBRARIES "cmtar")
 
 #-----------------------------------------------------------------------------
