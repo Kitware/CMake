@@ -69,6 +69,7 @@ FOREACH(file
   "inttypes.h"
   "libgen.h"
   "memory.h"
+  "sys/mkdev.h"
   "stdint.h"
   "stdlib.h"
   "stdio.h"

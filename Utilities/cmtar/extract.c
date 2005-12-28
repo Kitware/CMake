@@ -34,6 +34,10 @@
 # include <unistd.h>
 #endif
 
+#ifdef HAVE_SYS_MKDEV_H
+# include <sys/mkdev.h>
+#endif
+
 
 struct linkname
 {

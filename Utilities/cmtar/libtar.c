@@ -28,6 +28,7 @@
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
+# include <stdlib.h>
 #endif
 
 #ifdef DEBUG
