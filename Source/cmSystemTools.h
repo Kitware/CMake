@@ -297,6 +297,8 @@ public:
       of the form var=value */
   static bool PutEnv(const char* value);
 
+  /** Create tar */
+  static bool CreateTar(const char* outFileName, const std::vector<cmStdString>& files);
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
