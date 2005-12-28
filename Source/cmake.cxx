@@ -720,6 +720,8 @@ void CMakeCommandUsage(const char* program)
     << "  copy_directory source destination    - copy directory 'source' content to directory 'destination'\n"
     << "  echo [string]...        - displays arguments as text\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
+    << "  tar file.tar file/dir1 file/dir2 ... - create a tar\n"
+    << "  untar file.tar - create a tar\n"
     << "  time command [args] ... - run command and return elapsed time\n";
 #if defined(_WIN32) && !defined(__CYGWIN__)
   errorStream
@@ -942,6 +944,23 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
         return lgd->ScanDependencies(args)? 0 : 2;
         }
       return 1;
+      }
+
+    // Tar files
+    else if (args[1] == "tar" && args.size() > 3)
+      {
+      std::string outFile = args[2];
+      std::vector<cmStdString> files;
+      for (std::string::size_type cc = 3; cc < args.size(); cc ++)
+        {
+        files.push_back(args[cc]);
+        }
+      if ( !cmSystemTools::CreateTar(outFile.c_str(), files) )
+        {
+        cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
+        return 1;
+        }
+      return 0;
       }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
