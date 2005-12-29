@@ -234,7 +234,7 @@ tar_append_regfile(TAR *t, char *realname)
   int i, j;
   size_t size;
 
-#ifdef _WIN32
+#if defined( _WIN32 ) || defined(__CYGWIN__)
   filefd = open(realname, O_RDONLY | O_BINARY);
 #else
   filefd = open(realname, O_RDONLY);
@@ -254,7 +254,11 @@ tar_append_regfile(TAR *t, char *realname)
     if (j != T_BLOCKSIZE)
     {
       if (j != -1)
+        {
+        fprintf(stderr, "Unexpected size of read data: %d <> %d for file: %s\n",
+          j, T_BLOCKSIZE, realname);
         errno = EINVAL;
+        }
       return -1;
     }
     if (tar_block_write(t, &block) == -1)
