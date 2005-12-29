@@ -78,7 +78,7 @@ tar_append_file(TAR *t, char *realname, char *savename)
          (savename ? savename : "[NULL]"));
 #endif
 
-#ifdef WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
   if (stat(realname, &s) != 0)
 #else
   if (lstat(realname, &s) != 0)
@@ -157,7 +157,7 @@ tar_append_file(TAR *t, char *realname, char *savename)
   /* check if it's a symlink */
   if (TH_ISSYM(t))
   {
-#ifdef WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
     i = -1;
 #else
     i = readlink(realname, path, sizeof(path));
