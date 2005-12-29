@@ -1363,23 +1363,72 @@ bool cmSystemTools::IsPathToFramework(const char* path)
 #  include <libtar/libtar.h>
 #  include <memory> // auto_ptr
 #  include <fcntl.h>
+#  include <cmzlib/zlib.h>
+
+static int gzopen_frontend(char *pathname, int oflags, int mode)
+{
+  char *gzoflags;
+  gzFile gzf;
+  int fd;
+
+  switch (oflags & O_ACCMODE)
+  {
+  case O_WRONLY:
+    gzoflags = "wb";
+    break;
+  case O_RDONLY:
+    gzoflags = "rb";
+    break;
+  default:
+  case O_RDWR:
+    errno = EINVAL;
+    return -1;
+  }
+
+  fd = open(pathname, oflags, mode);
+  if (fd == -1)
+    {
+    return -1;
+    }
+
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  if ((oflags & O_CREAT) && fchmod(fd, mode))
+    {
+    return -1;
+    }
 #endif
 
-bool cmSystemTools::CreateTar(const char* outFileName, const std::vector<cmStdString>& files)
+  gzf = gzdopen(fd, gzoflags);
+  if (!gzf)
+  {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  return (int)gzf;
+}
+
+#endif
+
+bool cmSystemTools::CreateTar(const char* outFileName, const std::vector<cmStdString>& files, bool gzip, bool verbose)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   TAR *t;
   char buf[TAR_MAXPATHLEN];
   char pathname[TAR_MAXPATHLEN];
 
+  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) gzclose,
+    (readfunc_t) gzread, (writefunc_t) gzwrite
+  };
+
   // Ok, this libtar is not const safe. for now use auto_ptr hack
   char* realName = new char[ strlen(outFileName) + 1 ];
   std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
   if (tar_open(&t, realName,
-      NULL,
+      (gzip? &gztype : NULL),
       O_WRONLY | O_CREAT, 0644,
-      TAR_VERBOSE
+      (verbose?TAR_VERBOSE:0)
       | 0) == -1)
     {
     cmSystemTools::Error("Problem with tar_open(): ", strerror(errno));
@@ -1422,22 +1471,28 @@ bool cmSystemTools::CreateTar(const char* outFileName, const std::vector<cmStdSt
 #endif
 }
 
-bool cmSystemTools::ExtractTar(const char* outFileName, const std::vector<cmStdString>& files)
+bool cmSystemTools::ExtractTar(const char* outFileName, const std::vector<cmStdString>& files, bool gzip, bool verbose)
 {
+  (void)files;
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   TAR *t;
+
+  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) gzclose,
+    (readfunc_t) gzread, (writefunc_t) gzwrite
+  };
+
   // Ok, this libtar is not const safe. for now use auto_ptr hack
   char* realName = new char[ strlen(outFileName) + 1 ];
   std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
   if (tar_open(&t, realName,
-      NULL,
+      (gzip? &gztype : NULL),
       O_RDONLY
 #ifdef _WIN32
       | O_BINARY
 #endif
       , 0,
-      TAR_VERBOSE
+      (verbose?TAR_VERBOSE:0)
       | 0) == -1)
     {
     cmSystemTools::Error("Problem with tar_open(): ", strerror(errno));
@@ -1448,6 +1503,69 @@ bool cmSystemTools::ExtractTar(const char* outFileName, const std::vector<cmStdS
   {
     cmSystemTools::Error("Problem with tar_extract_all(): ", strerror(errno));
     return false;
+  }
+
+  if (tar_close(t) != 0)
+    {
+    cmSystemTools::Error("Problem with tar_close(): ", strerror(errno));
+    return false;
+    }
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool cmSystemTools::ListTar(const char* outFileName, std::vector<cmStdString>& files, bool gzip, bool verbose)
+{
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  TAR *t;
+
+  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) gzclose,
+    (readfunc_t) gzread, (writefunc_t) gzwrite
+  };
+
+  // Ok, this libtar is not const safe. for now use auto_ptr hack
+  char* realName = new char[ strlen(outFileName) + 1 ];
+  std::auto_ptr<char> realNamePtr(realName);
+  strcpy(realName, outFileName);
+  if (tar_open(&t, realName,
+      (gzip? &gztype : NULL),
+      O_RDONLY
+#ifdef _WIN32
+      | O_BINARY
+#endif
+      , 0,
+      (verbose?TAR_VERBOSE:0)
+      | 0) == -1)
+    {
+    cmSystemTools::Error("Problem with tar_open(): ", strerror(errno));
+    return false;
+    }
+
+  int i;
+  while ((i = th_read(t)) == 0)
+  {
+    const char* filename = th_get_pathname(t);
+    files.push_back(filename);
+   
+    if ( verbose )
+      {
+      th_print_long_ls(t);
+      }
+    else
+      {
+      std::cout << filename << std::endl;
+      }
+
+#ifdef DEBUG
+    th_print(t);
+#endif
+    if (TH_ISREG(t) && tar_skip_regfile(t) != 0)
+      {
+      cmSystemTools::Error("Problem with tar_skip_regfile(): ", strerror(errno));
+      return false;
+      }
   }
 
   if (tar_close(t) != 0)

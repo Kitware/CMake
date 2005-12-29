@@ -720,8 +720,7 @@ void CMakeCommandUsage(const char* program)
     << "  copy_directory source destination    - copy directory 'source' content to directory 'destination'\n"
     << "  echo [string]...        - displays arguments as text\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
-    << "  tar file.tar file/dir1 file/dir2 ... - create a tar\n"
-    << "  untar file.tar - create a tar\n"
+    << "  tar [cxt][vfz] file.tar file/dir1 file/dir2 ... - create a tar.\n"
     << "  time command [args] ... - run command and return elapsed time\n";
 #if defined(_WIN32) && !defined(__CYGWIN__)
   errorStream
@@ -949,33 +948,47 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     // Tar files
     else if (args[1] == "tar" && args.size() > 3)
       {
-      std::string outFile = args[2];
+      std::string flags = args[2];
+      std::string outFile = args[3];
       std::vector<cmStdString> files;
-      for (std::string::size_type cc = 3; cc < args.size(); cc ++)
+      for (std::string::size_type cc = 4; cc < args.size(); cc ++)
         {
         files.push_back(args[cc]);
         }
-      if ( !cmSystemTools::CreateTar(outFile.c_str(), files) )
+      bool gzip = false;
+      bool verbose = false;
+      if ( flags.find_first_of('z') != flags.npos )
         {
-        cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
-        return 1;
+        gzip = true;
         }
-      return 0;
-      }
+      if ( flags.find_first_of('v') != flags.npos )
+        {
+        verbose = true;
+        }
 
-    // Untar files
-    else if (args[1] == "untar" && args.size() > 2)
-      {
-      std::string outFile = args[2];
-      std::vector<cmStdString> files;
-      for (std::string::size_type cc = 3; cc < args.size(); cc ++)
+      if ( flags.find_first_of('t') != flags.npos )
         {
-        files.push_back(args[cc]);
+        if ( !cmSystemTools::ListTar(outFile.c_str(), files, gzip, verbose) )
+          {
+          cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
+          return 1;
+          }
         }
-      if ( !cmSystemTools::ExtractTar(outFile.c_str(), files) )
+      else if ( flags.find_first_of('c') != flags.npos )
         {
-        cmSystemTools::Error("Problem extracting tar: ", outFile.c_str());
-        return 1;
+        if ( !cmSystemTools::CreateTar(outFile.c_str(), files, gzip, verbose) )
+          {
+          cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
+          return 1;
+          }
+        }
+      else if ( flags.find_first_of('x') != flags.npos )
+        {
+        if ( !cmSystemTools::ExtractTar(outFile.c_str(), files, gzip, verbose) )
+          {
+          cmSystemTools::Error("Problem extracting tar: ", outFile.c_str());
+          return 1;
+          }
         }
       return 0;
       }

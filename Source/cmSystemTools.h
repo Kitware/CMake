@@ -298,8 +298,9 @@ public:
   static bool PutEnv(const char* value);
 
   /** Create tar */
-  static bool CreateTar(const char* outFileName, const std::vector<cmStdString>& files);
-  static bool ExtractTar(const char* inFileName, const std::vector<cmStdString>& files);
+  static bool ListTar(const char* outFileName, std::vector<cmStdString>& files, bool gzip, bool verbose);
+  static bool CreateTar(const char* outFileName, const std::vector<cmStdString>& files, bool gzip, bool verbose);
+  static bool ExtractTar(const char* inFileName, const std::vector<cmStdString>& files, bool gzip, bool verbose);
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
