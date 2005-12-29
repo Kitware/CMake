@@ -213,8 +213,14 @@ tar_extract_regfile(TAR *t, char *realname)
   uid = th_get_uid(t);
   gid = th_get_gid(t);
 
-  if (mkdirhier(dirname(filename)) == -1)
+  strncpy(buf, filename, sizeof(buf)-1);
+  buf[sizeof(buf)-1] = 0;
+
+
+  if (mkdirhier(dirname(buf)) == -1)
+    {
     return -1;
+    }
 
 #ifdef DEBUG
   printf("  ==> extracting: %s (mode %04o, uid %d, gid %d, %d bytes)\n",
