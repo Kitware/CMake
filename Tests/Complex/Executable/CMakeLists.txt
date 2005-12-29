@@ -11,7 +11,7 @@ LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source)
 LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source/kwsys)
 LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmexpat)
 LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmzlib)
-LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmcurl)
+LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmtar)
 # Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to 
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 LINK_LIBRARIES(${COMPLEX_LIBS})
