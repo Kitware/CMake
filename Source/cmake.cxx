@@ -964,7 +964,7 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       }
 
     // Untar files
-    else if (args[1] == "untar" && args.size() > 3)
+    else if (args[1] == "untar" && args.size() > 2)
       {
       std::string outFile = args[2];
       std::vector<cmStdString> files;
