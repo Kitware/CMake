@@ -963,6 +963,23 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       return 0;
       }
 
+    // Untar files
+    else if (args[1] == "untar" && args.size() > 3)
+      {
+      std::string outFile = args[2];
+      std::vector<cmStdString> files;
+      for (std::string::size_type cc = 3; cc < args.size(); cc ++)
+        {
+        files.push_back(args[cc]);
+        }
+      if ( !cmSystemTools::ExtractTar(outFile.c_str(), files) )
+        {
+        cmSystemTools::Error("Problem extracting tar: ", outFile.c_str());
+        return 1;
+        }
+      return 0;
+      }
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     // Internal CMake Fortran module support.
     else if (args[1] == "cmake_copy_f90_mod" && args.size() >= 4)

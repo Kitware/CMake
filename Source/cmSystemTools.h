@@ -299,6 +299,7 @@ public:
 
   /** Create tar */
   static bool CreateTar(const char* outFileName, const std::vector<cmStdString>& files);
+  static bool ExtractTar(const char* inFileName, const std::vector<cmStdString>& files);
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
