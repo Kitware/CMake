@@ -707,7 +707,11 @@ int mutt_snprintf (va_alist) va_dcl
   VA_SHIFT (str, char *);
   VA_SHIFT (count, size_t );
   VA_SHIFT (fmt, char *);
+#ifdef HAVE_VSNPRINTF
   (void) vsnprintf(str, count, fmt, ap);
+#else
+  (void) mutt_vsnprintf(str, count, fmt, ap);
+#endif
   VA_END;
   return(strlen(str));
 }
