@@ -1,5 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 1.5)
 
+INCLUDE_REGULAR_EXPRESSION("^.*$")
+
 # configure the .h file
 CONFIGURE_FILE(
   "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"

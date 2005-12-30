@@ -147,7 +147,7 @@ SET(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL
   "Where to put the libraries for CMake"
   )
 
-INCLUDE_REGULAR_EXPRESSION("^(\\.\\./)?(cm|CMake|form|ctest).*")
+INCLUDE_REGULAR_EXPRESSION("^.*$")
 
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
   ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)

@@ -1,5 +1,4 @@
 PROJECT(CMZLIB)
-INCLUDE_REGULAR_EXPRESSION("^(deflate|inf|trees|zconf|zlib|zutil).*$")
 
 INCLUDE_DIRECTORIES(
   "${CMZLIB_SOURCE_DIR}"
@@ -13,7 +12,7 @@ INCLUDE_DIRECTORIES(
 ADD_DEFINITIONS(-DCMZLIB_IN_C)
 
 # Match all headers for dependencies but complain about none.
-INCLUDE_REGULAR_EXPRESSION("^.*$" "^$")
+INCLUDE_REGULAR_EXPRESSION("^.*$")
 
 # source files for zlib
 SET(ZLIB_SRCS
