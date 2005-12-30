@@ -51,6 +51,9 @@
 /* Define if your system has a working snprintf */
 #cmakedefine HAVE_SNPRINTF @HAVE_SNPRINTF@
 
+/* Define if your system has a working vsnprintf */
+#cmakedefine HAVE_VSNPRINTF @HAVE_VSNPRINTF@
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #cmakedefine HAVE_STDINT_H @HAVE_STDINT_H@
 
@@ -184,7 +187,7 @@
 #cmakedefine size_t @size_t@
 
 /* Define to `int' if <sys/types.h> does not define. */
-#cmakedefine ssize_t @size_t@
+#cmakedefine ssize_t @ssize_t@
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #cmakedefine uid_t @uid_t@

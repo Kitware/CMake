@@ -201,10 +201,12 @@ int inet_aton(const char *, struct in_addr *);
 #ifdef _MSC_VER /* compile snprintf only onwin32 */
 #if !defined(HAVE_SNPRINTF)
 int mutt_snprintf(char *, size_t, const char *, ...);
-int mutt_vsnprintf(char *, size_t, const char *, va_list);
-#define snprintf mutt_snprintf
-#define vsnprintf mutt_vsnprintf
+# define snprintf mutt_snprintf
+#endif
 
+#if !defined(HAVE_VSNPRINTF)
+int mutt_vsnprintf(char *, size_t, const char *, va_list);
+# define vsnprintf mutt_vsnprintf
 #endif /* NEED_SNPRINTF && ! HAVE_SNPRINTF */
 #endif
 

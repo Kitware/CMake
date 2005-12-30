@@ -44,6 +44,7 @@
 
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)
 
+#include <stdio.h>
 #include <string.h>
 # include <ctype.h>
 #include <sys/types.h>
@@ -706,7 +707,7 @@ int mutt_snprintf (va_alist) va_dcl
   VA_SHIFT (str, char *);
   VA_SHIFT (count, size_t );
   VA_SHIFT (fmt, char *);
-  (void) mutt_vsnprintf(str, count, fmt, ap);
+  (void) vsnprintf(str, count, fmt, ap);
   VA_END;
   return(strlen(str));
 }
