@@ -110,8 +110,8 @@ th_print_long_ls(TAR *t)
   if (TH_ISCHR(t) || TH_ISBLK(t))
     printf(" %3d, %3d ", th_get_devmajor(t), th_get_devminor(t));
   else
-    printf("%9ld ", (long)th_get_size(t));
 #endif
+    printf("%9ld ", (long)th_get_size(t));
 
   mtime = th_get_mtime(t);
   mtm = localtime(&mtime);

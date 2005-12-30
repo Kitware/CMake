@@ -103,12 +103,24 @@ mkdirhier(char *path)
     if (dst[0] != '\0')
       strcat(dst, "/");
     strcat(dst, dirp);
+    if (
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    if (mkdir(dst) == -1)
+      mkdir(dst) == -1
 #else
-    if (mkdir(dst, 0777) == -1)
+      mkdir(dst, 0777) == -1
 #endif
+    )
     {
+#ifdef __BORLANDC__
+        /* There is a bug in the Borland Run time library which makes MKDIR
+           return EACCES when it should return EEXIST
+           if it is some other error besides directory exists
+           then return false */
+      if ( errno == EACCES) 
+        {
+        errno = EEXIST;
+        }
+#endif      
       if (errno != EEXIST)
         return -1;
     }

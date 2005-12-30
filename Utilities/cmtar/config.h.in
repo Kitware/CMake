@@ -36,6 +36,12 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine HAVE_MEMORY_H @HAVE_MEMORY_H@
 
+/* Define to 1 if you have the <dirent.h> header file. */
+#cmakedefine HAVE_DIRENT_H @HAVE_DIRENT_H@
+
+/* Define to 1 if you have the <sys/param.h> header file. */
+#cmakedefine HAVE_SYS_PARAM_H @HAVE_SYS_PARAM_H@
+
 /* Define to 1 if the system has the type `minor_t'. */
 #cmakedefine HAVE_MINOR_T @HAVE_MINOR_T@
 

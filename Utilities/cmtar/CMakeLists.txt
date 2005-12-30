@@ -75,10 +75,12 @@ FOREACH(file
   "stdio.h"
   "string.h"
   "strings.h"
+  "sys/param.h"
   "sys/types.h"
   "sys/stat.h"
   "unistd.h"
   "glob.h"
+  "dirent.h"
   )
   CHECK_INCLUDE_FILE_CONCAT("${file}")
 ENDFOREACH(file)
@@ -293,11 +295,11 @@ SET(libtar_SRC
 #  compat/strmode.c 
 #  compat/strsep.c 
 )
-IF(NOT UNIX)
+IF(NOT HAVE_DIRENT_H)
   SET(libtar_SRC
     ${libtar_SRC}
     filesystem.c filesystem.h)
-ENDIF(NOT UNIX)
+ENDIF(NOT HAVE_DIRENT_H)
 
 IF(NOT HAVE_STRLCPY)
 SET(libtar_SRC ${libtar_SRC} compat/strlcpy.c)

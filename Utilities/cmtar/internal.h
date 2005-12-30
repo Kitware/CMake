@@ -14,3 +14,10 @@
 #include <libtar/compat.h>
 
 #include <libtar/libtar.h>
+
+#ifndef major
+# define major(dev) ((int)(((dev) >> 8) & 0xff))
+#endif
+#ifndef minor
+# define minor(dev) ((int)((dev) & 0xff))
+#endif
