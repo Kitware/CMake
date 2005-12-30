@@ -62,10 +62,10 @@ struct tar_header
 
 /***** handle.c ************************************************************/
 
-typedef int (*openfunc_t)(const char *, int, ...);
-typedef int (*closefunc_t)(int);
-typedef ssize_t (*readfunc_t)(int, void *, size_t);
-typedef ssize_t (*writefunc_t)(int, const void *, size_t);
+typedef int (*openfunc_t)(void* call_data, const char *, int, mode_t);
+typedef int (*closefunc_t)(void* call_data, int);
+typedef ssize_t (*readfunc_t)(void* call_data, int, void *, size_t);
+typedef ssize_t (*writefunc_t)(void* call_data, int, const void *, size_t);
 
 typedef struct
 {
@@ -73,6 +73,7 @@ typedef struct
   closefunc_t closefunc;
   readfunc_t readfunc;
   writefunc_t writefunc;
+  void* call_data;
 }
 tartype_t;
 
@@ -114,6 +115,12 @@ int tar_fdopen(TAR **t, int fd, char *pathname, tartype_t *type,
 /* returns the descriptor associated with t */
 int tar_fd(TAR *t);
 
+/* returns the descriptor associated with t */
+void* tar_call_data(TAR *t);
+
+/* returns the descriptor associated with t */
+void tar_set_call_data(TAR *t, void* cd);
+
 /* close tarfile handle */
 int tar_close(TAR *t);
 
@@ -145,9 +152,9 @@ int tar_append_regfile(TAR *t, char *realname);
 
 /* macros for reading/writing tarchive blocks */
 #define tar_block_read(t, buf) \
-  (*((t)->type->readfunc))((t)->fd, (char *)(buf), T_BLOCKSIZE)
+  (*((t)->type->readfunc))((t)->type->call_data, (t)->fd, (char *)(buf), T_BLOCKSIZE)
 #define tar_block_write(t, buf) \
-  (*((t)->type->writefunc))((t)->fd, (char *)(buf), T_BLOCKSIZE)
+  (*((t)->type->writefunc))((t)->type->call_data, (t)->fd, (char *)(buf), T_BLOCKSIZE)
 
 /* read/write a header block */
 int th_read(TAR *t);

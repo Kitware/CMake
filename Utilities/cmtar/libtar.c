@@ -61,12 +61,17 @@ segv_handler(int sig)
 
 int use_zlib = 0;
 
-int
-gzopen_frontend(char *pathname, int oflags, int mode)
+struct gzStruct
+{
+  gzFile* GZFile;
+};
+struct gzStruct GZStruct;
+
+int libtar_gzopen(void* call_data, const char *pathname, int oflags, mode_t mode)
 {
   char *gzoflags;
-  gzFile gzf;
   int fd;
+  struct gzStruct* gzf = (struct gzStruct*)call_data;
 
   switch (oflags & O_ACCMODE)
   {
@@ -84,25 +89,54 @@ gzopen_frontend(char *pathname, int oflags, int mode)
 
   fd = open(pathname, oflags, mode);
   if (fd == -1)
+    {
     return -1;
+    }
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
   if ((oflags & O_CREAT) && fchmod(fd, mode))
+    {
     return -1;
+    }
 #endif
 
-  gzf = gzdopen(fd, gzoflags);
-  if (!gzf)
+  gzf->GZFile = cm_zlib_gzdopen(fd, gzoflags);
+  if (!gzf->GZFile)
   {
     errno = ENOMEM;
     return -1;
   }
 
-  return (int)gzf;
+  return fd;
 }
 
-tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) gzclose,
-  (readfunc_t) gzread, (writefunc_t) gzwrite
+int libtar_gzclose(void* call_data, int fd)
+{
+  struct gzStruct* gzf = (struct gzStruct*)call_data;
+  (void)fd;
+  return cm_zlib_gzclose(gzf->GZFile);
+}
+
+ssize_t libtar_gzread(void* call_data, int fd, void* buf, size_t count)
+{
+  struct gzStruct* gzf = (struct gzStruct*)call_data;
+  (void)fd;
+  return cm_zlib_gzread(gzf->GZFile, buf, count);
+}
+
+ssize_t libtar_gzwrite(void* call_data, int fd, const void* buf, size_t count)
+{
+  struct gzStruct* gzf = (struct gzStruct*)call_data;
+  (void)fd;
+  return cm_zlib_gzwrite(gzf->GZFile, (void*)buf, count);
+}
+
+tartype_t gztype = { 
+  libtar_gzopen,
+  libtar_gzclose,
+  libtar_gzread,
+  libtar_gzwrite,
+  &GZStruct
 };
 
 #endif /* HAVE_LIBZ */

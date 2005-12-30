@@ -1365,11 +1365,21 @@ bool cmSystemTools::IsPathToFramework(const char* path)
 #  include <fcntl.h>
 #  include <cmzlib/zlib.h>
 
-static int gzopen_frontend(char *pathname, int oflags, int mode)
+struct cmSystemToolsGZStruct
+{
+  gzFile GZFile;
+  static int Open(void* call_data, const char *pathname, int oflags, mode_t mode);
+  static int Close(void* call_data, int fd);
+  static ssize_t Read(void* call_data, int fd, void* buf, size_t count);
+  static ssize_t Write(void* call_data, int fd, const void* buf, size_t count);
+};
+
+int cmSystemToolsGZStruct::Open(void* call_data, const char *pathname, int oflags, mode_t mode)
 {
   char *gzoflags;
-  gzFile gzf;
   int fd;
+
+  cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
 
   switch (oflags & O_ACCMODE)
   {
@@ -1398,14 +1408,35 @@ static int gzopen_frontend(char *pathname, int oflags, int mode)
     }
 #endif
 
-  gzf = cm_zlib_gzdopen(fd, gzoflags);
-  if (!gzf)
+  gzf->GZFile = cm_zlib_gzdopen(fd, gzoflags);
+  if (!gzf->GZFile)
   {
     errno = ENOMEM;
     return -1;
   }
 
-  return (int)gzf;
+  return fd;
+}
+
+int cmSystemToolsGZStruct::Close(void* call_data, int fd)
+{
+  (void)fd;
+  cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
+  return cm_zlib_gzclose(gzf->GZFile);
+}
+
+ssize_t cmSystemToolsGZStruct::Read(void* call_data, int fd, void* buf, size_t count)
+{
+  (void)fd;
+  cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
+  return cm_zlib_gzread(gzf->GZFile, buf, count);
+}
+
+ssize_t cmSystemToolsGZStruct::Write(void* call_data, int fd, const void* buf, size_t count)
+{
+  (void)fd;
+  cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
+  return cm_zlib_gzwrite(gzf->GZFile, (void*)buf, count);
 }
 
 #endif
@@ -1416,9 +1447,14 @@ bool cmSystemTools::CreateTar(const char* outFileName, const std::vector<cmStdSt
   TAR *t;
   char buf[TAR_MAXPATHLEN];
   char pathname[TAR_MAXPATHLEN];
+  cmSystemToolsGZStruct gzs;
 
-  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) cm_zlib_gzclose,
-    (readfunc_t) cm_zlib_gzread, (writefunc_t) cm_zlib_gzwrite
+  tartype_t gztype = {
+    cmSystemToolsGZStruct::Open,
+    cmSystemToolsGZStruct::Close,
+    cmSystemToolsGZStruct::Read,
+    cmSystemToolsGZStruct::Write,
+    &gzs
   };
 
   // Ok, this libtar is not const safe. for now use auto_ptr hack
@@ -1476,9 +1512,14 @@ bool cmSystemTools::ExtractTar(const char* outFileName, const std::vector<cmStdS
   (void)files;
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   TAR *t;
+  cmSystemToolsGZStruct gzs;
 
-  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) cm_zlib_gzclose,
-    (readfunc_t) cm_zlib_gzread, (writefunc_t) cm_zlib_gzwrite
+  tartype_t gztype = {
+    cmSystemToolsGZStruct::Open,
+    cmSystemToolsGZStruct::Close,
+    cmSystemToolsGZStruct::Read,
+    cmSystemToolsGZStruct::Write,
+    &gzs
   };
 
   // Ok, this libtar is not const safe. for now use auto_ptr hack
@@ -1520,9 +1561,14 @@ bool cmSystemTools::ListTar(const char* outFileName, std::vector<cmStdString>& f
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   TAR *t;
+  cmSystemToolsGZStruct gzs;
 
-  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) cm_zlib_gzclose,
-    (readfunc_t) cm_zlib_gzread, (writefunc_t) cm_zlib_gzwrite
+  tartype_t gztype = {
+    cmSystemToolsGZStruct::Open,
+    cmSystemToolsGZStruct::Close,
+    cmSystemToolsGZStruct::Read,
+    cmSystemToolsGZStruct::Write,
+    &gzs
   };
 
   // Ok, this libtar is not const safe. for now use auto_ptr hack
