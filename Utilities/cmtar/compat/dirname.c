@@ -29,6 +29,7 @@
 
 #ifndef lint
 static char rcsid[] = "$OpenBSD: dirname.c,v 1.4 1999/05/30 17:10:30 espie Exp $";
+const char* libtar_compat_dirname_getrcsid() { return rcsid; }
 #endif /* not lint */
 
 #include <errno.h>
