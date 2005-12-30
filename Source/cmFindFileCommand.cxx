@@ -114,6 +114,9 @@ cmStdString cmFindFileCommand::FindHeaderInFrameworks(
   const char* file)
 {
 #ifndef __APPLE__
+  (void)path;
+  (void)defineVar;
+  (void)file;
   return cmStdString("");
 #else
   cmStdString fileName = file;

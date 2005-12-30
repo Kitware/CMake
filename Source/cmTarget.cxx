@@ -307,6 +307,7 @@ void cmTarget::AddLinkLibrary(const std::string& lib,
 
 bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
 {
+  (void)llt; // TODO: What is this?
   if(cmSystemTools::IsPathToFramework(libname.c_str()))
     {
     std::string frameworkDir = libname;
