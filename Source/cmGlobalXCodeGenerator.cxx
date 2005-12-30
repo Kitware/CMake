@@ -1198,12 +1198,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::vector<std::string>& frameworks = target.GetFrameworks();
   if(frameworks.size())
     {
-    for(std::vector<std::string>::iterator i = frameworks.begin();
-        i != frameworks.end(); ++i)
+    for(std::vector<std::string>::iterator fmIt = frameworks.begin();
+        fmIt != frameworks.end(); ++fmIt)
       {
-      if(emitted.insert(*i).second)
+      if(emitted.insert(*fmIt).second)
         {
-        fdirs += this->XCodeEscapePath(i->c_str());
+        fdirs += this->XCodeEscapePath(fmIt->c_str());
         fdirs += " ";
         }
       }

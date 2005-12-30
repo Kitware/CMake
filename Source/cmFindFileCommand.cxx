@@ -113,9 +113,10 @@ cmStdString cmFindFileCommand::FindHeaderInFrameworks(
   const char* defineVar,
   const char* file)
 {
+  (void)defineVar;
+
 #ifndef __APPLE__
   (void)path;
-  (void)defineVar;
   (void)file;
   return cmStdString("");
 #else
@@ -150,11 +151,11 @@ cmStdString cmFindFileCommand::FindHeaderInFrameworks(
       fpath += "/";
       fpath += frameWorkName;
       fpath += ".framework";
-      std::string path = fpath;
-      path += "/Headers/";
-      path += fileName;
-      std::cerr << "try " << path << "\n";
-      if(cmSystemTools::FileExists(path.c_str()))
+      std::string intPath = fpath;
+      intPath += "/Headers/";
+      intPath += fileName;
+      std::cerr << "try " << intPath << "\n";
+      if(cmSystemTools::FileExists(intPath.c_str()))
         {
         return fpath;
         }
