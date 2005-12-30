@@ -1378,7 +1378,7 @@ struct cmSystemToolsGZStruct
 
 int cmSystemToolsGZStruct::Open(void* call_data, const char *pathname, int oflags, mode_t mode)
 {
-  char *gzoflags;
+  const char *gzoflags;
   int fd;
 
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
@@ -1449,10 +1449,10 @@ bool cmSystemTools::CreateTar(const char* outFileName, const std::vector<cmStdSt
   cmSystemToolsGZStruct gzs;
 
   tartype_t gztype = {
-    cmSystemToolsGZStruct::Open,
-    cmSystemToolsGZStruct::Close,
-    cmSystemToolsGZStruct::Read,
-    cmSystemToolsGZStruct::Write,
+    (openfunc_t)cmSystemToolsGZStruct::Open,
+    (closefunc_t)cmSystemToolsGZStruct::Close,
+    (readfunc_t)cmSystemToolsGZStruct::Read,
+    (writefunc_t)cmSystemToolsGZStruct::Write,
     &gzs
   };
 
