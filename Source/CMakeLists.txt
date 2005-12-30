@@ -313,6 +313,16 @@ IF(BUILD_TESTING)
     --build-project CommandLineTest
     --test-command CommandLineTest)
 
+  ADD_TEST(TarTest ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/TarTest"
+    "${CMake_BINARY_DIR}/Tests/TarTest"
+    --build-two-config 
+    --build-generator ${CMAKE_GENERATOR}
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-project TestTar
+    --test-command TestTarExec)
+
   ADD_TEST(CustomCommand  ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/CustomCommand"
