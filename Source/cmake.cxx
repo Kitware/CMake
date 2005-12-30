@@ -718,6 +718,7 @@ void CMakeCommandUsage(const char* program)
     << "  copy file destination   - copy file to destination (either file or directory)\n"
     << "  copy_if_different in-file out-file   - copy file if input has changed\n"
     << "  copy_directory source destination    - copy directory 'source' content to directory 'destination'\n"
+    << "  compare_files file1 file2 - check if file1 is same as file2\n"
     << "  echo [string]...        - displays arguments as text\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
     << "  tar [cxt][vfz] file.tar file/dir1 file/dir2 ... - create a tar.\n"
@@ -772,6 +773,19 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
         std::cerr << "Error copying directory from \""
                   << args[2].c_str() << "\" to \"" << args[3].c_str()
                   << "\".\n";
+        return 1;
+        }
+      return 0;
+      }
+
+    // Compare files
+    if (args[1] == "compare_files" && args.size() == 4)
+      {
+      if(cmSystemTools::FilesDiffer(args[2].c_str(), args[3].c_str()))
+        {
+        std::cerr << "Files \""
+                  << args[2].c_str() << "\" to \"" << args[3].c_str()
+                  << "\" are different.\n";
         return 1;
         }
       return 0;
