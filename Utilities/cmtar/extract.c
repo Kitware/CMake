@@ -564,6 +564,16 @@ tar_extract_dir(TAR *t, char *realname)
   if (mkdir(filename, mode) == -1)
 #endif
   {
+#ifdef __BORLANDC__
+  /* There is a bug in the Borland Run time library which makes MKDIR
+     return EACCES when it should return EEXIST
+     if it is some other error besides directory exists
+     then return false */
+    if ( errno == EACCES) 
+    {
+      errno = EEXIST;
+    }
+#endif      
     if (errno == EEXIST)
     {
       if (chmod(filename, mode) == -1)
