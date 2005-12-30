@@ -1589,8 +1589,7 @@ bool cmSystemTools::ListTar(const char* outFileName, std::vector<cmStdString>& f
     return false;
     }
 
-  int i;
-  while ((i = th_read(t)) == 0)
+  while ((th_read(t)) == 0)
   {
     const char* filename = th_get_pathname(t);
     files.push_back(filename);
