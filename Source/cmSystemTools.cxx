@@ -1370,13 +1370,16 @@ bool cmSystemTools::IsPathToFramework(const char* path)
 struct cmSystemToolsGZStruct
 {
   gzFile GZFile;
-  static int Open(void* call_data, const char *pathname, int oflags, mode_t mode);
-  static int Close(void* call_data);
-  static ssize_t Read(void* call_data, void* buf, size_t count);
-  static ssize_t Write(void* call_data, const void* buf, size_t count);
 };
 
-int cmSystemToolsGZStruct::Open(void* call_data, const char *pathname, int oflags, mode_t mode)
+extern "C" {
+  static int cmSystemToolsGZStructOpen(void* call_data, const char *pathname, int oflags, mode_t mode);
+  static int cmSystemToolsGZStructClose(void* call_data);
+  static ssize_t cmSystemToolsGZStructRead(void* call_data, void* buf, size_t count);
+  static ssize_t cmSystemToolsGZStructWrite(void* call_data, const void* buf, size_t count);
+}
+
+int cmSystemToolsGZStructOpen(void* call_data, const char *pathname, int oflags, mode_t mode)
 {
   const char *gzoflags;
   int fd;
@@ -1420,19 +1423,19 @@ int cmSystemToolsGZStruct::Open(void* call_data, const char *pathname, int oflag
   return fd;
 }
 
-int cmSystemToolsGZStruct::Close(void* call_data)
+int cmSystemToolsGZStructClose(void* call_data)
 {
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
   return cm_zlib_gzclose(gzf->GZFile);
 }
 
-ssize_t cmSystemToolsGZStruct::Read(void* call_data, void* buf, size_t count)
+ssize_t cmSystemToolsGZStructRead(void* call_data, void* buf, size_t count)
 {
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
   return cm_zlib_gzread(gzf->GZFile, buf, count);
 }
 
-ssize_t cmSystemToolsGZStruct::Write(void* call_data, const void* buf, size_t count)
+ssize_t cmSystemToolsGZStructWrite(void* call_data, const void* buf, size_t count)
 {
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
   return cm_zlib_gzwrite(gzf->GZFile, (void*)buf, count);
@@ -1449,10 +1452,10 @@ bool cmSystemTools::CreateTar(const char* outFileName, const std::vector<cmStdSt
   cmSystemToolsGZStruct gzs;
 
   tartype_t gztype = {
-    (openfunc_t)cmSystemToolsGZStruct::Open,
-    (closefunc_t)cmSystemToolsGZStruct::Close,
-    (readfunc_t)cmSystemToolsGZStruct::Read,
-    (writefunc_t)cmSystemToolsGZStruct::Write,
+    (openfunc_t)cmSystemToolsGZStructOpen,
+    (closefunc_t)cmSystemToolsGZStructClose,
+    (readfunc_t)cmSystemToolsGZStructRead,
+    (writefunc_t)cmSystemToolsGZStructWrite,
     &gzs
   };
 
@@ -1514,10 +1517,10 @@ bool cmSystemTools::ExtractTar(const char* outFileName, const std::vector<cmStdS
   cmSystemToolsGZStruct gzs;
 
   tartype_t gztype = {
-    cmSystemToolsGZStruct::Open,
-    cmSystemToolsGZStruct::Close,
-    cmSystemToolsGZStruct::Read,
-    cmSystemToolsGZStruct::Write,
+    cmSystemToolsGZStructOpen,
+    cmSystemToolsGZStructClose,
+    cmSystemToolsGZStructRead,
+    cmSystemToolsGZStructWrite,
     &gzs
   };
 
@@ -1563,10 +1566,10 @@ bool cmSystemTools::ListTar(const char* outFileName, std::vector<cmStdString>& f
   cmSystemToolsGZStruct gzs;
 
   tartype_t gztype = {
-    cmSystemToolsGZStruct::Open,
-    cmSystemToolsGZStruct::Close,
-    cmSystemToolsGZStruct::Read,
-    cmSystemToolsGZStruct::Write,
+    cmSystemToolsGZStructOpen,
+    cmSystemToolsGZStructClose,
+    cmSystemToolsGZStructRead,
+    cmSystemToolsGZStructWrite,
     &gzs
   };
 
