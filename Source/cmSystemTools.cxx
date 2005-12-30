@@ -1398,7 +1398,7 @@ static int gzopen_frontend(char *pathname, int oflags, int mode)
     }
 #endif
 
-  gzf = gzdopen(fd, gzoflags);
+  gzf = cm_zlib_gzdopen(fd, gzoflags);
   if (!gzf)
   {
     errno = ENOMEM;
@@ -1417,8 +1417,8 @@ bool cmSystemTools::CreateTar(const char* outFileName, const std::vector<cmStdSt
   char buf[TAR_MAXPATHLEN];
   char pathname[TAR_MAXPATHLEN];
 
-  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) gzclose,
-    (readfunc_t) gzread, (writefunc_t) gzwrite
+  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) cm_zlib_gzclose,
+    (readfunc_t) cm_zlib_gzread, (writefunc_t) cm_zlib_gzwrite
   };
 
   // Ok, this libtar is not const safe. for now use auto_ptr hack
@@ -1477,8 +1477,8 @@ bool cmSystemTools::ExtractTar(const char* outFileName, const std::vector<cmStdS
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   TAR *t;
 
-  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) gzclose,
-    (readfunc_t) gzread, (writefunc_t) gzwrite
+  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) cm_zlib_gzclose,
+    (readfunc_t) cm_zlib_gzread, (writefunc_t) cm_zlib_gzwrite
   };
 
   // Ok, this libtar is not const safe. for now use auto_ptr hack
@@ -1521,8 +1521,8 @@ bool cmSystemTools::ListTar(const char* outFileName, std::vector<cmStdString>& f
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   TAR *t;
 
-  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) gzclose,
-    (readfunc_t) gzread, (writefunc_t) gzwrite
+  tartype_t gztype = { (openfunc_t) gzopen_frontend, (closefunc_t) cm_zlib_gzclose,
+    (readfunc_t) cm_zlib_gzread, (writefunc_t) cm_zlib_gzwrite
   };
 
   // Ok, this libtar is not const safe. for now use auto_ptr hack
