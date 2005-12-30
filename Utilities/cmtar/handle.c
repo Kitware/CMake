@@ -34,29 +34,37 @@
 
 const char libtar_version[] = PACKAGE_VERSION;
 
+struct libtar_fd_file
+{
+  int fd;
+};
+
+static struct libtar_fd_file libtar_fd_file_pointer;
+
 static int libtar_open(void* call_data, const char* pathname, int flags, mode_t mode)
 {
-  (void)call_data;
-  return open(pathname, flags, mode);
+  struct libtar_fd_file* lf = (struct libtar_fd_file*)call_data;
+  lf->fd = open(pathname, flags, mode);
+  return lf->fd;
 }
 
-static int libtar_close(void* call_data, int fd)
+static int libtar_close(void* call_data)
 {
-  (void)call_data;
-  return close(fd);
+  struct libtar_fd_file* lf = (struct libtar_fd_file*)call_data;
+  return close(lf->fd);
 }
-static ssize_t libtar_read(void* call_data, int fd, void* buf, size_t count)
+static ssize_t libtar_read(void* call_data, void* buf, size_t count)
 {
-  (void)call_data;
-  return read(fd, buf, count);
+  struct libtar_fd_file* lf = (struct libtar_fd_file*)call_data;
+  return read(lf->fd, buf, count);
 }
-static ssize_t libtar_write(void* call_data, int fd, const void* buf, size_t count)
+static ssize_t libtar_write(void* call_data, const void* buf, size_t count)
 {
-  (void)call_data;
-  return write(fd, buf, count);
+  struct libtar_fd_file* lf = (struct libtar_fd_file*)call_data;
+  return write(lf->fd, buf, count);
 }
 
-static tartype_t default_type = { libtar_open, libtar_close, libtar_read, libtar_write, 0 };
+static tartype_t default_type = { libtar_open, libtar_close, libtar_read, libtar_write, &libtar_fd_file_pointer };
 
 static int
 tar_init(TAR **t, char *pathname, tartype_t *type,
@@ -98,6 +106,7 @@ int
 tar_open(TAR **t, char *pathname, tartype_t *type,
    int oflags, int mode, int options)
 {
+  int res;
   if (tar_init(t, pathname, type, oflags, mode, options) == -1)
     return -1;
 
@@ -108,8 +117,8 @@ tar_open(TAR **t, char *pathname, tartype_t *type,
   oflags |= O_BINARY;
 #endif
 
-  (*t)->fd = (*((*t)->type->openfunc))((*t)->type->call_data, pathname, oflags, mode);
-  if ((*t)->fd == -1)
+  res = (*((*t)->type->openfunc))((*t)->type->call_data, pathname, oflags, mode);
+  if (res == -1)
   {
     free(*t);
     return -1;
@@ -126,17 +135,13 @@ tar_fdopen(TAR **t, int fd, char *pathname, tartype_t *type,
   if (tar_init(t, pathname, type, oflags, mode, options) == -1)
     return -1;
 
-  (*t)->fd = fd;
+  if ( !type )
+    {
+    struct libtar_fd_file* lf = (struct libtar_fd_file*)((*t)->type->call_data);
+    lf->fd = fd;
+    }
   return 0;
 }
-
-
-int
-tar_fd(TAR *t)
-{
-  return t->fd;
-}
-
 
 /* close tarfile handle */
 int
@@ -144,7 +149,7 @@ tar_close(TAR *t)
 {
   int i;
 
-  i = (*(t->type->closefunc))(t->type->call_data, t->fd);
+  i = (*(t->type->closefunc))(t->type->call_data);
 
   if (t->h != NULL)
     libtar_hash_free(t->h, ((t->oflags & O_ACCMODE) == O_RDONLY

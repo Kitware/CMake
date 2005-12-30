@@ -20,8 +20,7 @@
 #include <libtar/libtar_listhash.h>
 #include <libtar/compat.h>
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 
@@ -63,9 +62,9 @@ struct tar_header
 /***** handle.c ************************************************************/
 
 typedef int (*openfunc_t)(void* call_data, const char *, int, mode_t);
-typedef int (*closefunc_t)(void* call_data, int);
-typedef ssize_t (*readfunc_t)(void* call_data, int, void *, size_t);
-typedef ssize_t (*writefunc_t)(void* call_data, int, const void *, size_t);
+typedef int (*closefunc_t)(void* call_data);
+typedef ssize_t (*readfunc_t)(void* call_data, void *, size_t);
+typedef ssize_t (*writefunc_t)(void* call_data, const void *, size_t);
 
 typedef struct
 {
@@ -81,7 +80,6 @@ typedef struct
 {
   tartype_t *type;
   char *pathname;
-  long fd;
   int oflags;
   int options;
   struct tar_header th_buf;
@@ -103,7 +101,6 @@ TAR;
 
 extern const char libtar_version[];
 
-
 /* open a new tarfile handle */
 int tar_open(TAR **t, char *pathname, tartype_t *type,
        int oflags, int mode, int options);
@@ -111,15 +108,6 @@ int tar_open(TAR **t, char *pathname, tartype_t *type,
 /* make a tarfile handle out of a previously-opened descriptor */
 int tar_fdopen(TAR **t, int fd, char *pathname, tartype_t *type,
          int oflags, int mode, int options);
-
-/* returns the descriptor associated with t */
-int tar_fd(TAR *t);
-
-/* returns the descriptor associated with t */
-void* tar_call_data(TAR *t);
-
-/* returns the descriptor associated with t */
-void tar_set_call_data(TAR *t, void* cd);
 
 /* close tarfile handle */
 int tar_close(TAR *t);
@@ -152,9 +140,9 @@ int tar_append_regfile(TAR *t, char *realname);
 
 /* macros for reading/writing tarchive blocks */
 #define tar_block_read(t, buf) \
-  (*((t)->type->readfunc))((t)->type->call_data, (t)->fd, (char *)(buf), T_BLOCKSIZE)
+  (*((t)->type->readfunc))((t)->type->call_data, (char *)(buf), T_BLOCKSIZE)
 #define tar_block_write(t, buf) \
-  (*((t)->type->writefunc))((t)->type->call_data, (t)->fd, (char *)(buf), T_BLOCKSIZE)
+  (*((t)->type->writefunc))((t)->type->call_data, (char *)(buf), T_BLOCKSIZE)
 
 /* read/write a header block */
 int th_read(TAR *t);

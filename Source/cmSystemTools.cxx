@@ -45,6 +45,13 @@
 
 #include <sys/stat.h>
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#  include <libtar/libtar.h>
+#  include <memory> // auto_ptr
+#  include <fcntl.h>
+#  include <cmzlib/zlib.h>
+#endif
+
 #if defined(__sgi) && !defined(__GNUC__)
 # pragma set woff 1375 /* base class destructor not virtual */
 #endif
@@ -1360,18 +1367,13 @@ bool cmSystemTools::IsPathToFramework(const char* path)
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#  include <libtar/libtar.h>
-#  include <memory> // auto_ptr
-#  include <fcntl.h>
-#  include <cmzlib/zlib.h>
-
 struct cmSystemToolsGZStruct
 {
   gzFile GZFile;
   static int Open(void* call_data, const char *pathname, int oflags, mode_t mode);
-  static int Close(void* call_data, int fd);
-  static ssize_t Read(void* call_data, int fd, void* buf, size_t count);
-  static ssize_t Write(void* call_data, int fd, const void* buf, size_t count);
+  static int Close(void* call_data);
+  static ssize_t Read(void* call_data, void* buf, size_t count);
+  static ssize_t Write(void* call_data, const void* buf, size_t count);
 };
 
 int cmSystemToolsGZStruct::Open(void* call_data, const char *pathname, int oflags, mode_t mode)
@@ -1418,23 +1420,20 @@ int cmSystemToolsGZStruct::Open(void* call_data, const char *pathname, int oflag
   return fd;
 }
 
-int cmSystemToolsGZStruct::Close(void* call_data, int fd)
+int cmSystemToolsGZStruct::Close(void* call_data)
 {
-  (void)fd;
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
   return cm_zlib_gzclose(gzf->GZFile);
 }
 
-ssize_t cmSystemToolsGZStruct::Read(void* call_data, int fd, void* buf, size_t count)
+ssize_t cmSystemToolsGZStruct::Read(void* call_data, void* buf, size_t count)
 {
-  (void)fd;
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
   return cm_zlib_gzread(gzf->GZFile, buf, count);
 }
 
-ssize_t cmSystemToolsGZStruct::Write(void* call_data, int fd, const void* buf, size_t count)
+ssize_t cmSystemToolsGZStruct::Write(void* call_data, const void* buf, size_t count)
 {
-  (void)fd;
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
   return cm_zlib_gzwrite(gzf->GZFile, (void*)buf, count);
 }
