@@ -1004,14 +1004,6 @@ cmLocalUnixMakefileGenerator3
         << "\n";
     }
 
-  if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
-    {
-    makefileStream
-      << "# Produce verbose output by default.\n"
-      << "VERBOSE = 1\n"
-      << "\n";
-    }
-
   std::string cmakecommand =
       m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   makefileStream
@@ -1197,6 +1189,14 @@ cmLocalUnixMakefileGenerator3
   std::vector<std::string> commands;
   commands.clear();
   std::vector<std::string> no_depends;
+  if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+    {
+    makefileStream
+      << "# Produce verbose output by default.\n"
+      << "VERBOSE = 1\n"
+      << "\n";
+    }
+
   this->WriteMakeRule(makefileStream,
                       "Suppress display of executed commands.",
                       "$(VERBOSE).SILENT",
