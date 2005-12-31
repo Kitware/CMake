@@ -3,6 +3,12 @@
 /* Define if your system has a working basename */
 #cmakedefine HAVE_BASENAME @HAVE_BASENAME@
 
+/* Define if your system has a working major */
+#cmakedefine HAVE_MAJOR @HAVE_MAJOR@
+
+/* Define if your system has a working minor */
+#cmakedefine HAVE_MINOR @HAVE_MINOR@
+
 /* Define to 1 if you have the <ctype.h> header file. */
 #cmakedefine HAVE_CTYPE_H @HAVE_CTYPE_H@
 

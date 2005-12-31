@@ -15,9 +15,9 @@
 
 #include <libtar/libtar.h>
 
-#ifndef major
+#ifndef HAVE_MAJOR
 # define major(dev) ((int)(((dev) >> 8) & 0xff))
 #endif
-#ifndef minor
+#ifndef HAVE_MINOR
 # define minor(dev) ((int)((dev) & 0xff))
 #endif

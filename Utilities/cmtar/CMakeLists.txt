@@ -99,6 +99,8 @@ FOREACH(func
     strftime
     vsnprintf
     glob
+    major
+    minor
     )
   CHECK_SYMBOL_EXISTS_EX("${func}")
 ENDFOREACH(func)
