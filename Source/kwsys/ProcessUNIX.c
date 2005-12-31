@@ -1187,11 +1187,17 @@ static void kwsysProcessCleanup(kwsysProcess* cp, int error)
     /* Kill any children already started.  */
     if(cp->ForkPIDs)
       {
+      int status;
       for(i=0; i < cp->NumberOfCommands; ++i)
         {
         if(cp->ForkPIDs[i])
           {
+          /* Kill the child.  */
           kwsysProcessKill(cp->ForkPIDs[i]);
+          /* Reap the child.  Keep trying until the call is not
+             interrupted.  */
+          while((waitpid(cp->ForkPIDs[i], &status, 0) < 0) &&
+                (errno == EINTR));
           }
         }
       }
