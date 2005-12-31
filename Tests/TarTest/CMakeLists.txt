@@ -23,7 +23,7 @@ COPY("CMakeLists.txt" "d-4/f1.txt")
 COPY("CMakeLists.txt" "My Special Directory/f1.txt")
 
 IF(UNIX)
-  EXEC_PROGRAM("ln" ARGS "-s \"${CMAKE_CURRENT_BINARY_DIR}/tar_dir/d1/f1.txt\" \"${CMAKE_CURRENT_BINARY_DIR}/tar_dir/d1/f2.txt\"")
+  EXEC_PROGRAM("ln" ARGS "-sf f1.txt \"${CMAKE_CURRENT_BINARY_DIR}/tar_dir/d1/f2.txt\"")
   SET(CHECK_FILES ${CHECK_FILES} "d1/f2.txt")
 ENDIF(UNIX)
 
