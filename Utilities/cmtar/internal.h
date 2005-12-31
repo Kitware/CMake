@@ -15,6 +15,10 @@
 
 #include <libtar/libtar.h>
 
+#ifdef HAVE_SYS_SYSMACROS_H
+#include <sys/sysmacros.h>
+#endif
+
 #ifndef HAVE_MAJOR
 # define major(dev) ((int)(((dev) >> 8) & 0xff))
 #endif

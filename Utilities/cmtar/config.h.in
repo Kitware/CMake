@@ -12,6 +12,9 @@
 /* Define to 1 if you have the <ctype.h> header file. */
 #cmakedefine HAVE_CTYPE_H @HAVE_CTYPE_H@
 
+/* Define to 1 if you have the <sys/sysmacros.h> header file. */
+#cmakedefine HAVE_SYS_SYSMACROS_H @HAVE_SYS_SYSMACROS_H@
+
 /* Define to 1 if the system has the type `dev_t'. */
 #cmakedefine HAVE_DEV_T @HAVE_DEV_T@
 

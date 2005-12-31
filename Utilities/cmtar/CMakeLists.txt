@@ -81,6 +81,7 @@ FOREACH(file
   "unistd.h"
   "glob.h"
   "dirent.h"
+  "sys/sysmacros.h"
   )
   CHECK_INCLUDE_FILE_CONCAT("${file}")
 ENDFOREACH(file)
