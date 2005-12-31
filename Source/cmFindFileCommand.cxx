@@ -89,17 +89,6 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
       return true;
       }
     }
-#if defined (__APPLE__)
-  cmStdString fpath = this->FindHeaderInFrameworks(path, args[0].c_str(), args[1].c_str());
-  if(fpath.size())
-    {
-    m_Makefile->AddCacheDefinition(args[0].c_str(),
-                                   fpath.c_str(),
-                                   helpString.c_str(),
-                                   cmCacheManager::FILEPATH);
-    return true;
-    }
-#endif  
   std::string s = args[0] + "-NOTFOUND";
   m_Makefile->AddCacheDefinition(args[0].c_str(),
                                  s.c_str(),
@@ -108,71 +97,3 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
   return true;
 }
 
-cmStdString cmFindFileCommand::FindHeaderInFrameworks(
-  std::vector<std::string> path,
-  const char* defineVar,
-  const char* file)
-{
-  (void)defineVar;
-
-#ifndef __APPLE__
-  (void)path;
-  (void)file;
-  return cmStdString("");
-#else
-  cmStdString fileName = file;
-  cmStdString frameWorkName;
-  cmStdString::size_type pos = fileName.find("/");
-  std::cerr << "ff " << fileName << " " << pos << "\n";
-  if(pos != fileName.npos)
-    {
-    // remove the name from the slash;
-    fileName = fileName.substr(pos+1);
-    frameWorkName = file;
-    frameWorkName = frameWorkName.substr(0, frameWorkName.size()-fileName.size()-1);
-    // if the framework has a path in it then just use the filename
-    std::cerr << fileName << " " << frameWorkName << "\n";
-    if(frameWorkName.find("/") != frameWorkName.npos)
-      {
-      fileName = file;
-      frameWorkName = "";
-      }
-    }
-  path.push_back("~/Library/Frameworks");
-  path.push_back("/Library/Frameworks");
-  path.push_back("/System/Library/Frameworks");
-  path.push_back("/Network/Library/Frameworks");
-  for(  std::vector<std::string>::iterator i = path.begin();
-        i != path.end(); ++i)
-    {
-    if(frameWorkName.size())
-      {
-      std::string fpath = *i;
-      fpath += "/";
-      fpath += frameWorkName;
-      fpath += ".framework";
-      std::string intPath = fpath;
-      intPath += "/Headers/";
-      intPath += fileName;
-      std::cerr << "try " << intPath << "\n";
-      if(cmSystemTools::FileExists(intPath.c_str()))
-        {
-        return fpath;
-        }
-      }
-    cmStdString glob = *i;
-    glob += "/*/Headers/";
-    glob += file;
-    cmGlob globIt;
-    globIt.FindFiles(glob);
-    std::vector<std::string> files = globIt.GetFiles();
-    if(files.size())
-      {
-      cmStdString fheader = cmSystemTools::CollapseFullPath(files[0].c_str());
-      fheader = cmSystemTools::GetFilenamePath(fheader);
-      return fheader;
-      }
-    }
-  return cmStdString("");
-#endif
-}

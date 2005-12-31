@@ -78,7 +78,9 @@ public:
       "the cache entry <VAR>.  The environment variable CMAKE_INCLUDE_PATH "
       "is searched as well as the PATH variable.\n";
     }
-  
+  cmStdString FindHeaderInFrameworks( std::vector<std::string> path,
+                                      const char* var, const char* file);
+
   cmTypeMacro(cmFindPathCommand, cmCommand);
 };
 

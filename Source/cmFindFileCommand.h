@@ -79,8 +79,6 @@ public:
       "different extensions on different platforms, FIND_PROGRAM "
       "should be used instead of FIND_FILE when looking for them.";
     }
-  cmStdString FindHeaderInFrameworks( std::vector<std::string> path,
-                                      const char* var, const char* file);
   cmTypeMacro(cmFindFileCommand, cmCommand);
 };
 
