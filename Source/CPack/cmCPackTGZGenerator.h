@@ -50,9 +50,9 @@ public:
   virtual ~cmCPackTGZGenerator();
 
 protected:
-  static int TGZ_Open(struct archive *a, void *client_data);
-  static ssize_t TGZ_Write(struct archive *a, void *client_data, void *buff, size_t n);
-  static int TGZ_Close(struct archive *a, void *client_data);
+  static int TGZ_Open(void *client_data, const char* name, int oflags, mode_t mode);
+  static ssize_t TGZ_Write(void *client_data, void *buff, size_t n);
+  static int TGZ_Close(void *client_data);
 
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);

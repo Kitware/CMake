@@ -46,6 +46,8 @@ int cmCPackPackageMakerGenerator::ProcessGenerator()
 int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const char* toplevel,
   const std::vector<std::string>& files)
 {
+  (void) files; // TODO: Fix api to not need files.
+  (void) toplevel; // TODO: Use toplevel
   // Create directory structure
   std::string resDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   resDir += "/Resources";
