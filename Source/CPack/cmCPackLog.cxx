@@ -44,7 +44,7 @@ cmCPackLog::~cmCPackLog()
 }
 
 //----------------------------------------------------------------------
-void cmCPackLog::SetLogOutputStream(ostream* os)
+void cmCPackLog::SetLogOutputStream(std::ostream* os)
 {
   if ( m_LogOutputCleanup && m_LogOutput )
     {

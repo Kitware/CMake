@@ -84,13 +84,13 @@ public:
   bool GetQuiet() { return m_Quiet; }
 
   //! Set the output stream
-  void SetOutputStream(ostream* os) { m_DefaultOutput = os; }
+  void SetOutputStream(std::ostream* os) { m_DefaultOutput = os; }
 
   //! Set the error stream
-  void SetErrorStream(ostream* os) { m_DefaultError = os; }
+  void SetErrorStream(std::ostream* os) { m_DefaultError = os; }
 
   //! Set the log output stream
-  void SetLogOutputStream(ostream* os);
+  void SetLogOutputStream(std::ostream* os);
 
   //! Set the log output file. The cmCPackLog will try to create file. If it
   // cannot, it will report an error.
