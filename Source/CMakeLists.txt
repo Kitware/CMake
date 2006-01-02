@@ -7,6 +7,10 @@ CONFIGURE_FILE(
   "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"
   "${CMake_BINARY_DIR}/Source/cmConfigure.h"
   )
+CONFIGURE_FILE(
+  "${CMake_SOURCE_DIR}/Source/CPack/cmCPackConfigure.h.in"
+  "${CMake_BINARY_DIR}/Source/CPack/cmCPackConfigure.h"
+  )
 
 # add the include path to find the .h 
 INCLUDE_DIRECTORIES(
@@ -247,6 +251,21 @@ SET(CMTEST_SRCS cmCTest.cxx
 ADD_LIBRARY(CTestLib ${CMTEST_SRCS})
 TARGET_LINK_LIBRARIES(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_LIBRARIES})
 
+#
+# Sources for CPack
+#
+SET(CPACK_SRCS
+  CPack/cmCPackGenerators.cxx
+  CPack/cmCPackSTGZGenerator.cxx
+  CPack/cmCPackTGZGenerator.cxx
+  CPack/cmCPackNSISGenerator.cxx
+  CPack/cmCPackPackageMakerGenerator.cxx
+  CPack/cmCPackGenericGenerator.cxx
+  )
+# Build CPackLib
+ADD_LIBRARY(CPackLib ${CPACK_SRCS})
+TARGET_LINK_LIBRARIES(CPackLib CMakeLib)
+
 # Build CMake executable
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 TARGET_LINK_LIBRARIES(cmake CMakeLib)
@@ -264,6 +283,10 @@ ENDIF(WIN32)
 # Build CTest executable
 ADD_EXECUTABLE(ctest ctest.cxx)
 TARGET_LINK_LIBRARIES(ctest CTestLib)
+
+# Build CPack executable
+ADD_EXECUTABLE(cpack CPack/cpack.cxx)
+TARGET_LINK_LIBRARIES(cpack CPackLib)
 
 # Curses GUI
 IF (UNIX)
