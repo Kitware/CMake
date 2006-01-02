@@ -7,11 +7,11 @@ PROJECT (CustomCommand)
 # Lib and exe path
 #
 SET (LIBRARY_OUTPUT_PATH 
-  ${PROJECT_BINARY_DIR}/bin/ CACHE PATH 
+  ${PROJECT_BINARY_DIR}/bin/ CACHE INTERNAL 
   "Single output directory for building all libraries.")
 
 SET (EXECUTABLE_OUTPUT_PATH 
-  ${PROJECT_BINARY_DIR}/bin/ CACHE PATH 
+  ${PROJECT_BINARY_DIR}/bin/ CACHE INTERNAL 
   "Single output directory for building all executables.")
 
 ################################################################
