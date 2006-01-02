@@ -21,6 +21,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmCPackLog.h"
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
@@ -34,6 +35,7 @@ cmCPackGenericGenerator::cmCPackGenericGenerator()
   m_LocalGenerator = 0;
   m_MakefileMap = 0;
   m_CMakeInstance = 0;
+  m_Logger = 0;
 }
 
 //----------------------------------------------------------------------
@@ -60,6 +62,7 @@ cmCPackGenericGenerator::~cmCPackGenericGenerator()
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::PrepareNames()
 {
+  this->SetOption("CPACK_GENERATOR", m_Name.c_str());
   std::string tempDirectory = this->GetOption("CPACK_PROJECT_DIRECTORY");
   tempDirectory += "/_CPack_Packages/";
   tempDirectory += this->GetOption("CPACK_GENERATOR");
@@ -106,20 +109,20 @@ int cmCPackGenericGenerator::PrepareNames()
     cmsys::SystemTools::ConvertToOutputPath(this->GetInstallPath()).c_str());
   this->SetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY", installPrefix.c_str());
 
-  std::cout << "Look for: CPACK_PROJECT_DESCRIPTION_FILE_NAME" << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for: CPACK_PROJECT_DESCRIPTION_FILE_NAME" << std::endl);
   const char* descFileName = this->GetOption("CPACK_PROJECT_DESCRIPTION_FILE_NAME");
-  std::cout << "Look for: " << descFileName << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for: " << descFileName << std::endl);
   if ( descFileName )
     {
     if ( !cmSystemTools::FileExists(descFileName) )
       {
-      std::cout << "Cannot find description file name: " << descFileName << std::endl;
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find description file name: " << descFileName << std::endl);
       return 0;
       }
     std::ifstream ifs(descFileName);
     if ( !ifs )
       {
-      std::cout << "Cannot open description file name: " << descFileName << std::endl;
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot open description file name: " << descFileName << std::endl);
       return 0;
       }
     cmOStringStream ostr;
@@ -132,7 +135,9 @@ int cmCPackGenericGenerator::PrepareNames()
     }
   if ( !this->GetOption("CPACK_PROJECT_DESCRIPTION") )
     {
-    std::cout << "Project description not specified. Please specify CPACK_PROJECT_DESCRIPTION or CPACK_PROJECT_DESCRIPTION_FILE_NAME." << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Project description not specified. Please specify CPACK_PROJECT_DESCRIPTION or CPACK_PROJECT_DESCRIPTION_FILE_NAME."
+      << std::endl);
     return 0;
     }
 
@@ -142,12 +147,12 @@ int cmCPackGenericGenerator::PrepareNames()
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::InstallProject()
 {
-  std::cout << "Install project" << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Install project" << std::endl);
   const char* tempInstallDirectory = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   const char* installFile = this->GetOption("CPACK_INSTALL_FILE_NAME");
   if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory))
     {
-    std::cerr << "Problem creating temporary directory: " << tempInstallDirectory << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem creating temporary directory: " << tempInstallDirectory << std::endl);
     return 0;
     }
   cmake cm;
@@ -198,7 +203,7 @@ void cmCPackGenericGenerator::SetOption(const char* op, const char* value)
     m_MakefileMap->RemoveDefinition(op);
     return;
     }
-  std::cout << this->GetNameOfClass() << "::SetOption(" << op << ", " << value << ")" << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, this->GetNameOfClass() << "::SetOption(" << op << ", " << value << ")" << std::endl);
   m_MakefileMap->AddDefinition(op, value);
 }
 
@@ -220,34 +225,35 @@ int cmCPackGenericGenerator::ProcessGenerator()
   const char* tempDirectory = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
 
 
-  std::cout << "Find files" << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
   cmsys::Glob gl;
   std::string findExpr = tempDirectory;
   findExpr += "/*";
   gl.RecurseOn();
   if ( !gl.FindFiles(findExpr) )
     {
-    std::cerr << "CPack error: cannot find any files in the packaging tree" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find any files in the packaging tree" << std::endl);
     return 0;
     }
 
-  std::cout << "Compress files to: " << tempPackageFileName << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Compress package" << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Compress files to: " << tempPackageFileName << std::endl);
   if ( !this->CompressFiles(tempPackageFileName,
       tempDirectory, gl.GetFiles()) )
     {
-    std::cerr << "CPack error: problem compressing the directory" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem compressing the directory" << std::endl);
     return 0;
     }
 
-  std::cout << "Finalize package" << std::endl;
-  std::cout << "Copy final package: " << tempPackageFileName << " to " << packageFileName << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Finalize package" << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Copy final package: " << tempPackageFileName << " to " << packageFileName << std::endl);
   if ( !cmSystemTools::CopyFileIfDifferent(tempPackageFileName, packageFileName) )
     {
-    std::cerr << "CPack error: problem copying the package: " << tempPackageFileName << " to " << packageFileName << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the package: " << tempPackageFileName << " to " << packageFileName << std::endl);
     return 0;
     }
 
-  std::cout << "All done" << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Package " << packageFileName << " generated." << std::endl);
   return 1;
 }
 
@@ -261,7 +267,6 @@ int cmCPackGenericGenerator::Initialize(const char* name)
   m_LocalGenerator = m_GlobalGenerator->CreateLocalGenerator();
   m_MakefileMap = m_LocalGenerator->GetMakefile();
   m_Name = name;
-  this->SetOption("CPACK_GENERATOR", name);
   return 1;
 }
 

@@ -261,6 +261,7 @@ SET(CPACK_SRCS
   CPack/cmCPackNSISGenerator.cxx
   CPack/cmCPackPackageMakerGenerator.cxx
   CPack/cmCPackGenericGenerator.cxx
+  CPack/cmCPackLog.cxx
   )
 # Build CPackLib
 ADD_LIBRARY(CPackLib ${CPACK_SRCS})

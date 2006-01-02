@@ -22,6 +22,7 @@
 #include "cmLocalGenerator.h"
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
+#include "cmCPackLog.h"
 
 
 //----------------------------------------------------------------------
@@ -49,6 +50,7 @@ int cmCPackSTGZGenerator::Initialize(const char* name)
 //----------------------------------------------------------------------
 int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
 {
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Writing header" << std::endl);
   *os
     << "#!/bin/sh" << std::endl
     << "echo \"" << this->GetOption("ProjectName")

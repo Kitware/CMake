@@ -23,6 +23,8 @@
 #include "cmCPackNSISGenerator.h"
 #include "cmCPackPackageMakerGenerator.h"
 
+#include "cmCPackLog.h"
+
 //----------------------------------------------------------------------
 cmCPackGenerators::cmCPackGenerators()
 {
@@ -56,6 +58,7 @@ cmCPackGenericGenerator* cmCPackGenerators::NewGenerator(const char* name)
     return 0;
     }
   m_Generators.push_back(gen);
+  gen->SetLogger(m_Logger);
   return gen;
 }
 
@@ -72,26 +75,6 @@ cmCPackGenericGenerator* cmCPackGenerators::NewGeneratorInternal(const char* nam
     return 0;
     }
   return (it->second)();
-  /*
-  std::string sname = name;
-  if ( sname == "STGZ" )
-    {
-    return new cmCPackSTGZGenerator;
-    }
-  if ( sname == "TGZ" )
-    {
-    return new cmCPackTGZGenerator;
-    }
-  if ( sname == "NSIS" )
-    {
-    return new cmCPackNSISGenerator;
-    }
-  if ( sname == "PackageMaker" )
-    {
-    return new cmCPackPackageMakerGenerator;
-    }
-  return new cmCPackGenericGenerator;
-  */
 }
 
 //----------------------------------------------------------------------
@@ -99,7 +82,7 @@ void cmCPackGenerators::RegisterGenerator(const char* name, CreateGeneratorCall*
 {
   if ( !name || !createGenerator )
     {
-    std::cerr << "Cannot register generator" << std::endl;
+    cmCPack_Log(m_Logger, cmCPackLog::LOG_ERROR, "Cannot register generator" << std::endl);
     return;
     }
   m_GeneratorCreators[name] = createGenerator;

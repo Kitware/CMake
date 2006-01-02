@@ -25,10 +25,28 @@
   cmTypeMacro(class, superclass); \
   static cmCPackGenericGenerator* CreateGenerator() { return new class; }
 
+#define cmCPackLogger(logType, msg) \
+  do { \
+  cmOStringStream cmCPackLog_msg; \
+  cmCPackLog_msg << msg; \
+  m_Logger->Log(logType, __FILE__, __LINE__, cmCPackLog_msg.str().c_str());\
+  } while ( 0 )
+
+#ifdef cerr
+#  undef cerr
+#endif
+#define cerr no_cerr_use_cmCPack_Log
+
+#ifdef cout
+#  undef cout
+#endif
+#define cout no_cout_use_cmCPack_Log
+
 class cmMakefile;
 class cmLocalGenerator;
 class cmGlobalGenerator;
 class cmake;
+class cmCPackLog;
 
 /** \class cmCPackGenericGenerator
  * \brief A superclass of all CPack Generators
@@ -67,6 +85,9 @@ public:
   //! Set all the variables
   int FindRunningCMake(const char* arg0);
 
+  //! Set the logger
+  void SetLogger(cmCPackLog* log) { m_Logger = log; }
+
 protected:
   int PrepareNames();
   int InstallProject();
@@ -89,6 +110,8 @@ protected:
   std::string m_CPackSelf;
   std::string m_CMakeSelf;
   std::string m_CMakeRoot;
+
+  cmCPackLog* m_Logger;
 
 private:
   cmGlobalGenerator* m_GlobalGenerator;

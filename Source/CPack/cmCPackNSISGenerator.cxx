@@ -23,6 +23,7 @@
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
+#include "cmCPackLog.h"
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
@@ -53,19 +54,19 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName, const char* top
   std::string nsisInFileName = this->FindTemplate("NSIS.template.in");
   if ( nsisInFileName.size() == 0 )
     {
-    std::cerr << "CPack error: Could not find NSIS installer template file." << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack error: Could not find NSIS installer template file." << std::endl);
     return false;
     }
   std::string nsisFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   std::string tmpFile = nsisFileName;
   tmpFile += "/NSISOutput.log";
   nsisFileName += "/project.nsi";
-  std::cout << "Configure file: " << nsisInFileName << " to " << nsisFileName << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << nsisInFileName << " to " << nsisFileName << std::endl);
   this->ConfigureFile(nsisInFileName.c_str(), nsisFileName.c_str());
   std::string nsisCmd = "\"";
   nsisCmd += this->GetOption("CPACK_INSTALLER_PROGRAM");
   nsisCmd += "\" \"" + nsisFileName + "\"";
-  std::cout << "Execute: " << nsisCmd.c_str() << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << nsisCmd.c_str() << std::endl);
   std::string output;
   int retVal = 1;
   bool res = cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output, &retVal, 0, m_GeneratorVerbose, 0);
@@ -75,8 +76,8 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName, const char* top
     ofs << "# Run command: " << nsisCmd.c_str() << std::endl
       << "# Output:" << std::endl
       << output.c_str() << std::endl;
-    std::cerr << "Problem running NSIS command: " << nsisCmd.c_str() << std::endl;
-    std::cerr << "Please check " << tmpFile.c_str() << " for errors" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running NSIS command: " << nsisCmd.c_str() << std::endl
+      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
     return 0;
     }
   return 1;
@@ -85,21 +86,21 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName, const char* top
 //----------------------------------------------------------------------
 int cmCPackNSISGenerator::Initialize(const char* name)
 {
-  std::cout << "cmCPackNSISGenerator::Initialize()" << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackNSISGenerator::Initialize()" << std::endl);
   int res = this->Superclass::Initialize(name);
   std::vector<std::string> path;
   std::string nsisPath;
   if ( !cmsys::SystemTools::ReadRegistryValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS",
       nsisPath) )
     {
-    std::cerr << "Cannot find NSIS registry value" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find NSIS registry value" << std::endl);
     return 0;
     }
   path.push_back(nsisPath);
   nsisPath = cmSystemTools::FindProgram("makensis", path, false);
   if ( nsisPath.empty() )
     {
-    std::cerr << "Cannot find NSIS compiler" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find NSIS compiler" << std::endl);
     return 0;
     }
   this->SetOption("CPACK_INSTALLER_PROGRAM", nsisPath.c_str());

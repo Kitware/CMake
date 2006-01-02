@@ -20,6 +20,7 @@
 
 #include "cmObject.h"
 
+class cmCPackLog;
 class cmCPackGenericGenerator;
 
 /** \class cmCPackGenerators
@@ -42,12 +43,15 @@ public:
 
   void RegisterGenerator(const char* name, CreateGeneratorCall* createGenerator);
 
+  void SetLogger(cmCPackLog* logger) { m_Logger = logger; }
+
 private:
   cmCPackGenericGenerator* NewGeneratorInternal(const char* name);
   std::vector<cmCPackGenericGenerator*> m_Generators;
 
   typedef std::map<cmStdString, CreateGeneratorCall*> t_GeneratorCreatorsMap;
   t_GeneratorCreatorsMap m_GeneratorCreators;
+  cmCPackLog* m_Logger;
 };
 
 #endif

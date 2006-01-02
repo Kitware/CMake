@@ -22,6 +22,7 @@
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
+#include "cmCPackLog.h"
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
@@ -57,7 +58,8 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const c
   if ( !cmsys::SystemTools::MakeDirectory(preflightDirName.c_str())
     || !cmsys::SystemTools::MakeDirectory(postflightDirName.c_str()) )
     {
-    std::cerr << "Problem creating installer directories: " << preflightDirName.c_str() << " and " << postflightDirName.c_str() << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem creating installer directories: " << preflightDirName.c_str() << " and "
+      << postflightDirName.c_str() << std::endl);
     return 0;
     }
 
@@ -67,7 +69,7 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const c
     || !this->CopyResourcePlistFile("Info.plist")
     || !this->CopyResourcePlistFile("Description.plist") )
     {
-    std::cerr << "Problem copying the resource files" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files" << std::endl);
     return 0;
     }
 
@@ -85,21 +87,21 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const c
   << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Description.plist\"'";
   */
   pkgCmd << "/Users/kitware/Andy/CMake-CPack/foo.sh";
-  std::cout << "Execute: " << pkgCmd.str().c_str() << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << pkgCmd.str().c_str() << std::endl);
   std::string output;
   int retVal = 1;
   //bool res = cmSystemTools::RunSingleCommand(pkgCmd.str().c_str(), &output, &retVal, 0, m_GeneratorVerbose, 0);
   bool res = true;
   retVal = system(pkgCmd.str().c_str());
-  std::cout << "Done running package maker" << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Done running package maker" << std::endl);
   if ( !res || retVal )
     {
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << pkgCmd.str().c_str() << std::endl
       << "# Output:" << std::endl
       << output.c_str() << std::endl;
-    std::cerr << "Problem running PackageMaker command: " << pkgCmd.str().c_str() << std::endl;
-    std::cerr << "Please check " << tmpFile.c_str() << " for errors" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running PackageMaker command: " << pkgCmd.str().c_str() << std::endl
+      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
     return 0;
     }
 
@@ -115,8 +117,8 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const c
     ofs << "# Run command: " << dmgCmd.str().c_str() << std::endl
       << "# Output:" << std::endl
       << output.c_str() << std::endl;
-    std::cerr << "Problem running hdiutil command: " << dmgCmd.str().c_str() << std::endl;
-    std::cerr << "Please check " << tmpFile.c_str() << " for errors" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running hdiutil command: " << dmgCmd.str().c_str() << std::endl
+      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
     return 0;
     }
 
@@ -126,7 +128,7 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const c
 //----------------------------------------------------------------------
 int cmCPackPackageMakerGenerator::Initialize(const char* name)
 {
-  std::cout << "cmCPackPackageMakerGenerator::Initialize()" << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackPackageMakerGenerator::Initialize()" << std::endl);
   int res = this->Superclass::Initialize(name);
   std::vector<std::string> path;
   std::string pkgPath = "/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS";
@@ -134,14 +136,14 @@ int cmCPackPackageMakerGenerator::Initialize(const char* name)
   pkgPath = cmSystemTools::FindProgram("PackageMaker", path, false);
   if ( pkgPath.empty() )
     {
-    std::cerr << "Cannot find PackageMaker compiler" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find PackageMaker compiler" << std::endl);
     return 0;
     }
   this->SetOption("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
   pkgPath = cmSystemTools::FindProgram("hdiutil", path, false);
   if ( pkgPath.empty() )
     {
-    std::cerr << "Cannot find hdiutil compiler" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find hdiutil compiler" << std::endl);
     return 0;
     }
   this->SetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", pkgPath.c_str());
@@ -157,18 +159,18 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name)
   const char* inFileName = this->GetOption(cpackVar.c_str());
   if ( !inFileName )
     {
-    std::cerr << "CPack option: " << cpackVar.c_str() << " not specified. It should point to " << name << ".rtf, " << name << ".html, or " << name << ".txt file" << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack option: " << cpackVar.c_str() << " not specified. It should point to " << name << ".rtf, " << name << ".html, or " << name << ".txt file" << std::endl);
     return false;
     }
   if ( !cmSystemTools::FileExists(inFileName) )
     {
-    std::cerr << "Cannot find " << name << " resource file: " << inFileName << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find " << name << " resource file: " << inFileName << std::endl);
     return false;
     }
   std::string ext = cmSystemTools::GetFilenameLastExtension(inFileName);
   if ( ext != ".rtfd" && ext != ".rtf" && ext != ".html" && ext != ".txt" )
     {
-    std::cerr << "Bad file extension specified: " << ext << ". Currently only .rtfd, .rtf, .html, and .txt files allowed." << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Bad file extension specified: " << ext << ". Currently only .rtfd, .rtf, .html, and .txt files allowed." << std::endl);
     return false;
     }
 
@@ -177,7 +179,7 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name)
   destFileName += name + ext;
 
 
-  std::cout << "Configure file: " << inFileName << " to " << destFileName.c_str() << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << inFileName << " to " << destFileName.c_str() << std::endl);
   this->ConfigureFile(inFileName, destFileName.c_str());
   return true;
 }
@@ -190,7 +192,7 @@ bool cmCPackPackageMakerGenerator::CopyResourcePlistFile(const char* name)
   std::string inFileName = this->FindTemplate(inFName.c_str());
   if ( inFileName.empty() )
     {
-    std::cerr << "Cannot find input file: " << inFName << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find input file: " << inFName << std::endl);
     return false;
     }
 
@@ -198,7 +200,7 @@ bool cmCPackPackageMakerGenerator::CopyResourcePlistFile(const char* name)
   destFileName += "/";
   destFileName += name;
 
-  std::cout << "Configure file: " << inFileName.c_str() << " to " << destFileName.c_str() << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << inFileName.c_str() << " to " << destFileName.c_str() << std::endl);
   this->ConfigureFile(inFileName.c_str(), destFileName.c_str());
   return true;
 }

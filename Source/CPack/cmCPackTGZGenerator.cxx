@@ -23,6 +23,7 @@
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
+#include "cmCPackLog.h"
 
 #include <cmsys/SystemTools.hxx>
 #include <cmzlib/zlib.h>
@@ -74,6 +75,7 @@ public:
   cmCPackTGZGenerator* Generator;
 };
 
+//----------------------------------------------------------------------
 extern "C" {
   int cmCPackTGZ_Data_Open(void *client_data, const char* name, int oflags, mode_t mode);
   ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n);
@@ -96,7 +98,7 @@ int cmCPackTGZ_Data_Open(void *client_data, const char* pathname, int, mode_t)
   gf->SetCompression(true);
   gf->SetCompressionExtraExtension(false);
 
-  if ( !cmCPackTGZGeneratorForward::GenerateHeader(mydata->Generator,mydata->OutputStream))
+  if ( !cmCPackTGZGeneratorForward::GenerateHeader(mydata->Generator,gf))
     {
     return -1;
     }
@@ -130,7 +132,7 @@ int cmCPackTGZ_Data_Close(void *client_data)
 int cmCPackTGZGenerator::CompressFiles(const char* outFileName, const char* toplevel,
   const std::vector<std::string>& files)
 {
-  std::cout << "Toplevel: " << toplevel << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: " << toplevel << std::endl);
   cmCPackTGZ_Data mydata(this);
   TAR *t;
   char buf[TAR_MAXPATHLEN];
@@ -155,7 +157,7 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName, const char* topl
       (m_GeneratorVerbose?TAR_VERBOSE:0)
       | 0) == -1)
     {
-    cmSystemTools::Error("Problem with tar_open(): ", strerror(errno));
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): " << strerror(errno) << std::endl);
     return 0;
     }
 
@@ -168,24 +170,23 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName, const char* topl
     buf[sizeof(buf)-1] = 0;
     if (tar_append_tree(t, buf, pathname) != 0)
       {
-      cmOStringStream ostr;
-      ostr << "Problem with tar_append_tree(\"" << buf << "\", \"" << pathname << "\"): "
-        << strerror(errno);
-      cmSystemTools::Error(ostr.str().c_str());
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Problem with tar_append_tree(\"" << buf << "\", \"" << pathname << "\"): "
+        << strerror(errno) << std::endl);
       tar_close(t);
       return 0;
       }
     }
   if (tar_append_eof(t) != 0)
     {
-    cmSystemTools::Error("Problem with tar_append_eof(): ", strerror(errno));
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_append_eof(): " << strerror(errno) << std::endl);
     tar_close(t);
     return 0;
     }
 
   if (tar_close(t) != 0)
     {
-    cmSystemTools::Error("Problem with tar_close(): ", strerror(errno));
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_close(): " << strerror(errno) << std::endl);
     return 0;
     }
   return 1;
