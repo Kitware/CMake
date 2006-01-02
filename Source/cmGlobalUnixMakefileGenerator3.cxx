@@ -894,6 +894,14 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
             }
           }
         }
+      std::map<cmStdString,std::vector<cmTarget *> >& objs = lg->GetLocalObjectFiles();
+      for(std::map<cmStdString,std::vector<cmTarget *> >::iterator o =
+            objs.begin(); o != objs.end(); ++o)
+        {
+         path = "... ";
+         path += o->first;
+         lg->AppendEcho(commands, path.c_str());
+        }
       }
     }
   lg->WriteMakeRule(ruleFileStream, "Help Target",

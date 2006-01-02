@@ -169,7 +169,9 @@ public:
 
   // write the target rules for the local Makefile into the stream
   void WriteLocalAllRules(std::ostream& ruleFileStream);
-
+  
+  std::map<cmStdString,std::vector<cmTarget *> > GetLocalObjectFiles()
+    { return m_LocalObjectFiles;}
 protected:
   // Return the a string with -F flags on apple
   std::string GetFrameworkFlags(cmTarget&);
@@ -320,7 +322,8 @@ protected:
   std::string GetTargetDirectory(cmTarget& target);
   std::string GetSubdirTargetName(const char* pass, const char* subdir);
   std::string GetObjectFileName(cmTarget& target,
-                                const cmSourceFile& source);
+                                const cmSourceFile& source,
+                                std::string* nameWithoutTargetDir = 0);
   const char* GetSourceFileLanguage(const cmSourceFile& source);
   std::string ConvertToQuotedOutputPath(const char* p);
 

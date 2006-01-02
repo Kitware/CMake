@@ -721,8 +721,8 @@ cmLocalUnixMakefileGenerator3
     }
 
   // Get the full path name of the object file.
-  std::string obj = this->GetObjectFileName(target, source);
-  
+  std::string objNoTargetDir;
+  std::string obj = this->GetObjectFileName(target, source, &objNoTargetDir);
   // Avoid generating duplicate rules.
   if(m_ObjectFiles.find(obj) == m_ObjectFiles.end())
     {
@@ -749,7 +749,6 @@ cmLocalUnixMakefileGenerator3
   objects.push_back(obj);
   std::string relativeObj = this->GetHomeRelativeOutputPath();
   relativeObj += obj;
-  
   // we compute some depends when writing the depend.make that we will also
   // use in the build.make, same with depMakeFile
   std::vector<std::string> depends;
@@ -761,9 +760,12 @@ cmLocalUnixMakefileGenerator3
   
   // The object file should be checked for dependency integrity.
   m_CheckDependFiles[target.GetName()][lang].insert(&source);
-     
   // add this to the list of objects for this local generator
-  m_LocalObjectFiles[cmSystemTools::GetFilenameName(obj)].push_back(&target);
+  if(cmSystemTools::FileIsFullPath(objNoTargetDir.c_str()))
+    {
+    objNoTargetDir = cmSystemTools::GetFilenameName(objNoTargetDir);
+    }
+  m_LocalObjectFiles[objNoTargetDir].push_back(&target);
 }
 
 //----------------------------------------------------------------------------
@@ -2124,7 +2126,8 @@ cmLocalUnixMakefileGenerator3
 std::string
 cmLocalUnixMakefileGenerator3
 ::GetObjectFileName(cmTarget& target,
-                    const cmSourceFile& source)
+                    const cmSourceFile& source,
+                    std::string* nameWithoutTargetDir)
 {
   // If the full path to the source file includes this directory,
   // we want to use the relative path for the filename of the
@@ -2152,11 +2155,14 @@ cmLocalUnixMakefileGenerator3
 
   // Convert to a safe name.
   objectName = this->CreateSafeUniqueObjectFileName(objectName.c_str());
-
   // Prepend the target directory.
   std::string obj = this->GetTargetDirectory(target);
   obj += "/";
   obj += objectName;
+  if(nameWithoutTargetDir)
+    {
+    *nameWithoutTargetDir = objectName;
+    }
   return obj;
 }
 
