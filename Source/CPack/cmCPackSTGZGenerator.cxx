@@ -36,18 +36,6 @@ cmCPackSTGZGenerator::~cmCPackSTGZGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackSTGZGenerator::ProcessGenerator()
-{
-  return this->Superclass::ProcessGenerator();
-}
-
-//----------------------------------------------------------------------
-int cmCPackSTGZGenerator::Initialize(const char* name)
-{
-  return this->Superclass::Initialize(name);
-}
-
-//----------------------------------------------------------------------
 int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Writing header" << std::endl);

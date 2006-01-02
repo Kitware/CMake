@@ -39,12 +39,6 @@ cmCPackNSISGenerator::~cmCPackNSISGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackNSISGenerator::ProcessGenerator()
-{
-  return this->Superclass::ProcessGenerator();
-}
-
-//----------------------------------------------------------------------
 int cmCPackNSISGenerator::CompressFiles(const char* outFileName, const char* toplevel,
   const std::vector<std::string>& files)
 {
@@ -84,10 +78,14 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName, const char* top
 }
 
 //----------------------------------------------------------------------
-int cmCPackNSISGenerator::Initialize(const char* name)
+int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
 {
+  int res = this->Superclass::Initialize(name, mf);
+  if ( !res )
+    {
+    return res;
+    }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackNSISGenerator::Initialize()" << std::endl);
-  int res = this->Superclass::Initialize(name);
   std::vector<std::string> path;
   std::string nsisPath;
   if ( !cmsys::SystemTools::ReadRegistryValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS",

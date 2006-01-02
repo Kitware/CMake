@@ -43,9 +43,6 @@
 #define cout no_cout_use_cmCPack_Log
 
 class cmMakefile;
-class cmLocalGenerator;
-class cmGlobalGenerator;
-class cmake;
 class cmCPackLog;
 
 /** \class cmCPackGenericGenerator
@@ -70,7 +67,7 @@ public:
   /**
    * Initialize generator
    */
-  virtual int Initialize(const char* name);
+  virtual int Initialize(const char* name, cmMakefile* mf);
 
   /**
    * Construct generator
@@ -114,10 +111,7 @@ protected:
   cmCPackLog* m_Logger;
 
 private:
-  cmGlobalGenerator* m_GlobalGenerator;
-  cmLocalGenerator* m_LocalGenerator;
   cmMakefile* m_MakefileMap;
-  cmake* m_CMakeInstance;
 };
 
 #endif

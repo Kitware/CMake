@@ -53,18 +53,6 @@ cmCPackTGZGenerator::~cmCPackTGZGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackTGZGenerator::ProcessGenerator()
-{
-  return this->Superclass::ProcessGenerator();
-}
-
-//----------------------------------------------------------------------
-int cmCPackTGZGenerator::Initialize(const char* name)
-{
-  return this->Superclass::Initialize(name);
-}
-
-//----------------------------------------------------------------------
 class cmCPackTGZ_Data
 {
 public:

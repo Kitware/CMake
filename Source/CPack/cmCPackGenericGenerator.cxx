@@ -17,11 +17,11 @@
 
 #include "cmCPackGenericGenerator.h"
 
+#include "cmMakefile.h"
+#include "cmCPackLog.h"
 #include "cmake.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
-#include "cmMakefile.h"
-#include "cmCPackLog.h"
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
@@ -31,31 +31,13 @@
 cmCPackGenericGenerator::cmCPackGenericGenerator()
 {
   m_GeneratorVerbose = false;
-  m_GlobalGenerator = 0;
-  m_LocalGenerator = 0;
   m_MakefileMap = 0;
-  m_CMakeInstance = 0;
   m_Logger = 0;
 }
 
 //----------------------------------------------------------------------
 cmCPackGenericGenerator::~cmCPackGenericGenerator()
 {
-  if ( m_GlobalGenerator )
-    {
-    delete m_GlobalGenerator;
-    m_GlobalGenerator = 0;
-    }
-  if ( m_LocalGenerator )
-    {
-    delete m_LocalGenerator;
-    m_LocalGenerator = 0;
-    }
-  if ( m_CMakeInstance )
-    {
-    delete m_CMakeInstance;
-    m_CMakeInstance = 0;
-    }
   m_MakefileMap = 0;
 }
 
@@ -258,14 +240,9 @@ int cmCPackGenericGenerator::ProcessGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::Initialize(const char* name)
+int cmCPackGenericGenerator::Initialize(const char* name, cmMakefile* mf)
 {
-  m_CMakeInstance = new cmake;
-  m_CMakeInstance->AddCMakePaths(m_CMakeRoot.c_str());
-  m_GlobalGenerator = new cmGlobalGenerator;
-  m_GlobalGenerator->SetCMakeInstance(m_CMakeInstance);
-  m_LocalGenerator = m_GlobalGenerator->CreateLocalGenerator();
-  m_MakefileMap = m_LocalGenerator->GetMakefile();
+  m_MakefileMap = mf;
   m_Name = name;
   return 1;
 }

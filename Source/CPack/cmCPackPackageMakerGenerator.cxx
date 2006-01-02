@@ -38,12 +38,6 @@ cmCPackPackageMakerGenerator::~cmCPackPackageMakerGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackPackageMakerGenerator::ProcessGenerator()
-{
-  return this->Superclass::ProcessGenerator();
-}
-
-//----------------------------------------------------------------------
 int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const char* toplevel,
   const std::vector<std::string>& files)
 {
@@ -126,10 +120,10 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const c
 }
 
 //----------------------------------------------------------------------
-int cmCPackPackageMakerGenerator::Initialize(const char* name)
+int cmCPackPackageMakerGenerator::Initialize(const char* name, cmMakefile* mf)
 {
+  int res = this->Superclass::Initialize(name, mf);
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackPackageMakerGenerator::Initialize()" << std::endl);
-  int res = this->Superclass::Initialize(name);
   std::vector<std::string> path;
   std::string pkgPath = "/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS";
   path.push_back(pkgPath);

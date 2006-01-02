@@ -52,11 +52,6 @@ cmCPackGenericGenerator* cmCPackGenerators::NewGenerator(const char* name)
     {
     return 0;
     }
-  if ( !gen->Initialize(name) )
-    {
-    delete gen;
-    return 0;
-    }
   m_Generators.push_back(gen);
   gen->SetLogger(m_Logger);
   return gen;

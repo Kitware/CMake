@@ -31,16 +31,11 @@ class cmCPackNSISGenerator : public cmCPackGenericGenerator
 {
 public:
   cmCPackTypeMacro(cmCPackNSISGenerator, cmCPackGenericGenerator);
-  /**
-   * Do the actual processing. Subclass has to override it.
-   * Return < 0 if error.
-   */
-  virtual int ProcessGenerator();
 
   /**
    * Initialize generator
    */
-  virtual int Initialize(const char* name);
+  virtual int Initialize(const char* name, cmMakefile* mf);
 
   /**
    * Construct generator
