@@ -463,6 +463,6 @@ std::string cmCPackGenericGenerator::FindTemplate(const char* name)
 //----------------------------------------------------------------------
 bool cmCPackGenericGenerator::ConfigureFile(const char* inName, const char* outName)
 {
-  return m_MakefileMap->ConfigureFile(inName, outName, false, true, false);
+  return m_MakefileMap->ConfigureFile(inName, outName, false, true, false) == 1;
 }
 
