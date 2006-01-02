@@ -117,11 +117,11 @@ SET(FORCE_TEST 0 CACHE STRING "a test" FORCE)
 # Lib and exe path
 #
 SET (LIBRARY_OUTPUT_PATH 
-     ${Complex_BINARY_DIR}/bin/ CACHE PATH 
+     ${Complex_BINARY_DIR}/bin/ CACHE INTERNAL
      "Single output directory for building all libraries.")
 
 SET (EXECUTABLE_OUTPUT_PATH 
-     ${Complex_BINARY_DIR}/bin/ CACHE PATH 
+     ${Complex_BINARY_DIR}/bin/ CACHE INTERNAL
      "Single output directory for building all executables.")
 
 MESSAGE (Test " " escape " " semi-colon " " \; \;)
