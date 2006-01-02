@@ -894,8 +894,9 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
             }
           }
         }
-      std::map<cmStdString,std::vector<cmTarget *> >& objs = lg->GetLocalObjectFiles();
-      for(std::map<cmStdString,std::vector<cmTarget *> >::iterator o =
+      std::map<cmStdString,std::vector<cmTarget *> > const& objs =
+        lg->GetLocalObjectFiles();
+      for(std::map<cmStdString,std::vector<cmTarget *> >::const_iterator o =
             objs.begin(); o != objs.end(); ++o)
         {
          path = "... ";
