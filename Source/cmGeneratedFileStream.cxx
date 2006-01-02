@@ -163,7 +163,7 @@ void cmGeneratedFileStreamBase::Open(const char* name)
 void cmGeneratedFileStreamBase::Close()
 {
   std::string resname = m_Name;
-  if ( m_CompressExtraExtension )
+  if ( m_Compress && m_CompressExtraExtension )
     {
     resname += ".gz";
     }
