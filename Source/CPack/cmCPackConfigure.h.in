@@ -1,0 +1,32 @@
+#cmakedefine HAVE_WCHAR_H @HAVE_WCHAR_H@
+#cmakedefine HAVE_UNISTD_H @HAVE_UNISTD_H@
+#cmakedefine HAVE_IO_H @HAVE_IO_H@
+#cmakedefine HAVE_SIZEOF_SSIZE_T @HAVE_SIZEOF_SSIZE_T@
+#if !defined(HAVE_SIZEOF_SSIZE_T)
+#  define ssize_t @ssize_t@
+#endif
+#cmakedefine HAVE_SIZEOF_INT64_T @HAVE_SIZEOF_INT64_T@
+#if !defined(HAVE_SIZEOF_INT64_T)
+#  define int64_t @int64_t@
+#  define uint64_t unsigned @int64_t@
+#endif
+#cmakedefine HAVE_SIZEOF_UID_T @HAVE_SIZEOF_UID_T@
+#if !defined(HAVE_SIZEOF_UID_T)
+#  define uid_t @uid_t@
+#endif
+#cmakedefine HAVE_SIZEOF_GID_T @HAVE_SIZEOF_GID_T@
+#if !defined(HAVE_SIZEOF_GID_T)
+#  define gid_t @gid_t@
+#endif
+#cmakedefine HAVE_SIZEOF_INTMAX_T @HAVE_SIZEOF_INTMAX_T@
+#if !defined(HAVE_SIZEOF_INTMAX_T)
+#  define intmax_t @intmax_t@
+#endif
+#cmakedefine HAVE_SIZEOF_UINTMAX_T @HAVE_SIZEOF_UINTMAX_T@
+#if !defined(HAVE_SIZEOF_UINTMAX_T)
+#  define uintmax_t @uintmax_t@
+#endif
+#cmakedefine HAVE_GETEUID @HAVE_GETEUID@
+
+#cmakedefine HAVE_INTTYPES_H @HAVE_INTTYPES_H@
+
