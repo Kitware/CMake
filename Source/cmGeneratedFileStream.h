@@ -66,6 +66,9 @@ protected:
 
   // Whether the destionation file is compressed
   bool m_Compress;
+
+  // Whether the destionation file is compressed
+  bool m_CompressExtraExtension;
 };
 
 /** \class cmGeneratedFileStream
@@ -130,6 +133,11 @@ public:
    * Set whether compression is done.
    */
   void SetCompression(bool compression);
+
+  /**
+   * Set whether compression has extra extension
+   */
+  void SetCompressionExtraExtension(bool ext);
 
   /**
    * Set name of the file that will hold the actual output. This method allows

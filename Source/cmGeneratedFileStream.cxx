@@ -108,12 +108,19 @@ void cmGeneratedFileStream::SetCompression(bool compression)
 }
 
 //----------------------------------------------------------------------------
+void cmGeneratedFileStream::SetCompressionExtraExtension(bool ext)
+{
+  m_CompressExtraExtension = ext;
+}
+
+//----------------------------------------------------------------------------
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase():
   m_Name(),
   m_TempName(),
   m_CopyIfDifferent(false),
   m_Okay(false),
-  m_Compress(false)
+  m_Compress(false),
+  m_CompressExtraExtension(true)
 {
 }
 
@@ -123,7 +130,8 @@ cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(const char* name):
   m_TempName(),
   m_CopyIfDifferent(false),
   m_Okay(false),
-  m_Compress(false)
+  m_Compress(false),
+  m_CompressExtraExtension(true)
 {
   this->Open(name);
 }
@@ -155,7 +163,7 @@ void cmGeneratedFileStreamBase::Open(const char* name)
 void cmGeneratedFileStreamBase::Close()
 {
   std::string resname = m_Name;
-  if ( m_Compress )
+  if ( m_CompressExtraExtension )
     {
     resname += ".gz";
     }
