@@ -32,6 +32,16 @@
 #include <errno.h>
 
 //----------------------------------------------------------------------
+class cmCPackTGZGeneratorForward
+{
+  public:
+    static int GenerateHeader(cmCPackTGZGenerator* gg, std::ostream* os)
+      {
+      return gg->GenerateHeader(os);
+      }
+};
+
+//----------------------------------------------------------------------
 cmCPackTGZGenerator::cmCPackTGZGenerator()
 {
 }
@@ -64,8 +74,15 @@ public:
   cmCPackTGZGenerator* Generator;
 };
 
+extern "C" {
+  int cmCPackTGZ_Data_Open(void *client_data, const char* name, int oflags, mode_t mode);
+  ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n);
+  int cmCPackTGZ_Data_Close(void *client_data);
+}
+
+
 //----------------------------------------------------------------------
-int cmCPackTGZGenerator::TGZ_Open(void *client_data, const char* pathname, int, mode_t)
+int cmCPackTGZ_Data_Open(void *client_data, const char* pathname, int, mode_t)
 {
   cmCPackTGZ_Data *mydata = (cmCPackTGZ_Data*)client_data;
 
@@ -79,7 +96,7 @@ int cmCPackTGZGenerator::TGZ_Open(void *client_data, const char* pathname, int, 
   gf->SetCompression(true);
   gf->SetCompressionExtraExtension(false);
 
-  if ( !mydata->Generator->GenerateHeader(mydata->OutputStream))
+  if ( !cmCPackTGZGeneratorForward::GenerateHeader(mydata->Generator,mydata->OutputStream))
     {
     return -1;
     }
@@ -87,7 +104,7 @@ int cmCPackTGZGenerator::TGZ_Open(void *client_data, const char* pathname, int, 
 }
 
 //----------------------------------------------------------------------
-ssize_t cmCPackTGZGenerator::TGZ_Write(void *client_data, void *buff, size_t n)
+ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n)
 {
   cmCPackTGZ_Data *mydata = (cmCPackTGZ_Data*)client_data;
 
@@ -100,7 +117,7 @@ ssize_t cmCPackTGZGenerator::TGZ_Write(void *client_data, void *buff, size_t n)
 }
 
 //----------------------------------------------------------------------
-int cmCPackTGZGenerator::TGZ_Close(void *client_data)
+int cmCPackTGZ_Data_Close(void *client_data)
 {
   cmCPackTGZ_Data *mydata = (cmCPackTGZ_Data*)client_data;
 
@@ -120,10 +137,10 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName, const char* topl
   char pathname[TAR_MAXPATHLEN];
 
   tartype_t gztype = {
-    (openfunc_t)cmCPackTGZGenerator::TGZ_Open,
-    (closefunc_t)cmCPackTGZGenerator::TGZ_Close,
+    (openfunc_t)cmCPackTGZ_Data_Open,
+    (closefunc_t)cmCPackTGZ_Data_Close,
     (readfunc_t)0,
-    (writefunc_t)cmCPackTGZGenerator::TGZ_Write,
+    (writefunc_t)cmCPackTGZ_Data_Write,
     &mydata
   };
 
@@ -173,3 +190,12 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName, const char* topl
     }
   return 1;
 }
+
+//----------------------------------------------------------------------
+int cmCPackTGZGenerator::GenerateHeader(std::ostream* os)
+{
+  (void)os;
+  return 1;
+}
+
+

@@ -70,7 +70,6 @@ public:
 protected:
   int PrepareNames();
   int InstallProject();
-  virtual int GenerateHeader(std::ostream* os);
 
   virtual const char* GetOutputExtension() { return "cpack"; }
   virtual const char* GetOutputPostfix() { return 0; }

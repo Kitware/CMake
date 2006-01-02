@@ -18,9 +18,9 @@
 #ifndef cmCPackTGZGenerator_h
 #define cmCPackTGZGenerator_h
 
-
 #include "cmCPackGenericGenerator.h"
-#include "CPack/cmCPackConfigure.h" // for ssize_t
+
+class cmCPackTGZGeneratorForward;
 
 /** \class cmCPackTGZGenerator
  * \brief A generator for TGZ files
@@ -30,6 +30,7 @@
 class cmCPackTGZGenerator : public cmCPackGenericGenerator
 {
 public:
+  friend class cmCPackTGZGeneratorForward;
   cmCPackTypeMacro(cmCPackTGZGenerator, cmCPackGenericGenerator);
 
   /**
@@ -50,10 +51,7 @@ public:
   virtual ~cmCPackTGZGenerator();
 
 protected:
-  static int TGZ_Open(void *client_data, const char* name, int oflags, mode_t mode);
-  static ssize_t TGZ_Write(void *client_data, void *buff, size_t n);
-  static int TGZ_Close(void *client_data);
-
+  virtual int GenerateHeader(std::ostream* os);
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
   virtual const char* GetOutputExtension() { return "tar.gz"; }

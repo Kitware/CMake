@@ -272,13 +272,6 @@ const char* cmCPackGenericGenerator::GetOption(const char* op)
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::GenerateHeader(std::ostream* os)
-{
-  (void)os;
-  return 1;
-}
-
-//----------------------------------------------------------------------
 int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
 {
   int found = 0;
