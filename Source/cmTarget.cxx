@@ -914,6 +914,7 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type)
     case cmTarget::MODULE_LIBRARY:
       return "CMAKE_SHARED_MODULE_SUFFIX";
     case cmTarget::EXECUTABLE:
+      return "CMAKE_EXECUTABLE_SUFFIX";
     case cmTarget::UTILITY:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
@@ -956,10 +957,6 @@ std::string cmTarget::GetFullNameInternal(TargetType type)
 {
   const char* targetPrefix = this->GetProperty("PREFIX");
   const char* targetSuffix = this->GetProperty("SUFFIX");
-  if(!targetSuffix && type == cmTarget::EXECUTABLE)
-    {
-    targetSuffix = cmSystemTools::GetExecutableExtension();
-    }
   const char* prefixVar = this->GetPrefixVariableInternal(type);
   const char* suffixVar = this->GetSuffixVariableInternal(type);
   const char* ll =

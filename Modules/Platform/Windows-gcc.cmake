@@ -5,6 +5,7 @@ SET(CMAKE_SHARED_LIBRARY_PREFIX "lib")          # lib
 SET(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")          # .so
 SET(CMAKE_SHARED_MODULE_PREFIX "lib")          # lib
 SET(CMAKE_SHARED_MODULE_SUFFIX ".dll")          # .so
+SET(CMAKE_EXECUTABLE_SUFFIX ".exe")          # .exe
 SET(CMAKE_DL_LIBS "")
 SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic 
 SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "")            # -pic 
