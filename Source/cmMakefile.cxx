@@ -2279,8 +2279,8 @@ std::string cmMakefile::FindLibrary(const char* name,
       {
       path.push_back("~/Library/Frameworks");
       path.push_back("/Library/Frameworks");
-      path.push_back("/System/Library/Frameworks");
       path.push_back("/Network/Library/Frameworks");
+      path.push_back("/System/Library/Frameworks");
       }
     }
   if(m_LocalGenerator->GetGlobalGenerator()->GetLanguageEnabled("C"))

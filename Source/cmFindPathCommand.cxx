@@ -149,8 +149,8 @@ cmStdString cmFindPathCommand::FindHeaderInFrameworks(
     }
   path.push_back("~/Library/Frameworks");
   path.push_back("/Library/Frameworks");
-  path.push_back("/System/Library/Frameworks");
   path.push_back("/Network/Library/Frameworks");
+  path.push_back("/System/Library/Frameworks");
   for(  std::vector<std::string>::iterator i = path.begin();
         i != path.end(); ++i)
     {
