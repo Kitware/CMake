@@ -1418,10 +1418,10 @@ struct cmSystemToolsGZStruct
 };
 
 extern "C" {
-  static int cmSystemToolsGZStructOpen(void* call_data, const char *pathname, int oflags, mode_t mode);
-  static int cmSystemToolsGZStructClose(void* call_data);
-  static ssize_t cmSystemToolsGZStructRead(void* call_data, void* buf, size_t count);
-  static ssize_t cmSystemToolsGZStructWrite(void* call_data, const void* buf, size_t count);
+  int cmSystemToolsGZStructOpen(void* call_data, const char *pathname, int oflags, mode_t mode);
+  int cmSystemToolsGZStructClose(void* call_data);
+  ssize_t cmSystemToolsGZStructRead(void* call_data, void* buf, size_t count);
+  ssize_t cmSystemToolsGZStructWrite(void* call_data, const void* buf, size_t count);
 }
 
 int cmSystemToolsGZStructOpen(void* call_data, const char *pathname, int oflags, mode_t mode)
