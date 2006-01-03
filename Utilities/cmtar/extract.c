@@ -329,7 +329,7 @@ int
 tar_extract_hardlink(TAR * t, char *realname)
 {
   char *filename;
-  char *linktgt = NULL;
+  char *linktgt;
   linkname_t *lnp;
   libtar_hashptr_t hp;
   char buf[T_BLOCKSIZE];

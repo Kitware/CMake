@@ -318,10 +318,10 @@ usage()
 int
 main(int argc, char *argv[])
 {
-  char *tarfile = NULL;
+  char* tarfile;
   char *rootdir = NULL;
   int c;
-  int mode = 0;
+  int mode;
   libtar_list_t *l;
 #if defined(_WIN32) && !defined(__CYGWIN__)
    int optind;
@@ -329,6 +329,7 @@ main(int argc, char *argv[])
   progname = basename(argv[0]);
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
+  mode = 0;
   while ((c = getopt(argc, argv, "cC:gtvVxz")) != -1)
     switch (c)
     {

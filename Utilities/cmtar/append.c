@@ -65,8 +65,8 @@ tar_append_file(TAR *t, char *realname, char *savename)
 {
   struct stat s;
   libtar_hashptr_t hp;
-  tar_dev_t *td = NULL;
-  tar_ino_t *ti = NULL;
+  tar_dev_t *td;
+  tar_ino_t *ti;
 #if !defined(_WIN32) || defined(__CYGWIN__)
   int i;
 #else
