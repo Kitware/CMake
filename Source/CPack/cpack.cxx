@@ -135,7 +135,6 @@ int main (int argc, char *argv[])
   log.SetOutputPrefix("CPack: ");
   log.SetVerbosePrefix("CPack Verbose: ");
 
-  int res = 0;
   cmSystemTools::EnableMSVCDebugHook();
 
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
@@ -321,7 +320,7 @@ int main (int argc, char *argv[])
   cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "Use generator: " << cpackGenerator->GetNameOfClass() << std::endl);
   cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "For project: " << projName << std::endl);
 
-  res = cpackGenerator->ProcessGenerator();
+  int res = cpackGenerator->ProcessGenerator();
   if ( !res )
     {
     cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Error when generating package: " << cpackProjectName.c_str() << std::endl);

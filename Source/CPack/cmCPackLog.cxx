@@ -82,9 +82,6 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg, size_
   // By default no logging
   bool display = false;
 
-  // Should we go to the error stream
-  bool errorStream = false;
-
   // Display file and line number if debug
   bool useFileAndLine = m_Debug;
 
@@ -116,7 +113,6 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg, size_
     {
     warning = true;
     display = true;
-    errorStream = true;
     if ( needTagString )
       {
       if ( tagString.size() > 0 ) { tagString += ","; }
@@ -127,7 +123,6 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg, size_
     {
     error = true;
     display = true;
-    errorStream = true;
     if ( needTagString )
       {
       if ( tagString.size() > 0 ) { tagString += ","; }
