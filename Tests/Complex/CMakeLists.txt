@@ -243,6 +243,8 @@ WHILE (while_var LESS 1000)
   SET(while_var ${while_var}0)
 ENDWHILE(while_var LESS 1000)
 
+SET(SHOULD_BE_ZERO )
+SET(SHOULD_BE_ONE 1)
 #
 # Configure file 
 # (plug vars to #define so that they can be tested)

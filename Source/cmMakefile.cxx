@@ -74,7 +74,8 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("Header Files", "\\.(h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddDefaultDefinitions();
-  m_cmDefineRegex.compile("#cmakedefine[ \t]*([A-Za-z_0-9]*)");
+  m_cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
+  m_cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
 
   this->PreOrder = false;
 }
@@ -2397,6 +2398,20 @@ void cmMakefile::ConfigureString(const std::string& input,
         output += "/* ";
         output += line;
         output += " */";
+        }
+      }
+    else if(m_cmDefine01Regex.find(line))
+      {
+      const char* def = this->GetDefinition(m_cmDefine01Regex.match(1).c_str());
+      cmSystemTools::ReplaceString(line, "#cmakedefine01", "#define");
+      output += line;
+      if(!cmSystemTools::IsOff(def))
+        {
+        output += " 1";
+        }
+      else
+        {
+        output += " 0";
         }
       }
     else

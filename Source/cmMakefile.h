@@ -726,6 +726,7 @@ private:
   DefinitionMap::key_type  m_TemporaryDefinitionKey;
 
   cmsys::RegularExpression m_cmDefineRegex;
+  cmsys::RegularExpression m_cmDefine01Regex;
 
   std::map<cmStdString,cmStdString> m_Properties;
 

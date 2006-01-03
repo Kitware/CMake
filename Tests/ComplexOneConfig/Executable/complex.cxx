@@ -1114,7 +1114,22 @@ int main()
 #else
   cmFailed("Generated header included by non-generated source failed.");
 #endif
-  
+  if(SHOULD_BE_ZERO == 0)
+    {
+    cmPassed("cmakedefine01 is working for 0");
+    }
+  else
+    {
+    cmFailed("cmakedefine01 is not working for 0");
+    }  
+  if(SHOULD_BE_ONE == 1)
+    {
+    cmPassed("cmakedefine01 is working for 1");
+    }
+  else
+    {
+    cmFailed("cmakedefine01 is not working for 1");
+    }  
 #ifdef FORCE_TEST
   cmFailed("CMake SET CACHE FORCE");
 #else

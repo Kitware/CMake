@@ -39,6 +39,8 @@
 #cmakedefine CMAKE_NO_ANSI_STRING_STREAM
 #cmakedefine CMAKE_NO_ANSI_FOR_SCOPE
 
+#cmakedefine01 SHOULD_BE_ZERO
+#cmakedefine01 SHOULD_BE_ONE
 // Needed to check for files
 
 #define BINARY_DIR "${Complex_BINARY_DIR}"
