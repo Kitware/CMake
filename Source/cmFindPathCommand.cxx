@@ -132,7 +132,6 @@ cmStdString cmFindPathCommand::FindHeaderInFrameworks(
   cmStdString fileName = file;
   cmStdString frameWorkName;
   cmStdString::size_type pos = fileName.find("/");
-  std::cerr << "ff " << fileName << " " << pos << "\n";
   if(pos != fileName.npos)
     {
     // remove the name from the slash;
@@ -140,7 +139,6 @@ cmStdString cmFindPathCommand::FindHeaderInFrameworks(
     frameWorkName = file;
     frameWorkName = frameWorkName.substr(0, frameWorkName.size()-fileName.size()-1);
     // if the framework has a path in it then just use the filename
-    std::cerr << fileName << " " << frameWorkName << "\n";
     if(frameWorkName.find("/") != frameWorkName.npos)
       {
       fileName = file;
@@ -163,7 +161,6 @@ cmStdString cmFindPathCommand::FindHeaderInFrameworks(
       std::string intPath = fpath;
       intPath += "/Headers/";
       intPath += fileName;
-      std::cerr << "try " << intPath << "\n";
       if(cmSystemTools::FileExists(intPath.c_str()))
         {
         return fpath;
