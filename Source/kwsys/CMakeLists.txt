@@ -599,32 +599,32 @@ ENDIF(KWSYS_USE_Process)
 #-----------------------------------------------------------------------------
 # Setup testing if not being built as part of another project.
 IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
-  # C++ tests
-  FOREACH(test
-      testSystemTools
-      testIOS
-      testHashSTL
-      testCommandLineArguments
-      testRegistry
-      )
-    ADD_EXECUTABLE(${test} ${test}.cxx)
-    TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE})
-  ENDFOREACH(test)
-  # C tests
-  FOREACH(test
-      testProcess
-      testFail
-      )
-    ADD_EXECUTABLE(${test} ${test}.c)
-    TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE}_c)
-  ENDFOREACH(test)
-
-  SET(EXEC_DIR "${CMAKE_CURRENT_BINARY_DIR}")
-  IF(EXECUTABLE_OUTPUT_PATH)
-    SET(EXEC_DIR "${EXECUTABLE_OUTPUT_PATH}")
-  ENDIF(EXECUTABLE_OUTPUT_PATH)
-
   IF(BUILD_TESTING)
+    # C++ tests
+    FOREACH(test
+        testSystemTools
+        testIOS
+        testHashSTL
+        testCommandLineArguments
+        testRegistry
+        )
+      ADD_EXECUTABLE(${test} ${test}.cxx)
+      TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE})
+    ENDFOREACH(test)
+    # C tests
+    FOREACH(test
+        testProcess
+        testFail
+        )
+      ADD_EXECUTABLE(${test} ${test}.c)
+      TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE}_c)
+    ENDFOREACH(test)
+
+    SET(EXEC_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+    IF(EXECUTABLE_OUTPUT_PATH)
+      SET(EXEC_DIR "${EXECUTABLE_OUTPUT_PATH}")
+    ENDIF(EXECUTABLE_OUTPUT_PATH)
+
 
     SET(TEST_SYSTEMTOOLS_BIN_FILE
       "${CMAKE_CURRENT_SOURCE_DIR}/testSystemTools.bin")
