@@ -123,7 +123,10 @@ ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n)
     mydata->m_ZLibStream.avail_out = cmCPackTGZ_Data_BlockSize;
     mydata->m_ZLibStream.next_out = reinterpret_cast<Bytef*>(mydata->m_CompressedBuffer);
     int ret = deflate(&mydata->m_ZLibStream, (n?Z_NO_FLUSH:Z_FINISH));    /* no bad return value */
-    assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
+    if(ret == Z_STREAM_ERROR)
+      {
+      return 0;
+      }
 
     size_t compressedSize = cmCPackTGZ_Data_BlockSize - mydata->m_ZLibStream.avail_out;
 
