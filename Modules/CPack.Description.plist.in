@@ -3,10 +3,10 @@
 <plist version="1.4">
 <dict>
 	<key>IFPkgDescriptionTitle</key>
-	<string>@CPACK_PROJECT_NAME@</string>
+	<string>@CPACK_PACKAGE_NAME@</string>
   <key>IFPkgDescriptionVersion</key>
-  <string>@CPACK_PROJECT_VERSION@-@CPACK_PROJECT_VERSION_PATCH@</string>
+  <string>@CPACK_PACKAGE_VERSION@</string>
   <key>IFPkgDescriptionDescription</key>
-  <string>@CPACK_PROJECT_DESCRIPTION@</string>
+  <string>@CPACK_PACKAGE_DESCRIPTION@</string>
 </dict>
 </plist>

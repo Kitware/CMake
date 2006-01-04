@@ -3,8 +3,8 @@
 ;--------------------------------
 ; You must define these values
 
-  !define VERSION "@CPACK_PROJECT_VERSION@"
-  !define PATCH  "@CPACK_PROJECT_VERSION_PATCH@"
+  !define VERSION "@CPACK_PACKAGE_VERSION@"
+  !define PATCH  "@CPACK_PACKAGE_VERSION_PATCH@"
   !define INST_DIR @CPACK_TEMPORARY_DIRECTORY@
 
 ;--------------------------------
@@ -19,7 +19,7 @@
   !include "MUI.nsh"
 
   ;Default installation folder
-  InstallDir "$PROGRAMFILES\@CPACK_PROJECT_NAME@ ${VERSION}"  
+  InstallDir "$PROGRAMFILES\@CPACK_PACKAGE_NAME@ ${VERSION}"  
 
 ;--------------------------------
 ; determine admin versus local install
@@ -51,8 +51,8 @@ FunctionEnd
 ;General
 
   ;Name and file
-  Name "@CPACK_PROJECT_NAME@ ${VERSION}"
-  OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_PROJECT_NAME@-${VERSION}-${PATCH}-win32.exe"
+  Name "@CPACK_PACKAGE_NAME@ ${VERSION}"
+  OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_PACKAGE_NAME@-${VERSION}-${PATCH}-win32.exe"
 
 ;--------------------------------
 ;Interface Settings
@@ -303,7 +303,7 @@ FunctionEnd
 ;--------------------------------
 ; Define some macro setting for the gui
 
-  !define MUI_HEADERIMAGE_BITMAP "@CPACK_PROJECT_ICON@"
+  !define MUI_HEADERIMAGE_BITMAP "@CPACK_PACKAGE_ICON@"
 
 ;--------------------------------
 ;Pages
@@ -312,7 +312,7 @@ FunctionEnd
   
   ;Start Menu Folder Page Configuration
   !define MUI_STARTMENUPAGE_REGISTRY_ROOT "SHCTX" 
-  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\@CPACK_PROJECT_VENDOR@\@CPACK_PROJECT_NAME@ ${VERSION}" 
+  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@ ${VERSION}" 
   !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
   !insertmacro MUI_PAGE_STARTMENU Application $STARTMENU_FOLDER
 
@@ -349,7 +349,7 @@ Section "Dummy Section" SecDummy
   @CPACK_NSIS_EXTRA_COMMANDS@
 
   ;Store installation folder
-  WriteRegStr SHCTX "Software\@CPACK_PROJECT_VENDOR@\@CPACK_PROJECT_NAME@ ${VERSION}" "" $INSTDIR
+  WriteRegStr SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@ ${VERSION}" "" $INSTDIR
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -409,7 +409,7 @@ Section "Uninstall"
   RMDir "$INSTDIR"
 
   ; Remove the registry entries.
-  DeleteRegKey SHCTX "Software\@CPACK_PROJECT_VENDOR@\@CPACK_PROJECT_NAME@ ${VERSION}"
+  DeleteRegKey SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@ ${VERSION}"
 
   !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
     
@@ -429,7 +429,7 @@ Section "Uninstall"
     StrCmp $MUI_TEMP $SMPROGRAMS startMenuDeleteLoopDone startMenuDeleteLoop
   startMenuDeleteLoopDone:
 
-  DeleteRegKey /ifempty SHCTX "Software\@CPACK_PROJECT_VENDOR@\@CPACK_PROJECT_NAME@ ${VERSION}"
+  DeleteRegKey /ifempty SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@ ${VERSION}"
 
   Push $INSTDIR\bin
   Call un.RemoveFromPath

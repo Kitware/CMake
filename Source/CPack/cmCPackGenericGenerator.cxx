@@ -45,15 +45,15 @@ cmCPackGenericGenerator::~cmCPackGenericGenerator()
 int cmCPackGenericGenerator::PrepareNames()
 {
   this->SetOption("CPACK_GENERATOR", m_Name.c_str());
-  std::string tempDirectory = this->GetOption("CPACK_PROJECT_DIRECTORY");
+  std::string tempDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   tempDirectory += "/_CPack_Packages/";
   tempDirectory += this->GetOption("CPACK_GENERATOR");
   std::string topDirectory = tempDirectory;
 
-  std::string outName = this->GetOption("CPACK_PROJECT_NAME");
+  std::string outName = this->GetOption("CPACK_PACKAGE_NAME");
   outName += "-";
-  outName += this->GetOption("CPACK_PROJECT_VERSION");
-  const char* patch = this->GetOption("CPACK_PROJECT_VERSION_PATCH");
+  outName += this->GetOption("CPACK_PACKAGE_VERSION");
+  const char* patch = this->GetOption("CPACK_PACKAGE_VERSION_PATCH");
   if ( patch && *patch )
     {
     outName += "-";
@@ -71,10 +71,10 @@ int cmCPackGenericGenerator::PrepareNames()
   outName += this->GetOutputExtension();
 
 
-  std::string installFile = this->GetOption("CPACK_PROJECT_DIRECTORY");
+  std::string installFile = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   installFile += "/cmake_install.cmake";
 
-  std::string destFile = this->GetOption("CPACK_PROJECT_DIRECTORY");
+  std::string destFile = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   destFile += "/" + outName;
 
   std::string outFile = topDirectory + "/" + outName;
@@ -91,8 +91,8 @@ int cmCPackGenericGenerator::PrepareNames()
     cmsys::SystemTools::ConvertToOutputPath(this->GetInstallPath()).c_str());
   this->SetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY", installPrefix.c_str());
 
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for: CPACK_PROJECT_DESCRIPTION_FILE_NAME" << std::endl);
-  const char* descFileName = this->GetOption("CPACK_PROJECT_DESCRIPTION_FILE_NAME");
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for: CPACK_PACKAGE_DESCRIPTION_FILE" << std::endl);
+  const char* descFileName = this->GetOption("CPACK_PACKAGE_DESCRIPTION_FILE");
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for: " << descFileName << std::endl);
   if ( descFileName )
     {
@@ -109,16 +109,18 @@ int cmCPackGenericGenerator::PrepareNames()
       }
     cmOStringStream ostr;
     std::string line;
+
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Read description file: " << descFileName << std::endl);
     while ( ifs && cmSystemTools::GetLineFromStream(ifs, line) )
       {
       ostr << cmSystemTools::MakeXMLSafe(line.c_str()) << std::endl;
       }
-    this->SetOption("CPACK_PROJECT_DESCRIPTION", ostr.str().c_str());
+    this->SetOption("CPACK_PACKAGE_DESCRIPTION", ostr.str().c_str());
     }
-  if ( !this->GetOption("CPACK_PROJECT_DESCRIPTION") )
+  if ( !this->GetOption("CPACK_PACKAGE_DESCRIPTION") )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Project description not specified. Please specify CPACK_PROJECT_DESCRIPTION or CPACK_PROJECT_DESCRIPTION_FILE_NAME."
+      "Project description not specified. Please specify CPACK_PACKAGE_DESCRIPTION or CPACK_PACKAGE_DESCRIPTION_FILE_NAME."
       << std::endl);
     return 0;
     }
@@ -427,9 +429,9 @@ const char* cmCPackGenericGenerator::GetInstallPath()
     m_InstallPath = "c:/Program Files";
     }
   m_InstallPath += "/";
-  m_InstallPath += this->GetOption("CPACK_PROJECT_NAME");
+  m_InstallPath += this->GetOption("CPACK_PACKAGE_NAME");
   m_InstallPath += "-";
-  m_InstallPath += this->GetOption("CPACK_PROJECT_VERSION");
+  m_InstallPath += this->GetOption("CPACK_PACKAGE_VERSION");
 #else
   m_InstallPath = "/usr/local/";
 #endif

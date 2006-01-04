@@ -41,7 +41,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Writing header" << std::endl);
   *os
     << "#!/bin/sh" << std::endl
-    << "echo \"" << this->GetOption("ProjectName")
+    << "echo \"" << this->GetOption("CPACK_PACKAGE_NAME")
     << " - self-extracting archive.\"" << std::endl
     << "echo \"If you want to stop extracting, please press <ctrl-C>.\"" << std::endl
     << "read line" << std::endl
@@ -58,6 +58,6 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
     << "#-----------------------------------------------------------" << std::endl
     << "#      Start of TAR.GZ file" << std::endl
     << "#-----------------------------------------------------------" << std::endl;
-  return 1;
+  return this->Superclass::GenerateHeader(os);
 }
 

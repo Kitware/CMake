@@ -216,7 +216,7 @@ int main (int argc, char *argv[])
   if ( cpackConfigFile.empty() )
     {
     cpackConfigFile = cmSystemTools::GetCurrentWorkingDirectory();
-    cpackConfigFile += "/CPack.cmake";
+    cpackConfigFile += "/CPackConfig.cmake";
     cpackConfigFileSpecified = false;
     }
 
@@ -243,11 +243,10 @@ int main (int argc, char *argv[])
       }
 
     if ( !generator.empty() )             { mf->AddDefinition("CPACK_GENERATOR",             generator.c_str()); }
-    if ( !cpackProjectName.empty() )      { mf->AddDefinition("CPACK_PROJECT_NAME",          cpackProjectName.c_str()); }
-    if ( !cpackProjectVersion.empty() )   { mf->AddDefinition("CPACK_PROJECT_VERSION",       cpackProjectVersion.c_str()); }
-    if ( !cpackProjectPatch.empty() )     { mf->AddDefinition("CPACK_PROJECT_VERSION_PATCH", cpackProjectPatch.c_str()); }
-    if ( !cpackProjectVendor.empty() )    { mf->AddDefinition("CPACK_PROJECT_VENDOR",        cpackProjectVendor.c_str()); }
-    if ( !cpackProjectDirectory.empty() ) { mf->AddDefinition("CPACK_PROJECT_DIRECTORY",     cpackProjectDirectory.c_str()); }
+    if ( !cpackProjectName.empty() )      { mf->AddDefinition("CPACK_PACKAGE_NAME",          cpackProjectName.c_str()); }
+    if ( !cpackProjectVersion.empty() )   { mf->AddDefinition("CPACK_PACKAGE_VERSION",       cpackProjectVersion.c_str()); }
+    if ( !cpackProjectVendor.empty() )    { mf->AddDefinition("CPACK_PACKAGE_VENDOR",        cpackProjectVendor.c_str()); }
+    if ( !cpackProjectDirectory.empty() ) { mf->AddDefinition("CPACK_PACKAGE_DIRECTORY",     cpackProjectDirectory.c_str()); }
     if ( !cpackBuildConfig.empty() )      { mf->AddDefinition("CPACK_BUILD_CONFIG",          cpackBuildConfig.c_str()); }
     cpackDefinitions::MapType::iterator cdit;
     for ( cdit = definitions.m_Map.begin(); cdit != definitions.m_Map.end(); ++cdit )
@@ -261,14 +260,18 @@ int main (int argc, char *argv[])
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "CPack generator not specified" << std::endl);
       parsed = 0;
       }
-    if ( parsed && !mf->GetDefinition("CPACK_PROJECT_NAME") )
+    if ( parsed && !mf->GetDefinition("CPACK_PACKAGE_NAME") )
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "CPack project name not specified" << std::endl);
       parsed = 0;
       }
-    if ( parsed && !mf->GetDefinition("CPACK_PROJECT_VERSION"))
+    if ( parsed && !(mf->GetDefinition("CPACK_PACKAGE_VERSION")
+        || mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR") && mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR")
+        && mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH")) )
       {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "CPack project version not specified" << std::endl);
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "CPack project version not specified" << std::endl
+        << "Specify CPACK_PACKAGE_VERSION, or CPACK_PACKAGE_VERSION_MAJOR, CPACK_PACKAGE_VERSION_MINOR, and CPACK_PACKAGE_VERSION_PATCH."
+        << std::endl);
       parsed = 0;
       }
     if ( parsed )
@@ -316,9 +319,20 @@ int main (int argc, char *argv[])
   cmSystemTools::SetWindows9xComspecSubstitute(comspec.c_str());
 #endif
 
-  const char* projName = mf->GetDefinition("CPACK_PROJECT_NAME");
+  const char* projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
   cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "Use generator: " << cpackGenerator->GetNameOfClass() << std::endl);
   cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "For project: " << projName << std::endl);
+
+  const char* projVersion = mf->GetDefinition("CPACK_PACKAGE_VERSION");
+  if ( !projVersion )
+    {
+    const char* projVersionMajor = mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR");
+    const char* projVersionMinor = mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR");
+    const char* projVersionPatch = mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
+    cmOStringStream ostr;
+    ostr << projVersionMajor << "." << projVersionMinor << "." << projVersionPatch;
+    mf->AddDefinition("CPACK_PACKAGE_VERSION", ostr.str().c_str());
+    }
 
   int res = cpackGenerator->ProcessGenerator();
   if ( !res )
