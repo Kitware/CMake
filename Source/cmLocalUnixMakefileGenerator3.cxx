@@ -1373,6 +1373,27 @@ cmLocalUnixMakefileGenerator3
     // Make bundle directories
     outpath += target.GetName();
     outpath += ".app/Contents/MacOS/";
+    std::string f1 = m_Makefile->GetModulesFile("MacOSXBundleInfo.plist.in");
+    if ( f1.size() == 0 )
+      {
+      cmSystemTools::Error("could not find Mac OSX bundle template file.");
+      }
+    std::string macdir = m_Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+    if ( macdir.size() == 0 )
+      {
+      macdir = m_Makefile->GetCurrentOutputDirectory();
+      }
+    if(macdir.size() && macdir[macdir.size()-1] != '/')
+      {
+      macdir += "/";
+      }
+    macdir += target.GetName();
+    macdir += ".app/Contents/";
+    std::string f2 = macdir + "Info.plist";
+    macdir += "MacOS";
+    cmSystemTools::MakeDirectory(macdir.c_str());
+    m_Makefile->AddDefinition("MACOSX_BUNDLE_EXECUTABLE_NAME", target.GetName());
+    m_Makefile->ConfigureFile(f1.c_str(), f2.c_str(), false, false, false);
     }
 #endif
   std::string targetFullPath = outpath + targetName;

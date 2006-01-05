@@ -505,6 +505,10 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     {
     sourcecode += ".cpp.objc";
     }
+  else if(ext == "plist")
+    {
+    sourcecode += ".text.plist";
+    }
   else if(!lang)
     {
     sourcecode += ext;
@@ -1146,7 +1150,20 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     fileType = "compiled.mach-o.executable";
     if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
       {
+      std::string f1 = m_CurrentMakefile->GetModulesFile("MacOSXBundleInfo.plist.in");
+      if ( f1.size() == 0 )
+        {
+        cmSystemTools::Error("could not find Mac OSX bundle template file.");
+        }
+      std::string f2 = m_CurrentMakefile->GetCurrentOutputDirectory();
+      f2 += "/Info.plist";
+      m_CurrentMakefile->ConfigureFile(f1.c_str(), f2.c_str(), false, false, false);
       productType = "com.apple.product-type.application";
+      std::string path = 
+        this->ConvertToRelativeForXCode(f2.c_str());
+      buildSettings->AddAttribute("INFOPLIST_FILE", 
+                                  this->CreateString(path.c_str()));
+
       }
     else
       {
@@ -1777,6 +1794,17 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
     for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
       { 
       cmTarget& cmtarget = l->second;
+      // add the soon to be generated Info.plist file as a source for a MACOSX_BUNDLE
+      // file
+      if(cmtarget.GetPropertyAsBool("MACOSX_BUNDLE"))
+        {
+        cmSourceFile file;
+        file.SetName("Info.plist", m_CurrentMakefile->GetCurrentOutputDirectory(),
+                     m_CurrentMakefile->GetSourceExtensions(),
+                     m_CurrentMakefile->GetHeaderExtensions());
+        cmtarget.GetSourceFiles().push_back(m_CurrentMakefile->AddSource(file));
+        }
+
       std::vector<cmSourceFile*> & classes = cmtarget.GetSourceFiles();
       for(std::vector<cmSourceFile*>::const_iterator s = classes.begin(); 
           s != classes.end(); s++)

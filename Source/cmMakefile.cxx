@@ -73,6 +73,7 @@ cmMakefile::cmMakefile()
                        "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat)$");
   this->AddSourceGroup("Header Files", "\\.(h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddSourceGroup("CMake Rules", "\\.rule$");
+  this->AddSourceGroup("Resources", "\\.plist$");
   this->AddDefaultDefinitions();
   m_cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
   m_cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
