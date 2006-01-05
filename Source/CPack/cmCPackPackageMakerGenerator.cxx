@@ -73,14 +73,11 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const c
   std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   tmpFile += "/PackageMakerOutput.log";
   cmOStringStream pkgCmd;
-  /*
-  pkgCmd << "sh -c '\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
+  pkgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
   << "\" -build -p \"" << packageDirFileName << "\" -f \"" << this->GetOption("CPACK_TEMPORARY_DIRECTORY")
   << "\" -r \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Resources\" -i \""
   << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Info.plist\" -d \""
-  << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Description.plist\"'";
-  */
-  pkgCmd << "/Users/kitware/Andy/CMake-CPack/foo.sh";
+  << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Description.plist\"";
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << pkgCmd.str().c_str() << std::endl);
   std::string output;
   int retVal = 1;
