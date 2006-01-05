@@ -251,7 +251,7 @@ int main (int argc, char *argv[])
     cpackDefinitions::MapType::iterator cdit;
     for ( cdit = definitions.m_Map.begin(); cdit != definitions.m_Map.end(); ++cdit )
       {
-      cpackGenerator->SetOption(cdit->first.c_str(), cdit->second.c_str());
+      mf->AddDefinition(cdit->first.c_str(), cdit->second.c_str());
       }
 
     const char* gen = mf->GetDefinition("CPACK_GENERATOR");
