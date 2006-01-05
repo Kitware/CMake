@@ -195,7 +195,14 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg, size_
       }
     if ( useFileAndLine )
       {
-      *m_DefaultOutput << __FILE__ << ":" << __LINE__ << " ";
+      if ( error || warning )
+        {
+        *m_DefaultError << file << ":" << line << " ";
+        }
+      else
+        {
+        *m_DefaultOutput << file << ":" << line << " ";
+        }
       }
     }
   if ( error || warning )
