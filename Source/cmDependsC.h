@@ -53,6 +53,9 @@ protected:
   bool FileExistsOrIsGenerated(const std::string& fname,
                                std::set<cmStdString>& scanned,
                                std::set<cmStdString>& dependencies);
+  bool FileIsGenerated(const std::string& fname,
+                       std::set<cmStdString>& scanned,
+                       std::set<cmStdString>& dependencies);
 
   // The include file search path.
   std::vector<std::string> const* m_IncludePath;

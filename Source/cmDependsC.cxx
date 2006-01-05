@@ -318,10 +318,12 @@ void cmDependsC::Scan(std::istream& is, const char* directory, const cmStdString
       // Get the file being included.
       UnscannedEntry entry;
       entry.FileName = m_IncludeRegexLine.match(1);
-      if(m_IncludeRegexLine.match(2) == "\"")
+      if(m_IncludeRegexLine.match(2) == "\"" &&
+         !cmSystemTools::FileIsFullPath(entry.FileName.c_str()))
         {
-        // This was a double-quoted include.  We must check for the
-        // file in the directory containing the file we are scanning.
+        // This was a double-quoted include with a relative path.  We
+        // must check for the file in the directory containing the
+        // file we are scanning.
         entry.QuotedLocation = directory;
         entry.QuotedLocation += "/";
         entry.QuotedLocation += entry.FileName;
@@ -352,7 +354,32 @@ bool cmDependsC::FileExistsOrIsGenerated(const std::string& fname,
                                          std::set<cmStdString>& scanned,
                                          std::set<cmStdString>& dependencies)
 {
-  // Check first for a generated file.
+  // Check for a generated file.
+  if(this->FileIsGenerated(fname, scanned, dependencies))
+    {
+    return true;
+    }
+  else if(cmSystemTools::FileIsFullPath(fname.c_str()))
+    {
+    // The generated file may have been listed with a relative path.
+    std::string dir = cmSystemTools::CollapseFullPath(m_Directory.c_str());
+    std::string rname =
+      cmSystemTools::RelativePath(dir.c_str(), fname.c_str());
+    if(this->FileIsGenerated(rname, scanned, dependencies))
+      {
+      return true;
+      }
+    }
+
+  // Check for an existing file.
+  return cmSystemTools::FileExists(fname.c_str());
+}
+
+//----------------------------------------------------------------------------
+bool cmDependsC::FileIsGenerated(const std::string& fname,
+                                 std::set<cmStdString>& scanned,
+                                 std::set<cmStdString>& dependencies)
+{
   if(m_GeneratedFiles &&
      std::set<cmStdString>::const_iterator(m_GeneratedFiles->find(fname)) !=
      m_GeneratedFiles->end())
@@ -369,6 +396,6 @@ bool cmDependsC::FileExistsOrIsGenerated(const std::string& fname,
     }
   else
     {
-    return cmSystemTools::FileExists(fname.c_str());
+    return false;
     }
 }
