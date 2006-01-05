@@ -282,7 +282,10 @@ int main (int argc, char *argv[])
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Cannot initialize CPack generator: " << generator.c_str() << std::endl);
         parsed = 0;
         }
-      cpackGenerator->Initialize(gen, mf);
+      if ( !cpackGenerator->Initialize(gen, mf) )
+        {
+        parsed = 0;
+        }
       if ( parsed && !cpackGenerator->FindRunningCMake(argv[0]) )
         {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Cannot initialize the generator" << std::endl);
@@ -337,7 +340,7 @@ int main (int argc, char *argv[])
   int res = cpackGenerator->ProcessGenerator();
   if ( !res )
     {
-    cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Error when generating package: " << cpackProjectName.c_str() << std::endl);
+    cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Error when generating package: " << projName << std::endl);
     return 1;
     }
 

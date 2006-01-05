@@ -328,12 +328,13 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
   // do CMAKE_ROOT, look for the environment variable first
   std::string cMakeRoot;
   std::string modules;
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT" << std::endl);
   if (getenv("CMAKE_ROOT"))
     {
     cMakeRoot = getenv("CMAKE_ROOT");
     modules = cMakeRoot + "/Modules/CMake.cmake";
     }
-  if(!cmSystemTools::FileExists(modules.c_str()))
+  if(modules.empty() || !cmSystemTools::FileExists(modules.c_str()))
     {
     // next try exe/..
     cMakeRoot  = cmSystemTools::GetProgramPath(m_CMakeSelf.c_str());
@@ -344,6 +345,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
       }
     // is there no Modules direcory there?
     modules = cMakeRoot + "/Modules/CMake.cmake"; 
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
     }
   
   if (!cmSystemTools::FileExists(modules.c_str()))
@@ -351,6 +353,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     // try exe/../share/cmake
     cMakeRoot += CMAKE_DATA_DIR;
     modules = cMakeRoot + "/Modules/CMake.cmake";
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
     }
 #ifdef CMAKE_ROOT_DIR
   if (!cmSystemTools::FileExists(modules.c_str()))
@@ -358,6 +361,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     // try compiled in root directory
     cMakeRoot = CMAKE_ROOT_DIR;
     modules = cMakeRoot + "/Modules/CMake.cmake";
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
     }
 #endif
 #ifdef CMAKE_PREFIX
@@ -366,6 +370,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     // try compiled in install prefix
     cMakeRoot = CMAKE_PREFIX CMAKE_DATA_DIR;
     modules = cMakeRoot + "/Modules/CMake.cmake";
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
     }
 #endif
   if (!cmSystemTools::FileExists(modules.c_str()))
@@ -374,6 +379,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     cMakeRoot  = cmSystemTools::GetProgramPath(m_CMakeSelf.c_str());
     cMakeRoot += CMAKE_DATA_DIR;
     modules = cMakeRoot +  "/Modules/CMake.cmake";
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
     }
   if(!cmSystemTools::FileExists(modules.c_str()))
     {
@@ -381,6 +387,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     cMakeRoot  = cmSystemTools::GetProgramPath(m_CMakeSelf.c_str());
     // is there no Modules direcory there?
     modules = cMakeRoot + "/Modules/CMake.cmake"; 
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
     }
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
@@ -392,6 +399,8 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     return 0;
     }
   m_CMakeRoot = cMakeRoot;
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << m_CMakeRoot.c_str() << std::endl);
+  this->SetOption("CMAKE_ROOT", m_CMakeRoot.c_str());
   return 1;
 }
 
@@ -441,7 +450,10 @@ const char* cmCPackGenericGenerator::GetInstallPath()
 //----------------------------------------------------------------------
 std::string cmCPackGenericGenerator::FindTemplate(const char* name)
 {
-  return m_MakefileMap->GetModulesFile(name);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for template: " << name << std::endl);
+  std::string ffile = m_MakefileMap->GetModulesFile(name);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Found template: " << ffile.c_str() << std::endl);
+  return ffile;
 }
 
 //----------------------------------------------------------------------
