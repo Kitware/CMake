@@ -208,10 +208,12 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg, size_
   if ( error || warning )
     {
     m_DefaultError->write(msg, length);
+    m_DefaultError->flush();
     }
   else
     {
     m_DefaultOutput->write(msg, length);
+    m_DefaultOutput->flush();
     }
   if ( msg[length-1] == '\n' || length > 2 )
     {
