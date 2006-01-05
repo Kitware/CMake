@@ -36,7 +36,16 @@
 #endif
 
 #ifdef HAVE_LIBZ
+#ifdef HAVE_VTK_LIBZ
+# include <vtkzlib/zlib.h>
+# define cm_zlib_gzdopen gzdopen
+# define cm_zlib_gzclose gzclose
+# define cm_zlib_gzread gzread
+# define cm_zlib_gzwrite gzwrite
+
+#else
 # include <cmzlib/zlib.h>
+#endif
 #endif
 
 #include <libtar/compat.h>
