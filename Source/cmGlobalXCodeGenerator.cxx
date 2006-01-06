@@ -1150,14 +1150,16 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     fileType = "compiled.mach-o.executable";
     if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
       {
-      std::string f1 = m_CurrentMakefile->GetModulesFile("MacOSXBundleInfo.plist.in");
+      std::string f1 =
+        m_CurrentMakefile->GetModulesFile("MacOSXBundleInfo.plist.in");
       if ( f1.size() == 0 )
         {
         cmSystemTools::Error("could not find Mac OSX bundle template file.");
         }
       std::string f2 = m_CurrentMakefile->GetCurrentOutputDirectory();
       f2 += "/Info.plist";
-      m_CurrentMakefile->ConfigureFile(f1.c_str(), f2.c_str(), false, false, false);
+      m_CurrentMakefile->ConfigureFile(f1.c_str(), f2.c_str(),
+                                       false, false, false);
       productType = "com.apple.product-type.application";
       std::string path = 
         this->ConvertToRelativeForXCode(f2.c_str());
@@ -1799,9 +1801,9 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
       if(cmtarget.GetPropertyAsBool("MACOSX_BUNDLE"))
         {
         cmSourceFile file;
-        file.SetName("Info.plist", m_CurrentMakefile->GetCurrentOutputDirectory(),
-                     m_CurrentMakefile->GetSourceExtensions(),
-                     m_CurrentMakefile->GetHeaderExtensions());
+        file.SetName("Info",
+                     m_CurrentMakefile->GetCurrentOutputDirectory(),
+                     "plist", false);
         cmtarget.GetSourceFiles().push_back(m_CurrentMakefile->AddSource(file));
         }
 
