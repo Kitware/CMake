@@ -17,12 +17,14 @@ cpack_set_if_not_set(CPACK_PACKAGE_VERSION_MAJOR "0")
 cpack_set_if_not_set(CPACK_PACKAGE_VERSION_MINOR "1")
 cpack_set_if_not_set(CPACK_PACKAGE_VERSION_PATCH "1")
 cpack_set_if_not_set(CPACK_PACKAGE_VENDOR "Humanity")
-cpack_set_if_not_set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME} built using CMake")
-cpack_set_if_not_set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_ROOT}/Templates/CPack.GenericDescription.txt")
+cpack_set_if_not_set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+  "${PROJECT_NAME} built using CMake")
+cpack_set_if_not_set(CPACK_PACKAGE_DESCRIPTION_FILE
+  "${CMAKE_ROOT}/Templates/CPack.GenericDescription.txt")
 
 # <project>-<major>.<minor>.<patch>-<release>-<platform>.<pkgtype>
 cpack_set_if_not_set(CPACK_PACKAGE_FILE_NAME
-  "${CPACK_PACKAGE_NAME}.${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${CMAKE_SYSTEM_NAME}")
+  "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${CMAKE_SYSTEM_NAME}")
 
 IF(NOT EXISTS "${CPACK_PACKAGE_DESCRIPTION_FILE}")
   MESSAGE(SEND_ERROR "CPack package description file: \"${CPACK_PACKAGE_DESCRIPTION_FILE}\" could not be found.")
