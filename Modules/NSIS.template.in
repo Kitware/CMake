@@ -5,7 +5,7 @@
 
   !define VERSION "@CPACK_PACKAGE_VERSION@"
   !define PATCH  "@CPACK_PACKAGE_VERSION_PATCH@"
-  !define INST_DIR @CPACK_TEMPORARY_DIRECTORY@
+  !define INST_DIR "@CPACK_TEMPORARY_DIRECTORY@"
 
 ;--------------------------------
 ;Variables
