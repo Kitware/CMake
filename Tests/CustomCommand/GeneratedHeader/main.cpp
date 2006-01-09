@@ -1,0 +1,5 @@
+#include "generated.h"
+main()
+{
+  
+}
