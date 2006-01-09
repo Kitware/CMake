@@ -52,7 +52,7 @@ FunctionEnd
 
   ;Name and file
   Name "@CPACK_PACKAGE_NAME@ ${VERSION}"
-  OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_PACKAGE_NAME@-${VERSION}-${PATCH}-win32.exe"
+  OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
 
 ;--------------------------------
 ;Interface Settings

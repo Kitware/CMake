@@ -50,6 +50,7 @@ int cmCPackGenericGenerator::PrepareNames()
   tempDirectory += this->GetOption("CPACK_GENERATOR");
   std::string topDirectory = tempDirectory;
 
+/*
   std::string outName = this->GetOption("CPACK_PACKAGE_NAME");
   outName += "-";
   outName += this->GetOption("CPACK_PACKAGE_VERSION");
@@ -66,10 +67,11 @@ int cmCPackGenericGenerator::PrepareNames()
     outName += postfix;
     }
   tempDirectory += "/" + outName;
+*/
 
+  std::string outName = this->GetOption("CPACK_PACKAGE_FILE_NAME");
   outName += ".";
   outName += this->GetOutputExtension();
-
 
   std::string installFile = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   installFile += "/cmake_install.cmake";
@@ -84,7 +86,7 @@ int cmCPackGenericGenerator::PrepareNames()
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", tempDirectory.c_str());
   this->SetOption("CPACK_INSTALL_FILE_NAME", installFile.c_str());
   this->SetOption("CPACK_OUTPUT_FILE_NAME", outName.c_str());
-  this->SetOption("CPACK_PACKAGE_FILE_NAME", destFile.c_str());
+  this->SetOption("CPACK_OUTPUT_FILE_PATH", destFile.c_str());
   this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME", outFile.c_str());
   this->SetOption("CPACK_INSTALL_DIRECTORY", this->GetInstallPath());
   this->SetOption("CPACK_NATIVE_INSTALL_DIRECTORY",
@@ -168,6 +170,10 @@ int cmCPackGenericGenerator::InstallProject()
     cmSystemTools::PutEnv(destDir.c_str());
     }
   int res = mf->ReadListFile(0, installFile);
+  if ( cmSystemTools::GetErrorOccuredFlag() )
+    {
+    res = 0;
+    }
   if ( !movable )
     {
     cmSystemTools::PutEnv("DESTDIR=");
@@ -205,7 +211,7 @@ int cmCPackGenericGenerator::ProcessGenerator()
 
   const char* tempPackageFileName = this->GetOption(
     "CPACK_TEMPORARY_PACKAGE_FILE_NAME");
-  const char* packageFileName = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  const char* packageFileName = this->GetOption("CPACK_OUTPUT_FILE_PATH");
   const char* tempDirectory = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
 
 
