@@ -116,6 +116,7 @@ ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n)
 {
   cmCPackTGZ_Data *mydata = (cmCPackTGZ_Data*)client_data;
 
+
   mydata->m_ZLibStream.avail_in = n;
   mydata->m_ZLibStream.next_in  = reinterpret_cast<Bytef*>(buff);
 
@@ -240,7 +241,7 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName, const char* topl
 int cmCPackTGZGenerator::GenerateHeader(std::ostream* os)
 {
   const int gz_magic[2] = {0x1f, 0x8b}; /* gzip magic header */
-  char header[10];
+  char header[11];
   sprintf(header, "%c%c%c%c%c%c%c%c%c%c", gz_magic[0], gz_magic[1],
     Z_DEFLATED, 0 /*flags*/, 0,0,0,0 /*time*/, 0 /*xflags*/, OS_CODE);
   os->write(header, 10);
