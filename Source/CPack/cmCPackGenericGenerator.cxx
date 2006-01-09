@@ -222,6 +222,11 @@ int cmCPackGenericGenerator::ProcessGenerator()
 
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Compress package" << std::endl);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Compress files to: " << tempPackageFileName << std::endl);
+  if ( cmSystemTools::FileExists(tempPackageFileName) )
+    {
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Remove old package file" << std::endl);
+    cmSystemTools::RemoveFile(tempPackageFileName);
+    }
   if ( !this->CompressFiles(tempPackageFileName,
       tempDirectory, gl.GetFiles()) )
     {

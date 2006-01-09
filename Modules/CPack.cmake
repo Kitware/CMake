@@ -6,9 +6,9 @@ ENDIF(EXISTS "${CMAKE_SOURCE_DIR}/CPackConfig.cmake.in")
 
 # Macro for setting values if a user did not overwrite them
 MACRO(cpack_set_if_not_set name value)
-  IF(NOT "${name}")
+  IF(NOT DEFINED "${name}")
     SET(${name} "${value}")
-  ENDIF(NOT "${name}")
+  ENDIF(NOT DEFINED "${name}")
 ENDMACRO(cpack_set_if_not_set)
 
 # Set the package name
