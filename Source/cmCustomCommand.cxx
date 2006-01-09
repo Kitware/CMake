@@ -19,6 +19,7 @@
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand()
 {
+  m_Used = false;
 }
 
 //----------------------------------------------------------------------------
@@ -28,6 +29,7 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   m_CommandLines(r.m_CommandLines),
   m_Comment(r.m_Comment)
 {
+  m_Used = false;
 }
 
 //----------------------------------------------------------------------------
@@ -40,6 +42,7 @@ cmCustomCommand::cmCustomCommand(const char* output,
   m_CommandLines(commandLines),
   m_Comment(comment?comment:"")
 {
+  m_Used = false;
 }
 
 //----------------------------------------------------------------------------

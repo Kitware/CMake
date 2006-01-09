@@ -192,6 +192,16 @@ void cmTarget::TraceVSDependencies(std::string projFile,
     // finished with this SF move to the next
     srcFilesToProcess.pop();
     }
+  // mark all custom commands in the targets list of source files as used.
+  for(std::vector<cmSourceFile*>::iterator i =  m_SourceFiles.begin();
+      i != m_SourceFiles.end(); ++i)
+    {
+    cmCustomCommand* cc = (*i)->GetCustomCommand();
+    if(cc)
+      {
+      cc->Used();
+      }
+    }
 }
 
 void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)

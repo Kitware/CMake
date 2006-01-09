@@ -80,9 +80,60 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
 
   // clear project names
   m_CreatedProjectNames.clear();
-
+  // Call TraceVSDependencies on all targets
+  cmTargets &tgts = m_Makefile->GetTargets(); 
+  for(cmTargets::iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
+    // so don't build a projectfile for it
+    if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+        && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
+        && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0))
+      {
+      cmTarget& target = l->second;
+      target.TraceVSDependencies(target.GetName(), m_Makefile);
+      }
+    }
+  // now for all custom commands that are not used directly in a 
+  // target, add them to all targets in the current directory or
+  // makefile
+  std::vector<cmSourceFile*> & classesmf = m_Makefile->GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator i = classesmf.begin(); 
+      i != classesmf.end(); i++)
+    {
+    if(cmCustomCommand* cc = (*i)->GetCustomCommand())
+      {
+      if(!cc->IsUsed())
+        {
+        for(cmTargets::iterator l = tgts.begin(); 
+            l != tgts.end(); l++)
+          {
+          if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+              && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
+              && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0))
+            {
+            cmTarget& target = l->second;
+            bool sameAsTarget = false;
+            // make sure we don't add a custom command that depends on
+            // this target
+            for(unsigned int k =0; k < cc->GetDepends().size(); k++)
+              {
+              if(cmSystemTools::GetFilenameName(cc->GetDepends()[k]) == target.GetFullName())
+                {
+                sameAsTarget = true;
+                }
+              }
+            if(!sameAsTarget)
+              {
+              target.GetSourceFiles().push_back(*i);
+              }
+            }
+          }
+        }
+      }
+    }
   // build any targets
-  cmTargets &tgts = m_Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
@@ -266,7 +317,6 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   // trace the visual studio dependencies
   std::string name = libName;
   name += ".dsp.cmake";
-  target.TraceVSDependencies(name, m_Makefile);
 
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();

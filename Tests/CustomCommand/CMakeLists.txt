@@ -3,6 +3,8 @@
 #
 PROJECT (CustomCommand)
 
+ADD_SUBDIRECTORY(GeneratedHeader)
+
 #
 # Lib and exe path
 #
@@ -133,8 +135,10 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.c
 # auto-object-depends feature of the Makefile generator.  Currently
 # the feature does not seem to work in Visual Studio generators so
 # these dependencies are needed.
-SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/foo.c PROPERTIES
-  OBJECT_DEPENDS "${PROJECT_BINARY_DIR}/doc1.h;${PROJECT_BINARY_DIR}/foo.h")
+#SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/foo.c 
+#PROPERTIES
+#  OBJECT_DEPENDS "${PROJECT_BINARY_DIR}/doc1.h;${PROJECT_BINARY_DIR}/foo.h"
+#)
 
 # add the library
 ADD_EXECUTABLE(CustomCommand 
@@ -143,6 +147,9 @@ ADD_EXECUTABLE(CustomCommand
   ${PROJECT_BINARY_DIR}/generated.c
   )
 
+TARGET_LINK_LIBRARIES(CustomCommand GeneratedHeader)
+
 # must add a dependency on TDocument otherwise it might never build and 
 # the CustomCommand executable really needs doc1.h
 ADD_DEPENDENCIES(CustomCommand TDocument)
+
