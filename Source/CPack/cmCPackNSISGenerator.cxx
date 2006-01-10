@@ -17,7 +17,6 @@
 
 #include "cmCPackNSISGenerator.h"
 
-#include "cmake.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmSystemTools.h"

@@ -20,7 +20,6 @@
 
 
 #include "cmCPackGenericGenerator.h"
-#include "CPack/cmCPackConfigure.h" // for ssize_t
 
 /** \class cmCPackNSISGenerator
  * \brief A generator for NSIS files

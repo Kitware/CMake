@@ -20,7 +20,6 @@
 
 
 #include "cmCPackGenericGenerator.h"
-#include "CPack/cmCPackConfigure.h" // for ssize_t
 
 /** \class cmCPackPackageMakerGenerator
  * \brief A generator for PackageMaker files
