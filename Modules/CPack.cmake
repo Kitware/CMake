@@ -47,4 +47,32 @@ ENDIF(NOT CPACK_GENERATOR)
 SET(CPACK_SOURCE_DIR "${CMAKE_SOURCE_DIR}")
 SET(CPACK_BINARY_DIR "${CMAKE_BINARY_DIR}")
 
+# Hack for Visual Studio support
+# Search for system runtime libraries based on the platform.  This is
+# not complete because it is used only for the release process by the
+# developers.
+IF(WIN32 AND NOT CYGWIN)
+  STRING(REGEX REPLACE "\\\\" "/" SYSTEMROOT "$ENV{SYSTEMROOT}")
+  FOREACH(lib
+      "${SYSTEMROOT}/system32/mfc71.dll"
+      "${SYSTEMROOT}/system32/msvcp71.dll"
+      "${SYSTEMROOT}/system32/msvcr71.dll"
+      )
+    IF(EXISTS ${lib})
+      SET(CMake_INSTALL_SYSTEM_RUNTIME_LIBS
+        ${CMake_INSTALL_SYSTEM_RUNTIME_LIBS} ${lib})
+    ENDIF(EXISTS ${lib})
+  ENDFOREACH(lib)
+ENDIF(WIN32 AND NOT CYGWIN)
+
+# Include system runtime libraries in the installation if any are
+# specified by CMake_INSTALL_SYSTEM_RUNTIME_LIBS.
+IF(CMake_INSTALL_SYSTEM_RUNTIME_LIBS)
+  IF(WIN32)
+    INSTALL_PROGRAMS(/bin ${CMake_INSTALL_SYSTEM_RUNTIME_LIBS})
+  ELSE(WIN32)
+    INSTALL_PROGRAMS(/lib ${CMake_INSTALL_SYSTEM_RUNTIME_LIBS})
+  ENDIF(WIN32)
+ENDIF(CMake_INSTALL_SYSTEM_RUNTIME_LIBS)
+
 CONFIGURE_FILE("${cpack_input_file}" "${CMAKE_BINARY_DIR}/CPackConfig.cmake" @ONLY IMMEDIATE)

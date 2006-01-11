@@ -66,10 +66,10 @@ int cmCPackGenericGenerator::PrepareNames()
     outName += "-";
     outName += postfix;
     }
-  tempDirectory += "/" + outName;
 */
 
   std::string outName = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  tempDirectory += "/" + outName;
   outName += ".";
   outName += this->GetOutputExtension();
 
