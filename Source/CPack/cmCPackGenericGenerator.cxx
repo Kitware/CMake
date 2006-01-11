@@ -22,6 +22,7 @@
 #include "cmake.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
+#include "cmGeneratedFileStream.h"
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
@@ -49,24 +50,6 @@ int cmCPackGenericGenerator::PrepareNames()
   tempDirectory += "/_CPack_Packages/";
   tempDirectory += this->GetOption("CPACK_GENERATOR");
   std::string topDirectory = tempDirectory;
-
-/*
-  std::string outName = this->GetOption("CPACK_PACKAGE_NAME");
-  outName += "-";
-  outName += this->GetOption("CPACK_PACKAGE_VERSION");
-  const char* patch = this->GetOption("CPACK_PACKAGE_VERSION_PATCH");
-  if ( patch && *patch )
-    {
-    outName += "-";
-    outName += patch;
-    }
-  const char* postfix = this->GetOutputPostfix();
-  if ( postfix && *postfix )
-    {
-    outName += "-";
-    outName += postfix;
-    }
-*/
 
   std::string outName = this->GetOption("CPACK_PACKAGE_FILE_NAME");
   tempDirectory += "/" + outName;
@@ -136,28 +119,13 @@ int cmCPackGenericGenerator::InstallProject()
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Install project" << std::endl);
   const char* tempInstallDirectory = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   const char* installFile = this->GetOption("CPACK_INSTALL_FILE_NAME");
+  int res = 1;
   if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem creating temporary directory: " << tempInstallDirectory << std::endl);
     return 0;
     }
-  cmake cm;
-  cmGlobalGenerator gg;
-  gg.SetCMakeInstance(&cm);
-  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
-  lg->SetGlobalGenerator(&gg);
-  cmMakefile *mf = lg->GetMakefile();
   bool movable = true;
-  if ( movable )
-    {
-    mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
-    }
-  const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
-  if ( buildConfig && *buildConfig )
-    {
-    mf->AddDefinition("BUILD_TYPE", buildConfig);
-    }
-
   if ( movable )
     {
     // Make sure there is no destdir
@@ -169,10 +137,57 @@ int cmCPackGenericGenerator::InstallProject()
     destDir += tempInstallDirectory;
     cmSystemTools::PutEnv(destDir.c_str());
     }
-  int res = mf->ReadListFile(0, installFile);
-  if ( cmSystemTools::GetErrorOccuredFlag() )
+  const char* installCommands = this->GetOption("CPACK_INSTALL_COMMANDS");
+  if ( installCommands )
     {
-    res = 0;
+    std::vector<std::string> installCommandsVector;
+    cmSystemTools::ExpandListArgument(installCommands,installCommandsVector);
+    std::vector<std::string>::iterator it;
+    for ( it = installCommandsVector.begin(); it != installCommandsVector.end();
+      ++it )
+      {
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << it->c_str() << std::endl);
+      std::string output;
+      int retVal = 1;
+      bool resB = cmSystemTools::RunSingleCommand(it->c_str(), &output, &retVal, 0, m_GeneratorVerbose, 0);
+      if ( !resB || retVal )
+        {
+        std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+        tmpFile += "/InstallOutput.log";
+        cmGeneratedFileStream ofs(tmpFile.c_str());
+        ofs << "# Run command: " << it->c_str() << std::endl
+          << "# Output:" << std::endl
+          << output.c_str() << std::endl;
+        cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running install command: " << it->c_str() << std::endl
+          << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+        res = 0;
+        break;
+        }
+      }
+    }
+  else
+    {
+    cmake cm;
+    cmGlobalGenerator gg;
+    gg.SetCMakeInstance(&cm);
+    std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+    lg->SetGlobalGenerator(&gg);
+    cmMakefile *mf = lg->GetMakefile();
+    if ( movable )
+      {
+      mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
+      }
+    const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
+    if ( buildConfig && *buildConfig )
+      {
+      mf->AddDefinition("BUILD_TYPE", buildConfig);
+      }
+
+    res = mf->ReadListFile(0, installFile);
+    if ( cmSystemTools::GetErrorOccuredFlag() )
+      {
+      res = 0;
+      }
     }
   if ( !movable )
     {
@@ -298,7 +313,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
   std::string dir;
   std::string file;
   if(cmSystemTools::SplitProgramPath(m_CPackSelf.c_str(),
-                                     dir, file, true))
+      dir, file, true))
     {
     m_CMakeSelf = dir += "/cmake";
     m_CMakeSelf += cmSystemTools::GetExecutableExtension();
@@ -358,7 +373,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     modules = cMakeRoot + "/Modules/CMake.cmake"; 
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
     }
-  
+
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try exe/../share/cmake
@@ -404,9 +419,9 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     {
     // couldn't find modules
     cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n"
-                         "CMake has most likely not been installed correctly.\n"
-                         "Modules directory not found in\n",
-                         cMakeRoot.c_str());
+      "CMake has most likely not been installed correctly.\n"
+      "Modules directory not found in\n",
+      cMakeRoot.c_str());
     return 0;
     }
   m_CMakeRoot = cMakeRoot;
@@ -417,7 +432,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
 
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::CompressFiles(const char* outFileName, const char* toplevel,
-    const std::vector<std::string>& files)
+  const std::vector<std::string>& files)
 {
   (void)outFileName;
   (void)toplevel;
