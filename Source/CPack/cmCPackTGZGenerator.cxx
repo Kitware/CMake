@@ -59,8 +59,7 @@ class cmCPackTGZ_Data
 {
 public:
   cmCPackTGZ_Data(cmCPackTGZGenerator* gen) :
-    Name(0), OutputStream(0), Generator(gen), m_CompressionLevel(Z_DEFAULT_COMPRESSION) {}
-  const char *Name;
+    OutputStream(0), Generator(gen), m_CompressionLevel(Z_DEFAULT_COMPRESSION) {}
   std::ostream* OutputStream;
   cmCPackTGZGenerator* Generator;
   char m_CompressedBuffer[cmCPackTGZ_Data_BlockSize];
@@ -92,15 +91,15 @@ int cmCPackTGZ_Data_Open(void *client_data, const char* pathname, int, mode_t)
     return -1;
     }
 
-  cmGeneratedFileStream* gf = new cmGeneratedFileStream(pathname);
+  cmGeneratedFileStream* gf = new cmGeneratedFileStream;
+  // Open binary
+  gf->Open(pathname, false, true);
   mydata->OutputStream = gf;
   if ( !*mydata->OutputStream )
     {
     return -1;
     }
-
-  gf->SetCompression(false);
-
+  
   if ( !cmCPackTGZGeneratorForward::GenerateHeader(mydata->Generator,gf))
     {
     return -1;
@@ -116,14 +115,13 @@ ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n)
 {
   cmCPackTGZ_Data *mydata = (cmCPackTGZ_Data*)client_data;
 
-
   mydata->m_ZLibStream.avail_in = n;
   mydata->m_ZLibStream.next_in  = reinterpret_cast<Bytef*>(buff);
 
   do {
     mydata->m_ZLibStream.avail_out = cmCPackTGZ_Data_BlockSize;
     mydata->m_ZLibStream.next_out = reinterpret_cast<Bytef*>(mydata->m_CompressedBuffer);
-    int ret = deflate(&mydata->m_ZLibStream, (n?Z_NO_FLUSH:Z_FINISH));    /* no bad return value */
+    int ret = deflate(&mydata->m_ZLibStream, (n?Z_NO_FLUSH:Z_FINISH));    // no bad return value
     if(ret == Z_STREAM_ERROR)
       {
       return 0;
