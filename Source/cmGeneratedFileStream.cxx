@@ -62,13 +62,13 @@ cmGeneratedFileStream::~cmGeneratedFileStream()
 
 //----------------------------------------------------------------------------
 cmGeneratedFileStream&
-cmGeneratedFileStream::Open(const char* name, bool quiet)
+cmGeneratedFileStream::Open(const char* name, bool quiet, bool binary)
 {
   // Store the file name and construct the temporary file name.
   this->cmGeneratedFileStreamBase::Open(name);
 
   // Open the temporary output file.
-  this->Stream::open(m_TempName.c_str());
+  this->Stream::open(m_TempName.c_str(), std::ios::out | (binary ? std::ios::binary : 0));
 
   // Check if the file opened.
   if(!*this && !quiet)

@@ -114,7 +114,7 @@ public:
    * temporary file.  If the file cannot be opened an error message is
    * produced unless the second argument is set to true.
    */
-  cmGeneratedFileStream& Open(const char* name, bool quiet=false);
+  cmGeneratedFileStream& Open(const char* name, bool quiet=false, bool binary=false);
 
   /**
    * Close the output file.  This should be used only with an open
