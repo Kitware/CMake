@@ -15,13 +15,13 @@ MACRO(TRY_COMPILE_FROM_SOURCE SOURCE VAR)
     ENDFOREACH(inc)
 
     SET(src "${src}\nint main() { ${SOURCE} ; return 0; }")
-    FILE(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/src.c"
+    FILE(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/src.c"
       "${src}")
 
     MESSAGE(STATUS "Performing Test ${VAR}")
     TRY_COMPILE(${VAR}
       ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}/CMakeTmp/src.c
+      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/src.c
       CMAKE_FLAGS
       "${TRY_COMPILE_FROM_SOURCE_ADD_LIBRARIES}"
       OUTPUT_VARIABLE OUTPUT)

@@ -110,7 +110,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
   // signature
   if (srcFileSignature)
     {
-    tmpString = argv[1] + "/CMakeTmp";
+    tmpString = argv[1] + "/CMakeFiles/CMakeTmp";
     binaryDirectory = tmpString.c_str();
     }
   // make sure the binary directory exists
@@ -201,7 +201,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
     projectName = "CMAKE_TRY_COMPILE";
     targetName = "cmTryCompileExec";
     // if the source is not in CMakeTmp 
-    if(source.find(argv[1] + "/CMakeTmp") == source.npos)
+    if(source.find(argv[1] + "/CMakeFiles/CMakeTmp") == source.npos)
       {
       mf->AddCMakeDependFile(source.c_str());
       }

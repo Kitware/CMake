@@ -19,20 +19,20 @@ MACRO(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     ENDFOREACH(FILE)
     SET(CHECK_INCLUDE_FILES_CONTENT
       "${CHECK_INCLUDE_FILES_CONTENT}\n\nint main(){return 0;}\n")
-    FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFiles.c 
+    FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckIncludeFiles.c 
       "${CHECK_INCLUDE_FILES_CONTENT}")
 
     MESSAGE(STATUS "Looking for include files ${VARIABLE}")
     TRY_COMPILE(${VARIABLE}
       ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFiles.c
+      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckIncludeFiles.c
       CMAKE_FLAGS 
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILES_FLAGS}
       OUTPUT_VARIABLE OUTPUT)
     IF(${VARIABLE})
       MESSAGE(STATUS "Looking for include files ${VARIABLE} - found")
       SET(${VARIABLE} 1 CACHE INTERNAL "Have include ${VARIABLE}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeFiles/CMakeOutput.log 
         "Determining if files ${INCLUDE} "
         "exist passed with the following output:\n"
         "${OUTPUT}\n\n")

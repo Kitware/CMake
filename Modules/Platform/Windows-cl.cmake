@@ -115,12 +115,12 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
     # try to figure out if we are running the free command line
     # tools from Microsoft.  These tools do not provide debug libraries,
     # so the link flags used have to be different.
-    MAKE_DIRECTORY("${CMAKE_BINARY_DIR}/CMakeTmp2")
+    MAKE_DIRECTORY("${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp2")
     SET(testForFreeVCFile
       "${CMAKE_ROOT}/Modules/CMakeTestForFreeVC.cxx")
     STRING(REGEX REPLACE "/" "\\\\" testForFreeVCFile "${testForFreeVCFile}")
     MESSAGE(STATUS "Check if this is a free VC compiler")
-    EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}/CMakeTmp2
+    EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp2
       ARGS /nologo /MD /EHsc
       \"${testForFreeVCFile}\"
       OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 

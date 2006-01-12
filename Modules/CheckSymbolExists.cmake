@@ -25,13 +25,13 @@ MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
     SET(CHECK_SYMBOL_EXISTS_CONTENT
       "${CHECK_SYMBOL_EXISTS_CONTENT}\nvoid cmakeRequireSymbol(int dummy,...){(void)dummy;}\nint main()\n{\n#ifndef ${SYMBOL}\n  cmakeRequireSymbol(0,&${SYMBOL});\n#endif\n  return 0;\n}\n")
 
-    FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/CheckSymbolExists.c 
+    FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c 
       "${CHECK_SYMBOL_EXISTS_CONTENT}")
 
     MESSAGE(STATUS "Looking for ${SYMBOL}")
     TRY_COMPILE(${VARIABLE}
       ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}/CMakeTmp/CheckSymbolExists.c
+      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c
       CMAKE_FLAGS 
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_SYMBOL_EXISTS_FLAGS}
       "${CHECK_SYMBOL_EXISTS_LIBS}"
@@ -42,7 +42,7 @@ MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
         "Determining if the ${SYMBOL} "
         "exist passed with the following output:\n"
-        "${OUTPUT}\nFile ${CMAKE_BINARY_DIR}/CMakeTmp/CheckSymbolExists.c:\n"
+        "${OUTPUT}\nFile ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c:\n"
         "${CHECK_SYMBOL_EXISTS_CONTENT}\n")
     ELSE(${VARIABLE})
       MESSAGE(STATUS "Looking for ${SYMBOL} - not found.")
@@ -50,7 +50,7 @@ MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
         "Determining if the ${SYMBOL} "
         "exist failed with the following output:\n"
-        "${OUTPUT}\nFile ${CMAKE_BINARY_DIR}/CMakeTmp/CheckSymbolExists.c:\n"
+        "${OUTPUT}\nFile ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c:\n"
         "${CHECK_SYMBOL_EXISTS_CONTENT}\n")
     ENDIF(${VARIABLE})
   ENDIF("${VARIABLE}" MATCHES "^${VARIABLE}$")

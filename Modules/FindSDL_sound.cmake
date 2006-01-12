@@ -147,7 +147,7 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
   # To minimize external dependencies, create a sdlsound test program
   # which will be used to figure out if additional link dependencies are
   # required for the link phase.
-  FILE(WRITE ${PROJECT_BINARY_DIR}/CMakeTmp/DetermineSoundLibs.c
+  FILE(WRITE ${PROJECT_BINARY_DIR}/CMakeFiles/CMakeTmp/DetermineSoundLibs.c
     "#include \"SDL_sound.h\"
     #include \"SDL.h\"
     int main(int argc, char* argv[])
@@ -176,7 +176,7 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
    # in the TARGET_LINK_LIBRARIES, I seem to loose everything 
    # in the SDL_LIBRARY string after the "-framework".
    # But if I quote the stuff in INCLUDE_DIRECTORIES, it doesn't work.
-   FILE(WRITE ${PROJECT_BINARY_DIR}/CMakeTmp/CMakeLists.txt
+   FILE(WRITE ${PROJECT_BINARY_DIR}/CMakeFiles/CMakeTmp/CMakeLists.txt
      "PROJECT(DetermineSoundLibs)
         INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR} ${SDL_SOUND_INCLUDE_DIR})
         ADD_EXECUTABLE(DetermineSoundLibs DetermineSoundLibs.c)
@@ -185,8 +185,8 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
 
    TRY_COMPILE( 
      MY_RESULT
-     ${PROJECT_BINARY_DIR}/CMakeTmp
-     ${PROJECT_BINARY_DIR}/CMakeTmp
+     ${PROJECT_BINARY_DIR}/CMakeFiles/CMakeTmp
+     ${PROJECT_BINARY_DIR}/CMakeFiles/CMakeTmp
      DetermineSoundLibs
      OUTPUT_VARIABLE MY_OUTPUT
      )

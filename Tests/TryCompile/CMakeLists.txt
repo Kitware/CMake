@@ -2,7 +2,7 @@ PROJECT(TryCompile)
 
 # try to compile a file that should compile
 TRY_COMPILE(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}/CMakeTmp  
+    ${TryCompile_BINARY_DIR}/CMakeFiles/CMakeTmp  
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(NOT SHOULD_PASS)
@@ -11,7 +11,7 @@ ENDIF(NOT SHOULD_PASS)
 
 # try to compile a file that should not compile
 TRY_COMPILE(SHOULD_FAIL
-    ${TryCompile_BINARY_DIR}/CMakeTmp  
+    ${TryCompile_BINARY_DIR}/CMakeFiles/CMakeTmp  
     ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(SHOULD_FAIL)
@@ -20,7 +20,7 @@ ENDIF(SHOULD_FAIL)
 
 # try to compile a file that should compile
 TRY_COMPILE(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}/CMakeTmp  
+    ${TryCompile_BINARY_DIR}/CMakeFiles/CMakeTmp  
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(NOT SHOULD_PASS)
@@ -29,7 +29,7 @@ ENDIF(NOT SHOULD_PASS)
 
 # try to compile a file that should not compile
 TRY_COMPILE(SHOULD_FAIL
-    ${TryCompile_BINARY_DIR}/CMakeTmp 
+    ${TryCompile_BINARY_DIR}/CMakeFiles/CMakeTmp 
     ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(SHOULD_FAIL)
@@ -45,7 +45,8 @@ IF(NOT SHOULD_FAIL)
 ELSE(NOT SHOULD_FAIL)
   MESSAGE("Test failed")
 ENDIF(NOT SHOULD_FAIL)
-TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE   ${TryCompile_BINARY_DIR}/CMakeTmp 
+TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE   
+  ${TryCompile_BINARY_DIR}/CMakeFiles/CMakeTmp 
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
 IF (CMAKE_ANSI_FOR_SCOPE)
    MESSAGE("Compiler supports ansi for")
@@ -53,7 +54,8 @@ ELSE(CMAKE_ANSI_FOR_SCOPE)
    MESSAGE("Compiler does not support ansi for scope")
 ENDIF(CMAKE_ANSI_FOR_SCOPE)
 
-TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE   ${TryCompile_BINARY_DIR}/CMakeTmp 
+TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE
+  ${TryCompile_BINARY_DIR}/CMakeFiles/CMakeTmp 
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
 IF (CMAKE_ANSI_FOR_SCOPE)
    MESSAGE("Compiler supports ansi for")

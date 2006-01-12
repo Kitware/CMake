@@ -6,13 +6,13 @@
 # any makefiles or projects.
 IF(NOT CMAKE_CXX_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working CXX compiler: ${CMAKE_CXX_COMPILER}")
-  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testCXXCompiler.cxx 
+  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/testCXXCompiler.cxx 
     "#ifndef __cplusplus\n"
     "# error \"The CMAKE_CXX_COMPILER is set to a C compiler\"\n"
     "#endif\n"
     "int main(){return 0;}\n")
   TRY_COMPILE(CMAKE_CXX_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
-    ${CMAKE_BINARY_DIR}/CMakeTmp/testCXXCompiler.cxx
+    ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
     OUTPUT_VARIABLE OUTPUT)
   SET(CXX_TEST_WAS_RUN 1)
 ENDIF(NOT CMAKE_CXX_COMPILER_WORKS)

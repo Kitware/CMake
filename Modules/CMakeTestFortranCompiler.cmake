@@ -6,13 +6,13 @@
 # any makefiles or projects.
 IF(NOT CMAKE_Fortran_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working Fortran compiler: ${CMAKE_Fortran_COMPILER}")
-  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testFortranCompiler.f "
+  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/testFortranCompiler.f "
         PROGRAM TESTFortran
         PRINT *, 'Hello'
         END
   ")
   TRY_COMPILE(CMAKE_Fortran_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
-    ${CMAKE_BINARY_DIR}/CMakeTmp/testFortranCompiler.f
+    ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/testFortranCompiler.f
     OUTPUT_VARIABLE OUTPUT)
   SET(FORTRAN_TEST_WAS_RUN 1)
 ENDIF(NOT CMAKE_Fortran_COMPILER_WORKS)
@@ -41,13 +41,13 @@ IF(CMAKE_Fortran_COMPILER_WORKS)
   IF(DEFINED CMAKE_Fortran_COMPILER_SUPPORTS_F90)
   ELSE(DEFINED CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     MESSAGE(STATUS "Checking whether ${CMAKE_Fortran_COMPILER} supports Fortran 90")
-    FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testFortranCompilerF90.f90 "
+    FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/testFortranCompilerF90.f90 "
       PROGRAM TESTFortran90
       stop = 1 ; do while ( stop .eq. 0 ) ; end do
       END PROGRAM TESTFortran90
   ")
     TRY_COMPILE(CMAKE_Fortran_COMPILER_SUPPORTS_F90 ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}/CMakeTmp/testFortranCompilerF90.f90
+      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/testFortranCompilerF90.f90
       OUTPUT_VARIABLE OUTPUT)
     IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
       MESSAGE(STATUS "Checking whether ${CMAKE_Fortran_COMPILER} supports Fortran 90 -- yes")
