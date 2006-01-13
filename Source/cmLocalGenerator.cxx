@@ -1223,7 +1223,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += " ";
         }  
       cmOStringStream linklibsStr;
-      this->OutputLinkLibraries(linklibsStr, target.GetName(), target);
+      this->OutputLinkLibraries(linklibsStr, target);
       linkLibs = linklibsStr.str();
       }
       break;
@@ -1256,7 +1256,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       flags += m_Makefile->GetSafeDefinition(sharedFlagsVar.c_str());
       flags += " ";
       cmOStringStream linklibs;
-      this->OutputLinkLibraries(linklibs, 0, target);
+      this->OutputLinkLibraries(linklibs, target);
       linkLibs = linklibs.str();
       if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
         {
@@ -1296,7 +1296,6 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
  * to the name of the library.  This will not link a library against itself.
  */
 void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
-                                           const char* targetLibrary,
                                            cmTarget &tgt)
 {
   // Try to emit each search path once

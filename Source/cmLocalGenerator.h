@@ -174,7 +174,7 @@ protected:
                       cmTarget&target);
   
   ///! put all the libraries for a target on into the given stream
-  virtual void OutputLinkLibraries(std::ostream&, const char* name,cmTarget &);
+  virtual void OutputLinkLibraries(std::ostream&, cmTarget&);
 
   /** Compute the string to use to refer to a target in an install
       file.  */

@@ -1523,7 +1523,7 @@ cmLocalUnixMakefileGenerator3
 
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
-  this->OutputLinkLibraries(linklibs, 0, target);
+  this->OutputLinkLibraries(linklibs, target);
 
   // Construct object file lists that may be needed to expand the
   // rule.
@@ -1868,7 +1868,7 @@ cmLocalUnixMakefileGenerator3
 
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
-  this->OutputLinkLibraries(linklibs, target.GetName(), target);
+  this->OutputLinkLibraries(linklibs, target);
 
   // Construct object file lists that may be needed to expand the
   // rule.
