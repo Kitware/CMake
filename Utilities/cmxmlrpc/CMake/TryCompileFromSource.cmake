@@ -15,9 +15,10 @@ MACRO(TRY_COMPILE_FROM_SOURCE SOURCE VAR)
     ENDFOREACH(inc)
 
     SET(src "${src}\nint main() { ${SOURCE} ; return 0; }")
-    FILE(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/src.c"
+    FILE(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/src2.c"
       "${src}")
-
+    EXEC_PROGRAM("${CMAKE_COMMAND}" "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp"
+      ARGS -E copy src2.c src.c)
     MESSAGE(STATUS "Performing Test ${VAR}")
     TRY_COMPILE(${VAR}
       ${CMAKE_BINARY_DIR}

@@ -201,7 +201,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
     projectName = "CMAKE_TRY_COMPILE";
     targetName = "cmTryCompileExec";
     // if the source is not in CMakeTmp 
-    if(source.find(argv[1] + "/CMakeFiles/CMakeTmp") == source.npos)
+    if(source.find("CMakeTmp") == source.npos)
       {
       mf->AddCMakeDependFile(source.c_str());
       }

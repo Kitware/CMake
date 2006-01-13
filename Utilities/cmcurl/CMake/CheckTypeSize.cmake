@@ -23,7 +23,7 @@ MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
       SET(CHECK_TYPE_SIZE_PREMAIN "${CHECK_TYPE_SIZE_PREMAIN}#include \"${def}\"\n")
     ENDFOREACH(def)
     CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/CheckTypeSize.c.in"
-      "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckTypeSize.c" @ONLY)
+      "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckTypeSize.c" IMMEDIATE @ONLY)
     FILE(READ "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckTypeSize.c"
       CHECK_TYPE_SIZE_FILE_CONTENT)
     MESSAGE(STATUS "Check size of ${TYPE}")
