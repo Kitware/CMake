@@ -1,6 +1,5 @@
-#ifdef CHECK_TYPE_SIZE_TYPE
-
 @CHECK_TYPE_SIZE_PREINCLUDE@
+#ifdef CHECK_TYPE_SIZE_TYPE
 
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
