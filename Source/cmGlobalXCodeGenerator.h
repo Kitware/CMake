@@ -104,7 +104,7 @@ private:
   void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr, 
                                const char* value);
   void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr, 
-                                   const char* value);
+                                   const char* value, const char* configName);
   cmXCodeObject* CreateUtilityTarget(cmTarget& target);
   void AddDependAndLinkInformation(cmXCodeObject* target);
   void CreateBuildSettings(cmTarget& target,
@@ -128,11 +128,8 @@ private:
   void CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);
   void AddDependTarget(cmXCodeObject* target,
                        cmXCodeObject* dependTarget);
-  void AddLinkLibrary(cmXCodeObject* target,
-                      const char* lib, cmTarget* dtarget = 0);
   void ConfigureOutputPaths();
   void CreateXCodeDependHackTarget(std::vector<cmXCodeObject*>& targets);
-  std::string GetTargetFullPath(cmTarget*);
   bool SpecialTargetEmitted(std::string const& tname);
   void AddExtraTargets(cmLocalGenerator* root, 
                        std::vector<cmLocalGenerator*>& gens);
@@ -142,7 +139,6 @@ private:
                                   const std::vector<cmCustomCommand>&);
   void CreateReRunCMakeFile(cmLocalGenerator* root);
 protected:
-  std::string AddConfigDir(const char* d);
 
   int m_XcodeVersion;
   std::vector<cmXCodeObject*> m_XCodeObjects;
@@ -152,6 +148,7 @@ private:
   cmXCodeObject* m_SourcesGroupChildren;
   cmMakefile* m_CurrentMakefile;
   cmLocalGenerator* m_CurrentLocalGenerator;
+  std::vector<std::string> m_CurrentConfigurationTypes;
   std::string m_CurrentReRunCMakeMakefile;
   std::string m_CurrentXCodeHackMakefile;
   std::string m_CurrentProject;

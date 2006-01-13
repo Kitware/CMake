@@ -49,8 +49,9 @@ class cmOrderLinkDirectories
 public:
   cmOrderLinkDirectories();
   ///! set link information from the target
-  void SetLinkInformation(cmTarget&, cmTarget::LinkLibraryType,
-                          const char* targetLibrary);
+  void SetLinkInformation(const char* targetName,
+                          const std::vector<std::string>& linkLibraries,
+                          const std::vector<std::string>& linkDirectories);
   ///! Compute the best order for -L paths from GetLinkLibraries
   bool DetermineLibraryPathOrder();
   ///! Get the results from DetermineLibraryPathOrder
@@ -65,12 +66,18 @@ public:
   // CMAKE_LINK_LIBRARY_SUFFIX
   void AddLinkExtension(const char* e)
     {
+    if(e && *e)
+      {
       m_LinkExtensions.push_back(e);
+      }
     }
   // should be set from CMAKE_STATIC_LIBRARY_PREFIX
   void SetLinkPrefix(const char* s)
     {
+    if(s)
+      {
       m_LinkPrefix = s;
+      }
     }
   // Return any warnings if the exist
   std::string GetWarnings();

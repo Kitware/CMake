@@ -327,8 +327,7 @@ protected:
   const char* GetSourceFileLanguage(const cmSourceFile& source);
   std::string ConvertToQuotedOutputPath(const char* p);
 
-  void AppendAnyDepend(std::vector<std::string>& depends, const char* name,
-                       bool assume_unknown_is_file=false);
+  void AppendAnyDepend(std::vector<std::string>& depends, const char* name);
   void AppendRuleDepend(std::vector<std::string>& depends,
                         const char* ruleFileName);
   void AppendCustomDepends(std::vector<std::string>& depends,
@@ -363,6 +362,7 @@ private:
   std::string m_MakeSilentFlag;
   std::string m_ExecutableOutputPath;
   std::string m_LibraryOutputPath;
+  std::string m_ConfigurationName;
   bool m_DefineWindowsNULL;
   bool m_UnixCD;
   bool m_PassMakeflags;

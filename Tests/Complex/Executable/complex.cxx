@@ -36,20 +36,19 @@ bool TestLibraryOrder(bool shouldFail)
     rm += "/libA.a";
     cmSystemTools::RemoveFile(rm.c_str());
     }
-  cmTarget target;
-  target.AddLinkDirectory(Adir.c_str());
-  target.AddLinkDirectory(Bdir.c_str());
-  target.AddLinkDirectory(Cdir.c_str());
-  target.AddLinkDirectory("/lib/extra/stuff");
-  
+  std::vector<std::string> linkLibraries;
+  std::vector<std::string> linkDirectories;
+  linkDirectories.push_back(Adir);
+  linkDirectories.push_back(Bdir);
+  linkDirectories.push_back(Cdir);
+  linkDirectories.push_back("/lib/extra/stuff");
   Adir += "/libA.a";
   Bdir += "/libB.a";
   Cdir += "/libC.a";
-  
-  target.AddLinkLibrary(Adir.c_str(), cmTarget::GENERAL);
-  target.AddLinkLibrary(Bdir.c_str(), cmTarget::GENERAL);
-  target.AddLinkLibrary(Cdir.c_str(), cmTarget::GENERAL);
-  target.AddLinkLibrary("-lm", cmTarget::GENERAL);
+  linkLibraries.push_back(Adir);
+  linkLibraries.push_back(Bdir);
+  linkLibraries.push_back(Cdir);
+  linkLibraries.push_back("-lm");
   std::vector<cmStdString> sortedpaths;
   std::vector<cmStdString> linkItems;
   cmOrderLinkDirectories orderLibs;
@@ -57,7 +56,7 @@ bool TestLibraryOrder(bool shouldFail)
   orderLibs.AddLinkExtension(".so");
   orderLibs.AddLinkExtension(".a");
   orderLibs.SetLinkPrefix("lib");
-  orderLibs.SetLinkInformation(target, cmTarget::GENERAL, "A");
+  orderLibs.SetLinkInformation("test", linkLibraries, linkDirectories);
   bool ret = orderLibs.DetermineLibraryPathOrder();
   orderLibs.GetLinkerInformation(sortedpaths, linkItems);
   std::cout << "Sorted Link Paths:\n";

@@ -156,7 +156,7 @@ protected:
 
   void ConfigureRelativePaths();
   void SetupTests();
-  
+
   bool m_ForceUnixPaths;
   cmStdString m_FindMakeProgramFile;
   cmStdString m_ConfiguredFilesPath;

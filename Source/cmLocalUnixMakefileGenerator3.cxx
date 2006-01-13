@@ -111,6 +111,18 @@ void cmLocalUnixMakefileGenerator3::ConfigureOutputPaths()
     m_ExecutableOutputPath = exeOut;
     this->FormatOutputPath(m_ExecutableOutputPath, "EXECUTABLE");
     }
+
+  // Store the configuration name that will be generated.
+  if(const char* config = m_Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
+    {
+    // Use the build type given by the user.
+    m_ConfigurationName = config;
+    }
+  else
+    {
+    // No configuration type given.
+    m_ConfigurationName = "";
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1358,7 +1370,8 @@ cmLocalUnixMakefileGenerator3
   // Get the name of the executable to generate.
   std::string targetName;
   std::string targetNameReal;
-  target.GetExecutableNames(targetName, targetNameReal);
+  target.GetExecutableNames(targetName, targetNameReal,
+                            m_ConfigurationName.c_str());
 
   // Construct the full path version of the names.
   std::string outpath = m_ExecutableOutputPath;
@@ -1460,7 +1473,8 @@ cmLocalUnixMakefileGenerator3
   {
   std::string cleanName;
   std::string cleanRealName;
-  target.GetExecutableCleanNames(cleanName, cleanRealName);
+  target.GetExecutableCleanNames(cleanName, cleanRealName,
+                                 m_ConfigurationName.c_str());
   std::string cleanFullName = outpath + cleanName;
   std::string cleanFullRealName = outpath + cleanRealName;
   exeCleanFiles.push_back
@@ -1538,7 +1552,6 @@ cmLocalUnixMakefileGenerator3
                               0,
                               0,
                               flags.c_str(),
-                              0,
                               0,
                               0,
                               linkFlags.c_str());
@@ -1738,9 +1751,8 @@ cmLocalUnixMakefileGenerator3
   std::string targetName;
   std::string targetNameSO;
   std::string targetNameReal;
-  std::string targetNameBase;
-  target.GetLibraryNames(targetName, targetNameSO,
-                         targetNameReal, targetNameBase);
+  target.GetLibraryNames(targetName, targetNameSO, targetNameReal,
+                         m_ConfigurationName.c_str());
 
   // Construct the full path version of the names.
   std::string outpath = m_LibraryOutputPath;
@@ -1752,7 +1764,6 @@ cmLocalUnixMakefileGenerator3
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathSO = outpath + targetNameSO;
   std::string targetFullPathReal = outpath + targetNameReal;
-  std::string targetFullPathBase = outpath + targetNameBase;
 
   // Construct the output path version of the names for use in command
   // arguments.
@@ -1762,8 +1773,6 @@ cmLocalUnixMakefileGenerator3
     this->Convert(targetFullPathSO.c_str(),START_OUTPUT,MAKEFILE);
   std::string targetOutPathReal = 
     this->Convert(targetFullPathReal.c_str(),START_OUTPUT,MAKEFILE);
-  std::string targetOutPathBase = 
-    this->Convert(targetFullPathBase.c_str(),START_OUTPUT,MAKEFILE);
 
   // Add the link message.
   std::string buildEcho = "Linking ";
@@ -1793,7 +1802,8 @@ cmLocalUnixMakefileGenerator3
   target.GetLibraryCleanNames(cleanStaticName,
                               cleanSharedName,
                               cleanSharedSOName,
-                              cleanSharedRealName);
+                              cleanSharedRealName,
+                              m_ConfigurationName.c_str());
   std::string cleanFullStaticName = outpath + cleanStaticName;
   std::string cleanFullSharedName = outpath + cleanSharedName;
   std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
@@ -1885,7 +1895,6 @@ cmLocalUnixMakefileGenerator3
                               targetOutPathReal.c_str(),
                               linklibs.str().c_str(),
                               0, 0, 0, buildObjs.c_str(),
-                              targetOutPathBase.c_str(),
                               targetNameSO.c_str(),
                               linkFlags.c_str());
     }
@@ -2289,67 +2298,38 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
-::AppendAnyDepend(std::vector<std::string>& depends, const char* name,
-                  bool assume_unknown_is_file)
+::AppendAnyDepend(std::vector<std::string>& depends, const char* name)
 {
   // There are a few cases for the name of the target:
   //  - CMake target.
   //  - Full path to a file: depend on it.
-  //  - Other format (like -lm): do nothing unless assume_unknown_is_file is true.
+  //  - Other format (like -lm): no file on which to depend, do nothing.
 
-  // Look for a CMake target in the current makefile.
-  cmTarget* target = m_Makefile->FindTarget(name);
-
-  // If no target was found in the current makefile search globally.
-  bool local = target?true:false;
-  if(!local)
+  // Lookup the real name of the dependency in case it is a CMake target.
+  bool local;
+  std::string dep = this->GetRealDependency(name,
+                                            m_ConfigurationName.c_str(),
+                                            &local);
+  if(dep == name)
     {
-    target = m_GlobalGenerator->FindTarget(0, name);
-    }
-
-  // If a target was found then depend on it.
-  if(target)
-    {
-    switch (target->GetType())
+    if(local)
       {
-      case cmTarget::EXECUTABLE:
-      case cmTarget::STATIC_LIBRARY:
-      case cmTarget::SHARED_LIBRARY:
-      case cmTarget::MODULE_LIBRARY:
-        {
-        // Get the location of the target's output file and depend on it.
-        if(const char* location = target->GetProperty("LOCATION"))
-          {
-          depends.push_back(location);
-          }
-        }
-        break;
-      case cmTarget::UTILITY:
-        {
-        if(local)
-          {
-          // This is a utility target in the current makefile.  Just
-          // depend on it directly.
-          depends.push_back(name);
-          }
-        }
-        break;
-      case cmTarget::INSTALL_FILES:
-      case cmTarget::INSTALL_PROGRAMS:
-        // Do not depend on install targets.
-        break;
+      // The dependency is on a CMake utility target in the current
+      // makefile.  Just depend on it directly.
+      depends.push_back(name);
+      }
+    else if(cmSystemTools::FileIsFullPath(name))
+      {
+      // This is a path to a file.  Just trust the listfile author
+      // that it will be present or there is a rule to build it.
+      depends.push_back(cmSystemTools::CollapseFullPath(name));
       }
     }
-  else if(cmSystemTools::FileIsFullPath(name))
+  else
     {
-    // This is a path to a file.  Just trust the listfile author that
-    // it will be present or there is a rule to build it.
-    depends.push_back(cmSystemTools::CollapseFullPath(name));
-    }
-  else if(assume_unknown_is_file)
-    {
-    // Just assume this is a file or make target that will be present.
-    depends.push_back(name);
+    // The dependency is on a CMake target and has been transformed to
+    // the target's location on disk.
+    depends.push_back(dep);
     }
 }
 

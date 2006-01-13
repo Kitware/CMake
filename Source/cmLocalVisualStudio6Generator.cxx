@@ -553,40 +553,10 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
     for(std::vector<std::string>::const_iterator d = depends.begin();
         d != depends.end(); ++d)
       {
-      std::string dep = cmSystemTools::GetFilenameName(*d);
-      if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
-        {
-        dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
-        }
-      std::string libPath = dep + "_CMAKE_PATH";
-      const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-      if (cacheValue && *cacheValue)
-        {
-        std::string exePath = "";
-        if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
-          {
-          exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-          }
-        if(exePath.size())
-          {
-          libPath = exePath;
-          }
-        else
-          {
-          libPath = cacheValue;
-          }
-        libPath += "/";
-        libPath += "$(INTDIR)/";
-        libPath += dep;
-        libPath += ".exe";
-        fout << "\\\n\t" << 
-          this->ConvertToOptionallyRelativeOutputPath(libPath.c_str());
-        }
-      else
-        {
-        fout << "\\\n\t" << 
-          this->ConvertToOptionallyRelativeOutputPath(d->c_str());
-        }
+      // Lookup the real name of the dependency in case it is a CMake target.
+      std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
+      fout << "\\\n\t" <<
+        this->ConvertToOptionallyRelativeOutputPath(dep.c_str());
       }
     fout << "\n";
 
@@ -950,7 +920,6 @@ void cmLocalVisualStudio6Generator
       libMultiLineOptionsForDebug += " \n";
       }
     }
-  
   // find link libraries
   const cmTarget::LinkLibraries& libs = target.GetLinkLibraries();
   cmTarget::LinkLibraries::const_iterator j;
@@ -958,35 +927,41 @@ void cmLocalVisualStudio6Generator
     {
     // add libraries to executables and dlls (but never include
     // a library in a library, bad recursion)
+    // NEVER LINK STATIC LIBRARIES TO OTHER STATIC LIBRARIES
     if ((target.GetType() != cmTarget::SHARED_LIBRARY
          && target.GetType() != cmTarget::STATIC_LIBRARY 
          && target.GetType() != cmTarget::MODULE_LIBRARY) || 
         (target.GetType()==cmTarget::SHARED_LIBRARY && libName != j->first) ||
         (target.GetType()==cmTarget::MODULE_LIBRARY && libName != j->first))
       {
-      std::string lib = j->first;
-      std::string libDebug = j->first;
-      std::string libPath = j->first + "_CMAKE_PATH";
-      const char* cacheValue
-        = m_GlobalGenerator->GetCMakeInstance()->GetCacheDefinition(
-          libPath.c_str());
-      if ( cacheValue && *cacheValue && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX") )
-        { 
-        libDebug += m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
-        }
-      if(j->first.find(".lib") == std::string::npos)
+      // Compute the proper name to use to link this library.
+      std::string lib;
+      std::string libDebug;
+      cmTarget* tgt = m_GlobalGenerator->FindTarget(0, j->first.c_str());
+      if(tgt)
         {
+        lib = cmSystemTools::GetFilenameWithoutExtension(tgt->GetFullName().c_str());
+        libDebug = cmSystemTools::GetFilenameWithoutExtension(tgt->GetFullName("Debug").c_str());
         lib += ".lib";
         libDebug += ".lib";
         }
+      else
+        {
+        lib = j->first.c_str();
+        libDebug = j->first.c_str();
+        if(j->first.find(".lib") == std::string::npos)
+          {
+          lib += ".lib";
+          libDebug += ".lib";
+          }
+        }
       lib = this->ConvertToOptionallyRelativeOutputPath(lib.c_str());
       libDebug = this->ConvertToOptionallyRelativeOutputPath(libDebug.c_str());
-      
+
       if (j->second == cmTarget::GENERAL)
         {
         libOptions += " ";
         libOptions += lib;
-        
         libMultiLineOptions += "# ADD LINK32 ";
         libMultiLineOptions +=  lib;
         libMultiLineOptions += "\n";
@@ -1016,6 +991,12 @@ void cmLocalVisualStudio6Generator
     }
   std::string outputName = "(OUTPUT_NAME is for executables only)";
   std::string extraLinkOptions;
+  // TODO: Fix construction of library/executable name through
+  // cmTarget.  OUTPUT_LIBNAMEDEBUG_POSTFIX should be replaced by the
+  // library's debug configuration name.  OUTPUT_LIBNAME should be
+  // replaced by the non-debug configuration name.  This generator
+  // should just be re-written to not use template files and just
+  // generate the code.  Setting up these substitutions is a pain.
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
     extraLinkOptions = 

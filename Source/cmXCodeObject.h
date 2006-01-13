@@ -18,6 +18,7 @@ public:
                  PBXAggregateTarget,XCBuildConfiguration,XCConfigurationList,
                  None
   };
+  class StringVec: public std::vector<cmStdString> {};
   static const char* PBXTypeNames[];
   virtual ~cmXCodeObject();
   cmXCodeObject(PBXType ptype, Type type);
@@ -110,11 +111,16 @@ public:
     }
   void CopyAttributes(cmXCodeObject* );
   
-  void AddDependLibrary(const char* l)
+  void AddDependLibrary(const char* configName,
+                        const char* l)
     {
-      m_DependLibraries.push_back(l);
+      if(!configName)
+        {
+        configName = "";
+        }
+      m_DependLibraries[configName].push_back(l);
     }
-  std::vector<cmStdString> const& GetDependLibraries()
+  std::map<cmStdString, StringVec> const& GetDependLibraries()
     {
       return m_DependLibraries;
     }
@@ -131,7 +137,7 @@ protected:
   cmXCodeObject* m_Object;
   cmXCodeObject* m_PBXTargetDependency;
   std::vector<cmXCodeObject*> m_List;
-  std::vector<cmStdString> m_DependLibraries;
+  std::map<cmStdString, StringVec> m_DependLibraries;
   std::map<cmStdString, cmXCodeObject*> m_ObjectAttributes;
 };
 #endif

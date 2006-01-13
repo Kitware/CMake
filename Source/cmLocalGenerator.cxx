@@ -293,12 +293,29 @@ void cmLocalGenerator::GenerateInstallRules()
     << "ENDIF(NOT CMAKE_INSTALL_PREFIX)" << std::endl
     << std::endl;
 
-  const char* cmakeDebugPosfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
-  if ( cmakeDebugPosfix )
+  std::vector<std::string> configurationTypes;
+  if(const char* types = m_Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
     {
-    fout << "SET(CMAKE_DEBUG_POSTFIX \"" << cmakeDebugPosfix << "\")"
-      << std::endl << std::endl;
+    cmSystemTools::ExpandListArgument(types, configurationTypes);
     }
+  const char* config = 0;
+  if(configurationTypes.empty())
+    {
+    config = m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    }
+
+  fout <<
+    "# Set the install configuration name.\n"
+    "IF(NOT CMAKE_INSTALL_CONFIG_NAME)\n"
+    "  IF(BUILD_TYPE)\n"
+    "    STRING(REGEX REPLACE \"^[^A-Za-z0-9_]+\" \"\"\n"
+    "           CMAKE_INSTALL_CONFIG_NAME \"${BUILD_TYPE}\")\n"
+    "  ELSE(BUILD_TYPE)\n"
+    "    SET(CMAKE_INSTALL_CONFIG_NAME Release)\n"
+    "  ENDIF(BUILD_TYPE)\n"
+    "  MESSAGE(STATUS \"Install configuration: \\\"${CMAKE_INSTALL_CONFIG_NAME}\\\"\")\n"
+    "ENDIF(NOT CMAKE_INSTALL_CONFIG_NAME)\n"
+    "\n";
 
   std::string libOutPath = "";
   if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
@@ -349,116 +366,123 @@ void cmLocalGenerator::GenerateInstallRules()
       }
     if (l->second.GetInstallPath() != "")
       {
-      destination = "${CMAKE_INSTALL_PREFIX}/" + l->second.GetInstallPath();
+      destination = "${CMAKE_INSTALL_PREFIX}" + l->second.GetInstallPath();
       cmSystemTools::ConvertToUnixSlashes(destination);
       const char* dest = destination.c_str();
       int type = l->second.GetType();
-
-
       std::string fname;
+      std::string props;
+      const char* properties = 0;
       const char* files;
+
+      this->PrepareInstallReference(fout, l->second, configurationTypes);
+
       // now install the target
       switch (type)
         {
-      case cmTarget::STATIC_LIBRARY:
-      case cmTarget::MODULE_LIBRARY:
-        fname = libOutPath;
-        fname += l->second.GetFullName();
-        files = fname.c_str();
-        this->AddInstallRule(fout, dest, type, files);
-        break;
-      case cmTarget::SHARED_LIBRARY:
-        {
-        // Special code to handle DLL
-        fname = libOutPath;
-        fname += l->second.GetFullName();
-        std::string ext = cmSystemTools::GetFilenameExtension(fname);
-        ext = cmSystemTools::LowerCase(ext);
-        if ( ext == ".dll" )
+        case cmTarget::SHARED_LIBRARY:
           {
-          std::string libname = libOutPath;
-          libname += cmSystemTools::GetFilenameWithoutExtension(fname);
-          libname += ".lib";
-          files = libname.c_str();
-          this->AddInstallRule(fout, dest, cmTarget::STATIC_LIBRARY, files, true);
-          std::string dlldest = "${CMAKE_INSTALL_PREFIX}/" + l->second.GetRuntimeInstallPath();
-          files = fname.c_str();
-          this->AddInstallRule(fout, dlldest.c_str(), type, files);
+          // Special code to handle DLL
+          fname = l->second.GetFullName();
+          std::string ext = cmSystemTools::GetFilenameLastExtension(fname);
+          ext = cmSystemTools::LowerCase(ext);
+          if ( ext == ".dll" )
+            {
+            // Install the .lib separately.
+            std::string libname = libOutPath;
+            libname += this->GetInstallReference(l->second, config,
+                                                 configurationTypes,
+                                                 true);
+            files = libname.c_str();
+            this->AddInstallRule(fout, dest, cmTarget::STATIC_LIBRARY, files, true);
+
+            // Change the destination to the .dll destination.
+            destination = "${CMAKE_INSTALL_PREFIX}" + l->second.GetRuntimeInstallPath();
+            dest = destination.c_str();
+            }
+          else
+            {
+            // Add shared library installation properties.
+            const char* lib_version = l->second.GetProperty("VERSION");
+            const char* lib_soversion = l->second.GetProperty("SOVERSION");
+            if(!m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
+              {
+              // Versioning is supported only for shared libraries and modules,
+              // and then only when the platform supports an soname flag.
+              lib_version = 0;
+              lib_soversion = 0;
+              }
+            if ( lib_version )
+              {
+              props += " VERSION ";
+              props += lib_version;
+              }
+            if ( lib_soversion )
+              {
+              props += " SOVERSION ";
+              props += lib_soversion;
+              }
+            properties = props.c_str();
+            }
           }
-        else
+          /* No "break;" because we want to install the library here.  */
+        case cmTarget::STATIC_LIBRARY:
+        case cmTarget::MODULE_LIBRARY:
           {
+          fname = libOutPath;
+          fname += this->GetInstallReference(l->second, config,
+                                             configurationTypes);
           files = fname.c_str();
-          std::string properties;
-          const char* lib_version = l->second.GetProperty("VERSION");
-          const char* lib_soversion = l->second.GetProperty("SOVERSION");
-          if(!m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
-            {
-            // Versioning is supported only for shared libraries and modules,
-            // and then only when the platform supports an soname flag.
-            lib_version = 0;
-            lib_soversion = 0;
-            }
-          if ( lib_version )
-            {
-            properties += " VERSION ";
-            properties += lib_version;
-            }
-          if ( lib_soversion )
-            {
-            properties += " SOVERSION ";
-            properties += lib_soversion;
-            }
-          this->AddInstallRule(fout, dest, type, files, false, properties.c_str());
+          this->AddInstallRule(fout, dest, type, files, false, properties);
           }
-        }
-        break;
-      case cmTarget::EXECUTABLE:
-        {
-        std::string properties;
+          break;
+        case cmTarget::EXECUTABLE:
+          {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-        const char* exe_version = 0;
+          const char* exe_version = 0;
 #else
-        const char* exe_version = l->second.GetProperty("VERSION");
+          const char* exe_version = l->second.GetProperty("VERSION");
 #endif
-        if(exe_version)
-          {
-          properties += " VERSION ";
-          properties += exe_version;
-          }
-        if(l->second.GetPropertyAsBool("MACOSX_BUNDLE"))
-          {
+          if(exe_version)
+            {
+            props += " VERSION ";
+            props += exe_version;
+            properties = props.c_str();
+            }
+          std::string exeName =
+            this->GetInstallReference(l->second, config, configurationTypes);
           fname = exeOutPath;
-          fname += l->second.GetFullName();
-          std::string plist = fname;
-          plist += ".app/Contents/Info.plist";
-          fname += ".app/Contents/MacOS/";
-          fname += l->second.GetName();
-          files = fname.c_str();
-          std::string bdest = dest;
-          bdest += "/";
-          bdest += l->second.GetName();
-          std::string pdest = bdest;
-          pdest += ".app/Contents";
-          bdest += ".app/Contents/MacOS";
-          // first install the actual executable
-          this->AddInstallRule(fout, bdest.c_str(), type, files,
-                               false, properties.c_str());
-          files = plist.c_str();
-          // now install the Info.plist file
-          this->AddInstallRule(fout, pdest.c_str(), 
-                               cmTarget::INSTALL_FILES, files);
+          fname += exeName;
+          if(l->second.GetPropertyAsBool("MACOSX_BUNDLE"))
+            {
+            std::string plist = fname;
+            plist += ".app/Contents/Info.plist";
+            fname += ".app/Contents/MacOS/";
+            fname += exeName;
+            files = fname.c_str();
+            std::string bdest = dest;
+            bdest += "/";
+            bdest += exeName;
+            std::string pdest = bdest;
+            pdest += ".app/Contents";
+            bdest += ".app/Contents/MacOS";
+            // first install the actual executable
+            this->AddInstallRule(fout, bdest.c_str(), type, files,
+                                 false, properties);
+            files = plist.c_str();
+            // now install the Info.plist file
+            this->AddInstallRule(fout, pdest.c_str(),
+                                 cmTarget::INSTALL_FILES, files);
+            }
+          else
+            {
+            files = fname.c_str();
+            this->AddInstallRule(fout, dest, type, files, false,
+                                 properties);
+            }
           }
-        else
-          {
-          fname = exeOutPath;
-          fname += l->second.GetFullName();
-          files = fname.c_str();
-          this->AddInstallRule(fout, dest, type, files, false,
-                               properties.c_str());
-          }
-        }
-        break;
-      case cmTarget::INSTALL_FILES:
+          break;
+        case cmTarget::INSTALL_FILES:
           {
           std::string sourcePath = m_Makefile->GetCurrentDirectory();
           std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
@@ -482,8 +506,8 @@ void cmLocalGenerator::GenerateInstallRules()
             this->AddInstallRule(fout, dest, type, files);
             }
           }
-        break;
-      case cmTarget::INSTALL_PROGRAMS:
+          break;
+        case cmTarget::INSTALL_PROGRAMS:
           {
           std::string sourcePath = m_Makefile->GetCurrentDirectory();
           std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
@@ -506,10 +530,10 @@ void cmLocalGenerator::GenerateInstallRules()
             this->AddInstallRule(fout, dest, type, files);
             }
           }
-        break;
-      case cmTarget::UTILITY:
-      default:
-        break;
+          break;
+        case cmTarget::UTILITY:
+        default:
+          break;
         }
       }
     if ( postinstall )
@@ -687,7 +711,6 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
                             0, // object
                             flags.c_str(), // flags
                             0, // objects quoted
-                            0, // target base name
                             0, // target so name,
                             linkFlags.c_str() // link flags
     );
@@ -775,7 +798,6 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
                                      const char* object,
                                      const char* flags,
                                      const char* objectsquoted,
-                                     const char* targetBase,
                                      const char* targetSOName,
                                      const char* linkFlags)
 {
@@ -839,33 +861,19 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       {
       return target;
       }
-    }
-  if(targetBase)
-    {
-    if(variable == "TARGET_BASE.lib" || variable == "TARGET_BASE.dll")
-      {
-      // special case for quoted paths with spaces 
-      // if you see <TARGET_BASE>.lib then put the .lib inside
-      // the quotes, same for .dll
-      if((strlen(targetBase) > 1) && targetBase[0] == '\"')
-        {
-        std::string base = targetBase;
-        base[base.size()-1] = '.';
-        std::string baseLib = base + "lib\"";
-        std::string baseDll = base + "dll\"";
-        if(variable == "TARGET_BASE.lib" )
-          {
-          return baseLib;
-          }
-        if(variable == "TARGET_BASE.dll" )
-          {
-          return baseDll;
-          }
-        }
-      }
     if(variable == "TARGET_BASE")
       {
-      return targetBase;
+      // Strip the last extension off the target name.
+      std::string targetBase = target;
+      std::string::size_type pos = targetBase.rfind(".");
+      if(pos != targetBase.npos)
+        {
+        return targetBase.substr(0, pos);
+        }
+      else
+        {
+        return targetBase;
+        }
       }
     }
   if(targetSOName)
@@ -950,7 +958,6 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
                                       const char* object,
                                       const char* flags,
                                       const char* objectsquoted,
-                                      const char* targetBase,
                                       const char* targetSOName,
                                       const char* linkFlags)
 {
@@ -987,7 +994,7 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
                                                      target, linkLibs,
                                                      source, object, flags,
                                                      objectsquoted, 
-                                                     targetBase, targetSOName,
+                                                     targetSOName,
                                                      linkFlags);
       expandedInput += s.substr(pos, start-pos);
       expandedInput += replace;
@@ -1300,7 +1307,8 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string runtimeSep;
   std::vector<std::string> runtimeDirs;
 
-  std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  const char* config = m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  std::string buildType = config?config:"";
   buildType = cmSystemTools::UpperCase(buildType);
   cmTarget::LinkLibraryType cmakeBuildType = cmTarget::GENERAL;
   if(buildType == "DEBUG")
@@ -1350,42 +1358,17 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     linkLibs = m_Makefile->GetSafeDefinition(linkFlagsVar.c_str());
     linkLibs += " ";
     }
-  
-  cmOrderLinkDirectories orderLibs;
-  std::string ext = 
-    m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
-  if(ext.size())
+
+  // Compute the link library and directory information.
+  std::vector<cmStdString> libNames;
+  std::vector<cmStdString> libDirs;
+  this->ComputeLinkInformation(tgt, config, libNames, libDirs);
+
+  // Append the library search path flags.
+  for(std::vector<cmStdString>::const_iterator libDir = libDirs.begin();
+      libDir != libDirs.end(); ++libDir)
     {
-    orderLibs.AddLinkExtension(ext.c_str());
-    }
-  ext = 
-    m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
-  if(ext.size())
-    {
-    orderLibs.SetLinkPrefix(ext.c_str());
-    }
-  ext = 
-    m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
-  if(ext.size())
-    {
-    orderLibs.AddLinkExtension(ext.c_str());
-    }
-  ext = 
-    m_Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
-  if(ext.size())
-    {
-    orderLibs.AddLinkExtension(ext.c_str());
-    }
-  // compute the correct order for -L paths
-  orderLibs.SetLinkInformation(tgt, cmakeBuildType, targetLibrary);
-  orderLibs.DetermineLibraryPathOrder();
-  std::vector<cmStdString> libdirs;
-  std::vector<cmStdString> linkItems;
-  orderLibs.GetLinkerInformation(libdirs, linkItems);
-  for(std::vector<cmStdString>::const_iterator libDir = libdirs.begin();
-      libDir != libdirs.end(); ++libDir)
-    { 
-    std::string libpath = this->ConvertToOutputForExisting(libDir->c_str());
+   std::string libpath = this->ConvertToOutputForExisting(libDir->c_str());
     if(emitted.insert(libpath).second)
       {
       std::string fullLibPath;
@@ -1413,33 +1396,13 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
       }
     }
 
-  std::string linkSuffix =
-    m_Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
-  std::string regexp = ".*\\";
-  regexp += linkSuffix;
-  regexp += "$";
-  cmsys::RegularExpression hasSuffix(regexp.c_str());
-  std::string librariesLinked;
-  for(std::vector<cmStdString>::iterator lib = linkItems.begin();
-      lib != linkItems.end(); ++lib)
+  // Append the link libraries.
+  for(std::vector<cmStdString>::iterator lib = libNames.begin();
+      lib != libNames.end(); ++lib)
     {
-    cmStdString& linkItem = *lib;
-    // check to see if the link item has a -l already
-    cmsys::RegularExpression reg("^([ \t]*\\-[lLWRBF])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
-    if(!reg.find(linkItem))
-      {
-      librariesLinked += libLinkFlag;
-      }
-    librariesLinked += linkItem;
-    
-    if(linkSuffix.size() && !hasSuffix.find(linkItem))
-      {
-      librariesLinked += linkSuffix;
-      }
-    librariesLinked += " ";
+    linkLibs += *lib;
+    linkLibs += " ";
     }
-
-  linkLibs += librariesLinked;
 
   fout << linkLibs;
 
@@ -1470,6 +1433,191 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     }
 }
 
+//----------------------------------------------------------------------------
+void
+cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
+                                         const char* config,
+                                         std::vector<cmStdString>& outLibs,
+                                         std::vector<cmStdString>& outDirs,
+                                         std::vector<cmStdString>* fullPathLibs)
+{
+  // Compute which library configuration to link.
+  cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
+  if(config && cmSystemTools::UpperCase(config) == "DEBUG")
+    {
+    linkType = cmTarget::DEBUG;
+    }
+
+  // Get the list of libraries against which this target wants to link.
+  std::vector<std::string> linkLibraries;
+  const cmTarget::LinkLibraries& inLibs = target.GetLinkLibraries();
+  for(cmTarget::LinkLibraries::const_iterator j = inLibs.begin();
+      j != inLibs.end(); ++j)
+    {
+    // For backwards compatibility variables may have been expanded
+    // inside library names.  Clean up the resulting name.
+    std::string lib = j->first;
+    std::string::size_type pos = lib.find_first_not_of(" \t\r\n");
+    if(pos != lib.npos)
+      {
+      lib = lib.substr(pos, lib.npos);
+      }
+    pos = lib.find_last_not_of(" \t\r\n");
+    if(pos != lib.npos)
+      {
+      lib = lib.substr(0, pos);
+      }
+    if(lib.empty())
+      {
+      continue;
+      }
+
+    // Link to a library if it is not the same target and is meant for
+    // this configuration type.
+    if((target.GetType() == cmTarget::EXECUTABLE ||
+        j->first != target.GetName()) &&
+       (j->second == cmTarget::GENERAL || j->second == linkType))
+      {
+      // Compute the proper name to use to link this library.
+      cmTarget* tgt = m_GlobalGenerator->FindTarget(0, j->first.c_str());
+      if(tgt)
+        {
+        // This is a CMake target.  Ask the target for its real name.
+        linkLibraries.push_back(tgt->GetFullName(config));
+        if(fullPathLibs)
+          {
+          fullPathLibs->push_back(tgt->GetFullPath(config));
+          }
+        }
+      else
+        {
+        // This is not a CMake target.  Use the name given.
+        linkLibraries.push_back(j->first);
+        }
+      }
+    }
+
+  // Get the list of directories the target wants to search for libraries.
+  const std::vector<std::string>&
+    linkDirectories = target.GetLinkDirectories();
+
+  // Compute the link directory order needed to link the libraries.
+  cmOrderLinkDirectories orderLibs;
+  orderLibs.SetLinkPrefix(
+    m_Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_PREFIX"));
+  orderLibs.AddLinkExtension(
+    m_Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"));
+  orderLibs.AddLinkExtension(
+    m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"));
+  orderLibs.AddLinkExtension(
+    m_Makefile->GetDefinition("CMAKE_LINK_LIBRARY_SUFFIX"));
+  orderLibs.SetLinkInformation(target.GetName(),
+                               linkLibraries,
+                               linkDirectories);
+  orderLibs.DetermineLibraryPathOrder();
+  std::vector<cmStdString> orderedLibs;
+  orderLibs.GetLinkerInformation(outDirs, orderedLibs);
+  if(fullPathLibs)
+    {
+    orderLibs.GetFullPathLibraries(*fullPathLibs);
+    }
+
+  // Make sure libraries are linked with the proper syntax.
+  std::string libLinkFlag =
+    m_Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
+  std::string libLinkSuffix =
+    m_Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
+  for(std::vector<cmStdString>::iterator l = orderedLibs.begin();
+      l != orderedLibs.end(); ++l)
+    {
+    std::string lib = *l;
+    if(lib[0] == '-' || lib[0] == '$' || lib[0] == '`')
+      {
+      // The library is linked with special syntax by the user.
+      outLibs.push_back(lib);
+      }
+    else
+      {
+      // Generate the proper link syntax.
+      lib = libLinkFlag;
+      lib += *l;
+      lib += libLinkSuffix;
+      outLibs.push_back(lib);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::GetInstallReference(cmTarget& target, const char* config,
+                                      std::vector<std::string> const& configs,
+                                      bool implib /* = false*/)
+{
+  if(configs.empty())
+    {
+    std::string ref = target.GetFullName(config);
+    if(implib)
+      {
+      ref = cmSystemTools::GetFilenameWithoutLastExtension(ref);
+      ref += ".lib";
+      }
+    return ref;
+    }
+  else
+    {
+    std::string ref = "${";
+    ref += target.GetName();
+    if(implib)
+      {
+      ref += "_LIBNAME_";
+      }
+    else
+      {
+      ref += "_NAME_";
+      }
+    ref += "${CMAKE_INSTALL_CONFIG_NAME}}";
+    return ref;
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalGenerator
+::PrepareInstallReference(std::ostream& fout, cmTarget& target,
+                          std::vector<std::string> const& configs)
+{
+  // If the target name may vary with the configuration type then
+  // store all possible names ahead of time in variables.
+  cmTarget::TargetType type = target.GetType();
+  if(type == cmTarget::SHARED_LIBRARY ||
+     type == cmTarget::STATIC_LIBRARY ||
+     type == cmTarget::MODULE_LIBRARY ||
+     type == cmTarget::EXECUTABLE)
+    {
+    std::string fname;
+    for(std::vector<std::string>::const_iterator i = configs.begin();
+        i != configs.end(); ++i)
+      {
+      // Set a variable with the target name for this
+      // configuration.
+      fname = target.GetFullName(i->c_str());
+      fout << "SET(" << target.GetName() << "_NAME_" << *i
+           << " \"" << fname << "\")\n";
+
+#ifdef _WIN32
+      // If the target is a .dll then add the corresponding .lib
+      // name in its own variable.
+      if(type == cmTarget::SHARED_LIBRARY)
+        {
+        fname = cmSystemTools::GetFilenameWithoutExtension(fname);
+        fname += ".lib";
+        fout << "SET(" << target.GetName() << "_LIBNAME_" << *i
+             << " \"" << fname << "\")\n";
+        }
+#endif
+      }
+    }
+}
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddLanguageFlags(std::string& flags,
@@ -1480,6 +1628,65 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   flagsVar += lang;
   flagsVar += "_FLAGS";
   this->AddConfigVariableFlags(flags, flagsVar.c_str());
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::GetRealDependency(const char* inName,
+                                                const char* config,
+                                                bool* inLocal)
+{
+  // Older CMake code may specify the dependency using the target
+  // output file rather than the target name.  Such code would have
+  // been written before there was support for target properties that
+  // modify the name so stripping down to just the file name should
+  // produce the target name in this case.
+  std::string name = cmSystemTools::GetFilenameName(inName);
+  if(cmSystemTools::GetFilenameLastExtension(name) == ".exe")
+    {
+    name = cmSystemTools::GetFilenameWithoutLastExtension(name);
+    }
+
+  // Look for a CMake target in the current makefile.
+  cmTarget* target = m_Makefile->FindTarget(name.c_str());
+
+  // If no target was found in the current makefile search globally.
+  bool local = target?true:false;
+  if(inLocal)
+    {
+    *inLocal = local;
+    }
+  if(!local)
+    {
+    target = m_GlobalGenerator->FindTarget(0, name.c_str());
+    }
+
+  // If a target was found then get its real location.
+  if(target)
+    {
+    switch (target->GetType())
+      {
+      case cmTarget::EXECUTABLE:
+      case cmTarget::STATIC_LIBRARY:
+      case cmTarget::SHARED_LIBRARY:
+      case cmTarget::MODULE_LIBRARY:
+        {
+        // Get the location of the target's output file and depend on it.
+        if(const char* location = target->GetLocation(config))
+          {
+          return location;
+          }
+        }
+        break;
+      case cmTarget::UTILITY:
+      case cmTarget::INSTALL_FILES:
+      case cmTarget::INSTALL_PROGRAMS:
+        break;
+      }
+    }
+
+  // The name was not that of a CMake target.  The dependency should
+  // use the name as given.
+  return inName;
 }
 
 //----------------------------------------------------------------------------

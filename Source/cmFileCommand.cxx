@@ -288,12 +288,6 @@ bool cmFileCommand::HandleInstallCommand(
     build_type += 2;
     }
 
-  const char* debug_postfix
-    = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
-  if(!debug_postfix)
-    {
-    debug_postfix = "";
-    }
   const char* destdir = cmSystemTools::GetEnv("DESTDIR");
 
   std::string extra_dir = "";
@@ -505,11 +499,6 @@ bool cmFileCommand::HandleInstallCommand(
     case cmTarget::MODULE_LIBRARY:
     case cmTarget::STATIC_LIBRARY:
     case cmTarget::SHARED_LIBRARY:
-      if ( debug )
-        {
-        fname = fnamewe + debug_postfix + ext;
-        destfile = destfilewe + debug_postfix + ext;
-        }
         {
         // Handle shared library versioning
         const char* lib_version = 0;

@@ -32,6 +32,7 @@ class cmGlobalGenerator;
 class cmTarget
 {
 public:
+  cmTarget();
   enum TargetType { EXECUTABLE, STATIC_LIBRARY,
                     SHARED_LIBRARY, MODULE_LIBRARY, UTILITY, INSTALL_FILES, 
                     INSTALL_PROGRAMS };
@@ -111,9 +112,8 @@ public:
 
   void MergeLinkLibraries( cmMakefile& mf, const char* selfname, const LinkLibraries& libs );
 
-  const std::vector<std::string>& GetLinkDirectories() 
-  {return m_LinkDirectories;}
-  
+  const std::vector<std::string>& GetLinkDirectories();
+
   void AddLinkDirectory(const char* d);
 
   /**
@@ -151,6 +151,9 @@ public:
   const char *GetProperty(const char *prop);
   bool GetPropertyAsBool(const char *prop);
 
+  const char* GetDirectory();
+  const char* GetLocation(const char* config);
+
   /**
    * Trace through the source files in this target and add al source files
    * that they depend on, used by the visual studio generators
@@ -170,18 +173,19 @@ public:
 
   /** Get the full name of the target according to the settings in its
       makefile.  */
-  std::string GetFullName();
+  std::string GetFullName(const char* config=0);
+  void GetFullName(std::string& prefix, std::string& base, std::string& suffix,
+                   const char* config=0);
 
-  /** Get the base name (no suffix) of the target according to the
-      settings in its makefile.  */
-  std::string GetBaseName();
+  /** Get the full path to the target according to the settings in its
+      makefile and the configuration type.  */
+  std::string GetFullPath(const char* config=0);
 
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
       should be called only on a library target.  */
-  void GetLibraryNames(std::string& name,
-                       std::string& soName, std::string& realName,
-                       std::string& baseName);
+  void GetLibraryNames(std::string& name, std::string& soName,
+                       std::string& realName, const char* config);
 
   /** Get the names of the library used to remove existing copies of
       the library from the build tree either before linking or during
@@ -190,18 +194,21 @@ public:
   void GetLibraryCleanNames(std::string& staticName,
                             std::string& sharedName,
                             std::string& sharedSOName,
-                            std::string& sharedRealName);
+                            std::string& sharedRealName,
+                            const char* config);
 
   /** Get the names of the executable needed to generate a build rule
       that takes into account executable version numbers.  This should
       be called only on an executable target.  */
-  void GetExecutableNames(std::string& name, std::string& realName);
+  void GetExecutableNames(std::string& name, std::string& realName,
+                          const char* config);
 
   /** Get the names of the executable used to remove existing copies
       of the executable from the build tree either before linking or
       during a clean step.  This should be called only on an
       executable target.  */
-  void GetExecutableCleanNames(std::string& name, std::string& realName);
+  void GetExecutableCleanNames(std::string& name, std::string& realName,
+                               const char* config);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -258,15 +265,19 @@ private:
 
   const char* GetSuffixVariableInternal(TargetType type);
   const char* GetPrefixVariableInternal(TargetType type);
-  std::string GetFullNameInternal(TargetType type);
-  std::string GetBaseNameInternal(TargetType type);
+  std::string GetFullNameInternal(TargetType type, const char* config);
+  void GetFullNameInternal(TargetType type, const char* config,
+                           std::string& outPrefix, std::string& outBase,
+                           std::string& outSuffix);
   void GetLibraryNamesInternal(std::string& name,
                                std::string& soName,
                                std::string& realName,
-                               TargetType type);
+                               TargetType type,
+                               const char* config);
   void GetExecutableNamesInternal(std::string& name,
                                   std::string& realName,
-                                  TargetType type);
+                                  TargetType type,
+                                  const char* config);
 
   // update the value of the LOCATION var
   void UpdateLocation();
@@ -281,16 +292,22 @@ private:
   std::vector<cmSourceFile*> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
   LinkLibraries m_PrevLinkedLibraries;
+  bool m_LinkLibrariesAnalyzed;
+  bool m_LinkDirectoriesComputed;
   std::vector<std::string> m_Frameworks;
   std::vector<std::string> m_LinkDirectories;
+  std::vector<std::string> m_ExplicitLinkDirectories;
   std::string m_InstallPath;
   std::string m_RuntimeInstallPath;
+  std::string m_Directory;
+  std::string m_Location;
   std::set<cmStdString> m_Utilities;
   bool m_RecordDependencies; 
   std::map<cmStdString,cmStdString> m_Properties;
-  
-  // the Makefile that owns this target
-  cmMakefile *m_Makefile;
+
+  // The cmMakefile instance that owns this target.  This should
+  // always be set.
+  cmMakefile* m_Makefile;
 };
 
 typedef std::map<cmStdString,cmTarget> cmTargets;

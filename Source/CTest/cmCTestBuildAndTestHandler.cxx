@@ -72,7 +72,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring, cmOStringStream
     }
   if ( m_CTest->GetConfigType().size() > 0 )
     {
-    std::string btype = "-DBUILD_TYPE:STRING=" + m_CTest->GetConfigType();
+    std::string btype = "-DCMAKE_BUILD_TYPE:STRING=" + m_CTest->GetConfigType();
     args.push_back(btype);
     }
 

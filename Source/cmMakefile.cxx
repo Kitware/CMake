@@ -457,7 +457,6 @@ void cmMakefile::ConfigureFinalPass()
     {
     cmSystemTools::Error("You have requested backwards compatibility with CMake version 1.2 or earlier. This version of CMake only supports backwards compatibility with CMake 1.4 or later. For compatibility with 1.2 or earlier please use CMake 2.0");
     }
-  
   for (cmTargets::iterator l = m_Targets.begin();
        l != m_Targets.end(); l++)
     {
@@ -1090,14 +1089,6 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   target.SetMakefile(this);
   this->AddGlobalLinkInformation(lname, target);
   m_Targets.insert(cmTargets::value_type(lname,target));
-  
-  // Add an entry into the cache 
-  std::string libPath = lname;
-  libPath += "_CMAKE_PATH";
-  this->GetCacheManager()->
-    AddCacheEntry(libPath.c_str(),
-                  this->GetCurrentOutputDirectory(),
-                  "Path to a library", cmCacheManager::INTERNAL);
 }
 
 cmTarget* cmMakefile::AddExecutable(const char *exeName, 
@@ -1111,14 +1102,6 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
   this->AddGlobalLinkInformation(exeName, target);
   cmTargets::iterator it = 
     m_Targets.insert(cmTargets::value_type(exeName,target)).first;
-  
-  // Add an entry into the cache 
-  std::string exePath = exeName;
-  exePath += "_CMAKE_PATH";
-  this->GetCacheManager()->
-    AddCacheEntry(exePath.c_str(),
-                  this->GetCurrentOutputDirectory(),
-                  "Path to an executable", cmCacheManager::INTERNAL);
   return &it->second;
 }
 

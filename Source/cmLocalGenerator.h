@@ -134,6 +134,16 @@ public:
   ///! Get the include flags for the current makefile and language
   const char* GetIncludeFlags(const char* lang); 
 
+  /** Translate a dependency as given in CMake code to the name to
+      appear in a generated build file.  If the given name is that of
+      a CMake target it will be transformed to the real output
+      location of that target for the given configuration.  Otherwise
+      the original name will be returned.  If the local argument is
+      given it is set to indicate whethr the name is of a utility
+      target available in the same makefile.  */
+  std::string GetRealDependency(const char* name, const char* config,
+                                bool* local=0);
+
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char* p);
   
@@ -144,6 +154,13 @@ public:
   
   /** Called from command-line hook to scan dependencies.  */
   virtual bool ScanDependencies(std::vector<std::string> const& /* args */) {return true;};
+
+  /** Compute the list of link libraries and directories for the given
+      target and configuration.  */
+  void ComputeLinkInformation(cmTarget& target, const char* config,
+                              std::vector<cmStdString>& outLibs,
+                              std::vector<cmStdString>& outDirs,
+                              std::vector<cmStdString>* fullPathLibs=0);
 
 protected:
   /** Construct a script from the given list of command lines.  */
@@ -159,6 +176,13 @@ protected:
   ///! put all the libraries for a target on into the given stream
   virtual void OutputLinkLibraries(std::ostream&, const char* name,cmTarget &);
 
+  /** Compute the string to use to refer to a target in an install
+      file.  */
+  std::string GetInstallReference(cmTarget& target, const char* config,
+                                  std::vector<std::string> const& configs,
+                                  bool implib = false);
+  void PrepareInstallReference(std::ostream& fout, cmTarget& target,
+                               std::vector<std::string> const& configs);
 
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs);
@@ -173,7 +197,6 @@ protected:
                            const char* object =0,
                            const char* flags = 0,
                            const char* objectsquoted = 0,
-                           const char* targetBase = 0,
                            const char* targetSOName = 0,
                            const char* linkFlags = 0);
   // Expand rule variables in a single string
@@ -186,7 +209,6 @@ protected:
                                  const char* object,
                                  const char* flags,
                                  const char* objectsquoted,
-                                 const char* targetBase,
                                  const char* targetSOName,
                                  const char* linkFlags);
   

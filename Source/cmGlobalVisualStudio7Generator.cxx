@@ -238,6 +238,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
     {
     return;
     }
+  m_CurrentProject = root->GetMakefile()->GetProjectName();
   std::string fname = root->GetMakefile()->GetStartOutputDirectory();
   fname += "/";
   fname += root->GetMakefile()->GetProjectName();
@@ -547,10 +548,7 @@ cmGlobalVisualStudio7Generator
       if(j->first != dspname)
         {
         // is the library part of this SLN ? If so add dependency
-        std::string libPath = j->first + "_CMAKE_PATH";
-        const char* cacheValue
-          = m_CMakeInstance->GetCacheDefinition(libPath.c_str());
-        if(cacheValue && *cacheValue)
+        if(this->FindTarget(m_CurrentProject.c_str(), j->first.c_str()))
           {
           std::string guid = this->GetGUID(j->first.c_str());
           if(guid.size() == 0)
@@ -561,9 +559,8 @@ cmGlobalVisualStudio7Generator
             m += j->first.c_str();
             cmSystemTools::Error(m.c_str());
             }
-          
-          fout << "\t\t{" << this->GetGUID(dspname) << "}." << depcount << " = {"
-               << guid << "}\n";
+          fout << "\t\t{" << this->GetGUID(dspname) << "}."
+               << depcount << " = {" << guid << "}\n";
           depcount++;
           }
         }

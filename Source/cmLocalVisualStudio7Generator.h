@@ -90,12 +90,9 @@ private:
   void OutputBuildTool(std::ostream& fout, const char* configName,
                        const char* libname, cmTarget& t);
   void OutputLibraries(std::ostream& fout,
-                       const char* configName,
-                       const char* libName,
-                       cmTarget &target);
+                       std::vector<cmStdString> const& libs);
   void OutputLibraryDirectories(std::ostream& fout,
-                                const char* configName,
-                                const char* libName, cmTarget &target);
+                                std::vector<cmStdString> const& dirs);
   void OutputModuleDefinitionFile(std::ostream& fout, cmTarget &target);
   void WriteProjectStart(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);

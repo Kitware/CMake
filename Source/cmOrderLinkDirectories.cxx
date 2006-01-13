@@ -221,50 +221,29 @@ void cmOrderLinkDirectories::OrderPaths(std::vector<cmStdString>&
 }
 
 //-------------------------------------------------------------------
-void cmOrderLinkDirectories::SetLinkInformation(cmTarget& target,
-                                                cmTarget::LinkLibraryType 
-                                                linktype,
-                                                const char* targetLibrary)
+void cmOrderLinkDirectories::SetLinkInformation(
+  const char* targetName,
+  const std::vector<std::string>& linkLibraries,
+  const std::vector<std::string>& linkDirectories
+  )
 {
-  m_TargetName = target.GetName();
-    // collect the search paths from the target into paths set
-  const std::vector<std::string>& searchPaths = target.GetLinkDirectories();
+  // Save the target name.
+  m_TargetName = targetName;
+
+  // Merge the link directory search path given into our path set.
   std::vector<cmStdString> empty;
-  for(std::vector<std::string>::const_iterator p = searchPaths.begin();
-      p != searchPaths.end(); ++p)
+  for(std::vector<std::string>::const_iterator p = linkDirectories.begin();
+      p != linkDirectories.end(); ++p)
     {
     m_DirectoryToAfterList[*p] = empty;
     m_LinkPathSet.insert(*p);
     }
-  // collect the link items from the target and put it into libs
-  const cmTarget::LinkLibraries& tlibs = target.GetLinkLibraries();
-  std::vector<cmStdString>  libs;
-  for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
-      lib != tlibs.end(); ++lib)
+
+  // Append the link library list into our raw list.
+  for(std::vector<std::string>::const_iterator l = linkLibraries.begin();
+      l != linkLibraries.end(); ++l)
     {
-    // skip zero size library entries, this may happen
-    // if a variable expands to nothing.
-    if (lib->first.size() == 0)
-      {
-      continue;
-      }
-    // Don't link the library against itself!
-    if(targetLibrary && (lib->first == targetLibrary) && 
-       target.GetType() != cmTarget::EXECUTABLE)
-      {
-      continue;
-      }  
-    // use the correct lib for the current configuration
-    if (lib->second == cmTarget::DEBUG && linktype != cmTarget::DEBUG)
-      {
-      continue;
-      }
-    if (lib->second == cmTarget::OPTIMIZED && 
-        (linktype != cmTarget::OPTIMIZED && linktype != cmTarget::GENERAL))
-      {
-      continue;
-      }
-    m_RawLinkItems.push_back(lib->first);
+    m_RawLinkItems.push_back(*l);
     }
 }
 

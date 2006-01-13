@@ -264,10 +264,7 @@ cmGlobalVisualStudio71Generator
       if(j->first != dspname)
         {
         // is the library part of this SLN ? If so add dependency
-        std::string libPath = j->first + "_CMAKE_PATH";
-        const char* cacheValue
-          = m_CMakeInstance->GetCacheDefinition(libPath.c_str());
-        if(cacheValue && *cacheValue)
+        if(this->FindTarget(m_CurrentProject.c_str(), j->first.c_str()))
           {
           fout << "\t\t{" << this->GetGUID(j->first.c_str()) << "} = {"
                << this->GetGUID(j->first.c_str()) << "}\n";

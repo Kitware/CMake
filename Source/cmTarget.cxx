@@ -24,6 +24,13 @@
 #include <queue>
 #include <stdlib.h> // required for atof
 
+//----------------------------------------------------------------------------
+cmTarget::cmTarget()
+{
+  m_Makefile = 0;
+  m_LinkLibrariesAnalyzed = false;
+  m_LinkDirectoriesComputed = false;
+}
 
 void cmTarget::SetType(TargetType type, const char* name)
 {
@@ -171,9 +178,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
           dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
           }
         // watch for target dependencies,
-        std::string libPath = dep + "_CMAKE_PATH";
-        const char* cacheValue = makefile->GetDefinition(libPath.c_str());
-        if (cacheValue && *cacheValue)
+        if(m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->FindTarget(0, dep.c_str()))
           {
           // add the depend as a utility on the target
           this->AddUtility(dep.c_str());
@@ -271,14 +276,71 @@ void cmTarget::MergeLinkLibraries( cmMakefile& mf,
   m_PrevLinkedLibraries = libs;
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::AddLinkDirectory(const char* d)
 {
   // Make sure we don't add unnecessary search directories.
-  if( std::find( m_LinkDirectories.begin(), m_LinkDirectories.end(), d )
-      == m_LinkDirectories.end() )
-    m_LinkDirectories.push_back( d );
+  if(std::find(m_ExplicitLinkDirectories.begin(),
+               m_ExplicitLinkDirectories.end(), d)
+     == m_ExplicitLinkDirectories.end() )
+    {
+    m_ExplicitLinkDirectories.push_back( d );
+    m_LinkDirectoriesComputed = false;
+    }
 }
 
+//----------------------------------------------------------------------------
+const std::vector<std::string>& cmTarget::GetLinkDirectories()
+{
+  // Make sure all library dependencies have been analyzed.
+  if(!m_LinkLibrariesAnalyzed && !m_LinkLibraries.empty())
+    {
+    cmSystemTools::Error(
+      "cmTarget::GetLinkDirectories called before cmTarget::AnalyzeLibDependencies on target ",
+      m_Name.c_str());
+    }
+
+  // Make sure the complete set of link directories has been computed.
+  if(!m_LinkDirectoriesComputed)
+    {
+    // Compute the full set of link directories including the
+    // locations of targets that have been linked in.  Start with the
+    // link directories given explicitly.
+    m_LinkDirectories = m_ExplicitLinkDirectories;
+    for(LinkLibraries::iterator ll = m_LinkLibraries.begin();
+        ll != m_LinkLibraries.end(); ++ll)
+      {
+      // If this library is a CMake target then add its location as a
+      // link directory.
+      std::string lib = ll->first;
+      cmTarget* tgt = 0;
+      if(m_Makefile && m_Makefile->GetLocalGenerator() &&
+         m_Makefile->GetLocalGenerator()->GetGlobalGenerator())
+        {
+        tgt = (m_Makefile->GetLocalGenerator()->GetGlobalGenerator()
+               ->FindTarget(0, lib.c_str()));
+        }
+      if(tgt)
+        {
+        // Add the directory only if it is not already present.  This
+        // is an N^2 algorithm for adding the directories, but N
+        // should not get very big.
+        const char* libpath = tgt->GetDirectory();
+        if(std::find(m_LinkDirectories.begin(), m_LinkDirectories.end(),
+                     libpath) == m_LinkDirectories.end())
+          {
+          m_LinkDirectories.push_back(libpath);
+          }
+        }
+      }
+
+    // The complete set of link directories has now been computed.
+    m_LinkDirectoriesComputed = true;
+    }
+
+  // Return the complete set of link directories.
+  return m_LinkDirectories;
+}
 
 void cmTarget::ClearDependencyInformation( cmMakefile& mf, const char* target )
 {
@@ -498,11 +560,6 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // The dependency map.
   DependencyMap dep_map;
 
-  // If LIBRARY_OUTPUT_PATH is not set, then we must add search paths
-  // for all the new libraries added by the dependency analysis.
-  const char* libOutPath = mf.GetDefinition("LIBRARY_OUTPUT_PATH");
-  bool addLibDirs = (libOutPath==0 || strcmp(libOutPath,"")==0);
-
   // 1. Build the dependency graph
   //
   for(LinkLibraries::reverse_iterator lib = m_LinkLibraries.rbegin();
@@ -541,30 +598,11 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
       }
     }
 
-
   // 4. Add the new libraries to the link line.
   //
   for( std::vector<std::string>::reverse_iterator k = newLinkLibraries.rbegin();
        k != newLinkLibraries.rend(); ++k )
     {
-    if( addLibDirs )
-      {
-      // who the hell knows what this is, I think that K contains the
-      // name of a library but ... Ken
-      // k contains the same stuff that are on the LINK_LIBRARIES
-      // commands. Normally, they would just be library names. -- Amitha.
-      std::string libPathStr = *k + "_CMAKE_PATH";
-      const char* libpath = mf.GetDefinition( libPathStr.c_str() );
-      if( libpath )
-        {
-        // Don't add a link directory that is already present.
-        if(std::find(m_LinkDirectories.begin(),
-                     m_LinkDirectories.end(), libpath) == m_LinkDirectories.end())
-          {
-          m_LinkDirectories.push_back(libpath);
-          }
-        }
-      }
     std::string linkType = *k;
     linkType += "_LINK_TYPE";
     cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
@@ -582,6 +620,7 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
       }
     m_LinkLibraries.push_back( std::make_pair(*k,llt) );
     }
+  m_LinkLibrariesAnalyzed = true;
 }
 
 
@@ -722,6 +761,45 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     value = "NOTFOUND";
     }
   m_Properties[prop] = value;
+}
+
+const char* cmTarget::GetDirectory()
+{
+  switch( this->GetType() )
+    {
+    case cmTarget::STATIC_LIBRARY:
+    case cmTarget::MODULE_LIBRARY:
+    case cmTarget::SHARED_LIBRARY:
+      m_Directory = m_Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
+      break;
+    case cmTarget::EXECUTABLE:
+      m_Directory = m_Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+      break;
+    default:
+      return 0;
+    }
+  if(m_Directory.empty())
+    {
+    m_Directory = m_Makefile->GetStartOutputDirectory();
+    }
+  return m_Directory.c_str();
+}
+
+const char* cmTarget::GetLocation(const char* config)
+{
+  m_Location = this->GetDirectory();
+  if(!m_Location.empty())
+    {
+    m_Location += "/";
+    }
+  const char* cfgid = m_Makefile->GetDefinition("CMAKE_CFG_INTDIR");
+  if(cfgid && strcmp(cfgid, ".") != 0)
+    {
+    m_Location += cfgid;
+    m_Location += "/";
+    }
+  m_Location += this->GetFullName(config);
+  return m_Location.c_str();
 }
 
 void cmTarget::UpdateLocation()
@@ -908,12 +986,12 @@ const char* cmTarget::GetCreateRuleVariable()
   return "";
 }
 
-const char* cmTarget::GetSuffixVariable() 
+const char* cmTarget::GetSuffixVariable()
 {
   return this->GetSuffixVariableInternal(this->GetType());
 }
 
-const char* cmTarget::GetSuffixVariableInternal(TargetType type) 
+const char* cmTarget::GetSuffixVariableInternal(TargetType type)
 {
   switch(type)
     {
@@ -958,15 +1036,81 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type)
   return "";
 }
 
-std::string cmTarget::GetFullName()
+//----------------------------------------------------------------------------
+std::string cmTarget::GetFullName(const char* config)
 {
-  return this->GetFullNameInternal(this->GetType());
+  return this->GetFullNameInternal(this->GetType(), config);
 }
 
-std::string cmTarget::GetFullNameInternal(TargetType type)
+//----------------------------------------------------------------------------
+void cmTarget::GetFullName(std::string& prefix, std::string& base,
+                           std::string& suffix, const char* config)
 {
+  this->GetFullNameInternal(this->GetType(), config, prefix, base, suffix);
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetFullPath(const char* config)
+{
+  // Start with the output directory for the target.
+  std::string fpath = this->GetDirectory();
+  fpath += "/";
+
+  // Add the configuration's subdirectory.  This may need to be replaced with
+  // a call into the generator found through m_Makefile so that each
+  // generator can map configuration names to output directories its own way.
+  if(config)
+    {
+    fpath += config;
+    fpath += "/";
+    }
+
+  // Add the full name of the target.
+  fpath += this->GetFullName(config);
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetFullNameInternal(TargetType type, const char* config)
+{
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->GetFullNameInternal(type, config, prefix, base, suffix);
+  return prefix+base+suffix;
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetFullNameInternal(TargetType type,
+                                   const char* config,
+                                   std::string& outPrefix,
+                                   std::string& outBase,
+                                   std::string& outSuffix)
+{
+  // Use just the target name for non-main target types.
+  if(type != cmTarget::STATIC_LIBRARY &&
+     type != cmTarget::SHARED_LIBRARY &&
+     type != cmTarget::MODULE_LIBRARY &&
+     type != cmTarget::EXECUTABLE)
+    {
+    outPrefix = "";
+    outBase = this->GetName();
+    outSuffix = "";
+    return;
+    }
+
+  // Compute the full name for main target types.
   const char* targetPrefix = this->GetProperty("PREFIX");
   const char* targetSuffix = this->GetProperty("SUFFIX");
+  const char* configPostfix = 0;
+  if(config && *config && type != cmTarget::EXECUTABLE)
+    {
+    std::string configVar = "CMAKE_";
+    configVar += config;
+    configVar += "_POSTFIX";
+    configVar = cmSystemTools::UpperCase(configVar);
+    configPostfix = m_Makefile->GetDefinition(configVar.c_str());
+    }
   const char* prefixVar = this->GetPrefixVariableInternal(type);
   const char* suffixVar = this->GetSuffixVariableInternal(type);
   const char* ll =
@@ -999,91 +1143,48 @@ std::string cmTarget::GetFullNameInternal(TargetType type)
     }
 
   // Begin the final name with the prefix.
-  std::string name = targetPrefix?targetPrefix:"";
+  outPrefix = targetPrefix?targetPrefix:"";
 
   // Append the target name or property-specified name.  Support this
   // only for executable targets.
   const char* outname = this->GetProperty("OUTPUT_NAME");
   if(outname && type == cmTarget::EXECUTABLE)
     {
-    name += outname;
+    outBase = outname;
     }
   else
     {
-    name += this->GetName();
+    outBase = this->GetName();
     }
+
+  // Append the per-configuration postfix.
+  outBase += configPostfix?configPostfix:"";
 
   // Append the suffix.
-  name += targetSuffix?targetSuffix:"";
-
-  // Return the final name.
-  return name;
-}
-
-std::string cmTarget::GetBaseName()
-{
-  return this->GetBaseNameInternal(this->GetType());
-}
-
-std::string
-cmTarget::GetBaseNameInternal(TargetType type) 
-{
-  std::string pathPrefix = "";
-#ifdef __APPLE__
-  if(this->GetPropertyAsBool("MACOSX_BUNDLE"))
-    {
-    pathPrefix = this->GetName();
-    pathPrefix += ".app/Contents/MacOS/";
-    }
-#endif
-  const char* targetPrefix = this->GetProperty("PREFIX");
-  const char* prefixVar = this->GetPrefixVariableInternal(type);
-  // if there is no prefix on the target use the cmake definition
-  if(!targetPrefix && prefixVar)
-    {
-    // first check for a language specific suffix var
-    const char* ll =
-      this->GetLinkerLanguage(
-        m_Makefile->GetLocalGenerator()->GetGlobalGenerator());
-    if(ll)
-      {
-      std::string langPrefix = prefixVar + std::string("_") + ll;
-      targetPrefix = m_Makefile->GetDefinition(langPrefix.c_str());
-      }
-    // if there not a language specific suffix then use the general one
-    if(!targetPrefix)
-      {
-      targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
-      }
-    }
-  std::string name = pathPrefix;
-  name += targetPrefix?targetPrefix:"";
-  name += this->GetName();
-  return name;
+  outSuffix = targetSuffix?targetSuffix:"";
 }
 
 void cmTarget::GetLibraryNames(std::string& name,
                                std::string& soName,
                                std::string& realName,
-                               std::string& baseName) 
+                               const char* config)
 {
   // Get the names based on the real type of the library.
-  this->GetLibraryNamesInternal(name, soName, realName, this->GetType());
-
-  // The library name without extension.
-  baseName = this->GetBaseName();
+  this->GetLibraryNamesInternal(name, soName, realName, this->GetType(),
+                                config);
 }
 
 void cmTarget::GetLibraryCleanNames(std::string& staticName,
                                     std::string& sharedName,
                                     std::string& sharedSOName,
-                                    std::string& sharedRealName) 
+                                    std::string& sharedRealName,
+                                    const char* config)
 {
   // Get the name as if this were a static library.
   std::string soName;
   std::string realName;
   this->GetLibraryNamesInternal(staticName, soName, realName,
-                                cmTarget::STATIC_LIBRARY);
+                                cmTarget::STATIC_LIBRARY, config);
 
   // Get the names as if this were a shared library.
   if(this->GetType() == cmTarget::STATIC_LIBRARY)
@@ -1094,20 +1195,23 @@ void cmTarget::GetLibraryCleanNames(std::string& staticName,
     // type will never be MODULE.  Either way the only names that
     // might have to be cleaned are the shared library names.
     this->GetLibraryNamesInternal(sharedName, sharedSOName,
-                                  sharedRealName, cmTarget::SHARED_LIBRARY);
+                                  sharedRealName, cmTarget::SHARED_LIBRARY,
+                                  config);
     }
   else
     {
     // Use the name of the real type of the library (shared or module).
     this->GetLibraryNamesInternal(sharedName, sharedSOName,
-                                  sharedRealName, this->GetType());
+                                  sharedRealName, this->GetType(),
+                                  config);
     }
 }
 
 void cmTarget::GetLibraryNamesInternal(std::string& name,
                                        std::string& soName,
                                        std::string& realName,
-                                       TargetType type) 
+                                       TargetType type,
+                                       const char* config)
 {
   // Construct the name of the soname flag variable for this language.
   const char* ll =
@@ -1140,7 +1244,7 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
     }
 
   // The library name.
-  name = this->GetFullNameInternal(type);
+  name = this->GetFullNameInternal(type, config);
 
   // The library's soname.
   soName = name;
@@ -1165,22 +1269,26 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
 }
 
 void cmTarget::GetExecutableNames(std::string& name,
-                                  std::string& realName)
+                                  std::string& realName,
+                                  const char* config)
 {
   // Get the names based on the real type of the executable.
-  this->GetExecutableNamesInternal(name, realName, this->GetType());
+  this->GetExecutableNamesInternal(name, realName, this->GetType(), config);
 }
 
 void cmTarget::GetExecutableCleanNames(std::string& name,
-                                       std::string& realName)
+                                       std::string& realName,
+                                       const char* config)
 {
   // Get the name and versioned name of this executable.
-  this->GetExecutableNamesInternal(name, realName, cmTarget::EXECUTABLE);
+  this->GetExecutableNamesInternal(name, realName, cmTarget::EXECUTABLE,
+                                   config);
 }
 
 void cmTarget::GetExecutableNamesInternal(std::string& name,
                                           std::string& realName,
-                                          TargetType type)
+                                          TargetType type,
+                                          const char* config)
 {
   // This versioning is supported only for executables and then only
   // when the platform supports symbolic links.
@@ -1196,7 +1304,7 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
 #endif
 
   // The executable name.
-  name = this->GetFullNameInternal(type);
+  name = this->GetFullNameInternal(type, config);
 
   // The executable's real name on disk.
   realName = name;

@@ -92,6 +92,10 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
   // clear project names
   m_CreatedProjectNames.clear();
 
+#if 1
+  // TODO: This block should be moved to a central location for all
+  // generators.  It is duplicated in every generator.
+
   // Call TraceVSDependencies on all targets
   cmTargets &tgts = m_Makefile->GetTargets(); 
   for(cmTargets::iterator l = tgts.begin(); 
@@ -168,6 +172,7 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
         }
       }
     }
+#endif
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
@@ -446,12 +451,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   
   std::string programDatabase;
   const char* pre = "WIN32,_DEBUG,_WINDOWS";
-  std::string debugPostfix = "";
-  bool debug = !strcmp(configName,"Debug");
-  if (debug && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX"))
-    {
-    debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
-    }  
   // fill the flagMap for Debug, Release, MinSizeRel, and RelWithDebInfo
   // also set the flags, and pre-defined macros
   if(strcmp(configName, "Debug") == 0)
@@ -462,7 +461,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     flags += flagsDebug;
     pre = "WIN32,_DEBUG,_WINDOWS"; 
     std::string libpath = m_LibraryOutputPath + 
-      "$(OutDir)/" + libName + debugPostfix + ".pdb";
+      "$(OutDir)/" + libName + ".pdb";
     programDatabase = "\t\t\t\tProgramDatabaseFileName=\"";
     programDatabase += libpath;
     programDatabase += "\"";
@@ -492,7 +491,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     pre = "WIN32,_WINDOWS";
     flags += flagsDebugRel;
     std::string libpath = m_LibraryOutputPath + 
-      "$(OutDir)/" + libName + debugPostfix + ".pdb";
+      "$(OutDir)/" + libName + ".pdb";
     programDatabase = "\t\t\t\tProgramDatabaseFileName=\"";
     programDatabase += libpath;
     programDatabase += "\"";
@@ -665,15 +664,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                                                     const char* configName,
                                                     const char *libName,
                                                     cmTarget &target)
-{ 
+{
+  std::string targetFullName = target.GetFullName(configName);
   std::string temp;
-  std::string debugPostfix = "";
-  bool debug = !strcmp(configName,"Debug");
-  if (debug && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX"))
-    {
-    debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
-    }  
-  
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
@@ -704,8 +697,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     {
     case cmTarget::STATIC_LIBRARY:
     {
-    std::string libpath = m_LibraryOutputPath + 
-      "$(OutDir)/" + libName + debugPostfix + ".lib";
+    std::string libpath = m_LibraryOutputPath +
+      "$(OutDir)/" + targetFullName;
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"VCLibrarianTool\"\n";
     if(const char* libflags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
@@ -719,6 +712,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
     {
+    // Compute the link library and directory information.
+    std::vector<cmStdString> linkLibs;
+    std::vector<cmStdString> linkDirs;
+    this->ComputeLinkInformation(target, configName, linkLibs, linkDirs);
+
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"VCLinkerTool\"\n"
          << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
@@ -729,14 +727,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     fout << "\"\n"
          << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
-    this->OutputLibraries(fout, configName, libName, target);
+    this->OutputLibraries(fout, linkLibs);
     fout << "\"\n";
     temp = m_LibraryOutputPath;
     temp += configName;
     temp += "/";
-    temp += libName;
-    temp += debugPostfix;
-    temp += ".dll";
+    temp += targetFullName;
     fout << "\t\t\t\tOutputFile=\"" 
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
     for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
@@ -745,13 +741,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t\t" << i->first << "=\"" << i->second << "\"\n";
       }
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
-    this->OutputLibraryDirectories(fout, configName, libName, target);
+    this->OutputLibraryDirectories(fout, linkDirs);
     fout << "\"\n";
     this->OutputModuleDefinitionFile(fout, target);
     temp = m_LibraryOutputPath;
     temp += "$(OutDir)/";
     temp += libName;
-    temp += debugPostfix;
     temp += ".pdb";
     fout << "\t\t\t\tProgramDatabaseFile=\"" << 
       this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
@@ -778,15 +773,18 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp = m_LibraryOutputPath;
     temp += configName;
     temp += "/";
-    temp += libName;
-    temp += debugPostfix;
+    temp += cmSystemTools::GetFilenameWithoutLastExtension(targetFullName.c_str());
     temp += ".lib";
     fout << "\t\t\t\tImportLibrary=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
     }
     break;
     case cmTarget::EXECUTABLE:
     {
-    
+    // Compute the link library and directory information.
+    std::vector<cmStdString> linkLibs;
+    std::vector<cmStdString> linkDirs;
+    this->ComputeLinkInformation(target, configName, linkLibs, linkDirs);
+
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"VCLinkerTool\"\n"
          << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386"; 
@@ -799,23 +797,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
          << "\t\t\t\tAdditionalDependencies=\""
          << m_Makefile->GetRequiredDefinition("CMAKE_STANDARD_LIBRARIES") 
          << " ";
-    this->OutputLibraries(fout, configName, libName, target);
+    this->OutputLibraries(fout, linkLibs);
     fout << "\"\n";
     temp = m_ExecutableOutputPath;
     temp += configName;
     temp += "/";
-
-    // do we have a different executable name?
-    if (target.GetProperty("OUTPUT_NAME"))
-      {
-      temp += target.GetProperty("OUTPUT_NAME");
-      }
-    else
-      {
-      temp += libName;
-      }      
-          
-    temp += ".exe";
+    temp += targetFullName;
     fout << "\t\t\t\tOutputFile=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
     for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
         i != flagMap.end(); ++i)
@@ -823,7 +810,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t\t" << i->first << "=\"" << i->second << "\"\n";
       }
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
-    this->OutputLibraryDirectories(fout, configName, libName, target);
+    this->OutputLibraryDirectories(fout, linkDirs);
     fout << "\"\n";
     fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath 
          << "$(OutDir)\\" << libName << ".pdb\"\n";
@@ -881,108 +868,45 @@ void cmLocalVisualStudio7Generator::OutputModuleDefinitionFile(std::ostream& fou
   
 }
 
-void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
-                                                             const char*,
-                                                             const char*,
-                                                             cmTarget &tgt)
-{ 
-  bool hasone = false;
-  if(m_LibraryOutputPath.size())
-    {
-    hasone = true;
-    std::string temp = m_LibraryOutputPath;
-    temp += "$(OutDir)";
-    
-    fout << this->ConvertToXMLOutputPath(temp.c_str()) << "," << 
-      this->ConvertToXMLOutputPath(m_LibraryOutputPath.c_str());
-    }
-  if(m_ExecutableOutputPath.size() && 
-     (m_LibraryOutputPath != m_ExecutableOutputPath))
-    {
-    if (hasone)
-      {
-      fout << ",";
-      }
-    hasone = true;
-    std::string temp = m_ExecutableOutputPath;
-    temp += "$(OutDir)"; 
-    fout << this->ConvertToXMLOutputPath(temp.c_str()) << "," << 
-      this->ConvertToXMLOutputPath(m_ExecutableOutputPath.c_str());
-    }
-    
-  std::set<std::string> pathEmitted;
-  std::vector<std::string>::const_iterator i;
-  const std::vector<std::string>& libdirs = tgt.GetLinkDirectories();
-  for(i = libdirs.begin(); i != libdirs.end(); ++i)
-    {
-    std::string lpath = *i;
-    if(lpath[lpath.size()-1] != '/')
-      {
-      lpath += "/";
-      }
-    if(pathEmitted.insert(lpath).second)
-      {
-      if(hasone)
-        {
-        fout << ",";
-        }
-      std::string lpathi = lpath + "$(OutDir)";
-      fout << this->ConvertToXMLOutputPath(lpathi.c_str()) << "," << 
-        this->ConvertToXMLOutputPath(lpath.c_str());
-      hasone = true;
-      }
-    }
-}
-
-void cmLocalVisualStudio7Generator::OutputLibraries(std::ostream& fout,
-                                                    const char* configName,
-                                                    const char* libName,
-                                                    cmTarget &target)
+//----------------------------------------------------------------------------
+void
+cmLocalVisualStudio7Generator
+::OutputLibraries(std::ostream& fout,
+                  std::vector<cmStdString> const& libs)
 {
-  const cmTarget::LinkLibraries& libs = target.GetLinkLibraries();
-  cmTarget::LinkLibraries::const_iterator j;
-  for(j = libs.begin(); j != libs.end(); ++j)
-    { 
-    if(j->first != libName)
+  for(std::vector<cmStdString>::const_iterator l = libs.begin();
+      l != libs.end(); ++l)
+    {
+    fout << this->ConvertToXMLOutputPath(l->c_str()) << " ";
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalVisualStudio7Generator
+::OutputLibraryDirectories(std::ostream& fout,
+                           std::vector<cmStdString> const& dirs)
+{
+  const char* comma = "";
+  for(std::vector<cmStdString>::const_iterator d = dirs.begin();
+      d != dirs.end(); ++d)
+    {
+    std::string dir = *d;
+    if(!dir.empty())
       {
-      std::string lib = j->first;
-      std::string debugPostfix = "";
-      // if this is a library we are building then watch for a debugPostfix
-      if (!strcmp(configName,"Debug"))
+      if(dir[dir.size()-1] != '/')
         {
-        std::string libPath = j->first + "_CMAKE_PATH";
-        const char* cacheValue
-          = m_GlobalGenerator->GetCMakeInstance()->GetCacheDefinition(libPath.c_str());
-        if(cacheValue && *cacheValue && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX"))
-          {
-          debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
-          }
-        } 
-      // chop off the last 4 chars of the library string 
-      
-      std::string lowerCaseLibExt = j->first;
-      if(lowerCaseLibExt.size() > 4)
-        {
-        lowerCaseLibExt = j->first.substr(j->first.size()-4, 4);
+        dir += "/";
         }
-      // lower case the extension        
-      lowerCaseLibExt = cmSystemTools::LowerCase(lowerCaseLibExt);
-      // now check to see if it was a .lib, if not then add a .lib
-      if(lowerCaseLibExt != ".lib")
-        {
-        lib += debugPostfix + ".lib";
-        }
-      lib = this->ConvertToXMLOutputPath(lib.c_str());
-      if (j->second == cmTarget::GENERAL
-          || (j->second == cmTarget::DEBUG && strcmp(configName, "Debug") == 0)
-          || (j->second == cmTarget::OPTIMIZED && strcmp(configName, "Debug") != 0))
-        {
-        fout << lib << " ";
-        }
+      dir += "$(OutDir)";
+      fout << comma << this->ConvertToXMLOutputPath(dir.c_str())
+           << "," << this->ConvertToXMLOutputPath(d->c_str());
+      comma = ",";
       }
     }
 }
 
+//----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator::OutputDefineFlags(const char* flags,
                                                       std::ostream& fout)
 {
@@ -1250,42 +1174,11 @@ WriteCustomRule(std::ostream& fout,
     std::string temp;
     for(std::vector<std::string>::const_iterator d = depends.begin();
         d != depends.end(); ++d)
-      {  
-      std::string dep = cmSystemTools::GetFilenameName(*d);
-      if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
-        {
-        dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
-        }
-      // check to see if the dependency is another target built by cmake
-      std::string libPath = dep + "_CMAKE_PATH";
-      const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-      if (cacheValue && *cacheValue)
-        { 
-        std::string exePath = "";
-        if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
-          {
-          exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-          }
-        if(exePath.size())
-          {
-          libPath = exePath;
-          }
-        else
-          {
-          libPath = cacheValue;
-          }
-        libPath += "/";
-        libPath += "$(OutDir)/";
-        libPath += dep;
-        libPath += ".exe";
-        fout << this->ConvertToXMLOutputPath(libPath.c_str())
-             << ";";
-        }
-      else
-        {
-        fout << this->ConvertToXMLOutputPath(d->c_str())
-             << ";";
-        }
+      {
+      // Lookup the real name of the dependency in case it is a CMake target.
+      std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
+      fout << this->ConvertToXMLOutputPath(dep.c_str())
+           << ";";
       }
     fout << "\"\n";
     fout << "\t\t\t\t\tOutputs=\"";
