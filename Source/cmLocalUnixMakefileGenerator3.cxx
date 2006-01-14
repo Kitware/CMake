@@ -2270,6 +2270,7 @@ cmLocalUnixMakefileGenerator3
 ::AppendTargetDepends(std::vector<std::string>& depends,
                       cmTarget& target)
 {
+  // Static libraries never depend on anything for linking.
   if(target.GetType() == cmTarget::STATIC_LIBRARY)
     {
     return;
@@ -2289,47 +2290,16 @@ cmLocalUnixMakefileGenerator3
     // Don't emit the same library twice for this target.
     if(emitted.insert(lib->first).second)
       {
-      // Add this dependency.
-      this->AppendAnyDepend(depends, lib->first.c_str());
+      // Depend only on other CMake targets.
+      if(cmTarget* tgt = m_GlobalGenerator->FindTarget(0, lib->first.c_str()))
+        {
+        if(const char* location =
+           tgt->GetLocation(m_ConfigurationName.c_str()))
+          {
+          depends.push_back(location);
+          }
+        }
       }
-    }
-}
-
-//----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator3
-::AppendAnyDepend(std::vector<std::string>& depends, const char* name)
-{
-  // There are a few cases for the name of the target:
-  //  - CMake target.
-  //  - Full path to a file: depend on it.
-  //  - Other format (like -lm): no file on which to depend, do nothing.
-
-  // Lookup the real name of the dependency in case it is a CMake target.
-  bool local;
-  std::string dep = this->GetRealDependency(name,
-                                            m_ConfigurationName.c_str(),
-                                            &local);
-  if(dep == name)
-    {
-    if(local)
-      {
-      // The dependency is on a CMake utility target in the current
-      // makefile.  Just depend on it directly.
-      depends.push_back(name);
-      }
-    else if(cmSystemTools::FileIsFullPath(name))
-      {
-      // This is a path to a file.  Just trust the listfile author
-      // that it will be present or there is a rule to build it.
-      depends.push_back(cmSystemTools::CollapseFullPath(name));
-      }
-    }
-  else
-    {
-    // The dependency is on a CMake target and has been transformed to
-    // the target's location on disk.
-    depends.push_back(dep);
     }
 }
 
@@ -2370,8 +2340,10 @@ cmLocalUnixMakefileGenerator3
   for(std::vector<std::string>::const_iterator d = cc.GetDepends().begin();
       d != cc.GetDepends().end(); ++d)
     {
-    // Add this dependency.
-    this->AppendAnyDepend(depends, d->c_str());
+    // Lookup the real name of the dependency in case it is a CMake target.
+    std::string dep = this->GetRealDependency(d->c_str(),
+                                              m_ConfigurationName.c_str());
+    depends.push_back(dep);
     }
 }
 

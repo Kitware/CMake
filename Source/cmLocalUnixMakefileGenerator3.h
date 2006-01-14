@@ -327,7 +327,6 @@ protected:
   const char* GetSourceFileLanguage(const cmSourceFile& source);
   std::string ConvertToQuotedOutputPath(const char* p);
 
-  void AppendAnyDepend(std::vector<std::string>& depends, const char* name);
   void AppendRuleDepend(std::vector<std::string>& depends,
                         const char* ruleFileName);
   void AppendCustomDepends(std::vector<std::string>& depends,

@@ -137,12 +137,12 @@ public:
   /** Translate a dependency as given in CMake code to the name to
       appear in a generated build file.  If the given name is that of
       a CMake target it will be transformed to the real output
-      location of that target for the given configuration.  Otherwise
-      the original name will be returned.  If the local argument is
-      given it is set to indicate whethr the name is of a utility
-      target available in the same makefile.  */
-  std::string GetRealDependency(const char* name, const char* config,
-                                bool* local=0);
+      location of that target for the given configuration.  If the
+      given name is the full path to a file it will be returned.
+      Otherwise the name is treated as a relative path with respect to
+      the source directory of this generator.  This should only be
+      used for dependencies of custom commands.  */
+  std::string GetRealDependency(const char* name, const char* config);
 
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char* p);

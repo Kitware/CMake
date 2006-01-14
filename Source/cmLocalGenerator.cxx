@@ -1620,8 +1620,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::GetRealDependency(const char* inName,
-                                                const char* config,
-                                                bool* inLocal)
+                                                const char* config)
 {
   // Older CMake code may specify the dependency using the target
   // output file rather than the target name.  Such code would have
@@ -1634,22 +1633,8 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
     name = cmSystemTools::GetFilenameWithoutLastExtension(name);
     }
 
-  // Look for a CMake target in the current makefile.
-  cmTarget* target = m_Makefile->FindTarget(name.c_str());
-
-  // If no target was found in the current makefile search globally.
-  bool local = target?true:false;
-  if(inLocal)
-    {
-    *inLocal = local;
-    }
-  if(!local)
-    {
-    target = m_GlobalGenerator->FindTarget(0, name.c_str());
-    }
-
-  // If a target was found then get its real location.
-  if(target)
+  // Look for a CMake target with the given name.
+  if(cmTarget* target = m_GlobalGenerator->FindTarget(0, name.c_str()))
     {
     switch (target->GetType())
       {
@@ -1666,15 +1651,30 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
         }
         break;
       case cmTarget::UTILITY:
+        // Depending on a utility target may not work but just trust
+        // the user to have given a valid name.
+        return inName;
       case cmTarget::INSTALL_FILES:
       case cmTarget::INSTALL_PROGRAMS:
         break;
       }
     }
 
-  // The name was not that of a CMake target.  The dependency should
-  // use the name as given.
-  return inName;
+  // The name was not that of a CMake target.  It must name a file.
+  if(cmSystemTools::FileIsFullPath(inName))
+    {
+    // This is a full path.  Return it as given.
+    return inName;
+    }
+  else
+    {
+    // Treat the name as relative to the source directory in which it
+    // was given.
+    name = m_Makefile->GetCurrentDirectory();
+    name += "/";
+    name += inName;
+    return name;
+    }
 }
 
 //----------------------------------------------------------------------------
