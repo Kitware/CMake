@@ -2116,14 +2116,14 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
 #if 1
   // TODO: This block should be moved to a central location for all
   // generators.  It is duplicated in every generator.
-  for(std::vector<cmLocalGenerator*>::iterator i = generators.begin();
-      i != generators.end(); ++i)
+  for(std::vector<cmLocalGenerator*>::iterator g = generators.begin();
+      g != generators.end(); ++g)
     {
-    if(this->IsExcluded(root, *i))
+    if(this->IsExcluded(root, *g))
       {
       continue;
       }
-    cmMakefile* mf = (*i)->GetMakefile();
+    cmMakefile* mf = (*g)->GetMakefile();
     std::vector<cmSourceGroup> sourceGroups = mf->GetSourceGroups();
     cmTargets &tgts = mf->GetTargets();
   // Call TraceVSDependencies on all targets
