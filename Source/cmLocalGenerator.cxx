@@ -1307,17 +1307,6 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   std::vector<std::string> runtimeDirs;
 
   const char* config = m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  std::string buildType = config?config:"";
-  buildType = cmSystemTools::UpperCase(buildType);
-  cmTarget::LinkLibraryType cmakeBuildType = cmTarget::GENERAL;
-  if(buildType == "DEBUG")
-    {
-    cmakeBuildType = cmTarget::DEBUG;
-    }
-  else if(buildType.size())
-    {
-    cmakeBuildType = cmTarget::OPTIMIZED;
-    }
   const char* linkLanguage = tgt.GetLinkerLanguage(this->GetGlobalGenerator());
   if(!linkLanguage)
     {

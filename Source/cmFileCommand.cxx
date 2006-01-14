@@ -291,16 +291,10 @@ bool cmFileCommand::HandleInstallCommand(
   const char* destdir = cmSystemTools::GetEnv("DESTDIR");
 
   std::string extra_dir = "";
-  int debug = 0;
   if ( build_type )
     {
     extra_dir = build_type;
     std::string btype = cmSystemTools::LowerCase(build_type);
-    if ( m_Makefile->GetDefinition("WIN32")
-         && strncmp(btype.c_str(), "debug", strlen("debug")) == 0 )
-      {
-      debug = 1;
-      }
     }
 
   std::vector<std::string> files;
