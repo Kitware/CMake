@@ -16,7 +16,10 @@
 # include <libgen.h>
 #endif
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
+  
 #if defined(NEED_BASENAME) && !defined(HAVE_BASENAME)
 
 # ifdef basename
@@ -324,3 +327,6 @@ char *strsep(register char **, register const char *);
 # endif
 #endif
 
+#ifdef __cplusplus
+}
+#endif
