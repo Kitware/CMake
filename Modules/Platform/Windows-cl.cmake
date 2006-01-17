@@ -174,6 +174,8 @@ ELSE(CMAKE_COMPILER_2005)
     SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MT /Zi /O2")
     SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib advapi32.lib rpcrt4.lib" CACHE STRING
       "Libraries linked by defalut with all applications.")
+    SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib advapi32.lib rpcrt4.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib" CACHE STRING
+      "Libraries linked by defalut with all applications.")
   ELSE(CMAKE_USING_VC_FREE_TOOLS)
     SET(CMAKE_BUILD_TYPE_INIT Debug)
     SET (CMAKE_CXX_FLAGS_INIT "/W3 /Zm1000 /GX /GR")
