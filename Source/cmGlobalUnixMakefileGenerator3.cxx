@@ -135,6 +135,11 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   // target so that make with no arguments will run it.
   // Just depend on the all target to drive the build.
   std::vector<std::string> depends;
+  const char* sym = lg->GetMakefile()->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
+  if(sym)
+    {
+    depends.push_back(sym);
+    }
   std::vector<std::string> no_commands;
   depends.push_back("all");
 
@@ -146,10 +151,16 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
                     depends,
                     no_commands);
 
+  depends.clear();
+  if(sym)
+    {
+    depends.push_back(sym);
+    }
+    
   // Write and empty all:
   lg->WriteMakeRule(makefileStream, 
                     "The main recursive all target", "all", 
-                    no_commands, no_commands);
+                    depends, no_commands);
 
   lg->WriteMakeVariables(makefileStream);
   
@@ -590,6 +601,7 @@ cmGlobalUnixMakefileGenerator3
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
+    const char* sym = lg->GetMakefile()->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
 
     // for each target Generate the rule files for each target.
     cmTargets& targets = lg->GetMakefile()->GetTargets();
@@ -617,7 +629,11 @@ cmGlobalUnixMakefileGenerator3
           commands.clear();
           commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
                                                       t->second.GetName()));
-          depends.clear();
+          depends.clear(); 
+          if(sym)
+            {
+            depends.push_back(sym);
+            }
           depends.push_back("cmake_check_build_system");
           lg->WriteMakeRule(ruleFileStream, 
                             "Build rule for target.",
@@ -695,6 +711,11 @@ cmGlobalUnixMakefileGenerator3
       // Write the rule.
       localName += "/all";
       depends.clear();
+      const char* sym = lg->GetMakefile()->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
+      if(sym)
+        {
+        depends.push_back(sym);
+        }
       this->AppendGlobalTargetDepends(depends,t->second);
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName.c_str(), depends, commands);
@@ -714,6 +735,10 @@ cmGlobalUnixMakefileGenerator3
       commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
                                                   localName.c_str()));
       depends.clear();
+      if(sym)
+        {
+        depends.push_back(sym);
+        }
       depends.push_back("cmake_check_build_system");
       localName = lg->GetRelativeTargetDirectory(t->second);
       localName += "/rule";
@@ -733,6 +758,10 @@ cmGlobalUnixMakefileGenerator3
       makeTargetName = localName;
       makeTargetName += "/clean";
       depends.clear();
+      if(sym)
+        {
+        depends.push_back(sym);
+        }
       commands.clear();
       commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
                                                   makeTargetName.c_str()));
@@ -904,6 +933,11 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
          lg->AppendEcho(commands, path.c_str());
         }
       }
+    }
+  const char* sym = lg->GetMakefile()->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
+  if(sym)
+    {
+    no_depends.push_back(sym);
     }
   lg->WriteMakeRule(ruleFileStream, "Help Target",
                     "help:",

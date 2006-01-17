@@ -28,7 +28,7 @@ If you need other commands to do special things then it should still begin with 
 
 You really should also provide backwards compatibility any old settings that were actually in use. Make sure you comment them as deprecated, so that no-one starts using them.
 
-To correctly docuement a module, create a comment block at the top with # comments.  There are three types of comments that can be in the block:
+To correctly document a module, create a comment block at the top with # comments.  There are three types of comments that can be in the block:
 
 1. The brief description of the module, this is done by:
 # - a small description

@@ -1,7 +1,7 @@
+#cmakedefine CHECK_TYPE_SIZE_TYPE @CHECK_TYPE_SIZE_TYPE@
 #ifdef CHECK_TYPE_SIZE_TYPE
 
 @CHECK_TYPE_SIZE_PREINCLUDE@
-
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */

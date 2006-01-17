@@ -74,7 +74,7 @@ const char* Directory::GetFile(unsigned long dindex)
 
 // First microsoft compilers
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__WATCOMC__)
 #include <windows.h>
 #include <io.h>
 #include <ctype.h>

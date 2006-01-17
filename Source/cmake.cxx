@@ -47,6 +47,7 @@
 #  endif
 #  include "cmGlobalBorlandMakefileGenerator.h"
 #  include "cmGlobalNMakeMakefileGenerator.h"
+#  include "cmGlobalWatcomWMakeGenerator.h"
 #  include "cmGlobalMSYSMakefileGenerator.h"
 #  include "cmGlobalMinGWMakefileGenerator.h"
 #  include "cmWin32ProcessExecution.h"
@@ -1606,6 +1607,8 @@ void cmake::AddDefaultGenerators()
     &cmGlobalBorlandMakefileGenerator::New;
   m_Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
     &cmGlobalNMakeMakefileGenerator::New;
+  m_Generators[cmGlobalWatcomWMakeGenerator::GetActualName()] =
+    &cmGlobalWatcomWMakeGenerator::New;
   m_Generators[cmGlobalMSYSMakefileGenerator::GetActualName()] =
     &cmGlobalMSYSMakefileGenerator::New;
   m_Generators[cmGlobalMinGWMakefileGenerator::GetActualName()] =

@@ -35,7 +35,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
-
+#include <string.h>
 namespace KWSYS_NAMESPACE
 {
 #if defined( _WIN32 ) || defined( APPLE ) || defined( __CYGWIN__ )

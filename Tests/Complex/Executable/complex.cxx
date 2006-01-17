@@ -8,19 +8,44 @@
 extern "C" {
 #include "testConly.h"
 }
+#ifndef CMAKE_TEST_DIFFERENT_GENERATOR
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 #include "cmDynamicLoader.h"
 #include "cmSystemTools.h"
 #include "cmOrderLinkDirectories.h"
 #include "cmGeneratedFileStream.h"
+#else
+#include <vector>
+#include <string>
+#include <iostream>
+#include <string.h>
+#endif
+
 
 int cm_passed = 0;
 int cm_failed = 0;
+// ======================================================================
+
+void cmFailed(const char* Message, const char* m2= "", const char* m3 = "")
+{
+  std::cout << "FAILED: " << Message << m2 << m3 << "\n"; 
+  cm_failed++;
+}
+
+// ======================================================================
+
+void cmPassed(const char* Message, const char* m2="")
+{
+  std::cout << "Passed: " << Message << m2 << "\n"; 
+  cm_passed++;
+}
 
 #ifndef CMAKE_IS_REALLY_FUN
 This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
 #endif
+
+#ifndef CMAKE_TEST_DIFFERENT_GENERATOR
 // Here is a stupid function that tries to use std::string methods
 // so that the dec cxx compiler will instantiate the stuff that
 // we are using from the CMakeLib library....
@@ -97,43 +122,6 @@ bool TestLibraryOrder(bool shouldFail)
       }
     }
   return ret;
-}
-
-void ForceStringUse()
-{
-  std::vector<std::string> v;
-  std::vector<std::string> v2;
-  v = v2;
-  std::string cachetest = CACHE_TEST_VAR_INTERNAL;
-  v.push_back(cachetest);
-  v2 = v;
-  std::string x(5,'x');  
-  char buff[5];
-  x.copy(buff, 1, 0);
-  x[0] = 'a';
-  std::string::size_type pos = 0;
-  x.replace(pos, pos, pos, 'x');
-  std::string copy = cachetest;
-  cachetest.find("bar");
-  cachetest.rfind("bar");
-  copy.append(cachetest);
-  copy = cachetest.substr(0, cachetest.size());
-}
-
-// ======================================================================
-
-void cmFailed(const char* Message, const char* m2= "", const char* m3 = "")
-{
-  std::cout << "FAILED: " << Message << m2 << m3 << "\n"; 
-  cm_failed++;
-}
-
-// ======================================================================
-
-void cmPassed(const char* Message, const char* m2="")
-{
-  std::cout << "Passed: " << Message << m2 << "\n"; 
-  cm_passed++;
 }
 
 // ======================================================================
@@ -258,6 +246,30 @@ void TestCMGeneratedFileSTream()
   cmSystemTools::RemoveFile(file2tmp.c_str());
   cmSystemTools::RemoveFile(file3tmp.c_str());
 }
+#endif
+
+void ForceStringUse()
+{
+  std::vector<std::string> v;
+  std::vector<std::string> v2;
+  v = v2;
+  std::string cachetest = CACHE_TEST_VAR_INTERNAL;
+  v.push_back(cachetest);
+  v2 = v;
+  std::string x(5,'x');  
+  char buff[5];
+  x.copy(buff, 1, 0);
+  x[0] = 'a';
+  std::string::size_type pos = 0;
+  x.replace(pos, pos, pos, 'x');
+  std::string copy = cachetest;
+  cachetest.find("bar");
+  cachetest.rfind("bar");
+  copy.append(cachetest);
+  copy = cachetest.substr(0, cachetest.size());
+}
+
+
 // defined in testcflags.c
 extern "C" int TestCFlags(char* m);
 
@@ -273,6 +285,7 @@ int main()
 #endif
   std::string exe = lib;
 
+#ifndef CMAKE_TEST_DIFFERENT_GENERATOR  
   // Test a single character executable to test a: in makefiles
   exe += "A";
   exe += cmSystemTools::GetExecutableExtension();
@@ -351,6 +364,20 @@ int main()
     {
     cmPassed("Call to C sharedFunction from shared library worked.");
     }
+  
+    // ----------------------------------------------------------------------
+  // Test cmSystemTools::UpperCase
+  std::string str = "abc";
+  std::string strupper = "ABC";
+  if(cmSystemTools::UpperCase(str) == strupper)
+    {
+    cmPassed("cmSystemTools::UpperCase is working");
+    }
+  else
+    {
+    cmFailed("cmSystemTools::UpperCase is working");
+    }    
+#endif
   
   if(file1() != 1)
     {
@@ -926,6 +953,7 @@ int main()
     }
 #endif
 
+#ifndef CMAKE_TEST_DIFFERENT_GENERATOR  
   // ----------------------------------------------------------------------
   // Some pre-build/pre-link/post-build custom-commands have been
   // attached to the lib (see Library/).
@@ -955,7 +983,7 @@ int main()
   // only created during a build.
 
   TestAndRemoveFile(BINARY_DIR "/Library/custom_target1.txt");
-
+  
   // ----------------------------------------------------------------------
   // A directory has been created.
 
@@ -971,6 +999,7 @@ int main()
   // only created during a build.
 
   TestAndRemoveFile(BINARY_DIR "/Executable/Temp/complex-required.txt");
+#endif
 
   // ----------------------------------------------------------------------
   // Test FIND_LIBRARY
@@ -1088,19 +1117,6 @@ int main()
     
   
   // ----------------------------------------------------------------------
-  // Test cmSystemTools::UpperCase
-  std::string str = "abc";
-  std::string strupper = "ABC";
-  if(cmSystemTools::UpperCase(str) == strupper)
-    {
-    cmPassed("cmSystemTools::UpperCase is working");
-    }
-  else
-    {
-    cmFailed("cmSystemTools::UpperCase is working");
-    }    
-  
-  // ----------------------------------------------------------------------
   // Test if IF command inside a FOREACH works.
 #if defined(IF_INSIDE_FOREACH_THEN_EXECUTED) && !defined(IF_INSIDE_FOREACH_ELSE_EXECUTED)
   cmPassed("IF inside a FOREACH block works");
@@ -1135,6 +1151,7 @@ int main()
   cmPassed("CMake SET CACHE FORCE");
 #endif
 
+#ifndef CMAKE_TEST_DIFFERENT_GENERATOR
   // first run with shouldFail = true, this will
   // run with A B C as set by the CMakeList.txt file.
   if(!TestLibraryOrder(true))
@@ -1156,9 +1173,9 @@ int main()
     {
     cmFailed("CMake cmOrderLinkDirectories failed.");
     }
-
   // Test the generated file stream.
   TestCMGeneratedFileSTream();
+#endif
   
   // ----------------------------------------------------------------------
   // Summary

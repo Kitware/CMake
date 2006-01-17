@@ -116,6 +116,12 @@ public:
   void SetUnixCD(bool v)  {m_UnixCD = v;}
 
   /**
+   * Set Support Verbose Variable.  If true, then .SILENT will
+   * be not end with :  i.e. .SILENT: or .SILENT
+   */
+  void SetSilentNoColon(bool v)  {m_SilentNoColon = v;}
+
+  /**
    * Set the string used to include one makefile into another default
    * is include.
    */
@@ -365,6 +371,7 @@ private:
   bool m_DefineWindowsNULL;
   bool m_UnixCD;
   bool m_PassMakeflags;
+  bool m_SilentNoColon;
   //==========================================================================
 
   // Flag for whether echo command needs quotes.

@@ -45,6 +45,9 @@ Q190351 and Q150956.
 #include <string.h>  /* strlen, strdup */
 #include <stdio.h>   /* sprintf */
 #include <io.h>      /* _unlink */
+#ifdef __WATCOMC__
+#define _unlink unlink
+#endif
 
 #ifndef _MAX_FNAME
 #define _MAX_FNAME 4096

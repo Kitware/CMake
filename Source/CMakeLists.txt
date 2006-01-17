@@ -175,6 +175,7 @@ IF (WIN32)
     SET(SRCS ${SRCS}
       cmGlobalBorlandMakefileGenerator.cxx
       cmGlobalNMakeMakefileGenerator.cxx
+      cmGlobalWatcomWMakeGenerator.cxx
       cmGlobalMSYSMakefileGenerator.cxx
       cmGlobalMinGWMakefileGenerator.cxx
       cmGlobalVisualStudio6Generator.cxx
@@ -316,6 +317,15 @@ IF (NOT DART_ROOT)
 ENDIF (NOT DART_ROOT)
 
 IF(BUILD_TESTING)
+  SET(CMAKE_TEST_GENERATOR "" CACHE STRING "Generator used when running tests")
+  SET(CMAKE_TEST_MAKEPROGRAM "" CACHE FILEPATH "Generator used when running tests")
+  IF(NOT CMAKE_TEST_GENERATOR)
+    SET(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
+    SET(CMAKE_TEST_MAKEPROGRAM "${MAKEPROGRAM}")
+  ELSE(NOT CMAKE_TEST_GENERATOR)
+    SET(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
+  ENDIF(NOT CMAKE_TEST_GENERATOR)
+
   # This variable is set by cmake, however to
   # test cmake we want to make sure that 
   # the ctest from this cmake is used for testing
@@ -332,8 +342,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/CommandLineTest"
     "${CMake_BINARY_DIR}/Tests/CommandLineTest"
     --build-two-config 
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project CommandLineTest
     --test-command CommandLineTest)
 
@@ -342,8 +352,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/TarTest"
     "${CMake_BINARY_DIR}/Tests/TarTest"
     --build-two-config 
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project TestTar
     --test-command TestTarExec)
 
@@ -352,9 +362,9 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/CustomCommand"
     "${CMake_BINARY_DIR}/Tests/CustomCommand"
     --build-two-config
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project CustomCommand
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustomCommand/bin"
     --test-command CustomCommand
     )
@@ -364,9 +374,9 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/FindPackageTest"
     "${CMake_BINARY_DIR}/Tests/FindPackageTest"
     --build-two-config
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project FindPackageTest
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --test-command FindPackageTest)
 
   ADD_TEST(SystemInformation ${CMAKE_CTEST_COMMAND}
@@ -374,9 +384,9 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/SystemInformation"
     "${CMake_BINARY_DIR}/Tests/SystemInformation"
     --build-two-config
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project DumpInformation
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --test-command DumpInformation)
 
   ADD_TEST(StringFileTest ${CMAKE_CTEST_COMMAND}
@@ -384,9 +394,9 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/StringFileTest"
     "${CMake_BINARY_DIR}/Tests/StringFileTest"
     --build-two-config
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project StringFileTest
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --test-command StringFileTest)
 
   ADD_TEST(MathTest ${CMAKE_CTEST_COMMAND}
@@ -394,18 +404,18 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/MathTest"
     "${CMake_BINARY_DIR}/Tests/MathTest"
     --build-two-config
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project MathTest
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --test-command MathTestExec)
 
   ADD_TEST(TryCompile ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TryCompile"
     "${CMake_BINARY_DIR}/Tests/TryCompile"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project TryCompile
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command TryCompile)
 
@@ -413,9 +423,9 @@ IF(BUILD_TESTING)
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/Simple"
     "${CMake_BINARY_DIR}/Tests/Simple"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project Simple
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command simple)
 
@@ -423,9 +433,9 @@ IF(BUILD_TESTING)
 #    --build-and-test 
 #    "${CMake_SOURCE_DIR}/Tests/SameName"
 #    "${CMake_BINARY_DIR}/Tests/SameName"
-#    --build-generator ${CMAKE_GENERATOR}
+#    --build-generator ${CMAKE_TEST_GENERATOR}
 #    --build-project SameName
-#    --build-makeprogram ${MAKEPROGRAM}
+#    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
 #    --build-two-config
 #    --test-command   
 #    "${CMake_BINARY_DIR}/Tests/SameName/Exe1/mytest2")
@@ -434,9 +444,9 @@ IF(BUILD_TESTING)
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/OutOfSource"
     "${CMake_BINARY_DIR}/Tests/OutOfSource"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project OutOfSource
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command 
     "${CMake_BINARY_DIR}/Tests/OutOfSource/SubDir/OutOfSourceSubdir/simple")
@@ -445,9 +455,9 @@ IF(BUILD_TESTING)
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/PreOrder"
     "${CMake_BINARY_DIR}/Tests/PreOrder"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project PreOrder
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command simple)
 
@@ -455,9 +465,9 @@ IF(BUILD_TESTING)
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/COnly"
     "${CMake_BINARY_DIR}/Tests/COnly"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project conly
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command   conly)
 
@@ -465,9 +475,9 @@ IF(BUILD_TESTING)
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/MacroTest"
     "${CMake_BINARY_DIR}/Tests/MacroTest"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project littleMacroTest 
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command   miniMacroTest)
 
@@ -477,9 +487,9 @@ IF(BUILD_TESTING)
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/SimpleInstall"
     "${CMake_BINARY_DIR}/Tests/SimpleInstall"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project TestSimpleInstall
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --build-options
     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
@@ -488,9 +498,9 @@ IF(BUILD_TESTING)
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/SimpleInstallS2"
     "${CMake_BINARY_DIR}/Tests/SimpleInstallS2"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project TestSimpleInstall
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --build-options
     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
@@ -501,9 +511,9 @@ IF(BUILD_TESTING)
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/X11"
     "${CMake_BINARY_DIR}/Tests/X11"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project UseX11
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command  UseX11)
 
@@ -511,9 +521,9 @@ IF(BUILD_TESTING)
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/LoadCommand"
     "${CMake_BINARY_DIR}/Tests/LoadCommand"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project LoadedCommand
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command  LoadedCommand)
 
@@ -521,9 +531,9 @@ IF(BUILD_TESTING)
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/LoadCommandOneConfig"
     "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project LoadedCommand
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --test-command  LoadedCommand 
     )
 
@@ -538,10 +548,12 @@ IF(BUILD_TESTING)
       "${CMake_SOURCE_DIR}/Tests/Complex"
       "${CMake_BINARY_DIR}/Tests/Complex"
       --build-two-config
-      --build-generator ${CMAKE_GENERATOR}
+      --build-generator ${CMAKE_TEST_GENERATOR}
       --build-project complex
-      --build-makeprogram ${MAKEPROGRAM}
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"  
+      --build-options
+      -DCMAKE_TEST_DIFFERENT_GENERATOR:BOOL=${CMAKE_TEST_DIFFERENT_GENERATOR}
       --test-command complex 
       )
 
@@ -549,9 +561,9 @@ IF(BUILD_TESTING)
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/ComplexOneConfig"
       "${CMake_BINARY_DIR}/Tests/ComplexOneConfig"
-      --build-generator ${CMAKE_GENERATOR}
+      --build-generator ${CMAKE_TEST_GENERATOR}
       --build-project complex
-      --build-makeprogram ${MAKEPROGRAM}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin"
       --test-command complex)
 
@@ -559,9 +571,9 @@ IF(BUILD_TESTING)
 #      --build-and-test
 #      "${CMake_SOURCE_DIR}/Tests/ComplexRelativePaths"
 #      "${CMake_BINARY_DIR}/Tests/ComplexRelativePaths"
-#      --build-generator ${CMAKE_GENERATOR}
+#      --build-generator ${CMAKE_TEST_GENERATOR}
 #      --build-project complex
-#      --build-makeprogram ${MAKEPROGRAM}
+#      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
 #      --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexRelativePaths/bin" 
 #      --build-options -DCMAKE_USE_RELATIVE_PATHS:BOOL=ON
 #      --test-command complex)
@@ -572,9 +584,9 @@ IF(BUILD_TESTING)
     --build-and-test
     "${CMake_SOURCE_DIR}/Example"
     "${CMake_BINARY_DIR}/Example"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project HELLO
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Example/Demo"
     --test-command helloDemo
     )
@@ -584,8 +596,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Tutorial/Step1"
     "${CMake_BINARY_DIR}/Tests/Tutorial/Step1"
     --build-two-config 
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Tutorial
     --test-command Tutorial 25.0)
 
@@ -594,8 +606,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Tutorial/Step2"
     "${CMake_BINARY_DIR}/Tests/Tutorial/Step2"
     --build-two-config 
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Tutorial
     --test-command Tutorial 25.0)
 
@@ -604,8 +616,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Tutorial/Step3"
     "${CMake_BINARY_DIR}/Tests/Tutorial/Step3"
     --build-two-config 
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Tutorial
     --test-command Tutorial 25.0)
 
@@ -614,8 +626,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Tutorial/Step4"
     "${CMake_BINARY_DIR}/Tests/Tutorial/Step4"
     --build-two-config 
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Tutorial
     --test-command Tutorial 25.0)
 
@@ -624,8 +636,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Tutorial/Step5"
     "${CMake_BINARY_DIR}/Tests/Tutorial/Step5"
     --build-two-config 
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Tutorial
     --test-command Tutorial 25.0)
 
@@ -633,9 +645,9 @@ IF(BUILD_TESTING)
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Testing"
     "${CMake_BINARY_DIR}/Tests/Testing"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project testing
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Testing/bin"
     --test-command testing
     )
@@ -644,9 +656,9 @@ IF(BUILD_TESTING)
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Wrapping"
     "${CMake_BINARY_DIR}/Tests/Wrapping"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project wrapping
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --test-command wrapping
     )
@@ -663,9 +675,9 @@ IF(BUILD_TESTING)
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/Wrapping"
       "${CMake_BINARY_DIR}/Tests/Wrapping"
-      --build-generator ${CMAKE_GENERATOR}
+      --build-generator ${CMAKE_TEST_GENERATOR}
       --build-project Wrapping
-      --build-makeprogram ${MAKEPROGRAM}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
       --test-command qtwrapping
       )
@@ -675,8 +687,8 @@ IF(BUILD_TESTING)
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TestDriver"
     "${CMake_BINARY_DIR}/Tests/TestDriver"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
     --test-command TestDriverTest test1
@@ -686,8 +698,8 @@ IF(BUILD_TESTING)
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TestDriver"
     "${CMake_BINARY_DIR}/Tests/TestDriver"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
     --test-command TestDriverTest test2
@@ -697,8 +709,8 @@ IF(BUILD_TESTING)
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TestDriver"
     "${CMake_BINARY_DIR}/Tests/TestDriver"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
     --test-command TestDriverTest subdir/test3
@@ -710,8 +722,8 @@ IF(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut"
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec"
     --build-project Dependency 
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-options
     -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib
     --test-command exec
@@ -723,8 +735,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Dependency"
     "${CMake_BINARY_DIR}/Tests/Dependency/WOLibOut"
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WOLibOut/Exec"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Dependency 
     --test-command exec
     )
@@ -734,8 +746,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Dependency"
     "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut" 
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec2"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Dependency 
     --build-options
     -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib
@@ -747,8 +759,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Dependency"
     "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut"
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec3"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Dependency 
     --build-options
     -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib
@@ -759,8 +771,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Dependency"
     "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut"
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec4"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Dependency 
     --build-options
     -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib
@@ -773,8 +785,8 @@ IF(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut"
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Executable"
     --build-project Jump
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-options
     -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Lib
     --test-command jumpExecutable
@@ -787,8 +799,8 @@ IF(BUILD_TESTING)
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
     --build-run-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
     --build-project Jump 
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --test-command jumpExecutable
     )
 
@@ -797,8 +809,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/LinkLine"
     "${CMake_BINARY_DIR}/Tests/LinkLine"
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LinkLine"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Linkline
     --test-command Exec
     )
@@ -807,8 +819,8 @@ IF(BUILD_TESTING)
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/LinkLineOrder"
     "${CMake_BINARY_DIR}/Tests/LinkLineOrder" 
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LinkLineOrder"
     --build-project LinkLineOrder
     --test-command Exec1
@@ -819,8 +831,8 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/LinkLineOrder"
     "${CMake_BINARY_DIR}/Tests/LinkLineOrder"
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LinkLineOrder"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project LinkLineOrder
     --test-command Exec2
     )
@@ -829,23 +841,26 @@ IF(BUILD_TESTING)
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ExternalOBJ"
     "${CMake_BINARY_DIR}/Tests/ExternalOBJ"
-    --build-generator ${CMAKE_GENERATOR}
+    --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project ExternalOBJ
-    --build-makeprogram ${MAKEPROGRAM}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/ExternalOBJ"
     --test-command executable
     )
 
-  ADD_TEST(kwsys ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Source/kwsys"
-    "${CMake_BINARY_DIR}/Tests/kwsys"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/kwsys"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
-    --build-project kwsys
-    --test-command  testIOS
-    )
+  IF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+    ADD_TEST(kwsys ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Source/kwsys"
+      "${CMake_BINARY_DIR}/Tests/kwsys"
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/kwsys"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-project kwsys
+      --test-command  testIOS
+      )
+  ENDIF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+
 
   IF (WIN32)
     ADD_TEST(SubDir ${CMAKE_CTEST_COMMAND}
@@ -853,8 +868,8 @@ IF(BUILD_TESTING)
       "${CMake_SOURCE_DIR}/Tests/SubDir"
       "${CMake_BINARY_DIR}/Tests/SubDir"
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDir/Executable"
-      --build-generator ${CMAKE_GENERATOR}
-      --build-makeprogram ${MAKEPROGRAM}
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-project SUBDIR
       --test-command test 
       "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
@@ -866,8 +881,8 @@ IF(BUILD_TESTING)
       "${CMake_SOURCE_DIR}/Tests/SubDir"
       "${CMake_BINARY_DIR}/Tests/SubDir"
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDir/Executable"
-      --build-generator ${CMAKE_GENERATOR}
-      --build-makeprogram ${MAKEPROGRAM}
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-project SUBDIR
       --test-command test 
       "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
@@ -875,30 +890,30 @@ IF(BUILD_TESTING)
       )
   ENDIF (WIN32)    
 
-  IF("${CMAKE_GENERATOR}" MATCHES "Makefile")
+  IF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
     ADD_TEST(MakeClean ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/MakeClean"
       "${CMake_BINARY_DIR}/Tests/MakeClean"
-      --build-generator ${CMAKE_GENERATOR}
+      --build-generator ${CMAKE_TEST_GENERATOR}
       --build-project MakeClean
-      --build-makeprogram ${MAKEPROGRAM}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/MakeClean"
       --test-command check_clean
       )
-  ENDIF("${CMAKE_GENERATOR}" MATCHES "Makefile")
+  ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
 
-  IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  IF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
     ADD_TEST(VSExternalInclude ${CMAKE_CTEST_COMMAND}
       --build-and-test 
       "${CMake_SOURCE_DIR}/Tests/VSExternalInclude"
       "${CMake_BINARY_DIR}/Tests/VSExternalInclude"
       --build-two-config
-      --build-generator ${CMAKE_GENERATOR}
+      --build-generator ${CMAKE_TEST_GENERATOR}
       --build-project VSExternalInclude
-      --build-makeprogram ${MAKEPROGRAM}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --test-command VSExternalInclude)
-  ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
 
   IF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
     ADD_TEST(BundleTest ${CMAKE_CTEST_COMMAND}
@@ -906,8 +921,8 @@ IF(BUILD_TESTING)
       "${CMake_SOURCE_DIR}/Tests/BundleTest"
       "${CMake_BINARY_DIR}/Tests/BundleTest"
       --build-two-config
-      --build-generator ${CMAKE_GENERATOR}
-      --build-makeprogram ${MAKEPROGRAM}
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-project BundleTest
       --test-command  BundleTest.app/Contents/MacOS/BundleTest)
     
@@ -915,8 +930,8 @@ IF(BUILD_TESTING)
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/ObjC++"
       "${CMake_BINARY_DIR}/Tests/ObjC++"
-      --build-generator ${CMAKE_GENERATOR}
-      --build-makeprogram ${MAKEPROGRAM}
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-project  objc++
       --test-command  objc++
       )
@@ -943,9 +958,9 @@ IF(BUILD_TESTING)
       )
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
 
-  IF("${CMAKE_GENERATOR}" MATCHES Xcode)
+  IF("${CMAKE_TEST_GENERATOR}" MATCHES Xcode)
     SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)
-  ENDIF("${CMAKE_GENERATOR}" MATCHES Xcode)
+  ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES Xcode)
   IF(EXISTS "${CMAKE_BINARY_DIR}/CMakeLists.txt")
     # If there is CMakeLists.txt in the binary tree, assume in-source build
     SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)
@@ -958,11 +973,11 @@ IF(BUILD_TESTING)
       --build-nocmake 
       --build-noclean
       --build-makeprogram ${CMake_SOURCE_DIR}/bootstrap
-      --build-generator "${CMAKE_GENERATOR}"
+      --build-generator "${CMAKE_TEST_GENERATOR}"
       --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
   ENDIF(UNIX AND CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
 
-  IF(CMAKE_GENERATOR MATCHES "Makefiles")
+  IF(CMAKE_TEST_GENERATOR MATCHES "Makefiles")
     # see if we can find a fortran compiler on the machine
     # if so, add the fortran test and see if it works.
     SET(CMAKE_Fortran_COMPILER_LIST ifort ifc efc f95 pgf95 
@@ -975,9 +990,9 @@ IF(BUILD_TESTING)
         --build-and-test 
         "${CMake_SOURCE_DIR}/Tests/Fortran"
         "${CMake_BINARY_DIR}/Tests/Fortran"
-        --build-generator ${CMAKE_GENERATOR}
+        --build-generator ${CMAKE_TEST_GENERATOR}
         --build-project testf
-        --build-makeprogram ${MAKEPROGRAM}
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
         --build-two-config
         --test-command testf)
     ENDIF(CMAKE_Fortran_COMPILER_FULLPATH)
@@ -995,16 +1010,16 @@ IF(BUILD_TESTING)
             --build-and-test 
             "${CMake_SOURCE_DIR}/Tests/Java"
             "${CMake_BINARY_DIR}/Tests/Java"
-            --build-generator ${CMAKE_GENERATOR}
+            --build-generator ${CMAKE_TEST_GENERATOR}
             --build-project hello
-            --build-makeprogram ${MAKEPROGRAM}
+            --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
             --build-two-config 
             --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
             --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
         ENDIF("${JNI_FILE}" MATCHES "JDK1_2")
       ENDIF(JNI_H) 
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
-  ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
+  ENDIF(CMAKE_TEST_GENERATOR MATCHES "Makefiles")
     
   IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
     # Will be set if the wxwindows gui is on
@@ -1012,8 +1027,8 @@ IF(BUILD_TESTING)
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/UseWX"
       "${CMake_BINARY_DIR}/Tests/UseWX"
-      --build-generator ${CMAKE_GENERATOR}
-      --build-makeprogram ${MAKEPROGRAM}
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir ${CMake_BINARY_DIR}/Tests/UseWX
       --build-project UsewxWindows
       --build-options -DCMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE:FILEPATH=${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE}

@@ -75,6 +75,13 @@ struct gzStruct
   gzFile* GZFile;
 };
 struct gzStruct GZStruct;
+#if defined ( _MSC_VER) || defined(__WATCOMC__)
+#include <io.h>
+//Yogi: hack. this should work on windows where there is no O_ACCMODE defined
+#ifndef O_ACCMODE
+# define O_ACCMODE 0x0003
+#endif
+#endif
 
 int libtar_gzopen(void* call_data, const char *pathname, int oflags, mode_t mode)
 {

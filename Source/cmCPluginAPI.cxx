@@ -27,17 +27,17 @@
 extern "C" 
 {
   
-void *cmGetClientData(void *info)
+void CCONV *cmGetClientData(void *info)
 {
   return ((cmLoadedCommandInfo *)info)->ClientData;
 }
 
-void cmSetClientData(void *info, void *cd)
+void CCONV cmSetClientData(void *info, void *cd)
 {
   ((cmLoadedCommandInfo *)info)->ClientData = cd;
 }
 
-void cmSetError(void *info, const char *err)
+void CCONV cmSetError(void *info, const char *err)
 {
   if (((cmLoadedCommandInfo *)info)->Error)
     {
@@ -46,35 +46,35 @@ void cmSetError(void *info, const char *err)
   ((cmLoadedCommandInfo *)info)->Error = strdup(err);
 }
 
-unsigned int cmGetCacheMajorVersion(void *arg)
+unsigned int CCONV  cmGetCacheMajorVersion(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetCacheMajorVersion();
 }
-unsigned int cmGetCacheMinorVersion(void *arg)
+unsigned int CCONV cmGetCacheMinorVersion(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetCacheMinorVersion();
 }
 
-unsigned int cmGetMajorVersion(void *)
+unsigned int CCONV cmGetMajorVersion(void *)
 {
   return cmMakefile::GetMajorVersion();
 }
 
-unsigned int cmGetMinorVersion(void *)
+unsigned int CCONV cmGetMinorVersion(void *)
 {
   return cmMakefile::GetMinorVersion();
 }
 
-void cmAddDefinition(void *arg, const char* name, const char* value)
+void CCONV cmAddDefinition(void *arg, const char* name, const char* value)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   mf->AddDefinition(name,value);
 }
 
 /* Add a definition to this makefile and the global cmake cache. */
-void cmAddCacheDefinition(void *arg, const char* name, const char* value, 
+void CCONV cmAddCacheDefinition(void *arg, const char* name, const char* value, 
                           const char* doc,
                           int type)
 {
@@ -109,75 +109,75 @@ void cmAddCacheDefinition(void *arg, const char* name, const char* value,
     }
 }
 
-const char* cmGetProjectName(void *arg)
+const char* CCONV cmGetProjectName(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetProjectName();
 }
 
-const char* cmGetHomeDirectory(void *arg)
+const char* CCONV cmGetHomeDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetHomeDirectory();
 }
-const char* cmGetHomeOutputDirectory(void *arg)
+const char* CCONV cmGetHomeOutputDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetHomeOutputDirectory();
 }
-const char* cmGetStartDirectory(void *arg)
+const char* CCONV cmGetStartDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetStartDirectory();
 }
-const char* cmGetStartOutputDirectory(void *arg)
+const char* CCONV cmGetStartOutputDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetStartOutputDirectory();
 }
-const char* cmGetCurrentDirectory(void *arg) 
+const char* CCONV cmGetCurrentDirectory(void *arg) 
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetCurrentDirectory();
 }
-const char* cmGetCurrentOutputDirectory(void *arg)
+const char* CCONV cmGetCurrentOutputDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetCurrentOutputDirectory();
 }
-const char* cmGetDefinition(void *arg,const char*def)
+const char* CCONV cmGetDefinition(void *arg,const char*def)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetDefinition(def);
 }
 
-int cmIsOn(void *arg, const char* name)
+int CCONV cmIsOn(void *arg, const char* name)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return static_cast<int>(mf->IsOn(name));
 }
 
 /** Check if a command exists. */
-int cmCommandExists(void *arg, const char* name)
+int CCONV cmCommandExists(void *arg, const char* name)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return static_cast<int>(mf->CommandExists(name));
 }
 
-void cmAddDefineFlag(void *arg, const char* definition)
+void CCONV cmAddDefineFlag(void *arg, const char* definition)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   mf->AddDefineFlag(definition);
 }
 
-void cmAddLinkDirectoryForTarget(void *arg, const char *tgt, const char* d)
+void CCONV cmAddLinkDirectoryForTarget(void *arg, const char *tgt, const char* d)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   mf->AddLinkDirectoryForTarget(tgt,d);
 }
 
 
-void cmAddExecutable(void *arg, const char *exename, 
+void CCONV cmAddExecutable(void *arg, const char *exename, 
                      int numSrcs, const char **srcs, int win32)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
@@ -194,7 +194,7 @@ void cmAddExecutable(void *arg, const char *exename,
    }
 }
 
-void cmAddUtilityCommand(void *arg, const char* utilityName,
+void CCONV cmAddUtilityCommand(void *arg, const char* utilityName,
                          const char* command,
                          const char* arguments,
                          int all,
@@ -242,7 +242,7 @@ void cmAddUtilityCommand(void *arg, const char* utilityName,
   mf->AddUtilityCommand(utilityName, (all ? true : false),
                         output, depends2, commandLines);
 }
-void cmAddCustomCommand(void *arg, const char* source,
+void CCONV cmAddCustomCommand(void *arg, const char* source,
                         const char* command,
                         int numArgs, const char **args,
                         int numDepends, const char **depends,
@@ -287,7 +287,7 @@ void cmAddCustomCommand(void *arg, const char* source,
                                commandLines, no_comment);
 }
 
-void cmAddCustomCommandToOutput(void *arg, const char* output,
+void CCONV cmAddCustomCommandToOutput(void *arg, const char* output,
                                 const char* command,
                                 int numArgs, const char **args,
                                 const char* main_dependency,
@@ -323,7 +323,7 @@ void cmAddCustomCommandToOutput(void *arg, const char* output,
                                commandLines, no_comment);
 }
 
-void cmAddCustomCommandToTarget(void *arg, const char* target,
+void CCONV cmAddCustomCommandToTarget(void *arg, const char* target,
                                 const char* command,
                                 int numArgs, const char **args,
                                 int commandType)
@@ -366,7 +366,7 @@ void cmAddCustomCommandToTarget(void *arg, const char* target,
                                cctype, no_comment);
 }
 
-void cmAddLinkLibraryForTarget(void *arg, const char *tgt, const char*value, 
+void CCONV cmAddLinkLibraryForTarget(void *arg, const char *tgt, const char*value, 
                                int libtype)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
@@ -385,7 +385,7 @@ void cmAddLinkLibraryForTarget(void *arg, const char *tgt, const char*value,
     }
 }
 
-void cmAddLibrary(void *arg, const char *libname, int shared,
+void CCONV cmAddLibrary(void *arg, const char *libname, int shared,
                   int numSrcs, const char **srcs)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
@@ -398,7 +398,7 @@ void cmAddLibrary(void *arg, const char *libname, int shared,
   mf->AddLibrary(libname, (shared ? true : false), srcs2);
 }
 
-char *cmExpandVariablesInString(void *arg, const char *source, 
+char CCONV *cmExpandVariablesInString(void *arg, const char *source, 
                                 int escapeQuotes, int atOnly)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
@@ -417,7 +417,7 @@ char *cmExpandVariablesInString(void *arg, const char *source,
 }
 
 
-int cmExecuteCommand(void *arg, const char *name, 
+int CCONV cmExecuteCommand(void *arg, const char *name, 
                      int numArgs, const char **args)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
@@ -432,7 +432,7 @@ int cmExecuteCommand(void *arg, const char *name,
   return mf->ExecuteCommand(lff);
 }
 
-void cmExpandSourceListArguments(void *arg, 
+void CCONV cmExpandSourceListArguments(void *arg, 
                                  int numArgs,
                                  const char **args,
                                  int *resArgc,
@@ -462,7 +462,7 @@ void cmExpandSourceListArguments(void *arg,
   *resArgv = resargv;
 }
 
-void cmFreeArguments(int argc, char **argv)
+void CCONV cmFreeArguments(int argc, char **argv)
 {
   int i;
   for (i = 0; i < argc; ++i)
@@ -475,7 +475,7 @@ void cmFreeArguments(int argc, char **argv)
     }
 }
 
-int cmGetTotalArgumentSize(int argc, char **argv)
+int CCONV cmGetTotalArgumentSize(int argc, char **argv)
 {
   int i;
   int result = 0;
@@ -489,13 +489,13 @@ int cmGetTotalArgumentSize(int argc, char **argv)
   return result;
 }
 
-void *cmGetSource(void *arg, const char *name)
+void CCONV *cmGetSource(void *arg, const char *name)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return (void *)mf->GetSource(name);
 }
 
-void * cmAddSource(void *arg, void *arg2)
+void * CCONV cmAddSource(void *arg, void *arg2)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg2);
@@ -503,54 +503,54 @@ void * cmAddSource(void *arg, void *arg2)
 }
 
 
-void * cmCreateSourceFile()
+void * CCONV cmCreateSourceFile()
 {
   return (void *)(new cmSourceFile);
 }
 
-void cmDestroySourceFile(void *arg)
+void CCONV cmDestroySourceFile(void *arg)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
   delete sf;
 }
 
-const char *cmSourceFileGetSourceName(void *arg)
+const char * CCONV cmSourceFileGetSourceName(void *arg)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
   return sf->GetSourceName().c_str();
 }
 
-const char *cmSourceFileGetFullPath(void *arg)
+const char * CCONV  cmSourceFileGetFullPath(void *arg)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
   return sf->GetFullPath().c_str();
 }
 
-const char *cmSourceFileGetProperty(void *arg,const char *prop)
+const char * CCONV  cmSourceFileGetProperty(void *arg,const char *prop)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
   return sf->GetProperty(prop);
 }
 
-int cmSourceFileGetPropertyAsBool(void *arg,const char *prop)
+int CCONV cmSourceFileGetPropertyAsBool(void *arg,const char *prop)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
   return (sf->GetPropertyAsBool(prop) ? 1: 0);
 }
 
-void cmSourceFileSetProperty(void *arg,const char *prop, const char *val)
+void CCONV cmSourceFileSetProperty(void *arg,const char *prop, const char *val)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
   sf->SetProperty(prop,val);
 }
 
-void cmSourceFileAddDepend(void *arg, const char *depend)
+void CCONV cmSourceFileAddDepend(void *arg, const char *depend)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
   sf->GetDepends().push_back(depend);
 }
 
-void cmSourceFileSetName(void *arg, const char* name, const char* dir,
+void CCONV cmSourceFileSetName(void *arg, const char* name, const char* dir,
                          int numSourceExtensions,
                          const char **sourceExtensions,
                          int numHeaderExtensions,
@@ -571,7 +571,7 @@ void cmSourceFileSetName(void *arg, const char* name, const char* dir,
   sf->SetName(name,dir, srcs, hdrs);
 }
 
-void cmSourceFileSetName2(void *arg, const char* name, const char* dir, 
+void CCONV cmSourceFileSetName2(void *arg, const char* name, const char* dir, 
                           const char *ext, int headerFileOnly)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
@@ -579,7 +579,7 @@ void cmSourceFileSetName2(void *arg, const char* name, const char* dir,
 }
 
 
-char *cmGetFilenameWithoutExtension(const char *name)
+char * CCONV cmGetFilenameWithoutExtension(const char *name)
 {
   std::string sres = cmSystemTools::GetFilenameWithoutExtension(name);
   char *result = (char *)malloc(sres.size()+1);  
@@ -587,7 +587,7 @@ char *cmGetFilenameWithoutExtension(const char *name)
   return result;
 }
 
-char *cmGetFilenamePath(const char *name)
+char * CCONV cmGetFilenamePath(const char *name)
 {
   std::string sres = cmSystemTools::GetFilenamePath(name);
   char *result = (char *)malloc(sres.size()+1);  
@@ -595,7 +595,7 @@ char *cmGetFilenamePath(const char *name)
   return result;
 }
 
-char *cmCapitalized(const char *name)
+char * CCONV cmCapitalized(const char *name)
 {
   std::string sres = cmSystemTools::Capitalized(name);
   char *result = (char *)malloc(sres.size()+1);  
@@ -603,23 +603,23 @@ char *cmCapitalized(const char *name)
   return result;
 }
 
-void cmCopyFileIfDifferent(const char *name1, const char *name2)
+void CCONV cmCopyFileIfDifferent(const char *name1, const char *name2)
 {
   cmSystemTools::CopyFileIfDifferent(name1,name2);
 }
 
-void cmRemoveFile(const char *name)
+void CCONV cmRemoveFile(const char *name)
 {
   cmSystemTools::RemoveFile(name);
 }
 
-void cmDisplayStatus(void *arg, const char* message)
+void CCONV cmDisplayStatus(void *arg, const char* message)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   mf->DisplayStatus(message, -1);
 }
 
-void cmFree(void *data)
+void CCONV cmFree(void *data)
 {
   free(data);
 }

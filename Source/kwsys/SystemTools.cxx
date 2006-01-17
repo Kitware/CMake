@@ -85,7 +85,7 @@ public:
 }
 #endif
 
-#if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__))
+#if defined(_WIN32) && (defined(_MSC_VER) || defined(__WATCOMC__) ||defined(__BORLANDC__) || defined(__MINGW32__))
 #include <io.h>
 #include <direct.h>
 #define _unlink unlink
@@ -99,8 +99,15 @@ public:
 #else
 # define KWSYS_SYSTEMTOOLS_MAXPATH 16384
 #endif
+#if defined(__WATCOMC__)
+#include <direct.h>
+#define _mkdir mkdir
+#define _rmdir rmdir
+#define _getcwd getcwd
+#define _chdir chdir
+#endif
 
-#if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__))
+#if defined(_WIN32) && (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__MINGW32__)) 
 inline int Mkdir(const char* dir)
 {
   return _mkdir(dir);
@@ -1856,7 +1863,11 @@ kwsys_stl::string SystemTools
   SystemTools::GetPath(path, "CMAKE_FILE_PATH");
   SystemTools::GetPath(path);
   // now add the additional paths
-  path.insert(path.end(), userPaths.begin(), userPaths.end());
+  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator i = userPaths.begin();
+        i != userPaths.end(); ++i)
+    {
+    path.push_back(*i);
+    }
   // now look for the file
   kwsys_stl::string tryPath;
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
@@ -1911,8 +1922,11 @@ kwsys_stl::string SystemTools::FindProgram(
     }
   
   // now add the additional paths
-  path.insert(path.end(), userPaths.begin(), userPaths.end());
-  
+  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator i = userPaths.begin();
+        i != userPaths.end(); ++i)
+    {
+    path.push_back(*i);
+    }
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
@@ -1987,7 +2001,11 @@ kwsys_stl::string SystemTools
   kwsys_stl::vector<kwsys_stl::string> path;
   SystemTools::GetPath(path);
    // now add the additional paths
-  path.insert(path.end(), userPaths.begin(), userPaths.end());
+  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator i = userPaths.begin();
+        i != userPaths.end(); ++i)
+    {
+    path.push_back(*i);
+    }
   kwsys_stl::string tryPath;
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
       p != path.end(); ++p)

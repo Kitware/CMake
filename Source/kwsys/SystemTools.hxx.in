@@ -18,6 +18,7 @@
 #include <@KWSYS_NAMESPACE@/stl/string>
 #include <@KWSYS_NAMESPACE@/stl/vector>
 #include <@KWSYS_NAMESPACE@/stl/map>
+#include <@KWSYS_NAMESPACE@/stl/algorithm> 
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
 

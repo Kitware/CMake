@@ -26,7 +26,16 @@ int main() { return 0; }
 
 #ifdef TEST_KWSYS_IOS_USE_SSTREAM
 #include <sstream>
-int main() { return 0; }
+int main()
+{ 
+  std::ostringstream ostr;
+  ostr << "hello";
+  if(ostr.str().size() == 5)
+    {
+    return 0;
+    }
+  return -1;
+}
 #endif
 
 #ifdef TEST_KWSYS_IOS_USE_STRSTREAM_H

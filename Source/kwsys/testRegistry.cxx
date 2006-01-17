@@ -16,6 +16,7 @@
 
 #include KWSYS_HEADER(Registry.hxx)
 #include KWSYS_HEADER(ios/iostream)
+#include <string.h>
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.

@@ -31,7 +31,12 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
-  
+
+#ifdef __WATCOMC__
+#define CCONV __cdecl
+#else
+#define CCONV
+#endif
 /*=========================================================================
 this is the structure of function entry points that a plugin may call. This
 structure must be kept in sync with the static decaled at the bottom of
@@ -46,67 +51,67 @@ typedef struct
   /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
      information is passed from the InitialPass to FInalPass for commands
      that need a FinalPass and need information from the InitialPass */
-  void *(*GetClientData) (void *info);
+  void *(CCONV *GetClientData) (void *info);
   /* return the summed size in characters of all the arguments */
-  int   (*GetTotalArgumentSize) (int argc, char **argv);
+  int   (CCONV *GetTotalArgumentSize) (int argc, char **argv);
   /* free all the memory associated with an argc, argv pair */
-  void  (*FreeArguments) (int argc, char **argv);
+  void  (CCONV *FreeArguments) (int argc, char **argv);
   /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
      information is passed from the InitialPass to FInalPass for commands
      that need a FinalPass and need information from the InitialPass */
-  void  (*SetClientData) (void *info, void *cd);
+  void  (CCONV *SetClientData) (void *info, void *cd);
   /* when an error occurs, call this function to set the error string */
-  void  (*SetError) (void *info, const char *err);
+  void  (CCONV *SetError) (void *info, const char *err);
   
   /*=========================================================================
   The following functions all directly map to methods in the cmMakefile
   class. See cmMakefile.h for descriptions of what each method does. All of
   these methods take the void * makefile pointer as their first argument.
   =========================================================================*/
-  void  (*AddCacheDefinition) (void *mf, const char* name, 
+  void  (CCONV *AddCacheDefinition) (void *mf, const char* name, 
                                const char* value, 
                                const char* doc, int cachetype);
-  void  (*AddCustomCommand) (void *mf, const char* source,
+  void  (CCONV *AddCustomCommand) (void *mf, const char* source,
                              const char* command,
                              int numArgs, const char **args,
                              int numDepends, const char **depends,
                              int numOutputs, const char **outputs,
                              const char *target);
-  void  (*AddDefineFlag) (void *mf, const char* definition);
-  void  (*AddDefinition) (void *mf, const char* name, const char* value);
-  void  (*AddExecutable) (void *mf, const char *exename, 
+  void  (CCONV *AddDefineFlag) (void *mf, const char* definition);
+  void  (CCONV *AddDefinition) (void *mf, const char* name, const char* value);
+  void  (CCONV *AddExecutable) (void *mf, const char *exename, 
                          int numSrcs, const char **srcs, int win32);
-  void  (*AddLibrary) (void *mf, const char *libname, 
+  void  (CCONV *AddLibrary) (void *mf, const char *libname, 
                        int shared, int numSrcs, const char **srcs);
-  void  (*AddLinkDirectoryForTarget) (void *mf, const char *tgt, 
+  void  (CCONV *AddLinkDirectoryForTarget) (void *mf, const char *tgt, 
                                       const char* d);
-  void  (*AddLinkLibraryForTarget) (void *mf, const char *tgt, 
+  void  (CCONV *AddLinkLibraryForTarget) (void *mf, const char *tgt, 
                                     const char *libname, int libtype);
-  void  (*AddUtilityCommand) (void *mf, const char* utilityName,
+  void  (CCONV *AddUtilityCommand) (void *mf, const char* utilityName,
                               const char *command, const char *arguments,
                               int all, int numDepends, const char **depends,
                               int numOutputs, const char **outputs);
-  int   (*CommandExists) (void *mf, const char* name);
-  int  (*ExecuteCommand) (void *mf, const char *name, 
+  int   (CCONV *CommandExists) (void *mf, const char* name);
+  int  (CCONV *ExecuteCommand) (void *mf, const char *name, 
                           int numArgs, const char **args);
-  void  (*ExpandSourceListArguments) (void *mf,int argc, const char **argv,
+  void  (CCONV *ExpandSourceListArguments) (void *mf,int argc, const char **argv,
                                       int *resArgc, char ***resArgv,
                                       unsigned int startArgumentIndex);
-  char *(*ExpandVariablesInString) (void *mf, const char *source, 
+  char *(CCONV *ExpandVariablesInString) (void *mf, const char *source, 
                                     int escapeQuotes, int atOnly);
-  unsigned int (*GetCacheMajorVersion) (void *mf);
-  unsigned int (*GetCacheMinorVersion) (void *mf);
-  const char*  (*GetCurrentDirectory) (void *mf);
-  const char*  (*GetCurrentOutputDirectory) (void *mf);
-  const char*  (*GetDefinition) (void *mf, const char *def);
-  const char*  (*GetHomeDirectory) (void *mf);
-  const char*  (*GetHomeOutputDirectory) (void *mf);
-  unsigned int (*GetMajorVersion) (void *mf);
-  unsigned int (*GetMinorVersion) (void *mf);
-  const char*  (*GetProjectName) (void *mf);
-  const char*  (*GetStartDirectory) (void *mf);
-  const char*  (*GetStartOutputDirectory) (void *mf);
-  int          (*IsOn) (void *mf, const char* name);
+  unsigned int (CCONV *GetCacheMajorVersion) (void *mf);
+  unsigned int (CCONV *GetCacheMinorVersion) (void *mf);
+  const char*  (CCONV *GetCurrentDirectory) (void *mf);
+  const char*  (CCONV *GetCurrentOutputDirectory) (void *mf);
+  const char*  (CCONV *GetDefinition) (void *mf, const char *def);
+  const char*  (CCONV *GetHomeDirectory) (void *mf);
+  const char*  (CCONV *GetHomeOutputDirectory) (void *mf);
+  unsigned int (CCONV *GetMajorVersion) (void *mf);
+  unsigned int (CCONV *GetMinorVersion) (void *mf);
+  const char*  (CCONV *GetProjectName) (void *mf);
+  const char*  (CCONV *GetStartDirectory) (void *mf);
+  const char*  (CCONV *GetStartOutputDirectory) (void *mf);
+  int          (CCONV *IsOn) (void *mf, const char* name);
   
   
   /*=========================================================================
@@ -114,23 +119,23 @@ typedef struct
   cmSourceFiles. Please see cmSourceFile.h for additional information on many
   of these methods. Some of these methods are in cmMakefile.h.
   =========================================================================*/
-  void *(*AddSource) (void *mf, void *sf); 
-  void *(*CreateSourceFile) ();
-  void  (*DestroySourceFile) (void *sf);
-  void *(*GetSource) (void *mf, const char* sourceName);
-  void  (*SourceFileAddDepend) (void *sf, const char *depend);
-  const char *(*SourceFileGetProperty) (void *sf, const char *prop);
-  int   (*SourceFileGetPropertyAsBool) (void *sf, const char *prop);
-  const char *(*SourceFileGetSourceName) (void *sf);
-  const char *(*SourceFileGetFullPath) (void *sf);
-  void  (*SourceFileSetName) (void *sf, const char* name, const char* dir,
+  void *(CCONV *AddSource) (void *mf, void *sf); 
+  void *(CCONV *CreateSourceFile) ();
+  void  (CCONV *DestroySourceFile) (void *sf);
+  void *(CCONV *GetSource) (void *mf, const char* sourceName);
+  void  (CCONV *SourceFileAddDepend) (void *sf, const char *depend);
+  const char *(CCONV *SourceFileGetProperty) (void *sf, const char *prop);
+  int   (CCONV *SourceFileGetPropertyAsBool) (void *sf, const char *prop);
+  const char *(CCONV *SourceFileGetSourceName) (void *sf);
+  const char *(CCONV *SourceFileGetFullPath) (void *sf);
+  void  (CCONV *SourceFileSetName) (void *sf, const char* name, const char* dir,
                              int numSourceExtensions,
                              const char **sourceExtensions,
                              int numHeaderExtensions,
                              const char **headerExtensions);
-  void  (*SourceFileSetName2) (void *sf, const char* name, const char* dir, 
+  void  (CCONV *SourceFileSetName2) (void *sf, const char* name, const char* dir, 
                                const char *ext, int headerFileOnly);
-  void  (*SourceFileSetProperty) (void *sf, const char *prop,
+  void  (CCONV *SourceFileSetProperty) (void *sf, const char *prop,
                                   const char *value);
   
   
@@ -138,28 +143,28 @@ typedef struct
   The following methods are from cmSystemTools.h see that file for specific
   documentation on each method.
   =========================================================================*/
-  char  *(*Capitalized)(const char *);
-  void   (*CopyFileIfDifferent)(const char *f1, const char *f2);
-  char  *(*GetFilenameWithoutExtension)(const char *);
-  char  *(*GetFilenamePath)(const char *);
-  void   (*RemoveFile)(const char *f1);
-  void   (*Free)(void *);
+  char  *(CCONV *Capitalized)(const char *);
+  void   (CCONV *CopyFileIfDifferent)(const char *f1, const char *f2);
+  char  *(CCONV *GetFilenameWithoutExtension)(const char *);
+  char  *(CCONV *GetFilenamePath)(const char *);
+  void   (CCONV *RemoveFile)(const char *f1);
+  void   (CCONV *Free)(void *);
   
   /*=========================================================================
     The following are new functions added after 1.6
   =========================================================================*/
-  void  (*AddCustomCommandToOutput) (void *mf, const char* output,
+  void  (CCONV *AddCustomCommandToOutput) (void *mf, const char* output,
                                      const char* command,
                                      int numArgs, const char **args,
                                      const char* main_dependency,
                                      int numDepends, const char **depends);
-  void  (*AddCustomCommandToTarget) (void *mf, const char* target,
+  void  (CCONV *AddCustomCommandToTarget) (void *mf, const char* target,
                                      const char* command,
                                      int numArgs, const char **args,
                                      int commandType);
   
   /* display status information */
-  void  (*DisplaySatus) (void *info, const char *message);
+  void  (CCONV *DisplaySatus) (void *info, const char *message);
 
   /* this is the end of the C function stub API structure */ 
 } cmCAPI;
@@ -202,11 +207,11 @@ define the different types of custom commands for a target
 /*=========================================================================
 Finally we define the key data structures and function prototypes
 =========================================================================*/
-  typedef const char* (*CM_DOC_FUNCTION)();
-  typedef int (*CM_INITIAL_PASS_FUNCTION)(void *info, void *mf, 
+  typedef const char* (CCONV *CM_DOC_FUNCTION)();
+  typedef int (CCONV *CM_INITIAL_PASS_FUNCTION)(void *info, void *mf, 
                                           int argc, char *[]);
-  typedef void (*CM_FINAL_PASS_FUNCTION)(void *info, void *mf);
-  typedef void (*CM_DESTRUCTOR_FUNCTION)(void *info);
+  typedef void (CCONV *CM_FINAL_PASS_FUNCTION)(void *info, void *mf);
+  typedef void (CCONV *CM_DESTRUCTOR_FUNCTION)(void *info);
   
   typedef struct {
     unsigned long reserved1; /* Reserved for future use.  DO NOT USE.  */
@@ -223,7 +228,7 @@ Finally we define the key data structures and function prototypes
     void *ClientData;
   } cmLoadedCommandInfo;
 
-  typedef void (*CM_INIT_FUNCTION)(cmLoadedCommandInfo *);
+  typedef void (CCONV *CM_INIT_FUNCTION)(cmLoadedCommandInfo *);
   
 #ifdef  __cplusplus
 }

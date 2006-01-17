@@ -131,6 +131,7 @@ protected:
     RegexReplacement(const char* s): number(-1), value(s) {}
     RegexReplacement(const std::string& s): number(-1), value(s) {}
     RegexReplacement(int n): number(n), value() {}
+    RegexReplacement() {};
     int number;
     std::string value;
   };

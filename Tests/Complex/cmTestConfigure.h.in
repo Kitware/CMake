@@ -4,6 +4,7 @@
 #cmakedefine ONE_VAR_IS_DEFINED
 #cmakedefine ZERO_VAR
 
+#cmakedefine CMAKE_TEST_DIFFERENT_GENERATOR
 #define STRING_VAR "${STRING_VAR}"
 
 // Test FOREACH
