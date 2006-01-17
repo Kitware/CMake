@@ -6,13 +6,16 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_CXX_FLAGS")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
 SET(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
 
-# Link to CMake lib
-LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source)
-LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source/kwsys)
-LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmexpat)
-LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmzlib)
-LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmtar)
-# Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to 
+IF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+  # Link to CMake lib
+  LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source)
+  LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source/kwsys)
+  LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmexpat)
+  LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmzlib)
+  LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmtar)
+ENDIF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+
+  # Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to 
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 LINK_LIBRARIES(${COMPLEX_LIBS})
 
