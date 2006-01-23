@@ -1088,7 +1088,6 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
       includeFlags << includeFlag;
       flagUsed = true;
       }
-    includeFlags;
     std::string includePath = this->ConvertToOutputForExisting(i->c_str());
     if(quotePaths && includePath.size() && includePath[0] != '\"')
       {
