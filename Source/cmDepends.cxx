@@ -19,8 +19,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cmFileTimeComparison.h"
-
-#include <assert.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------
 cmDepends::cmDepends(): m_Verbose(false), m_FileComparison(0),
