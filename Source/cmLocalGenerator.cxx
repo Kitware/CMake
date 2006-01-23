@@ -1049,7 +1049,11 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
   flagVar = "CMAKE_INCLUDE_FLAG_SEP_";
   flagVar += lang;
   const char* sep = m_Makefile->GetDefinition(flagVar.c_str());
-
+  bool quotePaths = false;
+  if(m_Makefile->GetDefinition("CMAKE_QUOTE_INCLUDE_PATHS"))
+    {
+    quotePaths = true;
+    }
   bool repeatFlag = true; // should the include flag be repeated like ie. -IA -IB
   if(!sep)
     {
@@ -1084,7 +1088,18 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
       includeFlags << includeFlag;
       flagUsed = true;
       }
-    includeFlags << this->ConvertToOutputForExisting(i->c_str()) << sep;
+    includeFlags;
+    std::string includePath = this->ConvertToOutputForExisting(i->c_str());
+    if(quotePaths && includePath.size() && includePath[0] != '\"')
+      {
+      includeFlags << "\"";
+      }
+    includeFlags << includePath;
+    if(quotePaths && includePath.size() && includePath[0] != '\"')
+      {
+      includeFlags << "\"";
+      }
+    includeFlags << sep;
     }
   std::string flags = includeFlags.str();
   // remove trailing separators

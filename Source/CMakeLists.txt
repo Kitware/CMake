@@ -564,7 +564,9 @@ IF(BUILD_TESTING)
       --build-generator ${CMAKE_TEST_GENERATOR}
       --build-project complex
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin"
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin" 
+      --build-options
+      -DCMAKE_TEST_DIFFERENT_GENERATOR:BOOL=${CMAKE_TEST_DIFFERENT_GENERATOR}
       --test-command complex)
 
 #    ADD_TEST(complexRelativePaths  ${CMAKE_CTEST_COMMAND}
