@@ -2389,6 +2389,7 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
   SystemTools::CheckTranslationPath(newPath);
 #ifdef _WIN32
   newPath = SystemTools::GetActualCaseForPath(newPath.c_str());
+  SystemTools::ConvertToUnixSlashes(newPath);
 #endif
   // Return the reconstructed path.
   return newPath;
