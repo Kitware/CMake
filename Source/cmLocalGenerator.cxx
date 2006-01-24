@@ -1680,15 +1680,12 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
     // This is a full path.  Return it as given.
     return inName;
     }
-  else
-    {
-    // Treat the name as relative to the source directory in which it
-    // was given.
-    name = m_Makefile->GetCurrentDirectory();
-    name += "/";
-    name += inName;
-    return name;
-    }
+  // Treat the name as relative to the source directory in which it
+  // was given.
+  name = m_Makefile->GetCurrentDirectory();
+  name += "/";
+  name += inName;
+  return name;
 }
 
 //----------------------------------------------------------------------------
