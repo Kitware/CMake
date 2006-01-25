@@ -72,7 +72,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
           cmSystemTools::Message(message.c_str());
         }
     }
-  if(fatal_error)
+  if(fatal_error || send_error)
     {
     cmSystemTools::SetFatalErrorOccured();
     }
