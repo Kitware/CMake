@@ -14,11 +14,11 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define IDC_FOLDERTREE		0x3741
-#define IDC_TITLE			0x3742
-#define IDC_STATUSTEXT		0x3743
+#define IDC_FOLDERTREE          0x3741
+#define IDC_TITLE                       0x3742
+#define IDC_STATUSTEXT          0x3743
 
-#define IDC_NEW_EDIT_PATH	0x3744
+#define IDC_NEW_EDIT_PATH       0x3744
 
 // Class CDlgWnd
 BEGIN_MESSAGE_MAP(CPathDialogSub, CWnd)
@@ -248,18 +248,15 @@ int CPathDialog::MakeSurePathExists(LPCTSTR lpPath)
       }
 
     strMsg.Format(c_FolderDoesNotExist, lpPath);
-    if(AfxMessageBox(strMsg, MB_YESNO|MB_ICONQUESTION) != IDYES)
+    if(AfxMessageBox(strMsg, MB_YESNO|MB_ICONQUESTION) == IDYES)
       {
-      return (int)-1;
+      //create path
+      iRet=Touch(lpPath, FALSE);
+      if(iRet!=0)
+        {
+        throw iRet; 
+        }
       }
-
-    //create path
-    iRet=Touch(lpPath, FALSE);
-    if(iRet!=0)
-      {
-      throw iRet; 
-      }
-
     return 0;
     }
   catch(int nErrCode)
