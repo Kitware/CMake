@@ -405,6 +405,12 @@ void cmLocalVisualStudio6Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
       {
       compileFlags = cflags;
       }
+    if(target.GetProperty("COMPILE_FLAGS"))
+      {
+      compileFlags += " ";
+      compileFlags += target.GetProperty("COMPILE_FLAGS");
+      }
+
     const char* lang = 
       m_GlobalGenerator->GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
     if(lang && strcmp(lang, "CXX") == 0)

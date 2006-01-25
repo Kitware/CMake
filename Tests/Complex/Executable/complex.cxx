@@ -272,6 +272,7 @@ void ForceStringUse()
 
 // defined in testcflags.c
 extern "C" int TestCFlags(char* m);
+extern "C" int TestTargetCompileFlags(char* m);
 
 // ======================================================================
 
@@ -387,7 +388,12 @@ int main()
     {
     cmPassed("Call to file1 function returned 1.");
     }
-
+#ifndef COMPLEX_TARGET_FLAG
+  cmFailed("COMPILE_FLAGS did not work with SET_TARGET_PROPERTIES");
+#else
+  cmPassed("COMPILE_FLAGS did work with SET_TARGET_PROPERTIES");
+#endif
+  
   if(file2() != 1)
     {
     cmFailed("Call to file2 function from library failed.");
@@ -403,6 +409,7 @@ int main()
 #endif
   std::string gen = CMAKE_GENERATOR;
   // visual studio is currently broken for c flags
+  char msg[1024];
   if(gen.find("Visual") == gen.npos)
     {
 #ifdef TEST_C_FLAGS
@@ -410,7 +417,6 @@ int main()
 #else
     cmPassed("CMake CMAKE_C_FLAGS are not being passed to c++ files.");
 #endif
-    char msg[1024];
     if(TestCFlags(msg))
       {
       cmPassed(
@@ -421,7 +427,15 @@ int main()
       cmFailed(msg);
       }
     }
-  
+  if(TestTargetCompileFlags(msg))
+    {
+    cmPassed(msg);
+    }
+  else
+    {
+    cmFailed(msg);
+    }
+
   // ----------------------------------------------------------------------
   // Test ADD_DEFINITIONS
 

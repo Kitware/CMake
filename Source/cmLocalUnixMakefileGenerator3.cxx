@@ -617,6 +617,10 @@ cmLocalUnixMakefileGenerator3
   // Write the build rule.
   // Build the set of compiler flags.
   std::string flags;
+  if(target.GetProperty("COMPILE_FLAGS"))
+    {
+    this->AppendFlags(flags, target.GetProperty("COMPILE_FLAGS"));
+    }
 
   // Add flags from source file properties.
   if (source.GetProperty("COMPILE_FLAGS"))

@@ -1036,11 +1036,17 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
     std::string additionalDeps;
 
     // Check for extra compiler flags.
+    if(target.GetProperty("COMPILE_FLAGS"))
+      {
+      compileFlags += " ";
+      compileFlags += target.GetProperty("COMPILE_FLAGS");
+      }
     const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
     if(cflags)
       {
-      compileFlags = cflags;
-      }
+      compileFlags += " ";
+      compileFlags += cflags;
+      } 
     const char* lang = 
       m_GlobalGenerator->GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
     if(lang && strcmp(lang, "CXX") == 0)

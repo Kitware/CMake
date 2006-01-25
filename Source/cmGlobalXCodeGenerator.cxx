@@ -466,12 +466,16 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateObjectReference(cmXCodeObject* ref)
 //----------------------------------------------------------------------------
 cmXCodeObject* 
 cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg, 
-                                              cmSourceFile* sf)
+                                              cmSourceFile* sf,
+                                              cmTarget& cmtarget)
 {
   std::string flags;
   // Add flags from source file properties.
+  if(cmtarget.GetProperty("COMPILE_FLAGS"))
+    {
+    lg->AppendFlags(flags, cmtarget.GetProperty("COMPILE_FLAGS"));
+    }
   lg->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
-
   cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
 
   cmXCodeObject* group = m_GroupMap[sf];
@@ -650,7 +654,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         i != classes.end(); ++i)
       {
       cmXCodeObject* xsf =
-        this->CreateXCodeSourceFile(m_CurrentLocalGenerator, *i);
+        this->CreateXCodeSourceFile(m_CurrentLocalGenerator, *i, cmtarget);
       cmXCodeObject* fr = xsf->GetObject("fileRef");
       cmXCodeObject* filetype = 
         fr->GetObject()->GetObject("lastKnownFileType");

@@ -124,7 +124,8 @@ private:
                                   cmLocalGenerator* root,
                                   std::vector<cmLocalGenerator*>& generators);
   cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, 
-                                       cmSourceFile* sf);
+                                       cmSourceFile* sf,
+                                       cmTarget& cmtarget);
   void CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);
   void AddDependTarget(cmXCodeObject* target,
                        cmXCodeObject* dependTarget);

@@ -1,4 +1,15 @@
 #include <string.h>
+
+int TestTargetCompileFlags(char* m)
+{
+#ifndef COMPLEX_TARGET_FLAG
+  strcpy(m, "CMAKE SET_TARGET_PROPERTIES COMPILE_FLAGS did not work");
+  return 0;
+#endif
+  strcpy(m, "CMAKE SET_TARGET_PROPERTIES COMPILE_FLAGS worked");
+  return 1;
+}
+
 int TestCFlags(char* m)
 {
   /* TEST_CXX_FLAGS should not be defined in a c file */
