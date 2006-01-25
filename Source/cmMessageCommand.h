@@ -66,9 +66,14 @@ public:
     return
       "  MESSAGE([SEND_ERROR | STATUS | FATAL_ERROR]\n"
       "          \"message to display\" ...)\n"
-      "The arguments are messages to display.  If the first argument is "
-      "SEND_ERROR then an error is raised.  If the first argument is "
-      "STATUS then the message is displayed in the progress line for the GUI.";
+      "By default the message is displayed in a pop up window (CMakeSetup), "
+      "or in the stdout of cmake, or the error section of ccmake. "
+      "If the first argument is "
+      "SEND_ERROR then an error is raised, and the generate phase will be "
+      "be skipped.  If the first argument is FATAL_ERROR, all processing "
+      "is halted. If the first argument is STATUS then the message is "
+      "displayed in the progress line for the GUI, or with a -- in the "
+      "command line cmake.";
     }
   
   cmTypeMacro(cmMessageCommand, cmCommand);
