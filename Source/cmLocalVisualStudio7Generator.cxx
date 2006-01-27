@@ -658,7 +658,19 @@ void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
     }
 }
 
+//----------------------------------------------------------------------------
+std::string
+cmLocalVisualStudio7Generator
+::GetBuildTypeLinkerFlags(std::string rootLinkerFlags, const char* configName)
+{
+  std::string configTypeUpper = cmSystemTools::UpperCase(configName);
+  std::string extraLinkOptionsBuildTypeDef = rootLinkerFlags + "_" + configTypeUpper;
 
+  std::string extraLinkOptionsBuildType =
+    m_Makefile->GetRequiredDefinition(extraLinkOptionsBuildTypeDef.c_str());
+
+  return extraLinkOptionsBuildType;
+}
 
 void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                                                     const char* configName,
@@ -670,15 +682,18 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
-    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
+    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS") +
+      std::string(" ") + GetBuildTypeLinkerFlags("CMAKE_EXE_LINKER_FLAGS", configName);
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS") +
+      std::string(" ") + GetBuildTypeLinkerFlags("CMAKE_SHARED_LINKER_FLAGS", configName);
     }
   if(target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS") +
+      std::string(" ") + GetBuildTypeLinkerFlags("CMAKE_MODULE_LINKER_FLAGS", configName);
     }
   
   const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");

@@ -67,6 +67,8 @@ private:
   void FillFlagMapFromCommandFlags(std::map<cmStdString, cmStdString>& flagMap,
                                    cmVS7FlagTable* flagTable,
                                    std::string& flags);
+  std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
+                                      const char* configName);
   void OutputVCProjFile();
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
