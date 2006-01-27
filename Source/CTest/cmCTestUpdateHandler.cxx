@@ -586,6 +586,10 @@ int cmCTestUpdateHandler::ProcessHandler()
       std::string upFile = file_update_line.match(2);
       char mod = upChar[0];
       bool modifiedOrConflict = false;
+      if ( mod == 'X')
+        {
+        continue;
+        }
       if ( mod != 'M' && mod != 'C' && mod != 'G' )
         {
         count ++;
