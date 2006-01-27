@@ -60,20 +60,18 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
     {
     return true;
     }
-  // if it is not in the cache, then search the system path
-  std::vector<std::string> path;
 
-  // add any user specified paths
+  // The location is not in the cache.  Create a search path.
+  std::vector<std::string> path;
+  std::vector<std::string> callPaths;
   for (unsigned int j = 2; j < args.size(); j++)
     {
     // Glob the entry in case of wildcards.
-    cmSystemTools::GlobDirs(args[j].c_str(), path);
+    cmSystemTools::GlobDirs(args[j].c_str(), callPaths);
     }
+  m_Makefile->GetLibrarySearchPath(callPaths, path);
 
-  cmSystemTools::GetPath(path, "CMAKE_LIBRARY_PATH");
-
-  // add the standard path
-  cmSystemTools::GetPath(path);
+  // Use the search path to find the file.
   for(unsigned int k=0; k < path.size(); k++)
     {
     std::string tryPath = path[k];

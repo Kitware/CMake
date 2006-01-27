@@ -2195,18 +2195,17 @@ std::string cmMakefile::FindLibrary(const char* name,
     {
     return cmSystemTools::CollapseFullPath(name);
     }
-  // Add the system search path to our path.
+
+  // Construct a search path.
   std::vector<std::string> path;
-  cmSystemTools::GetPath(path, "CMAKE_LIBRARY_PATH");
-  cmSystemTools::GetPath(path, "LIB");
-  cmSystemTools::GetPath(path);
+  this->GetLibrarySearchPath(userPaths, path);
+
   bool supportFrameworks = false;
   if(this->GetDefinition("APPLE"))
     {
     supportFrameworks = true;
     }
-  // now add the path
-  path.insert(path.end(), userPaths.begin(), userPaths.end());
+
   // Add some lib directories specific to compilers, depending on the
   // current generator, so that library that might have been stored here
   // can be found too.
@@ -2307,6 +2306,50 @@ std::string cmMakefile::FindLibrary(const char* name,
   std::string tmp = cmSystemTools::FindLibrary(name, path);
   cmSystemTools::ConvertToUnixSlashes(tmp);
   return tmp;
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefile::GetIncludeSearchPath(const std::vector<std::string>& callerPaths,
+                                 std::vector<std::string>& path)
+{
+  // Add paths configured into the cache for this project.
+  if(const char* cmakeIncludePath = this->GetDefinition("CMAKE_INCLUDE_PATH"))
+    {
+    cmSystemTools::ExpandListArgument(cmakeIncludePath, path);
+    }
+
+  // Add paths in the user's environment.
+  cmSystemTools::GetPath(path, "CMAKE_INCLUDE_PATH");
+  cmSystemTools::GetPath(path, "INCLUDE");
+
+  // Add paths given by the caller.
+  path.insert(path.end(), callerPaths.begin(), callerPaths.end());
+
+  // Add standard system paths.
+  cmSystemTools::GetPath(path);
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefile::GetLibrarySearchPath(const std::vector<std::string>& callerPaths,
+                                 std::vector<std::string>& path)
+{
+  // Add paths configured into the cache for this project.
+  if(const char* cmakeLibPath = this->GetDefinition("CMAKE_LIBRARY_PATH"))
+    {
+    cmSystemTools::ExpandListArgument(cmakeLibPath, path);
+    }
+
+  // Add paths in the user's environment.
+  cmSystemTools::GetPath(path, "CMAKE_LIBRARY_PATH");
+  cmSystemTools::GetPath(path, "LIB");
+
+  // Add paths given by the caller.
+  path.insert(path.end(), callerPaths.begin(), callerPaths.end());
+
+  // Add standard system paths.
+  cmSystemTools::GetPath(path);
 }
 
 std::string cmMakefile::GetModulesFile(const char* filename)

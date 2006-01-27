@@ -64,20 +64,22 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
       helpString = hs?hs:"(none)";
       }
     }
+
+  // Construct a search path.
   std::vector<std::string> path;
-  // add any user specified paths
+  std::vector<std::string> callPaths;
   for (unsigned int j = 2; j < args.size(); j++)
     {
     // expand variables
     std::string exp = args[j];
-    cmSystemTools::ExpandRegistryValues(exp);      
+    cmSystemTools::ExpandRegistryValues(exp);
 
     // Glob the entry in case of wildcards.
-    cmSystemTools::GlobDirs(exp.c_str(), path);
+    cmSystemTools::GlobDirs(exp.c_str(), callPaths);
     }
-  cmSystemTools::GetPath(path, "CMAKE_INCLUDE_PATH");
-  // add the standard path
-  cmSystemTools::GetPath(path);
+  m_Makefile->GetIncludeSearchPath(callPaths, path);
+
+  // Use the search path to find the file.
   unsigned int k;
   for(k=0; k < path.size(); k++)
     {

@@ -236,6 +236,14 @@ public:
                           const std::vector<std::string>& path);
 
   /**
+   * Get the include file or library search path.
+   */
+  void GetIncludeSearchPath(const std::vector<std::string>& callerPaths,
+                            std::vector<std::string>& path);
+  void GetLibrarySearchPath(const std::vector<std::string>& callerPaths,
+                            std::vector<std::string>& path);
+
+  /**
    * Add a variable definition to the build. This variable
    * can be used in CMake to refer to lists, directories, etc.
    */
