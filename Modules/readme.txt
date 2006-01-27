@@ -55,3 +55,21 @@ To have a .cmake file in this directory NOT show up in the
 modules documentation, you should start the file with a blank
 line.
 
+A FindXXX.cmake module will typically be loaded by the command
+
+  FIND_PACKAGE(XXX [QUIET] [REQUIRED [components...]])
+
+If the QUIET option is given to the command it will set the variable
+XXX_FIND_QUIETLY to true before loading the FindXXX.cmake module.  If
+this variable is set the module should not complain about not being
+able to find the package and should never issue a FATAL_ERROR.  If the
+REQUIRED option is given to the command it will set the variable
+XXX_FIND_REQUIRED to true before loading the FindXXX.cmake module.  If
+this variable is set the module should issue a FATAL_ERROR if the
+package cannot be found.  For each package-specific component, say
+YYY, listed after the REQUIRED option a variable XXX_FIND_REQUIRED_YYY
+to true.  This can be used by the FindXXX.cmake module to determine
+which sub-components of the package must be found.  If neither the
+QUIET nor REQUIRED options are given then the FindXXX.cmake module
+should look for the package and complain without error if the module
+is not found.

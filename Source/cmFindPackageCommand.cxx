@@ -75,6 +75,11 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       else if(args[i] == "REQUIRED")
         {
         required = true;
+        while (++i < args.size() && args[i] != "QUIET")
+          {
+          std::string req_var = Name + "_FIND_REQUIRED_" + args[i];
+          m_Makefile->AddDefinition(req_var.c_str(), "1");
+          }
         }
       else
         {
