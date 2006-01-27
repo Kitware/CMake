@@ -103,13 +103,14 @@ private:
   std::vector<cmsys::RegularExpression> m_WarningMatchRegex;
   std::vector<cmsys::RegularExpression> m_WarningExceptionRegex;
 
+  typedef std::deque<char> t_BuildProcessingQueueType;
+
   void ProcessBuffer(const char* data, int length, size_t& tick, size_t tick_len, 
-    std::ofstream& ofs);
+    std::ofstream& ofs, t_BuildProcessingQueueType* queue);
   int ProcessSingleLine(const char* data);
 
-  typedef std::deque<char> t_BuildProcessingQueueType;
   t_BuildProcessingQueueType            m_BuildProcessingQueue;
-  t_BuildProcessingQueueType::iterator  m_BuildProcessingQueueLocation;
+  t_BuildProcessingQueueType            m_BuildProcessingErrorQueue;
   size_t                                m_BuildOutputLogSize;
   std::vector<char>                     m_CurrentProcessingLine;
 

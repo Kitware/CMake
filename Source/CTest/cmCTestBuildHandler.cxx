@@ -107,17 +107,17 @@ static const char* cmCTestWarningMatches[] = {
   "^cc[^C]*CC: WARNING File = ([^,]+), Line = ([0-9]+)",
   "^ld([^:])*:([ \\t])*WARNING([^:])*:",
   "([^:]+): warning ([0-9]+):",
-  "^\"[^\"]+\", line [0-9]+: [Ww]arning",
+  "^\"[^\"]+\", line [0-9]+: [Ww](arning|arnung)",
   "([^:]+): warning[ \\t]*[0-9]+[ \\t]*:",
-  "^Warning ([0-9]+):",
-  "^Warning ",
+  "^(Warning|Warnung) ([0-9]+):",
+  "^(Warning|Warnung) ",
   "WARNING: ",
   "([^ :]+) : warning",
   "([^:]+): warning",
   "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\(W\\)",
   "^cxx: Warning:",
   ".*file: .* has no symbols",
-  "([^ :]+):([0-9]+): Warning",
+  "([^ :]+):([0-9]+): (Warning|Warnung)",
   "\\([0-9]*\\): remark #[0-9]*",
   "\".*\", line [0-9]+: remark\\([0-9]*\\):",
   "cc-[0-9]* CC: REMARK File = .*, Line = [0-9]*",
@@ -192,7 +192,7 @@ void cmCTestBuildHandler::Initialize()
   m_WarningMatchRegex.clear();
   m_WarningExceptionRegex.clear();
   m_BuildProcessingQueue.clear();
-  m_BuildProcessingQueueLocation = m_BuildProcessingQueue.end();
+  m_BuildProcessingErrorQueue.clear();
   m_BuildOutputLogSize = 0;
   m_CurrentProcessingLine.clear();
 
@@ -593,7 +593,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
   m_ErrorQuotaReached = false;
 
   // For every chunk of data
-  while(cmsysProcess_WaitForData(cp, &data, &length, 0))
+  int res;
+  while((res = cmsysProcess_WaitForData(cp, &data, &length, 0)))
     {
     // Replace '\0' with '\n', since '\0' does not really make sense. This is
     // for Visual Studio output
@@ -606,10 +607,18 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
       }
 
     // Process the chunk of data
-    this->ProcessBuffer(data, length, tick, tick_len, ofs);
+    if ( res == cmsysProcess_Pipe_STDERR )
+      {
+      this->ProcessBuffer(data, length, tick, tick_len, ofs, &m_BuildProcessingErrorQueue);
+      }
+    else
+      {
+      this->ProcessBuffer(data, length, tick, tick_len, ofs, &m_BuildProcessingQueue);
+      }
     }
 
-  this->ProcessBuffer(0, 0, tick, tick_len, ofs);
+  this->ProcessBuffer(0, 0, tick, tick_len, ofs, &m_BuildProcessingQueue);
+  this->ProcessBuffer(0, 0, tick, tick_len, ofs, &m_BuildProcessingErrorQueue);
   cmCTestLog(m_CTest, OUTPUT, " Size of output: "
     << int(m_BuildOutputLogSize / 1024.0) << "K" << std::endl);
 
@@ -658,14 +667,14 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
 
 //----------------------------------------------------------------------
 void cmCTestBuildHandler::ProcessBuffer(const char* data, int length, size_t& tick, size_t tick_len, 
-    std::ofstream& ofs)
+    std::ofstream& ofs, t_BuildProcessingQueueType* queue)
 {
 #undef cerr
   const std::string::size_type tick_line_len = 50;
   const char* ptr;
   for ( ptr = data; ptr < data+length; ptr ++ )
     {
-    m_BuildProcessingQueue.push_back(*ptr);
+    queue->push_back(*ptr);
     }
   m_BuildOutputLogSize += length;
 
@@ -674,8 +683,8 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length, size_t& ti
     {
     // Find the end of line
     t_BuildProcessingQueueType::iterator it;
-    for ( it = m_BuildProcessingQueue.begin();
-      it != m_BuildProcessingQueue.end();
+    for ( it = queue->begin();
+      it != queue->end();
       ++ it )
       {
       if ( *it == '\n' )
@@ -695,12 +704,12 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length, size_t& ti
       }
 
     // If the end of line was found
-    if ( it != m_BuildProcessingQueue.end() )
+    if ( it != queue->end() )
       {
       // Create a contiguous array for the line
       m_CurrentProcessingLine.clear();
       t_BuildProcessingQueueType::iterator cit;
-      for ( cit = m_BuildProcessingQueue.begin(); cit != it; ++cit )
+      for ( cit = queue->begin(); cit != it; ++cit )
         {
         m_CurrentProcessingLine.push_back(*cit);
         }
@@ -711,7 +720,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length, size_t& ti
       int lineType = this->ProcessSingleLine(line);
 
       // Erase the line from the queue
-      m_BuildProcessingQueue.erase(m_BuildProcessingQueue.begin(), it+1);
+      queue->erase(queue->begin(), it+1);
 
       // Depending on the line type, produce error or warning, or nothing
       cmCTestBuildErrorWarning errorwarning;
