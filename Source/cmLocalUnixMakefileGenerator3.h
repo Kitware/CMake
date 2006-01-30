@@ -84,12 +84,7 @@ public:
   std::string &GetMakeSilentFlag() { return m_MakeSilentFlag; }
 
   /** used to create a recursive make call */
-  std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);
-
-  
-  
-  
-  
+  std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);  
   
   
   /** Set whether the echo command needs its argument quoted.  */
@@ -243,15 +238,6 @@ protected:
   void WriteObjectDependRules(cmSourceFile& source,
                               std::vector<std::string>& depends);
   
-  // this is used only by WriteObjectDependFile
-  bool GenerateDependsMakeFile(const std::string& lang,
-                               const char* objFile);
-
-  // return the appropriate depends checker
-  cmDepends* GetDependsChecker(const std::string& lang,
-                               bool verbose);
-  
-  
   void GenerateCustomRuleFile(const cmCustomCommand& cc, 
                               std::ostream &ruleStream);
   
@@ -337,12 +323,9 @@ protected:
                           const std::vector<std::string>& files);
 
   //==========================================================================
-  bool SamePath(const char* path1, const char* path2);
   std::string& CreateSafeUniqueObjectFileName(const char* sin);
   std::string CreateMakeVariable(const char* sin, const char* s2in);
   //==========================================================================
-
-  void ComputeHomeRelativeOutputPath();
 
 private:
   std::map<cmStdString, IntegrityCheckSetMap> m_CheckDependFiles;

@@ -60,7 +60,14 @@ cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3()
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::Configure()
 {
-  this->ComputeHomeRelativeOutputPath();
+  // Include the rule file for each object.
+  m_HomeRelativeOutputPath = 
+    cmSystemTools::RelativePath(m_Makefile->GetHomeOutputDirectory(),
+                                m_Makefile->GetStartOutputDirectory());
+  if (m_HomeRelativeOutputPath.size())
+    {
+    m_HomeRelativeOutputPath += "/";
+    }
   this->cmLocalGenerator::Configure();
 }
 
@@ -295,18 +302,6 @@ void cmLocalUnixMakefileGenerator3::WriteDisclaimer(std::ostream& os)
     << " Generator, CMake Version "
     << cmMakefile::GetMajorVersion() << "."
     << cmMakefile::GetMinorVersion() << "\n\n";
-}
-
-void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
-{
-  // Include the rule file for each object.
-  m_HomeRelativeOutputPath = 
-    cmSystemTools::RelativePath(m_Makefile->GetHomeOutputDirectory(),
-                                m_Makefile->GetStartOutputDirectory());
-  if (m_HomeRelativeOutputPath.size())
-    {
-    m_HomeRelativeOutputPath += "/";
-    }
 }
 
 const std::string &cmLocalUnixMakefileGenerator3::GetHomeRelativeOutputPath()
@@ -895,26 +890,6 @@ cmLocalUnixMakefileGenerator3
 
   // Write clean target
   this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
-}
-
-//----------------------------------------------------------------------------
-bool
-cmLocalUnixMakefileGenerator3
-::GenerateDependsMakeFile(const std::string& lang, const char* objFile)
-{
-  // Construct a checker for the given language.
-  std::auto_ptr<cmDepends>
-    checker(this->GetDependsChecker(lang,false));
-  if(checker.get())
-    {
-    // Check the dependencies. Ths is required because we need at least an
-    // empty depends.make for make to include, so at cmake time the
-    // ::Check() method will generate that if it does not exist
-    checker->Check(objFile, 0);
-    
-    return true;
-    }
-  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -2505,24 +2480,6 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
     }
 }
 
-//============================================================================
-//----------------------------------------------------------------------------
-bool
-cmLocalUnixMakefileGenerator3::SamePath(const char* path1, const char* path2)
-{
-  if (strcmp(path1, path2) == 0)
-    {
-    return true;
-    }
-#if defined(_WIN32) || defined(__APPLE__)
-  return
-    (cmSystemTools::LowerCase(this->ConvertToOutputForExisting(path1)) ==
-     cmSystemTools::LowerCase(this->ConvertToOutputForExisting(path2)));
-#else
-  return false;
-#endif
-}
-
 //----------------------------------------------------------------------------
 // take a tgt path and convert it into a make target, it could be full, or relative
 std::string
@@ -2676,35 +2633,6 @@ cmLocalUnixMakefileGenerator3
     }
   // always make an entry into the unmodified to variable map
   m_MakeVariableMap[unmodified] = ret;
-  return ret;
-}
-//============================================================================
-
-//----------------------------------------------------------------------------
-cmDepends*
-cmLocalUnixMakefileGenerator3::GetDependsChecker(const std::string& lang,
-                                                 bool verbose)
-{
-  cmDepends *ret = 0;
-  if(lang == "C" || lang == "CXX" || lang == "RC")
-    {
-    ret = new cmDependsC();
-    }
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  else if(lang == "Fortran")
-    {
-    ret = new cmDependsFortran();
-    }
-  else if(lang == "Java")
-    {
-    ret = new cmDependsJava();
-    }
-#endif
-  if (ret)
-    {
-    ret->SetVerbose(verbose);
-    ret->SetFileComparison(m_GlobalGenerator->GetCMakeInstance()->GetFileComparison());
-    }
   return ret;
 }
 
@@ -3283,7 +3211,4 @@ void cmLocalUnixMakefileGenerator3
       }
     cmakefileStream << "  )\n";
     }
-
-
-
 }
