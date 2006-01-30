@@ -2184,41 +2184,6 @@ cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(cmTarget& target)
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::GetSubdirTargetName(const char* pass, const char* subdir)
-{
-  // Convert the subdirectory name to a relative path to keep it short.
-  std::string reldir = this->Convert(subdir,START_OUTPUT);
-
-  // Convert the subdirectory name to a valid make target name.
-  std::string s = pass;
-  s += "_";
-  s += reldir;
-
-  // Replace "../" with 3 underscores.  This allows one .. at the beginning.
-  size_t pos = s.find("../");
-  if(pos != std::string::npos)
-    {
-    s.replace(pos, 3, "___");
-    }
-
-  // Replace "/" directory separators with a single underscore.
-  while((pos = s.find('/')) != std::string::npos)
-    {
-    s.replace(pos, 1, "_");
-    }
-
-  // Replace ":" drive specifier with a single underscore
-  while((pos = s.find(':')) != std::string::npos)
-    {
-    s.replace(pos, 1, "_");
-    }
-
-  return s;
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmLocalUnixMakefileGenerator3
 ::GetObjectFileName(cmTarget& target,
                     const cmSourceFile& source,
                     std::string* nameWithoutTargetDir)
@@ -2969,7 +2934,11 @@ void cmLocalUnixMakefileGenerator3
     dir = "all";
     depends.push_back("cmake_check_build_system");
     }
-  this->CreateJumpCommand(commands,"CMakeFiles/Makefile2",dir);
+  commands.push_back(this->GetRecursiveMakeCall
+                     ("CMakeFiles/Makefile2",dir.c_str()));  
+  this->CreateCDCommand(commands,
+                        m_Makefile->GetHomeOutputDirectory(),
+                        m_Makefile->GetStartOutputDirectory());
   this->WriteMakeRule(ruleFileStream, "The main all target", "all", depends, commands);
 
   // Write the clean rule.
@@ -2982,7 +2951,11 @@ void cmLocalUnixMakefileGenerator3
     {
     depends.push_back(sym);
     }
-  this->CreateJumpCommand(commands,"CMakeFiles/Makefile2",dir);
+  commands.push_back(this->GetRecursiveMakeCall
+                     ("CMakeFiles/Makefile2",dir.c_str()));  
+  this->CreateCDCommand(commands,
+                        m_Makefile->GetHomeOutputDirectory(),
+                        m_Makefile->GetStartOutputDirectory());
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean", depends, commands);
 
   // write the depend rule, really a recompute depends rule
@@ -3065,7 +3038,11 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
       tgtMakefileName += "/build.make";
       targetName += "/";
       targetName += lo->first.c_str();
-      this->CreateJumpCommand(commands,tgtMakefileName.c_str(),targetName);
+      commands.push_back(this->GetRecursiveMakeCall
+                         (tgtMakefileName.c_str(),targetName.c_str()));  
+      this->CreateCDCommand(commands,
+                            m_Makefile->GetHomeOutputDirectory(),
+                            m_Makefile->GetStartOutputDirectory());
       }
     this->WriteMakeRule(ruleFileStream, 
                         "target for object file", 
@@ -3177,20 +3154,6 @@ void cmLocalUnixMakefileGenerator3
       *i = cmd;
       }
     }
-}
-
-void cmLocalUnixMakefileGenerator3
-::CreateJumpCommand(std::vector<std::string>& commands,
-                    const char *MakefileName, 
-                    std::string& localName)
-{
-  // Build the target for this pass.
-  commands.push_back(this->GetRecursiveMakeCall
-                     (MakefileName,localName.c_str()));
-  
-  this->CreateCDCommand(commands,
-                        m_Makefile->GetHomeOutputDirectory(),
-                        m_Makefile->GetStartOutputDirectory());
 }
 
 //----------------------------------------------------------------------------

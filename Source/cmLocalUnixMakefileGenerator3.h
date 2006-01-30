@@ -192,11 +192,6 @@ protected:
   // write the local help rule
   void WriteHelpRule(std::ostream& ruleFileStream);
   
-  // create the cd to home commands
-  void CreateJumpCommand(std::vector<std::string>& commands, 
-                         const char *MakefileName,
-                         std::string & localName);
-  
   // create a command that cds to the start dir then runs the commands
   void CreateCDCommand(std::vector<std::string>& commands, 
                        const char *targetDir, const char *returnDir);
@@ -303,10 +298,6 @@ protected:
   void WriteLocalMakefile();
   
   
-  
-  
-  void WriteLocalRule(std::ostream& ruleFileStream, const char* pass,
-                      const char* dependency);
   void WriteConvenienceRule(std::ostream& ruleFileStream,
                             const char* realTarget,
                             const char* helpTarget);
@@ -326,7 +317,6 @@ protected:
                                const std::vector<std::string>& objects);
   
   std::string GetTargetDirectory(cmTarget& target);
-  std::string GetSubdirTargetName(const char* pass, const char* subdir);
   std::string GetObjectFileName(cmTarget& target,
                                 const cmSourceFile& source,
                                 std::string* nameWithoutTargetDir = 0);
