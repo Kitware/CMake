@@ -75,6 +75,20 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     }
   else if (args[2] == "ABSOLUTE")
     {
+    // If the path given is relative evaluate it relative to the
+    // current source directory.
+    if(!cmSystemTools::FileIsFullPath(filename.c_str()))
+      {
+      std::string fname = m_Makefile->GetCurrentDirectory();
+      if(!fname.empty())
+        {
+        fname += "/";
+        fname += filename;
+        filename = fname;
+        }
+      }
+
+    // Collapse the path to its simplest form.
     result = cmSystemTools::CollapseFullPath(filename.c_str());
     }
   else 
