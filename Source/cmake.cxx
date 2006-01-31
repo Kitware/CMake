@@ -37,17 +37,23 @@
 # endif
 #endif
 
+#if defined(__MINGW32__) && !defined(CMAKE_BUILD_WITH_CMAKE)
+# define CMAKE_BOOT_MINGW
+#endif
+
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#  include "cmGlobalVisualStudio6Generator.h"
 #  if !defined(__MINGW32__)
 #    include "cmGlobalVisualStudio7Generator.h"
 #    include "cmGlobalVisualStudio71Generator.h"
 #    include "cmGlobalVisualStudio8Generator.h"
 #  endif
-#  include "cmGlobalBorlandMakefileGenerator.h"
-#  include "cmGlobalNMakeMakefileGenerator.h"
-#  include "cmGlobalWatcomWMakeGenerator.h"
+#  if !defined(CMAKE_BOOT_MINGW)
+#    include "cmGlobalVisualStudio6Generator.h"
+#    include "cmGlobalBorlandMakefileGenerator.h"
+#    include "cmGlobalNMakeMakefileGenerator.h"
+#    include "cmGlobalWatcomWMakeGenerator.h"
+#  endif
 #  include "cmGlobalMSYSMakefileGenerator.h"
 #  include "cmGlobalMinGWMakefileGenerator.h"
 #  include "cmWin32ProcessExecution.h"
@@ -1243,7 +1249,7 @@ int cmake::Configure()
       {
 #if defined(__BORLANDC__) && defined(_WIN32)
       this->SetGlobalGenerator(new cmGlobalBorlandMakefileGenerator);
-#elif defined(_WIN32) && !defined(__CYGWIN__)  
+#elif defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
       std::string installedCompiler;
       std::string mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path]";
       cmSystemTools::ExpandRegistryValues(mp);
@@ -1593,8 +1599,6 @@ void cmake::AddDefaultCommands()
 void cmake::AddDefaultGenerators()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  m_Generators[cmGlobalVisualStudio6Generator::GetActualName()] =
-    &cmGlobalVisualStudio6Generator::New;
 #if !defined(__MINGW32__)
   m_Generators[cmGlobalVisualStudio7Generator::GetActualName()] =
     &cmGlobalVisualStudio7Generator::New;
@@ -1603,12 +1607,16 @@ void cmake::AddDefaultGenerators()
   m_Generators[cmGlobalVisualStudio8Generator::GetActualName()] =
     &cmGlobalVisualStudio8Generator::New;
 #endif
+#if !defined(CMAKE_BOOT_MINGW)
+  m_Generators[cmGlobalVisualStudio6Generator::GetActualName()] =
+    &cmGlobalVisualStudio6Generator::New;
   m_Generators[cmGlobalBorlandMakefileGenerator::GetActualName()] =
     &cmGlobalBorlandMakefileGenerator::New;
   m_Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
     &cmGlobalNMakeMakefileGenerator::New;
   m_Generators[cmGlobalWatcomWMakeGenerator::GetActualName()] =
     &cmGlobalWatcomWMakeGenerator::New;
+#endif
   m_Generators[cmGlobalMSYSMakefileGenerator::GetActualName()] =
     &cmGlobalMSYSMakefileGenerator::New;
   m_Generators[cmGlobalMinGWMakefileGenerator::GetActualName()] =
