@@ -43,13 +43,11 @@
 
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#  if !defined(__MINGW32__)
+#  if !defined(CMAKE_BOOT_MINGW)
+#    include "cmGlobalVisualStudio6Generator.h"
 #    include "cmGlobalVisualStudio7Generator.h"
 #    include "cmGlobalVisualStudio71Generator.h"
 #    include "cmGlobalVisualStudio8Generator.h"
-#  endif
-#  if !defined(CMAKE_BOOT_MINGW)
-#    include "cmGlobalVisualStudio6Generator.h"
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalWatcomWMakeGenerator.h"
@@ -1599,24 +1597,22 @@ void cmake::AddDefaultCommands()
 void cmake::AddDefaultGenerators()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#if !defined(__MINGW32__)
+# if !defined(CMAKE_BOOT_MINGW)
+  m_Generators[cmGlobalVisualStudio6Generator::GetActualName()] =
+    &cmGlobalVisualStudio6Generator::New;
   m_Generators[cmGlobalVisualStudio7Generator::GetActualName()] =
     &cmGlobalVisualStudio7Generator::New;
   m_Generators[cmGlobalVisualStudio71Generator::GetActualName()] =
     &cmGlobalVisualStudio71Generator::New;
   m_Generators[cmGlobalVisualStudio8Generator::GetActualName()] =
     &cmGlobalVisualStudio8Generator::New;
-#endif
-#if !defined(CMAKE_BOOT_MINGW)
-  m_Generators[cmGlobalVisualStudio6Generator::GetActualName()] =
-    &cmGlobalVisualStudio6Generator::New;
   m_Generators[cmGlobalBorlandMakefileGenerator::GetActualName()] =
     &cmGlobalBorlandMakefileGenerator::New;
   m_Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
     &cmGlobalNMakeMakefileGenerator::New;
   m_Generators[cmGlobalWatcomWMakeGenerator::GetActualName()] =
     &cmGlobalWatcomWMakeGenerator::New;
-#endif
+# endif
   m_Generators[cmGlobalMSYSMakefileGenerator::GetActualName()] =
     &cmGlobalMSYSMakefileGenerator::New;
   m_Generators[cmGlobalMinGWMakefileGenerator::GetActualName()] =

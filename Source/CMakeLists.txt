@@ -174,43 +174,43 @@ IF (WIN32)
   IF(NOT UNIX)
     SET(SRCS ${SRCS}
       cmGlobalBorlandMakefileGenerator.cxx
-      cmGlobalNMakeMakefileGenerator.cxx
-      cmGlobalWatcomWMakeGenerator.cxx
+      cmGlobalBorlandMakefileGenerator.h
       cmGlobalMSYSMakefileGenerator.cxx
       cmGlobalMinGWMakefileGenerator.cxx
-      cmGlobalVisualStudio6Generator.cxx
-      cmLocalVisualStudio6Generator.cxx
-      cmGlobalBorlandMakefileGenerator.h
+      cmGlobalNMakeMakefileGenerator.cxx
       cmGlobalNMakeMakefileGenerator.h
+      cmGlobalVisualStudio6Generator.cxx
       cmGlobalVisualStudio6Generator.h
+      cmGlobalVisualStudio71Generator.cxx
+      cmGlobalVisualStudio71Generator.h
+      cmGlobalVisualStudio7Generator.cxx
+      cmGlobalVisualStudio7Generator.h
+      cmGlobalVisualStudio8Generator.cxx
+      cmGlobalVisualStudio8Generator.h
+      cmGlobalWatcomWMakeGenerator.cxx
+      cmLocalVisualStudio6Generator.cxx
       cmLocalVisualStudio6Generator.h
+      cmLocalVisualStudio7Generator.cxx
+      cmLocalVisualStudio7Generator.h
       cmWin32ProcessExecution.cxx
       cmWin32ProcessExecution.h
       )
-    IF(NOT MINGW)
-      SET(SRCS ${SRCS}
-        cmGlobalVisualStudio71Generator.h
-        cmGlobalVisualStudio8Generator.h
-        cmGlobalVisualStudio7Generator.h
-        cmLocalVisualStudio7Generator.h
-        cmGlobalVisualStudio8Generator.cxx
-        cmGlobalVisualStudio71Generator.cxx
-        cmGlobalVisualStudio7Generator.cxx
-        cmLocalVisualStudio7Generator.cxx)
-    ENDIF(NOT MINGW)
   ENDIF(NOT UNIX)
 ENDIF (WIN32)
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
 TARGET_LINK_LIBRARIES(CMakeLib cmsys ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES} ${CMAKE_TAR_LIBRARIES})
-IF (UNIX)
+
+# On UNIX platforms we need the dl libraries for loading plugins.
+IF(UNIX)
   TARGET_LINK_LIBRARIES(CMakeLib ${CMAKE_DL_LIBS})
-ENDIF (UNIX)
-IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
-  # On Visual Studio we need rpcrt4.lib for cmVisualStudio7 generator.
-  TARGET_LINK_LIBRARIES(CMakeLib rpcrt4.lib)
-ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO)
+ENDIF(UNIX)
+
+# On some platforms we need the rpcrt4 library for the VS 7 generators.
+IF(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
+  TARGET_LINK_LIBRARIES(CMakeLib rpcrt4)
+ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
 
 #
 # CTestLib
