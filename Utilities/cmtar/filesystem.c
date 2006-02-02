@@ -54,19 +54,26 @@ kwDirectory * kwOpenDir(const char* name)
 
 kwDirEntry * kwReadDir(kwDirectory * dir)
 {
-  kwDirEntry * entry;
+  static kwDirEntry entry;
   if(!dir || dir->EOD ==1)
     {
     return NULL;
     }
-  entry = (kwDirEntry*)malloc(sizeof(kwDirEntry));
-  strncpy(entry->d_name,dir->Entry.name,TAR_MAXPATHLEN-1);
+  strncpy(entry.d_name,dir->Entry.name,TAR_MAXPATHLEN-1);
   if(_findnext(dir->SrchHandle, &dir->Entry) == -1)
     {
       dir->EOD=1;
     }
-  return entry;
+
+  // It is both stupid and dangerous to return a pointer to a static like this.
+  // This can only be called by one caller at a time: i.e., it's not thread safe.
+  // On the other hand, it mimics the documented behavior of "readdir" which is
+  // what it's implemented to replace for platforms that do not have readdir.
+  // Memory leaks are also stupid and dangerous... perhaps this is less so.
+  //
+  return &entry;
 }
+
 int kwCloseDir(kwDirectory * dir)
 {
   int r=-1;
