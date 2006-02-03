@@ -31,13 +31,15 @@
 
 
 /* determine full path name */
+/* caller must "free" returned pointer when done with it */
+/* th_get_pathname return values come directly from strdup */
 char *
 th_get_pathname(TAR *t)
 {
   char filename[TAR_MAXPATHLEN];
 
   if (t->th_buf.gnu_longname)
-    return t->th_buf.gnu_longname;
+    return strdup(t->th_buf.gnu_longname);
 
   if (t->th_buf.prefix[0] != '\0')
   {
