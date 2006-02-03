@@ -81,6 +81,9 @@ public:
   ///! do configure step
   virtual void Configure();
 
+  /** Append the subdirectory for the given configuration.  */
+  virtual void AppendDirectoryForConfig(const char* config, std::string& dir);
+
 protected:
   virtual void OutputSLNFile(cmLocalGenerator* root, 
                              std::vector<cmLocalGenerator*>& generators);

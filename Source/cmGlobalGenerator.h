@@ -149,6 +149,9 @@ public:
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const char* start_dir);
 
+  /** Append the subdirectory for the given configuration.  */
+  virtual void AppendDirectoryForConfig(const char* config, std::string& dir);
+
 protected:
   // Fill the m_ProjectMap, this must be called after m_LocalGenerators has been populated.
   void FillProjectMap();

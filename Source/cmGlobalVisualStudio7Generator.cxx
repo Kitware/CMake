@@ -718,3 +718,15 @@ void cmGlobalVisualStudio7Generator::Configure()
   this->CreateGUID("INSTALL");
   this->CreateGUID("RUN_TESTS");
 }
+
+//----------------------------------------------------------------------------
+void
+cmGlobalVisualStudio7Generator
+::AppendDirectoryForConfig(const char* config, std::string& dir)
+{
+  if(config)
+    {
+    dir += "/";
+    dir += config;
+    }
+}

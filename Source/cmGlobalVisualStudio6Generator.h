@@ -74,6 +74,10 @@ public:
   virtual void WriteDSWFile(std::ostream& fout,
                             cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
+
+  /** Append the subdirectory for the given configuration.  */
+  virtual void AppendDirectoryForConfig(const char* config, std::string& dir);
+
 private:
   void GenerateConfigurations(cmMakefile* mf);
   void WriteDSWFile(std::ostream& fout);

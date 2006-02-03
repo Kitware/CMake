@@ -486,3 +486,15 @@ void cmGlobalVisualStudio6Generator::GetDocumentation(cmDocumentationEntry& entr
   entry.brief = "Generates Visual Studio 6 project files.";
   entry.full = "";
 }
+
+//----------------------------------------------------------------------------
+void
+cmGlobalVisualStudio6Generator
+::AppendDirectoryForConfig(const char* config, std::string& dir)
+{
+  if(config)
+    {
+    dir += "/";
+    dir += config;
+    }
+}
