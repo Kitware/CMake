@@ -69,6 +69,9 @@ public:
    */
   virtual void Generate();
 
+  /** Append the subdirectory for the given configuration.  */
+  virtual void AppendDirectoryForConfig(const char* config, std::string& dir);
+
 private: 
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
                                      cmSourceGroup* sg);
