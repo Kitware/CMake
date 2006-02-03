@@ -18,6 +18,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmEndWhileCommand.cxx"
+#include "cmExecuteProcessCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
 #include "cmEnableLanguageCommand.cxx"
 #include "cmFLTKWrapUICommand.cxx"
@@ -60,6 +61,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmEnableLanguageCommand);
   commands.push_back(new cmEndWhileCommand);
+  commands.push_back(new cmExecuteProcessCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetCMakePropertyCommand);
