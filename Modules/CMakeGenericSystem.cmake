@@ -49,6 +49,10 @@ ELSE(UNIX)
     "${CMAKE_GENERIC_PROGRAM_FILES}/${PROJECT_NAME}"
     CACHE PATH "Install path prefix, prepended onto install directories.")
   SET(CMAKE_GENERIC_PROGRAM_FILES)
+
+  # Make sure the prefix uses forward slashes.
+  STRING(REGEX REPLACE "\\\\" "/"
+    CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 ENDIF(UNIX)
 
 MARK_AS_ADVANCED(
