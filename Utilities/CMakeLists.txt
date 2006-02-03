@@ -74,7 +74,7 @@ IF(UNIX)
   ENDIF(CURSES_LIBRARY)
 ENDIF(UNIX)
 
-IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
+IF(BUILD_MFCDialog)
   SET(CMD ${CMD_DIR}/CMakeSetup${CMD_EXT})
   ADD_CUSTOM_COMMAND(
     OUTPUT ${CMake_BINARY_DIR}/Docs/CMakeSetup.txt
@@ -93,7 +93,7 @@ IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
     ${CMake_BINARY_DIR}/Docs/CMakeSetup.html
     )
   SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/CMakeSetup.txt)
-ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO)
+ENDIF(BUILD_MFCDialog)
 
 # Drive documentation generation.
 ADD_CUSTOM_TARGET(documentation ALL   

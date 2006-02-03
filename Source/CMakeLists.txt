@@ -300,9 +300,9 @@ ENDIF (UNIX)
 
 # MFC GUI
 # MFC libraries are only available on Visual Studio
-IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
+IF(BUILD_MFCDialog)
   SUBDIRS(MFCDialog)
-ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO)
+ENDIF(BUILD_MFCDialog)
 
 # WX Widgets GUI
 OPTION(CMAKE_BUILD_WX_DIALOG "Build wxWidgets dialog for CMake" FALSE)

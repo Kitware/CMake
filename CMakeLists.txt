@@ -31,7 +31,7 @@ ENDIF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 1.4)
 
 # Disable deprecation warnings for standard C functions.
 IF(CMAKE_COMPILER_2005)
-  ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
+  ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
 ENDIF(CMAKE_COMPILER_2005)
 
 #silence duplicate symbol warnings on AIX
@@ -167,6 +167,42 @@ IF(WIN32)
     ENDIF(NOT BORLAND)
   ENDIF(NOT UNIX)
 ENDIF(WIN32)
+IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
+  IF("CMake_HAVE_MFC" MATCHES "^CMake_HAVE_MFC$")
+    SET(CHECK_INCLUDE_FILE_VAR "afxwin.h")
+    CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
+      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx IMMEDIATE)
+    MESSAGE(STATUS "Looking for MFC")
+    TRY_COMPILE(CMake_HAVE_MFC
+      ${CMAKE_BINARY_DIR}
+      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+      CMAKE_FLAGS
+      -DCMAKE_MFC_FLAG:STRING=2
+      -DCOMPILE_DEFINITIONS:STRING=-D_AFXDLL
+      OUTPUT_VARIABLE OUTPUT)
+    IF(CMake_HAVE_MFC)
+      MESSAGE(STATUS "Looking for MFC - found")
+      SET(CMake_HAVE_MFC 1 CACHE INTERNAL "Have MFC?")
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
+        "Determining if MFC exists passed with the following output:\n"
+        "${OUTPUT}\n\n")
+    ELSE(CMake_HAVE_MFC)
+      MESSAGE(STATUS "Looking for MFC - not found")
+      SET(CMake_HAVE_MFC 0 CACHE INTERNAL "Have MFC?")
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+        "Determining if MFC exists failed with the following output:\n"
+        "${OUTPUT}\n\n")
+    ENDIF(CMake_HAVE_MFC)
+  ENDIF("CMake_HAVE_MFC" MATCHES "^CMake_HAVE_MFC$")
+
+  IF(CMake_HAVE_MFC)
+    OPTION(BUILD_MFCDialog "Whether to build the CMakeSetup MFC dialog." ON)
+  ELSE(CMake_HAVE_MFC)
+    SET(BUILD_MFCDialog 0)
+  ENDIF(CMake_HAVE_MFC)
+ELSE(CMAKE_BUILD_ON_VISUAL_STUDIO)
+  SET(BUILD_MFCDialog 0)
+ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO)
 
 CONFIGURE_FILE(
   "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
