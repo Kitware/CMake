@@ -149,7 +149,7 @@ tar_extract_file(TAR *t, char *realname)
 {
   int i;
   linkname_t *lnp;
-  char *pathname = 0;
+  char *pathname;
 
   if (t->options & TAR_NOOVERWRITE)
   {

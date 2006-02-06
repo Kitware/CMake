@@ -13,6 +13,7 @@
 #include <libtarint/internal.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
 # include <pwd.h>
@@ -76,7 +77,7 @@ th_print_long_ls(TAR *t)
   char groupname[_POSIX_LOGIN_NAME_MAX];
   time_t mtime;
   struct tm *mtm;
-  char *pathname = 0;
+  char *pathname;
 
 #ifdef HAVE_STRFTIME
   char timebuf[18];

@@ -13,6 +13,8 @@
 #include <libtarint/internal.h>
 
 #include <stdio.h>
+#include <stdlib.h>
+
 #include <libtar/compat.h>
 #if defined(HAVE_SYS_PARAM_H)
 #include <sys/param.h>
@@ -39,7 +41,7 @@ tar_extract_glob(TAR *t, char *globname, char *prefix)
   char *filename;
   char buf[TAR_MAXPATHLEN];
   int i;
-  char *pathname = 0;
+  char *pathname;
 
   while ((i = th_read(t)) == 0)
   {
@@ -94,7 +96,7 @@ tar_extract_all(TAR *t, char *prefix)
   char *filename;
   char buf[TAR_MAXPATHLEN];
   int i;
-  char *pathname = 0;
+  char *pathname;
 
 #ifdef DEBUG
   printf("==> tar_extract_all(TAR *t, \"%s\")\n",
