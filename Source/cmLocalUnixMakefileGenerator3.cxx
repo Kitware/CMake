@@ -2561,7 +2561,8 @@ cmLocalUnixMakefileGenerator3
   // if there is no restriction on the length of make variables
   // and there are no "." charactors in the string, then return the
   // unmodified combination.
-  if(!m_MakefileVariableSize && unmodified.find('.') == s.npos)
+  if((!m_MakefileVariableSize && unmodified.find('.') == s.npos)
+     && (!m_MakefileVariableSize && unmodified.find('-') == s.npos))
     {
     return unmodified;
     }
@@ -2580,6 +2581,7 @@ cmLocalUnixMakefileGenerator3
   if(!m_MakefileVariableSize)
     {
     cmSystemTools::ReplaceString(ret, ".", "_");
+    cmSystemTools::ReplaceString(ret, "-", "__");
     int ni = 0;
     char buffer[5];
     // make sure the _ version is not already used, if
