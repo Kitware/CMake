@@ -69,6 +69,9 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
     {"-P <ProjectName>", "Specify the project name.",
     "This option specifies the project name that will be used to generate the "
       "installer." },
+    {"-C <Configuration>", "Specify the project configuration",
+    "This option specifies the configuration that the project was build with, "
+      "for example 'Debug', 'Release'." },
     {"-R <ReleaseVersion>", "Specify the release version of the project.",
     "This option specifies the release version of the project that will be "
       "used by installer." },
