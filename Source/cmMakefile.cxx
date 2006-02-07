@@ -2296,14 +2296,71 @@ std::string cmMakefile::FindLibrary(const char* name,
           }
         }
       // now look for the library in the 64 bit path
-      std::string tmp = cmSystemTools::FindLibrary(name, path64);
-      cmSystemTools::ConvertToUnixSlashes(tmp);
-      return tmp;
+      path = path64;
       }
     }
-  std::string tmp = cmSystemTools::FindLibrary(name, path);
-  cmSystemTools::ConvertToUnixSlashes(tmp);
-  return tmp;
+
+  // See if the library exists as written.
+  if(cmSystemTools::FileExists(name) &&
+     !cmSystemTools::FileIsDirectory(name))
+    {
+    return cmSystemTools::CollapseFullPath(name);
+    }
+
+  // Construct a list of possible suffixes.
+  const char* windows_suffixes[] = {".lib", 0};
+  const char* unix_suffixes[] = {".so", ".sl", ".dylib", ".a",
+                                 ".dll", ".dll.a", 0};
+  bool windowsLibs = false;
+  if(cmSystemTools::IsOn(this->GetDefinition("WIN32")) &&
+     !cmSystemTools::IsOn(this->GetDefinition("CYGWIN")) &&
+     !cmSystemTools::IsOn(this->GetDefinition("MINGW")))
+    {
+    windowsLibs = true;
+    }
+
+  std::string tryPath;
+  for(std::vector<std::string>::const_iterator p = path.begin();
+      p != path.end(); ++p)
+    {
+    // Look for a framework.
+    if(supportFrameworks)
+      {
+      tryPath = *p;
+      tryPath += "/";
+      tryPath += name;
+      tryPath += ".framework";
+      if(cmSystemTools::FileExists(tryPath.c_str())
+         && cmSystemTools::FileIsDirectory(tryPath.c_str()))
+        {
+        tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+        cmSystemTools::ConvertToUnixSlashes(tryPath);
+        return tryPath;
+        }
+      }
+
+    // Try various library naming conventions.
+    const char* prefix = windowsLibs? "" : "lib";
+    const char** suffixes = windowsLibs? windows_suffixes : unix_suffixes;
+    for(const char** suffix = suffixes; *suffix; ++suffix)
+      {
+      tryPath = *p;
+      tryPath += "/";
+      tryPath += prefix;
+      tryPath += name;
+      tryPath += *suffix;
+      if(cmSystemTools::FileExists(tryPath.c_str())
+         && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
+        {
+        tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+        cmSystemTools::ConvertToUnixSlashes(tryPath);
+        return tryPath;
+        }
+      }
+    }
+
+  // Couldn't find the library.
+  return "";
 }
 
 //----------------------------------------------------------------------------
