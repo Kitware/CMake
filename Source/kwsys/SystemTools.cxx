@@ -2475,7 +2475,7 @@ std::string SystemTools::RelativePath(const char* local, const char* remote)
     }
   // for each entry that is not common in the remote path add it
   // to the final path.
-  for(std::vector<kwsys_stl::string>::iterator i = remoteSplit.begin();
+  for(std::vector<String>::iterator i = remoteSplit.begin();
       i != remoteSplit.end(); ++i)
     {
     if(i->size())
@@ -2486,7 +2486,7 @@ std::string SystemTools::RelativePath(const char* local, const char* remote)
   std::string relativePath;     // result string
   // now turn the array of directories into a unix path by puttint / 
   // between each entry that does not already have one
-  for(std::vector<kwsys_stl::string>::iterator i = finalPath.begin();
+  for(std::vector<String>::iterator i = finalPath.begin();
       i != finalPath.end(); ++i)
     {
     if(relativePath.size() && relativePath[relativePath.size()-1] != '/')
