@@ -2442,8 +2442,8 @@ std::string SystemTools::RelativePath(const char* local, const char* remote)
     && 
 // for windows and apple do a case insensitive string compare    
 #if defined(_WIN32) || defined(__APPLE__)
-    cmSystemTools::Strucmp(localSplit[sameCount].c_str(),
-                           remoteSplit[sameCount].c_str()) == 0
+    SystemTools::Strucmp(localSplit[sameCount].c_str(),
+                         remoteSplit[sameCount].c_str()) == 0
 #else
     localSplit[sameCount] == remoteSplit[sameCount]
 #endif
