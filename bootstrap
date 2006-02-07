@@ -130,6 +130,7 @@ KWSYS_FILES="\
   Glob.hxx \
   Process.h \
   RegularExpression.hxx \
+  String.hxx \
   SystemTools.hxx"
 
 KWSYS_IOS_FILES="

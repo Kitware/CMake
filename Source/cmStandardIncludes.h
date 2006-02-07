@@ -212,26 +212,8 @@ inline bool operator==(std::string const& a, const char* b)
 // use this class to shrink the size of symbols in .o files
 // std::string is really basic_string<....lots of stuff....>
 // when combined with a map or set, the symbols can be > 2000 chars!
-struct cmStdString : public std::string
-{
-  typedef std::string StdString;
-  typedef StdString::value_type             value_type;
-  typedef StdString::pointer                pointer;
-  typedef StdString::reference              reference;
-  typedef StdString::const_reference        const_reference;
-  typedef StdString::size_type              size_type;
-  typedef StdString::difference_type        difference_type;
-  typedef StdString::iterator               iterator;
-  typedef StdString::const_iterator         const_iterator;
-  typedef StdString::reverse_iterator       reverse_iterator;
-  typedef StdString::const_reverse_iterator const_reverse_iterator;
-  
-  cmStdString(): StdString() {}
-  cmStdString(const value_type* s): StdString(s) {}
-  cmStdString(const value_type* s, size_type n): StdString(s, n) {}
-  cmStdString(const StdString& s, size_type pos=0, size_type n=npos):
-    StdString(s, pos, n) {}
-};
+#include <cmsys/String.hxx>
+typedef cmsys::String cmStdString;
 
 // Define cmOStringStream and cmIStringStream wrappers to hide
 // differences between std::stringstream and the old strstream.
