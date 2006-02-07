@@ -74,7 +74,6 @@ tar_extract_glob(TAR *t, char *globname, char *prefix)
       if (pathname)
         {
         free(pathname);
-        pathname = 0;
         }
       return -1;
       }
@@ -82,7 +81,6 @@ tar_extract_glob(TAR *t, char *globname, char *prefix)
     if (pathname)
       {
       free(pathname);
-      pathname = 0;
       }
   }
 
@@ -122,7 +120,6 @@ tar_extract_all(TAR *t, char *prefix)
     if (pathname)
       {
       free(pathname);
-      pathname = 0;
       }
 
 #ifdef DEBUG
