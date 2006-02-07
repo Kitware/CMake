@@ -20,6 +20,7 @@
 #include <@KWSYS_NAMESPACE@/stl/map>
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
+#include <@KWSYS_NAMESPACE@/String.hxx>
 
 #include <sys/types.h>
 
@@ -176,6 +177,13 @@ public:
    */
   static kwsys_stl::string CropString(const kwsys_stl::string&,size_t max_len);
   
+  /** split a path by separator into an array of strings, default is /.
+      If isPath is true then the string is treated like a path and if
+      s starts with a / then the first element of the returned array will
+      be /, so /foo/bar will be [/, foo, bar]
+  */  
+  static std::vector<String> SplitString(const char* s, char separator = '/', 
+                                         bool isPath = false);
   /**
    * Perform a case-independent string comparison
    */
@@ -574,6 +582,16 @@ public:
   static kwsys_stl::string FileExistsInParentDirectories(const char* fname,
     const char* directory, const char* toplevel);
 
+  /** compute the relative path from local to remote.  local must 
+      be a directory.  remote can be a file or a directory.  
+      Both remote and local must be full paths.  Basically, if
+      you are in directory local and you want to access the file in remote
+      what is the relative path to do that.  For example:
+      /a/b/c/d to /a/b/c1/d1 -> ../../c1/d1
+      from /usr/src to /usr/src/test/blah/foo.cpp -> test/blah/foo.cpp
+  */
+  static std::string RelativePath(const char* local, const char* remote);
+  
   /**
    * Return file's modified time
    */

@@ -285,14 +285,7 @@ public:
       from /usr/src to /usr/src/test/blah/foo.cpp -> test/blah/foo.cpp
   */
   static std::string RelativePath(const char* local, const char* remote);
-  
-  /** split a path by separator into an array of strings, default is /.
-      If isPath is true then the string is treated like a path and if
-      s starts with a / then the first element of the returned array will
-      be /, so /foo/bar will be [/, foo, bar]
-  */  
-  static std::vector<cmStdString> SplitString(const char* s, char separator = '/', 
-                                              bool isPath = false);
+
   /** put a string into the environment
       of the form var=value */
   static bool PutEnv(const char* value);
