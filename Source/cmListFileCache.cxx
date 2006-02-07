@@ -25,65 +25,7 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
                                   cmListFileFunction& function,
                                   const char* filename);
 
-cmListFileCache* cmListFileCache::Instance = 0;
-
-
-cmListFileCache* cmListFileCache::GetInstance()
-{
-  if(!cmListFileCache::Instance)
-    {
-    cmListFileCache::Instance = new cmListFileCache;
-    }
-  return cmListFileCache::Instance;
-}
-
-
-void cmListFileCache::ClearCache()
-{
-  delete cmListFileCache::Instance;
-  cmListFileCache::Instance = 0;
-}
-
-
-
-cmListFile* cmListFileCache::GetFileCache(const char* path,
-                                          bool requireProjectCommand)
-{
-  ListFileMap::iterator sl = m_ListFileCache.find(path);
-  if (sl == m_ListFileCache.end())
-    {
-    // if not already in the map, then parse and store the 
-    // file
-    if(!this->CacheFile(path, requireProjectCommand))
-      {
-      return 0;
-      }
-    sl = m_ListFileCache.find(path);
-    if (sl == m_ListFileCache.end())
-      {
-      cmSystemTools::Error("Fatal error, in cmListFileCache CacheFile failed",
-                           path);
-      return 0;
-      }
-    }
-  cmListFile& ret = sl->second;
-  if(cmSystemTools::ModifiedTime(path) > ret.m_ModifiedTime )
-    {
-    if(!this->CacheFile(path, requireProjectCommand))
-      {
-      return 0;
-      }
-    else
-      {
-      sl = m_ListFileCache.find(path);
-      return &sl->second;
-      }
-    } 
-  return &ret;
-}
-
-
-bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
+bool cmListFile::ParseFile(const char* path, bool requireProjectCommand)
 {
   if(!cmSystemTools::FileExists(path))
     {
@@ -110,8 +52,7 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
 
   // Use a simple recursive-descent parser to process the token
   // stream.
-  cmListFile inFile;
-  inFile.m_ModifiedTime = cmSystemTools::ModifiedTime(filename);
+  this->m_ModifiedTime = cmSystemTools::ModifiedTime(filename);
   bool parseError = false;
   bool haveNewline = true;
   cmListFileLexer_Token* token;
@@ -132,7 +73,7 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
         inFunction.m_Line = token->line;
         if(cmListFileCacheParseFunction(lexer, inFunction, filename))
           {
-          inFile.m_Functions.push_back(inFunction);
+          this->m_Functions.push_back(inFunction);
           }
         else
           {
@@ -166,7 +107,7 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
     }
   if (parseError)
     {
-    inFile.m_ModifiedTime = 0;
+    this->m_ModifiedTime = 0;
     }
 
   cmListFileLexer_Delete(lexer);
@@ -176,8 +117,8 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
     bool hasProject = false;
     // search for a project command
     for(std::vector<cmListFileFunction>::iterator i 
-          = inFile.m_Functions.begin();
-        i != inFile.m_Functions.end(); ++i)
+          = this->m_Functions.begin();
+        i != this->m_Functions.end(); ++i)
       {
       if(cmSystemTools::LowerCase(i->m_Name) == "project")
         {
@@ -192,21 +133,10 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
       project.m_Name = "PROJECT";
       cmListFileArgument prj("Project", false, filename, 0);
       project.m_Arguments.push_back(prj);
-      inFile.m_Functions.insert(inFile.m_Functions.begin(),project);
+      this->m_Functions.insert(this->m_Functions.begin(),project);
       }
     }
-  m_ListFileCache[filename] = inFile;
   return true;
-}
-
-void cmListFileCache::FlushCache(const char* path)
-{
-  ListFileMap::iterator it = m_ListFileCache.find(path);
-  if ( it != m_ListFileCache.end() )
-    {
-    m_ListFileCache.erase(it);
-    return;
-    }
 }
 
 bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
@@ -284,7 +214,7 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
 }
 
 //----------------------------------------------------------------------------
-const char* cmListFileCache::GetUniqueStringPointer(const char* name)
+const char* cmListFile::GetUniqueStringPointer(const char* name)
 {
   UniqueStrings::iterator i = m_UniqueStrings.find(name);
   if(i == m_UniqueStrings.end())
@@ -296,12 +226,3 @@ const char* cmListFileCache::GetUniqueStringPointer(const char* name)
   return i->second;
 }
 
-//----------------------------------------------------------------------------
-cmListFileCache::~cmListFileCache()
-{
-  for(UniqueStrings::iterator i = m_UniqueStrings.begin();
-      i != m_UniqueStrings.end(); ++i)
-    {
-    delete [] i->second;
-    }
-}

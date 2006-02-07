@@ -243,7 +243,6 @@ int cmTryCompileCommand::CoreTryCompileCode(
   // if They specified clean then we clean up what we can
   if (srcFileSignature && clean)
     {    
-    cmListFileCache::GetInstance()->FlushCache(outFileName.c_str());
     if(!mf->GetCMakeInstance()->GetDebugTryCompile())
       {
       cmTryCompileCommand::CleanupFiles(binaryDirectory);

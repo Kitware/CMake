@@ -378,20 +378,18 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
       }
     }
       
-  cmListFile* lf = 
-    cmListFileCache::GetInstance()->GetFileCache(filenametoread,
-                                                 requireProjectCommand);
-  if(!lf)
+  cmListFile cacheFile;
+  if( !cacheFile.ParseFile(filenametoread, requireProjectCommand) )
     {
     this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());
     return false;
     }
   // add this list file to the list of dependencies
   m_ListFiles.push_back( filenametoread);
-  const size_t numberFunctions = lf->m_Functions.size();
+  const size_t numberFunctions = cacheFile.m_Functions.size();
   for(size_t i =0; i < numberFunctions; ++i)
     {
-    this->ExecuteCommand(lf->m_Functions[i]);
+    this->ExecuteCommand(cacheFile.m_Functions[i]);
     if ( cmSystemTools::GetFatalErrorOccured() )
       {
       this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());

@@ -237,7 +237,6 @@ int main (int argc, char *argv[])
   std::string output;
   int res = inst.Run(args,&output);
   cmCTestLog(&inst, OUTPUT, output);
-  cmListFileCache::ClearCache();
 
   return res;
 }

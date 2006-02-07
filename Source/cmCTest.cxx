@@ -1656,13 +1656,6 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     cmCTestBuildAndTestHandler* handler = 
       static_cast<cmCTestBuildAndTestHandler*>(this->GetHandler("buildtest"));
     int retv = handler->ProcessHandler();
-    /*
-    cmSystemTools::ResetErrorOccuredFlag();
-    cmListFileCache::ClearCache();
-    int retv = this->RunCMakeAndTest(output);
-    cmSystemTools::ResetErrorOccuredFlag();
-    cmListFileCache::ClearCache();
-    */
     *output = handler->GetOutput();
 #ifdef CMAKE_BUILD_WITH_CMAKE
     cmDynamicLoader::FlushCache();

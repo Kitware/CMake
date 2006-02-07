@@ -212,7 +212,6 @@ CMakeSetupDialog::~CMakeSetupDialog()
 {
   delete m_CMakeInstance;
   // clean up globals 
-  cmListFileCache::GetInstance()->ClearCache(); 
   cmDynamicLoader::FlushCache();
 }
 

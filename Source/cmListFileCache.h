@@ -62,42 +62,12 @@ struct cmListFile
     :m_ModifiedTime(0) 
     {
     }
+  bool ParseFile(const char* path, bool requireProjectCommand);
   long int m_ModifiedTime;
   std::vector<cmListFileFunction> m_Functions;
-};
-
-class cmListFileCache
-{
-public:
-  static cmListFileCache* GetInstance();
-  static void ClearCache();
-
-
-  /** Return the cached version of the given file.
-   *  If the file is not already in the cache, a cache entry
-   *  will be made.  If there is an error loading the file,
-   *  NULL is returned.  If requireProjectCommand is true,
-   *  then a PROJECT(Project) command will be added to the file
-   *  if it does not have a PROJECT command in it.
-   */
-  cmListFile* GetFileCache(const char* path, bool requireProjectCommand);
-
-  //! Flush cache file out of cache.
-  void FlushCache(const char* path);
-
-  ~cmListFileCache();
-private:
-  // Cache the file
-  bool CacheFile(const char* path, bool requireProjectCommand);
-  // private data
-  typedef std::map<cmStdString, cmListFile> ListFileMap;
-  ListFileMap m_ListFileCache;  // file name to ListFile map
-
   typedef std::map<cmStdString, char*> UniqueStrings;
   UniqueStrings m_UniqueStrings;
   const char* GetUniqueStringPointer(const char* name);
-
-  static cmListFileCache* Instance; // singelton pointer
 };
 
 #endif

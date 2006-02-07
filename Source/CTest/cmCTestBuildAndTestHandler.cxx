@@ -48,10 +48,8 @@ int cmCTestBuildAndTestHandler::ProcessHandler()
   m_Output = "";
   std::string output;
   cmSystemTools::ResetErrorOccuredFlag();
-  cmListFileCache::ClearCache();
   int retv = this->RunCMakeAndTest(&m_Output);
   cmSystemTools::ResetErrorOccuredFlag();
-  cmListFileCache::ClearCache();
   return retv;
 }
 
