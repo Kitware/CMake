@@ -57,6 +57,10 @@ namespace @KWSYS_NAMESPACE@
 {
 
 class SystemToolsTranslationMap;
+/** \class SystemToolsManager
+ * \brief Use to make sure SystemTools is initialized before it is used
+ * and is the last static object destroyed
+ */
 class @KWSYS_NAMESPACE@_EXPORT SystemToolsManager
 {
 public:
