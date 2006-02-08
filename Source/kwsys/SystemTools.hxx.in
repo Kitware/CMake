@@ -182,8 +182,8 @@ public:
       s starts with a / then the first element of the returned array will
       be /, so /foo/bar will be [/, foo, bar]
   */  
-  static std::vector<String> SplitString(const char* s, char separator = '/', 
-                                         bool isPath = false);
+  static kwsys_stl::vector<String> SplitString(const char* s, char separator = '/', 
+                                               bool isPath = false);
   /**
    * Perform a case-independent string comparison
    */
@@ -590,7 +590,7 @@ public:
       /a/b/c/d to /a/b/c1/d1 -> ../../c1/d1
       from /usr/src to /usr/src/test/blah/foo.cpp -> test/blah/foo.cpp
   */
-  static std::string RelativePath(const char* local, const char* remote);
+  static kwsys_stl::string RelativePath(const char* local, const char* remote);
   
   /**
    * Return file's modified time

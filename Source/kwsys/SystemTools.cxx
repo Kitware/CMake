@@ -1131,18 +1131,18 @@ kwsys_stl::string SystemTools::CropString(const kwsys_stl::string& s,
 }
 
 //----------------------------------------------------------------------------
-std::vector<kwsys::String> SystemTools::SplitString(const char* p, char sep, bool isPath)
+kwsys_stl::vector<kwsys::String> SystemTools::SplitString(const char* p, char sep, bool isPath)
 {
-  std::string path = p;
-  std::vector<kwsys::String> paths;
+  kwsys_stl::string path = p;
+  kwsys_stl::vector<kwsys::String> paths;
   if(isPath && path[0] == '/')
     {
     path.erase(path.begin());
     paths.push_back("/"); 
     }
-  std::string::size_type pos1 = 0;
-  std::string::size_type pos2 = path.find(sep, pos1+1);
-  while(pos2 != std::string::npos)
+  kwsys_stl::string::size_type pos1 = 0;
+  kwsys_stl::string::size_type pos2 = path.find(sep, pos1+1);
+  while(pos2 != kwsys_stl::string::npos)
     {
     paths.push_back(path.substr(pos1, pos2-pos1));
     pos1 = pos2+1;
@@ -2419,7 +2419,7 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
 }
 
 // compute the relative path from here to there
-std::string SystemTools::RelativePath(const char* local, const char* remote)
+kwsys_stl::string SystemTools::RelativePath(const char* local, const char* remote)
 {
   if(!SystemTools::FileIsFullPath(local))
     {
@@ -2431,10 +2431,10 @@ std::string SystemTools::RelativePath(const char* local, const char* remote)
     }
   
   // split up both paths into arrays of strings using / as a separator
-  std::vector<kwsys::String> localSplit = SystemTools::SplitString(local, '/', true); 
-  std::vector<kwsys::String> remoteSplit = SystemTools::SplitString(remote, '/', true);
-  std::vector<kwsys::String> commonPath; // store shared parts of path in this array
-  std::vector<kwsys::String> finalPath;  // store the final relative path here
+  kwsys_stl::vector<kwsys::String> localSplit = SystemTools::SplitString(local, '/', true); 
+  kwsys_stl::vector<kwsys::String> remoteSplit = SystemTools::SplitString(remote, '/', true);
+  kwsys_stl::vector<kwsys::String> commonPath; // store shared parts of path in this array
+  kwsys_stl::vector<kwsys::String> finalPath;  // store the final relative path here
   // count up how many matching directory names there are from the start
   unsigned int sameCount = 0;
   while(
@@ -2475,25 +2475,25 @@ std::string SystemTools::RelativePath(const char* local, const char* remote)
     }
   // for each entry that is not common in the remote path add it
   // to the final path.
-  for(std::vector<String>::iterator i = remoteSplit.begin();
-      i != remoteSplit.end(); ++i)
+  for(kwsys_stl::vector<String>::iterator vit = remoteSplit.begin();
+      vit != remoteSplit.end(); ++vit)
     {
-    if(i->size())
+    if(vit->size())
       {
-      finalPath.push_back(*i);
+      finalPath.push_back(*vit);
       }
     }
-  std::string relativePath;     // result string
+  kwsys_stl::string relativePath;     // result string
   // now turn the array of directories into a unix path by puttint / 
   // between each entry that does not already have one
-  for(std::vector<String>::iterator i = finalPath.begin();
-      i != finalPath.end(); ++i)
+  for(kwsys_stl::vector<String>::iterator vit1 = finalPath.begin();
+      vit1 != finalPath.end(); ++vit1)
     {
     if(relativePath.size() && relativePath[relativePath.size()-1] != '/')
       {
       relativePath += "/";
       }
-    relativePath += *i;
+    relativePath += *vit1;
     }
   return relativePath;
 }
