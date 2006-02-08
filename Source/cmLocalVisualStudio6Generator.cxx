@@ -303,15 +303,13 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
            target.GetPreBuildCommands().begin();
          cr != target.GetPreBuildCommands().end(); ++cr)
       {
-      this->AddUtilityCommandHack(target, count++, depends,
-                                  cr->GetCommandLines());
+      this->AddUtilityCommandHack(target, count++, depends, *cr);
       }
     for (std::vector<cmCustomCommand>::const_iterator cr =
            target.GetPostBuildCommands().begin();
          cr != target.GetPostBuildCommands().end(); ++cr)
       {
-      this->AddUtilityCommandHack(target, count++, depends,
-                                  cr->GetCommandLines());
+      this->AddUtilityCommandHack(target, count++, depends, *cr);
       }
     }
   
@@ -503,7 +501,7 @@ void
 cmLocalVisualStudio6Generator
 ::AddUtilityCommandHack(cmTarget& target, int count,
                         std::vector<std::string>& depends,
-                        const cmCustomCommandLines& commandLines)
+                        const cmCustomCommand& origCommand)
 {
   // Create a fake output that forces the rule to run.
   char* output = new char[(strlen(m_Makefile->GetStartOutputDirectory()) +
@@ -518,9 +516,9 @@ cmLocalVisualStudio6Generator
   m_Makefile->AddCustomCommandToOutput(output,
                                        depends,
                                        no_main_dependency,
-                                       commandLines,
-                                       no_comment, 
-                                       no_working_directory);
+                                       origCommand.GetCommandLines(),
+                                       origCommand.GetComment(),
+                                       origCommand.GetWorkingDirectory());
 
   // Replace the dependencies with the output of this rule so that the
   // next rule added will run after this one.

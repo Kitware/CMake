@@ -89,7 +89,7 @@ private:
                        const char* flags);
   void AddUtilityCommandHack(cmTarget& target, int count,
                              std::vector<std::string>& depends,
-                             const cmCustomCommandLines& commandLines);
+                             const cmCustomCommand& origCommand);
   void WriteGroup(const cmSourceGroup *sg, cmTarget target,
                   std::ostream &fout, const char *libName);
   std::string CreateTargetRules(cmTarget &target, 
