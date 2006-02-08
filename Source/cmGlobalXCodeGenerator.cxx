@@ -342,8 +342,9 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     }
   cmCustomCommandLines commandLines;
   commandLines.push_back(makecommand);
-  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false, no_output, no_depends,
+  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false, no_output,
                         no_working_directory,
+                        no_depends,
                         commandLines);
 
   // Add Re-Run CMake rules
@@ -966,9 +967,17 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
         {
         // Build the command line in a single string.
         const cmCustomCommandLine& commandLine = *cl;
-        std::string cmd = commandLine[0];
-        cmSystemTools::ReplaceString(cmd, "/./", "/");
-        cmd = this->ConvertToRelativeForMake(cmd.c_str());
+        std::string cmd2 = commandLine[0];
+        cmSystemTools::ReplaceString(cmd2, "/./", "/");
+        cmd2 = this->ConvertToRelativeForMake(cmd2.c_str());
+        std::string cmd;
+        if(cc.GetWorkingDirectory())
+          {
+          cmd += "cd ";
+          cmd += this->ConvertToRelativeForMake(cc.GetWorkingDirectory());
+          cmd += " && ";
+          }
+        cmd += cmd2;
         for(unsigned int j=1; j < commandLine.size(); ++j)
           {
           cmd += " ";
