@@ -106,13 +106,20 @@ SET(CMAKE_XMLRPC_INCLUDES
 SET(CMAKE_XMLRPC_LIBRARIES "cmXMLRPC")
 
 IF (UNIX)
-  INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
+  FIND_PACKAGE(Curses QUIET)
   IF (CURSES_LIBRARY)
-    SUBDIRS(Source/CursesDialog/form)
+    OPTION(BUILD_CursesDialog "Build the CMake Curses Dialog ccmake" ON)
   ELSE (CURSES_LIBRARY)
     MESSAGE("Curses libraries were not found. Curses GUI for CMake will not be build.")
+    SET(BUILD_CursesDialog 0)
   ENDIF (CURSES_LIBRARY)
+ELSE (UNIX)
+  SET(BUILD_CursesDialog 0)
 ENDIF (UNIX)
+
+IF(BUILD_CursesDialog)
+  SUBDIRS(Source/CursesDialog/form)
+ENDIF(BUILD_CursesDialog)
 
 SUBDIRS(Source Modules Templates Utilities)
 ENABLE_TESTING()

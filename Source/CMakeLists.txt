@@ -291,12 +291,9 @@ ADD_EXECUTABLE(cpack CPack/cpack.cxx)
 TARGET_LINK_LIBRARIES(cpack CPackLib)
 
 # Curses GUI
-IF (UNIX)
-  INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
-  IF (CURSES_LIBRARY)
-    INCLUDE(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
-  ENDIF (CURSES_LIBRARY)
-ENDIF (UNIX)
+IF(BUILD_CursesDialog)
+  INCLUDE(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
+ENDIF(BUILD_CursesDialog)
 
 # MFC GUI
 # MFC libraries are only available on Visual Studio

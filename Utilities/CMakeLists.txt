@@ -51,28 +51,26 @@ INSTALL_FILES(${CMAKE_DOC_DIR} FILES
 SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/ctest.txt)
 
 # Generate documentation for "ccmake" executable.
-IF(UNIX)
-  IF(CURSES_LIBRARY)
-    SET(CMD ${CMD_DIR}/ccmake${CMD_EXT})
-    ADD_CUSTOM_COMMAND(
-      OUTPUT ${CMake_BINARY_DIR}/Docs/ccmake.txt
-      COMMAND ${CMD}
-      ARGS --help-full ${CMake_BINARY_DIR}/Docs/ccmake.txt
-           --help-html ${CMake_BINARY_DIR}/Docs/ccmake.html
-           --help-man ${CMake_BINARY_DIR}/Docs/ccmake.1
-      DEPENDS ccmake
-      MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
-      )
-    INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
-      ${CMake_BINARY_DIR}/Docs/ccmake.1
-      )
-    INSTALL_FILES(${CMAKE_DOC_DIR} FILES
-      ${CMake_BINARY_DIR}/Docs/ccmake.txt
-      ${CMake_BINARY_DIR}/Docs/ccmake.html
-      )
-    SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/ccmake.txt)
-  ENDIF(CURSES_LIBRARY)
-ENDIF(UNIX)
+IF(BUILD_CursesDialog)
+  SET(CMD ${CMD_DIR}/ccmake${CMD_EXT})
+  ADD_CUSTOM_COMMAND(
+    OUTPUT ${CMake_BINARY_DIR}/Docs/ccmake.txt
+    COMMAND ${CMD}
+    ARGS --help-full ${CMake_BINARY_DIR}/Docs/ccmake.txt
+         --help-html ${CMake_BINARY_DIR}/Docs/ccmake.html
+         --help-man ${CMake_BINARY_DIR}/Docs/ccmake.1
+    DEPENDS ccmake
+    MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
+    )
+  INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
+    ${CMake_BINARY_DIR}/Docs/ccmake.1
+    )
+  INSTALL_FILES(${CMAKE_DOC_DIR} FILES
+    ${CMake_BINARY_DIR}/Docs/ccmake.txt
+    ${CMake_BINARY_DIR}/Docs/ccmake.html
+    )
+  SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/ccmake.txt)
+ENDIF(BUILD_CursesDialog)
 
 IF(BUILD_MFCDialog)
   SET(CMD ${CMD_DIR}/CMakeSetup${CMD_EXT})
