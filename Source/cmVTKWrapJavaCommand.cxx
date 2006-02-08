@@ -185,5 +185,5 @@ void cmVTKWrapJavaCommand::FinalPass()
   const char* no_working_directory = 0;
   m_Makefile->AddUtilityCommand((m_LibraryName+"JavaClasses").c_str(),
                                 true, no_output, 
-                                alldepends, "", no_working_directory);
+                                alldepends, no_working_directory, "");
 }

@@ -64,7 +64,7 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
       {
       doing = doing_depends;
       }
-    if(copy == "WORKING_DIRECTORY")
+    else if(copy == "WORKING_DIRECTORY")
       {
       doing = doing_working_directory;
       }
