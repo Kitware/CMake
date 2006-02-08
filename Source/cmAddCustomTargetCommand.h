@@ -66,6 +66,7 @@ public:
       "  ADD_CUSTOM_TARGET(Name [ALL] [command1 [args1...]]\n"
       "                    [COMMAND command2 [args2...] ...]\n"
       "                    [DEPENDS depend depend depend ... ])\n"
+      "                    [WORKING_DIRECTORY dir]\n"
       "Adds a target with the given name that executes the given commands "
       "every time the target is built.  If the ALL option is specified "
       "it indicates that this target should be added to the default build "
@@ -73,7 +74,9 @@ public:
       "The command and arguments are optional.  If not specified, "
       "it will create an empty target.  The ADD_DEPENDENCIES command can be "
       "used in conjunction with this command to drive custom target "
-      "generation.  The command cannot be called ALL.";
+      "generation.  The command cannot be called ALL. "
+      "If WORKING_DIRECTORY is set, then the command will be run in that "
+      "directory.";
     }
   
   cmTypeMacro(cmAddCustomTargetCommand, cmCommand);

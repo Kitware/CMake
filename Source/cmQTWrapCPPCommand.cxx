@@ -127,10 +127,12 @@ void cmQTWrapCPPCommand::FinalPass()
     realdepends.push_back(m_WrapHeaders[classNum]);
 
     const char* no_main_dependency = 0;
+    const char* no_working_dir = 0;
     m_Makefile->AddCustomCommandToOutput(res.c_str(),
                                          realdepends,
                                          no_main_dependency,
                                          commandLines,
-                                         "QT Wrapped File");
+                                         "QT Wrapped File",
+                                         no_working_dir);
     }
 }

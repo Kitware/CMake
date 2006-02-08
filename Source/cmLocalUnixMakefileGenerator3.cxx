@@ -2405,13 +2405,19 @@ cmLocalUnixMakefileGenerator3
           cmSystemTools::SetForceUnixPaths(true);
           }
         }
-      
       commands1.push_back(cmd);
       }
     }
 
   // push back the custom commands
-  this->CreateCDCommand(commands1,m_Makefile->GetStartOutputDirectory(),
+  const char* dir  =m_Makefile->GetStartOutputDirectory();
+  // if the command specified a working directory use it.
+  if(cc.GetWorkingDirectory())
+    {
+    dir = cc.GetWorkingDirectory();
+    }
+  
+  this->CreateCDCommand(commands1, dir,
                         m_Makefile->GetHomeOutputDirectory());
   commands.insert(commands.end(), commands1.begin(), commands1.end());
 }

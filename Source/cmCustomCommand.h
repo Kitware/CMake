@@ -35,10 +35,14 @@ public:
   cmCustomCommand(const char* output,
                   const std::vector<std::string>& depends,
                   const cmCustomCommandLines& commandLines,
-                  const char* comment);
+                  const char* comment,
+                  const char* workingDirectory);
 
   /** Get the output file produced by the command.  */
   const char* GetOutput() const;
+
+  /** Get the working directory.  */
+  const char* GetWorkingDirectory() const;
 
   /** Get the vector that holds the list of dependencies.  */
   const std::vector<std::string>& GetDepends() const;
@@ -58,6 +62,7 @@ private:
   std::vector<std::string> m_Depends;
   cmCustomCommandLines m_CommandLines;
   std::string m_Comment;
+  std::string m_WorkingDirectory;
   bool m_Used;
 };
 

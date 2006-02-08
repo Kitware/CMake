@@ -240,7 +240,7 @@ void CCONV cmAddUtilityCommand(void *arg, const char* utilityName,
 
   // Pass the call to the makefile instance.
   mf->AddUtilityCommand(utilityName, (all ? true : false),
-                        output, depends2, commandLines);
+                        output, 0, depends2, commandLines);
 }
 void CCONV cmAddCustomCommand(void *arg, const char* source,
                         const char* command,
@@ -319,8 +319,9 @@ void CCONV cmAddCustomCommandToOutput(void *arg, const char* output,
 
   // Pass the call to the makefile instance.
   const char* no_comment = 0;
+  const char* no_working_dir = 0;
   mf->AddCustomCommandToOutput(output, depends2, main_dependency,
-                               commandLines, no_comment);
+                               commandLines, no_comment, no_working_dir);
 }
 
 void CCONV cmAddCustomCommandToTarget(void *arg, const char* target,
@@ -362,8 +363,9 @@ void CCONV cmAddCustomCommandToTarget(void *arg, const char* target,
   // Pass the call to the makefile instance.
   std::vector<std::string> no_depends;
   const char* no_comment = 0;
+  const char* no_working_dir = 0;
   mf->AddCustomCommandToTarget(target, no_depends, commandLines,
-                               cctype, no_comment);
+                               cctype, no_comment, no_working_dir);
 }
 
 void CCONV cmAddLinkLibraryForTarget(void *arg, const char *tgt, const char*value, 

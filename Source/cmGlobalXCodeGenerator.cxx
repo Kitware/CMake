@@ -279,8 +279,10 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   cmMakefile* mf = root->GetMakefile();
   // Add ALL_BUILD
   const char* no_output = 0;
+  const char* no_working_directory = 0;
   std::vector<std::string> no_depends;
   mf->AddUtilityCommand("ALL_BUILD", false, no_output, no_depends,
+                        no_working_directory,
                         "echo", "Build all projects");
   cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
   // ADD install
@@ -288,12 +290,14 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   if(m_XcodeVersion == 15)
     {
     mf->AddUtilityCommand("install", false, no_output, no_depends,
+                          no_working_directory,
                           cmake_command.c_str(),
                           "-P", "cmake_install.cmake"); 
     }
   else
     { 
     mf->AddUtilityCommand("install", false, no_output, no_depends,
+                          no_working_directory,
                           cmake_command.c_str(), 
                           "-DBUILD_TYPE=$(CONFIGURATION)",
                           "-P", "cmake_install.cmake"); 
@@ -317,6 +321,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     std::string ctest_command = 
       mf->GetRequiredDefinition("CMAKE_CTEST_COMMAND");
     mf->AddUtilityCommand("RUN_TESTS", false, no_output, no_depends,
+                          no_working_directory,
                           ctest_command.c_str());
     }
   // Add XCODE depend helper 
@@ -338,6 +343,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   cmCustomCommandLines commandLines;
   commandLines.push_back(makecommand);
   mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false, no_output, no_depends,
+                        no_working_directory,
                         commandLines);
 
   // Add Re-Run CMake rules

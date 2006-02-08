@@ -1749,10 +1749,18 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
+                                  const char* workingDirectory, 
                                   const char* newline)
+                                  
 {
   // Store the script in a string.
   std::string script;
+  if(workingDirectory)
+    {
+    script += "cd ";
+    script += this->Convert(workingDirectory, START_OUTPUT, SHELL);
+    script += newline;
+    }
 
   // Write each command on a single line.
   for(cmCustomCommandLines::const_iterator cl = commandLines.begin();

@@ -1164,6 +1164,7 @@ void cmGlobalGenerator::SetupTests()
     if (total_tests > 0)
       {
       const char* no_output = 0;
+      const char* no_working_dir = 0;
       std::vector<std::string> no_depends;
       std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
       for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
@@ -1176,7 +1177,8 @@ void cmGlobalGenerator::SetupTests()
           if(const char* outDir = mf->GetDefinition("CMAKE_CFG_INTDIR"))
             {
             mf->AddUtilityCommand("RUN_TESTS", false, no_output, no_depends,
-                                ctest.c_str(), "-C", outDir);
+                                  no_working_dir, 
+                                  ctest.c_str(), "-C", outDir);
             }
           }
         }

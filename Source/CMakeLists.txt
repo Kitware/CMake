@@ -365,7 +365,19 @@ IF(BUILD_TESTING)
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustomCommand/bin"
     --test-command CustomCommand
     )
-
+IF(FALSE)
+  ADD_TEST(CustomCommandWorkingDirectory  ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/CustomCommandWorkingDirectory"
+    "${CMake_BINARY_DIR}/Tests/CustomCommandWorkingDirectory"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project TestWorkingDir
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustomCommandWorkingDirectory"
+    --test-command working
+    )
+ENDIF(FALSE)
   ADD_TEST(FindPackageTest ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/FindPackageTest"

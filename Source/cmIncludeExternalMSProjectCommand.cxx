@@ -44,8 +44,10 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(std::vector<std::string> con
     utility_name += args[0];
 
     const char* no_output = 0;
+    const char* no_working_directory = 0;
     m_Makefile->AddUtilityCommand(utility_name.c_str(), true,
                                   no_output, depends,
+                                  no_working_directory,
                                   args[0].c_str(), args[1].c_str());
     
     }

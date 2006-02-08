@@ -31,7 +31,8 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       return false;
     }
 
-  std::string source, target, comment, output, main_dependency;
+  std::string source, target, comment, output, main_dependency,
+    working;
   std::vector<std::string> depends, outputs;
 
   // Accumulate one command line at a time.
@@ -51,6 +52,7 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
     doing_output,
     doing_outputs,
     doing_comment,
+    doing_working_directory,
     doing_nothing
   };
 
@@ -107,6 +109,10 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       {
       doing = doing_output;
       }
+    else if (copy == "WORKING_DIRECTORY")
+      {
+      doing = doing_working_directory;
+      }
     else if (copy == "MAIN_DEPENDENCY")
       {
       doing = doing_main_dependency;
@@ -141,6 +147,9 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
 
        switch (doing)
          {
+         case doing_working_directory:
+           working = copy;
+           break;
          case doing_source:
            source = copy;
            break;
@@ -210,14 +219,15 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
     std::vector<std::string> no_depends;
     m_Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
                                          commandLines, cctype,
-                                         comment.c_str());
+                                         comment.c_str(), working.c_str());
     }
   else if(target.empty())
     {
     // Target is empty, use the output.
     m_Makefile->AddCustomCommandToOutput(output.c_str(), depends,
                                          main_dependency.c_str(),
-                                         commandLines, comment.c_str());
+                                         commandLines, comment.c_str(),
+                                         working.c_str());
     }
   else
     {

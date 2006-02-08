@@ -190,6 +190,7 @@ void cmGlobalVisualStudio7Generator::Generate()
   // add a special target that depends on ALL projects for easy build
   // of one configuration only.
   const char* no_output = 0;
+  const char* no_working_dir = 0;
   std::vector<std::string> no_depends;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
@@ -200,11 +201,13 @@ void cmGlobalVisualStudio7Generator::Generate()
       {
       gen[0]->GetMakefile()->
         AddUtilityCommand("ALL_BUILD", false, no_output, no_depends,
+                          no_working_dir,
                           "echo", "Build all projects");
       std::string cmake_command = 
         m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
       gen[0]->GetMakefile()->
         AddUtilityCommand("INSTALL", false, no_output, no_depends,
+                          no_working_dir,
                           cmake_command.c_str(),
                           "-DBUILD_TYPE=$(OutDir)", "-P", "cmake_install.cmake");
 

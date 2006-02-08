@@ -254,9 +254,10 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
 
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
+  const char* no_working_directory = 0;
   const char* no_comment = 0;
   m_Makefile->AddCustomCommandToOutput(dspname.c_str(), listFiles, makefileIn.c_str(),
-                                       commandLines, no_comment, true);
+                                       commandLines, no_comment, no_working_directory, true);
 }
 
 
@@ -1096,7 +1097,8 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
       if (command)
         {
         // Construct the entire set of commands in one string.
-        std::string script = this->ConstructScript(command->GetCommandLines());
+        std::string script = this->ConstructScript(command->GetCommandLines(),
+                                                   command->GetWorkingDirectory());
         const char* comment = command->GetComment();
         const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
         this->WriteCustomRule(fout, source.c_str(), script.c_str(),
@@ -1254,7 +1256,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
       fout << "\nCommandLine=\"";
       init = true;
       }
-    std::string script = this->ConstructScript(cr->GetCommandLines());
+    std::string script = this->ConstructScript(cr->GetCommandLines(), cr->GetWorkingDirectory());
     fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)
@@ -1275,7 +1277,8 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
       fout << "\nCommandLine=\"";
       init = true;
       }
-    std::string script = this->ConstructScript(cr->GetCommandLines());
+    std::string script = this->ConstructScript(cr->GetCommandLines(),
+                                               cr->GetWorkingDirectory());
     fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)
@@ -1296,7 +1299,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
       fout << "\nCommandLine=\"";
       init = true;
       }
-    std::string script = this->ConstructScript(cr->GetCommandLines());
+    std::string script = this->ConstructScript(cr->GetCommandLines(), cr->GetWorkingDirectory());
     fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)

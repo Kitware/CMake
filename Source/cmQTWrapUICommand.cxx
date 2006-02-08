@@ -179,11 +179,13 @@ void cmQTWrapUICommand::FinalPass()
     depends.push_back(m_WrapUserInterface[classNum]);
     const char* no_main_dependency = 0;
     const char* no_comment = 0;
+    const char* no_working_dir = 0;
     m_Makefile->AddCustomCommandToOutput(hres.c_str(),
                                          depends,
                                          no_main_dependency,
                                          hCommandLines,
-                                         no_comment);
+                                         no_comment,
+                                         no_working_dir);
 
     depends.push_back(hres);
 
@@ -191,7 +193,8 @@ void cmQTWrapUICommand::FinalPass()
                                          depends,
                                          no_main_dependency,
                                          cxxCommandLines,
-                                         no_comment);
+                                         no_comment,
+                                         no_working_dir);
 
     depends.clear();
     depends.push_back(hres);
@@ -200,6 +203,7 @@ void cmQTWrapUICommand::FinalPass()
                                          depends,
                                          no_main_dependency,
                                          mocCommandLines,
-                                         no_comment);
+                                         no_comment,
+                                         no_working_dir);
     }
 }

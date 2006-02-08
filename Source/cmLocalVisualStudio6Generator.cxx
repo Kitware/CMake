@@ -252,8 +252,9 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule()
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
   const char* no_comment = 0;
+  const char* no_working_directory = 0;
   m_Makefile->AddCustomCommandToOutput(dspname.c_str(), listFiles, makefileIn.c_str(),
-                                       commandLines, no_comment, true);
+                                       commandLines, no_comment, no_working_directory, true);
 }
 
 
@@ -448,7 +449,9 @@ void cmLocalVisualStudio6Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
       if (command)
         {
         std::string script =
-          this->ConstructScript(command->GetCommandLines(), "\\\n\t");
+          this->ConstructScript(command->GetCommandLines(), 
+                                command->GetWorkingDirectory(),
+                                "\\\n\t");
         const char* comment = command->GetComment();
         const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
         this->WriteCustomRule(fout, source.c_str(), script.c_str(), 
@@ -511,11 +514,13 @@ cmLocalVisualStudio6Generator
   // Add the rule with the given dependencies and commands.
   const char* no_main_dependency = 0;
   const char* no_comment = 0;
+  const char* no_working_directory = 0;
   m_Makefile->AddCustomCommandToOutput(output,
                                        depends,
                                        no_main_dependency,
                                        commandLines,
-                                       no_comment);
+                                       no_comment, 
+                                       no_working_directory);
 
   // Replace the dependencies with the output of this rule so that the
   // next rule added will run after this one.
@@ -724,6 +729,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
       prelink_newline = "";
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
+                                            cr->GetWorkingDirectory(),
                                             prelink_newline);
     }
   for (std::vector<cmCustomCommand>::const_iterator cr =
@@ -735,6 +741,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
       prelink_newline = "";
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
+                                            cr->GetWorkingDirectory(),
                                             prelink_newline);
     }
   if(prelink_total > 0)
@@ -760,6 +767,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
       postbuild_newline = "";
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
+                                            cr->GetWorkingDirectory(),
                                             postbuild_newline);
     }
   if(postbuild_total > 0)

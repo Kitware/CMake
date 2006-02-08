@@ -115,6 +115,17 @@ IF(NOT CMAKE_Fortran_LINK_EXECUTABLE)
 ENDIF(NOT CMAKE_Fortran_LINK_EXECUTABLE)
 
 
+IF(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
+  SET (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG_INIT}" CACHE STRING
+     "Flags used by the compiler during debug builds.")
+  SET (CMAKE_Fortran_FLAGS_MINSIZEREL "${CMAKE_Fortran_FLAGS_MINSIZEREL_INIT}" CACHE STRING
+      "Flags used by the compiler during release minsize builds.")
+  SET (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE_INIT}" CACHE STRING
+     "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
+  SET (CMAKE_Fortran_FLAGS_RELWITHDEBINFO "${CMAKE_Fortran_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
+     "Flags used by the compiler during Release with Debug Info builds.")
+
+ENDIF(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 
 MARK_AS_ADVANCED(
 CMAKE_Fortran_FLAGS

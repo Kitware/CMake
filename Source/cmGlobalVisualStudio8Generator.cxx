@@ -67,6 +67,7 @@ void cmGlobalVisualStudio8Generator::Generate()
   // Add a special target on which all other targets depend that
   // checks the build system and optionally re-runs CMake.
   const char* no_output = 0;
+  const char* no_working_directory = 0;
   std::vector<std::string> no_depends;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
@@ -82,6 +83,7 @@ void cmGlobalVisualStudio8Generator::Generate()
       std::string cmake_command = mf->GetRequiredDefinition("CMAKE_COMMAND");
       mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, true,
                             no_output, no_depends,
+                            no_working_directory,
                             "echo", "Checking build system");
 
       // Add a custom rule to re-run CMake if any input files changed.
@@ -127,9 +129,10 @@ void cmGlobalVisualStudio8Generator::Generate()
         // target.
         const char* no_comment = 0;
         const char* no_main_dependency = 0;
+        const char* no_working_directory = 0;
         mf->AddCustomCommandToOutput(
           CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.cmake", listFiles,
-          no_main_dependency, commandLines, no_comment, true);
+          no_main_dependency, commandLines, no_comment, no_working_directory, true);
         }
       }
     }

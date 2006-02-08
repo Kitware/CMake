@@ -158,6 +158,7 @@ void cmGlobalVisualStudio6Generator::Generate()
   // of one configuration only.
   const char* no_output = 0;
   std::vector<std::string> no_depends;
+  const char* no_working_dir = 0;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
     {
@@ -166,12 +167,12 @@ void cmGlobalVisualStudio6Generator::Generate()
     if(gen.size())
       {
       gen[0]->GetMakefile()->
-        AddUtilityCommand("ALL_BUILD", false, no_output, no_depends,
+        AddUtilityCommand("ALL_BUILD", false, no_output, no_depends, no_working_dir,
                           "echo", "Build all projects");
       std::string cmake_command = 
         m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
       gen[0]->GetMakefile()->
-        AddUtilityCommand("INSTALL", false, no_output, no_depends,
+        AddUtilityCommand("INSTALL", false, no_output, no_depends, no_working_dir,
                           cmake_command.c_str(),
                           "-DBUILD_TYPE=$(IntDir)", "-P", "cmake_install.cmake");
 

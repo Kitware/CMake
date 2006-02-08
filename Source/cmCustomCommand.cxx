@@ -27,7 +27,8 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   m_Output(r.m_Output),
   m_Depends(r.m_Depends),
   m_CommandLines(r.m_CommandLines),
-  m_Comment(r.m_Comment)
+  m_Comment(r.m_Comment),
+  m_WorkingDirectory(r.m_WorkingDirectory)
 {
   m_Used = false;
 }
@@ -36,11 +37,12 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
 cmCustomCommand::cmCustomCommand(const char* output,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
-                                 const char* comment):
+                                 const char* comment, const char* workingDirectory):
   m_Output(output?output:""),
   m_Depends(depends),
   m_CommandLines(commandLines),
-  m_Comment(comment?comment:"")
+  m_Comment(comment?comment:""),
+  m_WorkingDirectory(workingDirectory?workingDirectory:"")
 {
   m_Used = false;
 }
@@ -49,6 +51,16 @@ cmCustomCommand::cmCustomCommand(const char* output,
 const char* cmCustomCommand::GetOutput() const
 {
   return m_Output.c_str();
+}
+
+//----------------------------------------------------------------------------
+const char* cmCustomCommand::GetWorkingDirectory() const
+{
+  if(m_WorkingDirectory.size() == 0)
+    {
+    return 0;
+    }
+  return m_WorkingDirectory.c_str();
 }
 
 //----------------------------------------------------------------------------

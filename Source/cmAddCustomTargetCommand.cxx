@@ -33,11 +33,13 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
 
   // Accumulate dependencies.
   std::vector<std::string> depends;
+  std::string working_directory;
 
   // Keep track of parser state.
   enum tdoing {
     doing_command,
-    doing_depends
+    doing_depends,
+    doing_working_directory
   };
   tdoing doing = doing_command;
 
@@ -62,6 +64,10 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
       {
       doing = doing_depends;
       }
+    if(copy == "WORKING_DIRECTORY")
+      {
+      doing = doing_working_directory;
+      }
     else if(copy == "COMMAND")
       {
       doing = doing_command;
@@ -77,6 +83,9 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
       {
       switch (doing)
         {
+        case doing_working_directory:
+          working_directory = copy;
+          break;
         case doing_command:
           currentLine.push_back(copy);
           break;
@@ -109,7 +118,8 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
 
   // Add the utility target to the makefile.
   const char* no_output = 0;
-  m_Makefile->AddUtilityCommand(args[0].c_str(), all, no_output, depends,
+  m_Makefile->AddUtilityCommand(args[0].c_str(), all, no_output, 
+                                working_directory.c_str(), depends,
                                 commandLines);
 
   return true;

@@ -138,12 +138,12 @@ public:
                                 const std::vector<std::string>& depends,
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
-                                const char* comment);
+                                const char* comment, const char* workingDir);
   void AddCustomCommandToOutput(const char* output,
                                 const std::vector<std::string>& depends,
                                 const char* main_dependency,
                                 const cmCustomCommandLines& commandLines,
-                                const char* comment,
+                                const char* comment, const char* workingDir,
                                 bool replace = false);
   void AddCustomCommandOldStyle(const char* target,
                                 const std::vector<std::string>& outputs,
@@ -171,6 +171,7 @@ public:
   void AddUtilityCommand(const char* utilityName, bool all,
                          const char* output,
                          const std::vector<std::string>& depends,
+                         const char* workingDirectory,
                          const char* command,
                          const char* arg1=0,
                          const char* arg2=0,
@@ -178,6 +179,7 @@ public:
                          const char* arg4=0);
   void AddUtilityCommand(const char* utilityName, bool all,
                          const char* output,
+                         const char* workingDirectory,
                          const std::vector<std::string>& depends,
                          const cmCustomCommandLines& commandLines);
 

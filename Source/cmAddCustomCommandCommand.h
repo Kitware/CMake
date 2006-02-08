@@ -71,6 +71,7 @@ public:
       "                     [COMMAND command2 [ARGS] [args2...] ...]\n"
       "                     [MAIN_DEPENDENCY depend]\n"
       "                     [DEPENDS [depends...]]\n"
+      "                     [WORKING_DIRECTORY dir]\n"
       "                     [COMMENT comment])\n"
       "This defines a new command that can be executed during the build "
       "process. Note that MAIN_DEPENDENCY is completely optional and is "
@@ -89,6 +90,7 @@ public:
       "                     PRE_BUILD | PRE_LINK | POST_BUILD\n"
       "                     COMMAND command1 [ARGS] [args1...]\n"
       "                     [COMMAND command2 [ARGS] [args2...] ...]\n"
+      "                     [WORKING_DIRECTORY dir]\n"
       "                     [COMMENT comment])\n"
       "This defines a new command that will be associated with "
       "building the specified target. When the command will "
@@ -98,7 +100,9 @@ public:
       "  POST_BUILD - run after the target has been built\n"
       "Note that the PRE_BUILD option is only supported on Visual "
       "Studio 7 or later. For all other generators PRE_BUILD "
-      "will be treated as PRE_LINK.";
+      "will be treated as PRE_LINK."
+      "If WORKING_DIRECTORY is specified the command a cd \"dir\" is "
+      "done prior to running the command.";
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);
