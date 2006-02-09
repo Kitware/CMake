@@ -22,6 +22,9 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "-fPIC")   # -pic
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
+SET(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+SET(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
+
 SET (CMAKE_SKIP_RPATH "NO" CACHE BOOL
      "If set, runtime paths are not added when using shared libraries.")
 

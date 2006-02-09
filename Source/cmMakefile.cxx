@@ -2310,17 +2310,16 @@ std::string cmMakefile::FindLibrary(const char* name,
     return cmSystemTools::CollapseFullPath(name);
     }
 
-  // Construct a list of possible suffixes.
-  const char* windows_suffixes[] = {".lib", 0};
-  const char* unix_suffixes[] = {".so", ".sl", ".dylib", ".a",
-                                 ".dll", ".dll.a", 0};
-  bool windowsLibs = false;
-  if(cmSystemTools::IsOn(this->GetDefinition("WIN32")) &&
-     !cmSystemTools::IsOn(this->GetDefinition("CYGWIN")) &&
-     !cmSystemTools::IsOn(this->GetDefinition("MINGW")))
-    {
-    windowsLibs = true;
-    }
+  // Get the list of possible prefixes and suffixes for libraries on
+  // this platform.
+  const char* prefixes_list =
+    this->GetRequiredDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
+  const char* suffixes_list =
+    this->GetRequiredDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
+  std::vector<std::string> prefixes;
+  std::vector<std::string> suffixes;
+  cmSystemTools::ExpandListArgument(prefixes_list, prefixes);
+  cmSystemTools::ExpandListArgument(suffixes_list, suffixes);
 
   std::string tryPath;
   for(std::vector<std::string>::const_iterator p = path.begin();
@@ -2343,21 +2342,24 @@ std::string cmMakefile::FindLibrary(const char* name,
       }
 
     // Try various library naming conventions.
-    const char* prefix = windowsLibs? "" : "lib";
-    const char** suffixes = windowsLibs? windows_suffixes : unix_suffixes;
-    for(const char** suffix = suffixes; *suffix; ++suffix)
+    for(std::vector<std::string>::iterator prefix = prefixes.begin();
+        prefix != prefixes.end(); ++prefix)
       {
-      tryPath = *p;
-      tryPath += "/";
-      tryPath += prefix;
-      tryPath += name;
-      tryPath += *suffix;
-      if(cmSystemTools::FileExists(tryPath.c_str())
-         && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
+      for(std::vector<std::string>::iterator suffix = suffixes.begin();
+          suffix != suffixes.end(); ++suffix)
         {
-        tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-        cmSystemTools::ConvertToUnixSlashes(tryPath);
-        return tryPath;
+        tryPath = *p;
+        tryPath += "/";
+        tryPath += *prefix;
+        tryPath += name;
+        tryPath += *suffix;
+        if(cmSystemTools::FileExists(tryPath.c_str())
+           && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
+          {
+          tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+          cmSystemTools::ConvertToUnixSlashes(tryPath);
+          return tryPath;
+          }
         }
       }
     }

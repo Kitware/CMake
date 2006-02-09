@@ -6,6 +6,9 @@ SET(CMAKE_EXECUTABLE_SUFFIX ".exe")          # .exe
 SET(CMAKE_LINK_LIBRARY_SUFFIX ".lib")
 SET(CMAKE_DL_LIBS "")
 
+SET(CMAKE_FIND_LIBRARY_PREFIXES "")
+SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
+
 # for borland make long command lines are redirected to a file
 # with the following syntax, see Windows-bcc32.cmake for use
 IF(CMAKE_GENERATOR MATCHES "Borland")
