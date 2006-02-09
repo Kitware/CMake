@@ -54,6 +54,15 @@ bool TestLibraryOrder(bool shouldFail)
   std::string Adir = std::string(BINARY_DIR) + std::string("/A");
   std::string Bdir = std::string(BINARY_DIR) + std::string("/B");
   std::string Cdir = std::string(BINARY_DIR) + std::string("/C");
+#ifdef _WIN32
+  // Avoid case problems for windows paths.
+  if(Adir[0] >= 'A' && Adir[0] <= 'Z') { Adir[0] += 'a' - 'A'; }
+  if(Bdir[0] >= 'A' && Bdir[0] <= 'Z') { Bdir[0] += 'a' - 'A'; }
+  if(Cdir[0] >= 'A' && Cdir[0] <= 'Z') { Cdir[0] += 'a' - 'A'; }
+  Adir = cmSystemTools::GetActualCaseForPath(Adir.c_str());
+  Bdir = cmSystemTools::GetActualCaseForPath(Bdir.c_str());
+  Cdir = cmSystemTools::GetActualCaseForPath(Cdir.c_str());
+#endif
   
   if(!shouldFail)
     {
