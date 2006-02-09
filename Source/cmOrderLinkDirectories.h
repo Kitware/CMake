@@ -137,7 +137,7 @@ private:
   // the names of link prefixes
   cmStdString m_LinkPrefix;
   // set of directories that can not be put in the correct order
-  std::set<cmStdString> m_ImposibleDirectories;
+  std::set<cmStdString> m_ImpossibleDirectories;
   // Name of target
   cmStdString m_TargetName;
   // library regular expressions

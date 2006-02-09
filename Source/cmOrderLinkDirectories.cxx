@@ -212,7 +212,7 @@ void cmOrderLinkDirectories::OrderPaths(std::vector<cmStdString>&
           = m_DirectoryToAfterList.begin();
         i != m_DirectoryToAfterList.end(); ++i)
       {
-      m_ImposibleDirectories.insert(i->first);
+      m_ImpossibleDirectories.insert(i->first);
       // still put it in the path list in the order we find them
       orderedPaths.push_back(i->first);
       }
@@ -297,6 +297,17 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
         {
         cmSystemTools::SplitProgramPath(m_RawLinkItems[i].c_str(),
                                         dir, file);
+#ifdef _WIN32
+        // Avoid case problems for windows paths.
+        if(dir.size() > 2 && dir[1] == ':')
+          {
+          if(dir[0] >= 'A' && dir[0] <= 'Z')
+            {
+            dir[0] += 'a' - 'A';
+            }
+          }
+        dir = cmSystemTools::GetActualCaseForPath(dir.c_str());
+#endif
         m_DirectoryToAfterList[dir] = empty;
         m_LinkPathSet.insert(dir);
         aLib.FullPath = m_RawLinkItems[i];
@@ -336,7 +347,7 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
   // now turn libfoo.a into foo and foo.a into foo
   // This will prepare the link items for -litem 
   this->PrepareLinkTargets();
-  if(m_ImposibleDirectories.size())
+  if(m_ImpossibleDirectories.size())
     {
     cmSystemTools::Message(this->GetWarnings().c_str());
     return false;
@@ -347,8 +358,8 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
 std::string cmOrderLinkDirectories::GetWarnings()
 {
   std::string warning = "It is impossible to order the linker search path in such a way that libraries specified as full paths will be picked by the linker.\nDirectories and libraries involved are:\n";
-  for(std::set<cmStdString>::iterator i = m_ImposibleDirectories.begin();
-      i != m_ImposibleDirectories.end(); ++i)
+  for(std::set<cmStdString>::iterator i = m_ImpossibleDirectories.begin();
+      i != m_ImpossibleDirectories.end(); ++i)
     {
     warning += "Directory: ";
     warning += *i;
