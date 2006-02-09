@@ -12,10 +12,15 @@ FIND_PATH(JPEG_INCLUDE_DIR jpeglib.h
 /usr/include
 )
 
-FIND_LIBRARY(JPEG_LIBRARY jpeg
-/usr/lib
-/usr/local/lib
-)
+IF(BORLAND)
+  SET(JPEG_NAMES ${JPEG_NAMES} jpeg-bcc)
+ENDIF(BORLAND)
+SET(JPEG_NAMES ${JPEG_NAMES} jpeg)
+
+FIND_LIBRARY(JPEG_LIBRARY
+  NAMES ${JPEG_NAMES}
+  PATHS /usr/lib /usr/local/lib
+  )
 
 IF (JPEG_LIBRARY)
   IF (JPEG_INCLUDE_DIR)

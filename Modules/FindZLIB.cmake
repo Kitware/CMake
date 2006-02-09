@@ -10,9 +10,14 @@ FIND_PATH(ZLIB_INCLUDE_DIR zlib.h
   /usr/include
 )
 
-FIND_LIBRARY(ZLIB_LIBRARY z
-  /usr/lib
-  /usr/local/lib
+IF(BORLAND)
+  SET(ZLIB_NAMES ${ZLIB_NAMES} zlib-bcc)
+ENDIF(BORLAND)
+SET(ZLIB_NAMES ${ZLIB_NAMES} z zlib)
+
+FIND_LIBRARY(ZLIB_LIBRARY
+  NAMES ${ZLIB_NAMES}
+  PATHS /usr/lib /usr/local/lib
 )
 
 IF(ZLIB_INCLUDE_DIR)
