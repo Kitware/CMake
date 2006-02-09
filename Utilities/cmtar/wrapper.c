@@ -53,7 +53,6 @@ tar_extract_glob(TAR *t, char *globname, char *prefix)
       if (pathname)
         {
         free(pathname);
-        pathname = 0;
         }
 
       if (TH_ISREG(t) && tar_skip_regfile(t))
