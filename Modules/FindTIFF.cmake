@@ -12,11 +12,7 @@ FIND_PATH(TIFF_INCLUDE_DIR tiff.h
   /usr/include
 )
 
-IF(BORLAND)
-  SET(TIFF_NAMES ${TIFF_NAMES} libtiff-bcc)
-ENDIF(BORLAND)
-SET(TIFF_NAMES ${TIFF_NAMES} tiff libtiff)
-
+SET(TIFF_NAMES ${TIFF_NAMES} tiff)
 FIND_LIBRARY(TIFF_LIBRARY
   NAMES ${TIFF_NAMES}
   PATHS /usr/lib /usr/local/lib

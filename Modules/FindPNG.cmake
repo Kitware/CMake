@@ -18,7 +18,7 @@ IF(ZLIB_FOUND)
   /usr/include
   )
 
-  SET(PNG_NAMES ${PNG_NAMES} png libpng)
+  SET(PNG_NAMES ${PNG_NAMES} png)
   FIND_LIBRARY(PNG_LIBRARY
     NAMES ${PNG_NAMES}
     PATHS /usr/lib /usr/local/lib
