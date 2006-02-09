@@ -85,6 +85,15 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
+    // Add a rule to regenerate the build system when the target
+    // specification source changes.
+    const char* suppRegenRule =
+      m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
+    if (!cmSystemTools::IsOn(suppRegenRule))
+      {
+      this->AddDSPBuildRule(l->second);
+      }
+
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
     if ((l->second.GetType() != cmTarget::INSTALL_FILES)
@@ -210,9 +219,9 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname, cmTarget 
 }
 
 
-void cmLocalVisualStudio6Generator::AddDSPBuildRule()
+void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
 {
-  std::string dspname = *(m_CreatedProjectNames.end()-1);
+  std::string dspname = tgt.GetName();
   dspname += ".dsp.cmake";
   const char* dsprule = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
@@ -262,14 +271,6 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
                                                  const char *libName,
                                                  cmTarget &target)
 {
-  // if we should add regen rule then...
-  const char *suppRegenRule = 
-    m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
-  if (!cmSystemTools::IsOn(suppRegenRule))
-    {
-    this->AddDSPBuildRule();
-    }
-
   // For utility targets need custom command since pre- and post-
   // build does not do anything in Visual Studio 6.  In order for the
   // rules to run in the correct order as custom commands, we need

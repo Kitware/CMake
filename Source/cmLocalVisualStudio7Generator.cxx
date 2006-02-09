@@ -101,6 +101,16 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
+    // Add a rule to regenerate the build system when the target
+    // specification source changes.
+    const char* suppRegenRule =
+      m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
+    if (!cmSystemTools::IsOn(suppRegenRule) &&
+        (strcmp(l->first.c_str(), CMAKE_CHECK_BUILD_SYSTEM_TARGET) != 0))
+      {
+      this->AddVCProjBuildRule(l->second);
+      }
+
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
     if ((l->second.GetType() != cmTarget::INSTALL_FILES)
@@ -213,9 +223,9 @@ void cmLocalVisualStudio7Generator::CreateSingleVCProj(const char *lname, cmTarg
 }
 
 
-void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
+void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmTarget& tgt)
 {
-  std::string dspname = *(m_CreatedProjectNames.end()-1);
+  std::string dspname = tgt.GetName();
   dspname += ".vcproj.cmake";
   const char* dsprule = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
@@ -970,15 +980,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     static_cast<cmGlobalVisualStudio7Generator *>
     (m_GlobalGenerator)->GetConfigurations();
   
-  // if we should add regen rule then...
-  const char *suppRegenRule = 
-    m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
-  if (!cmSystemTools::IsOn(suppRegenRule) &&
-      (strcmp(libName, CMAKE_CHECK_BUILD_SYSTEM_TARGET) != 0))
-    {
-    this->AddVCProjBuildRule();
-    }
-
   // trace the visual studio dependencies
   std::string name = libName;
   name += ".vcproj.cmake";

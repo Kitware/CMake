@@ -76,7 +76,7 @@ private:
   void CreateSingleVCProj(const char *lname, cmTarget &tgt);
   void WriteVCProjFile(std::ostream& fout, const char *libName, 
                        cmTarget &tgt);
-  void AddVCProjBuildRule();
+  void AddVCProjBuildRule(cmTarget& tgt);
   void WriteConfigurations(std::ostream& fout,
                            const char *libName, cmTarget &tgt);
   void WriteConfiguration(std::ostream& fout,

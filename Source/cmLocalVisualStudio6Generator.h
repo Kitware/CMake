@@ -79,7 +79,7 @@ private:
                       cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
 
   void WriteDSPFooter(std::ostream& fout);
-  void AddDSPBuildRule();
+  void AddDSPBuildRule(cmTarget& tgt);
   void WriteCustomRule(std::ostream& fout,
                        const char* source,
                        const char* command,
