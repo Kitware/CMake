@@ -512,8 +512,6 @@ cmLocalVisualStudio6Generator
 
   // Add the rule with the given dependencies and commands.
   const char* no_main_dependency = 0;
-  const char* no_comment = 0;
-  const char* no_working_directory = 0;
   m_Makefile->AddCustomCommandToOutput(output,
                                        depends,
                                        no_main_dependency,
