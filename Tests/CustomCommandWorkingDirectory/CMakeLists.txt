@@ -2,7 +2,7 @@ PROJECT(TestWorkingDir)
 
 ADD_CUSTOM_COMMAND(
   OUTPUT "${TestWorkingDir_BINARY_DIR}/working.c"
-  COMMAND "${CMAKE_COMMAND}" -E copy ./working.c "${TestWorkingDir_BINARY_DIR}/working.c"
+  COMMAND "${CMAKE_COMMAND}" -E copy ./working.c.in "${TestWorkingDir_BINARY_DIR}/working.c"
   WORKING_DIRECTORY "${TestWorkingDir_SOURCE_DIR}"
   COMMENT "custom command"
 )
