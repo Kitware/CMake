@@ -103,7 +103,9 @@ public:
       "If more than one OUTPUT_* or ERROR_* option is given for the same "
       "pipe the precedence is not specified.  "
       "If no OUTPUT_* or ERROR_* options are given the output will be shared "
-      "with the corresponding pipes of the CMake process itself."
+      "with the corresponding pipes of the CMake process itself.\n"
+      "The EXECUTE_PROCESS command is a newer more powerful version of "
+      "EXEC_PROGRAM, but the old command has been kept for compatibility."
       ;
     }
 

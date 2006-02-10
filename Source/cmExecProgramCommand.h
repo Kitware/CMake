@@ -80,7 +80,10 @@ public:
       "specifies a variable in which to store the output. "
       "To capture the return value of the execution, provide a RETURN_VALUE. "
       "If OUTPUT_VARIABLE is specified, then no output will go to the "
-      "stdout/stderr of the console running cmake.";
+      "stdout/stderr of the console running cmake.\n"
+      "The EXECUTE_PROCESS command is a newer more powerful version of "
+      "EXEC_PROGRAM, but the old command has been kept for compatibility."
+      ;
     }
   
   cmTypeMacro(cmExecProgramCommand, cmCommand);
