@@ -19,6 +19,8 @@
 
 #include <cmsys/Process.h>
 
+void cmExecuteProcessCommandFixText(std::vector<char>& output);
+
 // cmExecuteProcessCommand
 bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -254,15 +256,6 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
   int p;
   while((p = cmsysProcess_WaitForData(cp, &data, &length, 0), p))
     {
-    // Translate NULL characters in the output into valid text.
-    for(int i=0; i < length; ++i)
-      {
-      if(data[i] == '\0')
-        {
-        data[i] = ' ';
-        }
-      }
-
     // Put the output in the right place.
     if(p == cmsysProcess_Pipe_STDOUT && !output_quiet ||
        p == cmsysProcess_Pipe_STDERR && !error_quiet && merge_output)
@@ -288,15 +281,17 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
   // All output has been read.  Wait for the process to exit.
   cmsysProcess_WaitForExit(cp, 0);
 
+  // Fix the text in the output strings.
+  cmExecuteProcessCommandFixText(tempOutput);
+  cmExecuteProcessCommandFixText(tempError);
+
   // Store the output obtained.
   if(!output_variable.empty())
     {
-    tempOutput.push_back('\0');
     m_Makefile->AddDefinition(output_variable.c_str(), &*tempOutput.begin());
     }
   if(!merge_output && !error_variable.empty())
     {
-    tempError.push_back('\0');
     m_Makefile->AddDefinition(error_variable.c_str(), &*tempError.begin());
     }
 
@@ -332,4 +327,25 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
   cmsysProcess_Delete(cp);
 
   return true;
+}
+
+//----------------------------------------------------------------------------
+void cmExecuteProcessCommandFixText(std::vector<char>& output)
+{
+  // Remove \0 characters and the \r part of \r\n pairs.
+  unsigned int in_index = 0;
+  unsigned int out_index = 0;
+  while(in_index < output.size())
+    {
+    char c = output[in_index++];
+    if((c != '\r' || !(in_index < output.size() && output[in_index] == '\n'))
+       && c != '\0')
+      {
+      output[out_index++] = c;
+      }
+    }
+  output.resize(out_index);
+
+  // Put a terminator on the text string.
+  output.push_back('\0');
 }
