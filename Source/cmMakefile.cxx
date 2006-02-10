@@ -2318,8 +2318,8 @@ std::string cmMakefile::FindLibrary(const char* name,
     this->GetRequiredDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
   std::vector<std::string> prefixes;
   std::vector<std::string> suffixes;
-  cmSystemTools::ExpandListArgument(prefixes_list, prefixes);
-  cmSystemTools::ExpandListArgument(suffixes_list, suffixes);
+  cmSystemTools::ExpandListArgument(prefixes_list, prefixes, true);
+  cmSystemTools::ExpandListArgument(suffixes_list, suffixes, true);
 
   std::string tryPath;
   for(std::vector<std::string>::const_iterator p = path.begin();
