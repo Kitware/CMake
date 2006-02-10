@@ -1950,9 +1950,12 @@ kwsys_stl::string SystemTools::FindProgram(
     {
     path.push_back(*i);
     }
-  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
+  for(kwsys_stl::vector<kwsys_stl::string>::iterator p = path.begin();
       p != path.end(); ++p)
     {
+#ifdef _WIN32
+    SystemTools::ReplaceString(*p, "\"", "");
+#endif
     tryPath = *p;
     tryPath += "/";
     tryPath += name;
