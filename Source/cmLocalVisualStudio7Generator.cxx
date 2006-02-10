@@ -617,7 +617,22 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
        << "\t\t\t\tPreprocessorDefinitions=\"" << pre;
   this->OutputDefineFlags(defineFlags.c_str(), fout);
   fout << "\" />\n";
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCMIDLTool\"/>\n";
+
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCMIDLTool\"\n";
+  fout << "\t\t\t\tPreprocessorDefinitions=\"" << pre;
+  this->OutputDefineFlags(defineFlags.c_str(), fout);
+  fout << "\"\n";
+  fout << "\t\t\t\tMkTypLibCompatible=\"FALSE\"\n";
+  fout << "\t\t\t\tTargetEnvironment=\"1\"\n";
+  fout << "\t\t\t\tGenerateStublessProxies=\"TRUE\"\n";
+  fout << "\t\t\t\tTypeLibraryName=\"$(InputName).tlb\"\n";
+  fout << "\t\t\t\tOutputDirectory=\"$(IntDir)\"\n";
+  fout << "\t\t\t\tHeaderFileName=\"$(InputName).h\"\n";
+  fout << "\t\t\t\tDLLDataFileName=\"\"\n";
+  fout << "\t\t\t\tInterfaceIdentifierFileName=\"$(InputName)_i.c\"\n";
+  fout << "\t\t\t\tProxyFileName=\"$(InputName)_p.c\"/>\n";
+  // end of <Tool Name=VCMIDLTool
+
   this->OutputTargetRules(fout, target, libName);
   this->OutputBuildTool(fout, configName, libName, target);
   fout << "\t\t</Configuration>\n";
