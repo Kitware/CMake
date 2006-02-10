@@ -354,6 +354,15 @@ void cmLocalGenerator::GenerateInstallRules()
     exeOutPath = currdir + "/";
     }
 
+  // Include user-specified install scripts.
+  std::vector<std::string> const& installScripts =
+    m_Makefile->GetInstallScripts();
+  for(std::vector<std::string>::const_iterator s = installScripts.begin();
+      s != installScripts.end(); ++s)
+    {
+    fout << "INCLUDE(\"" << s->c_str() << "\")" << std::endl;
+    }
+
   std::string destination;
   for(cmTargets::iterator l = tgts.begin(); 
     l != tgts.end(); l++)

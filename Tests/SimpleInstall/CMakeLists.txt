@@ -19,6 +19,15 @@ IF(STAGE2)
   SET(t2NAMES test2 test2${CMAKE_DEBUG_POSTFIX})
   SET(t4NAMES test4 test4${CMAKE_DEBUG_POSTFIX})
 
+  # Make sure the install script ran.
+  SET(CMAKE_INSTALL_SCRIPT_DID_RUN 0)
+  INCLUDE(${CMAKE_INSTALL_PREFIX}/InstallScriptOut.cmake OPTIONAL)
+  IF(CMAKE_INSTALL_SCRIPT_DID_RUN)
+    MESSAGE(STATUS "Stage 1 did run install script 2.")
+  ELSE(CMAKE_INSTALL_SCRIPT_DID_RUN)
+    MESSAGE(SEND_ERROR "Stage 1 did not run install script 2.")
+  ENDIF(CMAKE_INSTALL_SCRIPT_DID_RUN)
+
   IF(CYGWIN OR MINGW)
     SET(LIBPATHS ${LIBPATHS} "${CMAKE_INSTALL_PREFIX}/bin")
   ENDIF(CYGWIN OR MINGW)
@@ -69,6 +78,14 @@ ELSE(STAGE2)
   INSTALL_TARGETS(/bin SimpleInstall)
   INSTALL_TARGETS(/lib test1 test2 test3 test4)
   INSTALL_FILES(/include FILES lib1.h lib2.h lib3.h)
+
+  # Test user-specified install scripts.
+  INSTALL(
+    SCRIPT InstallScript1.cmake
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/InstallScript2.cmake
+    )
+  SET_DIRECTORY_PROPERTIES(PROPERTIES
+    ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_INSTALL_PREFIX}/InstallScriptOut.cmake)
 
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES OUTPUT_NAME SimpleInstallExe)
   # Disable VERSION test until it is implemented in the XCode generator.
