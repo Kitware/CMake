@@ -973,10 +973,11 @@ void cmSystemTools::ExpandList(std::vector<std::string> const& arguments,
 }
 
 void cmSystemTools::ExpandListArgument(const std::string& arg,
-                                       std::vector<std::string>& newargs)
+                                       std::vector<std::string>& newargs,
+                                       bool emptyArgs)
 {
   // If argument is empty, it is an empty list.
-  if(arg.length() == 0)
+  if(arg.length() == 0 && !emptyArgs)
     {
     return;
     }
@@ -1027,7 +1028,7 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
         // brackets.
         if(squareNesting == 0)
           {
-          if ( newArgVec.size() )
+          if ( newArgVec.size() || emptyArgs )
             {
             // Add the last argument if the string is not empty.
             newArgVec.push_back(0);
@@ -1047,7 +1048,7 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
         } break;
       }
     }
-  if ( newArgVec.size() )
+  if ( newArgVec.size() || emptyArgs )
     {
     // Add the last argument if the string is not empty.
     newArgVec.push_back(0);

@@ -39,7 +39,8 @@ public:
   static void ExpandList(std::vector<std::string> const& argsIn,
                          std::vector<std::string>& argsOut);
   static void ExpandListArgument(const std::string& arg,
-                                 std::vector<std::string>& argsOut);
+                                 std::vector<std::string>& argsOut,
+                                 bool emptyArgs=false);
 
   /**
    * Look for and replace registry values in a string
