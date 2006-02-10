@@ -4,11 +4,14 @@
 #  SYMBOL   - symbol
 #  FILES    - include files to check
 #  VARIABLE - variable to return result
-#  
-# If CMAKE_REQUIRED_FLAGS is set then those flags will be passed into the
-# compile of the program likewise if CMAKE_REQUIRED_LIBRARIES is set then
-# those libraries will be linked against the test program
-
+#
+# The following variables may be set before calling this macro to
+# modify the way the check is run:
+#
+#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#  CMAKE_REQUIRED_INCLUDES = list of include directories
+#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")
@@ -40,6 +43,7 @@ MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
     TRY_COMPILE(${VARIABLE}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+      COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       CMAKE_FLAGS 
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_SYMBOL_EXISTS_FLAGS}
       "${CHECK_SYMBOL_EXISTS_LIBS}"

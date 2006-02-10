@@ -3,10 +3,14 @@
 # - macro which checks if the source code compiles\
 #  SOURCE - source code to try to compile
 #  VAR    - variable to store size if the type exists.
-# Checks the following optional VARIABLES (not arguments)
-#  CMAKE_REQUIRED_LIBRARIES - Link to extra libraries
-#  CMAKE_REQUIRED_FLAGS     - Extra flags to C compiler
 #
+# The following variables may be set before calling this macro to
+# modify the way the check is run:
+#
+#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#  CMAKE_REQUIRED_INCLUDES = list of include directories
+#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 MACRO(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
   IF("${VAR}" MATCHES "^${VAR}$")
@@ -31,6 +35,7 @@ MACRO(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
     TRY_COMPILE(${VAR}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/src.cxx
+      COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       CMAKE_FLAGS 
       "${CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES}"
       "${CHECK_CXX_SOURCE_COMPILES_ADD_INCLUDES}"

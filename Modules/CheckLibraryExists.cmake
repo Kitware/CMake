@@ -5,11 +5,13 @@
 #  FUNCTION - the name of the function
 #  LOCATION - location where the library should be found
 #  VARIABLE - variable to store the result
-#  
-# If CMAKE_REQUIRED_FLAGS is set then those flags will be passed into the
-# compile of the program likewise if CMAKE_REQUIRED_LIBRARIES is set then
-# those libraries will be linked against the test program
-
+#
+# The following variables may be set before calling this macro to
+# modify the way the check is run:
+#
+#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 MACRO(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")
@@ -20,10 +22,13 @@ MACRO(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
     IF(CMAKE_REQUIRED_LIBRARIES)
       SET(CHECK_LIBRARY_EXISTS_LIBRARIES 
         ${CHECK_LIBRARY_EXISTS_LIBRARIES} ${CMAKE_REQUIRED_LIBRARIES})
+    ELSE(CMAKE_REQUIRED_LIBRARIES)
+      SET(CHECK_LIBRARY_EXISTS_LIBRARIES)
     ENDIF(CMAKE_REQUIRED_LIBRARIES)
     TRY_COMPILE(${VARIABLE}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_ROOT}/Modules/CheckFunctionExists.c
+      COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       CMAKE_FLAGS 
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_LIBRARY_EXISTS_DEFINITION}
       -DLINK_DIRECTORIES:STRING=${LOCATION}

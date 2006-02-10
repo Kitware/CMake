@@ -3,23 +3,31 @@
 #  
 #  VAR      - the name of the variable
 #  VARIABLE - variable to store the result
-# If CMAKE_REQUIRED_FLAGS is set then those flags will be passed into the
-# compile of the program likewise if CMAKE_REQUIRED_LIBRARIES is set then
-# those libraries will be linked against the test program.
+#
 # This macro is only for C variables.
 #
+# The following variables may be set before calling this macro to
+# modify the way the check is run:
+#
+#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+
 MACRO(CHECK_VARIABLE_EXISTS VAR VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")
     SET(MACRO_CHECK_VARIABLE_DEFINITIONS 
       "-DCHECK_VARIABLE_EXISTS=${VAR} ${CMAKE_REQUIRED_FLAGS}")
     MESSAGE(STATUS "Looking for ${VAR}")
     IF(CMAKE_REQUIRED_LIBRARIES)
-      SET(CHECK_VARIABLE_EXISTS_ADD_LIBRARIES 
+      SET(CHECK_VARIABLE_EXISTS_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
+    ELSE(CMAKE_REQUIRED_LIBRARIES)
+      SET(CHECK_VARIABLE_EXISTS_ADD_LIBRARIES)
     ENDIF(CMAKE_REQUIRED_LIBRARIES)
     TRY_COMPILE(${VARIABLE}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_ROOT}/Modules/CheckVariableExists.c
+      COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_VARIABLE_DEFINITIONS}
       "${CHECK_VARIABLE_EXISTS_ADD_LIBRARIES}"
       OUTPUT_VARIABLE OUTPUT)
