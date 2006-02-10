@@ -1041,13 +1041,21 @@ else
   echo "${cmake_cxx_compiler} does not have ANSI for scoping"
 fi
 
+# When bootstrapping on MinGW with MSYS we must convert the source
+# directory to a windows path.
+if ${cmake_system_mingw}; then
+    cmake_root_dir=`cd "${cmake_source_dir}"; pwd -W`
+else
+    cmake_root_dir="${cmake_source_dir}"
+fi
+
 # Write CMake version
 for a in MAJOR MINOR PATCH; do
   CMake_VERSION=`cat "${cmake_source_dir}/CMakeLists.txt" | \
     grep "SET(CMake_VERSION_${a} *[0-9]*)" | sed "s/SET(CMake_VERSION_${a} *\([0-9]*\))/\1/"`
   cmake_report cmConfigure.h.tmp "#define CMake_VERSION_${a} ${CMake_VERSION}"
 done
-cmake_report cmConfigure.h.tmp "#define CMAKE_ROOT_DIR \"${cmake_source_dir}\""
+cmake_report cmConfigure.h.tmp "#define CMAKE_ROOT_DIR \"${cmake_root_dir}\""
 cmake_report cmConfigure.h.tmp "#define CMAKE_DATA_DIR \"${cmake_data_dir}\""
 cmake_report cmConfigure.h.tmp "#define CMAKE_BOOTSTRAP"
 
