@@ -1466,8 +1466,8 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
       }
     pos = lib.find_last_not_of(" \t\r\n");
     if(pos != lib.npos)
-      {
-      lib = lib.substr(0, pos);
+      { 
+      lib = lib.substr(0, pos+1); 
       }
     if(lib.empty())
       {
@@ -1477,11 +1477,11 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
     // Link to a library if it is not the same target and is meant for
     // this configuration type.
     if((target.GetType() == cmTarget::EXECUTABLE ||
-        j->first != target.GetName()) &&
+        lib != target.GetName()) &&
        (j->second == cmTarget::GENERAL || j->second == linkType))
       {
       // Compute the proper name to use to link this library.
-      cmTarget* tgt = m_GlobalGenerator->FindTarget(0, j->first.c_str());
+      cmTarget* tgt = m_GlobalGenerator->FindTarget(0, lib.c_str());
       if(tgt)
         {
         // This is a CMake target.  Ask the target for its real name.
@@ -1494,7 +1494,7 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
       else
         {
         // This is not a CMake target.  Use the name given.
-        linkLibraries.push_back(j->first);
+        linkLibraries.push_back(lib);
         }
       }
     }
