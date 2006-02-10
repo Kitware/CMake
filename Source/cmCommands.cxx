@@ -28,6 +28,7 @@
 #include "cmIncludeExternalMSProjectCommand.cxx"
 #include "cmInstallCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
+#include "cmListCommand.cxx"
 #include "cmLoadCacheCommand.cxx"
 #include "cmMathCommand.cxx"
 #include "cmOutputRequiredFilesCommand.cxx"
@@ -71,6 +72,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmIncludeExternalMSProjectCommand);
   commands.push_back(new cmInstallCommand);
   commands.push_back(new cmLinkLibrariesCommand);
+  commands.push_back(new cmListCommand);
   commands.push_back(new cmLoadCacheCommand);
   commands.push_back(new cmLoadCommandCommand);
   commands.push_back(new cmMathCommand);

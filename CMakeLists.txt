@@ -121,7 +121,7 @@ IF(BUILD_CursesDialog)
   SUBDIRS(Source/CursesDialog/form)
 ENDIF(BUILD_CursesDialog)
 
-SUBDIRS(Source Modules Templates Utilities)
+SUBDIRS(Source Modules Templates Utilities Tests/CMakeTests)
 ENABLE_TESTING()
 
 # Include the standard Dart testing module
