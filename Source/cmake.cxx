@@ -800,9 +800,11 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "echo" )
       {
       unsigned int cc;
+      const char* space = "";
       for ( cc = 2; cc < args.size(); cc ++ )
         {
-        std::cout << args[cc] << " ";
+        std::cout << space << args[cc];
+        space = " ";
         }
       std::cout << std::endl;
       return 0;
