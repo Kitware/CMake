@@ -2,9 +2,15 @@
 #  CHECK_TYPE_SIZE(TYPE VARIABLE)
 # Check if the type exists and determine size of type.  if the type
 # exists, the size will be stored to the variable.
-#
 #  VARIABLE - variable to store size if the type exists.
 #  HAVE_${VARIABLE} - does the variable exists or not
+# The following variables may be set before calling this macro to
+# modify the way the check is run:
+#
+#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#  CMAKE_REQUIRED_INCLUDES = list of include directories
+#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
   SET(CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS 1)
@@ -31,12 +37,22 @@ MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
     IF(CMAKE_REQUIRED_LIBRARIES)
       SET(CHECK_TYPE_SIZE_ADD_LIBRARIES 
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
+    ELSE(CMAKE_REQUIRED_LIBRARIES)
+      SET(CHECK_TYPE_SIZE_ADD_LIBRARIES)
     ENDIF(CMAKE_REQUIRED_LIBRARIES)
+    IF(CMAKE_REQUIRED_INCLUDES)
+      SET(CHECK_TYPE_SIZE_ADD_INCLUDES
+        "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
+    ELSE(CMAKE_REQUIRED_INCLUDES)
+      SET(CHECK_TYPE_SIZE_ADD_INCLUDES)
+    ENDIF(CMAKE_REQUIRED_INCLUDES)
     TRY_RUN(${VARIABLE} HAVE_${VARIABLE}
       ${CMAKE_BINARY_DIR}
       "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckTypeSize.c"
+      COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_TYPE_SIZE_FLAGS}
       "${CHECK_TYPE_SIZE_ADD_LIBRARIES}"
+      "${CHECK_TYPE_SIZE_ADD_INCLUDES}"
       OUTPUT_VARIABLE OUTPUT)
     IF(HAVE_${VARIABLE})
       MESSAGE(STATUS "Check size of ${TYPE} - done")
