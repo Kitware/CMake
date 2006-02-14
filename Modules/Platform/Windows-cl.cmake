@@ -1,5 +1,7 @@
 # try to load any previously computed information for C on this platform
 INCLUDE( ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCPlatform.cmake OPTIONAL)
+# try to load any previously computed information for CXX on this platform
+INCLUDE( ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCXXPlatform.cmake OPTIONAL)
 
 SET(CMAKE_LIBRARY_PATH_FLAG "-LIBPATH:")
 SET(CMAKE_LINK_LIBRARY_FLAG "")
@@ -219,5 +221,13 @@ SET (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_EXE_LINKER_FLAGS_RELW
 
 
 # save computed information for this platform
-CONFIGURE_FILE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in 
-               ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCPlatform.cmake IMMEDIATE)
+IF(NOT EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCPlatform.cmake")
+  CONFIGURE_FILE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in 
+    ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCPlatform.cmake IMMEDIATE)
+ENDIF(NOT EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCPlatform.cmake")
+
+IF(NOT EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCXXPlatform.cmake")
+  CONFIGURE_FILE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in 
+               ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCXXPlatform.cmake IMMEDIATE)
+ENDIF(NOT EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCXXPlatform.cmake")
+
