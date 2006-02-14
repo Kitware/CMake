@@ -25,6 +25,7 @@
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
 {
   m_FindMakeProgramFile = "CMakeVS8FindMake.cmake";
+  m_ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
 }
 
 
@@ -179,5 +180,37 @@ void cmGlobalVisualStudio8Generator::WriteSLNFile(
     }
 
   // Now write the solution file.
-  this->cmGlobalVisualStudio7Generator::WriteSLNFile(fout, root, generators);
+  this->cmGlobalVisualStudio71Generator::WriteSLNFile(fout, root, generators);
+}
+
+//----------------------------------------------------------------------------
+void
+cmGlobalVisualStudio8Generator
+::WriteSolutionConfigurations(std::ostream& fout)
+{
+  fout << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
+  for(std::vector<std::string>::iterator i = m_Configurations.begin();
+      i != m_Configurations.end(); ++i)
+    {
+    fout << "\t\t" << *i << "|Win32 = " << *i << "|Win32\n";
+    }
+  fout << "\tEndGlobalSection\n";
+}
+
+//----------------------------------------------------------------------------
+void
+cmGlobalVisualStudio8Generator
+::WriteProjectConfigurations(std::ostream& fout,
+                             const char* name, bool in_all_build)
+{
+  std::string guid = this->GetGUID(name);
+  for(std::vector<std::string>::iterator i = m_Configurations.begin();
+      i != m_Configurations.end(); ++i)
+    {
+    fout << "\t\t{" << guid << "}." << *i << "|Win32.ActiveCfg = " << *i << "|Win32\n";
+    if (in_all_build)
+      {
+      fout << "\t\t{" << guid << "}." << *i << "|Win32.Build.0 = " << *i << "|Win32\n";
+      }
+    }
 }

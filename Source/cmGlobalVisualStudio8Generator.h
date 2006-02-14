@@ -52,5 +52,8 @@ protected:
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNHeader(std::ostream& fout);
+  virtual void WriteSolutionConfigurations(std::ostream& fout);
+  virtual void WriteProjectConfigurations(std::ostream& fout,
+                                          const char* name, bool in_all);
 };
 #endif

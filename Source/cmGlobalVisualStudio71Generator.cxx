@@ -25,6 +25,7 @@
 cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator()
 {
   m_FindMakeProgramFile = "CMakeVS71FindMake.cmake";
+  m_ProjectConfigurationSectionName = "ProjectConfiguration";
 }
 
 
@@ -52,6 +53,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
   std::string rootdir = root->GetMakefile()->GetStartOutputDirectory();
   rootdir += "/";
   bool doneAllBuild = false;
+  bool doneCheckBuild = false;
   bool doneRunTests = false;
   bool doneInstall  = false;
   
@@ -141,6 +143,17 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
               doneAllBuild = true;
               }
             }
+          if(l->first == CMAKE_CHECK_BUILD_SYSTEM_TARGET)
+            {
+            if(doneCheckBuild)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneCheckBuild = true;
+              }
+            }
           if(l->first == "INSTALL")
             {
             if(doneInstall)
@@ -172,16 +185,10 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
         }
       }
     }
-  fout << "Global\n"
-       << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
-  
-  for(std::vector<std::string>::iterator i = m_Configurations.begin();
-      i != m_Configurations.end(); ++i)
-    {
-    fout << "\t\t" << *i << " = " << *i << "\n";
-    }
-  fout << "\tEndGlobalSection\n";
-  fout << "\tGlobalSection(ProjectConfiguration) = postSolution\n";
+  fout << "Global\n";
+  this->WriteSolutionConfigurations(fout);
+  fout << "\tGlobalSection(" << m_ProjectConfigurationSectionName
+       << ") = postSolution\n";
   // loop over again and compute the depends
   for(i = 0; i < generators.size(); ++i)
     {
@@ -220,6 +227,19 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
   this->WriteSLNFooter(fout);
 }
 
+
+void
+cmGlobalVisualStudio71Generator
+::WriteSolutionConfigurations(std::ostream& fout)
+{
+  fout << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
+  for(std::vector<std::string>::iterator i = m_Configurations.begin();
+      i != m_Configurations.end(); ++i)
+    {
+    fout << "\t\t" << *i << " = " << *i << "\n";
+    }
+  fout << "\tEndGlobalSection\n";
+}
 
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 

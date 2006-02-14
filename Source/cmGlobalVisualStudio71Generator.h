@@ -46,6 +46,7 @@ protected:
   virtual void WriteSLNFile(std::ostream& fout, 
                             cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
+  virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProject(std::ostream& fout, 
                             const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectDepends(std::ostream& fout, 
@@ -55,5 +56,7 @@ protected:
                                     const std::vector<std::string>& depends);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
+
+  std::string m_ProjectConfigurationSectionName;
 };
 #endif
