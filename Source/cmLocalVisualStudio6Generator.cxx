@@ -120,7 +120,10 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
           {
           if ((l->second.GetType() != cmTarget::INSTALL_FILES)
               && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
-              && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0))
+              && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
+              && (strcmp(l->first.c_str(), "ALL_BUILD") != 0)
+              && (strcmp(l->first.c_str(), "RUN_TESTS") != 0)
+              && (strcmp(l->first.c_str(), "INSTALL") != 0))
             {
             cmTarget& target = l->second;
             bool sameAsTarget = false;
@@ -264,6 +267,14 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
   const char* no_working_directory = 0;
   m_Makefile->AddCustomCommandToOutput(dspname.c_str(), listFiles, makefileIn.c_str(),
                                        commandLines, no_comment, no_working_directory, true);
+  if(cmSourceFile* file = m_Makefile->GetSource(makefileIn.c_str()))
+    {
+    tgt.GetSourceFiles().push_back(file);
+    }
+  else
+    {
+    cmSystemTools::Error("Error adding rule for ", makefileIn.c_str());
+    }
 }
 
 

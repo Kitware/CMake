@@ -86,6 +86,12 @@ void cmGlobalVisualStudio8Generator::Generate()
                             no_output, no_depends,
                             no_working_directory,
                             "echo", "Checking build system");
+      cmTarget* tgt = mf->FindTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+      if(!tgt)
+        {
+        cmSystemTools::Error("Error adding target " CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+        continue;
+        }
 
       // Add a custom rule to re-run CMake if any input files changed.
       const char* suppRegenRule =
@@ -134,6 +140,14 @@ void cmGlobalVisualStudio8Generator::Generate()
         mf->AddCustomCommandToOutput(
           CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.cmake", listFiles,
           no_main_dependency, commandLines, no_comment, no_working_directory, true);
+        if(cmSourceFile* file = mf->GetSource(CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.cmake.rule"))
+          {
+          tgt->GetSourceFiles().push_back(file);
+          }
+        else
+          {
+          cmSystemTools::Error("Error adding rule for " CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.cmake");
+          }
         }
       }
     }
