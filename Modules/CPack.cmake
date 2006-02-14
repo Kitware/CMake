@@ -44,7 +44,6 @@ IF(NOT CPACK_GENERATOR)
 ENDIF(NOT CPACK_GENERATOR)
 
 # Set some other variables
-SET(CPACK_SOURCE_DIR "${CMAKE_SOURCE_DIR}")
 SET(CPACK_BINARY_DIR "${CMAKE_BINARY_DIR}")
 
 # Hack for Visual Studio support

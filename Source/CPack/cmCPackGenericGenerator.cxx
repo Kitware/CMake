@@ -56,9 +56,6 @@ int cmCPackGenericGenerator::PrepareNames()
   outName += ".";
   outName += this->GetOutputExtension();
 
-  std::string installFile = this->GetOption("CPACK_PACKAGE_DIRECTORY");
-  installFile += "/cmake_install.cmake";
-
   std::string destFile = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   destFile += "/" + outName;
 
@@ -67,7 +64,6 @@ int cmCPackGenericGenerator::PrepareNames()
 
   this->SetOption("CPACK_TOPLEVEL_DIRECTORY", topDirectory.c_str());
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", tempDirectory.c_str());
-  this->SetOption("CPACK_INSTALL_FILE_NAME", installFile.c_str());
   this->SetOption("CPACK_OUTPUT_FILE_NAME", outName.c_str());
   this->SetOption("CPACK_OUTPUT_FILE_PATH", destFile.c_str());
   this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME", outFile.c_str());
@@ -118,7 +114,6 @@ int cmCPackGenericGenerator::InstallProject()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Install project" << std::endl);
   const char* tempInstallDirectory = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
-  const char* installFile = this->GetOption("CPACK_INSTALL_FILE_NAME");
   int res = 1;
   if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory))
     {
@@ -165,8 +160,54 @@ int cmCPackGenericGenerator::InstallProject()
         }
       }
     }
-  else
+  const char* installDirectories = this->GetOption("CPACK_INSTALLED_DIRECTORIES");
+  if ( installDirectories )
     {
+    std::vector<std::string> installDirectoriesVector;
+    cmSystemTools::ExpandListArgument(installDirectories,installDirectoriesVector);
+    if ( installDirectoriesVector.size() % 2 != 0 )
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "CPACK_INSTALLED_DIRECTORIES should contain pairs of <directory> and <subdirectory>. The <subdirectory> can be '.' to be installed in the toplevel directory of installation." << std::endl);
+      return 0;
+      }
+    std::vector<std::string>::iterator it;
+    const char* tempDir = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+    for ( it = installDirectoriesVector.begin(); it != installDirectoriesVector.end();
+      ++it )
+      {
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
+      cmsys::Glob gl;
+      std::string toplevel = it->c_str();
+      it ++;
+      std::string subdir = it->c_str();
+      std::string findExpr = toplevel;
+      findExpr += "/*";
+      gl.RecurseOn();
+      if ( !gl.FindFiles(findExpr) )
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find any files in the installed directory" << std::endl);
+        return 0;
+        }
+      std::vector<std::string>& files = gl.GetFiles();
+      std::vector<std::string>::iterator gfit;
+      for ( gfit = files.begin(); gfit != files.end(); ++ gfit )
+        {
+        std::string filePath = tempDir;
+        filePath += "/" + subdir + "/" + cmSystemTools::RelativePath(toplevel.c_str(), gfit->c_str());
+        std::string &inFile = *gfit;
+        cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: " << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
+        if ( !cmSystemTools::CopyFileIfDifferent(inFile.c_str(), filePath.c_str()) )
+          {
+          cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying file: " << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
+          }
+        }
+      }
+    }
+  const char* binaryDir = this->GetOption("CPACK_BINARY_DIR");
+  if ( binaryDir )
+    {
+    std::string installFile = binaryDir;
+    installFile += "/cmake_install.cmake";
     cmake cm;
     cmGlobalGenerator gg;
     gg.SetCMakeInstance(&cm);
@@ -183,7 +224,7 @@ int cmCPackGenericGenerator::InstallProject()
       mf->AddDefinition("BUILD_TYPE", buildConfig);
       }
 
-    res = mf->ReadListFile(0, installFile);
+    res = mf->ReadListFile(0, installFile.c_str());
     if ( cmSystemTools::GetErrorOccuredFlag() )
       {
       res = 0;

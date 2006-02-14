@@ -51,7 +51,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
     << "# take the archive portion of this file and pipe it to tar" << std::endl
     << "# the NUMERIC parameter in this command should be one more" << std::endl
     << "# than the number of lines in this header file" << std::endl
-    << "tail +18 $0 | gunzip | tar xf -" << std::endl
+    << "tail +18 \"$0\" | gunzip | tar xf -" << std::endl
     << "" << std::endl
     << "exit 0" << std::endl
     << "echo \"\"" << std::endl

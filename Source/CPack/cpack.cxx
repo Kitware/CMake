@@ -295,12 +295,16 @@ int main (int argc, char *argv[])
         parsed = 0;
         }
 
-      cmsys::SystemTools::ConvertToUnixSlashes(cpackProjectDirectory);
-      std::string makeInstallFile = cpackProjectDirectory + "/cmake_install.cmake";
-      if ( !cmsys::SystemTools::FileExists(makeInstallFile.c_str()) )
+      if ( !mf->GetDefinition("CPACK_INSTALL_COMMANDS") && !mf->GetDefinition("CPACK_INSTALLED_DIRECTORIES") )
         {
-        cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Cannot find installation file: " << makeInstallFile.c_str() << std::endl);
-        parsed = 0;
+        cmsys::SystemTools::ConvertToUnixSlashes(cpackProjectDirectory);
+        std::string makeInstallFile = cpackProjectDirectory + "/cmake_install.cmake";
+        if ( !cmsys::SystemTools::FileExists(makeInstallFile.c_str()) )
+          {
+          cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Cannot find installation file: " << makeInstallFile.c_str() << std::endl);
+          cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Please specify build tree of the project that uses CMake, specify CPACK_INSTALL_COMMANDS, or specify CPACK_INSTALLED_DIRECTORIES." << std::endl);
+          parsed = 0;
+          }
         }
       }
     }

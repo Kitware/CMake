@@ -230,12 +230,14 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   SET(CPACK_PACKAGE_VERSION_MAJOR "${CMake_VERSION_MAJOR}")
   SET(CPACK_PACKAGE_VERSION_MINOR "${CMake_VERSION_MINOR}")
   SET(CPACK_PACKAGE_VERSION_PATCH "${CMake_VERSION_PATCH}")
-  SET(CPACK_PACKAGE_EXECUTABLE "CMakeSetup")
-  SET(CPACK_PACKAGE_EXECUTABLE_LABEL "CMake")
+
   IF(WIN32 AND NOT UNIX)
     # There is a bug in NSI that does not handle full unix paths properly. Make
     # sure there is at least one set of four (4) backlasshes.
     SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\CMakeInstall.bmp")
+    SET(CPACK_PACKAGE_EXECUTABLE "CMakeSetup" "CMake")
+  ELSE(WIN32 AND NOT UNIX)
+    SET(CPACK_PACKAGE_EXECUTABLE "ccmake" "CMake")
   ENDIF(WIN32 AND NOT UNIX)
   INCLUDE(CPack)
 ENDIF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
