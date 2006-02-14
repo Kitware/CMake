@@ -1,5 +1,5 @@
 #include "generated.h"
-main()
+int main()
 {
-  
+  return 0;
 }
