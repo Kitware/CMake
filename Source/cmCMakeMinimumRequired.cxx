@@ -16,39 +16,106 @@
 =========================================================================*/
 #include "cmCMakeMinimumRequired.h"
 
+#include "cmVersion.h"
+
 // cmCMakeMinimumRequired
 bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() != 2)
+  // Process arguments.
+  std::string version_string;
+  bool doing_version = false;
+  bool fatal_error = false;
+  for(unsigned int i=0; i < args.size(); ++i)
     {
-    this->SetError("called with incorrect number of arguments");
+    if(args[i] == "VERSION")
+      {
+      doing_version = true;
+      }
+    else if(args[i] == "FATAL_ERROR")
+      {
+      if(doing_version)
+        {
+        this->SetError("called with no value for VERSION.");
+        return false;
+        }
+      doing_version = false;
+      fatal_error = true;
+      }
+    else if(doing_version)
+      {
+      doing_version = false;
+      version_string = args[i];
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "called with unknown argument \"" << args[i].c_str() << "\".";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+  if(doing_version)
+    {
+    this->SetError("called with no value for VERSION.");
     return false;
     }
-  if(args[0] == "VERSION")
-    {
-    m_Makefile->AddDefinition("CMAKE_MINIMUM_REQUIRED_VERSION", args[1].c_str());
-    }
-  float version = float(m_Makefile->GetMajorVersion());
-  version += (float(m_Makefile->GetMinorVersion()) * (float).1);
-  version += (float(m_Makefile->GetPatchVersion()) * (float).01);
-  float reqVersion = 0;
-  int major=0;
-  int minor=0;
-  int patch=0;
 
-  int res=sscanf(args[1].c_str(), "%d.%d.%d", &major, &minor, &patch);
-  if (res==3)
-     reqVersion=float(major)+0.1*float(minor)+0.01*float(patch);
-  else if (res==2)
-     reqVersion=float(major)+0.1*float(minor);
-
-  if(reqVersion > version)
+  // Make sure there was a version to check.
+  if(version_string.empty())
     {
-    cmOStringStream str;
-    str << "WARNING: This project requires version: " << args[1].c_str() << " of cmake.\n"
-        << "You are running version: " << version;
-    cmSystemTools::Message(str.str().c_str());
+    return true;
     }
+
+  // Save the required version string.
+  m_Makefile->AddDefinition("CMAKE_MINIMUM_REQUIRED_VERSION", version_string.c_str());
+
+  // Get the current version number.
+  int current_major = m_Makefile->GetMajorVersion();
+  int current_minor = m_Makefile->GetMinorVersion();
+  int current_patch = m_Makefile->GetPatchVersion();
+
+  // Parse the required version number.  If no patch-level is given
+  // use zero.
+  int required_major = 0;
+  int required_minor = 0;
+  int required_patch = 0;
+  if(sscanf(version_string.c_str(), "%d.%d.%d",
+            &required_major, &required_minor, &required_patch) < 2)
+    {
+    cmOStringStream e;
+    e << "could not parse VERSION \"" << version_string.c_str() << "\".";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  // Compare the version numbers.
+  if(current_major < required_major ||
+     current_major == required_major &&
+     current_minor < required_minor ||
+     current_major == required_major &&
+     current_minor == required_minor &&
+     current_patch < required_patch)
+    {
+    // The current version is too low.
+    cmOStringStream e;
+    if(!fatal_error)
+      {
+      e << "WARNING: ";
+      }
+    e << "This project requires version " << version_string.c_str() << " of CMake.  "
+      << "You are running version "
+      << current_major << "." << current_minor << "." << current_patch << ".\n";
+    if(fatal_error)
+      {
+      cmSystemTools::Error(e.str().c_str());
+      cmSystemTools::SetFatalErrorOccured();
+      }
+    else
+      {
+      cmSystemTools::Message(e.str().c_str());
+      }
+    }
+
   return true;
 }
 
