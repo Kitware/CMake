@@ -101,6 +101,34 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
     return 0;
     }
   this->SetOption("CPACK_INSTALLER_PROGRAM", nsisPath.c_str());
+
+  const char* cpackPackageExecutables = this->GetOption("CPACK_PACKAGE_EXECUTABLES");
+  if ( cpackPackageExecutables )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "The cpackPackageExecutables: " << cpackPackageExecutables << "." << std::endl);
+    cmOStringStream str;
+    cmOStringStream deleteStr;
+    std::vector<std::string> cpackPackageExecutablesVector;
+    cmSystemTools::ExpandListArgument(cpackPackageExecutables,cpackPackageExecutablesVector);
+    if ( cpackPackageExecutablesVector.size() % 2 != 0 )
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and <icon name>." << std::endl);
+      return 0;
+      }
+    std::vector<std::string>::iterator it;
+    for ( it = cpackPackageExecutablesVector.begin(); it != cpackPackageExecutablesVector.end();
+      ++it )
+      {
+      std::string execName = *it;
+      ++ it;
+      std::string linkName = *it;
+      str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\" << linkName << ".lnk\"" "\"$INSTDIR\\bin\\" << execName << ".exe\"" << std::endl;
+      deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName << ".lnk\"" << std::endl;
+      }
+    this->SetOption("CPACK_NSIS_CREATE_ICONS", str.str().c_str());
+    this->SetOption("CPACK_NSIS_DELETE_ICONS", deleteStr.str().c_str());
+    }
+
   return res;
 }
 
