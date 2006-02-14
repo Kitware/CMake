@@ -779,7 +779,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         extraLinkOptions.c_str()).c_str();
       }
     fout << "\"\n"
-         << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
+         << "\t\t\t\tAdditionalDependencies=\"";
     this->OutputLibraries(fout, linkLibs);
     fout << "\"\n";
     temp = m_LibraryOutputPath;
