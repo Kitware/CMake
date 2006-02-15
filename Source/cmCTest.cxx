@@ -255,6 +255,9 @@ cmCTest::cmCTest()
     {
     it->second->SetCTestInstance(this);
     }
+
+  // Make sure we can capture the build tool output.
+  cmSystemTools::EnableVSConsoleOutput();
 }
 
 //----------------------------------------------------------------------

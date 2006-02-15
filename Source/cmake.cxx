@@ -148,6 +148,8 @@ cmake::cmake()
   this->AddDefaultGenerators();
   this->AddDefaultCommands();
 
+  // Make sure we can capture the build tool output.
+  cmSystemTools::EnableVSConsoleOutput();
 }
 
 cmake::~cmake()

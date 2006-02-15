@@ -1266,6 +1266,20 @@ bool cmSystemTools::PutEnv(const char* value)
   return ret == 0;
 }
 
+void cmSystemTools::EnableVSConsoleOutput()
+{
+  // Visual Studio 8 2005 (devenv.exe or VCExpress.exe) will not
+  // display output to the console unless this environment variable is
+  // set.  We need it to capture the output of these build tools.
+  // Note for future work that one could pass "/out \\.\pipe\NAME" to
+  // either of these executables where NAME is created with
+  // CreateNamedPipe.  This would bypass the internal buffering of the
+  // output and allow it to be captured on the fly.
+#ifdef _WIN32
+  cmSystemTools::PutEnv("vsconsoleoutput=1");
+#endif
+}
+
 std::string cmSystemTools::MakeXMLSafe(const char* str)
 {
   std::vector<char> result;

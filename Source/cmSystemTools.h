@@ -291,6 +291,9 @@ public:
       of the form var=value */
   static bool PutEnv(const char* value);
 
+  /** Setup the environment to enable VS 8 IDE output.  */
+  static void EnableVSConsoleOutput();
+
   /** Make string XML safe */
   static std::string MakeXMLSafe(const char* str);
 
