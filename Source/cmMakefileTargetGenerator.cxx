@@ -715,7 +715,7 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags()
 #else
   std::set<cmStdString> emitted;
   std::vector<std::string> includes;
-  this->GetIncludeDirectories(includes);
+  this->LocalGenerator->GetIncludeDirectories(includes);
   std::vector<std::string>::iterator i;
   // check all include directories for frameworks as this
   // will already have added a -F for the framework
