@@ -83,6 +83,10 @@ CMAKE_CXX_SOURCES="\
   cmXCodeObject \
   cmXCode21Object \
   cmLocalUnixMakefileGenerator3 \
+  cmMakefileExecutableTargetGenerator \
+  cmMakefileLibraryTargetGenerator \
+  cmMakefileTargetGenerator \
+  cmMakefileUtilityTargetGenerator \
   cmBootstrapCommands \
   cmCommands \
   cmTarget \

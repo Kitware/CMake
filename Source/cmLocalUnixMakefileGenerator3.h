@@ -23,6 +23,7 @@ class cmCustomCommand;
 class cmDependInformation;
 class cmDepends;
 class cmMakeDepend;
+class cmMakefileTargetGenerator;
 class cmTarget;
 class cmSourceFile;
 
@@ -39,19 +40,29 @@ public:
   virtual ~cmLocalUnixMakefileGenerator3();
 
   /**
-   * Generate the makefile for this directory. 
-   */
-  virtual void Generate();
-
-  /**
    * Process the CMakeLists files for this directory to fill in the
    * m_Makefile ivar 
    */
   virtual void Configure();
 
-  /** creates the common disclainer text at the top of each makefile */
-  void WriteDisclaimer(std::ostream& os);
+  /**
+   * Generate the makefile for this directory. 
+   */
+  virtual void Generate();
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory
   const std::string &GetHomeRelativeOutputPath();
@@ -65,9 +76,6 @@ public:
   
   // write the main variables used by the makefiles
   void WriteMakeVariables(std::ostream& makefileStream);
-
-  // write a  comment line #====... in the stream
-  void WriteDivider(std::ostream& os);
 
   /**
    * If true, then explicitly pass MAKEFLAGS on the make all target for makes
@@ -83,10 +91,6 @@ public:
   void SetMakeSilentFlag(const char* s) { m_MakeSilentFlag = s; }
   std::string &GetMakeSilentFlag() { return m_MakeSilentFlag; }
 
-  /** used to create a recursive make call */
-  std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);  
-  
-  
   /** Set whether the echo command needs its argument quoted.  */
   void SetEchoNeedsQuote(bool b) { m_EchoNeedsQuote = b; }
 
@@ -134,8 +138,39 @@ public:
    */
   void SetIgnoreLibPrefix(bool s) { m_IgnoreLibPrefix = s; }
 
-    
+  // used in writing out Cmake files such as WriteDirectoryInformation
+  static void WriteCMakeArgument(std::ostream& os, const char* s);
+
+  /** creates the common disclainer text at the top of each makefile */
+  void WriteDisclaimer(std::ostream& os);
+
+  // write a  comment line #====... in the stream
+  void WriteDivider(std::ostream& os);
+
+  /** used to create a recursive make call */
+  std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);    
   
+  // append an echo command
+  void AppendEcho(std::vector<std::string>& commands, const char* text);
+
+  static std::string GetTargetDirectory(cmTarget& target);
+
+    // create a command that cds to the start dir then runs the commands
+  void CreateCDCommand(std::vector<std::string>& commands, 
+                       const char *targetDir, const char *returnDir);
+
+  static std::string ConvertToQuotedOutputPath(const char* p);
+
+  std::string& CreateSafeUniqueObjectFileName(const char* sin);
+  std::string CreateMakeVariable(const char* sin, const char* s2in);
+
+  // cleanup the name of a potential target
+  std::string ConvertToMakeTarget(const char* tgt);
+
+
+  const char* GetSourceFileLanguage(const cmSourceFile& source);
+
+
   
   
   /** Called from command-line hook to scan dependencies.  */
@@ -145,10 +180,10 @@ public:
   virtual void CheckDependencies(cmMakefile* mf, bool verbose,
                                  bool clear);
   
-  /** write some extra rules suahc as make test etc */
+  /** write some extra rules such as make test etc */
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
-
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
+
   std::string GetRelativeTargetDirectory(cmTarget& target);
 
   // List the files for which to check dependency integrity.  Each
@@ -159,140 +194,59 @@ public:
   std::map<cmStdString, IntegrityCheckSetMap> &GetIntegrityCheckSet() 
   { return m_CheckDependFiles;}
   
-  void AppendTargetDepends(std::vector<std::string>& depends,
-                           cmTarget& target);
-
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  cmTarget& target);
-
-  void AppendEcho(std::vector<std::string>& commands,
-                  const char* text);
 
   // write the target rules for the local Makefile into the stream
   void WriteLocalAllRules(std::ostream& ruleFileStream);
   
   std::map<cmStdString,std::vector<cmTarget *> > GetLocalObjectFiles()
     { return m_LocalObjectFiles;}
+
 protected:
-  // Return the a string with -F flags on apple
-  std::string GetFrameworkFlags(cmTarget&);
-  
-  // write the depend info 
-  void WriteDependLanguageInfo(std::ostream& cmakefileStream, cmTarget &tgt);
-  
-  // write the target rules for the local Makefile into the stream
-  void WriteLocalMakefileTargets(std::ostream& ruleFileStream,
-                                 std::set<cmStdString> &emitted);
-
-  // write the local help rule
-  void WriteHelpRule(std::ostream& ruleFileStream);
-  
-  // create a command that cds to the start dir then runs the commands
-  void CreateCDCommand(std::vector<std::string>& commands, 
-                       const char *targetDir, const char *returnDir);
-
   // these two methods just compute reasonable values for m_LibraryOutputPath
   // and m_ExecutableOutputPath
   void ConfigureOutputPaths();
   void FormatOutputPath(std::string& path, const char* name);
 
+  void WriteLocalMakefile();
+  
+  // write the target rules for the local Makefile into the stream
+  void WriteLocalMakefileTargets(std::ostream& ruleFileStream,
+                                 std::set<cmStdString> &emitted);
+
+  // this method Writes the Directory informaiton files
+  void WriteDirectoryInformationFile();
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  // write the depend info 
+  void WriteDependLanguageInfo(std::ostream& cmakefileStream, cmTarget &tgt);
+  
+  // write the local help rule
+  void WriteHelpRule(std::ostream& ruleFileStream);
+  
   // this converts a file name that is relative to the StartOuputDirectory
   // into a full path
   std::string ConvertToFullPath(const std::string& localPath);
 
-  // this is responsible for writing all of the rules for all this
-  // directories custom commands (but not utility targets)
-  void WriteCustomCommands(std::ostream& os,
-                           std::vector<std::string>& cleanFiles);
-  
-  // this method Writes the Directory informaiton files
-  void WriteDirectoryInformationFile();
-
-  // cleanup the name of a potential target
-  std::string ConvertToMakeTarget(const char* tgt);
-
-  // used in writing out Cmake files such as WriteDirectoryInformation
-  void WriteCMakeArgument(std::ostream& os, const char* s);
-
-  // write out all the rules for this target
-  void WriteTargetRuleFiles(cmTarget& target);
-  void WriteUtilityRuleFiles(cmTarget& target);
-  
-  // create the rule files for an object
-  void WriteObjectRuleFiles(cmTarget& target,
-                            cmSourceFile& source,
-                            std::vector<std::string>& objects,
-                            std::ostream &filestr,
-                            std::ostream &flagstr);
-
-  // write the build rule for an object
-  void WriteObjectBuildFile(std::string &obj,
-                            const char *lang, 
-                            cmTarget& target, 
-                            cmSourceFile& source,
-                            std::vector<std::string>& depends,
-                            std::ostream &filestr,
-                            std::ostream &flagstr);
-  
-  // write the depend.make file for an object
-  void WriteObjectDependRules(cmSourceFile& source,
-                              std::vector<std::string>& depends);
-  
-  void GenerateCustomRuleFile(const cmCustomCommand& cc, 
-                              std::ostream &ruleStream);
-  
-  // these three make some simple changes and then call WriteLibraryRule
-  void WriteStaticLibraryRule(std::ostream& ruleFileStream,
-                              const char* ruleFileName,
-                              cmTarget& target,
-                              const std::vector<std::string>& objects,
-                              const std::vector<std::string>& external_objects,
-                              std::vector<std::string>& cleanFiles);
-  
-  void WriteSharedLibraryRule(std::ostream& ruleFileStream,
-                              const char* ruleFileName,
-                              cmTarget& target,
-                              const std::vector<std::string>& objects,
-                              const std::vector<std::string>& external_objects,
-                              std::vector<std::string>& cleanFiles);
-  
-  void WriteModuleLibraryRule(std::ostream& ruleFileStream,
-                              const char* ruleFileName,
-                              cmTarget& target,
-                              const std::vector<std::string>& objects,
-                              const std::vector<std::string>& external_objects,
-                              std::vector<std::string>& cleanFiles);
-
-  // the main code for writing the Executable target rules
-  void WriteExecutableRule(std::ostream& ruleFileStream,
-                           const char* ruleFileName,
-                           cmTarget& target,
-                           const std::vector<std::string>& objects,
-                           const std::vector<std::string>& external_objects,
-                           std::vector<std::string>& cleanFiles);
-
-  // the main method for writing library rules
-  void WriteLibraryRule(std::ostream& ruleFileStream,
-                        const char* ruleFileName,
-                        cmTarget& target,
-                        const std::vector<std::string>& objects,
-                        const std::vector<std::string>& external_objects,
-                        const char* linkRuleVar,
-                        const char* extraLinkFlags,
-                        std::vector<std::string>& cleanFiles);
-  
-  void WriteLocalMakefile();
-  
   
   void WriteConvenienceRule(std::ostream& ruleFileStream,
                             const char* realTarget,
                             const char* helpTarget);
-  void WriteObjectsVariable(std::ostream& ruleFileStream,
-                            cmTarget& target,
-                            const std::vector<std::string>& objects,
-                            const std::vector<std::string>& external_objects,
-                            std::string& variableName,
-                            std::string& variableNameExternal);
+
   void WriteTargetDependRule(std::ostream& ruleFileStream,
                              cmTarget& target);
   void WriteTargetCleanRule(std::ostream& ruleFileStream,
@@ -302,12 +256,9 @@ protected:
                                cmTarget& target,
                                const std::vector<std::string>& objects);
   
-  std::string GetTargetDirectory(cmTarget& target);
   std::string GetObjectFileName(cmTarget& target,
                                 const cmSourceFile& source,
                                 std::string* nameWithoutTargetDir = 0);
-  const char* GetSourceFileLanguage(const cmSourceFile& source);
-  std::string ConvertToQuotedOutputPath(const char* p);
 
   void AppendRuleDepend(std::vector<std::string>& depends,
                         const char* ruleFileName);
@@ -322,20 +273,17 @@ protected:
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files);
 
-  //==========================================================================
-  std::string& CreateSafeUniqueObjectFileName(const char* sin);
-  std::string CreateMakeVariable(const char* sin, const char* s2in);
-  //==========================================================================
-
 private:
+  friend class cmMakefileTargetGenerator;
+  friend class cmMakefileExecutableTargetGenerator;
+  friend class cmMakefileLibraryTargetGenerator;
+  friend class cmMakefileUtilityTargetGenerator;
+  
   std::map<cmStdString, IntegrityCheckSetMap> m_CheckDependFiles;
 
   //==========================================================================
   // Configuration settings.
   int m_MakefileVariableSize;
-  std::map<cmStdString, cmStdString> m_MakeVariableMap;
-  std::map<cmStdString, cmStdString> m_ShortMakeVariableMap;
-  std::map<cmStdString, cmStdString> m_UniqueObjectNamesMap;
   std::string m_IncludeDirective;
   std::string m_MakeSilentFlag;
   std::string m_ExecutableOutputPath;
@@ -345,17 +293,19 @@ private:
   bool m_UnixCD;
   bool m_PassMakeflags;
   bool m_SilentNoColon;
-  //==========================================================================
-
   // Flag for whether echo command needs quotes.
   bool m_EchoNeedsQuote;
+  //==========================================================================
 
   std::string m_HomeRelativeOutputPath;
   
-  // Set of object file names that will be built in this directory.
-  std::set<cmStdString> m_ObjectFiles;
-
   std::map<cmStdString,std::vector<cmTarget *> > m_LocalObjectFiles;
+
+  /* does the work for each target */
+  std::vector<cmMakefileTargetGenerator *> TargetGenerators;
+  std::map<cmStdString, cmStdString> m_MakeVariableMap;
+  std::map<cmStdString, cmStdString> m_ShortMakeVariableMap;
+  std::map<cmStdString, cmStdString> m_UniqueObjectNamesMap;
 };
 
 #endif

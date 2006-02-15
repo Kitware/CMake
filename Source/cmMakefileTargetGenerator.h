@@ -144,7 +144,7 @@ protected:
     return this->LocalGenerator->Convert(source, relative, output, optional);
   }
 
-  // constructor to set the ivarscmMakefileTargetGenerator
+  // constructor to set the ivars
   cmMakefileTargetGenerator();
 
 };

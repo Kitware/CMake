@@ -129,6 +129,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     
   // Write the do not edit header.
   lg->WriteDisclaimer(makefileStream);
+
   // Write out the "special" stuff
   lg->WriteSpecialTargetsTop(makefileStream);
   // Write the main entry point target.  This must be the VERY first
@@ -390,8 +391,8 @@ cmGlobalUnixMakefileGenerator3
     // write the directory rule
     commands.clear();
     commands.push_back
-      (lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
-                                makeTargetName.c_str()));
+      (lg->GetRecursiveMakeCall
+       ("CMakeFiles/Makefile2",makeTargetName.c_str()));
     
     // Write the rule.
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
@@ -520,9 +521,8 @@ cmGlobalUnixMakefileGenerator3
     
     // write the directory rule
     commands.clear();
-    commands.push_back
-      (lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
-                                makeTargetName.c_str()));
+    commands.push_back(lg->GetRecursiveMakeCall
+                       ("CMakeFiles/Makefile2",makeTargetName.c_str()));
     
     // Write the rule.
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
@@ -627,8 +627,8 @@ cmGlobalUnixMakefileGenerator3
           
           // Write the rule.
           commands.clear();
-          commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
-                                                      t->second.GetName()));
+          commands.push_back(lg->GetRecursiveMakeCall
+                             ("CMakeFiles/Makefile2",t->second.GetName()));
           depends.clear(); 
           if(sym)
             {
@@ -691,22 +691,22 @@ cmGlobalUnixMakefileGenerator3
         {
         makeTargetName = localName;
         makeTargetName += "/depend";
-        commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
-                                                    makeTargetName.c_str()));
+        commands.push_back(lg->GetRecursiveMakeCall
+                           (makefileName.c_str(),makeTargetName.c_str()));
         
         // add requires if we need it for this generator
         if (needRequiresStep)
           {
           makeTargetName = localName;
           makeTargetName += "/requires";
-          commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
-                                                      makeTargetName.c_str()));
+          commands.push_back(lg->GetRecursiveMakeCall
+                             (makefileName.c_str(),makeTargetName.c_str()));
           }
         }
       makeTargetName = localName;
       makeTargetName += "/build";
-      commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
-                                                  makeTargetName.c_str()));
+      commands.push_back(lg->GetRecursiveMakeCall
+                         (makefileName.c_str(),makeTargetName.c_str()));
 
       // Write the rule.
       localName += "/all";
@@ -732,8 +732,8 @@ cmGlobalUnixMakefileGenerator3
 
       // Write the rule.
       commands.clear();
-      commands.push_back(lg->GetRecursiveMakeCall("CMakeFiles/Makefile2",
-                                                  localName.c_str()));
+      commands.push_back(lg->GetRecursiveMakeCall
+                         ("CMakeFiles/Makefile2",localName.c_str()));
       depends.clear();
       if(sym)
         {
@@ -763,8 +763,8 @@ cmGlobalUnixMakefileGenerator3
         depends.push_back(sym);
         }
       commands.clear();
-      commands.push_back(lg->GetRecursiveMakeCall(makefileName.c_str(),
-                                                  makeTargetName.c_str()));
+      commands.push_back(lg->GetRecursiveMakeCall
+                         (makefileName.c_str(), makeTargetName.c_str()));
       lg->WriteMakeRule(ruleFileStream, "clean rule for target.",
                         makeTargetName.c_str(), depends, commands);
       commands.clear();

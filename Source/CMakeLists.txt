@@ -125,6 +125,10 @@ SET(SRCS
   cmMakeDepend.h
   cmMakefile.cxx
   cmMakefile.h
+  cmMakefileTargetGenerator.cxx
+  cmMakefileExecutableTargetGenerator.cxx
+  cmMakefileLibraryTargetGenerator.cxx
+  cmMakefileUtilityTargetGenerator.cxx
   cmOrderLinkDirectories.cxx
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
