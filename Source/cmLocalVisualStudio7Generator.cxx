@@ -778,8 +778,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
         extraLinkOptions.c_str()).c_str();
       }
+    // Use the NOINHERIT macro to avoid getting VS project default
+    // libraries which may be set by the user to something bad.
     fout << "\"\n"
-         << "\t\t\t\tAdditionalDependencies=\"";
+         << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) ";
     this->OutputLibraries(fout, linkLibs);
     fout << "\"\n";
     temp = m_LibraryOutputPath;
@@ -846,8 +848,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
         extraLinkOptions.c_str()).c_str();
       }
+    // Use the NOINHERIT macro to avoid getting VS project default
+    // libraries which may be set by the user to something bad.
     fout << "\"\n"
-         << "\t\t\t\tAdditionalDependencies=\""
+         << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
          << m_Makefile->GetRequiredDefinition("CMAKE_STANDARD_LIBRARIES") 
          << " ";
     this->OutputLibraries(fout, linkLibs);
