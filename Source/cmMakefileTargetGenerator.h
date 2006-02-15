@@ -37,6 +37,10 @@ class cmSourceFile;
 class cmMakefileTargetGenerator 
 {
 public:
+  // constructor to set the ivars
+  cmMakefileTargetGenerator();
+  virtual ~cmMakefileTargetGenerator() {};
+
   // construct using this factory call
   static cmMakefileTargetGenerator *New(cmLocalUnixMakefileGenerator3 *lg,
                                         cmStdString tgtName,
@@ -143,9 +147,6 @@ protected:
   {
     return this->LocalGenerator->Convert(source, relative, output, optional);
   }
-
-  // constructor to set the ivars
-  cmMakefileTargetGenerator();
 
 };
 
