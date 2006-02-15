@@ -34,7 +34,10 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 
   // write in rules for object files
   this->WriteCommonCodeRules();
-  
+
+  // Write the dependency generation rule.
+  this->WriteTargetDependRules();
+
   // write the link rules
   this->WriteExecutableRule();
 
@@ -53,9 +56,6 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 //----------------------------------------------------------------------------
 void cmMakefileExecutableTargetGenerator::WriteExecutableRule()
 {
-  // Write the dependency generation rule.
-  this->WriteTargetDependRules();
-
   std::vector<std::string> commands;
 
   std::string relPath = this->LocalGenerator->GetHomeRelativeOutputPath();
@@ -296,7 +296,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule()
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 
                                       0,
                                       targetFullPathReal.c_str(), 
-                                      depends, commands);
+                                      depends, commands, false);
 
   // The symlink name for the target should depend on the real target
   // so if the target version changes it rebuilds and recreates the
@@ -308,7 +308,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule()
     depends.push_back(targetFullPathReal.c_str());
     this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                         targetFullPath.c_str(), 
-                                        depends, commands);
+                                        depends, commands, false);
     }
 
   // Write convenience targets.

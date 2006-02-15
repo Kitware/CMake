@@ -130,17 +130,10 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   // Write the do not edit header.
   lg->WriteDisclaimer(makefileStream);
 
-  // Write out the "special" stuff
-  lg->WriteSpecialTargetsTop(makefileStream);
   // Write the main entry point target.  This must be the VERY first
   // target so that make with no arguments will run it.
   // Just depend on the all target to drive the build.
   std::vector<std::string> depends;
-  const char* sym = lg->GetMakefile()->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-  if(sym)
-    {
-    depends.push_back(sym);
-    }
   std::vector<std::string> no_commands;
   depends.push_back("all");
 
@@ -150,20 +143,19 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
                     "given to make.",
                     "default_target",
                     depends,
-                    no_commands);
+                    no_commands, true);
 
   depends.clear();
-  if(sym)
-    {
-    depends.push_back(sym);
-    }
-    
+
   // Write and empty all:
   lg->WriteMakeRule(makefileStream, 
                     "The main recursive all target", "all", 
-                    depends, no_commands);
+                    depends, no_commands, true);
 
   lg->WriteMakeVariables(makefileStream);
+
+  // Write out the "special" stuff
+  lg->WriteSpecialTargetsTop(makefileStream);
   
   // write the target convenience rules
   unsigned int i;
@@ -396,12 +388,12 @@ cmGlobalUnixMakefileGenerator3
     
     // Write the rule.
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
-                      localName.c_str(), depends, commands);
+                      localName.c_str(), depends, commands, true);
 
     // Write the rule.
     commands.clear();
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
-                      makeTargetName.c_str(), all_tgts, commands);
+                      makeTargetName.c_str(), all_tgts, commands, true);
     }
 
   // now do the clean targets
@@ -450,7 +442,7 @@ cmGlobalUnixMakefileGenerator3
     // write the directory clean rule
     commands.clear();
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory clean.",
-                      makeTargetName.c_str(), all_tgts, commands);
+                      makeTargetName.c_str(), all_tgts, commands, true);
     }
 }
 
@@ -526,12 +518,12 @@ cmGlobalUnixMakefileGenerator3
     
     // Write the rule.
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
-                      localName.c_str(), depends, commands);
+                      localName.c_str(), depends, commands, true);
 
     // Write the rule.
     commands.clear();
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory.",
-                      makeTargetName.c_str(), all_tgts, commands);
+                      makeTargetName.c_str(), all_tgts, commands, true);
     }
 
   // now do the clean targets
@@ -580,7 +572,7 @@ cmGlobalUnixMakefileGenerator3
     // write the directory clean rule
     commands.clear();
     lg->WriteMakeRule(ruleFileStream, "Convenience name for directory clean.",
-                      makeTargetName.c_str(), all_tgts, commands);
+                      makeTargetName.c_str(), all_tgts, commands, true);
     }
 }
 
@@ -601,8 +593,6 @@ cmGlobalUnixMakefileGenerator3
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
-    const char* sym = lg->GetMakefile()->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-
     // for each target Generate the rule files for each target.
     cmTargets& targets = lg->GetMakefile()->GetTargets();
     for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
@@ -630,14 +620,11 @@ cmGlobalUnixMakefileGenerator3
           commands.push_back(lg->GetRecursiveMakeCall
                              ("CMakeFiles/Makefile2",t->second.GetName()));
           depends.clear(); 
-          if(sym)
-            {
-            depends.push_back(sym);
-            }
           depends.push_back("cmake_check_build_system");
           lg->WriteMakeRule(ruleFileStream, 
                             "Build rule for target.",
-                            t->second.GetName(), depends, commands);
+                            t->second.GetName(), depends, commands,
+                            true);
           }
         }
       }
@@ -711,14 +698,9 @@ cmGlobalUnixMakefileGenerator3
       // Write the rule.
       localName += "/all";
       depends.clear();
-      const char* sym = lg->GetMakefile()->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-      if(sym)
-        {
-        depends.push_back(sym);
-        }
       this->AppendGlobalTargetDepends(depends,t->second);
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
-                        localName.c_str(), depends, commands);
+                        localName.c_str(), depends, commands, true);
 
       // add the all/all dependency
       if (!exclude && t->second.IsInAll())
@@ -726,8 +708,8 @@ cmGlobalUnixMakefileGenerator3
         depends.clear();
         depends.push_back(localName);
         commands.clear();
-        lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
-                          "all", depends, commands);
+        lg->WriteMakeRule(ruleFileStream, "Include target in all.",
+                          "all", depends, commands, true);
         }
 
       // Write the rule.
@@ -735,42 +717,34 @@ cmGlobalUnixMakefileGenerator3
       commands.push_back(lg->GetRecursiveMakeCall
                          ("CMakeFiles/Makefile2",localName.c_str()));
       depends.clear();
-      if(sym)
-        {
-        depends.push_back(sym);
-        }
       depends.push_back("cmake_check_build_system");
       localName = lg->GetRelativeTargetDirectory(t->second);
       localName += "/rule";
       lg->WriteMakeRule(ruleFileStream, 
                         "Build rule for subdir invocation for target.",
-                        localName.c_str(), depends, commands);
+                        localName.c_str(), depends, commands, true);
 
       // Add a target with the canonical name (no prefix, suffix or path).
       commands.clear();
       depends.clear();
       depends.push_back(localName);
       lg->WriteMakeRule(ruleFileStream, "Convenience name for target.",
-                        t->second.GetName(), depends, commands);
+                        t->second.GetName(), depends, commands, true);
 
       // add the clean rule
       localName = lg->GetRelativeTargetDirectory(t->second);
       makeTargetName = localName;
       makeTargetName += "/clean";
       depends.clear();
-      if(sym)
-        {
-        depends.push_back(sym);
-        }
       commands.clear();
       commands.push_back(lg->GetRecursiveMakeCall
                          (makefileName.c_str(), makeTargetName.c_str()));
       lg->WriteMakeRule(ruleFileStream, "clean rule for target.",
-                        makeTargetName.c_str(), depends, commands);
+                        makeTargetName.c_str(), depends, commands, true);
       commands.clear();
       depends.push_back(makeTargetName);
       lg->WriteMakeRule(ruleFileStream, "clean rule for target.",
-                        "clean", depends, commands);
+                        "clean", depends, commands, true);
       }
     }
 }
@@ -934,14 +908,9 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
         }
       }
     }
-  const char* sym = lg->GetMakefile()->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-  if(sym)
-    {
-    no_depends.push_back(sym);
-    }
   lg->WriteMakeRule(ruleFileStream, "Help Target",
                     "help:",
-                    no_depends, commands);
+                    no_depends, commands, true);
   ruleFileStream << "\n\n";
 }
 

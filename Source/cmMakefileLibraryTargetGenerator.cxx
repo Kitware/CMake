@@ -35,6 +35,9 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
   // write in rules for object files
   this->WriteCommonCodeRules();
   
+  // Write the dependency generation rule.
+  this->WriteTargetDependRules();
+
   // write the link rules
   // Write the rule for this target type.
   switch(this->Target->GetType())
@@ -138,9 +141,6 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules()
 void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 (const char* linkRuleVar, const char* extraFlags)
 {
-  // Write the dependency generation rule.
-  this->WriteTargetDependRules();
-
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
   std::vector<std::string> commands;
@@ -351,7 +351,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Write the build rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                      targetFullPathReal.c_str(), depends, commands);
+                                      targetFullPathReal.c_str(),
+                                      depends, commands, false);
 
   // The symlink names for the target should depend on the real target
   // so if the target version changes it rebuilds and recreates the
@@ -362,7 +363,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     commands.clear();
     depends.push_back(targetFullPathReal.c_str());
     this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                        targetFullPathSO.c_str(), depends, commands);
+                                        targetFullPathSO.c_str(),
+                                        depends, commands, false);
     }
   if(targetFullPath != targetFullPathSO)
     {
@@ -370,7 +372,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     commands.clear();
     depends.push_back(targetFullPathSO.c_str());
     this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                        targetFullPath.c_str(), depends, commands);
+                                        targetFullPath.c_str(),
+                                        depends, commands, false);
     }
 
   // Write convenience targets.

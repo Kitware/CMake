@@ -32,7 +32,7 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator()
 {
   this->BuildFileStream = 0;
   this->InfoFileStream = 0;
-  this->FlagFileStream = 0;  
+  this->FlagFileStream = 0;
 }
 
 cmMakefileTargetGenerator *
@@ -398,11 +398,13 @@ cmMakefileTargetGenerator
     this->LocalGenerator->GetRelativeTargetDirectory(*this->Target);
   depMark += "/depend.make.mark";
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      depMark.c_str(), depends, no_commands);
+                                      depMark.c_str(),
+                                      depends, no_commands, false);
   
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      relativeObj.c_str(), depends, commands);
+                                      relativeObj.c_str(),
+                                      depends, commands, false);
 
   // If the language needs provides-requires mode, create the
   // corresponding targets.
@@ -412,7 +414,7 @@ cmMakefileTargetGenerator
   // always provide an empty requires target
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       objectRequires.c_str(), p_depends, 
-                                      no_commands);
+                                      no_commands, true);
 
   // write a build rule to recursively build what this obj provides
   std::string objectProvides = relativeObj;
@@ -429,13 +431,14 @@ cmMakefileTargetGenerator
   p_depends.push_back(objectRequires);
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       objectProvides.c_str(), p_depends, 
-                                      r_commands);
+                                      r_commands, true);
   
   // write the provides.build rule dependency on the obj file
   p_depends.clear();
   p_depends.push_back(relativeObj);
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      temp.c_str(), p_depends, no_commands);
+                                      temp.c_str(), p_depends, no_commands,
+                                      true);
 }
 
 //----------------------------------------------------------------------------
@@ -463,18 +466,14 @@ void cmMakefileTargetGenerator::WriteTargetRequiresRules()
 
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      depTarget.c_str(), depends, no_commands);
+                                      depTarget.c_str(),
+                                      depends, no_commands, true);
 }
 
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteTargetCleanRules()
 {
   std::vector<std::string> depends;
-  const char* sym = this->Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-  if(sym)
-    {
-    depends.push_back(sym);
-    }
   std::vector<std::string> commands;
 
   // Construct the clean target name.
@@ -490,7 +489,8 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
 
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      cleanTarget.c_str(), depends, commands);
+                                      cleanTarget.c_str(),
+                                      depends, commands, true);
 }
 
 
@@ -527,7 +527,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   depends.push_back(depMark);
   
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      depTarget.c_str(), depends, commands);
+                                      depTarget.c_str(),
+                                      depends, commands, true);
   depends.clear();
   
   // Write the dependency generation rule.
@@ -558,7 +559,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      depMark.c_str(), depends, commands);
+                                      depMark.c_str(),
+                                      depends, commands, false);
 }
 
 //----------------------------------------------------------------------------
@@ -632,7 +634,8 @@ void cmMakefileTargetGenerator
     comment = cc.GetComment();
     }
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, comment,
-                                      cc.GetOutput(), depends, commands);
+                                      cc.GetOutput(), depends, commands,
+                                      false);
 }
 
 //----------------------------------------------------------------------------

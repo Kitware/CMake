@@ -38,11 +38,6 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   // Collect the commands and dependencies.
   std::vector<std::string> commands;
   std::vector<std::string> depends;
-  const char* sym = this->Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-  if(sym)
-    {
-    depends.push_back(sym);
-    }
 
   // Utility targets store their rules in pre- and post-build commands.
   this->LocalGenerator->AppendCustomDepends
@@ -65,7 +60,8 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
 
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                      this->Target->GetName(), depends, commands);
+                                      this->Target->GetName(),
+                                      depends, commands, true);
 
   // Write convenience targets.
   std::string dir = this->Makefile->GetStartOutputDirectory();

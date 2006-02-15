@@ -231,7 +231,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
       }
     this->WriteMakeRule(ruleFileStream, 
                         "target for object file", 
-                        lo->first.c_str(), depends, commands);
+                        lo->first.c_str(), depends, commands, false);
     }
 
   // add a help target as long as there isn;t a real target named help
@@ -279,7 +279,7 @@ void cmLocalUnixMakefileGenerator3
                             m_Makefile->GetHomeOutputDirectory(),
                             m_Makefile->GetStartOutputDirectory());
       this->WriteMakeRule(ruleFileStream, "Convenience name for target.",
-                          localName.c_str(), depends, commands);
+                          localName.c_str(), depends, commands, true);
       
       // Add a target with the canonical name (no prefix, suffix or path).
       if(localName != t->second.GetName())
@@ -287,7 +287,7 @@ void cmLocalUnixMakefileGenerator3
         commands.clear();
         depends.push_back(localName);
         this->WriteMakeRule(ruleFileStream, "Convenience name for target.",
-                          t->second.GetName(), depends, commands);
+                            t->second.GetName(), depends, commands, true);
         }
       }
     }
@@ -409,7 +409,8 @@ cmLocalUnixMakefileGenerator3
                 const char* comment,
                 const char* target,
                 const std::vector<std::string>& depends,
-                const std::vector<std::string>& commands)
+                const std::vector<std::string>& commands,
+                bool symbolic)
 {
   // Make sure there is a target.
   if(!target || !*target)
@@ -445,6 +446,16 @@ cmLocalUnixMakefileGenerator3
     // Add a space before the ":" to avoid drive letter confusion on
     // Windows.
     space = " ";
+    }
+
+  // Mark the rule as symbolic if requested.
+  if(symbolic)
+    {
+    if(const char* sym =
+       m_Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE"))
+      {
+      os << tgt.c_str() << space << ": " << sym << "\n";
+      }
     }
 
   // Write the rule.
@@ -557,141 +568,6 @@ cmLocalUnixMakefileGenerator3
     << "# Special targets provided by cmake.\n"
     << "\n";
 
-  // Write the main entry point target.  This must be the VERY first
-  // target so that make with no arguments will run it.
-  {
-  // Just depend on the all target to drive the build.
-  std::vector<std::string> depends;
-  std::vector<std::string> no_commands;
-  depends.push_back("all");
-
-  // Write the rule.
-  this->WriteMakeRule(makefileStream,
-                      "Default target executed when no arguments are "
-                      "given to make.",
-                      "default_target",
-                      depends,
-                      no_commands);
-  }
-
-  // Write special "test" target to run ctest.
-  if(m_Makefile->IsOn("CMAKE_TESTING_ENABLED"))
-    {
-    std::string ctest;
-    if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
-      {
-      // We are building CMake itself.  Use the ctest that comes with
-      // this version of CMake instead of the one used to build it.
-      ctest = m_ExecutableOutputPath;
-      ctest += "ctest";
-      ctest += cmSystemTools::GetExecutableExtension();
-      ctest = this->Convert(ctest.c_str(),START_OUTPUT,SHELL);
-      ctest += " --force-new-ctest-process";
-      }
-    else
-      {
-      // We are building another project.  Use the ctest that comes with
-      // the CMake building it.
-      ctest = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
-      ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
-      ctest += "/";
-      ctest += "ctest";
-      ctest += cmSystemTools::GetExecutableExtension();
-      ctest = this->ConvertToOutputForExisting(ctest.c_str());
-      }
-    std::vector<std::string> no_depends;
-    std::vector<std::string> commands;
-    this->AppendEcho(commands, "Running tests...");
-    ctest += " $(ARGS)";
-    commands.push_back(ctest);
-    this->WriteMakeRule(makefileStream,
-                        "Special rule to drive testing with ctest.",
-                        "test", no_depends, commands);
-    }
-
-  // Write special "install" target to run cmake_install.cmake script.
-  {
-  std::vector<std::string> depends;
-  const char* sym = m_Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-  if(sym)
-    {
-    depends.push_back(sym);
-    }
-  std::vector<std::string> commands;
-  std::string cmd;
-  if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
-    {
-    // We are building CMake itself.  We cannot use the original
-    // executable to install over itself.
-    cmd = m_ExecutableOutputPath;
-    cmd += "cmake";
-    cmd = this->Convert(cmd.c_str(),START_OUTPUT,SHELL);
-    }
-  else
-    {
-    cmd = "$(CMAKE_COMMAND)";
-    }
-  cmd += " -P cmake_install.cmake";
-  commands.push_back(cmd);
-  const char* noall =
-    m_Makefile->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-  if(!noall || cmSystemTools::IsOff(noall))
-    {
-    // Drive the build before installing.
-    depends.push_back("all");
-    }
-  this->WriteMakeRule(makefileStream,
-                      "Special rule to run installation script.",
-                      "install", depends, commands);
-  }
-
-  std::vector<std::string> no_depends;
-  const char* sym = m_Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-  if(sym)
-    {
-    no_depends.push_back(sym);
-    }
-  // Write special "rebuild_cache" target to re-run cmake.
-  {
-  std::vector<std::string> commands;
-  this->AppendEcho(commands, "Running CMake to regenerate build system...");
-  commands.push_back(
-    "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
-  this->WriteMakeRule(makefileStream,
-                      "Special rule to re-run CMake using make.",
-                      "rebuild_cache",
-                      no_depends,
-                      commands);
-  }
-
-  // Use CMAKE_EDIT_COMMAND for the edit_cache rule if it is defined.
-  // Otherwise default to the interactive command-line interface.
-  if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
-    {
-    std::vector<std::string> commands;
-    this->AppendEcho(commands, "Running CMake cache editor...");
-    commands.push_back(
-      "$(CMAKE_EDIT_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
-    this->WriteMakeRule(makefileStream,
-                        "Special rule to re-run CMake cache editor using make.",
-                        "edit_cache",
-                        no_depends,
-                        commands);
-    }
-  else
-    {
-    std::vector<std::string> commands;
-    this->AppendEcho(commands,
-                     "Running interactive CMake command-line interface...");
-    commands.push_back(
-      "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) -i");
-    this->WriteMakeRule(makefileStream,
-                        "Special rule to re-run CMake cache editor using make.",
-                        "edit_cache",
-                        no_depends,
-                        commands);
-    }
-
   // Write special target to silence make output.  This must be after
   // the default target in case VERBOSE is set (which changes the
   // name).  The setting of CMAKE_VERBOSE_MAKEFILE to ON will cause a
@@ -699,7 +575,7 @@ cmLocalUnixMakefileGenerator3
   // name of this special target.  This gives a make-time choice to
   // the user.
   std::vector<std::string> commands;
-  no_depends.clear();
+  std::vector<std::string> no_depends;
   commands.clear();
   if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
     {
@@ -718,7 +594,7 @@ cmLocalUnixMakefileGenerator3
                         "Suppress display of executed commands.",
                         "$(VERBOSE).SILENT",
                         no_depends,
-                        commands);
+                        commands, false);
     }
 
   // Special target to cleanup operation of make tool.
@@ -727,11 +603,11 @@ cmLocalUnixMakefileGenerator3
                       "Disable implicit rules so canoncical targets will work.",
                       ".SUFFIXES",
                       depends,
-                      commands);
+                      commands, false);
   // Add a fake suffix to keep HP happy.  Must be max 32 chars for SGI make.
   depends.push_back(".hpux_make_needs_suffix_list");
   this->WriteMakeRule(makefileStream, 0,
-                      ".SUFFIXES", depends, commands);
+                      ".SUFFIXES", depends, commands, false);
 
 }
 
@@ -759,12 +635,6 @@ cmLocalUnixMakefileGenerator3
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
   commands.push_back(runRule);
-  const char* sym = m_Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-  if(sym)
-    {
-    no_depends.push_back(sym);
-    }
-  
   this->WriteMakeRule(makefileStream,
                       "Special rule to run CMake to check the build system "
                       "integrity.\n"
@@ -773,7 +643,7 @@ cmLocalUnixMakefileGenerator3
                       "because they might be regenerated.",
                       "cmake_check_build_system",
                       no_depends,
-                      commands);
+                      commands, true);
   }
 
   std::vector<std::string> no_commands;
@@ -794,11 +664,6 @@ cmLocalUnixMakefileGenerator3
     {
     // The helper target depends on the real target.
     std::vector<std::string> depends;
-    const char* sym = m_Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-    if(sym)
-      {
-      depends.push_back(sym);
-      }
     depends.push_back(realTarget);
 
     // There are no commands.
@@ -806,7 +671,7 @@ cmLocalUnixMakefileGenerator3
 
     // Write the rule.
     this->WriteMakeRule(ruleFileStream, "Convenience name for target.",
-                        helpTarget, depends, no_commands);
+                        helpTarget, depends, no_commands, true);
     }
 }
 
@@ -1367,21 +1232,144 @@ void cmLocalUnixMakefileGenerator3
 {
   this->WriteDisclaimer(ruleFileStream);
   this->WriteMakeVariables(ruleFileStream);
-  this->WriteSpecialTargetsTop(ruleFileStream);
-  
+
+  // Write the main entry point target.  This must be the VERY first
+  // target so that make with no arguments will run it.
+  {
+  // Just depend on the all target to drive the build.
+  std::vector<std::string> depends;
+  std::vector<std::string> no_commands;
+  depends.push_back("all");
+
+  // Write the rule.
+  this->WriteMakeRule(ruleFileStream,
+                      "Default target executed when no arguments are "
+                      "given to make.",
+                      "default_target",
+                      depends,
+                      no_commands, true);
+  }
+
+  // Write special "test" target to run ctest.
+  if(m_Makefile->IsOn("CMAKE_TESTING_ENABLED"))
+    {
+    std::string ctest;
+    if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
+      {
+      // We are building CMake itself.  Use the ctest that comes with
+      // this version of CMake instead of the one used to build it.
+      ctest = m_ExecutableOutputPath;
+      ctest += "ctest";
+      ctest += cmSystemTools::GetExecutableExtension();
+      ctest = this->Convert(ctest.c_str(),START_OUTPUT,SHELL);
+      ctest += " --force-new-ctest-process";
+      }
+    else
+      {
+      // We are building another project.  Use the ctest that comes with
+      // the CMake building it.
+      ctest = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
+      ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
+      ctest += "/";
+      ctest += "ctest";
+      ctest += cmSystemTools::GetExecutableExtension();
+      ctest = this->ConvertToOutputForExisting(ctest.c_str());
+      }
+    std::vector<std::string> no_depends;
+    std::vector<std::string> commands;
+    this->AppendEcho(commands, "Running tests...");
+    ctest += " $(ARGS)";
+    commands.push_back(ctest);
+    this->WriteMakeRule(ruleFileStream,
+                        "Special rule to drive testing with ctest.",
+                        "test", no_depends, commands, true);
+    }
+
+  // Write special "install" target to run cmake_install.cmake script.
+  {
   std::vector<std::string> depends;
   std::vector<std::string> commands;
-  
+  std::string cmd;
+  if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
+    {
+    // We are building CMake itself.  We cannot use the original
+    // executable to install over itself.
+    cmd = m_ExecutableOutputPath;
+    cmd += "cmake";
+    cmd = this->Convert(cmd.c_str(),START_OUTPUT,SHELL);
+    }
+  else
+    {
+    cmd = "$(CMAKE_COMMAND)";
+    }
+  cmd += " -P cmake_install.cmake";
+  commands.push_back(cmd);
+  const char* noall =
+    m_Makefile->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
+  if(!noall || cmSystemTools::IsOff(noall))
+    {
+    // Drive the build before installing.
+    depends.push_back("all");
+    }
+  this->WriteMakeRule(ruleFileStream,
+                      "Special rule to run installation script.",
+                      "install", depends, commands, true);
+  }
+
+  // Write special "rebuild_cache" target to re-run cmake.
+  {
+  std::vector<std::string> no_depends;
+  std::vector<std::string> commands;
+  this->AppendEcho(commands, "Running CMake to regenerate build system...");
+  commands.push_back(
+    "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+  this->WriteMakeRule(ruleFileStream,
+                      "Special rule to re-run CMake using make.",
+                      "rebuild_cache",
+                      no_depends,
+                      commands, true);
+  }
+
+  // Use CMAKE_EDIT_COMMAND for the edit_cache rule if it is defined.
+  // Otherwise default to the interactive command-line interface.
+  if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
+    {
+    std::vector<std::string> no_depends;
+    std::vector<std::string> commands;
+    this->AppendEcho(commands, "Running CMake cache editor...");
+    commands.push_back(
+      "$(CMAKE_EDIT_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+    this->WriteMakeRule(ruleFileStream,
+                        "Special rule to re-run CMake cache editor using make.",
+                        "edit_cache",
+                        no_depends,
+                        commands, true);
+    }
+  else
+    {
+    std::vector<std::string> no_depends;
+    std::vector<std::string> commands;
+    this->AppendEcho(commands,
+                     "Running interactive CMake command-line interface...");
+    commands.push_back(
+      "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) -i");
+    this->WriteMakeRule(ruleFileStream,
+                        "Special rule to re-run CMake cache editor using make.",
+                        "edit_cache",
+                        no_depends,
+                        commands, true);
+    }
+
+  this->WriteSpecialTargetsTop(ruleFileStream);
+
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+
   // Write the all rule.
   std::string dir = m_Makefile->GetStartOutputDirectory();
   dir += "/directorystart";
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
   // if at the top the rule is called all
-  const char* sym = m_Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE");
-  if(sym)
-    {
-    depends.push_back(sym);
-    }
   if (!m_Parent)
     {
     dir = "all";
@@ -1392,7 +1380,8 @@ void cmLocalUnixMakefileGenerator3
   this->CreateCDCommand(commands,
                                 m_Makefile->GetHomeOutputDirectory(),
                                 m_Makefile->GetStartOutputDirectory());
-  this->WriteMakeRule(ruleFileStream, "The main all target", "all", depends, commands);
+  this->WriteMakeRule(ruleFileStream, "The main all target", "all",
+                      depends, commands, true);
 
   // Write the clean rule.
   dir = m_Makefile->GetStartOutputDirectory();
@@ -1400,23 +1389,16 @@ void cmLocalUnixMakefileGenerator3
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
   commands.clear();
   depends.clear();
-  if(sym)
-    {
-    depends.push_back(sym);
-    }
   commands.push_back
     (this->GetRecursiveMakeCall("CMakeFiles/Makefile2",dir.c_str()));  
   this->CreateCDCommand(commands,
                                 m_Makefile->GetHomeOutputDirectory(),
                                 m_Makefile->GetStartOutputDirectory());
-  this->WriteMakeRule(ruleFileStream, "The main clean target", "clean", depends, commands);
+  this->WriteMakeRule(ruleFileStream, "The main clean target", "clean",
+                      depends, commands, true);
 
   // write the depend rule, really a recompute depends rule
   depends.clear();
-  if(sym)
-    {
-    depends.push_back(sym);
-    }
   commands.clear();
   std::string cmakefileName = "CMakeFiles/Makefile.cmake";
   this->Convert(cmakefileName.c_str(),HOME_OUTPUT,
@@ -1430,7 +1412,7 @@ void cmLocalUnixMakefileGenerator3
   commands.push_back(runRule);
   this->WriteMakeRule(ruleFileStream, "clear depends", 
                       "depend", 
-                      depends, commands);
+                      depends, commands, true);
 }
 
 

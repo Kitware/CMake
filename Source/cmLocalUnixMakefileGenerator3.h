@@ -72,7 +72,8 @@ public:
                      const char* comment,
                      const char* target,
                      const std::vector<std::string>& depends,
-                     const std::vector<std::string>& commands);
+                     const std::vector<std::string>& commands,
+                     bool symbolic);
   
   // write the main variables used by the makefiles
   void WriteMakeVariables(std::ostream& makefileStream);
