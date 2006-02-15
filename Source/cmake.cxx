@@ -1376,7 +1376,8 @@ int cmake::Configure()
     // user can select another.
     m_CacheManager->RemoveCacheEntry("CMAKE_GENERATOR");
     }
-  if ( !m_ScriptMode )
+  // only save the cache if there were no fatal errors
+  if ( !m_ScriptMode && !cmSystemTools::GetFatalErrorOccured() )
     {
     this->m_CacheManager->SaveCache(this->GetHomeOutputDirectory());
     }
