@@ -152,6 +152,11 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
                     "The main recursive all target", "all", 
                     depends, no_commands, true);
 
+  // Write an empty preinstall:
+  lg->WriteMakeRule(makefileStream,
+                    "The main recursive preinstall target", "preinstall",
+                    depends, no_commands, true);
+
   lg->WriteMakeVariables(makefileStream);
 
   // Write out the "special" stuff
@@ -730,6 +735,25 @@ cmGlobalUnixMakefileGenerator3
       depends.push_back(localName);
       lg->WriteMakeRule(ruleFileStream, "Convenience name for target.",
                         t->second.GetName(), depends, commands, true);
+
+      // Add rules to prepare the target for installation.
+      if(t->second.NeedRelinkBeforeInstall())
+        {
+        localName = lg->GetRelativeTargetDirectory(t->second);
+        localName += "/preinstall";
+        depends.clear();
+        commands.clear();
+        commands.push_back(lg->GetRecursiveMakeCall
+                           (makefileName.c_str(), localName.c_str()));
+        this->AppendGlobalTargetDepends(depends,t->second);
+        lg->WriteMakeRule(ruleFileStream, "Pre-intsall relink rule for target.",
+                          localName.c_str(), depends, commands, true);
+        depends.clear();
+        depends.push_back(localName);
+        commands.clear();
+        lg->WriteMakeRule(ruleFileStream, "Prepare target for install.",
+                          "preinstall", depends, commands, true);
+        }
 
       // add the clean rule
       localName = lg->GetRelativeTargetDirectory(t->second);

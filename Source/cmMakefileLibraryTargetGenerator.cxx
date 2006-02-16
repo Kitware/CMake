@@ -46,10 +46,20 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
       this->WriteStaticLibraryRules();
       break;
     case cmTarget::SHARED_LIBRARY:
-      this->WriteSharedLibraryRules();
+      this->WriteSharedLibraryRules(false);
+      if(this->Target->NeedRelinkBeforeInstall())
+        {
+        // Write rules to link an installable version of the target.
+        this->WriteSharedLibraryRules(true);
+        }
       break;
     case cmTarget::MODULE_LIBRARY:
-      this->WriteModuleLibraryRules();
+      this->WriteModuleLibraryRules(false);
+      if(this->Target->NeedRelinkBeforeInstall())
+        {
+        // Write rules to link an installable version of the target.
+        this->WriteModuleLibraryRules(true);
+        }
       break;
     default:
       // If language is not known, this is an error.
@@ -82,11 +92,11 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 
   std::string extraFlags;
   this->LocalGenerator->AppendFlags(extraFlags, this->Target->GetProperty("STATIC_LIBRARY_FLAGS"));
-  this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str());
+  this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), false);
 }
 
 //----------------------------------------------------------------------------
-void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules()
+void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 {
   const char* linkLanguage =
     this->Target->GetLinkerLanguage(this->GlobalGenerator);
@@ -115,11 +125,11 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules()
         }
       }
     }
-  this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str());
+  this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
 
 //----------------------------------------------------------------------------
-void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules()
+void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 {
   const char* linkLanguage =
     this->Target->GetLinkerLanguage(this->GlobalGenerator);
@@ -134,12 +144,12 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules()
   this->LocalGenerator->AppendFlags(extraFlags, this->Target->GetProperty("LINK_FLAGS"));
   this->LocalGenerator->AddConfigVariableFlags(extraFlags, "CMAKE_MODULE_LINKER_FLAGS");
   // TODO: .def files should be supported here also.
-  this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str());
+  this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
 
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteLibraryRules
-(const char* linkRuleVar, const char* extraFlags)
+(const char* linkRuleVar, const char* extraFlags, bool relink)
 {
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
@@ -200,6 +210,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(outpath.length() == 0)
     {
     outpath = this->Makefile->GetStartOutputDirectory();
+    outpath += "/";
+    }
+  if(relink)
+    {
+    outpath = this->Makefile->GetStartOutputDirectory();
+    outpath += "/CMakeFiles/CMakeRelink.dir";
+    cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
     }
   std::string targetFullPath = outpath + targetName;
@@ -285,9 +302,15 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                                         this->Makefile->GetHomeOutputDirectory());
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
-  // Add the pre-build and pre-link rules.
-  this->LocalGenerator->AppendCustomCommands(commands, this->Target->GetPreBuildCommands());
-  this->LocalGenerator->AppendCustomCommands(commands, this->Target->GetPreLinkCommands());
+
+  // Add the pre-build and pre-link rules building but not when relinking.
+  if(!relink)
+    {
+    this->LocalGenerator
+      ->AppendCustomCommands(commands, this->Target->GetPreBuildCommands());
+    this->LocalGenerator
+      ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands());
+    }
 
   // Construct the main link rule.
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
@@ -314,12 +337,16 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     }
 
-  // Add the post-build rules.
-  this->LocalGenerator->AppendCustomCommands(commands, this->Target->GetPostBuildCommands());
+  // Add the post-build rules when building but not when relinking.
+  if(!relink)
+    {
+    this->LocalGenerator->
+      AppendCustomCommands(commands, this->Target->GetPostBuildCommands());
+    }
 
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
-  this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target);
+  this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target, relink);
 
   // Construct object file lists that may be needed to expand the
   // rule.
@@ -381,7 +408,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   dir += "/";
   dir += this->LocalGenerator->GetTargetDirectory(*this->Target);
   std::string buildTargetRuleName = dir;
-  buildTargetRuleName += "/build";
+  buildTargetRuleName += relink?"/preinstall":"/build";
   buildTargetRuleName = 
     this->Convert(buildTargetRuleName.c_str(),
                   cmLocalGenerator::HOME_OUTPUT,cmLocalGenerator::MAKEFILE);

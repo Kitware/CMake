@@ -39,7 +39,12 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
   this->WriteTargetDependRules();
 
   // write the link rules
-  this->WriteExecutableRule();
+  this->WriteExecutableRule(false);
+  if(this->Target->NeedRelinkBeforeInstall())
+    {
+    // Write rules to link an installable version of the target.
+    this->WriteExecutableRule(true);
+    }
 
   // Write the requires target.
   this->WriteTargetRequiresRules();
@@ -54,7 +59,7 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 
 
 //----------------------------------------------------------------------------
-void cmMakefileExecutableTargetGenerator::WriteExecutableRule()
+void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 {
   std::vector<std::string> commands;
 
@@ -132,6 +137,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule()
                                                     false, false, false);
     }
 #endif
+  if(relink)
+    {
+    outpath = this->Makefile->GetStartOutputDirectory();
+    outpath += "/CMakeFiles/CMakeRelink.dir";
+    cmSystemTools::MakeDirectory(outpath.c_str());
+    outpath += "/";
+    }
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathReal = outpath + targetNameReal;
 
@@ -259,7 +271,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule()
 
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
-  this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target);
+  this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target, relink);
 
   // Construct object file lists that may be needed to expand the
   // rule.
@@ -316,7 +328,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule()
   dir += "/";
   dir += this->LocalGenerator->GetTargetDirectory(*this->Target);
   std::string buildTargetRuleName = dir;
-  buildTargetRuleName += "/build";
+  buildTargetRuleName += relink?"/preinstall":"/build";
   buildTargetRuleName = 
     this->Convert(buildTargetRuleName.c_str(),
                   cmLocalGenerator::HOME_OUTPUT,

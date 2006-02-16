@@ -63,7 +63,7 @@ public:
   void SetInAll(bool f) { this->SetProperty("IN_ALL", (f) ?"TRUE" : "FALSE"); }
 
   ///! Set the cmMakefile that owns this target
-  void SetMakefile(cmMakefile *mf) { m_Makefile = mf; };
+  void SetMakefile(cmMakefile *mf);
   cmMakefile *GetMakefile() { return m_Makefile;};
   
   /**
@@ -209,6 +209,15 @@ public:
       executable target.  */
   void GetExecutableCleanNames(std::string& name, std::string& realName,
                                const char* config);
+
+  /**
+   * Compute whether this target must be relinked before installing.
+   */
+  bool NeedRelinkBeforeInstall();
+
+  bool HaveBuildTreeRPATH();
+  bool HaveInstallTreeRPATH();
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -281,7 +290,10 @@ private:
 
   // update the value of the LOCATION var
   void UpdateLocation();
-  
+
+  // Use a makefile variable to set a default for the given property.
+  // If the variable is not defined use the given default instead.
+  void SetPropertyDefault(const char* property, const char* default_value);
 private:
   std::string m_Name;
   std::vector<cmCustomCommand> m_PreBuildCommands;

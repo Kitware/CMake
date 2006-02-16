@@ -29,9 +29,10 @@ public:
   
 protected:
   void WriteStaticLibraryRules();
-  void WriteSharedLibraryRules();
-  void WriteModuleLibraryRules();
-  void WriteLibraryRules(const char *linkRule, const char *extraFlags);
+  void WriteSharedLibraryRules(bool relink);
+  void WriteModuleLibraryRules(bool relink);
+  void WriteLibraryRules(const char *linkRule, const char *extraFlags,
+                         bool relink);
 };
 
 #endif

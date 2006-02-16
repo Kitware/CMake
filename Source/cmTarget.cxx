@@ -44,6 +44,17 @@ void cmTarget::SetType(TargetType type, const char* name)
   }
 }
 
+//----------------------------------------------------------------------------
+void cmTarget::SetMakefile(cmMakefile* mf)
+{
+  // Set our makefile.
+  m_Makefile = mf;
+
+  // Setup default property values.
+  this->SetPropertyDefault("INSTALL_RPATH", "");
+  this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
+  this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
+}
 
 void cmTarget::TraceVSDependencies(std::string projFile, 
                                    cmMakefile *makefile)
@@ -1308,4 +1319,94 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
     realName += "-";
     realName += version;
     }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::SetPropertyDefault(const char* property,
+                                  const char* default_value)
+{
+  // Compute the name of the variable holding the default value.
+  std::string var = "CMAKE_";
+  var += property;
+
+  if(const char* value = m_Makefile->GetDefinition(var.c_str()))
+    {
+    this->SetProperty(property, value);
+    }
+  else if(default_value)
+    {
+    this->SetProperty(property, default_value);
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::HaveBuildTreeRPATH()
+{
+  return (!this->GetPropertyAsBool("SKIP_BUILD_RPATH") &&
+          !m_LinkLibraries.empty());
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::HaveInstallTreeRPATH()
+{
+  const char* install_rpath = this->GetProperty("INSTALL_RPATH");
+  return install_rpath && *install_rpath;
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::NeedRelinkBeforeInstall()
+{
+  // Only executables and shared libraries can have an rpath and may
+  // need relinking.
+  if(m_TargetType != cmTarget::EXECUTABLE &&
+     m_TargetType != cmTarget::SHARED_LIBRARY &&
+     m_TargetType != cmTarget::MODULE_LIBRARY)
+    {
+    return false;
+    }
+
+  // If there is no install location this target will not be installed
+  // and therefore does not need relinking.
+  if(this->GetInstallPath().empty())
+    {
+    return false;
+    }
+
+  // If skipping all rpaths completely then no relinking is needed.
+  if(m_Makefile->IsOn("CMAKE_SKIP_RPATH"))
+    {
+    return false;
+    }
+
+  // If building with the install-tree rpath no relinking is needed.
+  if(this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
+    {
+    return false;
+    }
+
+  // Check for rpath support on this platform.
+  if(const char* ll = this->GetLinkerLanguage(
+       m_Makefile->GetLocalGenerator()->GetGlobalGenerator()))
+    {
+    std::string flagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
+    flagVar += ll;
+    flagVar += "_FLAG";
+    if(!m_Makefile->IsSet(flagVar.c_str()))
+      {
+      // There is no rpath support on this platform so nothing needs
+      // relinking.
+      return false;
+      }
+    }
+  else
+    {
+    // No linker language is known.  This error will be reported by
+    // other code.
+    return false;
+    }
+
+  // If either a build or install tree rpath is set then the rpath
+  // will likely change between the build tree and install tree and
+  // this target must be relinked.
+  return this->HaveBuildTreeRPATH() || this->HaveInstallTreeRPATH();
 }

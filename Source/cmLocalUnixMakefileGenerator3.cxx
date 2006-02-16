@@ -1288,6 +1288,7 @@ void cmLocalUnixMakefileGenerator3
   // Write special "install" target to run cmake_install.cmake script.
   {
   std::vector<std::string> depends;
+  depends.push_back("preinstall");
   std::vector<std::string> commands;
   std::string cmd;
   if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
@@ -1304,6 +1305,12 @@ void cmLocalUnixMakefileGenerator3
     }
   cmd += " -P cmake_install.cmake";
   commands.push_back(cmd);
+  this->WriteMakeRule(ruleFileStream,
+                      "Special rule to run installation script.",
+                      "install", depends, commands, true);
+
+  commands.clear();
+  depends.clear();
   const char* noall =
     m_Makefile->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
   if(!noall || cmSystemTools::IsOff(noall))
@@ -1311,9 +1318,16 @@ void cmLocalUnixMakefileGenerator3
     // Drive the build before installing.
     depends.push_back("all");
     }
+  else
+    {
+    // At least make sure the build system is up to date.
+    depends.push_back("cmake_check_build_system");
+    }
+  commands.push_back(this->GetRecursiveMakeCall
+                     ("CMakeFiles/Makefile2", "preinstall"));
   this->WriteMakeRule(ruleFileStream,
-                      "Special rule to run installation script.",
-                      "install", depends, commands, true);
+                      "Prepare targets for installation.",
+                      "preinstall", depends, commands, true);
   }
 
   // Write special "rebuild_cache" target to re-run cmake.

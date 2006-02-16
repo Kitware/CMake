@@ -8,6 +8,9 @@ SET(LIBRARY_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}")
 # avoids infinite loops when the post-build rule below installs.
 SET(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY 1)
 
+# Make sure the test executable can run from the install tree.
+SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+
 SET(CMAKE_DEBUG_POSTFIX "_test_debug_postfix")
 
 SET(EXTRA_INSTALL_FLAGS)

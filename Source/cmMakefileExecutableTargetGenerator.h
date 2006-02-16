@@ -27,7 +27,7 @@ public:
   virtual void WriteRuleFiles();
   
 protected:
-  virtual void WriteExecutableRule();
+  virtual void WriteExecutableRule(bool relink);
   
 };
 

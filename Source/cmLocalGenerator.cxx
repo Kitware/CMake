@@ -353,6 +353,7 @@ void cmLocalGenerator::GenerateInstallRules()
     // EXECUTABLE_OUTPUT_PATH not defined
     exeOutPath = currdir + "/";
     }
+  std::string relinkDir = currdir + "/CMakeFiles/CMakeRelink.dir/";
 
   // Include user-specified install scripts.
   std::vector<std::string> const& installScripts =
@@ -375,6 +376,7 @@ void cmLocalGenerator::GenerateInstallRules()
       }
     if (l->second.GetInstallPath() != "")
       {
+      bool need_relink = l->second.NeedRelinkBeforeInstall();
       destination = "${CMAKE_INSTALL_PREFIX}" + l->second.GetInstallPath();
       cmSystemTools::ConvertToUnixSlashes(destination);
       const char* dest = destination.c_str();
@@ -398,7 +400,7 @@ void cmLocalGenerator::GenerateInstallRules()
           if ( ext == ".dll" )
             {
             // Install the .lib separately.
-            std::string libname = libOutPath;
+            std::string libname = need_relink? relinkDir : libOutPath;
             libname += this->GetInstallReference(l->second, config,
                                                  configurationTypes,
                                                  true);
@@ -438,7 +440,7 @@ void cmLocalGenerator::GenerateInstallRules()
         case cmTarget::STATIC_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
           {
-          fname = libOutPath;
+          fname = need_relink? relinkDir : libOutPath;
           fname += this->GetInstallReference(l->second, config,
                                              configurationTypes);
           files = fname.c_str();
@@ -460,7 +462,7 @@ void cmLocalGenerator::GenerateInstallRules()
             }
           std::string exeName =
             this->GetInstallReference(l->second, config, configurationTypes);
-          fname = exeOutPath;
+          fname = need_relink? relinkDir : exeOutPath;
           fname += exeName;
           if(l->second.GetPropertyAsBool("MACOSX_BUNDLE"))
             {
@@ -1117,7 +1119,11 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     }
   flags += m_Makefile->GetDefineFlags();
   m_LanguageToIncludeFlags[lang] = flags;
-  return m_LanguageToIncludeFlags[lang].c_str();
+
+  // Use this temorary variable for the return value to work-around a
+  // bogus GCC 2.95 warning.
+  const char* ret = m_LanguageToIncludeFlags[lang].c_str();
+  return ret;
 }
 
 //----------------------------------------------------------------------------
@@ -1246,7 +1252,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += " ";
         }  
       cmOStringStream linklibsStr;
-      this->OutputLinkLibraries(linklibsStr, target);
+      this->OutputLinkLibraries(linklibsStr, target, false);
       linkLibs = linklibsStr.str();
       }
       break;
@@ -1279,7 +1285,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       flags += m_Makefile->GetSafeDefinition(sharedFlagsVar.c_str());
       flags += " ";
       cmOStringStream linklibs;
-      this->OutputLinkLibraries(linklibs, target);
+      this->OutputLinkLibraries(linklibs, target, false);
       linkLibs = linklibs.str();
       if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
         {
@@ -1319,7 +1325,8 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
  * to the name of the library.  This will not link a library against itself.
  */
 void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
-                                           cmTarget &tgt)
+                                           cmTarget& tgt,
+                                           bool relink)
 {
   // Try to emit each search path once
   std::set<cmStdString> emitted;
@@ -1327,7 +1334,6 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   bool outputRuntime = true;
   std::string runtimeFlag;
   std::string runtimeSep;
-  std::vector<std::string> runtimeDirs;
 
   const char* config = m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   const char* linkLanguage = tgt.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -1347,7 +1353,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   
   // concatenate all paths or no?
   bool runtimeConcatenate = ( runtimeSep!="" );
-  if(runtimeFlag == "" || m_Makefile->IsOn("CMAKE_SKIP_RPATH") )
+  if(runtimeFlag == "" || m_Makefile->IsOn("CMAKE_SKIP_RPATH"))
     {
     outputRuntime = false;
     }
@@ -1375,6 +1381,28 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   std::vector<cmStdString> libDirs;
   this->ComputeLinkInformation(tgt, config, libNames, libDirs);
 
+  // Select whether to generate an rpath for the install tree or the
+  // build tree.
+  bool linking_for_install =
+    relink || tgt.GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH");
+  bool use_install_rpath =
+    outputRuntime && tgt.HaveInstallTreeRPATH() && linking_for_install;
+  bool use_build_rpath =
+    outputRuntime && tgt.HaveBuildTreeRPATH() && !linking_for_install;
+
+  // Construct the RPATH.
+  std::vector<std::string> runtimeDirs;
+  if(use_install_rpath)
+    {
+    const char* install_rpath = tgt.GetProperty("INSTALL_RPATH");
+    cmSystemTools::ExpandListArgument(install_rpath, runtimeDirs);
+    for(unsigned int i=0; i < runtimeDirs.size(); ++i)
+      {
+      runtimeDirs[i] =
+        this->Convert(runtimeDirs[i].c_str(), FULL, SHELL, false);
+      }
+    }
+
   // Append the library search path flags.
   for(std::vector<cmStdString>::const_iterator libDir = libDirs.begin();
       libDir != libDirs.end(); ++libDir)
@@ -1397,7 +1425,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
          && libDir->find("${") == std::string::npos)
         {
         linkLibs += libPathFlag;
-        if(outputRuntime)
+        if(use_build_rpath)
           {
           runtimeDirs.push_back( fullLibPath );
           }
@@ -1417,7 +1445,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
 
   fout << linkLibs;
 
-  if(outputRuntime && runtimeDirs.size()>0)
+  if(!runtimeDirs.empty())
     {
     // For the runtime search directories, do a "-Wl,-rpath,a:b:c" or
     // a "-R a -R b -R c" type link line
