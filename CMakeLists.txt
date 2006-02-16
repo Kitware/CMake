@@ -235,9 +235,9 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     # There is a bug in NSI that does not handle full unix paths properly. Make
     # sure there is at least one set of four (4) backlasshes.
     SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\CMakeInstall.bmp")
-    SET(CPACK_PACKAGE_EXECUTABLE "CMakeSetup" "CMake")
+    SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMake")
   ELSE(WIN32 AND NOT UNIX)
-    SET(CPACK_PACKAGE_EXECUTABLE "ccmake" "CMake")
+    SET(CPACK_PACKAGE_EXECUTABLES "ccmake" "CMake")
   ENDIF(WIN32 AND NOT UNIX)
   INCLUDE(CPack)
 ENDIF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
