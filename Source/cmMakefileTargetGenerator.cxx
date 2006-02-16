@@ -55,7 +55,7 @@ cmMakefileTargetGenerator::New(cmLocalUnixMakefileGenerator3 *lg,
       result = new cmMakefileUtilityTargetGenerator;
       break;
     default:
-      return 0;
+      return result
       break;
     }
 
