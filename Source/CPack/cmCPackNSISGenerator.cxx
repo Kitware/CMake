@@ -26,6 +26,7 @@
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/Directory.hxx>
 
 //----------------------------------------------------------------------
 cmCPackNSISGenerator::cmCPackNSISGenerator()
@@ -43,7 +44,6 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName, const char* top
 {
   (void)outFileName; // TODO: Fix nsis to force out file name
   (void)toplevel;
-  (void)files;
   std::string nsisInFileName = this->FindTemplate("NSIS.template.in");
   if ( nsisInFileName.size() == 0 )
     {
@@ -54,6 +54,35 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName, const char* top
   std::string tmpFile = nsisFileName;
   tmpFile += "/NSISOutput.log";
   nsisFileName += "/project.nsi";
+  cmOStringStream str;
+  std::vector<std::string>::const_iterator it;
+  for ( it = files.begin(); it != files.end(); ++ it )
+    {
+    std::string fileN = cmSystemTools::RelativePath(toplevel,
+      it->c_str());
+    cmSystemTools::ReplaceString(fileN, "/", "\\");
+    str << "  Delete \"$INSTDIR\\" << fileN.c_str() << "\"" << std::endl;
+    }
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Uninstall Files: " << str.str().c_str() << std::endl);
+  this->SetOption("CPACK_NSIS_DELETE_FILES", str.str().c_str());
+  std::vector<std::string> dirs;
+  this->GetListOfSubdirectories(toplevel, dirs);
+  std::vector<std::string>::const_iterator sit;
+  cmOStringStream dstr;
+  for ( sit = dirs.begin(); sit != dirs.end(); ++ sit )
+    {
+    std::string fileN = cmSystemTools::RelativePath(toplevel,
+      sit->c_str());
+    if ( fileN.empty() )
+      {
+      continue;
+      }
+    cmSystemTools::ReplaceString(fileN, "/", "\\");
+    dstr << "  RMDir \"$INSTDIR\\" << fileN.c_str() << "\"" << std::endl;
+    }
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Uninstall Dirs: " << dstr.str().c_str() << std::endl);
+  this->SetOption("CPACK_NSIS_DELETE_DIRECTORIES", dstr.str().c_str());
+
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << nsisInFileName << " to " << nsisFileName << std::endl);
   this->ConfigureFile(nsisInFileName.c_str(), nsisFileName.c_str());
   std::string nsisCmd = "\"";
@@ -130,5 +159,33 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
     }
 
   return res;
+}
+
+//----------------------------------------------------------------------
+bool cmCPackNSISGenerator::GetListOfSubdirectories(const char* topdir, std::vector<std::string>& dirs)
+{
+  cmsys::Directory dir;
+  dir.Load(topdir);
+  size_t fileNum;
+  for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
+    {
+    if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&
+        strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".."))
+      {
+      kwsys_stl::string fullPath = topdir;
+      fullPath += "/";
+      fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+      if(cmsys::SystemTools::FileIsDirectory(fullPath.c_str()) &&
+        !cmsys::SystemTools::FileIsSymlink(fullPath.c_str()))
+        {
+        if (!this->GetListOfSubdirectories(fullPath.c_str(), dirs))
+          {
+          return false;
+          }
+        }
+      }
+    }
+  dirs.push_back(topdir);
+  return true;
 }
 

@@ -342,9 +342,7 @@ Section "Dummy Section" SecDummy
   ;Use the entire tree produced by the INSTALL target.  Keep the
   ;list of directories here in sync with the RMDir commands below.
   SetOutPath "$INSTDIR"
-  File /r "${INST_DIR}\bin"
-  File /r "${INST_DIR}\doc"
-  File /r "${INST_DIR}\share"
+  File /r "${INST_DIR}\*.*"
 
   @CPACK_NSIS_EXTRA_COMMANDS@
 
@@ -397,11 +395,10 @@ FunctionEnd
 
 Section "Uninstall"
 
-  ;Remove directories we installed.
+  ;Remove files we installed.
   ;Keep the list of directories here in sync with the File commands above.
-  RMDir /r "$INSTDIR\bin"
-  RMDir /r "$INSTDIR\doc"
-  RMDir /r "$INSTDIR\share"
+@CPACK_NSIS_DELETE_FILES@
+@CPACK_NSIS_DELETE_DIRECTORIES@
 
   ;Remove the uninstaller itself.
   Delete "$INSTDIR\Uninstall.exe"

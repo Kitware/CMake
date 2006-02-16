@@ -47,6 +47,8 @@ protected:
     const std::vector<std::string>& files);
   virtual const char* GetOutputExtension() { return "exe"; }
   virtual const char* GetOutputPostfix() { return "win32"; }
+
+  bool GetListOfSubdirectories(const char* dir, std::vector<std::string>& dirs);
 };
 
 #endif
