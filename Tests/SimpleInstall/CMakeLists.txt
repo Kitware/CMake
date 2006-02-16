@@ -8,9 +8,6 @@ SET(LIBRARY_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}")
 # avoids infinite loops when the post-build rule below installs.
 SET(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY 1)
 
-# Make sure the test executable can run from the install tree.
-SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-
 SET(CMAKE_DEBUG_POSTFIX "_test_debug_postfix")
 
 SET(EXTRA_INSTALL_FLAGS)
@@ -68,6 +65,10 @@ ELSE(STAGE2)
   ADD_EXECUTABLE (SimpleInstall inst.cxx foo.c foo.h)
   TARGET_LINK_LIBRARIES(SimpleInstall test1 test2 test4)
   SET(install_target SimpleInstall)
+
+  # Make sure the test executable can run from the install tree.
+  SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
   IF(CMAKE_GENERATOR MATCHES "Makefiles")
     ADD_SUBDIRECTORY(TestSubDir)
