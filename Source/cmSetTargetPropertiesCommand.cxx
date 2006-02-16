@@ -92,6 +92,7 @@ bool cmSetTargetPropertiesCommand::InitialPass(
       std::string message = "Can not find target to add properties to: ";
       message += args[i];
       this->SetError(message.c_str());
+      return false;
       }
     }
   return true;
