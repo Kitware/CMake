@@ -54,6 +54,10 @@ IF(STAGE2)
   TARGET_LINK_LIBRARIES(SimpleInstallS2 ${TEST1_LIBRARY} ${TEST2_LIBRARY} ${TEST4_LIBRARY})
   SET(install_target SimpleInstallS2)
 
+  # Make sure the test executable can run from the install tree.
+  SET_TARGET_PROPERTIES(SimpleInstallS2 PROPERTIES
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+
   INSTALL_TARGETS(/bin SimpleInstallS2)
 ELSE(STAGE2)
   # this is stage 1, so create libraries and modules and install everything
