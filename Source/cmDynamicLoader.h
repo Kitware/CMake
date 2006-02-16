@@ -28,14 +28,19 @@
 // Ugly stuff for library handles
 // They are different on several different OS's
 #if defined(__hpux)
-# include <dl.h>
+  #include <dl.h>
   typedef shl_t cmLibHandle;
 #elif defined(_WIN32)
   #include <windows.h>
   typedef HMODULE cmLibHandle;
 #elif defined(__APPLE__)
-  #include <mach-o/dyld.h>
-  typedef NSModule cmLibHandle;
+  #include <AvailabilityMacros.h>
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+    #include <mach-o/dyld.h>
+    typedef NSModule cmLibHandle;
+  #else
+    typedef void* cmLibHandle;
+  #endif
 #else
   typedef void* cmLibHandle;
 #endif

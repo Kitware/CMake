@@ -18,9 +18,9 @@
 
 // This file is actually several different implementations.
 // 1. HP machines which uses shl_load
-// 2. Apple OSX which uses NSLinkModule
+// 2. Mac OS X 10.2.x and earlier which uses NSLinkModule
 // 3. Windows which uses LoadLibrary
-// 4. Most unix systems which use dlopen (default )
+// 4. Most unix systems (including Mac OS X 10.3 and later) which use dlopen (default)
 // Each part of the ifdef contains a complete implementation for
 // the static methods of cmDynamicLoader.  
 
@@ -147,10 +147,10 @@ const char* cmDynamicLoader::LastError()
 
 
 // ---------------------------------------------------------------
-// 2. Implementation for Darwin (including OSX) Machines
-
+// 2. Implementation for Mac OS X 10.2.x and earlier
 #ifdef __APPLE__
-#define CMDYNAMICLOADER_DEFINED
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+#define CMDYNAMICLOADER_DEFINED 1
 #include <mach-o/dyld.h>
 
 cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
@@ -169,7 +169,7 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
     {
     return 0;
     }
-  lh = NSLinkModule(image, libname, TRUE);
+  lh = NSLinkModule(image, libname, NSLINKMODULE_OPTION_BINDNOW);
   if(lh)
     {
     cmDynamicLoaderCache::GetInstance()->CacheFile(libname, lh);
@@ -179,10 +179,7 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
-  // we have to use lib because the macro may not...
-  (void)lib;
-
-  NSUnLinkModule((NSModule)lib, FALSE);
+  NSUnLinkModule((NSModule)lib, NSUNLINKMODULE_OPTION_NONE);
   return 1;
 }
 
@@ -207,6 +204,7 @@ const char* cmDynamicLoader::LastError()
   return 0;
 }
 
+#endif
 #endif
 
 
@@ -290,7 +288,7 @@ const char* cmDynamicLoader::LastError()
 // 4. Implementation for default UNIX machines.
 // if nothing has been defined then use this
 #ifndef CMDYNAMICLOADER_DEFINED
-#define CMDYNAMICLOADER_DEFINED
+#define CMDYNAMICLOADER_DEFINED 1
 // Setup for most unix machines
 #include <dlfcn.h>
 
