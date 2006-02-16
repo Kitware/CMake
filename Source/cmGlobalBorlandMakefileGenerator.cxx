@@ -21,6 +21,7 @@
 
 cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
 {
+  m_EmptyRuleHackDepends = "NUL";
   m_FindMakeProgramFile = "CMakeBorlandFindMake.cmake";
   m_ForceUnixPaths = false;
 }

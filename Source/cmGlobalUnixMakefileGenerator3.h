@@ -119,6 +119,12 @@ protected:
   // does this generator need a requires step for any of its targets
   bool NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg, const char *);
 
+  // Some make programs (Borland) do not keep a rule if there are no
+  // dependencies or commands.  This is a problem for creating rules
+  // that might not do anything but might have other dependencies
+  // added later.  If non-empty this variable holds a fake dependency
+  // that can be added.
+  std::string m_EmptyRuleHackDepends;
 };
 
 #endif

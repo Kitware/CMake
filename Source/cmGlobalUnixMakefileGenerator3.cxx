@@ -147,6 +147,13 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
 
   depends.clear();
 
+  // The all and preinstall rules might never have any dependencies
+  // added to them.
+  if(m_EmptyRuleHackDepends != "")
+    {
+    depends.push_back(m_EmptyRuleHackDepends);
+    }
+
   // Write and empty all:
   lg->WriteMakeRule(makefileStream, 
                     "The main recursive all target", "all", 
