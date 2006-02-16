@@ -134,7 +134,7 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
   const char* cpackPackageExecutables = this->GetOption("CPACK_PACKAGE_EXECUTABLES");
   if ( cpackPackageExecutables )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "The cpackPackageExecutables: " << cpackPackageExecutables << "." << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "The cpackPackageExecutables: " << cpackPackageExecutables << "." << std::endl);
     cmOStringStream str;
     cmOStringStream deleteStr;
     std::vector<std::string> cpackPackageExecutablesVector;
@@ -151,7 +151,7 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
       std::string execName = *it;
       ++ it;
       std::string linkName = *it;
-      str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\" << linkName << ".lnk\"" "\"$INSTDIR\\bin\\" << execName << ".exe\"" << std::endl;
+      str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\" << linkName << ".lnk\" \"$INSTDIR\\bin\\" << execName << ".exe\"" << std::endl;
       deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName << ".lnk\"" << std::endl;
       }
     this->SetOption("CPACK_NSIS_CREATE_ICONS", str.str().c_str());
