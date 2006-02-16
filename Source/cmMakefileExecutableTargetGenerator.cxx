@@ -236,11 +236,15 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                         this->Makefile->GetHomeOutputDirectory()); 
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
-  // Add the pre-build and pre-link rules.
-  this->LocalGenerator->
-    AppendCustomCommands(commands, this->Target->GetPreBuildCommands());
-  this->LocalGenerator->
-    AppendCustomCommands(commands, this->Target->GetPreLinkCommands());
+
+  // Add the pre-build and pre-link rules building but not when relinking.
+  if(!relink)
+    {
+    this->LocalGenerator
+      ->AppendCustomCommands(commands, this->Target->GetPreBuildCommands());
+    this->LocalGenerator
+      ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands());
+    }
 
   // Construct the main link rule.
   std::string linkRuleVar = "CMAKE_";
@@ -265,9 +269,12 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     commands.push_back(symlink);
     }
 
-  // Add the post-build rules.
-  this->LocalGenerator->AppendCustomCommands
-    (commands, this->Target->GetPostBuildCommands());
+  // Add the post-build rules when building but not when relinking.
+  if(!relink)
+    {
+    this->LocalGenerator->
+      AppendCustomCommands(commands, this->Target->GetPostBuildCommands());
+    }
 
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
