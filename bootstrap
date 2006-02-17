@@ -44,6 +44,29 @@ else
   cmake_bootstrap_generator="Unix Makefiles"
 fi
 
+# Helper function to fix windows paths.
+cmake_fix_slashes ()
+{
+  echo "$1" | sed 's/\\/\//g'
+}
+
+# Choose the default install prefix.
+if ${cmake_system_mingw}; then
+  if [ "x${PROGRAMFILES}" != "x" ]; then
+    cmake_default_prefix=`cmake_fix_slashes "${PROGRAMFILES}/CMake"`
+  elif [ "x${ProgramFiles}" != "x" ]; then
+    cmake_default_prefix=`cmake_fix_slashes "${ProgramFiles}/CMake"`
+  elif [ "x${SYSTEMDRIVE}" != "x" ]; then
+    cmake_default_prefix=`cmake_fix_slashes "${SYSTEMDRIVE}/Program Files/CMake"`
+  elif [ "x${SystemDrive}" != "x" ]; then
+    cmake_default_prefix=`cmake_fix_slashes "${SystemDrive}/Program Files/CMake"`
+  else
+    cmake_default_prefix="c:/Program Files/CMake"
+  fi
+else
+  cmake_default_prefix="/usr/local"
+fi
+
 CMAKE_KNOWN_C_COMPILERS="cc gcc xlc icc tcc"
 CMAKE_KNOWN_CXX_COMPILERS="aCC xlC CC g++ c++ icc como "
 CMAKE_KNOWN_MAKE_PROCESSORS="gmake make"
@@ -159,7 +182,7 @@ Configuration:
 
 Directory and file names:
   --prefix=PREFIX         install files in tree rooted at PREFIX
-                          [/usr/local]
+                          [${cmake_default_prefix}]
   --datadir=DIR           install data files in PREFIX/DIR
                           [/share/CMake]
   --docdir=DIR            install documentation files in PREFIX/DIR
@@ -372,10 +395,11 @@ cmake_try_make ()
 # Parse arguments
 cmake_verbose=
 cmake_parallel_make=
-cmake_prefix_dir="/usr/local"
+cmake_prefix_dir="${cmake_default_prefix}"
 for a in "$@"; do
   if echo $a | grep "^--prefix=" > /dev/null 2> /dev/null; then
     cmake_prefix_dir=`echo $a | sed "s/^--prefix=//"`
+    cmake_prefix_dir=`cmake_fix_slashes "${cmake_prefix_dir}"`
   fi
   if echo $a | grep "^--parallel=" > /dev/null 2> /dev/null; then
     cmake_parallel_make=`echo $a | sed "s/^--parallel=//" | grep "[0-9][0-9]*"`
