@@ -4,7 +4,7 @@
 # Search for system runtime libraries based on the platform.  This is
 # not complete because it is used only for the release process by the
 # developers.
-IF(WIN32 AND NOT CYGWIN)
+IF(MSVC)
   STRING(REGEX REPLACE "\\\\" "/" SYSTEMROOT "$ENV{SYSTEMROOT}")
   FOREACH(lib
       "${SYSTEMROOT}/system32/mfc71.dll"
@@ -16,7 +16,7 @@ IF(WIN32 AND NOT CYGWIN)
         ${CMake_INSTALL_SYSTEM_RUNTIME_LIBS} ${lib})
     ENDIF(EXISTS ${lib})
   ENDFOREACH(lib)
-ENDIF(WIN32 AND NOT CYGWIN)
+ENDIF(MSVC)
 
 # Include system runtime libraries in the installation if any are
 # specified by CMake_INSTALL_SYSTEM_RUNTIME_LIBS.
