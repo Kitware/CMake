@@ -2382,12 +2382,12 @@ cmMakefile::GetIncludeSearchPath(const std::vector<std::string>& callerPaths,
   // Add paths in the user's environment.
   cmSystemTools::GetPath(path, "CMAKE_INCLUDE_PATH");
   cmSystemTools::GetPath(path, "INCLUDE");
+  // Add standard system paths.
+  cmSystemTools::GetPath(path);
 
   // Add paths given by the caller.
   path.insert(path.end(), callerPaths.begin(), callerPaths.end());
 
-  // Add standard system paths.
-  cmSystemTools::GetPath(path);
 }
 
 //----------------------------------------------------------------------------
@@ -2404,12 +2404,11 @@ cmMakefile::GetLibrarySearchPath(const std::vector<std::string>& callerPaths,
   // Add paths in the user's environment.
   cmSystemTools::GetPath(path, "CMAKE_LIBRARY_PATH");
   cmSystemTools::GetPath(path, "LIB");
+  // Add standard system paths.
+  cmSystemTools::GetPath(path);
 
   // Add paths given by the caller.
   path.insert(path.end(), callerPaths.begin(), callerPaths.end());
-
-  // Add standard system paths.
-  cmSystemTools::GetPath(path);
 }
 
 std::string cmMakefile::GetModulesFile(const char* filename)
