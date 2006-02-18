@@ -55,24 +55,45 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
       }
     }
 
-  // Setup /I and /LIBPATH options for the resulting DSP file
-  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
-  std::vector<std::string>::iterator i;
-  for(i = includes.begin(); i != includes.end(); ++i)
+  // Setup /I and /LIBPATH options for the resulting DSP file.  VS 6
+  // truncates long include paths so make it as short as possible if
+  // the length threatents this problem.
+  unsigned int maxIncludeLength = 3000;
+  bool useShortPath = false;
+  for(int j=0; j < 2; ++j)
     {
-    m_IncludeOptions +=  " /I ";
-    std::string tmp = this->ConvertToOptionallyRelativeOutputPath(i->c_str());
-
-    // quote if not already quoted
-    if (tmp[0] != '"')
+    std::vector<std::string> includes;
+    this->GetIncludeDirectories(includes);
+    std::vector<std::string>::iterator i;
+    for(i = includes.begin(); i != includes.end(); ++i)
       {
-      m_IncludeOptions += "\"";
-      m_IncludeOptions += tmp;
-      m_IncludeOptions += "\"";
+      std::string tmp = this->ConvertToOptionallyRelativeOutputPath(i->c_str());
+      if(useShortPath)
+        {
+        cmSystemTools::GetShortPath(tmp.c_str(), tmp);
+        }
+      m_IncludeOptions +=  " /I ";
+
+      // quote if not already quoted
+      if (tmp[0] != '"')
+        {
+        m_IncludeOptions += "\"";
+        m_IncludeOptions += tmp;
+        m_IncludeOptions += "\"";
+        }
+      else
+        {
+        m_IncludeOptions += tmp;
+        }
+      }
+    if(j == 0 && m_IncludeOptions.size() > maxIncludeLength)
+      {
+      m_IncludeOptions = "";
+      useShortPath = true;
       }
     else
       {
-      m_IncludeOptions += tmp;
+      break;
       }
     }
   

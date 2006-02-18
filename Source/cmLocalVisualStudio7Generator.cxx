@@ -566,7 +566,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << " -DCMAKE_INTDIR=\\&quot;" << configName << "\\&quot;" 
        << "\"\n";
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
-  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
+  std::vector<std::string> includes;
+  this->GetIncludeDirectories(includes);
   std::vector<std::string>::iterator i = includes.begin();
   for(;i != includes.end(); ++i)
     {

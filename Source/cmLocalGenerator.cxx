@@ -1129,22 +1129,20 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
 {
-  // Output Include paths
-  std::set<cmStdString> implicitIncludes;
-
   // CMake versions below 2.0 would add the source tree to the -I path
   // automatically.  Preserve compatibility.
   bool includeSourceDir = false;
   const char* versionValue =
     m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-  if(versionValue)
+  int major = 0;
+  int minor = 0;
+  if(versionValue && sscanf(versionValue, "%d.%d", &major, &minor) != 2)
     {
-    int major = 0;
-    int minor = 0;
-    if(sscanf(versionValue, "%d.%d", &major, &minor) == 2 && major < 2)
-      {
-      includeSourceDir = true;
-      }
+    versionValue = 0;
+    }
+  if(versionValue && major < 2)
+    {
+    includeSourceDir = true;
     }
   const char* vtkSourceDir =
     m_Makefile->GetDefinition("VTK_SOURCE_DIR");
@@ -1164,23 +1162,59 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
       }
     }
 
+  // If this is not an in-source build then include the binary
+  // directory at the beginning of the include path to approximate
+  // include file behavior for an in-source build.  This does not
+  // account for the case of a source file in a subdirectory of the
+  // current source directory but we cannot fix this because not all
+  // native build tools support per-source-file include paths.  Allow
+  // the behavior to be disabled by the project.
+  bool includeBinaryDir =
+    !cmSystemTools::ComparePath(m_Makefile->GetStartDirectory(),
+                                m_Makefile->GetStartOutputDirectory());
+  if(m_Makefile->IsOn("CMAKE_NO_AUTOMATIC_INCLUDE_DIRECTORIES"))
+    {
+    includeSourceDir = false;
+    includeBinaryDir = false;
+    }
+
+  // CMake versions 2.2 and earlier did not add the binary directory
+  // automatically.
+  if(versionValue && ((major < 2) || major == 2 && minor < 3))
+    {
+    includeBinaryDir = false;
+    }
+
+  // Do not repeat an include path.
+  std::set<cmStdString> emitted;
+
+  // Store the automatic include paths.
+  if(includeBinaryDir)
+    {
+    dirs.push_back(m_Makefile->GetStartOutputDirectory());
+    emitted.insert(m_Makefile->GetStartOutputDirectory());
+    }
   if(includeSourceDir)
     {
-    dirs.push_back(m_Makefile->GetStartDirectory());
+    if(emitted.find(m_Makefile->GetStartDirectory()) == emitted.end())
+      {
+      dirs.push_back(m_Makefile->GetStartDirectory());
+      emitted.insert(m_Makefile->GetStartDirectory());
+      }
     }
 
   // Do not explicitly add the standard include path "/usr/include".
   // This can cause problems with certain standard library
   // implementations because the wrong headers may be found first.
-  implicitIncludes.insert("/usr/include");
-  if(m_Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))
+  emitted.insert("/usr/include");
+  if(const char* implicitIncludes =
+     m_Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))
     {
-    std::string arg = m_Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES");
     std::vector<std::string> implicitIncludeVec;
-    cmSystemTools::ExpandListArgument(arg, implicitIncludeVec);
-    for(unsigned int k =0; k < implicitIncludeVec.size(); k++)
+    cmSystemTools::ExpandListArgument(implicitIncludes, implicitIncludeVec);
+    for(unsigned int k = 0; k < implicitIncludeVec.size(); ++k)
       {
-      implicitIncludes.insert(implicitIncludeVec[k]);
+      emitted.insert(implicitIncludeVec[k]);
       }
     }
 
@@ -1189,9 +1223,10 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
   for(std::vector<std::string>::iterator i = includes.begin();
       i != includes.end(); ++i)
     {
-    if(implicitIncludes.find(*i) == implicitIncludes.end())
+    if(emitted.find(*i) == emitted.end())
       {
       dirs.push_back(*i);
+      emitted.insert(*i);
       }
     }
 }
