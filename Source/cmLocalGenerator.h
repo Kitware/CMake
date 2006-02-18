@@ -247,6 +247,10 @@ protected:
   bool m_UseRelativePaths;
   bool m_IgnoreLibPrefix;
   bool Configured;
+
+  // Hack for ExpandRuleVariable until object-oriented version is
+  // committed.
+  std::string m_TargetImplib;
 };
 
 #endif

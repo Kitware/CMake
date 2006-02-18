@@ -809,7 +809,7 @@ const char* cmTarget::GetLocation(const char* config)
     m_Location += cfgid;
     m_Location += "/";
     }
-  m_Location += this->GetFullName(config);
+  m_Location += this->GetFullName(config, false);
   return m_Location.c_str();
 }
 
@@ -997,19 +997,17 @@ const char* cmTarget::GetCreateRuleVariable()
   return "";
 }
 
-const char* cmTarget::GetSuffixVariable()
-{
-  return this->GetSuffixVariableInternal(this->GetType());
-}
-
-const char* cmTarget::GetSuffixVariableInternal(TargetType type)
+const char* cmTarget::GetSuffixVariableInternal(TargetType type,
+                                                bool implib)
 {
   switch(type)
     {
     case cmTarget::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_SUFFIX";
     case cmTarget::SHARED_LIBRARY:
-      return "CMAKE_SHARED_LIBRARY_SUFFIX";
+      return (implib
+              ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
+              : "CMAKE_SHARED_LIBRARY_SUFFIX");
     case cmTarget::MODULE_LIBRARY:
       return "CMAKE_SHARED_MODULE_SUFFIX";
     case cmTarget::EXECUTABLE:
@@ -1023,19 +1021,17 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type)
 }
 
 
-const char* cmTarget::GetPrefixVariable() 
-{
-  return this->GetPrefixVariableInternal(this->GetType());
-}
-
-const char* cmTarget::GetPrefixVariableInternal(TargetType type) 
+const char* cmTarget::GetPrefixVariableInternal(TargetType type,
+                                                bool implib)
 {
   switch(type)
     {
     case cmTarget::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_PREFIX";
     case cmTarget::SHARED_LIBRARY:
-      return "CMAKE_SHARED_LIBRARY_PREFIX";
+      return (implib
+              ? "CMAKE_IMPORT_LIBRARY_PREFIX"
+              : "CMAKE_SHARED_LIBRARY_PREFIX");
     case cmTarget::MODULE_LIBRARY:
       return "CMAKE_SHARED_MODULE_PREFIX";
     case cmTarget::EXECUTABLE:
@@ -1048,20 +1044,22 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type)
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetFullName(const char* config)
+std::string cmTarget::GetFullName(const char* config, bool implib)
 {
-  return this->GetFullNameInternal(this->GetType(), config);
+  return this->GetFullNameInternal(this->GetType(), config, implib);
 }
 
 //----------------------------------------------------------------------------
 void cmTarget::GetFullName(std::string& prefix, std::string& base,
-                           std::string& suffix, const char* config)
+                           std::string& suffix, const char* config,
+                           bool implib)
 {
-  this->GetFullNameInternal(this->GetType(), config, prefix, base, suffix);
+  this->GetFullNameInternal(this->GetType(), config, implib,
+                            prefix, base, suffix);
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetFullPath(const char* config)
+std::string cmTarget::GetFullPath(const char* config, bool implib)
 {
   // Start with the output directory for the target.
   std::string fpath = this->GetDirectory();
@@ -1072,23 +1070,25 @@ std::string cmTarget::GetFullPath(const char* config)
 
   // Add the full name of the target.
   fpath += "/";
-  fpath += this->GetFullName(config);
+  fpath += this->GetFullName(config, implib);
   return fpath;
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetFullNameInternal(TargetType type, const char* config)
+std::string cmTarget::GetFullNameInternal(TargetType type, const char* config,
+                                          bool implib)
 {
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->GetFullNameInternal(type, config, prefix, base, suffix);
+  this->GetFullNameInternal(type, config, implib, prefix, base, suffix);
   return prefix+base+suffix;
 }
 
 //----------------------------------------------------------------------------
 void cmTarget::GetFullNameInternal(TargetType type,
                                    const char* config,
+                                   bool implib,
                                    std::string& outPrefix,
                                    std::string& outBase,
                                    std::string& outSuffix)
@@ -1105,9 +1105,19 @@ void cmTarget::GetFullNameInternal(TargetType type,
     return;
     }
 
+  // The implib option is only allowed for shared libraries.
+  if(type != cmTarget::SHARED_LIBRARY)
+    {
+    implib = false;
+    }
+
   // Compute the full name for main target types.
-  const char* targetPrefix = this->GetProperty("PREFIX");
-  const char* targetSuffix = this->GetProperty("SUFFIX");
+  const char* targetPrefix = (implib
+                              ? this->GetProperty("IMPORT_PREFIX")
+                              : this->GetProperty("PREFIX"));
+  const char* targetSuffix = (implib
+                              ? this->GetProperty("IMPORT_SUFFIX")
+                              : this->GetProperty("SUFFIX"));
   const char* configPostfix = 0;
   if(config && *config && type != cmTarget::EXECUTABLE)
     {
@@ -1117,8 +1127,8 @@ void cmTarget::GetFullNameInternal(TargetType type,
     configVar = cmSystemTools::UpperCase(configVar);
     configPostfix = m_Makefile->GetDefinition(configVar.c_str());
     }
-  const char* prefixVar = this->GetPrefixVariableInternal(type);
-  const char* suffixVar = this->GetSuffixVariableInternal(type);
+  const char* prefixVar = this->GetPrefixVariableInternal(type, implib);
+  const char* suffixVar = this->GetSuffixVariableInternal(type, implib);
   const char* ll =
     this->GetLinkerLanguage(
       m_Makefile->GetLocalGenerator()->GetGlobalGenerator());
@@ -1173,23 +1183,26 @@ void cmTarget::GetFullNameInternal(TargetType type,
 void cmTarget::GetLibraryNames(std::string& name,
                                std::string& soName,
                                std::string& realName,
+                               std::string& impName,
                                const char* config)
 {
   // Get the names based on the real type of the library.
-  this->GetLibraryNamesInternal(name, soName, realName, this->GetType(),
-                                config);
+  this->GetLibraryNamesInternal(name, soName, realName, impName,
+                                this->GetType(), config);
 }
 
 void cmTarget::GetLibraryCleanNames(std::string& staticName,
                                     std::string& sharedName,
                                     std::string& sharedSOName,
                                     std::string& sharedRealName,
+                                    std::string& importName,
                                     const char* config)
 {
   // Get the name as if this were a static library.
   std::string soName;
   std::string realName;
-  this->GetLibraryNamesInternal(staticName, soName, realName,
+  std::string impName;
+  this->GetLibraryNamesInternal(staticName, soName, realName, impName,
                                 cmTarget::STATIC_LIBRARY, config);
 
   // Get the names as if this were a shared library.
@@ -1200,22 +1213,22 @@ void cmTarget::GetLibraryCleanNames(std::string& staticName,
     // shared library will never be present.  In the latter case the
     // type will never be MODULE.  Either way the only names that
     // might have to be cleaned are the shared library names.
-    this->GetLibraryNamesInternal(sharedName, sharedSOName,
-                                  sharedRealName, cmTarget::SHARED_LIBRARY,
+    this->GetLibraryNamesInternal(sharedName, sharedSOName, sharedRealName,
+                                  importName, cmTarget::SHARED_LIBRARY,
                                   config);
     }
   else
     {
     // Use the name of the real type of the library (shared or module).
-    this->GetLibraryNamesInternal(sharedName, sharedSOName,
-                                  sharedRealName, this->GetType(),
-                                  config);
+    this->GetLibraryNamesInternal(sharedName, sharedSOName, sharedRealName,
+                                  importName, this->GetType(), config);
     }
 }
 
 void cmTarget::GetLibraryNamesInternal(std::string& name,
                                        std::string& soName,
                                        std::string& realName,
+                                       std::string& impName,
                                        TargetType type,
                                        const char* config)
 {
@@ -1250,7 +1263,7 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
     }
 
   // The library name.
-  name = this->GetFullNameInternal(type, config);
+  name = this->GetFullNameInternal(type, config, false);
 
   // The library's soname.
   soName = name;
@@ -1271,6 +1284,16 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
     {
     realName += ".";
     realName += soversion;
+    }
+
+  // The import library name.
+  if(type == cmTarget::SHARED_LIBRARY)
+    {
+    impName = this->GetFullNameInternal(type, config, true);
+    }
+  else
+    {
+    impName = "";
     }
 }
 
@@ -1310,7 +1333,7 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
 #endif
 
   // The executable name.
-  name = this->GetFullNameInternal(type, config);
+  name = this->GetFullNameInternal(type, config, false);
 
   // The executable's real name on disk.
   realName = name;

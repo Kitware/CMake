@@ -202,8 +202,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string targetName;
   std::string targetNameSO;
   std::string targetNameReal;
-  this->Target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
-                                this->LocalGenerator->m_ConfigurationName.c_str());
+  std::string targetNameImport;
+  this->Target->GetLibraryNames(
+    targetName, targetNameSO, targetNameReal, targetNameImport,
+    this->LocalGenerator->m_ConfigurationName.c_str());
 
   // Construct the full path version of the names.
   std::string outpath = this->LocalGenerator->m_LibraryOutputPath;
@@ -222,6 +224,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathSO = outpath + targetNameSO;
   std::string targetFullPathReal = outpath + targetNameReal;
+  std::string targetFullPathImport = outpath + targetNameImport;
 
   // Construct the output path version of the names for use in command
   // arguments.
@@ -233,6 +236,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                   cmLocalGenerator::MAKEFILE);
   std::string targetOutPathReal = 
     this->Convert(targetFullPathReal.c_str(),cmLocalGenerator::START_OUTPUT,
+                  cmLocalGenerator::MAKEFILE);
+  std::string targetOutPathImport =
+    this->Convert(targetFullPathImport.c_str(),cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::MAKEFILE);
 
   // Add the link message.
@@ -260,15 +266,19 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string cleanSharedName;
   std::string cleanSharedSOName;
   std::string cleanSharedRealName;
-  this->Target->GetLibraryCleanNames(cleanStaticName,
-                              cleanSharedName,
-                              cleanSharedSOName,
-                              cleanSharedRealName,
-                              this->LocalGenerator->m_ConfigurationName.c_str());
+  std::string cleanImportName;
+  this->Target->GetLibraryCleanNames(
+    cleanStaticName,
+    cleanSharedName,
+    cleanSharedSOName,
+    cleanSharedRealName,
+    cleanImportName,
+    this->LocalGenerator->m_ConfigurationName.c_str());
   std::string cleanFullStaticName = outpath + cleanStaticName;
   std::string cleanFullSharedName = outpath + cleanSharedName;
   std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
   std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
+  std::string cleanFullImportName = outpath + cleanImportName;
   libCleanFiles.push_back
     (this->Convert(cleanFullStaticName.c_str(),cmLocalGenerator::START_OUTPUT,
                    cmLocalGenerator::MAKEFILE));
@@ -290,6 +300,16 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
      cleanSharedName != cleanSharedRealName)
     {
     libCleanFiles.push_back(this->Convert(cleanFullSharedName.c_str(),
+                                          cmLocalGenerator::START_OUTPUT,
+                                          cmLocalGenerator::MAKEFILE));
+    }
+  if(!cleanImportName.empty() &&
+     cleanImportName != cleanStaticName &&
+     cleanImportName != cleanSharedSOName &&
+     cleanImportName != cleanSharedRealName &&
+     cleanImportName != cleanSharedName)
+    {
+    libCleanFiles.push_back(this->Convert(cleanFullImportName.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::MAKEFILE));
     }
@@ -363,6 +383,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   cleanObjs += ")";
 
   // Expand placeholders in the commands.
+  this->LocalGenerator->m_TargetImplib = targetOutPathImport;
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
@@ -375,6 +396,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                               targetNameSO.c_str(),
                               linkFlags.c_str());
     }
+  this->LocalGenerator->m_TargetImplib = "";
 
   // Write the build rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,

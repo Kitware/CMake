@@ -872,6 +872,10 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       {
       return target;
       }
+    if(variable == "TARGET_IMPLIB")
+      {
+      return m_TargetImplib;
+      }
     if(variable == "TARGET_BASE")
       {
       // Strip the last extension off the target name.

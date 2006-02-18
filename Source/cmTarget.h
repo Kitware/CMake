@@ -166,26 +166,23 @@ public:
   ///! Return the rule variable used to create this type of target, 
   //  need to add CMAKE_(LANG) for full name.
   const char* GetCreateRuleVariable();
-  ///! Return the name of the variable to look up the target suffix
-  const char* GetSuffixVariable();
-  ///! Return the name of the variable to look up the target suffix
-  const char* GetPrefixVariable();
 
   /** Get the full name of the target according to the settings in its
       makefile.  */
-  std::string GetFullName(const char* config=0);
+  std::string GetFullName(const char* config=0, bool implib = false);
   void GetFullName(std::string& prefix, std::string& base, std::string& suffix,
-                   const char* config=0);
+                   const char* config=0, bool implib = false);
 
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
-  std::string GetFullPath(const char* config=0);
+  std::string GetFullPath(const char* config=0, bool implib = false);
 
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
       should be called only on a library target.  */
   void GetLibraryNames(std::string& name, std::string& soName,
-                       std::string& realName, const char* config);
+                       std::string& realName, std::string& impName,
+                       const char* config);
 
   /** Get the names of the library used to remove existing copies of
       the library from the build tree either before linking or during
@@ -195,6 +192,7 @@ public:
                             std::string& sharedName,
                             std::string& sharedSOName,
                             std::string& sharedRealName,
+                            std::string& importName,
                             const char* config);
 
   /** Get the names of the executable needed to generate a build rule
@@ -272,15 +270,17 @@ private:
   void GatherDependencies( const cmMakefile& mf, const std::string& lib,
                            DependencyMap& dep_map ); 
 
-  const char* GetSuffixVariableInternal(TargetType type);
-  const char* GetPrefixVariableInternal(TargetType type);
-  std::string GetFullNameInternal(TargetType type, const char* config);
-  void GetFullNameInternal(TargetType type, const char* config,
+  const char* GetSuffixVariableInternal(TargetType type, bool implib);
+  const char* GetPrefixVariableInternal(TargetType type, bool implib);
+  std::string GetFullNameInternal(TargetType type, const char* config,
+                                  bool implib);
+  void GetFullNameInternal(TargetType type, const char* config, bool implib,
                            std::string& outPrefix, std::string& outBase,
                            std::string& outSuffix);
   void GetLibraryNamesInternal(std::string& name,
                                std::string& soName,
                                std::string& realName,
+                               std::string& impName,
                                TargetType type,
                                const char* config);
   void GetExecutableNamesInternal(std::string& name,
