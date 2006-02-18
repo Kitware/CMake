@@ -1157,10 +1157,10 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
     const char* vtk_minor = m_Makefile->GetDefinition("VTK_MINOR_VERSION");
     vtk_major = vtk_major? vtk_major : "4";
     vtk_minor = vtk_minor? vtk_minor : "4";
-    int major = 0;
-    int minor = 0;
-    if(sscanf(vtk_major, "%d", &major) && sscanf(vtk_minor, "%d", &minor) &&
-       major == 4 && minor <= 4)
+    int vmajor = 0;
+    int vminor = 0;
+    if(sscanf(vtk_major, "%d", &vmajor) && sscanf(vtk_minor, "%d", &vminor) &&
+       vmajor == 4 && vminor <= 4)
       {
       includeSourceDir = true;
       }
