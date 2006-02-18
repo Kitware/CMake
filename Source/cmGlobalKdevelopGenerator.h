@@ -63,7 +63,8 @@ public:
                           const std::string& outputDir, 
                           const std::string& projectDirIn,
                           const std::string& projectname,
-                          std::string& cmakeFilePattern);
+                          std::string& cmakeFilePattern,
+                          std::string& fileToOpen);
 
   /** Create the foo.kdevelop file. This one calls MergeProjectFiles()
     if it already exists, otherwise createNewProjectFile() The project
@@ -75,7 +76,8 @@ public:
                          const std::string& projectDir,
                          const std::string& projectname, 
                          const std::string& executable, 
-                         const std::string& cmakeFilePattern);
+                         const std::string& cmakeFilePattern,
+                         const std::string& fileToOpen);
 
   /*** Reads the old foo.kdevelop line by line and only replaces the
        "important" lines 
@@ -84,13 +86,17 @@ public:
                          const std::string& projectDir,
                          const std::string& filename,
                          const std::string& executable,
-                         const std::string& cmakeFilePattern);
-  ///! Creates a new foo.kdevelop file
+                         const std::string& cmakeFilePattern,
+                         const std::string& fileToOpen,
+                         const std::string& sessionFilename);
+  ///! Creates a new foo.kdevelop and a new foo.kdevses file
   void CreateNewProjectFile(const std::string& outputDir, 
                             const std::string& projectDir, 
                             const std::string& filename,
                             const std::string& executable, 
-                            const std::string& cmakeFilePattern);
+                            const std::string& cmakeFilePattern,
+                            const std::string& fileToOpen,
+                            const std::string& sessionFilename);
 
 };
 

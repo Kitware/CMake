@@ -66,10 +66,11 @@ void cmGlobalKdevelopGenerator::Generate()
     std::string projectDir=mf->GetHomeDirectory();
     std::string projectName=mf->GetProjectName();
     std::string cmakeFilePattern("CMakeLists.txt;*.cmake;");
+    std::string fileToOpen;
     // create the project.kdevelop.filelist file
     if(!this->CreateFilelistFile(it->second[0], it->second,
                                  outputDir, projectDir,
-                                 projectName, cmakeFilePattern))
+                                 projectName, cmakeFilePattern, fileToOpen))
       {
       cmSystemTools::Error("Can not create filelist file");
       return;
@@ -83,13 +84,13 @@ void cmGlobalKdevelopGenerator::Generate()
       {
       if (ti->second.GetType()==cmTarget::EXECUTABLE)
         {
-        executable=ti->first;
+        executable = ti->second.GetProperty("LOCATION");
         break;
         }
       }
     // now create a project file
     this->CreateProjectFile(outputDir, projectDir, projectName,
-                            executable, cmakeFilePattern);
+                            executable, cmakeFilePattern, fileToOpen);
     }
 }
 
@@ -99,7 +100,8 @@ bool cmGlobalKdevelopGenerator
                      const std::string& outputDir, 
                      const std::string& projectDirIn,
                      const std::string& projectname,
-                     std::string& cmakeFilePattern) 
+                     std::string& cmakeFilePattern,
+                     std::string& fileToOpen)
 {
   std::string projectDir = projectDirIn + "/";
   std::string filename = outputDir+ "/" + projectname +".kdevelop.filelist";
@@ -188,11 +190,21 @@ bool cmGlobalKdevelopGenerator
     return false;
     }
    
+  fileToOpen="";
   for (std::set<cmStdString>::const_iterator it=files.begin(); 
        it!=files.end(); it++)
     {
     // get the full path to the file
     tmp=cmSystemTools::CollapseFullPath(it->c_str(), projectDir.c_str());
+    // just select the first source file
+    if (fileToOpen.empty())
+    {
+       std::string ext = cmSystemTools::GetFilenameExtension(tmp);
+       if ((ext==".c") || (ext==".cc") || (ext==".cpp") || (ext==".C") || (ext==".h"))
+       {
+          fileToOpen=tmp;
+       }
+    }
     // make it relative to the project dir
     cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
     // only put relative paths
@@ -212,20 +224,24 @@ cmGlobalKdevelopGenerator::CreateProjectFile(const std::string& outputDir,
                                              const std::string& projectDir,
                                              const std::string& projectname, 
                                              const std::string& executable,
-                                             const std::string& cmakeFilePattern)
+                                             const std::string& cmakeFilePattern,
+                                             const std::string& fileToOpen)
 {
   std::string filename=outputDir+"/";
   filename+=projectname+".kdevelop";
+  std::string sessionFilename=outputDir+"/";
+  sessionFilename+=projectname+".kdevses";
 
   if (cmSystemTools::FileExists(filename.c_str()))
     {
     this->MergeProjectFiles(outputDir, projectDir, filename, 
-                            executable, cmakeFilePattern);
+                            executable, cmakeFilePattern, fileToOpen, sessionFilename);
     }
   else
     {
+
     this->CreateNewProjectFile(outputDir, projectDir, filename,
-                               executable, cmakeFilePattern);
+                               executable, cmakeFilePattern, fileToOpen, sessionFilename);
     }
    
 }
@@ -235,12 +251,14 @@ cmGlobalKdevelopGenerator::MergeProjectFiles(const std::string& outputDir,
                                              const std::string& projectDir, 
                                              const std::string& filename, 
                                              const std::string& executable, 
-                                             const std::string& cmakeFilePattern)
+                                             const std::string& cmakeFilePattern,
+                                             const std::string& fileToOpen,
+                                             const std::string& sessionFilename)
 {
   std::ifstream oldProjectFile(filename.c_str());
   if (!oldProjectFile)
     {
-    this->CreateNewProjectFile(outputDir, projectDir, filename, executable, cmakeFilePattern);
+    this->CreateNewProjectFile(outputDir, projectDir, filename, executable, cmakeFilePattern, fileToOpen, sessionFilename);
     return;
     }
 
@@ -305,7 +323,9 @@ cmGlobalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir,
                                                 const std::string& projectDir,
                                                 const std::string& filename,
                                                 const std::string& executable,
-                                                const std::string& cmakeFilePattern)
+                                                const std::string& cmakeFilePattern,
+                                                const std::string& fileToOpen,
+                                                const std::string& sessionFilename)
 {
   cmGeneratedFileStream fout(filename.c_str());
   if(!fout)
@@ -331,7 +351,7 @@ cmGlobalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir,
   fout<<"  <kdevcustomproject>\n";
   fout<<"    <filelistdirectory>"<<outputDir.c_str()<<"</filelistdirectory>\n";
   fout<<"    <run>\n";
-  fout<<"      <mainprogram>"<<outputDir.c_str()<<"/"<<executable.c_str()<<"</mainprogram>\n";
+  fout<<"      <mainprogram>"<<executable.c_str()<<"</mainprogram>\n";
   fout<<"      <directoryradio>custom</directoryradio>\n";
   fout<<"      <customdirectory>/</customdirectory>\n";
   fout<<"      <programargs></programargs>\n";
@@ -409,5 +429,23 @@ cmGlobalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir,
   fout<<"  </kdevfileview>\n";
   fout<<"</kdevelop>\n";
   
+  if (sessionFilename.empty())
+     return;
+
+  // and a session file, so that kdevelop opens a file if it opens the project the first time
+  cmGeneratedFileStream devses(sessionFilename.c_str());
+  if(!devses)
+  {
+     return;
+  }
+  devses<<"<?xml version = '1.0' encoding = \'UTF-8\'?>\n";
+  devses<<"<!DOCTYPE KDevPrjSession>\n";
+  devses<<"<KDevPrjSession>\n";
+  devses<<" <DocsAndViews NumberOfDocuments=\"1\" >\n";
+  devses<<"  <Doc0 NumberOfViews=\"1\" URL=\"file://"<<fileToOpen.c_str()<<"\" >\n";
+  devses<<"   <View0 line=\"0\" Type=\"Source\" />\n";
+  devses<<"  </Doc0>\n";
+  devses<<" </DocsAndViews>\n";
+  devses<<"</KDevPrjSession>\n";
 }
 
