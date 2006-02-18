@@ -459,8 +459,8 @@ bool cmFileCommand::HandleInstallCommand(
     }
   if ( !cmSystemTools::FileIsDirectory(destination.c_str()) )
     {
-    std::string errstring = "found file: " + destination +
-      " where expecting directory with the same name.";
+    std::string errstring = "INSTALL destination: " + destination +
+      " is not a directory.";
     this->SetError(errstring.c_str());
     return false;
     }
