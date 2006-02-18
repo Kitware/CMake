@@ -378,6 +378,10 @@ void cmLocalGenerator::GenerateInstallRules()
       {
       bool need_relink = l->second.NeedRelinkBeforeInstall();
       destination = "${CMAKE_INSTALL_PREFIX}" + l->second.GetInstallPath();
+      if(destination[destination.size()-1] == '/')
+        {
+        destination = destination.substr(0, destination.size()-1);
+        }
       cmSystemTools::ConvertToUnixSlashes(destination);
       const char* dest = destination.c_str();
       int type = l->second.GetType();
@@ -409,6 +413,10 @@ void cmLocalGenerator::GenerateInstallRules()
 
             // Change the destination to the .dll destination.
             destination = "${CMAKE_INSTALL_PREFIX}" + l->second.GetRuntimeInstallPath();
+            if(destination[destination.size()-1] == '/')
+              {
+              destination = destination.substr(0, destination.size()-1);
+              }
             dest = destination.c_str();
             }
           else
