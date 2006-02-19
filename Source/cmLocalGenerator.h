@@ -177,14 +177,6 @@ protected:
   ///! put all the libraries for a target on into the given stream
   virtual void OutputLinkLibraries(std::ostream&, cmTarget&, bool relink);
 
-  /** Compute the string to use to refer to a target in an install
-      file.  */
-  std::string GetInstallReference(cmTarget& target, const char* config,
-                                  std::vector<std::string> const& configs,
-                                  bool implib = false);
-  void PrepareInstallReference(std::ostream& fout, cmTarget& target,
-                               std::vector<std::string> const& configs);
-
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs);
 
@@ -226,8 +218,11 @@ protected:
   // of the types listed will be compiled as custom commands and added
   // to a custom target.
   void CreateCustomTargetsAndCommands(std::set<cmStdString> const&);
-  virtual void AddInstallRule(std::ostream& fout, const char* dest, int type, 
-    const char* files, bool optional = false, const char* properties = 0);
+
+  // Handle old-style install rules stored in the targets.
+  void GenerateTargetInstallRules(
+    std::ostream& os, const char* config,
+    std::vector<std::string> const& configurationTypes);
 
   cmMakefile *m_Makefile;
   cmGlobalGenerator *m_GlobalGenerator;

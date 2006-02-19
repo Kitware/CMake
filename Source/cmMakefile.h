@@ -28,6 +28,7 @@
 
 class cmFunctionBlocker;
 class cmCommand;
+class cmInstallGenerator;
 class cmLocalGenerator;
 class cmMakeDepend;
 class cmSourceFile;
@@ -672,11 +673,10 @@ public:
   void SetPreOrder(bool p) { this->PreOrder = p; }
   bool GetPreOrder() { return this->PreOrder; }
 
-  /** Add a script file to be invoked during installation.  */
-  void AddInstallScript(const char* script)
-    { m_InstallScripts.push_back(script); }
-  std::vector<std::string> const& GetInstallScripts()
-    { return m_InstallScripts; }
+  void AddInstallGenerator(cmInstallGenerator* g)
+    { m_InstallGenerators.push_back(g); }
+  std::vector<cmInstallGenerator*>& GetInstallGenerators()
+    { return m_InstallGenerators; }
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -709,8 +709,7 @@ protected:
   
   cmTarget::LinkLibraries m_LinkLibraries;
 
-  // List of install-time scripts.  This should not be inherited.
-  std::vector<std::string> m_InstallScripts;
+  std::vector<cmInstallGenerator*> m_InstallGenerators;
 
   std::string m_IncludeFileRegularExpression;
   std::string m_ComplainFileRegularExpression;

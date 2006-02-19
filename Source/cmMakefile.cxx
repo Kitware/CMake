@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmMakefile.h"
+
 #include "cmCommand.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
@@ -29,6 +30,7 @@
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #  include "cmVariableWatch.h"
 #endif
+#include "cmInstallGenerator.h"
 #include "cmake.h"
 #include <stdlib.h> // required for atoi
 
@@ -125,6 +127,12 @@ unsigned int cmMakefile::GetCacheMinorVersion()
 
 cmMakefile::~cmMakefile()
 {
+  for(std::vector<cmInstallGenerator*>::iterator
+        i = m_InstallGenerators.begin();
+      i != m_InstallGenerators.end(); ++i)
+    {
+    delete *i;
+    }
   for(std::vector<cmSourceFile*>::iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {

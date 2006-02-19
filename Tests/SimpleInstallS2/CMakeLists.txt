@@ -83,8 +83,8 @@ ELSE(STAGE2)
   ADD_DEPENDENCIES(test2 test3)
   ADD_DEPENDENCIES(test4 test2)
 
-  INSTALL_TARGETS(/bin SimpleInstall)
-  INSTALL_TARGETS(/lib test1 test2 test3 test4)
+  INSTALL(TARGETS SimpleInstall test1 test2 test3 test4
+          RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
   INSTALL_FILES(/include FILES lib1.h lib2.h lib3.h)
 
   # Test user-specified install scripts.

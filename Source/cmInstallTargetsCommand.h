@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create install rules for targets.";
+    return "Old installation command.  Use the INSTALL command.";
     }
   
   /**
@@ -62,6 +62,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
+      "This command has been superceded by the INSTALL command.  It "
+      "is provided for compatibility with older CMake code.\n"
       "  INSTALL_TARGETS(<dir> [RUNTIME_DIRECTORY dir] target target)\n"
       "Create rules to install the listed targets into the given directory.  "
       "The directory <dir> is relative to the installation prefix, which "

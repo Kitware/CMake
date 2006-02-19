@@ -115,6 +115,12 @@ SET(SRCS
   cmGlobalGenerator.h
   cmGlobalUnixMakefileGenerator3.cxx
   cmGlobalUnixMakefileGenerator3.h
+  cmInstallGenerator.h
+  cmInstallGenerator.cxx
+  cmInstallScriptGenerator.h
+  cmInstallScriptGenerator.cxx
+  cmInstallTargetGenerator.h
+  cmInstallTargetGenerator.cxx
   cmListFileCache.cxx
   cmListFileCache.h
   cmListFileLexer.c

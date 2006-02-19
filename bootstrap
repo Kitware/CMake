@@ -97,6 +97,9 @@ CMAKE_CXX_SOURCES="\
   cmGlobalGenerator \
   cmGlob \
   cmLocalGenerator \
+  cmInstallGenerator \
+  cmInstallScriptGenerator \
+  cmInstallTargetGenerator \
   cmSourceFile \
   cmSystemTools \
   cmFileTimeComparison \

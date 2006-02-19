@@ -15,13 +15,18 @@
 
 =========================================================================*/
 #include "cmLocalGenerator.h"
-#include "cmGlobalGenerator.h"
-#include "cmake.h"
-#include "cmMakefile.h"
+
 #include "cmGeneratedFileStream.h"
-#include "cmSourceFile.h"
+#include "cmGlobalGenerator.h"
+#include "cmInstallGenerator.h"
+#include "cmInstallScriptGenerator.h"
+#include "cmInstallTargetGenerator.h"
+#include "cmMakefile.h"
 #include "cmOrderLinkDirectories.h"
+#include "cmSourceFile.h"
 #include "cmTest.h"
+#include "cmake.h"
+
 #include <ctype.h> // for isalpha
 
 cmLocalGenerator::cmLocalGenerator()
@@ -238,11 +243,11 @@ void cmLocalGenerator::GenerateTestFiles()
     }
 }
 
+//----------------------------------------------------------------------------
 void cmLocalGenerator::GenerateInstallRules()
 {
-  cmTargets &tgts = m_Makefile->GetTargets();
-  const char* prefix
-    = m_Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
+  // Compute the install prefix.
+  const char* prefix = m_Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
 #if defined(_WIN32) && !defined(__CYGWIN__)
   std::string prefix_win32;
   if(!prefix)
@@ -270,6 +275,19 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 #endif
 
+  // Compute the set of configurations.
+  std::vector<std::string> configurationTypes;
+  if(const char* types = m_Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+    {
+    cmSystemTools::ExpandListArgument(types, configurationTypes);
+    }
+  const char* config = 0;
+  if(configurationTypes.empty())
+    {
+    config = m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    }
+
+  // Create the install script file.
   std::string file = m_Makefile->GetStartOutputDirectory();
   std::string homedir = m_Makefile->GetHomeOutputDirectory();
   std::string currdir = m_Makefile->GetCurrentOutputDirectory();
@@ -285,25 +303,16 @@ void cmLocalGenerator::GenerateInstallRules()
   cmGeneratedFileStream fout(file.c_str());
   fout.SetCopyIfDifferent(true);
 
-  fout << "# Install script for directory: " << m_Makefile->GetCurrentDirectory() 
-    << std::endl << std::endl;
+  // Write the header.
+  fout << "# Install script for directory: "
+       << m_Makefile->GetCurrentDirectory() << std::endl << std::endl;
   fout << "# Set the install prefix" << std::endl
     << "IF(NOT CMAKE_INSTALL_PREFIX)" << std::endl
     << "  SET(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
     << "ENDIF(NOT CMAKE_INSTALL_PREFIX)" << std::endl
     << std::endl;
 
-  std::vector<std::string> configurationTypes;
-  if(const char* types = m_Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
-    {
-    cmSystemTools::ExpandListArgument(types, configurationTypes);
-    }
-  const char* config = 0;
-  if(configurationTypes.empty())
-    {
-    config = m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-    }
-
+  // Write support code for generating per-configuration install rules.
   fout <<
     "# Set the install configuration name.\n"
     "IF(NOT CMAKE_INSTALL_CONFIG_NAME)\n"
@@ -317,250 +326,19 @@ void cmLocalGenerator::GenerateInstallRules()
     "ENDIF(NOT CMAKE_INSTALL_CONFIG_NAME)\n"
     "\n";
 
-  std::string libOutPath = "";
-  if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+  // Ask each install generator to write its code.
+  std::vector<cmInstallGenerator*> const& installers =
+    m_Makefile->GetInstallGenerators();
+  for(std::vector<cmInstallGenerator*>::const_iterator gi = installers.begin();
+      gi != installers.end(); ++gi)
     {
-    libOutPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
-    if(libOutPath.size())
-      {
-      if(libOutPath[libOutPath.size() -1] != '/')
-        {
-        libOutPath += "/";
-        }
-      }
+    (*gi)->Generate(fout, config, configurationTypes);
     }
 
-  std::string exeOutPath = "";
-  if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
-    {
-    exeOutPath =
-      m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-    if(exeOutPath.size())
-      {
-      if(exeOutPath[exeOutPath.size() -1] != '/')
-        {
-        exeOutPath += "/";
-        }
-      }
-    }
-  if ( libOutPath.size() == 0 )
-    {
-    // LIBRARY_OUTPUT_PATH not defined
-    libOutPath = currdir + "/";
-    }
-  if ( exeOutPath.size() == 0 )
-    {
-    // EXECUTABLE_OUTPUT_PATH not defined
-    exeOutPath = currdir + "/";
-    }
-  std::string relinkDir = currdir + "/CMakeFiles/CMakeRelink.dir/";
+  // Write rules from old-style specification stored in targets.
+  this->GenerateTargetInstallRules(fout, config, configurationTypes);
 
-  // Include user-specified install scripts.
-  std::vector<std::string> const& installScripts =
-    m_Makefile->GetInstallScripts();
-  for(std::vector<std::string>::const_iterator s = installScripts.begin();
-      s != installScripts.end(); ++s)
-    {
-    fout << "INCLUDE(\"" << s->c_str() << "\")" << std::endl;
-    }
-
-  std::string destination;
-  for(cmTargets::iterator l = tgts.begin(); 
-    l != tgts.end(); l++)
-    {
-    const char* preinstall = l->second.GetProperty("PRE_INSTALL_SCRIPT");
-    const char* postinstall = l->second.GetProperty("POST_INSTALL_SCRIPT");
-    if ( preinstall )
-      {
-      fout << "INCLUDE(\"" << preinstall << "\")" << std::endl;
-      }
-    if (l->second.GetInstallPath() != "")
-      {
-      bool need_relink = l->second.NeedRelinkBeforeInstall();
-      destination = "${CMAKE_INSTALL_PREFIX}" + l->second.GetInstallPath();
-      if(destination[destination.size()-1] == '/')
-        {
-        destination = destination.substr(0, destination.size()-1);
-        }
-      cmSystemTools::ConvertToUnixSlashes(destination);
-      const char* dest = destination.c_str();
-      int type = l->second.GetType();
-      std::string fname;
-      std::string props;
-      const char* properties = 0;
-      const char* files;
-
-      this->PrepareInstallReference(fout, l->second, configurationTypes);
-
-      // now install the target
-      switch (type)
-        {
-        case cmTarget::SHARED_LIBRARY:
-          {
-          // Special code to handle DLL
-          fname = l->second.GetFullName();
-          std::string ext = cmSystemTools::GetFilenameLastExtension(fname);
-          ext = cmSystemTools::LowerCase(ext);
-          if ( ext == ".dll" )
-            {
-            // Install the .lib separately.
-            std::string libname = need_relink? relinkDir : libOutPath;
-            libname += this->GetInstallReference(l->second, config,
-                                                 configurationTypes,
-                                                 true);
-            files = libname.c_str();
-            this->AddInstallRule(fout, dest, cmTarget::STATIC_LIBRARY, files, true);
-
-            // Change the destination to the .dll destination.
-            destination = "${CMAKE_INSTALL_PREFIX}" + l->second.GetRuntimeInstallPath();
-            if(destination[destination.size()-1] == '/')
-              {
-              destination = destination.substr(0, destination.size()-1);
-              }
-            dest = destination.c_str();
-            }
-          else
-            {
-            // Add shared library installation properties.
-            const char* lib_version = l->second.GetProperty("VERSION");
-            const char* lib_soversion = l->second.GetProperty("SOVERSION");
-            if(!m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
-              {
-              // Versioning is supported only for shared libraries and modules,
-              // and then only when the platform supports an soname flag.
-              lib_version = 0;
-              lib_soversion = 0;
-              }
-            if ( lib_version )
-              {
-              props += " VERSION ";
-              props += lib_version;
-              }
-            if ( lib_soversion )
-              {
-              props += " SOVERSION ";
-              props += lib_soversion;
-              }
-            properties = props.c_str();
-            }
-          }
-          /* No "break;" because we want to install the library here.  */
-        case cmTarget::STATIC_LIBRARY:
-        case cmTarget::MODULE_LIBRARY:
-          {
-          fname = need_relink? relinkDir : libOutPath;
-          fname += this->GetInstallReference(l->second, config,
-                                             configurationTypes);
-          files = fname.c_str();
-          this->AddInstallRule(fout, dest, type, files, false, properties);
-          }
-          break;
-        case cmTarget::EXECUTABLE:
-          {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-          const char* exe_version = 0;
-#else
-          const char* exe_version = l->second.GetProperty("VERSION");
-#endif
-          if(exe_version)
-            {
-            props += " VERSION ";
-            props += exe_version;
-            properties = props.c_str();
-            }
-          std::string exeName =
-            this->GetInstallReference(l->second, config, configurationTypes);
-          fname = need_relink? relinkDir : exeOutPath;
-          fname += exeName;
-          if(l->second.GetPropertyAsBool("MACOSX_BUNDLE"))
-            {
-            std::string plist = fname;
-            plist += ".app/Contents/Info.plist";
-            fname += ".app/Contents/MacOS/";
-            fname += exeName;
-            files = fname.c_str();
-            std::string bdest = dest;
-            bdest += "/";
-            bdest += exeName;
-            std::string pdest = bdest;
-            pdest += ".app/Contents";
-            bdest += ".app/Contents/MacOS";
-            // first install the actual executable
-            this->AddInstallRule(fout, bdest.c_str(), type, files,
-                                 false, properties);
-            files = plist.c_str();
-            // now install the Info.plist file
-            this->AddInstallRule(fout, pdest.c_str(),
-                                 cmTarget::INSTALL_FILES, files);
-            }
-          else
-            {
-            files = fname.c_str();
-            this->AddInstallRule(fout, dest, type, files, false,
-                                 properties);
-            }
-          }
-          break;
-        case cmTarget::INSTALL_FILES:
-          {
-          std::string sourcePath = m_Makefile->GetCurrentDirectory();
-          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
-          sourcePath += "/";
-          binaryPath += "/";
-          const std::vector<std::string> &sf = l->second.GetSourceLists();
-          std::vector<std::string>::const_iterator i;
-          for (i = sf.begin(); i != sf.end(); ++i)
-            {
-            std::string f = *i;
-            if(f.substr(0, sourcePath.length()) == sourcePath)
-              {
-              f = f.substr(sourcePath.length());
-              }
-            else if(f.substr(0, binaryPath.length()) == binaryPath)
-              {
-              f = f.substr(binaryPath.length());
-              }
-
-            files = i->c_str();
-            this->AddInstallRule(fout, dest, type, files);
-            }
-          }
-          break;
-        case cmTarget::INSTALL_PROGRAMS:
-          {
-          std::string sourcePath = m_Makefile->GetCurrentDirectory();
-          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
-          sourcePath += "/";
-          binaryPath += "/";
-          const std::vector<std::string> &sf = l->second.GetSourceLists();
-          std::vector<std::string>::const_iterator i;
-          for (i = sf.begin(); i != sf.end(); ++i)
-            {
-            std::string f = *i;
-            if(f.substr(0, sourcePath.length()) == sourcePath)
-              {
-              f = f.substr(sourcePath.length());
-              }
-            else if(f.substr(0, binaryPath.length()) == binaryPath)
-              {
-              f = f.substr(binaryPath.length());
-              }
-            files = i->c_str();
-            this->AddInstallRule(fout, dest, type, files);
-            }
-          }
-          break;
-        case cmTarget::UTILITY:
-        default:
-          break;
-        }
-      }
-    if ( postinstall )
-      {
-      fout << "INCLUDE(\"" << postinstall << "\")" << std::endl;
-      }
-    }
-
+  // Include install scripts from subdirectories.
   if ( this->Children.size())
     {
     std::vector<cmLocalGenerator*>::const_iterator i = this->Children.begin();
@@ -573,6 +351,8 @@ void cmLocalGenerator::GenerateInstallRules()
       }
     fout << std::endl;;
     }
+
+  // Record the install manifest.
   if ( toplevel_install )
     {
     fout << "FILE(WRITE \"" << homedir.c_str() << "/install_manifest.txt\" "
@@ -582,36 +362,6 @@ void cmLocalGenerator::GenerateInstallRules()
       << "\"${file}\\n\")" << std::endl
       << "ENDFOREACH(file)" << std::endl;
     }
-}
-
-void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest, 
-  int type, const char* files, bool optional /* = false */, const char* properties /* = 0 */)
-{
-  std::string sfiles = files;
-  std::string destination = dest;
-  std::string stype;
-  switch ( type )
-    {
-  case cmTarget::INSTALL_PROGRAMS: stype = "PROGRAM"; break;
-  case cmTarget::EXECUTABLE: stype = "EXECUTABLE"; break;
-  case cmTarget::STATIC_LIBRARY:   stype = "STATIC_LIBRARY"; break;
-  case cmTarget::SHARED_LIBRARY:   stype = "SHARED_LIBRARY"; break;
-  case cmTarget::MODULE_LIBRARY:   stype = "MODULE"; break;
-  case cmTarget::INSTALL_FILES:
-  default:                         stype = "FILE"; break;
-    }
-  std::string fname = cmSystemTools::GetFilenameName(sfiles.c_str());
-  fout 
-    << "MESSAGE(STATUS \"Installing " << destination.c_str() 
-    << "/" << fname.c_str() << "\")\n" 
-    << "FILE(INSTALL DESTINATION \"" << destination.c_str() 
-    << "\" TYPE " << stype.c_str() << (optional?" OPTIONAL":"") ;
-  if ( properties && *properties )
-    {
-    fout << " PROPERTIES" << properties;
-    }
-  fout
-    << " FILES \"" << sfiles.c_str() << "\")\n";
 }
 
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname, 
@@ -1633,78 +1383,6 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
 }
 
 //----------------------------------------------------------------------------
-std::string
-cmLocalGenerator::GetInstallReference(cmTarget& target, const char* config,
-                                      std::vector<std::string> const& configs,
-                                      bool implib /* = false*/)
-{
-  if(configs.empty())
-    {
-    std::string ref = target.GetFullName(config);
-    if(implib)
-      {
-      ref = cmSystemTools::GetFilenameWithoutLastExtension(ref);
-      ref += ".lib";
-      }
-    return ref;
-    }
-  else
-    {
-    std::string ref = "${";
-    ref += target.GetName();
-    if(implib)
-      {
-      ref += "_LIBNAME_";
-      }
-    else
-      {
-      ref += "_NAME_";
-      }
-    ref += "${CMAKE_INSTALL_CONFIG_NAME}}";
-    return ref;
-    }
-}
-
-//----------------------------------------------------------------------------
-void
-cmLocalGenerator
-::PrepareInstallReference(std::ostream& fout, cmTarget& target,
-                          std::vector<std::string> const& configs)
-{
-  // If the target name may vary with the configuration type then
-  // store all possible names ahead of time in variables.
-  cmTarget::TargetType type = target.GetType();
-  if(type == cmTarget::SHARED_LIBRARY ||
-     type == cmTarget::STATIC_LIBRARY ||
-     type == cmTarget::MODULE_LIBRARY ||
-     type == cmTarget::EXECUTABLE)
-    {
-    std::string fname;
-    for(std::vector<std::string>::const_iterator i = configs.begin();
-        i != configs.end(); ++i)
-      {
-      // Set a variable with the target name for this
-      // configuration.
-      fname = target.GetFullName(i->c_str());
-      fout << "SET(" << target.GetName() << "_NAME_" << *i
-           << " \"" << fname << "\")\n";
-
-#ifdef _WIN32
-      // If the target is a .dll then add the corresponding .lib
-      // name in its own variable.
-      if(type == cmTarget::SHARED_LIBRARY)
-        {
-        fname = cmSystemTools::GetFilenameWithoutExtension(fname);
-        fname += ".lib";
-        fout << "SET(" << target.GetName() << "_LIBNAME_" << *i
-             << " \"" << fname << "\")\n";
-        }
-#endif
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                                                      const char* lang)
 {
@@ -1937,4 +1615,129 @@ std::string cmLocalGenerator::Convert(const char* source,
       }
     }
   return result;
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalGenerator
+::GenerateTargetInstallRules(
+  std::ostream& os, const char* config,
+  std::vector<std::string> const& configurationTypes)
+{
+  // Convert the old-style install specification from each target to
+  // an install generator and run it.
+  cmTargets& tgts = m_Makefile->GetTargets();
+  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
+    {
+    // Include the user-specified pre-install script for this target.
+    if(const char* preinstall = l->second.GetProperty("PRE_INSTALL_SCRIPT"))
+      {
+      cmInstallScriptGenerator g(preinstall);
+      g.Generate(os, config, configurationTypes);
+      }
+
+    // Install this target if a destination is given.
+    if(l->second.GetInstallPath() != "")
+      {
+      // Compute the full install destination.  Note that converting
+      // to unix slashes also removes any trailing slash.
+      std::string destination = "${CMAKE_INSTALL_PREFIX}";
+      destination += l->second.GetInstallPath();
+      cmSystemTools::ConvertToUnixSlashes(destination);
+
+      // Generate the proper install generator for this target type.
+      switch(l->second.GetType())
+        {
+        case cmTarget::EXECUTABLE:
+        case cmTarget::STATIC_LIBRARY:
+        case cmTarget::MODULE_LIBRARY:
+          {
+          // Use a target install generator.
+          cmInstallTargetGenerator g(l->second, destination.c_str(), false);
+          g.Generate(os, config, configurationTypes);
+          }
+          break;
+        case cmTarget::SHARED_LIBRARY:
+          {
+#if defined(_WIN32) || defined(__CYGWIN__)
+          // Special code to handle DLL.  Install the import library
+          // to the normal destination and the DLL to the runtime
+          // destination.
+          cmInstallTargetGenerator g1(l->second, destination.c_str(), true);
+          g1.Generate(os, config, configurationTypes);
+          destination = "${CMAKE_INSTALL_PREFIX}";
+          destination += l->second.GetRuntimeInstallPath();
+          cmSystemTools::ConvertToUnixSlashes(destination);
+          cmInstallTargetGenerator g2(l->second, destination.c_str(), false);
+          g2.Generate(os, config, configurationTypes);
+#else
+          // Use a target install generator.
+          cmInstallTargetGenerator g(l->second, destination.c_str(), false);
+          g.Generate(os, config, configurationTypes);
+#endif
+          }
+          break;
+        case cmTarget::INSTALL_FILES:
+          {
+          std::string sourcePath = m_Makefile->GetCurrentDirectory();
+          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
+          sourcePath += "/";
+          binaryPath += "/";
+          const std::vector<std::string> &sf = l->second.GetSourceLists();
+          std::vector<std::string>::const_iterator i;
+          for (i = sf.begin(); i != sf.end(); ++i)
+            {
+            std::string f = *i;
+            if(f.substr(0, sourcePath.length()) == sourcePath)
+              {
+              f = f.substr(sourcePath.length());
+              }
+            else if(f.substr(0, binaryPath.length()) == binaryPath)
+              {
+              f = f.substr(binaryPath.length());
+              }
+            cmInstallGenerator::AddInstallRule(os, destination.c_str(),
+                                               cmTarget::INSTALL_FILES,
+                                               i->c_str());
+            }
+          }
+          break;
+        case cmTarget::INSTALL_PROGRAMS:
+          {
+          std::string sourcePath = m_Makefile->GetCurrentDirectory();
+          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
+          sourcePath += "/";
+          binaryPath += "/";
+          const std::vector<std::string> &sf = l->second.GetSourceLists();
+          std::vector<std::string>::const_iterator i;
+          for (i = sf.begin(); i != sf.end(); ++i)
+            {
+            std::string f = *i;
+            if(f.substr(0, sourcePath.length()) == sourcePath)
+              {
+              f = f.substr(sourcePath.length());
+              }
+            else if(f.substr(0, binaryPath.length()) == binaryPath)
+              {
+              f = f.substr(binaryPath.length());
+              }
+            cmInstallGenerator::AddInstallRule(os, destination.c_str(),
+                                               cmTarget::INSTALL_PROGRAMS,
+                                               i->c_str());
+            }
+          }
+          break;
+        case cmTarget::UTILITY:
+        default:
+          break;
+        }
+      }
+
+    // Include the user-specified post-install script for this target.
+    if(const char* postinstall = l->second.GetProperty("POST_INSTALL_SCRIPT"))
+      {
+      cmInstallScriptGenerator g(postinstall);
+      g.Generate(os, config, configurationTypes);
+      }
+    }
 }
