@@ -1141,9 +1141,29 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
 {
+  // Need to decide whether to automatically include the source and
+  // binary directories at the beginning of the include path.
+  bool includeSourceDir = false;
+  bool includeBinaryDir = false;
+
+  // When automatic include directories are requested for an
+  // out-of-source build then include the source and binary
+  // directories at the beginning of the include path to approximate
+  // include file behavior for an in-source build.  This does not
+  // account for the case of a source file in a subdirectory of the
+  // current source directory but we cannot fix this because not all
+  // native build tools support per-source-file include paths.
+  bool inSource =
+    cmSystemTools::ComparePath(m_Makefile->GetStartDirectory(),
+                               m_Makefile->GetStartOutputDirectory());
+  if(!inSource && m_Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR"))
+    {
+    includeSourceDir = true;
+    includeBinaryDir = true;
+    }
+
   // CMake versions below 2.0 would add the source tree to the -I path
   // automatically.  Preserve compatibility.
-  bool includeSourceDir = false;
   const char* versionValue =
     m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
   int major = 0;
@@ -1156,11 +1176,13 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
     {
     includeSourceDir = true;
     }
+
+  // Hack for VTK 4.0 - 4.4 which depend on the old behavior but do
+  // not set the backwards compatibility level automatically.
   const char* vtkSourceDir =
     m_Makefile->GetDefinition("VTK_SOURCE_DIR");
   if(vtkSourceDir)
     {
-    // Special hack for VTK 4.0 - 4.4.
     const char* vtk_major = m_Makefile->GetDefinition("VTK_MAJOR_VERSION");
     const char* vtk_minor = m_Makefile->GetDefinition("VTK_MINOR_VERSION");
     vtk_major = vtk_major? vtk_major : "4";
@@ -1172,29 +1194,6 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
       {
       includeSourceDir = true;
       }
-    }
-
-  // If this is not an in-source build then include the binary
-  // directory at the beginning of the include path to approximate
-  // include file behavior for an in-source build.  This does not
-  // account for the case of a source file in a subdirectory of the
-  // current source directory but we cannot fix this because not all
-  // native build tools support per-source-file include paths.  Allow
-  // the behavior to be disabled by the project.
-  bool includeBinaryDir =
-    !cmSystemTools::ComparePath(m_Makefile->GetStartDirectory(),
-                                m_Makefile->GetStartOutputDirectory());
-  if(m_Makefile->IsOn("CMAKE_NO_AUTOMATIC_INCLUDE_DIRECTORIES"))
-    {
-    includeSourceDir = false;
-    includeBinaryDir = false;
-    }
-
-  // CMake versions 2.2 and earlier did not add the binary directory
-  // automatically.
-  if(versionValue && ((major < 2) || major == 2 && minor < 3))
-    {
-    includeBinaryDir = false;
     }
 
   // Do not repeat an include path.
