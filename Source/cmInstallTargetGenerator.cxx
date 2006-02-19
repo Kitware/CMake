@@ -16,8 +16,6 @@
 =========================================================================*/
 #include "cmInstallTargetGenerator.h"
 
-#include "cmGlobalGenerator.h"
-#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
 
