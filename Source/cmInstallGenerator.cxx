@@ -50,14 +50,24 @@ cmInstallGenerator
 void cmInstallGenerator::AddInstallRule(std::ostream& os,
                                         const char* dest,
                                         int type,
-                                        const char* files,
+                                        const char* file,
                                         bool optional /* = false */,
                                         const char* properties /* = 0 */)
 {
-  // TODO: Make optional files use IF(EXISTS) to not report if not
-  // installing.
-  std::string sfiles = files;
-  std::string destination = dest;
+  // If the file is optional test its existence before installing.
+  const char* indent = "";
+  if(optional)
+    {
+    os << "IF(EXISTS \"" << file << "\")\n";
+    indent = "  ";
+    }
+
+  // Write a message indicating the file is being installed.
+  std::string fname = cmSystemTools::GetFilenameName(file);
+  os << indent << "MESSAGE(STATUS \"Installing " << dest
+     << "/" << fname.c_str() << "\")\n";
+
+  // Use the FILE command to install the file.
   std::string stype;
   switch(type)
     {
@@ -69,14 +79,17 @@ void cmInstallGenerator::AddInstallRule(std::ostream& os,
     case cmTarget::INSTALL_FILES:
     default:                         stype = "FILE"; break;
     }
-  std::string fname = cmSystemTools::GetFilenameName(sfiles.c_str());
-  os << "MESSAGE(STATUS \"Installing " << destination.c_str()
-     << "/" << fname.c_str() << "\")\n"
-     << "FILE(INSTALL DESTINATION \"" << destination.c_str()
-     << "\" TYPE " << stype.c_str() << (optional?" OPTIONAL":"") ;
+  os << indent << "FILE(INSTALL DESTINATION \"" << dest
+     << "\" TYPE " << stype.c_str() ;
   if(properties && *properties)
     {
     os << " PROPERTIES" << properties;
     }
-  os << " FILES \"" << sfiles.c_str() << "\")\n";
+  os << " FILES \"" << file << "\")\n";
+
+  // If the file is optional close the IF block.
+  if(optional)
+    {
+    os << "ENDIF(EXISTS \"" << file << "\")\n";
+    }
 }

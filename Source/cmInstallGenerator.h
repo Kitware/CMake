@@ -35,7 +35,7 @@ public:
                 std::vector<std::string> const& configurationTypes);
 
   static void AddInstallRule(std::ostream& os, const char* dest, int type,
-                             const char* files, bool optional = false,
+                             const char* file, bool optional = false,
                              const char* properties = 0);
 
 protected:
