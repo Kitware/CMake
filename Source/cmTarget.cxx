@@ -30,6 +30,7 @@ cmTarget::cmTarget()
   m_Makefile = 0;
   m_LinkLibrariesAnalyzed = false;
   m_LinkDirectoriesComputed = false;
+  m_HaveInstallRule = false;
 }
 
 void cmTarget::SetType(TargetType type, const char* name)
@@ -1390,7 +1391,7 @@ bool cmTarget::NeedRelinkBeforeInstall()
 
   // If there is no install location this target will not be installed
   // and therefore does not need relinking.
-  if(this->GetInstallPath().empty())
+  if(!this->GetHaveInstallRule())
     {
     return false;
     }

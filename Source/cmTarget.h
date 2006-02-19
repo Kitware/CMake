@@ -129,7 +129,13 @@ public:
    */
   std::string GetRuntimeInstallPath() {return m_RuntimeInstallPath;}
   void SetRuntimeInstallPath(const char *name) {m_RuntimeInstallPath = name;}
-  
+
+  /**
+   * Get/Set whether there is an install rule for this target.
+   */
+  bool GetHaveInstallRule() { return m_HaveInstallRule; }
+  void SetHaveInstallRule(bool h) { m_HaveInstallRule = h; }
+
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be
    * done once to be safe.  
@@ -309,6 +315,7 @@ private:
   std::vector<std::string> m_Frameworks;
   std::vector<std::string> m_LinkDirectories;
   std::vector<std::string> m_ExplicitLinkDirectories;
+  bool m_HaveInstallRule;
   std::string m_InstallPath;
   std::string m_RuntimeInstallPath;
   std::string m_Directory;

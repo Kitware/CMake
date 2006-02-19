@@ -46,6 +46,7 @@ bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args)
       {
       tgts[*s].SetInstallPath(args[0].c_str());
       tgts[*s].SetRuntimeInstallPath(runtime_dir.c_str());
+      tgts[*s].SetHaveInstallRule(true);
       }
     else
       {

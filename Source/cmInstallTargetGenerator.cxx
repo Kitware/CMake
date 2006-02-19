@@ -26,6 +26,7 @@ cmInstallTargetGenerator
 ::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib):
   Target(&t), Destination(dest), ImportLibrary(implib)
 {
+  this->Target->SetHaveInstallRule(true);
 }
 
 //----------------------------------------------------------------------------
