@@ -140,6 +140,12 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
       break;
     }
 
+  // An import library looks like a static library.
+  if(this->ImportLibrary)
+    {
+    type = cmTarget::STATIC_LIBRARY;
+    }
+
   // Write code to install the target file.
   this->AddInstallRule(os, this->Destination.c_str(), type, fromFile.c_str(),
                        this->ImportLibrary, properties);
@@ -170,11 +176,13 @@ std::string cmInstallTargetGenerator::GetInstallReference()
 {
   if(this->ConfigurationTypes->empty())
     {
+    // Reference the target by its one configuration name.
     return this->Target->GetFullName(this->ConfigurationName,
                                      this->ImportLibrary);
     }
   else
     {
+    // Reference the target using the per-configuration variable.
     std::string ref = "${";
     ref += this->Target->GetName();
     if(this->ImportLibrary)
