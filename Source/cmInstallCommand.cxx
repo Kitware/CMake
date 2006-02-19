@@ -94,8 +94,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   std::vector<cmTarget*> targets;
   const char* library_destination = 0;
   const char* runtime_destination = 0;
-  cmLocalGenerator* lg = m_Makefile->GetLocalGenerator();
-  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "DESTINATION")
@@ -122,7 +120,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       }
     else if(doing_targets)
       {
-      // Lookup this target in the current project.
+      // Lookup this target in the current directory.
       if(cmTarget* target = m_Makefile->FindTarget(args[i].c_str()))
         {
         // Found the target.  Check its type.
