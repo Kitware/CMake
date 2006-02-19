@@ -380,7 +380,7 @@ bool cmFileCommand::HandleInstallCommand(
     if ( ch1 != '/' )
       {
       int relative = 0;
-      if ( ( ch1 >= 'a' && ch1 <= 'z' || ch1 >= 'a' && ch1 <= 'z' ) &&
+      if ( ( ch1 >= 'a' && ch1 <= 'z' || ch1 >= 'A' && ch1 <= 'Z' ) &&
         ch2 == ':' )
         {
         // Assume windows
