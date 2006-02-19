@@ -4,6 +4,11 @@ SET(CMAKE_VERBOSE_MAKEFILE 1)
 SET(EXECUTABLE_OUTPUT_PATH "${TestSimpleInstall_BINARY_DIR}/ExecPath")
 SET(LIBRARY_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}")
 
+# Skip generating the rpath pointing at the build tree to make sure
+# the executable is installed with the proper rpath in the install
+# tree.
+SET(CMAKE_SKIP_BUILD_RPATH 1)
+
 # Skip the dependency that causes a build when installing.  This
 # avoids infinite loops when the post-build rule below installs.
 SET(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY 1)
