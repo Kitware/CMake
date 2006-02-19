@@ -52,7 +52,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create install rules for files.";
+    return "Old installation command.  Use the INSTALL command.";
     }
   
   /**
@@ -69,7 +69,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  INSTALL_FILES(<dir> extension file file ...)\n"      
+      "This command has been superceded by the INSTALL command.  It "
+      "is provided for compatibility with older CMake code.  "
+      "The FILES form is directly replaced by the FILES form of the "
+      "INSTALL command.  The regexp form can be expressed "
+      "more clearly using the GLOB form of the FILE command.\n"
+      "  INSTALL_FILES(<dir> extension file file ...)\n"
       "Create rules to install the listed files with the given extension "
       "into the given directory.  "
       "Only files existing in the current source tree or its corresponding "

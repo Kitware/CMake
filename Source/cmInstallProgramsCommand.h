@@ -52,7 +52,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create install rules for programs.";
+    return "Old installation command.  Use the INSTALL command.";
     }
   
   /**
@@ -69,6 +69,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
+      "This command has been superceded by the INSTALL command.  It "
+      "is provided for compatibility with older CMake code.  "
+      "The FILES form is directly replaced by the PROGRAMS form of the "
+      "INSTALL command.  The regexp form can be expressed more clearly "
+      "using the GLOB form of the FILE command.\n"
       "  INSTALL_PROGRAMS(<dir> file1 file2 [file3 ...])\n"
       "  INSTALL_PROGRAMS(<dir> FILES file1 [file2 ...])\n"
       "Create rules to install the listed programs into the given directory.  "
@@ -78,7 +83,8 @@ public:
       "In the second form any program in the current source directory that "
       "matches the regular expression will be installed.\n"
       "This command is intended to install programs that are not built "
-      "by cmake, such as shell scripts.  See INSTALL_TARGETS to "
+      "by cmake, such as shell scripts.  See the TARGETS form of "
+      "the INSTALL command to "
       "create installation rules for targets built by cmake.\n"
       "The directory <dir> is relative to the installation prefix, which "
       "is stored in the variable CMAKE_INSTALL_PREFIX.";

@@ -90,7 +90,8 @@ ELSE(STAGE2)
 
   INSTALL(TARGETS SimpleInstall test1 test2 test3 test4
           RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
-  INSTALL_FILES(/include FILES lib1.h lib2.h lib3.h)
+  INSTALL(FILES lib1.h lib2.h DESTINATION include)
+  INSTALL_FILES(/include FILES lib3.h)
 
   # Test user-specified install scripts.
   INSTALL(

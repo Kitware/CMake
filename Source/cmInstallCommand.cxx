@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmInstallCommand.h"
 
+#include "cmInstallFilesGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 
@@ -37,6 +38,14 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args)
   else if(args[0] == "TARGETS")
     {
     return this->HandleTargetsMode(args);
+    }
+  else if(args[0] == "FILES")
+    {
+    return this->HandleFilesMode(args);
+    }
+  else if(args[0] == "PROGRAMS")
+    {
+    return this->HandleFilesMode(args);
     }
 
   // Unknown mode.
@@ -279,6 +288,85 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         break;
       }
     }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
+{
+  // This is the FILES mode.
+  bool programs = (args[0] == "PROGRAMS");
+  bool doing_files = true;
+  bool doing_destination = false;
+  std::vector<std::string> files;
+  const char* destination = 0;
+  for(unsigned int i=1; i < args.size(); ++i)
+    {
+    if(args[i] == "DESTINATION")
+      {
+      // Switch to setting the destination property.
+      doing_files = false;
+      doing_destination = true;
+      }
+    else if(doing_files)
+      {
+      // Convert this file to a full path.
+      std::string file = args[i];
+      if(!cmSystemTools::FileIsFullPath(file.c_str()))
+        {
+        file = m_Makefile->GetCurrentDirectory();
+        file += "/";
+        file += args[i];
+        }
+
+      // Make sure the file is not a directory.
+      if(cmSystemTools::FileIsDirectory(file.c_str()))
+        {
+        cmOStringStream e;
+        e << args[0] << " given directory \"" << args[i] << "\" to install.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      // Store the file for installation.
+      files.push_back(file);
+      }
+    else if(doing_destination)
+      {
+      destination = args[i].c_str();
+      doing_destination = false;
+      }
+    else
+      {
+      // Unknown argument.
+      cmOStringStream e;
+      e << args[0] << " given unknown argument \"" << args[i] << "\".";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+
+  // Check if there is something to do.
+  if(files.empty())
+    {
+    return true;
+    }
+  if(!destination)
+    {
+    cmOStringStream e;
+    e << args[0] << " given no DESTINATION!";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  // Compute destination path.
+  std::string dest;
+  this->ComputeDestination(destination, dest);
+
+  // Create the files install generator.
+  m_Makefile->AddInstallGenerator(
+    new cmInstallFilesGenerator(files, dest.c_str(), programs));
 
   return true;
 }

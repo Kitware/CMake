@@ -117,6 +117,8 @@ SET(SRCS
   cmGlobalUnixMakefileGenerator3.h
   cmInstallGenerator.h
   cmInstallGenerator.cxx
+  cmInstallFilesGenerator.h
+  cmInstallFilesGenerator.cxx
   cmInstallScriptGenerator.h
   cmInstallScriptGenerator.cxx
   cmInstallTargetGenerator.h

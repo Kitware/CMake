@@ -19,6 +19,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmInstallFilesGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmMakefile.h"
@@ -1679,52 +1680,18 @@ cmLocalGenerator
           break;
         case cmTarget::INSTALL_FILES:
           {
-          std::string sourcePath = m_Makefile->GetCurrentDirectory();
-          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
-          sourcePath += "/";
-          binaryPath += "/";
-          const std::vector<std::string> &sf = l->second.GetSourceLists();
-          std::vector<std::string>::const_iterator i;
-          for (i = sf.begin(); i != sf.end(); ++i)
-            {
-            std::string f = *i;
-            if(f.substr(0, sourcePath.length()) == sourcePath)
-              {
-              f = f.substr(sourcePath.length());
-              }
-            else if(f.substr(0, binaryPath.length()) == binaryPath)
-              {
-              f = f.substr(binaryPath.length());
-              }
-            cmInstallGenerator::AddInstallRule(os, destination.c_str(),
-                                               cmTarget::INSTALL_FILES,
-                                               i->c_str());
-            }
+          // Use a file install generator.
+          cmInstallFilesGenerator g(l->second.GetSourceLists(),
+                                    destination.c_str(), false);
+          g.Generate(os, config, configurationTypes);
           }
           break;
         case cmTarget::INSTALL_PROGRAMS:
           {
-          std::string sourcePath = m_Makefile->GetCurrentDirectory();
-          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
-          sourcePath += "/";
-          binaryPath += "/";
-          const std::vector<std::string> &sf = l->second.GetSourceLists();
-          std::vector<std::string>::const_iterator i;
-          for (i = sf.begin(); i != sf.end(); ++i)
-            {
-            std::string f = *i;
-            if(f.substr(0, sourcePath.length()) == sourcePath)
-              {
-              f = f.substr(sourcePath.length());
-              }
-            else if(f.substr(0, binaryPath.length()) == binaryPath)
-              {
-              f = f.substr(binaryPath.length());
-              }
-            cmInstallGenerator::AddInstallRule(os, destination.c_str(),
-                                               cmTarget::INSTALL_PROGRAMS,
-                                               i->c_str());
-            }
+          // Use a file install generator.
+          cmInstallFilesGenerator g(l->second.GetSourceLists(),
+                                    destination.c_str(), true);
+          g.Generate(os, config, configurationTypes);
           }
           break;
         case cmTarget::UTILITY:
