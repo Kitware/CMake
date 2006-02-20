@@ -1064,13 +1064,13 @@ std::string cmTarget::GetFullPath(const char* config, bool implib)
 {
   // Start with the output directory for the target.
   std::string fpath = this->GetDirectory();
+  fpath += "/";
 
   // Add the configuration's subdirectory.
   m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->
     AppendDirectoryForConfig(config, fpath);
 
   // Add the full name of the target.
-  fpath += "/";
   fpath += this->GetFullName(config, implib);
   return fpath;
 }

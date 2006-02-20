@@ -717,7 +717,7 @@ cmGlobalVisualStudio7Generator
 {
   if(config)
     {
-    dir += "/";
     dir += config;
+    dir += "/";
     }
 }

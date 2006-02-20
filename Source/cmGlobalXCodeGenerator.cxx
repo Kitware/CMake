@@ -2309,8 +2309,8 @@ cmGlobalXCodeGenerator
     {
     if(config)
       {
-      dir += "/";
       dir += config;
+      dir += "/";
       }
     }
 }

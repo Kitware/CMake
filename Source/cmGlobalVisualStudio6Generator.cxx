@@ -495,7 +495,7 @@ cmGlobalVisualStudio6Generator
 {
   if(config)
     {
-    dir += "/";
     dir += config;
+    dir += "/";
     }
 }
