@@ -1211,8 +1211,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     }
   
   std::string dirs;
-  std::vector<std::string>& includes =
-    m_CurrentMakefile->GetIncludeDirectories();
+  std::vector<std::string> includes;
+  m_CurrentLocalGenerator->GetIncludeDirectories(includes);
   std::vector<std::string>::iterator i = includes.begin();
   std::string fdirs;
   std::set<cmStdString> emitted;

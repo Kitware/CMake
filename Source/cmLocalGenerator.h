@@ -162,6 +162,9 @@ public:
                               std::vector<cmStdString>& outDirs,
                               std::vector<cmStdString>* fullPathLibs=0);
 
+  /** Get the include flags for the current makefile and language.  */
+  void GetIncludeDirectories(std::vector<std::string>& dirs);
+
 protected:
   /** Construct a script from the given list of command lines.  */
   std::string ConstructScript(const cmCustomCommandLines& commandLines,
@@ -176,9 +179,6 @@ protected:
   
   ///! put all the libraries for a target on into the given stream
   virtual void OutputLinkLibraries(std::ostream&, cmTarget&, bool relink);
-
-  /** Get the include flags for the current makefile and language.  */
-  void GetIncludeDirectories(std::vector<std::string>& dirs);
 
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,
