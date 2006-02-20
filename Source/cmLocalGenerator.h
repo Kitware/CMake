@@ -165,21 +165,6 @@ public:
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs);
 
-protected:
-  /** Construct a script from the given list of command lines.  */
-  std::string ConstructScript(const cmCustomCommandLines& commandLines,
-                              const char* workingDirectory,
-                              const char* newline = "\n");
-
-  ///! Fill out these strings for the given target.  Libraries to link, flags, and linkflags.
-  void GetTargetFlags(std::string& linkLibs, 
-                      std::string& flags,
-                      std::string& linkFlags,
-                      cmTarget&target);
-  
-  ///! put all the libraries for a target on into the given stream
-  virtual void OutputLinkLibraries(std::ostream&, cmTarget&, bool relink);
-
   // Create a struct to hold the varibles passed into
   // ExpandRuleVariables
   struct RuleVariables
@@ -208,8 +193,22 @@ protected:
     const char* TargetSOName;
     const char* LinkFlags;
   };
-    
-    
+
+protected:
+  /** Construct a script from the given list of command lines.  */
+  std::string ConstructScript(const cmCustomCommandLines& commandLines,
+                              const char* workingDirectory,
+                              const char* newline = "\n");
+
+  ///! Fill out these strings for the given target.  Libraries to link, flags, and linkflags.
+  void GetTargetFlags(std::string& linkLibs, 
+                      std::string& flags,
+                      std::string& linkFlags,
+                      cmTarget&target);
+  
+  ///! put all the libraries for a target on into the given stream
+  virtual void OutputLinkLibraries(std::ostream&, cmTarget&, bool relink);
+
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,
                            const RuleVariables& replaceValues);
