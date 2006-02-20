@@ -381,20 +381,22 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string cleanObjs = "$(";
   cleanObjs += variableName;
   cleanObjs += ")";
-
+  cmLocalGenerator::RuleVariables vars;
+  vars.Language = linkLanguage;
+  vars.Objects = buildObjs.c_str();
+  vars.Target = targetOutPathReal.c_str();
+  std::string linkString = linklibs.str();
+  vars.LinkLibraries = linkString.c_str();
+  vars.ObjectsQuoted = buildObjs.c_str();
+  vars.TargetSOName= targetNameSO.c_str();
+  vars.LinkFlags = linkFlags.c_str();
+  
   // Expand placeholders in the commands.
   this->LocalGenerator->m_TargetImplib = targetOutPathImport;
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    this->LocalGenerator->ExpandRuleVariables(*i,
-                              linkLanguage,
-                              buildObjs.c_str(),
-                              targetOutPathReal.c_str(),
-                              linklibs.str().c_str(),
-                              0, 0, 0, buildObjs.c_str(),
-                              targetNameSO.c_str(),
-                              linkFlags.c_str());
+    this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
   this->LocalGenerator->m_TargetImplib = "";
 

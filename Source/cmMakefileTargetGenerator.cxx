@@ -379,19 +379,17 @@ cmMakefileTargetGenerator
   std::string compileRule =
     this->Makefile->GetRequiredDefinition(compileRuleVar.c_str());
   cmSystemTools::ExpandListArgument(compileRule, commands);
-
+  cmLocalGenerator::RuleVariables vars;
+  vars.Language = lang;
+  vars.Source = sourceFile.c_str();
+  vars.Object = relativeObj.c_str();
+  vars.Flags = flags.c_str();
+  
   // Expand placeholders in the commands.
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    this->LocalGenerator->ExpandRuleVariables(*i,
-                                              lang,
-                                              0, // no objects
-                                              0, // no target
-                                              0, // no link libs
-                                              sourceFile.c_str(),
-                                              relativeObj.c_str(),
-                                              flags.c_str());
+    this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
 
   // Make the target dependency scanning rule include cmake-time-known

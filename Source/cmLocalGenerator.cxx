@@ -387,17 +387,15 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   flags += this->GetIncludeFlags(lang);
   std::vector<std::string> commands;
   cmSystemTools::ExpandList(rules, commands);
+  cmLocalGenerator::RuleVariables vars;
+  vars.Language = lang;
+  vars.Source = sourceFile.c_str();
+  vars.Object = objectFile.c_str();
+  vars.Flags = flags.c_str();
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    this->ExpandRuleVariables(*i,
-                              lang,
-                              0, // no objects
-                              0, // no target
-                              0, // no link libs
-                              sourceFile.c_str(),
-                              objectFile.c_str(),
-                              flags.c_str());
+    this->ExpandRuleVariables(*i, vars);
     }
   std::vector<std::string> sourceAndDeps;
   sourceAndDeps.push_back(sourceFile);
@@ -472,28 +470,14 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   std::string linkFlags; // should be set 
   this->GetTargetFlags(linkLibs, flags, linkFlags, target);
   std::string rule = m_Makefile->GetRequiredDefinition(createRule.c_str());
-  this->ExpandRuleVariables(rule, 
-                            llang, // language
-                            objs.c_str(), // objects
-                            targetName.c_str(), // target
-                            linkLibs.c_str(), // link libs
-                            0, // source
-                            0, // object
-                            flags.c_str(), // flags
-                            0, // objects quoted
-                            0, // target so name,
-                            linkFlags.c_str() // link flags
-    );
-#if 0
-  std::string command;
-  std::string args;
-  cmSystemTools::SplitProgramFromArgs(rule.c_str(), command, args);
-  // Just like ADD_CUSTOM_TARGET(foo ALL DEPENDS a.o b.o)
-  // Add a custom command for generating each .o file
-  cmCustomCommand cc(command.c_str(), args.c_str(), objVector,
-                     targetName.c_str(), 0);
-  target.GetPostBuildCommands().push_back(cc);
-#endif
+  cmLocalGenerator::RuleVariables vars;
+  vars.Language = llang;
+  vars.Objects = objs.c_str();
+  vars.Target = targetName.c_str();
+  vars.LinkLibraries = linkLibs.c_str();
+  vars.Flags = flags.c_str();
+  vars.LinkFlags = linkFlags.c_str();
+  this->ExpandRuleVariables(rule, vars);
 }
 
   
@@ -560,76 +544,67 @@ static const char* ruleReplaceVars[] =
 
 std::string
 cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
-                                     const char* lang,
-                                     const char* objects,
-                                     const char* target,
-                                     const char* linkLibs,
-                                     const char* source,
-                                     const char* object,
-                                     const char* flags,
-                                     const char* objectsquoted,
-                                     const char* targetSOName,
-                                     const char* linkFlags)
+                                     const RuleVariables& replaceValues)
 {
-  if(linkFlags)
+  if(replaceValues.LinkFlags)
     {
     if(variable == "LINK_FLAGS")
       {
-      return linkFlags;
+      return replaceValues.LinkFlags;
       }
     }
-  if(flags)
+  if(replaceValues.Flags)
     {
     if(variable == "FLAGS")
       {
-      return flags;
+      return replaceValues.Flags;
       }
     }
     
-  if(source)
+  if(replaceValues.Source)
     {
     if(variable == "SOURCE")
       {
-      return source;
+      return replaceValues.Source;
       }
     }
-  if(object)
+  if(replaceValues.Object)
     {
     if(variable == "OBJECT")
       {
-      return object;
+      return replaceValues.Object;
       }
     }
-  if(objects)
+  if(replaceValues.Objects)
     {
     if(variable == "OBJECTS")
       {
-      return objects;
+      return replaceValues.Objects;
       }
     }
-  if(objectsquoted)
+  if(replaceValues.ObjectsQuoted)
     {
     if(variable == "OBJECTS_QUOTED")
       {
-      return objectsquoted;
+      return replaceValues.ObjectsQuoted;
       }
     }
-  if(target)
+  if(replaceValues.Target)
     { 
     if(variable == "TARGET_QUOTED")
       {
-      std::string targetQuoted = target;
+      std::string targetQuoted = replaceValues.Target;
       if(targetQuoted.size() && targetQuoted[0] != '\"')
         {
         targetQuoted = '\"';
-        targetQuoted += target;
+        targetQuoted += replaceValues.Target;
         targetQuoted += '\"';
         return targetQuoted;
         }
       }
     if(variable == "TARGET")
       {
-      return target;
+      return replaceValues.Target;
       }
     if(variable == "TARGET_IMPLIB")
       {
@@ -638,7 +613,7 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
     if(variable == "TARGET_BASE")
       {
       // Strip the last extension off the target name.
-      std::string targetBase = target;
+      std::string targetBase = replaceValues.Target;
       std::string::size_type pos = targetBase.rfind(".");
       if(pos != targetBase.npos)
         {
@@ -650,28 +625,28 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         }
       }
     }
-  if(targetSOName)
+  if(replaceValues.TargetSOName)
     {
     if(variable == "TARGET_SONAME")
       {
-      if(lang)
+      if(replaceValues.Language)
         {
         std::string name = "CMAKE_SHARED_LIBRARY_SONAME_";
-        name += lang;
+        name += replaceValues.Language;
         name += "_FLAG";
         if(m_Makefile->GetDefinition(name.c_str()))
           {
-          return targetSOName;
+          return replaceValues.TargetSOName;
           }
         }
       return "";
       }
     }
-  if(linkLibs)
+  if(replaceValues.LinkLibraries)
     {
     if(variable == "LINK_LIBRARIES")
       {
-      return linkLibs;
+      return replaceValues.LinkLibraries;
       }
     }
   std::vector<std::string> enabledLanguages;
@@ -683,7 +658,7 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
     for(std::vector<std::string>::iterator i = enabledLanguages.begin();   
         i != enabledLanguages.end(); ++i)   
       { 
-      lang = i->c_str();
+      const char* lang = i->c_str();
       std::string actualReplace = ruleReplaceVars[pos];
       // If this is the compiler then look for the extra variable
       // _COMPILER_ARG1 which must be the first argument to the compiler 
@@ -724,16 +699,7 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
 
 void 
 cmLocalGenerator::ExpandRuleVariables(std::string& s,
-                                      const char* lang,
-                                      const char* objects,
-                                      const char* target,
-                                      const char* linkLibs,
-                                      const char* source,
-                                      const char* object,
-                                      const char* flags,
-                                      const char* objectsquoted,
-                                      const char* targetSOName,
-                                      const char* linkFlags)
+                                      const RuleVariables& replaceValues)
 {
   std::vector<std::string> enabledLanguages;
   m_GlobalGenerator->GetEnabledLanguages(enabledLanguages);
@@ -764,12 +730,8 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
       {
       // extract the var
       std::string var = s.substr(start+1,  end - start-1);
-      std::string replace = this->ExpandRuleVariable(var, lang, objects,
-                                                     target, linkLibs,
-                                                     source, object, flags,
-                                                     objectsquoted, 
-                                                     targetSOName,
-                                                     linkFlags);
+      std::string replace = this->ExpandRuleVariable(var,
+                                                     replaceValues);
       expandedInput += s.substr(pos, start-pos);
       expandedInput += replace;
       // move to next one

@@ -180,30 +180,42 @@ protected:
   ///! put all the libraries for a target on into the given stream
   virtual void OutputLinkLibraries(std::ostream&, cmTarget&, bool relink);
 
+  // Create a struct to hold the varibles passed into
+  // ExpandRuleVariables
+  struct RuleVariables
+  {
+    RuleVariables()
+      {
+        this->Language= 0;
+        this->Objects= 0;
+        this->Target= 0;
+        this->LinkLibraries= 0;
+        this->Source= 0;
+        this->Object= 0;
+        this->Flags= 0;
+        this->ObjectsQuoted= 0;
+        this->TargetSOName= 0;
+        this->LinkFlags= 0;
+      }
+    const char* Language;
+    const char* Objects;
+    const char* Target;
+    const char* LinkLibraries;
+    const char* Source;
+    const char* Object;
+    const char* Flags;
+    const char* ObjectsQuoted;
+    const char* TargetSOName;
+    const char* LinkFlags;
+  };
+    
+    
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,
-                           const char* language,
-                           const char* objects=0,
-                           const char* target=0,
-                           const char* linkLibs=0,
-                           const char* source=0,
-                           const char* object =0,
-                           const char* flags = 0,
-                           const char* objectsquoted = 0,
-                           const char* targetSOName = 0,
-                           const char* linkFlags = 0);
+                           const RuleVariables& replaceValues);
   // Expand rule variables in a single string
   std::string ExpandRuleVariable(std::string const& variable,
-                                 const char* lang,
-                                 const char* objects,
-                                 const char* target,
-                                 const char* linkLibs,
-                                 const char* source,
-                                 const char* object,
-                                 const char* flags,
-                                 const char* objectsquoted,
-                                 const char* targetSOName,
-                                 const char* linkFlags);
+                                 const RuleVariables& replaceValues);
   
   ///! Convert a target to a utility target for unsupported languages of a generator
   void AddBuildTargetRule(const char* llang, cmTarget& target);
