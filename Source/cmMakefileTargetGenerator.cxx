@@ -321,8 +321,17 @@ cmMakefileTargetGenerator
     relativeObj = cmSystemTools::ConvertToOutputPath(relativeObj.c_str());
     }
   // Write the build rule.
+
   // Build the set of compiler flags.
   std::string flags;
+
+  // Add language-specific flags.
+  std::string langFlags = "$(";
+  langFlags += lang;
+  langFlags += "_FLAGS)";
+  this->LocalGenerator->AppendFlags(flags, langFlags.c_str());
+
+  // Add target-specific flags.
   if(this->Target->GetProperty("COMPILE_FLAGS"))
     {
     this->LocalGenerator->AppendFlags(flags, this->Target->GetProperty("COMPILE_FLAGS"));
@@ -338,12 +347,6 @@ cmMakefileTargetGenerator
                           << "\n"
                           << "\n";
     }
-  
-  // Add language-specific flags.
-  std::string langFlags = "$(";
-  langFlags += lang;
-  langFlags += "_FLAGS)";
-  this->LocalGenerator->AppendFlags(flags, langFlags.c_str());
   
   // Get the output paths for source and object files.
   std::string sourceFile = source.GetFullPath();
