@@ -290,13 +290,6 @@ bool cmFileCommand::HandleInstallCommand(
 
   const char* destdir = cmSystemTools::GetEnv("DESTDIR");
 
-  std::string extra_dir = "";
-  if ( build_type )
-    {
-    extra_dir = build_type;
-    std::string btype = cmSystemTools::LowerCase(build_type);
-    }
-
   std::vector<std::string> files;
   int itype = cmTarget::INSTALL_FILES;
 
@@ -553,14 +546,9 @@ bool cmFileCommand::HandleInstallCommand(
           }
 
         // Reconstruct the source file path taking into account the
-        // extra directory and possible new file name.
+        // possibly new file name.
         cmOStringStream str;
-        str << cmSystemTools::GetFilenamePath(ctarget) << "/";
-        if ( extra_dir.size() > 0 )
-          {
-          str << extra_dir << "/";
-          }
-        str << fname;
+        str << cmSystemTools::GetFilenamePath(ctarget) << "/" << fname;
         ctarget = str.str();
         }
       break;
@@ -597,23 +585,22 @@ bool cmFileCommand::HandleInstallCommand(
         }
 
       // Reconstruct the source file path taking into account the
-      // extra directory and possible new file name.
+      // possibly new file name.
       cmOStringStream str;
-      str << cmSystemTools::GetFilenamePath(ctarget) << "/";
-      if ( extra_dir.size() > 0 )
-        {
-        str << extra_dir << "/";
-        }
-      str << fname;
+      str << cmSystemTools::GetFilenamePath(ctarget) << "/" << fname;
       ctarget = str.str();
       }
       break;
       }
 
+    std::string message;
     if ( !cmSystemTools::SameFile(ctarget.c_str(), destfile.c_str()) )
       {
       if ( cmSystemTools::FileExists(ctarget.c_str()) )
         {
+        message = "Installing ";
+        message += destfile.c_str();
+        m_Makefile->DisplayStatus(message.c_str(), -1);
         cmSystemTools::RemoveFile(destfile.c_str());
         if ( !cmSystemTools::CopyFileAlways(ctarget.c_str(), 
             destination.c_str()) )

@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmInstallTargetGenerator.h"
 
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
 
@@ -162,8 +164,13 @@ cmInstallTargetGenerator
         this->ConfigurationTypes->begin();
       i != this->ConfigurationTypes->end(); ++i)
     {
+    // Start with the configuration's subdirectory.
+    fname = "";
+    this->Target->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->
+      AppendDirectoryForConfig(i->c_str(), fname);
+
     // Set a variable with the target name for this configuration.
-    fname = this->Target->GetFullName(i->c_str(), this->ImportLibrary);
+    fname += this->Target->GetFullName(i->c_str(), this->ImportLibrary);
     os << "SET(" << this->Target->GetName()
        << (this->ImportLibrary? "_IMPNAME_" : "_NAME_") << *i
        << " \"" << fname << "\")\n";
