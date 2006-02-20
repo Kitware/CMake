@@ -520,6 +520,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     programDatabase += "\"";
     }
 
+  // Add the target-specific flags.
+  if(const char* targetFlags = target.GetProperty("COMPILE_FLAGS"))
+    {
+    flags += " ";
+    flags += targetFlags;
+    }
+
   // The intermediate directory name consists of a directory for the
   // target and a subdirectory for the configuration name.
   std::string intermediateDir = this->GetTargetDirectory(target);
@@ -1084,12 +1091,7 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
     std::string compileFlags;
     std::string additionalDeps;
 
-    // Check for extra compiler flags.
-    if(target.GetProperty("COMPILE_FLAGS"))
-      {
-      compileFlags += " ";
-      compileFlags += target.GetProperty("COMPILE_FLAGS");
-      }
+    // Add per-source flags.
     const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
     if(cflags)
       {

@@ -432,15 +432,11 @@ void cmLocalVisualStudio6Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
       (*sf)->GetCustomCommand();
     std::string compileFlags;
     std::vector<std::string> depends;
-    const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
-    if(cflags)
+
+    // Add per-source file flags.
+    if(const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS"))
       {
-      compileFlags = cflags;
-      }
-    if(target.GetProperty("COMPILE_FLAGS"))
-      {
-      compileFlags += " ";
-      compileFlags += target.GetProperty("COMPILE_FLAGS");
+      compileFlags += cflags;
       }
 
     const char* lang = 
@@ -1246,7 +1242,14 @@ void cmLocalVisualStudio6Generator
       {
       flags += " /D \"_MBCS\"";
       }
-    
+
+    // Add per-target flags.
+    if(const char* targetFlags = target.GetProperty("COMPILE_FLAGS"))
+      {
+      flags += " ";
+      flags += targetFlags;
+      }
+
     // The template files have CXX FLAGS in them, that need to be replaced.
     // There are not separate CXX and C template files, so we use the same
     // variable names.   The previous code sets up flags* variables to contain
