@@ -53,12 +53,10 @@ void cmGlobalMSYSMakefileGenerator::EnableLanguage(std::vector<std::string>const
   std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::vector<std::string> locations;
   std::string makeloc = cmSystemTools::GetProgramPath(makeProgram.c_str());
-  locations.push_back(makeloc);
   locations.push_back(this->FindMinGW(makeloc));
+  locations.push_back(makeloc);
   locations.push_back("/mingw/bin");
-  locations.push_back("/msys/1.0/bin");
   locations.push_back("c:/mingw/bin");
-  locations.push_back("C:/msys/1.0/bin");
   std::string tgcc = cmSystemTools::FindProgram("gcc", locations);
   std::string gcc = "gcc.exe";
   if(tgcc.size())
