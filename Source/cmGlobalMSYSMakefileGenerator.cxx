@@ -25,13 +25,36 @@ cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator()
   m_ForceUnixPaths = true;
 }
 
+std::string 
+cmGlobalMSYSMakefileGenerator::FindMinGW(std::string const& makeloc)
+{
+  std::string fstab = makeloc;
+  fstab += "/../etc/fstab";
+  std::ifstream fin(fstab.c_str());
+  std::string path;
+  std::string mount;
+  while(fin)
+    {
+    fin >> path;
+    fin >> mount;
+    if(mount == "/mingw")
+      {
+      path += "/bin";
+      return path;
+      }
+    }
+  return "";
+}
+
 void cmGlobalMSYSMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,
                                                     cmMakefile *mf)
 {
   this->FindMakeProgram(mf);
   std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::vector<std::string> locations;
-  locations.push_back(cmSystemTools::GetProgramPath(makeProgram.c_str()));
+  std::string makeloc = cmSystemTools::GetProgramPath(makeProgram.c_str());
+  locations.push_back(makeloc);
+  locations.push_back(this->FindMinGW(makeloc));
   locations.push_back("/mingw/bin");
   locations.push_back("/msys/1.0/bin");
   locations.push_back("c:/mingw/bin");

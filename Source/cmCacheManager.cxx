@@ -19,6 +19,7 @@
 #include "cmSystemTools.h"
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
+#include <cmsys/Directory.hxx>
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -580,8 +581,26 @@ bool cmCacheManager::SaveCache(const char* path)
 bool cmCacheManager::DeleteCache(const char* path) 
 {
   std::string cacheFile = path;
+  cmSystemTools::ConvertToUnixSlashes(cacheFile);
+  std::string cmakeFiles = cacheFile;
   cacheFile += "/CMakeCache.txt";
   cmSystemTools::RemoveFile(cacheFile.c_str());
+  // now remove the files in the CMakeFiles directory
+  // this cleans up language cache files
+  cmsys::Directory dir;
+  cmakeFiles += "/CMakeFiles";
+  dir.Load(cmakeFiles.c_str());
+  for (unsigned long fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
+    {
+    if(!cmSystemTools::
+       FileIsDirectory(dir.GetFile(fileNum)))
+      {
+      std::string fullPath = cmakeFiles;
+      fullPath += "/";
+      fullPath += dir.GetFile(fileNum);
+      cmSystemTools::RemoveFile(fullPath.c_str());
+      }
+    }
   return true;
 }
 
