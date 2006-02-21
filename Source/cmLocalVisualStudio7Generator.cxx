@@ -438,10 +438,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
   
   std::string flags;
-  std::string flagsRelease = " ";
-  std::string flagsMinSize = " ";
-  std::string flagsDebug = " ";
-  std::string flagsDebugRel = " "; 
   if(strcmp(configType, "10") != 0)
     {
     const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -457,69 +453,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       baseFlagVar += linkLanguage;
       baseFlagVar += "_FLAGS";
       flags = m_Makefile->GetRequiredDefinition(baseFlagVar.c_str());
-      
-      std::string flagVar = baseFlagVar + "_RELEASE";
-      flagsRelease += m_Makefile->GetRequiredDefinition(flagVar.c_str());
-      
-      flagVar = baseFlagVar + "_MINSIZEREL";
-      flagsMinSize += m_Makefile->GetRequiredDefinition(flagVar.c_str());
-      
-      flagVar = baseFlagVar + "_DEBUG";
-      flagsDebug += m_Makefile->GetRequiredDefinition(flagVar.c_str());
-      
-      flagVar = baseFlagVar + "_RELWITHDEBINFO";
-      flagsDebugRel += m_Makefile->GetRequiredDefinition(flagVar.c_str());
+      std::string flagVar = baseFlagVar + std::string("_") +
+        cmSystemTools::UpperCase(configName);
+      flags += " ";
+      flags += m_Makefile->GetRequiredDefinition(flagVar.c_str());
       }
     }
   
-  std::string programDatabase;
-  const char* pre = "WIN32,_DEBUG,_WINDOWS";
-  // fill the flagMap for Debug, Release, MinSizeRel, and RelWithDebInfo
-  // also set the flags, and pre-defined macros
-  if(strcmp(configName, "Debug") == 0)
-    {
-    flagMap["InlineFunctionExpansion"] = "0";
-    flagMap["Optimization"] = "0";
-    flagMap["RuntimeLibrary"] = "3";
-    flags += flagsDebug;
-    pre = "WIN32,_DEBUG,_WINDOWS"; 
-    std::string libpath = m_LibraryOutputPath + 
-      "$(OutDir)/" + libName + ".pdb";
-    programDatabase = "\t\t\t\tProgramDatabaseFileName=\"";
-    programDatabase += libpath;
-    programDatabase += "\"";
-    }
-  else if (strcmp(configName, "Release") == 0)
-    {
-    flagMap["InlineFunctionExpansion"] = "1";
-    flagMap["Optimization"] = "2";
-    flagMap["RuntimeLibrary"] = "2";
-    flags += flagsRelease;
-    pre = "WIN32,_WINDOWS";
-    flags += flagsRelease;
-    }
-  else if(strcmp(configName, "MinSizeRel") == 0)
-    {
-    flagMap["InlineFunctionExpansion"] = "1";
-    flagMap["Optimization"] = "1";
-    flagMap["RuntimeLibrary"] = "2";
-    pre = "WIN32,_WINDOWS";
-    flags += flagsMinSize;
-    }
-  else if(strcmp(configName, "RelWithDebInfo") == 0)
-    {
-    flagMap["InlineFunctionExpansion"] = "1";
-    flagMap["Optimization"] = "2";
-    flagMap["RuntimeLibrary"] = "2"; 
-    pre = "WIN32,_WINDOWS";
-    flags += flagsDebugRel;
-    std::string libpath = m_LibraryOutputPath + 
-      "$(OutDir)/" + libName + ".pdb";
-    programDatabase = "\t\t\t\tProgramDatabaseFileName=\"";
-    programDatabase += libpath;
-    programDatabase += "\"";
-    }
-
   // Add the target-specific flags.
   if(const char* targetFlags = target.GetProperty("COMPILE_FLAGS"))
     {
@@ -598,7 +538,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     fout << "\t\t\t\t" << m->first << "=\"" << m->second << "\"\n";
     }
-  fout << "\t\t\t\tPreprocessorDefinitions=\"" << pre;
+  fout << "\t\t\t\tPreprocessorDefinitions=\"";
   if(target.GetType() == cmTarget::SHARED_LIBRARY
      || target.GetType() == cmTarget::MODULE_LIBRARY)
     {
@@ -619,9 +559,12 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\"\n";
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
-  if(programDatabase.size())
-    {
-    fout << programDatabase << "\n";
+  std::map<cmStdString, cmStdString>::iterator mi = flagMap.find("DebugInformationFormat");
+  if(mi != flagMap.end() && mi->second != "1")
+    { 
+    fout <<  "\t\t\t\tProgramDatabaseFileName=\""
+         << m_LibraryOutputPath 
+         << "$(OutDir)/" << libName << ".pdb\"\n";
     }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
@@ -634,12 +577,12 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
   // add the -D flags to the RC tool 
   fout << "\"\n"
-       << "\t\t\t\tPreprocessorDefinitions=\"" << pre;
+       << "\t\t\t\tPreprocessorDefinitions=\"";
   this->OutputDefineFlags(defineFlags.c_str(), fout);
   fout << "\" />\n";
 
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCMIDLTool\"\n";
-  fout << "\t\t\t\tPreprocessorDefinitions=\"" << pre;
+  fout << "\t\t\t\tPreprocessorDefinitions=\"";
   this->OutputDefineFlags(defineFlags.c_str(), fout);
   fout << "\"\n";
   fout << "\t\t\t\tMkTypLibCompatible=\"FALSE\"\n";
