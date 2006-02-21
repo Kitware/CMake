@@ -33,17 +33,18 @@ cmGlobalMSYSMakefileGenerator::FindMinGW(std::string const& makeloc)
   std::ifstream fin(fstab.c_str());
   std::string path;
   std::string mount;
+  std::string mingwBin;
   while(fin)
     {
     fin >> path;
     fin >> mount;
     if(mount == "/mingw")
       {
-      path += "/bin";
-      return path;
+      mingwBin = path;
+      mingwBin += "/bin";
       }
     }
-  return "";
+  return mingwBin;
 }
 
 void cmGlobalMSYSMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,
