@@ -21,27 +21,17 @@ inline std::vector<std::string> tokenize(const std::string& str,
                                          bool skipEmptyTokens)
 {
   std::vector<std::string> tokens;
+  if(str.size() == 0)
+    {
+    tokens.push_back("");
+    return tokens;
+    }
   std::string::size_type tokstart,tokend;
 
-  if (skipEmptyTokens) 
-    {
-    tokend=0;
-    }
-  else 
-    {
-    tokend=std::string::npos;
-    }
-        
+  tokend=0;
   do
     {
-    if (skipEmptyTokens)
-      {
-      tokstart=str.find_first_not_of(sep,tokend);
-      }
-    else 
-      {
-      tokstart=tokend+1;
-      }
+    tokstart=str.find_first_not_of(sep,tokend);
     if (tokstart==std::string::npos) 
       {
       break;    // no more tokens
@@ -56,7 +46,6 @@ inline std::vector<std::string> tokenize(const std::string& str,
       tokens.push_back(str.substr(tokstart,tokend-tokstart));
       }
     } while (tokend!=std::string::npos);
-        
   return tokens;
 }
 
@@ -70,16 +59,15 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
     }  
 
   std::string delimiter = "\\";
-
   if(m_Makefile->GetDefinition("SOURCE_GROUP_DELIMITER"))
+    {
     delimiter = m_Makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
+    }
 
   std::vector<std::string> folders = tokenize(args[0], delimiter, true);
  
   const char *parent = NULL;
- 
   cmSourceGroup* sg = NULL;
-        
   for(unsigned int i=0;i<folders.size();++i)
     {
     sg = m_Makefile->GetSourceGroup(folders[i].c_str());
@@ -90,7 +78,11 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
     sg = m_Makefile->GetSourceGroup(folders[i].c_str());
     parent = folders[i].c_str();
     }
-
+  if(!sg)
+    {
+    this->SetError("Could not create or find source group");
+    return false;
+    }
   // If only two arguments are given, the pre-1.8 version of the
   // command is being invoked.
   if(args.size() == 2  && args[1] != "FILES")
