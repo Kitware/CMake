@@ -1237,8 +1237,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   singleLine.push_back(this->GetCMakeInstance()->GetCTestCommand());
   singleLine.push_back("--force-new-ctest-process");
   cpackCommandLines.push_back(singleLine);
-  (*targets)[this->GetPackageTargetName()]
-    = this->CreateGlobalTarget(this->GetPackageTargetName(),
+  (*targets)[this->GetTestTargetName()]
+    = this->CreateGlobalTarget(this->GetTestTargetName(),
       "Running tests...", &cpackCommandLines, depends);
 
   //Edit Cache
@@ -1306,6 +1306,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   singleLine.push_back("-P");
   singleLine.push_back("cmake_install.cmake");
   cpackCommandLines.push_back(singleLine);
+  /*
   const char* noall =
     mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
   bool dependsOnAll = false;
@@ -1313,10 +1314,11 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     {
     dependsOnAll = true;
     }
+  */
   (*targets)[this->GetInstallTargetName()] =
     this->CreateGlobalTarget(
       this->GetInstallTargetName(), "Install the project...",
-      &cpackCommandLines, depends, dependsOnAll);
+      &cpackCommandLines, depends);
 }
 
 cmTarget cmGlobalGenerator::CreateGlobalTarget(
@@ -1330,13 +1332,19 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   target.SetType(cmTarget::GLOBAL_TARGET, name);
   target.SetInAll(false);
 
+  std::vector<std::string> fileDepends;
   // Store the custom command in the target.
-  cmCustomCommand cc(0, depends, *commandLines, 0, 0);
+  cmCustomCommand cc(0, fileDepends, *commandLines, 0, 0);
   target.GetPostBuildCommands().push_back(cc);
   target.SetProperty("EchoString", message);
   if ( depends_on_all )
     {
-    target.SetProperty("DependsOnAll", "ON");
+    target.AddUtility("all");
+    }
+  std::vector<std::string>::iterator dit;
+  for ( dit = depends.begin(); dit != depends.end(); ++ dit )
+    {
+    target.AddUtility(dit->c_str());
     }
   return target;
 }

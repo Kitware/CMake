@@ -1266,10 +1266,12 @@ void cmLocalUnixMakefileGenerator3
         {
         text = "Running external command ...";
         }
-      const char* dependsOnAll = glIt->second.GetProperty("DependsOnAll");
-      if ( dependsOnAll || cmSystemTools::IsOn(dependsOnAll) )
+      std::set<cmStdString>::iterator dit;
+      for ( dit = glIt->second.GetUtilities().begin();
+         dit != glIt->second.GetUtilities().end();
+        ++ dit )
         {
-        depends.push_back("all");
+        depends.push_back(dit->c_str());
         }
       this->AppendEcho(commands, text);
 
