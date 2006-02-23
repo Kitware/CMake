@@ -1880,3 +1880,96 @@ void cmake::TruncateOutputLog(const char* fname)
     }
 }
 
+inline std::string removeQuotes(const std::string& s)
+{
+  if(s[0] == '\"' && s[s.size()-1] == '\"')
+    {
+    return s.substr(1, s.size()-2);
+    }
+  return s;
+}
+
+const char* cmake::GetCTestCommand()
+{
+  if ( !m_CTestCommand.empty() )
+    {
+    return m_CTestCommand.c_str();
+    }
+
+  cmMakefile* mf = this->GetGlobalGenerator()->GetLocalGenerator(0)->GetMakefile();
+  m_CTestCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
+  m_CTestCommand = removeQuotes(m_CTestCommand);
+  m_CTestCommand = cmSystemTools::GetFilenamePath(m_CTestCommand.c_str());
+  m_CTestCommand += "/";
+  m_CTestCommand += "ctest";
+  m_CTestCommand += cmSystemTools::GetExecutableExtension();
+  if(!cmSystemTools::FileExists(m_CTestCommand.c_str()))
+    {
+    m_CTestCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
+    m_CTestCommand = cmSystemTools::GetFilenamePath(m_CTestCommand.c_str());
+    m_CTestCommand += "/Debug/";
+    m_CTestCommand += "ctest";
+    m_CTestCommand += cmSystemTools::GetExecutableExtension();
+    }
+  if(!cmSystemTools::FileExists(m_CTestCommand.c_str()))
+    {
+    m_CTestCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
+    m_CTestCommand = cmSystemTools::GetFilenamePath(m_CTestCommand.c_str());
+    m_CTestCommand += "/Release/";
+    m_CTestCommand += "ctest";
+    m_CTestCommand += cmSystemTools::GetExecutableExtension();
+    }
+  if ( m_CTestCommand.empty() )
+    {
+    cmSystemTools::Error("Cannot find the CTest executable");
+    m_CTestCommand = "CTEST-COMMAND-NOT-FOUND";
+    }
+  return m_CTestCommand.c_str();
+}
+
+const char* cmake::GetCPackCommand()
+{
+  if ( !m_CPackCommand.empty() )
+    {
+    return m_CPackCommand.c_str();
+    }
+
+  cmMakefile* mf = this->GetGlobalGenerator()->GetLocalGenerator(0)->GetMakefile();
+
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  m_CPackCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
+  m_CPackCommand = removeQuotes(m_CPackCommand);
+  m_CPackCommand = cmSystemTools::GetFilenamePath(m_CPackCommand.c_str());
+  m_CPackCommand += "/";
+  m_CPackCommand += "cpack";
+  m_CPackCommand += cmSystemTools::GetExecutableExtension();
+  if(!cmSystemTools::FileExists(m_CPackCommand.c_str()))
+    {
+    m_CPackCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
+    m_CPackCommand = cmSystemTools::GetFilenamePath(m_CPackCommand.c_str());
+    m_CPackCommand += "/Debug/";
+    m_CPackCommand += "cpack";
+    m_CPackCommand += cmSystemTools::GetExecutableExtension();
+    }
+  if(!cmSystemTools::FileExists(m_CPackCommand.c_str()))
+    {
+    m_CPackCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
+    m_CPackCommand = cmSystemTools::GetFilenamePath(m_CPackCommand.c_str());
+    m_CPackCommand += "/Release/";
+    m_CPackCommand += "cpack";
+    m_CPackCommand += cmSystemTools::GetExecutableExtension();
+    }
+  if (!cmSystemTools::FileExists(m_CPackCommand.c_str()))
+    {
+    cmSystemTools::Error("Cannot find the CPack executable");
+    m_CPackCommand = "CPACK-COMMAND-NOT-FOUND";
+    }
+#else
+  // Only for bootstrap
+  m_CPackCommand += mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+  m_CPackCommand += "/cpack";
+  m_CPackCommand += cmSystemTools::GetExecutableExtension();
+#endif
+  return m_CPackCommand.c_str();
+}
+

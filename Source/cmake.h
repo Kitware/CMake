@@ -268,6 +268,12 @@ class cmake
    */
   cmFileTimeComparison* GetFileComparison() { return m_FileComparison; }
 
+  /**
+   * Get the path to ctest
+   */
+  const char* GetCTestCommand();
+  const char* GetCPackCommand();
+
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString, CreateGeneratorFunctionType> RegisteredGeneratorsMap;
@@ -317,6 +323,8 @@ private:
   std::string m_CXXEnvironment;
   std::string m_CCEnvironment;
   std::string m_CheckBuildSystem;
+  std::string m_CTestCommand;
+  std::string m_CPackCommand;
   bool m_ClearBuildSystem;
   bool m_DebugTryCompile;
   cmFileTimeComparison* m_FileComparison;
