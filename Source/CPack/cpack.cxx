@@ -234,10 +234,13 @@ int main (int argc, char *argv[])
 
   if ( parsed && !help )
     {
-    if ( cmSystemTools::FileExists(cpackConfigFile.c_str()) && !mf->ReadListFile(0, cpackConfigFile.c_str()) )
+    if ( cmSystemTools::FileExists(cpackConfigFile.c_str()) )
       {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Problem reding CPack config file: \"" << cpackConfigFile.c_str() << "\"" << std::endl);
-      return 1;
+      if ( !mf->ReadListFile(0, cpackConfigFile.c_str()) )
+        {
+        cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Problem reding CPack config file: \"" << cpackConfigFile.c_str() << "\"" << std::endl);
+        return 1;
+        }
       }
     else if ( cpackConfigFileSpecified )
       {
