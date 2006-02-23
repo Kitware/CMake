@@ -1250,40 +1250,49 @@ void cmLocalUnixMakefileGenerator3
                       no_commands, true);
   }
 
-  // Write special "test" target to run ctest.
-  if(m_Makefile->IsOn("CMAKE_TESTING_ENABLED"))
+  // Write all global targets
+  cmTargets* targets = &(m_Makefile->GetTargets());
+  cmTargets::iterator glIt;
+  for ( glIt = targets->begin(); glIt != targets->end(); ++ glIt )
     {
-    std::string ctest;
-    if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
+    if ( glIt->second.GetType() == cmTarget::GLOBAL_TARGET )
       {
-      // We are building CMake itself.  Use the ctest that comes with
-      // this version of CMake instead of the one used to build it.
-      ctest = m_ExecutableOutputPath;
-      ctest += "ctest";
-      ctest += cmSystemTools::GetExecutableExtension();
-      ctest = this->Convert(ctest.c_str(),START_OUTPUT,SHELL);
-      ctest += " --force-new-ctest-process";
+      std::string targetString = "Special rule for the target " + glIt->first;
+      std::vector<std::string> commands;
+      std::vector<std::string> depends;
+
+      const char* text = glIt->second.GetProperty("EchoString");
+      if ( !text )
+        {
+        text = "Running external command ...";
+        }
+      const char* dependsOnAll = glIt->second.GetProperty("DependsOnAll");
+      if ( dependsOnAll || cmSystemTools::IsOn(dependsOnAll) )
+        {
+        depends.push_back("all");
+        }
+      this->AppendEcho(commands, text);
+      size_t cc;
+      std::cout << "Target: " << text << std::endl;
+      for ( cc = 0; cc < depends.size(); ++ cc )
+        {
+        std::cout << "  Depends [" << depends[cc].c_str() << "]" << std::endl;
+        }
+
+      // Utility targets store their rules in pre- and post-build commands.
+      this->AppendCustomDepends(depends,   glIt->second.GetPreBuildCommands());
+      this->AppendCustomDepends(depends,   glIt->second.GetPostBuildCommands());
+      std::cout << "Target: " << text << std::endl;
+      for ( cc = 0; cc < depends.size(); ++ cc )
+        {
+        std::cout << "  Depends [" << depends[cc].c_str() << "]" << std::endl;
+        }
+      this->AppendCustomCommands(commands, glIt->second.GetPreBuildCommands());
+      this->AppendCustomCommands(commands, glIt->second.GetPostBuildCommands());
+      this->WriteMakeRule(ruleFileStream, targetString.c_str(), glIt->first.c_str(), depends, commands, false);
       }
-    else
-      {
-      // We are building another project.  Use the ctest that comes with
-      // the CMake building it.
-      ctest = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
-      ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
-      ctest += "/";
-      ctest += "ctest";
-      ctest += cmSystemTools::GetExecutableExtension();
-      ctest = this->ConvertToOutputForExisting(ctest.c_str());
-      }
-    std::vector<std::string> no_depends;
-    std::vector<std::string> commands;
-    this->AppendEcho(commands, "Running tests...");
-    ctest += " $(ARGS)";
-    commands.push_back(ctest);
-    this->WriteMakeRule(ruleFileStream,
-                        "Special rule to drive testing with ctest.",
-                        "test", no_depends, commands, true);
     }
+
 
   // Write special "install" target to run cmake_install.cmake script.
   {
@@ -1307,7 +1316,7 @@ void cmLocalUnixMakefileGenerator3
   commands.push_back(cmd);
   this->WriteMakeRule(ruleFileStream,
                       "Special rule to run installation script.",
-                      "install", depends, commands, true);
+                      "old_install", depends, commands, true);
 
   commands.clear();
   depends.clear();
@@ -1329,50 +1338,6 @@ void cmLocalUnixMakefileGenerator3
                       "Prepare targets for installation.",
                       "preinstall", depends, commands, true);
   }
-
-  // Write special "rebuild_cache" target to re-run cmake.
-  {
-  std::vector<std::string> no_depends;
-  std::vector<std::string> commands;
-  this->AppendEcho(commands, "Running CMake to regenerate build system...");
-  commands.push_back(
-    "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
-  this->WriteMakeRule(ruleFileStream,
-                      "Special rule to re-run CMake using make.",
-                      "rebuild_cache",
-                      no_depends,
-                      commands, true);
-  }
-
-  // Use CMAKE_EDIT_COMMAND for the edit_cache rule if it is defined.
-  // Otherwise default to the interactive command-line interface.
-  if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
-    {
-    std::vector<std::string> no_depends;
-    std::vector<std::string> commands;
-    this->AppendEcho(commands, "Running CMake cache editor...");
-    commands.push_back(
-      "$(CMAKE_EDIT_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
-    this->WriteMakeRule(ruleFileStream,
-                        "Special rule to re-run CMake cache editor using make.",
-                        "edit_cache",
-                        no_depends,
-                        commands, true);
-    }
-  else
-    {
-    std::vector<std::string> no_depends;
-    std::vector<std::string> commands;
-    this->AppendEcho(commands,
-                     "Running interactive CMake command-line interface...");
-    commands.push_back(
-      "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) -i");
-    this->WriteMakeRule(ruleFileStream,
-                        "Special rule to re-run CMake cache editor using make.",
-                        "edit_cache",
-                        no_depends,
-                        commands, true);
-    }
 
   this->WriteSpecialTargetsTop(ruleFileStream);
 

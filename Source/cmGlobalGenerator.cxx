@@ -671,8 +671,36 @@ void cmGlobalGenerator::Generate()
 {
   // For each existing cmLocalGenerator
   unsigned int i;
+
+  // Consolidate global targets
+  cmTargets globalTargets;
+  this->CreateDefaultGlobalTargets(&globalTargets);
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
+    cmTargets* targets = &(m_LocalGenerators[i]->GetMakefile()->GetTargets());
+    cmTargets::iterator tarIt;
+    for ( tarIt = targets->begin(); tarIt != targets->end(); ++ tarIt )
+      {
+      if ( tarIt->second.GetType() == cmTarget::GLOBAL_TARGET )
+        {
+        globalTargets[tarIt->first] = tarIt->second;
+        }
+      }
+    }
+    {
+    cmTargets::iterator tarIt;
+    std::cout << "Global targets:" << std::endl;
+    for ( tarIt = globalTargets.begin(); tarIt != globalTargets.end(); ++ tarIt )
+      {
+      std::cout << "* " << tarIt->first.c_str() << std::endl;
+      }
+    }
+  
+  // Generate project files
+  for (i = 0; i < m_LocalGenerators.size(); ++i)
+    {
+    cmTargets* targets = &(m_LocalGenerators[i]->GetMakefile()->GetTargets());
+    targets->insert(globalTargets.begin(), globalTargets.end());
     m_LocalGenerators[i]->Generate();
     m_LocalGenerators[i]->GenerateInstallRules();
     m_LocalGenerators[i]->GenerateTestFiles();
@@ -1184,6 +1212,137 @@ void cmGlobalGenerator::SetupTests()
         }
       }
     }
+}
+
+void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
+{
+  cmMakefile* mf = m_LocalGenerators[0]->GetMakefile();
+  // CPack
+  cmCustomCommandLines cpackCommandLines;
+  std::vector<std::string> depends;
+  cmCustomCommandLine singleLine;
+  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+  singleLine.erase(singleLine.begin(), singleLine.end());
+  depends.erase(depends.begin(), depends.end());
+  singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
+  singleLine.push_back("--config");
+  std::string configFile = mf->GetStartOutputDirectory();;
+  configFile += "/CPackConfig.cmake";
+  singleLine.push_back(configFile);
+  cpackCommandLines.push_back(singleLine);
+  (*targets)[this->GetPackageTargetName()]
+    = this->CreateGlobalTarget(this->GetPackageTargetName(),
+      "Run CPack packaging tool...", &cpackCommandLines, depends);
+
+  // Test
+  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+  singleLine.erase(singleLine.begin(), singleLine.end());
+  depends.erase(depends.begin(), depends.end());
+  singleLine.push_back(this->GetCMakeInstance()->GetCTestCommand());
+  singleLine.push_back("--force-new-ctest-process");
+  cpackCommandLines.push_back(singleLine);
+  (*targets)[this->GetPackageTargetName()]
+    = this->CreateGlobalTarget(this->GetPackageTargetName(),
+      "Running tests...", &cpackCommandLines, depends);
+
+  //Edit Cache
+  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+  singleLine.erase(singleLine.begin(), singleLine.end());
+  depends.erase(depends.begin(), depends.end());
+  // Use CMAKE_EDIT_COMMAND for the edit_cache rule if it is defined.
+  // Otherwise default to the interactive command-line interface.
+  if(mf->GetDefinition("CMAKE_EDIT_COMMAND"))
+    {
+    singleLine.push_back("$(CMAKE_EDIT_COMMAND)");
+    singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
+    singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
+    cpackCommandLines.push_back(singleLine);
+    (*targets)[this->GetEditCacheTargetName()] =
+      this->CreateGlobalTarget(
+        this->GetEditCacheTargetName(), "Running CMake cache editor...",
+        &cpackCommandLines, depends);
+    }
+  else
+    {
+    singleLine.push_back("$(CMAKE_COMMAND)");
+    singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
+    singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
+    singleLine.push_back("-i");
+    cpackCommandLines.push_back(singleLine);
+    (*targets)[this->GetEditCacheTargetName()] =
+      this->CreateGlobalTarget(
+        this->GetEditCacheTargetName(), "Running interactive CMake command-line interface...",
+        &cpackCommandLines, depends);
+    }
+
+  //Rebuild Cache
+  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+  singleLine.erase(singleLine.begin(), singleLine.end());
+  depends.erase(depends.begin(), depends.end());
+  singleLine.push_back("$(CMAKE_COMMAND)");
+  singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
+  singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
+  cpackCommandLines.push_back(singleLine);
+  (*targets)[this->GetRebuildCacheTargetName()] =
+    this->CreateGlobalTarget(
+      this->GetRebuildCacheTargetName(), "Running CMake to regenerate build system...",
+      &cpackCommandLines, depends);
+
+  //Install
+  std::string cmd;
+  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+  singleLine.erase(singleLine.begin(), singleLine.end());
+  depends.erase(depends.begin(), depends.end());
+  depends.push_back("preinstall");
+  if(mf->GetDefinition("CMake_BINARY_DIR"))
+    {
+    // We are building CMake itself.  We cannot use the original
+    // executable to install over itself.
+    cmd = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    cmd += "/";
+    cmd += "cmake";
+    }
+  else
+    {
+    cmd = "$(CMAKE_COMMAND)";
+    }
+  singleLine.push_back(cmd.c_str());
+  singleLine.push_back("-P");
+  singleLine.push_back("cmake_install.cmake");
+  cpackCommandLines.push_back(singleLine);
+  const char* noall =
+    mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
+  bool dependsOnAll = false;
+  if(!noall || cmSystemTools::IsOff(noall))
+    {
+    dependsOnAll = true;
+    }
+  (*targets)[this->GetInstallTargetName()] =
+    this->CreateGlobalTarget(
+      this->GetInstallTargetName(), "Install the project...",
+      &cpackCommandLines, depends, dependsOnAll);
+}
+
+cmTarget cmGlobalGenerator::CreateGlobalTarget(
+  const char* name, const char* message,
+  const cmCustomCommandLines* commandLines,
+  std::vector<std::string> depends,
+  bool depends_on_all /* = false */)
+{
+  // Package
+  cmTarget target;
+  target.SetType(cmTarget::GLOBAL_TARGET, name);
+  target.SetInAll(false);
+
+  // Store the custom command in the target.
+  cmCustomCommand cc(0, depends, *commandLines, 0, 0);
+  target.GetPostBuildCommands().push_back(cc);
+  target.SetProperty("EchoString", message);
+  if ( depends_on_all )
+    {
+    target.SetProperty("DependsOnAll", "ON");
+    }
+  return target;
 }
 
 //----------------------------------------------------------------------------

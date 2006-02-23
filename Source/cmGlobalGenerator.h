@@ -20,6 +20,8 @@
 
 #include "cmStandardIncludes.h"
 
+#include "cmTarget.h" // For cmTargets
+
 class cmake;
 class cmMakefile;
 class cmLocalGenerator;
@@ -111,6 +113,7 @@ public:
     return this->m_CMakeInstance; };
 
   void SetConfiguredFilesPath(const char* s){m_ConfiguredFilesPath = s;}
+  cmLocalGenerator* GetLocalGenerator(int p) { return m_LocalGenerators[p];}
   void GetLocalGenerators(std::vector<cmLocalGenerator *>&g) { g = m_LocalGenerators;}
   void AddLocalGenerator(cmLocalGenerator *lg);
   
@@ -159,6 +162,18 @@ protected:
 
   void ConfigureRelativePaths();
   void SetupTests();
+
+  void CreateDefaultGlobalTargets(cmTargets* targets);
+  cmTarget CreateGlobalTarget(const char* name, const char* message,
+    const cmCustomCommandLines* commandLines,
+    std::vector<std::string> depends, bool depends_on_all = false);
+
+  virtual const char* GetInstallTargetName()      { return "install"; }
+  virtual const char* GetPreinstallTargetName()   { return "preinstall"; }
+  virtual const char* GetTestTargetName()         { return "test"; }
+  virtual const char* GetPackageTargetName()      { return "package"; }
+  virtual const char* GetEditCacheTargetName()    { return "edit_cache"; }
+  virtual const char* GetRebuildCacheTargetName() { return "rebuild_cache"; }
 
   bool m_ForceUnixPaths;
   cmStdString m_FindMakeProgramFile;
