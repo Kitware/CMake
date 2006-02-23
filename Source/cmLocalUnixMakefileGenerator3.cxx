@@ -1266,7 +1266,7 @@ void cmLocalUnixMakefileGenerator3
         {
         text = "Running external command ...";
         }
-      std::set<cmStdString>::iterator dit;
+      std::set<cmStdString>::const_iterator dit;
       for ( dit = glIt->second.GetUtilities().begin();
          dit != glIt->second.GetUtilities().end();
         ++ dit )
