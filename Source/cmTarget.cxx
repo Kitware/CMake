@@ -135,7 +135,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
     srcFilesQueued.insert(projFile);
     }
   // add in the library depends for custom targets
-  if (this->GetType() == cmTarget::UTILITY)
+  if (this->GetType() == cmTarget::UTILITY || this->GetType() == cmTarget::GLOBAL_TARGET)
     {
     for (std::vector<cmCustomCommand>::iterator ic = 
            this->GetPostBuildCommands().begin();
@@ -886,6 +886,9 @@ const char *cmTarget::GetProperty(const char* prop)
       case cmTarget::UTILITY:
         return "UTILITY";
         break;
+      case cmTarget::GLOBAL_TARGET:
+        return "GLOBAL_TARGET";
+        break;
       case cmTarget::INSTALL_FILES:
         return "INSTALL_FILES";
         break;
@@ -991,6 +994,7 @@ const char* cmTarget::GetCreateRuleVariable()
     case cmTarget::EXECUTABLE:
       return "_LINK_EXECUTABLE";
     case cmTarget::UTILITY:
+    case cmTarget::GLOBAL_TARGET:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
       break;
@@ -1014,6 +1018,7 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type,
     case cmTarget::EXECUTABLE:
       return "CMAKE_EXECUTABLE_SUFFIX";
     case cmTarget::UTILITY:
+    case cmTarget::GLOBAL_TARGET:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
       break;
@@ -1037,6 +1042,7 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type,
       return "CMAKE_SHARED_MODULE_PREFIX";
     case cmTarget::EXECUTABLE:
     case cmTarget::UTILITY:
+    case cmTarget::GLOBAL_TARGET:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
       break;

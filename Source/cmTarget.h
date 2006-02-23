@@ -35,7 +35,7 @@ public:
   cmTarget();
   enum TargetType { EXECUTABLE, STATIC_LIBRARY,
                     SHARED_LIBRARY, MODULE_LIBRARY, UTILITY, INSTALL_FILES, 
-                    INSTALL_PROGRAMS };
+                    INSTALL_PROGRAMS, GLOBAL_TARGET};
 
   enum CustomCommandType { PRE_BUILD, PRE_LINK, POST_BUILD };
 
