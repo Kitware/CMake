@@ -280,6 +280,9 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
   bool doneAllBuild = false;
   bool doneRunTests = false;
   bool doneInstall  = false;
+  bool doneEditCache = false;
+  bool doneRebuildCache = false;
+  bool donePackage = false;
   
   // For each cmMakefile, create a VCProj for it, and
   // add it to this SLN file
@@ -387,6 +390,39 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
             else
               {
               doneRunTests = true;
+              }
+            }
+          if(l->first == "EDIT_CACHE")
+            {
+            if(doneEditCache)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneEditCache = true;
+              }
+            }
+          if(l->first == "REBUILD_CACHE")
+            {
+            if(doneRebuildCache)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneRebuildCache = true;
+              }
+            }
+          if(l->first == "PACKAGE")
+            {
+            if(donePackage)
+              {
+              skip = true;
+              }
+            else
+              {
+              donePackage = true;
               }
             }
           if(!skip)
@@ -708,6 +744,9 @@ void cmGlobalVisualStudio7Generator::Configure()
   this->CreateGUID("ALL_BUILD");
   this->CreateGUID("INSTALL");
   this->CreateGUID("RUN_TESTS");
+  this->CreateGUID("EDIT_CACHE");
+  this->CreateGUID("REBUILD_CACHE");
+  this->CreateGUID("PACKAGE");
 }
 
 //----------------------------------------------------------------------------

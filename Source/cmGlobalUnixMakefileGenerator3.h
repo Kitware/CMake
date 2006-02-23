@@ -119,6 +119,15 @@ protected:
   // does this generator need a requires step for any of its targets
   bool NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg, const char *);
 
+  // Setup target names
+  virtual const char* GetInstallTargetName()      { return "install"; }
+  virtual const char* GetPreinstallTargetName()   { return "preinstall"; }
+  virtual const char* GetTestTargetName()         { return "test"; }
+  virtual const char* GetPackageTargetName()      { return "package"; }
+  virtual const char* GetEditCacheTargetName()    { return "edit_cache"; }
+  virtual const char* GetRebuildCacheTargetName() { return "rebuild_cache"; }
+
+
   // Some make programs (Borland) do not keep a rule if there are no
   // dependencies or commands.  This is a problem for creating rules
   // that might not do anything but might have other dependencies

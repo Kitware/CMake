@@ -168,12 +168,12 @@ protected:
     const cmCustomCommandLines* commandLines,
     std::vector<std::string> depends, bool depends_on_all = false);
 
-  virtual const char* GetInstallTargetName()      { return "install"; }
-  virtual const char* GetPreinstallTargetName()   { return "preinstall"; }
-  virtual const char* GetTestTargetName()         { return "test"; }
-  virtual const char* GetPackageTargetName()      { return "package"; }
-  virtual const char* GetEditCacheTargetName()    { return "edit_cache"; }
-  virtual const char* GetRebuildCacheTargetName() { return "rebuild_cache"; }
+  virtual const char* GetInstallTargetName()      { return "INSTALL"; }
+  virtual const char* GetPreinstallTargetName()   { return "PREINSTALL"; }
+  virtual const char* GetTestTargetName()         { return "RUN_TESTS"; }
+  virtual const char* GetPackageTargetName()      { return "PACKAGE"; }
+  virtual const char* GetEditCacheTargetName()    { return "EDIT_CACHE"; }
+  virtual const char* GetRebuildCacheTargetName() { return "REBUILD_CACHE"; }
 
   bool m_ForceUnixPaths;
   cmStdString m_FindMakeProgramFile;

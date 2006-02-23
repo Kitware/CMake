@@ -692,7 +692,11 @@ void cmGlobalGenerator::Generate()
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     cmTargets* targets = &(m_LocalGenerators[i]->GetMakefile()->GetTargets());
-    targets->insert(globalTargets.begin(), globalTargets.end());
+    cmTargets::iterator tit;
+    for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
+      {
+      targets[tit->first] = tit->second;
+      }
     m_LocalGenerators[i]->Generate();
     m_LocalGenerators[i]->GenerateInstallRules();
     m_LocalGenerators[i]->GenerateTestFiles();
