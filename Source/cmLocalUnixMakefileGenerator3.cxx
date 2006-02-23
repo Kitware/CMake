@@ -1272,21 +1272,10 @@ void cmLocalUnixMakefileGenerator3
         depends.push_back("all");
         }
       this->AppendEcho(commands, text);
-      size_t cc;
-      std::cout << "Target: " << text << std::endl;
-      for ( cc = 0; cc < depends.size(); ++ cc )
-        {
-        std::cout << "  Depends [" << depends[cc].c_str() << "]" << std::endl;
-        }
 
       // Utility targets store their rules in pre- and post-build commands.
       this->AppendCustomDepends(depends,   glIt->second.GetPreBuildCommands());
       this->AppendCustomDepends(depends,   glIt->second.GetPostBuildCommands());
-      std::cout << "Target: " << text << std::endl;
-      for ( cc = 0; cc < depends.size(); ++ cc )
-        {
-        std::cout << "  Depends [" << depends[cc].c_str() << "]" << std::endl;
-        }
       this->AppendCustomCommands(commands, glIt->second.GetPreBuildCommands());
       this->AppendCustomCommands(commands, glIt->second.GetPostBuildCommands());
       this->WriteMakeRule(ruleFileStream, targetString.c_str(), glIt->first.c_str(), depends, commands, false);

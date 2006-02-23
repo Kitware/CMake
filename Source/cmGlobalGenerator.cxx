@@ -687,14 +687,6 @@ void cmGlobalGenerator::Generate()
         }
       }
     }
-    {
-    cmTargets::iterator tarIt;
-    std::cout << "Global targets:" << std::endl;
-    for ( tarIt = globalTargets.begin(); tarIt != globalTargets.end(); ++ tarIt )
-      {
-      std::cout << "* " << tarIt->first.c_str() << std::endl;
-      }
-    }
   
   // Generate project files
   for (i = 0; i < m_LocalGenerators.size(); ++i)
