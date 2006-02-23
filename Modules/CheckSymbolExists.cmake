@@ -15,7 +15,7 @@
 
 MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")
-    SET(CHECK_SYMBOL_EXISTS_CONTENT "/* */\n")
+    SET(CMAKE_CONFIGURABLE_FILE_CONTENT "/* */\n")
     SET(MACRO_CHECK_SYMBOL_EXISTS_FLAGS ${CMAKE_REQUIRED_FLAGS})
     IF(CMAKE_REQUIRED_LIBRARIES)
       SET(CHECK_SYMBOL_EXISTS_LIBS 
@@ -30,14 +30,14 @@ MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
       SET(CMAKE_SYMBOL_EXISTS_INCLUDES)
     ENDIF(CMAKE_REQUIRED_INCLUDES)
     FOREACH(FILE ${FILES})
-      SET(CHECK_SYMBOL_EXISTS_CONTENT
-        "${CHECK_SYMBOL_EXISTS_CONTENT}#include <${FILE}>\n")
+      SET(CMAKE_CONFIGURABLE_FILE_CONTENT
+        "${CMAKE_CONFIGURABLE_FILE_CONTENT}#include <${FILE}>\n")
     ENDFOREACH(FILE)
-    SET(CHECK_SYMBOL_EXISTS_CONTENT
-      "${CHECK_SYMBOL_EXISTS_CONTENT}\nvoid cmakeRequireSymbol(int dummy,...){(void)dummy;}\nint main()\n{\n#ifndef ${SYMBOL}\n  cmakeRequireSymbol(0,&${SYMBOL});\n#endif\n  return 0;\n}\n")
+    SET(CMAKE_CONFIGURABLE_FILE_CONTENT
+      "${CMAKE_CONFIGURABLE_FILE_CONTENT}\nvoid cmakeRequireSymbol(int dummy,...){(void)dummy;}\nint main()\n{\n#ifndef ${SYMBOL}\n  cmakeRequireSymbol(0,&${SYMBOL});\n#endif\n  return 0;\n}\n")
 
-    FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c 
-      "${CHECK_SYMBOL_EXISTS_CONTENT}")
+    CONFIGURE_FILE("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
+      "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c" @ONLY)
 
     MESSAGE(STATUS "Looking for ${SYMBOL}")
     TRY_COMPILE(${VARIABLE}
@@ -56,7 +56,7 @@ MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
         "Determining if the ${SYMBOL} "
         "exist passed with the following output:\n"
         "${OUTPUT}\nFile ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c:\n"
-        "${CHECK_SYMBOL_EXISTS_CONTENT}\n")
+        "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n")
     ELSE(${VARIABLE})
       MESSAGE(STATUS "Looking for ${SYMBOL} - not found.")
       SET(${VARIABLE} "" CACHE INTERNAL "Have symbol ${SYMBOL}")
@@ -64,7 +64,7 @@ MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
         "Determining if the ${SYMBOL} "
         "exist failed with the following output:\n"
         "${OUTPUT}\nFile ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c:\n"
-        "${CHECK_SYMBOL_EXISTS_CONTENT}\n")
+        "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n")
     ENDIF(${VARIABLE})
   ENDIF("${VARIABLE}" MATCHES "^${VARIABLE}$")
 ENDMACRO(CHECK_SYMBOL_EXISTS)
