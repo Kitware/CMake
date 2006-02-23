@@ -695,7 +695,7 @@ void cmGlobalGenerator::Generate()
     cmTargets::iterator tit;
     for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
       {
-      targets[tit->first] = tit->second;
+      (*targets)[tit->first] = tit->second;
       }
     m_LocalGenerators[i]->Generate();
     m_LocalGenerators[i]->GenerateInstallRules();
