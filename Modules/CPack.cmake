@@ -16,6 +16,8 @@ cpack_set_if_not_set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 cpack_set_if_not_set(CPACK_PACKAGE_VERSION_MAJOR "0")
 cpack_set_if_not_set(CPACK_PACKAGE_VERSION_MINOR "1")
 cpack_set_if_not_set(CPACK_PACKAGE_VERSION_PATCH "1")
+cpack_set_if_not_set(CPACK_PACKAGE_VERSION
+  "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 cpack_set_if_not_set(CPACK_PACKAGE_VENDOR "Humanity")
 cpack_set_if_not_set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
   "${PROJECT_NAME} built using CMake")
@@ -25,6 +27,10 @@ cpack_set_if_not_set(CPACK_PACKAGE_DESCRIPTION_FILE
 # <project>-<major>.<minor>.<patch>-<release>-<platform>.<pkgtype>
 cpack_set_if_not_set(CPACK_PACKAGE_FILE_NAME
   "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${CMAKE_SYSTEM_NAME}")
+cpack_set_if_not_set(CPACK_PACKAGE_INSTALL_DIRECTORY
+  "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}")
+cpack_set_if_not_set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY
+  "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}")
 
 IF(NOT EXISTS "${CPACK_PACKAGE_DESCRIPTION_FILE}")
   MESSAGE(SEND_ERROR "CPack package description file: \"${CPACK_PACKAGE_DESCRIPTION_FILE}\" could not be found.")
@@ -36,7 +42,7 @@ IF(NOT CPACK_GENERATOR)
     IF(APPLE)
       SET(CPACK_GENERATOR "PackageMaker")
     ELSE(APPLE)
-      SET(CPACK_GENERATOR "TGZ")
+      SET(CPACK_GENERATOR "STGZ")
     ENDIF(APPLE)
   ELSE(UNIX)
     SET(CPACK_GENERATOR "NSIS")
@@ -50,19 +56,21 @@ SET(CPACK_BINARY_DIR "${CMAKE_BINARY_DIR}")
 # Search for system runtime libraries based on the platform.  This is
 # not complete because it is used only for the release process by the
 # developers.
-IF(MSVC)
-  STRING(REGEX REPLACE "\\\\" "/" SYSTEMROOT "$ENV{SYSTEMROOT}")
-  FOREACH(lib
-      "${SYSTEMROOT}/system32/mfc71.dll"
-      "${SYSTEMROOT}/system32/msvcp71.dll"
-      "${SYSTEMROOT}/system32/msvcr71.dll"
-      )
-    IF(EXISTS ${lib})
-      SET(CMake_INSTALL_SYSTEM_RUNTIME_LIBS
-        ${CMake_INSTALL_SYSTEM_RUNTIME_LIBS} ${lib})
-    ENDIF(EXISTS ${lib})
-  ENDFOREACH(lib)
-ENDIF(MSVC)
+IF(NOT CPACK_DISABLE_EXTRA_MSVC_LIBRARIES)
+  IF(MSVC)
+    STRING(REGEX REPLACE "\\\\" "/" SYSTEMROOT "$ENV{SYSTEMROOT}")
+    FOREACH(lib
+        "${SYSTEMROOT}/system32/mfc71.dll"
+        "${SYSTEMROOT}/system32/msvcp71.dll"
+        "${SYSTEMROOT}/system32/msvcr71.dll"
+        )
+      IF(EXISTS ${lib})
+        SET(CMake_INSTALL_SYSTEM_RUNTIME_LIBS
+          ${CMake_INSTALL_SYSTEM_RUNTIME_LIBS} ${lib})
+      ENDIF(EXISTS ${lib})
+    ENDFOREACH(lib)
+  ENDIF(MSVC)
+ENDIF(NOT CPACK_DISABLE_EXTRA_MSVC_LIBRARIES)
 
 # Include system runtime libraries in the installation if any are
 # specified by CMake_INSTALL_SYSTEM_RUNTIME_LIBS.

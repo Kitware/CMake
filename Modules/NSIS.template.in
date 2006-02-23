@@ -19,7 +19,7 @@
   !include "MUI.nsh"
 
   ;Default installation folder
-  InstallDir "$PROGRAMFILES\@CPACK_PACKAGE_NAME@ ${VERSION}"  
+  InstallDir "$PROGRAMFILES\@CPACK_PACKAGE_INSTALL_DIRECTORY@"  
 
 ;--------------------------------
 ; determine admin versus local install
@@ -51,7 +51,7 @@ FunctionEnd
 ;General
 
   ;Name and file
-  Name "@CPACK_PACKAGE_NAME@ ${VERSION}"
+  Name "@CPACK_PACKAGE_INSTALL_DIRECTORY@"
   OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
 
 ;--------------------------------
@@ -312,7 +312,7 @@ FunctionEnd
   
   ;Start Menu Folder Page Configuration
   !define MUI_STARTMENUPAGE_REGISTRY_ROOT "SHCTX" 
-  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@ ${VERSION}" 
+  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" 
   !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
   !insertmacro MUI_PAGE_STARTMENU Application $STARTMENU_FOLDER
 
@@ -344,10 +344,8 @@ Section "Dummy Section" SecDummy
   SetOutPath "$INSTDIR"
   File /r "${INST_DIR}\*.*"
 
-  @CPACK_NSIS_EXTRA_COMMANDS@
-
   ;Store installation folder
-  WriteRegStr SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@ ${VERSION}" "" $INSTDIR
+  WriteRegStr SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "" $INSTDIR
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -359,6 +357,8 @@ Section "Dummy Section" SecDummy
 @CPACK_NSIS_CREATE_ICONS@
 @CPACK_NSIS_CREATE_EXTRA_ICONS@
   CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
+
+@CPACK_NSIS_EXTRA_INSTALL_COMMANDS@
   
   !insertmacro MUI_STARTMENU_WRITE_END
 
@@ -395,6 +395,8 @@ FunctionEnd
 
 Section "Uninstall"
 
+@CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS@
+
   ;Remove files we installed.
   ;Keep the list of directories here in sync with the File commands above.
 @CPACK_NSIS_DELETE_FILES@
@@ -407,7 +409,7 @@ Section "Uninstall"
   RMDir "$INSTDIR"
 
   ; Remove the registry entries.
-  DeleteRegKey SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@ ${VERSION}"
+  DeleteRegKey SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@"
 
   !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
     
@@ -428,7 +430,7 @@ Section "Uninstall"
     StrCmp $MUI_TEMP $SMPROGRAMS startMenuDeleteLoopDone startMenuDeleteLoop
   startMenuDeleteLoopDone:
 
-  DeleteRegKey /ifempty SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@ ${VERSION}"
+  DeleteRegKey /ifempty SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@"
 
   Push $INSTDIR\bin
   Call un.RemoveFromPath

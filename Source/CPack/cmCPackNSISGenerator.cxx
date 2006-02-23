@@ -27,6 +27,7 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/Directory.hxx>
+#include <cmsys/RegularExpression.hxx>
 
 //----------------------------------------------------------------------
 cmCPackNSISGenerator::cmCPackNSISGenerator()
@@ -129,8 +130,37 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find NSIS compiler" << std::endl);
     return 0;
     }
-  this->SetOption("CPACK_INSTALLER_PROGRAM", nsisPath.c_str());
+  std::string nsisCmd = "\"" + nsisPath + "\" /VERSION";
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Test NSIS version: " << nsisCmd.c_str() << std::endl);
+  std::string output;
+  int retVal = 1;
+  bool resS = cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output, &retVal, 0, m_GeneratorVerbose, 0);
 
+  cmsys::RegularExpression versionRex("v([0-9]+.[0-9]+)");
+  if ( !resS || retVal || !versionRex.find(output))
+    {
+    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    tmpFile += "/NSISOutput.log";
+    cmGeneratedFileStream ofs(tmpFile.c_str());
+    ofs << "# Run command: " << nsisCmd.c_str() << std::endl
+      << "# Output:" << std::endl
+      << output.c_str() << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem checking NSIS version with command: " << nsisCmd.c_str() << std::endl
+      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+    return 0;
+    }
+  float nsisVersion = atof(versionRex.match(1).c_str());
+  float minNSISVersion = 2.09;
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "NSIS Version: "
+    << nsisVersion << std::endl);
+  if ( nsisVersion < minNSISVersion )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack requires NSIS Version 2.09 or greater. NSIS found on the system was: "
+      << nsisVersion << std::endl);
+    return 0;
+    }
+
+  this->SetOption("CPACK_INSTALLER_PROGRAM", nsisPath.c_str());
   const char* cpackPackageExecutables = this->GetOption("CPACK_PACKAGE_EXECUTABLES");
   if ( cpackPackageExecutables )
     {
