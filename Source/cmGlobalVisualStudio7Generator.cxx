@@ -205,22 +205,6 @@ void cmGlobalVisualStudio7Generator::Generate()
                           "echo", "Build all projects");
       std::string cmake_command = 
         m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
-      gen[0]->GetMakefile()->
-        AddUtilityCommand("INSTALL", false, no_output, no_depends,
-                          no_working_dir,
-                          cmake_command.c_str(),
-                          "-DBUILD_TYPE=$(OutDir)", "-P", "cmake_install.cmake");
-
-      // Make the INSTALL target depend on ALL_BUILD unless the
-      // project says to not do so.
-      const char* noall =
-        gen[0]->GetMakefile()
-        ->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-      if(!noall || cmSystemTools::IsOff(noall))
-        {
-        cmTarget* install = gen[0]->GetMakefile()->FindTarget("INSTALL");
-        install->AddUtility("ALL_BUILD");
-        }
       }
     }
 
@@ -331,7 +315,8 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
               {
               if (al->second.IsInAll())
                 {
-                if (al->second.GetType() == cmTarget::UTILITY)
+                if (al->second.GetType() == cmTarget::UTILITY &&
+                    al->second.GetType() == cmTarget::GLOBAL_TARGET)
                   {
                   l->second.AddUtility(al->first.c_str());
                   }

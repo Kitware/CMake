@@ -183,6 +183,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
         this->SetBuildType(EXECUTABLE,l->first.c_str(), l->second);
         break;
       case cmTarget::UTILITY:
+      case cmTarget::GLOBAL_TARGET:
         this->SetBuildType(UTILITY, l->first.c_str(), l->second);
         break;
       case cmTarget::INSTALL_FILES:
@@ -309,7 +310,8 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   // special care for dependencies.  The first rule must depend on all
   // the dependencies of all the rules.  The later rules must each
   // depend only on the previous rule.
-  if (target.GetType() == cmTarget::UTILITY &&
+  if ((target.GetType() == cmTarget::UTILITY ||
+      target.GetType() == cmTarget::GLOBAL_TARGET) &&
       (!target.GetPreBuildCommands().empty() ||
        !target.GetPostBuildCommands().empty()))
     {
@@ -453,7 +455,8 @@ void cmLocalVisualStudio6Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
       {
       cmSystemTools::ExpandListArgument(dependsValue, depends);
       }
-    if (source != libName || target.GetType() == cmTarget::UTILITY)
+    if (source != libName || target.GetType() == cmTarget::UTILITY
+      || target.GetType() == cmTarget::GLOBAL_TARGET)
       {
       fout << "# Begin Source File\n\n";
         
@@ -718,7 +721,8 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
 {
   std::string customRuleCode = "";
 
-  if (target.GetType() >= cmTarget::UTILITY)
+  if (target.GetType() >= cmTarget::UTILITY ||
+    target.GetType() >= cmTarget::GLOBAL_TARGET)
     {
     return customRuleCode;
     }

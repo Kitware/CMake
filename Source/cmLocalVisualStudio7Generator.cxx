@@ -162,11 +162,6 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
               && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
               && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
               && (strcmp(l->first.c_str(), "ALL_BUILD") != 0)
-              && (strcmp(l->first.c_str(), "RUN_TESTS") != 0)
-              && (strcmp(l->first.c_str(), "EDIT_CACHE") != 0)
-              && (strcmp(l->first.c_str(), "REBUILD_CACHE") != 0)
-              && (strcmp(l->first.c_str(), "PACKAGE") != 0)
-              && (strcmp(l->first.c_str(), "INSTALL") != 0)
               && (strcmp(l->first.c_str(), CMAKE_CHECK_BUILD_SYSTEM_TARGET) != 0))
             {
             cmTarget& target = l->second;
@@ -435,6 +430,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       configType = "1";
       break; 
     case cmTarget::UTILITY:
+    case cmTarget::GLOBAL_TARGET:
       configType = "10";
     default:
       break;
@@ -859,6 +855,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     break;
     }
     case cmTarget::UTILITY:
+    case cmTarget::GLOBAL_TARGET:
       break;
     }
 }
@@ -1070,7 +1067,8 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
           }
         }
       }
-    if (source != libName || target.GetType() == cmTarget::UTILITY)
+    if (source != libName || target.GetType() == cmTarget::UTILITY ||
+      target.GetType() == cmTarget::GLOBAL_TARGET )
       {
       fout << "\t\t\t<File\n";
       std::string d = this->ConvertToXMLOutputPathSingle(source.c_str());
@@ -1222,7 +1220,8 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
                                                       cmTarget &target, 
                                                       const char * /*libName*/)
 {
-  if (target.GetType() > cmTarget::UTILITY)
+  if (target.GetType() > cmTarget::UTILITY ||
+    target.GetType() > cmTarget::GLOBAL_TARGET)
     {
     return;
     }

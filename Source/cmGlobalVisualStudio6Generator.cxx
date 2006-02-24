@@ -169,23 +169,6 @@ void cmGlobalVisualStudio6Generator::Generate()
       gen[0]->GetMakefile()->
         AddUtilityCommand("ALL_BUILD", false, no_output, no_depends, no_working_dir,
                           "echo", "Build all projects");
-      std::string cmake_command = 
-        m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
-      gen[0]->GetMakefile()->
-        AddUtilityCommand("INSTALL", false, no_output, no_depends, no_working_dir,
-                          cmake_command.c_str(),
-                          "-DBUILD_TYPE=$(IntDir)", "-P", "cmake_install.cmake");
-
-      // Make the INSTALL target depend on ALL_BUILD unless the
-      // project says to not do so.
-      const char* noall =
-        gen[0]->GetMakefile()
-        ->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-      if(!noall || cmSystemTools::IsOff(noall))
-        {
-        cmTarget* install = gen[0]->GetMakefile()->FindTarget("INSTALL");
-        install->AddUtility("ALL_BUILD");
-        }
       }
     }
   
@@ -215,6 +198,9 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
   bool doneAllBuild = false;
   bool doneRunTests = false;
   bool doneInstall = false;
+  bool doneEditCache = false;
+  bool doneRebuildCache = false;
+  bool donePackage = false;
 
   for(i = 0; i < generators.size(); ++i)
     {
@@ -320,6 +306,39 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
             else
               {
               doneRunTests = true;
+              }
+            }
+          if(l->first == "EDIT_CACHE")
+            {
+            if(doneEditCache)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneEditCache = true;
+              }
+            }
+          if(l->first == "REBUILD_CACHE")
+            {
+            if(doneRebuildCache)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneRebuildCache = true;
+              }
+            }
+          if(l->first == "PACKAGE")
+            {
+            if(donePackage)
+              {
+              skip = true;
+              }
+            else
+              {
+              donePackage = true;
               }
             }
           if(!skip)
