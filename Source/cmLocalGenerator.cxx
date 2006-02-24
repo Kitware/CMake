@@ -511,6 +511,7 @@ void cmLocalGenerator::CreateCustomTargetsAndCommands(std::set<cmStdString> cons
         }
         break; 
       case cmTarget::UTILITY:
+      case cmTarget::GLOBAL_TARGET:
       case cmTarget::INSTALL_FILES:
       case cmTarget::INSTALL_PROGRAMS:
         break;
@@ -1072,6 +1073,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       }
       break; 
     case cmTarget::UTILITY:
+    case cmTarget::GLOBAL_TARGET:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
       break;
@@ -1389,6 +1391,7 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
         }
         break;
       case cmTarget::UTILITY:
+      case cmTarget::GLOBAL_TARGET:
         // Depending on a utility target may not work but just trust
         // the user to have given a valid name.
         return inName;
