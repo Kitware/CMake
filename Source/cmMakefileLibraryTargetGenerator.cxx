@@ -109,7 +109,8 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 
   std::string extraFlags;
   this->LocalGenerator->AppendFlags(extraFlags, this->Target->GetProperty("LINK_FLAGS"));
-  this->LocalGenerator->AddConfigVariableFlags(extraFlags, "CMAKE_SHARED_LINKER_FLAGS");
+  this->LocalGenerator->AddConfigVariableFlags(extraFlags, "CMAKE_SHARED_LINKER_FLAGS",
+                                               this->LocalGenerator->m_ConfigurationName.c_str());
   if(this->Makefile->IsOn("WIN32") && !(this->Makefile->IsOn("CYGWIN") || this->Makefile->IsOn("MINGW")))
     {
     const std::vector<cmSourceFile*>& sources = this->Target->GetSourceFiles();
@@ -142,7 +143,8 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 
   std::string extraFlags;
   this->LocalGenerator->AppendFlags(extraFlags, this->Target->GetProperty("LINK_FLAGS"));
-  this->LocalGenerator->AddConfigVariableFlags(extraFlags, "CMAKE_MODULE_LINKER_FLAGS");
+  this->LocalGenerator->AddConfigVariableFlags(extraFlags, "CMAKE_MODULE_LINKER_FLAGS",
+                                               this->LocalGenerator->m_ConfigurationName.c_str());
   // TODO: .def files should be supported here also.
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }

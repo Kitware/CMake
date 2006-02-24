@@ -219,7 +219,9 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
       }
     
     // Add language-specific flags.
-    this->LocalGenerator->AddLanguageFlags(flags, lang);
+    this->LocalGenerator
+      ->AddLanguageFlags(flags, lang,
+                         this->LocalGenerator->m_ConfigurationName.c_str());
     
     // Add shared-library flags if needed.
     this->LocalGenerator->AddSharedFlags(flags, lang, shared);

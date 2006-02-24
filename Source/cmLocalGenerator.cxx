@@ -1349,13 +1349,14 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddLanguageFlags(std::string& flags,
-                                                     const char* lang)
+                                        const char* lang,
+                                        const char* config)
 {
   // Add language-specific flags.
   std::string flagsVar = "CMAKE_";
   flagsVar += lang;
   flagsVar += "_FLAGS";
-  this->AddConfigVariableFlags(flags, flagsVar.c_str());
+  this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
 }
 
 //----------------------------------------------------------------------------
@@ -1417,8 +1418,8 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddSharedFlags(std::string& flags,
-                                                   const char* lang,
-                                                   bool shared)
+                                      const char* lang,
+                                      bool shared)
 {
   std::string flagsVar;
 
@@ -1443,18 +1444,18 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
-                                                           const char* var)
+                                              const char* var,
+                                              const char* config)
 {
   // Add the flags from the variable itself.
   std::string flagsVar = var;
   this->AppendFlags(flags, m_Makefile->GetDefinition(flagsVar.c_str()));
 
   // Add the flags from the build-type specific variable.
-  const char* buildType = m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  if(buildType && *buildType)
+  if(config && *config)
     {
     flagsVar += "_";
-    flagsVar += cmSystemTools::UpperCase(buildType);
+    flagsVar += cmSystemTools::UpperCase(config);
     this->AppendFlags(flags, m_Makefile->GetDefinition(flagsVar.c_str()));
     }
 }

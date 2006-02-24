@@ -187,7 +187,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add flags to create an executable.
   this->LocalGenerator->
-    AddConfigVariableFlags(linkFlags, "CMAKE_EXE_LINKER_FLAGS");
+    AddConfigVariableFlags(linkFlags, "CMAKE_EXE_LINKER_FLAGS",
+                           this->LocalGenerator->m_ConfigurationName.c_str());
 
 
   if(this->Target->GetPropertyAsBool("WIN32_EXECUTABLE"))
@@ -202,7 +203,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
 
   // Add language-specific flags.
-  this->LocalGenerator->AddLanguageFlags(flags, linkLanguage);
+  this->LocalGenerator
+    ->AddLanguageFlags(flags, linkLanguage,
+                       this->LocalGenerator->m_ConfigurationName.c_str());
 
   // Add target-specific linker flags.
   this->LocalGenerator->AppendFlags(linkFlags, this->Target->GetProperty("LINK_FLAGS"));

@@ -1031,27 +1031,18 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string cflags;
   if(lang)
     {
-    // Temporarily set the CMAKE_BUILD_TYPE so the local generator can use
-    // it.  TODO: The local generator methods should take the configuration
-    // name as input.
-    if(configName)
-      {
-      m_CurrentMakefile->AddDefinition("CMAKE_BUILD_TYPE", configName);
-      }
     // for c++ projects get the c flags as well
     if(strcmp(lang, "CXX") == 0)
       {
-      m_CurrentLocalGenerator->AddLanguageFlags(cflags, "C");
+      m_CurrentLocalGenerator->AddLanguageFlags(cflags, "C", configName);
       m_CurrentLocalGenerator->AddSharedFlags(cflags, lang, shared);
       }
+
     // Add language-specific flags.
-    m_CurrentLocalGenerator->AddLanguageFlags(flags, lang);
+    m_CurrentLocalGenerator->AddLanguageFlags(flags, lang, configName);
     
     // Add shared-library flags if needed.
     m_CurrentLocalGenerator->AddSharedFlags(flags, lang, shared);
-
-    // Remove the temporary CMAKE_BUILD_TYPE definition.
-    m_CurrentMakefile->AddDefinition("CMAKE_BUILD_TYPE", "");
     }
 
   // Add define flags
@@ -1364,13 +1355,18 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   std::string fileTypeString;
   std::string productTypeString;
   std::string productName;
-  this->CreateBuildSettings(cmtarget, 
-                            buildSettings, fileTypeString, 
-                            productTypeString, productName, 0);
+  const char* globalConfig = 0;
   if(m_XcodeVersion > 20)
     {
     this->AddConfigurations(target, cmtarget);
     }
+  else
+    {
+    globalConfig = m_CurrentMakefile->GetDefinition("CMAKE_BUILD_TYPE");  
+    }
+  this->CreateBuildSettings(cmtarget, 
+                            buildSettings, fileTypeString, 
+                            productTypeString, productName, globalConfig);
   target->AddAttribute("buildSettings", buildSettings);
   cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("dependencies", dependencies);
@@ -1441,13 +1437,18 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   std::string fileTypeString;
   std::string productTypeString;
   std::string productName;
+  const char* globalConfig = 0;
   if(m_XcodeVersion > 20)
     {
     this->AddConfigurations(target, cmtarget);
     }
+  else
+    {
+    globalConfig = m_CurrentMakefile->GetDefinition("CMAKE_BUILD_TYPE");  
+    }
   this->CreateBuildSettings(cmtarget, 
                             buildSettings, fileTypeString, 
-                            productTypeString, productName, 0);
+                            productTypeString, productName, globalConfig);
   target->AddAttribute("buildSettings", buildSettings);
   cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("dependencies", dependencies);
