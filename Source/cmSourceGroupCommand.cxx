@@ -17,8 +17,7 @@
 #include "cmSourceGroupCommand.h"
 
 inline std::vector<std::string> tokenize(const std::string& str,
-                                         const std::string& sep, 
-                                         bool skipEmptyTokens)
+                                         const std::string& sep)
 {
   std::vector<std::string> tokens;
   if(str.size() == 0)
@@ -64,7 +63,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
     delimiter = m_Makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
     }
 
-  std::vector<std::string> folders = tokenize(args[0], delimiter, true);
+  std::vector<std::string> folders = tokenize(args[0], delimiter);
  
   const char *parent = NULL;
   cmSourceGroup* sg = NULL;
