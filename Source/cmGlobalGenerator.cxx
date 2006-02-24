@@ -1231,15 +1231,18 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       "Run CPack packaging tool...", &cpackCommandLines, depends);
 
   // Test
-  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
-  singleLine.erase(singleLine.begin(), singleLine.end());
-  depends.erase(depends.begin(), depends.end());
-  singleLine.push_back(this->GetCMakeInstance()->GetCTestCommand());
-  singleLine.push_back("--force-new-ctest-process");
-  cpackCommandLines.push_back(singleLine);
-  (*targets)[this->GetTestTargetName()]
-    = this->CreateGlobalTarget(this->GetTestTargetName(),
-      "Running tests...", &cpackCommandLines, depends);
+  if(mf->IsOn("CMAKE_TESTING_ENABLED"))
+    {
+    cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+    singleLine.erase(singleLine.begin(), singleLine.end());
+    depends.erase(depends.begin(), depends.end());
+    singleLine.push_back(this->GetCMakeInstance()->GetCTestCommand());
+    singleLine.push_back("--force-new-ctest-process");
+    cpackCommandLines.push_back(singleLine);
+    (*targets)[this->GetTestTargetName()]
+      = this->CreateGlobalTarget(this->GetTestTargetName(),
+        "Running tests...", &cpackCommandLines, depends);
+    }
 
   //Edit Cache
   cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
@@ -1306,6 +1309,12 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     cmd = "$(CMAKE_COMMAND)";
     }
   singleLine.push_back(cmd.c_str());
+  const char* cmakeCfgIntDir = mf->GetDefinition("CMAKE_CFG_INTDIR");
+  if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[1] != '.' )
+    {
+    std::string cfgArg = "-DBUILD_TYPE=";
+    cfgArg += mf->GetDefinition("CMAKE_CFG_INTDIR");
+    }
   singleLine.push_back("-P");
   singleLine.push_back("cmake_install.cmake");
   cpackCommandLines.push_back(singleLine);
