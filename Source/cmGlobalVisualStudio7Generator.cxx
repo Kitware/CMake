@@ -210,6 +210,11 @@ void cmGlobalVisualStudio7Generator::Generate()
                           no_working_dir,
                           cmake_command.c_str(),
                           "-DBUILD_TYPE=$(OutDir)", "-P", "cmake_install.cmake");
+      gen[0]->GetMakefile()->
+        AddUtilityCommand("preinstall", false, no_output, no_depends,
+                          no_working_dir,
+                          cmake_command.c_str(),
+                          "-E", "echo", "preinstall");
 
       // Make the INSTALL target depend on ALL_BUILD unless the
       // project says to not do so.
@@ -283,6 +288,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
   bool doneEditCache = false;
   bool doneRebuildCache = false;
   bool donePackage = false;
+  bool donePreInstall = false;
   
   // For each cmMakefile, create a VCProj for it, and
   // add it to this SLN file
@@ -379,6 +385,17 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
             else
               {
               doneInstall = true;
+              }
+            }
+          if(l->first == "preinstall")
+            {
+            if(donePreInstall)
+              {
+              skip = true;
+              }
+            else
+              {
+              donePreInstall = true;
               }
             }
           if(l->first == "RUN_TESTS")
@@ -743,6 +760,7 @@ void cmGlobalVisualStudio7Generator::Configure()
   cmGlobalGenerator::Configure();
   this->CreateGUID("ALL_BUILD");
   this->CreateGUID("INSTALL");
+  this->CreateGUID("preinstall");
   this->CreateGUID("RUN_TESTS");
   this->CreateGUID("EDIT_CACHE");
   this->CreateGUID("REBUILD_CACHE");
