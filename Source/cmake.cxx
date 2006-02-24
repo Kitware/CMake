@@ -1897,6 +1897,7 @@ const char* cmake::GetCTestCommand()
     }
 
   cmMakefile* mf = this->GetGlobalGenerator()->GetLocalGenerator(0)->GetMakefile();
+#ifdef CMAKE_BUILD_WITH_CMAKE
   m_CTestCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
   m_CTestCommand = removeQuotes(m_CTestCommand);
   m_CTestCommand = cmSystemTools::GetFilenamePath(m_CTestCommand.c_str());
@@ -1919,6 +1920,12 @@ const char* cmake::GetCTestCommand()
     m_CTestCommand += "ctest";
     m_CTestCommand += cmSystemTools::GetExecutableExtension();
     }
+#else
+  // Only for bootstrap
+  m_CTestCommand += mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+  m_CTestCommand += "/ctest";
+  m_CTestCommand += cmSystemTools::GetExecutableExtension();
+#endif
   if ( m_CTestCommand.empty() )
     {
     cmSystemTools::Error("Cannot find the CTest executable");
