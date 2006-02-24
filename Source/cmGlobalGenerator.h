@@ -174,6 +174,7 @@ protected:
   virtual const char* GetPackageTargetName()      { return "PACKAGE"; }
   virtual const char* GetEditCacheTargetName()    { return "EDIT_CACHE"; }
   virtual const char* GetRebuildCacheTargetName() { return "REBUILD_CACHE"; }
+  virtual bool GetPreInstallAvailable() { return false; }
 
   bool m_ForceUnixPaths;
   cmStdString m_FindMakeProgramFile;

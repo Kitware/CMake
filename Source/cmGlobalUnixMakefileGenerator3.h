@@ -126,6 +126,7 @@ protected:
   virtual const char* GetPackageTargetName()      { return "package"; }
   virtual const char* GetEditCacheTargetName()    { return "edit_cache"; }
   virtual const char* GetRebuildCacheTargetName() { return "rebuild_cache"; }
+  virtual bool GetPreInstallAvailable() { return true; }
 
 
   // Some make programs (Borland) do not keep a rule if there are no

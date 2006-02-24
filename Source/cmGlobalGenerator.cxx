@@ -1289,7 +1289,10 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
   singleLine.erase(singleLine.begin(), singleLine.end());
   depends.erase(depends.begin(), depends.end());
-  depends.push_back("preinstall");
+  if ( this->GetPreInstallAvailable() )
+    {
+    depends.push_back("preinstall");
+    }
   if(mf->GetDefinition("CMake_BINARY_DIR"))
     {
     // We are building CMake itself.  We cannot use the original

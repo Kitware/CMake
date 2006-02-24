@@ -59,7 +59,6 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
   bool doneEditCache = false;
   bool doneRebuildCache = false;
   bool donePackage = false;
-  bool donePreInstall = false;
   
   // For each cmMakefile, create a VCProj for it, and
   // add it to this SLN file
@@ -167,17 +166,6 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
             else
               {
               doneInstall = true;
-              }
-            }
-          if(l->first == "preinstall")
-            {
-            if(donePreInstall)
-              {
-              skip = true;
-              }
-            else
-              {
-              donePreInstall = true;
               }
             }
           if(l->first == "RUN_TESTS")
