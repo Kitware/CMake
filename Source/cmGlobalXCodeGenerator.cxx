@@ -633,10 +633,12 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       continue;
       }
     if(cmtarget.GetType() == cmTarget::UTILITY ||
+       cmtarget.GetType() == cmTarget::GLOBAL_TARGET ||
        cmtarget.GetType() == cmTarget::INSTALL_FILES ||
        cmtarget.GetType() == cmTarget::INSTALL_PROGRAMS)
       {
-      if(cmtarget.GetType() == cmTarget::UTILITY)
+      if(cmtarget.GetType() == cmTarget::UTILITY ||
+         cmtarget.GetType() == cmTarget::GLOBAL_TARGET)
         {
         targets.push_back(this->CreateUtilityTarget(cmtarget));
         }
