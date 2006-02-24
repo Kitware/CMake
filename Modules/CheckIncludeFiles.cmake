@@ -29,7 +29,7 @@ MACRO(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     SET(CMAKE_CONFIGURABLE_FILE_CONTENT
       "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n\nint main(){return 0;}\n")
     CONFIGURE_FILE("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-      "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckIncludeFiles.c" @ONLY)
+      "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckIncludeFiles.c" @ONLY IMMEDIATE)
 
     MESSAGE(STATUS "Looking for include files ${VARIABLE}")
     TRY_COMPILE(${VARIABLE}
