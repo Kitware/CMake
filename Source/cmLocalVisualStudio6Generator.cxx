@@ -455,8 +455,8 @@ void cmLocalVisualStudio6Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
       {
       cmSystemTools::ExpandListArgument(dependsValue, depends);
       }
-    if (source != libName || target.GetType() == cmTarget::UTILITY
-      || target.GetType() == cmTarget::GLOBAL_TARGET)
+    if (source != libName || target.GetType() == cmTarget::UTILITY ||
+      target.GetType() == cmTarget::GLOBAL_TARGET)
       {
       fout << "# Begin Source File\n\n";
         
@@ -721,8 +721,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
 {
   std::string customRuleCode = "";
 
-  if (target.GetType() >= cmTarget::UTILITY ||
-    target.GetType() >= cmTarget::GLOBAL_TARGET)
+  if (target.GetType() >= cmTarget::UTILITY )
     {
     return customRuleCode;
     }

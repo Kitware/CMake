@@ -111,11 +111,9 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
   mf->AddDefinition("XCODE","1");
   if(m_XcodeVersion == 15)
     {
-    mf->AddDefinition("CMAKE_CFG_INTDIR",".");
     }
   else
     {
-    mf->AddDefinition("CMAKE_CFG_INTDIR","$(CONFIGURATION)");
     mf->AddCacheDefinition(
       "CMAKE_CONFIGURATION_TYPES",
       "Debug;Release;MinSizeRel;RelWithDebInfo",

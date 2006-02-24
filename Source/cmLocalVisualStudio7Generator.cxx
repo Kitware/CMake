@@ -1220,8 +1220,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
                                                       cmTarget &target, 
                                                       const char * /*libName*/)
 {
-  if (target.GetType() > cmTarget::UTILITY ||
-    target.GetType() > cmTarget::GLOBAL_TARGET)
+  if (target.GetType() > cmTarget::GLOBAL_TARGET)
     {
     return;
     }

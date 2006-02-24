@@ -32,6 +32,9 @@ public:
   virtual void  WriteXCodePBXProj(std::ostream& fout,
                                   cmLocalGenerator* root,
                                   std::vector<cmLocalGenerator*>& generators);
+
+  ///! What is the configurations directory variable called?
+  virtual const char* GetCMakeCFGInitDirectory()  { return "$(CONFIGURATION)"; }
 };
 
 #endif

@@ -131,6 +131,9 @@ public:
   ///! What is the output extension for a given source file extension.
   const char* GetLanguageOutputExtensionFromExtension(const char* lang);
 
+  ///! What is the configurations directory variable called?
+  virtual const char* GetCMakeCFGInitDirectory()  { return "."; }
+
   /**
    * Convert the given remote path to a relative path with respect to
    * the given local path.  The local path must be given in component

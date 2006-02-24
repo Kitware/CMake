@@ -2040,6 +2040,8 @@ cmSourceFile* cmMakefile::AddSource(cmSourceFile const&sf)
   
 void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang)
 {
+  this->AddDefinition("CMAKE_CFG_INTDIR",
+    m_LocalGenerator->GetGlobalGenerator()->GetCMakeCFGInitDirectory());
   m_LocalGenerator->GetGlobalGenerator()->EnableLanguage(lang, this);
 }
 

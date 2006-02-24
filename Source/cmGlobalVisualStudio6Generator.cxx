@@ -27,7 +27,6 @@ cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
 void cmGlobalVisualStudio6Generator::EnableLanguage(std::vector<std::string>const& lang,
                                                     cmMakefile *mf)
 {
-  mf->AddDefinition("CMAKE_CFG_INTDIR","$(IntDir)");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc"); 
@@ -246,7 +245,8 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
               {
               if (al->second.IsInAll())
                 {
-                if (al->second.GetType() == cmTarget::UTILITY)
+                if (al->second.GetType() == cmTarget::UTILITY ||
+                    al->second.GetType() == cmTarget::GLOBAL_TARGET)
                   {
                   l->second.AddUtility(al->first.c_str());
                   }

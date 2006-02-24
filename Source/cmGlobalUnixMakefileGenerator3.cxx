@@ -31,7 +31,6 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
 void cmGlobalUnixMakefileGenerator3
 ::EnableLanguage(std::vector<std::string>const& languages, cmMakefile *mf)
 {
-  mf->AddDefinition("CMAKE_CFG_INTDIR",".");
   this->cmGlobalGenerator::EnableLanguage(languages, mf);
   std::string path;
   for(std::vector<std::string>::const_iterator l = languages.begin();

@@ -84,6 +84,9 @@ public:
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* config, std::string& dir);
 
+  ///! What is the configurations directory variable called?
+  virtual const char* GetCMakeCFGInitDirectory()  { return "$(OutDir)"; }
+
 protected:
   virtual void OutputSLNFile(cmLocalGenerator* root, 
                              std::vector<cmLocalGenerator*>& generators);
@@ -102,6 +105,7 @@ protected:
   void WriteExternalProject(std::ostream& fout, 
                             const char* name, const char* path,
                             const std::vector<std::string>& dependencies);
+
 
   std::vector<std::string> m_Configurations;
   std::map<cmStdString, cmStdString> m_GUIDMap;

@@ -72,6 +72,9 @@ public:
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* config, std::string& dir);
 
+  ///! What is the configurations directory variable called?
+  virtual const char* GetCMakeCFGInitDirectory()  { return "."; }
+
 private: 
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
                                      cmSourceGroup* sg);
@@ -148,7 +151,6 @@ private:
                           const char* varNameSuffix,
                           const char* default_flags);
 protected:
-
   int m_XcodeVersion;
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;

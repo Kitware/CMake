@@ -1309,11 +1309,13 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     cmd = "$(CMAKE_COMMAND)";
     }
   singleLine.push_back(cmd.c_str());
-  const char* cmakeCfgIntDir = mf->GetDefinition("CMAKE_CFG_INTDIR");
+  const char* cmakeCfgIntDir = this->GetCMakeCFGInitDirectory();
+  std::cout << "CMakeCFG: " << cmakeCfgIntDir << std::endl;
   if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[1] != '.' )
     {
     std::string cfgArg = "-DBUILD_TYPE=";
     cfgArg += mf->GetDefinition("CMAKE_CFG_INTDIR");
+    singleLine.push_back(cfgArg);
     }
   singleLine.push_back("-P");
   singleLine.push_back("cmake_install.cmake");

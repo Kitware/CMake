@@ -78,6 +78,8 @@ public:
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* config, std::string& dir);
 
+  ///! What is the configurations directory variable called?
+  virtual const char* GetCMakeCFGInitDirectory()  { return "$(IntDir)"; }
 private:
   void GenerateConfigurations(cmMakefile* mf);
   void WriteDSWFile(std::ostream& fout);

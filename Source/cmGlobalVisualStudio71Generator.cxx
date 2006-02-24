@@ -107,7 +107,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
               {
               if (al->second.IsInAll())
                 {
-                if (al->second.GetType() == cmTarget::UTILITY &&
+                if (al->second.GetType() == cmTarget::UTILITY ||
                     al->second.GetType() == cmTarget::GLOBAL_TARGET)
                   {
                   l->second.AddUtility(al->first.c_str());
