@@ -273,6 +273,7 @@ class cmake
    */
   const char* GetCTestCommand();
   const char* GetCPackCommand();
+  const char* GetCMakeCommand() { return m_CMakeCommand.c_str(); }
 
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();

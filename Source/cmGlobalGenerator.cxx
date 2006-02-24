@@ -1248,11 +1248,13 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
   singleLine.erase(singleLine.begin(), singleLine.end());
   depends.erase(depends.begin(), depends.end());
+
+  const char* cmakeCommand = this->GetCMakeInstance()->GetCMakeCommand();
   // Use CMAKE_EDIT_COMMAND for the edit_cache rule if it is defined.
   // Otherwise default to the interactive command-line interface.
   if(mf->GetDefinition("CMAKE_EDIT_COMMAND"))
     {
-    singleLine.push_back("$(CMAKE_EDIT_COMMAND)");
+    singleLine.push_back(mf->GetDefinition("CMAKE_EDIT_COMMAND"));
     singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
     singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
     cpackCommandLines.push_back(singleLine);
@@ -1263,7 +1265,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     }
   else
     {
-    singleLine.push_back("$(CMAKE_COMMAND)");
+    singleLine.push_back(cmakeCommand);
     singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
     singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
     singleLine.push_back("-i");
@@ -1278,7 +1280,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
   singleLine.erase(singleLine.begin(), singleLine.end());
   depends.erase(depends.begin(), depends.end());
-  singleLine.push_back("$(CMAKE_COMMAND)");
+  singleLine.push_back(cmakeCommand);
   singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
   singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
   cpackCommandLines.push_back(singleLine);
@@ -1301,12 +1303,11 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     // We are building CMake itself.  We cannot use the original
     // executable to install over itself.
     cmd = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-    cmd += "/";
-    cmd += "cmake";
+    cmd += "/cmake";
     }
   else
     {
-    cmd = "$(CMAKE_COMMAND)";
+    cmd = cmakeCommand;
     }
   singleLine.push_back(cmd.c_str());
   const char* cmakeCfgIntDir = this->GetCMakeCFGInitDirectory();
