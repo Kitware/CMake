@@ -4,8 +4,11 @@ SET(CMAKE_SHARED_MODULE_PREFIX "lib")
 SET(CMAKE_SHARED_MODULE_SUFFIX ".so")
 SET(CMAKE_MODULE_EXISTS 1)
 SET(CMAKE_DL_LIBS "")
-SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-dynamiclib")
-SET(CMAKE_SHARED_MODULE_CREATE_C_FLAGS "-bundle")
+SET(CMAKE_C_LINK_FLAGS "-headerpad_max_install_names")
+SET(CMAKE_CXX_LINK_FLAGS "-headerpad_max_install_names")
+SET(CMAKE_PLATFORM_HAS_INSTALLNAME 1)
+SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-dynamiclib -headerpad_max_install_names")
+SET(CMAKE_SHARED_MODULE_CREATE_C_FLAGS "-bundle -headerpad_max_install_names")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib" ".so" ".a")
 
 IF("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
@@ -14,32 +17,17 @@ IF("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
 ENDIF("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
 
 IF(NOT XCODE)
-# Enable shared library versioning.
+  # Enable shared library versioning.  This flag is not actually referenced
+  # but the fact that the setting exists will cause the generators to support
+  # soname computation.
   SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
   SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-install_name")
 ENDIF(NOT XCODE)
 
-# OSX does not really implement an rpath, but it does allow a path to
-# be specified in the soname field of a dylib.
-IF(CMAKE_SKIP_RPATH)
-  # No rpath requested.  Just use the soname directly.
-  SET(CMAKE_C_CREATE_SHARED_LIBRARY
-    "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> <LINK_FLAGS> -o <TARGET> <CMAKE_SHARED_LIBRARY_SONAME_C_FLAG> <TARGET_SONAME> <OBJECTS> <LINK_LIBRARIES>")
-  SET(CMAKE_CXX_CREATE_SHARED_LIBRARY
-    "<CMAKE_CXX_COMPILER> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> <LINK_FLAGS> -o <TARGET> <CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG> <TARGET_SONAME> <OBJECTS> <LINK_LIBRARIES>")
-ELSE(CMAKE_SKIP_RPATH)
-  # Support for rpath is requested.  Approximate it by putting the
-  # full path to the library in the soname field.  Then when executables
-  # link the library they will copy this full path as the name to use
-  # to find the library.  We can get the directory containing the library
-  # by using the dirname of the <TARGET>.  It may be a relative path
-  # so we use a "cd ...;pwd" trick to convert it to a full path at
-  # build time.
-  SET(CMAKE_C_CREATE_SHARED_LIBRARY
-    "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> <LINK_FLAGS> -o <TARGET> <CMAKE_SHARED_LIBRARY_SONAME_C_FLAG> \"`cd \\`dirname <TARGET>\\`\;pwd`/<TARGET_SONAME>\" <OBJECTS> <LINK_LIBRARIES>")
-  SET(CMAKE_CXX_CREATE_SHARED_LIBRARY
-    "<CMAKE_CXX_COMPILER> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> <LINK_FLAGS> -o <TARGET> <CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG> \"`cd \\`dirname <TARGET>\\`\;pwd`/<TARGET_SONAME>\" <OBJECTS> <LINK_LIBRARIES>")
-ENDIF(CMAKE_SKIP_RPATH)
+SET(CMAKE_C_CREATE_SHARED_LIBRARY
+  "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> <LINK_FLAGS> -o <TARGET> -install_name <TARGET_INSTALLNAME_DIR><TARGET_SONAME> <OBJECTS> <LINK_LIBRARIES>")
+SET(CMAKE_CXX_CREATE_SHARED_LIBRARY
+  "<CMAKE_CXX_COMPILER> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> <LINK_FLAGS> -o <TARGET> -install_name <TARGET_INSTALLNAME_DIR><TARGET_SONAME> <OBJECTS> <LINK_LIBRARIES>")
 
 SET(CMAKE_CXX_CREATE_SHARED_MODULE
       "<CMAKE_CXX_COMPILER> <CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS> <LINK_FLAGS> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")

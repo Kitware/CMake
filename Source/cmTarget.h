@@ -157,7 +157,15 @@ public:
   const char *GetProperty(const char *prop);
   bool GetPropertyAsBool(const char *prop);
 
-  const char* GetDirectory();
+  /** Get the directory in which this target will be built.  If the
+      configuration name is given then the generator will add its
+      subdirectory for that configuration.  Otherwise just the canonical
+      output directory is given.  */
+  const char* GetDirectory(const char* config = 0);
+
+  /** Get the location of the target in the build tree for the given
+      configuration.  This location is suitable for use as the LOCATION
+      target property.  */
   const char* GetLocation(const char* config);
 
   /**
@@ -221,6 +229,9 @@ public:
 
   bool HaveBuildTreeRPATH();
   bool HaveInstallTreeRPATH();
+
+  std::string GetInstallNameDirForBuildTree(const char* config);
+  std::string GetInstallNameDirForInstallTree(const char* config);
 
 private:
   /**

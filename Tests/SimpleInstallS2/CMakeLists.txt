@@ -9,6 +9,9 @@ SET(LIBRARY_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}")
 # tree.
 SET(CMAKE_SKIP_BUILD_RPATH 1)
 
+# Make sure the executable can run from the install tree.
+SET(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+
 # Skip the dependency that causes a build when installing.  This
 # avoids infinite loops when the post-build rule below installs.
 SET(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY 1)

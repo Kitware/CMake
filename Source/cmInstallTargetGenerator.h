@@ -33,8 +33,12 @@ public:
 
 protected:
   virtual void GenerateScript(std::ostream& os);
-  void PrepareInstallReference(std::ostream& os);
-  std::string GetInstallReference();
+  void PrepareScriptReference(std::ostream& os, cmTarget* target,
+                              const char* place, bool useConfigDir,
+                              bool useSOName);
+  std::string GetScriptReference(cmTarget* target, const char* place,
+                                 bool useSOName);
+  void AddInstallNamePatchRule(std::ostream& os);
   cmTarget* Target;
   std::string Destination;
   bool ImportLibrary;

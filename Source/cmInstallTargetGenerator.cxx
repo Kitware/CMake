@@ -52,10 +52,11 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
     }
 
   // Write variable settings to do per-configuration references.
-  this->PrepareInstallReference(os);
+  this->PrepareScriptReference(os, this->Target, "BUILD", true, false);
 
   // Create the per-configuration reference.
-  std::string fromName = this->GetInstallReference();
+  std::string fromName = this->GetScriptReference(this->Target, "BUILD",
+                                                  false);
   std::string fromFile = fromDir;
   fromFile += fromName;
 
@@ -150,12 +151,22 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   // Write code to install the target file.
   this->AddInstallRule(os, this->Destination.c_str(), type, fromFile.c_str(),
                        this->ImportLibrary, properties);
+
+  // Fix the install_name settings in installed binaries.
+  if(type == cmTarget::SHARED_LIBRARY ||
+     type == cmTarget::MODULE_LIBRARY ||
+     type == cmTarget::EXECUTABLE)
+    {
+    this->AddInstallNamePatchRule(os);
+    }
 }
 
 //----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
-::PrepareInstallReference(std::ostream& os)
+::PrepareScriptReference(std::ostream& os, cmTarget* target,
+                         const char* place, bool useConfigDir,
+                         bool useSOName)
 {
   // If the target name may vary with the configuration type then
   // store all possible names ahead of time in variables.
@@ -164,42 +175,180 @@ cmInstallTargetGenerator
         this->ConfigurationTypes->begin();
       i != this->ConfigurationTypes->end(); ++i)
     {
-    // Start with the configuration's subdirectory.
+    // Initialize the name.
     fname = "";
-    this->Target->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->
-      AppendDirectoryForConfig(i->c_str(), fname);
+
+    if(useConfigDir)
+      {
+      // Start with the configuration's subdirectory.
+      target->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->
+        AppendDirectoryForConfig(i->c_str(), fname);
+      }
+
+    // Compute the name of the library.
+    std::string targetName;
+    std::string targetNameSO;
+    std::string targetNameReal;
+    std::string targetNameImport;
+    target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
+                            targetNameImport, i->c_str());
+    if(this->ImportLibrary)
+      {
+      // Use the import library name.
+      fname += targetNameImport;
+      }
+    else if(useSOName)
+      {
+      // Use the soname.
+      fname += targetNameSO;
+      }
+    else
+      {
+      // Use the canonical name.
+      fname += targetName;
+      }
 
     // Set a variable with the target name for this configuration.
-    fname += this->Target->GetFullName(i->c_str(), this->ImportLibrary);
-    os << "SET(" << this->Target->GetName()
+    os << "SET(" << target->GetName() << "_" << place
        << (this->ImportLibrary? "_IMPNAME_" : "_NAME_") << *i
        << " \"" << fname << "\")\n";
     }
 }
 
 //----------------------------------------------------------------------------
-std::string cmInstallTargetGenerator::GetInstallReference()
+std::string cmInstallTargetGenerator::GetScriptReference(cmTarget* target,
+                                                         const char* place,
+                                                         bool useSOName)
 {
   if(this->ConfigurationTypes->empty())
     {
     // Reference the target by its one configuration name.
-    return this->Target->GetFullName(this->ConfigurationName,
-                                     this->ImportLibrary);
+    std::string targetName;
+    std::string targetNameSO;
+    std::string targetNameReal;
+    std::string targetNameImport;
+    target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
+                            targetNameImport, this->ConfigurationName);
+    if(this->ImportLibrary)
+      {
+      // Use the import library name.
+      return targetNameImport;
+      }
+    else if(useSOName)
+      {
+      // Use the soname.
+      return targetNameSO;
+      }
+    else
+      {
+      // Use the canonical name.
+      return targetName;
+      }
     }
   else
     {
     // Reference the target using the per-configuration variable.
     std::string ref = "${";
-    ref += this->Target->GetName();
+    ref += target->GetName();
     if(this->ImportLibrary)
       {
+      ref += "_";
+      ref += place;
       ref += "_IMPNAME_";
       }
     else
       {
+      ref += "_";
+      ref += place;
       ref += "_NAME_";
       }
     ref += "${CMAKE_INSTALL_CONFIG_NAME}}";
     return ref;
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os)
+{
+  // Build a map of build-tree install_name to install-tree install_name for
+  // shared libraries linked to this target.
+  std::map<cmStdString, cmStdString> install_name_remap;
+  cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
+  const char* config = this->ConfigurationName;
+  if(config && cmSystemTools::UpperCase(config) == "DEBUG")
+    {
+    linkType = cmTarget::DEBUG;
+    }
+  // TODO: Merge with ComputeLinkInformation.
+  const cmTarget::LinkLibraries& inLibs = this->Target->GetLinkLibraries();
+  for(cmTarget::LinkLibraries::const_iterator j = inLibs.begin();
+      j != inLibs.end(); ++j)
+    {
+    std::string lib = j->first;
+    if((this->Target->GetType() == cmTarget::EXECUTABLE ||
+        lib != this->Target->GetName()) &&
+       (j->second == cmTarget::GENERAL || j->second == linkType))
+      {
+      if(cmTarget* tgt = this->Target->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->FindTarget(0, lib.c_str()))
+        {
+        if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
+          {
+          // If the build tree and install tree use different path components
+          // of the install_name field then we need to create a mapping to be
+          // applied after installation.
+          std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
+          std::string for_install = tgt->GetInstallNameDirForInstallTree(config);
+          if(for_build != for_install)
+            {
+            // Map from the build-tree install_name.
+            this->PrepareScriptReference(os, tgt, "REMAP_FROM",
+                                         !for_build.empty(), true);
+            for_build += this->GetScriptReference(tgt, "REMAP_FROM", true);
+
+            // Map to the install-tree install_name.
+            this->PrepareScriptReference(os, tgt, "REMAP_TO",
+                                         false, true);
+            for_install += this->GetScriptReference(tgt, "REMAP_TO", true);
+
+            // Store the mapping entry.
+            install_name_remap[for_build] = for_install;
+            }
+          }
+        }
+      }
+    }
+
+  // Edit the install_name of the target itself if necessary.
+  this->PrepareScriptReference(os, this->Target, "REMAPPED", false, true);
+  std::string new_id;
+  if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    std::string for_build = this->Target->GetInstallNameDirForBuildTree(config);
+    std::string for_install = this->Target->GetInstallNameDirForInstallTree(config);
+    if(for_build != for_install)
+      {
+      // Prepare to refer to the install-tree install_name.
+      new_id = for_install;
+      new_id += this->GetScriptReference(this->Target, "REMAPPED", true);
+      }
+    }
+
+  // Write a rule to run install_name_tool to set the install-tree
+  // install_name value and references.
+  if(!new_id.empty() || !install_name_remap.empty())
+    {
+    os << "EXECUTE_PROCESS(COMMAND install_name_tool";
+    if(!new_id.empty())
+      {
+      os << "\n  -id \"" << new_id << "\"";
+      }
+    for(std::map<cmStdString, cmStdString>::const_iterator
+          i = install_name_remap.begin();
+        i != install_name_remap.end(); ++i)
+      {
+      os << "\n  -change \"" << i->first << "\" \"" << i->second << "\"";
+      }
+    os << "\n  \"" << this->Destination.c_str() << "/"
+       << this->GetScriptReference(this->Target, "REMAPPED", true) << "\")\n";
     }
 }

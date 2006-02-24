@@ -52,6 +52,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   m_Makefile = mf;
 
   // Setup default property values.
+  this->SetPropertyDefault("INSTALL_NAME_DIR", "");
   this->SetPropertyDefault("INSTALL_RPATH", "");
   this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
   this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
@@ -775,7 +776,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
   m_Properties[prop] = value;
 }
 
-const char* cmTarget::GetDirectory()
+const char* cmTarget::GetDirectory(const char* config)
 {
   switch( this->GetType() )
     {
@@ -793,6 +794,13 @@ const char* cmTarget::GetDirectory()
   if(m_Directory.empty())
     {
     m_Directory = m_Makefile->GetStartOutputDirectory();
+    }
+  if(config)
+    {
+    // Add the configuration's subdirectory.
+    m_Directory += "/";
+    m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+      AppendDirectoryForConfig(config, m_Directory);
     }
   return m_Directory.c_str();
 }
@@ -1069,12 +1077,8 @@ void cmTarget::GetFullName(std::string& prefix, std::string& base,
 std::string cmTarget::GetFullPath(const char* config, bool implib)
 {
   // Start with the output directory for the target.
-  std::string fpath = this->GetDirectory();
+  std::string fpath = this->GetDirectory(config);
   fpath += "/";
-
-  // Add the configuration's subdirectory.
-  m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->
-    AppendDirectoryForConfig(config, fpath);
 
   // Add the full name of the target.
   fpath += this->GetFullName(config, implib);
@@ -1439,4 +1443,48 @@ bool cmTarget::NeedRelinkBeforeInstall()
   // will likely change between the build tree and install tree and
   // this target must be relinked.
   return this->HaveBuildTreeRPATH() || this->HaveInstallTreeRPATH();
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetInstallNameDirForBuildTree(const char* config)
+{
+  // If building directly for installation then the build tree install_name
+  // is the same as the install tree.
+  if(this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
+    {
+    return GetInstallNameDirForInstallTree(config);
+    }
+
+  // Use the build tree directory for the target.
+  if(m_Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME") &&
+     !m_Makefile->IsOn("CMAKE_SKIP_RPATH") &&
+     !this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
+    {
+    std::string dir = this->GetDirectory(config);
+    dir += "/";
+    return dir;
+    }
+  else
+    {
+    return "";
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetInstallNameDirForInstallTree(const char*)
+{
+  // Lookup the target property.
+  const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
+  if(m_Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME") &&
+     !m_Makefile->IsOn("CMAKE_SKIP_RPATH") &&
+     install_name_dir && *install_name_dir)
+    {
+    std::string dir = install_name_dir;
+    dir += "/";
+    return dir;
+    }
+  else
+    {
+    return "";
+    }
 }

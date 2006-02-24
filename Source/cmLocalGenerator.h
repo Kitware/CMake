@@ -182,6 +182,7 @@ public:
         this->Flags= 0;
         this->ObjectsQuoted= 0;
         this->TargetSOName= 0;
+        this->TargetInstallNameDir = 0;
         this->LinkFlags= 0;
       }
     const char* Language;
@@ -193,6 +194,7 @@ public:
     const char* Flags;
     const char* ObjectsQuoted;
     const char* TargetSOName;
+    const char* TargetInstallNameDir;
     const char* LinkFlags;
   };
 

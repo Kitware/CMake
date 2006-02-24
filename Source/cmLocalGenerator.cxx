@@ -643,6 +643,13 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       return "";
       }
     }
+  if(replaceValues.TargetInstallNameDir)
+    {
+    if(variable == "TARGET_INSTALLNAME_DIR")
+      {
+      return replaceValues.TargetInstallNameDir;
+      }
+    }
   if(replaceValues.LinkLibraries)
     {
     if(variable == "LINK_LIBRARIES")

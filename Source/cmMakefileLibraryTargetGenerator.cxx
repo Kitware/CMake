@@ -392,7 +392,46 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.ObjectsQuoted = buildObjs.c_str();
   vars.TargetSOName= targetNameSO.c_str();
   vars.LinkFlags = linkFlags.c_str();
-  
+
+  // Compute the directory portion of the install_name setting.
+  std::string install_name_dir;
+  if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    // Select whether to generate an install_name directory for the
+    // install tree or the build tree.
+    const char* config = this->LocalGenerator->m_ConfigurationName.c_str();
+    if(this->Target->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
+      {
+      install_name_dir =
+        this->Target->GetInstallNameDirForInstallTree(config);
+      }
+    else
+      {
+      install_name_dir =
+        this->Target->GetInstallNameDirForBuildTree(config);
+      }
+
+    // Set the rule variable replacement value.
+    if(install_name_dir.empty())
+      {
+      vars.TargetInstallNameDir = "";
+      }
+    else
+      {
+      // Convert to a path for the native build tool.
+      install_name_dir =
+        this->LocalGenerator->Convert(install_name_dir.c_str(),
+                                      cmLocalGenerator::FULL,
+                                      cmLocalGenerator::SHELL, false);
+
+      // The Convert method seems to strip trailing slashes, which should
+      // probably be fixed.  Since the only platform supporting install_name
+      // right now uses forward slashes just add one.
+      install_name_dir += "/";
+      vars.TargetInstallNameDir = install_name_dir.c_str();
+      }
+    }
+
   // Expand placeholders in the commands.
   this->LocalGenerator->m_TargetImplib = targetOutPathImport;
   for(std::vector<std::string>::iterator i = commands.begin();

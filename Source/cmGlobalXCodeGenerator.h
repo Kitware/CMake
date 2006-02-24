@@ -142,6 +142,11 @@ private:
                                   cmTarget& cmtarget,
                                   const std::vector<cmCustomCommand>&);
   void CreateReRunCMakeFile(cmLocalGenerator* root);
+
+  std::string LookupFlags(const char* varNamePrefix,
+                          const char* varNameLang,
+                          const char* varNameSuffix,
+                          const char* default_flags);
 protected:
 
   int m_XcodeVersion;

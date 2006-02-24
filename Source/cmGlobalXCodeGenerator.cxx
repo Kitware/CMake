@@ -1145,13 +1145,30 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       outflag += "\\\"";
       extraLinkOptions += " ";
       extraLinkOptions += outflag;
+
+      // Add the flags to create an executable.
+      std::string createFlags =
+        this->LookupFlags("CMAKE_", lang, "_LINK_FLAGS", "");
+      if(!createFlags.empty())
+        {
+        extraLinkOptions += " ";
+        extraLinkOptions += createFlags;
+        }
       }
     else
       {
       fileType = "compiled.mach-o.dylib";
       productType = "com.apple.product-type.library.dynamic";
 
-      extraLinkOptions += " -bundle";
+      // Add the flags to create a module.
+      std::string createFlags =
+        this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", lang, "_FLAGS",
+                          "-bundle");
+      if(!createFlags.empty())
+        {
+        extraLinkOptions += " ";
+        extraLinkOptions += createFlags;
+        }
       }
     break;
     }
@@ -1166,12 +1183,30 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                 this->CreateString("1"));
     buildSettings->AddAttribute("DYLIB_CURRENT_VERSION", 
                                 this->CreateString("1"));
-    extraLinkOptions += " -dynamiclib";
+
+    // Add the flags to create a shared library.
+    std::string createFlags =
+      this->LookupFlags("CMAKE_SHARED_LIBRARY_CREATE_", lang, "_FLAGS",
+                        "-dynamiclib");
+    if(!createFlags.empty())
+      {
+      extraLinkOptions += " ";
+      extraLinkOptions += createFlags;
+      }
     break;
     }
     case cmTarget::EXECUTABLE:
     {
     fileType = "compiled.mach-o.executable";
+
+    // Add the flags to create an executable.
+    std::string createFlags =
+      this->LookupFlags("CMAKE_", lang, "_LINK_FLAGS", "");
+    if(!createFlags.empty())
+      {
+      extraLinkOptions += " ";
+      extraLinkOptions += createFlags;
+      }
 
     // Handle bundles and normal executables separately.
     if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
@@ -1284,8 +1319,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString(debugStr));
   buildSettings->AddAttribute("GCC_OPTIMIZATION_LEVEL", 
                               this->CreateString(optLevel));
-  buildSettings->AddAttribute("INSTALL_PATH", 
-                              this->CreateString(""));
   buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
                               this->CreateString(oflagc.c_str()));
   if(lang && strcmp(lang, "CXX") == 0)
@@ -1307,9 +1340,45 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     buildSettings->AddAttribute("OTHER_CFLAGS", 
                                 this->CreateString(flags.c_str()));
     }
+
+  // Create the INSTALL_PATH attribute.
+  std::string install_name_dir;
+  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    // Select whether to generate an install_name directory for the
+    // install tree or the build tree.
+    if(target.GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
+      {
+      install_name_dir =
+        target.GetInstallNameDirForInstallTree(configName);
+      }
+    else
+      {
+      install_name_dir =
+        target.GetInstallNameDirForBuildTree(configName);
+      }
+
+    if(install_name_dir.empty())
+      {
+      // Xcode will not pass the -install_name option at all if INSTALL_PATH
+      // is not given or is empty.  We must explicitly put the flag in the
+      // link flags to create an install_name with just the library soname.
+      extraLinkOptions += " -install_name ";
+      extraLinkOptions += productName;
+      }
+    else
+      {
+      // Convert to a path for the native build tool.
+      cmSystemTools::ConvertToUnixSlashes(install_name_dir);
+      install_name_dir =
+        this->XCodeEscapePath(install_name_dir.c_str());
+      }
+    }
+  buildSettings->AddAttribute("INSTALL_PATH",
+                              this->CreateString(install_name_dir.c_str()));
+
   buildSettings->AddAttribute("OTHER_LDFLAGS", 
                               this->CreateString(extraLinkOptions.c_str()));
-
   buildSettings->AddAttribute("OTHER_REZFLAGS", 
                               this->CreateString(""));
   buildSettings->AddAttribute("SECTORDER_FLAGS",
@@ -2316,4 +2385,27 @@ cmGlobalXCodeGenerator
       dir += "/";
       }
     }
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalXCodeGenerator::LookupFlags(const char* varNamePrefix,
+                                                const char* varNameLang,
+                                                const char* varNameSuffix,
+                                                const char* default_flags)
+{
+  if(varNameLang)
+    {
+    std::string varName = varNamePrefix;
+    varName += varNameLang;
+    varName += varNameSuffix;
+    if(const char* varValue =
+       m_CurrentMakefile->GetDefinition(varName.c_str()))
+      {
+      if(*varValue)
+        {
+        return varValue;
+        }
+      }
+    }
+  return default_flags;
 }
