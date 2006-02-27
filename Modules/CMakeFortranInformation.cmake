@@ -135,4 +135,4 @@ CMAKE_Fortran_FLAGS_RELEASE
 CMAKE_Fortran_FLAGS_RELWITHDEBINFO)
 
 # set this variable so we can avoid loading this more than once.
-SET(CMAKE_Fortran_INFOMATION_LOADED 1)
+SET(CMAKE_Fortran_INFORMATION_LOADED 1)

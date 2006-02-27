@@ -27,4 +27,4 @@ MARK_AS_ADVANCED(
 CMAKE_RC_FLAGS
 )
 # set this variable so we can avoid loading this more than once.
-SET(CMAKE_RC_INFOMATION_LOADED 1)
+SET(CMAKE_RC_INFORMATION_LOADED 1)
