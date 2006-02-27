@@ -355,7 +355,6 @@ Section "Dummy Section" SecDummy
   ;Create shortcuts
   CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
 @CPACK_NSIS_CREATE_ICONS@
-@CPACK_NSIS_CREATE_EXTRA_ICONS@
   CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 
 @CPACK_NSIS_EXTRA_INSTALL_COMMANDS@
@@ -415,7 +414,6 @@ Section "Uninstall"
     
   Delete "$SMPROGRAMS\$MUI_TEMP\Uninstall.lnk"
 @CPACK_NSIS_DELETE_ICONS@
-@CPACK_NSIS_DELETE_EXTRA_ICONS@
   
   ;Delete empty start menu parent diretories
   StrCpy $MUI_TEMP "$SMPROGRAMS\$MUI_TEMP"

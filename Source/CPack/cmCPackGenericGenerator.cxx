@@ -101,7 +101,7 @@ int cmCPackGenericGenerator::PrepareNames()
   if ( !this->GetOption("CPACK_PACKAGE_DESCRIPTION") )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Project description not specified. Please specify CPACK_PACKAGE_DESCRIPTION or CPACK_PACKAGE_DESCRIPTION_FILE_NAME."
+      "Project description not specified. Please specify CPACK_PACKAGE_DESCRIPTION or CPACK_PACKAGE_DESCRIPTION_FILE."
       << std::endl);
     return 0;
     }

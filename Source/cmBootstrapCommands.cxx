@@ -44,6 +44,7 @@
 #include "cmFindPathCommand.cxx"
 #include "cmFindProgramCommand.cxx"
 #include "cmForEachCommand.cxx"
+#include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
 #include "cmGetSourceFilePropertyCommand.cxx"
 #include "cmGetTargetPropertyCommand.cxx"
@@ -102,6 +103,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmFindPathCommand);
   commands.push_back(new cmFindProgramCommand);
   commands.push_back(new cmForEachCommand);
+  commands.push_back(new cmGetCMakePropertyCommand);
   commands.push_back(new cmGetFilenameComponentCommand);
   commands.push_back(new cmGetSourceFilePropertyCommand);
   commands.push_back(new cmGetTargetPropertyCommand);

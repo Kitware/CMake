@@ -4,9 +4,9 @@
 <plist version="1.0">
 <dict>
 <key>IFMajorVersion</key>
-<integer>@CPACK_PACKAGE_MAJOR_VERSION@</integer>
+<integer>@CPACK_PACKAGE_VERSION_MAJOR@</integer>
 <key>IFMinorVersion</key>
-<integer>@CPACK_PACKAGE_MINOR_VERSION@</integer>
+<integer>@CPACK_PACKAGE_VERSION_MINOR@</integer>
 <key>IFPkgFlagAllowBackRev</key>
 <false/>
 <key>IFPkgFlagAuthorizationAction</key>

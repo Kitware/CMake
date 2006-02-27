@@ -1,22 +1,26 @@
-SET(CPACK_GENERATOR "@CPACK_GENERATOR@")
+# This file will be configured to contain variables for CPack. These variables
+# should be set in the CMake list file of the project before CPack module is
+# included. Example variables are:
+#   CPACK_BINARY_DIR                    - Path to the build tree
+#   CPACK_GENERATOR                     - Generator used to create package
+#   CPACK_PACKAGE_DESCRIPTION_FILE      - Description file for the package
+#   CPACK_PACKAGE_DESCRIPTION_SUMMARY   - Summary of the package
+#   CPACK_PACKAGE_EXECUTABLES           - List of pairs of executables and labels
+#   CPACK_PACKAGE_FILE_NAME             - Name of the package generated
+#   CPACK_PACKAGE_ICON                  - Icon used for the package
+#   CPACK_PACKAGE_INSTALL_DIRECTORY     - Name of directory for the installer
+#   CPACK_PACKAGE_NAME                  - Package project name
+#   CPACK_PACKAGE_VENDOR                - Package project vendor
+#   CPACK_PACKAGE_VERSION               - Package project version
+#   CPACK_PACKAGE_VERSION_MAJOR         - Package project version (major)
+#   CPACK_PACKAGE_VERSION_MINOR         - Package project version (minor)
+#   CPACK_PACKAGE_VERSION_PATCH         - Package project version (patch)
 
-SET(CPACK_PACKAGE_NAME "@CPACK_PACKAGE_NAME@")
-SET(CPACK_PACKAGE_INSTALL_DIRECTORY "@CPACK_PACKAGE_INSTALL_DIRECTORY@")
-SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@")
-SET(CPACK_PACKAGE_VERSION_MAJOR "@CPACK_PACKAGE_VERSION_MAJOR@")
-SET(CPACK_PACKAGE_VERSION_MINOR "@CPACK_PACKAGE_VERSION_MINOR@")
-SET(CPACK_PACKAGE_VERSION_PATCH "@CPACK_PACKAGE_VERSION_PATCH@")
+# There are certain generator specific ones
 
-SET(CPACK_PACKAGE_VENDOR "@CPACK_PACKAGE_VENDOR@")
+# NSIS Generator:
+#   CPACK_PACKAGE_INSTALL_REGISTRY_KEY  - Name of the registry key for the installer
+#   CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS - Extra commands used during uninstall
+#   CPACK_NSIS_EXTRA_INSTALL_COMMANDS   - Extra commands used during install
 
-SET(CPACK_PACKAGE_FILE_NAME "@CPACK_PACKAGE_FILE_NAME@")
-
-SET(CPACK_PACKAGE_EXECUTABLES "@CPACK_PACKAGE_EXECUTABLES@")
-
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "@CPACK_PACKAGE_DESCRIPTION_SUMMARY@")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "@CPACK_PACKAGE_DESCRIPTION_FILE@")
-
-# It is a CMake project, so we need a binary directory
-SET(CPACK_BINARY_DIR "@CPACK_BINARY_DIR@")
-
-SET(CPACK_PACKAGE_ICON "@CPACK_PACKAGE_ICON@")
+@_CPACK_OTHER_VARIABLES_@

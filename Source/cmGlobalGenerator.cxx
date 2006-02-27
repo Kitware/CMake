@@ -1226,6 +1226,10 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   configFile += "/CPackConfig.cmake";
   singleLine.push_back(configFile);
   cpackCommandLines.push_back(singleLine);
+  if ( this->GetPreInstallAvailable() )
+    {
+    depends.push_back("preinstall");
+    }
   (*targets)[this->GetPackageTargetName()]
     = this->CreateGlobalTarget(this->GetPackageTargetName(),
       "Run CPack packaging tool...", &cpackCommandLines, depends);
