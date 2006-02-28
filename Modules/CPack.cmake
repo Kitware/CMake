@@ -21,8 +21,15 @@ cpack_set_if_not_set(CPACK_PACKAGE_VERSION
 cpack_set_if_not_set(CPACK_PACKAGE_VENDOR "Humanity")
 cpack_set_if_not_set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
   "${PROJECT_NAME} built using CMake")
+
 cpack_set_if_not_set(CPACK_PACKAGE_DESCRIPTION_FILE
   "${CMAKE_ROOT}/Templates/CPack.GenericDescription.txt")
+cpack_set_if_not_set(CPACK_RESOURCE_FILE_LICENSE
+  "${CMAKE_ROOT}/Templates/CPack.GenericLicense.txt")
+cpack_set_if_not_set(CPACK_RESOURCE_FILE_README
+  "${CMAKE_ROOT}/Templates/CPack.GenericDescription.txt")
+cpack_set_if_not_set(CPACK_RESOURCE_FILE_WELCOME
+  "${CMAKE_ROOT}/Templates/CPack.GenericWelcome.txt")
 
 # <project>-<major>.<minor>.<patch>-<release>-<platform>.<pkgtype>
 cpack_set_if_not_set(CPACK_PACKAGE_FILE_NAME
@@ -32,9 +39,15 @@ cpack_set_if_not_set(CPACK_PACKAGE_INSTALL_DIRECTORY
 cpack_set_if_not_set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY
   "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}")
 
-IF(NOT EXISTS "${CPACK_PACKAGE_DESCRIPTION_FILE}")
-  MESSAGE(SEND_ERROR "CPack package description file: \"${CPACK_PACKAGE_DESCRIPTION_FILE}\" could not be found.")
-ENDIF(NOT EXISTS "${CPACK_PACKAGE_DESCRIPTION_FILE}")
+MACRO(cpack_check_file_exists file description)
+IF(NOT EXISTS "${file}")
+  MESSAGE(SEND_ERROR "CPack ${description} file: \"${file}\" could not be found.")
+ENDIF(NOT EXISTS "${file}")
+ENDMACRO(cpack_check_file_exists)
+cpack_check_file_exists("${CPACK_PACKAGE_DESCRIPTION_FILE}" "package description")
+cpack_check_file_exists("${CPACK_RESOURCE_FILE_LICENSE}"    "license resource")
+cpack_check_file_exists("${CPACK_RESOURCE_FILE_README}"     "readme resource")
+cpack_check_file_exists("${CPACK_RESOURCE_FILE_WELCOME}"    "welcome resource")
 
 # Pick a generator
 IF(NOT CPACK_GENERATOR)
