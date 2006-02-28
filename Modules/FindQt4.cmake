@@ -126,7 +126,7 @@ IF(GLOB_TEMP_VAR)
   SET(QT4_PATHS ${QT4_PATHS} ${GLOB_TEMP_VAR})
 ENDIF(GLOB_TEMP_VAR)
 # check for qmake
-FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake PATHS 
+FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake-qt4 qmak PATHS 
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/bin"
   $ENV{QTDIR}/bin
