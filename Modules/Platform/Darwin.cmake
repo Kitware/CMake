@@ -37,3 +37,12 @@ SET(CMAKE_C_CREATE_SHARED_MODULE
 
 
 SET(CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES /usr/local/include)
+# default to searching for frameworks first
+SET(CMAKE_FIND_FRAMEWORK FIRST)
+# set up the default search directories for frameworks
+SET(CMAKE_SYSTEM_FRAMEWORK_PATH
+  ~/Library/Frameworks
+  /Library/Frameworks;/Network
+  /Network/Library/Frameworks
+  /System/Library/Frameworks)
+

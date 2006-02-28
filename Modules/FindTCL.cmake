@@ -28,6 +28,7 @@ SET (TCLTK_POSSIBLE_LIB_PATHS
   "${TK_WISH_PATH}/../lib"
   "${TCL_INCLUDE_PATH}/../lib"
   "${TK_INCLUDE_PATH}/../lib"
+  "$ENV{ProgramFiles}/Tcl/Lib"
   "C:/Program Files/Tcl/lib" 
   "C:/Tcl/lib" 
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/lib
@@ -112,6 +113,7 @@ SET (TCLTK_POSSIBLE_INCLUDE_PATHS
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/include
+  "$ENV{ProgramFiles}/Tcl/include"
   "C:/Program Files/Tcl/include"
   C:/Tcl/include
   /usr/include

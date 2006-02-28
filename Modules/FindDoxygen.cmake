@@ -15,6 +15,7 @@ FIND_PROGRAM(DOXYGEN
 # which contains dot in its bundle.
 FIND_PROGRAM(DOT
   dot
+  "$ENV{ProgramFiles}/ATT/Graphviz/bin"
   "C:/Program Files/ATT/Graphviz/bin"
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\ATT\\Graphviz;InstallPath]/bin
   /Applications/Graphviz.app/Contents/MacOS

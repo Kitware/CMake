@@ -3,5 +3,6 @@ FIND_PROGRAM(GCCXML
   NAMES gccxml
         ../GCC_XML/gccxml
   PATHS [HKEY_CURRENT_USER\\Software\\Kitware\\GCC_XML;loc]
-        "C:/Program Files/GCC_XML"
+  "$ENV{ProgramFiles}/GCC_XML"
+  "C:/Program Files/GCC_XML"
 )

@@ -196,6 +196,7 @@ IF(QT4_QMAKE_FOUND)
     /usr/lib/qt/include/Qt
     /usr/include/Qt
     /usr/share/qt4/include/Qt
+    "$ENV{ProgramFiles}/qt/include/Qt"
     "C:/Program Files/qt/include/Qt"
     /usr/include/qt4/Qt)
 
