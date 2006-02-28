@@ -393,6 +393,10 @@ public:
 
 inline std::ostream& operator<< (std::ostream& os, const cmCTestLogWrite& c)
 {
+  if (!c.Length)
+    {
+    return os;
+    }
   os.write(c.Data, c.Length);
   os.flush();
   return os;
