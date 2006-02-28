@@ -1222,12 +1222,12 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
   singleLine.erase(singleLine.begin(), singleLine.end());
   depends.erase(depends.begin(), depends.end());
+  singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
   if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[1] != '.' )
     {
     singleLine.push_back("-C");
     singleLine.push_back(mf->GetDefinition("CMAKE_CFG_INTDIR"));
     }
-  singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
   singleLine.push_back("--config");
   std::string configFile = mf->GetStartOutputDirectory();;
   configFile += "/CPackConfig.cmake";
