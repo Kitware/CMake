@@ -124,6 +124,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
         src += "/";
         src += args[i];
         }
+      src = cmSystemTools::CollapseFullPath(src.c_str());
       sg->AddGroupFile(src.c_str());
       }
     else
