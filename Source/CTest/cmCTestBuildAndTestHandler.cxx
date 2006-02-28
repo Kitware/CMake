@@ -34,8 +34,6 @@ cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 //----------------------------------------------------------------------
 void cmCTestBuildAndTestHandler::Initialize()
 {
-#undef cout
-  std::cout << "Erase the list" << std::endl; std::cout.flush();
   m_BuildTargets.erase(m_BuildTargets.begin(), m_BuildTargets.end());
   this->Superclass::Initialize();
 }
@@ -183,17 +181,13 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   // do the build
   std::vector<std::string>::iterator tarIt;
-#undef cout
   if ( m_BuildTargets.size() == 0 )
     {
     m_BuildTargets.push_back("");
     }
-  std::cout << "Execute targets: " << std::endl;
   for ( tarIt = m_BuildTargets.begin(); tarIt != m_BuildTargets.end();
     ++ tarIt )
     {
-    std::cout << "Execute targets: " << tarIt->c_str() << std::endl;
-    std::cout.flush();
     std::string output;
     retVal = cm.GetGlobalGenerator()->Build(
       m_SourceDir.c_str(), m_BinaryDir.c_str(),
