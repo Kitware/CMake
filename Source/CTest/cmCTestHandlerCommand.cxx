@@ -26,7 +26,7 @@ cmCTestHandlerCommand::cmCTestHandlerCommand()
   m_Arguments.reserve(INIT_SIZE);
   for ( cc = 0; cc < INIT_SIZE; ++ cc )
     {
-    m_Arguments[cc] = 0;
+    m_Arguments.push_back(0);
     }
   m_Arguments[ct_RETURN_VALUE] = "RETURN_VALUE";
   m_Arguments[ct_SOURCE] = "SOURCE";
