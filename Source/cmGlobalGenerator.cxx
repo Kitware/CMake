@@ -1213,6 +1213,8 @@ void cmGlobalGenerator::SetupTests()
 void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
 {
   cmMakefile* mf = m_LocalGenerators[0]->GetMakefile();
+  const char* cmakeCfgIntDir = this->GetCMakeCFGInitDirectory();
+
   // CPack
   cmCustomCommandLines cpackCommandLines;
   std::vector<std::string> depends;
@@ -1220,6 +1222,11 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
   singleLine.erase(singleLine.begin(), singleLine.end());
   depends.erase(depends.begin(), depends.end());
+  if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[1] != '.' )
+    {
+    singleLine.push_back("-C");
+    singleLine.push_back(mf->GetDefinition("CMAKE_CFG_INTDIR"));
+    }
   singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
   singleLine.push_back("--config");
   std::string configFile = mf->GetStartOutputDirectory();;
@@ -1314,7 +1321,6 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     cmd = cmakeCommand;
     }
   singleLine.push_back(cmd.c_str());
-  const char* cmakeCfgIntDir = this->GetCMakeCFGInitDirectory();
   if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[1] != '.' )
     {
     std::string cfgArg = "-DBUILD_TYPE=";
