@@ -62,6 +62,10 @@ Q190351 and Q150956.
 #pragma warning (disable: 4706)
 #endif
 
+#if defined(__BORLANDC__)
+# pragma warn -8060 /* Assignment inside if() condition.  */
+#endif
+
 /* There are pipes for the process pipeline's stdout and stderr.  */
 #define KWSYSPE_PIPE_COUNT 2
 #define KWSYSPE_PIPE_STDOUT 0
@@ -107,7 +111,7 @@ static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
                                       double* userTimeout,
                                       kwsysProcessTime* timeoutLength);
-static kwsysProcessTime kwsysProcessTimeGetCurrent();
+static kwsysProcessTime kwsysProcessTimeGetCurrent(void);
 static DWORD kwsysProcessTimeToDWORD(kwsysProcessTime t);
 static double kwsysProcessTimeToDouble(kwsysProcessTime t);
 static kwsysProcessTime kwsysProcessTimeFromDouble(double d);
@@ -293,7 +297,7 @@ struct kwsysProcess_s
 };
 
 /*--------------------------------------------------------------------------*/
-kwsysProcess* kwsysProcess_New()
+kwsysProcess* kwsysProcess_New(void)
 {
   int i;
 
@@ -2348,7 +2352,7 @@ static void kwsysProcessSetExitException(kwsysProcess* cp, int code)
 #undef KWSYSPE_CASE
 
 typedef struct kwsysProcess_List_s kwsysProcess_List;
-static kwsysProcess_List* kwsysProcess_List_New();
+static kwsysProcess_List* kwsysProcess_List_New(void);
 static void kwsysProcess_List_Delete(kwsysProcess_List* self);
 static int kwsysProcess_List_Update(kwsysProcess_List* self);
 static int kwsysProcess_List_NextProcess(kwsysProcess_List* self);
@@ -2449,7 +2453,7 @@ struct kwsysProcess_List_s
 };
 
 /*--------------------------------------------------------------------------*/
-static kwsysProcess_List* kwsysProcess_List_New()
+static kwsysProcess_List* kwsysProcess_List_New(void)
 {
   OSVERSIONINFO osv;
   kwsysProcess_List* self;
