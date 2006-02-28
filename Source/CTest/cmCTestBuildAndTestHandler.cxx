@@ -34,6 +34,9 @@ cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 //----------------------------------------------------------------------
 void cmCTestBuildAndTestHandler::Initialize()
 {
+#undef cout
+  std::cout << "Erase the list" << std::endl; std::cout.flush();
+  m_BuildTargets.erase(m_BuildTargets.begin(), m_BuildTargets.end());
   this->Superclass::Initialize();
 }
 
@@ -179,25 +182,41 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     }
 
   // do the build
-  std::string output;
-  retVal = cm.GetGlobalGenerator()->Build(
-    m_SourceDir.c_str(), m_BinaryDir.c_str(),
-    m_BuildProject.c_str(), m_BuildTarget.c_str(),
-    &output, m_BuildMakeProgram.c_str(),
-    m_CTest->GetConfigType().c_str(),!m_BuildNoClean);
-  
-  out << output;
+  std::vector<std::string>::iterator tarIt;
+#undef cout
+  if ( m_BuildTargets.size() == 0 )
+    {
+    m_BuildTargets.push_back("");
+    }
+  std::cout << "Execute targets: " << std::endl;
+  for ( tarIt = m_BuildTargets.begin(); tarIt != m_BuildTargets.end();
+    ++ tarIt )
+    {
+    std::cout << "Execute targets: " << tarIt->c_str() << std::endl;
+    std::cout.flush();
+    std::string output;
+    retVal = cm.GetGlobalGenerator()->Build(
+      m_SourceDir.c_str(), m_BinaryDir.c_str(),
+      m_BuildProject.c_str(), tarIt->c_str(),
+      &output, m_BuildMakeProgram.c_str(),
+      m_CTest->GetConfigType().c_str(),!m_BuildNoClean);
+
+    out << output;
+    // if the build failed then return
+    if (retVal)
+      {
+      if(outstring)
+        {
+        *outstring =  out.str();
+        }
+      return 1;
+      }
+    }
   if(outstring)
     {
     *outstring =  out.str();
     }
   
-  // if the build failed then return
-  if (retVal)
-    {
-    return 1;
-    }
-    
   // if not test was specified then we are done
   if (!m_TestCommand.size())
     {
@@ -390,7 +409,7 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
   if(currentArg.find("--build-target",0) == 0 && idx < allArgs.size() - 1)
     {
     idx++;
-    m_BuildTarget = allArgs[idx];
+    m_BuildTargets.push_back(allArgs[idx]);
     }
   if(currentArg.find("--build-nocmake",0) == 0)
     {

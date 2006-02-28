@@ -73,7 +73,7 @@ protected:
   std::string              m_BuildRunDir;
   std::string              m_ExecutableDirectory;
   std::vector<std::string> m_TestCommandArgs;
-  std::string              m_BuildTarget;
+  std::vector<std::string> m_BuildTargets;
   bool                     m_BuildNoCMake;
 };
 

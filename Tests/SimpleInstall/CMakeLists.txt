@@ -120,6 +120,14 @@ ELSE(CMAKE_CONFIGURATION_TYPES)
   SET(SI_CONFIG)
 ENDIF(CMAKE_CONFIGURATION_TYPES)
 
+# Dummy test of CPack
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Test of packaging with cpack")
+SET(CPACK_PACKAGE_VENDOR "Kitware")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/foo.h")
+
+SET(CPACK_PACKAGE_EXECUTABLES "SimpleInstall" "Simple Install")
+INCLUDE(CPack)
+
 ADD_CUSTOM_COMMAND(
   TARGET ${install_target}
   POST_BUILD
@@ -133,5 +141,6 @@ ADD_CUSTOM_COMMAND(
        --build-makeprogram ${CMAKE_MAKE_PROGRAM}
        --build-noclean
        --build-target install
+       --build-target package
   COMMENT "Install Project"
   )
