@@ -1,0 +1,70 @@
+COMPILING INSTRUCTIONS
+======================
+
+This project uses the CMake (http://www.cmake.org) cross-platform build system.
+To compile this project, you will have to make sure you have CMake installed.
+Binary and source distributions of CMake can be found at
+http://www.cmake.org/HTML/Download.html.  If it exists for your platform, we
+highly recommend using a binary distribution.
+
+Once CMake is installed, you are ready to build this project. We highly
+recommend reading the documentation on
+http://www.cmake.org/HTML/Documentation.html if you are not familiar with this
+process.
+
+Here is a summary of the build:
+
+* Run one of the CMake user interfaces.
+* Change configuration options.
+* Compile (make on UNIX, Visual Studio on Windows).
+
+UNIX/Linux
+----------
+
+The following instructions only apply to Unix/Linux systems.  
+
+The following example shows how to use this technique to build this project on
+multiple architectures. Assume we have a Solaris machine and an IRIX machine
+with a shared disk with the source tarball in the home directory.
+
+On either machine, extract the source tarball:
+
+  tar xvzf paraview-2.0.0.tar.gz
+
+On the Solaris machine, run
+
+  mkdir paraview-2.0.0-solaris<br>
+  cd paraview-2.0.0-solaris<br>
+  ccmake ../paraview-2.0.0<br>
+  make && make install
+
+Then on the IRIX machine, run
+
+  mkdir paraview-2.0.0-irix<br>
+  cd paraview-2.0.0-irix<br>
+  ccmake ../paraview-2.0.0<br>
+  make && make install
+
+It is a very good idea to tell CMake what C and C++ compilers you will be
+using. This can prevent many build problems.  On most systems you can pass this
+information to CMake in the following way:
+
+  env CXX=/your/C++/compiler CC=/your/c/compiler ccmake .
+
+otherwise you must set CXX and CC in your environment and then run ccmake (or
+cmake -i).
+
+Windows
+-------
+
+The Windows build process uses the CMake GUI CMakeSetup.
+
+Execute CMakeSetup. This will pop-up a GUI that allows you to tailor the build.
+You'll have to tell CMakeSetup where you've placed your source code, and where
+to build the object code and dll's. The build directory is typically placed
+next to the source directory.
+
+When CMakeSetup completes you can build the project. If you are using Visual
+Studio, start up Visual Studio and load the project file.  Then select the
+ALL_BUILD project, and build it. If you are using NMake Makefiles, Borland
+Makefiles, Mingw, MSYS, or Cygwin, then use the appropriate make command.
