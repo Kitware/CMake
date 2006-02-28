@@ -1253,7 +1253,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   singleLine.erase(singleLine.begin(), singleLine.end());
   depends.erase(depends.begin(), depends.end());
 
-  const char* cmakeCommand = this->GetCMakeInstance()->GetCMakeCommand();
+  const char* cmakeCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
   // Use CMAKE_EDIT_COMMAND for the edit_cache rule if it is defined.
   // Otherwise default to the interactive command-line interface.
   if(mf->GetDefinition("CMAKE_EDIT_COMMAND"))
