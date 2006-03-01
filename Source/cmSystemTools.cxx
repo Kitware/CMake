@@ -1322,6 +1322,10 @@ std::string cmSystemTools::MakeXMLSafe(const char* str)
         }
       }
     }
+  if ( result.size() == 0 )
+    {
+    return "";
+    }
   return std::string(&*result.begin(), result.size());
 }
 
