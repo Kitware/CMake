@@ -31,6 +31,10 @@ cpack_set_if_not_set(CPACK_RESOURCE_FILE_README
 cpack_set_if_not_set(CPACK_RESOURCE_FILE_WELCOME
   "${CMAKE_ROOT}/Templates/CPack.GenericWelcome.txt")
 
+IF(CPACK_NSIS_MODIFY_PATH)
+  SET(CPACK_NSIS_MODIFY_PATH ON)
+ENDIF(CPACK_NSIS_MODIFY_PATH)
+
 # <project>-<major>.<minor>.<patch>-<release>-<platform>.<pkgtype>
 cpack_set_if_not_set(CPACK_PACKAGE_FILE_NAME
   "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${CMAKE_SYSTEM_NAME}")

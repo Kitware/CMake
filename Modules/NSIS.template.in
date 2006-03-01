@@ -12,6 +12,7 @@
 
   Var MUI_TEMP
   Var STARTMENU_FOLDER
+  Var SV_ALLUSERS
 
 ;--------------------------------
 ;Include Modern UI
@@ -23,7 +24,17 @@
 
 ;--------------------------------
 ; determine admin versus local install
+; Is install for "AllUsers" or "JustMe"?
+; Default to "JustMe" - set to "AllUsers" if admin or on Win9x
+; This function is used for the very first "custom page" of the installer.
+; This custom page does not show up visibly, but it executes prior to the
+; first visible page and sets up $INSTDIR properly...
+; Choose different default installation folder based on SV_ALLUSERS...
+; "Program Files" for AllUsers, "My Documents" for JustMe...
+
 Function .onInit
+  StrCpy $SV_ALLUSERS "JustMe"
+  StrCpy $INSTDIR "$DOCUMENTS\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
 
   ClearErrors
   UserInfo::GetName
@@ -34,18 +45,22 @@ Function .onInit
   StrCmp $1 "Admin" 0 +3
     SetShellVarContext all
     ;MessageBox MB_OK 'User "$0" is in the Admin group'
+    StrCpy $SV_ALLUSERS "AllUsers"
     Goto done
   StrCmp $1 "Power" 0 +3
     SetShellVarContext all
     ;MessageBox MB_OK 'User "$0" is in the Power Users group'
+    StrCpy $SV_ALLUSERS "AllUsers"
     Goto done
     
-    noLM:
-      ;Get installation folder from registry if available
+  noLM:
+    StrCpy $SV_ALLUSERS "AllUsers"
+    ;Get installation folder from registry if available
 
-    done:
+  done:
+  StrCmp $SV_ALLUSERS "AllUsers" 0 +2
+    StrCpy $INSTDIR "$PROGRAMFILES\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
 FunctionEnd
-
 
 ;--------------------------------
 ;General
@@ -331,13 +346,11 @@ FunctionEnd
 
 Section "Add to path"
   Push $INSTDIR\bin
-  Call AddToPath
+  StrCmp "@CPACK_NSIS_MODIFY_PATH@" "ON" 0 +2
+    Call AddToPath
 SectionEnd
 
-Section
-SectionEnd
-
-Section "Dummy Section" SecDummy
+Section "Installer Section" InstSection
 
   ;Use the entire tree produced by the INSTALL target.  Keep the
   ;list of directories here in sync with the RMDir commands below.
@@ -383,10 +396,10 @@ Function un.onInit
     ;MessageBox MB_OK 'User "$0" is in the Power Users group'
     Goto done
     
-    noLM:
-      ;Get installation folder from registry if available
+  noLM:
+    ;Get installation folder from registry if available
 
-    done:
+  done:
 FunctionEnd
 
 ;--------------------------------
@@ -431,8 +444,8 @@ Section "Uninstall"
   DeleteRegKey /ifempty SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@"
 
   Push $INSTDIR\bin
-  Call un.RemoveFromPath
-
+  StrCmp "@CPACK_NSIS_MODIFY_PATH@" "ON" 0 +2
+    Call un.RemoveFromPath
 SectionEnd
 
 
