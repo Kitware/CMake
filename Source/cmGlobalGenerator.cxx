@@ -1338,7 +1338,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     cmd = cmakeCommand;
     }
   singleLine.push_back(cmd.c_str());
-  if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[1] != '.' )
+  if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.' )
     {
     std::string cfgArg = "-DBUILD_TYPE=";
     cfgArg += mf->GetDefinition("CMAKE_CFG_INTDIR");
