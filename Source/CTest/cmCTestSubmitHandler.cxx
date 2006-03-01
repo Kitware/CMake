@@ -169,10 +169,16 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
 
-      cmCTestLog(m_CTest, DEBUG, "CURL output: ["
-        << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]" << std::endl);
-      cmCTestLog(m_CTest, DEBUG, "CURL debug output: ["
-        << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]" << std::endl);
+      if ( chunk.size() > 0 )
+        {
+        cmCTestLog(m_CTest, DEBUG, "CURL output: ["
+          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]" << std::endl);
+        }
+      if ( chunkDebug.size() > 0 )
+        {
+        cmCTestLog(m_CTest, DEBUG, "CURL debug output: ["
+          << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]" << std::endl);
+        }
 
       fclose(ftpfile);
       if ( res )
@@ -326,10 +332,16 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
 
-      cmCTestLog(m_CTest, DEBUG, "CURL output: ["
-        << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]" << std::endl);
-      cmCTestLog(m_CTest, DEBUG, "CURL debug output: ["
-        << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]" << std::endl);
+      if ( chunk.size() > 0 )
+        {
+        cmCTestLog(m_CTest, DEBUG, "CURL output: ["
+          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]" << std::endl);
+        }
+      if ( chunkDebug.size() > 0 )
+        {
+        cmCTestLog(m_CTest, DEBUG, "CURL debug output: ["
+          << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]" << std::endl);
+        }
 
       fclose(ftpfile);
       if ( res )
@@ -454,10 +466,16 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<cmStdString>& files,
         return false;
         }
 
-      cmCTestLog(m_CTest, DEBUG, "CURL output: ["
-        << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]" << std::endl);
-      cmCTestLog(m_CTest, DEBUG, "CURL debug output: ["
-        << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]" << std::endl);
+      if ( chunk.size() > 0 )
+        {
+        cmCTestLog(m_CTest, DEBUG, "CURL output: ["
+          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]" << std::endl);
+        }
+      if ( chunkDebug.size() > 0 )
+        {
+        cmCTestLog(m_CTest, DEBUG, "CURL debug output: ["
+          << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]" << std::endl);
+        }
 
       // always cleanup
       ::curl_easy_cleanup(curl);
