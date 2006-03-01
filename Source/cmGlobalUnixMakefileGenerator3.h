@@ -104,10 +104,12 @@ protected:
                               cmLocalUnixMakefileGenerator3 *,
                               bool exclude);
 
-  void WriteDirectoryRules(std::ostream& ruleFileStream, 
-                           cmLocalUnixMakefileGenerator3 *lg);
-  void WriteDirectoryRules2(std::ostream& ruleFileStream, 
-                            cmLocalUnixMakefileGenerator3 *lg);
+  void WriteDirectoryRule2(std::ostream& ruleFileStream,
+                           cmLocalUnixMakefileGenerator3* lg,
+                           const char* pass, bool check_all,
+                           bool check_relink);
+  void WriteDirectoryRules2(std::ostream& ruleFileStream,
+                            cmLocalUnixMakefileGenerator3* lg);
 
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  cmTarget& target);

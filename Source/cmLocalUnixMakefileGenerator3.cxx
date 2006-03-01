@@ -631,10 +631,16 @@ cmLocalUnixMakefileGenerator3
   runRule += " --check-build-system ";
   runRule += this->Convert(cmakefileName.c_str(),NONE,SHELL);
   runRule += " 0";
-  
+
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
   commands.push_back(runRule);
+  if(m_Parent)
+    {
+    this->CreateCDCommand(commands,
+                          m_Makefile->GetHomeOutputDirectory(),
+                          m_Makefile->GetStartOutputDirectory());
+    }
   this->WriteMakeRule(makefileStream,
                       "Special rule to run CMake to check the build system "
                       "integrity.\n"
@@ -1284,52 +1290,6 @@ void cmLocalUnixMakefileGenerator3
       }
     }
 
-
-  // Write special "install" target to run cmake_install.cmake script.
-  {
-  std::vector<std::string> depends;
-  depends.push_back("preinstall");
-  std::vector<std::string> commands;
-  std::string cmd;
-  if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
-    {
-    // We are building CMake itself.  We cannot use the original
-    // executable to install over itself.
-    cmd = m_ExecutableOutputPath;
-    cmd += "cmake";
-    cmd = this->Convert(cmd.c_str(),START_OUTPUT,SHELL);
-    }
-  else
-    {
-    cmd = "$(CMAKE_COMMAND)";
-    }
-  cmd += " -P cmake_install.cmake";
-  commands.push_back(cmd);
-  this->WriteMakeRule(ruleFileStream,
-                      "Special rule to run installation script.",
-                      "old_install", depends, commands, true);
-
-  commands.clear();
-  depends.clear();
-  const char* noall =
-    m_Makefile->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-  if(!noall || cmSystemTools::IsOff(noall))
-    {
-    // Drive the build before installing.
-    depends.push_back("all");
-    }
-  else
-    {
-    // At least make sure the build system is up to date.
-    depends.push_back("cmake_check_build_system");
-    }
-  commands.push_back(this->GetRecursiveMakeCall
-                     ("CMakeFiles/Makefile2", "preinstall"));
-  this->WriteMakeRule(ruleFileStream,
-                      "Prepare targets for installation.",
-                      "preinstall", depends, commands, true);
-  }
-
   this->WriteSpecialTargetsTop(ruleFileStream);
 
   std::vector<std::string> depends;
@@ -1337,14 +1297,9 @@ void cmLocalUnixMakefileGenerator3
 
   // Write the all rule.
   std::string dir = m_Makefile->GetStartOutputDirectory();
-  dir += "/directorystart";
+  dir += "/all";
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
-  // if at the top the rule is called all
-  if (!m_Parent)
-    {
-    dir = "all";
-    depends.push_back("cmake_check_build_system");
-    }
+  depends.push_back("cmake_check_build_system");
   commands.push_back
     (this->GetRecursiveMakeCall("CMakeFiles/Makefile2",dir.c_str()));  
   this->CreateCDCommand(commands,
@@ -1366,6 +1321,32 @@ void cmLocalUnixMakefileGenerator3
                                 m_Makefile->GetStartOutputDirectory());
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean",
                       depends, commands, true);
+
+  // Write the preinstall rule.
+  dir = m_Makefile->GetStartOutputDirectory();
+  dir += "/preinstall";
+  dir = this->Convert(dir.c_str(), HOME_OUTPUT,MAKEFILE);
+  commands.clear();
+  depends.clear();
+  const char* noall =
+    m_Makefile->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
+  if(!noall || cmSystemTools::IsOff(noall))
+    {
+    // Drive the build before installing.
+    depends.push_back("all");
+    }
+  else
+    {
+    // At least make sure the build system is up to date.
+    depends.push_back("cmake_check_build_system");
+    }
+  commands.push_back
+    (this->GetRecursiveMakeCall("CMakeFiles/Makefile2", dir.c_str()));
+  this->CreateCDCommand(commands,
+                        m_Makefile->GetHomeOutputDirectory(),
+                        m_Makefile->GetStartOutputDirectory());
+  this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
+                      "preinstall", depends, commands, true);
 
   // write the depend rule, really a recompute depends rule
   depends.clear();
