@@ -1214,6 +1214,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
 {
   cmMakefile* mf = m_LocalGenerators[0]->GetMakefile();
   const char* cmakeCfgIntDir = this->GetCMakeCFGInitDirectory();
+  const char* cmakeCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
 
   // CPack
   cmCustomCommandLines cpackCommandLines;
@@ -1233,7 +1234,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   configFile += "/CPackConfig.cmake";
   singleLine.push_back(configFile);
   cpackCommandLines.push_back(singleLine);
-  if ( this->GetPreInstallAvailable() )
+  if ( this->GetPreinstallTargetName() )
     {
     depends.push_back("preinstall");
     }
@@ -1256,58 +1257,74 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     }
 
   //Edit Cache
-  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
-  singleLine.erase(singleLine.begin(), singleLine.end());
-  depends.erase(depends.begin(), depends.end());
+  const char* editCacheTargetName = this->GetEditCacheTargetName();
+  if ( editCacheTargetName )
+    {
+    cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+    singleLine.erase(singleLine.begin(), singleLine.end());
+    depends.erase(depends.begin(), depends.end());
 
-  const char* cmakeCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-  // Use CMAKE_EDIT_COMMAND for the edit_cache rule if it is defined.
-  // Otherwise default to the interactive command-line interface.
-  if(mf->GetDefinition("CMAKE_EDIT_COMMAND"))
-    {
-    singleLine.push_back(mf->GetDefinition("CMAKE_EDIT_COMMAND"));
-    singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
-    singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
-    cpackCommandLines.push_back(singleLine);
-    (*targets)[this->GetEditCacheTargetName()] =
-      this->CreateGlobalTarget(
-        this->GetEditCacheTargetName(), "Running CMake cache editor...",
-        &cpackCommandLines, depends);
-    }
-  else
-    {
-    singleLine.push_back(cmakeCommand);
-    singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
-    singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
-    singleLine.push_back("-i");
-    cpackCommandLines.push_back(singleLine);
-    (*targets)[this->GetEditCacheTargetName()] =
-      this->CreateGlobalTarget(
-        this->GetEditCacheTargetName(), "Running interactive CMake command-line interface...",
-        &cpackCommandLines, depends);
+    // Use CMAKE_EDIT_COMMAND for the edit_cache rule if it is defined.
+    // Otherwise default to the interactive command-line interface.
+    if(mf->GetDefinition("CMAKE_EDIT_COMMAND"))
+      {
+      singleLine.push_back(mf->GetDefinition("CMAKE_EDIT_COMMAND"));
+      singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
+      singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
+      cpackCommandLines.push_back(singleLine);
+      (*targets)[editCacheTargetName] =
+        this->CreateGlobalTarget(
+          editCacheTargetName, "Running CMake cache editor...",
+          &cpackCommandLines, depends);
+      }
+    else
+      {
+      singleLine.push_back(cmakeCommand);
+      singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
+      singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
+      singleLine.push_back("-i");
+      cpackCommandLines.push_back(singleLine);
+      (*targets)[editCacheTargetName] =
+        this->CreateGlobalTarget(
+          editCacheTargetName, "Running interactive CMake command-line interface...",
+          &cpackCommandLines, depends);
+      }
     }
 
   //Rebuild Cache
-  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
-  singleLine.erase(singleLine.begin(), singleLine.end());
-  depends.erase(depends.begin(), depends.end());
-  singleLine.push_back(cmakeCommand);
-  singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
-  singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
-  cpackCommandLines.push_back(singleLine);
-  (*targets)[this->GetRebuildCacheTargetName()] =
-    this->CreateGlobalTarget(
-      this->GetRebuildCacheTargetName(), "Running CMake to regenerate build system...",
-      &cpackCommandLines, depends);
+  const char* rebuildCacheTargetName = this->GetRebuildCacheTargetName();
+  if ( rebuildCacheTargetName )
+    {
+    cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+    singleLine.erase(singleLine.begin(), singleLine.end());
+    depends.erase(depends.begin(), depends.end());
+    singleLine.push_back(cmakeCommand);
+    singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
+    singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
+    cpackCommandLines.push_back(singleLine);
+    (*targets)[rebuildCacheTargetName] =
+      this->CreateGlobalTarget(
+        rebuildCacheTargetName, "Running CMake to regenerate build system...",
+        &cpackCommandLines, depends);
+    }
 
   //Install
   std::string cmd;
   cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
   singleLine.erase(singleLine.begin(), singleLine.end());
   depends.erase(depends.begin(), depends.end());
-  if ( this->GetPreInstallAvailable() )
+  if ( this->GetPreinstallTargetName() )
     {
-    depends.push_back("preinstall");
+    depends.push_back(this->GetPreinstallTargetName());
+    }
+  else
+    {
+    const char* noall =
+      mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
+    if(!noall || cmSystemTools::IsOff(noall))
+      {
+      depends.push_back(this->GetAllTargetName());
+      }
     }
   if(mf->GetDefinition("CMake_BINARY_DIR"))
     {
@@ -1330,15 +1347,6 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   singleLine.push_back("-P");
   singleLine.push_back("cmake_install.cmake");
   cpackCommandLines.push_back(singleLine);
-  /*
-  const char* noall =
-    mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-  bool dependsOnAll = false;
-  if(!noall || cmSystemTools::IsOff(noall))
-    {
-    dependsOnAll = true;
-    }
-  */
   (*targets)[this->GetInstallTargetName()] =
     this->CreateGlobalTarget(
       this->GetInstallTargetName(), "Install the project...",

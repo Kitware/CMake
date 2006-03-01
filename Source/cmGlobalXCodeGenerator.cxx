@@ -283,45 +283,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                         no_working_directory,
                         "echo", "Build all projects");
   cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
-  // ADD install
-  std::string cmake_command = mf->GetRequiredDefinition("CMAKE_COMMAND");
-  if(m_XcodeVersion == 15)
-    {
-    mf->AddUtilityCommand("install", false, no_output, no_depends,
-                          no_working_directory,
-                          cmake_command.c_str(),
-                          "-P", "cmake_install.cmake"); 
-    }
-  else
-    { 
-    mf->AddUtilityCommand("install", false, no_output, no_depends,
-                          no_working_directory,
-                          cmake_command.c_str(), 
-                          "-DBUILD_TYPE=$(CONFIGURATION)",
-                          "-P", "cmake_install.cmake"); 
-    }
   
-  const char* noall =
-    mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-  if(!noall || cmSystemTools::IsOff(noall))
-    {
-    cmTarget* install = mf->FindTarget("install");
-    install->AddUtility("ALL_BUILD");
-    }
-  
-  // Add RUN_TESTS target if testing has been enabled
-  std::string fname;
-  fname = mf->GetStartOutputDirectory();
-  fname += "/";
-  fname += "DartTestfile.txt";
-  if (cmSystemTools::FileExists(fname.c_str()))
-    {
-    std::string ctest_command = 
-      mf->GetRequiredDefinition("CMAKE_CTEST_COMMAND");
-    mf->AddUtilityCommand("RUN_TESTS", false, no_output, no_depends,
-                          no_working_directory,
-                          ctest_command.c_str());
-    }
   // Add XCODE depend helper 
   std::string dir = mf->GetCurrentOutputDirectory();
   m_CurrentXCodeHackMakefile = dir;

@@ -151,6 +151,9 @@ private:
                           const char* varNameSuffix,
                           const char* default_flags);
 protected:
+  virtual const char* GetInstallTargetName()      { return "install"; }
+  virtual const char* GetPackageTargetName()      { return "package"; }
+
   int m_XcodeVersion;
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;

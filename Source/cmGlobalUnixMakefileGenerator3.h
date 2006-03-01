@@ -120,14 +120,13 @@ protected:
   bool NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg, const char *);
 
   // Setup target names
+  virtual const char* GetAllTargetName()          { return "all"; }
   virtual const char* GetInstallTargetName()      { return "install"; }
   virtual const char* GetPreinstallTargetName()   { return "preinstall"; }
   virtual const char* GetTestTargetName()         { return "test"; }
   virtual const char* GetPackageTargetName()      { return "package"; }
   virtual const char* GetEditCacheTargetName()    { return "edit_cache"; }
   virtual const char* GetRebuildCacheTargetName() { return "rebuild_cache"; }
-  virtual bool GetPreInstallAvailable() { return true; }
-
 
   // Some make programs (Borland) do not keep a rule if there are no
   // dependencies or commands.  This is a problem for creating rules
