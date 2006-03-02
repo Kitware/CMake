@@ -11,6 +11,10 @@ SET(CMake_VERSION_FULL "${CMake_VERSION}.${CMake_VERSION_PATCH}")
 
 SET(BUILD_SHARED_LIBS OFF)
 
+# The CMake executables do not need any rpath to run in the build or
+# install tree.
+SET(CMAKE_SKIP_RPATH ON CACHE INTERNAL "CMake does not need RPATHs.")
+
 SET(CMAKE_DATA_DIR "/share/CMake" CACHE STRING 
   "Install location for data (relative to prefix).")
 SET(CMAKE_DOC_DIR "/doc/CMake" CACHE STRING
