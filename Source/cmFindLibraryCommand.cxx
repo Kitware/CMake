@@ -33,7 +33,7 @@ cmFindLibraryCommand::cmFindLibraryCommand()
                                "SEARCH_XXX", "library");
   this->GenericDocumentation += 
     "\n"
-    "If the library found is a framework, then VAR will be set to the "
+    "If the library found is a framework, then VAR will be set to "
     "the full path to the framework <fullPath>/A.framework. "
     "When a full path to a framework is used as a library, "
     "CMake will use a -framework A, and a -F<fullPath> to "

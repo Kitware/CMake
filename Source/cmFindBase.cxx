@@ -33,7 +33,7 @@ cmFindBase::cmFindBase()
   this->SearchFrameworkLast = false;
   this->GenericDocumentation = 
     "   FIND_XXX(<VAR> name1 path1 path2 ...)\n"
-    "This is the short-hand signature for the command that"
+    "This is the short-hand signature for the command that "
     "is sufficient in many cases.  It is the same "
     "as FIND_XXX(<VAR> NAMES name1 PATHS path2 path2 ...)\n"
     "   FIND_XXX(\n"
@@ -54,12 +54,12 @@ cmFindBase::cmFindBase()
     "<VAR>-NOTFOUND.  The name of the SEARCH_XXX that "
     "is searched for is specified by the names listed "
     "after the NAMES argument.   Additional search locations "
-    "can be specified after the PATHS arguement.  The arguement "
+    "can be specified after the PATHS argument.  The argument "
     "after DOC will be used for the documentation string in "
     "the cache.  PATH_SUFFIXES can be used to give sub directories "
-    "that will be appeneded to the search paths.\n"
+    "that will be appended to the search paths.\n"
     "The search process is as follows:\n"
-    "1. Search cmake specific environment varibles.  This "
+    "1. Search cmake specific environment variables.  This "
     "can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
     ""
     "   CMAKE_FRAMEWORK_PATH\n"
@@ -88,7 +88,7 @@ cmFindBase::cmFindBase()
     "   \"FIRST\"  - Try to find frameworks before standard\n"
     "              libraries or headers. This is the default on Darwin.\n"
     "   \"LAST\"   - Try to find frameworks after standard\n"
-    "              librareis or headers.\n"
+    "              libraries or headers.\n"
     "   \"ONLY\"   - Only try to find frameworks.\n"
     "   \"NEVER\". - Never try to find frameworks.\n";
 }
