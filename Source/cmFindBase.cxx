@@ -31,8 +31,68 @@ cmFindBase::cmFindBase()
 #endif
   this->SearchFrameworkOnly = false;
   this->SearchFrameworkLast = false;
+  this->GenericDocumentation = 
+    "   FIND_XXX(<VAR> name1 path1 path2 ...)\n"
+    "This is the short-hand signature for the command that"
+    "is sufficient in many cases.  It is the same "
+    "as FIND_XXX(<VAR> NAMES name1 PATHS path2 path2 ...)\n"
+    "   FIND_XXX(\n"
+    "             <VAR> \n"
+    "             NAMES name1 [name2 ...]\n"
+    "             PATHS path1 [path2 ...]\n"
+    "             [PATH_SUFFIXES suffix1 [suffix2 ...]]\n"
+    "             [DOC \"cache documentation string\"]\n"
+    "             [NO_CMAKE_ENVIRONMENT_PATH]\n"
+    "             [NO_CMAKE_PATH]\n"
+    "             [NO_SYSTEM_PATH]\n"
+    "             [NO_CMAKE_SYSTEM_PATH]\n"
+    "            )\n"
+    ""
+    "This command is used to find a SEARCH_XXX_DESC. "
+    "A cache entry named by <VAR> is created to store the result "
+    "of this command.  If nothing is found, the result will be "
+    "<VAR>-NOTFOUND.  The name of the SEARCH_XXX that "
+    "is searched for is specified by the names listed "
+    "after the NAMES argument.   Additional search locations "
+    "can be specified after the PATHS arguement.  The arguement "
+    "after DOC will be used for the documentation string in "
+    "the cache.  PATH_SUFFIXES can be used to give sub directories "
+    "that will be appeneded to the search paths.\n"
+    "The search process is as follows:\n"
+    "1. Search cmake specific environment varibles.  This "
+    "can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
+    ""
+    "   CMAKE_FRAMEWORK_PATH\n"
+    "   CMAKE_XXX_PATH\n"
+    "2. Search cmake variables with the same names as "
+    "the cmake specific environment variables.  These "
+    "are intended to be used on the command line with a "
+    "-DVAR=value.  This can be skipped if NO_CMAKE_PATH "
+    "is passed.\n"
+    ""
+    "   CMAKE_FRAMEWORK_PATH\n"
+    "   CMAKE_XXX_PATH\n"
+    "3. Search the standard system environment variables. "
+    "This can be skipped if NO_SYSTEM_PATH is an argument.\n"
+    "   PATH\n"
+    "   XXX_SYSTEM\n"  // replace with "", LIB, or INCLUDE
+    "4. Search cmake variables defined in the Platform files "
+    "for the current system. This can be skipped if NO_CMAKE_SYSTEM_PATH "
+    "is passed.\n"
+    "   CMAKE_SYSTEM_FRAMEWORK_PATH\n"
+    "   CMAKE_SYSTEM_XXX_PATH\n"
+    "5. Search the paths specified after PATHS or in the short-hand version "
+    "of the command.\n"
+    "On Darwin or systems supporting OSX Frameworks, the cmake variable"
+    "    CMAKE_FIND_FRAMEWORK can be set to empty or one of the following:\n"
+    "   \"FIRST\"  - Try to find frameworks before standard\n"
+    "              libraries or headers. This is the default on Darwin.\n"
+    "   \"LAST\"   - Try to find frameworks after standard\n"
+    "              librareis or headers.\n"
+    "   \"ONLY\"   - Only try to find frameworks.\n"
+    "   \"NEVER\". - Never try to find frameworks.\n";
 }
-
+  
 bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 {
   if(argsIn.size() < 2 )
@@ -162,7 +222,6 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   // FIND_*(VAR name path1 path2 ...)
   if(!newStyle)
     {
-    std::cerr << "oldstyle\n";
     this->Names.push_back(args[1]);
     for(unsigned int j = 2; j < args.size(); ++j)
       {
@@ -355,7 +414,6 @@ void cmFindBase::PrintFindStuff()
 
 bool cmFindBase::CheckForVariableInCache()
 {
-  std::cerr << "CheckForVariableInCache " << this->VariableName << "\n";
   const char* cacheValue
     = m_Makefile->GetDefinition(this->VariableName.c_str());
   if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
@@ -364,7 +422,6 @@ bool cmFindBase::CheckForVariableInCache()
     }
   if(cacheValue)
     {
-    std::cerr << "Cachevalue " << cacheValue << "\n";
     cmCacheManager::CacheIterator it = 
       m_Makefile->GetCacheManager()->GetCacheIterator(this->VariableName.c_str());
     if(!it.IsAtEnd())

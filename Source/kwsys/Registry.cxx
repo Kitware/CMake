@@ -267,6 +267,7 @@ bool Registry::DeleteValue(const char *subkey, const char *key)
     if ( !this->Open(this->GetTopLevel(), subkey, 
         Registry::READWRITE) )
       {
+      std::cerr << "Failed to open\n";
       return res;
       }
     open = true;

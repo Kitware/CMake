@@ -1923,21 +1923,35 @@ kwsys_stl::string SystemTools::FindProgram(
     {
     return "";
     }
+  std::string ext = SystemTools::GetExecutableExtension();
+  if(ext.size())
+    {
+    unsigned int len = strlen(name);
+    if(len > ext.size())
+      {
+      if(strcmp(name+(len-ext.size()), ext.c_str()) == 0)
+        {
+        ext = ""; // name already has Executable extension
+        }
+      }
+    }
   // See if the executable exists as written.
   if(SystemTools::FileExists(name) &&
       !SystemTools::FileIsDirectory(name))
     {
     return SystemTools::CollapseFullPath(name);
     }
-  kwsys_stl::string tryPath = name;
-  tryPath += SystemTools::GetExecutableExtension();
-  if(SystemTools::FileExists(tryPath.c_str()) &&
-     !SystemTools::FileIsDirectory(tryPath.c_str()))
+  if(ext.size())
     {
-    return SystemTools::CollapseFullPath(tryPath.c_str());
+    kwsys_stl::string tryPath = name;
+    tryPath += ext;
+    if(SystemTools::FileExists(tryPath.c_str()) &&
+       !SystemTools::FileIsDirectory(tryPath.c_str()))
+      {
+      return SystemTools::CollapseFullPath(tryPath.c_str());
+      }
     }
   kwsys_stl::vector<kwsys_stl::string> path;
-  SystemTools::GetPath(path, "CMAKE_PROGRAM_PATH");
   // Add the system search path to our path.
   if (!no_system_path)
     {
@@ -1954,9 +1968,10 @@ kwsys_stl::string SystemTools::FindProgram(
       p != path.end(); ++p)
     {
 #ifdef _WIN32
+    // Remove double quotes from the path on windows
     SystemTools::ReplaceString(*p, "\"", "");
 #endif
-    tryPath = *p;
+    kwsys_stl::string tryPath = *p;
     tryPath += "/";
     tryPath += name;
     if(SystemTools::FileExists(tryPath.c_str()) &&
@@ -1965,21 +1980,34 @@ kwsys_stl::string SystemTools::FindProgram(
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
 #ifdef _WIN32
-    tryPath += ".com";
+    // on windows try .com before .exe
+    if(ext.size() == 0)
+      {
+      SystemTools::ReplaceString(tryPath, ".exe", ".com");
+      SystemTools::ReplaceString(tryPath, ".EXE", ".com");
+      }
+    else
+      {
+      tryPath += ".com";
+      }
     if(SystemTools::FileExists(tryPath.c_str()) &&
        !SystemTools::FileIsDirectory(tryPath.c_str()))
       {
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
-    tryPath = *p;
-    tryPath += "/";
-    tryPath += name;
 #endif
-    tryPath += SystemTools::GetExecutableExtension();
-    if(SystemTools::FileExists(tryPath.c_str()) &&
-       !SystemTools::FileIsDirectory(tryPath.c_str()))
+    // now try to add ext if it is different than name
+    if(ext.size())
       {
-      return SystemTools::CollapseFullPath(tryPath.c_str());
+      tryPath = *p;
+      tryPath += "/";
+      tryPath += name;
+      tryPath += ext;
+      if(SystemTools::FileExists(tryPath.c_str()) &&
+         !SystemTools::FileIsDirectory(tryPath.c_str()))
+        {
+        return SystemTools::CollapseFullPath(tryPath.c_str());
+        }
       }
     }
 

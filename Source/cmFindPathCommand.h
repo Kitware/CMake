@@ -17,7 +17,7 @@
 #ifndef cmFindPathCommand_h
 #define cmFindPathCommand_h
 
-#include "cmCommand.h"
+#include "cmFindBase.h"
 
 
 /** \class cmFindPathCommand
@@ -27,9 +27,10 @@
  * that specifies a library. The command searches for a given
  * file in a list of directories.
  */
-class cmFindPathCommand : public cmCommand
+class cmFindPathCommand : public cmFindBase
 {
 public:
+  cmFindPathCommand();
   /**
    * This is a virtual constructor for the command.
    */
@@ -61,31 +62,13 @@ public:
     {
     return "Find the directory containing a file.";
     }
-  
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation()
-    {
-    return
-      "  FIND_PATH(<VAR> fileName path1 [path2 ...]\n"
-      "            [DOC \"docstring\"])\n"
-      "Find the directory containing a file named by fileName.  "
-      "A cache entry named by "
-      "<VAR> is created to store the result.  If the file is not "
-      "found, the result will be <VAR>-NOTFOUND.  If DOC is specified "
-      "then the next argument is treated as a documentation string for "
-      "the cache entry <VAR>.  "
-      "The search proceeds first in paths listed in the CMAKE_INCLUDE_PATH "
-      "CMake variable (which is generally set by the user on the command line), "
-      "then in paths listed in the CMAKE_INCLUDE_PATH environment variable, "
-      "then in paths given to the command, and finally in paths listed in the "
-      "PATH environment variable.";
-    }
-  cmStdString FindHeaderInFrameworks( std::vector<std::string> path,
-                                      const char* var, const char* file);
 
-  cmTypeMacro(cmFindPathCommand, cmCommand);
+  std::string FindHeaderInFramework( std::string& file,
+                                     std::string& dir);
+  virtual const char* GetFullDocumentation();
+  cmTypeMacro(cmFindPathCommand, cmFindBase);
+  bool IncludeFileInPath;
+  bool ExtraDocAdded;
 };
 
 

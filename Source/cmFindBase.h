@@ -35,6 +35,10 @@ public:
    */
   virtual bool ParseArguments(std::vector<std::string> const& args);
   cmTypeMacro(cmFindBase, cmCommand);
+  
+  virtual const char* GetFullDocumentation()
+    {return this->GenericDocumentation.c_str();}
+
 protected:
   void PrintFindStuff();
   void ExpandPaths(std::vector<std::string> userPaths);
@@ -48,6 +52,7 @@ protected:
   // if it has documentation in the cache
   bool CheckForVariableInCache();
   
+  cmStdString GenericDocumentation;
   // use by command during find
   cmStdString VariableDocumentation;
   cmStdString VariableName;

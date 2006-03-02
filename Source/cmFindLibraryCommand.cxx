@@ -17,129 +17,182 @@
 #include "cmFindLibraryCommand.h"
 #include "cmCacheManager.h"
 
+cmFindLibraryCommand::cmFindLibraryCommand()
+{ 
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "FIND_XXX", "FIND_LIBRARY");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_XXX_PATH", "CMAKE_LIBRARY_PATH");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "XXX_SYSTEM", "LIB");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_SYSTEM_XXX_PATH", "CMAKE_SYSTEM_LIBRARY_PATH");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "SEARCH_XXX_DESC", "library");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "SEARCH_XXX", "library");
+  this->GenericDocumentation += 
+    "\n"
+    "If the library found is a framework, then VAR will be set to the "
+    "the full path to the framework <fullPath>/A.framework. "
+    "When a full path to a framework is used as a library, "
+    "CMake will use a -framework A, and a -F<fullPath> to "
+    "link the framework to the target. ";
+}
+
 // cmFindLibraryCommand
 bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(argsIn.size() < 2)
+  this->VariableDocumentation = "Path to a library.";
+  this->CMakePathName = "LIBRARY";
+  if(!this->ParseArguments(argsIn))
     {
-    this->SetError("called with incorrect number of arguments");
     return false;
-    } 
-  std::string helpString;
-  size_t size = argsIn.size();
-  std::vector<std::string> args;
-  for(unsigned int j = 0; j < size; ++j)
-    {
-    if(argsIn[j] != "DOC")
-      {
-      args.push_back(argsIn[j]);
-      }
-    else
-      {
-      if(j+1 < size)
-        {
-        helpString = argsIn[j+1];
-        }
-      break;
-      }
     }
-
-  std::vector<std::string> path;
-  std::vector<std::string> names;
-  bool foundName = false;
-  bool foundPath = false;
-  bool doingNames = true;
-  for (unsigned int j = 1; j < args.size(); ++j)
+  if(this->AlreadyInCache)
     {
-    if(args[j] == "NAMES")
-      {
-      doingNames = true;
-      foundName = true;
-      }
-    else if (args[j] == "PATHS")
-      {
-      doingNames = false;
-      foundPath = true;
-      }
-    else
-      { 
-      if(doingNames)
-        {
-        names.push_back(args[j]);
-        }
-      else
-        {
-        cmSystemTools::ExpandRegistryValues(args[j]);
-        // Glob the entry in case of wildcards.
-        cmSystemTools::GlobDirs(args[j].c_str(), path);
-        }
-      }
-    }
-  // old style name path1 path2 path3
-  if(!foundPath && !foundName)
-    {
-    names.clear();
-    path.clear();
-    names.push_back(args[1]);
-    // add any user specified paths
-    for (unsigned int j = 2; j < args.size(); j++)
-      {
-      // expand variables
-      std::string exp = args[j];
-      cmSystemTools::ExpandRegistryValues(exp);
-      
-      // Glob the entry in case of wildcards.
-      cmSystemTools::GlobDirs(exp.c_str(), path);
-      }
-    }
-  if(helpString.size() == 0)
-    {
-    helpString = "Where can ";
-    if (names.size() == 0)
-      {
-      helpString += "the (unknown) library be found";
-      }
-    else if (names.size() == 1)
-      {
-      helpString += "the " + names[0] + " library be found";
-      }
-    else
-      {
-      helpString += "one of the " + names[0];
-      for (unsigned int j = 1; j < names.size() - 1; ++j)
-        {
-        helpString += ", " + names[j];
-        }
-      helpString += " or " + names[names.size() - 1] + " libraries be found";
-      }
-    }
-  
-  const char* cacheValue
-    = m_Makefile->GetDefinition(args[0].c_str());
-  if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
-    { 
     return true;
     }
-
+  // add special 64 bit paths if this is a 64 bit compile.
+  this->AddLib64Paths();
   std::string library;
-  for(std::vector<std::string>::iterator i = names.begin();
-      i != names.end() ; ++i)
+  for(std::vector<std::string>::iterator i = this->Names.begin();
+      i != this->Names.end() ; ++i)
     {
-    library = m_Makefile->FindLibrary(i->c_str(), path);
+    library = this->FindLibrary(i->c_str());
     if(library != "")
       {  
-      m_Makefile->AddCacheDefinition(args[0].c_str(),
+      m_Makefile->AddCacheDefinition(this->VariableName.c_str(),
                                      library.c_str(),
-                                     helpString.c_str(),
+                                     this->VariableDocumentation.c_str(),
                                      cmCacheManager::FILEPATH);
       return true;
       } 
     }
-  std::string s = args[0] + "-NOTFOUND";
-  m_Makefile->AddCacheDefinition(args[0].c_str(),
-                                 s.c_str(),
-                                 helpString.c_str(),
+  std::string notfound = this->VariableName + "-NOTFOUND";
+  m_Makefile->AddCacheDefinition(this->VariableName.c_str(),
+                                 notfound.c_str(),
+                                 this->VariableDocumentation.c_str(),
                                  cmCacheManager::FILEPATH);
   return true;
 }
 
+
+void cmFindLibraryCommand::AddLib64Paths()
+{  
+  if(!m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->GetLanguageEnabled("C"))
+    {
+    return;
+    }
+  std::string voidsize = m_Makefile->GetRequiredDefinition("CMAKE_SIZEOF_VOID_P");
+  int size = atoi(voidsize.c_str());
+  std::vector<std::string> path64;
+  if(size != 8)
+    {
+    return;
+    }
+  bool found64 = false;
+  for(std::vector<std::string>::iterator i = this->SearchPaths.begin(); 
+      i != this->SearchPaths.end(); ++i)
+    {
+    std::string s = *i;
+    std::string s2 = *i;
+    cmSystemTools::ReplaceString(s, "lib/", "lib64/");
+    // try to replace lib with lib64 and see if it is there,
+    // then prepend it to the path
+    if((s != *i) && cmSystemTools::FileIsDirectory(s.c_str()))
+      {
+      path64.push_back(s);
+      found64 = true;
+      }  
+    // now just add a 64 to the path name and if it is there,
+    // add it to the path
+    s2 += "64";
+    if(cmSystemTools::FileIsDirectory(s2.c_str()))
+      {
+      found64 = true;
+      path64.push_back(s2);
+      } 
+    // now add the original unchanged path
+    if(cmSystemTools::FileIsDirectory(i->c_str()))
+      {
+      path64.push_back(*i);
+      }
+    }
+  // now replace the SearchPaths with the 64 bit converted path
+  // if any 64 bit paths were discovered
+  if(found64)
+    {
+    this->SearchPaths = path64;
+    }
+}
+
+std::string cmFindLibraryCommand::FindLibrary(const char* name)
+{
+  bool supportFrameworks = false;
+  bool onlyFrameworks = false;
+  std::string ff = m_Makefile->GetSafeDefinition("CMAKE_FIND_FRAMEWORK");
+  if(ff == "FIRST" || ff == "LAST")
+    {
+    supportFrameworks = true;
+    }
+  if(ff == "ONLY")
+    {
+    onlyFrameworks = true;
+    supportFrameworks = true;
+    }
+  
+  const char* prefixes_list =
+    m_Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
+  const char* suffixes_list =
+    m_Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
+  std::vector<std::string> prefixes;
+  std::vector<std::string> suffixes;
+  cmSystemTools::ExpandListArgument(prefixes_list, prefixes, true);
+  cmSystemTools::ExpandListArgument(suffixes_list, suffixes, true);
+  std::string tryPath;
+  for(std::vector<std::string>::const_iterator p = this->SearchPaths.begin();
+      p != this->SearchPaths.end(); ++p)
+    {
+    if(supportFrameworks)
+      {
+      tryPath = *p;
+      tryPath += "/";
+      tryPath += name;
+      tryPath += ".framework";
+      if(cmSystemTools::FileExists(tryPath.c_str())
+         && cmSystemTools::FileIsDirectory(tryPath.c_str()))
+        {
+        tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+        cmSystemTools::ConvertToUnixSlashes(tryPath);
+        return tryPath;
+        }
+      }
+    if(!onlyFrameworks)
+      {
+      // Try various library naming conventions.
+      for(std::vector<std::string>::iterator prefix = prefixes.begin();
+          prefix != prefixes.end(); ++prefix)
+        {
+        for(std::vector<std::string>::iterator suffix = suffixes.begin();
+            suffix != suffixes.end(); ++suffix)
+          {
+          tryPath = *p;
+          tryPath += "/";
+          tryPath += *prefix;
+          tryPath += name;
+          tryPath += *suffix;
+          if(cmSystemTools::FileExists(tryPath.c_str())
+             && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
+            {
+            tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+            cmSystemTools::ConvertToUnixSlashes(tryPath);
+            return tryPath;
+            }
+          }
+        }
+      }
+    }
+  // Couldn't find the library.
+  return "";
+}

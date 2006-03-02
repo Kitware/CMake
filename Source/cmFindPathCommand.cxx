@@ -17,123 +17,123 @@
 #include "cmFindPathCommand.h"
 #include "cmCacheManager.h"
 
+
+cmFindPathCommand::cmFindPathCommand()
+{
+  this->IncludeFileInPath = false;
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "FIND_XXX", "FIND_PATH");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_XXX_PATH", "CMAKE_INCLUDE_PATH");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "XXX_SYSTEM", "INCLUDE");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_SYSTEM_XXX_PATH", "CMAKE_SYSTEM_INCLUDE_PATH"); 
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "SEARCH_XXX_DESC", "directory containing the named file");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "SEARCH_XXX", "file in a directory");
+  this->ExtraDocAdded = false;
+}
+
+const char* cmFindPathCommand::GetFullDocumentation()
+{
+  if(!this->ExtraDocAdded && !this->IncludeFileInPath)
+    {
+    this->GenericDocumentation += 
+      "\n"
+      "When searching for frameworks, if the file is specified as "
+      "A/b.h, then the framework search will look for A.framework/Headers/b.h. "
+      "If that is found the path will be set to the path to the framework. "
+      "CMake will convert this to the correct -F option to include the file. ";
+    this->ExtraDocAdded = true;
+    }
+  return this->GenericDocumentation.c_str();
+}
+
 // cmFindPathCommand
 bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(argsIn.size() < 2)
+  this->VariableDocumentation = "Path to a file.";
+  this->CMakePathName = "INCLUDE";
+  if(!this->ParseArguments(argsIn))
     {
-    this->SetError("called with incorrect number of arguments");
     return false;
     }
-
-  // Now check and see if the value has been stored in the cache
-  // already, if so use that value and don't look for the program
-  std::string helpString = "What is the path where the file ";
-  helpString += argsIn[1] + " can be found";
-  std::vector<std::string> args;
-  size_t size = argsIn.size();
-  for(unsigned int j = 0; j < size; ++j)
+  if(this->AlreadyInCache)
     {
-    if(argsIn[j] != "DOC")
-      {
-      args.push_back(argsIn[j]);
-      }
-    else
-      {
-      if(j+1 < size)
-        {
-        helpString = argsIn[j+1];
-        }
-      break;
-      }
-    }
-
-  const char* cacheValue
-    = m_Makefile->GetDefinition(args[0].c_str());
-  if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
-    { 
     return true;
     }
-  if(cacheValue)
+  std::string ff = m_Makefile->GetSafeDefinition("CMAKE_FIND_FRAMEWORK");
+  bool supportFrameworks = true;
+  if( ff.size() == 0 || ff == "NEVER" )
     {
-    cmCacheManager::CacheIterator it = 
-      m_Makefile->GetCacheManager()->GetCacheIterator(args[0].c_str());
-    if(!it.IsAtEnd())
-      {
-      const char* hs = it.GetProperty("HELPSTRING");
-      helpString = hs?hs:"(none)";
-      }
+    supportFrameworks = false;
     }
-
-  // Construct a search path.
-  std::vector<std::string> path;
-  std::vector<std::string> callPaths;
-  for (unsigned int j = 2; j < args.size(); j++)
-    {
-    // expand variables
-    std::string exp = args[j];
-    cmSystemTools::ExpandRegistryValues(exp);
-
-    // Glob the entry in case of wildcards.
-    cmSystemTools::GlobDirs(exp.c_str(), callPaths);
-    }
-  m_Makefile->GetIncludeSearchPath(callPaths, path);
-
+  std::string framework;
   // Use the search path to find the file.
   unsigned int k;
-  for(k=0; k < path.size(); k++)
+  std::string result;
+  for(k=0; k < this->SearchPaths.size(); k++)
     {
-    std::string tryPath = path[k];
-    tryPath += "/";
-    tryPath += args[1];
-    if(cmSystemTools::FileExists(tryPath.c_str()))
+    for(unsigned int j =0; j < this->Names.size(); ++j)
       {
-      path[k] = cmSystemTools::CollapseFullPath(path[k].c_str()); 
-      if(path[k].size() && path[k][path[k].size()-1] == '/')
+      // if frameworks are supported try to find the header in a framework
+      std::string tryPath;
+      if(supportFrameworks)
         {
-        path[k] = path[k].substr(0, path[k].size()-1);
+        tryPath = this->FindHeaderInFramework(this->Names[j],
+                                              this->SearchPaths[k]);
+        if(tryPath.size())
+          {
+          result = tryPath;
+          }
         }
-      m_Makefile->AddCacheDefinition(args[0].c_str(),
-                                     path[k].c_str(),
-                                     helpString.c_str(),
-                                     cmCacheManager::PATH);
-      return true;
+      if(result.size() == 0)
+        {
+        tryPath = this->SearchPaths[k];
+        tryPath += "/";
+        tryPath += this->Names[j];
+        if(cmSystemTools::FileExists(tryPath.c_str()))
+          {
+          if(this->IncludeFileInPath)
+            {
+            result = tryPath;
+            }
+          else
+            {
+            result = this->SearchPaths[k];
+            }
+          }
+        }
+      if(result.size() != 0)
+        {
+        m_Makefile->AddCacheDefinition(this->VariableName.c_str(),
+                                       result.c_str(),
+                                       this->VariableDocumentation.c_str(),
+                                       (this->IncludeFileInPath) ? 
+                                       cmCacheManager::FILEPATH :cmCacheManager::PATH);
+        return true;
+        }
       }
     }
-#if defined (__APPLE__)
-  cmStdString fpath = this->FindHeaderInFrameworks(path, args[0].c_str(), args[1].c_str());
-  if(fpath.size())
-    {
-    m_Makefile->AddCacheDefinition(args[0].c_str(),
-                                   fpath.c_str(),
-                                   helpString.c_str(),
-                                   cmCacheManager::FILEPATH);
-    return true;
-    }
-#endif  
-
-  m_Makefile->AddCacheDefinition(args[0].c_str(),
-                                 (args[0] + "-NOTFOUND").c_str(),
-                                 helpString.c_str(),
-                                 cmCacheManager::PATH);
+  m_Makefile->AddCacheDefinition(this->VariableName.c_str(),
+                                 (this->VariableName + "-NOTFOUND").c_str(),
+                                 this->VariableDocumentation.c_str(),
+                                 (this->IncludeFileInPath) ? 
+                                 cmCacheManager::FILEPATH :cmCacheManager::PATH);
   return true;
 }
 
-cmStdString cmFindPathCommand::FindHeaderInFrameworks(
-  std::vector<std::string> path,
-  const char* defineVar,
-  const char* file)
+std::string cmFindPathCommand::FindHeaderInFramework(std::string& file,
+                                                     std::string& dir)
 {
-  (void)defineVar;
-
-#ifndef __APPLE__
-  (void)path;
-  (void)file;
-  return cmStdString("");
-#else
   cmStdString fileName = file;
   cmStdString frameWorkName;
   cmStdString::size_type pos = fileName.find("/");
+  // if there is a / in the name try to find the header as a framework
+  // For example bar/foo.h would look for:
+  // bar.framework/Headers/foo.h
   if(pos != fileName.npos)
     {
     // remove the name from the slash;
@@ -145,18 +145,10 @@ cmStdString cmFindPathCommand::FindHeaderInFrameworks(
       {
       fileName = file;
       frameWorkName = "";
-      }
-    }
-  path.push_back("~/Library/Frameworks");
-  path.push_back("/Library/Frameworks");
-  path.push_back("/Network/Library/Frameworks");
-  path.push_back("/System/Library/Frameworks");
-  for(  std::vector<std::string>::iterator i = path.begin();
-        i != path.end(); ++i)
-    {
+      } 
     if(frameWorkName.size())
       {
-      std::string fpath = *i;
+      std::string fpath = dir;
       fpath += "/";
       fpath += frameWorkName;
       fpath += ".framework";
@@ -164,11 +156,17 @@ cmStdString cmFindPathCommand::FindHeaderInFrameworks(
       intPath += "/Headers/";
       intPath += fileName;
       if(cmSystemTools::FileExists(intPath.c_str()))
-        {
+        { 
+        if(this->IncludeFileInPath)
+          {
+          return intPath;
+          }
         return fpath;
         }
       }
-    cmStdString glob = *i;
+    // if it is not found yet or not a framework header, then do a glob search
+    // for all files in dir/*/Headers/
+    cmStdString glob = dir;
     glob += "/*/Headers/";
     glob += file;
     cmGlob globIt;
@@ -177,11 +175,14 @@ cmStdString cmFindPathCommand::FindHeaderInFrameworks(
     if(files.size())
       {
       cmStdString fheader = cmSystemTools::CollapseFullPath(files[0].c_str());
+      if(this->IncludeFileInPath)
+        {
+        return fheader;
+        }
       fheader = cmSystemTools::GetFilenamePath(fheader);
       return fheader;
       }
     }
-  return cmStdString("");
-#endif
-
+  return "";
 }
+

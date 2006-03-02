@@ -231,3 +231,4 @@ IF(NOT EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCXXPlatform.cmake")
                ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCXXPlatform.cmake IMMEDIATE)
 ENDIF(NOT EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCXXPlatform.cmake")
 
+INCLUDE(Platform/WindowsPaths)
