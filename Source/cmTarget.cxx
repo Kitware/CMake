@@ -56,6 +56,39 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("INSTALL_RPATH", "");
   this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
   this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
+
+  // Collect the set of configuration types.
+  std::vector<std::string> configNames;
+  if(const char* configurationTypes =
+     mf->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+    {
+    cmSystemTools::ExpandListArgument(configurationTypes, configNames);
+    }
+  else if(const char* buildType = mf->GetDefinition("CMAKE_BUILD_TYPE"))
+    {
+    if(*buildType)
+      {
+      configNames.push_back(buildType);
+      }
+    }
+
+  // Setup per-configuration property default values.
+  for(std::vector<std::string>::iterator ci = configNames.begin();
+      ci != configNames.end(); ++ci)
+    {
+    // Initialize per-configuration name postfix property from the
+    // variable only for non-executable targets.  This preserves
+    // compatibility with previous CMake versions in which executables
+    // did not support this variable.  Projects may still specify the
+    // property directly.  TODO: Make this depend on backwards
+    // compatibility setting.
+    if(m_TargetType != cmTarget::EXECUTABLE)
+      {
+      std::string property = cmSystemTools::UpperCase(*ci);
+      property += "_POSTFIX";
+      this->SetPropertyDefault(property.c_str(), 0);
+      }
+    }
 }
 
 void cmTarget::TraceVSDependencies(std::string projFile, 
@@ -1130,13 +1163,11 @@ void cmTarget::GetFullNameInternal(TargetType type,
                               ? this->GetProperty("IMPORT_SUFFIX")
                               : this->GetProperty("SUFFIX"));
   const char* configPostfix = 0;
-  if(config && *config && type != cmTarget::EXECUTABLE)
+  if(config && *config)
     {
-    std::string configVar = "CMAKE_";
-    configVar += config;
-    configVar += "_POSTFIX";
-    configVar = cmSystemTools::UpperCase(configVar);
-    configPostfix = m_Makefile->GetDefinition(configVar.c_str());
+    std::string configProp = cmSystemTools::UpperCase(config);
+    configProp += "_POSTFIX";
+    configPostfix = this->GetProperty(configProp.c_str());
     }
   const char* prefixVar = this->GetPrefixVariableInternal(type, implib);
   const char* suffixVar = this->GetSuffixVariableInternal(type, implib);
@@ -1172,10 +1203,8 @@ void cmTarget::GetFullNameInternal(TargetType type,
   // Begin the final name with the prefix.
   outPrefix = targetPrefix?targetPrefix:"";
 
-  // Append the target name or property-specified name.  Support this
-  // only for executable targets.
-  const char* outname = this->GetProperty("OUTPUT_NAME");
-  if(outname && type == cmTarget::EXECUTABLE)
+  // Append the target name or property-specified name.
+  if(const char* outname = this->GetProperty("OUTPUT_NAME"))
     {
     outBase = outname;
     }
