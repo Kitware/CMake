@@ -233,20 +233,6 @@ public:
   void AddIncludeDirectory(const char*, bool before = false);
 
   /**
-   * Find a library (as in cmSystemTools) but add in compiler specific paths
-   */
-  std::string FindLibrary(const char* name,
-                          const std::vector<std::string>& path);
-
-  /**
-   * Get the include file or library search path.
-   */
-  void GetIncludeSearchPath(const std::vector<std::string>& callerPaths,
-                            std::vector<std::string>& path);
-  void GetLibrarySearchPath(const std::vector<std::string>& callerPaths,
-                            std::vector<std::string>& path);
-
-  /**
    * Add a variable definition to the build. This variable
    * can be used in CMake to refer to lists, directories, etc.
    */
