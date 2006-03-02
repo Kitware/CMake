@@ -150,6 +150,11 @@ int cmTryCompileCommand::CoreTryCompileCode(
     std::string ext = cmSystemTools::GetFilenameExtension(source);
     const char* lang = (mf->GetCMakeInstance()->GetGlobalGenerator()
                         ->GetLanguageFromExtension(ext.c_str()));
+    const char* def = mf->GetDefinition("CMAKE_MODULE_PATH");
+    if(def)
+      {
+      fprintf(fout, "SET(CMAKE_MODULE_PATH %s)\n", def);
+      }
     if(lang)
       {
       fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE %s)\n", lang);
