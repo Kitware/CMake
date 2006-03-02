@@ -12,6 +12,21 @@ SET(CMAKE_SYSTEM_AND_Fortran_COMPILER_INFO_FILE
   ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}.cmake)
 INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
 
+# This should be included before the _INIT variables are
+# used to initialize the cache.  Since the rule variables 
+# have if blocks on them, users can still define them here.
+# But, it should still be after the platform file so changes can
+# be made to those values.
+
+IF(CMAKE_USER_MAKE_RULES_OVERRIDE)
+   INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE})
+ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE)
+
+IF(CMAKE_USER_MAKE_RULES_OVERRIDE_Fortran)
+   INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE_Fortran})
+ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE_Fortran)
+
+
 # Fortran needs cmake to do a requires step during its build process to 
 # catch any modules
 SET(CMAKE_NEEDS_REQUIRES_STEP_Fortran_FLAG 1)

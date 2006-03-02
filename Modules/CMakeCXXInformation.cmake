@@ -3,7 +3,6 @@
 # It also loads the available platform file for the system-compiler
 # if it exists.
 
-
 GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_CXX_COMPILER} NAME_WE)
 # since the gnu compiler has several names force g++
 IF(CMAKE_COMPILER_IS_GNUCXX)
@@ -12,6 +11,20 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 SET(CMAKE_SYSTEM_AND_CXX_COMPILER_INFO_FILE
   ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}.cmake)
 INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
+# This should be included before the _INIT variables are
+# used to initialize the cache.  Since the rule variables 
+# have if blocks on them, users can still define them here.
+# But, it should still be after the platform file so changes can
+# be made to those values.
+
+IF(CMAKE_USER_MAKE_RULES_OVERRIDE)
+   INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE})
+ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE)
+
+IF(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
+   INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE_CXX})
+ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
+
 
 # for most systems a module is the same as a shared library
 # so unless the variable CMAKE_MODULE_EXISTS is set just

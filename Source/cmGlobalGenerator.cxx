@@ -430,13 +430,6 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     {
     mf->ReadListFile(0,projectCompatibility.c_str()); 
     }
-  // next load the file pointed to by CMAKE_USER_MAKE_RULES_OVERRIDE
-  std::string userMakeRules = 
-    mf->GetSafeDefinition("CMAKE_USER_MAKE_RULES_OVERRIDE");
-  if(userMakeRules.size())
-    {
-    mf->ReadListFile(0,userMakeRules.c_str());
-    }
 }
 
 const char* cmGlobalGenerator::GetLanguageOutputExtensionForLanguage(const char* lang)

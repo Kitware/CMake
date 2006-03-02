@@ -11,6 +11,21 @@ SET(CMAKE_SYSTEM_AND_C_COMPILER_INFO_FILE
   ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}.cmake)
 INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
 
+# This should be included before the _INIT variables are
+# used to initialize the cache.  Since the rule variables 
+# have if blocks on them, users can still define them here.
+# But, it should still be after the platform file so changes can
+# be made to those values.
+
+IF(CMAKE_USER_MAKE_RULES_OVERRIDE)
+   INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE})
+ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE)
+
+IF(CMAKE_USER_MAKE_RULES_OVERRIDE_C)
+   INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE_C})
+ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE_C)
+
+
 # for most systems a module is the same as a shared library
 # so unless the variable CMAKE_MODULE_EXISTS is set just
 # copy the values from the LIBRARY variables

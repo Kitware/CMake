@@ -1,3 +1,16 @@
+# This should be included before the _INIT variables are
+# used to initialize the cache.  Since the rule variables 
+# have if blocks on them, users can still define them here.
+# But, it should still be after the platform file so changes can
+# be made to those values.
+
+IF(CMAKE_USER_MAKE_RULES_OVERRIDE)
+   INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE})
+ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE)
+
+IF(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
+   INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE_CXX})
+ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
 
 # this is a place holder if java needed flags for javac they would go here.
 IF(NOT CMAKE_Java_CREATE_STATIC_LIBRARY)
