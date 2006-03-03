@@ -95,6 +95,7 @@ public:
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
   typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
   const LinkLibraries &GetLinkLibraries() {return m_LinkLibraries;}
+  const LinkLibraries &GetOriginalLinkLibraries() {return m_OriginalLinkLibraries;}
 
   /**
    * Clear the dependency information recorded for this target, if any.
@@ -321,6 +322,7 @@ private:
   std::vector<cmSourceFile*> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
   LinkLibraries m_PrevLinkedLibraries;
+  LinkLibraries m_OriginalLinkLibraries;
   bool m_LinkLibrariesAnalyzed;
   bool m_LinkDirectoriesComputed;
   std::vector<std::string> m_Frameworks;

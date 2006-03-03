@@ -311,6 +311,8 @@ protected:
 
   //! Make sure all commands are what they say they are and there is no macros.
   void CleanupCommandsAndMacros();
+
+  void GenerateGraphViz(const char* fileName);
   
   cmVariableWatch* m_VariableWatch;
 
@@ -329,6 +331,7 @@ private:
   bool m_ClearBuildSystem;
   bool m_DebugTryCompile;
   cmFileTimeComparison* m_FileComparison;
+  std::string m_GraphVizFile;
   
   void UpdateConversionPathTable();
 };

@@ -606,6 +606,11 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // The dependency map.
   DependencyMap dep_map;
 
+  if ( m_OriginalLinkLibraries.size() == 0 )
+    {
+    m_OriginalLinkLibraries = m_LinkLibraries;
+    }
+
   // 1. Build the dependency graph
   //
   for(LinkLibraries::reverse_iterator lib = m_LinkLibraries.rbegin();
