@@ -30,6 +30,7 @@
 //----------------------------------------------------------------------
 cmCPackPackageMakerGenerator::cmCPackPackageMakerGenerator()
 {
+  this->PackageMakerVersion = 0;
 }
 
 //----------------------------------------------------------------------
@@ -77,7 +78,11 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const c
   << "\" -build -p \"" << packageDirFileName << "\" -f \"" << this->GetOption("CPACK_TEMPORARY_DIRECTORY")
   << "\" -r \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Resources\" -i \""
   << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Info.plist\" -d \""
-  << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Description.plist\" -v";
+  << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Description.plist\"";
+  if ( this->PackageMakerVersion > 2.0 )
+    {
+    pkgCmd << " -v";
+    }
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << pkgCmd.str().c_str() << std::endl);
   std::string output;
   int retVal = 1;
@@ -122,7 +127,51 @@ int cmCPackPackageMakerGenerator::Initialize(const char* name, cmMakefile* mf)
   int res = this->Superclass::Initialize(name, mf);
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackPackageMakerGenerator::Initialize()" << std::endl);
   std::vector<std::string> path;
-  std::string pkgPath = "/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS";
+  std::string pkgPath = "/Developer/Applications/Utilities/PackageMaker.app/Contents";
+  std::string versionFile = pkgPath + "/version.plist";
+  pkgPath += "/MacOS";
+  if ( !cmSystemTools::FileExists(versionFile.c_str()) )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find PackageMaker compiler version file: " << versionFile.c_str() << std::endl);
+    return 0;
+    }
+  std::ifstream ifs(versionFile.c_str());
+  if ( !ifs )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot open PackageMaker compiler version file" << std::endl);
+    return 0;
+    }
+  // Check the PackageMaker version
+  cmsys::RegularExpression rexKey("<key>CFBundleShortVersionString</key>");
+  cmsys::RegularExpression rexVersion("<string>([0-9]+.[0-9]+)</string>");
+  std::string line;
+  bool foundKey = false;
+  while ( cmSystemTools::GetLineFromStream(ifs, line) )
+    {
+    if ( rexKey.find(line) )
+      {
+      foundKey = true;
+      break;
+      }
+    }
+  if ( !foundKey )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find CFBundleShortVersionString in the PackageMaker compiler version file" << std::endl);
+    return 0;
+    }
+  if ( !cmSystemTools::GetLineFromStream(ifs, line) || !rexVersion.find(line) )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem reading the PackageMaker compiler version file" << std::endl);
+    return 0;
+    }
+  this->PackageMakerVersion = atof(rexVersion.match(1).c_str());
+  if ( this->PackageMakerVersion < 1 )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Require PackageMaker 1.0 or higher" << std::endl);
+    return 0;
+    }
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "PackageMaker version is: " << this->PackageMakerVersion << std::endl);
+
   path.push_back(pkgPath);
   pkgPath = cmSystemTools::FindProgram("PackageMaker", path, false);
   if ( pkgPath.empty() )
