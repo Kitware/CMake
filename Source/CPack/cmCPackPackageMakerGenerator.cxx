@@ -77,7 +77,7 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName, const c
   << "\" -build -p \"" << packageDirFileName << "\" -f \"" << this->GetOption("CPACK_TEMPORARY_DIRECTORY")
   << "\" -r \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Resources\" -i \""
   << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Info.plist\" -d \""
-  << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Description.plist\"";
+  << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Description.plist\" -v";
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << pkgCmd.str().c_str() << std::endl);
   std::string output;
   int retVal = 1;
