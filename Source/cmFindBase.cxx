@@ -134,9 +134,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   this->AlreadyInCache = false; 
   std::vector<std::string> userPaths;
   std::string doc;
-  bool foundName = false;
   bool doingNames = false;
-  bool foundPaths = false;
   bool doingPaths = false;
   bool doingPathSuf = false;
   bool newStyle = false;
