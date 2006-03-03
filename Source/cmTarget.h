@@ -306,9 +306,6 @@ private:
                                   TargetType type,
                                   const char* config);
 
-  // update the value of the LOCATION var
-  void UpdateLocation();
-
   // Use a makefile variable to set a default for the given property.
   // If the variable is not defined use the given default instead.
   void SetPropertyDefault(const char* property, const char* default_value);

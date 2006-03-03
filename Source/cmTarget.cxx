@@ -859,56 +859,22 @@ const char* cmTarget::GetLocation(const char* config)
   return m_Location.c_str();
 }
 
-void cmTarget::UpdateLocation()
-{
-  // make sure we have a makefile
-  if (!m_Makefile)
-    {
-    return;
-    }
-  
-  // set the LOCATION property of the target
-  std::string target_location;
-  switch( this->GetType() )
-    {
-    case cmTarget::STATIC_LIBRARY:
-    case cmTarget::MODULE_LIBRARY:
-    case cmTarget::SHARED_LIBRARY:
-      target_location = 
-        m_Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
-      break;
-    case cmTarget::EXECUTABLE:
-      target_location = 
-        m_Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-      break;
-    default:
-      return;
-    }
-  if ( target_location.size() == 0 )
-    {
-    target_location += m_Makefile->GetStartOutputDirectory();
-    }
-  if ( target_location.size() > 0 )
-    {
-    target_location += "/";
-    }
-  const char* cfgid = m_Makefile->GetDefinition("CMAKE_CFG_INTDIR");
-  if ( cfgid && strcmp(cfgid, ".") != 0 )
-    {
-    target_location += cfgid;
-    target_location += "/";
-    }  
-  target_location += this->GetFullName();
-  this->SetProperty("LOCATION",target_location.c_str());
-}
-
 const char *cmTarget::GetProperty(const char* prop)
 {
   // watch for special "computed" properties that are dependent on other
   // properties or variables, always recompute them
   if (!strcmp(prop,"LOCATION"))
     {
-    this->UpdateLocation();
+    // Set the LOCATION property of the target.  Note that this cannot take
+    // into account the per-configuration name of the target because the
+    // configuration type may not be known at CMake time.  We should
+    // deprecate this feature and instead support transforming an executable
+    // target name given as the command part of custom commands into the
+    // proper path at build time.  Alternatively we could put environment
+    // variable settings in all custom commands that hold the name of the
+    // target for each configuration and then give a reference to the
+    // variable in the location.
+    this->SetProperty("LOCATION", this->GetLocation(0));
     }
   
   // the type property returns what type the target is
