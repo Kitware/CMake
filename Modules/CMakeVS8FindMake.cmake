@@ -1,5 +1,5 @@
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM
-  NAMES devenv VCExpress
+  NAMES VCExpress devenv 
   PATHS
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup\\VS;EnvironmentDirectory]
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path]
