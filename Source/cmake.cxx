@@ -2089,7 +2089,7 @@ void cmake::GenerateGraphViz(const char* fileName)
     if ( depIt->second == 1 )
       {
       std::map<cmStdString, cmTarget*>::iterator tarTypeIt= targetPtrs.find(tgtName);
-      if ( tarTypeIt == targetNamesNodes.end() )
+      if ( tarTypeIt == targetPtrs.end() )
         {
         // We should not be here.
         std::cout << "Cannot find library: " << tgtName << " even though it was added in the previous pass" << std::endl;
