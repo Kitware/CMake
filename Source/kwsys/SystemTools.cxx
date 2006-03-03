@@ -1923,7 +1923,7 @@ kwsys_stl::string SystemTools::FindProgram(
     {
     return "";
     }
-  std::string ext = SystemTools::GetExecutableExtension();
+  kwsys_stl::string ext = SystemTools::GetExecutableExtension();
   if(ext.size())
     {
     unsigned int len = strlen(name);
