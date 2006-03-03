@@ -1654,16 +1654,22 @@ cmLocalGenerator
         case cmTarget::INSTALL_FILES:
           {
           // Use a file install generator.
+          const char* no_permissions = "";
+          const char* no_rename = "";
           cmInstallFilesGenerator g(l->second.GetSourceLists(),
-                                    destination.c_str(), false);
+                                    destination.c_str(), false,
+                                    no_permissions, no_rename);
           g.Generate(os, config, configurationTypes);
           }
           break;
         case cmTarget::INSTALL_PROGRAMS:
           {
           // Use a file install generator.
+          const char* no_permissions = "";
+          const char* no_rename = "";
           cmInstallFilesGenerator g(l->second.GetSourceLists(),
-                                    destination.c_str(), true);
+                                    destination.c_str(), true,
+                                    no_permissions, no_rename);
           g.Generate(os, config, configurationTypes);
           }
           break;

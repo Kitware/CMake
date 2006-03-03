@@ -299,8 +299,12 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   bool programs = (args[0] == "PROGRAMS");
   bool doing_files = true;
   bool doing_destination = false;
+  bool doing_permissions = false;
+  bool doing_rename = false;
   std::vector<std::string> files;
   const char* destination = 0;
+  std::string rename;
+  std::string permissions;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "DESTINATION")
@@ -308,6 +312,24 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       // Switch to setting the destination property.
       doing_files = false;
       doing_destination = true;
+      doing_permissions = false;
+      doing_rename = false;
+      }
+    else if(args[i] == "PERMISSIONS")
+      {
+      // Switch to setting the permissions property.
+      doing_files = false;
+      doing_destination = false;
+      doing_permissions = true;
+      doing_rename = false;
+      }
+    else if(args[i] == "RENAME")
+      {
+      // Switch to setting the rename property.
+      doing_files = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_rename = true;
       }
     else if(doing_files)
       {
@@ -337,6 +359,23 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       destination = args[i].c_str();
       doing_destination = false;
       }
+    else if(doing_permissions)
+      {
+      // Check the requested permission.
+      if(!this->CheckPermissions(args[i], permissions))
+        {
+        cmOStringStream e;
+        e << args[0] << " given invalid permission \""
+          << args[i] << "\".";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      }
+    else if(doing_rename)
+      {
+      rename = args[i];
+      doing_rename = false;
+      }
     else
       {
       // Unknown argument.
@@ -354,8 +393,17 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     }
   if(!destination)
     {
+    // A destination is required.
     cmOStringStream e;
     e << args[0] << " given no DESTINATION!";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+  if(!rename.empty() && files.size() > 1)
+    {
+    // The rename option works only with one file.
+    cmOStringStream e;
+    e << args[0] << " given RENAME option with more than one file.";
     this->SetError(e.str().c_str());
     return false;
     }
@@ -366,7 +414,8 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
 
   // Create the files install generator.
   m_Makefile->AddInstallGenerator(
-    new cmInstallFilesGenerator(files, dest.c_str(), programs));
+    new cmInstallFilesGenerator(files, dest.c_str(), programs,
+                                permissions.c_str(), rename.c_str()));
 
   return true;
 }
@@ -397,4 +446,33 @@ void cmInstallCommand::ComputeDestination(const char* destination,
     {
     dest = "";
     }
+}
+
+//----------------------------------------------------------------------------
+bool cmInstallCommand::CheckPermissions(std::string const& arg,
+                                        std::string& permissions)
+{
+  // Table of valid permissions.
+  const char* table[] =
+    {
+      "OWNER_READ", "OWNER_WRITE", "OWNER_EXECUTE",
+      "GROUP_READ", "GROUP_WRITE", "GROUP_EXECUTE",
+      "WORLD_READ", "WORLD_WRITE", "WORLD_EXECUTE",
+      "SETUID", "SETGID", 0
+    };
+
+  // Check the permission against the table.
+  for(const char** valid = table; *valid; ++valid)
+    {
+    if(arg == *valid)
+      {
+      // This is a valid permission.
+      permissions += " ";
+      permissions += arg;
+      return true;
+      }
+    }
+
+  // This is not a valid permission.
+  return false;
 }

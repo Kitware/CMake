@@ -276,6 +276,7 @@ bool cmFileCommand::HandleInstallCommand(
     return false;
     }
 
+  std::string rename = "";
   std::string destination = "";
   std::string stype = "FILES";
   const char* build_type = m_Makefile->GetDefinition("BUILD_TYPE");
@@ -298,8 +299,38 @@ bool cmFileCommand::HandleInstallCommand(
 
   std::map<cmStdString, const char*> properties;
 
+  // Build a table of permissions flags.
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  mode_t mode_owner_read = S_IREAD;
+  mode_t mode_owner_write = S_IWRITE;
+  mode_t mode_owner_execute = S_IEXEC;
+  mode_t mode_group_read = 0;
+  mode_t mode_group_write = 0;
+  mode_t mode_group_execute = 0;
+  mode_t mode_world_read = 0;
+  mode_t mode_world_write = 0;
+  mode_t mode_world_execute = 0;
+  mode_t mode_setuid = 0;
+  mode_t mode_setgid = 0;
+#else
+  mode_t mode_owner_read = S_IRUSR;
+  mode_t mode_owner_write = S_IWUSR;
+  mode_t mode_owner_execute = S_IXUSR;
+  mode_t mode_group_read = S_IRGRP;
+  mode_t mode_group_write = S_IWGRP;
+  mode_t mode_group_execute = S_IXGRP;
+  mode_t mode_world_read = S_IROTH;
+  mode_t mode_world_write = S_IWOTH;
+  mode_t mode_world_execute = S_IXOTH;
+  mode_t mode_setuid = S_ISUID;
+  mode_t mode_setgid = S_ISGID;
+#endif
+
   bool in_files = false;
   bool in_properties = false;
+  bool in_permissions = false;
+  bool use_given_permissions = false;
+  mode_t permissions = 0;
   bool optional = false;
   for ( ; i != args.size(); ++i )
     {
@@ -310,6 +341,7 @@ bool cmFileCommand::HandleInstallCommand(
       destination = args[i];
       in_files = false;
       in_properties = false;
+      in_permissions = false;
       }
     else if ( *cstr == "TYPE" && i < args.size()-1 )
       {
@@ -322,16 +354,34 @@ bool cmFileCommand::HandleInstallCommand(
         }
       in_properties = false;
       in_files = false;
+      in_permissions = false;
+      }
+    else if ( *cstr == "RENAME" && i < args.size()-1 )
+      {
+      i++;
+      rename = args[i];
+      in_properties = false;
+      in_files = false;
+      in_permissions = false;
       }
     else if ( *cstr == "PROPERTIES"  )
       {
       in_properties = true;
       in_files = false;
+      in_permissions = false;
+      }
+    else if ( *cstr == "PERMISSIONS"  )
+      {
+      use_given_permissions = true;
+      in_properties = false;
+      in_files = false;
+      in_permissions = true;
       }
     else if ( *cstr == "FILES" && !in_files)
       {
       in_files = true;
       in_properties = false;
+      in_permissions = false;
       }
     else if ( in_properties && i < args.size()-1 )
       {
@@ -341,6 +391,50 @@ bool cmFileCommand::HandleInstallCommand(
     else if ( in_files )
       {
       files.push_back(*cstr);
+      }
+    else if(in_permissions && args[i] == "OWNER_READ")
+      {
+      permissions |= mode_owner_read;
+      }
+    else if(in_permissions && args[i] == "OWNER_WRITE")
+      {
+      permissions |= mode_owner_write;
+      }
+    else if(in_permissions && args[i] == "OWNER_EXECUTE")
+      {
+      permissions |= mode_owner_execute;
+      }
+    else if(in_permissions && args[i] == "GROUP_READ")
+      {
+      permissions |= mode_group_read;
+      }
+    else if(in_permissions && args[i] == "GROUP_WRITE")
+      {
+      permissions |= mode_group_write;
+      }
+    else if(in_permissions && args[i] == "GROUP_EXECUTE")
+      {
+      permissions |= mode_group_execute;
+      }
+    else if(in_permissions && args[i] == "WORLD_READ")
+      {
+      permissions |= mode_world_read;
+      }
+    else if(in_permissions && args[i] == "WORLD_WRITE")
+      {
+      permissions |= mode_world_write;
+      }
+    else if(in_permissions && args[i] == "WORLD_EXECUTE")
+      {
+      permissions |= mode_world_execute;
+      }
+    else if(in_permissions && args[i] == "SETUID")
+      {
+      permissions |= mode_setuid;
+      }
+    else if(in_permissions && args[i] == "SETGID")
+      {
+      permissions |= mode_setgid;
       }
     else
       {
@@ -458,6 +552,61 @@ bool cmFileCommand::HandleInstallCommand(
     return false;
     }
 
+  // Check rename form.
+  if(!rename.empty())
+    {
+    if(itype != cmTarget::INSTALL_FILES)
+      {
+      this->SetError("INSTALL option RENAME may be used only with FILES.");
+      return false;
+      }
+    if(files.size() > 1)
+      {
+      this->SetError("INSTALL option RENAME may be used only with one file.");
+      return false;
+      }
+    }
+
+  // If permissions were not specified set default permissions for
+  // this target type.
+  bool use_source_permissions = false;
+  if(!use_given_permissions)
+    {
+    switch(itype)
+      {
+      case cmTarget::SHARED_LIBRARY:
+      case cmTarget::MODULE_LIBRARY:
+#if !defined(_WIN32) && !defined(__APPLE_CC__)
+        // Use read/write permissions.
+        use_given_permissions = true;
+        permissions = 0;
+        permissions |= mode_owner_read;
+        permissions |= mode_owner_write;
+        permissions |= mode_group_read;
+        permissions |= mode_world_read;
+        break;
+#endif
+      case cmTarget::EXECUTABLE:
+      case cmTarget::INSTALL_PROGRAMS:
+        // Use read/write/executable permissions.
+        use_given_permissions = true;
+        permissions = 0;
+        permissions |= mode_owner_read;
+        permissions |= mode_owner_write;
+        permissions |= mode_owner_execute;
+        permissions |= mode_group_read;
+        permissions |= mode_group_execute;
+        permissions |= mode_world_read;
+        permissions |= mode_world_execute;
+        break;
+      default:
+        // Use the permissions of the file being copied.
+        use_source_permissions = true;
+        break;
+      }
+    }
+
+  // Get the current manifest.
   const char* manifest_files = 
     m_Makefile->GetDefinition("CMAKE_INSTALL_MANIFEST_FILES");
   std::string smanifest_files;
@@ -466,26 +615,24 @@ bool cmFileCommand::HandleInstallCommand(
     smanifest_files = manifest_files;
     }
 
+  // Handle each file listed.
   for ( i = 0; i < files.size(); i ++ )
     {
-    std::string destfilewe
-      = destination + "/"
-      + cmSystemTools::GetFilenameWithoutExtension(files[i]);
-    std::string ctarget = files[i].c_str();
-    std::string fname = cmSystemTools::GetFilenameName(ctarget);
-    std::string ext = cmSystemTools::GetFilenameExtension(ctarget);
-    std::string fnamewe 
-      = cmSystemTools::GetFilenameWithoutExtension(ctarget);
-    std::string destfile = destfilewe;
-    if ( ext.size() )
+    // Split the input file into its directory and name components.
+    std::string fromDir = cmSystemTools::GetFilenamePath(files[i]);
+    std::string fromName = cmSystemTools::GetFilenameName(files[i]);
+
+    // Compute the full path to the destination file.
+    std::string toFile = destination;
+    toFile += "/";
+    toFile += rename.empty()? fromName : rename;
+
+    // Handle type-specific installation details.
+    switch(itype)
       {
-      destfile += ext;
-      }
-    switch( itype )
-      {
-    case cmTarget::MODULE_LIBRARY:
-    case cmTarget::STATIC_LIBRARY:
-    case cmTarget::SHARED_LIBRARY:
+      case cmTarget::MODULE_LIBRARY:
+      case cmTarget::STATIC_LIBRARY:
+      case cmTarget::SHARED_LIBRARY:
         {
         // Handle shared library versioning
         const char* lib_version = 0;
@@ -508,18 +655,18 @@ bool cmFileCommand::HandleInstallCommand(
           }
         if ( lib_version && lib_soversion )
           {
-          std::string libname = destfile;
-          std::string soname = destfile;
-          std::string soname_nopath = fname;
+          std::string libname = toFile;
+          std::string soname = toFile;
+          std::string soname_nopath = fromName;
           soname += ".";
           soname += lib_soversion;
           soname_nopath += ".";
           soname_nopath += lib_soversion;
 
-          fname += ".";
-          fname += lib_version;
-          destfile += ".";
-          destfile += lib_version;
+          fromName += ".";
+          fromName += lib_version;
+          toFile += ".";
+          toFile += lib_version;
 
           cmSystemTools::RemoveFile(soname.c_str());
           cmSystemTools::RemoveFile(libname.c_str());
@@ -532,11 +679,11 @@ bool cmFileCommand::HandleInstallCommand(
             }
           smanifest_files += ";";
           smanifest_files += libname.substr(destDirLength);;
-          if ( destfile != soname )
+          if ( toFile != soname )
             {
-            if ( !cmSystemTools::CreateSymlink(fname.c_str(), soname.c_str()) )
+            if ( !cmSystemTools::CreateSymlink(fromName.c_str(), soname.c_str()) )
               {
-              std::string errstring = "error when creating symlink from: " + soname + " to " + fname;
+              std::string errstring = "error when creating symlink from: " + soname + " to " + fromName;
               this->SetError(errstring.c_str());
               return false;
               }
@@ -544,129 +691,134 @@ bool cmFileCommand::HandleInstallCommand(
             smanifest_files += soname.substr(destDirLength);
             }
           }
-
-        // Reconstruct the source file path taking into account the
-        // possibly new file name.
-        cmOStringStream str;
-        str << cmSystemTools::GetFilenamePath(ctarget) << "/" << fname;
-        ctarget = str.str();
         }
-      break;
-    case cmTarget::EXECUTABLE:
-      {
-      // Handle executable versioning
-      const char* exe_version = 0;
-      if ( properties.find("VERSION") != properties.end() )
+        break;
+      case cmTarget::EXECUTABLE:
         {
-        exe_version = properties["VERSION"];
-        }
-      if ( exe_version )
-        {
-        std::string exename = destfile;
-        std::string exename_nopath = fname;
-        exename_nopath += "-";
-        exename_nopath += exe_version;
-
-        fname += "-";
-        fname += exe_version;
-        destfile += "-";
-        destfile += exe_version;
-
-        cmSystemTools::RemoveFile(exename.c_str());
-
-        if (!cmSystemTools::CreateSymlink(exename_nopath.c_str(), exename.c_str()) )
+        // Handle executable versioning
+        const char* exe_version = 0;
+        if ( properties.find("VERSION") != properties.end() )
           {
-          std::string errstring = "error when creating symlink from: " + exename + " to " + exename_nopath;
-          this->SetError(errstring.c_str());
-          return false;
+          exe_version = properties["VERSION"];
           }
-        smanifest_files += ";";
-        smanifest_files += exename.substr(destDirLength);
-        }
+        if ( exe_version )
+          {
+          std::string exename = toFile;
+          std::string exename_nopath = fromName;
+          exename_nopath += "-";
+          exename_nopath += exe_version;
 
-      // Reconstruct the source file path taking into account the
-      // possibly new file name.
-      cmOStringStream str;
-      str << cmSystemTools::GetFilenamePath(ctarget) << "/" << fname;
-      ctarget = str.str();
+          fromName += "-";
+          fromName += exe_version;
+          toFile += "-";
+          toFile += exe_version;
+
+          cmSystemTools::RemoveFile(exename.c_str());
+
+          if (!cmSystemTools::CreateSymlink(exename_nopath.c_str(), exename.c_str()) )
+            {
+            std::string errstring = "error when creating symlink from: " + exename + " to " + exename_nopath;
+            this->SetError(errstring.c_str());
+            return false;
+            }
+          smanifest_files += ";";
+          smanifest_files += exename.substr(destDirLength);
+          }
+        }
+        break;
       }
-      break;
-      }
+
+    // Construct the full path to the source file.  The file name may
+    // have been changed above.
+    std::string fromFile = fromDir;
+    fromFile += "/";
+    fromFile += fromName;
 
     std::string message;
-    if ( !cmSystemTools::SameFile(ctarget.c_str(), destfile.c_str()) )
+    if(!cmSystemTools::SameFile(fromFile.c_str(), toFile.c_str()))
       {
-      if ( cmSystemTools::FileExists(ctarget.c_str()) )
+      if(cmSystemTools::FileExists(fromFile.c_str()))
         {
+        // We will install this file.  Display the information.
         message = "Installing ";
-        message += destfile.c_str();
+        message += toFile.c_str();
         m_Makefile->DisplayStatus(message.c_str(), -1);
-        cmSystemTools::RemoveFile(destfile.c_str());
-        if ( !cmSystemTools::CopyFileAlways(ctarget.c_str(), 
-            destination.c_str()) )
+
+        // If no permissions were already given use the permissions of
+        // the file being copied.
+        if(!use_given_permissions &&
+           (!use_source_permissions ||
+            !cmSystemTools::GetPermissions(fromFile.c_str(), permissions)))
           {
-          std::string errstring = "cannot copy file: " + ctarget + 
-            " to directory : " + destination + ".";
-          this->SetError(errstring.c_str());
+          // Set default permissions.
+          permissions = 0;
+          permissions |= mode_owner_read;
+          permissions |= mode_owner_write;
+          permissions |= mode_group_read;
+          permissions |= mode_world_read;
+          }
+
+        // Remove the original file and try copying the new file.
+        // TODO: This should be copy-if-different.  Don't forget to
+        // edit the destination file permissions, or compare files
+        // first.  This would need a new SystemTools::FilesDiffer that
+        // does not read all of the files at once.
+        cmSystemTools::RemoveFile(toFile.c_str());
+        if(!cmSystemTools::CopyFileAlways(fromFile.c_str(), toFile.c_str()))
+          {
+          cmOStringStream e;
+          e << "INSTALL cannot copy file \"" << fromFile
+            << "\" to \"" << toFile + "\".";
+          this->SetError(e.str().c_str());
           return false;
           }
-        switch( itype )
-          {
-          case cmTarget::STATIC_LIBRARY:
+
+        // Perform post-installation processing on the file depending
+        // on its type.
 #if defined(__APPLE_CC__)
-            {
-            std::string ranlib = "ranlib ";
-            ranlib += cmSystemTools::ConvertToOutputPath(destfile.c_str());
-            if(!cmSystemTools::RunSingleCommand(ranlib.c_str()))
-              {
-              std::string err = "ranlib failed: ";
-              err += ranlib;
-              this->SetError(err.c_str());
-              }
-            }
-#endif
-            break;
-            
-          case cmTarget::MODULE_LIBRARY:
-          case cmTarget::SHARED_LIBRARY:
-          case cmTarget::EXECUTABLE:
-          case cmTarget::INSTALL_PROGRAMS:
-            
-            if ( !cmSystemTools::SetPermissions(destfile.c_str(), 
-#if defined( _MSC_VER ) || defined( __MINGW32__ )
-                                                S_IREAD | S_IWRITE | S_IEXEC
-#elif defined( __BORLANDC__ )
-                                                S_IRUSR | S_IWUSR | S_IXUSR
-#else
-                                                S_IRUSR | S_IWUSR | S_IXUSR | 
-                                                S_IRGRP | S_IXGRP | 
-                                                S_IROTH | S_IXOTH 
-#endif
-                   ) )
-              {
-              cmOStringStream err;
-              err << "Problem setting permissions on file: " 
-                  << destfile.c_str();
-              perror(err.str().c_str());
-              }
-          }
-        smanifest_files += ";";
-        smanifest_files += destfile.substr(destDirLength);
-        }
-      else
-        {
-        if ( !optional )
+        // Static libraries need ranlib on this platform.
+        if(itype == cmTarget::STATIC_LIBRARY)
           {
-          std::string errstring = "cannot find file: " + 
-            ctarget + " to install.";
-          this->SetError(errstring.c_str());
+          std::string ranlib = "ranlib ";
+          ranlib += cmSystemTools::ConvertToOutputPath(toFile.c_str());
+          if(!cmSystemTools::RunSingleCommand(ranlib.c_str()))
+            {
+            std::string err = "ranlib failed: ";
+            err += ranlib;
+            this->SetError(err.c_str());
+            return false;
+            }
+          }
+#endif
+
+        // Set permissions of the destination file.
+        if(!cmSystemTools::SetPermissions(toFile.c_str(), permissions))
+          {
+          cmOStringStream e;
+          e << "Problem setting permissions on file \""
+            << toFile.c_str() << "\"";
+          this->SetError(e.str().c_str());
           return false;
           }
+
+        // Add the file to the manifest.
+        smanifest_files += ";";
+        smanifest_files += toFile.substr(destDirLength);
+        }
+      else if(!optional)
+        {
+        // The input file does not exist and installation is not optional.
+        cmOStringStream e;
+        e << "INSTALL cannot find file \"" << fromFile << "\" to install.";
+        this->SetError(e.str().c_str());
+        return false;
         }
       }
     }
+
+  // Save the updated install manifest.
   m_Makefile->AddDefinition("CMAKE_INSTALL_MANIFEST_FILES",
-    smanifest_files.c_str());
+                            smanifest_files.c_str());
 
   return true;
 }

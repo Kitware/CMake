@@ -58,7 +58,8 @@ IF(STAGE2)
     PATHS ${LIBPATHS}
     DOC "Fourth library")
 
-  ADD_EXECUTABLE (SimpleInstallS2 inst.cxx foo.c foo.h)
+  INCLUDE_DIRECTORIES(${CMAKE_INSTALL_PREFIX}/include)
+  ADD_EXECUTABLE (SimpleInstallS2 inst2.cxx foo.c foo.h)
   TARGET_LINK_LIBRARIES(SimpleInstallS2 ${TEST1_LIBRARY} ${TEST2_LIBRARY} ${TEST4_LIBRARY})
   SET(install_target SimpleInstallS2)
 
@@ -93,7 +94,12 @@ ELSE(STAGE2)
 
   INSTALL(TARGETS SimpleInstall test1 test2 test3 test4
           RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
-  INSTALL(FILES lib1.h lib2.h DESTINATION include)
+  INSTALL(FILES lib1.h DESTINATION include/foo)
+  INSTALL(FILES lib2.h
+    DESTINATION include/foo
+    PERMISSIONS OWNER_READ OWNER_WRITE
+    RENAME lib2renamed.h
+    )
   INSTALL_FILES(/include FILES lib3.h)
 
   # Test user-specified install scripts.

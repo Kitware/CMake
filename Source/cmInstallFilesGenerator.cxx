@@ -21,8 +21,10 @@
 //----------------------------------------------------------------------------
 cmInstallFilesGenerator
 ::cmInstallFilesGenerator(std::vector<std::string> const& files,
-                          const char* dest, bool programs):
-  Files(files), Destination(dest), Programs(programs)
+                          const char* dest, bool programs,
+                          const char* permissions, const char* rename):
+  Files(files), Destination(dest), Programs(programs),
+  Permissions(permissions), Rename(rename)
 {
 }
 
@@ -39,9 +41,13 @@ void cmInstallFilesGenerator::GenerateScript(std::ostream& os)
   for(std::vector<std::string>::const_iterator fi = this->Files.begin();
       fi != this->Files.end(); ++fi)
     {
+    bool not_optional = false;
+    const char* no_properties = 0;
     this->AddInstallRule(os, this->Destination.c_str(),
                          (this->Programs
                           ? cmTarget::INSTALL_PROGRAMS
-                          : cmTarget::INSTALL_FILES), fi->c_str());
+                          : cmTarget::INSTALL_FILES), fi->c_str(),
+                         not_optional, no_properties,
+                         this->Permissions.c_str(), this->Rename.c_str());
     }
 }

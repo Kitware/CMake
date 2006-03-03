@@ -52,7 +52,9 @@ void cmInstallGenerator::AddInstallRule(std::ostream& os,
                                         int type,
                                         const char* file,
                                         bool optional /* = false */,
-                                        const char* properties /* = 0 */)
+                                        const char* properties /* = 0 */,
+                                        const char* permissions /* = 0 */,
+                                        const char* rename /* = 0 */)
 {
   // Use the FILE command to install the file.
   std::string stype;
@@ -74,6 +76,14 @@ void cmInstallGenerator::AddInstallRule(std::ostream& os,
   if(properties && *properties)
     {
     os << " PROPERTIES" << properties;
+    }
+  if(permissions && *permissions)
+    {
+    os << " PERMISSIONS" << permissions;
+    }
+  if(rename && *rename)
+    {
+    os << " RENAME \"" << rename << "\"";
     }
   os << " FILES \"" << file << "\")\n";
 }

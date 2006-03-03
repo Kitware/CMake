@@ -1,7 +1,13 @@
 #include "foo.h"
 
-#include "lib1.h"
-#include "lib2.h"
+#ifdef STAGE_2
+# include <foo/lib1.h>
+# include <foo/lib2renamed.h>
+#else
+# include "lib1.h"
+# include "lib2.h"
+#endif
+
 #include "lib4.h"
 
 #include <stdio.h>

@@ -36,7 +36,9 @@ public:
 
   static void AddInstallRule(std::ostream& os, const char* dest, int type,
                              const char* file, bool optional = false,
-                             const char* properties = 0);
+                             const char* properties = 0,
+                             const char* permissions = 0,
+                             const char* rename = 0);
 
 protected:
   virtual void GenerateScript(std::ostream& os)=0;
