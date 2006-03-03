@@ -70,7 +70,10 @@ public:
   virtual void Generate();
 
   /** Append the subdirectory for the given configuration.  */
-  virtual void AppendDirectoryForConfig(const char* config, std::string& dir);
+  virtual void AppendDirectoryForConfig(const char* prefix,
+                                        const char* config,
+                                        const char* suffix,
+                                        std::string& dir);
 
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGInitDirectory()  { return "."; }

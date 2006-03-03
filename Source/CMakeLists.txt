@@ -939,6 +939,8 @@ IF(BUILD_TESTING)
   ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
 
   IF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
+    SET(BundleTestInstallDir 
+      "${CMake_BINARY_DIR}/Tests/BundleTest/InstallDirectory")
     ADD_TEST(BundleTest ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/BundleTest"
@@ -947,7 +949,10 @@ IF(BUILD_TESTING)
       --build-generator ${CMAKE_TEST_GENERATOR}
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-project BundleTest
-      --test-command  BundleTest.app/Contents/MacOS/BundleTest)
+      --build-target install
+      --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
+      --test-command
+      ${BundleTestInstallDir}/Application/BundleTestExe.app/Contents/MacOS/BundleTestExe)
     
     ADD_TEST(objc++ ${CMAKE_CTEST_COMMAND}
       --build-and-test

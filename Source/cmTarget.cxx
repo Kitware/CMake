@@ -831,9 +831,8 @@ const char* cmTarget::GetDirectory(const char* config)
   if(config)
     {
     // Add the configuration's subdirectory.
-    m_Directory += "/";
     m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->
-      AppendDirectoryForConfig(config, m_Directory);
+      AppendDirectoryForConfig("/", config, "", m_Directory);
     }
   return m_Directory.c_str();
 }

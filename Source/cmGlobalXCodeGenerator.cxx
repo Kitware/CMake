@@ -2335,14 +2335,18 @@ std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
 //----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator
-::AppendDirectoryForConfig(const char* config, std::string& dir)
+::AppendDirectoryForConfig(const char* prefix,
+                           const char* config,
+                           const char* suffix,
+                           std::string& dir)
 {
   if(m_XcodeVersion > 20)
     {
     if(config)
       {
+      dir += prefix;
       dir += config;
-      dir += "/";
+      dir += suffix;
       }
     }
 }

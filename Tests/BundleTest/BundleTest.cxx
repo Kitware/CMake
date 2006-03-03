@@ -1,4 +1,6 @@
+extern int foo();
+
 int main()
 {
-return 0;
+  return foo();
 }

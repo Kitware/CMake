@@ -736,11 +736,15 @@ void cmGlobalVisualStudio7Generator::Configure()
 //----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio7Generator
-::AppendDirectoryForConfig(const char* config, std::string& dir)
+::AppendDirectoryForConfig(const char* prefix,
+                           const char* config,
+                           const char* suffix,
+                           std::string& dir)
 {
   if(config)
     {
+    dir += prefix;
     dir += config;
-    dir += "/";
+    dir += suffix;
     }
 }

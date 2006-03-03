@@ -60,6 +60,10 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   std::string fromFile = fromDir;
   fromFile += fromName;
 
+  // Choose the final destination.  This may be modified for certain
+  // target types.
+  std::string destination = this->Destination;
+
   // Setup special properties for some target types.
   std::string props;
   const char* properties = 0;
@@ -114,23 +118,27 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
         {
         // Compute the source locations of the bundle executable and
         // Info.plist file.
+        this->PrepareScriptReference(os, this->Target, "INSTALL",
+                                     false, false);
         std::string plist = fromFile;
         plist += ".app/Contents/Info.plist";
         fromFile += ".app/Contents/MacOS/";
-        fromFile += fromName;
+        fromFile += this->GetScriptReference(this->Target, "INSTALL",
+                                             false);
 
-        // Compute the destination locations of the bundle executable
-        // and Info.plist file.
-        std::string bdest = this->Destination;
-        bdest += "/";
-        bdest += fromName;
-        std::string pdest = bdest;
-        pdest += ".app/Contents";
-        bdest += ".app/Contents/MacOS";
+        // Compute the destination locations of the bundle Info.plist file.
+        destination += "/";
+        destination += this->GetScriptReference(this->Target, "INSTALL",
+                                                false);
+        destination += ".app/Contents";
+
 
         // Install the Info.plist file.
-        this->AddInstallRule(os, pdest.c_str(), cmTarget::INSTALL_FILES,
+        this->AddInstallRule(os, destination.c_str(), cmTarget::INSTALL_FILES,
                              plist.c_str());
+
+        // Compute the destination locations of the bundle executable file.
+        destination += "/MacOS";
         }
       }
       break;
@@ -149,7 +157,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
     }
 
   // Write code to install the target file.
-  this->AddInstallRule(os, this->Destination.c_str(), type, fromFile.c_str(),
+  this->AddInstallRule(os, destination.c_str(), type, fromFile.c_str(),
                        this->ImportLibrary, properties);
 
   // Fix the install_name settings in installed binaries.
@@ -157,7 +165,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
      type == cmTarget::MODULE_LIBRARY ||
      type == cmTarget::EXECUTABLE)
     {
-    this->AddInstallNamePatchRule(os);
+    this->AddInstallNamePatchRule(os, destination.c_str());
     }
 }
 
@@ -182,7 +190,7 @@ cmInstallTargetGenerator
       {
       // Start with the configuration's subdirectory.
       target->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->
-        AppendDirectoryForConfig(i->c_str(), fname);
+        AppendDirectoryForConfig("", i->c_str(), "/", fname);
       }
 
     // Compute the name of the library.
@@ -268,7 +276,8 @@ std::string cmInstallTargetGenerator::GetScriptReference(cmTarget* target,
 }
 
 //----------------------------------------------------------------------------
-void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os)
+void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os,
+                                                       const char* destination)
 {
   // Build a map of build-tree install_name to install-tree install_name for
   // shared libraries linked to this target.
@@ -348,7 +357,7 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os)
       {
       os << "\n  -change \"" << i->first << "\" \"" << i->second << "\"";
       }
-    os << "\n  \"" << this->Destination.c_str() << "/"
+    os << "\n  \"" << destination << "/"
        << this->GetScriptReference(this->Target, "REMAPPED", true) << "\")\n";
     }
 }

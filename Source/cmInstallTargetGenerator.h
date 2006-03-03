@@ -38,7 +38,7 @@ protected:
                               bool useSOName);
   std::string GetScriptReference(cmTarget* target, const char* place,
                                  bool useSOName);
-  void AddInstallNamePatchRule(std::ostream& os);
+  void AddInstallNamePatchRule(std::ostream& os, const char* destination);
   cmTarget* Target;
   std::string Destination;
   bool ImportLibrary;

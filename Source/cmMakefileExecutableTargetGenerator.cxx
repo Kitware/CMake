@@ -109,7 +109,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if(this->Target->GetPropertyAsBool("MACOSX_BUNDLE"))
     {
     // Make bundle directories
-    outpath += this->Target->GetName();
+    outpath += targetName;
     outpath += ".app/Contents/MacOS/";
     std::string f1 = 
       this->Makefile->GetModulesFile("MacOSXBundleInfo.plist.in");
@@ -127,14 +127,17 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       {
       macdir += "/";
       }
-    macdir += this->Target->GetName();
+    macdir += targetName;
     macdir += ".app/Contents/";
+
+    // Configure the Info.plist file.  Note that it needs the executable name
+    // to be set.
     std::string f2 = macdir + "Info.plist";
     macdir += "MacOS";
     cmSystemTools::MakeDirectory(macdir.c_str());
-    this->Makefile->AddDefinition("MACOSX_BUNDLE_EXECUTABLE_NAME", this->Target->GetName());
-    this->Makefile->ConfigureFile(f1.c_str(), f2.c_str(), 
-                                                    false, false, false);
+    this->Makefile->AddDefinition("MACOSX_BUNDLE_EXECUTABLE_NAME",
+                                  targetName.c_str());
+    this->Makefile->ConfigureFile(f1.c_str(), f2.c_str(), false, false, false);
     }
 #endif
   if(relink)

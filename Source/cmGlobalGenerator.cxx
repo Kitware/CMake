@@ -1375,7 +1375,8 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AppendDirectoryForConfig(const char*, std::string&)
+void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
+                                                 const char*, std::string&)
 {
   // Subclasses that support multiple configurations should implement
   // this method to append the subdirectory for the given build

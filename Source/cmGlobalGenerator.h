@@ -155,8 +155,13 @@ public:
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const char* start_dir);
 
-  /** Append the subdirectory for the given configuration.  */
-  virtual void AppendDirectoryForConfig(const char* config, std::string& dir);
+  /** Append the subdirectory for the given configuration.  If anything is
+      appended the given prefix and suffix will be appended around it, which
+      is useful for leading or trailing slashes.  */
+  virtual void AppendDirectoryForConfig(const char* prefix,
+                                        const char* config,
+                                        const char* suffix,
+                                        std::string& dir);
 
 protected:
   // Fill the m_ProjectMap, this must be called after m_LocalGenerators has been populated.
