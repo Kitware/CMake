@@ -98,11 +98,14 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   // This is the TARGETS mode.
   bool doing_targets = true;
   bool doing_destination = false;
+  bool doing_permissions = false;
   bool library_settings = true;
   bool runtime_settings = true;
   std::vector<cmTarget*> targets;
   const char* library_destination = 0;
   const char* runtime_destination = 0;
+  std::string library_permissions;
+  std::string runtime_permissions;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "DESTINATION")
@@ -110,12 +113,21 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       // Switch to setting the destination property.
       doing_targets = false;
       doing_destination = true;
+      doing_permissions = false;
+      }
+    else if(args[i] == "PERMISSIONS")
+      {
+      // Switch to setting the permissions property.
+      doing_targets = false;
+      doing_destination = false;
+      doing_permissions = true;
       }
     else if(args[i] == "LIBRARY")
       {
       // Switch to setting only library properties.
       doing_targets = false;
       doing_destination = false;
+      doing_permissions = false;
       library_settings = true;
       runtime_settings = false;
       }
@@ -124,6 +136,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       // Switch to setting only runtime properties.
       doing_targets = false;
       doing_destination = false;
+      doing_permissions = false;
       library_settings = false;
       runtime_settings = true;
       }
@@ -170,6 +183,34 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         runtime_destination = args[i].c_str();
         }
       doing_destination = false;
+      }
+    else if(doing_permissions)
+      {
+      // Set the permissions in the active set(s) of properties.
+      if(library_settings)
+        {
+        // Check the requested permission.
+        if(!this->CheckPermissions(args[i], library_permissions))
+          {
+          cmOStringStream e;
+          e << args[0] << " given invalid permission \""
+            << args[i] << "\".";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+        }
+      if(runtime_settings)
+        {
+        // Check the requested permission.
+        if(!this->CheckPermissions(args[i], runtime_permissions))
+          {
+          cmOStringStream e;
+          e << args[0] << " given invalid permission \""
+            << args[i] << "\".";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+        }
       }
     else
       {
@@ -218,13 +259,15 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           {
           // The import library uses the LIBRARY properties.
           m_Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, library_dest.c_str(), true));
+            new cmInstallTargetGenerator(target, library_dest.c_str(), true,
+                                         library_permissions.c_str()));
           }
         if(runtime_destination)
           {
           // The DLL uses the RUNTIME properties.
           m_Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, runtime_dest.c_str(), false));
+            new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
+                                         runtime_permissions.c_str()));
           }
 #else
         // This is a non-DLL platform.
@@ -232,7 +275,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           {
           // The shared library uses the LIBRARY properties.
           m_Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, library_dest.c_str()));
+            new cmInstallTargetGenerator(target, library_dest.c_str(), false,
+                                         library_permissions.c_str()));
           }
 #endif
         }
@@ -244,7 +288,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         if(library_destination)
           {
           m_Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, library_dest.c_str()));
+            new cmInstallTargetGenerator(target, library_dest.c_str(), false,
+                                         library_permissions.c_str()));
           }
         else
           {
@@ -270,7 +315,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         if(runtime_destination)
           {
           m_Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, runtime_dest.c_str()));
+            new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
+                                         runtime_permissions.c_str()));
           }
         else
           {

@@ -23,8 +23,10 @@
 
 //----------------------------------------------------------------------------
 cmInstallTargetGenerator
-::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib):
-  Target(&t), Destination(dest), ImportLibrary(implib)
+::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
+                           const char* permissions):
+  Target(&t), Destination(dest), ImportLibrary(implib),
+  Permissions(permissions)
 {
   this->Target->SetHaveInstallRule(true);
 }
@@ -158,7 +160,8 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 
   // Write code to install the target file.
   this->AddInstallRule(os, destination.c_str(), type, fromFile.c_str(),
-                       this->ImportLibrary, properties);
+                       this->ImportLibrary, properties,
+                       this->Permissions.c_str());
 
   // Fix the install_name settings in installed binaries.
   if(type == cmTarget::SHARED_LIBRARY ||

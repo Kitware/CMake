@@ -90,6 +90,7 @@ public:
       "The TARGETS signature:\n"
       "  INSTALL(TARGETS targets... [[LIBRARY|RUNTIME]\n"
       "                              [DESTINATION <dir>]\n"
+      "                              [PERMISSIONS permissions...]\n"
       "                             ] [...])\n"
       "The TARGETS form specifies rules for installing targets from a "
       "project.  There are two kinds of target files that may be "
