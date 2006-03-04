@@ -35,10 +35,10 @@ cmFindBase::cmFindBase()
     "   FIND_XXX(<VAR> name1 path1 path2 ...)\n"
     "This is the short-hand signature for the command that "
     "is sufficient in many cases.  It is the same "
-    "as FIND_XXX(<VAR> NAMES name1 PATHS path2 path2 ...)\n"
+    "as FIND_XXX(<VAR> name1 PATHS path2 path2 ...)\n"
     "   FIND_XXX(\n"
     "             <VAR> \n"
-    "             NAMES name1 [name2 ...]\n"
+    "             name | NAMES name1 [name2 ...]\n"
     "             PATHS path1 [path2 ...]\n"
     "             [PATH_SUFFIXES suffix1 [suffix2 ...]]\n"
     "             [DOC \"cache documentation string\"]\n"
@@ -134,11 +134,11 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   this->AlreadyInCache = false; 
   std::vector<std::string> userPaths;
   std::string doc;
-  bool doingNames = false;
+  bool doingNames = true; // assume it starts with a name
   bool doingPaths = false;
   bool doingPathSuf = false;
   bool newStyle = false;
-
+  
   for (unsigned int j = 1; j < args.size(); ++j)
     {
     if(args[j] == "NAMES")
