@@ -138,7 +138,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   bool doingPaths = false;
   bool doingPathSuf = false;
   bool newStyle = false;
-  
+
   for (unsigned int j = 1; j < args.size(); ++j)
     {
     if(args[j] == "NAMES")
@@ -220,6 +220,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   // FIND_*(VAR name path1 path2 ...)
   if(!newStyle)
     {
+    this->Names.clear(); // clear out any values in Names
     this->Names.push_back(args[1]);
     for(unsigned int j = 2; j < args.size(); ++j)
       {
