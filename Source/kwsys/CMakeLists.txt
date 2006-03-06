@@ -86,6 +86,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   # Enable all components.
   SET(KWSYS_USE_Base64 1)
   SET(KWSYS_USE_Directory 1)
+  SET(KWSYS_USE_DynamicLoader 1)
   SET(KWSYS_USE_Glob 1)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_RegularExpression 1)
@@ -424,7 +425,7 @@ IF(KWSYS_USE_Glob)
 ENDIF(KWSYS_USE_Glob)
 
 # Add selected C++ classes.
-SET(cppclasses Directory Glob RegularExpression SystemTools CommandLineArguments Registry)
+SET(cppclasses Directory DynamicLoader Glob RegularExpression SystemTools CommandLineArguments Registry)
 FOREACH(c ${cppclasses})
   IF(KWSYS_USE_${c})
     SET(KWSYS_CLASSES ${KWSYS_CLASSES} ${c})
