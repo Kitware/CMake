@@ -1130,7 +1130,7 @@ for a in string vector map; do
 done
 
 # Generate Makefile
-dep="cmConfigure.h cmsys/Configure.hxx cmsys/Configure.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
+dep="cmConfigure.h cmsys/*.hxx cmsys/*.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
 objs=""
 for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES} ${KWSYS_C_GENERATED_SOURCES}; do
   objs="${objs} ${a}.o"
