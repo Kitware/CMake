@@ -26,6 +26,7 @@
 # include "Configure.hxx.in"
 # include "kwsys_stl.hxx.in"
 # include "kwsys_stl_string.hxx.in"
+# include "kwsys_stl_vector.hxx.in"
 #endif
 
 namespace KWSYS_NAMESPACE

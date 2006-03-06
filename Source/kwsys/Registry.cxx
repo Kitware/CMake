@@ -21,6 +21,18 @@
 #include KWSYS_HEADER(ios/iostream)
 #include KWSYS_HEADER(ios/fstream)
 #include KWSYS_HEADER(ios/sstream)
+// Work-around CMake dependency scanning limitation.  This must
+// duplicate the above list of headers.
+#if 0
+# include "Registry.hxx.in"
+# include "Configure.hxx.in"
+# include "kwsys_stl.hxx.in"
+# include "kwsys_stl_string.hxx.in"
+# include "kwsys_stl_map.hxx.in"
+# include "kwsys_ios_iostream.h.in"
+# include "kwsys_ios_fstream.h.in"
+# include "kwsys_ios_sstream.h.in"
+#endif
 
 #include <ctype.h> // for isspace
 #include <stdio.h>
