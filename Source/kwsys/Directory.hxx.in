@@ -57,6 +57,13 @@ public:
    */
   const char* GetPath() const;
 
+protected:
+  /**
+   * Clear the internal structure. Used internally at beginning of Load(...) to clear
+   * the cache.
+   */
+  void Clear();
+
 private:
   // Private implementation details.
   DirectoryInternals* Internal;

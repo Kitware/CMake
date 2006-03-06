@@ -76,6 +76,13 @@ const char* Directory::GetPath() const
   return this->Internal->Path.c_str();
 }
 
+//----------------------------------------------------------------------------
+void Directory::Clear()
+{
+  this->Internal->Path.clear();
+  this->Internal->Files.clear();
+}
+
 } // namespace KWSYS_NAMESPACE
 
 // First microsoft compilers
@@ -96,6 +103,7 @@ namespace KWSYS_NAMESPACE
 
 bool Directory::Load(const char* name)
 {
+  this->Clear();
 #if _MSC_VER < 1300
   long srchHandle;
 #else
@@ -148,6 +156,7 @@ namespace KWSYS_NAMESPACE
 
 bool Directory::Load(const char* name)
 {
+  this->Clear();
   DIR* dir = opendir(name);
 
   if (!dir)
