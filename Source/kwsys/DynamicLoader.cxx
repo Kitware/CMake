@@ -144,7 +144,7 @@ LibHandle DynamicLoader::OpenLibrary(const char* libname )
 //----------------------------------------------------------------------------
 int DynamicLoader::CloseLibrary( LibHandle lib)
 {
-  DYLD_BOOL success = NSUnLinkModule(lib, NSUNLINKMODULE_OPTION_NONE);
+  bool success = NSUnLinkModule(lib, NSUNLINKMODULE_OPTION_NONE);
   return success;
 }
 
