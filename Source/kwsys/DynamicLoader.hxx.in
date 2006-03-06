@@ -1,0 +1,87 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef @KWSYS_NAMESPACE@_DynamicLoader_hxx
+#define @KWSYS_NAMESPACE@_DynamicLoader_hxx
+
+#include <@KWSYS_NAMESPACE@/Configure.h>
+
+namespace @KWSYS_NAMESPACE@
+{
+// Ugly stuff for library handles
+// They are different on several different OS's
+#if defined(__hpux)
+  #include <dl.h>
+  typedef shl_t LibHandle;
+#elif defined(_WIN32)
+  #include <windows.h>
+  typedef HMODULE LibHandle;
+#elif defined(__APPLE__)
+  #include <AvailabilityMacros.h>
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+    #include <mach-o/dyld.h>
+    typedef NSModule LibHandle;
+  #else
+    typedef void* LibHandle;
+  #endif
+#else
+  typedef void* LibHandle;
+#endif
+} // namespace @KWSYS_NAMESPACE@
+
+namespace @KWSYS_NAMESPACE@
+{
+// Return type from DynamicLoader::GetSymbolAddress.
+typedef void (*DynamicLoaderFunction)();
+
+/** \class DynamicLoader
+ * \brief Portable loading of dynamic libraries or dll's.
+ *
+ * DynamicLoader provides a portable interface to loading dynamic
+ * libraries or dll's into a process.
+ *
+ * Directory currently works with Windows, Apple, HP-UX and Unix (POSIX)
+ * operating systems
+ */
+
+class @KWSYS_NAMESPACE@_EXPORT DynamicLoader
+{
+public:
+  DynamicLoader();
+  ~DynamicLoader();
+
+  /** Load a dynamic library into the current process.
+   * The returned LibHandle can be used to access the symbols in the
+   * library. */
+  static LibHandle OpenLibrary(const char*);
+
+  /** Attempt to detach a dynamic library from the
+   * process.  A value of true is returned if it is sucessful. */
+  static int CloseLibrary(LibHandle);
+
+  /** Find the address of the symbol in the given library. */
+  static DynamicLoaderFunction GetSymbolAddress(LibHandle, const char*);
+
+  /** Return the library prefix for the given architecture */
+  static const char* LibPrefix();
+
+  /** Return the library extension for the given architecture. */
+  static const char* LibExtension();
+
+  /** Return the last error produced from a calls made on this class. */
+  static const char* LastError();
+}; // End Class: DynamicLoader
+
+} // namespace @KWSYS_NAMESPACE@
+
+#endif
