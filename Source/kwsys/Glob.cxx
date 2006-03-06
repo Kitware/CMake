@@ -26,6 +26,7 @@
 // duplicate the above list of headers.
 #if 0
 # include "Glob.hxx.in"
+# include "Directory.hxx.in"
 # include "Configure.hxx.in"
 # include "RegularExpression.hxx.in"
 # include "SystemTools.hxx.in"
