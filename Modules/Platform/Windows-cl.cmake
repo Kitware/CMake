@@ -147,14 +147,17 @@ ENDIF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
 # default to Debug builds
 IF(CMAKE_COMPILER_2005)
   # for 2005 make sure the manifest is put in the dll with mt
-  SET(CMAKE_CXX_CREATE_SHARED_LIBRARY 
-    "link ${CMAKE_CL_NOLOGO} ${CMAKE_START_TEMP_FILE} /out:<TARGET> /dll  <LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE};mt /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
+  SET(CMAKE_CXX_CREATE_SHARED_LIBRARY "${CMAKE_CXX_CREATE_SHARED_LIBRARY}" 
+    "mt /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
   SET(CMAKE_CXX_CREATE_SHARED_MODULE "${CMAKE_CXX_CREATE_SHARED_LIBRARY}")
   # create a C shared library
   SET(CMAKE_C_CREATE_SHARED_LIBRARY "${CMAKE_CXX_CREATE_SHARED_LIBRARY}")
   # create a C shared module just copy the shared library rule
   SET(CMAKE_C_CREATE_SHARED_MODULE "${CMAKE_C_CREATE_SHARED_LIBRARY}")
-
+  SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}"
+    "mt /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
+  SET(CMAKE_C_LINK_EXECUTABLE "${CMAKE_C_LINK_EXECUTABLE}"
+    "mt /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
   SET(CMAKE_BUILD_TYPE_INIT Debug)
   SET (CMAKE_CXX_FLAGS_INIT "/W3 /Zm1000 /EHsc /GR")
   SET (CMAKE_CXX_FLAGS_DEBUG_INIT "/DWIN32 /D_DEBUG /D_WINDOWS /MDd /Zi /Ob0 /Od /RTC1")
