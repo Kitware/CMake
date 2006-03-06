@@ -79,7 +79,8 @@ const char* Directory::GetPath() const
 //----------------------------------------------------------------------------
 void Directory::Clear()
 {
-  this->Internal->Path.clear();
+  //this->Internal->Path.clear();
+  this->Internal->Path = "";
   this->Internal->Files.clear();
 }
 
