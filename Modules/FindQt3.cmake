@@ -38,6 +38,12 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   /usr/X11R6/include
   )
 
+# if qglobal.h is not in the qt_include_dir then set
+# QT_INCLUDE_DIR to NOTFOUND
+IF(NOT EXISTS ${QT_INCLUDE_DIR}/qglobal.h)
+  SET(QT_INCLUDE_DIR QT_INCLUDE_DIR-NOTFOUND CACHE PATH "path to qt3 include directory" FORCE)
+ENDIF(NOT EXISTS ${QT_INCLUDE_DIR}/qglobal.h)
+
 IF(QT_INCLUDE_DIR)
   #extract the version string from qglobal.h
   FILE(READ ${QT_INCLUDE_DIR}/qglobal.h QGLOBAL_H)
