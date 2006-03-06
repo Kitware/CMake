@@ -604,6 +604,10 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         return targetQuoted;
         }
       }
+    if(variable == "LANGUAGE_COMPILE_FLAGS")
+      {
+      return replaceValues.LanguageCompileFlags;
+      }
     if(variable == "TARGET")
       {
       return replaceValues.Target;

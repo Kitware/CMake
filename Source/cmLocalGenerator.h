@@ -196,6 +196,7 @@ public:
     const char* TargetSOName;
     const char* TargetInstallNameDir;
     const char* LinkFlags;
+    const char* LanguageCompileFlags;
   };
 
 protected:

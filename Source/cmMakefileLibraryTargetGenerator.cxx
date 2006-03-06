@@ -431,7 +431,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       vars.TargetInstallNameDir = install_name_dir.c_str();
       }
     }
-
+  std::string langFlags;
+  this->LocalGenerator
+    ->AddLanguageFlags(langFlags, linkLanguage,
+                       this->LocalGenerator->m_ConfigurationName.c_str());
+  vars.LanguageCompileFlags = langFlags.c_str();
   // Expand placeholders in the commands.
   this->LocalGenerator->m_TargetImplib = targetOutPathImport;
   for(std::vector<std::string>::iterator i = commands.begin();
