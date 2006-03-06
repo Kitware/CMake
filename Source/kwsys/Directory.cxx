@@ -55,19 +55,25 @@ Directory::~Directory()
 }
 
 //----------------------------------------------------------------------------
-unsigned long Directory::GetNumberOfFiles()
+unsigned long Directory::GetNumberOfFiles() const
 {
   return static_cast<unsigned long>(this->Internal->Files.size());
 }
 
 //----------------------------------------------------------------------------
-const char* Directory::GetFile(unsigned long dindex)
+const char* Directory::GetFile(unsigned long dindex) const
 {
   if ( dindex >= this->Internal->Files.size() )
     {
     return 0;
     }
   return this->Internal->Files[dindex].c_str();
+}
+
+//----------------------------------------------------------------------------
+const char* Directory::GetPath() const
+{
+  return this->Internal->Path.c_str();
 }
 
 } // namespace KWSYS_NAMESPACE

@@ -45,13 +45,18 @@ public:
   /**
    * Return the number of files in the current directory.
    */
-  unsigned long GetNumberOfFiles();
+  unsigned long GetNumberOfFiles() const;
   
   /**
    * Return the file at the given index, the indexing is 0 based
    */
-  const char* GetFile(unsigned long);
-  
+  const char* GetFile(unsigned long) const;
+
+  /**
+   * Return the path to Open'ed directory
+   */
+  const char* GetPath() const;
+
 private:
   // Private implementation details.
   DirectoryInternals* Internal;
