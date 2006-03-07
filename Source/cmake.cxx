@@ -2076,23 +2076,23 @@ void cmake::GenerateGraphViz(const char* fileName)
   std::map<cmStdString, int>::iterator depIt;
   for ( depIt = targetDeps.begin(); depIt != targetDeps.end(); ++ depIt )
     {
-    const char* tgtName = depIt->first.c_str();
-    std::map<cmStdString, cmStdString>::iterator tarIt = targetNamesNodes.find(tgtName);
+    const char* newTargetName = depIt->first.c_str();
+    std::map<cmStdString, cmStdString>::iterator tarIt = targetNamesNodes.find(newTargetName);
     if ( tarIt == targetNamesNodes.end() )
       {
       // We should not be here.
-      std::cout << "Cannot find library: " << tgtName << " even though it was added in the previous pass" << std::endl;
+      std::cout << "Cannot find library: " << newTargetName << " even though it was added in the previous pass" << std::endl;
       abort();
       }
 
-    str << "    \"" << tarIt->second.c_str() << "\" [ label=\"" << tgtName <<  "\" shape=\"";
+    str << "    \"" << tarIt->second.c_str() << "\" [ label=\"" << newTargetName <<  "\" shape=\"";
     if ( depIt->second == 1 )
       {
-      std::map<cmStdString, cmTarget*>::iterator tarTypeIt= targetPtrs.find(tgtName);
+      std::map<cmStdString, cmTarget*>::iterator tarTypeIt= targetPtrs.find(newTargetName);
       if ( tarTypeIt == targetPtrs.end() )
         {
         // We should not be here.
-        std::cout << "Cannot find library: " << tgtName << " even though it was added in the previous pass" << std::endl;
+        std::cout << "Cannot find library: " << newTargetName << " even though it was added in the previous pass" << std::endl;
         abort();
         }
       cmTarget* tg = tarTypeIt->second;
@@ -2128,8 +2128,8 @@ void cmake::GenerateGraphViz(const char* fileName)
     cmTargets::iterator tit;
     for ( tit = targets->begin(); tit != targets->end(); ++ tit )
       {
-      std::map<cmStdString, int>::iterator depIt = targetDeps.find(tit->first.c_str());
-      if ( depIt == targetDeps.end() )
+      std::map<cmStdString, int>::iterator dependIt = targetDeps.find(tit->first.c_str());
+      if ( dependIt == targetDeps.end() )
         {
         continue;
         }
