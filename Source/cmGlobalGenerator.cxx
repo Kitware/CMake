@@ -1217,7 +1217,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   singleLine.erase(singleLine.begin(), singleLine.end());
   depends.erase(depends.begin(), depends.end());
   singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
-  if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[1] != '.' )
+  if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.' )
     {
     singleLine.push_back("-C");
     singleLine.push_back(mf->GetDefinition("CMAKE_CFG_INTDIR"));
