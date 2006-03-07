@@ -1469,6 +1469,10 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
       return -1;
       }
     }
+  else
+    {
+    this->AddCMakePaths(m_CMakeCommand.c_str());
+    }
 
   // Add any cache args
   if ( !this->SetCacheArgs(args) )
