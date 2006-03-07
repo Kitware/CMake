@@ -576,7 +576,7 @@ bool cmFileCommand::HandleInstallCommand(
       {
       case cmTarget::SHARED_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
-#if !defined(_WIN32) && !defined(__APPLE_CC__)
+#if defined(__linux__)
         // Use read/write permissions.
         use_given_permissions = true;
         permissions = 0;
