@@ -1906,7 +1906,7 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
 #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
 # define KWSYSPE_PS_COMMAND "ps axo pid,ppid"
 # define KWSYSPE_PS_FORMAT  "%d %d\n"
-#elif defined(__hpux) || defined(__sparc)
+#elif defined(__hpux) || defined(__sparc) || defined(__sgi)
 # define KWSYSPE_PS_COMMAND "ps -ef"
 # define KWSYSPE_PS_FORMAT  "%*s %d %d %*[^\n]\n"
 #endif
@@ -1914,7 +1914,9 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
 /*--------------------------------------------------------------------------*/
 static void kwsysProcessKill(pid_t process_id)
 {
+#if defined(__linux__)
   DIR* procdir;
+#endif
 
   /* Suspend the process to be sure it will not create more children.  */
   kill(process_id, SIGSTOP);
