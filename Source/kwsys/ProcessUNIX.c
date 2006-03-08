@@ -1906,12 +1906,10 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
    pid and then the ppid.  */
 #if defined(__linux__) || defined(__APPLE__)
 # define KWSYSPE_PS_COMMAND "ps axo pid,ppid"
-# define KWSYSPE_PS_HEADER  "%*s %*s\n"
 # define KWSYSPE_PS_FORMAT  "%d %d\n"
-#elif defined(__hpux) && 0 /* Disable until tested.  */
+#elif defined(__hpux)
 # define KWSYSPE_PS_COMMAND "ps -ef"
-# define KWSYSPE_PS_HEADER  "%*s %*s %*s %*s %*s %*s %*s %*s\n"
-# define KWSYSPE_PS_FORMAT  "%*s %d %d %*s %*s %*s %*s %*s\n"
+# define KWSYSPE_PS_FORMAT  "%*s %d %d %*[^\n]\n"
 #endif
 
 /*--------------------------------------------------------------------------*/
@@ -1985,7 +1983,7 @@ static void kwsysProcessKill(pid_t process_id)
     FILE* ps = popen(KWSYSPE_PS_COMMAND, "r");
 
     /* Make sure the process started and provided a valid header.  */
-    if(ps && fscanf(ps, KWSYSPE_PS_HEADER) != EOF)
+    if(ps && fscanf(ps, "%*[^\n]\n") != EOF)
       {
       /* Look for processes whose parent is the process being killed.  */
       int pid, ppid;
