@@ -1899,6 +1899,22 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
 }
 
 /*--------------------------------------------------------------------------*/
+/* For systems without the /proc filesystem we try to obtain process
+   information by invoking the ps command.  Here we define the command
+   to call on each platform and the corresponding parsing format
+   string.  The parsing format should have two integers to store: the
+   pid and then the ppid.  */
+#if defined(__linux__) || defined(__APPLE__)
+# define KWSYSPE_PS_COMMAND "ps axo pid,ppid"
+# define KWSYSPE_PS_HEADER  "%*s %*s\n"
+# define KWSYSPE_PS_FORMAT  "%d %d\n"
+#elif defined(__hpux) && 0 /* Disable until tested.  */
+# define KWSYSPE_PS_COMMAND "ps -ef"
+# define KWSYSPE_PS_HEADER  "%*s %*s %*s %*s %*s %*s %*s %*s\n"
+# define KWSYSPE_PS_FORMAT  "%*s %d %d %*s %*s %*s %*s %*s\n"
+#endif
+
+/*--------------------------------------------------------------------------*/
 static void kwsysProcessKill(pid_t process_id)
 {
   DIR* procdir;
@@ -1906,8 +1922,8 @@ static void kwsysProcessKill(pid_t process_id)
   /* Suspend the process to be sure it will not create more children.  */
   kill(process_id, SIGSTOP);
 
-  /* Kill all children if we can find them.  Currently this works only
-     on systems that support the proc filesystem.  */
+  /* Kill all children if we can find them.  First try using the /proc
+     filesystem.  */
   if((procdir = opendir("/proc")) != NULL)
     {
 #if defined(MAXPATHLEN)
@@ -1962,6 +1978,31 @@ static void kwsysProcessKill(pid_t process_id)
       }
     closedir(procdir);
     }
+#if defined(KWSYSPE_PS_COMMAND)
+  else
+    {
+    /* Try running "ps" to get the process information.  */
+    FILE* ps = popen(KWSYSPE_PS_COMMAND, "r");
+
+    /* Make sure the process started and provided a valid header.  */
+    if(ps && fscanf(ps, KWSYSPE_PS_HEADER) != EOF)
+      {
+      /* Look for processes whose parent is the process being killed.  */
+      int pid, ppid;
+      while(fscanf(ps, KWSYSPE_PS_FORMAT, &pid, &ppid) == 2)
+        {
+        if(ppid == process_id)
+          {
+          /* Recursively kill this child aned its children.  */
+          kwsysProcessKill(pid);
+          }
+        }
+
+      /* We are done with the ps process.  */
+      pclose(ps);
+      }
+    }
+#endif
 
   /* Kill the process.  */
   kill(process_id, SIGKILL);
