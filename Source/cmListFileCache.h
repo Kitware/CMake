@@ -65,9 +65,6 @@ struct cmListFile
   bool ParseFile(const char* path, bool requireProjectCommand);
   long int m_ModifiedTime;
   std::vector<cmListFileFunction> m_Functions;
-  typedef std::map<cmStdString, char*> UniqueStrings;
-  UniqueStrings m_UniqueStrings;
-  const char* GetUniqueStringPointer(const char* name);
 };
 
 #endif

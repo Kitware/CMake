@@ -25,14 +25,12 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
                                   cmListFileFunction& function,
                                   const char* filename);
 
-bool cmListFile::ParseFile(const char* path, bool requireProjectCommand)
+bool cmListFile::ParseFile(const char* filename, bool requireProjectCommand)
 {
-  if(!cmSystemTools::FileExists(path))
+  if(!cmSystemTools::FileExists(filename))
     {
     return false;
     }
-  // Get a pointer to a persistent copy of the name.
-  const char* filename = this->GetUniqueStringPointer(path);
 
   // Create the scanner.
   cmListFileLexer* lexer = cmListFileLexer_New();
@@ -212,17 +210,3 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
 
   return false;
 }
-
-//----------------------------------------------------------------------------
-const char* cmListFile::GetUniqueStringPointer(const char* name)
-{
-  UniqueStrings::iterator i = m_UniqueStrings.find(name);
-  if(i == m_UniqueStrings.end())
-    {
-    char* str = new char[strlen(name)+1];
-    strcpy(str, name);
-    i = m_UniqueStrings.insert(UniqueStrings::value_type(name, str)).first;
-    }
-  return i->second;
-}
-
