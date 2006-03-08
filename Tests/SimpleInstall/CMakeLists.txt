@@ -158,6 +158,6 @@ ADD_CUSTOM_COMMAND(
        --build-makeprogram ${CMAKE_MAKE_PROGRAM}
        --build-noclean
        --build-target install
-       --build-target package
+#       --build-target package
   COMMENT "Install Project"
   )
