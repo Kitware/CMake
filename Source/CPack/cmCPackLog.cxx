@@ -77,7 +77,8 @@ bool cmCPackLog::SetLogOutputFile(const char* fname)
 }
 
 //----------------------------------------------------------------------
-void cmCPackLog::Log(int tag, const char* file, int line, const char* msg, size_t length)
+void cmCPackLog::Log(int tag, const char* file, int line,
+  const char* msg, size_t length)
 {
   // By default no logging
   bool display = false;
@@ -217,6 +218,6 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg, size_
     }
   if ( msg[length-1] == '\n' || length > 2 )
     {
-    m_NewLine = true;;
+    m_NewLine = true;
     }
 }

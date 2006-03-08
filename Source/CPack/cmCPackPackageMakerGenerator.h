@@ -24,7 +24,8 @@
 /** \class cmCPackPackageMakerGenerator
  * \brief A generator for PackageMaker files
  *
- * http://developer.apple.com/documentation/Darwin/Reference/ManPages/man1/packagemaker.1.html
+ * http://developer.apple.com/documentation/Darwin
+ * /Reference/ManPages/man1/packagemaker.1.html
  */
 class cmCPackPackageMakerGenerator : public cmCPackGenericGenerator
 {
@@ -56,5 +57,3 @@ protected:
 };
 
 #endif
-
-

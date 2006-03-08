@@ -72,26 +72,32 @@ int cmCPackGenericGenerator::PrepareNames()
     cmsys::SystemTools::ConvertToOutputPath(this->GetInstallPath()).c_str());
   this->SetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY", installPrefix.c_str());
 
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for: CPACK_PACKAGE_DESCRIPTION_FILE" << std::endl);
-  const char* descFileName = this->GetOption("CPACK_PACKAGE_DESCRIPTION_FILE");
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for: " << descFileName << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG,
+    "Look for: CPACK_PACKAGE_DESCRIPTION_FILE" << std::endl);
+  const char* descFileName
+    = this->GetOption("CPACK_PACKAGE_DESCRIPTION_FILE");
+  cmCPackLogger(cmCPackLog::LOG_DEBUG,
+    "Look for: " << descFileName << std::endl);
   if ( descFileName )
     {
     if ( !cmSystemTools::FileExists(descFileName) )
       {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find description file name: " << descFileName << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Cannot find description file name: " << descFileName << std::endl);
       return 0;
       }
     std::ifstream ifs(descFileName);
     if ( !ifs )
       {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot open description file name: " << descFileName << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Cannot open description file name: " << descFileName << std::endl);
       return 0;
       }
     cmOStringStream ostr;
     std::string line;
 
-    cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Read description file: " << descFileName << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+      "Read description file: " << descFileName << std::endl);
     while ( ifs && cmSystemTools::GetLineFromStream(ifs, line) )
       {
       ostr << cmSystemTools::MakeXMLSafe(line.c_str()) << std::endl;
@@ -101,7 +107,8 @@ int cmCPackGenericGenerator::PrepareNames()
   if ( !this->GetOption("CPACK_PACKAGE_DESCRIPTION") )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Project description not specified. Please specify CPACK_PACKAGE_DESCRIPTION or CPACK_PACKAGE_DESCRIPTION_FILE."
+      "Project description not specified. Please specify "
+      "CPACK_PACKAGE_DESCRIPTION or CPACK_PACKAGE_DESCRIPTION_FILE."
       << std::endl);
     return 0;
     }
@@ -113,11 +120,14 @@ int cmCPackGenericGenerator::PrepareNames()
 int cmCPackGenericGenerator::InstallProject()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Install project" << std::endl);
-  const char* tempInstallDirectory = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
+  const char* tempInstallDirectory
+    = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   int res = 1;
   if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory))
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem creating temporary directory: " << tempInstallDirectory << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Problem creating temporary directory: " << tempInstallDirectory
+      << std::endl);
     return 0;
     }
   bool movable = true;
@@ -141,10 +151,12 @@ int cmCPackGenericGenerator::InstallProject()
     for ( it = installCommandsVector.begin(); it != installCommandsVector.end();
       ++it )
       {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << it->c_str() << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << it->c_str()
+        << std::endl);
       std::string output;
       int retVal = 1;
-      bool resB = cmSystemTools::RunSingleCommand(it->c_str(), &output, &retVal, 0, m_GeneratorVerbose, 0);
+      bool resB = cmSystemTools::RunSingleCommand(it->c_str(), &output,
+        &retVal, 0, m_GeneratorVerbose, 0);
       if ( !resB || retVal )
         {
         std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -153,26 +165,33 @@ int cmCPackGenericGenerator::InstallProject()
         ofs << "# Run command: " << it->c_str() << std::endl
           << "# Output:" << std::endl
           << output.c_str() << std::endl;
-        cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running install command: " << it->c_str() << std::endl
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Problem running install command: " << it->c_str() << std::endl
           << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
         res = 0;
         break;
         }
       }
     }
-  const char* installDirectories = this->GetOption("CPACK_INSTALLED_DIRECTORIES");
+  const char* installDirectories
+    = this->GetOption("CPACK_INSTALLED_DIRECTORIES");
   if ( installDirectories )
     {
     std::vector<std::string> installDirectoriesVector;
-    cmSystemTools::ExpandListArgument(installDirectories,installDirectoriesVector);
+    cmSystemTools::ExpandListArgument(installDirectories,
+      installDirectoriesVector);
     if ( installDirectoriesVector.size() % 2 != 0 )
       {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "CPACK_INSTALLED_DIRECTORIES should contain pairs of <directory> and <subdirectory>. The <subdirectory> can be '.' to be installed in the toplevel directory of installation." << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "CPACK_INSTALLED_DIRECTORIES should contain pairs of <directory> and "
+        "<subdirectory>. The <subdirectory> can be '.' to be installed in the "
+        "toplevel directory of installation." << std::endl);
       return 0;
       }
     std::vector<std::string>::iterator it;
     const char* tempDir = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-    for ( it = installDirectoriesVector.begin(); it != installDirectoriesVector.end();
+    for ( it = installDirectoriesVector.begin();
+      it != installDirectoriesVector.end();
       ++it )
       {
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
@@ -185,7 +204,8 @@ int cmCPackGenericGenerator::InstallProject()
       gl.RecurseOn();
       if ( !gl.FindFiles(findExpr) )
         {
-        cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find any files in the installed directory" << std::endl);
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Cannot find any files in the installed directory" << std::endl);
         return 0;
         }
       std::vector<std::string>& files = gl.GetFiles();
@@ -193,12 +213,16 @@ int cmCPackGenericGenerator::InstallProject()
       for ( gfit = files.begin(); gfit != files.end(); ++ gfit )
         {
         std::string filePath = tempDir;
-        filePath += "/" + subdir + "/" + cmSystemTools::RelativePath(toplevel.c_str(), gfit->c_str());
+        filePath += "/" + subdir + "/"
+          + cmSystemTools::RelativePath(toplevel.c_str(), gfit->c_str());
         std::string &inFile = *gfit;
-        cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: " << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
-        if ( !cmSystemTools::CopyFileIfDifferent(inFile.c_str(), filePath.c_str()) )
+        cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: "
+          << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
+        if ( !cmSystemTools::CopyFileIfDifferent(inFile.c_str(),
+            filePath.c_str()) )
           {
-          cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying file: " << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
+          cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying file: "
+            << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
           }
         }
       }
@@ -249,7 +273,8 @@ void cmCPackGenericGenerator::SetOption(const char* op, const char* value)
     m_MakefileMap->RemoveDefinition(op);
     return;
     }
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, this->GetNameOfClass() << "::SetOption(" << op << ", " << value << ")" << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, this->GetNameOfClass()
+    << "::SetOption(" << op << ", " << value << ")" << std::endl);
   m_MakefileMap->AddDefinition(op, value);
 }
 
@@ -278,33 +303,41 @@ int cmCPackGenericGenerator::ProcessGenerator()
   gl.RecurseOn();
   if ( !gl.FindFiles(findExpr) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find any files in the packaging tree" << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Cannot find any files in the packaging tree" << std::endl);
     return 0;
     }
 
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Compress package" << std::endl);
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Compress files to: " << tempPackageFileName << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Compress files to: "
+    << tempPackageFileName << std::endl);
   if ( cmSystemTools::FileExists(tempPackageFileName) )
     {
-    cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Remove old package file" << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Remove old package file"
+      << std::endl);
     cmSystemTools::RemoveFile(tempPackageFileName);
     }
   if ( !this->CompressFiles(tempPackageFileName,
       tempDirectory, gl.GetFiles()) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem compressing the directory" << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem compressing the directory"
+      << std::endl);
     return 0;
     }
 
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Finalize package" << std::endl);
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Copy final package: " << tempPackageFileName << " to " << packageFileName << std::endl);
-  if ( !cmSystemTools::CopyFileIfDifferent(tempPackageFileName, packageFileName) )
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Copy final package: "
+    << tempPackageFileName << " to " << packageFileName << std::endl);
+  if ( !cmSystemTools::CopyFileIfDifferent(tempPackageFileName,
+      packageFileName) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the package: " << tempPackageFileName << " to " << packageFileName << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the package: "
+      << tempPackageFileName << " to " << packageFileName << std::endl);
     return 0;
     }
 
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Package " << packageFileName << " generated." << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Package " << packageFileName
+    << " generated." << std::endl);
   return 1;
 }
 
@@ -412,7 +445,8 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
       }
     // is there no Modules direcory there?
     modules = cMakeRoot + "/Modules/CMake.cmake"; 
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
+      << modules.c_str() << std::endl);
     }
 
   if (!cmSystemTools::FileExists(modules.c_str()))
@@ -420,7 +454,8 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     // try exe/../share/cmake
     cMakeRoot += CMAKE_DATA_DIR;
     modules = cMakeRoot + "/Modules/CMake.cmake";
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
+      << modules.c_str() << std::endl);
     }
 #ifdef CMAKE_ROOT_DIR
   if (!cmSystemTools::FileExists(modules.c_str()))
@@ -428,7 +463,8 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     // try compiled in root directory
     cMakeRoot = CMAKE_ROOT_DIR;
     modules = cMakeRoot + "/Modules/CMake.cmake";
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
+      << modules.c_str() << std::endl);
     }
 #endif
 #ifdef CMAKE_PREFIX
@@ -437,7 +473,8 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     // try compiled in install prefix
     cMakeRoot = CMAKE_PREFIX CMAKE_DATA_DIR;
     modules = cMakeRoot + "/Modules/CMake.cmake";
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
+      << modules.c_str() << std::endl);
     }
 #endif
   if (!cmSystemTools::FileExists(modules.c_str()))
@@ -446,7 +483,8 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     cMakeRoot  = cmSystemTools::GetProgramPath(m_CMakeSelf.c_str());
     cMakeRoot += CMAKE_DATA_DIR;
     modules = cMakeRoot +  "/Modules/CMake.cmake";
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
+      << modules.c_str() << std::endl);
     }
   if(!cmSystemTools::FileExists(modules.c_str()))
     {
@@ -454,7 +492,8 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     cMakeRoot  = cmSystemTools::GetProgramPath(m_CMakeSelf.c_str());
     // is there no Modules direcory there?
     modules = cMakeRoot + "/Modules/CMake.cmake"; 
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << modules.c_str() << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
+      << modules.c_str() << std::endl);
     }
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
@@ -466,14 +505,15 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     return 0;
     }
   m_CMakeRoot = cMakeRoot;
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: " << m_CMakeRoot.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
+    << m_CMakeRoot.c_str() << std::endl);
   this->SetOption("CMAKE_ROOT", m_CMakeRoot.c_str());
   return 1;
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::CompressFiles(const char* outFileName, const char* toplevel,
-  const std::vector<std::string>& files)
+int cmCPackGenericGenerator::CompressFiles(const char* outFileName,
+  const char* toplevel, const std::vector<std::string>& files)
 {
   (void)outFileName;
   (void)toplevel;
@@ -517,15 +557,18 @@ const char* cmCPackGenericGenerator::GetInstallPath()
 //----------------------------------------------------------------------
 std::string cmCPackGenericGenerator::FindTemplate(const char* name)
 {
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for template: " << name << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for template: "
+    << name << std::endl);
   std::string ffile = m_MakefileMap->GetModulesFile(name);
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Found template: " << ffile.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Found template: "
+    << ffile.c_str() << std::endl);
   return ffile;
 }
 
 //----------------------------------------------------------------------
-bool cmCPackGenericGenerator::ConfigureFile(const char* inName, const char* outName)
+bool cmCPackGenericGenerator::ConfigureFile(const char* inName,
+  const char* outName)
 {
-  return m_MakefileMap->ConfigureFile(inName, outName, false, true, false) == 1;
+  return m_MakefileMap->ConfigureFile(inName, outName,
+    false, true, false) == 1;
 }
-

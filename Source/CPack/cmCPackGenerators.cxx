@@ -31,7 +31,8 @@ cmCPackGenerators::cmCPackGenerators()
   this->RegisterGenerator("TGZ", cmCPackTGZGenerator::CreateGenerator);
   this->RegisterGenerator("STGZ", cmCPackSTGZGenerator::CreateGenerator);
   this->RegisterGenerator("NSIS", cmCPackNSISGenerator::CreateGenerator);
-  this->RegisterGenerator("PackageMaker", cmCPackPackageMakerGenerator::CreateGenerator);
+  this->RegisterGenerator("PackageMaker",
+    cmCPackPackageMakerGenerator::CreateGenerator);
 }
 
 //----------------------------------------------------------------------
@@ -58,13 +59,15 @@ cmCPackGenericGenerator* cmCPackGenerators::NewGenerator(const char* name)
 }
 
 //----------------------------------------------------------------------
-cmCPackGenericGenerator* cmCPackGenerators::NewGeneratorInternal(const char* name)
+cmCPackGenericGenerator* cmCPackGenerators::NewGeneratorInternal(
+  const char* name)
 {
   if ( !name )
     {
     return 0;
     }
-  cmCPackGenerators::t_GeneratorCreatorsMap::iterator it = m_GeneratorCreators.find(name);
+  cmCPackGenerators::t_GeneratorCreatorsMap::iterator it
+    = m_GeneratorCreators.find(name);
   if ( it == m_GeneratorCreators.end() )
     {
     return 0;
@@ -73,11 +76,13 @@ cmCPackGenericGenerator* cmCPackGenerators::NewGeneratorInternal(const char* nam
 }
 
 //----------------------------------------------------------------------
-void cmCPackGenerators::RegisterGenerator(const char* name, CreateGeneratorCall* createGenerator)
+void cmCPackGenerators::RegisterGenerator(const char* name,
+  CreateGeneratorCall* createGenerator)
 {
   if ( !name || !createGenerator )
     {
-    cmCPack_Log(m_Logger, cmCPackLog::LOG_ERROR, "Cannot register generator" << std::endl);
+    cmCPack_Log(m_Logger, cmCPackLog::LOG_ERROR, "Cannot register generator"
+      << std::endl);
     return;
     }
   m_GeneratorCreators[name] = createGenerator;

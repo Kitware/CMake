@@ -40,15 +40,17 @@ cmCPackNSISGenerator::~cmCPackNSISGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackNSISGenerator::CompressFiles(const char* outFileName, const char* toplevel,
-  const std::vector<std::string>& files)
+int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
+  const char* toplevel, const std::vector<std::string>& files)
 {
   (void)outFileName; // TODO: Fix nsis to force out file name
   (void)toplevel;
   std::string nsisInFileName = this->FindTemplate("NSIS.template.in");
   if ( nsisInFileName.size() == 0 )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack error: Could not find NSIS installer template file." << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "CPack error: Could not find NSIS installer template file."
+      << std::endl);
     return false;
     }
   std::string nsisFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -64,7 +66,8 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName, const char* top
     cmSystemTools::ReplaceString(fileN, "/", "\\");
     str << "  Delete \"$INSTDIR\\" << fileN.c_str() << "\"" << std::endl;
     }
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Uninstall Files: " << str.str().c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Uninstall Files: "
+    << str.str().c_str() << std::endl);
   this->SetOption("CPACK_NSIS_DELETE_FILES", str.str().c_str());
   std::vector<std::string> dirs;
   this->GetListOfSubdirectories(toplevel, dirs);
@@ -81,25 +84,30 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName, const char* top
     cmSystemTools::ReplaceString(fileN, "/", "\\");
     dstr << "  RMDir \"$INSTDIR\\" << fileN.c_str() << "\"" << std::endl;
     }
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Uninstall Dirs: " << dstr.str().c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Uninstall Dirs: "
+    << dstr.str().c_str() << std::endl);
   this->SetOption("CPACK_NSIS_DELETE_DIRECTORIES", dstr.str().c_str());
 
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << nsisInFileName << " to " << nsisFileName << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << nsisInFileName
+    << " to " << nsisFileName << std::endl);
   this->ConfigureFile(nsisInFileName.c_str(), nsisFileName.c_str());
   std::string nsisCmd = "\"";
   nsisCmd += this->GetOption("CPACK_INSTALLER_PROGRAM");
   nsisCmd += "\" \"" + nsisFileName + "\"";
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << nsisCmd.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << nsisCmd.c_str()
+    << std::endl);
   std::string output;
   int retVal = 1;
-  bool res = cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output, &retVal, 0, m_GeneratorVerbose, 0);
+  bool res = cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output,
+    &retVal, 0, m_GeneratorVerbose, 0);
   if ( !res || retVal )
     {
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << nsisCmd.c_str() << std::endl
       << "# Output:" << std::endl
       << output.c_str() << std::endl;
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running NSIS command: " << nsisCmd.c_str() << std::endl
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running NSIS command: "
+      << nsisCmd.c_str() << std::endl
       << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
     return 0;
     }
@@ -114,27 +122,32 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
     {
     return res;
     }
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackNSISGenerator::Initialize()" << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackNSISGenerator::Initialize()"
+    << std::endl);
   std::vector<std::string> path;
   std::string nsisPath;
-  if ( !cmsys::SystemTools::ReadRegistryValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS",
-      nsisPath) )
+  if ( !cmsys::SystemTools::ReadRegistryValue(
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find NSIS registry value" << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find NSIS registry value"
+      << std::endl);
     return 0;
     }
   path.push_back(nsisPath);
   nsisPath = cmSystemTools::FindProgram("makensis", path, false);
   if ( nsisPath.empty() )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find NSIS compiler" << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find NSIS compiler"
+      << std::endl);
     return 0;
     }
   std::string nsisCmd = "\"" + nsisPath + "\" /VERSION";
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Test NSIS version: " << nsisCmd.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Test NSIS version: "
+    << nsisCmd.c_str() << std::endl);
   std::string output;
   int retVal = 1;
-  bool resS = cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output, &retVal, 0, m_GeneratorVerbose, 0);
+  bool resS = cmSystemTools::RunSingleCommand(nsisCmd.c_str(),
+    &output, &retVal, 0, m_GeneratorVerbose, 0);
 
   cmsys::RegularExpression versionRex("v([0-9]+.[0-9]+)");
   if ( !resS || retVal || !versionRex.find(output))
@@ -145,7 +158,9 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
     ofs << "# Run command: " << nsisCmd.c_str() << std::endl
       << "# Output:" << std::endl
       << output.c_str() << std::endl;
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem checking NSIS version with command: " << nsisCmd.c_str() << std::endl
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Problem checking NSIS version with command: "
+      << nsisCmd.c_str() << std::endl
       << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
     return 0;
     }
@@ -155,34 +170,45 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
     << nsisVersion << std::endl);
   if ( nsisVersion < minNSISVersion )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack requires NSIS Version 2.09 or greater. NSIS found on the system was: "
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "CPack requires NSIS Version 2.09 or greater. NSIS found on the system "
+      "was: "
       << nsisVersion << std::endl);
     return 0;
     }
 
   this->SetOption("CPACK_INSTALLER_PROGRAM", nsisPath.c_str());
-  const char* cpackPackageExecutables = this->GetOption("CPACK_PACKAGE_EXECUTABLES");
+  const char* cpackPackageExecutables
+    = this->GetOption("CPACK_PACKAGE_EXECUTABLES");
   if ( cpackPackageExecutables )
     {
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "The cpackPackageExecutables: " << cpackPackageExecutables << "." << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "The cpackPackageExecutables: "
+      << cpackPackageExecutables << "." << std::endl);
     cmOStringStream str;
     cmOStringStream deleteStr;
     std::vector<std::string> cpackPackageExecutablesVector;
-    cmSystemTools::ExpandListArgument(cpackPackageExecutables,cpackPackageExecutablesVector);
+    cmSystemTools::ExpandListArgument(cpackPackageExecutables,
+      cpackPackageExecutablesVector);
     if ( cpackPackageExecutablesVector.size() % 2 != 0 )
       {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and <icon name>." << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
+        "<icon name>." << std::endl);
       return 0;
       }
     std::vector<std::string>::iterator it;
-    for ( it = cpackPackageExecutablesVector.begin(); it != cpackPackageExecutablesVector.end();
+    for ( it = cpackPackageExecutablesVector.begin();
+      it != cpackPackageExecutablesVector.end();
       ++it )
       {
       std::string execName = *it;
       ++ it;
       std::string linkName = *it;
-      str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\" << linkName << ".lnk\" \"$INSTDIR\\bin\\" << execName << ".exe\"" << std::endl;
-      deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName << ".lnk\"" << std::endl;
+      str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\"
+        << linkName << ".lnk\" \"$INSTDIR\\bin\\" << execName << ".exe\""
+        << std::endl;
+      deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
+        << ".lnk\"" << std::endl;
       }
     this->SetOption("CPACK_NSIS_CREATE_ICONS", str.str().c_str());
     this->SetOption("CPACK_NSIS_DELETE_ICONS", deleteStr.str().c_str());
@@ -192,7 +218,8 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------
-bool cmCPackNSISGenerator::GetListOfSubdirectories(const char* topdir, std::vector<std::string>& dirs)
+bool cmCPackNSISGenerator::GetListOfSubdirectories(const char* topdir,
+  std::vector<std::string>& dirs)
 {
   cmsys::Directory dir;
   dir.Load(topdir);
@@ -218,4 +245,3 @@ bool cmCPackNSISGenerator::GetListOfSubdirectories(const char* topdir, std::vect
   dirs.push_back(topdir);
   return true;
 }
-

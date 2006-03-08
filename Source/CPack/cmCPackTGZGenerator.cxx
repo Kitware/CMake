@@ -59,7 +59,8 @@ class cmCPackTGZ_Data
 {
 public:
   cmCPackTGZ_Data(cmCPackTGZGenerator* gen) :
-    OutputStream(0), Generator(gen), m_CompressionLevel(Z_DEFAULT_COMPRESSION) {}
+    OutputStream(0), Generator(gen),
+    m_CompressionLevel(Z_DEFAULT_COMPRESSION) {}
   std::ostream* OutputStream;
   cmCPackTGZGenerator* Generator;
   char m_CompressedBuffer[cmCPackTGZ_Data_BlockSize];
@@ -70,14 +71,16 @@ public:
 
 //----------------------------------------------------------------------
 extern "C" {
-  int cmCPackTGZ_Data_Open(void *client_data, const char* name, int oflags, mode_t mode);
+  int cmCPackTGZ_Data_Open(void *client_data, const char* name, int oflags,
+    mode_t mode);
   ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n);
   int cmCPackTGZ_Data_Close(void *client_data);
 }
 
 
 //----------------------------------------------------------------------
-int cmCPackTGZ_Data_Open(void *client_data, const char* pathname, int, mode_t)
+int cmCPackTGZ_Data_Open(void *client_data, const char* pathname,
+  int, mode_t)
 {
   cmCPackTGZ_Data *mydata = (cmCPackTGZ_Data*)client_data;
 
@@ -120,16 +123,21 @@ ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n)
 
   do {
     mydata->m_ZLibStream.avail_out = cmCPackTGZ_Data_BlockSize;
-    mydata->m_ZLibStream.next_out = reinterpret_cast<Bytef*>(mydata->m_CompressedBuffer);
-    int ret = deflate(&mydata->m_ZLibStream, (n?Z_NO_FLUSH:Z_FINISH));    // no bad return value
+    mydata->m_ZLibStream.next_out
+      = reinterpret_cast<Bytef*>(mydata->m_CompressedBuffer);
+    // no bad return value
+    int ret = deflate(&mydata->m_ZLibStream, (n?Z_NO_FLUSH:Z_FINISH));
     if(ret == Z_STREAM_ERROR)
       {
       return 0;
       }
 
-    size_t compressedSize = cmCPackTGZ_Data_BlockSize - mydata->m_ZLibStream.avail_out;
+    size_t compressedSize
+      = cmCPackTGZ_Data_BlockSize - mydata->m_ZLibStream.avail_out;
 
-    mydata->OutputStream->write(reinterpret_cast<const char*>(mydata->m_CompressedBuffer), compressedSize);
+    mydata->OutputStream->write(
+      reinterpret_cast<const char*>(mydata->m_CompressedBuffer),
+      compressedSize);
   } while ( mydata->m_ZLibStream.avail_out == 0 );
 
   if ( !*mydata->OutputStream )
@@ -171,8 +179,8 @@ int cmCPackTGZ_Data_Close(void *client_data)
 }
 
 //----------------------------------------------------------------------
-int cmCPackTGZGenerator::CompressFiles(const char* outFileName, const char* toplevel,
-  const std::vector<std::string>& files)
+int cmCPackTGZGenerator::CompressFiles(const char* outFileName,
+  const char* toplevel, const std::vector<std::string>& files)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: " << toplevel << std::endl);
   cmCPackTGZ_Data mydata(this);
@@ -199,7 +207,8 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName, const char* topl
       (m_GeneratorVerbose?TAR_VERBOSE:0)
       | 0) == -1)
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): " << strerror(errno) << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): "
+      << strerror(errno) << std::endl);
     return 0;
     }
 
@@ -214,7 +223,8 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName, const char* topl
     if (tar_append_tree(t, pathname, buf) != 0)
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-        "Problem with tar_append_tree(\"" << buf << "\", \"" << pathname << "\"): "
+        "Problem with tar_append_tree(\"" << buf << "\", \""
+        << pathname << "\"): "
         << strerror(errno) << std::endl);
       tar_close(t);
       return 0;
@@ -222,14 +232,16 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName, const char* topl
     }
   if (tar_append_eof(t) != 0)
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_append_eof(): " << strerror(errno) << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_append_eof(): "
+      << strerror(errno) << std::endl);
     tar_close(t);
     return 0;
     }
 
   if (tar_close(t) != 0)
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_close(): " << strerror(errno) << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_close(): "
+      << strerror(errno) << std::endl);
     return 0;
     }
   return 1;
@@ -245,5 +257,3 @@ int cmCPackTGZGenerator::GenerateHeader(std::ostream* os)
   os->write(header, 10);
   return 1;
 }
-
-

@@ -43,21 +43,25 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
     << "#!/bin/sh" << std::endl
     << "echo \"" << this->GetOption("CPACK_PACKAGE_NAME")
     << " - self-extracting archive.\"" << std::endl
-    << "echo \"If you want to stop extracting, please press <ctrl-C>.\"" << std::endl
+    << "echo \"If you want to stop extracting, please press <ctrl-C>.\""
+    << std::endl
     << "read line" << std::endl
     << "echo \"Extracting... Please wait...\"" << std::endl
     << "echo \"\"" << std::endl
     << "" << std::endl
-    << "# take the archive portion of this file and pipe it to tar" << std::endl
-    << "# the NUMERIC parameter in this command should be one more" << std::endl
+    << "# take the archive portion of this file and pipe it to tar"
+    << std::endl
+    << "# the NUMERIC parameter in this command should be one more"
+    << std::endl
     << "# than the number of lines in this header file" << std::endl
     << "tail +18 \"$0\" | gunzip | tar xf -" << std::endl
     << "" << std::endl
     << "exit 0" << std::endl
     << "echo \"\"" << std::endl
-    << "#-----------------------------------------------------------" << std::endl
+    << "#-----------------------------------------------------------"
+    << std::endl
     << "#      Start of TAR.GZ file" << std::endl
-    << "#-----------------------------------------------------------" << std::endl;
+    << "#-----------------------------------------------------------"
+    << std::endl;
   return this->Superclass::GenerateHeader(os);
 }
-

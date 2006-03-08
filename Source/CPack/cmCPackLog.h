@@ -60,10 +60,20 @@ public:
   };
 
   //! Various signatures for logging.
-  void Log(const char* file, int line, const char* msg) { this->Log(LOG_OUTPUT, file, line, msg); }
-  void Log(const char* file, int line, const char* msg, size_t length) { this->Log(LOG_OUTPUT, file, line, msg, length); }
-  void Log(int tag, const char* file, int line, const char* msg) { this->Log(tag, file, line, msg, strlen(msg)); }
-  void Log(int tag, const char* file, int line, const char* msg, size_t length);
+  void Log(const char* file, int line, const char* msg)
+    {
+    this->Log(LOG_OUTPUT, file, line, msg);
+    }
+  void Log(const char* file, int line, const char* msg, size_t length)
+    {
+    this->Log(LOG_OUTPUT, file, line, msg, length);
+    }
+  void Log(int tag, const char* file, int line, const char* msg)
+    {
+    this->Log(tag, file, line, msg, strlen(msg));
+    }
+  void Log(int tag, const char* file, int line, const char* msg,
+    size_t length);
 
   //! Set Verbose
   void VerboseOn() { this->SetVerbose(true); }
@@ -133,7 +143,8 @@ private:
 class cmCPackLogWrite
 {
 public:
-  cmCPackLogWrite(const char* data, size_t length) : Data(data), Length(length) {}
+  cmCPackLogWrite(const char* data, size_t length)
+    : Data(data), Length(length) {}
 
   const char* Data;
   size_t Length;

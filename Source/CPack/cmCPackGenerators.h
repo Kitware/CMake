@@ -41,7 +41,8 @@ public:
 
   typedef cmCPackGenericGenerator* CreateGeneratorCall();
 
-  void RegisterGenerator(const char* name, CreateGeneratorCall* createGenerator);
+  void RegisterGenerator(const char* name,
+    CreateGeneratorCall* createGenerator);
 
   void SetLogger(cmCPackLog* logger) { m_Logger = logger; }
 
@@ -55,6 +56,3 @@ private:
 };
 
 #endif
-
-
-
