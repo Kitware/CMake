@@ -16,28 +16,40 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
 
-namespace @KWSYS_NAMESPACE@
-{
 // Ugly stuff for library handles
 // They are different on several different OS's
 #if defined(__hpux)
   #include <dl.h>
+namespace @KWSYS_NAMESPACE@
+{
   typedef shl_t LibHandle;
+} // namespace @KWSYS_NAMESPACE@
 #elif defined(_WIN32)
   #include <windows.h>
+namespace @KWSYS_NAMESPACE@
+{
   typedef HMODULE LibHandle;
+} // namespace @KWSYS_NAMESPACE@
 #elif defined(__APPLE__)
   #include <AvailabilityMacros.h>
   #if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
     #include <mach-o/dyld.h>
+namespace @KWSYS_NAMESPACE@
+{
     typedef NSModule LibHandle;
+} // namespace @KWSYS_NAMESPACE@
   #else
+namespace @KWSYS_NAMESPACE@
+{
     typedef void* LibHandle;
+} // namespace @KWSYS_NAMESPACE@
   #endif
 #else
+namespace @KWSYS_NAMESPACE@
+{
   typedef void* LibHandle;
-#endif
 } // namespace @KWSYS_NAMESPACE@
+#endif
 
 namespace @KWSYS_NAMESPACE@
 {

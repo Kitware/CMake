@@ -25,9 +25,9 @@
 
 // This file is actually 3 different implementations.
 // 1. HP machines which uses shl_load
-// 2. Power PC MAC which uses GetSharedLibrary
+// 2. Mac OS X 10.2.x and earlier which uses NSLinkModule
 // 3. Windows which uses LoadLibrary
-// 4. Most unix systems which use dlopen (default )
+// 4. Most unix systems (including Mac OS X 10.3 and later) which use dlopen (default)
 // Each part of the ifdef contains a complete implementation for
 // the static methods of DynamicLoader.  
 
@@ -132,7 +132,7 @@ LibHandle DynamicLoader::OpenLibrary(const char* libname )
 {
   NSObjectFileImageReturnCode rc;
   NSObjectFileImage image = 0;
-  
+
   rc = NSCreateObjectFileImageFromFile(libname, &image);
   if(!image)
     {
@@ -150,7 +150,7 @@ int DynamicLoader::CloseLibrary( LibHandle lib)
 
 //----------------------------------------------------------------------------
 DynamicLoaderFunction DynamicLoader::GetSymbolAddress(LibHandle /* lib */, const char* sym)
-{ 
+{
   void *result=0;
   if(NSIsSymbolNameDefined(sym))
     {
