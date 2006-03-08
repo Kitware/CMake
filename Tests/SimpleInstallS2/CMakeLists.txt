@@ -10,7 +10,7 @@ SET(LIBRARY_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}")
 SET(CMAKE_SKIP_BUILD_RPATH 1)
 
 # Make sure the executable can run from the install tree.
-SET(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+SET(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
 
 # Skip the dependency that causes a build when installing.  This
 # avoids infinite loops when the post-build rule below installs.
@@ -22,14 +22,14 @@ SET(EXTRA_INSTALL_FLAGS)
 MESSAGE("Extra install: ${EXTRA_INSTALL_FLAGS}")
 
 IF(STAGE2)
-  SET(LIBPATHS "${CMAKE_INSTALL_PREFIX}/lib")
+  SET(LIBPATHS "${CMAKE_INSTALL_PREFIX}/MyTest/lib")
   SET(t1NAMES test1 test1${CMAKE_DEBUG_POSTFIX})
   SET(t2NAMES test2 test2${CMAKE_DEBUG_POSTFIX})
   SET(t4NAMES test4 test4${CMAKE_DEBUG_POSTFIX})
 
   # Make sure the install script ran.
   SET(CMAKE_INSTALL_SCRIPT_DID_RUN 0)
-  INCLUDE(${CMAKE_INSTALL_PREFIX}/InstallScriptOut.cmake OPTIONAL)
+  INCLUDE(${CMAKE_INSTALL_PREFIX}/MyTest/InstallScriptOut.cmake OPTIONAL)
   IF(CMAKE_INSTALL_SCRIPT_DID_RUN)
     MESSAGE(STATUS "Stage 1 did run install script 2.")
   ELSE(CMAKE_INSTALL_SCRIPT_DID_RUN)
@@ -37,7 +37,7 @@ IF(STAGE2)
   ENDIF(CMAKE_INSTALL_SCRIPT_DID_RUN)
 
   IF(CYGWIN OR MINGW)
-    SET(LIBPATHS ${LIBPATHS} "${CMAKE_INSTALL_PREFIX}/bin")
+    SET(LIBPATHS ${LIBPATHS} "${CMAKE_INSTALL_PREFIX}/MyTest/bin")
   ENDIF(CYGWIN OR MINGW)
   MESSAGE("Search for library in: ${LIBPATHS}")
 
@@ -58,16 +58,16 @@ IF(STAGE2)
     PATHS ${LIBPATHS}
     DOC "Fourth library")
 
-  INCLUDE_DIRECTORIES(${CMAKE_INSTALL_PREFIX}/include)
+  INCLUDE_DIRECTORIES(${CMAKE_INSTALL_PREFIX}/MyTest/include)
   ADD_EXECUTABLE (SimpleInstallS2 inst2.cxx foo.c foo.h)
   TARGET_LINK_LIBRARIES(SimpleInstallS2 ${TEST1_LIBRARY} ${TEST2_LIBRARY} ${TEST4_LIBRARY})
   SET(install_target SimpleInstallS2)
 
   # Make sure the test executable can run from the install tree.
   SET_TARGET_PROPERTIES(SimpleInstallS2 PROPERTIES
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
 
-  INSTALL_TARGETS(/bin SimpleInstallS2)
+  INSTALL_TARGETS(/MyTest/bin SimpleInstallS2)
 ELSE(STAGE2)
   # this is stage 1, so create libraries and modules and install everything
   ADD_LIBRARY(test1 STATIC lib1.cxx)
@@ -81,7 +81,7 @@ ELSE(STAGE2)
 
   # Make sure the test executable can run from the install tree.
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
 
   IF(CMAKE_GENERATOR MATCHES "Makefiles")
     ADD_SUBDIRECTORY(TestSubDir)
@@ -93,16 +93,16 @@ ELSE(STAGE2)
   ADD_DEPENDENCIES(test4 test2)
 
   INSTALL(TARGETS SimpleInstall test1 test2 test3
-          RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
+          RUNTIME DESTINATION MyTest/bin LIBRARY DESTINATION MyTest/lib)
   INSTALL(TARGETS test4 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-          RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
-  INSTALL(FILES lib1.h DESTINATION include/foo)
+          RUNTIME DESTINATION MyTest/bin LIBRARY DESTINATION MyTest/lib)
+  INSTALL(FILES lib1.h DESTINATION MyTest/include/foo)
   INSTALL(FILES lib2.h
-    DESTINATION include/foo
+    DESTINATION MyTest/include/foo
     PERMISSIONS OWNER_READ OWNER_WRITE
     RENAME lib2renamed.h
     )
-  INSTALL_FILES(/include FILES lib3.h)
+  INSTALL_FILES(/MyTest/include FILES lib3.h)
 
   # Test user-specified install scripts.
   INSTALL(
