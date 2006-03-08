@@ -1997,8 +1997,11 @@ static void kwsysProcessKill(pid_t process_id)
           kwsysProcessKill(pid);
           }
         }
+      }
 
-      /* We are done with the ps process.  */
+    /* We are done with the ps process.  */
+    if(ps)
+      {
       pclose(ps);
       }
     }
