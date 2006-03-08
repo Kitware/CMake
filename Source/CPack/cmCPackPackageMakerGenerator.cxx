@@ -143,7 +143,7 @@ int cmCPackPackageMakerGenerator::Initialize(const char* name, cmMakefile* mf)
     }
   // Check the PackageMaker version
   cmsys::RegularExpression rexKey("<key>CFBundleShortVersionString</key>");
-  cmsys::RegularExpression rexVersion("<string>([0-9]+.[0-9]+)</string>");
+  cmsys::RegularExpression rexVersion("<string>([0-9]+.[0-9.]+)</string>");
   std::string line;
   bool foundKey = false;
   while ( cmSystemTools::GetLineFromStream(ifs, line) )
@@ -161,7 +161,7 @@ int cmCPackPackageMakerGenerator::Initialize(const char* name, cmMakefile* mf)
     }
   if ( !cmSystemTools::GetLineFromStream(ifs, line) || !rexVersion.find(line) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem reading the PackageMaker compiler version file" << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem reading the PackageMaker compiler version file: " << versionFile.c_str() << std::endl);
     return 0;
     }
   this->PackageMakerVersion = atof(rexVersion.match(1).c_str());
