@@ -1899,15 +1899,14 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
 }
 
 /*--------------------------------------------------------------------------*/
-/* For systems without the /proc filesystem we try to obtain process
-   information by invoking the ps command.  Here we define the command
-   to call on each platform and the corresponding parsing format
-   string.  The parsing format should have two integers to store: the
-   pid and then the ppid.  */
-#if defined(__linux__) || defined(__APPLE__)
+/* We try to obtain process information by invoking the ps command.
+   Here we define the command to call on each platform and the
+   corresponding parsing format string.  The parsing format should
+   have two integers to store: the pid and then the ppid.  */
+#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
 # define KWSYSPE_PS_COMMAND "ps axo pid,ppid"
 # define KWSYSPE_PS_FORMAT  "%d %d\n"
-#elif defined(__hpux)
+#elif defined(__hpux) || defined(__sparc)
 # define KWSYSPE_PS_COMMAND "ps -ef"
 # define KWSYSPE_PS_FORMAT  "%*s %d %d %*[^\n]\n"
 #endif
@@ -1920,8 +1919,9 @@ static void kwsysProcessKill(pid_t process_id)
   /* Suspend the process to be sure it will not create more children.  */
   kill(process_id, SIGSTOP);
 
-  /* Kill all children if we can find them.  First try using the /proc
-     filesystem.  */
+  /* Kill all children if we can find them.  */
+#if defined(__linux__)
+  /* First try using the /proc filesystem.  */
   if((procdir = opendir("/proc")) != NULL)
     {
 #if defined(MAXPATHLEN)
@@ -1976,8 +1976,9 @@ static void kwsysProcessKill(pid_t process_id)
       }
     closedir(procdir);
     }
-#if defined(KWSYSPE_PS_COMMAND)
   else
+#endif
+#if defined(KWSYSPE_PS_COMMAND)
     {
     /* Try running "ps" to get the process information.  */
     FILE* ps = popen(KWSYSPE_PS_COMMAND, "r");
