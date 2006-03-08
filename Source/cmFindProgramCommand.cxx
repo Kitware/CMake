@@ -49,7 +49,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
     return true;
     }
   std::string result = cmSystemTools::FindProgram(this->Names,
-                                                  this->SearchPaths);
+                                                  this->SearchPaths, true);
   if(result != "")
     {
     // Save the value in the cache
