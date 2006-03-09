@@ -150,26 +150,6 @@ IF (WIN32)
     )
 ENDIF(WIN32)
 
-IF(Tcl_FRAMEWORKS)
-  # If we are using the Tcl framework, link to it.
-  IF("${TCL_INCLUDE_PATH}" MATCHES "Tcl\\.framework")
-    SET(TCL_LIBRARY "")
-  ENDIF("${TCL_INCLUDE_PATH}" MATCHES "Tcl\\.framework")
-  IF(NOT TCL_LIBRARY)
-    SET (TCL_LIBRARY "-framework Tcl" CACHE FILEPATH "Tcl Framework" FORCE)
-  ENDIF(NOT TCL_LIBRARY)
-ENDIF(Tcl_FRAMEWORKS)
-
-IF(Tk_FRAMEWORKS)
-  # If we are using the Tk framework, link to it.
-  IF("${TK_INCLUDE_PATH}" MATCHES "Tk\\.framework")
-    SET(TK_LIBRARY "")
-  ENDIF("${TK_INCLUDE_PATH}" MATCHES "Tk\\.framework")
-  IF(NOT TK_LIBRARY)
-    SET (TK_LIBRARY "-framework Tk" CACHE FILEPATH "Tk Framework" FORCE)
-  ENDIF(NOT TK_LIBRARY)
-ENDIF(Tk_FRAMEWORKS)
-
 MARK_AS_ADVANCED(
   TCL_STUB_LIBRARY
   TCL_STUB_LIBRARY_DEBUG

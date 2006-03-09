@@ -164,24 +164,24 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string& file,
         return fpath;
         }
       }
-    // if it is not found yet or not a framework header, then do a glob search
-    // for all files in dir/*/Headers/
-    cmStdString glob = dir;
-    glob += "/*/Headers/";
-    glob += file;
-    cmGlob globIt;
-    globIt.FindFiles(glob);
-    std::vector<std::string> files = globIt.GetFiles();
-    if(files.size())
+    }
+  // if it is not found yet or not a framework header, then do a glob search
+  // for all files in dir/*/Headers/
+  cmStdString glob = dir;
+  glob += "/*/Headers/";
+  glob += file;
+  cmGlob globIt;
+  globIt.FindFiles(glob);
+  std::vector<std::string> files = globIt.GetFiles();
+  if(files.size())
+    {
+    cmStdString fheader = cmSystemTools::CollapseFullPath(files[0].c_str());
+    if(this->IncludeFileInPath)
       {
-      cmStdString fheader = cmSystemTools::CollapseFullPath(files[0].c_str());
-      if(this->IncludeFileInPath)
-        {
-        return fheader;
-        }
-      fheader = cmSystemTools::GetFilenamePath(fheader);
       return fheader;
       }
+    fheader = cmSystemTools::GetFilenamePath(fheader);
+    return fheader;
     }
   return "";
 }
