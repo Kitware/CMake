@@ -23,25 +23,33 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
-int TestDynamicLoader(const char* libname, const char* symbol)
+#include "testSystemTools.h"
+
+/* libname = Library name
+ * System  = symbol to lookup in libname
+ * r1: should OpenLibrary succeed ?
+ * r2: should GetSymbolAddress succeed ?
+ * r3: should CloseLibrary succeed ?
+ */
+int TestDynamicLoader(const char* libname, const char* symbol, int r1, int r2, int r3)
 {
   kwsys::LibHandle l = kwsys::DynamicLoader::OpenLibrary(libname);
-  if( l )
+  // If result is incompatible with expectation just fails (xor):
+  if( (r1 && !l) || (!r1 && l) )
     {
     kwsys_ios::cerr
       << kwsys::DynamicLoader::LastError() << kwsys_ios::endl;
     return 1;
     }
-  kwsys::DynamicLoaderFunction f =
-    kwsys::DynamicLoader::GetSymbolAddress(l, symbol);
-  if( f )
+  kwsys::DynamicLoaderFunction f = kwsys::DynamicLoader::GetSymbolAddress(l, symbol);
+  if( (r2 && !f) || (!r2 && f) )
     {
     kwsys_ios::cerr
       << kwsys::DynamicLoader::LastError() << kwsys_ios::endl;
     return 1;
     }
-  int success = kwsys::DynamicLoader::CloseLibrary(l);
-  if( success )
+  int s = kwsys::DynamicLoader::CloseLibrary(l);
+  if( (r3 && !s) || (!r3 && s) )
     {
     kwsys_ios::cerr
       << kwsys::DynamicLoader::LastError() << kwsys_ios::endl;
@@ -52,7 +60,17 @@ int TestDynamicLoader(const char* libname, const char* symbol)
 
 int main(int , char *[])
 {
-  int res = TestDynamicLoader("foobar.lib", "foobar");
+  int res;
+  // Make sure that inexistant lib is giving correct result
+  res = TestDynamicLoader("foobar.lib", "foobar",0,0,0);
+  // Make sure that random binary file cannnot be assimilated as dylib
+  res += TestDynamicLoader(TEST_SYSTEMTOOLS_BIN_FILE, "wp",0,0,0);
+#ifdef __linux__
+  // This one is actually fun to test, since dlopen is by default loaded...wonder why :)
+  res += TestDynamicLoader("foobar.lib", "dlopen",0,1,0);
+  res += TestDynamicLoader("libdl.so", "dlopen",1,1,1);
+  res += TestDynamicLoader("libdl.so", "TestDynamicLoader",1,0,1);
+#endif
 
   return res;
 }
