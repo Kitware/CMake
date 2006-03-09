@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -39,16 +39,16 @@ public:
    * The main entry point for this class
    */
   int ProcessHandler();
-  
+
   cmCTestCoverageHandler();
-  
+
   virtual void Initialize();
 
   /**
    * This method is called when reading CTest custom file
    */
   void PopulateCustomVectors(cmMakefile *mf);
-  
+
 private:
   bool ShouldIDoCoverage(const char* file, const char* srcDir,
     const char* binDir);

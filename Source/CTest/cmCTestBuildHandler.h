@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -39,21 +39,21 @@ public:
    * The main entry point for this class
    */
   int ProcessHandler();
-  
+
   cmCTestBuildHandler();
-  
+
   void PopulateCustomVectors(cmMakefile *mf);
 
   /**
    * Initialize handler
    */
   virtual void Initialize();
-  
+
 private:
   //! Run command specialized for make and configure. Returns process status
   // and retVal is return value or exception.
   int RunMakeCommand(const char* command,
-    int* retVal, const char* dir, int timeout, 
+    int* retVal, const char* dir, int timeout,
     std::ofstream& ofs);
 
   enum {
@@ -84,14 +84,14 @@ private:
   };
 
   // generate the XML output
-  void GenerateDartBuildOutput(std::ostream& os, 
+  void GenerateDartBuildOutput(std::ostream& os,
                                std::vector<cmCTestBuildErrorWarning>,
                                double elapsed_time);
-  
+
 
   std::string             m_StartBuild;
   std::string             m_EndBuild;
-  
+
   std::vector<cmStdString> m_CustomErrorMatches;
   std::vector<cmStdString> m_CustomErrorExceptions;
   std::vector<cmStdString> m_CustomWarningMatches;
@@ -105,8 +105,8 @@ private:
 
   typedef std::deque<char> t_BuildProcessingQueueType;
 
-  void ProcessBuffer(const char* data, int length, size_t& tick, size_t tick_len, 
-    std::ofstream& ofs, t_BuildProcessingQueueType* queue);
+  void ProcessBuffer(const char* data, int length, size_t& tick,
+    size_t tick_len, std::ofstream& ofs, t_BuildProcessingQueueType* queue);
   int ProcessSingleLine(const char* data);
 
   t_BuildProcessingQueueType            m_BuildProcessingQueue;

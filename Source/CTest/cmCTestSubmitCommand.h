@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -22,18 +22,19 @@
 /** \class cmCTestSubmit
  * \brief Run a ctest script
  *
- * cmCTestSubmitCommand defineds the command to submit the test results for the project.
+ * cmCTestSubmitCommand defineds the command to submit the test results for
+ * the project.
  */
 class cmCTestSubmitCommand : public cmCTestCommand
 {
 public:
 
   cmCTestSubmitCommand() {}
-  
+
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     cmCTestSubmitCommand* ni = new cmCTestSubmitCommand;
     ni->m_CTest = this->m_CTest;
@@ -55,11 +56,11 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Submits the repository.";
     }
-  
+
   /**
    * More documentation.
    */

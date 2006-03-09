@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -29,11 +29,11 @@ class cmCTestConfigureCommand : public cmCTestCommand
 public:
 
   cmCTestConfigureCommand() {}
-  
+
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     cmCTestConfigureCommand* ni = new cmCTestConfigureCommand;
     ni->m_CTest = this->m_CTest;
@@ -55,11 +55,11 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Configures the repository.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -67,8 +67,9 @@ public:
     {
     return
       "  CTEST_CONFIGURE(BUILD build_dir RETURN_VALUE res)\n"
-      "Configures the given build directory and stores results in Configure.xml. The "
-      "second argument is a variable that will hold return value.";
+      "Configures the given build directory and stores results in "
+      "Configure.xml. The second argument is a variable that will hold "
+      "return value.";
     }
 
   cmTypeMacro(cmCTestConfigureCommand, cmCTestCommand);

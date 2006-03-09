@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -89,7 +89,7 @@ public:
 protected:
   bool StartResultingXML(const char* name, cmGeneratedFileStream& xofs);
   bool StartLogFile(const char* name, cmGeneratedFileStream& xofs);
-  
+
   bool m_HandlerVerbose;
   cmCTest *m_CTest;
   t_StringToString m_Options;

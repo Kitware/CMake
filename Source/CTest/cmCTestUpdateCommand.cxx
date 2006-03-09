@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -43,16 +43,18 @@ bool cmCTestUpdateCommand::InitialPass(
       {
       if ( res_var )
         {
-        this->SetError("called with incorrect number of arguments. RETURN_VALUE specified twice.");
+        this->SetError("called with incorrect number of arguments. "
+          "RETURN_VALUE specified twice.");
         return false;
         }
       havereturn_variable = true;
-      }    
+      }
     else if(args[i] == "SOURCE")
       {
       if ( source_dir )
         {
-        this->SetError("called with incorrect number of arguments. SOURCE specified twice.");
+        this->SetError("called with incorrect number of arguments. SOURCE "
+          "specified twice.");
         return false;
         }
       havesource = true;
@@ -60,20 +62,28 @@ bool cmCTestUpdateCommand::InitialPass(
     else
       {
       cmOStringStream str;
-      str << "called with incorrect number of arguments. Extra argument is: " << args[i].c_str() << ".";
+      str << "called with incorrect number of arguments. Extra argument is: "
+        << args[i].c_str() << ".";
       this->SetError(str.str().c_str());
       return false;
       }
     }
 
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "UpdateCommand", "CTEST_UPDATE_COMMAND");
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "UpdateOptions", "CTEST_UPDATE_OPTIONS");
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "CVSCommand", "CTEST_CVS_COMMAND");
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "CVSUpdateOptions", "CTEST_CVS_UPDATE_OPTIONS");
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "SVNCommand", "CTEST_SVN_COMMAND");
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile, "SVNUpdateOptions", "CTEST_SVN_UPDATE_OPTIONS");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+    "UpdateCommand", "CTEST_UPDATE_COMMAND");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+    "UpdateOptions", "CTEST_UPDATE_OPTIONS");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+    "CVSCommand", "CTEST_CVS_COMMAND");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+    "CVSUpdateOptions", "CTEST_CVS_UPDATE_OPTIONS");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+    "SVNCommand", "CTEST_SVN_COMMAND");
+  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+    "SVNUpdateOptions", "CTEST_SVN_UPDATE_OPTIONS");
 
-  const char* initialCheckoutCommand = m_Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
+  const char* initialCheckoutCommand
+    = m_Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
   if ( !initialCheckoutCommand )
     {
     initialCheckoutCommand = m_Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
@@ -95,14 +105,16 @@ bool cmCTestUpdateCommand::InitialPass(
     {
     handler->SetOption("InitialCheckout", initialCheckoutCommand);
     }
-  if ( (!cmSystemTools::FileExists(source_dir) || !cmSystemTools::FileIsDirectory(source_dir))
+  if ( (!cmSystemTools::FileExists(source_dir) ||
+      !cmSystemTools::FileIsDirectory(source_dir))
     && !initialCheckoutCommand )
     {
     cmOStringStream str;
     str << "cannot find source directory: " << source_dir << ".";
     if ( !cmSystemTools::FileExists(source_dir) )
       {
-      str << " Looks like it is not checked out yet. Please specify CTEST_CHECKOUT_COMMAND.";
+      str << " Looks like it is not checked out yet. Please specify "
+        "CTEST_CHECKOUT_COMMAND.";
       }
     this->SetError(str.str().c_str());
     return false;

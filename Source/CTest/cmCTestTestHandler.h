@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -37,7 +37,7 @@ public:
    * The main entry point for this class
    */
   int ProcessHandler();
-  
+
   /**
    * When both -R and -I are used should te resulting test list be the
    * intersection or the union of the lists. By default it is the
@@ -49,14 +49,14 @@ public:
    * This method is called when reading CTest custom file
    */
   void PopulateCustomVectors(cmMakefile *mf);
-  
+
   ///! Control the use of the regular expresisons, call these methods to turn
   ///them on
   void UseIncludeRegExp();
   void UseExcludeRegExp();
   void SetIncludeRegExp(const char *);
   void SetExcludeRegExp(const char *);
-  
+
 
   ///! pass the -I argument down
   void SetTestsToRunInformation(const char*);
@@ -140,9 +140,9 @@ private:
   /**
    * Run the test for a directory and any subdirectories
    */
-  void ProcessDirectory(std::vector<cmStdString> &passed, 
+  void ProcessDirectory(std::vector<cmStdString> &passed,
                         std::vector<cmStdString> &failed);
-  
+
 
   typedef std::vector<cmCTestTestProperties> tm_ListOfTests;
   /**

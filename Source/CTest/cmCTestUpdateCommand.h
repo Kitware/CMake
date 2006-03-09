@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -29,11 +29,11 @@ class cmCTestUpdateCommand : public cmCTestCommand
 public:
 
   cmCTestUpdateCommand() {}
-  
+
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     cmCTestUpdateCommand* ni = new cmCTestUpdateCommand;
     ni->m_CTest = this->m_CTest;
@@ -55,11 +55,11 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Updates the repository.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -67,8 +67,8 @@ public:
     {
     return
       "  CTEST_UPDATE([SOURCE source] [RETURN_VALUE res])\n"
-      "Updates the given source directory and stores results in Update.xml. The "
-      "second argument is a variable that will hold the number of files "
+      "Updates the given source directory and stores results in Update.xml. "
+      "The second argument is a variable that will hold the number of files "
       "modified. If there is a problem, the variable will be -1.";
     }
 

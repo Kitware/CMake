@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -56,19 +56,22 @@ bool cmCTestStartCommand::InitialPass(
     }
   if ( !src_dir )
     {
-    this->SetError("source directory not specified. Specify source directory as an argument or set CTEST_SOURCE_DIRECTORY");
+    this->SetError("source directory not specified. Specify source directory "
+      "as an argument or set CTEST_SOURCE_DIRECTORY");
     return false;
     }
   if ( !bld_dir)
     {
-    this->SetError("binary directory not specified. Specify binary directory as an argument or set CTEST_BINARY_DIRECTORY");
+    this->SetError("binary directory not specified. Specify binary directory "
+      "as an argument or set CTEST_BINARY_DIRECTORY");
     return false;
     }
   m_CTest->EmptyCTestConfiguration();
   m_CTest->SetCTestConfiguration("SourceDirectory", src_dir);
-  m_CTest->SetCTestConfiguration("BuildDirectory", bld_dir); 
+  m_CTest->SetCTestConfiguration("BuildDirectory", bld_dir);
 
-  cmCTestLog(m_CTest, HANDLER_OUTPUT, "Run dashboard with model " << smodel << std::endl
+  cmCTestLog(m_CTest, HANDLER_OUTPUT, "Run dashboard with model " << smodel
+    << std::endl
     << "   Source directory: " << src_dir << std::endl
     << "   Build directory: " << bld_dir << std::endl);
 

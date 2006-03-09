@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -29,11 +29,11 @@ class cmCTestStartCommand : public cmCTestCommand
 public:
 
   cmCTestStartCommand() {}
-  
+
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     cmCTestStartCommand* ni = new cmCTestStartCommand;
     ni->m_CTest = this->m_CTest;
@@ -55,11 +55,11 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Starts the testing for a given model";
     }
-  
+
   /**
    * More documentation.
    */
@@ -67,10 +67,10 @@ public:
     {
     return
       "  CTEST_START(Model [source [binary]])\n"
-      "Starts the testing for a given model. The command should be called after "
-      "the binary directory is initialized. If the 'source' and 'binary' "
-      "directory are not specified, it reads the CTEST_SOURCE_DIRECTORY and "
-      "CTEST_BINARY_DIRECTORY.";
+      "Starts the testing for a given model. The command should be called "
+      "after the binary directory is initialized. If the 'source' and "
+      "'binary' directory are not specified, it reads the "
+      "CTEST_SOURCE_DIRECTORY and CTEST_BINARY_DIRECTORY.";
     }
 
   cmTypeMacro(cmCTestStartCommand, cmCTestCommand);

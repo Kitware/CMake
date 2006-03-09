@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -38,7 +38,8 @@ cmCTestHandlerCommand::cmCTestHandlerCommand()
 bool cmCTestHandlerCommand::InitialPass(
   std::vector<std::string> const& args)
 {
-  if ( !this->ProcessArguments(args, m_Last, &*m_Arguments.begin(), m_Values) )
+  if ( !this->ProcessArguments(args, m_Last, &*m_Arguments.begin(),
+      m_Values) )
     {
     return false;
     }
@@ -58,8 +59,11 @@ bool cmCTestHandlerCommand::InitialPass(
     {
     if ( m_CTest->GetDartVersion() <= 1 )
       {
-      cmCTestLog(m_CTest, ERROR_MESSAGE, "Dart before version 2.0 does not support collecting submissions." << std::endl
-        << "Please upgrade the server to Dart 2 or higher, or do not use SUBMIT_INDEX." << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE,
+        "Dart before version 2.0 does not support collecting submissions."
+        << std::endl
+        << "Please upgrade the server to Dart 2 or higher, or do not use "
+        "SUBMIT_INDEX." << std::endl);
       }
     else
       {
@@ -69,7 +73,8 @@ bool cmCTestHandlerCommand::InitialPass(
 
 
   std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(m_CTest->GetCTestConfiguration("BuildDirectory").c_str());
+  cmSystemTools::ChangeDirectory(
+    m_CTest->GetCTestConfiguration("BuildDirectory").c_str());
   int res = handler->ProcessHandler();
   if ( m_Values[ct_RETURN_VALUE] && *m_Values[ct_RETURN_VALUE])
     {
@@ -81,8 +86,9 @@ bool cmCTestHandlerCommand::InitialPass(
   return true;
 }
 
-bool cmCTestHandlerCommand::ProcessArguments(std::vector<std::string> const& args,
-  int last, const char** strings, std::vector<const char*>& values)
+bool cmCTestHandlerCommand::ProcessArguments(
+  std::vector<std::string> const& args, int last, const char** strings,
+  std::vector<const char*>& values)
 {
   int state = 0;
   int cc;
@@ -98,7 +104,8 @@ bool cmCTestHandlerCommand::ProcessArguments(std::vector<std::string> const& arg
       {
       values[state] = args[i].c_str();
 #undef cerr
-      cmCTestLog(m_CTest, DEBUG, "Set " << strings[state] << " to " << args[i].c_str() << std::endl);
+      cmCTestLog(m_CTest, DEBUG, "Set " << strings[state] << " to "
+        << args[i].c_str() << std::endl);
       state = 0;
       }
     else
@@ -112,7 +119,8 @@ bool cmCTestHandlerCommand::ProcessArguments(std::vector<std::string> const& arg
           if ( values[state] )
             {
             cmOStringStream ostr;
-            ostr << "called with incorrect number of arguments. " << strings[state] << " specified twice.";
+            ostr << "called with incorrect number of arguments. "
+              << strings[state] << " specified twice.";
             this->SetError(ostr.str().c_str());
             return false;
             }
@@ -123,7 +131,9 @@ bool cmCTestHandlerCommand::ProcessArguments(std::vector<std::string> const& arg
       if ( !found )
         {
         cmOStringStream str;
-        str << "called with incorrect number of arguments. Extra argument is: " << args[i].c_str() << ".";
+        str
+          << "called with incorrect number of arguments. Extra argument is: "
+          << args[i].c_str() << ".";
         this->SetError(str.str().c_str());
         return false;
         }

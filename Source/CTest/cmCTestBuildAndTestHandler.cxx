@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -55,9 +55,9 @@ int cmCTestBuildAndTestHandler::ProcessHandler()
 }
 
 //----------------------------------------------------------------------
-int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring, cmOStringStream &out,
-                      std::string &cmakeOutString, std::string &cwd,
-                      cmake *cm)
+int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
+  cmOStringStream &out, std::string &cmakeOutString, std::string &cwd,
+  cmake *cm)
 {
   unsigned int k;
   std::vector<std::string> args;
@@ -71,7 +71,8 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring, cmOStringStream
     }
   if ( m_CTest->GetConfigType().size() > 0 )
     {
-    std::string btype = "-DCMAKE_BUILD_TYPE:STRING=" + m_CTest->GetConfigType();
+    std::string btype
+      = "-DCMAKE_BUILD_TYPE:STRING=" + m_CTest->GetConfigType();
     args.push_back(btype);
     }
 
@@ -114,7 +115,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring, cmOStringStream
         }
       return 1;
       }
-    } 
+    }
   return 0;
 }
 
@@ -135,7 +136,7 @@ void CMakeStdoutCallback(const char* m, int len, void* s)
 
 //----------------------------------------------------------------------
 int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
-{  
+{
   unsigned int k;
   std::string cmakeOutString;
   cmSystemTools::SetErrorCallback(CMakeMessageCallback, &cmakeOutString);
@@ -143,23 +144,23 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   cmOStringStream out;
   // What is this? double timeout = m_CTest->GetTimeOut();
   int retVal = 0;
-  
+
   // if the generator and make program are not specified then it is an error
   if (!m_BuildGenerator.size() || !m_BuildMakeProgram.size())
     {
     if(outstring)
       {
-      *outstring =  
+      *outstring =
         "--build-and-test requires that both the generator and makeprogram "
         "be provided using the --build-generator and --build-makeprogram "
         "command line options. ";
       }
     return 1;
     }
-    
+
   // make sure the binary dir is there
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  out << "Internal cmake changing into directory: " << m_BinaryDir << "\n";  
+  out << "Internal cmake changing into directory: " << m_BinaryDir << "\n";
   if (!cmSystemTools::FileIsDirectory(m_BinaryDir.c_str()))
     {
     cmSystemTools::MakeDirectory(m_BinaryDir.c_str());
@@ -169,7 +170,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   // should we cmake?
   cmake cm;
   cm.SetGlobalGenerator(cm.CreateGlobalGenerator(m_BuildGenerator.c_str()));
-    
+
   if(!m_BuildNoCMake)
     {
     // do the cmake step
@@ -210,20 +211,20 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     {
     *outstring =  out.str();
     }
-  
+
   // if not test was specified then we are done
   if (!m_TestCommand.size())
     {
     return 0;
     }
-  
+
   // now run the compiled test if we can find it
   std::vector<std::string> attempted;
   std::vector<std::string> failed;
   std::string tempPath;
-  std::string filepath = 
+  std::string filepath =
     cmSystemTools::GetFilenamePath(m_TestCommand);
-  std::string filename = 
+  std::string filename =
     cmSystemTools::GetFilenameName(m_TestCommand);
   // if full path specified then search that first
   if (filepath.size())
@@ -282,9 +283,9 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   // store the final location in fullPath
   std::string fullPath;
-  
+
   // now look in the paths we specified above
-  for(unsigned int ai=0; 
+  for(unsigned int ai=0;
       ai < attempted.size() && fullPath.size() == 0; ++ai)
     {
     // first check without exe extension
@@ -396,7 +397,8 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
       }
     else
       {
-      cmCTestLog(m_CTest, ERROR_MESSAGE, "--build-and-test must have source and binary dir" << std::endl);
+      cmCTestLog(m_CTest, ERROR_MESSAGE,
+        "--build-and-test must have source and binary dir" << std::endl);
       return 0;
       }
     }
@@ -433,7 +435,8 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
     idx++;
     m_BuildProject = allArgs[idx];
     }
-  if(currentArg.find("--build-makeprogram",0) == 0 && idx < allArgs.size() - 1)
+  if(currentArg.find("--build-makeprogram",0) == 0 &&
+    idx < allArgs.size() - 1)
     {
     idx++;
     m_BuildMakeProgram = allArgs[idx];
@@ -449,8 +452,9 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
     while(idx < allArgs.size() && !done)
       {
       m_BuildOptions.push_back(allArgs[idx]);
-      if(idx+1 < allArgs.size() 
-        && (allArgs[idx+1] == "--build-target" || allArgs[idx+1] == "--test-command"))
+      if(idx+1 < allArgs.size()
+        && (allArgs[idx+1] == "--build-target" ||
+          allArgs[idx+1] == "--test-command"))
         {
         done = true;
         }

@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -30,13 +30,14 @@ class cmCTestEmptyBinaryDirectoryCommand : public cmCTestCommand
 public:
 
   cmCTestEmptyBinaryDirectoryCommand() {}
-  
+
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
-    cmCTestEmptyBinaryDirectoryCommand* ni = new cmCTestEmptyBinaryDirectoryCommand;
+    cmCTestEmptyBinaryDirectoryCommand* ni
+      = new cmCTestEmptyBinaryDirectoryCommand;
     ni->m_CTest = this->m_CTest;
     ni->m_CTestScriptHandler = this->m_CTestScriptHandler;
     return ni;
@@ -56,11 +57,11 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "empties the binary directory";
     }
-  
+
   /**
    * More documentation.
    */
