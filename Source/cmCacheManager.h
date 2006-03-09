@@ -150,7 +150,9 @@ protected:
 
   ///! Get a cache entry object for a key
   CacheEntry *GetCacheEntry(const char *key);
-
+  ///! Clean out the CMakeFiles directory if no CMakeCache.txt
+  void CleanCMakeFiles(const char* path);
+  
 private:
   typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
   static void OutputHelpString(std::ofstream& fout, 

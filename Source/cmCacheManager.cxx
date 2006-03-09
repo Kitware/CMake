@@ -19,6 +19,7 @@
 #include "cmSystemTools.h"
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
+#include "cmGlob.h"
 #include <cmsys/Directory.hxx>
 
 #include <cmsys/RegularExpression.hxx>
@@ -154,6 +155,20 @@ bool cmCacheManager::ParseEntry(const char* entry,
   return flag;
 }
 
+void cmCacheManager::CleanCMakeFiles(const char* path)
+{
+  std::string glob = path;
+  glob += "/CMakeFiles/*.cmake";
+  cmGlob globIt;
+  globIt.FindFiles(glob);
+  std::vector<std::string> files = globIt.GetFiles();
+  for(std::vector<std::string>::iterator i = files.begin();
+      i != files.end(); ++i)
+    {
+    cmSystemTools::RemoveFile(i->c_str());
+    }
+}
+
 bool cmCacheManager::LoadCache(const char* path,
                                bool internal,
                                std::set<cmStdString>& excludes,
@@ -166,6 +181,12 @@ bool cmCacheManager::LoadCache(const char* path,
     {
     m_Cache.clear();
     }
+  if(!cmSystemTools::FileExists(cacheFile.c_str()))
+    {
+    this->CleanCMakeFiles(path);
+    return false;
+    }
+  
   std::ifstream fin(cacheFile.c_str());
   if(!fin)
     {
