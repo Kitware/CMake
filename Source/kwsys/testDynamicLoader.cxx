@@ -25,7 +25,18 @@
 
 #include "testSystemTools.h"
 
-/* libname = Library name
+kwsys_stl::string GetLibName(const char* lname)
+{
+  // Construct proper name of lib
+  kwsys_stl::string slname;
+  slname = kwsys::DynamicLoader::LibPrefix();
+  slname += lname;
+  slname += kwsys::DynamicLoader::LibExtension();
+
+  return slname;
+}
+
+/* libname = Library name (proper prefix, proper extension)
  * System  = symbol to lookup in libname
  * r1: should OpenLibrary succeed ?
  * r2: should GetSymbolAddress succeed ?
@@ -62,7 +73,7 @@ int main(int , char *[])
 {
   int res;
   // Make sure that inexistant lib is giving correct result
-  res = TestDynamicLoader("foobar.lib", "foobar",0,0,0);
+  res = TestDynamicLoader("azerty_", "foo_bar",0,0,0);
   // Make sure that random binary file cannnot be assimilated as dylib
   res += TestDynamicLoader(TEST_SYSTEMTOOLS_BIN_FILE, "wp",0,0,0);
 #ifdef __linux__
@@ -71,6 +82,11 @@ int main(int , char *[])
   res += TestDynamicLoader("libdl.so", "dlopen",1,1,1);
   res += TestDynamicLoader("libdl.so", "TestDynamicLoader",1,0,1);
 #endif
+  // Now try on the generated library
+  kwsys_stl::string libname = GetLibName("testDynload");
+  res += TestDynamicLoader(libname.c_str(), "dummy",1,0,1);
+  res += TestDynamicLoader(libname.c_str(), "TestDynamicLoaderFunction",1,1,1);
+  res += TestDynamicLoader(libname.c_str(), "TestDynamicLoaderData",1,1,1);
 
   return res;
 }
