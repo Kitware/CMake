@@ -426,11 +426,11 @@ ENDIF(KWSYS_USE_Glob)
 
 # Add selected C++ classes.
 SET(cppclasses Directory DynamicLoader Glob RegularExpression SystemTools CommandLineArguments Registry)
-FOREACH(c ${cppclasses})
-  IF(KWSYS_USE_${c})
-    SET(KWSYS_CLASSES ${KWSYS_CLASSES} ${c})
-  ENDIF(KWSYS_USE_${c})
-ENDFOREACH(c)
+FOREACH(cpp ${cppclasses})
+  IF(KWSYS_USE_${cpp})
+    SET(KWSYS_CLASSES ${KWSYS_CLASSES} ${cpp})
+  ENDIF(KWSYS_USE_${cpp})
+ENDFOREACH(cpp)
 
 # Add selected C components.
 FOREACH(c Process Base64 FundamentalType)
@@ -512,6 +512,13 @@ ENDFOREACH(h)
 IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
   ADD_LIBRARY(${KWSYS_NAMESPACE} ${KWSYS_LIBRARY_TYPE}
     ${KWSYS_C_SRCS} ${KWSYS_CXX_SRCS})
+
+  # If kwsys contains the DynamicLoader, need extra library
+  IF(KWSYS_USE_DynamicLoader)
+    IF(UNIX)
+      TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} dl)
+    ENDIF(UNIX)
+  ENDIF(KWSYS_USE_DynamicLoader)
 
   # Apply user-defined target properties to the library.
   IF(KWSYS_PROPERTIES_CXX)
@@ -602,12 +609,18 @@ ENDIF(KWSYS_USE_Process)
 IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   IF(BUILD_TESTING)
     # C++ tests
+    IF(KWSYS_USE_DynamicLoader)
+      SET(EXTRA_TESTS
+        testDynamicLoader
+        )
+    ENDIF(KWSYS_USE_DynamicLoader)
     FOREACH(test
         testSystemTools
         testIOS
         testHashSTL
         testCommandLineArguments
         testRegistry
+        ${EXTRA_TESTS}
         )
       ADD_EXECUTABLE(${test} ${test}.cxx)
       TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE})
@@ -629,7 +642,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
     SET(TEST_SYSTEMTOOLS_BIN_FILE
       "${CMAKE_CURRENT_SOURCE_DIR}/testSystemTools.bin")
-    SET(TEST_SYSTEMTOOLS_SRC_FILE 
+    SET(TEST_SYSTEMTOOLS_SRC_FILE
       "${CMAKE_CURRENT_SOURCE_DIR}/testSystemTools.cxx")
     CONFIGURE_FILE(
       ${PROJECT_SOURCE_DIR}/testSystemTools.h.in
@@ -642,6 +655,9 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       SET_DIRECTORY_PROPERTIES(PROPERTIES TEST_INCLUDE_FILE "${CMAKE_CURRENT_BINARY_DIR}/ExtraTest.cmake")
     ENDIF(CTEST_TEST_KWSYS)
     ADD_TEST(kwsys.testSystemTools ${EXEC_DIR}/testSystemTools)
+    IF(KWSYS_USE_DynamicLoader)
+      ADD_TEST(kwsys.testDynamicLoader ${EXEC_DIR}/testDynamicLoader)
+    ENDIF(KWSYS_USE_DynamicLoader)
     ADD_TEST(kwsys.testProcess-1 ${EXEC_DIR}/testProcess 1)
     ADD_TEST(kwsys.testProcess-2 ${EXEC_DIR}/testProcess 2)
     ADD_TEST(kwsys.testProcess-3 ${EXEC_DIR}/testProcess 3)
