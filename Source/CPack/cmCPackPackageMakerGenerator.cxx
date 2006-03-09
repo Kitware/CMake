@@ -181,7 +181,8 @@ int cmCPackPackageMakerGenerator::Initialize(const char* name, cmMakefile* mf)
       "version file" << std::endl);
     return 0;
     }
-  if ( !cmSystemTools::GetLineFromStream(ifs, line) || !rexVersion.find(line) )
+  if ( !cmSystemTools::GetLineFromStream(ifs, line) ||
+    !rexVersion.find(line) )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
       "Problem reading the PackageMaker compiler version file: "

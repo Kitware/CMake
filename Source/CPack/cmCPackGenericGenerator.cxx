@@ -148,7 +148,8 @@ int cmCPackGenericGenerator::InstallProject()
     std::vector<std::string> installCommandsVector;
     cmSystemTools::ExpandListArgument(installCommands,installCommandsVector);
     std::vector<std::string>::iterator it;
-    for ( it = installCommandsVector.begin(); it != installCommandsVector.end();
+    for ( it = installCommandsVector.begin();
+      it != installCommandsVector.end();
       ++it )
       {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << it->c_str()
@@ -167,7 +168,8 @@ int cmCPackGenericGenerator::InstallProject()
           << output.c_str() << std::endl;
         cmCPackLogger(cmCPackLog::LOG_ERROR,
           "Problem running install command: " << it->c_str() << std::endl
-          << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+          << "Please check " << tmpFile.c_str() << " for errors"
+          << std::endl);
         res = 0;
         break;
         }
@@ -184,8 +186,8 @@ int cmCPackGenericGenerator::InstallProject()
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
         "CPACK_INSTALLED_DIRECTORIES should contain pairs of <directory> and "
-        "<subdirectory>. The <subdirectory> can be '.' to be installed in the "
-        "toplevel directory of installation." << std::endl);
+        "<subdirectory>. The <subdirectory> can be '.' to be installed in "
+        "the toplevel directory of installation." << std::endl);
       return 0;
       }
     std::vector<std::string>::iterator it;

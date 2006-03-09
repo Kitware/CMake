@@ -42,7 +42,8 @@ static const cmDocumentationEntry cmDocumentationName[] =
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
   {0,
-   "  cpack -G <generator> -P <ProjectName> -R <ReleaseVersion> [options]", 0},
+   "  cpack -G <generator> -P <ProjectName> -R <ReleaseVersion> [options]",
+   0},
   {0,0,0}
 };
 
@@ -62,16 +63,16 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 static const cmDocumentationEntry cmDocumentationOptions[] =
 {
     {"-G <generator>", "Use the specified generator to generate package.",
-    "CPack may support multiple native packaging systems on certain platforms."
-      "A generator is responsible for generating input files for particular "
-      "system and invoking that systems. Possible generator names are "
-      "specified in the Generators section." },
+    "CPack may support multiple native packaging systems on certain "
+      "platforms. A generator is responsible for generating input files for "
+      "particular system and invoking that systems. Possible generator names "
+      "are specified in the Generators section." },
     {"-P <ProjectName>", "Specify the project name.",
-    "This option specifies the project name that will be used to generate the "
-      "installer." },
+    "This option specifies the project name that will be used to generate "
+      "the installer." },
     {"-C <Configuration>", "Specify the project configuration",
-    "This option specifies the configuration that the project was build with, "
-      "for example 'Debug', 'Release'." },
+    "This option specifies the configuration that the project was build "
+      "with, for example 'Debug', 'Release'." },
     {"-R <ReleaseVersion>", "Specify the release version of the project.",
     "This option specifies the release version of the project that will be "
       "used by installer." },
@@ -177,8 +178,10 @@ int main (int argc, char *argv[])
   typedef cmsys::CommandLineArguments argT;
   // Help arguments
   arg.AddArgument("--help", argT::NO_ARGUMENT, &help, "CPack help");
-  arg.AddArgument("--help-full", argT::SPACE_ARGUMENT, &helpFull, "CPack help");
-  arg.AddArgument("--help-html", argT::SPACE_ARGUMENT, &helpHTML, "CPack help");
+  arg.AddArgument("--help-full", argT::SPACE_ARGUMENT, &helpFull,
+    "CPack help");
+  arg.AddArgument("--help-html", argT::SPACE_ARGUMENT, &helpHTML,
+    "CPack help");
   arg.AddArgument("--help-man", argT::SPACE_ARGUMENT, &helpMAN, "CPack help");
   arg.AddArgument("--version", argT::NO_ARGUMENT, &helpVersion, "CPack help");
 
@@ -358,8 +361,9 @@ int main (int argc, char *argv[])
             "Cannot find installation file: " << makeInstallFile.c_str()
             << std::endl);
           cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-            "Please specify build tree of the project that uses CMake, specify "
-            "CPACK_INSTALL_COMMANDS, or specify CPACK_INSTALLED_DIRECTORIES."
+            "Please specify build tree of the project that uses CMake, "
+            "specify CPACK_INSTALL_COMMANDS, or specify "
+            "CPACK_INSTALLED_DIRECTORIES."
             << std::endl);
           parsed = 0;
           }
