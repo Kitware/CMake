@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -32,7 +32,8 @@ class cmCTestCommand;
   do { \
   cmOStringStream cmCTestLog_msg; \
   cmCTestLog_msg << msg; \
-  (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__, cmCTestLog_msg.str().c_str());\
+  (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,\
+                cmCTestLog_msg.str().c_str());\
   } while ( 0 )
 
 #ifdef cerr
@@ -53,11 +54,12 @@ public:
 
   ///! Process Command line arguments
   int Run(std::vector<std::string>const&, std::string* output = 0);
-  
+
   /**
    * Initialize and finalize testing
    */
-  int Initialize(const char* binary_dir, bool new_tag = false, bool verbose_tag = true);
+  int Initialize(const char* binary_dir, bool new_tag = false,
+    bool verbose_tag = true);
   bool InitializeFromCommand(cmCTestCommand* command, bool first = false);
   void Finalize();
 
@@ -76,14 +78,14 @@ public:
   /*
    * A utility function that returns the nightly time
    */
-  struct tm* GetNightlyTime(std::string str, 
+  struct tm* GetNightlyTime(std::string str,
     bool tomorrowtag);
-  
+
   /*
    * Is the tomorrow tag set?
    */
   bool GetTomorrowTag() { return m_TomorrowTag; };
-      
+
   /**
    * Try to run tests of the project
    */
@@ -93,7 +95,7 @@ public:
   std::string GetConfigType();
   double GetTimeOut() { return m_TimeOut; }
   void SetTimeOut(double t) { m_TimeOut = t; }
-  
+
   /**
    * Check if CTest file exists
    */
@@ -110,32 +112,33 @@ public:
    */
   void SetTestModel(int mode);
   int GetTestModel() { return m_TestModel; };
-  
+
   std::string GetTestModelString();
   static int GetTestModelFromString(const char* str);
   static std::string CleanString(const std::string& str);
   std::string GetCTestConfiguration(const char *name);
   void SetCTestConfiguration(const char *name, const char* value);
   void EmptyCTestConfiguration();
-  
+
   /**
    * constructor and destructor
    */
   cmCTest();
   ~cmCTest();
-  
+
   //! Set the notes files to be created.
   void SetNotesFiles(const char* notes);
 
-  static void PopulateCustomVector(cmMakefile* mf, const char* definition, 
+  static void PopulateCustomVector(cmMakefile* mf, const char* definition,
                                    tm_VectorOfStrings& vec);
-  static void PopulateCustomInteger(cmMakefile* mf, const char* def, int& val);
+  static void PopulateCustomInteger(cmMakefile* mf, const char* def,
+    int& val);
 
   ///! Get the current time as string
   std::string CurrentTime();
-  
+
   ///! Open file in the output directory and set the stream
-  bool OpenOutputFile(const std::string& path, 
+  bool OpenOutputFile(const std::string& path,
                       const std::string& name,
                       cmGeneratedFileStream& stream,
                       bool compress = false);
@@ -147,7 +150,7 @@ public:
   bool GetShowOnly();
 
    /**
-   * Run a single executable command and put the stdout and stderr 
+   * Run a single executable command and put the stdout and stderr
    * in output.
    *
    * If verbose is false, no user-viewable output from the program
@@ -157,19 +160,19 @@ public:
    * timeout expires. Timeout is specified in seconds.
    *
    * Argument retVal should be a pointer to the location where the
-   * exit code will be stored. If the retVal is not specified and 
-   * the program exits with a code other than 0, then the this 
+   * exit code will be stored. If the retVal is not specified and
+   * the program exits with a code other than 0, then the this
    * function will return false.
    *
    * If the command has spaces in the path the caller MUST call
    * cmSystemTools::ConvertToRunCommandPath on the command before passing
    * it into this function or it will not work.  The command must be correctly
-   * escaped for this to with spaces.  
+   * escaped for this to with spaces.
    */
   bool RunCommand(const char* command,
     std::string* stdOut, std::string* stdErr,
     int* retVal = 0, const char* dir = 0, double timeout = 0.0);
- 
+
   //! Start CTest XML output file
   void StartXML(std::ostream& ostr);
 
@@ -179,7 +182,7 @@ public:
   //! Run command specialized for make and configure. Returns process status
   // and retVal is return value or exception.
   int RunMakeCommand(const char* command, std::string* output,
-    int* retVal, const char* dir, int timeout, 
+    int* retVal, const char* dir, int timeout,
     std::ofstream& ofs);
 
   /*
@@ -189,7 +192,7 @@ public:
 
   //! Get the path to the build tree
   std::string GetBinaryDir();
-  
+
   //! Get the short path to the file. This means if the file is in binary or
   //source directory, it will become /.../relative/path/to/file
   std::string GetShortPathToFile(const char* fname);
@@ -221,15 +224,16 @@ public:
 
   //! Run command specialized for tests. Returns process status and retVal is
   // return value or exception.
-  int RunTest(std::vector<const char*> args, std::string* output, int *retVal, 
+  int RunTest(std::vector<const char*> args, std::string* output, int *retVal,
     std::ostream* logfile);
 
   /**
-   * Execute handler and return its result. If the handler fails, it returns negative value.
+   * Execute handler and return its result. If the handler fails, it returns
+   * negative value.
    */
   int ExecuteHandler(const char* handler);
 
-  /* 
+  /*
    * Get the handler object
    */
   cmCTestGenericHandler* GetHandler(const char* handler);
@@ -238,13 +242,14 @@ public:
   /*
    * Set the CTest variable from CMake variable
    */
-  bool SetCTestConfigurationFromCMakeVariable(cmMakefile* mf, const char* dconfig, const char* cmake_var);
+  bool SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
+    const char* dconfig, const char* cmake_var);
 
   //! Make string safe to be send as an URL
   static std::string MakeURLSafe(const std::string&);
 
-  //! Should ctect configuration be updated. When using new style ctest script,
-  //  this should be true.
+  //! Should ctect configuration be updated. When using new style ctest
+  // script, this should be true.
   void SetSuppressUpdatingCTestConfiguration(bool val)
     {
     m_SuppressUpdatingCTestConfiguration = val;
@@ -300,7 +305,7 @@ private:
   // these are helper classes
   typedef std::map<cmStdString,cmCTestGenericHandler*> t_TestingHandlers;
   t_TestingHandlers m_TestingHandlers;
-  
+
   bool m_ShowOnly;
 
   enum {
@@ -317,7 +322,7 @@ private:
     ALL_TEST       = 10,
     LAST_TEST      = 11
   };
-  
+
   //! Map of configuration properties
   typedef std::map<cmStdString, cmStdString> tm_CTestConfigurationMap;
 
@@ -325,7 +330,7 @@ private:
   tm_CTestConfigurationMap m_CTestConfiguration;
   tm_CTestConfigurationMap m_CTestConfigurationOverwrites;
   int                     m_Tests[LAST_TEST];
-  
+
   std::string             m_CurrentTag;
   bool                    m_TomorrowTag;
 
@@ -341,7 +346,7 @@ private:
   std::string              m_BinaryDir;
 
   std::string              m_NotesFiles;
-  
+
 
   int ReadCustomConfigurationFileTree(const char* dir);
 
@@ -350,21 +355,23 @@ private:
   bool                     m_ShortDateFormat;
 
   bool                     m_CompressXMLFiles;
-  
+
   void BlockTestErrorDiagnostics();
-  
+
 
   //! Reread the configuration file
   bool UpdateCTestConfiguration();
 
   //! Create not from files.
-  int GenerateCTestNotesOutput(std::ostream& os, const tm_VectorOfStrings& files);
+  int GenerateCTestNotesOutput(std::ostream& os,
+    const tm_VectorOfStrings& files);
 
   ///! Find the running cmake
   void FindRunningCMake(const char* arg0);
 
   //! Check if the argument is the one specified
-  bool CheckArgument(const std::string& arg, const char* varg1, const char* varg2 = 0);
+  bool CheckArgument(const std::string& arg, const char* varg1,
+    const char* varg2 = 0);
 
   bool                      m_SuppressUpdatingCTestConfiguration;
 
@@ -377,7 +384,7 @@ private:
   std::set<cmStdString> m_SubmitFiles;
 
   int m_SubmitIndex;
-  
+
   cmGeneratedFileStream* m_OutputLogFile;
   int                    m_OutputLogFileLastTag;
 };
@@ -385,7 +392,8 @@ private:
 class cmCTestLogWrite
 {
 public:
-  cmCTestLogWrite(const char* data, size_t length) : Data(data), Length(length) {}
+  cmCTestLogWrite(const char* data, size_t length)
+    : Data(data), Length(length) {}
 
   const char* Data;
   size_t Length;
