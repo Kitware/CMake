@@ -30,7 +30,7 @@
 #include "testSystemTools.h"
 
 //----------------------------------------------------------------------------
-const char* toUnixPaths[][2] = 
+const char* toUnixPaths[][2] =
 {
     { "/usr/local/bin/passwd", "/usr/local/bin/passwd" },
     { "/usr/lo cal/bin/pa sswd", "/usr/lo cal/bin/pa sswd" },
@@ -50,16 +50,16 @@ const char* toUnixPaths[][2] =
     {0, 0}
 };
 
-bool CheckConvertToUnixSlashes(kwsys_stl::string input, 
+bool CheckConvertToUnixSlashes(kwsys_stl::string input,
                                kwsys_stl::string output)
 {
   kwsys_stl::string result = input;
   kwsys::SystemTools::ConvertToUnixSlashes(result);
   if ( result != output )
     {
-    kwsys_ios::cerr 
-      << "Problem with ConvertToUnixSlashes - input: " << input.c_str() 
-      << " output: " << result.c_str() << " expected: " << output.c_str() 
+    kwsys_ios::cerr
+      << "Problem with ConvertToUnixSlashes - input: " << input.c_str()
+      << " output: " << result.c_str() << " expected: " << output.c_str()
       << kwsys_ios::endl;
     return false;
     }
@@ -67,25 +67,25 @@ bool CheckConvertToUnixSlashes(kwsys_stl::string input,
 }
 
 //----------------------------------------------------------------------------
-const char* checkEscapeChars[][4] = 
+const char* checkEscapeChars[][4] =
 {
   { "1 foo 2 bar 2", "12", "\\", "\\1 foo \\2 bar \\2"},
   { " {} ", "{}", "#", " #{#} "},
   {0, 0, 0, 0}
 };
 
-bool CheckEscapeChars(kwsys_stl::string input, 
-                      const char *chars_to_escape, 
-                      char escape_char, 
+bool CheckEscapeChars(kwsys_stl::string input,
+                      const char *chars_to_escape,
+                      char escape_char,
                       kwsys_stl::string output)
 {
   kwsys_stl::string result = kwsys::SystemTools::EscapeChars(
     input.c_str(), chars_to_escape, escape_char);
   if (result != output)
     {
-    kwsys_ios::cerr 
-      << "Problem with CheckEscapeChars - input: " << input.c_str() 
-      << " output: " << result.c_str() << " expected: " << output.c_str() 
+    kwsys_ios::cerr
+      << "Problem with CheckEscapeChars - input: " << input.c_str()
+      << " output: " << result.c_str() << " expected: " << output.c_str()
       << kwsys_ios::endl;
     return false;
     }
@@ -97,20 +97,20 @@ bool CheckDetectFileType()
 {
   bool res = true;
 
-  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_BIN_FILE) != 
+  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_BIN_FILE) !=
       kwsys::SystemTools::FileTypeBinary)
     {
-    kwsys_ios::cerr 
-      << "Problem with DetectFileType - failed to detect type of: " 
+    kwsys_ios::cerr
+      << "Problem with DetectFileType - failed to detect type of: "
       << TEST_SYSTEMTOOLS_BIN_FILE << kwsys_ios::endl;
     res = false;
     }
 
-  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_SRC_FILE) != 
+  if (kwsys::SystemTools::DetectFileType(TEST_SYSTEMTOOLS_SRC_FILE) !=
       kwsys::SystemTools::FileTypeText)
     {
-    kwsys_ios::cerr 
-      << "Problem with DetectFileType - failed to detect type of: " 
+    kwsys_ios::cerr
+      << "Problem with DetectFileType - failed to detect type of: "
       << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
     res = false;
     }

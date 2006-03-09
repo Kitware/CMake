@@ -29,7 +29,7 @@
 // 3. Windows which uses LoadLibrary
 // 4. Most unix systems (including Mac OS X 10.3 and later) which use dlopen (default)
 // Each part of the ifdef contains a complete implementation for
-// the static methods of DynamicLoader.  
+// the static methods of DynamicLoader.
 
 namespace KWSYS_NAMESPACE
 {
@@ -166,7 +166,7 @@ DynamicLoaderFunction DynamicLoader::GetSymbolAddress(LibHandle /* lib */, const
 
 //----------------------------------------------------------------------------
 const char* DynamicLoader::LibPrefix()
-{ 
+{
   return "";
 }
 
@@ -195,7 +195,7 @@ const char* DynamicLoader::LastError()
 
 namespace KWSYS_NAMESPACE
 {
-  
+
 //----------------------------------------------------------------------------
 LibHandle DynamicLoader::OpenLibrary(const char* libname)
 {
@@ -218,7 +218,7 @@ int DynamicLoader::CloseLibrary(LibHandle lib)
 
 //----------------------------------------------------------------------------
 DynamicLoaderFunction DynamicLoader::GetSymbolAddress(LibHandle lib, const char* sym)
-{ 
+{
   void *result;
 #ifdef UNICODE
   wchar_t wsym[MB_CUR_MAX];
@@ -233,7 +233,7 @@ DynamicLoaderFunction DynamicLoader::GetSymbolAddress(LibHandle lib, const char*
 
 //----------------------------------------------------------------------------
 const char* DynamicLoader::LibPrefix()
-{ 
+{
   return "";
 }
 
@@ -248,16 +248,16 @@ const char* DynamicLoader::LastError()
 {
   LPVOID lpMsgBuf;
 
-  FormatMessage( 
+  FormatMessage(
     FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
     NULL,
     GetLastError(),
     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
     (LPTSTR) &lpMsgBuf,
     0,
-    NULL 
+    NULL
     );
-  
+
   static char* str = 0;
   delete [] str;
   str = strcpy(new char[strlen((char*)lpMsgBuf)+1], (char*)lpMsgBuf);
@@ -280,7 +280,7 @@ const char* DynamicLoader::LastError()
 
 namespace KWSYS_NAMESPACE
 {
-  
+
 //----------------------------------------------------------------------------
 LibHandle DynamicLoader::OpenLibrary(const char* libname )
 {
@@ -301,16 +301,16 @@ int DynamicLoader::CloseLibrary(LibHandle lib)
 
 //----------------------------------------------------------------------------
 DynamicLoaderFunction DynamicLoader::GetSymbolAddress(LibHandle lib, const char* sym)
-{ 
+{
   void* result = dlsym(lib, sym);
-  
+
   // Hack to cast pointer-to-data to pointer-to-function.
   return *reinterpret_cast<DynamicLoaderFunction*>(&result);
 }
 
 //----------------------------------------------------------------------------
 const char* DynamicLoader::LibPrefix()
-{ 
+{
   return "lib";
 }
 
@@ -323,7 +323,7 @@ const char* DynamicLoader::LibExtension()
 //----------------------------------------------------------------------------
 const char* DynamicLoader::LastError()
 {
-  return dlerror(); 
+  return dlerror();
 }
 
 } // namespace KWSYS_NAMESPACE

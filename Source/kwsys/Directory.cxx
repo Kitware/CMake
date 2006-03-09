@@ -38,7 +38,7 @@ class DirectoryInternals
 public:
   // Array of Files
   kwsys_stl::vector<kwsys_stl::string> Files;
-  
+
   // Path to Open'ed directory
   kwsys_stl::string Path;
 };
@@ -113,32 +113,32 @@ bool Directory::Load(const char* name)
 #endif
   char* buf;
   size_t n = strlen(name);
-  if ( name[n - 1] == '/' ) 
+  if ( name[n - 1] == '/' )
     {
     buf = new char[n + 1 + 1];
     sprintf(buf, "%s*", name);
-    } 
+    }
   else
     {
     buf = new char[n + 2 + 1];
     sprintf(buf, "%s/*", name);
     }
   struct _finddata_t data;      // data of current file
-  
+
   // Now put them into the file array
   srchHandle = _findfirst(buf, &data);
   delete [] buf;
-  
+
   if ( srchHandle == -1 )
     {
     return 0;
     }
-  
+
   // Loop through names
-  do 
+  do
     {
     this->Internal->Files.push_back(data.name);
-    } 
+    }
   while ( _findnext(srchHandle, &data) != -1 );
   this->Internal->Path = name;
   return _findclose(srchHandle) != -1;
