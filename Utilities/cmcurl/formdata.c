@@ -1469,7 +1469,7 @@ char *Curl_FormBoundary(void)
   if(!retstring)
     return NULL; /* failed */
 
-  srand(time(NULL)+randomizer++); /* seed */
+  srand((unsigned int)((time(NULL)+randomizer++))); /* seed */
 
   strcpy(retstring, "----------------------------");
 

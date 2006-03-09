@@ -199,9 +199,9 @@ void th_set_user(TAR *t, uid_t uid);
 void th_set_group(TAR *t, gid_t gid);
 void th_set_mode(TAR *t, mode_t fmode);
 #define th_set_mtime(t, fmtime) \
-  int_to_oct_nonull((fmtime), (t)->th_buf.mtime, 12)
+  int_to_oct_nonull((int)(fmtime), (t)->th_buf.mtime, 12)
 #define th_set_size(t, fsize) \
-  int_to_oct_nonull((fsize), (t)->th_buf.size, 12)
+  int_to_oct_nonull((int)(fsize), (t)->th_buf.size, 12)
 
 /* encode everything at once (except the pathname and linkname) */
 void th_set_from_stat(TAR *t, struct stat *s);
