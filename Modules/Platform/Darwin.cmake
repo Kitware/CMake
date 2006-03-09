@@ -42,7 +42,7 @@ SET(CMAKE_FIND_FRAMEWORK FIRST)
 # set up the default search directories for frameworks
 SET(CMAKE_SYSTEM_FRAMEWORK_PATH
   ~/Library/Frameworks
-  /Library/Frameworks;/Network
+  /Library/Frameworks/Network
   /Network/Library/Frameworks
   /System/Library/Frameworks)
 
