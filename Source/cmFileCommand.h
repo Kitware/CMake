@@ -69,6 +69,8 @@ public:
       "  FILE(READ filename variable)\n"
       "  FILE(GLOB variable [globbing expressions]...)\n"
       "  FILE(GLOB_RECURSE variable [globbing expressions]...)\n"
+      "  FILE(REMOVE [directory]...)\n"
+      "  FILE(REMOVE_RECURSE [directory]...)\n"
       "  FILE(MAKE_DIRECTORY [directory]...)\n"
       "  FILE(RELATIVE_PATH variable directory file)\n"
       "WRITE will write a message into a file called 'filename'. It "
@@ -101,6 +103,7 @@ public:
   cmTypeMacro(cmFileCommand, cmCommand);
 
 protected:
+  bool HandleRemove(std::vector<std::string> const& args, bool recurse);
   bool HandleWriteCommand(std::vector<std::string> const& args, bool append);
   bool HandleReadCommand(std::vector<std::string> const& args);
   bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse);

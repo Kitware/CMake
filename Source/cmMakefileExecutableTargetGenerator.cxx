@@ -225,18 +225,19 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string cleanFullRealName = outpath + cleanRealName;
   exeCleanFiles.push_back(this->Convert(cleanFullName.c_str(),
                                         cmLocalGenerator::START_OUTPUT,
-                                        cmLocalGenerator::MAKEFILE));
+                                        cmLocalGenerator::UNCHANGED));
   if(cleanRealName != cleanName)
     {
     exeCleanFiles.push_back(this->Convert(cleanFullRealName.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::MAKEFILE));
+                                          cmLocalGenerator::UNCHANGED));
     }
   } 
 
   // Add a command to remove any existing files for this executable.
   std::vector<std::string> commands1;
-  this->LocalGenerator->AppendCleanCommand(commands1, exeCleanFiles);
+  this->LocalGenerator->AppendCleanCommand(commands1, exeCleanFiles,
+                                           *this->Target, "target");
   this->LocalGenerator->CreateCDCommand(commands1,
                                         this->Makefile->GetStartOutputDirectory(),
                                         this->Makefile->GetHomeOutputDirectory()); 
@@ -352,6 +353,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->CleanFiles.insert(this->CleanFiles.end(),
                           exeCleanFiles.begin(),
                           exeCleanFiles.end());
-  this->CleanFiles.push_back(cleanObjs);
+  this->CleanFiles.insert(this->CleanFiles.end(),
+                          this->Objects.begin(),
+                          this->Objects.end());
 }
 

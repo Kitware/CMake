@@ -813,17 +813,37 @@ cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::AppendCleanCommand(std::vector<std::string>& commands,
-                     const std::vector<std::string>& files)
+                     const std::vector<std::string>& files,
+                     cmTarget& target, const char* filename)
 {
   if(!files.empty())
     {
-    std::string remove = "$(CMAKE_COMMAND) -E remove -f";
+    std::string cleanfile = m_Makefile->GetCurrentOutputDirectory();
+    cleanfile += "/";
+    cleanfile += this->GetTargetDirectory(target);
+    cleanfile += "/cmake_clean";
+    if(filename)
+      {
+      cleanfile += "_";
+      cleanfile += filename;
+      }
+    cleanfile += ".cmake";
+    std::string cleanfilePath = this->Convert(cleanfile.c_str(), FULL);
+    std::ofstream fout(cleanfilePath.c_str());
+    if(!fout)
+      {
+      cmSystemTools::Error("Could not create ", cleanfilePath.c_str());
+      }
+    fout << "FILE(REMOVE\n";
+    std::string remove = "$(CMAKE_COMMAND) -P ";
+    remove += this->Convert(cleanfile.c_str(), START_OUTPUT, SHELL);
     for(std::vector<std::string>::const_iterator f = files.begin();
         f != files.end(); ++f)
       {
-      remove += " ";
-      remove += this->Convert(f->c_str(),START_OUTPUT,SHELL);
+      fout << "\"" << this->Convert(f->c_str(),START_OUTPUT,UNCHANGED) 
+           << "\"\n";
       }
+    fout << ")\n";
     commands.push_back(remove);
     }
 }

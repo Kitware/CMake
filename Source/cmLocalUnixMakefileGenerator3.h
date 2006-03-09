@@ -272,7 +272,8 @@ protected:
   void AppendCustomCommand(std::vector<std::string>& commands,
                            const cmCustomCommand& cc);
   void AppendCleanCommand(std::vector<std::string>& commands,
-                          const std::vector<std::string>& files);
+                          const std::vector<std::string>& files,
+                          cmTarget& target, const char* filename =0);
 
 private:
   friend class cmMakefileTargetGenerator;

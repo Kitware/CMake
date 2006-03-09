@@ -485,7 +485,8 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
   cleanTarget += "/clean";
   
   // Construct the clean command.
-  this->LocalGenerator->AppendCleanCommand(commands, this->CleanFiles);
+  this->LocalGenerator->AppendCleanCommand(commands, this->CleanFiles,
+                                           *this->Target);
   this->LocalGenerator->CreateCDCommand(commands,
                                         this->Makefile->GetStartOutputDirectory(),
                                         this->Makefile->GetHomeOutputDirectory());
@@ -605,7 +606,7 @@ void cmMakefileTargetGenerator::WriteCustomCommands()
         this->CleanFiles.push_back
           (this->Convert(cc->GetOutput(),
                          cmLocalGenerator::START_OUTPUT,
-                         cmLocalGenerator::SHELL));
+                         cmLocalGenerator::UNCHANGED));
         }
       }
     }

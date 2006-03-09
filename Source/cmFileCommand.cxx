@@ -20,6 +20,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <cmsys/Directory.hxx>
 
 // cmLibraryCommand
 bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
@@ -53,6 +54,14 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
   else if ( subCommand == "MAKE_DIRECTORY" )
     {
     return this->HandleMakeDirectoryCommand(args);
+    }
+  else if ( subCommand == "REMOVE" )
+    {
+    return this->HandleRemove(args, false);
+    }
+  else if ( subCommand == "REMOVE_RECURSE" )
+    {
+    return this->HandleRemove(args, true);
     }
   else if ( subCommand == "INSTALL" )
     {
@@ -856,4 +865,27 @@ bool cmFileCommand::HandleRelativePathCommand(
   return true;
 }
 
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleRemove(std::vector<std::string> const& args, 
+                                 bool recurse)
+{
+
+  std::string message;
+  std::vector<std::string>::const_iterator i = args.begin();
+
+  i++; // Get rid of subcommand
+  for(;i != args.end(); ++i)
+    {
+    if(cmSystemTools::FileIsDirectory(i->c_str()) && recurse)
+      {
+      cmSystemTools::RemoveADirectory(i->c_str());
+      }
+    else
+      {
+      cmSystemTools::RemoveFile(i->c_str());
+      }
+    }
+  return true;
+}
 

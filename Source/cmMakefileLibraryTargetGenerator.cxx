@@ -283,19 +283,19 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string cleanFullImportName = outpath + cleanImportName;
   libCleanFiles.push_back
     (this->Convert(cleanFullStaticName.c_str(),cmLocalGenerator::START_OUTPUT,
-                   cmLocalGenerator::MAKEFILE));
+                   cmLocalGenerator::UNCHANGED));
   if(cleanSharedRealName != cleanStaticName)
     {
     libCleanFiles.push_back(this->Convert(cleanFullSharedRealName.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::MAKEFILE));
+                                          cmLocalGenerator::UNCHANGED));
     }
   if(cleanSharedSOName != cleanStaticName &&
      cleanSharedSOName != cleanSharedRealName)
     {
     libCleanFiles.push_back(this->Convert(cleanFullSharedSOName.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::MAKEFILE));
+                                          cmLocalGenerator::UNCHANGED));
     }
   if(cleanSharedName != cleanStaticName &&
      cleanSharedName != cleanSharedSOName &&
@@ -303,7 +303,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     libCleanFiles.push_back(this->Convert(cleanFullSharedName.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::MAKEFILE));
+                                          cmLocalGenerator::UNCHANGED));
     }
   if(!cleanImportName.empty() &&
      cleanImportName != cleanStaticName &&
@@ -313,12 +313,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     libCleanFiles.push_back(this->Convert(cleanFullImportName.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::MAKEFILE));
+                                          cmLocalGenerator::UNCHANGED));
     }
   }
   // Add a command to remove any existing files for this library.
   std::vector<std::string> commands1;
-  this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles);
+  this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
+                                           *this->Target, "target");
   this->LocalGenerator->CreateCDCommand(commands1,
                                         this->Makefile->GetStartOutputDirectory(),
                                         this->Makefile->GetHomeOutputDirectory());
@@ -487,7 +488,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Clean all the possible library names and symlinks and object files.
   this->CleanFiles.insert(this->CleanFiles.end(),
-                          libCleanFiles.begin(),libCleanFiles.end());
-  this->CleanFiles.push_back(cleanObjs);
+                          libCleanFiles.begin(),libCleanFiles.end()); 
+  this->CleanFiles.insert(this->CleanFiles.end(),
+                          this->Objects.begin(),
+                          this->Objects.end());
 }
 
