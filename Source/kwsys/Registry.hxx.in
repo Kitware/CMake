@@ -27,7 +27,7 @@ class RegistryHelper;
  * \brief Portable registry class
  *
  * This class abstracts the storing of data that can be restored
- * when the program executes again. On Win32 platform it is 
+ * when the program executes again. On Win32 platform it is
  * implemented using the registry and on unix as a file in
  * the user's home directory.
  */
@@ -60,24 +60,24 @@ public:
   bool DeleteValue(const char *subkey, const char *key);
 
   //! Set value in a given key.
-  bool SetValue(const char *subkey, const char *key, 
+  bool SetValue(const char *subkey, const char *key,
                const char *value);
 
   //! Open the registry at toplevel/subkey.
-  bool Open(const char *toplevel, const char *subkey, 
+  bool Open(const char *toplevel, const char *subkey,
            int readonly);
-  
-  //! Close the registry. 
+
+  //! Close the registry.
   bool Close();
 
   //! Read from local or global scope. On Windows this mean from local machine
-  // or local user. On unix this will read from $HOME/.Projectrc or 
+  // or local user. On unix this will read from $HOME/.Projectrc or
   // /etc/Project
   void GlobalScopeOn() { this->SetGlobalScope(1); }
   void GlobalScopeOff() { this->SetGlobalScope(0); }
   void SetGlobalScope(bool b);
   bool GetGlobalScope();
-  
+
   // Set or get the toplevel registry key.
   void SetTopLevel(const char* tl);
   const char* GetTopLevel();
@@ -100,7 +100,7 @@ private:
   RegistryHelper* Helper;
 
   bool m_Opened;
-   
+
   bool m_Locked;
 }; // End Class: Registry
 

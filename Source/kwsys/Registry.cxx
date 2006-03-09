@@ -59,14 +59,13 @@ public:
   virtual bool DeleteValue(const char *key);
 
   // Set value in a given key.
-  virtual bool SetValue(const char *key, 
-    const char *value);
+  virtual bool SetValue(const char *key, const char *value);
 
   // Open the registry at toplevel/subkey.
-  virtual bool Open(const char *toplevel, const char *subkey, 
+  virtual bool Open(const char *toplevel, const char *subkey,
     int readonly);
 
-  // Close the registry. 
+  // Close the registry.
   virtual bool Close();
 
   // Set the value of changed
@@ -75,7 +74,7 @@ public:
   const char* GetTopLevel() { return m_TopLevel.c_str(); }
 
   //! Read from local or global scope. On Windows this mean from local machine
-  // or local user. On unix this will read from $HOME/.Projectrc or 
+  // or local user. On unix this will read from $HOME/.Projectrc or
   // /etc/Project
   void SetGlobalScope(bool b);
   bool GetGlobalScope();
@@ -86,7 +85,7 @@ public:
 
 protected:
   bool m_Changed;
-  kwsys_stl::string m_TopLevel;  
+  kwsys_stl::string m_TopLevel;
   bool m_GlobalScope;
 
 #ifdef _WIN32
@@ -161,11 +160,12 @@ bool Registry::Open(const char *toplevel,
     }
   if ( !toplevel || !*toplevel )
     {
-    kwsys_ios::cerr << "Registry::Opened() Toplevel not defined" << kwsys_ios::endl;
+    kwsys_ios::cerr << "Registry::Opened() Toplevel not defined"
+      << kwsys_ios::endl;
     return res;
     }
 
-  if ( isspace(toplevel[0]) || 
+  if ( isspace(toplevel[0]) ||
        isspace(toplevel[strlen(toplevel)-1]) )
     {
     kwsys_ios::cerr << "Toplevel has to start with letter or number and end"
@@ -178,7 +178,7 @@ bool Registry::Open(const char *toplevel,
     {
     m_Locked = true;
     }
-  
+
   if ( res )
     {
     m_Opened = true;
@@ -206,20 +206,20 @@ bool Registry::Close()
 }
 
 //----------------------------------------------------------------------------
-bool Registry::ReadValue(const char *subkey, 
-  const char *key, 
+bool Registry::ReadValue(const char *subkey,
+  const char *key,
   const char **value)
-{  
+{
   *value = 0;
   bool res = true;
-  bool open = false;  
+  bool open = false;
   if ( ! value )
     {
     return res;
     }
   if ( !m_Opened )
     {
-    if ( !this->Open(this->GetTopLevel(), subkey, 
+    if ( !this->Open(this->GetTopLevel(), subkey,
         Registry::READONLY) )
       {
       return res;
@@ -245,7 +245,7 @@ bool Registry::DeleteKey(const char *subkey, const char *key)
   bool open = false;
   if ( !m_Opened )
     {
-    if ( !this->Open(this->GetTopLevel(), subkey, 
+    if ( !this->Open(this->GetTopLevel(), subkey,
         Registry::READWRITE) )
       {
       return res;
@@ -276,7 +276,7 @@ bool Registry::DeleteValue(const char *subkey, const char *key)
   bool open = false;
   if ( !m_Opened )
     {
-    if ( !this->Open(this->GetTopLevel(), subkey, 
+    if ( !this->Open(this->GetTopLevel(), subkey,
         Registry::READWRITE) )
       {
       return res;
@@ -301,14 +301,14 @@ bool Registry::DeleteValue(const char *subkey, const char *key)
 }
 
 //----------------------------------------------------------------------------
-bool Registry::SetValue(const char *subkey, const char *key, 
+bool Registry::SetValue(const char *subkey, const char *key,
   const char *value)
 {
   bool res = false;
   bool open = false;
   if ( !m_Opened )
     {
-    if ( !this->Open(this->GetTopLevel(), subkey, 
+    if ( !this->Open(this->GetTopLevel(), subkey,
         Registry::READWRITE) )
       {
       return res;
@@ -378,7 +378,7 @@ RegistryHelper::~RegistryHelper()
 //----------------------------------------------------------------------------
 bool RegistryHelper::Open(const char *toplevel, const char *subkey,
   int readonly)
-{  
+{
   this->EntriesMap.clear();
   m_Empty = 1;
 
@@ -396,14 +396,14 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
     str << "Software\\Kitware\\" << toplevel << "\\" << subkey;
     if ( readonly == Registry::READONLY )
       {
-      res = ( RegOpenKeyEx(scope, str.str().c_str(), 
+      res = ( RegOpenKeyEx(scope, str.str().c_str(),
           0, KEY_READ, &this->HKey) == ERROR_SUCCESS );
       }
     else
       {
       res = ( RegCreateKeyEx(scope, str.str().c_str(),
-          0, "", REG_OPTION_NON_VOLATILE, KEY_READ|KEY_WRITE, 
-          NULL, &this->HKey, &dwDummy) == ERROR_SUCCESS );    
+          0, "", REG_OPTION_NON_VOLATILE, KEY_READ|KEY_WRITE,
+          NULL, &this->HKey, &dwDummy) == ERROR_SUCCESS );
       }
     if ( res != 0 )
       {
@@ -422,7 +422,7 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
       {
       if ( (homeDirectory = getenv("USERPROFILE")) == 0 )
         {
-        return false; 
+        return false;
         }
       }
     m_HomeDirectory = homeDirectory;
@@ -466,7 +466,7 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
         {
         // Comment
         continue;
-        }   
+        }
       int linelen = static_cast<int>(strlen(line));
       for ( cc = 0; cc < linelen; cc++ )
         {
@@ -500,7 +500,7 @@ bool RegistryHelper::Close()
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     int res;
-    res = ( RegCloseKey(this->HKey) == ERROR_SUCCESS );    
+    res = ( RegCloseKey(this->HKey) == ERROR_SUCCESS );
     return (res != 0);
     }
 #endif
@@ -563,11 +563,11 @@ bool RegistryHelper::ReadValue(const char *skey, const char **value)
       {
       return false;
       }
-    DWORD dwType, dwSize;  
+    DWORD dwType, dwSize;
     dwType = REG_SZ;
     char buffer[1024]; // Replace with RegQueryInfoKey
     dwSize = sizeof(buffer);
-    int res = ( RegQueryValueEx(this->HKey, skey, NULL, &dwType, 
+    int res = ( RegQueryValueEx(this->HKey, skey, NULL, &dwType,
         (BYTE *)buffer, &dwSize) == ERROR_SUCCESS );
     if ( !res )
       {
@@ -654,8 +654,8 @@ bool RegistryHelper::SetValue(const char *skey, const char *value)
   if ( m_RegistryType == Registry::WIN32_REGISTRY)
     {
     DWORD len = (DWORD)(value ? strlen(value) : 0);
-    int res = ( RegSetValueEx(this->HKey, skey, 0, REG_SZ, 
-        (CONST BYTE *)(const char *)value, 
+    int res = ( RegSetValueEx(this->HKey, skey, 0, REG_SZ,
+        (CONST BYTE *)(const char *)value,
         len+1) == ERROR_SUCCESS );
     return (res != 0);
     }
@@ -710,7 +710,7 @@ char *RegistryHelper::Strip(char *str)
   if ( !str )
     {
     return NULL;
-    }  
+    }
   len = strlen(str);
   nstr = str;
   for( cc=0; cc<len; cc++ )
@@ -773,7 +773,7 @@ kwsys_stl::string RegistryHelper::EncodeValue(const char* str)
     {
     switch ( *str )
       {
-    case '%': case '=': case '\n': case '\r': case '\t': 
+    case '%': case '=': case '\n': case '\r': case '\t':
       char buffer[4];
       sprintf(buffer, "%%%02X", *str);
       ostr << buffer;
