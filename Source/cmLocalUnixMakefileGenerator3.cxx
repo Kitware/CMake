@@ -1286,7 +1286,7 @@ void cmLocalUnixMakefileGenerator3
       this->AppendCustomDepends(depends,   glIt->second.GetPostBuildCommands());
       this->AppendCustomCommands(commands, glIt->second.GetPreBuildCommands());
       this->AppendCustomCommands(commands, glIt->second.GetPostBuildCommands());
-      this->WriteMakeRule(ruleFileStream, targetString.c_str(), glIt->first.c_str(), depends, commands, false);
+      this->WriteMakeRule(ruleFileStream, targetString.c_str(), glIt->first.c_str(), depends, commands, true);
       }
     }
 
