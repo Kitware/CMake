@@ -1,0 +1,5 @@
+int TestDynamicLoaderData;
+
+void TestDynamicLoaderFunction()
+{
+}
