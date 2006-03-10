@@ -33,6 +33,7 @@ kwsys_stl::string GetLibName(const char* lname)
   kwsys_stl::string slname;
   slname = EXECUTABLE_OUTPUT_PATH;
 #ifdef CMAKE_INTDIR
+  slname += "/";
   slname += CMAKE_INTDIR;
 #endif
   slname += "/";
