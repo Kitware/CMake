@@ -73,6 +73,7 @@ public:
       "  FILE(REMOVE_RECURSE [directory]...)\n"
       "  FILE(MAKE_DIRECTORY [directory]...)\n"
       "  FILE(RELATIVE_PATH variable directory file)\n"
+      "  FILE(SYSTEM_PATH ENVIRONMENT_VARIABLE result)\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
       "if it does not exist.\n"
@@ -98,7 +99,9 @@ public:
       "   /dir/*.py  - match all python files in /dir and subdirectories\n"
       "MAKE_DIRECTORY will create a directory at the specified location\n"
       "RELATIVE_PATH will determine relative path from directory to the given"
-      " file";
+      " file."
+      " SYSTEM_PATH will look up the environment variable named and "
+      "convert its contents into a cmake list of unix style paths. ";
     }
   
   cmTypeMacro(cmFileCommand, cmCommand);
@@ -111,6 +114,7 @@ protected:
   bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);
   bool HandleInstallCommand(std::vector<std::string> const& args);
   bool HandleRelativePathCommand(std::vector<std::string> const& args);
+  bool HandleSystemPathCommand(std::vector<std::string> const& args);
 };
 
 
