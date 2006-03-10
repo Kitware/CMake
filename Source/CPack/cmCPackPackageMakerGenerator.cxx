@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -50,7 +50,7 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
   resDir += "/Resources";
   std::string preflightDirName = resDir + "/PreFlight";
   std::string postflightDirName = resDir + "/PostFlight";
-  
+
   if ( !cmsys::SystemTools::MakeDirectory(preflightDirName.c_str())
     || !cmsys::SystemTools::MakeDirectory(postflightDirName.c_str()) )
     {
@@ -63,7 +63,7 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
 
   if ( !this->CopyCreateResourceFile("License")
     || !this->CopyCreateResourceFile("ReadMe")
-    || !this->CopyCreateResourceFile("Welcome") 
+    || !this->CopyCreateResourceFile("Welcome")
     || !this->CopyResourcePlistFile("Info.plist")
     || !this->CopyResourcePlistFile("Description.plist") )
     {
