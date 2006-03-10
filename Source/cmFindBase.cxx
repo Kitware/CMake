@@ -164,18 +164,30 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       }
     else if (args[j] == "NO_SYSTEM_PATH")
       {
+      doingPaths = false;
+      doingPathSuf = false;
+      doingNames = false;
       this->NoSystemPath = true;
       }
     else if (args[j] == "NO_CMAKE_PATH")
       {
+      doingPaths = false;
+      doingPathSuf = false;
+      doingNames = false;
       this->NoCMakePath = true;
       }
     else if (args[j] == "NO_CMAKE_ENVIRONMENT_PATH")
       {
+      doingPaths = false;
+      doingPathSuf = false;
+      doingNames = false;
       this->NoCMakeEnvironmentPath = true;
       }
     else if (args[j] == "NO_CMAKE_SYSTEM_PATH")
       {
+      doingPaths = false;
+      doingPathSuf = false;
+      doingNames = false;
       this->NoCMakeSystemPath = true;
       }
     else
