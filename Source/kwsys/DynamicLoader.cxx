@@ -16,6 +16,12 @@
 
 #include KWSYS_HEADER(Configure.hxx)
 
+#ifdef __APPLE__
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+#include <string.h> // for strlen
+#endif //MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+#endif // __APPLE__
+
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
@@ -70,20 +76,20 @@ int DynamicLoader::CloseLibrary(LibHandle lib)
 //----------------------------------------------------------------------------
 DynamicLoaderFunction
 DynamicLoader::GetSymbolAddress(LibHandle lib, const char* sym)
-{ 
+{
   void* addr;
   int status;
-  
+
   status = shl_findsym (&lib, sym, TYPE_PROCEDURE, &addr);
   void* result = (status < 0) ? (void*)0 : addr;
-  
+
   // Hack to cast pointer-to-data to pointer-to-function.
   return *reinterpret_cast<DynamicLoaderFunction*>(&result);
 }
 
 //----------------------------------------------------------------------------
 const char* DynamicLoader::LibPrefix()
-{ 
+{
   return "lib";
 }
 
@@ -97,9 +103,9 @@ const char* DynamicLoader::LibExtension()
 const char* DynamicLoader::LastError()
 {
   // TODO: Need implementation with errno/strerror
-  /* If successful, shl_findsym returns an integer (int) value zero. If 
-   * shl_findsym cannot find sym, it returns -1 and sets errno to zero. 
-   * If any other errors occur, shl_findsym returns -1 and sets errno to one 
+  /* If successful, shl_findsym returns an integer (int) value zero. If
+   * shl_findsym cannot find sym, it returns -1 and sets errno to zero.
+   * If any other errors occur, shl_findsym returns -1 and sets errno to one
    * of these values (defined in <errno.h>):
    * ENOEXEC
    * A format error was detected in the specified library.
@@ -134,11 +140,13 @@ LibHandle DynamicLoader::OpenLibrary(const char* libname )
   NSObjectFileImage image = 0;
 
   rc = NSCreateObjectFileImageFromFile(libname, &image);
-  if(!image)
+  // rc == NSObjectFileImageInappropriateFile when trying to load a dylib file
+  if( rc != NSObjectFileImageSuccess )
     {
     return 0;
     }
-  return NSLinkModule(image, libname, NSLINKMODULE_OPTION_BINDNOW);
+  return NSLinkModule(image, libname,
+    NSLINKMODULE_OPTION_PRIVATE|NSLINKMODULE_OPTION_BINDNOW);
 }
 
 //----------------------------------------------------------------------------
@@ -149,17 +157,22 @@ int DynamicLoader::CloseLibrary( LibHandle lib)
 }
 
 //----------------------------------------------------------------------------
-DynamicLoaderFunction DynamicLoader::GetSymbolAddress(LibHandle /* lib */, const char* sym)
+DynamicLoaderFunction DynamicLoader::GetSymbolAddress(LibHandle lib, const char* sym)
 {
   void *result=0;
-  if(NSIsSymbolNameDefined(sym))
+  // Need to prepend symbols with '_' on Apple-gcc compilers
+  size_t len = strlen(sym);
+  char *rsym = new char[len + 1 + 1];
+  strcpy(rsym, "_");
+  strcat(rsym+1, sym);
+
+  NSSymbol symbol = NSLookupSymbolInModule(lib, rsym);
+  if(symbol)
     {
-    NSSymbol symbol= NSLookupAndBindSymbol(sym);
-    if(symbol)
-      {
-      result = NSAddressOfSymbol(symbol);
-      }
+    result = NSAddressOfSymbol(symbol);
     }
+
+  delete[] rsym;
   // Hack to cast pointer-to-data to pointer-to-function.
   return *reinterpret_cast<DynamicLoaderFunction*>(&result);
 }
@@ -167,13 +180,16 @@ DynamicLoaderFunction DynamicLoader::GetSymbolAddress(LibHandle /* lib */, const
 //----------------------------------------------------------------------------
 const char* DynamicLoader::LibPrefix()
 {
-  return "";
+  return "lib";
 }
 
 //----------------------------------------------------------------------------
 const char* DynamicLoader::LibExtension()
 {
-  return ".dylib";
+  // NSCreateObjectFileImageFromFile fail when dealing with dylib image
+  // it returns NSObjectFileImageInappropriateFile
+  //return ".dylib";
+  return ".so";
 }
 
 //----------------------------------------------------------------------------

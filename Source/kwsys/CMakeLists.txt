@@ -515,7 +515,7 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
 
   # If kwsys contains the DynamicLoader, need extra library
   IF(KWSYS_USE_DynamicLoader)
-    ADD_LIBRARY(testDynload SHARED testDynload.c)
+    ADD_LIBRARY(testDynload MODULE testDynload.c)
     IF(UNIX)
       TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ${CMAKE_DL_LIBS})
     ENDIF(UNIX)
