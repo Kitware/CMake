@@ -64,6 +64,14 @@ typedef void (*DynamicLoaderFunction)();
  *
  * Directory currently works with Windows, Apple, HP-UX and Unix (POSIX)
  * operating systems
+ *
+ * \warning dlopen on *nix system works the following way:
+ * If filename contains a slash ("/"), then it is interpreted as a (relative or absolute) 
+ * pathname.  Otherwise, the dynamic linker searches for the library as follows : 
+ * see ld.so(8) for further details):
+ * Whereas this distinction does not exist on Win32. Therefore ideally you should be doing
+ * full path to garantee to have a consistent way of dealing with dynamic loading of shared
+ * library.
  */
 
 class @KWSYS_NAMESPACE@_EXPORT DynamicLoader

@@ -205,15 +205,15 @@ public:
   
   /** 
    * Return string with space added between capitalized words
-   * (i.e. EatMyShorts becomes Eat My Shorts 
+   * (i.e. EatMyShorts becomes Eat My Shorts )
    */
   static kwsys_stl::string AddSpaceBetweenCapitalizedWords(
     const kwsys_stl::string&);
 
-  /** 
+  /**
    * Append two or more strings and produce new one.
-   * Programmer must 'delete []' the resulting string, which was allocated 
-   * with 'new'. 
+   * Programmer must 'delete []' the resulting string, which was allocated
+   * with 'new'.
    * Return 0 if inputs are empty or there was an error
    */
   static char* AppendStrings(
@@ -221,7 +221,7 @@ public:
   static char* AppendStrings(
     const char* str1, const char* str2, const char* str3);
 
-  /** 
+  /**
    * Estimate the length of the string that will be produced
    * from printing the given format string and arguments.  The
    * returned length will always be at least as large as the string
@@ -237,7 +237,7 @@ public:
    */
   static kwsys_stl::string EscapeChars(
     const char *str, const char *chars_to_escape, char escape_char = '\\');
-  
+
   /** -----------------------------------------------------------------
    *               Filename Manipulation Routines
    *  -----------------------------------------------------------------
@@ -253,12 +253,12 @@ public:
    * it calls ConvertToUnixOutputPath
    */
   static kwsys_stl::string ConvertToOutputPath(const char*);
-  
+
   /**
    * Return true if a file exists in the current directory
    */
   static bool FileExists(const char* filename);
-  
+
   /**
    * Return file length
    */
@@ -268,7 +268,7 @@ public:
    *  Compare file modification times.
    *  Return true for successful comparison and false for error.
    *  When true is returned, result has -1, 0, +1 for
-   *  f1 older, same, or newer than f2.  
+   *  f1 older, same, or newer than f2.
    */
   static bool FileTimeCompare(const char* f1, const char* f2,
                               int* result);
@@ -293,12 +293,12 @@ public:
    * part, the empty string is returned.
    */
   static kwsys_stl::string GetProgramPath(const char*);
-  static bool SplitProgramPath(const char* in_name, 
-                               kwsys_stl::string& dir, 
+  static bool SplitProgramPath(const char* in_name,
+                               kwsys_stl::string& dir,
                                kwsys_stl::string& file,
                                bool errorReport = true);
-  
-  /** 
+
+  /**
    *  Given argv[0] for a unix program find the full path to a running
    *  executable.  argv0 can be null for windows WinMain programs
    *  in this case GetModuleFileName will be used to find the path
@@ -310,13 +310,13 @@ public:
    *  buildDir is a possibly null path to the build directory.
    *  installPrefix is a possibly null pointer to the install directory.
    */
-  static bool FindProgramPath(const char* argv0, 
+  static bool FindProgramPath(const char* argv0,
                               kwsys_stl::string& pathOut,
                               kwsys_stl::string& errorMsg,
                               const char* exeName = 0,
-                              const char* buildDir = 0,         
+                              const char* buildDir = 0,
                               const char* installPrefix = 0);
-  
+
   /**
    * Given a path to a file or directory, convert it to a full path.
    * This collapses away relative paths relative to the cwd argument
@@ -365,19 +365,19 @@ public:
    * Return file name of a full filename (i.e. file name without path)
    */
   static kwsys_stl::string GetFilenameName(const kwsys_stl::string&);
-  
+
   /**
    * Split a program from its arguments and handle spaces in the paths
    */
   static void SplitProgramFromArgs(
-    const char* path, 
+    const char* path,
     kwsys_stl::string& program, kwsys_stl::string& args);
-  
+
   /**
    * Return longest file extension of a full filename (dot included)
    */
   static kwsys_stl::string GetFilenameExtension(const kwsys_stl::string&);
-  
+
   /**
    * Return shortest file extension of a full filename (dot included)
    */
@@ -591,7 +591,7 @@ public:
       from /usr/src to /usr/src/test/blah/foo.cpp -> test/blah/foo.cpp
   */
   static kwsys_stl::string RelativePath(const char* local, const char* remote);
-  
+
   /**
    * Return file's modified time
    */
@@ -653,11 +653,11 @@ public:
    */
 
   /**
-   *  Add the paths from the environment variable PATH to the 
+   *  Add the paths from the environment variable PATH to the
    *  string vector passed in.  If env is set then the value
    *  of env will be used instead of PATH.
    */
-  static void GetPath(kwsys_stl::vector<kwsys_stl::string>& path, 
+  static void GetPath(kwsys_stl::vector<kwsys_stl::string>& path,
                       const char* env=0);
 
   /**
@@ -680,8 +680,8 @@ public:
    * Get the result of strerror(errno)
    */
   static kwsys_stl::string GetLastSystemError();
-  
-  /** 
+
+  /**
    * When building DEBUG with MSVC, this enables a hook that prevents
    * error dialogs from popping up if the program is being run from
    * DART.
@@ -694,7 +694,7 @@ public:
    * some bogus size.
    */
   static int GetTerminalWidth();
-  
+
   /**
    * Add an entry in the path translation table.
    */
@@ -711,13 +711,13 @@ public:
    */
   static void CheckTranslationPath(kwsys_stl::string & path);
 
-  /** 
-   * Delay the execution for a specified amount of time specified 
-   * in miliseconds 
+  /**
+   * Delay the execution for a specified amount of time specified
+   * in miliseconds
    */
   static void Delay(unsigned int msec);
 
-  /** 
+  /**
    * Get the operating system name and version
    * This is implemented for Win32 only for the moment
    */
@@ -731,10 +731,10 @@ public:
    */
   static void ConvertWindowsCommandLineToUnixArguments(
     const char *cmd_line, int *argc, char ***argv);
-  
+
 protected:
   // these two functions can be called from ConvertToOutputPath
-  
+
   /**
    * Convert the path to string that can be used in a windows project or
    * makefile.   Double slashes are removed if they are not at the start of
