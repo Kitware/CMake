@@ -15,6 +15,7 @@
 
 #include KWSYS_HEADER(DynamicLoader.hxx)
 #include KWSYS_HEADER(ios/iostream)
+#include KWSYS_HEADER(stl/string)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
