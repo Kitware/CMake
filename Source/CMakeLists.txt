@@ -950,6 +950,7 @@ IF(BUILD_TESTING)
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-project BundleTest
       --build-target install
+      --build-target package
       --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
       --test-command
       ${BundleTestInstallDir}/Application/BundleTestExe.app/Contents/MacOS/BundleTestExe)

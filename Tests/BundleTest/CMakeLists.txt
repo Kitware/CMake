@@ -24,3 +24,6 @@ ENDIF(NOT XCODE)
 # Make sure the executable can find its installed library.
 SET_TARGET_PROPERTIES(BundleTestLib PROPERTIES
   INSTALL_NAME_DIR "@executable_path/../Plugins")
+
+INCLUDE(CPack)
+
