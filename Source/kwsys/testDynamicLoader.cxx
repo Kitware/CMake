@@ -34,9 +34,9 @@ kwsys_stl::string GetLibName(const char* lname)
   slname = EXECUTABLE_OUTPUT_PATH;
 #ifdef CMAKE_INTDIR
   slname += CMAKE_INTDIR;
-  slname += "/";
 #endif
-  slname = kwsys::DynamicLoader::LibPrefix();
+  slname += "/";
+  slname += kwsys::DynamicLoader::LibPrefix();
   slname += lname;
   slname += kwsys::DynamicLoader::LibExtension();
 
