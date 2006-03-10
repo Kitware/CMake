@@ -65,9 +65,11 @@ public:
     return
       "  PROJECT(projectname [CXX] [C] [Java])\n"
       "Sets the name of the project.  "
-      "This creates the variables projectname_BINARY_DIR and projectname_SOURCE_DIR.  "
+      "This creates the variables projectname_BINARY_DIR and "
+      "projectname_SOURCE_DIR.  "
       "Optionally you can specify which languages your project supports.  "
-      "By default all languages are supported.  If you do not have a C++ compiler, but want" 
+      "By default all languages are supported.  If you do not have a "
+      "C++ compiler, but want" 
       " to build a c program with cmake, then use this option.";
     }
   

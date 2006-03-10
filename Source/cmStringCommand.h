@@ -119,7 +119,8 @@ protected:
   bool RegexMatch(std::vector<std::string> const& args);
   bool RegexMatchAll(std::vector<std::string> const& args);
   bool RegexReplace(std::vector<std::string> const& args);
-  bool HandleToUpperLowerCommand(std::vector<std::string> const& args, bool toUpper);
+  bool HandleToUpperLowerCommand(std::vector<std::string> const& args,
+                                 bool toUpper);
   bool HandleCompareCommand(std::vector<std::string> const& args);
   bool HandleReplaceCommand(std::vector<std::string> const& args);
   bool HandleLengthCommand(std::vector<std::string> const& args);

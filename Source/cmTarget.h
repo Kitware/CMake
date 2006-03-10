@@ -95,7 +95,8 @@ public:
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
   typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
   const LinkLibraries &GetLinkLibraries() {return m_LinkLibraries;}
-  const LinkLibraries &GetOriginalLinkLibraries() {return m_OriginalLinkLibraries;}
+  const LinkLibraries &GetOriginalLinkLibraries() 
+    {return m_OriginalLinkLibraries;}
 
   /**
    * Clear the dependency information recorded for this target, if any.
@@ -111,7 +112,8 @@ public:
   void AddLinkLibrary(const std::string& lib, 
                       LinkLibraryType llt);
 
-  void MergeLinkLibraries( cmMakefile& mf, const char* selfname, const LinkLibraries& libs );
+  void MergeLinkLibraries( cmMakefile& mf, const char* selfname,
+                           const LinkLibraries& libs );
 
   const std::vector<std::string>& GetLinkDirectories();
 
@@ -251,7 +253,8 @@ private:
   /**
    * Maps a library name to its internal structure
    */
-  typedef std::map< cmStdString, std::pair<cmStdString,LinkLibraryType> > LibTypeMap;
+  typedef std::map< cmStdString, std::pair<cmStdString,LinkLibraryType> >
+  LibTypeMap;
 
   /**
    * Inserts \a dep at the end of the dependency list of \a lib.

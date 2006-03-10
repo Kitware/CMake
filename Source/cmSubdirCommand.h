@@ -62,7 +62,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  SUBDIRS(dir1 dir2 ...[EXCLUDE_FROM_ALL exclude_dir1 exclude_dir2 ...] [PREORDER] )\n"
+      "  SUBDIRS(dir1 dir2 ...[EXCLUDE_FROM_ALL exclude_dir1 exclude_dir2 ...]"
+      " [PREORDER] )\n"
       "Add a list of subdirectories to the build. The ADD_SUBDIRECTORY "
       "command should be used instead of SUBDIRS although SUBDIRS will "
       "still work. "

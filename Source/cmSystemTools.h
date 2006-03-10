@@ -91,7 +91,8 @@ public:
   ///! Return true if there was an error at any point.
   static bool GetErrorOccuredFlag() 
     {
-      return cmSystemTools::s_ErrorOccured || cmSystemTools::s_FatalErrorOccured;
+      return cmSystemTools::s_ErrorOccured || 
+        cmSystemTools::s_FatalErrorOccured;
     }
   ///! If this is set to true, cmake stops processing commands.
   static void SetFatalErrorOccured()
@@ -152,7 +153,8 @@ public:
    * want to find. 0 means all files, -1 means directories, 1 means
    * files only. This method returns true if search was succesfull.
    */
-  static bool SimpleGlob(const cmStdString& glob, std::vector<cmStdString>& files, 
+  static bool SimpleGlob(const cmStdString& glob, 
+                         std::vector<cmStdString>& files, 
                          int type = 0);
   
   ///! Copy a file.
@@ -198,7 +200,9 @@ public:
    * escaped for this to with spaces.  
    */
   static bool RunSingleCommand(const char* command, std::string* output = 0,
-    int* retVal = 0, const char* dir = 0, bool verbose = true, double timeout = 0.0);
+                               int* retVal = 0, const char* dir = 0, 
+                               bool verbose = true,
+                               double timeout = 0.0);
 
   /**
    * Parse arguments out of a single string command
@@ -298,9 +302,14 @@ public:
   static std::string MakeXMLSafe(const char* str);
 
   /** Create tar */
-  static bool ListTar(const char* outFileName, std::vector<cmStdString>& files, bool gzip, bool verbose);
-  static bool CreateTar(const char* outFileName, const std::vector<cmStdString>& files, bool gzip, bool verbose);
-  static bool ExtractTar(const char* inFileName, const std::vector<cmStdString>& files, bool gzip, bool verbose);
+  static bool ListTar(const char* outFileName,
+                      std::vector<cmStdString>& files, bool gzip, bool verbose);
+  static bool CreateTar(const char* outFileName,
+                        const std::vector<cmStdString>& files, bool gzip,
+                        bool verbose);
+  static bool ExtractTar(const char* inFileName,
+                         const std::vector<cmStdString>& files, bool gzip, 
+                         bool verbose);
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

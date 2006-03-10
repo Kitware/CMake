@@ -31,7 +31,8 @@ class cmCacheManager
 public:
   class CacheIterator;
   friend class cmCacheManager::CacheIterator;
-  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC, UNINITIALIZED };
+  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC, 
+                       UNINITIALIZED };
 
 private:
   struct CacheEntry

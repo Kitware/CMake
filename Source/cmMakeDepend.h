@@ -99,7 +99,8 @@ public:
   /** 
    * Get the depend info struct for a source file
    */
-  const cmDependInformation *GetDependInformationForSourceFile(const cmSourceFile &sf) const;
+  const cmDependInformation 
+  *GetDependInformationForSourceFile(const cmSourceFile &sf) const;
 
   /**
    * Add a directory to the search path for include files.
@@ -144,7 +145,8 @@ protected:
    * Get an instance of cmDependInformation corresponding to the given file
    * name.
    */
-  cmDependInformation* GetDependInformation(const char* file, const char *extraPath);  
+  cmDependInformation* GetDependInformation(const char* file, 
+                                            const char *extraPath);  
   
   /** 
    * Find the full path name for the given file name.

@@ -52,12 +52,15 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  SET_TESTS_PROPERTIES(test1 [test2...] PROPERTIES prop1 value1 prop2 value2)\n"
+      "  SET_TESTS_PROPERTIES(test1 [test2...] PROPERTIES prop1 value1 prop2"
+      " value2)\n"
       "Set a property for the tests. If the property is not found, CMake will "
       "report an error. The properties include:\n"
-      "WILL_FAIL: If set to true, this will invert the pass/fail flag of the test.\n"
+      "WILL_FAIL: If set to true, this will invert the pass/fail flag of the"
+      " test.\n"
       "PASS_REGULAR_EXPRESSION: If set, the test output will be checked "
-      "against the specified regular expressions and at least one of the regular "
+      "against the specified regular expressions and at least one of the"
+      " regular "
       "expressions has to match, otherwise the test will fail.\n"
       "  Example: PASS_REGULAR_EXPRESSION \"TestPassed;All ok\"\n"
       "FAIL_REGULAR_EXPRESSION: If set, if the output will match to one of "

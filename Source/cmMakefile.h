@@ -217,7 +217,8 @@ public:
   /**
    * Add a subdirectory to the build.
    */
-  void AddSubDirectory(const char*, bool includeTopLevel=true, bool preorder = false);
+  void AddSubDirectory(const char*, bool includeTopLevel=true, 
+                       bool preorder = false);
   void AddSubDirectory(const char* fullSrcDir,const char *fullBinDir, 
                        bool includeTopLevel, bool preorder,
                        bool immediate);
@@ -277,7 +278,8 @@ public:
   /**
    * Add a source group for consideration when adding a new source.
    */
-  void AddSourceGroup(const char* name, const char* regex=0, const char* parent=0);
+  void AddSourceGroup(const char* name, const char* regex=0, 
+                      const char* parent=0);
   
   /**
    * Add an auxiliary directory to the build.
@@ -576,7 +578,7 @@ public:
    */
   void AddCommand(cmCommand* );
 
-  ///! Enable support for the named language, if null then all languages are enabled.
+  ///! Enable support for named language, if nil then all languages are enabled.
   void EnableLanguage(std::vector<std::string>const& languages);
 
   /**
@@ -713,8 +715,10 @@ private:
   void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;    // make depend needs direct access 
                                 // to the m_Sources array 
-  void PrintStringVector(const char* s, const std::vector<std::pair<cmStdString, bool> >& v) const;
-  void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
+  void PrintStringVector(const char* s, const 
+                         std::vector<std::pair<cmStdString, bool> >& v) const;
+  void PrintStringVector(const char* s, 
+                         const std::vector<std::string>& v) const;
   void AddDefaultDefinitions();
   std::list<cmFunctionBlocker *> m_FunctionBlockers;
 

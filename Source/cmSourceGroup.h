@@ -74,7 +74,8 @@ public:
   bool MatchesFiles(const char* name);
 
   /**
-   * Check if the given name matches this group's explicit file list in children.
+   * Check if the given name matches this group's explicit file list
+   * in children.
    */
   cmSourceGroup *MatchChildrenFiles(const char *name);
 

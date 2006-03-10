@@ -64,7 +64,10 @@ public:
     {
     return
       "  OUTPUT_REQUIRED_FILES(srcfile outputfile)\n"
-      "Outputs a list of all the source files that are required by the specified srcfile. This list is written into outputfile. This is similar to writing out the dependencies for srcfile except that it jumps from .h files into .cxx, .c and .cpp files if possible.";
+      "Outputs a list of all the source files that are required by the "
+      "specified srcfile. This list is written into outputfile. This is "
+      "similar to writing out the dependencies for srcfile except that it "
+      "jumps from .h files into .cxx, .c and .cpp files if possible.";
     }
   
   cmTypeMacro(cmOutputRequiredFilesCommand, cmCommand);

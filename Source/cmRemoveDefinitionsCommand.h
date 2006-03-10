@@ -22,7 +22,8 @@
 /** \class cmRemoveDefinitionsCommand
  * \brief Specify a list of compiler defines
  *
- * cmRemoveDefinitionsCommand specifies a list of compiler defines. These defines will
+ * cmRemoveDefinitionsCommand specifies a list of compiler defines. 
+ * These defines will
  * be removed from the compile command.  
  */
 class cmRemoveDefinitionsCommand : public cmCommand
@@ -52,7 +53,8 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Removes -D define flags to the command line of C and C++ compilers.";
+    return 
+      "Removes -D define flags to the command line of C and C++ compilers.";
     }
   
   /**

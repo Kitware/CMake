@@ -27,7 +27,8 @@
 class cmVariableWatch
 {
 public:
-  typedef void (*WatchMethod)(const std::string& variable, int access_type, void* client_data);
+  typedef void (*WatchMethod)(const std::string& variable, int access_type,
+                              void* client_data);
 
   cmVariableWatch();
   ~cmVariableWatch();

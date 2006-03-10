@@ -320,7 +320,8 @@ public:
 # pragma reset woff 1375 /* base class destructor not virtual */
 #endif
 
-// All subclasses of cmCommand or cmCTestGenericHandler should invoke this macro.
+// All subclasses of cmCommand or cmCTestGenericHandler should 
+// invoke this macro.
 #define cmTypeMacro(thisClass,superclass) \
 virtual const char* GetNameOfClass() { return #thisClass; } \
 typedef superclass Superclass; \
