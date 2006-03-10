@@ -4,7 +4,7 @@
 #define DL_EXPORT
 #endif
 
-DL_EXPORT int TestDynamicLoaderData;
+DL_EXPORT int TestDynamicLoaderData = 0;
 
 DL_EXPORT void TestDynamicLoaderFunction()
 {
