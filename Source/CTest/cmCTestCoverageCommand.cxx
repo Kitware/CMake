@@ -71,13 +71,14 @@ bool cmCTestCoverageCommand::InitialPass(
 
   if ( build_dir )
     {
-    m_CTest->SetCTestConfiguration("BuildDirectory", build_dir);
+    this->CTest->SetCTestConfiguration("BuildDirectory", build_dir);
     }
 
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
     "CoverageCommand", "CTEST_COVERAGE_COMMAND");
 
-  cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("coverage");
+  cmCTestGenericHandler* handler
+    = this->CTest->GetInitializedHandler("coverage");
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate test handler");
@@ -85,7 +86,7 @@ bool cmCTestCoverageCommand::InitialPass(
     }
   std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(
-    m_CTest->GetCTestConfiguration("BuildDirectory").c_str());
+    this->CTest->GetCTestConfiguration("BuildDirectory").c_str());
   int res = handler->ProcessHandler();
   if ( res_var )
     {

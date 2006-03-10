@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -32,15 +32,15 @@ public:
 
   cmCTestBuildCommand();
   ~cmCTestBuildCommand();
-  
+
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     cmCTestBuildCommand* ni = new cmCTestBuildCommand;
-    ni->m_CTest = this->m_CTest;
-    ni->m_CTestScriptHandler = this->m_CTestScriptHandler;
+    ni->CTest = this->CTest;
+    ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
     }
 
@@ -58,11 +58,11 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Builds the repository.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -75,7 +75,7 @@ public:
 
   cmTypeMacro(cmCTestBuildCommand, cmCTestCommand);
 
-  cmGlobalGenerator* m_GlobalGenerator;
+  cmGlobalGenerator* GlobalGenerator;
 };
 
 

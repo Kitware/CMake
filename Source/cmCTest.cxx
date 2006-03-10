@@ -690,7 +690,7 @@ bool cmCTest::OpenOutputFile(const std::string& path,
 }
 
 //----------------------------------------------------------------------
-bool cmCTest::AddIfExists(tm_SetOfStrings& files, const char* file)
+bool cmCTest::AddIfExists(SetOfStrings& files, const char* file)
 {
   if ( this->CTestFileExists(file) )
     {
@@ -1160,9 +1160,9 @@ void cmCTest::EndXML(std::ostream& ostr)
 
 //----------------------------------------------------------------------
 int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
-  const cmCTest::tm_VectorOfStrings& files)
+  const cmCTest::VectorOfStrings& files)
 {
-  cmCTest::tm_VectorOfStrings::const_iterator it;
+  cmCTest::VectorOfStrings::const_iterator it;
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     << "<?xml-stylesheet type=\"text/xsl\" "
     "href=\"Dart/Source/Server/XSL/Build.xsl "
@@ -1865,8 +1865,8 @@ void cmCTest::SetNotesFiles(const char* notes)
 //----------------------------------------------------------------------
 int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
 {
-  tm_VectorOfStrings dirs;
-  tm_VectorOfStrings ndirs;
+  VectorOfStrings dirs;
+  VectorOfStrings ndirs;
   cmake cm;
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
@@ -1905,7 +1905,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
 
 //----------------------------------------------------------------------
 void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def,
-  tm_VectorOfStrings& vec)
+  VectorOfStrings& vec)
 {
   if ( !def)
     {

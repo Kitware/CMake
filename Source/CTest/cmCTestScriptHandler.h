@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -50,7 +50,7 @@ class cmCTestCommand;
  *   CTEST_INITIAL_CACHE
  *   CTEST_START_WITH_EMPTY_BINARY_DIRECTORY
  *   CTEST_START_WITH_EMPTY_BINARY_DIRECTORY_ONCE
- *   
+ *
  * In addition the following variables can be used. The number can be 1-10.
  *   CTEST_EXTRA_UPDATES_1
  *   CTEST_EXTRA_UPDATES_2
@@ -83,7 +83,7 @@ public:
    */
   static bool RunScript(cmCTest* ctest, const char *script);
   int RunCurrentScript();
-    
+
   /*
    * Empty Binary Directory
    */
@@ -97,7 +97,7 @@ public:
 
   cmCTestScriptHandler();
   ~cmCTestScriptHandler();
-  
+
   void Initialize();
 private:
   // reads in a script
@@ -111,7 +111,7 @@ private:
 
   // perform any extra cvs updates that were requested
   int PerformExtraUpdates();
-  
+
   // backup and restore dirs
   int BackupDirectories();
   void RestoreBackupDirectories();
@@ -122,36 +122,36 @@ private:
   // Add ctest command
   void AddCTestCommand(cmCTestCommand* command);
 
-  std::vector<cmStdString> m_ConfigurationScripts;
+  std::vector<cmStdString> ConfigurationScripts;
 
-  bool m_Backup;
-  bool m_EmptyBinDir;
-  bool m_EmptyBinDirOnce;
-  
-  cmStdString m_SourceDir;
-  cmStdString m_BinaryDir;
-  cmStdString m_BackupSourceDir;
-  cmStdString m_BackupBinaryDir;
-  cmStdString m_CTestRoot;
-  cmStdString m_CVSCheckOut;
-  cmStdString m_CTestCmd;
-  cmStdString m_CVSCmd;
-  cmStdString m_CTestEnv;
-  cmStdString m_InitCache;
-  cmStdString m_CMakeCmd;
-  cmStdString m_CMOutFile;
-  std::vector<cmStdString> m_ExtraUpdates;
+  bool Backup;
+  bool EmptyBinDir;
+  bool EmptyBinDirOnce;
 
-  double m_MinimumInterval;
-  double m_ContinuousDuration;
+  cmStdString SourceDir;
+  cmStdString BinaryDir;
+  cmStdString BackupSourceDir;
+  cmStdString BackupBinaryDir;
+  cmStdString CTestRoot;
+  cmStdString CVSCheckOut;
+  cmStdString CTestCmd;
+  cmStdString CVSCmd;
+  cmStdString CTestEnv;
+  cmStdString InitCache;
+  cmStdString CMakeCmd;
+  cmStdString CMOutFile;
+  std::vector<cmStdString> ExtraUpdates;
+
+  double MinimumInterval;
+  double ContinuousDuration;
 
   // what time in seconds did this script start running
-  double m_ScriptStartTime;
-  
-  cmMakefile *m_Makefile;
-  cmLocalGenerator *m_LocalGenerator;
-  cmGlobalGenerator *m_GlobalGenerator;
-  cmake *m_CMake;
+  double ScriptStartTime;
+
+  cmMakefile *Makefile;
+  cmLocalGenerator *LocalGenerator;
+  cmGlobalGenerator *GlobalGenerator;
+  cmake *CMake;
 };
 
 #endif

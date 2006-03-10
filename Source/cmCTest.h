@@ -49,8 +49,8 @@ class cmCTestCommand;
 class cmCTest
 {
 public:
-  typedef std::vector<cmStdString> tm_VectorOfStrings;
-  typedef std::set<cmStdString> tm_SetOfStrings;
+  typedef std::vector<cmStdString> VectorOfStrings;
+  typedef std::set<cmStdString> SetOfStrings;
 
   ///! Process Command line arguments
   int Run(std::vector<std::string>const&, std::string* output = 0);
@@ -100,7 +100,7 @@ public:
    * Check if CTest file exists
    */
   bool CTestFileExists(const std::string& filename);
-  bool AddIfExists(tm_SetOfStrings& files, const char* file);
+  bool AddIfExists(SetOfStrings& files, const char* file);
 
   /**
    * Set the cmake test
@@ -130,7 +130,7 @@ public:
   void SetNotesFiles(const char* notes);
 
   static void PopulateCustomVector(cmMakefile* mf, const char* definition,
-                                   tm_VectorOfStrings& vec);
+                                   VectorOfStrings& vec);
   static void PopulateCustomInteger(cmMakefile* mf, const char* def,
     int& val);
 
@@ -288,7 +288,7 @@ public:
 
   //! Add file to be submitted
   void AddSubmitFile(const char* name);
-  tm_SetOfStrings* GetSubmitFiles() { return &m_SubmitFiles; }
+  SetOfStrings* GetSubmitFiles() { return &m_SubmitFiles; }
 
 private:
   std::string m_ConfigType;
@@ -324,11 +324,11 @@ private:
   };
 
   //! Map of configuration properties
-  typedef std::map<cmStdString, cmStdString> tm_CTestConfigurationMap;
+  typedef std::map<cmStdString, cmStdString> CTestConfigurationMap;
 
   std::string             m_CTestConfigFile;
-  tm_CTestConfigurationMap m_CTestConfiguration;
-  tm_CTestConfigurationMap m_CTestConfigurationOverwrites;
+  CTestConfigurationMap m_CTestConfiguration;
+  CTestConfigurationMap m_CTestConfigurationOverwrites;
   int                     m_Tests[LAST_TEST];
 
   std::string             m_CurrentTag;
@@ -364,7 +364,7 @@ private:
 
   //! Create not from files.
   int GenerateCTestNotesOutput(std::ostream& os,
-    const tm_VectorOfStrings& files);
+    const VectorOfStrings& files);
 
   ///! Find the running cmake
   void FindRunningCMake(const char* arg0);

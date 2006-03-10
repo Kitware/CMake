@@ -77,20 +77,20 @@ bool cmCTestSubmitCommand::InitialPass(
     {
     ctestTriggerSite
       = "http://public.kitware.com/cgi-bin/Submit-Random-TestingResults.cgi";
-    cmCTestLog(m_CTest, HANDLER_OUTPUT, "* Use default trigger site: "
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "* Use default trigger site: "
       << ctestTriggerSite << std::endl;);
     }
 
-  m_CTest->SetCTestConfiguration("DropMethod",   ctestDropMethod);
-  m_CTest->SetCTestConfiguration("DropSite",     ctestDropSite);
-  m_CTest->SetCTestConfiguration("DropLocation", ctestDropLocation);
-  m_CTest->SetCTestConfiguration("TriggerSite",  ctestTriggerSite);
+  this->CTest->SetCTestConfiguration("DropMethod",   ctestDropMethod);
+  this->CTest->SetCTestConfiguration("DropSite",     ctestDropSite);
+  this->CTest->SetCTestConfiguration("DropLocation", ctestDropLocation);
+  this->CTest->SetCTestConfiguration("TriggerSite",  ctestTriggerSite);
 
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
     "DropSiteUser", "CTEST_DROP_SITE_USER");
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
     "DropSitePassword", "CTEST_DROP_SITE_PASSWORD");
-  m_CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
     "ScpCommand", "CTEST_SCP_COMMAND");
 
   const char* notesFilesVariable
@@ -107,7 +107,7 @@ bool cmCTestSubmitCommand::InitialPass(
       {
       newNotesFiles.push_back(*it);
       }
-    m_CTest->GenerateNotesFile(newNotesFiles);
+    this->CTest->GenerateNotesFile(newNotesFiles);
     }
   const char* extraFilesVariable
     = m_Makefile->GetDefinition("CTEST_EXTRA_SUBMIT_FILES");
@@ -123,14 +123,15 @@ bool cmCTestSubmitCommand::InitialPass(
       {
       newExtraFiles.push_back(*it);
       }
-    if ( !m_CTest->SubmitExtraFiles(newExtraFiles))
+    if ( !this->CTest->SubmitExtraFiles(newExtraFiles))
       {
       this->SetError("problem submitting extra files.");
       return false;
       }
     }
 
-  cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("submit");
+  cmCTestGenericHandler* handler
+    = this->CTest->GetInitializedHandler("submit");
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate submit handler");

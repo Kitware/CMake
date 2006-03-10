@@ -43,7 +43,7 @@ public:
    * intersection or the union of the lists. By default it is the
    * intersection.
    */
-  void SetUseUnion(bool val) { m_UseUnion = val; }
+  void SetUseUnion(bool val) { this->UseUnion = val; }
 
   /**
    * This method is called when reading CTest custom file
@@ -75,16 +75,16 @@ public:
 
   struct cmCTestTestResult
   {
-    std::string m_Name;
-    std::string m_Path;
-    std::string m_FullCommandLine;
-    double      m_ExecutionTime;
-    int         m_ReturnValue;
-    int         m_Status;
-    std::string m_CompletionStatus;
-    std::string m_Output;
-    std::string m_RegressionImages;
-    int         m_TestCount;
+    std::string Name;
+    std::string Path;
+    std::string FullCommandLine;
+    double      ExecutionTime;
+    int         ReturnValue;
+    int         Status;
+    std::string CompletionStatus;
+    std::string Output;
+    std::string RegressionImages;
+    int         TestCount;
   };
 
   void Initialize();
@@ -92,13 +92,13 @@ public:
 protected:
   struct cmCTestTestProperties
   {
-    cmStdString m_Name;
-    cmStdString m_Directory;
-    std::vector<std::string> m_Args;
-    std::vector<cmsys::RegularExpression> m_ErrorRegularExpressions;
-    std::vector<cmsys::RegularExpression> m_RequiredRegularExpressions;
-    bool m_IsInBasedOnREOptions;
-    bool m_WillFail;
+    cmStdString Name;
+    cmStdString Directory;
+    std::vector<std::string> Args;
+    std::vector<cmsys::RegularExpression> ErrorRegularExpressions;
+    std::vector<cmsys::RegularExpression> RequiredRegularExpressions;
+    bool IsInBasedOnREOptions;
+    bool WillFail;
   };
 
 
@@ -107,15 +107,15 @@ protected:
   virtual void GenerateTestCommand(std::vector<const char*>& args);
   int ExecuteCommands(std::vector<cmStdString>& vec);
 
-  double                  m_ElapsedTestingTime;
+  double                  ElapsedTestingTime;
 
-  typedef std::vector<cmCTestTestResult> tm_TestResultsVector;
-  tm_TestResultsVector    m_TestResults;
+  typedef std::vector<cmCTestTestResult> TestResultsVector;
+  TestResultsVector    TestResults;
 
-  std::vector<cmStdString> m_CustomTestsIgnore;
-  std::string             m_StartTest;
-  std::string             m_EndTest;
-  bool m_MemCheck;
+  std::vector<cmStdString> CustomTestsIgnore;
+  std::string             StartTest;
+  std::string             EndTest;
+  bool MemCheck;
 
 private:
   enum { // Program statuses
@@ -144,7 +144,7 @@ private:
                         std::vector<cmStdString> &failed);
 
 
-  typedef std::vector<cmCTestTestProperties> tm_ListOfTests;
+  typedef std::vector<cmCTestTestProperties> ListOfTests;
   /**
    * Get the list of tests in directory and subdirectories.
    */
@@ -158,21 +158,21 @@ private:
   const char* GetTestStatus(int status);
   void ExpandTestsToRunInformation(int numPossibleTests);
 
-  std::vector<cmStdString> m_CustomPreTest;
-  std::vector<cmStdString> m_CustomPostTest;
+  std::vector<cmStdString> CustomPreTest;
+  std::vector<cmStdString> CustomPostTest;
 
-  int m_CustomMaximumPassedTestOutputSize;
-  int m_CustomMaximumFailedTestOutputSize;
+  int CustomMaximumPassedTestOutputSize;
+  int CustomMaximumFailedTestOutputSize;
 
-  std::vector<int>        m_TestsToRun;
+  std::vector<int>        TestsToRun;
 
-  bool m_UseIncludeRegExp;
-  bool m_UseExcludeRegExp;
-  bool m_UseExcludeRegExpFirst;
-  std::string m_IncludeRegExp;
-  std::string m_ExcludeRegExp;
-  cmsys::RegularExpression m_IncludeTestsRegularExpression;
-  cmsys::RegularExpression m_ExcludeTestsRegularExpression;
+  bool UseIncludeRegExpFlag;
+  bool UseExcludeRegExpFlag;
+  bool UseExcludeRegExpFirst;
+  std::string IncludeRegExp;
+  std::string ExcludeRegExp;
+  cmsys::RegularExpression IncludeTestsRegularExpression;
+  cmsys::RegularExpression ExcludeTestsRegularExpression;
 
   std::string GenerateRegressionImages(const std::string& xml);
 
@@ -180,11 +180,11 @@ private:
   bool CleanTestOutput(std::string& output, size_t length);
 
   std::string TestsToRunString;
-  bool m_UseUnion;
-  tm_ListOfTests m_TestList;
-  cmsys::RegularExpression m_DartStuff;
+  bool UseUnion;
+  ListOfTests TestList;
+  cmsys::RegularExpression DartStuff;
 
-  std::ostream* m_LogFile;
+  std::ostream* LogFile;
 };
 
 #endif

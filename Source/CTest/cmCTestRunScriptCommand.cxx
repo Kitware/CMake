@@ -23,7 +23,7 @@ bool cmCTestRunScriptCommand::InitialPass(
 {
   if(args.size() < 1 )
     {
-    m_CTestScriptHandler->RunCurrentScript();
+    this->CTestScriptHandler->RunCurrentScript();
     return true;
     }
 
@@ -31,7 +31,7 @@ bool cmCTestRunScriptCommand::InitialPass(
   unsigned int i;
   for (i = 0; i < args.size(); ++i)
     {
-    cmCTestScriptHandler::RunScript(m_CTest, args[i].c_str());
+    cmCTestScriptHandler::RunScript(this->CTest, args[i].c_str());
     }
   return true;
 }

@@ -34,7 +34,7 @@ bool cmCTestSleepCommand::InitialPass(
     {
     cmCTestScriptHandler::SleepInSeconds(time1);
     // update the elapsed time since it could have slept for a while
-    m_CTestScriptHandler->UpdateElapsedTime();
+    this->CTestScriptHandler->UpdateElapsedTime();
     return true;
     }
 
@@ -48,7 +48,7 @@ bool cmCTestSleepCommand::InitialPass(
       duration = (time1 + duration - time2);
       cmCTestScriptHandler::SleepInSeconds(duration);
       // update the elapsed time since it could have slept for a while
-      m_CTestScriptHandler->UpdateElapsedTime();
+      this->CTestScriptHandler->UpdateElapsedTime();
       }
     return true;
     }

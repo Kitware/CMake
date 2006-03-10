@@ -31,7 +31,7 @@ public:
   cmTypeMacro(cmCTestSubmitHandler, cmCTestGenericHandler);
 
   cmCTestSubmitHandler();
-  ~cmCTestSubmitHandler() { m_LogFile = 0; }
+  ~cmCTestSubmitHandler() { this->LogFile = 0; }
 
   /*
    * The main entry point for this class
@@ -41,7 +41,7 @@ public:
   void Initialize();
   
 private:
-  void SetLogFile(std::ostream* ost) { m_LogFile = ost; }
+  void SetLogFile(std::ostream* ost) { this->LogFile = ost; }
 
   /**
    * Submit file using various ways
@@ -71,12 +71,12 @@ private:
 
   std::string GetSubmitResultsPrefix();
 
-  cmStdString   m_HTTPProxy;
-  int           m_HTTPProxyType;
-  cmStdString   m_HTTPProxyAuth;
-  cmStdString   m_FTPProxy;
-  int           m_FTPProxyType;
-  std::ostream* m_LogFile;
+  cmStdString   HTTPProxy;
+  int           HTTPProxyType;
+  cmStdString   HTTPProxyAuth;
+  cmStdString   FTPProxy;
+  int           FTPProxyType;
+  std::ostream* LogFile;
 };
 
 #endif

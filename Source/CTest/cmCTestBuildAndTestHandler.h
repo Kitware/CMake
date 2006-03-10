@@ -59,22 +59,22 @@ protected:
                std::string &cmakeOutString,
                std::string &cwd, cmake *cm);
   
-  cmStdString  m_Output;
+  cmStdString  Output;
 
-  std::string              m_BuildGenerator;
-  std::vector<std::string> m_BuildOptions;
-  bool                     m_BuildTwoConfig;
-  std::string              m_BuildMakeProgram;
-  std::string              m_SourceDir;
-  std::string              m_BinaryDir;
-  std::string              m_BuildProject;
-  std::string              m_TestCommand;
-  bool                     m_BuildNoClean;
-  std::string              m_BuildRunDir;
-  std::string              m_ExecutableDirectory;
-  std::vector<std::string> m_TestCommandArgs;
-  std::vector<std::string> m_BuildTargets;
-  bool                     m_BuildNoCMake;
+  std::string              BuildGenerator;
+  std::vector<std::string> BuildOptions;
+  bool                     BuildTwoConfig;
+  std::string              BuildMakeProgram;
+  std::string              SourceDir;
+  std::string              BinaryDir;
+  std::string              BuildProject;
+  std::string              TestCommand;
+  bool                     BuildNoClean;
+  std::string              BuildRunDir;
+  std::string              ExecutableDirectory;
+  std::vector<std::string> TestCommandArgs;
+  std::vector<std::string> BuildTargets;
+  bool                     BuildNoCMake;
 };
 
 #endif

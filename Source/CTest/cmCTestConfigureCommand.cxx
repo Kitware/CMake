@@ -88,7 +88,7 @@ bool cmCTestConfigureCommand::InitialPass(
 
   if ( source_dir )
     {
-    m_CTest->SetCTestConfiguration("SourceDirectory", source_dir);
+    this->CTest->SetCTestConfiguration("SourceDirectory", source_dir);
     }
   else
     {
@@ -97,7 +97,7 @@ bool cmCTestConfigureCommand::InitialPass(
 
   if ( build_dir )
     {
-    m_CTest->SetCTestConfiguration("BuildDirectory", build_dir);
+    this->CTest->SetCTestConfiguration("BuildDirectory", build_dir);
     }
   else
     {
@@ -116,7 +116,8 @@ bool cmCTestConfigureCommand::InitialPass(
     = m_Makefile->GetDefinition("CTEST_CONFIGURE_COMMAND");
   if ( ctestConfigureCommand && *ctestConfigureCommand )
     {
-    m_CTest->SetCTestConfiguration("ConfigureCommand", ctestConfigureCommand);
+    this->CTest->SetCTestConfiguration("ConfigureCommand",
+      ctestConfigureCommand);
     }
   else
     {
@@ -125,13 +126,13 @@ bool cmCTestConfigureCommand::InitialPass(
     if ( cmakeGeneratorName && *cmakeGeneratorName )
       {
       std::string cmakeConfigureCommand = "\"";
-      cmakeConfigureCommand += m_CTest->GetCMakeExecutable();
+      cmakeConfigureCommand += this->CTest->GetCMakeExecutable();
       cmakeConfigureCommand += "\" \"-G";
       cmakeConfigureCommand += cmakeGeneratorName;
       cmakeConfigureCommand += "\" \"";
       cmakeConfigureCommand += source_dir;
       cmakeConfigureCommand += "\"";
-      m_CTest->SetCTestConfiguration("ConfigureCommand",
+      this->CTest->SetCTestConfiguration("ConfigureCommand",
         cmakeConfigureCommand.c_str());
       }
     else
@@ -144,7 +145,7 @@ bool cmCTestConfigureCommand::InitialPass(
     }
 
   cmCTestGenericHandler* handler
-    = m_CTest->GetInitializedHandler("configure");
+    = this->CTest->GetInitializedHandler("configure");
   if ( !handler )
     {
     this->SetError(

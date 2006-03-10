@@ -23,23 +23,23 @@ cmCTestHandlerCommand::cmCTestHandlerCommand()
 {
   const size_t INIT_SIZE = 100;
   size_t cc;
-  m_Arguments.reserve(INIT_SIZE);
+  this->Arguments.reserve(INIT_SIZE);
   for ( cc = 0; cc < INIT_SIZE; ++ cc )
     {
-    m_Arguments.push_back(0);
+    this->Arguments.push_back(0);
     }
-  m_Arguments[ct_RETURN_VALUE] = "RETURN_VALUE";
-  m_Arguments[ct_SOURCE] = "SOURCE";
-  m_Arguments[ct_BUILD] = "BUILD";
-  m_Arguments[ct_SUBMIT_INDEX] = "SUBMIT_INDEX";
-  m_Last = ct_LAST;
+  this->Arguments[ct_RETURN_VALUE] = "RETURN_VALUE";
+  this->Arguments[ct_SOURCE] = "SOURCE";
+  this->Arguments[ct_BUILD] = "BUILD";
+  this->Arguments[ct_SUBMIT_INDEX] = "SUBMIT_INDEX";
+  this->Last = ct_LAST;
 }
 
 bool cmCTestHandlerCommand::InitialPass(
   std::vector<std::string> const& args)
 {
-  if ( !this->ProcessArguments(args, m_Last, &*m_Arguments.begin(),
-      m_Values) )
+  if ( !this->ProcessArguments(args, this->Last, &*this->Arguments.begin(),
+      this->Values) )
     {
     return false;
     }
@@ -51,15 +51,16 @@ bool cmCTestHandlerCommand::InitialPass(
     return false;
     }
 
-  if ( m_Values[ct_BUILD] )
+  if ( this->Values[ct_BUILD] )
     {
-    m_CTest->SetCTestConfiguration("BuildDirectory", m_Values[ct_BUILD]);
+    this->CTest->SetCTestConfiguration("BuildDirectory",
+      this->Values[ct_BUILD]);
     }
-  if ( m_Values[ct_SUBMIT_INDEX] )
+  if ( this->Values[ct_SUBMIT_INDEX] )
     {
-    if ( m_CTest->GetDartVersion() <= 1 )
+    if ( this->CTest->GetDartVersion() <= 1 )
       {
-      cmCTestLog(m_CTest, ERROR_MESSAGE,
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
         "Dart before version 2.0 does not support collecting submissions."
         << std::endl
         << "Please upgrade the server to Dart 2 or higher, or do not use "
@@ -67,20 +68,21 @@ bool cmCTestHandlerCommand::InitialPass(
       }
     else
       {
-      handler->SetSubmitIndex(atoi(m_Values[ct_SUBMIT_INDEX]));
+      handler->SetSubmitIndex(atoi(this->Values[ct_SUBMIT_INDEX]));
       }
     }
 
 
   std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(
-    m_CTest->GetCTestConfiguration("BuildDirectory").c_str());
+    this->CTest->GetCTestConfiguration("BuildDirectory").c_str());
   int res = handler->ProcessHandler();
-  if ( m_Values[ct_RETURN_VALUE] && *m_Values[ct_RETURN_VALUE])
+  if ( this->Values[ct_RETURN_VALUE] && *this->Values[ct_RETURN_VALUE])
     {
     cmOStringStream str;
     str << res;
-    m_Makefile->AddDefinition(m_Values[ct_RETURN_VALUE], str.str().c_str());
+    m_Makefile->AddDefinition(
+      this->Values[ct_RETURN_VALUE], str.str().c_str());
     }
   cmSystemTools::ChangeDirectory(current_dir.c_str());
   return true;
@@ -103,8 +105,7 @@ bool cmCTestHandlerCommand::ProcessArguments(
     if ( state > 0 && state < last )
       {
       values[state] = args[i].c_str();
-#undef cerr
-      cmCTestLog(m_CTest, DEBUG, "Set " << strings[state] << " to "
+      cmCTestLog(this->CTest, DEBUG, "Set " << strings[state] << " to "
         << args[i].c_str() << std::endl);
       state = 0;
       }

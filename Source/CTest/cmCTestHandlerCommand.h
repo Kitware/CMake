@@ -54,10 +54,10 @@ protected:
   bool ProcessArguments(std::vector<std::string> const& args,
     int last, const char** strings, std::vector<const char*>& values);
 
-  std::string m_ReturnVariable;
-  std::vector<const char*> m_Arguments;
-  std::vector<const char*> m_Values;
-  size_t m_Last;
+  std::string ReturnVariable;
+  std::vector<const char*> Arguments;
+  std::vector<const char*> Values;
+  size_t Last;
 };
 
 #endif

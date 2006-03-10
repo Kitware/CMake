@@ -66,21 +66,21 @@ private:
     {
   public:
     cmCTestCompileErrorWarningRex() {}
-    int m_FileIndex;
-    int m_LineIndex;
-    cmsys::RegularExpression m_RegularExpression;
+    int FileIndex;
+    int LineIndex;
+    cmsys::RegularExpression RegularExpression;
     };
 
   struct cmCTestBuildErrorWarning
   {
-    bool        m_Error;
-    int         m_LogLine;
-    std::string m_Text;
-    std::string m_SourceFile;
-    std::string m_SourceFileTail;
-    int         m_LineNumber;
-    std::string m_PreContext;
-    std::string m_PostContext;
+    bool        Error;
+    int         LogLine;
+    std::string Text;
+    std::string SourceFile;
+    std::string SourceFileTail;
+    int         LineNumber;
+    std::string PreContext;
+    std::string PostContext;
   };
 
   // generate the XML output
@@ -89,19 +89,19 @@ private:
                                double elapsed_time);
 
 
-  std::string             m_StartBuild;
-  std::string             m_EndBuild;
+  std::string             StartBuild;
+  std::string             EndBuild;
 
-  std::vector<cmStdString> m_CustomErrorMatches;
-  std::vector<cmStdString> m_CustomErrorExceptions;
-  std::vector<cmStdString> m_CustomWarningMatches;
-  std::vector<cmStdString> m_CustomWarningExceptions;
-  std::vector<cmCTestCompileErrorWarningRex> m_ErrorWarningFileLineRegex;
+  std::vector<cmStdString> CustomErrorMatches;
+  std::vector<cmStdString> CustomErrorExceptions;
+  std::vector<cmStdString> CustomWarningMatches;
+  std::vector<cmStdString> CustomWarningExceptions;
+  std::vector<cmCTestCompileErrorWarningRex> ErrorWarningFileLineRegex;
 
-  std::vector<cmsys::RegularExpression> m_ErrorMatchRegex;
-  std::vector<cmsys::RegularExpression> m_ErrorExceptionRegex;
-  std::vector<cmsys::RegularExpression> m_WarningMatchRegex;
-  std::vector<cmsys::RegularExpression> m_WarningExceptionRegex;
+  std::vector<cmsys::RegularExpression> ErrorMatchRegex;
+  std::vector<cmsys::RegularExpression> ErrorExceptionRegex;
+  std::vector<cmsys::RegularExpression> WarningMatchRegex;
+  std::vector<cmsys::RegularExpression> WarningExceptionRegex;
 
   typedef std::deque<char> t_BuildProcessingQueueType;
 
@@ -109,31 +109,31 @@ private:
     size_t tick_len, std::ofstream& ofs, t_BuildProcessingQueueType* queue);
   int ProcessSingleLine(const char* data);
 
-  t_BuildProcessingQueueType            m_BuildProcessingQueue;
-  t_BuildProcessingQueueType            m_BuildProcessingErrorQueue;
-  size_t                                m_BuildOutputLogSize;
-  std::vector<char>                     m_CurrentProcessingLine;
+  t_BuildProcessingQueueType            BuildProcessingQueue;
+  t_BuildProcessingQueueType            BuildProcessingErrorQueue;
+  size_t                                BuildOutputLogSize;
+  std::vector<char>                     CurrentProcessingLine;
 
-  cmStdString                           m_SimplifySourceDir;
-  cmStdString                           m_SimplifyBuildDir;
-  size_t                                m_OutputLineCounter;
+  cmStdString                           SimplifySourceDir;
+  cmStdString                           SimplifyBuildDir;
+  size_t                                OutputLineCounter;
   typedef std::vector<cmCTestBuildErrorWarning> t_ErrorsAndWarningsVector;
-  t_ErrorsAndWarningsVector             m_ErrorsAndWarnings;
-  t_ErrorsAndWarningsVector::iterator   m_LastErrorOrWarning;
-  size_t                                m_PostContextCount;
-  size_t                                m_MaxPreContext;
-  size_t                                m_MaxPostContext;
-  std::deque<cmStdString>               m_PreContext;
+  t_ErrorsAndWarningsVector             ErrorsAndWarnings;
+  t_ErrorsAndWarningsVector::iterator   LastErrorOrWarning;
+  size_t                                PostContextCount;
+  size_t                                MaxPreContext;
+  size_t                                MaxPostContext;
+  std::deque<cmStdString>               PreContext;
 
-  int                                   m_TotalErrors;
-  int                                   m_TotalWarnings;
-  char                                  m_LastTickChar;
+  int                                   TotalErrors;
+  int                                   TotalWarnings;
+  char                                  LastTickChar;
 
-  bool                                  m_ErrorQuotaReached;
-  bool                                  m_WarningQuotaReached;
+  bool                                  ErrorQuotaReached;
+  bool                                  WarningQuotaReached;
 
-  int                                   m_MaxErrors;
-  int                                   m_MaxWarnings;
+  int                                   MaxErrors;
+  int                                   MaxWarnings;
 };
 
 #endif

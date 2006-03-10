@@ -21,17 +21,17 @@
 
 cmCTestTestCommand::cmCTestTestCommand()
 {
-  m_Arguments[ctt_START] = "START";
-  m_Arguments[ctt_END] = "END";
-  m_Arguments[ctt_STRIDE] = "STRIDE";
-  m_Arguments[ctt_LAST] = 0;
-  m_Last = ctt_LAST;
+  this->Arguments[ctt_START] = "START";
+  this->Arguments[ctt_END] = "END";
+  this->Arguments[ctt_STRIDE] = "STRIDE";
+  this->Arguments[ctt_LAST] = 0;
+  this->Last = ctt_LAST;
 }
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 {
   const char* ctestTimeout = m_Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
-  double timeout = m_CTest->GetTimeOut();
+  double timeout = this->CTest->GetTimeOut();
   if ( ctestTimeout )
     {
     timeout = atof(ctestTimeout);
@@ -44,24 +44,25 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
       timeout = 600;
       }
     }
-  m_CTest->SetTimeOut(timeout);
+  this->CTest->SetTimeOut(timeout);
   cmCTestGenericHandler* handler = this->InitializeActualHandler();
-  if ( m_Values[ctt_START] || m_Values[ctt_END] || m_Values[ctt_STRIDE] )
+  if ( this->Values[ctt_START] || this->Values[ctt_END] ||
+    this->Values[ctt_STRIDE] )
     {
     cmOStringStream testsToRunString;
-    if ( m_Values[ctt_START] )
+    if ( this->Values[ctt_START] )
       {
-      testsToRunString << m_Values[ctt_START];
+      testsToRunString << this->Values[ctt_START];
       }
     testsToRunString << ",";
-    if ( m_Values[ctt_END] )
+    if ( this->Values[ctt_END] )
       {
-      testsToRunString << m_Values[ctt_END];
+      testsToRunString << this->Values[ctt_END];
       }
     testsToRunString << ",";
-    if ( m_Values[ctt_STRIDE] )
+    if ( this->Values[ctt_STRIDE] )
       {
-      testsToRunString << m_Values[ctt_STRIDE];
+      testsToRunString << this->Values[ctt_STRIDE];
       }
     handler->SetOption("TestsToRunInformation",
       testsToRunString.str().c_str());
@@ -71,6 +72,6 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeActualHandler()
 {
-  return m_CTest->GetInitializedHandler("test");
+  return this->CTest->GetInitializedHandler("test");
 }
 

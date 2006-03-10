@@ -25,16 +25,16 @@
 //----------------------------------------------------------------------------
 cmCTestBuildCommand::cmCTestBuildCommand()
 {
-  m_GlobalGenerator = 0;
+  this->GlobalGenerator = 0;
 }
 
 //----------------------------------------------------------------------------
 cmCTestBuildCommand::~cmCTestBuildCommand()
 {
-  if ( m_GlobalGenerator )
+  if ( this->GlobalGenerator )
     {
-    delete m_GlobalGenerator;
-    m_GlobalGenerator = 0;
+    delete this->GlobalGenerator;
+    this->GlobalGenerator = 0;
     }
 }
 
@@ -91,10 +91,11 @@ bool cmCTestBuildCommand::InitialPass(
 
   if ( build_dir )
     {
-    m_CTest->SetCTestConfiguration("BuildDirectory", build_dir);
+    this->CTest->SetCTestConfiguration("BuildDirectory", build_dir);
     }
 
-  cmCTestGenericHandler* handler = m_CTest->GetInitializedHandler("build");
+  cmCTestGenericHandler* handler
+    = this->CTest->GetInitializedHandler("build");
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate build handler");
@@ -105,7 +106,7 @@ bool cmCTestBuildCommand::InitialPass(
     = m_Makefile->GetDefinition("CTEST_BUILD_COMMAND");
   if ( ctestBuildCommand && *ctestBuildCommand )
     {
-    m_CTest->SetCTestConfiguration("MakeCommand", ctestBuildCommand);
+    this->CTest->SetCTestConfiguration("MakeCommand", ctestBuildCommand);
     }
   else
     {
@@ -124,28 +125,29 @@ bool cmCTestBuildCommand::InitialPass(
         {
         cmakeBuildConfiguration = "Release";
         }
-      if ( m_GlobalGenerator )
+      if ( this->GlobalGenerator )
         {
-        if ( strcmp(m_GlobalGenerator->GetName(), cmakeGeneratorName) != 0 )
+        if ( strcmp(this->GlobalGenerator->GetName(),
+            cmakeGeneratorName) != 0 )
           {
-          delete m_GlobalGenerator;
-          m_GlobalGenerator = 0;
+          delete this->GlobalGenerator;
+          this->GlobalGenerator = 0;
           }
         }
-      if ( !m_GlobalGenerator )
+      if ( !this->GlobalGenerator )
         {
-        m_GlobalGenerator =
+        this->GlobalGenerator =
           m_Makefile->GetCMakeInstance()->CreateGlobalGenerator(
             cmakeGeneratorName);
         }
-      m_GlobalGenerator->FindMakeProgram(m_Makefile);
+      this->GlobalGenerator->FindMakeProgram(m_Makefile);
       const char* cmakeMakeProgram
         = m_Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
       std::string buildCommand
-        = m_GlobalGenerator->GenerateBuildCommand(cmakeMakeProgram,
+        = this->GlobalGenerator->GenerateBuildCommand(cmakeMakeProgram,
           cmakeProjectName,
           cmakeBuildAdditionalFlags, 0, cmakeBuildConfiguration, true);
-      m_CTest->SetCTestConfiguration("MakeCommand", buildCommand.c_str());
+      this->CTest->SetCTestConfiguration("MakeCommand", buildCommand.c_str());
       }
     else
       {

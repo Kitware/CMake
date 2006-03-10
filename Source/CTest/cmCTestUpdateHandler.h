@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -39,7 +39,7 @@ public:
    * The main entry point for this class
    */
   int ProcessHandler();
-  
+
   cmCTestUpdateHandler();
 
   enum {
@@ -53,13 +53,13 @@ public:
    * Initialize handler
    */
   virtual void Initialize();
-  
+
 private:
   // Some structures needed for update
-  struct StringPair : 
+  struct StringPair :
     public std::pair<std::string, std::string>{};
   struct UpdateFiles : public std::vector<StringPair>{};
-  struct AuthorsToUpdatesMap : 
+  struct AuthorsToUpdatesMap :
     public std::map<std::string, UpdateFiles>{};
 
   // Determine the type of version control

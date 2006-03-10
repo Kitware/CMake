@@ -39,21 +39,22 @@ void cmCTestConfigureHandler::Initialize()
 //functions and commented...
 int cmCTestConfigureHandler::ProcessHandler()
 {
-  cmCTestLog(m_CTest, HANDLER_OUTPUT, "Configure project" << std::endl);
-  std::string cCommand = m_CTest->GetCTestConfiguration("ConfigureCommand");
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, "Configure project" << std::endl);
+  std::string cCommand
+    = this->CTest->GetCTestConfiguration("ConfigureCommand");
   if ( cCommand.size() == 0 )
     {
-    cmCTestLog(m_CTest, ERROR_MESSAGE,
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot find ConfigureCommand key in the DartConfiguration.tcl"
       << std::endl);
     return -1;
     }
 
   std::string buildDirectory
-    = m_CTest->GetCTestConfiguration("BuildDirectory");
+    = this->CTest->GetCTestConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
     {
-    cmCTestLog(m_CTest, ERROR_MESSAGE,
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot find BuildDirectory  key in the DartConfiguration.tcl"
       << std::endl);
     return -1;
@@ -63,22 +64,22 @@ int cmCTestConfigureHandler::ProcessHandler()
   std::string output;
   int retVal = 0;
   int res = 0;
-  if ( !m_CTest->GetShowOnly() )
+  if ( !this->CTest->GetShowOnly() )
     {
     cmGeneratedFileStream os;
     if ( !this->StartResultingXML("Configure", os) )
       {
-      cmCTestLog(m_CTest, ERROR_MESSAGE, "Cannot open configure file"
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open configure file"
         << std::endl);
       return 1;
       }
-    std::string start_time = m_CTest->CurrentTime();
+    std::string start_time = this->CTest->CurrentTime();
 
     cmGeneratedFileStream ofs;
     this->StartLogFile("Configure", ofs);
-    cmCTestLog(m_CTest, HANDLER_VERBOSE_OUTPUT, "Configure with command: "
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Configure with command: "
       << cCommand.c_str() << std::endl);
-    res = m_CTest->RunMakeCommand(cCommand.c_str(), &output,
+    res = this->CTest->RunMakeCommand(cCommand.c_str(), &output,
       &retVal, buildDirectory.c_str(),
       0, ofs);
 
@@ -89,7 +90,7 @@ int cmCTestConfigureHandler::ProcessHandler()
 
     if ( os )
       {
-      m_CTest->StartXML(os);
+      this->CTest->StartXML(os);
       os << "<Configure>\n"
          << "\t<StartDateTime>" << start_time << "</StartDateTime>"
          << std::endl;
@@ -99,9 +100,9 @@ int cmCTestConfigureHandler::ProcessHandler()
         }
       os << "<ConfigureCommand>" << cCommand.c_str() << "</ConfigureCommand>"
         << std::endl;
-      cmCTestLog(m_CTest, DEBUG, "End" << std::endl);
+      cmCTestLog(this->CTest, DEBUG, "End" << std::endl);
       os << "<Log>" << cmCTest::MakeXMLSafe(output) << "</Log>" << std::endl;
-      std::string end_time = m_CTest->CurrentTime();
+      std::string end_time = this->CTest->CurrentTime();
       os << "\t<ConfigureStatus>" << retVal << "</ConfigureStatus>\n"
          << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
          << "<ElapsedMinutes>"
@@ -109,18 +110,18 @@ int cmCTestConfigureHandler::ProcessHandler()
            (cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0
          << "</ElapsedMinutes>"
          << "</Configure>" << std::endl;
-      m_CTest->EndXML(os);
+      this->CTest->EndXML(os);
       }
     }
   else
     {
-    cmCTestLog(m_CTest, DEBUG, "Configure with command: " << cCommand
+    cmCTestLog(this->CTest, DEBUG, "Configure with command: " << cCommand
       << std::endl);
     }
   if (! res || retVal )
     {
-    cmCTestLog(m_CTest, ERROR_MESSAGE, "Error(s) when updating the project"
-      << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+      "Error(s) when updating the project" << std::endl);
     return -1;
     }
   return 0;

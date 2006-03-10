@@ -66,22 +66,22 @@ bool cmCTestStartCommand::InitialPass(
       "as an argument or set CTEST_BINARY_DIRECTORY");
     return false;
     }
-  m_CTest->EmptyCTestConfiguration();
-  m_CTest->SetCTestConfiguration("SourceDirectory", src_dir);
-  m_CTest->SetCTestConfiguration("BuildDirectory", bld_dir);
+  this->CTest->EmptyCTestConfiguration();
+  this->CTest->SetCTestConfiguration("SourceDirectory", src_dir);
+  this->CTest->SetCTestConfiguration("BuildDirectory", bld_dir);
 
-  cmCTestLog(m_CTest, HANDLER_OUTPUT, "Run dashboard with model " << smodel
-    << std::endl
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, "Run dashboard with model "
+    << smodel << std::endl
     << "   Source directory: " << src_dir << std::endl
     << "   Build directory: " << bld_dir << std::endl);
 
   m_Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", "OFF");
-  m_CTest->SetSuppressUpdatingCTestConfiguration(true);
-  int model = m_CTest->GetTestModelFromString(smodel);
-  m_CTest->SetTestModel(model);
-  m_CTest->SetProduceXML(true);
+  this->CTest->SetSuppressUpdatingCTestConfiguration(true);
+  int model = this->CTest->GetTestModelFromString(smodel);
+  this->CTest->SetTestModel(model);
+  this->CTest->SetProduceXML(true);
 
-  return m_CTest->InitializeFromCommand(this, true);
+  return this->CTest->InitializeFromCommand(this, true);
 }
 
 

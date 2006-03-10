@@ -91,12 +91,12 @@ private:
     COMPLETED
   };
 
-  std::string              m_MemoryTester;
-  std::vector<cmStdString> m_MemoryTesterOptionsParsed;
-  std::string              m_MemoryTesterOptions;
-  int                      m_MemoryTesterStyle;
-  std::string              m_MemoryTesterOutputFile;
-  int                      m_MemoryTesterGlobalResults[NO_MEMORY_FAULT];
+  std::string              MemoryTester;
+  std::vector<cmStdString> MemoryTesterOptionsParsed;
+  std::string              MemoryTesterOptions;
+  int                      MemoryTesterStyle;
+  std::string              MemoryTesterOutputFile;
+  int                      MemoryTesterGlobalResults[NO_MEMORY_FAULT];
 
   ///! Initialize memory checking subsystem.
   bool InitializeMemoryChecking();
@@ -106,8 +106,8 @@ private:
    */
   void GenerateDartOutput(std::ostream& os);
 
-  std::vector<cmStdString> m_CustomPreMemCheck;
-  std::vector<cmStdString> m_CustomPostMemCheck;
+  std::vector<cmStdString> CustomPreMemCheck;
+  std::vector<cmStdString> CustomPostMemCheck;
 
   //! Parse Valgrind/Purify/Bounds Checker result out of the output
   //string. After running, log holds the output and results hold the

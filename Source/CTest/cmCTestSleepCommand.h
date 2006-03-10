@@ -37,8 +37,8 @@ public:
   virtual cmCommand* Clone() 
     {
     cmCTestSleepCommand* ni = new cmCTestSleepCommand;
-    ni->m_CTest = this->m_CTest;
-    ni->m_CTestScriptHandler = this->m_CTestScriptHandler;
+    ni->CTest = this->CTest;
+    ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
     }
 

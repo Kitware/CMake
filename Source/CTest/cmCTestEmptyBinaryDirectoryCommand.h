@@ -38,8 +38,8 @@ public:
     {
     cmCTestEmptyBinaryDirectoryCommand* ni
       = new cmCTestEmptyBinaryDirectoryCommand;
-    ni->m_CTest = this->m_CTest;
-    ni->m_CTestScriptHandler = this->m_CTestScriptHandler;
+    ni->CTest = this->CTest;
+    ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
     }
 

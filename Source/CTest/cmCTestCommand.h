@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -27,17 +27,17 @@ class cmCTestScriptHandler;
  *
  * cmCTestCommand is the superclass for all commands that will be added to
  * the ctest script handlers parser.
- * 
+ *
  */
 class cmCTestCommand : public cmCommand
 {
 public:
 
-  cmCTestCommand() {m_CTest = 0; m_CTestScriptHandler = 0;}
-  
-  cmCTest *m_CTest;
-  cmCTestScriptHandler *m_CTestScriptHandler;
-  
+  cmCTestCommand() {this->CTest = 0; this->CTestScriptHandler = 0;}
+
+  cmCTest *CTest;
+  cmCTestScriptHandler *CTestScriptHandler;
+
   cmTypeMacro(cmCTestCommand, cmCommand);
 };
 

@@ -59,48 +59,48 @@ private:
     {
     cmCTestCoverage()
       {
-      m_AbsolutePath = "";
-      m_FullPath = "";
-      m_Covered = false;
-      m_Tested = 0;
-      m_UnTested = 0;
-      m_Lines.clear();
-      m_Show = false;
+      this->AbsolutePath = "";
+      this->FullPath = "";
+      this->Covered = false;
+      this->Tested = 0;
+      this->UnTested = 0;
+      this->Lines.clear();
+      this->Show = false;
       }
     cmCTestCoverage(const cmCTestCoverage& rhs) :
-      m_AbsolutePath(rhs.m_AbsolutePath),
-      m_FullPath(rhs.m_FullPath),
-      m_Covered(rhs.m_Covered),
-      m_Tested(rhs.m_Tested),
-      m_UnTested(rhs.m_UnTested),
-      m_Lines(rhs.m_Lines),
-      m_Show(rhs.m_Show)
+      AbsolutePath(rhs.AbsolutePath),
+      FullPath(rhs.FullPath),
+      Covered(rhs.Covered),
+      Tested(rhs.Tested),
+      UnTested(rhs.UnTested),
+      Lines(rhs.Lines),
+      Show(rhs.Show)
       {
       }
     cmCTestCoverage& operator=(const cmCTestCoverage& rhs)
       {
-      m_AbsolutePath = rhs.m_AbsolutePath;
-      m_FullPath = rhs.m_FullPath;
-      m_Covered = rhs.m_Covered;
-      m_Tested = rhs.m_Tested;
-      m_UnTested = rhs.m_UnTested;
-      m_Lines = rhs.m_Lines;
-      m_Show = rhs.m_Show;
+      this->AbsolutePath = rhs.AbsolutePath;
+      this->FullPath = rhs.FullPath;
+      this->Covered = rhs.Covered;
+      this->Tested = rhs.Tested;
+      this->UnTested = rhs.UnTested;
+      this->Lines = rhs.Lines;
+      this->Show = rhs.Show;
       return *this;
       }
-    std::string      m_AbsolutePath;
-    std::string      m_FullPath;
-    bool             m_Covered;
-    int              m_Tested;
-    int              m_UnTested;
-    std::vector<int> m_Lines;
-    bool             m_Show;
+    std::string      AbsolutePath;
+    std::string      FullPath;
+    bool             Covered;
+    int              Tested;
+    int              UnTested;
+    std::vector<int> Lines;
+    bool             Show;
     };
 
-  std::vector<cmStdString> m_CustomCoverageExclude;
-  std::vector<cmsys::RegularExpression> m_CustomCoverageExcludeRegex;
+  std::vector<cmStdString> CustomCoverageExclude;
+  std::vector<cmsys::RegularExpression> CustomCoverageExcludeRegex;
 
-  typedef std::map<std::string, cmCTestCoverage> tm_CoverageMap;
+  typedef std::map<std::string, cmCTestCoverage> CoverageMap;
 };
 
 #endif
