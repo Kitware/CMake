@@ -46,6 +46,7 @@ kwsys_stl::string GetLibName(const char* lname)
  */
 int TestDynamicLoader(const char* libname, const char* symbol, int r1, int r2, int r3)
 {
+  //kwsys_ios::cerr << "Testing: " << libname << kwsys_ios::endl;
   kwsys::LibHandle l = kwsys::DynamicLoader::OpenLibrary(libname);
   // If result is incompatible with expectation just fails (xor):
   if( (r1 && !l) || (!r1 && l) )
@@ -85,10 +86,10 @@ int main(int , char *[])
   res += TestDynamicLoader("libdl.so", "TestDynamicLoader",1,0,1);
 #endif
   // Now try on the generated library
-  //kwsys_stl::string libname = GetLibName("testDynload");
-  //res += TestDynamicLoader(libname.c_str(), "dummy",1,0,1);
-  //res += TestDynamicLoader(libname.c_str(), "TestDynamicLoaderFunction",1,1,1);
-  //res += TestDynamicLoader(libname.c_str(), "TestDynamicLoaderData",1,1,1);
+  kwsys_stl::string libname = GetLibName("testDynload");
+  res += TestDynamicLoader(libname.c_str(), "dummy",1,0,1);
+  res += TestDynamicLoader(libname.c_str(), "TestDynamicLoaderFunction",1,1,1);
+  res += TestDynamicLoader(libname.c_str(), "TestDynamicLoaderData",1,1,1);
 
   return res;
 }

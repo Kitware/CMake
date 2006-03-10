@@ -220,12 +220,24 @@ int DynamicLoader::CloseLibrary(LibHandle lib)
 DynamicLoaderFunction DynamicLoader::GetSymbolAddress(LibHandle lib, const char* sym)
 {
   void *result;
+#ifdef __BORLANDC__
+  // Need to prepend symbols with '_' on borland compilers
+  size_t len = strlen(sym);
+  char *rsym = new char[len + 1 + 1];
+  strcpy(rsym, "_");
+  strcat(rsym+1, sym);
+#else
+  const char *rsym = sym;
+#endif
 #ifdef UNICODE
   wchar_t wsym[MB_CUR_MAX];
-  mbstowcs(wsym, sym, MB_CUR_MAX);
+  mbstowcs(wsym, rsym, MB_CUR_MAX);
   result = GetProcAddress(lib, wsym);
 #else
-  result = (void*)GetProcAddress(lib, sym);
+  result = (void*)GetProcAddress(lib, rsym);
+#endif
+#ifdef __BORLANDC__
+  delete[] rsym;
 #endif
   // Hack to cast pointer-to-data to pointer-to-function.
   return *reinterpret_cast<DynamicLoaderFunction*>(&result);
@@ -317,7 +329,11 @@ const char* DynamicLoader::LibPrefix()
 //----------------------------------------------------------------------------
 const char* DynamicLoader::LibExtension()
 {
+#ifdef __CYGWIN__
+  return ".dll";
+#else
   return ".so";
+#endif
 }
 
 //----------------------------------------------------------------------------
