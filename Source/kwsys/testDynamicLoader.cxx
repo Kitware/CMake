@@ -51,7 +51,7 @@ kwsys_stl::string GetLibName(const char* lname)
  */
 int TestDynamicLoader(const char* libname, const char* symbol, int r1, int r2, int r3)
 {
-  //kwsys_ios::cerr << "Testing: " << libname << kwsys_ios::endl;
+  kwsys_ios::cerr << "Testing: " << libname << kwsys_ios::endl;
   kwsys::LibHandle l = kwsys::DynamicLoader::OpenLibrary(libname);
   // If result is incompatible with expectation just fails (xor):
   if( (r1 && !l) || (!r1 && l) )
