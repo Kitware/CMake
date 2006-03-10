@@ -396,7 +396,7 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr)
       }
     else
       {
-      cexpr.append(1, (char)ch);
+      cexpr.append(1, static_cast<char>(ch));
       }
     }
   if ( cexpr.size() > 0 )

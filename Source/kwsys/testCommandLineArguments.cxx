@@ -22,7 +22,7 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
-void* random_ptr = (void*)0x123;
+void* random_ptr = reinterpret_cast<void*>(0x123);
 
 int argument(const char* arg, const char* value, void* call_data)
 {

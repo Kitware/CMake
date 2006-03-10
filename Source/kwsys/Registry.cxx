@@ -798,7 +798,7 @@ kwsys_stl::string RegistryHelper::DecodeValue(const char* str)
     case '%':
       if ( *(str+1) && *(str+2) && sscanf(str+1, "%x", &val) == 1 )
         {
-        ostr << (char)val;
+        ostr << static_cast<char>(val);
         str += 2;
         }
       else
