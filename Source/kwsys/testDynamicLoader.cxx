@@ -22,6 +22,7 @@
 #if 0
 # include "DynamicLoader.hxx.in"
 # include "kwsys_ios_iostream.h.in"
+# include "kwsys_stl_string.hxx.in"
 #endif
 
 #include "testSystemTools.h"
