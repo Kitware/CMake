@@ -65,7 +65,8 @@ public:
     {
     return
       "  LIST(LENGTH <list> <output variable>)\n"
-      "  LIST(GET <list> <element index> [<element index> ...] <output variable>)\n"
+      "  LIST(GET <list> <element index> [<element index> ...] "
+      "<output variable>)\n"
       "  LIST(SET <list> <element> [<element> ...])\n"
       "  LIST(INSERT <list> <element_index> <element> [<element> ...])\n"
       "  LIST(REMOVE <variable> <value> [<value> ...])\n"
@@ -76,8 +77,8 @@ public:
       "GET will return list of elements specified by indices from the list.\n"
       "SET will append elements to the list.\n"
       "INSERT will insert elements to the list to the specified location.\n"
-      "When specifying an index, negative value corresponds to index from the end "
-      "of the list.\n"
+      "When specifying an index, negative value corresponds to index from the"
+      " end of the list.\n"
       ;
     }
   

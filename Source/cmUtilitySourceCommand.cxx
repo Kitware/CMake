@@ -67,7 +67,8 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   // The source exists.
-  std::string cmakeCFGout = m_Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
+  std::string cmakeCFGout =
+    m_Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
   std::string utilityDirectory = m_Makefile->GetCurrentOutputDirectory();
   std::string exePath;
   if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))

@@ -75,7 +75,8 @@ private:
     cmStdString Name;
     std::vector<CurrentClass> NestedClasses;
     CurrentClass() {}
-    void AddFileNamesForPrinting(std::vector<cmStdString> *files, const char* prefix, const char* sep);
+    void AddFileNamesForPrinting(std::vector<cmStdString> *files, 
+                                 const char* prefix, const char* sep);
     };
   cmStdString CurrentPackage;
   cmStdString::size_type InputBufferPos;

@@ -155,7 +155,8 @@ public:
                                  bool /* clear */) {};
   
   /** Called from command-line hook to scan dependencies.  */
-  virtual bool ScanDependencies(std::vector<std::string> const& /* args */) {return true;};
+  virtual bool ScanDependencies(std::vector<std::string> const& /* args */)
+    {return true;};
 
   /** Compute the list of link libraries and directories for the given
       target and configuration.  */
@@ -205,7 +206,8 @@ protected:
                               const char* workingDirectory,
                               const char* newline = "\n");
 
-  ///! Fill out these strings for the given target.  Libraries to link, flags, and linkflags.
+  /** Fill out these strings for the given target.  Libraries to link,
+   *  flags, and linkflags. */
   void GetTargetFlags(std::string& linkLibs, 
                       std::string& flags,
                       std::string& linkFlags,
@@ -221,7 +223,8 @@ protected:
   std::string ExpandRuleVariable(std::string const& variable,
                                  const RuleVariables& replaceValues);
   
-  ///! Convert a target to a utility target for unsupported languages of a generator
+  /** Convert a target to a utility target for unsupported 
+   *  languages of a generator */
   void AddBuildTargetRule(const char* llang, cmTarget& target);
   ///! add a custom command to build a .o file that is part of a target 
   void AddCustomCommandToCreateObject(const char* ofname, 

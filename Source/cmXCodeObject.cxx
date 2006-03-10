@@ -8,7 +8,8 @@ const char* cmXCodeObject::PBXTypeNames[] = {
     "PBXTargetDependency", "PBXShellScriptBuildPhase", 
     "PBXResourcesBuildPhase", "PBXApplicationReference",
     "PBXExecutableFileReference", "PBXLibraryReference", "PBXToolTarget",
-    "PBXLibraryTarget", "PBXAggregateTarget", "XCBuildConfiguration", "XCConfigurationList",
+    "PBXLibraryTarget", "PBXAggregateTarget", "XCBuildConfiguration", 
+    "XCConfigurationList",
     "None"
   };
 
@@ -118,7 +119,8 @@ void cmXCodeObject::Print(std::ostream& out)
       {
       std::map<cmStdString, cmXCodeObject*>::iterator j;
       out << i->first << " = {" << separator;
-      for(j = object->m_ObjectAttributes.begin(); j != object->m_ObjectAttributes.end(); ++j)
+      for(j = object->m_ObjectAttributes.begin(); j != 
+            object->m_ObjectAttributes.end(); ++j)
         {
         cmXCodeObject::Indent(4 *indentFactor, out);
         out << j->first << " = " << j->second->m_String << ";";

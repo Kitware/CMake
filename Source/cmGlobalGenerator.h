@@ -73,7 +73,8 @@ public:
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.  
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages, cmMakefile *);
+  virtual void EnableLanguage(std::vector<std::string>const& languages,
+                              cmMakefile *);
 
   /**
    * Try to determine system infomation, get it from another generator
@@ -101,7 +102,8 @@ public:
                     const char *makeProgram, const char *config,
                     bool clean);
   virtual std::string GenerateBuildCommand(const char* makeProgram,
-    const char *projectName, const char* additionalOptions, const char *targetName,
+    const char *projectName, const char* additionalOptions, 
+                                           const char *targetName,
     const char* config, bool ignoreErrors);
 
   ///! Set the CMake instance
@@ -114,7 +116,8 @@ public:
 
   void SetConfiguredFilesPath(const char* s){m_ConfiguredFilesPath = s;}
   cmLocalGenerator* GetLocalGenerator(int p) { return m_LocalGenerators[p];}
-  void GetLocalGenerators(std::vector<cmLocalGenerator *>&g) { g = m_LocalGenerators;}
+  void GetLocalGenerators(std::vector<cmLocalGenerator *>&g) 
+    { g = m_LocalGenerators;}
   void AddLocalGenerator(cmLocalGenerator *lg);
   
   static int s_TryCompileTimeout;
@@ -164,7 +167,8 @@ public:
                                         std::string& dir);
 
 protected:
-  // Fill the m_ProjectMap, this must be called after m_LocalGenerators has been populated.
+  // Fill the m_ProjectMap, this must be called after m_LocalGenerators 
+  // has been populated.
   void FillProjectMap();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
 

@@ -44,7 +44,8 @@ public:
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.  
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages, cmMakefile *);
+  virtual void EnableLanguage(std::vector<std::string>const& languages, 
+                              cmMakefile *);
 };
 
 #endif

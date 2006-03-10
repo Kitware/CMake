@@ -131,8 +131,10 @@ void cmTarget::TraceVSDependencies(std::string projFile,
           makefile->GetSourceFileWithOutput(id->c_str());
         // if a source file was found then add it
         if (outsf && 
-            (std::find(classes.begin(),classes.end(),outsf) == classes.end()) &&
-            (std::find(newClasses.begin(),newClasses.end(),outsf) == newClasses.end()))
+            (std::find(classes.begin(),classes.end(),outsf) == classes.end())
+            &&
+            (std::find(newClasses.begin(),newClasses.end(),outsf)
+             == newClasses.end()))
           {
           // then add the source to this target and add it to the queue
           newClasses.push_back(outsf);
@@ -169,7 +171,8 @@ void cmTarget::TraceVSDependencies(std::string projFile,
     srcFilesQueued.insert(projFile);
     }
   // add in the library depends for custom targets
-  if (this->GetType() == cmTarget::UTILITY || this->GetType() == cmTarget::GLOBAL_TARGET)
+  if (this->GetType() == cmTarget::UTILITY || 
+      this->GetType() == cmTarget::GLOBAL_TARGET)
     {
     for (std::vector<cmCustomCommand>::iterator ic = 
            this->GetPostBuildCommands().begin();
@@ -224,7 +227,8 @@ void cmTarget::TraceVSDependencies(std::string projFile,
           dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
           }
         // watch for target dependencies,
-        if(m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->FindTarget(0, dep.c_str()))
+        if(m_Makefile->GetLocalGenerator()->
+           GetGlobalGenerator()->FindTarget(0, dep.c_str()))
           {
           // add the depend as a utility on the target
           this->AddUtility(dep.c_str());
@@ -342,7 +346,8 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
   if(!m_LinkLibrariesAnalyzed && !m_LinkLibraries.empty())
     {
     cmSystemTools::Error(
-      "cmTarget::GetLinkDirectories called before cmTarget::AnalyzeLibDependencies on target ",
+      "cmTarget::GetLinkDirectories called before "
+      "cmTarget::AnalyzeLibDependencies on target ",
       m_Name.c_str());
     }
 
@@ -420,7 +425,8 @@ void cmTarget::AddLinkLibrary(const std::string& lib,
                               LinkLibraryType llt)
 {
   this->AddFramework(lib.c_str(), llt);
-  m_LinkLibraries.push_back( std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt) );
+  m_LinkLibraries.push_back( std::pair<std::string,
+                             cmTarget::LinkLibraryType>(lib,llt) );
 }
 
 bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
@@ -452,7 +458,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     return;
     }
   this->AddFramework(lib, llt);
-  m_LinkLibraries.push_back( std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt) );
+  m_LinkLibraries.push_back( std::pair<std::string,
+                             cmTarget::LinkLibraryType>(lib,llt) );
 
   if(llt != cmTarget::GENERAL)
     {
@@ -470,13 +477,16 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
         if(!def || strcmp(def, "debug") == 0)
           {
           mf.AddCacheDefinition(linkTypeName.c_str(),
-                                "debug", "Library is used for debug links only",
+                                "debug", 
+                                "Library is used for debug links only",
                                 cmCacheManager::STATIC);
           }
         else
           {
           mf.AddCacheDefinition(linkTypeName.c_str(),
-                                "general", "Library is used for both debug and optimized links",
+                                "general", 
+                                "Library is used for both debug "
+                                "and optimized links",
                                 cmCacheManager::STATIC);
           }
         }
@@ -487,13 +497,15 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
         if(!def || strcmp(def, "optimized") == 0)
           {
           mf.AddCacheDefinition(linkTypeName.c_str(),
-                                "optimized", "Library is used for debug links only",
+                                "optimized", "Library is used for debug "
+                                "links only",
                                 cmCacheManager::STATIC);
           }
         else
           {
           mf.AddCacheDefinition(linkTypeName.c_str(),
-                                "general", "Library is used for both debug and optimized links",
+                                "general", "Library is used for both debug "
+                                "and optimized links",
                                 cmCacheManager::STATIC);
           }
         }
@@ -651,7 +663,8 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 
   // 4. Add the new libraries to the link line.
   //
-  for( std::vector<std::string>::reverse_iterator k = newLinkLibraries.rbegin();
+  for( std::vector<std::string>::reverse_iterator k = 
+         newLinkLibraries.rbegin();
        k != newLinkLibraries.rend(); ++k )
     {
     std::string linkType = *k;
@@ -694,7 +707,8 @@ void cmTarget::DeleteDependency( DependencyMap& depMap,
     {
     DependencyList& depList = map_itr->second;
     DependencyList::iterator itr;
-    while( (itr = std::find(depList.begin(), depList.end(), dep)) != depList.end() )
+    while( (itr = std::find(depList.begin(), depList.end(), dep)) != 
+           depList.end() )
       {
       depList.erase( itr );
       }
@@ -958,7 +972,8 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
     }
   if(languages.size() == 1)
     {
-    const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", languages.begin()->c_str());
+    const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", 
+                                             languages.begin()->c_str());
     return this->GetProperty("LINKER_LANGUAGE");
     }
   const char* prefLang = 0;

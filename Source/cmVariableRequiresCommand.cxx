@@ -18,7 +18,8 @@
 #include "cmCacheManager.h"
 
 // cmLibraryCommand
-bool cmVariableRequiresCommand::InitialPass(std::vector<std::string> const& args)
+bool cmVariableRequiresCommand::InitialPass(std::vector<std::string>const&
+                                            args)
 {
   if(args.size() < 3 )
     {
@@ -62,13 +63,16 @@ bool cmVariableRequiresCommand::InitialPass(std::vector<std::string> const& args
   if(!requirementsMet)
     {
     std::string message = "Variable assertion failed:\n";
-    message += testVariable + " Requires that the following unset variables are set:\n";
+    message += testVariable + 
+      " Requires that the following unset variables are set:\n";
     message += notSet;
     message += "\nPlease set them, or set ";
     message += testVariable + " to false, and re-configure.\n";
     if(hasAdvanced)
       {
-      message += "One or more of the required variables is advanced.  To set the variable, you must turn on advanced mode in cmake.";
+      message += 
+        "One or more of the required variables is advanced."
+        "  To set the variable, you must turn on advanced mode in cmake.";
       }
     cmSystemTools::Error(message.c_str());
     }

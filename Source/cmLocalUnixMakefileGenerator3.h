@@ -191,7 +191,8 @@ public:
   // language has its own list because integrity may be checked
   // differently.
   struct IntegrityCheckSet: public std::set<cmSourceFile *> {};
-  struct IntegrityCheckSetMap: public std::map<cmStdString, IntegrityCheckSet> {};
+  struct IntegrityCheckSetMap: public std::map<cmStdString, IntegrityCheckSet>
+  {};
   std::map<cmStdString, IntegrityCheckSetMap> &GetIntegrityCheckSet() 
   { return m_CheckDependFiles;}
   

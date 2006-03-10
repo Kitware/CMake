@@ -44,7 +44,8 @@ void cmVariableWatch::AddWatch(const std::string& variable,
   vp->push_back(p);
 }
 
-void cmVariableWatch::RemoveWatch(const std::string& variable, WatchMethod method)
+void cmVariableWatch::RemoveWatch(const std::string& variable, 
+                                  WatchMethod method)
 {
   cmVariableWatch::VectorOfPairs* vp = &m_WatchMap[variable];
   cmVariableWatch::VectorOfPairs::iterator it;
@@ -58,9 +59,11 @@ void cmVariableWatch::RemoveWatch(const std::string& variable, WatchMethod metho
     }
 }
 
-void  cmVariableWatch::VariableAccessed(const std::string& variable, int access_type) const
+void  cmVariableWatch::VariableAccessed(const std::string& variable, 
+                                        int access_type) const
 {
-  cmVariableWatch::StringToVectorOfPairs::const_iterator mit = m_WatchMap.find(variable);
+  cmVariableWatch::StringToVectorOfPairs::const_iterator mit = 
+    m_WatchMap.find(variable);
   if ( mit  != m_WatchMap.end() )
     {
     const cmVariableWatch::VectorOfPairs* vp = &mit->second;

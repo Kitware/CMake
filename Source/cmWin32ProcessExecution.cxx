@@ -106,7 +106,8 @@ inline bool IsWinNT()
 //--------------------------------------------------------------------------- 
 bool cmWin32ProcessExecution::BorlandRunCommand(
   const char* command, const char* dir, 
-  std::string& output, int& retVal, bool verbose, int /* timeout */, bool hideWindows) 
+  std::string& output, int& retVal, bool verbose, int /* timeout */, 
+  bool hideWindows) 
 {
   //verbose = true;
   //std::cerr << std::endl 

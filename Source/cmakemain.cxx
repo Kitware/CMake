@@ -76,7 +76,8 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "Only load the cache. Do not actually run configure and generate steps."},
   {"-P <file>", "Process script mode.",
    "Process the given cmake file as a script written in the CMake language.  "
-   "No configure or generate step is performed and the cache is not modified."},
+   "No configure or generate step is performed and the cache is not"
+   " modified."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed."},
   {"--help-command-list [file]", "List available listfile commands and exit.",
@@ -133,7 +134,8 @@ int do_cmake(int ac, char** av)
 
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
     {
-    std::cerr << "Current working directory cannot be established." << std::endl;
+    std::cerr << "Current working directory cannot be established." 
+              << std::endl;
     nocwd = 1;
     }
 
@@ -173,7 +175,9 @@ int do_cmake(int ac, char** av)
 #else
   if ( nocwd || ac == 1 )
     {
-    std::cout << "Bootstrap CMake should not be used outside CMake build process." << std::endl;
+    std::cout << 
+      "Bootstrap CMake should not be used outside CMake build process."
+              << std::endl;
     return 0;
     }
 #endif
@@ -253,7 +257,8 @@ int do_cmake(int ac, char** av)
   int res = cm.Run(args, view_only);
   if ( list_cached || list_all_cached )
     {
-    cmCacheManager::CacheIterator it = cm.GetCacheManager()->GetCacheIterator();
+    cmCacheManager::CacheIterator it = 
+      cm.GetCacheManager()->GetCacheIterator();
     std::cout << "-- Cache values" << std::endl;
     for ( it.Begin(); !it.IsAtEnd(); it.Next() )
       {
@@ -268,7 +273,8 @@ int do_cmake(int ac, char** av)
             {
             std::cout << "// " << it.GetProperty("HELPSTRING") << std::endl;
             }
-          std::cout << it.GetName() << ":" << cmCacheManager::TypeToString(it.GetType()) 
+          std::cout << it.GetName() << ":" << 
+            cmCacheManager::TypeToString(it.GetType()) 
             << "=" << it.GetValue() << std::endl;
           if ( list_help )
             {

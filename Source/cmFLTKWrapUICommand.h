@@ -22,7 +22,8 @@
 /** \class cmFLTKWrapUICommand
  * \brief Create .h and .cxx files rules for FLTK user interfaces files
  *
- * cmFLTKWrapUICommand is used to create wrappers for FLTK classes into normal C++
+ * cmFLTKWrapUICommand is used to create wrappers for FLTK classes into
+ * normal C++
  */
 class cmFLTKWrapUICommand : public cmCommand
 {

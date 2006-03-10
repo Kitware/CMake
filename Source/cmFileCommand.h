@@ -97,7 +97,8 @@ public:
       "Examples of recursive globbing include:\n"
       "   /dir/*.py  - match all python files in /dir and subdirectories\n"
       "MAKE_DIRECTORY will create a directory at the specified location\n"
-      "RELATIVE_PATH will determine relative path from directory to the given file";
+      "RELATIVE_PATH will determine relative path from directory to the given"
+      " file";
     }
   
   cmTypeMacro(cmFileCommand, cmCommand);

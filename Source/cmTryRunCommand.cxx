@@ -56,7 +56,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         if ( argv.size() <= (i+1) )
           {
           cmSystemTools::Error(
-                               "OUTPUT_VARIABLE specified but there is no variable");
+            "OUTPUT_VARIABLE specified but there is no variable");
           return false;
           }
         outputVariable = argv[i+1];
@@ -64,7 +64,8 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
       }
     }
   // do the try compile
-  int res = cmTryCompileCommand::CoreTryCompileCode(m_Makefile, tryCompile, false);
+  int res = cmTryCompileCommand::CoreTryCompileCode(m_Makefile, tryCompile,
+                                                    false);
   
   // now try running the command if it compiled
   std::string binaryDirectory = argv[2] + "/CMakeFiles/CMakeTmp";

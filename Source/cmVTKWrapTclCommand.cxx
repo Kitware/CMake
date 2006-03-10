@@ -163,7 +163,8 @@ void cmVTKWrapTclCommand::FinalPass()
       {
       commandLine.push_back(hints);
       }
-    commandLine.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
+    commandLine.push_back(
+      (m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
     std::string res = m_Makefile->GetCurrentOutputDirectory();
     res += "/";
     res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
@@ -225,7 +226,8 @@ bool cmVTKWrapTclCommand::WriteInit(const char *kitName,
   FILE *fout = fopen(tempOutputFile.c_str(),"w");
   if (!fout)
     {
-    cmSystemTools::Error("Failed to open TclInit file for ", tempOutputFile.c_str());
+    cmSystemTools::Error("Failed to open TclInit file for ",
+                         tempOutputFile.c_str());
     cmSystemTools::ReportLastSystemError("");
     return false;
     }

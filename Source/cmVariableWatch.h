@@ -36,7 +36,8 @@ public:
   /**
    * Add watch to the variable
    */
-  void AddWatch(const std::string& variable, WatchMethod method, void* client_data=0);
+  void AddWatch(const std::string& variable, WatchMethod method,
+                void* client_data=0);
   void RemoveWatch(const std::string& variable, WatchMethod method);
   
   /**

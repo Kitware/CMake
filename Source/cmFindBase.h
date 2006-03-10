@@ -59,8 +59,9 @@ protected:
   std::vector<std::string> Names;
   std::vector<std::string> SearchPaths;
   std::vector<std::string> SearchPathSuffixes;
-  
-  cmStdString CMakePathName; // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
+
+  // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
+  cmStdString CMakePathName; 
   cmStdString EnvironmentPath; // LIB,INCLUDE
 
   bool AlreadyInCache;

@@ -47,15 +47,19 @@ public:
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.  
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages, cmMakefile *);
+  virtual void EnableLanguage(std::vector<std::string>const& languages, 
+                              cmMakefile *);
 
   /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
    */
   virtual std::string GenerateBuildCommand(const char* makeProgram,
-    const char *projectName, const char* additionalOptions, const char *targetName, const char* config,
-    bool ignoreErrors);
+                                           const char *projectName, 
+                                           const char* additionalOptions, 
+                                           const char *targetName,
+                                           const char* config,
+                                           bool ignoreErrors);
 
   /**
    * Generate the all required files for building this project/tree. This
@@ -99,7 +103,8 @@ protected:
                             const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectDepends(std::ostream& fout, 
                            const char* name, const char* path, cmTarget &t);
-  virtual void WriteProjectConfigurations(std::ostream& fout, const char* name, bool in_all);
+  virtual void WriteProjectConfigurations(std::ostream& fout, const char* name,
+                                          bool in_all);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
 

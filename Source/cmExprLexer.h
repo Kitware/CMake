@@ -189,16 +189,22 @@ struct yy_buffer_state
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
 void cmExpr_yyrestart (FILE *input_file ,yyscan_t yyscanner );
-void cmExpr_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmExpr_yy_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void cmExpr_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,
+                                 yyscan_t yyscanner );
+YY_BUFFER_STATE cmExpr_yy_create_buffer (FILE *file,int size ,
+                                         yyscan_t yyscanner );
 void cmExpr_yy_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
 void cmExpr_yy_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmExpr_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void cmExpr_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,
+                                 yyscan_t yyscanner );
 void cmExpr_yypop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE cmExpr_yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmExpr_yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmExpr_yy_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE cmExpr_yy_scan_buffer (char *base,yy_size_t size ,
+                                       yyscan_t yyscanner );
+YY_BUFFER_STATE cmExpr_yy_scan_string (yyconst char *yy_str ,
+                                       yyscan_t yyscanner );
+YY_BUFFER_STATE cmExpr_yy_scan_bytes (yyconst char *bytes,int len ,
+                                      yyscan_t yyscanner );
 
 void *cmExpr_yyalloc (yy_size_t ,yyscan_t yyscanner );
 void *cmExpr_yyrealloc (void *,yy_size_t ,yyscan_t yyscanner );

@@ -94,7 +94,8 @@ CopyAndFullPathMesaHeader(const char* source,
   // input file at the same time
   std::string inLine;  
   // regular expression for any #include line
-  cmsys::RegularExpression includeLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
+  cmsys::RegularExpression includeLine(
+    "^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
   // regular expression for gl/ or GL/ in a file (match(1) of above)
   cmsys::RegularExpression glDirLine("(gl|GL)(/|\\\\)([^<\"]+)");
   // regular expression for gl GL or xmesa in a file (match(1) of above)
@@ -111,7 +112,8 @@ CopyAndFullPathMesaHeader(const char* source,
         }
       else if(glLine.find(includeFile.c_str()))
         {
-        fout << "#include \"" << outdir << "/" << includeLine.match(1).c_str() << "\"\n";
+        fout << "#include \"" << outdir << "/" << 
+          includeLine.match(1).c_str() << "\"\n";
         }
       else
         {

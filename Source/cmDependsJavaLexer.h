@@ -185,16 +185,22 @@ struct yy_buffer_state
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
 void cmDependsJava_yyrestart (FILE *input_file ,yyscan_t yyscanner );
-void cmDependsJava_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmDependsJava_yy_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void cmDependsJava_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,
+                                        yyscan_t yyscanner );
+YY_BUFFER_STATE cmDependsJava_yy_create_buffer (FILE *file,int size ,
+                                                yyscan_t yyscanner );
 void cmDependsJava_yy_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
 void cmDependsJava_yy_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmDependsJava_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void cmDependsJava_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,
+                                        yyscan_t yyscanner );
 void cmDependsJava_yypop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE cmDependsJava_yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmDependsJava_yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmDependsJava_yy_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE cmDependsJava_yy_scan_buffer (char *base,yy_size_t size ,
+                                              yyscan_t yyscanner );
+YY_BUFFER_STATE cmDependsJava_yy_scan_string (yyconst char *yy_str ,
+                                              yyscan_t yyscanner );
+YY_BUFFER_STATE cmDependsJava_yy_scan_bytes (yyconst char *bytes,int len ,
+                                             yyscan_t yyscanner );
 
 void *cmDependsJava_yyalloc (yy_size_t ,yyscan_t yyscanner );
 void *cmDependsJava_yyrealloc (void *,yy_size_t ,yyscan_t yyscanner );
@@ -229,7 +235,8 @@ void cmDependsJava_yyset_debug (int debug_flag ,yyscan_t yyscanner );
 
 YY_EXTRA_TYPE cmDependsJava_yyget_extra (yyscan_t yyscanner );
 
-void cmDependsJava_yyset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void cmDependsJava_yyset_extra (YY_EXTRA_TYPE user_defined ,
+                                yyscan_t yyscanner );
 
 FILE *cmDependsJava_yyget_in (yyscan_t yyscanner );
 
@@ -292,7 +299,8 @@ extern int cmDependsJava_yylex (yyscan_t yyscanner);
 #define YY_DECL int cmDependsJava_yylex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
-/* yy_get_previous_state - get the state just before the EOB char was reached */
+/* yy_get_previous_state - get the state just before the
+   EOB char was reached */
 
 #undef YY_NEW_FILE
 #undef YY_FLUSH_BUFFER

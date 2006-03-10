@@ -212,7 +212,8 @@ const std::string& cmSourceFile::GetSourceNameWithoutLastExtension()
 {
   if ( m_SourceNameWithoutLastExtension.empty() )
     {
-    m_SourceNameWithoutLastExtension = cmSystemTools::GetFilenameWithoutLastExtension(m_FullPath);
+    m_SourceNameWithoutLastExtension = 
+      cmSystemTools::GetFilenameWithoutLastExtension(m_FullPath);
     }
   return m_SourceNameWithoutLastExtension;
 }

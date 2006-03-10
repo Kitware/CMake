@@ -49,7 +49,8 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   
   // Prepare java dependency file
-  const char* resultDirectory = m_Makefile->GetRequiredDefinition("VTK_JAVA_HOME");
+  const char* resultDirectory = 
+    m_Makefile->GetRequiredDefinition("VTK_JAVA_HOME");
   std::string res = m_Makefile->GetCurrentOutputDirectory();
   std::string depFileName = res + "/JavaDependencies.cmake";
   std::ofstream depFile(depFileName.c_str());
@@ -113,7 +114,8 @@ void cmVTKWrapJavaCommand::FinalPass()
   const char* wjava = m_Makefile->GetRequiredDefinition("VTK_WRAP_JAVA_EXE");
   const char* pjava = m_Makefile->GetRequiredDefinition("VTK_PARSE_JAVA_EXE");
   const char* hints = m_Makefile->GetDefinition("VTK_WRAP_HINTS");
-  const char* resultDirectory = m_Makefile->GetRequiredDefinition("VTK_JAVA_HOME");
+  const char* resultDirectory = 
+    m_Makefile->GetRequiredDefinition("VTK_JAVA_HOME");
 
   // wrap all the .h files
   depends.push_back(wjava);
@@ -143,7 +145,8 @@ void cmVTKWrapJavaCommand::FinalPass()
       {
       commandLineW.push_back(hints);
       }
-    commandLineW.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
+    commandLineW.push_back(
+      (m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
     commandLineW.push_back(res);
 
     cmCustomCommandLines commandLines;
@@ -165,7 +168,8 @@ void cmVTKWrapJavaCommand::FinalPass()
       {
       commandLineP.push_back(hints);
       }
-    commandLineP.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
+    commandLineP.push_back(
+      (m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
     commandLineP.push_back(res2);
 
     cmCustomCommandLines commandLines2;

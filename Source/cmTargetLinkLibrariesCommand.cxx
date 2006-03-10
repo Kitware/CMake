@@ -17,7 +17,8 @@
 #include "cmTargetLinkLibrariesCommand.h"
 
 // cmTargetLinkLibrariesCommand
-bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args)
+bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> 
+                                               const& args)
 {
   // must have one argument
   if(args.size() < 1)
@@ -55,7 +56,8 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& a
       ++i;
       if(i == args.end())
         {
-        this->SetError("The \"optimized\" argument must be followed by a library");
+        this->SetError(
+          "The \"optimized\" argument must be followed by a library");
         return false;
         }
       m_Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),

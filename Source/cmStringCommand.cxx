@@ -226,7 +226,8 @@ bool cmStringCommand::HandleRegexCommand(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
 {
-  //"STRING(REGEX MATCH <regular_expression> <output variable> <input> [<input>...])\n";
+  //"STRING(REGEX MATCH <regular_expression> <output variable>
+  // <input> [<input>...])\n";
   std::string regex = args[2];
   std::string outvar = args[3];
   
@@ -241,7 +242,8 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
   cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
     {
-    std::string e = "sub-command REGEX, mode MATCH failed to compile regex \""+regex+"\".";
+    std::string e = 
+      "sub-command REGEX, mode MATCH failed to compile regex \""+regex+"\".";
     this->SetError(e.c_str());
     return false;
     }
@@ -254,7 +256,9 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
     std::string::size_type r = re.end();
     if(r-l == 0)
       {
-      std::string e = "sub-command REGEX, mode MATCH regex \""+regex+"\" matched an empty string.";
+      std::string e = 
+        "sub-command REGEX, mode MATCH regex \""+regex+
+        "\" matched an empty string.";
       this->SetError(e.c_str());
       return false;
       }
@@ -269,7 +273,8 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
 {
-  //"STRING(REGEX MATCHALL <regular_expression> <output variable> <input> [<input>...])\n";
+  //"STRING(REGEX MATCHALL <regular_expression> <output variable> <input> 
+  // [<input>...])\n";
   std::string regex = args[2];
   std::string outvar = args[3];
   
@@ -284,7 +289,9 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
   cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
     {
-    std::string e = "sub-command REGEX, mode MATCHALL failed to compile regex \""+regex+"\".";
+    std::string e =
+      "sub-command REGEX, mode MATCHALL failed to compile regex \""+
+      regex+"\".";
     this->SetError(e.c_str());
     return false;
     }
@@ -298,7 +305,8 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
     std::string::size_type r = re.end();
     if(r-l == 0)
       {
-      std::string e = "sub-command REGEX, mode MATCHALL regex \""+regex+"\" matched an empty string.";
+      std::string e = "sub-command REGEX, mode MATCHALL regex \""+
+        regex+"\" matched an empty string.";
       this->SetError(e.c_str());
       return false;
       }
@@ -318,7 +326,8 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
 {
-  //"STRING(REGEX REPLACE <regular_expression> <replace_expression> <output variable> <input> [<input>...])\n"
+  //"STRING(REGEX REPLACE <regular_expression> <replace_expression> 
+  // <output variable> <input> [<input>...])\n"
   std::string regex = args[2];
   std::string replace = args[3];  
   std::string outvar = args[4];
@@ -382,7 +391,9 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
     {
-    std::string e = "sub-command REGEX, mode REPLACE failed to compile regex \""+regex+"\".";
+    std::string e = 
+      "sub-command REGEX, mode REPLACE failed to compile regex \""+
+      regex+"\".";
     this->SetError(e.c_str());
     return false;
     }
@@ -401,7 +412,8 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
     // Make sure the match had some text.
     if(r-l2 == 0)
       {
-      std::string e = "sub-command REGEX, mode REPLACE regex \""+regex+"\" matched an empty string.";
+      std::string e = "sub-command REGEX, mode REPLACE regex \""+
+        regex+"\" matched an empty string.";
       this->SetError(e.c_str());
       return false;
       }
@@ -451,7 +463,8 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmStringCommand::HandleCompareCommand(std::vector<std::string> const& args)
+bool cmStringCommand::HandleCompareCommand(std::vector<std::string> const&
+                                           args)
 {
   if(args.size() < 2)
     {
@@ -507,7 +520,8 @@ bool cmStringCommand::HandleCompareCommand(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const& args)
+bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const&
+                                           args)
 {
   if(args.size() < 5)
     {
@@ -525,14 +539,16 @@ bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const& args)
     input += args[i];
     }
 
-  cmsys::SystemTools::ReplaceString(input, matchExpression.c_str(), replaceExpression.c_str());
+  cmsys::SystemTools::ReplaceString(input, matchExpression.c_str(), 
+                                    replaceExpression.c_str());
 
   m_Makefile->AddDefinition(variableName.c_str(), input.c_str());
   return true;
 }
 
 //----------------------------------------------------------------------------
-bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const& args)
+bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const& 
+                                             args)
 {
   if(args.size() != 5)
     {
@@ -550,7 +566,8 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const& arg
   if ( begin < 0 || begin > intStringLength )
     {
     cmOStringStream ostr;
-    ostr << "begin index: " << begin << " is out of range 0 - " << stringLength;
+    ostr << "begin index: " << begin << " is out of range 0 - "
+         << stringLength;
     this->SetError(ostr.str().c_str());
     return false;
     }
@@ -558,12 +575,14 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const& arg
   if ( end < 0 || end > leftOverLength )
     {
     cmOStringStream ostr;
-    ostr << "end index: " << end << " is out of range " << 0 << " - " << leftOverLength;
+    ostr << "end index: " << end << " is out of range " << 0 << " - "
+         << leftOverLength;
     this->SetError(ostr.str().c_str());
     return false;
     }
 
-  m_Makefile->AddDefinition(variableName.c_str(), stringValue.substr(begin, end).c_str());
+  m_Makefile->AddDefinition(variableName.c_str(),
+                            stringValue.substr(begin, end).c_str());
   return true;
 }
 

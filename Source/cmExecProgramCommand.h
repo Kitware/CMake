@@ -59,7 +59,9 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Run and executable program during the processing of the CMakeList.txt file.";
+    return 
+      "Run and executable program during the processing of the CMakeList.txt"
+      " file.";
     }
   
   /**

@@ -275,7 +275,8 @@ cmVTKMakeInstantiatorCommand
   // Write the extern declarations for all the creation functions.
   for(unsigned int i=0;i < m_Classes.size();++i)
     {
-    os << "extern vtkObject* vtkInstantiator" << m_Classes[i].c_str() << "New();\n";
+    os << "extern vtkObject* vtkInstantiator" << m_Classes[i].c_str() 
+       << "New();\n";
     }
   
   // Write the ClassInitialize method to register all the creation functions.
@@ -405,7 +406,8 @@ cmVTKMakeInstantiatorCommand
   os <<
     "};\n"
     "\n"
-    "class " << m_ExportMacro.c_str() << " " << m_ClassName.c_str() << "Initialize\n"
+    "class " << m_ExportMacro.c_str() << " " << m_ClassName.c_str() 
+     << "Initialize\n"
     "{\n"
     "public:\n"
     "  " << m_ClassName.c_str() << "Initialize();\n"
@@ -414,7 +416,8 @@ cmVTKMakeInstantiatorCommand
     "  static unsigned int Count;\n"
     "};\n"
     "\n"
-    "static " << m_ClassName.c_str() << "Initialize " << m_ClassName.c_str() << "Initializer;\n"
+    "static " << m_ClassName.c_str() << "Initialize " << m_ClassName.c_str() 
+     << "Initializer;\n"
     "\n"
     "#endif\n";  
 }
@@ -460,13 +463,15 @@ cmVTKMakeInstantiatorCommand
   os <<
     "}\n"
     "\n" <<
-    m_ClassName.c_str() << "Initialize::" << m_ClassName.c_str() << "Initialize()\n"
+    m_ClassName.c_str() << "Initialize::" << m_ClassName.c_str() 
+     << "Initialize()\n"
     "{\n"
     "  if(++" << m_ClassName.c_str() << "Initialize::Count == 1)\n"
     "    { " << m_ClassName.c_str() << "::ClassInitialize(); }\n"
     "}\n"
     "\n" <<
-    m_ClassName.c_str() << "Initialize::~" << m_ClassName.c_str() << "Initialize()\n"
+    m_ClassName.c_str() << "Initialize::~" << m_ClassName.c_str() 
+     << "Initialize()\n"
     "{\n"
     "  if(--" << m_ClassName.c_str() << "Initialize::Count == 0)\n"
     "    { " << m_ClassName.c_str() << "::ClassFinalize(); }\n"
