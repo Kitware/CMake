@@ -31,6 +31,11 @@ kwsys_stl::string GetLibName(const char* lname)
 {
   // Construct proper name of lib
   kwsys_stl::string slname;
+  slname = EXECUTABLE_OUTPUT_PATH;
+#ifdef CMAKE_INTDIR
+  slname += CMAKE_INTDIR;
+  slname += "/";
+#endif
   slname = kwsys::DynamicLoader::LibPrefix();
   slname += lname;
   slname += kwsys::DynamicLoader::LibExtension();
@@ -86,7 +91,7 @@ int main(int , char *[])
   res += TestDynamicLoader("libdl.so", "TestDynamicLoader",1,0,1);
 #endif
   // Now try on the generated library
-  kwsys_stl::string libname = TEST_DYNLOAD_LOCATION; //GetLibName("testDynload");
+  kwsys_stl::string libname = GetLibName("testDynload");
   res += TestDynamicLoader(libname.c_str(), "dummy",1,0,1);
   res += TestDynamicLoader(libname.c_str(), "TestDynamicLoaderFunction",1,1,1);
   res += TestDynamicLoader(libname.c_str(), "_TestDynamicLoaderFunction",1,0,1);
