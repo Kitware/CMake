@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -23,7 +23,7 @@
 /** \class cmMacroFunctionBlocker
  * \brief subclass of function blocker
  *
- * 
+ *
  */
 class cmMacroFunctionBlocker : public cmFunctionBlocker
 {
@@ -33,7 +33,7 @@ public:
   virtual bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile &mf);
   virtual bool ShouldRemove(const cmListFileFunction&, cmMakefile &mf);
   virtual void ScopeEnded(cmMakefile &mf);
-  
+
   std::vector<std::string> m_Args;
   std::vector<cmListFileFunction> m_Functions;
 };
@@ -49,7 +49,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmMacroCommand;
     }
@@ -73,11 +73,11 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Start recording a macro for later invocation as a command.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -93,8 +93,8 @@ public:
       "arg1 arg2 arg3 (...).  Commands listed after MACRO, "
       "but before the matching ENDMACRO, are not invoked until the macro "
       "is invoked.  When it is invoked, the commands recorded in the "
-      "macro are first modified by replacing formal parameters (${arg1}) with "
-      "the arguments passed, and then invoked as normal commands. In "
+      "macro are first modified by replacing formal parameters (${arg1}) "
+      "with the arguments passed, and then invoked as normal commands. In "
       "addition to referencing the formal parameters you can reference "
       "the variable ARGC which will be set to the number of arguments "
       "passed into the function as well as ARGV0 ARGV1 ARGV2 ... which "
@@ -103,7 +103,7 @@ public:
       "ARGV holds the list of all arguments given to the macro and ARGN "
       "holds the list of argument pass the last expected argument.";
     }
-  
+
   cmTypeMacro(cmMacroCommand, cmCommand);
 };
 

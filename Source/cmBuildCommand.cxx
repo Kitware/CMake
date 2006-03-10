@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -32,8 +32,9 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
     = m_Makefile->GetDefinition(define);
   std::string makeprogram = args[1];
   std::string makecommand
-    = m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->GenerateBuildCommand(
-    makeprogram.c_str(), m_Makefile->GetProjectName(), 0,
+    = m_Makefile->GetLocalGenerator()
+    ->GetGlobalGenerator()->GenerateBuildCommand(
+      makeprogram.c_str(), m_Makefile->GetProjectName(), 0,
     0, "Release", true);
 
   if(cacheValue)

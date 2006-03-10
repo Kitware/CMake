@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -26,7 +26,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     return false;
     }
 
-  
+
   std::vector<std::string>::const_iterator i = args.begin();
   std::string extraInclude;
   std::string function;
@@ -63,7 +63,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
       }
     }
   i = tests.begin();
-  
+
   // Name of the source list
 
   const char* sourceList = i->c_str();
@@ -73,7 +73,8 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
   // make sure they specified an extension
   if (cmSystemTools::GetFilenameExtension(*i).size() < 2)
     {
-    this->SetError("You must specify a file extenion for the test driver file.");
+    this->SetError(
+      "You must specify a file extenion for the test driver file.");
     return false;
     }
   std::string driver = m_Makefile->GetCurrentOutputDirectory();
@@ -81,18 +82,18 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
   driver += *i;
   ++i;
 
-  std::string configFile = 
+  std::string configFile =
     m_Makefile->GetRequiredDefinition("CMAKE_ROOT");
   configFile += "/Templates/TestDriver.cxx.in";
   // Create the test driver file
-  
+
   std::vector<std::string>::const_iterator testsBegin = i;
   std::vector<std::string> tests_func_name;
 
   // The rest of the arguments consist of a list of test source files.
-  // Sadly, they can be in directories. Let's find a unique function 
+  // Sadly, they can be in directories. Let's find a unique function
   // name for the corresponding test, and push it to the tests_func_name
-  // list. 
+  // list.
   // For the moment:
   //   - replace spaces ' ', ':' and '/' with underscores '_'
   std::string forwardDeclareCode;
@@ -105,7 +106,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     std::string func_name;
     if (cmSystemTools::GetFilenamePath(*i).size() > 0)
       {
-      func_name = cmSystemTools::GetFilenamePath(*i) + "/" + 
+      func_name = cmSystemTools::GetFilenamePath(*i) + "/" +
         cmSystemTools::GetFilenameWithoutLastExtension(*i);
       }
     else
@@ -121,7 +122,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     forwardDeclareCode += func_name;
     forwardDeclareCode += "(int, char*[]);\n";
     }
-  
+
   std::string functionMapCode;
   int numTests = 0;
   std::vector<std::string>::iterator j;
@@ -130,7 +131,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     std::string func_name;
     if (cmSystemTools::GetFilenamePath(*i).size() > 0)
       {
-      func_name = cmSystemTools::GetFilenamePath(*i) + "/" + 
+      func_name = cmSystemTools::GetFilenamePath(*i) + "/" +
         cmSystemTools::GetFilenameWithoutLastExtension(*i);
       }
     else
@@ -149,16 +150,21 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     }
   if(extraInclude.size())
     {
-    m_Makefile->AddDefinition("CMAKE_TESTDRIVER_EXTRA_INCLUDES", extraInclude.c_str());
+    m_Makefile->AddDefinition("CMAKE_TESTDRIVER_EXTRA_INCLUDES",
+      extraInclude.c_str());
     }
   if(function.size())
     {
-    m_Makefile->AddDefinition("CMAKE_TESTDRIVER_ARGVC_FUNCTION", function.c_str());
+    m_Makefile->AddDefinition("CMAKE_TESTDRIVER_ARGVC_FUNCTION",
+      function.c_str());
     }
-  m_Makefile->AddDefinition("CMAKE_FORWARD_DECLARE_TESTS", forwardDeclareCode.c_str());
-  m_Makefile->AddDefinition("CMAKE_FUNCTION_TABLE_ENTIRES", functionMapCode.c_str());
+  m_Makefile->AddDefinition("CMAKE_FORWARD_DECLARE_TESTS",
+    forwardDeclareCode.c_str());
+  m_Makefile->AddDefinition("CMAKE_FUNCTION_TABLE_ENTIRES",
+    functionMapCode.c_str());
   bool res = true;
-  if ( !m_Makefile->ConfigureFile(configFile.c_str(), driver.c_str(), false, true, false) )
+  if ( !m_Makefile->ConfigureFile(configFile.c_str(), driver.c_str(),
+      false, true, false) )
     {
     res = false;
     }
@@ -166,22 +172,22 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
   // Create the source list
   cmSourceFile cfile;
   std::string sourceListValue;
-  
+
   cfile.SetProperty("ABSTRACT","0");
-  cfile.SetName(cmSystemTools::GetFilenameWithoutExtension(args[1]).c_str(), 
+  cfile.SetName(cmSystemTools::GetFilenameWithoutExtension(args[1]).c_str(),
                 m_Makefile->GetCurrentOutputDirectory(),
-                cmSystemTools::GetFilenameExtension(args[1]).c_str()+1, 
+                cmSystemTools::GetFilenameExtension(args[1]).c_str()+1,
                 false);
   m_Makefile->AddSource(cfile);
   sourceListValue = args[1];
-    
+
   for(i = testsBegin; i != tests.end(); ++i)
     {
     cmSourceFile icfile;
     icfile.SetProperty("ABSTRACT","0");
-    icfile.SetName(i->c_str(), 
+    icfile.SetName(i->c_str(),
                   m_Makefile->GetCurrentDirectory(),
-                  m_Makefile->GetSourceExtensions(), 
+                  m_Makefile->GetSourceExtensions(),
                   m_Makefile->GetHeaderExtensions());
     m_Makefile->AddSource(icfile);
     sourceListValue += ";";

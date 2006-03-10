@@ -29,7 +29,7 @@
   do { \
   cmOStringStream cmCPackLog_msg; \
   cmCPackLog_msg << msg; \
-  m_Logger->Log(logType, __FILE__, __LINE__, cmCPackLog_msg.str().c_str());\
+  this->Logger->Log(logType, __FILE__, __LINE__, cmCPackLog_msg.str().c_str());\
   } while ( 0 )
 
 #ifdef cerr
@@ -56,7 +56,7 @@ public:
   /**
    * If verbose then more informaiton is printed out
    */
-  void SetVerbose(bool val) { m_GeneratorVerbose = val; }
+  void SetVerbose(bool val) { this->GeneratorVerbose = val; }
 
   /**
    * Do the actual processing. Subclass has to override it.
@@ -83,7 +83,7 @@ public:
   int FindRunningCMake(const char* arg0);
 
   //! Set the logger
-  void SetLogger(cmCPackLog* log) { m_Logger = log; }
+  void SetLogger(cmCPackLog* log) { this->Logger = log; }
 
 protected:
   int PrepareNames();
@@ -99,19 +99,19 @@ protected:
   virtual std::string FindTemplate(const char* name);
   virtual bool ConfigureFile(const char* inName, const char* outName);
 
-  bool m_GeneratorVerbose;
-  std::string m_Name;
+  bool GeneratorVerbose;
+  std::string Name;
 
-  std::string m_InstallPath;
+  std::string InstallPath;
 
-  std::string m_CPackSelf;
-  std::string m_CMakeSelf;
-  std::string m_CMakeRoot;
+  std::string CPackSelf;
+  std::string CMakeSelf;
+  std::string CMakeRoot;
 
-  cmCPackLog* m_Logger;
+  cmCPackLog* Logger;
 
 private:
-  cmMakefile* m_MakefileMap;
+  cmMakefile* MakefileMap;
 };
 
 #endif

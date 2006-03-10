@@ -37,7 +37,8 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
 cmCustomCommand::cmCustomCommand(const char* output,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
-                                 const char* comment, const char* workingDirectory):
+                                 const char* comment,
+                                 const char* workingDirectory):
   m_Output(output?output:""),
   m_Depends(depends),
   m_CommandLines(commandLines),

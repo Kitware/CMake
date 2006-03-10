@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -31,7 +31,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmAddExecutableCommand;
     }
@@ -50,11 +50,12 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
-    return "Add an executable to the project using the specified source files.";
+    return
+      "Add an executable to the project using the specified source files.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -68,15 +69,15 @@ public:
       "specified.\n"
       "After specifying the executable name, WIN32 and/or MACOSX_BUNDLE can "
       "be specified. WIN32 indicates that the executable (when compiled on "
-      "windows) is a windows app (using WinMain) not a console app (using main). "
-      "The variable CMAKE_MFC_FLAG be used if the windows app uses MFC. "
-      "This variable can be set to the following values:\n"
+      "windows) is a windows app (using WinMain) not a console app "
+      "(using main). The variable CMAKE_MFC_FLAG be used if the windows app "
+      "uses MFC. This variable can be set to the following values:\n"
       " 0: Use Standard Windows Libraries\n"
       " 1: Use MFC in a Static Library \n"
       " 2: Use MFC in a Shared DLL \n"
       "MACOSX_BUNDLE indicates that when build on Mac OSX, executable should "
-      "be in the bundle form. The MACOSX_BUNDLE also allows several variables "
-      "to be specified:\n"
+      "be in the bundle form. The MACOSX_BUNDLE also allows several "
+      "variables to be specified:\n"
       "  MACOSX_BUNDLE_INFO_STRING\n"
       "  MACOSX_BUNDLE_ICON_FILE\n"
       "  MACOSX_BUNDLE_GUI_IDENTIFIER\n"
@@ -87,7 +88,7 @@ public:
       "  MACOSX_BUNDLE_COPYRIGHT\n"
       ;
     }
-  
+
   cmTypeMacro(cmAddExecutableCommand, cmCommand);
 };
 

@@ -95,7 +95,7 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
   std::string output;
   int retVal = 1;
   //bool res = cmSystemTools::RunSingleCommand(pkgCmd.str().c_str(), &output,
-  //&retVal, 0, m_GeneratorVerbose, 0);
+  //&retVal, 0, this->GeneratorVerbose, 0);
   bool res = true;
   retVal = system(pkgCmd.str().c_str());
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Done running package maker"
@@ -120,7 +120,7 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
     << "\" create -ov -format UDZO -srcfolder \"" << packageDirFileName
     << "\" \"" << outFileName << "\"";
   res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
-    &retVal, 0, m_GeneratorVerbose, 0);
+    &retVal, 0, this->GeneratorVerbose, 0);
   if ( !res || retVal )
     {
     cmGeneratedFileStream ofs(tmpFile.c_str());

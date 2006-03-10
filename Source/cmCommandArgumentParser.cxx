@@ -1,7 +1,8 @@
 /* A Bison parser, made by GNU Bison 1.875d.  */
 
 /* Skeleton parser for Yacc-like parsing with Bison,
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -115,7 +116,9 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmCommandArgument_yy --defines=cmCommandArgumentParserTokens.h -ocmCommandArgumentParser.cxx cmCommandArgumentParser.y
+  bison --yacc --name-prefix=cmCommandArgument_yy \
+    --defines=cmCommandArgumentParserTokens.h \
+    -ocmCommandArgumentParser.cxx cmCommandArgumentParser.y
 
 Modify cmCommandArgumentParser.cxx:
   - remove TABs
@@ -153,7 +156,7 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 #endif
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
-# pragma warning (disable: 4065) /* Switch statement contains default but no case. */
+# pragma warning (disable: 4065) /* Switch contains default but no case. */
 #endif
 
 
@@ -1171,7 +1174,6 @@ yyreduce:
 
     {
   yyval.str = yyGetParser->ExpandSpecialVariable(yyvsp[-2].str,yyvsp[-1].str);
-  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
 }
     break;
 
@@ -1179,7 +1181,6 @@ yyreduce:
 
     {
   yyval.str = yyGetParser->ExpandVariable(yyvsp[-1].str);
-  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
 }
     break;
 

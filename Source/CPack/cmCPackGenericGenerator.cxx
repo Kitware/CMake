@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -31,21 +31,21 @@
 //----------------------------------------------------------------------
 cmCPackGenericGenerator::cmCPackGenericGenerator()
 {
-  m_GeneratorVerbose = false;
-  m_MakefileMap = 0;
-  m_Logger = 0;
+  this->GeneratorVerbose = false;
+  this->MakefileMap = 0;
+  this->Logger = 0;
 }
 
 //----------------------------------------------------------------------
 cmCPackGenericGenerator::~cmCPackGenericGenerator()
 {
-  m_MakefileMap = 0;
+  this->MakefileMap = 0;
 }
 
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::PrepareNames()
 {
-  this->SetOption("CPACK_GENERATOR", m_Name.c_str());
+  this->SetOption("CPACK_GENERATOR", this->Name.c_str());
   std::string tempDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   tempDirectory += "/_CPack_Packages/";
   tempDirectory += this->GetOption("CPACK_GENERATOR");
@@ -157,7 +157,7 @@ int cmCPackGenericGenerator::InstallProject()
       std::string output;
       int retVal = 1;
       bool resB = cmSystemTools::RunSingleCommand(it->c_str(), &output,
-        &retVal, 0, m_GeneratorVerbose, 0);
+        &retVal, 0, this->GeneratorVerbose, 0);
       if ( !resB || retVal )
         {
         std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -272,12 +272,12 @@ void cmCPackGenericGenerator::SetOption(const char* op, const char* value)
     }
   if ( !value )
     {
-    m_MakefileMap->RemoveDefinition(op);
+    this->MakefileMap->RemoveDefinition(op);
     return;
     }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, this->GetNameOfClass()
     << "::SetOption(" << op << ", " << value << ")" << std::endl);
-  m_MakefileMap->AddDefinition(op, value);
+  this->MakefileMap->AddDefinition(op, value);
 }
 
 //----------------------------------------------------------------------
@@ -346,15 +346,15 @@ int cmCPackGenericGenerator::ProcessGenerator()
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::Initialize(const char* name, cmMakefile* mf)
 {
-  m_MakefileMap = mf;
-  m_Name = name;
+  this->MakefileMap = mf;
+  this->Name = name;
   return 1;
 }
 
 //----------------------------------------------------------------------
 const char* cmCPackGenericGenerator::GetOption(const char* op)
 {
-  return m_MakefileMap->GetDefinition(op);
+  return this->MakefileMap->GetDefinition(op);
 }
 
 //----------------------------------------------------------------------
@@ -363,18 +363,18 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
   int found = 0;
   // Find our own executable.
   std::vector<cmStdString> failures;
-  m_CPackSelf = arg0;
-  cmSystemTools::ConvertToUnixSlashes(m_CPackSelf);
-  failures.push_back(m_CPackSelf);
-  m_CPackSelf = cmSystemTools::FindProgram(m_CPackSelf.c_str());
-  if(!cmSystemTools::FileExists(m_CPackSelf.c_str()))
+  this->CPackSelf = arg0;
+  cmSystemTools::ConvertToUnixSlashes(this->CPackSelf);
+  failures.push_back(this->CPackSelf);
+  this->CPackSelf = cmSystemTools::FindProgram(this->CPackSelf.c_str());
+  if(!cmSystemTools::FileExists(this->CPackSelf.c_str()))
     {
-    failures.push_back(m_CPackSelf);
-    m_CPackSelf =  "/usr/local/bin/ctest";
+    failures.push_back(this->CPackSelf);
+    this->CPackSelf =  "/usr/local/bin/ctest";
     }
-  if(!cmSystemTools::FileExists(m_CPackSelf.c_str()))
+  if(!cmSystemTools::FileExists(this->CPackSelf.c_str()))
     {
-    failures.push_back(m_CPackSelf);
+    failures.push_back(this->CPackSelf);
     cmOStringStream msg;
     msg << "CTEST can not find the command line program ctest.\n";
     msg << "  argv[0] = \"" << arg0 << "\"\n";
@@ -388,33 +388,33 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     }
   std::string dir;
   std::string file;
-  if(cmSystemTools::SplitProgramPath(m_CPackSelf.c_str(),
+  if(cmSystemTools::SplitProgramPath(this->CPackSelf.c_str(),
       dir, file, true))
     {
-    m_CMakeSelf = dir += "/cmake";
-    m_CMakeSelf += cmSystemTools::GetExecutableExtension();
-    if(cmSystemTools::FileExists(m_CMakeSelf.c_str()))
+    this->CMakeSelf = dir += "/cmake";
+    this->CMakeSelf += cmSystemTools::GetExecutableExtension();
+    if(cmSystemTools::FileExists(this->CMakeSelf.c_str()))
       {
       found = 1;
       }
     }
   if ( !found )
     {
-    failures.push_back(m_CMakeSelf);
+    failures.push_back(this->CMakeSelf);
 #ifdef CMAKE_BUILD_DIR
     std::string intdir = ".";
 #ifdef  CMAKE_INTDIR
     intdir = CMAKE_INTDIR;
 #endif
-    m_CMakeSelf = CMAKE_BUILD_DIR;
-    m_CMakeSelf += "/bin/";
-    m_CMakeSelf += intdir;
-    m_CMakeSelf += "/cmake";
-    m_CMakeSelf += cmSystemTools::GetExecutableExtension();
+    this->CMakeSelf = CMAKE_BUILD_DIR;
+    this->CMakeSelf += "/bin/";
+    this->CMakeSelf += intdir;
+    this->CMakeSelf += "/cmake";
+    this->CMakeSelf += cmSystemTools::GetExecutableExtension();
 #endif
-    if(!cmSystemTools::FileExists(m_CMakeSelf.c_str()))
+    if(!cmSystemTools::FileExists(this->CMakeSelf.c_str()))
       {
-      failures.push_back(m_CMakeSelf);
+      failures.push_back(this->CMakeSelf);
       cmOStringStream msg;
       msg << "CTEST can not find the command line program cmake.\n";
       msg << "  argv[0] = \"" << arg0 << "\"\n";
@@ -439,14 +439,14 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
   if(modules.empty() || !cmSystemTools::FileExists(modules.c_str()))
     {
     // next try exe/..
-    cMakeRoot  = cmSystemTools::GetProgramPath(m_CMakeSelf.c_str());
+    cMakeRoot  = cmSystemTools::GetProgramPath(this->CMakeSelf.c_str());
     std::string::size_type slashPos = cMakeRoot.rfind("/");
-    if(slashPos != std::string::npos)      
+    if(slashPos != std::string::npos)
       {
       cMakeRoot = cMakeRoot.substr(0, slashPos);
       }
     // is there no Modules direcory there?
-    modules = cMakeRoot + "/Modules/CMake.cmake"; 
+    modules = cMakeRoot + "/Modules/CMake.cmake";
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
       << modules.c_str() << std::endl);
     }
@@ -481,8 +481,8 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
 #endif
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
-    // try 
-    cMakeRoot  = cmSystemTools::GetProgramPath(m_CMakeSelf.c_str());
+    // try
+    cMakeRoot  = cmSystemTools::GetProgramPath(this->CMakeSelf.c_str());
     cMakeRoot += CMAKE_DATA_DIR;
     modules = cMakeRoot +  "/Modules/CMake.cmake";
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
@@ -491,9 +491,9 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
   if(!cmSystemTools::FileExists(modules.c_str()))
     {
     // next try exe
-    cMakeRoot  = cmSystemTools::GetProgramPath(m_CMakeSelf.c_str());
+    cMakeRoot  = cmSystemTools::GetProgramPath(this->CMakeSelf.c_str());
     // is there no Modules direcory there?
-    modules = cMakeRoot + "/Modules/CMake.cmake"; 
+    modules = cMakeRoot + "/Modules/CMake.cmake";
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
       << modules.c_str() << std::endl);
     }
@@ -506,10 +506,10 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
       cMakeRoot.c_str());
     return 0;
     }
-  m_CMakeRoot = cMakeRoot;
+  this->CMakeRoot = cMakeRoot;
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
-    << m_CMakeRoot.c_str() << std::endl);
-  this->SetOption("CMAKE_ROOT", m_CMakeRoot.c_str());
+    << this->CMakeRoot.c_str() << std::endl);
+  this->SetOption("CMAKE_ROOT", this->CMakeRoot.c_str());
   return 1;
 }
 
@@ -526,34 +526,34 @@ int cmCPackGenericGenerator::CompressFiles(const char* outFileName,
 //----------------------------------------------------------------------
 const char* cmCPackGenericGenerator::GetInstallPath()
 {
-  if ( !m_InstallPath.empty() )
+  if ( !this->InstallPath.empty() )
     {
-    return m_InstallPath.c_str();
+    return this->InstallPath.c_str();
     }
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const char* prgfiles = cmsys::SystemTools::GetEnv("ProgramFiles");
   const char* sysDrive = cmsys::SystemTools::GetEnv("SystemDrive");
   if ( prgfiles )
     {
-    m_InstallPath = prgfiles;
+    this->InstallPath = prgfiles;
     }
   else if ( sysDrive )
     {
-    m_InstallPath = sysDrive;
-    m_InstallPath += "/Program Files";
+    this->InstallPath = sysDrive;
+    this->InstallPath += "/Program Files";
     }
-  else 
+  else
     {
-    m_InstallPath = "c:/Program Files";
+    this->InstallPath = "c:/Program Files";
     }
-  m_InstallPath += "/";
-  m_InstallPath += this->GetOption("CPACK_PACKAGE_NAME");
-  m_InstallPath += "-";
-  m_InstallPath += this->GetOption("CPACK_PACKAGE_VERSION");
+  this->InstallPath += "/";
+  this->InstallPath += this->GetOption("CPACK_PACKAGE_NAME");
+  this->InstallPath += "-";
+  this->InstallPath += this->GetOption("CPACK_PACKAGE_VERSION");
 #else
-  m_InstallPath = "/usr/local/";
+  this->InstallPath = "/usr/local/";
 #endif
-  return m_InstallPath.c_str();
+  return this->InstallPath.c_str();
 }
 
 //----------------------------------------------------------------------
@@ -561,7 +561,7 @@ std::string cmCPackGenericGenerator::FindTemplate(const char* name)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for template: "
     << name << std::endl);
-  std::string ffile = m_MakefileMap->GetModulesFile(name);
+  std::string ffile = this->MakefileMap->GetModulesFile(name);
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Found template: "
     << ffile.c_str() << std::endl);
   return ffile;
@@ -571,6 +571,6 @@ std::string cmCPackGenericGenerator::FindTemplate(const char* name)
 bool cmCPackGenericGenerator::ConfigureFile(const char* inName,
   const char* outName)
 {
-  return m_MakefileMap->ConfigureFile(inName, outName,
+  return this->MakefileMap->ConfigureFile(inName, outName,
     false, true, false) == 1;
 }

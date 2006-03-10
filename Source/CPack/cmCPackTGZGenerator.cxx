@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -60,13 +60,13 @@ class cmCPackTGZ_Data
 public:
   cmCPackTGZ_Data(cmCPackTGZGenerator* gen) :
     OutputStream(0), Generator(gen),
-    m_CompressionLevel(Z_DEFAULT_COMPRESSION) {}
+    CompressionLevel(Z_DEFAULT_COMPRESSION) {}
   std::ostream* OutputStream;
   cmCPackTGZGenerator* Generator;
-  char m_CompressedBuffer[cmCPackTGZ_Data_BlockSize];
-  int m_CompressionLevel;
-  z_stream m_ZLibStream;
-  uLong m_CRC;
+  char CompressedBuffer[cmCPackTGZ_Data_BlockSize];
+  int CompressionLevel;
+  z_stream ZLibStream;
+  uLong CRC;
 };
 
 //----------------------------------------------------------------------
@@ -84,11 +84,11 @@ int cmCPackTGZ_Data_Open(void *client_data, const char* pathname,
 {
   cmCPackTGZ_Data *mydata = (cmCPackTGZ_Data*)client_data;
 
-  mydata->m_ZLibStream.zalloc = Z_NULL;
-  mydata->m_ZLibStream.zfree = Z_NULL;
-  mydata->m_ZLibStream.opaque = Z_NULL;
+  mydata->ZLibStream.zalloc = Z_NULL;
+  mydata->ZLibStream.zfree = Z_NULL;
+  mydata->ZLibStream.opaque = Z_NULL;
   int strategy = Z_DEFAULT_STRATEGY;
-  if ( deflateInit2(&mydata->m_ZLibStream, mydata->m_CompressionLevel,
+  if ( deflateInit2(&mydata->ZLibStream, mydata->CompressionLevel,
       Z_DEFLATED, -MAX_WBITS, DEF_MEM_LEVEL, strategy) != Z_OK )
     {
     return -1;
@@ -102,13 +102,13 @@ int cmCPackTGZ_Data_Open(void *client_data, const char* pathname,
     {
     return -1;
     }
-  
+
   if ( !cmCPackTGZGeneratorForward::GenerateHeader(mydata->Generator,gf))
     {
     return -1;
     }
 
-  mydata->m_CRC = crc32(0L, Z_NULL, 0);
+  mydata->CRC = crc32(0L, Z_NULL, 0);
 
   return 0;
 }
@@ -118,27 +118,27 @@ ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n)
 {
   cmCPackTGZ_Data *mydata = (cmCPackTGZ_Data*)client_data;
 
-  mydata->m_ZLibStream.avail_in = n;
-  mydata->m_ZLibStream.next_in  = reinterpret_cast<Bytef*>(buff);
+  mydata->ZLibStream.avail_in = n;
+  mydata->ZLibStream.next_in  = reinterpret_cast<Bytef*>(buff);
 
   do {
-    mydata->m_ZLibStream.avail_out = cmCPackTGZ_Data_BlockSize;
-    mydata->m_ZLibStream.next_out
-      = reinterpret_cast<Bytef*>(mydata->m_CompressedBuffer);
+    mydata->ZLibStream.avail_out = cmCPackTGZ_Data_BlockSize;
+    mydata->ZLibStream.next_out
+      = reinterpret_cast<Bytef*>(mydata->CompressedBuffer);
     // no bad return value
-    int ret = deflate(&mydata->m_ZLibStream, (n?Z_NO_FLUSH:Z_FINISH));
+    int ret = deflate(&mydata->ZLibStream, (n?Z_NO_FLUSH:Z_FINISH));
     if(ret == Z_STREAM_ERROR)
       {
       return 0;
       }
 
     size_t compressedSize
-      = cmCPackTGZ_Data_BlockSize - mydata->m_ZLibStream.avail_out;
+      = cmCPackTGZ_Data_BlockSize - mydata->ZLibStream.avail_out;
 
     mydata->OutputStream->write(
-      reinterpret_cast<const char*>(mydata->m_CompressedBuffer),
+      reinterpret_cast<const char*>(mydata->CompressedBuffer),
       compressedSize);
-  } while ( mydata->m_ZLibStream.avail_out == 0 );
+  } while ( mydata->ZLibStream.avail_out == 0 );
 
   if ( !*mydata->OutputStream )
     {
@@ -146,7 +146,7 @@ ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n)
     }
   if ( n )
     {
-    mydata->m_CRC = crc32(mydata->m_CRC, reinterpret_cast<Bytef *>(buff), n);
+    mydata->CRC = crc32(mydata->CRC, reinterpret_cast<Bytef *>(buff), n);
     }
   return n;
 }
@@ -160,19 +160,19 @@ int cmCPackTGZ_Data_Close(void *client_data)
 
   char buffer[8];
   int n;
-  uLong x = mydata->m_CRC;
+  uLong x = mydata->CRC;
   for (n = 0; n < 4; n++) {
     buffer[n] = (int)(x & 0xff);
     x >>= 8;
   }
-  x = mydata->m_ZLibStream.total_in;
+  x = mydata->ZLibStream.total_in;
   for (n = 0; n < 4; n++) {
     buffer[n+4] = (int)(x & 0xff);
     x >>= 8;
   }
 
   mydata->OutputStream->write(buffer, 8);
-  (void)deflateEnd(&mydata->m_ZLibStream);
+  (void)deflateEnd(&mydata->ZLibStream);
   delete mydata->OutputStream;
   mydata->OutputStream = 0;
   return (0);
@@ -204,7 +204,7 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName,
   if (tar_open(&t, realName,
       &gztype,
       flags, 0644,
-      (m_GeneratorVerbose?TAR_VERBOSE:0)
+      (this->GeneratorVerbose?TAR_VERBOSE:0)
       | 0) == -1)
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): "

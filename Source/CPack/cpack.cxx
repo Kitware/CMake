@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -105,12 +105,12 @@ int cpackUnknownArgument(const char*, void*)
 struct cpackDefinitions
 {
   typedef std::map<cmStdString, cmStdString> MapType;
-  MapType m_Map;
-  cmCPackLog *m_Log;
+  MapType Map;
+  cmCPackLog *Log;
 };
 
 //----------------------------------------------------------------------------
-int cpackDefinitionArgument(const char* argument, const char* cValue, 
+int cpackDefinitionArgument(const char* argument, const char* cValue,
   void* call_data)
 {
   (void)argument;
@@ -119,14 +119,14 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
   size_t pos = value.find_first_of("=");
   if ( pos == std::string::npos )
     {
-    cmCPack_Log(def->m_Log, cmCPackLog::LOG_ERROR,
+    cmCPack_Log(def->Log, cmCPackLog::LOG_ERROR,
       "Please specify CPack definitions as: KEY=VALUE" << std::endl);
     return 0;
     }
   std::string key = value.substr(0, pos);
   value = value.c_str() + pos + 1;
-  def->m_Map[key] = value;
-  cmCPack_Log(def->m_Log, cmCPackLog::LOG_DEBUG, "Set CPack variable: "
+  def->Map[key] = value;
+  cmCPack_Log(def->Log, cmCPackLog::LOG_DEBUG, "Set CPack variable: "
     << key.c_str() << " to \"" << value.c_str() << "\"" << std::endl);
   return 1;
 }
@@ -168,7 +168,7 @@ int main (int argc, char *argv[])
   std::string cpackConfigFile;
 
   cpackDefinitions definitions;
-  definitions.m_Log = &log;
+  definitions.Log = &log;
 
   cpackConfigFile = "";
 
@@ -296,8 +296,8 @@ int main (int argc, char *argv[])
       mf->AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
       }
     cpackDefinitions::MapType::iterator cdit;
-    for ( cdit = definitions.m_Map.begin();
-      cdit != definitions.m_Map.end();
+    for ( cdit = definitions.Map.begin();
+      cdit != definitions.Map.end();
       ++cdit )
       {
       mf->AddDefinition(cdit->first.c_str(), cdit->second.c_str());

@@ -32,22 +32,24 @@ public:
   cmDependsC();
   cmDependsC(std::vector<std::string> const& includes,
              const char* scanRegex, const char* complainRegex,
-             std::set<cmStdString> const& generatedFiles, const cmStdString& cachFileName);
+             std::set<cmStdString> const& generatedFiles,
+             const cmStdString& cachFileName);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsC();
-  
+
 protected:
   typedef std::vector<char> t_CharBuffer;
 
   // Implement writing/checking methods required by superclass.
-  virtual bool WriteDependencies(const char *src, 
+  virtual bool WriteDependencies(const char *src,
                                  const char *file,
                                  std::ostream& makeDepends,
                                  std::ostream& internalDepends);
 
   // Method to scan a single file.
-  void Scan(std::istream& is, const char* directory, const cmStdString& fullName);
+  void Scan(std::istream& is, const char* directory,
+    const cmStdString& fullName);
 
   // Method to test for the existence of a file.
   bool FileExistsOrIsGenerated(const std::string& fname,

@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -22,19 +22,19 @@
 //----------------------------------------------------------------------
 cmCPackLog::cmCPackLog()
 {
-  m_Verbose = false;
-  m_Debug = false;
-  m_Quiet = false;
-  m_NewLine = true;
+  this->Verbose = false;
+  this->Debug = false;
+  this->Quiet = false;
+  this->NewLine = true;
 
-  m_LastTag = cmCPackLog::NOTAG;
+  this->LastTag = cmCPackLog::NOTAG;
 #undef cerr
 #undef cout
-  m_DefaultOutput = &std::cout;
-  m_DefaultError = &std::cerr;
-  
-  m_LogOutput = 0;
-  m_LogOutputCleanup = false;
+  this->DefaultOutput = &std::cout;
+  this->DefaultError = &std::cerr;
+
+  this->LogOutput = 0;
+  this->LogOutputCleanup = false;
 }
 
 //----------------------------------------------------------------------
@@ -46,12 +46,12 @@ cmCPackLog::~cmCPackLog()
 //----------------------------------------------------------------------
 void cmCPackLog::SetLogOutputStream(std::ostream* os)
 {
-  if ( m_LogOutputCleanup && m_LogOutput )
+  if ( this->LogOutputCleanup && this->LogOutput )
     {
-    delete m_LogOutput;
+    delete this->LogOutput;
     }
-  m_LogOutputCleanup = false;
-  m_LogOutput = os;
+  this->LogOutputCleanup = false;
+  this->LogOutput = os;
 }
 
 //----------------------------------------------------------------------
@@ -72,7 +72,7 @@ bool cmCPackLog::SetLogOutputFile(const char* fname)
     {
     return false;
     }
-  m_LogOutputCleanup = true;
+  this->LogOutputCleanup = true;
   return true;
 }
 
@@ -84,7 +84,7 @@ void cmCPackLog::Log(int tag, const char* file, int line,
   bool display = false;
 
   // Display file and line number if debug
-  bool useFileAndLine = m_Debug;
+  bool useFileAndLine = this->Debug;
 
   bool output  = false;
   bool debug   = false;
@@ -95,7 +95,7 @@ void cmCPackLog::Log(int tag, const char* file, int line,
   // When writing in file, add list of tags whenever tag changes.
   std::string tagString;
   bool needTagString = false;
-  if ( m_LogOutput && m_LastTag != tag )
+  if ( this->LogOutput && this->LastTag != tag )
     {
     needTagString = true;
     }
@@ -130,7 +130,7 @@ void cmCPackLog::Log(int tag, const char* file, int line,
       tagString = "ERROR";
       }
     }
-  if ( tag & LOG_DEBUG && m_Debug )
+  if ( tag & LOG_DEBUG && this->Debug )
     {
     debug = true;
     display = true;
@@ -141,7 +141,7 @@ void cmCPackLog::Log(int tag, const char* file, int line,
       }
     useFileAndLine = true;
     }
-  if ( tag & LOG_VERBOSE && m_Verbose )
+  if ( tag & LOG_VERBOSE && this->Verbose )
     {
     verbose = true;
     display = true;
@@ -151,73 +151,74 @@ void cmCPackLog::Log(int tag, const char* file, int line,
       tagString = "VERBOSE";
       }
     }
-  if ( m_Quiet )
+  if ( this->Quiet )
     {
     display = false;
     }
-  if ( m_LogOutput )
+  if ( this->LogOutput )
     {
     if ( needTagString )
       {
-      *m_LogOutput << "[" << file << ":" << line << " " << tagString << "] ";
+      *this->LogOutput << "[" << file << ":" << line << " "
+        << tagString << "] ";
       }
-    m_LogOutput->write(msg, length);
+    this->LogOutput->write(msg, length);
     }
-  m_LastTag = tag;
+  this->LastTag = tag;
   if ( !display )
     {
     return;
     }
-  if ( m_NewLine )
+  if ( this->NewLine )
     {
-    if ( error && !m_ErrorPrefix.empty() )
+    if ( error && !this->ErrorPrefix.empty() )
       {
-      *m_DefaultError << m_ErrorPrefix.c_str();
+      *this->DefaultError << this->ErrorPrefix.c_str();
       }
-    else if ( warning && !m_WarningPrefix.empty() )
+    else if ( warning && !this->WarningPrefix.empty() )
       {
-      *m_DefaultError << m_WarningPrefix.c_str();
+      *this->DefaultError << this->WarningPrefix.c_str();
       }
-    else if ( output && !m_OutputPrefix.empty() )
+    else if ( output && !this->OutputPrefix.empty() )
       {
-      *m_DefaultOutput << m_OutputPrefix.c_str();
+      *this->DefaultOutput << this->OutputPrefix.c_str();
       }
-    else if ( verbose && !m_VerbosePrefix.empty() )
+    else if ( verbose && !this->VerbosePrefix.empty() )
       {
-      *m_DefaultOutput << m_VerbosePrefix.c_str();
+      *this->DefaultOutput << this->VerbosePrefix.c_str();
       }
-    else if ( debug && !m_DebugPrefix.empty() )
+    else if ( debug && !this->DebugPrefix.empty() )
       {
-      *m_DefaultOutput << m_DebugPrefix.c_str();
+      *this->DefaultOutput << this->DebugPrefix.c_str();
       }
-    else if ( !m_Prefix.empty() )
+    else if ( !this->Prefix.empty() )
       {
-      *m_DefaultOutput << m_Prefix.c_str();
+      *this->DefaultOutput << this->Prefix.c_str();
       }
     if ( useFileAndLine )
       {
       if ( error || warning )
         {
-        *m_DefaultError << file << ":" << line << " ";
+        *this->DefaultError << file << ":" << line << " ";
         }
       else
         {
-        *m_DefaultOutput << file << ":" << line << " ";
+        *this->DefaultOutput << file << ":" << line << " ";
         }
       }
     }
   if ( error || warning )
     {
-    m_DefaultError->write(msg, length);
-    m_DefaultError->flush();
+    this->DefaultError->write(msg, length);
+    this->DefaultError->flush();
     }
   else
     {
-    m_DefaultOutput->write(msg, length);
-    m_DefaultOutput->flush();
+    this->DefaultOutput->write(msg, length);
+    this->DefaultOutput->flush();
     }
   if ( msg[length-1] == '\n' || length > 2 )
     {
-    m_NewLine = true;
+    this->NewLine = true;
     }
 }

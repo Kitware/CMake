@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -78,26 +78,26 @@ public:
   //! Set Verbose
   void VerboseOn() { this->SetVerbose(true); }
   void VerboseOff() { this->SetVerbose(true); }
-  void SetVerbose(bool verb) { m_Verbose = verb; }
-  bool GetVerbose() { return m_Verbose; }
+  void SetVerbose(bool verb) { this->Verbose = verb; }
+  bool GetVerbose() { return this->Verbose; }
 
   //! Set Debug
   void DebugOn() { this->SetDebug(true); }
   void DebugOff() { this->SetDebug(true); }
-  void SetDebug(bool verb) { m_Debug = verb; }
-  bool GetDebug() { return m_Debug; }
+  void SetDebug(bool verb) { this->Debug = verb; }
+  bool GetDebug() { return this->Debug; }
 
   //! Set Quiet
   void QuietOn() { this->SetQuiet(true); }
   void QuietOff() { this->SetQuiet(true); }
-  void SetQuiet(bool verb) { m_Quiet = verb; }
-  bool GetQuiet() { return m_Quiet; }
+  void SetQuiet(bool verb) { this->Quiet = verb; }
+  bool GetQuiet() { return this->Quiet; }
 
   //! Set the output stream
-  void SetOutputStream(std::ostream* os) { m_DefaultOutput = os; }
+  void SetOutputStream(std::ostream* os) { this->DefaultOutput = os; }
 
   //! Set the error stream
-  void SetErrorStream(std::ostream* os) { m_DefaultError = os; }
+  void SetErrorStream(std::ostream* os) { this->DefaultError = os; }
 
   //! Set the log output stream
   void SetLogOutputStream(std::ostream* os);
@@ -108,36 +108,36 @@ public:
 
   //! Set the various prefixes for the logging. SetPrefix sets the generic
   // prefix that overwrittes missing ones.
-  void SetPrefix(std::string pfx) { m_Prefix = pfx; }
-  void SetOutputPrefix(std::string pfx) { m_OutputPrefix = pfx; }
-  void SetVerbosePrefix(std::string pfx) { m_VerbosePrefix = pfx; }
-  void SetDebugPrefix(std::string pfx) { m_DebugPrefix = pfx; }
-  void SetWarningPrefix(std::string pfx) { m_WarningPrefix = pfx; }
-  void SetErrorPrefix(std::string pfx) { m_ErrorPrefix = pfx; }
+  void SetPrefix(std::string pfx) { this->Prefix = pfx; }
+  void SetOutputPrefix(std::string pfx) { this->OutputPrefix = pfx; }
+  void SetVerbosePrefix(std::string pfx) { this->VerbosePrefix = pfx; }
+  void SetDebugPrefix(std::string pfx) { this->DebugPrefix = pfx; }
+  void SetWarningPrefix(std::string pfx) { this->WarningPrefix = pfx; }
+  void SetErrorPrefix(std::string pfx) { this->ErrorPrefix = pfx; }
 
 private:
-  bool m_Verbose;
-  bool m_Debug;
-  bool m_Quiet;
+  bool Verbose;
+  bool Debug;
+  bool Quiet;
 
-  bool m_NewLine;
+  bool NewLine;
 
-  int m_LastTag;
+  int LastTag;
 
-  std::string m_Prefix;
-  std::string m_OutputPrefix;
-  std::string m_VerbosePrefix;
-  std::string m_DebugPrefix;
-  std::string m_WarningPrefix;
-  std::string m_ErrorPrefix;
+  std::string Prefix;
+  std::string OutputPrefix;
+  std::string VerbosePrefix;
+  std::string DebugPrefix;
+  std::string WarningPrefix;
+  std::string ErrorPrefix;
 
-  std::ostream *m_DefaultOutput;
-  std::ostream *m_DefaultError;
+  std::ostream *DefaultOutput;
+  std::ostream *DefaultError;
 
-  std::string m_LogOutputFileName;
-  std::ostream *m_LogOutput;
+  std::string LogOutputFileName;
+  std::ostream *LogOutput;
   // Do we need to cleanup log output stream
-  bool m_LogOutputCleanup;
+  bool LogOutputCleanup;
 };
 
 class cmCPackLogWrite

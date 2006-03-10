@@ -31,7 +31,7 @@ cmDependsC::cmDependsC():
 // yummy look at all those constructor arguments
 cmDependsC::cmDependsC(std::vector<std::string> const& includes,
                        const char* scanRegex, const char* complainRegex,
-                       std::set<cmStdString> const& generatedFiles, 
+                       std::set<cmStdString> const& generatedFiles,
                        const cmStdString& cacheFileName):
   m_IncludePath(&includes),
   m_IncludeRegexLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)([\">])"),
@@ -48,7 +48,8 @@ cmDependsC::~cmDependsC()
 {
   this->WriteCacheFile();
 
-  for (std::map<cmStdString, cmIncludeLines*>::iterator it=m_fileCache.begin(); 
+  for (std::map<cmStdString, cmIncludeLines*>::iterator it
+    = m_fileCache.begin();
        it!=m_fileCache.end(); ++it)
     {
     delete it->second;
@@ -154,13 +155,14 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
       scanned.insert(fullName);
 
       // Check whether this file is already in the cache
-      std::map<cmStdString, cmIncludeLines*>::iterator fileIt=m_fileCache.find(fullName);
+      std::map<cmStdString, cmIncludeLines*>::iterator fileIt
+        = m_fileCache.find(fullName);
       if (fileIt!=m_fileCache.end())
         {
         fileIt->second->m_Used=true;
         dependencies.insert(fullName);
         for (std::vector<UnscannedEntry>::const_iterator incIt=
-               fileIt->second->m_UnscannedEntries.begin(); 
+               fileIt->second->m_UnscannedEntries.begin();
              incIt!=fileIt->second->m_UnscannedEntries.end(); ++incIt)
           {
           if (m_Encountered.find(incIt->FileName) == m_Encountered.end())
@@ -172,7 +174,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
         }
       else
         {
-        
+
         // Try to scan the file.  Just leave it out if we cannot find
         // it.
         std::ifstream fin(fullName.c_str());
@@ -180,7 +182,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
           {
           // Add this file as a dependency.
           dependencies.insert(fullName);
-          
+
           // Scan this file for new dependencies.  Pass the directory
           // containing the file to handle double-quote includes.
           std::string dir = cmSystemTools::GetFilenamePath(fullName);
@@ -188,10 +190,10 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
           }
         }
       }
-    
+
     first = false;
     }
-  
+
   // Write the dependencies to the output stream.
   internalDepends << obj << std::endl;
   for(std::set<cmStdString>::iterator i=dependencies.begin();
@@ -203,7 +205,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
     internalDepends << " " << i->c_str() << std::endl;
     }
   makeDepends << std::endl;
-  
+
   return true;
 }
 
@@ -219,11 +221,11 @@ void cmDependsC::ReadCacheFile()
     {
     return;
     }
-  
+
   std::string line;
   cmIncludeLines* cacheEntry=0;
   bool haveFileName=false;
-  
+
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
     if (line.empty())
@@ -238,12 +240,13 @@ void cmDependsC::ReadCacheFile()
       haveFileName=true;
       int newer=0;
       cmFileTimeComparison comp;
-      bool res=comp.FileTimeCompare(m_cacheFileName.c_str(), line.c_str(), &newer);
-      
+      bool res
+        = comp.FileTimeCompare(m_cacheFileName.c_str(), line.c_str(), &newer);
+
       if ((res==true) && (newer==1)) //cache is newer than the parsed file
         {
         cacheEntry=new cmIncludeLines;
-        m_fileCache[line]=cacheEntry; 
+        m_fileCache[line]=cacheEntry;
         }
       }
     else if (cacheEntry!=0)
@@ -274,16 +277,17 @@ void cmDependsC::WriteCacheFile() const
     {
     return;
     }
-  
-  for (std::map<cmStdString, cmIncludeLines*>::const_iterator fileIt=m_fileCache.begin(); 
+
+  for (std::map<cmStdString, cmIncludeLines*>::const_iterator fileIt
+    = m_fileCache.begin();
        fileIt!=m_fileCache.end(); ++fileIt)
     {
     if (fileIt->second->m_Used)
       {
       cacheOut<<fileIt->first.c_str()<<std::endl;
-      
+
       for (std::vector<UnscannedEntry>::const_iterator
-             incIt=fileIt->second->m_UnscannedEntries.begin(); 
+             incIt=fileIt->second->m_UnscannedEntries.begin();
            incIt!=fileIt->second->m_UnscannedEntries.end(); ++incIt)
         {
         cacheOut<<incIt->FileName.c_str()<<std::endl;
@@ -302,12 +306,13 @@ void cmDependsC::WriteCacheFile() const
 }
 
 //----------------------------------------------------------------------------
-void cmDependsC::Scan(std::istream& is, const char* directory, const cmStdString& fullName)
+void cmDependsC::Scan(std::istream& is, const char* directory,
+  const cmStdString& fullName)
 {
   cmIncludeLines* newCacheEntry=new cmIncludeLines;
   newCacheEntry->m_Used=true;
   m_fileCache[fullName]=newCacheEntry;
-  
+
   // Read one line at a time.
   std::string line;
   while(cmSystemTools::GetLineFromStream(is, line))

@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -19,7 +19,8 @@
 #include "cmTarget.h"
 
 // cmAddCustomCommandCommand
-bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args)
+bool cmAddCustomCommandCommand::InitialPass(
+  std::vector<std::string> const& args)
 {
   /* Let's complain at the end of this function about the lack of a particular
      arg. For the moment, let's say that COMMAND, and either TARGET or SOURCE
@@ -42,7 +43,7 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
   cmCustomCommandLines commandLines;
 
   cmTarget::CustomCommandType cctype = cmTarget::POST_BUILD;
-  
+
   enum tdoing {
     doing_source,
     doing_command,
@@ -198,7 +199,8 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
 
   if(source.empty() && !target.empty() && !output.empty())
     {
-    this->SetError("Wrong syntax. A TARGET and OUTPUT can not both be specified.");
+    this->SetError(
+      "Wrong syntax. A TARGET and OUTPUT can not both be specified.");
     return false;
     }
 

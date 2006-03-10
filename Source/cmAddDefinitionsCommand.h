@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -22,8 +22,8 @@
 /** \class cmAddDefinitionsCommand
  * \brief Specify a list of compiler defines
  *
- * cmAddDefinitionsCommand specifies a list of compiler defines. These defines will
- * be added to the compile command.  
+ * cmAddDefinitionsCommand specifies a list of compiler defines. These defines
+ * will be added to the compile command.
  */
 class cmAddDefinitionsCommand : public cmCommand
 {
@@ -31,7 +31,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmAddDefinitionsCommand;
     }
@@ -46,15 +46,15 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() {return "ADD_DEFINITIONS";}
-  
+
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Adds -D define flags to the command line of C and C++ compilers.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -67,7 +67,7 @@ public:
       "but the -D flag is accepted most C/C++ compilers.  "
       "Other flags may not be as portable.";
     }
-  
+
   cmTypeMacro(cmAddDefinitionsCommand, cmCommand);
 };
 

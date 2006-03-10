@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -44,15 +44,15 @@ public:
   void RegisterGenerator(const char* name,
     CreateGeneratorCall* createGenerator);
 
-  void SetLogger(cmCPackLog* logger) { m_Logger = logger; }
+  void SetLogger(cmCPackLog* logger) { this->Logger = logger; }
 
 private:
   cmCPackGenericGenerator* NewGeneratorInternal(const char* name);
-  std::vector<cmCPackGenericGenerator*> m_Generators;
+  std::vector<cmCPackGenericGenerator*> Generators;
 
   typedef std::map<cmStdString, CreateGeneratorCall*> t_GeneratorCreatorsMap;
-  t_GeneratorCreatorsMap m_GeneratorCreators;
-  cmCPackLog* m_Logger;
+  t_GeneratorCreatorsMap GeneratorCreators;
+  cmCPackLog* Logger;
 };
 
 #endif

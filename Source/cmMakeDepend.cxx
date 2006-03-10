@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -36,7 +36,7 @@ cmMakeDepend::cmMakeDepend()
 
 
 cmMakeDepend::~cmMakeDepend()
-{ 
+{
   for(DependInformationMap::iterator i = m_DependInformationMap.begin();
       i != m_DependInformationMap.end(); ++i)
     {
@@ -58,7 +58,7 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
     m_Makefile->m_IncludeFileRegularExpression.c_str());
   m_ComplainFileRegularExpression.compile(
     m_Makefile->m_ComplainFileRegularExpression.c_str());
-  
+
   // Now extract any include paths from the makefile flags
   const std::vector<std::string>& includes =
     m_Makefile->GetIncludeDirectories();
@@ -94,7 +94,8 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
   const char* path = info->m_FullPath.c_str();
   if(!path)
     {
-    cmSystemTools::Error("Attempt to find dependencies for file without path!");
+    cmSystemTools::Error(
+      "Attempt to find dependencies for file without path!");
     return;
     }
 
@@ -108,7 +109,7 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
     found = true;
     }
 
- 
+
   // See if the cmSourceFile for it has any files specified as
   // dependency hints.
   if(info->m_cmSourceFile != 0)
@@ -123,12 +124,12 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
       // Dependency hints have been given.  Use them to begin the
       // recursion.
       for(std::vector<std::string>::const_iterator file =
-            cFile.GetDepends().begin(); file != cFile.GetDepends().end(); 
+            cFile.GetDepends().begin(); file != cFile.GetDepends().end();
           ++file)
         {
         this->AddDependency(info, file->c_str());
         }
-      
+
       // Found dependency information.  We are done.
       found = true;
       }
@@ -137,8 +138,9 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
   if(!found)
     {
     // Try to find the file amongst the sources
-    cmSourceFile *srcFile = 
-      m_Makefile->GetSource(cmSystemTools::GetFilenameWithoutExtension(path).c_str());
+    cmSourceFile *srcFile =
+      m_Makefile->GetSource(
+        cmSystemTools::GetFilenameWithoutExtension(path).c_str());
     if (srcFile)
       {
       if (srcFile->GetFullPath() == path)
@@ -148,7 +150,7 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
       else
         {
         //try to guess which include path to use
-        for(std::vector<std::string>::iterator t = 
+        for(std::vector<std::string>::iterator t =
               m_IncludeDirectories.begin();
             t != m_IncludeDirectories.end(); ++t)
           {
@@ -161,14 +163,14 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
           if (srcFile->GetFullPath() == incpath)
             {
             // set the path to the guessed path
-            info->m_FullPath = incpath; 
+            info->m_FullPath = incpath;
             found=true;
             }
           }
         }
       }
     }
-  
+
   if(!found)
     {
     // Couldn't find any dependency information.
@@ -189,7 +191,8 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
 // #include directives
 void cmMakeDepend::DependWalk(cmDependInformation* info)
 {
-  cmsys::RegularExpression includeLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
+  cmsys::RegularExpression includeLine(
+    "^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
   std::ifstream fin(info->m_FullPath.c_str());
   if(!fin)
     {
@@ -218,7 +221,7 @@ void cmMakeDepend::DependWalk(cmDependInformation* info)
           }
         continue;
         }
-      
+
       // Add this file and all its dependencies.
       this->AddDependency(info, includeFile.c_str());
       }
@@ -228,7 +231,7 @@ void cmMakeDepend::DependWalk(cmDependInformation* info)
 
 void cmMakeDepend::AddDependency(cmDependInformation* info, const char* file)
 {
-  cmDependInformation* dependInfo = 
+  cmDependInformation* dependInfo =
     this->GetDependInformation(file, info->m_PathOnly.c_str());
   this->GenerateDependInformation(dependInfo);
   info->AddDependencies(dependInfo);
@@ -239,7 +242,7 @@ cmDependInformation* cmMakeDepend::GetDependInformation(const char* file,
 {
   // Get the full path for the file so that lookup is unambiguous.
   std::string fullPath = this->FullPath(file, extraPath);
-  
+
   // Try to find the file's instance of cmDependInformation.
   DependInformationMap::const_iterator result =
     m_DependInformationMap.find(fullPath);
@@ -265,11 +268,11 @@ void cmMakeDepend::GenerateMakefileDependencies()
 {
   // Now create cmDependInformation objects for files in the directory
   cmTargets &tgts = m_Makefile->GetTargets();
-  for(cmTargets::iterator l = tgts.begin(); 
+  for(cmTargets::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
     const std::vector<cmSourceFile*> &classes = l->second.GetSourceFiles();
-    for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
+    for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
         i != classes.end(); ++i)
       {
       if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
@@ -297,7 +300,7 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
     {
     m = m_DirectoryToFileToPathMap.find("");
     }
-  
+
   if(m != m_DirectoryToFileToPathMap.end())
     {
     FileToPathMap& map = m->second;
@@ -314,7 +317,7 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
     m_DirectoryToFileToPathMap[extraPath? extraPath: ""][fname] = fp;
     return fp;
     }
-  
+
   for(std::vector<std::string>::iterator i = m_IncludeDirectories.begin();
       i != m_IncludeDirectories.end(); ++i)
     {
@@ -349,7 +352,7 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
       return fp;
       }
     }
-  
+
   // Couldn't find the file.
   return std::string(fname);
 }

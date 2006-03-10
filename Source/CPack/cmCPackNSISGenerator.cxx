@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -99,7 +99,7 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
   std::string output;
   int retVal = 1;
   bool res = cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output,
-    &retVal, 0, m_GeneratorVerbose, 0);
+    &retVal, 0, this->GeneratorVerbose, 0);
   if ( !res || retVal )
     {
     cmGeneratedFileStream ofs(tmpFile.c_str());
@@ -147,7 +147,7 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
   std::string output;
   int retVal = 1;
   bool resS = cmSystemTools::RunSingleCommand(nsisCmd.c_str(),
-    &output, &retVal, 0, m_GeneratorVerbose, 0);
+    &output, &retVal, 0, this->GeneratorVerbose, 0);
 
   cmsys::RegularExpression versionRex("v([0-9]+.[0-9]+)");
   if ( !resS || retVal || !versionRex.find(output))

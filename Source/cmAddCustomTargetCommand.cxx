@@ -9,15 +9,16 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
 #include "cmAddCustomTargetCommand.h"
 
 // cmAddCustomTargetCommand
-bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
+bool cmAddCustomTargetCommand::InitialPass(
+  std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -118,7 +119,7 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
 
   // Add the utility target to the makefile.
   const char* no_output = 0;
-  m_Makefile->AddUtilityCommand(args[0].c_str(), all, no_output, 
+  m_Makefile->AddUtilityCommand(args[0].c_str(), all, no_output,
                                 working_directory.c_str(), depends,
                                 commandLines);
 

@@ -9,12 +9,12 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#ifndef cmCommandArgumentParserHelper_h 
+#ifndef cmCommandArgumentParserHelper_h
 #define cmCommandArgumentParserHelper_h
 
 #include "cmStandardIncludes.h"
@@ -22,7 +22,8 @@
 #define YYSTYPE cmCommandArgumentParserHelper::ParserType
 #define YYSTYPE_IS_DECLARED
 #define YY_EXTRA_TYPE cmCommandArgumentParserHelper*
-#define YY_DECL int cmCommandArgument_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
+#define YY_DECL int cmCommandArgument_yylex(YYSTYPE* yylvalp,\
+  yyscan_t yyscanner)
 
 /** \class cmCommandArgumentParserHelper
  * \brief Helper class for parsing java source files
@@ -45,9 +46,10 @@ public:
   int ParseString(const char* str, int verb);
 
   // For the lexer:
-  void AllocateParserType(cmCommandArgumentParserHelper::ParserType* pt, 
+  void AllocateParserType(cmCommandArgumentParserHelper::ParserType* pt,
     const char* str, int len = 0);
-  bool HandleEscapeSymbol(cmCommandArgumentParserHelper::ParserType* pt, char symbol);
+  bool HandleEscapeSymbol(cmCommandArgumentParserHelper::ParserType* pt,
+    char symbol);
 
   int LexInput(char* buf, int maxlen);
   void Error(const char* str);

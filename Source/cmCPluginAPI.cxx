@@ -9,12 +9,12 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-/* 
+/*
    this file contains the implementation of the C API to CMake. Generally
    these routines just manipulate arguments and then call the associated
    methods on the CMake classes. */
@@ -24,9 +24,9 @@
 
 #include "cmSourceFile.h"
 
-extern "C" 
+extern "C"
 {
-  
+
 void CCONV *cmGetClientData(void *info)
 {
   return ((cmLoadedCommandInfo *)info)->ClientData;
@@ -74,12 +74,11 @@ void CCONV cmAddDefinition(void *arg, const char* name, const char* value)
 }
 
 /* Add a definition to this makefile and the global cmake cache. */
-void CCONV cmAddCacheDefinition(void *arg, const char* name, const char* value, 
-                          const char* doc,
-                          int type)
+void CCONV cmAddCacheDefinition(void *arg, const char* name,
+  const char* value, const char* doc, int type)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  
+
   switch (type)
     {
     case CM_CACHE_BOOL:
@@ -135,7 +134,7 @@ const char* CCONV cmGetStartOutputDirectory(void *arg)
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetStartOutputDirectory();
 }
-const char* CCONV cmGetCurrentDirectory(void *arg) 
+const char* CCONV cmGetCurrentDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   return mf->GetCurrentDirectory();
@@ -170,14 +169,15 @@ void CCONV cmAddDefineFlag(void *arg, const char* definition)
   mf->AddDefineFlag(definition);
 }
 
-void CCONV cmAddLinkDirectoryForTarget(void *arg, const char *tgt, const char* d)
+void CCONV cmAddLinkDirectoryForTarget(void *arg, const char *tgt,
+  const char* d)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   mf->AddLinkDirectoryForTarget(tgt,d);
 }
 
 
-void CCONV cmAddExecutable(void *arg, const char *exename, 
+void CCONV cmAddExecutable(void *arg, const char *exename,
                      int numSrcs, const char **srcs, int win32)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
@@ -368,11 +368,11 @@ void CCONV cmAddCustomCommandToTarget(void *arg, const char* target,
                                cctype, no_comment, no_working_dir);
 }
 
-void CCONV cmAddLinkLibraryForTarget(void *arg, const char *tgt, const char*value, 
-                               int libtype)
+void CCONV cmAddLinkLibraryForTarget(void *arg, const char *tgt,
+  const char*value, int libtype)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  
+
   switch (libtype)
     {
     case CM_LIBRARY_GENERAL:
@@ -400,13 +400,13 @@ void CCONV cmAddLibrary(void *arg, const char *libname, int shared,
   mf->AddLibrary(libname, (shared ? true : false), srcs2);
 }
 
-char CCONV *cmExpandVariablesInString(void *arg, const char *source, 
+char CCONV *cmExpandVariablesInString(void *arg, const char *source,
                                 int escapeQuotes, int atOnly)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   std::string barf = source;
-  std::string result = 
-    mf->ExpandVariablesInString(barf, 
+  std::string result =
+    mf->ExpandVariablesInString(barf,
                                 (escapeQuotes ? true : false),
                                 (atOnly ? true : false));
   char *res = static_cast<char *>(malloc(result.size() + 1));
@@ -419,7 +419,7 @@ char CCONV *cmExpandVariablesInString(void *arg, const char *source,
 }
 
 
-int CCONV cmExecuteCommand(void *arg, const char *name, 
+int CCONV cmExecuteCommand(void *arg, const char *name,
                      int numArgs, const char **args)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
@@ -434,7 +434,7 @@ int CCONV cmExecuteCommand(void *arg, const char *name,
   return mf->ExecuteCommand(lff);
 }
 
-void CCONV cmExpandSourceListArguments(void *arg, 
+void CCONV cmExpandSourceListArguments(void *arg,
                                  int numArgs,
                                  const char **args,
                                  int *resArgc,
@@ -540,7 +540,8 @@ int CCONV cmSourceFileGetPropertyAsBool(void *arg,const char *prop)
   return (sf->GetPropertyAsBool(prop) ? 1: 0);
 }
 
-void CCONV cmSourceFileSetProperty(void *arg,const char *prop, const char *val)
+void CCONV cmSourceFileSetProperty(void *arg,const char *prop,
+  const char *val)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
   sf->SetProperty(prop,val);
@@ -573,7 +574,7 @@ void CCONV cmSourceFileSetName(void *arg, const char* name, const char* dir,
   sf->SetName(name,dir, srcs, hdrs);
 }
 
-void CCONV cmSourceFileSetName2(void *arg, const char* name, const char* dir, 
+void CCONV cmSourceFileSetName2(void *arg, const char* name, const char* dir,
                           const char *ext, int headerFileOnly)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
@@ -584,7 +585,7 @@ void CCONV cmSourceFileSetName2(void *arg, const char* name, const char* dir,
 char * CCONV cmGetFilenameWithoutExtension(const char *name)
 {
   std::string sres = cmSystemTools::GetFilenameWithoutExtension(name);
-  char *result = (char *)malloc(sres.size()+1);  
+  char *result = (char *)malloc(sres.size()+1);
   strcpy(result,sres.c_str());
   return result;
 }
@@ -592,7 +593,7 @@ char * CCONV cmGetFilenameWithoutExtension(const char *name)
 char * CCONV cmGetFilenamePath(const char *name)
 {
   std::string sres = cmSystemTools::GetFilenamePath(name);
-  char *result = (char *)malloc(sres.size()+1);  
+  char *result = (char *)malloc(sres.size()+1);
   strcpy(result,sres.c_str());
   return result;
 }
@@ -600,7 +601,7 @@ char * CCONV cmGetFilenamePath(const char *name)
 char * CCONV cmCapitalized(const char *name)
 {
   std::string sres = cmSystemTools::Capitalized(name);
-  char *result = (char *)malloc(sres.size()+1);  
+  char *result = (char *)malloc(sres.size()+1);
   strcpy(result,sres.c_str());
   return result;
 }
@@ -661,7 +662,7 @@ cmCAPI cmStaticCAPI =
   cmGetStartDirectory,
   cmGetStartOutputDirectory,
   cmIsOn,
-  
+
   cmAddSource,
   cmCreateSourceFile,
   cmDestroySourceFile,
@@ -674,7 +675,7 @@ cmCAPI cmStaticCAPI =
   cmSourceFileSetName,
   cmSourceFileSetName2,
   cmSourceFileSetProperty,
-  
+
   cmCapitalized,
   cmCopyFileIfDifferent,
   cmGetFilenameWithoutExtension,

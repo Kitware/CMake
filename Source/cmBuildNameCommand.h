@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -22,7 +22,7 @@
 /** \class cmBuildNameCommand
  * \brief BuildName a CMAKE variable
  *
- * cmBuildNameCommand sets a variable to a value with expansion.  
+ * cmBuildNameCommand sets a variable to a value with expansion.
  */
 class cmBuildNameCommand : public cmCommand
 {
@@ -30,7 +30,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmBuildNameCommand;
     }
@@ -50,15 +50,16 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() {return "BUILD_NAME";}
-  
+
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
-    return "Deprecated.  Use ${CMAKE_SYSTEM} and ${CMAKE_CXX_COMPILER} instead.";
+    return
+      "Deprecated.  Use ${CMAKE_SYSTEM} and ${CMAKE_CXX_COMPILER} instead.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -70,7 +71,7 @@ public:
       "and compiler settings.  These values are now available through the "
       "CMAKE_SYSTEM and CMAKE_CXX_COMPILER variables.";
     }
-  
+
   cmTypeMacro(cmBuildNameCommand, cmCommand);
 };
 

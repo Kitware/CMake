@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -67,7 +67,8 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args)
     }
 
   // Save the required version string.
-  m_Makefile->AddDefinition("CMAKE_MINIMUM_REQUIRED_VERSION", version_string.c_str());
+  m_Makefile->AddDefinition("CMAKE_MINIMUM_REQUIRED_VERSION",
+    version_string.c_str());
 
   // Get the current version number.
   int current_major = m_Makefile->GetMajorVersion();
@@ -102,9 +103,11 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args)
       {
       e << "WARNING: ";
       }
-    e << "This project requires version " << version_string.c_str() << " of CMake.  "
+    e << "This project requires version " << version_string.c_str()
+      << " of CMake.  "
       << "You are running version "
-      << current_major << "." << current_minor << "." << current_patch << ".\n";
+      << current_major << "." << current_minor << "." << current_patch
+      << ".\n";
     if(fatal_error)
       {
       cmSystemTools::Error(e.str().c_str());
