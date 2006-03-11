@@ -277,7 +277,11 @@ DynamicLoaderFunction DynamicLoader::GetSymbolAddress(LibHandle lib, const char*
 //----------------------------------------------------------------------------
 const char* DynamicLoader::LibPrefix()
 {
+#ifdef __MINGW32__
+  return "lib";
+#else
   return "";
+#endif
 }
 
 //----------------------------------------------------------------------------
