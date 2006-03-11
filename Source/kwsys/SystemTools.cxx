@@ -1914,94 +1914,41 @@ kwsys_stl::string SystemTools
  * found.  Otherwise, the empty string is returned.
  */
 kwsys_stl::string SystemTools::FindProgram(
-  const char* name,
+  const char* nameIn,
   const kwsys_stl::vector<kwsys_stl::string>& userPaths,
   bool no_system_path)
 {
-  if(!name)
+  if(!nameIn)
     {
     return "";
     }
-  kwsys_stl::string ext = SystemTools::GetExecutableExtension();
-  if(ext.size())
+  kwsys_stl::string name = nameIn;
+  bool hasExtension = false;
+  // check to see if the name already has a .xxx at
+  // the end of it
+  if(name.size() > 3 && name[name.size()-4] == '.')
     {
-    unsigned int len = strlen(name);
-    if(len > ext.size())
-      {
-      if(strcmp(name+(len-ext.size()), ext.c_str()) == 0)
-        {
-        ext = ""; // name already has Executable extension
-        }
-      }
+    hasExtension = true;
     }
-  // See if the executable exists as written.
-  if(SystemTools::FileExists(name) &&
-      !SystemTools::FileIsDirectory(name))
+  kwsys_stl::vector<kwsys_stl::string> extensions;
+#if defined (_WIN32) || defined(__CYGWIN__) | defined(__MINGW32__)
+  // on windows try .com then .exe
+  if(!hasExtension)
     {
-    return SystemTools::CollapseFullPath(name);
+    extensions.push_back(".com");
+    extensions.push_back(".exe");
     }
-  if(ext.size())
-    {
-    kwsys_stl::string tryPath = name;
-    tryPath += ext;
-    if(SystemTools::FileExists(tryPath.c_str()) &&
-       !SystemTools::FileIsDirectory(tryPath.c_str()))
-      {
-      return SystemTools::CollapseFullPath(tryPath.c_str());
-      }
-    }
-  kwsys_stl::vector<kwsys_stl::string> path;
-  // Add the system search path to our path.
-  if (!no_system_path)
-    {
-    SystemTools::GetPath(path);
-    }
-
-  // now add the additional paths
-  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator i = userPaths.begin();
-        i != userPaths.end(); ++i)
-    {
-    path.push_back(*i);
-    }
-  for(kwsys_stl::vector<kwsys_stl::string>::iterator p = path.begin();
-      p != path.end(); ++p)
-    {
-#ifdef _WIN32
-    // Remove double quotes from the path on windows
-    SystemTools::ReplaceString(*p, "\"", "");
 #endif
-    kwsys_stl::string tryPath = *p;
-    tryPath += "/";
-    tryPath += name;
-    if(SystemTools::FileExists(tryPath.c_str()) &&
-      !SystemTools::FileIsDirectory(tryPath.c_str()))
+  kwsys_stl::string tryPath;
+  // first try the name as it was given (adding extensions
+  // if needed.)
+  if(extensions.size())
+    {
+    for(kwsys_stl::vector<kwsys_stl::string>::iterator i = 
+          extensions.begin(); i != extensions.end(); ++i)
       {
-      return SystemTools::CollapseFullPath(tryPath.c_str());
-      }
-#ifdef _WIN32
-    // on windows try .com before .exe
-    if(ext.size() == 0)
-      {
-      SystemTools::ReplaceString(tryPath, ".exe", ".com");
-      SystemTools::ReplaceString(tryPath, ".EXE", ".com");
-      }
-    else
-      {
-      tryPath += ".com";
-      }
-    if(SystemTools::FileExists(tryPath.c_str()) &&
-       !SystemTools::FileIsDirectory(tryPath.c_str()))
-      {
-      return SystemTools::CollapseFullPath(tryPath.c_str());
-      }
-#endif
-    // now try to add ext if it is different than name
-    if(ext.size())
-      {
-      tryPath = *p;
-      tryPath += "/";
-      tryPath += name;
-      tryPath += ext;
+      tryPath = name;
+      tryPath += *i;
       if(SystemTools::FileExists(tryPath.c_str()) &&
          !SystemTools::FileIsDirectory(tryPath.c_str()))
         {
@@ -2009,7 +1956,64 @@ kwsys_stl::string SystemTools::FindProgram(
         }
       }
     }
-
+  else
+    {
+    tryPath = name;
+    if(SystemTools::FileExists(tryPath.c_str()) &&
+       !SystemTools::FileIsDirectory(tryPath.c_str()))
+      {
+      return SystemTools::CollapseFullPath(tryPath.c_str());
+      }
+    }
+  // now construct the path
+  kwsys_stl::vector<kwsys_stl::string> path;
+  // Add the system search path to our path.
+  if (!no_system_path)
+    {
+    SystemTools::GetPath(path);
+    }
+  // now add the additional paths
+  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator i = 
+        userPaths.begin();  i != userPaths.end(); ++i)
+    {
+    path.push_back(*i);
+    }
+  // Try each path
+  for(kwsys_stl::vector<kwsys_stl::string>::iterator p = path.begin();
+      p != path.end(); ++p)
+    {
+#ifdef _WIN32
+    // Remove double quotes from the path on windows
+    SystemTools::ReplaceString(*p, "\"", "");
+#endif
+    if(extensions.size())
+      {
+      for(kwsys_stl::vector<kwsys_stl::string>::iterator ext 
+            = extensions.begin(); ext != extensions.end(); ++ext)
+        {
+        tryPath = *p;
+        tryPath += "/";
+        tryPath += name;
+        tryPath += *ext;
+        if(SystemTools::FileExists(tryPath.c_str()) &&
+           !SystemTools::FileIsDirectory(tryPath.c_str()))
+          {
+          return SystemTools::CollapseFullPath(tryPath.c_str());
+          }
+        }
+      }
+    else
+      {
+      tryPath = *p;
+      tryPath += "/";
+      tryPath += name;
+      if(SystemTools::FileExists(tryPath.c_str()) &&
+         !SystemTools::FileIsDirectory(tryPath.c_str()))
+        {
+        return SystemTools::CollapseFullPath(tryPath.c_str());
+        }
+      }
+    }
   // Couldn't find the program.
   return "";
 }
