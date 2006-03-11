@@ -301,7 +301,6 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         cmSystemTools::Error("No cmake script provided.");
         return false;
         }
-      std::cerr << "Running cmake script file " << path.c_str() << "\n";
       this->ReadListFile(path.c_str());
       }
     }
