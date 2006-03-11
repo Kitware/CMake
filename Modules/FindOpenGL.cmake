@@ -15,8 +15,9 @@
 # People will have to change the cache values of OPENGL_glu_LIBRARY 
 # and OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX
 IF (APPLE)
-  SET (OPENGL_gl_LIBRARY "-framework OpenGL" CACHE STRING "OpenGL lib for OSX")
-  SET (OPENGL_glu_LIBRARY "-framework AGL" CACHE STRING "AGL lib for OSX")
+  FIND_LIBRARY(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL lib for OSX")
+  FIND_LIBRARY(OPENGL_glu_LIBRARY AGL DOC "AGL lib for OSX")
+  FIND_PATH(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OSX")
 ENDIF (APPLE)
 
 IF (WIN32)
