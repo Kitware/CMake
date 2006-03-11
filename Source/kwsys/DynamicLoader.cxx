@@ -80,7 +80,11 @@ DynamicLoader::GetSymbolAddress(LibHandle lib, const char* sym)
   void* addr;
   int status;
 
-  status = shl_findsym (&lib, sym, TYPE_PROCEDURE, &addr);
+  /* TYPE_PROCEDURE Look for a function or procedure.
+   * TYPE_DATA      Look for a symbol in the data segment (for example, variables).
+   * TYPE_UNDEFINED Look for any symbol.
+   */
+  status = shl_findsym (&lib, sym, TYPE_UNDEFINED, &addr);
   void* result = (status < 0) ? (void*)0 : addr;
 
   // Hack to cast pointer-to-data to pointer-to-function.
