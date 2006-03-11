@@ -22,6 +22,10 @@
 #endif //MAC_OS_X_VERSION_MIN_REQUIRED < 1030
 #endif // __APPLE__
 
+#ifdef __hpux
+#include <errno.h>
+#endif //__hpux
+
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
@@ -119,6 +123,13 @@ const char* DynamicLoader::LastError()
    * The specified handle is invalid.
    */
 
+  if(  errno == ENOEXEC
+    || errno == ENOSYM
+    || errno == EINVAL )
+    {
+    return strerror(errno);
+    }
+  // else
   return 0;
 }
 
