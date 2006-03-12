@@ -1923,6 +1923,8 @@ kwsys_stl::string SystemTools::FindProgram(
     return "";
     }
   kwsys_stl::string name = nameIn;
+  kwsys_stl::vector<kwsys_stl::string> extensions;
+#if defined (_WIN32) || defined(__CYGWIN__) | defined(__MINGW32__)
   bool hasExtension = false;
   // check to see if the name already has a .xxx at
   // the end of it
@@ -1930,8 +1932,6 @@ kwsys_stl::string SystemTools::FindProgram(
     {
     hasExtension = true;
     }
-  kwsys_stl::vector<kwsys_stl::string> extensions;
-#if defined (_WIN32) || defined(__CYGWIN__) | defined(__MINGW32__)
   // on windows try .com then .exe
   if(!hasExtension)
     {
