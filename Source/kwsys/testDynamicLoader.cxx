@@ -76,6 +76,8 @@ int TestDynamicLoader(const char* libname, const char* symbol, int r1, int r2, i
       << kwsys::DynamicLoader::LastError() << kwsys_ios::endl;
     return 1;
     }
+#else
+  (void)r3;
 #endif
   return 0;
 }
