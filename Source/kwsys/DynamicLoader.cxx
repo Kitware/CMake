@@ -167,7 +167,13 @@ LibHandle DynamicLoader::OpenLibrary(const char* libname )
 //----------------------------------------------------------------------------
 int DynamicLoader::CloseLibrary( LibHandle lib)
 {
-  bool success = NSUnLinkModule(lib, NSUNLINKMODULE_OPTION_NONE);
+  // Initially this function was written using NSUNLINKMODULE_OPTION_NONE, but when
+  // the code is compiled with coverage on, one cannot close the library properly
+  // so instead of not unloading the library. We use a special option:
+  // NSUNLINKMODULE_OPTION_KEEP_MEMORY_MAPPED
+  // With  this  option  the memory for the module is not deallocated
+  // allowing pointers into the module to still be valid.
+  bool success = NSUnLinkModule(lib, NSUNLINKMODULE_OPTION_KEEP_MEMORY_MAPPED);
   return success;
 }
 
