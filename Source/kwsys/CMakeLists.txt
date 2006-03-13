@@ -513,14 +513,6 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
   ADD_LIBRARY(${KWSYS_NAMESPACE} ${KWSYS_LIBRARY_TYPE}
     ${KWSYS_C_SRCS} ${KWSYS_CXX_SRCS})
 
-  # If kwsys contains the DynamicLoader, need extra library
-  IF(KWSYS_USE_DynamicLoader)
-    ADD_LIBRARY(testDynload MODULE testDynload.c)
-    IF(UNIX)
-      TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ${CMAKE_DL_LIBS})
-    ENDIF(UNIX)
-  ENDIF(KWSYS_USE_DynamicLoader)
-
   # Apply user-defined target properties to the library.
   IF(KWSYS_PROPERTIES_CXX)
     SET_TARGET_PROPERTIES(${KWSYS_NAMESPACE} PROPERTIES
@@ -614,6 +606,11 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       SET(EXTRA_TESTS
         testDynamicLoader
         )
+      # If kwsys contains the DynamicLoader, need extra library
+      ADD_LIBRARY(testDynload MODULE testDynload.c)
+      IF(UNIX)
+        TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ${CMAKE_DL_LIBS})
+      ENDIF(UNIX)
     ENDIF(KWSYS_USE_DynamicLoader)
     FOREACH(test
         testSystemTools
@@ -670,6 +667,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     ADD_TEST(kwsys.testRegistry ${EXEC_DIR}/testRegistry)
     IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY AND KWSYS_STANDALONE)
       ADD_TEST(kwsys.testFail ${EXEC_DIR}/testFail)
+      # We expect test to fail
       SET_TESTS_PROPERTIES(kwsys.testFail PROPERTIES WILL_FAIL ON)
       GET_TEST_PROPERTY(kwsys.testFail WILL_FAIL wfv)
       SET_TESTS_PROPERTIES(kwsys.testRegistry PROPERTIES FAIL_REGULAR_EXPRESSION "ERROR;FAIL;Test failed")
