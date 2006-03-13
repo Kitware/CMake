@@ -10,3 +10,10 @@ SET(VTKFREETYPE_BINARY_DIR "${VTK_BINARY_DIR}/Utilities/freetype" CACHE INTERNAL
 SET(VTKFTGL_SOURCE_DIR "${VTK_SOURCE_DIR}/Utilities/ftgl" CACHE INTERNAL "")
 SET(VTKFREETYPE_SOURCE_DIR "${VTK_SOURCE_DIR}/Utilities/freetype" CACHE INTERNAL "")
 
+SET(VTK_GLEXT_FILE "${VTK_SOURCE_DIR}/Utilities/ParseOGLExt/headers/glext.h" CACHE FILEPATH 
+  "Location of the OpenGL extensions header file (glext.h).")
+SET(VTK_GLXEXT_FILE "${VTK_SOURCE_DIR}/Utilities/ParseOGLExt/headers/glxext.h" CACHE FILEPATH
+  "Location of the GLX extensions header file (glxext.h).")
+SET(VTK_WGLEXT_FILE "${VTK_SOURCE_DIR}/Utilities/ParseOGLExt/headers/wglext.h" CACHE FILEPATH
+  "Location of the WGL extensions header file (wglext.h).")
+
