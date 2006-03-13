@@ -78,9 +78,15 @@ int TestDynamicLoader(const char* libname, const char* symbol, int r1, int r2, i
   return 0;
 }
 
-int main(int , char *[])
+int main(int argc, char *argv[])
 {
   int res;
+  if( argc == 3 )
+    {
+    // User specify a libname and symbol to check.
+    res = TestDynamicLoader(argv[1], argv[2],1,1,1);
+    return res;
+    }
   // Make sure that inexistant lib is giving correct result
   res = TestDynamicLoader("azerty_", "foo_bar",0,0,0);
   // Make sure that random binary file cannnot be assimilated as dylib
