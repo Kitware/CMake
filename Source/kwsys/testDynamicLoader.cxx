@@ -68,6 +68,7 @@ int TestDynamicLoader(const char* libname, const char* symbol, int r1, int r2, i
       << kwsys::DynamicLoader::LastError() << kwsys_ios::endl;
     return 1;
     }
+#ifndef __APPLE__
   int s = kwsys::DynamicLoader::CloseLibrary(l);
   if( (r3 && !s) || (!r3 && s) )
     {
@@ -75,6 +76,7 @@ int TestDynamicLoader(const char* libname, const char* symbol, int r1, int r2, i
       << kwsys::DynamicLoader::LastError() << kwsys_ios::endl;
     return 1;
     }
+#endif
   return 0;
 }
 

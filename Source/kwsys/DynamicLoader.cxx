@@ -160,20 +160,21 @@ LibHandle DynamicLoader::OpenLibrary(const char* libname )
     {
     return 0;
     }
-  return NSLinkModule(image, libname,
-    NSLINKMODULE_OPTION_PRIVATE|NSLINKMODULE_OPTION_BINDNOW);
+  NSModule handle = NSLinkModule(image, libname,
+    NSLINKMODULE_OPTION_BINDNOW|NSLINKMODULE_OPTION_RETURN_ON_ERROR);
+  NSDestroyObjectFileImage(image);
+  return handle;
 }
 
 //----------------------------------------------------------------------------
 int DynamicLoader::CloseLibrary( LibHandle lib)
 {
-  // Initially this function was written using NSUNLINKMODULE_OPTION_NONE, but when
-  // the code is compiled with coverage on, one cannot close the library properly
-  // so instead of not unloading the library. We use a special option:
   // NSUNLINKMODULE_OPTION_KEEP_MEMORY_MAPPED
   // With  this  option  the memory for the module is not deallocated
   // allowing pointers into the module to still be valid.
-  bool success = NSUnLinkModule(lib, NSUNLINKMODULE_OPTION_KEEP_MEMORY_MAPPED);
+  // You should use this option instead if your code experience some problems
+  // reported against Panther 10.3.9 (fixed in Tiger 10.4.2 and up)
+  bool success = NSUnLinkModule(lib, NSUNLINKMODULE_OPTION_NONE);
   return success;
 }
 
