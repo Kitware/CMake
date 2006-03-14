@@ -17,9 +17,7 @@
 IF (APPLE)
   FIND_LIBRARY(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL lib for OSX")
   FIND_LIBRARY(OPENGL_glu_LIBRARY AGL DOC "AGL lib for OSX")
-# since many package include opengl by GL/gl.h look for this version
-# instead of the framework OpenGL/gl.h
-  FIND_PATH(OPENGL_INCLUDE_DIR NAMES gl.h GL/gl.h DOC "Include for OpenGL on OSX")
+  FIND_PATH(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OSX")
 ENDIF (APPLE)
 
 IF (WIN32)
