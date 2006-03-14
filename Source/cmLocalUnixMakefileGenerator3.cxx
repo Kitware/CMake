@@ -929,8 +929,19 @@ cmLocalUnixMakefileGenerator3::CreateSafeUniqueObjectFileName(const char* sin)
     // Start with the original name.
     std::string ssin = sin;
 
+    // Avoid full paths by removing leading slashes.
+    std::string::size_type pos = 0;
+    for(;pos < ssin.size() && ssin[pos] == '/'; ++pos);
+    ssin = ssin.substr(pos);
+
+    // Avoid full paths by removing colons.
+    cmSystemTools::ReplaceString(ssin, ":", "_");
+
     // Avoid relative paths that go up the tree.
     cmSystemTools::ReplaceString(ssin, "../", "__/");
+
+    // Avoid spaces.
+    cmSystemTools::ReplaceString(ssin, " ", "_");
 
     // Mangle the name if necessary.
     if(m_Makefile->IsOn("CMAKE_MANGLE_OBJECT_FILE_NAMES"))
