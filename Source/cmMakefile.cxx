@@ -757,7 +757,11 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
     }
   else
     {
-    cmSystemTools::Error("Attempt to add link libraries to non-existant target: ",  target, " for lib ", lib);
+    cmOStringStream e;
+    e << "Attempt to add link library \""
+      << lib << "\" to target \""
+      << target << "\" which is not built by this project.";
+    cmSystemTools::Error(e.str().c_str());
     }
 }
 
