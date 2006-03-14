@@ -799,3 +799,25 @@ void cmMakefileTargetGenerator
   delete this->InfoFileStream;
   delete this->FlagFileStream;
 }
+
+void cmMakefileTargetGenerator::RemoveForbiddenFlags(const char* flagVar,
+                                                     const char* linkLang, 
+                                                     std::string& linkFlags)
+{
+  // check for language flags that are not allowed at link time, and
+  // remove them, -w on darwin for gcc -w -dynamiclib sends -w to libtool
+  // which fails, there may be more]
+  
+  std::string removeFlags = "CMAKE_";
+  removeFlags += linkLang;
+  removeFlags += flagVar;
+  std::string removeflags = 
+    this->Makefile->GetSafeDefinition(removeFlags.c_str());
+  std::vector<std::string> removeList;
+  cmSystemTools::ExpandListArgument(removeflags, removeList);
+  for(std::vector<std::string>::iterator i = removeList.begin();
+      i != removeList.end(); ++i)
+    {
+    cmSystemTools::ReplaceString(linkFlags, i->c_str(), "");
+    }
+}

@@ -246,16 +246,23 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Add the link message.
   std::string buildEcho = "Linking ";
   buildEcho += linkLanguage;
+  const char* forbiddenFlagVar = 0;
   switch(this->Target->GetType())
     {
     case cmTarget::STATIC_LIBRARY:
-      buildEcho += " static library "; break;
+      buildEcho += " static library "; 
+      break;
     case cmTarget::SHARED_LIBRARY:
-      buildEcho += " shared library "; break;
+      forbiddenFlagVar = "_CREATE_SHARED_LIBRARY_FORBIDDEN_FLAGS";
+      buildEcho += " shared library ";
+      break;
     case cmTarget::MODULE_LIBRARY:
-      buildEcho += " shared module "; break;
+      forbiddenFlagVar = "_CREATE_SHARED_MODULE_FORBIDDEN_FLAGS";
+      buildEcho += " shared module ";
+      break;
     default:
-      buildEcho += " library "; break;
+      buildEcho += " library "; 
+      break;
     }
   buildEcho += targetOutPath.c_str();
   this->LocalGenerator->AppendEcho(commands, buildEcho.c_str());
@@ -436,6 +443,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   this->LocalGenerator
     ->AddLanguageFlags(langFlags, linkLanguage,
                        this->LocalGenerator->m_ConfigurationName.c_str());
+  // remove any language flags that might not work with the
+  // particular os
+  if(forbiddenFlagVar)
+    {
+    this->RemoveForbiddenFlags(forbiddenFlagVar,
+                               linkLanguage, langFlags);
+    }
   vars.LanguageCompileFlags = langFlags.c_str();
   // Expand placeholders in the commands.
   this->LocalGenerator->m_TargetImplib = targetOutPathImport;

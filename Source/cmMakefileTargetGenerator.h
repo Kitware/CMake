@@ -99,7 +99,8 @@ protected:
   void AppendTargetDepends(std::vector<std::string>& depends);
 
   virtual void CloseFileStreams();
-  
+  void RemoveForbiddenFlags(const char* flagVar, const char* linkLang, 
+                            std::string& linkFlags);
   cmStdString TargetName;
   cmTarget *Target;
   cmLocalUnixMakefileGenerator3 *LocalGenerator;
