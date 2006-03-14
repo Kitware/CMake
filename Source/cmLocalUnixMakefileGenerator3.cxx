@@ -1509,19 +1509,19 @@ cmLocalUnixMakefileGenerator3
 {
   // If the source file is located below the current binary directory
   // then use that relative path for the object file name.
-  std::string objectName =
-    cmSystemTools::RelativePath(m_Makefile->GetCurrentOutputDirectory(),
-                                source.GetFullPath().c_str());
-  if(objectName.empty() || objectName[0] == '.')
+  std::string objectName = this->Convert(source.GetFullPath().c_str(),
+                                         START_OUTPUT);
+  if(cmSystemTools::FileIsFullPath(objectName.c_str()) ||
+     objectName.empty() || objectName[0] == '.')
     {
     // If the source file is located below the current source
     // directory then use that relative path for the object file name.
     // Otherwise just use the relative path from the current binary
     // directory.
-    std::string relFromSource =
-      cmSystemTools::RelativePath(m_Makefile->GetCurrentDirectory(),
-                                  source.GetFullPath().c_str());
-    if(!relFromSource.empty() && relFromSource[0] != '.')
+    std::string relFromSource = this->Convert(source.GetFullPath().c_str(),
+                                              START);
+    if(!cmSystemTools::FileIsFullPath(relFromSource.c_str()) &&
+       !relFromSource.empty() && relFromSource[0] != '.')
       {
       objectName = relFromSource;
       }
