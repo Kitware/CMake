@@ -113,11 +113,11 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
 
   // See if the cmSourceFile for it has any files specified as
   // dependency hints.
-  if(info->cmSourceFile != 0)
+  if(info->SourceFile != 0)
     {
 
     // Get the cmSourceFile corresponding to this.
-    const cmSourceFile& cFile = *(info->cmSourceFile);
+    const cmSourceFile& cFile = *(info->SourceFile);
     // See if there are any hints for finding dependencies for the missing
     // file.
     if(!cFile.GetDepends().empty())
@@ -280,7 +280,7 @@ void cmMakeDepend::GenerateMakefileDependencies()
         cmDependInformation* info =
           this->GetDependInformation((*i)->GetFullPath().c_str(),0);
         this->AddFileToSearchPath(info->FullPath.c_str());
-        info->cmSourceFile = *i;
+        info->SourceFile = *i;
         this->GenerateDependInformation(info);
         }
       }
@@ -389,7 +389,7 @@ cmMakeDepend::GetDependInformationForSourceFile(const cmSourceFile &sf) const
       i != this->DependInformationMap.end(); ++i)
     {
     const cmDependInformation* info = i->second;
-    if(info->cmSourceFile == &sf)
+    if(info->SourceFile == &sf)
       {
       return info;
       }

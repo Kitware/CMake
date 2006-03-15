@@ -976,9 +976,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   if(shared)
     {
     defFlags += "-D";
-    if(const char* custothis->export_name = target.GetProperty("DEFINE_SYMBOL"))
+    if(const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
       {
-      defFlags += custothis->export_name;
+      defFlags += custom_export_name;
       }
     else
       {
@@ -1401,7 +1401,7 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   target->AddAttribute("dependencies", dependencies);
   target->AddAttribute("name", this->CreateString(productName.c_str()));
   target->AddAttribute("productName",this->CreateString(productName.c_str()));
-  target->SetcmTarget(&cmtarget);
+  target->SetTarget(&cmtarget);
   return target;
 }
 
@@ -1496,7 +1496,7 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
                        this->CreateObjectReference(fileRef));
   target->AddAttribute("productType", 
                        this->CreateString(productTypeString.c_str()));
-  target->SetcmTarget(&cmtarget);
+  target->SetTarget(&cmtarget);
   return target;
 }
 
@@ -1511,7 +1511,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::FindXCodeTarget(cmTarget* t)
       i != this->XCodeObjects.end(); ++i)
     {
     cmXCodeObject* o = *i;
-    if(o->GetcmTarget() == t)
+    if(o->GetTarget() == t)
       {
       return o;
       }
@@ -1553,7 +1553,7 @@ void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
                             this->CreateObjectReference(dependTarget));
     container->AddAttribute("remoteInfo", 
                             this->CreateString(
-                              dependTarget->GetcmTarget()->GetName()));
+                              dependTarget->GetTarget()->GetName()));
     targetdep = 
       this->CreateObject(cmXCodeObject::PBXTargetDependency);
     targetdep->SetComment("PBXTargetDependency");
@@ -1645,7 +1645,7 @@ void cmGlobalXCodeGenerator::AppendBuildSettingAttribute(cmXCodeObject* target,
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 {
-  cmTarget* cmtarget = target->GetcmTarget();
+  cmTarget* cmtarget = target->GetTarget();
   if(!cmtarget)
     {
     cmSystemTools::Error("Error no target on xobject\n");
@@ -1662,8 +1662,8 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     emitted.insert(cmtarget->GetName());
 
     // Loop over all library dependencies.
-    const cmTarget::LinkLibraries& tlibs = cmtarget->GetLinkLibraries();
-    for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+    const cmTarget::LinkLibraryVectorType& tlibs = cmtarget->GetLinkLibraries();
+    for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
         lib != tlibs.end(); ++lib)
       {
       // Don't emit the same library twice for this target.
@@ -2064,7 +2064,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         i != targets.end(); ++i)
       {
       cmXCodeObject* target = *i;
-      cmTarget* t =target->GetcmTarget();
+      cmTarget* t =target->GetTarget();
       if(t->GetType() == cmTarget::EXECUTABLE ||
          t->GetType() == cmTarget::SHARED_LIBRARY ||
          t->GetType() == cmTarget::MODULE_LIBRARY)
@@ -2120,7 +2120,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         i != targets.end(); ++i)
       {
       cmXCodeObject* target = *i;
-      cmTarget* t =target->GetcmTarget();
+      cmTarget* t =target->GetTarget();
       if(t->GetType() == cmTarget::EXECUTABLE ||
          t->GetType() == cmTarget::SHARED_LIBRARY ||
          t->GetType() == cmTarget::MODULE_LIBRARY)
@@ -2363,7 +2363,7 @@ std::string cmGlobalXCodeGenerator::LookupFlags(const char* varNamePrefix,
     varName += varNameLang;
     varName += varNameSuffix;
     if(const char* varValue =
-       m_CurrentMakefile->GetDefinition(varName.c_str()))
+       this->CurrentMakefile->GetDefinition(varName.c_str()))
       {
       if(*varValue)
         {

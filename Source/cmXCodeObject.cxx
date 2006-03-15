@@ -23,8 +23,8 @@ cmXCodeObject::~cmXCodeObject()
 cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
 {
   this->Version = 15;
-  this->PBXTargetDependency = 0;
-  this->cmTarget = 0;
+  this->PBXTargetDependencyValue = 0;
+  this->Target = 0;
   this->Object =0;
   
   this->IsA = ptype;
@@ -50,8 +50,8 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
       this->Id += "0";
       }
     }
-  this->Type = type;
-  if(this->Type == OBJECT)
+  this->TypeValue = type;
+  if(this->TypeValue == OBJECT)
     {
     this->AddAttribute("isa", 0);
     }
@@ -79,7 +79,7 @@ void cmXCodeObject::Print(std::ostream& out)
     }
   cmXCodeObject::Indent(2*indentFactor, out);
   out << this->Id << " ";
-  if(!(this->this->IsA == PBXGroup && this->this->Comment.size() == 0))
+  if(!(this->IsA == PBXGroup && this->Comment.size() == 0))
     {
     this->PrintComment(out);
     }
@@ -102,20 +102,20 @@ void cmXCodeObject::Print(std::ostream& out)
       {
       continue;
       }
-    if(object->this->Type == OBJECT_LIST)
+    if(object->TypeValue == OBJECT_LIST)
       {
       out << i->first << " = (" << separator;
-      for(unsigned int k = 0; k < i->second->this->List.size(); k++)
+      for(unsigned int k = 0; k < i->second->List.size(); k++)
         {
         cmXCodeObject::Indent(4*indentFactor, out);
-        out << i->second->this->List[k]->this->Id << " ";
-        i->second->this->List[k]->PrintComment(out);
+        out << i->second->List[k]->Id << " ";
+        i->second->List[k]->PrintComment(out);
         out << "," << separator;
         } 
       cmXCodeObject::Indent(3*indentFactor, out);
       out << ");" << separator;
       }
-    else if(object->this->Type == ATTRIBUTE_GROUP)
+    else if(object->TypeValue == ATTRIBUTE_GROUP)
       {
       std::map<cmStdString, cmXCodeObject*>::iterator j;
       out << i->first << " = {" << separator;
@@ -123,25 +123,25 @@ void cmXCodeObject::Print(std::ostream& out)
             object->ObjectAttributes.end(); ++j)
         {
         cmXCodeObject::Indent(4 *indentFactor, out);
-        out << j->first << " = " << j->second->this->String << ";";
+        out << j->first << " = " << j->second->String << ";";
         out << separator;
         }
       cmXCodeObject::Indent(3 *indentFactor, out);
       out << "};" << separator;
       }
-    else if(object->this->Type == OBJECT_REF)
+    else if(object->TypeValue == OBJECT_REF)
       {
-      out << i->first << " = " << object->this->Object->this->Id;
-      if(object->this->Object->HasComment() && i->first != "remoteGlobalIDString")
+      out << i->first << " = " << object->Object->Id;
+      if(object->Object->HasComment() && i->first != "remoteGlobalIDString")
         {
         out << " ";
-        object->this->Object->PrintComment(out);
+        object->Object->PrintComment(out);
         }
       out << ";" << separator;
       }
-    else if(object->this->Type == STRING)
+    else if(object->TypeValue == STRING)
       {
-      out << i->first << " = " << object->this->String << ";" << separator;
+      out << i->first << " = " << object->String << ";" << separator;
       }
     else
       {
@@ -160,7 +160,7 @@ void cmXCodeObject::PrintList(std::vector<cmXCodeObject*> const& objs,
   out << "objects = {\n";
   for(unsigned int i = 0; i < objs.size(); ++i)
     {
-    if(objs[i]->this->Type == OBJECT)
+    if(objs[i]->TypeValue == OBJECT)
       {
       objs[i]->Print(out);
       }
@@ -172,10 +172,10 @@ void cmXCodeObject::PrintList(std::vector<cmXCodeObject*> const& objs,
 
 void cmXCodeObject::CopyAttributes(cmXCodeObject* copy)
 {
-  this->this->ObjectAttributes = copy->this->ObjectAttributes;
-  this->this->List = copy->this->List;
-  this->this->String = copy->this->String;
-  this->this->Object = copy->this->Object;
+  this->ObjectAttributes = copy->ObjectAttributes;
+  this->List = copy->List;
+  this->String = copy->String;
+  this->Object = copy->Object;
 }
 
 void cmXCodeObject::SetString(const char* s)

@@ -22,7 +22,7 @@ public:
   static const char* PBXTypeNames[];
   virtual ~cmXCodeObject();
   cmXCodeObject(PBXType ptype, Type type);
-  Type GetType() { return this->Type;}
+  Type GetType() { return this->TypeValue;}
   PBXType GetIsA() { return this->IsA;}
 
   void SetString(const char* s);
@@ -68,13 +68,13 @@ public:
     {
       return this->Id.c_str();
     }
-  cmTarget* GetcmTarget()
+  cmTarget* GetTarget()
     {
-      return this->cmTarget;
+      return this->Target;
     }
-  void SetcmTarget(cmTarget* t)
+  void SetTarget(cmTarget* t)
     {
-      this->cmTarget = t;
+      this->Target = t;
     }
   const char* GetComment() {return this->Comment.c_str();}
   bool HasComment() { return (this->Comment.size() !=  0);}
@@ -93,7 +93,7 @@ public:
           i != this->List.end(); ++i)
         {
         cmXCodeObject* o = *i;
-        if(o->this->IsA == t)
+        if(o->IsA == t)
           {
           return o;
           }
@@ -103,11 +103,11 @@ public:
   
   cmXCodeObject* GetPBXTargetDependency()
     {
-      return this->PBXTargetDependency;
+      return this->PBXTargetDependencyValue;
     }
   void SetPBXTargetDependency(cmXCodeObject* d)
     {
-      this->PBXTargetDependency = d;
+      this->PBXTargetDependencyValue = d;
     }
   void CopyAttributes(cmXCodeObject* );
   
@@ -127,15 +127,15 @@ public:
   std::vector<cmXCodeObject*> const& GetObjectList() { return this->List;}
   void SetComment(const char* c) { this->Comment = c;}
 protected:
-  cmTarget* cmTarget;
-  Type Type;
+  cmTarget* Target;
+  Type TypeValue;
   cmStdString Id;
   PBXType IsA;
   int Version;
   cmStdString Comment;
   cmStdString String;
   cmXCodeObject* Object;
-  cmXCodeObject* PBXTargetDependency;
+  cmXCodeObject* PBXTargetDependencyValue;
   std::vector<cmXCodeObject*> List;
   std::map<cmStdString, StringVec> DependLibraries;
   std::map<cmStdString, cmXCodeObject*> ObjectAttributes;

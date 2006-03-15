@@ -34,7 +34,7 @@ public:
    * Construct with dependency generation marked not done; instance
    * not placed in cmMakefile's list.
    */
-  cmDependInformation(): DependDone(false), cmSourceFile(0) {}
+  cmDependInformation(): DependDone(false), SourceFile(0) {}
 
   /**
    * The set of files on which this one depends.
@@ -52,7 +52,7 @@ public:
    * If this object corresponds to a cmSourceFile instance, this points
    * to it.
    */
-  const cmSourceFile *cmSourceFile;
+  const cmSourceFile *SourceFile;
   
   /**
    * Full path to this file.
