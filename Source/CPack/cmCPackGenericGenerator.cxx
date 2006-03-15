@@ -229,31 +229,40 @@ int cmCPackGenericGenerator::InstallProject()
         }
       }
     }
-  const char* binaryDir = this->GetOption("CPACK_BINARY_DIR");
-  if ( binaryDir )
+  const char* binaryDirectories = this->GetOption("CPACK_BINARY_DIR");
+  if ( binaryDirectories )
     {
-    std::string installFile = binaryDir;
-    installFile += "/cmake_install.cmake";
-    cmake cm;
-    cmGlobalGenerator gg;
-    gg.SetCMakeInstance(&cm);
-    std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
-    lg->SetGlobalGenerator(&gg);
-    cmMakefile *mf = lg->GetMakefile();
-    if ( movable )
+    std::vector<std::string> binaryDirectoriesVector;
+    cmSystemTools::ExpandListArgument(binaryDirectories,
+      binaryDirectoriesVector);
+    std::vector<std::string>::iterator it;
+    for ( it = binaryDirectoriesVector.begin();
+      it != binaryDirectoriesVector.end();
+      ++it )
       {
-      mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
-      }
-    const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
-    if ( buildConfig && *buildConfig )
-      {
-      mf->AddDefinition("BUILD_TYPE", buildConfig);
-      }
+      std::string installFile = it->c_str();
+      installFile += "/cmake_install.cmake";
+      cmake cm;
+      cmGlobalGenerator gg;
+      gg.SetCMakeInstance(&cm);
+      std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+      lg->SetGlobalGenerator(&gg);
+      cmMakefile *mf = lg->GetMakefile();
+      if ( movable )
+        {
+        mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
+        }
+      const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
+      if ( buildConfig && *buildConfig )
+        {
+        mf->AddDefinition("BUILD_TYPE", buildConfig);
+        }
 
-    res = mf->ReadListFile(0, installFile.c_str());
-    if ( cmSystemTools::GetErrorOccuredFlag() )
-      {
-      res = 0;
+      res = mf->ReadListFile(0, installFile.c_str());
+      if ( cmSystemTools::GetErrorOccuredFlag() )
+        {
+        res = 0;
+        }
       }
     }
   if ( !movable )
