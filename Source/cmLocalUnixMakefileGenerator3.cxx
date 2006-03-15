@@ -1574,12 +1574,12 @@ void cmLocalUnixMakefileGenerator3::WriteDisclaimer(std::ostream& os)
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::GetRecursiveMakeCall(const char *Makefile, const char* tgt)
+::GetRecursiveMakeCall(const char *makefile, const char* tgt)
 {
   // Call make on the given file.
   std::string cmd;
   cmd += "$(MAKE) -f ";
-  cmd += Makefile;
+  cmd += makefile;
   cmd += " ";
   
   // Passg down verbosity level.
