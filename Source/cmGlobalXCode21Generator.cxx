@@ -19,7 +19,7 @@
 
 cmGlobalXCode21Generator::cmGlobalXCode21Generator()
 {
-  this->this->XcodeVersion = 21;
+  this->XcodeVersion = 21;
 }
 
 //----------------------------------------------------------------------------

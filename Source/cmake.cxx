@@ -112,9 +112,9 @@ cmake::cmake()
   struct rlimit rlp;
   if(!getrlimit(RLIMIT_STACK, &rlp))
     {
-    if(rlp.rlithis->cur != rlp.rlithis->max)
+    if(rlp.rlim_cur != rlp.rlim_max)
       {
-        rlp.rlithis->cur = rlp.rlithis->max;
+        rlp.rlim_cur = rlp.rlim_max;
          setrlimit(RLIMIT_STACK, &rlp);
       }
     }

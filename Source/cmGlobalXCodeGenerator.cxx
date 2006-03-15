@@ -55,9 +55,9 @@ public:
     {
       this->Data.append(data, length);
     }
-  int this->Version;
-  std::string this->Key;
-  std::string this->Data;
+  int Version;
+  std::string Key;
+  std::string Data;
 };
 #endif
 
