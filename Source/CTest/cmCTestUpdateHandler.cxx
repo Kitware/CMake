@@ -407,10 +407,54 @@ int cmCTestUpdateHandler::ProcessHandler()
       }
     }
 
+  bool res = true;
+
   updateCommand = "\"" + updateCommand + "\"";
 
   // First, check what the current state of repository is
   std::string command = "";
+  switch( updateType )
+    {
+  case cmCTestUpdateHandler::e_CVS:
+    // TODO: CVS - for now just leave empty
+    break;
+  case cmCTestUpdateHandler::e_SVN:
+    command = updateCommand + " cleanup";
+    break;
+    }
+
+  //
+  // Get initial repository information if that is possible. With subversion,
+  // this will check the current revision.
+  //
+  if ( !command.empty() )
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "* Cleanup repository: " << command.c_str() << std::endl);
+    if ( !this->CTest->GetShowOnly() )
+      {
+      ofs << "* Cleanup repository" << std::endl;
+      ofs << "  Command: " << command.c_str() << std::endl;
+      res = this->CTest->RunCommand(command.c_str(), &goutput, &errors,
+        &retVal, sourceDirectory, 0 /*this->TimeOut*/);
+
+      ofs << "  Output: " << goutput.c_str() << std::endl;
+      ofs << "  Errors: " << errors.c_str() << std::endl;
+      if ( ofs )
+        {
+        ofs << "--- Cleanup ---" << std::endl;
+        ofs << goutput << std::endl;
+        }
+      }
+    else
+      {
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+        "Cleanup with command: " << command << std::endl);
+      }
+    }
+
+  // First, check what the current state of repository is
+  command = "";
   switch( updateType )
     {
   case cmCTestUpdateHandler::e_CVS:
@@ -427,17 +471,14 @@ int cmCTestUpdateHandler::ProcessHandler()
   int svn_latest_revision = 0;
   int svn_use_status = 0;
 
-  bool res = true;
-
-
   //
   // Get initial repository information if that is possible. With subversion,
   // this will check the current revision.
   //
   if ( !command.empty() )
     {
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-        "* Get repository information: " << command.c_str() << std::endl);
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "* Get repository information: " << command.c_str() << std::endl);
     if ( !this->CTest->GetShowOnly() )
       {
       ofs << "* Get repository information" << std::endl;
@@ -477,7 +518,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     else
       {
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-        "Update with command: " << command << std::endl);
+        "Get information with command: " << command << std::endl);
       }
     }
 
