@@ -134,7 +134,7 @@ protected:
   std::vector<std::string> ExternalObjects;
 
   // Set of object file names that will be built in this directory.
-  std::set<cmStdString> m_ObjectFiles;
+  std::set<cmStdString> ObjectFiles;
 
 
   //==================================================================

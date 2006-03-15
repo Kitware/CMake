@@ -35,7 +35,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
   std::string output = "";
     
   // get the directory argument if there is one
-  cmMakefile *dir = m_Makefile;
+  cmMakefile *dir = this->Makefile;
   if (*i == "DIRECTORY")
     {
     ++i;
@@ -49,13 +49,13 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     // make sure the start dir is a full path
     if (!cmSystemTools::FileIsFullPath(sd.c_str()))
       {
-      sd = m_Makefile->GetStartDirectory();
+      sd = this->Makefile->GetStartDirectory();
       sd += "/";
       sd += *i;
       }
     // lookup the makefile from the directory name
     cmLocalGenerator *lg = 
-      m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+      this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
       FindLocalGenerator(sd.c_str());
     if (!lg)
       {
@@ -151,13 +151,13 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     const char *prop = dir->GetProperty(i->c_str());
     if (prop)
       {
-      m_Makefile->AddDefinition(variable.c_str(), prop);
+      this->Makefile->AddDefinition(variable.c_str(), prop);
       return true;
       }
-    m_Makefile->AddDefinition(variable.c_str(), "");
+    this->Makefile->AddDefinition(variable.c_str(), "");
     return true;
     }
-  m_Makefile->AddDefinition(variable.c_str(), output.c_str());
+  this->Makefile->AddDefinition(variable.c_str(), output.c_str());
   
   return true;
 }

@@ -26,7 +26,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  const char* cacheValue = m_Makefile->GetDefinition(args[0].c_str());
+  const char* cacheValue = this->Makefile->GetDefinition(args[0].c_str());
   if(cacheValue)
     {
     // do we need to correct the value? 
@@ -37,7 +37,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
       cmSystemTools::ReplaceString(cv,"/", "_");
       cmSystemTools::ReplaceString(cv,"(", "_");
       cmSystemTools::ReplaceString(cv,")", "_");
-      m_Makefile->AddCacheDefinition(args[0].c_str(),
+      this->Makefile->AddCacheDefinition(args[0].c_str(),
                                      cv.c_str(),
                                      "Name of build.",
                                      cmCacheManager::STRING);
@@ -47,7 +47,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
 
   
   std::string buildname = "WinNT";
-  if(m_Makefile->GetDefinition("UNIX"))
+  if(this->Makefile->GetDefinition("UNIX"))
     {
     buildname = "";
     cmSystemTools::RunSingleCommand("uname -a", &buildname);
@@ -62,7 +62,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
   std::string compiler = "${CMAKE_CXX_COMPILER}";
-  m_Makefile->ExpandVariablesInString ( compiler );
+  this->Makefile->ExpandVariablesInString ( compiler );
   buildname += "-";
   buildname += cmSystemTools::GetFilenameName(compiler);
   cmSystemTools::ReplaceString(buildname,
@@ -72,7 +72,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
   cmSystemTools::ReplaceString(buildname,
                                ")", "_");
   
-  m_Makefile->AddCacheDefinition(args[0].c_str(),
+  this->Makefile->AddCacheDefinition(args[0].c_str(),
                                  buildname.c_str(),
                                  "Name of build.",
                                  cmCacheManager::STRING);

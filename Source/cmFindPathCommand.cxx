@@ -64,7 +64,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
     {
     return true;
     }
-  std::string ff = m_Makefile->GetSafeDefinition("CMAKE_FIND_FRAMEWORK");
+  std::string ff = this->Makefile->GetSafeDefinition("CMAKE_FIND_FRAMEWORK");
   bool supportFrameworks = true;
   if( ff.size() == 0 || ff == "NEVER" )
     {
@@ -108,7 +108,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
         }
       if(result.size() != 0)
         {
-        m_Makefile->AddCacheDefinition(this->VariableName.c_str(),
+        this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
                                        result.c_str(),
                                        this->VariableDocumentation.c_str(),
                                        (this->IncludeFileInPath) ? 
@@ -117,7 +117,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
         }
       }
     }
-  m_Makefile->AddCacheDefinition(this->VariableName.c_str(),
+  this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
                                  (this->VariableName + "-NOTFOUND").c_str(),
                                  this->VariableDocumentation.c_str(),
                                  (this->IncludeFileInPath) ? 

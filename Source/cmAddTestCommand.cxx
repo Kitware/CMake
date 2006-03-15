@@ -42,7 +42,7 @@ bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args)
     arguments.push_back(*it);
     }
 
-  cmTest* test = m_Makefile->CreateTest(args[0].c_str());
+  cmTest* test = this->Makefile->CreateTest(args[0].c_str());
   test->SetCommand(args[1].c_str());
   test->SetArguments(arguments);
 

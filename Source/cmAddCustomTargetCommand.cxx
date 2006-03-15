@@ -119,9 +119,9 @@ bool cmAddCustomTargetCommand::InitialPass(
 
   // Add the utility target to the makefile.
   const char* no_output = 0;
-  m_Makefile->AddUtilityCommand(args[0].c_str(), all, no_output,
-                                working_directory.c_str(), depends,
-                                commandLines);
+  this->Makefile->AddUtilityCommand(args[0].c_str(), all, no_output,
+                                    working_directory.c_str(), depends,
+                                    commandLines);
 
   return true;
 }

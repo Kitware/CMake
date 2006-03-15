@@ -78,11 +78,11 @@ public:
     }
   
 private:
-  std::vector<cmSourceFile> m_WrapClasses;
-  std::vector<std::string> m_WrapHeaders;
-  std::vector<std::string> m_OriginalNames;
-  std::string m_LibraryName;
-  std::string m_SourceList;
+  std::vector<cmSourceFile> WrapClasses;
+  std::vector<std::string> WrapHeaders;
+  std::vector<std::string> OriginalNames;
+  std::string LibraryName;
+  std::string SourceList;
 };
 
 

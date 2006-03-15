@@ -24,7 +24,7 @@
 
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator()
 {
-  m_FindMakeProgramFile = "CMakeVS7FindMake.cmake";
+  this->FindMakeProgramFile = "CMakeVS7FindMake.cmake";
 }
 
 
@@ -120,7 +120,7 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
 {
   // process the configurations
   const char* ct 
-    = m_CMakeInstance->GetCacheDefinition("CMAKE_CONFIGURATION_TYPES");
+    = this->CMakeInstance->GetCacheDefinition("CMAKE_CONFIGURATION_TYPES");
   if ( ct )
     {
     std::string configTypes = ct;
@@ -145,10 +145,10 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
          config == "MinSizeRel" || config == "RelWithDebInfo")
         {
         // only add unique configurations
-        if(std::find(m_Configurations.begin(),
-                     m_Configurations.end(), config) == m_Configurations.end())
+        if(std::find(this->Configurations.begin(),
+                     this->Configurations.end(), config) == this->Configurations.end())
           {
-          m_Configurations.push_back(config);
+          this->Configurations.push_back(config);
           }
         }
       else
@@ -161,18 +161,18 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
       start = endpos+1;
       }
     }
-  if(m_Configurations.size() == 0)
+  if(this->Configurations.size() == 0)
     {
-    m_Configurations.push_back("Debug");
-    m_Configurations.push_back("Release");
+    this->Configurations.push_back("Debug");
+    this->Configurations.push_back("Release");
     }
   
   // Reset the entry to have a semi-colon separated list.
-  std::string configs = m_Configurations[0];
-  for(unsigned int i=1; i < m_Configurations.size(); ++i)
+  std::string configs = this->Configurations[0];
+  for(unsigned int i=1; i < this->Configurations.size(); ++i)
     {
     configs += ";";
-    configs += m_Configurations[i];
+    configs += this->Configurations[i];
     }
   
   mf->AddCacheDefinition(
@@ -192,7 +192,7 @@ void cmGlobalVisualStudio7Generator::Generate()
   const char* no_working_dir = 0;
   std::vector<std::string> no_depends;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
+  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
     // add the ALL_BUILD to the first local generator of each project
@@ -203,7 +203,8 @@ void cmGlobalVisualStudio7Generator::Generate()
                           no_working_dir,
                           "echo", "Build all projects");
       std::string cmake_command = 
-        m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
+        this->LocalGenerators[0]->GetMakefile()->
+        GetRequiredDefinition("CMAKE_COMMAND");
       }
     }
 
@@ -224,7 +225,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
     {
     return;
     }
-  m_CurrentProject = root->GetMakefile()->GetProjectName();
+  this->CurrentProject = root->GetMakefile()->GetProjectName();
   std::string fname = root->GetMakefile()->GetStartOutputDirectory();
   fname += "/";
   fname += root->GetMakefile()->GetProjectName();
@@ -242,7 +243,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
 void cmGlobalVisualStudio7Generator::OutputSLNFile()
 { 
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
+  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     this->OutputSLNFile(it->second[0], it->second);
     }
@@ -422,8 +423,8 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
        << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
   
   int c = 0;
-  for(std::vector<std::string>::iterator i = m_Configurations.begin();
-      i != m_Configurations.end(); ++i)
+  for(std::vector<std::string>::iterator i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     fout << "\t\tConfigName." << c << " = " << *i << "\n";
     c++;
@@ -551,7 +552,7 @@ cmGlobalVisualStudio7Generator
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
   if (target.GetType() != cmTarget::STATIC_LIBRARY)
     {
-    cmTarget::LinkLibraries::const_iterator j, jend;
+    cmTarget::LinkLibraryVectorType::const_iterator j, jend;
     j = target.GetLinkLibraries().begin();
     jend = target.GetLinkLibraries().end();
     for(;j!= jend; ++j)
@@ -559,7 +560,7 @@ cmGlobalVisualStudio7Generator
       if(j->first != dspname)
         {
         // is the library part of this SLN ? If so add dependency
-        if(this->FindTarget(m_CurrentProject.c_str(), j->first.c_str()))
+        if(this->FindTarget(this->CurrentProject.c_str(), j->first.c_str()))
           {
           std::string guid = this->GetGUID(j->first.c_str());
           if(guid.size() == 0)
@@ -624,8 +625,8 @@ cmGlobalVisualStudio7Generator::WriteProjectConfigurations(std::ostream& fout,
                                                            bool in_all_build)
 {
   std::string guid = this->GetGUID(name);
-  for(std::vector<std::string>::iterator i = m_Configurations.begin();
-      i != m_Configurations.end(); ++i)
+  for(std::vector<std::string>::iterator i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << *i << "|Win32\n";
     if (in_all_build)
@@ -677,7 +678,7 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(const char* name)
 {
   std::string guidStoreName = name;
   guidStoreName += "_GUID_CMAKE";
-  const char* storedGUID = m_CMakeInstance->GetCacheDefinition(guidStoreName.c_str());
+  const char* storedGUID = this->CMakeInstance->GetCacheDefinition(guidStoreName.c_str());
   if(storedGUID)
     {
     return std::string(storedGUID);
@@ -692,7 +693,7 @@ void cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
 {
   std::string guidStoreName = name;
   guidStoreName += "_GUID_CMAKE";
-  if(m_CMakeInstance->GetCacheDefinition(guidStoreName.c_str()))
+  if(this->CMakeInstance->GetCacheDefinition(guidStoreName.c_str()))
     {
     return;
     }
@@ -704,13 +705,13 @@ void cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
   ret = reinterpret_cast<char*>(uidstr);
   RpcStringFree(&uidstr);
   ret = cmSystemTools::UpperCase(ret);
-  m_CMakeInstance->AddCacheEntry(guidStoreName.c_str(), ret.c_str(), "Stored GUID", 
+  this->CMakeInstance->AddCacheEntry(guidStoreName.c_str(), ret.c_str(), "Stored GUID", 
                                  cmCacheManager::INTERNAL);
 }
 
 std::vector<std::string> *cmGlobalVisualStudio7Generator::GetConfigurations()
 {
-  return &m_Configurations;
+  return &this->Configurations;
 };
 
 //----------------------------------------------------------------------------

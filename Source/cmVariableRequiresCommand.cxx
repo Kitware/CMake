@@ -28,7 +28,7 @@ bool cmVariableRequiresCommand::InitialPass(std::vector<std::string>const&
     }
 
   std::string testVariable = args[0]; 
-  if(!m_Makefile->IsOn(testVariable.c_str()))
+  if(!this->Makefile->IsOn(testVariable.c_str()))
     {
     return true;
     }
@@ -38,26 +38,26 @@ bool cmVariableRequiresCommand::InitialPass(std::vector<std::string>const&
   bool hasAdvanced = false;
   for(unsigned int i = 2; i < args.size(); ++i)
     {
-    if(!m_Makefile->IsOn(args[i].c_str()))
+    if(!this->Makefile->IsOn(args[i].c_str()))
       {
       requirementsMet = false;
       notSet += args[i];
       notSet += "\n";
       cmCacheManager::CacheIterator it = 
-        m_Makefile->GetCacheManager()->GetCacheIterator(args[i].c_str());
+        this->Makefile->GetCacheManager()->GetCacheIterator(args[i].c_str());
       if(!it.IsAtEnd() && it.GetPropertyAsBool("ADVANCED"))
         {
         hasAdvanced = true;
         }
       }
     }
-  const char* reqVar = m_Makefile->GetDefinition(resultVariable.c_str());
+  const char* reqVar = this->Makefile->GetDefinition(resultVariable.c_str());
   // if reqVar is unset, then set it to requirementsMet 
   // if reqVar is set to true, but requirementsMet is false , then
   // set reqVar to false.
-  if(!reqVar || (!requirementsMet && m_Makefile->IsOn(reqVar)))
+  if(!reqVar || (!requirementsMet && this->Makefile->IsOn(reqVar)))
     {
-    m_Makefile->AddDefinition(resultVariable.c_str(), requirementsMet);
+    this->Makefile->AddDefinition(resultVariable.c_str(), requirementsMet);
     }
 
   if(!requirementsMet)

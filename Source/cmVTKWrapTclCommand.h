@@ -87,11 +87,11 @@ public:
                          std::vector<std::string>& classes);
   
 private:
-  std::vector<cmSourceFile> m_WrapClasses;
-  std::vector<std::string> m_WrapHeaders;
-  std::string m_LibraryName;
-  std::string m_SourceList;
-  std::vector<std::string> m_Commands;
+  std::vector<cmSourceFile> WrapClasses;
+  std::vector<std::string> WrapHeaders;
+  std::string LibraryName;
+  std::string SourceList;
+  std::vector<std::string> Commands;
 };
 
 

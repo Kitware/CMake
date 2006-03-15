@@ -17,7 +17,7 @@
 #include "cmSourceGroup.h"
 
 //----------------------------------------------------------------------------
-cmSourceGroup::cmSourceGroup(const char* name, const char* regex): m_Name(name)
+cmSourceGroup::cmSourceGroup(const char* name, const char* regex): Name(name)
 {
   this->SetGroupRegex(regex);
 }
@@ -27,37 +27,37 @@ void cmSourceGroup::SetGroupRegex(const char* regex)
 {
   if(regex)
     {
-    m_GroupRegex.compile(regex);
+    this->GroupRegex.compile(regex);
     }
   else
     {
-    m_GroupRegex.compile("^$");
+    this->GroupRegex.compile("^$");
     }
 }
   
 //----------------------------------------------------------------------------
 void cmSourceGroup::AddGroupFile(const char* name)
 {
-  m_GroupFiles.insert(name);
+  this->GroupFiles.insert(name);
 }
   
 //----------------------------------------------------------------------------
 const char* cmSourceGroup::GetName() const
 {
-  return m_Name.c_str();
+  return this->Name.c_str();
 }
   
 //----------------------------------------------------------------------------
 bool cmSourceGroup::MatchesRegex(const char* name)
 {
-  return m_GroupRegex.find(name);
+  return this->GroupRegex.find(name);
 }
 
 //----------------------------------------------------------------------------
 bool cmSourceGroup::MatchesFiles(const char* name)
 {
-  std::set<cmStdString>::const_iterator i = m_GroupFiles.find(name);
-  if(i != m_GroupFiles.end())
+  std::set<cmStdString>::const_iterator i = this->GroupFiles.find(name);
+  if(i != this->GroupFiles.end())
     {
     return true;
     }
@@ -67,33 +67,33 @@ bool cmSourceGroup::MatchesFiles(const char* name)
 //----------------------------------------------------------------------------
 void cmSourceGroup::AssignSource(const cmSourceFile* sf)
 {
-  m_SourceFiles.push_back(sf);
+  this->SourceFiles.push_back(sf);
 }
 
 //----------------------------------------------------------------------------
 const std::vector<const cmSourceFile*>& cmSourceGroup::GetSourceFiles() const
 {
-  return m_SourceFiles;
+  return this->SourceFiles;
 }
 
 //----------------------------------------------------------------------------
 std::vector<const cmSourceFile*>& cmSourceGroup::GetSourceFiles()
 {
-  return m_SourceFiles;
+  return this->SourceFiles;
 }
 
 //----------------------------------------------------------------------------
 void cmSourceGroup::AddChild(cmSourceGroup child)
 {
-  m_GroupChildren.push_back(child);
+  this->GroupChildren.push_back(child);
 }
 
 //----------------------------------------------------------------------------
 cmSourceGroup *cmSourceGroup::lookupChild(const char* name)
 {
   // initializing iterators
-  std::vector<cmSourceGroup>::iterator iter = m_GroupChildren.begin();
-  std::vector<cmSourceGroup>::iterator end = m_GroupChildren.end();
+  std::vector<cmSourceGroup>::iterator iter = this->GroupChildren.begin();
+  std::vector<cmSourceGroup>::iterator end = this->GroupChildren.end();
 
   // st
   for(;iter!=end; ++iter)
@@ -122,8 +122,8 @@ cmSourceGroup *cmSourceGroup::lookupChild(const char* name)
 cmSourceGroup *cmSourceGroup::MatchChildrenFiles(const char *name)
 {
   // initializing iterators
-  std::vector<cmSourceGroup>::iterator iter = m_GroupChildren.begin();
-  std::vector<cmSourceGroup>::iterator end = m_GroupChildren.end();
+  std::vector<cmSourceGroup>::iterator iter = this->GroupChildren.begin();
+  std::vector<cmSourceGroup>::iterator end = this->GroupChildren.end();
 
   if(this->MatchesFiles(name))
     {
@@ -144,8 +144,8 @@ cmSourceGroup *cmSourceGroup::MatchChildrenFiles(const char *name)
 cmSourceGroup *cmSourceGroup::MatchChildrenRegex(const char *name)
 {
   // initializing iterators
-  std::vector<cmSourceGroup>::iterator iter = m_GroupChildren.begin();
-  std::vector<cmSourceGroup>::iterator end = m_GroupChildren.end();
+  std::vector<cmSourceGroup>::iterator iter = this->GroupChildren.begin();
+  std::vector<cmSourceGroup>::iterator end = this->GroupChildren.end();
 
   if(this->MatchesRegex(name))
     {
@@ -164,5 +164,5 @@ cmSourceGroup *cmSourceGroup::MatchChildrenRegex(const char *name)
 
 std::vector<cmSourceGroup> cmSourceGroup::GetGroupChildren() const
 {
-  return m_GroupChildren;
+  return this->GroupChildren;
 }

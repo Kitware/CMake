@@ -41,8 +41,8 @@ public:
   //! Set recurse to true to match subdirectories.
   void RecurseOn() { this->SetRecurse(true); }
   void RecurseOff() { this->SetRecurse(false); }
-  void SetRecurse(bool i) { m_Recurse = i; }
-  bool GetRecurse() { return m_Recurse; }
+  void SetRecurse(bool i) { this->Recurse = i; }
+  bool GetRecurse() { return this->Recurse; }
 
 protected:
   //! Process directory
@@ -65,8 +65,8 @@ protected:
   //! Add regular expression
   void AddExpression(const char* expr);
 
-  cmGlobInternal* m_Internals;
-  bool m_Recurse;
+  cmGlobInternal* Internals;
+  bool Recurse;
 };
 
 

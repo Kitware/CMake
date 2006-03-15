@@ -25,7 +25,7 @@ bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
 
-  cmTargets &tgts = m_Makefile->GetTargets();
+  cmTargets &tgts = this->Makefile->GetTargets();
   std::vector<std::string>::const_iterator s = args.begin();
   ++s;
   std::string runtime_dir = "/bin";

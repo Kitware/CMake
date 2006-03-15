@@ -103,7 +103,7 @@ bool cmCTestBuildCommand::InitialPass(
     }
 
   const char* ctestBuildCommand
-    = m_Makefile->GetDefinition("CTEST_BUILD_COMMAND");
+    = this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");
   if ( ctestBuildCommand && *ctestBuildCommand )
     {
     this->CTest->SetCTestConfiguration("MakeCommand", ctestBuildCommand);
@@ -111,13 +111,13 @@ bool cmCTestBuildCommand::InitialPass(
   else
     {
     const char* cmakeGeneratorName
-      = m_Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
+      = this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
     const char* cmakeProjectName
-      = m_Makefile->GetDefinition("CTEST_PROJECT_NAME");
+      = this->Makefile->GetDefinition("CTEST_PROJECT_NAME");
     const char* cmakeBuildConfiguration
-      = m_Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
+      = this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
     const char* cmakeBuildAdditionalFlags
-      = m_Makefile->GetDefinition("CTEST_BUILD_FLAGS");
+      = this->Makefile->GetDefinition("CTEST_BUILD_FLAGS");
     if ( cmakeGeneratorName && *cmakeGeneratorName &&
       cmakeProjectName && *cmakeProjectName )
       {
@@ -137,12 +137,12 @@ bool cmCTestBuildCommand::InitialPass(
       if ( !this->GlobalGenerator )
         {
         this->GlobalGenerator =
-          m_Makefile->GetCMakeInstance()->CreateGlobalGenerator(
+          this->Makefile->GetCMakeInstance()->CreateGlobalGenerator(
             cmakeGeneratorName);
         }
-      this->GlobalGenerator->FindMakeProgram(m_Makefile);
+      this->GlobalGenerator->FindMakeProgram(this->Makefile);
       const char* cmakeMakeProgram
-        = m_Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
+        = this->Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
       std::string buildCommand
         = this->GlobalGenerator->GenerateBuildCommand(cmakeMakeProgram,
           cmakeProjectName,
@@ -166,7 +166,7 @@ bool cmCTestBuildCommand::InitialPass(
     {
     cmOStringStream str;
     str << res;
-    m_Makefile->AddDefinition(res_var, str.str().c_str());
+    this->Makefile->AddDefinition(res_var, str.str().c_str());
     }
   return true;
 }

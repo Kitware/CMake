@@ -69,7 +69,7 @@ bool cmSetTargetPropertiesCommand::InitialPass(
      return false;
     }
   
-  cmTargets& targets = m_Makefile->GetTargets();
+  cmTargets& targets = this->Makefile->GetTargets();
   // now loop over all the targets
   int i;
   unsigned int k;

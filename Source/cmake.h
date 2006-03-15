@@ -78,12 +78,12 @@ class cmake
   void SetHomeDirectory(const char* dir);
   const char* GetHomeDirectory() const
     {
-    return m_cmHomeDirectory.c_str();
+    return this->cmHomeDirectory.c_str();
     }
   void SetHomeOutputDirectory(const char* lib);
   const char* GetHomeOutputDirectory() const
     {
-    return m_HomeOutputDirectory.c_str();
+    return this->HomeOutputDirectory.c_str();
     }
   //@}
 
@@ -97,21 +97,21 @@ class cmake
    */
   void SetStartDirectory(const char* dir) 
     {
-      m_cmStartDirectory = dir;
-      cmSystemTools::ConvertToUnixSlashes(m_cmStartDirectory);
+      this->cmStartDirectory = dir;
+      cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
     }
   const char* GetStartDirectory() const
     {
-      return m_cmStartDirectory.c_str();
+      return this->cmStartDirectory.c_str();
     }
   void SetStartOutputDirectory(const char* lib)
     {
-      m_StartOutputDirectory = lib;
-      cmSystemTools::ConvertToUnixSlashes(m_StartOutputDirectory);
+      this->StartOutputDirectory = lib;
+      cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
     }
   const char* GetStartOutputDirectory() const
     {
-      return m_StartOutputDirectory.c_str();
+      return this->StartOutputDirectory.c_str();
     }
   //@}
 
@@ -161,7 +161,7 @@ class cmake
   cmGlobalGenerator* CreateGlobalGenerator(const char* name);
 
   ///! Return the global generator assigned to this instance of cmake
-  cmGlobalGenerator* GetGlobalGenerator() { return m_GlobalGenerator; };
+  cmGlobalGenerator* GetGlobalGenerator() { return this->GlobalGenerator; };
 
   ///! Return the global generator assigned to this instance of cmake
   void SetGlobalGenerator(cmGlobalGenerator *);
@@ -170,10 +170,10 @@ class cmake
   void GetRegisteredGenerators(std::vector<std::string>& names);
 
   ///! get the cmCachemManager used by this invocation of cmake
-  cmCacheManager *GetCacheManager() { return m_CacheManager; }
+  cmCacheManager *GetCacheManager() { return this->CacheManager; }
   
   ///! set the cmake command this instance of cmake should use
-  void SetCMakeCommand(const char* cmd) { m_CMakeCommand = cmd; }
+  void SetCMakeCommand(const char* cmd) { this->CMakeCommand = cmd; }
   
   /**
    * Given a variable name, return its value (as a string).
@@ -187,7 +187,7 @@ class cmake
    * Execute commands during the build process. Supports options such
    * as echo, remove file etc.
    */
-  static int CMakeCommand(std::vector<std::string>&);
+  static int ExecuteCMakeCommand(std::vector<std::string>&);
 
   /**
    * Add a command to this cmake instance
@@ -201,7 +201,7 @@ class cmake
   cmCommand *GetCommand(const char *name);
 
   /** Get list of all commands */
-  RegisteredCommandsMap* GetCommands() { return &m_Commands; }
+  RegisteredCommandsMap* GetCommands() { return &this->Commands; }
 
   /** Check if a command exists. */
   bool CommandExists(const char* name) const;
@@ -210,15 +210,16 @@ class cmake
   void SetArgs(const std::vector<std::string>&);
 
   ///! Is this cmake running as a result of a TRY_COMPILE command
-  bool GetIsInTryCompile() { return m_InTryCompile; }
+  bool GetIsInTryCompile() { return this->InTryCompile; }
   
   ///! Is this cmake running as a result of a TRY_COMPILE command
-  void SetIsInTryCompile(bool i) { m_InTryCompile = i; }
+  void SetIsInTryCompile(bool i) { this->InTryCompile = i; }
   
   ///! Parse command line arguments that might set cache values
   bool SetCacheArgs(const std::vector<std::string>&);
 
-  typedef  void (*ProgressCallback)(const char*msg, float progress, void *);
+  typedef  void (*ProgressCallbackType)
+    (const char*msg, float progress, void *);
   /**
    *  Set the function used by GUI's to receive progress updates
    *  Function gets passed: message as a const char*, a progress 
@@ -226,14 +227,14 @@ class cmake
    *  number provided may be negative in cases where a message is 
    *  to be displayed without any progress percentage.
    */
-  void SetProgressCallback(ProgressCallback f, void* clientData=0);
+  void SetProgressCallback(ProgressCallbackType f, void* clientData=0);
 
   ///! this is called by generators to update the progress
   void UpdateProgress(const char *msg, float prog);
 
 
   ///! Get the variable watch object
-  cmVariableWatch* GetVariableWatch() { return m_VariableWatch; }
+  cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
 
   void GetCommandDocumentation(std::vector<cmDocumentationEntry>&) const;
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
@@ -246,12 +247,12 @@ class cmake
    * and no cache. Also, language are not enabled, so add_executable and things
    * do not do anything.
    */
-  void SetScriptMode(bool mode) { m_ScriptMode = mode; }
-  bool GetScriptMode() { return m_ScriptMode; }
+  void SetScriptMode(bool mode) { this->ScriptMode = mode; }
+  bool GetScriptMode() { return this->ScriptMode; }
   
   ///! Debug the try compile stuff by not delelting the files
-  bool GetDebugTryCompile(){return m_DebugTryCompile;}
-  void DebugTryCompileOn(){m_DebugTryCompile = true;}
+  bool GetDebugTryCompile(){return this->DebugTryCompile;}
+  void DebugTryCompileOn(){this->DebugTryCompile = true;}
 
   ///! Get the list of files written by CMake using FILE(WRITE / WRITE_FILE
   void AddWrittenFile(const char* file);
@@ -266,32 +267,32 @@ class cmake
   /**
    * Get the file comparison class
    */
-  cmFileTimeComparison* GetFileComparison() { return m_FileComparison; }
+  cmFileTimeComparison* GetFileComparison() { return this->FileComparison; }
 
   /**
    * Get the path to ctest
    */
   const char* GetCTestCommand();
   const char* GetCPackCommand();
-  const char* GetCMakeCommand() { return m_CMakeCommand.c_str(); }
+  const char* GetCMakeCommand() { return this->CMakeCommand.c_str(); }
 
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString,
                    CreateGeneratorFunctionType> RegisteredGeneratorsMap;
-  RegisteredCommandsMap m_Commands;
-  RegisteredGeneratorsMap m_Generators;
+  RegisteredCommandsMap Commands;
+  RegisteredGeneratorsMap Generators;
   void AddDefaultCommands();
   void AddDefaultGenerators();
 
-  cmGlobalGenerator *m_GlobalGenerator;
-  cmCacheManager *m_CacheManager;
-  std::string m_cmHomeDirectory; 
-  std::string m_HomeOutputDirectory;
-  std::string m_cmStartDirectory; 
-  std::string m_StartOutputDirectory;
+  cmGlobalGenerator *GlobalGenerator;
+  cmCacheManager *CacheManager;
+  std::string cmHomeDirectory; 
+  std::string HomeOutputDirectory;
+  std::string cmStartDirectory; 
+  std::string StartOutputDirectory;
 
-  std::set<cmStdString> m_WrittenFiles;
+  std::set<cmStdString> WrittenFiles;
 
   ///! return true if the same cmake was used to make the cache.
   bool CacheVersionMatches();
@@ -315,24 +316,24 @@ protected:
 
   void GenerateGraphViz(const char* fileName);
   
-  cmVariableWatch* m_VariableWatch;
+  cmVariableWatch* VariableWatch;
 
 private:
-  ProgressCallback m_ProgressCallback;
-  void* m_ProgressCallbackClientData;
-  bool m_Verbose;
-  bool m_InTryCompile;
-  bool m_ScriptMode;
-  std::string m_CMakeCommand;
-  std::string m_CXXEnvironment;
-  std::string m_CCEnvironment;
-  std::string m_CheckBuildSystem;
-  std::string m_CTestCommand;
-  std::string m_CPackCommand;
-  bool m_ClearBuildSystem;
-  bool m_DebugTryCompile;
-  cmFileTimeComparison* m_FileComparison;
-  std::string m_GraphVizFile;
+  ProgressCallbackType ProgressCallback;
+  void* ProgressCallbackClientData;
+  bool Verbose;
+  bool InTryCompile;
+  bool ScriptMode;
+  std::string CMakeCommand;
+  std::string CXXEnvironment;
+  std::string CCEnvironment;
+  std::string CheckBuildSystemArgument;
+  std::string CTestCommand;
+  std::string CPackCommand;
+  bool ClearBuildSystem;
+  bool DebugTryCompile;
+  cmFileTimeComparison* FileComparison;
+  std::string GraphVizFile;
   
   void UpdateConversionPathTable();
 };

@@ -24,8 +24,8 @@
 
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
 {
-  m_FindMakeProgramFile = "CMakeVS8FindMake.cmake";
-  m_ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
+  this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
+  this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
 }
 
 
@@ -71,7 +71,7 @@ void cmGlobalVisualStudio8Generator::Generate()
   const char* no_working_directory = 0;
   std::vector<std::string> no_depends;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
+  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& generators = it->second;
     if(!generators.empty())
@@ -203,8 +203,8 @@ cmGlobalVisualStudio8Generator
 ::WriteSolutionConfigurations(std::ostream& fout)
 {
   fout << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
-  for(std::vector<std::string>::iterator i = m_Configurations.begin();
-      i != m_Configurations.end(); ++i)
+  for(std::vector<std::string>::iterator i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     fout << "\t\t" << *i << "|Win32 = " << *i << "|Win32\n";
     }
@@ -218,8 +218,8 @@ cmGlobalVisualStudio8Generator
                              const char* name, bool in_all_build)
 {
   std::string guid = this->GetGUID(name);
-  for(std::vector<std::string>::iterator i = m_Configurations.begin();
-      i != m_Configurations.end(); ++i)
+  for(std::vector<std::string>::iterator i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i << "|Win32.ActiveCfg = " << *i << "|Win32\n";
     if (in_all_build)

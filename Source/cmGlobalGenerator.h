@@ -101,28 +101,30 @@ public:
                     std::string *output, 
                     const char *makeProgram, const char *config,
                     bool clean);
-  virtual std::string GenerateBuildCommand(const char* makeProgram,
-    const char *projectName, const char* additionalOptions, 
-                                           const char *targetName,
-    const char* config, bool ignoreErrors);
+  virtual std::string GenerateBuildCommand
+  (const char* makeProgram,
+   const char *projectName, const char* additionalOptions, 
+   const char *targetName,
+   const char* config, bool ignoreErrors);
+
 
   ///! Set the CMake instance
-  void SetCMakeInstance(cmake *cm) {
-    this->m_CMakeInstance = cm; };
+  void SetCMakeInstance(cmake *cm) { this->CMakeInstance = cm; };
   
   ///! Get the CMake instance
-  cmake *GetCMakeInstance() {
-    return this->m_CMakeInstance; };
+  cmake *GetCMakeInstance() { return this->CMakeInstance; };
 
-  void SetConfiguredFilesPath(const char* s){m_ConfiguredFilesPath = s;}
-  cmLocalGenerator* GetLocalGenerator(int p) { return m_LocalGenerators[p];}
-  void GetLocalGenerators(std::vector<cmLocalGenerator *>&g) 
-    { g = m_LocalGenerators;}
+  void SetConfiguredFilesPath(const char* s){this->ConfiguredFilesPath = s;}
+  cmLocalGenerator* GetLocalGenerator(int p) { 
+    return this->LocalGenerators[p];}
+  void GetLocalGenerators(std::vector<cmLocalGenerator *>&g) { 
+    g = this->LocalGenerators;}
+
   void AddLocalGenerator(cmLocalGenerator *lg);
   
   static int s_TryCompileTimeout;
   
-  bool GetForceUnixPaths() {return m_ForceUnixPaths;}
+  bool GetForceUnixPaths() {return this->ForceUnixPaths;}
   ///! return the language for the given extension
   const char* GetLanguageFromExtension(const char* ext);
   ///! is an extension to be ignored
@@ -188,31 +190,31 @@ protected:
   virtual const char* GetEditCacheTargetName()    { return 0; }
   virtual const char* GetRebuildCacheTargetName() { return 0; }
 
-  bool m_ForceUnixPaths;
-  cmStdString m_FindMakeProgramFile;
-  cmStdString m_ConfiguredFilesPath;
-  cmake *m_CMakeInstance;
-  std::vector<cmLocalGenerator *> m_LocalGenerators;
+  bool ForceUnixPaths;
+  cmStdString FindMakeProgramFile;
+  cmStdString ConfiguredFilesPath;
+  cmake *CMakeInstance;
+  std::vector<cmLocalGenerator *> LocalGenerators;
   // map from project name to vector of local generators in that project
-  std::map<cmStdString, std::vector<cmLocalGenerator*> > m_ProjectMap;
+  std::map<cmStdString, std::vector<cmLocalGenerator*> > ProjectMap;
 
 private:
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator 
-  std::map<cmStdString, bool> m_IgnoreExtensions;
-  std::map<cmStdString, bool> m_LanguageEnabled;
-  std::map<cmStdString, cmStdString> m_OutputExtensions;
-  std::map<cmStdString, cmStdString> m_LanguageToOutputExtension;
-  std::map<cmStdString, cmStdString> m_ExtensionToLanguage;
-  std::map<cmStdString, cmStdString> m_LanguageToLinkerPreference; 
+  std::map<cmStdString, bool> IgnoreExtensions;
+  std::map<cmStdString, bool> LanguageEnabled;
+  std::map<cmStdString, cmStdString> OutputExtensions;
+  std::map<cmStdString, cmStdString> LanguageToOutputExtension;
+  std::map<cmStdString, cmStdString> ExtensionToLanguage;
+  std::map<cmStdString, cmStdString> LanguageToLinkerPreference; 
 
   // The paths to the tops of the source and binary trees used for
   // relative path computation.  A path must be either in the source
   // tree or the build tree to be converted to a relative path.  The
   // ConfigureRelativePaths method may set these to be empty when
   // using relative paths is unsafe.
-  std::string m_RelativePathTopSource;
-  std::string m_RelativePathTopBinary;
+  std::string RelativePathTopSource;
+  std::string RelativePathTopBinary;
 };
 
 #endif

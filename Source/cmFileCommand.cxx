@@ -93,7 +93,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   std::string fileName = *i;
   if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
     {
-    fileName = m_Makefile->GetCurrentDirectory();
+    fileName = this->Makefile->GetCurrentDirectory();
     fileName += "/" + *i;
     }
 
@@ -143,7 +143,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   file << message;
   file.close();
   cmSystemTools::SetPermissions(fileName.c_str(), mode);
-  m_Makefile->AddWrittenFile(fileName.c_str());
+  this->Makefile->AddWrittenFile(fileName.c_str());
   return true;
 }
 
@@ -159,7 +159,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   std::string fileName = args[1];
   if ( !cmsys::SystemTools::FileIsFullPath(args[1].c_str()) )
     {
-    fileName = m_Makefile->GetCurrentDirectory();
+    fileName = this->Makefile->GetCurrentDirectory();
     fileName += "/" + args[1];
     }
 
@@ -185,7 +185,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
       output += "\n";
       }
     }
-  m_Makefile->AddDefinition(variable.c_str(), output.c_str());
+  this->Makefile->AddDefinition(variable.c_str(), output.c_str());
   return true;
 }
 
@@ -213,7 +213,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     {
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
-      std::string expr = m_Makefile->GetCurrentDirectory();
+      std::string expr = this->Makefile->GetCurrentDirectory();
       // Handle script mode
       if ( expr.size() > 0 )
         {
@@ -241,7 +241,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       first = false;
       }
     }
-  m_Makefile->AddDefinition(variable.c_str(), output.c_str());
+  this->Makefile->AddDefinition(variable.c_str(), output.c_str());
   return true;
 }
 
@@ -265,7 +265,7 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
     const std::string* cdir = &(*i);
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
-      expr = m_Makefile->GetCurrentDirectory();
+      expr = this->Makefile->GetCurrentDirectory();
       expr += "/" + *i;
       cdir = &expr;
       }
@@ -292,7 +292,7 @@ bool cmFileCommand::HandleInstallCommand(
   std::string rename = "";
   std::string destination = "";
   std::string stype = "FILES";
-  const char* build_type = m_Makefile->GetDefinition("BUILD_TYPE");
+  const char* build_type = this->Makefile->GetDefinition("BUILD_TYPE");
   if ( build_type && strcmp(build_type, ".") == 0 )
     {
     build_type = 0;
@@ -621,7 +621,7 @@ bool cmFileCommand::HandleInstallCommand(
 
   // Get the current manifest.
   const char* manifest_files = 
-    m_Makefile->GetDefinition("CMAKE_INSTALL_MANIFEST_FILES");
+    this->Makefile->GetDefinition("CMAKE_INSTALL_MANIFEST_FILES");
   std::string smanifest_files;
   if ( manifest_files )
     {
@@ -755,7 +755,7 @@ bool cmFileCommand::HandleInstallCommand(
         // We will install this file.  Display the information.
         message = "Installing ";
         message += toFile.c_str();
-        m_Makefile->DisplayStatus(message.c_str(), -1);
+        this->Makefile->DisplayStatus(message.c_str(), -1);
 
         // If no permissions were already given use the permissions of
         // the file being copied.
@@ -830,7 +830,7 @@ bool cmFileCommand::HandleInstallCommand(
     }
 
   // Save the updated install manifest.
-  m_Makefile->AddDefinition("CMAKE_INSTALL_MANIFEST_FILES",
+  this->Makefile->AddDefinition("CMAKE_INSTALL_MANIFEST_FILES",
                             smanifest_files.c_str());
 
   return true;
@@ -864,7 +864,7 @@ bool cmFileCommand::HandleRelativePathCommand(
     }
 
   std::string res = cmSystemTools::RelativePath(directoryName.c_str(), fileName.c_str());
-  m_Makefile->AddDefinition(outVar.c_str(),
+  this->Makefile->AddDefinition(outVar.c_str(),
     res.c_str());
   return true;
 }
@@ -915,6 +915,6 @@ bool cmFileCommand::HandleSystemPathCommand(std::vector<std::string>
     value += *j;
     value += ";";
     }
-  m_Makefile->AddDefinition(var, value.c_str());
+  this->Makefile->AddDefinition(var, value.c_str());
   return true;
 }

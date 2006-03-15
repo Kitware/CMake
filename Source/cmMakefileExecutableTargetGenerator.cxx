@@ -96,10 +96,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetName;
   std::string targetNameReal;
   this->Target->GetExecutableNames(targetName, targetNameReal,
-                                   this->LocalGenerator->m_ConfigurationName.c_str());
+                                   this->LocalGenerator->ConfigurationName.c_str());
 
   // Construct the full path version of the names.
-  std::string outpath = this->LocalGenerator->m_ExecutableOutputPath;
+  std::string outpath = this->LocalGenerator->ExecutableOutputPath;
   if(outpath.length() == 0)
     {
     outpath = this->Makefile->GetStartOutputDirectory();
@@ -191,7 +191,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Add flags to create an executable.
   this->LocalGenerator->
     AddConfigVariableFlags(linkFlags, "CMAKE_EXE_LINKER_FLAGS",
-                           this->LocalGenerator->m_ConfigurationName.c_str());
+                           this->LocalGenerator->ConfigurationName.c_str());
 
 
   if(this->Target->GetPropertyAsBool("WIN32_EXECUTABLE"))
@@ -208,7 +208,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Add language-specific flags.
   this->LocalGenerator
     ->AddLanguageFlags(flags, linkLanguage,
-                       this->LocalGenerator->m_ConfigurationName.c_str());
+                       this->LocalGenerator->ConfigurationName.c_str());
 
   // Add target-specific linker flags.
   this->LocalGenerator->AppendFlags(linkFlags, this->Target->GetProperty("LINK_FLAGS"));
@@ -220,7 +220,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string cleanName;
   std::string cleanRealName;
   this->Target->GetExecutableCleanNames(cleanName, cleanRealName,
-                                        this->LocalGenerator->m_ConfigurationName.c_str());
+                                        this->LocalGenerator->ConfigurationName.c_str());
   std::string cleanFullName = outpath + cleanName;
   std::string cleanFullRealName = outpath + cleanRealName;
   exeCleanFiles.push_back(this->Convert(cleanFullName.c_str(),

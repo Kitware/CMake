@@ -4,23 +4,23 @@
 cmXCode21Object::cmXCode21Object(PBXType ptype, Type type)
   :cmXCodeObject(ptype, type)
 {
-  m_Version = 21;
+  this->Version = 21;
 }
 
 //----------------------------------------------------------------------------
 void cmXCode21Object::PrintComment(std::ostream& out)
 {
-  if(m_Comment.size() == 0)
+  if(this->Comment.size() == 0)
     {
     cmXCodeObject* n = this->GetObject("name");
     if(n)
       {
-      m_Comment = n->GetString();
-      cmSystemTools::ReplaceString(m_Comment, "\"", "");
+      this->Comment = n->GetString();
+      cmSystemTools::ReplaceString(this->Comment, "\"", "");
       }
     }
   out << "/* ";
-  out << m_Comment;
+  out << this->Comment;
   out << " */";
 }
 

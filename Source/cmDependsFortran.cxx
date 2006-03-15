@@ -77,13 +77,13 @@ struct cmDependsFortranParser_s
 
 //----------------------------------------------------------------------------
 cmDependsFortran::cmDependsFortran():
-  m_IncludePath(0)
+  IncludePath(0)
 {
 }
 
 //----------------------------------------------------------------------------
 cmDependsFortran::cmDependsFortran(std::vector<std::string> const& includes):
-  m_IncludePath(&includes)
+  IncludePath(&includes)
 {
 }
 
@@ -107,7 +107,7 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
     cmSystemTools::Error("Cannot scan dependencies without an object file.");
     return false;
     }
-  if(!m_IncludePath)
+  if(!this->IncludePath)
     {
     cmSystemTools::Error("Cannot scan dependencies without an include path.");
     return false;
@@ -311,8 +311,8 @@ bool cmDependsFortran::FindIncludeFile(const char* dir,
       }
 
     // Search the include path for the file.
-    for(std::vector<std::string>::const_iterator i = m_IncludePath->begin();
-        i != m_IncludePath->end(); ++i)
+    for(std::vector<std::string>::const_iterator i = this->IncludePath->begin();
+        i != this->IncludePath->end(); ++i)
       {
       fullName = *i;
       fullName += "/";

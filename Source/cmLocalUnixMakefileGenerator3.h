@@ -31,7 +31,7 @@ class cmSourceFile;
  * \brief Write a LocalUnix makefiles.
  *
  * cmLocalUnixMakefileGenerator3 produces a LocalUnix makefile from its
- * member m_Makefile.
+ * member Makefile.
  */
 class cmLocalUnixMakefileGenerator3 : public cmLocalGenerator
 {
@@ -41,7 +41,7 @@ public:
 
   /**
    * Process the CMakeLists files for this directory to fill in the
-   * m_Makefile ivar 
+   * Makefile ivar 
    */
   virtual void Configure();
 
@@ -83,61 +83,61 @@ public:
    * that do not use environment variables.
    *
    */
-  void SetPassMakeflags(bool s){m_PassMakeflags = s;}
-  bool GetPassMakeflags() { return m_PassMakeflags; }
+  void SetPassMakeflags(bool s){this->PassMakeflags = s;}
+  bool GetPassMakeflags() { return this->PassMakeflags; }
   
   /**
    * Set the flag used to keep the make program silent.
    */
-  void SetMakeSilentFlag(const char* s) { m_MakeSilentFlag = s; }
-  std::string &GetMakeSilentFlag() { return m_MakeSilentFlag; }
+  void SetMakeSilentFlag(const char* s) { this->MakeSilentFlag = s; }
+  std::string &GetMakeSilentFlag() { return this->MakeSilentFlag; }
 
   /** Set whether the echo command needs its argument quoted.  */
-  void SetEchoNeedsQuote(bool b) { m_EchoNeedsQuote = b; }
+  void SetEchoNeedsQuote(bool b) { this->EchoNeedsQuote = b; }
 
   /**
    * Set to true if the shell being used is the windows shell.
    * This controls if statements in the makefile and the SHELL variable.
    * The default is false.
    */
-  void SetWindowsShell(bool v)  {m_WindowsShell = v;}
+  void SetWindowsShell(bool v)  {this->WindowsShell = v;}
 
   /**
    * If set to true, then NULL is set to nil for non Windows_NT.
    * This uses make syntax used by nmake and borland.
    * The default is false.
    */
-  void SetDefineWindowsNULL(bool v)  {m_DefineWindowsNULL = v;}
+  void SetDefineWindowsNULL(bool v)  {this->DefineWindowsNULL = v;}
 
   /**
    * If set to true, cd dir && command is used to 
    * run commands in a different directory.
    */
-  void SetUnixCD(bool v)  {m_UnixCD = v;}
+  void SetUnixCD(bool v)  {this->UnixCD = v;}
 
   /**
    * Set Support Verbose Variable.  If true, then .SILENT will
    * be not end with :  i.e. .SILENT: or .SILENT
    */
-  void SetSilentNoColon(bool v)  {m_SilentNoColon = v;}
+  void SetSilentNoColon(bool v)  {this->SilentNoColon = v;}
 
   /**
    * Set the string used to include one makefile into another default
    * is include.
    */
-  void SetIncludeDirective(const char* s) { m_IncludeDirective = s; }
-  const char *GetIncludeDirective() { return m_IncludeDirective.c_str(); }
+  void SetIncludeDirective(const char* s) { this->IncludeDirective = s; }
+  const char *GetIncludeDirective() { return this->IncludeDirective.c_str(); }
 
   /**
    * Set max makefile variable size, default is 0 which means unlimited.
    */
-  void SetMakefileVariableSize(int s) { m_MakefileVariableSize = s; }
+  void SetMakefileVariableSize(int s) { this->MakefileVariableSize = s; }
 
   /**
    * If ignore lib prefix is true, then do not strip lib from the name
    * of a library.
    */
-  void SetIgnoreLibPrefix(bool s) { m_IgnoreLibPrefix = s; }
+  void SetIgnoreLibPrefix(bool s) { this->IgnoreLibPrefix = s; }
 
   // used in writing out Cmake files such as WriteDirectoryInformation
   static void WriteCMakeArgument(std::ostream& os, const char* s);
@@ -194,7 +194,7 @@ public:
   struct IntegrityCheckSetMap: public std::map<cmStdString, IntegrityCheckSet>
   {};
   std::map<cmStdString, IntegrityCheckSetMap> &GetIntegrityCheckSet() 
-  { return m_CheckDependFiles;}
+  { return this->CheckDependFiles;}
   
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  cmTarget& target);
@@ -203,11 +203,11 @@ public:
   void WriteLocalAllRules(std::ostream& ruleFileStream);
   
   std::map<cmStdString,std::vector<cmTarget *> > GetLocalObjectFiles()
-    { return m_LocalObjectFiles;}
+    { return this->LocalObjectFiles;}
 
 protected:
-  // these two methods just compute reasonable values for m_LibraryOutputPath
-  // and m_ExecutableOutputPath
+  // these two methods just compute reasonable values for LibraryOutputPath
+  // and ExecutableOutputPath
   void ConfigureOutputPaths();
   void FormatOutputPath(std::string& path, const char* name);
 
@@ -282,33 +282,33 @@ private:
   friend class cmMakefileLibraryTargetGenerator;
   friend class cmMakefileUtilityTargetGenerator;
   
-  std::map<cmStdString, IntegrityCheckSetMap> m_CheckDependFiles;
+  std::map<cmStdString, IntegrityCheckSetMap> CheckDependFiles;
 
   //==========================================================================
   // Configuration settings.
-  int m_MakefileVariableSize;
-  std::string m_IncludeDirective;
-  std::string m_MakeSilentFlag;
-  std::string m_ExecutableOutputPath;
-  std::string m_LibraryOutputPath;
-  std::string m_ConfigurationName;
-  bool m_DefineWindowsNULL;
-  bool m_UnixCD;
-  bool m_PassMakeflags;
-  bool m_SilentNoColon;
+  int MakefileVariableSize;
+  std::string IncludeDirective;
+  std::string MakeSilentFlag;
+  std::string ExecutableOutputPath;
+  std::string LibraryOutputPath;
+  std::string ConfigurationName;
+  bool DefineWindowsNULL;
+  bool UnixCD;
+  bool PassMakeflags;
+  bool SilentNoColon;
   // Flag for whether echo command needs quotes.
-  bool m_EchoNeedsQuote;
+  bool EchoNeedsQuote;
   //==========================================================================
 
-  std::string m_HomeRelativeOutputPath;
+  std::string HomeRelativeOutputPath;
   
-  std::map<cmStdString,std::vector<cmTarget *> > m_LocalObjectFiles;
+  std::map<cmStdString,std::vector<cmTarget *> > LocalObjectFiles;
 
   /* does the work for each target */
   std::vector<cmMakefileTargetGenerator *> TargetGenerators;
-  std::map<cmStdString, cmStdString> m_MakeVariableMap;
-  std::map<cmStdString, cmStdString> m_ShortMakeVariableMap;
-  std::map<cmStdString, cmStdString> m_UniqueObjectNamesMap;
+  std::map<cmStdString, cmStdString> MakeVariableMap;
+  std::map<cmStdString, cmStdString> ShortMakeVariableMap;
+  std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
 };
 
 #endif

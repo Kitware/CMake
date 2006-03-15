@@ -266,7 +266,7 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
     return false;
     }
 
-  cmTryCompileCommand::CoreTryCompileCode(m_Makefile,argv,true);
+  cmTryCompileCommand::CoreTryCompileCode(this->Makefile,argv,true);
   
   return true;
 }

@@ -131,7 +131,7 @@ bool cmAddCustomCommandCommand::InitialPass(
         case doing_outputs:
           if (!cmSystemTools::FileIsFullPath(copy.c_str()))
             {
-            filename = m_Makefile->GetStartDirectory();
+            filename = this->Makefile->GetStartDirectory();
             filename += "/";
             }
           filename += copy;
@@ -218,14 +218,14 @@ bool cmAddCustomCommandCommand::InitialPass(
     {
     // Source is empty, use the target.
     std::vector<std::string> no_depends;
-    m_Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
+    this->Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
                                          commandLines, cctype,
                                          comment.c_str(), working.c_str());
     }
   else if(target.empty())
     {
     // Target is empty, use the output.
-    m_Makefile->AddCustomCommandToOutput(output.c_str(), depends,
+    this->Makefile->AddCustomCommandToOutput(output.c_str(), depends,
                                          main_dependency.c_str(),
                                          commandLines, comment.c_str(),
                                          working.c_str());
@@ -233,7 +233,7 @@ bool cmAddCustomCommandCommand::InitialPass(
   else
     {
     // Use the old-style mode for backward compatibility.
-    m_Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
+    this->Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
                                          source.c_str(), commandLines,
                                          comment.c_str());
     }

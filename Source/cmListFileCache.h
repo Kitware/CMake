@@ -50,21 +50,22 @@ struct cmListFileArgument
 
 struct cmListFileFunction
 {
-  std::string m_Name;
-  std::vector<cmListFileArgument> m_Arguments;
-  const char* m_FilePath;
-  long m_Line;
+  std::string Name;
+  std::vector<cmListFileArgument> Arguments;
+  const char* FilePath;
+  long Line;
 };
 
 struct cmListFile
 {
   cmListFile() 
-    :m_ModifiedTime(0) 
+    :ModifiedTime(0) 
     {
     }
   bool ParseFile(const char* path, bool requireProjectCommand);
-  long int m_ModifiedTime;
-  std::vector<cmListFileFunction> m_Functions;
+
+  long int ModifiedTime;
+  std::vector<cmListFileFunction> Functions;
 };
 
 #endif

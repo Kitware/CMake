@@ -115,12 +115,12 @@ protected:
                             const std::vector<std::string>& dependencies);
 
 
-  std::vector<std::string> m_Configurations;
-  std::map<cmStdString, cmStdString> m_GUIDMap;
+  std::vector<std::string> Configurations;
+  std::map<cmStdString, cmStdString> GUIDMap;
 
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.
-  std::string m_CurrentProject;
+  std::string CurrentProject;
 };
 
 #define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"

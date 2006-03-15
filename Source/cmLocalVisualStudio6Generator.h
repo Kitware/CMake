@@ -29,7 +29,7 @@ class cmCustomCommand;
  * \brief Write a LocalUnix makefiles.
  *
  * cmLocalVisualStudio6Generator produces a LocalUnix makefile from its
- * member m_Makefile.
+ * member this->Makefile.
  */
 class cmLocalVisualStudio6Generator : public cmLocalGenerator
 {
@@ -59,13 +59,13 @@ public:
    */
   std::vector<std::string> GetCreatedProjectNames() 
     {
-    return m_CreatedProjectNames;
+    return this->CreatedProjectNames;
     }
 
 private:
-  std::string m_DSPHeaderTemplate;
-  std::string m_DSPFooterTemplate;
-  std::vector<std::string> m_CreatedProjectNames;
+  std::string DSPHeaderTemplate;
+  std::string DSPFooterTemplate;
+  std::vector<std::string> CreatedProjectNames;
   
   void CreateSingleDSP(const char *lname, cmTarget &tgt);
   void WriteDSPFile(std::ostream& fout, const char *libName, 
@@ -94,8 +94,8 @@ private:
                   std::ostream &fout, const char *libName);
   std::string CreateTargetRules(cmTarget &target, 
                                 const char *libName);
-  std::string m_IncludeOptions;
-  std::vector<std::string> m_Configurations;
+  std::string IncludeOptions;
+  std::vector<std::string> Configurations;
 };
 
 #endif

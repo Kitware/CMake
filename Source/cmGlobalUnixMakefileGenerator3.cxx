@@ -24,8 +24,8 @@
 cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
 {
   // This type of makefile always requires unix style paths
-  m_ForceUnixPaths = true;
-  m_FindMakeProgramFile = "CMakeUnixFindMake.cmake";
+  this->ForceUnixPaths = true;
+  this->FindMakeProgramFile = "CMakeUnixFindMake.cmake";
 }
 
 void cmGlobalUnixMakefileGenerator3
@@ -124,7 +124,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
  
   // get a local generator for some useful methods
   cmLocalUnixMakefileGenerator3 *lg = 
-    static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
+    static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[0]);
     
   // Write the do not edit header.
   lg->WriteDisclaimer(makefileStream);
@@ -148,9 +148,9 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
 
   // The all and preinstall rules might never have any dependencies
   // added to them.
-  if(m_EmptyRuleHackDepends != "")
+  if(this->EmptyRuleHackDepends != "")
     {
-    depends.push_back(m_EmptyRuleHackDepends);
+    depends.push_back(this->EmptyRuleHackDepends);
     }
 
   // Write and empty all:
@@ -170,9 +170,9 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   
   // write the target convenience rules
   unsigned int i;
-  for (i = 0; i < m_LocalGenerators.size(); ++i)
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
+    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
     // are any parents excluded
     bool exclude = false;
     cmLocalGenerator *lg3 = lg;
@@ -188,7 +188,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     this->WriteConvenienceRules2(makefileStream,lg,exclude);
     }
 
-  lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
+  lg = static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[0]);
   lg->WriteSpecialTargetsBottom(makefileStream);
 }
 
@@ -214,7 +214,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   
   // get a local generator for some useful methods
   cmLocalUnixMakefileGenerator3 *lg = 
-    static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
+    static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[0]);
     
   // Write the do not edit header.
   lg->WriteDisclaimer(cmakefileStream);
@@ -226,9 +226,9 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
 
   // for each cmMakefile get its list of dependencies
   std::vector<std::string> lfiles;
-  for (unsigned int i = 0; i < m_LocalGenerators.size(); ++i)
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
+    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
   
     // Get the list of files contributing to this generation step.
     lfiles.insert(lfiles.end(),lg->GetMakefile()->GetListFiles().begin(),
@@ -241,7 +241,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   lfiles.erase(new_end, lfiles.end());
 
   // reset lg to the first makefile
-  lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[0]);
+  lg = static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[0]);
 
   // Build the path to the cache file.
   std::string cache = this->GetCMakeInstance()->GetHomeOutputDirectory();
@@ -279,9 +279,9 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
 
   // add in all the directory information files
   std::string tmpStr;
-  for (unsigned int i = 0; i < m_LocalGenerators.size(); ++i)
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
+    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
     tmpStr = lg->GetMakefile()->GetStartOutputDirectory();
     tmpStr += "/CMakeFiles/CMakeDirectoryInformation.cmake";
     cmakefileStream << "  \"" << 
@@ -289,7 +289,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     }
   cmakefileStream << "  )\n\n";
 
-  this->WriteMainCMakefileLanguageRules(cmakefileStream, m_LocalGenerators);
+  this->WriteMainCMakefileLanguageRules(cmakefileStream, this->LocalGenerators);
 }
   
 void cmGlobalUnixMakefileGenerator3
@@ -383,9 +383,9 @@ cmGlobalUnixMakefileGenerator3
 
   // Work-around for makes that drop rules that have no dependencies
   // or commands.
-  if(depends.empty() && m_EmptyRuleHackDepends != "")
+  if(depends.empty() && this->EmptyRuleHackDepends != "")
     {
-    depends.push_back(m_EmptyRuleHackDepends);
+    depends.push_back(this->EmptyRuleHackDepends);
     }
 
   // Write the rule.
@@ -442,9 +442,9 @@ cmGlobalUnixMakefileGenerator3
   // write the target convenience rules
   unsigned int i;
   cmLocalUnixMakefileGenerator3 *lg;
-  for (i = 0; i < m_LocalGenerators.size(); ++i)
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
+    lg = static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
     // for each target Generate the rule files for each target.
     cmTargets& targets = lg->GetMakefile()->GetTargets();
     for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
@@ -636,8 +636,8 @@ cmGlobalUnixMakefileGenerator3
   // Loop over all library dependencies but not for static libs
   if (target.GetType() != cmTarget::STATIC_LIBRARY)
     {
-    const cmTarget::LinkLibraries& tlibs = target.GetLinkLibraries();
-    for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+    const cmTarget::LinkLibraryVectorType& tlibs = target.GetLinkLibraries();
+    for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
         lib != tlibs.end(); ++lib)
       {
       // Don't emit the same library twice for this target.
@@ -683,14 +683,14 @@ cmGlobalUnixMakefileGenerator3
   if (!result)
     {
     unsigned int i;
-    for (i = 0; i < m_LocalGenerators.size(); ++i)
+    for (i = 0; i < this->LocalGenerators.size(); ++i)
       {
       // search all targets
-      result = m_LocalGenerators[i]->GetMakefile()->FindTarget(name);
+      result = this->LocalGenerators[i]->GetMakefile()->FindTarget(name);
       if (result)
         {
         lg3 = static_cast<cmLocalUnixMakefileGenerator3 *>
-          (m_LocalGenerators[i]);
+          (this->LocalGenerators[i]);
         break;
         }
       }
@@ -704,8 +704,9 @@ cmGlobalUnixMakefileGenerator3
     depends.push_back(tgtName);
     if(result->GetType() == cmTarget::STATIC_LIBRARY)
       {
-      const cmTarget::LinkLibraries& tlibs = result->GetLinkLibraries();
-      for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+      const cmTarget::LinkLibraryVectorType& tlibs 
+        = result->GetLinkLibraries();
+      for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
           lib != tlibs.end(); ++lib)
         {
         // Don't emit the same library twice for this target.
@@ -743,9 +744,9 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
   // for each local generator
   unsigned int i;
   cmLocalUnixMakefileGenerator3 *lg2;
-  for (i = 0; i < m_LocalGenerators.size(); ++i)
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    lg2 = static_cast<cmLocalUnixMakefileGenerator3 *>(m_LocalGenerators[i]);
+    lg2 = static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
     // for the passed in makefile or if this is the top Makefile wripte out
     // the targets
     if (lg2 == lg || !lg->GetParent())

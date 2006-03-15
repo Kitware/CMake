@@ -95,8 +95,8 @@ public:
 protected:
   std::string FindInstallSource(const char* name) const;
 private:
-  std::string m_TargetName;
-  std::vector<std::string> m_FinalArgs;
+  std::string TargetName;
+  std::vector<std::string> FinalArgs;
 };
 
 

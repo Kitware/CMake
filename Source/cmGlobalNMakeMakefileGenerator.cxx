@@ -20,8 +20,8 @@
 
 cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
 {
-  m_FindMakeProgramFile = "CMakeNMakeFindMake.cmake";
-  m_ForceUnixPaths = false;
+  this->FindMakeProgramFile = "CMakeNMakeFindMake.cmake";
+  this->ForceUnixPaths = false;
 }
 
 void cmGlobalNMakeMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,

@@ -61,15 +61,15 @@ public:
 protected:
   struct Pair
   {
-    WatchMethod m_Method;
-    void*        m_ClientData;
-    Pair() : m_Method(0), m_ClientData(0) {}
+    WatchMethod Method;
+    void*        ClientData;
+    Pair() : Method(0), ClientData(0) {}
   };
 
   typedef std::vector< Pair > VectorOfPairs;
   typedef std::map<cmStdString, VectorOfPairs > StringToVectorOfPairs;
 
-  StringToVectorOfPairs m_WatchMap;
+  StringToVectorOfPairs WatchMap;
 };
 
 

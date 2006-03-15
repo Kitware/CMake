@@ -84,7 +84,7 @@ public:
   /*
    * Is the tomorrow tag set?
    */
-  bool GetTomorrowTag() { return m_TomorrowTag; };
+  bool GetTomorrowTag() { return this->TomorrowTag; };
 
   /**
    * Try to run tests of the project
@@ -93,8 +93,8 @@ public:
 
   ///! what is the configuraiton type, e.g. Debug, Release etc.
   std::string GetConfigType();
-  double GetTimeOut() { return m_TimeOut; }
-  void SetTimeOut(double t) { m_TimeOut = t; }
+  double GetTimeOut() { return this->TimeOut; }
+  void SetTimeOut(double t) { this->TimeOut = t; }
 
   /**
    * Check if CTest file exists
@@ -111,7 +111,7 @@ public:
    * Set the cmake test mode (experimental, nightly, continuous).
    */
   void SetTestModel(int mode);
-  int GetTestModel() { return m_TestModel; };
+  int GetTestModel() { return this->TestModel; };
 
   std::string GetTestModelString();
   static int GetTestModelFromString(const char* str);
@@ -198,8 +198,8 @@ public:
   std::string GetShortPathToFile(const char* fname);
 
   //! Get the path to CTest
-  const char* GetCTestExecutable() { return m_CTestSelf.c_str(); }
-  const char* GetCMakeExecutable() { return m_CMakeSelf.c_str(); }
+  const char* GetCTestExecutable() { return this->CTestSelf.c_str(); }
+  const char* GetCMakeExecutable() { return this->CMakeSelf.c_str(); }
 
   enum {
     EXPERIMENTAL,
@@ -252,7 +252,7 @@ public:
   // script, this should be true.
   void SetSuppressUpdatingCTestConfiguration(bool val)
     {
-    m_SuppressUpdatingCTestConfiguration = val;
+    this->SuppressUpdatingCTestConfiguration = val;
     }
 
   //! Add overwrite to ctest configuration.
@@ -284,29 +284,29 @@ public:
   void Log(int logType, const char* file, int line, const char* msg);
 
   //! Get the version of dart server
-  int GetDartVersion() { return m_DartVersion; }
+  int GetDartVersion() { return this->DartVersion; }
 
   //! Add file to be submitted
   void AddSubmitFile(const char* name);
-  SetOfStrings* GetSubmitFiles() { return &m_SubmitFiles; }
+  SetOfStrings* GetSubmitFiles() { return &this->SubmitFiles; }
 
 private:
-  std::string m_ConfigType;
-  bool m_Verbose;
-  bool m_ExtraVerbose;
-  bool m_ProduceXML;
+  std::string ConfigType;
+  bool Verbose;
+  bool ExtraVerbose;
+  bool ProduceXML;
 
-  bool m_ForceNewCTestProcess;
+  bool ForceNewCTestProcess;
 
-  bool m_RunConfigurationScript;
+  bool RunConfigurationScript;
 
   int GenerateNotesFile(const char* files);
 
   // these are helper classes
   typedef std::map<cmStdString,cmCTestGenericHandler*> t_TestingHandlers;
-  t_TestingHandlers m_TestingHandlers;
+  t_TestingHandlers TestingHandlers;
 
-  bool m_ShowOnly;
+  bool ShowOnly;
 
   enum {
     FIRST_TEST     = 0,
@@ -326,35 +326,35 @@ private:
   //! Map of configuration properties
   typedef std::map<cmStdString, cmStdString> CTestConfigurationMap;
 
-  std::string             m_CTestConfigFile;
-  CTestConfigurationMap m_CTestConfiguration;
-  CTestConfigurationMap m_CTestConfigurationOverwrites;
-  int                     m_Tests[LAST_TEST];
+  std::string             CTestConfigFile;
+  CTestConfigurationMap CTestConfiguration;
+  CTestConfigurationMap CTestConfigurationOverwrites;
+  int                     Tests[LAST_TEST];
 
-  std::string             m_CurrentTag;
-  bool                    m_TomorrowTag;
+  std::string             CurrentTag;
+  bool                    TomorrowTag;
 
-  int                     m_TestModel;
+  int                     TestModel;
 
-  double                  m_TimeOut;
+  double                  TimeOut;
 
-  int                     m_CompatibilityMode;
+  int                     CompatibilityMode;
 
   // information for the --build-and-test options
-  std::string              m_CMakeSelf;
-  std::string              m_CTestSelf;
-  std::string              m_BinaryDir;
+  std::string              CMakeSelf;
+  std::string              CTestSelf;
+  std::string              BinaryDir;
 
-  std::string              m_NotesFiles;
+  std::string              NotesFiles;
 
 
   int ReadCustomConfigurationFileTree(const char* dir);
 
-  bool                     m_InteractiveDebugMode;
+  bool                     InteractiveDebugMode;
 
-  bool                     m_ShortDateFormat;
+  bool                     ShortDateFormat;
 
-  bool                     m_CompressXMLFiles;
+  bool                     CompressXMLFiles;
 
   void BlockTestErrorDiagnostics();
 
@@ -373,20 +373,20 @@ private:
   bool CheckArgument(const std::string& arg, const char* varg1,
     const char* varg2 = 0);
 
-  bool                      m_SuppressUpdatingCTestConfiguration;
+  bool                      SuppressUpdatingCTestConfiguration;
 
-  bool m_Debug;
-  bool m_ShowLineNumbers;
-  bool m_Quiet;
+  bool Debug;
+  bool ShowLineNumbers;
+  bool Quiet;
 
-  int  m_DartVersion;
+  int  DartVersion;
 
-  std::set<cmStdString> m_SubmitFiles;
+  std::set<cmStdString> SubmitFiles;
 
-  int m_SubmitIndex;
+  int SubmitIndex;
 
-  cmGeneratedFileStream* m_OutputLogFile;
-  int                    m_OutputLogFileLastTag;
+  cmGeneratedFileStream* OutputLogFile;
+  int OutputLogFileLastTag;
 };
 
 class cmCTestLogWrite

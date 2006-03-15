@@ -40,13 +40,13 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args)
     // Not a path. Maybe module.
     std::string module = fname;
     module += ".cmake";
-    std::string mfile = m_Makefile->GetModulesFile(module.c_str());
+    std::string mfile = this->Makefile->GetModulesFile(module.c_str());
     if ( mfile.size() )
       {
       fname = mfile.c_str();
       }
     }
-  bool readit = m_Makefile->ReadListFile( m_Makefile->GetCurrentListFile(), 
+  bool readit = this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(), 
                                           fname.c_str() );
   if(!optional && !readit && !cmSystemTools::GetFatalErrorOccured())
     {

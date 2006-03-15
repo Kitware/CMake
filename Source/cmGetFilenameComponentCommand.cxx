@@ -30,7 +30,7 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
   // already, if so use that value
   if(args.size() == 4 && args[3] == "CACHE")
     {
-    const char* cacheValue = m_Makefile->GetDefinition(args[0].c_str());
+    const char* cacheValue = this->Makefile->GetDefinition(args[0].c_str());
     if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
       {
       return true;
@@ -79,7 +79,7 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     // current source directory.
     if(!cmSystemTools::FileIsFullPath(filename.c_str()))
       {
-      std::string fname = m_Makefile->GetCurrentDirectory();
+      std::string fname = this->Makefile->GetCurrentDirectory();
       if(!fname.empty())
         {
         fname += "/";
@@ -102,13 +102,13 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     {
     if(programArgs.size() && storeArgs.size())
       {
-      m_Makefile->AddCacheDefinition(storeArgs.c_str(),
+      this->Makefile->AddCacheDefinition(storeArgs.c_str(),
                                      programArgs.c_str(),
                                      "",
                                      args[2] == "PATH" ? cmCacheManager::FILEPATH
                                      : cmCacheManager::STRING);
       }
-    m_Makefile->AddCacheDefinition(args[0].c_str(),
+    this->Makefile->AddCacheDefinition(args[0].c_str(),
                                    result.c_str(),
                                    "",
                                    args[2] == "PATH" ? cmCacheManager::FILEPATH
@@ -118,9 +118,9 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     {
     if(programArgs.size() && storeArgs.size())
       {
-      m_Makefile->AddDefinition(storeArgs.c_str(), programArgs.c_str());
+      this->Makefile->AddDefinition(storeArgs.c_str(), programArgs.c_str());
       }
-    m_Makefile->AddDefinition(args[0].c_str(), result.c_str());
+    this->Makefile->AddDefinition(args[0].c_str(), result.c_str());
     }
 
   return true;

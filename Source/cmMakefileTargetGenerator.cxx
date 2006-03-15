@@ -121,7 +121,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   dependFileNameFull += "/depend.make";
   *this->BuildFileStream
     << "# Include any dependencies generated for this target.\n"
-    << this->LocalGenerator->m_IncludeDirective << " "
+    << this->LocalGenerator->IncludeDirective << " "
     << this->Convert(dependFileNameFull.c_str(),
                                      cmLocalGenerator::HOME_OUTPUT,
                                      cmLocalGenerator::MAKEFILE)
@@ -153,7 +153,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   // Include the flags for the target.
   *this->BuildFileStream
     << "# Include the compile flags for this target's objects.\n"
-    << this->LocalGenerator->m_IncludeDirective << " "
+    << this->LocalGenerator->IncludeDirective << " "
     << this->Convert(this->FlagFileNameFull.c_str(), 
                                      cmLocalGenerator::HOME_OUTPUT, 
                                      cmLocalGenerator::MAKEFILE)
@@ -221,7 +221,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     // Add language-specific flags.
     this->LocalGenerator
       ->AddLanguageFlags(flags, lang,
-                         this->LocalGenerator->m_ConfigurationName.c_str());
+                         this->LocalGenerator->ConfigurationName.c_str());
     
     // Add shared-library flags if needed.
     this->LocalGenerator->AddSharedFlags(flags, lang, shared);
@@ -258,9 +258,9 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     this->LocalGenerator->GetObjectFileName(*this->Target, source, &objNoTargetDir);
 
   // Avoid generating duplicate rules.
-  if(m_ObjectFiles.find(obj) == m_ObjectFiles.end())
+  if(this->ObjectFiles.find(obj) == this->ObjectFiles.end())
     {
-    m_ObjectFiles.insert(obj);
+    this->ObjectFiles.insert(obj);
     }
   else
     {
@@ -294,13 +294,13 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
   this->WriteObjectBuildFile(obj, lang, source, depends);
   
   // The object file should be checked for dependency integrity.
-  this->LocalGenerator->m_CheckDependFiles[this->Target->GetName()][lang].insert(&source);
+  this->LocalGenerator->CheckDependFiles[this->Target->GetName()][lang].insert(&source);
   // add this to the list of objects for this local generator
   if(cmSystemTools::FileIsFullPath(objNoTargetDir.c_str()))
     {
     objNoTargetDir = cmSystemTools::GetFilenameName(objNoTargetDir);
     }
-  this->LocalGenerator->m_LocalObjectFiles[objNoTargetDir].push_back(this->Target);
+  this->LocalGenerator->LocalObjectFiles[objNoTargetDir].push_back(this->Target);
 }
 
 //----------------------------------------------------------------------------
@@ -352,7 +352,7 @@ cmMakefileTargetGenerator
   
   // Get the output paths for source and object files.
   std::string sourceFile = source.GetFullPath();
-  if(this->LocalGenerator->m_UseRelativePaths)
+  if(this->LocalGenerator->UseRelativePaths)
     {
     sourceFile = this->Convert(sourceFile.c_str(),
                                                cmLocalGenerator::HOME_OUTPUT);
@@ -770,8 +770,9 @@ void cmMakefileTargetGenerator
   emitted.insert(this->Target->GetName());
 
   // Loop over all library dependencies.
-  const cmTarget::LinkLibraries& tlibs = this->Target->GetLinkLibraries();
-  for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+  const cmTarget::LinkLibraryVectorType& tlibs = 
+    this->Target->GetLinkLibraries();
+  for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
       lib != tlibs.end(); ++lib)
     {
     // Don't emit the same library twice for this target.
@@ -782,7 +783,7 @@ void cmMakefileTargetGenerator
          this->GlobalGenerator->FindTarget(0, lib->first.c_str()))
         {
         if(const char* location =
-           tgt->GetLocation(this->LocalGenerator->m_ConfigurationName.c_str()))
+           tgt->GetLocation(this->LocalGenerator->ConfigurationName.c_str()))
           {
           depends.push_back(location);
           }

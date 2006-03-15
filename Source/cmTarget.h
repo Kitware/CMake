@@ -44,7 +44,7 @@ public:
    */
   TargetType GetType()
     {
-      return m_TargetType;
+      return this->TargetTypeValue;
     }
   
   /**
@@ -53,7 +53,7 @@ public:
   void SetType(TargetType f, const char* name);
 
   ///! Set/Get the name of the target
-  const char* GetName() {return m_Name.c_str();}
+  const char* GetName() {return this->Name.c_str();}
 
   /**
    * Indicate whether the target is part of the all target
@@ -64,40 +64,42 @@ public:
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
-  cmMakefile *GetMakefile() { return m_Makefile;};
+  cmMakefile *GetMakefile() { return this->Makefile;};
   
   /**
    * Get the list of the custom commands for this target
    */
   std::vector<cmCustomCommand> &GetPreBuildCommands() 
-    {return m_PreBuildCommands;}
+    {return this->PreBuildCommands;}
   std::vector<cmCustomCommand> &GetPreLinkCommands() 
-    {return m_PreLinkCommands;}
+    {return this->PreLinkCommands;}
   std::vector<cmCustomCommand> &GetPostBuildCommands() 
-    {return m_PostBuildCommands;}
+    {return this->PostBuildCommands;}
 
   /**
    * Get the list of the source lists used by this target
    */
-  std::vector<std::string> &GetSourceLists() {return m_SourceLists;}
+  std::vector<std::string> &GetSourceLists() {return this->SourceLists;}
 
   ///! Return the list of frameworks being linked to this target
-  std::vector<std::string> &GetFrameworks() {return m_Frameworks;}
+  std::vector<std::string> &GetFrameworks() {return this->Frameworks;}
   
   /**
    * Get the list of the source files used by this target
    */
-  std::vector<cmSourceFile*> &GetSourceFiles() {return m_SourceFiles;}
+  std::vector<cmSourceFile*> &GetSourceFiles() {return this->SourceFiles;}
 
   /**
    * Get the list of the source files used by this target
    */
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
-  typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
-  const LinkLibraries &GetLinkLibraries() {return m_LinkLibraries;}
-  const LinkLibraries &GetOriginalLinkLibraries() 
-    {return m_OriginalLinkLibraries;}
 
+  typedef std::vector<std::pair<std::string,LinkLibraryType> > 
+  LinkLibraryVectorType;
+  const LinkLibraryVectorType &GetLinkLibraries() {return this->LinkLibraries;}
+  const LinkLibraryVectorType &GetOriginalLinkLibraries() 
+    {return this->OriginalLinkLibraries;}
+  
   /**
    * Clear the dependency information recorded for this target, if any.
    */
@@ -112,8 +114,8 @@ public:
   void AddLinkLibrary(const std::string& lib, 
                       LinkLibraryType llt);
 
-  void MergeLinkLibraries( cmMakefile& mf, const char* selfname,
-                           const LinkLibraries& libs );
+  void MergeLinkLibraries( cmMakefile& mf, const char* selfname, 
+                           const LinkLibraryVectorType& libs );
 
   const std::vector<std::string>& GetLinkDirectories();
 
@@ -123,21 +125,21 @@ public:
    * Set the path where this target should be installed. This is relative to
    * INSTALL_PREFIX
    */
-  std::string GetInstallPath() {return m_InstallPath;}
-  void SetInstallPath(const char *name) {m_InstallPath = name;}
+  std::string GetInstallPath() {return this->InstallPath;}
+  void SetInstallPath(const char *name) {this->InstallPath = name;}
   
   /**
    * Set the path where this target (if it has a runtime part) should be
    * installed. This is relative to INSTALL_PREFIX
    */
-  std::string GetRuntimeInstallPath() {return m_RuntimeInstallPath;}
-  void SetRuntimeInstallPath(const char *name) {m_RuntimeInstallPath = name;}
+  std::string GetRuntimeInstallPath() {return this->RuntimeInstallPath;}
+  void SetRuntimeInstallPath(const char *name) {this->RuntimeInstallPath = name;}
 
   /**
    * Get/Set whether there is an install rule for this target.
    */
-  bool GetHaveInstallRule() { return m_HaveInstallRule; }
-  void SetHaveInstallRule(bool h) { m_HaveInstallRule = h; }
+  bool GetHaveInstallRule() { return this->HaveInstallRule; }
+  void SetHaveInstallRule(bool h) { this->HaveInstallRule = h; }
 
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be
@@ -149,9 +151,9 @@ public:
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
    * commands. It is not a full path nor does it have an extension.  
    */
-  void AddUtility(const char* u) { m_Utilities.insert(u);}
+  void AddUtility(const char* u) { this->Utilities.insert(u);}
   ///! Get the utilities used by this target
-  std::set<cmStdString>const& GetUtilities() { return m_Utilities; }
+  std::set<cmStdString>const& GetUtilities() { return this->Utilities; }
 
   void AnalyzeLibDependencies( const cmMakefile& mf );
 
@@ -313,33 +315,33 @@ private:
   // If the variable is not defined use the given default instead.
   void SetPropertyDefault(const char* property, const char* default_value);
 private:
-  std::string m_Name;
-  std::vector<cmCustomCommand> m_PreBuildCommands;
-  std::vector<cmCustomCommand> m_PreLinkCommands;
-  std::vector<cmCustomCommand> m_PostBuildCommands;
-  std::vector<std::string> m_SourceLists;
-  TargetType m_TargetType;
-  std::vector<cmSourceFile*> m_SourceFiles;
-  LinkLibraries m_LinkLibraries;
-  LinkLibraries m_PrevLinkedLibraries;
-  LinkLibraries m_OriginalLinkLibraries;
-  bool m_LinkLibrariesAnalyzed;
-  bool m_LinkDirectoriesComputed;
-  std::vector<std::string> m_Frameworks;
-  std::vector<std::string> m_LinkDirectories;
-  std::vector<std::string> m_ExplicitLinkDirectories;
-  bool m_HaveInstallRule;
-  std::string m_InstallPath;
-  std::string m_RuntimeInstallPath;
-  std::string m_Directory;
-  std::string m_Location;
-  std::set<cmStdString> m_Utilities;
-  bool m_RecordDependencies; 
-  std::map<cmStdString,cmStdString> m_Properties;
+  std::string Name;
+  std::vector<cmCustomCommand> PreBuildCommands;
+  std::vector<cmCustomCommand> PreLinkCommands;
+  std::vector<cmCustomCommand> PostBuildCommands;
+  std::vector<std::string> SourceLists;
+  TargetType TargetTypeValue;
+  std::vector<cmSourceFile*> SourceFiles;
+  LinkLibraryVectorType LinkLibraries;
+  LinkLibraryVectorType PrevLinkedLibraries;
+  bool LinkLibrariesAnalyzed;
+  bool LinkDirectoriesComputed;
+  std::vector<std::string> Frameworks;
+  std::vector<std::string> LinkDirectories;
+  std::vector<std::string> ExplicitLinkDirectories;
+  bool HaveInstallRule;
+  std::string InstallPath;
+  std::string RuntimeInstallPath;
+  std::string Directory;
+  std::string Location;
+  std::set<cmStdString> Utilities;
+  bool RecordDependencies; 
+  std::map<cmStdString,cmStdString> Properties;
+  LinkLibraryVectorType OriginalLinkLibraries;
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.
-  cmMakefile* m_Makefile;
+  cmMakefile* Makefile;
 };
 
 typedef std::map<cmStdString,cmTarget> cmTargets;

@@ -27,7 +27,7 @@ bool cmLinkDirectoriesCommand::InitialPass(std::vector<std::string> const& args)
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
     {
-    m_Makefile->AddLinkDirectory((*i).c_str());
+    this->Makefile->AddLinkDirectory((*i).c_str());
     }
   return true;
 }

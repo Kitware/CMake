@@ -829,7 +829,7 @@ YY_RULE_SETUP
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_DCURLYVariable;
+  yylvalp->str = yyextra->DCURLYVariable;
   return cal_DCURLY;
 }
 case 4:
@@ -838,7 +838,7 @@ YY_RULE_SETUP
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_RCURLYVariable;
+  yylvalp->str = yyextra->RCURLYVariable;
   return cal_RCURLY;
 }
 case 5:
@@ -847,7 +847,7 @@ YY_RULE_SETUP
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_ATVariable;
+  yylvalp->str = yyextra->ATVariable;
   return cal_AT;
 }
 case 6:
@@ -882,7 +882,7 @@ YY_RULE_SETUP
 
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_DOLLARVariable;
+  yylvalp->str = yyextra->DOLLARVariable;
   return cal_DOLLAR; 
 }
 case 10:
@@ -890,7 +890,7 @@ YY_RULE_SETUP
 
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_LCURLYVariable;
+  yylvalp->str = yyextra->LCURLYVariable;
   return cal_LCURLY; 
 }
 case 11:
@@ -898,7 +898,7 @@ YY_RULE_SETUP
 
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_BSLASHVariable;
+  yylvalp->str = yyextra->BSLASHVariable;
   return cal_BSLASH; 
 }
 case 12:
@@ -1093,10 +1093,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
   else
     {
-      size_t num_to_read =
+      size_t nuto_read =
       YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
-    while ( num_to_read <= 0 )
+    while ( nuto_read <= 0 )
       { /* Not enough room in the buffer - grow it. */
 
       /* just a shorter name for the current buffer */
@@ -1128,17 +1128,17 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
       yyg->yy_c_buf_p = &b->yy_ch_buf[yy_c_buf_p_offset];
 
-      num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
+      nuto_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
             number_to_move - 1;
 
       }
 
-    if ( num_to_read > YY_READ_BUF_SIZE )
-      num_to_read = YY_READ_BUF_SIZE;
+    if ( nuto_read > YY_READ_BUF_SIZE )
+      nuto_read = YY_READ_BUF_SIZE;
 
     /* Read in more data. */
     YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-      yyg->yy_n_chars, num_to_read );
+      yyg->yy_n_chars, nuto_read );
 
     YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
     }
@@ -1539,7 +1539,7 @@ void cmCommandArgument_yypop_buffer_state (yyscan_t yyscanner)
  */
 static void cmCommandArgument_yyensure_buffer_stack (yyscan_t yyscanner)
 {
-  int num_to_alloc;
+  int nuto_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
   if (!yyg->yy_buffer_stack) {
@@ -1548,14 +1548,14 @@ static void cmCommandArgument_yyensure_buffer_stack (yyscan_t yyscanner)
      * scanner will even need a stack. We use 2 instead of 1 to avoid an
      * immediate realloc on the next call.
          */
-    num_to_alloc = 1;
+    nuto_alloc = 1;
     yyg->yy_buffer_stack = (struct yy_buffer_state**)cmCommandArgument_yyalloc
-                (num_to_alloc * sizeof(struct yy_buffer_state*)
+                (nuto_alloc * sizeof(struct yy_buffer_state*)
                 , yyscanner);
     
-    memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
+    memset(yyg->yy_buffer_stack, 0, nuto_alloc * sizeof(struct yy_buffer_state*));
         
-    yyg->yy_buffer_stack_max = num_to_alloc;
+    yyg->yy_buffer_stack_max = nuto_alloc;
     yyg->yy_buffer_stack_top = 0;
     return;
   }
@@ -1565,15 +1565,15 @@ static void cmCommandArgument_yyensure_buffer_stack (yyscan_t yyscanner)
     /* Increase the buffer to prepare for a possible push. */
     int grow_size = 8 /* arbitrary grow size */;
 
-    num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
+    nuto_alloc = yyg->yy_buffer_stack_max + grow_size;
     yyg->yy_buffer_stack = (struct yy_buffer_state**)cmCommandArgument_yyrealloc
                 (yyg->yy_buffer_stack,
-                num_to_alloc * sizeof(struct yy_buffer_state*)
+                nuto_alloc * sizeof(struct yy_buffer_state*)
                 , yyscanner);
 
     /* zero only the new slots.*/
     memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
-    yyg->yy_buffer_stack_max = num_to_alloc;
+    yyg->yy_buffer_stack_max = nuto_alloc;
   }
 }
 

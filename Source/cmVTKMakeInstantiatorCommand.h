@@ -78,10 +78,10 @@ public:
   cmTypeMacro(cmVTKMakeInstantiatorCommand, cmCommand);
   
 protected:
-  std::string m_ClassName;
-  std::string m_ExportMacro;
-  std::vector<cmStdString> m_Includes;
-  std::vector<cmStdString> m_Classes;
+  std::string ClassName;
+  std::string ExportMacro;
+  std::vector<cmStdString> Includes;
+  std::vector<cmStdString> Classes;
   
   void GenerateHeaderFile(std::ostream&);
   void GenerateImplementationFile(std::ostream&);

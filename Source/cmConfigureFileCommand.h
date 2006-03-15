@@ -81,12 +81,12 @@ public:
 private:
   int ConfigureFile();
   
-  std::string m_InputFile;
-  std::string m_OuputFile;
-  bool m_CopyOnly;
-  bool m_EscapeQuotes;
-  bool m_Immediate;
-  bool m_AtOnly;
+  std::string InputFile;
+  std::string OuputFile;
+  bool CopyOnly;
+  bool EscapeQuotes;
+  bool Immediate;
+  bool AtOnly;
 };
 
 

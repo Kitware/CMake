@@ -28,7 +28,7 @@ bool cmGetTargetPropertyCommand::InitialPass(
   const char* var = args[0].c_str();
   const char* targetName = args[1].c_str();
 
-  cmTarget *tgt = m_Makefile->GetLocalGenerator()->GetGlobalGenerator()
+  cmTarget *tgt = this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
     ->FindTarget(0,targetName);
   if (tgt)
     {
@@ -36,11 +36,11 @@ bool cmGetTargetPropertyCommand::InitialPass(
     const char *prop = target.GetProperty(args[2].c_str());
     if (prop)
       {
-      m_Makefile->AddDefinition(var, prop);
+      this->Makefile->AddDefinition(var, prop);
       return true;
       }
     }
-  m_Makefile->AddDefinition(var, "NOTFOUND");
+  this->Makefile->AddDefinition(var, "NOTFOUND");
   return true;
 }
 

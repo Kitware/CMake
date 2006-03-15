@@ -78,7 +78,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         while (++i < args.size() && args[i] != "QUIET")
           {
           std::string req_var = Name + "_FIND_REQUIRED_" + args[i];
-          m_Makefile->AddDefinition(req_var.c_str(), "1");
+          this->Makefile->AddDefinition(req_var.c_str(), "1");
           }
         }
       else
@@ -118,7 +118,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   if(!(upperDir == this->Variable))
     {
     const char* versionValue =
-      m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+      this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
     if(atof(versionValue) < 1.7)
       {
       needCompatibility = true;
@@ -126,16 +126,16 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   // Try to find the config file.
-  const char* def = m_Makefile->GetDefinition(this->Variable.c_str());
+  const char* def = this->Makefile->GetDefinition(this->Variable.c_str());
   if(needCompatibility && cmSystemTools::IsOff(def))
     {
     // Use the setting of the old name of the variable to provide the
     // value of the new.
-    const char* oldDef = m_Makefile->GetDefinition(upperDir.c_str());
+    const char* oldDef = this->Makefile->GetDefinition(upperDir.c_str());
     if(!cmSystemTools::IsOff(oldDef))
       {
-      m_Makefile->AddDefinition(this->Variable.c_str(), oldDef);
-      def = m_Makefile->GetDefinition(this->Variable.c_str());
+      this->Makefile->AddDefinition(this->Variable.c_str(), oldDef);
+      def = this->Makefile->GetDefinition(this->Variable.c_str());
       }
     }
   if(cmSystemTools::IsOff(def))
@@ -149,7 +149,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // If the config file was found, load it.
   bool result = true;
   bool found = false;
-  def = m_Makefile->GetDefinition(this->Variable.c_str());
+  def = this->Makefile->GetDefinition(this->Variable.c_str());
   if(!cmSystemTools::IsOff(def))
     {
     std::string f = def;
@@ -196,16 +196,16 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // Set a variable marking whether the package was found.
   std::string foundVar = this->Name;
   foundVar += "_FOUND";
-  m_Makefile->AddDefinition(foundVar.c_str(), found? "1":"0");
+  this->Makefile->AddDefinition(foundVar.c_str(), found? "1":"0");
 
   if(needCompatibility)
     {
     // Listfiles will be looking for the capitalized version of the
     // name.  Provide it.
-    m_Makefile->AddDefinition(upperDir.c_str(),
-                              m_Makefile->GetDefinition(this->Variable.c_str()));
-    m_Makefile->AddDefinition(upperFound.c_str(),
-                              m_Makefile->GetDefinition(foundVar.c_str()));
+    this->Makefile->AddDefinition(upperDir.c_str(),
+                              this->Makefile->GetDefinition(this->Variable.c_str()));
+    this->Makefile->AddDefinition(upperFound.c_str(),
+                              this->Makefile->GetDefinition(foundVar.c_str()));
     }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -215,11 +215,11 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       {
       // Listfiles may use the capitalized version of the name.
       // Remove any previously added watch.
-      m_Makefile->GetVariableWatch()->RemoveWatch(
+      this->Makefile->GetVariableWatch()->RemoveWatch(
         upperDir.c_str(),
         cmFindPackageNeedBackwardsCompatibility
         );
-      m_Makefile->GetVariableWatch()->RemoveWatch(
+      this->Makefile->GetVariableWatch()->RemoveWatch(
         upperFound.c_str(),
         cmFindPackageNeedBackwardsCompatibility
         );
@@ -228,11 +228,11 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       {
       // Listfiles should not be using the capitalized version of the
       // name.  Add a watch to warn the user.
-      m_Makefile->GetVariableWatch()->AddWatch(
+      this->Makefile->GetVariableWatch()->AddWatch(
         upperDir.c_str(),
         cmFindPackageNeedBackwardsCompatibility
         );
-      m_Makefile->GetVariableWatch()->AddWatch(
+      this->Makefile->GetVariableWatch()->AddWatch(
         upperFound.c_str(),
         cmFindPackageNeedBackwardsCompatibility
         );
@@ -249,7 +249,7 @@ bool cmFindPackageCommand::FindModule(bool& found, bool quiet, bool required)
   std::string module = "Find";
   module += this->Name;
   module += ".cmake";
-  std::string mfile = m_Makefile->GetModulesFile(module.c_str());
+  std::string mfile = this->Makefile->GetModulesFile(module.c_str());
   if ( mfile.size() )
     {
     if(quiet)
@@ -258,7 +258,7 @@ bool cmFindPackageCommand::FindModule(bool& found, bool quiet, bool required)
       // quietly.
       std::string quietly = this->Name;
       quietly += "_FIND_QUIETLY";
-      m_Makefile->AddDefinition(quietly.c_str(), "1");
+      this->Makefile->AddDefinition(quietly.c_str(), "1");
       }
 
     if(required)
@@ -267,7 +267,7 @@ bool cmFindPackageCommand::FindModule(bool& found, bool quiet, bool required)
       // a fatal error if the package is not found.
       std::string req = this->Name;
       req += "_FIND_REQUIRED";
-      m_Makefile->AddDefinition(req.c_str(), "1");
+      this->Makefile->AddDefinition(req.c_str(), "1");
       }
 
     // Load the module we found.
@@ -330,7 +330,7 @@ bool cmFindPackageCommand::FindConfig()
   std::string init = this->SearchForConfig();
 
   // Store the entry in the cache so it can be set by the user.
-  m_Makefile->AddCacheDefinition(this->Variable.c_str(),
+  this->Makefile->AddCacheDefinition(this->Variable.c_str(),
                                  init.c_str(),
                                  help.c_str(),
                                  cmCacheManager::PATH);
@@ -393,7 +393,7 @@ std::string cmFindPackageCommand::SearchForConfig() const
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::ReadListFile(const char* f)
 {
-  if(m_Makefile->ReadListFile(m_Makefile->GetCurrentListFile(),f))
+  if(this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(),f))
     {
     return true;
     }

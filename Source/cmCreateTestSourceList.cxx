@@ -77,13 +77,14 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
       "You must specify a file extenion for the test driver file.");
     return false;
     }
-  std::string driver = m_Makefile->GetCurrentOutputDirectory();
+  std::string driver = this->Makefile->GetCurrentOutputDirectory();
   driver += "/";
   driver += *i;
   ++i;
 
   std::string configFile =
-    m_Makefile->GetRequiredDefinition("CMAKE_ROOT");
+    this->Makefile->GetRequiredDefinition("CMAKE_ROOT");
+
   configFile += "/Templates/TestDriver.cxx.in";
   // Create the test driver file
 
@@ -150,20 +151,20 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     }
   if(extraInclude.size())
     {
-    m_Makefile->AddDefinition("CMAKE_TESTDRIVER_EXTRA_INCLUDES",
-      extraInclude.c_str());
+    this->Makefile->AddDefinition("CMAKE_TESTDRIVER_EXTRA_INCLUDES",
+                                  extraInclude.c_str());
     }
   if(function.size())
     {
-    m_Makefile->AddDefinition("CMAKE_TESTDRIVER_ARGVC_FUNCTION",
-      function.c_str());
+    this->Makefile->AddDefinition("CMAKE_TESTDRIVER_ARGVC_FUNCTION",
+                                  function.c_str());
     }
-  m_Makefile->AddDefinition("CMAKE_FORWARD_DECLARE_TESTS",
+  this->Makefile->AddDefinition("CMAKE_FORWARD_DECLARE_TESTS",
     forwardDeclareCode.c_str());
-  m_Makefile->AddDefinition("CMAKE_FUNCTION_TABLE_ENTIRES",
+  this->Makefile->AddDefinition("CMAKE_FUNCTION_TABLE_ENTIRES",
     functionMapCode.c_str());
   bool res = true;
-  if ( !m_Makefile->ConfigureFile(configFile.c_str(), driver.c_str(),
+  if ( !this->Makefile->ConfigureFile(configFile.c_str(), driver.c_str(),
       false, true, false) )
     {
     res = false;
@@ -175,10 +176,10 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
 
   cfile.SetProperty("ABSTRACT","0");
   cfile.SetName(cmSystemTools::GetFilenameWithoutExtension(args[1]).c_str(),
-                m_Makefile->GetCurrentOutputDirectory(),
+                this->Makefile->GetCurrentOutputDirectory(),
                 cmSystemTools::GetFilenameExtension(args[1]).c_str()+1,
                 false);
-  m_Makefile->AddSource(cfile);
+  this->Makefile->AddSource(cfile);
   sourceListValue = args[1];
 
   for(i = testsBegin; i != tests.end(); ++i)
@@ -186,15 +187,15 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     cmSourceFile icfile;
     icfile.SetProperty("ABSTRACT","0");
     icfile.SetName(i->c_str(),
-                  m_Makefile->GetCurrentDirectory(),
-                  m_Makefile->GetSourceExtensions(),
-                  m_Makefile->GetHeaderExtensions());
-    m_Makefile->AddSource(icfile);
+                  this->Makefile->GetCurrentDirectory(),
+                  this->Makefile->GetSourceExtensions(),
+                  this->Makefile->GetHeaderExtensions());
+    this->Makefile->AddSource(icfile);
     sourceListValue += ";";
     sourceListValue += *i;
     }
 
-  m_Makefile->AddDefinition(sourceList, sourceListValue.c_str());
+  this->Makefile->AddDefinition(sourceList, sourceListValue.c_str());
   return res;
 }
 

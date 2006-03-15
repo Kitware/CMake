@@ -54,29 +54,29 @@ bool cmSetDirectoryPropertiesCommand::InitialPass(
       {
       std::vector<std::string> varArgsExpanded;
       cmSystemTools::ExpandListArgument(value, varArgsExpanded);
-      m_Makefile->SetIncludeDirectories(varArgsExpanded);
+      this->Makefile->SetIncludeDirectories(varArgsExpanded);
       }
     else if ( prop == "LINK_DIRECTORIES" )
       {
       std::vector<std::string> varArgsExpanded;
       cmSystemTools::ExpandListArgument(value, varArgsExpanded);
-      m_Makefile->SetLinkDirectories(varArgsExpanded);
+      this->Makefile->SetLinkDirectories(varArgsExpanded);
       }
     else if ( prop == "INCLUDE_REGULAR_EXPRESSION" )
       {
-      m_Makefile->SetIncludeRegularExpression(value.c_str());
+      this->Makefile->SetIncludeRegularExpression(value.c_str());
       }
     else
       {
       if ( prop == "ADDITIONAL_MAKE_CLEAN_FILES" )
         {
         // This property is not inherrited
-        if ( strcmp(m_Makefile->GetCurrentDirectory(), m_Makefile->GetStartDirectory()) != 0 )
+        if ( strcmp(this->Makefile->GetCurrentDirectory(), this->Makefile->GetStartDirectory()) != 0 )
           {
           continue;
           }
         }
-      m_Makefile->SetProperty(prop.c_str(), value.c_str());
+      this->Makefile->SetProperty(prop.c_str(), value.c_str());
       }
     }
   

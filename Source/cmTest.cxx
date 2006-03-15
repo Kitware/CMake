@@ -32,7 +32,7 @@ void cmTest::SetName(const char* name)
     {
     name = "";
     }
-  m_Name = name;
+  this->Name = name;
 }
 
 void cmTest::SetCommand(const char* command)
@@ -41,19 +41,19 @@ void cmTest::SetCommand(const char* command)
     {
     command = "";
     }
-  m_Command = command;
+  this->Command = command;
 }
 
 void cmTest::SetArguments(const std::vector<cmStdString>& args)
 {
-  m_Args = args;
+  this->Args = args;
 }
 
 const char *cmTest::GetProperty(const char* prop) const
 {
   std::map<cmStdString,cmStdString>::const_iterator i = 
-    m_Properties.find(prop);
-  if (i != m_Properties.end())
+    this->Properties.find(prop);
+  if (i != this->Properties.end())
     {
     return i->second.c_str();
     }
@@ -63,8 +63,8 @@ const char *cmTest::GetProperty(const char* prop) const
 bool cmTest::GetPropertyAsBool(const char* prop) const
 {
   std::map<cmStdString,cmStdString>::const_iterator i = 
-    m_Properties.find(prop);
-  if (i != m_Properties.end())
+    this->Properties.find(prop);
+  if (i != this->Properties.end())
     {
     return cmSystemTools::IsOn(i->second.c_str());
     }
@@ -81,6 +81,6 @@ void cmTest::SetProperty(const char* prop, const char* value)
     {
     value = "NOTFOUND";
     }
-  m_Properties[prop] = value;
+  this->Properties[prop] = value;
 }
 

@@ -29,19 +29,18 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
     }
   const char* define = args[0].c_str();
   const char* cacheValue
-    = m_Makefile->GetDefinition(define);
+    = this->Makefile->GetDefinition(define);
   std::string makeprogram = args[1];
-  std::string makecommand
-    = m_Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->GenerateBuildCommand(
-      makeprogram.c_str(), m_Makefile->GetProjectName(), 0,
-    0, "Release", true);
+  std::string makecommand = this->Makefile->GetLocalGenerator()
+    ->GetGlobalGenerator()->GenerateBuildCommand
+    (makeprogram.c_str(), this->Makefile->GetProjectName(), 0,
+     0, "Release", true);
 
   if(cacheValue)
     {
     return true;
     }
-  m_Makefile->AddCacheDefinition(define,
+  this->Makefile->AddCacheDefinition(define,
                                  makecommand.c_str(),
                                  "Command used to build entire project "
                                  "from the command line.",

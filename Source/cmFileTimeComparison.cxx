@@ -106,19 +106,19 @@ bool cmFileTimeComparisonInternal::Stat(const char* fname,
 //----------------------------------------------------------------------------
 cmFileTimeComparison::cmFileTimeComparison()
 {
-  m_Internals = new cmFileTimeComparisonInternal;
+  this->Internals = new cmFileTimeComparisonInternal;
 }
 
 //----------------------------------------------------------------------------
 cmFileTimeComparison::~cmFileTimeComparison()
 {
-  delete m_Internals;
+  delete this->Internals;
 }
 
 //----------------------------------------------------------------------------
 bool cmFileTimeComparison::FileTimeCompare(const char* f1, const char* f2, int* result)
 {
-  return m_Internals->FileTimeCompare(f1, f2, result);
+  return this->Internals->FileTimeCompare(f1, f2, result);
 }
 
 //----------------------------------------------------------------------------

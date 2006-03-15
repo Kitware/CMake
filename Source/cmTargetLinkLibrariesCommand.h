@@ -74,7 +74,6 @@ public:
   
   cmTypeMacro(cmTargetLinkLibrariesCommand, cmCommand);
 private:
-  std::string m_TargetName;
 };
 
 

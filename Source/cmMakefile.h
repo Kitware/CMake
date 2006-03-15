@@ -81,9 +81,9 @@ public:
    * Add a function blocker to this makefile
    */
   void AddFunctionBlocker(cmFunctionBlocker *fb)
-    { m_FunctionBlockers.push_back(fb);}
+    { this->FunctionBlockers.push_back(fb);}
   void RemoveFunctionBlocker(cmFunctionBlocker *fb)
-    { m_FunctionBlockers.remove(fb);}
+    { this->FunctionBlockers.remove(fb);}
   void RemoveFunctionBlocker(const cmListFileFunction& lff);
 
   /**
@@ -116,7 +116,7 @@ public:
   
   ///! Get the current makefile generator.
   cmLocalGenerator* GetLocalGenerator() 
-    { return m_LocalGenerator;}
+    { return this->LocalGenerator;}
 
   /**
    * Perform FinalPass, Library dependency analysis etc before output of the
@@ -203,15 +203,15 @@ public:
    */
   std::vector<std::string>& GetLinkDirectories()
     {
-      return m_LinkDirectories;
+      return this->LinkDirectories;
     }
   const std::vector<std::string>& GetLinkDirectories() const
     {
-      return m_LinkDirectories;
+      return this->LinkDirectories;
     }
   void SetLinkDirectories(const std::vector<std::string>& vec)
     {
-      m_LinkDirectories = vec;
+      this->LinkDirectories = vec;
     }
 
   /**
@@ -266,7 +266,7 @@ public:
    */
   const char* GetProjectName()
     {
-      return m_ProjectName.c_str();
+      return this->ProjectName.c_str();
     }
   
   /**
@@ -293,9 +293,9 @@ public:
   void MakeStartDirectoriesCurrent()
     {
       this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", 
-                          m_cmStartDirectory.c_str());
+                          this->cmStartDirectory.c_str());
       this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", 
-                          m_StartOutputDirectory.c_str());
+                          this->StartOutputDirectory.c_str());
     }
   
   //@{
@@ -309,12 +309,12 @@ public:
   void SetHomeDirectory(const char* dir);
   const char* GetHomeDirectory() const
     {
-      return m_cmHomeDirectory.c_str();
+      return this->cmHomeDirectory.c_str();
     }
   void SetHomeOutputDirectory(const char* lib);
   const char* GetHomeOutputDirectory() const
     {
-      return m_HomeOutputDirectory.c_str();
+      return this->HomeOutputDirectory.c_str();
     }
   //@}
   
@@ -328,36 +328,36 @@ public:
    */
   void SetStartDirectory(const char* dir) 
     {
-      m_cmStartDirectory = dir;
-      cmSystemTools::ConvertToUnixSlashes(m_cmStartDirectory);
+      this->cmStartDirectory = dir;
+      cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
       this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", 
-                          m_cmStartDirectory.c_str());
+                          this->cmStartDirectory.c_str());
     }
   const char* GetStartDirectory() const
     {
-      return m_cmStartDirectory.c_str();
+      return this->cmStartDirectory.c_str();
     }
   void SetStartOutputDirectory(const char* lib)
     {
-      m_StartOutputDirectory = lib;
-      cmSystemTools::ConvertToUnixSlashes(m_StartOutputDirectory);
-      cmSystemTools::MakeDirectory(m_StartOutputDirectory.c_str());
+      this->StartOutputDirectory = lib;
+      cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
+      cmSystemTools::MakeDirectory(this->StartOutputDirectory.c_str());
       this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", 
-                          m_StartOutputDirectory.c_str());
+                          this->StartOutputDirectory.c_str());
     }
   const char* GetStartOutputDirectory() const
     {
-      return m_StartOutputDirectory.c_str();
+      return this->StartOutputDirectory.c_str();
     }
   //@}
 
   const char* GetCurrentDirectory() const 
     {
-      return m_cmStartDirectory.c_str();
+      return this->cmStartDirectory.c_str();
     }
   const char* GetCurrentOutputDirectory() const
     {
-      return m_StartOutputDirectory.c_str();
+      return this->StartOutputDirectory.c_str();
     }
 
   /* Get the current CMakeLists.txt file that is being processed.  This
@@ -365,7 +365,7 @@ public:
    * transparently */
   const char* GetCurrentListFile() const
     {
-      return m_cmCurrentListFile.c_str();
+      return this->cmCurrentListFile.c_str();
     }
 
   //@}
@@ -376,11 +376,11 @@ public:
    */
   void SetIncludeRegularExpression(const char* regex)
     {
-      m_IncludeFileRegularExpression = regex;
+      this->IncludeFileRegularExpression = regex;
     }
   const char* GetIncludeRegularExpression()
     { 
-      return m_IncludeFileRegularExpression.c_str();
+      return this->IncludeFileRegularExpression.c_str();
     }
 
   /** 
@@ -389,17 +389,17 @@ public:
    */
   void SetComplainRegularExpression(const char* regex)
     {
-      m_ComplainFileRegularExpression = regex;
+      this->ComplainFileRegularExpression = regex;
     }
   const char* GetComplainRegularExpression()
     {
-      return m_ComplainFileRegularExpression.c_str();
+      return this->ComplainFileRegularExpression.c_str();
     }
 
   /**
    * Get the list of targets
    */
-  cmTargets &GetTargets() { return m_Targets; }
+  cmTargets &GetTargets() { return this->Targets; }
 
   cmTarget* FindTarget(const char* name);
 
@@ -408,15 +408,15 @@ public:
    */
   std::vector<std::string>& GetIncludeDirectories()
     { 
-      return m_IncludeDirectories;
+      return this->IncludeDirectories;
     }
   const std::vector<std::string>& GetIncludeDirectories() const
     { 
-      return m_IncludeDirectories;
+      return this->IncludeDirectories;
     }
   void SetIncludeDirectories(const std::vector<std::string>& vec)
     {
-      m_IncludeDirectories = vec;
+      this->IncludeDirectories = vec;
     }
 
   /** Expand out any arguements in the vector that have ; separated
@@ -449,7 +449,7 @@ public:
    * Obtain a list of auxiliary source directories.
    */
   std::vector<std::string>& GetAuxSourceDirectories()
-    {return m_AuxSourceDirectories;}
+    {return this->AuxSourceDirectories;}
 
   //@{
   /**
@@ -457,9 +457,9 @@ public:
    * files
    */
   const std::vector<std::string>& GetSourceExtensions() const
-    {return m_SourceFileExtensions;}
+    {return this->SourceFileExtensions;}
   const std::vector<std::string>& GetHeaderExtensions() const
-    {return m_HeaderFileExtensions;}
+    {return this->HeaderFileExtensions;}
   //@}
 
   /**
@@ -487,19 +487,19 @@ public:
    * Get a list of preprocessor define flags.
    */
   const char* GetDefineFlags()
-    {return m_DefineFlags.c_str();}
+    {return this->DefineFlags.c_str();}
   
   /**
    * Get the vector of used command instances.
    */
   const std::vector<cmCommand*>& GetUsedCommands() const
-    {return m_UsedCommands;}
+    {return this->UsedCommands;}
   
   /**
    * Get the vector source groups.
    */
   const std::vector<cmSourceGroup>& GetSourceGroups() const
-    { return m_SourceGroups; }
+    { return this->SourceGroups; }
 
   /**
    * Get the source group
@@ -510,17 +510,17 @@ public:
    * Get the vector of list files on which this makefile depends
    */
   const std::vector<std::string>& GetListFiles() const
-    { return m_ListFiles; }
+    { return this->ListFiles; }
   
   ///! When the file changes cmake will be re-run from the build system.
   void AddCMakeDependFile(const char* file)
-    { m_ListFiles.push_back(file);}
+    { this->ListFiles.push_back(file);}
   
   /**
    * Expand all defined variables in the string.  
-   * Defined variables come from the m_Definitions map.
+   * Defined variables come from the this->Definitions map.
    * They are expanded with ${var} where var is the
-   * entry in the m_Definitions map.  Also @var@ is
+   * entry in the this->Definitions map.  Also @var@ is
    * expanded to match autoconf style expansions.
    */
   const char *ExpandVariablesInString(std::string& source) const;
@@ -613,8 +613,8 @@ public:
    * Get all the source files this makefile knows about
    */
   const std::vector<cmSourceFile*> &GetSourceFiles() const 
-    {return m_SourceFiles;}
-  std::vector<cmSourceFile*> &GetSourceFiles() {return m_SourceFiles;}
+    {return this->SourceFiles;}
+  std::vector<cmSourceFile*> &GetSourceFiles() {return this->SourceFiles;}
 
   /**
    * Is there a source file that has the provided source file as an output?
@@ -662,80 +662,82 @@ public:
   bool GetPreOrder() { return this->PreOrder; }
 
   void AddInstallGenerator(cmInstallGenerator* g)
-    { m_InstallGenerators.push_back(g); }
+    { this->InstallGenerators.push_back(g); }
   std::vector<cmInstallGenerator*>& GetInstallGenerators()
-    { return m_InstallGenerators; }
+    { return this->InstallGenerators; }
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
   
-  std::string m_Prefix;
-  std::vector<std::string> m_AuxSourceDirectories; // 
+  std::string Prefix;
+  std::vector<std::string> AuxSourceDirectories; // 
 
-  std::string m_cmStartDirectory; 
-  std::string m_StartOutputDirectory; 
-  std::string m_cmHomeDirectory; 
-  std::string m_HomeOutputDirectory;
-  std::string m_cmCurrentListFile;
+  std::string cmStartDirectory; 
+  std::string StartOutputDirectory; 
+  std::string cmHomeDirectory; 
+  std::string HomeOutputDirectory;
+  std::string cmCurrentListFile;
 
-  std::string m_ProjectName;    // project name
+  std::string ProjectName;    // project name
 
   // libraries, classes, and executables
-  cmTargets m_Targets;
-  std::vector<cmSourceFile*> m_SourceFiles;
+  cmTargets Targets;
+  std::vector<cmSourceFile*> SourceFiles;
 
   // Tests
-  std::vector<cmTest*> m_Tests;
+  std::vector<cmTest*> Tests;
   
   // The include and link-library paths.  These may have order
   // dependency, so they must be vectors (not set).
-  std::vector<std::string> m_IncludeDirectories;
-  std::vector<std::string> m_LinkDirectories;
+  std::vector<std::string> IncludeDirectories;
+  std::vector<std::string> LinkDirectories;
   
-  std::vector<std::string> m_ListFiles; // list of command files loaded
+  std::vector<std::string> ListFiles; // list of command files loaded
   
   
-  cmTarget::LinkLibraries m_LinkLibraries;
+  cmTarget::LinkLibraryVectorType LinkLibraries;
 
-  std::vector<cmInstallGenerator*> m_InstallGenerators;
+  std::vector<cmInstallGenerator*> InstallGenerators;
 
-  std::string m_IncludeFileRegularExpression;
-  std::string m_ComplainFileRegularExpression;
-  std::vector<std::string> m_SourceFileExtensions;
-  std::vector<std::string> m_HeaderFileExtensions;
-  std::string m_DefineFlags;
-  std::vector<cmSourceGroup> m_SourceGroups;
-  DefinitionMap m_Definitions;
-  std::vector<cmCommand*> m_UsedCommands;
-  cmLocalGenerator* m_LocalGenerator;
+  std::string IncludeFileRegularExpression;
+  std::string ComplainFileRegularExpression;
+  std::vector<std::string> SourceFileExtensions;
+  std::vector<std::string> HeaderFileExtensions;
+  std::string DefineFlags;
+  std::vector<cmSourceGroup> SourceGroups;
+  DefinitionMap Definitions;
+  std::vector<cmCommand*> UsedCommands;
+  cmLocalGenerator* LocalGenerator;
   bool IsFunctionBlocked(const cmListFileFunction& lff);
   
 private:
 
   void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;    // make depend needs direct access 
+
                                 // to the m_Sources array 
   void PrintStringVector(const char* s, const 
                          std::vector<std::pair<cmStdString, bool> >& v) const;
   void PrintStringVector(const char* s, 
                          const std::vector<std::string>& v) const;
-  void AddDefaultDefinitions();
-  std::list<cmFunctionBlocker *> m_FunctionBlockers;
 
-  typedef std::map<cmStdString, cmData*> DataMap;
-  DataMap m_DataMap;
+  void AddDefaultDefinitions();
+  std::list<cmFunctionBlocker *> FunctionBlockers;
+
+  typedef std::map<cmStdString, cmData*> DataMapType;
+  DataMapType DataMap;
 
   typedef std::map<cmStdString, cmStdString> StringStringMap;
-  StringStringMap m_MacrosMap;
+  StringStringMap MacrosMap;
 
-  std::map<cmStdString, bool> m_SubDirectoryOrder;
+  std::map<cmStdString, bool> SubDirectoryOrder;
   // used in AddDefinition for performance improvement
-  DefinitionMap::key_type  m_TemporaryDefinitionKey;
+  DefinitionMap::key_type  TemporaryDefinitionKey;
 
-  cmsys::RegularExpression m_cmDefineRegex;
-  cmsys::RegularExpression m_cmDefine01Regex;
+  cmsys::RegularExpression cmDefineRegex;
+  cmsys::RegularExpression cmDefine01Regex;
 
-  std::map<cmStdString,cmStdString> m_Properties;
+  std::map<cmStdString,cmStdString> Properties;
 
   // should this makefile be processed before or after processing the parent
   bool PreOrder;

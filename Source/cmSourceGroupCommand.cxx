@@ -58,9 +58,9 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
     }  
 
   std::string delimiter = "\\";
-  if(m_Makefile->GetDefinition("SOURCE_GROUP_DELIMITER"))
+  if(this->Makefile->GetDefinition("SOURCE_GROUP_DELIMITER"))
     {
-    delimiter = m_Makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
+    delimiter = this->Makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
     }
 
   std::vector<std::string> folders = tokenize(args[0], delimiter);
@@ -69,12 +69,12 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
   cmSourceGroup* sg = NULL;
   for(unsigned int i=0;i<folders.size();++i)
     {
-    sg = m_Makefile->GetSourceGroup(folders[i].c_str());
+    sg = this->Makefile->GetSourceGroup(folders[i].c_str());
     if(!sg)
       {
-      m_Makefile->AddSourceGroup(folders[i].c_str(), 0, parent);
+      this->Makefile->AddSourceGroup(folders[i].c_str(), 0, parent);
       }
-    sg = m_Makefile->GetSourceGroup(folders[i].c_str());
+    sg = this->Makefile->GetSourceGroup(folders[i].c_str());
     parent = folders[i].c_str();
     }
   if(!sg)
@@ -120,7 +120,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
       std::string src = args[i].c_str();
       if(!cmSystemTools::FileIsFullPath(src.c_str()))
         {
-        src = m_Makefile->GetCurrentDirectory();
+        src = this->Makefile->GetCurrentDirectory();
         src += "/";
         src += args[i];
         }

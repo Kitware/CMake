@@ -35,13 +35,13 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
   paths.push_back("/usr/local/bin");
   
   const char* cacheValue
-    = m_Makefile->GetDefinition(args[0].c_str());
+    = this->Makefile->GetDefinition(args[0].c_str());
   if(cacheValue)
     {
     return true;
     }
   
-  const char *temp = m_Makefile->GetDefinition("HOSTNAME");
+  const char *temp = this->Makefile->GetDefinition("HOSTNAME");
   std::string hostname_cmd;
   if(temp)
     {
@@ -88,7 +88,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
 #endif
-  m_Makefile->
+  this->Makefile->
     AddCacheDefinition(args[0].c_str(),
                        siteName.c_str(),
                        "Name of the computer/site where compile is being run",

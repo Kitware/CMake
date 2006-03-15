@@ -72,7 +72,7 @@ bool cmSetTestsPropertiesCommand::InitialPass(
     return false;
     }
 
-  std::vector<cmTest*> &tests = *m_Makefile->GetTests();
+  std::vector<cmTest*> &tests = *this->Makefile->GetTests();
   // now loop over all the targets
   int i;
   unsigned int k;

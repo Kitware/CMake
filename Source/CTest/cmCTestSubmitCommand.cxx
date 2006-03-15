@@ -53,13 +53,13 @@ bool cmCTestSubmitCommand::InitialPass(
     }
 
   const char* ctestDropMethod
-    = m_Makefile->GetDefinition("CTEST_DROP_METHOD");
+    = this->Makefile->GetDefinition("CTEST_DROP_METHOD");
   const char* ctestDropSite
-    = m_Makefile->GetDefinition("CTEST_DROP_SITE");
+    = this->Makefile->GetDefinition("CTEST_DROP_SITE");
   const char* ctestDropLocation
-    = m_Makefile->GetDefinition("CTEST_DROP_LOCATION");
+    = this->Makefile->GetDefinition("CTEST_DROP_LOCATION");
   const char* ctestTriggerSite
-    = m_Makefile->GetDefinition("CTEST_TRIGGER_SITE");
+    = this->Makefile->GetDefinition("CTEST_TRIGGER_SITE");
 
   if ( !ctestDropMethod )
     {
@@ -86,15 +86,15 @@ bool cmCTestSubmitCommand::InitialPass(
   this->CTest->SetCTestConfiguration("DropLocation", ctestDropLocation);
   this->CTest->SetCTestConfiguration("TriggerSite",  ctestTriggerSite);
 
-  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "DropSiteUser", "CTEST_DROP_SITE_USER");
-  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "DropSitePassword", "CTEST_DROP_SITE_PASSWORD");
-  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "ScpCommand", "CTEST_SCP_COMMAND");
 
   const char* notesFilesVariable
-    = m_Makefile->GetDefinition("CTEST_NOTES_FILES");
+    = this->Makefile->GetDefinition("CTEST_NOTES_FILES");
   if (notesFilesVariable)
     {
     std::vector<std::string> notesFiles;
@@ -110,7 +110,7 @@ bool cmCTestSubmitCommand::InitialPass(
     this->CTest->GenerateNotesFile(newNotesFiles);
     }
   const char* extraFilesVariable
-    = m_Makefile->GetDefinition("CTEST_EXTRA_SUBMIT_FILES");
+    = this->Makefile->GetDefinition("CTEST_EXTRA_SUBMIT_FILES");
   if (extraFilesVariable)
     {
     std::vector<std::string> extraFiles;
@@ -142,7 +142,7 @@ bool cmCTestSubmitCommand::InitialPass(
     {
     cmOStringStream str;
     str << res;
-    m_Makefile->AddDefinition(res_var, str.str().c_str());
+    this->Makefile->AddDefinition(res_var, str.str().c_str());
     }
   return true;
 }

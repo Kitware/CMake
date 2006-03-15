@@ -33,9 +33,9 @@ public:
   virtual bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile &mf);
   virtual bool ShouldRemove(const cmListFileFunction&, cmMakefile &mf);
   virtual void ScopeEnded(cmMakefile &mf);
-
-  std::vector<std::string> m_Args;
-  std::vector<cmListFileFunction> m_Functions;
+  
+  std::vector<std::string> Args;
+  std::vector<cmListFileFunction> Functions;
 };
 
 /** \class cmMacroCommand

@@ -27,29 +27,32 @@
 //----------------------------------------------------------------------------
 cmTarget::cmTarget()
 {
-  m_Makefile = 0;
-  m_LinkLibrariesAnalyzed = false;
-  m_LinkDirectoriesComputed = false;
-  m_HaveInstallRule = false;
+  this->Makefile = 0;
+  this->LinkLibrariesAnalyzed = false;
+  this->LinkDirectoriesComputed = false;
+  this->HaveInstallRule = false;
 }
 
 void cmTarget::SetType(TargetType type, const char* name)
 {
-  m_Name = name;
+  this->Name = name;
   // only add dependency information for library targets
-  m_TargetType = type;
-  if(m_TargetType >= STATIC_LIBRARY && m_TargetType <= MODULE_LIBRARY) {
-    m_RecordDependencies = true;
-  } else {
-    m_RecordDependencies = false;
-  }
+  this->TargetTypeValue = type;
+  if(this->TargetTypeValue >= STATIC_LIBRARY && this->TargetTypeValue <= MODULE_LIBRARY) 
+    {
+    this->RecordDependencies = true;
+    } 
+  else 
+    {
+    this->RecordDependencies = false;
+    }
 }
 
 //----------------------------------------------------------------------------
 void cmTarget::SetMakefile(cmMakefile* mf)
 {
   // Set our makefile.
-  m_Makefile = mf;
+  this->Makefile = mf;
 
   // Setup default property values.
   this->SetPropertyDefault("INSTALL_NAME_DIR", "");
@@ -82,7 +85,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     // did not support this variable.  Projects may still specify the
     // property directly.  TODO: Make this depend on backwards
     // compatibility setting.
-    if(m_TargetType != cmTarget::EXECUTABLE)
+    if(this->TargetTypeValue != cmTarget::EXECUTABLE)
       {
       std::string property = cmSystemTools::UpperCase(*ci);
       property += "_POSTFIX";
@@ -227,7 +230,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
           dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
           }
         // watch for target dependencies,
-        if(m_Makefile->GetLocalGenerator()->
+        if(this->Makefile->GetLocalGenerator()->
            GetGlobalGenerator()->FindTarget(0, dep.c_str()))
           {
           // add the depend as a utility on the target
@@ -248,13 +251,13 @@ void cmTarget::TraceVSDependencies(std::string projFile,
     srcFilesToProcess.pop();
     }
   // mark all custom commands in the targets list of source files as used.
-  for(std::vector<cmSourceFile*>::iterator i =  m_SourceFiles.begin();
-      i != m_SourceFiles.end(); ++i)
+  for(std::vector<cmSourceFile*>::iterator i =  this->SourceFiles.begin();
+      i != this->SourceFiles.end(); ++i)
     {
     cmCustomCommand* cc = (*i)->GetCustomCommand();
     if(cc)
       {
-      cc->Used();
+      cc->SetUsed();
       }
     }
 }
@@ -262,15 +265,15 @@ void cmTarget::TraceVSDependencies(std::string projFile,
 void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
 {
   // this is only done for non install targets
-  if ((this->m_TargetType == cmTarget::INSTALL_FILES)
-      || (this->m_TargetType == cmTarget::INSTALL_PROGRAMS))
+  if ((this->TargetTypeValue == cmTarget::INSTALL_FILES)
+      || (this->TargetTypeValue == cmTarget::INSTALL_PROGRAMS))
     {
     return;
     }
 
   // for each src lists add the classes
-  for (std::vector<std::string>::const_iterator s = m_SourceLists.begin();
-       s != m_SourceLists.end(); ++s)
+  for (std::vector<std::string>::const_iterator s = this->SourceLists.begin();
+       s != this->SourceLists.end(); ++s)
     {
     int done = 0;
     // replace any variables
@@ -284,7 +287,7 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
       cmSourceFile* sourceFile = mf.GetSource(temps.c_str());
       if ( sourceFile )
         {
-        m_SourceFiles.push_back(sourceFile);
+        this->SourceFiles.push_back(sourceFile);
         done = 1;
         }
       }
@@ -297,13 +300,13 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
       file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
                    mf.GetSourceExtensions(),
                    mf.GetHeaderExtensions());
-      m_SourceFiles.push_back(mf.AddSource(file));
+      this->SourceFiles.push_back(mf.AddSource(file));
       }
     }
   
   // expand any link library variables whle we are at it
-  LinkLibraries::iterator p = m_LinkLibraries.begin();
-  for (;p != m_LinkLibraries.end(); ++p)
+  LinkLibraryVectorType::iterator p = this->LinkLibraries.begin();
+  for (;p != this->LinkLibraries.end(); ++p)
     {
     mf.ExpandVariablesInString(p->first, true, true);
     }
@@ -312,30 +315,30 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
 
 void cmTarget::MergeLinkLibraries( cmMakefile& mf,
                                    const char *selfname,
-                                   const LinkLibraries& libs )
+                                   const LinkLibraryVectorType& libs )
 {
   // Only add on libraries we haven't added on before.
   // Assumption: the global link libraries could only grow, never shrink
-  LinkLibraries::const_iterator i = libs.begin();
-  i += m_PrevLinkedLibraries.size();
+  LinkLibraryVectorType::const_iterator i = libs.begin();
+  i += this->PrevLinkedLibraries.size();
   for( ; i != libs.end(); ++i )
     {
     // We call this so that the dependencies get written to the cache
     this->AddLinkLibrary( mf, selfname, i->first.c_str(), i->second );
     }
-  m_PrevLinkedLibraries = libs;
+  this->PrevLinkedLibraries = libs;
 }
 
 //----------------------------------------------------------------------------
 void cmTarget::AddLinkDirectory(const char* d)
 {
   // Make sure we don't add unnecessary search directories.
-  if(std::find(m_ExplicitLinkDirectories.begin(),
-               m_ExplicitLinkDirectories.end(), d)
-     == m_ExplicitLinkDirectories.end() )
+  if(std::find(this->ExplicitLinkDirectories.begin(),
+               this->ExplicitLinkDirectories.end(), d)
+     == this->ExplicitLinkDirectories.end() )
     {
-    m_ExplicitLinkDirectories.push_back( d );
-    m_LinkDirectoriesComputed = false;
+    this->ExplicitLinkDirectories.push_back( d );
+    this->LinkDirectoriesComputed = false;
     }
 }
 
@@ -343,32 +346,32 @@ void cmTarget::AddLinkDirectory(const char* d)
 const std::vector<std::string>& cmTarget::GetLinkDirectories()
 {
   // Make sure all library dependencies have been analyzed.
-  if(!m_LinkLibrariesAnalyzed && !m_LinkLibraries.empty())
+  if(!this->LinkLibrariesAnalyzed && !this->LinkLibraries.empty())
     {
     cmSystemTools::Error(
       "cmTarget::GetLinkDirectories called before "
       "cmTarget::AnalyzeLibDependencies on target ",
-      m_Name.c_str());
+      this->Name.c_str());
     }
 
   // Make sure the complete set of link directories has been computed.
-  if(!m_LinkDirectoriesComputed)
+  if(!this->LinkDirectoriesComputed)
     {
     // Compute the full set of link directories including the
     // locations of targets that have been linked in.  Start with the
     // link directories given explicitly.
-    m_LinkDirectories = m_ExplicitLinkDirectories;
-    for(LinkLibraries::iterator ll = m_LinkLibraries.begin();
-        ll != m_LinkLibraries.end(); ++ll)
+    this->LinkDirectories = this->ExplicitLinkDirectories;
+    for(LinkLibraryVectorType::iterator ll = this->LinkLibraries.begin();
+        ll != this->LinkLibraries.end(); ++ll)
       {
       // If this library is a CMake target then add its location as a
       // link directory.
       std::string lib = ll->first;
       cmTarget* tgt = 0;
-      if(m_Makefile && m_Makefile->GetLocalGenerator() &&
-         m_Makefile->GetLocalGenerator()->GetGlobalGenerator())
+      if(this->Makefile && this->Makefile->GetLocalGenerator() &&
+         this->Makefile->GetLocalGenerator()->GetGlobalGenerator())
         {
-        tgt = (m_Makefile->GetLocalGenerator()->GetGlobalGenerator()
+        tgt = (this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
                ->FindTarget(0, lib.c_str()));
         }
       if(tgt)
@@ -377,20 +380,20 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
         // is an N^2 algorithm for adding the directories, but N
         // should not get very big.
         const char* libpath = tgt->GetDirectory();
-        if(std::find(m_LinkDirectories.begin(), m_LinkDirectories.end(),
-                     libpath) == m_LinkDirectories.end())
+        if(std::find(this->LinkDirectories.begin(), this->LinkDirectories.end(),
+                     libpath) == this->LinkDirectories.end())
           {
-          m_LinkDirectories.push_back(libpath);
+          this->LinkDirectories.push_back(libpath);
           }
         }
       }
 
     // The complete set of link directories has now been computed.
-    m_LinkDirectoriesComputed = true;
+    this->LinkDirectoriesComputed = true;
     }
 
   // Return the complete set of link directories.
-  return m_LinkDirectories;
+  return this->LinkDirectories;
 }
 
 void cmTarget::ClearDependencyInformation( cmMakefile& mf, const char* target )
@@ -399,7 +402,7 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf, const char* target )
   // recording dependency information for this target.
   std::string depname = target;
   depname += "_LIB_DEPENDS";
-  if (m_RecordDependencies)
+  if (this->RecordDependencies)
     {
     mf.AddCacheDefinition(depname.c_str(), "",
                           "Dependencies for target", cmCacheManager::STATIC);
@@ -425,8 +428,8 @@ void cmTarget::AddLinkLibrary(const std::string& lib,
                               LinkLibraryType llt)
 {
   this->AddFramework(lib.c_str(), llt);
-  m_LinkLibraries.push_back( std::pair<std::string,
-                             cmTarget::LinkLibraryType>(lib,llt) );
+  this->LinkLibraries.push_back( std::pair<std::string, 
+                                 cmTarget::LinkLibraryType>(lib,llt) );
 }
 
 bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
@@ -438,11 +441,11 @@ bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
     frameworkDir += "/../";
     frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
     std::vector<std::string>::iterator i = 
-      std::find(m_Frameworks.begin(),
-                m_Frameworks.end(), frameworkDir);
-    if(i == m_Frameworks.end())
+      std::find(this->Frameworks.begin(),
+                this->Frameworks.end(), frameworkDir);
+    if(i == this->Frameworks.end())
       {
-      m_Frameworks.push_back(frameworkDir);
+      this->Frameworks.push_back(frameworkDir);
       }
     return true;
     }
@@ -458,8 +461,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     return;
     }
   this->AddFramework(lib, llt);
-  m_LinkLibraries.push_back( std::pair<std::string,
-                             cmTarget::LinkLibraryType>(lib,llt) );
+  this->LinkLibraries.push_back( std::pair<std::string, 
+                                 cmTarget::LinkLibraryType>(lib,llt) );
 
   if(llt != cmTarget::GENERAL)
     {
@@ -483,11 +486,10 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
           }
         else
           {
-          mf.AddCacheDefinition(linkTypeName.c_str(),
-                                "general", 
-                                "Library is used for both debug "
-                                "and optimized links",
-                                cmCacheManager::STATIC);
+          mf.AddCacheDefinition
+            (linkTypeName.c_str(), "general", 
+             "Library is used for both debug and optimized links",
+             cmCacheManager::STATIC);
           }
         }
         break;
@@ -496,17 +498,17 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
         const char* def = mf.GetDefinition(linkTypeName.c_str());
         if(!def || strcmp(def, "optimized") == 0)
           {
-          mf.AddCacheDefinition(linkTypeName.c_str(),
-                                "optimized", "Library is used for debug "
-                                "links only",
-                                cmCacheManager::STATIC);
+          mf.AddCacheDefinition
+            (linkTypeName.c_str(), "optimized", 
+             "Library is used for debug links only",
+             cmCacheManager::STATIC);
           }
         else
           {
-          mf.AddCacheDefinition(linkTypeName.c_str(),
-                                "general", "Library is used for both debug "
-                                "and optimized links",
-                                cmCacheManager::STATIC);
+          mf.AddCacheDefinition
+            (linkTypeName.c_str(), "general", 
+             "Library is used for both debug and optimized links",
+             cmCacheManager::STATIC);
           }
         }
         break;
@@ -522,7 +524,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   // may be purposefully duplicated to handle recursive dependencies,
   // and we removing one instance will break the link line. Duplicates
   // will be appropriately eliminated at emit time.
-  if(m_RecordDependencies)
+  if(this->RecordDependencies)
     {
     std::string targetEntry = target;
     targetEntry += "_LIB_DEPENDS";
@@ -618,15 +620,15 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // The dependency map.
   DependencyMap dep_map;
 
-  if ( m_OriginalLinkLibraries.size() == 0 )
+  if ( this->OriginalLinkLibraries.size() == 0 )
     {
-    m_OriginalLinkLibraries = m_LinkLibraries;
+    this->OriginalLinkLibraries = this->LinkLibraries;
     }
 
   // 1. Build the dependency graph
   //
-  for(LinkLibraries::reverse_iterator lib = m_LinkLibraries.rbegin();
-      lib != m_LinkLibraries.rend(); ++lib)
+  for(LinkLibraryVectorType::reverse_iterator lib = this->LinkLibraries.rbegin();
+      lib != this->LinkLibraries.rend(); ++lib)
     {
     this->GatherDependencies( mf, lib->first, dep_map );
     }
@@ -634,11 +636,11 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // 2. Remove any dependencies that are already satisfied in the original
   // link line.
   //
-  for(LinkLibraries::iterator lib = m_LinkLibraries.begin();
-      lib != m_LinkLibraries.end(); ++lib)
+  for(LinkLibraryVectorType::iterator lib = this->LinkLibraries.begin();
+      lib != this->LinkLibraries.end(); ++lib)
     {
-    for( LinkLibraries::iterator lib2 = lib;
-      lib2 != m_LinkLibraries.end(); ++lib2)
+    for( LinkLibraryVectorType::iterator lib2 = lib;
+      lib2 != this->LinkLibraries.end(); ++lib2)
       {
       DeleteDependency( dep_map, lib->first, lib2->first );
       }
@@ -650,8 +652,9 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   //
   std::set<cmStdString> done, visited;
   std::vector<std::string> newLinkLibraries;
-  for(LinkLibraries::reverse_iterator lib = m_LinkLibraries.rbegin();
-      lib != m_LinkLibraries.rend(); ++lib)
+  for(LinkLibraryVectorType::reverse_iterator lib = 
+        this->LinkLibraries.rbegin();
+      lib != this->LinkLibraries.rend(); ++lib)
     {
     // skip zero size library entries, this may happen
     // if a variable expands to nothing.
@@ -682,9 +685,9 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
         llt = cmTarget::OPTIMIZED;
         }
       }
-    m_LinkLibraries.push_back( std::make_pair(*k,llt) );
+    this->LinkLibraries.push_back( std::make_pair(*k,llt) );
     }
-  m_LinkLibrariesAnalyzed = true;
+  this->LinkLibrariesAnalyzed = true;
 }
 
 
@@ -825,7 +828,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     {
     value = "NOTFOUND";
     }
-  m_Properties[prop] = value;
+  this->Properties[prop] = value;
 }
 
 const char* cmTarget::GetDirectory(const char* config)
@@ -835,42 +838,43 @@ const char* cmTarget::GetDirectory(const char* config)
     case cmTarget::STATIC_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
     case cmTarget::SHARED_LIBRARY:
-      m_Directory = m_Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
+      this->Directory = this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
       break;
     case cmTarget::EXECUTABLE:
-      m_Directory = m_Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+      this->Directory = this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
       break;
     default:
       return 0;
     }
-  if(m_Directory.empty())
+  if(this->Directory.empty())
     {
-    m_Directory = m_Makefile->GetStartOutputDirectory();
+    this->Directory = this->Makefile->GetStartOutputDirectory();
     }
+
   if(config)
     {
     // Add the configuration's subdirectory.
-    m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->
-      AppendDirectoryForConfig("/", config, "", m_Directory);
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+      AppendDirectoryForConfig("/", config, "", this->Directory);
     }
-  return m_Directory.c_str();
+  return this->Directory.c_str();
 }
 
 const char* cmTarget::GetLocation(const char* config)
 {
-  m_Location = this->GetDirectory();
-  if(!m_Location.empty())
+  this->Location = this->GetDirectory();
+  if(!this->Location.empty())
     {
-    m_Location += "/";
+    this->Location += "/";
     }
-  const char* cfgid = m_Makefile->GetDefinition("CMAKE_CFG_INTDIR");
+  const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
   if(cfgid && strcmp(cfgid, ".") != 0)
     {
-    m_Location += cfgid;
-    m_Location += "/";
+    this->Location += cfgid;
+    this->Location += "/";
     }
-  m_Location += this->GetFullName(config, false);
-  return m_Location.c_str();
+  this->Location += this->GetFullName(config, false);
+  return this->Location.c_str();
 }
 
 const char *cmTarget::GetProperty(const char* prop)
@@ -925,8 +929,8 @@ const char *cmTarget::GetProperty(const char* prop)
     }
       
   std::map<cmStdString,cmStdString>::const_iterator i = 
-    m_Properties.find(prop);
-  if (i != m_Properties.end())
+    this->Properties.find(prop);
+  if (i != this->Properties.end())
     {
     return i->second.c_str();
     }
@@ -936,8 +940,8 @@ const char *cmTarget::GetProperty(const char* prop)
 bool cmTarget::GetPropertyAsBool(const char* prop)
 {
   std::map<cmStdString,cmStdString>::const_iterator i = 
-    m_Properties.find(prop);
-  if (i != m_Properties.end())
+    this->Properties.find(prop);
+  if (i != this->Properties.end())
     {
     return cmSystemTools::IsOn(i->second.c_str());
     }
@@ -956,8 +960,8 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
     return linkerLang;
     }
   std::set<cmStdString> languages;
-  for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin();
-      i != m_SourceFiles.end(); ++i)
+  for(std::vector<cmSourceFile*>::const_iterator i = this->SourceFiles.begin();
+      i != this->SourceFiles.end(); ++i)
     {
     const char* lang = 
       gg->GetLanguageFromExtension((*i)->GetSourceExtension().c_str());
@@ -986,7 +990,7 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
       if(prefLang && !(*s == prefLang))
         {
         std::string m = "Error Target: ";
-        m += m_Name + " Contains more than one Prefered language: ";
+        m += this->Name + " Contains more than one Prefered language: ";
         m += *s;
         m += " and ";
         m += prefLang;
@@ -1158,31 +1162,31 @@ void cmTarget::GetFullNameInternal(TargetType type,
   const char* suffixVar = this->GetSuffixVariableInternal(type, implib);
   const char* ll =
     this->GetLinkerLanguage(
-      m_Makefile->GetLocalGenerator()->GetGlobalGenerator());
+      this->Makefile->GetLocalGenerator()->GetGlobalGenerator());
   // first try language specific suffix
   if(ll)
     {
     if(!targetSuffix && suffixVar && *suffixVar)
       {
       std::string langSuff = suffixVar + std::string("_") + ll;
-      targetSuffix = m_Makefile->GetDefinition(langSuff.c_str());
+      targetSuffix = this->Makefile->GetDefinition(langSuff.c_str());
       }
     if(!targetPrefix && prefixVar && *prefixVar)
       {
       std::string langPrefix = prefixVar + std::string("_") + ll;
-      targetPrefix = m_Makefile->GetDefinition(langPrefix.c_str());
+      targetPrefix = this->Makefile->GetDefinition(langPrefix.c_str());
       }
     }
 
   // if there is no prefix on the target use the cmake definition
   if(!targetPrefix && prefixVar)
     {
-    targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
+    targetPrefix = this->Makefile->GetSafeDefinition(prefixVar);
     }
   // if there is no suffix on the target use the cmake definition
   if(!targetSuffix && suffixVar)
     {
-    targetSuffix = m_Makefile->GetSafeDefinition(suffixVar);
+    targetSuffix = this->Makefile->GetSafeDefinition(suffixVar);
     }
 
   // Begin the final name with the prefix.
@@ -1260,7 +1264,7 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
   // Construct the name of the soname flag variable for this language.
   const char* ll =
     this->GetLinkerLanguage(
-      m_Makefile->GetLocalGenerator()->GetGlobalGenerator());
+      this->Makefile->GetLocalGenerator()->GetGlobalGenerator());
   std::string sonameFlag = "CMAKE_SHARED_LIBRARY_SONAME";
   if(ll)
     {
@@ -1273,7 +1277,7 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
   const char* version = this->GetProperty("VERSION");
   const char* soversion = this->GetProperty("SOVERSION");
   if((type != cmTarget::SHARED_LIBRARY && type != cmTarget::MODULE_LIBRARY) ||
-     !m_Makefile->GetDefinition(sonameFlag.c_str()))
+     !this->Makefile->GetDefinition(sonameFlag.c_str()))
     {
     // Versioning is supported only for shared libraries and modules,
     // and then only when the platform supports an soname flag.
@@ -1377,7 +1381,7 @@ void cmTarget::SetPropertyDefault(const char* property,
   std::string var = "CMAKE_";
   var += property;
 
-  if(const char* value = m_Makefile->GetDefinition(var.c_str()))
+  if(const char* value = this->Makefile->GetDefinition(var.c_str()))
     {
     this->SetProperty(property, value);
     }
@@ -1391,7 +1395,7 @@ void cmTarget::SetPropertyDefault(const char* property,
 bool cmTarget::HaveBuildTreeRPATH()
 {
   return (!this->GetPropertyAsBool("SKIP_BUILD_RPATH") &&
-          !m_LinkLibraries.empty());
+          !this->LinkLibraries.empty());
 }
 
 //----------------------------------------------------------------------------
@@ -1406,9 +1410,9 @@ bool cmTarget::NeedRelinkBeforeInstall()
 {
   // Only executables and shared libraries can have an rpath and may
   // need relinking.
-  if(m_TargetType != cmTarget::EXECUTABLE &&
-     m_TargetType != cmTarget::SHARED_LIBRARY &&
-     m_TargetType != cmTarget::MODULE_LIBRARY)
+  if(this->TargetTypeValue != cmTarget::EXECUTABLE &&
+     this->TargetTypeValue != cmTarget::SHARED_LIBRARY &&
+     this->TargetTypeValue != cmTarget::MODULE_LIBRARY)
     {
     return false;
     }
@@ -1421,7 +1425,7 @@ bool cmTarget::NeedRelinkBeforeInstall()
     }
 
   // If skipping all rpaths completely then no relinking is needed.
-  if(m_Makefile->IsOn("CMAKE_SKIP_RPATH"))
+  if(this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
     {
     return false;
     }
@@ -1434,12 +1438,12 @@ bool cmTarget::NeedRelinkBeforeInstall()
 
   // Check for rpath support on this platform.
   if(const char* ll = this->GetLinkerLanguage(
-       m_Makefile->GetLocalGenerator()->GetGlobalGenerator()))
+       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()))
     {
     std::string flagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
     flagVar += ll;
     flagVar += "_FLAG";
-    if(!m_Makefile->IsSet(flagVar.c_str()))
+    if(!this->Makefile->IsSet(flagVar.c_str()))
       {
       // There is no rpath support on this platform so nothing needs
       // relinking.
@@ -1470,8 +1474,8 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config)
     }
 
   // Use the build tree directory for the target.
-  if(m_Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME") &&
-     !m_Makefile->IsOn("CMAKE_SKIP_RPATH") &&
+  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME") &&
+     !this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
      !this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
     {
     std::string dir = this->GetDirectory(config);
@@ -1489,8 +1493,8 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char*)
 {
   // Lookup the target property.
   const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
-  if(m_Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME") &&
-     !m_Makefile->IsOn("CMAKE_SKIP_RPATH") &&
+  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME") &&
+     !this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
      install_name_dir && *install_name_dir)
     {
     std::string dir = install_name_dir;

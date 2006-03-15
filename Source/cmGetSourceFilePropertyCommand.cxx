@@ -29,19 +29,19 @@ bool cmGetSourceFilePropertyCommand::InitialPass(
     }
   const char* var = args[0].c_str();
   const char* file = args[1].c_str();
-  cmSourceFile* sf = m_Makefile->GetSource(file);
+  cmSourceFile* sf = this->Makefile->GetSource(file);
 
   if(sf)
     {
     const char *prop = sf->GetProperty(args[2].c_str());
     if (prop)
       {
-      m_Makefile->AddDefinition(var, prop);
+      this->Makefile->AddDefinition(var, prop);
       return true;
       }
     }
 
-  m_Makefile->AddDefinition(var, "NOTFOUND");
+  this->Makefile->AddDefinition(var, "NOTFOUND");
   return true;
 }
 

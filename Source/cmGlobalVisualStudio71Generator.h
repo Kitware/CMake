@@ -60,6 +60,6 @@ protected:
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
 
-  std::string m_ProjectConfigurationSectionName;
+  std::string ProjectConfigurationSectionName;
 };
 #endif

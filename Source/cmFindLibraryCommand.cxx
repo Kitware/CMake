@@ -62,29 +62,29 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
     library = this->FindLibrary(i->c_str());
     if(library != "")
       {  
-      m_Makefile->AddCacheDefinition(this->VariableName.c_str(),
-                                     library.c_str(),
-                                     this->VariableDocumentation.c_str(),
-                                     cmCacheManager::FILEPATH);
+      this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
+                                         library.c_str(),
+                                         this->VariableDocumentation.c_str(),
+                                         cmCacheManager::FILEPATH);
       return true;
       } 
     }
   std::string notfound = this->VariableName + "-NOTFOUND";
-  m_Makefile->AddCacheDefinition(this->VariableName.c_str(),
-                                 notfound.c_str(),
-                                 this->VariableDocumentation.c_str(),
-                                 cmCacheManager::FILEPATH);
+  this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
+                                     notfound.c_str(),
+                                     this->VariableDocumentation.c_str(),
+                                     cmCacheManager::FILEPATH);
   return true;
 }
 
 
 void cmFindLibraryCommand::AddLib64Paths()
 {  
-  if(!m_Makefile->GetLocalGenerator()->GetGlobalGenerator()->GetLanguageEnabled("C"))
+  if(!this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->GetLanguageEnabled("C"))
     {
     return;
     }
-  std::string voidsize = m_Makefile->GetRequiredDefinition("CMAKE_SIZEOF_VOID_P");
+  std::string voidsize = this->Makefile->GetRequiredDefinition("CMAKE_SIZEOF_VOID_P");
   int size = atoi(voidsize.c_str());
   std::vector<std::string> path64;
   if(size != 8)
@@ -131,7 +131,7 @@ std::string cmFindLibraryCommand::FindLibrary(const char* name)
 {
   bool supportFrameworks = false;
   bool onlyFrameworks = false;
-  std::string ff = m_Makefile->GetSafeDefinition("CMAKE_FIND_FRAMEWORK");
+  std::string ff = this->Makefile->GetSafeDefinition("CMAKE_FIND_FRAMEWORK");
   if(ff == "FIRST" || ff == "LAST")
     {
     supportFrameworks = true;
@@ -143,9 +143,9 @@ std::string cmFindLibraryCommand::FindLibrary(const char* name)
     }
   
   const char* prefixes_list =
-    m_Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
+    this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
   const char* suffixes_list =
-    m_Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
+    this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
   std::vector<std::string> prefixes;
   std::vector<std::string> suffixes;
   cmSystemTools::ExpandListArgument(prefixes_list, prefixes, true);

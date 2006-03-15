@@ -24,11 +24,11 @@ bool cmIncludeRegularExpressionCommand::InitialPass(std::vector<std::string> con
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  m_Makefile->SetIncludeRegularExpression(args[0].c_str());
+  this->Makefile->SetIncludeRegularExpression(args[0].c_str());
   
   if(args.size() > 1)
     {
-    m_Makefile->SetComplainRegularExpression(args[1].c_str());
+    this->Makefile->SetComplainRegularExpression(args[1].c_str());
     }
   
   return true;

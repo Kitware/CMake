@@ -264,7 +264,7 @@ bool cmWin32ProcessExecution::StartProcess(
   const char* cmd, const char* path, bool verbose)
 {
   this->Initialize();
-  m_Verbose = verbose;
+  this->Verbose = verbose;
   return this->PrivateOpen(cmd, path, _O_RDONLY | _O_TEXT, POPEN_3);
 }
 
@@ -505,7 +505,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
   
   if (!CreatePipe(&this->hChildStdinRd, &this->hChildStdinWr, &saAttr, 0))
     {
-    m_Output += "CreatePipeError\n";
+    this->Output += "CreatePipeError\n";
     return false;
     }
     
@@ -519,7 +519,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                              DUPLICATE_SAME_ACCESS);
   if (!fSuccess)
     {
-    m_Output += "DuplicateHandleError\n";
+    this->Output += "DuplicateHandleError\n";
     return false;
     }
 
@@ -530,7 +530,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
 
   if (!CreatePipe(&this->hChildStdoutRd, &this->hChildStdoutWr, &saAttr, 0))
     {
-    m_Output += "CreatePipeError\n";
+    this->Output += "CreatePipeError\n";
     return false;
     }
 
@@ -539,7 +539,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                              FALSE, DUPLICATE_SAME_ACCESS);
   if (!fSuccess)
     {
-    m_Output += "DuplicateHandleError\n";
+    this->Output += "DuplicateHandleError\n";
     return false;
     }
 
@@ -551,7 +551,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     {
     if (!CreatePipe(&this->hChildStderrRd, &this->hChildStderrWr, &saAttr, 0))
       {
-      m_Output += "CreatePipeError\n";
+      this->Output += "CreatePipeError\n";
       return false;
       }
    fSuccess = DuplicateHandle(GetCurrentProcess(),
@@ -561,7 +561,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                               FALSE, DUPLICATE_SAME_ACCESS);
     if (!fSuccess)
       {
-      m_Output += "DuplicateHandleError\n";
+      this->Output += "DuplicateHandleError\n";
       return false;
       }
     /* Close the inheritable version of ChildStdErr that we're using. */
@@ -628,24 +628,24 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     {
     if (!RealPopenCreateProcess(cmdstring,
                                 path,
-                                m_ConsoleSpawn.c_str(),
+                                this->ConsoleSpawn.c_str(),
                                 this->hChildStdinRd,
                                 this->hChildStdoutWr,
                                 this->hChildStdoutWr,
-                                &hProcess, m_HideWindows,
-                                m_Output))
+                                &hProcess, this->HideWindows,
+                                this->Output))
       return 0;
     }
   else 
     {
     if (!RealPopenCreateProcess(cmdstring,
                                 path,
-                                m_ConsoleSpawn.c_str(),
+                                this->ConsoleSpawn.c_str(),
                                 this->hChildStdinRd,
                                 this->hChildStdoutWr,
                                 this->hChildStderrWr,
-                                &hProcess, m_HideWindows,
-                                m_Output))
+                                &hProcess, this->HideWindows,
+                                this->Output))
       return 0;
     }
 
@@ -666,21 +666,21 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
    * make sure that no handles to the write end of the output pipe
    * are maintained in this process or else the pipe will not close
    * when the child process exits and the ReadFile will hang. */
-  m_ProcessHandle = hProcess;
+  this->ProcessHandle = hProcess;
   if ( fd1 >= 0 )
     {
-    //  m_StdIn = f1;
-    m_pStdIn = fd1;
+    //  this->StdIn = f1;
+    this->pStdIn = fd1;
     }
   if ( fd2 >= 0 )
     {
-    //  m_StdOut = f2;
-    m_pStdOut = fd2;
+    //  this->StdOut = f2;
+    this->pStdOut = fd2;
     }
   if ( fd3 >= 0 )
     {
-    //  m_StdErr = f3;
-    m_pStdErr = fd3;
+    //  this->StdErr = f3;
+    this->pStdErr = fd3;
     }
 
   return true;
@@ -691,37 +691,37 @@ bool cmWin32ProcessExecution::CloseHandles()
   bool ret = true;
   if (this->hChildStdinRd && !CloseHandle(this->hChildStdinRd))
     {
-    m_Output += "CloseHandleError\n";
+    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStdinRd = 0;
   if(this->hChildStdoutRdDup && !CloseHandle(this->hChildStdoutRdDup))
     {
-    m_Output += "CloseHandleError\n";
+    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStdoutRdDup = 0;
   if(this->hChildStderrRdDup && !CloseHandle(this->hChildStderrRdDup))
     {
-    m_Output += "CloseHandleError\n";
+    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStderrRdDup = 0;
   if(this->hChildStdinWrDup && !CloseHandle(this->hChildStdinWrDup))
     {
-    m_Output += "CloseHandleError\n";
+    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStdinWrDup = 0;
   if (this->hChildStdoutWr && !CloseHandle(this->hChildStdoutWr))
     {
-    m_Output += "CloseHandleError\n";
+    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStdoutWr = 0;
   if (this->hChildStderrWr && !CloseHandle(this->hChildStderrWr))
     {
-    m_Output += "CloseHandleError\n";
+    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStderrWr = 0;
@@ -771,7 +771,7 @@ cmWin32ProcessExecution::~cmWin32ProcessExecution()
 
 bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
 {
-  HANDLE hProcess = m_ProcessHandle;
+  HANDLE hProcess = this->ProcessHandle;
 
   int result = -1;
   DWORD exit_code;
@@ -784,8 +784,8 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
     bool have_some = false;
     struct _stat fsout;
     struct _stat fserr;
-    int rout = _fstat(m_pStdOut, &fsout);
-    int rerr = _fstat(m_pStdErr, &fserr);
+    int rout = _fstat(this->pStdOut, &fsout);
+    int rerr = _fstat(this->pStdErr, &fserr);
     if ( rout && rerr )
       {
       break;
@@ -793,9 +793,9 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
     if (fserr.st_size > 0)
       {
       char buffer[1024];
-      int len = read(m_pStdErr, buffer, 1023);
+      int len = read(this->pStdErr, buffer, 1023);
       buffer[len] = 0;
-      if ( m_Verbose )
+      if ( this->Verbose )
         {
         cmSystemTools::Stdout(buffer);
         }
@@ -805,9 +805,9 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
     if (fsout.st_size > 0)
       {
       char buffer[1024];
-      int len = read(m_pStdOut, buffer, 1023);
+      int len = read(this->pStdOut, buffer, 1023);
       buffer[len] = 0;
-      if ( m_Verbose )
+      if ( this->Verbose )
         {
         cmSystemTools::Stdout(buffer);
         }
@@ -851,8 +851,8 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
 
   /* Free up the native handle at this point */
   CloseHandle(hProcess);
-  m_ExitValue = result;
-  m_Output += output;
+  this->ExitValue = result;
+  this->Output += output;
   bool ret = this->CloseHandles();
   if ( result < 0 || !ret)
     {

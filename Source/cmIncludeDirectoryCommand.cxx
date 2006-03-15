@@ -39,7 +39,7 @@ bool cmIncludeDirectoryCommand::InitialPass(std::vector<std::string> const& args
       {
       cmSystemTools::Error("Empty Include Directory Passed into INCLUDE_DIRECTORIES command.");
       }
-    m_Makefile->AddIncludeDirectory((*i).c_str(), before);
+    this->Makefile->AddIncludeDirectory((*i).c_str(), before);
     }
   return true;
 }

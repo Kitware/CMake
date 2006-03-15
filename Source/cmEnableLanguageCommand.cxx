@@ -24,7 +24,7 @@ bool cmEnableLanguageCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("ENABLE_LANGUAGE called with incorrect number of arguments");
     return false;
     } 
-  m_Makefile->EnableLanguage(args);
+  this->Makefile->EnableLanguage(args);
   return true;
 }
 

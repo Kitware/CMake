@@ -95,7 +95,7 @@ bool cmStringCommand::HandleToUpperLowerCommand(
     }
 
   // Store the output in the provided variable.
-  m_Makefile->AddDefinition(outvar.c_str(), output.c_str());
+  this->Makefile->AddDefinition(outvar.c_str(), output.c_str());
   return true;
 }
 
@@ -127,7 +127,7 @@ bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
       }
     }
   // Store the output in the provided variable.
-  m_Makefile->AddDefinition(outvar.c_str(), output.c_str());
+  this->Makefile->AddDefinition(outvar.c_str(), output.c_str());
   return true;
 }
 
@@ -170,10 +170,10 @@ bool cmStringCommand::HandleConfigureCommand(
 
   // Configure the string.
   std::string output;
-  m_Makefile->ConfigureString(args[1], output, atOnly, escapeQuotes);
+  this->Makefile->ConfigureString(args[1], output, atOnly, escapeQuotes);
 
   // Store the output in the provided variable.
-  m_Makefile->AddDefinition(args[2].c_str(), output.c_str());
+  this->Makefile->AddDefinition(args[2].c_str(), output.c_str());
 
   return true;
 }
@@ -266,7 +266,7 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
     }
   
   // Store the output in the provided variable.
-  m_Makefile->AddDefinition(outvar.c_str(), output.c_str());
+  this->Makefile->AddDefinition(outvar.c_str(), output.c_str());
   return true;
 }
 
@@ -319,7 +319,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
     }
   
   // Store the output in the provided variable.
-  m_Makefile->AddDefinition(outvar.c_str(), output.c_str());
+  this->Makefile->AddDefinition(outvar.c_str(), output.c_str());
   return true;
 }
 
@@ -458,7 +458,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   output += input.substr(base, input.length()-base);
   
   // Store the output in the provided variable.
-  m_Makefile->AddDefinition(outvar.c_str(), output.c_str());
+  this->Makefile->AddDefinition(outvar.c_str(), output.c_str());
   return true;
 }
 
@@ -506,11 +506,11 @@ bool cmStringCommand::HandleCompareCommand(std::vector<std::string> const&
       }
     if(result)
       {
-      m_Makefile->AddDefinition(outvar.c_str(), "1");
+      this->Makefile->AddDefinition(outvar.c_str(), "1");
       }
     else
       {
-      m_Makefile->AddDefinition(outvar.c_str(), "0");
+      this->Makefile->AddDefinition(outvar.c_str(), "0");
       }
     return true;
     }  
@@ -542,7 +542,7 @@ bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const&
   cmsys::SystemTools::ReplaceString(input, matchExpression.c_str(), 
                                     replaceExpression.c_str());
 
-  m_Makefile->AddDefinition(variableName.c_str(), input.c_str());
+  this->Makefile->AddDefinition(variableName.c_str(), input.c_str());
   return true;
 }
 
@@ -581,8 +581,8 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
     return false;
     }
 
-  m_Makefile->AddDefinition(variableName.c_str(),
-                            stringValue.substr(begin, end).c_str());
+  this->Makefile->AddDefinition(variableName.c_str(), 
+                                stringValue.substr(begin, end).c_str());
   return true;
 }
 
@@ -602,6 +602,6 @@ bool cmStringCommand::HandleLengthCommand(std::vector<std::string> const& args)
   char buffer[1024];
   sprintf(buffer, "%d", static_cast<int>(length));
 
-  m_Makefile->AddDefinition(variableName.c_str(), buffer);
+  this->Makefile->AddDefinition(variableName.c_str(), buffer);
   return true;
 }

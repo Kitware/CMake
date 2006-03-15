@@ -42,13 +42,13 @@ public:
 
 cmGlob::cmGlob()
 {
-  m_Internals = new cmGlobInternal;
-  m_Recurse = false;
+  this->Internals = new cmGlobInternal;
+  this->Recurse = false;
 }
 
 cmGlob::~cmGlob()
 {
-  delete m_Internals;
+  delete this->Internals;
 }
 
 void cmGlob::Escape(int ch, char* buffer)
@@ -73,7 +73,7 @@ void cmGlob::Escape(int ch, char* buffer)
 
 std::vector<std::string>& cmGlob::GetFiles()
 {
-  return m_Internals->Files;
+  return this->Internals->Files;
 }
 
 std::string cmGlob::ConvertExpression(const std::string& expr)
@@ -200,9 +200,9 @@ void cmGlob::RecurseDirectory(std::string::size_type start,
 
     if ( !dir_only || !cmsys::SystemTools::FileIsDirectory(realname.c_str()) )
       {
-      if ( m_Internals->Expressions[m_Internals->Expressions.size()-1].find(fname.c_str()) )
+      if ( this->Internals->Expressions[this->Internals->Expressions.size()-1].find(fname.c_str()) )
         {
-        m_Internals->Files.push_back(realname);
+        this->Internals->Files.push_back(realname);
         }
       }
     if ( cmsys::SystemTools::FileIsDirectory(realname.c_str()) )
@@ -216,8 +216,8 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
   const std::string& dir, bool dir_only)
 {
   //std::cout << "ProcessDirectory: " << dir << std::endl;
-  bool last = ( start == m_Internals->Expressions.size()-1 );
-  if ( last && m_Recurse )
+  bool last = ( start == this->Internals->Expressions.size()-1 );
+  if ( last && this->Recurse )
     {
     this->RecurseDirectory(start, dir, dir_only);
     return;
@@ -264,7 +264,7 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
       }
 
     //std::cout << "Look at file: " << fname << std::endl;
-    //std::cout << "Match: " << m_Internals->TextExpressions[start].c_str() << std::endl;
+    //std::cout << "Match: " << this->Internals->TextExpressions[start].c_str() << std::endl;
     //std::cout << "Full name: " << fullname << std::endl;
 
     if ( (!dir_only || !last) && !cmsys::SystemTools::FileIsDirectory(realname.c_str()) )
@@ -272,11 +272,11 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
       continue;
       }
 
-    if ( m_Internals->Expressions[start].find(fname.c_str()) )
+    if ( this->Internals->Expressions[start].find(fname.c_str()) )
       {
       if ( last )
         {
-        m_Internals->Files.push_back(realname);
+        this->Internals->Files.push_back(realname);
         }
       else
         {
@@ -292,8 +292,8 @@ bool cmGlob::FindFiles(const std::string& inexpr)
   std::string::size_type cc;
   std::string expr = inexpr;
 
-  m_Internals->Expressions.clear();
-  m_Internals->Files.clear();
+  this->Internals->Expressions.clear();
+  this->Internals->Files.clear();
 
   if ( !cmsys::SystemTools::FileIsFullPath(expr.c_str()) )
     {
@@ -393,9 +393,9 @@ bool cmGlob::FindFiles(const std::string& inexpr)
 
 void cmGlob::AddExpression(const char* expr)
 {
-  m_Internals->Expressions.push_back(
+  this->Internals->Expressions.push_back(
     cmsys::RegularExpression(
       this->ConvertExpression(expr).c_str()));
-  m_Internals->TextExpressions.push_back(this->ConvertExpression(expr));
+  this->Internals->TextExpressions.push_back(this->ConvertExpression(expr));
 }
 

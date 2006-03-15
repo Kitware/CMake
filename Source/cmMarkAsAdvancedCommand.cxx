@@ -40,11 +40,11 @@ bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args)
   for(; i < args.size(); ++i)
     {
     std::string variable = args[i];
-    cmCacheManager* manager = m_Makefile->GetCacheManager();
+    cmCacheManager* manager = this->Makefile->GetCacheManager();
     cmCacheManager::CacheIterator it = manager->GetCacheIterator(variable.c_str());
     if ( it.IsAtEnd() )
       {
-      m_Makefile->AddCacheDefinition(variable.c_str(), 0, 0,
+      this->Makefile->AddCacheDefinition(variable.c_str(), 0, 0,
                                      cmCacheManager::UNINITIALIZED);
       overwrite = true;
       }

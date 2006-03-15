@@ -110,7 +110,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   std::string extraFlags;
   this->LocalGenerator->AppendFlags(extraFlags, this->Target->GetProperty("LINK_FLAGS"));
   this->LocalGenerator->AddConfigVariableFlags(extraFlags, "CMAKE_SHARED_LINKER_FLAGS",
-                                               this->LocalGenerator->m_ConfigurationName.c_str());
+                                               this->LocalGenerator->ConfigurationName.c_str());
   if(this->Makefile->IsOn("WIN32") && !(this->Makefile->IsOn("CYGWIN") || this->Makefile->IsOn("MINGW")))
     {
     const std::vector<cmSourceFile*>& sources = this->Target->GetSourceFiles();
@@ -144,7 +144,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   std::string extraFlags;
   this->LocalGenerator->AppendFlags(extraFlags, this->Target->GetProperty("LINK_FLAGS"));
   this->LocalGenerator->AddConfigVariableFlags(extraFlags, "CMAKE_MODULE_LINKER_FLAGS",
-                                               this->LocalGenerator->m_ConfigurationName.c_str());
+                                               this->LocalGenerator->ConfigurationName.c_str());
   // TODO: .def files should be supported here also.
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
@@ -207,10 +207,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string targetNameImport;
   this->Target->GetLibraryNames(
     targetName, targetNameSO, targetNameReal, targetNameImport,
-    this->LocalGenerator->m_ConfigurationName.c_str());
+    this->LocalGenerator->ConfigurationName.c_str());
 
   // Construct the full path version of the names.
-  std::string outpath = this->LocalGenerator->m_LibraryOutputPath;
+  std::string outpath = this->LocalGenerator->LibraryOutputPath;
   if(outpath.length() == 0)
     {
     outpath = this->Makefile->GetStartOutputDirectory();
@@ -282,7 +282,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     cleanSharedSOName,
     cleanSharedRealName,
     cleanImportName,
-    this->LocalGenerator->m_ConfigurationName.c_str());
+    this->LocalGenerator->ConfigurationName.c_str());
   std::string cleanFullStaticName = outpath + cleanStaticName;
   std::string cleanFullSharedName = outpath + cleanSharedName;
   std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
@@ -407,7 +407,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     // Select whether to generate an install_name directory for the
     // install tree or the build tree.
-    const char* config = this->LocalGenerator->m_ConfigurationName.c_str();
+    const char* config = this->LocalGenerator->ConfigurationName.c_str();
     if(this->Target->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
       {
       install_name_dir =
@@ -442,7 +442,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string langFlags;
   this->LocalGenerator
     ->AddLanguageFlags(langFlags, linkLanguage,
-                       this->LocalGenerator->m_ConfigurationName.c_str());
+                       this->LocalGenerator->ConfigurationName.c_str());
   // remove any language flags that might not work with the
   // particular os
   if(forbiddenFlagVar)
@@ -452,13 +452,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
   vars.LanguageCompileFlags = langFlags.c_str();
   // Expand placeholders in the commands.
-  this->LocalGenerator->m_TargetImplib = targetOutPathImport;
+  this->LocalGenerator->TargetImplib = targetOutPathImport;
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
     this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
-  this->LocalGenerator->m_TargetImplib = "";
+  this->LocalGenerator->TargetImplib = "";
 
   // Write the build rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,

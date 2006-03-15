@@ -22,25 +22,25 @@
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
-  const char* name = lff.m_Name.c_str();
-  const std::vector<cmListFileArgument>& args = lff.m_Arguments;
+  const char* name = lff.Name.c_str();
+  const std::vector<cmListFileArgument>& args = lff.Arguments;
   // always let if statements through
-  if (cmSystemTools::LowerCase(lff.m_Name) == "if")
+  if (cmSystemTools::LowerCase(lff.Name) == "if")
     {
     return false;
     }
   
   // watch for our ELSE or ENDIF
-  if (cmSystemTools::LowerCase(lff.m_Name) == "else" || 
-      cmSystemTools::LowerCase(lff.m_Name) == "endif")
+  if (cmSystemTools::LowerCase(lff.Name) == "else" || 
+      cmSystemTools::LowerCase(lff.Name) == "endif")
     {
-    if (args == m_Args)
+    if (args == this->Args)
       {
       // if it was an else statement then we should change state
       // and block this Else Command
-      if (cmSystemTools::LowerCase(lff.m_Name) == "else")
+      if (cmSystemTools::LowerCase(lff.Name) == "else")
         {
-        m_IsBlocking = !m_IsBlocking;
+        this->IsBlocking = !this->IsBlocking;
         return true;
         }
       // otherwise it must be an ENDIF statement, in that case remove the
@@ -55,8 +55,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       err += ".  Did you mean ";
       err += name;
       err += "( ";
-      for(std::vector<cmListFileArgument>::const_iterator a = m_Args.begin();
-          a != m_Args.end();++a)
+      for(std::vector<cmListFileArgument>::const_iterator a = this->Args.begin();
+          a != this->Args.end();++a)
         {
         err += (a->Quoted?"\"":"");
         err += a->Value;
@@ -67,15 +67,15 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       cmSystemTools::Error(err.c_str());
       }
     }
-  return m_IsBlocking;
+  return this->IsBlocking;
 }
 
 bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
                                        cmMakefile&)
 {
-  if (cmSystemTools::LowerCase(lff.m_Name) == "endif")
+  if (cmSystemTools::LowerCase(lff.Name) == "endif")
     {
-    if (lff.m_Arguments == m_Args)
+    if (lff.Arguments == this->Args)
       {
       return true;
       }
@@ -89,8 +89,8 @@ ScopeEnded(cmMakefile &mf)
   std::string errmsg = "The end of a CMakeLists file was reached with an IF statement that was not closed properly.\nWithin the directory: ";
   errmsg += mf.GetCurrentDirectory();
   errmsg += "\nThe arguments are: ";
-  for(std::vector<cmListFileArgument>::const_iterator j = m_Args.begin();
-      j != m_Args.end(); ++j)
+  for(std::vector<cmListFileArgument>::const_iterator j = this->Args.begin();
+      j != this->Args.end(); ++j)
     {   
     errmsg += (j->Quoted?"\"":"");
     errmsg += j->Value;
@@ -105,8 +105,8 @@ bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
   char* errorString = 0;
   
   std::vector<std::string> expandedArguments;
-  m_Makefile->ExpandArguments(args, expandedArguments);
-  bool isTrue = cmIfCommand::IsTrue(expandedArguments,&errorString,m_Makefile);
+  this->Makefile->ExpandArguments(args, expandedArguments);
+  bool isTrue = cmIfCommand::IsTrue(expandedArguments,&errorString,this->Makefile);
   
   if (errorString)
     {
@@ -129,9 +129,9 @@ bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
   
   cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
   // if is isn't true block the commands
-  f->m_IsBlocking = !isTrue;
-  f->m_Args = args;
-  m_Makefile->AddFunctionBlocker(f);
+  f->IsBlocking = !isTrue;
+  f->Args = args;
+  this->Makefile->AddFunctionBlocker(f);
   
   return true;
 }

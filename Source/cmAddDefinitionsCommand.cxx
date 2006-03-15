@@ -29,7 +29,7 @@ bool cmAddDefinitionsCommand::InitialPass(
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
     {
-    m_Makefile->AddDefineFlag(i->c_str());
+    this->Makefile->AddDefineFlag(i->c_str());
     }
   return true;
 }

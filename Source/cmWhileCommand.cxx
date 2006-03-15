@@ -22,31 +22,31 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
   // Prevent recusion and don't let this blocker block its own
   // commands.
-  if (m_Executing)
+  if (this->Executing)
     {
     return false;
     }
   
   // at end of for each execute recorded commands
-  if (cmSystemTools::LowerCase(lff.m_Name) == "endwhile")
+  if (cmSystemTools::LowerCase(lff.Name) == "endwhile")
     {
     char* errorString = 0;
     
     std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(m_Args, expandedArguments);
+    mf.ExpandArguments(this->Args, expandedArguments);
     bool isTrue = 
       cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
 
-    m_Executing = true;
+    this->Executing = true;
     while (isTrue)
       {      
       // Invoke all the functions that were collected in the block.
-      for(unsigned int c = 0; c < m_Functions.size(); ++c)
+      for(unsigned int c = 0; c < this->Functions.size(); ++c)
         {
-        mf.ExecuteCommand(m_Functions[c]);
+        mf.ExecuteCommand(this->Functions[c]);
         }
       expandedArguments.clear();
-      mf.ExpandArguments(m_Args, expandedArguments);
+      mf.ExpandArguments(this->Args, expandedArguments);
       isTrue = 
         cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
       }
@@ -55,7 +55,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
     }
 
   // record the command
-  m_Functions.push_back(lff);
+  this->Functions.push_back(lff);
   
   // always return true
   return true;
@@ -64,9 +64,9 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 bool cmWhileFunctionBlocker::
 ShouldRemove(const cmListFileFunction& lff, cmMakefile& )
 {
-  if(cmSystemTools::LowerCase(lff.m_Name) == "endwhile")
+  if(cmSystemTools::LowerCase(lff.Name) == "endwhile")
     {
-    if (lff.m_Arguments == m_Args)
+    if (lff.Arguments == this->Args)
       {
       return true;
       }
@@ -94,8 +94,8 @@ bool cmWhileCommand::InvokeInitialPass(
   
   // create a function blocker
   cmWhileFunctionBlocker *f = new cmWhileFunctionBlocker();
-  f->m_Args = args;
-  m_Makefile->AddFunctionBlocker(f);
+  f->Args = args;
+  this->Makefile->AddFunctionBlocker(f);
   
   return true;
 }

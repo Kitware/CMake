@@ -36,7 +36,7 @@ public:
   static cmDynamicLoaderCache* GetInstance();
 
 private:
-  std::map<cmStdString, cmLibHandle> m_CacheMap;
+  std::map<cmStdString, cmLibHandle> CacheMap;
   static cmDynamicLoaderCache* Instance;
 };
 
@@ -53,13 +53,13 @@ void cmDynamicLoaderCache::CacheFile(const char* path, const cmLibHandle& p)
     {
     this->FlushCache(path);
     }
-  this->m_CacheMap[path] = p;
+  this->CacheMap[path] = p;
 }
 
 bool cmDynamicLoaderCache::GetCacheFile(const char* path, cmLibHandle& p)
 {
-  std::map<cmStdString, cmLibHandle>::iterator it = m_CacheMap.find(path);
-  if ( it != m_CacheMap.end() )
+  std::map<cmStdString, cmLibHandle>::iterator it = this->CacheMap.find(path);
+  if ( it != this->CacheMap.end() )
     {
     p = it->second;
     return true;
@@ -69,12 +69,12 @@ bool cmDynamicLoaderCache::GetCacheFile(const char* path, cmLibHandle& p)
 
 bool cmDynamicLoaderCache::FlushCache(const char* path)
 {
-  std::map<cmStdString, cmLibHandle>::iterator it = m_CacheMap.find(path);
+  std::map<cmStdString, cmLibHandle>::iterator it = this->CacheMap.find(path);
   bool ret = false;
-  if ( it != m_CacheMap.end() )
+  if ( it != this->CacheMap.end() )
     {
     cmDynamicLoader::CloseLibrary(it->second);
-    m_CacheMap.erase(it);
+    this->CacheMap.erase(it);
     ret = true;
     }
   return ret;
@@ -82,8 +82,8 @@ bool cmDynamicLoaderCache::FlushCache(const char* path)
 
 void cmDynamicLoaderCache::FlushCache()
 {
-  for ( std::map<cmStdString, cmLibHandle>::iterator it = m_CacheMap.begin();
-        it != m_CacheMap.end(); it++ )
+  for ( std::map<cmStdString, cmLibHandle>::iterator it = this->CacheMap.begin();
+        it != this->CacheMap.end(); it++ )
     {
     cmDynamicLoader::CloseLibrary(it->second);
     }

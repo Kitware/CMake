@@ -26,25 +26,25 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const&
     return false;
     }
   std::vector<std::string> args;
-  m_Makefile->ExpandSourceListArguments(argsIn, args, 2);
+  this->Makefile->ExpandSourceListArguments(argsIn, args, 2);
 
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
-  if(!m_Makefile->IsOn("VTK_WRAP_PYTHON"))
+  if(!this->Makefile->IsOn("VTK_WRAP_PYTHON"))
     {
     return true;
     }
 
   
   // what is the current source dir
-  std::string cdir = m_Makefile->GetCurrentDirectory();
+  std::string cdir = this->Makefile->GetCurrentDirectory();
 
   // keep the library name
-  m_LibraryName = args[0];
-  m_SourceList = args[1];
+  this->LibraryName = args[0];
+  this->SourceList = args[1];
   std::string sourceListValue;
   // was the list already populated
-  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
+  const char *def = this->Makefile->GetDefinition(this->SourceList.c_str());  
   if (def)
     {
     sourceListValue = def;
@@ -52,11 +52,11 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const&
     }
 
   // Create the init file 
-  std::string res = m_LibraryName;
+  std::string res = this->LibraryName;
   res += "Init.cxx";
 
   // add the init file
-  std::string initName = m_LibraryName;
+  std::string initName = this->LibraryName;
   initName += "Init";
   sourceListValue += initName + ".cxx";
 
@@ -64,7 +64,7 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const&
   for(std::vector<std::string>::iterator j = (args.begin() + 2);
       j != args.end(); ++j)
     {   
-    cmSourceFile *curr = m_Makefile->GetSource(j->c_str());
+    cmSourceFile *curr = this->Makefile->GetSource(j->c_str());
     
     // if we should wrap the class
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
@@ -76,13 +76,13 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const&
         }
       std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
       std::string newName = srcName + "Python";
-      file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+      file.SetName(newName.c_str(), this->Makefile->GetCurrentOutputDirectory(),
                    "cxx",false);
       std::string hname = cdir + "/" + srcName + ".h";
-      m_WrapHeaders.push_back(hname);
+      this->WrapHeaders.push_back(hname);
       // add starting depends
       file.GetDepends().push_back(hname);
-      m_WrapClasses.push_back(file);
+      this->WrapClasses.push_back(file);
       sourceListValue += ";";
       sourceListValue += newName + ".cxx";
       }
@@ -91,21 +91,21 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const&
   cmSourceFile cfile;
   cfile.SetProperty("ABSTRACT","0");
   this->CreateInitFile(res);
-  cfile.SetName(initName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+  cfile.SetName(initName.c_str(), this->Makefile->GetCurrentOutputDirectory(),
                 "cxx",false);
-  m_Makefile->AddSource(cfile);
-  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());
+  this->Makefile->AddSource(cfile);
+  this->Makefile->AddDefinition(this->SourceList.c_str(), sourceListValue.c_str());
   return true;
 }
 
 void cmVTKWrapPythonCommand::FinalPass() 
 {
   // first we add the rules for all the .h to Python.cxx files
-  size_t lastClass = m_WrapClasses.size();
+  size_t lastClass = this->WrapClasses.size();
   std::vector<std::string> depends;
-  const char* wpython = m_Makefile->
-    GetRequiredDefinition("VTK_WRAP_PYTHON_EXE");
-  const char* hints = m_Makefile->GetDefinition("VTK_WRAP_HINTS");
+  const char* wpython = 
+    this->Makefile->GetRequiredDefinition("VTK_WRAP_PYTHON_EXE");
+  const char* hints = this->Makefile->GetDefinition("VTK_WRAP_HINTS");
 
   // wrap all the .h files
   depends.push_back(wpython);
@@ -115,19 +115,19 @@ void cmVTKWrapPythonCommand::FinalPass()
     }
   for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
-    m_Makefile->AddSource(m_WrapClasses[classNum]);
-    std::string res = m_Makefile->GetCurrentOutputDirectory();
+    this->Makefile->AddSource(this->WrapClasses[classNum]);
+    std::string res = this->Makefile->GetCurrentOutputDirectory();
     res += "/";
-    res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
+    res += this->WrapClasses[classNum].GetSourceName() + ".cxx";
     cmCustomCommandLine commandLine;
     commandLine.push_back(wpython);
-    commandLine.push_back(m_WrapHeaders[classNum]);
+    commandLine.push_back(this->WrapHeaders[classNum]);
     if(hints)
       {
       commandLine.push_back(hints);
       }
-    commandLine.push_back(
-      (m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
+    commandLine.push_back((this->WrapClasses[classNum].
+                           GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
     commandLine.push_back(res);
 
     cmCustomCommandLines commandLines;
@@ -135,10 +135,10 @@ void cmVTKWrapPythonCommand::FinalPass()
     std::vector<std::string> outputs;
     outputs.push_back(res);
     const char* no_comment = 0;
-    m_Makefile->AddCustomCommandOldStyle(m_LibraryName.c_str(),
+    this->Makefile->AddCustomCommandOldStyle(this->LibraryName.c_str(),
                                          outputs,
                                          depends,
-                                         m_WrapHeaders[classNum].c_str(),
+                                         this->WrapHeaders[classNum].c_str(),
                                          commandLines,
                                          no_comment);
     }
@@ -147,11 +147,11 @@ void cmVTKWrapPythonCommand::FinalPass()
 bool cmVTKWrapPythonCommand::CreateInitFile(std::string& res) 
 {
   std::vector<std::string> classes;
-  size_t lastClass = m_WrapHeaders.size();
+  size_t lastClass = this->WrapHeaders.size();
   size_t classNum;
   for(classNum = 0; classNum < lastClass; classNum++)
     {
-    std::string cls = m_WrapHeaders[classNum];
+    std::string cls = this->WrapHeaders[classNum];
     cls = cls.substr(0,cls.size()-2);
     std::string::size_type pos = cls.rfind('/');    
     if(pos != std::string::npos)
@@ -163,10 +163,10 @@ bool cmVTKWrapPythonCommand::CreateInitFile(std::string& res)
   
   // open the init file
   std::string outFileName = 
-    m_Makefile->GetCurrentOutputDirectory();
+    this->Makefile->GetCurrentOutputDirectory();
   outFileName += "/" + res;
   
-  return this->WriteInit(m_LibraryName.c_str(), outFileName, classes);
+  return this->WriteInit(this->LibraryName.c_str(), outFileName, classes);
 }
 
 

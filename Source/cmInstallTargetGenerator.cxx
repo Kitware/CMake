@@ -292,8 +292,9 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os,
     linkType = cmTarget::DEBUG;
     }
   // TODO: Merge with ComputeLinkInformation.
-  const cmTarget::LinkLibraries& inLibs = this->Target->GetLinkLibraries();
-  for(cmTarget::LinkLibraries::const_iterator j = inLibs.begin();
+  const cmTarget::LinkLibraryVectorType& inLibs = 
+    this->Target->GetLinkLibraries();
+  for(cmTarget::LinkLibraryVectorType::const_iterator j = inLibs.begin();
       j != inLibs.end(); ++j)
     {
     std::string lib = j->first;
@@ -309,7 +310,8 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os,
           // of the install_name field then we need to create a mapping to be
           // applied after installation.
           std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
-          std::string for_install = tgt->GetInstallNameDirForInstallTree(config);
+          std::string for_install = 
+            tgt->GetInstallNameDirForInstallTree(config);
           if(for_build != for_install)
             {
             // Map from the build-tree install_name.

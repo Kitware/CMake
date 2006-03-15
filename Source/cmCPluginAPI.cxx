@@ -424,12 +424,12 @@ int CCONV cmExecuteCommand(void *arg, const char *name,
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   cmListFileFunction lff;
-  lff.m_Name = name;
+  lff.Name = name;
   for(int i = 0; i < numArgs; ++i)
     {
     // Assume all arguments are quoted.
-    lff.m_Arguments.push_back(cmListFileArgument(args[i], true,
-                                                 "[CMake-Plugin]", 0));
+    lff.Arguments.push_back(cmListFileArgument(args[i], true,
+                                               "[CMake-Plugin]", 0));
     }
   return mf->ExecuteCommand(lff);
 }

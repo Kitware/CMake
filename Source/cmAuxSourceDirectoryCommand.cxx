@@ -30,13 +30,13 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
   
   std::string sourceListValue;
   std::string templateDirectory = args[0];
-  m_Makefile->AddExtraDirectory(templateDirectory.c_str());
-  std::string tdir = m_Makefile->GetCurrentDirectory();
+  this->Makefile->AddExtraDirectory(templateDirectory.c_str());
+  std::string tdir = this->Makefile->GetCurrentDirectory();
   tdir += "/";
   tdir += templateDirectory;
 
   // was the list already populated
-  const char *def = m_Makefile->GetDefinition(args[1].c_str());  
+  const char *def = this->Makefile->GetDefinition(args[1].c_str());  
   if (def)
     {
     sourceListValue = def;
@@ -58,9 +58,9 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
         file = file.substr(0, dotpos);
         // Process only source files
         if( file.size() != 0
-            && std::find( m_Makefile->GetSourceExtensions().begin(),
-                          m_Makefile->GetSourceExtensions().end(), ext )
-                 != m_Makefile->GetSourceExtensions().end() )
+            && std::find( this->Makefile->GetSourceExtensions().begin(),
+                          this->Makefile->GetSourceExtensions().end(), ext )
+                 != this->Makefile->GetSourceExtensions().end() )
           {
           std::string fullname = templateDirectory;
           fullname += "/";
@@ -68,11 +68,11 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
           // add the file as a class file so 
           // depends can be done
           cmSourceFile cmfile;
-          cmfile.SetName(fullname.c_str(), m_Makefile->GetCurrentDirectory(),
-                         m_Makefile->GetSourceExtensions(),
-                         m_Makefile->GetHeaderExtensions());
+          cmfile.SetName(fullname.c_str(), this->Makefile->GetCurrentDirectory(),
+                         this->Makefile->GetSourceExtensions(),
+                         this->Makefile->GetHeaderExtensions());
           cmfile.SetProperty("ABSTRACT","0");
-          m_Makefile->AddSource(cmfile);
+          this->Makefile->AddSource(cmfile);
           if (sourceListValue.size() > 0)
             {
             sourceListValue += ";";
@@ -84,7 +84,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
         }
       }
     }
-  m_Makefile->AddDefinition(args[1].c_str(), sourceListValue.c_str());  
+  this->Makefile->AddDefinition(args[1].c_str(), sourceListValue.c_str());  
   return true;
 }
 

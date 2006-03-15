@@ -58,8 +58,8 @@ public:
   void GetLinkerInformation(std::vector<cmStdString>& searchPaths,
                             std::vector<cmStdString>& linkItems)
   {
-    linkItems = m_LinkItems;
-    searchPaths = m_SortedSearchPaths;
+    linkItems = this->LinkItems;
+    searchPaths = this->SortedSearchPaths;
   }
   // should be set from CMAKE_STATIC_LIBRARY_SUFFIX,
   // CMAKE_SHARED_LIBRARY_SUFFIX
@@ -68,7 +68,7 @@ public:
     {
     if(e && *e)
       {
-      m_LinkExtensions.push_back(e);
+      this->LinkExtensions.push_back(e);
       }
     }
   // should be set from CMAKE_STATIC_LIBRARY_PREFIX
@@ -76,7 +76,7 @@ public:
     {
     if(s)
       {
-      m_LinkPrefix = s;
+      this->LinkPrefix = s;
       }
     }
   // Return any warnings if the exist
@@ -94,7 +94,7 @@ public:
   friend struct cmOrderLinkDirectoriesCompare;
   void DebugOn() 
     {
-      m_Debug = true;
+      this->Debug = true;
     }
   
 private:
@@ -113,39 +113,39 @@ private:
   std::string NoCaseExpression(const char* str);
 private:
   // map from library to directories that it is in other than its full path
-  std::map<cmStdString, std::vector<cmStdString> > m_LibraryToDirectories;
+  std::map<cmStdString, std::vector<cmStdString> > LibraryToDirectories;
   // map from directory to vector of directories that must be after it
-  std::map<cmStdString, std::vector<cmStdString> > m_DirectoryToAfterList;
+  std::map<cmStdString, std::vector<cmStdString> > DirectoryToAfterList;
   // map from full path to a Library struct
-  std::map<cmStdString, Library> m_FullPathLibraries;
+  std::map<cmStdString, Library> FullPathLibraries;
   // libraries that are found in multiple directories
-  std::vector<Library> m_MultiDirectoryLibraries;
+  std::vector<Library> MultiDirectoryLibraries;
   // libraries that are only found in one directory
-  std::vector<Library> m_SingleDirectoryLibraries;
+  std::vector<Library> SingleDirectoryLibraries;
   // This is a vector of all the link objects -lm or m
-  std::vector<cmStdString> m_LinkItems;
+  std::vector<cmStdString> LinkItems;
   // Unprocessed link items
-  std::vector<cmStdString> m_RawLinkItems;
+  std::vector<cmStdString> RawLinkItems;
   // This vector holds the sorted -L paths
-  std::vector<cmStdString> m_SortedSearchPaths;
+  std::vector<cmStdString> SortedSearchPaths;
   // This vector holds the -F paths
-  std::set<cmStdString> m_EmittedFrameworkPaths;
+  std::set<cmStdString> EmittedFrameworkPaths;
   // This is the set of -L paths unsorted, but unique
-  std::set<cmStdString> m_LinkPathSet;
+  std::set<cmStdString> LinkPathSet;
   // the names of link extensions
-  std::vector<cmStdString> m_LinkExtensions;
+  std::vector<cmStdString> LinkExtensions;
   // the names of link prefixes
-  cmStdString m_LinkPrefix;
+  cmStdString LinkPrefix;
   // set of directories that can not be put in the correct order
-  std::set<cmStdString> m_ImpossibleDirectories;
+  std::set<cmStdString> ImpossibleDirectories;
   // Name of target
-  cmStdString m_TargetName;
+  cmStdString TargetName;
   // library regular expressions
-  cmsys::RegularExpression m_RemoveLibraryExtension;
-  cmsys::RegularExpression m_ExtractBaseLibraryName;
-  cmsys::RegularExpression m_ExtractBaseLibraryNameNoPrefix;
-  cmsys::RegularExpression m_SplitFramework;
-  bool m_Debug;
+  cmsys::RegularExpression RemoveLibraryExtension;
+  cmsys::RegularExpression ExtractBaseLibraryName;
+  cmsys::RegularExpression ExtractBaseLibraryNameNoPrefix;
+  cmsys::RegularExpression SplitFramework;
+  bool Debug;
 };
 
 #endif

@@ -43,14 +43,14 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
       }
 
     // if they specified a relative path then compute the full
-    std::string srcPath = std::string(m_Makefile->GetCurrentDirectory()) + 
+    std::string srcPath = std::string(this->Makefile->GetCurrentDirectory()) + 
         "/" + i->c_str();
     if (cmSystemTools::FileIsDirectory(srcPath.c_str()))
       {
       std::string binPath = 
-        std::string(m_Makefile->GetCurrentOutputDirectory()) + 
+        std::string(this->Makefile->GetCurrentOutputDirectory()) + 
         "/" + i->c_str();
-      m_Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
+      this->Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
                                   intoplevel, preorder, false);
       }
     // otherwise it is a full path
@@ -59,9 +59,9 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
       // we must compute the binPath from the srcPath, we just take the last
       // element from the source path and use that
       std::string binPath = 
-        std::string(m_Makefile->GetCurrentOutputDirectory()) + 
+        std::string(this->Makefile->GetCurrentOutputDirectory()) + 
         "/" + cmSystemTools::GetFilenameName(i->c_str());
-      m_Makefile->AddSubDirectory(i->c_str(), binPath.c_str(),
+      this->Makefile->AddSubDirectory(i->c_str(), binPath.c_str(),
                                   intoplevel, preorder, false);
       }
     else

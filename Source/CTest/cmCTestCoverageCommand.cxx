@@ -74,7 +74,7 @@ bool cmCTestCoverageCommand::InitialPass(
     this->CTest->SetCTestConfiguration("BuildDirectory", build_dir);
     }
 
-  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "CoverageCommand", "CTEST_COVERAGE_COMMAND");
 
   cmCTestGenericHandler* handler
@@ -92,7 +92,7 @@ bool cmCTestCoverageCommand::InitialPass(
     {
     cmOStringStream str;
     str << res;
-    m_Makefile->AddDefinition(res_var, str.str().c_str());
+    this->Makefile->AddDefinition(res_var, str.str().c_str());
     }
   cmSystemTools::ChangeDirectory(current_dir.c_str());
   return true;

@@ -27,7 +27,7 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args)
   const char* variable = args[0].c_str(); // VAR is always first
   // get the old value
   const char* cacheValue
-    = m_Makefile->GetDefinition(variable);
+    = this->Makefile->GetDefinition(variable);
 
   // if there is no old value then return
   if (!cacheValue)
@@ -73,7 +73,7 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   // add the definition
-  m_Makefile->AddDefinition(variable, value.c_str());
+  this->Makefile->AddDefinition(variable, value.c_str());
 
   return true;
 }

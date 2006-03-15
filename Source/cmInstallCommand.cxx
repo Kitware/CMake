@@ -71,7 +71,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
       std::string script = args[i];
       if(!cmSystemTools::FileIsFullPath(script.c_str()))
         {
-        script = m_Makefile->GetCurrentDirectory();
+        script = this->Makefile->GetCurrentDirectory();
         script += "/";
         script += args[i];
         }
@@ -80,7 +80,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
         this->SetError("given a directory as value of SCRIPT argument.");
         return false;
         }
-      m_Makefile->AddInstallGenerator(
+      this->Makefile->AddInstallGenerator(
         new cmInstallScriptGenerator(script.c_str()));
       }
     }
@@ -143,7 +143,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     else if(doing_targets)
       {
       // Lookup this target in the current directory.
-      if(cmTarget* target = m_Makefile->FindTarget(args[i].c_str()))
+      if(cmTarget* target = this->Makefile->FindTarget(args[i].c_str()))
         {
         // Found the target.  Check its type.
         if(target->GetType() != cmTarget::EXECUTABLE &&
@@ -258,14 +258,14 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         if(library_destination)
           {
           // The import library uses the LIBRARY properties.
-          m_Makefile->AddInstallGenerator(
+          this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, library_dest.c_str(), true,
                                          library_permissions.c_str()));
           }
         if(runtime_destination)
           {
           // The DLL uses the RUNTIME properties.
-          m_Makefile->AddInstallGenerator(
+          this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
                                          runtime_permissions.c_str()));
           }
@@ -274,7 +274,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         if(library_destination)
           {
           // The shared library uses the LIBRARY properties.
-          m_Makefile->AddInstallGenerator(
+          this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, library_dest.c_str(), false,
                                          library_permissions.c_str()));
           }
@@ -287,7 +287,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Static libraries and modules use LIBRARY properties.
         if(library_destination)
           {
-          m_Makefile->AddInstallGenerator(
+          this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, library_dest.c_str(), false,
                                          library_permissions.c_str()));
           }
@@ -314,7 +314,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Executables use the RUNTIME properties.
         if(runtime_destination)
           {
-          m_Makefile->AddInstallGenerator(
+          this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
                                          runtime_permissions.c_str()));
           }
@@ -383,7 +383,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       std::string file = args[i];
       if(!cmSystemTools::FileIsFullPath(file.c_str()))
         {
-        file = m_Makefile->GetCurrentDirectory();
+        file = this->Makefile->GetCurrentDirectory();
         file += "/";
         file += args[i];
         }
@@ -459,7 +459,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   this->ComputeDestination(destination, dest);
 
   // Create the files install generator.
-  m_Makefile->AddInstallGenerator(
+  this->Makefile->AddInstallGenerator(
     new cmInstallFilesGenerator(files, dest.c_str(), programs,
                                 permissions.c_str(), rename.c_str()));
 

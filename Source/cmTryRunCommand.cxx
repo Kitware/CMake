@@ -64,8 +64,8 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
       }
     }
   // do the try compile
-  int res = cmTryCompileCommand::CoreTryCompileCode(m_Makefile, tryCompile,
-                                                    false);
+  int res = cmTryCompileCommand::CoreTryCompileCode(this->Makefile, 
+                                                    tryCompile, false);
   
   // now try running the command if it compiled
   std::string binaryDirectory = argv[2] + "/CMakeFiles/CMakeTmp";
@@ -127,12 +127,12 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         // if the TryCompileCore saved output in this outputVariable then
         // prepend that output to this output
         const char* compileOutput
-          = m_Makefile->GetDefinition(outputVariable.c_str());
+          = this->Makefile->GetDefinition(outputVariable.c_str());
         if(compileOutput)
           {
           output = std::string(compileOutput) + output;
           }
-        m_Makefile->AddDefinition(outputVariable.c_str(), output.c_str());
+        this->Makefile->AddDefinition(outputVariable.c_str(), output.c_str());
         }
       // set the run var
       char retChar[1000];
@@ -144,7 +144,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         {
         strcpy(retChar, "FAILED_TO_RUN");
         }
-      m_Makefile->AddCacheDefinition(argv[0].c_str(), retChar,
+      this->Makefile->AddCacheDefinition(argv[0].c_str(), retChar,
                                      "Result of TRY_RUN",
                                      cmCacheManager::INTERNAL);
       }
@@ -153,7 +153,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
   // if we created a directory etc, then cleanup after ourselves  
   std::string cacheFile = binaryDirectory;
   cacheFile += "/CMakeLists.txt";
-  if(!m_Makefile->GetCMakeInstance()->GetDebugTryCompile())
+  if(!this->Makefile->GetCMakeInstance()->GetDebugTryCompile())
     {
     cmTryCompileCommand::CleanupFiles(binaryDirectory.c_str());
     }

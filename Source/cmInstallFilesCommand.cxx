@@ -25,18 +25,18 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     }
   std::vector<std::string> args;
-  m_Makefile->ExpandSourceListArguments(argsIn, args, 2);
+  this->Makefile->ExpandSourceListArguments(argsIn, args, 2);
 
   // Create an INSTALL_FILES target specifically for this path.
-  m_TargetName = "INSTALL_FILES_"+args[0];
-  cmTarget& target = m_Makefile->GetTargets()[m_TargetName];
+  this->TargetName = "INSTALL_FILES_"+args[0];
+  cmTarget& target = this->Makefile->GetTargets()[this->TargetName];
   target.SetInAll(false);
-  target.SetType(cmTarget::INSTALL_FILES, m_TargetName.c_str());
+  target.SetType(cmTarget::INSTALL_FILES, this->TargetName.c_str());
   target.SetInstallPath(args[0].c_str());
   
   if((args.size() > 1) && (args[1] == "FILES"))
     {
-    m_IsFilesForm = true;    
+    this->IsFilesForm = true;    
     for(std::vector<std::string>::const_iterator s = args.begin()+2;
         s != args.end(); ++s)
       {
@@ -47,11 +47,11 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   else
     {
-    m_IsFilesForm = false;
+    this->IsFilesForm = false;
     std::vector<std::string>::const_iterator s = args.begin();
     for (++s;s != args.end(); ++s)
       {
-      m_FinalArgs.push_back(*s);
+      this->FinalArgs.push_back(*s);
       }
     }
   
@@ -61,24 +61,24 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
 void cmInstallFilesCommand::FinalPass() 
 {
   // No final pass for "FILES" form of arguments.
-  if(m_IsFilesForm)
+  if(this->IsFilesForm)
     {
     return;
     }
   
   std::string testf;
-  std::string ext = m_FinalArgs[0];
+  std::string ext = this->FinalArgs[0];
   std::vector<std::string>& targetSourceLists =
-    m_Makefile->GetTargets()[m_TargetName].GetSourceLists();
+    this->Makefile->GetTargets()[this->TargetName].GetSourceLists();
   
   // two different options
-  if (m_FinalArgs.size() > 1)
+  if (this->FinalArgs.size() > 1)
     {
     // now put the files into the list
-    std::vector<std::string>::iterator s = m_FinalArgs.begin();
+    std::vector<std::string>::iterator s = this->FinalArgs.begin();
     ++s;
     // for each argument, get the files 
-    for (;s != m_FinalArgs.end(); ++s)
+    for (;s != this->FinalArgs.end(); ++s)
       {
       // replace any variables
       std::string temps = *s;
@@ -99,8 +99,8 @@ void cmInstallFilesCommand::FinalPass()
   else     // reg exp list
     {
     std::vector<std::string> files;
-    std::string regex = m_FinalArgs[0].c_str();
-    cmSystemTools::Glob(m_Makefile->GetCurrentDirectory(),
+    std::string regex = this->FinalArgs[0].c_str();
+    cmSystemTools::Glob(this->Makefile->GetCurrentDirectory(),
                         regex.c_str(), files);
     
     std::vector<std::string>::iterator s = files.begin();
@@ -127,10 +127,10 @@ std::string cmInstallFilesCommand::FindInstallSource(const char* name) const
     }
   
   // This is a relative path.
-  std::string tb = m_Makefile->GetCurrentOutputDirectory();
+  std::string tb = this->Makefile->GetCurrentOutputDirectory();
   tb += "/";
   tb += name;
-  std::string ts = m_Makefile->GetCurrentDirectory();
+  std::string ts = this->Makefile->GetCurrentDirectory();
   ts += "/";
   ts += name;
   

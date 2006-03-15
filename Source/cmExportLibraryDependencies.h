@@ -79,7 +79,7 @@ public:
   cmTypeMacro(cmExportLibraryDependenciesCommand, cmCommand);
 
 private:
-  std::vector<std::string> m_Args;
+  std::vector<std::string> Args;
 };
 
 

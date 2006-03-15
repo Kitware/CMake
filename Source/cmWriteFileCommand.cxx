@@ -82,7 +82,7 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args)
   file << message << std::endl;
   file.close();
   cmSystemTools::SetPermissions(fileName.c_str(), mode);
-  m_Makefile->AddWrittenFile(fileName.c_str());
+  this->Makefile->AddWrittenFile(fileName.c_str());
 
   return true;
 }

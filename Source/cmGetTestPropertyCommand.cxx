@@ -31,17 +31,17 @@ bool cmGetTestPropertyCommand::InitialPass(
 
   std::string testName = args[0];
   std::string var = args[2];
-  cmTest *test = m_Makefile->GetTest(testName.c_str());
+  cmTest *test = this->Makefile->GetTest(testName.c_str());
   if (test)
     {
     const char *prop = test->GetProperty(args[1].c_str());
     if (prop)
       {
-      m_Makefile->AddDefinition(var.c_str(), prop);
+      this->Makefile->AddDefinition(var.c_str(), prop);
       return true;
       }
     }
-  m_Makefile->AddDefinition(var.c_str(), "NOTFOUND");
+  this->Makefile->AddDefinition(var.c_str(), "NOTFOUND");
   return true;
 }
 

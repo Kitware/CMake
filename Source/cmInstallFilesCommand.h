@@ -100,9 +100,9 @@ protected:
   std::string FindInstallSource(const char* name) const;
   
  private:
-  std::string m_TargetName;
-  std::vector<std::string> m_FinalArgs;
-  bool m_IsFilesForm;
+  std::string TargetName;
+  std::vector<std::string> FinalArgs;
+  bool IsFilesForm;
 };
 
 

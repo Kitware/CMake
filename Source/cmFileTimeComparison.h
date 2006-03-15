@@ -42,7 +42,7 @@ public:
 
 protected:
   
-  cmFileTimeComparisonInternal* m_Internals;
+  cmFileTimeComparisonInternal* Internals;
 };
 
 

@@ -29,16 +29,16 @@
 class cmForEachFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmForEachFunctionBlocker() {m_Executing = false;}
+  cmForEachFunctionBlocker() {this->Executing = false;}
   virtual ~cmForEachFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf);
   virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
   virtual void ScopeEnded(cmMakefile &mf);
   
-  std::vector<std::string> m_Args;
-  std::vector<cmListFileFunction> m_Functions;
-  bool m_Executing;
+  std::vector<std::string> Args;
+  std::vector<cmListFileFunction> Functions;
+  bool Executing;
 };
 
 /** \class cmForEachCommand

@@ -288,11 +288,11 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
   // Store the output obtained.
   if(!output_variable.empty())
     {
-    m_Makefile->AddDefinition(output_variable.c_str(), &*tempOutput.begin());
+    this->Makefile->AddDefinition(output_variable.c_str(), &*tempOutput.begin());
     }
   if(!merge_output && !error_variable.empty())
     {
-    m_Makefile->AddDefinition(error_variable.c_str(), &*tempError.begin());
+    this->Makefile->AddDefinition(error_variable.c_str(), &*tempError.begin());
     }
 
   // Store the result of running the process.
@@ -305,19 +305,19 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
         int v = cmsysProcess_GetExitValue(cp);
         char buf[100];
         sprintf(buf, "%d", v);
-        m_Makefile->AddDefinition(result_variable.c_str(), buf);
+        this->Makefile->AddDefinition(result_variable.c_str(), buf);
         }
         break;
       case cmsysProcess_State_Exception:
-        m_Makefile->AddDefinition(result_variable.c_str(),
+        this->Makefile->AddDefinition(result_variable.c_str(),
                                   cmsysProcess_GetExceptionString(cp));
         break;
       case cmsysProcess_State_Error:
-        m_Makefile->AddDefinition(result_variable.c_str(),
+        this->Makefile->AddDefinition(result_variable.c_str(),
                                   cmsysProcess_GetErrorString(cp));
         break;
       case cmsysProcess_State_Expired:
-        m_Makefile->AddDefinition(result_variable.c_str(),
+        this->Makefile->AddDefinition(result_variable.c_str(),
                                   "Process terminated due to timeout");
         break;
       }

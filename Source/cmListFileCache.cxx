@@ -50,7 +50,7 @@ bool cmListFile::ParseFile(const char* filename, bool requireProjectCommand)
 
   // Use a simple recursive-descent parser to process the token
   // stream.
-  this->m_ModifiedTime = cmSystemTools::ModifiedTime(filename);
+  this->ModifiedTime = cmSystemTools::ModifiedTime(filename);
   bool parseError = false;
   bool haveNewline = true;
   cmListFileLexer_Token* token;
@@ -66,12 +66,12 @@ bool cmListFile::ParseFile(const char* filename, bool requireProjectCommand)
         {
         haveNewline = false;
         cmListFileFunction inFunction;
-        inFunction.m_Name = token->text;
-        inFunction.m_FilePath = filename;
-        inFunction.m_Line = token->line;
+        inFunction.Name = token->text;
+        inFunction.FilePath = filename;
+        inFunction.Line = token->line;
         if(cmListFileCacheParseFunction(lexer, inFunction, filename))
           {
-          this->m_Functions.push_back(inFunction);
+          this->Functions.push_back(inFunction);
           }
         else
           {
@@ -105,7 +105,7 @@ bool cmListFile::ParseFile(const char* filename, bool requireProjectCommand)
     }
   if (parseError)
     {
-    this->m_ModifiedTime = 0;
+    this->ModifiedTime = 0;
     }
 
   cmListFileLexer_Delete(lexer);
@@ -115,10 +115,10 @@ bool cmListFile::ParseFile(const char* filename, bool requireProjectCommand)
     bool hasProject = false;
     // search for a project command
     for(std::vector<cmListFileFunction>::iterator i 
-          = this->m_Functions.begin();
-        i != this->m_Functions.end(); ++i)
+          = this->Functions.begin();
+        i != this->Functions.end(); ++i)
       {
-      if(cmSystemTools::LowerCase(i->m_Name) == "project")
+      if(cmSystemTools::LowerCase(i->Name) == "project")
         {
         hasProject = true;
         break;
@@ -128,10 +128,10 @@ bool cmListFile::ParseFile(const char* filename, bool requireProjectCommand)
     if(!hasProject)
       {
       cmListFileFunction project;
-      project.m_Name = "PROJECT";
+      project.Name = "PROJECT";
       cmListFileArgument prj("Project", false, filename, 0);
-      project.m_Arguments.push_back(prj);
-      this->m_Functions.insert(this->m_Functions.begin(),project);
+      project.Arguments.push_back(prj);
+      this->Functions.insert(this->Functions.begin(),project);
       }
     }
   return true;
@@ -177,13 +177,13 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
       {
       cmListFileArgument a(token->text,
                            false, filename, token->line);
-      function.m_Arguments.push_back(a);
+      function.Arguments.push_back(a);
       }
     else if(token->type == cmListFileLexer_Token_ArgumentQuoted)
       {
       cmListFileArgument a(token->text,
                            true, filename, token->line);
-      function.m_Arguments.push_back(a);
+      function.Arguments.push_back(a);
       }
     else if(token->type != cmListFileLexer_Token_Newline)
       {

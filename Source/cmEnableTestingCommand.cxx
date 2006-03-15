@@ -21,6 +21,6 @@
 // been defined
 bool cmEnableTestingCommand::InitialPass(std::vector<std::string> const&)
 {
-  m_Makefile->AddDefinition("CMAKE_TESTING_ENABLED","1");
+  this->Makefile->AddDefinition("CMAKE_TESTING_ENABLED","1");
   return true;
 }

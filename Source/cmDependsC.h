@@ -60,18 +60,18 @@ protected:
                        std::set<cmStdString>& dependencies);
 
   // The include file search path.
-  std::vector<std::string> const* m_IncludePath;
+  std::vector<std::string> const* IncludePath;
 
   // Regular expression to identify C preprocessor include directives.
-  cmsys::RegularExpression m_IncludeRegexLine;
+  cmsys::RegularExpression IncludeRegexLine;
 
   // Regular expressions to choose which include files to scan
   // recursively and which to complain about not finding.
-  cmsys::RegularExpression m_IncludeRegexScan;
-  cmsys::RegularExpression m_IncludeRegexComplain;
+  cmsys::RegularExpression IncludeRegexScan;
+  cmsys::RegularExpression IncludeRegexComplain;
 
   // Set of generated files available.
-  std::set<cmStdString> const* m_GeneratedFiles;
+  std::set<cmStdString> const* GeneratedFiles;
 public:
   // Data structures for dependency graph walk.
   struct UnscannedEntry
@@ -82,18 +82,18 @@ public:
 
   struct cmIncludeLines
   {
-    cmIncludeLines(): m_Used(false) {}
-    std::vector<UnscannedEntry> m_UnscannedEntries;
-    bool m_Used;
+    cmIncludeLines(): Used(false) {}
+    std::vector<UnscannedEntry> UnscannedEntries;
+    bool Used;
   };
 protected:
-  std::set<cmStdString> m_Encountered;
-  std::queue<UnscannedEntry> m_Unscanned;
-  t_CharBuffer m_Buffer;
+  std::set<cmStdString> Encountered;
+  std::queue<UnscannedEntry> Unscanned;
+  t_CharBuffer Buffer;
 
-  std::map<cmStdString, cmIncludeLines *> m_fileCache;
+  std::map<cmStdString, cmIncludeLines *> fileCache;
 
-  cmStdString m_cacheFileName;
+  cmStdString cacheFileName;
 
   void WriteCacheFile() const;
   void ReadCacheFile();

@@ -41,7 +41,7 @@ protected:
 
   // Internal methods to handle the temporary file.  Open is always
   // called before the real stream is opened.  Close is always called
-  // after the real stream is closed and m_Okay is set to whether the
+  // after the real stream is closed and Okay is set to whether the
   // real stream was still valid for writing when it was closed.
   void Open(const char* name);
   void Close();
@@ -53,22 +53,22 @@ protected:
   int CompressFile(const char* oldname, const char* newname);
 
   // The name of the final destination file for the output.
-  std::string m_Name;
+  std::string Name;
 
   // The name of the temporary file.
-  std::string m_TempName;
+  std::string TempName;
 
   // Whether to do a copy-if-different.
-  bool m_CopyIfDifferent;
+  bool CopyIfDifferent;
 
   // Whether the real file stream was valid when it was closed.
-  bool m_Okay;
+  bool Okay;
 
   // Whether the destionation file is compressed
-  bool m_Compress;
+  bool Compress;
 
   // Whether the destionation file is compressed
-  bool m_CompressExtraExtension;
+  bool CompressExtraExtension;
 };
 
 /** \class cmGeneratedFileStream

@@ -29,16 +29,16 @@
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmWhileFunctionBlocker() {m_Executing = false;}
+  cmWhileFunctionBlocker() {Executing = false;}
   virtual ~cmWhileFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf);
   virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
   virtual void ScopeEnded(cmMakefile &mf);
   
-  std::vector<cmListFileArgument> m_Args;
-  std::vector<cmListFileFunction> m_Functions;
-  bool m_Executing;
+  std::vector<cmListFileArgument> Args;
+  std::vector<cmListFileFunction> Functions;
+  bool Executing;
 };
 
 /** \class cmWhileCommand

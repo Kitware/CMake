@@ -39,12 +39,12 @@ cmGeneratedFileStream::cmGeneratedFileStream():
 //----------------------------------------------------------------------------
 cmGeneratedFileStream::cmGeneratedFileStream(const char* name, bool quiet):
   cmGeneratedFileStreamBase(name),
-  Stream(m_TempName.c_str())
+  Stream(TempName.c_str())
 {
   // Check if the file opened.
   if(!*this && !quiet)
     {
-    cmSystemTools::Error("Cannot open file for write: ", m_TempName.c_str());
+    cmSystemTools::Error("Cannot open file for write: ", this->TempName.c_str());
     cmSystemTools::ReportLastSystemError("");
     }
 }
@@ -57,7 +57,7 @@ cmGeneratedFileStream::~cmGeneratedFileStream()
   // stream will be destroyed which will close the temporary file.
   // Finally the base destructor will be called to replace the
   // destination file.
-  m_Okay = (*this)?true:false;
+  this->Okay = (*this)?true:false;
 }
 
 //----------------------------------------------------------------------------
@@ -70,17 +70,17 @@ cmGeneratedFileStream::Open(const char* name, bool quiet, bool binaryFlag)
   // Open the temporary output file.
   if ( binaryFlag )
     {
-    this->Stream::open(m_TempName.c_str(), std::ios::out | std::ios::binary);
+    this->Stream::open(this->TempName.c_str(), std::ios::out | std::ios::binary);
     }
   else
     {
-    this->Stream::open(m_TempName.c_str(), std::ios::out);
+    this->Stream::open(this->TempName.c_str(), std::ios::out);
     }
 
   // Check if the file opened.
   if(!*this && !quiet)
     {
-    cmSystemTools::Error("Cannot open file for write: ", m_TempName.c_str());
+    cmSystemTools::Error("Cannot open file for write: ", this->TempName.c_str());
     cmSystemTools::ReportLastSystemError("");
     }
   return *this;
@@ -91,7 +91,7 @@ cmGeneratedFileStream&
 cmGeneratedFileStream::Close()
 {
   // Save whether the temporary output file is valid before closing.
-  m_Okay = (*this)?true:false;
+  this->Okay = (*this)?true:false;
 
   // Close the temporary output file.
   this->Stream::close();
@@ -105,40 +105,40 @@ cmGeneratedFileStream::Close()
 //----------------------------------------------------------------------------
 void cmGeneratedFileStream::SetCopyIfDifferent(bool copy_if_different)
 {
-  m_CopyIfDifferent = copy_if_different;
+  this->CopyIfDifferent = copy_if_different;
 }
 
 //----------------------------------------------------------------------------
 void cmGeneratedFileStream::SetCompression(bool compression)
 {
-  m_Compress = compression;
+  this->Compress = compression;
 }
 
 //----------------------------------------------------------------------------
 void cmGeneratedFileStream::SetCompressionExtraExtension(bool ext)
 {
-  m_CompressExtraExtension = ext;
+  this->CompressExtraExtension = ext;
 }
 
 //----------------------------------------------------------------------------
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase():
-  m_Name(),
-  m_TempName(),
-  m_CopyIfDifferent(false),
-  m_Okay(false),
-  m_Compress(false),
-  m_CompressExtraExtension(true)
+  Name(),
+  TempName(),
+  CopyIfDifferent(false),
+  Okay(false),
+  Compress(false),
+  CompressExtraExtension(true)
 {
 }
 
 //----------------------------------------------------------------------------
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(const char* name):
-  m_Name(),
-  m_TempName(),
-  m_CopyIfDifferent(false),
-  m_Okay(false),
-  m_Compress(false),
-  m_CompressExtraExtension(true)
+  Name(),
+  TempName(),
+  CopyIfDifferent(false),
+  Okay(false),
+  Compress(false),
+  CompressExtraExtension(true)
 {
   this->Open(name);
 }
@@ -153,41 +153,41 @@ cmGeneratedFileStreamBase::~cmGeneratedFileStreamBase()
 void cmGeneratedFileStreamBase::Open(const char* name)
 {
   // Save the original name of the file.
-  m_Name = name;
+  this->Name = name;
 
   // Create the name of the temporary file.
-  m_TempName = name;
-  m_TempName += ".tmp";
+  this->TempName = name;
+  this->TempName += ".tmp";
 
   // Make sure the temporary file that will be used is not present.
-  cmSystemTools::RemoveFile(m_TempName.c_str());
+  cmSystemTools::RemoveFile(this->TempName.c_str());
 
-  std::string dir = cmSystemTools::GetFilenamePath(m_TempName);
+  std::string dir = cmSystemTools::GetFilenamePath(this->TempName);
   cmSystemTools::MakeDirectory(dir.c_str());
 }
 
 //----------------------------------------------------------------------------
 void cmGeneratedFileStreamBase::Close()
 {
-  std::string resname = m_Name;
-  if ( m_Compress && m_CompressExtraExtension )
+  std::string resname = this->Name;
+  if ( this->Compress && this->CompressExtraExtension )
     {
     resname += ".gz";
     }
 
   // Only consider replacing the destination file if no error
   // occurred.
-  if(!m_Name.empty() &&
-    m_Okay &&
-    (!m_CopyIfDifferent ||
-     cmSystemTools::FilesDiffer(m_TempName.c_str(), resname.c_str())))
+  if(!this->Name.empty() &&
+    this->Okay &&
+    (!this->CopyIfDifferent ||
+     cmSystemTools::FilesDiffer(this->TempName.c_str(), resname.c_str())))
     {
     // The destination is to be replaced.  Rename the temporary to the
     // destination atomically.
-    if ( m_Compress )
+    if ( this->Compress )
       {
-      std::string gzname = m_TempName + ".temp.gz";
-      if ( this->CompressFile(m_TempName.c_str(), gzname.c_str()) )
+      std::string gzname = this->TempName + ".temp.gz";
+      if ( this->CompressFile(this->TempName.c_str(), gzname.c_str()) )
         {
         this->RenameFile(gzname.c_str(), resname.c_str());
         }
@@ -195,14 +195,14 @@ void cmGeneratedFileStreamBase::Close()
       }
     else
       {
-      this->RenameFile(m_TempName.c_str(), resname.c_str());
+      this->RenameFile(this->TempName.c_str(), resname.c_str());
       }
     }
 
   // Else, the destination was not replaced.
   //
   // Always delete the temporary file. We never want it to stay around.
-  cmSystemTools::RemoveFile(m_TempName.c_str());
+  cmSystemTools::RemoveFile(this->TempName.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -299,8 +299,8 @@ void cmGeneratedFileStream::SetName(const char* fname)
 {
   if ( !fname )
     {
-    m_Name = "";
+    this->Name = "";
     return;
     }
-  m_Name = fname;
+  this->Name = fname;
 }

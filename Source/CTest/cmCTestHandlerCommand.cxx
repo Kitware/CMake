@@ -81,7 +81,7 @@ bool cmCTestHandlerCommand::InitialPass(
     {
     cmOStringStream str;
     str << res;
-    m_Makefile->AddDefinition(
+    this->Makefile->AddDefinition(
       this->Values[ct_RETURN_VALUE], str.str().c_str());
     }
   cmSystemTools::ChangeDirectory(current_dir.c_str());

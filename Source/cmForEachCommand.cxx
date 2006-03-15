@@ -21,49 +21,49 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
   // Prevent recusion and don't let this blobker block its own
   // commands.
-  if (m_Executing)
+  if (this->Executing)
     {
     return false;
     }
   
   // at end of for each execute recorded commands
-  if (cmSystemTools::LowerCase(lff.m_Name) == "endforeach")
+  if (cmSystemTools::LowerCase(lff.Name) == "endforeach")
     {
     std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.m_Arguments, expandedArguments);
-    if(!expandedArguments.empty() && (expandedArguments[0] == m_Args[0]))
+    mf.ExpandArguments(lff.Arguments, expandedArguments);
+    if(!expandedArguments.empty() && (expandedArguments[0] == this->Args[0]))
       {
       // store the old value
       std::string oldDef;
-      if (mf.GetDefinition(m_Args[0].c_str()))
+      if (mf.GetDefinition(this->Args[0].c_str()))
         {
-        oldDef = mf.GetDefinition(m_Args[0].c_str());
+        oldDef = mf.GetDefinition(this->Args[0].c_str());
         }
-      m_Executing = true;
-      std::vector<std::string>::const_iterator j = m_Args.begin();
+      this->Executing = true;
+      std::vector<std::string>::const_iterator j = this->Args.begin();
       ++j;
       
       std::string tmps;
       cmListFileArgument arg;
-      for( ; j != m_Args.end(); ++j)
+      for( ; j != this->Args.end(); ++j)
         {   
         // set the variable to the loop value
-        mf.AddDefinition(m_Args[0].c_str(),j->c_str());
+        mf.AddDefinition(this->Args[0].c_str(),j->c_str());
         // Invoke all the functions that were collected in the block.
-        for(unsigned int c = 0; c < m_Functions.size(); ++c)
+        for(unsigned int c = 0; c < this->Functions.size(); ++c)
           {
-          mf.ExecuteCommand(m_Functions[c]);
+          mf.ExecuteCommand(this->Functions[c]);
           }
         }
       // restore the variable to its prior value
-      mf.AddDefinition(m_Args[0].c_str(),oldDef.c_str());
+      mf.AddDefinition(this->Args[0].c_str(),oldDef.c_str());
       mf.RemoveFunctionBlocker(lff);
       return true;
       }
     }
 
   // record the command
-  m_Functions.push_back(lff);
+  this->Functions.push_back(lff);
   
   // always return true
   return true;
@@ -72,11 +72,11 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 bool cmForEachFunctionBlocker::
 ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
 {
-  if(cmSystemTools::LowerCase(lff.m_Name) == "endforeach")
+  if(cmSystemTools::LowerCase(lff.Name) == "endforeach")
     {
     std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.m_Arguments, expandedArguments);
-    if(!expandedArguments.empty() && (expandedArguments[0] == m_Args[0]))
+    mf.ExpandArguments(lff.Arguments, expandedArguments);
+    if(!expandedArguments.empty() && (expandedArguments[0] == this->Args[0]))
       {
       return true;
       }
@@ -163,18 +163,18 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args)
           break;
           }
         }
-      f->m_Args = range;
+      f->Args = range;
       }
     else
       {
-      f->m_Args = args;
+      f->Args = args;
       }
     }
   else
     {
-    f->m_Args = args;
+    f->Args = args;
     }
-  m_Makefile->AddFunctionBlocker(f);
+  this->Makefile->AddFunctionBlocker(f);
   
   return true;
 }

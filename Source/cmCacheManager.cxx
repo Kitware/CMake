@@ -183,7 +183,7 @@ bool cmCacheManager::LoadCache(const char* path,
   // clear the old cache, if we are reading in internal values
   if ( internal )
     {
-    m_Cache.clear();
+    this->Cache.clear();
     }
   if(!cmSystemTools::FileExists(cacheFile.c_str()))
     {
@@ -220,7 +220,7 @@ bool cmCacheManager::LoadCache(const char* path,
       }
     while(realbuffer[0] == '/' && realbuffer[1] == '/')
       {
-      e.m_Properties["HELPSTRING"] += &realbuffer[2];
+      e.Properties["HELPSTRING"] += &realbuffer[2];
       cmSystemTools::GetLineFromStream(fin, buffer);
       realbuffer = buffer.c_str();
       if(!fin)
@@ -228,7 +228,7 @@ bool cmCacheManager::LoadCache(const char* path,
         continue;
         }
       }
-    if(cmCacheManager::ParseEntry(realbuffer, entryKey, e.m_Value, e.m_Type))
+    if(cmCacheManager::ParseEntry(realbuffer, entryKey, e.Value, e.Type))
       {
       if ( excludes.find(entryKey) == excludes.end() )
         {
@@ -236,7 +236,7 @@ bool cmCacheManager::LoadCache(const char* path,
         // If the entry is not internal to the cache being loaded
         // or if it is in the list of internal entries to be
         // imported, load it.
-        if ( internal || (e.m_Type != INTERNAL) ||
+        if ( internal || (e.Type != INTERNAL) || 
              (includes.find(entryKey) != includes.end()) )
           {
           // If we are loading the cache from another project,
@@ -244,28 +244,28 @@ bool cmCacheManager::LoadCache(const char* path,
           // not visible in the gui
           if (!internal)
             {
-            e.m_Type = INTERNAL;
-            e.m_Properties["HELPSTRING"] = "DO NOT EDIT, ";
-            e.m_Properties["HELPSTRING"] += entryKey;
-            e.m_Properties["HELPSTRING"] += " loaded from external file.  "
+            e.Type = INTERNAL;
+            e.Properties["HELPSTRING"] = "DO NOT EDIT, ";
+            e.Properties["HELPSTRING"] += entryKey;
+            e.Properties["HELPSTRING"] += " loaded from external file.  "
               "To change this value edit this file: ";
-            e.m_Properties["HELPSTRING"] += path;
-            e.m_Properties["HELPSTRING"] += "/CMakeCache.txt"   ;
+            e.Properties["HELPSTRING"] += path;
+            e.Properties["HELPSTRING"] += "/CMakeCache.txt"   ;
             }
-          if ( e.m_Type == cmCacheManager::INTERNAL &&
+          if ( e.Type == cmCacheManager::INTERNAL &&
                (entryKey.size() > strlen("-ADVANCED")) &&
                strcmp(entryKey.c_str() + (entryKey.size() -
                    strlen("-ADVANCED")), "-ADVANCED") == 0 )
             {
-            std::string value = e.m_Value;
-            std::string akey
-              = entryKey.substr(0, (entryKey.size() - strlen("-ADVANCED")));
-            cmCacheManager::CacheIterator it
-              = this->GetCacheIterator(akey.c_str());
+            std::string value = e.Value;
+            std::string akey = 
+              entryKey.substr(0, (entryKey.size() - strlen("-ADVANCED")));
+            cmCacheManager::CacheIterator it = 
+              this->GetCacheIterator(akey.c_str());
             if ( it.IsAtEnd() )
               {
-              e.m_Type = cmCacheManager::UNINITIALIZED;
-              m_Cache[akey] = e;
+              e.Type = cmCacheManager::UNINITIALIZED;
+              this->Cache[akey] = e;
               }
             if (!it.Find(akey.c_str()))
               {
@@ -273,20 +273,20 @@ bool cmCacheManager::LoadCache(const char* path,
               }
             it.SetProperty("ADVANCED", value.c_str());
             }
-          else if ( e.m_Type == cmCacheManager::INTERNAL &&
+          else if ( e.Type == cmCacheManager::INTERNAL &&
                     (entryKey.size() > strlen("-MODIFIED")) &&
                     strcmp(entryKey.c_str() + (entryKey.size() -
                         strlen("-MODIFIED")), "-MODIFIED") == 0 )
             {
-            std::string value = e.m_Value;
-            std::string akey
-              = entryKey.substr(0, (entryKey.size() - strlen("-MODIFIED")));
-            cmCacheManager::CacheIterator it
-              = this->GetCacheIterator(akey.c_str());
+            std::string value = e.Value;
+            std::string akey = 
+              entryKey.substr(0, (entryKey.size() - strlen("-MODIFIED")));
+            cmCacheManager::CacheIterator it = 
+              this->GetCacheIterator(akey.c_str());
             if ( it.IsAtEnd() )
               {
-              e.m_Type = cmCacheManager::UNINITIALIZED;
-              m_Cache[akey] = e;
+              e.Type = cmCacheManager::UNINITIALIZED;
+              this->Cache[akey] = e;
               }
             if (!it.Find(akey.c_str()))
               {
@@ -296,8 +296,8 @@ bool cmCacheManager::LoadCache(const char* path,
             }
           else
             {
-            e.m_Initialized = true;
-            m_Cache[entryKey] = e;
+            e.Initialized = true;
+            this->Cache[entryKey] = e;
             }
           }
         }
@@ -400,8 +400,8 @@ bool cmCacheManager::SaveCache(const char* path)
     = this->GetCacheEntry("CMAKE_COMMAND");
   if ( cmakeCacheEntry )
     {
-    fout << "# It was generated by CMake: " << cmakeCacheEntry->m_Value
-      << std::endl;
+    fout << "# It was generated by CMake: " << 
+      cmakeCacheEntry->Value << std::endl;
     }
 
   fout << "# You can edit this file to change values found and used by cmake."
@@ -422,12 +422,12 @@ bool cmCacheManager::SaveCache(const char* path)
   fout << "########################\n";
   fout << "\n";
 
-  for( std::map<cmStdString, CacheEntry>::const_iterator i = m_Cache.begin();
-       i != m_Cache.end(); ++i)
+  for( std::map<cmStdString, CacheEntry>::const_iterator i = this->Cache.begin();
+       i != this->Cache.end(); ++i)
     {
-    const CacheEntry& ce = (*i).second;
-    CacheEntryType t = ce.m_Type;
-    if(t == cmCacheManager::UNINITIALIZED || !ce.m_Initialized)
+    const CacheEntry& ce = (*i).second; 
+    CacheEntryType t = ce.Type;
+    if(t == cmCacheManager::UNINITIALIZED || !ce.Initialized)
       {
       /*
         // This should be added in, but is not for now.
@@ -438,9 +438,9 @@ bool cmCacheManager::SaveCache(const char* path)
     else if(t != INTERNAL)
       {
       // Format is key:type=value
-      std::map<cmStdString,cmStdString>::const_iterator it =
-        ce.m_Properties.find("HELPSTRING");
-      if ( it == ce.m_Properties.end() )
+      std::map<cmStdString,cmStdString>::const_iterator it = 
+        ce.Properties.find("HELPSTRING");
+      if ( it == ce.Properties.end() )
         {
         cmCacheManager::OutputHelpString(fout, "Missing description");
         }
@@ -464,15 +464,15 @@ bool cmCacheManager::SaveCache(const char* path)
       fout << key.c_str() << ":"
            << cmCacheManagerTypes[t] << "=";
       // if value has trailing space or tab, enclose it in single quotes
-      if (ce.m_Value.size() &&
-          (ce.m_Value[ce.m_Value.size() - 1] == ' ' ||
-           ce.m_Value[ce.m_Value.size() - 1] == '\t'))
+      if (ce.Value.size() &&
+          (ce.Value[ce.Value.size() - 1] == ' ' || 
+           ce.Value[ce.Value.size() - 1] == '\t'))
         {
-        fout << '\'' << ce.m_Value << '\'';
+        fout << '\'' << ce.Value << '\'';
         }
       else
         {
-        fout << ce.m_Value;
+        fout << ce.Value;
         }
       fout << "\n\n";
       }
@@ -679,10 +679,10 @@ void cmCacheManager::OutputHelpString(std::ofstream& fout,
 
 void cmCacheManager::RemoveCacheEntry(const char* key)
 {
-  CacheEntryMap::iterator i = m_Cache.find(key);
-  if(i != m_Cache.end())
+  CacheEntryMap::iterator i = this->Cache.find(key);
+  if(i != this->Cache.end())
     {
-    m_Cache.erase(i);
+    this->Cache.erase(i);
     }
   else
     {
@@ -693,8 +693,8 @@ void cmCacheManager::RemoveCacheEntry(const char* key)
 
 cmCacheManager::CacheEntry *cmCacheManager::GetCacheEntry(const char* key)
 {
-  CacheEntryMap::iterator i = m_Cache.find(key);
-  if(i != m_Cache.end())
+  CacheEntryMap::iterator i = this->Cache.find(key);
+  if(i != this->Cache.end())
     {
     return &i->second;
     }
@@ -709,11 +709,11 @@ cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(
 
 const char* cmCacheManager::GetCacheValue(const char* key) const
 {
-  CacheEntryMap::const_iterator i = m_Cache.find(key);
-  if(i != m_Cache.end() &&
-    i->second.m_Initialized)
+  CacheEntryMap::const_iterator i = this->Cache.find(key);
+  if(i != this->Cache.end() &&
+    i->second.Initialized)
     {
-    return i->second.m_Value.c_str();
+    return i->second.Value.c_str();
     }
   return 0;
 }
@@ -723,13 +723,13 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 {
   out << "=================================================" << std::endl;
   out << "CMakeCache Contents:" << std::endl;
-  for(std::map<cmStdString, CacheEntry>::const_iterator i = m_Cache.begin();
-      i != m_Cache.end(); ++i)
+  for(std::map<cmStdString, CacheEntry>::const_iterator i = this->Cache.begin();
+      i != this->Cache.end(); ++i)
     {
-    if((*i).second.m_Type != INTERNAL)
+    if((*i).second.Type != INTERNAL)
       {
-      out << (*i).first.c_str() << " = " << (*i).second.m_Value.c_str()
-        << std::endl;
+      out << (*i).first.c_str() << " = " << (*i).second.Value.c_str() 
+          << std::endl;
       }
     }
   out << "\n\n";
@@ -744,32 +744,32 @@ void cmCacheManager::AddCacheEntry(const char* key,
                                    const char* helpString,
                                    CacheEntryType type)
 {
-  CacheEntry& e = m_Cache[key];
+  CacheEntry& e = this->Cache[key];
   if ( value )
     {
-    e.m_Value = value;
-    e.m_Initialized = true;
+    e.Value = value;
+    e.Initialized = true;
     }
   else
     {
-    e.m_Value = "";
+    e.Value = "";
     }
-  e.m_Type = type;
+  e.Type = type;
   // make sure we only use unix style paths
   if(type == FILEPATH || type == PATH)
     {
-    cmSystemTools::ConvertToUnixSlashes(e.m_Value);
+    cmSystemTools::ConvertToUnixSlashes(e.Value);
     }
   if ( helpString )
     {
-    e.m_Properties["HELPSTRING"] = helpString;
+    e.Properties["HELPSTRING"] = helpString;
     }
   else
     {
-    e.m_Properties["HELPSTRING"]
-      = "(This variable does not exists and should not be used)";
+    e.Properties["HELPSTRING"] = 
+      "(This variable does not exists and should not be used)";
     }
-  m_Cache[key] = e;
+  this->Cache[key] = e;
 }
 
 void cmCacheManager::AddCacheEntry(const char* key, bool v,
@@ -787,17 +787,17 @@ void cmCacheManager::AddCacheEntry(const char* key, bool v,
 
 bool cmCacheManager::CacheIterator::IsAtEnd() const
 {
-  return m_Position == m_Container.m_Cache.end();
+  return this->Position == this->Container.Cache.end();
 }
 
 void cmCacheManager::CacheIterator::Begin()
 {
-  m_Position = m_Container.m_Cache.begin();
+  this->Position = this->Container.Cache.begin(); 
 }
 
 bool cmCacheManager::CacheIterator::Find(const char* key)
 {
-  m_Position = m_Container.m_Cache.find(key);
+  this->Position = this->Container.Cache.find(key);
   return !this->IsAtEnd();
 }
 
@@ -805,7 +805,7 @@ void cmCacheManager::CacheIterator::Next()
 {
   if (!this->IsAtEnd())
     {
-    ++m_Position;
+    ++this->Position; 
     }
 }
 
@@ -818,12 +818,12 @@ void cmCacheManager::CacheIterator::SetValue(const char* value)
   CacheEntry* entry = &this->GetEntry();
   if ( value )
     {
-    entry->m_Value = value;
-    entry->m_Initialized = true;
+    entry->Value = value;
+    entry->Initialized = true;
     }
   else
     {
-    entry->m_Value = "";
+    entry->Value = "";
     }
 }
 
@@ -843,9 +843,9 @@ const char* cmCacheManager::CacheIterator::GetProperty(
     return 0;
     }
   const CacheEntry* ent = &this->GetEntry();
-  std::map<cmStdString,cmStdString>::const_iterator it =
-    ent->m_Properties.find(property);
-  if ( it == ent->m_Properties.end() )
+  std::map<cmStdString,cmStdString>::const_iterator it = 
+    ent->Properties.find(property);
+  if ( it == ent->Properties.end() )
     {
     return 0;
     }
@@ -867,12 +867,13 @@ void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v)
     return;
     }
   CacheEntry* ent = &this->GetEntry();
-  ent->m_Properties[p] = v;
+  ent->Properties[p] = v;
 }
 
-bool cmCacheManager::CacheIterator::GetValueAsBool() const
-{
-  return cmSystemTools::IsOn(this->GetEntry().m_Value.c_str());
+
+bool cmCacheManager::CacheIterator::GetValueAsBool() const 
+{ 
+  return cmSystemTools::IsOn(this->GetEntry().Value.c_str()); 
 }
 
 bool cmCacheManager::CacheIterator::GetPropertyAsBool(
@@ -891,9 +892,9 @@ bool cmCacheManager::CacheIterator::GetPropertyAsBool(
     return false;
     }
   const CacheEntry* ent = &this->GetEntry();
-  std::map<cmStdString,cmStdString>::const_iterator it =
-    ent->m_Properties.find(property);
-  if ( it == ent->m_Properties.end() )
+  std::map<cmStdString,cmStdString>::const_iterator it = 
+    ent->Properties.find(property);
+  if ( it == ent->Properties.end() )
     {
     return false;
     }
@@ -916,7 +917,7 @@ void cmCacheManager::CacheIterator::SetProperty(const char* p, bool v)
     return;
     }
   CacheEntry* ent = &this->GetEntry();
-  ent->m_Properties[p] = v ? "ON" : "OFF";
+  ent->Properties[p] = v ? "ON" : "OFF";
 }
 
 bool cmCacheManager::CacheIterator::PropertyExists(const char* property) const
@@ -934,9 +935,9 @@ bool cmCacheManager::CacheIterator::PropertyExists(const char* property) const
     return false;
     }
   const CacheEntry* ent = &this->GetEntry();
-  std::map<cmStdString,cmStdString>::const_iterator it =
-    ent->m_Properties.find(property);
-  if ( it == ent->m_Properties.end() )
+  std::map<cmStdString,cmStdString>::const_iterator it = 
+    ent->Properties.find(property);
+  if ( it == ent->Properties.end() )
     {
     return false;
     }

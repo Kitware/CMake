@@ -53,14 +53,14 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
   if(result != "")
     {
     // Save the value in the cache
-    m_Makefile->AddCacheDefinition(this->VariableName.c_str(),
-                                   result.c_str(),
-                                   this->VariableDocumentation.c_str(),
-                                   cmCacheManager::FILEPATH);
+    this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
+                                       result.c_str(),
+                                       this->VariableDocumentation.c_str(),
+                                       cmCacheManager::FILEPATH);
     
     return true;
     }
-  m_Makefile->AddCacheDefinition(this->VariableName.c_str(),
+  this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
                                  (this->VariableName + "-NOTFOUND").c_str(),
                                  this->VariableDocumentation.c_str(),
                                  cmCacheManager::FILEPATH);

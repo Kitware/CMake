@@ -24,7 +24,7 @@ bool cmSeparateArgumentsCommand::InitialPass(std::vector<std::string> const& arg
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  const char* cacheValue = m_Makefile->GetDefinition(args[0].c_str());
+  const char* cacheValue = this->Makefile->GetDefinition(args[0].c_str());
   if(!cacheValue)
     {
     return true;
@@ -32,7 +32,7 @@ bool cmSeparateArgumentsCommand::InitialPass(std::vector<std::string> const& arg
   std::string value = cacheValue;
   cmSystemTools::ReplaceString(value,
                                " ", ";");
-  m_Makefile->AddDefinition(args[0].c_str(), value.c_str());
+  this->Makefile->AddDefinition(args[0].c_str(), value.c_str());
   return true;
 }
 

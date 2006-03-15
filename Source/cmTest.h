@@ -34,13 +34,13 @@ public:
 
   ///! Set the test name
   void SetName(const char* name);
-  const char* GetName() const { return m_Name.c_str(); }
+  const char* GetName() const { return this->Name.c_str(); }
   void SetCommand(const char* command);
-  const char* GetCommand() const { return m_Command.c_str(); }
+  const char* GetCommand() const { return this->Command.c_str(); }
   void SetArguments(const std::vector<cmStdString>& args);
   const std::vector<cmStdString>& GetArguments() const
     {
-    return m_Args;
+    return this->Args;
     }
 
   /**
@@ -54,14 +54,14 @@ public:
   bool GetPropertyAsBool(const char *prop) const;
   const std::map<cmStdString,cmStdString>& GetProperties() const
     {
-    return m_Properties;
+    return this->Properties;
     }
     
 private:
-  std::map<cmStdString,cmStdString> m_Properties;
-  cmStdString m_Name;
-  cmStdString m_Command;
-  std::vector<cmStdString> m_Args;
+  std::map<cmStdString,cmStdString> Properties;
+  cmStdString Name;
+  cmStdString Command;
+  std::vector<cmStdString> Args;
 };
 
 #endif

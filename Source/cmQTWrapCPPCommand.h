@@ -83,13 +83,13 @@ private:
   /**
    * List of produced files.
    */
-  std::vector<cmSourceFile> m_WrapClasses;
+  std::vector<cmSourceFile> WrapClasses;
   /**
-   * List of header files that pprovide the source for m_WrapClasses.
+   * List of header files that pprovide the source for WrapClasses.
    */
-  std::vector<std::string> m_WrapHeaders;
-  std::string m_LibraryName;
-  std::string m_SourceList;
+  std::vector<std::string> WrapHeaders;
+  std::string LibraryName;
+  std::string SourceList;
 };
 
 

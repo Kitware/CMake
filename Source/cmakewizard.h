@@ -42,6 +42,6 @@ public:
   int RunWizard(std::vector<std::string>const& args);
   
 private:
-  bool m_ShowAdvanced;
+  bool ShowAdvanced;
 };
 

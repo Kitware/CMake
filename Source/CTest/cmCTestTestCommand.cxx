@@ -30,7 +30,8 @@ cmCTestTestCommand::cmCTestTestCommand()
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 {
-  const char* ctestTimeout = m_Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
+  const char* ctestTimeout = 
+    this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
   double timeout = this->CTest->GetTimeOut();
   if ( ctestTimeout )
     {

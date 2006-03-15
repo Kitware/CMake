@@ -21,7 +21,7 @@
 
 cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
 {
-  m_FindMakeProgramFile = "CMakeVS6FindMake.cmake";
+  this->FindMakeProgramFile = "CMakeVS6FindMake.cmake";
 }
 
 void cmGlobalVisualStudio6Generator::EnableLanguage(std::vector<std::string>const& lang,
@@ -159,7 +159,7 @@ void cmGlobalVisualStudio6Generator::Generate()
   std::vector<std::string> no_depends;
   const char* no_working_dir = 0;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
+  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
     // add the ALL_BUILD to the first local generator of each project
@@ -381,7 +381,7 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile(cmLocalGenerator* root,
 void cmGlobalVisualStudio6Generator::OutputDSWFile()
 { 
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
+  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     this->OutputDSWFile(it->second[0], it->second);
     }
@@ -406,7 +406,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
   if (target.GetType() != cmTarget::STATIC_LIBRARY)
     {
-    cmTarget::LinkLibraries::const_iterator j, jend;
+    cmTarget::LinkLibraryVectorType::const_iterator j, jend;
     j = target.GetLinkLibraries().begin();
     jend = target.GetLinkLibraries().end();
     for(;j!= jend; ++j)

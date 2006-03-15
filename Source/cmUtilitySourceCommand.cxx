@@ -30,16 +30,16 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
   // The first argument is the cache entry name.
   std::string cacheEntry = *arg++;
   const char* cacheValue =
-    m_Makefile->GetDefinition(cacheEntry.c_str());
+    this->Makefile->GetDefinition(cacheEntry.c_str());
   // If it exists already and appears up to date then we are done.  If
   // the string contains "(IntDir)" but that is not the
   // CMAKE_CFG_INTDIR setting then the value is out of date.
-  const char* intDir = m_Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
+  const char* intDir = this->Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
   if(cacheValue &&
      (strstr(cacheValue, "(IntDir)") == 0 ||
       intDir && strcmp(intDir, "$(IntDir)") == 0) &&
-     (m_Makefile->GetCacheMajorVersion() != 0 &&
-      m_Makefile->GetCacheMinorVersion() != 0 ))
+     (this->Makefile->GetCacheMajorVersion() != 0 &&
+      this->Makefile->GetCacheMinorVersion() != 0 ))
     {
     return true;
     }
@@ -51,7 +51,7 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
   // The third argument specifies the relative directory of the source
   // of the utility.
   std::string relativeSource = *arg++;
-  std::string utilitySource = m_Makefile->GetCurrentDirectory();
+  std::string utilitySource = this->Makefile->GetCurrentDirectory();
   utilitySource = utilitySource+"/"+relativeSource;
   
   // If the directory doesn't exist, the source has not been included.
@@ -67,13 +67,13 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   // The source exists.
-  std::string cmakeCFGout =
-    m_Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
-  std::string utilityDirectory = m_Makefile->GetCurrentOutputDirectory();
+  std::string cmakeCFGout = 
+    this->Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
+  std::string utilityDirectory = this->Makefile->GetCurrentOutputDirectory();
   std::string exePath;
-  if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+  if (this->Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
     {
-    exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    exePath = this->Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
     }
   if(exePath.size())
     {
@@ -93,14 +93,14 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
   cmSystemTools::ReplaceString(utilityExecutable, "/./", "/");
   
   // Enter the value into the cache.
-  m_Makefile->AddCacheDefinition(cacheEntry.c_str(),
+  this->Makefile->AddCacheDefinition(cacheEntry.c_str(),
                                  utilityExecutable.c_str(),
                                  "Path to an internal program.",
                                  cmCacheManager::FILEPATH);
   // add a value into the cache that maps from the
   // full path to the name of the project
   cmSystemTools::ConvertToUnixSlashes(utilityExecutable);
-  m_Makefile->AddCacheDefinition(utilityExecutable.c_str(),
+  this->Makefile->AddCacheDefinition(utilityExecutable.c_str(),
                                  utilityName.c_str(),
                                  "Executable to project name.",
                                  cmCacheManager::INTERNAL);

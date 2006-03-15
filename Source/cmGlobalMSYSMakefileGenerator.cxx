@@ -21,8 +21,8 @@
 
 cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator()
 {
-  m_FindMakeProgramFile = "CMakeMSYSFindMake.cmake";
-  m_ForceUnixPaths = true;
+  this->FindMakeProgramFile = "CMakeMSYSFindMake.cmake";
+  this->ForceUnixPaths = true;
 }
 
 std::string 
@@ -73,7 +73,7 @@ void cmGlobalMSYSMakefileGenerator::EnableLanguage(std::vector<std::string>const
   mf->AddDefinition("CMAKE_GENERATOR_CC", gcc.c_str());
   mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx.c_str());
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf);
-  if(!mf->IsSet("CMAKE_AR") && !m_CMakeInstance->GetIsInTryCompile())
+  if(!mf->IsSet("CMAKE_AR") && !this->CMakeInstance->GetIsInTryCompile())
     {
     cmSystemTools::Error("CMAKE_AR was not found, please set to archive program. ",
                          mf->GetDefinition("CMAKE_AR"));

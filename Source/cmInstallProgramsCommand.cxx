@@ -26,16 +26,16 @@ bool cmInstallProgramsCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   // Create an INSTALL_PROGRAMS target specifically for this path.
-  m_TargetName = "INSTALL_PROGRAMS_"+args[0];
-  cmTarget& target = m_Makefile->GetTargets()[m_TargetName];
+  this->TargetName = "INSTALL_PROGRAMS_"+args[0];
+  cmTarget& target = this->Makefile->GetTargets()[this->TargetName];
   target.SetInAll(false);
-  target.SetType(cmTarget::INSTALL_PROGRAMS, m_TargetName.c_str());
+  target.SetType(cmTarget::INSTALL_PROGRAMS, this->TargetName.c_str());
   target.SetInstallPath(args[0].c_str());
 
   std::vector<std::string>::const_iterator s = args.begin();
   for (++s;s != args.end(); ++s)
     {
-    m_FinalArgs.push_back(*s);
+    this->FinalArgs.push_back(*s);
     }  
   
   return true;
@@ -44,25 +44,25 @@ bool cmInstallProgramsCommand::InitialPass(std::vector<std::string> const& args)
 void cmInstallProgramsCommand::FinalPass() 
 {
   std::vector<std::string>& targetSourceLists =
-    m_Makefile->GetTargets()[m_TargetName].GetSourceLists();
+    this->Makefile->GetTargets()[this->TargetName].GetSourceLists();
 
   bool files_mode = false;
-  if(!m_FinalArgs.empty() && m_FinalArgs[0] == "FILES")
+  if(!this->FinalArgs.empty() && this->FinalArgs[0] == "FILES")
     {
     files_mode = true;
     }
   
   // two different options
-  if (m_FinalArgs.size() > 1 || files_mode)
+  if (this->FinalArgs.size() > 1 || files_mode)
     {
     // for each argument, get the programs 
-    std::vector<std::string>::iterator s = m_FinalArgs.begin();
+    std::vector<std::string>::iterator s = this->FinalArgs.begin();
     if(files_mode)
       {
       // Skip the FILES argument in files mode.
       ++s;
       }
-    for(;s != m_FinalArgs.end(); ++s)
+    for(;s != this->FinalArgs.end(); ++s)
       {
       // add to the result
       targetSourceLists.push_back(this->FindInstallSource(s->c_str()));
@@ -71,8 +71,8 @@ void cmInstallProgramsCommand::FinalPass()
   else     // reg exp list
     {
     std::vector<std::string> programs;
-    cmSystemTools::Glob(m_Makefile->GetCurrentDirectory(),
-                        m_FinalArgs[0].c_str(), programs);
+    cmSystemTools::Glob(this->Makefile->GetCurrentDirectory(),
+                        this->FinalArgs[0].c_str(), programs);
     
     std::vector<std::string>::iterator s = programs.begin();
     // for each argument, get the programs 
@@ -98,10 +98,10 @@ std::string cmInstallProgramsCommand::FindInstallSource(const char* name) const
     }
   
   // This is a relative path.
-  std::string tb = m_Makefile->GetCurrentOutputDirectory();
+  std::string tb = this->Makefile->GetCurrentOutputDirectory();
   tb += "/";
   tb += name;
-  std::string ts = m_Makefile->GetCurrentDirectory();
+  std::string ts = this->Makefile->GetCurrentDirectory();
   ts += "/";
   ts += name;
   

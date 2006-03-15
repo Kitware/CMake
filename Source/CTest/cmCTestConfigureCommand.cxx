@@ -92,7 +92,7 @@ bool cmCTestConfigureCommand::InitialPass(
     }
   else
     {
-    source_dir = m_Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY");
+    source_dir = this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY");
     }
 
   if ( build_dir )
@@ -101,7 +101,7 @@ bool cmCTestConfigureCommand::InitialPass(
     }
   else
     {
-    build_dir = m_Makefile->GetDefinition("CTEST_BINARY_DIRECTORY");
+    build_dir = this->Makefile->GetDefinition("CTEST_BINARY_DIRECTORY");
     if ( !build_dir )
       {
       this->SetError("Build directory not specified. Either use BUILD "
@@ -113,7 +113,7 @@ bool cmCTestConfigureCommand::InitialPass(
 
 
   const char* ctestConfigureCommand
-    = m_Makefile->GetDefinition("CTEST_CONFIGURE_COMMAND");
+    = this->Makefile->GetDefinition("CTEST_CONFIGURE_COMMAND");
   if ( ctestConfigureCommand && *ctestConfigureCommand )
     {
     this->CTest->SetCTestConfiguration("ConfigureCommand",
@@ -122,7 +122,7 @@ bool cmCTestConfigureCommand::InitialPass(
   else
     {
     const char* cmakeGeneratorName
-      = m_Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
+      = this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
     if ( cmakeGeneratorName && *cmakeGeneratorName )
       {
       std::string cmakeConfigureCommand = "\"";
@@ -157,7 +157,7 @@ bool cmCTestConfigureCommand::InitialPass(
     {
     cmOStringStream str;
     str << res;
-    m_Makefile->AddDefinition(res_var, str.str().c_str());
+    this->Makefile->AddDefinition(res_var, str.str().c_str());
     }
   return true;
 }

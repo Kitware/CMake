@@ -102,25 +102,25 @@ private:
   /**
    * The name of the source group.
    */
-  std::string m_Name;
+  std::string Name;
   
   /**
    * The regular expression matching the files in the group.
    */
-  cmsys::RegularExpression m_GroupRegex;
+  cmsys::RegularExpression GroupRegex;
   
   /**
    * Set of file names explicitly added to this group.
    */
-  std::set<cmStdString> m_GroupFiles;
+  std::set<cmStdString> GroupFiles;
   
   /**
    * Vector of all source files that have been assigned to
    * this group.
    */
-  std::vector<const cmSourceFile*> m_SourceFiles;
+  std::vector<const cmSourceFile*> SourceFiles;
 
-  std::vector<cmSourceGroup> m_GroupChildren;
+  std::vector<cmSourceGroup> GroupChildren;
 };
 
 #endif

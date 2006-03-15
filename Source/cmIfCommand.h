@@ -36,8 +36,8 @@ public:
                             cmMakefile &mf);
   virtual void ScopeEnded(cmMakefile &mf);
   
-  std::vector<cmListFileArgument> m_Args;
-  bool m_IsBlocking;
+  std::vector<cmListFileArgument> Args;
+  bool IsBlocking;
 };
 
 /** \class cmIfCommand

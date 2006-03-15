@@ -37,11 +37,11 @@ public:
 private:
   struct CacheEntry
   {
-    std::string m_Value;
-    CacheEntryType m_Type;
-    std::map<cmStdString,cmStdString> m_Properties;
-    bool m_Initialized;
-    CacheEntry() : m_Value(""), m_Type(UNINITIALIZED), m_Initialized(false)
+    std::string Value;
+    CacheEntryType Type;
+    std::map<cmStdString,cmStdString> Properties;
+    bool Initialized;
+    CacheEntry() : Value(""), Type(UNINITIALIZED), Initialized(false)
       {}
   };
 
@@ -54,23 +54,23 @@ public:
     bool IsAtEnd() const;
     void Next();
     const char *GetName() const {
-      return m_Position->first.c_str(); } 
+      return this->Position->first.c_str(); } 
     const char* GetProperty(const char*) const ;
     bool GetPropertyAsBool(const char*) const ;
     bool PropertyExists(const char*) const;
     void SetProperty(const char* property, const char* value);
     void SetProperty(const char* property, bool value);
-    const char* GetValue() const { return this->GetEntry().m_Value.c_str(); }
+    const char* GetValue() const { return this->GetEntry().Value.c_str(); }
     bool GetValueAsBool() const;
     void SetValue(const char*);
-    CacheEntryType GetType() const { return this->GetEntry().m_Type; }
-    bool Initialized() { return this->GetEntry().m_Initialized; }
-    cmCacheManager &m_Container;
-    std::map<cmStdString, CacheEntry>::iterator m_Position;
-    CacheIterator(cmCacheManager &cm) : m_Container(cm) {
+    CacheEntryType GetType() const { return this->GetEntry().Type; }
+    bool Initialized() { return this->GetEntry().Initialized; }
+    cmCacheManager &Container;
+    std::map<cmStdString, CacheEntry>::iterator Position;
+    CacheIterator(cmCacheManager &cm) : Container(cm) {
       this->Begin();
     }
-    CacheIterator(cmCacheManager &cm, const char* key) : m_Container(cm) 
+    CacheIterator(cmCacheManager &cm, const char* key) : Container(cm) 
       {
       if ( key )
         {
@@ -78,8 +78,8 @@ public:
         }
     }
   private:
-    CacheEntry const& GetEntry() const { return m_Position->second; }
-    CacheEntry& GetEntry() { return m_Position->second; }
+    CacheEntry const& GetEntry() const { return this->Position->second; }
+    CacheEntry& GetEntry() { return this->Position->second; }
   };
   
   ///! return an iterator to iterate through the cache map
@@ -126,7 +126,7 @@ public:
   
   ///! Get the number of entries in the cache
   int GetSize() {
-    return static_cast<int>(m_Cache.size()); }
+    return static_cast<int>(this->Cache.size()); }
   
   ///! Break up a line like VAR:type="value" into var, type and value
   static bool ParseEntry(const char* entry, 
@@ -158,7 +158,7 @@ private:
   typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
   static void OutputHelpString(std::ofstream& fout, 
                                const std::string& helpString);
-  CacheEntryMap m_Cache;
+  CacheEntryMap Cache;
   // Only cmake and cmMakefile should be able to add cache values
   // the commands should never use the cmCacheManager directly
   friend class cmMakefile; // allow access to add cache values

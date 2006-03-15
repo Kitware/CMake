@@ -26,8 +26,8 @@
 cmGlobalKdevelopGenerator::cmGlobalKdevelopGenerator()
 {
   // This type of makefile always requires unix style paths
-  m_ForceUnixPaths = true;
-  m_FindMakeProgramFile = "CMakeUnixFindMake.cmake";
+  this->ForceUnixPaths = true;
+  this->FindMakeProgramFile = "CMakeUnixFindMake.cmake";
 }
 
 ///! Create a local generator appropriate to this Global Generator
@@ -59,7 +59,7 @@ void cmGlobalKdevelopGenerator::Generate()
   // for each sub project in the project create 
   // a kdevelop project
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
+  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     cmMakefile* mf = it->second[0]->GetMakefile();
     std::string outputDir=mf->GetStartOutputDirectory();

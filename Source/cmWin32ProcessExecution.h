@@ -45,13 +45,13 @@ class cmWin32ProcessExecution
 public:
   cmWin32ProcessExecution()
     {
-    m_HideWindows = false;
+    this->HideWindows = false;
     this->SetConsoleSpawn("w9xpopen.exe");
     this->Initialize();
     }
   ~cmWin32ProcessExecution();
   ///! If true windows will be created hidden.
-  void SetHideWindows(bool v) { m_HideWindows = v;  }
+  void SetHideWindows(bool v) { this->HideWindows = v;  }
   
   /**
    * Initialize the process execution datastructure. Do not call while
@@ -59,16 +59,16 @@ public:
    */
   void Initialize() 
     {
-    this->m_ProcessHandle = 0;
-    this->m_ExitValue    = -1;
+    this->ProcessHandle = 0;
+    this->ExitValue    = -1;
     // Comment this out. Maybe we will need it in the future.
     // file IO access to the process might be cool.
-    //this->m_StdIn  =  0;
-    //this->m_StdOut =  0;
-    //this->m_StdErr =  0;
-    this->m_pStdIn  =  -1;
-    this->m_pStdOut =  -1;
-    this->m_pStdErr =  -1;
+    //this->StdIn  =  0;
+    //this->StdOut =  0;
+    //this->StdErr =  0;
+    this->pStdIn  =  -1;
+    this->pStdOut =  -1;
+    this->pStdErr =  -1;
     }
   
   /**
@@ -90,13 +90,13 @@ public:
    * Get the output of the process (mixed stdout and stderr) as
    * std::string.
    */
-  const std::string GetOutput() const { return this->m_Output; }
+  const std::string GetOutput() const { return this->Output; }
 
   /**
    * Get the return value of the process. If the process is still
    * running, the return value is -1.
    */
-  int GetExitValue() const { return this->m_ExitValue; }
+  int GetExitValue() const { return this->ExitValue; }
 
   /**
    * On Windows 9x there is a bug in the process execution code which
@@ -104,7 +104,7 @@ public:
    * used. Specify the console spawn, which should run the
    * Windows9xHack code.
    */
-  void SetConsoleSpawn(const char* prog) { this->m_ConsoleSpawn = prog; }
+  void SetConsoleSpawn(const char* prog) { this->ConsoleSpawn = prog; }
   static int Windows9xHack(const char* command);
 
   /** Code from a Borland web site with the following explaination :
@@ -144,7 +144,7 @@ private:
   bool PrivateOpen(const char*, const char*, int, int);
   bool PrivateClose(int timeout);
 
-  HANDLE m_ProcessHandle;
+  HANDLE ProcessHandle;
   HANDLE hChildStdinRd;
   HANDLE hChildStdinWr;
   HANDLE hChildStdoutRd;
@@ -156,16 +156,16 @@ private:
   HANDLE hChildStderrRdDup;
   
   
-  int m_pStdIn;
-  int m_pStdOut;
-  int m_pStdErr;
+  int pStdIn;
+  int pStdOut;
+  int pStdErr;
 
-  int m_ExitValue;
+  int ExitValue;
 
-  std::string m_Output;
-  std::string m_ConsoleSpawn;
-  bool m_Verbose;
-  bool m_HideWindows;
+  std::string Output;
+  std::string ConsoleSpawn;
+  bool Verbose;
+  bool HideWindows;
 };
 
 

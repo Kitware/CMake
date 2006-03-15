@@ -58,10 +58,10 @@ public:
    */
   std::vector<std::string> GetCreatedProjectNames() 
     {
-    return m_CreatedProjectNames;
+    return this->CreatedProjectNames;
     }
-  void SetVersion71() {m_Version = 71;}
-  void SetVersion8() {m_Version = 8;}
+  void SetVersion71() {this->Version = 71;}
+  void SetVersion8() {this->Version = 8;}
   virtual void ConfigureFinalPass();
 private:
   void FillFlagMapFromCommandFlags(std::map<cmStdString, cmStdString>& flagMap,
@@ -114,11 +114,11 @@ private:
                   const char *libName, std::vector<std::string> *configs);
   virtual std::string GetTargetDirectory(cmTarget&);
 
-  std::vector<std::string> m_CreatedProjectNames;
-  std::string m_LibraryOutputPath;
-  std::string m_ExecutableOutputPath;
-  std::string m_ModuleDefinitionFile;
-  int m_Version;
+  std::vector<std::string> CreatedProjectNames;
+  std::string LibraryOutputPath;
+  std::string ExecutableOutputPath;
+  std::string ModuleDefinitionFile;
+  int Version;
 };
 
 #endif

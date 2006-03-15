@@ -45,7 +45,7 @@ public:
 
   /**
    * Process the CMakeLists files for this directory to fill in the
-   * m_Makefile ivar 
+   * Makefile ivar 
    */
   virtual void Configure();
 
@@ -67,11 +67,11 @@ public:
 
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {
-    return this->m_Makefile; };
+    return this->Makefile; };
   
   ///! Get the GlobalGenerator this is associated with
   cmGlobalGenerator *GetGlobalGenerator() {
-    return m_GlobalGenerator; };
+    return this->GlobalGenerator; };
 
   ///! Set the Global Generator, done on creation by the GlobalGenerator
   void SetGlobalGenerator(cmGlobalGenerator *gg);
@@ -111,16 +111,16 @@ public:
   // flag to determine if this project should be included in a parent project
   bool GetExcludeAll()
     {
-      return m_ExcludeFromAll;
+      return this->ExcludeFromAll;
     }
   void SetExcludeAll(bool b)
     {
-      m_ExcludeFromAll = b;
+      this->ExcludeFromAll = b;
     }
   
   ///! set/get the parent generator 
-  cmLocalGenerator* GetParent(){return m_Parent;}
-  void SetParent(cmLocalGenerator* g) { m_Parent = g; g->AddChild(this); }
+  cmLocalGenerator* GetParent(){return this->Parent;}
+  void SetParent(cmLocalGenerator* g) { this->Parent = g; g->AddChild(this); }
 
   ///! set/get the children
   void AddChild(cmLocalGenerator* g) { this->Children.push_back(g); }
@@ -243,28 +243,28 @@ protected:
     std::ostream& os, const char* config,
     std::vector<std::string> const& configurationTypes);
 
-  cmMakefile *m_Makefile;
-  cmGlobalGenerator *m_GlobalGenerator;
+  cmMakefile *Makefile;
+  cmGlobalGenerator *GlobalGenerator;
   // members used for relative path function ConvertToMakefilePath
-  std::string m_RelativePathToSourceDir;
-  std::string m_RelativePathToBinaryDir;
-  std::vector<std::string> m_HomeDirectoryComponents;
-  std::vector<std::string> m_StartDirectoryComponents;
-  std::vector<std::string> m_HomeOutputDirectoryComponents;
-  std::vector<std::string> m_StartOutputDirectoryComponents;
-  bool m_ExcludeFromAll;
-  cmLocalGenerator* m_Parent;
+  std::string RelativePathToSourceDir;
+  std::string RelativePathToBinaryDir;
+  std::vector<std::string> HomeDirectoryComponents;
+  std::vector<std::string> StartDirectoryComponents;
+  std::vector<std::string> HomeOutputDirectoryComponents;
+  std::vector<std::string> StartOutputDirectoryComponents;
+  bool ExcludeFromAll;
+  cmLocalGenerator* Parent;
   std::vector<cmLocalGenerator*> Children;
-  std::map<cmStdString, cmStdString> m_LanguageToIncludeFlags;
-  bool m_WindowsShell;
-  bool m_ForceUnixPath;
-  bool m_UseRelativePaths;
-  bool m_IgnoreLibPrefix;
+  std::map<cmStdString, cmStdString> LanguageToIncludeFlags;
+  bool WindowsShell;
+  bool ForceUnixPath;
+  bool UseRelativePaths;
+  bool IgnoreLibPrefix;
   bool Configured;
 
   // Hack for ExpandRuleVariable until object-oriented version is
   // committed.
-  std::string m_TargetImplib;
+  std::string TargetImplib;
 };
 
 #endif

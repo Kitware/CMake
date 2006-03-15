@@ -19,65 +19,65 @@
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand()
 {
-  m_Used = false;
+  this->Used = false;
 }
 
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
-  m_Output(r.m_Output),
-  m_Depends(r.m_Depends),
-  m_CommandLines(r.m_CommandLines),
-  m_Comment(r.m_Comment),
-  m_WorkingDirectory(r.m_WorkingDirectory)
+  Output(r.Output),
+  Depends(r.Depends),
+  CommandLines(r.CommandLines),
+  Comment(r.Comment),
+  WorkingDirectory(r.WorkingDirectory)
 {
-  m_Used = false;
+  this->Used = false;
 }
 
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand(const char* output,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
-                                 const char* comment,
+                                 const char* comment, 
                                  const char* workingDirectory):
-  m_Output(output?output:""),
-  m_Depends(depends),
-  m_CommandLines(commandLines),
-  m_Comment(comment?comment:""),
-  m_WorkingDirectory(workingDirectory?workingDirectory:"")
+  Output(output?output:""),
+  Depends(depends),
+  CommandLines(commandLines),
+  Comment(comment?comment:""),
+  WorkingDirectory(workingDirectory?workingDirectory:"")
 {
-  m_Used = false;
+  this->Used = false;
 }
 
 //----------------------------------------------------------------------------
 const char* cmCustomCommand::GetOutput() const
 {
-  return m_Output.c_str();
+  return this->Output.c_str();
 }
 
 //----------------------------------------------------------------------------
 const char* cmCustomCommand::GetWorkingDirectory() const
 {
-  if(m_WorkingDirectory.size() == 0)
+  if(this->WorkingDirectory.size() == 0)
     {
     return 0;
     }
-  return m_WorkingDirectory.c_str();
+  return this->WorkingDirectory.c_str();
 }
 
 //----------------------------------------------------------------------------
 const std::vector<std::string>& cmCustomCommand::GetDepends() const
 {
-  return m_Depends;
+  return this->Depends;
 }
 
 //----------------------------------------------------------------------------
 const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
 {
-  return m_CommandLines;
+  return this->CommandLines;
 }
 
 //----------------------------------------------------------------------------
 const char* cmCustomCommand::GetComment() const
 {
-  return m_Comment.c_str();
+  return this->Comment.c_str();
 }

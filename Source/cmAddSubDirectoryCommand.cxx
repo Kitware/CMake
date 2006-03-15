@@ -55,7 +55,7 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
   // check for relative arguments
   bool relativeSource = true;
   std::string binPath = binArg;
-  std::string srcPath = std::string(m_Makefile->GetCurrentDirectory()) + 
+  std::string srcPath = std::string(this->Makefile->GetCurrentDirectory()) + 
     "/" + srcArg;
   // if the path does not exist then the arg was relative
   if (!cmSystemTools::FileIsDirectory(srcPath.c_str()))
@@ -79,7 +79,7 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
     {
     if (!cmSystemTools::FileIsFullPath(binPath.c_str()))
       {
-      binPath = std::string(m_Makefile->GetCurrentOutputDirectory()) + 
+      binPath = std::string(this->Makefile->GetCurrentOutputDirectory()) + 
         "/" + binArg.c_str();
       }
     }
@@ -89,7 +89,7 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
     // if the srcArg was relative then we just do the same for the binPath
     if (relativeSource)
       {
-      binPath = std::string(m_Makefile->GetCurrentOutputDirectory()) + 
+      binPath = std::string(this->Makefile->GetCurrentOutputDirectory()) + 
         "/" + srcArg;
       }
     // otherwise we try to remove the CurrentDirectory from the srcPath and
@@ -101,18 +101,18 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
       // try replacing the home dir with the home output dir
       binPath = srcPath;
       if (!cmSystemTools::FindLastString(binPath.c_str(), 
-                                         m_Makefile->GetHomeDirectory()))
+                                         this->Makefile->GetHomeDirectory()))
         {
         this->SetError("A full source directory was specified that is not in the source tree but no binary directory was specified. If you specify an out of tree source directory then you must provide the binary directory as well.");   
         return false;
         }
-      cmSystemTools::ReplaceString(binPath,m_Makefile->GetHomeDirectory(), 
-                                   m_Makefile->GetHomeOutputDirectory());
+      cmSystemTools::ReplaceString(binPath,this->Makefile->GetHomeDirectory(), 
+                                   this->Makefile->GetHomeOutputDirectory());
       }
     }
   
   // now we have all the arguments
-  m_Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
+  this->Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
                               intoplevel, false, true);
 
   return true;

@@ -27,8 +27,6 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string>
     return false;
     }
 
-  m_TargetName = args[0];
-
   // but we might not have any libs after variable expansion
   if(args.size() < 2)
     {
@@ -48,7 +46,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string>
         this->SetError("The \"debug\" argument must be followed by a library");
         return false;
         }
-      m_Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
+      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
                                           cmTarget::DEBUG);
       }
     else if (*i == "optimized")
@@ -60,12 +58,12 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string>
           "The \"optimized\" argument must be followed by a library");
         return false;
         }
-      m_Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
+      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
                                  cmTarget::OPTIMIZED);
       }
     else
       {
-      m_Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
+      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
                                           cmTarget::GENERAL);  
       }
     } 

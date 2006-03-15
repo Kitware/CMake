@@ -297,7 +297,8 @@ void cmFindBase::AddCMakeVairables()
 { 
   if(this->SearchFrameworkFirst || this->SearchFrameworkOnly)
     { 
-    if(const char* path = m_Makefile->GetDefinition("CMAKE_FRAMEWORK_PATH"))
+    if(const char* path = 
+       this->Makefile->GetDefinition("CMAKE_FRAMEWORK_PATH"))
       {
       cmSystemTools::ExpandListArgument(path, this->SearchPaths);
       }
@@ -305,13 +306,14 @@ void cmFindBase::AddCMakeVairables()
   std::string var = "CMAKE_";
   var += this->CMakePathName;
   var += "_PATH";
-  if(const char* path = m_Makefile->GetDefinition(var.c_str()))
+  if(const char* path = this->Makefile->GetDefinition(var.c_str()))
     {
     cmSystemTools::ExpandListArgument(path, this->SearchPaths);
     } 
   if(this->SearchFrameworkLast)
     {
-    if(const char* path = m_Makefile->GetDefinition("CMAKE_FRAMEWORK_PATH"))
+    if(const char* path = 
+       this->Makefile->GetDefinition("CMAKE_FRAMEWORK_PATH"))
       {
       cmSystemTools::ExpandListArgument(path, this->SearchPaths);
       }
@@ -333,7 +335,7 @@ void cmFindBase::AddCMakeSystemVariables()
 {  
   if(this->SearchFrameworkFirst || this->SearchFrameworkOnly)
     { 
-    if(const char* path = m_Makefile->GetDefinition("CMAKE_SYSTEM_FRAMEWORK_PATH"))
+    if(const char* path = this->Makefile->GetDefinition("CMAKE_SYSTEM_FRAMEWORK_PATH"))
       {
       cmSystemTools::ExpandListArgument(path, this->SearchPaths);
       }
@@ -341,13 +343,13 @@ void cmFindBase::AddCMakeSystemVariables()
   std::string var = "CMAKE_SYSTEM_";
   var += this->CMakePathName;
   var += "_PATH";
-  if(const char* path = m_Makefile->GetDefinition(var.c_str()))
+  if(const char* path = this->Makefile->GetDefinition(var.c_str()))
     {
     cmSystemTools::ExpandListArgument(path, this->SearchPaths);
     }  
   if(this->SearchFrameworkLast)
     {
-    if(const char* path = m_Makefile->GetDefinition("CMAKE_SYSTEM_FRAMEWORK_PATH"))
+    if(const char* path = this->Makefile->GetDefinition("CMAKE_SYSTEM_FRAMEWORK_PATH"))
       {
       cmSystemTools::ExpandListArgument(path, this->SearchPaths);
       }
@@ -426,7 +428,7 @@ void cmFindBase::PrintFindStuff()
 bool cmFindBase::CheckForVariableInCache()
 {
   const char* cacheValue
-    = m_Makefile->GetDefinition(this->VariableName.c_str());
+    = this->Makefile->GetDefinition(this->VariableName.c_str());
   if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
     {
     return true;
@@ -434,7 +436,7 @@ bool cmFindBase::CheckForVariableInCache()
   if(cacheValue)
     {
     cmCacheManager::CacheIterator it = 
-      m_Makefile->GetCacheManager()->GetCacheIterator(this->VariableName.c_str());
+      this->Makefile->GetCacheManager()->GetCacheIterator(this->VariableName.c_str());
     if(!it.IsAtEnd())
       {
       const char* hs = it.GetProperty("HELPSTRING");

@@ -63,21 +63,20 @@ public:
 
   void SetMakefile(const cmMakefile* mf);
 
-  std::string& GetResult() { return m_Result; }
+  std::string& GetResult() { return this->Result; }
 
   void SetLineFile(long line, const char* file);
-  void SetEscapeQuotes(bool b) { m_EscapeQuotes = b; }
-  void SetNoEscapeMode(bool b) { m_NoEscapeMode = b; }
+  void SetEscapeQuotes(bool b) { this->EscapeQuotes = b; }
+  void SetNoEscapeMode(bool b) { this->NoEscapeMode = b; }
 
-  const char* GetError() { return m_Error.c_str(); }
-
-  char m_EmptyVariable[1];
-  char m_DCURLYVariable[3];
-  char m_RCURLYVariable[3];
-  char m_ATVariable[3];
-  char m_DOLLARVariable[3];
-  char m_LCURLYVariable[3];
-  char m_BSLASHVariable[3];
+  const char* GetError() { return this->ErrorString.c_str(); } 
+  char EmptyVariable[1];
+  char DCURLYVariable[3];
+  char RCURLYVariable[3];
+  char ATVariable[3];
+  char DOLLARVariable[3];
+  char LCURLYVariable[3];
+  char BSLASHVariable[3];
 
 private:
   cmStdString::size_type InputBufferPos;
@@ -94,14 +93,14 @@ private:
 
   void CleanupParser();
 
-  std::vector<char*> m_Variables;
-  const cmMakefile* m_Makefile;
-  std::string m_Result;
-  const char* m_FileName;
-  long m_FileLine;
-  bool m_EscapeQuotes;
-  std::string m_Error;
-  bool m_NoEscapeMode;
+  std::vector<char*> Variables;
+  const cmMakefile* Makefile;
+  std::string Result;
+  const char* FileName;
+  long FileLine;
+  bool EscapeQuotes;
+  std::string ErrorString;
+  bool NoEscapeMode;
 };
 
 #endif

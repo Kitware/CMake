@@ -83,13 +83,13 @@ private:
   /**
    * List of produced files.
    */
-  std::vector<cmSourceFile *> m_GeneratedSourcesClasses;
+  std::vector<cmSourceFile *> GeneratedSourcesClasses;
 
   /**
    * List of Fluid files that provide the source 
    * generating .cxx and .h files
    */
-  std::string m_Target;
+  std::string Target;
 };
 
 

@@ -54,16 +54,16 @@ public:
   const char* GetComment() const;
 
   /** set get the used status of the command */ 
-  void Used() { m_Used = true;}; 
-  bool IsUsed() { return m_Used;};
+  void SetUsed() { this->Used = true;}; 
+  bool IsUsed() { return this->Used;};
  
 private:
-  std::string m_Output;
-  std::vector<std::string> m_Depends;
-  cmCustomCommandLines m_CommandLines;
-  std::string m_Comment;
-  std::string m_WorkingDirectory;
-  bool m_Used;
+  std::string Output;
+  std::vector<std::string> Depends;
+  cmCustomCommandLines CommandLines;
+  std::string Comment;
+  std::string WorkingDirectory;
+  bool Used;
 };
 
 #endif

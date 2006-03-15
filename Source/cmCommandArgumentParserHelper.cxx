@@ -25,18 +25,18 @@ int cmCommandArgument_yyparse( yyscan_t yyscanner );
 //
 cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
 {
-  m_FileLine = -1;
-  m_FileName = 0;
+  this->FileLine = -1;
+  this->FileName = 0;
 
-  m_EmptyVariable[0] = 0;
-  strcpy(m_DCURLYVariable, "${");
-  strcpy(m_RCURLYVariable, "}");
-  strcpy(m_ATVariable,     "@");
-  strcpy(m_DOLLARVariable, "$");
-  strcpy(m_LCURLYVariable, "{");
-  strcpy(m_BSLASHVariable, "\\");
+  this->EmptyVariable[0] = 0;
+  strcpy(this->DCURLYVariable, "${");
+  strcpy(this->RCURLYVariable, "}");
+  strcpy(this->ATVariable,     "@");
+  strcpy(this->DOLLARVariable, "$");
+  strcpy(this->LCURLYVariable, "{");
+  strcpy(this->BSLASHVariable, "\\");
 
-  m_NoEscapeMode = false;
+  this->NoEscapeMode = false;
 }
 
 
@@ -47,19 +47,19 @@ cmCommandArgumentParserHelper::~cmCommandArgumentParserHelper()
 
 void cmCommandArgumentParserHelper::SetLineFile(long line, const char* file)
 {
-  m_FileLine = line;
-  m_FileName = file;
+  this->FileLine = line;
+  this->FileName = file;
 }
 
 char* cmCommandArgumentParserHelper::AddString(const char* str)
 {
   if ( !str || !*str )
     {
-    return m_EmptyVariable;
+    return this->EmptyVariable;
     }
   char* stVal = new char[strlen(str)+1];
   strcpy(stVal, str);
-  m_Variables.push_back(stVal);
+  this->Variables.push_back(stVal);
   return stVal;
 }
 
@@ -74,7 +74,7 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key, cons
     char *ptr = getenv(var);
     if (ptr)
       {
-      if (m_EscapeQuotes)
+      if (this->EscapeQuotes)
         {
         return this->AddString(cmSystemTools::EscapeQuotes(ptr).c_str());
         }
@@ -83,7 +83,7 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key, cons
         return ptr;
         }
       }
-    return m_EmptyVariable;
+    return this->EmptyVariable;
     }
   cmSystemTools::Error("Key ", key, " is not used yet. For now only $ENV{..} is allowed");
   return 0;
@@ -91,18 +91,18 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key, cons
 
 char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
 {
-  if(m_FileName && strcmp(var, "CMAKE_CURRENT_LIST_FILE") == 0)
+  if(this->FileName && strcmp(var, "CMAKE_CURRENT_LIST_FILE") == 0)
     {
-    return this->AddString(m_FileName);
+    return this->AddString(this->FileName);
     }
-  else if(m_FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0)
+  else if(this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0)
     {
     cmOStringStream ostr;
-    ostr << m_FileLine;
+    ostr << this->FileLine;
     return this->AddString(ostr.str().c_str());
     } 
-  const char* value = m_Makefile->GetDefinition(var);
-  if (m_EscapeQuotes && value)
+  const char* value = this->Makefile->GetDefinition(var);
+  if (this->EscapeQuotes && value)
     {
     return this->AddString(cmSystemTools::EscapeQuotes(value).c_str());
     }
@@ -123,7 +123,7 @@ char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
   char* out = new char [ len ];
   strcpy(out, in1);
   strcat(out, in2);
-  m_Variables.push_back(out);
+  this->Variables.push_back(out);
   return out;
 }
 
@@ -142,13 +142,13 @@ void cmCommandArgumentParserHelper::AllocateParserType(cmCommandArgumentParserHe
   pt->str = new char[ len + 1 ];
   strncpy(pt->str, str, len);
   pt->str[len] = 0;
-  m_Variables.push_back(pt->str);
+  this->Variables.push_back(pt->str);
   // std::cout << (void*) pt->str << " " << pt->str << " JPAllocateParserType" << std::endl;
 }
 
 bool cmCommandArgumentParserHelper::HandleEscapeSymbol(cmCommandArgumentParserHelper::ParserType* pt, char symbol)
 {
-  if ( m_NoEscapeMode )
+  if ( this->NoEscapeMode )
     {
     char buffer[3];
     buffer[0] = '\\';
@@ -207,7 +207,7 @@ int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
   this->InputBufferPos = 0;
   this->CurrentLine = 0;
   
-  m_Result = "";
+  this->Result = "";
 
   yyscan_t yyscanner;
   cmCommandArgument_yylex_init(&yyscanner);
@@ -225,7 +225,7 @@ int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
 
   if ( Verbose )
     {
-    std::cerr << "Expanding [" << str << "] produced: [" << m_Result.c_str() << "]" << std::endl;
+    std::cerr << "Expanding [" << str << "] produced: [" << this->Result.c_str() << "]" << std::endl;
     }
   return 1;
 }
@@ -233,13 +233,13 @@ int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
 void cmCommandArgumentParserHelper::CleanupParser()
 {
   std::vector<char*>::iterator sit;
-  for ( sit = m_Variables.begin();
-    sit != m_Variables.end();
+  for ( sit = this->Variables.begin();
+    sit != this->Variables.end();
     ++ sit )
     {
     delete [] *sit;
     }
-  m_Variables.erase(m_Variables.begin(), m_Variables.end());
+  this->Variables.erase(this->Variables.begin(), this->Variables.end());
 }
 
 int cmCommandArgumentParserHelper::LexInput(char* buf, int maxlen)
@@ -283,21 +283,21 @@ void cmCommandArgumentParserHelper::Error(const char* str)
     }
   std::cerr << "]" << std::endl;
   */
-  m_Error = ostr.str();
+  this->ErrorString = ostr.str();
 }
 
 void cmCommandArgumentParserHelper::SetMakefile(const cmMakefile* mf)
 {
-  m_Makefile = mf;
+  this->Makefile = mf;
 }
 
 void cmCommandArgumentParserHelper::SetResult(const char* value)
 {
   if ( !value )
     {
-    m_Result = "";
+    this->Result = "";
     return;
     }
-  m_Result = value;
+  this->Result = value;
 }
 

@@ -170,7 +170,8 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args)
     argv[i] = strdup(args[i].c_str());
     }
   cmLoadedCommand::InstallSignalHandlers(info.Name);
-  int result = info.InitialPass((void *)&info,(void *)this->m_Makefile,argc,argv); 
+  int result = info.InitialPass((void *)&info,
+                                (void *)this->Makefile,argc,argv); 
   cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
   cmFreeArguments(argc,argv);
   
@@ -192,7 +193,7 @@ void cmLoadedCommand::FinalPass()
   if (this->info.FinalPass)
     {
     cmLoadedCommand::InstallSignalHandlers(info.Name);
-    this->info.FinalPass((void *)&this->info,(void *)this->m_Makefile);
+    this->info.FinalPass((void *)&this->info,(void *)this->Makefile);
     cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
     }
 }
@@ -223,7 +224,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
   // Start by removing the definition in case of failure.
   std::string reportVar = "CMAKE_LOADED_COMMAND_";
   reportVar += args[0];
-  m_Makefile->RemoveDefinition(reportVar.c_str());
+  this->Makefile->RemoveDefinition(reportVar.c_str());
 
   // the file must exist
   std::string fullPath = cmDynamicLoader::LibPrefix();
@@ -269,7 +270,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   // Report what file was loaded for this command.
-  m_Makefile->AddDefinition(reportVar.c_str(), fullPath.c_str());
+  this->Makefile->AddDefinition(reportVar.c_str(), fullPath.c_str());
 
   // find the init function
   std::string initFuncName = args[0] + "Init";
@@ -291,7 +292,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
     // create a function blocker and set it up
     cmLoadedCommand *f = new cmLoadedCommand();
     (*initFunction)(&f->info);
-    m_Makefile->AddCommand(f);
+    this->Makefile->AddCommand(f);
     return true;
     }
   this->SetError("Attempt to load command failed. "

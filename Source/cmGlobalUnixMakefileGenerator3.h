@@ -136,7 +136,7 @@ protected:
   // that might not do anything but might have other dependencies
   // added later.  If non-empty this variable holds a fake dependency
   // that can be added.
-  std::string m_EmptyRuleHackDepends;
+  std::string EmptyRuleHackDepends;
 };
 
 #endif

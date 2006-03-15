@@ -67,13 +67,14 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args)
     }
 
   // Save the required version string.
-  m_Makefile->AddDefinition("CMAKE_MINIMUM_REQUIRED_VERSION",
-    version_string.c_str());
+  this->Makefile->AddDefinition("CMAKE_MINIMUM_REQUIRED_VERSION",
+                                version_string.c_str());
+
 
   // Get the current version number.
-  int current_major = m_Makefile->GetMajorVersion();
-  int current_minor = m_Makefile->GetMinorVersion();
-  int current_patch = m_Makefile->GetPatchVersion();
+  int current_major = this->Makefile->GetMajorVersion();
+  int current_minor = this->Makefile->GetMinorVersion();
+  int current_patch = this->Makefile->GetPatchVersion();
 
   // Parse the required version number.  If no patch-level is given
   // use zero.

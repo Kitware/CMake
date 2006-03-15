@@ -36,10 +36,10 @@ public:
   cmDepends();
   
   /** at what level will the compile be done from */
-  void SetCompileDirectory(const char *dir) {m_CompileDirectory = dir;};
+  void SetCompileDirectory(const char *dir) {this->CompileDirectory = dir;};
     
   /** should this be verbose in its output */
-  void SetVerbose(bool verb) { m_Verbose = verb; }
+  void SetVerbose(bool verb) { this->Verbose = verb; }
     
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDepends();
@@ -55,7 +55,8 @@ public:
   void Clear(const char *file);
 
   /** Set the file comparison object */
-  void SetFileComparison(cmFileTimeComparison* fc) { m_FileComparison = fc; }
+  void SetFileComparison(cmFileTimeComparison* fc) { 
+    this->FileComparison = fc; }
 
 protected:
 
@@ -70,16 +71,16 @@ protected:
   virtual bool CheckDependencies(std::istream& internalDepends);
 
   // The directory in which the build rule for the target file is executed.
-  std::string m_Directory;
-  std::string m_CompileDirectory;
+  std::string Directory;
+  std::string CompileDirectory;
 
   // Flag for verbose output.
-  bool m_Verbose;
-  cmFileTimeComparison* m_FileComparison;
+  bool Verbose;
+  cmFileTimeComparison* FileComparison;
 
-  size_t m_MaxPath;
-  char* m_Dependee;
-  char* m_Depender;
+  size_t MaxPath;
+  char* Dependee;
+  char* Depender;
 
 private:
   cmDepends(cmDepends const&); // Purposely not implemented.

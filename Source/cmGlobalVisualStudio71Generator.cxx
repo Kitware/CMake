@@ -24,8 +24,8 @@
 
 cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator()
 {
-  m_FindMakeProgramFile = "CMakeVS71FindMake.cmake";
-  m_ProjectConfigurationSectionName = "ProjectConfiguration";
+  this->FindMakeProgramFile = "CMakeVS71FindMake.cmake";
+  this->ProjectConfigurationSectionName = "ProjectConfiguration";
 }
 
 
@@ -224,7 +224,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
     }
   fout << "Global\n";
   this->WriteSolutionConfigurations(fout);
-  fout << "\tGlobalSection(" << m_ProjectConfigurationSectionName
+  fout << "\tGlobalSection(" << this->ProjectConfigurationSectionName
        << ") = postSolution\n";
   // loop over again and compute the depends
   for(i = 0; i < generators.size(); ++i)
@@ -270,8 +270,8 @@ cmGlobalVisualStudio71Generator
 ::WriteSolutionConfigurations(std::ostream& fout)
 {
   fout << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
-  for(std::vector<std::string>::iterator i = m_Configurations.begin();
-      i != m_Configurations.end(); ++i)
+  for(std::vector<std::string>::iterator i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     fout << "\t\t" << *i << " = " << *i << "\n";
     }
@@ -313,7 +313,7 @@ cmGlobalVisualStudio71Generator
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
   if (target.GetType() != cmTarget::STATIC_LIBRARY)
     {
-    cmTarget::LinkLibraries::const_iterator j, jend;
+    cmTarget::LinkLibraryVectorType::const_iterator j, jend;
     j = target.GetLinkLibraries().begin();
     jend = target.GetLinkLibraries().end();
     for(;j!= jend; ++j)
@@ -321,7 +321,7 @@ cmGlobalVisualStudio71Generator
       if(j->first != dspname)
         {
         // is the library part of this SLN ? If so add dependency
-        if(this->FindTarget(m_CurrentProject.c_str(), j->first.c_str()))
+        if(this->FindTarget(this->CurrentProject.c_str(), j->first.c_str()))
           {
           fout << "\t\t{" << this->GetGUID(j->first.c_str()) << "} = {"
                << this->GetGUID(j->first.c_str()) << "}\n";
@@ -414,8 +414,8 @@ cmGlobalVisualStudio71Generator::WriteProjectConfigurations(std::ostream& fout,
                                                            bool in_all_build)
 {
   std::string guid = this->GetGUID(name);
-  for(std::vector<std::string>::iterator i = m_Configurations.begin();
-      i != m_Configurations.end(); ++i)
+  for(std::vector<std::string>::iterator i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << *i << "|Win32\n";
     if (in_all_build)

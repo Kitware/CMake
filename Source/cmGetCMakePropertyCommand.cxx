@@ -39,7 +39,7 @@ bool cmGetCMakePropertyCommand::InitialPass(
       {
       cacheonly = 1;
       }
-    std::vector<std::string> vars = m_Makefile->GetDefinitions(cacheonly);
+    std::vector<std::string> vars = this->Makefile->GetDefinitions(cacheonly);
     for ( cc = 0; cc < vars.size(); cc ++ )
       {
       if ( cc > 0 )
@@ -52,9 +52,9 @@ bool cmGetCMakePropertyCommand::InitialPass(
   else if ( args[1] == "COMMANDS" )
     {
     cmake::RegisteredCommandsMap::iterator cmds 
-        = m_Makefile->GetCMakeInstance()->GetCommands()->begin();
+        = this->Makefile->GetCMakeInstance()->GetCommands()->begin();
     for (cc=0 ; 
-      cmds != m_Makefile->GetCMakeInstance()->GetCommands()->end(); 
+      cmds != this->Makefile->GetCMakeInstance()->GetCommands()->end(); 
       ++ cmds )
       {
       if ( cc > 0 )
@@ -67,7 +67,7 @@ bool cmGetCMakePropertyCommand::InitialPass(
     }
   else if ( args[1] == "MACROS" )
     {
-    m_Makefile->GetListOfMacros(output);
+    this->Makefile->GetListOfMacros(output);
     }
   else
     {
@@ -75,7 +75,7 @@ bool cmGetCMakePropertyCommand::InitialPass(
     this->SetError(emsg.c_str());
     return false;
     }
-  m_Makefile->AddDefinition(variable.c_str(), output.c_str());
+  this->Makefile->AddDefinition(variable.c_str(), output.c_str());
   
   return true;
 }

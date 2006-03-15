@@ -21,16 +21,16 @@
 
 cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
 {
-  m_EmptyRuleHackDepends = "NUL";
-  m_FindMakeProgramFile = "CMakeBorlandFindMake.cmake";
-  m_ForceUnixPaths = false;
+  this->EmptyRuleHackDepends = "NUL";
+  this->FindMakeProgramFile = "CMakeBorlandFindMake.cmake";
+  this->ForceUnixPaths = false;
 }
 
 
 void cmGlobalBorlandMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,
                                                       cmMakefile *mf)
 {
-  std::string outdir = m_CMakeInstance->GetStartOutputDirectory();
+  std::string outdir = this->CMakeInstance->GetStartOutputDirectory();
   mf->AddDefinition("BORLAND", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "bcc32");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "bcc32"); 

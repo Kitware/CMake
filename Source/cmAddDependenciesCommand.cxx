@@ -28,7 +28,7 @@ bool cmAddDependenciesCommand::InitialPass(
 
   std::string target_name = args[0];
 
-  cmTargets &tgts = m_Makefile->GetTargets();
+  cmTargets &tgts = this->Makefile->GetTargets();
   if (tgts.find(target_name) != tgts.end())
     {
     std::vector<std::string>::const_iterator s = args.begin();

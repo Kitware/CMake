@@ -84,7 +84,7 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args)
       {
       break;
       }
-    m_Makefile->GetCacheManager()->LoadCache(args[i].c_str(), false,
+    this->Makefile->GetCacheManager()->LoadCache(args[i].c_str(), false,
                                              excludes, includes);
     }
 
@@ -188,11 +188,11 @@ void cmLoadCacheCommand::CheckLine(const char* line)
       var = this->Prefix + var;
       if(value.length())
         {
-        m_Makefile->AddDefinition(var.c_str(), value.c_str());
+        this->Makefile->AddDefinition(var.c_str(), value.c_str());
         }
       else
         {
-        m_Makefile->RemoveDefinition(var.c_str());
+        this->Makefile->RemoveDefinition(var.c_str());
         }
       }
     }

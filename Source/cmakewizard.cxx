@@ -20,7 +20,7 @@
 
 cmakewizard::cmakewizard()
 {
-  m_ShowAdvanced = false;
+  this->ShowAdvanced = false;
 }
 
 
@@ -92,7 +92,7 @@ void cmakewizard::ShowMessage(const char* m)
 
 int cmakewizard::RunWizard(std::vector<std::string> const& args)
 {
-  m_ShowAdvanced = this->AskAdvanced();
+  this->ShowAdvanced = this->AskAdvanced();
   cmSystemTools::DisableRunCommandOutput();
   cmake make;
   make.SetArgs(args);
@@ -130,7 +130,7 @@ int cmakewizard::RunWizard(std::vector<std::string> const& args)
         std::string& e = askedCache.find(key)->second;
         if(e != i.GetValue())
           {
-          if(m_ShowAdvanced || !i.GetPropertyAsBool("ADVANCED"))
+          if(this->ShowAdvanced || !i.GetPropertyAsBool("ADVANCED"))
             {
             this->AskUser(key.c_str(), i);
             asked = true;
@@ -138,8 +138,8 @@ int cmakewizard::RunWizard(std::vector<std::string> const& args)
           }
         }
       else
-        {
-        if(m_ShowAdvanced || !i.GetPropertyAsBool("ADVANCED"))
+        {    
+        if(this->ShowAdvanced || !i.GetPropertyAsBool("ADVANCED"))
           {
           this->AskUser(key.c_str(), i);
           asked = true;

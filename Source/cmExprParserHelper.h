@@ -49,11 +49,11 @@ public:
 
   void SetResult(int value);
 
-  int GetResult() { return m_Result; }
+  int GetResult() { return this->Result; }
 
   void SetLineFile(long line, const char* file);
 
-  const char* GetError() { return m_Error.c_str(); }
+  const char* GetError() { return this->ErrorString.c_str(); }
 
 private:
   cmStdString::size_type InputBufferPos;
@@ -67,10 +67,10 @@ private:
 
   void CleanupParser();
 
-  int m_Result;
-  const char* m_FileName;
-  long m_FileLine;
-  std::string m_Error;
+  int Result;
+  const char* FileName;
+  long FileLine;
+  std::string ErrorString;
 };
 
 #endif

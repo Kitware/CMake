@@ -69,24 +69,24 @@ bool cmCTestUpdateCommand::InitialPass(
       }
     }
 
-  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "UpdateCommand", "CTEST_UPDATE_COMMAND");
-  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "UpdateOptions", "CTEST_UPDATE_OPTIONS");
-  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "CVSCommand", "CTEST_CVS_COMMAND");
-  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "CVSUpdateOptions", "CTEST_CVS_UPDATE_OPTIONS");
-  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "SVNCommand", "CTEST_SVN_COMMAND");
-  this->CTest->SetCTestConfigurationFromCMakeVariable(m_Makefile,
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "SVNUpdateOptions", "CTEST_SVN_UPDATE_OPTIONS");
 
   const char* initialCheckoutCommand
-    = m_Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
+    = this->Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
   if ( !initialCheckoutCommand )
     {
-    initialCheckoutCommand = m_Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
+    initialCheckoutCommand = this->Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
     }
 
   cmCTestGenericHandler* handler
@@ -126,7 +126,7 @@ bool cmCTestUpdateCommand::InitialPass(
     {
     cmOStringStream str;
     str << res;
-    m_Makefile->AddDefinition(res_var, str.str().c_str());
+    this->Makefile->AddDefinition(res_var, str.str().c_str());
     }
   return true;
 }

@@ -34,40 +34,40 @@ public:
    * Construct with dependency generation marked not done; instance
    * not placed in cmMakefile's list.
    */
-  cmDependInformation(): m_DependDone(false), m_cmSourceFile(0) {}
+  cmDependInformation(): DependDone(false), cmSourceFile(0) {}
 
   /**
    * The set of files on which this one depends.
    */
-  typedef std::set<cmDependInformation*> DependencySet;
-  DependencySet m_DependencySet;
+  typedef std::set<cmDependInformation*> DependencySetType;
+  DependencySetType DependencySet;
 
   /**
    * This flag indicates whether dependency checking has been
    * performed for this file.
    */
-  bool m_DependDone;
+  bool DependDone;
 
   /**
    * If this object corresponds to a cmSourceFile instance, this points
    * to it.
    */
-  const cmSourceFile *m_cmSourceFile;
+  const cmSourceFile *cmSourceFile;
   
   /**
    * Full path to this file.
    */
-  std::string m_FullPath;
+  std::string FullPath;
   
   /**
    * Full path not including file name.
    */
-  std::string m_PathOnly;
+  std::string PathOnly;
   
   /**
    * Name used to #include this file.
    */
-  std::string m_IncludeName;
+  std::string IncludeName;
   
   /**
    * This method adds the dependencies of another file to this one.
@@ -155,16 +155,17 @@ protected:
    */
   std::string FullPath(const char *filename, const char *extraPath);
 
-  cmMakefile* m_Makefile;
-  bool m_Verbose;
-  cmsys::RegularExpression m_IncludeFileRegularExpression;
-  cmsys::RegularExpression m_ComplainFileRegularExpression;
-  std::vector<std::string> m_IncludeDirectories;
-  typedef std::map<cmStdString, cmStdString> FileToPathMap;
-  typedef std::map<cmStdString, FileToPathMap> DirectoryToFileToPathMap;
-  typedef std::map<cmStdString, cmDependInformation*> DependInformationMap;
-  DependInformationMap m_DependInformationMap;
-  DirectoryToFileToPathMap m_DirectoryToFileToPathMap;
+  cmMakefile* Makefile;
+  bool Verbose;
+  cmsys::RegularExpression IncludeFileRegularExpression;
+  cmsys::RegularExpression ComplainFileRegularExpression;
+  std::vector<std::string> IncludeDirectories;
+  typedef std::map<cmStdString, cmStdString> FileToPathMapType;
+  typedef std::map<cmStdString, FileToPathMapType> 
+  DirectoryToFileToPathMapType;
+  typedef std::map<cmStdString, cmDependInformation*> DependInformationMapType;
+  DependInformationMapType DependInformationMap;
+  DirectoryToFileToPathMapType DirectoryToFileToPathMap;
 };
 
 #endif

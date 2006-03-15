@@ -20,8 +20,8 @@
 
 cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator()
 {
-  m_FindMakeProgramFile = "CMakeMinGWFindMake.cmake";
-  m_ForceUnixPaths = true;
+  this->FindMakeProgramFile = "CMakeMinGWFindMake.cmake";
+  this->ForceUnixPaths = true;
   
 }
 

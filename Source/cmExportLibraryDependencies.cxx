@@ -38,7 +38,7 @@ bool cmExportLibraryDependenciesCommand::InitialPass(std::vector<std::string> co
   // store the arguments for the final pass
   // also expand any CMake variables
 
-  m_Args = args;
+  this->Args = args;
   return true;
 }
 
@@ -46,11 +46,11 @@ bool cmExportLibraryDependenciesCommand::InitialPass(std::vector<std::string> co
 void cmExportLibraryDependenciesCommand::FinalPass()
 {
   // Create a full path filename for output
-  std::string fname = m_Args[0];
+  std::string fname = this->Args[0];
   bool append = false;
-  if(m_Args.size() > 1)
+  if(this->Args.size() > 1)
     {
-    if(m_Args[1] == "APPEND")
+    if(this->Args[1] == "APPEND")
       {
       append = true;
       }
@@ -79,7 +79,7 @@ void cmExportLibraryDependenciesCommand::FinalPass()
     cmSystemTools::ReportLastSystemError("");
     return;
     }
-  cmake* cm = m_Makefile->GetCMakeInstance();
+  cmake* cm = this->Makefile->GetCMakeInstance();
   cmGlobalGenerator* global = cm->GetGlobalGenerator();
   std::vector<cmLocalGenerator *> locals;
   global->GetLocalGenerators(locals);
@@ -99,7 +99,7 @@ void cmExportLibraryDependenciesCommand::FinalPass()
         {
         libDepName = l->first;
         libDepName += "_LIB_DEPENDS";
-        const char* def = m_Makefile->GetDefinition(libDepName.c_str());
+        const char* def = this->Makefile->GetDefinition(libDepName.c_str());
         if(def)
           {
           fout << "SET(" << libDepName << " \"" << def << "\")\n";
@@ -110,7 +110,7 @@ void cmExportLibraryDependenciesCommand::FinalPass()
             {
             libDepName = *d;
             libDepName += "_LINK_TYPE";
-            defType = m_Makefile->GetDefinition(libDepName.c_str());
+            defType = this->Makefile->GetDefinition(libDepName.c_str());
             libDepName = cmSystemTools::EscapeSpaces(libDepName.c_str());
             if(defType)
               {

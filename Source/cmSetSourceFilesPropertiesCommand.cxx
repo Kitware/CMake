@@ -129,7 +129,7 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
     {   
     // get the source file
     cmSourceFile* sf =
-      m_Makefile->GetOrCreateSource(args[i].c_str(), generated);
+      this->Makefile->GetOrCreateSource(args[i].c_str(), generated);
     if(sf)
       {
       // now loop through all the props and set them

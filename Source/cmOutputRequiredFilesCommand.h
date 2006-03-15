@@ -76,8 +76,8 @@ public:
                         std::set<cmDependInformation const*> *visited);
 
 private:
-  std::string m_File;
-  std::string m_OutputFile;
+  std::string File;
+  std::string OutputFile;
 };
 
 

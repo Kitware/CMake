@@ -60,6 +60,6 @@ bool cmMathCommand::HandleExprCommand(std::vector<std::string> const& args)
   char buffer[1024];
   sprintf(buffer, "%d", helper.GetResult());
 
-  m_Makefile->AddDefinition(outputVariable.c_str(), buffer);
+  this->Makefile->AddDefinition(outputVariable.c_str(), buffer);
   return true;
 }

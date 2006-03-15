@@ -7,7 +7,7 @@
 //-------------------------------------------------------------------
 cmOrderLinkDirectories::cmOrderLinkDirectories()
 {
-  m_Debug = false;
+  this->Debug = false;
 }
 
 //-------------------------------------------------------------------
@@ -24,12 +24,12 @@ bool cmOrderLinkDirectories::LibraryInDirectory(const char* dir,
     }
   // next remove the extension (.a, .so ) and look for the library
   // under a different name as the linker can do either
-  if(m_RemoveLibraryExtension.find(libIn))
+  if(this->RemoveLibraryExtension.find(libIn))
     {
-    cmStdString lib = m_RemoveLibraryExtension.match(1);
-    cmStdString ext = m_RemoveLibraryExtension.match(2);
-    for(std::vector<cmStdString>::iterator i = m_LinkExtensions.begin();
-        i != m_LinkExtensions.end(); ++i)
+    cmStdString lib = this->RemoveLibraryExtension.match(1);
+    cmStdString ext = this->RemoveLibraryExtension.match(2);
+    for(std::vector<cmStdString>::iterator i = this->LinkExtensions.begin();
+        i != this->LinkExtensions.end(); ++i)
       {
       if(ext != *i)
         {
@@ -49,18 +49,18 @@ bool cmOrderLinkDirectories::LibraryInDirectory(const char* dir,
 //-------------------------------------------------------------------
 void cmOrderLinkDirectories::FindLibrariesInSeachPaths()
 {
-  for(std::set<cmStdString>::iterator dir = m_LinkPathSet.begin();
-      dir != m_LinkPathSet.end(); ++dir)
+  for(std::set<cmStdString>::iterator dir = this->LinkPathSet.begin();
+      dir != this->LinkPathSet.end(); ++dir)
     {
     for(std::map<cmStdString, Library>::iterator lib
-          = m_FullPathLibraries.begin();
-        lib != m_FullPathLibraries.end(); ++lib)
+          = this->FullPathLibraries.begin();
+        lib != this->FullPathLibraries.end(); ++lib)
       {
       if(lib->second.Path != *dir)
         {
         if(this->LibraryInDirectory(dir->c_str(), lib->second.File.c_str()))
           {
-          m_LibraryToDirectories[lib->second.FullPath].push_back(*dir);
+          this->LibraryToDirectories[lib->second.FullPath].push_back(*dir);
           }
         }
       }
@@ -70,11 +70,11 @@ void cmOrderLinkDirectories::FindLibrariesInSeachPaths()
 //-------------------------------------------------------------------
 void cmOrderLinkDirectories::FindIndividualLibraryOrders()
 {
-  for(std::vector<Library>::iterator lib = m_MultiDirectoryLibraries.begin();
-      lib != m_MultiDirectoryLibraries.end(); ++lib)
+  for(std::vector<Library>::iterator lib = this->MultiDirectoryLibraries.begin();
+      lib != this->MultiDirectoryLibraries.end(); ++lib)
     {
-    std::vector<cmStdString>& dirs = m_LibraryToDirectories[lib->FullPath];
-    m_DirectoryToAfterList[lib->Path] = dirs;
+    std::vector<cmStdString>& dirs = this->LibraryToDirectories[lib->FullPath];
+    this->DirectoryToAfterList[lib->Path] = dirs;
     }
 }
 
@@ -104,11 +104,11 @@ std::string cmOrderLinkDirectories::NoCaseExpression(const char* str)
 //-------------------------------------------------------------------
 void cmOrderLinkDirectories::CreateRegularExpressions()
 {
-  m_SplitFramework.compile("(.*)/(.*)\\.framework$");
+  this->SplitFramework.compile("(.*)/(.*)\\.framework$");
   cmStdString libext = "(";
   bool first = true;
-  for(std::vector<cmStdString>::iterator i = m_LinkExtensions.begin();
-      i != m_LinkExtensions.end(); ++i)
+  for(std::vector<cmStdString>::iterator i = this->LinkExtensions.begin();
+      i != this->LinkExtensions.end(); ++i)
     {
     if(!first)
       {
@@ -125,36 +125,36 @@ void cmOrderLinkDirectories::CreateRegularExpressions()
   libext += ").*";
   cmStdString reg("(.*)");
   reg += libext;
-  m_RemoveLibraryExtension.compile(reg.c_str());
+  this->RemoveLibraryExtension.compile(reg.c_str());
   reg = "";
-  if(m_LinkPrefix.size())
+  if(this->LinkPrefix.size())
     {
     reg = "^";
-    reg += m_LinkPrefix;
+    reg += this->LinkPrefix;
     }
   reg += "([^/]*)";
   reg += libext;
-  m_ExtractBaseLibraryName.compile(reg.c_str());
+  this->ExtractBaseLibraryName.compile(reg.c_str());
   reg = "([^/]*)";
   reg += libext;
-  m_ExtractBaseLibraryNameNoPrefix.compile(reg.c_str());
+  this->ExtractBaseLibraryNameNoPrefix.compile(reg.c_str());
 }
 
 
 //-------------------------------------------------------------------
 void cmOrderLinkDirectories::PrepareLinkTargets()
 {
-  for(std::vector<cmStdString>::iterator i = m_LinkItems.begin();
-      i != m_LinkItems.end(); ++i)
+  for(std::vector<cmStdString>::iterator i = this->LinkItems.begin();
+      i != this->LinkItems.end(); ++i)
     {
     // separate the library name from libfoo.a or foo.a
-    if(m_ExtractBaseLibraryName.find(*i))
+    if(this->ExtractBaseLibraryName.find(*i))
       {
-      *i = m_ExtractBaseLibraryName.match(1);
+      *i = this->ExtractBaseLibraryName.match(1);
       }
-    else if(m_ExtractBaseLibraryNameNoPrefix.find(*i))
+    else if(this->ExtractBaseLibraryNameNoPrefix.find(*i))
       {
-      *i = m_ExtractBaseLibraryNameNoPrefix.match(1);
+      *i = this->ExtractBaseLibraryNameNoPrefix.match(1);
       }
     }
 }
@@ -164,13 +164,13 @@ bool cmOrderLinkDirectories::FindPathNotInDirectoryToAfterList(
   cmStdString& path)
 {
   for(std::map<cmStdString, std::vector<cmStdString> >::iterator i
-        = m_DirectoryToAfterList.begin();
-      i != m_DirectoryToAfterList.end(); ++i)
+        = this->DirectoryToAfterList.begin();
+      i != this->DirectoryToAfterList.end(); ++i)
     {
     const cmStdString& p = i->first;
     bool found = false;
     for(std::map<cmStdString, std::vector<cmStdString> >::iterator j 
-          = m_DirectoryToAfterList.begin(); j != m_DirectoryToAfterList.end() 
+          = this->DirectoryToAfterList.begin(); j != this->DirectoryToAfterList.end() 
           && !found; ++j)
       {
       if(j != i)
@@ -181,7 +181,7 @@ bool cmOrderLinkDirectories::FindPathNotInDirectoryToAfterList(
     if(!found)
       {
       path = p;
-      m_DirectoryToAfterList.erase(i);
+      this->DirectoryToAfterList.erase(i);
       return true;
       }
     }
@@ -199,20 +199,20 @@ void cmOrderLinkDirectories::OrderPaths(std::vector<cmStdString>&
   // One at a time find paths that are not in any other paths after list
   // and put them into the orderedPaths vector in that order
   // FindPathNotInDirectoryToAfterList removes the path from the
-  // m_DirectoryToAfterList once it is found
+  // this->DirectoryToAfterList once it is found
   while(this->FindPathNotInDirectoryToAfterList(path))
     {
     orderedPaths.push_back(path);
     }
-  // at this point if there are still paths in m_DirectoryToAfterList
+  // at this point if there are still paths in this->DirectoryToAfterList
   // then there is a cycle and we are stuck
-  if(m_DirectoryToAfterList.size())
+  if(this->DirectoryToAfterList.size())
     {
     for(std::map<cmStdString, std::vector<cmStdString> >::iterator i
-          = m_DirectoryToAfterList.begin();
-        i != m_DirectoryToAfterList.end(); ++i)
+          = this->DirectoryToAfterList.begin();
+        i != this->DirectoryToAfterList.end(); ++i)
       {
-      m_ImpossibleDirectories.insert(i->first);
+      this->ImpossibleDirectories.insert(i->first);
       // still put it in the path list in the order we find them
       orderedPaths.push_back(i->first);
       }
@@ -228,22 +228,22 @@ void cmOrderLinkDirectories::SetLinkInformation(
   )
 {
   // Save the target name.
-  m_TargetName = targetName;
+  this->TargetName = targetName;
 
   // Merge the link directory search path given into our path set.
   std::vector<cmStdString> empty;
   for(std::vector<std::string>::const_iterator p = linkDirectories.begin();
       p != linkDirectories.end(); ++p)
     {
-    m_DirectoryToAfterList[*p] = empty;
-    m_LinkPathSet.insert(*p);
+    this->DirectoryToAfterList[*p] = empty;
+    this->LinkPathSet.insert(*p);
     }
 
   // Append the link library list into our raw list.
   for(std::vector<std::string>::const_iterator l = linkLibraries.begin();
       l != linkLibraries.end(); ++l)
     {
-    m_RawLinkItems.push_back(*l);
+    this->RawLinkItems.push_back(*l);
     }
 }
 
@@ -259,35 +259,35 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
   cmStdString file;
   std::vector<cmStdString> empty;
   bool framework = false;
-  for(unsigned int i=0; i < m_RawLinkItems.size(); ++i)
+  for(unsigned int i=0; i < this->RawLinkItems.size(); ++i)
     {
-    if(cmSystemTools::FileIsFullPath(m_RawLinkItems[i].c_str()))
+    if(cmSystemTools::FileIsFullPath(this->RawLinkItems[i].c_str()))
       {
-      if(cmSystemTools::FileIsDirectory(m_RawLinkItems[i].c_str()))
+      if(cmSystemTools::FileIsDirectory(this->RawLinkItems[i].c_str()))
         {
-        if(cmSystemTools::IsPathToFramework(m_RawLinkItems[i].c_str()))
+        if(cmSystemTools::IsPathToFramework(this->RawLinkItems[i].c_str()))
           {
-          m_SplitFramework.find(m_RawLinkItems[i]);
-          cmStdString path = m_SplitFramework.match(1);
+          this->SplitFramework.find(this->RawLinkItems[i]);
+          cmStdString path = this->SplitFramework.match(1);
           // Add the -F path if we have not yet done so
-          if(m_EmittedFrameworkPaths.insert(path).second)
+          if(this->EmittedFrameworkPaths.insert(path).second)
             {
             std::string fpath = "-F";
             fpath += cmSystemTools::ConvertToOutputPath(path.c_str());
-            m_LinkItems.push_back(fpath);
+            this->LinkItems.push_back(fpath);
             }
           // now add the -framework option
           std::string frame = "-framework ";
-          frame += m_SplitFramework.match(2);
-          m_LinkItems.push_back(frame);
+          frame += this->SplitFramework.match(2);
+          this->LinkItems.push_back(frame);
           framework = true;
           }
         else
           {
           std::string message = "Warning: Ignoring path found in link libraries for target: ";
-          message += m_TargetName;
+          message += this->TargetName;
           message += ", path is: ";
-          message += m_RawLinkItems[i];
+          message += this->RawLinkItems[i];
           message += ". Expected a library name or a full path to a library name.";
           cmSystemTools::Message(message.c_str());
           continue;
@@ -295,7 +295,7 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
         }
       if(!framework)
         {
-        cmSystemTools::SplitProgramPath(m_RawLinkItems[i].c_str(),
+        cmSystemTools::SplitProgramPath(this->RawLinkItems[i].c_str(),
                                         dir, file);
 #ifdef _WIN32
         // Avoid case problems for windows paths.
@@ -308,46 +308,46 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
           }
         dir = cmSystemTools::GetActualCaseForPath(dir.c_str());
 #endif
-        m_DirectoryToAfterList[dir] = empty;
-        m_LinkPathSet.insert(dir);
-        aLib.FullPath = m_RawLinkItems[i];
+        this->DirectoryToAfterList[dir] = empty;
+        this->LinkPathSet.insert(dir);
+        aLib.FullPath = this->RawLinkItems[i];
         aLib.File = file;
         aLib.Path = dir;
-        m_FullPathLibraries[aLib.FullPath] = aLib;
-        m_LinkItems.push_back(file);
+        this->FullPathLibraries[aLib.FullPath] = aLib;
+        this->LinkItems.push_back(file);
         }
       }
     else
       {
-      m_LinkItems.push_back(m_RawLinkItems[i]);
+      this->LinkItems.push_back(this->RawLinkItems[i]);
       }
     }
   this->FindLibrariesInSeachPaths();
   for(std::map<cmStdString, std::vector<cmStdString> >::iterator lib =
-        m_LibraryToDirectories.begin(); lib!= m_LibraryToDirectories.end(); 
+        this->LibraryToDirectories.begin(); lib!= this->LibraryToDirectories.end(); 
       ++lib)
     {
     if(lib->second.size() > 0)
       {
-      m_MultiDirectoryLibraries.push_back(m_FullPathLibraries[lib->first]);
+      this->MultiDirectoryLibraries.push_back(this->FullPathLibraries[lib->first]);
       }
     else
       {
-      m_SingleDirectoryLibraries.push_back(m_FullPathLibraries[lib->first]);
+      this->SingleDirectoryLibraries.push_back(this->FullPathLibraries[lib->first]);
       }
     }
   this->FindIndividualLibraryOrders();
-  m_SortedSearchPaths.clear();
-  if(m_Debug)
+  this->SortedSearchPaths.clear();
+  if(this->Debug)
     {
-    this->PrintMap("m_LibraryToDirectories", m_LibraryToDirectories);
-    this->PrintMap("m_DirectoryToAfterList", m_DirectoryToAfterList);
+    this->PrintMap("this->LibraryToDirectories", this->LibraryToDirectories);
+    this->PrintMap("this->DirectoryToAfterList", this->DirectoryToAfterList);
     }
-  this->OrderPaths(m_SortedSearchPaths); 
+  this->OrderPaths(this->SortedSearchPaths); 
   // now turn libfoo.a into foo and foo.a into foo
   // This will prepare the link items for -litem 
   this->PrepareLinkTargets();
-  if(m_ImpossibleDirectories.size())
+  if(this->ImpossibleDirectories.size())
     {
     cmSystemTools::Message(this->GetWarnings().c_str());
     return false;
@@ -358,15 +358,15 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
 std::string cmOrderLinkDirectories::GetWarnings()
 {
   std::string warning = "It is impossible to order the linker search path in such a way that libraries specified as full paths will be picked by the linker.\nDirectories and libraries involved are:\n";
-  for(std::set<cmStdString>::iterator i = m_ImpossibleDirectories.begin();
-      i != m_ImpossibleDirectories.end(); ++i)
+  for(std::set<cmStdString>::iterator i = this->ImpossibleDirectories.begin();
+      i != this->ImpossibleDirectories.end(); ++i)
     {
     warning += "Directory: ";
     warning += *i;
     warning += " contains:\n";
     std::map<cmStdString, std::vector<cmStdString> >::iterator j;
-    for(j = m_LibraryToDirectories.begin(); 
-        j != m_LibraryToDirectories.end(); ++j)
+    for(j = this->LibraryToDirectories.begin(); 
+        j != this->LibraryToDirectories.end(); ++j)
       {
       if(std::find(j->second.begin(), j->second.end(), *i)
          != j->second.end())
@@ -405,8 +405,8 @@ cmOrderLinkDirectories::PrintMap(const char* name,
 void cmOrderLinkDirectories::GetFullPathLibraries(std::vector<cmStdString>& 
                                                   libs)
 {
-  for(std::map<cmStdString, Library>::iterator i = m_FullPathLibraries.begin();
-      i != m_FullPathLibraries.end(); ++i)
+  for(std::map<cmStdString, Library>::iterator i = this->FullPathLibraries.begin();
+      i != this->FullPathLibraries.end(); ++i)
     {
     libs.push_back(i->first);
     }

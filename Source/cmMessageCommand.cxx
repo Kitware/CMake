@@ -65,7 +65,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
     {
       if (status)
         {
-          m_Makefile->DisplayStatus(message.c_str(), -1);
+          this->Makefile->DisplayStatus(message.c_str(), -1);
         }
       else
         {

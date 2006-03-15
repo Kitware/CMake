@@ -25,8 +25,8 @@ int cmExpr_yyparse( yyscan_t yyscanner );
 //
 cmExprParserHelper::cmExprParserHelper()
 {
-  m_FileLine = -1;
-  m_FileName = 0;
+  this->FileLine = -1;
+  this->FileName = 0;
 }
 
 
@@ -37,8 +37,8 @@ cmExprParserHelper::~cmExprParserHelper()
 
 void cmExprParserHelper::SetLineFile(long line, const char* file)
 {
-  m_FileLine = line;
-  m_FileName = file;
+  this->FileLine = line;
+  this->FileName = file;
 }
 
 int cmExprParserHelper::ParseString(const char* str, int verb)
@@ -54,7 +54,7 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
   this->InputBufferPos = 0;
   this->CurrentLine = 0;
   
-  m_Result = 0;
+  this->Result = 0;
 
   yyscan_t yyscanner;
   cmExpr_yylex_init(&yyscanner);
@@ -72,7 +72,7 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
 
   if ( Verbose )
     {
-    std::cerr << "Expanding [" << str << "] produced: [" << m_Result << "]" << std::endl;
+    std::cerr << "Expanding [" << str << "] produced: [" << this->Result << "]" << std::endl;
     }
   return 1;
 }
@@ -122,12 +122,12 @@ void cmExprParserHelper::Error(const char* str)
     }
   std::cerr << "]" << std::endl;
   */
-  m_Error = ostr.str();
+  this->ErrorString = ostr.str();
 }
 
 void cmExprParserHelper::SetResult(int value)
 {
-  m_Result = value;
+  this->Result = value;
 }
 
 

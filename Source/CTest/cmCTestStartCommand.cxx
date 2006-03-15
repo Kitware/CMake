@@ -48,11 +48,11 @@ bool cmCTestStartCommand::InitialPass(
     }
   if ( !src_dir )
     {
-    src_dir = m_Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY");
+    src_dir = this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY");
     }
   if ( !bld_dir)
     {
-    bld_dir = m_Makefile->GetDefinition("CTEST_BINARY_DIRECTORY");
+    bld_dir = this->Makefile->GetDefinition("CTEST_BINARY_DIRECTORY");
     }
   if ( !src_dir )
     {
@@ -75,7 +75,7 @@ bool cmCTestStartCommand::InitialPass(
     << "   Source directory: " << src_dir << std::endl
     << "   Build directory: " << bld_dir << std::endl);
 
-  m_Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", "OFF");
+  this->Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", "OFF");
   this->CTest->SetSuppressUpdatingCTestConfiguration(true);
   int model = this->CTest->GetTestModelFromString(smodel);
   this->CTest->SetTestModel(model);

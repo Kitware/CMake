@@ -56,10 +56,10 @@ protected:
     std::ostream& makeDepends, std::ostream& internalDepends);
 
   // The source file from which to start scanning.
-  std::string m_SourceFile;
+  std::string SourceFile;
 
   // The include file search path.
-  std::vector<std::string> const* m_IncludePath;
+  std::vector<std::string> const* IncludePath;
 
 private:
   cmDependsFortran(cmDependsFortran const&); // Purposely not implemented.

@@ -34,7 +34,7 @@ public:
    */
   cmSourceFile()
     {
-      m_CustomCommand = 0;
+      this->CustomCommand = 0;
     }
   ~cmSourceFile()
     {
@@ -54,8 +54,8 @@ public:
    * Get the list of the custom commands for this source file
    */
   const cmCustomCommand *GetCustomCommand() const 
-    {return m_CustomCommand;}
-  cmCustomCommand *GetCustomCommand() {return m_CustomCommand;}
+    {return this->CustomCommand;}
+  cmCustomCommand *GetCustomCommand() {return this->CustomCommand;}
   void SetCustomCommand(cmCustomCommand *cc);
     
   /**
@@ -79,27 +79,27 @@ public:
   /**
    * The full path to the file.
    */
-  const std::string &GetFullPath() const {return m_FullPath;}
-  void SetFullPath(const char *name) {m_FullPath = name;}
+  const std::string &GetFullPath() const {return this->FullPath;}
+  void SetFullPath(const char *name) {this->FullPath = name;}
 
   /**
    * The file name associated with stripped off directory and extension.
    * (In most cases this is the name of the class.)
    */
-  const std::string &GetSourceName() const {return m_SourceName;}
-  void SetSourceName(const char *name) {m_SourceName = name;}
+  const std::string &GetSourceName() const {return this->SourceName;}
+  void SetSourceName(const char *name) {this->SourceName = name;}
 
   /**
    * The file extension associated with source file
    */
-  const std::string &GetSourceExtension() const {return m_SourceExtension;}
-  void SetSourceExtension(const char *name) {m_SourceExtension = name;}
+  const std::string &GetSourceExtension() const {return this->SourceExtension;}
+  void SetSourceExtension(const char *name) {this->SourceExtension = name;}
 
   /**
    * Return the vector that holds the list of dependencies
    */
-  const std::vector<std::string> &GetDepends() const {return m_Depends;}
-  std::vector<std::string> &GetDepends() {return m_Depends;}
+  const std::vector<std::string> &GetDepends() const {return this->Depends;}
+  std::vector<std::string> &GetDepends() {return this->Depends;}
 
   /**
    * Get the source name without last extension
@@ -107,13 +107,13 @@ public:
   const std::string& GetSourceNameWithoutLastExtension();
 
 private:
-  std::map<cmStdString,cmStdString> m_Properties;
-  cmCustomCommand *m_CustomCommand;
-  std::string m_FullPath;
-  std::string m_SourceName;
-  std::string m_SourceExtension;
-  std::vector<std::string> m_Depends;
-  std::string m_SourceNameWithoutLastExtension;
+  std::map<cmStdString,cmStdString> Properties;
+  cmCustomCommand *CustomCommand;
+  std::string FullPath;
+  std::string SourceName;
+  std::string SourceExtension;
+  std::vector<std::string> Depends;
+  std::string SourceNameWithoutLastExtension;
 };
 
 #endif

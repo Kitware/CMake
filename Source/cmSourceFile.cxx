@@ -29,10 +29,10 @@ void cmSourceFile::SetName(const char* name, const char* dir,
 {
 
   this->SetProperty("HEADER_FILE_ONLY","1");
-  m_SourceNameWithoutLastExtension = "";
+  this->SourceNameWithoutLastExtension = "";
 
   // Save the original name given.
-  m_SourceName = name;
+  this->SourceName = name;
 
   // Convert the name to a full path in case the given name is a
   // relative path.
@@ -43,39 +43,39 @@ void cmSourceFile::SetName(const char* name, const char* dir,
   std::string hname = pathname;
   if(cmSystemTools::FileExists(hname.c_str()))
     {
-    m_SourceName = cmSystemTools::GetFilenamePath(name);
-    if ( m_SourceName.size() > 0 )
+    this->SourceName = cmSystemTools::GetFilenamePath(name);
+    if ( this->SourceName.size() > 0 )
       {
-      m_SourceName += "/";
+      this->SourceName += "/";
       }
-    m_SourceName += cmSystemTools::GetFilenameWithoutLastExtension(name);
+    this->SourceName += cmSystemTools::GetFilenameWithoutLastExtension(name);
     std::string::size_type pos = hname.rfind('.');
     if(pos != std::string::npos)
       {
-      m_SourceExtension = hname.substr(pos+1, hname.size()-pos);
+      this->SourceExtension = hname.substr(pos+1, hname.size()-pos);
       if ( cmSystemTools::FileIsFullPath(name) )
         {
         std::string::size_type pos2 = hname.rfind('/');
         if(pos2 != std::string::npos)
           {
-          m_SourceName = hname.substr(pos2+1, pos - pos2-1);
+          this->SourceName = hname.substr(pos2+1, pos - pos2-1);
           }
         }
       }
 
     // See if the file is a header file
-    if(std::find( headerExts.begin(), headerExts.end(), m_SourceExtension ) ==
+    if(std::find( headerExts.begin(), headerExts.end(), this->SourceExtension ) ==
       headerExts.end())
       {
       this->SetProperty("HEADER_FILE_ONLY","0");
       }
-    m_FullPath = hname;
+    this->FullPath = hname;
 
     // Mark this as an external object file if it has the proper
     // extension.  THIS CODE IS DUPLICATED IN THE OTHER SetName METHOD.
     // THESE METHODS SHOULD BE MERGED.
-    if ( m_SourceExtension == "obj" || m_SourceExtension == "o" ||
-      m_SourceExtension == "lo" )
+    if ( this->SourceExtension == "obj" || this->SourceExtension == "o" ||
+      this->SourceExtension == "lo" )
       {
       this->SetProperty("EXTERNAL_OBJECT", "1");
       }
@@ -91,9 +91,9 @@ void cmSourceFile::SetName(const char* name, const char* dir,
     hname += *ext;
     if(cmSystemTools::FileExists(hname.c_str()))
       {
-      m_SourceExtension = *ext;
+      this->SourceExtension = *ext;
       this->SetProperty("HEADER_FILE_ONLY","0");
-      m_FullPath = hname;
+      this->FullPath = hname;
       return;
       }
     }
@@ -107,8 +107,8 @@ void cmSourceFile::SetName(const char* name, const char* dir,
     hname += *ext;
     if(cmSystemTools::FileExists(hname.c_str()))
       {
-      m_SourceExtension = *ext;
-      m_FullPath = hname;
+      this->SourceExtension = *ext;
+      this->FullPath = hname;
       return;
       }
     }
@@ -134,23 +134,23 @@ void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
                            bool hfo)
 {
   this->SetProperty("HEADER_FILE_ONLY",(hfo ? "1" : "0"));
-  m_SourceNameWithoutLastExtension = "";
-  m_SourceName = name;
-  std::string fname = m_SourceName;
+  this->SourceNameWithoutLastExtension = "";
+  this->SourceName = name;
+  std::string fname = this->SourceName;
   if(ext && strlen(ext))
     {
     fname += ".";
     fname += ext;
     }
-  m_FullPath = cmSystemTools::CollapseFullPath(fname.c_str(), dir);
-  cmSystemTools::ConvertToUnixSlashes(m_FullPath);
-  m_SourceExtension = ext;
+  this->FullPath = cmSystemTools::CollapseFullPath(fname.c_str(), dir);
+  cmSystemTools::ConvertToUnixSlashes(this->FullPath);
+  this->SourceExtension = ext;
 
   // Mark this as an external object file if it has the proper
   // extension.  THIS CODE IS DUPLICATED IN THE OTHER SetName METHOD.
   // THESE METHODS SHOULD BE MERGED.
-  if ( m_SourceExtension == "obj" || m_SourceExtension == "o" ||
-       m_SourceExtension == "lo" )
+  if ( this->SourceExtension == "obj" || this->SourceExtension == "o" ||
+       this->SourceExtension == "lo" )
     {
     this->SetProperty("EXTERNAL_OBJECT", "1");
     }
@@ -159,9 +159,9 @@ void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
 
 void cmSourceFile::Print() const
 {
-  std::cerr << "m_FullPath: " <<  m_FullPath << "\n";
-  std::cerr << "m_SourceName: " << m_SourceName << std::endl;
-  std::cerr << "m_SourceExtension: " << m_SourceExtension << "\n";
+  std::cerr << "this->FullPath: " <<  this->FullPath << "\n";
+  std::cerr << "this->SourceName: " << this->SourceName << std::endl;
+  std::cerr << "this->SourceExtension: " << this->SourceExtension << "\n";
 }
 
 void cmSourceFile::SetProperty(const char* prop, const char* value)
@@ -174,14 +174,14 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
     {
     value = "NOTFOUND";
     }
-  m_Properties[prop] = value;
+  this->Properties[prop] = value;
 }
 
 const char *cmSourceFile::GetProperty(const char* prop) const
 {
   std::map<cmStdString,cmStdString>::const_iterator i = 
-    m_Properties.find(prop);
-  if (i != m_Properties.end())
+    this->Properties.find(prop);
+  if (i != this->Properties.end())
     {
     return i->second.c_str();
     }
@@ -191,8 +191,8 @@ const char *cmSourceFile::GetProperty(const char* prop) const
 bool cmSourceFile::GetPropertyAsBool(const char* prop) const
 {
   std::map<cmStdString,cmStdString>::const_iterator i = 
-    m_Properties.find(prop);
-  if (i != m_Properties.end())
+    this->Properties.find(prop);
+  if (i != this->Properties.end())
     {
     return cmSystemTools::IsOn(i->second.c_str());
     }
@@ -201,19 +201,19 @@ bool cmSourceFile::GetPropertyAsBool(const char* prop) const
 
 void cmSourceFile::SetCustomCommand(cmCustomCommand* cc)
 {
-  if(m_CustomCommand)
+  if(this->CustomCommand)
     {
-    delete m_CustomCommand;
+    delete this->CustomCommand;
     }
-  m_CustomCommand = cc;
+  this->CustomCommand = cc;
 }
 
 const std::string& cmSourceFile::GetSourceNameWithoutLastExtension()
 {
-  if ( m_SourceNameWithoutLastExtension.empty() )
+  if ( this->SourceNameWithoutLastExtension.empty() )
     {
-    m_SourceNameWithoutLastExtension = 
-      cmSystemTools::GetFilenameWithoutLastExtension(m_FullPath);
+    this->SourceNameWithoutLastExtension = 
+      cmSystemTools::GetFilenameWithoutLastExtension(this->FullPath);
     }
-  return m_SourceNameWithoutLastExtension;
+  return this->SourceNameWithoutLastExtension;
 }

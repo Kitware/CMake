@@ -133,14 +133,14 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
       }
     
     std::string coutput = std::string(output, first, last-first+1);
-    m_Makefile->AddDefinition(output_variable.c_str(), coutput.c_str());
+    this->Makefile->AddDefinition(output_variable.c_str(), coutput.c_str());
     }
 
   if ( return_variable.size() > 0 )
     {
     char buffer[100];
     sprintf(buffer, "%d", retVal);
-    m_Makefile->AddDefinition(return_variable.c_str(), buffer);
+    this->Makefile->AddDefinition(return_variable.c_str(), buffer);
     }
   
   return true;

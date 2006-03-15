@@ -243,7 +243,7 @@ int do_cmake(int ac, char** av)
 
   if(command)
     {
-    int ret = cmake::CMakeCommand(args);
+    int ret = cmake::ExecuteCMakeCommand(args);
     return ret;
     }
   if (wiz)

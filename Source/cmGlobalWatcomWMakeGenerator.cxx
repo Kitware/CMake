@@ -20,8 +20,8 @@
 
 cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
 {
-  m_FindMakeProgramFile = "CMakeFindWMake.cmake";
-  m_ForceUnixPaths = false;
+  this->FindMakeProgramFile = "CMakeFindWMake.cmake";
+  this->ForceUnixPaths = false;
 }
 
 void cmGlobalWatcomWMakeGenerator::EnableLanguage(std::vector<std::string>const& l,

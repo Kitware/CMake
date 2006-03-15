@@ -22,18 +22,18 @@
 #include <string.h>
 
 //----------------------------------------------------------------------------
-cmDepends::cmDepends(): m_Verbose(false), m_FileComparison(0),
-  m_MaxPath(cmSystemTools::GetMaximumFilePathLength()),
-  m_Dependee(new char[m_MaxPath]),
-  m_Depender(new char[m_MaxPath])
+cmDepends::cmDepends(): Verbose(false), FileComparison(0),
+  MaxPath(cmSystemTools::GetMaximumFilePathLength()),
+  Dependee(new char[MaxPath]),
+  Depender(new char[MaxPath])
 {
 }
 
 //----------------------------------------------------------------------------
 cmDepends::~cmDepends()
 {
-  delete [] m_Dependee;
-  delete [] m_Depender;
+  delete [] this->Dependee;
+  delete [] this->Depender;
 }
 
 //----------------------------------------------------------------------------
@@ -48,12 +48,12 @@ void cmDepends::Check(const char *makeFile, const char *internalFile)
 {
   // Dependency checks must be done in proper working directory.
   std::string oldcwd = ".";
-  if(m_CompileDirectory != ".")
+  if(this->CompileDirectory != ".")
     {
     // Get the CWD but do not call CollapseFullPath because
     // we only need it to cd back, and the form does not matter
     oldcwd = cmSystemTools::GetCurrentWorkingDirectory(false);
-    cmSystemTools::ChangeDirectory(m_CompileDirectory.c_str());
+    cmSystemTools::ChangeDirectory(this->CompileDirectory.c_str());
     }
 
   // Check whether dependencies must be regenerated.
@@ -76,7 +76,7 @@ void cmDepends::Check(const char *makeFile, const char *internalFile)
 void cmDepends::Clear(const char *file)
 {
   // Print verbose output.
-  if(m_Verbose)
+  if(this->Verbose)
     {
     cmOStringStream msg;
     msg << "Clearing dependencies in \"" << file << "\"." << std::endl;
@@ -103,21 +103,21 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
   // or newer than the depender then dependencies should be
   // regenerated.
   bool okay = true;
-  while(internalDepends.getline(m_Dependee, m_MaxPath))
+  while(internalDepends.getline(this->Dependee, this->MaxPath))
     {
-    if ( m_Dependee[0] == 0 || m_Dependee[0] == '#' || m_Dependee[0] == '\r' )
+    if ( this->Dependee[0] == 0 || this->Dependee[0] == '#' || this->Dependee[0] == '\r' )
       {
       continue;
       }
     size_t len = internalDepends.gcount()-1;
-    if ( m_Dependee[len-1] == '\r' )
+    if ( this->Dependee[len-1] == '\r' )
       {
       len --;
-      m_Dependee[len] = 0;
+      this->Dependee[len] = 0;
       }
-    if ( m_Dependee[0] != ' ' )
+    if ( this->Dependee[0] != ' ' )
       {
-      memcpy(m_Depender, m_Dependee, len+1);
+      memcpy(this->Depender, this->Dependee, len+1);
       continue;
       }
     /*
@@ -131,15 +131,15 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
     // Dependencies must be regenerated if the dependee does not exist
     // or if the depender exists and is older than the dependee.
     bool regenerate = false;
-    const char* dependee = m_Dependee+1;
-    const char* depender = m_Depender;
+    const char* dependee = this->Dependee+1;
+    const char* depender = this->Depender;
     if(!cmSystemTools::FileExists(dependee))
       {
       // The dependee does not exist.
       regenerate = true;
 
       // Print verbose output.
-      if(m_Verbose)
+      if(this->Verbose)
         {
         cmOStringStream msg;
         msg << "Dependee \"" << dependee
@@ -152,14 +152,14 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
       {
       // The dependee and depender both exist.  Compare file times.
       int result = 0;
-      if((!m_FileComparison->FileTimeCompare(depender, dependee,
+      if((!this->FileComparison->FileTimeCompare(depender, dependee,
                                              &result) || result < 0))
         {
         // The depender is older than the dependee.
         regenerate = true;
 
         // Print verbose output.
-        if(m_Verbose)
+        if(this->Verbose)
           {
           cmOStringStream msg;
           msg << "Dependee \"" << dependee

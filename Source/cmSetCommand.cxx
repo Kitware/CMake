@@ -63,7 +63,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
   // SET (VAR) // Removes the definition of VAR.
   if (args.size() == 1)
     {
-    m_Makefile->RemoveDefinition(args[0].c_str());
+    this->Makefile->RemoveDefinition(args[0].c_str());
     return true;
     }
 
@@ -134,7 +134,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
 
   // see if this is already in the cache
   cmCacheManager::CacheIterator it = 
-    m_Makefile->GetCacheManager()->GetCacheIterator(variable);
+    this->Makefile->GetCacheManager()->GetCacheIterator(variable);
   if(!it.IsAtEnd() && (it.GetType() != cmCacheManager::UNINITIALIZED))
     {
     // if the set is trying to CACHE the value but the value
@@ -150,7 +150,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
   // if it is meant to be in the cache then define it in the cache
   if(cache)
     {
-    m_Makefile->AddCacheDefinition(variable,
+    this->Makefile->AddCacheDefinition(variable,
                                    value.c_str(),
                                    docstring,
                                    type);
@@ -158,7 +158,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
   else
     {
     // add the definition
-    m_Makefile->AddDefinition(variable, value.c_str());
+    this->Makefile->AddDefinition(variable, value.c_str());
     }
   return true;
 }

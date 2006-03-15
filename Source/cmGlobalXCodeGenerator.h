@@ -36,7 +36,7 @@ public:
   cmGlobalXCodeGenerator();
   static cmGlobalGenerator* New();
 
-  void SetVersion(int v) { m_XcodeVersion = v;}
+  void SetVersion(int v) { this->XcodeVersion = v;}
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalXCodeGenerator::GetActualName();}
@@ -104,7 +104,7 @@ private:
                                const char* commandFileName);
   cmXCodeObject* FindXCodeTarget(cmTarget*);
   // create cmXCodeObject from these functions so that memory can be managed
-  // correctly.  All objects created are stored in m_XCodeObjects.
+  // correctly.  All objects created are stored in this->XCodeObjects.
   cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype);
   cmXCodeObject* CreateObject(cmXCodeObject::Type type);
   cmXCodeObject* CreateString(const char* s);
@@ -126,7 +126,7 @@ private:
                            std::string& projectName,
                            const char* buildType);
   std::string ExtractFlag(const char* flag, std::string& flags);
-  // delete all objects in the m_XCodeObjects vector.
+  // delete all objects in the this->XCodeObjects vector.
   void ClearXCodeObjects();
   void CreateXCodeObjects(cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
@@ -160,27 +160,27 @@ protected:
   virtual const char* GetInstallTargetName()      { return "install"; }
   virtual const char* GetPackageTargetName()      { return "package"; }
 
-  int m_XcodeVersion;
-  std::vector<cmXCodeObject*> m_XCodeObjects;
-  cmXCodeObject* m_RootObject;
+  int XcodeVersion;
+  std::vector<cmXCodeObject*> XCodeObjects;
+  cmXCodeObject* RootObject;
 private:
-  cmXCodeObject* m_MainGroupChildren;
-  cmXCodeObject* m_SourcesGroupChildren;
-  cmMakefile* m_CurrentMakefile;
-  cmLocalGenerator* m_CurrentLocalGenerator;
-  std::vector<std::string> m_CurrentConfigurationTypes;
-  std::string m_CurrentReRunCMakeMakefile;
-  std::string m_CurrentXCodeHackMakefile;
-  std::string m_CurrentProject;
-  std::string m_OutputDir; 
-  std::string m_LibraryOutputPath;
-  std::string m_ExecutableOutputPath;
-  std::set<cmStdString> m_TargetDoneSet;
-  std::vector<std::string> m_CurrentOutputDirectoryComponents;
-  std::vector<std::string> m_ProjectOutputDirectoryComponents;
-  std::map<cmSourceFile*, cmXCodeObject* > m_GroupMap;
-  std::map<cmStdString, cmXCodeObject* > m_GroupNameMap;
-  std::map<cmStdString, cmXCodeObject* > m_TargetGroup;
+  cmXCodeObject* MainGroupChildren;
+  cmXCodeObject* SourcesGroupChildren;
+  cmMakefile* CurrentMakefile;
+  cmLocalGenerator* CurrentLocalGenerator;
+  std::vector<std::string> CurrentConfigurationTypes;
+  std::string CurrentReRunCMakeMakefile;
+  std::string CurrentXCodeHackMakefile;
+  std::string CurrentProject;
+  std::string OutputDir; 
+  std::string LibraryOutputPath;
+  std::string ExecutableOutputPath;
+  std::set<cmStdString> TargetDoneSet;
+  std::vector<std::string> CurrentOutputDirectoryComponents;
+  std::vector<std::string> ProjectOutputDirectoryComponents;
+  std::map<cmSourceFile*, cmXCodeObject* > GroupMap;
+  std::map<cmStdString, cmXCodeObject* > GroupNameMap;
+  std::map<cmStdString, cmXCodeObject* > TargetGroup;
 };
 
 #endif
