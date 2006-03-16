@@ -57,21 +57,19 @@ void cmExportLibraryDependenciesCommand::FinalPass()
     }
 
   // Use copy-if-different if not appending.
-  std::ostream* foutPtr;
-  std::auto_ptr<cmGeneratedFileStream> foutNew;
+  std::auto_ptr<std::ofstream> foutPtr;
   if(append)
     {
-    foutPtr = new std::ofstream(fname.c_str(), std::ios::app);
+    foutPtr.reset(new std::ofstream(fname.c_str(), std::ios::app));
     }
   else
     {
     std::auto_ptr<cmGeneratedFileStream> ap(
       new cmGeneratedFileStream(fname.c_str(), true));
     ap->SetCopyIfDifferent(true);
-    foutNew = ap;
-    foutPtr = foutNew.get();
+    foutPtr.reset(ap.release());
     }
-  std::ostream& fout = *foutPtr;
+  std::ostream& fout = *foutPtr.get();
 
   if (!fout)
     {
