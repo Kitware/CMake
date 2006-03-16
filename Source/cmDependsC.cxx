@@ -38,7 +38,7 @@ cmDependsC::cmDependsC(std::vector<std::string> const& includes,
   IncludeRegexScan(scanRegex),
   IncludeRegexComplain(complainRegex),
   GeneratedFiles(&generatedFiles),
-  cacheFileName(cacheFileName)
+  CacheFileName(cacheFileName)
 {
   this->ReadCacheFile();
 }
@@ -212,11 +212,11 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
 //----------------------------------------------------------------------------
 void cmDependsC::ReadCacheFile()
 {
-  if(this->cacheFileName.size() == 0)
+  if(this->CacheFileName.size() == 0)
     {
     return;
     }
-  std::ifstream fin(this->cacheFileName.c_str());
+  std::ifstream fin(this->CacheFileName.c_str());
   if(!fin)
     {
     return;
@@ -240,7 +240,7 @@ void cmDependsC::ReadCacheFile()
       haveFileName=true;
       int newer=0;
       cmFileTimeComparison comp;
-      bool res=comp.FileTimeCompare(this->cacheFileName.c_str(), 
+      bool res=comp.FileTimeCompare(this->CacheFileName.c_str(), 
                                     line.c_str(), &newer);
       
       if ((res==true) && (newer==1)) //cache is newer than the parsed file
@@ -268,11 +268,11 @@ void cmDependsC::ReadCacheFile()
 //----------------------------------------------------------------------------
 void cmDependsC::WriteCacheFile() const
 {
-  if(this->cacheFileName.size() == 0)
+  if(this->CacheFileName.size() == 0)
     {
     return;
     }
-  std::ofstream cacheOut(this->cacheFileName.c_str());
+  std::ofstream cacheOut(this->CacheFileName.c_str());
   if(!cacheOut)
     {
     return;

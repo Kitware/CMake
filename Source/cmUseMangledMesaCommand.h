@@ -75,12 +75,6 @@ public:
 protected:
   void CopyAndFullPathMesaHeader(const char* source,
                                  const char* outdir);
-private:
-  std::vector<cmSourceFile> m_WrapClasses;
-  std::vector<std::string> m_WrapHeaders;
-  std::string m_LibraryName;
-  std::string m_SourceList;
-  std::vector<std::string> m_Commands;
 };
 
 

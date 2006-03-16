@@ -31,13 +31,13 @@
 class cmData
 {
 public:
-  cmData(const char* name): m_Name(name) {}
+  cmData(const char* name): Name(name) {}
   virtual ~cmData() {}
   
   const std::string& GetName() const
-    { return m_Name; }
+    { return this->Name; }
 protected:
-  std::string m_Name;
+  std::string Name;
 };
 
 #endif

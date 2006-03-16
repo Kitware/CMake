@@ -240,11 +240,11 @@ private:
 class cmOStrStreamCleanup
 {
 public:
-  cmOStrStreamCleanup(std::ostrstream& ostr): m_OStrStream(ostr) {}
-  ~cmOStrStreamCleanup() { m_OStrStream.rdbuf()->freeze(0); }
+  cmOStrStreamCleanup(std::ostrstream& ostr): OStrStream(ostr) {}
+  ~cmOStrStreamCleanup() { this->OStrStream.rdbuf()->freeze(0); }
   static void IgnoreUnusedVariable(const cmOStrStreamCleanup&) {}
 protected:
-  std::ostrstream& m_OStrStream;
+  std::ostrstream& OStrStream;
 };
 
 class cmOStringStream: public std::ostrstream

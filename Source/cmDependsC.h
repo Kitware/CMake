@@ -93,7 +93,7 @@ protected:
 
   std::map<cmStdString, cmIncludeLines *> fileCache;
 
-  cmStdString cacheFileName;
+  cmStdString CacheFileName;
 
   void WriteCacheFile() const;
   void ReadCacheFile();

@@ -73,9 +73,6 @@ public:
     }
   
   cmTypeMacro(cmVariableRequiresCommand, cmCommand);
-private:
-  std::string m_ErrorMessage;
-  bool m_RequirementsMet;
 };
 
 

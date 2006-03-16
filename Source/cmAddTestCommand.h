@@ -74,8 +74,6 @@ public:
   
   cmTypeMacro(cmAddTestCommand, cmCommand);
 
-private:
-  std::string m_Test;
 };
 
 
