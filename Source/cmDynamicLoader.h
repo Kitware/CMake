@@ -37,14 +37,6 @@ public:
   static cmsys::DynamicLoader::LibraryHandle OpenLibrary(const char*);
 
   // Description:
-  // Return the library prefix for the given architecture
-  static const char* LibPrefix();
-
-  // Description:
-  // Return the library extension for the given architecture
-  static const char* LibExtension();
-
-  // Description:
   // Flush the cache of dynamic loader.
   static void FlushCache();
 

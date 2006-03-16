@@ -230,8 +230,11 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
   this->Makefile->RemoveDefinition(reportVar.c_str());
 
   // the file must exist
-  std::string fullPath = cmDynamicLoader::LibPrefix();
-  fullPath += "cm" + args[0] + cmDynamicLoader::LibExtension();
+  std::string moduleName =
+    this->Makefile->GetRequiredDefinition("CMAKE_SHARED_MODULE_PREFIX");
+  moduleName += "cm" + args[0];
+  moduleName +=
+    this->Makefile->GetRequiredDefinition("CMAKE_SHARED_MODULE_SUFFIX");
 
   // search for the file
   std::vector<std::string> path;
@@ -246,13 +249,13 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   // Try to find the program.
-  fullPath = cmSystemTools::FindFile(fullPath.c_str(), path);
+  std::string fullPath = cmSystemTools::FindFile(moduleName.c_str(), path);
   if (fullPath == "")
     {
-    fullPath = "Attempt to load command failed from file : ";
-    fullPath += cmDynamicLoader::LibPrefix();
-    fullPath += "cm" + args[0] + cmDynamicLoader::LibExtension();
-    this->SetError(fullPath.c_str());
+    cmOStringStream e;
+    e << "Attempt to load command failed from file \""
+      << moduleName << "\"";
+    this->SetError(e.str().c_str());
     return false;
     }
 

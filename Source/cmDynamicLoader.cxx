@@ -115,16 +115,3 @@ void cmDynamicLoader::FlushCache()
 {
   cmDynamicLoaderCache::GetInstance()->FlushCache();
 }
-
-// Stay consistent with the Modules/Platform directory as
-// to what the correct prefix and lib extension
-const char* cmDynamicLoader::LibPrefix()
-{
-  return CMAKE_SHARED_MODULE_PREFIX;
-}
-
-const char* cmDynamicLoader::LibExtension()
-{
-  return CMAKE_SHARED_MODULE_SUFFIX;
-}
-
