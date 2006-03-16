@@ -65,10 +65,7 @@ protected:
   cmStdString EnvironmentPath; // LIB,INCLUDE
 
   bool AlreadyInCache;
-  bool NoSystemPath;
-  bool NoCMakeEnvironmentPath;
-  bool NoCMakePath;
-  bool NoCMakeSystemPath;
+  bool NoDefaultPath;
   
   bool SearchFrameworkFirst;
   bool SearchFrameworkOnly;
