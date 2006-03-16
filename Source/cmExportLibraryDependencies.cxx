@@ -20,7 +20,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmake.h"
 
-#include <memory> // auto_ptr
+#include <cmsys/auto_ptr.hxx>
 
 // cmExecutableCommand
 bool cmExportLibraryDependenciesCommand::InitialPass(std::vector<std::string> const& args)
@@ -57,16 +57,16 @@ void cmExportLibraryDependenciesCommand::FinalPass()
     }
 
   // Use copy-if-different if not appending.
-  std::auto_ptr<std::ofstream> foutPtr;
+  cmsys::auto_ptr<std::ofstream> foutPtr;
   if(append)
     {
-    std::auto_ptr<std::ofstream> ap(
+    cmsys::auto_ptr<std::ofstream> ap(
       new std::ofstream(fname.c_str(), std::ios::app));
     foutPtr = ap;
     }
   else
     {
-    std::auto_ptr<cmGeneratedFileStream> ap(
+    cmsys::auto_ptr<cmGeneratedFileStream> ap(
       new cmGeneratedFileStream(fname.c_str(), true));
     ap->SetCopyIfDifferent(true);
     foutPtr = ap;
