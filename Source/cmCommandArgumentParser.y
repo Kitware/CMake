@@ -76,13 +76,13 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 /* Tokens */
 %token cal_NCURLY
 %token cal_DCURLY
-%token cal_DOLLAR
-%token cal_LCURLY
-%token cal_RCURLY
+%token cal_DOLLAR "$"
+%token cal_LCURLY "{"
+%token cal_RCURLY "}"
 %token cal_NAME
-%token cal_BSLASH
+%token cal_BSLASH "\\"
 %token cal_SYMBOL
-%token cal_AT
+%token cal_AT     "@"
 %token cal_ERROR
 %token cal_ATNAME
 
