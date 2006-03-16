@@ -738,8 +738,13 @@ int cmCursesMainForm::Generate()
     cmSystemTools::ResetErrorOccuredFlag();
     int xx,yy;
     getmaxyx(stdscr, yy, xx);
+    const char* title = "Messages during last pass.";
+    if(cmSystemTools::GetErrorOccuredFlag())
+      {
+      title = "Errors occurred during the last pass.";
+      }
     cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(this->Errors,
-                                                                "Errors occurred during the last pass.");
+                                                                title);
     CurrentForm = msgs;
     msgs->Render(1,1,xx,yy);
     msgs->HandleInput();
