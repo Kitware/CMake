@@ -14,24 +14,6 @@
 #ifndef @KWSYS_NAMESPACE@_auto_ptr_hxx
 #define @KWSYS_NAMESPACE@_auto_ptr_hxx
 
-#if !((defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__))
-
-// Use the conforming implementation provided by the compiler.
-
-#include <@KWSYS_NAMESPACE@/stl/memory>
-
-namespace @KWSYS_NAMESPACE@
-{
-
-using @KWSYS_NAMESPACE@_stl::auto_ptr;
-
-}
-
-#else
-
-// This compiler does not have a conforming implementation.  Use our
-// own.
-
 namespace @KWSYS_NAMESPACE@
 {
 
@@ -72,7 +54,5 @@ public:
 };
 
 } // namespace @KWSYS_NAMESPACE@
-
-#endif
 
 #endif
