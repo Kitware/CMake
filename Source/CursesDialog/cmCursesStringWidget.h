@@ -50,10 +50,8 @@ public:
    * Set/Get InEdit flag. Can be used to tell the widget to leave
    * edit mode (in case of a resize for example).
    */
-  void SetInEdit(bool inedit)
-    { m_InEdit = inedit; }
-  bool GetInEdit()
-    { return m_InEdit; }
+  void SetInEdit(bool inedit) { this->InEdit = inedit; }
+  bool GetInEdit() { return this->InEdit; }
 
   /**
    * This method is called when different keys are pressed. The
@@ -75,9 +73,9 @@ protected:
   void operator=(const cmCursesStringWidget&);
 
   // true if the widget is in edit mode
-  bool m_InEdit;
-  char* m_OriginalString;
-  bool m_Done;
+  bool InEdit;
+  char* OriginalString;
+  bool Done;
 };
 
 #endif // __cmCursesStringWidget_h

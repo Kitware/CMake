@@ -36,12 +36,12 @@ protected:
   cmCursesCacheEntryComposite(const cmCursesCacheEntryComposite& from);
   void operator=(const cmCursesCacheEntryComposite&);
 
-  cmCursesLabelWidget* m_Label;
-  cmCursesLabelWidget* m_IsNewLabel;
-  cmCursesWidget* m_Entry;
-  std::string m_Key;
-  int m_LabelWidth;
-  int m_EntryWidth;
+  cmCursesLabelWidget* Label;
+  cmCursesLabelWidget* IsNewLabel;
+  cmCursesWidget* Entry;
+  std::string Key;
+  int LabelWidth;
+  int EntryWidth;
 };
 
 #endif // __cmCursesCacheEntryComposite_h

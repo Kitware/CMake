@@ -20,6 +20,6 @@ cmCursesFilePathWidget::cmCursesFilePathWidget(int width, int height,
                                            int left, int top) :
   cmCursesPathWidget(width, height, left, top)
 {
-  m_Type = cmCacheManager::FILEPATH;
+  this->Type = cmCacheManager::FILEPATH;
 }
 

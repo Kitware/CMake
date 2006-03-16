@@ -52,7 +52,7 @@ public:
    * Get the type of the widget (STRING, PATH etc...)
    */
   cmCacheManager::CacheEntryType GetType()
-    { return m_Type; }
+    { return this->Type; }
 
   /**
    * If there are any, print the widget specific commands
@@ -69,11 +69,11 @@ public:
    */
   void SetPage(int page)
     {
-      m_Page = page;
+      this->Page = page;
     }
   int GetPage()
     {
-      return m_Page;
+      return this->Page;
     }
 
   friend class cmCursesMainForm;
@@ -82,11 +82,11 @@ protected:
   cmCursesWidget(const cmCursesWidget& from);
   void operator=(const cmCursesWidget&);
 
-  cmCacheManager::CacheEntryType m_Type;
-  std::string m_Value;
-  FIELD* m_Field;
+  cmCacheManager::CacheEntryType Type;
+  std::string Value;
+  FIELD* Field;
   // The page in the main form this widget is in
-  int m_Page;
+  int Page;
 };
 
 #endif // __cmCursesWidget_h

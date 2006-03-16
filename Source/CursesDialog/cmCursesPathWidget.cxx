@@ -23,16 +23,16 @@ cmCursesPathWidget::cmCursesPathWidget(int width, int height,
                                            int left, int top) :
   cmCursesStringWidget(width, height, left, top)
 {
-  m_Type = cmCacheManager::PATH;
-  m_Cycle = false;
-  m_CurrentIndex = 0;
+  this->Type = cmCacheManager::PATH;
+  this->Cycle = false;
+  this->CurrentIndex = 0;
 }
 
 void cmCursesPathWidget::OnType(int& key, cmCursesMainForm* fm, WINDOW* w)
 {
-  m_Cycle = false;
-  m_CurrentIndex = 0;
-  m_LastGlob = "";
+  this->Cycle = false;
+  this->CurrentIndex = 0;
+  this->LastGlob = "";
   this->cmCursesStringWidget::OnType(key, fm, w);
 }
 
@@ -47,16 +47,16 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
   form_driver(form, REQ_PREV_FIELD);
   std::string cstr = this->GetString();
   cstr = cstr.substr(0, cstr.find_last_not_of(" \t\n\r")+1);
-  if ( m_LastString != cstr )
+  if ( this->LastString != cstr )
     {
-    m_Cycle = false;
-    m_CurrentIndex = 0;
-    m_LastGlob = "";
+    this->Cycle = false;
+    this->CurrentIndex = 0;
+    this->LastGlob = "";
     }
   std::string glob;
-  if ( m_Cycle )
+  if ( this->Cycle )
     {
-    glob = m_LastGlob;
+    glob = this->LastGlob;
     }
   else
     {
@@ -64,10 +64,10 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
     }
   std::vector<cmStdString> dirs;
 
-  cmSystemTools::SimpleGlob(glob.c_str(), dirs, (m_Type == cmCacheManager::PATH?-1:0));
-  if ( m_CurrentIndex < dirs.size() )
+  cmSystemTools::SimpleGlob(glob.c_str(), dirs, (this->Type == cmCacheManager::PATH?-1:0));
+  if ( this->CurrentIndex < dirs.size() )
     {
-    cstr = dirs[m_CurrentIndex];
+    cstr = dirs[this->CurrentIndex];
     }
   if ( cstr[cstr.size()-1] == '*' )
     {
@@ -83,13 +83,13 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
   touchwin(w); 
   wrefresh(w); 
   form_driver(form, REQ_END_FIELD);
-  m_LastGlob = glob;
-  m_LastString = cstr;
-  m_Cycle = true;
-  m_CurrentIndex ++;
-  if ( m_CurrentIndex >= dirs.size() )
+  this->LastGlob = glob;
+  this->LastString = cstr;
+  this->Cycle = true;
+  this->CurrentIndex ++;
+  if ( this->CurrentIndex >= dirs.size() )
     {
-    m_CurrentIndex = 0;
+    this->CurrentIndex = 0;
     }
 }
 

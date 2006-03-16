@@ -132,39 +132,39 @@ protected:
   void JumpToCacheEntry(int idx, const char* str);
 
   // Copies of cache entries stored in the user interface
-  std::vector<cmCursesCacheEntryComposite*>* m_Entries;
+  std::vector<cmCursesCacheEntryComposite*>* Entries;
   // Errors produced during last run of cmake
-  std::vector<std::string> m_Errors;
+  std::vector<std::string> Errors;
   // Command line argumens to be passed to cmake each time
   // it is run
-  std::vector<std::string> m_Args;
+  std::vector<std::string> Args;
   // Message displayed when user presses 'h'
   // It is: Welcome + info about current entry + common help
-  std::vector<std::string> m_HelpMessage;
+  std::vector<std::string> HelpMessage;
 
   // Common help
   static const char* s_ConstHelpMessage;
 
   // Fields displayed. Includes labels, new entry markers, entries
-  FIELD** m_Fields;
+  FIELD** Fields;
   // Where is source of current project
-  std::string m_WhereSource;
+  std::string WhereSource;
   // Where is cmake executable
-  std::string m_WhereCMake;
+  std::string WhereCMake;
   // Number of entries shown (depends on mode -normal or advanced-)
-  int m_NumberOfVisibleEntries;
-  bool m_AdvancedMode;
+  int NumberOfVisibleEntries;
+  bool AdvancedMode;
   // Did the iteration converge (no new entries) ?
-  bool m_OkToGenerate;
+  bool OkToGenerate;
   // Number of pages displayed
-  int m_NumberOfPages;
+  int NumberOfPages;
 
-  int m_InitialWidth;
-  cmake *m_CMakeInstance;
+  int InitialWidth;
+  cmake *CMakeInstance;
 
-  std::string m_SearchString;
-  std::string m_OldSearchString;
-  bool m_SearchMode;
+  std::string SearchString;
+  std::string OldSearchString;
+  bool SearchMode;
 };
 
 #endif // __cmCursesMainForm_h

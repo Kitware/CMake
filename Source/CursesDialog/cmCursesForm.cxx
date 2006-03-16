@@ -21,16 +21,16 @@ bool cmCursesForm::Debug = false;
 
 cmCursesForm::cmCursesForm()
 {
-  m_Form = 0;
+  this->Form = 0;
 }
 
 cmCursesForm::~cmCursesForm()
 {
-  if (m_Form)
+  if (this->Form)
     {
-    unpost_form(m_Form);
-    free_form(m_Form);
-    m_Form = 0;
+    unpost_form(this->Form);
+    free_form(this->Form);
+    this->Form = 0;
     }
 }
 

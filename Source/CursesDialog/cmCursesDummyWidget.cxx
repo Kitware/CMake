@@ -20,7 +20,7 @@ cmCursesDummyWidget::cmCursesDummyWidget(int width, int height,
                                            int left, int top) :
   cmCursesWidget(width, height, left, top)
 {
-  m_Type = cmCacheManager::INTERNAL;
+  this->Type = cmCacheManager::INTERNAL;
 }
 
 

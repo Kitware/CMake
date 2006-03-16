@@ -21,10 +21,10 @@ cmCursesBoolWidget::cmCursesBoolWidget(int width, int height,
                                        int left, int top) :
   cmCursesWidget(width, height, left, top)
 {
-  m_Type = cmCacheManager::BOOL;
-  set_field_fore(m_Field,  A_NORMAL);
-  set_field_back(m_Field,  A_STANDOUT);
-  field_opts_off(m_Field,  O_STATIC);
+  this->Type = cmCacheManager::BOOL;
+  set_field_fore(this->Field,  A_NORMAL);
+  set_field_back(this->Field,  A_STANDOUT);
+  field_opts_off(this->Field,  O_STATIC);
   this->SetValueAsBool(false);
 }
 
@@ -68,7 +68,7 @@ void cmCursesBoolWidget::SetValueAsBool(bool value)
 
 bool cmCursesBoolWidget::GetValueAsBool()
 {
-  if (m_Value == "ON")
+  if (this->Value == "ON")
     {
     return true;
     }

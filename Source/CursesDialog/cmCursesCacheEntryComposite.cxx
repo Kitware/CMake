@@ -24,57 +24,57 @@
 #include "../cmSystemTools.h"
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key,
-                                                         int labelwidth,
+                                                         int labelwidth, 
                                                          int entrywidth) :
-  m_Key(key), m_LabelWidth(labelwidth), m_EntryWidth(entrywidth)
+  Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
 {
-  m_Label = new cmCursesLabelWidget(m_LabelWidth, 1, 1, 1, key);
-  m_IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
-  m_Entry = 0;
+  this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
+  this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
+  this->Entry = 0;
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   const char* key, const cmCacheManager::CacheIterator& it, bool isNew, 
   int labelwidth, int entrywidth) 
-  : m_Key(key), m_LabelWidth(labelwidth), m_EntryWidth(entrywidth)
+  : Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
 {
-  m_Label = new cmCursesLabelWidget(m_LabelWidth, 1, 1, 1, key);
+  this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
   if (isNew)
     {
-    m_IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, "*");
+    this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, "*");
     }
   else
     {
-    m_IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
+    this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
     }
 
-  m_Entry = 0;
+  this->Entry = 0;
   switch ( it.GetType() )
     {
     case  cmCacheManager::BOOL:
-      m_Entry = new cmCursesBoolWidget(m_EntryWidth, 1, 1, 1);
+      this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
       if (cmSystemTools::IsOn(it.GetValue()))
         {
-        static_cast<cmCursesBoolWidget*>(m_Entry)->SetValueAsBool(true);
+        static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(true);
         }
       else
         {
-        static_cast<cmCursesBoolWidget*>(m_Entry)->SetValueAsBool(false);
+        static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(false);
         }
       break;
     case cmCacheManager::PATH:
-      m_Entry = new cmCursesPathWidget(m_EntryWidth, 1, 1, 1);
-      static_cast<cmCursesPathWidget*>(m_Entry)->SetString(
+      this->Entry = new cmCursesPathWidget(this->EntryWidth, 1, 1, 1);
+      static_cast<cmCursesPathWidget*>(this->Entry)->SetString(
         it.GetValue());
       break;
     case cmCacheManager::FILEPATH:
-      m_Entry = new cmCursesFilePathWidget(m_EntryWidth, 1, 1, 1);
-      static_cast<cmCursesFilePathWidget*>(m_Entry)->SetString(
+      this->Entry = new cmCursesFilePathWidget(this->EntryWidth, 1, 1, 1);
+      static_cast<cmCursesFilePathWidget*>(this->Entry)->SetString(
         it.GetValue());
       break;
     case cmCacheManager::STRING:
-      m_Entry = new cmCursesStringWidget(m_EntryWidth, 1, 1, 1);
-      static_cast<cmCursesStringWidget*>(m_Entry)->SetString(
+      this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
+      static_cast<cmCursesStringWidget*>(this->Entry)->SetString(
         it.GetValue());
       break;
     case cmCacheManager::UNINITIALIZED:
@@ -89,16 +89,16 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
 
 cmCursesCacheEntryComposite::~cmCursesCacheEntryComposite()
 {
-  delete m_Label;
-  delete m_IsNewLabel;
-  delete m_Entry;
+  delete this->Label;
+  delete this->IsNewLabel;
+  delete this->Entry;
 }
 
 const char* cmCursesCacheEntryComposite::GetValue()
 {
-  if (m_Label)
+  if (this->Label)
     {
-    return m_Label->GetValue();
+    return this->Label->GetValue();
     }
   else
     {

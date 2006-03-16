@@ -33,20 +33,20 @@ cmCursesLongMessageForm::cmCursesLongMessageForm(std::vector<std::string>
   std::vector<std::string>::const_iterator it;
   for(it=messages.begin(); it != messages.end(); it++)
     {
-    m_Messages += (*it);
+    this->Messages += (*it);
     // Add one blank line after each message
-    m_Messages += "\n\n";
+    this->Messages += "\n\n";
     }
-  m_Title = title;
-  m_Fields[0] = 0;
-  m_Fields[1] = 0;
+  this->Title = title;
+  this->Fields[0] = 0;
+  this->Fields[1] = 0;
 }
 
 cmCursesLongMessageForm::~cmCursesLongMessageForm()
 {
-  if (m_Fields[0])
+  if (this->Fields[0])
     {
-    free_field(m_Fields[0]);
+    free_field(this->Fields[0]);
     }
 }
 
@@ -57,12 +57,12 @@ void cmCursesLongMessageForm::UpdateStatusBar()
   getmaxyx(stdscr, y, x);
 
   char bar[cmCursesMainForm::MAX_WIDTH];
-  int size = strlen(m_Title.c_str());
+  int size = strlen(this->Title.c_str());
   if ( size >= cmCursesMainForm::MAX_WIDTH )
     {
     size = cmCursesMainForm::MAX_WIDTH-1;
     }
-  strncpy(bar, m_Title.c_str(), size);
+  strncpy(bar, this->Title.c_str(), size);
   for(int i=size-1; i<cmCursesMainForm::MAX_WIDTH; i++) bar[i] = ' ';
 
   int width;
@@ -92,7 +92,7 @@ void cmCursesLongMessageForm::UpdateStatusBar()
   attroff(A_STANDOUT);  
   curses_move(y-3,0);
   printw(version);
-  pos_form_cursor(m_Form);
+  pos_form_cursor(this->Form);
 }
 
 void cmCursesLongMessageForm::PrintKeys()
@@ -109,7 +109,7 @@ void cmCursesLongMessageForm::PrintKeys()
 
   curses_move(y-2,0);
   printw(firstLine);
-  pos_form_cursor(m_Form);
+  pos_form_cursor(this->Form);
   
 }
 
@@ -118,45 +118,45 @@ void cmCursesLongMessageForm::Render(int, int, int, int)
   int x,y;
   getmaxyx(stdscr, y, x);
 
-  if (m_Form)
+  if (this->Form)
     {
-    unpost_form(m_Form);
-    free_form(m_Form);
-    m_Form = 0;
+    unpost_form(this->Form);
+    free_form(this->Form);
+    this->Form = 0;
     }
 
-  const char* msg = m_Messages.c_str();
+  const char* msg = this->Messages.c_str();
 
   curses_clear();
 
-  if (m_Fields[0])
+  if (this->Fields[0])
     {
-    free_field(m_Fields[0]);
-    m_Fields[0] = 0;
+    free_field(this->Fields[0]);
+    this->Fields[0] = 0;
     }
 
-  m_Fields[0] = new_field(y-6, x-2, 1, 1, 0, 0);
+  this->Fields[0] = new_field(y-6, x-2, 1, 1, 0, 0);
 
-  field_opts_off(m_Fields[0],  O_STATIC);
+  field_opts_off(this->Fields[0],  O_STATIC);
 
-  m_Form = new_form(m_Fields);
-  post_form(m_Form);
+  this->Form = new_form(this->Fields);
+  post_form(this->Form);
 
   int i=0;
-  form_driver(m_Form, REQ_BEG_FIELD);
+  form_driver(this->Form, REQ_BEG_FIELD);
   while(msg[i] != '\0' && i < 60000)
     {
     if (msg[i] == '\n' && msg[i+1] != '\0')
       {
-      form_driver(m_Form, REQ_NEW_LINE);
+      form_driver(this->Form, REQ_NEW_LINE);
       }
     else
       {
-      form_driver(m_Form, msg[i]);
+      form_driver(this->Form, msg[i]);
       }
     i++;
     }
-  form_driver(m_Form, REQ_BEG_FIELD);
+  form_driver(this->Form, REQ_BEG_FIELD);
 
   this->UpdateStatusBar();
   this->PrintKeys();
@@ -167,7 +167,7 @@ void cmCursesLongMessageForm::Render(int, int, int, int)
 
 void cmCursesLongMessageForm::HandleInput()
 {
-  if (!m_Form)
+  if (!this->Form)
     {
     return;
     }
@@ -188,19 +188,19 @@ void cmCursesLongMessageForm::HandleInput()
       }
     else if ( key == KEY_DOWN || key == ctrl('n') )
       {
-      form_driver(m_Form, REQ_SCR_FLINE);
+      form_driver(this->Form, REQ_SCR_FLINE);
       }
     else if ( key == KEY_UP  || key == ctrl('p') )
       {
-      form_driver(m_Form, REQ_SCR_BLINE);
+      form_driver(this->Form, REQ_SCR_BLINE);
       }
     else if ( key == KEY_NPAGE || key == ctrl('d') )
       {
-      form_driver(m_Form, REQ_SCR_FPAGE);
+      form_driver(this->Form, REQ_SCR_FPAGE);
       }
     else if ( key == KEY_PPAGE || key == ctrl('u') )
       {
-      form_driver(m_Form, REQ_SCR_BPAGE);
+      form_driver(this->Form, REQ_SCR_BPAGE);
       }
 
     this->UpdateStatusBar();

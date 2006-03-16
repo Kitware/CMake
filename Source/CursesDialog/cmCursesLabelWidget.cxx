@@ -21,9 +21,9 @@ cmCursesLabelWidget::cmCursesLabelWidget(int width, int height,
                                          const std::string& name) :
   cmCursesWidget(width, height, left, top)
 {
-  field_opts_off(m_Field,  O_EDIT);
-  field_opts_off(m_Field,  O_ACTIVE);
-  field_opts_off(m_Field,  O_STATIC);
+  field_opts_off(this->Field,  O_EDIT);
+  field_opts_off(this->Field,  O_ACTIVE);
+  field_opts_off(this->Field,  O_STATIC);
   this->SetValue(name.c_str());
 }
 

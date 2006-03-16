@@ -36,10 +36,10 @@ protected:
   cmCursesPathWidget(const cmCursesPathWidget& from);
   void operator=(const cmCursesPathWidget&);
 
-  std::string m_LastString;
-  std::string m_LastGlob;
-  bool m_Cycle;
-  std::string::size_type m_CurrentIndex;
+  std::string LastString;
+  std::string LastGlob;
+  bool Cycle;
+  std::string::size_type CurrentIndex;
 };
 
 #endif // __cmCursesPathWidget_h

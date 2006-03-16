@@ -53,10 +53,10 @@ protected:
   cmCursesLongMessageForm(const cmCursesLongMessageForm& from);
   void operator=(const cmCursesLongMessageForm&);
 
-  std::string m_Messages;
-  std::string m_Title;
+  std::string Messages;
+  std::string Title;
 
-  FIELD* m_Fields[2];
+  FIELD* Fields[2];
 
 };
 

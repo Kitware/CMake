@@ -60,7 +60,7 @@ public:
   // Return the FORM. Should be only used by low-level methods.
   FORM* GetForm()
     {
-      return m_Form;
+      return this->Form;
     }
 
   static cmCursesForm* CurrentForm;
@@ -71,10 +71,10 @@ protected:
   static std::ofstream DebugFile;
   static bool Debug;
 
-  cmCursesForm(const cmCursesForm& from);
+  cmCursesForm(const cmCursesForm& form);
   void operator=(const cmCursesForm&);
 
-  FORM* m_Form;
+  FORM* Form;
 };
 
 #endif // __cmCursesForm_h
