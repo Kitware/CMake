@@ -60,14 +60,16 @@ void cmExportLibraryDependenciesCommand::FinalPass()
   std::auto_ptr<std::ofstream> foutPtr;
   if(append)
     {
-    foutPtr.reset(new std::ofstream(fname.c_str(), std::ios::app));
+    std::auto_ptr<std::ofstream> ap(
+      new std::ofstream(fname.c_str(), std::ios::app));
+    foutPtr = ap;
     }
   else
     {
     std::auto_ptr<cmGeneratedFileStream> ap(
       new cmGeneratedFileStream(fname.c_str(), true));
     ap->SetCopyIfDifferent(true);
-    foutPtr.reset(ap.release());
+    foutPtr = ap;
     }
   std::ostream& fout = *foutPtr.get();
 
