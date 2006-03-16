@@ -457,7 +457,7 @@ int cmCTestTestHandler::ProcessHandler()
     }
 
   cmGeneratedFileStream mLogFile;
-  this->StartLogFile("Tests", mLogFile);
+  this->StartLogFile((this->MemCheck ? "DynamicAnalysis" : "Test"), mLogFile);
   this->LogFile = &mLogFile;
 
   std::vector<cmStdString> passed;

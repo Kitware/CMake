@@ -88,6 +88,8 @@ static const char* cmCTestMemCheckResultLongStrings[] = {
 cmCTestMemCheckHandler::cmCTestMemCheckHandler()
 {
   this->MemCheck = true;
+  this->CustomMaximumPassedTestOutputSize = 0;
+  this->CustomMaximumFailedTestOutputSize = 0;
 }
 
 //----------------------------------------------------------------------
@@ -224,6 +226,8 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
       {
       continue;
       }
+    this->CleanTestOutput(memcheckstr,
+      static_cast<size_t>(this->CustomMaximumFailedTestOutputSize));
     os << "\t<Test Status=\"";
     if ( result->Status == cmCTestMemCheckHandler::COMPLETED )
       {
