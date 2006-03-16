@@ -107,6 +107,9 @@ protected:
   virtual void GenerateTestCommand(std::vector<const char*>& args);
   int ExecuteCommands(std::vector<cmStdString>& vec);
 
+  //! Clean test output to specified length
+  bool CleanTestOutput(std::string& output, size_t length);
+
   double                  ElapsedTestingTime;
 
   typedef std::vector<cmCTestTestResult> TestResultsVector;
@@ -116,6 +119,9 @@ protected:
   std::string             StartTest;
   std::string             EndTest;
   bool MemCheck;
+  int CustomMaximumPassedTestOutputSize;
+  int CustomMaximumFailedTestOutputSize;
+
 
 private:
   enum { // Program statuses
@@ -161,9 +167,6 @@ private:
   std::vector<cmStdString> CustomPreTest;
   std::vector<cmStdString> CustomPostTest;
 
-  int CustomMaximumPassedTestOutputSize;
-  int CustomMaximumFailedTestOutputSize;
-
   std::vector<int>        TestsToRun;
 
   bool UseIncludeRegExpFlag;
@@ -175,9 +178,6 @@ private:
   cmsys::RegularExpression ExcludeTestsRegularExpression;
 
   std::string GenerateRegressionImages(const std::string& xml);
-
-  //! Clean test output to specified length
-  bool CleanTestOutput(std::string& output, size_t length);
 
   std::string TestsToRunString;
   bool UseUnion;
