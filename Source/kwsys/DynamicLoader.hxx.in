@@ -16,6 +16,17 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
 
+#if defined(__hpux)
+  #include <dl.h>
+#elif defined(_WIN32)
+  #include <windows.h>
+#elif defined(__APPLE__)
+  #include <AvailabilityMacros.h>
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+    #include <mach-o/dyld.h>
+  #endif
+#endif
+
 namespace @KWSYS_NAMESPACE@
 {
 /** \class DynamicLoader
@@ -42,15 +53,11 @@ public:
 // Ugly stuff for library handles
 // They are different on several different OS's
 #if defined(__hpux)
-  #include <dl.h>
   typedef shl_t LibraryHandle;
 #elif defined(_WIN32)
-  #include <windows.h>
   typedef HMODULE LibraryHandle;
 #elif defined(__APPLE__)
-  #include <AvailabilityMacros.h>
   #if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
-    #include <mach-o/dyld.h>
     typedef NSModule LibraryHandle;
   #else
     typedef void* LibraryHandle;
