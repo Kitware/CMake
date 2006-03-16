@@ -21,14 +21,26 @@ FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde-config
    /usr/bin
    /usr/local/bin
    NO_SYSTEM_PATH
+   NO_CMAKE_SYSTEM_PATH
    )
+
+
+IF (NOT KDE4_KDECONFIG_EXECUTABLE)
+   FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde-config )
+ENDIF (NOT KDE4_KDECONFIG_EXECUTABLE)
 
 IF (KDE4_KDECONFIG_EXECUTABLE)
    # then ask kde-config for the kde data dirs
    EXEC_PROGRAM(${KDE4_KDECONFIG_EXECUTABLE} ARGS --path data OUTPUT_VARIABLE _data_DIR )
 
-   # replace the ":" with ";" so that it becomes a valid cmake list
-   STRING(REGEX REPLACE ":" ";" _data_DIR "${_data_DIR}")
+
+   IF(WIN32)
+      # cmake can't handle paths with '\' correct :-(
+      STRING(REGEX REPLACE "\\\\" "/" _data_DIR "${_data_DIR}")
+   ELSE(WIN32)
+      # replace the ":" with ";" so that it becomes a valid cmake list
+      STRING(REGEX REPLACE ":" ";" _data_DIR "${_data_DIR}")
+   ENDIF(WIN32)
 
    # then check the data dirs for FindKDE4Internal.cmake
    FIND_PATH(KDE4_DATA_DIR cmake/modules/FindKDE4Internal.cmake ${_data_DIR})
