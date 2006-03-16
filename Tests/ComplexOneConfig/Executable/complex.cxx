@@ -325,9 +325,9 @@ int main()
     cmPassed("run Single Character executable A returned 10 as expected.");
     }
   
-  lib += cmDynamicLoader::LibPrefix();
+  lib += CMAKE_SHARED_MODULE_PREFIX;
   lib += "CMakeTestModule";
-  lib += cmDynamicLoader::LibExtension();
+  lib += CMAKE_SHARED_MODULE_SUFFIX;
   cmsys::DynamicLoader::LibraryHandle handle = cmDynamicLoader::OpenLibrary(lib.c_str());
   if(!handle)
     {
