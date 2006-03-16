@@ -713,9 +713,8 @@ protected:
 private:
 
   void ReadSources(std::ifstream& fin, bool t);
-  friend class cmMakeDepend;    // make depend needs direct access 
-
-                                // to the m_Sources array 
+  friend class cmMakeDepend;    // make depend needs direct access
+                                // to the Sources array 
   void PrintStringVector(const char* s, const 
                          std::vector<std::pair<cmStdString, bool> >& v) const;
   void PrintStringVector(const char* s, 

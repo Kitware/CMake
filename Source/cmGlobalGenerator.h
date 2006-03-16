@@ -169,7 +169,7 @@ public:
                                         std::string& dir);
 
 protected:
-  // Fill the m_ProjectMap, this must be called after m_LocalGenerators 
+  // Fill the ProjectMap, this must be called after LocalGenerators 
   // has been populated.
   void FillProjectMap();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);

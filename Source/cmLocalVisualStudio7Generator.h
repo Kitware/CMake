@@ -30,7 +30,7 @@ struct cmVS7FlagTable;
  * \brief Write a LocalUnix makefiles.
  *
  * cmLocalVisualStudio7Generator produces a LocalUnix makefile from its
- * member m_Makefile.
+ * member Makefile.
  */
 class cmLocalVisualStudio7Generator : public cmLocalGenerator
 {

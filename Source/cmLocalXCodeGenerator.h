@@ -23,7 +23,7 @@
  * \brief Write a local Xcode project
  *
  * cmLocalXCodeGenerator produces a LocalUnix makefile from its
- * member m_Makefile.
+ * member Makefile.
  */
 class cmLocalXCodeGenerator : public cmLocalGenerator
 {
