@@ -122,7 +122,6 @@ Run bison like this:
 
 Modify cmCommandArgumentParser.cxx:
   - remove TABs
-  - add __HP_aCC to the #if test for yyerrorlab warning suppression
 
 */
 
@@ -133,6 +132,13 @@ Modify cmCommandArgumentParser.cxx:
 #define cmCommandArgument_yyerror(x) \
         cmCommandArgumentError(yyscanner, x)
 #define yyGetParser (cmCommandArgument_yyget_extra(yyscanner))
+
+/* Make sure the parser uses standard memory allocation.  The default
+   generated parser malloc/free declarations do not work on all
+   platforms.  */
+#include <stdlib.h>
+#define YYMALLOC malloc
+#define YYFREE free
 
 /*-------------------------------------------------------------------------*/
 #include "cmCommandArgumentParserHelper.h" /* Interface to parser object.  */
