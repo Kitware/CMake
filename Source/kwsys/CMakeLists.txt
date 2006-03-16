@@ -412,7 +412,10 @@ ENDFOREACH(header)
 # selected components.  Initialize with required components.
 SET(KWSYS_CLASSES)
 SET(KWSYS_H_FILES Configure SharedForward)
-SET(KWSYS_HXX_FILES Configure String hashtable hash_fun hash_map hash_set)
+SET(KWSYS_HXX_FILES Configure String
+  hashtable hash_fun hash_map hash_set
+  auto_ptr
+  )
 
 # Enforce component dependencies.
 IF(KWSYS_USE_SystemTools)
