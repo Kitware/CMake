@@ -308,7 +308,7 @@ void cmLocalGenerator::GenerateInstallRules()
   fout << "# Install script for directory: "
        << this->Makefile->GetCurrentDirectory() << std::endl << std::endl;
   fout << "# Set the install prefix" << std::endl
-    << "IF(NOT CMAKE_INSTALL_PREFIX)" << std::endl
+    << "IF(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
     << "  SET(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
     << "ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
     << "STRING(REGEX REPLACE \"/$\" \"\" CMAKE_INSTALL_PREFIX \"${CMAKE_INSTALL_PREFIX}\")" << std::endl
