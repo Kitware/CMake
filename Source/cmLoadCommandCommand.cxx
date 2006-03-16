@@ -18,6 +18,9 @@
 #include "cmCPluginAPI.h"
 #include "cmCPluginAPI.cxx"
 #include "cmDynamicLoader.h"
+
+#include <cmsys/DynamicLoader.hxx>
+
 #include <signal.h>
 extern "C" void TrapsForSignalsCFunction(int sig);
 
@@ -254,12 +257,13 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   // try loading the shared library / dll
-  cmLibHandle lib = cmDynamicLoader::OpenLibrary(fullPath.c_str());
+  cmsys::DynamicLoader::LibraryHandle lib
+    = cmDynamicLoader::OpenLibrary(fullPath.c_str());
   if(!lib)
     {
     std::string err = "Attempt to load the library ";
     err += fullPath + " failed.";
-    const char* error = cmDynamicLoader::LastError();
+    const char* error = cmsys::DynamicLoader::LastError();
     if ( error )
       {
       err += " Additional error info is:\n";
@@ -276,14 +280,14 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
   std::string initFuncName = args[0] + "Init";
   CM_INIT_FUNCTION initFunction
     = (CM_INIT_FUNCTION)
-    cmDynamicLoader::GetSymbolAddress(lib, initFuncName.c_str());
+    cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName.c_str());
   if ( !initFunction )
     {
     initFuncName = "_";
     initFuncName += args[0];
     initFuncName += "Init";
     initFunction = (CM_INIT_FUNCTION)(
-      cmDynamicLoader::GetSymbolAddress(lib, initFuncName.c_str()));
+      cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName.c_str()));
     }
   // if the symbol is found call it to set the name on the 
   // function blocker

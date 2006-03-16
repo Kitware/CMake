@@ -15,6 +15,7 @@ extern "C" {
 #include "cmSystemTools.h"
 #include "cmOrderLinkDirectories.h"
 #include "cmGeneratedFileStream.h"
+#include <cmsys/DynamicLoader.hxx>
 #else
 #include <vector>
 #include <string>
@@ -327,7 +328,7 @@ int main()
   lib += cmDynamicLoader::LibPrefix();
   lib += "CMakeTestModule";
   lib += cmDynamicLoader::LibExtension();
-  cmLibHandle handle = cmDynamicLoader::OpenLibrary(lib.c_str());
+  cmsys::DynamicLoader::LibraryHandle handle = cmDynamicLoader::OpenLibrary(lib.c_str());
   if(!handle)
     {
     std::string err = "Can not open CMakeTestModule:\n";
@@ -336,11 +337,11 @@ int main()
     }
   else
     {
-    cmDynamicLoaderFunction fun = 
-    cmDynamicLoader::GetSymbolAddress(handle, "ModuleFunction"); 
+    cmsys::DynamicLoader::SymbolPointer fun = 
+      cmsys::DynamicLoader::GetSymbolAddress(handle, "ModuleFunction"); 
     if(!fun)
       {
-      fun = cmDynamicLoader::GetSymbolAddress(handle, "_ModuleFunction");
+      fun = cmsys::DynamicLoader::GetSymbolAddress(handle, "_ModuleFunction");
       }
     typedef int (*TEST_FUNCTION)();
     TEST_FUNCTION testFun = (TEST_FUNCTION)fun;

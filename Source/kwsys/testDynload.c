@@ -6,6 +6,6 @@
 
 DL_EXPORT int TestDynamicLoaderData = 0;
 
-DL_EXPORT void TestDynamicLoaderFunction()
+DL_EXPORT void TestDynamicLoaderSymbolPointer()
 {
 }

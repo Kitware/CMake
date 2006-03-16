@@ -17,10 +17,10 @@
 #include "cmakewizard.h"
 #include "cmake.h"
 #include "cmCacheManager.h"
-#include "cmDynamicLoader.h"
 #include "cmListFileCache.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
+#include "cmDynamicLoader.h"
 #include "cmDocumentation.h"
 
 //----------------------------------------------------------------------------

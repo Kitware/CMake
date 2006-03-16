@@ -16,46 +16,8 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
 
-// Ugly stuff for library handles
-// They are different on several different OS's
-#if defined(__hpux)
-  #include <dl.h>
 namespace @KWSYS_NAMESPACE@
 {
-  typedef shl_t LibHandle;
-} // namespace @KWSYS_NAMESPACE@
-#elif defined(_WIN32)
-  #include <windows.h>
-namespace @KWSYS_NAMESPACE@
-{
-  typedef HMODULE LibHandle;
-} // namespace @KWSYS_NAMESPACE@
-#elif defined(__APPLE__)
-  #include <AvailabilityMacros.h>
-  #if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
-    #include <mach-o/dyld.h>
-namespace @KWSYS_NAMESPACE@
-{
-    typedef NSModule LibHandle;
-} // namespace @KWSYS_NAMESPACE@
-  #else
-namespace @KWSYS_NAMESPACE@
-{
-    typedef void* LibHandle;
-} // namespace @KWSYS_NAMESPACE@
-  #endif
-#else
-namespace @KWSYS_NAMESPACE@
-{
-  typedef void* LibHandle;
-} // namespace @KWSYS_NAMESPACE@
-#endif
-
-namespace @KWSYS_NAMESPACE@
-{
-// Return type from DynamicLoader::GetSymbolAddress.
-typedef void (*DynamicLoaderFunction)();
-
 /** \class DynamicLoader
  * \brief Portable loading of dynamic libraries or dll's.
  *
@@ -66,31 +28,54 @@ typedef void (*DynamicLoaderFunction)();
  * operating systems
  *
  * \warning dlopen on *nix system works the following way:
- * If filename contains a slash ("/"), then it is interpreted as a (relative or absolute) 
- * pathname.  Otherwise, the dynamic linker searches for the library as follows : 
- * see ld.so(8) for further details):
- * Whereas this distinction does not exist on Win32. Therefore ideally you should be doing
- * full path to garantee to have a consistent way of dealing with dynamic loading of shared
- * library.
+ * If filename contains a slash ("/"), then it is interpreted as a (relative
+ * or absolute) pathname.  Otherwise, the dynamic linker searches for the
+ * library as follows : see ld.so(8) for further details):
+ * Whereas this distinction does not exist on Win32. Therefore ideally you
+ * should be doing full path to garantee to have a consistent way of dealing
+ * with dynamic loading of shared library.
  */
 
 class @KWSYS_NAMESPACE@_EXPORT DynamicLoader
 {
 public:
+// Ugly stuff for library handles
+// They are different on several different OS's
+#if defined(__hpux)
+  #include <dl.h>
+  typedef shl_t LibraryHandle;
+#elif defined(_WIN32)
+  #include <windows.h>
+  typedef HMODULE LibraryHandle;
+#elif defined(__APPLE__)
+  #include <AvailabilityMacros.h>
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+    #include <mach-o/dyld.h>
+    typedef NSModule LibraryHandle;
+  #else
+    typedef void* LibraryHandle;
+  #endif
+#else
+  typedef void* LibraryHandle;
+#endif
+
+  // Return type from DynamicLoader::GetSymbolAddress.
+  typedef void (*SymbolPointer)();
+
   DynamicLoader();
   ~DynamicLoader();
 
   /** Load a dynamic library into the current process.
-   * The returned LibHandle can be used to access the symbols in the
+   * The returned LibraryHandle can be used to access the symbols in the
    * library. */
-  static LibHandle OpenLibrary(const char*);
+  static LibraryHandle OpenLibrary(const char*);
 
   /** Attempt to detach a dynamic library from the
    * process.  A value of true is returned if it is sucessful. */
-  static int CloseLibrary(LibHandle);
+  static int CloseLibrary(LibraryHandle);
 
   /** Find the address of the symbol in the given library. */
-  static DynamicLoaderFunction GetSymbolAddress(LibHandle, const char*);
+  static SymbolPointer GetSymbolAddress(LibraryHandle, const char*);
 
   /** Return the library prefix for the given architecture */
   static const char* LibPrefix();

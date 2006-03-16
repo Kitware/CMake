@@ -1501,6 +1501,10 @@ bool cmSystemTools::CreateTar(const char* outFileName,
     }
   return true;
 #else
+  (void)outFileName;
+  (void)files;
+  (void)gzip;
+  (void)verbose;
   return false;
 #endif
 }
@@ -1553,6 +1557,9 @@ bool cmSystemTools::ExtractTar(const char* outFileName,
     }
   return true;
 #else
+  (void)outFileName;
+  (void)gzip;
+  (void)verbose;
   return false;
 #endif
 }
@@ -1623,6 +1630,10 @@ bool cmSystemTools::ListTar(const char* outFileName,
     }
   return true;
 #else
+  (void)outFileName;
+  (void)files;
+  (void)gzip;
+  (void)verbose;
   return false;
 #endif
 }
