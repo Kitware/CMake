@@ -1324,6 +1324,11 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     // We are building CMake itself.  We cannot use the original
     // executable to install over itself.
     cmd = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    if(cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.')
+      {
+      cmd += "/";
+      cmd += cmakeCfgIntDir;
+      }
     cmd += "/cmake";
     }
   else
