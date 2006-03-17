@@ -1282,13 +1282,7 @@ bool cmSystemTools::PutEnv(const char* value)
 
 bool cmSystemTools::UnsetEnv(const char* value)
 {
-#ifdef _WIN32
-  std::string var = value;
-  var += "=";
-  return cmSystemTools::PutEnv(var.c_str());
-#else
-  return unsetenv(value) == 0;
-#endif
+  return false;
 }
 
 std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
