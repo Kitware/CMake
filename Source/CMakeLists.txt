@@ -25,7 +25,7 @@ INCLUDE_DIRECTORIES(
 ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
 INCLUDE(CheckSymbolExists)
 CHECK_SYMBOL_EXISTS(unsetenv "stdlib.h" HAVE_UNSETENV)
-INCLUDE("${CMAKE_ROOT}/Modules/CheckCXXSourceCompiles.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/Modules/CheckCXXSourceCompiles.cmake")
 CHECK_CXX_SOURCE_COMPILES(
   "int main(int argc, char* argv[]) { return sizeof(environ); }"
   HAVE_ENVIRON_WITHOUT_SIGNATURE)
