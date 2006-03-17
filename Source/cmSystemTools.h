@@ -295,11 +295,13 @@ public:
       of the form var=value */
   static bool PutEnv(const char* value);
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
   /** Remove an environment variable */
   static bool UnsetEnv(const char* value);
 
   /** Get the list of all environment variables */
   static std::vector<std::string> GetEnvironmentVariables();
+#endif
 
   /** Setup the environment to enable VS 8 IDE output.  */
   static void EnableVSConsoleOutput();

@@ -831,6 +831,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       return 0;
       }
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
     // Command to create a symbolic link.  Fails on platforms not
     // supporting them.
     else if (args[1] == "environment" )
@@ -843,6 +844,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       return 0;
       }
+#endif
 
     // Remove file
     else if (args[1] == "remove" && args.size() > 2)

@@ -56,7 +56,14 @@
 # pragma set woff 1375 /* base class destructor not virtual */
 #endif
 
-extern char** environ; // For GetEnvironmentVariables
+#if !defined(HAVE_ENVIRON_WITHOUT_SIGNATURE)
+// For GetEnvironmentVariables
+# if defined(_WIN32)
+extern __declspec( dllimport ) char** environ;
+# else
+extern char** environ;
+# endif
+#endif
 
 bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;
@@ -1280,9 +1287,17 @@ bool cmSystemTools::PutEnv(const char* value)
   return ret == 0;
 }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
 bool cmSystemTools::UnsetEnv(const char* value)
 {
-  return false;
+#if !defined(HAVE_UNSETENV)
+  std::string var = value;
+  var += "=";
+  return cmSystemTools::PutEnv(var.c_str());
+#else
+  unsetenv(value);
+  return true;
+#endif
 }
 
 std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
@@ -1295,6 +1310,7 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
     }
   return env;
 }
+#endif
 
 void cmSystemTools::EnableVSConsoleOutput()
 {
