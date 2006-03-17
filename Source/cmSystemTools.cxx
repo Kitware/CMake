@@ -1280,9 +1280,9 @@ bool cmSystemTools::PutEnv(const char* value)
   return ret == 0;
 }
 
-std::vector<cmStdString> cmSystemTools::GetEnvironmentVariables()
+std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
 {
-  std::vector<cmStdString> env;
+  std::vector<std::string> env;
   int cc;
   for ( cc = 0; environ[cc]; ++ cc )
     {

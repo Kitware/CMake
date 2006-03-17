@@ -745,18 +745,18 @@ void CMakeCommandUsage(const char* program)
     "content to directory 'destination'\n"
     << "  compare_files file1 file2 - check if file1 is same as file2\n"
     << "  echo [string]...        - displays arguments as text\n"
+    << "  environment             - display the current enviroment\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
     << "  tar [cxt][vfz] file.tar file/dir1 file/dir2 ... - create a tar.\n"
-    << "  time command [args] ... - run command and return elapsed time\n";
+    << "  time command [args] ... - run command and return elapsed time\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  errorStream
     << "  write_regv key value    - write registry value\n"
     << "  delete_regv key         - delete registry value\n"
-    << "  comspec                 - on windows 9x use this for RunCommand\n";
+    << "  comspec                 - on windows 9x use this for RunCommand\n"
 #else
-  errorStream
-    << "  create_symlink old new  - create a symbolic link new -> old\n";
+    << "  create_symlink old new  - create a symbolic link new -> old\n"
 #endif
+    ;
 
   cmSystemTools::Error(errorStream.str().c_str());
 }
@@ -828,6 +828,19 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         space = " ";
         }
       std::cout << std::endl;
+      return 0;
+      }
+
+    // Command to create a symbolic link.  Fails on platforms not
+    // supporting them.
+    else if (args[1] == "environment" )
+      {
+      std::vector<std::string> env = cmSystemTools::GetEnvironmentVariables();
+      std::vector<std::string>::iterator it;
+      for ( it = env.begin(); it != env.end(); ++ it )
+        {
+        std::cout << it->c_str() << std::endl;
+        }
       return 0;
       }
 
