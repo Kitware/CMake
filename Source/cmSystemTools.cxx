@@ -56,6 +56,8 @@
 # pragma set woff 1375 /* base class destructor not virtual */
 #endif
 
+extern char** environ; // For GetEnvironmentVariables
+
 bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
@@ -1276,6 +1278,17 @@ bool cmSystemTools::PutEnv(const char* value)
   // be deleted on exit
   localEnvironment.push_back(envVar);
   return ret == 0;
+}
+
+std::vector<cmStdString> cmSystemTools::GetEnvironmentVariables()
+{
+  std::vector<cmStdString> env;
+  int cc;
+  for ( cc = 0; environ[cc]; ++ cc )
+    {
+    env.push_back(environ[cc]);
+    }
+  return env;
 }
 
 void cmSystemTools::EnableVSConsoleOutput()

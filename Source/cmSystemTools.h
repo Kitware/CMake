@@ -294,6 +294,7 @@ public:
   /** put a string into the environment
       of the form var=value */
   static bool PutEnv(const char* value);
+  static std::vector<cmStdString> GetEnvironmentVariables();
 
   /** Setup the environment to enable VS 8 IDE output.  */
   static void EnableVSConsoleOutput();
