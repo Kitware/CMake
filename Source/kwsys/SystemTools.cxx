@@ -359,10 +359,10 @@ bool SystemTools::MakeDirectory(const char* path)
     // return EACCES when it should return EEXISTS
     // if it is some other error besides directory exists
     // then return false
-    if( (errno != EEXIST) 
+    if( (errno != EEXIST)
 #ifdef __BORLANDC__
-        && (errno != EACCES) 
-#endif      
+        && (errno != EACCES)
+#endif
       )
       {
       return false;

@@ -32,7 +32,7 @@
 // after stdarg.h does not solve things because we do not have control over
 // what the user does. This hack solves this problem by moving va_list to our
 // own namespace that is local for kwsys.
-namespace std {} // Required for platforms that do not have std:: 
+namespace std {} // Required for platforms that do not have std::
 namespace @KWSYS_NAMESPACE@_VA_LIST
 {
   using namespace std;
