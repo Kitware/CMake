@@ -291,9 +291,14 @@ public:
   */
   static std::string RelativePath(const char* local, const char* remote);
 
-  /** put a string into the environment
+  /** Put a string into the environment
       of the form var=value */
   static bool PutEnv(const char* value);
+
+  /** Remove an environment variable */
+  static bool UnsetEnv(const char* value);
+
+  /** Get the list of all environment variables */
   static std::vector<std::string> GetEnvironmentVariables();
 
   /** Setup the environment to enable VS 8 IDE output.  */
