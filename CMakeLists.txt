@@ -125,6 +125,10 @@ IF(BUILD_CursesDialog)
   SUBDIRS(Source/CursesDialog/form)
 ENDIF(BUILD_CursesDialog)
 
+INCLUDE(CheckSymbolExists)
+CHECK_SYMBOL_EXISTS(unsetenv "stdlib.h" HAVE_UNSETENV)
+CHECK_SYMBOL_EXISTS(environ "stdlib.h" HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
+
 SUBDIRS(Source Modules Templates Utilities Tests/CMakeTests)
 ENABLE_TESTING()
 

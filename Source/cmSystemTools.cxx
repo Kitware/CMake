@@ -56,7 +56,7 @@
 # pragma set woff 1375 /* base class destructor not virtual */
 #endif
 
-#if !defined(HAVE_ENVIRON_WITHOUT_SIGNATURE)
+#if !defined(HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
 // For GetEnvironmentVariables
 # if defined(_WIN32)
 extern __declspec( dllimport ) char** environ;

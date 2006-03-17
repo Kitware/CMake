@@ -23,23 +23,6 @@ INCLUDE_DIRECTORIES(
 
 # let cmake know it is supposed to use it
 ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
-INCLUDE(CheckSymbolExists)
-CHECK_SYMBOL_EXISTS(unsetenv "stdlib.h" HAVE_UNSETENV)
-INCLUDE("${CMAKE_SOURCE_DIR}/Modules/CheckCXXSourceCompiles.cmake")
-CHECK_CXX_SOURCE_COMPILES(
-  "int main(int argc, char* argv[]) { return sizeof(environ); }"
-  HAVE_ENVIRON_WITHOUT_SIGNATURE)
-IF(NOT HAVE_ENVIRON_WITHOUT_SIGNATURE)
-  CHECK_CXX_SOURCE_COMPILES(
-    "
-    #ifdef _WIN32
-    extern __declspec( dllimport ) char** environ;
-    #else
-    extern char** environ;
-    #endif
-    int main(int argc, char* argv[]) { return sizeof(environ); }"
-    HAVE_ENVIRON_WITH_SIGNATURE)
-ENDIF(NOT HAVE_ENVIRON_WITHOUT_SIGNATURE)
 
 OPTION(CMAKE_REGENERATE_YACCLEX
   "Regenerate YACC and LEXX files" OFF)
