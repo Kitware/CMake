@@ -4,7 +4,7 @@
 # KDE3_DEFINITIONS         - compiler definitions required for compiling KDE software
 # KDE3_INCLUDE_DIR         - the KDE include directory
 # KDE3_INCLUDE_DIRS        - the KDE and the Qt include directory, for use with INCLUDE_DIRECTORIES()
-# KDE3_LIB_DIR             - the directory where the KDE libraries are installed, for use with LINK_DIR()
+# KDE3_LIB_DIR             - the directory where the KDE libraries are installed, for use with LINK_DIRECTORIES()
 # QT_AND_KDECORE_LIBRARIES - this contains both the Qt and the kdecore library
 # KDE3_DCOPIDL_EXECUTABLE  - the dcopidl executable
 # KDE3_DCOPIDL2CPP_EXECUTABLE - the dcopidl2cpp executable
@@ -53,13 +53,12 @@
 #    Create a KDE plugin (KPart, kioslave, etc.) from the given source files.
 #    It supports KDE3_ENABLE_FINAL
 #    If WITH_PREFIX is given, the resulting plugin will have the prefix "lib", otherwise it won't.
-#    It creates and install an appropriate libtool la-file.
+#    It creates and installs an appropriate libtool la-file.
 #
 # KDE3_ADD_KDEINIT_EXECUTABLE(name file1 ... fileN )
 #    Create a KDE application in the form of a module loadable via kdeinit.
-#    It supports KDE3_ENABLE_FINAL.
 #    A library named kdeinit_<name> will be created and a small executable which links to it.
-#    Supports KDE3_ENABLE_FINAL
+#    It supports KDE3_ENABLE_FINAL
 #
 # Author: Alexander Neundorf <neundorf@kde.org>
 
