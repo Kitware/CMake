@@ -18,7 +18,7 @@
 
 #neundorf@kde.org
 
-INCLUDE(MacroLibrary)
+INCLUDE(AddFileDependencies)
 
 #create the kidl and skeletion file for dcop stuff
 #usage: KDE_ADD_COP_SKELS(foo_SRCS ${dcop_headers})
@@ -226,7 +226,7 @@ MACRO(KDE3_AUTOMOC)
                   DEPENDS ${_header}
                )
 
-               MACRO_ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
+               ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
 
             ENDFOREACH (_current_MOC_INC)
          ENDIF(_match)
