@@ -146,13 +146,19 @@ int cmCPackPackageMakerGenerator::Initialize(const char* name, cmMakefile* mf)
   std::string pkgPath
     = "/Developer/Applications/Utilities/PackageMaker.app/Contents";
   std::string versionFile = pkgPath + "/version.plist";
-  pkgPath += "/MacOS";
   if ( !cmSystemTools::FileExists(versionFile.c_str()) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Cannot find PackageMaker compiler version file: "
-      << versionFile.c_str() << std::endl);
-    return 0;
+    pkgPath = "/Developer/Applications/PackageMaker.app/Contents";
+    std::string newVersionFile = pkgPath + "/version.plist";
+    if ( !cmSystemTools::FileExists(newVersionFile.c_str()) )
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Cannot find PackageMaker compiler version file: "
+        << versionFile.c_str() << " or " << newVersionFile.c_str()
+        << std::endl);
+      return 0;
+      }
+    versionFile = newVersionFile;
     }
   std::ifstream ifs(versionFile.c_str());
   if ( !ifs )
@@ -199,6 +205,7 @@ int cmCPackPackageMakerGenerator::Initialize(const char* name, cmMakefile* mf)
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "PackageMaker version is: "
     << this->PackageMakerVersion << std::endl);
 
+  pkgPath += "/MacOS";
   path.push_back(pkgPath);
   pkgPath = cmSystemTools::FindProgram("PackageMaker", path, false);
   if ( pkgPath.empty() )
