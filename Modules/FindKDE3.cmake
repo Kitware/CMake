@@ -113,7 +113,7 @@ FIND_PATH(KDE3_INCLUDE_DIR kpassdlg.h
 )
 
 #now the KDE library directory
-FIND_LIBRARY(KDE3_LIB_DIR NAMES kdecore
+FIND_LIBRARY(KDE3_KDECORE_LIBRARY NAMES kdecore
   PATHS
   $ENV{KDEDIR}/lib
   /opt/kde/lib
@@ -121,6 +121,8 @@ FIND_LIBRARY(KDE3_LIB_DIR NAMES kdecore
   /usr/lib
   /usr/local/lib
 )
+
+GET_FILENAME_COMPONENT(KDE3_LIB_DIR ${KDE3_KDECORE_LIBRARY} PATH )
 
 #now the KDE service types directory
 #FIND_PATH(KDE3_SERVICETYPES_DIR ktexteditor.desktop
