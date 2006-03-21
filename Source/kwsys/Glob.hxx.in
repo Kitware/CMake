@@ -54,12 +54,16 @@ public:
   //! Set recurse to true to match subdirectories.
   void RecurseOn() { this->SetRecurse(true); }
   void RecurseOff() { this->SetRecurse(false); }
-  void SetRecurse(bool i) { m_Recurse = i; }
-  bool GetRecurse() { return m_Recurse; }
+  void SetRecurse(bool i) { this->Recurse = i; }
+  bool GetRecurse() { return this->Recurse; }
+
+  //! Set relative to true to only show relative path to files.
+  void SetRelative(const char* dir);
+  const char* GetRelative();
 
 protected:
   //! Process directory
-  void ProcessDirectory(kwsys_stl::string::size_type start, 
+  void ProcessDirectory(kwsys_stl::string::size_type start,
     const kwsys_stl::string& dir, bool dir_only);
 
   //! Process last directory, but only when recurse flags is on. That is
@@ -78,8 +82,12 @@ protected:
   //! Add regular expression
   void AddExpression(const char* expr);
 
-  GlobInternals* m_Internals;
-  bool m_Recurse;
+  //! Add a file to the list
+  void AddFile(kwsys_stl::vector<kwsys_stl::string>& files, const char* file);
+
+  GlobInternals* Internals;
+  bool Recurse;
+  kwsys_stl::string Relative;
 };
 
 } // namespace @KWSYS_NAMESPACE@
