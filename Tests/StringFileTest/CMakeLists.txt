@@ -91,8 +91,11 @@ SET(expr "${CMAKE_CURRENT_SOURCE_DIR}/[sS][!a-su-zA-Z0-9][^a-qs-zA-Z0-9]ing?ile*
 MESSAGE("Glob expression is [${expr}].")
 FILE(GLOB src_files "${expr}")
 MESSAGE("Globbed files [${src_files}].")
-
 ADD_EXECUTABLE(StringFileTest ${src_files})
+
+SET(expr "${CMAKE_CURRENT_SOURCE_DIR}/../*.cxx")
+FILE(GLOB_RECURSE rel_src_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/.." "${expr}")
+MESSAGE("Globbed files [${rel_src_files}].")
 
 # Test FOREACH range
 MESSAGE("Cheack if FOREACH with RANGE works")

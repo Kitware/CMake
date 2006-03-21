@@ -210,6 +210,17 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   bool first = true;
   for ( ; i != args.end(); ++i )
     {
+    if ( *i == "RELATIVE" )
+      {
+      ++i; // skip RELATIVE
+      if ( i == args.end() )
+        {
+        this->SetError("GLOB requires a directory after the RELATIVE tag");
+        return false;
+        }
+      g.SetRelative(i->c_str());
+      ++i;
+      }
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
       std::string expr = this->Makefile->GetCurrentDirectory();
