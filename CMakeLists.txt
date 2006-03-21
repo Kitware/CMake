@@ -233,6 +233,7 @@ INCLUDE (${CMake_SOURCE_DIR}/Utilities/Release/Release.cmake)
 # If the cmake version includes cpack, use it
 IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   IF(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
+    SET(CMAKE_INSTALL_MFC_LIBRARIES 1)
     INCLUDE(InstallRequiredSystemLibraries)
   ENDIF(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
   SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CMake is a build tool")
