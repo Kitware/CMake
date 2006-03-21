@@ -22,7 +22,6 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include <cmsys/Directory.hxx>
-#include "cmGlob.h"
 #include "cmDynamicLoader.h"
 #include "cmGeneratedFileStream.h"
 #include "cmCTestCommand.h"
@@ -41,6 +40,7 @@
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
+#include <cmsys/Glob.hxx>
 
 #include <stdlib.h>
 #include <math.h>
@@ -1876,7 +1876,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
 
   std::string rexpr = dir;
   rexpr += "/CTestCustom.ctest";
-  cmGlob gl;
+  cmsys::Glob gl;
   gl.RecurseOn();
   gl.FindFiles(rexpr);
   std::vector<std::string>& files = gl.GetFiles();

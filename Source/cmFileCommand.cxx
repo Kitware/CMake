@@ -9,18 +9,17 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
 #include "cmFileCommand.h"
 
-#include "cmGlob.h"
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <cmsys/Directory.hxx>
+#include <cmsys/Glob.hxx>
 
 // cmLibraryCommand
 bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
@@ -82,7 +81,7 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args, 
+bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   bool append)
 {
   std::string message;
@@ -205,7 +204,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
 
   std::string variable = *i;
   i++;
-  cmGlob g;
+  cmsys::Glob g;
   g.SetRecurse(recurse);
   std::string output = "";
   bool first = true;
@@ -509,7 +508,7 @@ bool cmFileCommand::HandleInstallCommand(
       {
       if ( ch2 == '/' )
         {
-        // looks like a network path. 
+        // looks like a network path.
         this->SetError("called with network path DESTINATION. This "
           "does not make sense when using DESTDIR. Specify local "
           "absolute path or remove DESTDIR environment variable.");
@@ -530,11 +529,11 @@ bool cmFileCommand::HandleInstallCommand(
     {
     itype = cmTarget::EXECUTABLE;
     }
-  else if ( stype == "PROGRAM" ) 
+  else if ( stype == "PROGRAM" )
     {
     itype = cmTarget::INSTALL_PROGRAMS;
     }
-  else if ( stype == "STATIC_LIBRARY" ) 
+  else if ( stype == "STATIC_LIBRARY" )
     {
     itype = cmTarget::STATIC_LIBRARY;
     }
@@ -620,7 +619,7 @@ bool cmFileCommand::HandleInstallCommand(
     }
 
   // Get the current manifest.
-  const char* manifest_files = 
+  const char* manifest_files =
     this->Makefile->GetDefinition("CMAKE_INSTALL_MANIFEST_FILES");
   std::string smanifest_files;
   if ( manifest_files )
@@ -871,7 +870,7 @@ bool cmFileCommand::HandleRelativePathCommand(
 
 
 //----------------------------------------------------------------------------
-bool cmFileCommand::HandleRemove(std::vector<std::string> const& args, 
+bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
                                  bool recurse)
 {
 
@@ -893,9 +892,10 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmFileCommand::HandleSystemPathCommand(std::vector<std::string> 
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleSystemPathCommand(std::vector<std::string>
                                             const& args)
-{ 
+{
   std::vector<std::string>::const_iterator i = args.begin();
   if(args.size() != 3)
     {

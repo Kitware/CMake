@@ -21,9 +21,10 @@
 #include "cmake.h"
 #include "cmSystemTools.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGlob.h"
+
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/Glob.hxx>
 
 #include <stdlib.h>
 #include <math.h>
@@ -237,7 +238,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   cmSystemTools::MakeDirectory(tempDir.c_str());
   cmSystemTools::ChangeDirectory(tempDir.c_str());
 
-  cmGlob gl;
+  cmsys::Glob gl;
   gl.RecurseOn();
   std::string daGlob = binaryDir + "/*.da";
   gl.FindFiles(daGlob);

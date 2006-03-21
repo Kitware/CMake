@@ -110,7 +110,6 @@ SET(SRCS
   cmExprParser.cxx
   cmExprParserHelper.cxx
   cmGeneratedFileStream.cxx
-  cmGlob.cxx
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
   cmGlobalUnixMakefileGenerator3.cxx

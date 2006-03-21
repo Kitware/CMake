@@ -17,6 +17,7 @@
 #include "cmFindPathCommand.h"
 #include "cmCacheManager.h"
 
+#include <cmsys/Glob.hxx>
 
 cmFindPathCommand::cmFindPathCommand()
 {
@@ -170,7 +171,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string& file,
   cmStdString glob = dir;
   glob += "/*/Headers/";
   glob += file;
-  cmGlob globIt;
+  cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();
   if(files.size())

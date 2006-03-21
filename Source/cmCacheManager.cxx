@@ -19,8 +19,9 @@
 #include "cmSystemTools.h"
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
-#include "cmGlob.h"
+
 #include <cmsys/Directory.hxx>
+#include <cmsys/Glob.hxx>
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -163,7 +164,7 @@ void cmCacheManager::CleanCMakeFiles(const char* path)
 {
   std::string glob = path;
   glob += "/CMakeFiles/*.cmake";
-  cmGlob globIt;
+  cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();
   for(std::vector<std::string>::iterator i = files.begin();
