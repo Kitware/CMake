@@ -1918,7 +1918,7 @@ kwsys_stl::string SystemTools::FindProgram(
   const kwsys_stl::vector<kwsys_stl::string>& userPaths,
   bool no_system_path)
 {
-  if(!nameIn)
+  if(!nameIn || !*nameIn)
     {
     return "";
     }
@@ -2245,9 +2245,9 @@ bool SystemTools::FindProgramPath(const char* argv0,
                                   const char* installPrefix )
 {
   kwsys_stl::vector<kwsys_stl::string> failures;
-  kwsys_stl::string self = argv0;
+  kwsys_stl::string self = argv0 ? argv0 : "";
+  failures.push_back(self);
   SystemTools::ConvertToUnixSlashes(self);
-  failures.push_back(argv0);
   self = SystemTools::FindProgram(self.c_str());
   if(!SystemTools::FileExists(self.c_str()))
     {
@@ -2279,8 +2279,16 @@ bool SystemTools::FindProgramPath(const char* argv0,
     {
     failures.push_back(self);
     kwsys_ios::ostringstream msg;
-    msg << "Can not find the command line program " << exeName << "\n";
-    msg << "  argv[0] = \"" << argv0 << "\"\n";
+    msg << "Can not find the command line program ";
+    if (exeName)
+      {
+      msg << exeName;
+      }
+    msg << "\n";
+    if (argv0)
+      {
+      msg << "  argv[0] = \"" << argv0 << "\"\n";
+      }
     msg << "  Attempted paths:\n";
     kwsys_stl::vector<kwsys_stl::string>::iterator i;
     for(i=failures.begin(); i != failures.end(); ++i)
