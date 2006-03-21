@@ -1876,30 +1876,53 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
   lg->SetGlobalGenerator(&gg);
   cmMakefile *mf = lg->GetMakefile();
 
-  std::string rexpr = dir;
-  rexpr += "/CTestCustom.ctest";
-  cmsys::Glob gl;
-  gl.RecurseOn();
-  gl.FindFiles(rexpr);
-  std::vector<std::string>& files = gl.GetFiles();
-  std::vector<std::string>::iterator fileIt;
-  for ( fileIt = files.begin(); fileIt != files.end();
-    ++ fileIt )
+  bool found = false;
+  std::string fname = dir;
+  fname += "/CTestCustom.cmake";
+  if ( cmSystemTools::FileExists(fname.c_str()) )
     {
     cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
-      << fileIt->c_str() << std::endl);
-    if ( !lg->GetMakefile()->ReadListFile(0, fileIt->c_str()) ||
+      << fname.c_str() << std::endl);
+    if ( !lg->GetMakefile()->ReadListFile(0, fname.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag() )
       {
       cmCTestLog(this, ERROR_MESSAGE, "Problem reading custom configuration: "
-        << fileIt->c_str() << std::endl);
+        << fname.c_str() << std::endl);
       }
+    found = true;
     }
 
-  cmCTest::t_TestingHandlers::iterator it;
-  for ( it = this->TestingHandlers.begin(); it != this->TestingHandlers.end(); ++ it )
+  std::string rexpr = dir;
+  rexpr += "/CTestCustom.ctest";
+  if ( !found && cmSystemTools::FileExists(fname.c_str()) )
     {
-    it->second->PopulateCustomVectors(mf);
+    cmsys::Glob gl;
+    gl.RecurseOn();
+    gl.FindFiles(rexpr);
+    std::vector<std::string>& files = gl.GetFiles();
+    std::vector<std::string>::iterator fileIt;
+    for ( fileIt = files.begin(); fileIt != files.end();
+      ++ fileIt )
+      {
+      cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
+        << fileIt->c_str() << std::endl);
+      if ( !lg->GetMakefile()->ReadListFile(0, fileIt->c_str()) ||
+        cmSystemTools::GetErrorOccuredFlag() )
+        {
+        cmCTestLog(this, ERROR_MESSAGE, "Problem reading custom configuration: "
+          << fileIt->c_str() << std::endl);
+        }
+      }
+    found = true;
+    }
+
+  if ( found )
+    {
+    cmCTest::t_TestingHandlers::iterator it;
+    for ( it = this->TestingHandlers.begin(); it != this->TestingHandlers.end(); ++ it )
+      {
+      it->second->PopulateCustomVectors(mf);
+      }
     }
 
   return 1;
