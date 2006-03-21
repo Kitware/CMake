@@ -257,7 +257,8 @@ cmCTest::cmCTest()
   this->TestingHandlers["submit"]    = new cmCTestSubmitHandler;
 
   cmCTest::t_TestingHandlers::iterator it;
-  for ( it = this->TestingHandlers.begin(); it != this->TestingHandlers.end(); ++ it )
+  for ( it = this->TestingHandlers.begin();
+    it != this->TestingHandlers.end(); ++ it )
     {
     it->second->SetCTestInstance(this);
     }
@@ -270,7 +271,8 @@ cmCTest::cmCTest()
 cmCTest::~cmCTest()
 {
   cmCTest::t_TestingHandlers::iterator it;
-  for ( it = this->TestingHandlers.begin(); it != this->TestingHandlers.end(); ++ it )
+  for ( it = this->TestingHandlers.begin();
+    it != this->TestingHandlers.end(); ++ it )
     {
     delete it->second;
     it->second = 0;
@@ -2168,8 +2170,14 @@ bool cmCTest::RunCommand(
     }
 
   cmsysProcess_WaitForExit(cp, 0);
-  stdOut->append(&*tempOutput.begin(), tempOutput.size());
-  stdErr->append(&*tempError.begin(), tempError.size());
+  if ( tempOutput.size() > 0 )
+    {
+    stdOut->append(&*tempOutput.begin(), tempOutput.size());
+    }
+  if ( tempError.size() > 0 )
+    {
+    stdErr->append(&*tempError.begin(), tempError.size());
+    }
 
   bool result = true;
   if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
