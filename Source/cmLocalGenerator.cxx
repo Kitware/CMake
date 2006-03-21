@@ -872,17 +872,14 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
   bool includeSourceDir = false;
   bool includeBinaryDir = false;
 
-  // When automatic include directories are requested for an
-  // out-of-source build then include the source and binary
-  // directories at the beginning of the include path to approximate
-  // include file behavior for an in-source build.  This does not
-  // account for the case of a source file in a subdirectory of the
-  // current source directory but we cannot fix this because not all
-  // native build tools support per-source-file include paths.
-  bool inSource =
-    cmSystemTools::ComparePath(this->Makefile->GetStartDirectory(),
-                               this->Makefile->GetStartOutputDirectory());
-  if(!inSource && this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR"))
+  // When automatic include directories are requested for a build then
+  // include the source and binary directories at the beginning of the
+  // include path to approximate include file behavior for an
+  // in-source build.  This does not account for the case of a source
+  // file in a subdirectory of the current source directory but we
+  // cannot fix this because not all native build tools support
+  // per-source-file include paths.
+  if(this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR"))
     {
     includeSourceDir = true;
     includeBinaryDir = true;
