@@ -1324,7 +1324,7 @@ bool cmMakefile::CanIWriteThisFile(const char* fileName)
 {
   if ( !this->IsOn("CMAKE_DISABLE_SOURCE_CHANGES") )
     {
-    return 0;
+    return true;
     }
   // If we are doing an in-source build, than the test will always fail
   if ( cmSystemTools::SameFile(this->GetHomeDirectory(), this->GetHomeOutputDirectory()) )
