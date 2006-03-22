@@ -295,11 +295,11 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
   cmExecuteProcessCommandFixText(tempError);
 
   // Store the output obtained.
-  if(!output_variable.empty())
+  if(!output_variable.empty() && tempOutput.size())
     {
     this->Makefile->AddDefinition(output_variable.c_str(), &*tempOutput.begin());
     }
-  if(!merge_output && !error_variable.empty())
+  if(!merge_output && !error_variable.empty() && tempError.size())
     {
     this->Makefile->AddDefinition(error_variable.c_str(), &*tempError.begin());
     }
