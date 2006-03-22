@@ -16,6 +16,9 @@
 =========================================================================*/
 #include "cmWriteFileCommand.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 // cmLibraryCommand
 bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args)
 {
