@@ -1320,6 +1320,33 @@ bool cmMakefile::IsSet(const char* name) const
   return true;
 }
 
+bool cmMakefile::CanIWriteThisFile(const char* fileName)
+{
+  if ( !this->IsOn("CMAKE_DISABLE_SOURCE_CHANGES") )
+    {
+    return 0;
+    }
+  // If we are doing an in-source build, than the test will always fail
+  if ( cmSystemTools::SameFile(this->GetHomeDirectory(), this->GetHomeOutputDirectory()) )
+    {
+    if ( this->IsOn("CMAKE_DISABLE_IN_SOURCE_BUILD") )
+      {
+      return false;
+      }
+    return true;
+    }
+
+  // Check if this is subdirectory of the source tree but not a subdirectory of a build tree
+  if ( cmSystemTools::IsSubDirectory(fileName,
+      this->GetHomeDirectory()) &&
+    !cmSystemTools::IsSubDirectory(fileName,
+      this->GetHomeOutputDirectory()) )
+    {
+    return false;
+    }
+  return true;
+}
+
 const char* cmMakefile::GetRequiredDefinition(const char* name) const
 {
   const char* ret = this->GetDefinition(name);
@@ -2328,6 +2355,11 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
                               bool copyonly, bool atOnly, bool escapeQuotes)
 {
   int res = 1;
+  if ( !this->CanIWriteThisFile(outfile) )
+    {
+    cmSystemTools::Error("Attempt to write file: ", outfile, " into a source directory.");
+    return 0;
+    }
   if ( !cmSystemTools::FileExists(infile) )
     {
     cmSystemTools::Error("File ", infile, " does not exist.");

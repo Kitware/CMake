@@ -204,6 +204,27 @@ bool cmAddCustomCommandCommand::InitialPass(
     return false;
     }
 
+  if ( !this->Makefile->CanIWriteThisFile(output.c_str()) )
+    {
+    std::string e = "attempted to have a file: " + output +
+      " in a source directory as an output of custom command.";
+    this->SetError(e.c_str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+  std::vector<std::string>::iterator oit;
+  for ( oit = outputs.begin(); oit != outputs.end(); ++ oit )
+    {
+    if ( !this->Makefile->CanIWriteThisFile(oit->c_str()) )
+      {
+      std::string e = "attempted to have a file: " + *oit +
+        " in a source directory as an output of custom command.";
+      this->SetError(e.c_str());
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+      }
+    }
+
   std::string::size_type pos = output.find_first_of("#<>");
   if(pos != output.npos)
     {
@@ -213,6 +234,7 @@ bool cmAddCustomCommandCommand::InitialPass(
     this->SetError(msg.str().c_str());
     return false;
     }
+
   // Choose which mode of the command to use.
   if(source.empty() && output.empty())
     {

@@ -45,6 +45,16 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args)
       message += *i;
       }
     }
+
+  if ( !this->Makefile->CanIWriteThisFile(fileName.c_str()) )
+    {
+    std::string e = "attempted to write a file: " + fileName
+      + " into a source directory.";
+    this->SetError(e.c_str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+
   std::string dir = cmSystemTools::GetFilenamePath(fileName);
   cmSystemTools::MakeDirectory(dir.c_str());
 

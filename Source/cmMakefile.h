@@ -494,6 +494,11 @@ public:
    */
   const char* GetDefineFlags()
     {return this->DefineFlags.c_str();}
+
+  /**
+   * Make sure CMake can write this file
+   */
+  bool CanIWriteThisFile(const char* fileName);
   
   /**
    * Get the vector of used command instances.
