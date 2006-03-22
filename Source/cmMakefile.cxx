@@ -70,12 +70,15 @@ cmMakefile::cmMakefile()
   
   this->DefineFlags = " ";
   this->LocalGenerator = 0;
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   this->AddSourceGroup("", "^.*$");
   this->AddSourceGroup("Source Files", 
                        "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat)$");
   this->AddSourceGroup("Header Files", "\\.(h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddSourceGroup("Resources", "\\.plist$");
+#endif
   this->AddDefaultDefinitions();
   this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
   this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
@@ -212,11 +215,13 @@ void cmMakefile::Print()
   std::cout << " this->ProjectName; " <<  this->ProjectName.c_str() << std::endl;
   this->PrintStringVector("this->IncludeDirectories;", this->IncludeDirectories);
   this->PrintStringVector("this->LinkDirectories", this->LinkDirectories);
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   for( std::vector<cmSourceGroup>::const_iterator i = this->SourceGroups.begin();
        i != this->SourceGroups.end(); ++i)
     {
     std::cout << "Source Group: " << i->GetName() << std::endl;
     }
+#endif
 }
 
 bool cmMakefile::CommandExists(const char* name) const
@@ -1151,7 +1156,7 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
   return 0;
 }
 
-
+#if defined(CMAKE_BUILD_WITH_CMAKE)
 cmSourceGroup* cmMakefile::GetSourceGroup(const char* name)
 {
   // First see if the group exists.  If so, replace its regular expression.
@@ -1247,6 +1252,7 @@ void cmMakefile::AddSourceGroup(const char* name, const char* regex, const char 
   // The group doesn't exist.  Add it.
   this->SourceGroups.push_back(cmSourceGroup(name, regex));
 }
+#endif
 
 void cmMakefile::AddExtraDirectory(const char* dir)
 {
@@ -1676,6 +1682,7 @@ void cmMakefile::AddDefaultDefinitions()
   this->AddDefinition("CMAKE_MAJOR_VERSION", temp);
 }
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
 /**
  * Find a source group whose regular expression matches the filename
  * part of the given source name.  Search backward through the list of
@@ -1713,6 +1720,7 @@ cmMakefile::FindSourceGroup(const char* source,
   // Shouldn't get here, but just in case, return the default group.
   return groups.front();
 }
+#endif
 
 bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff)
 {

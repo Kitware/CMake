@@ -19,10 +19,13 @@
 
 #include "cmData.h"
 #include "cmSystemTools.h"
-#include "cmSourceGroup.h"
 #include "cmTarget.h"
 #include "cmListFileCache.h"
 #include "cmCacheManager.h"
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#include "cmSourceGroup.h"
+#endif
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -275,11 +278,13 @@ public:
   void AddLibrary(const char *libname, int shared,
                   const std::vector<std::string> &srcs);
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
    * Add a source group for consideration when adding a new source.
    */
   void AddSourceGroup(const char* name, const char* regex=0, 
                       const char* parent=0);
+#endif
   
   /**
    * Add an auxiliary directory to the build.
@@ -434,6 +439,7 @@ public:
    *  not found, then a null pointer is returned.
    */
   cmSourceFile* GetSource(const char* sourceName) const;
+
   ///! Add a new cmSourceFile to the list of sources for this makefile.
   cmSourceFile* AddSource(cmSourceFile const&);
 
@@ -495,6 +501,7 @@ public:
   const std::vector<cmCommand*>& GetUsedCommands() const
     {return this->UsedCommands;}
   
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
    * Get the vector source groups.
    */
@@ -505,6 +512,7 @@ public:
    * Get the source group
    */
   cmSourceGroup* GetSourceGroup(const char* name); 
+#endif
 
   /**
    * Get the vector of list files on which this makefile depends
@@ -555,11 +563,14 @@ public:
   int ConfigureFile(const char* infile, const char* outfile, 
                     bool copyonly, bool atOnly, bool escapeQuotes);
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
    * find what source group this source is in
    */
   cmSourceGroup& FindSourceGroup(const char* source,
                                  std::vector<cmSourceGroup> &groups);
+#endif
+
   void RegisterData(cmData*);
   void RegisterData(const char*, cmData*);
   cmData* LookupData(const char*) const;
@@ -704,7 +715,11 @@ protected:
   std::vector<std::string> SourceFileExtensions;
   std::vector<std::string> HeaderFileExtensions;
   std::string DefineFlags;
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   std::vector<cmSourceGroup> SourceGroups;
+#endif
+
   DefinitionMap Definitions;
   std::vector<cmCommand*> UsedCommands;
   cmLocalGenerator* LocalGenerator;

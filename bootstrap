@@ -82,9 +82,17 @@ CMAKE_PROBLEMATIC_FILES="\
   Utilities/cmexpat/expatDllConfig.h \
   "
 
+CMAKE_UNUSED_SOURCES="\
+  cmakewizard  \
+  cmGlobalXCodeGenerator \
+  cmLocalXCodeGenerator \
+  cmXCodeObject \
+  cmXCode21Object \
+  cmSourceGroup \
+"
+
 CMAKE_CXX_SOURCES="\
   cmake  \
-  cmakewizard  \
   cmakemain \
   cmCommandArgumentLexer \
   cmCommandArgumentParser \
@@ -104,10 +112,6 @@ CMAKE_CXX_SOURCES="\
   cmSystemTools \
   cmFileTimeComparison \
   cmGlobalUnixMakefileGenerator3 \
-  cmGlobalXCodeGenerator \
-  cmLocalXCodeGenerator \
-  cmXCodeObject \
-  cmXCode21Object \
   cmLocalUnixMakefileGenerator3 \
   cmMakefileExecutableTargetGenerator \
   cmMakefileLibraryTargetGenerator \
@@ -121,7 +125,7 @@ CMAKE_CXX_SOURCES="\
   cmCacheManager \
   cmListFileCache \
   cmOrderLinkDirectories \
-  cmSourceGroup"
+"
 
 if ${cmake_system_mingw}; then
   CMAKE_CXX_SOURCES="${CMAKE_CXX_SOURCES}\
