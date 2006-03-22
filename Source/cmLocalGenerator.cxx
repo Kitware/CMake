@@ -1319,7 +1319,20 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
   orderLibs.AddLinkExtension(
     this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"));
   orderLibs.AddLinkExtension(
+    this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"));
+  orderLibs.AddLinkExtension(
     this->Makefile->GetDefinition("CMAKE_LINK_LIBRARY_SUFFIX"));
+  if(const char* linkSuffixes =
+     this->Makefile->GetDefinition("CMAKE_EXTRA_LINK_EXTENSIONS"))
+    {
+    std::vector<std::string> linkSuffixVec;
+    cmSystemTools::ExpandListArgument(linkSuffixes, linkSuffixVec);
+    for(std::vector<std::string>::iterator i = linkSuffixVec.begin();
+        i != linkSuffixVec.end(); ++i)
+      {
+      orderLibs.AddLinkExtension(i->c_str());
+      }
+    }
   orderLibs.SetLinkInformation(target.GetName(),
                                linkLibraries,
                                linkDirectories);
