@@ -661,7 +661,7 @@ public:
 
   ///! Set/Get a property of this directory 
   void SetProperty(const char *prop, const char *value);
-  const char *GetProperty(const char *prop) const;
+  const char *GetProperty(const char *prop);
   bool GetPropertyAsBool(const char *prop) const;
 
   typedef std::map<cmStdString, cmStdString> DefinitionMap;
@@ -755,6 +755,9 @@ private:
 
   // should this makefile be processed before or after processing the parent
   bool PreOrder;
+
+  // stack of list files being read 
+  std::deque<cmStdString> ListFileStack;
 };
 
 

@@ -57,7 +57,7 @@ public:
         "stored in the variable VAR.  If the property is not found, VAR "
         "will be set to \"NOTFOUND\".  Use SET_SOURCE_FILES_PROPERTIES to set "
         "property values.  Source file properties usually control how the "
-        "file is built.";
+        "file is built. One property that is always there is LOCATION";
     }
   
   cmTypeMacro(cmGetSourceFilePropertyCommand, cmCommand);

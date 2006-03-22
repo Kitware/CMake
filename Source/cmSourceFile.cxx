@@ -179,6 +179,13 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
 
 const char *cmSourceFile::GetProperty(const char* prop) const
 {
+  // watch for special "computed" properties that are dependent on other
+  // properties or variables, always recompute them
+  if (!strcmp(prop,"LOCATION"))
+    {
+    return this->FullPath.c_str();
+    }
+
   std::map<cmStdString,cmStdString>::const_iterator i = 
     this->Properties.find(prop);
   if (i != this->Properties.end())

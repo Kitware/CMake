@@ -156,17 +156,17 @@ namespace
 
 
 // order of operations, 
-// EXISTS COMMAND DEFINED 
+// IS_DIRECTORY EXISTS COMMAND DEFINED 
 // MATCHES LESS GREATER EQUAL STRLESS STRGREATER STREQUAL 
 // AND OR
 //
 // There is an issue on whether the arguments should be values of references,
 // for example IF (FOO AND BAR) should that compare the strings FOO and BAR
-// or should it really do IF (${FOO} AND ${BAR}) Currently EXISTS COMMAND and
-// DEFINED all take values. EQUAL, LESS and GREATER can take numeric values or
-// variable names. STRLESS and STRGREATER take variable names but if the
-// variable name is not found it will use the name directly. AND OR take
-// variables or the values 0 or 1.
+// or should it really do IF (${FOO} AND ${BAR}) Currently IS_DIRECTORY
+// EXISTS COMMAND and DEFINED all take values. EQUAL, LESS and GREATER can
+// take numeric values or variable names. STRLESS and STRGREATER take
+// variable names but if the variable name is not found it will use the name
+// directly. AND OR take variables or the values 0 or 1.
 
 
 bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
@@ -231,6 +231,22 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
       if (*arg == "EXISTS" && argP1  != newArgs.end())
         {
         if(cmSystemTools::FileExists((argP1)->c_str()))
+          {
+          *arg = "1";
+          }
+        else 
+          {
+          *arg = "0";
+          }
+        newArgs.erase(argP1);
+        argP1 = arg;
+        IncrementArguments(newArgs,argP1,argP2);
+        reducible = 1;
+        }
+      // does a file exist
+      if (*arg == "IS_DIRECTORY" && argP1  != newArgs.end())
+        {
+        if(cmSystemTools::FileIsDirectory((argP1)->c_str()))
           {
           *arg = "1";
           }

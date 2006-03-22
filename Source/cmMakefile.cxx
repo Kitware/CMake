@@ -391,6 +391,9 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
       }
     }
       
+  // push the listfile onto the stack
+  this->ListFileStack.push_back(filenametoread);
+  
   cmListFile cacheFile;
   if( !cacheFile.ParseFile(filenametoread, requireProjectCommand) )
     {
@@ -405,6 +408,8 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
     this->ExecuteCommand(cacheFile.Functions[i]);
     if ( cmSystemTools::GetFatalErrorOccured() )
       {
+      // pop the listfile off the stack
+      this->ListFileStack.pop_back();
       this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());
       return true;
       }
@@ -428,6 +433,10 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
     }
   
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());
+
+  // pop the listfile off the stack
+  this->ListFileStack.pop_back();
+
   return true;
 }
 
@@ -2430,8 +2439,29 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   this->Properties[prop] = value;
 }
 
-const char *cmMakefile::GetProperty(const char* prop) const
+const char *cmMakefile::GetProperty(const char* prop)
 {
+  // watch for specific properties
+  if (!strcmp("PARENT_DIRECTORY",prop))
+    {
+    return this->LocalGenerator->GetParent()
+      ->GetMakefile()->GetStartDirectory();
+    }
+  // watch for specific properties
+  if (!strcmp("LISTFILE_STACK",prop))
+    {
+    std::string tmp;
+    for (std::deque<cmStdString>::iterator i = this->ListFileStack.begin();
+         i != this->ListFileStack.end(); ++i)
+      {
+      if (i != this->ListFileStack.begin())
+        {
+        tmp += ";";
+        }
+      tmp += *i;
+      }
+    this->SetProperty("LISTFILE_STACK",tmp.c_str());
+    }
   std::map<cmStdString,cmStdString>::const_iterator i = 
     this->Properties.find(prop);
   if (i != this->Properties.end())

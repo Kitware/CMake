@@ -31,6 +31,11 @@ bool cmGetSourceFilePropertyCommand::InitialPass(
   const char* file = args[1].c_str();
   cmSourceFile* sf = this->Makefile->GetSource(file);
 
+  // for the location we must create a source file first
+  if (!sf && args[2] == "LOCATION")
+    {
+    sf = this->Makefile->GetOrCreateSource(file);
+    }
   if(sf)
     {
     const char *prop = sf->GetProperty(args[2].c_str());
