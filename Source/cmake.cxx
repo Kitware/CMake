@@ -66,9 +66,11 @@
 
 #include <stdlib.h> // required for atoi
 
-#ifdef __APPLE__
-#  include "cmGlobalXCodeGenerator.h"
-#  define CMAKE_USE_XCODE 1
+#if defined( __APPLE__ )
+#  if defined(CMAKE_BUILD_WITH_CMAKE)
+#    include "cmGlobalXCodeGenerator.h"
+#    define CMAKE_USE_XCODE 1
+#  endif
 #  include <sys/types.h>
 #  include <sys/time.h>
 #  include <sys/resource.h>
