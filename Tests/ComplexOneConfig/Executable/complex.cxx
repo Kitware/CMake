@@ -462,6 +462,30 @@ int main()
 #endif
 
   // ----------------------------------------------------------------------
+  // Test GET_SOURCE_FILE_PROPERTY for location
+#ifndef CMAKE_FOUND_ACXX
+  cmFailed("CMake did not get the location of A.cxx correctly");
+#else
+  cmPassed("CMake found A.cxx properly");
+#endif
+
+  // ----------------------------------------------------------------------
+  // Test GET_DIRECTORY_PROPERTY for parent
+#ifndef CMAKE_FOUND_PARENT
+  cmFailed("CMake did not get the location of the parent directory properly");
+#else
+  cmPassed("CMake found the parent directory properly");
+#endif
+  
+  // ----------------------------------------------------------------------
+  // Test GET_DIRECTORY_PROPERTY for listfiles
+#ifndef CMAKE_FOUND_LISTFILE_STACK
+  cmFailed("CMake did not get the listfile stack properly");
+#else
+  cmPassed("CMake found the listfile stack properly");
+#endif
+  
+  // ----------------------------------------------------------------------
   // Test SET, VARIABLE_REQUIRES
 
 #ifdef SHOULD_NOT_BE_DEFINED
@@ -656,6 +680,18 @@ int main()
   cmPassed("SHOULD_BE_DEFINED_EXISTS2 is defined.");
 #endif
   
+#ifndef SHOULD_BE_DEFINED_IS_DIRECTORY
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_IS_DIRECTORY is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_IS_DIRECTORY is defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_IS_DIRECTORY2
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_IS_DIRECTORY2 is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_IS_DIRECTORY2 is defined.");
+#endif
+
 #ifdef SHOULD_NOT_BE_DEFINED_LESS
   cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_LESS is defined.");
 #else
