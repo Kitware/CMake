@@ -15,7 +15,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "Source/CTest/Curl"      
   "Utilities/cmcurl"      
   "Source/CursesDialog/form"      
-  "Redeclaration of \"sendpath\" with a different storage class specifier"
+  "Redeclaration of .sendpath. with a different storage class specifier"
   "Utilities/cmexpat/"
   "is not used for resolving any symbol"
   "remark\\(1209"
