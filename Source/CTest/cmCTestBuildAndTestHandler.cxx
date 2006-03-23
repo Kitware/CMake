@@ -144,7 +144,6 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
   cmOStringStream out;
   // What is this? double timeout = this->CTest->GetTimeOut();
-  int retVal = 0;
 
   // if the generator and make program are not specified then it is an error
   if (!this->BuildGenerator.size() || !this->BuildMakeProgram.size())
@@ -193,7 +192,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     ++ tarIt )
     {
     std::string output;
-    retVal = cm.GetGlobalGenerator()->Build(
+    int retVal = cm.GetGlobalGenerator()->Build(
       this->SourceDir.c_str(), this->BinaryDir.c_str(),
       this->BuildProject.c_str(), tarIt->c_str(),
       &output, this->BuildMakeProgram.c_str(),
