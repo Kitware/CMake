@@ -1894,7 +1894,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
 
   std::string rexpr = dir;
   rexpr += "/CTestCustom.ctest";
-  if ( !found && cmSystemTools::FileExists(fname.c_str()) )
+  if ( !found && cmSystemTools::FileExists(rexpr.c_str()) )
     {
     cmsys::Glob gl;
     gl.RecurseOn();
