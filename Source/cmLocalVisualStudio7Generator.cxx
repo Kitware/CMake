@@ -93,10 +93,6 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
   // clear project names
   this->CreatedProjectNames.clear();
 
-#if 1
-  // TODO: This block should be moved to a central location for all
-  // generators.  It is duplicated in every generator.
-
   // Call TraceVSDependencies on all targets
   cmTargets &tgts = this->Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin();
@@ -122,70 +118,7 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
       target.TraceVSDependencies(target.GetName(), this->Makefile);
       }
     }
-  // now for all custom commands that are not used directly in a
-  // target, add them to all targets in the current directory or
-  // makefile
-  std::vector<cmSourceFile*> & classesmf = this->Makefile->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator i = classesmf.begin();
-      i != classesmf.end(); i++)
-    {
-    if(cmCustomCommand* cc = (*i)->GetCustomCommand())
-      {
-      // while we are at it, if it is a .rule file then for visual studio 7 we
-      // must generate it so that depend information works correctly
-      if ((*i)->GetSourceExtension() == "rule")
-        {
-        std::string source = (*i)->GetFullPath();
-        if(!cmSystemTools::FileExists(source.c_str()))
-          {
-          cmSystemTools::ReplaceString(source, "$(IntDir)/", "");
-#if defined(_WIN32) || defined(__CYGWIN__)
-          std::ofstream fout(source.c_str(),
-                             std::ios::binary | std::ios::out | std::ios::trunc);
-#else
-          std::ofstream fout(source.c_str(),
-                             std::ios::out | std::ios::trunc);
-#endif
-          if(fout)
-            {
-            fout.write("# generated from CMake",22);
-            fout.flush();
-            fout.close();
-            }
-          }
-        }
-      if(!cc->IsUsed())
-        {
-        for(cmTargets::iterator l = tgts.begin();
-            l != tgts.end(); l++)
-          {
-          if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-              && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
-              && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
-              && (strcmp(l->first.c_str(), "ALL_BUILD") != 0)
-              && (strcmp(l->first.c_str(), CMAKE_CHECK_BUILD_SYSTEM_TARGET) != 0))
-            {
-            cmTarget& target = l->second;
-            bool sameAsTarget = false;
-            // make sure we don't add a custom command that depends on
-            // this target
-            for(unsigned int k =0; k < cc->GetDepends().size(); k++)
-              {
-              if(cmSystemTools::GetFilenameName(cc->GetDepends()[k]) == target.GetFullName())
-                {
-                sameAsTarget = true;
-                }
-              }
-            if(!sameAsTarget)
-              {
-              target.GetSourceFiles().push_back(*i);
-              }
-            }
-          }
-        }
-      }
-    }
-#endif
+
   for(cmTargets::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {

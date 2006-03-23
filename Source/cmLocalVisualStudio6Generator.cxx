@@ -126,47 +126,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
       target.TraceVSDependencies(target.GetName(), this->Makefile);
       }
     }
-  // now for all custom commands that are not used directly in a 
-  // target, add them to all targets in the current directory or
-  // makefile
-  std::vector<cmSourceFile*> & classesmf = this->Makefile->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator i = classesmf.begin(); 
-      i != classesmf.end(); i++)
-    {
-    if(cmCustomCommand* cc = (*i)->GetCustomCommand())
-      {
-      if(!cc->IsUsed())
-        {
-        for(cmTargets::iterator l = tgts.begin(); 
-            l != tgts.end(); l++)
-          {
-          if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-              && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
-              && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
-              && (strcmp(l->first.c_str(), "ALL_BUILD") != 0)
-              && (strcmp(l->first.c_str(), "RUN_TESTS") != 0)
-              && (strcmp(l->first.c_str(), "INSTALL") != 0))
-            {
-            cmTarget& target = l->second;
-            bool sameAsTarget = false;
-            // make sure we don't add a custom command that depends on
-            // this target
-            for(unsigned int k =0; k < cc->GetDepends().size(); k++)
-              {
-              if(cmSystemTools::GetFilenameName(cc->GetDepends()[k]) == target.GetFullName())
-                {
-                sameAsTarget = true;
-                }
-              }
-            if(!sameAsTarget)
-              {
-              target.GetSourceFiles().push_back(*i);
-              }
-            }
-          }
-        }
-      }
-    }
+
   // build any targets
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
