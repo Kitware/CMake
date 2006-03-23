@@ -86,6 +86,8 @@ static const char* cmCTestErrorMatches[] = {
   "\\*\\*\\* Error code",
   "nternal error:",
   "Makefile:[0-9]+: \\*\\*\\* .*  Stop\\.",
+  ": No such file or directory",
+  ": Invalid argument",
   0
 };
 
