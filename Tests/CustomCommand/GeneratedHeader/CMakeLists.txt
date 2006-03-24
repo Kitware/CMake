@@ -9,5 +9,5 @@ ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generated.h
   ${CMAKE_CURRENT_BINARY_DIR}/generated.h 
 )
 
-ADD_LIBRARY(GeneratedHeader main.cpp) 
+ADD_LIBRARY(GeneratedHeader main.cpp ${CMAKE_CURRENT_BINARY_DIR}/generated.h) 
  

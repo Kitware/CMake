@@ -142,6 +142,7 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.c
 
 # add the library
 ADD_EXECUTABLE(CustomCommand 
+  ${PROJECT_BINARY_DIR}/foo.h
   ${PROJECT_BINARY_DIR}/foo.c
   ${PROJECT_BINARY_DIR}/wrapped.c
   ${PROJECT_BINARY_DIR}/generated.c
