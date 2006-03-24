@@ -231,7 +231,20 @@ int cmTryCompileCommand::CoreTryCompileCode(
   // actually do the try compile now that everything is setup
   int res = mf->TryCompile(sourceDirectory, binaryDirectory,
                            projectName, targetName, &cmakeFlags, &output);
-  
+  // for the xcode generator 
+  if(strcmp(mf->GetCMakeInstance()->GetGlobalGenerator()->GetName() ,
+            "Xcode") == 0)
+    {
+    int numTrys = 0;
+    while(output.find("/bin/sh: bad interpreter: Text file busy") 
+          != output.npos && numTrys < 4)
+      {
+      output = "";
+      res = mf->TryCompile(sourceDirectory, binaryDirectory,
+                           projectName, targetName, &cmakeFlags, &output);
+      numTrys++;
+      }
+    }
   if ( erroroc )
     {
     cmSystemTools::SetErrorOccured();

@@ -62,9 +62,6 @@ public:
 #endif
 
 
-//TODO
-// add OSX application stuff
-
 //----------------------------------------------------------------------------
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
 {
@@ -1096,16 +1093,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                   this->CreateString("mh_bundle"));
       buildSettings->AddAttribute("GCC_DYNAMIC_NO_PIC", 
                                   this->CreateString("NO"));
+      buildSettings->AddAttribute("PREBINDING", 
+                                  this->CreateString("NO"));
       buildSettings->AddAttribute("GCC_SYMBOLS_PRIVATE_EXTERN", 
                                   this->CreateString("NO"));
       buildSettings->AddAttribute("GCC_INLINES_ARE_PRIVATE_EXTERN", 
                                   this->CreateString("NO"));
-      std::string outflag = "-o \\\"$(CONFIGURATION_BUILD_DIR)/";
-      outflag += productName;
-      outflag += "\\\"";
-      extraLinkOptions += " ";
-      extraLinkOptions += outflag;
-
       // Add the flags to create an executable.
       std::string createFlags =
         this->LookupFlags("CMAKE_", lang, "_LINK_FLAGS", "");
@@ -1980,7 +1973,31 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
   configlist->AddAttribute("defaultConfigurationIsVisible", this->CreateString("0"));
   configlist->AddAttribute("defaultConfigurationName", this->CreateString("Debug"));
   cmXCodeObject* buildSettings =
-    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+      this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  const char* osxArch = 
+      this->CurrentMakefile->GetDefinition("CMAKE_OSX_ARCHITECTURES");
+  const char* sysroot = 
+      this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
+  if(osxArch && sysroot)
+    {
+    std::vector<std::string> archs;
+    cmSystemTools::ExpandListArgument(std::string(osxArch),
+                                      archs);
+    if(archs.size() > 1)
+      {
+      buildSettings->AddAttribute("SDKROOT", 
+                                  this->CreateString(sysroot));
+      std::string archString;
+      for( std::vector<std::string>::iterator i = archs.begin();
+           i != archs.end(); ++i)
+        {
+        archString += *i;
+        archString += " ";
+        }
+      buildSettings->AddAttribute("ARCHS", 
+                                  this->CreateString(archString.c_str()));
+      }
+    }
   configDebug->AddAttribute("name", this->CreateString("Debug"));
   configDebug->AddAttribute("buildSettings", buildSettings);
   configRelease->AddAttribute("name", this->CreateString("Release"));

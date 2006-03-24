@@ -40,6 +40,7 @@ cmLocalGenerator::cmLocalGenerator()
   this->IgnoreLibPrefix = false;
   this->UseRelativePaths = false;
   this->Configured = false;
+  this->EmitUniversalBinaryFlags = true;
 }
 
 cmLocalGenerator::~cmLocalGenerator()
@@ -1378,6 +1379,30 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   std::string flagsVar = "CMAKE_";
   flagsVar += lang;
   flagsVar += "_FLAGS";
+  if(this->EmitUniversalBinaryFlags)
+    {
+    const char* osxArch = 
+      this->Makefile->GetDefinition("CMAKE_OSX_ARCHITECTURES");
+    const char* sysroot = 
+      this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
+    if(osxArch && sysroot  && lang && lang[0] =='C')
+      { 
+      std::vector<std::string> archs;
+      cmSystemTools::ExpandListArgument(std::string(osxArch),
+                                        archs);
+      if(archs.size() > 1)
+        {
+        for( std::vector<std::string>::iterator i = archs.begin();
+             i != archs.end(); ++i)
+          {
+          flags += " -arch ";
+          flags += *i;
+          }
+        flags += " -isysroot ";
+        flags += sysroot;
+        }
+      }
+    }
   this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
 }
 
@@ -1472,7 +1497,6 @@ void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
   // Add the flags from the variable itself.
   std::string flagsVar = var;
   this->AppendFlags(flags, this->Makefile->GetDefinition(flagsVar.c_str()));
-
   // Add the flags from the build-type specific variable.
   if(config && *config)
     {

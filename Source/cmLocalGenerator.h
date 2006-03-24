@@ -261,7 +261,7 @@ protected:
   bool UseRelativePaths;
   bool IgnoreLibPrefix;
   bool Configured;
-
+  bool EmitUniversalBinaryFlags;
   // Hack for ExpandRuleVariable until object-oriented version is
   // committed.
   std::string TargetImplib;
