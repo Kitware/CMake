@@ -22,7 +22,10 @@ SET(EXTRA_INSTALL_FLAGS)
 MESSAGE("Extra install: ${EXTRA_INSTALL_FLAGS}")
 
 IF(STAGE2)
-  SET(LIBPATHS "${CMAKE_INSTALL_PREFIX}/MyTest/lib")
+  SET(LIBPATHS
+    ${CMAKE_INSTALL_PREFIX}/MyTest/lib/static
+    ${CMAKE_INSTALL_PREFIX}/MyTest/lib
+    )
   SET(t1NAMES test1 test1${CMAKE_DEBUG_POSTFIX})
   SET(t2NAMES test2 test2${CMAKE_DEBUG_POSTFIX})
   SET(t4NAMES test4 test4${CMAKE_DEBUG_POSTFIX})
@@ -63,6 +66,12 @@ IF(STAGE2)
   TARGET_LINK_LIBRARIES(SimpleInstallS2 ${TEST1_LIBRARY} ${TEST2_LIBRARY} ${TEST4_LIBRARY})
   SET(install_target SimpleInstallS2)
 
+  IF("${TEST1_LIBRARY}" MATCHES "static")
+    MESSAGE(STATUS "test1 correctly found in lib/static")
+  ELSE("${TEST1_LIBRARY}" MATCHES "static")
+    MESSAGE(SEND_ERROR "test1 not found in lib/static!")
+  ENDIF("${TEST1_LIBRARY}" MATCHES "static")
+
   # Make sure the test executable can run from the install tree.
   SET_TARGET_PROPERTIES(SimpleInstallS2 PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
@@ -93,9 +102,15 @@ ELSE(STAGE2)
   ADD_DEPENDENCIES(test4 test2)
 
   INSTALL(TARGETS SimpleInstall test1 test2 test3
-          RUNTIME DESTINATION MyTest/bin LIBRARY DESTINATION MyTest/lib)
+    RUNTIME DESTINATION MyTest/bin        # .exe, .dll
+    LIBRARY DESTINATION MyTest/lib        # .so, module.dll, ...
+    ARCHIVE DESTINATION MyTest/lib/static # .a, .lib
+    )
   INSTALL(TARGETS test4 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-          RUNTIME DESTINATION MyTest/bin LIBRARY DESTINATION MyTest/lib)
+    RUNTIME DESTINATION MyTest/bin
+    LIBRARY DESTINATION MyTest/lib
+    ARCHIVE DESTINATION MyTest/lib/static
+    )
   INSTALL(FILES lib1.h DESTINATION MyTest/include/foo)
   INSTALL(FILES lib2.h
     DESTINATION MyTest/include/foo

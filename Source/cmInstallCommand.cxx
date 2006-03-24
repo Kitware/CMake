@@ -99,11 +99,14 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   bool doing_targets = true;
   bool doing_destination = false;
   bool doing_permissions = false;
+  bool archive_settings = true;
   bool library_settings = true;
   bool runtime_settings = true;
   std::vector<cmTarget*> targets;
+  const char* archive_destination = 0;
   const char* library_destination = 0;
   const char* runtime_destination = 0;
+  std::string archive_permissions;
   std::string library_permissions;
   std::string runtime_permissions;
   for(unsigned int i=1; i < args.size(); ++i)
@@ -122,12 +125,23 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_destination = false;
       doing_permissions = true;
       }
+    else if(args[i] == "ARCHIVE")
+      {
+      // Switch to setting only archive properties.
+      doing_targets = false;
+      doing_destination = false;
+      doing_permissions = false;
+      archive_settings = true;
+      library_settings = false;
+      runtime_settings = false;
+      }
     else if(args[i] == "LIBRARY")
       {
       // Switch to setting only library properties.
       doing_targets = false;
       doing_destination = false;
       doing_permissions = false;
+      archive_settings = false;
       library_settings = true;
       runtime_settings = false;
       }
@@ -137,6 +151,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_targets = false;
       doing_destination = false;
       doing_permissions = false;
+      archive_settings = false;
       library_settings = false;
       runtime_settings = true;
       }
@@ -174,6 +189,10 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     else if(doing_destination)
       {
       // Set the destination in the active set(s) of properties.
+      if(archive_settings)
+        {
+        archive_destination = args[i].c_str();
+        }
       if(library_settings)
         {
         library_destination = args[i].c_str();
@@ -187,6 +206,18 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     else if(doing_permissions)
       {
       // Set the permissions in the active set(s) of properties.
+      if(archive_settings)
+        {
+        // Check the requested permission.
+        if(!this->CheckPermissions(args[i], archive_permissions))
+          {
+          cmOStringStream e;
+          e << args[0] << " given invalid permission \""
+            << args[i] << "\".";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+        }
       if(library_settings)
         {
         // Check the requested permission.
@@ -227,15 +258,17 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     {
     return true;
     }
-  if(!library_destination && !runtime_destination)
+  if(!archive_destination && !library_destination && !runtime_destination)
     {
     this->SetError("TARGETS given no DESTINATION!");
     return false;
     }
 
   // Compute destination paths.
+  std::string archive_dest;
   std::string library_dest;
   std::string runtime_dest;
+  this->ComputeDestination(archive_destination, archive_dest);
   this->ComputeDestination(library_destination, library_dest);
   this->ComputeDestination(runtime_destination, runtime_dest);
 
@@ -255,12 +288,12 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // platform.
 #if defined(_WIN32) || defined(__CYGWIN__)
         // This is a DLL platform.
-        if(library_destination)
+        if(archive_destination)
           {
-          // The import library uses the LIBRARY properties.
+          // The import library uses the ARCHIVE properties.
           this->Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, library_dest.c_str(), true,
-                                         library_permissions.c_str()));
+            new cmInstallTargetGenerator(target, archive_dest.c_str(), true,
+                                         archive_permissions.c_str()));
           }
         if(runtime_destination)
           {
@@ -278,13 +311,39 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             new cmInstallTargetGenerator(target, library_dest.c_str(), false,
                                          library_permissions.c_str()));
           }
+        else
+          {
+          cmOStringStream e;
+          e << "TARGETS given no LIBRARY DESTINATION for shared library "
+            "target \"" << target.GetName() << "\".";
+          this->SetError(e.str().c_str());
+          return false;
+          }
 #endif
         }
         break;
       case cmTarget::STATIC_LIBRARY:
+        {
+        // Static libraries use ARCHIVE properties.
+        if(archive_destination)
+          {
+          this->Makefile->AddInstallGenerator(
+            new cmInstallTargetGenerator(target, archive_dest.c_str(), false,
+                                         archive_permissions.c_str()));
+          }
+        else
+          {
+          cmOStringStream e;
+          e << "TARGETS given no ARCHIVE DESTINATION for static library "
+            "target \"" << target.GetName() << "\".";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+        }
+        break;
       case cmTarget::MODULE_LIBRARY:
         {
-        // Static libraries and modules use LIBRARY properties.
+        // Modules use LIBRARY properties.
         if(library_destination)
           {
           this->Makefile->AddInstallGenerator(
@@ -294,16 +353,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         else
           {
           cmOStringStream e;
-          e << "TARGETS given no LIBRARY DESTINATION for ";
-          if(target.GetType() == cmTarget::STATIC_LIBRARY)
-            {
-            e << "static library";
-            }
-          else
-            {
-            e << "module";
-            }
-          e << " target \"" << target.GetName() << "\".";
+          e << "TARGETS given no LIBRARY DESTINATION for module target \""
+            << target.GetName() << "\".";
           this->SetError(e.str().c_str());
           return false;
           }
