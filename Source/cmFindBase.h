@@ -66,6 +66,10 @@ protected:
 
   bool AlreadyInCache;
   bool NoDefaultPath;
+  bool NoCMakePath;
+  bool NoCMakeEnvironmentPath;
+  bool NoSystemEnvironmentPath;
+  bool NoCMakeSystemPath;
   
   bool SearchFrameworkFirst;
   bool SearchFrameworkOnly;

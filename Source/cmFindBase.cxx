@@ -20,11 +20,15 @@ cmFindBase::cmFindBase()
 {
   this->AlreadyInCache = false;
   this->NoDefaultPath = false;
+  this->NoCMakePath = false;
+  this->NoCMakeEnvironmentPath = false;
+  this->NoSystemEnvironmentPath = false;
+  this->NoCMakeSystemPath = false;
   // default is to search frameworks first on apple
 #if defined(__APPLE__)
   this->SearchFrameworkFirst = true;
 #else
-   this->SearchFrameworkFirst = false;
+  this->SearchFrameworkFirst = false;
 #endif
   this->SearchFrameworkOnly = false;
   this->SearchFrameworkLast = false;
@@ -40,6 +44,10 @@ cmFindBase::cmFindBase()
     "             [PATH_SUFFIXES suffix1 [suffix2 ...]]\n"
     "             [DOC \"cache documentation string\"]\n"
     "             [NO_DEFAULT_PATH]\n"
+    "             [NO_CMAKE_ENVIRONMENT_PATH]\n"
+    "             [NO_CMAKE_PATH]\n"
+    "             [NO_SYSTEM_ENVIRONMENT_PATH]\n"
+    "             [NO_CMAKE_SYSTEM_PATH]\n"
     "            )\n"
     ""
     "This command is used to find a SEARCH_XXX_DESC. "
@@ -59,22 +67,26 @@ cmFindBase::cmFindBase()
     "If NO_DEFAULT_PATH is specified, then no additional paths are "
     "added to the search. "
     "If NO_DEFAULT_PATH is not specified, the search process is as follows:\n"
-    "1. Search cmake specific environment variables."
+    "1. Search cmake specific environment variables.  This "
+    "can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
     ""
     "   CMAKE_FRAMEWORK_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "2. Search cmake variables with the same names as "
     "the cmake specific environment variables.  These "
     "are intended to be used on the command line with a "
-    "-DVAR=value.  \n"
+    "-DVAR=value.  This can be skipped if NO_CMAKE_PATH "
+    "is passed.\n"
     ""
     "   CMAKE_FRAMEWORK_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "3. Search the standard system environment variables. "
+    "This can be skipped if NO_SYSTEM_ENVIRONMENT_PATH is an argument.\n"
     "   PATH\n"
     "   XXX_SYSTEM\n"  // replace with "", LIB, or INCLUDE
     "4. Search cmake variables defined in the Platform files "
-    "for the current system. \n"
+    "for the current system.  This can be skipped if NO_CMAKE_SYSTEM_PATH "
+    "is passed.\n"
     "   CMAKE_SYSTEM_FRAMEWORK_PATH\n"
     "   CMAKE_SYSTEM_XXX_PATH\n"
     "5. Search the paths specified after PATHS or in the short-hand version "
@@ -169,19 +181,40 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       doingNames = false;
       doingPaths = false;
       }
-    else if (args[j] == "NO_SYSTEM_PATH")
+    else if (args[j] == "NO_DEFAULT_PATH" || args[j] == "NO_SYSTEM_PATH")
       {
       doingPaths = false;
       doingPathSuf = false;
       doingNames = false;
       this->NoDefaultPath = true;
       }
-    else if (args[j] == "NO_DEFAULT_PATH")
+    else if (args[j] == "NO_CMAKE_ENVIRONMENT_PATH")
       {
       doingPaths = false;
       doingPathSuf = false;
       doingNames = false;
-      this->NoDefaultPath = true;
+      this->NoCMakeEnvironmentPath = true;
+      }
+    else if (args[j] == "NO_CMAKE_PATH")
+      {
+      doingPaths = false;
+      doingPathSuf = false;
+      doingNames = false;
+      this->NoCMakePath = true;
+      }
+    else if (args[j] == "NO_SYSTEM_ENVIRONMENT_PATH")
+      {
+      doingPaths = false;
+      doingPathSuf = false;
+      doingNames = false;
+      this->NoSystemEnvironmentPath = true;
+      }
+    else if (args[j] == "NO_CMAKE_SYSTEM_PATH")
+      {
+      doingPaths = false;
+      doingPathSuf = false;
+      doingNames = false;
+      this->NoCMakeSystemPath = true;
       }
     else
       {
@@ -242,16 +275,28 @@ void cmFindBase::ExpandPaths(std::vector<std::string> userPaths)
   // standard search paths.
   if(!this->NoDefaultPath)
     {
-    // Add CMAKE_*_PATH environment variables
-    this->AddEnvironmentVairables();
-    // Add CMake varibles of the same name as the previous environment
-    // varibles CMAKE_*_PATH to be used most of the time with -D
-    // command line options
-    this->AddCMakeVairables();
-    // add System environment PATH and (LIB or INCLUDE)
-    this->AddSystemEnvironmentVairables();
-    // Add CMAKE_SYSTEM_*_PATH variables which are defined in platform files
-    this->AddCMakeSystemVariables();
+    if(!this->NoCMakeEnvironmentPath)
+      {
+      // Add CMAKE_*_PATH environment variables
+      this->AddEnvironmentVairables();
+      }
+    if(!this->NoCMakePath)
+      {
+      // Add CMake varibles of the same name as the previous environment
+      // varibles CMAKE_*_PATH to be used most of the time with -D
+      // command line options
+      this->AddCMakeVairables();
+      }
+    if(!this->NoSystemEnvironmentPath)
+      {
+      // add System environment PATH and (LIB or INCLUDE)
+      this->AddSystemEnvironmentVairables();
+      }
+    if(!this->NoCMakeSystemPath)
+      {
+      // Add CMAKE_SYSTEM_*_PATH variables which are defined in platform files
+      this->AddCMakeSystemVariables();
+      }
     }
   // add the paths specified in the FIND_* call 
   for(unsigned int i =0; i < userPaths.size(); ++i)
@@ -386,6 +431,10 @@ void cmFindBase::PrintFindStuff()
   std::cerr << "VariableName " << this->VariableName << "\n";
   std::cerr << "VariableDocumentation " << this->VariableDocumentation << "\n";
   std::cerr << "NoDefaultPath " << this->NoDefaultPath << "\n";
+  std::cerr << "NoCMakeEnvironmentPath " << this->NoCMakeEnvironmentPath << "\n";
+  std::cerr << "NoCMakePath " << this->NoCMakePath << "\n";
+  std::cerr << "NoSystemEnvironmentPath " << this->NoSystemEnvironmentPath << "\n";
+  std::cerr << "NoCMakeSystemPath " << this->NoCMakeSystemPath << "\n";
   std::cerr << "EnvironmentPath " << this->EnvironmentPath << "\n";
   std::cerr << "CMakePathName " << this->CMakePathName << "\n";
   std::cerr << "Names  ";
