@@ -32,30 +32,34 @@ IF(WIN32)
 ENDIF(WIN32)
 
 FIND_LIBRARY(PYTHON_LIBRARY
-  NAMES python24 python2.4 python2.4.dll
-        python23 python2.3 python2.3.dll
-        python22 python2.2 python2.2.dll
-        python21 python2.1 python2.1.dll
-        python20 python2.0 python2.0.dll
-        python16 python1.6 python1.6.dll
-        python15 python1.5 python1.5.dll
+  NAMES python24 python2.4
+        python23 python2.3
+        python22 python2.2
+        python21 python2.1
+        python20 python2.0
+        python16 python1.6
+        python15 python1.5
+
   PATHS
-  /usr/lib/python2.4/config
-  /usr/lib/python2.3/config
-  /usr/lib/python2.2/config
-  /usr/lib/python2.1/config
-  /usr/lib/python2.0/config
-  /usr/lib/python1.6/config
-  /usr/lib/python1.5/config
-  /usr/lib
-  /usr/local/lib
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/libs
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/libs
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/libs
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.6\\InstallPath]/libs
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/libs
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/libs
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/libs
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/libs
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.6\\InstallPath]/libs
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/libs
+
+  PATH_SUFFIXES
+    python2.4/config
+    python2.3/config
+    python2.2/config
+    python2.1/config
+    python2.0/config
+    python1.6/config
+    python1.5/config
+
+  # Avoid finding the .dll in the PATH.  We want the .lib.
+  NO_SYSTEM_ENVIRONMENT_PATH
 )
 
 # Search for the python framework on Apple.
@@ -72,24 +76,27 @@ IF(Python_FRAMEWORKS)
   ENDIF(NOT PYTHON_INCLUDE_PATH)
 ENDIF(Python_FRAMEWORKS)
 
-FIND_PATH(PYTHON_INCLUDE_PATH Python.h
-  ${PYTHON_FRAMEWORK_INCLUDES}
-  /usr/include/python2.4
-  /usr/include/python2.3
-  /usr/include/python2.2
-  /usr/include/python2.1
-  /usr/include/python2.0
-  /usr/include/python1.6
-  /usr/include/python1.5
-  /usr/include
-  /usr/local/include
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/include
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/include
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/include
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/include
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/include
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.6\\InstallPath]/include
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/include
+FIND_PATH(PYTHON_INCLUDE_PATH
+  NAMES Python.h
+
+  PATHS
+    ${PYTHON_FRAMEWORK_INCLUDES}
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/include
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/include
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/include
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/include
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/include
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.6\\InstallPath]/include
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/include
+
+  PATH_SUFFIXES
+    python2.4
+    python2.3
+    python2.2
+    python2.1
+    python2.0
+    python1.6
+    python1.5
 )
 
 IF (WIN32)
