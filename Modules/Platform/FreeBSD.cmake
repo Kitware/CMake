@@ -8,5 +8,4 @@ IF(EXISTS /usr/include/dlfcn.h)
   SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,-soname,")
   SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-Wl,-soname,")
 ENDIF(EXISTS /usr/include/dlfcn.h)
-# include the gcc flags 
 INCLUDE(Platform/UnixPaths)
