@@ -70,3 +70,4 @@ ELSE(CMAKE_COMPILER_IS_GNUCXX)
   SET (CMAKE_C_FLAGS_INIT "")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 # set flags for gcc support
+INCLUDE(Platform/UnixPaths)

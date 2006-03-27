@@ -6,3 +6,4 @@ IF(EXISTS /usr/include/dlfcn.h)
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")       # -rpath
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")   # : or empty
 ENDIF(EXISTS /usr/include/dlfcn.h)
+INCLUDE(Platform/UnixPaths)
