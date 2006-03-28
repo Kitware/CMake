@@ -33,7 +33,7 @@ bool cmCTestReadCustomFilesCommand::InitialPass(
     this->CTest->ReadCustomConfigurationFileTree(dit->c_str());
     }
   
-  return false;
+  return true;
 }
 
 
