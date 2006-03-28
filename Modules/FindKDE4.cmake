@@ -60,13 +60,14 @@ IF (KDE4_KDECONFIG_EXECUTABLE)
 
       # use FindKDE4Internal.cmake to do the rest
       FIND_PACKAGE(KDE4Internal ${_req} ${_quiet})
-
+   ELSE (KDE4_DATA_DIR)
+      MESSAGE(FATAL_ERROR "ERROR: cmake/modules/FindKDE4Internal.cmake not found in ${_data_DIR}")
    ENDIF (KDE4_DATA_DIR)
 
 ENDIF (KDE4_KDECONFIG_EXECUTABLE)
 
 
 IF (KDE4_FIND_REQUIRED AND NOT KDE4_FOUND)
-   MESSAGE(FATAL_ERROR "Could not find KDE4")
+   MESSAGE(FATAL_ERROR "ERROR: Could not find KDE4")
 ENDIF (KDE4_FIND_REQUIRED AND NOT KDE4_FOUND)
 
