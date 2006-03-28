@@ -98,7 +98,15 @@ cmFindBase::cmFindBase()
     "   \"LAST\"   - Try to find frameworks after standard\n"
     "              libraries or headers.\n"
     "   \"ONLY\"   - Only try to find frameworks.\n"
-    "   \"NEVER\". - Never try to find frameworks.\n";
+    "   \"NEVER\". - Never try to find frameworks.\n"
+    "The reason the paths listed in the call to the command are searched "
+    "last is that most users of CMake would expect things to be found "
+    "first in the locations specified by their environment. Projects may "
+    "override this behavior by simply calling the command twice:\n"
+    "   FIND_XXX(<VAR> NAMES name PATHS paths NO_DEFAULT_PATH)\n"
+    "   FIND_XXX(<VAR> NAMES name)\n"
+    "Once one of these calls succeeds the result variable will be set "
+    "and stored in the cache so that neither call will search again.";
 }
   
 bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
@@ -108,6 +116,24 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+
+  // CMake versions below 2.3 did not search all these extra
+  // locations.  Preserve compatibility unless a modern argument is
+  // passed.
+  bool compatibility = false;
+  const char* versionValue =
+    this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  int major = 0;
+  int minor = 0;
+  if(versionValue && sscanf(versionValue, "%d.%d", &major, &minor) != 2)
+    {
+    versionValue = 0;
+    }
+  if(versionValue && (major < 2 || major == 2 && minor < 3))
+    {
+    compatibility = true;
+    }
+
   // copy argsIn into args so it can be modified,
   // in the process extract the DOC "documentation" 
   size_t size = argsIn.size();
@@ -175,14 +201,23 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       doingPathSuf = false;
       }
     else if (args[j] == "PATH_SUFFIXES")
-      { 
+      {
+      compatibility = false;
       doingPathSuf = true;
       newStyle = true;
       doingNames = false;
       doingPaths = false;
       }
-    else if (args[j] == "NO_DEFAULT_PATH" || args[j] == "NO_SYSTEM_PATH")
+    else if (args[j] == "NO_SYSTEM_PATH")
       {
+      doingPaths = false;
+      doingPathSuf = false;
+      doingNames = false;
+      this->NoDefaultPath = true;
+      }
+    else if (args[j] == "NO_DEFAULT_PATH")
+      {
+      compatibility = false;
       doingPaths = false;
       doingPathSuf = false;
       doingNames = false;
@@ -190,6 +225,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       }
     else if (args[j] == "NO_CMAKE_ENVIRONMENT_PATH")
       {
+      compatibility = false;
       doingPaths = false;
       doingPathSuf = false;
       doingNames = false;
@@ -197,6 +233,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       }
     else if (args[j] == "NO_CMAKE_PATH")
       {
+      compatibility = false;
       doingPaths = false;
       doingPathSuf = false;
       doingNames = false;
@@ -204,6 +241,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       }
     else if (args[j] == "NO_SYSTEM_ENVIRONMENT_PATH")
       {
+      compatibility = false;
       doingPaths = false;
       doingPathSuf = false;
       doingNames = false;
@@ -211,6 +249,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       }
     else if (args[j] == "NO_CMAKE_SYSTEM_PATH")
       {
+      compatibility = false;
       doingPaths = false;
       doingPathSuf = false;
       doingNames = false;
@@ -232,6 +271,18 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
         }
       }
     }
+
+  // Now that arguments have been parsed check the compatibility
+  // setting.  If we need to be compatible with CMake 2.2 and earlier
+  // do not add the CMake system paths.  It is safe to add the CMake
+  // environment paths and system environment paths because that
+  // existed in 2.2.  It is safe to add the CMake user variable paths
+  // because the user or project has explicitly set them.
+  if(compatibility)
+    {
+    this->NoCMakeSystemPath = true;
+    }
+
   if(this->VariableDocumentation.size() == 0)
     {
     this->VariableDocumentation = "Whare can ";
