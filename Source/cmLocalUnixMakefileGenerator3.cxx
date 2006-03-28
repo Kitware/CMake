@@ -1585,6 +1585,7 @@ cmLocalUnixMakefileGenerator3
       // Framework not handled yet
       abort();
       }
+    obj = cmSystemTools::RelativePath(this->Makefile->GetHomeOutputDirectory(), obj.c_str());
     }
   else
     {
