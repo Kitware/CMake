@@ -48,6 +48,7 @@
 #include "cmCTestCoverageCommand.h"
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
 #include "cmCTestMemCheckCommand.h"
+#include "cmCTestReadCustomFilesCommand.h"
 #include "cmCTestRunScriptCommand.h"
 #include "cmCTestSleepCommand.h"
 #include "cmCTestStartCommand.h"
@@ -277,6 +278,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->AddCTestCommand(new cmCTestCoverageCommand);
   this->AddCTestCommand(new cmCTestEmptyBinaryDirectoryCommand);
   this->AddCTestCommand(new cmCTestMemCheckCommand);
+  this->AddCTestCommand(new cmCTestReadCustomFilesCommand);
   this->AddCTestCommand(new cmCTestRunScriptCommand);
   this->AddCTestCommand(new cmCTestSleepCommand);
   this->AddCTestCommand(new cmCTestStartCommand);
