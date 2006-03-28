@@ -1,6 +1,9 @@
-extern int foo();
+#include <stdio.h>
 
-int main()
+extern int foo(char* exec);
+
+int main(int argc, char* argv[])
 {
-  return foo();
+  printf("Started with: %d arguments\n", argc);
+  return foo(argv[0]);
 }
