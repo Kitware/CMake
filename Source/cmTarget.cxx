@@ -924,6 +924,9 @@ const char *cmTarget::GetProperty(const char* prop)
       case cmTarget::INSTALL_PROGRAMS:
         return "INSTALL_PROGRAMS";
         break;
+      case cmTarget::INSTALL_DIRECTORY:
+        return "INSTALL_DIRECTORY";
+        break;
       }
     return 0;
     }
@@ -1027,6 +1030,7 @@ const char* cmTarget::GetCreateRuleVariable()
     case cmTarget::GLOBAL_TARGET:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
+    case cmTarget::INSTALL_DIRECTORY:
       break;
     }
   return "";
@@ -1051,6 +1055,7 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type,
     case cmTarget::GLOBAL_TARGET:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
+    case cmTarget::INSTALL_DIRECTORY:
       break;
     }
   return "";
@@ -1075,6 +1080,7 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type,
     case cmTarget::GLOBAL_TARGET:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
+    case cmTarget::INSTALL_DIRECTORY:
       break;
     }
   return "";

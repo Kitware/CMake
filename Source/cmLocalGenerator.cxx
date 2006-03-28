@@ -516,6 +516,7 @@ void cmLocalGenerator::CreateCustomTargetsAndCommands(std::set<cmStdString> cons
       case cmTarget::GLOBAL_TARGET:
       case cmTarget::INSTALL_FILES:
       case cmTarget::INSTALL_PROGRAMS:
+      case cmTarget::INSTALL_DIRECTORY:
         break;
       }
     }
@@ -1086,6 +1087,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
     case cmTarget::GLOBAL_TARGET:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
+    case cmTarget::INSTALL_DIRECTORY:
       break;
     }
 }
@@ -1445,6 +1447,7 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
         return inName;
       case cmTarget::INSTALL_FILES:
       case cmTarget::INSTALL_PROGRAMS:
+      case cmTarget::INSTALL_DIRECTORY:
         break;
       }
     }
