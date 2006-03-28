@@ -116,7 +116,8 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
         }
 
       // Handle OSX Bundles.
-      if(this->Target->GetPropertyAsBool("MACOSX_BUNDLE"))
+      if(this->Target->GetMakefile()->IsOn("APPLE") &&
+         this->Target->GetPropertyAsBool("MACOSX_BUNDLE"))
         {
         // Compute the source locations of the bundle executable and
         // Info.plist file.
@@ -133,7 +134,6 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
         destination += this->GetScriptReference(this->Target, "INSTALL",
                                                 false);
         destination += ".app/Contents";
-
 
         // Install the Info.plist file.
         this->AddInstallRule(os, destination.c_str(), cmTarget::INSTALL_FILES,
