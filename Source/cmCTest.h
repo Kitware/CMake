@@ -290,6 +290,9 @@ public:
   void AddSubmitFile(const char* name);
   SetOfStrings* GetSubmitFiles() { return &this->SubmitFiles; }
 
+  //! Read the custom configuration files and apply them to the current ctest
+  int ReadCustomConfigurationFileTree(const char* dir);
+
 private:
   std::string ConfigType;
   bool Verbose;
@@ -347,8 +350,6 @@ private:
 
   std::string              NotesFiles;
 
-
-  int ReadCustomConfigurationFileTree(const char* dir);
 
   bool                     InteractiveDebugMode;
 

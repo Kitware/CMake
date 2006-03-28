@@ -247,6 +247,7 @@ SET(CMTEST_SRCS cmCTest.cxx
   CTest/cmCTestHandlerCommand.cxx
   CTest/cmCTestMemCheckCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx
+  CTest/cmCTestReadCustomFilesCommand.cxx
   CTest/cmCTestRunScriptCommand.cxx
   CTest/cmCTestScriptHandler.cxx
   CTest/cmCTestSleepCommand.cxx
