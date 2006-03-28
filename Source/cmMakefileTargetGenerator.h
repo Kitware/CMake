@@ -34,7 +34,7 @@ class cmSourceFile;
  * \brief Support Routines for writing makefiles
  *
  */
-class cmMakefileTargetGenerator 
+class cmMakefileTargetGenerator
 {
 public:
   // constructor to set the ivars
@@ -49,12 +49,12 @@ public:
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
   virtual void WriteRuleFiles() = 0;
-  
+
 protected:
 
   // create the file and directory etc
   void CreateRuleFile();
-  
+
   // outputs the rules for any custom commands used by this target
   void WriteCustomCommandsForTarget();
 
@@ -75,38 +75,38 @@ protected:
 
   // write the build rule for an object
   void WriteObjectBuildFile(std::string &obj,
-                            const char *lang, 
+                            const char *lang,
                             cmSourceFile& source,
                             std::vector<std::string>& depends);
-  
+
   // write the depend.make file for an object
   void WriteObjectDependRules(cmSourceFile& source,
                               std::vector<std::string>& depends);
-  
+
   // this is responsible for writing all of the rules for all this
   // directories custom commands (but not utility targets)
   void WriteCustomCommands();
   void GenerateCustomRuleFile(const cmCustomCommand& cc);
-  
+
   // write out the variable that lists the objects for this target
   void WriteObjectsVariable(std::string& variableName,
                             std::string& variableNameExternal);
-  
+
   // Return the a string with -F flags on apple
   std::string GetFrameworkFlags();
-  
+
   // append intertarget dependencies
   void AppendTargetDepends(std::vector<std::string>& depends);
 
   virtual void CloseFileStreams();
-  void RemoveForbiddenFlags(const char* flagVar, const char* linkLang, 
+  void RemoveForbiddenFlags(const char* flagVar, const char* linkLang,
                             std::string& linkFlags);
   cmStdString TargetName;
   cmTarget *Target;
   cmLocalUnixMakefileGenerator3 *LocalGenerator;
   cmGlobalGenerator *GlobalGenerator;
   cmMakefile *Makefile;
-  
+
   // the full path to the build file
   std::string BuildFileName;
   std::string BuildFileNameFull;
@@ -132,19 +132,20 @@ protected:
   // objects used by this target
   std::vector<std::string> Objects;
   std::vector<std::string> ExternalObjects;
+  std::set<std::string> ExtraContent;
 
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> ObjectFiles;
 
 
   //==================================================================
-  // Convenience routines that do nothing more than forward to 
+  // Convenience routines that do nothing more than forward to
   // implementaitons
-  std::string Convert(const char* source, 
-                      cmLocalGenerator::RelativeRoot relative, 
-                      cmLocalGenerator::OutputFormat output = 
+  std::string Convert(const char* source,
+                      cmLocalGenerator::RelativeRoot relative,
+                      cmLocalGenerator::OutputFormat output =
                       cmLocalGenerator::UNCHANGED,
-                      bool optional = false) 
+                      bool optional = false)
   {
     return this->LocalGenerator->Convert(source, relative, output, optional);
   }

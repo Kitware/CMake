@@ -237,8 +237,6 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     }
 }
 
-
-
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
 {
@@ -282,6 +280,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     (this->LocalGenerator->ConvertToFullPath(dir).c_str());
   
   // Save this in the target's list of object files.
+  if ( source.GetPropertyAsBool("EXTRA_CONTENT") )
+    {
+    this->ExtraContent.insert(obj);
+    }
   this->Objects.push_back(obj);
   std::string relativeObj = this->LocalGenerator->GetHomeRelativeOutputPath();
   relativeObj += obj;
@@ -587,6 +589,7 @@ void cmMakefileTargetGenerator
     }
 }
 
+//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteCustomCommands()
 {
   // add custom commands to the clean rules?
@@ -667,6 +670,10 @@ cmMakefileTargetGenerator
   for(std::vector<std::string>::const_iterator i = this->Objects.begin();
       i != this->Objects.end(); ++i)
     {
+    if ( this->ExtraContent.find(i->c_str()) != this->ExtraContent.end() )
+      {
+      continue;
+      }
     *this->BuildFileStream << " " << lineContinue << "\n";
     if(objName)
       {

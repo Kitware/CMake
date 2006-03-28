@@ -28,7 +28,7 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 {
   // create the build.make file and directory, put in the common blocks
   this->CreateRuleFile();
-  
+
   // Add in any rules for custom commands
   this->WriteCustomCommandsForTarget();
 
@@ -82,8 +82,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Add a dependency on the rule file itself.
   this->LocalGenerator->AppendRuleDepend(depends,
                                          this->BuildFileNameFull.c_str());
-  
-  for(std::vector<std::string>::const_iterator obj = 
+
+  for(std::vector<std::string>::const_iterator obj =
         this->ExternalObjects.begin();
       obj != this->ExternalObjects.end(); ++obj)
     {
@@ -111,13 +111,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     // Make bundle directories
     outpath += targetName;
     outpath += ".app/Contents/MacOS/";
-    std::string f1 = 
+    std::string f1 =
       this->Makefile->GetModulesFile("MacOSXBundleInfo.plist.in");
     if ( f1.size() == 0 )
       {
       cmSystemTools::Error("could not find Mac OSX bundle template file.");
       }
-    std::string macdir = 
+    std::string macdir =
       this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
     if ( macdir.size() == 0 )
       {
@@ -129,6 +129,25 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       }
     macdir += targetName;
     macdir += ".app/Contents/";
+
+    std::vector<cmSourceFile*>::iterator sourceIt;
+    for ( sourceIt = this->Target->GetSourceFiles().begin();
+      sourceIt != this->Target->GetSourceFiles().end();
+      ++ sourceIt )
+      {
+      const char* subDir = (*sourceIt)->GetProperty("MACOSX_PACKAGE_LOCATION");
+      if ( subDir )
+        {
+        std::string newDir = macdir;
+        newDir += subDir;
+        if ( !cmSystemTools::MakeDirectory(newDir.c_str()) )
+          {
+          cmSystemTools::Error("Cannot create a subdirectory for \"",
+            newDir.c_str(), "\".");
+          return;
+          }
+        }
+      }
 
     // Configure the Info.plist file.  Note that it needs the executable name
     // to be set.
@@ -232,7 +251,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
     }
-  } 
+  }
 
   // Add a command to remove any existing files for this executable.
   std::vector<std::string> commands1;
@@ -240,7 +259,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                            *this->Target, "target");
   this->LocalGenerator->CreateCDCommand(commands1,
                                         this->Makefile->GetStartOutputDirectory(),
-                                        this->Makefile->GetHomeOutputDirectory()); 
+                                        this->Makefile->GetHomeOutputDirectory());
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
 
@@ -257,7 +276,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string linkRuleVar = "CMAKE_";
   linkRuleVar += linkLanguage;
   linkRuleVar += "_LINK_EXECUTABLE";
-  std::string linkRule = 
+  std::string linkRule =
     this->Makefile->GetRequiredDefinition(linkRuleVar.c_str());
   cmSystemTools::ExpandListArgument(linkRule, commands1);
   this->LocalGenerator->CreateCDCommand
@@ -317,9 +336,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
 
   // Write the build rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream,
                                       0,
-                                      targetFullPathReal.c_str(), 
+                                      targetFullPathReal.c_str(),
                                       depends, commands, false);
 
   // The symlink name for the target should depend on the real target
@@ -331,7 +350,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     commands.clear();
     depends.push_back(targetFullPathReal.c_str());
     this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                        targetFullPath.c_str(), 
+                                        targetFullPath.c_str(),
                                         depends, commands, false);
     }
 
@@ -341,11 +360,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   dir += this->LocalGenerator->GetTargetDirectory(*this->Target);
   std::string buildTargetRuleName = dir;
   buildTargetRuleName += relink?"/preinstall":"/build";
-  buildTargetRuleName = 
+  buildTargetRuleName =
     this->Convert(buildTargetRuleName.c_str(),
                   cmLocalGenerator::HOME_OUTPUT,
                   cmLocalGenerator::MAKEFILE);
-  this->LocalGenerator->WriteConvenienceRule(*this->BuildFileStream, 
+  this->LocalGenerator->WriteConvenienceRule(*this->BuildFileStream,
                                              targetFullPath.c_str(),
                                              buildTargetRuleName.c_str());
 

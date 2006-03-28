@@ -1,9 +1,36 @@
 PROJECT(BundleTest)
 SET(MACOSX_BUNDLE_INFO_STRING "bundle_info_string")
+SET(CMAKE_MacOSX_Content_COMPILE_OBJECT "\"${CMAKE_COMMAND}\" -E copy_if_different <SOURCE> <OBJECT>")
+
+ADD_CUSTOM_COMMAND(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
+  COMMAND /bin/cp
+  ARGS "${CMAKE_CURRENT_SOURCE_DIR}/randomResourceFile.plist.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist")
+
+SET_SOURCE_FILES_PROPERTIES(
+  "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
+  PROPERTIES
+  MACOSX_PACKAGE_LOCATION Resources
+  )
+
+SET_SOURCE_FILES_PROPERTIES(
+  SomeRandomFile.txt
+  PROPERTIES
+  MACOSX_PACKAGE_LOCATION MacOS
+  )
+
+SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/foobar")
 
 # Test building a bundle linking to a shared library.
 ADD_LIBRARY(BundleTestLib SHARED BundleLib.cxx)
-ADD_EXECUTABLE(BundleTest MACOSX_BUNDLE BundleTest.cxx)
+ADD_EXECUTABLE(BundleTest
+  MACOSX_BUNDLE
+  BundleTest.cxx
+  SomeRandomFile.txt
+  "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
+  )
+
 TARGET_LINK_LIBRARIES(BundleTest BundleTestLib)
 
 # Test bundle installation.

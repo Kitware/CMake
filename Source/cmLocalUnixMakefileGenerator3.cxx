@@ -1542,15 +1542,54 @@ cmLocalUnixMakefileGenerator3
     {
     objectName = objectName.substr(0, dot_pos);
     }
-  objectName +=
-    this->GlobalGenerator->GetLanguageOutputExtensionFromExtension(
-      source.GetSourceExtension().c_str());
+  if ( source.GetPropertyAsBool("KEEP_EXTENSION") )
+    {
+    if ( !source.GetSourceExtension().empty() )
+      {
+      objectName += "." + source.GetSourceExtension();
+      }
+    }
+  else
+    {
+    objectName +=
+      this->GlobalGenerator->GetLanguageOutputExtensionFromExtension(
+        source.GetSourceExtension().c_str());
+    }
 
   // Convert to a safe name.
   objectName = this->CreateSafeUniqueObjectFileName(objectName.c_str());
 
   // Prepend the target directory.
-  std::string obj = this->GetTargetDirectory(target);
+  std::string obj;
+  const char* fileTargetDirectory = source.GetProperty("MACOSX_PACKAGE_LOCATION");
+  if ( fileTargetDirectory )
+    {
+    std::string targetName;
+    std::string targetNameReal;
+    target.GetExecutableNames(targetName, targetNameReal,
+                                   this->ConfigurationName.c_str());
+    if ( target.GetPropertyAsBool("MACOSX_BUNDLE") )
+      {
+      // Construct the full path version of the names.
+      obj = this->ExecutableOutputPath;
+      if(obj.empty())
+        {
+        obj = this->Makefile->GetStartOutputDirectory();
+        obj += "/";
+        }
+      obj += targetName + ".app/Contents/";
+      obj += fileTargetDirectory;
+      }
+    else
+      {
+      // Framework not handled yet
+      abort();
+      }
+    }
+  else
+    {
+    obj = this->GetTargetDirectory(target);
+    }
   obj += "/";
   obj += objectName;
   if(nameWithoutTargetDir)
@@ -1763,6 +1802,11 @@ const char*
 cmLocalUnixMakefileGenerator3
 ::GetSourceFileLanguage(const cmSourceFile& source)
 {
+  const char* lang = source.GetProperty("LANGUAGE");
+  if ( lang )
+    {
+    return lang;
+    }
   // Identify the language of the source file.
   return (this->GlobalGenerator
           ->GetLanguageFromExtension(source.GetSourceExtension().c_str()));

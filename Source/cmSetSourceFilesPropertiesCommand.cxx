@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -63,7 +63,8 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
       ++j;
       if(j == args.end())
         {
-        this->SetError("called with incorrect number of arguments COMPILE_FLAGS with no flags");
+        this->SetError("called with incorrect number of arguments "
+          "COMPILE_FLAGS with no flags");
         return false;
         }
       propertyPairs.push_back(*j);
@@ -85,6 +86,7 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
       {
       // now loop through the rest of the arguments, new style
       ++j;
+      bool dontPush = false;
       while (j != args.end())
         {
         propertyPairs.push_back(*j);
@@ -96,6 +98,25 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
             generated = true;
             }
           }
+        else if(*j == "MACOSX_PACKAGE_LOCATION")
+          {
+          doingFiles = false;
+          ++j;
+          if(j == args.end())
+            {
+            this->SetError("called with incorrect number of arguments "
+              "MACOSX_PACKAGE_LOCATION with no flags");
+            return false;
+            }
+          propertyPairs.push_back(*j);
+          propertyPairs.push_back("EXTRA_CONTENT");
+          propertyPairs.push_back("1");
+          propertyPairs.push_back("KEEP_EXTENSION");
+          propertyPairs.push_back("1");
+          propertyPairs.push_back("LANGUAGE");
+          propertyPairs.push_back("MacOSX_Content");
+          dontPush = true;
+          }
         else
           {
           ++j;
@@ -105,8 +126,12 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
           this->SetError("called with incorrect number of arguments.");
           return false;
           }
-        propertyPairs.push_back(*j);
+        if ( !dontPush )
+          {
+          propertyPairs.push_back(*j);
+          }
         ++j;
+        dontPush = false;
         }
       // break out of the loop because j is already == end
       break;
@@ -117,16 +142,17 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
       }
     else
       {
-      this->SetError("called with illegal arguments, maybe missing a PROPERTIES specifier?");
+      this->SetError("called with illegal arguments, maybe missing a "
+        "PROPERTIES specifier?");
       return false;
       }
     }
-  
+
   // now loop over all the files
   int i;
   unsigned int k;
   for(i = 0; i < numFiles; ++i)
-    {   
+    {
     // get the source file
     cmSourceFile* sf =
       this->Makefile->GetOrCreateSource(args[i].c_str(), generated);
