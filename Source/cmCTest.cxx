@@ -1651,15 +1651,20 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       this->GetHandler("test")->SetOption("TestsToRunInformation",
         args[i].c_str());
+      this->GetHandler("memcheck")->SetOption("TestsToRunInformation",
+        args[i].c_str());
       }
     if(this->CheckArgument(arg, "-U", "--union"))
       {
       this->GetHandler("test")->SetOption("UseUnion", "true");
+      this->GetHandler("memcheck")->SetOption("UseUnion", "true");
       }
     if(this->CheckArgument(arg, "-R", "--tests-regex") && i < args.size() - 1)
       {
       i++;
       this->GetHandler("test")->SetOption("IncludeRegularExpression",
+        args[i].c_str());
+      this->GetHandler("memcheck")->SetOption("IncludeRegularExpression",
         args[i].c_str());
       }
 
@@ -1668,6 +1673,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       {
       i++;
       this->GetHandler("test")->SetOption("ExcludeRegularExpression",
+        args[i].c_str());
+      this->GetHandler("memcheck")->SetOption("ExcludeRegularExpression",
         args[i].c_str());
       }
 
