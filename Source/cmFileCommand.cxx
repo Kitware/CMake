@@ -571,6 +571,10 @@ bool cmFileCommand::HandleInstallCommand(
     {
     itype = cmTarget::MODULE_LIBRARY;
     }
+  else if ( stype == "DIRECTORY" )
+    {
+    itype = cmTarget::INSTALL_DIRECTORY;
+    }
 
   if ( !cmSystemTools::FileExists(destination.c_str()) )
     {
@@ -775,7 +779,23 @@ bool cmFileCommand::HandleInstallCommand(
     std::string message;
     if(!cmSystemTools::SameFile(fromFile.c_str(), toFile.c_str()))
       {
-      if(cmSystemTools::FileExists(fromFile.c_str()))
+      if(itype == cmTarget::INSTALL_DIRECTORY &&
+        cmSystemTools::FileIsDirectory(fromFile.c_str()))
+        {
+        // We will install this file.  Display the information.
+        message = "Installing ";
+        message += toFile.c_str();
+        this->Makefile->DisplayStatus(message.c_str(), -1);
+        if(!cmSystemTools::CopyADirectory(fromFile.c_str(), toFile.c_str()))
+          {
+          cmOStringStream e;
+          e << "INSTALL cannot copy directory \"" << fromFile
+            << "\" to \"" << toFile + "\".";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+        }
+      else if(cmSystemTools::FileExists(fromFile.c_str()))
         {
         // We will install this file.  Display the information.
         message = "Installing ";

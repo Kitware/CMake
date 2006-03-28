@@ -60,6 +60,7 @@ void cmInstallGenerator::AddInstallRule(std::ostream& os,
   std::string stype;
   switch(type)
     {
+    case cmTarget::INSTALL_DIRECTORY:stype = "DIRECTORY"; break;
     case cmTarget::INSTALL_PROGRAMS: stype = "PROGRAM"; break;
     case cmTarget::EXECUTABLE:       stype = "EXECUTABLE"; break;
     case cmTarget::STATIC_LIBRARY:   stype = "STATIC_LIBRARY"; break;

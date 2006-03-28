@@ -123,24 +123,8 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
         // Info.plist file.
         this->PrepareScriptReference(os, this->Target, "INSTALL",
                                      false, false);
-        std::string plist = fromFile;
-        plist += ".app/Contents/Info.plist";
-        fromFile += ".app/Contents/MacOS/";
-        fromFile += this->GetScriptReference(this->Target, "INSTALL",
-                                             false);
-
-        // Compute the destination locations of the bundle Info.plist file.
-        destination += "/";
-        destination += this->GetScriptReference(this->Target, "INSTALL",
-                                                false);
-        destination += ".app/Contents";
-
-        // Install the Info.plist file.
-        this->AddInstallRule(os, destination.c_str(), cmTarget::INSTALL_FILES,
-                             plist.c_str());
-
-        // Compute the destination locations of the bundle executable file.
-        destination += "/MacOS";
+        fromFile += ".app";
+        type = cmTarget::INSTALL_DIRECTORY;
         }
       }
       break;
