@@ -100,7 +100,6 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
           }
         else if(*j == "MACOSX_PACKAGE_LOCATION")
           {
-          doingFiles = false;
           ++j;
           if(j == args.end())
             {
