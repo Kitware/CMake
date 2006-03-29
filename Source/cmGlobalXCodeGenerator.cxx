@@ -704,7 +704,10 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
         this->CreateString("0"));
       cmOStringStream ostr;
-      ostr << "../" << mit->first.c_str();
+      if ( mit->first != "MacOS" )
+        {
+        ostr << "../" << mit->first.c_str();
+        }
       copyFilesBuildPhase->AddAttribute("dstPath",
         this->CreateString(ostr.str().c_str()));
       buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
