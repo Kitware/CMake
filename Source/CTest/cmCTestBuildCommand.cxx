@@ -46,7 +46,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate build handler");
-    return false;
+    return 0;
     }
 
   const char* ctestBuildCommand
@@ -104,7 +104,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         "this is a CMake project, or specify the CTEST_BUILD_COMMAND for "
         "cmake or any other project.";
       this->SetError(ostr.str().c_str());
-      return false;
+      return 0;
       }
     }
 

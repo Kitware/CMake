@@ -29,7 +29,7 @@ cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate test handler");
-    return false;
+    return 0;
     }
   return handler;
 }

@@ -59,13 +59,13 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate update handler");
-    return false;
+    return 0;
     }
   handler->SetCommand(this);
   if ( source_dir.empty() )
     {
     this->SetError("source directory not specified. Please use SOURCE tag");
-    return false;
+    return 0;
     }
   handler->SetOption("SourceDirectory", source_dir.c_str());
   if ( initialCheckoutCommand )
@@ -84,7 +84,7 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
         "CTEST_CHECKOUT_COMMAND.";
       }
     this->SetError(str.str().c_str());
-    return false;
+    return 0;
     }
   return handler;
 }

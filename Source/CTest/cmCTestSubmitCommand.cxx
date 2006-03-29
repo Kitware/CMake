@@ -95,7 +95,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     if ( !this->CTest->SubmitExtraFiles(newExtraFiles))
       {
       this->SetError("problem submitting extra files.");
-      return false;
+      return 0;
       }
     }
 
@@ -104,7 +104,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   if ( !handler )
     {
     this->SetError("internal CTest error. Cannot instantiate submit handler");
-    return false;
+    return 0;
     }
   return handler;
 }

@@ -46,7 +46,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
     this->SetError("Build directory not specified. Either use BUILD "
       "argument to CTEST_CONFIGURE command or set CTEST_BINARY_DIRECTORY "
       "variable");
-    return false;
+    return 0;
     }
 
   const char* ctestConfigureCommand
@@ -69,7 +69,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         this->SetError("Source directory not specified. Either use SOURCE "
           "argument to CTEST_CONFIGURE command or set CTEST_SOURCE_DIRECTORY "
           "variable");
-        return false;
+        return 0;
         }
       std::string cmakeConfigureCommand = "\"";
       cmakeConfigureCommand += this->CTest->GetCMakeExecutable();
@@ -86,7 +86,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       this->SetError("Configure command is not specified. If this is a CMake "
         "project, specify CTEST_CMAKE_GENERATOR, or if this is not CMake "
         "project, specify CTEST_CONFIGURE_COMMAND.");
-      return false;
+      return 0;
       }
     }
 
@@ -96,7 +96,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
     {
     this->SetError(
       "internal CTest error. Cannot instantiate configure handler");
-    return false;
+    return 0;
     }
   return handler;
 }
