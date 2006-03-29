@@ -16,6 +16,7 @@ public:
                  PBXApplicationReference, PBXExecutableFileReference, 
                  PBXLibraryReference, PBXToolTarget, PBXLibraryTarget, 
                  PBXAggregateTarget,XCBuildConfiguration,XCConfigurationList,
+                 PBXCopyFilesBuildPhase,
                  None
   };
   class StringVec: public std::vector<cmStdString> {};

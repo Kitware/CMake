@@ -616,6 +616,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     // add all the sources
     std::vector<cmXCodeObject*> externalObjFiles;
     std::vector<cmXCodeObject*> headerFiles;
+    std::vector<cmXCodeObject*> specialBundleFiles;
     for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
@@ -674,6 +675,48 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                headerBuildPhase, frameworkBuildPhase,
                                cmtarget);
     targets.push_back(this->CreateXCodeTarget(l->second, buildPhases));
+
+    // copy files build phase
+    typedef std::map<cmStdString, std::vector<cmSourceFile*> >
+      mapOfVectorOfSourceFiles;
+    mapOfVectorOfSourceFiles bundleFiles;
+    for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
+        i != classes.end(); ++i)
+      {
+      const char* resLoc = (*i)->GetProperty("MACOSX_PACKAGE_LOCATION");
+      if ( !resLoc )
+        {
+        continue;
+        }
+      bundleFiles[resLoc].push_back(*i);
+      }
+    mapOfVectorOfSourceFiles::iterator mit;
+    for ( mit = bundleFiles.begin(); mit != bundleFiles.end(); ++ mit )
+      {
+      cmXCodeObject* copyFilesBuildPhase
+        = this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
+      buildPhases->AddObject(copyFilesBuildPhase);
+      copyFilesBuildPhase->SetComment("Copy files");
+      copyFilesBuildPhase->AddAttribute("buildActionMask",
+        this->CreateString("2147483647"));
+      copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
+        this->CreateString("6"));
+      copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
+        this->CreateString("0"));
+      cmOStringStream ostr;
+      ostr << "../" << mit->first.c_str();
+      copyFilesBuildPhase->AddAttribute("dstPath",
+        this->CreateString(ostr.str().c_str()));
+      buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+      copyFilesBuildPhase->AddAttribute("files", buildFiles);
+      std::vector<cmSourceFile*>::iterator sfIt;
+      for ( sfIt = mit->second.begin(); sfIt != mit->second.end(); ++ sfIt )
+        {
+        cmXCodeObject* xsf =
+          this->CreateXCodeSourceFile(this->CurrentLocalGenerator, *sfIt, cmtarget);
+        buildFiles->AddObject(xsf);
+        }
+      }
     }
 }
 

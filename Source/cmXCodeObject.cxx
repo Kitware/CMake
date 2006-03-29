@@ -10,6 +10,7 @@ const char* cmXCodeObject::PBXTypeNames[] = {
     "PBXExecutableFileReference", "PBXLibraryReference", "PBXToolTarget",
     "PBXLibraryTarget", "PBXAggregateTarget", "XCBuildConfiguration", 
     "XCConfigurationList",
+    "PBXCopyFilesBuildPhase",
     "None"
   };
 
