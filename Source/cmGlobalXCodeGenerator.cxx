@@ -693,23 +693,32 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     mapOfVectorOfSourceFiles::iterator mit;
     for ( mit = bundleFiles.begin(); mit != bundleFiles.end(); ++ mit )
       {
-      cmXCodeObject* copyFilesBuildPhase
-        = this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
-      buildPhases->AddObject(copyFilesBuildPhase);
-      copyFilesBuildPhase->SetComment("Copy files");
-      copyFilesBuildPhase->AddAttribute("buildActionMask",
-        this->CreateString("2147483647"));
-      copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
-        this->CreateString("6"));
+      cmXCodeObject* copyFilesBuildPhase;
+      if ( mit->first == "Resources" )
+        {
+        copyFilesBuildPhase
+          = this->CreateObject(cmXCodeObject::PBXResourcesBuildPhase);
+        }
+      else
+        {
+        copyFilesBuildPhase
+          = this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
+        copyFilesBuildPhase->SetComment("Copy files");
+        copyFilesBuildPhase->AddAttribute("buildActionMask",
+          this->CreateString("2147483647"));
+        copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
+          this->CreateString("6"));
+        cmOStringStream ostr;
+        if ( mit->first != "MacOS" )
+          {
+          ostr << "../" << mit->first.c_str();
+          }
+        copyFilesBuildPhase->AddAttribute("dstPath",
+          this->CreateString(ostr.str().c_str()));
+        }
       copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
         this->CreateString("0"));
-      cmOStringStream ostr;
-      if ( mit->first != "MacOS" )
-        {
-        ostr << "../" << mit->first.c_str();
-        }
-      copyFilesBuildPhase->AddAttribute("dstPath",
-        this->CreateString(ostr.str().c_str()));
+      buildPhases->AddObject(copyFilesBuildPhase);
       buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       copyFilesBuildPhase->AddAttribute("files", buildFiles);
       std::vector<cmSourceFile*>::iterator sfIt;
