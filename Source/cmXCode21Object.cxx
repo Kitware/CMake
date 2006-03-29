@@ -75,6 +75,7 @@ void cmXCode21Object::PrintList(std::vector<cmXCodeObject*> const& v,
                              cmXCode21Object::PBXShellScriptBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXResourcesBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXSourcesBuildPhase);
+  cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXCopyFilesBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXApplicationReference);
   cmXCode21Object::PrintList(v, out, 
                              cmXCode21Object::PBXExecutableFileReference);
