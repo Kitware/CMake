@@ -17,7 +17,7 @@
 #ifndef cmCTestBuildCommand_h
 #define cmCTestBuildCommand_h
 
-#include "cmCTestCommand.h"
+#include "cmCTestHandlerCommand.h"
 
 class cmGlobalGenerator;
 
@@ -26,7 +26,7 @@ class cmGlobalGenerator;
  *
  * cmCTestBuildCommand defineds the command to build the project.
  */
-class cmCTestBuildCommand : public cmCTestCommand
+class cmCTestBuildCommand : public cmCTestHandlerCommand
 {
 public:
 
@@ -43,12 +43,6 @@ public:
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
     }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -73,9 +67,12 @@ public:
       "Builds the given build directory and stores results in Build.xml.";
     }
 
-  cmTypeMacro(cmCTestBuildCommand, cmCTestCommand);
+  cmTypeMacro(cmCTestBuildCommand, cmCTestHandlerCommand);
 
   cmGlobalGenerator* GlobalGenerator;
+
+protected:
+  cmCTestGenericHandler* InitializeHandler();
 };
 
 

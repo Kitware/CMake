@@ -836,7 +836,7 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile *mf)
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
     " Add coverage exclude regular expressions." << std::endl);
-  cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_COVERAGE_EXCLUDE",
+  this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_COVERAGE_EXCLUDE",
                                 this->CustomCoverageExclude);
   std::vector<cmStdString>::iterator it;
   for ( it = this->CustomCoverageExclude.begin();

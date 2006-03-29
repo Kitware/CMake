@@ -17,7 +17,7 @@
 #ifndef cmCTestSubmitCommand_h
 #define cmCTestSubmitCommand_h
 
-#include "cmCTestCommand.h"
+#include "cmCTestHandlerCommand.h"
 
 /** \class cmCTestSubmit
  * \brief Run a ctest script
@@ -25,7 +25,7 @@
  * cmCTestSubmitCommand defineds the command to submit the test results for
  * the project.
  */
-class cmCTestSubmitCommand : public cmCTestCommand
+class cmCTestSubmitCommand : public cmCTestHandlerCommand
 {
 public:
 
@@ -41,12 +41,6 @@ public:
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
     }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -71,8 +65,10 @@ public:
       "Submits the test results for the project.";
     }
 
-  cmTypeMacro(cmCTestSubmitCommand, cmCTestCommand);
+  cmTypeMacro(cmCTestSubmitCommand, cmCTestHandlerCommand);
 
+protected:
+  cmCTestGenericHandler* InitializeHandler();
 };
 
 

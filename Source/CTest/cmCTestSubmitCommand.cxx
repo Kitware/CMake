@@ -19,39 +19,8 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 
-bool cmCTestSubmitCommand::InitialPass(
-  std::vector<std::string> const& args)
+cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {
-  const char* res_var = 0;
-
-  bool havereturn_variable = false;
-  for(size_t i=0; i < args.size(); ++i)
-    {
-    if ( havereturn_variable )
-      {
-      res_var = args[i].c_str();
-      havereturn_variable = false;
-      }
-    else if(args[i] == "RETURN_VALUE")
-      {
-      if ( res_var )
-        {
-        this->SetError("called with incorrect number of arguments. "
-          "RETURN_VALUE specified twice.");
-        return false;
-        }
-      havereturn_variable = true;
-      }
-    else
-      {
-      cmOStringStream str;
-      str << "called with incorrect number of arguments. Extra argument is: "
-        << args[i].c_str() << ".";
-      this->SetError(str.str().c_str());
-      return false;
-      }
-    }
-
   const char* ctestDropMethod
     = this->Makefile->GetDefinition("CTEST_DROP_METHOD");
   const char* ctestDropSite
@@ -137,14 +106,7 @@ bool cmCTestSubmitCommand::InitialPass(
     this->SetError("internal CTest error. Cannot instantiate submit handler");
     return false;
     }
-  int res = handler->ProcessHandler();
-  if ( res_var )
-    {
-    cmOStringStream str;
-    str << res;
-    this->Makefile->AddDefinition(res_var, str.str().c_str());
-    }
-  return true;
+  return handler;
 }
 
 

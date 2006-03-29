@@ -161,12 +161,12 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
 void cmCTestMemCheckHandler::PopulateCustomVectors(cmMakefile *mf)
 {
   this->cmCTestTestHandler::PopulateCustomVectors(mf);
-  cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_PRE_MEMCHECK",
+  this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_PRE_MEMCHECK",
                                 this->CustomPreMemCheck);
-  cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_POST_MEMCHECK",
+  this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_POST_MEMCHECK",
                                 this->CustomPostMemCheck);
 
-  cmCTest::PopulateCustomVector(mf,
+  this->CTest->PopulateCustomVector(mf,
                              "CTEST_CUSTOM_MEMCHECK_IGNORE",
                              this->CustomTestsIgnore);
 }

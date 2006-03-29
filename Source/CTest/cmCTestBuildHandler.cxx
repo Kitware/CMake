@@ -222,18 +222,18 @@ void cmCTestBuildHandler::Initialize()
 //----------------------------------------------------------------------
 void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 {
-  cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_ERROR_MATCH",
-                                this->CustomErrorMatches);
-  cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_ERROR_EXCEPTION",
-                                this->CustomErrorExceptions);
-  cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_WARNING_MATCH",
-                                this->CustomWarningMatches);
-  cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_WARNING_EXCEPTION",
-                                this->CustomWarningExceptions);
-  cmCTest::PopulateCustomInteger(mf,
-                             "CTEST_CUSTOM_MAXIMUM_NUMBER_OF_ERRORS",
-                             this->MaxErrors);
-  cmCTest::PopulateCustomInteger(mf,
+  this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_ERROR_MATCH",
+                             this->CustomErrorMatches);
+  this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_ERROR_EXCEPTION",
+                             this->CustomErrorExceptions);
+  this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_WARNING_MATCH",
+                             this->CustomWarningMatches);
+  this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_WARNING_EXCEPTION",
+                             this->CustomWarningExceptions);
+  this->CTest->PopulateCustomInteger(mf,
+                          "CTEST_CUSTOM_MAXIMUM_NUMBER_OF_ERRORS",
+                          this->MaxErrors);
+  this->CTest->PopulateCustomInteger(mf,
                              "CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS",
                              this->MaxWarnings);
 }

@@ -385,17 +385,17 @@ void cmCTestTestHandler::Initialize()
 //----------------------------------------------------------------------
 void cmCTestTestHandler::PopulateCustomVectors(cmMakefile *mf)
 {
-  cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_PRE_TEST",
+  this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_PRE_TEST",
                                 this->CustomPreTest);
-  cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_POST_TEST",
+  this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_POST_TEST",
                                 this->CustomPostTest);
-  cmCTest::PopulateCustomVector(mf,
+  this->CTest->PopulateCustomVector(mf,
                              "CTEST_CUSTOM_TESTS_IGNORE",
                              this->CustomTestsIgnore);
-  cmCTest::PopulateCustomInteger(mf,
+  this->CTest->PopulateCustomInteger(mf,
                              "CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE",
                              this->CustomMaximumPassedTestOutputSize);
-  cmCTest::PopulateCustomInteger(mf,
+  this->CTest->PopulateCustomInteger(mf,
                              "CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE",
                              this->CustomMaximumFailedTestOutputSize);
 }

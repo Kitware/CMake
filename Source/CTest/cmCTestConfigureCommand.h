@@ -17,14 +17,14 @@
 #ifndef cmCTestConfigureCommand_h
 #define cmCTestConfigureCommand_h
 
-#include "cmCTestCommand.h"
+#include "cmCTestHandlerCommand.h"
 
 /** \class cmCTestConfigure
  * \brief Run a ctest script
  *
  * cmCTestConfigureCommand defineds the command to configures the project.
  */
-class cmCTestConfigureCommand : public cmCTestCommand
+class cmCTestConfigureCommand : public cmCTestHandlerCommand
 {
 public:
 
@@ -40,12 +40,6 @@ public:
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
     }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -72,7 +66,10 @@ public:
       "return value.";
     }
 
-  cmTypeMacro(cmCTestConfigureCommand, cmCTestCommand);
+  cmTypeMacro(cmCTestConfigureCommand, cmCTestHandlerCommand);
+
+protected:
+  cmCTestGenericHandler* InitializeHandler();
 
 };
 

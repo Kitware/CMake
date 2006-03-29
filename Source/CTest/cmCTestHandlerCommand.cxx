@@ -44,6 +44,7 @@ bool cmCTestHandlerCommand::InitialPass(
     return false;
     }
 
+  cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl;);
   cmCTestGenericHandler* handler = this->InitializeHandler();
   if ( !handler )
     {
@@ -51,10 +52,30 @@ bool cmCTestHandlerCommand::InitialPass(
     return false;
     }
 
+  cmCTestLog(this->CTest, DEBUG, "Populate Custom Vectors" << std::endl;);
+  handler->PopulateCustomVectors(this->Makefile);
+
   if ( this->Values[ct_BUILD] )
     {
     this->CTest->SetCTestConfiguration("BuildDirectory",
       this->Values[ct_BUILD]);
+    }
+  else
+    {
+    this->CTest->SetCTestConfiguration("BuildDirectory",
+      this->Makefile->GetDefinition("CTEST_BINARY_DIRECTORY"));
+    }
+  if ( this->Values[ct_SOURCE] )
+    {
+    cmCTestLog(this->CTest, DEBUG,
+      "Set source directory to: " << this->Values[ct_SOURCE] << std::endl);
+    this->CTest->SetCTestConfiguration("SourceDirectory",
+      this->Values[ct_SOURCE]);
+    }
+  else
+    {
+    this->CTest->SetCTestConfiguration("SourceDirectory",
+      this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY"));
     }
   if ( this->Values[ct_SUBMIT_INDEX] )
     {
@@ -71,7 +92,6 @@ bool cmCTestHandlerCommand::InitialPass(
       handler->SetSubmitIndex(atoi(this->Values[ct_SUBMIT_INDEX]));
       }
     }
-
 
   std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(

@@ -19,55 +19,20 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 
-bool cmCTestUpdateCommand::InitialPass(
-  std::vector<std::string> const& args)
+cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
 {
-  const char* source_dir = 0;
-  const char* res_var = 0;
-
-  bool havereturn_variable = false;
-  bool havesource = false;
-  for(size_t i=0; i < args.size(); ++i)
+  if ( this->Values[ct_SOURCE] )
     {
-    if ( havereturn_variable )
-      {
-      res_var = args[i].c_str();
-      havereturn_variable = false;
-      }
-    else if ( havesource )
-      {
-      source_dir = args[i].c_str();
-      havesource = false;
-      }
-    else if(args[i] == "RETURN_VALUE")
-      {
-      if ( res_var )
-        {
-        this->SetError("called with incorrect number of arguments. "
-          "RETURN_VALUE specified twice.");
-        return false;
-        }
-      havereturn_variable = true;
-      }
-    else if(args[i] == "SOURCE")
-      {
-      if ( source_dir )
-        {
-        this->SetError("called with incorrect number of arguments. SOURCE "
-          "specified twice.");
-        return false;
-        }
-      havesource = true;
-      }
-    else
-      {
-      cmOStringStream str;
-      str << "called with incorrect number of arguments. Extra argument is: "
-        << args[i].c_str() << ".";
-      this->SetError(str.str().c_str());
-      return false;
-      }
+    this->CTest->SetCTestConfiguration("SourceDirectory",
+      this->Values[ct_SOURCE]);
     }
+  else
+    {
+    this->CTest->SetCTestConfiguration("SourceDirectory",
+      this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY"));
+    }
+  std::string source_dir
+    = this->CTest->GetCTestConfiguration("SourceDirectory");
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "UpdateCommand", "CTEST_UPDATE_COMMAND");
@@ -97,22 +62,23 @@ bool cmCTestUpdateCommand::InitialPass(
     return false;
     }
   handler->SetCommand(this);
-  if ( !source_dir )
+  if ( source_dir.empty() )
     {
     this->SetError("source directory not specified. Please use SOURCE tag");
     return false;
     }
+  handler->SetOption("SourceDirectory", source_dir.c_str());
   if ( initialCheckoutCommand )
     {
     handler->SetOption("InitialCheckout", initialCheckoutCommand);
     }
-  if ( (!cmSystemTools::FileExists(source_dir) ||
-      !cmSystemTools::FileIsDirectory(source_dir))
+  if ( (!cmSystemTools::FileExists(source_dir.c_str()) ||
+      !cmSystemTools::FileIsDirectory(source_dir.c_str()))
     && !initialCheckoutCommand )
     {
     cmOStringStream str;
-    str << "cannot find source directory: " << source_dir << ".";
-    if ( !cmSystemTools::FileExists(source_dir) )
+    str << "cannot find source directory: " << source_dir.c_str() << ".";
+    if ( !cmSystemTools::FileExists(source_dir.c_str()) )
       {
       str << " Looks like it is not checked out yet. Please specify "
         "CTEST_CHECKOUT_COMMAND.";
@@ -120,15 +86,7 @@ bool cmCTestUpdateCommand::InitialPass(
     this->SetError(str.str().c_str());
     return false;
     }
-  handler->SetOption("SourceDirectory", source_dir);
-  int res = handler->ProcessHandler();
-  if ( res_var )
-    {
-    cmOStringStream str;
-    str << res;
-    this->Makefile->AddDefinition(res_var, str.str().c_str());
-    }
-  return true;
+  return handler;
 }
 
 

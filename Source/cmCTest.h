@@ -129,9 +129,9 @@ public:
   //! Set the notes files to be created.
   void SetNotesFiles(const char* notes);
 
-  static void PopulateCustomVector(cmMakefile* mf, const char* definition,
-                                   VectorOfStrings& vec);
-  static void PopulateCustomInteger(cmMakefile* mf, const char* def,
+  void PopulateCustomVector(cmMakefile* mf, const char* definition,
+    VectorOfStrings& vec);
+  void PopulateCustomInteger(cmMakefile* mf, const char* def,
     int& val);
 
   ///! Get the current time as string

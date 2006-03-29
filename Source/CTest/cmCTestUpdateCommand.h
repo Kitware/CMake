@@ -17,14 +17,14 @@
 #ifndef cmCTestUpdateCommand_h
 #define cmCTestUpdateCommand_h
 
-#include "cmCTestCommand.h"
+#include "cmCTestHandlerCommand.h"
 
 /** \class cmCTestUpdate
  * \brief Run a ctest script
  *
  * cmCTestUpdateCommand defineds the command to updates the repository.
  */
-class cmCTestUpdateCommand : public cmCTestCommand
+class cmCTestUpdateCommand : public cmCTestHandlerCommand
 {
 public:
 
@@ -40,12 +40,6 @@ public:
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
     }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -72,8 +66,10 @@ public:
       "modified. If there is a problem, the variable will be -1.";
     }
 
-  cmTypeMacro(cmCTestUpdateCommand, cmCTestCommand);
+  cmTypeMacro(cmCTestUpdateCommand, cmCTestHandlerCommand);
 
+protected:
+  cmCTestGenericHandler* InitializeHandler();
 };
 
 

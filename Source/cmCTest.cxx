@@ -1322,6 +1322,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if(this->CheckArgument(arg, "--debug"))
       {
       this->Debug = true;
+      this->ShowLineNumbers = true;
       }
     if(this->CheckArgument(arg, "--show-line-numbers"))
       {
@@ -1948,12 +1949,14 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def,
     {
     return;
     }
+  cmCTestLog(this, DEBUG, "PopulateCustomVector: " << def << std::endl);
   std::vector<std::string> slist;
   cmSystemTools::ExpandListArgument(dval, slist);
   std::vector<std::string>::iterator it;
 
   for ( it = slist.begin(); it != slist.end(); ++it )
     {
+    cmCTestLog(this, DEBUG, "  -- " << it->c_str() << std::endl);
     vec.push_back(it->c_str());
     }
 }
