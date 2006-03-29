@@ -116,6 +116,31 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  std::string ff = this->Makefile->GetSafeDefinition("CMAKE_FIND_FRAMEWORK");
+  if(ff == "NEVER")
+    {
+    this->SearchFrameworkLast = false;
+    this->SearchFrameworkFirst = false;
+    this->SearchFrameworkOnly = false;
+    }
+  else if (ff == "ONLY")
+    {
+    this->SearchFrameworkLast = false;
+    this->SearchFrameworkFirst = false;
+    this->SearchFrameworkOnly = true;
+    }
+  else if (ff == "FIRST")
+    {
+    this->SearchFrameworkLast = false;
+    this->SearchFrameworkFirst = true;
+    this->SearchFrameworkOnly = false;
+    }
+  else if (ff == "LAST")
+    {
+    this->SearchFrameworkLast = true;
+    this->SearchFrameworkFirst = false;
+    this->SearchFrameworkOnly = false;
+    }
 
   // CMake versions below 2.3 did not search all these extra
   // locations.  Preserve compatibility unless a modern argument is
@@ -479,6 +504,9 @@ void cmFindBase::ExpandRegistryAndCleanPath()
 
 void cmFindBase::PrintFindStuff()
 {
+  std::cerr << "SearchFrameworkLast: " << this->SearchFrameworkLast << "\n";
+  std::cerr << "SearchFrameworkOnly: " << this->SearchFrameworkOnly << "\n";
+  std::cerr << "SearchFrameworkFirst: " << this->SearchFrameworkFirst << "\n";
   std::cerr << "VariableName " << this->VariableName << "\n";
   std::cerr << "VariableDocumentation " << this->VariableDocumentation << "\n";
   std::cerr << "NoDefaultPath " << this->NoDefaultPath << "\n";
