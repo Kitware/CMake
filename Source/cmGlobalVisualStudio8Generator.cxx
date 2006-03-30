@@ -26,6 +26,7 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
 {
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
+  this->PlatformName = "Win32";
 }
 
 
@@ -206,7 +207,8 @@ cmGlobalVisualStudio8Generator
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    fout << "\t\t" << *i << "|Win32 = " << *i << "|Win32\n";
+    fout << "\t\t" << *i << "|" << this->PlatformName << " = " << *i << "|"
+         << this->PlatformName << "\n";
     }
   fout << "\tEndGlobalSection\n";
 }
@@ -221,10 +223,12 @@ cmGlobalVisualStudio8Generator
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    fout << "\t\t{" << guid << "}." << *i << "|Win32.ActiveCfg = " << *i << "|Win32\n";
+      fout << "\t\t{" << guid << "}." << *i << "|" << this->PlatformName << ".ActiveCfg = " 
+           << *i << "|" << this->PlatformName << "\n";
     if (in_all_build)
       {
-      fout << "\t\t{" << guid << "}." << *i << "|Win32.Build.0 = " << *i << "|Win32\n";
+        fout << "\t\t{" << guid << "}." << *i << "|" << this->PlatformName << ".Build.0 = " 
+             << *i << "|" << this->PlatformName << "\n";
       }
     }
 }

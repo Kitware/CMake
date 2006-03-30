@@ -119,7 +119,7 @@ char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
     {
     return in1;
     }
-  int len = strlen(in1) + strlen(in2) + 1;
+  size_t len = strlen(in1) + strlen(in2) + 1;
   char* out = new char [ len ];
   strcpy(out, in1);
   strcat(out, in2);
@@ -133,7 +133,7 @@ void cmCommandArgumentParserHelper::AllocateParserType(cmCommandArgumentParserHe
   pt->str = 0;
   if ( len == 0 )
     {
-    len = strlen(str);
+    len = (int)strlen(str);
     }
   if ( len == 0 )
     {

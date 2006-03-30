@@ -86,6 +86,9 @@ int TestDynamicLoader(const char* libname, const char* symbol, int r1, int r2, i
 
 int main(int argc, char *argv[])
 {
+#if defined(_WIN32)
+  SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+#endif
   int res;
   if( argc == 3 )
     {

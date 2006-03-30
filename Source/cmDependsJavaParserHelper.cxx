@@ -143,7 +143,7 @@ void cmDependsJavaParserHelper::Print(const char* place, const char* str)
 void cmDependsJavaParserHelper::CombineUnions(char** out, const char* in1, char** in2,
   const char* sep)
 {
-  int len = 1;
+  size_t len = 1;
   if ( in1 )
     {
     len += strlen(in1);
@@ -202,7 +202,7 @@ void cmDependsJavaParserHelper::AllocateParserType(cmDependsJavaParserHelper::Pa
   pt->str = 0;
   if ( len == 0 )
     {
-    len = strlen(str);
+    len = (int)strlen(str);
     }
   if ( len == 0 )
     {

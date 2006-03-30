@@ -211,9 +211,9 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
   os << "\t</TestList>\n";
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
     "-- Processing memory checking output: ");
-  unsigned int total = this->TestResults.size();
-  unsigned int step = total / 10;
-  unsigned int current = 0;
+  size_t total = this->TestResults.size();
+  size_t step = total / 10;
+  size_t current = 0;
   for ( cc = 0; cc < this->TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &this->TestResults[cc];

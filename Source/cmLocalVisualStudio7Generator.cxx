@@ -25,6 +25,7 @@
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
 {
   this->Version = 7;
+  this->PlatformName = "Win32";
 }
 
 cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
@@ -343,7 +344,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     mfcFlag = "0";
     }
   fout << "\t\t<Configuration\n"
-       << "\t\t\tName=\"" << configName << "|Win32\"\n"
+       << "\t\t\tName=\"" << configName << "|" << this->PlatformName << "\"\n"
        << "\t\t\tOutputDirectory=\"" << configName << "\"\n";
   // This is an internal type to Visual Studio, it seems that:
   // 4 == static library
@@ -1043,7 +1044,7 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
             i != configs->end(); ++i)
           {
           fout << "\t\t\t\t<FileConfiguration\n"
-               << "\t\t\t\t\tName=\""  << *i << "|Win32\">\n"
+               << "\t\t\t\t\tName=\""  << *i << "|" << this->PlatformName << "\">\n"
                << "\t\t\t\t\t<Tool\n"
                << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
           if(compileFlags.size())
@@ -1093,7 +1094,7 @@ WriteCustomRule(std::ostream& fout,
   for(i = configs->begin(); i != configs->end(); ++i)
     {
     fout << "\t\t\t\t<FileConfiguration\n";
-    fout << "\t\t\t\t\tName=\"" << *i << "|Win32\">\n";
+    fout << "\t\t\t\t\tName=\"" << *i << "|" << this->PlatformName << "\">\n";
     if(compileFlags)
       {
       fout << "\t\t\t\t\t<Tool\n"
@@ -1270,7 +1271,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
        << "\tSccLocalPath=\"\"\n"
        << "\tKeyword=\"" << keyword << "\">\n"
        << "\t<Platforms>\n"
-       << "\t\t<Platform\n\t\t\tName=\"Win32\"/>\n"
+       << "\t\t<Platform\n\t\t\tName=\"" << this->PlatformName << "\"/>\n"
        << "\t</Platforms>\n";
 }
 

@@ -120,7 +120,7 @@ xmlrpc_struct_size(xmlrpc_env* env, xmlrpc_value* strct)
     XMLRPC_ASSERT_VALUE_OK(strct);
 
     XMLRPC_TYPE_CHECK(env, strct, XMLRPC_TYPE_STRUCT);
-    retval = XMLRPC_MEMBLOCK_SIZE(_struct_member, &strct->_block);
+    retval = (int)XMLRPC_MEMBLOCK_SIZE(_struct_member, &strct->_block);
 
  cleanup:
     if (env->fault_occurred)
@@ -186,7 +186,7 @@ find_member(xmlrpc_value * const strctP,
             keystr = XMLRPC_MEMBLOCK_CONTENTS(char, &keyval->_block);
             keystr_size = XMLRPC_MEMBLOCK_SIZE(char, &keyval->_block)-1;
             if (key_len == keystr_size && memcmp(key, keystr, key_len) == 0)
-                return i;
+                return (int)i;
         }   
     }
     return -1;

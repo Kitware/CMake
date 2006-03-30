@@ -38,8 +38,8 @@ cmXMLParser::~cmXMLParser()
 //----------------------------------------------------------------------------
 int cmXMLParser::Parse(const char* string)
 {
-  return this->InitializeParser() &&
-    this->ParseChunk(string, strlen(string)) && 
+  return (int)this->InitializeParser() &&
+    this->ParseChunk(string, (unsigned int)strlen(string)) && 
     this->CleanupParser();
 }
 

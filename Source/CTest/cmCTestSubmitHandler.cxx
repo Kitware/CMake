@@ -39,7 +39,7 @@ static size_t
 cmCTestSubmitHandlerWriteMemoryCallback(void *ptr, size_t size, size_t nmemb,
   void *data)
 {
-  register int realsize = size * nmemb;
+  register int realsize = (int)(size * nmemb);
 
   cmCTestSubmitHandlerVectorOfChar *vec
     = static_cast<cmCTestSubmitHandlerVectorOfChar*>(data);

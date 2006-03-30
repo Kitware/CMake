@@ -139,7 +139,7 @@ void xml_element_free (xml_element *elem)
     /* Deallocate all of our children recursively. */
     children = &elem->_children;
     contents = XMLRPC_TYPED_MEM_BLOCK_CONTENTS(xml_element*, children);
-    size = XMLRPC_TYPED_MEM_BLOCK_SIZE(xml_element*, children);
+    size = (int)XMLRPC_TYPED_MEM_BLOCK_SIZE(xml_element*, children);
     for (i = 0; i < size; i++)
         xml_element_free(contents[i]);
 

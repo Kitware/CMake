@@ -367,7 +367,7 @@ xmlrpc_registry_process_call(xmlrpc_env *      const envP,
     XMLRPC_ASSERT_ENV_OK(envP);
     XMLRPC_ASSERT_PTR_OK(xml_data);
     
-    xmlrpc_traceXml("XML-RPC CALL", xml_data, xml_len);
+    xmlrpc_traceXml("XML-RPC CALL", xml_data, (unsigned int)xml_len);
 
     /* Allocate our output buffer.
     ** If this fails, we need to die in a special fashion. */
@@ -412,7 +412,7 @@ xmlrpc_registry_process_call(xmlrpc_env *      const envP,
         else
             xmlrpc_traceXml("XML-RPC RESPONSE", 
                             XMLRPC_MEMBLOCK_CONTENTS(char, output),
-                            XMLRPC_MEMBLOCK_SIZE(char, output));
+                            (unsigned int)XMLRPC_MEMBLOCK_SIZE(char, output));
     }
     return output;
 }
@@ -507,7 +507,7 @@ system_multicall(xmlrpc_env *env,
     size = xmlrpc_array_size(env, methlist);
     XMLRPC_ASSERT_ENV_OK(env);
     for (i = 0; i < size; i++) {
-        methinfo = xmlrpc_array_get_item(env, methlist, i);
+        methinfo = xmlrpc_array_get_item(env, methlist, (int)i);
         XMLRPC_ASSERT_ENV_OK(env);
         
         /* Call our method. */
@@ -588,7 +588,7 @@ system_listMethods(xmlrpc_env *env,
     size = xmlrpc_struct_size(env, registry->_methods);
     XMLRPC_FAIL_IF_FAULT(env);
     for (i = 0; i < size; i++) {
-        xmlrpc_struct_get_key_and_value(env, registry->_methods, i,
+        xmlrpc_struct_get_key_and_value(env, registry->_methods, (int)i,
                                         &method_name, &method_info);
         XMLRPC_FAIL_IF_FAULT(env);
         xmlrpc_array_append_item(env, method_names, method_name);

@@ -269,7 +269,7 @@ call_info_new(xmlrpc_env *         const envP,
                 if (!envP->fault_occurred) {
                     xmlrpc_traceXml("XML-RPC CALL", 
                                     XMLRPC_MEMBLOCK_CONTENTS(char, callXmlP),
-                                    XMLRPC_MEMBLOCK_SIZE(char, callXmlP));
+                                    (unsigned int)XMLRPC_MEMBLOCK_SIZE(char, callXmlP));
         
                     callInfoP->serialized_xml = callXmlP;
 
@@ -312,7 +312,7 @@ clientCallServerParams(xmlrpc_env *             const envP,
             if (!envP->fault_occurred) {
                 xmlrpc_traceXml("XML-RPC RESPONSE", 
                                 XMLRPC_MEMBLOCK_CONTENTS(char, respXmlP),
-                                XMLRPC_MEMBLOCK_SIZE(char, respXmlP));
+                                (unsigned int)XMLRPC_MEMBLOCK_SIZE(char, respXmlP));
             
                 *resultPP = xmlrpc_parse_response(
                     envP,

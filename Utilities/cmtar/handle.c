@@ -56,12 +56,12 @@ static int libtar_close(void* call_data)
 static ssize_t libtar_read(void* call_data, void* buf, size_t count)
 {
   struct libtar_fd_file* lf = (struct libtar_fd_file*)call_data;
-  return read(lf->fd, buf, count);
+  return (ssize_t)read(lf->fd, buf, (unsigned int)count);
 }
 static ssize_t libtar_write(void* call_data, const void* buf, size_t count)
 {
   struct libtar_fd_file* lf = (struct libtar_fd_file*)call_data;
-  return write(lf->fd, buf, count);
+  return (ssize_t) write(lf->fd, buf, (unsigned int)count);
 }
 
 static tartype_t default_type = { libtar_open, libtar_close, libtar_read, libtar_write, &libtar_fd_file_pointer };

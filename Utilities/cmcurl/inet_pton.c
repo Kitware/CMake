@@ -113,11 +113,11 @@ inet_pton4(const char *src, unsigned char *dst)
                 const char *pch;
 
                 if ((pch = strchr(digits, ch)) != NULL) {
-                        u_int new = *tp * 10 + (pch - digits);
+                        size_t new = *tp * 10 + (pch - digits);
 
                         if (new > 255)
                                 return (0);
-                        *tp = new;
+                        *tp = (unsigned char)new;
                         if (! saw_digit) {
                                 if (++octets > 4)
                                         return (0);

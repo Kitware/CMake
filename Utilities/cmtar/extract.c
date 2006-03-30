@@ -224,7 +224,7 @@ tar_extract_regfile(TAR *t, char *realname)
   uid_t uid;
   gid_t gid;
   int fdout;
-  int i, k;
+  ssize_t i, k;
   char buf[T_BLOCKSIZE];
   char *filename;
   char *pathname = 0;
@@ -334,7 +334,7 @@ tar_extract_regfile(TAR *t, char *realname)
 
     /* write block to output file */
     if (write(fdout, buf,
-        ((i > T_BLOCKSIZE) ? T_BLOCKSIZE : i)) == -1)
+        ((i > T_BLOCKSIZE) ? T_BLOCKSIZE : (unsigned int)i)) == -1)
       {
       if (pathname)
         {
@@ -375,7 +375,7 @@ tar_extract_regfile(TAR *t, char *realname)
 int
 tar_skip_regfile(TAR *t)
 {
-  int i, k;
+  ssize_t i, k;
   size_t size;
   char buf[T_BLOCKSIZE];
 

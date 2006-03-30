@@ -295,7 +295,7 @@ xmlrpc_serialize_struct(xmlrpc_env *env,
     size = xmlrpc_struct_size(env, strct);
     XMLRPC_FAIL_IF_FAULT(env);
     for (i = 0; i < size; i++) {
-        xmlrpc_struct_get_key_and_value(env, strct, i, &key, &value);
+        xmlrpc_struct_get_key_and_value(env, strct, (int)i, &key, &value);
         XMLRPC_FAIL_IF_FAULT(env);
         format_out(env, output, "<member><name>");
         XMLRPC_FAIL_IF_FAULT(env);
@@ -379,7 +379,7 @@ xmlrpc_serialize_value(xmlrpc_env *env,
         size = xmlrpc_array_size(env, value);
         XMLRPC_FAIL_IF_FAULT(env);
         for (i = 0; i < size; i++) {
-            item = xmlrpc_array_get_item(env, value, i);
+            item = xmlrpc_array_get_item(env, value, (int)i);
             XMLRPC_FAIL_IF_FAULT(env);
             xmlrpc_serialize_value(env, output, item);
             XMLRPC_FAIL_IF_FAULT(env);
@@ -469,7 +469,7 @@ xmlrpc_serialize_params(xmlrpc_env *env,
     for (i = 0; i < size; i++) {
         format_out(env, output, "<param>");
         XMLRPC_FAIL_IF_FAULT(env);
-        item = xmlrpc_array_get_item(env, param_array, i);
+        item = xmlrpc_array_get_item(env, param_array, (int)i);
         XMLRPC_FAIL_IF_FAULT(env);
         xmlrpc_serialize_value(env, output, item);
         XMLRPC_FAIL_IF_FAULT(env);

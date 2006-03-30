@@ -278,7 +278,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
       // is a variable defined
       if (*arg == "DEFINED" && argP1  != newArgs.end())
         {
-        unsigned int argP1len = argP1->size();
+        size_t argP1len = argP1->size();
         if(argP1len > 4 && argP1->substr(0, 4) == "ENV{" &&
            argP1->operator[](argP1len-1) == '}')
           {

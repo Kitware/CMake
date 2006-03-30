@@ -254,12 +254,12 @@ xmlrpc_read_string(xmlrpc_env *         const envP,
 -----------------------------------------------------------------------------*/
     validateType(envP, valueP, XMLRPC_TYPE_STRING);
     if (!envP->fault_occurred) {
-        unsigned int const size = 
+        size_t const size = 
             XMLRPC_MEMBLOCK_SIZE(char, &valueP->_block);
         const char * const contents = 
             XMLRPC_MEMBLOCK_CONTENTS(char, &valueP->_block);
 
-        verifyNoNulls(envP, contents, size);
+        verifyNoNulls(envP, contents, (unsigned int)size);
         if (!envP->fault_occurred) {
             char * stringValue;
             
@@ -289,7 +289,7 @@ xmlrpc_read_string_lp(xmlrpc_env *         const envP,
 
     validateType(envP, valueP, XMLRPC_TYPE_STRING);
     if (!envP->fault_occurred) {
-        unsigned int const size = 
+        size_t const size = 
             XMLRPC_MEMBLOCK_SIZE(char, &valueP->_block);
         const char * const contents = 
             XMLRPC_MEMBLOCK_CONTENTS(char, &valueP->_block);
@@ -304,7 +304,7 @@ xmlrpc_read_string_lp(xmlrpc_env *         const envP,
         else {
             memcpy(stringValue, contents, size);
             *stringValueP = stringValue;
-            *lengthP = size;
+            *lengthP = (unsigned int)size;
         }
     }
 }
@@ -449,7 +449,7 @@ getString(xmlrpc_env *    const envP,
           xmlrpc_value ** const valPP) {
 
     const char * str;
-    unsigned int len;
+    size_t len;
     
     str = (const char*) va_arg(*args, char*);
     if (**formatP == '#') {
@@ -458,7 +458,7 @@ getString(xmlrpc_env *    const envP,
     } else
         len = strlen(str);
 
-    mkString(envP, str, len, valPP);
+    mkString(envP, str, (unsigned int)len, valPP);
 }
 
 
@@ -1143,7 +1143,7 @@ parsevalue(xmlrpc_env *   const envP,
                 (*format)++;
                 *sizeptr = len;
             } else
-                verifyNoNulls(envP, contents, len);
+                verifyNoNulls(envP, contents, (unsigned int)len);
             *strptr = contents;
         }
         break;
@@ -1173,7 +1173,7 @@ parsevalue(xmlrpc_env *   const envP,
                     (*format)++;
                     *sizeptr = len;
                 } else
-                    verifyNoNullsW(envP, wcontents, len);
+                    verifyNoNullsW(envP, wcontents, (unsigned int)len);
                 *wcsptr = wcontents;
             }
         }

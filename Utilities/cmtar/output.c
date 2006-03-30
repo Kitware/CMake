@@ -118,7 +118,7 @@ th_print_long_ls(TAR *t)
   mtime = th_get_mtime(t);
   mtm = localtime(&mtime);
 #ifdef HAVE_STRFTIME
-  strftime(timebuf, sizeof(timebuf), "%h %e %H:%M %Y", mtm);
+  strftime(timebuf, sizeof(timebuf), "%b %d %H:%M %Y", mtm);
   printf("%s", timebuf);
 #else
   printf("%.3s %2d %2d:%02d %4d",

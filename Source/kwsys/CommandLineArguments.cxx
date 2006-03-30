@@ -513,7 +513,7 @@ const char* CommandLineArguments::GetArgv0()
 //----------------------------------------------------------------------------
 unsigned int CommandLineArguments::GetLastArgument()
 {
-  return this->Internals->LastArgument + 1;
+  return (unsigned int)this->Internals->LastArgument + 1;
 }
 
 //----------------------------------------------------------------------------
@@ -620,7 +620,7 @@ void CommandLineArguments::GenerateHelp()
       str << buffer;
       }
     const char* ptr = this->Internals->Callbacks[mpit->first].Help;
-    int len = strlen(ptr);
+    size_t len = strlen(ptr);
     int cnt = 0;
     while ( len > 0)
       {

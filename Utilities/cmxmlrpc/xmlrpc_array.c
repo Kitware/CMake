@@ -22,7 +22,7 @@ xmlrpc_abort_if_array_bad(xmlrpc_value * const arrayP) {
     else if (arrayP->_type != XMLRPC_TYPE_ARRAY)
         abort();
     else {
-        unsigned int const arraySize =
+        size_t const arraySize =
             XMLRPC_MEMBLOCK_SIZE(xmlrpc_value*, &arrayP->_block);
         xmlrpc_value ** const contents = 
             XMLRPC_MEMBLOCK_CONTENTS(xmlrpc_value*, &arrayP->_block);
@@ -51,7 +51,7 @@ xmlrpc_destroyArrayContents(xmlrpc_value * const arrayP) {
    Dispose of the contents of an array (but not the array value itself).
    The value is not valid after this.
 -----------------------------------------------------------------------------*/
-    unsigned int const arraySize =
+    size_t const arraySize =
         XMLRPC_MEMBLOCK_SIZE(xmlrpc_value*, &arrayP->_block);
     xmlrpc_value ** const contents = 
         XMLRPC_MEMBLOCK_CONTENTS(xmlrpc_value*, &arrayP->_block);
@@ -83,7 +83,7 @@ xmlrpc_array_size(xmlrpc_env *         const env,
     XMLRPC_ASSERT_VALUE_OK(array);
     XMLRPC_TYPE_CHECK(env, array, XMLRPC_TYPE_ARRAY);
 
-    retval = XMLRPC_TYPED_MEM_BLOCK_SIZE(xmlrpc_value*, &array->_block);
+    retval = (int)XMLRPC_TYPED_MEM_BLOCK_SIZE(xmlrpc_value*, &array->_block);
 
                   cleanup:
     if (env->fault_occurred)

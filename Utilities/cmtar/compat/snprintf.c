@@ -316,7 +316,7 @@ static void dopr (char *buffer, size_t maxlen, const char *format, va_list args)
       case 's':
   strvalue = va_arg (args, char *);
   if (max < 0) 
-    max = maxlen; /* ie, no max */
+    max = (int)maxlen; /* ie, no max */
   fmtstr (buffer, &currlen, maxlen, strvalue, flags, min, max);
   break;
       case 'p':
@@ -328,19 +328,19 @@ static void dopr (char *buffer, size_t maxlen, const char *format, va_list args)
   {
     short int *num;
     num = va_arg (args, short int *);
-    *num = currlen;
+    *num = (int)currlen;
         } 
   else if (cflags == DP_C_LONG) 
   {
     long int *num;
     num = va_arg (args, long int *);
-    *num = currlen;
+    *num = (int)currlen;
         } 
   else 
   {
     int *num;
     num = va_arg (args, int *);
-    *num = currlen;
+    *num = (int)currlen;
         }
   break;
       case '%':
@@ -713,7 +713,7 @@ int mutt_snprintf (va_alist) va_dcl
   (void) mutt_vsnprintf(str, count, fmt, ap);
 #endif
   VA_END;
-  return(strlen(str));
+  return((int)strlen(str));
 }
 
 #ifdef TEST_SNPRINTF

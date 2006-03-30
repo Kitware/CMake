@@ -62,6 +62,7 @@ public:
     }
   void SetVersion71() {this->Version = 71;}
   void SetVersion8() {this->Version = 8;}
+  void SetPlatformName(const char* n) { this->PlatformName = n;}
   virtual void ConfigureFinalPass();
 private:
   void FillFlagMapFromCommandFlags(std::map<cmStdString, cmStdString>& flagMap,
@@ -119,6 +120,7 @@ private:
   std::string ExecutableOutputPath;
   std::string ModuleDefinitionFile;
   int Version;
+  std::string PlatformName; // Win32 or x64 
 };
 
 #endif

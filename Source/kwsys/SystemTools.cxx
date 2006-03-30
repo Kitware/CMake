@@ -1166,7 +1166,7 @@ int SystemTools::EstimateFormatLength(const char *format, va_list ap)
   
   // Start with the length of the format string itself.
 
-  int length = strlen(format);
+  size_t length = strlen(format);
   
   // Increase the length for every argument in the format.
 
@@ -1219,7 +1219,7 @@ int SystemTools::EstimateFormatLength(const char *format, va_list ap)
       }
     }
   
-  return length;
+  return (int)length;
 }
 
 kwsys_stl::string SystemTools::EscapeChars(
@@ -2581,7 +2581,7 @@ int OldWindowsGetLongPath(kwsys_stl::string const& shortPath,
     {
     longPath = shortPath;
     }
-  return longPath.size();
+  return (int)longPath.size();
 }
 
 

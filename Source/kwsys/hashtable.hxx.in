@@ -392,7 +392,7 @@ static const unsigned long _stl_prime_list[_stl_num_primes] =
   1610612741ul, 3221225473ul, 4294967291ul
 };
 
-inline unsigned long _stl_next_prime(unsigned long __n)
+inline size_t _stl_next_prime(size_t __n)
 {
   const unsigned long* __first = _stl_prime_list;
   const unsigned long* __last = _stl_prime_list + (int)_stl_num_primes;

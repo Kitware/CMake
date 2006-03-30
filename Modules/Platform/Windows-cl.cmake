@@ -140,8 +140,35 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
       MESSAGE(STATUS "Check if this is a free VC compiler - no")
       SET(CMAKE_USING_VC_FREE_TOOLS 0)
     ENDIF(CMAKE_COMPILER_RETURN)
+    MAKE_DIRECTORY("${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp3")
+    MESSAGE(STATUS "Check for CL win64")
+    EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp3
+      ARGS /nologo /link /machine:i386
+      \"${testForFreeVCFile}\"
+      OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 
+      RETURN_VALUE CMAKE_COMPILER_RETURN
+      )
+    # if there was an error assume it is a 64bit system
+    IF(CMAKE_COMPILER_RETURN)
+      FILE(APPEND 
+        ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+        "Determining if this is a 64 bit system passed:\n"
+        "${CMAKE_COMPILER_OUTPUT}\n\n")
+      MESSAGE(STATUS "Check if this is a 64 bit system - yes")
+      SET(CMAKE_CL_64 1)
+    ELSE(CMAKE_COMPILER_RETURN)
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+        "Determining if this is a 32 bit system passed:\n"
+        "${CMAKE_COMPILER_OUTPUT}\n\n")
+      MESSAGE(STATUS "Check if this is 32 bit system - yes")
+      SET(CMAKE_CL_64 0)
+    ENDIF(CMAKE_COMPILER_RETURN)
   ENDIF(NOT CMAKE_VC_COMPILER_TESTS_RUN)
 ENDIF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
+
+IF(CMAKE_FORCE_WIN64)
+  SET(CMAKE_CL_64 1)
+ENDIF(CMAKE_FORCE_WIN64)
 
 
 # default to Debug builds
@@ -213,7 +240,11 @@ MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES)
 
 # executable linker flags
 SET (CMAKE_LINK_DEF_FILE_FLAG "/DEF:")
-SET (CMAKE_EXE_LINKER_FLAGS_INIT "/STACK:10000000 /machine:I386 /INCREMENTAL:YES")
+IF(CMAKE_CL_64)
+  SET (CMAKE_EXE_LINKER_FLAGS_INIT "/STACK:10000000 /machine:x64 /INCREMENTAL:YES")
+ELSE(CMAKE_CL_64)
+  SET (CMAKE_EXE_LINKER_FLAGS_INIT "/STACK:10000000 /machine:I386 /INCREMENTAL:YES")
+ENDIF(CMAKE_CL_64)
 IF (CMAKE_COMPILER_SUPPORTS_PDBTYPE)
   SET (CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT "/debug /pdbtype:sept")
   SET (CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT "/debug /pdbtype:sept")

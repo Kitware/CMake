@@ -1105,7 +1105,7 @@ int yynerrs;
   if (yyss + yystacksize - 1 <= yyssp)
     {
       /* Get the current used size of the three stacks, in elements.  */
-      YYSIZE_T yysize = yyssp - yyss + 1;
+      YYSIZE_T yysize = (YYSIZE_T)(yyssp - yyss + 1);
 
 #ifdef yyoverflow
       {
@@ -1281,7 +1281,7 @@ yyreduce:
     break;
 
   case 5:
-#line 251 "getdate.y"
+    //#line 251 "getdate.y"
     {
             context->yyHaveZone++;
         }

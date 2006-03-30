@@ -338,7 +338,7 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr)
     {
     if ( cc > 0 && expr[cc] == '/' && expr[cc-1] != '\\' )
       {
-      last_slash = cc;
+      last_slash = (int)cc;
       }
     if ( cc > 0 &&
       (expr[cc] == '[' || expr[cc] == '?' || expr[cc] == '*') &&
@@ -371,7 +371,7 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr)
             }
           }
         }
-      skip = cc + 1;
+      skip = int(cc + 1);
       }
     else
 #endif

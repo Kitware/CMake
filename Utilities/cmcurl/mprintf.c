@@ -619,10 +619,10 @@ static int dprintf_formatf(
     char alt;
 
     /* Width of a field.  */
-    long width;
+    ssize_t width;
 
     /* Precision of a field.  */
-    long prec;
+    ssize_t prec;
 
     /* Decimal integer is negative.  */
     char is_neg;

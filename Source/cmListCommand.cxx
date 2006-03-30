@@ -145,12 +145,12 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
       {
       value += ";";
       }
-    int nitem = varArgsExpanded.size();
+    size_t nitem = varArgsExpanded.size();
     if ( item < 0 )
       {
-      item = nitem + item;
+      item = (int)nitem + item;
       }
-    if ( item < 0 || nitem <= item )
+    if ( item < 0 || nitem <= (size_t)item )
       {
       cmOStringStream str;
       str << "index: " << item << " out of range (-" << varArgsExpanded.size() << ", " << varArgsExpanded.size()-1 << ")";
@@ -213,12 +213,12 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
 
   int item = atoi(args[2].c_str());
 
-  int nitem = varArgsExpanded.size();
+  size_t nitem = varArgsExpanded.size();
   if ( item < 0 )
     {
-    item = nitem + item;
+    item = (int)nitem + item;
     }
-  if ( item < 0 || nitem <= item )
+  if ( item < 0 || nitem <= (size_t)item )
     {
     cmOStringStream str;
     str << "index: " << item << " out of range (-" << varArgsExpanded.size() << ", " << varArgsExpanded.size()-1 << ")";
@@ -314,12 +314,12 @@ bool cmListCommand::HandleRemoveItemCommand(std::vector<std::string> const& args
   for ( cc = 2; cc < args.size(); ++ cc )
     {
     int item = atoi(args[cc].c_str());
-    int nitem = varArgsExpanded.size();
+    size_t nitem = varArgsExpanded.size();
     if ( item < 0 )
       {
-      item = nitem + item;
+      item = (int)nitem + item;
       }
-    if ( item < 0 || nitem <= item )
+    if ( item < 0 || nitem <= (size_t)item )
       {
       cmOStringStream str;
       str << "index: " << item << " out of range (-" << varArgsExpanded.size() << ", " << varArgsExpanded.size()-1 << ")";

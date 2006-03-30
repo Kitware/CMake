@@ -326,7 +326,7 @@ xmlrpc_mem_block_append(xmlrpc_env *       const env,
                         void *             const data, 
                         size_t             const len)
 {
-    int size;
+    size_t size;
 
     XMLRPC_ASSERT_ENV_OK(env);
     XMLRPC_ASSERT(block != NULL);

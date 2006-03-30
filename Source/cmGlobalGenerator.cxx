@@ -1207,8 +1207,8 @@ void cmGlobalGenerator::SetupTests()
       }
 
     // Add run_test only if any tests are foun
-    long total_tests = 0;
-    unsigned int i;
+    size_t total_tests = 0;
+    size_t i;
     for (i = 0; i < this->LocalGenerators.size(); ++i)
       {
       total_tests += this->LocalGenerators[i]->GetMakefile()->GetTests()->size();

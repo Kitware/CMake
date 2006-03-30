@@ -32,7 +32,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
   std::vector< std::vector<const char*> > cmds;
   std::string arguments;
   bool doing_command = false;
-  unsigned int command_index = 0;
+  size_t command_index = 0;
   bool output_quiet = false;
   bool error_quiet = false;
   std::string timeout_string;

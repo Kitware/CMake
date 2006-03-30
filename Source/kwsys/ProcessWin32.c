@@ -2141,7 +2141,7 @@ void kwsysProcessCleanup(kwsysProcess* cp, int error)
 void kwsysProcessCleanErrorMessage(kwsysProcess* cp)
 {
   /* Remove trailing period and newline, if any.  */
-  int length = strlen(cp->ErrorMessage);
+  size_t length = strlen(cp->ErrorMessage);
   if(cp->ErrorMessage[length-1] == '\n')
     {
     cp->ErrorMessage[length-1] = 0;

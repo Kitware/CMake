@@ -19,7 +19,7 @@ xmlrpc_makePrintable(const char * const input) {
    get the storage.
 -----------------------------------------------------------------------------*/
     char * output;
-    const unsigned int inputLength = strlen(input);
+    const size_t inputLength = strlen(input);
 
     output = malloc(inputLength*4+1);
 

@@ -248,7 +248,7 @@ static xmlrpc_value *
 convert_value(xmlrpc_env *env, unsigned *depth, xml_element *elem)
 {
     xml_element *child;
-    int child_count;
+    size_t child_count;
     char *cdata, *child_name;
     size_t cdata_size, ascii_len;
     xmlrpc_mem_block *decoded;
@@ -356,7 +356,7 @@ convert_array(xmlrpc_env *env, unsigned *depth, xml_element *elem)
 {
     xml_element *data, **values, *value;
     xmlrpc_value *array, *item;
-    int size, i;
+    size_t size, i;
 
     XMLRPC_ASSERT_ENV_OK(env);
     XMLRPC_ASSERT(elem != NULL);
@@ -413,7 +413,7 @@ convert_struct(xmlrpc_env *env, unsigned *depth, xml_element *elem)
 {
     xmlrpc_value *strct, *key, *value;
     xml_element **members, *member, *name_elem, *value_elem;
-    int size, i;
+    size_t size, i;
     char *cdata;
     size_t cdata_size;
 
@@ -490,7 +490,7 @@ static xmlrpc_value *
 convert_params(xmlrpc_env *env, unsigned *depth, xml_element *elem)
 {
     xmlrpc_value *array, *item;
-    int size, i;
+    size_t size, i;
     xml_element **params, *param, *value;
 
     XMLRPC_ASSERT_ENV_OK(env);
@@ -546,7 +546,7 @@ parseCallXml(xmlrpc_env *   const envP,
     xmlrpc_env env;
 
     xmlrpc_env_init(&env);
-    *callElemP = xml_parse(&env, xmlData, xmlLen);
+    *callElemP = xml_parse(&env, xmlData, (int)xmlLen);
     if (env.fault_occurred)
         xmlrpc_env_set_fault_formatted(
             envP, env.fault_code, "Call is not valid XML.  %s",
@@ -697,7 +697,7 @@ xmlrpc_parse_response(xmlrpc_env *env,
     depth = 0;
 
     /* Parse our XML data. */
-    response = xml_parse(env, xml_data, xml_len);
+    response = xml_parse(env, xml_data, (int)xml_len);
     XMLRPC_FAIL_IF_FAULT(env);
 
     /* Pick apart and verify our structure. */

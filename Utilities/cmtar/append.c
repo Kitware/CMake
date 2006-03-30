@@ -217,7 +217,7 @@ tar_append_file(TAR *t, char *realname, char *savename)
 int
 tar_append_eof(TAR *t)
 {
-  int i, j;
+  ssize_t i, j;
   char block[T_BLOCKSIZE];
 
   memset(&block, 0, T_BLOCKSIZE);
@@ -242,7 +242,7 @@ tar_append_regfile(TAR *t, char *realname)
 {
   char block[T_BLOCKSIZE];
   int filefd;
-  int i, j;
+  ssize_t i, j;
   size_t size;
 
 #if defined( _WIN32 ) || defined(__CYGWIN__)
@@ -278,7 +278,7 @@ tar_append_regfile(TAR *t, char *realname)
 
   if (i > 0)
   {
-    j = read(filefd, &block, i);
+    j = (size_t)read(filefd, &block, (unsigned int)i);
     if (j == -1)
       return -1;
     memset(&(block[i]), 0, T_BLOCKSIZE - i);
