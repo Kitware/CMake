@@ -141,10 +141,11 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
       SET(CMAKE_USING_VC_FREE_TOOLS 0)
     ENDIF(CMAKE_COMPILER_RETURN)
     MAKE_DIRECTORY("${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp3")
-    MESSAGE(STATUS "Check for CL win64")
+    MESSAGE(STATUS "Check CL platform")
     EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp3
-      ARGS /nologo /link /machine:i386
+      ARGS /nologo
       \"${testForFreeVCFile}\"
+      /link /machine:i386
       OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 
       RETURN_VALUE CMAKE_COMPILER_RETURN
       )
@@ -154,13 +155,13 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
         ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
         "Determining if this is a 64 bit system passed:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
-      MESSAGE(STATUS "Check if this is a 64 bit system - yes")
+      MESSAGE(STATUS "Check CL platform - 64 bit")
       SET(CMAKE_CL_64 1)
     ELSE(CMAKE_COMPILER_RETURN)
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
         "Determining if this is a 32 bit system passed:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
-      MESSAGE(STATUS "Check if this is 32 bit system - yes")
+      MESSAGE(STATUS "Check CL platform - 32 bit")
       SET(CMAKE_CL_64 0)
     ENDIF(CMAKE_COMPILER_RETURN)
   ENDIF(NOT CMAKE_VC_COMPILER_TESTS_RUN)
