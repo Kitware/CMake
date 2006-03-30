@@ -329,6 +329,7 @@ bool cmFileCommand::HandleInstallCommand(
 
   const char* destdir = cmSystemTools::GetEnv("DESTDIR");
 
+  std::set<cmStdString> components;
   std::vector<std::string> files;
   int itype = cmTarget::INSTALL_FILES;
 
@@ -367,6 +368,7 @@ bool cmFileCommand::HandleInstallCommand(
   bool in_files = false;
   bool in_properties = false;
   bool in_permissions = false;
+  bool in_components = false;
   bool use_given_permissions = false;
   mode_t permissions = 0;
   bool optional = false;
@@ -380,6 +382,7 @@ bool cmFileCommand::HandleInstallCommand(
       in_files = false;
       in_properties = false;
       in_permissions = false;
+      in_components = false;
       }
     else if ( *cstr == "TYPE" && i < args.size()-1 )
       {
@@ -393,6 +396,7 @@ bool cmFileCommand::HandleInstallCommand(
       in_properties = false;
       in_files = false;
       in_permissions = false;
+      in_components = false;
       }
     else if ( *cstr == "RENAME" && i < args.size()-1 )
       {
@@ -401,12 +405,14 @@ bool cmFileCommand::HandleInstallCommand(
       in_properties = false;
       in_files = false;
       in_permissions = false;
+      in_components = false;
       }
     else if ( *cstr == "PROPERTIES"  )
       {
       in_properties = true;
       in_files = false;
       in_permissions = false;
+      in_components = false;
       }
     else if ( *cstr == "PERMISSIONS"  )
       {
@@ -414,12 +420,21 @@ bool cmFileCommand::HandleInstallCommand(
       in_properties = false;
       in_files = false;
       in_permissions = true;
+      in_components = false;
+      }
+    else if ( *cstr == "COMPONENTS"  )
+      {
+      in_properties = false;
+      in_files = false;
+      in_permissions = false;
+      in_components = true;
       }
     else if ( *cstr == "FILES" && !in_files)
       {
       in_files = true;
       in_properties = false;
       in_permissions = false;
+      in_components = false;
       }
     else if ( in_properties && i < args.size()-1 )
       {
@@ -429,6 +444,10 @@ bool cmFileCommand::HandleInstallCommand(
     else if ( in_files )
       {
       files.push_back(*cstr);
+      }
+    else if ( in_components )
+      {
+      components.insert(*cstr);
       }
     else if(in_permissions && args[i] == "OWNER_READ")
       {
@@ -486,6 +505,19 @@ bool cmFileCommand::HandleInstallCommand(
     this->SetError("called with inapropriate arguments. "
       "No DESTINATION provided or .");
     return false;
+    }
+
+  // Check for component-specific installation.
+  const char* cmake_install_component =
+    this->Makefile->GetDefinition("CMAKE_INSTALL_COMPONENT");
+  if(cmake_install_component && *cmake_install_component)
+    {
+    // This install rule applies only if it is associated with the
+    // current component.
+    if(components.find(cmake_install_component) == components.end())
+      {
+      return true;
+      }
     }
 
   int destDirLength = 0;

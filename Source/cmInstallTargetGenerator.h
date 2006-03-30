@@ -28,7 +28,8 @@ class cmInstallTargetGenerator: public cmInstallGenerator
 {
 public:
   cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
-                           const char* permissions = "");
+                           const char* permissions = "",
+                           const char* component = "");
   virtual ~cmInstallTargetGenerator();
 
 protected:
@@ -43,6 +44,7 @@ protected:
   std::string Destination;
   bool ImportLibrary;
   std::string Permissions;
+  std::string Component;
 };
 
 #endif

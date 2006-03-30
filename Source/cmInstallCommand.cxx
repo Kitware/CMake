@@ -99,6 +99,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   bool doing_targets = true;
   bool doing_destination = false;
   bool doing_permissions = false;
+  bool doing_component = false;
   bool archive_settings = true;
   bool library_settings = true;
   bool runtime_settings = true;
@@ -109,6 +110,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   std::string archive_permissions;
   std::string library_permissions;
   std::string runtime_permissions;
+  std::string archive_component;
+  std::string library_component;
+  std::string runtime_component;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "DESTINATION")
@@ -117,6 +121,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_targets = false;
       doing_destination = true;
       doing_permissions = false;
+      doing_component = false;
       }
     else if(args[i] == "PERMISSIONS")
       {
@@ -124,6 +129,15 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_targets = false;
       doing_destination = false;
       doing_permissions = true;
+      doing_component = false;
+      }
+    else if(args[i] == "COMPONENT")
+      {
+      // Switch to setting the component property.
+      doing_targets = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_component = true;
       }
     else if(args[i] == "ARCHIVE")
       {
@@ -131,6 +145,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_targets = false;
       doing_destination = false;
       doing_permissions = false;
+      doing_component = false;
       archive_settings = true;
       library_settings = false;
       runtime_settings = false;
@@ -141,6 +156,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_targets = false;
       doing_destination = false;
       doing_permissions = false;
+      doing_component = false;
       archive_settings = false;
       library_settings = true;
       runtime_settings = false;
@@ -151,6 +167,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_targets = false;
       doing_destination = false;
       doing_permissions = false;
+      doing_component = false;
       archive_settings = false;
       library_settings = false;
       runtime_settings = true;
@@ -202,6 +219,23 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         runtime_destination = args[i].c_str();
         }
       doing_destination = false;
+      }
+    else if(doing_component)
+      {
+      // Set the component in the active set(s) of properties.
+      if(archive_settings)
+        {
+        archive_component = args[i];
+        }
+      if(library_settings)
+        {
+        library_component = args[i];
+        }
+      if(runtime_settings)
+        {
+        runtime_component = args[i];
+        }
+      doing_component = false;
       }
     else if(doing_permissions)
       {
@@ -293,14 +327,16 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           // The import library uses the ARCHIVE properties.
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, archive_dest.c_str(), true,
-                                         archive_permissions.c_str()));
+                                         archive_permissions.c_str(),
+                                         archive_component.c_str()));
           }
         if(runtime_destination)
           {
           // The DLL uses the RUNTIME properties.
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
-                                         runtime_permissions.c_str()));
+                                         runtime_permissions.c_str(),
+                                         runtime_component.c_str()));
           }
 #else
         // This is a non-DLL platform.
@@ -309,7 +345,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           // The shared library uses the LIBRARY properties.
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, library_dest.c_str(), false,
-                                         library_permissions.c_str()));
+                                         library_permissions.c_str(),
+                                         library_component.c_str()));
           }
         else
           {
@@ -329,7 +366,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           {
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, archive_dest.c_str(), false,
-                                         archive_permissions.c_str()));
+                                         archive_permissions.c_str(),
+                                         archive_component.c_str()));
           }
         else
           {
@@ -348,7 +386,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           {
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, library_dest.c_str(), false,
-                                         library_permissions.c_str()));
+                                         library_permissions.c_str(),
+                                         library_component.c_str()));
           }
         else
           {
@@ -367,7 +406,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           {
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
-                                         runtime_permissions.c_str()));
+                                         runtime_permissions.c_str(),
+                                         runtime_component.c_str()));
           }
         else
           {
@@ -386,6 +426,15 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       }
     }
 
+  // Tell the global generator about any installation component names
+  // specified.
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    ->AddInstallComponent(archive_component.c_str());
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    ->AddInstallComponent(library_component.c_str());
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    ->AddInstallComponent(runtime_component.c_str());
+
   return true;
 }
 
@@ -397,11 +446,13 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   bool doing_files = true;
   bool doing_destination = false;
   bool doing_permissions = false;
+  bool doing_component = false;
   bool doing_rename = false;
   std::vector<std::string> files;
   const char* destination = 0;
   std::string rename;
   std::string permissions;
+  std::string component;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "DESTINATION")
@@ -410,6 +461,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       doing_files = false;
       doing_destination = true;
       doing_permissions = false;
+      doing_component = false;
       doing_rename = false;
       }
     else if(args[i] == "PERMISSIONS")
@@ -418,6 +470,16 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       doing_files = false;
       doing_destination = false;
       doing_permissions = true;
+      doing_component = false;
+      doing_rename = false;
+      }
+    else if(args[i] == "COMPONENT")
+      {
+      // Switch to setting the component property.
+      doing_files = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_component = true;
       doing_rename = false;
       }
     else if(args[i] == "RENAME")
@@ -426,6 +488,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       doing_files = false;
       doing_destination = false;
       doing_permissions = false;
+      doing_component = false;
       doing_rename = true;
       }
     else if(doing_files)
@@ -455,6 +518,11 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       {
       destination = args[i].c_str();
       doing_destination = false;
+      }
+    else if(doing_component)
+      {
+      component = args[i];
+      doing_component = false;
       }
     else if(doing_permissions)
       {
@@ -512,7 +580,13 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   // Create the files install generator.
   this->Makefile->AddInstallGenerator(
     new cmInstallFilesGenerator(files, dest.c_str(), programs,
-                                permissions.c_str(), rename.c_str()));
+                                permissions.c_str(), component.c_str(),
+                                rename.c_str()));
+
+  // Tell the global generator about any installation component names
+  // specified.
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    ->AddInstallComponent(component.c_str());
 
   return true;
 }

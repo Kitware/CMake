@@ -329,6 +329,19 @@ void cmLocalGenerator::GenerateInstallRules()
     "ENDIF(NOT CMAKE_INSTALL_CONFIG_NAME)\n"
     "\n";
 
+  // Write support code for dealing with component-specific installs.
+  fout <<
+    "# Set the component getting installed.\n"
+    "IF(NOT CMAKE_INSTALL_COMPONENT)\n"
+    "  IF(COMPONENT)\n"
+    "    MESSAGE(STATUS \"Install component: \\\"${COMPONENT}\\\"\")\n"
+    "    SET(CMAKE_INSTALL_COMPONENT \"${COMPONENT}\")\n"
+    "  ELSE(COMPONENT)\n"
+    "    SET(CMAKE_INSTALL_COMPONENT)\n"
+    "  ENDIF(COMPONENT)\n"
+    "ENDIF(NOT CMAKE_INSTALL_COMPONENT)\n"
+    "\n";
+
   // Ask each install generator to write its code.
   std::vector<cmInstallGenerator*> const& installers =
     this->Makefile->GetInstallGenerators();
@@ -358,10 +371,21 @@ void cmLocalGenerator::GenerateInstallRules()
   // Record the install manifest.
   if ( toplevel_install )
     {
-    fout << "FILE(WRITE \"" << homedir.c_str() << "/install_manifest.txt\" "
-         << "\"\")" << std::endl;
-    fout << "FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})" << std::endl
-      << "  FILE(APPEND \"" << homedir.c_str() << "/install_manifest.txt\" "
+    fout <<
+      "IF(CMAKE_INSTALL_COMPONENT)\n"
+      "  SET(CMAKE_INSTALL_MANIFEST \"install_manifest_"
+      "${CMAKE_INSTALL_COMPONENT}.txt\")\n"
+      "ELSE(CMAKE_INSTALL_COMPONENT)\n"
+      "  SET(CMAKE_INSTALL_MANIFEST \"install_manifest.txt\")\n"
+      "ENDIF(CMAKE_INSTALL_COMPONENT)\n";
+    fout
+      << "FILE(WRITE \""
+      << homedir.c_str() << "/${CMAKE_INSTALL_MANIFEST}\" "
+      << "\"\")" << std::endl;
+    fout
+      << "FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})" << std::endl
+      << "  FILE(APPEND \""
+      << homedir.c_str() << "/${CMAKE_INSTALL_MANIFEST}\" "
       << "\"${file}\\n\")" << std::endl
       << "ENDFOREACH(file)" << std::endl;
     }
@@ -1698,9 +1722,10 @@ cmLocalGenerator
           // Use a file install generator.
           const char* no_permissions = "";
           const char* no_rename = "";
+          const char* no_component = "";
           cmInstallFilesGenerator g(l->second.GetSourceLists(),
                                     destination.c_str(), false,
-                                    no_permissions, no_rename);
+                                    no_permissions, no_component, no_rename);
           g.Generate(os, config, configurationTypes);
           }
           break;
@@ -1709,9 +1734,10 @@ cmLocalGenerator
           // Use a file install generator.
           const char* no_permissions = "";
           const char* no_rename = "";
+          const char* no_component = "";
           cmInstallFilesGenerator g(l->second.GetSourceLists(),
                                     destination.c_str(), true,
-                                    no_permissions, no_rename);
+                                    no_permissions, no_component, no_rename);
           g.Generate(os, config, configurationTypes);
           }
           break;

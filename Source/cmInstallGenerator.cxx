@@ -54,6 +54,7 @@ void cmInstallGenerator::AddInstallRule(std::ostream& os,
                                         bool optional /* = false */,
                                         const char* properties /* = 0 */,
                                         const char* permissions /* = 0 */,
+                                        const char* component /* = 0 */,
                                         const char* rename /* = 0 */)
 {
   // Use the FILE command to install the file.
@@ -85,6 +86,10 @@ void cmInstallGenerator::AddInstallRule(std::ostream& os,
   if(rename && *rename)
     {
     os << " RENAME \"" << rename << "\"";
+    }
+  if(component && *component)
+    {
+    os << " COMPONENTS \"" << component << "\"";
     }
   os << " FILES \"" << file << "\")\n";
 }

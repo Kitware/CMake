@@ -869,6 +869,14 @@ void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
   this->CMakeInstance->UpdateProgress("Configuring", prog);
 }
 
+void cmGlobalGenerator::AddInstallComponent(const char* component)
+{
+  if(component && *component)
+    {
+    this->InstallComponents.insert(component);
+    }
+}
+
 cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
 {
   cmLocalGenerator *lg = new cmLocalGenerator;

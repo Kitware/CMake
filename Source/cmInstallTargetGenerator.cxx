@@ -24,9 +24,9 @@
 //----------------------------------------------------------------------------
 cmInstallTargetGenerator
 ::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
-                           const char* permissions):
+                           const char* permissions, const char* component):
   Target(&t), Destination(dest), ImportLibrary(implib),
-  Permissions(permissions)
+  Permissions(permissions), Component(component)
 {
   this->Target->SetHaveInstallRule(true);
 }
@@ -145,7 +145,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   // Write code to install the target file.
   this->AddInstallRule(os, destination.c_str(), type, fromFile.c_str(),
                        this->ImportLibrary, properties,
-                       this->Permissions.c_str());
+                       this->Permissions.c_str(), this->Component.c_str());
 
   // Fix the install_name settings in installed binaries.
   if(type == cmTarget::SHARED_LIBRARY ||
@@ -335,18 +335,24 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os,
   // install_name value and references.
   if(!new_id.empty() || !install_name_remap.empty())
     {
-    os << "EXECUTE_PROCESS(COMMAND install_name_tool";
+    std::string component_test =
+      "NOT CMAKE_INSTALL_COMPONENT OR \"${CMAKE_INSTALL_COMPONENT}\" MATCHES \"^(";
+    component_test += this->Component;
+    component_test += ")$\"";
+    os << "IF(" << component_test << ")\n";
+    os << "  EXECUTE_PROCESS(COMMAND install_name_tool";
     if(!new_id.empty())
       {
-      os << "\n  -id \"" << new_id << "\"";
+      os << "\n    -id \"" << new_id << "\"";
       }
     for(std::map<cmStdString, cmStdString>::const_iterator
           i = install_name_remap.begin();
         i != install_name_remap.end(); ++i)
       {
-      os << "\n  -change \"" << i->first << "\" \"" << i->second << "\"";
+      os << "\n    -change \"" << i->first << "\" \"" << i->second << "\"";
       }
-    os << "\n  \"" << destination << "/"
+    os << "\n    \"" << destination << "/"
        << this->GetScriptReference(this->Target, "REMAPPED", true) << "\")\n";
+    os << "ENDIF(" << component_test << ")\n";
     }
 }

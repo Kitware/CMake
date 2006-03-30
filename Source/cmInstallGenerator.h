@@ -38,6 +38,7 @@ public:
                              const char* file, bool optional = false,
                              const char* properties = 0,
                              const char* permissions = 0,
+                             const char* component = 0,
                              const char* rename = 0);
 
 protected:

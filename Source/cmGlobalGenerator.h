@@ -121,6 +121,8 @@ public:
     g = this->LocalGenerators;}
 
   void AddLocalGenerator(cmLocalGenerator *lg);
+
+  void AddInstallComponent(const char* component);
   
   static int s_TryCompileTimeout;
   
@@ -197,6 +199,9 @@ protected:
   std::vector<cmLocalGenerator *> LocalGenerators;
   // map from project name to vector of local generators in that project
   std::map<cmStdString, std::vector<cmLocalGenerator*> > ProjectMap;
+
+  // Set of named installation components requested by the project.
+  std::set<cmStdString> InstallComponents;
 
 private:
   // If you add a new map here, make sure it is copied
