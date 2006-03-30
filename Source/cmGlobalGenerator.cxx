@@ -1033,20 +1033,49 @@ cmGlobalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
     return in_remote;
     }
 
-  // Skip conversion if the path is not in the source or binary tree.
   std::string original = in_remote;
-  if((original.size() < this->RelativePathTopSource.size() ||
-      !cmSystemTools::ComparePath(
-        original.substr(0, this->RelativePathTopSource.size()).c_str(),
-        this->RelativePathTopSource.c_str())) &&
-     (original.size() < this->RelativePathTopBinary.size() ||
-      !cmSystemTools::ComparePath(
-        original.substr(0, this->RelativePathTopBinary.size()).c_str(),
-        this->RelativePathTopBinary.c_str())))
+
+  // Skip conversion if the path and local are not both in the source or both
+  // in the binary tree
+  std::string local_path = cmSystemTools::JoinPath(local);
+  bool should_convert = false;
+  
+  // is the root in the binary tree?
+  if (local_path.size() >= this->RelativePathTopBinary.size() &&
+      cmSystemTools::ComparePath
+      (local_path.substr(0, this->RelativePathTopBinary.size()).c_str(),
+       this->RelativePathTopBinary.c_str()))
+    {
+    // is the source also in the binary tree?
+    if (original.size() >= this->RelativePathTopBinary.size() &&
+        cmSystemTools::ComparePath
+        (original.substr(0, this->RelativePathTopBinary.size()).c_str(),
+         this->RelativePathTopBinary.c_str()))
+      {
+      should_convert = true;
+      }
+    }
+  
+  if (local_path.size() >= this->RelativePathTopSource.size() &&
+      cmSystemTools::ComparePath
+      (local_path.substr(0, this->RelativePathTopSource.size()).c_str(),
+       this->RelativePathTopSource.c_str()))
+    {
+    // is the source also in the binary tree?
+    if (original.size() >= this->RelativePathTopSource.size() &&
+        cmSystemTools::ComparePath
+        (original.substr(0, this->RelativePathTopSource.size()).c_str(),
+         this->RelativePathTopSource.c_str()))
+      {
+      should_convert = true;
+      }
+    }
+  
+  if (!should_convert)
     {
     return in_remote;
     }
-
+  
   // Identify the longest shared path component between the remote
   // path and the local path.
   std::vector<std::string> remote;
