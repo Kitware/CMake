@@ -42,6 +42,7 @@ public:
 protected:
   void PrintFindStuff();
   void ExpandPaths(std::vector<std::string> userPaths);
+  void AddFrameWorkPaths();
   void AddEnvironmentVairables();
   void AddCMakeVairables();
   void AddSystemEnvironmentVairables();

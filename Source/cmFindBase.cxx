@@ -351,27 +351,35 @@ void cmFindBase::ExpandPaths(std::vector<std::string> userPaths)
   // standard search paths.
   if(!this->NoDefaultPath)
     {
-    if(!this->NoCMakeEnvironmentPath)
+    if(this->SearchFrameworkFirst)
+      {
+      this->AddFrameWorkPaths();
+      }
+    if(!this->NoCMakeEnvironmentPath && !this->SearchFrameworkOnly)
       {
       // Add CMAKE_*_PATH environment variables
       this->AddEnvironmentVairables();
       }
-    if(!this->NoCMakePath)
+    if(!this->NoCMakePath && !this->SearchFrameworkOnly)
       {
       // Add CMake varibles of the same name as the previous environment
       // varibles CMAKE_*_PATH to be used most of the time with -D
       // command line options
       this->AddCMakeVairables();
       }
-    if(!this->NoSystemEnvironmentPath)
+    if(!this->NoSystemEnvironmentPath && !this->SearchFrameworkOnly)
       {
       // add System environment PATH and (LIB or INCLUDE)
       this->AddSystemEnvironmentVairables();
       }
-    if(!this->NoCMakeSystemPath)
+    if(!this->NoCMakeSystemPath && !this->SearchFrameworkOnly)
       {
       // Add CMAKE_SYSTEM_*_PATH variables which are defined in platform files
       this->AddCMakeSystemVariables();
+      }
+    if(this->SearchFrameworkLast)
+      {
+      this->AddFrameWorkPaths();
       }
     }
   // add the paths specified in the FIND_* call 
@@ -379,16 +387,13 @@ void cmFindBase::ExpandPaths(std::vector<std::string> userPaths)
     {
     this->SearchPaths.push_back(userPaths[i]);
     }
+
   // clean things up
   this->ExpandRegistryAndCleanPath();
 }
 
 void cmFindBase::AddEnvironmentVairables()
 { 
-  if(this->SearchFrameworkFirst || this->SearchFrameworkOnly)
-    {
-    cmSystemTools::GetPath(this->SearchPaths, "CMAKE_FRAMEWORK_PATH");
-    }
   std::string var = "CMAKE_";
   var += this->CMakePathName;
   var += "_PATH";
@@ -400,16 +405,39 @@ void cmFindBase::AddEnvironmentVairables()
 
 }
 
-void cmFindBase::AddCMakeVairables()
-{ 
-  if(this->SearchFrameworkFirst || this->SearchFrameworkOnly)
-    { 
+void cmFindBase::AddFrameWorkPaths()
+{
+  if(this->NoDefaultPath)
+    {
+    return;
+    }
+  // first environment variables
+  if(!this->NoCMakeEnvironmentPath)
+    {
+    cmSystemTools::GetPath(this->SearchPaths, "CMAKE_FRAMEWORK_PATH");
+    }
+  // add cmake variables
+  if(!this->NoCMakePath)
+    {
     if(const char* path = 
        this->Makefile->GetDefinition("CMAKE_FRAMEWORK_PATH"))
       {
       cmSystemTools::ExpandListArgument(path, this->SearchPaths);
       }
     }
+  // AddCMakeSystemVariables
+   if(!this->NoCMakeSystemPath)
+     {
+     if(const char* path = 
+        this->Makefile->GetDefinition("CMAKE_SYSTEM_FRAMEWORK_PATH"))
+       {
+       cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+       }
+     }
+}
+
+void cmFindBase::AddCMakeVairables()
+{ 
   std::string var = "CMAKE_";
   var += this->CMakePathName;
   var += "_PATH";
@@ -440,13 +468,6 @@ void cmFindBase::AddSystemEnvironmentVairables()
 
 void cmFindBase::AddCMakeSystemVariables()
 {  
-  if(this->SearchFrameworkFirst || this->SearchFrameworkOnly)
-    { 
-    if(const char* path = this->Makefile->GetDefinition("CMAKE_SYSTEM_FRAMEWORK_PATH"))
-      {
-      cmSystemTools::ExpandListArgument(path, this->SearchPaths);
-      }
-    }
   std::string var = "CMAKE_SYSTEM_";
   var += this->CMakePathName;
   var += "_PATH";
