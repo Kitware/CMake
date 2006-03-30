@@ -152,7 +152,10 @@ public:
   std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);    
   
   // append an echo command
-  void AppendEcho(std::vector<std::string>& commands, const char* text);
+  enum EchoColor { EchoNormal, EchoDepend, EchoBuild, EchoLink,
+                   EchoGenerate, EchoGlobal };
+  void AppendEcho(std::vector<std::string>& commands, const char* text,
+                  EchoColor color = EchoNormal);
 
   static std::string GetTargetDirectory(cmTarget& target);
 

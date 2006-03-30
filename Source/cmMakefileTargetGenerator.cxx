@@ -374,7 +374,8 @@ cmMakefileTargetGenerator
   buildEcho += lang;
   buildEcho += " object ";
   buildEcho += relativeObj;
-  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str());
+  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
+                                   cmLocalUnixMakefileGenerator3::EchoBuild);
 
   // Construct the compile rules.
   std::string compileRuleVar = "CMAKE_";
@@ -540,7 +541,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   // Write the dependency generation rule.
   std::string depEcho = "Scanning dependencies of target ";
   depEcho += this->Target->GetName();
-  this->LocalGenerator->AppendEcho(commands, depEcho.c_str());
+  this->LocalGenerator->AppendEcho(commands, depEcho.c_str(),
+                                   cmLocalUnixMakefileGenerator3::EchoDepend);
   
   // Add a command to call CMake to scan dependencies.  CMake will
   // touch the corresponding depends file after scanning dependencies.
@@ -627,7 +629,9 @@ void cmMakefileTargetGenerator
   std::vector<std::string> commands;
   std::string preEcho = "Generating ";
   preEcho += output;
-  this->LocalGenerator->AppendEcho(commands, preEcho.c_str());
+  this->LocalGenerator
+    ->AppendEcho(commands, preEcho.c_str(),
+                 cmLocalUnixMakefileGenerator3::EchoGenerate);
   this->LocalGenerator->AppendCustomCommand(commands, cc);
   
   // Collect the dependencies.

@@ -265,7 +265,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       break;
     }
   buildEcho += targetOutPath.c_str();
-  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str());
+  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
+                                   cmLocalUnixMakefileGenerator3::EchoLink);
 
   // Construct a list of files associated with this library that may
   // need to be cleaned.

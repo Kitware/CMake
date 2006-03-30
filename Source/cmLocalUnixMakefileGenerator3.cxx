@@ -35,6 +35,28 @@
 #include <memory> // auto_ptr
 #include <queue>
 
+#define CMAKE_VT100_NORMAL        "\33[0m"
+#define CMAKE_VT100_BOLD          "\33[1m"
+#define CMAKE_VT100_UNDERLINE     "\33[4m"
+#define CMAKE_VT100_BLINK         "\33[5m"
+#define CMAKE_VT100_INVERSE       "\33[7m"
+#define CMAKE_VT100_FRONT_BLACK   "\33[30m"
+#define CMAKE_VT100_FRONT_RED     "\33[31m"
+#define CMAKE_VT100_FRONT_GREEN   "\33[32m"
+#define CMAKE_VT100_FRONT_YELLOW  "\33[33m"
+#define CMAKE_VT100_FRONT_BLUE    "\33[34m"
+#define CMAKE_VT100_FRONT_MAGENTA "\33[35m"
+#define CMAKE_VT100_FRONT_CYAN    "\33[36m"
+#define CMAKE_VT100_FRONT_WHITE   "\33[37m"
+#define CMAKE_VT100_BACK_BLACK    "\33[40m"
+#define CMAKE_VT100_BACK_RED      "\33[41m"
+#define CMAKE_VT100_BACK_GREEN    "\33[42m"
+#define CMAKE_VT100_BACK_YELLOW   "\33[43m"
+#define CMAKE_VT100_BACK_BLUE     "\33[44m"
+#define CMAKE_VT100_BACK_MAGENTA  "\33[45m"
+#define CMAKE_VT100_BACK_CYAN     "\33[46m"
+#define CMAKE_VT100_BACK_WHITE    "\33[47m"
+
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
 {
@@ -851,8 +873,37 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
-                                          const char* text)
+                                          const char* text,
+                                          EchoColor color)
 {
+  // Choose the color for the text.
+  const char* prefix = 0;
+  if(this->GlobalGenerator->GetToolSupportsColorVT100() &&
+     this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE"))
+    {
+    switch(color)
+      {
+      case EchoNormal:
+        break;
+      case EchoDepend:
+        prefix = CMAKE_VT100_FRONT_MAGENTA CMAKE_VT100_BOLD;
+        break;
+      case EchoBuild:
+        prefix = CMAKE_VT100_FRONT_GREEN CMAKE_VT100_BOLD;
+        break;
+      case EchoLink:
+        prefix = CMAKE_VT100_FRONT_YELLOW CMAKE_VT100_BOLD;
+        break;
+      case EchoGenerate:
+        prefix = CMAKE_VT100_FRONT_BLUE CMAKE_VT100_BOLD;
+        break;
+      case EchoGlobal:
+        prefix = CMAKE_VT100_FRONT_CYAN CMAKE_VT100_BOLD;
+        break;
+      }
+    }
+  const char* suffix = prefix? CMAKE_VT100_NORMAL : 0;
+
   // Echo one line at a time.
   std::string line;
   for(const char* c = text;; ++c)
@@ -868,7 +919,15 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
           {
           cmd += "\"";
           }
+        if(prefix)
+          {
+          cmd += prefix;
+          }
         cmd += line;
+        if(suffix)
+          {
+          cmd += suffix;
+          }
         if(this->EchoNeedsQuote)
           {
           cmd += "\"";
@@ -1320,7 +1379,8 @@ void cmLocalUnixMakefileGenerator3
         {
         depends.push_back(dit->c_str());
         }
-      this->AppendEcho(commands, text);
+      this->AppendEcho(commands, text,
+                       cmLocalUnixMakefileGenerator3::EchoGlobal);
 
       // Utility targets store their rules in pre- and post-build commands.
       this->AppendCustomDepends(depends,   

@@ -196,7 +196,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   buildEcho += linkLanguage;
   buildEcho += " executable ";
   buildEcho += targetOutPath;
-  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str());
+  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
+                                   cmLocalUnixMakefileGenerator3::EchoLink);
 
   // Build a list of compiler flags and linker flags.
   std::string flags;

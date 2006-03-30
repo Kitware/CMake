@@ -23,6 +23,7 @@ cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator()
 {
   this->FindMakeProgramFile = "CMakeMSYSFindMake.cmake";
   this->ForceUnixPaths = true;
+  this->ToolSupportsColorVT100 = true;
 }
 
 std::string 

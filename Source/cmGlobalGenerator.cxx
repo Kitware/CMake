@@ -33,6 +33,9 @@ cmGlobalGenerator::cmGlobalGenerator()
 {
   // by default use the native paths
   this->ForceUnixPaths = false;
+
+  // By default do not try to support color.
+  this->ToolSupportsColorVT100 = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()

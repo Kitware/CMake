@@ -127,6 +127,7 @@ public:
   static int s_TryCompileTimeout;
   
   bool GetForceUnixPaths() {return this->ForceUnixPaths;}
+  bool GetToolSupportsColorVT100() { return this->ToolSupportsColorVT100; }
   ///! return the language for the given extension
   const char* GetLanguageFromExtension(const char* ext);
   ///! is an extension to be ignored
@@ -193,6 +194,7 @@ protected:
   virtual const char* GetRebuildCacheTargetName() { return 0; }
 
   bool ForceUnixPaths;
+  bool ToolSupportsColorVT100;
   cmStdString FindMakeProgramFile;
   cmStdString ConfiguredFilesPath;
   cmake *CMakeInstance;

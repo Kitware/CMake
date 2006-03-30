@@ -24,6 +24,7 @@ cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
   this->EmptyRuleHackDepends = "NUL";
   this->FindMakeProgramFile = "CMakeBorlandFindMake.cmake";
   this->ForceUnixPaths = false;
+  this->ToolSupportsColorVT100 = false;
 }
 
 
