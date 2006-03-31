@@ -267,7 +267,7 @@ tar_append_regfile(TAR *t, char *realname)
       if (j != -1)
         {
         fprintf(stderr, "Unexpected size of read data: %d <> %d for file: %s\n",
-          j, T_BLOCKSIZE, realname);
+          (int)j, T_BLOCKSIZE, realname);
         errno = EINVAL;
         }
       return -1;
