@@ -258,11 +258,11 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
   cmStdString dir;
   cmStdString file;
   std::vector<cmStdString> empty;
-  bool framework = false;
   // do not add a -F for the system frameworks
   this->EmittedFrameworkPaths.insert("/System/Library/Frameworks");
   for(unsigned int i=0; i < this->RawLinkItems.size(); ++i)
     {
+    bool framework = false;
     if(cmSystemTools::FileIsFullPath(this->RawLinkItems[i].c_str()))
       {
       if(cmSystemTools::FileIsDirectory(this->RawLinkItems[i].c_str()))
