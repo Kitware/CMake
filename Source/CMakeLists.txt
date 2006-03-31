@@ -282,6 +282,11 @@ SET(CPACK_SRCS
 ADD_LIBRARY(CPackLib ${CPACK_SRCS})
 TARGET_LINK_LIBRARIES(CPackLib CMakeLib)
 
+IF(APPLE)
+  ADD_EXECUTABLE(cmakexbuild cmakexbuild.cxx)
+  TARGET_LINK_LIBRARIES(cmakexbuild CMakeLib)
+ENDIF(APPLE)
+
 # Build CMake executable
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 TARGET_LINK_LIBRARIES(cmake CMakeLib)
@@ -1088,4 +1093,8 @@ INCLUDE (${CMAKE_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 INSTALL_TARGETS(/bin cmake)
 INSTALL_TARGETS(/bin ctest)
 INSTALL_TARGETS(/bin cpack)
+IF(APPLE)
+  INSTALL_TARGETS(/bin cmakexbuild)
+ENDIF(APPLE)
+
 INSTALL_FILES(${CMAKE_DATA_DIR}/include cmCPluginAPI.h)

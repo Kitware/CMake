@@ -1148,8 +1148,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                   this->CreateString("mh_bundle"));
       buildSettings->AddAttribute("GCC_DYNAMIC_NO_PIC", 
                                   this->CreateString("NO"));
-      buildSettings->AddAttribute("PREBINDING", 
-                                  this->CreateString("NO"));
       buildSettings->AddAttribute("GCC_SYMBOLS_PRIVATE_EXTERN", 
                                   this->CreateString("NO"));
       buildSettings->AddAttribute("GCC_INLINES_ARE_PRIVATE_EXTERN", 
@@ -1245,7 +1243,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     default:
       break;
     }
-  
+  if(this->XcodeVersion >= 22)
+    {
+    buildSettings->AddAttribute("PREBINDING", 
+                                this->CreateString("NO"));
+    }
   std::string dirs;
   std::vector<std::string> includes;
   this->CurrentLocalGenerator->GetIncludeDirectories(includes);

@@ -17,9 +17,9 @@
 #include "cmake.h"
 #include "cmCacheManager.h"
 #include "cmListFileCache.h"
+#include "cmakewizard.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-#include "cmakewizard.h"
 #include "cmDynamicLoader.h"
 #include "cmDocumentation.h"
 
@@ -182,9 +182,7 @@ int do_cmake(int ac, char** av)
     }
 #endif
   
-#if defined(CMAKE_BUILD_WITH_CMAKE)
   bool wiz = false;
-#endif
   bool command = false;
   bool list_cached = false;
   bool list_all_cached = false;
@@ -194,16 +192,13 @@ int do_cmake(int ac, char** av)
   std::vector<std::string> args;
   for(int i =0; i < ac; ++i)
     {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
     if(strcmp(av[i], "-i") == 0)
       {
       wiz = true;
       }
-    else
-#endif
     // if command has already been set, then
     // do not eat the -E 
-    if (!command && strcmp(av[i], "-E") == 0)
+    else if (!command && strcmp(av[i], "-E") == 0)
       {
       command = true;
       }
@@ -251,13 +246,11 @@ int do_cmake(int ac, char** av)
     int ret = cmake::ExecuteCMakeCommand(args);
     return ret;
     }
-#if defined(CMAKE_BUILD_WITH_CMAKE)
   if (wiz)
     {
     cmakewizard wizard;
     return wizard.RunWizard(args); 
     }
-#endif
   cmake cm;  
   cm.SetProgressCallback(updateProgress, 0);
   cm.SetScriptMode(script_mode);

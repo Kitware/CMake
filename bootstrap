@@ -83,7 +83,6 @@ CMAKE_PROBLEMATIC_FILES="\
   "
 
 CMAKE_UNUSED_SOURCES="\
-  cmakewizard  \
   cmGlobalXCodeGenerator \
   cmLocalXCodeGenerator \
   cmXCodeObject \
@@ -94,6 +93,7 @@ CMAKE_UNUSED_SOURCES="\
 CMAKE_CXX_SOURCES="\
   cmake  \
   cmakemain \
+  cmakewizard  \
   cmCommandArgumentLexer \
   cmCommandArgumentParser \
   cmCommandArgumentParserHelper \

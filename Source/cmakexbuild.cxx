@@ -1,6 +1,13 @@
 #include <cmsys/Process.h>
 #include "cmStandardIncludes.h"
 
+// This is a wrapper program for xcodebuild
+// it calls xcodebuild, and does two things
+// it removes much of the output, all the setevn
+// stuff.  Also, it checks for the text file busy
+// error, and re-runs xcodebuild until that error does
+// not show up.
+
 int WaitForLine(cmsysProcess* process, std::string& line,
                 double timeout,
                 std::vector<char>& out,
@@ -113,29 +120,31 @@ int RunXCode(std::vector<const char*>& argv, bool& hitbug)
   std::vector<char> out;
   std::vector<char> err;
   std::string line;
-  int pipe =WaitForLine(cp, line, 0, out, err);
+  int pipe =WaitForLine(cp, line, 100.0, out, err);
   while(pipe != cmsysProcess_Pipe_None)
     {
     if(line.find("/bin/sh: bad interpreter: Text file busy") 
        != line.npos)
       {
       hitbug = true;
-      std::cerr << "Found xcodebuild bug: " << line << "\n";
+      std::cerr << "Hit xcodebuild bug : " << line << "\n";
       }
     // if the bug is hit, no more output should be generated
     // because it may contain bogus errors
-    if(!hitbug)
+    // also remove all output with setenv in it to tone down
+    // the verbosity of xcodebuild
+    if(!hitbug && (line.find("setenv") == line.npos))
       {
       if(pipe == cmsysProcess_Pipe_STDERR)
         {
-        std::cerr << line;
+        std::cerr << line << "\n";
         }
       else if(pipe == cmsysProcess_Pipe_STDOUT)
         {
-        std::cout << line;
+        std::cout << line << "\n";
         }
-      pipe =WaitForLine(cp, line, 0, out, err);
       }
+    pipe =WaitForLine(cp, line, 100, out, err);
     }
   cmsysProcess_WaitForExit(cp, 0);
   if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
@@ -144,7 +153,6 @@ int RunXCode(std::vector<const char*>& argv, bool& hitbug)
     }
   if(cmsysProcess_GetState(cp) == cmsysProcess_State_Error)
     {
-    std::cerr << "error\n";
     return -1;
     }
   return -1;
@@ -160,12 +168,11 @@ int main(int ac, char*av[])
     }
   argv.push_back(0);
   bool hitbug = true;
-  int ret;
+  int ret = 0;
   while(hitbug)
     {
     ret = RunXCode(argv, hitbug);
     }
-  std::cerr << "ret " << ret << "\n";
   if(ret < 0)
     {
     return 255;
