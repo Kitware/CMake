@@ -1281,7 +1281,7 @@ yyreduce:
     break;
 
   case 5:
-    //#line 251 "getdate.y"
+#line 251 "getdate.y"
     {
             context->yyHaveZone++;
         }
