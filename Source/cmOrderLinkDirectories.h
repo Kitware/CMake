@@ -104,7 +104,7 @@ private:
                                  std::vector<cmStdString>& sortedPaths);
   void PrepareLinkTargets();
   bool LibraryInDirectory(const char* dir, const char* lib);
-  void FindLibrariesInSeachPaths();
+  void FindLibrariesInSearchPaths();
   void FindIndividualLibraryOrders();
   void PrintMap(const char* name,
                 std::map<cmStdString, std::vector<cmStdString> >& m);

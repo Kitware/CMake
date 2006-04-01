@@ -47,7 +47,7 @@ bool cmOrderLinkDirectories::LibraryInDirectory(const char* dir,
 }
 
 //-------------------------------------------------------------------
-void cmOrderLinkDirectories::FindLibrariesInSeachPaths()
+void cmOrderLinkDirectories::FindLibrariesInSearchPaths()
 {
   for(std::set<cmStdString>::iterator dir = this->LinkPathSet.begin();
       dir != this->LinkPathSet.end(); ++dir)
@@ -324,7 +324,7 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
       this->LinkItems.push_back(this->RawLinkItems[i]);
       }
     }
-  this->FindLibrariesInSeachPaths();
+  this->FindLibrariesInSearchPaths();
   for(std::map<cmStdString, std::vector<cmStdString> >::iterator lib =
         this->LibraryToDirectories.begin(); lib!= this->LibraryToDirectories.end(); 
       ++lib)
