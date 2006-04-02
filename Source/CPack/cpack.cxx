@@ -338,7 +338,7 @@ int main (int argc, char *argv[])
           << generator.c_str() << std::endl);
         parsed = 0;
         }
-      if ( !cpackGenerator->Initialize(gen, mf) )
+      if ( parsed && !cpackGenerator->Initialize(gen, mf) )
         {
         parsed = 0;
         }

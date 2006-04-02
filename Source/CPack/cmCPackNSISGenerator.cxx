@@ -122,6 +122,14 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
     {
     return res;
     }
+  if ( cmSystemTools::IsOn(this->GetOption(
+        "CPACK_INCLUDE_TOPLEVEL_DIRECTORY")) )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "NSIS Generator cannot work with CPACK_INCLUDE_TOPLEVEL_DIRECTORY. This option will be ignored."
+      << std::endl);
+    this->SetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", 0);
+    }
+
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackNSISGenerator::Initialize()"
     << std::endl);
   std::vector<std::string> path;

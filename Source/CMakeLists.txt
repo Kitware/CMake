@@ -275,6 +275,7 @@ SET(CPACK_SRCS
   CPack/cmCPackTGZGenerator.cxx
   CPack/cmCPackNSISGenerator.cxx
   CPack/cmCPackPackageMakerGenerator.cxx
+  CPack/cmCPackZIPGenerator.cxx
   CPack/cmCPackGenericGenerator.cxx
   CPack/cmCPackLog.cxx
   )

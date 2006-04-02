@@ -328,6 +328,11 @@ int cmCPackGenericGenerator::ProcessGenerator()
       << std::endl);
     cmSystemTools::RemoveFile(tempPackageFileName);
     }
+  if ( cmSystemTools::IsOn(this->GetOption(
+        "CPACK_INCLUDE_TOPLEVEL_DIRECTORY")) )
+    {
+    tempDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    }
   if ( !this->CompressFiles(tempPackageFileName,
       tempDirectory, gl.GetFiles()) )
     {

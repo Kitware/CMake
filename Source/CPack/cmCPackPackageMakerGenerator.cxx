@@ -140,6 +140,10 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
 int cmCPackPackageMakerGenerator::Initialize(const char* name, cmMakefile* mf)
 {
   int res = this->Superclass::Initialize(name, mf);
+  if ( !res )
+    {
+    return res;
+    }
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
     "cmCPackPackageMakerGenerator::Initialize()" << std::endl);
   std::vector<std::string> path;

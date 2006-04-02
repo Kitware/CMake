@@ -19,6 +19,7 @@
 
 #include "cmCPackGenericGenerator.h"
 #include "cmCPackTGZGenerator.h"
+#include "cmCPackZIPGenerator.h"
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackNSISGenerator.h"
 #include "cmCPackPackageMakerGenerator.h"
@@ -31,6 +32,7 @@ cmCPackGenerators::cmCPackGenerators()
   this->RegisterGenerator("TGZ", cmCPackTGZGenerator::CreateGenerator);
   this->RegisterGenerator("STGZ", cmCPackSTGZGenerator::CreateGenerator);
   this->RegisterGenerator("NSIS", cmCPackNSISGenerator::CreateGenerator);
+  this->RegisterGenerator("ZIP", cmCPackZIPGenerator::CreateGenerator);
   this->RegisterGenerator("PackageMaker",
     cmCPackPackageMakerGenerator::CreateGenerator);
 }
