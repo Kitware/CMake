@@ -975,20 +975,12 @@ bool cmFileCommand::HandleSystemPathCommand(std::vector<std::string>
                                             const& args)
 {
   std::vector<std::string>::const_iterator i = args.begin();
-  for(std::vector<std::string>::const_iterator j = args.begin();
-      j != args.end(); ++j)
-    {
-    std::cerr << "[" << *j << "]\n";
-    }
-  return true;
   if(args.size() != 3)
     {
     this->SetError("FILE(SYSTEM_PATH ENV result) must be called with "
                    "only three arguments.");
     return false;
     }
-  
-
   i++; // Get rid of subcommand
   std::vector<std::string> path;
   cmSystemTools::GetPath(path, i->c_str());
