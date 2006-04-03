@@ -27,7 +27,9 @@ bool cmLinkDirectoriesCommand::InitialPass(std::vector<std::string> const& args)
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
     {
-    this->Makefile->AddLinkDirectory((*i).c_str());
+    std::string unixPath = *i;
+    cmSystemTools::ConvertToUnixSlashes(unixPath);
+    this->Makefile->AddLinkDirectory(unixPath.c_str());
     }
   return true;
 }

@@ -39,7 +39,9 @@ bool cmIncludeDirectoryCommand::InitialPass(std::vector<std::string> const& args
       {
       cmSystemTools::Error("Empty Include Directory Passed into INCLUDE_DIRECTORIES command.");
       }
-    this->Makefile->AddIncludeDirectory((*i).c_str(), before);
+    std::string unixPath = *i;
+    cmSystemTools::ConvertToUnixSlashes(unixPath);
+    this->Makefile->AddIncludeDirectory(unixPath.c_str(), before);
     }
   return true;
 }
