@@ -626,7 +626,15 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
     }
-
+  std::string configTypeUpper = cmSystemTools::UpperCase(configName);
+  std::string linkFlagsConfig = "LINK_FLAGS_";
+  linkFlagsConfig += configTypeUpper;
+  targetLinkFlags = target.GetProperty(linkFlagsConfig.c_str());
+  if(targetLinkFlags)
+    {
+    extraLinkOptions += " ";
+    extraLinkOptions += targetLinkFlags;
+    }
   std::map<cmStdString, cmStdString> flagMap;
   this->
     FillFlagMapFromCommandFlags(flagMap,

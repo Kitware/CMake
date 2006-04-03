@@ -1062,7 +1062,6 @@ void cmLocalVisualStudio6Generator
     libMultiLineOptionsForDebug +=  targetLinkFlags;
     libMultiLineOptionsForDebug += " \n";
     }
-
   
   // are there any custom rules on the target itself
   // only if the target is a lib or exe
@@ -1185,18 +1184,38 @@ void cmLocalVisualStudio6Generator
       std::string flagVar = baseFlagVar + "_RELEASE";
       flagsRelease = this->Makefile->GetRequiredDefinition(flagVar.c_str());
       flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
-      
+      if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_RELEASE"))
+        {
+        flagsRelease += targetLinkFlags;
+        flagsRelease += " ";
+        }
       flagVar = baseFlagVar + "_MINSIZEREL";
       flagsMinSize = this->Makefile->GetRequiredDefinition(flagVar.c_str());
       flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
+      if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_MINSIZEREL"))
+        {
+        flagsMinSize += targetLinkFlags;
+        flagsMinSize += " ";
+        }
       
       flagVar = baseFlagVar + "_DEBUG";
       flagsDebug = this->Makefile->GetRequiredDefinition(flagVar.c_str());
       flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
-      
+      if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_DEBUG"))
+        {
+        flagsDebug += targetLinkFlags;
+        flagsDebug += " ";
+        }
+
       flagVar = baseFlagVar + "_RELWITHDEBINFO";
       flagsDebugRel = this->Makefile->GetRequiredDefinition(flagVar.c_str());
       flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
+      if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_RELWITHDEBINFO"))
+        {
+        flagsDebugRel += targetLinkFlags;
+        flagsDebugRel += " ";
+        }
+
       }
     
     // if unicode is not found, then add -D_MBCS

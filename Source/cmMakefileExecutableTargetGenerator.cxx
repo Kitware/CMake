@@ -232,7 +232,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add target-specific linker flags.
   this->LocalGenerator->AppendFlags(linkFlags, this->Target->GetProperty("LINK_FLAGS"));
-
+  std::string linkFlagsConfig = "LINK_FLAGS_";
+  linkFlagsConfig += cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
+  this->LocalGenerator->AppendFlags(linkFlags, 
+                                    this->Target->GetProperty(linkFlagsConfig.c_str()));
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;

@@ -1045,6 +1045,14 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         {
         linkFlags += targetLinkFlags;
         linkFlags += " ";
+        std::string configLinkFlags = targetLinkFlags;
+        configLinkFlags += buildType;
+        targetLinkFlags = target.GetProperty(configLinkFlags.c_str());
+        if(targetLinkFlags)
+          { 
+          linkFlags += targetLinkFlags;
+          linkFlags += " ";
+          }
         }  
       cmOStringStream linklibsStr;
       this->OutputLinkLibraries(linklibsStr, target, false);
@@ -1103,7 +1111,15 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       if(targetLinkFlags)
         {
         linkFlags += targetLinkFlags;
-        linkFlags += " ";
+        linkFlags += " ";  
+        std::string configLinkFlags = targetLinkFlags;
+        configLinkFlags += buildType;
+        targetLinkFlags = target.GetProperty(configLinkFlags.c_str());
+        if(targetLinkFlags)
+          { 
+          linkFlags += targetLinkFlags;
+          linkFlags += " ";
+          }
         }
       }
       break; 
