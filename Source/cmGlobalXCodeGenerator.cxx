@@ -1380,8 +1380,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       {
       // Convert to a path for the native build tool.
       cmSystemTools::ConvertToUnixSlashes(install_name_dir);
-      install_name_dir =
-        this->XCodeEscapePath(install_name_dir.c_str());
+      // do not escape spaces on this since it is only a single path
       }
     }
   buildSettings->AddAttribute("INSTALL_PATH",
