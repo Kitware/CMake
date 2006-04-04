@@ -11,14 +11,12 @@ cmOrderLinkDirectories::cmOrderLinkDirectories()
 }
 
 //-------------------------------------------------------------------
-bool cmOrderLinkDirectories::LibraryInDirectory(const char* dir, 
+bool cmOrderLinkDirectories::LibraryInDirectory(const char* desiredLib,
+                                                const char* dir,
                                                 const char* libIn)
 {
-  cmStdString path = dir;
-  path += "/";
-  path += libIn;
   // first look for the library as given
-  if(cmSystemTools::FileExists(path.c_str()))
+  if(this->LibraryMayConflict(desiredLib, dir, libIn))
     {
     return true;
     }
@@ -33,10 +31,9 @@ bool cmOrderLinkDirectories::LibraryInDirectory(const char* dir,
       {
       if(ext != *i)
         {
-        path = dir;
-        path += "/";
-        path += lib + *i;
-        if(cmSystemTools::FileExists(path.c_str()))
+        std::string fname = lib;
+        lib += *i;
+        if(this->LibraryMayConflict(desiredLib, dir, fname.c_str()))
           {
           return true;
           } 
@@ -58,7 +55,8 @@ void cmOrderLinkDirectories::FindLibrariesInSearchPaths()
       {
       if(lib->second.Path != *dir)
         {
-        if(this->LibraryInDirectory(dir->c_str(), lib->second.File.c_str()))
+        if(this->LibraryInDirectory(lib->second.FullPath.c_str(),
+                                    dir->c_str(), lib->second.File.c_str()))
           {
           this->LibraryToDirectories[lib->second.FullPath].push_back(*dir);
           }
@@ -244,11 +242,16 @@ void cmOrderLinkDirectories::OrderPaths(std::vector<cmStdString>&
 void cmOrderLinkDirectories::SetLinkInformation(
   const char* targetName,
   const std::vector<std::string>& linkLibraries,
-  const std::vector<std::string>& linkDirectories
+  const std::vector<std::string>& linkDirectories,
+  const cmTargetManifest& manifest,
+  const char* configSubdir
   )
 {
   // Save the target name.
   this->TargetName = targetName;
+
+  // Save the subdirectory used for linking in this configuration.
+  this->ConfigSubdir = configSubdir? configSubdir : "";
 
   // Merge the link directory search path given into our path set.
   std::vector<cmStdString> empty;
@@ -269,6 +272,17 @@ void cmOrderLinkDirectories::SetLinkInformation(
       l != linkLibraries.end(); ++l)
     {
     this->RawLinkItems.push_back(*l);
+    }
+
+  // Construct a set of files that will exist after building.
+  for(cmTargetManifest::const_iterator i = manifest.begin();
+      i != manifest.end(); ++i)
+    {
+    for(cmTargetSet::const_iterator j = i->second.begin();
+        j != i->second.end(); ++j)
+      {
+      this->ManifestFiles.insert(*j);
+      }
     }
 }
 
@@ -463,4 +477,54 @@ void cmOrderLinkDirectories::GetFullPathLibraries(std::vector<cmStdString>&
     libs.push_back(i->first);
     }
   
+}
+
+//----------------------------------------------------------------------------
+bool cmOrderLinkDirectories::LibraryMayConflict(const char* desiredLib,
+                                                const char* dir,
+                                                const char* fname)
+{
+  // We need to check whether the given file may be picked up by the
+  // linker.  This will occur if it exists as given or may be built
+  // using the name given.
+  bool found = false;
+  std::string path = dir;
+  path += "/";
+  path += fname;
+  if(this->ManifestFiles.find(path) != this->ManifestFiles.end())
+    {
+    found = true;
+    }
+  else if(cmSystemTools::FileExists(path.c_str()))
+    {
+    found = true;
+    }
+
+  // When linking with a multi-configuration build tool the
+  // per-configuration subdirectory is added to each link path.  Check
+  // this subdirectory too.
+  if(!found && !this->ConfigSubdir.empty())
+    {
+    path = dir;
+    path += "/";
+    path += this->ConfigSubdir;
+    path += "/";
+    path += fname;
+    if(this->ManifestFiles.find(path) != this->ManifestFiles.end())
+      {
+      found = true;
+      }
+    else if(cmSystemTools::FileExists(path.c_str()))
+      {
+      found = true;
+      }
+    }
+
+  // A library conflicts if it is found and is not a symlink back to
+  // the desired library.
+  if(found)
+    {
+    return !cmSystemTools::SameFile(desiredLib, path.c_str());
+    }
+  return false;
 }

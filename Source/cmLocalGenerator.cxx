@@ -1392,10 +1392,11 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
       if(tgt)
         {
         // This is a CMake target.  Ask the target for its real name.
-        linkLibraries.push_back(tgt->GetFullName(config));
+        std::string realLibrary = tgt->GetFullPath(config);
+        linkLibraries.push_back(realLibrary);
         if(fullPathLibs)
           {
-          fullPathLibs->push_back(tgt->GetFullPath(config));
+          fullPathLibs->push_back(realLibrary);
           }
         }
       else
@@ -1433,9 +1434,14 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
       orderLibs.AddLinkExtension(i->c_str());
       }
     }
+  std::string configSubdir;
+  cmGlobalGenerator* gg = this->GetGlobalGenerator();
+  gg->AppendDirectoryForConfig("", config, "", configSubdir);
   orderLibs.SetLinkInformation(target.GetName(),
                                linkLibraries,
-                               linkDirectories);
+                               linkDirectories,
+                               gg->GetTargetManifest(),
+                               configSubdir.c_str());
   orderLibs.DetermineLibraryPathOrder();
   std::vector<cmStdString> orderedLibs;
   orderLibs.GetLinkerInformation(outDirs, orderedLibs);

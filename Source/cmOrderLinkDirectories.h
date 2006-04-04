@@ -51,7 +51,9 @@ public:
   ///! set link information from the target
   void SetLinkInformation(const char* targetName,
                           const std::vector<std::string>& linkLibraries,
-                          const std::vector<std::string>& linkDirectories);
+                          const std::vector<std::string>& linkDirectories,
+                          const cmTargetManifest& manifest,
+                          const char* configSubdir);
   ///! Compute the best order for -L paths from GetLinkLibraries
   bool DetermineLibraryPathOrder();
   ///! Get the results from DetermineLibraryPathOrder
@@ -103,7 +105,8 @@ private:
                                  std::vector<cmStdString>& libs,
                                  std::vector<cmStdString>& sortedPaths);
   void PrepareLinkTargets();
-  bool LibraryInDirectory(const char* dir, const char* lib);
+  bool LibraryInDirectory(const char* desiredLib,
+                          const char* dir, const char* lib);
   void FindLibrariesInSearchPaths();
   void FindIndividualLibraryOrders();
   void PrintMap(const char* name,
@@ -114,7 +117,11 @@ private:
   void OrderPaths(std::vector<cmStdString>& paths);
   bool FindPathNotInDirectoryToAfterList(cmStdString& path);
   std::string NoCaseExpression(const char* str);
+  bool LibraryMayConflict(const char* desiredLib,
+                          const char* dir, const char* fname);
 private:
+  // set of files that will exist when the build occurs
+  std::set<cmStdString> ManifestFiles;
   // map from library to directories that it is in other than its full path
   std::map<cmStdString, std::vector<cmStdString> > LibraryToDirectories;
   // map from directory to vector of directories that must be after it
@@ -144,6 +151,8 @@ private:
   std::set<cmStdString> ImpossibleDirectories;
   // Name of target
   cmStdString TargetName;
+  // Subdirectory used for this configuration if any.
+  cmStdString ConfigSubdir;
   // library regular expressions
   cmsys::RegularExpression RemoveLibraryExtension;
   cmsys::RegularExpression ExtractBaseLibraryName;

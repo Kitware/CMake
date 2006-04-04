@@ -91,7 +91,9 @@ bool TestLibraryOrder(bool shouldFail)
   orderLibs.AddLinkExtension(".so");
   orderLibs.AddLinkExtension(".a");
   orderLibs.SetLinkPrefix("lib");
-  orderLibs.SetLinkInformation("test", linkLibraries, linkDirectories);
+  cmTargetManifest manifest;
+  orderLibs.SetLinkInformation("test", linkLibraries, linkDirectories,
+                               manifest, "");
   bool ret = orderLibs.DetermineLibraryPathOrder();
   if(!ret)
     {
