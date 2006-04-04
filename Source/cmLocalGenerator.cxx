@@ -1392,11 +1392,10 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
       if(tgt)
         {
         // This is a CMake target.  Ask the target for its real name.
-        std::string realLibrary = tgt->GetFullPath(config);
-        linkLibraries.push_back(realLibrary);
+        linkLibraries.push_back(tgt->GetFullName(config));
         if(fullPathLibs)
           {
-          fullPathLibs->push_back(realLibrary);
+          fullPathLibs->push_back(tgt->GetFullPath(config));
           }
         }
       else
