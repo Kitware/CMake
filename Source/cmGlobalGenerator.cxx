@@ -95,10 +95,11 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     makeProgram = dir;
     makeProgram += "/";
     makeProgram += saveFile;
-    this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", makeProgram.c_str(),
-                                            "make program",
-                                            cmCacheManager::FILEPATH);
+    mf->AddCacheDefinition("CMAKE_MAKE_PROGRAM", makeProgram.c_str(),
+                           "make program",
+                           cmCacheManager::FILEPATH);
     }
+
   if(makeProgram.find("xcodebuild") != makeProgram.npos)
     {
     // due to the text file busy /bin/sh problem with xcodebuild
@@ -112,11 +113,10 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     cmakexbuild = cmakexbuild.substr(0, cmakexbuild.length()-5);
     cmakexbuild += "cmakexbuild";
     
-    this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", 
-                                            cmakexbuild.c_str(),
-                                            "make program",
-                                            cmCacheManager::FILEPATH);
-    
+    mf->AddCacheDefinition("CMAKE_MAKE_PROGRAM", 
+                           cmakexbuild.c_str(),
+                           "make program",
+                           cmCacheManager::FILEPATH);
     }
 }
 
