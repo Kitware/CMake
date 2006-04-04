@@ -293,6 +293,9 @@ public:
   //! Read the custom configuration files and apply them to the current ctest
   int ReadCustomConfigurationFileTree(const char* dir);
 
+  std::vector<cmStdString> &GetInitialCommandLineArguments() 
+  { return this->InitialCommandLineArguments; };
+
 private:
   std::string ConfigType;
   bool Verbose;
@@ -383,7 +386,8 @@ private:
   int  DartVersion;
 
   std::set<cmStdString> SubmitFiles;
-
+  std::vector<cmStdString> InitialCommandLineArguments;
+  
   int SubmitIndex;
 
   cmGeneratedFileStream* OutputLogFile;

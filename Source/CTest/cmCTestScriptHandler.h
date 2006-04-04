@@ -69,9 +69,9 @@ public:
   cmTypeMacro(cmCTestScriptHandler, cmCTestGenericHandler);
 
   /**
-   * Add a script to run
+   * Add a script to run, and if is should run in the current process
    */
-  void AddConfigurationScript(const char *);
+  void AddConfigurationScript(const char *, bool pscope);
 
   /**
    * Run a dashboard using a specified confiuration script
@@ -81,7 +81,7 @@ public:
   /*
    * Run a script
    */
-  static bool RunScript(cmCTest* ctest, const char *script);
+  static bool RunScript(cmCTest* ctest, const char *script, bool InProcess);
   int RunCurrentScript();
 
   /*
@@ -99,9 +99,11 @@ public:
   ~cmCTestScriptHandler();
 
   void Initialize();
+
 private:
   // reads in a script
   int ReadInScript(const std::string& total_script_arg);
+  int ExecuteScript(const std::string& total_script_arg);
 
   // extract vars from the script to set ivars
   int ExtractVariables();
@@ -116,13 +118,14 @@ private:
   int BackupDirectories();
   void RestoreBackupDirectories();
 
-  int RunConfigurationScript(const std::string& script);
+  int RunConfigurationScript(const std::string& script, bool pscope);
   int RunConfigurationDashboard();
 
   // Add ctest command
   void AddCTestCommand(cmCTestCommand* command);
 
   std::vector<cmStdString> ConfigurationScripts;
+  std::vector<bool> ScriptProcessScope;
 
   bool Backup;
   bool EmptyBinDir;

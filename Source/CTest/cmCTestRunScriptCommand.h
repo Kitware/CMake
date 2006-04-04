@@ -67,11 +67,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_RUN_SCRIPT(script_file_name script_file_name1 \n"
+      "  CTEST_RUN_SCRIPT([NEW_PROCESS] script_file_name script_file_name1 \n"
       "              script_file_name2 ...)\n"
       "Runs a script or scripts much like if it was run from ctest -S. "
       "If no argument is provided then the current script is run using "
-      "the current settings of the variables.";
+      "the current settings of the variables. If NEW_PROCESS is specified "
+      "then each script will be run in a seperate process.";
     }
 
   cmTypeMacro(cmCTestRunScriptCommand, cmCTestCommand);

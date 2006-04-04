@@ -103,6 +103,12 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "ctest will do what is required to create and run a dashboard. This "
    "option basically sets up a dashboard and then runs ctest -D with the "
    "appropriate options."},
+  {"-SP <script>, --script-new-process <script>", "Execute a dashboard for a "
+   "configuration",
+   "This option does the same operations as -S but it will do them in a "
+   "seperate process. This is primarily useful in cases where the script "
+   "may modify the environment and you do not want the modified enviroment "
+   "to impact other -S scripts."},
   {"-A <file>, --add-notes <file>", "Add a notes file with submission",
    "This option tells ctest to include a notes file when submitting "
    "dashboard. "},

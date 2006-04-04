@@ -42,7 +42,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       this->Executing = true;
       std::vector<std::string>::const_iterator j = this->Args.begin();
       ++j;
-      
+
       std::string tmps;
       cmListFileArgument arg;
       for( ; j != this->Args.end(); ++j)

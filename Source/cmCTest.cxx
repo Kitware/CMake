@@ -1302,6 +1302,13 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
   const char* ctestExec = "ctest";
   bool cmakeAndTest = false;
   bool performSomeTest = true;
+  bool SRArgumentSpecified = false;
+
+  // copy the command line
+  for(size_t i=0; i < args.size(); ++i)
+    {
+    this->InitialCommandLineArguments.push_back(args[i]);
+    }
   for(size_t i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
@@ -1347,13 +1354,40 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       this->ShowOnly = true;
       }
 
+    if(this->CheckArgument(arg, "-SP", "--script-new-process") && i < args.size() - 1 )
+      {
+      this->RunConfigurationScript = true;
+      i++;
+      cmCTestScriptHandler* ch
+        = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+      // -SR is an internal argument, -SP should be ignored when it is passed
+      if (!SRArgumentSpecified)
+        {
+        ch->AddConfigurationScript(args[i].c_str(),false);
+        }
+      }
+
+    if(this->CheckArgument(arg, "-SR", "--script-run") && i < args.size() - 1 )
+      {
+      SRArgumentSpecified = true;
+      this->RunConfigurationScript = true;
+      i++;
+      cmCTestScriptHandler* ch
+        = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+      ch->AddConfigurationScript(args[i].c_str(),true);
+      }
+
     if(this->CheckArgument(arg, "-S", "--script") && i < args.size() - 1 )
       {
       this->RunConfigurationScript = true;
       i++;
       cmCTestScriptHandler* ch
         = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
-      ch->AddConfigurationScript(args[i].c_str());
+      // -SR is an internal argument, -S should be ignored when it is passed
+      if (!SRArgumentSpecified)
+        {
+        ch->AddConfigurationScript(args[i].c_str(),true);
+        }
       }
 
     if(this->CheckArgument(arg, "-O", "--output-log") && i < args.size() - 1 )

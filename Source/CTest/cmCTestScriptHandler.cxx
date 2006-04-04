@@ -167,9 +167,10 @@ cmCTestScriptHandler::~cmCTestScriptHandler()
 
 //----------------------------------------------------------------------
 // just adds an argument to the vector
-void cmCTestScriptHandler::AddConfigurationScript(const char *script)
+void cmCTestScriptHandler::AddConfigurationScript(const char *script, bool pscope)
 {
   this->ConfigurationScripts.push_back(script);
+  this->ScriptProcessScope.push_back(pscope);
 }
 
 
@@ -179,14 +180,12 @@ void cmCTestScriptHandler::AddConfigurationScript(const char *script)
 int cmCTestScriptHandler::ProcessHandler()
 {
   int res = 0;
-  std::vector<cmStdString>::iterator it;
-  for ( it = this->ConfigurationScripts.begin();
-        it != this->ConfigurationScripts.end();
-        it ++ )
+  for (size_t i=0; i <  this->ConfigurationScripts.size(); ++i)
     {
     // for each script run it
-    res += this->RunConfigurationScript(
-      cmSystemTools::CollapseFullPath(it->c_str()));
+    res += this->RunConfigurationScript
+      (cmSystemTools::CollapseFullPath(this->ConfigurationScripts[i].c_str()),
+       this->ScriptProcessScope[i]);
     }
   if ( res )
     {
@@ -218,8 +217,73 @@ void cmCTestScriptHandler::AddCTestCommand(cmCTestCommand* command)
   this->CMake->AddCommand(newCom);
 }
 
+int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
+{
+  // execute the script passing in the arguments to the script as well as the
+  // arguments from this invocation of cmake
+  std::vector<const char*> argv;
+  argv.push_back(this->CTest->GetCTestExecutable());
+  argv.push_back("-SR");
+  argv.push_back(total_script_arg.c_str());
+
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+             "Executable for CTest is: " << 
+             this->CTest->GetCTestExecutable() << "\n");
+
+  // now pass through all the other arguments
+  std::vector<cmStdString> &initArgs = 
+    this->CTest->GetInitialCommandLineArguments();
+  for(size_t i=1; i < initArgs.size(); ++i)
+    {
+    argv.push_back(initArgs[i].c_str());
+    }
+  argv.push_back(0);
+
+  // Now create process object
+  cmsysProcess* cp = cmsysProcess_New();
+  cmsysProcess_SetCommand(cp, &*argv.begin());
+  //cmsysProcess_SetWorkingDirectory(cp, dir);
+  cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
+  //cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_Execute(cp);
+
+  std::vector<char> out;
+  std::vector<char> err;
+  std::string line;
+  int pipe = cmSystemTools::WaitForLine(cp, line, 100.0, out, err);
+  while(pipe != cmsysProcess_Pipe_None)
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Output: " << line << "\n");
+    if(pipe == cmsysProcess_Pipe_STDERR)
+      {
+      cmCTestLog(this->CTest, ERROR_MESSAGE, line << "\n");
+      }
+    else if(pipe == cmsysProcess_Pipe_STDOUT)
+      {
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, line << "\n");
+      }
+    pipe = cmSystemTools::WaitForLine(cp, line, 100, out, err);
+    }
+  
+  // Properly handle output of the build command
+  cmsysProcess_WaitForExit(cp, 0);
+  int result = cmsysProcess_GetState(cp);
+
+  int retVal = 0;
+  if(result == cmsysProcess_State_Exited)
+    {
+    retVal = cmsysProcess_GetExitValue(cp);
+    }
+  else
+    {
+    abort();
+    }
+  return retVal;
+}
+
+
 //----------------------------------------------------------------------
-// this sets up some variables for thew script to use, creates the required
+// this sets up some variables for the script to use, creates the required
 // cmake instance and generators, and then reads in the script
 int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 {
@@ -426,8 +490,8 @@ void cmCTestScriptHandler::SleepInSeconds(unsigned int secondsToWait)
 
 //----------------------------------------------------------------------
 // run a specific script
-int cmCTestScriptHandler::RunConfigurationScript(
-  const std::string& total_script_arg)
+int cmCTestScriptHandler::RunConfigurationScript
+(const std::string& total_script_arg, bool pscope)
 {
   int result;
 
@@ -435,7 +499,18 @@ int cmCTestScriptHandler::RunConfigurationScript(
     cmSystemTools::GetTime();
 
   // read in the script
-  result = this->ReadInScript(total_script_arg);
+  if (pscope)
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "Reading Script: " << total_script_arg << std::endl);
+    result = this->ReadInScript(total_script_arg);
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "Executing Script: " << total_script_arg << std::endl);
+    result = this->ExecuteScript(total_script_arg);
+    }
   if (result)
     {
     return result;
@@ -847,11 +922,11 @@ void cmCTestScriptHandler::RestoreBackupDirectories()
     }
 }
 
-bool cmCTestScriptHandler::RunScript(cmCTest* ctest, const char *sname)
+bool cmCTestScriptHandler::RunScript(cmCTest* ctest, const char *sname, bool InProcess)
 {
   cmCTestScriptHandler* sh = new cmCTestScriptHandler();
   sh->SetCTestInstance(ctest);
-  sh->AddConfigurationScript(sname);
+  sh->AddConfigurationScript(sname,InProcess);
   sh->ProcessHandler();
   delete sh;
   return true;

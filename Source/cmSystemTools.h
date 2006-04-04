@@ -20,6 +20,9 @@
 #include "cmStandardIncludes.h"
 
 #include <cmsys/SystemTools.hxx>
+#include <cmsys/Process.h>
+
+
 
 /** \class cmSystemTools
  * \brief A collection of useful functions for CMake.
@@ -257,6 +260,12 @@ public:
    */
   static void ReportLastSystemError(const char* m);
   
+  /** a general output handler for cmsysProcess  */
+  static int WaitForLine(cmsysProcess* process, std::string& line,
+                         double timeout,
+                         std::vector<char>& out,
+                         std::vector<char>& err);
+    
   /** Split a string on its newlines into multiple lines.  Returns
       false only if the last line stored had no newline.  */
   static bool Split(const char* s, std::vector<cmStdString>& l);  

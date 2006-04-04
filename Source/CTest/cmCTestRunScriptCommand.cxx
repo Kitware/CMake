@@ -27,11 +27,17 @@ bool cmCTestRunScriptCommand::InitialPass(
     return true;
     }
 
-  // run each script
-  unsigned int i;
-  for (i = 0; i < args.size(); ++i)
+  bool np = false;
+  unsigned int i = 0;
+  if (args[i] == "NEW_PROCESS")
     {
-    cmCTestScriptHandler::RunScript(this->CTest, args[i].c_str());
+    np = true;
+    i++;
+    }
+  // run each script
+  for (; i < args.size(); ++i)
+    {
+    cmCTestScriptHandler::RunScript(this->CTest, args[i].c_str(), !np);
     }
   return true;
 }
