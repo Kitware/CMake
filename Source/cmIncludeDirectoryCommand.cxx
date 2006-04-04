@@ -26,10 +26,16 @@ bool cmIncludeDirectoryCommand::InitialPass(std::vector<std::string> const& args
 
   std::vector<std::string>::const_iterator i = args.begin();
 
-  bool before = false;
+  bool before = this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_BEFORE");
+
   if ((*i) == "BEFORE")
     {
     before = true;
+    ++i;
+    }
+  else if ((*i) == "AFTER")
+    {
+    before = false;
     ++i;
     }
 
