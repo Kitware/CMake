@@ -701,8 +701,6 @@ void cmGlobalGenerator::Generate()
         }
       }
     }
-  
-  // Generate project files
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
     cmTargets* targets = &(this->LocalGenerators[i]->GetMakefile()->GetTargets());
@@ -711,6 +709,17 @@ void cmGlobalGenerator::Generate()
       {
       (*targets)[tit->first] = tit->second;
       }
+    }
+
+  // Compute the manifest of main targets generated.
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    this->LocalGenerators[i]->GenerateTargetManifest(this->TargetManifest);
+    }
+
+  // Generate project files
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
     this->LocalGenerators[i]->Generate();
     this->LocalGenerators[i]->GenerateInstallRules();
     this->LocalGenerators[i]->GenerateTestFiles();

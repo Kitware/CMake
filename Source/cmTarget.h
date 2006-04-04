@@ -346,4 +346,7 @@ private:
 
 typedef std::map<cmStdString,cmTarget> cmTargets;
 
+class cmTargetSet: public std::set<cmStdString> {};
+class cmTargetManifest: public std::map<cmStdString, cmTargetSet> {};
+
 #endif

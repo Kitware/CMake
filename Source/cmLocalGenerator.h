@@ -22,6 +22,7 @@
 class cmMakefile;
 class cmGlobalGenerator;
 class cmTarget;
+class cmTargetManifest;
 class cmSourceFile;
 
 
@@ -63,7 +64,11 @@ public:
    * Generate the test files for tests.
    */
   virtual void GenerateTestFiles();
-  
+
+  /**
+   * Generate a manifest of target files that will be built.
+   */
+  virtual void GenerateTargetManifest(cmTargetManifest&);
 
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {

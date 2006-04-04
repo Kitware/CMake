@@ -171,6 +171,10 @@ public:
                                         const char* suffix,
                                         std::string& dir);
 
+  /** Get the manifest of all targets that will be built for each
+      configuration.  This is valid during generation only.  */
+  cmTargetManifest const& GetTargetManifest() { return this->TargetManifest; }
+
 protected:
   // Fill the ProjectMap, this must be called after LocalGenerators 
   // has been populated.
@@ -204,6 +208,10 @@ protected:
 
   // Set of named installation components requested by the project.
   std::set<cmStdString> InstallComponents;
+
+  // Manifest of all targets that will be built for each configuration.
+  // This is computed just before local generators generate.
+  cmTargetManifest TargetManifest;
 
 private:
   // If you add a new map here, make sure it is copied

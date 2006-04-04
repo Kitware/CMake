@@ -391,6 +391,63 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 }
 
+//----------------------------------------------------------------------------
+void cmLocalGenerator::GenerateTargetManifest(cmTargetManifest& manifest)
+{
+  // Collect the set of configuration types.
+  std::vector<std::string> configNames;
+  if(const char* configurationTypes =
+     this->Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+    {
+    cmSystemTools::ExpandListArgument(configurationTypes, configNames);
+    }
+  else if(const char* buildType =
+          this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
+    {
+    if(*buildType)
+      {
+      configNames.push_back(buildType);
+      }
+    }
+
+  // Add our targets to the manifest for each configuration.
+  cmTargets& targets = this->Makefile->GetTargets();
+  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
+    {
+    cmTarget& target = t->second;
+    cmTarget::TargetType type = target.GetType();
+    if(type == cmTarget::STATIC_LIBRARY ||
+       type == cmTarget::SHARED_LIBRARY ||
+       type == cmTarget::MODULE_LIBRARY ||
+       type == cmTarget::EXECUTABLE)
+      {
+      if(configNames.empty())
+        {
+        manifest[""].insert(target.GetFullPath(0, false));
+        if(type == cmTarget::SHARED_LIBRARY &&
+           this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
+          {
+          manifest[""].insert(target.GetFullPath(0, true));
+          }
+        }
+      else
+        {
+        for(std::vector<std::string>::iterator ci = configNames.begin();
+            ci != configNames.end(); ++ci)
+          {
+          const char* config = ci->c_str();
+          manifest[config].insert(target.GetFullPath(config, false));
+          if(type == cmTarget::SHARED_LIBRARY &&
+             this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
+            {
+            manifest[config].insert(target.GetFullPath(config, true));
+            }
+          }
+        }
+      }
+    }
+}
+
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname, 
                                                       const char* lang, 
                                                       cmSourceFile& source,
