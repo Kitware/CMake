@@ -74,7 +74,27 @@ void cmOrderLinkDirectories::FindIndividualLibraryOrders()
       lib != this->MultiDirectoryLibraries.end(); ++lib)
     {
     std::vector<cmStdString>& dirs = this->LibraryToDirectories[lib->FullPath];
-    this->DirectoryToAfterList[lib->Path] = dirs;
+    std::vector<std::pair<cmStdString, std::vector<cmStdString> > >::iterator i;
+    for(i = this->DirectoryToAfterList.begin(); i != this->DirectoryToAfterList.end();
+        ++i)
+      {
+      if(i->first == lib->Path)
+        {
+        break;
+        }
+      }
+    if(i == this->DirectoryToAfterList.end())
+      {
+      std::cerr << "ERROR: should not happen\n";
+      }
+    else
+      {
+      for(std::vector<cmStdString>::iterator d = dirs.begin(); 
+          d != dirs.end(); ++d)
+        {
+        i->second.push_back(*d);
+        }
+      }
     }
 }
 
@@ -162,14 +182,14 @@ void cmOrderLinkDirectories::PrepareLinkTargets()
 //-------------------------------------------------------------------
 bool cmOrderLinkDirectories::FindPathNotInDirectoryToAfterList(
   cmStdString& path)
-{
-  for(std::map<cmStdString, std::vector<cmStdString> >::iterator i
+{   
+  for(std::vector<std::pair<cmStdString, std::vector<cmStdString> > >::iterator i
         = this->DirectoryToAfterList.begin();
       i != this->DirectoryToAfterList.end(); ++i)
     {
     const cmStdString& p = i->first;
     bool found = false;
-    for(std::map<cmStdString, std::vector<cmStdString> >::iterator j 
+    for(std::vector<std::pair<cmStdString, std::vector<cmStdString> > >::iterator j 
           = this->DirectoryToAfterList.begin(); j != this->DirectoryToAfterList.end() 
           && !found; ++j)
       {
@@ -208,7 +228,7 @@ void cmOrderLinkDirectories::OrderPaths(std::vector<cmStdString>&
   // then there is a cycle and we are stuck
   if(this->DirectoryToAfterList.size())
     {
-    for(std::map<cmStdString, std::vector<cmStdString> >::iterator i
+    for(std::vector<std::pair<cmStdString, std::vector<cmStdString> > >::iterator i
           = this->DirectoryToAfterList.begin();
         i != this->DirectoryToAfterList.end(); ++i)
       {
@@ -235,8 +255,13 @@ void cmOrderLinkDirectories::SetLinkInformation(
   for(std::vector<std::string>::const_iterator p = linkDirectories.begin();
       p != linkDirectories.end(); ++p)
     {
-    this->DirectoryToAfterList[*p] = empty;
-    this->LinkPathSet.insert(*p);
+    if(this->DirectoryToAfterListEmitted.insert(*p).second)
+      {
+      std::pair<cmStdString, std::vector<cmStdString> > dp;
+      dp.first = *p;
+      this->DirectoryToAfterList.push_back(dp);
+      this->LinkPathSet.insert(*p);
+      }
     }
 
   // Append the link library list into our raw list.
@@ -310,7 +335,12 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
           }
         dir = cmSystemTools::GetActualCaseForPath(dir.c_str());
 #endif
-        this->DirectoryToAfterList[dir] = empty;
+        if(this->DirectoryToAfterListEmitted.insert(dir).second)
+          {
+          std::pair<cmStdString, std::vector<cmStdString> > dp;
+          dp.first = dir;
+          this->DirectoryToAfterList.push_back(dp);
+          }
         this->LinkPathSet.insert(dir);
         aLib.FullPath = this->RawLinkItems[i];
         aLib.File = file;
@@ -343,7 +373,7 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
   if(this->Debug)
     {
     this->PrintMap("this->LibraryToDirectories", this->LibraryToDirectories);
-    this->PrintMap("this->DirectoryToAfterList", this->DirectoryToAfterList);
+    this->PrintVector("this->DirectoryToAfterList", this->DirectoryToAfterList);
     }
   this->OrderPaths(this->SortedSearchPaths); 
   // now turn libfoo.a into foo and foo.a into foo
@@ -391,6 +421,26 @@ cmOrderLinkDirectories::PrintMap(const char* name,
 {
   std::cout << name << "\n";
   for(std::map<cmStdString, std::vector<cmStdString> >::iterator i =
+        m.begin(); i != m.end();
+      ++i)
+    {
+    std::cout << i->first << ":  ";
+    for(std::vector<cmStdString>::iterator l = i->second.begin();
+        l != i->second.end(); ++l)
+      {
+      std::cout << *l << " ";
+      }
+    std::cout << "\n";
+    }
+}
+//-------------------------------------------------------------------
+void
+cmOrderLinkDirectories::PrintVector(const char* name,
+                                    std::vector<std::pair<cmStdString, 
+                                    std::vector<cmStdString> > >& m)
+{
+  std::cout << name << "\n";
+  for(std::vector<std::pair<cmStdString, std::vector<cmStdString> > >::iterator i =
         m.begin(); i != m.end();
       ++i)
     {

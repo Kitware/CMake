@@ -108,6 +108,9 @@ private:
   void FindIndividualLibraryOrders();
   void PrintMap(const char* name,
                 std::map<cmStdString, std::vector<cmStdString> >& m);
+  void PrintVector(const char* name,
+                   std::vector<std::pair<cmStdString, 
+                   std::vector<cmStdString> > >& m);
   void OrderPaths(std::vector<cmStdString>& paths);
   bool FindPathNotInDirectoryToAfterList(cmStdString& path);
   std::string NoCaseExpression(const char* str);
@@ -115,7 +118,8 @@ private:
   // map from library to directories that it is in other than its full path
   std::map<cmStdString, std::vector<cmStdString> > LibraryToDirectories;
   // map from directory to vector of directories that must be after it
-  std::map<cmStdString, std::vector<cmStdString> > DirectoryToAfterList;
+  std::vector<std::pair<cmStdString, std::vector<cmStdString> > > DirectoryToAfterList;
+  std::set<cmStdString> DirectoryToAfterListEmitted;
   // map from full path to a Library struct
   std::map<cmStdString, Library> FullPathLibraries;
   // libraries that are found in multiple directories

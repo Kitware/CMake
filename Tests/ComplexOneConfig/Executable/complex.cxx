@@ -93,6 +93,10 @@ bool TestLibraryOrder(bool shouldFail)
   orderLibs.SetLinkPrefix("lib");
   orderLibs.SetLinkInformation("test", linkLibraries, linkDirectories);
   bool ret = orderLibs.DetermineLibraryPathOrder();
+  if(!ret)
+    {
+    std::cout << orderLibs.GetWarnings() << "\n";
+    }
   orderLibs.GetLinkerInformation(sortedpaths, linkItems);
   std::cout << "Sorted Link Paths:\n";
   for(std::vector<cmStdString>::iterator i = sortedpaths.begin();
