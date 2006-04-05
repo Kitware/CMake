@@ -258,8 +258,8 @@ void cmOrderLinkDirectories::SetLinkInformation(
   for(std::vector<std::string>::const_iterator p = linkDirectories.begin();
       p != linkDirectories.end(); ++p)
     {
-#ifdef _WIN32
     std::string dir = *p;
+#ifdef _WIN32
     // Avoid case problems for windows paths.
     if(dir.size() > 2 && dir[1] == ':')
       {
