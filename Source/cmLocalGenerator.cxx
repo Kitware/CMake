@@ -1392,7 +1392,13 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
       if(tgt)
         {
         // This is a CMake target.  Ask the target for its real name.
-        linkLibraries.push_back(tgt->GetFullName(config));
+        // Pass the full path to the target file but purposely leave
+        // off the per-configuration subdirectory.  The link directory
+        // ordering knows how to deal with this.
+        std::string linkItem = tgt->GetDirectory(0);
+        linkItem += "/";
+        linkItem += tgt->GetFullName(config);
+        linkLibraries.push_back(linkItem);
         if(fullPathLibs)
           {
           fullPathLibs->push_back(tgt->GetFullPath(config));

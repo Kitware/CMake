@@ -258,12 +258,24 @@ void cmOrderLinkDirectories::SetLinkInformation(
   for(std::vector<std::string>::const_iterator p = linkDirectories.begin();
       p != linkDirectories.end(); ++p)
     {
-    if(this->DirectoryToAfterListEmitted.insert(*p).second)
+#ifdef _WIN32
+    std::string dir = *p;
+    // Avoid case problems for windows paths.
+    if(dir.size() > 2 && dir[1] == ':')
+      {
+      if(dir[0] >= 'A' && dir[0] <= 'Z')
+        {
+        dir[0] += 'a' - 'A';
+        }
+      }
+    dir = cmSystemTools::GetActualCaseForPath(dir.c_str());
+#endif
+    if(this->DirectoryToAfterListEmitted.insert(dir).second)
       {
       std::pair<cmStdString, std::vector<cmStdString> > dp;
-      dp.first = *p;
+      dp.first = dir;
       this->DirectoryToAfterList.push_back(dp);
-      this->LinkPathSet.insert(*p);
+      this->LinkPathSet.insert(dir);
       }
     }
 
@@ -336,8 +348,8 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
         }
       if(!framework)
         {
-        cmSystemTools::SplitProgramPath(this->RawLinkItems[i].c_str(),
-                                        dir, file);
+        dir = cmSystemTools::GetFilenamePath(this->RawLinkItems[i]);
+        file = cmSystemTools::GetFilenameName(this->RawLinkItems[i]);
 #ifdef _WIN32
         // Avoid case problems for windows paths.
         if(dir.size() > 2 && dir[1] == ':')
