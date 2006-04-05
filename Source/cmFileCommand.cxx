@@ -70,9 +70,13 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleRelativePathCommand(args);
     }
-  else if ( subCommand == "SYSTEM_PATH" )
+  else if ( subCommand == "TO_CMAKE_PATH" )
     {
-    return this->HandleSystemPathCommand(args);
+    return this->HandleCMakePathCommand(args, false);
+    }
+  else if ( subCommand == "TO_NATIVE_PATH" )
+    {
+    return this->HandleCMakePathCommand(args, true);
     }
 
   std::string e = "does not recognize sub-command "+subCommand;
@@ -971,8 +975,9 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
 }
 
 //----------------------------------------------------------------------------
-bool cmFileCommand::HandleSystemPathCommand(std::vector<std::string>
-                                            const& args)
+bool cmFileCommand::HandleCMakePathCommand(std::vector<std::string>
+                                           const& args, 
+                                           bool nativePath)
 {
   std::vector<std::string>::const_iterator i = args.begin();
   if(args.size() != 3)
@@ -982,17 +987,39 @@ bool cmFileCommand::HandleSystemPathCommand(std::vector<std::string>
     return false;
     }
   i++; // Get rid of subcommand
-  std::vector<std::string> path;
-  cmSystemTools::GetPath(path, i->c_str());
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  char pathSep = ';';
+#else
+  char pathSep = ':';
+#endif
+  std::vector<cmsys::String> path = cmSystemTools::SplitString(i->c_str(), 
+                                                             pathSep);
   i++;
   const char* var =  i->c_str();
   std::string value;
-  for(std::vector<std::string>::iterator j = path.begin();
+  for(std::vector<cmsys::String>::iterator j = path.begin();
       j != path.end(); ++j)
     {
+    if(!nativePath)
+      {
+      cmSystemTools::ConvertToUnixSlashes(*j);
+      }
+    else
+      {
+      *j = cmSystemTools::ConvertToOutputPath(j->c_str());
+      // remove double quotes in the path
+      cmsys::String& s = *j;
+      
+      if(s.size() > 1 && s[0] == '\"' && s[s.size()-1] == '\"')
+        {
+        s = s.substr(1,s.size()-2);
+        }
+      }
     value += *j;
     value += ";";
     }
   this->Makefile->AddDefinition(var, value.c_str());
   return true;
 }
+
+
