@@ -77,7 +77,9 @@ SET(CMAKE_COMPILE_RESOURCE "rc <FLAGS> /fo<OBJECT> <SOURCE>")
 # test results are saved in CMakeCPlatform.cmake, a file
 # that is automatically copied into try_compile directories
 # by the global generator.
+SET(MSVC_IDE 1)
 IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
+  SET(MSVC_IDE 0)
   IF(NOT CMAKE_VC_COMPILER_TESTS_RUN)
     SET(CMAKE_VC_COMPILER_TESTS 1)
     SET(testNmakeCLVersionFile
@@ -97,16 +99,28 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
       STRING(REGEX REPLACE ".*VERSION=(.*)" "\\1"
         compilerVersion "${compilerVersion}")
       MESSAGE(STATUS "Check for CL compiler version - ${compilerVersion}")
-      IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[3-9][0-9][0-9].*" )
-        SET(CMAKE_COMPILER_SUPPORTS_PDBTYPE 0)
-      ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[3-9][0-9][0-9].*" )
+      SET(MSVC60)
+      SET(MSVC70)
+      SET(MSVC71)
+      SET(MSVC80)
+      SET(CMAKE_COMPILER_2005)
+      IF("${compilerVersion}" LESS 1300)
+        SET(MSVC60 1)
         SET(CMAKE_COMPILER_SUPPORTS_PDBTYPE 1)
-      ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[3-9][0-9][0-9].*" )
-      IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
+      ENDIF("${compilerVersion}" LESS 1300)
+      IF("${compilerVersion}" EQUAL 1300)
+        SET(MSVC70 1)
+        SET(CMAKE_COMPILER_SUPPORTS_PDBTYPE 0)
+      ENDIF("${compilerVersion}" EQUAL 1300)
+      IF("${compilerVersion}" EQUAL 1310)
+        SET(MSVC71 1)
+        SET(CMAKE_COMPILER_SUPPORTS_PDBTYPE 0)
+      ENDIF("${compilerVersion}" EQUAL 1310)
+      IF("${compilerVersion}" GREATER 1400)
+        SET(MSVC80 1)
         SET(CMAKE_COMPILER_2005 1)
-      ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
-        SET(CMAKE_COMPILER_2005 0)
-      ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
+      ENDIF("${compilerVersion}" GREATER 1400)
+      SET(MSVC_VERSION "${compilerVersion}")
     ELSE(NOT CMAKE_COMPILER_RETURN)
       MESSAGE(STATUS "Check for CL compiler version - failed")
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
@@ -173,7 +187,7 @@ ENDIF(CMAKE_FORCE_WIN64)
 
 
 # default to Debug builds
-IF(CMAKE_COMPILER_2005)
+IF(MSVC80)
   # for 2005 make sure the manifest is put in the dll with mt
   SET(CMAKE_CXX_CREATE_SHARED_LIBRARY "${CMAKE_CXX_CREATE_SHARED_LIBRARY}" 
     "mt /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
@@ -199,7 +213,7 @@ IF(CMAKE_COMPILER_2005)
   SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
   SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib " CACHE STRING 
       "Libraries linked by defalut with all applications.")
-ELSE(CMAKE_COMPILER_2005)
+ELSE(MSVC80)
   IF(CMAKE_USING_VC_FREE_TOOLS)
     MESSAGE(STATUS "Using FREE VC TOOLS, NO DEBUG available")
     SET(CMAKE_BUILD_TYPE_INIT Release)
@@ -232,7 +246,7 @@ ELSE(CMAKE_COMPILER_2005)
     SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
       "Libraries linked by defalut with all applications.")
   ENDIF(CMAKE_USING_VC_FREE_TOOLS)
-ENDIF(CMAKE_COMPILER_2005)
+ENDIF(MSVC80)
 
 
 MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES)
