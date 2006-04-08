@@ -279,6 +279,7 @@ protected:
                           const std::vector<std::string>& files,
                           cmTarget& target, const char* filename =0);
 
+  bool ForceVerboseMakefiles;
 private:
   friend class cmMakefileTargetGenerator;
   friend class cmMakefileExecutableTargetGenerator;

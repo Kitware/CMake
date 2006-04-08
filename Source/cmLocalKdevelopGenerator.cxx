@@ -29,6 +29,10 @@
 cmLocalKdevelopGenerator::cmLocalKdevelopGenerator()
   :cmLocalUnixMakefileGenerator3()
 {
+   // KDevelop can itself shorten the output, so it should
+   // always get the full output, otherwise the "full output"
+   // option in kdevelop doesn't make much sense, Alex
+   this->ForceVerboseMakefiles=true;
 }
 
 cmLocalKdevelopGenerator::~cmLocalKdevelopGenerator()

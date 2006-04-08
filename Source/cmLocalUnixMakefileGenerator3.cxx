@@ -69,6 +69,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->EchoNeedsQuote = true;
   this->DefineWindowsNULL = false;
   this->UnixCD = true;
+  this->ForceVerboseMakefiles=false;
 }
 
 //----------------------------------------------------------------------------
@@ -599,7 +600,7 @@ cmLocalUnixMakefileGenerator3
   std::vector<std::string> commands;
   std::vector<std::string> no_depends;
   commands.clear();
-  if(this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+  if((this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE")) || (this->ForceVerboseMakefiles))
     {
     makefileStream
       << "# Produce verbose output by default.\n"
