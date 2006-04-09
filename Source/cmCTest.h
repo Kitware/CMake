@@ -291,9 +291,10 @@ public:
   SetOfStrings* GetSubmitFiles() { return &this->SubmitFiles; }
 
   //! Read the custom configuration files and apply them to the current ctest
-  int ReadCustomConfigurationFileTree(const char* dir);
+  int ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf,
+    bool fast = false);
 
-  std::vector<cmStdString> &GetInitialCommandLineArguments() 
+  std::vector<cmStdString> &GetInitialCommandLineArguments()
   { return this->InitialCommandLineArguments; };
 
 private:
@@ -387,7 +388,7 @@ private:
 
   std::set<cmStdString> SubmitFiles;
   std::vector<cmStdString> InitialCommandLineArguments;
-  
+
   int SubmitIndex;
 
   cmGeneratedFileStream* OutputLogFile;

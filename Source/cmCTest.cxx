@@ -312,7 +312,13 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
       }
     }
 
-  if ( !this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str()) )
+  cmake cm;
+  cmGlobalGenerator gg;
+  gg.SetCMakeInstance(&cm);
+  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  lg->SetGlobalGenerator(&gg);
+  cmMakefile *mf = lg->GetMakefile();
+  if ( !this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str(), mf) )
     {
     cmCTestLog(this, DEBUG, "Cannot find custom configuration file tree"
       << std::endl);
@@ -1907,35 +1913,40 @@ void cmCTest::SetNotesFiles(const char* notes)
 }
 
 //----------------------------------------------------------------------
-int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
+int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf,
+  bool fast /* = false */)
 {
+  bool found = false;
   VectorOfStrings dirs;
   VectorOfStrings ndirs;
-  cmake cm;
-  cmGlobalGenerator gg;
-  gg.SetCMakeInstance(&cm);
-  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
-  lg->SetGlobalGenerator(&gg);
-  cmMakefile *mf = lg->GetMakefile();
+  cmCTestLog(this, DEBUG, "* Read custom CTest configuration directory: "
+    << dir << std::endl);
 
-  bool found = false;
-  std::string fname = dir;
-  fname += "/CTestCustom.cmake";
-  if ( cmSystemTools::FileExists(fname.c_str()) )
+  if ( !fast )
     {
-    cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
+    std::string fname = dir;
+    fname += "/CTestCustom.cmake";
+    cmCTestLog(this, DEBUG, "* Check for file: "
       << fname.c_str() << std::endl);
-    if ( !lg->GetMakefile()->ReadListFile(0, fname.c_str()) ||
-      cmSystemTools::GetErrorOccuredFlag() )
+    if ( cmSystemTools::FileExists(fname.c_str()) )
       {
-      cmCTestLog(this, ERROR_MESSAGE, "Problem reading custom configuration: "
+      cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
         << fname.c_str() << std::endl);
+      if ( !mf->ReadListFile(0, fname.c_str()) ||
+        cmSystemTools::GetErrorOccuredFlag() )
+        {
+        cmCTestLog(this, ERROR_MESSAGE,
+          "Problem reading custom configuration: "
+          << fname.c_str() << std::endl);
+        }
+      found = true;
       }
-    found = true;
     }
 
   std::string rexpr = dir;
   rexpr += "/CTestCustom.ctest";
+  cmCTestLog(this, DEBUG, "* Check for file: "
+    << rexpr.c_str() << std::endl);
   if ( !found && cmSystemTools::FileExists(rexpr.c_str()) )
     {
     cmsys::Glob gl;
@@ -1948,10 +1959,11 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
       {
       cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
         << fileIt->c_str() << std::endl);
-      if ( !lg->GetMakefile()->ReadListFile(0, fileIt->c_str()) ||
+      if ( !mf->ReadListFile(0, fileIt->c_str()) ||
         cmSystemTools::GetErrorOccuredFlag() )
         {
-        cmCTestLog(this, ERROR_MESSAGE, "Problem reading custom configuration: "
+        cmCTestLog(this, ERROR_MESSAGE,
+          "Problem reading custom configuration: "
           << fileIt->c_str() << std::endl);
         }
       }
@@ -1961,8 +1973,12 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
   if ( found )
     {
     cmCTest::t_TestingHandlers::iterator it;
-    for ( it = this->TestingHandlers.begin(); it != this->TestingHandlers.end(); ++ it )
+    for ( it = this->TestingHandlers.begin();
+      it != this->TestingHandlers.end(); ++ it )
       {
+      cmCTestLog(this, DEBUG,
+        "* Read custom CTest configuration vectors for handler: "
+        << it->first.c_str() << " (" << it->second << ")" << std::endl);
       it->second->PopulateCustomVectors(mf);
       }
     }

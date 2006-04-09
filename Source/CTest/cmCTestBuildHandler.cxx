@@ -311,6 +311,7 @@ int cmCTestBuildHandler::ProcessHandler()
     {
     this->CustomWarningMatches.push_back(cmCTestWarningMatches[cc]);
     }
+  
   for ( cc = 0; cmCTestWarningExceptions[cc]; cc ++ )
     {
     this->CustomWarningExceptions.push_back(cmCTestWarningExceptions[cc]);
@@ -321,8 +322,12 @@ int cmCTestBuildHandler::ProcessHandler()
 
 #define cmCTestBuildHandlerPopulateRegexVector(strings, regexes) \
   regexes.clear(); \
+    cmCTestLog(this->CTest, DEBUG, this << "Add " #regexes \
+    << std::endl); \
   for ( it = strings.begin(); it != strings.end(); ++it ) \
     { \
+    cmCTestLog(this->CTest, DEBUG, "Add " #strings ": " \
+    << it->c_str() << std::endl); \
     regexes.push_back(it->c_str()); \
     }
   cmCTestBuildHandlerPopulateRegexVector(
