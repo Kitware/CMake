@@ -287,6 +287,13 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     tmpStr += "/CMakeFiles/CMakeDirectoryInformation.cmake";
     cmakefileStream << "  \"" << 
       lg->Convert(tmpStr.c_str(),cmLocalGenerator::HOME_OUTPUT).c_str() << "\"\n";
+    const std::vector<std::string>& outfiles = lg->GetMakefile()->GetOutputFiles();
+    for(std::vector<std::string>::const_iterator k= outfiles.begin();
+        k != outfiles.end(); ++k)
+      {
+      cmakefileStream << "  \"" << 
+        lg->Convert(k->c_str(),cmLocalGenerator::HOME_OUTPUT).c_str() << "\"\n";
+      }
     }
   cmakefileStream << "  )\n\n";
 

@@ -524,9 +524,16 @@ public:
    */
   const std::vector<std::string>& GetListFiles() const
     { return this->ListFiles; }
-  
   ///! When the file changes cmake will be re-run from the build system.
   void AddCMakeDependFile(const char* file)
+    { this->ListFiles.push_back(file);}
+  
+  /**
+   * Get the vector of  files created by this makefile
+   */
+  const std::vector<std::string>& GetOutputFiles() const
+    { return this->OutputFiles; }
+  void AddCMakeOutputFile(const char* file)
     { this->ListFiles.push_back(file);}
   
   /**
@@ -709,6 +716,7 @@ protected:
   std::vector<std::string> LinkDirectories;
   
   std::vector<std::string> ListFiles; // list of command files loaded
+  std::vector<std::string> OutputFiles; // list of command files loaded
   
   
   cmTarget::LinkLibraryVectorType LinkLibraries;
