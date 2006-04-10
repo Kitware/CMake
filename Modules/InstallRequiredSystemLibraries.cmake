@@ -3,22 +3,7 @@
 # not complete because it is used only for the release process by the
 # developers.
 IF(MSVC)
-  STRING(REGEX REPLACE "\\\\" "/" SYSTEMROOT "$ENV{SYSTEMROOT}")
-  IF(CMAKE_GENERATOR STREQUAL "Visual Studio 7")
-    SET(MSVC70 1)
-    SET(MSVC71)
-    SET(MSVC80)
-  ENDIF(CMAKE_GENERATOR STREQUAL "Visual Studio 7")
-  IF(CMAKE_GENERATOR STREQUAL "Visual Studio 7 .NET 2003")
-    SET(MSVC70)
-    SET(MSVC71 1)
-    SET(MSVC80)
-  ENDIF(CMAKE_GENERATOR STREQUAL "Visual Studio 7 .NET 2003")
-  IF(CMAKE_GENERATOR STREQUAL "Visual Studio 8 2005")
-    SET(MSVC70)
-    SET(MSVC71)
-    SET(MSVC80 1)
-  ENDIF(CMAKE_GENERATOR STREQUAL "Visual Studio 8 2005")
+  FILE(TO_CMAKE_PATH "$ENV{SYSTEMROOT}" SYSTEMROOT)
   IF(MSVC70)
     SET(__install__libs
       "${SYSTEMROOT}/system32/msvcp70.dll"
@@ -39,17 +24,17 @@ IF(MSVC)
   ENDIF(MSVC80)
   IF(CMAKE_INSTALL_MFC_LIBRARIES)
     IF(MSVC70)
-      SET(__install__libs
+      SET(__install__libs ${__install__libs}
         "${SYSTEMROOT}/system32/mfc70.dll"
         )
     ENDIF(MSVC70)
     IF(MSVC71)
-      SET(__install__libs
+      SET(__install__libs ${__install__libs}
         "${SYSTEMROOT}/system32/mfc71.dll"
         )
     ENDIF(MSVC71)
     IF(MSVC80)
-      SET(__install__libs
+      SET(__install__libs ${__install__libs}
         "${SYSTEMROOT}/system32/mfc80.dll"
         )
     ENDIF(MSVC80)

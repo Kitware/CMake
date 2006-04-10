@@ -7,3 +7,4 @@ FIND_PROGRAM(CMAKE_MAKE_PROGRAM
   "/Program Files/Microsoft Visual Studio/Common/MSDev98/Bin"
   )
 MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
+SET(MSVC60 1)

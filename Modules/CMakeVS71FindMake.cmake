@@ -8,3 +8,4 @@ FIND_PROGRAM(CMAKE_MAKE_PROGRAM
   "/Program Files/Microsoft Visual Studio .NET/Common7/IDE/"
   )
 MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
+SET(MSVC71 1)
