@@ -1937,36 +1937,37 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
   group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
   cmXCodeObject* developBuildStyle = 
     this->CreateObject(cmXCodeObject::PBXBuildStyle);
+  cmXCodeObject* listObjs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   if(this->XcodeVersion == 15)
     {
     developBuildStyle->AddAttribute("name", this->CreateString("Development"));
-    }
-  else
-    {
-    developBuildStyle->AddAttribute("name", this->CreateString("Debug"));
-    developBuildStyle->SetComment("Debug");
-    }
-  developBuildStyle->AddAttribute("buildSettings", group);
-  
-  group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("YES"));
-  cmXCodeObject* deployBuildStyle =
+    developBuildStyle->AddAttribute("buildSettings", group);
+    listObjs->AddObject(developBuildStyle);
+    group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+    group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("YES"));
+    cmXCodeObject* deployBuildStyle =
     this->CreateObject(cmXCodeObject::PBXBuildStyle);
-  if(this->XcodeVersion == 15)
-    {
     deployBuildStyle->AddAttribute("name", this->CreateString("Deployment"));
+    deployBuildStyle->AddAttribute("buildSettings", group);
+    listObjs->AddObject(deployBuildStyle);
     }
   else
     {
-    deployBuildStyle->AddAttribute("name", this->CreateString("Release"));
-    deployBuildStyle->SetComment("Release");
+    for(unsigned int i = 0; i < this->CurrentConfigurationTypes.size(); ++i)
+      {
+      cmXCodeObject* buildStyle = 
+        this->CreateObject(cmXCodeObject::PBXBuildStyle);
+      const char* name = this->CurrentConfigurationTypes[i].c_str();
+      buildStyle->AddAttribute("name", this->CreateString(name));
+      buildStyle->SetComment(name);
+      cmXCodeObject* sgroup =
+        this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+      sgroup->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
+      buildStyle->AddAttribute("buildSettings", sgroup);
+      listObjs->AddObject(buildStyle);
+      }
     }
 
-  deployBuildStyle->AddAttribute("buildSettings", group);
-
-  cmXCodeObject* listObjs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  listObjs->AddObject(developBuildStyle);
-  listObjs->AddObject(deployBuildStyle);
   cmXCodeObject* mainGroup = this->CreateObject(cmXCodeObject::PBXGroup);
   this->MainGroupChildren = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -2013,14 +2014,40 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
   this->RootObject->AddAttribute("buildStyles", listObjs);
   this->RootObject->AddAttribute("hasScannedForEncodings",
                              this->CreateString("0"));
-  cmXCodeObject* configlist = this->CreateObject(cmXCodeObject::XCConfigurationList);
-  cmXCodeObject* configDebug = this->CreateObject(cmXCodeObject::XCBuildConfiguration);
-  cmXCodeObject* configRelease = this->CreateObject(cmXCodeObject::XCBuildConfiguration);
+  cmXCodeObject* configlist = 
+    this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  buildConfigurations->AddObject(configDebug);
-  buildConfigurations->AddObject(configRelease);
+  std::vector<cmXCodeObject*> configs;
+  if(this->XcodeVersion == 15)
+    {
+    cmXCodeObject* configDebug = 
+      this->CreateObject(cmXCodeObject::XCBuildConfiguration);
+    configDebug->AddAttribute("name", this->CreateString("Debug"));
+    configs.push_back(configDebug);
+    cmXCodeObject* configRelease = 
+      this->CreateObject(cmXCodeObject::XCBuildConfiguration);
+    configRelease->AddAttribute("name", this->CreateString("Release"));
+    configs.push_back(configRelease);
+    }
+  else
+    {
+    for(unsigned int i = 0; i < this->CurrentConfigurationTypes.size(); ++i)
+      {
+      const char* name = this->CurrentConfigurationTypes[i].c_str();
+      cmXCodeObject* config = 
+        this->CreateObject(cmXCodeObject::XCBuildConfiguration);
+      config->AddAttribute("name", this->CreateString(name));
+      configs.push_back(config);
+      }
+    }
+  for(std::vector<cmXCodeObject*>::iterator c = configs.begin();
+      c != configs.end(); ++c)
+    {
+    buildConfigurations->AddObject(*c);
+    }
   configlist->AddAttribute("buildConfigurations", buildConfigurations);
+
   std::string comment = "Build configuration list for PBXProject ";
   comment += " \"";
   comment += this->CurrentProject;
@@ -2054,11 +2081,11 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
                                   this->CreateString(archString.c_str()));
       }
     }
-  configDebug->AddAttribute("name", this->CreateString("Debug"));
-  configDebug->AddAttribute("buildSettings", buildSettings);
-  configRelease->AddAttribute("name", this->CreateString("Release"));
-  configRelease->AddAttribute("buildSettings", buildSettings);
-
+  for( std::vector<cmXCodeObject*>::iterator i = configs.begin();
+       i != configs.end(); ++i)
+    {
+    (*i)->AddAttribute("buildSettings", buildSettings);
+    }
   this->RootObject->AddAttribute("buildConfigurationList", 
                              this->CreateObjectReference(configlist));
 
