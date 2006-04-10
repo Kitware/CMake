@@ -119,7 +119,7 @@ int cmCPackGenericGenerator::PrepareNames()
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::InstallProject()
 {
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Install project" << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Install projects" << std::endl);
   const char* tempInstallDirectory
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   int res = 1;
@@ -229,8 +229,49 @@ int cmCPackGenericGenerator::InstallProject()
         }
       }
     }
+  const char* cmakeProjects
+    = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
+  if ( cmakeProjects )
+    {
+    std::vector<std::string> cmakeProjectsVector;
+    cmSystemTools::ExpandListArgument(cmakeProjects,
+      cmakeProjectsVector);
+    std::vector<std::string>::iterator it;
+    for ( it = cmakeProjectsVector.begin();
+      it != cmakeProjectsVector.end();
+      ++it )
+      {
+      std::string installDirectory = it->c_str();
+      ++it;
+      std::string installProjectName = it->c_str();
+      cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+        "- Install project: " << installProjectName << std::endl);
+      std::string installFile = installDirectory + "/cmake_install.cmake";
+      cmake cm;
+      cmGlobalGenerator gg;
+      gg.SetCMakeInstance(&cm);
+      std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+      lg->SetGlobalGenerator(&gg);
+      cmMakefile *mf = lg->GetMakefile();
+      if ( movable )
+        {
+        mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
+        }
+      const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
+      if ( buildConfig && *buildConfig )
+        {
+        mf->AddDefinition("BUILD_TYPE", buildConfig);
+        }
+
+      res = mf->ReadListFile(0, installFile.c_str());
+      if ( cmSystemTools::GetErrorOccuredFlag() )
+        {
+        res = 0;
+        }
+      }
+    }
   const char* binaryDirectories = this->GetOption("CPACK_BINARY_DIR");
-  if ( binaryDirectories )
+  if ( binaryDirectories && !cmakeProjects )
     {
     std::vector<std::string> binaryDirectoriesVector;
     cmSystemTools::ExpandListArgument(binaryDirectories,
