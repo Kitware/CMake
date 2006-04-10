@@ -1000,6 +1000,10 @@ bool cmFileCommand::HandleCMakePathCommand(std::vector<std::string>
   for(std::vector<cmsys::String>::iterator j = path.begin();
       j != path.end(); ++j)
     {
+    if(j != path.begin())
+      {
+      value += ";";
+      }
     if(!nativePath)
       {
       cmSystemTools::ConvertToUnixSlashes(*j);
@@ -1016,7 +1020,6 @@ bool cmFileCommand::HandleCMakePathCommand(std::vector<std::string>
         }
       }
     value += *j;
-    value += ";";
     }
   this->Makefile->AddDefinition(var, value.c_str());
   return true;
