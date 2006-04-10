@@ -12,7 +12,7 @@ MACRO(cpack_set_if_not_set name value)
 ENDMACRO(cpack_set_if_not_set)
 
 # Set the package name
-cpack_set_if_not_set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+cpack_set_if_not_set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
 cpack_set_if_not_set(CPACK_PACKAGE_VERSION_MAJOR "0")
 cpack_set_if_not_set(CPACK_PACKAGE_VERSION_MINOR "1")
 cpack_set_if_not_set(CPACK_PACKAGE_VERSION_PATCH "1")
@@ -20,7 +20,7 @@ cpack_set_if_not_set(CPACK_PACKAGE_VERSION
   "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 cpack_set_if_not_set(CPACK_PACKAGE_VENDOR "Humanity")
 cpack_set_if_not_set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
-  "${PROJECT_NAME} built using CMake")
+  "${CMAKE_PROJECT_NAME} built using CMake")
 
 cpack_set_if_not_set(CPACK_PACKAGE_DESCRIPTION_FILE
   "${CMAKE_ROOT}/Templates/CPack.GenericDescription.txt")
@@ -70,6 +70,7 @@ ENDIF(NOT CPACK_GENERATOR)
 cpack_set_if_not_set(CPACK_BINARY_DIR "${CMAKE_BINARY_DIR}")
 cpack_set_if_not_set(CPACK_INSTALL_CMAKE_PROJECTS
   "${CMAKE_BINARY_DIR};${CMAKE_PROJECT_NAME}")
+cpack_set_if_not_set(CPACK_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 
 SET(_CPACK_UNUSED_VARIABLES_)
 GET_CMAKE_PROPERTY(res VARIABLES)

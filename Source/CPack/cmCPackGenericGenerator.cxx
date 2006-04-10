@@ -225,14 +225,25 @@ int cmCPackGenericGenerator::InstallProject()
           {
           cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying file: "
             << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
+          return 0;
           }
         }
       }
     }
   const char* cmakeProjects
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
+  const char* cmakeGenerator
+    = this->GetOption("CPACK_CMAKE_GENERATOR");
   if ( cmakeProjects )
     {
+    if ( !cmakeGenerator )
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "CPACK_INSTALL_CMAKE_PROJECTS is specified, but CPACK_CMAKE_GENERATOR "
+        "is not. CPACK_CMAKE_GENERATOR is required to install the project."
+        << std::endl);
+      return 0;
+      }
     std::vector<std::string> cmakeProjectsVector;
     cmSystemTools::ExpandListArgument(cmakeProjects,
       cmakeProjectsVector);
@@ -244,9 +255,53 @@ int cmCPackGenericGenerator::InstallProject()
       std::string installDirectory = it->c_str();
       ++it;
       std::string installProjectName = it->c_str();
+      std::string installFile = installDirectory + "/cmake_install.cmake";
+
+      const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
+      cmGlobalGenerator* globalGenerator 
+        = this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
+          cmakeGenerator);
+
+      // Does this generator require pre-install?
+      if ( globalGenerator->GetPreinstallTargetName() )
+        {
+        globalGenerator->FindMakeProgram(this->MakefileMap);
+        const char* cmakeMakeProgram
+          = this->MakefileMap->GetDefinition("CMAKE_MAKE_PROGRAM");
+        std::string buildCommand
+          = globalGenerator->GenerateBuildCommand(cmakeMakeProgram,
+            installProjectName.c_str(), 0, 
+            globalGenerator->GetPreinstallTargetName(),
+            buildConfig, false);
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+          "- Install command: " << buildCommand << std::endl);
+        cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+          "- Run preinstall target for: " << installProjectName << std::endl);
+        std::string output;
+        int retVal = 1;
+        bool resB = cmSystemTools::RunSingleCommand(buildCommand.c_str(), &output,
+          &retVal, installDirectory.c_str(), this->GeneratorVerbose, 0);
+        if ( !resB || retVal )
+          {
+          std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+          tmpFile += "/PreinstallOutput.log";
+          cmGeneratedFileStream ofs(tmpFile.c_str());
+          ofs << "# Run command: " << buildCommand.c_str() << std::endl
+            << "# Directory: " << installDirectory.c_str() << std::endl
+            << "# Output:" << std::endl
+            << output.c_str() << std::endl;
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+            "Problem running install command: " << buildCommand.c_str()
+            << std::endl
+            << "Please check " << tmpFile.c_str() << " for errors"
+            << std::endl);
+          return 0;
+          }
+        }
+      delete globalGenerator;
+      
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
         "- Install project: " << installProjectName << std::endl);
-      std::string installFile = installDirectory + "/cmake_install.cmake";
       cmake cm;
       cmGlobalGenerator gg;
       gg.SetCMakeInstance(&cm);
@@ -257,7 +312,6 @@ int cmCPackGenericGenerator::InstallProject()
         {
         mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
         }
-      const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
       if ( buildConfig && *buildConfig )
         {
         mf->AddDefinition("BUILD_TYPE", buildConfig);

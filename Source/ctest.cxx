@@ -21,6 +21,7 @@
 #include "cmake.h"
 #include "cmDocumentation.h"
 
+
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
 {
@@ -206,8 +207,6 @@ int main (int argc, char *argv[])
       "Current working directory cannot be established." << std::endl);
     nocwd = 1;
     }
-
-
 
   // If there is a testing input file, check for documentation options
   // only if there are actually arguments.  We want running without

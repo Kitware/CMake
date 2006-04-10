@@ -175,6 +175,14 @@ public:
       configuration.  This is valid during generation only.  */
   cmTargetManifest const& GetTargetManifest() { return this->TargetManifest; }
 
+  virtual const char* GetAllTargetName()          { return "ALL_BUILD"; }
+  virtual const char* GetInstallTargetName()      { return "INSTALL"; }
+  virtual const char* GetPreinstallTargetName()   { return 0; }
+  virtual const char* GetTestTargetName()         { return "RUN_TESTS"; }
+  virtual const char* GetPackageTargetName()      { return "PACKAGE"; }
+  virtual const char* GetEditCacheTargetName()    { return 0; }
+  virtual const char* GetRebuildCacheTargetName() { return 0; }
+
 protected:
   // Fill the ProjectMap, this must be called after LocalGenerators 
   // has been populated.
@@ -188,14 +196,6 @@ protected:
   cmTarget CreateGlobalTarget(const char* name, const char* message,
     const cmCustomCommandLines* commandLines,
     std::vector<std::string> depends, bool depends_on_all = false);
-
-  virtual const char* GetAllTargetName()          { return "ALL_BUILD"; }
-  virtual const char* GetInstallTargetName()      { return "INSTALL"; }
-  virtual const char* GetPreinstallTargetName()   { return 0; }
-  virtual const char* GetTestTargetName()         { return "RUN_TESTS"; }
-  virtual const char* GetPackageTargetName()      { return "PACKAGE"; }
-  virtual const char* GetEditCacheTargetName()    { return 0; }
-  virtual const char* GetRebuildCacheTargetName() { return 0; }
 
   bool ForceUnixPaths;
   bool ToolSupportsColorVT100;
