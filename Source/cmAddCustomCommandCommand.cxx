@@ -32,9 +32,9 @@ bool cmAddCustomCommandCommand::InitialPass(
       return false;
     }
 
-  std::string source, target, comment, output, main_dependency,
+  std::string source, target, comment, main_dependency,
     working;
-  std::vector<std::string> depends, outputs;
+  std::vector<std::string> depends, outputs, output;
 
   // Accumulate one command line at a time.
   cmCustomCommandLine currentLine;
@@ -155,7 +155,7 @@ bool cmAddCustomCommandCommand::InitialPass(
            source = copy;
            break;
          case doing_output:
-           output = filename;
+           output.push_back(filename);
            break;
          case doing_main_dependency:
            main_dependency = copy;
@@ -204,34 +204,9 @@ bool cmAddCustomCommandCommand::InitialPass(
     return false;
     }
 
-  if ( !this->Makefile->CanIWriteThisFile(output.c_str()) )
+  // Make sure the output names and locations are safe.
+  if(!this->CheckOutputs(output) || !this->CheckOutputs(outputs))
     {
-    std::string e = "attempted to have a file: " + output +
-      " in a source directory as an output of custom command.";
-    this->SetError(e.c_str());
-    cmSystemTools::SetFatalErrorOccured();
-    return false;
-    }
-  std::vector<std::string>::iterator oit;
-  for ( oit = outputs.begin(); oit != outputs.end(); ++ oit )
-    {
-    if ( !this->Makefile->CanIWriteThisFile(oit->c_str()) )
-      {
-      std::string e = "attempted to have a file: " + *oit +
-        " in a source directory as an output of custom command.";
-      this->SetError(e.c_str());
-      cmSystemTools::SetFatalErrorOccured();
-      return false;
-      }
-    }
-
-  std::string::size_type pos = output.find_first_of("#<>");
-  if(pos != output.npos)
-    {
-    cmOStringStream msg;
-    msg << "called with OUTPUT containing a \"" << output[pos]
-        << "\".  This character is not allowed.";
-    this->SetError(msg.str().c_str());
     return false;
     }
 
@@ -247,7 +222,7 @@ bool cmAddCustomCommandCommand::InitialPass(
   else if(target.empty())
     {
     // Target is empty, use the output.
-    this->Makefile->AddCustomCommandToOutput(output.c_str(), depends,
+    this->Makefile->AddCustomCommandToOutput(output, depends,
                                          main_dependency.c_str(),
                                          commandLines, comment.c_str(),
                                          working.c_str());
@@ -258,6 +233,39 @@ bool cmAddCustomCommandCommand::InitialPass(
     this->Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
                                          source.c_str(), commandLines,
                                          comment.c_str());
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmAddCustomCommandCommand
+::CheckOutputs(const std::vector<std::string>& outputs)
+{
+  for(std::vector<std::string>::const_iterator o = outputs.begin();
+      o != outputs.end(); ++o)
+    {
+    // Make sure the file will not be generated into the source
+    // directory during an out of source build.
+    if(!this->Makefile->CanIWriteThisFile(o->c_str()))
+      {
+      std::string e = "attempted to have a file \"" + *o +
+        "\" in a source directory as an output of custom command.";
+      this->SetError(e.c_str());
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+      }
+
+    // Make sure the output file name has no invalid characters.
+    std::string::size_type pos = o->find_first_of("#<>");
+    if(pos != o->npos)
+      {
+      cmOStringStream msg;
+      msg << "called with OUTPUT containing a \"" << (*o)[pos]
+          << "\".  This character is not allowed.";
+      this->SetError(msg.str().c_str());
+      return false;
+      }
     }
   return true;
 }

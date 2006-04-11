@@ -1921,9 +1921,13 @@ int cmake::CheckBuildSystem()
   cmGlobalGenerator *ggd = this->CreateGlobalGenerator(genName);
   if (ggd)
     {
+    // Check the dependencies in case source files were removed.
     std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
     lgd->SetGlobalGenerator(ggd);
     lgd->CheckDependencies(mf, verbose, this->ClearBuildSystem);
+
+    // Check for multiple output pairs.
+    ggd->CheckMultipleOutputs(mf, verbose);
     }
 
   // No need to rerun.

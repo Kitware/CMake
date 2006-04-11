@@ -2,14 +2,17 @@
 
 int main(int argc, char *argv[])
 {
-  if ( argc < 2 )
+  if ( argc < 3 )
     {
-    fprintf(stderr, "Usage: %s <file>\n", argv[0]);
+    fprintf(stderr, "Usage: %s <file1> <file2>\n", argv[0]);
     return 1;
     }
   FILE *fp = fopen(argv[1],"w");
-  
-  fprintf(fp,"int wrapped() { return 5; }\n");
+  fprintf(fp,"extern int wrapped_help(void);\n");
+  fprintf(fp,"int wrapped(void) { return wrapped_help(); }\n");
+  fclose(fp);
+  fp = fopen(argv[2],"w");
+  fprintf(fp,"int wrapped_help(void) { return 5; }\n");
   fclose(fp);
   return 0;
 }

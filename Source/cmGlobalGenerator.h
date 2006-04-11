@@ -175,6 +175,9 @@ public:
       configuration.  This is valid during generation only.  */
   cmTargetManifest const& GetTargetManifest() { return this->TargetManifest; }
 
+  /** Support for multiple custom command outputs.  */
+  virtual void CheckMultipleOutputs(cmMakefile* mf, bool verbose);
+
   virtual const char* GetAllTargetName()          { return "ALL_BUILD"; }
   virtual const char* GetInstallTargetName()      { return "INSTALL"; }
   virtual const char* GetPreinstallTargetName()   { return 0; }

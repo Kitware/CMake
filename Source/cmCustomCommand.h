@@ -32,14 +32,14 @@ public:
   cmCustomCommand(const cmCustomCommand& r);
 
   /** Main constructor specifies all information for the command.  */
-  cmCustomCommand(const char* output,
+  cmCustomCommand(const std::vector<std::string>& outputs,
                   const std::vector<std::string>& depends,
                   const cmCustomCommandLines& commandLines,
                   const char* comment,
                   const char* workingDirectory);
 
   /** Get the output file produced by the command.  */
-  const char* GetOutput() const;
+  const std::vector<std::string>& GetOutputs() const;
 
   /** Get the working directory.  */
   const char* GetWorkingDirectory() const;
@@ -58,7 +58,7 @@ public:
   bool IsUsed() { return this->Used;};
  
 private:
-  std::string Output;
+  std::vector<std::string> Outputs;
   std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
   std::string Comment;

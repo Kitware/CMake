@@ -1670,6 +1670,37 @@ cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
 
 //----------------------------------------------------------------------------
 std::string
+cmLocalGenerator::ConstructComment(const cmCustomCommand& cc,
+                                   const char* default_comment)
+{
+  // Check for a comment provided with the command.
+  if(cc.GetComment() && *cc.GetComment())
+    {
+    return cc.GetComment();
+    }
+
+  // Construct a reasonable default comment if possible.
+  if(!cc.GetOutputs().empty())
+    {
+    std::string comment;
+    comment = "Generating ";
+    const char* sep = "";
+    for(std::vector<std::string>::const_iterator o = cc.GetOutputs().begin();
+        o != cc.GetOutputs().end(); ++o)
+      {
+      comment += sep;
+      comment += this->Convert(o->c_str(), cmLocalGenerator::START_OUTPUT);
+      sep = ", ";
+      }
+    return comment;
+    }
+
+  // Otherwise use the provided default.
+  return default_comment;
+}
+
+//----------------------------------------------------------------------------
+std::string
 cmLocalGenerator::ConvertToOptionallyRelativeOutputPath(const char* remote)
 {
   return this->Convert(remote, START_OUTPUT, SHELL, true);

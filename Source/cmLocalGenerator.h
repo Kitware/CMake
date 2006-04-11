@@ -24,7 +24,7 @@ class cmGlobalGenerator;
 class cmTarget;
 class cmTargetManifest;
 class cmSourceFile;
-
+class cmCustomCommand;
 
 /** \class cmLocalGenerator
  * \brief Create required build files for a directory.
@@ -210,6 +210,10 @@ protected:
   std::string ConstructScript(const cmCustomCommandLines& commandLines,
                               const char* workingDirectory,
                               const char* newline = "\n");
+
+  /** Construct a comment for a custom command.  */
+  std::string ConstructComment(const cmCustomCommand& cc,
+                               const char* default_comment = "");
 
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */

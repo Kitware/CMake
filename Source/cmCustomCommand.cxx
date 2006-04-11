@@ -24,7 +24,7 @@ cmCustomCommand::cmCustomCommand()
 
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
-  Output(r.Output),
+  Outputs(r.Outputs),
   Depends(r.Depends),
   CommandLines(r.CommandLines),
   Comment(r.Comment),
@@ -34,12 +34,12 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
 }
 
 //----------------------------------------------------------------------------
-cmCustomCommand::cmCustomCommand(const char* output,
+cmCustomCommand::cmCustomCommand(const std::vector<std::string>& outputs,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
                                  const char* comment, 
                                  const char* workingDirectory):
-  Output(output?output:""),
+  Outputs(outputs),
   Depends(depends),
   CommandLines(commandLines),
   Comment(comment?comment:""),
@@ -49,9 +49,9 @@ cmCustomCommand::cmCustomCommand(const char* output,
 }
 
 //----------------------------------------------------------------------------
-const char* cmCustomCommand::GetOutput() const
+const std::vector<std::string>& cmCustomCommand::GetOutputs() const
 {
-  return this->Output.c_str();
+  return this->Outputs;
 }
 
 //----------------------------------------------------------------------------

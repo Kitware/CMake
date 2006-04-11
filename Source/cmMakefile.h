@@ -143,6 +143,12 @@ public:
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
                                 const char* comment, const char* workingDir);
+  void AddCustomCommandToOutput(const std::vector<std::string>& outputs,
+                                const std::vector<std::string>& depends,
+                                const char* main_dependency,
+                                const cmCustomCommandLines& commandLines,
+                                const char* comment, const char* workingDir,
+                                bool replace = false);
   void AddCustomCommandToOutput(const char* output,
                                 const std::vector<std::string>& depends,
                                 const char* main_dependency,

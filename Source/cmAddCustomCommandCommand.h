@@ -66,7 +66,7 @@ public:
       "There are two main signatures for ADD_CUSTOM_COMMAND "
       "The first signature is for adding a custom command "
       "to produce an output.\n"
-      "  ADD_CUSTOM_COMMAND(OUTPUT result\n"
+      "  ADD_CUSTOM_COMMAND(OUTPUT output1 [output2 ...]\n"
       "                     COMMAND command1 [ARGS] [args1...]\n"
       "                     [COMMAND command2 [ARGS] [args2...] ...]\n"
       "                     [MAIN_DEPENDENCY depend]\n"
@@ -106,6 +106,8 @@ public:
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);
+protected:
+  bool CheckOutputs(const std::vector<std::string>& outputs);
 };
 
 

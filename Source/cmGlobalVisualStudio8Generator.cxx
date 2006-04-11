@@ -135,12 +135,12 @@ void cmGlobalVisualStudio8Generator::Generate()
         // file as the main dependency because it would get
         // overwritten by the AddVCProjBuildRule of the ALL_BUILD
         // target.
-        const char* no_comment = 0;
         const char* no_main_dependency = 0;
         const char* no_working_directory = 0;
         mf->AddCustomCommandToOutput(
           CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.cmake", listFiles,
-          no_main_dependency, commandLines, no_comment, no_working_directory, true);
+          no_main_dependency, commandLines, "Checking Build System",
+          no_working_directory, true);
         if(cmSourceFile* file = mf->GetSource(CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.cmake.rule"))
           {
           tgt->GetSourceFiles().push_back(file);

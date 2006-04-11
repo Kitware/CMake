@@ -48,11 +48,11 @@ ADD_EXECUTABLE(wrapper wrapper.cxx)
 # is instantiated for the output, with GENERATED 1
 # at the end of the day this becomes a what in VS ?
 ADD_CUSTOM_COMMAND(
-  OUTPUT ${PROJECT_BINARY_DIR}/wrapped.c
+  OUTPUT ${PROJECT_BINARY_DIR}/wrapped.c ${PROJECT_BINARY_DIR}/wrapped_help.c
   DEPENDS wrapper
   MAIN_DEPENDENCY ${PROJECT_SOURCE_DIR}/wrapped.h
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/wrapper
-  ARGS ${PROJECT_BINARY_DIR}/wrapped.c ${PROJECT_SOURCE_DIR}/wrapped.h
+  ${PROJECT_BINARY_DIR}/wrapped.c ${PROJECT_BINARY_DIR}/wrapped_help.c
   )
 
 ################################################################
@@ -145,6 +145,7 @@ ADD_EXECUTABLE(CustomCommand
   ${PROJECT_BINARY_DIR}/foo.h
   ${PROJECT_BINARY_DIR}/foo.c
   ${PROJECT_BINARY_DIR}/wrapped.c
+  ${PROJECT_BINARY_DIR}/wrapped_help.c
   ${PROJECT_BINARY_DIR}/generated.c
   )
 

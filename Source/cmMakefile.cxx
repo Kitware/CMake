@@ -499,7 +499,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
   if(ti != this->Targets.end())
     {
     // Add the command to the appropriate build step for the target.
-    const char* no_output = 0;
+    std::vector<std::string> no_output;
     cmCustomCommand cc(no_output, depends, commandLines, comment, workingDir);
     switch(type)
       {
@@ -530,7 +530,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
 
 //----------------------------------------------------------------------------
 void
-cmMakefile::AddCustomCommandToOutput(const char* output,
+cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                      const std::vector<std::string>& depends,
                                      const char* main_dependency,
                                      const cmCustomCommandLines& commandLines,
@@ -538,6 +538,13 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
                                      const char* workingDir,
                                      bool replace)
 {
+  // Make sure there is at least one output.
+  if(outputs.empty())
+    {
+    cmSystemTools::Error("Attempt to add a custom rule with no output!");
+    return;
+    }
+
   // Choose a source file on which to store the custom command.
   cmSourceFile* file = 0;
   if(main_dependency && main_dependency[0])
@@ -572,8 +579,8 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
   // Generate a rule file if the main dependency is not available.
   if(!file)
     {
-    // Construct a rule file associated with the output produced.
-    std::string outName = output;
+    // Construct a rule file associated with the first output produced.
+    std::string outName = outputs[0];
     outName += ".rule";
 
     // Check if the rule file already exists.
@@ -584,7 +591,8 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
       if(commandLines != file->GetCustomCommand()->GetCommandLines())
         {
         cmSystemTools::Error("Attempt to add a custom rule to output \"",
-                             output, "\" which already has a custom rule.");
+                             outName.c_str(),
+                             "\" which already has a custom rule.");
         }
       return;
       }
@@ -593,10 +601,14 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
     file = this->GetOrCreateSource(outName.c_str(), true);
     }
 
-  // Always create the output and mark it generated.
-  if(cmSourceFile* out = this->GetOrCreateSource(output, true))
+  // Always create the output sources and mark them generated.
+  for(std::vector<std::string>::const_iterator o = outputs.begin();
+      o != outputs.end(); ++o)
     {
-    out->SetProperty("GENERATED", "1");
+    if(cmSourceFile* out = this->GetOrCreateSource(o->c_str(), true))
+      {
+      out->SetProperty("GENERATED", "1");
+      }
     }
 
   // Construct a complete list of dependencies.
@@ -610,9 +622,27 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
   if(file)
     {
     cmCustomCommand* cc =
-      new cmCustomCommand(output, depends2, commandLines, comment, workingDir);
+      new cmCustomCommand(outputs, depends2, commandLines,
+                          comment, workingDir);
     file->SetCustomCommand(cc);
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefile::AddCustomCommandToOutput(const char* output,
+                                     const std::vector<std::string>& depends,
+                                     const char* main_dependency,
+                                     const cmCustomCommandLines& commandLines,
+                                     const char* comment,
+                                     const char* workingDir,
+                                     bool replace)
+{
+  std::vector<std::string> outputs;
+  outputs.push_back(output);
+  this->AddCustomCommandToOutput(outputs, depends, main_dependency,
+                                 commandLines, comment, workingDir,
+                                 replace);
 }
 
 //----------------------------------------------------------------------------
@@ -735,7 +765,12 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   target.SetInAll(all);
   target.SetMakefile(this);
   // Store the custom command in the target.
-  cmCustomCommand cc(output, depends, commandLines, 0, workingDirectory);
+  std::vector<std::string> outputs;
+  if(output)
+    {
+    outputs.push_back(output);
+    }
+  cmCustomCommand cc(outputs, depends, commandLines, 0, workingDirectory);
   target.GetPostBuildCommands().push_back(cc);
 
   // Add the target to the set of targets.
@@ -1149,14 +1184,20 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
     if ((*i)->GetCustomCommand())
       {
       // is the output of the custom command match the source files name
-      out = (*i)->GetCustomCommand()->GetOutput();
-      std::string::size_type pos = out.rfind(name);
-      // If the output matches exactly
-      if (pos != out.npos &&
-          pos == out.size() - name.size() &&
-          (pos ==0 || out[pos-1] == '/'))
+      const std::vector<std::string>& outputs =
+        (*i)->GetCustomCommand()->GetOutputs();
+      for(std::vector<std::string>::const_iterator o = outputs.begin();
+          o != outputs.end(); ++o)
         {
-        return *i;
+        out = *o;
+        std::string::size_type pos = out.rfind(name);
+        // If the output matches exactly
+        if (pos != out.npos &&
+            pos == out.size() - name.size() &&
+            (pos ==0 || out[pos-1] == '/'))
+          {
+          return *i;
+          }
         }
       }
     }

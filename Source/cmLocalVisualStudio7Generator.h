@@ -108,7 +108,7 @@ private:
                        const char* command,
                        const char* comment,
                        const std::vector<std::string>& depends,
-                       const char* output,
+                       const std::vector<std::string>& outputs,
                        const char* extraFlags);
 
   void WriteGroup(const cmSourceGroup *sg, cmTarget target, std::ostream &fout, 

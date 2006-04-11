@@ -85,7 +85,7 @@ private:
                        const char* command,
                        const char* comment,
                        const std::vector<std::string>& depends,
-                       const char* output,
+                       const std::vector<std::string>& outputs,
                        const char* flags);
   void AddUtilityCommandHack(cmTarget& target, int count,
                              std::vector<std::string>& depends,

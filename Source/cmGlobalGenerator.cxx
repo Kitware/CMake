@@ -1428,9 +1428,10 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   target.SetType(cmTarget::GLOBAL_TARGET, name);
   target.SetInAll(false);
 
-  std::vector<std::string> fileDepends;
+  std::vector<std::string> no_outputs;
+  std::vector<std::string> no_depends;
   // Store the custom command in the target.
-  cmCustomCommand cc(0, fileDepends, *commandLines, 0, 0);
+  cmCustomCommand cc(no_outputs, no_depends, *commandLines, 0, 0);
   target.GetPostBuildCommands().push_back(cc);
   target.SetProperty("EchoString", message);
   if ( depends_on_all )
@@ -1452,4 +1453,11 @@ void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
   // Subclasses that support multiple configurations should implement
   // this method to append the subdirectory for the given build
   // configuration.
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::CheckMultipleOutputs(cmMakefile*, bool)
+{
+  // Only certain generators need this check.  They define this
+  // method.
 }

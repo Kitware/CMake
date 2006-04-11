@@ -18,6 +18,7 @@
 
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
@@ -608,10 +609,15 @@ void cmMakefileTargetGenerator::WriteCustomCommands()
       this->GenerateCustomRuleFile(*cc);
       if (clean)
         {
-        this->CleanFiles.push_back
-          (this->Convert(cc->GetOutput(),
-                         cmLocalGenerator::START_OUTPUT,
-                         cmLocalGenerator::UNCHANGED));
+        const std::vector<std::string>& outputs = cc->GetOutputs();
+        for(std::vector<std::string>::const_iterator o = outputs.begin();
+            o != outputs.end(); ++o)
+          {
+          this->CleanFiles.push_back
+            (this->Convert(o->c_str(),
+                           cmLocalGenerator::START_OUTPUT,
+                           cmLocalGenerator::UNCHANGED));
+          }
         }
       }
     }
@@ -621,17 +627,15 @@ void cmMakefileTargetGenerator::WriteCustomCommands()
 void cmMakefileTargetGenerator
 ::GenerateCustomRuleFile(const cmCustomCommand& cc)
 {
-  // Convert the output name to a relative path if possible.
-  std::string output = this->Convert(cc.GetOutput(),
-                                     cmLocalGenerator::START_OUTPUT);
-
   // Collect the commands.
   std::vector<std::string> commands;
-  std::string preEcho = "Generating ";
-  preEcho += output;
-  this->LocalGenerator
-    ->AppendEcho(commands, preEcho.c_str(),
-                 cmLocalUnixMakefileGenerator3::EchoGenerate);
+  std::string comment = this->LocalGenerator->ConstructComment(cc);
+  if(!comment.empty())
+    {
+    this->LocalGenerator
+      ->AppendEcho(commands, comment.c_str(),
+                   cmLocalUnixMakefileGenerator3::EchoGenerate);
+    }
   this->LocalGenerator->AppendCustomCommand(commands, cc);
   
   // Collect the dependencies.
@@ -639,14 +643,30 @@ void cmMakefileTargetGenerator
   this->LocalGenerator->AppendCustomDepend(depends, cc);
 
   // Write the rule.
-  const char* comment = 0;
-  if(cc.GetComment() && *cc.GetComment())
-    {
-    comment = cc.GetComment();
-    }
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, comment,
-                                      cc.GetOutput(), depends, commands,
+  const std::vector<std::string>& outputs = cc.GetOutputs();
+  std::vector<std::string>::const_iterator o = outputs.begin();
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+                                      o->c_str(), depends, commands,
                                       false);
+
+  // If the rule has multiple outputs, add a rule for the extra
+  // outputs to just depend on the first output with no command.  Also
+  // register the extra outputs as paired with the first output so
+  // that the check-build-system step will remove the primary output
+  // if any extra outputs are missing, forcing the rule to regenerate
+  // all outputs.
+  depends.clear();
+  depends.push_back(*o);
+  commands.clear();
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  for(++o; o != outputs.end(); ++o)
+    {
+    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+                                        o->c_str(), depends, commands,
+                                        false);
+    gg->AddMultipleOutputPair(o->c_str(), depends[0].c_str());
+    }
 }
 
 //----------------------------------------------------------------------------
