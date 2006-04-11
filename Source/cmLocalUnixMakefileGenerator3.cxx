@@ -709,10 +709,8 @@ cmLocalUnixMakefileGenerator3
 std::string
 cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(cmTarget& target)
 {
-  std::string dir = this->Makefile->GetStartOutputDirectory();
-  dir += "/";
+  std::string dir = this->HomeRelativeOutputPath;
   dir += this->GetTargetDirectory(target);
-  dir = cmSystemTools::RelativePath(this->Makefile->GetHomeOutputDirectory(), dir.c_str());
   return this->Convert(dir.c_str(),NONE,MAKEFILE);
 }
 
@@ -907,6 +905,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
 
   // Echo one line at a time.
   std::string line;
+  line.reserve(200);
   for(const char* c = text;; ++c)
     {
     if(*c == '\n' || *c == '\0')

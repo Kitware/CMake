@@ -584,7 +584,8 @@ void cmGlobalGenerator::Configure()
 
   // Setup relative path generation.
   this->ConfigureRelativePaths();
-
+  this->TotalTargets.clear();
+  
   // start with this directory
   cmLocalGenerator *lg = this->CreateLocalGenerator();
   this->LocalGenerators.push_back(lg);
@@ -1019,17 +1020,28 @@ cmTarget* cmGlobalGenerator::FindTarget(const char* project,
                                         const char* name)
 {
   std::vector<cmLocalGenerator*>* gens = &this->LocalGenerators;
+  // if project specific
   if(project)
     {
     gens = &this->ProjectMap[project];
-    }
-  for(unsigned int i = 0; i < gens->size(); ++i)
-    {
-    cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name);
-    if(ret)
+    for(unsigned int i = 0; i < gens->size(); ++i)
       {
-      return ret;
+      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name);
+      if(ret)
+        {
+        return ret;
+        }
       }
+    }
+  // if all projects/directories
+  else
+    {
+    std::map<cmStdString,cmTarget *>::iterator i = this->TotalTargets.find(name);
+    if (i == this->TotalTargets.end())
+      {
+      return 0;
+      }
+    return i->second;
     }
   return 0;
 }

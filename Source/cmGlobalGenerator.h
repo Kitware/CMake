@@ -175,6 +175,9 @@ public:
       configuration.  This is valid during generation only.  */
   cmTargetManifest const& GetTargetManifest() { return this->TargetManifest; }
 
+  void AddTarget(cmTargets::value_type &v) { 
+    this->TotalTargets.insert(std::pair<cmStdString,cmTarget *>(v.first,&v.second));};
+  
   /** Support for multiple custom command outputs.  */
   virtual void CheckMultipleOutputs(cmMakefile* mf, bool verbose);
 
@@ -233,6 +236,9 @@ private:
   // using relative paths is unsafe.
   std::string RelativePathTopSource;
   std::string RelativePathTopBinary;
+
+  // this is used to improve performance 
+  std::map<cmStdString,cmTarget *> TotalTargets;
 };
 
 #endif

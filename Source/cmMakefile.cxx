@@ -774,7 +774,9 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   target.GetPostBuildCommands().push_back(cc);
 
   // Add the target to the set of targets.
-  this->Targets.insert(cmTargets::value_type(utilityName, target));
+  cmTargets::iterator it = 
+    this->Targets.insert(cmTargets::value_type(utilityName,target)).first;
+  this->LocalGenerator->GetGlobalGenerator()->AddTarget(*it);
 }
 
 void cmMakefile::AddDefineFlag(const char* flag)
@@ -1152,7 +1154,9 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   target.GetSourceLists() = srcs;
   target.SetMakefile(this);
   this->AddGlobalLinkInformation(lname, target);
-  this->Targets.insert(cmTargets::value_type(lname,target));
+  cmTargets::iterator it = 
+    this->Targets.insert(cmTargets::value_type(lname,target)).first;
+  this->LocalGenerator->GetGlobalGenerator()->AddTarget(*it);
 }
 
 cmTarget* cmMakefile::AddExecutable(const char *exeName, 
@@ -1166,6 +1170,7 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
   this->AddGlobalLinkInformation(exeName, target);
   cmTargets::iterator it = 
     this->Targets.insert(cmTargets::value_type(exeName,target)).first;
+  this->LocalGenerator->GetGlobalGenerator()->AddTarget(*it);
   return &it->second;
 }
 
@@ -2560,14 +2565,13 @@ bool cmMakefile::GetPropertyAsBool(const char* prop) const
 cmTarget* cmMakefile::FindTarget(const char* name)
 {
   cmTargets& tgts = this->GetTargets();
-  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+  
+  cmTargets::iterator i = tgts.find(name);
+  if (i == tgts.end())
     {
-    if(l->first == name)
-      {
-      return &l->second;
-      }
+    return 0;
     }
-  return 0;
+  return &i->second;
 }
 
 cmTest* cmMakefile::CreateTest(const char* testName)
