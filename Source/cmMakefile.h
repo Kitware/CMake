@@ -534,7 +534,7 @@ public:
   const std::vector<std::string>& GetOutputFiles() const
     { return this->OutputFiles; }
   void AddCMakeOutputFile(const char* file)
-    { this->ListFiles.push_back(file);}
+    { this->OutputFiles.push_back(file);}
   
   /**
    * Expand all defined variables in the string.  
