@@ -472,6 +472,9 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   flags += this->Makefile->GetSafeDefinition(varString.c_str());
   flags += " ";
   flags += this->GetIncludeFlags(lang);
+
+  // Construct the command lines.
+  cmCustomCommandLines commandLines;
   std::vector<std::string> commands;
   cmSystemTools::ExpandList(rules, commands);
   cmLocalGenerator::RuleVariables vars;
@@ -482,39 +485,45 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
+    // Expand the full command line string.
     this->ExpandRuleVariables(*i, vars);
+
+    // Parse the string to get the custom command line.
+    cmCustomCommandLine commandLine;
+    std::vector<cmStdString> cmd = cmSystemTools::ParseArguments(i->c_str());
+    for(std::vector<cmStdString>::iterator a = cmd.begin();
+        a != cmd.end(); ++a)
+      {
+      commandLine.push_back(*a);
+      }
+
+    // Store this command line.
+    commandLines.push_back(commandLine);
     }
-  std::vector<std::string> sourceAndDeps;
-  sourceAndDeps.push_back(sourceFile);
-  if(commands.size() > 1)
-    {
-    cmSystemTools::Error("Currently custom rules can only have one command sorry ");
-    }
-   // Check for extra object-file dependencies.
+
+  // Check for extra object-file dependencies.
   std::vector<std::string> depends;
   const char* additionalDeps = source.GetProperty("OBJECT_DEPENDS");
   if(additionalDeps)
     {
     cmSystemTools::ExpandListArgument(additionalDeps, depends);
-    for(std::vector<std::string>::iterator i = depends.begin();
-        i != depends.end(); ++i)
-      {
-      sourceAndDeps.push_back(this->Convert(i->c_str(),START_OUTPUT,SHELL));
-      }
-    } 
-#if 0
-  std::string command;
-  std::string args;
-  cmSystemTools::SplitProgramFromArgs(commands[0].c_str(), command, args);
-  std::vector<std::string> argsv;
-  argsv.push_back(args);
-  this->Makefile->AddCustomCommandToOutput(ofname, 
-                                       command.c_str(), 
-                                       argsv,
-                                       source.GetFullPath().c_str(),
-                                       sourceAndDeps,
-                                       "build from source");
-#endif
+    }
+
+  // Generate a meaningful comment for the command.
+  std::string comment = "Building ";
+  comment += lang;
+  comment += " object ";
+  comment += this->Convert(ofname, START_OUTPUT);
+
+  // Add the custom command to build the object file.
+  this->Makefile->AddCustomCommandToOutput(
+    ofname,
+    depends,
+    source.GetFullPath().c_str(),
+    commandLines,
+    comment.c_str(),
+    this->Makefile->GetStartOutputDirectory()
+    );
 }
 
 void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
