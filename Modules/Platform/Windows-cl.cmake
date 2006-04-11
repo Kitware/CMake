@@ -211,8 +211,7 @@ IF(MSVC80)
   SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
   SET (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
   SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
-  SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib " CACHE STRING 
-      "Libraries linked by defalut with all applications.")
+  SET (CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib ")
 ELSE(MSVC80)
   IF(CMAKE_USING_VC_FREE_TOOLS)
     MESSAGE(STATUS "Using FREE VC TOOLS, NO DEBUG available")
@@ -227,10 +226,7 @@ ELSE(MSVC80)
     SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MT /O1 /Ob1")
     SET (CMAKE_C_FLAGS_RELEASE_INIT "/MT /O2 /Ob2")
     SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MT /Zi /O2 /Ob1")
-    SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib advapi32.lib rpcrt4.lib" CACHE STRING
-      "Libraries linked by defalut with all applications.")
-    SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib advapi32.lib rpcrt4.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib" CACHE STRING
-      "Libraries linked by defalut with all applications.")
+    SET (CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib advapi32.lib rpcrt4.lib")
   ELSE(CMAKE_USING_VC_FREE_TOOLS)
     SET(CMAKE_BUILD_TYPE_INIT Debug)
     SET (CMAKE_CXX_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000 /GX /GR")
@@ -243,15 +239,11 @@ ELSE(MSVC80)
     SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
     SET (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
     SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
-    SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
-      "Libraries linked by defalut with all applications.")
+    SET (CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib")
   ENDIF(CMAKE_USING_VC_FREE_TOOLS)
 ENDIF(MSVC80)
 
-
-MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES)
-
-
+SET(CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
 
 # executable linker flags
 SET (CMAKE_LINK_DEF_FILE_FLAG "/DEF:")

@@ -60,9 +60,8 @@ SET (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2")
 SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2")
 
 
-SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib" CACHE STRING 
-     "Libraries linked by defalut with all applications.")
-MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES)
+SET(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib")
+SET(CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
 
 # executable linker flags
 SET (CMAKE_LINK_DEF_FILE_FLAG "/DEF:")

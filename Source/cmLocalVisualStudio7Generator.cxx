@@ -667,6 +667,21 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     std::vector<cmStdString> linkDirs;
     this->ComputeLinkInformation(target, configName, linkLibs, linkDirs);
 
+    // Get the language to use for linking.
+    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+    if(!linkLanguage)
+      {
+      cmSystemTools::Error("CMake can not determine linker language for target:",
+                           target.GetName());
+      return;
+      }
+
+    // Compute the variable name to lookup standard libraries for this
+    // language.
+    std::string standardLibsVar = "CMAKE_";
+    standardLibsVar += linkLanguage;
+    standardLibsVar += "_STANDARD_LIBRARIES";
+
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"VCLinkerTool\"\n"
          << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
@@ -679,7 +694,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     // libraries which may be set by the user to something bad.
     fout << "\"\n"
          << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
-         << this->Makefile->GetRequiredDefinition("CMAKE_STANDARD_LIBRARIES")
+         << this->Makefile->GetSafeDefinition(standardLibsVar.c_str())
          << " ";
     this->OutputLibraries(fout, linkLibs);
     fout << "\"\n";
@@ -709,13 +724,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
       }
-    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
-    if(!linkLanguage)
-      {
-      cmSystemTools::Error("CMake can not determine linker language for target:",
-                           target.GetName());
-      return;
-      }
     std::string stackVar = "CMAKE_";
     stackVar += linkLanguage;
     stackVar += "_STACK_SIZE";
@@ -739,6 +747,21 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     std::vector<cmStdString> linkDirs;
     this->ComputeLinkInformation(target, configName, linkLibs, linkDirs);
 
+    // Get the language to use for linking.
+    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+    if(!linkLanguage)
+      {
+      cmSystemTools::Error("CMake can not determine linker language for target:",
+                           target.GetName());
+      return;
+      }
+
+    // Compute the variable name to lookup standard libraries for this
+    // language.
+    std::string standardLibsVar = "CMAKE_";
+    standardLibsVar += linkLanguage;
+    standardLibsVar += "_STANDARD_LIBRARIES";
+
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"VCLinkerTool\"\n"
          << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
@@ -751,7 +774,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     // libraries which may be set by the user to something bad.
     fout << "\"\n"
          << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
-         << this->Makefile->GetRequiredDefinition("CMAKE_STANDARD_LIBRARIES")
+         << this->Makefile->GetSafeDefinition(standardLibsVar.c_str())
          << " ";
     this->OutputLibraries(fout, linkLibs);
     fout << "\"\n";
@@ -782,13 +805,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     else
       {
       fout << "\t\t\t\tSubSystem=\"1\"\n";
-      }
-    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
-    if(!linkLanguage)
-      {
-      cmSystemTools::Error("CMake can not determine linker language for target:",
-                           target.GetName());
-      return;
       }
     std::string stackVar = "CMAKE_";
     stackVar += linkLanguage;

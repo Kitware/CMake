@@ -53,6 +53,12 @@ IF(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
     "Flags used by the compiler during Release with Debug Info builds.")
 ENDIF(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 
+IF(CMAKE_C_STANDARD_LIBRARIES_INIT)
+  SET(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES_INIT}"
+    CACHE STRING "Libraries linked by defalut with all C applications.")
+  MARK_AS_ADVANCED(CMAKE_C_STANDARD_LIBRARIES)
+ENDIF(CMAKE_C_STANDARD_LIBRARIES_INIT)
+
 INCLUDE(CMakeCommonLanguageInclude)
 
 # now define the following rule variables

@@ -1349,9 +1349,15 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
       }
     fout << " ";
     }
-  if(this->Makefile->GetDefinition("CMAKE_STANDARD_LIBRARIES"))
+
+  // Add standard libraries for this language.
+  std::string standardLibsVar = "CMAKE_";
+  standardLibsVar += linkLanguage;
+  standardLibsVar += "_STANDARD_LIBRARIES";
+  if(const char* stdLibs =
+     this->Makefile->GetDefinition(standardLibsVar.c_str()))
     {
-    fout << this->Makefile->GetDefinition("CMAKE_STANDARD_LIBRARIES") << " ";
+    fout << stdLibs << " ";
     }
 }
 

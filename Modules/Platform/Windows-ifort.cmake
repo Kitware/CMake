@@ -43,13 +43,8 @@ SET (CMAKE_Fortran_FLAGS_DEBUG_INIT "/debug:full")
 SET (CMAKE_Fortran_FLAGS_MINSIZEREL_INIT "/O2 /D NDEBUG")
 SET (CMAKE_Fortran_FLAGS_RELEASE_INIT "/MD /O1 /D NDEBUG")
 SET (CMAKE_Fortran_FLAGS_RELWITHDEBINFO_INIT "/O1 /debug:full /D NDEBUG")
-SET (CMAKE_STANDARD_LIBRARIES "user32.lib" CACHE STRING 
-     "Libraries linked by defalut with all applications.")
 
-
-MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES)
-
-
+SET (CMAKE_Fortran_STANDARD_LIBRARIES_INIT "user32.lib")
 
 # executable linker flags
 SET (CMAKE_LINK_DEF_FILE_FLAG "/DEF:")

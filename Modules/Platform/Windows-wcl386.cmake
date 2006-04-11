@@ -22,8 +22,8 @@ SET (CMAKE_C_FLAGS_DEBUG_INIT "-br -bm  -od")
 SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "-br -bm -os -dNDEBUG")
 SET (CMAKE_C_FLAGS_RELEASE_INIT "-br -bm -ot -dNDEBUG")
 SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "-br -bm  -ot -dNDEBUG")
-SET (CMAKE_STANDARD_LIBRARIES "library clbrdll.lib library plbrdll.lib  library kernel32.lib library user32.lib library gdi32.lib library winspool.lib library comdlg32.lib library advapi32.lib library shell32.lib library ole32.lib library oleaut32.lib library uuid.lib library odbc32.lib library odbccp32.lib" CACHE STRING 
-  "Libraries linked by defalut with all applications.")
+SET (CMAKE_C_STANDARD_LIBRARIES_INIT "library clbrdll.lib library plbrdll.lib  library kernel32.lib library user32.lib library gdi32.lib library winspool.lib library comdlg32.lib library advapi32.lib library shell32.lib library ole32.lib library oleaut32.lib library uuid.lib library odbc32.lib library odbccp32.lib")
+SET (CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
 
 SET(CMAKE_C_LINK_EXECUTABLE
     "wlink ${CMAKE_START_TEMP_FILE} ${CMAKE_WLINK_QUIET} name <TARGET> option caseexact file {<OBJECTS>} <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")

@@ -1059,17 +1059,38 @@ void cmLocalVisualStudio6Generator
     libMultiLineOptionsForDebug +=  extraLinkOptions;
     libMultiLineOptionsForDebug += " \n";
     }
-  if(const char* stdLibs =  this->Makefile->GetDefinition("CMAKE_STANDARD_LIBRARIES"))
+  if(target.GetType() >= cmTarget::EXECUTABLE && 
+     target.GetType() <= cmTarget::MODULE_LIBRARY)
     {
-    libOptions += " ";
-    libOptions += stdLibs;
-    libOptions += " ";
-    libMultiLineOptions += "# ADD LINK32 ";
-    libMultiLineOptions +=  stdLibs;
-    libMultiLineOptions += " \n";
-    libMultiLineOptionsForDebug += "# ADD LINK32 ";
-    libMultiLineOptionsForDebug +=  stdLibs;
-    libMultiLineOptionsForDebug += " \n";
+    // Get the language to use for linking.
+    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+    if(!linkLanguage)
+      {
+      cmSystemTools::Error("CMake can not determine linker language for target:",
+                           target.GetName());
+      return;
+      }
+
+    // Compute the variable name to lookup standard libraries for this
+    // language.
+    std::string standardLibsVar = "CMAKE_";
+    standardLibsVar += linkLanguage;
+    standardLibsVar += "_STANDARD_LIBRARIES";
+
+    // Add standard libraries.
+    if(const char* stdLibs =
+       this->Makefile->GetDefinition(standardLibsVar.c_str()))
+      {
+      libOptions += " ";
+      libOptions += stdLibs;
+      libOptions += " ";
+      libMultiLineOptions += "# ADD LINK32 ";
+      libMultiLineOptions +=  stdLibs;
+      libMultiLineOptions += " \n";
+      libMultiLineOptionsForDebug += "# ADD LINK32 ";
+      libMultiLineOptionsForDebug +=  stdLibs;
+      libMultiLineOptionsForDebug += " \n";
+      }
     }
   if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS"))
     {
