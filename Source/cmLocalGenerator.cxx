@@ -1399,6 +1399,8 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
         linkItem += "/";
         linkItem += tgt->GetFullName(config);
         linkLibraries.push_back(linkItem);
+
+        // For full path, use the true location.
         if(fullPathLibs)
           {
           fullPathLibs->push_back(tgt->GetFullPath(config));
@@ -1408,6 +1410,14 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
         {
         // This is not a CMake target.  Use the name given.
         linkLibraries.push_back(lib);
+
+        // Add to the list of full paths if this library is one.
+        if(fullPathLibs &&
+           cmSystemTools::FileIsFullPath(lib.c_str()) &&
+           !cmSystemTools::FileIsDirectory(lib.c_str()))
+          {
+          fullPathLibs->push_back(lib);
+          }
         }
       }
     }
@@ -1450,10 +1460,6 @@ cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
   orderLibs.DetermineLibraryPathOrder();
   std::vector<cmStdString> orderedLibs;
   orderLibs.GetLinkerInformation(outDirs, orderedLibs);
-  if(fullPathLibs)
-    {
-    orderLibs.GetFullPathLibraries(*fullPathLibs);
-    }
 
   // Make sure libraries are linked with the proper syntax.
   std::string libLinkFlag =
