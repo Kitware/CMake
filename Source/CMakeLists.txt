@@ -1014,6 +1014,8 @@ IF(BUILD_TESTING)
       --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
   ENDIF(UNIX AND CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
 
+  # fortran does not work for IDE builds because 
+  # CMAKE_STANDARD_LIBRARIES needs to be per language
   IF(CMAKE_TEST_GENERATOR MATCHES "Makefiles")
     # see if we can find a fortran compiler on the machine
     # if so, add the fortran test and see if it works.
@@ -1033,7 +1035,7 @@ IF(BUILD_TESTING)
         --build-two-config
         --test-command testf)
     ENDIF(CMAKE_Fortran_COMPILER_FULLPATH)
-
+  ENDIF(CMAKE_TEST_GENERATOR MATCHES "Makefiles")
     INCLUDE(FindJava)
     IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
       GET_FILENAME_COMPONENT(JNIPATH ${JAVA_COMPILE} PATH)
@@ -1056,7 +1058,7 @@ IF(BUILD_TESTING)
         ENDIF("${JNI_FILE}" MATCHES "JDK1_2")
       ENDIF(JNI_H) 
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
-  ENDIF(CMAKE_TEST_GENERATOR MATCHES "Makefiles")
+
     
   IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
     # Will be set if the wxwindows gui is on

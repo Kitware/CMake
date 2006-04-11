@@ -565,7 +565,6 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   std::string flags; // should be set
   std::string linkFlags; // should be set 
   this->GetTargetFlags(linkLibs, flags, linkFlags, target);
-  std::string rule = this->Makefile->GetRequiredDefinition(createRule.c_str());
   cmLocalGenerator::RuleVariables vars;
   vars.Language = llang;
   vars.Objects = objs.c_str();
@@ -573,7 +572,45 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   vars.LinkLibraries = linkLibs.c_str();
   vars.Flags = flags.c_str();
   vars.LinkFlags = linkFlags.c_str();
-  this->ExpandRuleVariables(rule, vars);
+
+  cmCustomCommandLines commandLines;
+  std::vector<std::string> rules;
+  rules.push_back(this->Makefile->GetRequiredDefinition(createRule.c_str()));
+  std::vector<std::string> commands;
+  cmSystemTools::ExpandList(rules, commands);  
+  for(std::vector<std::string>::iterator i = commands.begin();
+      i != commands.end(); ++i)
+    {
+    // Expand the full command line string.
+    this->ExpandRuleVariables(*i, vars);
+
+    // Parse the string to get the custom command line.
+    cmCustomCommandLine commandLine;
+    std::vector<cmStdString> cmd = cmSystemTools::ParseArguments(i->c_str());
+    for(std::vector<cmStdString>::iterator a = cmd.begin();
+        a != cmd.end(); ++a)
+      {
+      commandLine.push_back(*a);
+      }
+
+    // Store this command line.
+    commandLines.push_back(commandLine);
+    }
+  std::string targetFullPath = target.GetFullPath();
+  // Generate a meaningful comment for the command.
+  std::string comment = "Linking ";
+  comment += llang;
+  comment += " target ";
+  comment += this->Convert(targetFullPath.c_str(), START_OUTPUT);
+  this->Makefile->AddCustomCommandToOutput(
+    targetFullPath.c_str(),
+    objVector,
+    0,
+    commandLines,
+    comment.c_str(),
+    this->Makefile->GetStartOutputDirectory()
+    );
+  target.GetSourceFiles().push_back(this->Makefile->GetSource(targetFullPath.c_str()));
 }
 
   
