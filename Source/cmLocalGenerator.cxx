@@ -355,17 +355,21 @@ void cmLocalGenerator::GenerateInstallRules()
   this->GenerateTargetInstallRules(fout, config, configurationTypes);
 
   // Include install scripts from subdirectories.
-  if ( this->Children.size())
+  if(!this->Children.empty())
     {
-    std::vector<cmLocalGenerator*>::const_iterator i = this->Children.begin();
-    for(; i != this->Children.end(); ++i)
+    fout << "# Include the install script for each subdirectory.\n";
+    for(std::vector<cmLocalGenerator*>::const_iterator
+          ci = this->Children.begin(); ci != this->Children.end(); ++ci)
       {
-      std::string odir = (*i)->GetMakefile()->GetStartOutputDirectory();
-      cmSystemTools::ConvertToUnixSlashes(odir);
-      fout << "INCLUDE(\"" <<  odir.c_str() 
-           << "/cmake_install.cmake\")" << std::endl;
+      if(!(*ci)->GetExcludeAll())
+        {
+        std::string odir = (*ci)->GetMakefile()->GetStartOutputDirectory();
+        cmSystemTools::ConvertToUnixSlashes(odir);
+        fout << "INCLUDE(\"" <<  odir.c_str()
+             << "/cmake_install.cmake\")" << std::endl;
+        }
       }
-    fout << std::endl;;
+    fout << "\n";
     }
 
   // Record the install manifest.
