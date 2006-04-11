@@ -384,7 +384,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
                            target.GetName());
       return;
       }
-    if(!(strcmp(linkLanguage, "RC") == 0 || strcmp(linkLanguage, "DEF") == 0))
+    if(strcmp(linkLanguage, "C") == 0 || strcmp(linkLanguage, "CXX") == 0)
       {
       std::string baseFlagVar = "CMAKE_";
       baseFlagVar += linkLanguage;
