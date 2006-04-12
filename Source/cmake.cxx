@@ -1844,6 +1844,11 @@ void cmake::UpdateConversionPathTable()
 //----------------------------------------------------------------------------
 int cmake::CheckBuildSystem()
 {
+  // We do not need to rerun CMake.  Check dependency integrity.  Use
+  // the make system's VERBOSE environment variable to enable verbose
+  // output.
+  bool verbose = cmSystemTools::GetEnv("VERBOSE") != 0;
+  
   // This method will check the integrity of the build system if the
   // option was given on the command line.  It reads the given file to
   // determine whether CMake should rerun.  If it does rerun then the
@@ -1852,13 +1857,26 @@ int cmake::CheckBuildSystem()
 
   // If no file is provided for the check, we have to rerun.
   if(this->CheckBuildSystemArgument.size() == 0)
-    {
+    { 
+    if(verbose)
+      {
+      cmOStringStream msg;
+      msg << "Re-run cmake no build system arguments\n";
+      cmSystemTools::Stdout(msg.str().c_str());
+      }
     return 1;
     }
 
   // If the file provided does not exist, we have to rerun.
   if(!cmSystemTools::FileExists(this->CheckBuildSystemArgument.c_str()))
     {
+    if(verbose)
+      {
+      cmOStringStream msg;
+      msg << "Re-run cmake missing file: " 
+          << this->CheckBuildSystemArgument.c_str() << "\n";
+      cmSystemTools::Stdout(msg.str().c_str());
+      }
     return 1;
     }
 
@@ -1873,6 +1891,13 @@ int cmake::CheckBuildSystem()
   if(!mf->ReadListFile(0, this->CheckBuildSystemArgument.c_str()) ||
      cmSystemTools::GetErrorOccuredFlag())
     {
+    if(verbose)
+      {
+      cmOStringStream msg;
+      msg << "Re-run cmake error reading : " 
+          << this->CheckBuildSystemArgument.c_str() << "\n";
+      cmSystemTools::Stdout(msg.str().c_str());
+      }
     // There was an error reading the file.  Just rerun.
     return 1;
     }
@@ -1883,6 +1908,13 @@ int cmake::CheckBuildSystem()
   if(!dependsStr || !outputsStr)
     {
     // Not enough information was provided to do the test.  Just rerun.
+    if(verbose)
+      {
+      cmOStringStream msg;
+      msg << "Re-run cmake no CMAKE_MAKEFILE_DEPENDS "
+        "or CMAKE_MAKEFILE_OUTPUTS :\n";
+      cmSystemTools::Stdout(msg.str().c_str());
+      }
     return 1;
     }
   std::vector<std::string> depends;
@@ -1902,15 +1934,17 @@ int cmake::CheckBuildSystem()
                                                 dep->c_str(), &result) ||
          result < 0)
         {
+        if(verbose)
+          {
+          cmOStringStream msg;
+          msg << "Re-run cmake file: " << out->c_str()
+              << " older than: " << dep->c_str() << "\n";
+          cmSystemTools::Stdout(msg.str().c_str());
+          }
         return 1;
         }
       }
     }
-
-  // We do not need to rerun CMake.  Check dependency integrity.  Use
-  // the make system's VERBOSE environment variable to enable verbose
-  // output.
-  bool verbose = cmSystemTools::GetEnv("VERBOSE") != 0;
 
   // compute depends based on the generator specified
   const char* genName = mf->GetDefinition("CMAKE_DEPENDS_GENERATOR");
