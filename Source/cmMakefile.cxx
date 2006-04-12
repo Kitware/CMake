@@ -2414,7 +2414,6 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
   std::string soutfile = outfile;
   std::string sinfile = infile;
   this->AddCMakeDependFile(infile);
-  this->AddCMakeOutputFile(outfile);
   cmSystemTools::ConvertToUnixSlashes(soutfile);
   mode_t perm = 0;
   cmSystemTools::GetPermissions(sinfile.c_str(), perm);
