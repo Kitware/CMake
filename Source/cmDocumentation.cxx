@@ -434,6 +434,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
       if((i+1 < argc) && !this->IsOption(argv[i+1]))
         {
         this->SingleCommand = argv[i+1];
+        this->SingleCommand = cmSystemTools::UpperCase(this->SingleCommand);
         i = i+1;
         }
       }
