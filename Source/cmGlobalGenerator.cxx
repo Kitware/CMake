@@ -1019,11 +1019,10 @@ cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(const char* start_dir)
 cmTarget* cmGlobalGenerator::FindTarget(const char* project, 
                                         const char* name)
 {
-  std::vector<cmLocalGenerator*>* gens = &this->LocalGenerators;
   // if project specific
   if(project)
     {
-    gens = &this->ProjectMap[project];
+    std::vector<cmLocalGenerator*>* gens = &this->ProjectMap[project];
     for(unsigned int i = 0; i < gens->size(); ++i)
       {
       cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name);
