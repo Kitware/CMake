@@ -18,7 +18,8 @@
 
 //----------------------------------------------------------------------------
 cmInstallScriptGenerator
-::cmInstallScriptGenerator(const char* script): Script(script)
+::cmInstallScriptGenerator(const char* script, bool code):
+  Script(script), Code(code)
 {
 }
 
@@ -31,5 +32,12 @@ cmInstallScriptGenerator
 //----------------------------------------------------------------------------
 void cmInstallScriptGenerator::GenerateScript(std::ostream& os)
 {
-  os << "INCLUDE(\"" << this->Script << "\")\n";
+  if(this->Code)
+    {
+    os << this->Script << "\n";
+    }
+  else
+    {
+    os << "INCLUDE(\"" << this->Script << "\")\n";
+    }
 }

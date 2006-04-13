@@ -25,12 +25,13 @@
 class cmInstallScriptGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallScriptGenerator(const char* script);
+  cmInstallScriptGenerator(const char* script, bool code = false);
   virtual ~cmInstallScriptGenerator();
 
 protected:
   virtual void GenerateScript(std::ostream& os);
   std::string Script;
+  bool Code;
 };
 
 #endif

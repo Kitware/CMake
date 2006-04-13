@@ -122,6 +122,7 @@ ELSE(STAGE2)
   # Test user-specified install scripts.
   INSTALL(
     SCRIPT InstallScript1.cmake
+    CODE "SET(INSTALL_CODE_DID_RUN 1)"
     SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/InstallScript2.cmake
     )
   SET_DIRECTORY_PROPERTIES(PROPERTIES

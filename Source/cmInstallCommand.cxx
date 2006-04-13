@@ -35,6 +35,10 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleScriptMode(args);
     }
+  else if(args[0] == "CODE")
+    {
+    return this->HandleScriptMode(args);
+    }
   else if(args[0] == "TARGETS")
     {
     return this->HandleTargetsMode(args);
@@ -59,11 +63,18 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args)
 bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
 {
   bool doing_script = false;
+  bool doing_code = false;
   for(size_t i=0; i < args.size(); ++i)
     {
     if(args[i] == "SCRIPT")
       {
       doing_script = true;
+      doing_code = false;
+      }
+    else if(args[i] == "CODE")
+      {
+      doing_script = false;
+      doing_code = true;
       }
     else if(doing_script)
       {
@@ -83,10 +94,22 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
       this->Makefile->AddInstallGenerator(
         new cmInstallScriptGenerator(script.c_str()));
       }
+    else if(doing_code)
+      {
+      doing_code = false;
+      std::string code = args[i];
+      this->Makefile->AddInstallGenerator(
+        new cmInstallScriptGenerator(code.c_str(), true));
+      }
     }
   if(doing_script)
     {
     this->SetError("given no value for SCRIPT argument.");
+    return false;
+    }
+  if(doing_code)
+    {
+    this->SetError("given no value for CODE argument.");
     return false;
     }
   return true;
