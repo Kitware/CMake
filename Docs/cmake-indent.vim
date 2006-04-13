@@ -16,10 +16,15 @@
 " =============================================================================
 
 " Vim indent file
-" Language: CMake (ft=cmake)
-" Author:	Andy Cedilnik <andy.cedilnik@kitware.com>
-" URL:		http://www.cmake.org
-" Last Change:	Sun Mar 23 15:41:55 EST 2003
+" Language:     CMake (ft=cmake)
+" Author:       Andy Cedilnik <andy.cedilnik@kitware.com>
+" Maintainer:   Andy Cedilnik <andy.cedilnik@kitware.com>
+" Last Change:  $Date$
+" Version:      $Revision$
+" 
+" Licence:      This program is free software; you can redistribute it
+"               and/or modify it under the terms of the CMake
+"               License. See http://www.cmake.org/HTML/Copyright.html
 
 if exists("b:did_indent")
   finish
