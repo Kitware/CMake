@@ -220,6 +220,12 @@ IF(UNIX)
   TARGET_LINK_LIBRARIES(CMakeLib ${CMAKE_DL_LIBS})
 ENDIF(UNIX)
 
+# On Apple we need Carbon
+IF(APPLE)
+  FIND_LIBRARY(CARBON Carbon)
+  TARGET_LINK_LIBRARIES(CMakeLib ${CARBON})
+ENDIF(APPLE)
+
 # On some platforms we need the rpcrt4 library for the VS 7 generators.
 IF(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
   TARGET_LINK_LIBRARIES(CMakeLib rpcrt4)

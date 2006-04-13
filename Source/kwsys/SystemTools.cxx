@@ -1877,13 +1877,17 @@ size_t SystemTools::GetMaximumFilePathLength()
  * found.  Otherwise, the empty string is returned.
  */
 kwsys_stl::string SystemTools
-::FindFile(const char* name,
-           const kwsys_stl::vector<kwsys_stl::string>& userPaths)
+::FindName(const char* name,
+           const kwsys_stl::vector<kwsys_stl::string>& userPaths,
+           bool no_system_path)
 {
   // Add the system search path to our path first
   kwsys_stl::vector<kwsys_stl::string> path;
-  SystemTools::GetPath(path, "CMAKE_FILE_PATH");
-  SystemTools::GetPath(path);
+  if (!no_system_path) 
+    {
+    SystemTools::GetPath(path, "CMAKE_FILE_PATH");
+    SystemTools::GetPath(path);
+    }
   // now add the additional paths
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator i = userPaths.begin();
         i != userPaths.end(); ++i)
@@ -1898,11 +1902,48 @@ kwsys_stl::string SystemTools
     tryPath = *p;
     tryPath += "/";
     tryPath += name;
-    if(SystemTools::FileExists(tryPath.c_str()) &&
-      !SystemTools::FileIsDirectory(tryPath.c_str()))
+    if(SystemTools::FileExists(tryPath.c_str()))
       {
-      return SystemTools::CollapseFullPath(tryPath.c_str());
+      return tryPath;
       }
+    }
+  // Couldn't find the file.
+  return "";
+}
+
+/**
+ * Find the file the given name.  Searches the given path and then
+ * the system search path.  Returns the full path to the file if it is
+ * found.  Otherwise, the empty string is returned.
+ */
+kwsys_stl::string SystemTools
+::FindFile(const char* name,
+           const kwsys_stl::vector<kwsys_stl::string>& userPaths,
+           bool no_system_path)
+{
+  kwsys_stl::string tryPath = SystemTools::FindName(name, userPaths, no_system_path);
+  if(tryPath != "" && !SystemTools::FileIsDirectory(tryPath.c_str()))
+    {
+    return SystemTools::CollapseFullPath(tryPath.c_str());
+    }
+  // Couldn't find the file.
+  return "";
+}
+
+/**
+ * Find the directory the given name.  Searches the given path and then
+ * the system search path.  Returns the full path to the directory if it is
+ * found.  Otherwise, the empty string is returned.
+ */
+kwsys_stl::string SystemTools
+::FindDirectory(const char* name,
+                const kwsys_stl::vector<kwsys_stl::string>& userPaths,
+                bool no_system_path)
+{
+  kwsys_stl::string tryPath = SystemTools::FindName(name, userPaths, no_system_path);
+  if(tryPath != "" && SystemTools::FileIsDirectory(tryPath.c_str()))
+    {
+    return SystemTools::CollapseFullPath(tryPath.c_str());
     }
   // Couldn't find the file.
   return "";

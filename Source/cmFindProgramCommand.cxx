@@ -17,6 +17,10 @@
 #include "cmFindProgramCommand.h"
 #include "cmCacheManager.h"
 #include <stdlib.h>
+
+#if defined(__APPLE__)
+#include <CoreFoundation/CoreFoundation.h>
+#endif
   
 cmFindProgramCommand::cmFindProgramCommand()
 {
@@ -48,8 +52,8 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
     {
     return true;
     }
-  std::string result = cmSystemTools::FindProgram(this->Names,
-                                                  this->SearchPaths, true);
+
+  std::string result = FindProgram(this->Names);
   if(result != "")
     {
     // Save the value in the cache
@@ -65,5 +69,93 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
                                  this->VariableDocumentation.c_str(),
                                  cmCacheManager::FILEPATH);
   return true;
+}
+
+std::string cmFindProgramCommand::FindProgram(std::vector<std::string> names)
+{
+  std::string program = "";
+
+  // First/last order taken care of in cmFindBase when the paths are setup.
+  if(this->SearchAppBundleFirst || this->SearchAppBundleLast)
+    {
+    program = FindAppBundle(names);
+    }
+  if(program.empty() && !this->SearchAppBundleOnly)
+    {
+    program = cmSystemTools::FindProgram(names, this->SearchPaths, true);
+    }
+
+  return program;
+}
+
+std::string cmFindProgramCommand::FindAppBundle(std::vector<std::string> names)
+{
+  for(std::vector<std::string>::const_iterator name = names.begin();
+      name != names.end() ; ++name)
+    {
+    
+    std::string appName = *name + std::string(".app");
+    std::string appPath = cmSystemTools::FindDirectory(appName.c_str(), this->SearchPaths, true);
+
+    if ( !appPath.empty() )
+      {
+      std::string executable = GetBundleExecutable(appPath);
+      if (!executable.empty()) 
+        {
+        return cmSystemTools::CollapseFullPath(executable.c_str());
+        }
+      } 
+    } 
+
+  // Couldn't find app bundle
+  return "";
+}
+
+std::string cmFindProgramCommand::GetBundleExecutable(std::string bundlePath)
+{
+  std::string executable = "";
+
+#if defined(__APPLE__)
+  // Started with an example on developer.apple.com about finding bundles 
+  // and modified from that.
+  
+  // Get a CFString of the app bundle path
+  // XXX - Is it safe to assume everything is in UTF8?
+  CFStringRef bundlePathCFS = CFStringCreateWithCString(kCFAllocatorDefault , 
+                                                        bundlePath.c_str(), kCFStringEncodingUTF8 );
+  
+  // Make a CFURLRef from the CFString representation of the bundle’s path.
+  CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, 
+                                                     bundlePathCFS,
+                                                     kCFURLPOSIXPathStyle,
+                                                     true );
+  
+  // Make a bundle instance using the URLRef.
+  CFBundleRef appBundle = CFBundleCreate( kCFAllocatorDefault, bundleURL );
+  
+  // returned executableURL is relative to <appbundle>/Contents/MacOS/
+  CFURLRef executableURL = CFBundleCopyExecutableURL(appBundle);
+  
+  if (executableURL != NULL)
+    {
+    const int MAX_OSX_PATH_SIZE = 1024;
+    char buffer[MAX_OSX_PATH_SIZE];
+    
+    // Convert the CFString to a C string
+    CFStringGetCString( CFURLGetString(executableURL), buffer, MAX_OSX_PATH_SIZE, kCFStringEncodingUTF8 );
+    
+    // And finally to a c++ string
+    executable = bundlePath + "/Contents/MacOS/" + std::string(buffer);
+    }
+
+  // Any CF objects returned from functions with "create" or 
+  // "copy" in their names must be released by us!
+  CFRelease( bundlePathCFS );
+  CFRelease( bundleURL );
+  CFRelease( appBundle );
+  CFRelease( executableURL );
+#endif
+
+  return executable;
 }
 

@@ -43,6 +43,7 @@ protected:
   void PrintFindStuff();
   void ExpandPaths(std::vector<std::string> userPaths);
   void AddFrameWorkPaths();
+  void AddAppBundlePaths();
   void AddEnvironmentVairables();
   void AddCMakeVairables();
   void AddSystemEnvironmentVairables();
@@ -75,6 +76,10 @@ protected:
   bool SearchFrameworkFirst;
   bool SearchFrameworkOnly;
   bool SearchFrameworkLast;
+  
+  bool SearchAppBundleFirst;
+  bool SearchAppBundleOnly;
+  bool SearchAppBundleLast;
   
 };
 

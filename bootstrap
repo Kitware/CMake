@@ -35,6 +35,13 @@ else
   cmake_system_mingw=false
 fi
 
+# Determine whether this is OS X
+if echo "${cmake_system}" | grep Darwin >/dev/null 2>&1; then
+  cmake_system_darwin=true
+else
+  cmake_system_darwin=false
+fi
+
 # Choose the generator to use for bootstrapping.
 if ${cmake_system_mingw}; then
   # Bootstrapping from an MSYS prompt.
@@ -508,6 +515,13 @@ rm -f "${cmake_bootstrap_dir}/cmConfigure.h.tmp"
 # If exist compiler flags, set them
 cmake_c_flags=${CFLAGS}
 cmake_cxx_flags=${CXXFLAGS}
+
+# Add Carbon framework on Darwin
+if ${cmake_system_darwin}; then
+  cmake_ld_flags="${LDFLAGS} -framework Carbon"  
+else
+  cmake_ld_flags=${LDFLAGS}
+fi
 
 # Test C compiler
 cmake_c_compiler=
@@ -1162,7 +1176,7 @@ cmake_c_flags="${cmake_c_flags}-I`cmake_escape \"${cmake_source_dir}/Source\"` \
 cmake_cxx_flags="${cmake_cxx_flags}-I`cmake_escape \"${cmake_source_dir}/Source\"` \
   -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
 echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
-echo "	${cmake_cxx_compiler} ${LDFLAGS} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
+echo "	${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
 for a in ${CMAKE_CXX_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/${a}.cxx"`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
@@ -1190,9 +1204,9 @@ if ${cmake_system_mingw}; then
   cmd=`cmake_escape "${cmake_bootstrap_dir}/cmsysEncodeExecutable.exe"`
   a="cmsysProcessFwd9xEnc"
   echo "${cmd} : EncodeExecutable.o" >> "${cmake_bootstrap_dir}/Makefile"
-  echo "	${cmake_c_compiler} ${LDFLAGS} ${cmake_c_flags} EncodeExecutable.o -o ${cmd}" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_c_compiler} ${cmake_ld_flags} ${cmake_c_flags} EncodeExecutable.o -o ${cmd}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "${in} : ProcessFwd9x.o" >> "${cmake_bootstrap_dir}/Makefile"
-  echo "	${cmake_c_compiler} ${LDFLAGS} ${cmake_c_flags} ProcessFwd9x.o -o ${in}" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_c_compiler} ${cmake_ld_flags} ${cmake_c_flags} ProcessFwd9x.o -o ${in}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "${src} : ${cmd} ${in}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmd} ${in} ${src} cmsys ProcessFwd9x" >> "${cmake_bootstrap_dir}/Makefile"
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"

@@ -73,6 +73,14 @@ SET(CMAKE_SYSTEM_FRAMEWORK_PATH
   /Network/Library/Frameworks
   /System/Library/Frameworks)
 
+# default to searching for application bundles first
+SET(CMAKE_FIND_APPBUNDLE FIRST)
+# set up the default search directories for application bundles
+SET(CMAKE_SYSTEM_APPBUNDLE_PATH
+  ~/Applications
+  /Applications
+  /Developer/Applications)
+
 INCLUDE(Platform/UnixPaths)
 SET(CMAKE_SYSTEM_INCLUDE_PATH ${CMAKE_SYSTEM_INCLUDE_PATH} /sw/include)
 SET(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH} /sw/lib)

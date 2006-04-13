@@ -27,11 +27,15 @@ cmFindBase::cmFindBase()
   // default is to search frameworks first on apple
 #if defined(__APPLE__)
   this->SearchFrameworkFirst = true;
+  this->SearchAppBundleFirst = true;
 #else
   this->SearchFrameworkFirst = false;
+  this->SearchAppBundleFirst = false;
 #endif
   this->SearchFrameworkOnly = false;
   this->SearchFrameworkLast = false;
+  this->SearchAppBundleOnly = false;
+  this->SearchAppBundleLast = false;
   this->GenericDocumentation = 
     "   FIND_XXX(<VAR> name1 path1 path2 ...)\n"
     "This is the short-hand signature for the command that "
@@ -71,6 +75,7 @@ cmFindBase::cmFindBase()
     "can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
     ""
     "   CMAKE_FRAMEWORK_PATH\n"
+    "   CMAKE_APPBUNDLE_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "2. Search cmake variables with the same names as "
     "the cmake specific environment variables.  These "
@@ -79,6 +84,7 @@ cmFindBase::cmFindBase()
     "is passed.\n"
     ""
     "   CMAKE_FRAMEWORK_PATH\n"
+    "   CMAKE_APPBUNDLE_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "3. Search the standard system environment variables. "
     "This can be skipped if NO_SYSTEM_ENVIRONMENT_PATH is an argument.\n"
@@ -88,6 +94,7 @@ cmFindBase::cmFindBase()
     "for the current system.  This can be skipped if NO_CMAKE_SYSTEM_PATH "
     "is passed.\n"
     "   CMAKE_SYSTEM_FRAMEWORK_PATH\n"
+    "   CMAKE_SYSTEM_APPBUNDLE_PATH\n"
     "   CMAKE_SYSTEM_XXX_PATH\n"
     "5. Search the paths specified after PATHS or in the short-hand version "
     "of the command.\n"
@@ -99,6 +106,14 @@ cmFindBase::cmFindBase()
     "              libraries or headers.\n"
     "   \"ONLY\"   - Only try to find frameworks.\n"
     "   \"NEVER\". - Never try to find frameworks.\n"
+    "On Darwin or systems supporting OSX Application Bundles, the cmake variable"
+    "    CMAKE_FIND_APPBUNDLE can be set to empty or one of the following:\n"
+    "   \"FIRST\"  - Try to find application bundles before standard\n"
+    "              programs. This is the default on Darwin.\n"
+    "   \"LAST\"   - Try to find application bundles after standard\n"
+    "              programs.\n"
+    "   \"ONLY\"   - Only try to find application bundles.\n"
+    "   \"NEVER\". - Never try to find application bundles.\n"
     "The reason the paths listed in the call to the command are searched "
     "last is that most users of CMake would expect things to be found "
     "first in the locations specified by their environment. Projects may "
@@ -140,6 +155,32 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     this->SearchFrameworkLast = true;
     this->SearchFrameworkFirst = false;
     this->SearchFrameworkOnly = false;
+    }
+
+  std::string fab = this->Makefile->GetSafeDefinition("CMAKE_FIND_APPBUNDLE");
+  if(fab == "NEVER")
+    {
+    this->SearchAppBundleLast = false;
+    this->SearchAppBundleFirst = false;
+    this->SearchAppBundleOnly = false;
+    }
+  else if (fab == "ONLY")
+    {
+    this->SearchAppBundleLast = false;
+    this->SearchAppBundleFirst = false;
+    this->SearchAppBundleOnly = true;
+    }
+  else if (fab == "FIRST")
+    {
+    this->SearchAppBundleLast = false;
+    this->SearchAppBundleFirst = true;
+    this->SearchAppBundleOnly = false;
+    }
+  else if (fab == "LAST")
+    {
+    this->SearchAppBundleLast = true;
+    this->SearchAppBundleFirst = false;
+    this->SearchAppBundleOnly = false;
     }
 
   // CMake versions below 2.3 did not search all these extra
@@ -355,27 +396,35 @@ void cmFindBase::ExpandPaths(std::vector<std::string> userPaths)
       {
       this->AddFrameWorkPaths();
       }
-    if(!this->NoCMakeEnvironmentPath && !this->SearchFrameworkOnly)
+    if(this->SearchAppBundleFirst)
+      {
+      this->AddAppBundlePaths();
+      }
+    if(!this->NoCMakeEnvironmentPath && !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
       {
       // Add CMAKE_*_PATH environment variables
       this->AddEnvironmentVairables();
       }
-    if(!this->NoCMakePath && !this->SearchFrameworkOnly)
+    if(!this->NoCMakePath && !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
       {
       // Add CMake varibles of the same name as the previous environment
       // varibles CMAKE_*_PATH to be used most of the time with -D
       // command line options
       this->AddCMakeVairables();
       }
-    if(!this->NoSystemEnvironmentPath && !this->SearchFrameworkOnly)
+    if(!this->NoSystemEnvironmentPath && !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
       {
       // add System environment PATH and (LIB or INCLUDE)
       this->AddSystemEnvironmentVairables();
       }
-    if(!this->NoCMakeSystemPath && !this->SearchFrameworkOnly)
+    if(!this->NoCMakeSystemPath && !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
       {
       // Add CMAKE_SYSTEM_*_PATH variables which are defined in platform files
       this->AddCMakeSystemVariables();
+      }
+    if(this->SearchAppBundleLast)
+      {
+      this->AddAppBundlePaths();
       }
     if(this->SearchFrameworkLast)
       {
@@ -398,6 +447,10 @@ void cmFindBase::AddEnvironmentVairables()
   var += this->CMakePathName;
   var += "_PATH";
   cmSystemTools::GetPath(this->SearchPaths, var.c_str());
+  if(this->SearchAppBundleLast)
+    {
+    cmSystemTools::GetPath(this->SearchPaths, "CMAKE_APPBUNDLE_PATH");
+    }
   if(this->SearchFrameworkLast)
     {
     cmSystemTools::GetPath(this->SearchPaths, "CMAKE_FRAMEWORK_PATH");
@@ -436,6 +489,37 @@ void cmFindBase::AddFrameWorkPaths()
      }
 }
 
+void cmFindBase::AddAppBundlePaths()
+{
+  if(this->NoDefaultPath)
+    {
+    return;
+    }
+  // first environment variables
+  if(!this->NoCMakeEnvironmentPath)
+    {
+    cmSystemTools::GetPath(this->SearchPaths, "CMAKE_APPBUNDLE_PATH");
+    }
+  // add cmake variables
+  if(!this->NoCMakePath)
+    {
+    if(const char* path = 
+       this->Makefile->GetDefinition("CMAKE_APPBUNDLE_PATH"))
+      {
+      cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+      }
+    }
+  // AddCMakeSystemVariables
+   if(!this->NoCMakeSystemPath)
+     {
+     if(const char* path = 
+        this->Makefile->GetDefinition("CMAKE_SYSTEM_APPBUNDLE_PATH"))
+       {
+       cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+       }
+     }
+}
+
 void cmFindBase::AddCMakeVairables()
 { 
   std::string var = "CMAKE_";
@@ -445,6 +529,14 @@ void cmFindBase::AddCMakeVairables()
     {
     cmSystemTools::ExpandListArgument(path, this->SearchPaths);
     } 
+  if(this->SearchAppBundleLast)
+    {
+    if(const char* path = 
+       this->Makefile->GetDefinition("CMAKE_APPBUNDLE_PATH"))
+      {
+      cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+      }
+    }
   if(this->SearchFrameworkLast)
     {
     if(const char* path = 
@@ -475,6 +567,13 @@ void cmFindBase::AddCMakeSystemVariables()
     {
     cmSystemTools::ExpandListArgument(path, this->SearchPaths);
     }  
+  if(this->SearchAppBundleLast)
+    {
+    if(const char* path = this->Makefile->GetDefinition("CMAKE_SYSTEM_APPBUNDLE_PATH"))
+      {
+      cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+      }
+    }
   if(this->SearchFrameworkLast)
     {
     if(const char* path = this->Makefile->GetDefinition("CMAKE_SYSTEM_FRAMEWORK_PATH"))
@@ -528,6 +627,9 @@ void cmFindBase::PrintFindStuff()
   std::cerr << "SearchFrameworkLast: " << this->SearchFrameworkLast << "\n";
   std::cerr << "SearchFrameworkOnly: " << this->SearchFrameworkOnly << "\n";
   std::cerr << "SearchFrameworkFirst: " << this->SearchFrameworkFirst << "\n";
+  std::cerr << "SearchAppBundleLast: " << this->SearchAppBundleLast << "\n";
+  std::cerr << "SearchAppBundleOnly: " << this->SearchAppBundleOnly << "\n";
+  std::cerr << "SearchAppBundleFirst: " << this->SearchAppBundleFirst << "\n";
   std::cerr << "VariableName " << this->VariableName << "\n";
   std::cerr << "VariableDocumentation " << this->VariableDocumentation << "\n";
   std::cerr << "NoDefaultPath " << this->NoDefaultPath << "\n";
