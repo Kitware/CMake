@@ -660,6 +660,11 @@ void cmMakefileTargetGenerator
   commands.clear();
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  std::string emptyCommand = gg->GetEmptyCommandHack();
+  if(!emptyCommand.empty())
+    {
+    commands.push_back(emptyCommand);
+    }
   for(++o; o != outputs.end(); ++o)
     {
     this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,

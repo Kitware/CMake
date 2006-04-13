@@ -23,6 +23,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->FindMakeProgramFile = "CMakeFindWMake.cmake";
   this->ForceUnixPaths = false;
   this->ToolSupportsColorVT100 = false;
+  this->EmptyCommandsHack = "@cd .";
 }
 
 void cmGlobalWatcomWMakeGenerator::EnableLanguage(std::vector<std::string>const& l,
