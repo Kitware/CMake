@@ -96,6 +96,9 @@ public:
   
   /** Clear all previously added sections of help.  */
   void ClearSections();  
+  
+  /** Set cmake root so we can find installed files */
+  void SetCMakeRoot(const char* root)  { this->CMakeRoot = root;}
 private:
   void PrintSection(std::ostream& os,
                     const cmDocumentationEntry* section,
@@ -161,7 +164,7 @@ private:
   std::string SeeAlsoString;
   std::string SingleCommand;
   std::string SingleModuleName;
-
+  std::string CMakeRoot;
   std::vector< char* > ModuleStrings;
   std::vector< const char* > Names;
   std::vector< const cmDocumentationEntry* > Sections;

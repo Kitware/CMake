@@ -217,8 +217,7 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 bool cmDocumentation::CreateModulesSection()
 {
   this->ModulesSection.push_back(cmDocumentationModulesHeader[0]);
-#ifdef CMAKE_ROOT_DIR
-  std::string cmakeModules = CMAKE_ROOT_DIR;
+  std::string cmakeModules = this->CMakeRoot;
   cmakeModules += "/Modules";
   cmsys::Directory dir;
   dir.Load(cmakeModules.c_str());
@@ -237,7 +236,6 @@ bool cmDocumentation::CreateModulesSection()
         }
       }
     } 
-#endif
   cmDocumentationEntry e = { 0, 0, 0 };
   this->ModulesSection.push_back(e);
   return true;
@@ -997,8 +995,7 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
     os << "Argument --help-module needs a module name.\n";
     return false;
     }
-#ifdef CMAKE_ROOT_DIR
-  std::string cmakeModules = CMAKE_ROOT_DIR;
+  std::string cmakeModules = this->CMakeRoot;
   cmakeModules += "/Modules/";
   cmakeModules += this->SingleModuleName;
   cmakeModules += ".cmake";
@@ -1007,12 +1004,13 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
                                  this->SingleModuleName.c_str()))
     {
     this->PrintDocumentationCommand(os, &this->ModulesSection[0]);
+    os <<  "\n       Defined in: ";
+    os << cmakeModules << "\n";
     return true;
     }
   // Argument was not a module.  Complain.
   os << "Argument \"" << this->SingleModuleName.c_str()
      << "\" to --help-module is not a CMake module.";
-#endif
   return false;
 }
 

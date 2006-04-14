@@ -141,9 +141,11 @@ int do_cmake(int ac, char** av)
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   if(doc.CheckOptions(ac, av) || nocwd)
-    {
+    { 
     // Construct and print requested documentation.
     cmake hcm;
+    hcm.AddCMakePaths(av[0]);
+    doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
     std::vector<cmDocumentationEntry> commands;
     std::vector<cmDocumentationEntry> generators;
     hcm.GetCommandDocumentation(commands);
