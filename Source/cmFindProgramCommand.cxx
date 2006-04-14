@@ -114,7 +114,7 @@ std::string cmFindProgramCommand::FindAppBundle(std::vector<std::string> names)
 std::string cmFindProgramCommand::GetBundleExecutable(std::string bundlePath)
 {
   std::string executable = "";
-
+  (void)bundlePath;
 #if defined(__APPLE__)
   // Started with an example on developer.apple.com about finding bundles 
   // and modified from that.
