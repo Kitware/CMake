@@ -852,13 +852,9 @@ bool cmFileCommand::HandleInstallCommand(
           permissions |= mode_world_read;
           }
 
-        // Remove the original file and try copying the new file.
-        // TODO: This should be copy-if-different.  Don't forget to
-        // edit the destination file permissions, or compare files
-        // first.  This would need a new SystemTools::FilesDiffer that
-        // does not read all of the files at once.
-        cmSystemTools::RemoveFile(toFile.c_str());
-        if(!cmSystemTools::CopyFileAlways(fromFile.c_str(), toFile.c_str()))
+        // Copy the file, but only if it has changed.
+        if(!cmSystemTools::CopyFileIfDifferent(fromFile.c_str(),
+                                               toFile.c_str()))
           {
           cmOStringStream e;
           e << "INSTALL cannot copy file \"" << fromFile
