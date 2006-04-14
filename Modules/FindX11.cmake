@@ -6,7 +6,10 @@
 
 IF (UNIX)
   SET(X11_FOUND 0)
-
+  # X11 is never a framework and some header files may be
+  # found in tcl on the mac
+  SET(CMAKE_FIND_FRAMEWORK_SAVE ${CMAKE_FIND_FRAMEWORK})
+  SET(CMAKE_FIND_FRAMEWORK NONE)
   SET(X11_INC_SEARCH_PATH
     /usr/X11R6/include 
     /usr/local/include 
@@ -147,5 +150,5 @@ IF (UNIX)
     X11_Xutil_INCLUDE_PATH
     X11_LIBRARIES
     )
-
+  SET(CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK_SAVE})
 ENDIF (UNIX)
