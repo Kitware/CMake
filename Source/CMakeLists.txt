@@ -222,8 +222,7 @@ ENDIF(UNIX)
 
 # On Apple we need Carbon
 IF(APPLE)
-  FIND_LIBRARY(CARBON Carbon)
-  TARGET_LINK_LIBRARIES(CMakeLib ${CARBON})
+  TARGET_LINK_LIBRARIES(CMakeLib -framework Carbon)
 ENDIF(APPLE)
 
 # On some platforms we need the rpcrt4 library for the VS 7 generators.
