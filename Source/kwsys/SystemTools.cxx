@@ -1419,7 +1419,8 @@ bool SystemTools::CopyFileIfDifferent(const char* source,
   return true;
 }
 
-  
+#define KWSYS_ST_BUFFER 4096
+
 bool SystemTools::FilesDiffer(const char* source,
                                 const char* destination)
 {
@@ -1459,28 +1460,36 @@ bool SystemTools::FilesDiffer(const char* source,
     return true;
     }
 
-  char* source_buf = new char[statSource.st_size];
-  char* dest_buf = new char[statSource.st_size];
-
-  finSource.read(source_buf, statSource.st_size);
-  finDestination.read(dest_buf, statSource.st_size);
-
-  if(statSource.st_size != static_cast<long>(finSource.gcount()) ||
-     statSource.st_size != static_cast<long>(finDestination.gcount()))
+  // Compare the files a block at a time.
+  char source_buf[KWSYS_ST_BUFFER];
+  char dest_buf[KWSYS_ST_BUFFER];
+  long nleft = statSource.st_size;
+  while(nleft > 0)
     {
-    // Failed to read files.
-    delete [] source_buf;
-    delete [] dest_buf;
-    return true;
+    // Read a block from each file.
+    long nnext = (nleft > KWSYS_ST_BUFFER)? KWSYS_ST_BUFFER : nleft;
+    finSource.read(source_buf, nnext);
+    finDestination.read(dest_buf, nnext);
+
+    // If either failed to read assume they are different.
+    if(static_cast<long>(finSource.gcount()) != nnext ||
+       static_cast<long>(finDestination.gcount()) != nnext)
+      {
+      return true;
+      }
+
+    // If this block differs the file differs.
+    if(memcmp((const void*)source_buf, (const void*)dest_buf, nnext) != 0)
+      {
+      return true;
+      }
+
+    // Update the byte count remaining.
+    nleft -= nnext;
     }
-  int ret = memcmp((const void*)source_buf,
-                   (const void*)dest_buf,
-                   statSource.st_size);
 
-  delete [] dest_buf;
-  delete [] source_buf;
-
-  return ret != 0;
+  // No differences found.
+  return false;
 }
 
 
