@@ -252,9 +252,25 @@ int cmCPackGenericGenerator::InstallProject()
       it != cmakeProjectsVector.end();
       ++it )
       {
+      if ( it+1 == cmakeProjectsVector.end() ||
+        it+2 == cmakeProjectsVector.end() ||
+        it+3 == cmakeProjectsVector.end() )
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Not enough items on list: CPACK_INSTALL_CMAKE_PROJECTS. "
+          "CPACK_INSTALL_CMAKE_PROJECTS should hold quadruplet of install "
+          "directory, install project name, install component, and install "
+          "subdirectory."
+          << std::endl);
+        return 0;
+        }
       std::string installDirectory = it->c_str();
       ++it;
       std::string installProjectName = it->c_str();
+      ++it;
+      std::string installComponent = it->c_str();
+      ++it;
+      std::string installSubDirectory = it->c_str();
       std::string installFile = installDirectory + "/cmake_install.cmake";
 
       const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
