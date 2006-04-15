@@ -38,13 +38,9 @@ cmCPackZIPGenerator::~cmCPackZIPGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackZIPGenerator::Initialize(const char* name, cmMakefile* mf)
+int cmCPackZIPGenerator::InitializeInternal()
 {
-  int res = this->Superclass::Initialize(name, mf);
-  if ( !res )
-    {
-    return res;
-    }
+  this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "1");
   std::vector<std::string> path;
   std::string pkgPath = "c:/Program Files/WinZip";
   path.push_back(pkgPath);
@@ -68,7 +64,8 @@ int cmCPackZIPGenerator::Initialize(const char* name, cmMakefile* mf)
     pkgPath = cmSystemTools::FindProgram("zip", path, false);
     if ( pkgPath.empty() )
       {
-      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Cannot find unix ZIP" << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Cannot find unix ZIP"
+        << std::endl);
       }
     else
       {
@@ -83,9 +80,10 @@ int cmCPackZIPGenerator::Initialize(const char* name, cmMakefile* mf)
     return 0;
     }
   this->SetOption("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Found ZIP program: " << pkgPath.c_str()
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Found ZIP program: "
+    << pkgPath.c_str()
     << std::endl);
-  return 1;
+  return this->Superclass::InitializeInternal();
 }
 
 //----------------------------------------------------------------------

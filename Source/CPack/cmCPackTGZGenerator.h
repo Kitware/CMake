@@ -40,6 +40,7 @@ public:
   virtual ~cmCPackTGZGenerator();
 
 protected:
+  virtual int InitializeInternal();
   virtual int GenerateHeader(std::ostream* os);
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);

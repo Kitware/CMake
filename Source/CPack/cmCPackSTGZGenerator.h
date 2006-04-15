@@ -37,6 +37,7 @@ public:
   virtual ~cmCPackSTGZGenerator();
 
 protected:
+  virtual int InitializeInternal();
   int GenerateHeader(std::ostream* os);
   virtual const char* GetOutputExtension() { return "sh"; }
 };

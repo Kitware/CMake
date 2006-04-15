@@ -36,6 +36,13 @@ cmCPackSTGZGenerator::~cmCPackSTGZGenerator()
 }
 
 //----------------------------------------------------------------------
+int cmCPackSTGZGenerator::InitializeInternal()
+{
+  this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "0");
+  return this->Superclass::InitializeInternal();
+}
+
+//----------------------------------------------------------------------
 int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Writing header" << std::endl);

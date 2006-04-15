@@ -115,17 +115,14 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
 }
 
 //----------------------------------------------------------------------
-int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
+int cmCPackNSISGenerator::InitializeInternal()
 {
-  int res = this->Superclass::Initialize(name, mf);
-  if ( !res )
-    {
-    return res;
-    }
   if ( cmSystemTools::IsOn(this->GetOption(
         "CPACK_INCLUDE_TOPLEVEL_DIRECTORY")) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "NSIS Generator cannot work with CPACK_INCLUDE_TOPLEVEL_DIRECTORY. This option will be ignored."
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "NSIS Generator cannot work with CPACK_INCLUDE_TOPLEVEL_DIRECTORY. "
+      "This option will be ignored."
       << std::endl);
     this->SetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", 0);
     }
@@ -222,7 +219,7 @@ int cmCPackNSISGenerator::Initialize(const char* name, cmMakefile* mf)
     this->SetOption("CPACK_NSIS_DELETE_ICONS", deleteStr.str().c_str());
     }
 
-  return res;
+  return this->Superclass::InitializeInternal();
 }
 
 //----------------------------------------------------------------------

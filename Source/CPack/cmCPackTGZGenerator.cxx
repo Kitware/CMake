@@ -179,6 +179,13 @@ int cmCPackTGZ_Data_Close(void *client_data)
 }
 
 //----------------------------------------------------------------------
+int cmCPackTGZGenerator::InitializeInternal()
+{
+  this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "1");
+  return this->Superclass::InitializeInternal();
+}
+
+//----------------------------------------------------------------------
 int cmCPackTGZGenerator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {

@@ -3,6 +3,10 @@ SET(cpack_input_file "${CMAKE_ROOT}/Templates/CPackConfig.cmake.in")
 IF(EXISTS "${CMAKE_SOURCE_DIR}/CPackConfig.cmake.in")
   SET(cpack_input_file "${CMAKE_SOURCE_DIR}/CPackConfig.cmake.in")
 ENDIF(EXISTS "${CMAKE_SOURCE_DIR}/CPackConfig.cmake.in")
+SET(cpack_source_input_file "${CMAKE_ROOT}/Templates/CPackConfig.cmake.in")
+IF(EXISTS "${CMAKE_SOURCE_DIR}/CPackSourceConfig.cmake.in")
+  SET(cpack_source_input_file "${CMAKE_SOURCE_DIR}/CPackSourceConfig.cmake.in")
+ENDIF(EXISTS "${CMAKE_SOURCE_DIR}/CPackSourceConfig.cmake.in")
 
 # Macro for setting values if a user did not overwrite them
 MACRO(cpack_set_if_not_set name value)
@@ -10,6 +14,19 @@ MACRO(cpack_set_if_not_set name value)
     SET(${name} "${value}")
   ENDIF(NOT DEFINED "${name}")
 ENDMACRO(cpack_set_if_not_set)
+
+# Macro to encode variables for the configuration file
+MACRO(cpack_encode_variables)
+  SET(_CPACK_OTHER_VARIABLES_)
+  GET_CMAKE_PROPERTY(res VARIABLES)
+  FOREACH(var ${res})
+    IF("xxx${var}" MATCHES "xxxCPACK")
+      SET(_CPACK_OTHER_VARIABLES_
+        "${_CPACK_OTHER_VARIABLES_}\nSET(${var} \"${${var}}\")")
+    ENDIF("xxx${var}" MATCHES "xxxCPACK")
+  ENDFOREACH(var ${res})
+ENDMACRO(cpack_encode_variables)
+
 
 # Set the package name
 cpack_set_if_not_set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
@@ -61,24 +78,38 @@ IF(NOT CPACK_GENERATOR)
     ELSE(APPLE)
       SET(CPACK_GENERATOR "STGZ")
     ENDIF(APPLE)
+    SET(CPACK_SOURCE_GENERATOR "TGZ")
   ELSE(UNIX)
     SET(CPACK_GENERATOR "NSIS")
+    SET(CPACK_SOURCE_GENERATOR "ZIP")
   ENDIF(UNIX)
 ENDIF(NOT CPACK_GENERATOR)
 
 # Set some other variables
-cpack_set_if_not_set(CPACK_BINARY_DIR "${CMAKE_BINARY_DIR}")
 cpack_set_if_not_set(CPACK_INSTALL_CMAKE_PROJECTS
   "${CMAKE_BINARY_DIR};${CMAKE_PROJECT_NAME};ALL;/")
 cpack_set_if_not_set(CPACK_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
+cpack_set_if_not_set(CPACK_TOPLEVEL_TAG "${CMAKE_SYSTEM_NAME}")
 
-SET(_CPACK_UNUSED_VARIABLES_)
-GET_CMAKE_PROPERTY(res VARIABLES)
-FOREACH(var ${res})
-  IF("xxx${var}" MATCHES "xxxCPACK")
-    SET(_CPACK_OTHER_VARIABLES_
-      "${_CPACK_OTHER_VARIABLES_}\nSET(${var} \"${${var}}\")")
-  ENDIF("xxx${var}" MATCHES "xxxCPACK")
-ENDFOREACH(var ${res})
+cpack_encode_variables()
+CONFIGURE_FILE("${cpack_input_file}"
+  "${CMAKE_BINARY_DIR}/CPackConfig.cmake" @ONLY IMMEDIATE)
 
-CONFIGURE_FILE("${cpack_input_file}" "${CMAKE_BINARY_DIR}/CPackConfig.cmake" @ONLY IMMEDIATE)
+# Generate source file
+cpack_set_if_not_set(CPACK_SOURCE_INSTALLED_DIRECTORIES
+  "${CMAKE_SOURCE_DIR};/")
+cpack_set_if_not_set(CPACK_SOURCE_TOPLEVEL_TAG "${CMAKE_SYSTEM_NAME}-Source")
+cpack_set_if_not_set(CPACK_SOURCE_PACKAGE_FILE_NAME
+  "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-Source")
+cpack_set_if_not_set(CPACK_SOURCE_IGNORE_FILES
+  "/CVS/;/\\\\\\\\.svn/;\\\\\\\\.swp$;\\\\\\\\.#")
+SET(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_SOURCE_INSTALL_CMAKE_PROJECTS}")
+SET(CPACK_INSTALLED_DIRECTORIES "${CPACK_SOURCE_INSTALLED_DIRECTORIES}")
+SET(CPACK_GENERATOR "${CPACK_SOURCE_GENERATOR}")
+SET(CPACK_TOPLEVEL_TAG "${CPACK_SOURCE_TOPLEVEL_TAG}")
+SET(CPACK_PACKAGE_FILE_NAME "${CPACK_SOURCE_PACKAGE_FILE_NAME}")
+SET(CPACK_IGNORE_FILES "${CPACK_SOURCE_IGNORE_FILES}")
+
+cpack_encode_variables()
+CONFIGURE_FILE("${cpack_source_input_file}"
+  "${CMAKE_BINARY_DIR}/CPackSourceConfig.cmake" @ONLY IMMEDIATE)

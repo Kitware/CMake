@@ -32,17 +32,13 @@ public:
   cmCPackTypeMacro(cmCPackNSISGenerator, cmCPackGenericGenerator);
 
   /**
-   * Initialize generator
-   */
-  virtual int Initialize(const char* name, cmMakefile* mf);
-
-  /**
    * Construct generator
    */
   cmCPackNSISGenerator();
   virtual ~cmCPackNSISGenerator();
 
 protected:
+  virtual int InitializeInternal();
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
   virtual const char* GetOutputExtension() { return "exe"; }

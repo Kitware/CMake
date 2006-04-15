@@ -137,13 +137,8 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
 }
 
 //----------------------------------------------------------------------
-int cmCPackPackageMakerGenerator::Initialize(const char* name, cmMakefile* mf)
+int cmCPackPackageMakerGenerator::InitializeInternal()
 {
-  int res = this->Superclass::Initialize(name, mf);
-  if ( !res )
-    {
-    return res;
-    }
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
     "cmCPackPackageMakerGenerator::Initialize()" << std::endl);
   std::vector<std::string> path;
@@ -228,7 +223,7 @@ int cmCPackPackageMakerGenerator::Initialize(const char* name, cmMakefile* mf)
     }
   this->SetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", pkgPath.c_str());
 
-  return res;
+  return this->Superclass::InitializeInternal();
 }
 
 //----------------------------------------------------------------------
