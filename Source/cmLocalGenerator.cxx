@@ -458,6 +458,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
                                                       cmTarget& )
 { 
   std::string objectDir = cmSystemTools::GetFilenamePath(std::string(ofname));
+  objectDir = this->Convert(objectDir.c_str(),START_OUTPUT,SHELL);
   std::string objectFile = this->Convert(ofname,START_OUTPUT,SHELL);
   std::string sourceFile = 
     this->Convert(source.GetFullPath().c_str(),START_OUTPUT,SHELL,true);
@@ -570,10 +571,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   cmLocalGenerator::RuleVariables vars;
   vars.Language = llang;
   vars.Objects = objs.c_str();
-  std::string objdir = "CMakeFiles/";
-  objdir += targetName;
-  objdir += ".dir";
-  vars.ObjectDir = objdir.c_str();
+  vars.ObjectDir = ".";
   vars.Target = targetName.c_str();
   vars.LinkLibraries = linkLibs.c_str();
   vars.Flags = flags.c_str();
