@@ -389,6 +389,12 @@ cmMakefileTargetGenerator
   vars.Language = lang;
   vars.Source = sourceFile.c_str();
   vars.Object = relativeObj.c_str();
+  std::string objdir = this->LocalGenerator->GetHomeRelativeOutputPath();
+  objdir = this->Convert(objdir.c_str(), 
+                         cmLocalGenerator::START_OUTPUT,
+                         cmLocalGenerator::SHELL);
+  std::string objectDir = cmSystemTools::GetFilenamePath(obj);
+  vars.ObjectDir = objectDir.c_str();
   vars.Flags = flags.c_str();
   
   // Expand placeholders in the commands.

@@ -185,6 +185,7 @@ public:
         this->LinkLibraries= 0;
         this->Source= 0;
         this->Object= 0;
+        this->ObjectDir= 0;
         this->Flags= 0;
         this->ObjectsQuoted= 0;
         this->TargetSOName= 0;
@@ -197,6 +198,7 @@ public:
     const char* LinkLibraries;
     const char* Source;
     const char* Object;
+    const char* ObjectDir;
     const char* Flags;
     const char* ObjectsQuoted;
     const char* TargetSOName;

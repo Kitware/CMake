@@ -404,6 +404,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   cmLocalGenerator::RuleVariables vars;
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
+  std::string objdir = "CMakeFiles/";
+  objdir += this->Target->GetName();
+  objdir += ".dir";
+  vars.ObjectDir = objdir.c_str(); 
   vars.Target = targetOutPathReal.c_str();
   std::string linkString = linklibs.str();
   vars.LinkLibraries = linkString.c_str();

@@ -457,6 +457,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
                                                       cmSourceFile& source,
                                                       cmTarget& )
 { 
+  std::string objectDir = cmSystemTools::GetFilenamePath(std::string(ofname));
   std::string objectFile = this->Convert(ofname,START_OUTPUT,SHELL);
   std::string sourceFile = 
     this->Convert(source.GetFullPath().c_str(),START_OUTPUT,SHELL,true);
@@ -481,6 +482,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   vars.Language = lang;
   vars.Source = sourceFile.c_str();
   vars.Object = objectFile.c_str();
+  vars.ObjectDir = objectDir.c_str();
   vars.Flags = flags.c_str();
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
@@ -568,6 +570,10 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   cmLocalGenerator::RuleVariables vars;
   vars.Language = llang;
   vars.Objects = objs.c_str();
+  std::string objdir = "CMakeFiles/";
+  objdir += targetName;
+  objdir += ".dir";
+  vars.ObjectDir = objdir.c_str();
   vars.Target = targetName.c_str();
   vars.LinkLibraries = linkLibs.c_str();
   vars.Flags = flags.c_str();
@@ -583,7 +589,6 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
     {
     // Expand the full command line string.
     this->ExpandRuleVariables(*i, vars);
-
     // Parse the string to get the custom command line.
     cmCustomCommandLine commandLine;
     std::vector<cmStdString> cmd = cmSystemTools::ParseArguments(i->c_str());
@@ -708,6 +713,13 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
     if(variable == "OBJECT")
       {
       return replaceValues.Object;
+      }
+    }
+  if(replaceValues.ObjectDir)
+    {
+    if(variable == "OBJECT_DIR")
+      {
+      return replaceValues.ObjectDir;
       }
     }
   if(replaceValues.Objects)
