@@ -20,7 +20,8 @@ SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared
 LINK_LIBRARIES(${COMPLEX_LIBS})
 
 ADD_EXECUTABLE(A A.cxx)
-ADD_EXECUTABLE(complex complex testcflags.c)
+ADD_EXECUTABLE(complex complex testcflags.c 
+  Sub1/NameConflictTest.c Sub2/NameConflictTest.c)
 ADD_EXECUTABLE(complex.file complex.file.cxx)
 IF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
   TARGET_LINK_LIBRARIES(complex CMakeLib cmsys cmexpat cmzlib cmtar)
