@@ -290,10 +290,12 @@ void ForceStringUse()
 extern "C" int TestCFlags(char* m);
 extern "C" int TestTargetCompileFlags(char* m);
 
+#if 0
 // defined in  Sub1/NameConflictTest.c
 extern "C" int NameConflictTest1();
 // defined in  Sub2/NameConflictTest.c
 extern "C" int NameConflictTest2();
+#endif
 
 // ======================================================================
 
@@ -400,6 +402,7 @@ int main()
     cmFailed("cmSystemTools::UpperCase is working");
     }    
 #endif
+#if 0
   if(NameConflictTest1() == 0 && NameConflictTest2() == 0)
     {
     cmPassed("Sub dir with same named source works");
@@ -408,6 +411,7 @@ int main()
     {
     cmFailed("Sub dir with same named source fails");
     }
+#endif
   if(file1() != 1)
     {
     cmFailed("Call to file1 function from library failed.");
