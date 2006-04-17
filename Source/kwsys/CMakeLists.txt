@@ -515,6 +515,11 @@ ENDFOREACH(h)
 IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
   ADD_LIBRARY(${KWSYS_NAMESPACE} ${KWSYS_LIBRARY_TYPE}
     ${KWSYS_C_SRCS} ${KWSYS_CXX_SRCS})
+  IF(KWSYS_USE_DynamicLoader)
+    IF(UNIX)
+      TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ${CMAKE_DL_LIBS})
+    ENDIF(UNIX)
+  ENDIF(KWSYS_USE_DynamicLoader)
 
   # Apply user-defined target properties to the library.
   IF(KWSYS_PROPERTIES_CXX)
@@ -611,9 +616,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
         )
       # If kwsys contains the DynamicLoader, need extra library
       ADD_LIBRARY(testDynload MODULE testDynload.c)
-      IF(UNIX)
-        TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ${CMAKE_DL_LIBS})
-      ENDIF(UNIX)
     ENDIF(KWSYS_USE_DynamicLoader)
     FOREACH(test
         testSystemTools
