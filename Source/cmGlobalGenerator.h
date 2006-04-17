@@ -185,6 +185,7 @@ public:
   virtual const char* GetPreinstallTargetName()   { return 0; }
   virtual const char* GetTestTargetName()         { return "RUN_TESTS"; }
   virtual const char* GetPackageTargetName()      { return "PACKAGE"; }
+  virtual const char* GetPackageSourceTargetName(){ return 0; }
   virtual const char* GetEditCacheTargetName()    { return 0; }
   virtual const char* GetRebuildCacheTargetName() { return 0; }
 

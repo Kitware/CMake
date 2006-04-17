@@ -144,6 +144,7 @@ protected:
   virtual const char* GetPreinstallTargetName()   { return "preinstall"; }
   virtual const char* GetTestTargetName()         { return "test"; }
   virtual const char* GetPackageTargetName()      { return "package"; }
+  virtual const char* GetPackageSourceTargetName(){ return "package_source"; }
   virtual const char* GetEditCacheTargetName()    { return "edit_cache"; }
   virtual const char* GetRebuildCacheTargetName() { return "rebuild_cache"; }
 
