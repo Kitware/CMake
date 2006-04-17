@@ -973,7 +973,8 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   this->WriteVCProjFooter(fout);
 }
 
-void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget target, std::ostream &fout, const char *libName, std::vector<std::string> *configs)
+void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget target, 
+                                               std::ostream &fout, const char *libName, std::vector<std::string> *configs)
 {
   const std::vector<const cmSourceFile *> &sourceFiles =
     sg->GetSourceFiles();
@@ -991,6 +992,7 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
     }
 
   // Loop through each source in the source group.
+  std::string sourceName;
   for(std::vector<const cmSourceFile *>::const_iterator sf =
         sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
     {
@@ -998,6 +1000,16 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
     const cmCustomCommand *command = (*sf)->GetCustomCommand();
     std::string compileFlags;
     std::string additionalDeps;
+    sourceName = (*sf)->GetSourceName();
+    if(sourceName.find("/") != sourceName.npos)
+      {
+      cmSystemTools::ReplaceString(sourceName, "/", "_");
+      sourceName += ".obj";
+      }
+    else
+      {
+      sourceName = "";
+      }
 
     // Add per-source flags.
     const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
@@ -1049,7 +1061,7 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
                               comment.c_str(), command->GetDepends(),
                               command->GetOutputs(), flags);
         }
-      else if(compileFlags.size() || additionalDeps.length())
+      else if(compileFlags.size() || additionalDeps.length() || sourceName.size())
         {
         const char* aCompilerTool = "VCCLCompilerTool";
         std::string ext = (*sf)->GetSourceExtension();
@@ -1082,6 +1094,11 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
             {
             fout << "\t\t\t\t\tAdditionalDependencies=\""
                  << additionalDeps.c_str() << "\"\n";
+            }
+          if(sourceName.size())
+            {
+            fout << "\t\t\t\t\tObjectFile=\"$(IntDir)/"
+                 << sourceName.c_str() << "\"\n";
             }
           fout << "\t\t\t\t\t/>\n"
                << "\t\t\t\t</FileConfiguration>\n";
