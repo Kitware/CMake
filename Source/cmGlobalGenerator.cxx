@@ -1313,19 +1313,23 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     = this->CreateGlobalTarget(this->GetPackageTargetName(),
       "Run CPack packaging tool...", &cpackCommandLines, depends);
 
-  // CPack
-  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
-  singleLine.erase(singleLine.begin(), singleLine.end());
-  depends.erase(depends.begin(), depends.end());
-  singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
-  singleLine.push_back("--config");
-  configFile = mf->GetStartOutputDirectory();;
-  configFile += "/CPackSourceConfig.cmake";
-  singleLine.push_back(configFile);
-  cpackCommandLines.push_back(singleLine);
-  (*targets)[this->GetPackageSourceTargetName()]
-    = this->CreateGlobalTarget(this->GetPackageSourceTargetName(),
-      "Run CPack packaging tool for source...", &cpackCommandLines, depends);
+  // CPack source
+  const char* packageSourceTargetName = this->GetPackageSourceTargetName();
+  if ( packageSourceTargetName )
+    {
+    cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+    singleLine.erase(singleLine.begin(), singleLine.end());
+    depends.erase(depends.begin(), depends.end());
+    singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
+    singleLine.push_back("--config");
+    configFile = mf->GetStartOutputDirectory();;
+    configFile += "/CPackSourceConfig.cmake";
+    singleLine.push_back(configFile);
+    cpackCommandLines.push_back(singleLine);
+    (*targets)[packageSourceTargetName]
+      = this->CreateGlobalTarget(packageSourceTargetName,
+        "Run CPack packaging tool for source...", &cpackCommandLines, depends);
+    }
 
   // Test
   if(mf->IsOn("CMAKE_TESTING_ENABLED"))
