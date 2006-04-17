@@ -225,7 +225,7 @@ cmake_version()
   else
     CMAKE_VERSION=`echo $CMAKE_VERSION | sed "s/\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)/\1.\2-\3/"`
   fi
-  echo "CMake ${CMAKE_VERSION}, Copyright (c) 2002 Kitware, Inc., Insight Consortium"
+  echo "CMake ${CMAKE_VERSION}, Copyright (c) 2006 Kitware, Inc., Insight Consortium"
 }
 
 # Display CMake bootstrap error, display the log file and exit
