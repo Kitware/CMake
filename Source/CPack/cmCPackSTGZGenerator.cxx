@@ -24,8 +24,6 @@
 #include "cmMakefile.h"
 #include "cmCPackLog.h"
 
-#include "CPack/cmCPackSTGZGeneratorEncodedHeader.h"
-
 #include <cmsys/ios/sstream>
 #include <sys/types.h>
 #include <sys/stat.h>
