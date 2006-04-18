@@ -649,7 +649,6 @@ bool cmFileCommand::HandleInstallCommand(
 
   // If permissions were not specified set default permissions for
   // this target type.
-  bool use_source_permissions = false;
   if(!use_given_permissions)
     {
     switch(itype)
@@ -658,7 +657,6 @@ bool cmFileCommand::HandleInstallCommand(
       case cmTarget::MODULE_LIBRARY:
 #if defined(__linux__)
         // Use read/write permissions.
-        use_given_permissions = true;
         permissions = 0;
         permissions |= mode_owner_read;
         permissions |= mode_owner_write;
@@ -669,7 +667,6 @@ bool cmFileCommand::HandleInstallCommand(
       case cmTarget::EXECUTABLE:
       case cmTarget::INSTALL_PROGRAMS:
         // Use read/write/executable permissions.
-        use_given_permissions = true;
         permissions = 0;
         permissions |= mode_owner_read;
         permissions |= mode_owner_write;
@@ -680,8 +677,12 @@ bool cmFileCommand::HandleInstallCommand(
         permissions |= mode_world_execute;
         break;
       default:
-        // Use the permissions of the file being copied.
-        use_source_permissions = true;
+        // Use read/write permissions.
+        permissions = 0;
+        permissions |= mode_owner_read;
+        permissions |= mode_owner_write;
+        permissions |= mode_group_read;
+        permissions |= mode_world_read;
         break;
       }
     }
@@ -839,20 +840,6 @@ bool cmFileCommand::HandleInstallCommand(
         message = "Installing ";
         message += toFile.c_str();
         this->Makefile->DisplayStatus(message.c_str(), -1);
-
-        // If no permissions were already given use the permissions of
-        // the file being copied.
-        if(!use_given_permissions &&
-           (!use_source_permissions ||
-            !cmSystemTools::GetPermissions(fromFile.c_str(), permissions)))
-          {
-          // Set default permissions.
-          permissions = 0;
-          permissions |= mode_owner_read;
-          permissions |= mode_owner_write;
-          permissions |= mode_group_read;
-          permissions |= mode_world_read;
-          }
 
         // Copy the file, but only if it has changed.
         if(!cmSystemTools::CopyFileIfDifferent(fromFile.c_str(),
