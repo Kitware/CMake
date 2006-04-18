@@ -26,7 +26,7 @@ IF(STAGE2)
     ${CMAKE_INSTALL_PREFIX}/MyTest/lib/static
     ${CMAKE_INSTALL_PREFIX}/MyTest/lib
     )
-  SET(t1NAMES test1 test1${CMAKE_DEBUG_POSTFIX})
+  SET(t1NAMES test1 test1${CMAKE_DEBUG_POSTFIX} test1rel)
   SET(t2NAMES test2 test2${CMAKE_DEBUG_POSTFIX})
   SET(t4NAMES test4 test4${CMAKE_DEBUG_POSTFIX})
 
@@ -91,6 +91,9 @@ ELSE(STAGE2)
   # Make sure the test executable can run from the install tree.
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
+
+  # Test per-configuration output name.
+  SET_TARGET_PROPERTIES(test1 PROPERTIES RELEASE_OUTPUT_NAME test1rel)
 
   IF(CMAKE_GENERATOR MATCHES "Makefiles")
     ADD_SUBDIRECTORY(TestSubDir)

@@ -1013,30 +1013,13 @@ void cmLocalVisualStudio6Generator
         }      
       }
     }
-  std::string outputName = "(OUTPUT_NAME is for executables only)";
+
+  // Get extra linker options for this target type.
   std::string extraLinkOptions;
-  // TODO: Fix construction of library/executable name through
-  // cmTarget.  OUTPUT_LIBNAMEDEBUG_POSTFIX should be replaced by the
-  // library's debug configuration name.  OUTPUT_LIBNAME should be
-  // replaced by the non-debug configuration name.  This generator
-  // should just be re-written to not use template files and just
-  // generate the code.  Setting up these substitutions is a pain.
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
     extraLinkOptions = 
       this->Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
-
-    // Use the OUTPUT_NAME property if it was set.  This is supported
-    // only for executables.
-    if(const char* outName = target.GetProperty("OUTPUT_NAME"))
-      {
-      outputName = outName;
-      }
-    else
-      {
-      outputName = target.GetName();
-      }
-    outputName += ".exe";
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
@@ -1045,6 +1028,24 @@ void cmLocalVisualStudio6Generator
   if(target.GetType() == cmTarget::MODULE_LIBRARY)
     {
     extraLinkOptions = this->Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    }
+
+  // Compute the real name of the target.
+  std::string outputName = "(OUTPUT_NAME is for libraries and executables only)";
+  std::string outputNameDebug = outputName;
+  std::string outputNameRelease = outputName;
+  std::string outputNameMinSizeRel = outputName;
+  std::string outputNameRelWithDebInfo = outputName;
+  if(target.GetType() == cmTarget::EXECUTABLE ||
+     target.GetType() == cmTarget::STATIC_LIBRARY ||
+     target.GetType() == cmTarget::SHARED_LIBRARY ||
+     target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    outputName = target.GetFullName();
+    outputNameDebug = target.GetFullName("Debug");
+    outputNameRelease = target.GetFullName("Release");
+    outputNameMinSizeRel = target.GetFullName("MinSizeRel");
+    outputNameRelWithDebInfo = target.GetFullName("RelWithDebInfo");
     }
 
   if(extraLinkOptions.size())
@@ -1174,9 +1175,11 @@ void cmLocalVisualStudio6Generator
     cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIMIZED_LIBRARIES",
                                  libMultiLineOptimizedOptions.c_str());
 
-    // Replace the template file text OUTPUT_NAME with the real output
-    // name that will be used.  Only the executable template should
-    // have this text.
+    // Substitute the real output name into the template.
+    cmSystemTools::ReplaceString(line, "OUTPUT_NAME_DEBUG", outputNameDebug.c_str());
+    cmSystemTools::ReplaceString(line, "OUTPUT_NAME_RELEASE", outputNameRelease.c_str());
+    cmSystemTools::ReplaceString(line, "OUTPUT_NAME_MINSIZEREL", outputNameMinSizeRel.c_str());
+    cmSystemTools::ReplaceString(line, "OUTPUT_NAME_RELWITHDEBINFO", outputNameRelWithDebInfo.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_NAME", outputName.c_str());
 
     cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
