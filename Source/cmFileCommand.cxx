@@ -108,7 +108,9 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
     }
   if ( !this->Makefile->CanIWriteThisFile(fileName.c_str()) )
     {
-    std::string e = "attempted to write a file: " + fileName + " into a source directory.";
+    std::string e
+      = "attempted to write a file: " + fileName +
+      " into a source directory.";
     this->SetError(e.c_str());
     cmSystemTools::SetFatalErrorOccured();
     return false;

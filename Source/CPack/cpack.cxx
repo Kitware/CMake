@@ -338,11 +338,7 @@ int main (int argc, char *argv[])
           << generator.c_str() << std::endl);
         parsed = 0;
         }
-      if ( parsed && !cpackGenerator->Initialize(gen, mf) )
-        {
-        parsed = 0;
-        }
-      if ( parsed && !cpackGenerator->FindRunningCMake(argv[0]) )
+      if ( parsed && !cpackGenerator->Initialize(gen, mf, argv[0]) )
         {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
           "Cannot initialize the generator" << std::endl);

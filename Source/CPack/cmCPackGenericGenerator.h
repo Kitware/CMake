@@ -68,7 +68,7 @@ public:
   /**
    * Initialize generator
    */
-  int Initialize(const char* name, cmMakefile* mf);
+  int Initialize(const char* name, cmMakefile* mf, const char* argv0);
 
   /**
    * Construct generator
@@ -100,6 +100,7 @@ protected:
 
   virtual std::string FindTemplate(const char* name);
   virtual bool ConfigureFile(const char* inName, const char* outName);
+  virtual bool ConfigureString(const std::string& input, std::string& output);
   virtual int InitializeInternal();
 
   bool GeneratorVerbose;

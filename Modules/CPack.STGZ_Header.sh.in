@@ -1,0 +1,89 @@
+#!/bin/sh
+
+# Display usage
+cpack_usage()
+{
+  cat <<EOF
+Usage: $0 [options]
+Options: [defaults in brackets after descriptions]
+  --help            print this message
+  --prefix=dir      directory in which to install
+  --include-subdir  include the @CPACK_PACKAGE_FILE_NAME@ subdirectory
+  --exclude-subdir  exclude the @CPACK_PACKAGE_FILE_NAME@ subdirectory
+EOF
+  exit 1
+}
+
+# Display version
+cpack_version()
+{
+  echo "@CPACK_PACKAGE_NAME@ Installer Version: @CPACK_PACKAGE_VERSION@, Copyright (c) @CPACK_PACKAGE_VENDOR@"
+}
+
+# Helper function to fix windows paths.
+cpack_fix_slashes ()
+{
+  echo "$1" | sed 's/\\/\//g'
+}
+
+
+for a in "$@CPACK_AT_SIGN@"; do
+  if echo $a | grep "^--prefix=" > /dev/null 2> /dev/null; then
+    cpack_prefix_dir=`echo $a | sed "s/^--prefix=//"`
+    cpack_prefix_dir=`cpack_fix_slashes "${cpack_prefix_dir}"`
+  fi
+  if echo $a | grep "^--help" > /dev/null 2> /dev/null; then
+    cpack_usage 
+  fi
+  if echo $a | grep "^--version" > /dev/null 2> /dev/null; then
+    cpack_version 
+    exit 2
+  fi
+  if echo $a | grep "^--include-subdir" > /dev/null 2> /dev/null; then
+    cpack_include_subdir=TRUE
+  fi
+  if echo $a | grep "^--exclude-subdir" > /dev/null 2> /dev/null; then
+    cpack_include_subdir=FALSE
+  fi
+done
+
+cpack_version
+echo "This is a self-extracting archive."
+toplevel="`pwd`"
+if [ "x${cpack_prefix_dir}x" != "xx" ]
+then
+  toplevel="${cpack_prefix_dir}"
+fi
+
+echo "The archive will be extracted to: ${toplevel}"
+echo ""
+
+if [ "x${cpack_include_subdir}x" == "xx" ]
+then
+  echo "If you want to stop extracting, please press <ctrl-C>."
+  echo "Include the subdirectory @CPACK_PACKAGE_FILE_NAME@" [Yn]: 
+  read line
+  if [ "x${line}x" != "xnx" -a "x${line}x" != "xNx" ]
+  then
+    cpack_include_subdir=TRUE
+  fi
+fi
+
+if [ "x${cpack_include_subdir}x" == "xTRUEx" ]
+then
+  toplevel="${toplevel}/@CPACK_PACKAGE_FILE_NAME@"
+  mkdir -p "${toplevel}"
+fi
+echo "Extracting... Please wait..."
+echo ""
+
+# take the archive portion of this file and pipe it to tar
+# the NUMERIC parameter in this command should be one more
+# than the number of lines in this header file
+tail -n +###CPACK_HEADER_LENGTH### "$0" | gunzip | (cd "${toplevel}" && tar xf -)
+
+exit 0
+#-----------------------------------------------------------
+#      Start of TAR.GZ file
+#-----------------------------------------------------------;
+

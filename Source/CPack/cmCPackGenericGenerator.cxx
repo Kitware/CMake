@@ -532,10 +532,17 @@ int cmCPackGenericGenerator::ProcessGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::Initialize(const char* name, cmMakefile* mf)
+int cmCPackGenericGenerator::Initialize(const char* name, cmMakefile* mf,
+ const char* argv0)
 {
   this->MakefileMap = mf;
   this->Name = name;
+  if ( !this->FindRunningCMake(argv0) )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Cannot initialize the generator" << std::endl);
+    return 0;
+    }
   return this->InitializeInternal();
 }
 
@@ -759,6 +766,15 @@ std::string cmCPackGenericGenerator::FindTemplate(const char* name)
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Found template: "
     << ffile.c_str() << std::endl);
   return ffile;
+}
+
+//----------------------------------------------------------------------
+bool cmCPackGenericGenerator::ConfigureString(const std::string& inString,
+  std::string& outString)
+{
+  this->MakefileMap->ConfigureString(inString,
+    outString, true, false);
+  return true;
 }
 
 //----------------------------------------------------------------------

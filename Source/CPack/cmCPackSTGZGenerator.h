@@ -37,6 +37,8 @@ public:
   virtual ~cmCPackSTGZGenerator();
 
 protected:
+  int CompressFiles(const char* outFileName, const char* toplevel,
+    const std::vector<std::string>& files);
   virtual int InitializeInternal();
   int GenerateHeader(std::ostream* os);
   virtual const char* GetOutputExtension() { return "sh"; }
