@@ -1199,9 +1199,20 @@ void cmTarget::GetFullNameInternal(TargetType type,
   outPrefix = targetPrefix?targetPrefix:"";
 
   // Append the target name or property-specified name.
-  if(const char* outname = this->GetProperty("OUTPUT_NAME"))
+  const char* outName = 0;
+  if(config && *config)
     {
-    outBase = outname;
+    std::string configProp = cmSystemTools::UpperCase(config);
+    configProp += "_OUTPUT_NAME";
+    outName = this->GetProperty(configProp.c_str());
+    }
+  if(!outName)
+    {
+    outName = this->GetProperty("OUTPUT_NAME");
+    }
+  if(outName)
+    {
+    outBase = outName;
     }
   else
     {
