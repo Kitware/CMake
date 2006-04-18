@@ -137,7 +137,7 @@ int cmCPackGenericGenerator::InstallProject()
       it != ignoreFilesRegexString.end();
       ++it )
       {
-      cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
         "Create ignore files regex for: " << it->c_str() << std::endl);
       ignoreFilesRegex.push_back(it->c_str());
       }
@@ -247,7 +247,7 @@ int cmCPackGenericGenerator::InstallProject()
           {
           if ( regIt->find(inFile.c_str()) )
             {
-            cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Ignore file: "
+            cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Ignore file: "
               << inFile.c_str() << std::endl);
             skip = true;
             }

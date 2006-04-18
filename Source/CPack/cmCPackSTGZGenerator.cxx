@@ -111,7 +111,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
     ++ptr;
     }
   counter ++;
-  cmCPackLogger(cmCPackLog::LOG_ERROR, "Counter: " << counter << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Number of lines: " << counter << std::endl);
   char buffer[1024];
   sprintf(buffer, "%d", counter);
   cmSystemTools::ReplaceString(res, headerLengthTag, buffer);
