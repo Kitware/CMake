@@ -1224,10 +1224,10 @@ void cmLocalVisualStudio6Generator
       std::string baseFlagVar = "CMAKE_";
       baseFlagVar += linkLanguage;
       baseFlagVar += "_FLAGS";
-      flags = this->Makefile->GetRequiredDefinition(baseFlagVar.c_str());
+      flags = this->Makefile->GetSafeDefinition(baseFlagVar.c_str());
       
       std::string flagVar = baseFlagVar + "_RELEASE";
-      flagsRelease = this->Makefile->GetRequiredDefinition(flagVar.c_str());
+      flagsRelease = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
       if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_RELEASE"))
         {
@@ -1235,7 +1235,7 @@ void cmLocalVisualStudio6Generator
         flagsRelease += " ";
         }
       flagVar = baseFlagVar + "_MINSIZEREL";
-      flagsMinSize = this->Makefile->GetRequiredDefinition(flagVar.c_str());
+      flagsMinSize = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
       if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_MINSIZEREL"))
         {
@@ -1244,7 +1244,7 @@ void cmLocalVisualStudio6Generator
         }
       
       flagVar = baseFlagVar + "_DEBUG";
-      flagsDebug = this->Makefile->GetRequiredDefinition(flagVar.c_str());
+      flagsDebug = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
       if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_DEBUG"))
         {
@@ -1253,7 +1253,7 @@ void cmLocalVisualStudio6Generator
         }
 
       flagVar = baseFlagVar + "_RELWITHDEBINFO";
-      flagsDebugRel = this->Makefile->GetRequiredDefinition(flagVar.c_str());
+      flagsDebugRel = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
       if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_RELWITHDEBINFO"))
         {
