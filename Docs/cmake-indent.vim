@@ -2,16 +2,9 @@
 " 
 "   Program:   CMake - Cross-Platform Makefile Generator
 "   Module:    $RCSfile$
-"   Language:  C++
+"   Language:  VIM
 "   Date:      $Date$
 "   Version:   $Revision$
-" 
-"   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-"   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-" 
-"      This software is distributed WITHOUT ANY WARRANTY"  without even 
-"      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-"      PURPOSE.  See the above copyright notices for more information.
 " 
 " =============================================================================
 
@@ -21,10 +14,10 @@
 " Maintainer:   Andy Cedilnik <andy.cedilnik@kitware.com>
 " Last Change:  $Date$
 " Version:      $Revision$
-" 
-" Licence:      This program is free software; you can redistribute it
-"               and/or modify it under the terms of the CMake
-"               License. See http://www.cmake.org/HTML/Copyright.html
+"
+" Licence:      The CMake license applies to this file. See
+"               http://www.cmake.org/HTML/Copyright.html
+"               This implies that distribution with Vim is allowed
 
 if exists("b:did_indent")
   finish
