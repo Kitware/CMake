@@ -831,6 +831,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
         if((t->second.GetType() == cmTarget::EXECUTABLE) ||
            (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
            (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+           (t->second.GetType() == cmTarget::GLOBAL_TARGET) ||
            (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
            (t->second.GetType() == cmTarget::UTILITY))
           {
