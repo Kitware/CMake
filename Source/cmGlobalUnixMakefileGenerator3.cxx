@@ -808,8 +808,6 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
   lg->AppendEcho(commands,"... all (the default if no target is provided)");
   lg->AppendEcho(commands,"... clean");
   lg->AppendEcho(commands,"... depend");
-  lg->AppendEcho(commands,"... install");
-  lg->AppendEcho(commands,"... rebuild_cache");
   
   // Keep track of targets already listed.
   std::set<cmStdString> emittedTargets;
@@ -832,6 +830,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
            (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
            (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
            (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+           (t->second.GetType() == cmTarget::GLOBAL_TARGET) ||
            (t->second.GetType() == cmTarget::UTILITY))
           {
           if(emittedTargets.insert(t->second.GetName()).second)
