@@ -1,11 +1,37 @@
 1. Update Version information
   - change version in CMakeLists.txt
-  - build on windows, and do a make; make install; make release // this step tags 
+  - build release on windows, and do a make; make install; make release // this step tags 
     - this changes cmake_release.sh
+      -winzip command line, nullsoft installer
+
   * for major release edit   Source/cmCPluginAPI.h 
+
+2. UNIX builds:
+  Log into hythloth as kingb.
+  cd ~kingb/Programs/releases/CMake/Utilities/Release
+# build the binaries
+  ./release_dispatch.sh clean
+  ./release_dispatch.sh binary
+  ./release_dispatch.sh logs
+# build a second sgi for 64 bit
+  ./cmake_release.sh remote_binary dashsgi1
+# now build source tar ball
+  ./cmake_release.sh remote_source localhost
+# not upload the whole thing to public
+  ./cmake_release.sh upload
+
+
+3. Cygwin build:
+  Checkout release branch.
+  cd Utilities/Release
+  ./cmake_release.sh  cygwin_package
+  ./cmake_release.sh cygwin_upload
+  (now you have to send email to cygwin-apps to get it uploaded to cygwin site.)
 
 
 NOTES from Brad:
+Log into hythloth as kingb.
+cd ~kingb/Programs/releases/CMake/Utilities/Release
 
 The release scripts are located in CMake and ParaView under the Utilities/Release directory.  It is important to run the script obtained by checking out a copy of the corresponding release branch from CVS. Here is a summary of how to use them:
 

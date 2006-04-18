@@ -26,7 +26,7 @@
 #define cmCPluginAPI_h
 
 #define CMAKE_VERSION_MAJOR 2
-#define CMAKE_VERSION_MINOR 3
+#define CMAKE_VERSION_MINOR 4
 
 #ifdef  __cplusplus
 extern "C" {
