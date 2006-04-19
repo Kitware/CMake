@@ -43,17 +43,17 @@ MACRO(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
     IF(${VAR})
       SET(${VAR} 1 CACHE INTERNAL "Test ${FUNCTION}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
-      FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
         "Performing C++ SOURCE FILE Test ${VAR} succeded with the following output:\n"
         "${OUTPUT}\n"
-        "Source file was:\n${SOURCE}\n" APPEND)
+        "Source file was:\n${SOURCE}\n")
     ELSE(${VAR})
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
       SET(${VAR} "" CACHE INTERNAL "Test ${FUNCTION}")
-      FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
         "Performing C++ SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"
-        "Source file was:\n${SOURCE}\n" APPEND)
+        "Source file was:\n${SOURCE}\n")
     ENDIF(${VAR})
   ENDIF("${VAR}" MATCHES "^${VAR}$")
 ENDMACRO(CHECK_CXX_SOURCE_COMPILES)
