@@ -1,0 +1,43 @@
+Changes in CMake 2.4.0
+
+* CPack beta
+
+* Visual Studio 2005 win64 support
+
+* Improved install support
+
+* Improved FIND_PROGRAM, FIND_LIBRARY, FIND_PATH, FIND_FILE
+
+* Improved support for finding/using OSX Frameworks
+
+* Multiple output support for custom commands
+
+* Color output in make with vt100 terminals CMAKE_COLOR_MAKFILE
+
+* Better variables for MSVC MSVC80 
+
+* Library path order is preserved
+
+* Fix for text file busy in xcodebuild runs
+
+* Better bundle support on OSX
+
+* ctest -S scripts can run in new process with new environment
+
+* OSX universal binary support
+
+* Watcom support
+ 
+* MinGW and MSYS support
+
+* Visual studio 2005 manifest support
+
+* Better handling of RPATH, no longer put rpath in install tree
+
+* Fix OUTPUT_NAME 
+
+* ctest captures output from vcexpress
+
+* cmake --help-module can give help for cmake modules
+
+* Lots of bug fixes
