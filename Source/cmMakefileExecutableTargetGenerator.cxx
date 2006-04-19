@@ -168,17 +168,22 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathReal = outpath + targetNameReal;
-
+  std::string targetFullPathPDB = outpath + this->Target->GetName();
+  targetFullPathPDB += ".pdb";
+  std::string targetOutPathPDB = 
+    this->Convert(targetFullPathPDB.c_str(),
+                  cmLocalGenerator::FULL,
+                  cmLocalGenerator::MAKEFILE); 
   // Convert to the output path to use in constructing commands.
   std::string targetOutPath =
     this->Convert(targetFullPath.c_str(),
-                                  cmLocalGenerator::START_OUTPUT,
-                                  cmLocalGenerator::MAKEFILE);
+                  cmLocalGenerator::START_OUTPUT,
+                  cmLocalGenerator::MAKEFILE); 
   std::string targetOutPathReal =
     this->Convert(targetFullPathReal.c_str(),
-                                  cmLocalGenerator::START_OUTPUT,
-                                  cmLocalGenerator::MAKEFILE);
-
+                  cmLocalGenerator::START_OUTPUT,
+                  cmLocalGenerator::MAKEFILE);
+  
   // Get the language to use for linking this executable.
   const char* linkLanguage =
     this->Target->GetLinkerLanguage(this->GlobalGenerator);
@@ -328,6 +333,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
   vars.Target = targetOutPathReal.c_str();
+  vars.TargetPDB = targetOutPathPDB.c_str();
   std::string linkString = linklibs.str();
   vars.LinkLibraries = linkString.c_str();
   vars.Flags = flags.c_str();

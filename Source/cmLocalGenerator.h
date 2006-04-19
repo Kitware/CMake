@@ -192,6 +192,7 @@ public:
         this->TargetInstallNameDir = 0;
         this->LinkFlags= 0;
       }
+    const char* TargetPDB;
     const char* Language;
     const char* Objects;
     const char* Target;
