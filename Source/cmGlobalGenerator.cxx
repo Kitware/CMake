@@ -1309,10 +1309,13 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     {
     depends.push_back("preinstall");
     }
-  (*targets)[this->GetPackageTargetName()]
-    = this->CreateGlobalTarget(this->GetPackageTargetName(),
-      "Run CPack packaging tool...", &cpackCommandLines, depends);
-
+  if(cmSystemTools::FileExists(configFile.c_str()))
+    {
+    (*targets)[this->GetPackageTargetName()]
+      = this->CreateGlobalTarget(this->GetPackageTargetName(),
+                                 "Run CPack packaging tool...",
+                                 &cpackCommandLines, depends);
+    }
   // CPack source
   const char* packageSourceTargetName = this->GetPackageSourceTargetName();
   if ( packageSourceTargetName )
@@ -1324,11 +1327,15 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     singleLine.push_back("--config");
     configFile = mf->GetStartOutputDirectory();;
     configFile += "/CPackSourceConfig.cmake";
-    singleLine.push_back(configFile);
-    cpackCommandLines.push_back(singleLine);
-    (*targets)[packageSourceTargetName]
-      = this->CreateGlobalTarget(packageSourceTargetName,
-        "Run CPack packaging tool for source...", &cpackCommandLines, depends);
+    if(cmSystemTools::FileExists(configFile.c_str()))
+      {
+      singleLine.push_back(configFile);
+      cpackCommandLines.push_back(singleLine);
+      (*targets)[packageSourceTargetName]
+        = this->CreateGlobalTarget(packageSourceTargetName,
+                                   "Run CPack packaging tool for source...",
+                                   &cpackCommandLines, depends);
+      }
     }
 
   // Test
