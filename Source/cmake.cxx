@@ -1432,7 +1432,7 @@ int cmake::Configure()
     this->CacheManager->RemoveCacheEntry("CMAKE_GENERATOR");
     }
   // only save the cache if there were no fatal errors
-  if ( !this->ScriptMode && !cmSystemTools::GetFatalErrorOccured() )
+  if ( !this->ScriptMode )
     {
     this->CacheManager->SaveCache(this->GetHomeOutputDirectory());
     }
