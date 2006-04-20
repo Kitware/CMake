@@ -5,7 +5,7 @@ SET(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
 SET(CMAKE_SHARED_LIBRARY_PREFIX "lib")          # lib
 SET(CMAKE_SHARED_LIBRARY_SUFFIX ".so")          # .so
 SET(CMAKE_EXECUTABLE_SUFFIX "")          # .exe
-SET(CMAKE_DL_LIBS "-ldl")
+SET(CMAKE_DL_LIBS "dl")
 SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic 
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")       # -shared
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")         # +s, flag for exe link to use shared lib
