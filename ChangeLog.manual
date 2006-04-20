@@ -1,3 +1,15 @@
+Changes in CMake 2.4.1
+
+* Fix check c/cxx source compiles macros to not clobber log files
+ 
+* Fix nmake version detection of cl and create correct pdb files
+
+* Fix msys bootstrap
+
+* Change color output to be more readable
+
+* Fix vs6 library naming
+
 Changes in CMake 2.4.0
 
 * CPack beta

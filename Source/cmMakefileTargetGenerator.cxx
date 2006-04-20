@@ -385,8 +385,16 @@ cmMakefileTargetGenerator
   std::string compileRule =
     this->Makefile->GetRequiredDefinition(compileRuleVar.c_str());
   cmSystemTools::ExpandListArgument(compileRule, commands);
+
+  std::string outpath = this->Makefile->GetStartOutputDirectory();
+  outpath += "/";
+  outpath += this->Target->GetName();
+  outpath += ".pdb";
+  outpath = this->Convert(outpath.c_str(), cmLocalGenerator::FULL,
+                          cmLocalGenerator::MAKEFILE);
   cmLocalGenerator::RuleVariables vars;
   vars.Language = lang;
+  vars.TargetPDB = outpath.c_str();
   vars.Source = sourceFile.c_str();
   vars.Object = relativeObj.c_str();
   std::string objdir = this->LocalGenerator->GetHomeRelativeOutputPath();

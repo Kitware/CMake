@@ -799,12 +799,45 @@ inline std::string removeQuotes(const std::string& s)
   return s;
 }
 
+// Code in blocks surrounded by a test for this definition is needed
+// only for compatibility with user project's replacement DSP
+// templates.  The CMake templates no longer use them.
+#define CM_USE_OLD_VS6
   
 void cmLocalVisualStudio6Generator
 ::WriteDSPHeader(std::ostream& fout, 
                  const char *libName, cmTarget &target, 
                  std::vector<cmSourceGroup> &)
 {
+  // Lookup the library and executable output directories.
+  std::string libPath;
+  if(this->Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    {
+    libPath = this->Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+    }
+  std::string exePath;
+  if(this->Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+    {
+    exePath = this->Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    }
+
+  // Make sure there are trailing slashes.
+  if(!libPath.empty())
+    {
+    if(libPath[libPath.size()-1] != '/')
+      {
+      libPath += "/";
+      }
+    }
+  if(!exePath.empty())
+    {
+    if(exePath[exePath.size()-1] != '/')
+      {
+      exePath += "/";
+      }
+    }
+
+#ifdef CM_USE_OLD_VS6
   std::set<std::string> pathEmitted;
   
   // determine the link directories
@@ -817,25 +850,8 @@ void cmLocalVisualStudio6Generator
   std::string libMultiLineDebugOptions;
   std::string libMultiLineOptimizedOptions;
 
-  // suppoirt override in output directory
-  std::string libPath = "";
-  if (this->Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
-    {
-    libPath = this->Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
-    }
-  std::string exePath = "";
-  if (this->Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
-    {
-    exePath = this->Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-    
-    }
   if(libPath.size())
     {
-    // make sure there is a trailing slash
-    if(libPath[libPath.size()-1] != '/')
-      {
-      libPath += "/";
-      }
     std::string lpath = 
       this->ConvertToOptionallyRelativeOutputPath(libPath.c_str());
     if(lpath.size() == 0)
@@ -868,11 +884,6 @@ void cmLocalVisualStudio6Generator
     }
   if(exePath.size())
     {
-    // make sure there is a trailing slash
-    if(exePath[exePath.size()-1] != '/')
-      {
-      exePath += "/";
-      }
     std::string lpath = 
       this->ConvertToOptionallyRelativeOutputPath(exePath.c_str());
     if(lpath.size() == 0)
@@ -1013,13 +1024,13 @@ void cmLocalVisualStudio6Generator
         }      
       }
     }
+#endif
 
   // Get extra linker options for this target type.
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
-    extraLinkOptions = 
-      this->Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
+    extraLinkOptions = this->Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
@@ -1030,36 +1041,14 @@ void cmLocalVisualStudio6Generator
     extraLinkOptions = this->Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
     }
 
-  // Compute the real name of the target.
-  std::string outputName = "(OUTPUT_NAME is for libraries and executables only)";
-  std::string outputNameDebug = outputName;
-  std::string outputNameRelease = outputName;
-  std::string outputNameMinSizeRel = outputName;
-  std::string outputNameRelWithDebInfo = outputName;
-  if(target.GetType() == cmTarget::EXECUTABLE ||
-     target.GetType() == cmTarget::STATIC_LIBRARY ||
-     target.GetType() == cmTarget::SHARED_LIBRARY ||
-     target.GetType() == cmTarget::MODULE_LIBRARY)
+  // Get extra linker options for this target.
+  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS"))
     {
-    outputName = target.GetFullName();
-    outputNameDebug = target.GetFullName("Debug");
-    outputNameRelease = target.GetFullName("Release");
-    outputNameMinSizeRel = target.GetFullName("MinSizeRel");
-    outputNameRelWithDebInfo = target.GetFullName("RelWithDebInfo");
+    extraLinkOptions += " ";
+    extraLinkOptions += targetLinkFlags;
     }
 
-  if(extraLinkOptions.size())
-    {
-    libOptions += " ";
-    libOptions += extraLinkOptions;
-    libOptions += " ";
-    libMultiLineOptions += "# ADD LINK32 ";
-    libMultiLineOptions +=  extraLinkOptions;
-    libMultiLineOptions += " \n";
-    libMultiLineOptionsForDebug += "# ADD LINK32 ";
-    libMultiLineOptionsForDebug +=  extraLinkOptions;
-    libMultiLineOptionsForDebug += " \n";
-    }
+  // Get standard libraries for this language.
   if(target.GetType() >= cmTarget::EXECUTABLE && 
      target.GetType() <= cmTarget::MODULE_LIBRARY)
     {
@@ -1082,29 +1071,63 @@ void cmLocalVisualStudio6Generator
     if(const char* stdLibs =
        this->Makefile->GetDefinition(standardLibsVar.c_str()))
       {
-      libOptions += " ";
-      libOptions += stdLibs;
-      libOptions += " ";
-      libMultiLineOptions += "# ADD LINK32 ";
-      libMultiLineOptions +=  stdLibs;
-      libMultiLineOptions += " \n";
-      libMultiLineOptionsForDebug += "# ADD LINK32 ";
-      libMultiLineOptionsForDebug +=  stdLibs;
-      libMultiLineOptionsForDebug += " \n";
+      extraLinkOptions += " ";
+      extraLinkOptions += stdLibs;
       }
     }
-  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS"))
+
+  // Compute the real name of the target.
+  std::string outputName = "(OUTPUT_NAME is for libraries and executables only)";
+  std::string outputNameDebug = outputName;
+  std::string outputNameRelease = outputName;
+  std::string outputNameMinSizeRel = outputName;
+  std::string outputNameRelWithDebInfo = outputName;
+  if(target.GetType() == cmTarget::EXECUTABLE ||
+     target.GetType() == cmTarget::STATIC_LIBRARY ||
+     target.GetType() == cmTarget::SHARED_LIBRARY ||
+     target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    outputName = target.GetFullName();
+    outputNameDebug = target.GetFullName("Debug");
+    outputNameRelease = target.GetFullName("Release");
+    outputNameMinSizeRel = target.GetFullName("MinSizeRel");
+    outputNameRelWithDebInfo = target.GetFullName("RelWithDebInfo");
+    }
+
+  // Compute the proper link information for the target.
+  std::string optionsDebug;
+  std::string optionsRelease;
+  std::string optionsMinSizeRel;
+  std::string optionsRelWithDebInfo;
+  if(target.GetType() == cmTarget::EXECUTABLE ||
+     target.GetType() == cmTarget::SHARED_LIBRARY ||
+     target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    this->ComputeLinkOptions(target, "Debug", extraLinkOptions,
+                             optionsDebug);
+    this->ComputeLinkOptions(target, "Release", extraLinkOptions,
+                             optionsRelease);
+    this->ComputeLinkOptions(target, "MinSizeRel", extraLinkOptions,
+                             optionsMinSizeRel);
+    this->ComputeLinkOptions(target, "RelWithDebInfo", extraLinkOptions,
+                             optionsRelWithDebInfo);
+    }
+
+#ifdef CM_USE_OLD_VS6
+  // Compute link information for the target.
+  if(extraLinkOptions.size())
     {
     libOptions += " ";
-    libOptions += targetLinkFlags;
+    libOptions += extraLinkOptions;
     libOptions += " ";
     libMultiLineOptions += "# ADD LINK32 ";
-    libMultiLineOptions +=  targetLinkFlags;
+    libMultiLineOptions +=  extraLinkOptions;
     libMultiLineOptions += " \n";
     libMultiLineOptionsForDebug += "# ADD LINK32 ";
-    libMultiLineOptionsForDebug +=  targetLinkFlags;
+    libMultiLineOptionsForDebug +=  extraLinkOptions;
     libMultiLineOptionsForDebug += " \n";
     }
+#endif
   
   // are there any custom rules on the target itself
   // only if the target is a lib or exe
@@ -1160,6 +1183,7 @@ void cmLocalVisualStudio6Generator
       cmSystemTools::ReplaceString(line, "/nologo", "");
       }
     
+#ifdef CM_USE_OLD_VS6
     cmSystemTools::ReplaceString(line, "CM_LIBRARIES",
                                  libOptions.c_str());
     cmSystemTools::ReplaceString(line, "CM_DEBUG_LIBRARIES",
@@ -1174,6 +1198,7 @@ void cmLocalVisualStudio6Generator
                                  libMultiLineDebugOptions.c_str());
     cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIMIZED_LIBRARIES",
                                  libMultiLineOptimizedOptions.c_str());
+#endif
 
     // Substitute the real output name into the template.
     cmSystemTools::ReplaceString(line, "OUTPUT_NAME_DEBUG", outputNameDebug.c_str());
@@ -1181,6 +1206,12 @@ void cmLocalVisualStudio6Generator
     cmSystemTools::ReplaceString(line, "OUTPUT_NAME_MINSIZEREL", outputNameMinSizeRel.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_NAME_RELWITHDEBINFO", outputNameRelWithDebInfo.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_NAME", outputName.c_str());
+
+    // Substitute the proper link information into the template.
+    cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIONS_DEBUG", optionsDebug.c_str());
+    cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIONS_RELEASE", optionsRelease.c_str());
+    cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIONS_MINSIZEREL", optionsMinSizeRel.c_str());
+    cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIONS_RELWITHDEBINFO", optionsRelWithDebInfo.c_str());
 
     cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                  this->IncludeOptions.c_str());
@@ -1303,5 +1334,52 @@ void cmLocalVisualStudio6Generator::WriteDSPFooter(std::ostream& fout)
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
     fout << line << std::endl;
+    }
+}
+
+//-----------------------------------------------------------------------------
+void cmLocalVisualStudio6Generator::ComputeLinkOptions(cmTarget& target,
+                                                       const char* configName,
+                                                       const std::string extraOptions,
+                                                       std::string& options)
+{
+  // Compute the link information for this configuration.
+  std::vector<cmStdString> linkLibs;
+  std::vector<cmStdString> linkDirs;
+  this->ComputeLinkInformation(target, configName, linkLibs, linkDirs);
+
+  // Build the link options code.
+  for(std::vector<cmStdString>::const_iterator d = linkDirs.begin();
+      d != linkDirs.end(); ++d)
+    {
+    std::string dir = *d;
+    if(!dir.empty())
+      {
+      if(dir[dir.size()-1] != '/')
+        {
+        dir += "/";
+        }
+      dir += "$(IntDir)";
+      options += "# ADD LINK32 /LIBPATH:";
+      options += this->ConvertToOptionallyRelativeOutputPath(dir.c_str());
+      options += " /LIBPATH:";
+      options += this->ConvertToOptionallyRelativeOutputPath(d->c_str());
+      options += "\n";
+      }
+    }
+  for(std::vector<cmStdString>::const_iterator l = linkLibs.begin();
+      l != linkLibs.end(); ++l)
+    {
+    options += "# ADD LINK32 ";
+    options += this->ConvertToOptionallyRelativeOutputPath(l->c_str());
+    options += "\n";
+    }
+
+  // Add extra options if any.
+  if(!extraOptions.empty())
+    {
+    options += "# ADD LINK32 ";
+    options += extraOptions;
+    options += "\n";
     }
 }

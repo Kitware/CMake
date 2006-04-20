@@ -734,6 +734,14 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       return replaceValues.ObjectsQuoted;
       }
     }
+  if(replaceValues.TargetPDB )
+    {
+    if(variable == "TARGET_PDB")
+      {
+      return replaceValues.TargetPDB;
+      }
+    }
+
   if(replaceValues.Target)
     { 
     if(variable == "TARGET_QUOTED")

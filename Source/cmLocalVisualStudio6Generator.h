@@ -94,6 +94,9 @@ private:
                   std::ostream &fout, const char *libName);
   std::string CreateTargetRules(cmTarget &target, 
                                 const char *libName);
+  void ComputeLinkOptions(cmTarget& target, const char* configName,
+                          const std::string extraOptions,
+                          std::string& options);
   std::string IncludeOptions;
   std::vector<std::string> Configurations;
 };

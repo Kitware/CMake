@@ -78,6 +78,9 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "Process the given cmake file as a script written in the CMake language.  "
    "No configure or generate step is performed and the cache is not"
    " modified."},
+  {"--graphviz=[file]", "Generate graphviz of dependencies.",
+   "Generate a graphviz input file that will contain all the library and "
+   "executable dependencies in the project."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed."},
   {"--help-command-list [file]", "List available listfile commands and exit.",

@@ -233,12 +233,16 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     outpath += "/";
     }
   std::string targetFullPath = outpath + targetName;
+  std::string targetFullPathPDB = outpath + this->Target->GetName() + std::string(".pdb");
   std::string targetFullPathSO = outpath + targetNameSO;
   std::string targetFullPathReal = outpath + targetNameReal;
   std::string targetFullPathImport = outpath + targetNameImport;
 
   // Construct the output path version of the names for use in command
   // arguments.
+  std::string targetOutPathPDB = 
+    this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::FULL,
+                  cmLocalGenerator::MAKEFILE);
   std::string targetOutPath = 
     this->Convert(targetFullPath.c_str(),cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::MAKEFILE);
@@ -402,6 +406,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   cleanObjs += variableName;
   cleanObjs += ")";
   cmLocalGenerator::RuleVariables vars;
+  vars.TargetPDB = targetOutPathPDB.c_str();
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
   std::string objdir = "CMakeFiles/";
