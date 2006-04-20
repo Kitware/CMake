@@ -876,7 +876,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
                                           EchoColor color)
 {
   // Choose the color for the text.
-  const char* prefix = 0;
+  std::string prefix;
   if(this->GlobalGenerator->GetToolSupportsColorVT100() &&
      this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE"))
     {
@@ -885,23 +885,23 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
       case EchoNormal:
         break;
       case EchoDepend:
-        prefix = CMAKE_VT100_FRONT_MAGENTA CMAKE_VT100_BOLD;
+        prefix = CMAKE_VT100_FRONT_MAGENTA;
         break;
       case EchoBuild:
-        prefix = CMAKE_VT100_FRONT_GREEN CMAKE_VT100_BOLD;
+        prefix = CMAKE_VT100_FRONT_GREEN;
         break;
       case EchoLink:
-        prefix = CMAKE_VT100_FRONT_YELLOW CMAKE_VT100_BOLD;
+        prefix = CMAKE_VT100_FRONT_RED;
         break;
       case EchoGenerate:
-        prefix = CMAKE_VT100_FRONT_BLUE CMAKE_VT100_BOLD;
+        prefix = CMAKE_VT100_FRONT_BLUE;
         break;
       case EchoGlobal:
-        prefix = CMAKE_VT100_FRONT_CYAN CMAKE_VT100_BOLD;
+        prefix = CMAKE_VT100_FRONT_CYAN;
         break;
       }
     }
-  const char* suffix = prefix? CMAKE_VT100_NORMAL : 0;
+  std::string suffix = prefix.empty()? "" : CMAKE_VT100_NORMAL;
 
   // Echo one line at a time.
   std::string line;
@@ -919,15 +919,9 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
           {
           cmd += "\"";
           }
-        if(prefix)
-          {
-          cmd += prefix;
-          }
+        cmd += prefix;
         cmd += line;
-        if(suffix)
-          {
-          cmd += suffix;
-          }
+        cmd += suffix;
         if(this->EchoNeedsQuote)
           {
           cmd += "\"";
