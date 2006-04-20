@@ -864,18 +864,32 @@ cmLocalVisualStudio7Generator
   for(std::vector<cmStdString>::const_iterator d = dirs.begin();
       d != dirs.end(); ++d)
     {
+    // Remove any trailing slash and skip empty paths.
     std::string dir = *d;
-    if(!dir.empty())
+    if(dir[dir.size()-1] == '/')
       {
-      if(dir[dir.size()-1] != '/')
-        {
-        dir += "/";
-        }
-      dir += "$(OutDir)";
-      fout << comma << this->ConvertToXMLOutputPath(dir.c_str())
-           << "," << this->ConvertToXMLOutputPath(d->c_str());
-      comma = ",";
+      dir = dir.substr(0, dir.size()-1);
       }
+    if(dir.empty())
+      {
+      continue;
+      }
+
+    // Switch to a relative path specification if it is shorter.
+    if(cmSystemTools::FileIsFullPath(dir.c_str()))
+      {
+      std::string rel = this->Convert(dir.c_str(), START_OUTPUT, UNCHANGED);
+      if(rel.size() < dir.size())
+        {
+        dir = rel;
+        }
+      }
+
+    // First search a configuration-specific subdirectory and then the
+    // original directory.
+    fout << comma << this->ConvertToXMLOutputPath((dir+"/$(OutDir)").c_str())
+         << "," << this->ConvertToXMLOutputPath(dir.c_str());
+    comma = ",";
     }
 }
 
