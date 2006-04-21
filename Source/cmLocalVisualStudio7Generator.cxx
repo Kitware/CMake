@@ -1015,7 +1015,8 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
     std::string compileFlags;
     std::string additionalDeps;
     sourceName = (*sf)->GetSourceName();
-    if(sourceName.find("/") != sourceName.npos)
+    if(!(*sf)->GetPropertyAsBool("HEADER_FILE_ONLY" )
+       && sourceName.find("/") != sourceName.npos)
       {
       cmSystemTools::ReplaceString(sourceName, "/", "_");
       sourceName += ".obj";
