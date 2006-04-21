@@ -1006,7 +1006,7 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
     }
 
   // Loop through each source in the source group.
-  std::string sourceName;
+  std::string objectName;
   for(std::vector<const cmSourceFile *>::const_iterator sf =
         sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
     {
@@ -1014,16 +1014,16 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
     const cmCustomCommand *command = (*sf)->GetCustomCommand();
     std::string compileFlags;
     std::string additionalDeps;
-    sourceName = (*sf)->GetSourceName();
+    objectName = (*sf)->GetSourceName();
     if(!(*sf)->GetPropertyAsBool("HEADER_FILE_ONLY" )
-       && sourceName.find("/") != sourceName.npos)
+       && objectName.find("/") != objectName.npos)
       {
-      cmSystemTools::ReplaceString(sourceName, "/", "_");
-      sourceName += ".obj";
+      cmSystemTools::ReplaceString(objectName, "/", "_");
+      objectName += ".obj";
       }
     else
       {
-      sourceName = "";
+      objectName = "";
       }
 
     // Add per-source flags.
@@ -1076,7 +1076,7 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
                               comment.c_str(), command->GetDepends(),
                               command->GetOutputs(), flags);
         }
-      else if(compileFlags.size() || additionalDeps.length() || sourceName.size())
+      else if(compileFlags.size() || additionalDeps.length() || objectName.size())
         {
         const char* aCompilerTool = "VCCLCompilerTool";
         std::string ext = (*sf)->GetSourceExtension();
@@ -1110,10 +1110,10 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
             fout << "\t\t\t\t\tAdditionalDependencies=\""
                  << additionalDeps.c_str() << "\"\n";
             }
-          if(sourceName.size())
+          if(objectName.size())
             {
             fout << "\t\t\t\t\tObjectFile=\"$(IntDir)/"
-                 << sourceName.c_str() << "\"\n";
+                 << objectName.c_str() << "\"\n";
             }
           fout << "\t\t\t\t\t/>\n"
                << "\t\t\t\t</FileConfiguration>\n";
