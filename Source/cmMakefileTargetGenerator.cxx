@@ -245,9 +245,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
   const char* lang = this->LocalGenerator->GetSourceFileLanguage(source);
   if(!lang)
     {
-    // If language is not known, this is an error.
-    cmSystemTools::Error("Source file \"", source.GetFullPath().c_str(),
-                         "\" has unknown type.");
+    // don't know anything about this file so skip it
     return;
     }
 
