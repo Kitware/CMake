@@ -1,5 +1,5 @@
 # GCC is the default compiler on Linux.
-SET(CMAKE_DL_LIBS "-ldl")
+SET(CMAKE_DL_LIBS "dl")
 SET(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")        
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-rdynamic")  

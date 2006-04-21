@@ -341,6 +341,8 @@ public:
     {
       this->cmStartDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
+      this->cmStartDirectory = 
+        cmSystemTools::CollapseFullPath(this->cmStartDirectory.c_str());
       this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", 
                           this->cmStartDirectory.c_str());
     }
@@ -352,6 +354,8 @@ public:
     {
       this->StartOutputDirectory = lib;
       cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
+      this->StartOutputDirectory = 
+        cmSystemTools::CollapseFullPath(this->StartOutputDirectory.c_str());
       cmSystemTools::MakeDirectory(this->StartOutputDirectory.c_str());
       this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", 
                           this->StartOutputDirectory.c_str());

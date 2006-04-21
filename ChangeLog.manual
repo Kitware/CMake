@@ -1,5 +1,17 @@
 Changes in CMake 2.4.1
 
+* allow the cache to be saved even if a fatal error occurs
+
+* fix bug in relative path subdir and add_subdirectoy commands
+
+* support in vs for two object files with the same name
+
+* short file names used for library paths in visual studio
+
+* package target only shows up when you have cpack config files
+
+* Use dl and not -ldl for adding in the dynamic library
+
 * Fix check c/cxx source compiles macros to not clobber log files
  
 * Fix nmake version detection of cl and create correct pdb files

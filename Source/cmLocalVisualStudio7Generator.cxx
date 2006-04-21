@@ -864,18 +864,32 @@ cmLocalVisualStudio7Generator
   for(std::vector<cmStdString>::const_iterator d = dirs.begin();
       d != dirs.end(); ++d)
     {
+    // Remove any trailing slash and skip empty paths.
     std::string dir = *d;
-    if(!dir.empty())
+    if(dir[dir.size()-1] == '/')
       {
-      if(dir[dir.size()-1] != '/')
-        {
-        dir += "/";
-        }
-      dir += "$(OutDir)";
-      fout << comma << this->ConvertToXMLOutputPath(dir.c_str())
-           << "," << this->ConvertToXMLOutputPath(d->c_str());
-      comma = ",";
+      dir = dir.substr(0, dir.size()-1);
       }
+    if(dir.empty())
+        {
+      continue;
+        }
+
+    // Switch to a relative path specification if it is shorter.
+    if(cmSystemTools::FileIsFullPath(dir.c_str()))
+      {
+      std::string rel = this->Convert(dir.c_str(), START_OUTPUT, UNCHANGED);
+      if(rel.size() < dir.size())
+        {
+        dir = rel;
+      }
+      }
+
+    // First search a configuration-specific subdirectory and then the
+    // original directory.
+    fout << comma << this->ConvertToXMLOutputPath((dir+"/$(OutDir)").c_str())
+         << "," << this->ConvertToXMLOutputPath(dir.c_str());
+    comma = ",";
     }
 }
 
@@ -992,7 +1006,7 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
     }
 
   // Loop through each source in the source group.
-  std::string sourceName;
+  std::string objectName;
   for(std::vector<const cmSourceFile *>::const_iterator sf =
         sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
     {
@@ -1000,15 +1014,16 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
     const cmCustomCommand *command = (*sf)->GetCustomCommand();
     std::string compileFlags;
     std::string additionalDeps;
-    sourceName = (*sf)->GetSourceName();
-    if(sourceName.find("/") != sourceName.npos)
+    objectName = (*sf)->GetSourceName();
+    if(!(*sf)->GetPropertyAsBool("HEADER_FILE_ONLY" )
+       && objectName.find("/") != objectName.npos)
       {
-      cmSystemTools::ReplaceString(sourceName, "/", "_");
-      sourceName += ".obj";
+      cmSystemTools::ReplaceString(objectName, "/", "_");
+      objectName += ".obj";
       }
     else
       {
-      sourceName = "";
+      objectName = "";
       }
 
     // Add per-source flags.
@@ -1061,7 +1076,7 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
                               comment.c_str(), command->GetDepends(),
                               command->GetOutputs(), flags);
         }
-      else if(compileFlags.size() || additionalDeps.length() || sourceName.size())
+      else if(compileFlags.size() || additionalDeps.length() || objectName.size())
         {
         const char* aCompilerTool = "VCCLCompilerTool";
         std::string ext = (*sf)->GetSourceExtension();
@@ -1095,10 +1110,10 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
             fout << "\t\t\t\t\tAdditionalDependencies=\""
                  << additionalDeps.c_str() << "\"\n";
             }
-          if(sourceName.size())
+          if(objectName.size())
             {
             fout << "\t\t\t\t\tObjectFile=\"$(IntDir)/"
-                 << sourceName.c_str() << "\"\n";
+                 << objectName.c_str() << "\"\n";
             }
           fout << "\t\t\t\t\t/>\n"
                << "\t\t\t\t</FileConfiguration>\n";

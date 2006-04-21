@@ -15,6 +15,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "Source/CTest/Curl"
   "Utilities/cmcurl"
   "Source/CursesDialog/form"
+  "/usr/bin/ld.*warning.*-..*directory.name.*bin.*does not exist"
   "Redeclaration of .send..... with a different storage class specifier"
   "Utilities/cmexpat/"
   "is not used for resolving any symbol"
