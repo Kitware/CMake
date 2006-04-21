@@ -56,7 +56,7 @@ fun! CMakeGetIndent(lnum)
                     \       or . '[^()\\#"]' . or . '\\.' . '\)*'
 
   let cmake_indent_comment_line = '^\s*' . cmake_regex_comment
-  let cmake_indent_blank_regex = '^\s*$')
+  let cmake_indent_blank_regex = '^\s*$'
   let cmake_indent_open_regex = '^\s*' . cmake_regex_identifier .
                     \           '\s*(' . cmake_regex_arguments .
                     \           '\(' . cmake_regex_comment . '\)\?$'
