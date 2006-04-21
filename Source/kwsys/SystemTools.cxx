@@ -2652,11 +2652,6 @@ int OldWindowsGetLongPath(kwsys_stl::string const& shortPath,
 int PortableGetLongPathName(const char* pathIn,
                             kwsys_stl::string & longPath)
 { 
-  kwsys_stl::string shortPath;
-  if(!SystemTools::GetShortPath(pathIn, shortPath))
-    {
-    return 0;
-    }
   HMODULE lh = LoadLibrary("Kernel32.dll");
   if(lh)
     {
@@ -2666,7 +2661,7 @@ int PortableGetLongPathName(const char* pathIn,
       typedef  DWORD (WINAPI * GetLongFunctionPtr) (LPCSTR,LPSTR,DWORD); 
       GetLongFunctionPtr func = (GetLongFunctionPtr)proc;
       char buffer[MAX_PATH+1];
-      int len = (*func)(shortPath.c_str(), buffer, MAX_PATH+1);
+      int len = (*func)(pathIn, buffer, MAX_PATH+1);
       if(len == 0 || len > MAX_PATH+1)
         {
         FreeLibrary(lh);
@@ -2678,7 +2673,7 @@ int PortableGetLongPathName(const char* pathIn,
       }
     FreeLibrary(lh);
     }
-  return OldWindowsGetLongPath(shortPath.c_str(), longPath);
+  return OldWindowsGetLongPath(pathIn, longPath);
 }
 #endif
 
@@ -2790,7 +2785,11 @@ SystemTools::JoinPath(const kwsys_stl::vector<kwsys_stl::string>& components)
 bool SystemTools::ComparePath(const char* c1, const char* c2)
 {
 #if defined(_WIN32) || defined(__APPLE__)
-  return SystemTools::Strucmp(c1, c2) == 0;
+# ifdef _MSC_VER
+  return _stricmp(c1, c2) == 0;
+# elif defined(__APPLE__) || defined(__GNUC__)
+  return strcasecmp(c1, c2) == 0;
+# endif
 #else
   return strcmp(c1, c2) == 0;
 #endif
