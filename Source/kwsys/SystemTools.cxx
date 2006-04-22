@@ -2789,6 +2789,8 @@ bool SystemTools::ComparePath(const char* c1, const char* c2)
   return _stricmp(c1, c2) == 0;
 # elif defined(__APPLE__) || defined(__GNUC__)
   return strcasecmp(c1, c2) == 0;
+#else
+  return SystemTools::Strucmp(c1, c2) == 0;
 # endif
 #else
   return strcmp(c1, c2) == 0;
