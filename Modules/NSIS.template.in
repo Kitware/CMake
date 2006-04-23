@@ -362,6 +362,10 @@ Section "Installer Section" InstSection
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
+    "DisplayName" "@CPACK_PACKAGE_INSTALL_DIRECTORY@ -- @CPACK_PACKAGE_DESCRIPTION_SUMMARY@"
+WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
+    "UninstallString" "$INSTDIR\Uninstall.exe"
 
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     
@@ -416,6 +420,7 @@ Section "Uninstall"
 
   ;Remove the uninstaller itself.
   Delete "$INSTDIR\Uninstall.exe"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
 
   ;Remove the installation directory if it is empty.
   RMDir "$INSTDIR"
