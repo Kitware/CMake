@@ -64,7 +64,7 @@ void kwsysTerminal_cfprintf(int color, FILE* stream, const char* format, ...)
   /* Setup the stream with the given color if possible.  */
   int pipeIsConsole = 0;
   int pipeIsVT100 = 0;
-  int default_vt100 = color & kwsysTerminal_Color_AssumeTTY;
+  int default_vt100 = color & kwsysTerminal_Color_AssumeVT100;
   int default_tty = color & kwsysTerminal_Color_AssumeTTY;
 #if defined(KWSYS_TERMINAL_SUPPORT_CONSOLE)
   CONSOLE_SCREEN_BUFFER_INFO hOutInfo;
