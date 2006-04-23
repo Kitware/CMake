@@ -261,6 +261,7 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     # sure there is at least one set of four (4) backlasshes.
     SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\CMakeInstall.bmp")
     SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMake")
+    SET(CPACK_NSIS_MODIFY_PATH ON)
   ELSE(WIN32 AND NOT UNIX)
     SET(CPACK_PACKAGE_EXECUTABLES "ccmake" "CMake")
   ENDIF(WIN32 AND NOT UNIX)
