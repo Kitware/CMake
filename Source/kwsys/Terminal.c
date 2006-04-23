@@ -33,6 +33,7 @@
 /* Include needed system APIs.  */
 
 #include <stdlib.h> /* getenv */
+#include <string.h> /* strcmp */
 #include <stdarg.h> /* va_list */
 
 #if defined(KWSYS_TERMINAL_SUPPORT_CONSOLE)
