@@ -52,9 +52,19 @@ IF(CPACK_NSIS_MODIFY_PATH)
   SET(CPACK_NSIS_MODIFY_PATH ON)
 ENDIF(CPACK_NSIS_MODIFY_PATH)
 
+SET(__cpack_system_name ${CMAKE_SYSTEM_NAME})
+IF(${__cpack_system_name} MATCHES Windows)
+  IF(CMAKE_CL_64)
+    SET(__cpack_system_name win64)
+  ELSE(CMAKE_CL_64)
+    SET(__cpack_system_name win32)
+  ENDIF(CMAKE_CL_64)
+ENDIF(${__cpack_system_name} MATCHES Windows)
+cpack_set_if_not_set(CPACK_SYSTEM_NAME "${__cpack_system_name}")
+
 # <project>-<major>.<minor>.<patch>-<release>-<platform>.<pkgtype>
 cpack_set_if_not_set(CPACK_PACKAGE_FILE_NAME
-  "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${CMAKE_SYSTEM_NAME}")
+  "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${CPACK_SYSTEM_NAME}")
 cpack_set_if_not_set(CPACK_PACKAGE_INSTALL_DIRECTORY
   "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}")
 cpack_set_if_not_set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY
@@ -89,7 +99,7 @@ ENDIF(NOT CPACK_GENERATOR)
 cpack_set_if_not_set(CPACK_INSTALL_CMAKE_PROJECTS
   "${CMAKE_BINARY_DIR};${CMAKE_PROJECT_NAME};ALL;/")
 cpack_set_if_not_set(CPACK_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
-cpack_set_if_not_set(CPACK_TOPLEVEL_TAG "${CMAKE_SYSTEM_NAME}")
+cpack_set_if_not_set(CPACK_TOPLEVEL_TAG "${CPACK_SYSTEM_NAME}")
 
 cpack_encode_variables()
 CONFIGURE_FILE("${cpack_input_file}"
@@ -98,7 +108,7 @@ CONFIGURE_FILE("${cpack_input_file}"
 # Generate source file
 cpack_set_if_not_set(CPACK_SOURCE_INSTALLED_DIRECTORIES
   "${CMAKE_SOURCE_DIR};/")
-cpack_set_if_not_set(CPACK_SOURCE_TOPLEVEL_TAG "${CMAKE_SYSTEM_NAME}-Source")
+cpack_set_if_not_set(CPACK_SOURCE_TOPLEVEL_TAG "${CPACK_SYSTEM_NAME}-Source")
 cpack_set_if_not_set(CPACK_SOURCE_PACKAGE_FILE_NAME
   "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-Source")
 cpack_set_if_not_set(CPACK_SOURCE_IGNORE_FILES

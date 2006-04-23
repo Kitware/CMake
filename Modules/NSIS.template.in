@@ -134,6 +134,7 @@ Function AddToPath
     Goto AddToPath_done
  
   AddToPath_NT:
+    MessageBox MB_OK 'Add to path "$0"'
     ReadRegStr $1 SHCTX "Environment" "PATH"
     StrCpy $2 $1 1 -1 # copy last char
     StrCmp $2 ";" 0 +2 # if last char == ;
@@ -202,6 +203,7 @@ Function un.RemoveFromPath
       Goto unRemoveFromPath_done
  
   unRemoveFromPath_NT:
+    MessageBox MB_OK 'Remove from path "$0"'
     ReadRegStr $1 SHCTX "Environment" "PATH"
     StrCpy $5 $1 1 -1 # copy last char
     StrCmp $5 ";" +2 # if last char != ;
