@@ -63,6 +63,7 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
       // add starting depends
       std::vector<std::string> depends;
       depends.push_back(origname);
+      depends.push_back(fluid_exe);
       std::string cxxres = outputDirectory.c_str();
       cxxres += "/" + srcName;
       cxxres += ".cxx";
