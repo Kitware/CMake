@@ -80,24 +80,25 @@ void cmGlobalKdevelopGenerator::Generate()
     //try to find the name of an executable so we have something to
     //run from kdevelop for now just pick the first executable found
     std::string executable;
-    for (std::vector<cmLocalGenerator*>::const_iterator it=lgs.begin();
-         it!=lgs.end(); it++)
-    {
-       cmMakefile* makefile=(*it)->GetMakefile();
-
-       cmTargets& targets=makefile->GetTargets();
-    for (cmTargets::iterator ti = targets.begin();
-         ti != targets.end(); ti++)
+    for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
+         lg!=lgs.end(); lg++)
       {
-      if (ti->second.GetType()==cmTarget::EXECUTABLE)
+      cmMakefile* makefile=(*lg)->GetMakefile();
+      cmTargets& targets=makefile->GetTargets();
+      for (cmTargets::iterator ti = targets.begin();
+           ti != targets.end(); ti++)
         {
-        executable = ti->second.GetProperty("LOCATION");
+        if (ti->second.GetType()==cmTarget::EXECUTABLE)
+          {
+          executable = ti->second.GetProperty("LOCATION");
+          break;
+          }
+        }
+      if (!executable.empty())
+        {
         break;
         }
       }
-     if (!executable.empty())
-        break;
-    }
     // now create a project file
     this->CreateProjectFile(outputDir, projectDir, projectName,
                             executable, cmakeFilePattern, fileToOpen);
