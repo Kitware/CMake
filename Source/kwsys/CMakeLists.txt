@@ -94,7 +94,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_SystemTools 1)
   SET(KWSYS_USE_CommandLineArguments 1)
   SET(KWSYS_USE_FundamentalType 1)
-  #SET(KWSYS_USE_Terminal 1)
+  SET(KWSYS_USE_Terminal 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
 #-----------------------------------------------------------------------------
@@ -635,7 +635,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     FOREACH(test
         testProcess
         testFail
-        # testTerminal
+        testTerminal
         )
       ADD_EXECUTABLE(${test} ${test}.c)
       TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE}_c)
