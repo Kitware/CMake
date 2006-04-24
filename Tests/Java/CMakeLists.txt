@@ -29,7 +29,7 @@ IF(OLD_CUSTOM_COMMAND_WAY)
     COMMAND ${CMAKE_COMMAND}
     ARGS -E chdir ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_Java_ARCHIVE}
-    -cvf foo.jar *.class)
+    -cvf hello.jar *.class)
   
   ADD_CUSTOM_TARGET(hello.jar ALL 
     DEPENDS ${hello_BINARY_DIR}/hello.jar)
