@@ -40,6 +40,22 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
   // Create list of configurations requested by user's cache, if any.
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
   this->GenerateConfigurations(mf);
+  
+  // if this environment variable is set, then copy it to
+  // a static cache entry.  It will be used by 
+  // cmLocalGenerator::ConstructScript, to add an extra PATH
+  // to all custom commands.   This is because the VS IDE
+  // does not use the environment it is run in, and this allows
+  // for running commands and using dll's that the IDE environment
+  // does not know about.
+  const char* extraPath = cmSystemTools::GetEnv("CMAKE_MSVCIDE_RUN_PATH");
+  if(extraPath)
+    {
+    mf->AddCacheDefinition("CMAKE_MSVCIDE_RUN_PATH",
+                           extraPath, "Saved environment variable CMAKE_MSVCIDE_RUN_PATH",
+                           cmCacheManager::STATIC);
+    }
+
 }
 
 std::string cmGlobalVisualStudio7Generator::GenerateBuildCommand(const char* makeProgram,

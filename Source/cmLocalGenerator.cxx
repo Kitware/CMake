@@ -1726,7 +1726,14 @@ cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
     script += this->Convert(workingDirectory, START_OUTPUT, SHELL);
     script += newline;
     }
-
+  const char* extraPath = this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
+  if(extraPath)
+    {
+    script += "set PATH=";
+    script += extraPath;
+    script += ";%PATH%";
+    script += newline;
+    }
   // Write each command on a single line.
   for(cmCustomCommandLines::const_iterator cl = commandLines.begin();
       cl != commandLines.end(); ++cl)
