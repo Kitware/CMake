@@ -114,7 +114,7 @@ enum kwsysTerminal_Color_e
   kwsysTerminal_Color_BackgroundBold = 0x200,
   kwsysTerminal_Color_AssumeTTY      = 0x400,
   kwsysTerminal_Color_AssumeVT100    = 0x800,
-  kwsysTerminal_Color_AttributeMask  = 0xF00,
+  kwsysTerminal_Color_AttributeMask  = 0xF00
 };
 
 #if defined(__cplusplus)
