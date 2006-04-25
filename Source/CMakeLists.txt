@@ -215,11 +215,6 @@ ENDIF (WIN32)
 ADD_LIBRARY(CMakeLib ${SRCS})
 TARGET_LINK_LIBRARIES(CMakeLib cmsys ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES} ${CMAKE_TAR_LIBRARIES})
 
-# On UNIX platforms we need the dl libraries for loading plugins.
-IF(UNIX)
-  TARGET_LINK_LIBRARIES(CMakeLib ${CMAKE_DL_LIBS})
-ENDIF(UNIX)
-
 # On Apple we need Carbon
 IF(APPLE)
   TARGET_LINK_LIBRARIES(CMakeLib "-framework Carbon")

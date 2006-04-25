@@ -1,5 +1,9 @@
 Changes in CMake 2.4.1
 
+* Kdevelop generator handles CMakeFiles directory better
+
+* add correct depend information for fluid 
+
 * allow the cache to be saved even if a fatal error occurs
 
 * fix bug in relative path subdir and add_subdirectoy commands

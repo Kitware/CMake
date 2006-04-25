@@ -134,6 +134,7 @@ Function AddToPath
     Goto AddToPath_done
  
   AddToPath_NT:
+    MessageBox MB_OK 'Add to path "$0"'
     ReadRegStr $1 SHCTX "Environment" "PATH"
     StrCpy $2 $1 1 -1 # copy last char
     StrCmp $2 ";" 0 +2 # if last char == ;
@@ -202,6 +203,7 @@ Function un.RemoveFromPath
       Goto unRemoveFromPath_done
  
   unRemoveFromPath_NT:
+    MessageBox MB_OK 'Remove from path "$0"'
     ReadRegStr $1 SHCTX "Environment" "PATH"
     StrCpy $5 $1 1 -1 # copy last char
     StrCmp $5 ";" +2 # if last char != ;
@@ -362,6 +364,10 @@ Section "Installer Section" InstSection
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
+    "DisplayName" "@CPACK_PACKAGE_INSTALL_DIRECTORY@ -- @CPACK_PACKAGE_DESCRIPTION_SUMMARY@"
+WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
+    "UninstallString" "$INSTDIR\Uninstall.exe"
 
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     
@@ -416,6 +422,7 @@ Section "Uninstall"
 
   ;Remove the uninstaller itself.
   Delete "$INSTDIR\Uninstall.exe"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
 
   ;Remove the installation directory if it is empty.
   RMDir "$INSTDIR"

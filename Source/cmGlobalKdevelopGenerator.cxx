@@ -68,8 +68,9 @@ void cmGlobalKdevelopGenerator::Generate()
     std::string projectName=mf->GetProjectName();
     std::string cmakeFilePattern("CMakeLists.txt;*.cmake;");
     std::string fileToOpen;
+    std::vector<cmLocalGenerator*>& lgs= it->second;
     // create the project.kdevelop.filelist file
-    if(!this->CreateFilelistFile(it->second[0], it->second,
+    if(!this->CreateFilelistFile(it->second[0], lgs,
                                  outputDir, projectDir,
                                  projectName, cmakeFilePattern, fileToOpen))
       {
@@ -79,7 +80,11 @@ void cmGlobalKdevelopGenerator::Generate()
     //try to find the name of an executable so we have something to
     //run from kdevelop for now just pick the first executable found
     std::string executable;
-    cmTargets& targets=mf->GetTargets();
+    for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
+         lg!=lgs.end(); lg++)
+    {
+      cmMakefile* makefile=(*lg)->GetMakefile();
+       cmTargets& targets=makefile->GetTargets();
     for (cmTargets::iterator ti = targets.begin();
          ti != targets.end(); ti++)
       {
@@ -88,6 +93,11 @@ void cmGlobalKdevelopGenerator::Generate()
         executable = ti->second.GetProperty("LOCATION");
         break;
         }
+      }
+     if (!executable.empty())
+        {
+        break;
+    }
       }
     // now create a project file
     this->CreateProjectFile(outputDir, projectDir, projectName,
@@ -121,7 +131,7 @@ bool cmGlobalKdevelopGenerator
       tmp=*lt;
       cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
       // make sure the file is part of this source tree
-      if (tmp[0]!='/')
+      if ((tmp[0]!='/') && (strstr(tmp.c_str(), "CMakeFiles/")==0))
         {
         files.insert(tmp);
         tmp=cmSystemTools::GetFilenameName(tmp);
@@ -146,7 +156,7 @@ bool cmGlobalKdevelopGenerator
         {
         tmp=(*si)->GetFullPath();
         cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
-        if (tmp[0]!='/')
+        if ((tmp[0]!='/')  && (strstr(tmp.c_str(), "CMakeFiles/")==0))
           {
           files.insert(tmp);
           }
@@ -156,7 +166,7 @@ bool cmGlobalKdevelopGenerator
         {
         tmp=*lt;
         cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
-        if (tmp[0]!='/')
+        if ((tmp[0]!='/')  && (strstr(tmp.c_str(), "CMakeFiles/")==0))
           {
           files.insert(tmp.c_str());
           }
