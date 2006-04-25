@@ -3466,7 +3466,7 @@ bool SystemTools::IsSubDirectory(const char* cSubdir, const char* cDir)
   do
     {
     path = SystemTools::GetParentDirectory(path.c_str());
-    if ( dir == path )
+    if(SystemTools::ComparePath(dir.c_str(), path.c_str()))
       {
       return true;
       }
