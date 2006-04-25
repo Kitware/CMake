@@ -823,7 +823,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
     if (lg2 == lg || !lg->GetParent())
       {
       // for each target Generate the rule files for each target.
-      cmTargets& targets = lg->GetMakefile()->GetTargets();
+      cmTargets& targets = lg2->GetMakefile()->GetTargets();
       for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
         {
         if((t->second.GetType() == cmTarget::EXECUTABLE) ||
