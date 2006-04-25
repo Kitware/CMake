@@ -1103,15 +1103,40 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
       }
     }
 
-  // Construct the ordered list.
+  // Get the project-specified include directories.
   std::vector<std::string>& includes = this->Makefile->GetIncludeDirectories();
+
+  // Support putting all the in-project include directories first if
+  // it is requested by the project.
+  if(this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE"))
+    {
+    const char* topSourceDir = this->Makefile->GetHomeDirectory();
+    const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
+    for(std::vector<std::string>::iterator i = includes.begin();
+        i != includes.end(); ++i)
+      {
+      // Emit this directory only if it is a subdirectory of the
+      // top-level source or binary tree.
+      if(cmSystemTools::ComparePath(i->c_str(), topSourceDir) ||
+         cmSystemTools::ComparePath(i->c_str(), topBinaryDir) ||
+         cmSystemTools::IsSubDirectory(i->c_str(), topSourceDir) ||
+         cmSystemTools::IsSubDirectory(i->c_str(), topBinaryDir))
+        {
+        if(emitted.insert(*i).second)
+          {
+          dirs.push_back(*i);
+          }
+        }
+      }
+    }
+
+  // Construct the final ordered include directory list.
   for(std::vector<std::string>::iterator i = includes.begin();
       i != includes.end(); ++i)
     {
-    if(emitted.find(*i) == emitted.end())
+    if(emitted.insert(*i).second)
       {
       dirs.push_back(*i);
-      emitted.insert(*i);
       }
     }
 }
