@@ -25,7 +25,7 @@
 ;;  (setq load-path (cons (expand-file-name "/dir/with/cmake-mode") load-path))
 ;;  (require 'cmake-mode)
 ;;  (setq auto-mode-alist
-;;        (append '(("CMakeLists.txt" . cmake-mode)
+;;        (append '(("CMakeLists\\.txt" . cmake-mode)
 ;;                  ("\\.cmake$" . cmake-mode))
 ;;                auto-mode-alist))
 
@@ -156,7 +156,7 @@
 ;; Keyword highlighting regex-to-face map.
 ;;
 (defconst cmake-font-lock-keywords
-  (list '("^[ ]*\\(\\w+\\)[ ]*(" 1 font-lock-function-name-face))
+  (list '("^[ \t]*\\(\\w+\\)[ \t]*(" 1 font-lock-function-name-face))
   "Highlighting expressions for CMAKE mode."
   )
 
