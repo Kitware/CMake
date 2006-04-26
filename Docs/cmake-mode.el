@@ -155,33 +155,10 @@
 ;;
 ;; Keyword highlighting regex-to-face map.
 ;;
-(defconst cmake-font-lock-defaults
-  (list
-  '("\\<\\(A\\(?:DD_\\(?:CUSTOM_\\(?:COMMAND\\|TARGET\\)\\|DE\\(?:\\(?:FINITION\\|PENDENCIE\\)S\\)\\|EXECUTABLE\\|LIBRARY\\|SUBDIRECTORY\\|TEST\\)\\|UX_SOURCE_DIRECTORY\\)\\|BUILD_\\(?:COMMAND\\|NAME\\)\\|C\\(?:MAKE_MINIMUM_REQUIRED\\|ONFIGURE_FILE\\|REATE_TEST_SOURCELIST ?\\)\\|E\\(?:LSE\\|N\\(?:ABLE_TESTING ?\\|D\\(?:FOREACH\\|IF\\|MACRO\\|WHILE\\)\\)\\|X\\(?:EC\\(?:UTE_PROCESS\\|_PROGRAM\\)\\|PORT_LIBRARY_DEPENDENCIES\\)\\)\\|F\\(?:I\\(?:LE\\|ND_\\(?:FILE\\|LIBRARY\\|P\\(?:A\\(?:CKAGE\\|TH\\)\\|ROGRAM\\)\\)\\)\\|LTK_WRAP_UI\\|OREACH\\)\\|GET_\\(?:CMAKE_PROPERTY\\|DIRECTORY_PROPERTY\\|FILENAME_COMPONENT\\|\\(?:SOURCE_FILE\\|TARGET\\)_PROPERTY\\)\\|I\\(?:F\\|N\\(?:CLUDE\\(?:_\\(?:DIRECTORIES\\|EXTERNAL_MSPROJECT\\|REGULAR_EXPRESSION\\)\\)?\\|STALL\\(?:_\\(?:\\(?:FILE\\|PROGRAM\\|TARGET\\)S\\)\\)?\\)\\|TK_WRAP_TCL\\)\\|L\\(?:I\\(?:NK_\\(?:\\(?:DIRECTO\\|LIBRA\\)RIES\\)\\|ST\\)\\|OAD_C\\(?:ACHE\\|OMMAND\\)\\)\\|M\\(?:A\\(?:CRO\\|KE_DIRECTORY\\|RK_AS_ADVANCED\\)\\|ESSAGE\\)\\|O\\(?:PTION\\|UTPUT_REQUIRED_FILES\\)\\|PROJECT\\|QT_WRAP_\\(?:CPP\\|UI\\)\\|REMOVE\\|S\\(?:E\\(?:PARATE_ARGUMENTS\\|T\\(?:_\\(?:\\(?:DIRECTORY\\|SOURCE_FILES\\|TARGET\\)_PROPERTIES\\)\\)?\\)\\|ITE_NAME\\|OURCE_GROUP\\|TRING\\|UBDIR\\(?:\\(?:_DEPEND\\)?S\\)\\)\\|T\\(?:ARGET_LINK_LIBRARIES\\|RY_\\(?:COMPILE\\|RUN\\)\\)\\|U\\(?:SE_MANGLED_MESA\\|TILITY_SOURCE\\)\\|V\\(?:ARIABLE_REQUIRES\\|TK_\\(?:MAKE_INSTANTIATOR ?\\|WRAP_\\(?:JAVA\\|PYTHON\\|TCL\\)\\)\\)\\|W\\(?:\\(?:H\\|RITE_F\\)ILE\\)\\|a\\(?:dd_\\(?:custom_\\(?:command\\|target\\)\\|de\\(?:\\(?:finition\\|pendencie\\)s\\)\\|executable\\|library\\|subdirectory\\|test\\)\\|ux_source_directory\\)\\|build_\\(?:command\\|name\\)\\|c\\(?:make_minimum_required\\|onfigure_file\\|reate_test_sourcelist ?\\)\\|e\\(?:lse\\|n\\(?:able_testing ?\\|d\\(?:foreach\\|if\\|macro\\|while\\)\\)\\|x\\(?:ec_program\\|port_library_dependencies\\)\\)\\|f\\(?:ind_\\(?:file\\|library\\|p\\(?:a\\(?:ckage\\|th\\)\\|rogram\\)\\)\\|ltk_wrap_ui\\|oreach\\)\\|get_\\(?:cmake_property\\|directory_property\\|filename_component\\|\\(?:source_file\\|target\\)_property\\)\\|i\\(?:f\\|n\\(?:clude\\(?:_\\(?:directories\\|external_msproject\\|regular_expression\\)\\)?\\|stall_\\(?:\\(?:file\\|program\\|target\\)s\\)\\)\\|tk_wrap_tcl\\)\\|l\\(?:ink_\\(?:\\(?:directo\\|libra\\)ries\\)\\|oad_c\\(?:ache\\|ommand\\)\\)\\|m\\(?:a\\(?:cro\\|ke_directory\\|rk_as_advanced\\)\\|essage\\)\\|o\\(?:ption\\|utput_required_files\\)\\|project\\|qt_wrap_\\(?:cpp\\|ui\\)\\|remove\\|s\\(?:e\\(?:parate_arguments\\|t\\(?:_\\(?:\\(?:directory\\|source_files\\|target\\)_properties\\)\\)?\\)\\|ite_name\\|ource_group\\|tring\\|ubdir\\(?:\\(?:_depend\\)?s\\)\\)\\|t\\(?:arget_link_libraries\\|ry_\\(?:compile\\|run\\)\\)\\|u\\(?:se_mangled_mesa\\|tility_source\\)\\|v\\(?:ariable_requires\\|tk_\\(?:make_instantiator ?\\|wrap_\\(?:java\\|python\\|tcl\\)\\)\\)\\|w\\(?:\\(?:h\\|rite_f\\)ile\\)\\)\\>"
-    . font-lock-function-name-face)
-  "Highlighting expressions for CMAKE mode.")
+(defconst cmake-font-lock-keywords
+  (list '("^[ ]*\\(\\w+\\)[ ]*(" 1 font-lock-function-name-face))
+  "Highlighting expressions for CMAKE mode."
   )
-
-; The big regular expression above is constructed by running this
-; command in the scratch buffer.
-;
-;   (regexp-opt '("ADD_CUSTOM_COMMAND" "ADD_CUSTOM_TARGET" "ADD_DEFINITIONS" "ADD_DEPENDENCIES" "ADD_SUBDIRECTORY" "ADD_EXECUTABLE" "ADD_LIBRARY" "ADD_TEST" "AUX_SOURCE_DIRECTORY" "BUILD_COMMAND" "BUILD_NAME" "CMAKE_MINIMUM_REQUIRED" "CONFIGURE_FILE" "CREATE_TEST_SOURCELIST" "CREATE_TEST_SOURCELIST " "ELSE" "ENABLE_TESTING" "ENABLE_TESTING " "ENDFOREACH" "ENDIF" "ENDMACRO" "ENDWHILE" "EXEC_PROGRAM" "EXECUTE_PROCESS" "EXPORT_LIBRARY_DEPENDENCIES" "FILE" "FIND_FILE" "FIND_LIBRARY" "FIND_PACKAGE" "FIND_PATH" "FIND_PROGRAM" "FLTK_WRAP_UI" "FOREACH" "GET_CMAKE_PROPERTY" "GET_DIRECTORY_PROPERTY" "GET_FILENAME_COMPONENT" "GET_SOURCE_FILE_PROPERTY" "GET_TARGET_PROPERTY" "IF" "INCLUDE" "INCLUDE_DIRECTORIES" "INCLUDE_EXTERNAL_MSPROJECT" "INCLUDE_REGULAR_EXPRESSION" "INSTALL" "INSTALL_FILES" "INSTALL_PROGRAMS" "INSTALL_TARGETS" "ITK_WRAP_TCL" "LINK_DIRECTORIES" "LINK_LIBRARIES" "LIST" "LOAD_CACHE" "LOAD_COMMAND" "MACRO" "MAKE_DIRECTORY" "MARK_AS_ADVANCED" "MESSAGE" "OPTION" "OUTPUT_REQUIRED_FILES" "PROJECT" "QT_WRAP_CPP" "QT_WRAP_UI" "REMOVE" "SEPARATE_ARGUMENTS" "SET" "SET_DIRECTORY_PROPERTIES" "SET_SOURCE_FILES_PROPERTIES" "SET_TARGET_PROPERTIES" "SITE_NAME" "SOURCE_GROUP" "STRING" "SUBDIRS" "SUBDIR_DEPENDS" "TARGET_LINK_LIBRARIES" "TRY_COMPILE" "TRY_RUN" "USE_MANGLED_MESA" "UTILITY_SOURCE" "VARIABLE_REQUIRES" "VTK_MAKE_INSTANTIATOR" "VTK_MAKE_INSTANTIATOR " "VTK_WRAP_JAVA" "VTK_WRAP_PYTHON" "VTK_WRAP_TCL" "WHILE" "WRITE_FILE" "add_custom_command" "add_custom_target" "add_definitions" "add_dependencies" "add_subdirectory" "add_executable" "add_library" "add_test" "aux_source_directory" "build_command" "build_name" "cmake_minimum_required" "configure_file" "create_test_sourcelist" "create_test_sourcelist " "else" "enable_testing" "enable_testing " "endforeach" "endif" "endmacro" "endwhile" "exec_program" "export_library_dependencies" "find_file" "find_library" "find_package" "find_path" "find_program" "fltk_wrap_ui" "foreach" "get_cmake_property" "get_directory_property" "get_filename_component" "get_source_file_property" "get_target_property" "if" "include" "include_directories" "include_external_msproject" "include_regular_expression" "install_files" "install_programs" "install_targets" "itk_wrap_tcl" "link_directories" "link_libraries" "load_cache" "load_command" "macro" "make_directory" "mark_as_advanced" "message" "option" "output_required_files" "project" "qt_wrap_cpp" "qt_wrap_ui" "remove" "separate_arguments" "set" "set_directory_properties" "set_source_files_properties" "set_target_properties" "site_name" "source_group" "string" "subdirs" "subdir_depends" "target_link_libraries" "try_compile" "try_run" "use_mangled_mesa" "utility_source" "variable_requires" "vtk_make_instantiator" "vtk_make_instantiator " "vtk_wrap_java" "vtk_wrap_python" "vtk_wrap_tcl" "while" "write_file") t)
-;
-; The output can then be found in the *Messages* buffer, and is put in the
-; above list as
-;
-;   '("\\<the-regexp-string\\>" . font-lock-function-name-face)
-;
-; Note that the syntax \\<...\\> prevents highlighting keywords that
-; appear in the middle of other words.
-;
-; TODO: If anyone knows how to match function names occuring before an
-; open-paren and highlight them without also highlighting the
-; open-paren, please contact cmake@cmake.org or kitware@kitware.com
-; and tell us how to do it.  We would rather not have to include the
-; entire list of CMake commands in this mode file, which is a pain to
-; maintain.  Thanks.
-;
 
 ;------------------------------------------------------------------------------
 
@@ -225,7 +202,7 @@
 
   ; Setup font-lock mode.
   (make-local-variable 'font-lock-defaults)
-  (setq font-lock-defaults '(cmake-font-lock-defaults))
+  (setq font-lock-defaults '(cmake-font-lock-keywords))
 
   ; Setup indentation function.
   (make-local-variable 'indent-line-function)
