@@ -562,6 +562,17 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
   // definitions when scanning for dependencies.
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  // This platform supports symlinks, so cmSystemTools will translate
+  // paths.  Make sure PWD is set to the original name of the home
+  // output directory to help cmSystemTools to create the same
+  // translation table for the dependency scanning process.
+  depCmd << "cd "
+         << (this->LocalGenerator->Convert(
+               this->Makefile->GetHomeOutputDirectory(),
+               cmLocalGenerator::FULL, cmLocalGenerator::SHELL))
+         << " && ";
+#endif
   depCmd << "$(CMAKE_COMMAND) -E cmake_depends " 
          << " \""
          << this->GlobalGenerator->GetName() << "\" "
