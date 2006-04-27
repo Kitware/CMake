@@ -161,6 +161,7 @@
 #  QT_QT_LIBRARY        Qt-Library is now split
 
 INCLUDE(CheckSymbolExists)
+INCLUDE(AddFileDependencies)
 
 SET(QT_USE_FILE ${CMAKE_ROOT}/Modules/UseQt4.cmake)
 
@@ -183,7 +184,7 @@ SET(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
 IF (QT_QMAKE_EXECUTABLE)
 
    SET(QT4_QMAKE_FOUND FALSE)
-   
+
    EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE} ARGS "-query QT_VERSION" OUTPUT_VARIABLE QTVERSION)
 
    # check that we found the Qt4 qmake, Qt3 qmake output won't match here
@@ -194,31 +195,31 @@ IF (QT_QMAKE_EXECUTABLE)
       IF (NOT QT_MIN_VERSION)
          SET(QT_MIN_VERSION "4.0.0")
       ENDIF (NOT QT_MIN_VERSION)
-   
+
       #now parse the parts of the user given version string into variables
       STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" req_qt_major_vers "${QT_MIN_VERSION}")
       IF (NOT req_qt_major_vers)
          MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", expected e.g. \"4.0.1\"")
       ENDIF (NOT req_qt_major_vers)
-   
+
       # now parse the parts of the user given version string into variables
       STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_qt_major_vers "${QT_MIN_VERSION}")
       STRING(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_qt_minor_vers "${QT_MIN_VERSION}")
       STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
-   
+
       IF (NOT req_qt_major_vers EQUAL 4)
          MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", major version 4 is required, e.g. \"4.0.1\"")
       ENDIF (NOT req_qt_major_vers EQUAL 4)
-   
+
       # and now the version string given by qmake
       STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" found_qt_major_vers "${QTVERSION}")
       STRING(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" found_qt_minor_vers "${QTVERSION}")
       STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" found_qt_patch_vers "${QTVERSION}")
-   
+
       # compute an overall version number which can be compared at once
       MATH(EXPR req_vers "${req_qt_major_vers}*10000 + ${req_qt_minor_vers}*100 + ${req_qt_patch_vers}")
       MATH(EXPR found_vers "${found_qt_major_vers}*10000 + ${found_qt_minor_vers}*100 + ${found_qt_patch_vers}")
-   
+
       IF (found_vers LESS req_vers)
          SET(QT4_QMAKE_FOUND FALSE)
          SET(QT4_INSTALLED_VERSION_TOO_OLD TRUE)
@@ -566,7 +567,7 @@ IF (QT4_QMAKE_FOUND)
   # Set QT_QTDESIGNER_LIBRARY
   FIND_LIBRARY(QT_QTDESIGNER_LIBRARY_RELEASE NAMES QtDesigner QtDesigner4 PATHS ${QT_LIBRARY_DIR}        NO_DEFAULT_PATH)
   FIND_LIBRARY(QT_QTDESIGNER_LIBRARY_DEBUG   NAMES QtDesigner_debug QtDesignerd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
-  
+
   ############################################
   #
   # Check the existence of the libraries.
@@ -771,17 +772,6 @@ IF (QT4_QMAKE_FOUND)
   ENDMACRO (QT4_ADD_RESOURCES)
 
 
-   MACRO(_QT4_ADD_FILE_DEPENDENCIES _file)
-      GET_SOURCE_FILE_PROPERTY(_deps ${_file} OBJECT_DEPENDS)
-      IF (_deps)
-         SET(_deps ${_deps} ${ARGN})
-      ELSE (_deps)
-         SET(_deps ${ARGN})
-      ENDIF (_deps)
-      SET_SOURCE_FILES_PROPERTIES(${_file} PROPERTIES OBJECT_DEPENDS "${_deps}")
-   ENDMACRO(_QT4_ADD_FILE_DEPENDENCIES)
-
-
    MACRO(QT4_AUTOMOC)
       QT4_GET_MOC_INC_DIRS(_moc_INCS)
 
@@ -819,7 +809,7 @@ IF (QT4_QMAKE_FOUND)
                      DEPENDS ${_header}
                   )
 
-                  _QT4_ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
+                  ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
                ENDFOREACH (_current_MOC_INC)
             ENDIF(_match)
          ENDIF ( NOT _skip AND EXISTS ${_abs_FILE} )
@@ -889,6 +879,6 @@ ELSE(QT4_QMAKE_FOUND)
          MESSAGE(STATUS "The installed Qt version ${QTVERSION} is too old, at least version ${QT_MIN_VERSION} is required")
       ENDIF(QT4_INSTALLED_VERSION_TOO_OLD AND NOT Qt4_FIND_QUIETLY)
    ENDIF(Qt4_FIND_REQUIRED)
- 
+
 ENDIF (QT4_QMAKE_FOUND)
 
