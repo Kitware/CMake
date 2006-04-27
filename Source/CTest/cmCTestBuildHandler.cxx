@@ -534,20 +534,23 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
           break;
           }
         }
-      if ( cm->SourceFile.size() > 0 )
+      if ( !cm->SourceFile.empty() && cm->LineNumber >= 0 )
         {
-        os << "\t\t<SourceFile>" << cm->SourceFile << "</SourceFile>"
-           << std::endl;
-        }
-      if ( cm->SourceFileTail.size() > 0 )
-        {
-        os << "\t\t<SourceFileTail>" << cm->SourceFileTail
-           << "</SourceFileTail>" << std::endl;
-        }
-      if ( cm->LineNumber >= 0 )
-        {
-        os << "\t\t<SourceLineNumber>" << cm->LineNumber
-           << "</SourceLineNumber>" << std::endl;
+        if ( cm->SourceFile.size() > 0 )
+          {
+          os << "\t\t<SourceFile>" << cm->SourceFile << "</SourceFile>"
+            << std::endl;
+          }
+        if ( cm->SourceFileTail.size() > 0 )
+          {
+          os << "\t\t<SourceFileTail>" << cm->SourceFileTail
+            << "</SourceFileTail>" << std::endl;
+          }
+        if ( cm->LineNumber >= 0 )
+          {
+          os << "\t\t<SourceLineNumber>" << cm->LineNumber
+            << "</SourceLineNumber>" << std::endl;
+          }
         }
       os << "\t\t<PreContext>" << this->CTest->MakeXMLSafe(cm->PreContext)
          << "</PreContext>\n"
@@ -891,6 +894,7 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
   if ( !this->ErrorQuotaReached )
     {
     // Errors
+    int wrxCnt = 0;
     for ( it = this->ErrorMatchRegex.begin();
       it != this->ErrorMatchRegex.end();
       ++ it )
@@ -898,11 +902,15 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
       if ( it->find(data) )
         {
         errorLine = 1;
-        cmCTestLog(this->CTest, DEBUG, "  Error Line: " << data << std::endl);
+        cmCTestLog(this->CTest, DEBUG, "  Error Line: " << data
+          << " (matches: " << this->CustomWarningMatches[wrxCnt] << ")"
+          << std::endl);
         break;
         }
+      wrxCnt ++;
       }
     // Error exceptions
+    wrxCnt = 0;
     for ( it = this->ErrorExceptionRegex.begin();
       it != this->ErrorExceptionRegex.end();
       ++ it )
@@ -911,14 +919,17 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
         {
         errorLine = 0;
         cmCTestLog(this->CTest, DEBUG, "  Not an error Line: " << data
+          << " (matches: " << this->CustomErrorExceptions[wrxCnt] << ")"
           << std::endl);
         break;
         }
+      wrxCnt ++;
       }
     }
   if ( !this->WarningQuotaReached )
     {
     // Warnings
+    int wrxCnt = 0;
     for ( it = this->WarningMatchRegex.begin();
       it != this->WarningMatchRegex.end();
       ++ it )
@@ -927,11 +938,15 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
         {
         warningLine = 1;
         cmCTestLog(this->CTest, DEBUG,
-          "  Warning Line: " << data << std::endl);
+          "  Warning Line: " << data
+          << " (matches: " << this->CustomWarningMatches[wrxCnt] << ")"
+          << std::endl);
         break;
         }
+      wrxCnt ++;
       }
 
+    wrxCnt = 0;
     // Warning exceptions
     for ( it = this->WarningExceptionRegex.begin();
       it != this->WarningExceptionRegex.end();
@@ -941,9 +956,11 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
         {
         warningLine = 0;
         cmCTestLog(this->CTest, DEBUG, "  Not a warning Line: " << data
+          << " (matches: " << this->CustomWarningExceptions[wrxCnt] << ")"
           << std::endl);
         break;
         }
+      wrxCnt ++;
       }
     }
   if ( errorLine )
