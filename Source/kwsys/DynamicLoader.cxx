@@ -359,10 +359,14 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
   DynamicLoader::LibraryHandle lib, const char* sym)
 {
-  void* result = dlsym(lib, sym);
-
   // Hack to cast pointer-to-data to pointer-to-function.
-  return *reinterpret_cast<DynamicLoader::SymbolPointer*>(&result);
+  union 
+  {
+    void* pvoid;
+    DynamicLoader::SymbolPointer psym;
+  } result;
+  result.pvoid = dlsym(lib, sym);
+  return result.psym;
 }
 
 //----------------------------------------------------------------------------
