@@ -24,12 +24,11 @@
 #include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
 
-#include <cmsys/Terminal.h>
-
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
 # include "cmVariableWatch.h"
 # include "cmVersion.h"
+# include <cmsys/Terminal.h>
 #endif
 
 // only build kdevelop generator on non-windows platforms
@@ -1007,11 +1006,13 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       return 1;
       }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
     // Internal CMake color makefile support.
-    else if (args[1] == "cmake_echo_color" )
+    else if (args[1] == "cmake_echo_color")
       {
       return cmake::ExecuteEchoColor(args);
       }
+#endif
 
     // Tar files
     else if (args[1] == "tar" && args.size() > 3)
@@ -2353,6 +2354,7 @@ void cmake::GenerateGraphViz(const char* fileName)
 }
 
 //----------------------------------------------------------------------------
+#ifdef CMAKE_BUILD_WITH_CMAKE
 int cmake::ExecuteEchoColor(std::vector<std::string>& args)
 {
   // The arguments are
@@ -2457,3 +2459,9 @@ int cmake::ExecuteEchoColor(std::vector<std::string>& args)
 
   return 0;
 }
+#else
+int cmake::ExecuteEchoColor(std::vector<std::string>&)
+{
+  return 1;
+}
+#endif

@@ -856,6 +856,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
 {
   // Choose the color for the text.
   std::string color_name;
+#ifdef CMAKE_BUILD_WITH_CMAKE
   if(this->GlobalGenerator->GetToolSupportsColor() &&
      this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE"))
     {
@@ -882,6 +883,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
         break;
       }
     }
+#endif
 
   // Echo one line at a time.
   std::string line;
