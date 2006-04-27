@@ -315,6 +315,8 @@ protected:
   void CleanupCommandsAndMacros();
 
   void GenerateGraphViz(const char* fileName);
+
+  static int ExecuteEchoColor(std::vector<std::string>& args);
   
   cmVariableWatch* VariableWatch;
 

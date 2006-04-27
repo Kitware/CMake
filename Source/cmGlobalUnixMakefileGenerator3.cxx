@@ -26,7 +26,7 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
   // This type of makefile always requires unix style paths
   this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeUnixFindMake.cmake";
-  this->ToolSupportsColorVT100 = true;
+  this->ToolSupportsColor = true;
 }
 
 void cmGlobalUnixMakefileGenerator3

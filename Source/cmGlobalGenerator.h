@@ -127,7 +127,7 @@ public:
   static int s_TryCompileTimeout;
   
   bool GetForceUnixPaths() {return this->ForceUnixPaths;}
-  bool GetToolSupportsColorVT100() { return this->ToolSupportsColorVT100; }
+  bool GetToolSupportsColor() { return this->ToolSupportsColor; }
   ///! return the language for the given extension
   const char* GetLanguageFromExtension(const char* ext);
   ///! is an extension to be ignored
@@ -204,7 +204,7 @@ protected:
     std::vector<std::string> depends, bool depends_on_all = false);
 
   bool ForceUnixPaths;
-  bool ToolSupportsColorVT100;
+  bool ToolSupportsColor;
   cmStdString FindMakeProgramFile;
   cmStdString ConfiguredFilesPath;
   cmake *CMakeInstance;

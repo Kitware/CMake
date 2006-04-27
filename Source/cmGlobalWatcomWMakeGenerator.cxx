@@ -22,7 +22,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
 {
   this->FindMakeProgramFile = "CMakeFindWMake.cmake";
   this->ForceUnixPaths = false;
-  this->ToolSupportsColorVT100 = false;
+  this->ToolSupportsColor = true;
   this->EmptyCommandsHack = "@cd .";
 }
 

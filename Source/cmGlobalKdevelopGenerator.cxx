@@ -28,7 +28,7 @@ cmGlobalKdevelopGenerator::cmGlobalKdevelopGenerator()
   // This type of makefile always requires unix style paths
   this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeUnixFindMake.cmake";
-  this->ToolSupportsColorVT100 = false;
+  this->ToolSupportsColor = false;
 }
 
 ///! Create a local generator appropriate to this Global Generator
