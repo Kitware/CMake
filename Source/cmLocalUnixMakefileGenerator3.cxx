@@ -510,7 +510,8 @@ cmLocalUnixMakefileGenerator3
   if(this->WindowsShell)
     {
      makefileStream
-       << "SHELL = C:\\WINDOWS\\system32\\cmd.exe\n";
+       << "SHELL = cmd.exe\n"
+       << "\n";
     }
   else
     {
