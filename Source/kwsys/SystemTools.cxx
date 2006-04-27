@@ -118,7 +118,12 @@ inline int Rmdir(const char* dir)
 }
 inline const char* Getcwd(char* buf, unsigned int len)
 {
-  return _getcwd(buf, len);
+  const char* ret _getcwd(buf, len);
+  if(!ret)
+    {
+    fprintf(stderr, "No current working directory.\n");
+    abort();
+    }
 }
 inline int Chdir(const char* dir)
 {
@@ -152,8 +157,15 @@ inline int Rmdir(const char* dir)
 }
 inline const char* Getcwd(char* buf, unsigned int len)
 {
-  return getcwd(buf, len);
+  const char* ret = getcwd(buf, len);
+  if(!ret)
+    {
+    fprintf(stderr, "No current working directory\n");
+    abort();
+    }
+  return ret;
 }
+
 inline int Chdir(const char* dir)
 {
   return chdir(dir);
