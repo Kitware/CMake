@@ -22,7 +22,7 @@ cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator()
 {
   this->FindMakeProgramFile = "CMakeMinGWFindMake.cmake";
   this->ForceUnixPaths = true;
-  this->ToolSupportsColorVT100 = false;
+  this->ToolSupportsColor = true;
 }
 
 void cmGlobalMinGWMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,

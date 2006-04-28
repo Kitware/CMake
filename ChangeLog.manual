@@ -1,5 +1,13 @@
 Changes in CMake 2.4.1
 
+* Many updates and fixes for FindQt4.cmake
+
+* Fix CMAKE_REQUIRED_FLAGS in CheckCXXSourceCompiles.cmake 
+
+* Handle running make from a symlinked build tree
+
+* Automatic color ouput detection for shells building with make
+
 * Kdevelop generator handles CMakeFiles directory better
 
 * add correct depend information for fluid 

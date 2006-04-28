@@ -28,6 +28,7 @@
 # include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
 # include "cmVariableWatch.h"
 # include "cmVersion.h"
+# include <cmsys/Terminal.h>
 #endif
 
 // only build kdevelop generator on non-windows platforms
@@ -1004,6 +1005,14 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       return 1;
       }
+
+#ifdef CMAKE_BUILD_WITH_CMAKE
+    // Internal CMake color makefile support.
+    else if (args[1] == "cmake_echo_color")
+      {
+      return cmake::ExecuteEchoColor(args);
+      }
+#endif
 
     // Tar files
     else if (args[1] == "tar" && args.size() > 3)
@@ -2344,3 +2353,115 @@ void cmake::GenerateGraphViz(const char* fileName)
   str << "}" << std::endl;
 }
 
+//----------------------------------------------------------------------------
+#ifdef CMAKE_BUILD_WITH_CMAKE
+int cmake::ExecuteEchoColor(std::vector<std::string>& args)
+{
+  // The arguments are
+  //   argv[0] == <cmake-executable>
+  //   argv[1] == cmake_echo_color
+
+  // On some platforms (an MSYS prompt) cmsysTerminal may not be able
+  // to determine whether the stream is displayed on a tty.  In this
+  // case it assumes no unless we tell it otherwise.  Since we want
+  // color messages to be displayed for users we will assume yes.
+  // However, we can test for some situations when the answer is most
+  // likely no.
+  int assumeTTY = cmsysTerminal_Color_AssumeTTY;
+  if(cmSystemTools::GetEnv("DART_TEST_FROM_DART") ||
+     cmSystemTools::GetEnv("DASHBOARD_TEST_FROM_CTEST"))
+    {
+    // Avoid printing color escapes during dashboard builds.
+    assumeTTY = 0;
+    }
+
+  bool enabled = true;
+  int color = cmsysTerminal_Color_Normal;
+  bool newline = true;
+  for(unsigned int i=2; i < args.size(); ++i)
+    {
+    if(args[i].find("--switch=") == 0)
+      {
+      // Enable or disable color based on the switch value.
+      std::string value = args[i].substr(9);
+      if(!value.empty())
+        {
+        if(cmSystemTools::IsOn(value.c_str()))
+          {
+          enabled = true;
+          }
+        else
+          {
+          enabled = false;
+          }
+        }
+      }
+    else if(args[i] == "--normal")
+      {
+      color = cmsysTerminal_Color_Normal;
+      }
+    else if(args[i] == "--black")
+      {
+      color = cmsysTerminal_Color_ForegroundBlack;
+      }
+    else if(args[i] == "--red")
+      {
+      color = cmsysTerminal_Color_ForegroundRed;
+      }
+    else if(args[i] == "--green")
+      {
+      color = cmsysTerminal_Color_ForegroundGreen;
+      }
+    else if(args[i] == "--yellow")
+      {
+      color = cmsysTerminal_Color_ForegroundYellow;
+      }
+    else if(args[i] == "--blue")
+      {
+      color = cmsysTerminal_Color_ForegroundBlue;
+      }
+    else if(args[i] == "--magenta")
+      {
+      color = cmsysTerminal_Color_ForegroundMagenta;
+      }
+    else if(args[i] == "--cyan")
+      {
+      color = cmsysTerminal_Color_ForegroundCyan;
+      }
+    else if(args[i] == "--white")
+      {
+      color = cmsysTerminal_Color_ForegroundWhite;
+      }
+    else if(args[i] == "--bold")
+      {
+      color |= cmsysTerminal_Color_ForegroundBold;
+      }
+    else if(args[i] == "--no-newline")
+      {
+      newline = false;
+      }
+    else if(args[i] == "--newline")
+      {
+      newline = true;
+      }
+    else if(enabled)
+      {
+      // Color is enabled.  Print with the current color.
+      cmsysTerminal_cfprintf(color | assumeTTY, stdout, "%s%s",
+                             args[i].c_str(), newline? "\n" : "");
+      }
+    else
+      {
+      // Color is disabled.  Print without color.
+      fprintf(stdout, "%s%s", args[i].c_str(), newline? "\n" : "");
+      }
+    }
+
+  return 0;
+}
+#else
+int cmake::ExecuteEchoColor(std::vector<std::string>&)
+{
+  return 1;
+}
+#endif

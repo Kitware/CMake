@@ -42,6 +42,7 @@ void cmTest::SetCommand(const char* command)
     command = "";
     }
   this->Command = command;
+  cmSystemTools::ConvertToUnixSlashes(this->Command);
 }
 
 void cmTest::SetArguments(const std::vector<cmStdString>& args)

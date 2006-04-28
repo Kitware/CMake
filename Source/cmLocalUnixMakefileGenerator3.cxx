@@ -35,28 +35,6 @@
 #include <memory> // auto_ptr
 #include <queue>
 
-#define CMAKE_VT100_NORMAL        "\33[0m"
-#define CMAKE_VT100_BOLD          "\33[1m"
-#define CMAKE_VT100_UNDERLINE     "\33[4m"
-#define CMAKE_VT100_BLINK         "\33[5m"
-#define CMAKE_VT100_INVERSE       "\33[7m"
-#define CMAKE_VT100_FRONT_BLACK   "\33[30m"
-#define CMAKE_VT100_FRONT_RED     "\33[31m"
-#define CMAKE_VT100_FRONT_GREEN   "\33[32m"
-#define CMAKE_VT100_FRONT_YELLOW  "\33[33m"
-#define CMAKE_VT100_FRONT_BLUE    "\33[34m"
-#define CMAKE_VT100_FRONT_MAGENTA "\33[35m"
-#define CMAKE_VT100_FRONT_CYAN    "\33[36m"
-#define CMAKE_VT100_FRONT_WHITE   "\33[37m"
-#define CMAKE_VT100_BACK_BLACK    "\33[40m"
-#define CMAKE_VT100_BACK_RED      "\33[41m"
-#define CMAKE_VT100_BACK_GREEN    "\33[42m"
-#define CMAKE_VT100_BACK_YELLOW   "\33[43m"
-#define CMAKE_VT100_BACK_BLUE     "\33[44m"
-#define CMAKE_VT100_BACK_MAGENTA  "\33[45m"
-#define CMAKE_VT100_BACK_CYAN     "\33[46m"
-#define CMAKE_VT100_BACK_WHITE    "\33[47m"
-
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
 {
@@ -532,7 +510,8 @@ cmLocalUnixMakefileGenerator3
   if(this->WindowsShell)
     {
      makefileStream
-       << "SHELL = C:\\WINDOWS\\system32\\cmd.exe\n";
+       << "SHELL = cmd.exe\n"
+       << "\n";
     }
   else
     {
@@ -876,32 +855,35 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
                                           EchoColor color)
 {
   // Choose the color for the text.
-  std::string prefix;
-  if(this->GlobalGenerator->GetToolSupportsColorVT100() &&
+  std::string color_name;
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  if(this->GlobalGenerator->GetToolSupportsColor() &&
      this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE"))
     {
+    // See cmake::ExecuteEchoColor in cmake.cxx for these options.
+    // This color set is readable on both black and white backgrounds.
     switch(color)
       {
       case EchoNormal:
         break;
       case EchoDepend:
-        prefix = CMAKE_VT100_FRONT_MAGENTA;
+        color_name = "--magenta --bold ";
         break;
       case EchoBuild:
-        prefix = CMAKE_VT100_FRONT_GREEN;
+        color_name = "--green ";
         break;
       case EchoLink:
-        prefix = CMAKE_VT100_FRONT_RED;
+        color_name = "--red --bold ";
         break;
       case EchoGenerate:
-        prefix = CMAKE_VT100_FRONT_BLUE;
+        color_name = "--blue --bold ";
         break;
       case EchoGlobal:
-        prefix = CMAKE_VT100_FRONT_CYAN;
+        color_name = "--cyan ";
         break;
       }
     }
-  std::string suffix = prefix.empty()? "" : CMAKE_VT100_NORMAL;
+#endif
 
   // Echo one line at a time.
   std::string line;
@@ -914,16 +896,28 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
       if(*c != '\0' || !line.empty())
         {
         // Add a command to echo this line.
-        std::string cmd = "@echo ";
+        std::string cmd;
+        if(color_name.empty())
+          {
+          // Use the native echo command.
+          cmd = "@echo ";
         if(this->EchoNeedsQuote)
           {
           cmd += "\"";
           }
-          cmd += prefix;
         cmd += line;
-          cmd += suffix;
         if(this->EchoNeedsQuote)
           {
+            cmd += "\"";
+            }
+          }
+        else
+          {
+          // Use cmake to echo the text in color.
+          cmd = "@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) ";
+          cmd += color_name;
+          cmd += "\"";
+          cmd += line;
           cmd += "\"";
           }
         commands.push_back(cmd);

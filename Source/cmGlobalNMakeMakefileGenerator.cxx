@@ -22,7 +22,7 @@ cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
 {
   this->FindMakeProgramFile = "CMakeNMakeFindMake.cmake";
   this->ForceUnixPaths = false;
-  this->ToolSupportsColorVT100 = false;
+  this->ToolSupportsColor = true;
 }
 
 void cmGlobalNMakeMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,
