@@ -97,6 +97,11 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "This option tells ctest to act as a Dart client "
    "and perform some action such as start, build, test etc. "
    "Combining -M and -T is similar to -D"},
+  {"--track <track>", "Specify the track to submit dashboard to",
+   "Submit dashboard to specified track instead of default one. By "
+   "default, the dashboard is submitted to Nightly, Experimental, or "
+   "Continuous track, but by specifying this option, the track can be "
+   "arbitrary."},
   {"-S <script>, --script <script>", "Execute a dashboard for a "
    "configuration",
    "This option tells ctest to load in a configuration script which sets "

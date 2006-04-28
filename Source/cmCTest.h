@@ -297,6 +297,10 @@ public:
   std::vector<cmStdString> &GetInitialCommandLineArguments()
   { return this->InitialCommandLineArguments; };
 
+  //! Set the track to submit to
+  void SetSpecificTrack(const char* track);
+  const char* GetSpecificTrack();
+
 private:
   std::string ConfigType;
   bool Verbose;
@@ -342,6 +346,7 @@ private:
   bool                    TomorrowTag;
 
   int                     TestModel;
+  std::string             SpecificTrack;
 
   double                  TimeOut;
 

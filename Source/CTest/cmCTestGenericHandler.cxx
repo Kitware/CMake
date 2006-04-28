@@ -54,9 +54,37 @@ void cmCTestGenericHandler::SetOption(const char* op, const char* value)
 }
 
 //----------------------------------------------------------------------
+void cmCTestGenericHandler::SetPersistentOption(const char* op, const char* value)
+{
+  if ( !op )
+    {
+    return;
+    }
+  if ( !value )
+    {
+    cmCTestGenericHandler::t_StringToString::iterator remit
+      = this->PersistentOptions.find(op);
+    if ( remit != this->PersistentOptions.end() )
+      {
+      this->PersistentOptions.erase(remit);
+      }
+    return;
+    }
+
+  this->PersistentOptions[op] = value;
+}
+
+//----------------------------------------------------------------------
 void cmCTestGenericHandler::Initialize()
 {
   this->Options.clear();
+  t_StringToString::iterator it;
+  for ( it = this->PersistentOptions.begin(); 
+    it != this->PersistentOptions.end();
+    ++ it )
+    {
+    this->Options[it->first.c_str()] = it->second.c_str();
+    }
 }
 
 //----------------------------------------------------------------------

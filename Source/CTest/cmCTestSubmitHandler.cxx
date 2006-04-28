@@ -874,6 +874,12 @@ int cmCTestSubmitHandler::ProcessHandler()
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "Submit files (using "
     << this->CTest->GetCTestConfiguration("DropMethod") << ")"
     << std::endl);
+  const char* specificTrack = this->CTest->GetSpecificTrack();
+  if ( specificTrack )
+    {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Send to track: "
+      << specificTrack << std::endl);
+    }
   this->SetLogFile(&ofs);
   if ( this->CTest->GetCTestConfiguration("DropMethod") == "" ||
     this->CTest->GetCTestConfiguration("DropMethod") ==  "ftp" )
