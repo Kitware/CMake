@@ -53,9 +53,19 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
       << std::endl);
     return false;
     }
+  std::string nsisInInstallOptions
+    = this->FindTemplate("NSIS.InstallOptions.ini.in");
+  if ( nsisInInstallOptions.size() == 0 )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "CPack error: Could not find NSIS installer options file."
+      << std::endl);
+    return false;
+    }
   std::string nsisFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   std::string tmpFile = nsisFileName;
   tmpFile += "/NSISOutput.log";
+  std::string nsisInstallOptions = nsisFileName + "/NSIS.InstallOptions.ini";
   nsisFileName += "/project.nsi";
   cmOStringStream str;
   std::vector<std::string>::const_iterator it;
@@ -90,6 +100,7 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << nsisInFileName
     << " to " << nsisFileName << std::endl);
+  this->ConfigureFile(nsisInInstallOptions.c_str(), nsisInstallOptions.c_str());
   this->ConfigureFile(nsisInFileName.c_str(), nsisFileName.c_str());
   std::string nsisCmd = "\"";
   nsisCmd += this->GetOption("CPACK_INSTALLER_PROGRAM");

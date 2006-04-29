@@ -13,6 +13,9 @@
   Var MUI_TEMP
   Var STARTMENU_FOLDER
   Var SV_ALLUSERS
+  Var START_MENU
+  Var ADD_TO_PATH
+  Var ADD_TO_PATH_ALL_USERS
 
 ;--------------------------------
 ;Include Modern UI
@@ -60,6 +63,8 @@ Function .onInit
   done:
   StrCmp $SV_ALLUSERS "AllUsers" 0 +2
     StrCpy $INSTDIR "$PROGRAMFILES\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
+
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "NSIS.InstallOptions.ini"
 FunctionEnd
 
 ;--------------------------------
@@ -95,12 +100,7 @@ FunctionEnd
 ;====================================================
 !macro select_NT_profile UN
 Function ${UN}select_NT_profile
-   MessageBox MB_YESNO|MB_ICONQUESTION "Change the environment for all users? $\n\
-$\n\
-Saying no here will change the envrironment for the current user only. $\n\
-$\n\
-(Administrator permissions required for all users)" \
-      IDNO environment_single
+   StrCmp $ADD_TO_PATH_ALL_USERS "1" 0 environment_single
       DetailPrint "Selected environment for all users"
       Push "all"
       Return
@@ -124,7 +124,7 @@ Function AddToPath
    Exch $0
    Push $1
    Push $2
-  
+
    Call IsNT
    Pop $1
    StrCmp $1 1 AddToPath_NT
@@ -153,8 +153,12 @@ $\r$\n\
       read_path_NT_current:
          ReadRegStr $1 ${NT_current_env} "PATH"
       read_path_NT_resume:
-      StrCmp $1 "" AddToPath_NTdoIt
+      StrCmp $1 "" AddToPath_NoCurrentPath
          StrCpy $2 "$0;$1"
+         Goto AddToPath_NTdoIt
+      AddToPath_NoCurrentPath:
+         DetailPrint "No current path, so just use $0"
+         StrCpy $2 $0
          Goto AddToPath_NTdoIt
       AddToPath_NTdoIt:
          StrCmp $4 "current" write_path_NT_current
@@ -176,7 +180,8 @@ Should I try for the current user?" \
             Goto write_path_NT_failed
          write_path_NT_resume:
          SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-         DetailPrint "added path for user ($4), $0"
+         DetailPrint "Added path for user ($4), $0"
+         DetailPrint "New path is: $2"
          write_path_NT_failed:
       
       Pop $4
@@ -243,18 +248,32 @@ $\r$\n\
          ReadRegStr $1 ${NT_current_env} "PATH"
       un_read_path_NT_resume:
  
+      StrCpy $8 $0
       Push $1
       Push $0
       Call un.StrStr ; Find $0 in $1
       Pop $0 ; pos of our dir
       IntCmp $0 -1 unRemoveFromPath_done
          ; else, it is in path
-         StrCpy $3 $1 $0 ; $3 now has the part of the path before our dir
-         IntOp $2 $2 + $0 ; $2 now contains the pos after our dir in the path (';')
-         IntOp $2 $2 + 1 ; $2 now containts the pos after our dir and the semicolon.
-         StrLen $0 $1
-         StrCpy $1 $1 $0 $2
-         StrCpy $3 "$3$1"
+         StrLen $5 $1 ; Get the length of the original path
+         StrLen $6 $0 ; get the length of path without the first path
+         IntOp $5 $5 - $6
+         IntOp $5 $5 - 1
+         IntCmp $5 -1 unRemoveFromPath_nothingBefore
+           StrCpy $3 $1 $5 ; $3 now has the part of the path before our dir
+           Goto unRemoveFromPath_AfterBefore
+         unRemoveFromPath_nothingBefore:
+           StrCpy $3 ""
+         unRemoveFromPath_AfterBefore:
+         StrCpy $7 $0 "" $2 ; $3 now has the part of the path after our dir
+         StrCpy $3 "$3$7"
+
+         ; $3 now holds path, but there may be some stray semicolon at
+         ; beginning. Let's remove it
+         StrCpy $7 $3 1
+         StrCmp $7 ";" 0 unRemoveFromPath_NoTrailingSemiColon
+           StrCpy $3 $3 "" 1
+         unRemoveFromPath_NoTrailingSemiColon:
  
          StrCmp $4 "current" un_write_path_NT_current
             WriteRegExpandStr ${NT_all_env} "PATH" $3
@@ -263,6 +282,8 @@ $\r$\n\
             WriteRegExpandStr ${NT_current_env} "PATH" $3
          un_write_path_NT_resume:
          SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+         DetailPrint "Removed $8 from the path"
+         DetailPrint "New path is: $3"
    unRemoveFromPath_done:
    Pop $4
    Pop $3
@@ -364,7 +385,10 @@ FunctionEnd
 
 ;--------------------------------
 ;Pages
+  !insertmacro MUI_PAGE_WELCOME
 
+  !insertmacro MUI_PAGE_LICENSE "@CPACK_RESOURCE_FILE_LICENSE@"
+  Page custom InstallOptionsPage
   !insertmacro MUI_PAGE_DIRECTORY
   
   ;Start Menu Folder Page Configuration
@@ -384,12 +408,28 @@ FunctionEnd
   !insertmacro MUI_LANGUAGE "English"
 
 ;--------------------------------
+;Reserve Files
+
+  ;These files should be inserted before other files in the data block
+  ;Keep these lines before any File command
+  ;Only for solid compression (by default, solid compression is enabled for BZIP2 and LZMA)
+
+  ReserveFile "NSIS.InstallOptions.ini"
+  !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
+
+
+;--------------------------------
 ;Installer Sections
 
 Section "Add to path"
   Push $INSTDIR\bin
-  StrCmp "@CPACK_NSIS_MODIFY_PATH@" "ON" 0 +2
+  ;Read a value from an InstallOptions INI file
+  !insertmacro MUI_INSTALLOPTIONS_READ $ADD_TO_PATH "NSIS.InstallOptions.ini" "Field 2" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $ADD_TO_PATH_ALL_USERS "NSIS.InstallOptions.ini" "Field 3" "State"
+  ;StrCmp "@CPACK_NSIS_MODIFY_PATH@" "ON" 0 +2
+  StrCmp $ADD_TO_PATH "1" 0 doNotAddToPath
     Call AddToPath
+  doNotAddToPath:
 SectionEnd
 
 Section "Installer Section" InstSection
@@ -416,12 +456,26 @@ WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PAC
 @CPACK_NSIS_CREATE_ICONS@
   CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 
+  ; Write special uninstall registry entries
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
+    "StartMenu" "$STARTMENU_FOLDER"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
+    "AddToPath" "$ADD_TO_PATH"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
+    "AddToPathAllUsers" "$ADD_TO_PATH_ALL_USERS"
+
 @CPACK_NSIS_EXTRA_INSTALL_COMMANDS@
   
   !insertmacro MUI_STARTMENU_WRITE_END
 
 SectionEnd
 
+;--------------------------------
+; Create custom pages
+Function InstallOptionsPage
+  !insertmacro MUI_HEADER_TEXT "Install Options" "Chose options for installing @CPACK_PACKAGE_INSTALL_DIRECTORY@"
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "NSIS.InstallOptions.ini"
+FunctionEnd
 
 ;--------------------------------
 ; determine admin versus local install
@@ -452,6 +506,14 @@ FunctionEnd
 ;Uninstaller Section
 
 Section "Uninstall"
+  ReadRegStr $START_MENU HKLM \
+   "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" "StartMenu"
+  ;MessageBox MB_OK "Start menu is in: $START_MENU"
+  ReadRegStr $ADD_TO_PATH HKLM \
+    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" "AddToPath"
+  ReadRegStr $ADD_TO_PATH_ALL_USERS HKLM \
+    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" "AddToPathAllUsers"
+  ;MessageBox MB_OK "Add to path: $ADD_TO_PATH all users: $ADD_TO_PATH_ALL_USERS"
 
 @CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS@
 
@@ -485,14 +547,34 @@ Section "Uninstall"
     
     IfErrors startMenuDeleteLoopDone
   
-    StrCmp $MUI_TEMP $SMPROGRAMS startMenuDeleteLoopDone startMenuDeleteLoop
+    StrCmp "$MUI_TEMP" "$SMPROGRAMS" startMenuDeleteLoopDone startMenuDeleteLoop
   startMenuDeleteLoopDone:
+
+  ; If the user changed the shortcut, then untinstall may not work. This should
+  ; try to fix it.
+  StrCpy $MUI_TEMP "$START_MENU"
+  Delete "$SMPROGRAMS\$MUI_TEMP\Uninstall.lnk"
+@CPACK_NSIS_DELETE_ICONS@
+  
+  ;Delete empty start menu parent diretories
+  StrCpy $MUI_TEMP "$SMPROGRAMS\$MUI_TEMP"
+ 
+  secondStartMenuDeleteLoop:
+    ClearErrors
+    RMDir $MUI_TEMP
+    GetFullPathName $MUI_TEMP "$MUI_TEMP\.."
+    
+    IfErrors secondStartMenuDeleteLoopDone
+  
+    StrCmp "$MUI_TEMP" "$SMPROGRAMS" secondStartMenuDeleteLoopDone secondStartMenuDeleteLoop
+  secondStartMenuDeleteLoopDone:
 
   DeleteRegKey /ifempty SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@"
 
   Push $INSTDIR\bin
-  StrCmp "@CPACK_NSIS_MODIFY_PATH@" "ON" 0 +2
+  StrCmp $ADD_TO_PATH "1" 0 doNotRemoveFromPath
     Call un.RemoveFromPath
+  doNotRemoveFromPath:
 SectionEnd
 
 
