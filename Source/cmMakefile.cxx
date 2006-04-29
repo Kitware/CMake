@@ -91,8 +91,8 @@ const char* cmMakefile::GetReleaseVersion()
 #if CMake_VERSION_MINOR & 1
   return "development";
 #else
-# if CMake_VERSION_PATCH == 0
-  return "beta";
+# if CMake_VERSION_PATCH == 1
+  return "1-beta";
 # else
   return "patch " CMAKE_TO_STRING(CMake_VERSION_PATCH);
 # endif  

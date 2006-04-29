@@ -1,5 +1,7 @@
 Changes in CMake 2.4.1
 
+* Several ctest and cpack bug fixes
+
 * Many updates and fixes for FindQt4.cmake
 
 * Fix CMAKE_REQUIRED_FLAGS in CheckCXXSourceCompiles.cmake 

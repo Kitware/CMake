@@ -784,7 +784,7 @@ int cmCTest::ProcessTests()
   if ( this->Tests[UPDATE_TEST] || this->Tests[ALL_TEST] )
     {
     cmCTestGenericHandler* uphandler = this->GetHandler("update");
-    uphandler->SetOption("SourceDirectory",
+    uphandler->SetPersistentOption("SourceDirectory",
       this->GetCTestConfiguration("SourceDirectory").c_str());
     update_count = uphandler->ProcessHandler();
     if ( update_count < 0 )
@@ -887,6 +887,10 @@ int cmCTest::ProcessTests()
 //----------------------------------------------------------------------
 std::string cmCTest::GetTestModelString()
 {
+  if ( !this->SpecificTrack.empty() )
+    {
+    return this->SpecificTrack;
+    }
   switch ( this->TestModel )
     {
   case cmCTest::NIGHTLY:
@@ -1337,6 +1341,11 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       this->Debug = true;
       this->ShowLineNumbers = true;
       }
+    if(this->CheckArgument(arg, "--track") && i < args.size() - 1)
+      {
+      i++;
+      this->SpecificTrack = args[i];
+      }
     if(this->CheckArgument(arg, "--show-line-numbers"))
       {
       this->ShowLineNumbers = true;
@@ -1690,22 +1699,22 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i < args.size() - 1)
       {
       i++;
-      this->GetHandler("test")->SetOption("TestsToRunInformation",
+      this->GetHandler("test")->SetPersistentOption("TestsToRunInformation",
         args[i].c_str());
-      this->GetHandler("memcheck")->SetOption("TestsToRunInformation",
+      this->GetHandler("memcheck")->SetPersistentOption("TestsToRunInformation",
         args[i].c_str());
       }
     if(this->CheckArgument(arg, "-U", "--union"))
       {
-      this->GetHandler("test")->SetOption("UseUnion", "true");
-      this->GetHandler("memcheck")->SetOption("UseUnion", "true");
+      this->GetHandler("test")->SetPersistentOption("UseUnion", "true");
+      this->GetHandler("memcheck")->SetPersistentOption("UseUnion", "true");
       }
     if(this->CheckArgument(arg, "-R", "--tests-regex") && i < args.size() - 1)
       {
       i++;
-      this->GetHandler("test")->SetOption("IncludeRegularExpression",
+      this->GetHandler("test")->SetPersistentOption("IncludeRegularExpression",
         args[i].c_str());
-      this->GetHandler("memcheck")->SetOption("IncludeRegularExpression",
+      this->GetHandler("memcheck")->SetPersistentOption("IncludeRegularExpression",
         args[i].c_str());
       }
 
@@ -1713,9 +1722,9 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i < args.size() - 1)
       {
       i++;
-      this->GetHandler("test")->SetOption("ExcludeRegularExpression",
+      this->GetHandler("test")->SetPersistentOption("ExcludeRegularExpression",
         args[i].c_str());
-      this->GetHandler("memcheck")->SetOption("ExcludeRegularExpression",
+      this->GetHandler("memcheck")->SetPersistentOption("ExcludeRegularExpression",
         args[i].c_str());
       }
 
@@ -1930,6 +1939,9 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf,
     {
     cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
       << fname.c_str() << std::endl);
+    bool erroroc = cmSystemTools::GetErrorOccuredFlag();
+    cmSystemTools::ResetErrorOccuredFlag();
+
     if ( !mf->ReadListFile(0, fname.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag() )
       {
@@ -1938,6 +1950,10 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf,
         << fname.c_str() << std::endl);
       }
     found = true;
+    if ( erroroc )
+      {
+      cmSystemTools::SetErrorOccured();
+      }
     }
 
   if ( !fast )
@@ -2148,6 +2164,27 @@ void cmCTest::SetProduceXML(bool v)
 bool cmCTest::GetProduceXML()
 {
   return this->ProduceXML;
+}
+
+//----------------------------------------------------------------------
+const char* cmCTest::GetSpecificTrack()
+{
+  if ( this->SpecificTrack.empty() )
+    {
+    return 0;
+    }
+  return this->SpecificTrack.c_str();
+}
+
+//----------------------------------------------------------------------
+void cmCTest::SetSpecificTrack(const char* track)
+{
+  if ( !track )
+    {
+    this->SpecificTrack = "";
+    return;
+    }
+  this->SpecificTrack = track;
 }
 
 //----------------------------------------------------------------------

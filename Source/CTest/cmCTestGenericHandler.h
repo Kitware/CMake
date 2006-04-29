@@ -75,6 +75,8 @@ public:
 
   typedef std::map<cmStdString,cmStdString> t_StringToString;
 
+  
+  void SetPersistentOption(const char* op, const char* value);
   void SetOption(const char* op, const char* value);
   const char* GetOption(const char* op);
 
@@ -93,6 +95,7 @@ protected:
   bool HandlerVerbose;
   cmCTest *CTest;
   t_StringToString Options;
+  t_StringToString PersistentOptions;
 
   cmCTestCommand* Command;
   int SubmitIndex;

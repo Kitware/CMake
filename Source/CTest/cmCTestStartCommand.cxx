@@ -29,22 +29,32 @@ bool cmCTestStartCommand::InitialPass(
     return false;
     }
 
-  const char* smodel = args[0].c_str();
+  size_t cnt = 0;
+  const char* smodel = args[cnt].c_str();
   const char* src_dir = 0;
   const char* bld_dir = 0;
 
-  if ( args.size() >= 2 )
+  cnt++;
+
+  this->CTest->SetSpecificTrack(0);
+  if ( cnt < args.size() -1 )
     {
-    src_dir = args[1].c_str();
-    if ( args.size() == 3 )
+    if ( args[cnt] == "TRACK" )
       {
-      bld_dir = args[2].c_str();
+      cnt ++;
+      this->CTest->SetSpecificTrack(args[cnt].c_str());
+      cnt ++;
       }
     }
-  if ( args.size() > 3 )
+
+  if ( cnt < args.size() )
     {
-    this->SetError("called with incorrect number of arguments");
-    return false;
+    src_dir = args[cnt].c_str();
+    cnt ++;
+    if ( cnt < args.size() )
+      {
+      bld_dir = args[cnt].c_str();
+      }
     }
   if ( !src_dir )
     {
@@ -74,6 +84,12 @@ bool cmCTestStartCommand::InitialPass(
     << smodel << std::endl
     << "   Source directory: " << src_dir << std::endl
     << "   Build directory: " << bld_dir << std::endl);
+  const char* track = this->CTest->GetSpecificTrack();
+  if ( track )
+    {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+      "   Track: " << track << std::endl);
+    }
 
   this->Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", "OFF");
   this->CTest->SetSuppressUpdatingCTestConfiguration(true);

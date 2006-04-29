@@ -161,6 +161,7 @@
 #  QT_QT_LIBRARY        Qt-Library is now split
 
 INCLUDE(CheckSymbolExists)
+INCLUDE(AddFileDependencies)
 
 SET(QT_USE_FILE ${CMAKE_ROOT}/Modules/UseQt4.cmake)
 
@@ -771,17 +772,6 @@ IF (QT4_QMAKE_FOUND)
   ENDMACRO (QT4_ADD_RESOURCES)
 
 
-   MACRO(_QT4_ADD_FILE_DEPENDENCIES _file)
-      GET_SOURCE_FILE_PROPERTY(_deps ${_file} OBJECT_DEPENDS)
-      IF (_deps)
-         SET(_deps ${_deps} ${ARGN})
-      ELSE (_deps)
-         SET(_deps ${ARGN})
-      ENDIF (_deps)
-      SET_SOURCE_FILES_PROPERTIES(${_file} PROPERTIES OBJECT_DEPENDS "${_deps}")
-   ENDMACRO(_QT4_ADD_FILE_DEPENDENCIES)
-
-
    MACRO(QT4_AUTOMOC)
       QT4_GET_MOC_INC_DIRS(_moc_INCS)
 
@@ -819,7 +809,7 @@ IF (QT4_QMAKE_FOUND)
                      DEPENDS ${_header}
                   )
 
-                  _QT4_ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
+                  ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
                ENDFOREACH (_current_MOC_INC)
             ENDIF(_match)
          ENDIF ( NOT _skip AND EXISTS ${_abs_FILE} )

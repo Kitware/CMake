@@ -56,8 +56,8 @@ std::string cmVersion::GetReleaseVersion()
     }
   return res;
 #else
-# if CMake_VERSION_PATCH == 0
-  return "beta";
+# if CMake_VERSION_PATCH == 1
+  return "1-beta";
 # else
   return "patch " CMAKE_TO_STRING(CMake_VERSION_PATCH);
 # endif  
