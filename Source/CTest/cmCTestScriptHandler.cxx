@@ -113,7 +113,7 @@ void cmCTestScriptHandler::Initialize()
   this->CTestRoot = "";
   this->CVSCheckOut = "";
   this->CTestCmd = "";
-  this->CVSCmd = "";
+  this->UpdateCmd = "";
   this->CTestEnv = "";
   this->InitCache = "";
   this->CMakeCmd = "";
@@ -389,8 +389,13 @@ int cmCTestScriptHandler::ExtractVariables()
     = this->Makefile->GetSafeDefinition("CTEST_CVS_CHECKOUT");
   this->CTestRoot
     = this->Makefile->GetSafeDefinition("CTEST_DASHBOARD_ROOT");
-  this->CVSCmd
+  this->UpdateCmd
+    = this->Makefile->GetSafeDefinition("CTEST_UPDATE_COMMAND");
+  if ( this->UpdateCmd.empty() )
+    {
+    this->UpdateCmd
     = this->Makefile->GetSafeDefinition("CTEST_CVS_COMMAND");
+    }
   this->CTestEnv
     = this->Makefile->GetSafeDefinition("CTEST_ENVIRONMENT");
   this->InitCache
@@ -420,7 +425,7 @@ int cmCTestScriptHandler::ExtractVariables()
     const char *updateVal = this->Makefile->GetDefinition(updateVar);
     if ( updateVal )
       {
-      if ( this->CVSCmd.empty() )
+      if ( this->UpdateCmd.empty() )
         {
         cmSystemTools::Error(updateVar,
           " specified without specifying CTEST_CVS_COMMAND.");
@@ -669,7 +674,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
   bool res;
 
   // do an initial cvs update as required
-  command = this->CVSCmd;
+  command = this->UpdateCmd;
   std::vector<cmStdString>::iterator it;
   for (it = this->ExtraUpdates.begin();
     it != this->ExtraUpdates.end();
@@ -684,14 +689,14 @@ int cmCTestScriptHandler::PerformExtraUpdates()
       fullCommand += cvsArgs[1];
       output = "";
       retVal = 0;
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run CVS: "
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run Update: "
         << fullCommand.c_str() << std::endl);
       res = cmSystemTools::RunSingleCommand(fullCommand.c_str(), &output,
         &retVal, cvsArgs[0].c_str(),
         this->HandlerVerbose, 0 /*this->TimeOut*/);
       if (!res || retVal != 0)
         {
-        cmSystemTools::Error("Unable to perform extra cvs updates:\n",
+        cmSystemTools::Error("Unable to perform extra updates:\n",
           output.c_str());
         return 0;
         }
