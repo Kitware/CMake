@@ -64,7 +64,9 @@ Function .onInit
   StrCmp $SV_ALLUSERS "AllUsers" 0 +2
     StrCpy $INSTDIR "$PROGRAMFILES\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
 
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "NSIS.InstallOptions.ini"
+  StrCmp "@CPACK_NSIS_MODIFY_PATH@" "ON" 0 noOptionsPage
+    !insertmacro MUI_INSTALLOPTIONS_EXTRACT "NSIS.InstallOptions.ini"
+  noOptionsPage:
 FunctionEnd
 
 ;--------------------------------
@@ -378,6 +380,17 @@ FunctionEnd
 !insertmacro StrStr ""
 !insertmacro StrStr "un."
 
+Function ConditionalAddToRegisty
+  Pop $0
+  Pop $1
+  StrCmp "$0" "" ConditionalAddToRegisty_EmptyString
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
+    "$1" "$0"
+    ;MessageBox MB_OK "Set Registry: '$1' to '$0'"
+    DetailPrint "Set install registry entry: '$1' to '$0'"
+  ConditionalAddToRegisty_EmptyString:
+FunctionEnd
+
 ;--------------------------------
 ; Define some macro setting for the gui
 
@@ -426,7 +439,6 @@ Section "Add to path"
   ;Read a value from an InstallOptions INI file
   !insertmacro MUI_INSTALLOPTIONS_READ $ADD_TO_PATH "NSIS.InstallOptions.ini" "Field 2" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ $ADD_TO_PATH_ALL_USERS "NSIS.InstallOptions.ini" "Field 3" "State"
-  ;StrCmp "@CPACK_NSIS_MODIFY_PATH@" "ON" 0 +2
   StrCmp $ADD_TO_PATH "1" 0 doNotAddToPath
     Call AddToPath
   doNotAddToPath:
@@ -445,9 +457,30 @@ Section "Installer Section" InstSection
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
-    "DisplayName" "@CPACK_PACKAGE_INSTALL_DIRECTORY@ -- @CPACK_PACKAGE_DESCRIPTION_SUMMARY@"
+    "DisplayName" "@CPACK_NSIS_DISPLAY_NAME@"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
+    "DisplayVersion" "@CPACK_PACKAGE_VERSION@"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
+    "Publisher" "@CPACK_PACKAGE_VENDOR@"
 WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" \
     "UninstallString" "$INSTDIR\Uninstall.exe"
+
+  ; Optional registration
+  Push "DisplayIcon"
+  Push "$INSTDIR\@CPACK_NSIS_INSTALLED_ICON_NAME@"
+  Call ConditionalAddToRegisty
+  Push "HelpLink"
+  Push "@CPACK_NSIS_HELP_LINK@"
+  Call ConditionalAddToRegisty
+  Push "URLInfoAbout"
+  Push "@CPACK_NSIS_URL_INFO_ABOUT@"
+  Call ConditionalAddToRegisty
+  Push "Contact"
+  Push "@CPACK_NSIS_CONTACT@"
+  Call ConditionalAddToRegisty
+  Push "FooBar"
+  Push ""
+  Call ConditionalAddToRegisty
 
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     
