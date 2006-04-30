@@ -45,6 +45,7 @@ class cmCTestCommand;
  *   CTEST_CONTINUOUS_MINIMUM_INTERVAL
  *   CTEST_CVS_CHECKOUT
  *   CTEST_CVS_COMMAND
+ *   CTEST_UPDATE_COMMAND
  *   CTEST_DASHBOARD_ROOT
  *   CTEST_ENVIRONMENT
  *   CTEST_INITIAL_CACHE
@@ -138,7 +139,7 @@ private:
   cmStdString CTestRoot;
   cmStdString CVSCheckOut;
   cmStdString CTestCmd;
-  cmStdString CVSCmd;
+  cmStdString UpdateCmd;
   cmStdString CTestEnv;
   cmStdString InitCache;
   cmStdString CMakeCmd;
