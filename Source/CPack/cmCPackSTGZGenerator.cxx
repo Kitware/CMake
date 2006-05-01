@@ -84,11 +84,20 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
   cmsys_ios::ostringstream str;
   int counter = 0;
 
+  std::string inLicFile = this->GetOption("CPACK_RESOURCE_FILE_LICENSE");
+  std::string line;
+  std::ifstream ilfs(inLicFile.c_str());
+  std::string licenseText;
+  while ( cmSystemTools::GetLineFromStream(ilfs, line) )
+    {
+    licenseText += line + "\n";
+    }
+  this->SetOptionIfNotSet("CPACK_RESOURCE_FILE_LICENSE_CONTENT", licenseText.c_str());
+
   const char headerLengthTag[] = "###CPACK_HEADER_LENGTH###";
 
   // Create the header
   std::string inFile = this->GetOption("CPACK_STGZ_HEADER_FILE");
-  std::string line;
   std::ifstream ifs(inFile.c_str());
   std::string packageHeaderText;
   while ( cmSystemTools::GetLineFromStream(ifs, line) )
