@@ -37,7 +37,6 @@ remote_command(
 remote_command(
   "Login into cvs."
   "cvs -d ${CVSROOT} login" cmake_login)
-message(FATAL_ERROR "done")
 # checkout the source
 remote_command(
   "Checkout the source for ${CMAKE_VERSION}"
