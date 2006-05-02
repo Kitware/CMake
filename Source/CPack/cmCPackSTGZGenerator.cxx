@@ -51,7 +51,7 @@ int cmCPackSTGZGenerator::InitializeInternal()
     return 0;
     }
   this->SetOptionIfNotSet("CPACK_STGZ_HEADER_FILE", inFile.c_str());
-  this->SetOption("CPACK_AT_SIGN", "@");
+  this->SetOptionIfNotSet("CPACK_AT_SIGN", "@");
 
   return this->Superclass::InitializeInternal();
 }

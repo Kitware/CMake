@@ -213,7 +213,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
       << std::endl);
     return 0;
     }
-  this->SetOption("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
+  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
   pkgPath = cmSystemTools::FindProgram("hdiutil", path, false);
   if ( pkgPath.empty() )
     {
@@ -221,7 +221,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
       << std::endl);
     return 0;
     }
-  this->SetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", pkgPath.c_str());
+  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", pkgPath.c_str());
 
   return this->Superclass::InitializeInternal();
 }

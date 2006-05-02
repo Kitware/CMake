@@ -68,15 +68,15 @@ int cmCPackGenericGenerator::PrepareNames()
   std::string outFile = topDirectory + "/" + outName;
   std::string installPrefix = tempDirectory + this->GetInstallPrefix();
 
-  this->SetOption("CPACK_TOPLEVEL_DIRECTORY", topDirectory.c_str());
-  this->SetOption("CPACK_TEMPORARY_DIRECTORY", tempDirectory.c_str());
-  this->SetOption("CPACK_OUTPUT_FILE_NAME", outName.c_str());
-  this->SetOption("CPACK_OUTPUT_FILE_PATH", destFile.c_str());
-  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME", outFile.c_str());
-  this->SetOption("CPACK_INSTALL_DIRECTORY", this->GetInstallPath());
-  this->SetOption("CPACK_NATIVE_INSTALL_DIRECTORY",
+  this->SetOptionIfNotSet("CPACK_TOPLEVEL_DIRECTORY", topDirectory.c_str());
+  this->SetOptionIfNotSet("CPACK_TEMPORARY_DIRECTORY", tempDirectory.c_str());
+  this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_NAME", outName.c_str());
+  this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_PATH", destFile.c_str());
+  this->SetOptionIfNotSet("CPACK_TEMPORARY_PACKAGE_FILE_NAME", outFile.c_str());
+  this->SetOptionIfNotSet("CPACK_INSTALL_DIRECTORY", this->GetInstallPath());
+  this->SetOptionIfNotSet("CPACK_NATIVE_INSTALL_DIRECTORY",
     cmsys::SystemTools::ConvertToOutputPath(this->GetInstallPath()).c_str());
-  this->SetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY", installPrefix.c_str());
+  this->SetOptionIfNotSet("CPACK_TEMPORARY_INSTALL_DIRECTORY", installPrefix.c_str());
 
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
     "Look for: CPACK_PACKAGE_DESCRIPTION_FILE" << std::endl);
@@ -108,7 +108,7 @@ int cmCPackGenericGenerator::PrepareNames()
       {
       ostr << cmSystemTools::MakeXMLSafe(line.c_str()) << std::endl;
       }
-    this->SetOption("CPACK_PACKAGE_DESCRIPTION", ostr.str().c_str());
+    this->SetOptionIfNotSet("CPACK_PACKAGE_DESCRIPTION", ostr.str().c_str());
     }
   if ( !this->GetOption("CPACK_PACKAGE_DESCRIPTION") )
     {
@@ -117,6 +117,13 @@ int cmCPackGenericGenerator::PrepareNames()
       "CPACK_PACKAGE_DESCRIPTION or CPACK_PACKAGE_DESCRIPTION_FILE."
       << std::endl);
     return 0;
+    }
+
+  std::vector<std::string> path;
+  std::string pkgPath = cmSystemTools::FindProgram("strip", path, false);
+  if ( !pkgPath.empty() )
+    {
+    this->SetOptionIfNotSet("CPACK_STRIP_COMMAND", pkgPath.c_str());
     }
 
   return 1;
@@ -431,6 +438,44 @@ int cmCPackGenericGenerator::InstallProject()
   if ( !movable )
     {
     cmSystemTools::PutEnv("DESTDIR=");
+    }
+
+  const char* stripExecutable = this->GetOption("CPACK_STRIP_COMMAND");
+  const char* stripFiles
+    = this->GetOption("CPACK_STRIP_FILES");
+  if ( stripFiles && *stripFiles && stripExecutable && *stripExecutable )
+    {
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Strip files" << std::endl);
+    std::vector<std::string> stripFilesVector;
+    cmSystemTools::ExpandListArgument(stripFiles,
+      stripFilesVector);
+    std::vector<std::string>::iterator it;
+    for ( it = stripFilesVector.begin();
+      it != stripFilesVector.end();
+      ++it )
+      {
+      std::string fileName = tempInstallDirectory;
+      fileName += "/" + *it;
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+        "    Strip file: " << fileName.c_str()
+        << std::endl);
+      std::string stripCommand = stripExecutable;
+      stripCommand += " \"";
+      stripCommand += fileName + "\"";
+      int retVal = 1;
+      std::string output;
+      bool resB = cmSystemTools::RunSingleCommand(stripCommand.c_str(), &output,
+        &retVal, 0, this->GeneratorVerbose, 0);
+      if ( !resB || retVal )
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Problem running install command: " << stripCommand.c_str()
+          << std::endl
+          << "Error was: \"" << output.c_str() << "\""
+          << std::endl);
+        return 0;
+        }
+      }
     }
   return res;
 }

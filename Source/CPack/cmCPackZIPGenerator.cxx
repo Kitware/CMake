@@ -79,7 +79,7 @@ int cmCPackZIPGenerator::InitializeInternal()
       << std::endl);
     return 0;
     }
-  this->SetOption("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
+  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Found ZIP program: "
     << pkgPath.c_str()
     << std::endl);
