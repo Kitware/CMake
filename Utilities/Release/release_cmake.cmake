@@ -12,7 +12,6 @@ endif(NOT HOST)
 if(NOT DEFINED MAKE)
   message(FATAL_ERROR "MAKE must be specified with -DMAKE=\"make -j2\"")
 endif(NOT DEFINED MAKE)
-
   
 message("Creating CMake release ${CMAKE_VERSION} on ${HOST} with parallel = ${PROCESSORS}")
 
@@ -30,7 +29,6 @@ macro(remote_command comment command)
   endif(${result} GREATER 0)
 endmacro(remote_command)
 
-if(0)
 # remove and create a directory to work with
 remote_command(
   "remove and create working directory ~/CMakeReleaseDirectory"
@@ -47,7 +45,6 @@ remote_command(
 remote_command(
   "Create a directory to build in"
   "rm -rf ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build && mkdir ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build")
-
 # now bootstrap cmake
 remote_command(
   "Run cmake bootstrap --parallel=${PROCESSORS}"
@@ -72,8 +69,6 @@ remote_command(
 remote_command(
   "Package cmake"
   "cd ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build && ./bin/cpack -G TGZ")
-
-endif(0)
 
 message("copy the .gz file back from the machine")
 execute_process(COMMAND scp ${HOST}:CMakeReleaseDirectory/${CMAKE_VERSION}-build/*.gz .
