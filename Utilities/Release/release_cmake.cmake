@@ -19,7 +19,7 @@ message("Creating CMake release ${CMAKE_VERSION} on ${HOST} with parallel = ${PR
 macro(remote_command comment command)
   message("${comment}")
   if(${ARGC} GREATER 2)
-    execute_process(COMMAND ssh ${HOST} ${command} RESULT_VARIABLE result INPUT_FILE ${ARGV0})
+    execute_process(COMMAND ssh ${HOST} ${command} RESULT_VARIABLE result INPUT_FILE ${ARGV2})
   else(${ARGC} GREATER 2)
     execute_process(COMMAND ssh ${HOST} ${command} RESULT_VARIABLE result) 
   endif(${ARGC} GREATER 2)
@@ -37,6 +37,7 @@ remote_command(
 remote_command(
   "Login into cvs."
   "cvs -d ${CVSROOT} login" cmake_login)
+message(FATAL_ERROR "done")
 # checkout the source
 remote_command(
   "Checkout the source for ${CMAKE_VERSION}"
