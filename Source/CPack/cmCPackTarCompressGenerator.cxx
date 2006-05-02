@@ -26,7 +26,14 @@
 #include "cmCPackLog.h"
 
 #include <cmsys/SystemTools.hxx>
-#include <sys/stat.h>
+
+// Includes needed for implementation of RenameFile.  This is not in
+// system tools because it is not implemented robustly enough to move
+// files across directories.
+#ifdef _WIN32
+# include <windows.h>
+# include <sys/stat.h>
+#endif
 
 //----------------------------------------------------------------------
 cmCPackTarCompressGenerator::cmCPackTarCompressGenerator()
