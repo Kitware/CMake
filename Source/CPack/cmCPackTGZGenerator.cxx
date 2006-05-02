@@ -162,7 +162,7 @@ ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n)
     }
   else
     {
-    mydata->OutputStream->write(buff, n);
+    mydata->OutputStream->write(reinterpret_cast<char*>(buff), n);
     }
   return n;
 }
