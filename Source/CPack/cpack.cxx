@@ -376,6 +376,23 @@ int main (int argc, char *argv[])
     doc.SetUsageSection(cmDocumentationUsage);
     doc.SetDescriptionSection(cmDocumentationDescription);
     doc.SetOptionsSection(cmDocumentationOptions);
+
+    std::vector<cmDocumentationEntry> v;
+    cmCPackGenerators::DescriptionsMap::const_iterator generatorIt;
+    for( generatorIt = generators.GetGeneratorsList().begin();
+      generatorIt != generators.GetGeneratorsList().end();
+      ++ generatorIt )
+      {
+      cmDocumentationEntry e;
+      e.name = generatorIt->first.c_str();
+      e.brief = generatorIt->second.c_str();
+      e.full = "";
+      v.push_back(e);
+      }
+    cmDocumentationEntry empty = {0,0,0};
+    v.push_back(empty);
+    doc.SetGeneratorsSection(&v[0]);
+
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
 #undef cout
     return doc.PrintRequestedDocumentation(std::cout)? 0:1;
