@@ -543,9 +543,9 @@ std::string cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(const char* mak
       lg->GetMakefile()->SetStartOutputDirectory
         (this->CMakeInstance->GetStartOutputDirectory());
       lg->GetMakefile()->MakeStartDirectoriesCurrent();
-      lg->SetupPathConversions();
       }
     
+    lg->SetupPathConversions();
     makeCommand += " \"";
     std::string tname = targetName;
     tname += "/fast";
