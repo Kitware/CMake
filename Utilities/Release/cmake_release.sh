@@ -447,13 +447,13 @@ tests()
 #-----------------------------------------------------------------------------
 package()
 {
-    [ -z "${DONE_install}" ] || return 0 ; DONE_install="yes"
+    [ -z "${DONE_package}" ] || return 0 ; DONE_package="yes"
     config || return 1
     [ -d "cmake-${VERSION}-${PLATFORM}/Tests/Simple" ] || tests || return 1
     echo "Running make package ..." &&
     (
         cd "cmake-${VERSION}-${PLATFORM}" &&
-        ${MAKE} package"
+        ${MAKE} package
     ) >Logs/install.log 2>&1 || error_log Logs/install.log
 }
 #-----------------------------------------------------------------------------
