@@ -18,18 +18,16 @@
 #ifndef cmCPackTarCompressGenerator_h
 #define cmCPackTarCompressGenerator_h
 
-#include "cmCPackGenericGenerator.h"
-
-class cmCPackTarCompressGeneratorForward;
+#include "cmCPackTGZGenerator.h"
 
 /** \class cmCPackTarCompressGenerator
  * \brief A generator for TarCompress files
  */
-class cmCPackTarCompressGenerator : public cmCPackGenericGenerator
+class cmCPackTarCompressGenerator : public cmCPackTGZGenerator
 {
 public:
   friend class cmCPackTarCompressGeneratorForward;
-  cmCPackTypeMacro(cmCPackTarCompressGenerator, cmCPackGenericGenerator);
+  cmCPackTypeMacro(cmCPackTarCompressGenerator, cmCPackTGZGenerator);
 
   /**
    * Construct generator

@@ -26,10 +26,12 @@
 #include "cmCPackLog.h"
 
 #include <cmsys/SystemTools.hxx>
+#include <sys/stat.h>
 
 //----------------------------------------------------------------------
 cmCPackTarCompressGenerator::cmCPackTarCompressGenerator()
 {
+  this->Compress = false;
 }
 
 //----------------------------------------------------------------------
@@ -42,20 +44,7 @@ int cmCPackTarCompressGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "1");
   std::vector<std::string> path;
-  std::vector<std::string> names;
-  names.push_back("tar");
-  names.push_back("gtar");
-  std::string pkgPath = cmSystemTools::FindProgram(names, path, false);
-  if ( pkgPath.empty() )
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find Tar" << std::endl);
-    return 0;
-    }
-  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_TAR", pkgPath.c_str());
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Found Tar program: "
-    << pkgPath.c_str()
-    << std::endl);
-  pkgPath = cmSystemTools::FindProgram("compress", path, false);
+  std::string pkgPath = cmSystemTools::FindProgram("compress", path, false);
   if ( pkgPath.empty() )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find Compress" << std::endl);
@@ -76,32 +65,10 @@ int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
   std::string packageDirFileName
     = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   packageDirFileName += ".tar";
-  cmOStringStream dmgCmd;
-  dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM_TAR")
-    << "\" cvf \"" << packageDirFileName
-    << "\"";
-  std::vector<std::string>::const_iterator fileIt;
-  for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
-    {
-    dmgCmd << " \""
-      << cmSystemTools::RelativePath(toplevel, fileIt->c_str())
-      << "\"";
-    }
   std::string output;
   int retVal = -1;
-  int res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
-    &retVal, toplevel, this->GeneratorVerbose, 0);
-  if ( !res || retVal )
+  if ( !this->Superclass::CompressFiles(packageDirFileName.c_str(), toplevel, files) )
     {
-    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    tmpFile += "/CompressTar.log";
-    cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << dmgCmd.str().c_str() << std::endl
-      << "# Output:" << std::endl
-      << output.c_str() << std::endl;
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running Tar command: "
-      << dmgCmd.str().c_str() << std::endl
-      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
     return 0;
     }
 
@@ -110,7 +77,7 @@ int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
     << "\" \"" << packageDirFileName
     << "\"";
   retVal = -1;
-  res = cmSystemTools::RunSingleCommand(dmgCmd1.str().c_str(), &output,
+  int res = cmSystemTools::RunSingleCommand(dmgCmd1.str().c_str(), &output,
     &retVal, toplevel, this->GeneratorVerbose, 0);
   if ( !res || retVal )
     {
