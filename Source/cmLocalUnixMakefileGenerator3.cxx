@@ -1418,6 +1418,11 @@ void cmLocalUnixMakefileGenerator3
                                 this->Makefile->GetStartOutputDirectory());
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean",
                       depends, commands, true);
+  commands.clear();
+  depends.clear();
+  depends.push_back("clean");
+  this->WriteMakeRule(ruleFileStream, "The main clean target", "clean/fast",
+                      depends, commands, true);
 
   // Write the preinstall rule.
   dir = this->Makefile->GetStartOutputDirectory();

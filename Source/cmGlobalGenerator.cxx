@@ -169,42 +169,21 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   // files from the parent cmake bin dir, into the try compile bin dir
   if(this->ConfiguredFilesPath.size())
     {
-    std::string src = this->ConfiguredFilesPath;
-    src += "/CMakeSystem.cmake";
-    std::string dst = rootBin;
-    dst += "/CMakeSystem.cmake";
-    cmSystemTools::CopyFileIfDifferent(src.c_str(), dst.c_str());
     for(std::vector<std::string>::const_iterator l = languages.begin();
         l != languages.end(); ++l)
       {
       if(*l == "NONE")
         {
         this->SetLanguageEnabled("NONE", mf);
-        continue;
+        break;
         }
-      const char* lang = l->c_str();
-      std::string src2 = this->ConfiguredFilesPath;
-      src2 += "/CMake";
-      src2 += lang;
-      src2 += "Compiler.cmake";
-      std::string dst2 = rootBin;
-      dst2 += "/CMake";
-      dst2 += lang;
-      dst2 += "Compiler.cmake";
-      cmSystemTools::CopyFileIfDifferent(src2.c_str(), dst2.c_str()); 
-      src2 = this->ConfiguredFilesPath;
-      src2 += "/CMake";
-      src2 += lang;
-      src2 += "Platform.cmake";
-      dst2 = rootBin;
-      dst2 += "/CMake";
-      dst2 += lang;
-      dst2 += "Platform.cmake";
-      cmSystemTools::CopyFileIfDifferent(src2.c_str(), dst2.c_str());
       }
     rootBin = this->ConfiguredFilesPath;
     }
 
+  // set the dir for parent files so they can be used by modules
+  mf->AddDefinition("CMAKE_PLATFORM_ROOT_BIN",rootBin.c_str());  
+                    
   // find and make sure CMAKE_MAKE_PROGRAM is defined
   this->FindMakeProgram(mf);
 

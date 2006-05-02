@@ -91,7 +91,7 @@ ENDIF(NOT CMAKE_COMPILER_IS_GNUCC_RUN)
 
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in 
-               ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCCompiler.cmake IMMEDIATE)
+               "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCCompiler.cmake" IMMEDIATE)
 MARK_AS_ADVANCED(CMAKE_AR)
 
 SET(CMAKE_C_COMPILER_ENV_VAR "CC")
