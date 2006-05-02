@@ -1449,6 +1449,10 @@ void cmLocalUnixMakefileGenerator3
                         this->Makefile->GetStartOutputDirectory());
   this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
                       "preinstall", depends, commands, true);
+  commands.clear();
+  depends.push_back("preinstall");
+  this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
+                      "preinstall/fast", depends, commands, true);
 
   // write the depend rule, really a recompute depends rule
   depends.clear();
