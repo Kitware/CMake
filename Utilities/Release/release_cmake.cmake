@@ -10,6 +10,17 @@ endif(NOT DEFINED PROCESSORS)
 if(NOT DEFINED CMAKE_VERSION)
   message(FATAL_ERROR "CMAKE_VERSION not defined")
 endif(NOT DEFINED CMAKE_VERSION)
+if(NOT DEFINED CVS_COMMAND)
+  set(CVS_COMMAND cvs)
+endif(NOT DEFINED CVS_COMMAND)
+
+if("${CMAKE_VERSION}" STREQUAL "CVS")
+  set( CMAKE_CHECKOUT "${CVS_COMMAND} -q -z3 -d ${CVSROOT} export -D now ")
+  set( CMAKE_VERSION "CurrentCVS")
+else("${CMAKE_VERSION}" STREQUAL "CVS")
+  set( CMAKE_CHECKOUT "${CVS_COMMAND} -q -z3 -d ${CVSROOT} export -r ${CMAKE_VERSION} ")
+endif("${CMAKE_VERSION}" STREQUAL "CVS")
+
 if(NOT HOST)
   message(FATAL_ERROR "HOST must be specified with -DHOST=host")
 endif(NOT HOST)
@@ -59,7 +70,7 @@ remote_command(
 # checkout the source
 remote_command(
   "Checkout the source for ${CMAKE_VERSION}"
-  "cd ~/CMakeReleaseDirectory && cvs -q -z3 -d ${CVSROOT} export -r ${CMAKE_VERSION} -d ${CMAKE_VERSION} CMake")
+  "cd ~/CMakeReleaseDirectory && ${CMAKE_CHECKOUT} -d ${CMAKE_VERSION} CMake")
 # now bootstrap cmake
 remote_command(
   "Run cmake bootstrap --parallel=${PROCESSORS}"
