@@ -66,7 +66,7 @@ endif(DEFINED INITIAL_CACHE)
 # login to cvs
 remote_command(
   "Login into cvs."
-  "cvs -d ${CVSROOT} login" "${SCRIPT_PATH}/cmake_login")
+  "${CVS_COMMAND} -d ${CVSROOT} login" "${SCRIPT_PATH}/cmake_login")
 # checkout the source
 remote_command(
   "Checkout the source for ${CMAKE_VERSION}"
