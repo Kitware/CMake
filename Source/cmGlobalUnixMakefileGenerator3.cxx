@@ -550,7 +550,7 @@ std::string cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(const char* mak
     std::string tname = targetName;
     tname += "/fast";
     tname = lg->Convert(tname.c_str(),cmLocalGenerator::HOME_OUTPUT,
-                        cmLocalGenerator::SHELL);
+                        cmLocalGenerator::MAKEFILE);
     tname = lg->ConvertToMakeTarget(tname.c_str());
     makeCommand += tname.c_str();
     makeCommand += "\"";
