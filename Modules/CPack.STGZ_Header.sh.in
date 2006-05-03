@@ -14,6 +14,12 @@ EOF
   exit 1
 }
 
+cpack_echo_exit()
+{
+  echo $1
+  exit 1
+}
+
 # Display version
 cpack_version()
 {
@@ -92,13 +98,14 @@ ____cpack__here_doc____
   if [ "x${cpack_include_subdir}x" == "xx" ]
   then
     echo "By default the @CPACK_PACKAGE_NAME@ will be installed in:"
-    echo "  \"${toplevel}\""
+    echo "  \"${toplevel}/@CPACK_PACKAGE_FILE_NAME@\""
     echo "Do you want to include the subdirectory @CPACK_PACKAGE_FILE_NAME@?"
-    echo "Install in: \"${toplevel}/@CPACK_PACKAGE_FILE_NAME@\" [Yn]: "
+    echo "Saying no will install in: \"${toplevel}\" [Yn]: "
     read line leftover
+    cpack_include_subdir=TRUE
     case ${line} in
-      y* | Y*)
-        cpack_include_subdir=TRUE
+      n* | N*)
+        cpack_include_subdir=FALSE
     esac
   fi
 fi
@@ -116,7 +123,9 @@ echo ""
 # take the archive portion of this file and pipe it to tar
 # the NUMERIC parameter in this command should be one more
 # than the number of lines in this header file
-tail -n +###CPACK_HEADER_LENGTH### "$0" | gunzip | (cd "${toplevel}" && tar xf -)
+tail -n +###CPACK_HEADER_LENGTH### "$0" | gunzip | (cd "${toplevel}" && tar xf -) || cpack_echo_exit "Problem unpacking the @CPACK_PACKAGE_FILE_NAME@"
+
+echo "Unpacking finished successfully"
 
 exit 0
 #-----------------------------------------------------------
