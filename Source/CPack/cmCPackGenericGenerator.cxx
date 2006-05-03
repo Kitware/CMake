@@ -325,7 +325,11 @@ int cmCPackGenericGenerator::InstallProject()
       cmGlobalGenerator* globalGenerator 
         = this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
           cmakeGenerator);
-
+      // set the global flag for unix style paths on cmSystemTools as 
+      // soon as the generator is set.  This allows gmake to be used
+      // on windows.
+      cmSystemTools::SetForceUnixPaths(globalGenerator->GetForceUnixPaths());
+      
       // Does this generator require pre-install?
       if ( globalGenerator->GetPreinstallTargetName() )
         {
