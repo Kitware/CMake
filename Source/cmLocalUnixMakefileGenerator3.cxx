@@ -1275,6 +1275,7 @@ cmLocalUnixMakefileGenerator3
                                includeRegexScan.c_str(),
                                includeRegexComplain.c_str(),
                                generatedFiles, includeCacheFileName);
+      scanner->SetHomeOutputDirectory(mf->GetHomeOutputDirectory());
       }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")

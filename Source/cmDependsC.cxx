@@ -26,7 +26,6 @@ cmDependsC::cmDependsC():
   IncludePath(0), GeneratedFiles(0)
 {
 }
-
 //----------------------------------------------------------------------------
 // yummy look at all those constructor arguments
 cmDependsC::cmDependsC(std::vector<std::string> const& includes,
@@ -85,6 +84,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
   this->Encountered.insert(src);
   std::set<cmStdString> dependencies;
   std::set<cmStdString> scanned;
+
   while(!this->Unscanned.empty())
     {
     // Get the next file to scan.
@@ -367,9 +367,10 @@ bool cmDependsC::FileExistsOrIsGenerated(const std::string& fname,
   else if(cmSystemTools::FileIsFullPath(fname.c_str()))
     {
     // The generated file may have been listed with a relative path.
-    std::string dir = cmSystemTools::CollapseFullPath(this->Directory.c_str());
+    // Note that CMAKE_GENERATED_FILES is written with a conversion
+    // relative to the home output directory.
     std::string rname =
-      cmSystemTools::RelativePath(dir.c_str(), fname.c_str());
+      cmSystemTools::RelativePath(this->HomeOutputDirectory.c_str(), fname.c_str());
     if(this->FileIsGenerated(rname, scanned, dependencies))
       {
       return true;
