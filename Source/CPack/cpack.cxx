@@ -42,7 +42,7 @@ static const cmDocumentationEntry cmDocumentationName[] =
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
   {0,
-   "  cpack -G <generator> -P <ProjectName> -R <ReleaseVersion> [options]",
+   "  cpack -G <generator> [options]",
    0},
   {0,0,0}
 };
@@ -67,23 +67,14 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
       "platforms. A generator is responsible for generating input files for "
       "particular system and invoking that systems. Possible generator names "
       "are specified in the Generators section." },
-    {"-P <ProjectName>", "Specify the project name.",
-    "This option specifies the project name that will be used to generate "
-      "the installer." },
     {"-C <Configuration>", "Specify the project configuration",
     "This option specifies the configuration that the project was build "
       "with, for example 'Debug', 'Release'." },
-    {"-R <ReleaseVersion>", "Specify the release version of the project.",
-    "This option specifies the release version of the project that will be "
-      "used by installer." },
     {"-D <var>=<value>", "Set a CPack variable.", \
     "Set a variable that can be used by the generator."}, \
-    {"--patch <ReleasePatch>", "Specify the patch of the project.",
-    "This option specifies the patch of the project that will be "
-      "used by installer." },
-    {"--vendor <ProjectVendor>", "Specify the vendor of the project.",
-    "This option specifies the vendor of the project that will be "
-      "used by installer." },
+    {"--config <config file>", "Specify the config file.",
+    "Specify the config file to use to create the package. By default "
+      "CPackConfig.cmake in the current directory will be used." },
     {0,0,0}
 };
 

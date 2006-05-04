@@ -19,6 +19,7 @@
 
 #include "cmCPackGenericGenerator.h"
 #include "cmCPackTGZGenerator.h"
+#include "cmCPackTarBZip2Generator.h"
 #include "cmCPackTarCompressGenerator.h"
 #include "cmCPackZIPGenerator.h"
 #include "cmCPackSTGZGenerator.h"
@@ -40,6 +41,8 @@ cmCPackGenerators::cmCPackGenerators()
 #endif
   this->RegisterGenerator("ZIP", "ZIP file format",
     cmCPackZIPGenerator::CreateGenerator);
+  this->RegisterGenerator("TBZ2", "Tar BZip2 compression",
+    cmCPackTarBZip2Generator::CreateGenerator);
   this->RegisterGenerator("TZ", "Tar Compress compression",
     cmCPackTarCompressGenerator::CreateGenerator);
 #ifdef __APPLE__
