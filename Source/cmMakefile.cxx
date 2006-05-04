@@ -804,6 +804,21 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
   cmTargets::iterator i = this->Targets.find(target);
   if ( i != this->Targets.end())
     {
+    cmTarget* tgt = 
+      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0, lib);
+    if(tgt)
+      {
+      // if it is not a static or shared library then you can not link to it
+      if(!((tgt->GetType() == cmTarget::STATIC_LIBRARY) ||
+           (tgt->GetType() == cmTarget::SHARED_LIBRARY)))
+        { 
+        cmOStringStream e;
+        e << "Attempt to add link library " << lib 
+          << " which is not a library target to target " << tgt->GetType() << "  " << 
+          target << "\n";
+        cmSystemTools::Error(e.str().c_str());
+        }
+      }
     i->second.AddLinkLibrary( *this, target, lib, llt );
     }
   else
