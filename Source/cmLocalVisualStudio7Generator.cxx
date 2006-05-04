@@ -406,7 +406,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       {
       flags += " /TP ";
       }
-    std::cerr << flags << "\n";
     }
 
   // Add the target-specific flags.
