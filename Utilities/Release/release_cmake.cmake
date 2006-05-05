@@ -48,17 +48,19 @@ macro(remote_command comment command)
   endif(${result} GREATER 0)
 endmacro(remote_command)
 
+# set this so configure file will work from script mode
 set(CMAKE_BACKWARDS_COMPATIBILITY 2.4)
+# create the script specific for the given host
 configure_file(${SCRIPT_PATH}/release_cmake.sh.in
   release_cmake-${HOST}.sh @ONLY)
-file(READ release_cmake-${HOST}.sh RELEASE_CMAKE_CONTENTS)
+# remove any old version of the script
 remote_command("remove old release_cmake-${HOST}.sh from server"
   "rm -f release_cmake-${HOST}.sh")
-
-# copy the release script to the remote server via tr to remove any dos 
-# line feed stuff in case this was run on a windows box
+# copy the script to the remote host via cat with the 
+# script as input for the execute_process this will translate
+# the file from dos to unix
 remote_command("Copy release_cmake-${HOST}.sh to sever"
-  "tr -d '\\\\015' > release_cmake-${HOST}.sh" release_cmake-${HOST}.sh)
+  "cat > release_cmake-${HOST}.sh" release_cmake-${HOST}.sh)
 
 # now run the script on the remote machine
 remote_command("Run release script" "${RUN_SHELL} release_cmake-${HOST}.sh")
