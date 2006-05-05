@@ -2,17 +2,16 @@
 echo  "remove and create working directory ~/CMakeReleaseDirectory"
 rm -rf ~/CMakeReleaseDirectory 
 mkdir ~/CMakeReleaseDirectory
-
 check_exit_value()
 {
    VALUE="$1"
-   if [ "$VALUE" != "0" ]\; then
+   if [ "$VALUE" != "0" ]; then
     echo "error in $2"
     exit 1
    fi      
 }
 
-if [ ! -z "@USER_MAKE_RULE_FILE_CONTENTS@" ]\; then
+if [ ! -z "@USER_MAKE_RULE_FILE_CONTENTS@" ]; then
     echo "@USER_MAKE_RULE_FILE_CONTENTS@" > "@USER_MAKE_RULE_FILE@"
     check_exit_value $? "Create User Rule file" || exit 1
 fi
@@ -22,29 +21,29 @@ check_exit_value $? "Remove build tree" || exit 1
 mkdir ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build
 check_exit_value $? "Create build directory" || exit 1
 # make sure directory was created
-if [ ! -d ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build ]\; then
+if [ ! -d ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build ]; then
         echo "Could not create ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build"
         exit -1
 fi
 
 echo "Create initial cache"
-echo "@INITIAL_CACHE@" > ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build/CMakeCache.txt
+echo "@INITIAL_CACHE@" > ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build/CMakeCache.txt
 check_exit_value $? "Create initial cache" || exit 1
 
 #echo "Login into cvs."
-#echo "cmake" | @CVS_COMMAND@ -d ${CVSROOT} login
+#echo "cmake" | @CVS_COMMAND@ -d @CVSROOT@ login
 
 echo "Checkout the source for @CMAKE_VERSION@"
 cd ~/CMakeReleaseDirectory 
-@CMAKE_CHECKOUT@ -d ${CMAKE_VERSION} CMake
+@CMAKE_CHECKOUT@ -d @CMAKE_VERSION@ CMake
 check_exit_value $? "Checkout cmake source" || exit 1
 
 cd ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build 
 echo  "Run cmake bootstrap --parallel=@PROCESSORS@"
-../${CMAKE_VERSION}/bootstrap --parallel=@PROCESSORS@
+../@CMAKE_VERSION@/bootstrap --parallel=@PROCESSORS@
 check_exit_value $? "Bootstrap cmake" || exit 1
 
-echo "Build cmake with ${MAKE}"
+echo "Build cmake with @MAKE@
 @MAKE@
 check_exit_value $? "Build cmake" || exit 1
 

@@ -1,4 +1,6 @@
 set(PROCESSORS 1)
+set(RUN_SHELL "/usr/local/bin/zsh -l")
+set(CVS_COMMAND "/usr/local/bin/cvs")
 set(HOST destiny)
 set(MAKE "gmake")
 set(INITIAL_CACHE "CMAKE_BUILD_TYPE:STRING=Release

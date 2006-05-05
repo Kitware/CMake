@@ -1,6 +1,9 @@
 set(CVSROOT ":pserver:anonymous@www.cmake.org:/cvsroot/CMake")
 get_filename_component(SCRIPT_PATH "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
+if(NOT DEFINED RUN_SHELL)
+  set(RUN_SHELL "/bin/sh")
+endif(NOT DEFINED RUN_SHELL)
 if(NOT DEFINED INSTALLER_SUFFIX)
   set(INSTALLER_SUFFIX "*.sh")
 endif(NOT DEFINED INSTALLER_SUFFIX)
@@ -33,19 +36,26 @@ message("Creating CMake release ${CMAKE_VERSION} on ${HOST} with parallel = ${PR
 # define a macro to run a remote command
 macro(remote_command comment command)
   message("${comment}")
-  execute_process(COMMAND ssh ${HOST} ${EXTRA_HOP} ${command} RESULT_VARIABLE result) 
+  if(${ARGC} GREATER 2)
+    message("ssh ${HOST} ${EXTRA_HOP} ${command}")
+    execute_process(COMMAND ssh ${HOST} ${EXTRA_HOP} ${command} RESULT_VARIABLE result INPUT_FILE ${ARGV2})
+  else(${ARGC} GREATER 2)
+    message("ssh ${HOST} ${EXTRA_HOP} ${command}") 
+    execute_process(COMMAND ssh ${HOST} ${EXTRA_HOP} ${command} RESULT_VARIABLE result) 
+  endif(${ARGC} GREATER 2)
   if(${result} GREATER 0)
     message(FATAL_ERROR "Error running command: ${command}, return value = ${result}")
   endif(${result} GREATER 0)
 endmacro(remote_command)
 
 set(CMAKE_BACKWARDS_COMPATIBILITY 2.4)
-configure_file(${SCRIPT_PATH}/release_cmake.sh.in release_cmake-${HOST}.sh)
+configure_file(${SCRIPT_PATH}/release_cmake.sh.in
+  release_cmake-${HOST}.sh @ONLY)
 file(READ release_cmake-${HOST}.sh RELEASE_CMAKE_CONTENTS)
 remote_command("Copy release_cmake-${HOST}.sh to sever"
-  "echo '${RELEASE_CMAKE_CONTENTS}' > release_cmake-${HOST}.sh")
+  "tr -d '\\\\015' > release_cmake-${HOST}.sh" release_cmake-${HOST}.sh)
 
-remote_command("Run release script" "sh release_cmake-${HOST}.sh")
+remote_command("Run release script" "${RUN_SHELL} release_cmake-${HOST}.sh")
 
 message("copy the .gz file back from the machine")
 execute_process(COMMAND scp ${HOST}:CMakeReleaseDirectory/${CMAKE_VERSION}-build/*.gz .
