@@ -45,7 +45,7 @@ endmacro(remote_command)
 
 set(CMAKE_BACKWARDS_COMPATIBILITY 2.4)
 configure_file(${SCRIPT_PATH}/release_cmake.sh.in release_cmake-${HOST}.sh)
-file(READ release_cmake.sh RELEASE_CMAKE_CONTENTS)
+file(READ release_cmake-${HOST}.sh RELEASE_CMAKE_CONTENTS)
 remote_command("Copy release_cmake.sh to sever"
   "echo '${RELEASE_CMAKE_CONTENTS}' > release_cmake-${HOST}.sh")
 
