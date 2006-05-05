@@ -323,19 +323,10 @@ bool cmFileCommand::HandleInstallCommand(
   std::string rename = "";
   std::string destination = "";
   std::string stype = "FILES";
-  const char* build_type = this->Makefile->GetDefinition("BUILD_TYPE");
-  if ( build_type && strcmp(build_type, ".") == 0 )
-    {
-    build_type = 0;
-    }
-  if ( build_type && strncmp(build_type, ".\\", 2) == 0 )
-    {
-    build_type += 2;
-    }
-
   const char* destdir = cmSystemTools::GetEnv("DESTDIR");
 
   std::set<cmStdString> components;
+  std::set<cmStdString> configurations;
   std::vector<std::string> files;
   int itype = cmTarget::INSTALL_FILES;
 
@@ -375,6 +366,7 @@ bool cmFileCommand::HandleInstallCommand(
   bool in_properties = false;
   bool in_permissions = false;
   bool in_components = false;
+  bool in_configurations = false;
   bool use_given_permissions = false;
   mode_t permissions = 0;
   bool optional = false;
@@ -389,6 +381,7 @@ bool cmFileCommand::HandleInstallCommand(
       in_properties = false;
       in_permissions = false;
       in_components = false;
+      in_configurations = false;
       }
     else if ( *cstr == "TYPE" && i < args.size()-1 )
       {
@@ -403,6 +396,7 @@ bool cmFileCommand::HandleInstallCommand(
       in_files = false;
       in_permissions = false;
       in_components = false;
+      in_configurations = false;
       }
     else if ( *cstr == "RENAME" && i < args.size()-1 )
       {
@@ -412,6 +406,7 @@ bool cmFileCommand::HandleInstallCommand(
       in_files = false;
       in_permissions = false;
       in_components = false;
+      in_configurations = false;
       }
     else if ( *cstr == "PROPERTIES"  )
       {
@@ -419,6 +414,7 @@ bool cmFileCommand::HandleInstallCommand(
       in_files = false;
       in_permissions = false;
       in_components = false;
+      in_configurations = false;
       }
     else if ( *cstr == "PERMISSIONS"  )
       {
@@ -427,6 +423,7 @@ bool cmFileCommand::HandleInstallCommand(
       in_files = false;
       in_permissions = true;
       in_components = false;
+      in_configurations = false;
       }
     else if ( *cstr == "COMPONENTS"  )
       {
@@ -434,6 +431,15 @@ bool cmFileCommand::HandleInstallCommand(
       in_files = false;
       in_permissions = false;
       in_components = true;
+      in_configurations = false;
+      }
+    else if ( *cstr == "CONFIGURATIONS"  )
+      {
+      in_properties = false;
+      in_files = false;
+      in_permissions = false;
+      in_components = false;
+      in_configurations = true;
       }
     else if ( *cstr == "FILES" && !in_files)
       {
@@ -441,6 +447,7 @@ bool cmFileCommand::HandleInstallCommand(
       in_properties = false;
       in_permissions = false;
       in_components = false;
+      in_configurations = false;
       }
     else if ( in_properties && i < args.size()-1 )
       {
@@ -454,6 +461,10 @@ bool cmFileCommand::HandleInstallCommand(
     else if ( in_components )
       {
       components.insert(*cstr);
+      }
+    else if ( in_configurations )
+      {
+      configurations.insert(cmSystemTools::UpperCase(*cstr));
       }
     else if(in_permissions && args[i] == "OWNER_READ")
       {
@@ -522,6 +533,26 @@ bool cmFileCommand::HandleInstallCommand(
     // current component.
     if(components.find(cmake_install_component) == components.end())
       {
+      return true;
+      }
+    }
+
+  // Check for configuration-specific installation.
+  if(!configurations.empty())
+    {
+    std::string cmake_install_configuration =
+      cmSystemTools::UpperCase(
+        this->Makefile->GetSafeDefinition("CMAKE_INSTALL_CONFIG_NAME"));
+    if(cmake_install_configuration.empty())
+      {
+      // No configuration specified for installation but this install
+      // rule is configuration-specific.  Skip it.
+      return true;
+      }
+    else if(configurations.find(cmake_install_configuration) ==
+            configurations.end())
+      {
+      // This rule is specific to a configuration not being installed.
       return true;
       }
     }

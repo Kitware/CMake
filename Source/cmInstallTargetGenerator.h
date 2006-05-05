@@ -27,9 +27,12 @@ class cmTarget;
 class cmInstallTargetGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
-                           const char* permissions = "",
-                           const char* component = "");
+  cmInstallTargetGenerator(
+    cmTarget& t, const char* dest, bool implib,
+    const char* permissions = "",
+    std::vector<std::string> const& configurations =std::vector<std::string>(),
+    const char* component = ""
+    );
   virtual ~cmInstallTargetGenerator();
 
 protected:
@@ -44,6 +47,7 @@ protected:
   std::string Destination;
   bool ImportLibrary;
   std::string Permissions;
+  std::vector<std::string> Configurations;
   std::string Component;
 };
 

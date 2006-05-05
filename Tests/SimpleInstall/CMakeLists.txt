@@ -72,6 +72,14 @@ IF(STAGE2)
     MESSAGE(SEND_ERROR "test1 not found in lib/static!")
   ENDIF("${TEST1_LIBRARY}" MATCHES "static")
 
+  # Check for failure of configuration-specific installation.
+  IF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/include/Release/lib1debug.h")
+    MESSAGE(FATAL_ERROR "Debug-configuration file installed for Release!")
+  ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/include/Release/lib1debug.h")
+  IF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/include/Debug/lib1release.h")
+    MESSAGE(FATAL_ERROR "Release-configuration file installed for Debug!")
+  ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/include/Debug/lib1release.h")
+
   # Make sure the test executable can run from the install tree.
   SET_TARGET_PROPERTIES(SimpleInstallS2 PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
@@ -121,6 +129,14 @@ ELSE(STAGE2)
     RENAME lib2renamed.h
     )
   INSTALL_FILES(/MyTest/include FILES lib3.h)
+
+  # Test configuration-specific installation.
+  INSTALL(FILES lib1.h RENAME lib1release.h CONFIGURATIONS Release
+    DESTINATION MyTest/include/Release
+    )
+  INSTALL(FILES lib1.h RENAME lib1debug.h CONFIGURATIONS Debug
+    DESTINATION MyTest/include/Debug
+    )
 
   # Test user-specified install scripts.
   INSTALL(

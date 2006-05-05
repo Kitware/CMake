@@ -47,15 +47,18 @@ cmInstallGenerator
 }
 
 //----------------------------------------------------------------------------
-void cmInstallGenerator::AddInstallRule(std::ostream& os,
-                                        const char* dest,
-                                        int type,
-                                        const char* file,
-                                        bool optional /* = false */,
-                                        const char* properties /* = 0 */,
-                                        const char* permissions /* = 0 */,
-                                        const char* component /* = 0 */,
-                                        const char* rename /* = 0 */)
+void cmInstallGenerator::AddInstallRule(
+  std::ostream& os,
+  const char* dest,
+  int type,
+  const char* file,
+  bool optional /* = false */,
+  const char* properties /* = 0 */,
+  const char* permissions /* = 0 */,
+  std::vector<std::string> const& configurations /* = std::vector<std::string>() */,
+  const char* component /* = 0 */,
+  const char* rename /* = 0 */
+  )
 {
   // Use the FILE command to install the file.
   std::string stype;
@@ -86,6 +89,15 @@ void cmInstallGenerator::AddInstallRule(std::ostream& os,
   if(rename && *rename)
     {
     os << " RENAME \"" << rename << "\"";
+    }
+  if(!configurations.empty())
+    {
+    os << " CONFIGURATIONS";
+    for(std::vector<std::string>::const_iterator c = configurations.begin();
+        c != configurations.end(); ++c)
+      {
+      os << " \"" << *c << "\"";
+      }
     }
   if(component && *component)
     {
