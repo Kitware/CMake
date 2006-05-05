@@ -469,10 +469,21 @@ public:
   static bool CopyFileAlways(const char* source, const char* destination);
 
   /**
-   * Copy content directory to another directory with all files and 
-   * subdirectories
+   * Copy a file.  If the "always" argument is true the file is always
+   * copied.  If it is false, the file is copied only if it is new or
+   * has changed.
    */
-  static bool CopyADirectory(const char* source, const char* destination);
+  static bool CopyAFile(const char* source, const char* destination,
+                        bool always = true);
+
+  /**
+   * Copy content directory to another directory with all files and
+   * subdirectories.  If the "always" argument is true all files are
+   * always copied.  If it is false, only files that have changed or
+   * are new are copied.
+   */
+  static bool CopyADirectory(const char* source, const char* destination,
+                             bool always = true);
   
   /**
    * Remove a file

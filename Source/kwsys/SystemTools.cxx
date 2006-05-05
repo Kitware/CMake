@@ -1637,11 +1637,26 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
   return true;
 }
 
+//----------------------------------------------------------------------------
+bool SystemTools::CopyAFile(const char* source, const char* destination,
+                            bool always)
+{
+  if(always)
+    {
+    return SystemTools::CopyFileAlways(source, destination);
+    }
+  else
+    {
+    return SystemTools::CopyFileIfDifferent(source, destination);
+    }
+}
+
 /**
  * Copy a directory content from "source" directory to the directory named by
  * "destination".
  */
-bool SystemTools::CopyADirectory(const char* source, const char* destination)
+bool SystemTools::CopyADirectory(const char* source, const char* destination,
+                                 bool always)
 {
   Directory dir;
   dir.Load(source);
@@ -1663,14 +1678,16 @@ bool SystemTools::CopyADirectory(const char* source, const char* destination)
         kwsys_stl::string fullDestPath = destination;
         fullDestPath += "/";
         fullDestPath += dir.GetFile(static_cast<unsigned long>(fileNum));
-        if (!SystemTools::CopyADirectory(fullPath.c_str(), fullDestPath.c_str()))
+        if (!SystemTools::CopyADirectory(fullPath.c_str(),
+                                         fullDestPath.c_str(),
+                                         always))
           {
           return false;
           }
         }
       else
         {
-        if(!SystemTools::CopyFileAlways(fullPath.c_str(), destination))
+        if(!SystemTools::CopyAFile(fullPath.c_str(), destination, always))
           {
           return false;
           }
