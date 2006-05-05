@@ -105,9 +105,9 @@ ELSE(STAGE2)
   ADD_DEPENDENCIES(test4 test2)
 
   INSTALL(TARGETS SimpleInstall test1 test2 test3
-    RUNTIME DESTINATION MyTest/bin        # .exe, .dll
-    LIBRARY DESTINATION MyTest/lib        # .so, module.dll, ...
-    ARCHIVE DESTINATION MyTest/lib/static # .a, .lib
+    RUNTIME DESTINATION MyTest/bin        COMPONENT Runtime     # .exe, .dll
+    LIBRARY DESTINATION MyTest/lib        COMPONENT Runtime     # .so, mod.dll
+    ARCHIVE DESTINATION MyTest/lib/static COMPONENT Development # .a, .lib
     )
   INSTALL(TARGETS test4 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
     RUNTIME DESTINATION MyTest/bin
