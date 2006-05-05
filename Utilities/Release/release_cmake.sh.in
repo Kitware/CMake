@@ -43,7 +43,7 @@ echo  "Run cmake bootstrap --parallel=@PROCESSORS@"
 ../@CMAKE_VERSION@/bootstrap --parallel=@PROCESSORS@
 check_exit_value $? "Bootstrap cmake" || exit 1
 
-echo "Build cmake with @MAKE@
+echo "Build cmake with @MAKE@"
 @MAKE@
 check_exit_value $? "Build cmake" || exit 1
 

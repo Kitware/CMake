@@ -54,9 +54,13 @@ configure_file(${SCRIPT_PATH}/release_cmake.sh.in
 file(READ release_cmake-${HOST}.sh RELEASE_CMAKE_CONTENTS)
 remote_command("remove old release_cmake-${HOST}.sh from server"
   "rm -f release_cmake-${HOST}.sh")
+
+# copy the release script to the remote server via tr to remove any dos 
+# line feed stuff in case this was run on a windows box
 remote_command("Copy release_cmake-${HOST}.sh to sever"
   "tr -d '\\\\015' > release_cmake-${HOST}.sh" release_cmake-${HOST}.sh)
 
+# now run the script on the remote machine
 remote_command("Run release script" "${RUN_SHELL} release_cmake-${HOST}.sh")
 
 message("copy the .gz file back from the machine")
