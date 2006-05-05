@@ -52,6 +52,8 @@ set(CMAKE_BACKWARDS_COMPATIBILITY 2.4)
 configure_file(${SCRIPT_PATH}/release_cmake.sh.in
   release_cmake-${HOST}.sh @ONLY)
 file(READ release_cmake-${HOST}.sh RELEASE_CMAKE_CONTENTS)
+remote_command("remove old release_cmake-${HOST}.sh from server"
+  "rm -f release_cmake-${HOST}.sh")
 remote_command("Copy release_cmake-${HOST}.sh to sever"
   "tr -d '\\\\015' > release_cmake-${HOST}.sh" release_cmake-${HOST}.sh)
 

@@ -58,3 +58,5 @@ check_exit_value $? "Package cmake" || exit 1
 echo "Create Tar.gz"
 ./bin/cpack -G TGZ
 check_exit_value $? "Create TGZ" || exit 1
+
+exit 0
