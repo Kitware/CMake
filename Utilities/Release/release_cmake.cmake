@@ -44,14 +44,12 @@ macro(remote_command comment command)
 endmacro(remote_command)
 
 set(CMAKE_BACKWARDS_COMPATIBILITY 2.4)
-configure_file(${SCRIPT_PATH}/release_cmake.sh.in release_cmake.sh)
-execute_process(COMMAND
-  scp release_cmake.sh ${HOST}:release_cmake.sh
-  RESULT_VARIABLE result) 
-if(${result} GREATER 0)
-  message(FATAL_ERROR "Error scp release_cmake.sh to ${HOST}:release_cmake.sh")
-endif(${result} GREATER 0)
-remote_command("Run release script" "sh release_cmake.sh")
+configure_file(${SCRIPT_PATH}/release_cmake.sh.in release_cmake-${HOST}.sh)
+file(READ release_cmake.sh RELEASE_CMAKE_CONTENTS)
+remote_command("Copy release_cmake.sh to sever"
+  "echo '${RELEASE_CMAKE_CONTENTS}' > release_cmake-${HOST}.sh")
+
+remote_command("Run release script" "sh release_cmake-${HOST}.sh")
 
 message("copy the .gz file back from the machine")
 execute_process(COMMAND scp ${HOST}:CMakeReleaseDirectory/${CMAKE_VERSION}-build/*.gz .

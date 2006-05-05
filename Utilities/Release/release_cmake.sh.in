@@ -6,13 +6,13 @@ mkdir ~/CMakeReleaseDirectory
 check_exit_value()
 {
    VALUE="$1"
-   if [ "$VALUE" != "0" ]; then
+   if [ "$VALUE" != "0" ]\; then
     echo "error in $2"
     exit 1
    fi      
 }
 
-if [ ! -z "@USER_MAKE_RULE_FILE_CONTENTS@" ]; then
+if [ ! -z "@USER_MAKE_RULE_FILE_CONTENTS@" ]\; then
     echo "@USER_MAKE_RULE_FILE_CONTENTS@" > "@USER_MAKE_RULE_FILE@"
     check_exit_value $? "Create User Rule file" || exit 1
 fi
@@ -22,7 +22,7 @@ check_exit_value $? "Remove build tree" || exit 1
 mkdir ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build
 check_exit_value $? "Create build directory" || exit 1
 # make sure directory was created
-if [ ! -d ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build ]; then
+if [ ! -d ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build ]\; then
         echo "Could not create ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build"
         exit -1
 fi
