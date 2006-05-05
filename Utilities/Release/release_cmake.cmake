@@ -43,62 +43,21 @@ macro(remote_command comment command)
   endif(${result} GREATER 0)
 endmacro(remote_command)
 
-# remove and create a directory to work with
-remote_command(
-  "remove and create working directory ~/CMakeReleaseDirectory"
-  "rm -rf ~/CMakeReleaseDirectory && mkdir ~/CMakeReleaseDirectory")
-# create user make rule file
-if(DEFINED USER_MAKE_RULE_FILE_CONTENTS)
-  remote_command("Create ${USER_MAKE_RULE_FILE}"
-    "echo ${USER_MAKE_RULE_FILE_CONTENTS} > ${USER_MAKE_RULE_FILE}" )
-endif(DEFINED USER_MAKE_RULE_FILE_CONTENTS)
+set(CMAKE_BACKWARDS_COMPATIBILITY 2.4)
+configure_file(${SCRIPT_PATH}/release_cmake.sh.in release_cmake.sh)
+execute_process(COMMAND
+  scp release_cmake.sh ${HOST}:release_cmake.sh
+  RESULT_VARIABLE result) 
+if(${result} GREATER 0)
+  message(FATAL_ERROR "Error scp release_cmake.sh to ${HOST}:release_cmake.sh")
+endif(${result} GREATER 0)
+remote_command("Run release script" "sh release_cmake.sh")
 
-# create the build directory
-remote_command(
-  "Create a directory to build in"
-  "rm -rf ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build && mkdir ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build")
-# set the initial cache
-if(DEFINED INITIAL_CACHE)
-  remote_command("Create ${USER_MAKE_RULE_FILE}"
-    "echo \"${INITIAL_CACHE}\" > ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build/CMakeCache.txt" )
-endif(DEFINED INITIAL_CACHE)
-  
-# login to cvs
-remote_command(
-  "Login into cvs."
-  "${CVS_COMMAND} -d ${CVSROOT} login" "${SCRIPT_PATH}/cmake_login")
-# checkout the source
-remote_command(
-  "Checkout the source for ${CMAKE_VERSION}"
-  "cd ~/CMakeReleaseDirectory && ${CMAKE_CHECKOUT} -d ${CMAKE_VERSION} CMake")
-# now bootstrap cmake
-remote_command(
-  "Run cmake bootstrap --parallel=${PROCESSORS}"
-  "cd ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build && ../${CMAKE_VERSION}/bootstrap --parallel=${PROCESSORS}")
-# build cmake
-remote_command(
-  "Build cmake with ${MAKE}"
-  "cd ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build && ${MAKE}")
-# build cmake
-remote_command(
-  "Build cmake with ${MAKE}"
-  "cd ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build && ${MAKE}")
-# run the tests
-remote_command(
-  "Run cmake tests"
-  "cd ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build && ${MAKE} test")
-
-# package cmake with self-extracting shell script
-remote_command(
-  "Package cmake"
-  "cd ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build && ${MAKE} package")
-# package cmake with a tar gz file
-remote_command(
-  "Package cmake"
-  "cd ~/CMakeReleaseDirectory/${CMAKE_VERSION}-build && ./bin/cpack -G TGZ")
 message("copy the .gz file back from the machine")
 execute_process(COMMAND scp ${HOST}:CMakeReleaseDirectory/${CMAKE_VERSION}-build/*.gz .
   RESULT_VARIABLE result) 
+
 message("copy the ${INSTALLER_SUFFIX} file back from the machine")
 execute_process(COMMAND scp ${HOST}:CMakeReleaseDirectory/${CMAKE_VERSION}-build/${INSTALLER_SUFFIX} .
   RESULT_VARIABLE result) 
+
