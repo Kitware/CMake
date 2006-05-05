@@ -2,6 +2,7 @@
 echo  "remove and create working directory ~/CMakeReleaseDirectory"
 rm -rf ~/CMakeReleaseDirectory 
 mkdir ~/CMakeReleaseDirectory
+
 check_exit_value()
 {
    VALUE="$1"
@@ -10,6 +11,21 @@ check_exit_value()
     exit 1
    fi      
 }
+
+if [ ! -z "@CC@" ]; then
+    set CC="@CC@"
+    check_exit_value $? "set CC compiler env var" || exit 1
+fi
+
+if [ ! -z "@CXX@" ]; then
+    set CXX="@CXX@"
+    check_exit_value $? "set CC compiler env var" || exit 1
+fi
+if [ ! -z "@LDFLAGS@" ]; then
+    set LDFLAGS="@LDFLAGS@"
+    check_exit_value $? "set CC compiler env var" || exit 1
+fi
+
 
 if [ ! -z "@USER_MAKE_RULE_FILE_CONTENTS@" ]; then
     echo "@USER_MAKE_RULE_FILE_CONTENTS@" > "@USER_MAKE_RULE_FILE@"
