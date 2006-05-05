@@ -696,6 +696,11 @@ bool cmFileCommand::HandleInstallCommand(
     smanifest_files = manifest_files;
     }
 
+  // Check whether files should be copied always or only if they have
+  // changed.
+  bool copy_always =
+    cmSystemTools::IsOn(cmSystemTools::GetEnv("CMAKE_INSTALL_ALWAYS"));
+
   // Handle each file listed.
   for ( i = 0; i < files.size(); i ++ )
     {
@@ -825,7 +830,8 @@ bool cmFileCommand::HandleInstallCommand(
         message = "Installing ";
         message += toFile.c_str();
         this->Makefile->DisplayStatus(message.c_str(), -1);
-        if(!cmSystemTools::CopyADirectory(fromFile.c_str(), toFile.c_str()))
+        if(!cmSystemTools::CopyADirectory(fromFile.c_str(), toFile.c_str(),
+                                          copy_always))
           {
           cmOStringStream e;
           e << "INSTALL cannot copy directory \"" << fromFile
@@ -841,9 +847,9 @@ bool cmFileCommand::HandleInstallCommand(
         message += toFile.c_str();
         this->Makefile->DisplayStatus(message.c_str(), -1);
 
-        // Copy the file, but only if it has changed.
-        if(!cmSystemTools::CopyFileIfDifferent(fromFile.c_str(),
-                                               toFile.c_str()))
+        // Copy the file.
+        if(!cmSystemTools::CopyAFile(fromFile.c_str(), toFile.c_str(),
+                                     copy_always))
           {
           cmOStringStream e;
           e << "INSTALL cannot copy file \"" << fromFile
