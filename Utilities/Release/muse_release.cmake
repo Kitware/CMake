@@ -1,0 +1,6 @@
+set(PROCESSORS 20)
+set(HOST muse)
+set(MAKE "gmake -j20")
+set(INITIAL_CACHE "CMAKE_BUILD_TYPE:STRING=Release")
+get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(${path}/release_cmake.cmake)
