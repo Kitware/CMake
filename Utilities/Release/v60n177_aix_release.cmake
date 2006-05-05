@@ -1,3 +1,4 @@
+set(CMAKE_RELEASE_DIRECTORY "/bench1/noibm34/CMakeReleaseDirectory" )
 set(PROCESSORS 2)
 set(CVS_COMMAND /vol/local/bin/cvs)
 set(HOST "sshserv.centers.ihost.com" )
