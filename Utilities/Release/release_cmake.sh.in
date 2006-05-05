@@ -1,7 +1,7 @@
 #!/bin/sh
-echo  "remove and create working directory ~/CMakeReleaseDirectory"
-rm -rf ~/CMakeReleaseDirectory 
-mkdir ~/CMakeReleaseDirectory
+echo  "remove and create working directory @CMAKE_RELEASE_DIRECTORY@"
+rm -rf @CMAKE_RELEASE_DIRECTORY@ 
+mkdir @CMAKE_RELEASE_DIRECTORY@
 
 check_exit_value()
 {
@@ -31,29 +31,29 @@ if [ ! -z "@USER_MAKE_RULE_FILE_CONTENTS@" ]; then
     check_exit_value $? "Create User Rule file" || exit 1
 fi
 echo "Create a directory to build in"
-rm -rf ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build
+rm -rf @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build
 check_exit_value $? "Remove build tree" || exit 1
-mkdir ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build
+mkdir @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build
 check_exit_value $? "Create build directory" || exit 1
 # make sure directory was created
-if [ ! -d ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build ]; then
-        echo "Could not create ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build"
+if [ ! -d @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build ]; then
+        echo "Could not create @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build"
         exit -1
 fi
 
 echo "Create initial cache"
-echo "@INITIAL_CACHE@" > ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build/CMakeCache.txt
+echo "@INITIAL_CACHE@" > @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build/CMakeCache.txt
 check_exit_value $? "Create initial cache" || exit 1
 
 #echo "Login into cvs."
 #echo "cmake" | @CVS_COMMAND@ -d @CVSROOT@ login
 
 echo "Checkout the source for @CMAKE_VERSION@"
-cd ~/CMakeReleaseDirectory 
+cd @CMAKE_RELEASE_DIRECTORY@ 
 @CMAKE_CHECKOUT@ -d @CMAKE_VERSION@ CMake
 check_exit_value $? "Checkout cmake source" || exit 1
 
-cd ~/CMakeReleaseDirectory/@CMAKE_VERSION@-build 
+cd @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build 
 echo  "Run cmake bootstrap --parallel=@PROCESSORS@"
 ../@CMAKE_VERSION@/bootstrap --parallel=@PROCESSORS@
 check_exit_value $? "Bootstrap cmake" || exit 1
