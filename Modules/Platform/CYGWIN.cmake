@@ -11,7 +11,7 @@ SET(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
 SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")
 SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "")
 SET(CMAKE_EXECUTABLE_SUFFIX ".exe")          # .exe
-
+SET(CMAKE_CREATE_WIN32_EXE  "-mwindows")
 # Modules have a different default prefix that shared libs.
 SET(CMAKE_MODULE_EXISTS 1)
 
