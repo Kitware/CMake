@@ -32,6 +32,7 @@ void cmGlobalVisualStudio6Generator::EnableLanguage(std::vector<std::string>cons
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc"); 
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   mf->AddDefinition("CMAKE_GENERATOR_Fortran", "ifort");
+  mf->AddDefinition("MSVC60", "1");
   this->GenerateConfigurations(mf);
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }

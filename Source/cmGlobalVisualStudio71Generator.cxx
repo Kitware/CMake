@@ -39,7 +39,10 @@ cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
   return lg;
 }
 
-
+void cmGlobalVisualStudio71Generator::AddPlatformDefinitions(cmMakefile* mf)
+{
+  mf->AddDefinition("MSVC71", "1");
+}
 
 // Write a SLN file to the stream
 void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
