@@ -7,5 +7,7 @@ set(MAKE "make")
 set(CC "xlc")
 set(CXX "xlC")
 set(INITIAL_CACHE "CMAKE_BUILD_TYPE:STRING=Release")
+set(EXTRA_COPY "mv *.sh ~
+mv *.tgz ~")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)

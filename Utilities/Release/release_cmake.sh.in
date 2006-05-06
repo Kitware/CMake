@@ -74,4 +74,9 @@ echo "Create Tar.gz"
 ./bin/cpack -G TGZ
 check_exit_value $? "Create TGZ" || exit 1
 
+# need to add an extra copy thing here
+if [ ! -z "@EXTRA_COPY@" ]; then
+    @EXTRA_COPY@
+    check_exit_value $? "Extra copy step @EXTRA_COPY@" || exit 1
+fi
 exit 0
