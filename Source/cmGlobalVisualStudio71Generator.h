@@ -44,6 +44,7 @@ public:
   virtual cmLocalGenerator *CreateLocalGenerator();
 
 protected:
+  virtual void AddPlatformDefinitions(cmMakefile* mf);
   virtual void WriteSLNFile(std::ostream& fout, 
                             cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);

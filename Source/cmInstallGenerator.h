@@ -34,12 +34,15 @@ public:
   void Generate(std::ostream& os, const char* config,
                 std::vector<std::string> const& configurationTypes);
 
-  static void AddInstallRule(std::ostream& os, const char* dest, int type,
-                             const char* file, bool optional = false,
-                             const char* properties = 0,
-                             const char* permissions = 0,
-                             const char* component = 0,
-                             const char* rename = 0);
+  static void AddInstallRule(
+    std::ostream& os, const char* dest, int type,
+    const char* file, bool optional = false,
+    const char* properties = 0,
+    const char* permissions = 0,
+    std::vector<std::string> const& configurations =std::vector<std::string>(),
+    const char* component = 0,
+    const char* rename = 0
+    );
 
 protected:
   virtual void GenerateScript(std::ostream& os)=0;

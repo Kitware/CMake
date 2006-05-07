@@ -299,7 +299,7 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
       file.SetProperty("ABSTRACT","0");
       file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
                    mf.GetSourceExtensions(),
-                   mf.GetHeaderExtensions());
+                   mf.GetHeaderExtensions(), this->Name.c_str());
       this->SourceFiles.push_back(mf.AddSource(file));
       }
     }

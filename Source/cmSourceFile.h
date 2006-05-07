@@ -46,9 +46,10 @@ public:
    * in.  The various extensions provided are tried on the name
    * (e.g., cxx, cpp) in the directory to find the actual file.
    */
-  void SetName(const char* name, const char* dir,
+  bool SetName(const char* name, const char* dir,
                const std::vector<std::string>& sourceExts,
-               const std::vector<std::string>& headerExts);
+               const std::vector<std::string>& headerExts,
+               const char* target = 0);
 
   /**
    * Get the list of the custom commands for this source file

@@ -262,6 +262,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"EnableEnhancedInstructionSet", "arch:SSE", "Use sse instructions",   "1"},
   {"FavorSizeOrSpeed",  "Ot", "Favor fast code",  "1"},
   {"FavorSizeOrSpeed",  "Os", "Favor small code", "2"},
+  {"CompileAs", "TC", "Compile as c code",        "1"},
+  {"CompileAs", "TP", "Compile as c++ code",      "2"},
   {"Optimization", "Od", "Non Debug",        "0"},
   {"Optimization", "O1", "Min Size",         "1"},
   {"Optimization", "O2", "Max Speed",        "2"},
@@ -394,6 +396,15 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
         cmSystemTools::UpperCase(configName);
       flags += " ";
       flags += this->Makefile->GetRequiredDefinition(flagVar.c_str());
+      }
+    // set the correct language
+    if(strcmp(linkLanguage, "C") == 0)
+      {
+      flags += " /TC ";
+      }
+    if(strcmp(linkLanguage, "CXX") == 0)
+      {
+      flags += " /TP ";
       }
     }
 
@@ -1035,10 +1046,21 @@ void cmLocalVisualStudio7Generator::WriteGroup(const cmSourceGroup *sg, cmTarget
       }
     const char* lang =
       this->GlobalGenerator->GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
-    if(lang && strcmp(lang, "CXX") == 0)
+    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+    // if the source file does not match the linker language
+    // then force c or c++
+    if(linkLanguage && lang && strcmp(lang, linkLanguage) != 0)
+      {
+      if(strcmp(lang, "CXX") == 0)
       {
       // force a C++ file type
       compileFlags += " /TP ";
+        }
+      else if(strcmp(lang, "C") == 0)
+        {
+        // force to c 
+        compileFlags += " /TC ";
+        }
       }
     // Check for extra object-file dependencies.
     const char* deps = (*sf)->GetProperty("OBJECT_DEPENDS");

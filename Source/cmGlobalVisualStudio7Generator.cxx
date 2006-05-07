@@ -37,6 +37,8 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   mf->AddDefinition("CMAKE_GENERATOR_Fortran", "ifort");
   
+  this->AddPlatformDefinitions(mf);
+  
   // Create list of configurations requested by user's cache, if any.
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
   this->GenerateConfigurations(mf);
@@ -56,6 +58,11 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
                            cmCacheManager::STATIC);
     }
 
+}
+
+void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
+{
+  mf->AddDefinition("MSVC70", "1");
 }
 
 std::string cmGlobalVisualStudio7Generator::GenerateBuildCommand(const char* makeProgram,

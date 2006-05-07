@@ -501,6 +501,67 @@ cmGlobalUnixMakefileGenerator3
   this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", false, true);
 }
 
+
+std::string cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(const char* makeProgram,
+  const char *projectName, const char* additionalOptions, const char *targetName,
+  const char* config, bool ignoreErrors)
+{
+  // Project name and config are not used yet.
+  (void)projectName;
+  (void)config;
+
+  std::string makeCommand = cmSystemTools::ConvertToUnixOutputPath(makeProgram);
+
+  // Since we have full control over the invocation of nmake, let us
+  // make it quiet.
+  if ( strcmp(this->GetName(), "NMake Makefiles") == 0 )
+    {
+    makeCommand += " /NOLOGO ";
+    }
+  if ( ignoreErrors )
+    {
+    makeCommand += " -i";
+    }
+  if ( additionalOptions )
+    {
+    makeCommand += " ";
+    makeCommand += additionalOptions;
+    }
+  if ( targetName && strlen(targetName))
+    {
+    cmLocalUnixMakefileGenerator3 *lg;
+    if (this->LocalGenerators.size())
+      {
+      lg = static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[0]);
+      }
+    else
+      {
+      lg = static_cast<cmLocalUnixMakefileGenerator3 *>(this->CreateLocalGenerator());
+      // set the Start directories
+      lg->GetMakefile()->SetStartDirectory
+        (this->CMakeInstance->GetStartDirectory());
+      lg->GetMakefile()->SetStartOutputDirectory
+        (this->CMakeInstance->GetStartOutputDirectory());
+      lg->GetMakefile()->MakeStartDirectoriesCurrent();
+      }
+    
+    lg->SetupPathConversions();
+    makeCommand += " \"";
+    std::string tname = targetName;
+    tname += "/fast";
+    tname = lg->Convert(tname.c_str(),cmLocalGenerator::HOME_OUTPUT,
+                        cmLocalGenerator::MAKEFILE);
+    tname = lg->ConvertToMakeTarget(tname.c_str());
+    makeCommand += tname.c_str();
+    makeCommand += "\"";
+    if (!this->LocalGenerators.size())
+      {
+      delete lg;
+      }
+    }
+  return makeCommand;
+}
+
 //----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
@@ -550,7 +611,34 @@ cmGlobalUnixMakefileGenerator3
                             "Build rule for target.",
                             t->second.GetName(), depends, commands,
                             true);
+          
+          // Add a fast rule to build the target
+          std::string localName = lg->GetRelativeTargetDirectory(t->second);
+          std::string makefileName;
+          makefileName = localName;
+          makefileName += "/build.make";          
+          depends.clear();
+          commands.clear();
+          std::string makeTargetName = localName;
+          makeTargetName += "/build";
+          localName = t->second.GetName();
+          localName += "/fast";
+          commands.push_back(lg->GetRecursiveMakeCall
+                             (makefileName.c_str(), makeTargetName.c_str()));
+          lg->WriteMakeRule(ruleFileStream, "fast build rule for target.",
+                            localName.c_str(), depends, commands, true);
           }
+          }
+      else
+        {
+        // Add a fast rule to build the target
+        depends.clear();
+        commands.clear();
+        std::string localName = t->second.GetName();
+        depends.push_back(localName);
+        localName += "/fast";
+        lg->WriteMakeRule(ruleFileStream, "fast build rule for target.",
+                          localName.c_str(), depends, commands, true);        
         }
       }
     }
@@ -578,20 +666,22 @@ cmGlobalUnixMakefileGenerator3
   cmTargets& targets = lg->GetMakefile()->GetTargets();
   for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
+    if (t->second.GetName() && strlen(t->second.GetName()))
+      {
+      std::string makefileName;
+      // Add a rule to build the target by name.
+      localName = lg->GetRelativeTargetDirectory(t->second);
+      makefileName = localName;
+      makefileName += "/build.make";
+      
     if (((t->second.GetType() == cmTarget::EXECUTABLE) ||
          (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
          (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
          (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
-         (t->second.GetType() == cmTarget::UTILITY)) &&
-        t->second.GetName() &&
-        strlen(t->second.GetName()))  
+           (t->second.GetType() == cmTarget::UTILITY)))  
       {
       bool needRequiresStep = 
         this->NeedRequiresStep(lg,t->second.GetName());
-      // Add a rule to build the target by name.
-      localName = lg->GetRelativeTargetDirectory(t->second);
-      std::string makefileName = localName;
-      makefileName += "/build.make";
       
       lg->WriteDivider(ruleFileStream);
       ruleFileStream
@@ -689,6 +779,7 @@ cmGlobalUnixMakefileGenerator3
       depends.push_back(makeTargetName);
       lg->WriteMakeRule(ruleFileStream, "clean rule for target.",
                         "clean", depends, commands, true);
+        }
       }
     }
 }

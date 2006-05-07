@@ -1,3 +1,22 @@
+Changes in CMake 2.4.2
+* Significant speedup in try-compile for nmake
+
+* CPack improvments including tar bzip2
+
+* FindQt4 windows path fix
+
+* Sunos cc optimize flags are correct
+
+* Fix crash with ${} empty variable
+
+* Increase depend speed on Mac OS.
+
+* install command CONFIGURATIONS option.
+
+* Fix MSVC60, MSVC70, MSVC71, MSVC80 definitions for IDE builds
+
+* Fix for C++ compiler being used for c code in VS IDE
+
 Changes in CMake 2.4.1
 
 * Several ctest and cpack bug fixes

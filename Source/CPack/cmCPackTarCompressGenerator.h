@@ -15,38 +15,33 @@
 
 =========================================================================*/
 
-#ifndef cmCPackTGZGenerator_h
-#define cmCPackTGZGenerator_h
+#ifndef cmCPackTarCompressGenerator_h
+#define cmCPackTarCompressGenerator_h
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackTGZGenerator.h"
 
-class cmCPackTGZGeneratorForward;
-
-/** \class cmCPackTGZGenerator
- * \brief A generator for TGZ files
- *
- * http://people.freebsd.org/~kientzle/libarchive/
+/** \class cmCPackTarCompressGenerator
+ * \brief A generator for TarCompress files
  */
-class cmCPackTGZGenerator : public cmCPackGenericGenerator
+class cmCPackTarCompressGenerator : public cmCPackTGZGenerator
 {
 public:
-  friend class cmCPackTGZGeneratorForward;
-  cmCPackTypeMacro(cmCPackTGZGenerator, cmCPackGenericGenerator);
+  friend class cmCPackTarCompressGeneratorForward;
+  cmCPackTypeMacro(cmCPackTarCompressGenerator, cmCPackTGZGenerator);
 
   /**
    * Construct generator
    */
-  cmCPackTGZGenerator();
-  virtual ~cmCPackTGZGenerator();
+  cmCPackTarCompressGenerator();
+  virtual ~cmCPackTarCompressGenerator();
 
 protected:
   virtual int InitializeInternal();
-  virtual int GenerateHeader(std::ostream* os);
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
-  virtual const char* GetOutputExtension() { return "tar.gz"; }
+  virtual const char* GetOutputExtension() { return "tar.Z"; }
 
-  bool Compress;
+  int RenameFile(const char* oldname, const char* newname);
 };
 
 #endif

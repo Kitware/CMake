@@ -49,6 +49,7 @@ public:
   virtual void Configure();
   virtual void Generate();
 protected:
+  virtual void AddPlatformDefinitions(cmMakefile* mf);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNHeader(std::ostream& fout);

@@ -91,6 +91,10 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key, cons
 
 char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
 {
+  if(!var)
+    {
+    return 0;
+    }
   if(this->FileName && strcmp(var, "CMAKE_CURRENT_LIST_FILE") == 0)
     {
     return this->AddString(this->FileName);

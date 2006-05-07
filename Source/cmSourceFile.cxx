@@ -23,9 +23,10 @@
 // The class must be found in dir and end in name.cxx, name.txx, 
 // name.c or it will be considered a header file only class
 // and not included in the build process
-void cmSourceFile::SetName(const char* name, const char* dir,
+bool cmSourceFile::SetName(const char* name, const char* dir,
                            const std::vector<std::string>& sourceExts,
-                           const std::vector<std::string>& headerExts)
+                           const std::vector<std::string>& headerExts,
+                           const char* target)
 {
 
   this->SetProperty("HEADER_FILE_ONLY","1");
@@ -79,7 +80,7 @@ void cmSourceFile::SetName(const char* name, const char* dir,
       {
       this->SetProperty("EXTERNAL_OBJECT", "1");
       }
-    return;
+    return true;
     }
   
   // Next, try the various source extensions
@@ -94,7 +95,7 @@ void cmSourceFile::SetName(const char* name, const char* dir,
       this->SourceExtension = *ext;
       this->SetProperty("HEADER_FILE_ONLY","0");
       this->FullPath = hname;
-      return;
+      return true;
       }
     }
 
@@ -109,25 +110,29 @@ void cmSourceFile::SetName(const char* name, const char* dir,
       {
       this->SourceExtension = *ext;
       this->FullPath = hname;
-      return;
+      return true;
       }
     }
 
-  std::string errorMsg = "\n\nTried";
+  cmOStringStream e;
+  e << "Cannot find source file \"" << pathname << "\"";
+  if(target)
+    {
+    e << " for target \"" << target << "\"";
+    }
+  e << "\n\nTried extensions";
   for( std::vector<std::string>::const_iterator ext = sourceExts.begin();
        ext != sourceExts.end(); ++ext )
     {
-    errorMsg += " .";
-    errorMsg += *ext;
+    e << " ." << *ext;
     }
   for( std::vector<std::string>::const_iterator ext = headerExts.begin();
        ext != headerExts.end(); ++ext )
     {
-    errorMsg += " .";
-    errorMsg += *ext;
+    e << " ." << *ext;
     }
-  cmSystemTools::Error("can not find file ", pathname.c_str(), 
-                       errorMsg.c_str());
+  cmSystemTools::Error(e.str().c_str());
+  return false;
 }
 
 void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,

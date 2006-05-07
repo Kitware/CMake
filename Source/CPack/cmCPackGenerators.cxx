@@ -19,6 +19,8 @@
 
 #include "cmCPackGenericGenerator.h"
 #include "cmCPackTGZGenerator.h"
+#include "cmCPackTarBZip2Generator.h"
+#include "cmCPackTarCompressGenerator.h"
 #include "cmCPackZIPGenerator.h"
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackNSISGenerator.h"
@@ -29,12 +31,24 @@
 //----------------------------------------------------------------------
 cmCPackGenerators::cmCPackGenerators()
 {
-  this->RegisterGenerator("TGZ", cmCPackTGZGenerator::CreateGenerator);
-  this->RegisterGenerator("STGZ", cmCPackSTGZGenerator::CreateGenerator);
-  this->RegisterGenerator("NSIS", cmCPackNSISGenerator::CreateGenerator);
-  this->RegisterGenerator("ZIP", cmCPackZIPGenerator::CreateGenerator);
-  this->RegisterGenerator("PackageMaker",
+  this->RegisterGenerator("TGZ", "Tar GZip compression",
+    cmCPackTGZGenerator::CreateGenerator);
+  this->RegisterGenerator("STGZ", "Self extracting Tar GZip compression",
+    cmCPackSTGZGenerator::CreateGenerator);
+#ifdef _WIN32
+  this->RegisterGenerator("NSIS", "Null Soft Installer",
+    cmCPackNSISGenerator::CreateGenerator);
+#endif
+  this->RegisterGenerator("ZIP", "ZIP file format",
+    cmCPackZIPGenerator::CreateGenerator);
+  this->RegisterGenerator("TBZ2", "Tar BZip2 compression",
+    cmCPackTarBZip2Generator::CreateGenerator);
+  this->RegisterGenerator("TZ", "Tar Compress compression",
+    cmCPackTarCompressGenerator::CreateGenerator);
+#ifdef __APPLE__
+  this->RegisterGenerator("PackageMaker", "Mac OSX Package Maker compression",
     cmCPackPackageMakerGenerator::CreateGenerator);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -79,6 +93,7 @@ cmCPackGenericGenerator* cmCPackGenerators::NewGeneratorInternal(
 
 //----------------------------------------------------------------------
 void cmCPackGenerators::RegisterGenerator(const char* name,
+  const char* generatorDescription,
   CreateGeneratorCall* createGenerator)
 {
   if ( !name || !createGenerator )
@@ -88,4 +103,5 @@ void cmCPackGenerators::RegisterGenerator(const char* name,
     return;
     }
   this->GeneratorCreators[name] = createGenerator;
+  this->GeneratorDescriptions[name] = generatorDescription;
 }

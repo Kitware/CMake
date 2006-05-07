@@ -123,6 +123,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   bool doing_destination = false;
   bool doing_permissions = false;
   bool doing_component = false;
+  bool doing_configurations = false;
   bool archive_settings = true;
   bool library_settings = true;
   bool runtime_settings = true;
@@ -136,6 +137,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   std::string archive_component;
   std::string library_component;
   std::string runtime_component;
+  std::vector<std::string> archive_configurations;
+  std::vector<std::string> library_configurations;
+  std::vector<std::string> runtime_configurations;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "DESTINATION")
@@ -145,6 +149,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_destination = true;
       doing_permissions = false;
       doing_component = false;
+      doing_configurations = false;
       }
     else if(args[i] == "PERMISSIONS")
       {
@@ -153,6 +158,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_destination = false;
       doing_permissions = true;
       doing_component = false;
+      doing_configurations = false;
       }
     else if(args[i] == "COMPONENT")
       {
@@ -161,6 +167,16 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_destination = false;
       doing_permissions = false;
       doing_component = true;
+      doing_configurations = false;
+      }
+    else if(args[i] == "CONFIGURATIONS")
+      {
+      // Switch to setting the configurations property.
+      doing_targets = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_component = false;
+      doing_configurations = true;
       }
     else if(args[i] == "ARCHIVE")
       {
@@ -169,6 +185,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_destination = false;
       doing_permissions = false;
       doing_component = false;
+      doing_configurations = false;
       archive_settings = true;
       library_settings = false;
       runtime_settings = false;
@@ -180,6 +197,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_destination = false;
       doing_permissions = false;
       doing_component = false;
+      doing_configurations = false;
       archive_settings = false;
       library_settings = true;
       runtime_settings = false;
@@ -191,6 +209,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_destination = false;
       doing_permissions = false;
       doing_component = false;
+      doing_configurations = false;
       archive_settings = false;
       library_settings = false;
       runtime_settings = true;
@@ -300,6 +319,22 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           }
         }
       }
+    else if(doing_configurations)
+      {
+      // Add the configuration in the active set(s) of properties.
+      if(archive_settings)
+        {
+        archive_configurations.push_back(args[i]);
+        }
+      if(library_settings)
+        {
+        library_configurations.push_back(args[i]);
+        }
+      if(runtime_settings)
+        {
+        runtime_configurations.push_back(args[i]);
+        }
+      }
     else
       {
       // Unknown argument.
@@ -351,6 +386,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, archive_dest.c_str(), true,
                                          archive_permissions.c_str(),
+                                         archive_configurations,
                                          archive_component.c_str()));
           }
         if(runtime_destination)
@@ -359,6 +395,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
                                          runtime_permissions.c_str(),
+                                         runtime_configurations,
                                          runtime_component.c_str()));
           }
 #else
@@ -369,6 +406,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, library_dest.c_str(), false,
                                          library_permissions.c_str(),
+                                         library_configurations,
                                          library_component.c_str()));
           }
         else
@@ -390,6 +428,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, archive_dest.c_str(), false,
                                          archive_permissions.c_str(),
+                                         archive_configurations,
                                          archive_component.c_str()));
           }
         else
@@ -410,6 +449,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, library_dest.c_str(), false,
                                          library_permissions.c_str(),
+                                         library_configurations,
                                          library_component.c_str()));
           }
         else
@@ -430,6 +470,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           this->Makefile->AddInstallGenerator(
             new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
                                          runtime_permissions.c_str(),
+                                         runtime_configurations,
                                          runtime_component.c_str()));
           }
         else
@@ -469,12 +510,14 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   bool doing_files = true;
   bool doing_destination = false;
   bool doing_permissions = false;
+  bool doing_configurations = false;
   bool doing_component = false;
   bool doing_rename = false;
   std::vector<std::string> files;
   const char* destination = 0;
   std::string rename;
   std::string permissions;
+  std::vector<std::string> configurations;
   std::string component;
   for(unsigned int i=1; i < args.size(); ++i)
     {
@@ -484,6 +527,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       doing_files = false;
       doing_destination = true;
       doing_permissions = false;
+      doing_configurations = false;
       doing_component = false;
       doing_rename = false;
       }
@@ -493,6 +537,17 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       doing_files = false;
       doing_destination = false;
       doing_permissions = true;
+      doing_configurations = false;
+      doing_component = false;
+      doing_rename = false;
+      }
+    else if(args[i] == "CONFIGURATIONS")
+      {
+      // Switch to setting the configurations property.
+      doing_files = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_configurations = true;
       doing_component = false;
       doing_rename = false;
       }
@@ -502,6 +557,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       doing_files = false;
       doing_destination = false;
       doing_permissions = false;
+      doing_configurations = false;
       doing_component = true;
       doing_rename = false;
       }
@@ -511,6 +567,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       doing_files = false;
       doing_destination = false;
       doing_permissions = false;
+      doing_configurations = false;
       doing_component = false;
       doing_rename = true;
       }
@@ -536,6 +593,10 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
 
       // Store the file for installation.
       files.push_back(file);
+      }
+    else if(doing_configurations)
+      {
+      configurations.push_back(args[i]);
       }
     else if(doing_destination)
       {
@@ -603,8 +664,8 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   // Create the files install generator.
   this->Makefile->AddInstallGenerator(
     new cmInstallFilesGenerator(files, dest.c_str(), programs,
-                                permissions.c_str(), component.c_str(),
-                                rename.c_str()));
+                                permissions.c_str(), configurations,
+                                component.c_str(), rename.c_str()));
 
   // Tell the global generator about any installation component names
   // specified.

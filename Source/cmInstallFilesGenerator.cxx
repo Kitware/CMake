@@ -23,10 +23,12 @@ cmInstallFilesGenerator
 ::cmInstallFilesGenerator(std::vector<std::string> const& files,
                           const char* dest, bool programs,
                           const char* permissions,
+                          std::vector<std::string> const& configurations,
                           const char* component,
                           const char* rename):
   Files(files), Destination(dest), Programs(programs),
-  Permissions(permissions), Component(component), Rename(rename)
+  Permissions(permissions), Configurations(configurations),
+  Component(component), Rename(rename)
 {
 }
 
@@ -51,6 +53,7 @@ void cmInstallFilesGenerator::GenerateScript(std::ostream& os)
                           : cmTarget::INSTALL_FILES), fi->c_str(),
                          not_optional, no_properties,
                          this->Permissions.c_str(),
+                         this->Configurations,
                          this->Component.c_str(),
                          this->Rename.c_str());
     }

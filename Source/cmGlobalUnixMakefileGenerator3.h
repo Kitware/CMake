@@ -113,6 +113,15 @@ public:
   /** Get the command to use for a non-symbolic target file that has
       no rule.  This is used for multiple output dependencies.  */
   std::string GetEmptyCommandHack() { return this->EmptyCommandsHack; }
+
+
+  // change the build command for speed
+  virtual std::string GenerateBuildCommand
+  (const char* makeProgram,
+   const char *projectName, const char* additionalOptions, 
+   const char *targetName,
+   const char* config, bool ignoreErrors);
+
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();

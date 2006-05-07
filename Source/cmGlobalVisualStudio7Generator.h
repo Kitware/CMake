@@ -107,6 +107,7 @@ protected:
                                           bool in_all);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
+  virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   void GenerateConfigurations(cmMakefile* mf);
 

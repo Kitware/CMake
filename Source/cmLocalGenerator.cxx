@@ -289,6 +289,30 @@ void cmLocalGenerator::GenerateInstallRules()
     config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
     }
 
+  // Choose a default install configuration.
+  const char* default_config = config;
+  const char* default_order[] = {"RELEASE", "MINSIZEREL",
+                                 "RELWITHDEBINFO", "DEBUG", 0};
+  for(const char** c = default_order; *c && !default_config; ++c)
+    {
+    for(std::vector<std::string>::iterator i = configurationTypes.begin();
+        i != configurationTypes.end(); ++i)
+      {
+      if(cmSystemTools::UpperCase(*i) == *c)
+        {
+        default_config = i->c_str();
+        }
+      }
+    }
+  if(!default_config && !configurationTypes.empty())
+    {
+    default_config = configurationTypes[0].c_str();
+    }
+  if(!default_config)
+    {
+    default_config = "Release";
+    }
+
   // Create the install script file.
   std::string file = this->Makefile->GetStartOutputDirectory();
   std::string homedir = this->Makefile->GetHomeOutputDirectory();
@@ -323,7 +347,7 @@ void cmLocalGenerator::GenerateInstallRules()
     "    STRING(REGEX REPLACE \"^[^A-Za-z0-9_]+\" \"\"\n"
     "           CMAKE_INSTALL_CONFIG_NAME \"${BUILD_TYPE}\")\n"
     "  ELSE(BUILD_TYPE)\n"
-    "    SET(CMAKE_INSTALL_CONFIG_NAME Release)\n"
+    "    SET(CMAKE_INSTALL_CONFIG_NAME \"" << default_config << "\")\n"
     "  ENDIF(BUILD_TYPE)\n"
     "  MESSAGE(STATUS \"Install configuration: \\\"${CMAKE_INSTALL_CONFIG_NAME}\\\"\")\n"
     "ENDIF(NOT CMAKE_INSTALL_CONFIG_NAME)\n"
@@ -1955,9 +1979,11 @@ cmLocalGenerator
           const char* no_permissions = "";
           const char* no_rename = "";
           const char* no_component = "";
+          std::vector<std::string> no_configurations;
           cmInstallFilesGenerator g(l->second.GetSourceLists(),
                                     destination.c_str(), false,
-                                    no_permissions, no_component, no_rename);
+                                    no_permissions, no_configurations,
+                                    no_component, no_rename);
           g.Generate(os, config, configurationTypes);
           }
           break;
@@ -1967,9 +1993,11 @@ cmLocalGenerator
           const char* no_permissions = "";
           const char* no_rename = "";
           const char* no_component = "";
+          std::vector<std::string> no_configurations;
           cmInstallFilesGenerator g(l->second.GetSourceLists(),
                                     destination.c_str(), true,
-                                    no_permissions, no_component, no_rename);
+                                    no_permissions, no_configurations,
+                                    no_component, no_rename);
           g.Generate(os, config, configurationTypes);
           }
           break;

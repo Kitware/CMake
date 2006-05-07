@@ -14,6 +14,12 @@ EOF
   exit 1
 }
 
+cpack_echo_exit()
+{
+  echo $1
+  exit 1
+}
+
 # Display version
 cpack_version()
 {
@@ -26,7 +32,9 @@ cpack_fix_slashes ()
   echo "$1" | sed 's/\\/\//g'
 }
 
-
+interactive=TRUE
+cpack_skip_license=FALSE
+cpack_include_subdir=""
 for a in "$@CPACK_AT_SIGN@"; do
   if echo $a | grep "^--prefix=" > /dev/null 2> /dev/null; then
     cpack_prefix_dir=`echo $a | sed "s/^--prefix=//"`
@@ -45,7 +53,15 @@ for a in "$@CPACK_AT_SIGN@"; do
   if echo $a | grep "^--exclude-subdir" > /dev/null 2> /dev/null; then
     cpack_include_subdir=FALSE
   fi
+  if echo $a | grep "^--skip-license" > /dev/null 2> /dev/null; then
+    cpack_skip_license=TRUE
+  fi
 done
+
+if [ "x${cpack_include_subdir}x" != "xx" -o "x${cpack_skip_license}x" == "xTRUEx" ]
+then
+  interactive=FALSE
+fi
 
 cpack_version
 echo "This is a self-extracting archive."
@@ -56,16 +72,41 @@ then
 fi
 
 echo "The archive will be extracted to: ${toplevel}"
-echo ""
 
-if [ "x${cpack_include_subdir}x" == "xx" ]
+if [ "x${interactive}x" == "xTRUEx" ]
 then
+  echo ""
   echo "If you want to stop extracting, please press <ctrl-C>."
-  echo "Include the subdirectory @CPACK_PACKAGE_FILE_NAME@" [Yn]: 
-  read line
-  if [ "x${line}x" != "xnx" -a "x${line}x" != "xNx" ]
+
+  if [ "x${cpack_skip_license}x" != "xTRUEx" ]
   then
+    more << ____cpack__here_doc____
+@CPACK_RESOURCE_FILE_LICENSE_CONTENT@
+____cpack__here_doc____
+    echo
+    echo "Do you accept the license? [Yn]: "
+    read line leftover
+    case ${line} in
+      y* | Y*)
+        cpack_license_accepted=TRUE;;
+      *)
+        echo "License not accepted. Exiting ..."
+        exit 1;;
+    esac
+  fi
+
+  if [ "x${cpack_include_subdir}x" == "xx" ]
+  then
+    echo "By default the @CPACK_PACKAGE_NAME@ will be installed in:"
+    echo "  \"${toplevel}/@CPACK_PACKAGE_FILE_NAME@\""
+    echo "Do you want to include the subdirectory @CPACK_PACKAGE_FILE_NAME@?"
+    echo "Saying no will install in: \"${toplevel}\" [Yn]: "
+    read line leftover
     cpack_include_subdir=TRUE
+    case ${line} in
+      n* | N*)
+        cpack_include_subdir=FALSE
+    esac
   fi
 fi
 
@@ -74,13 +115,17 @@ then
   toplevel="${toplevel}/@CPACK_PACKAGE_FILE_NAME@"
   mkdir -p "${toplevel}"
 fi
-echo "Extracting... Please wait..."
+echo
+echo "Using target directory: ${toplevel}"
+echo "Extracting, please wait..."
 echo ""
 
 # take the archive portion of this file and pipe it to tar
 # the NUMERIC parameter in this command should be one more
 # than the number of lines in this header file
-tail -n +###CPACK_HEADER_LENGTH### "$0" | gunzip | (cd "${toplevel}" && tar xf -)
+tail -n +###CPACK_HEADER_LENGTH### "$0" | gunzip | (cd "${toplevel}" && tar xf -) || cpack_echo_exit "Problem unpacking the @CPACK_PACKAGE_FILE_NAME@"
+
+echo "Unpacking finished successfully"
 
 exit 0
 #-----------------------------------------------------------

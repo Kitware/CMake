@@ -1275,6 +1275,7 @@ cmLocalUnixMakefileGenerator3
                                includeRegexScan.c_str(),
                                includeRegexComplain.c_str(),
                                generatedFiles, includeCacheFileName);
+      scanner->SetHomeOutputDirectory(mf->GetHomeOutputDirectory());
       }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")
@@ -1418,6 +1419,11 @@ void cmLocalUnixMakefileGenerator3
                                 this->Makefile->GetStartOutputDirectory());
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean",
                       depends, commands, true);
+  commands.clear();
+  depends.clear();
+  depends.push_back("clean");
+  this->WriteMakeRule(ruleFileStream, "The main clean target", "clean/fast",
+                      depends, commands, true);
 
   // Write the preinstall rule.
   dir = this->Makefile->GetStartOutputDirectory();
@@ -1444,6 +1450,10 @@ void cmLocalUnixMakefileGenerator3
                         this->Makefile->GetStartOutputDirectory());
   this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
                       "preinstall", depends, commands, true);
+  commands.clear();
+  depends.push_back("preinstall");
+  this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
+                      "preinstall/fast", depends, commands, true);
 
   // write the depend rule, really a recompute depends rule
   depends.clear();

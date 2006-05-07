@@ -57,6 +57,12 @@ void cmGlobalVisualStudio8Generator::GetDocumentation(cmDocumentationEntry& entr
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
+{
+  mf->AddDefinition("MSVC80", "1");
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::Configure()
 {
   this->cmGlobalVisualStudio7Generator::Configure();

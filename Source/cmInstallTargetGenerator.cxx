@@ -24,9 +24,12 @@
 //----------------------------------------------------------------------------
 cmInstallTargetGenerator
 ::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
-                           const char* permissions, const char* component):
+                           const char* permissions,
+                           std::vector<std::string> const& configurations,
+                           const char* component):
   Target(&t), Destination(dest), ImportLibrary(implib),
-  Permissions(permissions), Component(component)
+  Permissions(permissions), Configurations(configurations),
+  Component(component)
 {
   this->Target->SetHaveInstallRule(true);
 }
@@ -145,7 +148,9 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   // Write code to install the target file.
   this->AddInstallRule(os, destination.c_str(), type, fromFile.c_str(),
                        this->ImportLibrary, properties,
-                       this->Permissions.c_str(), this->Component.c_str());
+                       this->Permissions.c_str(),
+                       this->Configurations,
+                       this->Component.c_str());
 
   // Fix the install_name settings in installed binaries.
   if(type == cmTarget::SHARED_LIBRARY ||
