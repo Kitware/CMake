@@ -1,6 +1,7 @@
 set(PROCESSORS 2)
 set(HOST hythloth)
-set(MAKE "make -j2")
+set(MAKE_COMMAND "make")
+set(MAKE "${MAKE_COMMAND} -j2")
 set(INITIAL_CACHE "
 CMAKE_BUILD_TYPE:STRING=Release
 ")
