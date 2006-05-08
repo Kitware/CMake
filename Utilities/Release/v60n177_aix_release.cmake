@@ -6,7 +6,10 @@ set(EXTRA_HOP "rsh v60n177" )
 set(MAKE_PROGRAM "make")
 set(CC "xlc")
 set(CXX "xlC")
-set(INITIAL_CACHE "CMAKE_BUILD_TYPE:STRING=Release")
+set(INITIAL_CACHE "
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
+")
 set(EXTRA_COPY "mv *.sh ~
 mv *.tgz ~")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
