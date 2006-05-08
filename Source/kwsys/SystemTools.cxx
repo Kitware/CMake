@@ -2018,7 +2018,7 @@ kwsys_stl::string SystemTools::FindProgram(
     }
   kwsys_stl::string name = nameIn;
   kwsys_stl::vector<kwsys_stl::string> extensions;
-#if defined (_WIN32) || defined(__CYGWIN__) | defined(__MINGW32__)
+#if defined (_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
   bool hasExtension = false;
   // check to see if the name already has a .xxx at
   // the end of it
@@ -2034,8 +2034,8 @@ kwsys_stl::string SystemTools::FindProgram(
     }
 #endif
   kwsys_stl::string tryPath;
-  // first try the name as it was given (adding extensions
-  // if needed.)
+
+  // first try with extensions if the os supports them
   if(extensions.size())
     {
     for(kwsys_stl::vector<kwsys_stl::string>::iterator i = 
@@ -2050,14 +2050,12 @@ kwsys_stl::string SystemTools::FindProgram(
         }
       }
     }
-  else
+  // now try just the name
+  tryPath = name;
+  if(SystemTools::FileExists(tryPath.c_str()) &&
+     !SystemTools::FileIsDirectory(tryPath.c_str()))
     {
-    tryPath = name;
-    if(SystemTools::FileExists(tryPath.c_str()) &&
-       !SystemTools::FileIsDirectory(tryPath.c_str()))
-      {
-      return SystemTools::CollapseFullPath(tryPath.c_str());
-      }
+    return SystemTools::CollapseFullPath(tryPath.c_str());
     }
   // now construct the path
   kwsys_stl::vector<kwsys_stl::string> path;
@@ -2080,6 +2078,7 @@ kwsys_stl::string SystemTools::FindProgram(
     // Remove double quotes from the path on windows
     SystemTools::ReplaceString(*p, "\"", "");
 #endif
+    // first try with extensions
     if(extensions.size())
       {
       for(kwsys_stl::vector<kwsys_stl::string>::iterator ext 
@@ -2096,16 +2095,14 @@ kwsys_stl::string SystemTools::FindProgram(
           }
         }
       }
-    else
+    // now try it without them
+    tryPath = *p;
+    tryPath += "/";
+    tryPath += name;
+    if(SystemTools::FileExists(tryPath.c_str()) &&
+       !SystemTools::FileIsDirectory(tryPath.c_str()))
       {
-      tryPath = *p;
-      tryPath += "/";
-      tryPath += name;
-      if(SystemTools::FileExists(tryPath.c_str()) &&
-         !SystemTools::FileIsDirectory(tryPath.c_str()))
-        {
-        return SystemTools::CollapseFullPath(tryPath.c_str());
-        }
+      return SystemTools::CollapseFullPath(tryPath.c_str());
       }
     }
   // Couldn't find the program.
