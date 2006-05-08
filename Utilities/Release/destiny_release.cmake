@@ -2,7 +2,7 @@ set(PROCESSORS 1)
 set(RUN_SHELL "/usr/local/bin/zsh -l")
 set(CVS_COMMAND "/usr/local/bin/cvs")
 set(HOST destiny)
-set(MAKE_COMMAND "/usr/local/bin/gmake")
+set(MAKE_PROGRAM "/usr/local/bin/gmake")
 set(INITIAL_CACHE "CMAKE_BUILD_TYPE:STRING=Release
 CMAKE_EXE_LINKER_FLAGS:STRING=-Wl,-a,archive_shared
 CMAKE_C_FLAGS:STRING=+DAportable
