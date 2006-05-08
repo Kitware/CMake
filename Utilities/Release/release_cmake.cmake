@@ -1,6 +1,9 @@
 set(CVSROOT ":pserver:anonymous@www.cmake.org:/cvsroot/CMake")
 get_filename_component(SCRIPT_PATH "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
+if(DEFINED EXTRA_COPY)
+  set(HAS_EXTRA_COPY 1)
+endif(DEFINED EXTRA_COPY)
 if(NOT DEFINED CMAKE_RELEASE_DIRECTORY)
   set(CMAKE_RELEASE_DIRECTORY "~/CMakeReleaseDirectory")
 endif(NOT DEFINED CMAKE_RELEASE_DIRECTORY)
@@ -75,10 +78,12 @@ remote_command("Copy release_cmake-${HOST}.sh to sever"
 remote_command("Run release script" "${RUN_SHELL} release_cmake-${HOST}.sh")
 
 message("copy the .gz file back from the machine")
+message("scp ${HOST}:${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build/*.gz .")
 execute_process(COMMAND scp ${HOST}:${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build/*.gz .
   RESULT_VARIABLE result) 
 
 message("copy the ${INSTALLER_SUFFIX} file back from the machine")
+message("scp ${HOST}:${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build/${INSTALLER_SUFFIX} .")
 execute_process(COMMAND scp ${HOST}:${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build/${INSTALLER_SUFFIX} .
   RESULT_VARIABLE result) 
 
