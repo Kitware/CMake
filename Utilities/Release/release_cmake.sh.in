@@ -24,9 +24,20 @@ if [ ! -z "@CXX@" ]; then
     export CXX="@CXX@"
     check_exit_value $? "set CC compiler env var" || exit 1
 fi
+
 if [ ! -z "@LDFLAGS@" ]; then
     export LDFLAGS="@LDFLAGS@"
-    check_exit_value $? "set CC compiler env var" || exit 1
+    check_exit_value $? "set LDFLAGS env var" || exit 1
+fi
+
+if [ ! -z "@CFLAGS@" ]; then
+    export CFLAGS="@CFLAGS@"
+    check_exit_value $? "set CFLAGS  env var" || exit 1
+fi
+
+if [ ! -z "@CXXFLAGS@" ]; then
+    export CXXFLAGS="@CXXFLAGS@"
+    check_exit_value $? "setCXXFLAGS env var" || exit 1
 fi
 
 if [ ! -z "@USER_MAKE_RULE_FILE_CONTENTS@" ]; then

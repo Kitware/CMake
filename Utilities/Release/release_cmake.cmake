@@ -7,6 +7,9 @@ endif(DEFINED EXTRA_COPY)
 if(NOT DEFINED CMAKE_RELEASE_DIRECTORY)
   set(CMAKE_RELEASE_DIRECTORY "~/CMakeReleaseDirectory")
 endif(NOT DEFINED CMAKE_RELEASE_DIRECTORY)
+if(NOT DEFINED SCRIPT_NAME)
+  set(SCRIPT_NAME "${HOST}")
+endif(NOT DEFINED SCRIPT_NAME)
 if(NOT DEFINED MAKE_PROGRAM)
   message(FATAL_ERROR "MAKE_PROGRAM must be set")
 endif(NOT DEFINED MAKE_PROGRAM)
@@ -63,19 +66,19 @@ endmacro(remote_command)
 # set this so configure file will work from script mode
 set(CMAKE_BACKWARDS_COMPATIBILITY 2.4)
 # create the script specific for the given host
-configure_file(${SCRIPT_PATH}/release_cmake.sh.in
-  release_cmake-${HOST}.sh @ONLY)
+set(SCRIPT_FILE release_cmake-${SCRIPT_NAME}.sh)
+configure_file(${SCRIPT_PATH}/release_cmake.sh.in ${SCRIPT_FILE} @ONLY)
 # remove any old version of the script
-remote_command("remove old release_cmake-${HOST}.sh from server"
-  "rm -f release_cmake-${HOST}.sh")
+remote_command("remove old ${SCRIPT_FILE} from server"
+  "rm -f  ${SCRIPT_FILE}")
 # copy the script to the remote host via cat with the 
 # script as input for the execute_process this will translate
 # the file from dos to unix
 remote_command("Copy release_cmake-${HOST}.sh to sever"
-  "cat > release_cmake-${HOST}.sh" release_cmake-${HOST}.sh)
+  "cat > ${SCRIPT_FILE}" ${SCRIPT_FILE})
 
 # now run the script on the remote machine
-remote_command("Run release script" "${RUN_SHELL} release_cmake-${HOST}.sh")
+remote_command("Run release script" "${RUN_SHELL} ${SCRIPT_FILE}")
 
 message("copy the .gz file back from the machine")
 message("scp ${HOST}:${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build/*.gz .")

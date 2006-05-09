@@ -1,14 +1,9 @@
 set(PROCESSORS 1)
 set(HOST dashsun1)
-set(MAKE "make")
-execute_process(COMMAND ssh ${HOST}
-  pwd RESULT_VARIABLE result OUTPUT_VARIABLE BUILD_DIR)
-# now strip the newline (we need perl chop...)
-string(LENGTH "${BUILD_DIR}" length)
-math(EXPR length "${length} -1" )
-string(SUBSTRING "${BUILD_DIR}" 0 ${length} BUILD_DIR)
+set(CMAKE_RELEASE_DIRECTORY "/home/kitware/CMakeReleaseDirectory" )
+set(MAKE_PROGRAM "make")
 set(USER_MAKE_RULE_FILE
-  "${BUILD_DIR}/CMakeReleaseDirectory/UserMakeRules.cmake")
+  "/home/kitware/CMakeReleaseDirectory/UserMakeRules.cmake")
 set(INITIAL_CACHE "
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
 CMAKE_BUILD_TYPE:STRING=Release
