@@ -13,6 +13,6 @@ CMAKE_USER_MAKE_RULES_OVERRIDE:STRING=${USER_MAKE_RULE_FILE}
 CURSES_LIBRARY:FILEPATH=/usr/lib/libcurses.a
 FORM_LIBRARY:FILEPATH=/usr/lib/libform.a")
 set(USER_MAKE_RULE_FILE_CONTENTS
-  "SET(CMAKE_DL_LIBS \\\\\"-Bdynamic -ldl -Bstatic\\\\\")")
+  "SET(CMAKE_DL_LIBS \\\"-Bdynamic -ldl -Bstatic\\\")")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)

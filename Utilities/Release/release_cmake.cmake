@@ -7,6 +7,9 @@ endif(DEFINED EXTRA_COPY)
 if(NOT DEFINED CMAKE_RELEASE_DIRECTORY)
   set(CMAKE_RELEASE_DIRECTORY "~/CMakeReleaseDirectory")
 endif(NOT DEFINED CMAKE_RELEASE_DIRECTORY)
+if(NOT DEFINED FINAL_PATH )
+  set(FINAL_PATH ${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build)
+endif(NOT DEFINED FINAL_PATH )
 if(NOT DEFINED SCRIPT_NAME)
   set(SCRIPT_NAME "${HOST}")
 endif(NOT DEFINED SCRIPT_NAME)
@@ -75,12 +78,12 @@ remote_command("run release_cmake-${HOST}.sh on server"
   "${RUN_SHELL}" ${SCRIPT_FILE})
 
 message("copy the .gz file back from the machine")
-message("scp ${HOST}:${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build/*.gz .")
-execute_process(COMMAND scp ${HOST}:${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build/*.gz .
+message("scp ${HOST}:${FINAL_PATH}/*.gz .")
+execute_process(COMMAND scp ${HOST}:${FINAL_PATH}/*.gz .
   RESULT_VARIABLE result) 
 
 message("copy the ${INSTALLER_SUFFIX} file back from the machine")
-message("scp ${HOST}:${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build/${INSTALLER_SUFFIX} .")
-execute_process(COMMAND scp ${HOST}:${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build/${INSTALLER_SUFFIX} .
+message("scp ${HOST}:${FINAL_PATH}/${INSTALLER_SUFFIX} .")
+execute_process(COMMAND scp ${HOST}:${FINAL_PATH}/${INSTALLER_SUFFIX} .
   RESULT_VARIABLE result) 
 
