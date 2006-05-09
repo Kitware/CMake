@@ -11,6 +11,6 @@ CMAKE_BUILD_TYPE:STRING=Release
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
 ")
 set(EXTRA_COPY "mv *.sh ~
-mv *.tgz ~")
+mv *.gz ~")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)
