@@ -1,4 +1,7 @@
 #!/bin/sh
+echo "Start release"
+date
+echo ""
 echo  "remove and create working directory @CMAKE_RELEASE_DIRECTORY@"
 rm -rf @CMAKE_RELEASE_DIRECTORY@ 
 mkdir @CMAKE_RELEASE_DIRECTORY@
@@ -81,4 +84,7 @@ if [ ! -z "@EXTRA_COPY@" ]; then
     @EXTRA_COPY@
     check_exit_value $? "Extra copy step @EXTRA_COPY@" || exit 1
 fi
+echo "End release"
+date
+echo ""
 exit 0
