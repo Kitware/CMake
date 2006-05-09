@@ -1,4 +1,8 @@
 Changes in CMake 2.4.2
+* Find executables with no extension on windows mingw
+
+* Fix FindQt3 to use QTDIR over path
+
 * Significant speedup in try-compile for nmake
 
 * CPack improvments including tar bzip2
