@@ -3,13 +3,13 @@ if(NOT DEFINED CMAKE_VERSION)
 endif(NOT DEFINED CMAKE_VERSION)
 
 set(RELEASE_SCRIPTS
-#  dashmacmini2_release.cmake  # Mac Darwin universal
-#  dashsun1_release.cmake      # SunOS
+  dashmacmini2_release.cmake  # Mac Darwin universal
+  dashsun1_release.cmake      # SunOS
   destiny_release.cmake       # HPUX
-#  hythloth_release.cmake      # Linux
-#  muse_release.cmake          # IRIX
-#  muse_release64.cmake        # IRIX 64
-#  v60n177_aix_release.cmake   # AIX
+  hythloth_release.cmake      # Linux
+  muse_release.cmake          # IRIX
+  muse_release64.cmake        # IRIX 64
+  v60n177_aix_release.cmake   # AIX
 )
 
 file(WRITE create-${CMAKE_VERSION}.sh "#!/bin/sh")

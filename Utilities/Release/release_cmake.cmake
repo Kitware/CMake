@@ -68,17 +68,11 @@ set(CMAKE_BACKWARDS_COMPATIBILITY 2.4)
 # create the script specific for the given host
 set(SCRIPT_FILE release_cmake-${SCRIPT_NAME}.sh)
 configure_file(${SCRIPT_PATH}/release_cmake.sh.in ${SCRIPT_FILE} @ONLY)
-# remove any old version of the script
-remote_command("remove old ${SCRIPT_FILE} from server"
-  "rm -f  ${SCRIPT_FILE}")
-# copy the script to the remote host via cat with the 
-# script as input for the execute_process this will translate
-# the file from dos to unix
-remote_command("Copy release_cmake-${HOST}.sh to sever"
-  "cat > ${SCRIPT_FILE}" ${SCRIPT_FILE})
 
-# now run the script on the remote machine
-remote_command("Run release script" "${RUN_SHELL} ${SCRIPT_FILE}")
+# run the script by starting a shell on the remote machine
+# then using the script file as input to the shell
+remote_command("run release_cmake-${HOST}.sh on server"
+  "${RUN_SHELL}" ${SCRIPT_FILE})
 
 message("copy the .gz file back from the machine")
 message("scp ${HOST}:${CMAKE_RELEASE_DIRECTORY}/${CMAKE_VERSION}-build/*.gz .")
