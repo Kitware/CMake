@@ -723,15 +723,16 @@ bool cmCTest::AddIfExists(SetOfStrings& files, const char* file)
 //----------------------------------------------------------------------
 bool cmCTest::CTestFileExists(const std::string& filename)
 {
-  std::string testingDir = this->BinaryDir + "/Testing/" + this->CurrentTag + "/" +
-    filename;
+  std::string testingDir = this->BinaryDir + "/Testing/" + 
+    this->CurrentTag + "/" + filename;
   return cmSystemTools::FileExists(testingDir.c_str());
 }
 
 //----------------------------------------------------------------------
 cmCTestGenericHandler* cmCTest::GetInitializedHandler(const char* handler)
 {
-  cmCTest::t_TestingHandlers::iterator it = this->TestingHandlers.find(handler);
+  cmCTest::t_TestingHandlers::iterator it = 
+    this->TestingHandlers.find(handler);
   if ( it == this->TestingHandlers.end() )
     {
     return 0;
@@ -743,7 +744,8 @@ cmCTestGenericHandler* cmCTest::GetInitializedHandler(const char* handler)
 //----------------------------------------------------------------------
 cmCTestGenericHandler* cmCTest::GetHandler(const char* handler)
 {
-  cmCTest::t_TestingHandlers::iterator it = this->TestingHandlers.find(handler);
+  cmCTest::t_TestingHandlers::iterator it = 
+    this->TestingHandlers.find(handler);
   if ( it == this->TestingHandlers.end() )
     {
     return 0;
@@ -1369,7 +1371,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       this->ShowOnly = true;
       }
 
-    if(this->CheckArgument(arg, "-SP", "--script-new-process") && i < args.size() - 1 )
+    if(this->CheckArgument(arg, "-SP", "--script-new-process") && 
+       i < args.size() - 1 )
       {
       this->RunConfigurationScript = true;
       i++;
@@ -1382,7 +1385,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         }
       }
 
-    if(this->CheckArgument(arg, "-SR", "--script-run") && i < args.size() - 1 )
+    if(this->CheckArgument(arg, "-SR", "--script-run") && 
+       i < args.size() - 1 )
       {
       SRArgumentSpecified = true;
       this->RunConfigurationScript = true;
@@ -1701,8 +1705,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       this->GetHandler("test")->SetPersistentOption("TestsToRunInformation",
         args[i].c_str());
-      this->GetHandler("memcheck")->SetPersistentOption("TestsToRunInformation",
-        args[i].c_str());
+      this->GetHandler("memcheck")->
+        SetPersistentOption("TestsToRunInformation",args[i].c_str());
       }
     if(this->CheckArgument(arg, "-U", "--union"))
       {
@@ -1712,20 +1716,20 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if(this->CheckArgument(arg, "-R", "--tests-regex") && i < args.size() - 1)
       {
       i++;
-      this->GetHandler("test")->SetPersistentOption("IncludeRegularExpression",
-        args[i].c_str());
-      this->GetHandler("memcheck")->SetPersistentOption("IncludeRegularExpression",
-        args[i].c_str());
+      this->GetHandler("test")->
+        SetPersistentOption("IncludeRegularExpression", args[i].c_str());
+      this->GetHandler("memcheck")->
+        SetPersistentOption("IncludeRegularExpression", args[i].c_str());
       }
 
     if(this->CheckArgument(arg, "-E", "--exclude-regex") &&
       i < args.size() - 1)
       {
       i++;
-      this->GetHandler("test")->SetPersistentOption("ExcludeRegularExpression",
-        args[i].c_str());
-      this->GetHandler("memcheck")->SetPersistentOption("ExcludeRegularExpression",
-        args[i].c_str());
+      this->GetHandler("test")->
+        SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
+      this->GetHandler("memcheck")->
+        SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
       }
 
     if(this->CheckArgument(arg, "--overwrite") && i < args.size() - 1)
