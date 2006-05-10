@@ -1,7 +1,7 @@
 /* A Bison parser, made by GNU Bison 1.875d.  */
 
-/* Skeleton parser for Yacc-like parsing with Bison,
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+/* Skeleton parser for Yacc-like parsing with Bison, Copyright (C) 1984,
+   1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -157,7 +157,9 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmDependsFortran_yy --defines=cmDependsFortranParserTokens.h -ocmDependsFortranParser.cxx cmDependsFortranParser.y
+  bison --yacc --name-prefix=cmDependsFortran_yy
+  --defines=cmDependsFortranParserTokens.h -ocmDependsFortranParser.cxx
+  cmDependsFortranParser.y
 
 Modify cmDependsFortranParser.cxx:
   - remove TABs
@@ -1387,7 +1389,8 @@ yyerrlab:
                  YYPOPSTACK;
                  if (yyssp == yyss)
                    YYABORT;
-                 YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp, yylsp);
+                 YYDSYMPRINTF ("Error: popping", yystos[*yyssp], 
+                               yyvsp, yylsp);
                  yydestruct (yystos[*yyssp], yyvsp);
                }
         }

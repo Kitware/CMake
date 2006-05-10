@@ -112,8 +112,8 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
       }
     else
       {
-      for(std::vector<std::string>::const_iterator i = this->IncludePath->begin();
-          i != this->IncludePath->end(); ++i)
+      for(std::vector<std::string>::const_iterator i = 
+            this->IncludePath->begin(); i != this->IncludePath->end(); ++i)
         {
         // Construct the name of the file as if it were in the current
         // include directory.  Avoid using a leading "./".
@@ -370,7 +370,8 @@ bool cmDependsC::FileExistsOrIsGenerated(const std::string& fname,
     // Note that CMAKE_GENERATED_FILES is written with a conversion
     // relative to the home output directory.
     std::string rname =
-      cmSystemTools::RelativePath(this->HomeOutputDirectory.c_str(), fname.c_str());
+      cmSystemTools::RelativePath(this->HomeOutputDirectory.c_str(), 
+                                  fname.c_str());
     if(this->FileIsGenerated(rname, scanned, dependencies))
       {
       return true;
@@ -387,8 +388,8 @@ bool cmDependsC::FileIsGenerated(const std::string& fname,
                                  std::set<cmStdString>& dependencies)
 {
   if(this->GeneratedFiles &&
-     std::set<cmStdString>::const_iterator(this->GeneratedFiles->find(fname)) !=
-     this->GeneratedFiles->end())
+     std::set<cmStdString>::const_iterator(this->GeneratedFiles->find(fname)) 
+     != this->GeneratedFiles->end())
     {
     // If the file does not really exist yet pretend it has already
     // been scanned.  When it exists later then dependencies will be
