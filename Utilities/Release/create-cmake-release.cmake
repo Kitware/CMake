@@ -7,8 +7,8 @@ set(RELEASE_SCRIPTS
   dashsun1_release.cmake      # SunOS
   destiny_release.cmake       # HPUX
   hythloth_release.cmake      # Linux
-  muse_release.cmake          # IRIX
-  muse_release64.cmake        # IRIX 64
+  dashsgi1_release.cmake      # IRIX
+  dashsgi1_release64.cmake    # IRIX 64
   v60n177_aix_release.cmake   # AIX
 )
 

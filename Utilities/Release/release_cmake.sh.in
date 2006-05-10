@@ -68,9 +68,16 @@ cd @CMAKE_RELEASE_DIRECTORY@
 check_exit_value $? "Checkout cmake source" || exit 1
 
 cd @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build 
-echo  "Run cmake bootstrap --parallel=@PROCESSORS@"
-../@CMAKE_VERSION@/bootstrap --parallel=@PROCESSORS@
-check_exit_value $? "Bootstrap cmake" || exit 1
+
+if [ ! -z "@CONFIGURE_WITH_CMAKE@" ]; then 
+    echo  "Run cmake to configure cmake"
+    @CMAKE_CONFIGURE_PATH@ ../@CMAKE_VERSION@
+    check_exit_value $? "Configure cmake" || exit 1
+else
+    echo  "Run cmake bootstrap --parallel=@PROCESSORS@"
+    ../@CMAKE_VERSION@/bootstrap --parallel=@PROCESSORS@
+    check_exit_value $? "Bootstrap cmake" || exit 1
+fi
 
 echo "Build cmake with @MAKE@"
 @MAKE@
