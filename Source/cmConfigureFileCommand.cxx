@@ -30,7 +30,8 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args)
   this->OuputFile = args[1];
   if ( !this->Makefile->CanIWriteThisFile(this->OuputFile.c_str()) )
     {
-    std::string e = "attempted to configure a file: " + this->OuputFile + " into a source directory.";
+    std::string e = "attempted to configure a file: " + this->OuputFile 
+      + " into a source directory.";
     this->SetError(e.c_str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
