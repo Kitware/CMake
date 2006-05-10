@@ -9,16 +9,18 @@ set(RELEASE_SCRIPTS
   hythloth_release.cmake      # Linux
   dashsgi1_release.cmake      # IRIX
   dashsgi1_release64.cmake    # IRIX 64
+  vogon_release.cmake         # Windows
   v60n177_aix_release.cmake   # AIX
 )
 
 file(WRITE create-${CMAKE_VERSION}.sh "#!/bin/sh")
+make_directory(${CMAKE_CURRENT_SOURCE_DIR}/logs)
 
 foreach(f ${RELEASE_SCRIPTS})
   file(APPEND create-${CMAKE_VERSION}.sh
     "
-${CMAKE_COMMAND} -DCMAKE_VERSION=${CMAKE_VERSION} -P ${CMAKE_ROOT}/Utilities/Release/${f} < /dev/null >& ${CMAKE_CURRENT_SOURCE_DIR}/${f}-${CMAKE_VERSION}.log &
- xterm -geometry 80x10 -sb -sl 2000 -T ${f}-${CMAKE_VERSION}.log -e tail -f  ${CMAKE_CURRENT_SOURCE_DIR}/${f}-${CMAKE_VERSION}.log&")
+${CMAKE_COMMAND} -DCMAKE_VERSION=${CMAKE_VERSION} -P ${CMAKE_ROOT}/Utilities/Release/${f} < /dev/null >& ${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_VERSION}.log &
+ xterm -geometry 80x10 -sb -sl 2000 -T ${f}-${CMAKE_VERSION}.log -e tail -f  ${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_VERSION}.log&")
 endforeach(f)
 file(APPEND create-${CMAKE_VERSION}.sh "
 echo \"ps -ef | grep ssh | grep release\"
