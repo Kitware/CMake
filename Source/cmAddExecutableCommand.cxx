@@ -51,7 +51,8 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
 
   if (s == args.end())
     {
-    this->SetError("called with incorrect number of arguments, no sources provided");
+    this->SetError
+      ("called with incorrect number of arguments, no sources provided");
     return false;
     }
 

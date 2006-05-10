@@ -111,8 +111,9 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
       }
     fname += "/";
     fname += testFilename;
-    bool readit = this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(),
-      fname.c_str());
+    bool readit = 
+      this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(),
+                                   fname.c_str());
     cmSystemTools::ChangeDirectory(cwd.c_str());
     if(!readit)
       {

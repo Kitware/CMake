@@ -38,8 +38,8 @@ cmCTestHandlerCommand::cmCTestHandlerCommand()
 bool cmCTestHandlerCommand::InitialPass(
   std::vector<std::string> const& args)
 {
-  if ( !this->ProcessArguments(args, (unsigned int)this->Last, &*this->Arguments.begin(),
-      this->Values) )
+  if ( !this->ProcessArguments(args, (unsigned int)this->Last, 
+                               &*this->Arguments.begin(),this->Values) )
     {
     return false;
     }

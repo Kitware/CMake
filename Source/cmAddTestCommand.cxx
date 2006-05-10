@@ -22,10 +22,9 @@
 // cmExecutableCommand
 bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args)
 {
-  // First argument is the name of the test
-  // Second argument is the name of the executable to run (a target or external
-  //    program)
-  // Remaining arguments are the arguments to pass to the executable
+  // First argument is the name of the test Second argument is the name of
+  // the executable to run (a target or external program) Remaining arguments
+  // are the arguments to pass to the executable
   if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");

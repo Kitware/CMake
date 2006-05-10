@@ -167,7 +167,8 @@ cmCTestScriptHandler::~cmCTestScriptHandler()
 
 //----------------------------------------------------------------------
 // just adds an argument to the vector
-void cmCTestScriptHandler::AddConfigurationScript(const char *script, bool pscope)
+void cmCTestScriptHandler::AddConfigurationScript(const char *script, 
+                                                  bool pscope)
 {
   this->ConfigurationScripts.push_back(script);
   this->ScriptProcessScope.push_back(pscope);
@@ -253,7 +254,8 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   int pipe = cmSystemTools::WaitForLine(cp, line, 100.0, out, err);
   while(pipe != cmsysProcess_Pipe_None)
     {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Output: " << line << "\n");
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Output: " 
+               << line << "\n");
     if(pipe == cmsysProcess_Pipe_STDERR)
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE, line << "\n");
@@ -927,7 +929,8 @@ void cmCTestScriptHandler::RestoreBackupDirectories()
     }
 }
 
-bool cmCTestScriptHandler::RunScript(cmCTest* ctest, const char *sname, bool InProcess)
+bool cmCTestScriptHandler::RunScript(cmCTest* ctest, const char *sname, 
+                                     bool InProcess)
 {
   cmCTestScriptHandler* sh = new cmCTestScriptHandler();
   sh->SetCTestInstance(ctest);

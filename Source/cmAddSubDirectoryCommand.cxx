@@ -17,7 +17,8 @@
 #include "cmAddSubDirectoryCommand.h"
 
 // cmAddSubDirectoryCommand
-bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
+bool cmAddSubDirectoryCommand::InitialPass
+(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -103,7 +104,11 @@ bool cmAddSubDirectoryCommand::InitialPass(std::vector<std::string> const& args)
       if (!cmSystemTools::FindLastString(binPath.c_str(), 
                                          this->Makefile->GetHomeDirectory()))
         {
-        this->SetError("A full source directory was specified that is not in the source tree but no binary directory was specified. If you specify an out of tree source directory then you must provide the binary directory as well.");   
+        this->SetError("A full source directory was specified that is not "
+                       "in the source tree but no binary directory was "
+                       "specified. If you specify an out of tree source "
+                       "directory then you must provide the binary "
+                       "directory as well.");   
         return false;
         }
       cmSystemTools::ReplaceString(binPath,this->Makefile->GetHomeDirectory(), 

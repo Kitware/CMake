@@ -54,7 +54,8 @@ void cmCTestGenericHandler::SetOption(const char* op, const char* value)
 }
 
 //----------------------------------------------------------------------
-void cmCTestGenericHandler::SetPersistentOption(const char* op, const char* value)
+void cmCTestGenericHandler::SetPersistentOption(const char* op, 
+                                                const char* value)
 {
   this->SetOption(op, value);
   if ( !op )

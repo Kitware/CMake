@@ -51,7 +51,8 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
     = this->Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
   if ( !initialCheckoutCommand )
     {
-    initialCheckoutCommand = this->Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
+    initialCheckoutCommand = 
+      this->Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
     }
 
   cmCTestGenericHandler* handler
