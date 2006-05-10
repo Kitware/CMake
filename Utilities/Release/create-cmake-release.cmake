@@ -22,10 +22,7 @@ foreach(f ${RELEASE_SCRIPTS})
 ${CMAKE_COMMAND} -DCMAKE_VERSION=${CMAKE_VERSION} -P ${CMAKE_ROOT}/Utilities/Release/${f} < /dev/null >& ${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_VERSION}.log &
  xterm -geometry 80x10 -sb -sl 2000 -T ${f}-${CMAKE_VERSION}.log -e tail -f  ${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_VERSION}.log&")
 endforeach(f)
-file(APPEND create-${CMAKE_VERSION}.sh "
-echo \"ps -ef | grep ssh | grep release\"
-")
 execute_process(COMMAND chmod a+x create-${CMAKE_VERSION}.sh)
-message("Run create-${CMAKE_VERSION}.sh")
+message("Run ./create-${CMAKE_VERSION}.sh")
 
 
