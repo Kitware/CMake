@@ -99,7 +99,8 @@ private:
   void PrintClasses();
 
   void Print(const char* place, const char* str);
-  void CombineUnions(char** out, const char* in1, char** in2, const char* sep);
+  void CombineUnions(char** out, const char* in1, char** in2, 
+                     const char* sep);
   void SafePrintMissing(const char* str, int line, int cnt);
 
   void CleanupParser();

@@ -51,7 +51,8 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationOptions[] =
 {
-  {"--all-for-coverage", "Dump all documentation to stdout.  For testing.", 0},
+  {"--all-for-coverage", 
+   "Dump all documentation to stdout.  For testing.", 0},
   {0,0,0}
 };
 

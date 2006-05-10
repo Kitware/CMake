@@ -170,7 +170,8 @@ bool cmDocumentation::PrintCopyright(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintVersion(std::ostream& os)
 {
-  os << this->GetNameString() << " version " << cmVersion::GetCMakeVersion() << "\n";
+  os << this->GetNameString() << " version " 
+     << cmVersion::GetCMakeVersion() << "\n";
   return true;
 }
 
@@ -200,8 +201,10 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
   switch (ht)
     {
     case cmDocumentation::Usage:     return this->PrintDocumentationUsage(os);
-    case cmDocumentation::Single:    return this->PrintDocumentationSingle(os);
-    case cmDocumentation::SingleModule:  return this->PrintDocumentationSingleModule(os);
+    case cmDocumentation::Single:    
+      return this->PrintDocumentationSingle(os);
+    case cmDocumentation::SingleModule:  
+      return this->PrintDocumentationSingleModule(os);
     case cmDocumentation::List:      return this->PrintDocumentationList(os);
     case cmDocumentation::ModuleList: return this->PrintModuleList(os);
     case cmDocumentation::Full:      return this->PrintDocumentationFull(os);
@@ -242,7 +245,8 @@ bool cmDocumentation::CreateModulesSection()
 }
 
 //----------------------------------------------------------------------------
-bool cmDocumentation::CreateSingleModule(const char* fname, const char* moduleName)
+bool cmDocumentation::CreateSingleModule(const char* fname, 
+                                         const char* moduleName)
 {
   std::ifstream fin(fname);
   if(!fin)
@@ -510,7 +514,8 @@ void cmDocumentation::SetUsageSection(const cmDocumentationEntry* section)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetDescriptionSection(const cmDocumentationEntry* section)
+void cmDocumentation
+::SetDescriptionSection(const cmDocumentationEntry* section)
 {
   this->SetSection(0, section, 0, this->DescriptionSection);
 }
@@ -530,7 +535,8 @@ void cmDocumentation::SetCommandsSection(const cmDocumentationEntry* section)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetGeneratorsSection(const cmDocumentationEntry* section)
+void cmDocumentation
+::SetGeneratorsSection(const cmDocumentationEntry* section)
 {
   this->SetSection(cmDocumentationGeneratorsHeader, section, 0,
                    this->GeneratorsSection);
@@ -787,7 +793,8 @@ void cmDocumentation::PrintParagraph(std::ostream& os, const char* text)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintPreformattedText(std::ostream& os, const char* text)
+void cmDocumentation
+::PrintPreformattedText(std::ostream& os, const char* text)
 {
   bool newline = true;
   for(const char* ptr = text; *ptr; ++ptr)
@@ -815,7 +822,8 @@ void cmDocumentation::PrintParagraphText(std::ostream& os, const char* text)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintPreformattedHTML(std::ostream& os, const char* text)
+void cmDocumentation
+::PrintPreformattedHTML(std::ostream& os, const char* text)
 {
   os << "<pre>";
   this->PrintHTMLEscapes(os, text);
@@ -1085,7 +1093,8 @@ bool cmDocumentation::PrintDocumentationMan(std::ostream& os)
   this->CreateManDocumentation();
   os << ".TH " << this->GetNameString() << " 1 \""
      << cmSystemTools::GetCurrentDateTime("%B %d, %Y").c_str()
-     << "\" \"" << this->GetNameString() << " " << cmVersion::GetCMakeVersion()
+     << "\" \"" << this->GetNameString() 
+     << " " << cmVersion::GetCMakeVersion()
      << "\"\n";
   this->Print(ManForm, os);
   return true;
@@ -1251,7 +1260,6 @@ const char* cmDocumentation::GetNameString()
 //----------------------------------------------------------------------------
 bool cmDocumentation::IsOption(const char* arg)
 {
-  return ((arg[0] == '-') ||
-          (strcmp(arg, "/V") == 0) ||
+  return ((arg[0] == '-') || (strcmp(arg, "/V") == 0) || 
           (strcmp(arg, "/?") == 0));
 }
