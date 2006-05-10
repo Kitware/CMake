@@ -282,6 +282,7 @@ int cmCPackGenericGenerator::InstallProject()
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   const char* cmakeGenerator
     = this->GetOption("CPACK_CMAKE_GENERATOR");
+  std::string currentWorkingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
   if ( cmakeProjects && *cmakeProjects )
     {
     if ( !cmakeGenerator )
