@@ -202,10 +202,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     {
     // Listfiles will be looking for the capitalized version of the
     // name.  Provide it.
-    this->Makefile->AddDefinition(upperDir.c_str(),
-                              this->Makefile->GetDefinition(this->Variable.c_str()));
-    this->Makefile->AddDefinition(upperFound.c_str(),
-                              this->Makefile->GetDefinition(foundVar.c_str()));
+    this->Makefile->AddDefinition
+      (upperDir.c_str(),
+       this->Makefile->GetDefinition(this->Variable.c_str()));
+    this->Makefile->AddDefinition
+      (upperFound.c_str(),
+       this->Makefile->GetDefinition(foundVar.c_str()));
     }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -297,8 +299,8 @@ bool cmFindPackageCommand::FindConfig()
   for(int i=1; i <= 10; ++i)
     {
     cmOStringStream r;
-    r << "[HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild"
-      << i << "]";
+    r << "[HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\"
+      "Settings\\StartPath;WhereBuild" << i << "]";
     std::string entry = r.str();
     cmSystemTools::ExpandRegistryValues(entry);
     cmSystemTools::ConvertToUnixSlashes(entry);

@@ -788,9 +788,11 @@ bool cmFileCommand::HandleInstallCommand(
           cmSystemTools::RemoveFile(soname.c_str());
           cmSystemTools::RemoveFile(libname.c_str());
 
-          if (!cmSystemTools::CreateSymlink(soname_nopath.c_str(), libname.c_str()) )
+          if (!cmSystemTools::CreateSymlink(soname_nopath.c_str(), 
+                                            libname.c_str()) )
             {
-            std::string errstring = "error when creating symlink from: " + libname + " to " + soname_nopath;
+            std::string errstring = "error when creating symlink from: " 
+              + libname + " to " + soname_nopath;
             this->SetError(errstring.c_str());
             return false;
             }
@@ -798,9 +800,11 @@ bool cmFileCommand::HandleInstallCommand(
           smanifest_files += libname.substr(destDirLength);;
           if ( toFile != soname )
             {
-            if ( !cmSystemTools::CreateSymlink(fromName.c_str(), soname.c_str()) )
+            if ( !cmSystemTools::CreateSymlink(fromName.c_str(), 
+                                               soname.c_str()) )
               {
-              std::string errstring = "error when creating symlink from: " + soname + " to " + fromName;
+              std::string errstring = "error when creating symlink from: " 
+                + soname + " to " + fromName;
               this->SetError(errstring.c_str());
               return false;
               }
@@ -832,9 +836,11 @@ bool cmFileCommand::HandleInstallCommand(
 
           cmSystemTools::RemoveFile(exename.c_str());
 
-          if (!cmSystemTools::CreateSymlink(exename_nopath.c_str(), exename.c_str()) )
+          if (!cmSystemTools::CreateSymlink(exename_nopath.c_str(), 
+                                            exename.c_str()) )
             {
-            std::string errstring = "error when creating symlink from: " + exename + " to " + exename_nopath;
+            std::string errstring = "error when creating symlink from: " 
+              + exename + " to " + exename_nopath;
             this->SetError(errstring.c_str());
             return false;
             }
@@ -955,18 +961,23 @@ bool cmFileCommand::HandleRelativePathCommand(
 
   if(!cmSystemTools::FileIsFullPath(directoryName.c_str()))
     {
-    std::string errstring = "RelativePath must be passed a full path to the directory: " + directoryName;
+    std::string errstring = 
+      "RelativePath must be passed a full path to the directory: " 
+      + directoryName;
     this->SetError(errstring.c_str());
     return false;
     }
   if(!cmSystemTools::FileIsFullPath(fileName.c_str()))
     {
-    std::string errstring = "RelativePath must be passed a full path to the directory: " + directoryName;
+    std::string errstring = 
+      "RelativePath must be passed a full path to the directory: " 
+      + directoryName;
     this->SetError(errstring.c_str());
     return false;
     }
 
-  std::string res = cmSystemTools::RelativePath(directoryName.c_str(), fileName.c_str());
+  std::string res = cmSystemTools::RelativePath(directoryName.c_str(), 
+                                                fileName.c_str());
   this->Makefile->AddDefinition(outVar.c_str(),
     res.c_str());
   return true;

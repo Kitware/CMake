@@ -29,9 +29,11 @@ cmFindPathCommand::cmFindPathCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SYSTEM", "INCLUDE");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_SYSTEM_XXX_PATH", "CMAKE_SYSTEM_INCLUDE_PATH"); 
+                               "CMAKE_SYSTEM_XXX_PATH", 
+                               "CMAKE_SYSTEM_INCLUDE_PATH"); 
   cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "SEARCH_XXX_DESC", "directory containing the named file");
+                               "SEARCH_XXX_DESC", 
+                               "directory containing the named file");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "SEARCH_XXX", "file in a directory");
   this->ExtraDocAdded = false;
@@ -44,9 +46,11 @@ const char* cmFindPathCommand::GetFullDocumentation()
     this->GenericDocumentation += 
       "\n"
       "When searching for frameworks, if the file is specified as "
-      "A/b.h, then the framework search will look for A.framework/Headers/b.h. "
+      "A/b.h, then the framework search will look for "
+      "A.framework/Headers/b.h. "
       "If that is found the path will be set to the path to the framework. "
-      "CMake will convert this to the correct -F option to include the file. ";
+      "CMake will convert this to the correct -F option to include the "
+      "file. ";
     this->ExtraDocAdded = true;
     }
   return this->GenericDocumentation.c_str();
@@ -109,20 +113,21 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
         }
       if(result.size() != 0)
         {
-        this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
-                                       result.c_str(),
-                                       this->VariableDocumentation.c_str(),
-                                       (this->IncludeFileInPath) ? 
-                                       cmCacheManager::FILEPATH :cmCacheManager::PATH);
+        this->Makefile->AddCacheDefinition
+          (this->VariableName.c_str(), result.c_str(),
+           this->VariableDocumentation.c_str(),
+           (this->IncludeFileInPath) ? 
+           cmCacheManager::FILEPATH :cmCacheManager::PATH);
         return true;
         }
       }
     }
-  this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
-                                 (this->VariableName + "-NOTFOUND").c_str(),
-                                 this->VariableDocumentation.c_str(),
-                                 (this->IncludeFileInPath) ? 
-                                 cmCacheManager::FILEPATH :cmCacheManager::PATH);
+  this->Makefile->AddCacheDefinition
+    (this->VariableName.c_str(),
+     (this->VariableName + "-NOTFOUND").c_str(),
+     this->VariableDocumentation.c_str(),
+     (this->IncludeFileInPath) ? 
+     cmCacheManager::FILEPATH :cmCacheManager::PATH);
   return true;
 }
 
@@ -140,7 +145,8 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string& file,
     // remove the name from the slash;
     fileName = fileName.substr(pos+1);
     frameWorkName = file;
-    frameWorkName = frameWorkName.substr(0, frameWorkName.size()-fileName.size()-1);
+    frameWorkName = 
+      frameWorkName.substr(0, frameWorkName.size()-fileName.size()-1);
     // if the framework has a path in it then just use the filename
     if(frameWorkName.find("/") != frameWorkName.npos)
       {

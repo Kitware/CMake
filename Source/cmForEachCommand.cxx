@@ -87,7 +87,9 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
 void cmForEachFunctionBlocker::
 ScopeEnded(cmMakefile &mf) 
 {
-  cmSystemTools::Error("The end of a CMakeLists file was reached with a FOREACH statement that was not closed properly. Within the directory: ", 
+  cmSystemTools::Error("The end of a CMakeLists file was reached with a "
+                       "FOREACH statement that was not closed properly. "
+                       "Within the directory: ", 
                        mf.GetCurrentDirectory());
 }
 

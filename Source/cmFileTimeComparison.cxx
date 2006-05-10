@@ -84,7 +84,8 @@ bool cmFileTimeComparisonInternal::Stat(const char* fname,
     return false;
     }
 #else
-  // Windows version.  Get the modification time from extended file attributes.
+  // Windows version.  Get the modification time from extended file
+  // attributes.
   WIN32_FILE_ATTRIBUTE_DATA fdata;
   if(!GetFileAttributesEx(fname, GetFileExInfoStandard, &fdata))
     {
@@ -116,13 +117,15 @@ cmFileTimeComparison::~cmFileTimeComparison()
 }
 
 //----------------------------------------------------------------------------
-bool cmFileTimeComparison::FileTimeCompare(const char* f1, const char* f2, int* result)
+bool cmFileTimeComparison::FileTimeCompare(const char* f1, 
+                                           const char* f2, int* result)
 {
   return this->Internals->FileTimeCompare(f1, f2, result);
 }
 
 //----------------------------------------------------------------------------
-int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1, cmFileTimeComparison_Type* s2)
+int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1, 
+                                          cmFileTimeComparison_Type* s2)
 {
 #if !defined(_WIN32) || defined(__CYGWIN__)
 # if cmsys_STAT_HAS_ST_MTIM
