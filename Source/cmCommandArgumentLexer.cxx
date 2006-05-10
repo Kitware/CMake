@@ -289,8 +289,7 @@ static void cmCommandArgument_yy_init_buffer (YY_BUFFER_STATE b,
                                               FILE *file ,
                                               yyscan_t yyscanner );
 
-#define YY_FLUSH_BUFFER cmCommandArgument_yy_flush_buffer(YY_CURRENT_BUFFER ,
-                                                          yyscanner)
+#define YY_FLUSH_BUFFER cmCommandArgument_yy_flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
 
 YY_BUFFER_STATE cmCommandArgument_yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
 YY_BUFFER_STATE cmCommandArgument_yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
