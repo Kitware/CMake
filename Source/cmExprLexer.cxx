@@ -165,7 +165,8 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
     #define YY_LESS_LINENO(n)
     
-/* Return all but the first "n" matched characters back to the input stream. */
+/* Return all but the first "n" matched characters back to the input
+   stream. */
 #define yyless(n) \
   do \
     { \
@@ -264,8 +265,8 @@ struct yy_buffer_state
                           ? yyg->yy_buffer_stack[yyg->yy_buffer_stack_top] \
                           : NULL)
 
-/* Same as previous macro, but useful when we know that the buffer stack is not
- * NULL or when we need an lvalue. For internal use only.
+/* Same as previous macro, but useful when we know that the buffer stack is
+ * not NULL or when we need an lvalue. For internal use only.
  */
 #define YY_CURRENT_BUFFER_LVALUE yyg->yy_buffer_stack[yyg->yy_buffer_stack_top]
 
@@ -327,7 +328,8 @@ typedef int yy_state_type;
 #define yytext_ptr yytext_r
 
 static yy_state_type yy_get_previous_state (yyscan_t yyscanner );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  ,yyscan_t yyscanner);
+static yy_state_type yy_try_NUL_trans (yy_state_type current_state  ,
+                                       yyscan_t yyscanner);
 static int yy_get_next_buffer (yyscan_t yyscanner );
 static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
 
@@ -456,7 +458,8 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex like this:
 
-  flex --prefix=cmExpr_yy --header-file=cmExprLexer.h -ocmExprLexer.cxx cmExprLexer.in.l
+  flex --prefix=cmExpr_yy --header-file=cmExprLexer.h -ocmExprLexer.cxx
+  cmExprLexer.in.l
 
 Modify cmExprLexer.cxx:
   - remove TABs
@@ -535,7 +538,8 @@ struct yyguts_t
     /* User-defined. Not touched by flex. */
     YY_EXTRA_TYPE yyextra_r;
 
-    /* The rest are the same as the globals declared in the non-reentrant scanner. */
+    /* The rest are the same as the globals declared in the non-reentrant
+       scanner. */
     FILE *yyin_r, *yyout_r;
     size_t yy_buffer_stack_top; /**< index of top of stack. */
     size_t yy_buffer_stack_max; /**< capacity of stack. */
@@ -1137,7 +1141,8 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
   return ret_val;
 }
 
-/* yy_get_previous_state - get the state just before the EOB char was reached */
+/* yy_get_previous_state - get the state just before the EOB char was
+   reached */
 
     static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
 {
