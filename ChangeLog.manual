@@ -1,5 +1,7 @@
 Changes in CMake 2.4.2
 
+* Fix FindQT to be able to use full paths to source files
+
 * Fix CPack ZIP on windows command line problem
 
 * Find executables with no extension on windows mingw
