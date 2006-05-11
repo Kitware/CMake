@@ -39,7 +39,8 @@ public:
     const char* file, bool optional = false,
     const char* properties = 0,
     const char* permissions = 0,
-    std::vector<std::string> const& configurations =std::vector<std::string>(),
+    std::vector<std::string> const& configurations 
+    = std::vector<std::string>(),
     const char* component = 0,
     const char* rename = 0
     );

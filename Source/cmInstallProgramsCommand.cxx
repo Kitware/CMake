@@ -17,7 +17,8 @@
 #include "cmInstallProgramsCommand.h"
 
 // cmExecutableCommand
-bool cmInstallProgramsCommand::InitialPass(std::vector<std::string> const& args)
+bool cmInstallProgramsCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2)
     {
@@ -89,7 +90,8 @@ void cmInstallProgramsCommand::FinalPass()
  * present in the build tree.  If a full path is given, it is just
  * returned.
  */
-std::string cmInstallProgramsCommand::FindInstallSource(const char* name) const
+std::string cmInstallProgramsCommand
+::FindInstallSource(const char* name) const
 {
   if(cmSystemTools::FileIsFullPath(name))
     {

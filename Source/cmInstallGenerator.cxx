@@ -47,18 +47,19 @@ cmInstallGenerator
 }
 
 //----------------------------------------------------------------------------
-void cmInstallGenerator::AddInstallRule(
-  std::ostream& os,
-  const char* dest,
-  int type,
-  const char* file,
-  bool optional /* = false */,
-  const char* properties /* = 0 */,
-  const char* permissions /* = 0 */,
-  std::vector<std::string> const& configurations /* = std::vector<std::string>() */,
-  const char* component /* = 0 */,
-  const char* rename /* = 0 */
-  )
+void cmInstallGenerator
+::AddInstallRule(
+                 std::ostream& os,
+                 const char* dest,
+                 int type,
+                 const char* file,
+                 bool optional /* = false */,
+                 const char* properties /* = 0 */,
+                 const char* permissions /* = 0 */,
+                 std::vector<std::string> const& configurations,
+                 const char* component /* = 0 */,
+                 const char* rename /* = 0 */
+                 )
 {
   // Use the FILE command to install the file.
   std::string stype;

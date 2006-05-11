@@ -17,7 +17,8 @@
 #include "cmInstallFilesCommand.h"
 
 // cmExecutableCommand
-bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmInstallFilesCommand
+::InitialPass(std::vector<std::string> const& argsIn)
 {
   if(argsIn.size() < 2)
     {

@@ -17,7 +17,8 @@
 #include "cmInstallTargetsCommand.h"
 
 // cmExecutableCommand
-bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args)
+bool cmInstallTargetsCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2 )
     {
@@ -36,7 +37,8 @@ bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args)
       ++s;
       if ( s == args.end() )
         {
-        this->SetError("called with RUNTIME_DIRECTORY but no actual directory");
+        this->SetError("called with RUNTIME_DIRECTORY but no actual "
+                       "directory");
         return false;
         }
 
