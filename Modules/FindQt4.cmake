@@ -741,7 +741,7 @@ IF (QT4_QMAKE_FOUND)
 
     FOREACH (it ${ARGN})
       GET_FILENAME_COMPONENT(outfile ${it} NAME_WE)
-      SET(infile ${CMAKE_CURRENT_SOURCE_DIR}/${it})
+      GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
       SET(outfile ${CMAKE_CURRENT_BINARY_DIR}/ui_${outfile}.h)
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
         COMMAND ${QT_UIC_EXECUTABLE}
@@ -760,7 +760,7 @@ IF (QT4_QMAKE_FOUND)
 
     FOREACH (it ${ARGN})
       GET_FILENAME_COMPONENT(outfilename ${it} NAME_WE)
-      SET(infile ${CMAKE_CURRENT_SOURCE_DIR}/${it})
+      GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
       SET(outfile ${CMAKE_CURRENT_BINARY_DIR}/qrc_${outfilename}.cxx)
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
         COMMAND ${QT_RCC_EXECUTABLE}
