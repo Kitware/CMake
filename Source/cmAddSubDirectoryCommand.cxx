@@ -111,7 +111,8 @@ bool cmAddSubDirectoryCommand::InitialPass
                        "directory as well.");   
         return false;
         }
-      cmSystemTools::ReplaceString(binPath,this->Makefile->GetHomeDirectory(), 
+      cmSystemTools::ReplaceString(binPath,
+                                   this->Makefile->GetHomeDirectory(), 
                                    this->Makefile->GetHomeOutputDirectory());
       }
     }

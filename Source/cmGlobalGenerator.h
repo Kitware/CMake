@@ -175,7 +175,8 @@ public:
       configuration.  This is valid during generation only.  */
   cmTargetManifest const& GetTargetManifest() { return this->TargetManifest; }
 
-  void AddTarget(cmTargets::value_type &v) { this->TotalTargets[v.first] = &v.second;};
+  void AddTarget(cmTargets::value_type &v) { 
+    this->TotalTargets[v.first] = &v.second;};
   
   /** Support for multiple custom command outputs.  */
   virtual void CheckMultipleOutputs(cmMakefile* mf, bool verbose);

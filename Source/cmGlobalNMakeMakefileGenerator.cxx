@@ -25,8 +25,8 @@ cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
   this->ToolSupportsColor = true;
 }
 
-void cmGlobalNMakeMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,
-                                                    cmMakefile *mf)
+void cmGlobalNMakeMakefileGenerator
+::EnableLanguage(std::vector<std::string>const& l, cmMakefile *mf)
 {
   // pick a default 
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
@@ -50,7 +50,8 @@ cmLocalGenerator *cmGlobalNMakeMakefileGenerator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalNMakeMakefileGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalNMakeMakefileGenerator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates NMake makefiles.";

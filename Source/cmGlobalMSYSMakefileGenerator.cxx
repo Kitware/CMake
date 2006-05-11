@@ -48,8 +48,8 @@ cmGlobalMSYSMakefileGenerator::FindMinGW(std::string const& makeloc)
   return mingwBin;
 }
 
-void cmGlobalMSYSMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,
-                                                    cmMakefile *mf)
+void cmGlobalMSYSMakefileGenerator
+::EnableLanguage(std::vector<std::string>const& l, cmMakefile *mf)
 {
   this->FindMakeProgram(mf);
   std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
@@ -76,8 +76,9 @@ void cmGlobalMSYSMakefileGenerator::EnableLanguage(std::vector<std::string>const
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf);
   if(!mf->IsSet("CMAKE_AR") && !this->CMakeInstance->GetIsInTryCompile())
     {
-    cmSystemTools::Error("CMAKE_AR was not found, please set to archive program. ",
-                         mf->GetDefinition("CMAKE_AR"));
+    cmSystemTools::Error
+      ("CMAKE_AR was not found, please set to archive program. ",
+       mf->GetDefinition("CMAKE_AR"));
     }
 }
 
@@ -94,9 +95,11 @@ cmLocalGenerator *cmGlobalMSYSMakefileGenerator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalMSYSMakefileGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalMSYSMakefileGenerator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates MSYS makefiles.";
-  entry.full = "The makefiles use /bin/sh as the shell.  They require msys to be installed on the machine.";
+  entry.full = "The makefiles use /bin/sh as the shell.  "
+    "They require msys to be installed on the machine.";
 }

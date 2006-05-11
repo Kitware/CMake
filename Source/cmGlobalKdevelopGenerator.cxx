@@ -7,7 +7,7 @@
   Version:   $Revision$
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  Copyright (c) 2004 Alexander Neundorf, neundorf@kde.org. All rights reserved.
+  Copyright (c) 2004 Alexander Neundorf neundorf@kde.org, All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
@@ -40,16 +40,19 @@ cmLocalGenerator *cmGlobalKdevelopGenerator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalKdevelopGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalKdevelopGenerator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates KDevelop 3 project files.";
   entry.full =
-    "Project files for KDevelop 3 will be created in the top directory and in every subdirectory "
-    "which features a CMakeLists.txt file containing a PROJECT() call. "
+    "Project files for KDevelop 3 will be created in the top directory "
+    "and in every subdirectory which features a CMakeLists.txt file "
+    "containing a PROJECT() call. "
     "If you change the settings using KDevelop cmake will try its best "
     "to keep your changes when regenerating the project files. "
-    "Additionally a hierarchy of UNIX makefiles is generated into the build tree.  Any "
+    "Additionally a hierarchy of UNIX makefiles is generated into the "
+    "build tree.  Any "
     "standard UNIX-style make program can build the project through the "
     "default make target.  A \"make install\" target is also provided.";
 }
@@ -211,9 +214,10 @@ bool cmGlobalKdevelopGenerator
     if (fileToOpen.empty())
     {
        std::string ext = cmSystemTools::GetFilenameExtension(tmp);
-       if ((ext==".c") || (ext==".cc") || (ext==".cpp") || (ext==".C") || (ext==".h"))
+       if ((ext==".c") || (ext==".cc") || (ext==".cpp") 
+           || (ext==".C") || (ext==".h"))
        {
-          fileToOpen=tmp;
+       fileToOpen=tmp;
        }
     }
     // make it relative to the project dir
@@ -230,13 +234,13 @@ bool cmGlobalKdevelopGenerator
 
 /* create the project file, if it already exists, merge it with the
 existing one, otherwise create a new one */
-void 
-cmGlobalKdevelopGenerator::CreateProjectFile(const std::string& outputDir,
-                                             const std::string& projectDir,
-                                             const std::string& projectname, 
-                                             const std::string& executable,
-                                             const std::string& cmakeFilePattern,
-                                             const std::string& fileToOpen)
+void cmGlobalKdevelopGenerator
+::CreateProjectFile(const std::string& outputDir,
+                    const std::string& projectDir,
+                    const std::string& projectname, 
+                    const std::string& executable,
+                    const std::string& cmakeFilePattern,
+                    const std::string& fileToOpen)
 {
   std::string filename=outputDir+"/";
   filename+=projectname+".kdevelop";
@@ -246,30 +250,33 @@ cmGlobalKdevelopGenerator::CreateProjectFile(const std::string& outputDir,
   if (cmSystemTools::FileExists(filename.c_str()))
     {
     this->MergeProjectFiles(outputDir, projectDir, filename, 
-                            executable, cmakeFilePattern, fileToOpen, sessionFilename);
+                            executable, cmakeFilePattern, 
+                            fileToOpen, sessionFilename);
     }
   else
     {
-
     this->CreateNewProjectFile(outputDir, projectDir, filename,
-                               executable, cmakeFilePattern, fileToOpen, sessionFilename);
+                               executable, cmakeFilePattern, 
+                               fileToOpen, sessionFilename);
     }
    
 }
 
-void 
-cmGlobalKdevelopGenerator::MergeProjectFiles(const std::string& outputDir, 
-                                             const std::string& projectDir, 
-                                             const std::string& filename, 
-                                             const std::string& executable, 
-                                             const std::string& cmakeFilePattern,
-                                             const std::string& fileToOpen,
-                                             const std::string& sessionFilename)
+void cmGlobalKdevelopGenerator
+::MergeProjectFiles(const std::string& outputDir, 
+                    const std::string& projectDir, 
+                    const std::string& filename, 
+                    const std::string& executable, 
+                    const std::string& cmakeFilePattern,
+                    const std::string& fileToOpen,
+                    const std::string& sessionFilename)
 {
   std::ifstream oldProjectFile(filename.c_str());
   if (!oldProjectFile)
     {
-    this->CreateNewProjectFile(outputDir, projectDir, filename, executable, cmakeFilePattern, fileToOpen, sessionFilename);
+    this->CreateNewProjectFile(outputDir, projectDir, filename, 
+                               executable, cmakeFilePattern, 
+                               fileToOpen, sessionFilename);
     return;
     }
 
@@ -307,12 +314,15 @@ cmGlobalKdevelopGenerator::MergeProjectFiles(const std::string& outputDir,
 
     // output the line from the file if it is not one of the above tags
     fout<<*it<<"\n";
-    // if this is the <general> tag output the stuff that goes in the general tag
+    // if this is the <general> tag output the stuff that goes in the
+    // general tag
     if (strstr(line, "<general>"))
       {
-      fout<<"  <projectmanagement>KDevCustomProject</projectmanagement>\n";
-      fout<<"  <projectdirectory>"<<projectDir.c_str()<<"</projectdirectory>\n";   //this one is important
-      fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n";                 //and this one
+      fout<< "  <projectmanagement>KDevCustomProject</projectmanagement>\n";
+      fout<< "  <projectdirectory>" <<projectDir.c_str() 
+          << "</projectdirectory>\n";   //this one is important
+      fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n";
+      //and this one
       }
     // inside kdevcustomproject the <filelistdirectory> must be put
     if (strstr(line, "<kdevcustomproject>"))
@@ -329,14 +339,14 @@ cmGlobalKdevelopGenerator::MergeProjectFiles(const std::string& outputDir,
     }
 }
 
-void 
-cmGlobalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir,
-                                                const std::string& projectDir,
-                                                const std::string& filename,
-                                                const std::string& executable,
-                                                const std::string& cmakeFilePattern,
-                                                const std::string& fileToOpen,
-                                                const std::string& sessionFilename)
+void cmGlobalKdevelopGenerator
+::CreateNewProjectFile(const std::string& outputDir,
+                       const std::string& projectDir,
+                       const std::string& filename,
+                       const std::string& executable,
+                       const std::string& cmakeFilePattern,
+                       const std::string& fileToOpen,
+                       const std::string& sessionFilename)
 {
   cmGeneratedFileStream fout(filename.c_str());
   if(!fout)
@@ -353,14 +363,16 @@ cmGlobalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir,
   fout<<"  <projectmanagement>KDevCustomProject</projectmanagement>\n";
   fout<<"  <primarylanguage>C++</primarylanguage>\n";
   fout<<"  <ignoreparts/>\n";
-  fout<<"  <projectdirectory>"<<projectDir.c_str()<<"</projectdirectory>\n";   //this one is important
-  fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n";          //and this one
+  fout<<"  <projectdirectory>"<<projectDir.c_str()
+      <<"</projectdirectory>\n";   //this one is important
+  fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n"; //and this one
   fout<<"  <secondaryLanguages>\n";
   fout<<"     <language>C</language>\n";
   fout<<"  </secondaryLanguages>\n";
   fout<<"  </general>\n";
   fout<<"  <kdevcustomproject>\n";
-  fout<<"    <filelistdirectory>"<<outputDir.c_str()<<"</filelistdirectory>\n";
+  fout<<"    <filelistdirectory>"<<outputDir.c_str()
+      <<"</filelistdirectory>\n";
   fout<<"    <run>\n";
   fout<<"      <mainprogram>"<<executable.c_str()<<"</mainprogram>\n";
   fout<<"      <directoryradio>custom</directoryradio>\n";
@@ -371,8 +383,8 @@ cmGlobalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir,
   fout<<"      <envvars/>\n";
   fout<<"    </run>\n";
   fout<<"    <build>\n";
-  fout<<"      <buildtool>make</buildtool>\n";                                        //this one is important
-  fout<<"      <builddir>"<<outputDir.c_str()<<"</builddir>\n";   //and this one
+  fout<<"      <buildtool>make</buildtool>\n"; //this one is important
+  fout<<"      <builddir>"<<outputDir.c_str()<<"</builddir>\n"; //and this one
   fout<<"    </build>\n";
   fout<<"    <make>\n";
   fout<<"      <abortonerror>false</abortonerror>\n";
@@ -427,7 +439,8 @@ cmGlobalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir,
   fout<<"  </kdevcppsupport>\n";
   fout<<"  <kdevfileview>\n";
   fout<<"    <groups>\n";
-  fout<<"      <group pattern=\""<<cmakeFilePattern.c_str()<<"\" name=\"CMake\" />\n";
+  fout<<"      <group pattern=\""<<cmakeFilePattern.c_str()
+      <<"\" name=\"CMake\" />\n";
   fout<<"      <group pattern=\"*.h;*.hxx\" name=\"Header\" />\n";
   fout<<"      <group pattern=\"*.cpp;*.c;*.C;*.cxx\" name=\"Sources\" />\n";
   fout<<"      <group pattern=\"*.ui\" name=\"Qt Designer files\" />\n";
@@ -443,7 +456,8 @@ cmGlobalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir,
   if (sessionFilename.empty())
      return;
 
-  // and a session file, so that kdevelop opens a file if it opens the project the first time
+  // and a session file, so that kdevelop opens a file if it opens the
+  // project the first time
   cmGeneratedFileStream devses(sessionFilename.c_str());
   if(!devses)
   {
@@ -453,7 +467,8 @@ cmGlobalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir,
   devses<<"<!DOCTYPE KDevPrjSession>\n";
   devses<<"<KDevPrjSession>\n";
   devses<<" <DocsAndViews NumberOfDocuments=\"1\" >\n";
-  devses<<"  <Doc0 NumberOfViews=\"1\" URL=\"file://"<<fileToOpen.c_str()<<"\" >\n";
+  devses<<"  <Doc0 NumberOfViews=\"1\" URL=\"file://"
+        <<fileToOpen.c_str()<<"\" >\n";
   devses<<"   <View0 line=\"0\" Type=\"Source\" />\n";
   devses<<"  </Doc0>\n";
   devses<<" </DocsAndViews>\n";
