@@ -17,7 +17,8 @@
 #include "cmIncludeDirectoryCommand.h"
 
 // cmIncludeDirectoryCommand
-bool cmIncludeDirectoryCommand::InitialPass(std::vector<std::string> const& args)
+bool cmIncludeDirectoryCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -43,7 +44,8 @@ bool cmIncludeDirectoryCommand::InitialPass(std::vector<std::string> const& args
     {
     if(i->size() == 0)
       {
-      cmSystemTools::Error("Empty Include Directory Passed into INCLUDE_DIRECTORIES command.");
+      cmSystemTools::Error
+        ("Empty Include Directory Passed into INCLUDE_DIRECTORIES command.");
       }
     std::string unixPath = *i;
     cmSystemTools::ConvertToUnixSlashes(unixPath);

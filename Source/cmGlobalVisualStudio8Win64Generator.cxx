@@ -38,14 +38,16 @@ cmLocalGenerator *cmGlobalVisualStudio8Win64Generator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio8Win64Generator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalVisualStudio8Win64Generator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates Visual Studio .NET 2005 Win64 project files.";
   entry.full = "";
 }
 
-void cmGlobalVisualStudio8Win64Generator::EnableLanguage(std::vector<std::string>const &  lang, 
+void cmGlobalVisualStudio8Win64Generator
+::EnableLanguage(std::vector<std::string>const &  lang, 
                                                          cmMakefile *mf)
 {
   mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");

@@ -17,7 +17,8 @@
 #include "cmIncludeRegularExpressionCommand.h"
 
 // cmIncludeRegularExpressionCommand
-bool cmIncludeRegularExpressionCommand::InitialPass(std::vector<std::string> const& args)
+bool cmIncludeRegularExpressionCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   if((args.size() < 1) || (args.size() > 2))
     {

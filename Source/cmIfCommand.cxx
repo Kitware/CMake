@@ -55,7 +55,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       err += ".  Did you mean ";
       err += name;
       err += "( ";
-      for(std::vector<cmListFileArgument>::const_iterator a = this->Args.begin();
+      for(std::vector<cmListFileArgument>::const_iterator a = 
+            this->Args.begin();
           a != this->Args.end();++a)
         {
         err += (a->Quoted?"\"":"");
@@ -86,7 +87,8 @@ bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
 void cmIfFunctionBlocker::
 ScopeEnded(cmMakefile &mf)
 {
-  std::string errmsg = "The end of a CMakeLists file was reached with an IF statement that was not closed properly.\nWithin the directory: ";
+  std::string errmsg = "The end of a CMakeLists file was reached with an "
+    "IF statement that was not closed properly.\nWithin the directory: ";
   errmsg += mf.GetCurrentDirectory();
   errmsg += "\nThe arguments are: ";
   for(std::vector<cmListFileArgument>::const_iterator j = this->Args.begin();
@@ -100,13 +102,15 @@ ScopeEnded(cmMakefile &mf)
   cmSystemTools::Message(errmsg.c_str(), "Warning");
 }
 
-bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
+bool cmIfCommand
+::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
 {
   char* errorString = 0;
   
   std::vector<std::string> expandedArguments;
   this->Makefile->ExpandArguments(args, expandedArguments);
-  bool isTrue = cmIfCommand::IsTrue(expandedArguments,&errorString,this->Makefile);
+  bool isTrue = 
+    cmIfCommand::IsTrue(expandedArguments,&errorString,this->Makefile);
   
   if (errorString)
     {

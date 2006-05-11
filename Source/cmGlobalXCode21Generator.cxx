@@ -40,6 +40,7 @@ cmGlobalXCode21Generator::WriteXCodePBXProj(std::ostream& fout,
   fout << "objectVersion = 42;\n";
   cmXCode21Object::PrintList(this->XCodeObjects, fout);
   cmXCode21Object::Indent(1, fout);
-  fout << "rootObject = " << this->RootObject->GetId() << " /* Project object */;\n";
+  fout << "rootObject = " << this->RootObject->GetId() 
+       << " /* Project object */;\n";
   fout << "}\n";
 }

@@ -28,7 +28,8 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator()
 }
 
 
-void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>const &  lang, 
+void cmGlobalVisualStudio7Generator
+::EnableLanguage(std::vector<std::string>const &  lang, 
                                                     cmMakefile *mf)
 {
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
@@ -53,8 +54,9 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
   const char* extraPath = cmSystemTools::GetEnv("CMAKE_MSVCIDE_RUN_PATH");
   if(extraPath)
     {
-    mf->AddCacheDefinition("CMAKE_MSVCIDE_RUN_PATH",
-                           extraPath, "Saved environment variable CMAKE_MSVCIDE_RUN_PATH",
+    mf->AddCacheDefinition
+      ("CMAKE_MSVCIDE_RUN_PATH", extraPath, 
+       "Saved environment variable CMAKE_MSVCIDE_RUN_PATH",
                            cmCacheManager::STATIC);
     }
 
@@ -65,8 +67,10 @@ void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
   mf->AddDefinition("MSVC70", "1");
 }
 
-std::string cmGlobalVisualStudio7Generator::GenerateBuildCommand(const char* makeProgram,
-  const char *projectName, const char* additionalOptions, const char *targetName,
+std::string cmGlobalVisualStudio7Generator
+::GenerateBuildCommand(const char* makeProgram,
+                       const char *projectName, 
+                       const char* additionalOptions, const char *targetName,
   const char* config, bool ignoreErrors)
 {
   // Ingoring errors is not implemented in visual studio 6
@@ -169,7 +173,8 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
         {
         // only add unique configurations
         if(std::find(this->Configurations.begin(),
-                     this->Configurations.end(), config) == this->Configurations.end())
+                     this->Configurations.end(),
+                     config) == this->Configurations.end())
           {
           this->Configurations.push_back(config);
           }
@@ -241,7 +246,8 @@ void cmGlobalVisualStudio7Generator::Generate()
   this->OutputSLNFile();
 }
 
-void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
+void cmGlobalVisualStudio7Generator
+::OutputSLNFile(cmLocalGenerator* root,
                                                    std::vector<cmLocalGenerator*>& generators)
 {
   if(generators.size() == 0)
@@ -274,7 +280,8 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile()
 
 
 // Write a SLN file to the stream
-void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
+void cmGlobalVisualStudio7Generator
+::WriteSLNFile(std::ostream& fout,
                                                   cmLocalGenerator* root,
                                                   std::vector<cmLocalGenerator*>& generators)
 {
@@ -359,7 +366,8 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string project = cmds[0][0];
         std::string location = cmds[0][1];
-        this->WriteExternalProject(fout, project.c_str(), location.c_str(), cc.GetDepends());
+        this->WriteExternalProject(fout, project.c_str(), 
+                                   location.c_str(), cc.GetDepends());
         }
       else 
         {
@@ -492,8 +500,8 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
              cmSystemTools::Error(m.c_str());
              }
            
-           fout << "\t\t{" << this->GetGUID(name.c_str()) << "}." << depcount << " = {"
-                << guid.c_str() << "}\n";
+           fout << "\t\t{" << this->GetGUID(name.c_str()) 
+                << "}." << depcount << " = {" << guid.c_str() << "}\n";
            depcount++;
            }
          }
@@ -529,12 +537,14 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string name = cmds[0][0];
-        this->WriteProjectConfigurations(fout, name.c_str(), l->second.IsInAll());
+        this->WriteProjectConfigurations(fout, name.c_str(), 
+                                         l->second.IsInAll());
         }
       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
-        this->WriteProjectConfigurations(fout, si->c_str(), l->second.IsInAll());
+        this->WriteProjectConfigurations(fout, si->c_str(), 
+                                         l->second.IsInAll());
         ++si;
         }
       }
@@ -613,12 +623,12 @@ cmGlobalVisualStudio7Generator
       std::string name = *i;
       if(strncmp(name.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
-        // kind of weird removing the first 27 letters.
-        // my recommendatsions:
-        // use cmCustomCommand::GetCommand() to get the project name
-        // or get rid of the target name starting with "INCLUDE_EXTERNAL_MSPROJECT_" and use another 
-        // indicator/flag somewhere.  These external project names shouldn't conflict with cmake 
-        // target names anyways.
+        // kind of weird removing the first 27 letters.  my
+        // recommendatsions: use cmCustomCommand::GetCommand() to get the
+        // project name or get rid of the target name starting with
+        // "INCLUDE_EXTERNAL_MSPROJECT_" and use another indicator/flag
+        // somewhere.  These external project names shouldn't conflict
+        // with cmake target names anyways.
         name.erase(name.begin(), name.begin() + 27);
         }
       std::string guid = this->GetGUID(name.c_str());
@@ -639,11 +649,10 @@ cmGlobalVisualStudio7Generator
 }
 
 
-// Write a dsp file into the SLN file,
-// Note, that dependencies from executables to 
-// the libraries it uses are also done here
-void 
-cmGlobalVisualStudio7Generator::WriteProjectConfigurations(std::ostream& fout, 
+// Write a dsp file into the SLN file, Note, that dependencies from
+// executables to the libraries it uses are also done here
+void cmGlobalVisualStudio7Generator
+::WriteProjectConfigurations(std::ostream& fout, 
                                                            const char* name, 
                                                            bool in_all_build)
 {
@@ -651,10 +660,12 @@ cmGlobalVisualStudio7Generator::WriteProjectConfigurations(std::ostream& fout,
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << *i << "|Win32\n";
+    fout << "\t\t{" << guid << "}." << *i 
+         << ".ActiveCfg = " << *i << "|Win32\n";
     if (in_all_build)
       {
-      fout << "\t\t{" << guid << "}." << *i << ".Build.0 = " << *i << "|Win32\n";
+      fout << "\t\t{" << guid << "}." << *i 
+           << ".Build.0 = " << *i << "|Win32\n";
       }
     }
 }
@@ -701,7 +712,8 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(const char* name)
 {
   std::string guidStoreName = name;
   guidStoreName += "_GUID_CMAKE";
-  const char* storedGUID = this->CMakeInstance->GetCacheDefinition(guidStoreName.c_str());
+  const char* storedGUID = 
+    this->CMakeInstance->GetCacheDefinition(guidStoreName.c_str());
   if(storedGUID)
     {
     return std::string(storedGUID);
@@ -728,7 +740,8 @@ void cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
   ret = reinterpret_cast<char*>(uidstr);
   RpcStringFree(&uidstr);
   ret = cmSystemTools::UpperCase(ret);
-  this->CMakeInstance->AddCacheEntry(guidStoreName.c_str(), ret.c_str(), "Stored GUID", 
+  this->CMakeInstance->AddCacheEntry(guidStoreName.c_str(), 
+                                     ret.c_str(), "Stored GUID", 
                                  cmCacheManager::INTERNAL);
 }
 
@@ -738,7 +751,8 @@ std::vector<std::string> *cmGlobalVisualStudio7Generator::GetConfigurations()
 };
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio7Generator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalVisualStudio7Generator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates Visual Studio .NET 2002 project files.";

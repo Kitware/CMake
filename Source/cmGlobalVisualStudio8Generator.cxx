@@ -49,7 +49,8 @@ void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio8Generator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalVisualStudio8Generator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates Visual Studio .NET 2005 project files.";
@@ -96,7 +97,8 @@ void cmGlobalVisualStudio8Generator::Generate()
       cmTarget* tgt = mf->FindTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
       if(!tgt)
         {
-        cmSystemTools::Error("Error adding target " CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+        cmSystemTools::Error("Error adding target " 
+                             CMAKE_CHECK_BUILD_SYSTEM_TARGET);
         continue;
         }
 
@@ -115,7 +117,8 @@ void cmGlobalVisualStudio8Generator::Generate()
                            lmf->GetListFiles().end());
           }
         // Sort the list of input files and remove duplicates.
-        std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
+        std::sort(listFiles.begin(), listFiles.end(), 
+                  std::less<std::string>());
         std::vector<std::string>::iterator new_end =
           std::unique(listFiles.begin(), listFiles.end());
         listFiles.erase(new_end, listFiles.end());
@@ -147,13 +150,16 @@ void cmGlobalVisualStudio8Generator::Generate()
           CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.cmake", listFiles,
           no_main_dependency, commandLines, "Checking Build System",
           no_working_directory, true);
-        if(cmSourceFile* file = mf->GetSource(CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.cmake.rule"))
+        if(cmSourceFile* file = mf->GetSource(CMAKE_CHECK_BUILD_SYSTEM_TARGET 
+                                              ".vcproj.cmake.rule"))
           {
           tgt->GetSourceFiles().push_back(file);
           }
         else
           {
-          cmSystemTools::Error("Error adding rule for " CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.cmake");
+          cmSystemTools::Error("Error adding rule for " 
+                               CMAKE_CHECK_BUILD_SYSTEM_TARGET 
+                               ".vcproj.cmake");
           }
         }
       }
@@ -229,11 +235,13 @@ cmGlobalVisualStudio8Generator
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-      fout << "\t\t{" << guid << "}." << *i << "|" << this->PlatformName << ".ActiveCfg = " 
+    fout << "\t\t{" << guid << "}." << *i 
+         << "|" << this->PlatformName << ".ActiveCfg = " 
            << *i << "|" << this->PlatformName << "\n";
     if (in_all_build)
       {
-        fout << "\t\t{" << guid << "}." << *i << "|" << this->PlatformName << ".Build.0 = " 
+      fout << "\t\t{" << guid << "}." << *i 
+           << "|" << this->PlatformName << ".Build.0 = " 
              << *i << "|" << this->PlatformName << "\n";
       }
     }

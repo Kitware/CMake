@@ -903,7 +903,7 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
         {
         errorLine = 1;
         cmCTestLog(this->CTest, DEBUG, "  Error Line: " << data
-          << " (matches: " << this->CustomWarningMatches[wrxCnt] << ")"
+          << " (matches: " << this->CustomErrorMatches[wrxCnt] << ")"
           << std::endl);
         break;
         }

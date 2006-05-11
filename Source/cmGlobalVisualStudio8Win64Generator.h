@@ -25,11 +25,13 @@
  *
  * cmGlobalVisualStudio8Win64Generator manages UNIX build process for a tree
  */
-class cmGlobalVisualStudio8Win64Generator : public cmGlobalVisualStudio8Generator
+class cmGlobalVisualStudio8Win64Generator : 
+  public cmGlobalVisualStudio8Generator
 {
 public:
   cmGlobalVisualStudio8Win64Generator();
-  static cmGlobalGenerator* New() { return new cmGlobalVisualStudio8Win64Generator; }
+  static cmGlobalGenerator* New() { 
+    return new cmGlobalVisualStudio8Win64Generator; }
   
   ///! Get the name for the generator.
   virtual const char* GetName() const {

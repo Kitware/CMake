@@ -25,8 +25,8 @@ cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator()
   this->ToolSupportsColor = true;
 }
 
-void cmGlobalMinGWMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,
-                                                    cmMakefile *mf)
+void cmGlobalMinGWMakefileGenerator
+::EnableLanguage(std::vector<std::string>const& l, cmMakefile *mf)
 { 
   this->FindMakeProgram(mf);
   std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
@@ -64,7 +64,8 @@ cmLocalGenerator *cmGlobalMinGWMakefileGenerator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalMinGWMakefileGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalMinGWMakefileGenerator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates a make file for use with mingw32-make.";

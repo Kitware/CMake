@@ -45,7 +45,8 @@ void cmGlobalVisualStudio71Generator::AddPlatformDefinitions(cmMakefile* mf)
 }
 
 // Write a SLN file to the stream
-void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
+void cmGlobalVisualStudio71Generator
+::WriteSLNFile(std::ostream& fout,
                                                    cmLocalGenerator* root,
                                                    std::vector<cmLocalGenerator*>& generators)
 {
@@ -131,7 +132,8 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string project = cmds[0][0];
         std::string location = cmds[0][1];
-        this->WriteExternalProject(fout, project.c_str(), location.c_str(), cc.GetDepends());
+        this->WriteExternalProject(fout, project.c_str(), 
+                                   location.c_str(), cc.GetDepends());
         }
       else 
         {
@@ -251,12 +253,14 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string project = cmds[0][0];
-        this->WriteProjectConfigurations(fout, project.c_str(), l->second.IsInAll());
+        this->WriteProjectConfigurations(fout, project.c_str(), 
+                                         l->second.IsInAll());
         }
       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
                && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
-        this->WriteProjectConfigurations(fout, si->c_str(), l->second.IsInAll());
+        this->WriteProjectConfigurations(fout, si->c_str(), 
+                                         l->second.IsInAll());
         ++si;
         }
       }
@@ -344,12 +348,12 @@ cmGlobalVisualStudio71Generator
       std::string name = i->c_str();
       if(strncmp(name.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
-        // kind of weird removing the first 27 letters.
-        // my recommendatsions:
-        // use cmCustomCommand::GetCommand() to get the project name
-        // or get rid of the target name starting with "INCLUDE_EXTERNAL_MSPROJECT_" and use another 
-        // indicator/flag somewhere.  These external project names shouldn't conflict with cmake 
-        // target names anyways.
+        // kind of weird removing the first 27 letters.  my
+        // recommendatsions: use cmCustomCommand::GetCommand() to get the
+        // project name or get rid of the target name starting with
+        // "INCLUDE_EXTERNAL_MSPROJECT_" and use another indicator/flag
+        // somewhere.  These external project names shouldn't conflict
+        // with cmake target names anyways.
         name.erase(name.begin(), name.begin() + 27);
         }
       std::string guid = this->GetGUID(name.c_str());
@@ -367,10 +371,10 @@ cmGlobalVisualStudio71Generator
     }
 }
 
-// Write a dsp file into the SLN file,
-// Note, that dependencies from executables to 
-// the libraries it uses are also done here
-void cmGlobalVisualStudio71Generator::WriteExternalProject(std::ostream& fout, 
+// Write a dsp file into the SLN file, Note, that dependencies from
+// executables to the libraries it uses are also done here
+void cmGlobalVisualStudio71Generator
+::WriteExternalProject(std::ostream& fout, 
                                const char* name,
                                const char* location,
                                const std::vector<std::string>& depends)
@@ -382,8 +386,8 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(std::ostream& fout,
        << this->GetGUID(name)
        << "}\"\n";
   
-  // write out the dependencies here
-  // VS 7.1 includes dependencies with the project instead of in the global section
+  // write out the dependencies here VS 7.1 includes dependencies with the
+  // project instead of in the global section
   if(!depends.empty())
     {
     fout << "\tProjectSection(ProjectDependencies) = postProject\n";
@@ -408,11 +412,10 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(std::ostream& fout,
 }
 
 
-// Write a dsp file into the SLN file,
-// Note, that dependencies from executables to 
-// the libraries it uses are also done here
-void 
-cmGlobalVisualStudio71Generator::WriteProjectConfigurations(std::ostream& fout, 
+// Write a dsp file into the SLN file, Note, that dependencies from
+// executables to the libraries it uses are also done here
+void cmGlobalVisualStudio71Generator
+::WriteProjectConfigurations(std::ostream& fout, 
                                                            const char* name, 
                                                            bool in_all_build)
 {
@@ -420,10 +423,12 @@ cmGlobalVisualStudio71Generator::WriteProjectConfigurations(std::ostream& fout,
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << *i << "|Win32\n";
+    fout << "\t\t{" << guid << "}." << *i 
+         << ".ActiveCfg = " << *i << "|Win32\n";
     if (in_all_build)
       {
-      fout << "\t\t{" << guid << "}." << *i << ".Build.0 = " << *i << "|Win32\n";
+      fout << "\t\t{" << guid << "}." << *i 
+           << ".Build.0 = " << *i << "|Win32\n";
       }
     }
 }
@@ -449,7 +454,8 @@ void cmGlobalVisualStudio71Generator::WriteSLNHeader(std::ostream& fout)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio71Generator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalVisualStudio71Generator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates Visual Studio .NET 2003 project files.";

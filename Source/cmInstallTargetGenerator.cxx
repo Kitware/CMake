@@ -268,7 +268,8 @@ std::string cmInstallTargetGenerator::GetScriptReference(cmTarget* target,
 }
 
 //----------------------------------------------------------------------------
-void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os,
+void cmInstallTargetGenerator
+::AddInstallNamePatchRule(std::ostream& os,
                                                        const char* destination)
 {
   // Build a map of build-tree install_name to install-tree install_name for
@@ -291,13 +292,15 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os,
         lib != this->Target->GetName()) &&
        (j->second == cmTarget::GENERAL || j->second == linkType))
       {
-      if(cmTarget* tgt = this->Target->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->FindTarget(0, lib.c_str()))
+      if(cmTarget* tgt = this->Target->GetMakefile()->
+         GetLocalGenerator()->GetGlobalGenerator()->
+         FindTarget(0, lib.c_str()))
         {
         if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
           {
-          // If the build tree and install tree use different path components
-          // of the install_name field then we need to create a mapping to be
-          // applied after installation.
+          // If the build tree and install tree use different path
+          // components of the install_name field then we need to create a
+          // mapping to be applied after installation.
           std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
           std::string for_install = 
             tgt->GetInstallNameDirForInstallTree(config);
@@ -326,8 +329,10 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os,
   std::string new_id;
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
     {
-    std::string for_build = this->Target->GetInstallNameDirForBuildTree(config);
-    std::string for_install = this->Target->GetInstallNameDirForInstallTree(config);
+    std::string for_build = 
+      this->Target->GetInstallNameDirForBuildTree(config);
+    std::string for_install = 
+      this->Target->GetInstallNameDirForInstallTree(config);
     if(for_build != for_install)
       {
       // Prepare to refer to the install-tree install_name.
@@ -340,8 +345,8 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(std::ostream& os,
   // install_name value and references.
   if(!new_id.empty() || !install_name_remap.empty())
     {
-    std::string component_test =
-      "NOT CMAKE_INSTALL_COMPONENT OR \"${CMAKE_INSTALL_COMPONENT}\" MATCHES \"^(";
+    std::string component_test = "NOT CMAKE_INSTALL_COMPONENT OR "
+      "\"${CMAKE_INSTALL_COMPONENT}\" MATCHES \"^(";
     component_test += this->Component;
     component_test += ")$\"";
     os << "IF(" << component_test << ")\n";

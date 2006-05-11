@@ -24,8 +24,8 @@ cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
   this->FindMakeProgramFile = "CMakeVS6FindMake.cmake";
 }
 
-void cmGlobalVisualStudio6Generator::EnableLanguage(std::vector<std::string>const& lang,
-                                                    cmMakefile *mf)
+void cmGlobalVisualStudio6Generator
+::EnableLanguage(std::vector<std::string>const& lang, cmMakefile *mf)
 {
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
@@ -67,16 +67,21 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
     }
 }
 
-std::string cmGlobalVisualStudio6Generator::GenerateBuildCommand(const char* makeProgram,
-  const char *projectName, const char* additionalOptions, const char *targetName,
-  const char* config, bool ignoreErrors)
+std::string cmGlobalVisualStudio6Generator
+::GenerateBuildCommand(const char* makeProgram,
+                       const char *projectName, 
+                       const char* additionalOptions, 
+                       const char *targetName,
+                       const char* config, 
+                       bool ignoreErrors)
 {
   // Ingoring errors is not implemented in visual studio 6
   (void) ignoreErrors;
 
   // now build the test
   std::vector<std::string> mp;
-  mp.push_back("[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup;VsCommonDir]/MSDev98/Bin");
+  mp.push_back("[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio"
+               "\\6.0\\Setup;VsCommonDir]/MSDev98/Bin");
   cmSystemTools::ExpandRegistryValues(mp[0]);
   std::string originalCommand = makeProgram;
   std::string makeCommand = 
@@ -166,8 +171,9 @@ void cmGlobalVisualStudio6Generator::Generate()
     // add the ALL_BUILD to the first local generator of each project
     if(gen.size())
       {
-      gen[0]->GetMakefile()->
-        AddUtilityCommand("ALL_BUILD", false, no_output, no_depends, no_working_dir,
+      gen[0]->GetMakefile()->AddUtilityCommand("ALL_BUILD", false, 
+                                               no_output, no_depends, 
+                                               no_working_dir,
                           "echo", "Build all projects");
       }
     }
@@ -183,8 +189,8 @@ void cmGlobalVisualStudio6Generator::Generate()
 }
 
 // Write a DSW file to the stream
-void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
-                                                  cmLocalGenerator* root,
+void cmGlobalVisualStudio6Generator
+::WriteDSWFile(std::ostream& fout,cmLocalGenerator* root,
                                                   std::vector<cmLocalGenerator*>& generators)
 {
   // Write out the header for a DSW file
@@ -267,7 +273,8 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string project = cmds[0][0];
         std::string location = cmds[0][1];
-        this->WriteExternalProject(fout, project.c_str(), location.c_str(), cc.GetDepends());
+        this->WriteExternalProject(fout, project.c_str(), 
+                                   location.c_str(), cc.GetDepends());
         }
       else 
         {
@@ -356,7 +363,8 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
   this->WriteDSWFooter(fout);
 }
 
-void cmGlobalVisualStudio6Generator::OutputDSWFile(cmLocalGenerator* root, 
+void cmGlobalVisualStudio6Generator
+::OutputDSWFile(cmLocalGenerator* root, 
                                                    std::vector<cmLocalGenerator*>& generators)
 {
   if(generators.size() == 0)
@@ -501,7 +509,8 @@ void cmGlobalVisualStudio6Generator::WriteDSWHeader(std::ostream& fout)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio6Generator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalVisualStudio6Generator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates Visual Studio 6 project files.";

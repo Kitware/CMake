@@ -30,7 +30,8 @@ class cmGlobalVisualStudio7Generator : public cmGlobalGenerator
 {
 public:
   cmGlobalVisualStudio7Generator();
-  static cmGlobalGenerator* New() { return new cmGlobalVisualStudio7Generator; }
+  static cmGlobalGenerator* New() { 
+    return new cmGlobalVisualStudio7Generator; }
   
   ///! Get the name for the generator.
   virtual const char* GetName() const {
@@ -103,7 +104,8 @@ protected:
                             const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectDepends(std::ostream& fout, 
                            const char* name, const char* path, cmTarget &t);
-  virtual void WriteProjectConfigurations(std::ostream& fout, const char* name,
+  virtual void WriteProjectConfigurations(std::ostream& fout, 
+                                          const char* name,
                                           bool in_all);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);

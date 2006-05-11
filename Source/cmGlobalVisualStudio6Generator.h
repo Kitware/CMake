@@ -30,7 +30,8 @@ class cmGlobalVisualStudio6Generator : public cmGlobalGenerator
 {
 public:
   cmGlobalVisualStudio6Generator();
-  static cmGlobalGenerator* New() { return new cmGlobalVisualStudio6Generator; }
+  static cmGlobalGenerator* New() { 
+    return new cmGlobalVisualStudio6Generator; }
   
   ///! Get the name for the generator.
   virtual const char* GetName() const {

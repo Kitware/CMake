@@ -58,7 +58,8 @@ class cmGlobalUnixMakefileGenerator3 : public cmGlobalGenerator
 {
 public:
   cmGlobalUnixMakefileGenerator3();
-  static cmGlobalGenerator* New() { return new cmGlobalUnixMakefileGenerator3; }
+  static cmGlobalGenerator* New() {
+    return new cmGlobalUnixMakefileGenerator3; }
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {

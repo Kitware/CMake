@@ -46,7 +46,8 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args)
       fname = mfile.c_str();
       }
     }
-  bool readit = this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(), 
+  bool readit = 
+    this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(), 
                                           fname.c_str() );
   if(!optional && !readit && !cmSystemTools::GetFatalErrorOccured())
     {

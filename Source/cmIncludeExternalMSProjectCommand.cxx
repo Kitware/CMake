@@ -17,11 +17,13 @@
 #include "cmIncludeExternalMSProjectCommand.h"
 
 // cmIncludeExternalMSProjectCommand
-bool cmIncludeExternalMSProjectCommand::InitialPass(std::vector<std::string> const& args)
+bool cmIncludeExternalMSProjectCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2) 
   {
-    this->SetError("INCLUDE_EXTERNAL_MSPROJECT called with incorrect number of arguments");
+  this->SetError("INCLUDE_EXTERNAL_MSPROJECT called with incorrect "
+                 "number of arguments");
     return false;
   }
 // only compile this for win32 to avoid coverage errors

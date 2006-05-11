@@ -34,7 +34,8 @@ public:
                                   std::vector<cmLocalGenerator*>& generators);
 
   ///! What is the configurations directory variable called?
-  virtual const char* GetCMakeCFGInitDirectory()  { return "$(CONFIGURATION)"; }
+  virtual const char* GetCMakeCFGInitDirectory()  { 
+    return "$(CONFIGURATION)"; }
 };
 
 #endif

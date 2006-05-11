@@ -47,7 +47,8 @@ cmInstallGenerator
 }
 
 //----------------------------------------------------------------------------
-void cmInstallGenerator::AddInstallRule(
+void cmInstallGenerator
+::AddInstallRule(
   std::ostream& os,
                                         const char* dest,
                                         int type,
@@ -55,7 +56,7 @@ void cmInstallGenerator::AddInstallRule(
                                         bool optional /* = false */,
                                         const char* properties /* = 0 */,
                                         const char* permissions /* = 0 */,
-  std::vector<std::string> const& configurations /* = std::vector<std::string>() */,
+                 std::vector<std::string> const& configurations,
                                         const char* component /* = 0 */,
   const char* rename /* = 0 */
   )

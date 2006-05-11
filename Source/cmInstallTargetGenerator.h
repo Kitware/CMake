@@ -30,7 +30,8 @@ public:
   cmInstallTargetGenerator(
     cmTarget& t, const char* dest, bool implib,
     const char* permissions = "",
-    std::vector<std::string> const& configurations =std::vector<std::string>(),
+    std::vector<std::string> const& configurations 
+    = std::vector<std::string>(),
     const char* component = ""
     );
   virtual ~cmInstallTargetGenerator();

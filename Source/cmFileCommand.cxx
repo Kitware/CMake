@@ -970,8 +970,8 @@ bool cmFileCommand::HandleRelativePathCommand(
   if(!cmSystemTools::FileIsFullPath(fileName.c_str()))
     {
     std::string errstring = 
-      "RelativePath must be passed a full path to the directory: " 
-      + directoryName;
+      "RelativePath must be passed a full path to the file: " 
+      + fileName;
     this->SetError(errstring.c_str());
     return false;
     }
