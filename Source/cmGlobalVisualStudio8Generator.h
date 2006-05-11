@@ -29,7 +29,8 @@ class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
   cmGlobalVisualStudio8Generator();
-  static cmGlobalGenerator* New() { return new cmGlobalVisualStudio8Generator; }
+  static cmGlobalGenerator* New() { 
+    return new cmGlobalVisualStudio8Generator; }
   
   ///! Get the name for the generator.
   virtual const char* GetName() const {

@@ -79,7 +79,8 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
 { 
 #if defined(CMAKE_BUILD_WITH_CMAKE)  
   cmXcodeVersionParser parser;
-  parser.ParseFile("/Developer/Applications/Xcode.app/Contents/version.plist");
+  parser.ParseFile
+    ("/Developer/Applications/Xcode.app/Contents/version.plist");
   if(parser.Version == 15)
     {
     return new cmGlobalXCodeGenerator;
@@ -94,8 +95,8 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
   ret->SetVersion(parser.Version);
   return ret;
 #else
-  std::cerr 
-    << "CMake should be built with cmake to use XCode, default to Xcode 1.5\n";
+  std::cerr << "CMake should be built with cmake to use XCode, "
+    "default to Xcode 1.5\n";
   return new cmGlobalXCodeGenerator;
 #endif
 }
@@ -126,9 +127,13 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalXCodeGenerator::GenerateBuildCommand(const char* makeProgram,
-  const char *projectName, const char* additionalOptions, const char *targetName,
-  const char* config, bool ignoreErrors)
+std::string cmGlobalXCodeGenerator
+::GenerateBuildCommand(const char* makeProgram,
+                       const char *projectName, 
+                       const char* additionalOptions, 
+                       const char *targetName,
+                       const char* config, 
+                       bool ignoreErrors)
 {
   // Config is not used yet
   (void) ignoreErrors;

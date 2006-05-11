@@ -26,8 +26,8 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->EmptyCommandsHack = "@cd .";
 }
 
-void cmGlobalWatcomWMakeGenerator::EnableLanguage(std::vector<std::string>const& l,
-                                                    cmMakefile *mf)
+void cmGlobalWatcomWMakeGenerator
+::EnableLanguage(std::vector<std::string>const& l, cmMakefile *mf)
 {
   // pick a default 
   mf->AddDefinition("WATCOM", "1");
@@ -60,7 +60,8 @@ cmLocalGenerator *cmGlobalWatcomWMakeGenerator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalWatcomWMakeGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalWatcomWMakeGenerator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates Watcom WMake makefiles.";
