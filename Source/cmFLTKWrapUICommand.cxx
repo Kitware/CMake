@@ -139,9 +139,10 @@ void cmFLTKWrapUICommand::FinalPass()
     std::string msg = 
       "In CMake 2.2 the FLTK_WRAP_UI command sets a variable to the list of "
       "source files that should be added to your executable or library. It "
-      "appears that you have not added these source files to your target. You "
-      "should change your CMakeLists.txt file to directly add the generated "
-      "files to the target. For example FTLK_WRAP_UI(foo src1 src2 src3) "
+      "appears that you have not added these source files to your target. "
+      "You should change your CMakeLists.txt file to "
+      "directly add the generated files to the target. "
+      "For example FTLK_WRAP_UI(foo src1 src2 src3) "
       "will create a variable named foo_FLTK_UI_SRCS that contains the list "
       "of sources to add to your target when you call ADD_LIBRARY or "
       "ADD_EXECUTABLE. For now CMake will add the sources to your target "

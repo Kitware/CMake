@@ -121,7 +121,8 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmExpr_yy --defines=cmExprParserTokens.h -ocmExprParser.cxx cmExprParser.y
+  bison --yacc --name-prefix=cmExpr_yy --defines=cmExprParserTokens.h
+  -ocmExprParser.cxx cmExprParser.y
 
 Modify cmExprParser.cxx:
   - remove TABs
@@ -161,7 +162,8 @@ static void cmExprError(yyscan_t yyscanner, const char* message);
 #endif
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
-# pragma warning (disable: 4065) /* Switch statement contains default but no case. */
+# pragma warning (disable: 4065) /* Switch statement contains default but
+                                    no case. */
 #endif
 
 
