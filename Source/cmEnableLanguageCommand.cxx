@@ -17,11 +17,13 @@
 #include "cmEnableLanguageCommand.h"
 
 // cmEnableLanguageCommand
-bool cmEnableLanguageCommand::InitialPass(std::vector<std::string> const& args)
+bool cmEnableLanguageCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
-    this->SetError("ENABLE_LANGUAGE called with incorrect number of arguments");
+    this->SetError
+      ("ENABLE_LANGUAGE called with incorrect number of arguments");
     return false;
     } 
   this->Makefile->EnableLanguage(args);

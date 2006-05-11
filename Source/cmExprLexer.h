@@ -300,7 +300,8 @@ extern int cmExpr_yylex (yyscan_t yyscanner);
 #define YY_DECL int cmExpr_yylex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
-/* yy_get_previous_state - get the state just before the EOB char was reached */
+/* yy_get_previous_state - get the state just before the EOB char was
+   reached */
 
 #undef YY_NEW_FILE
 #undef YY_FLUSH_BUFFER

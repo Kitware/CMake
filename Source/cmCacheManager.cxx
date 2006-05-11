@@ -423,8 +423,8 @@ bool cmCacheManager::SaveCache(const char* path)
   fout << "########################\n";
   fout << "\n";
 
-  for( std::map<cmStdString, CacheEntry>::const_iterator i = this->Cache.begin();
-       i != this->Cache.end(); ++i)
+  for( std::map<cmStdString, CacheEntry>::const_iterator i = 
+         this->Cache.begin(); i != this->Cache.end(); ++i)
     {
     const CacheEntry& ce = (*i).second; 
     CacheEntryType t = ce.Type;
@@ -724,8 +724,8 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 {
   out << "=================================================" << std::endl;
   out << "CMakeCache Contents:" << std::endl;
-  for(std::map<cmStdString, CacheEntry>::const_iterator i = this->Cache.begin();
-      i != this->Cache.end(); ++i)
+  for(std::map<cmStdString, CacheEntry>::const_iterator i = 
+        this->Cache.begin(); i != this->Cache.end(); ++i)
     {
     if((*i).second.Type != INTERNAL)
       {

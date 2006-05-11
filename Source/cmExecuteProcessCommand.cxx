@@ -22,7 +22,8 @@
 void cmExecuteProcessCommandFixText(std::vector<char>& output);
 
 // cmExecuteProcessCommand
-bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
+bool cmExecuteProcessCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -241,11 +242,13 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
     }
   if(!output_file.empty())
     {
-    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDOUT, output_file.c_str());
+    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDOUT, 
+                             output_file.c_str());
     }
   if(!error_file.empty())
     {
-    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDERR, error_file.c_str());
+    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDERR, 
+                             error_file.c_str());
     }
 
   // Set the timeout if any.
@@ -297,11 +300,13 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args)
   // Store the output obtained.
   if(!output_variable.empty() && tempOutput.size())
     {
-    this->Makefile->AddDefinition(output_variable.c_str(), &*tempOutput.begin());
+    this->Makefile->AddDefinition(output_variable.c_str(), 
+                                  &*tempOutput.begin());
     }
   if(!merge_output && !error_variable.empty() && tempError.size())
     {
-    this->Makefile->AddDefinition(error_variable.c_str(), &*tempError.begin());
+    this->Makefile->AddDefinition(error_variable.c_str(), 
+                                  &*tempError.begin());
     }
 
   // Store the result of running the process.

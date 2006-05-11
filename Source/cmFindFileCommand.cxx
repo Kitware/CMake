@@ -23,7 +23,8 @@ cmFindFileCommand::cmFindFileCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "FIND_PATH", "FIND_FILE");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "directory containing the named file", "full path to named file");
+                               "directory containing the named file", 
+                               "full path to named file");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                 "file in a directory", "full path to a file");
 }

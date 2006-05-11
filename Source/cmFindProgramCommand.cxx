@@ -31,7 +31,8 @@ cmFindProgramCommand::cmFindProgramCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SYSTEM", "");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_SYSTEM_XXX_PATH", "CMAKE_SYSTEM_PROGRAM_PATH"); 
+                               "CMAKE_SYSTEM_XXX_PATH", 
+                               "CMAKE_SYSTEM_PROGRAM_PATH"); 
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "SEARCH_XXX_DESC", "program");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
@@ -88,14 +89,17 @@ std::string cmFindProgramCommand::FindProgram(std::vector<std::string> names)
   return program;
 }
 
-std::string cmFindProgramCommand::FindAppBundle(std::vector<std::string> names)
+std::string cmFindProgramCommand
+::FindAppBundle(std::vector<std::string> names)
 {
   for(std::vector<std::string>::const_iterator name = names.begin();
       name != names.end() ; ++name)
     {
     
     std::string appName = *name + std::string(".app");
-    std::string appPath = cmSystemTools::FindDirectory(appName.c_str(), this->SearchPaths, true);
+    std::string appPath = cmSystemTools::FindDirectory(appName.c_str(), 
+                                                       this->SearchPaths, 
+                                                       true);
 
     if ( !appPath.empty() )
       {
@@ -121,10 +125,12 @@ std::string cmFindProgramCommand::GetBundleExecutable(std::string bundlePath)
   
   // Get a CFString of the app bundle path
   // XXX - Is it safe to assume everything is in UTF8?
-  CFStringRef bundlePathCFS = CFStringCreateWithCString(kCFAllocatorDefault , 
+  CFStringRef bundlePathCFS = 
+    CFStringCreateWithCString(kCFAllocatorDefault , 
                                                         bundlePath.c_str(), kCFStringEncodingUTF8 );
   
-  // Make a CFURLRef from the CFString representation of the bundle’s path.
+  // Make a CFURLRef from the CFString representation of the
+  // bundle’s path.
   CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, 
                                                      bundlePathCFS,
                                                      kCFURLPOSIXPathStyle,
@@ -142,7 +148,8 @@ std::string cmFindProgramCommand::GetBundleExecutable(std::string bundlePath)
     char buffer[MAX_OSX_PATH_SIZE];
     
     // Convert the CFString to a C string
-    CFStringGetCString( CFURLGetString(executableURL), buffer, MAX_OSX_PATH_SIZE, kCFStringEncodingUTF8 );
+    CFStringGetCString( CFURLGetString(executableURL), buffer, 
+                        MAX_OSX_PATH_SIZE, kCFStringEncodingUTF8 );
     
     // And finally to a c++ string
     executable = bundlePath + "/Contents/MacOS/" + std::string(buffer);

@@ -105,7 +105,8 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
   bool okay = true;
   while(internalDepends.getline(this->Dependee, this->MaxPath))
     {
-    if ( this->Dependee[0] == 0 || this->Dependee[0] == '#' || this->Dependee[0] == '\r' )
+    if ( this->Dependee[0] == 0 || this->Dependee[0] == '#' || 
+         this->Dependee[0] == '\r' )
       {
       continue;
       }

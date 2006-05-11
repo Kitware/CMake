@@ -18,7 +18,8 @@
 #include "cmSystemTools.h"
 
 // cmGetFilenameComponentCommand
-bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& args)
+bool cmGetFilenameComponentCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 3)
     {
@@ -63,7 +64,8 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
           }
         }
       }
-    cmSystemTools::SplitProgramFromArgs(filename.c_str(), result, programArgs);
+    cmSystemTools::SplitProgramFromArgs(filename.c_str(), 
+                                        result, programArgs);
     }
   else if (args[2] == "EXT")
     {
@@ -102,15 +104,13 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     {
     if(programArgs.size() && storeArgs.size())
       {
-      this->Makefile->AddCacheDefinition(storeArgs.c_str(),
-                                     programArgs.c_str(),
-                                     "",
-                                     args[2] == "PATH" ? cmCacheManager::FILEPATH
+      this->Makefile->AddCacheDefinition
+        (storeArgs.c_str(), programArgs.c_str(),
+         "", args[2] == "PATH" ? cmCacheManager::FILEPATH
                                      : cmCacheManager::STRING);
       }
-    this->Makefile->AddCacheDefinition(args[0].c_str(),
-                                   result.c_str(),
-                                   "",
+    this->Makefile->AddCacheDefinition
+      (args[0].c_str(), result.c_str(), "",
                                    args[2] == "PATH" ? cmCacheManager::FILEPATH
                                                      : cmCacheManager::STRING);
     }

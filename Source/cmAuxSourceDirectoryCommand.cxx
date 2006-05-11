@@ -20,7 +20,8 @@
 #include <cmsys/Directory.hxx>
 
 // cmAuxSourceDirectoryCommand
-bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& args)
+bool cmAuxSourceDirectoryCommand::InitialPass
+(std::vector<std::string> const& args)
 {
   if(args.size() < 2 || args.size() > 2)
     {
@@ -68,7 +69,8 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
           // add the file as a class file so 
           // depends can be done
           cmSourceFile cmfile;
-          cmfile.SetName(fullname.c_str(), this->Makefile->GetCurrentDirectory(),
+          cmfile.SetName(fullname.c_str(), 
+                         this->Makefile->GetCurrentDirectory(),
                          this->Makefile->GetSourceExtensions(),
                          this->Makefile->GetHeaderExtensions());
           cmfile.SetProperty("ABSTRACT","0");

@@ -67,8 +67,8 @@ public:
     {
     return
       "  CTEST_READ_CUSTOM_FILES( directory ... )\n"
-      "Read all the CTestCustom.ctest or CTestCustom.cmake files from the given "
-      "directory.";
+      "Read all the CTestCustom.ctest or CTestCustom.cmake files from "
+      "the given directory.";
     }
 
   cmTypeMacro(cmCTestReadCustomFilesCommand, cmCTestCommand);

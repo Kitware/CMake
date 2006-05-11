@@ -60,7 +60,9 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     if (!lg)
       {
       this->SetError
-        ("DIRECTORY argument provided but requested directory not found. This could be because the directory argument was invalid or, it is valid but has not been processed yet.");
+        ("DIRECTORY argument provided but requested directory not found. "
+         "This could be because the directory argument was invalid or, "
+         "it is valid but has not been processed yet.");
       return false;
       }
     dir = lg->GetMakefile();
@@ -140,8 +142,8 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     ++i;
     if (i == args.end())
       {
-      this->SetError
-        ("A request for a variable definition was made without providing the name of the variable to get.");
+      this->SetError("A request for a variable definition was made without "
+                     "providing the name of the variable to get.");
       return false;
       }
     output = dir->GetSafeDefinition(i->c_str());

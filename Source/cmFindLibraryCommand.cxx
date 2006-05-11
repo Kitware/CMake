@@ -26,7 +26,8 @@ cmFindLibraryCommand::cmFindLibraryCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SYSTEM", "LIB");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_SYSTEM_XXX_PATH", "CMAKE_SYSTEM_LIBRARY_PATH");
+                               "CMAKE_SYSTEM_XXX_PATH", 
+                               "CMAKE_SYSTEM_LIBRARY_PATH");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "SEARCH_XXX_DESC", "library");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
@@ -80,11 +81,13 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 
 void cmFindLibraryCommand::AddLib64Paths()
 {  
-  if(!this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->GetLanguageEnabled("C"))
+  if(!this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+     GetLanguageEnabled("C"))
     {
     return;
     }
-  std::string voidsize = this->Makefile->GetRequiredDefinition("CMAKE_SIZEOF_VOID_P");
+  std::string voidsize = 
+    this->Makefile->GetRequiredDefinition("CMAKE_SIZEOF_VOID_P");
   int size = atoi(voidsize.c_str());
   std::vector<std::string> path64;
   if(size != 8)

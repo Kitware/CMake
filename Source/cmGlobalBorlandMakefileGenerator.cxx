@@ -28,8 +28,8 @@ cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
 }
 
 
-void cmGlobalBorlandMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,
-                                                      cmMakefile *mf)
+void cmGlobalBorlandMakefileGenerator
+::EnableLanguage(std::vector<std::string>const& l, cmMakefile *mf)
 {
   std::string outdir = this->CMakeInstance->GetStartOutputDirectory();
   mf->AddDefinition("BORLAND", "1");
@@ -55,7 +55,8 @@ cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
 
 
 //----------------------------------------------------------------------------
-void cmGlobalBorlandMakefileGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalBorlandMakefileGenerator
+::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates Borland makefiles.";

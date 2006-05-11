@@ -112,7 +112,8 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
     }
   else
     {
-    result = cmSystemTools::RunCommand(command.c_str(), output, retVal, 0, verbose);
+    result = cmSystemTools::RunCommand(command.c_str(), output, 
+                                       retVal, 0, verbose);
     }
   if(!result)
     {

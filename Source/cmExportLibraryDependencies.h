@@ -22,7 +22,8 @@
 /** \class cmExportLibraryDependenciesCommand
  * \brief Add a test to the lists of tests to run.
  *
- * cmExportLibraryDependenciesCommand adds a test to the list of tests to run .
+ * cmExportLibraryDependenciesCommand adds a test to the list of tests to run
+ * 
  */
 class cmExportLibraryDependenciesCommand : public cmCommand
 {
@@ -57,7 +58,8 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Write out the dependency information for all targets of a project.";
+    return 
+      "Write out the dependency information for all targets of a project.";
     }
   
   /**

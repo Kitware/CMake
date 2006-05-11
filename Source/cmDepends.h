@@ -41,7 +41,8 @@ public:
   /** Set the full path to the top of the build tree.  This is
       the base path from which dependencies are referenced as
       relative paths.  */
-  void SetHomeOutputDirectory(const char *dir) {this->HomeOutputDirectory = dir;};
+  void SetHomeOutputDirectory(const char *dir) {
+    this->HomeOutputDirectory = dir;};
     
   /** should this be verbose in its output */
   void SetVerbose(bool verb) { this->Verbose = verb; }
