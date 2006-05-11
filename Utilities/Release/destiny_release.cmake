@@ -1,5 +1,5 @@
 set(PROCESSORS 1)
-set(RUN_SHELL "/usr/local/bin/zsh -l")
+set(RUN_SHELL "/usr/local/bin/zsh -l -c /bin/sh")
 set(CVS_COMMAND "/usr/local/bin/cvs")
 set(HOST destiny)
 set(MAKE_PROGRAM "/usr/local/bin/gmake")

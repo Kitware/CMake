@@ -89,13 +89,23 @@ if [ -z "@SKIP_TESTS@" ]; then
     check_exit_value $? "Test cmake" || exit 1
 fi
 
-echo "Run package"
-./bin/cpack -D CMAKE_MAKE_PROGRAM=@MAKE_PROGRAM@
-check_exit_value $? "Package cmake" || exit 1
+# loop over binary generators 
+generators="@CPACK_BINARY_GENERATORS@"
+for GEN in $generators; do
+    echo "Create $GEN package"
+    ./bin/cpack -D CMAKE_MAKE_PROGRAM=@MAKE_PROGRAM@ -G $GEN
+    check_exit_value $? "Create $GEN package" || exit 1
+done
 
-echo "Create Tar.gz"
-./bin/cpack  -D CMAKE_MAKE_PROGRAM=@MAKE_PROGRAM@ -G TGZ
-check_exit_value $? "Create TGZ" || exit 1
+# loop over source generators 
+generators="@CPACK_SOURCE_GENERATORS@"
+for GEN in $generators; do
+    echo "Create $GEN package"
+    ./bin/cpack -D CMAKE_MAKE_PROGRAM=@MAKE_PROGRAM@ -G $GEN --config CPackSourceConfig.cmake
+    check_exit_value $? "Create $GEN package" || exit 1
+done
+
+
 
 # need to add an extra copy thing here
 if [ ! -z "@EXTRA_COPY@" ]; then
