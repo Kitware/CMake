@@ -38,7 +38,7 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleGetCommand(args);
     }
-  if(subCommand == "SET")
+  if(subCommand == "SET" || subCommand == "APPEND")
     {
     return this->HandleSetCommand(args);
     }
