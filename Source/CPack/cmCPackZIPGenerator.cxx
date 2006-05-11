@@ -90,13 +90,16 @@ int cmCPackZIPGenerator::InitializeInternal()
 int cmCPackZIPGenerator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {
+  std::string tempFileName;
   cmOStringStream dmgCmd;
   switch ( this->ZipStyle )
     {
   case cmCPackZIPGenerator::StyleWinZip:
+    tempFileName = toplevel;
+    tempFileName += "/winZip.filelist";
     dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
       << "\" -P \"" << outFileName
-      << "\"";
+           << "\" @\"" << tempFileName.c_str() << "\"";
     break;
   case cmCPackZIPGenerator::StyleUnixZip:
     dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
@@ -108,12 +111,26 @@ int cmCPackZIPGenerator::CompressFiles(const char* outFileName,
       << std::endl);
     return 0;
     }
+  if(tempFileName.size())
+    {
+    cmGeneratedFileStream out(tempFileName.c_str());
+    std::vector<std::string>::const_iterator fileIt;
+    for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
+      {
+      out << "\""
+          << cmSystemTools::RelativePath(toplevel, fileIt->c_str())
+          << "\"" << std::endl;
+      }
+    }
+  else
+    {
   std::vector<std::string>::const_iterator fileIt;
   for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
     {
     dmgCmd << " \""
       << cmSystemTools::RelativePath(toplevel, fileIt->c_str())
       << "\"";
+      }
     }
   std::string output;
   int retVal = -1;

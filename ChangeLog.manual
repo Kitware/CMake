@@ -1,4 +1,7 @@
 Changes in CMake 2.4.2
+
+* Fix CPack ZIP on windows command line problem
+
 * Find executables with no extension on windows mingw
 
 * Fix FindQt3 to use QTDIR over path
