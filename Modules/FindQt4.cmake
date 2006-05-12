@@ -176,58 +176,58 @@ FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake qmake-qt4 PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/bin"
   $ENV{QTDIR}/bin
-)
+  )
 
 SET(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
 
 
 IF (QT_QMAKE_EXECUTABLE)
 
-   SET(QT4_QMAKE_FOUND FALSE)
+  SET(QT4_QMAKE_FOUND FALSE)
 
-   EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE} ARGS "-query QT_VERSION" OUTPUT_VARIABLE QTVERSION)
+  EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE} ARGS "-query QT_VERSION" OUTPUT_VARIABLE QTVERSION)
 
-   # check that we found the Qt4 qmake, Qt3 qmake output won't match here
-   STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" qt_version_tmp "${QTVERSION}")
-   IF (qt_version_tmp)
+  # check that we found the Qt4 qmake, Qt3 qmake output won't match here
+  STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" qt_version_tmp "${QTVERSION}")
+  IF (qt_version_tmp)
 
-      # we need at least version 4.0.0
-      IF (NOT QT_MIN_VERSION)
-         SET(QT_MIN_VERSION "4.0.0")
-      ENDIF (NOT QT_MIN_VERSION)
+    # we need at least version 4.0.0
+    IF (NOT QT_MIN_VERSION)
+      SET(QT_MIN_VERSION "4.0.0")
+    ENDIF (NOT QT_MIN_VERSION)
 
-      #now parse the parts of the user given version string into variables
-      STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" req_qt_major_vers "${QT_MIN_VERSION}")
-      IF (NOT req_qt_major_vers)
-         MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", expected e.g. \"4.0.1\"")
-      ENDIF (NOT req_qt_major_vers)
+    #now parse the parts of the user given version string into variables
+    STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" req_qt_major_vers "${QT_MIN_VERSION}")
+    IF (NOT req_qt_major_vers)
+      MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", expected e.g. \"4.0.1\"")
+    ENDIF (NOT req_qt_major_vers)
 
-      # now parse the parts of the user given version string into variables
-      STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_qt_major_vers "${QT_MIN_VERSION}")
-      STRING(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_qt_minor_vers "${QT_MIN_VERSION}")
-      STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
+    # now parse the parts of the user given version string into variables
+    STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_qt_major_vers "${QT_MIN_VERSION}")
+    STRING(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_qt_minor_vers "${QT_MIN_VERSION}")
+    STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
 
-      IF (NOT req_qt_major_vers EQUAL 4)
-         MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", major version 4 is required, e.g. \"4.0.1\"")
-      ENDIF (NOT req_qt_major_vers EQUAL 4)
+    IF (NOT req_qt_major_vers EQUAL 4)
+      MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", major version 4 is required, e.g. \"4.0.1\"")
+    ENDIF (NOT req_qt_major_vers EQUAL 4)
 
-      # and now the version string given by qmake
-      STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" found_qt_major_vers "${qt_version_tmp}")
-      STRING(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" found_qt_minor_vers "${qt_version_tmp}")
-      STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" found_qt_patch_vers "${qt_version_tmp}")
+    # and now the version string given by qmake
+    STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" found_qt_major_vers "${qt_version_tmp}")
+    STRING(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" found_qt_minor_vers "${qt_version_tmp}")
+    STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" found_qt_patch_vers "${qt_version_tmp}")
 
-      # compute an overall version number which can be compared at once
-      MATH(EXPR req_vers "${req_qt_major_vers}*10000 + ${req_qt_minor_vers}*100 + ${req_qt_patch_vers}")
-      MATH(EXPR found_vers "${found_qt_major_vers}*10000 + ${found_qt_minor_vers}*100 + ${found_qt_patch_vers}")
+    # compute an overall version number which can be compared at once
+    MATH(EXPR req_vers "${req_qt_major_vers}*10000 + ${req_qt_minor_vers}*100 + ${req_qt_patch_vers}")
+    MATH(EXPR found_vers "${found_qt_major_vers}*10000 + ${found_qt_minor_vers}*100 + ${found_qt_patch_vers}")
 
-      IF (found_vers LESS req_vers)
-         SET(QT4_QMAKE_FOUND FALSE)
-         SET(QT4_INSTALLED_VERSION_TOO_OLD TRUE)
-      ELSE (found_vers LESS req_vers)
-         SET(QT4_QMAKE_FOUND TRUE)
-      ENDIF (found_vers LESS req_vers)
+    IF (found_vers LESS req_vers)
+      SET(QT4_QMAKE_FOUND FALSE)
+      SET(QT4_INSTALLED_VERSION_TOO_OLD TRUE)
+    ELSE (found_vers LESS req_vers)
+      SET(QT4_QMAKE_FOUND TRUE)
+    ENDIF (found_vers LESS req_vers)
 
-   ENDIF (qt_version_tmp)
+  ENDIF (qt_version_tmp)
 
 ENDIF (QT_QMAKE_EXECUTABLE)
 
@@ -237,23 +237,23 @@ IF (QT4_QMAKE_FOUND)
   # Set QT_LIBRARY_DIR
   IF (NOT QT_LIBRARY_DIR)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
-       ARGS "-query QT_INSTALL_LIBS"
-       OUTPUT_VARIABLE QT_LIBRARY_DIR_TMP )
+      ARGS "-query QT_INSTALL_LIBS"
+      OUTPUT_VARIABLE QT_LIBRARY_DIR_TMP )
     IF(EXISTS "${QT_LIBRARY_DIR_TMP}")
-       SET(QT_LIBRARY_DIR ${QT_LIBRARY_DIR_TMP} CACHE PATH "Qt library dir")
+      SET(QT_LIBRARY_DIR ${QT_LIBRARY_DIR_TMP} CACHE PATH "Qt library dir")
     ELSE(EXISTS "${QT_LIBRARY_DIR_TMP}")
-       MESSAGE("Warning: QT_QMAKE_EXECUTABLE reported QT_INSTALL_LIBS as ${QT_LIBRARY_DIR_TMP}")
-       MESSAGE("Warning: ${QT_LIBRARY_DIR_TMP} does NOT exist, Qt must NOT be installed correctly.")
+      MESSAGE("Warning: QT_QMAKE_EXECUTABLE reported QT_INSTALL_LIBS as ${QT_LIBRARY_DIR_TMP}")
+      MESSAGE("Warning: ${QT_LIBRARY_DIR_TMP} does NOT exist, Qt must NOT be installed correctly.")
     ENDIF(EXISTS "${QT_LIBRARY_DIR_TMP}")
   ENDIF(NOT QT_LIBRARY_DIR)
 
   IF (APPLE)
     IF (EXISTS ${QT_LIBRARY_DIR}/QtCore.framework)
       SET(QT_USE_FRAMEWORKS ON
-         CACHE BOOL "Set to ON if Qt build uses frameworks.")
+        CACHE BOOL "Set to ON if Qt build uses frameworks.")
     ELSE (EXISTS ${QT_LIBRARY_DIR}/QtCore.framework)
-       SET(QT_USE_FRAMEWORKS OFF
-         CACHE BOOL "Set to ON if Qt build uses frameworks.")
+      SET(QT_USE_FRAMEWORKS OFF
+        CACHE BOOL "Set to ON if Qt build uses frameworks.")
     ENDIF (EXISTS ${QT_LIBRARY_DIR}/QtCore.framework)
 
     MARK_AS_ADVANCED(QT_USE_FRAMEWORKS)
@@ -261,10 +261,10 @@ IF (QT4_QMAKE_FOUND)
 
   # ask qmake for the binary dir
   IF (NOT QT_BINARY_DIR)
-     EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
-        ARGS "-query QT_INSTALL_BINS"
-        OUTPUT_VARIABLE qt_bins )
-     SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "")
+    EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
+      ARGS "-query QT_INSTALL_BINS"
+      OUTPUT_VARIABLE qt_bins )
+    SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "")
   ENDIF (NOT QT_BINARY_DIR)
 
   # ask qmake for the include dir
@@ -303,8 +303,8 @@ IF (QT4_QMAKE_FOUND)
     ${QT_HEADERS_DIR}/QtCore
     ${QT_LIBRARY_DIR}/QtCore.framework/Headers
     $ENV{QTDIR}/include/QtCore
-   "$ENV{ProgramFiles}/qt/include/Qt"
-   )
+    "$ENV{ProgramFiles}/qt/include/Qt"
+    )
 
   # Set QT_INCLUDE_DIR by removine "/QtCore" in the string ${QT_QTCORE_INCLUDE_DIR}
   IF( QT_QTCORE_INCLUDE_DIR AND NOT QT_INCLUDE_DIR)
@@ -337,10 +337,10 @@ IF (QT4_QMAKE_FOUND)
   CHECK_SYMBOL_EXISTS(Q_WS_WIN "QtCore/qglobal.h" Q_WS_WIN)
 
   IF (QT_QTCOPY_REQUIRED)
-     CHECK_SYMBOL_EXISTS(QT_IS_QTCOPY "QtCore/qglobal.h" QT_KDE_QT_COPY)
-     IF (NOT QT_IS_QTCOPY)
-        MESSAGE(FATAL_ERROR "qt-copy is required, but hasn't been found")
-     ENDIF (NOT QT_IS_QTCOPY)
+    CHECK_SYMBOL_EXISTS(QT_IS_QTCOPY "QtCore/qglobal.h" QT_KDE_QT_COPY)
+    IF (NOT QT_IS_QTCOPY)
+      MESSAGE(FATAL_ERROR "qt-copy is required, but hasn't been found")
+    ENDIF (NOT QT_IS_QTCOPY)
   ENDIF (QT_QTCOPY_REQUIRED)
 
   # Restore CMAKE_REQUIRED_INCLUDES variable
@@ -611,7 +611,7 @@ IF (QT4_QMAKE_FOUND)
   ENDMACRO (_QT4_ADJUST_LIB_VARS)
 
   IF(WIN32)
-     _QT4_ADJUST_LIB_VARS(QTMAIN)
+    _QT4_ADJUST_LIB_VARS(QTMAIN)
   ENDIF(WIN32)
 
 
@@ -640,26 +640,28 @@ IF (QT4_QMAKE_FOUND)
   #######################################
 
 
-   # find moc and uic using qmake
-   FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmpQmake/tmp.pro
-      "message("MOC <$$QMAKE_MOC>")
+  # find moc and uic using qmake
+  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmpQmake/tmp.pro
+    "message("MOC <$$QMAKE_MOC>")
       message("UIC <$$QMAKE_UIC>")
    ")
 
-   EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
-      WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmpQmake
-      OUTPUT_VARIABLE _moc_OUTPUT
-      ERROR_VARIABLE _moc_OUTPUT )
+  EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
+    WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmpQmake
+    OUTPUT_VARIABLE _moc_OUTPUT
+    ERROR_VARIABLE _moc_OUTPUT )
+  
+  FILE(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmpQmake")
+  
+  STRING(REGEX REPLACE ".*MOC<([^>]+).*" "\\1" QT_MOC_EXECUTABLE_INTERNAL "${_moc_OUTPUT}" )
+  STRING(REGEX REPLACE ".*UIC<([^>]+).*" "\\1" QT_UIC_EXECUTABLE_INTERNAL "${_moc_OUTPUT}" )
+  
+  FILE(TO_CMAKE_PATH ${QT_MOC_EXECUTABLE_INTERNAL} QT_MOC_EXECUTABLE_INTERNAL)
+  FILE(TO_CMAKE_PATH ${QT_UIC_EXECUTABLE_INTERNAL} QT_UIC_EXECUTABLE_INTERNAL)
 
-   FILE(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmpQmake")
-
-   STRING(REGEX REPLACE ".*MOC<([^>]+).*" "\\1" QT_MOC_EXECUTABLE_INTERNAL "${_moc_OUTPUT}" )
-   STRING(REGEX REPLACE ".*UIC<([^>]+).*" "\\1" QT_UIC_EXECUTABLE_INTERNAL "${_moc_OUTPUT}" )
-
-   SET(QT_MOC_EXECUTABLE ${QT_MOC_EXECUTABLE_INTERNAL} CACHE FILEPATH "The moc executable")
-   SET(QT_UIC_EXECUTABLE ${QT_UIC_EXECUTABLE_INTERNAL} CACHE FILEPATH "The uic executable")
-
-
+  SET(QT_MOC_EXECUTABLE ${QT_MOC_EXECUTABLE_INTERNAL} CACHE FILEPATH "The moc executable")
+  SET(QT_UIC_EXECUTABLE ${QT_UIC_EXECUTABLE_INTERNAL} CACHE FILEPATH "The uic executable")
+  
   FIND_PROGRAM(QT_UIC3_EXECUTABLE
     NAMES uic3
     PATHS ${QT_BINARY_DIR}
