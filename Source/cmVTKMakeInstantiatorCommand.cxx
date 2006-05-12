@@ -238,7 +238,8 @@ cmVTKMakeInstantiatorCommand
   // Write the instantiator class definition.
   os <<
     "\n"
-    "class " << this->ExportMacro.c_str() << " " << this->ClassName.c_str() << "\n"
+    "class " << this->ExportMacro.c_str() 
+     << " " << this->ClassName.c_str() << "\n"
     "{\n"
     "public:\n"
     "  " << this->ClassName.c_str() << "();\n"
@@ -388,7 +389,8 @@ cmVTKMakeInstantiatorCommand
     "\n"
     "class " << this->ClassName.c_str() << "Initialize;\n"
     "\n"
-    "class " << this->ExportMacro.c_str() << " " << this->ClassName.c_str() << "\n"
+    "class " << this->ExportMacro.c_str() << " " 
+     << this->ClassName.c_str() << "\n"
     "{\n"
     "  friend class " << this->ClassName.c_str() << "Initialize;\n"
     "\n"
@@ -398,7 +400,8 @@ cmVTKMakeInstantiatorCommand
   
   for(unsigned int i=0;i < this->Classes.size();++i)
     {
-    os << "  static vtkObject* Create_" << this->Classes[i].c_str() << "();\n";
+    os << "  static vtkObject* Create_" 
+       << this->Classes[i].c_str() << "();\n";
     }
   
   // Write the initializer class to make sure the creation functions
@@ -425,8 +428,7 @@ cmVTKMakeInstantiatorCommand
 // Generates the file with the implementation of the class.  All
 // methods except the actual object creation functions are generated
 // here.
-void
-cmVTKMakeInstantiatorCommand
+void cmVTKMakeInstantiatorCommand
 ::OldGenerateImplementationFile(std::ostream& os)
 {
   // Write the ClassInitialize method to register all the creation functions.
@@ -439,7 +441,8 @@ cmVTKMakeInstantiatorCommand
   for(unsigned int i=0;i < this->Classes.size();++i)
     {
     os << "  vtkInstantiator::RegisterInstantiator(\""
-       << this->Classes[i].c_str() << "\", " << this->ClassName.c_str() << "::Create_"
+       << this->Classes[i].c_str() << "\", " 
+       << this->ClassName.c_str() << "::Create_"
        << this->Classes[i].c_str() << ");\n";
     }
   
@@ -453,7 +456,8 @@ cmVTKMakeInstantiatorCommand
   for(unsigned int i=0;i < this->Classes.size();++i)
     {
     os << "  vtkInstantiator::UnRegisterInstantiator(\""
-       << this->Classes[i].c_str() << "\", " << this->ClassName.c_str() << "::Create_"
+       << this->Classes[i].c_str() << "\", " 
+       << this->ClassName.c_str() << "::Create_"
        << this->Classes[i].c_str() << ");\n";
     }
   

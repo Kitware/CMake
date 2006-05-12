@@ -20,7 +20,8 @@
 #include <cmsys/RegularExpression.hxx>
 
 // cmUseMangledMesaCommand
-bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args)
+bool cmUseMangledMesaCommand
+::InitialPass(std::vector<std::string> const& args)
 { 
   // expected two arguments:
   // arguement one: the full path to gl_mangle.h

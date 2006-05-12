@@ -60,7 +60,8 @@ public:
    */
   bool IsInAll() { return this->GetPropertyAsBool("IN_ALL"); }
   bool GetInAll() { return this->GetPropertyAsBool("IN_ALL"); }
-  void SetInAll(bool f) { this->SetProperty("IN_ALL", (f) ?"TRUE" : "FALSE"); }
+  void SetInAll(bool f) { 
+    this->SetProperty("IN_ALL", (f) ?"TRUE" : "FALSE"); }
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
@@ -96,7 +97,8 @@ public:
 
   typedef std::vector<std::pair<std::string,LinkLibraryType> > 
   LinkLibraryVectorType;
-  const LinkLibraryVectorType &GetLinkLibraries() {return this->LinkLibraries;}
+  const LinkLibraryVectorType &GetLinkLibraries() {
+    return this->LinkLibraries;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() 
     {return this->OriginalLinkLibraries;}
   
@@ -133,7 +135,8 @@ public:
    * installed. This is relative to INSTALL_PREFIX
    */
   std::string GetRuntimeInstallPath() {return this->RuntimeInstallPath;}
-  void SetRuntimeInstallPath(const char *name) {this->RuntimeInstallPath = name;}
+  void SetRuntimeInstallPath(const char *name) {
+    this->RuntimeInstallPath = name;}
 
   /**
    * Get/Set whether there is an install rule for this target.
@@ -189,9 +192,10 @@ public:
   /** Get the full name of the target according to the settings in its
       makefile.  */
   std::string GetFullName(const char* config=0, bool implib = false);
-  void GetFullName(std::string& prefix, std::string& base, std::string& suffix,
+  void GetFullName(std::string& prefix, 
+                   std::string& base, std::string& suffix,
                    const char* config=0, bool implib = false);
-
+  
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(const char* config=0, bool implib = false);

@@ -43,7 +43,8 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string>
       ++i;
       if(i == args.end())
         {
-        this->SetError("The \"debug\" argument must be followed by a library");
+        this->SetError
+          ("The \"debug\" argument must be followed by a library");
         return false;
         }
       this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
