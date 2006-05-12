@@ -1410,7 +1410,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   const char* rebuildCacheTargetName = this->GetRebuildCacheTargetName();
   if ( rebuildCacheTargetName )
     {
-    cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+    cpackCommandLines.erase(cpackCommandLines.begin(), 
+                            cpackCommandLines.end());
     singleLine.erase(singleLine.begin(), singleLine.end());
     depends.erase(depends.begin(), depends.end());
     singleLine.push_back(cmakeCommand);
