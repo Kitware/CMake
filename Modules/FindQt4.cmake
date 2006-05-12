@@ -642,15 +642,14 @@ IF (QT4_QMAKE_FOUND)
 
   # find moc and uic using qmake
   FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmpQmake/tmp.pro
-    "message("MOC <$$QMAKE_MOC>")
-      message("UIC <$$QMAKE_UIC>")
+    "message(MOC<$$QMAKE_MOC>)
+      message(UIC<$$QMAKE_UIC>)
    ")
-
+  
   EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
     WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmpQmake
     OUTPUT_VARIABLE _moc_OUTPUT
     ERROR_VARIABLE _moc_OUTPUT )
-  
   FILE(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmpQmake")
   
   STRING(REGEX REPLACE ".*MOC<([^>]+).*" "\\1" QT_MOC_EXECUTABLE_INTERNAL "${_moc_OUTPUT}" )
