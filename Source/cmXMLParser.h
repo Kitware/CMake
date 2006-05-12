@@ -44,18 +44,20 @@ public:
   virtual int ParseFile(const char* file);
   
   /**
-   * When parsing fragments of XML or streaming XML, use the following three
-   * methods.  InitializeParser method initialize parser but does not perform
-   * any actual parsing.  ParseChunk parses framgent of XML. This has to match
-   * to what was already parsed. CleanupParser finishes parsing. If there were
-   * errors, CleanupParser will report them.
+   * When parsing fragments of XML or streaming XML, use the following
+   * three methods.  InitializeParser method initialize parser but does
+   * not perform any actual parsing.  ParseChunk parses framgent of
+   * XML. This has to match to what was already parsed. CleanupParser
+   * finishes parsing. If there were errors, CleanupParser will report
+   * them.
    */
   virtual int InitializeParser();
   virtual int ParseChunk(const char* inputString, unsigned int length);
   virtual int CleanupParser();
 
 protected:
-  //! This variable is true if there was a parse error while parsing in chunks.
+  //! This variable is true if there was a parse error while parsing in
+  //chunks.
   int ParseError;
 
   //1 Expat parser structure.  Exists only during call to Parse().
@@ -71,16 +73,15 @@ protected:
   virtual int ParsingComplete();
 
   /**
-   * Called when a new element is opened in the XML source.  Should be replaced
-   * by subclasses to handle each element.
-   *   name = Name of new element.
-   *   atts = Null-terminated array of attribute name/value pairs.  Even
-   *          indices are attribute names, and odd indices are values.
+   * Called when a new element is opened in the XML source.  Should be
+   * replaced by subclasses to handle each element.  name = Name of new
+   * element.  atts = Null-terminated array of attribute name/value pairs.
+   * Even indices are attribute names, and odd indices are values.
    */
   virtual void StartElement(const char* name, const char** atts);
   
-  //! Called at the end of an element in the XML source opened when StartElement
-  // was called.
+  //! Called at the end of an element in the XML source opened when
+  //StartElement was called.
   virtual void EndElement(const char* name);
   
   //! Called when there is character data to handle.

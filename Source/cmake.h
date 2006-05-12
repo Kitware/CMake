@@ -243,9 +243,9 @@ class cmake
   int DoPreConfigureChecks();
 
   /**
-   * Set and get the script mode option. In script mode there is no generator
-   * and no cache. Also, language are not enabled, so add_executable and things
-   * do not do anything.
+   * Set and get the script mode option. In script mode there is no
+   * generator and no cache. Also, language are not enabled, so
+   * add_executable and things do not do anything.
    */
   void SetScriptMode(bool mode) { this->ScriptMode = mode; }
   bool GetScriptMode() { return this->ScriptMode; }
@@ -311,7 +311,8 @@ protected:
 
   void SetDirectoriesFromFile(const char* arg);
 
-  //! Make sure all commands are what they say they are and there is no macros.
+  //! Make sure all commands are what they say they are and there is no
+  //macros.
   void CleanupCommandsAndMacros();
 
   void GenerateGraphViz(const char* fileName);
@@ -366,7 +367,8 @@ private:
   {0, \
    "CMake is a cross-platform build system generator.  Projects " \
    "specify their build process with platform-independent CMake listfiles " \
-   "included in each directory of a source tree with the name CMakeLists.txt. "\
+   "included in each directory of a source tree with the name " \
+   "CMakeLists.txt. " \
    "Users build a project by using CMake to generate a build system " \
    "for a native tool on their platform.", 0}
 #endif
