@@ -92,7 +92,7 @@ ENDIF(${fooCACHE_TEST_VAR2} MATCHES bar)
 # (BEFORE is for coverage)
 #
 INCLUDE_DIRECTORIES(
-  ${Complex_SOURCE_DIR}/Library
+  Library
   ${Complex_SOURCE_DIR}/../../Source
   ${Complex_BINARY_DIR}/../../Source
 )

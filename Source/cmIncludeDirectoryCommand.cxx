@@ -49,6 +49,13 @@ bool cmIncludeDirectoryCommand
       }
     std::string unixPath = *i;
     cmSystemTools::ConvertToUnixSlashes(unixPath);
+    if(!cmSystemTools::FileIsFullPath(unixPath.c_str()))
+      {
+      std::string tmp = this->Makefile->GetStartDirectory();
+      tmp += "/";
+      tmp += unixPath;
+      unixPath = tmp;
+      }
     this->Makefile->AddIncludeDirectory(unixPath.c_str(), before);
     }
   return true;
