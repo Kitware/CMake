@@ -775,7 +775,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
 
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"VCLinkerTool\"\n"
-         << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
+         << "\t\t\t\tAdditionalOptions=\"";
     if(extraLinkOptions.size())
       {
       fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
