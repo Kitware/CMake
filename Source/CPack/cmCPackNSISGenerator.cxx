@@ -96,11 +96,13 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
     }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Uninstall Dirs: "
     << dstr.str().c_str() << std::endl);
-  this->SetOptionIfNotSet("CPACK_NSIS_DELETE_DIRECTORIES", dstr.str().c_str());
+  this->SetOptionIfNotSet("CPACK_NSIS_DELETE_DIRECTORIES", 
+                          dstr.str().c_str());
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << nsisInFileName
     << " to " << nsisFileName << std::endl);
-  this->ConfigureFile(nsisInInstallOptions.c_str(), nsisInstallOptions.c_str());
+  this->ConfigureFile(nsisInInstallOptions.c_str(), 
+                      nsisInstallOptions.c_str());
   this->ConfigureFile(nsisInFileName.c_str(), nsisFileName.c_str());
   std::string nsisCmd = "\"";
   nsisCmd += this->GetOption("CPACK_INSTALLER_PROGRAM");
@@ -227,7 +229,8 @@ int cmCPackNSISGenerator::InitializeInternal()
         << ".lnk\"" << std::endl;
       }
     this->SetOptionIfNotSet("CPACK_NSIS_CREATE_ICONS", str.str().c_str());
-    this->SetOptionIfNotSet("CPACK_NSIS_DELETE_ICONS", deleteStr.str().c_str());
+    this->SetOptionIfNotSet("CPACK_NSIS_DELETE_ICONS", 
+                            deleteStr.str().c_str());
     }
 
   return this->Superclass::InitializeInternal();

@@ -72,11 +72,13 @@ int cmCPackGenericGenerator::PrepareNames()
   this->SetOptionIfNotSet("CPACK_TEMPORARY_DIRECTORY", tempDirectory.c_str());
   this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_NAME", outName.c_str());
   this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_PATH", destFile.c_str());
-  this->SetOptionIfNotSet("CPACK_TEMPORARY_PACKAGE_FILE_NAME", outFile.c_str());
+  this->SetOptionIfNotSet("CPACK_TEMPORARY_PACKAGE_FILE_NAME", 
+                          outFile.c_str());
   this->SetOptionIfNotSet("CPACK_INSTALL_DIRECTORY", this->GetInstallPath());
   this->SetOptionIfNotSet("CPACK_NATIVE_INSTALL_DIRECTORY",
     cmsys::SystemTools::ConvertToOutputPath(this->GetInstallPath()).c_str());
-  this->SetOptionIfNotSet("CPACK_TEMPORARY_INSTALL_DIRECTORY", installPrefix.c_str());
+  this->SetOptionIfNotSet("CPACK_TEMPORARY_INSTALL_DIRECTORY", 
+                          installPrefix.c_str());
 
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
     "Look for: CPACK_PACKAGE_DESCRIPTION_FILE" << std::endl);
@@ -138,7 +140,8 @@ int cmCPackGenericGenerator::InstallProject()
   if ( cpackIgnoreFiles )
     {
     std::vector<std::string> ignoreFilesRegexString;
-    cmSystemTools::ExpandListArgument(cpackIgnoreFiles,ignoreFilesRegexString);
+    cmSystemTools::ExpandListArgument(cpackIgnoreFiles,
+                                      ignoreFilesRegexString);
     std::vector<std::string>::iterator it;
     for ( it = ignoreFilesRegexString.begin();
       it != ignoreFilesRegexString.end();
@@ -282,15 +285,17 @@ int cmCPackGenericGenerator::InstallProject()
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   const char* cmakeGenerator
     = this->GetOption("CPACK_CMAKE_GENERATOR");
-  std::string currentWorkingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
+  std::string currentWorkingDirectory = 
+    cmSystemTools::GetCurrentWorkingDirectory();
   if ( cmakeProjects && *cmakeProjects )
     {
     if ( !cmakeGenerator )
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-        "CPACK_INSTALL_CMAKE_PROJECTS is specified, but CPACK_CMAKE_GENERATOR "
-        "is not. CPACK_CMAKE_GENERATOR is required to install the project."
-        << std::endl);
+                    "CPACK_INSTALL_CMAKE_PROJECTS is specified, but "
+                    "CPACK_CMAKE_GENERATOR is not. CPACK_CMAKE_GENERATOR "
+                    "is required to install the project."
+                    << std::endl);
       return 0;
       }
     std::vector<std::string> cmakeProjectsVector;
@@ -348,8 +353,12 @@ int cmCPackGenericGenerator::InstallProject()
           "- Run preinstall target for: " << installProjectName << std::endl);
         std::string output;
         int retVal = 1;
-        bool resB = cmSystemTools::RunSingleCommand(buildCommand.c_str(), &output,
-          &retVal, installDirectory.c_str(), this->GeneratorVerbose, 0);
+        bool resB = 
+          cmSystemTools::RunSingleCommand(buildCommand.c_str(), 
+                                          &output,
+                                          &retVal, 
+                                          installDirectory.c_str(), 
+                                          this->GeneratorVerbose, 0);
         if ( !resB || retVal )
           {
           std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -394,7 +403,8 @@ int cmCPackGenericGenerator::InstallProject()
         = cmSystemTools::LowerCase(installComponent);
       if ( installComponentLowerCase != "all" )
         {
-        mf->AddDefinition("CMAKE_INSTALL_COMPONENT", installComponent.c_str());
+        mf->AddDefinition("CMAKE_INSTALL_COMPONENT", 
+                          installComponent.c_str());
         }
 
       res = mf->ReadListFile(0, installFile.c_str());
@@ -469,8 +479,10 @@ int cmCPackGenericGenerator::InstallProject()
       stripCommand += fileName + "\"";
       int retVal = 1;
       std::string output;
-      bool resB = cmSystemTools::RunSingleCommand(stripCommand.c_str(), &output,
-        &retVal, 0, this->GeneratorVerbose, 0);
+      bool resB = 
+        cmSystemTools::RunSingleCommand(stripCommand.c_str(), &output,
+                                        &retVal, 0, 
+                                        this->GeneratorVerbose, 0);
       if ( !resB || retVal )
         {
         cmCPackLogger(cmCPackLog::LOG_ERROR,

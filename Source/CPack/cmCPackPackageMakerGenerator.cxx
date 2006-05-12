@@ -221,7 +221,8 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
       << std::endl);
     return 0;
     }
-  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", pkgPath.c_str());
+  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", 
+                          pkgPath.c_str());
 
   return this->Superclass::InitializeInternal();
 }
