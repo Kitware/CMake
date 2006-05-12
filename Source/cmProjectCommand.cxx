@@ -31,12 +31,14 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
   std::string srcdir = args[0];
   srcdir += "_SOURCE_DIR";
   
-  this->Makefile->AddCacheDefinition(bindir.c_str(),
-                                 this->Makefile->GetCurrentOutputDirectory(),
-                                 "Value Computed by CMake", cmCacheManager::STATIC);
-  this->Makefile->AddCacheDefinition(srcdir.c_str(),
-                                 this->Makefile->GetCurrentDirectory(),
-                                 "Value Computed by CMake", cmCacheManager::STATIC);
+  this->Makefile->AddCacheDefinition
+    (bindir.c_str(),
+     this->Makefile->GetCurrentOutputDirectory(),
+     "Value Computed by CMake", cmCacheManager::STATIC);
+  this->Makefile->AddCacheDefinition
+    (srcdir.c_str(),
+     this->Makefile->GetCurrentDirectory(),
+     "Value Computed by CMake", cmCacheManager::STATIC);
   
   bindir = "PROJECT_BINARY_DIR";
   srcdir = "PROJECT_SOURCE_DIR";
