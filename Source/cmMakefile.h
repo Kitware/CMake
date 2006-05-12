@@ -566,7 +566,8 @@ public:
    * Remove any remaining variables in the string. Anything with ${var} or
    * @var@ will be removed.  
    */
-  void RemoveVariablesInString(std::string& source, bool atOnly = false) const;
+  void RemoveVariablesInString(std::string& source, 
+                               bool atOnly = false) const;
 
   /**
    * Expand variables in the makefiles ivars such as link directories etc
@@ -612,7 +613,8 @@ public:
    */
   void AddCommand(cmCommand* );
 
-  ///! Enable support for named language, if nil then all languages are enabled.
+  ///! Enable support for named language, if nil then all languages are
+  ///enabled.
   void EnableLanguage(std::vector<std::string>const& languages);
 
   /**

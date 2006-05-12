@@ -163,7 +163,8 @@ protected:
   typedef std::map<cmStdString, cmStdString> FileToPathMapType;
   typedef std::map<cmStdString, FileToPathMapType> 
   DirectoryToFileToPathMapType;
-  typedef std::map<cmStdString, cmDependInformation*> DependInformationMapType;
+  typedef std::map<cmStdString, cmDependInformation*> 
+  DependInformationMapType;
   DependInformationMapType DependInformationMap;
   DirectoryToFileToPathMapType DirectoryToFileToPathMap;
 };

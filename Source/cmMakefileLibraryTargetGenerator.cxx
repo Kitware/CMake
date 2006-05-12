@@ -91,7 +91,8 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
   linkRuleVar += "_CREATE_STATIC_LIBRARY";
 
   std::string extraFlags;
-  this->LocalGenerator->AppendFlags(extraFlags, this->Target->GetProperty("STATIC_LIBRARY_FLAGS"));
+  this->LocalGenerator->AppendFlags
+    (extraFlags,this->Target->GetProperty("STATIC_LIBRARY_FLAGS"));
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), false);
 }
 
@@ -108,26 +109,34 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   linkRuleVar += "_CREATE_SHARED_LIBRARY";
 
   std::string extraFlags;
-  this->LocalGenerator->AppendFlags(extraFlags, this->Target->GetProperty("LINK_FLAGS"));
+  this->LocalGenerator->AppendFlags
+    (extraFlags, this->Target->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
-  this->LocalGenerator->AppendFlags(extraFlags, 
-                                    this->Target->GetProperty(linkFlagsConfig.c_str()));
+  linkFlagsConfig += 
+    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
+  this->LocalGenerator->AppendFlags
+    (extraFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
                                     
-  this->LocalGenerator->AddConfigVariableFlags(extraFlags, "CMAKE_SHARED_LINKER_FLAGS",
-                                               this->LocalGenerator->ConfigurationName.c_str());
-  if(this->Makefile->IsOn("WIN32") && !(this->Makefile->IsOn("CYGWIN") || this->Makefile->IsOn("MINGW")))
+  this->LocalGenerator->AddConfigVariableFlags
+    (extraFlags, "CMAKE_SHARED_LINKER_FLAGS",
+     this->LocalGenerator->ConfigurationName.c_str());
+  if(this->Makefile->IsOn("WIN32") && !(this->Makefile->IsOn("CYGWIN") 
+                                        || this->Makefile->IsOn("MINGW")))
     {
-    const std::vector<cmSourceFile*>& sources = this->Target->GetSourceFiles();
+    const std::vector<cmSourceFile*>& sources = 
+      this->Target->GetSourceFiles();
     for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
         i != sources.end(); ++i)
       {
       if((*i)->GetSourceExtension() == "def")
         {
         extraFlags += " ";
-        extraFlags += this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
         extraFlags += 
-          this->Convert((*i)->GetFullPath().c_str(),cmLocalGenerator::START_OUTPUT,cmLocalGenerator::MAKEFILE);
+          this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+        extraFlags += 
+          this->Convert((*i)->GetFullPath().c_str(),
+                        cmLocalGenerator::START_OUTPUT,
+                        cmLocalGenerator::MAKEFILE);
         }
       }
     }
@@ -147,13 +156,17 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   linkRuleVar += "_CREATE_SHARED_MODULE";
 
   std::string extraFlags;
-  this->LocalGenerator->AppendFlags(extraFlags, this->Target->GetProperty("LINK_FLAGS"));
-  std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
   this->LocalGenerator->AppendFlags(extraFlags, 
-                                    this->Target->GetProperty(linkFlagsConfig.c_str()));
-  this->LocalGenerator->AddConfigVariableFlags(extraFlags, "CMAKE_MODULE_LINKER_FLAGS",
-                                               this->LocalGenerator->ConfigurationName.c_str());
+                                    this->Target->GetProperty("LINK_FLAGS"));
+  std::string linkFlagsConfig = "LINK_FLAGS_";
+  linkFlagsConfig += 
+    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
+  this->LocalGenerator->AppendFlags
+    (extraFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
+  this->LocalGenerator->AddConfigVariableFlags
+    (extraFlags, "CMAKE_MODULE_LINKER_FLAGS",
+     this->LocalGenerator->ConfigurationName.c_str());
+
   // TODO: .def files should be supported here also.
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
@@ -233,7 +246,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     outpath += "/";
     }
   std::string targetFullPath = outpath + targetName;
-  std::string targetFullPathPDB = outpath + this->Target->GetName() + std::string(".pdb");
+  std::string targetFullPathPDB = 
+    outpath + this->Target->GetName() + std::string(".pdb");
   std::string targetFullPathSO = outpath + targetNameSO;
   std::string targetFullPathReal = outpath + targetNameReal;
   std::string targetFullPathImport = outpath + targetNameImport;
@@ -341,9 +355,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::vector<std::string> commands1;
   this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
                                            *this->Target, "target");
-  this->LocalGenerator->CreateCDCommand(commands1,
-                                        this->Makefile->GetStartOutputDirectory(),
-                                        this->Makefile->GetHomeOutputDirectory());
+  this->LocalGenerator->CreateCDCommand
+    (commands1,
+     this->Makefile->GetStartOutputDirectory(),
+     this->Makefile->GetHomeOutputDirectory());
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
 
@@ -359,9 +374,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Construct the main link rule.
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
   cmSystemTools::ExpandListArgument(linkRule, commands1);
-  this->LocalGenerator->CreateCDCommand(commands1,
-                                        this->Makefile->GetStartOutputDirectory(),
-                                        this->Makefile->GetHomeOutputDirectory());
+  this->LocalGenerator->CreateCDCommand
+    (commands1,
+     this->Makefile->GetStartOutputDirectory(),
+     this->Makefile->GetHomeOutputDirectory());
   commands.insert(commands.end(), commands1.begin(), commands1.end());
 
   // Add a rule to create necessary symlinks for the library.

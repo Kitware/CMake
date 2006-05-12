@@ -126,8 +126,8 @@ bool cmMacroHelperCommand::InvokeInitialPass
     newLFF.Name = this->Functions[c].Name;
     newLFF.FilePath = this->Functions[c].FilePath;
     newLFF.Line = this->Functions[c].Line;
-    const char* def =
-      this->Makefile->GetDefinition("CMAKE_MACRO_REPORT_DEFINITION_LOCATION"); 
+    const char* def = this->Makefile->GetDefinition
+      ("CMAKE_MACRO_REPORT_DEFINITION_LOCATION"); 
     bool macroReportLocation = false;
     if(def && !cmSystemTools::IsOff(def))
       {

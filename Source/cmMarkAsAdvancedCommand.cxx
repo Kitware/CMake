@@ -17,7 +17,8 @@
 #include "cmMarkAsAdvancedCommand.h"
 
 // cmMarkAsAdvancedCommand
-bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args)
+bool cmMarkAsAdvancedCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -41,7 +42,8 @@ bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args)
     {
     std::string variable = args[i];
     cmCacheManager* manager = this->Makefile->GetCacheManager();
-    cmCacheManager::CacheIterator it = manager->GetCacheIterator(variable.c_str());
+    cmCacheManager::CacheIterator it = 
+      manager->GetCacheIterator(variable.c_str());
     if ( it.IsAtEnd() )
       {
       this->Makefile->AddCacheDefinition(variable.c_str(), 0, 0,
