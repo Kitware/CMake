@@ -65,7 +65,8 @@ public:
   void SetPlatformName(const char* n) { this->PlatformName = n;}
   virtual void ConfigureFinalPass();
 private:
-  void FillFlagMapFromCommandFlags(std::map<cmStdString, cmStdString>& flagMap,
+  void FillFlagMapFromCommandFlags(std::map<cmStdString, 
+                                   cmStdString>& flagMap,
                                    cmVS7FlagTable* flagTable,
                                    std::string& flags);
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
@@ -111,7 +112,8 @@ private:
                        const std::vector<std::string>& outputs,
                        const char* extraFlags);
 
-  void WriteGroup(const cmSourceGroup *sg, cmTarget target, std::ostream &fout, 
+  void WriteGroup(const cmSourceGroup *sg, 
+                  cmTarget target, std::ostream &fout, 
                   const char *libName, std::vector<std::string> *configs);
   virtual std::string GetTargetDirectory(cmTarget&);
 

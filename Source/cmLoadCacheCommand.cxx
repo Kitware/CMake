@@ -205,7 +205,8 @@ bool cmLoadCacheCommand::ParseEntry(const char* entry, std::string& var,
   // input line is:         key:type=value
   cmsys::RegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   // input line is:         "key":type=value
-  cmsys::RegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  cmsys::RegularExpression 
+    regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   bool flag = false;
   if(regQuoted.find(entry))
     {

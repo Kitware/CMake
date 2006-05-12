@@ -153,7 +153,9 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
     if ( item < 0 || nitem <= (size_t)item )
       {
       cmOStringStream str;
-      str << "index: " << item << " out of range (-" << varArgsExpanded.size() << ", " << varArgsExpanded.size()-1 << ")";
+      str << "index: " << item << " out of range (-" 
+          << varArgsExpanded.size() << ", " 
+          << varArgsExpanded.size()-1 << ")";
       this->SetError(str.str().c_str());
       return false;
       }
@@ -221,7 +223,9 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
   if ( item < 0 || nitem <= (size_t)item )
     {
     cmOStringStream str;
-    str << "index: " << item << " out of range (-" << varArgsExpanded.size() << ", " << varArgsExpanded.size()-1 << ")";
+    str << "index: " << item << " out of range (-" 
+        << varArgsExpanded.size() << ", " 
+        << varArgsExpanded.size()-1 << ")";
     this->SetError(str.str().c_str());
     return false;
     }
@@ -293,11 +297,13 @@ bool cmListCommand::HandleRemoveCommand(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmListCommand::HandleRemoveItemCommand(std::vector<std::string> const& args)
+bool cmListCommand
+::HandleRemoveItemCommand(std::vector<std::string> const& args)
 {
   if(args.size() < 3)
     {
-    this->SetError("sub-command REMOVE_ITEM requires at least two arguments.");
+    this->SetError("sub-command REMOVE_ITEM requires at least "
+                   "two arguments.");
     return false;
     }
 
@@ -322,7 +328,9 @@ bool cmListCommand::HandleRemoveItemCommand(std::vector<std::string> const& args
     if ( item < 0 || nitem <= (size_t)item )
       {
       cmOStringStream str;
-      str << "index: " << item << " out of range (-" << varArgsExpanded.size() << ", " << varArgsExpanded.size()-1 << ")";
+      str << "index: " << item << " out of range (-" 
+          << varArgsExpanded.size() << ", " 
+          << varArgsExpanded.size()-1 << ")";
       this->SetError(str.str().c_str());
       return false;
       }

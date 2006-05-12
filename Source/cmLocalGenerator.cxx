@@ -94,12 +94,16 @@ void cmLocalGenerator::SetupPathConversions()
   outdir =
     cmSystemTools::CollapseFullPath(this->Makefile->GetStartDirectory());
   cmSystemTools::SplitPath(outdir.c_str(), this->StartDirectoryComponents);
-  outdir =
-    cmSystemTools::CollapseFullPath(this->Makefile->GetHomeOutputDirectory());
-  cmSystemTools::SplitPath(outdir.c_str(), this->HomeOutputDirectoryComponents);
-  outdir =
-    cmSystemTools::CollapseFullPath(this->Makefile->GetStartOutputDirectory());
-cmSystemTools::SplitPath(outdir.c_str(), this->StartOutputDirectoryComponents);
+
+  outdir = cmSystemTools::CollapseFullPath
+    (this->Makefile->GetHomeOutputDirectory());
+  cmSystemTools::SplitPath(outdir.c_str(), 
+                           this->HomeOutputDirectoryComponents);
+
+  outdir = cmSystemTools::CollapseFullPath
+    (this->Makefile->GetStartOutputDirectory());
+  cmSystemTools::SplitPath(outdir.c_str(), 
+                           this->StartOutputDirectoryComponents);
 }
 
 
@@ -139,22 +143,28 @@ void cmLocalGenerator::GenerateTestFiles()
   fout.SetCopyIfDifferent(true);
 
   fout << "# CMake generated Testfile for " << std::endl
-    << "# Source directory: " << this->Makefile->GetStartDirectory() << std::endl
-    << "# Build directory: " << this->Makefile->GetStartOutputDirectory() << std::endl
-    << "# " << std::endl
-    << "# This file replicates the SUBDIRS() and ADD_TEST() commands from the source" << std::endl
-    << "# tree CMakeLists.txt file, skipping any SUBDIRS() or ADD_TEST() commands" << std::endl
-    << "# that are excluded by CMake control structures, i.e. IF() commands." << std::endl
-    << "#" << std::endl
-    << "# The next line is critical for Dart to work" << std::endl
-    << "# Duh :-)" << std::endl << std::endl;
-
-  const char* testIncludeFile = this->Makefile->GetProperty("TEST_INCLUDE_FILE");
+       << "# Source directory: " 
+       << this->Makefile->GetStartDirectory() << std::endl
+       << "# Build directory: " 
+       << this->Makefile->GetStartOutputDirectory() << std::endl
+       << "# " << std::endl
+       << "# This file replicates the SUBDIRS() and ADD_TEST() commands "
+       << "from the source" << std::endl
+       << "# tree CMakeLists.txt file, skipping any SUBDIRS() or "
+       << "ADD_TEST() commands" << std::endl
+       << "# that are excluded by CMake control structures, i.e. IF() "
+       << "commands." << std::endl
+       << "#" << std::endl
+       << "# The next line is critical for Dart to work" << std::endl
+       << "# Duh :-)" << std::endl << std::endl;
+  
+  const char* testIncludeFile = 
+    this->Makefile->GetProperty("TEST_INCLUDE_FILE");
   if ( testIncludeFile )
     {
     fout << "INCLUDE(\"" << testIncludeFile << "\")" << std::endl;
     }
-
+  
   const std::vector<cmTest*> *tests = this->Makefile->GetTests();
   std::vector<cmTest*>::const_iterator it;
   for ( it = tests->begin(); it != tests->end(); ++ it )
@@ -162,15 +172,16 @@ void cmLocalGenerator::GenerateTestFiles()
     cmTest* test = *it;
     fout << "ADD_TEST(";
     fout << test->GetName() << " \"" << test->GetCommand() << "\"";
-
+    
     std::vector<cmStdString>::const_iterator argit;
     for (argit = test->GetArguments().begin();
-      argit != test->GetArguments().end(); ++argit)
+         argit != test->GetArguments().end(); ++argit)
       {
       // Just double-quote all arguments so they are re-parsed
       // correctly by the test system.
       fout << " \"";
-      for(std::string::const_iterator c = argit->begin(); c != argit->end(); ++c)
+      for(std::string::const_iterator c = argit->begin(); 
+          c != argit->end(); ++c)
         {
         // Escape quotes within arguments.  We should escape
         // backslashes too but we cannot because it makes the result
@@ -233,7 +244,8 @@ void cmLocalGenerator::GenerateTestFiles()
     outDir += "/";
     for(i = 0; i < this->Children.size(); ++i)
       {
-      std::string binP = this->Children[i]->GetMakefile()->GetStartOutputDirectory();
+      std::string binP = 
+        this->Children[i]->GetMakefile()->GetStartOutputDirectory();
       cmSystemTools::ReplaceString(binP, outDir.c_str(), "");
       if ( i > 0 )
         {
@@ -279,7 +291,8 @@ void cmLocalGenerator::GenerateInstallRules()
 
   // Compute the set of configurations.
   std::vector<std::string> configurationTypes;
-  if(const char* types = this->Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+  if(const char* types = 
+     this->Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
     {
     cmSystemTools::ExpandListArgument(types, configurationTypes);
     }
@@ -333,11 +346,12 @@ void cmLocalGenerator::GenerateInstallRules()
   fout << "# Install script for directory: "
        << this->Makefile->GetCurrentDirectory() << std::endl << std::endl;
   fout << "# Set the install prefix" << std::endl
-    << "IF(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
-    << "  SET(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
-    << "ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
-    << "STRING(REGEX REPLACE \"/$\" \"\" CMAKE_INSTALL_PREFIX \"${CMAKE_INSTALL_PREFIX}\")" << std::endl
-    << std::endl;
+       << "IF(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
+       << "  SET(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
+       << "ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
+       << "STRING(REGEX REPLACE \"/$\" \"\" CMAKE_INSTALL_PREFIX "
+       << "\"${CMAKE_INSTALL_PREFIX}\")" << std::endl
+       << std::endl;
 
   // Write support code for generating per-configuration install rules.
   fout <<
@@ -349,7 +363,8 @@ void cmLocalGenerator::GenerateInstallRules()
     "  ELSE(BUILD_TYPE)\n"
     "    SET(CMAKE_INSTALL_CONFIG_NAME \"" << default_config << "\")\n"
     "  ENDIF(BUILD_TYPE)\n"
-    "  MESSAGE(STATUS \"Install configuration: \\\"${CMAKE_INSTALL_CONFIG_NAME}\\\"\")\n"
+    "  MESSAGE(STATUS \"Install configuration: "
+    "\\\"${CMAKE_INSTALL_CONFIG_NAME}\\\"\")\n"
     "ENDIF(NOT CMAKE_INSTALL_CONFIG_NAME)\n"
     "\n";
 
@@ -369,7 +384,8 @@ void cmLocalGenerator::GenerateInstallRules()
   // Ask each install generator to write its code.
   std::vector<cmInstallGenerator*> const& installers =
     this->Makefile->GetInstallGenerators();
-  for(std::vector<cmInstallGenerator*>::const_iterator gi = installers.begin();
+  for(std::vector<cmInstallGenerator*>::const_iterator 
+        gi = installers.begin();
       gi != installers.end(); ++gi)
     {
     (*gi)->Generate(fout, config, configurationTypes);
@@ -574,7 +590,8 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
         ofname += "/";
         ofname += (*i)->GetSourceName() + outExt;
         objVector.push_back(ofname);
-        this->AddCustomCommandToCreateObject(ofname.c_str(), llang, *(*i), target);
+        this->AddCustomCommandToCreateObject(ofname.c_str(), 
+                                             llang, *(*i), target);
         objs += this->Convert(ofname.c_str(),START_OUTPUT,MAKEFILE);
         objs += " ";
         }
@@ -637,11 +654,13 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
     comment.c_str(),
     this->Makefile->GetStartOutputDirectory()
     );
-  target.GetSourceFiles().push_back(this->Makefile->GetSource(targetFullPath.c_str()));
+  target.GetSourceFiles().push_back
+    (this->Makefile->GetSource(targetFullPath.c_str()));
 }
 
   
-void cmLocalGenerator::CreateCustomTargetsAndCommands(std::set<cmStdString> const& lang)
+void cmLocalGenerator
+::CreateCustomTargetsAndCommands(std::set<cmStdString> const& lang)
 { 
   cmTargets &tgts = this->Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); 
@@ -655,11 +674,13 @@ void cmLocalGenerator::CreateCustomTargetsAndCommands(std::set<cmStdString> cons
       case cmTarget::MODULE_LIBRARY:
       case cmTarget::EXECUTABLE: 
         {
-        const char* llang = target.GetLinkerLanguage(this->GetGlobalGenerator());
+        const char* llang = 
+          target.GetLinkerLanguage(this->GetGlobalGenerator());
         if(!llang)
           {
-          cmSystemTools::Error("CMake can not determine linker language for target:",
-                               target.GetName());
+          cmSystemTools::Error
+            ("CMake can not determine linker language for target:",
+             target.GetName());
           return;
           }
         // if the language is not in the set lang then create custom
@@ -679,8 +700,6 @@ void cmLocalGenerator::CreateCustomTargetsAndCommands(std::set<cmStdString> cons
       }
     }
 }
-
-
 
 // List of variables that are replaced when
 // rules are expanced.  These variables are
@@ -863,12 +882,14 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         }
       if(actualReplace == variable)
         {
-        std::string replace = this->Makefile->GetSafeDefinition(variable.c_str());
+        std::string replace = 
+          this->Makefile->GetSafeDefinition(variable.c_str());
         // if the variable is not a FLAG then treat it like a path
         if(variable.find("_FLAG") == variable.npos)
           {
           std::string ret = this->ConvertToOutputForExisting(replace.c_str());
-          // if there is a required first argument to the compiler add it to the compiler string
+          // if there is a required first argument to the compiler add it
+          // to the compiler string
           if(compilerArg1)
             {
             ret += " ";
@@ -978,15 +999,16 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     {
     quotePaths = true;
     }
-  bool repeatFlag = true; // should the include flag be repeated like ie. -IA -IB
+  bool repeatFlag = true; 
+  // should the include flag be repeated like ie. -IA -IB
   if(!sep)
     {
     sep = " ";
     }
   else
     {
-    // if there is a separator then the flag is not repeated but is only given once
-    // i.e.  -classpath a:b:c
+    // if there is a separator then the flag is not repeated but is only
+    // given once i.e.  -classpath a:b:c
     repeatFlag = false;
     }
   bool flagUsed = false;
@@ -1001,7 +1023,9 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
       if(emitted.insert(frameworkDir).second)
         {
-        includeFlags << "-F" << this->ConvertToOutputForExisting(frameworkDir.c_str()) << " ";
+        includeFlags 
+          << "-F" 
+          << this->ConvertToOutputForExisting(frameworkDir.c_str()) << " ";
         }
       continue;
       }
@@ -1081,14 +1105,16 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
     this->Makefile->GetDefinition("VTK_SOURCE_DIR");
   if(vtkSourceDir)
     {
-    const char* vtk_major = this->Makefile->GetDefinition("VTK_MAJOR_VERSION");
-    const char* vtk_minor = this->Makefile->GetDefinition("VTK_MINOR_VERSION");
+    const char* vtk_major = 
+      this->Makefile->GetDefinition("VTK_MAJOR_VERSION");
+    const char* vtk_minor = 
+      this->Makefile->GetDefinition("VTK_MINOR_VERSION");
     vtk_major = vtk_major? vtk_major : "4";
     vtk_minor = vtk_minor? vtk_minor : "4";
     int vmajor = 0;
     int vminor = 0;
-    if(sscanf(vtk_major, "%d", &vmajor) && sscanf(vtk_minor, "%d", &vminor) &&
-       vmajor == 4 && vminor <= 4)
+    if(sscanf(vtk_major, "%d", &vmajor) && 
+       sscanf(vtk_minor, "%d", &vminor) && vmajor == 4 && vminor <= 4)
       {
       includeSourceDir = true;
       }
@@ -1116,8 +1142,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
   // This can cause problems with certain standard library
   // implementations because the wrong headers may be found first.
   emitted.insert("/usr/include");
-  if(const char* implicitIncludes =
-     this->Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))
+  if(const char* implicitIncludes = this->Makefile->GetDefinition
+     ("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))
     {
     std::vector<std::string> implicitIncludeVec;
     cmSystemTools::ExpandListArgument(implicitIncludes, implicitIncludeVec);
@@ -1128,7 +1154,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
     }
 
   // Get the project-specified include directories.
-  std::vector<std::string>& includes = this->Makefile->GetIncludeDirectories();
+  std::vector<std::string>& includes = 
+    this->Makefile->GetIncludeDirectories();
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.
@@ -1170,15 +1197,18 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
                                  std::string& linkFlags,
                                  cmTarget& target)
 {
-  std::string buildType =  this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  std::string buildType =  
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType); 
-  const char* libraryLinkVariable = "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
+  const char* libraryLinkVariable = 
+    "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
   
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY: 
       {
-      const char* targetLinkFlags = target.GetProperty("STATIC_LIBRARY_FLAGS");
+      const char* targetLinkFlags = 
+        target.GetProperty("STATIC_LIBRARY_FLAGS");
       if(targetLinkFlags)
         {
         linkFlags += targetLinkFlags;
@@ -1200,7 +1230,8 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += this->Makefile->GetSafeDefinition(build.c_str());
         linkFlags += " ";
         }  
-      if(this->Makefile->IsOn("WIN32") && !(this->Makefile->IsOn("CYGWIN") || this->Makefile->IsOn("MINGW")))
+      if(this->Makefile->IsOn("WIN32") && 
+         !(this->Makefile->IsOn("CYGWIN") || this->Makefile->IsOn("MINGW")))
         {
         const std::vector<cmSourceFile*>& sources = target.GetSourceFiles();
         for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
@@ -1208,8 +1239,10 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           {
           if((*i)->GetSourceExtension() == "def")
             {
-            linkFlags += this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-            linkFlags += this->Convert((*i)->GetFullPath().c_str(),START_OUTPUT,MAKEFILE);
+            linkFlags += 
+              this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+            linkFlags += this->Convert((*i)->GetFullPath().c_str(),
+                                       START_OUTPUT,MAKEFILE);
             linkFlags += " ";
             }
           }
@@ -1235,7 +1268,8 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       break;
     case cmTarget::EXECUTABLE:
       {
-      linkFlags += this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
+      linkFlags += 
+        this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
       linkFlags += " ";
       if(buildType.size())
         {
@@ -1244,11 +1278,13 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += this->Makefile->GetSafeDefinition(build.c_str());
         linkFlags += " ";
         } 
-      const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+      const char* linkLanguage = 
+        target.GetLinkerLanguage(this->GetGlobalGenerator());
       if(!linkLanguage)
         {
-        cmSystemTools::Error("CMake can not determine linker language for target:",
-                             target.GetName());
+        cmSystemTools::Error
+          ("CMake can not determine linker language for target:",
+           target.GetName());
         return;
         }
       std::string langVar = "CMAKE_";
@@ -1264,21 +1300,24 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       cmOStringStream linklibs;
       this->OutputLinkLibraries(linklibs, target, false);
       linkLibs = linklibs.str();
-      if(cmSystemTools::IsOn(this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+      if(cmSystemTools::IsOn
+         (this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
         {
-        std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") + linkLanguage 
-          + std::string("_FLAGS");
+        std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") 
+          + linkLanguage + std::string("_FLAGS");
         linkFlags += this->Makefile->GetSafeDefinition(sFlagVar.c_str());
         linkFlags += " ";
         }
       if ( target.GetPropertyAsBool("WIN32_EXECUTABLE") )
         {
-        linkFlags +=  this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
+        linkFlags +=
+          this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
         linkFlags += " ";
         }
       else
         {
-        linkFlags +=  this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
+        linkFlags +=  
+          this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
         linkFlags += " ";
         }
       const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
@@ -1323,7 +1362,8 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string runtimeSep;
 
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  const char* linkLanguage = tgt.GetLinkerLanguage(this->GetGlobalGenerator());
+  const char* linkLanguage = 
+    tgt.GetLinkerLanguage(this->GetGlobalGenerator());
   if(!linkLanguage)
     {
     cmSystemTools::
@@ -1348,8 +1388,10 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   // Some search paths should never be emitted
   emitted.insert("");
   emitted.insert("/usr/lib");
-  std::string libPathFlag = this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
-  std::string libLinkFlag = this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
+  std::string libPathFlag = 
+    this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
+  std::string libLinkFlag = 
+    this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
   // collect all the flags needed for linking libraries
   std::string linkLibs;
   
@@ -1466,12 +1508,12 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
 }
 
 //----------------------------------------------------------------------------
-void
-cmLocalGenerator::ComputeLinkInformation(cmTarget& target,
-                                         const char* config,
-                                         std::vector<cmStdString>& outLibs,
-                                         std::vector<cmStdString>& outDirs,
-                                         std::vector<cmStdString>* fullPathLibs)
+void cmLocalGenerator
+::ComputeLinkInformation(cmTarget& target,
+                         const char* config,
+                         std::vector<cmStdString>& outLibs,
+                         std::vector<cmStdString>& outDirs,
+                         std::vector<cmStdString>* fullPathLibs)
 {
   // Compute which library configuration to link.
   cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
@@ -1779,7 +1821,8 @@ cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
   // if CMAKE_MSVCIDE_RUN_PATH is set.
   if(this->Makefile->GetDefinition("MSVC_IDE"))
     {
-    const char* extraPath = this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
+    const char* extraPath = 
+      this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
     if(extraPath)
       {
       script += "set PATH=";
@@ -1863,22 +1906,26 @@ std::string cmLocalGenerator::Convert(const char* source,
       case HOME:
         //result = cmSystemTools::CollapseFullPath(result.c_str());
         result = this->GlobalGenerator->
-          ConvertToRelativePath(this->HomeDirectoryComponents, result.c_str());
+          ConvertToRelativePath(this->HomeDirectoryComponents, 
+                                result.c_str());
         break;
       case START:
         //result = cmSystemTools::CollapseFullPath(result.c_str());
         result = this->GlobalGenerator->
-          ConvertToRelativePath(this->StartDirectoryComponents, result.c_str());
+          ConvertToRelativePath(this->StartDirectoryComponents, 
+                                result.c_str());
         break;
       case HOME_OUTPUT:
         //result = cmSystemTools::CollapseFullPath(result.c_str());
         result = this->GlobalGenerator->
-          ConvertToRelativePath(this->HomeOutputDirectoryComponents, result.c_str());
+          ConvertToRelativePath(this->HomeOutputDirectoryComponents, 
+                                result.c_str());
         break;
       case START_OUTPUT:
         //result = cmSystemTools::CollapseFullPath(result.c_str());
         result = this->GlobalGenerator->
-          ConvertToRelativePath(this->StartOutputDirectoryComponents, result.c_str());
+          ConvertToRelativePath(this->StartOutputDirectoryComponents, 
+                                result.c_str());
         break;
       case FULL:
         result = cmSystemTools::CollapseFullPath(result.c_str());
