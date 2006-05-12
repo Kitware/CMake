@@ -24,9 +24,10 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args)
     {
     argError = true;
     }
-  // for VTK 4.0 we have to support the option command with more than 3 arguments
-  // if CMAKE_MINIMUM_REQUIRED_VERSION is not defined, if CMAKE_MINIMUM_REQUIRED_VERSION
-  // is defined, then we can have stricter checking.
+  // for VTK 4.0 we have to support the option command with more than 3
+  // arguments if CMAKE_MINIMUM_REQUIRED_VERSION is not defined, if
+  // CMAKE_MINIMUM_REQUIRED_VERSION is defined, then we can have stricter
+  // checking.
   if(this->Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION"))
     {
     if(args.size() > 3)
