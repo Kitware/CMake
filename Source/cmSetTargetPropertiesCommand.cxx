@@ -59,13 +59,15 @@ bool cmSetTargetPropertiesCommand::InitialPass(
       }
     else
       {
-      this->SetError("called with illegal arguments, maybe missing a PROPERTIES specifier?");
+      this->SetError("called with illegal arguments, maybe missing "
+                     "a PROPERTIES specifier?");
       return false;
       }
     }
   if(propertyPairs.size() == 0)
     {
-     this->SetError("called with illegal arguments, maybe missing a PROPERTIES specifier?");
+     this->SetError("called with illegal arguments, maybe missing "
+                    "a PROPERTIES specifier?");
      return false;
     }
   
@@ -83,7 +85,8 @@ bool cmSetTargetPropertiesCommand::InitialPass(
       // now loop through all the props and set them
       for (k = 0; k < propertyPairs.size(); k = k + 2)
         {
-        target.SetProperty(propertyPairs[k].c_str(),propertyPairs[k+1].c_str());
+        target.SetProperty(propertyPairs[k].c_str(),
+                           propertyPairs[k+1].c_str());
         }
       }
     // if file is not already in the makefile, then add it

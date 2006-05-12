@@ -587,7 +587,8 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
 }
 
 //----------------------------------------------------------------------------
-bool cmStringCommand::HandleLengthCommand(std::vector<std::string> const& args)
+bool cmStringCommand
+::HandleLengthCommand(std::vector<std::string> const& args)
 {
   if(args.size() != 3)
     {

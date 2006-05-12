@@ -56,7 +56,8 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Split space separated arguments into a semi-colon separated list.";
+    return 
+      "Split space separated arguments into a semi-colon separated list.";
     }
   
   /**

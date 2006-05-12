@@ -55,9 +55,9 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
   std::string siteName = "unknown";
 #if defined(_WIN32) && !defined(__CYGWIN__)
   std::string host;
-  if(cmSystemTools::ReadRegistryValue(
-    "HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\ComputerName\\ComputerName;ComputerName",
-    host))
+  if(cmSystemTools::ReadRegistryValue
+     ("HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\"
+      "Control\\ComputerName\\ComputerName;ComputerName", host))
     {
     siteName = host;
     }

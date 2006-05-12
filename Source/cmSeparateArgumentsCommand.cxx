@@ -17,7 +17,8 @@
 #include "cmSeparateArgumentsCommand.h"
 
 // cmSeparateArgumentsCommand
-bool cmSeparateArgumentsCommand::InitialPass(std::vector<std::string> const& args)
+bool cmSeparateArgumentsCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() != 1 )
     {
