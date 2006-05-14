@@ -38,7 +38,8 @@ void cmTarget::SetType(TargetType type, const char* name)
   this->Name = name;
   // only add dependency information for library targets
   this->TargetTypeValue = type;
-  if(this->TargetTypeValue >= STATIC_LIBRARY && this->TargetTypeValue <= MODULE_LIBRARY) 
+  if(this->TargetTypeValue >= STATIC_LIBRARY 
+     && this->TargetTypeValue <= MODULE_LIBRARY) 
     {
     this->RecordDependencies = true;
     } 
@@ -182,8 +183,8 @@ void cmTarget::TraceVSDependencies(std::string projFile,
          ic != this->GetPostBuildCommands().end(); ++ic)
       {
       cmCustomCommand &c = *ic;
-      for (std::vector<std::string>::const_iterator i = c.GetDepends().begin();
-           i != c.GetDepends().end(); ++i)
+      for (std::vector<std::string>::const_iterator i 
+             = c.GetDepends().begin(); i != c.GetDepends().end(); ++i)
         {
         srcFilesToProcess.push(*i);
         srcFilesQueued.insert(*i);
@@ -241,7 +242,8 @@ void cmTarget::TraceVSDependencies(std::string projFile,
           if (srcFilesQueued.find(outsf->GetCustomCommand()->GetDepends()[i]) 
           == srcFilesQueued.end())
             {
-            srcFilesToProcess.push(outsf->GetCustomCommand()->GetDepends()[i]);
+            srcFilesToProcess.push
+              (outsf->GetCustomCommand()->GetDepends()[i]);
             srcFilesQueued.insert(outsf->GetCustomCommand()->GetDepends()[i]);
             }
           }
@@ -380,7 +382,8 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
         // is an N^2 algorithm for adding the directories, but N
         // should not get very big.
         const char* libpath = tgt->GetDirectory();
-        if(std::find(this->LinkDirectories.begin(), this->LinkDirectories.end(),
+        if(std::find(this->LinkDirectories.begin(), 
+                     this->LinkDirectories.end(),
                      libpath) == this->LinkDirectories.end())
           {
           this->LinkDirectories.push_back(libpath);
@@ -396,7 +399,8 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
   return this->LinkDirectories;
 }
 
-void cmTarget::ClearDependencyInformation( cmMakefile& mf, const char* target )
+void cmTarget::ClearDependencyInformation( cmMakefile& mf, 
+                                           const char* target )
 {
   // Clear the dependencies. The cache variable must exist iff we are
   // recording dependency information for this target.
@@ -627,7 +631,8 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 
   // 1. Build the dependency graph
   //
-  for(LinkLibraryVectorType::reverse_iterator lib = this->LinkLibraries.rbegin();
+  for(LinkLibraryVectorType::reverse_iterator lib 
+        = this->LinkLibraries.rbegin();
       lib != this->LinkLibraries.rend(); ++lib)
     {
     this->GatherDependencies( mf, lib->first, dep_map );
@@ -838,10 +843,12 @@ const char* cmTarget::GetDirectory(const char* config)
     case cmTarget::STATIC_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
     case cmTarget::SHARED_LIBRARY:
-      this->Directory = this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
+      this->Directory = 
+        this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
       break;
     case cmTarget::EXECUTABLE:
-      this->Directory = this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+      this->Directory = 
+        this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
       break;
     default:
       return 0;
@@ -963,7 +970,8 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
     return linkerLang;
     }
   std::set<cmStdString> languages;
-  for(std::vector<cmSourceFile*>::const_iterator i = this->SourceFiles.begin();
+  for(std::vector<cmSourceFile*>::const_iterator i 
+        = this->SourceFiles.begin();
       i != this->SourceFiles.end(); ++i)
     {
     const char* lang = 

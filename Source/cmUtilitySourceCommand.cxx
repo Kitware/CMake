@@ -34,7 +34,8 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
   // If it exists already and appears up to date then we are done.  If
   // the string contains "(IntDir)" but that is not the
   // CMAKE_CFG_INTDIR setting then the value is out of date.
-  const char* intDir = this->Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
+  const char* intDir = 
+    this->Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
   if(cacheValue &&
      (strstr(cacheValue, "(IntDir)") == 0 ||
       intDir && strcmp(intDir, "$(IntDir)") == 0) &&

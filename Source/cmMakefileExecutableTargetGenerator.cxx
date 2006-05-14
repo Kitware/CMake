@@ -95,7 +95,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Get the name of the executable to generate.
   std::string targetName;
   std::string targetNameReal;
-  this->Target->GetExecutableNames(targetName, targetNameReal,
+  this->Target->GetExecutableNames
+    (targetName, targetNameReal,
                                    this->LocalGenerator->ConfigurationName.c_str());
 
   // Construct the full path version of the names.
@@ -135,7 +136,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       sourceIt != this->Target->GetSourceFiles().end();
       ++ sourceIt )
       {
-      const char* subDir = (*sourceIt)->GetProperty("MACOSX_PACKAGE_LOCATION");
+      const char* subDir = 
+        (*sourceIt)->GetProperty("MACOSX_PACKAGE_LOCATION");
       if ( subDir )
         {
         std::string newDir = macdir;
@@ -156,7 +158,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     cmSystemTools::MakeDirectory(macdir.c_str());
     this->Makefile->AddDefinition("MACOSX_BUNDLE_EXECUTABLE_NAME",
                                   targetName.c_str());
-    this->Makefile->ConfigureFile(f1.c_str(), f2.c_str(), false, false, false);
+    this->Makefile->ConfigureFile(f1.c_str(), f2.c_str(), 
+                                  false, false, false);
     }
 #endif
   if(relink)
@@ -221,13 +224,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   if(this->Target->GetPropertyAsBool("WIN32_EXECUTABLE"))
     {
-    this->LocalGenerator->AppendFlags(linkFlags,
-                                      this->Makefile->GetDefinition("CMAKE_CREATE_WIN32_EXE"));
+    this->LocalGenerator->AppendFlags
+      (linkFlags, this->Makefile->GetDefinition("CMAKE_CREATE_WIN32_EXE"));
     }
   else
     {
-    this->LocalGenerator->AppendFlags(linkFlags,
-                                      this->Makefile->GetDefinition("CMAKE_CREATE_CONSOLE_EXE"));
+    this->LocalGenerator->AppendFlags
+      (linkFlags, this->Makefile->GetDefinition("CMAKE_CREATE_CONSOLE_EXE"));
     }
 
   // Add language-specific flags.
@@ -236,19 +239,24 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                        this->LocalGenerator->ConfigurationName.c_str());
 
   // Add target-specific linker flags.
-  this->LocalGenerator->AppendFlags(linkFlags, this->Target->GetProperty("LINK_FLAGS"));
+  this->LocalGenerator->AppendFlags
+    (linkFlags, this->Target->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
-  this->LocalGenerator->AppendFlags(linkFlags, 
-                                    this->Target->GetProperty(linkFlagsConfig.c_str()));
+  linkFlagsConfig += 
+    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
+  this->LocalGenerator->AppendFlags
+    (linkFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
+
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;
   {
   std::string cleanName;
   std::string cleanRealName;
-  this->Target->GetExecutableCleanNames(cleanName, cleanRealName,
+  this->Target->GetExecutableCleanNames
+    (cleanName, cleanRealName,
                                         this->LocalGenerator->ConfigurationName.c_str());
+
   std::string cleanFullName = outpath + cleanName;
   std::string cleanFullRealName = outpath + cleanRealName;
   exeCleanFiles.push_back(this->Convert(cleanFullName.c_str(),
@@ -266,9 +274,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::vector<std::string> commands1;
   this->LocalGenerator->AppendCleanCommand(commands1, exeCleanFiles,
                                            *this->Target, "target");
-  this->LocalGenerator->CreateCDCommand(commands1,
+  this->LocalGenerator->CreateCDCommand
+    (commands1,
                                         this->Makefile->GetStartOutputDirectory(),
                                         this->Makefile->GetHomeOutputDirectory());
+
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
 

@@ -17,7 +17,8 @@
 #include "cmRemoveDefinitionsCommand.h"
 
 // cmRemoveDefinitionsCommand
-bool cmRemoveDefinitionsCommand::InitialPass(std::vector<std::string> const& args)
+bool cmRemoveDefinitionsCommand
+::InitialPass(std::vector<std::string> const& args)
 {
   // it is OK to have no arguments
   if(args.size() < 1 )

@@ -33,7 +33,8 @@ bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args)
       ++i;
       if(i == args.end())
         {
-        this->SetError("The \"debug\" argument must be followed by a library");
+        this->SetError("The \"debug\" argument must be followed by "
+                       "a library");
         return false;
         }
       this->Makefile->AddLinkLibrary(i->c_str(),
@@ -44,7 +45,8 @@ bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args)
       ++i;
       if(i == args.end())
         {
-        this->SetError("The \"optimized\" argument must be followed by a library");
+        this->SetError("The \"optimized\" argument must be followed by "
+                       "a library");
         return false;
         }
       this->Makefile->AddLinkLibrary(i->c_str(),

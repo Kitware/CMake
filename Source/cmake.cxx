@@ -1163,10 +1163,12 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
 
   // set the new
   this->GlobalGenerator = gg;
-  // set the global flag for unix style paths on cmSystemTools as 
-  // soon as the generator is set.  This allows gmake to be used
-  // on windows.
-  cmSystemTools::SetForceUnixPaths(this->GlobalGenerator->GetForceUnixPaths());
+
+  // set the global flag for unix style paths on cmSystemTools as soon as
+  // the generator is set.  This allows gmake to be used on windows.
+  cmSystemTools::SetForceUnixPaths
+    (this->GlobalGenerator->GetForceUnixPaths());
+
   // Save the environment variables CXX and CC
   const char* cxx = getenv("CXX");
   const char* cc = getenv("CC");
@@ -1287,7 +1289,8 @@ int cmake::Configure()
   // no generator specified on the command line
   if(!this->GlobalGenerator)
     {
-    const char* genName = this->CacheManager->GetCacheValue("CMAKE_GENERATOR");
+    const char* genName = 
+      this->CacheManager->GetCacheValue("CMAKE_GENERATOR");
     if(genName)
       {
       this->GlobalGenerator = this->CreateGlobalGenerator(genName);
@@ -2023,14 +2026,16 @@ const char* cmake::GetCTestCommand()
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->CTestCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
   this->CTestCommand = removeQuotes(this->CTestCommand);
-  this->CTestCommand = cmSystemTools::GetFilenamePath(this->CTestCommand.c_str());
+  this->CTestCommand = 
+    cmSystemTools::GetFilenamePath(this->CTestCommand.c_str());
   this->CTestCommand += "/";
   this->CTestCommand += "ctest";
   this->CTestCommand += cmSystemTools::GetExecutableExtension();
   if(!cmSystemTools::FileExists(this->CTestCommand.c_str()))
     {
     this->CTestCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-    this->CTestCommand = cmSystemTools::GetFilenamePath(this->CTestCommand.c_str());
+    this->CTestCommand = 
+      cmSystemTools::GetFilenamePath(this->CTestCommand.c_str());
     this->CTestCommand += "/Debug/";
     this->CTestCommand += "ctest";
     this->CTestCommand += cmSystemTools::GetExecutableExtension();
@@ -2038,7 +2043,8 @@ const char* cmake::GetCTestCommand()
   if(!cmSystemTools::FileExists(this->CTestCommand.c_str()))
     {
     this->CTestCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-    this->CTestCommand = cmSystemTools::GetFilenamePath(this->CTestCommand.c_str());
+    this->CTestCommand = 
+      cmSystemTools::GetFilenamePath(this->CTestCommand.c_str());
     this->CTestCommand += "/Release/";
     this->CTestCommand += "ctest";
     this->CTestCommand += cmSystemTools::GetExecutableExtension();
@@ -2070,14 +2076,16 @@ const char* cmake::GetCPackCommand()
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->CPackCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
   this->CPackCommand = removeQuotes(this->CPackCommand);
-  this->CPackCommand = cmSystemTools::GetFilenamePath(this->CPackCommand.c_str());
+  this->CPackCommand = 
+    cmSystemTools::GetFilenamePath(this->CPackCommand.c_str());
   this->CPackCommand += "/";
   this->CPackCommand += "cpack";
   this->CPackCommand += cmSystemTools::GetExecutableExtension();
   if(!cmSystemTools::FileExists(this->CPackCommand.c_str()))
     {
     this->CPackCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-    this->CPackCommand = cmSystemTools::GetFilenamePath(this->CPackCommand.c_str());
+    this->CPackCommand = 
+      cmSystemTools::GetFilenamePath(this->CPackCommand.c_str());
     this->CPackCommand += "/Debug/";
     this->CPackCommand += "cpack";
     this->CPackCommand += cmSystemTools::GetExecutableExtension();
@@ -2085,7 +2093,8 @@ const char* cmake::GetCPackCommand()
   if(!cmSystemTools::FileExists(this->CPackCommand.c_str()))
     {
     this->CPackCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-    this->CPackCommand = cmSystemTools::GetFilenamePath(this->CPackCommand.c_str());
+    this->CPackCommand = 
+      cmSystemTools::GetFilenamePath(this->CPackCommand.c_str());
     this->CPackCommand += "/Release/";
     this->CPackCommand += "cpack";
     this->CPackCommand += cmSystemTools::GetExecutableExtension();
@@ -2201,8 +2210,6 @@ void cmake::GenerateGraphViz(const char* fileName)
       sprintf(tgtName, "%s%d", graphNodePrefix, cnt++);
       targetNamesNodes[realTargetName] = tgtName;
       targetPtrs[realTargetName] = &tit->second;
-      //str << "    \"" << tgtName << "\" [ label=\"" << tit->first.c_str()
-      //<<  "\" shape=\"box\"];" << std::endl;
       }
     }
   // Ok, now find all the stuff we link to that is not in cmake

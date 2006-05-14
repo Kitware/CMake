@@ -65,8 +65,8 @@ bool cmSourceFile::SetName(const char* name, const char* dir,
       }
 
     // See if the file is a header file
-    if(std::find( headerExts.begin(), headerExts.end(), this->SourceExtension ) ==
-      headerExts.end())
+    if(std::find( headerExts.begin(), headerExts.end(), 
+                  this->SourceExtension ) == headerExts.end())
       {
       this->SetProperty("HEADER_FILE_ONLY","0");
       }

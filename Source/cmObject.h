@@ -22,8 +22,8 @@
 /** \class cmObject
  * \brief Superclass for all commands and other classes in CMake.
  *
- * cmObject is the base class for all classes in CMake. It defines some methods
- * such as GetNameOfClass, IsA, SafeDownCast.
+ * cmObject is the base class for all classes in CMake. It defines some
+ * methods such as GetNameOfClass, IsA, SafeDownCast.
  */
 class cmObject
 {

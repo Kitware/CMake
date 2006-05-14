@@ -1363,6 +1363,11 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     singleLine.erase(singleLine.begin(), singleLine.end());
     depends.erase(depends.begin(), depends.end());
     singleLine.push_back(this->GetCMakeInstance()->GetCTestCommand());
+    if(cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.')
+      {
+      singleLine.push_back("-C");
+      singleLine.push_back(mf->GetDefinition("CMAKE_CFG_INTDIR"));
+      }
     singleLine.push_back("--force-new-ctest-process");
     cpackCommandLines.push_back(singleLine);
     (*targets)[this->GetTestTargetName()]
@@ -1410,7 +1415,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   const char* rebuildCacheTargetName = this->GetRebuildCacheTargetName();
   if ( rebuildCacheTargetName )
     {
-    cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+    cpackCommandLines.erase(cpackCommandLines.begin(), 
+                            cpackCommandLines.end());
     singleLine.erase(singleLine.begin(), singleLine.end());
     depends.erase(depends.begin(), depends.end());
     singleLine.push_back(cmakeCommand);

@@ -93,7 +93,8 @@ public:
   /**
    * The file extension associated with source file
    */
-  const std::string &GetSourceExtension() const {return this->SourceExtension;}
+  const std::string &GetSourceExtension() const {
+    return this->SourceExtension;}
   void SetSourceExtension(const char *name) {this->SourceExtension = name;}
 
   /**

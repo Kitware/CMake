@@ -75,7 +75,8 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
         {
         if ( curr && curr->GetPropertyAsBool("GENERATED") )
           {
-          origname = std::string( this->Makefile->GetCurrentOutputDirectory() ) + "/" + *j;
+          origname = std::string(this->Makefile->GetCurrentOutputDirectory()) 
+            + "/" + *j;
           }
         else
           {
@@ -114,8 +115,10 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
       }
     }
   
-  this->Makefile->AddDefinition(this->SourceList.c_str(), sourceListValue.c_str());  
-  this->Makefile->AddDefinition(this->HeaderList.c_str(), headerListValue.c_str());  
+  this->Makefile->AddDefinition(this->SourceList.c_str(),
+                                sourceListValue.c_str());  
+  this->Makefile->AddDefinition(this->HeaderList.c_str(),
+                                headerListValue.c_str());  
   return true;
 }
 
@@ -125,8 +128,10 @@ void cmQTWrapUICommand::FinalPass()
   // first we add the rules for all the .ui to .h and .cxx files
   size_t lastHeadersClass = this->WrapHeadersClasses.size();
   std::vector<std::string> depends;
-  const char* uic_exe = this->Makefile->GetRequiredDefinition("QT_UIC_EXECUTABLE");
-  const char* moc_exe = this->Makefile->GetRequiredDefinition("QT_MOC_EXECUTABLE");
+  const char* uic_exe =
+    this->Makefile->GetRequiredDefinition("QT_UIC_EXECUTABLE");
+  const char* moc_exe =
+    this->Makefile->GetRequiredDefinition("QT_MOC_EXECUTABLE");
 
   // wrap all the .h files
   depends.push_back(uic_exe);

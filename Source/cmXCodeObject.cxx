@@ -39,7 +39,8 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
     }
   else
     {
-    this->Id = "Temporary cmake object, should not be refered to in xcode file";
+    this->Id = 
+      "Temporary cmake object, should not be refered to in xcode file";
     }
   cmSystemTools::ReplaceString(this->Id, "0x", "");
   this->Id = cmSystemTools::UpperCase(this->Id);
@@ -73,7 +74,8 @@ void cmXCodeObject::Print(std::ostream& out)
 {
   std::string separator = "\n";
   int indentFactor = 1;
-  if(this->Version > 15 && (this->IsA == PBXFileReference || this->IsA == PBXBuildFile))
+  if(this->Version > 15 
+     && (this->IsA == PBXFileReference || this->IsA == PBXBuildFile))
     {
     separator = " ";
     indentFactor = 0;
@@ -92,7 +94,8 @@ void cmXCodeObject::Print(std::ostream& out)
   std::map<cmStdString, cmXCodeObject*>::iterator i;
   cmXCodeObject::Indent(3*indentFactor, out);
   out << "isa = " << PBXTypeNames[this->IsA]  << ";" << separator;
-  for(i = this->ObjectAttributes.begin(); i != this->ObjectAttributes.end(); ++i)
+  for(i = this->ObjectAttributes.begin(); 
+      i != this->ObjectAttributes.end(); ++i)
     { 
     cmXCodeObject* object = i->second;
     if(i->first != "isa")

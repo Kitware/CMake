@@ -245,7 +245,8 @@ int main (int argc, char *argv[])
     {
     if ( cmSystemTools::FileExists(cpackConfigFile.c_str()) )
       {
-      cpackConfigFile = cmSystemTools::CollapseFullPath(cpackConfigFile.c_str());
+      cpackConfigFile = 
+        cmSystemTools::CollapseFullPath(cpackConfigFile.c_str());
       if ( !mf->ReadListFile(0, cpackConfigFile.c_str()) )
         {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR,

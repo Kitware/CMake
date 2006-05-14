@@ -92,7 +92,8 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
     {
     licenseText += line + "\n";
     }
-  this->SetOptionIfNotSet("CPACK_RESOURCE_FILE_LICENSE_CONTENT", licenseText.c_str());
+  this->SetOptionIfNotSet("CPACK_RESOURCE_FILE_LICENSE_CONTENT", 
+                          licenseText.c_str());
 
   const char headerLengthTag[] = "###CPACK_HEADER_LENGTH###";
 
@@ -120,7 +121,8 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
     ++ptr;
     }
   counter ++;
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Number of lines: " << counter << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, 
+                "Number of lines: " << counter << std::endl);
   char buffer[1024];
   sprintf(buffer, "%d", counter);
   cmSystemTools::ReplaceString(res, headerLengthTag, buffer);

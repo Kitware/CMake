@@ -320,7 +320,8 @@ public:
 
   /** Create tar */
   static bool ListTar(const char* outFileName,
-                      std::vector<cmStdString>& files, bool gzip, bool verbose);
+                      std::vector<cmStdString>& files, 
+                      bool gzip, bool verbose);
   static bool CreateTar(const char* outFileName,
                         const std::vector<cmStdString>& files, bool gzip,
                         bool verbose);

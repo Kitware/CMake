@@ -57,9 +57,11 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
         {
         file.SetProperty("ABSTRACT",curr->GetProperty("ABSTRACT"));
         }
-      std::string srcName = cmSystemTools::GetFilenameWithoutLastExtension(*j);
+      std::string srcName = 
+        cmSystemTools::GetFilenameWithoutLastExtension(*j);
       std::string newName = "moc_" + srcName;
-      file.SetName(newName.c_str(), this->Makefile->GetCurrentOutputDirectory(),
+      file.SetName(newName.c_str(), 
+                   this->Makefile->GetCurrentOutputDirectory(),
                    "cxx",false);
       std::string hname;
       if ( (*j)[0] == '/' || (*j)[1] == ':' )
@@ -70,7 +72,8 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
         {
         if ( curr && curr->GetPropertyAsBool("GENERATED") )
           {
-          hname = std::string( this->Makefile->GetCurrentOutputDirectory() ) + "/" + *j;
+          hname = std::string(this->Makefile->GetCurrentOutputDirectory()) 
+            + "/" + *j;
           }
         else
           {
@@ -89,7 +92,8 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
       }
     }
   
-  this->Makefile->AddDefinition(this->SourceList.c_str(), sourceListValue.c_str());
+  this->Makefile->AddDefinition(this->SourceList.c_str(), 
+                                sourceListValue.c_str());
   return true;
 }
 
@@ -99,7 +103,8 @@ void cmQTWrapCPPCommand::FinalPass()
   // first we add the rules for all the .h to Moc files
   size_t lastClass = this->WrapClasses.size();
   std::vector<std::string> depends;
-  const char* moc_exe = this->Makefile->GetRequiredDefinition("QT_MOC_EXECUTABLE");
+  const char* moc_exe = 
+    this->Makefile->GetRequiredDefinition("QT_MOC_EXECUTABLE");
 
   // wrap all the .h files
   depends.push_back(moc_exe);

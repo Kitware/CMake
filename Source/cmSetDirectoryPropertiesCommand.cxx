@@ -42,12 +42,14 @@ bool cmSetDirectoryPropertiesCommand::InitialPass(
     const std::string& value = *(ait+1);
     if ( prop == "VARIABLES" )
       {
-      this->SetError("Variables and cache variables should be set using SET command");
+      this->SetError
+        ("Variables and cache variables should be set using SET command");
       return false;
       }
     else if ( prop == "MACROS" )
       {
-      this->SetError("Commands and macros cannot be set using SET_CMAKE_PROPERTIES");
+      this->SetError
+        ("Commands and macros cannot be set using SET_CMAKE_PROPERTIES");
       return false;
       }
     else if ( prop == "INCLUDE_DIRECTORIES" )
@@ -71,7 +73,8 @@ bool cmSetDirectoryPropertiesCommand::InitialPass(
       if ( prop == "ADDITIONAL_MAKE_CLEAN_FILES" )
         {
         // This property is not inherrited
-        if ( strcmp(this->Makefile->GetCurrentDirectory(), this->Makefile->GetStartDirectory()) != 0 )
+        if ( strcmp(this->Makefile->GetCurrentDirectory(), 
+                    this->Makefile->GetStartDirectory()) != 0 )
           {
           continue;
           }

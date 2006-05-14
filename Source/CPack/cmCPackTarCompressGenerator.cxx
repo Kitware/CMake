@@ -74,7 +74,8 @@ int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
   packageDirFileName += ".tar";
   std::string output;
   int retVal = -1;
-  if ( !this->Superclass::CompressFiles(packageDirFileName.c_str(), toplevel, files) )
+  if ( !this->Superclass::CompressFiles(packageDirFileName.c_str(), 
+                                        toplevel, files) )
     {
     return 0;
     }

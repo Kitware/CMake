@@ -17,7 +17,8 @@
 #include "cmLinkDirectoriesCommand.h"
 
 // cmLinkDirectoriesCommand
-bool cmLinkDirectoriesCommand::InitialPass(std::vector<std::string> const& args)
+bool cmLinkDirectoriesCommand
+::InitialPass(std::vector<std::string> const& args)
 {
  if(args.size() < 1 )
     {

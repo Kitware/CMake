@@ -66,7 +66,8 @@ void cmXCode21Object::PrintList(std::vector<cmXCodeObject*> const& v,
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXBuildStyle);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXContainerItemProxy);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXFileReference);
-  cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXFrameworksBuildPhase);
+  cmXCode21Object::PrintList(v, out, 
+                             cmXCode21Object::PBXFrameworksBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXGroup);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXHeadersBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXNativeTarget);
@@ -76,7 +77,8 @@ void cmXCode21Object::PrintList(std::vector<cmXCodeObject*> const& v,
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXResourcesBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXSourcesBuildPhase);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXCopyFilesBuildPhase);
-  cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXApplicationReference);
+  cmXCode21Object::PrintList(v, out, 
+                             cmXCode21Object::PBXApplicationReference);
   cmXCode21Object::PrintList(v, out, 
                              cmXCode21Object::PBXExecutableFileReference);
   cmXCode21Object::PrintList(v, out, cmXCode21Object::PBXLibraryReference);

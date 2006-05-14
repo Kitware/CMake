@@ -84,7 +84,8 @@ const char* cmSystemTools::GetWindows9xComspecSubstitute()
   return cmSystemTools::s_Windows9xComspecSubstitute.c_str();
 }
 
-void (*cmSystemTools::s_ErrorCallback)(const char*, const char*, bool&, void*);
+void (*cmSystemTools::s_ErrorCallback)(const char*, const char*, 
+                                       bool&, void*);
 void (*cmSystemTools::s_StdoutCallback)(const char*, int len, void*);
 void* cmSystemTools::s_ErrorCallbackClientData = 0;
 void* cmSystemTools::s_StdoutCallbackClientData = 0;
@@ -1254,8 +1255,8 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
     }
   if(!cmSystemTools::FileIsFullPath(remote))
     {
-    cmSystemTools::Error("RelativePath must be passed a full path to remote: ",
-                         remote);
+    cmSystemTools::Error
+      ("RelativePath must be passed a full path to remote: ", remote);
     }
   return cmsys::SystemTools::RelativePath(local, remote);
 }

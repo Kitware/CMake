@@ -44,7 +44,8 @@ bool cmListFile::ParseFile(const char* filename, bool requireProjectCommand)
   if(!cmListFileLexer_SetFileName(lexer, filename))
     {
     cmListFileLexer_Delete(lexer);
-    cmSystemTools::Error("cmListFileCache: error can not open file ", filename);
+    cmSystemTools::Error("cmListFileCache: error can not open file ", 
+                         filename);
     return false;
     }
 
@@ -190,7 +191,8 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
       // Error.
       cmOStringStream error;
       error << "Error in cmake code at\n"
-            << filename << ":" << cmListFileLexer_GetCurrentLine(lexer) << ":\n"
+            << filename << ":" << cmListFileLexer_GetCurrentLine(lexer) 
+            << ":\n"
             << "Parse error.  Function missing ending \")\".  "
             << "Instead found "
             << cmListFileLexer_GetTypeAsString(lexer, token->type)

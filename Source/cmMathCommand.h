@@ -66,7 +66,8 @@ public:
     return
       "  MATH(EXPR <output variable> <math expression>)\n"
       "EXPR evaluates mathematical expression and return result in the "
-      "output variable. Example mathematical expression is '5 * ( 10 + 13 )'.";
+      "output variable. Example mathematical expression is "
+      "'5 * ( 10 + 13 )'.";
     }
   
   cmTypeMacro(cmMathCommand, cmCommand);

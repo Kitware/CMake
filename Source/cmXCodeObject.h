@@ -51,11 +51,13 @@ public:
     }
   bool HasObject(cmXCodeObject* o)
     {
-      return !(std::find(this->List.begin(), this->List.end(), o) == this->List.end());
+    return !(std::find(this->List.begin(), this->List.end(), o) 
+             == this->List.end());
     }
   void AddUniqueObject(cmXCodeObject* value)
     {
-      if(std::find(this->List.begin(), this->List.end(), value) == this->List.end())
+    if(std::find(this->List.begin(), this->List.end(), value) 
+       == this->List.end())
         {
         this->List.push_back(value);
         }
@@ -64,7 +66,8 @@ public:
   void Print(std::ostream& out);
   virtual void PrintComment(std::ostream&) {};
 
-  static void PrintList(std::vector<cmXCodeObject*> const&, std::ostream& out);
+  static void PrintList(std::vector<cmXCodeObject*> const&, 
+                        std::ostream& out);
   const char* GetId()
     {
       return this->Id.c_str();
