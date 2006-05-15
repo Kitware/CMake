@@ -871,17 +871,11 @@ cmGlobalUnixMakefileGenerator3
   // search each local generator until a match is found
   if (!result)
     {
-    unsigned int i;
-    for (i = 0; i < this->LocalGenerators.size(); ++i)
+    result = this->FindTarget(0,name);
+    if (result)
       {
-      // search all targets
-      result = this->LocalGenerators[i]->GetMakefile()->FindTarget(name);
-      if (result)
-        {
-        lg3 = static_cast<cmLocalUnixMakefileGenerator3 *>
-          (this->LocalGenerators[i]);
-        break;
-        }
+      lg3 = static_cast<cmLocalUnixMakefileGenerator3 *>
+        (result->GetMakefile()->GetLocalGenerator());
       }
     }
   
