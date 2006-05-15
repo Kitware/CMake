@@ -1,7 +1,7 @@
 /* A Bison parser, made by GNU Bison 1.875d.  */
 
-/* Skeleton parser for Yacc-like parsing with Bison,
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+/* Skeleton parser for Yacc-like parsing with Bison, Copyright (C) 1984,
+   1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -299,7 +299,9 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmDependsJava_yy --defines=cmDependsJavaParserTokens.h -ocmDependsJavaParser.cxx cmDependsJavaParser.y
+  bison --yacc --name-prefix=cmDependsJava_yy
+  --defines=cmDependsJavaParserTokens.h -ocmDependsJavaParser.cxx
+  cmDependsJavaParser.y
 
 Modify cmDependsJavaParser.c:
   - remove TABs
@@ -331,14 +333,16 @@ static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
 
 #define jpCheckEmpty(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp);
 #define jpElementStart(cnt) yyGetParser->PrepareElement(&yyval)
-#define jpStoreClass(str) yyGetParser->AddClassFound(str); yyGetParser->DeallocateParserType(&(str))
+#define jpStoreClass(str) \
+yyGetParser->AddClassFound(str); yyGetParser->DeallocateParserType(&(str))
 /* Disable some warnings in the generated code.  */
 #ifdef __BORLANDC__
 # pragma warn -8004 /* Variable assigned a value that is not used.  */
 #endif
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
-# pragma warning (disable: 4065) /* Switch statement contains default but no case. */
+# pragma warning (disable: 4065) /* Switch statement contains default but
+                                    no case. */
 #endif
 
 

@@ -24,7 +24,8 @@
 /** \class cmQTWrapCPPCommand
  * \brief Create moc file rules for QT classes
  *
- * cmQTWrapCPPCommand is used to create wrappers for QT classes into normal C++
+ * cmQTWrapCPPCommand is used to create wrappers for QT classes into
+ * normal C++
  */
 class cmQTWrapCPPCommand : public cmCommand
 {

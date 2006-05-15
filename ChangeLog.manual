@@ -1,4 +1,5 @@
 Changes in CMake 2.4.2
+* Changes to LIST command, see --help-command LIST
 
 * Fix FindQT to be able to use full paths to source files
 
