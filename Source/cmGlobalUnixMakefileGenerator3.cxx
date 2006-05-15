@@ -623,6 +623,8 @@ cmGlobalUnixMakefileGenerator3
           commands.clear();
           commands.push_back(lg->GetRecursiveMakeCall
                              ("CMakeFiles/Makefile2",t->second.GetName()));
+          std::string echoCommand = "@echo \"\"";
+          commands.push_back(echoCommand.c_str());
           depends.clear(); 
           depends.push_back("cmake_check_build_system");
           lg->WriteMakeRule(ruleFileStream, 
@@ -675,6 +677,7 @@ cmGlobalUnixMakefileGenerator3
   std::string localName;
   std::string makeTargetName;
 
+
   // write the directory level rules for this local gen
   this->WriteDirectoryRules2(ruleFileStream,lg);
   
@@ -707,6 +710,8 @@ cmGlobalUnixMakefileGenerator3
           << localName << "\n\n";
       
         commands.clear();
+        std::string echoCommand = "@$(CMAKE_COMMAND) -E echo_append \".\"";
+        commands.push_back(echoCommand.c_str());
         if (t->second.GetType() != cmTarget::UTILITY)
           {
           makeTargetName = localName;
@@ -731,6 +736,7 @@ cmGlobalUnixMakefileGenerator3
         // Write the rule.
         localName += "/all";
         depends.clear();
+
         this->AppendGlobalTargetDepends(depends,t->second);
         lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                           localName.c_str(), depends, commands, true);

@@ -749,6 +749,8 @@ void CMakeCommandUsage(const char* program)
     "content to directory 'destination'\n"
     << "  compare_files file1 file2 - check if file1 is same as file2\n"
     << "  echo [string]...        - displays arguments as text\n"
+    << "  echo_append [string]... - displays arguments as text but no new"
+    " line\n"
     << "  environment             - display the current enviroment\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
     << "  tar [cxt][vfz] file.tar file/dir1 file/dir2 ... - create a tar.\n"
@@ -832,6 +834,19 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         space = " ";
         }
       std::cout << std::endl;
+      return 0;
+      }
+
+    // Echo string no new line
+    else if (args[1] == "echo_append" )
+      {
+      unsigned int cc;
+      const char* space = "";
+      for ( cc = 2; cc < args.size(); cc ++ )
+        {
+        std::cout << space << args[cc];
+        space = " ";
+        }
       return 0;
       }
 
