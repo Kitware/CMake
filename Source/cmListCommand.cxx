@@ -205,27 +205,30 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
   // expand the variable
   int item = atoi(args[2].c_str());
   std::vector<std::string> varArgsExpanded;
-  if ( !this->GetList(varArgsExpanded, listName.c_str()) && (item > 0 || item < -1))
+  if ( !this->GetList(varArgsExpanded, listName.c_str()) && item != 0)
     {
     cmOStringStream str;
-    str << "index: " << item << " out of range (-1, 0)";
+    str << "index: " << item << " out of range (0, 0)";
     this->SetError(str.str().c_str());
     return false;
     }
 
-  size_t nitem = varArgsExpanded.size();
-  if ( item < 0 )
+  if ( varArgsExpanded.size() != 0 )
     {
-    item = (int)nitem + item;
-    }
-  if ( item < 0 || nitem <= (size_t)item )
-    {
-    cmOStringStream str;
-    str << "index: " << item << " out of range (-" 
-      << varArgsExpanded.size() << ", " 
-      << varArgsExpanded.size()-1 << ")";
-    this->SetError(str.str().c_str());
-    return false;
+    size_t nitem = varArgsExpanded.size();
+    if ( item < 0 )
+      {
+      item = (int)nitem + item;
+      }
+    if ( item < 0 || nitem <= (size_t)item )
+      {
+      cmOStringStream str;
+      str << "index: " << item << " out of range (-" 
+        << varArgsExpanded.size() << ", " 
+        << (varArgsExpanded.size() == 0?0:(varArgsExpanded.size()-1)) << ")";
+      this->SetError(str.str().c_str());
+      return false;
+      }
     }
   size_t cc;
   size_t cnt = 0;

@@ -1,6 +1,6 @@
 MACRO(TEST command expected)
   IF("x${result}" STREQUAL "x${expected}")
-    MESSAGE("TEST \"${command}\" success: \"${result}\" expected: \"${expected}\"")
+    #MESSAGE("TEST \"${command}\" success: \"${result}\" expected: \"${expected}\"")
   ELSE("x${result}" STREQUAL "x${expected}")
     MESSAGE(SEND_ERROR "${CMAKE_CURRENT_LIST_LINE}: TEST \"${command}\" failed: \"${result}\" expected: \"${expected}\"")
   ENDIF("x${result}" STREQUAL "x${expected}")
@@ -41,7 +41,11 @@ TEST("APPEND result brad" "andy;brad")
 
 LIST(APPEND "nonexiting_list3" brad)
 SET(result "${nonexiting_list3}")
-TEST("APPEND \"nonexiting_list1\" brad" "brad")
+TEST("APPEND \"nonexiting_list3\" brad" "brad")
+
+LIST(INSERT "nonexiting_list4" 0 andy bill brad ken)
+SET(result "${nonexiting_list4}")
+TEST("APPEND \"nonexiting_list4\" andy bill brad ken" "andy;bill;brad;ken")
 
 SET(result andy brad)
 LIST(INSERT result -1 bill ken)
