@@ -46,9 +46,9 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleInsertCommand(args);
     }
-  if(subCommand == "REMOVE")
+  if(subCommand == "REMOVE_AT")
     {
-    return this->HandleRemoveCommand(args);
+    return this->HandleRemoveAtCommand(args);
     }
   if(subCommand == "REMOVE_ITEM")
     {
@@ -250,7 +250,8 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmListCommand::HandleRemoveCommand(std::vector<std::string> const& args)
+bool cmListCommand
+::HandleRemoveItemCommand(std::vector<std::string> const& args)
 {
   if(args.size() < 3)
     {
@@ -295,8 +296,7 @@ bool cmListCommand::HandleRemoveCommand(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmListCommand
-::HandleRemoveItemCommand(std::vector<std::string> const& args)
+bool cmListCommand::HandleRemoveAtCommand(std::vector<std::string> const& args)
 {
   if(args.size() < 3)
     {
