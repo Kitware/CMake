@@ -33,13 +33,13 @@ IF(UNIX)
     EXEC_PROGRAM(uname ARGS -r OUTPUT_VARIABLE CMAKE_SYSTEM_VERSION)
     EXEC_PROGRAM(uname ARGS -p OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR
       RETURN_VALUE val)
-    IF(${val} GREATER 0)
+    IF("${val}" GREATER 0)
       EXEC_PROGRAM(uname ARGS -m OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR
         RETURN_VALUE val)
-    ENDIF(${val} GREATER 0)
-    IF(${val} GREATER 0)
+    ENDIF("${val}" GREATER 0)
+    IF("${val}" GREATER 0)
       SET(CMAKE_SYSTEM_PROCESSOR "unknown")
-    ENDIF(${val} GREATER 0)
+    ENDIF("${val}" GREATER 0)
     SET(CMAKE_UNAME ${CMAKE_UNAME} CACHE INTERNAL "uname command")
     # processor may have double quote in the name, and that needs to be removed
     STRING(REGEX REPLACE "\"" "" CMAKE_SYSTEM_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}")
