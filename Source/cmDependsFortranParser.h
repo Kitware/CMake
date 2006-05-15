@@ -69,17 +69,20 @@ union cmDependsFortran_yystype_u
 
 /* Setup the proper yylex interface.  */
 #define YY_EXTRA_TYPE cmDependsFortranParser*
-#define YY_DECL int cmDependsFortran_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
+#define YY_DECL \
+int cmDependsFortran_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
 #define YYSTYPE cmDependsFortran_yystype
 #define YYSTYPE_IS_DECLARED 1
 #if !defined(cmDependsFortranLexer_cxx)
 # include "cmDependsFortranLexer.h"
 #endif
-#if !defined(cmDependsFortranLexer_cxx) && !defined(cmDependsFortranParser_cxx)
+#if !defined(cmDependsFortranLexer_cxx)
+#if !defined(cmDependsFortranParser_cxx)
 # undef YY_EXTRA_TYPE
 # undef YY_DECL
 # undef YYSTYPE
 # undef YYSTYPE_IS_DECLARED
+#endif
 #endif
 
 #endif
