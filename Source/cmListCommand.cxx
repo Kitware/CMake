@@ -38,9 +38,9 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleGetCommand(args);
     }
-  if(subCommand == "SET" || subCommand == "APPEND")
+  if(subCommand == "APPEND")
     {
-    return this->HandleSetCommand(args);
+    return this->HandleAppendCommand(args);
     }
   if(subCommand == "INSERT")
     {
@@ -72,9 +72,6 @@ bool cmListCommand::GetListString(std::string& listString, const char* var)
     = this->Makefile->GetDefinition(var);
   if(!cacheValue)
     {
-    cmOStringStream str;
-    str << "cannot find variable: " << var;
-    this->SetError(str.str().c_str());
     return false;
     }
   listString = cacheValue;
@@ -133,7 +130,8 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
   std::vector<std::string> varArgsExpanded;
   if ( !this->GetList(varArgsExpanded, listName.c_str()) )
     {
-    return false;
+    this->Makefile->AddDefinition(variableName.c_str(), "NOTFOUND");
+    return true;
     }
 
   std::string value;
@@ -167,21 +165,18 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmListCommand::HandleSetCommand(std::vector<std::string> const& args)
+bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
 {
   if(args.size() < 3)
     {
-    this->SetError("sub-command SET requires at least two arguments.");
+    this->SetError("sub-command APPEND requires at least two arguments.");
     return false;
     }
 
   const std::string& listName = args[1];
   // expand the variable
   std::string listString;
-  if ( !this->GetListString(listString, listName.c_str()) )
-    {
-    return false;
-    }
+  this->GetListString(listString, listName.c_str());
   size_t cc;
   for ( cc = 2; cc < args.size(); ++ cc )
     {
@@ -206,14 +201,17 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
     }
 
   const std::string& listName = args[1];
+
   // expand the variable
+  int item = atoi(args[2].c_str());
   std::vector<std::string> varArgsExpanded;
-  if ( !this->GetList(varArgsExpanded, listName.c_str()) )
+  if ( !this->GetList(varArgsExpanded, listName.c_str()) && (item > 0 || item < -1))
     {
+    cmOStringStream str;
+    str << "index: " << item << " out of range (-1, 0)";
+    this->SetError(str.str().c_str());
     return false;
     }
-
-  int item = atoi(args[2].c_str());
 
   size_t nitem = varArgsExpanded.size();
   if ( item < 0 )
@@ -224,8 +222,8 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
     {
     cmOStringStream str;
     str << "index: " << item << " out of range (-" 
-        << varArgsExpanded.size() << ", " 
-        << varArgsExpanded.size()-1 << ")";
+      << varArgsExpanded.size() << ", " 
+      << varArgsExpanded.size()-1 << ")";
     this->SetError(str.str().c_str());
     return false;
     }

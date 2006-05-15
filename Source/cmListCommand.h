@@ -89,7 +89,7 @@ public:
 protected:
   bool HandleLengthCommand(std::vector<std::string> const& args);
   bool HandleGetCommand(std::vector<std::string> const& args);
-  bool HandleSetCommand(std::vector<std::string> const& args);
+  bool HandleAppendCommand(std::vector<std::string> const& args);
   bool HandleInsertCommand(std::vector<std::string> const& args);
   bool HandleRemoveCommand(std::vector<std::string> const& args);
   bool HandleRemoveItemCommand(std::vector<std::string> const& args);

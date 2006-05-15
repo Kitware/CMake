@@ -13,6 +13,9 @@ TEST("LENGTH mylist result" "4")
 LIST(LENGTH "mylist" result)
 TEST("LENGTH \"mylist\" result" "4")
 
+LIST(LENGTH "nonexiting_list1" result)
+TEST("LENGTH \"nonexiting_list1\" result" "0")
+
 LIST(GET mylist 3 2 1 0 result)
 TEST("GET mylist 3 2 1 0 result" "brad;ken;bill;andy")
 
@@ -29,9 +32,16 @@ TEST("GET mylist -1 -2 -3 -4 result" "brad;ken;bill;andy")
 LIST(GET mylist -1 2 -3 0 result)
 TEST("GET mylist -1 2 -3 0 ${result}" "brad;ken;bill;andy")
 
+LIST(GET "nonexiting_list2" 1 result)
+TEST("GET \"nonexiting_list2\" 1 result" "NOTFOUND")
+
 SET(result andy)
-LIST(SET result brad)
-TEST("SET result brad" "andy;brad")
+LIST(APPEND result brad)
+TEST("APPEND result brad" "andy;brad")
+
+LIST(APPEND "nonexiting_list3" brad)
+SET(result "${nonexiting_list3}")
+TEST("APPEND \"nonexiting_list1\" brad" "brad")
 
 SET(result andy brad)
 LIST(INSERT result -1 bill ken)
