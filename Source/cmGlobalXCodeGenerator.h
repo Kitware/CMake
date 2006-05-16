@@ -182,6 +182,7 @@ private:
   std::map<cmSourceFile*, cmXCodeObject* > GroupMap;
   std::map<cmStdString, cmXCodeObject* > GroupNameMap;
   std::map<cmStdString, cmXCodeObject* > TargetGroup;
+  std::vector<std::string> Architectures;
 };
 
 #endif
