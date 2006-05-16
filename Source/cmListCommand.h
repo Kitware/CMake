@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -29,7 +29,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmListCommand;
     }
@@ -53,11 +53,11 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "List operations.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -79,12 +79,12 @@ public:
       "INSERT will insert elements to the list to the specified location.\n"
       "When specifying an index, negative value corresponds to index from the"
       " end of the list.\n"
-      "REMOVE_AT and REMOVE_ITEM will remove item from the list. The difference "
-      "is that REMOVE_ITEM will remove the given items, while REMOVE_AT will "
-      "remove the item at the given indices.\n"
+      "REMOVE_AT and REMOVE_ITEM will remove item from the list. The "
+      "difference is that REMOVE_ITEM will remove the given items, while "
+      "REMOVE_AT will remove the item at the given indices.\n"
       ;
     }
-  
+
   cmTypeMacro(cmListCommand, cmCommand);
 protected:
   bool HandleLengthCommand(std::vector<std::string> const& args);

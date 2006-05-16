@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -28,7 +28,7 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("must be called with at least one argument.");
     return false;
     }
-  
+
   const std::string &subCommand = args[0];
   if(subCommand == "LENGTH")
     {
@@ -54,7 +54,7 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleRemoveItemCommand(args);
     }
-  
+
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
   return false;
@@ -151,8 +151,8 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
     if ( item < 0 || nitem <= (size_t)item )
       {
       cmOStringStream str;
-      str << "index: " << item << " out of range (-" 
-          << varArgsExpanded.size() << ", " 
+      str << "index: " << item << " out of range (-"
+          << varArgsExpanded.size() << ", "
           << varArgsExpanded.size()-1 << ")";
       this->SetError(str.str().c_str());
       return false;
@@ -223,8 +223,8 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
     if ( item < 0 || nitem <= (size_t)item )
       {
       cmOStringStream str;
-      str << "index: " << item << " out of range (-" 
-        << varArgsExpanded.size() << ", " 
+      str << "index: " << item << " out of range (-"
+        << varArgsExpanded.size() << ", "
         << (varArgsExpanded.size() == 0?0:(varArgsExpanded.size()-1)) << ")";
       this->SetError(str.str().c_str());
       return false;
@@ -299,7 +299,8 @@ bool cmListCommand
 }
 
 //----------------------------------------------------------------------------
-bool cmListCommand::HandleRemoveAtCommand(std::vector<std::string> const& args)
+bool cmListCommand::HandleRemoveAtCommand(
+  std::vector<std::string> const& args)
 {
   if(args.size() < 3)
     {
@@ -329,8 +330,8 @@ bool cmListCommand::HandleRemoveAtCommand(std::vector<std::string> const& args)
     if ( item < 0 || nitem <= (size_t)item )
       {
       cmOStringStream str;
-      str << "index: " << item << " out of range (-" 
-          << varArgsExpanded.size() << ", " 
+      str << "index: " << item << " out of range (-"
+          << varArgsExpanded.size() << ", "
           << varArgsExpanded.size()-1 << ")";
       this->SetError(str.str().c_str());
       return false;
