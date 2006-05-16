@@ -2145,16 +2145,17 @@ void cmGlobalXCodeGenerator
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
   if(osxArch && sysroot)
     {
-    std::vector<std::string> archs;
+    this->Architectures.clear();
     cmSystemTools::ExpandListArgument(std::string(osxArch),
-                                      archs);
-    if(archs.size() > 1)
+                                      this->Architectures);
+    if(this->Architectures.size() > 1)
       {
       buildSettings->AddAttribute("SDKROOT", 
                                   this->CreateString(sysroot));
       std::string archString;
-      for( std::vector<std::string>::iterator i = archs.begin();
-           i != archs.end(); ++i)
+      for( std::vector<std::string>::iterator i = 
+             this->Architectures.begin();
+           i != this->Architectures.end(); ++i)
         {
         archString += *i;
         archString += " ";
@@ -2326,12 +2327,37 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
               this->ConvertToRelativeForMake(d->c_str());
             }
           }
-
         // Write the action to remove the target if it is out of date.
         makefileStream << "\n";
         makefileStream << "\t/bin/rm -f "
                        << this->ConvertToRelativeForMake(tfull.c_str())
                        << "\n";
+        // if building for more than one architecture
+        // then remove those exectuables as well
+        if(this->Architectures.size() > 1)
+          {
+          std::string universal = t->GetDirectory();
+          universal += "/";
+          universal += this->CurrentMakefile->GetProjectName();
+          universal += ".build/";
+          universal += configName;
+          universal += "/";
+          universal += t->GetName();
+          universal += ".build/Objects-normal/";
+          for( std::vector<std::string>::iterator arch = 
+                 this->Architectures.begin();
+               arch != this->Architectures.end(); ++arch)
+            {
+            std::string universalFile = universal;
+            universalFile += *arch;
+            universalFile += "/";
+            universalFile += t->GetName();
+            makefileStream << "\t/bin/rm -f "
+                           << 
+              this->ConvertToRelativeForMake(universalFile.c_str())
+                           << "\n";
+            }
+          }
         makefileStream << "\n\n";
         }
       }

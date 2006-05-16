@@ -1,4 +1,9 @@
 Changes in CMake 2.4.2
+
+* Run symlink command from correct directory for executable versions
+
+* Fix for universal binaries and Xcode depend problem
+
 * Changes to LIST command, see --help-command LIST
 
 * Fix FindQT to be able to use full paths to source files

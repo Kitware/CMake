@@ -1413,8 +1413,6 @@ void cmLocalUnixMakefileGenerator3
   this->CreateCDCommand(commands,
                                 this->Makefile->GetHomeOutputDirectory(),
                                 this->Makefile->GetStartOutputDirectory());
-  std::string echoCommand = "@echo \"\"";
-  commands.push_back(echoCommand.c_str());
   this->WriteMakeRule(ruleFileStream, "The main all target", "all",
                       depends, commands, true);
 

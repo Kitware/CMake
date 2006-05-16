@@ -79,10 +79,9 @@ public:
       "INSERT will insert elements to the list to the specified location.\n"
       "When specifying an index, negative value corresponds to index from the"
       " end of the list.\n"
-      "REMOVE_AT and REMOVE_ITEM will remove item from the list. "
-      "The difference "
-      "is that REMOVE_ITEM will remove the given items, while REMOVE_AT will "
-      "remove the item at the given indices.\n"
+      "REMOVE_AT and REMOVE_ITEM will remove item from the list. The "
+      "difference is that REMOVE_ITEM will remove the given items, while "
+      "REMOVE_AT will remove the item at the given indices.\n"
       ;
     }
   

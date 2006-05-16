@@ -299,7 +299,8 @@ bool cmListCommand
 }
 
 //----------------------------------------------------------------------------
-bool cmListCommand::HandleRemoveAtCommand(std::vector<std::string> const& args)
+bool cmListCommand::HandleRemoveAtCommand(
+  std::vector<std::string> const& args)
 {
   if(args.size() < 3)
     {

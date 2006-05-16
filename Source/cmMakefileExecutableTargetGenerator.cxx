@@ -312,6 +312,12 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     symlink += " ";
     symlink += targetOutPath;
     commands.push_back(symlink);
+    commands1.clear();
+    commands1.push_back(symlink);
+    this->LocalGenerator->CreateCDCommand(commands1,
+                                  this->Makefile->GetStartOutputDirectory(),
+                                  this->Makefile->GetHomeOutputDirectory());
+    commands.insert(commands.end(), commands1.begin(), commands1.end());
     }
 
   // Add the post-build rules when building but not when relinking.
