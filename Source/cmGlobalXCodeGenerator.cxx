@@ -2344,12 +2344,12 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           universal += "/";
           universal += t->GetName();
           universal += ".build/Objects-normal/";
-          for( std::vector<std::string>::iterator i = 
+          for( std::vector<std::string>::iterator arch = 
                  this->Architectures.begin();
-               i != this->Architectures.end(); ++i)
+               arch != this->Architectures.end(); ++arch)
             {
             std::string universalFile = universal;
-            universalFile += *i;
+            universalFile += *arch;
             universalFile += "/";
             universalFile += t->GetName();
             makefileStream << "\t/bin/rm -f "
