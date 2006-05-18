@@ -651,14 +651,19 @@ cmGlobalUnixMakefileGenerator3
         }
       else
         {
-        // Add a fast rule to build the target
-        depends.clear();
-        commands.clear();
-        std::string localName = t->second.GetName();
-        depends.push_back(localName);
-        localName += "/fast";
-        lg->WriteMakeRule(ruleFileStream, "fast build rule for target.",
-                          localName.c_str(), depends, commands, true);        
+        if(t->second.GetName() &&
+           strlen(t->second.GetName()) &&
+           emitted.insert(t->second.GetName()).second)
+          {
+          // Add a fast rule to build the target
+          depends.clear();
+          commands.clear();
+          std::string localName = t->second.GetName();
+          depends.push_back(localName);
+          localName += "/fast";
+          lg->WriteMakeRule(ruleFileStream, "fast build rule for target.",
+                            localName.c_str(), depends, commands, true);
+          }
         }
       }
     }
