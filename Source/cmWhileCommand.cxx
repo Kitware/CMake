@@ -28,30 +28,44 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
     }
   
   // at end of for each execute recorded commands
-  if (cmSystemTools::LowerCase(lff.Name) == "endwhile")
+  if (cmSystemTools::LowerCase(lff.Name) == "while")
     {
-    char* errorString = 0;
+    // record the number of while commands past this one
+    this->Depth++;
+    }
+  else if (cmSystemTools::LowerCase(lff.Name) == "endwhile")
+    {
+    // if this is the endwhile for this while loop then execute
+    if (!this->Depth) 
+      {
+      char* errorString = 0;
     
-    std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(this->Args, expandedArguments);
-    bool isTrue = 
-      cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
-
-    this->Executing = true;
-    while (isTrue)
-      {      
-      // Invoke all the functions that were collected in the block.
-      for(unsigned int c = 0; c < this->Functions.size(); ++c)
-        {
-        mf.ExecuteCommand(this->Functions[c]);
-        }
-      expandedArguments.clear();
+      std::vector<std::string> expandedArguments;
       mf.ExpandArguments(this->Args, expandedArguments);
-      isTrue = 
+      bool isTrue = 
         cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
+
+      this->Executing = true;
+      while (isTrue)
+        {      
+        // Invoke all the functions that were collected in the block.
+        for(unsigned int c = 0; c < this->Functions.size(); ++c)
+          {
+          mf.ExecuteCommand(this->Functions[c]);
+          }
+        expandedArguments.clear();
+        mf.ExpandArguments(this->Args, expandedArguments);
+        isTrue = 
+          cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
+        }
+      mf.RemoveFunctionBlocker(lff);
+      return true;
       }
-    mf.RemoveFunctionBlocker(lff);
-    return true;
+    else
+      {
+      // decrement for each nested while that ends
+      this->Depth--;
+      }
     }
 
   // record the command
@@ -62,11 +76,12 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 }
 
 bool cmWhileFunctionBlocker::
-ShouldRemove(const cmListFileFunction& lff, cmMakefile& )
+ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
 {
   if(cmSystemTools::LowerCase(lff.Name) == "endwhile")
     {
-    if (lff.Arguments == this->Args)
+    if (lff.Arguments == this->Args
+        || mf.IsOn("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS"))
       {
       return true;
       }

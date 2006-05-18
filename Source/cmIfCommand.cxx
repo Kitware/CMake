@@ -34,53 +34,34 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
   if (cmSystemTools::LowerCase(lff.Name) == "else" || 
       cmSystemTools::LowerCase(lff.Name) == "endif")
     {
-    if (args == this->Args)
-      {
-      // if it was an else statement then we should change state
-      // and block this Else Command
-      if (cmSystemTools::LowerCase(lff.Name) == "else")
+    // if it was an else statement then we should change state
+    // and block this Else Command
+    if (cmSystemTools::LowerCase(lff.Name) == "else")
         {
         this->IsBlocking = !this->IsBlocking;
         return true;
         }
-      // otherwise it must be an ENDIF statement, in that case remove the
-      // function blocker
-      mf.RemoveFunctionBlocker(lff);
-      return true;
-      }
-    else if(args.empty())
-      {
-      std::string err = "Empty arguments for ";
-      err += name;
-      err += ".  Did you mean ";
-      err += name;
-      err += "( ";
-      for(std::vector<cmListFileArgument>::const_iterator a = 
-            this->Args.begin();
-          a != this->Args.end();++a)
-        {
-        err += (a->Quoted?"\"":"");
-        err += a->Value;
-        err += (a->Quoted?"\"":"");
-        err += " ";
-        }
-      err += ")?";
-      cmSystemTools::Error(err.c_str());
-      }
-    }
+     // otherwise it must be an ENDIF statement, in that case remove the
+     // function blocker
+     mf.RemoveFunctionBlocker(lff);
+     return true;
+   }
+   
   return this->IsBlocking;
 }
 
 bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                       cmMakefile&)
+                                       cmMakefile& mf)
 {
   if (cmSystemTools::LowerCase(lff.Name) == "endif")
     {
-    if (lff.Arguments == this->Args)
+    if (mf.IsOn("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS") 
+        || lff.Arguments == this->Args)
       {
       return true;
       }
     }
+
   return false;
 }
 

@@ -25,14 +25,18 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
     {
     return false;
     }
-  
-  // at end of for each execute recorded commands
-  if (cmSystemTools::LowerCase(lff.Name) == "endforeach")
+
+  if (cmSystemTools::LowerCase(lff.Name) == "foreach")
     {
-    std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments);
-    if(!expandedArguments.empty() && (expandedArguments[0] == this->Args[0]))
+    // record the number of nested foreach commands
+    this->Depth++;
+    }
+  else if (cmSystemTools::LowerCase(lff.Name) == "endforeach")
+    {
+    // if this is the endofreach for this statement
+    if (!this->Depth) 
       {
+      // at end of for each execute recorded commands
       // store the old value
       std::string oldDef;
       if (mf.GetDefinition(this->Args[0].c_str()))
@@ -60,8 +64,13 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       mf.RemoveFunctionBlocker(lff);
       return true;
       }
+    else
+      {
+      // close out a nested foreach
+      this->Depth--;
+      }
     }
-
+  
   // record the command
   this->Functions.push_back(lff);
   
@@ -76,7 +85,9 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
     {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.Arguments, expandedArguments);
-    if(!expandedArguments.empty() && (expandedArguments[0] == this->Args[0]))
+    if ((!expandedArguments.empty() && 
+         (expandedArguments[0] == this->Args[0]))
+        || mf.IsOn("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS"))
       {
       return true;
       }
