@@ -824,16 +824,35 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
       this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0, lib);
     if(tgt)
       {
+      bool allowModules = true;
+      const char* versionValue
+        = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+      if (versionValue &&  (atof(versionValue) >= 2.4) )
+        {
+        allowModules = false;
+        }
       // if it is not a static or shared library then you can not link to it
       if(!((tgt->GetType() == cmTarget::STATIC_LIBRARY) ||
            (tgt->GetType() == cmTarget::SHARED_LIBRARY)))
-        { 
+        {
         cmOStringStream e;
-        e << "Attempt to add link library " << lib 
-          << " which is not a library target to target " 
-          << tgt->GetType() << "  " << 
-          target << "\n";
-        cmSystemTools::Error(e.str().c_str());
+        e << "Attempt to add link target " << lib << " of type: "
+          << cmTarget::TargetTypeNames[(int)tgt->GetType()]
+          << "\nto target " << target
+          << ". You can only link to STATIC or SHARED libraries.";
+        // in older versions of cmake linking to modules was allowed
+        if( tgt->GetType() == cmTarget::MODULE_LIBRARY )
+          {
+          e << "\nTo allow linking of modules set CMAKE_BACKWARDS_COMPATIBILITY to 2.2 or lower\n";
+          }
+        // if no modules are allowed then this is always an error
+        if(!allowModules || 
+           // if we allow modules but the type is not a module then it is
+           // still an error
+           (allowModules && tgt->GetType() != cmTarget::MODULE_LIBRARY))
+          {
+          cmSystemTools::Error(e.str().c_str());
+          }
         }
       }
     i->second.AddLinkLibrary( *this, target, lib, llt );

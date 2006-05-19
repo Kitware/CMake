@@ -23,6 +23,11 @@
 #include <set>
 #include <queue>
 #include <stdlib.h> // required for atof
+const char* cmTarget::TargetTypeNames[] = {
+  "EXECUTABLE", "STATIC_LIBRARY",
+  "SHARED_LIBRARY", "MODULE_LIBRARY", "UTILITY", "GLOBAL_TARGET",
+  "INSTALL_FILES", "INSTALL_PROGRAMS", "INSTALL_DIRECTORY"
+};
 
 //----------------------------------------------------------------------------
 cmTarget::cmTarget()
