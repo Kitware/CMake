@@ -170,9 +170,10 @@ MACRO(KDE3_ADD_UI_FILES _sources )
       ADD_CUSTOM_COMMAND(OUTPUT ${_src}
          COMMAND ${CMAKE_COMMAND}
          ARGS
-         -DKDE_UIC_FILE:STRING=${_tmp_FILE}
-         -DKDE_UIC_CPP_FILE:STRING=${_src}
-         -DKDE_UIC_H_FILE:STRING=${_header}
+         -DKDE_UIC_EXECUTABLE:FILEPATH=${QT_UIC_EXECUTABLE}
+         -DKDE_UIC_FILE:FILEPATH=${_tmp_FILE}
+         -DKDE_UIC_CPP_FILE:FILEPATH=${_src}
+         -DKDE_UIC_H_FILE:FILEPATH=${_header}
          -P ${KDE3_MODULE_DIR}/kde3uic.cmake
          DEPENDS ${_header}
       )
