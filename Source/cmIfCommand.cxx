@@ -22,8 +22,6 @@
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
-  const char* name = lff.Name.c_str();
-  const std::vector<cmListFileArgument>& args = lff.Arguments;
   // always let if statements through
   if (cmSystemTools::LowerCase(lff.Name) == "if")
     {
