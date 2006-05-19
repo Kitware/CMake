@@ -236,10 +236,13 @@ int do_cmake(int ac, char** av)
         {
         cmSystemTools::Error("No script specified for argument -P");
         }
-      script_mode = true;
-      args.push_back(av[i]);
-      i++;
-      args.push_back(av[i]);
+      else
+        {
+        script_mode = true;
+        args.push_back(av[i]);
+        i++;
+        args.push_back(av[i]);
+        }
       }
     else 
       {

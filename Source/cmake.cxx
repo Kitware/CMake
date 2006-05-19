@@ -267,7 +267,16 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       std::string entry = arg.substr(2);
       if(entry.size() == 0)
         {
-        entry = args[++i];
+        ++i;
+        if(i < args.size())
+          {
+          entry = args[i];
+          }
+        else
+          {
+          cmSystemTools::Error("-D must be followed with VAR=VALUE.");
+          return false;
+          }
         }
       std::string var, value;
       cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
@@ -291,7 +300,16 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       std::string path = arg.substr(2);
       if ( path.size() == 0 )
         {
-        path = args[++i];
+        ++i;
+        if(i < args.size())
+          {
+          path = args[i];
+          }
+        else
+          {
+          cmSystemTools::Error("-C must be followed by a file name.");
+          return false;
+          }
         }
       std::cerr << "loading initial cache file " << path.c_str() << "\n";
       this->ReadListFile(path.c_str());
@@ -299,6 +317,11 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     else if(arg.find("-P",0) == 0)
       {
       i++;
+      if(i >= args.size())
+        {
+        cmSystemTools::Error("-P must be followed by a file name.");
+        return false;
+        }
       std::string path = args[i];
       if ( path.size() == 0 )
         {
@@ -425,7 +448,13 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       std::string value = arg.substr(2);
       if(value.size() == 0)
         {
-        value = args[++i];
+        ++i;
+        if(i >= args.size())
+          {
+          cmSystemTools::Error("No generator specified for -G");
+          return;
+          }
+        value = args[i];
         }
       cmGlobalGenerator* gen =
         this->CreateGlobalGenerator(value.c_str());
