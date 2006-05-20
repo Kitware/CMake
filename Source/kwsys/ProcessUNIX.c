@@ -1909,12 +1909,15 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
 #elif defined(__hpux) || defined(__sparc) || defined(__sgi) || defined(_AIX)
 # define KWSYSPE_PS_COMMAND "ps -ef"
 # define KWSYSPE_PS_FORMAT  "%*s %d %d %*[^\n]\n"
+#elif defined(__CYGWIN__)
+# define KWSYSPE_PS_COMMAND "ps aux"
+# define KWSYSPE_PS_FORMAT  "%d %d %*[^\n]\n"
 #endif
 
 /*--------------------------------------------------------------------------*/
 static void kwsysProcessKill(pid_t process_id)
 {
-#if defined(__linux__)
+#if defined(__linux__) || defined(__CYGWIN__)
   DIR* procdir;
 #endif
 
@@ -1922,7 +1925,7 @@ static void kwsysProcessKill(pid_t process_id)
   kill(process_id, SIGSTOP);
 
   /* Kill all children if we can find them.  */
-#if defined(__linux__)
+#if defined(__linux__) || defined(__CYGWIN__)
   /* First try using the /proc filesystem.  */
   if((procdir = opendir("/proc")) != NULL)
     {
@@ -1980,8 +1983,8 @@ static void kwsysProcessKill(pid_t process_id)
     }
   else
 #endif
-#if defined(KWSYSPE_PS_COMMAND)
     {
+#if defined(KWSYSPE_PS_COMMAND)
     /* Try running "ps" to get the process information.  */
     FILE* ps = popen(KWSYSPE_PS_COMMAND, "r");
 
@@ -2005,8 +2008,8 @@ static void kwsysProcessKill(pid_t process_id)
       {
       pclose(ps);
       }
-    }
 #endif
+    }
 
   /* Kill the process.  */
   kill(process_id, SIGKILL);
