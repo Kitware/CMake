@@ -843,7 +843,9 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
         // in older versions of cmake linking to modules was allowed
         if( tgt->GetType() == cmTarget::MODULE_LIBRARY )
           {
-          e << "\nTo allow linking of modules set CMAKE_BACKWARDS_COMPATIBILITY to 2.2 or lower\n";
+          e << 
+            "\nTo allow linking of modules set "
+            "CMAKE_BACKWARDS_COMPATIBILITY to 2.2 or lower\n";
           }
         // if no modules are allowed then this is always an error
         if(!allowModules || 
