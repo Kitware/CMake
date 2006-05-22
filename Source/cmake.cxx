@@ -29,6 +29,7 @@
 # include "cmVariableWatch.h"
 # include "cmVersion.h"
 # include <cmsys/Terminal.h>
+# include <cmsys/Directory.hxx>
 #endif
 
 // only build kdevelop generator on non-windows platforms
@@ -973,6 +974,68 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       return 1;
       }
 
+    // Command to start progress for a build
+    else if (args[1] == "cmake_progress_start" && args.size() == 4)
+      {
+      // bascially remove the directory
+      std::string dirName = args[2];
+      dirName += "/Progress";
+      cmSystemTools::RemoveADirectory(dirName.c_str());
+      cmSystemTools::MakeDirectory(dirName.c_str());
+      // write the count into the directory
+      std::string fName = dirName;
+      fName += "/count.txt";
+      FILE *progFile = fopen(fName.c_str(),"w");
+      if (progFile)
+        {
+        int count = atoi(args[3].c_str());
+        fprintf(progFile,"%i\n",count);
+        fclose(progFile);
+        }
+      return 0;
+      }
+
+    // Command to report progress for a build
+    else if (args[1] == "cmake_progress_report" && args.size() >= 4)
+      {
+      std::string dirName = args[2];
+      dirName += "/Progress";
+      std::string fName;
+      FILE *progFile;
+      unsigned int i;
+      for (i = 3; i < args.size(); ++i)
+        {
+        fName = dirName;
+        fName += "/";
+        fName += args[i];
+        progFile = fopen(fName.c_str(),"w");
+        if (progFile)
+          {
+          fprintf(progFile,"empty");
+          fclose(progFile);
+          }
+        }
+      cmsys::Directory dir;
+      dir.Load(dirName.c_str());
+      size_t fileNum = dir.GetNumberOfFiles();
+      // read the count
+      fName = dirName;
+      fName += "/count.txt";
+      progFile = fopen(fName.c_str(),"r");
+      if (progFile)
+        {
+        int count = 0;
+        fscanf(progFile,"%i",&count);
+        if (count > 0)
+          {
+          // print the progress
+          fprintf(stdout,"%3i%% complete\n",((fileNum-3)*100)/count);
+          }
+        fclose(progFile);
+        }
+      return 0;
+      }
+    
     // Command to create a symbolic link.  Fails on platforms not
     // supporting them.
     else if (args[1] == "create_symlink" && args.size() == 4)
