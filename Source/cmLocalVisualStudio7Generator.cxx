@@ -22,6 +22,8 @@
 #include "cmCacheManager.h"
 #include "cmake.h"
 
+#include <ctype.h> // for isspace
+
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
 {
   this->Version = 7;
