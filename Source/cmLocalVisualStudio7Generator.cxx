@@ -958,6 +958,12 @@ void cmLocalVisualStudio7Generator::OutputDefineFlags(const char* flags,
       done = true;
       }
 
+    // Remove trailing whitespace from the definition.
+    while(!define.empty() && isspace(define[define.size()-1]))
+      {
+      define = define.substr(0, define.size()-1);
+      }
+
     // Double-quotes in the value of the definition must be escaped
     // with a backslash.  The entire definition should be quoted in
     // the generated xml attribute to avoid confusing the VS parser.
