@@ -311,7 +311,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     symlink += targetOutPathReal;
     symlink += " ";
     symlink += targetOutPath;
-    commands.push_back(symlink);
     commands1.clear();
     commands1.push_back(symlink);
     this->LocalGenerator->CreateCDCommand(commands1,
