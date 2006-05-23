@@ -280,11 +280,14 @@ protected:
                           cmTarget& target, const char* filename =0);
 
   bool ForceVerboseMakefiles;
+  std::map<cmStdString, std::vector<int> > ProgressFiles;
+
 private:
   friend class cmMakefileTargetGenerator;
   friend class cmMakefileExecutableTargetGenerator;
   friend class cmMakefileLibraryTargetGenerator;
   friend class cmMakefileUtilityTargetGenerator;
+  friend class cmGlobalUnixMakefileGenerator3;
   
   std::map<cmStdString, IntegrityCheckSetMap> CheckDependFiles;
 

@@ -123,6 +123,15 @@ public:
    const char *targetName,
    const char* config, bool ignoreErrors);
 
+  // returns true if a progress rule should be added
+  int ShouldAddProgressRule();
+  int GetNumberOfSourceFiles() {return this->NumberOfSourceFiles; }
+  int GetNumberOfCompilableSourceFilesForTarget(cmTarget &tgt);
+  int GetTargetTotalNumberOfSourceFiles(cmTarget& target);
+  
+  // what targets does the specified target depend on
+  std::vector<cmTarget *>& GetTargetDepends(cmTarget& target);
+
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
@@ -173,6 +182,12 @@ protected:
 
   typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
+
+  size_t NumberOfSourceFiles;
+  size_t NumberOfSourceFilesWritten;
+
+  std::map<cmStdString, std::vector<cmTarget *> > TargetDependencies;
+  std::map<cmStdString, int > TargetSourceFileCount;
 };
 
 #endif

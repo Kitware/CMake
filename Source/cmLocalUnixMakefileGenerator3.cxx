@@ -1408,13 +1408,32 @@ void cmLocalUnixMakefileGenerator3
 
   depends.push_back("cmake_check_build_system");
 
+  if (!this->Parent)
+    {
+    cmGlobalUnixMakefileGenerator3 *gg = 
+      static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+    cmOStringStream progCmd;
+    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
+    progCmd << this->Makefile->GetHomeOutputDirectory();
+    progCmd << "/CMakeFiles 100";
+    commands.push_back(progCmd.str());
+    }
+
   commands.push_back
     (this->GetRecursiveMakeCall("CMakeFiles/Makefile2",dir.c_str()));  
   this->CreateCDCommand(commands,
                                 this->Makefile->GetHomeOutputDirectory(),
                                 this->Makefile->GetStartOutputDirectory());
-  std::string echoCommand = "@echo \"\"";
-  commands.push_back(echoCommand.c_str());
+  if (!this->Parent)
+    {
+    cmGlobalUnixMakefileGenerator3 *gg = 
+      static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+    cmOStringStream progCmd;
+    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
+    progCmd << this->Makefile->GetHomeOutputDirectory();
+    progCmd << "/CMakeFiles 0";
+    commands.push_back(progCmd.str());
+    }
   this->WriteMakeRule(ruleFileStream, "The main all target", "all",
                       depends, commands, true);
 

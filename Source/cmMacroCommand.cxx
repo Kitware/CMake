@@ -252,11 +252,14 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
   // record commands until we hit the ENDMACRO
   // at the ENDMACRO call we shift gears and start looking for invocations
-  if(cmSystemTools::LowerCase(lff.Name) == "endmacro")
+  if(cmSystemTools::LowerCase(lff.Name) == "macro")
     {
-    std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments);
-    if(!expandedArguments.empty() && (expandedArguments[0] == this->Args[0]))
+    this->Depth++;
+    }
+  else if(cmSystemTools::LowerCase(lff.Name) == "endmacro")
+    {
+    // if this is the endmacro for this macro then execute
+    if (!this->Depth) 
       {
       std::string name = this->Args[0];
       std::vector<std::string>::size_type cc;
@@ -280,6 +283,11 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       mf.RemoveFunctionBlocker(lff);
       return true;
       }
+    else
+      {
+      // decrement for each nested macro that ends
+      this->Depth--;
+      }
     }
 
   // if it wasn't an endmacro and we are not executing then we must be
@@ -296,11 +304,14 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
     {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.Arguments, expandedArguments);
-    if(!expandedArguments.empty() && (expandedArguments[0] == this->Args[0]))
+    if ((!expandedArguments.empty() && 
+        (expandedArguments[0] == this->Args[0]))
+        || mf.IsOn("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS"))
       {
       return true;
       }
     }
+
   return false;
 }
 

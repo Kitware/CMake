@@ -381,6 +381,22 @@ cmMakefileTargetGenerator
   this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
                                    cmLocalUnixMakefileGenerator3::EchoBuild);
 
+  // add in a progress call if needed
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  int prog = gg->ShouldAddProgressRule();
+  if (prog)
+    {
+    cmOStringStream progCmd;
+    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
+    progCmd << this->Makefile->GetHomeOutputDirectory();
+    progCmd << "/CMakeFiles ";
+    progCmd << prog;
+    commands.push_back(progCmd.str());
+    this->LocalGenerator->ProgressFiles[this->Target->GetName()].
+      push_back(prog);
+    }
+      
   // Construct the compile rules.
   std::string compileRuleVar = "CMAKE_";
   compileRuleVar += lang;
