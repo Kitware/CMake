@@ -470,11 +470,13 @@ tar_extract_hardlink(TAR * t, char *realname)
     return -1;
   }
 
+#ifndef WIN32
   if (pathname)
     {
     free(pathname);
     }
   return 0;
+#endif
 }
 
 
@@ -545,11 +547,13 @@ tar_extract_symlink(TAR *t, char *realname)
     return -1;
   }
 
+#ifndef WIN32
   if (pathname)
     {
     free(pathname);
     }
   return 0;
+#endif
 }
 
 
@@ -620,11 +624,13 @@ tar_extract_chardev(TAR *t, char *realname)
     return -1;
   }
 
+#ifndef WIN32
   if (pathname)
     {
     free(pathname);
     }
   return 0;
+#endif
 }
 
 
@@ -694,11 +700,13 @@ tar_extract_blockdev(TAR *t, char *realname)
     return -1;
   }
 
+#ifndef WIN32
   if (pathname)
     {
     free(pathname);
     }
   return 0;
+#endif
 }
 
 
@@ -867,9 +875,11 @@ tar_extract_fifo(TAR *t, char *realname)
     return -1;
   }
 
+#ifndef WIN32
   if (pathname)
     {
     free(pathname);
     }
   return 0;
+#endif
 }

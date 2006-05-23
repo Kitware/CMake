@@ -67,6 +67,7 @@ FOREACH(file
   "ctype.h"
   "fnmatch.h"
   "inttypes.h"
+  "io.h"
   "libgen.h"
   "memory.h"
   "sys/mkdev.h"

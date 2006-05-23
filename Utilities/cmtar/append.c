@@ -31,8 +31,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#ifdef _MSC_VER
-#include <io.h>
+
+#ifdef HAVE_IO_H
+# include <io.h>
 #endif
 
 struct tar_dev

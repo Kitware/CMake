@@ -30,6 +30,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #cmakedefine HAVE_INTTYPES_H @HAVE_INTTYPES_H@
 
+/* Define to 1 if you have the <io.h> header file. */
+#cmakedefine HAVE_IO_H @HAVE_IO_H@
+
 /* Define to 1 if you have the `lchown' function. */
 #cmakedefine HAVE_LCHOWN @HAVE_LCHOWN@
 
