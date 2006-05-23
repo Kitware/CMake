@@ -42,6 +42,18 @@ void cmPassed(const char* Message, const char* m2="")
   cm_passed++;
 }
 
+#ifndef COMPLEX_DEFINED_PRE
+# error "COMPLEX_DEFINED_PRE not defined!"
+#endif
+
+#ifdef COMPLEX_DEFINED
+# error "COMPLEX_DEFINED is defined but it should not!"
+#endif
+
+#ifndef COMPLEX_DEFINED_POST
+# error "COMPLEX_DEFINED_POST not defined!"
+#endif
+
 #ifndef CMAKE_IS_REALLY_FUN
 This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
 #endif

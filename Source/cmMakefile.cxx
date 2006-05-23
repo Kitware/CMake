@@ -36,6 +36,8 @@
 
 #include <cmsys/RegularExpression.hxx>
 
+#include <ctype.h> // for isspace
+
 // default is not to be building executables
 cmMakefile::cmMakefile()
 {
@@ -803,7 +805,29 @@ void cmMakefile::AddDefineFlag(const char* flag)
 
 void cmMakefile::RemoveDefineFlag(const char* flag)
 {
-  cmSystemTools::ReplaceString(this->DefineFlags, flag, " ");
+  // Check the length of the flag to remove.
+  std::string::size_type len = strlen(flag);
+  if(len < 1)
+    {
+    return;
+    }
+
+  // Remove all instances of the flag that are surrounded by
+  // whitespace or the beginning/end of the string.
+  for(std::string::size_type lpos = this->DefineFlags.find(flag, 0);
+      lpos != std::string::npos; lpos = this->DefineFlags.find(flag, lpos))
+    {
+    std::string::size_type rpos = lpos + len;
+    if((lpos <= 0 || isspace(this->DefineFlags[lpos-1])) &&
+       (rpos >= this->DefineFlags.size() || isspace(this->DefineFlags[rpos])))
+      {
+      this->DefineFlags.erase(lpos, len);
+      }
+    else
+      {
+      ++lpos;
+      }
+    }
 }
 
 void cmMakefile::AddLinkLibrary(const char* lib, 
