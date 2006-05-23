@@ -699,11 +699,15 @@ cmGlobalUnixMakefileGenerator3
           
           // Write the rule.
           commands.clear();
+          std::string progressDir =
+            lg->GetMakefile()->GetHomeOutputDirectory();
+          progressDir += "/CMakeFiles";
           cmOStringStream progCmd;
           progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
-          progCmd << lg->GetMakefile()->GetHomeOutputDirectory();
-          progCmd << "/CMakeFiles ";
-          progCmd << 
+          progCmd << lg->Convert(progressDir.c_str(),
+                                 cmLocalGenerator::FULL,
+                                 cmLocalGenerator::SHELL);
+          progCmd << " " <<
             (100*this->GetTargetTotalNumberOfSourceFiles(t->second))/
             this->GetNumberOfSourceFiles();
           commands.push_back(progCmd.str());
@@ -824,10 +828,15 @@ cmGlobalUnixMakefileGenerator3
         localName += "/all";
         depends.clear();
 
+        std::string progressDir =
+          lg->GetMakefile()->GetHomeOutputDirectory();
+        progressDir += "/CMakeFiles";
         cmOStringStream progCmd;
         progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-        progCmd << lg->GetMakefile()->GetHomeOutputDirectory();
-        progCmd << "/CMakeFiles ";
+        progCmd << lg->Convert(progressDir.c_str(),
+                               cmLocalGenerator::FULL,
+                               cmLocalGenerator::SHELL);
+        progCmd << " ";
         std::vector<int> &progFiles = lg->ProgressFiles[t->first];
         for (std::vector<int>::iterator i = progFiles.begin();
              i != progFiles.end(); ++i)

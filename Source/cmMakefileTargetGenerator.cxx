@@ -387,11 +387,14 @@ cmMakefileTargetGenerator
   int prog = gg->ShouldAddProgressRule();
   if (prog)
     {
+    std::string progressDir = this->Makefile->GetHomeOutputDirectory();
+    progressDir += "/CMakeFiles";
     cmOStringStream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-    progCmd << this->Makefile->GetHomeOutputDirectory();
-    progCmd << "/CMakeFiles ";
-    progCmd << prog;
+    progCmd << this->LocalGenerator->Convert(progressDir.c_str(),
+                                             cmLocalGenerator::FULL,
+                                             cmLocalGenerator::SHELL);
+    progCmd << " " << prog;
     commands.push_back(progCmd.str());
     this->LocalGenerator->ProgressFiles[this->Target->GetName()].
       push_back(prog);

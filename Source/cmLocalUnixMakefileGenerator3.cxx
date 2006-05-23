@@ -1410,12 +1410,14 @@ void cmLocalUnixMakefileGenerator3
 
   if (!this->Parent)
     {
-    cmGlobalUnixMakefileGenerator3 *gg = 
-      static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+    std::string progressDir = this->Makefile->GetHomeOutputDirectory();
+    progressDir += "/CMakeFiles";
     cmOStringStream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
-    progCmd << this->Makefile->GetHomeOutputDirectory();
-    progCmd << "/CMakeFiles 100";
+    progCmd << this->Convert(progressDir.c_str(),
+                             cmLocalGenerator::FULL,
+                             cmLocalGenerator::SHELL);
+    progCmd << " 100";
     commands.push_back(progCmd.str());
     }
 
@@ -1426,12 +1428,14 @@ void cmLocalUnixMakefileGenerator3
                                 this->Makefile->GetStartOutputDirectory());
   if (!this->Parent)
     {
-    cmGlobalUnixMakefileGenerator3 *gg = 
-      static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+    std::string progressDir = this->Makefile->GetHomeOutputDirectory();
+    progressDir += "/CMakeFiles";
     cmOStringStream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
-    progCmd << this->Makefile->GetHomeOutputDirectory();
-    progCmd << "/CMakeFiles 0";
+    progCmd << this->Convert(progressDir.c_str(),
+                             cmLocalGenerator::FULL,
+                             cmLocalGenerator::SHELL);
+    progCmd << " 0";
     commands.push_back(progCmd.str());
     }
   this->WriteMakeRule(ruleFileStream, "The main all target", "all",
