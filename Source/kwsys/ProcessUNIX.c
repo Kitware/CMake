@@ -2213,9 +2213,6 @@ static void kwsysProcessesRemove(kwsysProcess* cp)
       newProcesses.Processes[i] = newProcesses.Processes[i+1];
       }
 
-    /* Store the new set in that seen by the signal handler.  */
-    kwsysProcessesUpdate(&newProcesses);
-
     /* If this was the last process, disable the signal handler.  */
     if(newProcesses.Count == 0)
       {
@@ -2223,7 +2220,16 @@ static void kwsysProcessesRemove(kwsysProcess* cp)
          interrupted.  */
       while((sigaction(SIGCHLD, &kwsysProcessesOldSigChldAction, 0) < 0) &&
             (errno == EINTR));
+
+      /* Free the table of process pointers since it is now empty.
+         This is safe because the signal handler has been removed.  */
+      newProcesses.Size = 0;
+      free(newProcesses.Processes);
+      newProcesses.Processes = 0;
       }
+
+    /* Store the new set in that seen by the signal handler.  */
+    kwsysProcessesUpdate(&newProcesses);
     }
   }
 
