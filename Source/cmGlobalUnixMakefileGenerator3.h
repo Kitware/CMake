@@ -125,7 +125,6 @@ public:
 
   // returns true if a progress rule should be added
   int ShouldAddProgressRule();
-  int GetNumberOfSourceFiles() {return this->NumberOfSourceFiles; }
   int GetNumberOfCompilableSourceFilesForTarget(cmTarget &tgt);
   int GetTargetTotalNumberOfSourceFiles(cmTarget& target);
   
@@ -183,8 +182,8 @@ protected:
   typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
 
-  size_t NumberOfSourceFiles;
-  size_t NumberOfSourceFilesWritten;
+  int NumberOfSourceFiles;
+  int NumberOfSourceFilesWritten;
 
   std::map<cmStdString, std::vector<cmTarget *> > TargetDependencies;
   std::map<cmStdString, int > TargetSourceFileCount;
