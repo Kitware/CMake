@@ -160,8 +160,7 @@ public:
                                  bool /* clear */) {};
   
   /** Called from command-line hook to scan dependencies.  */
-  virtual bool ScanDependencies(std::vector<std::string> const& /* args */)
-    {return true;};
+  virtual bool ScanDependencies(const char* /* tgtInfo */) { return true; }
 
   /** Compute the list of link libraries and directories for the given
       target and configuration.  */

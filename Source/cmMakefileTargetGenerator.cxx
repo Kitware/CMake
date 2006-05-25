@@ -600,20 +600,31 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
                cmLocalGenerator::FULL, cmLocalGenerator::SHELL))
          << " && ";
 #endif
-  depCmd << "$(CMAKE_COMMAND) -E cmake_depends " 
-         << " \""
+  // Generate a call this signature:
+  //
+  //   cmake -E cmake_depends <generator>
+  //                          <home-src-dir> <start-src-dir>
+  //                          <home-out-dir> <start-out-dir>
+  //                          <dep-info>
+  //
+  // This gives the dependency scanner enough information to recreate
+  // the state of our local generator sufficiently for its needs.
+  depCmd << "$(CMAKE_COMMAND) -E cmake_depends \""
          << this->GlobalGenerator->GetName() << "\" "
-         << this->LocalGenerator->Convert
-    (this->Makefile->GetHomeOutputDirectory(),
-     cmLocalGenerator::FULL,cmLocalGenerator::SHELL)
+         << this->Convert(this->Makefile->GetHomeDirectory(),
+                          cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
-         << this->LocalGenerator->Convert
-    (this->Makefile->GetStartOutputDirectory(),
-     cmLocalGenerator::FULL,cmLocalGenerator::SHELL)
+         << this->Convert(this->Makefile->GetStartDirectory(),
+                          cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
+         << " "
+         << this->Convert(this->Makefile->GetHomeOutputDirectory(),
+                          cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
+         << " "
+         << this->Convert(this->Makefile->GetStartOutputDirectory(),
+                          cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
          << this->Convert(this->InfoFileNameFull.c_str(),
-                          cmLocalGenerator::FULL,
-                          cmLocalGenerator::SHELL);
+                          cmLocalGenerator::FULL, cmLocalGenerator::SHELL);
   commands.push_back(depCmd.str());
   
   // Write the rule.

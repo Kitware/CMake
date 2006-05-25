@@ -178,7 +178,7 @@ public:
   
   
   /** Called from command-line hook to scan dependencies.  */
-  virtual bool ScanDependencies(std::vector<std::string> const& args);
+  virtual bool ScanDependencies(const char* tgtInfo);
 
   /** Called from command-line hook to check dependencies.  */
   virtual void CheckDependencies(cmMakefile* mf, bool verbose,

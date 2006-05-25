@@ -20,6 +20,7 @@
 #include "cmStandardIncludes.h"
 
 class cmFileTimeComparison;
+class cmLocalGenerator;
 
 /** \class cmDepends
  * \brief Dependency scanner superclass.
@@ -37,13 +38,13 @@ public:
   
   /** at what level will the compile be done from */
   void SetCompileDirectory(const char *dir) {this->CompileDirectory = dir;};
-  
-  /** Set the full path to the top of the build tree.  This is
-      the base path from which dependencies are referenced as
-      relative paths.  */
-  void SetHomeOutputDirectory(const char *dir) {
-    this->HomeOutputDirectory = dir;};
-    
+
+  /** Set the local generator for the directory in which we are
+      scanning dependencies.  This is not a full local generator; it
+      has been setup to do relative path conversions for the current
+      directory.  */
+  void SetLocalGenerator(cmLocalGenerator* lg) { this->LocalGenerator = lg; }
+
   /** should this be verbose in its output */
   void SetVerbose(bool verb) { this->Verbose = verb; }
     
@@ -79,8 +80,8 @@ protected:
   // The directory in which the build rule for the target file is executed.
   std::string CompileDirectory;
 
-  // The full path to the top of the build tree.
-  std::string HomeOutputDirectory;
+  // The local generator.
+  cmLocalGenerator* LocalGenerator;
 
   // Flag for verbose output.
   bool Verbose;

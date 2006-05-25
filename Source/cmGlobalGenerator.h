@@ -109,7 +109,7 @@ public:
 
 
   ///! Set the CMake instance
-  void SetCMakeInstance(cmake *cm) { this->CMakeInstance = cm; };
+  void SetCMakeInstance(cmake *cm);
   
   ///! Get the CMake instance
   cmake *GetCMakeInstance() { return this->CMakeInstance; };

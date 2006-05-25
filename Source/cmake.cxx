@@ -1102,14 +1102,71 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Internal CMake dependency scanning support.
     else if (args[1] == "cmake_depends" && args.size() >= 6)
       {
+      // Create a cmake object instance to process dependencies.
       cmake cm;
-      cmGlobalGenerator *ggd = cm.CreateGlobalGenerator(args[2].c_str());
-      if (ggd)
+      std::string gen;
+      std::string homeDir;
+      std::string startDir;
+      std::string homeOutDir;
+      std::string startOutDir;
+      std::string depInfo;
+      if(args.size() >= 8)
         {
-        ggd->SetCMakeInstance(&cm);
+        // Full signature:
+        //
+        //   -E cmake_depends <generator>
+        //                    <home-src-dir> <start-src-dir>
+        //                    <home-out-dir> <start-out-dir>
+        //                    <dep-info>
+        //
+        // All paths are provided.
+        gen = args[2];
+        homeDir = args[3];
+        startDir = args[4];
+        homeOutDir = args[5];
+        startOutDir = args[6];
+        depInfo = args[7];
+        }
+      else
+        {
+        // Support older signature for existing makefiles:
+        //
+        //   -E cmake_depends <generator>
+        //                    <home-out-dir> <start-out-dir>
+        //                    <dep-info>
+        //
+        // Just pretend the source directories are the same as the
+        // binary directories so at least scanning will work.
+        gen = args[2];
+        homeDir = args[3];
+        startDir = args[4];
+        homeOutDir = args[3];
+        startOutDir = args[3];
+        depInfo = args[5];
+        }
+
+      // Create a local generator configured for the directory in
+      // which dependencies will be scanned.
+      homeDir = cmSystemTools::CollapseFullPath(homeDir.c_str());
+      startDir = cmSystemTools::CollapseFullPath(startDir.c_str());
+      homeOutDir = cmSystemTools::CollapseFullPath(homeOutDir.c_str());
+      startOutDir = cmSystemTools::CollapseFullPath(startOutDir.c_str());
+      cm.SetHomeDirectory(homeDir.c_str());
+      cm.SetStartDirectory(startDir.c_str());
+      cm.SetHomeOutputDirectory(homeOutDir.c_str());
+      cm.SetStartOutputDirectory(startOutDir.c_str());
+      if(cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen.c_str()))
+        {
+        cm.SetGlobalGenerator(ggd);
         std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
         lgd->SetGlobalGenerator(ggd);
-        return lgd->ScanDependencies(args)? 0 : 2;
+        lgd->GetMakefile()->SetStartDirectory(startDir.c_str());
+        lgd->GetMakefile()->SetStartOutputDirectory(startOutDir.c_str());
+        lgd->GetMakefile()->MakeStartDirectoriesCurrent();
+        lgd->SetupPathConversions();
+
+        // Actually scan dependencies.
+        return lgd->ScanDependencies(depInfo.c_str())? 0 : 2;
         }
       return 1;
       }

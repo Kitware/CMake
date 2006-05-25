@@ -589,8 +589,6 @@ void cmGlobalGenerator::Configure()
     }
   this->LocalGenerators.clear();
 
-  // Setup relative path generation.
-  this->ConfigureRelativePaths();
   this->TotalTargets.clear();
   
   // start with this directory
@@ -1217,6 +1215,15 @@ inline std::string removeQuotes(const std::string& s)
     return s.substr(1, s.size()-2);
     }
   return s;
+}
+
+void cmGlobalGenerator::SetCMakeInstance(cmake* cm)
+{
+  // Store a pointer to the cmake object instance.
+  this->CMakeInstance = cm;
+
+  // Setup relative path conversion for the instance.
+  this->ConfigureRelativePaths();
 }
 
 void cmGlobalGenerator::SetupTests()

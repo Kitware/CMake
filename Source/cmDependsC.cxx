@@ -16,8 +16,9 @@
 =========================================================================*/
 #include "cmDependsC.h"
 
-#include "cmSystemTools.h"
 #include "cmFileTimeComparison.h"
+#include "cmLocalGenerator.h"
+#include "cmSystemTools.h"
 
 #include <ctype.h> // isspace
 
@@ -194,13 +195,18 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
     first = false;
     }
 
-  // Write the dependencies to the output stream.
+  // Write the dependencies to the output stream.  Makefile rules
+  // written by the original local generator for this directory
+  // convert the dependencies to paths relative to the home output
+  // directory.  We must do the same here.
   internalDepends << obj << std::endl;
   for(std::set<cmStdString>::iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
     makeDepends << obj << ": "
-                << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
+                << this->LocalGenerator->Convert(i->c_str(),
+                                                 cmLocalGenerator::HOME_OUTPUT,
+                                                 cmLocalGenerator::MAKEFILE)
                 << std::endl;
     internalDepends << " " << i->c_str() << std::endl;
     }
@@ -370,8 +376,9 @@ bool cmDependsC::FileExistsOrIsGenerated(const std::string& fname,
     // Note that CMAKE_GENERATED_FILES is written with a conversion
     // relative to the home output directory.
     std::string rname =
-      cmSystemTools::RelativePath(this->HomeOutputDirectory.c_str(), 
-                                  fname.c_str());
+      this->LocalGenerator->Convert(fname.c_str(),
+                                    cmLocalGenerator::HOME_OUTPUT,
+                                    cmLocalGenerator::UNCHANGED);
     if(this->FileIsGenerated(rname, scanned, dependencies))
       {
       return true;

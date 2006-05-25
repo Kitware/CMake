@@ -1127,30 +1127,15 @@ cmLocalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
-bool
-cmLocalUnixMakefileGenerator3
-::ScanDependencies(std::vector<std::string> const& args)
+bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
 {
-  // Format of arguments is: $(CMAKE_COMMAND), cmake_depends,
-  // GeneratorName, home_output_dir, start_output_dir, info file The
-  // caller has ensured that all required arguments exist.
-
   // The info file for this target
-  std::string const& infoFile = args[5];
+  std::string const& infoFile = tgtInfo;
 
   // Read the directory information file.
-  cmake cm;
-  cmGlobalGenerator gg;
-  gg.SetCMakeInstance(&cm);
-  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
-  lg->SetGlobalGenerator(&gg);
-  cmMakefile* mf = lg->GetMakefile();
-  mf->SetHomeOutputDirectory(args[3].c_str());
-  mf->SetStartOutputDirectory(args[4].c_str());
-  lg->SetupPathConversions();
-  
+  cmMakefile* mf = this->Makefile;
   bool haveDirectoryInfo = false;
-  std::string dirInfoFile = args[4];
+  std::string dirInfoFile = this->Makefile->GetStartOutputDirectory();
   dirInfoFile += "/CMakeFiles/CMakeDirectoryInformation.cmake";
   if(mf->ReadListFile(0, dirInfoFile.c_str()) &&
      !cmSystemTools::GetErrorOccuredFlag())
@@ -1283,7 +1268,7 @@ cmLocalUnixMakefileGenerator3
                                includeRegexScan.c_str(),
                                includeRegexComplain.c_str(),
                                generatedFiles, includeCacheFileName);
-      scanner->SetHomeOutputDirectory(mf->GetHomeOutputDirectory());
+      scanner->SetLocalGenerator(this);
       }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")
@@ -1313,7 +1298,7 @@ cmLocalUnixMakefileGenerator3
         ++si;
         // make sure the object file is relative to home output
         std::string obj = *si;
-        obj = lg->Convert(obj.c_str(),HOME_OUTPUT,MAKEFILE);
+        obj = this->Convert(obj.c_str(),HOME_OUTPUT,MAKEFILE);
         scanner->Write(src.c_str(),obj.c_str(),
                        ruleFileStream, internalRuleFileStream);
         }
