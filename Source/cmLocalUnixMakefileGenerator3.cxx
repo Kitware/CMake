@@ -48,6 +48,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->DefineWindowsNULL = false;
   this->UnixCD = true;
   this->ForceVerboseMakefiles=false;
+  this->ColorMakefile = false;
 }
 
 //----------------------------------------------------------------------------
@@ -74,6 +75,10 @@ void cmLocalUnixMakefileGenerator3::Generate()
 {
   // Setup our configuration variables for this directory.
   this->ConfigureOutputPaths();
+
+  // Record whether color makefiles are enabled to avoid checking many
+  // times later.
+  this->ColorMakefile = this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE");
 
   // Generate the rule files for each target.
   cmTargets& targets = this->Makefile->GetTargets();
@@ -860,8 +865,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
   // Choose the color for the text.
   std::string color_name;
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  if(this->GlobalGenerator->GetToolSupportsColor() &&
-     this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE"))
+  if(this->GlobalGenerator->GetToolSupportsColor() && this->ColorMakefile)
     {
     // See cmake::ExecuteEchoColor in cmake.cxx for these options.
     // This color set is readable on both black and white backgrounds.

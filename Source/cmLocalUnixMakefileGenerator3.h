@@ -308,7 +308,11 @@ private:
   //==========================================================================
 
   std::string HomeRelativeOutputPath;
-  
+
+  /* Copy the setting of CMAKE_COLOR_MAKEFILE from the makefile at the
+     beginning of generation to avoid many duplicate lookups.  */
+  bool ColorMakefile;
+
   std::map<cmStdString,std::vector<cmTarget *> > LocalObjectFiles;
 
   /* does the work for each target */
