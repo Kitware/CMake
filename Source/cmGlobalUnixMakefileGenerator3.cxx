@@ -117,7 +117,8 @@ cmGlobalUnixMakefileGenerator3
 int cmGlobalUnixMakefileGenerator3::ShouldAddProgressRule() 
 {
   // add progress to 100 source files
-  if ((((this->NumberOfSourceFilesWritten + 1)*100)/this->NumberOfSourceFiles)
+  if (this->NumberOfSourceFiles && 
+      (((this->NumberOfSourceFilesWritten + 1)*100)/this->NumberOfSourceFiles)
       -(this->NumberOfSourceFilesWritten*100)/this->NumberOfSourceFiles)
     {
     this->NumberOfSourceFilesWritten++;    
@@ -173,9 +174,8 @@ GetNumberOfCompilableSourceFilesForTarget(cmTarget &tgt)
 //----------------------------------------------------------------------------
 void cmGlobalUnixMakefileGenerator3::Generate() 
 {
-  // initialize progress, always pretend there is at least 1 file
-  // to avoid division errors etc
-  this->NumberOfSourceFiles = 1;
+  // initialize progress
+  this->NumberOfSourceFiles = 0;
   unsigned int i;
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
@@ -708,9 +708,16 @@ cmGlobalUnixMakefileGenerator3
           progCmd << lg->Convert(progressDir.c_str(),
                                  cmLocalGenerator::FULL,
                                  cmLocalGenerator::SHELL);
-          progCmd << " " <<
-            (100*this->GetTargetTotalNumberOfSourceFiles(t->second))/
-            this->NumberOfSourceFiles;
+          if (this->NumberOfSourceFiles)
+            {
+            progCmd << " " <<
+              (100*this->GetTargetTotalNumberOfSourceFiles(t->second))/
+              this->NumberOfSourceFiles;
+            }
+          else
+            {
+            progCmd << " 0";
+            }
           commands.push_back(progCmd.str());
           commands.push_back(lg->GetRecursiveMakeCall
                              ("CMakeFiles/Makefile2",t->second.GetName()));

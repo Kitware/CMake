@@ -127,7 +127,8 @@ public:
   int ShouldAddProgressRule();
   int GetNumberOfCompilableSourceFilesForTarget(cmTarget &tgt);
   int GetTargetTotalNumberOfSourceFiles(cmTarget& target);
-  
+  int GetNumberOfSourceFiles() { return this->NumberOfSourceFiles; };
+
   // what targets does the specified target depend on
   std::vector<cmTarget *>& GetTargetDepends(cmTarget& target);
 

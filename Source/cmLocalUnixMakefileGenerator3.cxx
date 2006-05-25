@@ -1402,7 +1402,9 @@ void cmLocalUnixMakefileGenerator3
     progCmd << this->Convert(progressDir.c_str(),
                              cmLocalGenerator::FULL,
                              cmLocalGenerator::SHELL);
-    progCmd << " 100";
+    cmGlobalUnixMakefileGenerator3 *gg = 
+      static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+    progCmd << " " << gg->GetNumberOfSourceFiles();
     commands.push_back(progCmd.str());
     }
 
