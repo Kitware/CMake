@@ -899,15 +899,22 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Remove file
     else if (args[1] == "remove" && args.size() > 2)
       {
+      bool force = false;
       for (std::string::size_type cc = 2; cc < args.size(); cc ++)
         {
-        if(args[cc] != "-f")
+        if(args[cc] == "\\-f" || args[cc] == "-f")
           {
-          if(args[cc] == "\\-f")
+          force = true;
+          }
+        else
+          {
+          // Complain if the file could not be removed, still exists,
+          // and the -f option was not given.
+          if(!cmSystemTools::RemoveFile(args[cc].c_str()) && !force &&
+             cmSystemTools::FileExists(args[cc].c_str()))
             {
-            args[cc] = "-f";
+            return 1;
             }
-          cmSystemTools::RemoveFile(args[cc].c_str());
           }
         }
       return 0;
