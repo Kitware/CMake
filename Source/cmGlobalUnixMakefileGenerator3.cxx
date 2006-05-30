@@ -703,15 +703,23 @@ cmGlobalUnixMakefileGenerator3
           std::string progressDir =
             lg->GetMakefile()->GetHomeOutputDirectory();
           progressDir += "/CMakeFiles";
+
+          {
+          // TODO: Convert the total progress count to a make variable.
           cmOStringStream progCmd;
-          progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
+          progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # in target
           progCmd << lg->Convert(progressDir.c_str(),
                                  cmLocalGenerator::FULL,
                                  cmLocalGenerator::SHELL);
+          int n = this->GetNumberOfSourceFiles();
+          if(n > 100)
+            {
+            n = 100;
+            }
           if (this->NumberOfSourceFiles)
             {
             progCmd << " " <<
-              (100*this->GetTargetTotalNumberOfSourceFiles(t->second))/
+              (n*this->GetTargetTotalNumberOfSourceFiles(t->second))/
               this->NumberOfSourceFiles;
             }
           else
@@ -719,9 +727,19 @@ cmGlobalUnixMakefileGenerator3
             progCmd << " 0";
             }
           commands.push_back(progCmd.str());
+          }
           commands.push_back(lg->GetRecursiveMakeCall
                              ("CMakeFiles/Makefile2",t->second.GetName()));
-          depends.clear(); 
+          {
+          cmOStringStream progCmd;
+          progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
+          progCmd << lg->Convert(progressDir.c_str(),
+                                 cmLocalGenerator::FULL,
+                                 cmLocalGenerator::SHELL);
+          progCmd << " 0";
+          commands.push_back(progCmd.str());
+          }
+          depends.clear();
           depends.push_back("cmake_check_build_system");
           lg->WriteMakeRule(ruleFileStream, 
                             "Build rule for target.",
@@ -840,7 +858,7 @@ cmGlobalUnixMakefileGenerator3
           lg->GetMakefile()->GetHomeOutputDirectory();
         progressDir += "/CMakeFiles";
         cmOStringStream progCmd;
-        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
+        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report "; // all target counts
         progCmd << lg->Convert(progressDir.c_str(),
                                cmLocalGenerator::FULL,
                                cmLocalGenerator::SHELL);

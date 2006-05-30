@@ -1402,13 +1402,18 @@ void cmLocalUnixMakefileGenerator3
     std::string progressDir = this->Makefile->GetHomeOutputDirectory();
     progressDir += "/CMakeFiles";
     cmOStringStream progCmd;
-    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
+    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # src files
     progCmd << this->Convert(progressDir.c_str(),
                              cmLocalGenerator::FULL,
                              cmLocalGenerator::SHELL);
     cmGlobalUnixMakefileGenerator3 *gg = 
       static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-    progCmd << " " << gg->GetNumberOfSourceFiles();
+    int n = gg->GetNumberOfSourceFiles();
+    if(n > 100)
+      {
+      n = 100;
+      }
+    progCmd << " " << n;
     commands.push_back(progCmd.str());
     }
 
@@ -1422,7 +1427,7 @@ void cmLocalUnixMakefileGenerator3
     std::string progressDir = this->Makefile->GetHomeOutputDirectory();
     progressDir += "/CMakeFiles";
     cmOStringStream progCmd;
-    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
+    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
     progCmd << this->Convert(progressDir.c_str(),
                              cmLocalGenerator::FULL,
                              cmLocalGenerator::SHELL);
