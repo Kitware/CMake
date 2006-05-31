@@ -28,12 +28,12 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
     }
   
   // at end of for each execute recorded commands
-  if (cmSystemTools::LowerCase(lff.Name) == "while")
+  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"while"))
     {
     // record the number of while commands past this one
     this->Depth++;
     }
-  else if (cmSystemTools::LowerCase(lff.Name) == "endwhile")
+  else if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endwhile"))
     {
     // if this is the endwhile for this while loop then execute
     if (!this->Depth) 
@@ -78,7 +78,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 bool cmWhileFunctionBlocker::
 ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
 {
-  if(cmSystemTools::LowerCase(lff.Name) == "endwhile")
+  if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endwhile"))
     {
     if (lff.Arguments == this->Args
         || mf.IsOn("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS"))

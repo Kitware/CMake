@@ -23,18 +23,18 @@ bool cmIfFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
   // always let if statements through
-  if (cmSystemTools::LowerCase(lff.Name) == "if")
+  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"if"))
     {
     return false;
     }
   
   // watch for our ELSE or ENDIF
-  if (cmSystemTools::LowerCase(lff.Name) == "else" || 
-      cmSystemTools::LowerCase(lff.Name) == "endif")
+  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else") || 
+      !cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
     {
     // if it was an else statement then we should change state
     // and block this Else Command
-    if (cmSystemTools::LowerCase(lff.Name) == "else")
+    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else"))
         {
         this->IsBlocking = !this->IsBlocking;
         return true;
@@ -51,7 +51,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
                                        cmMakefile& mf)
 {
-  if (cmSystemTools::LowerCase(lff.Name) == "endif")
+  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
     {
     if (mf.IsOn("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS") 
         || lff.Arguments == this->Args)

@@ -252,11 +252,11 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
   // record commands until we hit the ENDMACRO
   // at the ENDMACRO call we shift gears and start looking for invocations
-  if(cmSystemTools::LowerCase(lff.Name) == "macro")
+  if(!cmSystemTools::Strucmp(lff.Name.c_str(),"macro"))
     {
     this->Depth++;
     }
-  else if(cmSystemTools::LowerCase(lff.Name) == "endmacro")
+  else if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endmacro"))
     {
     // if this is the endmacro for this macro then execute
     if (!this->Depth) 
@@ -300,7 +300,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 bool cmMacroFunctionBlocker::
 ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
 {
-  if(cmSystemTools::LowerCase(lff.Name) == "endmacro")
+  if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endmacro"))
     {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.Arguments, expandedArguments);
