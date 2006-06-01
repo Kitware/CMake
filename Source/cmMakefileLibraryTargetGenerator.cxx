@@ -28,13 +28,16 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
 {
   // create the build.make file and directory, put in the common blocks
   this->CreateRuleFile();
-  
-  // Add in any rules for custom commands
-  this->WriteCustomCommandsForTarget();
 
-  // write in rules for object files
+  // write rules used to help build object files
   this->WriteCommonCodeRules();
-  
+
+  // write in rules for object files and custom commands
+  this->WriteTargetBuildRules();
+
+  // write the per-target per-language flags
+  this->WriteTargetLanguageFlags();
+
   // Write the dependency generation rule.
   this->WriteTargetDependRules();
 
@@ -522,18 +525,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                                         depends, commands, false);
     }
 
-  // Write convenience targets.
-  std::string dir = this->Makefile->GetStartOutputDirectory();
-  dir += "/";
-  dir += this->LocalGenerator->GetTargetDirectory(*this->Target);
-  std::string buildTargetRuleName = dir;
-  buildTargetRuleName += relink?"/preinstall":"/build";
-  buildTargetRuleName = 
-    this->Convert(buildTargetRuleName.c_str(),
-                  cmLocalGenerator::HOME_OUTPUT,cmLocalGenerator::MAKEFILE);
-  this->LocalGenerator->WriteConvenienceRule(*this->BuildFileStream, 
-                                             targetFullPath.c_str(),
-                                             buildTargetRuleName.c_str());
+  // Write the main driver rule to build everything in this target.
+  this->WriteTargetDriverRule(targetFullPath.c_str(), relink);
 
   // Clean all the possible library names and symlinks and object files.
   this->CleanFiles.insert(this->CleanFiles.end(),

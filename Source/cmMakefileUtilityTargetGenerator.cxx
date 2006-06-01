@@ -33,7 +33,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
     << "# Utility rule file for " << this->Target->GetName() << ".\n\n";
 
   // write the custom commands for this target
-  this->WriteCustomCommandsForTarget();
+  this->WriteTargetBuildRules();
 
   // Collect the commands and dependencies.
   std::vector<std::string> commands;
@@ -63,19 +63,8 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
                                       this->Target->GetName(),
                                       depends, commands, true);
 
-  // Write convenience targets.
-  std::string dir = this->Makefile->GetStartOutputDirectory();
-  dir += "/";
-  dir += this->LocalGenerator->GetTargetDirectory(*this->Target);
-  std::string buildTargetRuleName = dir;
-  buildTargetRuleName += "/build";
-  buildTargetRuleName = 
-    this->LocalGenerator->Convert(buildTargetRuleName.c_str(),
-                                  cmLocalGenerator::HOME_OUTPUT,
-                                  cmLocalGenerator::MAKEFILE);
-  this->LocalGenerator->WriteConvenienceRule(*this->BuildFileStream, 
-                                             this->Target->GetName(),
-                                             buildTargetRuleName.c_str());
+  // Write the main driver rule to build everything in this target.
+  this->WriteTargetDriverRule(this->Target->GetName(), false);
 
   // Write clean target
   this->WriteTargetCleanRules();
