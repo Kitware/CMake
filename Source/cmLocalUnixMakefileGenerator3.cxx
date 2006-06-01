@@ -1387,7 +1387,7 @@ void cmLocalUnixMakefileGenerator3
       this->AppendEcho(commands, text,
                        cmLocalUnixMakefileGenerator3::EchoGlobal);
 
-      // Utility targets store their rules in pre- and post-build commands.
+      // Global targets store their rules in pre- and post-build commands.
       this->AppendCustomDepends(depends,   
                                 glIt->second.GetPreBuildCommands());
       this->AppendCustomDepends(depends,   
@@ -1396,8 +1396,27 @@ void cmLocalUnixMakefileGenerator3
                                  glIt->second.GetPreBuildCommands());
       this->AppendCustomCommands(commands, 
                                  glIt->second.GetPostBuildCommands());
+      std::string targetName = glIt->second.GetName();
       this->WriteMakeRule(ruleFileStream, targetString.c_str(), 
-                          glIt->first.c_str(), depends, commands, true);
+                          targetName.c_str(), depends, commands, true);
+
+      // Provide a "/fast" version of the target.
+      depends.clear();
+      if(targetName == "install")
+        {
+        // Provide a fast install target that does not depend on all
+        // but has the same command.
+        depends.push_back("preinstall/fast");
+        }
+      else
+        {
+        // Just forward to the real target so at least it will work.
+        depends.push_back(targetName);
+        commands.clear();
+        }
+      targetName += "/fast";
+      this->WriteMakeRule(ruleFileStream, targetString.c_str(),
+                          targetName.c_str(), depends, commands, true);
       }
     }
 

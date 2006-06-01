@@ -686,6 +686,8 @@ cmGlobalUnixMakefileGenerator3
          strlen(t->second.GetName()) &&
          emitted.insert(t->second.GetName()).second)
         {
+        // Handle user targets here.  Global targets are handled in
+        // the local generator on a per-directory basis.
         if((t->second.GetType() == cmTarget::EXECUTABLE) ||
            (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
            (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
@@ -759,18 +761,6 @@ cmGlobalUnixMakefileGenerator3
           localName += "/fast";
           commands.push_back(lg->GetRecursiveMakeCall
                              (makefileName.c_str(), makeTargetName.c_str()));
-          lg->WriteMakeRule(ruleFileStream, "fast build rule for target.",
-                            localName.c_str(), depends, commands, true);
-          }
-        else if(t->second.GetType() == cmTarget::GLOBAL_TARGET)
-          {
-          // Provide a fast target for the global targets that just
-          // forwards to the real target so at least it will work.
-          depends.clear();
-          commands.clear();
-          std::string localName = t->second.GetName();
-          depends.push_back(localName);
-          localName += "/fast";
           lg->WriteMakeRule(ruleFileStream, "fast build rule for target.",
                             localName.c_str(), depends, commands, true);
           }
