@@ -296,6 +296,23 @@ void cmLocalUnixMakefileGenerator3
         this->WriteMakeRule(ruleFileStream, "Convenience name for target.",
                             t->second.GetName(), depends, commands, true);
         }
+
+      // Add a fast rule to build the target
+      std::string makefileName = this->GetRelativeTargetDirectory(t->second);
+      makefileName += "/build.make";
+      std::string makeTargetName = this->GetRelativeTargetDirectory(t->second);
+      makeTargetName += "/build";
+      localName = t->second.GetName();
+      localName += "/fast";
+      depends.clear();
+      commands.clear();
+      commands.push_back(this->GetRecursiveMakeCall
+                         (makefileName.c_str(), makeTargetName.c_str()));
+      this->CreateCDCommand(commands,
+                            this->Makefile->GetHomeOutputDirectory(),
+                            this->Makefile->GetStartOutputDirectory());
+      this->WriteMakeRule(ruleFileStream, "fast build rule for target.",
+                          localName.c_str(), depends, commands, true);
       }
     }
 }
@@ -1481,8 +1498,7 @@ void cmLocalUnixMakefileGenerator3
                         this->Makefile->GetStartOutputDirectory());
   this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
                       "preinstall", depends, commands, true);
-  commands.clear();
-  depends.push_back("preinstall");
+  depends.clear();
   this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
                       "preinstall/fast", depends, commands, true);
 

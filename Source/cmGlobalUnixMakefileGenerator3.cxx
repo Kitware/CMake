@@ -680,17 +680,17 @@ cmGlobalUnixMakefileGenerator3
     cmTargets& targets = lg->GetMakefile()->GetTargets();
     for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
       {
-      if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-         (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-         (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-         (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
-         (t->second.GetType() == cmTarget::UTILITY))
+      // Don't emit the same rule twice (e.g. two targets with the same
+      // simple name)
+      if(t->second.GetName() &&
+         strlen(t->second.GetName()) &&
+         emitted.insert(t->second.GetName()).second)
         {
-        // Don't emit the same rule twice (e.g. two targets with the same
-        // simple name)
-        if(t->second.GetName() &&
-           strlen(t->second.GetName()) &&
-           emitted.insert(t->second.GetName()).second)
+        if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+           (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+           (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+           (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+           (t->second.GetType() == cmTarget::UTILITY))
           {
           // Add a rule to build the target by name.
           lg->WriteDivider(ruleFileStream);
@@ -762,14 +762,10 @@ cmGlobalUnixMakefileGenerator3
           lg->WriteMakeRule(ruleFileStream, "fast build rule for target.",
                             localName.c_str(), depends, commands, true);
           }
-        }
-      else
-        {
-        if(t->second.GetName() &&
-           strlen(t->second.GetName()) &&
-           emitted.insert(t->second.GetName()).second)
+        else if(t->second.GetType() == cmTarget::GLOBAL_TARGET)
           {
-          // Add a fast rule to build the target
+          // Provide a fast target for the global targets that just
+          // forwards to the real target so at least it will work.
           depends.clear();
           commands.clear();
           std::string localName = t->second.GetName();
