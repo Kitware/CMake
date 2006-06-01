@@ -23,8 +23,8 @@
 #
 
 # Release version number.
-TAG="CMake-2-4-1"
-VERSION="2.4.1"
+TAG="CMake-2-4-2"
+VERSION="2.4.2"
 CMAKE_VERSION="2.4"
 RELEASE="1"
 PREVIOUS_VERSION="2.2.3"
