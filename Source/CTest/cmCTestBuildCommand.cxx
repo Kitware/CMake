@@ -93,7 +93,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       std::string buildCommand
         = this->GlobalGenerator->GenerateBuildCommand(cmakeMakeProgram,
           cmakeProjectName,
-          cmakeBuildAdditionalFlags, 0, cmakeBuildConfiguration, true);
+          cmakeBuildAdditionalFlags, 0, cmakeBuildConfiguration, true, false);
       this->CTest->SetCTestConfiguration("MakeCommand", buildCommand.c_str());
       }
     else

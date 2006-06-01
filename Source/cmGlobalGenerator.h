@@ -100,12 +100,12 @@ public:
                     const char *projectName, const char *targetName,
                     std::string *output, 
                     const char *makeProgram, const char *config,
-                    bool clean);
+                    bool clean, bool fast);
   virtual std::string GenerateBuildCommand
   (const char* makeProgram,
    const char *projectName, const char* additionalOptions, 
    const char *targetName,
-   const char* config, bool ignoreErrors);
+   const char* config, bool ignoreErrors, bool fast);
 
 
   ///! Set the CMake instance

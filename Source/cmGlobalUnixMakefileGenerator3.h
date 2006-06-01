@@ -121,7 +121,7 @@ public:
   (const char* makeProgram,
    const char *projectName, const char* additionalOptions, 
    const char *targetName,
-   const char* config, bool ignoreErrors);
+   const char* config, bool ignoreErrors, bool fast);
 
   // returns true if a progress rule should be added
   int ShouldAddProgressRule();

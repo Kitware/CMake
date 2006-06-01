@@ -597,7 +597,7 @@ cmGlobalUnixMakefileGenerator3
 std::string cmGlobalUnixMakefileGenerator3
 ::GenerateBuildCommand(const char* makeProgram, const char *projectName, 
                        const char* additionalOptions, const char *targetName,
-                       const char* config, bool ignoreErrors)
+                       const char* config, bool ignoreErrors, bool fast)
 {
   // Project name and config are not used yet.
   (void)projectName;
@@ -644,7 +644,10 @@ std::string cmGlobalUnixMakefileGenerator3
     lg->SetupPathConversions();
     makeCommand += " \"";
     std::string tname = targetName;
-    tname += "/fast";
+    if(fast)
+      {
+      tname += "/fast";
+      }
     tname = lg->Convert(tname.c_str(),cmLocalGenerator::HOME_OUTPUT,
                         cmLocalGenerator::MAKEFILE);
     tname = lg->ConvertToMakeTarget(tname.c_str());

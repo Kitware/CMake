@@ -770,13 +770,13 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
   const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   return this->Build(srcdir,bindir,projectName,
                      newTarget.c_str(),
-                     output,makeCommand.c_str(),config,false);
+                     output,makeCommand.c_str(),config,false,true);
 }
 
 std::string cmGlobalGenerator
 ::GenerateBuildCommand(const char* makeProgram, const char *projectName, 
                        const char* additionalOptions, const char *targetName,
-                       const char* config, bool ignoreErrors)
+                       const char* config, bool ignoreErrors, bool)
 {
   // Project name and config are not used yet.
   (void)projectName;
@@ -814,7 +814,7 @@ int cmGlobalGenerator::Build(
   std::string *output, 
   const char *makeCommandCSTR,
   const char *config,
-  bool clean)
+  bool clean, bool fast)
 {
   *output += "\nTesting TryCompileWithoutMakefile\n";
   
@@ -834,7 +834,7 @@ int cmGlobalGenerator::Build(
     {
     std::string cleanCommand = 
       this->GenerateBuildCommand(makeCommandCSTR, projectName,
-      0, "clean", config, false);
+      0, "clean", config, false, fast);
     if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), output, 
                                          &retVal, 0, false, timeout))
       {
@@ -854,7 +854,7 @@ int cmGlobalGenerator::Build(
   // now build
   std::string makeCommand = 
     this->GenerateBuildCommand(makeCommandCSTR, projectName,
-                               0, target, config, false);
+                               0, target, config, false, fast);
   
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
                                        &retVal, 0, false, timeout))

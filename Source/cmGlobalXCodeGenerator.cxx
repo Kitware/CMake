@@ -133,7 +133,8 @@ std::string cmGlobalXCodeGenerator
                        const char* additionalOptions, 
                        const char *targetName,
                        const char* config, 
-                       bool ignoreErrors)
+                       bool ignoreErrors,
+                       bool)
 {
   // Config is not used yet
   (void) ignoreErrors;

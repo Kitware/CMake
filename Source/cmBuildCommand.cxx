@@ -34,7 +34,7 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
   std::string makecommand = this->Makefile->GetLocalGenerator()
     ->GetGlobalGenerator()->GenerateBuildCommand
     (makeprogram.c_str(), this->Makefile->GetProjectName(), 0,
-     0, "Release", true);
+     0, "Release", true, false);
 
   if(cacheValue)
     {
