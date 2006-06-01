@@ -361,7 +361,7 @@ void cmInstallTargetGenerator
       {
       os << "\n    -change \"" << i->first << "\" \"" << i->second << "\"";
       }
-    os << "\n    \"" << destination << "/"
+    os << "\n    \"$ENV{DESTDIR}" << destination << "/"
        << this->GetScriptReference(this->Target, "REMAPPED", true) << "\")\n";
     os << "ENDIF(" << component_test << ")\n";
     }
