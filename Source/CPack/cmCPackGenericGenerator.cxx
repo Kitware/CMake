@@ -43,6 +43,20 @@ cmCPackGenericGenerator::~cmCPackGenericGenerator()
 }
 
 //----------------------------------------------------------------------
+void cmCPackGenericGeneratorProgress(const char *msg, float prog, void* ptr)
+{
+  cmCPackGenericGenerator* self = static_cast<cmCPackGenericGenerator*>(ptr);
+  self->DisplayVerboseOutput(msg, prog);
+}
+
+//----------------------------------------------------------------------
+void cmCPackGenericGenerator::DisplayVerboseOutput(const char* msg,
+  float progress)
+{
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "" << msg << std::endl);
+}
+
+//----------------------------------------------------------------------
 int cmCPackGenericGenerator::PrepareNames()
 {
   this->SetOption("CPACK_GENERATOR", this->Name.c_str());
@@ -381,6 +395,7 @@ int cmCPackGenericGenerator::InstallProject()
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
         "- Install project: " << installProjectName << std::endl);
       cmake cm;
+      cm.SetProgressCallback(cmCPackGenericGeneratorProgress, this);
       cmGlobalGenerator gg;
       gg.SetCMakeInstance(&cm);
       std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
