@@ -149,6 +149,7 @@ static const char* kwsysTerminalVT100Names[] =
   "vt100",
   "xterm",
   "xterm-color",
+  "screen",
   0
 };
 
