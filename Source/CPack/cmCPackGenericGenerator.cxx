@@ -53,6 +53,7 @@ void cmCPackGenericGeneratorProgress(const char *msg, float prog, void* ptr)
 void cmCPackGenericGenerator::DisplayVerboseOutput(const char* msg,
   float progress)
 {
+  (void)progress;
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "" << msg << std::endl);
 }
 
