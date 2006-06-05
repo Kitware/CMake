@@ -54,14 +54,12 @@ bool cmAddSubDirectoryCommand::InitialPass
     }
 
   // check for relative arguments
-  bool relativeSource = true;
   std::string binPath = binArg;
   std::string srcPath = std::string(this->Makefile->GetCurrentDirectory()) + 
     "/" + srcArg;
   // if the path does not exist then the arg was relative
   if (!cmSystemTools::FileIsDirectory(srcPath.c_str()))
     {
-    relativeSource = false;
     srcPath = srcArg;
     if (!cmSystemTools::FileIsDirectory(srcPath.c_str()))
       {
