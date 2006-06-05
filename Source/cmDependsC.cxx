@@ -203,10 +203,10 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
   for(std::set<cmStdString>::iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
-    makeDepends << obj << ": "
-                << this->LocalGenerator->Convert(i->c_str(),
-                                                 cmLocalGenerator::HOME_OUTPUT,
-                                                 cmLocalGenerator::MAKEFILE)
+    makeDepends << obj << ": " << 
+      this->LocalGenerator->Convert(i->c_str(),
+                                    cmLocalGenerator::HOME_OUTPUT,
+                                    cmLocalGenerator::MAKEFILE)
                 << std::endl;
     internalDepends << " " << i->c_str() << std::endl;
     }

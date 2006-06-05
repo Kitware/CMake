@@ -712,7 +712,8 @@ cmGlobalUnixMakefileGenerator3
           {
           // TODO: Convert the total progress count to a make variable.
           cmOStringStream progCmd;
-          progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # in target
+          progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; 
+          // # in target
           progCmd << lg->Convert(progressDir.c_str(),
                                  cmLocalGenerator::FULL,
                                  cmLocalGenerator::SHELL);
@@ -847,7 +848,8 @@ cmGlobalUnixMakefileGenerator3
           lg->GetMakefile()->GetHomeOutputDirectory();
         progressDir += "/CMakeFiles";
         cmOStringStream progCmd;
-        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report "; // all target counts
+        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report "; 
+        // all target counts
         progCmd << lg->Convert(progressDir.c_str(),
                                cmLocalGenerator::FULL,
                                cmLocalGenerator::SHELL);
