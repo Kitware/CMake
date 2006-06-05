@@ -1321,19 +1321,36 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
     soversion = version;
     }
 
+  // Get the components of the library name.
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->GetFullNameInternal(type, config, false, prefix, base, suffix);
+
   // The library name.
-  name = this->GetFullNameInternal(type, config, false);
+  name = prefix+base+suffix;
 
   // The library's soname.
+#if defined(__APPLE__)
+  soName = prefix+base;
+#else
   soName = name;
+#endif
   if(soversion)
     {
     soName += ".";
     soName += soversion;
     }
+#if defined(__APPLE__)
+  soName += suffix;
+#endif
 
   // The library's real name on disk.
+#if defined(__APPLE__)
+  realName = prefix+base;
+#else
   realName = name;
+#endif
   if(version)
     {
     realName += ".";
@@ -1344,6 +1361,9 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
     realName += ".";
     realName += soversion;
     }
+#if defined(__APPLE__)
+  realName += suffix;
+#endif
 
   // The import library name.
   if(type == cmTarget::SHARED_LIBRARY)
