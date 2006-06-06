@@ -1166,9 +1166,22 @@ void cmLocalVisualStudio7Generator
                << "\t\t\t\t\t<Tool\n"
                << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
           if(compileFlags.size())
-            {
-            fout << "\t\t\t\t\tAdditionalOptions=\""
-                 << this->EscapeForXML(compileFlags.c_str()) << "\"\n";
+            { 
+            std::string compileFlagsCopy = compileFlags;
+            std::map<cmStdString, cmStdString> fileFlagMap;
+            this->FillFlagMapFromCommandFlags
+              (fileFlagMap, &cmLocalVisualStudio7GeneratorFlagTable[0], compileFlagsCopy);
+            if(compileFlagsCopy.size() && compileFlagsCopy.find_first_not_of(" ") 
+               != compileFlagsCopy.npos)
+              {
+              fout << "\t\t\t\t\tAdditionalOptions=\""
+                   << this->EscapeForXML(compileFlagsCopy.c_str()) << "\"\n"; 
+              }
+            for(std::map<cmStdString, cmStdString>::iterator m = fileFlagMap.begin();
+                m != fileFlagMap.end(); ++m)
+              {
+              fout << "\t\t\t\t\t" << m->first << "=\"" << m->second << "\"\n";
+              }
             }
           if(additionalDeps.length())
             {
