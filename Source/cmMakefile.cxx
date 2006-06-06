@@ -1712,8 +1712,16 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
         {
         markerPos += markerStartSize; // move past marker
         // find the end variable marker starting at the markerPos
+        // make sure it is a valid variable between 
         std::string::size_type endVariablePos =
-          source.find(endVariableMarker, markerPos);
+          source.find_first_not_of(
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_",
+            markerPos);
+        if(endVariablePos != std::string::npos && 
+          source[endVariablePos] != endVariableMarker)
+          {
+          endVariablePos = std::string::npos;
+          }
         if(endVariablePos == std::string::npos)
           {
           // no end marker found so add the bogus start
