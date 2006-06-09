@@ -93,7 +93,7 @@ public:
 protected:
   int PrepareNames();
   int InstallProject();
-
+  int CleanTemporaryDirectory();
   virtual const char* GetOutputExtension() { return "cpack"; }
   virtual const char* GetOutputPostfix() { return 0; }
   virtual int CompressFiles(const char* outFileName, const char* toplevel,

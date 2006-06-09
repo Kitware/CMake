@@ -25,6 +25,7 @@
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackNSISGenerator.h"
 #include "cmCPackPackageMakerGenerator.h"
+#include "cmCPackCygwinBinaryGenerator.h"
 
 #include "cmCPackLog.h"
 
@@ -38,6 +39,8 @@ cmCPackGenerators::cmCPackGenerators()
 #ifdef _WIN32
   this->RegisterGenerator("NSIS", "Null Soft Installer",
     cmCPackNSISGenerator::CreateGenerator);
+//  this->RegisterGenerator("Cygwin", "Cygwin Setup program",
+//    cmCPackCygwinBinaryGenerator::CreateGenerator);
 #endif
   this->RegisterGenerator("ZIP", "ZIP file format",
     cmCPackZIPGenerator::CreateGenerator);

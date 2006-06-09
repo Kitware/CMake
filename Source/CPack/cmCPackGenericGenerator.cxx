@@ -167,6 +167,7 @@ int cmCPackGenericGenerator::InstallProject()
       ignoreFilesRegex.push_back(it->c_str());
       }
     }
+  this->CleanTemporaryDirectory();
   const char* tempInstallDirectory
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   int res = 1;
@@ -189,6 +190,10 @@ int cmCPackGenericGenerator::InstallProject()
     destDir += tempInstallDirectory;
     cmSystemTools::PutEnv(destDir.c_str());
     }
+#undef cerr
+  
+  // If the CPackConfig file sets CPACK_INSTALL_COMMANDS then run them
+  // as listed
   const char* installCommands = this->GetOption("CPACK_INSTALL_COMMANDS");
   if ( installCommands && *installCommands )
     {
@@ -199,6 +204,7 @@ int cmCPackGenericGenerator::InstallProject()
       it != installCommandsVector.end();
       ++it )
       {
+      std::cerr << *it << "\n";
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << it->c_str()
         << std::endl);
       std::string output;
@@ -222,6 +228,10 @@ int cmCPackGenericGenerator::InstallProject()
         }
       }
     }
+  
+  // If the CPackConfig file sets CPACK_INSTALLED_DIRECTORIES 
+  // then glob it and copy it to CPACK_TEMPORARY_DIRECTORY
+  // This is used in Source packageing
   const char* installDirectories
     = this->GetOption("CPACK_INSTALLED_DIRECTORIES");
   if ( installDirectories && *installDirectories )
@@ -243,6 +253,7 @@ int cmCPackGenericGenerator::InstallProject()
       it != installDirectoriesVector.end();
       ++it )
       {
+      std::cerr << *it << "\n";
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
       std::string toplevel = it->c_str();
@@ -296,6 +307,9 @@ int cmCPackGenericGenerator::InstallProject()
         }
       }
     }
+
+  // If the project is a CMAKE project then run pre-install
+  // and then read the cmake_install script to run it
   const char* cmakeProjects
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   const char* cmakeGenerator
@@ -321,6 +335,7 @@ int cmCPackGenericGenerator::InstallProject()
       it != cmakeProjectsVector.end();
       ++it )
       {
+      std::cerr << *it << "\n";
       if ( it+1 == cmakeProjectsVector.end() ||
         it+2 == cmakeProjectsVector.end() ||
         it+3 == cmakeProjectsVector.end() )
@@ -430,6 +445,8 @@ int cmCPackGenericGenerator::InstallProject()
         }
       }
     }
+
+  // ????? 
   const char* binaryDirectories = this->GetOption("CPACK_BINARY_DIR");
   if ( binaryDirectories && !cmakeProjects )
     {
@@ -441,6 +458,7 @@ int cmCPackGenericGenerator::InstallProject()
       it != binaryDirectoriesVector.end();
       ++it )
       {
+      std::cerr << *it << "\n";
       std::string installFile = it->c_str();
       installFile += "/cmake_install.cmake";
       cmake cm;
@@ -471,6 +489,7 @@ int cmCPackGenericGenerator::InstallProject()
     cmSystemTools::PutEnv("DESTDIR=");
     }
 
+  std::cerr << "strip loop \n";
   const char* stripExecutable = this->GetOption("CPACK_STRIP_COMMAND");
   const char* stripFiles
     = this->GetOption("CPACK_STRIP_FILES");
@@ -485,6 +504,7 @@ int cmCPackGenericGenerator::InstallProject()
       it != stripFilesVector.end();
       ++it )
       {
+      std::cerr << *it << "\n";
       std::string fileName = tempInstallDirectory;
       fileName += "/" + *it;
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
@@ -861,4 +881,26 @@ bool cmCPackGenericGenerator::ConfigureFile(const char* inName,
 {
   return this->MakefileMap->ConfigureFile(inName, outName,
     false, true, false) == 1;
+}
+
+//----------------------------------------------------------------------
+int cmCPackGenericGenerator::CleanTemporaryDirectory()
+{
+  const char* tempInstallDirectory
+    = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
+  if(cmsys::SystemTools::FileExists(tempInstallDirectory))
+    { 
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                  "- Clean temporary : " 
+                  << tempInstallDirectory << std::endl);
+    if(!cmsys::SystemTools::RemoveADirectory(tempInstallDirectory))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Problem removing temporary directory: " <<
+                    tempInstallDirectory
+                    << std::endl);
+      return 0;
+      }
+    }
+  return 1;
 }
