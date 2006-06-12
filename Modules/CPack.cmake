@@ -1,3 +1,7 @@
+# Default output files will be CPackConfig.cmake and CPackSourceConfig.cmake.
+# This can be overwritten with CPACK_OUTPUT_CONFIG_FILE and
+# CPACK_SOURCE_OUTPUT_CONFIG_FILE.
+
 # Pick a configuration file
 SET(cpack_input_file "${CMAKE_ROOT}/Templates/CPackConfig.cmake.in")
 IF(EXISTS "${CMAKE_SOURCE_DIR}/CPackConfig.cmake.in")
@@ -103,9 +107,14 @@ cpack_set_if_not_set(CPACK_TOPLEVEL_TAG "${CPACK_SYSTEM_NAME}")
 
 cpack_set_if_not_set(CPACK_NSIS_DISPLAY_NAME "@CPACK_PACKAGE_INSTALL_DIRECTORY@")
 
+cpack_set_if_not_set(CPACK_OUTPUT_CONFIG_FILE
+  "${CMAKE_BINARY_DIR}/CPackConfig.cmake")
+
+cpack_set_if_not_set(CPACK_SOURCE_OUTPUT_CONFIG_FILE
+  "${CMAKE_BINARY_DIR}/CPackSourceConfig.cmake")
+
 cpack_encode_variables()
-CONFIGURE_FILE("${cpack_input_file}"
-  "${CMAKE_BINARY_DIR}/CPackConfig.cmake" @ONLY IMMEDIATE)
+CONFIGURE_FILE("${cpack_input_file}" "${CPACK_OUTPUT_CONFIG_FILE}" @ONLY IMMEDIATE)
 
 # Generate source file
 cpack_set_if_not_set(CPACK_SOURCE_INSTALLED_DIRECTORIES
@@ -125,4 +134,4 @@ SET(CPACK_STRIP_FILES "${CPACK_SOURCE_STRIP_FILES}")
 
 cpack_encode_variables()
 CONFIGURE_FILE("${cpack_source_input_file}"
-  "${CMAKE_BINARY_DIR}/CPackSourceConfig.cmake" @ONLY IMMEDIATE)
+  "${CPACK_SOURCE_OUTPUT_CONFIG_FILE}" @ONLY IMMEDIATE)
