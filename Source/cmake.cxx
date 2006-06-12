@@ -1004,7 +1004,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
 
     // Command to report progress for a build
-    else if (args[1] == "cmake_progress_report" && args.size() >= 4)
+    else if (args[1] == "cmake_progress_report" && args.size() >= 3)
       {
       std::string dirName = args[2];
       dirName += "/Progress";
@@ -1037,7 +1037,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         if (count > 0)
           {
           // print the progress
-          fprintf(stdout,"%3i%% complete\n",((fileNum-3)*100)/count);
+          fprintf(stdout,"[%3i%%] ",((fileNum-3)*100)/count);
           }
         fclose(progFile);
         }

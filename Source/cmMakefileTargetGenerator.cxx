@@ -408,20 +408,21 @@ cmMakefileTargetGenerator
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   int prog = gg->ShouldAddProgressRule();
+
+  std::string progressDir = this->Makefile->GetHomeOutputDirectory();
+  progressDir += "/CMakeFiles";
+  cmOStringStream progCmd;
+  progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
+  progCmd << this->LocalGenerator->Convert(progressDir.c_str(),
+                                           cmLocalGenerator::FULL,
+                                           cmLocalGenerator::SHELL);
   if (prog)
     {
-    std::string progressDir = this->Makefile->GetHomeOutputDirectory();
-    progressDir += "/CMakeFiles";
-    cmOStringStream progCmd;
-    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-    progCmd << this->LocalGenerator->Convert(progressDir.c_str(),
-                                             cmLocalGenerator::FULL,
-                                             cmLocalGenerator::SHELL);
     progCmd << " " << prog;
-    commands.push_back(progCmd.str());
     this->LocalGenerator->ProgressFiles[this->Target->GetName()].
       push_back(prog);
     }
+  commands.push_back(progCmd.str());
       
   // Construct the compile rules.
   std::string compileRuleVar = "CMAKE_";
