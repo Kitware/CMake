@@ -397,18 +397,12 @@ cmMakefileTargetGenerator
   // Construct the build message.
   std::vector<std::string> no_commands;
   std::vector<std::string> commands;
-  std::string buildEcho = "Building ";
-  buildEcho += lang;
-  buildEcho += " object ";
-  buildEcho += relativeObj;
-  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
-                                   cmLocalUnixMakefileGenerator3::EchoBuild);
-
+  
   // add in a progress call if needed
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   int prog = gg->ShouldAddProgressRule();
-
+  
   std::string progressDir = this->Makefile->GetHomeOutputDirectory();
   progressDir += "/CMakeFiles";
   cmOStringStream progCmd;
@@ -423,7 +417,14 @@ cmMakefileTargetGenerator
       push_back(prog);
     }
   commands.push_back(progCmd.str());
-      
+  
+  std::string buildEcho = "Building ";
+  buildEcho += lang;
+  buildEcho += " object ";
+  buildEcho += relativeObj;
+  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
+                                   cmLocalUnixMakefileGenerator3::EchoBuild);
+
   // Construct the compile rules.
   std::string compileRuleVar = "CMAKE_";
   compileRuleVar += lang;
