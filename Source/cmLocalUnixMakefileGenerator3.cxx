@@ -300,7 +300,8 @@ void cmLocalUnixMakefileGenerator3
       // Add a fast rule to build the target
       std::string makefileName = this->GetRelativeTargetDirectory(t->second);
       makefileName += "/build.make";
-      std::string makeTargetName = this->GetRelativeTargetDirectory(t->second);
+      std::string makeTargetName = 
+        this->GetRelativeTargetDirectory(t->second);
       makeTargetName += "/build";
       localName = t->second.GetName();
       localName += "/fast";
