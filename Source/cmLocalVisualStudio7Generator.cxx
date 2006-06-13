@@ -1184,7 +1184,8 @@ void cmLocalVisualStudio7Generator
                   cmStdString>::iterator m = fileFlagMap.begin();
                 m != fileFlagMap.end(); ++m)
               {
-              fout << "\t\t\t\t\t" << m->first << "=\"" << m->second << "\"\n";
+              fout << "\t\t\t\t\t" << m->first << "=\"" 
+                   << m->second << "\"\n";
               }
             }
           if(additionalDeps.length())
