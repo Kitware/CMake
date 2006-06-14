@@ -34,13 +34,13 @@ MACRO(CHECK_VARIABLE_EXISTS VAR VARIABLE)
     IF(${VARIABLE})
       SET(${VARIABLE} 1 CACHE INTERNAL "Have variable ${VAR}")
       MESSAGE(STATUS "Looking for ${VAR} - found")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Determining if the variable ${VAR} exists passed with the following output:\n"
         "${OUTPUT}\n\n")
     ELSE(${VARIABLE})
       SET(${VARIABLE} "" CACHE INTERNAL "Have variable ${VAR}")
       MESSAGE(STATUS "Looking for ${VAR} - not found")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Determining if the variable ${VAR} exists failed with the following output:\n"
         "${OUTPUT}\n\n")
     ENDIF(${VARIABLE})

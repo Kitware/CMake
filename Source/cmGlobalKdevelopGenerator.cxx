@@ -134,7 +134,9 @@ bool cmGlobalKdevelopGenerator
       tmp=*lt;
       cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
       // make sure the file is part of this source tree
-      if ((tmp[0]!='/') && (strstr(tmp.c_str(), "CMakeFiles/")==0))
+      if ((tmp[0]!='/') && 
+          (strstr(tmp.c_str(), 
+                  cmake::GetCMakeFilesDirectoryPostSlash())==0))
         {
         files.insert(tmp);
         tmp=cmSystemTools::GetFilenameName(tmp);
@@ -159,7 +161,8 @@ bool cmGlobalKdevelopGenerator
         {
         tmp=(*si)->GetFullPath();
         cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
-        if ((tmp[0]!='/')  && (strstr(tmp.c_str(), "CMakeFiles/")==0))
+        if ((tmp[0]!='/')  && 
+            (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash())==0))
           {
           files.insert(tmp);
           }
@@ -169,7 +172,8 @@ bool cmGlobalKdevelopGenerator
         {
         tmp=*lt;
         cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
-        if ((tmp[0]!='/')  && (strstr(tmp.c_str(), "CMakeFiles/")==0))
+        if ((tmp[0]!='/') && 
+            (strstr(tmp.c_str(), cmake::GetCMakeFilesDirectoryPostSlash())==0))
           {
           files.insert(tmp.c_str());
           }

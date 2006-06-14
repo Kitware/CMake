@@ -1868,6 +1868,9 @@ void cmMakefile::AddDefaultDefinitions()
   this->AddDefinition("CMAKE_MINOR_VERSION", temp);
   sprintf(temp, "%d", cmMakefile::GetMajorVersion());
   this->AddDefinition("CMAKE_MAJOR_VERSION", temp);
+
+  this->AddDefinition("CMAKE_FILES_DIRECTORY", 
+                      cmake::GetCMakeFilesDirectory());
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

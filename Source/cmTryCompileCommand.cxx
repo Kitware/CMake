@@ -110,7 +110,9 @@ int cmTryCompileCommand::CoreTryCompileCode(
   // signature
   if (srcFileSignature)
     {
-    tmpString = argv[1] + "/CMakeFiles/CMakeTmp";
+    tmpString = argv[1];
+    tmpString += cmake::GetCMakeFilesDirectory();
+    tmpString += "/CMakeTmp";
     binaryDirectory = tmpString.c_str();
     }
   // make sure the binary directory exists

@@ -22,6 +22,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmTarget.h"
+#include "cmake.h"
 
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
@@ -244,7 +245,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(relink)
     {
     outpath = this->Makefile->GetStartOutputDirectory();
-    outpath += "/CMakeFiles/CMakeRelink.dir";
+    outpath += cmake::GetCMakeFilesDirectory();
+    outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
     }
@@ -428,7 +430,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.TargetPDB = targetOutPathPDB.c_str();
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
-  std::string objdir = "CMakeFiles/";
+  std::string objdir = cmake::GetCMakeFilesDirectoryPostSlash();
   objdir += this->Target->GetName();
   objdir += ".dir";
   vars.ObjectDir = objdir.c_str(); 

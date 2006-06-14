@@ -22,6 +22,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmTarget.h"
+#include "cmake.h"
 
 //----------------------------------------------------------------------------
 void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
@@ -168,7 +169,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if(relink)
     {
     outpath = this->Makefile->GetStartOutputDirectory();
-    outpath += "/CMakeFiles/CMakeRelink.dir";
+    outpath += cmake::GetCMakeFilesDirectory();
+    outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
     }

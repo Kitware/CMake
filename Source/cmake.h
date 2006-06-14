@@ -67,6 +67,10 @@ class cmake
   static unsigned int GetMinorVersion(); 
   static const char *GetReleaseVersion();
 
+  ///! construct an instance of cmake
+  static const char *GetCMakeFilesDirectory() {return "/CMakeFiles";};
+  static const char *GetCMakeFilesDirectoryPostSlash() {return "CMakeFiles/";};
+  
   //@{
   /**
    * Set/Get the home directory (or output directory) in the project. The

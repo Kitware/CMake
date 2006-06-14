@@ -62,12 +62,14 @@ ELSE(CMAKE_HAVE_SPROC_H)
             MESSAGE(STATUS "Check if compiler accepts -pthread - yes")
           ELSE(THREADS_PTHREAD_ARG MATCHES "^2$")
             MESSAGE(STATUS "Check if compiler accepts -pthread - no")
-            FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+            FILE(APPEND 
+              ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
               "Determining if compiler accepts -pthread returned ${THREADS_PTHREAD_ARG} instead of 2. The compiler had the following output:\n${OUTPUT}\n\n")
           ENDIF(THREADS_PTHREAD_ARG MATCHES "^2$")
         ELSE(THREADS_HAVE_PTHREAD_ARG)
           MESSAGE(STATUS "Check if compiler accepts -pthread - no")
-          FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+          FILE(APPEND 
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
             "Determining if compiler accepts -pthread failed with the following output:\n${OUTPUT}\n\n")
         ENDIF(THREADS_HAVE_PTHREAD_ARG)
       ENDIF("THREADS_HAVE_PTHREAD_ARG" MATCHES "^THREADS_HAVE_PTHREAD_ARG")

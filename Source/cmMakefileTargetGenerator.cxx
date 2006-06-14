@@ -23,6 +23,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmTarget.h"
+#include "cmake.h"
 
 #include "cmMakefileExecutableTargetGenerator.h"
 #include "cmMakefileLibraryTargetGenerator.h"
@@ -404,7 +405,7 @@ cmMakefileTargetGenerator
   int prog = gg->ShouldAddProgressRule();
   
   std::string progressDir = this->Makefile->GetHomeOutputDirectory();
-  progressDir += "/CMakeFiles";
+  progressDir += cmake::GetCMakeFilesDirectory();
   cmOStringStream progCmd;
   progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
   progCmd << this->LocalGenerator->Convert(progressDir.c_str(),

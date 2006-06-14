@@ -175,7 +175,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     }
   mf->AddDefinition("RUN_CONFIGURE", true);
   std::string rootBin = mf->GetHomeOutputDirectory();
-  rootBin += "/CMakeFiles";
+  rootBin += cmake::GetCMakeFilesDirectory();
   
   // If the configuration files path has been set,
   // then we are in a try compile and need to copy the enable language
@@ -930,7 +930,7 @@ cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
 {
   std::string cfp = gen->GetCMakeInstance()->GetHomeOutputDirectory();
-  cfp += "/CMakeFiles";
+  cfp += cmake::GetCMakeFilesDirectory();
   this->SetConfiguredFilesPath(cfp.c_str());
   const char* make =
     gen->GetCMakeInstance()->GetCacheDefinition("CMAKE_MAKE_PROGRAM");

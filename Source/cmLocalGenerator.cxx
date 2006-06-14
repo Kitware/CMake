@@ -52,7 +52,7 @@ void cmLocalGenerator::Configure()
 {
   // make sure the CMakeFiles dir is there
   std::string filesDir = this->Makefile->GetStartOutputDirectory();
-  filesDir += "/CMakeFiles";
+  filesDir += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(filesDir.c_str());
   
   // find & read the list file

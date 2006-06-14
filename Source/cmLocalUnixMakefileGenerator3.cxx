@@ -280,8 +280,10 @@ void cmLocalUnixMakefileGenerator3
       depends.clear();
       
       // Build the target for this pass.
+      std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
+      tmp += "Makefile2";
       commands.push_back(this->GetRecursiveMakeCall
-                         ("CMakeFiles/Makefile2",localName.c_str()));
+                         (tmp.c_str(),localName.c_str()));
       this->CreateCDCommand(commands,
                             this->Makefile->GetHomeOutputDirectory(),
                             this->Makefile->GetStartOutputDirectory());
@@ -322,7 +324,8 @@ void cmLocalUnixMakefileGenerator3
 void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
 {
   std::string infoFileName = this->Makefile->GetStartOutputDirectory();
-  infoFileName += "/CMakeFiles/CMakeDirectoryInformation.cmake";
+  infoFileName += cmake::GetCMakeFilesDirectory();
+  infoFileName += "/CMakeDirectoryInformation.cmake";
 
   // Open the output file.
   cmGeneratedFileStream infoFileStream(infoFileName.c_str());
@@ -653,7 +656,8 @@ void cmLocalUnixMakefileGenerator3
   // the --check-build-system flag.
   {
   // Build command to run CMake to check if anything needs regenerating.
-  std::string cmakefileName = "CMakeFiles/Makefile.cmake";
+  std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
+  cmakefileName += "Makefile.cmake";
   std::string runRule =
     "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
@@ -1158,7 +1162,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
   cmMakefile* mf = this->Makefile;
   bool haveDirectoryInfo = false;
   std::string dirInfoFile = this->Makefile->GetStartOutputDirectory();
-  dirInfoFile += "/CMakeFiles/CMakeDirectoryInformation.cmake";
+  dirInfoFile += cmake::GetCMakeFilesDirectory();
+  dirInfoFile += "/CMakeDirectoryInformation.cmake";
   if(mf->ReadListFile(0, dirInfoFile.c_str()) &&
      !cmSystemTools::GetErrorOccuredFlag())
     {
@@ -1437,7 +1442,7 @@ void cmLocalUnixMakefileGenerator3
   if (!this->Parent)
     {
     std::string progressDir = this->Makefile->GetHomeOutputDirectory();
-    progressDir += "/CMakeFiles";
+    progressDir += cmake::GetCMakeFilesDirectory();
     cmOStringStream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # src files
     progCmd << this->Convert(progressDir.c_str(),
@@ -1454,15 +1459,16 @@ void cmLocalUnixMakefileGenerator3
     commands.push_back(progCmd.str());
     }
 
-  commands.push_back
-    (this->GetRecursiveMakeCall("CMakeFiles/Makefile2",dir.c_str()));  
+  std::string mf2Dir = cmake::GetCMakeFilesDirectoryPostSlash();
+  mf2Dir += "Makefile2";
+  commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),dir.c_str()));  
   this->CreateCDCommand(commands,
-                                this->Makefile->GetHomeOutputDirectory(),
-                                this->Makefile->GetStartOutputDirectory());
+                        this->Makefile->GetHomeOutputDirectory(),
+                        this->Makefile->GetStartOutputDirectory());
   if (!this->Parent)
     {
     std::string progressDir = this->Makefile->GetHomeOutputDirectory();
-    progressDir += "/CMakeFiles";
+    progressDir += cmake::GetCMakeFilesDirectory();
     cmOStringStream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
     progCmd << this->Convert(progressDir.c_str(),
@@ -1480,8 +1486,7 @@ void cmLocalUnixMakefileGenerator3
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
   commands.clear();
   depends.clear();
-  commands.push_back
-    (this->GetRecursiveMakeCall("CMakeFiles/Makefile2",dir.c_str()));  
+  commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),dir.c_str()));  
   this->CreateCDCommand(commands,
                                 this->Makefile->GetHomeOutputDirectory(),
                                 this->Makefile->GetStartOutputDirectory());
@@ -1512,7 +1517,7 @@ void cmLocalUnixMakefileGenerator3
     depends.push_back("cmake_check_build_system");
     }
   commands.push_back
-    (this->GetRecursiveMakeCall("CMakeFiles/Makefile2", dir.c_str()));
+    (this->GetRecursiveMakeCall(mf2Dir.c_str(), dir.c_str()));
   this->CreateCDCommand(commands,
                         this->Makefile->GetHomeOutputDirectory(),
                         this->Makefile->GetStartOutputDirectory());
@@ -1525,7 +1530,8 @@ void cmLocalUnixMakefileGenerator3
   // write the depend rule, really a recompute depends rule
   depends.clear();
   commands.clear();
-  std::string cmakefileName = "CMakeFiles/Makefile.cmake";
+  std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
+  cmakefileName += "Makefile.cmake";
   this->Convert(cmakefileName.c_str(),HOME_OUTPUT,
                 cmLocalGenerator::MAKEFILE);  
   std::string runRule =
@@ -1873,7 +1879,7 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p)
 std::string
 cmLocalUnixMakefileGenerator3::GetTargetDirectory(cmTarget& target)
 {
-  std::string dir = "CMakeFiles/";
+  std::string dir = cmake::GetCMakeFilesDirectoryPostSlash();
   dir += target.GetName();
   dir += ".dir";
   return dir;

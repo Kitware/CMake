@@ -37,12 +37,12 @@ MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
       "${CMAKE_CONFIGURABLE_FILE_CONTENT}\nvoid cmakeRequireSymbol(int dummy,...){(void)dummy;}\nint main()\n{\n#ifndef ${SYMBOL}\n  cmakeRequireSymbol(0,&${SYMBOL});\n#endif\n  return 0;\n}\n")
 
     CONFIGURE_FILE("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-      "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c" @ONLY)
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.c" @ONLY)
 
     MESSAGE(STATUS "Looking for ${SYMBOL}")
     TRY_COMPILE(${VARIABLE}
       ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.c
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       CMAKE_FLAGS 
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_SYMBOL_EXISTS_FLAGS}
@@ -52,18 +52,18 @@ MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
     IF(${VARIABLE})
       MESSAGE(STATUS "Looking for ${SYMBOL} - found")
       SET(${VARIABLE} 1 CACHE INTERNAL "Have symbol ${SYMBOL}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Determining if the ${SYMBOL} "
         "exist passed with the following output:\n"
-        "${OUTPUT}\nFile ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c:\n"
+        "${OUTPUT}\nFile ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.c:\n"
         "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n")
     ELSE(${VARIABLE})
       MESSAGE(STATUS "Looking for ${SYMBOL} - not found.")
       SET(${VARIABLE} "" CACHE INTERNAL "Have symbol ${SYMBOL}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Determining if the ${SYMBOL} "
         "exist failed with the following output:\n"
-        "${OUTPUT}\nFile ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckSymbolExists.c:\n"
+        "${OUTPUT}\nFile ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.c:\n"
         "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n")
     ENDIF(${VARIABLE})
   ENDIF("${VARIABLE}" MATCHES "^${VARIABLE}$")
