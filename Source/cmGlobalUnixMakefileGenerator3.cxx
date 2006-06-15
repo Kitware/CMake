@@ -916,7 +916,6 @@ cmGlobalUnixMakefileGenerator3
           commands.clear();
           commands.push_back(lg->GetRecursiveMakeCall
                              (makefileName.c_str(), localName.c_str()));
-          this->AppendGlobalTargetDepends(depends,t->second);
           lg->WriteMakeRule(ruleFileStream, 
                             "Pre-install relink rule for target.",
                             localName.c_str(), depends, commands, true);
