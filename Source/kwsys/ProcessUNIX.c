@@ -60,6 +60,7 @@ do.
 #include <time.h>      /* gettimeofday */
 #include <signal.h>    /* sigaction */
 #include <dirent.h>    /* DIR, dirent */
+#include <ctype.h>     /* isspace */
 
 /* The number of pipes for the child's output.  The standard stdout
    and stderr pipes are the first two.  One more pipe is used to
@@ -122,6 +123,7 @@ static int kwsysProcessesAdd(kwsysProcess* cp);
 static void kwsysProcessesRemove(kwsysProcess* cp);
 static void kwsysProcessesSignalHandler(int signum, siginfo_t* info,
                                         void* ucontext);
+static char** kwsysProcessParseVerbatimCommand(const char* command);
 
 /*--------------------------------------------------------------------------*/
 /* Structure containing data used to implement the child's execution.  */
@@ -158,6 +160,9 @@ struct kwsysProcess_s
 
   /* Whether the child was created as a detached process.  */
   int Detached;
+
+  /* Whether to treat command lines as verbatim.  */
+  int Verbatim;
 
   /* Time at which the child started.  Negative for no timeout.  */
   kwsysProcessTime StartTime;
@@ -309,7 +314,7 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
   char*** newCommands;
 
   /* Make sure we have a command to add.  */
-  if(!cp || !command)
+  if(!cp || !command || !*command)
     {
     return 0;
     }
@@ -332,39 +337,54 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
   }
 
   /* Add the new command.  */
-  {
-  char const* const* c = command;
-  int n = 0;
-  int i = 0;
-  while(*c++);
-  n = c - command - 1;
-  newCommands[cp->NumberOfCommands] = (char**)malloc((n+1)*sizeof(char*));
-  if(!newCommands[cp->NumberOfCommands])
+  if(cp->Verbatim)
     {
-    /* Out of memory.  */
-    free(newCommands);
-    return 0;
-    }
-  for(i=0; i < n; ++i)
-    {
-    newCommands[cp->NumberOfCommands][i] = strdup(command[i]);
-    if(!newCommands[cp->NumberOfCommands][i])
+    /* In order to run the given command line verbatim we need to
+       parse it.  */
+    newCommands[cp->NumberOfCommands] =
+      kwsysProcessParseVerbatimCommand(*command);
+    if(!newCommands[cp->NumberOfCommands])
       {
-      break;
+      /* Out of memory.  */
+      free(newCommands);
+      return 0;
       }
     }
-  if(i < n)
+  else
     {
-    /* Out of memory.  */
-    for(;i > 0; --i)
+    /* Copy each argument string individually.  */
+    char const* const* c = command;
+    int n = 0;
+    int i = 0;
+    while(*c++);
+    n = c - command - 1;
+    newCommands[cp->NumberOfCommands] = (char**)malloc((n+1)*sizeof(char*));
+    if(!newCommands[cp->NumberOfCommands])
       {
-      free(newCommands[cp->NumberOfCommands][i-1]);
+      /* Out of memory.  */
+      free(newCommands);
+      return 0;
       }
-    free(newCommands);
-    return 0;
+    for(i=0; i < n; ++i)
+      {
+      newCommands[cp->NumberOfCommands][i] = strdup(command[i]);
+      if(!newCommands[cp->NumberOfCommands][i])
+        {
+        break;
+        }
+      }
+    if(i < n)
+      {
+      /* Out of memory.  */
+      for(;i > 0; --i)
+        {
+        free(newCommands[cp->NumberOfCommands][i-1]);
+        }
+      free(newCommands);
+      return 0;
+      }
+    newCommands[cp->NumberOfCommands][n] = 0;
     }
-  newCommands[cp->NumberOfCommands][n] = 0;
-  }
 
   /* Successfully allocated new command array.  Free the old array. */
   free(cp->Commands);
@@ -492,6 +512,7 @@ int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
   switch(optionId)
     {
     case kwsysProcess_Option_Detach: return cp->OptionDetach;
+    case kwsysProcess_Option_Verbatim: return cp->Verbatim;
     default: return 0;
     }
 }
@@ -507,6 +528,7 @@ void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
   switch(optionId)
     {
     case kwsysProcess_Option_Detach: cp->OptionDetach = value; break;
+    case kwsysProcess_Option_Verbatim: cp->Verbatim = value; break;
     default: break;
     }
 }
@@ -2255,4 +2277,257 @@ static void kwsysProcessesSignalHandler(int signum, siginfo_t* info,
     read(cp->PipeReadEnds[KWSYSPE_PIPE_SIGNAL], &buf, 1);
     write(cp->SignalPipe, &buf, 1);
     }
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcessAppendByte(char* local,
+                                  char** begin, char** end,
+                                  int* size, char c)
+{
+  /* Allocate space for the character.  */
+  if((*end - *begin) >= *size)
+    {
+    int length = *end - *begin;
+    char* newBuffer = (char*)malloc(*size*2);
+    if(!newBuffer)
+      {
+      return 0;
+      }
+    memcpy(newBuffer, *begin, length*sizeof(char));
+    if(*begin != local)
+      {
+      free(*begin);
+      }
+    *begin = newBuffer;
+    *end = *begin + length;
+    *size *= 2;
+    }
+
+  /* Store the character.  */
+  *(*end)++ = c;
+  return 1;
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcessAppendArgument(char** local,
+                                      char*** begin, char*** end,
+                                      int* size,
+                                      char* arg_local,
+                                      char** arg_begin, char** arg_end,
+                                      int* arg_size)
+{
+  /* Append a null-terminator to the argument string.  */
+  if(!kwsysProcessAppendByte(arg_local, arg_begin, arg_end, arg_size, '\0'))
+    {
+    return 0;
+    }
+
+  /* Allocate space for the argument pointer.  */
+  if((*end - *begin) >= *size)
+    {
+    int length = *end - *begin;
+    char** newPointers = (char**)malloc(*size*2*sizeof(char*));
+    if(!newPointers)
+      {
+      return 0;
+      }
+    memcpy(newPointers, *begin, length*sizeof(char*));
+    if(*begin != local)
+      {
+      free(*begin);
+      }
+    *begin = newPointers;
+    *end = *begin + length;
+    *size *= 2;
+    }
+
+  /* Allocate space for the argument string.  */
+  **end = (char*)malloc(*arg_end - *arg_begin);
+  if(!**end)
+    {
+    return 0;
+    }
+
+  /* Store the argument in the command array.  */
+  memcpy(**end, *arg_begin, *arg_end - *arg_begin);
+  ++(*end);
+
+  /* Reset the argument to be empty.  */
+  *arg_end = *arg_begin;
+
+  return 1;
+}
+
+/*--------------------------------------------------------------------------*/
+#define KWSYSPE_LOCAL_BYTE_COUNT 1024
+#define KWSYSPE_LOCAL_ARGS_COUNT 32
+static char** kwsysProcessParseVerbatimCommand(const char* command)
+{
+  /* Create a buffer for argument pointers during parsing.  */
+  char* local_pointers[KWSYSPE_LOCAL_ARGS_COUNT];
+  int pointers_size = KWSYSPE_LOCAL_ARGS_COUNT;
+  char** pointer_begin = local_pointers;
+  char** pointer_end = pointer_begin;
+
+  /* Create a buffer for argument strings during parsing.  */
+  char local_buffer[KWSYSPE_LOCAL_BYTE_COUNT];
+  int buffer_size = KWSYSPE_LOCAL_BYTE_COUNT;
+  char* buffer_begin = local_buffer;
+  char* buffer_end = buffer_begin;
+
+  /* Parse the command string.  Try to behave like a UNIX shell.  */
+  char** newCommand = 0;
+  const char* c = command;
+  int in_argument = 0;
+  int in_escape = 0;
+  int in_single = 0;
+  int in_double = 0;
+  int failed = 0;
+  for(;*c; ++c)
+    {
+    if(in_escape)
+      {
+      /* This character is escaped so do no special handling.  */
+      if(!in_argument)
+        {
+        in_argument = 1;
+        }
+      if(!kwsysProcessAppendByte(local_buffer, &buffer_begin,
+                                 &buffer_end, &buffer_size, *c))
+        {
+        failed = 1;
+        break;
+        }
+      in_escape = 0;
+      }
+    else if(*c == '\\' && !in_single)
+      {
+      /* The next character should be escaped.  */
+      in_escape = 1;
+      }
+    else if(*c == '\'' && !in_double)
+      {
+      /* Enter or exit single-quote state.  */
+      if(in_single)
+        {
+        in_single = 0;
+        }
+      else
+        {
+        in_single = 1;
+        if(!in_argument)
+          {
+          in_argument = 1;
+          }
+        }
+      }
+    else if(*c == '"' && !in_single)
+      {
+      /* Enter or exit double-quote state.  */
+      if(in_double)
+        {
+        in_double = 0;
+        }
+      else
+        {
+        in_double = 1;
+        if(!in_argument)
+          {
+          in_argument = 1;
+          }
+        }
+      }
+    else if(isspace(*c))
+      {
+      if(in_argument)
+        {
+        if(in_single || in_double)
+          {
+          /* This space belongs to a quoted argument.  */
+          if(!kwsysProcessAppendByte(local_buffer, &buffer_begin,
+                                     &buffer_end, &buffer_size, *c))
+            {
+            failed = 1;
+            break;
+            }
+          }
+        else
+          {
+          /* This argument has been terminated by whitespace.  */
+          if(!kwsysProcessAppendArgument(local_pointers, &pointer_begin,
+                                         &pointer_end, &pointers_size,
+                                         local_buffer, &buffer_begin,
+                                         &buffer_end, &buffer_size))
+            {
+            failed = 1;
+            break;
+            }
+          in_argument = 0;
+          }
+        }
+      }
+    else
+      {
+      /* This character belong to an argument.  */
+      if(!in_argument)
+        {
+        in_argument = 1;
+        }
+      if(!kwsysProcessAppendByte(local_buffer, &buffer_begin,
+                                 &buffer_end, &buffer_size, *c))
+        {
+        failed = 1;
+        break;
+        }
+      }
+    }
+
+  /* Finish the last argument.  */
+  if(in_argument)
+    {
+    if(!kwsysProcessAppendArgument(local_pointers, &pointer_begin,
+                                   &pointer_end, &pointers_size,
+                                   local_buffer, &buffer_begin,
+                                   &buffer_end, &buffer_size))
+      {
+      failed = 1;
+      }
+    }
+
+  /* If we still have memory allocate space for the new command
+     buffer.  */
+  if(!failed)
+    {
+    int n = pointer_end - pointer_begin;
+    newCommand = (char**)malloc((n+1)*sizeof(char*));
+    }
+
+  if(newCommand)
+    {
+    /* Copy the arguments into the new command buffer.  */
+    int n = pointer_end - pointer_begin;
+    memcpy(newCommand, pointer_begin, sizeof(char*)*n);
+    newCommand[n] = 0;
+    }
+  else
+    {
+    /* Free arguments already allocated.  */
+    while(pointer_end != pointer_begin)
+      {
+      free(*(--pointer_end));
+      }
+    }
+
+  /* Free temporary buffers.  */
+  if(pointer_begin != local_pointers)
+    {
+    free(pointer_begin);
+    }
+  if(buffer_begin != local_buffer)
+    {
+    free(buffer_begin);
+    }
+
+  /* Return the final command buffer.  */
+  return newCommand;
 }
