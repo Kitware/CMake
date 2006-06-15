@@ -152,6 +152,9 @@ public:
   std::string ConvertToRelativePath(const std::vector<std::string>& local,
                                     const char* remote);
 
+  /** Get whether the generator should use a script for link commands.  */
+  bool GetUseLinkScript() { return this->UseLinkScript; }
+
   /*
    * Determine what program to use for building the project.
    */
@@ -204,6 +207,7 @@ protected:
     const cmCustomCommandLines* commandLines,
     std::vector<std::string> depends, bool depends_on_all = false);
 
+  bool UseLinkScript;
   bool ForceUnixPaths;
   bool ToolSupportsColor;
   cmStdString FindMakeProgramFile;

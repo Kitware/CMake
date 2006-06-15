@@ -23,6 +23,7 @@ cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator()
   this->FindMakeProgramFile = "CMakeMinGWFindMake.cmake";
   this->ForceUnixPaths = true;
   this->ToolSupportsColor = true;
+  this->UseLinkScript = true;
 }
 
 void cmGlobalMinGWMakefileGenerator

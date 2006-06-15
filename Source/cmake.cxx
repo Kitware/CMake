@@ -32,6 +32,7 @@
 #endif
 
 # include <cmsys/Directory.hxx>
+#include <cmsys/Process.h>
 
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
@@ -1176,6 +1177,12 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         return lgd->ScanDependencies(depInfo.c_str())? 0 : 2;
         }
       return 1;
+      }
+
+    // Internal CMake link script support.
+    else if (args[1] == "cmake_link_script" && args.size() >= 3)
+      {
+      return cmake::ExecuteLinkScript(args);
       }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -2643,3 +2650,101 @@ int cmake::ExecuteEchoColor(std::vector<std::string>&)
   return 1;
 }
 #endif
+
+//----------------------------------------------------------------------------
+int cmake::ExecuteLinkScript(std::vector<std::string>& args)
+{
+  // The arguments are
+  //   argv[0] == <cmake-executable>
+  //   argv[1] == cmake_link_script
+  //   argv[2] == <link-script-name>
+  //   argv[3] == --verbose=?
+  bool verbose = false;
+  if(args.size() >= 4)
+    {
+    if(args[3].find("--verbose=") == 0)
+      {
+      if(!cmSystemTools::IsOff(args[3].substr(10).c_str()))
+        {
+        verbose = true;
+        }
+      }
+    }
+
+  // Allocate a process instance.
+  cmsysProcess* cp = cmsysProcess_New();
+  if(!cp)
+    {
+    std::cerr << "Error allocating process instance in link script."
+              << std::endl;
+    return 1;
+    }
+
+  // Children should share stdout and stderr with this process.
+  cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDOUT, 1);
+  cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDERR, 1);
+
+  // Run the command lines verbatim.
+  cmsysProcess_SetOption(cp, cmsysProcess_Option_Verbatim, 1);
+
+  // Read command lines from the script.
+  std::ifstream fin(args[2].c_str());
+  if(!fin)
+    {
+    std::cerr << "Error opening link script \""
+              << args[2] << "\"" << std::endl;
+    return 1;
+    }
+
+  // Run one command at a time.
+  std::string command;
+  int result = 0;
+  while(result == 0 && cmSystemTools::GetLineFromStream(fin, command))
+    {
+    // Setup this command line.
+    const char* cmd[2] = {command.c_str(), 0};
+    cmsysProcess_SetCommand(cp, cmd);
+
+    // Report the command if verbose output is enabled.
+    if(verbose)
+      {
+      std::cout << command << std::endl;
+      }
+
+    // Run the command and wait for it to exit.
+    cmsysProcess_Execute(cp);
+    cmsysProcess_WaitForExit(cp, 0);
+
+    // Report failure if any.
+    switch(cmsysProcess_GetState(cp))
+      {
+      case cmsysProcess_State_Exited:
+        {
+        int value = cmsysProcess_GetExitValue(cp);
+        if(value != 0)
+          {
+          result = value;
+          }
+        }
+        break;
+      case cmsysProcess_State_Exception:
+        std::cerr << "Error running link command: "
+                  << cmsysProcess_GetExceptionString(cp) << std::endl;
+        result = 1;
+        break;
+      case cmsysProcess_State_Error:
+        std::cerr << "Error running link command: "
+                  << cmsysProcess_GetErrorString(cp) << std::endl;
+        result = 2;
+        break;
+      default:
+        break;
+      };
+    }
+
+  // Free the process instance.
+  cmsysProcess_Delete(cp);
+
+  // Return the final resulting return value.
+  return result;
+}

@@ -36,6 +36,9 @@ cmGlobalGenerator::cmGlobalGenerator()
 
   // By default do not try to support color.
   this->ToolSupportsColor = false;
+
+  // By default do not use link scripts.
+  this->UseLinkScript = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()

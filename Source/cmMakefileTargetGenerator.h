@@ -91,6 +91,7 @@ protected:
   // write out the variable that lists the objects for this target
   void WriteObjectsVariable(std::string& variableName,
                             std::string& variableNameExternal);
+  void WriteObjectsString(std::string& buildObjs);
 
   // write the driver rule to build target outputs
   void WriteTargetDriverRule(const char* main_output, bool relink);

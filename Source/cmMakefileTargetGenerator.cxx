@@ -809,6 +809,56 @@ cmMakefileTargetGenerator
 }
 
 //----------------------------------------------------------------------------
+void
+cmMakefileTargetGenerator
+::WriteObjectsString(std::string& buildObjs)
+{
+  std::string object;
+  const char* no_quoted =
+    this->Makefile->GetDefinition("CMAKE_NO_QUOTED_OBJECTS");
+  const char* space = "";
+  for(std::vector<std::string>::const_iterator i = this->Objects.begin();
+      i != this->Objects.end(); ++i)
+    {
+    if ( this->ExtraContent.find(i->c_str()) != this->ExtraContent.end() )
+      {
+      continue;
+      }
+    buildObjs += space;
+    space = " ";
+    if(no_quoted)
+      {
+      buildObjs +=
+        this->Convert(i->c_str(), cmLocalGenerator::START_OUTPUT,
+                      cmLocalGenerator::SHELL);
+      }
+    else
+      {
+      buildObjs +=
+        this->LocalGenerator->ConvertToQuotedOutputPath(i->c_str());
+      }
+    }
+  for(std::vector<std::string>::const_iterator i =
+        this->ExternalObjects.begin();
+      i != this->ExternalObjects.end(); ++i)
+    {
+    buildObjs += space;
+    space = " ";
+    if(no_quoted)
+      {
+      buildObjs +=
+        this->Convert(i->c_str(), cmLocalGenerator::START_OUTPUT,
+                      cmLocalGenerator::SHELL);
+      }
+    else
+      {
+      buildObjs +=
+        this->LocalGenerator->ConvertToQuotedOutputPath(i->c_str());
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
                                                       bool relink)
 {

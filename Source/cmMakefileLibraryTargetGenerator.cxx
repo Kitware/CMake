@@ -24,6 +24,8 @@
 #include "cmTarget.h"
 #include "cmake.h"
 
+#include <memory> // auto_ptr
+
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
 {
@@ -376,9 +378,41 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands());
     }
 
+  // Open the link script if it will be used.
+  bool useLinkScript = false;
+  std::string linkScriptName;
+  std::auto_ptr<cmGeneratedFileStream> linkScriptStream;
+  if(this->GlobalGenerator->GetUseLinkScript() &&
+     (this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
+      this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+      this->Target->GetType() == cmTarget::MODULE_LIBRARY))
+    {
+    useLinkScript = true;
+    linkScriptName = this->TargetBuildDirectoryFull;
+    linkScriptName += "/link.txt";
+    std::auto_ptr<cmGeneratedFileStream> lss(
+      new cmGeneratedFileStream(linkScriptName.c_str()));
+    linkScriptStream = lss;
+    }
+
+  std::vector<std::string> link_script_commands;
+
   // Construct the main link rule.
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
-  cmSystemTools::ExpandListArgument(linkRule, commands1);
+  if(useLinkScript)
+    {
+    cmSystemTools::ExpandListArgument(linkRule, link_script_commands);
+    std::string link_command = "$(CMAKE_COMMAND) -E cmake_link_script ";
+    link_command += this->Convert(linkScriptName.c_str(),
+                                  cmLocalGenerator::START_OUTPUT,
+                                  cmLocalGenerator::SHELL);
+    link_command += " --verbose=$(VERBOSE)";
+    commands1.push_back(link_command);
+    }
+  else
+    {
+    cmSystemTools::ExpandListArgument(linkRule, commands1);
+    }
   this->LocalGenerator->CreateCDCommand
     (commands1,
      this->Makefile->GetStartOutputDirectory(),
@@ -418,11 +452,19 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string variableName;
   std::string variableNameExternal;
   this->WriteObjectsVariable(variableName, variableNameExternal);
-  std::string buildObjs = "$(";
-  buildObjs += variableName;
-  buildObjs += ") $(";
-  buildObjs += variableNameExternal;
-  buildObjs += ")";
+  std::string buildObjs;
+  if(useLinkScript)
+    {
+    this->WriteObjectsString(buildObjs);
+    }
+  else
+    {
+    buildObjs = "$(";
+    buildObjs += variableName;
+    buildObjs += ") $(";
+    buildObjs += variableNameExternal;
+    buildObjs += ")";
+    }
   std::string cleanObjs = "$(";
   cleanObjs += variableName;
   cleanObjs += ")";
@@ -493,12 +535,34 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.LanguageCompileFlags = langFlags.c_str();
   // Expand placeholders in the commands.
   this->LocalGenerator->TargetImplib = targetOutPathImport;
-  for(std::vector<std::string>::iterator i = commands.begin();
-      i != commands.end(); ++i)
+  if(useLinkScript)
     {
-    this->LocalGenerator->ExpandRuleVariables(*i, vars);
+    for(std::vector<std::string>::iterator i = link_script_commands.begin();
+        i != link_script_commands.end(); ++i)
+      {
+      this->LocalGenerator->ExpandRuleVariables(*i, vars);
+      }
+    }
+  else
+    {
+    for(std::vector<std::string>::iterator i = commands.begin();
+        i != commands.end(); ++i)
+      {
+      this->LocalGenerator->ExpandRuleVariables(*i, vars);
+      }
     }
   this->LocalGenerator->TargetImplib = "";
+
+  // Optionally convert the build rule to use a script to avoid long
+  // command lines in the make shell.
+  if(useLinkScript)
+    {
+    for(std::vector<std::string>::iterator cmd = link_script_commands.begin();
+        cmd != link_script_commands.end(); ++cmd)
+      {
+      (*linkScriptStream) << *cmd << "\n";
+      }
+    }
 
   // Write the build rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,

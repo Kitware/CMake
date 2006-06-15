@@ -23,6 +23,7 @@ cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
   this->FindMakeProgramFile = "CMakeNMakeFindMake.cmake";
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
+  this->UseLinkScript = false;
 }
 
 void cmGlobalNMakeMakefileGenerator
