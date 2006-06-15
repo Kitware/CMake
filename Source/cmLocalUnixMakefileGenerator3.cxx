@@ -1461,7 +1461,8 @@ void cmLocalUnixMakefileGenerator3
 
   std::string mf2Dir = cmake::GetCMakeFilesDirectoryPostSlash();
   mf2Dir += "Makefile2";
-  commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),dir.c_str()));  
+  commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),
+                                                dir.c_str()));  
   this->CreateCDCommand(commands,
                         this->Makefile->GetHomeOutputDirectory(),
                         this->Makefile->GetStartOutputDirectory());
@@ -1486,7 +1487,8 @@ void cmLocalUnixMakefileGenerator3
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
   commands.clear();
   depends.clear();
-  commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),dir.c_str()));  
+  commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),
+                                                dir.c_str()));  
   this->CreateCDCommand(commands,
                                 this->Makefile->GetHomeOutputDirectory(),
                                 this->Makefile->GetStartOutputDirectory());

@@ -69,7 +69,8 @@ class cmake
 
   ///! construct an instance of cmake
   static const char *GetCMakeFilesDirectory() {return "/CMakeFiles";};
-  static const char *GetCMakeFilesDirectoryPostSlash() {return "CMakeFiles/";};
+  static const char *GetCMakeFilesDirectoryPostSlash() {
+    return "CMakeFiles/";};
   
   //@{
   /**
