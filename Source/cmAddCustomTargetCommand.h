@@ -68,15 +68,18 @@ public:
       "                    [DEPENDS depend depend depend ... ])\n"
       "                    [WORKING_DIRECTORY dir]\n"
       "Adds a target with the given name that executes the given commands "
-      "every time the target is built.  If the ALL option is specified "
+      "every time the target is built. If the ALL option is specified "
       "it indicates that this target should be added to the default build "
-      "target so that it will be run every time.  "
-      "The command and arguments are optional.  If not specified, "
-      "it will create an empty target.  The ADD_DEPENDENCIES command can be "
-      "used in conjunction with this command to drive custom target "
-      "generation.  The command cannot be called ALL. "
+      "target so that it will be run every time "
+      "(the command cannot be called ALL). "
+      "The command and arguments are optional and if not specified an "
+      "empty target will be created. "
       "If WORKING_DIRECTORY is set, then the command will be run in that "
-      "directory.";
+      "directory. "
+      "Dependencies listed with the DEPENDS argument may reference files "
+      "and outputs of custom commands created with ADD_CUSTOM_COMMAND. "
+      "Dependencies on other targets may be added using the "
+      "ADD_DEPENDENCIES command.";
     }
   
   cmTypeMacro(cmAddCustomTargetCommand, cmCommand);
