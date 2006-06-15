@@ -2035,9 +2035,7 @@ int cmake::CheckBuildSystem()
   
   // This method will check the integrity of the build system if the
   // option was given on the command line.  It reads the given file to
-  // determine whether CMake should rerun.  If it does rerun then the
-  // generation step will check the integrity of dependencies.  If it
-  // does not then we need to check the integrity here.
+  // determine whether CMake should rerun.
 
   // If no file is provided for the check, we have to rerun.
   if(this->CheckBuildSystemArgument.size() == 0)
@@ -2086,6 +2084,25 @@ int cmake::CheckBuildSystem()
     return 1;
     }
 
+  // Now that we know the generator used to build the project, use it
+  // to check the dependency integrity.
+  const char* genName = mf->GetDefinition("CMAKE_DEPENDS_GENERATOR");
+  if (!genName || genName[0] == '\0')
+    {
+    genName = "Unix Makefiles";
+    }
+  cmGlobalGenerator *ggd = this->CreateGlobalGenerator(genName);
+  if (ggd)
+    {
+    // Check the dependencies in case source files were removed.
+    std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
+    lgd->SetGlobalGenerator(ggd);
+    lgd->CheckDependencies(mf, verbose, this->ClearBuildSystem);
+
+    // Check for multiple output pairs.
+    ggd->CheckMultipleOutputs(mf, verbose);
+    }
+
   // Get the set of dependencies and outputs.
   const char* dependsStr = mf->GetDefinition("CMAKE_MAKEFILE_DEPENDS");
   const char* outputsStr = mf->GetDefinition("CMAKE_MAKEFILE_OUTPUTS");
@@ -2128,24 +2145,6 @@ int cmake::CheckBuildSystem()
         return 1;
         }
       }
-    }
-
-  // compute depends based on the generator specified
-  const char* genName = mf->GetDefinition("CMAKE_DEPENDS_GENERATOR");
-  if (!genName || genName[0] == '\0')
-    {
-    genName = "Unix Makefiles";
-    }
-  cmGlobalGenerator *ggd = this->CreateGlobalGenerator(genName);
-  if (ggd)
-    {
-    // Check the dependencies in case source files were removed.
-    std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
-    lgd->SetGlobalGenerator(ggd);
-    lgd->CheckDependencies(mf, verbose, this->ClearBuildSystem);
-
-    // Check for multiple output pairs.
-    ggd->CheckMultipleOutputs(mf, verbose);
     }
 
   // No need to rerun.
