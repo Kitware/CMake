@@ -1418,6 +1418,9 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     outputRuntime && tgt.HaveInstallTreeRPATH() && linking_for_install;
   bool use_build_rpath =
     outputRuntime && tgt.HaveBuildTreeRPATH() && !linking_for_install;
+  bool use_link_rpath =
+    outputRuntime && linking_for_install &&
+    tgt.GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
 
   // Construct the RPATH.
   std::vector<std::string> runtimeDirs;
@@ -1454,13 +1457,29 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
          && libDir->find("${") == std::string::npos)
         {
         linkLibs += libPathFlag;
+        linkLibs += fullLibPath;
+        linkLibs += " ";
+
+        // Put this directory in the rpath if using build-tree rpath
+        // support or if using the link path as an rpath.
         if(use_build_rpath)
           {
-          runtimeDirs.push_back( fullLibPath );
+          runtimeDirs.push_back(fullLibPath);
+          }
+        else if(use_link_rpath)
+          {
+          // Do not add any path inside the source or build tree.
+          const char* topSourceDir = this->Makefile->GetHomeDirectory();
+          const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
+          if(!cmSystemTools::ComparePath(libDir->c_str(), topSourceDir) &&
+             !cmSystemTools::ComparePath(libDir->c_str(), topBinaryDir) &&
+             !cmSystemTools::IsSubDirectory(libDir->c_str(), topSourceDir) &&
+             !cmSystemTools::IsSubDirectory(libDir->c_str(), topBinaryDir))
+            {
+            runtimeDirs.push_back(fullLibPath);
+            }
           }
         }
-      linkLibs += fullLibPath;
-      linkLibs += " ";
       }
     }
 

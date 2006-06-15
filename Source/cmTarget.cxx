@@ -63,6 +63,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   // Setup default property values.
   this->SetPropertyDefault("INSTALL_NAME_DIR", "");
   this->SetPropertyDefault("INSTALL_RPATH", "");
+  this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");
   this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
   this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
 
