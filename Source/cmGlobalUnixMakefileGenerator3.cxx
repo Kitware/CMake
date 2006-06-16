@@ -816,20 +816,22 @@ cmGlobalUnixMakefileGenerator3
         std::string progressDir =
           lg->GetMakefile()->GetHomeOutputDirectory();
         progressDir += cmake::GetCMakeFilesDirectory();
-        cmOStringStream progCmd;
-        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report "; 
-        // all target counts
-        progCmd << lg->Convert(progressDir.c_str(),
-                               cmLocalGenerator::FULL,
-                               cmLocalGenerator::SHELL);
-        progCmd << " ";
-        std::vector<int> &progFiles = lg->ProgressFiles[t->first];
-        for (std::vector<int>::iterator i = progFiles.begin();
-             i != progFiles.end(); ++i)
           {
-          progCmd << " " << *i;
+          cmOStringStream progCmd;
+          progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report "; 
+          // all target counts
+          progCmd << lg->Convert(progressDir.c_str(),
+                                 cmLocalGenerator::FULL,
+                                 cmLocalGenerator::SHELL);
+          progCmd << " ";
+          std::vector<int> &progFiles = lg->ProgressFiles[t->first];
+          for (std::vector<int>::iterator i = progFiles.begin();
+               i != progFiles.end(); ++i)
+            {
+            progCmd << " " << *i;
+            }
+          commands.push_back(progCmd.str());
           }
-        commands.push_back(progCmd.str());
         progressDir = "Building target ";
         progressDir += t->first;
         lg->AppendEcho(commands,progressDir.c_str());
