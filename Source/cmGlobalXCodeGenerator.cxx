@@ -947,9 +947,10 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
           }
         }
       else
-        {
-        char c = '1' + count++;
-        tname[&cc] = std::string(target.GetName()) + c;
+        {  
+        cmOStringStream str;
+        str << "_buildpart_" << count++ ;
+        tname[&cc] = std::string(target.GetName()) + str.str(); 
         makefileStream << "\\\n\t" << tname[&cc];
         }
       }
