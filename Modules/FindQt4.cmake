@@ -161,7 +161,7 @@
 #  QT_QT_LIBRARY        Qt-Library is now split
 
 INCLUDE(CheckSymbolExists)
-INCLUDE(AddFileDependencies)
+INCLUDE(MacroAddFileDependencies)
 
 SET(QT_USE_FILE ${CMAKE_ROOT}/Modules/UseQt4.cmake)
 
@@ -176,7 +176,7 @@ FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake qmake-qt4 PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/bin"
   $ENV{QTDIR}/bin
-  )
+)
 
 SET(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
 
@@ -203,18 +203,18 @@ IF (QT_QMAKE_EXECUTABLE)
       ENDIF (NOT req_qt_major_vers)
    
       # now parse the parts of the user given version string into variables
-      STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_qt_major_vers "${QT_MIN_VERSION}")
-      STRING(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_qt_minor_vers "${QT_MIN_VERSION}")
-      STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
+      STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_qt_major_vers "${QT_MIN_VERSION}")
+      STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_qt_minor_vers "${QT_MIN_VERSION}")
+      STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
    
       IF (NOT req_qt_major_vers EQUAL 4)
          MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", major version 4 is required, e.g. \"4.0.1\"")
       ENDIF (NOT req_qt_major_vers EQUAL 4)
    
       # and now the version string given by qmake
-      STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" found_qt_major_vers "${qt_version_tmp}")
-      STRING(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" found_qt_minor_vers "${qt_version_tmp}")
-      STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" found_qt_patch_vers "${qt_version_tmp}")
+      STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" found_qt_major_vers "${QTVERSION}")
+      STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+.*" "\\1" found_qt_minor_vers "${QTVERSION}")
+      STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" found_qt_patch_vers "${QTVERSION}")
    
       # compute an overall version number which can be compared at once
       MATH(EXPR req_vers "${req_qt_major_vers}*10000 + ${req_qt_minor_vers}*100 + ${req_qt_patch_vers}")
@@ -299,12 +299,10 @@ IF (QT4_QMAKE_FOUND)
   ########################################
 
   FIND_PATH(QT_QTCORE_INCLUDE_DIR QtGlobal
-    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/include/QtCore"
     ${QT_HEADERS_DIR}/QtCore
     ${QT_LIBRARY_DIR}/QtCore.framework/Headers
-    $ENV{QTDIR}/include/QtCore
-    "$ENV{ProgramFiles}/qt/include/Qt"
-   )
+    NO_DEFAULT_PATH
+  )
 
   # Set QT_INCLUDE_DIR by removine "/QtCore" in the string ${QT_QTCORE_INCLUDE_DIR}
   IF( QT_QTCORE_INCLUDE_DIR AND NOT QT_INCLUDE_DIR)
@@ -470,41 +468,6 @@ IF (QT4_QMAKE_FOUND)
   SET( QT_INCLUDES ${QT_INCLUDE_DIR} ${QT_QT_INCLUDE_DIR} ${QT_MKSPECS_DIR}/default )
 
 
-  ########################################
-  #
-  #       Setting the LIBRARY-Variables
-  #
-  ########################################
-
-  IF (QT_USE_FRAMEWORKS)
-    # If FIND_LIBRARY found libraries in Apple frameworks, we would NOT have
-    # to jump through these hoops.
-    SET(QT_QTCORE_LIBRARY_RELEASE "-F${QT_LIBRARY_DIR} -framework QtCore" CACHE STRING "The QtCore library.")
-    SET(QT_QTCORE_LIBRARY_DEBUG   "-F${QT_LIBRARY_DIR} -framework QtCore" CACHE STRING "The QtCore library.")
-    SET(QT_QT3SUPPORT_LIBRARY_RELEASE "-framework Qt3Support" CACHE STRING "The Qt3Support library.")
-    SET(QT_QT3SUPPORT_LIBRARY_DEBUG   "-framework Qt3Support" CACHE STRING "The Qt3Support library.")
-    SET(QT_QTGUI_LIBRARY_RELEASE      "-framework QtGui"      CACHE STRING "The QtGui library.")
-    SET(QT_QTGUI_LIBRARY_DEBUG        "-framework QtGui"      CACHE STRING "The QtGui library.")
-    SET(QT_QTNETWORK_LIBRARY_RELEASE  "-framework QtNetwork"  CACHE STRING "The QtNetwork library.")
-    SET(QT_QTNETWORK_LIBRARY_DEBUG    "-framework QtNetwork"  CACHE STRING "The QtNetwork library.")
-    SET(QT_QTOPENGL_LIBRARY_RELEASE   "-framework QtOpenGL"   CACHE STRING "The QtOpenGL library.")
-    SET(QT_QTOPENGL_LIBRARY_DEBUG     "-framework QtOpenGL"   CACHE STRING "The QtOpenGL library.")
-    SET(QT_QTSQL_LIBRARY_RELEASE      "-framework QtSql"      CACHE STRING "The QtSql library.")
-    SET(QT_QTSQL_LIBRARY_DEBUG        "-framework QtSql"      CACHE STRING "The QtSql library.")
-    SET(QT_QTXML_LIBRARY_RELEASE      "-framework QtXml"      CACHE STRING "The QtXml library.")
-    SET(QT_QTXML_LIBRARY_DEBUG        "-framework QtXml"      CACHE STRING "The QtXml library.")
-    SET(QT_QTSVG_LIBRARY_RELEASE      "-framework QtSvg"      CACHE STRING "The QtSvg library.")
-    SET(QT_QTSVG_LIBRARY_DEBUG        "-framework QtSvg"      CACHE STRING "The QtSvg library.")
-    SET(QT_QTUITOOLS_LIBRARY_RELEASE      "-framework QtUiTools"      CACHE STRING "The QtUiTools library.")
-    SET(QT_QTUITOOLS_LIBRARY_DEBUG        "-framework QtUiTools"      CACHE STRING "The QtUiTools library.")
-
-
-    # WTF?  why don't we have frameworks?  :P
-    SET(QT_QTTEST_LIBRARY_RELEASE "-L${QT_LIBRARY_DIR} -lQtTest" CACHE STRING "The QtTest library.")
-    SET(QT_QTTEST_LIBRARY_DEBUG   "-L${QT_LIBRARY_DIR} -lQtTest_debug" CACHE STRING "The QtTest library.")
-    MARK_AS_ADVANCED(QT_QT3SUPPORT_LIBRARY QT_QTGUI_LIBRARY )
-
-  ELSE (QT_USE_FRAMEWORKS)
     
     # Set QT_QTCORE_LIBRARY by searching for a lib with "QtCore."  as part of the filename
     FIND_LIBRARY(QT_QTCORE_LIBRARY_RELEASE NAMES QtCore QtCore4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH )
@@ -558,7 +521,11 @@ IF (QT4_QMAKE_FOUND)
 
     MARK_AS_ADVANCED(QT_QT3SUPPORT_LIBRARY QT_QTGUI_LIBRARY )
 
-  ENDIF (QT_USE_FRAMEWORKS)
+  IF( NOT QT_QTCORE_LIBRARY_DEBUG AND NOT QT_QTCORE_LIBRARY_RELEASE )
+    IF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
+      MESSAGE( FATAL_ERROR "Could NOT find QtCore. Check CMakeFiles/CMakeError.log for more details.")
+    ENDIF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
+  ENDIF( NOT QT_QTCORE_LIBRARY_DEBUG AND NOT QT_QTCORE_LIBRARY_RELEASE )
 
   # Set QT_QTASSISTANT_LIBRARY
   FIND_LIBRARY(QT_QTASSISTANT_LIBRARY_RELEASE NAMES QtAssistantClient QtAssistant QtAssistant4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
@@ -567,12 +534,6 @@ IF (QT4_QMAKE_FOUND)
   # Set QT_QTDESIGNER_LIBRARY
   FIND_LIBRARY(QT_QTDESIGNER_LIBRARY_RELEASE NAMES QtDesigner QtDesigner4 PATHS ${QT_LIBRARY_DIR}        NO_DEFAULT_PATH)
   FIND_LIBRARY(QT_QTDESIGNER_LIBRARY_DEBUG   NAMES QtDesigner_debug QtDesignerd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
-
-  # Set QT_QTMAIN_LIBRARY
-  IF(WIN32)
-    FIND_LIBRARY(QT_QTMAIN_LIBRARY_RELEASE NAMES qtmain PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
-    FIND_LIBRARY(QT_QTMAIN_LIBRARY_DEBUG   NAMES qtmaind PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
-  ENDIF(WIN32)
 
   ############################################
   #
@@ -598,7 +559,11 @@ IF (QT4_QMAKE_FOUND)
       ENDIF (QT_${basename}_LIBRARY_DEBUG AND NOT QT_${basename}_LIBRARY_RELEASE)
 
       IF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
+        IF(NOT MSVC)
         SET(QT_${basename}_LIBRARY         ${QT_${basename}_LIBRARY_RELEASE})
+        ELSE(NOT MSVC)
+          SET(QT_${basename}_LIBRARY       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
+        ENDIF(NOT MSVC)
         SET(QT_${basename}_LIBRARIES       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
       ENDIF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
 
@@ -725,6 +690,8 @@ IF (QT4_QMAKE_FOUND)
         COMMAND ${QT_MOC_EXECUTABLE}
         ARGS ${moc_includes} -o ${outfile} ${infile}
         DEPENDS ${infile})
+
+     MACRO_ADD_FILE_DEPENDENCIES(${infile} ${outfile})
   ENDMACRO (QT4_GENERATE_MOC)
 
 
@@ -824,7 +791,7 @@ IF (QT4_QMAKE_FOUND)
                      DEPENDS ${_header}
                   )
 
-                  ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
+                  MACRO_ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
                ENDFOREACH (_current_MOC_INC)
             ENDIF(_match)
          ENDIF ( NOT _skip AND EXISTS ${_abs_FILE} )
