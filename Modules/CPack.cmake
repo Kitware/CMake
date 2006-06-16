@@ -20,6 +20,10 @@ MACRO(cpack_set_if_not_set name value)
 ENDMACRO(cpack_set_if_not_set)
 
 # Macro to encode variables for the configuration file
+# find any varable that stars with CPACK and create a variable
+# _CPACK_OTHER_VARIABLES_ that contains SET commands for
+# each cpack variable.  _CPACK_OTHER_VARIABLES_ is then
+# used as an @ replacment in configure_file for the CPackConfig.
 MACRO(cpack_encode_variables)
   SET(_CPACK_OTHER_VARIABLES_)
   GET_CMAKE_PROPERTY(res VARIABLES)
