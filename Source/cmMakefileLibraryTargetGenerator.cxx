@@ -389,7 +389,14 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     useLinkScript = true;
     linkScriptName = this->TargetBuildDirectoryFull;
-    linkScriptName += "/link.txt";
+    if(relink)
+      {
+      linkScriptName += "/relink.txt";
+      }
+    else
+      {
+      linkScriptName += "/link.txt";
+      }
     std::auto_ptr<cmGeneratedFileStream> lss(
       new cmGeneratedFileStream(linkScriptName.c_str()));
     linkScriptStream = lss;
