@@ -567,7 +567,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     for(std::vector<std::string>::iterator cmd = link_script_commands.begin();
         cmd != link_script_commands.end(); ++cmd)
       {
-      (*linkScriptStream) << *cmd << "\n";
+      // Do not write out empty commands or commands beginning in the
+      // shell no-op ":".
+      if(!cmd->empty() && (*cmd)[0] != ':')
+        {
+        (*linkScriptStream) << *cmd << "\n";
+        }
       }
     }
 
