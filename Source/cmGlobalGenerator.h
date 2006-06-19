@@ -200,6 +200,7 @@ protected:
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
 
   void ConfigureRelativePaths();
+  bool RelativePathsConfigured;
   void SetupTests();
 
   void CreateDefaultGlobalTargets(cmTargets* targets);

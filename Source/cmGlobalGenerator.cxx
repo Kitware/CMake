@@ -39,6 +39,9 @@ cmGlobalGenerator::cmGlobalGenerator()
 
   // By default do not use link scripts.
   this->UseLinkScript = false;
+
+  // Relative paths are not configured in the constructor.
+  this->RelativePathsConfigured = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -1098,6 +1101,13 @@ std::string cmGlobalGenerator
     return in_remote;
     }
 
+  // Make sure relative path conversion is configured.
+  if(!this->RelativePathsConfigured)
+    {
+    this->ConfigureRelativePaths();
+    this->RelativePathsConfigured = true;
+    }
+
   std::string original = in_remote;
 
   // Skip conversion if the path and local are not both in the source or both
@@ -1224,9 +1234,6 @@ void cmGlobalGenerator::SetCMakeInstance(cmake* cm)
 {
   // Store a pointer to the cmake object instance.
   this->CMakeInstance = cm;
-
-  // Setup relative path conversion for the instance.
-  this->ConfigureRelativePaths();
 }
 
 void cmGlobalGenerator::SetupTests()
