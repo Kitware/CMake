@@ -31,7 +31,11 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
   this->ToolSupportsColor = true;
   this->NumberOfSourceFiles = 0;
   this->NumberOfSourceFilesWritten = 0;
+#ifdef _WIN32
+  this->UseLinkScript = false;
+#else
   this->UseLinkScript = true;
+#endif
 }
 
 void cmGlobalUnixMakefileGenerator3
