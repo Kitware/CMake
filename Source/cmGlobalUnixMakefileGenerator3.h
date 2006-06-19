@@ -126,7 +126,7 @@ public:
   // returns true if a progress rule should be added
   int ShouldAddProgressRule();
   int GetNumberOfCompilableSourceFilesForTarget(cmTarget &tgt);
-  int GetTargetTotalNumberOfSourceFiles(cmTarget& target);
+  int GetTargetTotalNumberOfProgressFiles(cmTarget& target);
   int GetNumberOfSourceFiles() { return this->NumberOfSourceFiles; };
 
   // what targets does the specified target depend on

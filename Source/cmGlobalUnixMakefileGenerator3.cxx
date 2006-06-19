@@ -867,7 +867,8 @@ cmGlobalUnixMakefileGenerator3
         progCmd << lg->Convert(progressDir.c_str(),
                                cmLocalGenerator::FULL,
                                cmLocalGenerator::SHELL);
-        progCmd << " " << lg->ProgressFiles[t->first].size();
+        //
+        progCmd << " " << this->GetTargetTotalNumberOfProgressFiles(t->second);
         commands.push_back(progCmd.str());
         }
         std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
@@ -938,15 +939,18 @@ cmGlobalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 int cmGlobalUnixMakefileGenerator3
-::GetTargetTotalNumberOfSourceFiles(cmTarget& target)
+::GetTargetTotalNumberOfProgressFiles(cmTarget& target)
 {
-  int result = this->GetNumberOfCompilableSourceFilesForTarget(target);
+  cmLocalUnixMakefileGenerator3 *lg = 
+    static_cast<cmLocalUnixMakefileGenerator3 *>
+    (target.GetMakefile()->GetLocalGenerator());
+  int result = lg->ProgressFiles[target.GetName()].size();
   std::vector<cmTarget *>& depends = this->GetTargetDepends(target);
 
   std::vector<cmTarget *>::iterator i;
   for (i = depends.begin(); i != depends.end(); ++i)
     {
-    result += this->GetTargetTotalNumberOfSourceFiles(**i);
+    result += this->GetTargetTotalNumberOfProgressFiles(**i);
     }
   
   return result;
