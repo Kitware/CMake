@@ -2073,7 +2073,7 @@ int kwsysProcessComputeCommandLength(kwsysProcess* cp,
     {
     /* Treat the first argument as a verbatim command line.  Use its
        length directly and add space for the null-terminator.  */
-    length = strlen(*command)+1;
+    length = (int)strlen(*command)+1;
     }
   else
     {
