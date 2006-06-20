@@ -2369,7 +2369,7 @@ void cmake::GenerateGraphViz(const char* fileName)
   std::map<cmStdString, int> targetDeps;
   std::map<cmStdString, cmTarget*> targetPtrs;
   std::map<cmStdString, cmStdString> targetNamesNodes;
-  char tgtName[100];
+  char tgtName[2048];
   int cnt = 0;
   // First pass get the list of all cmake targets
   for ( lit = localGenerators.begin(); lit != localGenerators.end(); ++ lit )
