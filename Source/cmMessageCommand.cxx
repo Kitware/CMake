@@ -57,25 +57,26 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
     message += *i;
     }
 
-  if (send_error)
+  if (send_error || fatal_error)
     {
-    cmSystemTools::Error(message.c_str());
+    //cmSystemTools::Error(message.c_str());
+    this->SetError(message.c_str());
     }
   else
     {
-      if (status)
-        {
-          this->Makefile->DisplayStatus(message.c_str(), -1);
-        }
-      else
-        {
-          cmSystemTools::Message(message.c_str());
-        }
+    if (status)
+      {
+      this->Makefile->DisplayStatus(message.c_str(), -1);
+      }
+    else
+      {
+      cmSystemTools::Message(message.c_str());
+      }
     }
   if(fatal_error )
     {
     cmSystemTools::SetFatalErrorOccured();
     }
-  return true;
+  return (!send_error && !fatal_error);
 }
 
