@@ -267,7 +267,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
       cmOStringStream error;
       error << "Error in cmake code at\n"
             << lff.FilePath << ":" << lff.Line << ":\n"
-            << rm->GetError();
+            << rm->GetError() << std::endl
+            << "Current CMake stack: " << this->GetListFileStack().c_str();
       cmSystemTools::Error(error.str().c_str());
       return false;
       }
@@ -283,7 +284,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
         cmOStringStream error;
         error << "Error in cmake code at\n"
               << lff.FilePath << ":" << lff.Line << ":\n"
-              << usedCommand->GetError();
+              << usedCommand->GetError() << std::endl
+              << "Current CMake stack: " << this->GetListFileStack().c_str();
         cmSystemTools::Error(error.str().c_str());
         result = false;
         if ( this->GetCMakeInstance()->GetScriptMode() )
@@ -2743,3 +2745,17 @@ std::vector<cmTest*> *cmMakefile::GetTests()
   return &this->Tests;
 }
 
+std::string cmMakefile::GetListFileStack()
+{
+  std::string tmp;
+  for (std::deque<cmStdString>::iterator i = this->ListFileStack.begin();
+    i != this->ListFileStack.end(); ++i)
+    {
+    if (i != this->ListFileStack.begin())
+      {
+      tmp += ";";
+      }
+    tmp += *i;
+    }
+  return tmp;
+}
