@@ -1024,9 +1024,8 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
           fclose(progFile);
           }
         }
-      cmsys::Directory dir;
-      dir.Load(dirName.c_str());
-      int fileNum = static_cast<int>(dir.GetNumberOfFiles());
+      int fileNum = static_cast<int>
+        (cmsys::Directory::GetNumberOfFilesInDirectory(dirName.c_str()));
       // read the count
       fName = dirName;
       fName += "/count.txt";
