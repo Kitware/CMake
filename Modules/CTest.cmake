@@ -48,6 +48,7 @@ IF(BUILD_TESTING)
     # Dashboard is opened for submissions for a 24 hour period starting at
     # the specified NIGHTLY_START_TIME. Time is specified in 24 hour format.
     SET_IF_NOT_SET (NIGHTLY_START_TIME "00:00:00 EDT")
+    SET_IF_NOT_SET(DROP_METHOD "http")
 
     # Dart server to submit results (used by client)
     # There should be an option to specify submit method, but I will leave it
