@@ -4,6 +4,9 @@
     - this changes cmake_release.sh
   * for major release edit   Source/cmCPluginAPI.h 
 
+2. Update the FAQ with the current release.
+3. Update hythloth:~kingb/Nightly/Scripts/util.CMakeWeb to generate web page docs for the new version.
+
 
 NOTES from Brad:
 
