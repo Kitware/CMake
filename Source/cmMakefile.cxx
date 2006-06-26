@@ -2062,10 +2062,21 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
 {
   // if the source is provided with a full path use it, otherwise
   // by default it is in the current source dir
-  std::string path = cmSystemTools::GetFilenamePath(sourceName);
-  if (path.empty())
+  std::string path;
+  if (cmSystemTools::FileIsFullPath(sourceName))
+    {
+    path = cmSystemTools::GetFilenamePath(sourceName);
+    }
+  else
     {
     path = this->GetCurrentDirectory();
+    // even though it is not a full path, it may still be relative
+    std::string subpath = cmSystemTools::GetFilenamePath(sourceName);
+    if (!subpath.empty())
+      {
+      path += "/";
+      path += cmSystemTools::GetFilenamePath(sourceName);
+      }
     }
 
   std::string sname = 
