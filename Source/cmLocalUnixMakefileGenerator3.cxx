@@ -788,9 +788,16 @@ cmLocalUnixMakefileGenerator3
 ::AppendCustomCommand(std::vector<std::string>& commands,
                       const cmCustomCommand& cc)
 {
-  std::vector<std::string> commands1;
+  // if the command specified a working directory use it.
+  const char* dir  = this->Makefile->GetStartOutputDirectory();
+  const char* workingDir = cc.GetWorkingDirectory();
+  if(workingDir)
+    {
+    dir = workingDir;
+    }
 
   // Add each command line to the set of commands.
+  std::vector<std::string> commands1;
   for(cmCustomCommandLines::const_iterator cl = cc.GetCommandLines().begin();
       cl != cc.GetCommandLines().end(); ++cl)
     {
@@ -800,7 +807,12 @@ cmLocalUnixMakefileGenerator3
     if (cmd.size())
       {
       cmSystemTools::ReplaceString(cmd, "/./", "/");
-      cmd = this->Convert(cmd.c_str(),START_OUTPUT);
+      // Convert the command to a relative path only if the current
+      // working directory will be the start-output directory.
+      if(!workingDir)
+        {
+        cmd = this->Convert(cmd.c_str(),START_OUTPUT);
+        }
       if(cmd.find("/") == cmd.npos &&
          commandLine[0].find("/") != cmd.npos)
         {
@@ -826,16 +838,11 @@ cmLocalUnixMakefileGenerator3
       }
     }
 
-  // push back the custom commands
-  const char* dir  = this->Makefile->GetStartOutputDirectory();
-  // if the command specified a working directory use it.
-  if(cc.GetWorkingDirectory())
-    {
-    dir = cc.GetWorkingDirectory();
-    }
+  // Setup the proper working directory for the commands.
   this->CreateCDCommand(commands1, dir,
                         this->Makefile->GetHomeOutputDirectory());
 
+  // push back the custom commands
   commands.insert(commands.end(), commands1.begin(), commands1.end());
 }
 
