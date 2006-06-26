@@ -689,7 +689,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
       }
     fout << "\t\t\t\tOutputFile=\""
-         << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << ".\"/>\n";
+         << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << "\"/>\n";
     break;
     }
     case cmTarget::SHARED_LIBRARY:
