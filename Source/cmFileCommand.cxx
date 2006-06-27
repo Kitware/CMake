@@ -233,6 +233,11 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         }
       g.SetRelative(i->c_str());
       ++i;
+      if(i == args.end())
+        {
+        this->SetError("GLOB requires a glob expression after the directory");
+        return false;
+        }
       }
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
