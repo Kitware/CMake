@@ -1448,25 +1448,26 @@ void cmLocalUnixMakefileGenerator3
 
   std::string progressDir = this->Makefile->GetHomeOutputDirectory();
   progressDir += cmake::GetCMakeFilesDirectory();
-  cmOStringStream progCmd;
-  progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # src files
-  progCmd << this->Convert(progressDir.c_str(),
-                           cmLocalGenerator::FULL,
-                           cmLocalGenerator::SHELL);
-  cmGlobalUnixMakefileGenerator3 *gg = 
+    {
+    cmOStringStream progCmd;
+    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # src files
+    progCmd << this->Convert(progressDir.c_str(),
+                             cmLocalGenerator::FULL,
+                             cmLocalGenerator::SHELL);
+    cmGlobalUnixMakefileGenerator3 *gg = 
       static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  int n = gg->GetNumberOfSourceFiles();
-  if(n > 100)
-    {
-    n = 100;
+    int n = gg->GetNumberOfSourceFiles();
+    if(n > 100)
+      {
+      n = 100;
+      }
+    if (this->Parent)
+      {
+      n = 0;
+      }
+    progCmd << " " << n;
+    commands.push_back(progCmd.str());
     }
-  if (this->Parent)
-    {
-    n = 0;
-    }
-  progCmd << " " << n;
-  commands.push_back(progCmd.str());
-  
   std::string mf2Dir = cmake::GetCMakeFilesDirectoryPostSlash();
   mf2Dir += "Makefile2";
   commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),
@@ -1476,8 +1477,6 @@ void cmLocalUnixMakefileGenerator3
                         this->Makefile->GetStartOutputDirectory());
   if (!this->Parent)
     {
-    std::string progressDir = this->Makefile->GetHomeOutputDirectory();
-    progressDir += cmake::GetCMakeFilesDirectory();
     cmOStringStream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
     progCmd << this->Convert(progressDir.c_str(),
