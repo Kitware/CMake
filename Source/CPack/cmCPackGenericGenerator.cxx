@@ -190,7 +190,6 @@ int cmCPackGenericGenerator::InstallProject()
     destDir += tempInstallDirectory;
     cmSystemTools::PutEnv(destDir.c_str());
     }
-#undef cerr
   
   // If the CPackConfig file sets CPACK_INSTALL_COMMANDS then run them
   // as listed
@@ -204,7 +203,6 @@ int cmCPackGenericGenerator::InstallProject()
       it != installCommandsVector.end();
       ++it )
       {
-      std::cerr << *it << "\n";
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << it->c_str()
         << std::endl);
       std::string output;
@@ -253,7 +251,6 @@ int cmCPackGenericGenerator::InstallProject()
       it != installDirectoriesVector.end();
       ++it )
       {
-      std::cerr << *it << "\n";
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
       std::string toplevel = it->c_str();
@@ -335,7 +332,6 @@ int cmCPackGenericGenerator::InstallProject()
       it != cmakeProjectsVector.end();
       ++it )
       {
-      std::cerr << *it << "\n";
       if ( it+1 == cmakeProjectsVector.end() ||
         it+2 == cmakeProjectsVector.end() ||
         it+3 == cmakeProjectsVector.end() )
@@ -458,7 +454,6 @@ int cmCPackGenericGenerator::InstallProject()
       it != binaryDirectoriesVector.end();
       ++it )
       {
-      std::cerr << *it << "\n";
       std::string installFile = it->c_str();
       installFile += "/cmake_install.cmake";
       cmake cm;
@@ -489,7 +484,6 @@ int cmCPackGenericGenerator::InstallProject()
     cmSystemTools::PutEnv("DESTDIR=");
     }
 
-  std::cerr << "strip loop \n";
   const char* stripExecutable = this->GetOption("CPACK_STRIP_COMMAND");
   const char* stripFiles
     = this->GetOption("CPACK_STRIP_FILES");
@@ -504,7 +498,6 @@ int cmCPackGenericGenerator::InstallProject()
       it != stripFilesVector.end();
       ++it )
       {
-      std::cerr << *it << "\n";
       std::string fileName = tempInstallDirectory;
       fileName += "/" + *it;
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
