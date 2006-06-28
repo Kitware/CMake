@@ -1,7 +1,7 @@
 # - setup CTest 
 # This file configures a project to use the CTest/Dart
 # testing/dashboard process.  
-# OPTION(BUILD_TESTING "Build the testing tree." ON)
+OPTION(BUILD_TESTING "Build the testing tree." ON)
 
 IF(BUILD_TESTING)
   # Setup some auxilary macros
