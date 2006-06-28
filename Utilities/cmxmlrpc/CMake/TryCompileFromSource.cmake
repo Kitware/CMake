@@ -16,7 +16,7 @@ MACRO(TRY_COMPILE_FROM_SOURCE SOURCE VAR)
 
     SET(src "${src}\nint main() { ${SOURCE} ; return 0; }")
     FILE(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src2.c"
-      "${src}")
+      "${src}\n")
     EXEC_PROGRAM("${CMAKE_COMMAND}" 
       "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp"
       ARGS -E copy src2.c src.c)
