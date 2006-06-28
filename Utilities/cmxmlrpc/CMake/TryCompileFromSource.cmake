@@ -30,17 +30,17 @@ MACRO(TRY_COMPILE_FROM_SOURCE SOURCE VAR)
     IF(${VAR})
       SET(${VAR} 1 CACHE INTERNAL "Test ${FUNCTION}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
-      FILE(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C SOURCE FILE Test ${VAR} succeded with the following output:\n"
         "${OUTPUT}\n"
-        "Source file was:\n${src}\n" APPEND)
+        "Source file was:\n${src}\n")
     ELSE(${VAR})
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
       SET(${VAR} "" CACHE INTERNAL "Test ${FUNCTION}")
-      FILE(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing C SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"
-        "Source file was:\n${src}\n" APPEND)
+        "Source file was:\n${src}\n")
     ENDIF(${VAR})
   ENDIF("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
 ENDMACRO(TRY_COMPILE_FROM_SOURCE)
