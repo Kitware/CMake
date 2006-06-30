@@ -305,6 +305,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"EnableFunctionLevelLinking", "Gy", "EnableFunctionLevelLinking", "TRUE"},
   {"EnableIntrinsicFunctions", "Oi", "EnableIntrinsicFunctions", "TRUE"},
   {"ExceptionHandling", "EHsc", "enable c++ exceptions", "TRUE"},
+  {"ExceptionHandling", "EHa", "enable c++ exceptions", "2"},
   {"ExceptionHandling", "GX", "enable c++ exceptions", "TRUE"},
   {"GlobalOptimizations", "Og", "Global Optimize", "TRUE"},
   {"ImproveFloatingPointConsistency", "Op", 
