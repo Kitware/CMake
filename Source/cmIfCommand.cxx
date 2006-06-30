@@ -22,23 +22,19 @@
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
-  const char* name = lff.Name.c_str();
-  const std::vector<cmListFileArgument>& args = lff.Arguments;
   // always let if statements through
-  if (cmSystemTools::LowerCase(lff.Name) == "if")
+  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"if"))
     {
     return false;
     }
   
   // watch for our ELSE or ENDIF
-  if (cmSystemTools::LowerCase(lff.Name) == "else" || 
-      cmSystemTools::LowerCase(lff.Name) == "endif")
-    {
-    if (args == this->Args)
+  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else") || 
+      !cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
       {
       // if it was an else statement then we should change state
       // and block this Else Command
-      if (cmSystemTools::LowerCase(lff.Name) == "else")
+    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else"))
         {
         this->IsBlocking = !this->IsBlocking;
         return true;
@@ -48,39 +44,22 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       mf.RemoveFunctionBlocker(lff);
       return true;
       }
-    else if(args.empty())
-      {
-      std::string err = "Empty arguments for ";
-      err += name;
-      err += ".  Did you mean ";
-      err += name;
-      err += "( ";
-      for(std::vector<cmListFileArgument>::const_iterator a = 
-            this->Args.begin();
-          a != this->Args.end();++a)
-        {
-        err += (a->Quoted?"\"":"");
-        err += a->Value;
-        err += (a->Quoted?"\"":"");
-        err += " ";
-        }
-      err += ")?";
-      cmSystemTools::Error(err.c_str());
-      }
-    }
+   
   return this->IsBlocking;
 }
 
 bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                       cmMakefile&)
+                                       cmMakefile& mf)
 {
-  if (cmSystemTools::LowerCase(lff.Name) == "endif")
+  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
     {
-    if (lff.Arguments == this->Args)
+    if (mf.IsOn("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS") 
+        || lff.Arguments == this->Args)
       {
       return true;
       }
     }
+
   return false;
 }
 

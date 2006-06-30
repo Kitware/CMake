@@ -73,7 +73,8 @@ std::string cmGlobalVisualStudio6Generator
                        const char* additionalOptions, 
                        const char *targetName,
                        const char* config, 
-                       bool ignoreErrors)
+                       bool ignoreErrors,
+                       bool)
 {
   // Ingoring errors is not implemented in visual studio 6
   (void) ignoreErrors;

@@ -22,6 +22,9 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmTarget.h"
+#include "cmake.h"
+
+#include <memory> // auto_ptr
 
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
@@ -29,12 +32,15 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
   // create the build.make file and directory, put in the common blocks
   this->CreateRuleFile();
   
-  // Add in any rules for custom commands
-  this->WriteCustomCommandsForTarget();
-
-  // write in rules for object files
+  // write rules used to help build object files
   this->WriteCommonCodeRules();
   
+  // write in rules for object files and custom commands
+  this->WriteTargetBuildRules();
+
+  // write the per-target per-language flags
+  this->WriteTargetLanguageFlags();
+
   // Write the dependency generation rule.
   this->WriteTargetDependRules();
 
@@ -241,7 +247,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(relink)
     {
     outpath = this->Makefile->GetStartOutputDirectory();
-    outpath += "/CMakeFiles/CMakeRelink.dir";
+    outpath += cmake::GetCMakeFilesDirectory();
+    outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
     }
@@ -371,9 +378,48 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands());
     }
 
+  // Open the link script if it will be used.
+  bool useLinkScript = false;
+  std::string linkScriptName;
+  std::auto_ptr<cmGeneratedFileStream> linkScriptStream;
+  if(this->GlobalGenerator->GetUseLinkScript() &&
+     (this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
+      this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+      this->Target->GetType() == cmTarget::MODULE_LIBRARY))
+    {
+    useLinkScript = true;
+    linkScriptName = this->TargetBuildDirectoryFull;
+    if(relink)
+      {
+      linkScriptName += "/relink.txt";
+      }
+    else
+      {
+      linkScriptName += "/link.txt";
+      }
+    std::auto_ptr<cmGeneratedFileStream> lss(
+      new cmGeneratedFileStream(linkScriptName.c_str()));
+    linkScriptStream = lss;
+    }
+
+  std::vector<std::string> link_script_commands;
+
   // Construct the main link rule.
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
+  if(useLinkScript)
+    {
+    cmSystemTools::ExpandListArgument(linkRule, link_script_commands);
+    std::string link_command = "$(CMAKE_COMMAND) -E cmake_link_script ";
+    link_command += this->Convert(linkScriptName.c_str(),
+                                  cmLocalGenerator::START_OUTPUT,
+                                  cmLocalGenerator::SHELL);
+    link_command += " --verbose=$(VERBOSE)";
+    commands1.push_back(link_command);
+    }
+  else
+    {
   cmSystemTools::ExpandListArgument(linkRule, commands1);
+    }
   this->LocalGenerator->CreateCDCommand
     (commands1,
                                         this->Makefile->GetStartOutputDirectory(),
@@ -413,11 +459,19 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string variableName;
   std::string variableNameExternal;
   this->WriteObjectsVariable(variableName, variableNameExternal);
-  std::string buildObjs = "$(";
+  std::string buildObjs;
+  if(useLinkScript)
+    {
+    this->WriteObjectsString(buildObjs);
+    }
+  else
+    {
+    buildObjs = "$(";
   buildObjs += variableName;
   buildObjs += ") $(";
   buildObjs += variableNameExternal;
   buildObjs += ")";
+    }
   std::string cleanObjs = "$(";
   cleanObjs += variableName;
   cleanObjs += ")";
@@ -425,7 +479,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.TargetPDB = targetOutPathPDB.c_str();
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
-  std::string objdir = "CMakeFiles/";
+  std::string objdir = cmake::GetCMakeFilesDirectoryPostSlash();
   objdir += this->Target->GetName();
   objdir += ".dir";
   vars.ObjectDir = objdir.c_str(); 
@@ -488,12 +542,39 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.LanguageCompileFlags = langFlags.c_str();
   // Expand placeholders in the commands.
   this->LocalGenerator->TargetImplib = targetOutPathImport;
+  if(useLinkScript)
+    {
+    for(std::vector<std::string>::iterator i = link_script_commands.begin();
+        i != link_script_commands.end(); ++i)
+      {
+      this->LocalGenerator->ExpandRuleVariables(*i, vars);
+      }
+    }
+  else
+    {
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
     this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
+    }
   this->LocalGenerator->TargetImplib = "";
+
+  // Optionally convert the build rule to use a script to avoid long
+  // command lines in the make shell.
+  if(useLinkScript)
+    {
+    for(std::vector<std::string>::iterator cmd = link_script_commands.begin();
+        cmd != link_script_commands.end(); ++cmd)
+      {
+      // Do not write out empty commands or commands beginning in the
+      // shell no-op ":".
+      if(!cmd->empty() && (*cmd)[0] != ':')
+        {
+        (*linkScriptStream) << *cmd << "\n";
+        }
+      }
+    }
 
   // Write the build rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
@@ -522,18 +603,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                                         depends, commands, false);
     }
 
-  // Write convenience targets.
-  std::string dir = this->Makefile->GetStartOutputDirectory();
-  dir += "/";
-  dir += this->LocalGenerator->GetTargetDirectory(*this->Target);
-  std::string buildTargetRuleName = dir;
-  buildTargetRuleName += relink?"/preinstall":"/build";
-  buildTargetRuleName = 
-    this->Convert(buildTargetRuleName.c_str(),
-                  cmLocalGenerator::HOME_OUTPUT,cmLocalGenerator::MAKEFILE);
-  this->LocalGenerator->WriteConvenienceRule(*this->BuildFileStream, 
-                                             targetFullPath.c_str(),
-                                             buildTargetRuleName.c_str());
+  // Write the main driver rule to build everything in this target.
+  this->WriteTargetDriverRule(targetFullPath.c_str(), relink);
 
   // Clean all the possible library names and symlinks and object files.
   this->CleanFiles.insert(this->CleanFiles.end(),

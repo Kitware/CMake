@@ -67,6 +67,11 @@ class cmake
   static unsigned int GetMinorVersion(); 
   static const char *GetReleaseVersion();
 
+  ///! construct an instance of cmake
+  static const char *GetCMakeFilesDirectory() {return "/CMakeFiles";};
+  static const char *GetCMakeFilesDirectoryPostSlash() {
+    return "CMakeFiles/";};
+  
   //@{
   /**
    * Set/Get the home directory (or output directory) in the project. The
@@ -318,6 +323,7 @@ protected:
   void GenerateGraphViz(const char* fileName);
 
   static int ExecuteEchoColor(std::vector<std::string>& args);
+  static int ExecuteLinkScript(std::vector<std::string>& args);
   
   cmVariableWatch* VariableWatch;
 

@@ -55,11 +55,13 @@ protected:
   // create the file and directory etc
   void CreateRuleFile();
 
-  // outputs the rules for any custom commands used by this target
-  void WriteCustomCommandsForTarget();
+  // outputs the rules for object files and custom commands used by
+  // this target
+  void WriteTargetBuildRules();
 
   // write some common code at the top of build.make
   void WriteCommonCodeRules();
+  void WriteTargetLanguageFlags();
 
   // write the provide require rules for this target
   void WriteTargetRequiresRules();
@@ -83,14 +85,16 @@ protected:
   void WriteObjectDependRules(cmSourceFile& source,
                               std::vector<std::string>& depends);
 
-  // this is responsible for writing all of the rules for all this
-  // directories custom commands (but not utility targets)
-  void WriteCustomCommands();
+  // write the build rule for a custom command
   void GenerateCustomRuleFile(const cmCustomCommand& cc);
 
   // write out the variable that lists the objects for this target
   void WriteObjectsVariable(std::string& variableName,
                             std::string& variableNameExternal);
+  void WriteObjectsString(std::string& buildObjs);
+
+  // write the driver rule to build target outputs
+  void WriteTargetDriverRule(const char* main_output, bool relink);
 
   // Return the a string with -F flags on apple
   std::string GetFrameworkFlags();

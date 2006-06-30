@@ -71,7 +71,7 @@ std::string cmGlobalVisualStudio7Generator
 ::GenerateBuildCommand(const char* makeProgram,
                        const char *projectName, 
                        const char* additionalOptions, const char *targetName,
-  const char* config, bool ignoreErrors)
+                       const char* config, bool ignoreErrors, bool)
 {
   // Ingoring errors is not implemented in visual studio 6
   (void) ignoreErrors;

@@ -22,7 +22,11 @@
 #include <string.h>
 
 //----------------------------------------------------------------------------
-cmDepends::cmDepends(): Verbose(false), FileComparison(0),
+cmDepends::cmDepends():
+  CompileDirectory(),
+  LocalGenerator(0),
+  Verbose(false),
+  FileComparison(0),
   MaxPath(cmSystemTools::GetMaximumFilePathLength()),
   Dependee(new char[MaxPath]),
   Depender(new char[MaxPath])

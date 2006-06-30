@@ -48,6 +48,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->DefineWindowsNULL = false;
   this->UnixCD = true;
   this->ForceVerboseMakefiles=false;
+  this->ColorMakefile = false;
 }
 
 //----------------------------------------------------------------------------
@@ -74,6 +75,10 @@ void cmLocalUnixMakefileGenerator3::Generate()
 {
   // Setup our configuration variables for this directory.
   this->ConfigureOutputPaths();
+
+  // Record whether color makefiles are enabled to avoid checking many
+  // times later.
+  this->ColorMakefile = this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE");
 
   // Generate the rule files for each target.
   cmTargets& targets = this->Makefile->GetTargets();
@@ -275,8 +280,10 @@ void cmLocalUnixMakefileGenerator3
       depends.clear();
       
       // Build the target for this pass.
+      std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
+      tmp += "Makefile2";
       commands.push_back(this->GetRecursiveMakeCall
-                         ("CMakeFiles/Makefile2",localName.c_str()));
+                         (tmp.c_str(),localName.c_str()));
       this->CreateCDCommand(commands,
                             this->Makefile->GetHomeOutputDirectory(),
                             this->Makefile->GetStartOutputDirectory());
@@ -291,6 +298,24 @@ void cmLocalUnixMakefileGenerator3
         this->WriteMakeRule(ruleFileStream, "Convenience name for target.",
                             t->second.GetName(), depends, commands, true);
         }
+
+      // Add a fast rule to build the target
+      std::string makefileName = this->GetRelativeTargetDirectory(t->second);
+      makefileName += "/build.make";
+      std::string makeTargetName = 
+        this->GetRelativeTargetDirectory(t->second);
+      makeTargetName += "/build";
+      localName = t->second.GetName();
+      localName += "/fast";
+      depends.clear();
+      commands.clear();
+      commands.push_back(this->GetRecursiveMakeCall
+                         (makefileName.c_str(), makeTargetName.c_str()));
+      this->CreateCDCommand(commands,
+                            this->Makefile->GetHomeOutputDirectory(),
+                            this->Makefile->GetStartOutputDirectory());
+      this->WriteMakeRule(ruleFileStream, "fast build rule for target.",
+                          localName.c_str(), depends, commands, true);
       }
     }
 }
@@ -299,7 +324,8 @@ void cmLocalUnixMakefileGenerator3
 void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
 {
   std::string infoFileName = this->Makefile->GetStartOutputDirectory();
-  infoFileName += "/CMakeFiles/CMakeDirectoryInformation.cmake";
+  infoFileName += cmake::GetCMakeFilesDirectory();
+  infoFileName += "/CMakeDirectoryInformation.cmake";
 
   // Open the output file.
   cmGeneratedFileStream infoFileStream(infoFileName.c_str());
@@ -630,7 +656,8 @@ void cmLocalUnixMakefileGenerator3
   // the --check-build-system flag.
   {
   // Build command to run CMake to check if anything needs regenerating.
-  std::string cmakefileName = "CMakeFiles/Makefile.cmake";
+  std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
+  cmakefileName += "Makefile.cmake";
   std::string runRule =
     "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
@@ -761,9 +788,16 @@ cmLocalUnixMakefileGenerator3
 ::AppendCustomCommand(std::vector<std::string>& commands,
                       const cmCustomCommand& cc)
 {
-  std::vector<std::string> commands1;
+  // if the command specified a working directory use it.
+  const char* dir  = this->Makefile->GetStartOutputDirectory();
+  const char* workingDir = cc.GetWorkingDirectory();
+  if(workingDir)
+    {
+    dir = workingDir;
+    }
 
   // Add each command line to the set of commands.
+  std::vector<std::string> commands1;
   for(cmCustomCommandLines::const_iterator cl = cc.GetCommandLines().begin();
       cl != cc.GetCommandLines().end(); ++cl)
     {
@@ -773,7 +807,12 @@ cmLocalUnixMakefileGenerator3
     if (cmd.size())
       {
       cmSystemTools::ReplaceString(cmd, "/./", "/");
+      // Convert the command to a relative path only if the current
+      // working directory will be the start-output directory.
+      if(!workingDir)
+        {
       cmd = this->Convert(cmd.c_str(),START_OUTPUT);
+        }
       if(cmd.find("/") == cmd.npos &&
          commandLine[0].find("/") != cmd.npos)
         {
@@ -799,16 +838,11 @@ cmLocalUnixMakefileGenerator3
       }
     }
 
-  // push back the custom commands
-  const char* dir  = this->Makefile->GetStartOutputDirectory();
-  // if the command specified a working directory use it.
-  if(cc.GetWorkingDirectory())
-    {
-    dir = cc.GetWorkingDirectory();
-    }
+  // Setup the proper working directory for the commands.
   this->CreateCDCommand(commands1, dir,
                         this->Makefile->GetHomeOutputDirectory());
 
+  // push back the custom commands
   commands.insert(commands.end(), commands1.begin(), commands1.end());
 }
 
@@ -860,8 +894,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
   // Choose the color for the text.
   std::string color_name;
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  if(this->GlobalGenerator->GetToolSupportsColor() &&
-     this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE"))
+  if(this->GlobalGenerator->GetToolSupportsColor() && this->ColorMakefile)
     {
     // See cmake::ExecuteEchoColor in cmake.cxx for these options.
     // This color set is readable on both black and white backgrounds.
@@ -1127,31 +1160,17 @@ cmLocalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
-bool
-cmLocalUnixMakefileGenerator3
-::ScanDependencies(std::vector<std::string> const& args)
+bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
 {
-  // Format of arguments is: $(CMAKE_COMMAND), cmake_depends,
-  // GeneratorName, home_output_dir, start_output_dir, info file The
-  // caller has ensured that all required arguments exist.
-
   // The info file for this target
-  std::string const& infoFile = args[5];
+  std::string const& infoFile = tgtInfo;
 
   // Read the directory information file.
-  cmake cm;
-  cmGlobalGenerator gg;
-  gg.SetCMakeInstance(&cm);
-  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
-  lg->SetGlobalGenerator(&gg);
-  cmMakefile* mf = lg->GetMakefile();
-  mf->SetHomeOutputDirectory(args[3].c_str());
-  mf->SetStartOutputDirectory(args[4].c_str());
-  lg->SetupPathConversions();
-  
+  cmMakefile* mf = this->Makefile;
   bool haveDirectoryInfo = false;
-  std::string dirInfoFile = args[4];
-  dirInfoFile += "/CMakeFiles/CMakeDirectoryInformation.cmake";
+  std::string dirInfoFile = this->Makefile->GetStartOutputDirectory();
+  dirInfoFile += cmake::GetCMakeFilesDirectory();
+  dirInfoFile += "/CMakeDirectoryInformation.cmake";
   if(mf->ReadListFile(0, dirInfoFile.c_str()) &&
      !cmSystemTools::GetErrorOccuredFlag())
     {
@@ -1283,7 +1302,7 @@ cmLocalUnixMakefileGenerator3
                                includeRegexScan.c_str(),
                                includeRegexComplain.c_str(),
                                generatedFiles, includeCacheFileName);
-      scanner->SetHomeOutputDirectory(mf->GetHomeOutputDirectory());
+      scanner->SetLocalGenerator(this);
       }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")
@@ -1313,7 +1332,7 @@ cmLocalUnixMakefileGenerator3
         ++si;
         // make sure the object file is relative to home output
         std::string obj = *si;
-        obj = lg->Convert(obj.c_str(),HOME_OUTPUT,MAKEFILE);
+        obj = this->Convert(obj.c_str(),HOME_OUTPUT,MAKEFILE);
         scanner->Write(src.c_str(),obj.c_str(),
                        ruleFileStream, internalRuleFileStream);
         }
@@ -1381,7 +1400,7 @@ void cmLocalUnixMakefileGenerator3
       this->AppendEcho(commands, text,
                        cmLocalUnixMakefileGenerator3::EchoGlobal);
 
-      // Utility targets store their rules in pre- and post-build commands.
+      // Global targets store their rules in pre- and post-build commands.
       this->AppendCustomDepends(depends,   
                                 glIt->second.GetPreBuildCommands());
       this->AppendCustomDepends(depends,   
@@ -1390,8 +1409,27 @@ void cmLocalUnixMakefileGenerator3
                                  glIt->second.GetPreBuildCommands());
       this->AppendCustomCommands(commands, 
                                  glIt->second.GetPostBuildCommands());
+      std::string targetName = glIt->second.GetName();
       this->WriteMakeRule(ruleFileStream, targetString.c_str(), 
-                          glIt->first.c_str(), depends, commands, true);
+                          targetName.c_str(), depends, commands, true);
+
+      // Provide a "/fast" version of the target.
+      depends.clear();
+      if(targetName == "install")
+        {
+        // Provide a fast install target that does not depend on all
+        // but has the same command.
+        depends.push_back("preinstall/fast");
+        }
+      else
+        {
+        // Just forward to the real target so at least it will work.
+        depends.push_back(targetName);
+        commands.clear();
+        }
+      targetName += "/fast";
+      this->WriteMakeRule(ruleFileStream, targetString.c_str(),
+                          targetName.c_str(), depends, commands, true);
       }
     }
 
@@ -1408,11 +1446,45 @@ void cmLocalUnixMakefileGenerator3
 
   depends.push_back("cmake_check_build_system");
 
-  commands.push_back
-    (this->GetRecursiveMakeCall("CMakeFiles/Makefile2",dir.c_str()));  
+  std::string progressDir = this->Makefile->GetHomeOutputDirectory();
+  progressDir += cmake::GetCMakeFilesDirectory();
+    {
+    cmOStringStream progCmd;
+    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # src files
+    progCmd << this->Convert(progressDir.c_str(),
+                             cmLocalGenerator::FULL,
+                             cmLocalGenerator::SHELL);
+    cmGlobalUnixMakefileGenerator3 *gg = 
+      static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+    int n = gg->GetNumberOfSourceFiles();
+    if(n > 100)
+      {
+      n = 100;
+      }
+    if (this->Parent)
+      {
+      n = 0;
+      }
+    progCmd << " " << n;
+    commands.push_back(progCmd.str());
+    }
+  std::string mf2Dir = cmake::GetCMakeFilesDirectoryPostSlash();
+  mf2Dir += "Makefile2";
+  commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),
+                                                dir.c_str()));  
   this->CreateCDCommand(commands,
                                 this->Makefile->GetHomeOutputDirectory(),
                                 this->Makefile->GetStartOutputDirectory());
+  if (!this->Parent)
+    {
+    cmOStringStream progCmd;
+    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
+    progCmd << this->Convert(progressDir.c_str(),
+                             cmLocalGenerator::FULL,
+                             cmLocalGenerator::SHELL);
+    progCmd << " 0";
+    commands.push_back(progCmd.str());
+    }
   this->WriteMakeRule(ruleFileStream, "The main all target", "all",
                       depends, commands, true);
 
@@ -1422,8 +1494,8 @@ void cmLocalUnixMakefileGenerator3
   dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
   commands.clear();
   depends.clear();
-  commands.push_back
-    (this->GetRecursiveMakeCall("CMakeFiles/Makefile2",dir.c_str()));  
+  commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),
+                                                dir.c_str()));  
   this->CreateCDCommand(commands,
                                 this->Makefile->GetHomeOutputDirectory(),
                                 this->Makefile->GetStartOutputDirectory());
@@ -1454,21 +1526,21 @@ void cmLocalUnixMakefileGenerator3
     depends.push_back("cmake_check_build_system");
     }
   commands.push_back
-    (this->GetRecursiveMakeCall("CMakeFiles/Makefile2", dir.c_str()));
+    (this->GetRecursiveMakeCall(mf2Dir.c_str(), dir.c_str()));
   this->CreateCDCommand(commands,
                         this->Makefile->GetHomeOutputDirectory(),
                         this->Makefile->GetStartOutputDirectory());
   this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
                       "preinstall", depends, commands, true);
-  commands.clear();
-  depends.push_back("preinstall");
+  depends.clear();
   this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
                       "preinstall/fast", depends, commands, true);
 
   // write the depend rule, really a recompute depends rule
   depends.clear();
   commands.clear();
-  std::string cmakefileName = "CMakeFiles/Makefile.cmake";
+  std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
+  cmakefileName += "Makefile.cmake";
   this->Convert(cmakefileName.c_str(),HOME_OUTPUT,
                 cmLocalGenerator::MAKEFILE);  
   std::string runRule =
@@ -1816,7 +1888,7 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p)
 std::string
 cmLocalUnixMakefileGenerator3::GetTargetDirectory(cmTarget& target)
 {
-  std::string dir = "CMakeFiles/";
+  std::string dir = cmake::GetCMakeFilesDirectoryPostSlash();
   dir += target.GetName();
   dir += ".dir";
   return dir;

@@ -1,6 +1,6 @@
 # - setup CTest
-# This file configures a project to use the CTest/Dart testing/dashboard process.
-#
+# This file configures a project to use the CTest/Dart
+# testing/dashboard process.  
 OPTION(BUILD_TESTING "Build the testing tree." ON)
 
 IF(BUILD_TESTING)
@@ -48,6 +48,7 @@ IF(BUILD_TESTING)
     # Dashboard is opened for submissions for a 24 hour period starting at
     # the specified NIGHTLY_START_TIME. Time is specified in 24 hour format.
     SET_IF_NOT_SET (NIGHTLY_START_TIME "00:00:00 EDT")
+    SET_IF_NOT_SET(DROP_METHOD "http")
 
     # Dart server to submit results (used by client)
     # There should be an option to specify submit method, but I will leave it
@@ -81,9 +82,9 @@ IF(BUILD_TESTING)
   SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
 
   FIND_PROGRAM(CVSCOMMAND cvs )
-  SET(CVS_UPDATE_OPTIONS "-d -A -P" CACHE STRING "Options passed to the cvs update command.")
+  SET(CVS_UPDATE_OPTIONS "-d -A -P" CACHE STRING 
+    "Options passed to the cvs update command.")
   FIND_PROGRAM(SVNCOMMAND svn)
-  #SET(SVN_UPDATE_OPTIONS "-d -A -P" CACHE STRING "Options passed to the svn update command.")
 
   IF(NOT UPDATE_TYPE)
     IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/CVS")
@@ -100,18 +101,17 @@ IF(BUILD_TESTING)
   ENDIF(NOT UPDATE_TYPE)
 
   IF(UPDATE_TYPE MATCHES "[Cc][Vv][Ss]")
-    MESSAGE(STATUS "This is a CVS repository")
     SET(UPDATE_COMMAND "${CVSCOMMAND}")
     SET(UPDATE_OPTIONS "${CVS_UPDATE_OPTIONS}")
   ELSE(UPDATE_TYPE MATCHES "[Cc][Vv][Ss]")
     IF(UPDATE_TYPE MATCHES "[Ss][Vv][Nn]")
-      MESSAGE(STATUS "This is a SVN repository")
       SET(UPDATE_COMMAND "${SVNCOMMAND}")
       SET(UPDATE_OPTIONS "${SVN_UPDATE_OPTIONS}")
     ENDIF(UPDATE_TYPE MATCHES "[Ss][Vv][Nn]")
   ENDIF(UPDATE_TYPE MATCHES "[Cc][Vv][Ss]")
 
-  SET(DART_TESTING_TIMEOUT 1500 CACHE STRING "MAximum time allowed before CTest will kill the test.")
+  SET(DART_TESTING_TIMEOUT 1500 CACHE STRING 
+    "Maximum time allowed before CTest will kill the test.")
 
   FIND_PROGRAM(MEMORYCHECK_COMMAND
     NAMES purify valgrind boundscheck
@@ -119,9 +119,14 @@ IF(BUILD_TESTING)
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Rational Software\\Purify\\Setup;InstallFolder]"
     DOC "Path to the memory checking command, used for memory error detection."
     )
-  SET(MEMORYCHECK_SUPPRESSIONS_FILE "" CACHE FILEPATH "File that contains suppressions for the memory checker")
-  FIND_PROGRAM(SCPCOMMAND scp DOC "Path to scp command, used by CTest for submitting results to a Dart server")
-  FIND_PROGRAM(COVERAGE_COMMAND gcov DOC "Path to the coverage program that CTest uses for performing coverage inspection")
+  SET(MEMORYCHECK_SUPPRESSIONS_FILE "" CACHE FILEPATH 
+    "File that contains suppressions for the memory checker")
+  FIND_PROGRAM(SCPCOMMAND scp DOC 
+    "Path to scp command, used by CTest for submitting results to a Dart server"
+    )
+  FIND_PROGRAM(COVERAGE_COMMAND gcov DOC 
+    "Path to the coverage program that CTest uses for performing coverage inspection"
+    )
 
   # set the site name
   SITE_NAME(SITE)
@@ -146,9 +151,11 @@ IF(BUILD_TESTING)
       SET(BUILD_NAME_SYSTEM_NAME "Win32")
     ENDIF(WIN32)
     IF(UNIX OR BORLAND)
-      GET_FILENAME_COMPONENT(DART_CXX_NAME "${CMAKE_CXX_COMPILER}" ${DART_NAME_COMPONENT})
+      GET_FILENAME_COMPONENT(DART_CXX_NAME 
+        "${CMAKE_CXX_COMPILER}" ${DART_NAME_COMPONENT})
     ELSE(UNIX OR BORLAND)
-      GET_FILENAME_COMPONENT(DART_CXX_NAME "${CMAKE_BUILD_TOOL}" ${DART_NAME_COMPONENT})
+      GET_FILENAME_COMPONENT(DART_CXX_NAME 
+        "${CMAKE_BUILD_TOOL}" ${DART_NAME_COMPONENT})
     ENDIF(UNIX OR BORLAND)
     IF(DART_CXX_NAME MATCHES "msdev")
       SET(DART_CXX_NAME "vs60")
@@ -165,7 +172,6 @@ IF(BUILD_TESTING)
       ENDIF(CMAKE_GENERATOR MATCHES "^Visual Studio 7$")
     ENDIF(DART_CXX_NAME MATCHES "devenv")
     SET(BUILDNAME "${BUILD_NAME_SYSTEM_NAME}-${DART_CXX_NAME}")
-    MESSAGE(STATUS "Using Buildname: ${BUILDNAME}")
   ENDIF(NOT BUILDNAME)
   # set the build command
   BUILD_COMMAND(MAKECOMMAND ${MAKEPROGRAM} )

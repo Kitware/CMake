@@ -44,7 +44,12 @@ IF(NOT VTK_DIR)
   # Construct a set of paths relative to the system search path.
   SET(VTK_DIR_SEARCH "")
   FOREACH(dir ${VTK_DIR_SEARCH2})
-    SET(VTK_DIR_SEARCH ${VTK_DIR_SEARCH} "${dir}/../lib/vtk")
+    SET(VTK_DIR_SEARCH ${VTK_DIR_SEARCH}
+      ${dir}/../lib/vtk-5.2
+      ${dir}/../lib/vtk-5.1
+      ${dir}/../lib/vtk-5.0
+      ${dir}/../lib/vtk
+      )
   ENDFOREACH(dir)
 
   # Old scripts may set these directories in the CMakeCache.txt file.

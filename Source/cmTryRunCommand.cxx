@@ -68,7 +68,9 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
                                                     tryCompile, false);
   
   // now try running the command if it compiled
-  std::string binaryDirectory = argv[2] + "/CMakeFiles/CMakeTmp";
+  std::string binaryDirectory = argv[2];
+  binaryDirectory += cmake::GetCMakeFilesDirectory();
+  binaryDirectory += "/CMakeTmp";
   if (!res)
     {
     int retVal = -1;

@@ -31,6 +31,9 @@
 # include <cmsys/Terminal.h>
 #endif
 
+# include <cmsys/Directory.hxx>
+#include <cmsys/Process.h>
+
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
 #if !defined(_WIN32)
@@ -267,7 +270,16 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       std::string entry = arg.substr(2);
       if(entry.size() == 0)
         {
-        entry = args[++i];
+        ++i;
+        if(i < args.size())
+          {
+          entry = args[i];
+          }
+        else
+          {
+          cmSystemTools::Error("-D must be followed with VAR=VALUE.");
+          return false;
+          }
         }
       std::string var, value;
       cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
@@ -291,7 +303,16 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       std::string path = arg.substr(2);
       if ( path.size() == 0 )
         {
-        path = args[++i];
+        ++i;
+        if(i < args.size())
+          {
+          path = args[i];
+          }
+        else
+          {
+          cmSystemTools::Error("-C must be followed by a file name.");
+          return false;
+          }
         }
       std::cerr << "loading initial cache file " << path.c_str() << "\n";
       this->ReadListFile(path.c_str());
@@ -299,6 +320,11 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     else if(arg.find("-P",0) == 0)
       {
       i++;
+      if(i >= args.size())
+        {
+        cmSystemTools::Error("-P must be followed by a file name.");
+        return false;
+        }
       std::string path = args[i];
       if ( path.size() == 0 )
         {
@@ -425,7 +451,13 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       std::string value = arg.substr(2);
       if(value.size() == 0)
         {
-        value = args[++i];
+        ++i;
+        if(i >= args.size())
+          {
+          cmSystemTools::Error("No generator specified for -G");
+          return;
+          }
+        value = args[i];
         }
       cmGlobalGenerator* gen =
         this->CreateGlobalGenerator(value.c_str());
@@ -837,6 +869,19 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       return 0;
       }
 
+    // Echo string no new line
+    else if (args[1] == "echo_append" )
+      {
+      unsigned int cc;
+      const char* space = "";
+      for ( cc = 2; cc < args.size(); cc ++ )
+        {
+        std::cout << space << args[cc];
+        space = " ";
+        }
+      return 0;
+      }
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     // Command to create a symbolic link.  Fails on platforms not
     // supporting them.
@@ -855,15 +900,22 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Remove file
     else if (args[1] == "remove" && args.size() > 2)
       {
+      bool force = false;
       for (std::string::size_type cc = 2; cc < args.size(); cc ++)
         {
-        if(args[cc] != "-f")
+        if(args[cc] == "\\-f" || args[cc] == "-f")
           {
-          if(args[cc] == "\\-f")
+          force = true;
+          }
+        else
             {
-            args[cc] = "-f";
+          // Complain if the file could not be removed, still exists,
+          // and the -f option was not given.
+          if(!cmSystemTools::RemoveFile(args[cc].c_str()) && !force &&
+             cmSystemTools::FileExists(args[cc].c_str()))
+            {
+            return 1;
             }
-          cmSystemTools::RemoveFile(args[cc].c_str());
           }
         }
       return 0;
@@ -931,6 +983,67 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       return 1;
       }
 
+    // Command to start progress for a build
+    else if (args[1] == "cmake_progress_start" && args.size() == 4)
+      {
+      // bascially remove the directory
+      std::string dirName = args[2];
+      dirName += "/Progress";
+      cmSystemTools::RemoveADirectory(dirName.c_str());
+      cmSystemTools::MakeDirectory(dirName.c_str());
+      // write the count into the directory
+      std::string fName = dirName;
+      fName += "/count.txt";
+      FILE *progFile = fopen(fName.c_str(),"w");
+      if (progFile)
+        {
+        int count = atoi(args[3].c_str());
+        fprintf(progFile,"%i\n",count);
+        fclose(progFile);
+        }
+      return 0;
+      }
+
+    // Command to report progress for a build
+    else if (args[1] == "cmake_progress_report" && args.size() >= 3)
+      {
+      std::string dirName = args[2];
+      dirName += "/Progress";
+      std::string fName;
+      FILE *progFile;
+      unsigned int i;
+      for (i = 3; i < args.size(); ++i)
+        {
+        fName = dirName;
+        fName += "/";
+        fName += args[i];
+        progFile = fopen(fName.c_str(),"w");
+        if (progFile)
+          {
+          fprintf(progFile,"empty");
+          fclose(progFile);
+          }
+        }
+      int fileNum = static_cast<int>
+        (cmsys::Directory::GetNumberOfFilesInDirectory(dirName.c_str()));
+      // read the count
+      fName = dirName;
+      fName += "/count.txt";
+      progFile = fopen(fName.c_str(),"r");
+      if (progFile)
+        {
+        int count = 0;
+        fscanf(progFile,"%i",&count);
+        if (count > 0)
+          {
+          // print the progress
+          fprintf(stdout,"[%3i%%] ",((fileNum-3)*100)/count);
+          }
+        fclose(progFile);
+        }
+      return 0;
+      }
+    
     // Command to create a symbolic link.  Fails on platforms not
     // supporting them.
     else if (args[1] == "create_symlink" && args.size() == 4)
@@ -996,16 +1109,79 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Internal CMake dependency scanning support.
     else if (args[1] == "cmake_depends" && args.size() >= 6)
       {
+      // Create a cmake object instance to process dependencies.
       cmake cm;
-      cmGlobalGenerator *ggd = cm.CreateGlobalGenerator(args[2].c_str());
-      if (ggd)
+      std::string gen;
+      std::string homeDir;
+      std::string startDir;
+      std::string homeOutDir;
+      std::string startOutDir;
+      std::string depInfo;
+      if(args.size() >= 8)
         {
-        ggd->SetCMakeInstance(&cm);
+        // Full signature:
+        //
+        //   -E cmake_depends <generator>
+        //                    <home-src-dir> <start-src-dir>
+        //                    <home-out-dir> <start-out-dir>
+        //                    <dep-info>
+        //
+        // All paths are provided.
+        gen = args[2];
+        homeDir = args[3];
+        startDir = args[4];
+        homeOutDir = args[5];
+        startOutDir = args[6];
+        depInfo = args[7];
+        }
+      else
+        {
+        // Support older signature for existing makefiles:
+        //
+        //   -E cmake_depends <generator>
+        //                    <home-out-dir> <start-out-dir>
+        //                    <dep-info>
+        //
+        // Just pretend the source directories are the same as the
+        // binary directories so at least scanning will work.
+        gen = args[2];
+        homeDir = args[3];
+        startDir = args[4];
+        homeOutDir = args[3];
+        startOutDir = args[3];
+        depInfo = args[5];
+        }
+
+      // Create a local generator configured for the directory in
+      // which dependencies will be scanned.
+      homeDir = cmSystemTools::CollapseFullPath(homeDir.c_str());
+      startDir = cmSystemTools::CollapseFullPath(startDir.c_str());
+      homeOutDir = cmSystemTools::CollapseFullPath(homeOutDir.c_str());
+      startOutDir = cmSystemTools::CollapseFullPath(startOutDir.c_str());
+      cm.SetHomeDirectory(homeDir.c_str());
+      cm.SetStartDirectory(startDir.c_str());
+      cm.SetHomeOutputDirectory(homeOutDir.c_str());
+      cm.SetStartOutputDirectory(startOutDir.c_str());
+      if(cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen.c_str()))
+        {
+        cm.SetGlobalGenerator(ggd);
         std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
         lgd->SetGlobalGenerator(ggd);
-        return lgd->ScanDependencies(args)? 0 : 2;
+        lgd->GetMakefile()->SetStartDirectory(startDir.c_str());
+        lgd->GetMakefile()->SetStartOutputDirectory(startOutDir.c_str());
+        lgd->GetMakefile()->MakeStartDirectoriesCurrent();
+        lgd->SetupPathConversions();
+
+        // Actually scan dependencies.
+        return lgd->ScanDependencies(depInfo.c_str())? 0 : 2;
         }
       return 1;
+      }
+
+    // Internal CMake link script support.
+    else if (args[1] == "cmake_link_script" && args.size() >= 3)
+      {
+      return cmake::ExecuteLinkScript(args);
       }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -1865,9 +2041,7 @@ int cmake::CheckBuildSystem()
   
   // This method will check the integrity of the build system if the
   // option was given on the command line.  It reads the given file to
-  // determine whether CMake should rerun.  If it does rerun then the
-  // generation step will check the integrity of dependencies.  If it
-  // does not then we need to check the integrity here.
+  // determine whether CMake should rerun.
 
   // If no file is provided for the check, we have to rerun.
   if(this->CheckBuildSystemArgument.size() == 0)
@@ -1916,6 +2090,25 @@ int cmake::CheckBuildSystem()
     return 1;
     }
 
+  // Now that we know the generator used to build the project, use it
+  // to check the dependency integrity.
+  const char* genName = mf->GetDefinition("CMAKE_DEPENDS_GENERATOR");
+  if (!genName || genName[0] == '\0')
+    {
+    genName = "Unix Makefiles";
+    }
+  cmGlobalGenerator *ggd = this->CreateGlobalGenerator(genName);
+  if (ggd)
+    {
+    // Check the dependencies in case source files were removed.
+    std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
+    lgd->SetGlobalGenerator(ggd);
+    lgd->CheckDependencies(mf, verbose, this->ClearBuildSystem);
+
+    // Check for multiple output pairs.
+    ggd->CheckMultipleOutputs(mf, verbose);
+    }
+
   // Get the set of dependencies and outputs.
   const char* dependsStr = mf->GetDefinition("CMAKE_MAKEFILE_DEPENDS");
   const char* outputsStr = mf->GetDefinition("CMAKE_MAKEFILE_OUTPUTS");
@@ -1958,24 +2151,6 @@ int cmake::CheckBuildSystem()
         return 1;
         }
       }
-    }
-
-  // compute depends based on the generator specified
-  const char* genName = mf->GetDefinition("CMAKE_DEPENDS_GENERATOR");
-  if (!genName || genName[0] == '\0')
-    {
-    genName = "Unix Makefiles";
-    }
-  cmGlobalGenerator *ggd = this->CreateGlobalGenerator(genName);
-  if (ggd)
-    {
-    // Check the dependencies in case source files were removed.
-    std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
-    lgd->SetGlobalGenerator(ggd);
-    lgd->CheckDependencies(mf, verbose, this->ClearBuildSystem);
-
-    // Check for multiple output pairs.
-    ggd->CheckMultipleOutputs(mf, verbose);
     }
 
   // No need to rerun.
@@ -2193,7 +2368,7 @@ void cmake::GenerateGraphViz(const char* fileName)
   std::map<cmStdString, int> targetDeps;
   std::map<cmStdString, cmTarget*> targetPtrs;
   std::map<cmStdString, cmStdString> targetNamesNodes;
-  char tgtName[100];
+  char tgtName[2048];
   int cnt = 0;
   // First pass get the list of all cmake targets
   for ( lit = localGenerators.begin(); lit != localGenerators.end(); ++ lit )
@@ -2474,3 +2649,101 @@ int cmake::ExecuteEchoColor(std::vector<std::string>&)
   return 1;
 }
 #endif
+
+//----------------------------------------------------------------------------
+int cmake::ExecuteLinkScript(std::vector<std::string>& args)
+{
+  // The arguments are
+  //   argv[0] == <cmake-executable>
+  //   argv[1] == cmake_link_script
+  //   argv[2] == <link-script-name>
+  //   argv[3] == --verbose=?
+  bool verbose = false;
+  if(args.size() >= 4)
+    {
+    if(args[3].find("--verbose=") == 0)
+      {
+      if(!cmSystemTools::IsOff(args[3].substr(10).c_str()))
+        {
+        verbose = true;
+        }
+      }
+    }
+
+  // Allocate a process instance.
+  cmsysProcess* cp = cmsysProcess_New();
+  if(!cp)
+    {
+    std::cerr << "Error allocating process instance in link script."
+              << std::endl;
+    return 1;
+    }
+
+  // Children should share stdout and stderr with this process.
+  cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDOUT, 1);
+  cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDERR, 1);
+
+  // Run the command lines verbatim.
+  cmsysProcess_SetOption(cp, cmsysProcess_Option_Verbatim, 1);
+
+  // Read command lines from the script.
+  std::ifstream fin(args[2].c_str());
+  if(!fin)
+    {
+    std::cerr << "Error opening link script \""
+              << args[2] << "\"" << std::endl;
+    return 1;
+    }
+
+  // Run one command at a time.
+  std::string command;
+  int result = 0;
+  while(result == 0 && cmSystemTools::GetLineFromStream(fin, command))
+    {
+    // Setup this command line.
+    const char* cmd[2] = {command.c_str(), 0};
+    cmsysProcess_SetCommand(cp, cmd);
+
+    // Report the command if verbose output is enabled.
+    if(verbose)
+      {
+      std::cout << command << std::endl;
+      }
+
+    // Run the command and wait for it to exit.
+    cmsysProcess_Execute(cp);
+    cmsysProcess_WaitForExit(cp, 0);
+
+    // Report failure if any.
+    switch(cmsysProcess_GetState(cp))
+      {
+      case cmsysProcess_State_Exited:
+        {
+        int value = cmsysProcess_GetExitValue(cp);
+        if(value != 0)
+          {
+          result = value;
+          }
+        }
+        break;
+      case cmsysProcess_State_Exception:
+        std::cerr << "Error running link command: "
+                  << cmsysProcess_GetExceptionString(cp) << std::endl;
+        result = 1;
+        break;
+      case cmsysProcess_State_Error:
+        std::cerr << "Error running link command: "
+                  << cmsysProcess_GetErrorString(cp) << std::endl;
+        result = 2;
+        break;
+      default:
+        break;
+      };
+    }
+
+  // Free the process instance.
+  cmsysProcess_Delete(cp);
+
+  // Return the final resulting return value.
+  return result;
+}

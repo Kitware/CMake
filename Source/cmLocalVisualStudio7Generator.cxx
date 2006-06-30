@@ -22,6 +22,8 @@
 #include "cmCacheManager.h"
 #include "cmake.h"
 
+#include <ctype.h> // for isspace
+
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
 {
   this->Version = 7;
@@ -687,7 +689,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
       }
     fout << "\t\t\t\tOutputFile=\""
-         << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << ".\"/>\n";
+         << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << "\"/>\n";
     break;
     }
     case cmTarget::SHARED_LIBRARY:
@@ -958,6 +960,12 @@ void cmLocalVisualStudio7Generator::OutputDefineFlags(const char* flags,
       done = true;
       }
 
+    // Remove trailing whitespace from the definition.
+    while(!define.empty() && isspace(define[define.size()-1]))
+      {
+      define = define.substr(0, define.size()-1);
+      }
+
     // Double-quotes in the value of the definition must be escaped
     // with a backslash.  The entire definition should be quoted in
     // the generated xml attribute to avoid confusing the VS parser.
@@ -1159,8 +1167,26 @@ void cmLocalVisualStudio7Generator
                << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
           if(compileFlags.size())
             {
+            std::string compileFlagsCopy = compileFlags;
+            std::map<cmStdString, cmStdString> fileFlagMap;
+            this->FillFlagMapFromCommandFlags
+              (fileFlagMap, 
+               &cmLocalVisualStudio7GeneratorFlagTable[0], 
+               compileFlagsCopy);
+            if(compileFlagsCopy.size() && 
+               compileFlagsCopy.find_first_not_of(" ") 
+               != compileFlagsCopy.npos)
+              {
             fout << "\t\t\t\t\tAdditionalOptions=\""
-                 << this->EscapeForXML(compileFlags.c_str()) << "\"\n";
+                   << this->EscapeForXML(compileFlagsCopy.c_str()) << "\"\n"; 
+              }
+            for(std::map<cmStdString, 
+                  cmStdString>::iterator m = fileFlagMap.begin();
+                m != fileFlagMap.end(); ++m)
+              {
+              fout << "\t\t\t\t\t" << m->first << "=\"" 
+                   << m->second << "\"\n";
+              }
             }
           if(additionalDeps.length())
             {

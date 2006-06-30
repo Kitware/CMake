@@ -1,3 +1,40 @@
+Changes in CMake 2.4.3
+* progress is now reported for each compile
+
+* location of CMakeTmp changed to a varible
+
+* CMAKE_COLOR_MAKEFILE cache variable available to turn off color output
+
+* fixes for FindQt4 on mac.
+
+* Better search paths for finding VTK
+
+* Fix relative path problems in ADD_SUBDIRECTORY
+
+* Fix long link commands on UNIX shells
+
+* Fix depend file names in makefiles for generated headers
+
+* CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS allows for if/endif without variable
+
+* Xcode multiple custom command problem fixed.
+
+* INSTALL_RPATH_USE_LINK_PATH when true will add the link path to the rpath
+
+* Add target/fast rules in the sub directories
+
+* Fix Visual stuido C and C++ targets to not add /TP and /TC
+
+* print a context when cmake errors occur
+
+* add rxvt-unicode, cygwin, and screen terminal support for color output
+
+* Fix crash in CMakeSetup when status line is long
+
+* make sure try compile files have a newline at the end
+
+* fix for hp itanium build
+
 Changes in CMake 2.4.2
 
 * Run symlink command from correct directory for executable versions

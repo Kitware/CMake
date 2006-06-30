@@ -36,6 +36,12 @@ cmGlobalGenerator::cmGlobalGenerator()
 
   // By default do not try to support color.
   this->ToolSupportsColor = false;
+
+  // By default do not use link scripts.
+  this->UseLinkScript = false;
+
+  // Relative paths are not configured in the constructor.
+  this->RelativePathsConfigured = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -175,7 +181,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     }
   mf->AddDefinition("RUN_CONFIGURE", true);
   std::string rootBin = mf->GetHomeOutputDirectory();
-  rootBin += "/CMakeFiles";
+  rootBin += cmake::GetCMakeFilesDirectory();
   
   // If the configuration files path has been set,
   // then we are in a try compile and need to copy the enable language
@@ -589,8 +595,6 @@ void cmGlobalGenerator::Configure()
     }
   this->LocalGenerators.clear();
 
-  // Setup relative path generation.
-  this->ConfigureRelativePaths();
   this->TotalTargets.clear();
   
   // start with this directory
@@ -772,13 +776,13 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
   const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   return this->Build(srcdir,bindir,projectName,
                      newTarget.c_str(),
-                     output,makeCommand.c_str(),config,false);
+                     output,makeCommand.c_str(),config,false,true);
 }
 
 std::string cmGlobalGenerator
 ::GenerateBuildCommand(const char* makeProgram, const char *projectName, 
                        const char* additionalOptions, const char *targetName,
-  const char* config, bool ignoreErrors)
+                       const char* config, bool ignoreErrors, bool)
 {
   // Project name and config are not used yet.
   (void)projectName;
@@ -816,7 +820,7 @@ int cmGlobalGenerator::Build(
   std::string *output, 
   const char *makeCommandCSTR,
   const char *config,
-  bool clean)
+  bool clean, bool fast)
 {
   *output += "\nTesting TryCompileWithoutMakefile\n";
   
@@ -836,7 +840,7 @@ int cmGlobalGenerator::Build(
     {
     std::string cleanCommand = 
       this->GenerateBuildCommand(makeCommandCSTR, projectName,
-      0, "clean", config, false);
+      0, "clean", config, false, fast);
     if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), output, 
                                          &retVal, 0, false, timeout))
       {
@@ -856,7 +860,7 @@ int cmGlobalGenerator::Build(
   // now build
   std::string makeCommand = 
     this->GenerateBuildCommand(makeCommandCSTR, projectName,
-    0, target, config, false);
+                               0, target, config, false, fast);
 
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
                                        &retVal, 0, false, timeout))
@@ -932,7 +936,7 @@ cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
 {
   std::string cfp = gen->GetCMakeInstance()->GetHomeOutputDirectory();
-  cfp += "/CMakeFiles";
+  cfp += cmake::GetCMakeFilesDirectory();
   this->SetConfiguredFilesPath(cfp.c_str());
   const char* make =
     gen->GetCMakeInstance()->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
@@ -1097,6 +1101,13 @@ std::string cmGlobalGenerator
     return in_remote;
     }
 
+  // Make sure relative path conversion is configured.
+  if(!this->RelativePathsConfigured)
+    {
+    this->ConfigureRelativePaths();
+    this->RelativePathsConfigured = true;
+    }
+
   std::string original = in_remote;
 
   // Skip conversion if the path and local are not both in the source or both
@@ -1217,6 +1228,12 @@ inline std::string removeQuotes(const std::string& s)
     return s.substr(1, s.size()-2);
     }
   return s;
+}
+
+void cmGlobalGenerator::SetCMakeInstance(cmake* cm)
+{
+  // Store a pointer to the cmake object instance.
+  this->CMakeInstance = cm;
 }
 
 void cmGlobalGenerator::SetupTests()

@@ -54,14 +54,12 @@ bool cmAddSubDirectoryCommand::InitialPass
     }
 
   // check for relative arguments
-  bool relativeSource = true;
   std::string binPath = binArg;
   std::string srcPath = std::string(this->Makefile->GetCurrentDirectory()) + 
     "/" + srcArg;
   // if the path does not exist then the arg was relative
   if (!cmSystemTools::FileIsDirectory(srcPath.c_str()))
     {
-    relativeSource = false;
     srcPath = srcArg;
     if (!cmSystemTools::FileIsDirectory(srcPath.c_str()))
       {
@@ -74,6 +72,7 @@ bool cmAddSubDirectoryCommand::InitialPass
   
   // at this point srcPath has the full path to the source directory
   // now we need to compute the binPath if it was not provided
+  srcPath = cmSystemTools::CollapseFullPath(srcPath.c_str());
   
   // if the argument was provided then use it
   if (binArg.size())
@@ -87,21 +86,13 @@ bool cmAddSubDirectoryCommand::InitialPass
   // otherwise compute the binPath from the srcPath
   else
     {
-    // if the srcArg was relative then we just do the same for the binPath
-    if (relativeSource)
-      {
-      binPath = std::string(this->Makefile->GetCurrentOutputDirectory()) + 
-        "/" + srcArg;
-      }
-    // otherwise we try to remove the CurrentDirectory from the srcPath and
+    // we try to remove the CurrentDirectory from the srcPath and
     // replace it with the CurrentOutputDirectory. This may not really work
     // because the source dir they provided may not be "in" the source
     // tree. This is an error if this happens.
-    else
-      {
       // try replacing the home dir with the home output dir
       binPath = srcPath;
-      if (!cmSystemTools::FindLastString(binPath.c_str(), 
+    if(!cmSystemTools::FindLastString(binPath.c_str(),
                                          this->Makefile->GetHomeDirectory()))
         {
         this->SetError("A full source directory was specified that is not "
@@ -114,7 +105,6 @@ bool cmAddSubDirectoryCommand::InitialPass
       cmSystemTools::ReplaceString(binPath,
                                    this->Makefile->GetHomeDirectory(), 
                                    this->Makefile->GetHomeOutputDirectory());
-      }
     }
   
   // now we have all the arguments

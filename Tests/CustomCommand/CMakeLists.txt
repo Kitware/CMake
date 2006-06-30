@@ -131,22 +131,31 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.c
   ${PROJECT_BINARY_DIR}/foo.c
   )
 
-# These object dependencies can be removed to test the
-# auto-object-depends feature of the Makefile generator.  Currently
-# the feature does not seem to work in Visual Studio generators so
-# these dependencies are needed.
-#SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/foo.c 
-#PROPERTIES
-#  OBJECT_DEPENDS "${PROJECT_BINARY_DIR}/doc1.h;${PROJECT_BINARY_DIR}/foo.h"
-#)
+# Add custom command to generate not_included.h, which is a header
+# file that is not included by any source in this project.  This will
+# test whether all custom command outputs explicitly listed as sources
+# get generated even if they are not needed by an object file.
+ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/not_included.h
+  DEPENDS ${PROJECT_SOURCE_DIR}/foo.h.in
+  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/foo.h.in
+                                   ${PROJECT_BINARY_DIR}/not_included.h
+  )
 
-# add the library
+# Tell the executable where to find not_included.h.
+CONFIGURE_FILE(
+  ${PROJECT_SOURCE_DIR}/config.h.in
+  ${PROJECT_BINARY_DIR}/config.h
+  @ONLY IMMEDIATE
+  )
+
+# add the executable
 ADD_EXECUTABLE(CustomCommand 
   ${PROJECT_BINARY_DIR}/foo.h
   ${PROJECT_BINARY_DIR}/foo.c
   ${PROJECT_BINARY_DIR}/wrapped.c
   ${PROJECT_BINARY_DIR}/wrapped_help.c
   ${PROJECT_BINARY_DIR}/generated.c
+  ${PROJECT_BINARY_DIR}/not_included.h
   )
 
 TARGET_LINK_LIBRARIES(CustomCommand GeneratedHeader)

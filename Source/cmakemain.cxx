@@ -82,6 +82,9 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"--graphviz=[file]", "Generate graphviz of dependencies.",
    "Generate a graphviz input file that will contain all the library and "
    "executable dependencies in the project."},
+  {"--debug-trycompile", "Do not delete the try compile directories..",
+   "Do not delete the files and directories created for try_compile calls. "
+   "This is useful in debugging failed try_compiles."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed."},
   {"--help-command-list [file]", "List available listfile commands and exit.",
@@ -236,10 +239,13 @@ int do_cmake(int ac, char** av)
         {
         cmSystemTools::Error("No script specified for argument -P");
         }
+      else
+        {
       script_mode = true;
       args.push_back(av[i]);
       i++;
       args.push_back(av[i]);
+        }
       }
     else 
       {

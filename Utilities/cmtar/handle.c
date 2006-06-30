@@ -24,7 +24,7 @@
 # include <stdlib.h>
 #endif
 
-#if defined ( _MSC_VER) || defined(__WATCOMC__)
+#ifdef HAVE_IO_H
 #include <io.h>
 //Yogi: hack. this should work on windows where there is no O_ACCMODE defined
 #ifndef O_ACCMODE

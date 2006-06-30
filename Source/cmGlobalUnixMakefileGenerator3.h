@@ -121,7 +121,16 @@ public:
   (const char* makeProgram,
    const char *projectName, const char* additionalOptions, 
    const char *targetName,
-   const char* config, bool ignoreErrors);
+   const char* config, bool ignoreErrors, bool fast);
+
+  // returns true if a progress rule should be added
+  int ShouldAddProgressRule();
+  int GetNumberOfCompilableSourceFilesForTarget(cmTarget &tgt);
+  int GetTargetTotalNumberOfProgressFiles(cmTarget& target);
+  int GetNumberOfSourceFiles() { return this->NumberOfSourceFiles; };
+
+  // what targets does the specified target depend on
+  std::vector<cmTarget *>& GetTargetDepends(cmTarget& target);
 
 protected:
   void WriteMainMakefile2();
@@ -173,6 +182,12 @@ protected:
 
   typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
+
+  int NumberOfSourceFiles;
+  int NumberOfSourceFilesWritten;
+
+  std::map<cmStdString, std::vector<cmTarget *> > TargetDependencies;
+  std::map<cmStdString, int > TargetSourceFileCount;
 };
 
 #endif

@@ -19,6 +19,7 @@
 #include "cmSystemTools.h"
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
+#include "cmake.h"
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
@@ -163,7 +164,8 @@ bool cmCacheManager::ParseEntry(const char* entry,
 void cmCacheManager::CleanCMakeFiles(const char* path)
 {
   std::string glob = path;
-  glob += "/CMakeFiles/*.cmake";
+  glob += cmake::GetCMakeFilesDirectory();
+  glob += "/*.cmake";
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();
@@ -601,7 +603,7 @@ bool cmCacheManager::SaveCache(const char* path)
                                      cacheFile.c_str());
   cmSystemTools::RemoveFile(tempFile.c_str());
   std::string checkCacheFile = path;
-  checkCacheFile += "/CMakeFiles";
+  checkCacheFile += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(checkCacheFile.c_str());
   checkCacheFile += "/cmake.check_cache";
   std::ofstream checkCache(checkCacheFile.c_str());
@@ -626,7 +628,7 @@ bool cmCacheManager::DeleteCache(const char* path)
   // now remove the files in the CMakeFiles directory
   // this cleans up language cache files
   cmsys::Directory dir;
-  cmakeFiles += "/CMakeFiles";
+  cmakeFiles += cmake::GetCMakeFilesDirectory();
   dir.Load(cmakeFiles.c_str());
   for (unsigned long fileNum = 0;
     fileNum <  dir.GetNumberOfFiles();

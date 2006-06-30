@@ -233,6 +233,11 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         }
       g.SetRelative(i->c_str());
       ++i;
+      if(i == args.end())
+        {
+        this->SetError("GLOB requires a glob expression after the directory");
+        return false;
+        }
       }
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
@@ -775,15 +780,10 @@ bool cmFileCommand::HandleInstallCommand(
           std::string libname = toFile;
           std::string soname = toFile;
           std::string soname_nopath = fromName;
-          soname += ".";
-          soname += lib_soversion;
-          soname_nopath += ".";
-          soname_nopath += lib_soversion;
-
-          fromName += ".";
-          fromName += lib_version;
-          toFile += ".";
-          toFile += lib_version;
+          this->ComputeVersionedName(soname, lib_soversion);
+          this->ComputeVersionedName(soname_nopath, lib_soversion);
+          this->ComputeVersionedName(fromName, lib_version);
+          this->ComputeVersionedName(toFile, lib_version);
 
           cmSystemTools::RemoveFile(soname.c_str());
           cmSystemTools::RemoveFile(libname.c_str());
@@ -943,6 +943,26 @@ bool cmFileCommand::HandleInstallCommand(
                             smanifest_files.c_str());
 
   return true;
+}
+
+//----------------------------------------------------------------------------
+void cmFileCommand::ComputeVersionedName(std::string& name,
+                                         const char* version)
+{
+#if defined(__APPLE__)
+  std::string ext;
+  kwsys_stl::string::size_type dot_pos = name.rfind(".");
+  if(dot_pos != name.npos)
+    {
+    ext = name.substr(dot_pos, name.npos);
+    name = name.substr(0, dot_pos);
+    }
+#endif
+  name += ".";
+  name += version;
+#if defined(__APPLE__)
+  name += ext;
+#endif
 }
 
 //----------------------------------------------------------------------------

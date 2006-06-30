@@ -43,6 +43,21 @@ cmCPackGenericGenerator::~cmCPackGenericGenerator()
 }
 
 //----------------------------------------------------------------------
+void cmCPackGenericGeneratorProgress(const char *msg, float prog, void* ptr)
+{
+  cmCPackGenericGenerator* self = static_cast<cmCPackGenericGenerator*>(ptr);
+  self->DisplayVerboseOutput(msg, prog);
+}
+
+//----------------------------------------------------------------------
+void cmCPackGenericGenerator::DisplayVerboseOutput(const char* msg,
+  float progress)
+{
+  (void)progress;
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "" << msg << std::endl);
+}
+
+//----------------------------------------------------------------------
 int cmCPackGenericGenerator::PrepareNames()
 {
   this->SetOption("CPACK_GENERATOR", this->Name.c_str());
@@ -152,6 +167,7 @@ int cmCPackGenericGenerator::InstallProject()
       ignoreFilesRegex.push_back(it->c_str());
       }
     }
+  this->CleanTemporaryDirectory();
   const char* tempInstallDirectory
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   int res = 1;
@@ -174,6 +190,9 @@ int cmCPackGenericGenerator::InstallProject()
     destDir += tempInstallDirectory;
     cmSystemTools::PutEnv(destDir.c_str());
     }
+  
+  // If the CPackConfig file sets CPACK_INSTALL_COMMANDS then run them
+  // as listed
   const char* installCommands = this->GetOption("CPACK_INSTALL_COMMANDS");
   if ( installCommands && *installCommands )
     {
@@ -207,6 +226,10 @@ int cmCPackGenericGenerator::InstallProject()
         }
       }
     }
+  
+  // If the CPackConfig file sets CPACK_INSTALLED_DIRECTORIES 
+  // then glob it and copy it to CPACK_TEMPORARY_DIRECTORY
+  // This is used in Source packageing
   const char* installDirectories
     = this->GetOption("CPACK_INSTALLED_DIRECTORIES");
   if ( installDirectories && *installDirectories )
@@ -281,6 +304,9 @@ int cmCPackGenericGenerator::InstallProject()
         }
       }
     }
+
+  // If the project is a CMAKE project then run pre-install
+  // and then read the cmake_install script to run it
   const char* cmakeProjects
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   const char* cmakeGenerator
@@ -346,7 +372,7 @@ int cmCPackGenericGenerator::InstallProject()
           = globalGenerator->GenerateBuildCommand(cmakeMakeProgram,
             installProjectName.c_str(), 0, 
             globalGenerator->GetPreinstallTargetName(),
-            buildConfig, false);
+            buildConfig, false, false);
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
           "- Install command: " << buildCommand << std::endl);
         cmCPackLogger(cmCPackLog::LOG_OUTPUT,
@@ -381,6 +407,7 @@ int cmCPackGenericGenerator::InstallProject()
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
         "- Install project: " << installProjectName << std::endl);
       cmake cm;
+      cm.SetProgressCallback(cmCPackGenericGeneratorProgress, this);
       cmGlobalGenerator gg;
       gg.SetCMakeInstance(&cm);
       std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
@@ -414,6 +441,8 @@ int cmCPackGenericGenerator::InstallProject()
         }
       }
     }
+
+  // ????? 
   const char* binaryDirectories = this->GetOption("CPACK_BINARY_DIR");
   if ( binaryDirectories && !cmakeProjects )
     {
@@ -845,4 +874,26 @@ bool cmCPackGenericGenerator::ConfigureFile(const char* inName,
 {
   return this->MakefileMap->ConfigureFile(inName, outName,
     false, true, false) == 1;
+}
+
+//----------------------------------------------------------------------
+int cmCPackGenericGenerator::CleanTemporaryDirectory()
+{
+  const char* tempInstallDirectory
+    = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
+  if(cmsys::SystemTools::FileExists(tempInstallDirectory))
+    { 
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                  "- Clean temporary : " 
+                  << tempInstallDirectory << std::endl);
+    if(!cmsys::SystemTools::RemoveADirectory(tempInstallDirectory))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Problem removing temporary directory: " <<
+                    tempInstallDirectory
+                    << std::endl);
+      return 0;
+      }
+    }
+  return 1;
 }

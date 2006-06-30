@@ -22,9 +22,12 @@ MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
     FOREACH(def ${CMAKE_EXTRA_INCLUDE_FILES})
       SET(CHECK_TYPE_SIZE_PREMAIN "${CHECK_TYPE_SIZE_PREMAIN}#include \"${def}\"\n")
     ENDFOREACH(def)
-    CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/CheckTypeSize.c.in"
-      "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckTypeSize.c" IMMEDIATE @ONLY)
-    FILE(READ "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckTypeSize.c"
+    CONFIGURE_FILE(
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/CheckTypeSize.c.in"
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckTypeSize.c" 
+      IMMEDIATE @ONLY)
+    FILE(READ 
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckTypeSize.c"
       CHECK_TYPE_SIZE_FILE_CONTENT)
     MESSAGE(STATUS "Check size of ${TYPE}")
     IF(CMAKE_REQUIRED_LIBRARIES)
@@ -33,17 +36,17 @@ MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
     ENDIF(CMAKE_REQUIRED_LIBRARIES)
     TRY_RUN(${VARIABLE} HAVE_${VARIABLE}
       ${CMAKE_BINARY_DIR}
-      "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckTypeSize.c"
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckTypeSize.c"
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_TYPE_SIZE_FLAGS}
       "${CHECK_TYPE_SIZE_ADD_LIBRARIES}"
       OUTPUT_VARIABLE OUTPUT)
     IF(HAVE_${VARIABLE})
       MESSAGE(STATUS "Check size of ${TYPE} - done")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Determining size of ${TYPE} passed with the following output:\n${OUTPUT}\n\n")
     ELSE(HAVE_${VARIABLE})
       MESSAGE(STATUS "Check size of ${TYPE} - failed")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Determining size of ${TYPE} failed with the following output:\n${OUTPUT}\nCheckTypeSize.c:\n${CHECK_TYPE_SIZE_FILE_CONTENT}\n\n")
     ENDIF(HAVE_${VARIABLE})
   ENDIF("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")

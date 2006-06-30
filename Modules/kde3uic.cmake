@@ -4,7 +4,7 @@
 # neundorf@kde.org
 
 
-EXECUTE_PROCESS(COMMAND uic
+EXECUTE_PROCESS(COMMAND ${KDE_UIC_EXECUTABLE}
    -nounload -tr tr2i18n
    -impl ${KDE_UIC_H_FILE}
    ${KDE_UIC_FILE}

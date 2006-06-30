@@ -36,6 +36,8 @@
 
 #include <cmsys/RegularExpression.hxx>
 
+#include <ctype.h> // for isspace
+
 // default is not to be building executables
 cmMakefile::cmMakefile()
 {
@@ -265,7 +267,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
       cmOStringStream error;
       error << "Error in cmake code at\n"
             << lff.FilePath << ":" << lff.Line << ":\n"
-            << rm->GetError();
+            << rm->GetError() << std::endl
+            << "Current CMake stack: " << this->GetListFileStack().c_str();
       cmSystemTools::Error(error.str().c_str());
       return false;
       }
@@ -281,7 +284,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
         cmOStringStream error;
         error << "Error in cmake code at\n"
               << lff.FilePath << ":" << lff.Line << ":\n"
-              << usedCommand->GetError();
+              << usedCommand->GetError() << std::endl
+              << "Current CMake stack: " << this->GetListFileStack().c_str();
         cmSystemTools::Error(error.str().c_str());
         result = false;
         if ( this->GetCMakeInstance()->GetScriptMode() )
@@ -325,6 +329,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
             << "Unknown CMake command \"" << lff.Name.c_str() << "\".";
       cmSystemTools::Error(error.str().c_str());
       result = false;
+      cmSystemTools::SetFatalErrorOccured();
       }
     }
   
@@ -803,7 +808,29 @@ void cmMakefile::AddDefineFlag(const char* flag)
 
 void cmMakefile::RemoveDefineFlag(const char* flag)
 {
-  cmSystemTools::ReplaceString(this->DefineFlags, flag, " ");
+  // Check the length of the flag to remove.
+  std::string::size_type len = strlen(flag);
+  if(len < 1)
+    {
+    return;
+    }
+
+  // Remove all instances of the flag that are surrounded by
+  // whitespace or the beginning/end of the string.
+  for(std::string::size_type lpos = this->DefineFlags.find(flag, 0);
+      lpos != std::string::npos; lpos = this->DefineFlags.find(flag, lpos))
+    {
+    std::string::size_type rpos = lpos + len;
+    if((lpos <= 0 || isspace(this->DefineFlags[lpos-1])) &&
+       (rpos >= this->DefineFlags.size() || isspace(this->DefineFlags[rpos])))
+      {
+      this->DefineFlags.erase(lpos, len);
+      }
+    else
+      {
+      ++lpos;
+      }
+    }
 }
 
 void cmMakefile::AddLinkLibrary(const char* lib, 
@@ -824,17 +851,38 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
       this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0, lib);
     if(tgt)
       {
+      bool allowModules = true;
+      const char* versionValue
+        = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+      if (versionValue &&  (atof(versionValue) >= 2.4) )
+        {
+        allowModules = false;
+        }
       // if it is not a static or shared library then you can not link to it
       if(!((tgt->GetType() == cmTarget::STATIC_LIBRARY) ||
            (tgt->GetType() == cmTarget::SHARED_LIBRARY)))
         { 
         cmOStringStream e;
-        e << "Attempt to add link library " << lib 
-          << " which is not a library target to target " 
-          << tgt->GetType() << "  " << 
-          target << "\n";
+        e << "Attempt to add link target " << lib << " of type: "
+          << cmTarget::TargetTypeNames[(int)tgt->GetType()]
+          << "\nto target " << target
+          << ". You can only link to STATIC or SHARED libraries.";
+        // in older versions of cmake linking to modules was allowed
+        if( tgt->GetType() == cmTarget::MODULE_LIBRARY )
+          {
+          e << 
+            "\nTo allow linking of modules set "
+            "CMAKE_BACKWARDS_COMPATIBILITY to 2.2 or lower\n";
+          }
+        // if no modules are allowed then this is always an error
+        if(!allowModules || 
+           // if we allow modules but the type is not a module then it is
+           // still an error
+           (allowModules && tgt->GetType() != cmTarget::MODULE_LIBRARY))
+          {
         cmSystemTools::Error(e.str().c_str());
         }
+      }
       }
     i->second.AddLinkLibrary( *this, target, lib, llt );
     }
@@ -1667,8 +1715,16 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
         {
         markerPos += markerStartSize; // move past marker
         // find the end variable marker starting at the markerPos
+        // make sure it is a valid variable between 
         std::string::size_type endVariablePos =
-          source.find(endVariableMarker, markerPos);
+          source.find_first_not_of(
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_",
+            markerPos);
+        if(endVariablePos != std::string::npos && 
+          source[endVariablePos] != endVariableMarker)
+          {
+          endVariablePos = std::string::npos;
+          }
         if(endVariablePos == std::string::npos)
           {
           // no end marker found so add the bogus start
@@ -1815,6 +1871,11 @@ void cmMakefile::AddDefaultDefinitions()
   this->AddDefinition("CMAKE_MINOR_VERSION", temp);
   sprintf(temp, "%d", cmMakefile::GetMajorVersion());
   this->AddDefinition("CMAKE_MAJOR_VERSION", temp);
+  sprintf(temp, "%d", cmMakefile::GetPatchVersion());
+  this->AddDefinition("CMAKE_PATCH_VERSION", temp);
+
+  this->AddDefinition("CMAKE_FILES_DIRECTORY", 
+                      cmake::GetCMakeFilesDirectory());
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -2001,10 +2062,21 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
 {
   // if the source is provided with a full path use it, otherwise
   // by default it is in the current source dir
-  std::string path = cmSystemTools::GetFilenamePath(sourceName);
-  if (path.empty())
+  std::string path;
+  if (cmSystemTools::FileIsFullPath(sourceName))
+    {
+    path = cmSystemTools::GetFilenamePath(sourceName);
+    }
+  else
     {
     path = this->GetCurrentDirectory();
+    // even though it is not a full path, it may still be relative
+    std::string subpath = cmSystemTools::GetFilenamePath(sourceName);
+    if (!subpath.empty())
+      {
+      path += "/";
+      path += cmSystemTools::GetFilenamePath(sourceName);
+      }
     }
 
   std::string sname = 
@@ -2684,3 +2756,17 @@ std::vector<cmTest*> *cmMakefile::GetTests()
   return &this->Tests;
 }
 
+std::string cmMakefile::GetListFileStack()
+{
+  std::string tmp;
+  for (std::deque<cmStdString>::iterator i = this->ListFileStack.begin();
+    i != this->ListFileStack.end(); ++i)
+    {
+    if (i != this->ListFileStack.begin())
+      {
+      tmp += ";";
+      }
+    tmp += *i;
+    }
+  return tmp;
+}

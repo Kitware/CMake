@@ -74,7 +74,9 @@ public:
       "                     [WORKING_DIRECTORY dir]\n"
       "                     [COMMENT comment])\n"
       "This defines a new command that can be executed during the build "
-      "process. Note that MAIN_DEPENDENCY is completely optional and is "
+      "process. The outputs named should be listed as source files in the "
+      "target for which they are to be generated. "
+      "Note that MAIN_DEPENDENCY is completely optional and is "
       "used as a suggestion to visual studio about where to hang the "
       "custom command. In makefile terms this creates a new target in the "
       "following form:\n"
@@ -100,9 +102,9 @@ public:
       "  POST_BUILD - run after the target has been built\n"
       "Note that the PRE_BUILD option is only supported on Visual "
       "Studio 7 or later. For all other generators PRE_BUILD "
-      "will be treated as PRE_LINK."
-      "If WORKING_DIRECTORY is specified the command a cd \"dir\" is "
-      "done prior to running the command.";
+      "will be treated as PRE_LINK. "
+      "If WORKING_DIRECTORY is specified the command will be executed "
+      "in the directory given.";
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);

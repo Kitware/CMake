@@ -186,11 +186,11 @@ IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
   IF("CMake_HAVE_MFC" MATCHES "^CMake_HAVE_MFC$")
     SET(CHECK_INCLUDE_FILE_VAR "afxwin.h")
     CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
-      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx IMMEDIATE)
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx IMMEDIATE)
     MESSAGE(STATUS "Looking for MFC")
     TRY_COMPILE(CMake_HAVE_MFC
       ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx
       CMAKE_FLAGS
       -DCMAKE_MFC_FLAG:STRING=2
       -DCOMPILE_DEFINITIONS:STRING=-D_AFXDLL
@@ -198,13 +198,13 @@ IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
     IF(CMake_HAVE_MFC)
       MESSAGE(STATUS "Looking for MFC - found")
       SET(CMake_HAVE_MFC 1 CACHE INTERNAL "Have MFC?")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if MFC exists passed with the following output:\n"
         "${OUTPUT}\n\n")
     ELSE(CMake_HAVE_MFC)
       MESSAGE(STATUS "Looking for MFC - not found")
       SET(CMake_HAVE_MFC 0 CACHE INTERNAL "Have MFC?")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if MFC exists failed with the following output:\n"
         "${OUTPUT}\n\n")
     ENDIF(CMake_HAVE_MFC)

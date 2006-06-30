@@ -70,11 +70,7 @@ static char rcsid[] = "$OpenBSD: fnmatch.c,v 1.6 1998/03/19 00:29:59 millert Exp
 #define  RANGE_NOMATCH  0
 #define  RANGE_ERROR  (-1)
 
-#ifdef NO_IBM_COMPILER_HORKAGE
 static int rangematch (const char *, char, int, char **);
-#else
-static int rangematch ();
-#endif
 
 int
 fnmatch(pattern, string, flags)
@@ -195,7 +191,8 @@ rangematch(pattern, test, flags, newp)
    * consistency with the regular expression syntax.
    * J.T. Conklin (conklin@ngai.kaleida.com)
    */
-  if ((negate = (*pattern == '!' || *pattern == '^')))
+  negate = (*pattern == '!' || *pattern == '^');
+  if (negate)
     ++pattern;
 
   if (flags & FNM_CASEFOLD)

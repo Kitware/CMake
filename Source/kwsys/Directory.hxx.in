@@ -48,6 +48,12 @@ public:
   unsigned long GetNumberOfFiles() const;
 
   /**
+   * Return the number of files in the specified directory.
+   * A higher performance static method.
+   */
+  static unsigned long GetNumberOfFilesInDirectory(const char*);
+
+  /**
    * Return the file at the given index, the indexing is 0 based
    */
   const char* GetFile(unsigned long) const;

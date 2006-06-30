@@ -36,7 +36,7 @@ public:
   enum TargetType { EXECUTABLE, STATIC_LIBRARY,
                     SHARED_LIBRARY, MODULE_LIBRARY, UTILITY, GLOBAL_TARGET,
                     INSTALL_FILES, INSTALL_PROGRAMS, INSTALL_DIRECTORY};
-
+  static const char* TargetTypeNames[];
   enum CustomCommandType { PRE_BUILD, PRE_LINK, POST_BUILD };
 
   /**

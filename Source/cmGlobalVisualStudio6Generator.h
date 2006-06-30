@@ -60,7 +60,8 @@ public:
                                            const char* additionalOptions, 
                                            const char *targetName, 
                                            const char* config,
-                                           bool ignoreErrors);
+                                           bool ignoreErrors,
+                                           bool fast);
 
   /**
    * Generate the all required files for building this project/tree. This

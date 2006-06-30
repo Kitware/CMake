@@ -15,31 +15,32 @@ MACRO(TRY_COMPILE_FROM_SOURCE SOURCE VAR)
     ENDFOREACH(inc)
 
     SET(src "${src}\nint main() { ${SOURCE} ; return 0; }")
-    FILE(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/src2.c"
-      "${src}")
-    EXEC_PROGRAM("${CMAKE_COMMAND}" "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp"
+    FILE(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src2.c"
+      "${src}\n")
+    EXEC_PROGRAM("${CMAKE_COMMAND}" 
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp"
       ARGS -E copy src2.c src.c)
     MESSAGE(STATUS "Performing Test ${VAR}")
     TRY_COMPILE(${VAR}
       ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/src.c
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c
       CMAKE_FLAGS
       "${TRY_COMPILE_FROM_SOURCE_ADD_LIBRARIES}"
       OUTPUT_VARIABLE OUTPUT)
     IF(${VAR})
       SET(${VAR} 1 CACHE INTERNAL "Test ${FUNCTION}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
-      FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C SOURCE FILE Test ${VAR} succeded with the following output:\n"
         "${OUTPUT}\n"
-        "Source file was:\n${src}\n" APPEND)
+        "Source file was:\n${src}\n")
     ELSE(${VAR})
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
       SET(${VAR} "" CACHE INTERNAL "Test ${FUNCTION}")
-      FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing C SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"
-        "Source file was:\n${src}\n" APPEND)
+        "Source file was:\n${src}\n")
     ENDIF(${VAR})
   ENDIF("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
 ENDMACRO(TRY_COMPILE_FROM_SOURCE)

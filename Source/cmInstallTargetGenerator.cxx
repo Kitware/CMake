@@ -20,6 +20,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
+#include "cmake.h"
 
 //----------------------------------------------------------------------------
 cmInstallTargetGenerator
@@ -48,7 +49,8 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   if(this->Target->NeedRelinkBeforeInstall())
     {
     fromDir = this->Target->GetMakefile()->GetStartOutputDirectory();
-    fromDir += "/CMakeFiles/CMakeRelink.dir/";
+    fromDir += cmake::GetCMakeFilesDirectory();
+    fromDir += "/CMakeRelink.dir/";
     }
   else
     {
@@ -361,7 +363,7 @@ void cmInstallTargetGenerator
       {
       os << "\n    -change \"" << i->first << "\" \"" << i->second << "\"";
       }
-    os << "\n    \"" << destination << "/"
+    os << "\n    \"$ENV{DESTDIR}" << destination << "/"
        << this->GetScriptReference(this->Target, "REMAPPED", true) << "\")\n";
     os << "ENDIF(" << component_test << ")\n";
     }

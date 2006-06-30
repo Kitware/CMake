@@ -196,7 +196,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       this->SourceDir.c_str(), this->BinaryDir.c_str(),
       this->BuildProject.c_str(), tarIt->c_str(),
       &output, this->BuildMakeProgram.c_str(),
-      this->CTest->GetConfigType().c_str(),!this->BuildNoClean);
+      this->CTest->GetConfigType().c_str(),!this->BuildNoClean, false);
 
     out << output;
     // if the build failed then return

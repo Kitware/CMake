@@ -383,7 +383,7 @@ MACRO(CURL_INTERNAL_TEST CURL_TEST)
     ELSE(${CURL_TEST})
       MESSAGE(STATUS "Performing Curl Test ${CURL_TEST} - Failed")
       SET(${CURL_TEST} "" CACHE INTERNAL "Curl test ${FUNCTION}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Performing Curl Test ${CURL_TEST} failed with the following output:\n"
         "${OUTPUT}\n")
     ENDIF(${CURL_TEST})
@@ -411,14 +411,15 @@ MACRO(CURL_INTERNAL_TEST_RUN CURL_TEST)
     ELSE(${CURL_TEST}_COMPILE AND NOT ${CURL_TEST})
       MESSAGE(STATUS "Performing Curl Test ${CURL_TEST} - Failed")
       SET(${CURL_TEST} "" CACHE INTERNAL "Curl test ${FUNCTION}")
-      FILE(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log"
+      FILE(APPEND "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log"
         "Performing Curl Test ${CURL_TEST} failed with the following output:\n"
         "${OUTPUT}")
       IF(${CURL_TEST}_COMPILE)
-        FILE(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log" 
+        FILE(APPEND 
+          "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log" 
           "There was a running problem of this test\n")
       ENDIF(${CURL_TEST}_COMPILE)
-      FILE(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log" 
+      FILE(APPEND "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log" 
         "\n\n")
     ENDIF(${CURL_TEST}_COMPILE AND NOT ${CURL_TEST})
   ENDIF("${CURL_TEST}_COMPILE" MATCHES "^${CURL_TEST}_COMPILE$")

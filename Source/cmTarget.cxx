@@ -23,6 +23,11 @@
 #include <set>
 #include <queue>
 #include <stdlib.h> // required for atof
+const char* cmTarget::TargetTypeNames[] = {
+  "EXECUTABLE", "STATIC_LIBRARY",
+  "SHARED_LIBRARY", "MODULE_LIBRARY", "UTILITY", "GLOBAL_TARGET",
+  "INSTALL_FILES", "INSTALL_PROGRAMS", "INSTALL_DIRECTORY"
+};
 
 //----------------------------------------------------------------------------
 cmTarget::cmTarget()
@@ -58,6 +63,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   // Setup default property values.
   this->SetPropertyDefault("INSTALL_NAME_DIR", "");
   this->SetPropertyDefault("INSTALL_RPATH", "");
+  this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");
   this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
   this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
 
@@ -1316,19 +1322,36 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
     soversion = version;
     }
 
+  // Get the components of the library name.
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->GetFullNameInternal(type, config, false, prefix, base, suffix);
+
   // The library name.
-  name = this->GetFullNameInternal(type, config, false);
+  name = prefix+base+suffix;
 
   // The library's soname.
+#if defined(__APPLE__)
+  soName = prefix+base;
+#else
   soName = name;
+#endif
   if(soversion)
     {
     soName += ".";
     soName += soversion;
     }
+#if defined(__APPLE__)
+  soName += suffix;
+#endif
 
   // The library's real name on disk.
+#if defined(__APPLE__)
+  realName = prefix+base;
+#else
   realName = name;
+#endif
   if(version)
     {
     realName += ".";
@@ -1339,6 +1362,9 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
     realName += ".";
     realName += soversion;
     }
+#if defined(__APPLE__)
+  realName += suffix;
+#endif
 
   // The import library name.
   if(type == cmTarget::SHARED_LIBRARY)

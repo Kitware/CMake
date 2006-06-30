@@ -95,7 +95,9 @@ ELSE (WIN32)
   # It's not true on OSX.
 
   IF (OPENGL_gl_LIBRARY)
+    IF(NOT X11_FOUND)
     INCLUDE(FindX11)
+    ENDIF(NOT X11_FOUND)
     IF (X11_FOUND)
       IF (NOT APPLE)
         SET (OPENGL_LIBRARIES ${X11_LIBRARIES})

@@ -92,7 +92,7 @@ IF(CMAKE_GENERATOR MATCHES "Makefiles")
       RETURN_VALUE CMAKE_COMPILER_RETURN
       )
     IF(NOT CMAKE_COMPILER_RETURN)
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Determining the version of compiler passed with the following output:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
       STRING(REGEX REPLACE "\n" " " compilerVersion "${CMAKE_COMPILER_OUTPUT}")
@@ -127,40 +127,40 @@ IF(CMAKE_GENERATOR MATCHES "Makefiles")
       SET(MSVC_VERSION "${compilerVersion}")
     ELSE(NOT CMAKE_COMPILER_RETURN)
       MESSAGE(STATUS "Check for CL compiler version - failed")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Determining the version of compiler failed with the following output:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
     ENDIF(NOT CMAKE_COMPILER_RETURN)
     # try to figure out if we are running the free command line
     # tools from Microsoft.  These tools do not provide debug libraries,
     # so the link flags used have to be different.
-    MAKE_DIRECTORY("${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp2")
+    MAKE_DIRECTORY("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp2")
     SET(testForFreeVCFile
       "${CMAKE_ROOT}/Modules/CMakeTestForFreeVC.cxx")
     STRING(REGEX REPLACE "/" "\\\\" testForFreeVCFile "${testForFreeVCFile}")
     MESSAGE(STATUS "Check if this is a free VC compiler")
-    EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp2
+    EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp2
       ARGS /nologo /MD /EHsc
       \"${testForFreeVCFile}\"
       OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 
       RETURN_VALUE CMAKE_COMPILER_RETURN
       )
     IF(CMAKE_COMPILER_RETURN)
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Determining if this is a free VC compiler failed with the following output:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
       MESSAGE(STATUS "Check if this is a free VC compiler - yes")
       SET(CMAKE_USING_VC_FREE_TOOLS 1)
     ELSE(CMAKE_COMPILER_RETURN)
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Determining if this is a free VC compiler passed with the following output:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
       MESSAGE(STATUS "Check if this is a free VC compiler - no")
       SET(CMAKE_USING_VC_FREE_TOOLS 0)
     ENDIF(CMAKE_COMPILER_RETURN)
-    MAKE_DIRECTORY("${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp3")
+    MAKE_DIRECTORY("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp3")
     MESSAGE(STATUS "Check CL platform")
-    EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp3
+    EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp3
       ARGS /nologo
       \"${testForFreeVCFile}\"
       /link /machine:i386
@@ -170,13 +170,13 @@ IF(CMAKE_GENERATOR MATCHES "Makefiles")
     # if there was an error assume it is a 64bit system
     IF(CMAKE_COMPILER_RETURN)
       FILE(APPEND 
-        ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Determining if this is a 64 bit system passed:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
       MESSAGE(STATUS "Check CL platform - 64 bit")
       SET(CMAKE_CL_64 1)
     ELSE(CMAKE_COMPILER_RETURN)
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Determining if this is a 32 bit system passed:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
       MESSAGE(STATUS "Check CL platform - 32 bit")
@@ -194,16 +194,16 @@ ENDIF(CMAKE_FORCE_WIN64)
 IF(MSVC80)
   # for 2005 make sure the manifest is put in the dll with mt
   SET(CMAKE_CXX_CREATE_SHARED_LIBRARY "${CMAKE_CXX_CREATE_SHARED_LIBRARY}" 
-    "mt /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
+    "mt ${CMAKE_CL_NOLOGO} /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
   SET(CMAKE_CXX_CREATE_SHARED_MODULE "${CMAKE_CXX_CREATE_SHARED_LIBRARY}")
   # create a C shared library
   SET(CMAKE_C_CREATE_SHARED_LIBRARY "${CMAKE_CXX_CREATE_SHARED_LIBRARY}")
   # create a C shared module just copy the shared library rule
   SET(CMAKE_C_CREATE_SHARED_MODULE "${CMAKE_C_CREATE_SHARED_LIBRARY}")
   SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}"
-    "mt /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
+    "mt ${CMAKE_CL_NOLOGO} /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
   SET(CMAKE_C_LINK_EXECUTABLE "${CMAKE_C_LINK_EXECUTABLE}"
-    "mt /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
+    "mt ${CMAKE_CL_NOLOGO} /manifest <TARGET>.manifest /outputresource:<TARGET>\;#2")
   SET(CMAKE_BUILD_TYPE_INIT Debug)
   SET (CMAKE_CXX_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000 /EHsc /GR")
   SET (CMAKE_CXX_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi /Ob0 /Od /RTC1")
@@ -275,12 +275,12 @@ SET (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_EXE_LINKER_FLAGS_RELW
 # save computed information for this platform
 IF(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCPlatform.cmake")
   CONFIGURE_FILE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in 
-    ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCPlatform.cmake IMMEDIATE)
+    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCPlatform.cmake IMMEDIATE)
 ENDIF(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCPlatform.cmake")
 
 IF(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake")
   CONFIGURE_FILE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in 
-               ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeCXXPlatform.cmake IMMEDIATE)
+               ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXPlatform.cmake IMMEDIATE)
 ENDIF(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake")
 
 INCLUDE(Platform/WindowsPaths)

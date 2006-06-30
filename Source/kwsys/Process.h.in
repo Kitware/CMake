@@ -36,6 +36,7 @@
 #define kwsysProcess_SetPipeShared       kwsys_ns(Process_SetPipeShared)
 #define kwsysProcess_Option_Detach       kwsys_ns(Process_Option_Detach)
 #define kwsysProcess_Option_HideWindow   kwsys_ns(Process_Option_HideWindow)
+#define kwsysProcess_Option_Verbatim     kwsys_ns(Process_Option_Verbatim)
 #define kwsysProcess_GetOption           kwsys_ns(Process_GetOption)
 #define kwsysProcess_SetOption           kwsys_ns(Process_SetOption)
 #define kwsysProcess_Option_e            kwsys_ns(Process_Option_e)
@@ -154,6 +155,13 @@ kwsysEXPORT void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe,
  *  kwsysProcess_Option_HideWindow = Whether to hide window on Windows.
  *         0 = No (default)
  *         1 = Yes
+ *
+ *  kwsysProcess_Option_Verbatim = Whether SetCommand and AddCommand
+ *                                 should treat the first argument
+ *                                 as a verbatim command line
+ *                                 and ignore the rest of the arguments.
+ *         0 = No (default)
+ *         1 = Yes
  */
 kwsysEXPORT int kwsysProcess_GetOption(kwsysProcess* cp, int optionId);
 kwsysEXPORT void kwsysProcess_SetOption(kwsysProcess* cp, int optionId,
@@ -161,7 +169,8 @@ kwsysEXPORT void kwsysProcess_SetOption(kwsysProcess* cp, int optionId,
 enum kwsysProcess_Option_e
 {
   kwsysProcess_Option_HideWindow,
-  kwsysProcess_Option_Detach
+  kwsysProcess_Option_Detach,
+  kwsysProcess_Option_Verbatim
 };
 
 /**
@@ -343,6 +352,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_SetPipeShared
 # undef kwsysProcess_Option_Detach
 # undef kwsysProcess_Option_HideWindow
+# undef kwsysProcess_Option_Verbatim
 # undef kwsysProcess_GetOption
 # undef kwsysProcess_SetOption
 # undef kwsysProcess_Option_e

@@ -91,11 +91,11 @@ IF(NOT CMAKE_COMPILER_IS_GNUG77_RUN)
   IF(NOT CMAKE_COMPILER_RETURN)
     IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
       SET(CMAKE_COMPILER_IS_GNUG77 1)
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the Fortran compiler is GNU succeeded with "
         "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
     ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the Fortran compiler is GNU failed with "
         "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
     ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
@@ -111,6 +111,6 @@ ENDIF(NOT CMAKE_COMPILER_IS_GNUG77_RUN)
 
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in 
-  ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeFortranCompiler.cmake IMMEDIATE)
+  ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake IMMEDIATE)
 MARK_AS_ADVANCED(CMAKE_AR)
 SET(CMAKE_Fortran_COMPILER_ENV_VAR "FC")

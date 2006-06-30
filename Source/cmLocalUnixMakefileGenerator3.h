@@ -178,7 +178,7 @@ public:
   
   
   /** Called from command-line hook to scan dependencies.  */
-  virtual bool ScanDependencies(std::vector<std::string> const& args);
+  virtual bool ScanDependencies(const char* tgtInfo);
 
   /** Called from command-line hook to check dependencies.  */
   virtual void CheckDependencies(cmMakefile* mf, bool verbose,
@@ -280,11 +280,14 @@ protected:
                           cmTarget& target, const char* filename =0);
 
   bool ForceVerboseMakefiles;
+  std::map<cmStdString, std::vector<int> > ProgressFiles;
+
 private:
   friend class cmMakefileTargetGenerator;
   friend class cmMakefileExecutableTargetGenerator;
   friend class cmMakefileLibraryTargetGenerator;
   friend class cmMakefileUtilityTargetGenerator;
+  friend class cmGlobalUnixMakefileGenerator3;
   
   std::map<cmStdString, IntegrityCheckSetMap> CheckDependFiles;
 
@@ -306,6 +309,10 @@ private:
 
   std::string HomeRelativeOutputPath;
   
+  /* Copy the setting of CMAKE_COLOR_MAKEFILE from the makefile at the
+     beginning of generation to avoid many duplicate lookups.  */
+  bool ColorMakefile;
+
   std::map<cmStdString,std::vector<cmTarget *> > LocalObjectFiles;
 
   /* does the work for each target */

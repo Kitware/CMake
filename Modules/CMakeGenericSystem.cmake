@@ -34,6 +34,13 @@ IF(CMAKE_GENERATOR MATCHES "KDevelop3")
 ENDIF(CMAKE_GENERATOR MATCHES "KDevelop3")
 SET(CMAKE_VERBOSE_MAKEFILE ${CMAKE_INIT_VALUE} CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.") 
 
+IF(CMAKE_GENERATOR MATCHES "Makefiles")
+  SET(CMAKE_COLOR_MAKEFILE ON CACHE BOOL
+    "Enable/Disable color output during build."
+    )
+  MARK_AS_ADVANCED(CMAKE_COLOR_MAKEFILE)
+ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
+
 # Choose a default install prefix for this platform.
 IF(UNIX)
   SET(CMAKE_INSTALL_PREFIX "/usr/local"

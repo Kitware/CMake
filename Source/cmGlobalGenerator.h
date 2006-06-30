@@ -100,16 +100,16 @@ public:
                     const char *projectName, const char *targetName,
                     std::string *output, 
                     const char *makeProgram, const char *config,
-                    bool clean);
+                    bool clean, bool fast);
   virtual std::string GenerateBuildCommand
   (const char* makeProgram,
    const char *projectName, const char* additionalOptions, 
    const char *targetName,
-   const char* config, bool ignoreErrors);
+   const char* config, bool ignoreErrors, bool fast);
 
 
   ///! Set the CMake instance
-  void SetCMakeInstance(cmake *cm) { this->CMakeInstance = cm; };
+  void SetCMakeInstance(cmake *cm);
   
   ///! Get the CMake instance
   cmake *GetCMakeInstance() { return this->CMakeInstance; };
@@ -151,6 +151,9 @@ public:
    */
   std::string ConvertToRelativePath(const std::vector<std::string>& local,
                                     const char* remote);
+
+  /** Get whether the generator should use a script for link commands.  */
+  bool GetUseLinkScript() { return this->UseLinkScript; }
 
   /*
    * Determine what program to use for building the project.
@@ -197,6 +200,7 @@ protected:
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
 
   void ConfigureRelativePaths();
+  bool RelativePathsConfigured;
   void SetupTests();
 
   void CreateDefaultGlobalTargets(cmTargets* targets);
@@ -204,6 +208,7 @@ protected:
     const cmCustomCommandLines* commandLines,
     std::vector<std::string> depends, bool depends_on_all = false);
 
+  bool UseLinkScript;
   bool ForceUnixPaths;
   bool ToolSupportsColor;
   cmStdString FindMakeProgramFile;

@@ -28,13 +28,13 @@ MACRO(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
     ELSE(CMAKE_REQUIRED_INCLUDES)
       SET(CHECK_CXX_SOURCE_COMPILES_ADD_INCLUDES)
     ENDIF(CMAKE_REQUIRED_INCLUDES)
-    FILE(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/src.cxx"
-      "${SOURCE}")
+    FILE(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.cxx"
+      "${SOURCE}\n")
 
     MESSAGE(STATUS "Performing Test ${VAR}")
     TRY_COMPILE(${VAR}
       ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeTmp/src.cxx
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.cxx
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
       "${CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES}"
@@ -43,14 +43,14 @@ MACRO(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
     IF(${VAR})
       SET(${VAR} 1 CACHE INTERNAL "Test ${FUNCTION}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Performing C++ SOURCE FILE Test ${VAR} succeded with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${SOURCE}\n")
     ELSE(${VAR})
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
       SET(${VAR} "" CACHE INTERNAL "Test ${FUNCTION}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Performing C++ SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${SOURCE}\n")

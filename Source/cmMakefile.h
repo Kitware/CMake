@@ -539,6 +539,11 @@ public:
   void AddCMakeDependFile(const char* file)
     { this->ListFiles.push_back(file);}
   
+    /**
+     * Get the list file stack as a string
+     */
+    std::string GetListFileStack();
+
   /**
    * Get the vector of  files created by this makefile
    */
