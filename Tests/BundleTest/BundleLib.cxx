@@ -51,8 +51,10 @@ int foo(char *exec)
 {
   int res1 = findBundleFile(exec, "Resources/randomResourceFile.plist");
   int res2 = findBundleFile(exec, "MacOS/SomeRandomFile.txt");
+  int res3 = findBundleFile(exec, "MacOS/ChangeLog.txt");
   if ( !res1 ||
-    !res2 )
+    !res2 ||
+    !res3 )
     {
     return 1;
     }

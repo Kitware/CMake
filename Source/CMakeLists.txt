@@ -962,6 +962,7 @@ IF(BUILD_TESTING)
       --build-target install
 #     --build-target package
       --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
+       "-DCMake_SOURCE_DIR:PATH=${CMAKE_SOURCE_DIR}"
       --test-command
       ${BundleTestInstallDir}/Application/BundleTestExe.app/Contents/MacOS/BundleTestExe)
 

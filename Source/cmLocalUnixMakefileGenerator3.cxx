@@ -1674,6 +1674,11 @@ cmLocalUnixMakefileGenerator3
       {
       objectName = relFromSource;
       }
+    else
+      {
+      // This is not relative to source or binary, so make it no path at all
+      objectName = cmSystemTools::GetFilenameName(objectName.c_str());
+      }
     }
 
   // Replace the original source file extension with the object file
