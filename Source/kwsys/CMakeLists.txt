@@ -37,6 +37,41 @@
 #      SET(KWSYS_HEADER_ROOT ${PROJECT_BINARY_DIR})
 #      INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 #
+#  KWSYS_IOS_FORCE_OLD = Force use of old non-ANSI C++ streams even if
+#                        new streams are available.  This may be used
+#                        by projects that cannot configure their
+#                        streams library.
+#    Example:
+#
+#      SET(KWSYS_IOS_FORCE_OLD 1)
+#
+#
+# Optional settings to setup install rules work in one of two ways.
+# The modern way utilizes the CMake 2.4 INSTALL command.  Settings
+# for this mode are as follows:
+#
+#  KWSYS_INSTALL_BIN_DIR     = The installation target directories into
+#  KWSYS_INSTALL_LIB_DIR       which the libraries and headers from
+#  KWSYS_INSTALL_INCLUDE_DIR   kwsys should be installed by a "make install".
+#                              The values should be specified relative to
+#                              the installation prefix and NOT start with '/'.
+#
+#  KWSYS_INSTALL_COMPONENT_NAME_RUNTIME     = Name of runtime and development
+#  KWSYS_INSTALL_COMPONENT_NAME_DEVELOPMENT   installation components.
+#                                             If not given the install rules
+#                                             will not be in any component.
+#
+#    Example:
+#
+#      SET(KWSYS_INSTALL_BIN_DIR bin)
+#      SET(KWSYS_INSTALL_LIB_DIR lib)
+#      SET(KWSYS_INSTALL_INCLUDE_DIR include)
+#      SET(KWSYS_INSTALL_COMPONENT_NAME_RUNTIME Runtime)
+#      SET(KWSYS_INSTALL_COMPONENT_NAME_DEVELOPMENT Development)
+#
+# The old way uses the original CMake INSTALL_* commands.  Settings
+# for this mode are as follows:
+#
 #  KWSYS_LIBRARY_INSTALL_DIR = The installation target directories into
 #  KWSYS_HEADER_INSTALL_DIR    which the libraries and headers from
 #                              kwsys should be installed by a "make install".
@@ -47,14 +82,11 @@
 #      SET(KWSYS_LIBRARY_INSTALL_DIR /lib)
 #      SET(KWSYS_HEADER_INSTALL_DIR /include)
 #
-#  KWSYS_IOS_FORCE_OLD = Force use of old non-ANSI C++ streams even if
-#                        new streams are available.  This may be used
-#                        by projects that cannot configure their
-#                        streams library.
-#    Example:
-#
-#      SET(KWSYS_IOS_FORCE_OLD 1)
-#
+# The modern way will be used whenever the INSTALL command is
+# available.  If the settings are not available the old names will be
+# used to construct them.  The old way will be used whenever the
+# INSTALL command is not available.  If the settings are not available
+# the new names will be used to construct them.
 
 # Once configured, kwsys should be used as follows from C or C++ code:
 #
@@ -112,6 +144,87 @@ ENDIF(KWSYS_STANDALONE)
 
 # Do full dependency headers.
 INCLUDE_REGULAR_EXPRESSION("^.*$")
+
+# Choose which kind of install commands to use.
+IF(COMMAND INSTALL)
+  # Use new KWSYS_INSTALL_*_DIR variable names to control installation.
+  # Take defaults from the old names.  Note that there was no old name
+  # for the bin dir, so we take the old lib dir name so DLLs will be
+  # installed in a compatible way for old code.
+  IF(NOT KWSYS_INSTALL_INCLUDE_DIR)
+    STRING(REGEX REPLACE "^/" "" KWSYS_INSTALL_INCLUDE_DIR
+      "${KWSYS_HEADER_INSTALL_DIR}")
+  ENDIF(NOT KWSYS_INSTALL_INCLUDE_DIR)
+  IF(NOT KWSYS_INSTALL_LIB_DIR)
+    STRING(REGEX REPLACE "^/" "" KWSYS_INSTALL_LIB_DIR
+      "${KWSYS_LIBRARY_INSTALL_DIR}")
+  ENDIF(NOT KWSYS_INSTALL_LIB_DIR)
+  IF(NOT KWSYS_INSTALL_BIN_DIR)
+    STRING(REGEX REPLACE "^/" "" KWSYS_INSTALL_BIN_DIR
+      "${KWSYS_LIBRARY_INSTALL_DIR}")
+  ENDIF(NOT KWSYS_INSTALL_BIN_DIR)
+
+  # Setup library install rules.
+  SET(KWSYS_INSTALL_LIBRARY_RULE)
+  IF(KWSYS_INSTALL_LIB_DIR)
+    # Install the shared library to the lib directory.
+    SET(KWSYS_INSTALL_LIBRARY_RULE ${KWSYS_INSTALL_LIBRARY_RULE}
+      LIBRARY DESTINATION ${KWSYS_INSTALL_LIB_DIR}
+      )
+    # Assign the shared library to the runtime component.
+    IF(KWSYS_INSTALL_COMPONENT_NAME_RUNTIME)
+      SET(KWSYS_INSTALL_LIBRARY_RULE ${KWSYS_INSTALL_LIBRARY_RULE}
+        COMPONENT ${KWSYS_INSTALL_COMPONENT_NAME_RUNTIME}
+        )
+    ENDIF(KWSYS_INSTALL_COMPONENT_NAME_RUNTIME)
+
+    # Install the archive to the lib directory.
+    SET(KWSYS_INSTALL_LIBRARY_RULE ${KWSYS_INSTALL_LIBRARY_RULE}
+      ARCHIVE DESTINATION ${KWSYS_INSTALL_LIB_DIR}
+      )
+    # Assign the archive to the development component.
+    IF(KWSYS_INSTALL_COMPONENT_NAME_DEVELOPMENT)
+      SET(KWSYS_INSTALL_LIBRARY_RULE ${KWSYS_INSTALL_LIBRARY_RULE}
+        COMPONENT ${KWSYS_INSTALL_COMPONENT_NAME_DEVELOPMENT}
+        )
+    ENDIF(KWSYS_INSTALL_COMPONENT_NAME_DEVELOPMENT)
+  ENDIF(KWSYS_INSTALL_LIB_DIR)
+  IF(KWSYS_INSTALL_BIN_DIR)
+    # Install the runtime library to the bin directory.
+    SET(KWSYS_INSTALL_LIBRARY_RULE ${KWSYS_INSTALL_LIBRARY_RULE}
+      RUNTIME DESTINATION ${KWSYS_INSTALL_BIN_DIR}
+      )
+    # Assign the runtime library to the runtime component.
+    IF(KWSYS_INSTALL_COMPONENT_NAME_RUNTIME)
+      SET(KWSYS_INSTALL_LIBRARY_RULE ${KWSYS_INSTALL_LIBRARY_RULE}
+        COMPONENT ${KWSYS_INSTALL_COMPONENT_NAME_RUNTIME}
+        )
+    ENDIF(KWSYS_INSTALL_COMPONENT_NAME_RUNTIME)
+  ENDIF(KWSYS_INSTALL_BIN_DIR)
+
+  # Do not support old KWSYS_*_INSTALL_DIR variable names.
+  SET(KWSYS_HEADER_INSTALL_DIR)
+  SET(KWSYS_LIBRARY_INSTALL_DIR)
+
+ELSE(COMMAND INSTALL)
+  # Use old KWSYS_*_INSTALL_DIR variable names.
+  # Take defaults from the new names.
+  IF(KWSYS_INSTALL_LIB_DIR)
+    IF(NOT KWSYS_LIBRARY_INSTALL_DIR)
+      SET(KWSYS_LIBRARY_INSTALL_DIR "/${KWSYS_INSTALL_LIB_DIR}")
+    ENDIF(NOT KWSYS_LIBRARY_INSTALL_DIR)
+  ENDIF(KWSYS_INSTALL_LIB_DIR)
+  IF(KWSYS_INSTALL_INCLUDE_DIR)
+    IF(NOT KWSYS_HEADER_INSTALL_DIR)
+      SET(KWSYS_HEADER_INSTALL_DIR "/${KWSYS_INSTALL_INCLUDE_DIR}")
+    ENDIF(NOT KWSYS_HEADER_INSTALL_DIR)
+  ENDIF(KWSYS_INSTALL_INCLUDE_DIR)
+
+  # Do not support new KWSYS_INSTALL_*_DIR variable names.
+  SET(KWSYS_INSTALL_BIN_DIR)
+  SET(KWSYS_INSTALL_INCLUDE_DIR)
+  SET(KWSYS_INSTALL_LIB_DIR)
+ENDIF(COMMAND INSTALL)
 
 # Work-around for CMake 1.6.7 bug in custom command dependencies when
 # there is no executable output path.
@@ -369,6 +482,10 @@ FOREACH(header algorithm deque iterator list map numeric queue set stack string
     CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_stl_${header}.hxx.in
                    ${KWSYS_HEADER_DIR}/stl/${header}.hxx
                    @ONLY IMMEDIATE)
+    IF(KWSYS_INSTALL_INCLUDE_DIR)
+      INSTALL(FILES ${KWSYS_HEADER_DIR}/stl/${header}.hxx
+        DESTINATION ${KWSYS_INSTALL_INCLUDE_DIR}/${KWSYS_NAMESPACE}/stl)
+    ENDIF(KWSYS_INSTALL_INCLUDE_DIR)
     IF(KWSYS_HEADER_INSTALL_DIR)
       INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}/stl
         FILES ${KWSYS_HEADER_DIR}/stl/${header}.hxx)
@@ -381,6 +498,10 @@ FOREACH(header algorithm deque iterator list map numeric queue set stack string
                  @ONLY IMMEDIATE)
 
   # Create an install target for the header wrapper.
+  IF(KWSYS_INSTALL_INCLUDE_DIR)
+    INSTALL(FILES ${KWSYS_HEADER_DIR}/stl/${header}
+      DESTINATION ${KWSYS_INSTALL_INCLUDE_DIR}/${KWSYS_NAMESPACE}/stl)
+  ENDIF(KWSYS_INSTALL_INCLUDE_DIR)
   IF(KWSYS_HEADER_INSTALL_DIR)
     INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}/stl
       FILES ${KWSYS_HEADER_DIR}/stl/${header})
@@ -402,6 +523,10 @@ FOREACH(header iostream fstream sstream iosfwd)
                  @ONLY IMMEDIATE)
 
   # Create an install target for the header wrapper.
+  IF(KWSYS_INSTALL_INCLUDE_DIR)
+    INSTALL(FILES ${KWSYS_HEADER_DIR}/ios/${header}
+      DESTINATION ${KWSYS_INSTALL_INCLUDE_DIR}/${KWSYS_NAMESPACE}/ios)
+  ENDIF(KWSYS_INSTALL_INCLUDE_DIR)
   IF(KWSYS_HEADER_INSTALL_DIR)
     INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}/ios
       FILES ${KWSYS_HEADER_DIR}/ios/${header})
@@ -481,6 +606,10 @@ FOREACH(c ${KWSYS_CLASSES})
                  @ONLY IMMEDIATE)
 
   # Create an install target for the header.
+  IF(KWSYS_INSTALL_INCLUDE_DIR)
+    INSTALL(FILES ${KWSYS_HEADER_DIR}/${c}.hxx
+      DESTINATION ${KWSYS_INSTALL_INCLUDE_DIR}/${KWSYS_NAMESPACE})
+  ENDIF(KWSYS_INSTALL_INCLUDE_DIR)
   IF(KWSYS_HEADER_INSTALL_DIR)
     INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}
                   FILES  ${KWSYS_HEADER_DIR}/${c}.hxx)
@@ -494,6 +623,10 @@ FOREACH(h ${KWSYS_H_FILES})
                  @ONLY IMMEDIATE)
 
   # Create an install target for the header.
+  IF(KWSYS_INSTALL_INCLUDE_DIR)
+    INSTALL(FILES ${KWSYS_HEADER_DIR}/${h}.h
+      DESTINATION ${KWSYS_INSTALL_INCLUDE_DIR}/${KWSYS_NAMESPACE})
+  ENDIF(KWSYS_INSTALL_INCLUDE_DIR)
   IF(KWSYS_HEADER_INSTALL_DIR)
     INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}
                   FILES  ${KWSYS_HEADER_DIR}/${h}.h)
@@ -507,6 +640,10 @@ FOREACH(h ${KWSYS_HXX_FILES})
                  @ONLY IMMEDIATE)
 
   # Create an install target for the header.
+  IF(KWSYS_INSTALL_INCLUDE_DIR)
+    INSTALL(FILES ${KWSYS_HEADER_DIR}/${h}.hxx
+      DESTINATION ${KWSYS_INSTALL_INCLUDE_DIR}/${KWSYS_NAMESPACE})
+  ENDIF(KWSYS_INSTALL_INCLUDE_DIR)
   IF(KWSYS_HEADER_INSTALL_DIR)
     INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}
                   FILES  ${KWSYS_HEADER_DIR}/${h}.hxx)
@@ -532,15 +669,11 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
   ENDIF(KWSYS_PROPERTIES_CXX)
 
   # Create an install target for the library.
+  IF(KWSYS_INSTALL_LIBRARY_RULE)
+    INSTALL(TARGETS ${KWSYS_NAMESPACE} ${KWSYS_INSTALL_LIBRARY_RULE})
+  ENDIF(KWSYS_INSTALL_LIBRARY_RULE)
   IF(KWSYS_LIBRARY_INSTALL_DIR)
-    IF(VTK_INSTALL_HAS_CMAKE_24)
-      INSTALL(TARGETS ${KWSYS_NAMESPACE}
-        RUNTIME DESTINATION ${VTK_INSTALL_BIN_DIR_CM24} COMPONENT Runtime
-        LIBRARY DESTINATION ${VTK_INSTALL_LIB_DIR_CM24} COMPONENT Runtime
-        ARCHIVE DESTINATION ${VTK_INSTALL_LIB_DIR_CM24} COMPONENT Development)
-    ELSE(VTK_INSTALL_HAS_CMAKE_24)
-      INSTALL_TARGETS(${KWSYS_LIBRARY_INSTALL_DIR} ${KWSYS_NAMESPACE})
-    ENDIF(VTK_INSTALL_HAS_CMAKE_24)
+    INSTALL_TARGETS(${KWSYS_LIBRARY_INSTALL_DIR} ${KWSYS_NAMESPACE})
   ENDIF(KWSYS_LIBRARY_INSTALL_DIR)
 ENDIF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
 
@@ -556,6 +689,9 @@ IF(KWSYS_ENABLE_C AND KWSYS_C_SRCS)
   ENDIF(KWSYS_PROPERTIES_C)
 
   # Create an install target for the library.
+  IF(KWSYS_INSTALL_LIBRARY_RULE)
+    INSTALL(TARGETS ${KWSYS_NAMESPACE}_c ${KWSYS_INSTALL_LIBRARY_RULE})
+  ENDIF(KWSYS_INSTALL_LIBRARY_RULE)
   IF(KWSYS_LIBRARY_INSTALL_DIR)
     INSTALL_TARGETS(${KWSYS_LIBRARY_INSTALL_DIR} ${KWSYS_NAMESPACE}_c)
   ENDIF(KWSYS_LIBRARY_INSTALL_DIR)
