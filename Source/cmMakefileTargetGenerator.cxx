@@ -309,8 +309,11 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     this->ExtraContent.insert(obj);
     }
   this->Objects.push_back(obj);
-  std::string relativeObj = this->LocalGenerator->GetHomeRelativeOutputPath();
-  relativeObj += obj;
+
+  // TODO: Remove
+  //std::string relativeObj = this->LocalGenerator->GetHomeRelativeOutputPath();
+  //relativeObj += obj;
+
   // we compute some depends when writing the depend.make that we will also
   // use in the build.make, same with depMakeFile
   std::vector<std::string> depends;
@@ -346,6 +349,10 @@ cmMakefileTargetGenerator
   this->WriteObjectDependRules(source, depends);
 
   std::string relativeObj = this->LocalGenerator->GetHomeRelativeOutputPath();
+  if ( source.GetPropertyAsBool("MACOSX_CONTENT") )
+    {
+    relativeObj = "";
+    }
   relativeObj += obj;
   if(this->Makefile->GetDefinition("CMAKE_WINDOWS_OBJECT_PATH"))
     {

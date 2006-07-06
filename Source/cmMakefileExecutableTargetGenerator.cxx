@@ -76,6 +76,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       obj != this->Objects.end(); ++obj)
     {
     objTarget = relPath;
+    // Handle extra content on Mac bundles
+    if ( this->ExtraContent.find(*obj) != this->ExtraContent.end() )
+      {
+      objTarget = "";
+      }
     objTarget += *obj;
     depends.push_back(objTarget);
     }
