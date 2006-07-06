@@ -964,7 +964,7 @@ IF(BUILD_TESTING)
       --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
        "-DCMake_SOURCE_DIR:PATH=${CMAKE_SOURCE_DIR}"
       --test-command
-      ${BundleTestInstallDir}/Application/BundleTestExe.app/Contents/MacOS/BundleTestExe)
+      ${BundleTestInstallDir}/Application/SecondBundleExe.app/Contents/MacOS/SecondBundleExe)
 
     ADD_TEST(objc++ ${CMAKE_CTEST_COMMAND}
       --build-and-test

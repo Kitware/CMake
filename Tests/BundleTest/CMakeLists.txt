@@ -36,7 +36,8 @@ ADD_EXECUTABLE(BundleTest
 TARGET_LINK_LIBRARIES(BundleTest BundleTestLib)
 
 # Test bundle installation.
-INSTALL(TARGETS BundleTestLib DESTINATION Application/BundleTestExe.app/Contents/Plugins)
+#INSTALL(TARGETS BundleTestLib DESTINATION Application/BundleTestExe.app/Contents/Plugins)
+INSTALL(TARGETS BundleTestLib DESTINATION Application/SecondBundleExe.app/Contents/Plugins)
 INSTALL(TARGETS BundleTest DESTINATION Application)
 
 # Test whether bundles respect the output name.  Since the library is
@@ -87,3 +88,5 @@ IF(EXISTS /usr/lib/libtcl.dylib
   MESSAGE("frame: ${TCL}")
 ENDIF(EXISTS /usr/lib/libtcl.dylib
   AND EXISTS /System/Library/Frameworks/tcl.framework)
+
+SUBDIRS(BundleSubDir)
