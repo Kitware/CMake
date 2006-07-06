@@ -1706,6 +1706,7 @@ cmLocalUnixMakefileGenerator3
     source.GetProperty("MACOSX_PACKAGE_LOCATION");
   if ( fileTargetDirectory )
     {
+    objectName = cmSystemTools::GetFilenameName(objectName.c_str());
     std::string targetName;
     std::string targetNameReal;
     target.GetExecutableNames(targetName, targetNameReal,
