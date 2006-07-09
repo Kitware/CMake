@@ -90,6 +90,47 @@ cmMakefile::cmMakefile()
   this->PreOrder = false;
 }
 
+cmMakefile::cmMakefile(const cmMakefile& mf)
+{
+  this->Prefix = mf.Prefix;
+  this->AuxSourceDirectories = mf.AuxSourceDirectories;
+  this->cmStartDirectory = mf.cmStartDirectory; 
+  this->StartOutputDirectory = mf.StartOutputDirectory; 
+  this->cmHomeDirectory = mf.cmHomeDirectory; 
+  this->HomeOutputDirectory = mf.HomeOutputDirectory;
+  this->cmCurrentListFile = mf.cmCurrentListFile;
+  this->ProjectName = mf.ProjectName;
+  this->Targets = mf.Targets;
+  this->SourceFiles = mf.SourceFiles;
+  this->Tests = mf.Tests;
+  this->IncludeDirectories = mf.IncludeDirectories;
+  this->LinkDirectories = mf.LinkDirectories;
+  this->ListFiles = mf.ListFiles;
+  this->OutputFiles = mf.OutputFiles;
+  this->LinkLibraries = mf.LinkLibraries;
+  this->InstallGenerators = mf.InstallGenerators;
+  this->IncludeFileRegularExpression = mf.IncludeFileRegularExpression;
+  this->ComplainFileRegularExpression = mf.ComplainFileRegularExpression;
+  this->SourceFileExtensions = mf.SourceFileExtensions;
+  this->HeaderFileExtensions = mf.HeaderFileExtensions;
+  this->DefineFlags = mf.DefineFlags;
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->SourceGroups = mf.SourceGroups;
+#endif
+
+  this->Definitions = mf.Definitions;
+  this->LocalGenerator = mf.LocalGenerator;
+  this->FunctionBlockers = mf.FunctionBlockers;
+  this->DataMap = mf.DataMap;
+  this->MacrosMap = mf.MacrosMap;
+  this->SubDirectoryOrder = mf.SubDirectoryOrder;
+  this->TemporaryDefinitionKey = mf.TemporaryDefinitionKey;
+  this->Properties = mf.Properties;
+  this->PreOrder = mf.PreOrder;
+  this->ListFileStack = mf.ListFileStack;
+}
+
 const char* cmMakefile::GetReleaseVersion()
 {
 #if CMake_VERSION_MINOR & 1

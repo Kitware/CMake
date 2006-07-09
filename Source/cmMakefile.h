@@ -69,6 +69,7 @@ public:
    * Construct an empty makefile.
    */
   cmMakefile();
+  cmMakefile(const cmMakefile& mf);
 
   /**
    * Destructor.
