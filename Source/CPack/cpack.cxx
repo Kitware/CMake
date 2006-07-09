@@ -221,7 +221,7 @@ int main (int argc, char *argv[])
   cmGlobalGenerator cmgg;
   cmgg.SetCMakeInstance(&cminst);
   cmLocalGenerator* cmlg = cmgg.CreateLocalGenerator();
-  cmMakefile* mf = cmlg->GetMakefile();
+  cmMakefile* globalMF = cmlg->GetMakefile();
 
   bool cpackConfigFileSpecified = true;
   if ( cpackConfigFile.empty() )
@@ -247,7 +247,10 @@ int main (int argc, char *argv[])
       {
       cpackConfigFile = 
         cmSystemTools::CollapseFullPath(cpackConfigFile.c_str());
-      if ( !mf->ReadListFile(0, cpackConfigFile.c_str()) )
+      cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
+        "Read CPack configuration file: " << cpackConfigFile.c_str()
+        << std::endl);
+      if ( !globalMF->ReadListFile(0, cpackConfigFile.c_str()) )
         {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
           "Problem reding CPack config file: \""
@@ -265,157 +268,173 @@ int main (int argc, char *argv[])
 
     if ( !generator.empty() )
       {
-      mf->AddDefinition("CPACK_GENERATOR", generator.c_str());
+      globalMF->AddDefinition("CPACK_GENERATOR", generator.c_str());
       }
     if ( !cpackProjectName.empty() )
       {
-      mf->AddDefinition("CPACK_PACKAGE_NAME", cpackProjectName.c_str());
+      globalMF->AddDefinition("CPACK_PACKAGE_NAME", cpackProjectName.c_str());
       }
     if ( !cpackProjectVersion.empty() )
       {
-      mf->AddDefinition("CPACK_PACKAGE_VERSION", cpackProjectVersion.c_str());
+      globalMF->AddDefinition("CPACK_PACKAGE_VERSION", cpackProjectVersion.c_str());
       }
     if ( !cpackProjectVendor.empty() )
       {
-      mf->AddDefinition("CPACK_PACKAGE_VENDOR", cpackProjectVendor.c_str());
+      globalMF->AddDefinition("CPACK_PACKAGE_VENDOR", cpackProjectVendor.c_str());
       }
     if ( !cpackProjectDirectory.empty() )
       {
-      mf->AddDefinition("CPACK_PACKAGE_DIRECTORY",
+      globalMF->AddDefinition("CPACK_PACKAGE_DIRECTORY",
         cpackProjectDirectory.c_str());
       }
     if ( !cpackBuildConfig.empty() )
       {
-      mf->AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
+      globalMF->AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
       }
     cpackDefinitions::MapType::iterator cdit;
     for ( cdit = definitions.Map.begin();
       cdit != definitions.Map.end();
       ++cdit )
       {
-      mf->AddDefinition(cdit->first.c_str(), cdit->second.c_str());
+      globalMF->AddDefinition(cdit->first.c_str(), cdit->second.c_str());
       }
 
-    const char* gen = mf->GetDefinition("CPACK_GENERATOR");
-    if ( !gen )
+    const char* genList = globalMF->GetDefinition("CPACK_GENERATOR");
+    if ( !genList )
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
         "CPack generator not specified" << std::endl);
       parsed = 0;
       }
-    if ( parsed && !mf->GetDefinition("CPACK_PACKAGE_NAME") )
+    std::vector<std::string> generatorsVector;
+    cmSystemTools::ExpandListArgument(genList,
+      generatorsVector);
+    std::vector<std::string>::iterator it;
+    for ( it = generatorsVector.begin();
+      it != generatorsVector.end();
+      ++it )
       {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-        "CPack project name not specified" << std::endl);
-      parsed = 0;
-      }
-    if ( parsed && !(mf->GetDefinition("CPACK_PACKAGE_VERSION")
-        || mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR") &&
-        mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR")
-        && mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH")) )
-      {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-        "CPack project version not specified" << std::endl
-        << "Specify CPACK_PACKAGE_VERSION, or CPACK_PACKAGE_VERSION_MAJOR, "
-        "CPACK_PACKAGE_VERSION_MINOR, and CPACK_PACKAGE_VERSION_PATCH."
-        << std::endl);
-      parsed = 0;
-      }
-    if ( parsed )
-      {
-      cpackGenerator = generators.NewGenerator(gen);
-      if ( !cpackGenerator )
+      const char* gen = it->c_str();
+      cmMakefile newMF(*globalMF);
+      cmMakefile* mf = &newMF;
         {
-        cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-          "Cannot initialize CPack generator: "
-          << generator.c_str() << std::endl);
-        parsed = 0;
+        cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
+          "Specified generator: " << gen << std::endl);
+        if ( parsed && !mf->GetDefinition("CPACK_PACKAGE_NAME") )
+          {
+          cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+            "CPack project name not specified" << std::endl);
+          parsed = 0;
+          }
+        if ( parsed && !(mf->GetDefinition("CPACK_PACKAGE_VERSION")
+            || mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR") &&
+            mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR")
+            && mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH")) )
+          {
+          cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+            "CPack project version not specified" << std::endl
+            << "Specify CPACK_PACKAGE_VERSION, or CPACK_PACKAGE_VERSION_MAJOR, "
+            "CPACK_PACKAGE_VERSION_MINOR, and CPACK_PACKAGE_VERSION_PATCH."
+            << std::endl);
+          parsed = 0;
+          }
+        if ( parsed )
+          {
+          cpackGenerator = generators.NewGenerator(gen);
+          if ( !cpackGenerator )
+            {
+            cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+              "Cannot initialize CPack generator: "
+              << generator.c_str() << std::endl);
+            parsed = 0;
+            }
+          if ( parsed && !cpackGenerator->Initialize(gen, mf, argv[0]) )
+            {
+            cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+              "Cannot initialize the generator" << std::endl);
+            parsed = 0;
+            }
+
+          if ( !mf->GetDefinition("CPACK_INSTALL_COMMANDS") &&
+            !mf->GetDefinition("CPACK_INSTALLED_DIRECTORIES") &&
+            !mf->GetDefinition("CPACK_INSTALL_CMAKE_PROJECTS") )
+            {
+            cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+              "Please specify build tree of the project that uses CMake using "
+              " CPACK_INSTALL_CMAKE_PROJECTS, specify CPACK_INSTALL_COMMANDS, or "
+              "specify CPACK_INSTALLED_DIRECTORIES."
+              << std::endl);
+            parsed = 0;
+            }
+          }
         }
-      if ( parsed && !cpackGenerator->Initialize(gen, mf, argv[0]) )
+
+      if ( !parsed || help )
         {
-        cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-          "Cannot initialize the generator" << std::endl);
-        parsed = 0;
-        }
+        doc.CheckOptions(argc, argv);
+        // Construct and print requested documentation.
+        doc.SetName("cpack");
+        doc.SetNameSection(cmDocumentationName);
+        doc.SetUsageSection(cmDocumentationUsage);
+        doc.SetDescriptionSection(cmDocumentationDescription);
+        doc.SetOptionsSection(cmDocumentationOptions);
 
-      if ( !mf->GetDefinition("CPACK_INSTALL_COMMANDS") &&
-        !mf->GetDefinition("CPACK_INSTALLED_DIRECTORIES") &&
-        !mf->GetDefinition("CPACK_INSTALL_CMAKE_PROJECTS") )
-        {
-        cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-          "Please specify build tree of the project that uses CMake using "
-          " CPACK_INSTALL_CMAKE_PROJECTS, specify CPACK_INSTALL_COMMANDS, or "
-          "specify CPACK_INSTALLED_DIRECTORIES."
-          << std::endl);
-        parsed = 0;
-        }
-      }
-    }
+        std::vector<cmDocumentationEntry> v;
+        cmCPackGenerators::DescriptionsMap::const_iterator generatorIt;
+        for( generatorIt = generators.GetGeneratorsList().begin();
+          generatorIt != generators.GetGeneratorsList().end();
+          ++ generatorIt )
+          {
+          cmDocumentationEntry e;
+          e.name = generatorIt->first.c_str();
+          e.brief = generatorIt->second.c_str();
+          e.full = "";
+          v.push_back(e);
+          }
+        cmDocumentationEntry empty = {0,0,0};
+        v.push_back(empty);
+        doc.SetGeneratorsSection(&v[0]);
 
-  if ( !parsed || help )
-    {
-    doc.CheckOptions(argc, argv);
-    // Construct and print requested documentation.
-    doc.SetName("cpack");
-    doc.SetNameSection(cmDocumentationName);
-    doc.SetUsageSection(cmDocumentationUsage);
-    doc.SetDescriptionSection(cmDocumentationDescription);
-    doc.SetOptionsSection(cmDocumentationOptions);
-
-    std::vector<cmDocumentationEntry> v;
-    cmCPackGenerators::DescriptionsMap::const_iterator generatorIt;
-    for( generatorIt = generators.GetGeneratorsList().begin();
-      generatorIt != generators.GetGeneratorsList().end();
-      ++ generatorIt )
-      {
-      cmDocumentationEntry e;
-      e.name = generatorIt->first.c_str();
-      e.brief = generatorIt->second.c_str();
-      e.full = "";
-      v.push_back(e);
-      }
-    cmDocumentationEntry empty = {0,0,0};
-    v.push_back(empty);
-    doc.SetGeneratorsSection(&v[0]);
-
-    doc.SetSeeAlsoList(cmDocumentationSeeAlso);
+        doc.SetSeeAlsoList(cmDocumentationSeeAlso);
 #undef cout
-    return doc.PrintRequestedDocumentation(std::cout)? 0:1;
+        return doc.PrintRequestedDocumentation(std::cout)? 0:1;
 #define cout no_cout_use_cmCPack_Log
-    }
+        }
 
 #ifdef _WIN32
-  std::string comspec = "cmw9xcom.exe";
-  cmSystemTools::SetWindows9xComspecSubstitute(comspec.c_str());
+      std::string comspec = "cmw9xcom.exe";
+      cmSystemTools::SetWindows9xComspecSubstitute(comspec.c_str());
 #endif
 
-  const char* projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
-  cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "Use generator: "
-    << cpackGenerator->GetNameOfClass() << std::endl);
-  cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "For project: "
-    << projName << std::endl);
+      const char* projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
+      cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "Use generator: "
+        << cpackGenerator->GetNameOfClass() << std::endl);
+      cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "For project: "
+        << projName << std::endl);
 
-  const char* projVersion = mf->GetDefinition("CPACK_PACKAGE_VERSION");
-  if ( !projVersion )
-    {
-    const char* projVersionMajor
-      = mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR");
-    const char* projVersionMinor
-      = mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR");
-    const char* projVersionPatch
-      = mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
-    cmOStringStream ostr;
-    ostr << projVersionMajor << "." << projVersionMinor << "."
-      << projVersionPatch;
-    mf->AddDefinition("CPACK_PACKAGE_VERSION", ostr.str().c_str());
-    }
+      const char* projVersion = mf->GetDefinition("CPACK_PACKAGE_VERSION");
+      if ( !projVersion )
+        {
+        const char* projVersionMajor
+          = mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR");
+        const char* projVersionMinor
+          = mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR");
+        const char* projVersionPatch
+          = mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
+        cmOStringStream ostr;
+        ostr << projVersionMajor << "." << projVersionMinor << "."
+          << projVersionPatch;
+        mf->AddDefinition("CPACK_PACKAGE_VERSION", ostr.str().c_str());
+        }
 
-  int res = cpackGenerator->ProcessGenerator();
-  if ( !res )
-    {
-    cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-      "Error when generating package: " << projName << std::endl);
-    return 1;
+      int res = cpackGenerator->ProcessGenerator();
+      if ( !res )
+        {
+        cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+          "Error when generating package: " << projName << std::endl);
+        return 1;
+        }
+      }
     }
 
   return 0;

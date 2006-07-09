@@ -142,6 +142,7 @@ int cmCPackGenericGenerator::PrepareNames()
     {
     this->SetOptionIfNotSet("CPACK_STRIP_COMMAND", pkgPath.c_str());
     }
+  this->SetOptionIfNotSet("CPACK_REMOVE_TOPLEVEL_DIRECTORY", "1");
 
   return 1;
 }
@@ -150,23 +151,6 @@ int cmCPackGenericGenerator::PrepareNames()
 int cmCPackGenericGenerator::InstallProject()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Install projects" << std::endl);
-  std::vector<cmsys::RegularExpression> ignoreFilesRegex;
-  const char* cpackIgnoreFiles = this->GetOption("CPACK_IGNORE_FILES");
-  if ( cpackIgnoreFiles )
-    {
-    std::vector<std::string> ignoreFilesRegexString;
-    cmSystemTools::ExpandListArgument(cpackIgnoreFiles,
-                                      ignoreFilesRegexString);
-    std::vector<std::string>::iterator it;
-    for ( it = ignoreFilesRegexString.begin();
-      it != ignoreFilesRegexString.end();
-      ++it )
-      {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-        "Create ignore files regex for: " << it->c_str() << std::endl);
-      ignoreFilesRegex.push_back(it->c_str());
-      }
-    }
   this->CleanTemporaryDirectory();
   const char* tempInstallDirectory
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
@@ -178,6 +162,7 @@ int cmCPackGenericGenerator::InstallProject()
       << std::endl);
     return 0;
     }
+
   bool movable = true;
   if ( movable )
     {
@@ -190,9 +175,80 @@ int cmCPackGenericGenerator::InstallProject()
     destDir += tempInstallDirectory;
     cmSystemTools::PutEnv(destDir.c_str());
     }
-  
+
   // If the CPackConfig file sets CPACK_INSTALL_COMMANDS then run them
   // as listed
+  if ( !this->InstallProjectViaInstallCommands(movable, tempInstallDirectory) )
+    {
+    return 0;
+    }
+  
+  // If the CPackConfig file sets CPACK_INSTALLED_DIRECTORIES 
+  // then glob it and copy it to CPACK_TEMPORARY_DIRECTORY
+  // This is used in Source packageing
+  if ( !this->InstallProjectViaInstalledDirectories(movable, tempInstallDirectory) )
+    {
+    return 0;
+    }
+  
+
+  // If the project is a CMAKE project then run pre-install
+  // and then read the cmake_install script to run it
+  if ( !this->InstallProjectViaInstallCMakeProjects(movable, tempInstallDirectory) )
+    {
+    return 0;
+    }
+
+  if ( !movable )
+    {
+    cmSystemTools::PutEnv("DESTDIR=");
+    }
+
+  const char* stripExecutable = this->GetOption("CPACK_STRIP_COMMAND");
+  const char* stripFiles
+    = this->GetOption("CPACK_STRIP_FILES");
+  if ( stripFiles && *stripFiles && stripExecutable && *stripExecutable )
+    {
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Strip files" << std::endl);
+    std::vector<std::string> stripFilesVector;
+    cmSystemTools::ExpandListArgument(stripFiles,
+      stripFilesVector);
+    std::vector<std::string>::iterator it;
+    for ( it = stripFilesVector.begin();
+      it != stripFilesVector.end();
+      ++it )
+      {
+      std::string fileName = tempInstallDirectory;
+      fileName += "/" + *it;
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+        "    Strip file: " << fileName.c_str()
+        << std::endl);
+      std::string stripCommand = stripExecutable;
+      stripCommand += " \"";
+      stripCommand += fileName + "\"";
+      int retVal = 1;
+      std::string output;
+      bool resB = 
+        cmSystemTools::RunSingleCommand(stripCommand.c_str(), &output,
+                                        &retVal, 0, 
+                                        this->GeneratorVerbose, 0);
+      if ( !resB || retVal )
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Problem running install command: " << stripCommand.c_str()
+          << std::endl
+          << "Error was: \"" << output.c_str() << "\""
+          << std::endl);
+        return 0;
+        }
+      }
+    }
+  return res;
+}
+
+//----------------------------------------------------------------------
+int cmCPackGenericGenerator::InstallProjectViaInstallCommands(bool movable, const char* tempInstallDirectory)
+{
   const char* installCommands = this->GetOption("CPACK_INSTALL_COMMANDS");
   if ( installCommands && *installCommands )
     {
@@ -221,15 +277,33 @@ int cmCPackGenericGenerator::InstallProject()
           "Problem running install command: " << it->c_str() << std::endl
           << "Please check " << tmpFile.c_str() << " for errors"
           << std::endl);
-        res = 0;
-        break;
+        return 0;
         }
       }
     }
-  
-  // If the CPackConfig file sets CPACK_INSTALLED_DIRECTORIES 
-  // then glob it and copy it to CPACK_TEMPORARY_DIRECTORY
-  // This is used in Source packageing
+  return 1;
+}
+
+//----------------------------------------------------------------------
+int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(bool movable, const char* tempInstallDirectory)
+{
+  std::vector<cmsys::RegularExpression> ignoreFilesRegex;
+  const char* cpackIgnoreFiles = this->GetOption("CPACK_IGNORE_FILES");
+  if ( cpackIgnoreFiles )
+    {
+    std::vector<std::string> ignoreFilesRegexString;
+    cmSystemTools::ExpandListArgument(cpackIgnoreFiles,
+                                      ignoreFilesRegexString);
+    std::vector<std::string>::iterator it;
+    for ( it = ignoreFilesRegexString.begin();
+      it != ignoreFilesRegexString.end();
+      ++it )
+      {
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+        "Create ignore files regex for: " << it->c_str() << std::endl);
+      ignoreFilesRegex.push_back(it->c_str());
+      }
+    }
   const char* installDirectories
     = this->GetOption("CPACK_INSTALLED_DIRECTORIES");
   if ( installDirectories && *installDirectories )
@@ -304,9 +378,12 @@ int cmCPackGenericGenerator::InstallProject()
         }
       }
     }
+  return 1;
+}
 
-  // If the project is a CMAKE project then run pre-install
-  // and then read the cmake_install script to run it
+//----------------------------------------------------------------------
+int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(bool movable, const char* tempInstallDirectory)
+{
   const char* cmakeProjects
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   const char* cmakeGenerator
@@ -434,96 +511,14 @@ int cmCPackGenericGenerator::InstallProject()
                           installComponent.c_str());
         }
 
-      res = mf->ReadListFile(0, installFile.c_str());
-      if ( cmSystemTools::GetErrorOccuredFlag() )
+      int res = mf->ReadListFile(0, installFile.c_str());
+      if ( cmSystemTools::GetErrorOccuredFlag() || !res )
         {
-        res = 0;
-        }
-      }
-    }
-
-  // ????? 
-  const char* binaryDirectories = this->GetOption("CPACK_BINARY_DIR");
-  if ( binaryDirectories && !cmakeProjects )
-    {
-    std::vector<std::string> binaryDirectoriesVector;
-    cmSystemTools::ExpandListArgument(binaryDirectories,
-      binaryDirectoriesVector);
-    std::vector<std::string>::iterator it;
-    for ( it = binaryDirectoriesVector.begin();
-      it != binaryDirectoriesVector.end();
-      ++it )
-      {
-      std::string installFile = it->c_str();
-      installFile += "/cmake_install.cmake";
-      cmake cm;
-      cmGlobalGenerator gg;
-      gg.SetCMakeInstance(&cm);
-      std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
-      lg->SetGlobalGenerator(&gg);
-      cmMakefile *mf = lg->GetMakefile();
-      if ( movable )
-        {
-        mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
-        }
-      const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
-      if ( buildConfig && *buildConfig )
-        {
-        mf->AddDefinition("BUILD_TYPE", buildConfig);
-        }
-
-      res = mf->ReadListFile(0, installFile.c_str());
-      if ( cmSystemTools::GetErrorOccuredFlag() )
-        {
-        res = 0;
-        }
-      }
-    }
-  if ( !movable )
-    {
-    cmSystemTools::PutEnv("DESTDIR=");
-    }
-
-  const char* stripExecutable = this->GetOption("CPACK_STRIP_COMMAND");
-  const char* stripFiles
-    = this->GetOption("CPACK_STRIP_FILES");
-  if ( stripFiles && *stripFiles && stripExecutable && *stripExecutable )
-    {
-    cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Strip files" << std::endl);
-    std::vector<std::string> stripFilesVector;
-    cmSystemTools::ExpandListArgument(stripFiles,
-      stripFilesVector);
-    std::vector<std::string>::iterator it;
-    for ( it = stripFilesVector.begin();
-      it != stripFilesVector.end();
-      ++it )
-      {
-      std::string fileName = tempInstallDirectory;
-      fileName += "/" + *it;
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-        "    Strip file: " << fileName.c_str()
-        << std::endl);
-      std::string stripCommand = stripExecutable;
-      stripCommand += " \"";
-      stripCommand += fileName + "\"";
-      int retVal = 1;
-      std::string output;
-      bool resB = 
-        cmSystemTools::RunSingleCommand(stripCommand.c_str(), &output,
-                                        &retVal, 0, 
-                                        this->GeneratorVerbose, 0);
-      if ( !resB || retVal )
-        {
-        cmCPackLogger(cmCPackLog::LOG_ERROR,
-          "Problem running install command: " << stripCommand.c_str()
-          << std::endl
-          << "Error was: \"" << output.c_str() << "\""
-          << std::endl);
         return 0;
         }
       }
     }
-  return res;
+  return 1;
 }
 
 //----------------------------------------------------------------------
@@ -557,9 +552,29 @@ void cmCPackGenericGenerator::SetOption(const char* op, const char* value)
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::ProcessGenerator()
 {
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+    "Create package using " << this->Name.c_str() << std::endl);
+
   if ( !this->PrepareNames() )
     {
     return 0;
+    }
+  if ( cmSystemTools::IsOn(this->GetOption("CPACK_REMOVE_TOPLEVEL_DIRECTORY")) )
+    {
+    const char* toplevelDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    if ( cmSystemTools::FileExists(toplevelDirectory) )
+      {
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Remove toplevel directory: "
+        << toplevelDirectory << std::endl);
+      if ( !cmSystemTools::RemoveADirectory(toplevelDirectory) )
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Problem removing toplevel directory: "
+          << toplevelDirectory
+          << std::endl);
+        return 0;
+        }
+      }
     }
   if ( !this->InstallProject() )
     {
@@ -668,7 +683,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
     {
     failures.push_back(this->CPackSelf);
     cmOStringStream msg;
-    msg << "CTEST can not find the command line program ctest.\n";
+    msg << "CPack can not find the command line program ctest.\n";
     msg << "  argv[0] = \"" << arg0 << "\"\n";
     msg << "  Attempted paths:\n";
     std::vector<cmStdString>::iterator i;
@@ -676,7 +691,9 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
       {
       msg << "    \"" << i->c_str() << "\"\n";
       }
-    cmSystemTools::Error(msg.str().c_str());
+    cmCPackLogger(cmCPackLog::LOG_ERROR, msg.str().c_str()
+      << std::endl);
+    return 0;
     }
   std::string dir;
   std::string file;
@@ -708,7 +725,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
       {
       failures.push_back(this->CMakeSelf);
       cmOStringStream msg;
-      msg << "CTEST can not find the command line program cmake.\n";
+      msg << "CPack can not find the command line program cmake.\n";
       msg << "  argv[0] = \"" << arg0 << "\"\n";
       msg << "  Attempted paths:\n";
       std::vector<cmStdString>::iterator i;
@@ -716,7 +733,9 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
         {
         msg << "    \"" << i->c_str() << "\"\n";
         }
-      cmSystemTools::Error(msg.str().c_str());
+      cmCPackLogger(cmCPackLog::LOG_ERROR, msg.str().c_str()
+        << std::endl);
+      return 0;
       }
     }
   // do CMAKE_ROOT, look for the environment variable first
@@ -792,10 +811,12 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // couldn't find modules
-    cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n"
-      "CMake has most likely not been installed correctly.\n"
-      "Modules directory not found in\n",
-      cMakeRoot.c_str());
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Could not find CMAKE_ROOT !!!" << std::endl
+      << "CMake has most likely not been installed correctly." << std::endl
+      <<"Modules directory not found in" << std::endl
+      << cMakeRoot.c_str()
+      << std::endl);
     return 0;
     }
   this->CMakeRoot = cMakeRoot;

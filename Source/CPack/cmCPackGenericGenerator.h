@@ -106,6 +106,15 @@ protected:
   virtual bool ConfigureString(const std::string& input, std::string& output);
   virtual int InitializeInternal();
 
+
+  //! Run install commands if specified
+  virtual int InstallProjectViaInstallCommands(
+    bool movable, const char* tempInstallDirectory);
+  virtual int InstallProjectViaInstalledDirectories(
+    bool movable, const char* tempInstallDirectory);
+  virtual int InstallProjectViaInstallCMakeProjects(
+    bool movable, const char* tempInstallDirectory);
+
   bool GeneratorVerbose;
   std::string Name;
 
