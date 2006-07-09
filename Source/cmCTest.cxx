@@ -1336,6 +1336,12 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       this->ConfigType = args[i];
       cmSystemTools::ReplaceString(this->ConfigType, ".\\", "");
+      if ( !this->ConfigType.empty() )
+        {
+        std::string confTypeEnv
+          = "CMAKE_CONFIG_TYPE=" + this->ConfigType;
+        cmSystemTools::PutEnv(confTypeEnv.c_str());
+        }
       }
 
     if(this->CheckArgument(arg, "--debug"))
