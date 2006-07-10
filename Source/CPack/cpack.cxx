@@ -276,11 +276,13 @@ int main (int argc, char *argv[])
       }
     if ( !cpackProjectVersion.empty() )
       {
-      globalMF->AddDefinition("CPACK_PACKAGE_VERSION", cpackProjectVersion.c_str());
+      globalMF->AddDefinition("CPACK_PACKAGE_VERSION",
+        cpackProjectVersion.c_str());
       }
     if ( !cpackProjectVendor.empty() )
       {
-      globalMF->AddDefinition("CPACK_PACKAGE_VENDOR", cpackProjectVendor.c_str());
+      globalMF->AddDefinition("CPACK_PACKAGE_VENDOR",
+        cpackProjectVendor.c_str());
       }
     if ( !cpackProjectDirectory.empty() )
       {
@@ -333,7 +335,8 @@ int main (int argc, char *argv[])
           {
           cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
             "CPack project version not specified" << std::endl
-            << "Specify CPACK_PACKAGE_VERSION, or CPACK_PACKAGE_VERSION_MAJOR, "
+            << "Specify CPACK_PACKAGE_VERSION, or "
+            "CPACK_PACKAGE_VERSION_MAJOR, "
             "CPACK_PACKAGE_VERSION_MINOR, and CPACK_PACKAGE_VERSION_PATCH."
             << std::endl);
           parsed = 0;
@@ -360,9 +363,10 @@ int main (int argc, char *argv[])
             !mf->GetDefinition("CPACK_INSTALL_CMAKE_PROJECTS") )
             {
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-              "Please specify build tree of the project that uses CMake using "
-              " CPACK_INSTALL_CMAKE_PROJECTS, specify CPACK_INSTALL_COMMANDS, or "
-              "specify CPACK_INSTALLED_DIRECTORIES."
+              "Please specify build tree of the project that uses CMake "
+              "using CPACK_INSTALL_CMAKE_PROJECTS, specify "
+              "CPACK_INSTALL_COMMANDS, or specify "
+              "CPACK_INSTALLED_DIRECTORIES."
               << std::endl);
             parsed = 0;
             }
