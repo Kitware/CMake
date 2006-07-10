@@ -87,12 +87,12 @@ int cmCPackGenericGenerator::PrepareNames()
   this->SetOptionIfNotSet("CPACK_TEMPORARY_DIRECTORY", tempDirectory.c_str());
   this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_NAME", outName.c_str());
   this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_PATH", destFile.c_str());
-  this->SetOptionIfNotSet("CPACK_TEMPORARY_PACKAGE_FILE_NAME", 
+  this->SetOptionIfNotSet("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
                           outFile.c_str());
   this->SetOptionIfNotSet("CPACK_INSTALL_DIRECTORY", this->GetInstallPath());
   this->SetOptionIfNotSet("CPACK_NATIVE_INSTALL_DIRECTORY",
     cmsys::SystemTools::ConvertToOutputPath(this->GetInstallPath()).c_str());
-  this->SetOptionIfNotSet("CPACK_TEMPORARY_INSTALL_DIRECTORY", 
+  this->SetOptionIfNotSet("CPACK_TEMPORARY_INSTALL_DIRECTORY",
                           installPrefix.c_str());
 
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
@@ -178,23 +178,26 @@ int cmCPackGenericGenerator::InstallProject()
 
   // If the CPackConfig file sets CPACK_INSTALL_COMMANDS then run them
   // as listed
-  if ( !this->InstallProjectViaInstallCommands(movable, tempInstallDirectory) )
+  if ( !this->InstallProjectViaInstallCommands(
+      movable, tempInstallDirectory) )
     {
     return 0;
     }
-  
-  // If the CPackConfig file sets CPACK_INSTALLED_DIRECTORIES 
+
+  // If the CPackConfig file sets CPACK_INSTALLED_DIRECTORIES
   // then glob it and copy it to CPACK_TEMPORARY_DIRECTORY
   // This is used in Source packageing
-  if ( !this->InstallProjectViaInstalledDirectories(movable, tempInstallDirectory) )
+  if ( !this->InstallProjectViaInstalledDirectories(
+      movable, tempInstallDirectory) )
     {
     return 0;
     }
-  
+
 
   // If the project is a CMAKE project then run pre-install
   // and then read the cmake_install script to run it
-  if ( !this->InstallProjectViaInstallCMakeProjects(movable, tempInstallDirectory) )
+  if ( !this->InstallProjectViaInstallCMakeProjects(
+      movable, tempInstallDirectory) )
     {
     return 0;
     }
@@ -228,9 +231,9 @@ int cmCPackGenericGenerator::InstallProject()
       stripCommand += fileName + "\"";
       int retVal = 1;
       std::string output;
-      bool resB = 
+      bool resB =
         cmSystemTools::RunSingleCommand(stripCommand.c_str(), &output,
-                                        &retVal, 0, 
+                                        &retVal, 0,
                                         this->GeneratorVerbose, 0);
       if ( !resB || retVal )
         {
@@ -247,8 +250,11 @@ int cmCPackGenericGenerator::InstallProject()
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::InstallProjectViaInstallCommands(bool movable, const char* tempInstallDirectory)
+int cmCPackGenericGenerator::InstallProjectViaInstallCommands(
+  bool movable, const char* tempInstallDirectory)
 {
+  (void)movable;
+  (void)tempInstallDirectory;
   const char* installCommands = this->GetOption("CPACK_INSTALL_COMMANDS");
   if ( installCommands && *installCommands )
     {
@@ -285,8 +291,11 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCommands(bool movable, cons
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(bool movable, const char* tempInstallDirectory)
+int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(
+  bool movable, const char* tempInstallDirectory)
 {
+  (void)movable;
+  (void)tempInstallDirectory;
   std::vector<cmsys::RegularExpression> ignoreFilesRegex;
   const char* cpackIgnoreFiles = this->GetOption("CPACK_IGNORE_FILES");
   if ( cpackIgnoreFiles )
@@ -382,13 +391,14 @@ int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(bool movable,
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(bool movable, const char* tempInstallDirectory)
+int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
+  bool movable, const char* tempInstallDirectory)
 {
   const char* cmakeProjects
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   const char* cmakeGenerator
     = this->GetOption("CPACK_CMAKE_GENERATOR");
-  std::string currentWorkingDirectory = 
+  std::string currentWorkingDirectory =
     cmSystemTools::GetCurrentWorkingDirectory();
   if ( cmakeProjects && *cmakeProjects )
     {
@@ -431,14 +441,14 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(bool movable,
       std::string installFile = installDirectory + "/cmake_install.cmake";
 
       const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
-      cmGlobalGenerator* globalGenerator 
+      cmGlobalGenerator* globalGenerator
         = this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
           cmakeGenerator);
-      // set the global flag for unix style paths on cmSystemTools as 
+      // set the global flag for unix style paths on cmSystemTools as
       // soon as the generator is set.  This allows gmake to be used
       // on windows.
       cmSystemTools::SetForceUnixPaths(globalGenerator->GetForceUnixPaths());
-      
+
       // Does this generator require pre-install?
       if ( globalGenerator->GetPreinstallTargetName() )
         {
@@ -447,7 +457,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(bool movable,
           = this->MakefileMap->GetDefinition("CMAKE_MAKE_PROGRAM");
         std::string buildCommand
           = globalGenerator->GenerateBuildCommand(cmakeMakeProgram,
-            installProjectName.c_str(), 0, 
+            installProjectName.c_str(), 0,
             globalGenerator->GetPreinstallTargetName(),
             buildConfig, false, false);
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
@@ -456,11 +466,11 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(bool movable,
           "- Run preinstall target for: " << installProjectName << std::endl);
         std::string output;
         int retVal = 1;
-        bool resB = 
-          cmSystemTools::RunSingleCommand(buildCommand.c_str(), 
+        bool resB =
+          cmSystemTools::RunSingleCommand(buildCommand.c_str(),
                                           &output,
-                                          &retVal, 
-                                          installDirectory.c_str(), 
+                                          &retVal,
+                                          installDirectory.c_str(),
                                           this->GeneratorVerbose, 0);
         if ( !resB || retVal )
           {
@@ -480,7 +490,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(bool movable,
           }
         }
       delete globalGenerator;
-      
+
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
         "- Install project: " << installProjectName << std::endl);
       cmake cm;
@@ -507,7 +517,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(bool movable,
         = cmSystemTools::LowerCase(installComponent);
       if ( installComponentLowerCase != "all" )
         {
-        mf->AddDefinition("CMAKE_INSTALL_COMPONENT", 
+        mf->AddDefinition("CMAKE_INSTALL_COMPONENT",
                           installComponent.c_str());
         }
 
@@ -559,9 +569,11 @@ int cmCPackGenericGenerator::ProcessGenerator()
     {
     return 0;
     }
-  if ( cmSystemTools::IsOn(this->GetOption("CPACK_REMOVE_TOPLEVEL_DIRECTORY")) )
+  if ( cmSystemTools::IsOn(
+      this->GetOption("CPACK_REMOVE_TOPLEVEL_DIRECTORY")) )
     {
-    const char* toplevelDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    const char* toplevelDirectory
+      = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     if ( cmSystemTools::FileExists(toplevelDirectory) )
       {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Remove toplevel directory: "
@@ -903,9 +915,9 @@ int cmCPackGenericGenerator::CleanTemporaryDirectory()
   const char* tempInstallDirectory
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   if(cmsys::SystemTools::FileExists(tempInstallDirectory))
-    { 
+    {
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-                  "- Clean temporary : " 
+                  "- Clean temporary : "
                   << tempInstallDirectory << std::endl);
     if(!cmsys::SystemTools::RemoveADirectory(tempInstallDirectory))
       {
