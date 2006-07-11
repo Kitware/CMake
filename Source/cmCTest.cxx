@@ -2056,8 +2056,11 @@ void cmCTest::PopulateCustomInteger(cmMakefile* mf, const char* def, int& val)
 std::string cmCTest::GetShortPathToFile(const char* cfname)
 {
   const std::string& sourceDir
-    = this->GetCTestConfiguration("SourceDirectory");
-  const std::string& buildDir = this->GetCTestConfiguration("BuildDirectory");
+    = cmSystemTools::CollapseFullPath(
+        this->GetCTestConfiguration("SourceDirectory"));
+  const std::string& buildDir
+    = cmSystemTools::CollapseFullPath(
+        this->GetCTestConfiguration("BuildDirectory"));
   std::string fname = cmSystemTools::CollapseFullPath(cfname);
 
   // Find relative paths to both directories

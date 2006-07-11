@@ -72,6 +72,7 @@ public:
 //----------------------------------------------------------------------
 bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
 {
+#undef cout
   if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
@@ -79,9 +80,11 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
     }
   std::vector<std::string>::const_iterator it;
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  std::cout << __LINE__ << " Current directory: " << cwd.c_str() << std::endl;
   for ( it = args.begin(); it != args.end(); ++ it )
     {
     cmSystemTools::ChangeDirectory(cwd.c_str());
+    std::cout << __LINE__ << " Current directory: " << cwd.c_str() << std::endl;
     std::string fname = cwd;
     fname += "/";
     fname += *it;
@@ -92,6 +95,7 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
       continue;
       }
     cmSystemTools::ChangeDirectory(fname.c_str());
+    std::cout << __LINE__ << " Current directory: " << fname.c_str() << std::endl;
     const char* testFilename;
     if( cmSystemTools::FileExists("CTestTestfile.cmake") )
       {
@@ -1655,6 +1659,7 @@ bool cmCTestTestHandler::SetTestsProperties(
 bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
 {
   const std::string& testname = args[0];
+  cmCTestLog(this->CTest, ERROR_MESSAGE, "Add test: " << args[0] << std::endl);
   if (this->UseExcludeRegExpFlag &&
     this->UseExcludeRegExpFirst &&
     this->ExcludeTestsRegularExpression.find(testname.c_str()))
@@ -1706,6 +1711,8 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.Name = testname;
   test.Args = args;
   test.Directory = cmSystemTools::GetCurrentWorkingDirectory();
+  cmCTestLog(this->CTest, ERROR_MESSAGE, "Set test directory: " << test.Directory << std::endl);
+  
   test.IsInBasedOnREOptions = true;
   test.WillFail = false;
   if (this->UseIncludeRegExpFlag &&

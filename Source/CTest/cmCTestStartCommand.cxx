@@ -77,8 +77,10 @@ bool cmCTestStartCommand::InitialPass(
     return false;
     }
   this->CTest->EmptyCTestConfiguration();
-  this->CTest->SetCTestConfiguration("SourceDirectory", src_dir);
-  this->CTest->SetCTestConfiguration("BuildDirectory", bld_dir);
+  this->CTest->SetCTestConfiguration("SourceDirectory",
+    cmSystemTools::CollapseFullPath(src_dir).c_str());
+  this->CTest->SetCTestConfiguration("BuildDirectory",
+    cmSystemTools::CollapseFullPath(bld_dir).c_str());
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "Run dashboard with model "
     << smodel << std::endl

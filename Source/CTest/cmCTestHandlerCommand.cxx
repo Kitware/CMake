@@ -58,24 +58,28 @@ bool cmCTestHandlerCommand::InitialPass(
   if ( this->Values[ct_BUILD] )
     {
     this->CTest->SetCTestConfiguration("BuildDirectory",
-      this->Values[ct_BUILD]);
+      cmSystemTools::CollapseFullPath(
+        this->Values[ct_BUILD]).c_str());
     }
   else
     {
     this->CTest->SetCTestConfiguration("BuildDirectory",
-      this->Makefile->GetDefinition("CTEST_BINARY_DIRECTORY"));
+      cmSystemTools::CollapseFullPath(
+        this->Makefile->GetDefinition("CTEST_BINARY_DIRECTORY")).c_str());
     }
   if ( this->Values[ct_SOURCE] )
     {
     cmCTestLog(this->CTest, DEBUG,
       "Set source directory to: " << this->Values[ct_SOURCE] << std::endl);
     this->CTest->SetCTestConfiguration("SourceDirectory",
-      this->Values[ct_SOURCE]);
+      cmSystemTools::CollapseFullPath(
+        this->Values[ct_SOURCE]).c_str());
     }
   else
     {
     this->CTest->SetCTestConfiguration("SourceDirectory",
-      this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY"));
+      cmSystemTools::CollapseFullPath(
+        this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY")).c_str());
     }
   if ( this->Values[ct_SUBMIT_INDEX] )
     {
