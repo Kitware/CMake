@@ -434,8 +434,6 @@ cmMakefileTargetGenerator
   std::vector<std::string> commands;
 
   // add in a progress call if needed
-  cmGlobalUnixMakefileGenerator3* gg =
-    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   std::string progressDir = this->Makefile->GetHomeOutputDirectory();
   progressDir += cmake::GetCMakeFilesDirectory();
   cmOStringStream progCmd;
