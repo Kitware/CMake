@@ -17,7 +17,7 @@
 #ifndef cmLocalVisualStudio7Generator_h
 #define cmLocalVisualStudio7Generator_h
 
-#include "cmLocalGenerator.h"
+#include "cmLocalVisualStudioGenerator.h"
 
 class cmMakeDepend;
 class cmTarget;
@@ -27,12 +27,12 @@ class cmSourceGroup;
 struct cmVS7FlagTable;
 
 /** \class cmLocalVisualStudio7Generator
- * \brief Write a LocalUnix makefiles.
+ * \brief Write Visual Studio .NET project files.
  *
- * cmLocalVisualStudio7Generator produces a LocalUnix makefile from its
- * member Makefile.
+ * cmLocalVisualStudio7Generator produces a Visual Studio .NET project
+ * file for each target in its directory.
  */
-class cmLocalVisualStudio7Generator : public cmLocalGenerator
+class cmLocalVisualStudio7Generator : public cmLocalVisualStudioGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.

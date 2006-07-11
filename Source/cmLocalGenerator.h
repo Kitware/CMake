@@ -254,6 +254,10 @@ protected:
     std::ostream& os, const char* config,
     std::vector<std::string> const& configurationTypes);
 
+  // Compute object file names.
+  std::string GetObjectFileNameWithoutTarget(const cmSourceFile& source);
+  std::string& CreateSafeUniqueObjectFileName(const char* sin);
+
   cmMakefile *Makefile;
   cmGlobalGenerator *GlobalGenerator;
   // members used for relative path function ConvertToMakefilePath
@@ -267,6 +271,7 @@ protected:
   cmLocalGenerator* Parent;
   std::vector<cmLocalGenerator*> Children;
   std::map<cmStdString, cmStdString> LanguageToIncludeFlags;
+  std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
   bool WindowsShell;
   bool ForceUnixPath;
   bool UseRelativePaths;

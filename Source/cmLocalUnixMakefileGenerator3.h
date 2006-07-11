@@ -168,7 +168,6 @@ public:
 
   static std::string ConvertToQuotedOutputPath(const char* p);
 
-  std::string& CreateSafeUniqueObjectFileName(const char* sin);
   std::string CreateMakeVariable(const char* sin, const char* s2in);
 
   // cleanup the name of a potential target
@@ -326,7 +325,6 @@ private:
   std::vector<cmMakefileTargetGenerator *> TargetGenerators;
   std::map<cmStdString, cmStdString> MakeVariableMap;
   std::map<cmStdString, cmStdString> ShortMakeVariableMap;
-  std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
 };
 
 #endif

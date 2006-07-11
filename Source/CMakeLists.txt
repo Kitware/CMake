@@ -205,6 +205,8 @@ IF (WIN32)
       cmLocalVisualStudio6Generator.h
       cmLocalVisualStudio7Generator.cxx
       cmLocalVisualStudio7Generator.h
+      cmLocalVisualStudioGenerator.cxx
+      cmLocalVisualStudioGenerator.h
       cmWin32ProcessExecution.cxx
       cmWin32ProcessExecution.h
       )

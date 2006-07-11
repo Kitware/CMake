@@ -1012,6 +1012,9 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     sourceGroup.AssignSource(*i);
     }
 
+  // Compute which sources need unique object computation.
+  this->ComputeObjectNameRequirements(sourceGroups);
+
   // open the project
   this->WriteProjectStart(fout, libName, target, sourceGroups);
   // write the configuration information
@@ -1064,12 +1067,9 @@ void cmLocalVisualStudio7Generator
     const cmCustomCommand *command = (*sf)->GetCustomCommand();
     std::string compileFlags;
     std::string additionalDeps;
-    objectName = (*sf)->GetSourceName();
-    if(!(*sf)->GetPropertyAsBool("HEADER_FILE_ONLY" )
-       && objectName.find("/") != objectName.npos)
+    if(this->NeedObjectName.find(*sf) != this->NeedObjectName.end())
       {
-      cmSystemTools::ReplaceString(objectName, "/", "_");
-      objectName += ".obj";
+      objectName = this->GetObjectFileNameWithoutTarget(*(*sf));
       }
     else
       {
