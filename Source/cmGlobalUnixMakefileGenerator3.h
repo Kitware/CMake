@@ -123,11 +123,10 @@ public:
    const char *targetName,
    const char* config, bool ignoreErrors, bool fast);
 
-  // returns true if a progress rule should be added
-  int ShouldAddProgressRule();
-  int GetNumberOfCompilableSourceFilesForTarget(cmTarget &tgt);
-  int GetTargetTotalNumberOfProgressFiles(cmTarget& target);
-  int GetNumberOfSourceFiles() { return this->NumberOfSourceFiles; };
+  // returns some progress informaiton
+  int GetTargetTotalNumberOfActions(cmTarget& target);
+  unsigned long GetNumberOfProgressActionsInAll
+  (cmLocalUnixMakefileGenerator3 *lg);
 
   // what targets does the specified target depend on
   std::vector<cmTarget *>& GetTargetDepends(cmTarget& target);
@@ -182,9 +181,6 @@ protected:
 
   typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
-
-  int NumberOfSourceFiles;
-  int NumberOfSourceFilesWritten;
 
   std::map<cmStdString, std::vector<cmTarget *> > TargetDependencies;
   std::map<cmStdString, int > TargetSourceFileCount;

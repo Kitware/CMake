@@ -33,6 +33,7 @@
 cmMakefileTargetGenerator::cmMakefileTargetGenerator()
 {
   this->BuildFileStream = 0;
+  this->ProgressFileStream = 0;
   this->InfoFileStream = 0;
   this->FlagFileStream = 0;
 }
@@ -84,6 +85,22 @@ void cmMakefileTargetGenerator::CreateRuleFile()
   this->BuildFileName += "/build.make";
   this->BuildFileNameFull = this->TargetBuildDirectoryFull;
   this->BuildFileNameFull += "/build.make";
+
+  // Construct the rule file name.
+  this->ProgressFileName = this->TargetBuildDirectory;
+  this->ProgressFileName += "/progress.make";
+  this->ProgressFileNameFull = this->TargetBuildDirectoryFull;
+  this->ProgressFileNameFull += "/progress.make";
+
+  this->ProgressFileStream = 
+    new cmGeneratedFileStream(this->ProgressFileNameFull.c_str());
+  if(!this->ProgressFileStream)
+    {
+    return;
+    }
+
+  // reset the progress count
+  this->NumberOfProgressActions = 0;
 
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
@@ -174,8 +191,17 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     << "# Include any dependencies generated for this target.\n"
     << this->LocalGenerator->IncludeDirective << " "
     << this->Convert(dependFileNameFull.c_str(),
-                                     cmLocalGenerator::HOME_OUTPUT,
-                                     cmLocalGenerator::MAKEFILE)
+                     cmLocalGenerator::HOME_OUTPUT,
+                     cmLocalGenerator::MAKEFILE)
+    << "\n\n";
+  
+  // Include the progress variables for the target.
+  *this->BuildFileStream
+    << "# Include the progress variables for this target.\n"
+    << this->LocalGenerator->IncludeDirective << " "
+    << this->Convert(this->ProgressFileNameFull.c_str(),
+                     cmLocalGenerator::HOME_OUTPUT,
+                     cmLocalGenerator::MAKEFILE)
     << "\n\n";
 
   // make sure the depend file exists
@@ -410,8 +436,6 @@ cmMakefileTargetGenerator
   // add in a progress call if needed
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  int prog = gg->ShouldAddProgressRule();
-
   std::string progressDir = this->Makefile->GetHomeOutputDirectory();
   progressDir += cmake::GetCMakeFilesDirectory();
   cmOStringStream progCmd;
@@ -419,12 +443,10 @@ cmMakefileTargetGenerator
   progCmd << this->LocalGenerator->Convert(progressDir.c_str(),
                                            cmLocalGenerator::FULL,
                                            cmLocalGenerator::SHELL);
-  if (prog)
-    {
-    progCmd << " " << prog;
-    this->LocalGenerator->ProgressFiles[this->Target->GetName()].
-      push_back(prog);
-    }
+  this->NumberOfProgressActions++;
+  progCmd << " $(CMAKE_PROGRESS_" 
+          << this->NumberOfProgressActions 
+          << ")";
   commands.push_back(progCmd.str());
 
   std::string buildEcho = "Building ";
@@ -1031,3 +1053,33 @@ void cmMakefileTargetGenerator::RemoveForbiddenFlags(const char* flagVar,
     cmSystemTools::ReplaceString(linkFlags, i->c_str(), "");
     }
 }
+
+void cmMakefileTargetGenerator::WriteProgressVariables(unsigned long total,
+                                                       unsigned long &current)
+{
+  unsigned long num;
+  unsigned long i;
+  for (i = 1; i <= this->NumberOfProgressActions; ++i)
+    {
+    *this->ProgressFileStream
+      << "CMAKE_PROGRESS_" << i << " = ";
+    if (total <= 100)
+      {
+      num = i + current;
+      *this->ProgressFileStream << num;
+      this->LocalGenerator->ProgressFiles[this->Target->GetName()]
+        .push_back(num);
+      }
+    else if (((i+current)*100)/total > ((i-1+current)*100)/total)
+      {
+      num = ((i+current)*100)/total;
+      *this->ProgressFileStream << num;
+      this->LocalGenerator->ProgressFiles[this->Target->GetName()]
+        .push_back(num);
+      }
+    *this->ProgressFileStream << "\n";
+    }
+  current += this->NumberOfProgressActions;
+  delete this->ProgressFileStream;
+}
+

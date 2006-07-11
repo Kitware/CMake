@@ -29,8 +29,6 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
   this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeUnixFindMake.cmake";
   this->ToolSupportsColor = true;
-  this->NumberOfSourceFiles = 0;
-  this->NumberOfSourceFilesWritten = 0;
 #ifdef _WIN32
   this->UseLinkScript = false;
 #else
@@ -118,87 +116,39 @@ cmGlobalUnixMakefileGenerator3
   this->MultipleOutputPairs.insert(p);
 }
 
-//----------------------------------------------------------------------------
-int cmGlobalUnixMakefileGenerator3::ShouldAddProgressRule() 
-{
-  // add progress to 100 source files
-  if (this->NumberOfSourceFiles && 
-      (((this->NumberOfSourceFilesWritten + 1)*100)/this->NumberOfSourceFiles)
-      -(this->NumberOfSourceFilesWritten*100)/this->NumberOfSourceFiles)
-    {
-    this->NumberOfSourceFilesWritten++;    
-    return (this->NumberOfSourceFilesWritten*100)/this->NumberOfSourceFiles;
-    }
-  this->NumberOfSourceFilesWritten++;
-  return 0;
-}
-
-int cmGlobalUnixMakefileGenerator3::
-GetNumberOfCompilableSourceFilesForTarget(cmTarget &tgt)
-{
-  std::map<cmStdString, int >::iterator tgtI = 
-    this->TargetSourceFileCount.find(tgt.GetName());
-  if (tgtI != this->TargetSourceFileCount.end())
-    {
-    return tgtI->second;
-    }
-  
-  int result = 0;
-  
-  if((tgt.GetType() == cmTarget::EXECUTABLE) ||
-     (tgt.GetType() == cmTarget::STATIC_LIBRARY) ||
-     (tgt.GetType() == cmTarget::SHARED_LIBRARY) ||
-     (tgt.GetType() == cmTarget::MODULE_LIBRARY) )
-    {
-    std::vector<cmSourceFile*>& sources = tgt.GetSourceFiles();
-    for(std::vector<cmSourceFile*>::iterator source = sources.begin();
-        source != sources.end(); ++source)
-      {
-      if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY") &&
-         !(*source)->GetCustomCommand())
-        {
-        if(!this->IgnoreFile((*source)->GetSourceExtension().c_str()))
-          {
-          const char* lang = 
-            static_cast<cmLocalUnixMakefileGenerator3 *>
-            (tgt.GetMakefile()->GetLocalGenerator())
-            ->GetSourceFileLanguage(**source);
-          if(lang)
-            {
-            result++;
-            }
-          }
-        }
-      }
-    }
-  this->TargetSourceFileCount[tgt.GetName()] = result;
-  return result;
-}
-
 
 //----------------------------------------------------------------------------
 void cmGlobalUnixMakefileGenerator3::Generate() 
 {
-  // initialize progress
-  this->NumberOfSourceFiles = 0;
-  unsigned int i;
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    // for all of out targets
-    for (cmTargets::iterator l = 
-           this->LocalGenerators[i]->GetMakefile()->GetTargets().begin();
-         l != this->LocalGenerators[i]->GetMakefile()->GetTargets().end(); 
-         l++)
-      {
-      this->NumberOfSourceFiles += 
-        this->GetNumberOfCompilableSourceFilesForTarget(l->second);
-      }
-    }
-  this->NumberOfSourceFilesWritten = 0;
-
   // first do superclass method
   this->cmGlobalGenerator::Generate();
 
+  // initialize progress
+  unsigned int i;
+  unsigned long total = 0;
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmLocalUnixMakefileGenerator3 *lg = 
+      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
+    total += lg->GetNumberOfProgressActions();
+    }
+
+  // write each target's progress.make
+  unsigned long current = 0;
+  for (i = 1; i < this->LocalGenerators.size(); ++i)
+    {
+    cmLocalUnixMakefileGenerator3 *lg = 
+      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
+    lg->WriteProgressVariables(total,current);
+    }
+  // write the top one last to get the total count
+  if (this->LocalGenerators.size())
+    {
+    cmLocalUnixMakefileGenerator3 *lg = 
+      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[0]);
+    lg->WriteProgressVariables(total,current);
+    }
+  
   // write the main makefile
   this->WriteMainMakefile2();
   this->WriteMainCMakefile();
@@ -869,7 +819,7 @@ cmGlobalUnixMakefileGenerator3
                                cmLocalGenerator::SHELL);
         //
         progCmd << " " 
-                << this->GetTargetTotalNumberOfProgressFiles(t->second);
+                << this->GetTargetTotalNumberOfActions(t->second);
         commands.push_back(progCmd.str());
         }
         std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
@@ -940,7 +890,7 @@ cmGlobalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 int cmGlobalUnixMakefileGenerator3
-::GetTargetTotalNumberOfProgressFiles(cmTarget& target)
+::GetTargetTotalNumberOfActions(cmTarget& target)
 {
   cmLocalUnixMakefileGenerator3 *lg = 
     static_cast<cmLocalUnixMakefileGenerator3 *>
@@ -951,9 +901,51 @@ int cmGlobalUnixMakefileGenerator3
   std::vector<cmTarget *>::iterator i;
   for (i = depends.begin(); i != depends.end(); ++i)
     {
-    result += this->GetTargetTotalNumberOfProgressFiles(**i);
+    result += this->GetTargetTotalNumberOfActions(**i);
     }
   
+  return result;
+}
+
+unsigned long cmGlobalUnixMakefileGenerator3::
+GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
+{
+  unsigned long result = 0;
+
+  // for every target in the top level all
+  if (!lg->GetParent())
+    {
+    // loop over the generators and targets
+    unsigned int i;
+    cmLocalUnixMakefileGenerator3 *lg3;
+    for (i = 0; i < this->LocalGenerators.size(); ++i)
+      {
+      lg3 = static_cast<cmLocalUnixMakefileGenerator3 *>
+        (this->LocalGenerators[i]);
+      // for each target Generate the rule files for each target.
+      cmTargets& targets = lg3->GetMakefile()->GetTargets();
+      for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
+        {
+        if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+           (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+           (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+           (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+           (t->second.GetType() == cmTarget::UTILITY))
+          {
+          if (t->second.IsInAll())
+            {
+            std::vector<int> &progFiles = lg3->ProgressFiles[t->first];
+            result += progFiles.size();
+            }
+          }
+        }
+      }
+    }
+  else
+    {
+    // TODO: would be nice to report progress for subdir "all" targets
+    return 0;
+    }
   return result;
 }
 

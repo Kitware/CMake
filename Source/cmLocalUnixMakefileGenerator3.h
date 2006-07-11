@@ -78,6 +78,9 @@ public:
   // write the main variables used by the makefiles
   void WriteMakeVariables(std::ostream& makefileStream);
 
+  // write the progress variables used by the makefiles
+  void WriteProgressVariables(unsigned long total, unsigned long &current);
+
   /**
    * If true, then explicitly pass MAKEFLAGS on the make all target for makes
    * that do not use environment variables.
@@ -207,6 +210,10 @@ public:
   
   std::map<cmStdString,std::vector<cmTarget *> > GetLocalObjectFiles()
     { return this->LocalObjectFiles;}
+
+  // return info about progress actions
+  unsigned long GetNumberOfProgressActions();
+  unsigned long GetNumberOfProgressActionsForTarget(const char *);
 
 protected:
   // these two methods just compute reasonable values for LibraryOutputPath
