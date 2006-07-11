@@ -359,6 +359,9 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
         }
       }
     }
+
+  // Compute which sources need unique object computation.
+  this->ComputeObjectNameRequirements(sourceGroups);
   
   // Write the DSP file's header.
   this->WriteDSPHeader(fout, libName, target, sourceGroups);
@@ -404,6 +407,13 @@ void cmLocalVisualStudio6Generator
       (*sf)->GetCustomCommand();
     std::string compileFlags;
     std::vector<std::string> depends;
+    std::string objectNameDir;
+    if(this->NeedObjectName.find(*sf) != this->NeedObjectName.end())
+      {
+      objectNameDir =
+        cmSystemTools::GetFilenamePath(
+          this->GetObjectFileNameWithoutTarget(*(*sf)));
+      }
 
     // Add per-source file flags.
     if(const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS"))
@@ -464,7 +474,7 @@ void cmLocalVisualStudio6Generator
                               comment.c_str(), command->GetDepends(),
                               command->GetOutputs(), flags);
         }
-      else if(compileFlags.size())
+      else if(!compileFlags.empty() || !objectNameDir.empty())
         {
         for(std::vector<std::string>::iterator i
               = this->Configurations.begin(); 
@@ -478,7 +488,22 @@ void cmLocalVisualStudio6Generator
             {
             fout << "!ELSEIF  \"$(CFG)\" == " << i->c_str() << std::endl;
             }
-          fout << "\n# ADD CPP " << compileFlags << "\n\n";
+          if(!compileFlags.empty())
+            {
+            fout << "\n# ADD CPP " << compileFlags << "\n\n";
+            }
+          if(!objectNameDir.empty())
+            {
+            // Strip the subdirectory name out of the configuration name.
+            std::string config = *i;
+            std::string::size_type pos = config.find_last_of(" ");
+            config = config.substr(pos+1, std::string::npos);
+            config = config.substr(0, config.size()-1);
+
+            // Setup an alternate object file directory.
+            fout << "\n# PROP Intermediate_Dir \""
+                 << config << "/" << objectNameDir << "\"\n\n";
+            }
           } 
         fout << "!ENDIF\n\n";
         }
