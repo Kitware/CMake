@@ -2057,10 +2057,10 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
 {
   const std::string& sourceDir
     = cmSystemTools::CollapseFullPath(
-        this->GetCTestConfiguration("SourceDirectory"));
+        this->GetCTestConfiguration("SourceDirectory").c_str());
   const std::string& buildDir
     = cmSystemTools::CollapseFullPath(
-        this->GetCTestConfiguration("BuildDirectory"));
+        this->GetCTestConfiguration("BuildDirectory").c_str());
   std::string fname = cmSystemTools::CollapseFullPath(cfname);
 
   // Find relative paths to both directories
