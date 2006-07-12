@@ -133,20 +133,25 @@ void cmGlobalUnixMakefileGenerator3::Generate()
     total += lg->GetNumberOfProgressActions();
     }
 
-  // write each target's progress.make
+  // write each target's progress.make this loop is done twice. Bascially the
+  // Generate pass counts all the actions, the first loop below determines
+  // how many actions have progress updates for each target and writes to
+  // corrrect variable values for everything except the all targets. The
+  // second loop actually writes out correct values for the all targets as
+  // well. This is because the all targets require more information that is
+  // computed in the first loop.
   unsigned long current = 0;
-  for (i = 1; i < this->LocalGenerators.size(); ++i)
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
     cmLocalUnixMakefileGenerator3 *lg = 
       static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
     lg->WriteProgressVariables(total,current);
     }
-  // write the top one last to get the total count
-  if (this->LocalGenerators.size())
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
     cmLocalUnixMakefileGenerator3 *lg = 
-      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[0]);
-    lg->WriteProgressVariables(total,current);
+      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
+    lg->WriteAllProgressVariable();
     }
   
   // write the main makefile
@@ -935,7 +940,7 @@ GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
           if (t->second.IsInAll())
             {
             std::vector<int> &progFiles = lg3->ProgressFiles[t->first];
-            result += progFiles.size();
+            result += static_cast<unsigned long>(progFiles.size());
             }
           }
         }
@@ -943,8 +948,61 @@ GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
     }
   else
     {
-    // TODO: would be nice to report progress for subdir "all" targets
-    return 0;
+    std::deque<cmLocalUnixMakefileGenerator3 *> lg3Stack;
+    lg3Stack.push_back(lg);
+    std::vector<cmStdString> targetsInAll;
+    std::set<cmTarget *> targets;
+    while (lg3Stack.size())
+      {
+      cmLocalUnixMakefileGenerator3 *lg3 = lg3Stack.front();
+      lg3Stack.pop_front();
+      for(cmTargets::iterator l = lg3->GetMakefile()->GetTargets().begin();
+          l != lg3->GetMakefile()->GetTargets().end(); ++l)
+        {
+        if((l->second.GetType() == cmTarget::EXECUTABLE) ||
+           (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+           (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+           (l->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+           (l->second.GetType() == cmTarget::UTILITY))
+          {
+          // Add this to the list of depends rules in this directory.
+          if (l->second.IsInAll() && 
+              targets.find(&l->second) == targets.end())
+            {
+            std::deque<cmTarget *> activeTgts;
+            activeTgts.push_back(&(l->second));
+            // trace depth of target dependencies
+            while (activeTgts.size())
+              {
+              if (targets.find(activeTgts.front()) == targets.end())
+                {
+                targets.insert(activeTgts.front());
+                cmLocalUnixMakefileGenerator3 *lg4 = 
+                  static_cast<cmLocalUnixMakefileGenerator3 *>
+                  (activeTgts.front()->GetMakefile()->GetLocalGenerator());
+                std::vector<int> &progFiles2 = 
+                  lg4->ProgressFiles[activeTgts.front()->GetName()];
+                result += progFiles2.size();
+                std::vector<cmTarget *> deps2 = 
+                  this->GetTargetDepends(*activeTgts.front());
+                activeTgts.insert(activeTgts.end(),deps2.begin(),deps2.end());
+                }
+              activeTgts.pop_front();
+              }
+            }
+          }
+        }
+      
+      // The directory-level rule depends on the directory-level
+      // rules of the subdirectories.
+      for(std::vector<cmLocalGenerator*>::iterator sdi = 
+            lg3->GetChildren().begin(); sdi != lg3->GetChildren().end(); ++sdi)
+        {
+        cmLocalUnixMakefileGenerator3* slg =
+          static_cast<cmLocalUnixMakefileGenerator3*>(*sdi);
+        lg3Stack.push_back(slg);
+        }
+      }
     }
   return result;
 }

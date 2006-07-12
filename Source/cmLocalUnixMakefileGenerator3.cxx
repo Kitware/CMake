@@ -150,7 +150,10 @@ void cmLocalUnixMakefileGenerator3
     delete *mtgIter;
     }  
   this->TargetGenerators.clear();
+}
 
+void cmLocalUnixMakefileGenerator3::WriteAllProgressVariable()
+{
   // write the top level progress for the all target
   std::string progressFileNameFull = 
     this->ConvertToFullPath("progress.make");
@@ -1447,7 +1450,7 @@ void cmLocalUnixMakefileGenerator3
     progCmd << this->Convert(progressDir.c_str(),
                              cmLocalGenerator::FULL,
                              cmLocalGenerator::SHELL);
-    progCmd << " $(CMAKE_ALL_PROGRESS)\n";
+    progCmd << " $(CMAKE_ALL_PROGRESS)";
     commands.push_back(progCmd.str());
     }
   std::string mf2Dir = cmake::GetCMakeFilesDirectoryPostSlash();
@@ -1457,7 +1460,6 @@ void cmLocalUnixMakefileGenerator3
   this->CreateCDCommand(commands,
                         this->Makefile->GetHomeOutputDirectory(),
                         this->Makefile->GetStartOutputDirectory());
-  if (!this->Parent)
     {
     cmOStringStream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0

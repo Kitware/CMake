@@ -80,6 +80,7 @@ public:
 
   // write the progress variables used by the makefiles
   void WriteProgressVariables(unsigned long total, unsigned long &current);
+  void WriteAllProgressVariable();
 
   /**
    * If true, then explicitly pass MAKEFLAGS on the make all target for makes
