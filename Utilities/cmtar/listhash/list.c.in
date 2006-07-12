@@ -434,7 +434,8 @@ int
 /*
 ** @LISTHASH_PREFIX@_list_merge() - merge two lists into a new list
 */
-@LISTHASH_PREFIX@_list_t *
+/*
+static @LISTHASH_PREFIX@_list_t *
 @LISTHASH_PREFIX@_list_merge(@LISTHASH_PREFIX@_cmpfunc_t cmpfunc, int flags,
            @LISTHASH_PREFIX@_list_t *list1,
            @LISTHASH_PREFIX@_list_t *list2)
@@ -453,5 +454,6 @@ int
 
   return newlist;
 }
+*/
 
 

@@ -704,7 +704,7 @@ void RegistryHelper::SetSubKey(const char* sk)
 //----------------------------------------------------------------------------
 char *RegistryHelper::Strip(char *str)
 {
-  int cc;
+  size_t cc;
   size_t len;
   char *nstr;
   if ( !str )
@@ -713,7 +713,7 @@ char *RegistryHelper::Strip(char *str)
     }
   len = strlen(str);
   nstr = str;
-  for( cc=0; cc<(int)len; cc++ )
+  for( cc=0; cc < len; cc++ )
     {
     if ( !isspace( *nstr ) )
       {
@@ -721,7 +721,7 @@ char *RegistryHelper::Strip(char *str)
       }
     nstr ++;
     }
-  for( cc=int(strlen(nstr)-1); cc>=0; cc-- )
+  for( cc= strlen(nstr)-1; cc>=0; cc-- )
     {
     if ( !isspace( nstr[cc] ) )
       {

@@ -237,10 +237,10 @@ SystemTools::GetTime(void)
   struct timeval t;
 #ifdef GETTIMEOFDAY_NO_TZ
   if (gettimeofday(&t) == 0)
-    return (double)t.tv_sec + t.tv_usec*0.000001;
+    return static_cast<double>(t.tv_sec) + t.tv_usec*0.000001;
 #else /* !GETTIMEOFDAY_NO_TZ */
-  if (gettimeofday(&t, (struct timezone *)NULL) == 0)
-    return (double)t.tv_sec + t.tv_usec*0.000001;
+  if (gettimeofday(&t, static_cast<struct timezone *>(NULL)) == 0)
+    return static_cast<double>(t.tv_sec) + t.tv_usec*0.000001;
 #endif /* !GETTIMEOFDAY_NO_TZ */
   }
 #endif /* !HAVE_GETTIMEOFDAY */
@@ -248,11 +248,12 @@ SystemTools::GetTime(void)
 #if defined(HAVE_FTIME)
   struct TIMEB t;
   ::FTIME(&t);
-  return (double)t.time + (double)t.millitm * (double)0.001;
+  return static_cast<double>(t.time) +
+    static_cast<double>(t.millitm) * static_cast<double>(0.001);
 #else /* !HAVE_FTIME */
   time_t secs;
   time(&secs);
-  return (double)secs;
+  return static_cast<double>(secs);
 #endif /* !HAVE_FTIME */
   }
 }
@@ -1246,7 +1247,7 @@ int SystemTools::EstimateFormatLength(const char *format, va_list ap)
       }
     }
   
-  return (int)length;
+  return static_cast<int>(length);
 }
 
 kwsys_stl::string SystemTools::EscapeChars(

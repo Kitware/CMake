@@ -513,7 +513,7 @@ const char* CommandLineArguments::GetArgv0()
 //----------------------------------------------------------------------------
 unsigned int CommandLineArguments::GetLastArgument()
 {
-  return (unsigned int)this->Internals->LastArgument + 1;
+  return static_cast<unsigned int>(this->Internals->LastArgument + 1);
 }
 
 //----------------------------------------------------------------------------
