@@ -985,7 +985,11 @@ GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
                 result += progFiles2.size();
                 std::vector<cmTarget *> deps2 = 
                   this->GetTargetDepends(*activeTgts.front());
-                activeTgts.insert(activeTgts.end(),deps2.begin(),deps2.end());
+                for (std::vector<cmTarget *>::const_iterator di = 
+                       deps2.begin(); di != deps2.end(); ++di)
+                  {
+                  activeTgts.push_back(*di);
+                  }
                 }
               activeTgts.pop_front();
               }
