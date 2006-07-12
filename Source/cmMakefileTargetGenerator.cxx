@@ -33,7 +33,6 @@
 cmMakefileTargetGenerator::cmMakefileTargetGenerator()
 {
   this->BuildFileStream = 0;
-  this->ProgressFileStream = 0;
   this->InfoFileStream = 0;
   this->FlagFileStream = 0;
 }
@@ -91,13 +90,6 @@ void cmMakefileTargetGenerator::CreateRuleFile()
   this->ProgressFileName += "/progress.make";
   this->ProgressFileNameFull = this->TargetBuildDirectoryFull;
   this->ProgressFileNameFull += "/progress.make";
-
-  this->ProgressFileStream = 
-    new cmGeneratedFileStream(this->ProgressFileNameFull.c_str());
-  if(!this->ProgressFileStream)
-    {
-    return;
-    }
 
   // reset the progress count
   this->NumberOfProgressActions = 0;
@@ -1055,29 +1047,36 @@ void cmMakefileTargetGenerator::RemoveForbiddenFlags(const char* flagVar,
 void cmMakefileTargetGenerator::WriteProgressVariables(unsigned long total,
                                                        unsigned long &current)
 {
+  cmGeneratedFileStream *progressFileStream = 
+    new cmGeneratedFileStream(this->ProgressFileNameFull.c_str());
+  if(!progressFileStream)
+    {
+    return;
+    }
+
   unsigned long num;
   unsigned long i;
   for (i = 1; i <= this->NumberOfProgressActions; ++i)
     {
-    *this->ProgressFileStream
+    *progressFileStream
       << "CMAKE_PROGRESS_" << i << " = ";
     if (total <= 100)
       {
       num = i + current;
-      *this->ProgressFileStream << num;
+      *progressFileStream << num;
       this->LocalGenerator->ProgressFiles[this->Target->GetName()]
         .push_back(num);
       }
     else if (((i+current)*100)/total > ((i-1+current)*100)/total)
       {
       num = ((i+current)*100)/total;
-      *this->ProgressFileStream << num;
+      *progressFileStream << num;
       this->LocalGenerator->ProgressFiles[this->Target->GetName()]
         .push_back(num);
       }
-    *this->ProgressFileStream << "\n";
+    *progressFileStream << "\n";
     }
   current += this->NumberOfProgressActions;
-  delete this->ProgressFileStream;
+  delete progressFileStream;
 }
 

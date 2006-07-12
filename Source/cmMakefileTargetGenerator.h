@@ -129,8 +129,6 @@ protected:
   // the full path to the progress file
   std::string ProgressFileName;
   std::string ProgressFileNameFull;
-  // the stream for the build file
-  cmGeneratedFileStream *ProgressFileStream;
   unsigned long NumberOfProgressActions;
 
   // the path to the directory the build file is in
