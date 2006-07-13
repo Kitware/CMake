@@ -1507,7 +1507,8 @@ bool SystemTools::FilesDiffer(const char* source,
       }
 
     // If this block differs the file differs.
-    if(memcmp((const void*)source_buf, (const void*)dest_buf, nnext) != 0)
+    if(memcmp(static_cast<const void*>(source_buf),
+        static_cast<const void*>(dest_buf), nnext) != 0)
       {
       return true;
       }
@@ -1737,7 +1738,7 @@ long int SystemTools::ModifiedTime(const char* filename)
     }
   else
     {
-    return (long int)fs.st_mtime;
+    return static_cast<long int>(fs.st_mtime);
     }
 }
 
@@ -1751,7 +1752,7 @@ long int SystemTools::CreationTime(const char* filename)
     }
   else
     {
-    return fs.st_ctime >= 0 ? (long int)fs.st_ctime : 0;
+    return fs.st_ctime >= 0 ? static_cast<long int>(fs.st_ctime) : 0;
     }
 }
 
@@ -2238,7 +2239,7 @@ bool SystemTools::FileIsDirectory(const char* name)
   struct stat fs;
   if(stat(name, &fs) == 0)
     {
-#if _WIN32
+#if defined( _WIN32 )
     return ((fs.st_mode & _S_IFDIR) != 0);
 #else
     return S_ISDIR(fs.st_mode);
@@ -2252,7 +2253,7 @@ bool SystemTools::FileIsDirectory(const char* name)
 
 bool SystemTools::FileIsSymlink(const char* name)
 {
-#if _WIN32
+#if defined( _WIN32 )
   (void)name;
   return false;
 #else
@@ -3077,7 +3078,8 @@ SystemTools::DetectFileType(const char *filename,
   delete [] buffer;
 
   double current_percent_bin =  
-    ((double)(read_length - text_count) / (double)read_length);
+    (static_cast<double>(read_length - text_count) /
+     static_cast<double>(read_length));
 
   if (current_percent_bin >= percent_bin)
     {
@@ -3107,14 +3109,14 @@ bool SystemTools::LocateFileInDir(const char *filename,
   kwsys_stl::string real_dir;
   if (!SystemTools::FileIsDirectory(dir))
     {
-#if _WIN32
+#if defined( _WIN32 )
     size_t dir_len = strlen(dir);
     if (dir_len < 2 || dir[dir_len - 1] != ':')
       {
 #endif
       real_dir = SystemTools::GetFilenamePath(dir);
       dir = real_dir.c_str();
-#if _WIN32
+#if defined( _WIN32 )
       }
 #endif
     }
@@ -3417,7 +3419,7 @@ int SystemTools::GetTerminalWidth()
     t = strtol(columns, &endptr, 0);
     if(endptr && !*endptr && (t>0) && (t<1000))
       {
-      width = (int)t;
+      width = static_cast<int>(t);
       }
     }
   if ( width < 9 )

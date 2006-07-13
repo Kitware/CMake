@@ -83,7 +83,8 @@ struct gzStruct GZStruct;
 #endif
 #endif
 
-int libtar_gzopen(void* call_data, const char *pathname, int oflags, mode_t mode)
+static int libtar_gzopen(void* call_data, const char *pathname,
+  int oflags, mode_t mode)
 {
   char *gzoflags;
   int fd;
@@ -155,7 +156,7 @@ tartype_t gztype = {
 #endif /* HAVE_LIBZ */
 
 
-int
+static int
 create(char *tarfile, char *rootdir, libtar_list_t *l)
 {
   TAR *t;

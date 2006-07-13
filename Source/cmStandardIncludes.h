@@ -341,7 +341,7 @@ static thisClass* SafeDownCast(cmObject *c) \
 { \
   if ( c && c->IsA(#thisClass) ) \
     { \
-    return (thisClass *)c; \
+    return static_cast<thisClass *>(c); \
     } \
   return 0;\
 }
