@@ -414,6 +414,7 @@ int
 /*
 ** @LISTHASH_PREFIX@_list_dup() - copy an existing list
 */
+/*
 static @LISTHASH_PREFIX@_list_t *
 @LISTHASH_PREFIX@_list_dup(@LISTHASH_PREFIX@_list_t *l)
 {
@@ -429,6 +430,7 @@ static @LISTHASH_PREFIX@_list_t *
 #endif
   return newlist;
 }
+*/
 
 
 /*
