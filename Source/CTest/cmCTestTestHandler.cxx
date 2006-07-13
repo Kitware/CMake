@@ -1707,7 +1707,8 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.Name = testname;
   test.Args = args;
   test.Directory = cmSystemTools::GetCurrentWorkingDirectory();
-  cmCTestLog(this->CTest, DEBUG, "Set test directory: " << test.Directory << std::endl);
+  cmCTestLog(this->CTest, DEBUG, "Set test directory: "
+    << test.Directory << std::endl);
   
   test.IsInBasedOnREOptions = true;
   test.WillFail = false;
