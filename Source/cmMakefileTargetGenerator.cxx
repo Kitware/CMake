@@ -708,6 +708,19 @@ void cmMakefileTargetGenerator
   std::string comment = this->LocalGenerator->ConstructComment(cc);
   if(!comment.empty())
     {
+    // add in a progress call if needed
+    std::string progressDir = this->Makefile->GetHomeOutputDirectory();
+    progressDir += cmake::GetCMakeFilesDirectory();
+    cmOStringStream progCmd;
+    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
+    progCmd << this->LocalGenerator->Convert(progressDir.c_str(),
+                                             cmLocalGenerator::FULL,
+                                             cmLocalGenerator::SHELL);
+    this->NumberOfProgressActions++;
+    progCmd << " $(CMAKE_PROGRESS_" 
+            << this->NumberOfProgressActions 
+            << ")";
+    commands.push_back(progCmd.str());
     this->LocalGenerator
       ->AppendEcho(commands, comment.c_str(),
                    cmLocalUnixMakefileGenerator3::EchoGenerate);
