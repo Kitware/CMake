@@ -99,6 +99,8 @@ public:
   void*             ClientData;
 
   VectorOfStrings::size_type LastArgument;
+
+  VectorOfStrings UnusedArguments;
 };
 //============================================================================
 //----------------------------------------------------------------------------
@@ -109,6 +111,7 @@ CommandLineArguments::CommandLineArguments()
   this->Internals = new CommandLineArguments::Internal;
   this->Help = "";
   this->LineLength = 80;
+  this->StoreUnusedArgumentsFlag = false;
 }
 
 //----------------------------------------------------------------------------
@@ -185,6 +188,10 @@ int CommandLineArguments::Parse()
 {
   kwsys_stl::vector<kwsys_stl::string>::size_type cc;
   kwsys_stl::vector<kwsys_stl::string> matches;
+  if ( this->StoreUnusedArgumentsFlag )
+    {
+    this->Internals->UnusedArguments.clear();
+    }
   for ( cc = 0; cc < this->Internals->Argv.size(); cc ++ )
     {
     const kwsys_stl::string& arg = this->Internals->Argv[cc]; 
@@ -281,6 +288,7 @@ int CommandLineArguments::Parse()
           cc--;
           continue;
           }
+        break;
       default:
         kwsys_ios::cerr << "Got unknown argument type: \"" << cs->ArgumentType << "\"" << kwsys_ios::endl;
         this->Internals->LastArgument --;
@@ -299,6 +307,11 @@ int CommandLineArguments::Parse()
           return 0;
           }
         return 1;
+        }
+      else if ( this->StoreUnusedArgumentsFlag )
+        {
+        CommandLineArguments_DEBUG("Store unused argument " << arg);
+        this->Internals->UnusedArguments.push_back(arg.c_str());
         }
       else
         {
@@ -330,6 +343,32 @@ void CommandLineArguments::GetRemainingArguments(int* argc, char*** argv)
     {
     args[cnt] = new char[ this->Internals->Argv[cc].size() + 1];
     strcpy(args[cnt], this->Internals->Argv[cc].c_str());
+    cnt ++;
+    }
+  *argc = cnt;
+  *argv = args;
+}
+
+//----------------------------------------------------------------------------
+void CommandLineArguments::GetUnusedArguments(int* argc, char*** argv)
+{
+  CommandLineArguments::Internal::VectorOfStrings::size_type size 
+    = this->Internals->UnusedArguments.size() + 1;
+  CommandLineArguments::Internal::VectorOfStrings::size_type cc;
+
+  // Copy Argv0 as the first argument
+  char** args = new char*[ size ];
+  args[0] = new char[ this->Internals->Argv0.size() + 1 ];
+  strcpy(args[0], this->Internals->Argv0.c_str());
+  int cnt = 1;
+
+  // Copy everything after the LastArgument, since that was not parsed.
+  for ( cc = 0;
+    cc < this->Internals->UnusedArguments.size(); cc ++ )
+    {
+    kwsys::String &str = this->Internals->UnusedArguments[cc];
+    args[cnt] = new char[ str.size() + 1];
+    strcpy(args[cnt], str.c_str());
     cnt ++;
     }
   *argc = cnt;
@@ -769,6 +808,7 @@ bool CommandLineArguments::PopulateVariable(CommandLineArgumentsCallbackStructur
       return 0;
       }
     }
+  CommandLineArguments_DEBUG("Set argument: " << cs->Argument << " to " << value);
   if ( cs->Variable )
     {
     kwsys_stl::string var = "1";

@@ -205,6 +205,14 @@ public:
   void DeleteRemainingArguments(int argc, char*** argv);
 
   /**
+   * If StoreUnusedArguments is set to true, then all unknown arguments will be
+   * stored and the user can access the modified argc, argv without known
+   * arguments.
+   */
+  void StoreUnusedArguments(bool val) { this->StoreUnusedArgumentsFlag = val; }
+  void GetUnusedArguments(int* argc, char*** argv);
+
+  /**
    * Return string containing help. If the argument is specified, only return
    * help for that argument.
    */
@@ -261,6 +269,8 @@ protected:
   kwsys_stl::string Help;
 
   unsigned int LineLength;
+
+  bool StoreUnusedArgumentsFlag;
 };
 
 } // namespace @KWSYS_NAMESPACE@

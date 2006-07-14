@@ -50,6 +50,8 @@ int unknown_argument(const char* argument, void* call_data)
 bool CompareTwoItemsOnList(bool i1, bool i2) { return i1 == i2; }
 bool CompareTwoItemsOnList(int i1, int i2) { return i1 == i2; }
 bool CompareTwoItemsOnList(double i1, double i2) { return i1 == i2; }
+bool CompareTwoItemsOnList(const char* i1,
+  const char* i2) { return strcmp(i1, i2) == 0; }
 bool CompareTwoItemsOnList(const kwsys_stl::string& i1,
   const kwsys_stl::string& i2) { return i1 == i2; }
 

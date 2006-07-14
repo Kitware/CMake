@@ -768,6 +768,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
         testIOS
         testHashSTL
         testCommandLineArguments
+        testCommandLineArguments1
         testRegistry
         ${EXTRA_TESTS}
         )
@@ -837,6 +838,14 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       -A
       -C=test
       --long2 hello)
+    ADD_TEST(kwsys.testCommandLineArguments1 ${EXEC_DIR}/testCommandLineArguments1
+      --ignored
+      -n 24
+      --second-ignored
+      "-m=test value"
+      third-ignored
+      -p
+      some junk at the end)
     IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY AND KWSYS_STANDALONE)
       ADD_TEST(kwsys.testFail ${EXEC_DIR}/testFail)
       # We expect test to fail
