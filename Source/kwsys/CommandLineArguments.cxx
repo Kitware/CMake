@@ -416,12 +416,6 @@ CommandLineArgumentsAddBooleanArgumentMacro(DOUBLE,     double);
 CommandLineArgumentsAddBooleanArgumentMacro(STRING,     char*);
 CommandLineArgumentsAddBooleanArgumentMacro(STL_STRING, kwsys_stl::string);
 
-CommandLineArgumentsAddBooleanArgumentMacro(VECTOR_BOOL,       kwsys_stl::vector<bool>);
-CommandLineArgumentsAddBooleanArgumentMacro(VECTOR_INT,        kwsys_stl::vector<int>);
-CommandLineArgumentsAddBooleanArgumentMacro(VECTOR_DOUBLE,     kwsys_stl::vector<double>);
-CommandLineArgumentsAddBooleanArgumentMacro(VECTOR_STRING,     kwsys_stl::vector<char*>);
-CommandLineArgumentsAddBooleanArgumentMacro(VECTOR_STL_STRING, kwsys_stl::vector<kwsys_stl::string>);
-
 //----------------------------------------------------------------------------
 void CommandLineArguments::SetClientData(void* client_data)
 {

@@ -192,22 +192,6 @@ public:
     kwsys_stl::string* variable, const char* help);
 
   /**
-   * Add handler for boolean argument. The argument does not take any option
-   * and if it is specified, the value of the variable is true/1, otherwise it
-   * is false/0. This will handle the multi argument values.
-   */
-  void AddBooleanArgument(const char* argument,
-    kwsys_stl::vector<bool>* variable, const char* help);
-  void AddBooleanArgument(const char* argument,
-    kwsys_stl::vector<int>* variable, const char* help);
-  void AddBooleanArgument(const char* argument,
-    kwsys_stl::vector<double>* variable, const char* help);
-  void AddBooleanArgument(const char* argument,
-    kwsys_stl::vector<char*>* variable, const char* help);
-  void AddBooleanArgument(const char* argument,
-    kwsys_stl::vector<kwsys_stl::string>* variable, const char* help);
-
-  /**
    * Set the callbacks for error handling.
    */
   void SetClientData(void* client_data);
