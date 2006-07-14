@@ -29,7 +29,7 @@ namespace @KWSYS_NAMESPACE@
 {
 
 class CommandLineArgumentsInternal;
-class CommandLineArgumentsCallbackStructure;
+struct CommandLineArgumentsCallbackStructure;
 
 /** \class CommandLineArguments
  * \brief Command line arguments processing code.
