@@ -3157,7 +3157,7 @@ bool SystemTools::LocateFileInDir(const char *filename,
         {
         filename_dir = SystemTools::GetFilenamePath(filename_dir);
         filename_dir_base = SystemTools::GetFilenameName(filename_dir);
-#if _WIN32
+#if defined( _WIN32 )
         if (!filename_dir_base.size() || 
             filename_dir_base[filename_dir_base.size() - 1] == ':')
 #else

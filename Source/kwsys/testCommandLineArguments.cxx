@@ -14,6 +14,7 @@
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(CommandLineArguments.hxx)
 #include KWSYS_HEADER(ios/iostream)
+#include KWSYS_HEADER(stl/vector)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
@@ -46,6 +47,12 @@ int unknown_argument(const char* argument, void* call_data)
   return 1;
 }
 
+bool CompareTwoItemsOnList(bool i1, bool i2) { return i1 == i2; }
+bool CompareTwoItemsOnList(int i1, int i2) { return i1 == i2; }
+bool CompareTwoItemsOnList(double i1, double i2) { return i1 == i2; }
+bool CompareTwoItemsOnList(const kwsys_stl::string& i1,
+  const kwsys_stl::string& i2) { return i1 == i2; }
+
 int main(int argc, char* argv[])
 {
   // Example run: ./testCommandLineArguments --some-int-variable 4
@@ -70,6 +77,21 @@ int main(int argc, char* argv[])
   bool bool_arg1 = false;
   int bool_arg2 = 0;
 
+  kwsys_stl::vector<int> numbers_argument;
+  int valid_numbers[] = { 5, 1, 8, 3, 7, 1, 3, 9, 7, 1 };
+
+  kwsys_stl::vector<double> doubles_argument;
+  double valid_doubles[] = { 12.5, 1.31, 22 };
+
+  kwsys_stl::vector<bool> bools_argument;
+  bool valid_bools[] = { true, true, false };
+
+  kwsys_stl::vector<char*> strings_argument;
+  char* valid_strings[] = { "andy", "bill", "brad", "ken" };
+
+  kwsys_stl::vector<kwsys_stl::string> stl_strings_argument;
+  kwsys_stl::string valid_stl_strings[] = { "ken", "brad", "bill", "andy" };
+
   typedef kwsys::CommandLineArguments argT;
 
   arg.AddArgument("--some-int-variable", argT::SPACE_ARGUMENT, &some_int_variable, "Set some random int variable");
@@ -80,6 +102,11 @@ int main(int argc, char* argv[])
   arg.AddArgument("--another-bool-variable", argT::NO_ARGUMENT, &some_bool_variable1, "Set some random bool variable 1");
   arg.AddBooleanArgument("--set-bool-arg1", &bool_arg1, "Test AddBooleanArgument 1");
   arg.AddBooleanArgument("--set-bool-arg2", &bool_arg2, "Test AddBooleanArgument 2");
+  arg.AddArgument("--some-multi-argument", argT::MULTI_ARGUMENT, &numbers_argument, "Some multiple values variable");
+  arg.AddArgument("-N", argT::SPACE_ARGUMENT, &doubles_argument, "Some explicit multiple values variable");
+  arg.AddArgument("-BB", argT::CONCAT_ARGUMENT, &bools_argument, "Some explicit multiple values variable");
+  arg.AddArgument("-SS", argT::EQUAL_ARGUMENT, &strings_argument, "Some explicit multiple values variable");
+  arg.AddArgument("-SSS", argT::MULTI_ARGUMENT, &stl_strings_argument, "Some explicit multiple values variable");
 
   arg.AddCallback("-A", argT::NO_ARGUMENT, argument, random_ptr, "Some option -A. This option has a multiline comment. It should demonstrate how the code splits lines.");
   arg.AddCallback("-B", argT::SPACE_ARGUMENT, argument, random_ptr, "Option -B takes argument with space");
@@ -99,7 +126,7 @@ int main(int argc, char* argv[])
 
   kwsys_ios::cout << "Some int variable was set to: " << some_int_variable << kwsys_ios::endl;
   kwsys_ios::cout << "Some double variable was set to: " << some_double_variable << kwsys_ios::endl;
-  if ( some_string_variable )
+  if ( some_string_variable && strcmp(some_string_variable, "test string with space") == 0)
     {
     kwsys_ios::cout << "Some string variable was set to: " << some_string_variable << kwsys_ios::endl;
     delete [] some_string_variable;
@@ -109,6 +136,38 @@ int main(int argc, char* argv[])
     kwsys_ios::cerr << "Problem setting string variable" << kwsys_ios::endl;
     res = 1;
     }
+  size_t cc;
+#define CompareTwoLists(list1, list_valid, lsize) \
+  if ( list1.size() != lsize ) \
+    { \
+    kwsys_ios::cerr << "Problem setting " #list1 ". Size is: " << list1.size() \
+     << " should be: " << lsize << kwsys_ios::endl; \
+    res = 1; \
+    } \
+  else \
+    { \
+    kwsys_ios::cout << #list1 " argument set:"; \
+    for ( cc =0; cc < lsize; ++ cc ) \
+      { \
+      kwsys_ios::cout << " " << list1[cc]; \
+      if ( !CompareTwoItemsOnList(list1[cc], list_valid[cc]) ) \
+        { \
+        kwsys_ios::cerr << "Problem setting " #list1 ". Value of " \
+        << cc << " is: [" << list1[cc] << "] <> [" \
+        << list_valid[cc] << "]" << kwsys_ios::endl; \
+        res = 1; \
+        break; \
+        } \
+      } \
+    kwsys_ios::cout << kwsys_ios::endl; \
+    }
+
+  CompareTwoLists(numbers_argument, valid_numbers, 10);
+  CompareTwoLists(doubles_argument, valid_doubles, 3);
+  CompareTwoLists(bools_argument, valid_bools, 3);
+  CompareTwoLists(strings_argument, valid_strings, 4);
+  CompareTwoLists(stl_strings_argument, valid_stl_strings, 4);
+
   kwsys_ios::cout << "Some STL String variable was set to: " << some_stl_string_variable.c_str() << kwsys_ios::endl;
   kwsys_ios::cout << "Some bool variable was set to: " << some_bool_variable << kwsys_ios::endl;
   kwsys_ios::cout << "Some bool variable was set to: " << some_bool_variable1 << kwsys_ios::endl;

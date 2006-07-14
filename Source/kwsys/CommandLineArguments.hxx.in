@@ -18,6 +18,7 @@
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
 #include <@KWSYS_NAMESPACE@/stl/string>
+#include <@KWSYS_NAMESPACE@/stl/vector>
 
 /* Define this macro temporarily to keep the code readable.  */
 #if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
@@ -28,6 +29,7 @@ namespace @KWSYS_NAMESPACE@
 {
 
 class CommandLineArgumentsInternal;
+class CommandLineArgumentsCallbackStructure;
 
 /** \class CommandLineArguments
  * \brief Command line arguments processing code.
@@ -53,6 +55,7 @@ class CommandLineArgumentsInternal;
  *   CONCAT_ARGUMENT - The argument takes value after no space : --Aval
  *   SPACE_ARGUMENT  - The argument takes value after space    : --A val 
  *   EQUAL_ARGUMENT  - The argument takes value after equal    : --A=val
+ *   MULTI_ARGUMENT  - The argument takes values after space   : --A val1 val2 val3 ...
  *
  * Example use:
  *
@@ -82,7 +85,8 @@ public:
     NO_ARGUMENT,
     CONCAT_ARGUMENT,
     SPACE_ARGUMENT,
-    EQUAL_ARGUMENT
+    EQUAL_ARGUMENT,
+    MULTI_ARGUMENT
   };
 
   /**
@@ -95,7 +99,13 @@ public:
     BOOL_TYPE,            // The vairable is boolean (bool)
     DOUBLE_TYPE,          // The variable is float (double)
     STRING_TYPE,          // The variable is string (char*)
-    STL_STRING_TYPE       // The variable is string (char*)
+    STL_STRING_TYPE,      // The variable is string (char*)
+    VECTOR_INT_TYPE,             // The variable is integer (int)
+    VECTOR_BOOL_TYPE,            // The vairable is boolean (bool)
+    VECTOR_DOUBLE_TYPE,          // The variable is float (double)
+    VECTOR_STRING_TYPE,          // The variable is string (char*)
+    VECTOR_STL_STRING_TYPE,      // The variable is string (char*)
+    LAST_VARIABLE_TYPE
   };
 
   /**
@@ -138,10 +148,10 @@ public:
    * specified value. If the argument is specified, the option is casted to the
    * apropriate type.
    */
-  void AddArgument(const char* argument, ArgumentTypeEnum type, bool* variable,
-    const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type, int* variable,
-    const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type,
+    bool* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type,
+    int* variable, const char* help);
   void AddArgument(const char* argument, ArgumentTypeEnum type, 
     double* variable, const char* help);
   void AddArgument(const char* argument, ArgumentTypeEnum type, 
@@ -150,14 +160,52 @@ public:
     kwsys_stl::string* variable, const char* help);
 
   /**
+   * Add handler for argument which is going to set the variable to the
+   * specified value. If the argument is specified, the option is casted to the
+   * apropriate type. This will handle the multi argument values.
+   */
+  void AddArgument(const char* argument, ArgumentTypeEnum type,
+    kwsys_stl::vector<bool>* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type,
+    kwsys_stl::vector<int>* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, 
+    kwsys_stl::vector<double>* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, 
+    kwsys_stl::vector<char*>* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type,
+    kwsys_stl::vector<kwsys_stl::string>* variable, const char* help);
+
+  /**
    * Add handler for boolean argument. The argument does not take any option
    * and if it is specified, the value of the variable is true/1, otherwise it
    * is false/0.
    */
-  void AddBooleanArgument(const char* argument, bool* variable, const char*
-    help);
-  void AddBooleanArgument(const char* argument, int* variable, const char*
-    help);
+  void AddBooleanArgument(const char* argument,
+    bool* variable, const char* help);
+  void AddBooleanArgument(const char* argument,
+    int* variable, const char* help);
+  void AddBooleanArgument(const char* argument,
+    double* variable, const char* help);
+  void AddBooleanArgument(const char* argument,
+    char** variable, const char* help);
+  void AddBooleanArgument(const char* argument,
+    kwsys_stl::string* variable, const char* help);
+
+  /**
+   * Add handler for boolean argument. The argument does not take any option
+   * and if it is specified, the value of the variable is true/1, otherwise it
+   * is false/0. This will handle the multi argument values.
+   */
+  void AddBooleanArgument(const char* argument,
+    kwsys_stl::vector<bool>* variable, const char* help);
+  void AddBooleanArgument(const char* argument,
+    kwsys_stl::vector<int>* variable, const char* help);
+  void AddBooleanArgument(const char* argument,
+    kwsys_stl::vector<double>* variable, const char* help);
+  void AddBooleanArgument(const char* argument,
+    kwsys_stl::vector<char*>* variable, const char* help);
+  void AddBooleanArgument(const char* argument,
+    kwsys_stl::vector<kwsys_stl::string>* variable, const char* help);
 
   /**
    * Set the callbacks for error handling.
@@ -204,6 +252,25 @@ protected:
   //! This is internal method that registers variable with argument
   void AddArgument(const char* argument, ArgumentTypeEnum type,
     VariableTypeEnum vtype, void* variable, const char* help);
+
+  bool GetMatchedArguments(kwsys_stl::vector<kwsys_stl::string>* matches,
+    const kwsys_stl::string& arg);
+
+  //! Populate individual variables
+  bool PopulateVariable(CommandLineArgumentsCallbackStructure* cs,
+    const char* value);
+
+  //! Populate individual variables of type ...
+  void PopulateVariable(bool* variable, const kwsys_stl::string& value);
+  void PopulateVariable(int* variable, const kwsys_stl::string& value);
+  void PopulateVariable(double* variable, const kwsys_stl::string& value);
+  void PopulateVariable(char** variable, const kwsys_stl::string& value);
+  void PopulateVariable(kwsys_stl::string* variable, const kwsys_stl::string& value);
+  void PopulateVariable(kwsys_stl::vector<bool>* variable, const kwsys_stl::string& value);
+  void PopulateVariable(kwsys_stl::vector<int>* variable, const kwsys_stl::string& value);
+  void PopulateVariable(kwsys_stl::vector<double>* variable, const kwsys_stl::string& value);
+  void PopulateVariable(kwsys_stl::vector<char*>* variable, const kwsys_stl::string& value);
+  void PopulateVariable(kwsys_stl::vector<kwsys_stl::string>* variable, const kwsys_stl::string& value);
 
   typedef CommandLineArgumentsInternal Internal;
   Internal* Internals;

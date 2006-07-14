@@ -819,6 +819,24 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     ENDIF(NOT CYGWIN)
     ADD_TEST(kwsys.testHashSTL ${EXEC_DIR}/testHashSTL)
     ADD_TEST(kwsys.testRegistry ${EXEC_DIR}/testRegistry)
+    ADD_TEST(kwsys.testCommandLineArguments ${EXEC_DIR}/testCommandLineArguments
+      --another-bool-variable
+      --long3=opt
+      --set-bool-arg1
+      -SSS ken brad bill andy
+      --some-bool-variable=true
+      --some-double-variable12.5
+      --some-int-variable 14
+      "--some-string-variable=test string with space"
+      --some-multi-argument 5 1 8 3 7 1 3 9 7 1
+      -N 12.5 -SS=andy -N 1.31 -N 22
+      -SS=bill -BBtrue -SS=brad
+      -BBtrue 
+      -BBfalse
+      -SS=ken
+      -A
+      -C=test
+      --long2 hello)
     IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY AND KWSYS_STANDALONE)
       ADD_TEST(kwsys.testFail ${EXEC_DIR}/testFail)
       # We expect test to fail
