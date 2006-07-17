@@ -63,12 +63,16 @@ int main(int argc, char* argv[])
   kwsys_ios::cout << "Value of N: " << n << kwsys_ios::endl;
   kwsys_ios::cout << "Value of M: " << m << kwsys_ios::endl;
   kwsys_ios::cout << "Value of P: " << p.c_str() << kwsys_ios::endl;
+  if ( m )
+    {
+    delete [] m;
+    }
 
   char** newArgv = 0;
   int newArgc = 0;
   arg.GetUnusedArguments(&newArgc, &newArgv);
   int cc;
-  char* valid_unused_args[9] = {
+  const char* valid_unused_args[9] = {
     0, "--ignored", "--second-ignored", "third-ignored",
     "some", "junk", "at", "the", "end"
   };

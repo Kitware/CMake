@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
   bool valid_bools[] = { true, true, false };
 
   kwsys_stl::vector<char*> strings_argument;
-  char* valid_strings[] = { "andy", "bill", "brad", "ken" };
+  const char* valid_strings[] = { "andy", "bill", "brad", "ken" };
 
   kwsys_stl::vector<kwsys_stl::string> stl_strings_argument;
   kwsys_stl::string valid_stl_strings[] = { "ken", "brad", "bill", "andy" };
@@ -176,5 +176,11 @@ int main(int argc, char* argv[])
   kwsys_ios::cout << "bool_arg1 variable was set to: " << bool_arg1 << kwsys_ios::endl;
   kwsys_ios::cout << "bool_arg2 variable was set to: " << bool_arg2 << kwsys_ios::endl;
   kwsys_ios::cout << kwsys_ios::endl;
+
+  for ( cc = 0; cc < strings_argument.size(); ++ cc )
+    {
+    delete [] strings_argument[cc];
+    strings_argument[cc] = 0;
+    }
   return res;
 }
