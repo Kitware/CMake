@@ -101,10 +101,6 @@ int main(int argc, char* argv[])
     }
   arg.DeleteRemainingArguments(newArgc, &newArgv);
 
-  if ( m )
-    {
-    delete [] m;
-    }
   return res;
 }
  
