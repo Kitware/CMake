@@ -31,9 +31,8 @@ cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 }
 
 //----------------------------------------------------------------------------
-void
-cmLocalVisualStudioGenerator
-::ComputeObjectNameRequirements(std::vector<cmSourceGroup> const& sourceGroups)
+void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
+(std::vector<cmSourceGroup> const& sourceGroups)
 {
   // Clear the current set of requirements.
   this->NeedObjectName.clear();

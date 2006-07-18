@@ -1000,7 +1000,8 @@ GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
       // The directory-level rule depends on the directory-level
       // rules of the subdirectories.
       for(std::vector<cmLocalGenerator*>::iterator sdi = 
-            lg3->GetChildren().begin(); sdi != lg3->GetChildren().end(); ++sdi)
+            lg3->GetChildren().begin(); 
+          sdi != lg3->GetChildren().end(); ++sdi)
         {
         cmLocalUnixMakefileGenerator3* slg =
           static_cast<cmLocalUnixMakefileGenerator3*>(*sdi);
