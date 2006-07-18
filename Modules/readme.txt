@@ -4,11 +4,12 @@ We would like all FindXXX.cmake files to produce consistent variable names.
 
 Please use the following consistent variable names for general use.
 
-XXX_INCLUDE_DIR        	Where to find xxx.h, etc. If for some reason, you really need two paths, then that shouldn't be a problem - however, consider if you really should have two different FindXXX.cmake files. (XXX_INCLUDE_PATH was considered bad because a path includes an actual filename.)
-XXX_LIBRARIES          	The libraries to link against to use XXX. These should include full paths.
+XXX_INCLUDE_DIRS        The final set of include directories listed in one variable for use by client code.  This should not be a cache entry.
+XXX_LIBRARIES          	The libraries to link against to use XXX. These should include full paths.  This should not be a cache entry.
 XXX_DEFINITIONS        	Definitions to use when compiling code that uses XXX. This really shouldn't include options such as (-DHAS_JPEG)that a client source-code file uses to decide whether to #include <jpeg.h>
 XXX_EXECUTABLE         	Where to find the XXX tool.
 XXX_YYY_EXECUTABLE     	Where to find the YYY tool that comes with XXX.
+XXX_LIBRARY_DIRS        Optionally, the final set of library directories listed in one variable for use by client code.  This should not be a cache entry.
 XXX_ROOT_DIR           	Where to find the base directory of XXX.
 XXX_VERSION_YY		Expect Version YY if true. Make sure at most one of these is ever true.
 XXX_WRAP_YY		If False, do not try to use the relevent CMake wrapping command.
@@ -21,6 +22,8 @@ The following names should not usually be used in CMakeLists.txt files, but they
 
 XXX_LIBRARY		Name of XXX Library. A User may set this and XXX_INCLUDE_DIR to ignore to force non-use of XXX.
 XXX_YY_LIBRARY		Name of YY library that is part of the XXX system. It may or may not be required to use XXX.
+XXX_INCLUDE_DIR        	Where to find xxx.h, etc.  (XXX_INCLUDE_PATH was considered bad because a path includes an actual filename.)
+XXX_YY_INCLUDE_DIR      Where to find xxx_yy.h, etc.
 
 For tidiness's sake, try to keep as many options as possible out of the cache, leaving at least one option which can be used to disable use of the module, or locate a not-found library (e.g. XXX_ROOT_DIR). For the same reason, mark most cache options as advanced.
 
