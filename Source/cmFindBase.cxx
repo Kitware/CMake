@@ -19,6 +19,7 @@
 cmFindBase::cmFindBase()
 {
   this->AlreadyInCache = false;
+  this->AlreadyInCacheWithoutMetaInfo = false;
   this->NoDefaultPath = false;
   this->NoCMakePath = false;
   this->NoCMakeEnvironmentPath = false;
@@ -674,18 +675,27 @@ void cmFindBase::PrintFindStuff()
 
 bool cmFindBase::CheckForVariableInCache()
 {
-  const char* cacheValue
-    = this->Makefile->GetDefinition(this->VariableName.c_str());
-  if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
+  if(const char* cacheValue =
+     this->Makefile->GetDefinition(this->VariableName.c_str()))
     {
-    return true;
-    }
-  if(cacheValue)
-    {
-    cmCacheManager::CacheIterator it = 
+    cmCacheManager::CacheIterator it =
       this->Makefile->GetCacheManager()->
       GetCacheIterator(this->VariableName.c_str());
-    if(!it.IsAtEnd())
+    bool found = !cmSystemTools::IsNOTFOUND(cacheValue);
+    bool cached = !it.IsAtEnd();
+    if(found)
+      {
+      // If the user specifies the entry on the command line without a
+      // type we should add the type and docstring but keep the
+      // original value.  Tell the subclass implementations to do
+      // this.
+      if(cached && it.GetType() == cmCacheManager::UNINITIALIZED)
+        {
+        this->AlreadyInCacheWithoutMetaInfo = true;
+        }
+      return true;
+      }
+    else if(cached)
       {
       const char* hs = it.GetProperty("HELPSTRING");
       this->VariableDocumentation = hs?hs:"(none)";

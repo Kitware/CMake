@@ -67,6 +67,7 @@ protected:
   cmStdString EnvironmentPath; // LIB,INCLUDE
 
   bool AlreadyInCache;
+  bool AlreadyInCacheWithoutMetaInfo;
   bool NoDefaultPath;
   bool NoCMakePath;
   bool NoCMakeEnvironmentPath;

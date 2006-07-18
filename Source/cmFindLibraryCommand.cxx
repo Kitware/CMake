@@ -52,6 +52,15 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   if(this->AlreadyInCache)
     {
+    // If the user specifies the entry on the command line without a
+    // type we should add the type and docstring but keep the original
+    // value.
+    if(this->AlreadyInCacheWithoutMetaInfo)
+      {
+      this->Makefile->AddCacheDefinition(this->VariableName.c_str(), "",
+                                         this->VariableDocumentation.c_str(),
+                                         cmCacheManager::FILEPATH);
+      }
     return true;
     }
   // add special 64 bit paths if this is a 64 bit compile.
