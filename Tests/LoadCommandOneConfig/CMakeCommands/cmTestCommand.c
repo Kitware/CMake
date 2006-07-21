@@ -128,7 +128,7 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
   ccArgs[3] = argv[1];
   ccDep[0] = ccArgs[2];
   ccOut[0] = ccArgs[3];
-  info->CAPI->AddCustomCommand(mf, "LoadedCommand.cxx",
+  info->CAPI->AddCustomCommand(mf, "LoadedCommand.cxx.in",
                                file,
                                4, ccArgs,
                                1, ccDep,
