@@ -326,11 +326,11 @@ IF(BUILD_MFCDialog)
 ENDIF(BUILD_MFCDialog)
 
 # WX Widgets GUI
-OPTION(CMAKE_BUILD_WX_DIALOG "Build wxWidgets dialog for CMake" FALSE)
-MARK_AS_ADVANCED(CMAKE_BUILD_WX_DIALOG)
-IF(CMAKE_BUILD_WX_DIALOG)
+OPTION(BUILD_WXDialog "Build wxWidgets dialog for CMake" FALSE)
+MARK_AS_ADVANCED(BUILD_WXDialog)
+IF(BUILD_WXDialog)
   SUBDIRS(WXDialog)
-ENDIF(CMAKE_BUILD_WX_DIALOG)
+ENDIF(BUILD_WXDialog)
 
 # Testing
 IF (NOT DART_ROOT)
@@ -1076,9 +1076,8 @@ IF(BUILD_TESTING)
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
   ENDIF(NOT CMAKE_TEST_GENERATOR MATCHES "Xcode")
 
-
-  IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
-    # Will be set if the wxwindows gui is on
+  IF(BUILD_WXDialog AND wxWidgets_CONFIG_EXECUTABLE)
+    # Will be set if the WX gui is on
     ADD_TEST(UseWX ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/UseWX"
@@ -1086,11 +1085,11 @@ IF(BUILD_TESTING)
       --build-generator ${CMAKE_TEST_GENERATOR}
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir ${CMake_BINARY_DIR}/Tests/UseWX
-      --build-project UsewxWindows
-      --build-options -DCMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE:FILEPATH=${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE}
+      --build-project UsewxWidgets
+      --build-options -DwxWidgets_CONFIG_EXECUTABLE=${wxWidgets_CONFIG_EXECUTABLE}
       --test-command UseWX
       )
-  ENDIF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
+  ENDIF(BUILD_WXDialog AND wxWidgets_CONFIG_EXECUTABLE)
 
   IF(UNIX)
     STRING(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "${CMake_BINARY_DIR}/Tests/TestShellInstall/Prefix"
