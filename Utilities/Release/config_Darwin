@@ -1,7 +1,6 @@
 PLATFORM="darwin"
 CC="cc"
 CXX="c++"
-WX_PREFIX=/Users/kitware/wxMac-2.6.1-build
 
 # Write entries into the cache file before building cmake.
 write_cache()
@@ -10,7 +9,5 @@ write_standard_cache
 
 cat >> CMakeCache.txt <<EOF
 CURSES_LIBRARY:FILEPATH=/Users/kitware/staticCurses/libncurses.a
-CMAKE_BUILD_WX_DIALOG:BOOL=ON
-CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE:FILEPATH=${WX_PREFIX}/wx-config
 EOF
 }
