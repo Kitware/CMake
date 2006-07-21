@@ -24,6 +24,7 @@ SET(CTEST_CMAKE_COMMAND "\"${CTEST_EXECUTABLE_PATH}/cmake\"")
 MESSAGE("CTest executable: ${CTEST_EXECUTABLE_NAME}")
 MESSAGE("CMake executable: ${CTEST_CMAKE_COMMAND}")
 
+CTEST_SLEEP(5)
 
 ####################################################################
 # The values in this section are optional you can either

@@ -51,7 +51,11 @@ IF (COMPILE_OK)
     )
   # if the command loaded, execute the command
   IF (COMMAND CMAKE_TEST_COMMAND)
-    CMAKE_TEST_COMMAND()
+    CMAKE_TEST_COMMAND(
+      "${LoadedCommand_SOURCE_DIR}/LoadedCommand.cxx"
+      "${LoadedCommand_BINARY_DIR}/LoadedCommand2.cxx"
+      "${LoadedCommand_BINARY_DIR}/LoadedCommand3.cxx"
+      )
   ENDIF (COMMAND CMAKE_TEST_COMMAND)
 ELSE (COMPILE_OK)
   MESSAGE("failed to compile CMAKE_LOADED_COMMANDS")
