@@ -289,6 +289,10 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
     {
     this->BlockTestErrorDiagnostics();
     }
+  else
+    {
+    cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
+    }
 
   this->BinaryDir = binary_dir;
   cmSystemTools::ConvertToUnixSlashes(this->BinaryDir);

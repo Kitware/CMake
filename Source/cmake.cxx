@@ -2554,7 +2554,8 @@ int cmake::ExecuteEchoColor(std::vector<std::string>& args)
   // likely no.
   int assumeTTY = cmsysTerminal_Color_AssumeTTY;
   if(cmSystemTools::GetEnv("DART_TEST_FROM_DART") ||
-     cmSystemTools::GetEnv("DASHBOARD_TEST_FROM_CTEST"))
+     cmSystemTools::GetEnv("DASHBOARD_TEST_FROM_CTEST") ||
+     cmSystemTools::GetEnv("CTEST_INTERACTIVE_DEBUG_MODE"))
     {
     // Avoid printing color escapes during dashboard builds.
     assumeTTY = 0;
