@@ -504,6 +504,16 @@ IF(BUILD_TESTING)
     --build-two-config
     --test-command   conly)
 
+  ADD_TEST(CxxOnly  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/CxxOnly"
+    "${CMake_BINARY_DIR}/Tests/CxxOnly"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project cxxonly
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-two-config
+    --test-command cxxonly)
+
   ADD_TEST(MacroTest ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/MacroTest"
