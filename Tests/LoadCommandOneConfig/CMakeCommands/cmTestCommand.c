@@ -121,6 +121,9 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
   srcs =  argv[2];
   info->CAPI->AddExecutable(mf,"LoadedCommand",1, &srcs, 0);
 
+  // remove an old file if it is there
+  info->CAPI->RemoveFile(argv[2]);
+
   /* add customs commands to generate the source file */
   ccArgs[0] = "-E";
   ccArgs[1] = "copy";
@@ -146,6 +149,14 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
                                        ccDep[0],
                                        0, 0);
 
+
+  ccArgs[1] = "echo";
+  ccArgs[2] = "Build has finished";
+  info->CAPI->AddCustomCommandToTarget(mf, "LoadedCommand",
+                                       file,
+                                       3, ccArgs,
+                                       CM_POST_BUILD);
+
   info->CAPI->Free(file);
 
   args[0] = "TEST_EXEC";
@@ -158,6 +169,13 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
     }
   info->CAPI->ExecuteCommand(mf,"SET",2,args);
   
+  // make sure we can find the source file
+  if (!info->CAPI->GetSource(mf,argv[1]))
+    {
+    info->CAPI->SetError(mf, "Source file could not be found!");
+    return 0;    
+    }
+
   return 1;
 }
 
