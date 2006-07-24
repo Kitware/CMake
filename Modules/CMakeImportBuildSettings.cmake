@@ -43,9 +43,16 @@ MACRO(CMAKE_IMPORT_BUILD_SETTINGS SETTINGS_FILE)
     # Check the C++ compiler setting.  If it is empty, the imported
     # project is not a C++ project, and doesn't need a matching compiler.
     IF(CMAKE_BUILD_SETTING_CXX_COMPILER)
-      STRING(COMPARE NOTEQUAL
-             "x${CMAKE_CXX_COMPILER}" "x${CMAKE_BUILD_SETTING_CXX_COMPILER}"
-             CMAKE_CXX_COMPILER_MISMATCH)
+      IF(WIN32)
+        STRING(TOLOWER "x${CMAKE_CXX_COMPILER}" COMPARE_CXX_LOCAL)
+        STRING(TOLOWER "x${CMAKE_BUILD_SETTING_CXX_COMPILER}" COMPARE_CXX_REMOTE)
+        STRING(COMPARE NOTEQUAL "${COMPARE_CXX_LOCAL}" "${COMPARE_CXX_REMOTE}"
+          CMAKE_CXX_COMPILER_MISMATCH)
+      ELSE(WIN32)
+        STRING(COMPARE NOTEQUAL
+          "x${CMAKE_CXX_COMPILER}" "x${CMAKE_BUILD_SETTING_CXX_COMPILER}"
+          CMAKE_CXX_COMPILER_MISMATCH)
+      ENDIF(WIN32)
     ENDIF(CMAKE_BUILD_SETTING_CXX_COMPILER)
 
     # Check the C build variation flags.
@@ -119,7 +126,7 @@ MACRO(CMAKE_IMPORT_BUILD_SETTINGS SETTINGS_FILE)
               "because C++ projects must use the same compiler.  "
               "If this message appears for more than one imported project, "
               "you have conflicting C++ compilers and will have to "
-              "re-build one of those projects.")
+              "re-build one of those projects. Was set to ${CMAKE_CXX_COMPILER}")
       SET(CMAKE_CXX_COMPILER ${CMAKE_BUILD_SETTING_CXX_COMPILER}
           CACHE STRING "C++ compiler imported from ${CMAKE_BUILD_SETTING_PROJECT_NAME}." FORCE)
     ENDIF(CMAKE_CXX_COMPILER_MISMATCH)
