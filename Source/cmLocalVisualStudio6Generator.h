@@ -17,7 +17,7 @@
 #ifndef cmLocalVisualStudio6Generator_h
 #define cmLocalVisualStudio6Generator_h
 
-#include "cmLocalGenerator.h"
+#include "cmLocalVisualStudioGenerator.h"
 
 class cmMakeDepend;
 class cmTarget;
@@ -31,7 +31,7 @@ class cmCustomCommand;
  * cmLocalVisualStudio6Generator produces a LocalUnix makefile from its
  * member this->Makefile.
  */
-class cmLocalVisualStudio6Generator : public cmLocalGenerator
+class cmLocalVisualStudio6Generator : public cmLocalVisualStudioGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.

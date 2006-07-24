@@ -1,7 +1,9 @@
 # - Find wxWindows (wxWidgets) installation 
 # This module finds if wxWindows/wxWidgets is installed and determines where 
 # the include files and libraries are. It also determines what the name of
-# the library is. This code sets the following variables:
+# the library is.
+# Please note this file is DEPRECATED and replaced by FindwxWidgets.cmake.
+# This code sets the following variables:
 #  
 #  WXWINDOWS_FOUND     = system has WxWindows 
 #  WXWINDOWS_LIBRARIES = path to the wxWindows libraries
@@ -16,17 +18,13 @@
 #                                Unix
 #  WXWINDOWS_DEFINITIONS      = extra defines
 # 
-# DEPRECATED
-#  CMAKE_WX_CAN_COMPILE
-#  WXWINDOWS_LIBRARY
-#  CMAKE_WX_CXX_FLAGS
-#  WXWINDOWS_INCLUDE_PATH
-#
 # OPTIONS 
 # If you need OpenGL support please 
 #  SET(WXWINDOWS_USE_GL 1) 
 # in your CMakeLists.txt *before* you include this file.
 # 
+#  HAVE_ISYSTEM      - true required to replace -I by -isystem on g++
+#
 # For convenience include Use_wxWindows.cmake in your project's
 # CMakeLists.txt using INCLUDE(Use_wxWindows). 
 # 
@@ -38,6 +36,13 @@
 # wxWidgets 2.6.x is supported for monolithic builds 
 # e.g. compiled  in wx/build/msw dir as:  
 #  nmake -f makefile.vc BUILD=debug SHARED=0 USE_OPENGL=1 MONOLITHIC=1
+#
+# DEPRECATED
+#
+#  CMAKE_WX_CAN_COMPILE
+#  WXWINDOWS_LIBRARY
+#  CMAKE_WX_CXX_FLAGS
+#  WXWINDOWS_INCLUDE_PATH
 #
 # AUTHOR
 # Jan Woetzel <http://www.mip.informatik.uni-kiel.de/~jw> (07/2003-01/2006)
@@ -606,7 +611,17 @@ ELSE(WIN32_STYLE_FIND)
       ##MESSAGE("DBG: WX_CONFIG_ARGS_LIBS=${WX_CONFIG_ARGS_LIBS}===")
       
       # set CXXFLAGS to be fed into CMAKE_CXX_FLAGS by the user:
+      IF (HAVE_ISYSTEM) # does the compiler support -isystem ?
+              IF (NOT APPLE) # -isystem seem sto be unsuppored on Mac
+                IF(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX )
+            IF (CMAKE_CXX_COMPILER MATCHES g\\+\\+)
       SET(CMAKE_WXWINDOWS_CXX_FLAGS "`${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE} --cxxflags|sed -e s/-I/-isystem/g`")
+            ELSE(CMAKE_CXX_COMPILER MATCHES g\\+\\+)
+              SET(CMAKE_WXWINDOWS_CXX_FLAGS "`${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE} --cxxflags`")
+            ENDIF(CMAKE_CXX_COMPILER MATCHES g\\+\\+)
+                ENDIF(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX )
+              ENDIF (NOT APPLE)
+      ENDIF (HAVE_ISYSTEM)
       ##MESSAGE("DBG: for compilation:
         ##CMAKE_WXWINDOWS_CXX_FLAGS=${CMAKE_WXWINDOWS_CXX_FLAGS}===")
 

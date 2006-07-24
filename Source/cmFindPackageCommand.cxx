@@ -56,6 +56,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 
   this->Name = args[0];
 
+  // Build a list of required components.
+  std::string components;
+  const char* components_sep = "";
   bool quiet = false;
   bool required = false;
   if(args.size() > 1)
@@ -74,11 +77,32 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         }
       else if(args[i] == "REQUIRED")
         {
+        // The package is required.
         required = true;
-        while (++i < args.size() && args[i] != "QUIET")
+
+        // Look for a list of required components.
+        while(++i < args.size())
           {
+          // Stop looking when a known keyword argument is
+          // encountered.
+          if((args[i] == "QUIET") ||
+             (args[i] == "REQUIRED"))
+            {
+            --i;
+            break;
+            }
+          else
+          {
+            // Set a variable telling the find script this component
+            // is required.
           std::string req_var = Name + "_FIND_REQUIRED_" + args[i];
           this->Makefile->AddDefinition(req_var.c_str(), "1");
+
+            // Append to the list of required components.
+            components += components_sep;
+            components += args[i];
+            components_sep = ";";
+            }
           }
         }
       else
@@ -89,6 +113,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         return false;
         }
       }
+
+    // Store the list of components.
+    std::string components_var = Name + "_FIND_COMPONENTS";
+    this->Makefile->AddDefinition(components_var.c_str(), components.c_str());
     }
 
   // See if there is a Find<name>.cmake module.

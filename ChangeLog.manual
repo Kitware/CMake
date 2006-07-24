@@ -1,5 +1,27 @@
 Changes in CMake 2.4.3
-* progress is now reported for each compile
+
+* Add support for CXX only projects
+
+* Better FindWxWidgets
+
+* Added FindBoose.cmake
+
+* add more fortran file extensions
+
+* Cpack supports multiple packages at the same time
+
+* Fix to FindKDE4 to look for kde4-config first
+
+* Support for env var CMAKE_CONFIG_TYPE in ctest
+
+* Fix for -DVAR=foo on the command line not saving to the cache
+
+* ENH: Added creation of XXX_FIND_COMPONENTS list of all components requested
+  withREQUIRED option.  This addresses the feature request in bug#3494.
+
+* Object files get safe names
+
+* progress is now reported with makefiles
 
 * location of CMakeTmp changed to a varible
 

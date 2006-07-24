@@ -414,7 +414,8 @@ int
 /*
 ** @LISTHASH_PREFIX@_list_dup() - copy an existing list
 */
-@LISTHASH_PREFIX@_list_t *
+/*
+static @LISTHASH_PREFIX@_list_t *
 @LISTHASH_PREFIX@_list_dup(@LISTHASH_PREFIX@_list_t *l)
 {
   @LISTHASH_PREFIX@_list_t *newlist;
@@ -429,12 +430,14 @@ int
 #endif
   return newlist;
 }
+*/
 
 
 /*
 ** @LISTHASH_PREFIX@_list_merge() - merge two lists into a new list
 */
-@LISTHASH_PREFIX@_list_t *
+/*
+static @LISTHASH_PREFIX@_list_t *
 @LISTHASH_PREFIX@_list_merge(@LISTHASH_PREFIX@_cmpfunc_t cmpfunc, int flags,
            @LISTHASH_PREFIX@_list_t *list1,
            @LISTHASH_PREFIX@_list_t *list2)
@@ -453,5 +456,6 @@ int
 
   return newlist;
 }
+*/
 
 

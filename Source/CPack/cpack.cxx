@@ -221,7 +221,7 @@ int main (int argc, char *argv[])
   cmGlobalGenerator cmgg;
   cmgg.SetCMakeInstance(&cminst);
   cmLocalGenerator* cmlg = cmgg.CreateLocalGenerator();
-  cmMakefile* mf = cmlg->GetMakefile();
+  cmMakefile* globalMF = cmlg->GetMakefile();
 
   bool cpackConfigFileSpecified = true;
   if ( cpackConfigFile.empty() )
@@ -247,7 +247,10 @@ int main (int argc, char *argv[])
       {
       cpackConfigFile = 
         cmSystemTools::CollapseFullPath(cpackConfigFile.c_str());
-      if ( !mf->ReadListFile(0, cpackConfigFile.c_str()) )
+      cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
+        "Read CPack configuration file: " << cpackConfigFile.c_str()
+        << std::endl);
+      if ( !globalMF->ReadListFile(0, cpackConfigFile.c_str()) )
         {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
           "Problem reding CPack config file: \""
@@ -265,44 +268,60 @@ int main (int argc, char *argv[])
 
     if ( !generator.empty() )
       {
-      mf->AddDefinition("CPACK_GENERATOR", generator.c_str());
+      globalMF->AddDefinition("CPACK_GENERATOR", generator.c_str());
       }
     if ( !cpackProjectName.empty() )
       {
-      mf->AddDefinition("CPACK_PACKAGE_NAME", cpackProjectName.c_str());
+      globalMF->AddDefinition("CPACK_PACKAGE_NAME", cpackProjectName.c_str());
       }
     if ( !cpackProjectVersion.empty() )
       {
-      mf->AddDefinition("CPACK_PACKAGE_VERSION", cpackProjectVersion.c_str());
+      globalMF->AddDefinition("CPACK_PACKAGE_VERSION",
+        cpackProjectVersion.c_str());
       }
     if ( !cpackProjectVendor.empty() )
       {
-      mf->AddDefinition("CPACK_PACKAGE_VENDOR", cpackProjectVendor.c_str());
+      globalMF->AddDefinition("CPACK_PACKAGE_VENDOR",
+        cpackProjectVendor.c_str());
       }
     if ( !cpackProjectDirectory.empty() )
       {
-      mf->AddDefinition("CPACK_PACKAGE_DIRECTORY",
+      globalMF->AddDefinition("CPACK_PACKAGE_DIRECTORY",
         cpackProjectDirectory.c_str());
       }
     if ( !cpackBuildConfig.empty() )
       {
-      mf->AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
+      globalMF->AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
       }
     cpackDefinitions::MapType::iterator cdit;
     for ( cdit = definitions.Map.begin();
       cdit != definitions.Map.end();
       ++cdit )
       {
-      mf->AddDefinition(cdit->first.c_str(), cdit->second.c_str());
+      globalMF->AddDefinition(cdit->first.c_str(), cdit->second.c_str());
       }
 
-    const char* gen = mf->GetDefinition("CPACK_GENERATOR");
-    if ( !gen )
+    const char* genList = globalMF->GetDefinition("CPACK_GENERATOR");
+    if ( !genList )
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
         "CPack generator not specified" << std::endl);
       parsed = 0;
       }
+    std::vector<std::string> generatorsVector;
+    cmSystemTools::ExpandListArgument(genList,
+      generatorsVector);
+    std::vector<std::string>::iterator it;
+    for ( it = generatorsVector.begin();
+      it != generatorsVector.end();
+      ++it )
+      {
+      const char* gen = it->c_str();
+      cmMakefile newMF(*globalMF);
+      cmMakefile* mf = &newMF;
+        {
+        cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
+          "Specified generator: " << gen << std::endl);
     if ( parsed && !mf->GetDefinition("CPACK_PACKAGE_NAME") )
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
@@ -316,7 +335,8 @@ int main (int argc, char *argv[])
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
         "CPack project version not specified" << std::endl
-        << "Specify CPACK_PACKAGE_VERSION, or CPACK_PACKAGE_VERSION_MAJOR, "
+            << "Specify CPACK_PACKAGE_VERSION, or "
+            "CPACK_PACKAGE_VERSION_MAJOR, "
         "CPACK_PACKAGE_VERSION_MINOR, and CPACK_PACKAGE_VERSION_PATCH."
         << std::endl);
       parsed = 0;
@@ -343,9 +363,10 @@ int main (int argc, char *argv[])
         !mf->GetDefinition("CPACK_INSTALL_CMAKE_PROJECTS") )
         {
           cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-          "Please specify build tree of the project that uses CMake using "
-          " CPACK_INSTALL_CMAKE_PROJECTS, specify CPACK_INSTALL_COMMANDS, or "
-          "specify CPACK_INSTALLED_DIRECTORIES."
+              "Please specify build tree of the project that uses CMake "
+              "using CPACK_INSTALL_CMAKE_PROJECTS, specify "
+              "CPACK_INSTALL_COMMANDS, or specify "
+              "CPACK_INSTALLED_DIRECTORIES."
             << std::endl);
           parsed = 0;
         }
@@ -416,6 +437,8 @@ int main (int argc, char *argv[])
     cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
       "Error when generating package: " << projName << std::endl);
     return 1;
+        }
+      }
     }
 
   return 0;

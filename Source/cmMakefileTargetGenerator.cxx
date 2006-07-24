@@ -85,6 +85,15 @@ void cmMakefileTargetGenerator::CreateRuleFile()
   this->BuildFileNameFull = this->TargetBuildDirectoryFull;
   this->BuildFileNameFull += "/build.make";
   
+  // Construct the rule file name.
+  this->ProgressFileName = this->TargetBuildDirectory;
+  this->ProgressFileName += "/progress.make";
+  this->ProgressFileNameFull = this->TargetBuildDirectoryFull;
+  this->ProgressFileNameFull += "/progress.make";
+
+  // reset the progress count
+  this->NumberOfProgressActions = 0;
+
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
   this->BuildFileStream = 
@@ -178,6 +187,15 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
                                      cmLocalGenerator::MAKEFILE)
     << "\n\n";
   
+  // Include the progress variables for the target.
+  *this->BuildFileStream
+    << "# Include the progress variables for this target.\n"
+    << this->LocalGenerator->IncludeDirective << " "
+    << this->Convert(this->ProgressFileNameFull.c_str(),
+                     cmLocalGenerator::HOME_OUTPUT,
+                     cmLocalGenerator::MAKEFILE)
+    << "\n\n";
+
   // make sure the depend file exists
   if (!cmSystemTools::FileExists(dependFileNameFull.c_str()))
     {
@@ -309,8 +327,12 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     this->ExtraContent.insert(obj);
     }
   this->Objects.push_back(obj);
-  std::string relativeObj = this->LocalGenerator->GetHomeRelativeOutputPath();
-  relativeObj += obj;
+
+  // TODO: Remove
+  //std::string relativeObj
+  //= this->LocalGenerator->GetHomeRelativeOutputPath();
+  //relativeObj += obj;
+
   // we compute some depends when writing the depend.make that we will also
   // use in the build.make, same with depMakeFile
   std::vector<std::string> depends;
@@ -346,6 +368,10 @@ cmMakefileTargetGenerator
   this->WriteObjectDependRules(source, depends);
 
   std::string relativeObj = this->LocalGenerator->GetHomeRelativeOutputPath();
+  if ( source.GetPropertyAsBool("MACOSX_CONTENT") )
+    {
+    relativeObj = "";
+    }
   relativeObj += obj;
   if(this->Makefile->GetDefinition("CMAKE_WINDOWS_OBJECT_PATH"))
     {
@@ -400,10 +426,6 @@ cmMakefileTargetGenerator
   std::vector<std::string> commands;
   
   // add in a progress call if needed
-  cmGlobalUnixMakefileGenerator3* gg =
-    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  int prog = gg->ShouldAddProgressRule();
-  
   std::string progressDir = this->Makefile->GetHomeOutputDirectory();
   progressDir += cmake::GetCMakeFilesDirectory();
   cmOStringStream progCmd;
@@ -411,12 +433,10 @@ cmMakefileTargetGenerator
   progCmd << this->LocalGenerator->Convert(progressDir.c_str(),
                                            cmLocalGenerator::FULL,
                                            cmLocalGenerator::SHELL);
-  if (prog)
-    {
-    progCmd << " " << prog;
-    this->LocalGenerator->ProgressFiles[this->Target->GetName()].
-      push_back(prog);
-    }
+  this->NumberOfProgressActions++;
+  progCmd << " $(CMAKE_PROGRESS_" 
+          << this->NumberOfProgressActions 
+          << ")";
   commands.push_back(progCmd.str());
   
   std::string buildEcho = "Building ";
@@ -688,6 +708,19 @@ void cmMakefileTargetGenerator
   std::string comment = this->LocalGenerator->ConstructComment(cc);
   if(!comment.empty())
     {
+    // add in a progress call if needed
+    std::string progressDir = this->Makefile->GetHomeOutputDirectory();
+    progressDir += cmake::GetCMakeFilesDirectory();
+    cmOStringStream progCmd;
+    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
+    progCmd << this->LocalGenerator->Convert(progressDir.c_str(),
+                                             cmLocalGenerator::FULL,
+                                             cmLocalGenerator::SHELL);
+    this->NumberOfProgressActions++;
+    progCmd << " $(CMAKE_PROGRESS_" 
+            << this->NumberOfProgressActions 
+            << ")";
+    commands.push_back(progCmd.str());
     this->LocalGenerator
       ->AppendEcho(commands, comment.c_str(),
                    cmLocalUnixMakefileGenerator3::EchoGenerate);
@@ -1023,3 +1056,40 @@ void cmMakefileTargetGenerator::RemoveForbiddenFlags(const char* flagVar,
     cmSystemTools::ReplaceString(linkFlags, i->c_str(), "");
     }
 }
+
+void cmMakefileTargetGenerator::WriteProgressVariables(unsigned long total,
+                                                       unsigned long &current)
+{
+  cmGeneratedFileStream *progressFileStream = 
+    new cmGeneratedFileStream(this->ProgressFileNameFull.c_str());
+  if(!progressFileStream)
+    {
+    return;
+    }
+
+  unsigned long num;
+  unsigned long i;
+  for (i = 1; i <= this->NumberOfProgressActions; ++i)
+    {
+    *progressFileStream
+      << "CMAKE_PROGRESS_" << i << " = ";
+    if (total <= 100)
+      {
+      num = i + current;
+      *progressFileStream << num;
+      this->LocalGenerator->ProgressFiles[this->Target->GetName()]
+        .push_back(num);
+      }
+    else if (((i+current)*100)/total > ((i-1+current)*100)/total)
+      {
+      num = ((i+current)*100)/total;
+      *progressFileStream << num;
+      this->LocalGenerator->ProgressFiles[this->Target->GetName()]
+        .push_back(num);
+      }
+    *progressFileStream << "\n";
+    }
+  current += this->NumberOfProgressActions;
+  delete progressFileStream;
+}
+

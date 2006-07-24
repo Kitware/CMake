@@ -110,6 +110,8 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
           propertyPairs.push_back(*j);
           propertyPairs.push_back("EXTRA_CONTENT");
           propertyPairs.push_back("1");
+          propertyPairs.push_back("MACOSX_CONTENT");
+          propertyPairs.push_back("1");
           propertyPairs.push_back("KEEP_EXTENSION");
           propertyPairs.push_back("1");
           propertyPairs.push_back("LANGUAGE");

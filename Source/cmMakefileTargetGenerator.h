@@ -50,6 +50,17 @@ public:
      with this target */
   virtual void WriteRuleFiles() = 0;
 
+  /* the main entry point for this class. Writes the Makefiles associated
+     with this target */
+  virtual void WriteProgressVariables(unsigned long total, 
+                                      unsigned long &current);
+  
+  /* return the number of actions that have progress reporting on them */
+  virtual unsigned long GetNumberOfProgressActions() {
+    return this->NumberOfProgressActions;}
+
+  const char *GetTargetName() { return this->TargetName.c_str(); }
+
 protected:
 
   // create the file and directory etc
@@ -114,6 +125,11 @@ protected:
   // the full path to the build file
   std::string BuildFileName;
   std::string BuildFileNameFull;
+
+  // the full path to the progress file
+  std::string ProgressFileName;
+  std::string ProgressFileNameFull;
+  unsigned long NumberOfProgressActions;
 
   // the path to the directory the build file is in
   std::string TargetBuildDirectory;

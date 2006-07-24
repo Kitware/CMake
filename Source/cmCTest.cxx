@@ -289,6 +289,10 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
     {
     this->BlockTestErrorDiagnostics();
     }
+  else
+    {
+    cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
+    }
 
   this->BinaryDir = binary_dir;
   cmSystemTools::ConvertToUnixSlashes(this->BinaryDir);
@@ -1336,6 +1340,12 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       this->ConfigType = args[i];
       cmSystemTools::ReplaceString(this->ConfigType, ".\\", "");
+      if ( !this->ConfigType.empty() )
+        {
+        std::string confTypeEnv
+          = "CMAKE_CONFIG_TYPE=" + this->ConfigType;
+        cmSystemTools::PutEnv(confTypeEnv.c_str());
+        }
       }
 
     if(this->CheckArgument(arg, "--debug"))
@@ -2050,8 +2060,11 @@ void cmCTest::PopulateCustomInteger(cmMakefile* mf, const char* def, int& val)
 std::string cmCTest::GetShortPathToFile(const char* cfname)
 {
   const std::string& sourceDir
-    = this->GetCTestConfiguration("SourceDirectory");
-  const std::string& buildDir = this->GetCTestConfiguration("BuildDirectory");
+    = cmSystemTools::CollapseFullPath(
+        this->GetCTestConfiguration("SourceDirectory").c_str());
+  const std::string& buildDir
+    = cmSystemTools::CollapseFullPath(
+        this->GetCTestConfiguration("BuildDirectory").c_str());
   std::string fname = cmSystemTools::CollapseFullPath(cfname);
 
   // Find relative paths to both directories

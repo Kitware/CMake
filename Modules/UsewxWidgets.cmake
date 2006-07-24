@@ -1,4 +1,67 @@
-# - Same as Use_wxWindows
+# - Convenience include for using wxWidgets library
+# Finds if wxWidgets is installed 
+# and set the appropriate libs, incdirs, flags etc. 
+# INCLUDE_DIRECTORIES, LINK_DIRECTORIES and ADD_DEFINITIONS
+# are called.
 #
+# USAGE
+#  SET( wxWidgets_USE_LIBS  gl xml xrc ) # optionally: more than wx std libs
+#  FIND_PACKAGE(wxWidgets REQUIRED)
+#  INCLUDE( ${xWidgets_USE_FILE} )
+#  ... add your targets here, e.g. ADD_EXECUTABLE/ ADD_LIBRARY ...
+#  TARGET_LINK_LIBRARIERS( <yourWxDependantTarget>  ${wxWidgets_LIBRARIES})
+# 
+# DEPRECATED
+#  LINK_LIBRARIES is not called in favor of adding dependencies per target.
+#
+# AUTHOR
+#  Jan Woetzel <jw -at- mip.informatik.uni-kiel.de>
 
-INCLUDE(Use_wxWindows)
+
+# debug message and logging. 
+# comment these out for distribution
+IF    (NOT LOGFILE )
+  #  SET(LOGFILE "${PROJECT_BINARY_DIR}/CMakeOutput.log")
+ENDIF (NOT LOGFILE )
+MACRO(MSG _MSG)
+  #  FILE(APPEND ${LOGFILE} "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}):   ${_MSG}\n")
+  #  MESSAGE(STATUS "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}): ${_MSG}")
+ENDMACRO(MSG)
+
+
+MSG("wxWidgets_FOUND=${wxWidgets_FOUND}")
+IF   (wxWidgets_FOUND)
+  IF   (wxWidgets_INCLUDE_DIRS)
+    INCLUDE_DIRECTORIES( ${wxWidgets_INCLUDE_DIRS} )
+    MSG("wxWidgets_INCLUDE_DIRS=${wxWidgets_INCLUDE_DIRS}")
+  ENDIF(wxWidgets_INCLUDE_DIRS)
+
+  IF   (wxWidgets_LIBRARY_DIRS)
+    LINK_DIRECTORIES(${wxWidgets_LIBRARY_DIRS})
+    MSG("wxWidgets_LIBRARY_DIRS=${wxWidgets_LIBRARY_DIRS}")
+  ENDIF(wxWidgets_LIBRARY_DIRS)
+
+  IF   (wxWidgets_DEFINITIONS)
+    ADD_DEFINITIONS( ${wxWidgets_DEFINITIONS} )
+    MSG("wxWidgets_DEFINITIONS=${wxWidgets_DEFINITIONS}")
+  ENDIF(wxWidgets_DEFINITIONS)  
+
+  IF   (wxWidgets_CXX_FLAGS)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${wxWidgets_CXX_FLAGS}")
+    MSG("wxWidgets_CXX_FLAGS=${wxWidgets_CXX_FLAGS}")
+  ENDIF(wxWidgets_CXX_FLAGS)
+
+  # DEPRECATED JW
+  # just for backward compatibility: add deps to all targets
+  # library projects better use advanced FIND_PACKAGE(wxWidgets) directly.
+  #IF(wxWidgets_LIBRARIES)
+  #  LINK_LIBRARIES(${wxWidgets_LIBRARIES})
+  #  # BUG: str too long:  MSG("wxWidgets_LIBRARIES=${wxWidgets_LIBRARIES}")
+  #  IF(LOGFILE)
+  #    FILE(APPEND ${LOGFILE} "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}):   ${wxWidgets_LIBRARIES}\n")
+  #  ENDIF(LOGFILE)
+  #ENDIF(wxWidgets_LIBRARIES)  
+
+ELSE (wxWidgets_FOUND)
+  MESSAGE("wxWidgets requested but not found.")
+ENDIF(wxWidgets_FOUND)

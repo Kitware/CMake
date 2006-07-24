@@ -724,7 +724,6 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
   size_t& tick, size_t tick_len, std::ofstream& ofs,
   t_BuildProcessingQueueType* queue)
 {
-#undef cerr
   const std::string::size_type tick_line_len = 50;
   const char* ptr;
   for ( ptr = data; ptr < data+length; ptr ++ )

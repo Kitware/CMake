@@ -1593,8 +1593,9 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
   else if(cp->PipeFileSTDIN)
     {
     /* Create a handle to read a file for stdin.  */
-    HANDLE fin = CreateFile(cp->PipeFileSTDIN, GENERIC_READ,
-                            FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    HANDLE fin = CreateFile(cp->PipeFileSTDIN, GENERIC_READ|GENERIC_WRITE,
+                            FILE_SHARE_READ|FILE_SHARE_WRITE,
+                            0, OPEN_EXISTING, 0, 0);
     if(fin == INVALID_HANDLE_VALUE)
       {
       return 0;

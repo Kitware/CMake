@@ -1,3 +1,6 @@
+
+MESSAGE("${CMAKE_CURRENT_FILE} is deprecated, please use FindwxWidgets.cmake instead.")
+
 #
 # FindwxW.cmake
 # v1.01 2005-05-27
@@ -13,6 +16,7 @@
 #  WXWIDGETS_CXX_FLAGS        = compiler flags for building wxWindows
 #  WXWIDGETS_INCLUDE_DIR    = all include path of wxWindows
 #  WXWIDGETS_DEFINITIONS  = all flags of wxWindows
+
 
 # NOTE: This module REQUIRES that an environment variable named WXWIN
 # be set to the base wxWidgets installation directory.

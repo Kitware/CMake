@@ -100,17 +100,75 @@ void cmLocalUnixMakefileGenerator3::Generate()
   
   // Write the cmake file with information for this directory.
   this->WriteDirectoryInformationFile();
+}
+
+//----------------------------------------------------------------------------
+// return info about progress actions
+unsigned long cmLocalUnixMakefileGenerator3::GetNumberOfProgressActions()
+{
+  unsigned long result = 0;
+
+  for (std::vector<cmMakefileTargetGenerator *>::iterator mtgIter = 
+         this->TargetGenerators.begin();
+       mtgIter != this->TargetGenerators.end(); ++mtgIter)
+    {
+    result += (*mtgIter)->GetNumberOfProgressActions();
+    }  
+  return result;
+}
+
+//----------------------------------------------------------------------------
+// return info about progress actions
+unsigned long cmLocalUnixMakefileGenerator3
+::GetNumberOfProgressActionsForTarget(const char *name)
+{
+  for (std::vector<cmMakefileTargetGenerator *>::iterator mtgIter = 
+         this->TargetGenerators.begin();
+       mtgIter != this->TargetGenerators.end(); ++mtgIter)
+    {
+    if (!strcmp(name,(*mtgIter)->GetTargetName()))
+      {
+      return (*mtgIter)->GetNumberOfProgressActions();
+      }
+    }  
+  return 0;
+}
   
+
+//----------------------------------------------------------------------------
+// writes the progreess variables and also closes out the targets
+void cmLocalUnixMakefileGenerator3
+::WriteProgressVariables(unsigned long total,
+                         unsigned long &current)
+{
   // delete the makefile target generator objects
   for (std::vector<cmMakefileTargetGenerator *>::iterator mtgIter = 
          this->TargetGenerators.begin();
        mtgIter != this->TargetGenerators.end(); ++mtgIter)
     {
+    (*mtgIter)->WriteProgressVariables(total,current);
     delete *mtgIter;
     }  
   this->TargetGenerators.clear();
 }
 
+void cmLocalUnixMakefileGenerator3::WriteAllProgressVariable()
+{
+  // write the top level progress for the all target
+  std::string progressFileNameFull = 
+    this->ConvertToFullPath("progress.make");
+  cmGeneratedFileStream ruleFileStream(progressFileNameFull.c_str());
+  if(!ruleFileStream)
+    {
+    return;
+    }
+
+  cmGlobalUnixMakefileGenerator3 *gg = 
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+
+  ruleFileStream << "CMAKE_ALL_PROGRESS = " 
+                 << gg->GetNumberOfProgressActionsInAll(this);
+}
 
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::ConfigureOutputPaths()
@@ -191,6 +249,12 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
     {
     ruleFileStream.SetCopyIfDifferent(true);
     }
+  
+  // Include the progress variables for the target.
+  ruleFileStream
+    << "# Include the progress variables for this target.\n"
+    << this->IncludeDirective << " "
+    << "progress.make\n\n";
   
   // write the all rules
   this->WriteLocalAllRules(ruleFileStream);
@@ -1001,75 +1065,6 @@ std::string cmLocalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
-std::string&
-cmLocalUnixMakefileGenerator3::CreateSafeUniqueObjectFileName(const char* sin)
-{
-  // Look for an existing mapped name for this object file.
-  std::map<cmStdString,cmStdString>::iterator it =
-    this->UniqueObjectNamesMap.find(sin);
-
-  // If no entry exists create one.
-  if(it == this->UniqueObjectNamesMap.end())
-    {
-    // Start with the original name.
-    std::string ssin = sin;
-
-    // Avoid full paths by removing leading slashes.
-    std::string::size_type pos = 0;
-    for(;pos < ssin.size() && ssin[pos] == '/'; ++pos);
-    ssin = ssin.substr(pos);
-
-    // Avoid full paths by removing colons.
-    cmSystemTools::ReplaceString(ssin, ":", "_");
-
-    // Avoid relative paths that go up the tree.
-    cmSystemTools::ReplaceString(ssin, "../", "__/");
-
-    // Avoid spaces.
-    cmSystemTools::ReplaceString(ssin, " ", "_");
-
-    // Mangle the name if necessary.
-    if(this->Makefile->IsOn("CMAKE_MANGLE_OBJECT_FILE_NAMES"))
-      {
-      bool done;
-      int cc = 0;
-      char rpstr[100];
-      sprintf(rpstr, "_p_");
-      cmSystemTools::ReplaceString(ssin, "+", rpstr);
-      std::string sssin = sin;
-      do
-        {
-        done = true;
-        for ( it = this->UniqueObjectNamesMap.begin();
-              it != this->UniqueObjectNamesMap.end();
-              ++ it )
-          {
-          if ( it->second == ssin )
-            {
-            done = false;
-            }
-          }
-        if ( done )
-          {
-          break;
-          }
-        sssin = ssin;
-        cmSystemTools::ReplaceString(ssin, "_p_", rpstr);
-        sprintf(rpstr, "_p%d_", cc++);
-        }
-      while ( !done );
-      }
-
-    // Insert the newly mapped object file name.
-    std::map<cmStdString, cmStdString>::value_type e(sin, ssin);
-    it = this->UniqueObjectNamesMap.insert(e).first;
-    }
-
-  // Return the map entry.
-  return it->second;
-}
-
-//----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
 ::CreateMakeVariable(const char* sin, const char* s2in)
@@ -1450,22 +1445,12 @@ void cmLocalUnixMakefileGenerator3
   progressDir += cmake::GetCMakeFilesDirectory();
     {
     cmOStringStream progCmd;
-    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # src files
+    progCmd << 
+      "$(CMAKE_COMMAND) -E cmake_progress_start ";
     progCmd << this->Convert(progressDir.c_str(),
                              cmLocalGenerator::FULL,
                              cmLocalGenerator::SHELL);
-    cmGlobalUnixMakefileGenerator3 *gg = 
-      static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-    int n = gg->GetNumberOfSourceFiles();
-    if(n > 100)
-      {
-      n = 100;
-      }
-    if (this->Parent)
-      {
-      n = 0;
-      }
-    progCmd << " " << n;
+    progCmd << " $(CMAKE_ALL_PROGRESS)";
     commands.push_back(progCmd.str());
     }
   std::string mf2Dir = cmake::GetCMakeFilesDirectoryPostSlash();
@@ -1475,7 +1460,6 @@ void cmLocalUnixMakefileGenerator3
   this->CreateCDCommand(commands,
                                 this->Makefile->GetHomeOutputDirectory(),
                                 this->Makefile->GetStartOutputDirectory());
-  if (!this->Parent)
     {
     cmOStringStream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
@@ -1656,49 +1640,12 @@ cmLocalUnixMakefileGenerator3
                     const cmSourceFile& source,
                     std::string* nameWithoutTargetDir)
 {
-  // If the source file is located below the current binary directory
-  // then use that relative path for the object file name.
-  std::string objectName = this->Convert(source.GetFullPath().c_str(),
-                                         START_OUTPUT);
-  if(cmSystemTools::FileIsFullPath(objectName.c_str()) ||
-     objectName.empty() || objectName[0] == '.')
+  // Get the object file name independent of target.
+  std::string objectName = this->GetObjectFileNameWithoutTarget(source);
+  if(nameWithoutTargetDir)
     {
-    // If the source file is located below the current source
-    // directory then use that relative path for the object file name.
-    // Otherwise just use the relative path from the current binary
-    // directory.
-    std::string relFromSource = this->Convert(source.GetFullPath().c_str(),
-                                              START);
-    if(!cmSystemTools::FileIsFullPath(relFromSource.c_str()) &&
-       !relFromSource.empty() && relFromSource[0] != '.')
-      {
-      objectName = relFromSource;
-      }
+    *nameWithoutTargetDir = objectName;
     }
-
-  // Replace the original source file extension with the object file
-  // extension.
-  std::string::size_type dot_pos = objectName.rfind(".");
-  if(dot_pos != std::string::npos)
-    {
-    objectName = objectName.substr(0, dot_pos);
-    }
-  if ( source.GetPropertyAsBool("KEEP_EXTENSION") )
-    {
-    if ( !source.GetSourceExtension().empty() )
-      {
-      objectName += "." + source.GetSourceExtension();
-      }
-    }
-  else
-    {
-    objectName +=
-      this->GlobalGenerator->GetLanguageOutputExtensionFromExtension(
-        source.GetSourceExtension().c_str());
-    }
-
-  // Convert to a safe name.
-  objectName = this->CreateSafeUniqueObjectFileName(objectName.c_str());
 
   // Prepend the target directory.
   std::string obj;
@@ -1706,6 +1653,7 @@ cmLocalUnixMakefileGenerator3
     source.GetProperty("MACOSX_PACKAGE_LOCATION");
   if ( fileTargetDirectory )
     {
+    objectName = cmSystemTools::GetFilenameName(objectName.c_str());
     std::string targetName;
     std::string targetNameReal;
     target.GetExecutableNames(targetName, targetNameReal,
@@ -1736,10 +1684,6 @@ cmLocalUnixMakefileGenerator3
     }
   obj += "/";
   obj += objectName;
-  if(nameWithoutTargetDir)
-    {
-    *nameWithoutTargetDir = objectName;
-    }
   return obj;
 }
 

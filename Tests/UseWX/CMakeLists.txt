@@ -1,9 +1,7 @@
-PROJECT (UsewxWindows)
+PROJECT (UsewxWidgets)
 
-INCLUDE( ${CMAKE_ROOT}/Modules/Use_wxWindows.cmake)
+FIND_PACKAGE(wxWidgets REQUIRED)
+INCLUDE( ${wxWidgets_USE_FILE} )
 
 ADD_EXECUTABLE (UseWX WIN32 WX.cxx)
-
-#TODO: 
-#- dll linking is not working on WIN32, need to '-DWXUSINGDLL' to preprocessor
-
+TARGET_LINK_LIBRARIES(UseWX ${wxWidgets_LIBRARIES} )

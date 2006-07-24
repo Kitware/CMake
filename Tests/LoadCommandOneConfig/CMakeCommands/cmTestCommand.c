@@ -20,6 +20,9 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
   char buffer[1024];
   void *source_file;
   char *args[2];
+  char *ccArgs[4];
+  char *ccDep[1];
+  char *ccOut[1];
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
  
   cmVTKWrapTclData *cdata = 
@@ -72,8 +75,6 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
   info->CAPI->DisplaySatus(mf, str);
   info->CAPI->Free(str);
 
-  info->CAPI->Free(file);
-
   info->CAPI->DisplaySatus(mf, info->CAPI->GetProjectName(mf));
   info->CAPI->DisplaySatus(mf, info->CAPI->GetHomeDirectory(mf));
   info->CAPI->DisplaySatus(mf, info->CAPI->GetHomeOutputDirectory(mf));
@@ -117,8 +118,35 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
 
   info->CAPI->DestroySourceFile(source_file);
 
-  srcs =  "LoadedCommand.cxx";
+  srcs =  argv[2];
   info->CAPI->AddExecutable(mf,"LoadedCommand",1, &srcs, 0);
+
+  /* add customs commands to generate the source file */
+  ccArgs[0] = "-E";
+  ccArgs[1] = "copy";
+  ccArgs[2] = argv[0];
+  ccArgs[3] = argv[1];
+  ccDep[0] = ccArgs[2];
+  ccOut[0] = ccArgs[3];
+  info->CAPI->AddCustomCommand(mf, "LoadedCommand.cxx.in",
+                               file,
+                               4, ccArgs,
+                               1, ccDep,
+                               1, ccOut,
+                               "LoadedCommand");
+  
+
+  ccArgs[2] = argv[1];
+  ccArgs[3] = argv[2];
+  ccDep[0] = ccArgs[2];
+  ccOut[0] = ccArgs[3];
+  info->CAPI->AddCustomCommandToOutput(mf, ccOut[0],
+                                       file,
+                                       4, ccArgs,
+                                       ccDep[0],
+                                       0, 0);
+
+  info->CAPI->Free(file);
 
   args[0] = "TEST_EXEC";
   args[1] = "TRUE";

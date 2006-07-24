@@ -83,7 +83,8 @@ struct gzStruct GZStruct;
 #endif
 #endif
 
-int libtar_gzopen(void* call_data, const char *pathname, int oflags, mode_t mode)
+static int libtar_gzopen(void* call_data, const char *pathname,
+  int oflags, mode_t mode)
 {
   char *gzoflags;
   int fd;
@@ -126,19 +127,19 @@ int libtar_gzopen(void* call_data, const char *pathname, int oflags, mode_t mode
   return fd;
 }
 
-int libtar_gzclose(void* call_data)
+static int libtar_gzclose(void* call_data)
 {
   struct gzStruct* gzf = (struct gzStruct*)call_data;
   return cm_zlib_gzclose(gzf->GZFile);
 }
 
-ssize_t libtar_gzread(void* call_data, void* buf, size_t count)
+static ssize_t libtar_gzread(void* call_data, void* buf, size_t count)
 {
   struct gzStruct* gzf = (struct gzStruct*)call_data;
   return cm_zlib_gzread(gzf->GZFile, buf, count);
 }
 
-ssize_t libtar_gzwrite(void* call_data, const void* buf, size_t count)
+static ssize_t libtar_gzwrite(void* call_data, const void* buf, size_t count)
 {
   struct gzStruct* gzf = (struct gzStruct*)call_data;
   return cm_zlib_gzwrite(gzf->GZFile, (void*)buf, count);
@@ -155,7 +156,7 @@ tartype_t gztype = {
 #endif /* HAVE_LIBZ */
 
 
-int
+static int
 create(char *tarfile, char *rootdir, libtar_list_t *l)
 {
   TAR *t;
@@ -212,7 +213,7 @@ create(char *tarfile, char *rootdir, libtar_list_t *l)
 }
 
 
-int
+static int
 list(char *tarfile)
 {
   TAR *t;
@@ -272,7 +273,7 @@ list(char *tarfile)
 }
 
 
-int
+static int
 extract(char *tarfile, char *rootdir)
 {
   TAR *t;
@@ -316,7 +317,7 @@ extract(char *tarfile, char *rootdir)
 }
 
 
-void
+static void
 usage()
 {
   printf("Usage: %s [-C rootdir] [-g] [-z] -x|-t filename.tar\n",

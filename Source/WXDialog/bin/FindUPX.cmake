@@ -5,12 +5,9 @@
 # UPX_FOUND             Is set to 1 when upx is found
 
 FIND_PATH(UPX_PROGRAM_PATH upx.exe
-    "c:\Program Files\upx"
-    "d:\Program Files\upx"
-    "e:\Program Files\upx"
-    "f:\Program Files\upx"
-    "g:\Program Files\upx"
-    "h:\Program Files\upx"
+  ${UPX_DIR}
+  $ENV{UPX_DIR}
+  "$ENV{ProgramFiles}/upx"
   )
   
 # when found, note this as target

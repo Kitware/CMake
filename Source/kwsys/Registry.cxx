@@ -211,7 +211,7 @@ bool Registry::ReadValue(const char *subkey,
   const char **value)
 {
   *value = 0;
-  bool res = true;
+  bool res = false;
   bool open = false;
   if ( ! value )
     {
@@ -241,7 +241,7 @@ bool Registry::ReadValue(const char *subkey,
 //----------------------------------------------------------------------------
 bool Registry::DeleteKey(const char *subkey, const char *key)
 {
-  bool res = true;
+  bool res = false;
   bool open = false;
   if ( !m_Opened )
     {
@@ -272,7 +272,7 @@ bool Registry::DeleteKey(const char *subkey, const char *key)
 //----------------------------------------------------------------------------
 bool Registry::DeleteValue(const char *subkey, const char *key)
 {
-  bool res = true;
+  bool res = false;
   bool open = false;
   if ( !m_Opened )
     {
@@ -713,7 +713,7 @@ char *RegistryHelper::Strip(char *str)
     }
   len = strlen(str);
   nstr = str;
-  for( cc=0; cc<(int)len; cc++ )
+  for( cc=0; cc < static_cast<int>(len); cc++ )
     {
     if ( !isspace( *nstr ) )
       {
@@ -721,7 +721,7 @@ char *RegistryHelper::Strip(char *str)
       }
     nstr ++;
     }
-  for( cc=int(strlen(nstr)-1); cc>=0; cc-- )
+  for( cc= static_cast<int>(strlen(nstr))-1; cc>=0; cc-- )
     {
     if ( !isspace( nstr[cc] ) )
       {

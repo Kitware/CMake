@@ -1655,6 +1655,7 @@ bool cmCTestTestHandler::SetTestsProperties(
 bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
 {
   const std::string& testname = args[0];
+  cmCTestLog(this->CTest, DEBUG, "Add test: " << args[0] << std::endl);
   if (this->UseExcludeRegExpFlag &&
     this->UseExcludeRegExpFirst &&
     this->ExcludeTestsRegularExpression.find(testname.c_str()))
@@ -1706,6 +1707,9 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.Name = testname;
   test.Args = args;
   test.Directory = cmSystemTools::GetCurrentWorkingDirectory();
+  cmCTestLog(this->CTest, DEBUG, "Set test directory: "
+    << test.Directory << std::endl);
+  
   test.IsInBasedOnREOptions = true;
   test.WillFail = false;
   if (this->UseIncludeRegExpFlag &&

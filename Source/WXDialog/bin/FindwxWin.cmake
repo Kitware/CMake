@@ -1,3 +1,8 @@
+
+
+MESSAGE("${CMAKE_CURRENT_FILE} is deprecated, please use FindwxWidgets.cmake instead.")
+
+
 ##---------------------------------------------------------------------------
 ## $RCSfile$
 ## $Source$

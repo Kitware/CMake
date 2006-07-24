@@ -16,6 +16,7 @@ SET_SOURCE_FILES_PROPERTIES(
 
 SET_SOURCE_FILES_PROPERTIES(
   SomeRandomFile.txt
+  "${CMake_SOURCE_DIR}/ChangeLog.txt"
   PROPERTIES
   MACOSX_PACKAGE_LOCATION MacOS
   )
@@ -28,13 +29,15 @@ ADD_EXECUTABLE(BundleTest
   MACOSX_BUNDLE
   BundleTest.cxx
   SomeRandomFile.txt
+  "${CMake_SOURCE_DIR}/ChangeLog.txt"
   "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
   )
 
 TARGET_LINK_LIBRARIES(BundleTest BundleTestLib)
 
 # Test bundle installation.
-INSTALL(TARGETS BundleTestLib DESTINATION Application/BundleTestExe.app/Contents/Plugins)
+#INSTALL(TARGETS BundleTestLib DESTINATION Application/BundleTestExe.app/Contents/Plugins)
+INSTALL(TARGETS BundleTestLib DESTINATION Application/SecondBundleExe.app/Contents/Plugins)
 INSTALL(TARGETS BundleTest DESTINATION Application)
 
 # Test whether bundles respect the output name.  Since the library is
@@ -85,3 +88,5 @@ IF(EXISTS /usr/lib/libtcl.dylib
   MESSAGE("frame: ${TCL}")
 ENDIF(EXISTS /usr/lib/libtcl.dylib
   AND EXISTS /System/Library/Frameworks/tcl.framework)
+
+SUBDIRS(BundleSubDir)

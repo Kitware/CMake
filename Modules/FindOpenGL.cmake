@@ -52,6 +52,7 @@ IF (WIN32)
   ENDIF (CYGWIN)
 
 ELSE (WIN32)
+  IF(NOT APPLE)
 
   # The first line below is to make sure that the proper headers
   # are used on a Linux machine with the NVidia drivers installed.
@@ -116,6 +117,7 @@ ELSE (WIN32)
           /usr/shlib
   )
 
+  ENDIF(NOT APPLE)
 ENDIF (WIN32)
 
 SET( OPENGL_FOUND "NO" )

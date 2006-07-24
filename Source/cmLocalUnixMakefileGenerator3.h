@@ -78,6 +78,10 @@ public:
   // write the main variables used by the makefiles
   void WriteMakeVariables(std::ostream& makefileStream);
 
+  // write the progress variables used by the makefiles
+  void WriteProgressVariables(unsigned long total, unsigned long &current);
+  void WriteAllProgressVariable();
+
   /**
    * If true, then explicitly pass MAKEFLAGS on the make all target for makes
    * that do not use environment variables.
@@ -165,7 +169,6 @@ public:
 
   static std::string ConvertToQuotedOutputPath(const char* p);
 
-  std::string& CreateSafeUniqueObjectFileName(const char* sin);
   std::string CreateMakeVariable(const char* sin, const char* s2in);
 
   // cleanup the name of a potential target
@@ -207,6 +210,10 @@ public:
   
   std::map<cmStdString,std::vector<cmTarget *> > GetLocalObjectFiles()
     { return this->LocalObjectFiles;}
+
+  // return info about progress actions
+  unsigned long GetNumberOfProgressActions();
+  unsigned long GetNumberOfProgressActionsForTarget(const char *);
 
 protected:
   // these two methods just compute reasonable values for LibraryOutputPath
@@ -319,7 +326,6 @@ private:
   std::vector<cmMakefileTargetGenerator *> TargetGenerators;
   std::map<cmStdString, cmStdString> MakeVariableMap;
   std::map<cmStdString, cmStdString> ShortMakeVariableMap;
-  std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
 };
 
 #endif

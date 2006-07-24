@@ -1,3 +1,7 @@
+
+MESSAGE("${CMAKE_CURRENT_FILE} is deprecated, please use FindwxWidgets.cmake instead.")
+
+
 #
 # UsewxW.cmake
 # v1.0 2005-05-27

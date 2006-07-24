@@ -34,15 +34,14 @@ static char *rcsid = "$OpenBSD: strlcpy.c,v 1.4 1999/05/01 18:56:41 millert Exp 
 #include <sys/types.h>
 #include <string.h>
 
+size_t strlcpy(char *dst, const char *src, size_t siz);
+
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters
  * will be copied.  Always NUL terminates (unless siz == 0).
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
-size_t strlcpy(dst, src, siz)
-  char *dst;
-  const char *src;
-  size_t siz;
+size_t strlcpy(char *dst, const char *src, size_t siz)
 {
   register char *d = dst;
   register const char *s = src;

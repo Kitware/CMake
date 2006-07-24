@@ -31,10 +31,16 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
   const char* cacheValue
     = this->Makefile->GetDefinition(define);
   std::string makeprogram = args[1];
+  std::string configType = "Release";
+  const char* cfg = getenv("CMAKE_CONFIG_TYPE");
+  if ( cfg )
+    {
+    configType = cfg;
+    }
   std::string makecommand = this->Makefile->GetLocalGenerator()
     ->GetGlobalGenerator()->GenerateBuildCommand
     (makeprogram.c_str(), this->Makefile->GetProjectName(), 0,
-     0, "Release", true, false);
+     0, configType.c_str(), true, false);
 
   if(cacheValue)
     {
