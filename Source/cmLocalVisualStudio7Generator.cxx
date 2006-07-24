@@ -176,6 +176,7 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmTarget& tgt)
   std::string makefileIn = this->Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
+  makefileIn = cmSystemTools::CollapseFullPath(makefileIn.c_str());
   std::string comment = "Building Custom Rule ";
   comment += makefileIn;
   std::string args;

@@ -1339,13 +1339,17 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
         path.replace(0,1,homeEnv);
         }
       }
-
+    // remove trailing slash if the path is more than 
+    // a single /
     pathCString = path.c_str();
-    if (*(pathCString+(path.size()-1)) == '/')
+    if(path.size() > 1 && *(pathCString+(path.size()-1)) == '/')
       {
-      path = path.substr(0, path.size()-1);
+      // if it is c:/ then do not remove the trailing slash
+      if(!((path.size() == 3 && pathCString[1] == ':')))
+        {
+        path = path.substr(0, path.size()-1);
+        }
       }
-
     }
 }
 
@@ -2503,7 +2507,6 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
   // Split the input path components.
   kwsys_stl::vector<kwsys_stl::string> path_components;
   SystemTools::SplitPath(in_path, path_components);
-
   // If the input path is relative, start with a base path.
   if(path_components[0].length() == 0)
     {
@@ -2891,7 +2894,16 @@ kwsys_stl::string SystemTools::GetFilenamePath(const kwsys_stl::string& filename
   kwsys_stl::string::size_type slash_pos = fn.rfind("/");
   if(slash_pos != kwsys_stl::string::npos)
     {
-    return fn.substr(0, slash_pos);
+    kwsys_stl::string  ret = fn.substr(0, slash_pos);
+    if(ret.size() == 2 && ret[1] == ':')
+      {
+      return ret + '/';
+      }
+    if(ret.size() == 0)
+      {
+      return "/";
+      }
+    return ret;
     }
   else
     {
