@@ -152,7 +152,7 @@ bool CheckStringOperations()
     res = false;    
     }
 
-  const char * cres = 
+  char * cres = 
     kwsys::SystemTools::AppendStrings("Mary Had A"," Little Lamb.");
   if (strcmp(cres,"Mary Had A Little Lamb."))
     {
