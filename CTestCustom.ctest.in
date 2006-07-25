@@ -19,6 +19,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "Redeclaration of .send..... with a different storage class specifier"
   "Utilities/cmexpat/"
   "is not used for resolving any symbol"
+  "Clock skew detected"
   "remark\\(1209"
   "stl_deque.h:1051"
   )
