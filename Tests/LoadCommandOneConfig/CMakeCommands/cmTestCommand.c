@@ -118,9 +118,6 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
 
   info->CAPI->DestroySourceFile(source_file);
 
-  /* remove an old file if it is there */
-  info->CAPI->RemoveFile(argv[2]);
-
   srcs =  argv[2];
   info->CAPI->AddExecutable(mf,"LoadedCommand",1, &srcs, 0);
 
