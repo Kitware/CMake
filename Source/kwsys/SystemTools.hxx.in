@@ -206,6 +206,7 @@ public:
   /** 
    * Return string with space added between capitalized words
    * (i.e. EatMyShorts becomes Eat My Shorts )
+   * (note that IEatShorts becomes IEat Shorts) 
    */
   static kwsys_stl::string AddSpaceBetweenCapitalizedWords(
     const kwsys_stl::string&);

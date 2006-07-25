@@ -886,6 +886,7 @@ kwsys_stl::string SystemTools::UnCapitalizedWords(const kwsys_stl::string& s)
   return n;
 }
 
+// only works for words with at least two letters
 kwsys_stl::string SystemTools::AddSpaceBetweenCapitalizedWords(
   const kwsys_stl::string& s)
 {
@@ -1035,7 +1036,7 @@ char* SystemTools::RemoveCharsButUpperHex(const char* str)
   char *ptr = clean_str;
   while (*str)
     {
-    if ((*str >= '0' && *str <= '9') || (*str >= 'A' && *str <= 'H'))
+    if ((*str >= '0' && *str <= '9') || (*str >= 'A' && *str <= 'F'))
       {
       *ptr++ = *str;
       }
