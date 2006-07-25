@@ -56,6 +56,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <termios.h>
+#include <signal.h>    /* sigprocmask */
 #endif
 
 // Windows API.  Some parts used even on cygwin.
@@ -3546,7 +3547,34 @@ void SystemTools::Delay(unsigned int msec)
 #ifdef _WIN32
   Sleep(msec);
 #else
-  usleep(msec * 1000);
+  // Block signals to make sure the entire sleep duration occurs.  If
+  // a signal were to arrive the sleep or usleep might return early
+  // and there is no way to accurately know how much time was really
+  // slept without setting up timers.
+  sigset_t newset;
+  sigset_t oldset;
+  sigfillset(&newset);
+  sigprocmask(SIG_BLOCK, &newset, &oldset);
+
+  // The sleep function gives 1 second resolution and the usleep
+  // function gives 1e-6 second resolution but on some platforms has a
+  // maximum sleep time of 1 second.  This could be re-implemented to
+  // use select with masked signals or pselect to mask signals
+  // atomically.  If select is given empty sets and zero as the max
+  // file descriptor but a non-zero timeout it can be used to block
+  // for a precise amount of time.
+  if(msec >= 1000)
+    {
+    sleep(msec / 1000);
+    usleep((msec % 1000) * 1000);
+    }
+  else
+    {
+    usleep(msec * 1000);
+    }
+
+  // Restore the signal mask to the previous setting.
+  sigprocmask(SIG_SETMASK, &oldset, 0);
 #endif
 }
 
