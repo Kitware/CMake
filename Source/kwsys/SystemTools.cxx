@@ -56,6 +56,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <termios.h>
+#include <signal.h>    /* sigprocmask */
 #endif
 
 // Windows API.  Some parts used even on cygwin.
@@ -886,6 +887,7 @@ kwsys_stl::string SystemTools::UnCapitalizedWords(const kwsys_stl::string& s)
   return n;
 }
 
+// only works for words with at least two letters
 kwsys_stl::string SystemTools::AddSpaceBetweenCapitalizedWords(
   const kwsys_stl::string& s)
 {
@@ -1035,7 +1037,7 @@ char* SystemTools::RemoveCharsButUpperHex(const char* str)
   char *ptr = clean_str;
   while (*str)
     {
-    if ((*str >= '0' && *str <= '9') || (*str >= 'A' && *str <= 'H'))
+    if ((*str >= '0' && *str <= '9') || (*str >= 'A' && *str <= 'F'))
       {
       *ptr++ = *str;
       }
@@ -1339,13 +1341,17 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
         path.replace(0,1,homeEnv);
         }
       }
-
+    // remove trailing slash if the path is more than 
+    // a single /
     pathCString = path.c_str();
-    if (*(pathCString+(path.size()-1)) == '/')
+    if(path.size() > 1 && *(pathCString+(path.size()-1)) == '/')
+      {
+      // if it is c:/ then do not remove the trailing slash
+      if(!((path.size() == 3 && pathCString[1] == ':')))
       {
       path = path.substr(0, path.size()-1);
       }
-
+      }
     }
 }
 
@@ -2503,7 +2509,6 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
   // Split the input path components.
   kwsys_stl::vector<kwsys_stl::string> path_components;
   SystemTools::SplitPath(in_path, path_components);
-
   // If the input path is relative, start with a base path.
   if(path_components[0].length() == 0)
     {
@@ -2891,7 +2896,16 @@ kwsys_stl::string SystemTools::GetFilenamePath(const kwsys_stl::string& filename
   kwsys_stl::string::size_type slash_pos = fn.rfind("/");
   if(slash_pos != kwsys_stl::string::npos)
     {
-    return fn.substr(0, slash_pos);
+    kwsys_stl::string  ret = fn.substr(0, slash_pos);
+    if(ret.size() == 2 && ret[1] == ':')
+      {
+      return ret + '/';
+      }
+    if(ret.size() == 0)
+      {
+      return "/";
+      }
+    return ret;
     }
   else
     {
@@ -3533,7 +3547,34 @@ void SystemTools::Delay(unsigned int msec)
 #ifdef _WIN32
   Sleep(msec);
 #else
+  // Block signals to make sure the entire sleep duration occurs.  If
+  // a signal were to arrive the sleep or usleep might return early
+  // and there is no way to accurately know how much time was really
+  // slept without setting up timers.
+  sigset_t newset;
+  sigset_t oldset;
+  sigfillset(&newset);
+  sigprocmask(SIG_BLOCK, &newset, &oldset);
+
+  // The sleep function gives 1 second resolution and the usleep
+  // function gives 1e-6 second resolution but on some platforms has a
+  // maximum sleep time of 1 second.  This could be re-implemented to
+  // use select with masked signals or pselect to mask signals
+  // atomically.  If select is given empty sets and zero as the max
+  // file descriptor but a non-zero timeout it can be used to block
+  // for a precise amount of time.
+  if(msec >= 1000)
+    {
+    sleep(msec / 1000);
+    usleep((msec % 1000) * 1000);
+    }
+  else
+    {
   usleep(msec * 1000);
+    }
+
+  // Restore the signal mask to the previous setting.
+  sigprocmask(SIG_SETMASK, &oldset, 0);
 #endif
 }
 

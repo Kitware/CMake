@@ -1,5 +1,11 @@
 Changes in CMake 2.4.3
 
+* fix bootstrap to use more ansi c main it test compiler
+
+* fix import build settings to do case insensitive match on windows
+
+* fix building in root directory c:/
+
 * Add support for CXX only projects
 
 * Better FindWxWidgets
