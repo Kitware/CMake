@@ -10,7 +10,8 @@ IF(NOT CMAKE_C_COMPILER_WORKS)
     "#ifdef __cplusplus\n"
     "# error \"The CMAKE_C_COMPILER is set to a C++ compiler\"\n"
     "#endif\n"
-    "int main(){return 0;}\n")
+    "#include <stdio.h>\n"
+    "int main(int argc, char* argv[]){ printf(\"%s\\n\", argv[0]); return argc-1;}\n")
   TRY_COMPILE(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler.c
     OUTPUT_VARIABLE OUTPUT) 

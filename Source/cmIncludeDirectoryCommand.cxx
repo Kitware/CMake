@@ -56,6 +56,14 @@ bool cmIncludeDirectoryCommand
       tmp += unixPath;
       unixPath = tmp;
       }
+    /*
+    if ( !cmSystemTools::FileExists(unixPath.c_str()) )
+      {
+      std::string out = "Cannot find directory: " + unixPath;
+      this->SetError(out.c_str());
+      return false;
+      }
+      */
     this->Makefile->AddIncludeDirectory(unixPath.c_str(), before);
     }
   return true;

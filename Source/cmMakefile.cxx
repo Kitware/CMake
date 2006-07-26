@@ -905,7 +905,7 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
         {
         cmOStringStream e;
         e << "Attempt to add link target " << lib << " of type: "
-          << cmTarget::TargetTypeNames[(int)tgt->GetType()]
+          << cmTarget::TargetTypeNames[static_cast<int>(tgt->GetType())]
           << "\nto target " << target
           << ". You can only link to STATIC or SHARED libraries.";
         // in older versions of cmake linking to modules was allowed

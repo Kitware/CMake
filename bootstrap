@@ -537,7 +537,24 @@ fi
 TMPFILE=`cmake_tmp_file`
 cat > "${TMPFILE}.c" <<EOF
 #include<stdio.h>
+#if defined(__hpux) && !defined(__GNUC__)
+# if defined(__CLASSIC_C__)
+/* No ansi option given. */
+#  define bootstrap_require_no_prototype
+# elif defined(__STDC_EXT__)
+/* Option -Ae given. */
+# else
+/* Option -Aa given. */
+# endif
+#endif
+
+#ifdef bootstrap_require_no_prototype
+int main(argc, argv)
+  int argc;
+  char* argv[];
+#else
 int main(int argc, char* argv[])
+#endif
 {
   printf("%d\n", (argv != 0));
   return argc-1;

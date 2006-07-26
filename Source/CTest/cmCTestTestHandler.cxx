@@ -684,6 +684,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
         << std::endl;
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Unable to find executable: "
         << args[1].c_str() << std::endl);
+      cres.Output = "Unable to find executable: " + args[1];
       if ( !this->CTest->GetShowOnly() )
         {
         cres.FullCommandLine = actualCommand;

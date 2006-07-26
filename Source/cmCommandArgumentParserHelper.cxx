@@ -139,7 +139,7 @@ void cmCommandArgumentParserHelper::AllocateParserType
   pt->str = 0;
   if ( len == 0 )
     {
-    len = (int)strlen(str);
+    len = static_cast<int>(strlen(str));
     }
   if ( len == 0 )
     {
