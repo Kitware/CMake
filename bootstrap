@@ -536,19 +536,13 @@ fi
 # Check if C compiler works
 TMPFILE=`cmake_tmp_file`
 cat > "${TMPFILE}.c" <<EOF
-#include<stdio.h>
-#if defined(__hpux) && !defined(__GNUC__)
-# if defined(__CLASSIC_C__)
-/* No ansi option given. */
-#  define bootstrap_require_no_prototype
-# elif defined(__STDC_EXT__)
-/* Option -Ae given. */
-# else
-/* Option -Aa given. */
-# endif
+#ifdef __cplusplus
+# error "The CMAKE_C_COMPILER is set to a C++ compiler"
 #endif
 
-#ifdef bootstrap_require_no_prototype
+#include<stdio.h>
+
+#if defined(__CLASSIC_C__)
 int main(argc, argv)
   int argc;
   char* argv[];
