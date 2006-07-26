@@ -537,10 +537,10 @@ fi
 TMPFILE=`cmake_tmp_file`
 cat > "${TMPFILE}.c" <<EOF
 #include<stdio.h>
-int main(int argc, char* argv[])
+int main()
 {
-  printf("%d\n", (argv != 0));
-  return argc-1;
+  printf("1\n");
+  return 0;
 }
 EOF
 for a in ${cmake_c_compilers}; do
