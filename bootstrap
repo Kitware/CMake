@@ -536,11 +536,22 @@ fi
 # Check if C compiler works
 TMPFILE=`cmake_tmp_file`
 cat > "${TMPFILE}.c" <<EOF
+#ifdef __cplusplus
+# error "The CMAKE_C_COMPILER is set to a C++ compiler"
+#endif
+
 #include<stdio.h>
-int main()
+
+#if defined(__CLASSIC_C__)
+int main(argc, argv)
+  int argc;
+  char* argv[];
+#else
+int main(int argc, char* argv[])
+#endif
 {
-  printf("1\n");
-  return 0;
+  printf("%d\n", (argv != 0));
+  return argc-1;
 }
 EOF
 for a in ${cmake_c_compilers}; do

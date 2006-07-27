@@ -1,5 +1,9 @@
 Changes in CMake 2.4.3
 
+* better prototype for main in try compile of c programs avoids warnings in logs.
+
+* with visual studio do not use incremental linking for release builds by default.
+
 * fix bootstrap to use more ansi c main it test compiler
 
 * fix import build settings to do case insensitive match on windows

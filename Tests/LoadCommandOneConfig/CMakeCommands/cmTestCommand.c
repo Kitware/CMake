@@ -166,7 +166,7 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
     }
   info->CAPI->ExecuteCommand(mf,"SET",2,args);
   
-  // make sure we can find the source file
+  /* make sure we can find the source file */
   if (!info->CAPI->GetSource(mf,argv[1]))
     {
     info->CAPI->SetError(mf, "Source file could not be found!");
