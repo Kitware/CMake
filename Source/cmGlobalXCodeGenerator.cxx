@@ -1213,10 +1213,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                   this->CreateString("mh_bundle"));
       buildSettings->AddAttribute("GCC_DYNAMIC_NO_PIC", 
                                   this->CreateString("NO"));
-      buildSettings->AddAttribute("GCC_SYMBOLS_PRIVATE_EXTERN", 
-                                  this->CreateString("NO"));
-      buildSettings->AddAttribute("GCC_INLINES_ARE_PRIVATE_EXTERN", 
-                                  this->CreateString("NO"));
       // Add the flags to create an executable.
       std::string createFlags =
         this->LookupFlags("CMAKE_", lang, "_LINK_FLAGS", "");
@@ -1396,6 +1392,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString(optLevel));
   buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
                               this->CreateString(oflagc.c_str()));
+  buildSettings->AddAttribute("GCC_SYMBOLS_PRIVATE_EXTERN",
+                              this->CreateString("NO"));
+  buildSettings->AddAttribute("GCC_INLINES_ARE_PRIVATE_EXTERN",
+                              this->CreateString("NO"));
   if(lang && strcmp(lang, "CXX") == 0)
     {
     flags += " ";
