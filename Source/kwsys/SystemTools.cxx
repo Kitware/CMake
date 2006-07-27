@@ -3547,15 +3547,6 @@ void SystemTools::Delay(unsigned int msec)
 #ifdef _WIN32
   Sleep(msec);
 #else
-  // Block signals to make sure the entire sleep duration occurs.  If
-  // a signal were to arrive the sleep or usleep might return early
-  // and there is no way to accurately know how much time was really
-  // slept without setting up timers.
-  sigset_t newset;
-  sigset_t oldset;
-  sigfillset(&newset);
-  sigprocmask(SIG_BLOCK, &newset, &oldset);
-
   // The sleep function gives 1 second resolution and the usleep
   // function gives 1e-6 second resolution but on some platforms has a
   // maximum sleep time of 1 second.  This could be re-implemented to
@@ -3572,9 +3563,6 @@ void SystemTools::Delay(unsigned int msec)
     {
     usleep(msec * 1000);
     }
-
-  // Restore the signal mask to the previous setting.
-  sigprocmask(SIG_SETMASK, &oldset, 0);
 #endif
 }
 
