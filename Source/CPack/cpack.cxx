@@ -306,7 +306,7 @@ int main (int argc, char *argv[])
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
         "CPack generator not specified" << std::endl);
-      parsed = 0;
+      return 1;
       }
     std::vector<std::string> generatorsVector;
     cmSystemTools::ExpandListArgument(genList,
