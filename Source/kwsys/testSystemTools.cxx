@@ -156,7 +156,6 @@ bool CheckStringOperations()
     kwsys::SystemTools::AppendStrings("Mary Had A"," Little Lamb.");
   if (strcmp(cres,"Mary Had A Little Lamb."))
     {
-    delete [] cres;
     kwsys_ios::cerr
       << "Problem with AppendStrings "
       << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
@@ -168,7 +167,6 @@ bool CheckStringOperations()
     kwsys::SystemTools::AppendStrings("Mary Had"," A ","Little Lamb.");
   if (strcmp(cres,"Mary Had A Little Lamb."))
     {
-    delete [] cres;
     kwsys_ios::cerr
       << "Problem with AppendStrings "
       << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
@@ -188,7 +186,6 @@ bool CheckStringOperations()
     kwsys::SystemTools::RemoveChars("Mary Had A Little Lamb.","aeiou");
   if (strcmp(cres,"Mry Hd A Lttl Lmb."))
     {
-    delete [] cres;
     kwsys_ios::cerr
       << "Problem with RemoveChars "
       << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
@@ -200,7 +197,6 @@ bool CheckStringOperations()
     kwsys::SystemTools::RemoveCharsButUpperHex("Mary Had A Little Lamb.");
   if (strcmp(cres,"A"))
     {
-    delete [] cres;
     kwsys_ios::cerr
       << "Problem with RemoveCharsButUpperHex "
       << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
@@ -213,7 +209,6 @@ bool CheckStringOperations()
   kwsys::SystemTools::ReplaceChars(cres2,"aeiou",'X');
   if (strcmp(cres2,"MXry HXd A LXttlX LXmb."))
     {
-    delete [] cres2;
     kwsys_ios::cerr
       << "Problem with ReplaceChars "
       << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
@@ -242,7 +237,6 @@ bool CheckStringOperations()
   cres = kwsys::SystemTools::DuplicateString("Mary Had A Little Lamb.");
   if (strcmp(cres,"Mary Had A Little Lamb."))
     {
-    delete [] cres;
     kwsys_ios::cerr
       << "Problem with DuplicateString "
       << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
@@ -259,7 +253,37 @@ bool CheckStringOperations()
       << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
     res = false;    
     }
+
+  kwsys_stl::vector<kwsys_stl::string> lines;
+  kwsys::SystemTools::Split("Mary Had A Little Lamb.",lines,' ');
+  if (lines[0] != "Mary" || lines[1] != "Had" ||
+      lines[2] != "A" || lines[3] != "Little" || lines[4] != "Lamb.")
+    {
+    kwsys_ios::cerr
+      << "Problem with Split "
+      << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
+    res = false;    
+    }
   
+  int targc;
+  char **targv;
+  kwsys::SystemTools::ConvertWindowsCommandLineToUnixArguments
+    ("\"Local Mojo\\Voodoo.asp\" -CastHex \"D:\\My Secret Mojo\\Voodoo.mp3\"", &targc, &targv);
+  if (targc != 4 || strcmp(targv[1],"Local Mojo\\Voodoo.asp") ||
+      strcmp(targv[2],"-CastHex") || 
+      strcmp(targv[3],"D:\\My Secret Mojo\\Voodoo.mp3"))
+    {
+    kwsys_ios::cerr
+      << "Problem with ConvertWindowsCommandLineToUnixArguments"
+      << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
+    res = false;    
+    }
+  for (;targc >=0; --targc)
+    {
+    delete [] targv[targc];
+    }
+  delete [] targv;
+
   return res;
 }
 
