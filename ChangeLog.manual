@@ -1,8 +1,13 @@
 Changes in CMake 2.4.3
 
-* better prototype for main in try compile of c programs avoids warnings in logs.
+* Fix for Xcode all projects to prevent -fvisibility=hidden flags. This is
+needed to make RTTI work by default.
 
-* with visual studio do not use incremental linking for release builds by default.
+* better prototype for main in try compile of c programs avoids warnings in
+logs.
+
+* with visual studio do not use incremental linking for release builds by
+default.
 
 * fix bootstrap to use more ansi c main it test compiler
 
