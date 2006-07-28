@@ -1,5 +1,7 @@
 Changes in CMake 2.4.3
 
+* fix for 3557 - Under MSVC8 hardcoded TargetEnvironment for MIDL Compiler 
+
 * Fix for Xcode all projects to prevent -fvisibility=hidden flags. This is
 needed to make RTTI work by default.
 
