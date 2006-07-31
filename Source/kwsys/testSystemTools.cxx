@@ -93,7 +93,7 @@ bool CheckEscapeChars(kwsys_stl::string input,
 }
 
 //----------------------------------------------------------------------------
-bool CheckDetectFileType()
+bool CheckFileOperations()
 {
   bool res = true;
 
@@ -113,6 +113,14 @@ bool CheckDetectFileType()
       << "Problem with DetectFileType - failed to detect type of: "
       << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
     res = false;
+    }
+  
+  if (kwsys::SystemTools::FileLength(TEST_SYSTEMTOOLS_BIN_FILE) != 766)
+    {
+    kwsys_ios::cerr
+      << "Problem with FileLength - incorrect length for: "
+      << TEST_SYSTEMTOOLS_BIN_FILE << kwsys_ios::endl;
+    res = false;    
     }
 
   return res;
@@ -264,7 +272,37 @@ bool CheckStringOperations()
       << TEST_SYSTEMTOOLS_SRC_FILE << kwsys_ios::endl;
     res = false;    
     }
+
+  if (kwsys::SystemTools::ConvertToWindowsOutputPath
+      ("L://Local Mojo/Hex Power Pack/Iffy Voodoo") != 
+      "\"L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\"")
+    {
+    kwsys_ios::cerr
+      << "Problem with ConvertToWindowsOutputPath "
+      << kwsys_ios::endl;
+    res = false;    
+    }
   
+  if (kwsys::SystemTools::ConvertToWindowsOutputPath
+      ("//grayson/Local Mojo/Hex Power Pack/Iffy Voodoo") != 
+      "\"\\\\grayson\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\"")
+    {
+    kwsys_ios::cerr
+      << "Problem with ConvertToWindowsOutputPath "
+      << kwsys_ios::endl;
+    res = false;    
+    }
+
+  if (kwsys::SystemTools::ConvertToUnixOutputPath
+      ("//Local Mojo/Hex Power Pack/Iffy Voodoo") != 
+      "/Local\\ Mojo/Hex\\ Power\\ Pack/Iffy\\ Voodoo")
+    {
+    kwsys_ios::cerr
+      << "Problem with ConvertToUnixOutputPath "
+      << kwsys_ios::endl;
+    res = false;    
+    }
+
   int targc;
   char **targv;
   kwsys::SystemTools::ConvertWindowsCommandLineToUnixArguments
@@ -312,7 +350,7 @@ int main(/*int argc, char* argv*/)
                             *checkEscapeChars[cc][2], checkEscapeChars[cc][3]);
     }
 
-  res &= CheckDetectFileType();
+  res &= CheckFileOperations();
 
   res &= CheckStringOperations();
 

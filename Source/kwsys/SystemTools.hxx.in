@@ -256,6 +256,20 @@ public:
   static kwsys_stl::string ConvertToOutputPath(const char*);
 
   /**
+   * Convert the path to a string that can be used in a unix makefile.
+   * double slashes are removed, and spaces are escaped.
+   */
+  static kwsys_stl::string ConvertToUnixOutputPath(const char*);
+
+  /**
+   * Convert the path to string that can be used in a windows project or
+   * makefile.   Double slashes are removed if they are not at the start of
+   * the string, the slashes are converted to windows style backslashes, and
+   * if there are spaces in the string it is double quoted.
+   */
+  static kwsys_stl::string ConvertToWindowsOutputPath(const char*);
+
+  /**
    * Return true if a file exists in the current directory
    */
   static bool FileExists(const char* filename);
@@ -428,12 +442,6 @@ public:
    * Check if the given file or directory is in subdirectory of dir
    */
   static bool IsSubDirectory(const char* fileOrDir, const char* dir);
-
-  /**
-   * Convert the path to a string that can be used in a unix makefile.
-   * double slashes are removed, and spaces are escaped.
-   */
-  static kwsys_stl::string ConvertToUnixOutputPath(const char*);
 
   /** -----------------------------------------------------------------
    *               File Manipulation Routines
@@ -753,17 +761,6 @@ public:
    */
   static void ConvertWindowsCommandLineToUnixArguments(
     const char *cmd_line, int *argc, char ***argv);
-
-protected:
-  // these two functions can be called from ConvertToOutputPath
-
-  /**
-   * Convert the path to string that can be used in a windows project or
-   * makefile.   Double slashes are removed if they are not at the start of
-   * the string, the slashes are converted to windows style backslashes, and
-   * if there are spaces in the string it is double quoted.
-   */
-  static kwsys_stl::string ConvertToWindowsOutputPath(const char*);
 
 private:
   /**
