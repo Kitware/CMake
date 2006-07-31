@@ -385,7 +385,8 @@ int main (int argc, char *argv[])
               cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "For project: "
                 << projName << std::endl);
   
-              const char* projVersion = mf->GetDefinition("CPACK_PACKAGE_VERSION");
+              const char* projVersion = 
+                mf->GetDefinition("CPACK_PACKAGE_VERSION");
               if ( !projVersion )
                 {
                 const char* projVersionMajor
@@ -397,7 +398,8 @@ int main (int argc, char *argv[])
                 cmOStringStream ostr;
                 ostr << projVersionMajor << "." << projVersionMinor << "."
                   << projVersionPatch;
-                mf->AddDefinition("CPACK_PACKAGE_VERSION", ostr.str().c_str());
+                mf->AddDefinition("CPACK_PACKAGE_VERSION", 
+                                  ostr.str().c_str());
                 }
   
               int res = cpackGenerator->ProcessGenerator();
