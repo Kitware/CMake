@@ -24,6 +24,12 @@
 
 #include "cmSourceFile.h"
 
+#include <stdlib.h>
+
+#ifdef __QNX__
+# include <malloc.h> /* for malloc/free on QNX */
+#endif
+
 extern "C"
 {
 
