@@ -1158,7 +1158,7 @@ cmLocalUnixMakefileGenerator3
 bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
 {
   // The info file for this target
-  std::string const& infoFile = tgtInfo;
+  std::string infoFile = tgtInfo;
 
   // Read the directory information file.
   cmMakefile* mf = this->Makefile;

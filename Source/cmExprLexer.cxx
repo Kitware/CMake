@@ -491,6 +491,11 @@ Modify cmExprLexer.h:
 # pragma warning ( disable : 4786 )
 #endif
 
+#if defined(__BORLANDC__)
+# pragma warn -8008 /* condition always returns true */
+# pragma warn -8066 /* unreachable code */
+#endif
+
 /* Disable features we do not need. */
 #define YY_NEVER_INTERACTIVE 1
 #undef ECHO /* SGI termios defines this differently. */

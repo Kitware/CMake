@@ -14,6 +14,11 @@ ADD_DEFINITIONS(-DCMZLIB_IN_C)
 # Match all headers for dependencies but complain about none.
 INCLUDE_REGULAR_EXPRESSION("^.*$")
 
+# Disable warnings on Borland to avoid changing 3rd party code.
+IF(BORLAND)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
+ENDIF(BORLAND)
+
 # source files for zlib
 SET(ZLIB_SRCS
   adler32.c   gzio.c      inftrees.c  uncompr.c

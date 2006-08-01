@@ -43,6 +43,10 @@
 #define CMAKE_NO_ANSI_FOR_SCOPE
 #endif
 
+#ifdef __BORLANDC__
+#pragma warn -8030 /* Temporary used for parameter */
+#endif
+
 #ifdef __ICL
 #pragma warning ( disable : 985 )
 #endif

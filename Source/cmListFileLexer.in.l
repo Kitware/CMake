@@ -56,6 +56,11 @@ Modify cmListFileLexer.c:
 # pragma warning ( disable : 4786 )
 #endif
 
+#if defined(__BORLANDC__)
+# pragma warn -8008 /* condition always returns true */
+# pragma warn -8066 /* unreachable code */
+#endif
+
 #include "cmListFileLexer.h"
 
 /*--------------------------------------------------------------------------*/

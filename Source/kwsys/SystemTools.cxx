@@ -3348,7 +3348,7 @@ kwsys_stl::string SystemTools::GetCurrentDateTime(const char* format)
   time_t t;
   time(&t);
   strftime(buf, sizeof(buf), format, localtime(&t));
-  return buf;
+  return kwsys_stl::string(buf);
 }
 
 kwsys_stl::string SystemTools::MakeCindentifier(const char* s)

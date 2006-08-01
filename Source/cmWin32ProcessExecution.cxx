@@ -293,14 +293,14 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
   PROCESS_INFORMATION piProcInfo;
   STARTUPINFO siStartInfo;
   char *s1=0,*s2=0, *s3 = " /c ";
-  int i;
-  int x;
-  if (i = GetEnvironmentVariable("COMSPEC",NULL,0)) 
+  int i = GetEnvironmentVariable("COMSPEC",NULL,0);
+  if (i)
     {
     char *comshell;
 
     s1 = (char *)malloc(i);
-    if (!(x = GetEnvironmentVariable("COMSPEC", s1, i)))
+    int x = GetEnvironmentVariable("COMSPEC", s1, i);
+    if (!x)
       {
       free(s1);
       return x;
@@ -607,7 +607,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
         
     case POPEN_2:
     case POPEN_4: 
-      if ( 1 ) 
+      //if ( 1 ) 
         {
         fd1 = _open_osfhandle(TO_INTPTR(this->hChildStdinWrDup), mode);
         fd2 = _open_osfhandle(TO_INTPTR(this->hChildStdoutRdDup), mode);
@@ -615,7 +615,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
         }
         
     case POPEN_3:
-      if ( 1) 
+      //if ( 1) 
         {
         fd1 = _open_osfhandle(TO_INTPTR(this->hChildStdinWrDup), mode);
         fd2 = _open_osfhandle(TO_INTPTR(this->hChildStdoutRdDup), mode);

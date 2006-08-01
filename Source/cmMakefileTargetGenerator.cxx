@@ -58,7 +58,7 @@ cmMakefileTargetGenerator::New(cmLocalUnixMakefileGenerator3 *lg,
       break;
     default:
       return result;
-      break;
+      // break; /* unreachable */
     }
 
   result->TargetName = tgtName;

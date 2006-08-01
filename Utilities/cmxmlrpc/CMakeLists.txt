@@ -2,6 +2,11 @@ PROJECT(XMLRPC)
 
 INCLUDE_REGULAR_EXPRESSION("^.*$")
 
+# Disable warnings on Borland to avoid changing 3rd party code.
+IF(BORLAND)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
+ENDIF(BORLAND)
+
 # Include all the necessary files for macros
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 

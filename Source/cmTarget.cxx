@@ -915,31 +915,31 @@ const char *cmTarget::GetProperty(const char* prop)
       {
       case cmTarget::STATIC_LIBRARY:
         return "STATIC_LIBRARY";
-        break;
+        // break; /* unreachable */
       case cmTarget::MODULE_LIBRARY:
         return "MODULE_LIBRARY";
-        break;
+        // break; /* unreachable */
       case cmTarget::SHARED_LIBRARY:
         return "SHARED_LIBRARY";
-        break;
+        // break; /* unreachable */
       case cmTarget::EXECUTABLE:
         return "EXECUTABLE";
-        break;
+        // break; /* unreachable */
       case cmTarget::UTILITY:
         return "UTILITY";
-        break;
+        // break; /* unreachable */
       case cmTarget::GLOBAL_TARGET:
         return "GLOBAL_TARGET";
-        break;
+        // break; /* unreachable */
       case cmTarget::INSTALL_FILES:
         return "INSTALL_FILES";
-        break;
+        // break; /* unreachable */
       case cmTarget::INSTALL_PROGRAMS:
         return "INSTALL_PROGRAMS";
-        break;
+        // break; /* unreachable */
       case cmTarget::INSTALL_DIRECTORY:
         return "INSTALL_DIRECTORY";
-        break;
+        // break; /* unreachable */
       }
     return 0;
     }
