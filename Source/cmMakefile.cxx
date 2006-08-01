@@ -1907,6 +1907,9 @@ void cmMakefile::AddDefaultDefinitions()
 #if defined(__APPLE__)
   this->AddDefinition("APPLE", "1");
 #endif
+#if defined(__QNXNTO__)
+  this->AddDefinition("QNXNTO", "1");
+#endif
 
   char temp[1024];
   sprintf(temp, "%d", cmMakefile::GetMinorVersion());
