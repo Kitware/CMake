@@ -81,16 +81,25 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
       {
       // Add shared library installation properties if this platform
       // supports them.
-      const char* lib_version = this->Target->GetProperty("VERSION");
-      const char* lib_soversion = this->Target->GetProperty("SOVERSION");
-      if(!this->Target->GetMakefile()
-         ->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
+      const char* lib_version = 0;
+      const char* lib_soversion = 0;
+
+      // Versioning is supported only for shared libraries and modules,
+      // and then only when the platform supports an soname flag.
+      cmGlobalGenerator* gg =
+        this->Target->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator();
+      if(const char* linkLanguage = this->Target->GetLinkerLanguage(gg))
         {
-        // Versioning is supported only for shared libraries and modules,
-        // and then only when the platform supports an soname flag.
-        lib_version = 0;
-        lib_soversion = 0;
+        std::string sonameFlagVar = "CMAKE_SHARED_LIBRARY_SONAME_";
+        sonameFlagVar += linkLanguage;
+        sonameFlagVar += "_FLAG";
+        if(this->Target->GetMakefile()->GetDefinition(sonameFlagVar.c_str()))
+          {
+          lib_version = this->Target->GetProperty("VERSION");
+          lib_soversion = this->Target->GetProperty("SOVERSION");
+          }
         }
+
       if(lib_version)
         {
         props += " VERSION ";
