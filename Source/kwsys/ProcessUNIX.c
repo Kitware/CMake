@@ -2201,7 +2201,10 @@ static int kwsysProcessesAdd(kwsysProcess* cp)
     struct sigaction newSigChldAction;
     memset(&newSigChldAction, 0, sizeof(struct sigaction));
     newSigChldAction.sa_sigaction = kwsysProcessesSignalHandler;
-    newSigChldAction.sa_flags = SA_NOCLDSTOP | SA_RESTART | SA_SIGINFO;
+    newSigChldAction.sa_flags = SA_NOCLDSTOP | SA_SIGINFO;
+#ifdef SA_RESTART
+    newSigChldAction.sa_flags |= SA_RESTART;
+#endif
     while((sigaction(SIGCHLD, &newSigChldAction,
                      &kwsysProcessesOldSigChldAction) < 0) &&
           (errno == EINTR));
