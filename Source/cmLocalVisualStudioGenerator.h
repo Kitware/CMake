@@ -37,6 +37,7 @@ public:
 protected:
   // Safe object file name generation.
   void ComputeObjectNameRequirements(std::vector<cmSourceGroup> const&);
+  bool SourceFileCompiles(const cmSourceFile* sf);
   std::set<const cmSourceFile*> NeedObjectName;
 };
 

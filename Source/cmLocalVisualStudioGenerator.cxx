@@ -31,6 +31,14 @@ cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 }
 
 //----------------------------------------------------------------------------
+bool cmLocalVisualStudioGenerator::SourceFileCompiles(const cmSourceFile* sf)
+{
+  return (!sf->GetCustomCommand() &&
+          !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
+          !sf->GetPropertyAsBool("EXTERNAL_OBJECT"));
+}
+
+//----------------------------------------------------------------------------
 void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
 (std::vector<cmSourceGroup> const& sourceGroups)
 {
@@ -46,14 +54,12 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
     for(std::vector<const cmSourceFile*>::const_iterator s = srcs.begin();
         s != srcs.end(); ++s)
       {
-      const cmSourceFile& sf = *(*s);
-      if(!sf.GetCustomCommand() &&
-         !sf.GetPropertyAsBool("HEADER_FILE_ONLY") &&
-         !sf.GetPropertyAsBool("EXTERNAL_OBJECT"))
+      const cmSourceFile* sf = *s;
+      if(this->SourceFileCompiles(sf))
         {
         std::string objectName =
           cmSystemTools::GetFilenameWithoutLastExtension(
-            sf.GetFullPath().c_str());
+            sf->GetFullPath().c_str());
         objectName += ".obj";
         objectNameCounts[objectName] += 1;
         }
@@ -70,9 +76,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
         s != srcs.end(); ++s)
       {
       const cmSourceFile* sf = *s;
-      if(!sf->GetCustomCommand() &&
-         !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
-         !sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
+      if(this->SourceFileCompiles(sf))
         {
         std::string objectName =
           cmSystemTools::GetFilenameWithoutLastExtension(

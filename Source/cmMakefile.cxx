@@ -63,6 +63,7 @@ cmMakefile::cmMakefile()
   this->SourceFileExtensions.push_back( "mm" );
 
   this->HeaderFileExtensions.push_back( "h" );
+  this->HeaderFileExtensions.push_back( "hh" );
   this->HeaderFileExtensions.push_back( "h++" );
   this->HeaderFileExtensions.push_back( "hm" );
   this->HeaderFileExtensions.push_back( "hpp" );
@@ -79,7 +80,7 @@ cmMakefile::cmMakefile()
     ("Source Files",
      "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat)$");
   this->AddSourceGroup("Header Files", 
-                       "\\.(h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
+                       "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddSourceGroup("Resources", "\\.plist$");
 #endif
