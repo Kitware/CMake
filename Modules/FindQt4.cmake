@@ -565,13 +565,17 @@ IF (QT4_QMAKE_FOUND)
         SET(QT_${basename}_LIBRARY         ${QT_${basename}_LIBRARY_DEBUG})
         SET(QT_${basename}_LIBRARIES       ${QT_${basename}_LIBRARY_DEBUG})
       ENDIF (QT_${basename}_LIBRARY_DEBUG AND NOT QT_${basename}_LIBRARY_RELEASE)
-
+      
       IF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
-        IF(NOT MSVC)
-        SET(QT_${basename}_LIBRARY         ${QT_${basename}_LIBRARY_RELEASE})
-        ELSE(NOT MSVC)
+        # if the generator supports configuration types then set
+        # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
+        IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
           SET(QT_${basename}_LIBRARY       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
-        ENDIF(NOT MSVC)
+        ELSE(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+          # if there are no configuration types and CMAKE_BUILD_TYPE has no value
+          # then just use the release libraries
+          SET(QT_${basename}_LIBRARY       ${QT_${basename}_LIBRARY_RELEASE} )
+        ENDIF(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
         SET(QT_${basename}_LIBRARIES       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
       ENDIF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
 
