@@ -29,6 +29,8 @@
 
 #include "testSystemTools.h"
 
+#include <string.h> /* strcmp */
+
 //----------------------------------------------------------------------------
 const char* toUnixPaths[][2] =
 {

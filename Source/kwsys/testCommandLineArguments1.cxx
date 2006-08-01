@@ -23,6 +23,8 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
+#include <string.h> /* strcmp */
+
 int main(int argc, char* argv[])
 {
   kwsys::CommandLineArguments arg;

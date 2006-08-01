@@ -36,6 +36,8 @@
 
 #include <ctype.h> // for isspace
 #include <stdio.h>
+#include <string.h> /* strlen, strncpy */
+#include <stdlib.h> /* getenv */
 
 #ifdef _WIN32
 # include <windows.h>
