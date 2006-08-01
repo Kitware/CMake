@@ -565,7 +565,6 @@ IF (QT4_QMAKE_FOUND)
         SET(QT_${basename}_LIBRARY         ${QT_${basename}_LIBRARY_DEBUG})
         SET(QT_${basename}_LIBRARIES       ${QT_${basename}_LIBRARY_DEBUG})
       ENDIF (QT_${basename}_LIBRARY_DEBUG AND NOT QT_${basename}_LIBRARY_RELEASE)
-      
       IF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
         # if the generator supports configuration types then set
         # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
@@ -594,7 +593,10 @@ IF (QT4_QMAKE_FOUND)
   ENDMACRO (_QT4_ADJUST_LIB_VARS)
 
   IF(WIN32)
+    # there is no include for qtmain but adjust macro needs it set
+    SET(QT_QTMAIN_INCLUDE_DIR 1)
      _QT4_ADJUST_LIB_VARS(QTMAIN)
+    SET(QT_QTMAIN_INCLUDE_DIR )
   ENDIF(WIN32)
 
 
