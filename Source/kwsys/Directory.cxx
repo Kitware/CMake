@@ -199,6 +199,11 @@ namespace KWSYS_NAMESPACE
 bool Directory::Load(const char* name)
 {
   this->Clear();
+   
+  if (!name)
+    {
+    return 0;
+    }
   DIR* dir = opendir(name);
 
   if (!dir)
