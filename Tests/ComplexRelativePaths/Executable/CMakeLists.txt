@@ -19,7 +19,7 @@ ENDIF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 LINK_LIBRARIES(${COMPLEX_LIBS})
 
-ADD_EXECUTABLE(A A.cxx)
+ADD_EXECUTABLE(A A.cxx A.hh A.h)
 ADD_EXECUTABLE(complex complex testcflags.c )
 #  Sub1/NameConflictTest.c Sub2/NameConflictTest.c)
 ADD_EXECUTABLE(complex.file complex.file.cxx)
