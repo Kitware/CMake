@@ -223,7 +223,6 @@ protected:
 
   void WriteLocalMakefile();
   
-  
   // write the target rules for the local Makefile into the stream
   void WriteLocalMakefileTargets(std::ostream& ruleFileStream,
                                  std::set<cmStdString> &emitted);
@@ -268,9 +267,6 @@ protected:
   void WriteTargetRequiresRule(std::ostream& ruleFileStream,
                                cmTarget& target,
                                const std::vector<std::string>& objects);
-  void WriteObjectConvenienceRule(std::ostream& ruleFileStream,
-                                  const char* comment, const char* output,
-                                  std::vector<cmTarget*>& targets);
   
   std::string GetObjectFileName(cmTarget& target,
                                 const cmSourceFile& source,
