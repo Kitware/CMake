@@ -254,7 +254,11 @@ int main ()
 ")
 # get this from the source tree since it was not in the previous
 # version of cmake and cmake need to build cmake
-INCLUDE(${CMake_SOURCE_DIR}/Modules/CheckCSourceCompiles.cmake)
+IF("${CMake_SOURCE_DIR}" STREQUAL "")
+  INCLUDE(CheckCSourceCompiles)
+ELSE("${CMake_SOURCE_DIR}" STREQUAL "")
+  INCLUDE(${CMake_SOURCE_DIR}/Modules/CheckCSourceCompiles.cmake)
+ENDIF("${CMake_SOURCE_DIR}" STREQUAL "")
 CHECK_C_SOURCE_COMPILES("${CMAKE_MAKEDEV_SOURCE}" MAKEDEV_THREE_ARGS)
 #SET (MAKEDEV_THREE_ARGS 0)
 #SET (NEED_BASENAME 0)
