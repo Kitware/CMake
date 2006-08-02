@@ -275,34 +275,15 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
     gg->WriteConvenienceRules(ruleFileStream,emittedTargets);
     }
   
-  std::vector<std::string> depends;
-  std::vector<std::string> commands;
-
   // now write out the object rules
   // for each object file name
   for (std::map<cmStdString,std::vector<cmTarget *> >::iterator lo = 
          this->LocalObjectFiles.begin();
        lo != this->LocalObjectFiles.end(); ++lo)
     {
-    commands.clear();
-    // for each target using the object file
-    for (std::vector<cmTarget *>::iterator to = 
-           lo->second.begin(); to != lo->second.end(); ++to)
-      {
-      std::string tgtMakefileName = this->GetRelativeTargetDirectory(**to);
-      std::string targetName = tgtMakefileName;
-      tgtMakefileName += "/build.make";
-      targetName += "/";
-      targetName += lo->first.c_str();
-      commands.push_back(this->GetRecursiveMakeCall
-                         (tgtMakefileName.c_str(),targetName.c_str()));  
-      this->CreateCDCommand(commands,
-                            this->Makefile->GetHomeOutputDirectory(),
-                            this->Makefile->GetStartOutputDirectory());
-      }
-    this->WriteMakeRule(ruleFileStream, 
-                        "target for object file", 
-                        lo->first.c_str(), depends, commands, false);
+    this->WriteObjectConvenienceRule(ruleFileStream,
+                                     "target to build an object file",
+                                     lo->first.c_str(), lo->second);
     }
 
   // add a help target as long as there isn;t a real target named help
@@ -316,6 +297,38 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   this->WriteSpecialTargetsBottom(ruleFileStream);
 }
 
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator3
+::WriteObjectConvenienceRule(std::ostream& ruleFileStream,
+                             const char* comment, const char* output,
+                             std::vector<cmTarget*>& targets)
+{
+  // Recursively make the rule for each target using the object file.
+  std::vector<std::string> commands;
+  for(std::vector<cmTarget*>::iterator t = targets.begin();
+      t != targets.end(); ++t)
+    {
+    std::string tgtMakefileName = this->GetRelativeTargetDirectory(**t);
+    std::string targetName = tgtMakefileName;
+    tgtMakefileName += "/build.make";
+    targetName += "/";
+    targetName += output;
+    commands.push_back(
+      this->GetRecursiveMakeCall(tgtMakefileName.c_str(), targetName.c_str())
+      );
+    this->CreateCDCommand(commands,
+                          this->Makefile->GetHomeOutputDirectory(),
+                          this->Makefile->GetStartOutputDirectory());
+    }
+
+  // Write the rule to the makefile.
+  std::vector<std::string> no_depends;
+  this->WriteMakeRule(ruleFileStream, comment,
+                      output, no_depends, commands, true);
+}
+
+//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3
 ::WriteLocalMakefileTargets(std::ostream& ruleFileStream,
                             std::set<cmStdString> &emitted)
