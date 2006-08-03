@@ -1,6 +1,6 @@
 # - Check if the source code provided in the SOURCE argument compiles.
-# CHECK_C_SOURCE_COMPILES(SOURCE VAR)
-# - macro which checks if the source code compiles
+# CHECK_C_SOURCE_RUNS(SOURCE VAR)
+# - macro which checks if the source code runs
 #  SOURCE   - source code to try to compile
 #  VAR - variable to store size if the type exists.
 #
@@ -12,7 +12,7 @@
 #  CMAKE_REQUIRED_INCLUDES = list of include directories
 #  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
-MACRO(CHECK_C_SOURCE_COMPILES SOURCE VAR)
+MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
   IF("${VAR}" MATCHES "^${VAR}$")
     SET(MACRO_CHECK_FUNCTION_DEFINITIONS 
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
@@ -32,7 +32,7 @@ MACRO(CHECK_C_SOURCE_COMPILES SOURCE VAR)
       "${SOURCE}\n")
 
     MESSAGE(STATUS "Performing Test ${VAR}")
-    TRY_COMPILE(${VAR}
+    TRY_RUN(${VAR} ${VAR}_COMPILED
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
@@ -56,5 +56,5 @@ MACRO(CHECK_C_SOURCE_COMPILES SOURCE VAR)
         "Source file was:\n${SOURCE}\n")
     ENDIF(${VAR})
   ENDIF("${VAR}" MATCHES "^${VAR}$")
-ENDMACRO(CHECK_C_SOURCE_COMPILES)
+ENDMACRO(CHECK_C_SOURCE_RUNS)
 
