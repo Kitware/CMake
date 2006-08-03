@@ -252,7 +252,9 @@ int main ()
 
   dev = makedev(0, maj, min);
   if(major(dev) != maj || minor(dev) != min)
-    exit(1);
+    {
+    return 1;
+    }
   return 0;
 }
 ")
