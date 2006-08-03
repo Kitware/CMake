@@ -246,8 +246,8 @@ SET(CMAKE_MAKEDEV_SOURCE
     "${CMAKE_MAKEDEV_SOURCE}
 int main ()
 {
-  major_t maj = 5;
-  minor_t min = 7;
+  dev_t maj = 5;
+  dev_t min = 7;
   makedev(0, maj, min);
   return 0;
 }
