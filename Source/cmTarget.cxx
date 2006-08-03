@@ -1158,6 +1158,17 @@ void cmTarget::GetFullNameInternal(TargetType type,
     return;
     }
 
+  // Return an empty name for the import library if this platform
+  // does not support import libraries.
+  if(implib &&
+     !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
+    {
+    outPrefix = "";
+    outBase = "";
+    outSuffix = "";
+    return;
+    }
+
   // The implib option is only allowed for shared libraries.
   if(type != cmTarget::SHARED_LIBRARY)
     {

@@ -305,59 +305,93 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Construct a list of files associated with this library that may
   // need to be cleaned.
   std::vector<std::string> libCleanFiles;
-  {
-  std::string cleanStaticName;
-  std::string cleanSharedName;
-  std::string cleanSharedSOName;
-  std::string cleanSharedRealName;
-  std::string cleanImportName;
-  this->Target->GetLibraryCleanNames(
-    cleanStaticName,
-    cleanSharedName,
-    cleanSharedSOName,
-    cleanSharedRealName,
-    cleanImportName,
-    this->LocalGenerator->ConfigurationName.c_str());
-  std::string cleanFullStaticName = outpath + cleanStaticName;
-  std::string cleanFullSharedName = outpath + cleanSharedName;
-  std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
-  std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
-  std::string cleanFullImportName = outpath + cleanImportName;
-  libCleanFiles.push_back
-    (this->Convert(cleanFullStaticName.c_str(),cmLocalGenerator::START_OUTPUT,
-                   cmLocalGenerator::UNCHANGED));
-  if(cleanSharedRealName != cleanStaticName)
+  if(this->Target->GetPropertyAsBool("CLEAN_DIRECT_OUTPUT"))
     {
-    libCleanFiles.push_back(this->Convert(cleanFullSharedRealName.c_str(),
-                                          cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::UNCHANGED));
+    // The user has requested that only the files directly built
+    // by this target be cleaned instead of all possible names.
+    libCleanFiles.push_back(this->Convert(targetFullPath.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+    if(targetNameReal != targetName)
+      {
+      libCleanFiles.push_back(this->Convert(targetFullPathReal.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+      }
+    if(targetNameSO != targetName &&
+       targetNameSO != targetNameReal)
+      {
+      libCleanFiles.push_back(this->Convert(targetFullPathSO.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+      }
+    if(!targetNameImport.empty() &&
+       targetNameImport != targetName &&
+       targetNameImport != targetNameReal &&
+       targetNameImport != targetNameSO)
+      {
+      libCleanFiles.push_back(this->Convert(targetFullPathImport.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+      }
     }
-  if(cleanSharedSOName != cleanStaticName &&
-     cleanSharedSOName != cleanSharedRealName)
+  else
     {
-    libCleanFiles.push_back(this->Convert(cleanFullSharedSOName.c_str(),
-                                          cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::UNCHANGED));
+    // This target may switch between static and shared based
+    // on a user option or the BUILD_SHARED_LIBS switch.  Clean
+    // all possible names.
+    std::string cleanStaticName;
+    std::string cleanSharedName;
+    std::string cleanSharedSOName;
+    std::string cleanSharedRealName;
+    std::string cleanImportName;
+    this->Target->GetLibraryCleanNames(
+      cleanStaticName,
+      cleanSharedName,
+      cleanSharedSOName,
+      cleanSharedRealName,
+      cleanImportName,
+      this->LocalGenerator->ConfigurationName.c_str());
+    std::string cleanFullStaticName = outpath + cleanStaticName;
+    std::string cleanFullSharedName = outpath + cleanSharedName;
+    std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
+    std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
+    std::string cleanFullImportName = outpath + cleanImportName;
+    libCleanFiles.push_back
+      (this->Convert(cleanFullStaticName.c_str(),cmLocalGenerator::START_OUTPUT,
+                     cmLocalGenerator::UNCHANGED));
+    if(cleanSharedRealName != cleanStaticName)
+      {
+      libCleanFiles.push_back(this->Convert(cleanFullSharedRealName.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+      }
+    if(cleanSharedSOName != cleanStaticName &&
+      cleanSharedSOName != cleanSharedRealName)
+      {
+      libCleanFiles.push_back(this->Convert(cleanFullSharedSOName.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+      }
+    if(cleanSharedName != cleanStaticName &&
+      cleanSharedName != cleanSharedSOName &&
+      cleanSharedName != cleanSharedRealName)
+      {
+      libCleanFiles.push_back(this->Convert(cleanFullSharedName.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+      }
+    if(!cleanImportName.empty() &&
+      cleanImportName != cleanStaticName &&
+      cleanImportName != cleanSharedSOName &&
+      cleanImportName != cleanSharedRealName &&
+      cleanImportName != cleanSharedName)
+      {
+      libCleanFiles.push_back(this->Convert(cleanFullImportName.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+      }
     }
-  if(cleanSharedName != cleanStaticName &&
-     cleanSharedName != cleanSharedSOName &&
-     cleanSharedName != cleanSharedRealName)
-    {
-    libCleanFiles.push_back(this->Convert(cleanFullSharedName.c_str(),
-                                          cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::UNCHANGED));
-    }
-  if(!cleanImportName.empty() &&
-     cleanImportName != cleanStaticName &&
-     cleanImportName != cleanSharedSOName &&
-     cleanImportName != cleanSharedRealName &&
-     cleanImportName != cleanSharedName)
-    {
-    libCleanFiles.push_back(this->Convert(cleanFullImportName.c_str(),
-                                          cmLocalGenerator::START_OUTPUT,
-                                          cmLocalGenerator::UNCHANGED));
-    }
-  }
   // Add a command to remove any existing files for this library.
   std::vector<std::string> commands1;
   this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
