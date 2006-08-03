@@ -46,7 +46,7 @@ MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
     ENDIF(NOT ${${VAR}_COMPILED})
     # if the return value was 0 then it worked
     SET(result_var ${${VAR}})
-    IF(${result_var} EQUAL 0)
+    IF("${result_var}" EQUAL 0)
       SET(${VAR} 1 CACHE INTERNAL "Test ${FUNCTION}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
@@ -54,7 +54,7 @@ MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
         "${OUTPUT}\n"
         "Return value: ${${VAR}}\n"
         "Source file was:\n${SOURCE}\n")
-    ELSE(${result_var} EQUAL 0)
+    ELSE("${result_var}" EQUAL 0)
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
       SET(${VAR} "" CACHE INTERNAL "Test ${FUNCTION}")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
@@ -62,7 +62,7 @@ MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
         "${OUTPUT}\n"
         "Return value: ${result_var}\n"
         "Source file was:\n${SOURCE}\n")
-    ENDIF(${result_var} EQUAL 0)
+    ENDIF("${result_var}" EQUAL 0)
   ENDIF("${VAR}" MATCHES "^${VAR}$")
 ENDMACRO(CHECK_C_SOURCE_RUNS)
 
