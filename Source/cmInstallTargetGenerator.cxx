@@ -87,7 +87,8 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
       // Versioning is supported only for shared libraries and modules,
       // and then only when the platform supports an soname flag.
       cmGlobalGenerator* gg =
-        this->Target->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator();
+        (this->Target->GetMakefile()
+         ->GetLocalGenerator()->GetGlobalGenerator());
       if(const char* linkLanguage = this->Target->GetLinkerLanguage(gg))
         {
         std::string sonameFlagVar = "CMAKE_SHARED_LIBRARY_SONAME_";
