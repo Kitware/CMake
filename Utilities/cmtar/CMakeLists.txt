@@ -245,10 +245,14 @@ ENDFOREACH(FILE)
 SET(CMAKE_MAKEDEV_SOURCE
     "${CMAKE_MAKEDEV_SOURCE}
 int main ()
-{
+{ 
   dev_t maj = 5;
   dev_t min = 7;
-  makedev(0, maj, min);
+  dev_t dev;
+
+  dev = makedev(0, maj, min);
+  if(major(dev) != maj || minor(dev) != min)
+    exit(1);
   return 0;
 }
 ")
