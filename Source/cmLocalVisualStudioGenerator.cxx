@@ -33,9 +33,19 @@ cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 //----------------------------------------------------------------------------
 bool cmLocalVisualStudioGenerator::SourceFileCompiles(const cmSourceFile* sf)
 {
-  return (!sf->GetCustomCommand() &&
-          !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
-          !sf->GetPropertyAsBool("EXTERNAL_OBJECT"));
+  // Identify the language of the source file.
+  if(const char* lang = this->GetSourceFileLanguage(*sf))
+    {
+    // Check whether this source will actually be compiled.
+    return (!sf->GetCustomCommand() &&
+            !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
+            !sf->GetPropertyAsBool("EXTERNAL_OBJECT"));
+    }
+  else
+    {
+    // Unknown source file language.  Assume it will not be compiled.
+    return false;
+    }
 }
 
 //----------------------------------------------------------------------------
