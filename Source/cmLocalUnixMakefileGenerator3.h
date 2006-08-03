@@ -174,12 +174,6 @@ public:
   // cleanup the name of a potential target
   std::string ConvertToMakeTarget(const char* tgt);
 
-
-  const char* GetSourceFileLanguage(const cmSourceFile& source);
-
-
-  
-  
   /** Called from command-line hook to scan dependencies.  */
   virtual bool ScanDependencies(const char* tgtInfo);
 

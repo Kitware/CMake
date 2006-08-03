@@ -1897,19 +1897,3 @@ void cmLocalUnixMakefileGenerator3
       }
     }
 }
-
-//----------------------------------------------------------------------------
-const char*
-cmLocalUnixMakefileGenerator3
-::GetSourceFileLanguage(const cmSourceFile& source)
-{
-  const char* lang = source.GetProperty("LANGUAGE");
-  if ( lang )
-    {
-    return lang;
-    }
-  // Identify the language of the source file.
-  return (this->GlobalGenerator
-          ->GetLanguageFromExtension(source.GetSourceExtension().c_str()));
-}
-

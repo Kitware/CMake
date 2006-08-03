@@ -2198,3 +2198,19 @@ cmLocalGenerator::GetObjectFileNameWithoutTarget(const cmSourceFile& source)
   // Convert to a safe name.
   return this->CreateSafeUniqueObjectFileName(objectName.c_str());
 }
+
+//----------------------------------------------------------------------------
+const char*
+cmLocalGenerator
+::GetSourceFileLanguage(const cmSourceFile& source)
+{
+  // Check for an explicitly assigned language.
+  if(const char* lang = source.GetProperty("LANGUAGE"))
+    {
+    return lang;
+    }
+
+  // Infer the language from the source file extension.
+  return (this->GlobalGenerator
+          ->GetLanguageFromExtension(source.GetSourceExtension().c_str()));
+}
