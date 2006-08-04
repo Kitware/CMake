@@ -237,36 +237,12 @@ SET (HAVE_LIBZ 1)
 SET (MAJOR_IN_MKDEV 0)
 SET (MAJOR_IN_SYSMACROS 0)
 
-SET(CMAKE_MAKEDEV_SOURCE)
-FOREACH(FILE ${HEADER_INCLUDES})
-  SET(CMAKE_MAKEDEV_SOURCE
-    "${CMAKE_MAKEDEV_SOURCE}#include <${FILE}>\n")
-ENDFOREACH(FILE)
-SET(CMAKE_MAKEDEV_SOURCE
-    "${CMAKE_MAKEDEV_SOURCE}
-int main ()
-{ 
-  dev_t maj = 5;
-  dev_t min = 7;
-  dev_t dev;
-
-  dev = makedev(0, maj, min);
-  if(major(dev) != maj || minor(dev) != min)
-    {
-    return 1;
-    }
-  return 0;
-}
-")
-# get this from the source tree since it was not in the previous
-# version of cmake and cmake need to build cmake
-IF("${CMake_SOURCE_DIR}" STREQUAL "")
-  INCLUDE(CheckCSourceRuns)
-ELSE("${CMake_SOURCE_DIR}" STREQUAL "")
-  INCLUDE(${CMake_SOURCE_DIR}/Modules/CheckCSourceRuns.cmake)
-ENDIF("${CMake_SOURCE_DIR}" STREQUAL "")
-CHECK_C_SOURCE_RUNS("${CMAKE_MAKEDEV_SOURCE}" MAKEDEV_THREE_ARGS)
-#SET (MAKEDEV_THREE_ARGS 0)
+# for most systems makedev is two args on qnx it is three
+# try run is nothing but trouble so just hard code it 
+SET (MAKEDEV_THREE_ARGS 0)
+IF(QNXNTO)
+  SET(MAKEDEV_THREE_ARGS 1)
+ENDIF(QNXNTO)
 #SET (NEED_BASENAME 0)
 #SET (NEED_DIRNAME 0)
 #SET (NEED_FNMATCH 1)
