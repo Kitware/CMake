@@ -1184,6 +1184,18 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       return cmake::ExecuteLinkScript(args);
       }
 
+    // Internal CMake unimplemented feature notification.
+    else if (args[1] == "cmake_unimplemented_variable")
+      {
+      std::cerr << "Feature not implemented for this platform.";
+      if(args.size() == 3)
+        {
+        std::cerr << "  Variable " << args[2] << " is not set.";
+        }
+      std::cerr << std::endl;
+      return 1;
+      }
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
     // Internal CMake color makefile support.
     else if (args[1] == "cmake_echo_color")
