@@ -55,7 +55,8 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
   // Clear the current set of requirements.
   this->NeedObjectName.clear();
 
-  // Count the number of object files with each name.
+  // Count the number of object files with each name.  Note that
+  // windows file names are not case sensitive.
   std::map<cmStdString, int> objectNameCounts;
   for(unsigned int i = 0; i < sourceGroups.size(); ++i)
     {
@@ -68,8 +69,9 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
       if(this->SourceFileCompiles(sf))
         {
         std::string objectName =
-          cmSystemTools::GetFilenameWithoutLastExtension(
-            sf->GetFullPath().c_str());
+          cmSystemTools::LowerCase(
+            cmSystemTools::GetFilenameWithoutLastExtension(
+              sf->GetFullPath().c_str()));
         objectName += ".obj";
         objectNameCounts[objectName] += 1;
         }
@@ -89,8 +91,9 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
       if(this->SourceFileCompiles(sf))
         {
         std::string objectName =
-          cmSystemTools::GetFilenameWithoutLastExtension(
-            sf->GetFullPath().c_str());
+          cmSystemTools::LowerCase(
+            cmSystemTools::GetFilenameWithoutLastExtension(
+              sf->GetFullPath().c_str()));
         objectName += ".obj";
         if(objectNameCounts[objectName] > 1)
           {
