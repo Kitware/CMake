@@ -477,30 +477,9 @@ Modify cmCommandArgumentLexer.h:
 
 */
 
+#include "cmStandardLexer.h"
+
 #include "cmCommandArgumentParserHelper.h"
-
-/* Disable some warnings.  */
-#if defined(_MSC_VER)
-# pragma warning ( disable : 4127 )
-# pragma warning ( disable : 4131 )
-# pragma warning ( disable : 4244 )
-# pragma warning ( disable : 4251 )
-# pragma warning ( disable : 4267 )
-# pragma warning ( disable : 4305 )
-# pragma warning ( disable : 4309 )
-# pragma warning ( disable : 4706 )
-# pragma warning ( disable : 4786 )
-#endif
-
-#if defined(__BORLANDC__)
-# pragma warn -8008 /* condition always returns true */
-# pragma warn -8066 /* unreachable code */
-#endif
-
-/* Disable features we do not need. */
-#define YY_NEVER_INTERACTIVE 1
-#undef ECHO /* SGI termios defines this differently. */
-#define ECHO
 
 /* Replace the lexer input function.  */
 #undef YY_INPUT
@@ -509,16 +488,6 @@ Modify cmCommandArgumentLexer.h:
 
 /* Include the set of tokens from the parser.  */
 #include "cmCommandArgumentParserTokens.h"
-
-
-#if defined( _WIN32 ) && !defined( __CYGWIN__ )
-/* Handle Windows properly */
-#  include <io.h>
-#  if defined( _MSC_VER )
-#    define isatty _isatty
-#  endif
-#  define YY_NO_UNISTD_H 1
-#endif
 
 /*--------------------------------------------------------------------------*/
 

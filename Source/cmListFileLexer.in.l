@@ -27,39 +27,21 @@ Modify cmListFileLexer.c:
   - remove TABs
   - remove the yyunput function
   - add a statement "(void)yyscanner;" to the top of these methods:
-      yy_fatal_error, yyalloc, yyrealloc, yyfree
+      yy_fatal_error, cmListFileLexer_yyalloc, cmListFileLexer_yyrealloc, cmListFileLexer_yyfree
   - remove all YY_BREAK lines occurring right after return statements
 
 */
 
+#include "cmStandardLexer.h"
+
 /* Disable features we do not need. */
-#define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
 #define YY_NO_UNPUT 1
 #define YY_NO_UNISTD_H 1
-#define ECHO
 
-/* Setup the proper yylex declaration.  */
+/* Setup the proper cmListFileLexer_yylex declaration.  */
 #define YY_EXTRA_TYPE cmListFileLexer*
 #define YY_DECL int cmListFileLexer_yylex (yyscan_t yyscanner, cmListFileLexer* lexer)
-
-/* Disable some warnings.  */
-#if defined(_MSC_VER)
-# pragma warning ( disable : 4127 )
-# pragma warning ( disable : 4131 )
-# pragma warning ( disable : 4244 )
-# pragma warning ( disable : 4251 )
-# pragma warning ( disable : 4267 )
-# pragma warning ( disable : 4305 )
-# pragma warning ( disable : 4309 )
-# pragma warning ( disable : 4706 )
-# pragma warning ( disable : 4786 )
-#endif
-
-#if defined(__BORLANDC__)
-# pragma warn -8008 /* condition always returns true */
-# pragma warn -8066 /* unreachable code */
-#endif
 
 #include "cmListFileLexer.h"
 
