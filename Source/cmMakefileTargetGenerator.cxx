@@ -495,6 +495,104 @@ cmMakefileTargetGenerator
                                       relativeObj.c_str(),
                                       depends, commands, false);
 
+  bool do_preprocess_rules =
+    this->LocalGenerator->GetCreatePreprocessedSourceRules();
+  bool do_assembly_rules =
+    this->LocalGenerator->GetCreateAssemblySourceRules();
+  if(do_preprocess_rules || do_assembly_rules)
+    {
+    std::vector<std::string> force_depends;
+    force_depends.push_back("cmake_force");
+    std::string::size_type dot_pos = relativeObj.rfind(".");
+    std::string relativeObjBase = relativeObj.substr(0, dot_pos);
+
+    if(do_preprocess_rules)
+      {
+      commands.clear();
+      std::string relativeObjE = relativeObjBase + ".E";
+
+      std::string preprocessEcho = "Preprocessing ";
+      preprocessEcho += lang;
+      preprocessEcho += " source to ";
+      preprocessEcho += relativeObjE;
+      this->LocalGenerator->AppendEcho(
+        commands, preprocessEcho.c_str(),
+        cmLocalUnixMakefileGenerator3::EchoBuild
+        );
+
+      std::string preprocessRuleVar = "CMAKE_";
+      preprocessRuleVar += lang;
+      preprocessRuleVar += "_CREATE_PREPROCESSED_SOURCE";
+      if(const char* preprocessRule =
+         this->Makefile->GetDefinition(preprocessRuleVar.c_str()))
+        {
+        cmSystemTools::ExpandListArgument(preprocessRule, commands);
+
+        vars.PreprocessedSource = relativeObjE.c_str();
+
+        // Expand placeholders in the commands.
+        for(std::vector<std::string>::iterator i = commands.begin();
+            i != commands.end(); ++i)
+          {
+          this->LocalGenerator->ExpandRuleVariables(*i, vars);
+          }
+        }
+      else
+        {
+        std::string cmd = "$(CMAKE_COMMAND) -E cmake_unimplemented_variable ";
+        cmd += preprocessRuleVar;
+        commands.push_back(cmd);
+        }
+
+      this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+                                          relativeObjE.c_str(),
+                                          force_depends, commands, false);
+      }
+
+    if(do_assembly_rules)
+      {
+      commands.clear();
+      std::string relativeObjS = relativeObjBase + ".S";
+
+      std::string assemblyEcho = "Compiling ";
+      assemblyEcho += lang;
+      assemblyEcho += " source to assembly ";
+      assemblyEcho += relativeObjS;
+      this->LocalGenerator->AppendEcho(
+        commands, assemblyEcho.c_str(),
+        cmLocalUnixMakefileGenerator3::EchoBuild
+        );
+
+      std::string assemblyRuleVar = "CMAKE_";
+      assemblyRuleVar += lang;
+      assemblyRuleVar += "_CREATE_ASSEMBLY_SOURCE";
+      if(const char* assemblyRule =
+         this->Makefile->GetDefinition(assemblyRuleVar.c_str()))
+        {
+        cmSystemTools::ExpandListArgument(assemblyRule, commands);
+
+        vars.AssemblySource = relativeObjS.c_str();
+
+        // Expand placeholders in the commands.
+        for(std::vector<std::string>::iterator i = commands.begin();
+            i != commands.end(); ++i)
+          {
+          this->LocalGenerator->ExpandRuleVariables(*i, vars);
+          }
+        }
+      else
+        {
+        std::string cmd = "$(CMAKE_COMMAND) -E cmake_unimplemented_variable ";
+        cmd += assemblyRuleVar;
+        commands.push_back(cmd);
+        }
+
+      this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+                                          relativeObjS.c_str(),
+                                          force_depends, commands, false);
+      }
+    }
+
   // If the language needs provides-requires mode, create the
   // corresponding targets.
   std::string objectRequires = relativeObj;

@@ -749,6 +749,20 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       return replaceValues.Source;
       }
     }
+  if(replaceValues.PreprocessedSource)
+    {
+    if(variable == "PREPROCESSED_SOURCE")
+      {
+      return replaceValues.PreprocessedSource;
+      }
+    }
+  if(replaceValues.AssemblySource)
+    {
+    if(variable == "ASSEMBLY_SOURCE")
+      {
+      return replaceValues.AssemblySource;
+      }
+    }
   if(replaceValues.Object)
     {
     if(variable == "OBJECT")

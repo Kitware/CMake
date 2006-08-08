@@ -209,6 +209,12 @@ public:
   unsigned long GetNumberOfProgressActions();
   unsigned long GetNumberOfProgressActionsForTarget(const char *);
 
+  /** Get whether to create rules to generate preprocessed and
+      assembly sources.  This could be converted to a variable lookup
+      later.  */
+  bool GetCreatePreprocessedSourceRules() { return true; }
+  bool GetCreateAssemblySourceRules() { return true; }
+
 protected:
   // these two methods just compute reasonable values for LibraryOutputPath
   // and ExecutableOutputPath

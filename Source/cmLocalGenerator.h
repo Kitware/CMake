@@ -186,6 +186,8 @@ public:
         this->Target= 0;
         this->LinkLibraries= 0;
         this->Source= 0;
+        this->AssemblySource = 0;
+        this->PreprocessedSource = 0;
         this->Object= 0;
         this->ObjectDir= 0;
         this->Flags= 0;
@@ -200,6 +202,8 @@ public:
     const char* Target;
     const char* LinkLibraries;
     const char* Source;
+    const char* AssemblySource;
+    const char* PreprocessedSource;
     const char* Object;
     const char* ObjectDir;
     const char* Flags;

@@ -274,16 +274,41 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
       static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
     gg->WriteConvenienceRules(ruleFileStream,emittedTargets);
     }
-  
+
+  bool do_preprocess_rules =
+    this->GetCreatePreprocessedSourceRules();
+  bool do_assembly_rules =
+    this->GetCreateAssemblySourceRules();
+
   // now write out the object rules
   // for each object file name
   for (std::map<cmStdString,std::vector<cmTarget *> >::iterator lo = 
          this->LocalObjectFiles.begin();
        lo != this->LocalObjectFiles.end(); ++lo)
     {
+    // Add a convenience rule for building the object file.
     this->WriteObjectConvenienceRule(ruleFileStream,
                                      "target to build an object file",
                                      lo->first.c_str(), lo->second);
+
+    // Add convenience rules for preprocessed and assembly files.
+    if(do_preprocess_rules || do_assembly_rules)
+      {
+      std::string::size_type dot_pos = lo->first.rfind(".");
+      std::string base = lo->first.substr(0, dot_pos);
+      if(do_preprocess_rules)
+        {
+        this->WriteObjectConvenienceRule(
+          ruleFileStream, "target to preprocess a source file",
+          (base + ".E").c_str(), lo->second);
+        }
+      if(do_assembly_rules)
+        {
+        this->WriteObjectConvenienceRule(
+          ruleFileStream, "target to generate assembly for a file",
+          (base + ".S").c_str(), lo->second);
+        }
+      }
     }
 
   // add a help target as long as there isn;t a real target named help
@@ -706,8 +731,15 @@ cmLocalUnixMakefileGenerator3
                         commands, false);
     }
 
-  // Special target to cleanup operation of make tool.
+  // Special symbolic target that never exists to force dependers to
+  // run their rules.
   std::vector<std::string> depends;
+  this->WriteMakeRule
+    (makefileStream,
+     "A target that is always out of date.",
+     "cmake_force", depends, commands, true);
+
+  // Special target to cleanup operation of make tool.
   this->WriteMakeRule
     (makefileStream,
      "Disable implicit rules so canoncical targets will work.",
