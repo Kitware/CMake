@@ -617,7 +617,11 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   vars.LinkLibraries = linkLibs.c_str();
   vars.Flags = flags.c_str();
   vars.LinkFlags = linkFlags.c_str();
-
+ 
+  std::string langFlags;
+  this->AddLanguageFlags(langFlags, llang, 0);
+  vars.LanguageCompileFlags = langFlags.c_str();
+  
   cmCustomCommandLines commandLines;
   std::vector<std::string> rules;
   rules.push_back(this->Makefile->GetRequiredDefinition(createRule.c_str()));
@@ -812,30 +816,39 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         return targetQuoted;
         }
       }
-    if(variable == "LANGUAGE_COMPILE_FLAGS")
+    if(replaceValues.LanguageCompileFlags)
       {
-      return replaceValues.LanguageCompileFlags;
+      if(variable == "LANGUAGE_COMPILE_FLAGS")
+        {
+        return replaceValues.LanguageCompileFlags;
+        }
       }
-    if(variable == "TARGET")
+    if(replaceValues.Target)
       {
-      return replaceValues.Target;
+      if(variable == "TARGET")
+        {
+        return replaceValues.Target;
+        }
       }
     if(variable == "TARGET_IMPLIB")
       {
       return this->TargetImplib;
       }
-    if(variable == "TARGET_BASE")
+    if(replaceValues.Target)
       {
-      // Strip the last extension off the target name.
-      std::string targetBase = replaceValues.Target;
-      std::string::size_type pos = targetBase.rfind(".");
-      if(pos != targetBase.npos)
+      if(variable == "TARGET_BASE")
         {
+        // Strip the last extension off the target name.
+        std::string targetBase = replaceValues.Target;
+        std::string::size_type pos = targetBase.rfind(".");
+        if(pos != targetBase.npos)
+          {
         return targetBase.substr(0, pos);
-        }
-      else
-        {
-        return targetBase;
+          }
+        else
+          {
+          return targetBase;
+          }
         }
       }
     }

@@ -181,20 +181,7 @@ public:
   {
     RuleVariables()
       {
-        this->Language= 0;
-        this->Objects= 0;
-        this->Target= 0;
-        this->LinkLibraries= 0;
-        this->Source= 0;
-        this->AssemblySource = 0;
-        this->PreprocessedSource = 0;
-        this->Object= 0;
-        this->ObjectDir= 0;
-        this->Flags= 0;
-        this->ObjectsQuoted= 0;
-        this->TargetSOName= 0;
-        this->TargetInstallNameDir = 0;
-        this->LinkFlags= 0;
+        memset(this, 0,  sizeof(*this));
       }
     const char* TargetPDB;
     const char* Language;
