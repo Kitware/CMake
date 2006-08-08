@@ -358,7 +358,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
     std::string cleanFullImportName = outpath + cleanImportName;
     libCleanFiles.push_back
-      (this->Convert(cleanFullStaticName.c_str(),cmLocalGenerator::START_OUTPUT,
+      (this->Convert(cleanFullStaticName.c_str(),
+                     cmLocalGenerator::START_OUTPUT,
                      cmLocalGenerator::UNCHANGED));
     if(cleanSharedRealName != cleanStaticName)
       {
