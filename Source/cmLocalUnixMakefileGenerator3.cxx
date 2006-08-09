@@ -49,6 +49,8 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->UnixCD = true;
   this->ForceVerboseMakefiles=false;
   this->ColorMakefile = false;
+  this->SkipPreprocessedSourceRules = false;
+  this->SkipAssemblySourceRules = false;
 }
 
 //----------------------------------------------------------------------------
@@ -76,9 +78,13 @@ void cmLocalUnixMakefileGenerator3::Generate()
   // Setup our configuration variables for this directory.
   this->ConfigureOutputPaths();
 
-  // Record whether color makefiles are enabled to avoid checking many
+  // Record whether some options are enabled to avoid checking many
   // times later.
   this->ColorMakefile = this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE");
+  this->SkipPreprocessedSourceRules =
+    this->Makefile->IsOn("CMAKE_SKIP_PREPROCESSED_SOURCE_RULES");
+  this->SkipAssemblySourceRules =
+    this->Makefile->IsOn("CMAKE_SKIP_ASSEMBLY_SOURCE_RULES");
 
   // Generate the rule files for each target.
   cmTargets& targets = this->Makefile->GetTargets();

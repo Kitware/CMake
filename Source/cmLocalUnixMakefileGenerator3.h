@@ -212,8 +212,14 @@ public:
   /** Get whether to create rules to generate preprocessed and
       assembly sources.  This could be converted to a variable lookup
       later.  */
-  bool GetCreatePreprocessedSourceRules() { return true; }
-  bool GetCreateAssemblySourceRules() { return true; }
+  bool GetCreatePreprocessedSourceRules()
+    {
+    return !this->SkipPreprocessedSourceRules;
+    }
+  bool GetCreateAssemblySourceRules()
+    {
+    return !this->SkipAssemblySourceRules;
+    }
 
 protected:
   // these two methods just compute reasonable values for LibraryOutputPath
@@ -323,6 +329,12 @@ private:
   /* Copy the setting of CMAKE_COLOR_MAKEFILE from the makefile at the
      beginning of generation to avoid many duplicate lookups.  */
   bool ColorMakefile;
+
+  /* Copy the setting of CMAKE_SKIP_PREPROCESSED_SOURCE_RULES and
+     CMAKE_SKIP_ASSEMBLY_SOURCE_RULES at the beginning of generation to
+     avoid many duplicate lookups.  */
+  bool SkipPreprocessedSourceRules;
+  bool SkipAssemblySourceRules;
 
   std::map<cmStdString,std::vector<cmTarget *> > LocalObjectFiles;
 
