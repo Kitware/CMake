@@ -306,13 +306,13 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
         {
         this->WriteObjectConvenienceRule(
           ruleFileStream, "target to preprocess a source file",
-          (base + ".E").c_str(), lo->second);
+          (base + ".i").c_str(), lo->second);
         }
       if(do_assembly_rules)
         {
         this->WriteObjectConvenienceRule(
           ruleFileStream, "target to generate assembly for a file",
-          (base + ".S").c_str(), lo->second);
+          (base + ".s").c_str(), lo->second);
         }
       }
     }

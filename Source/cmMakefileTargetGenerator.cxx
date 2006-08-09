@@ -509,12 +509,12 @@ cmMakefileTargetGenerator
     if(do_preprocess_rules)
       {
       commands.clear();
-      std::string relativeObjE = relativeObjBase + ".E";
+      std::string relativeObjI = relativeObjBase + ".i";
 
       std::string preprocessEcho = "Preprocessing ";
       preprocessEcho += lang;
       preprocessEcho += " source to ";
-      preprocessEcho += relativeObjE;
+      preprocessEcho += relativeObjI;
       this->LocalGenerator->AppendEcho(
         commands, preprocessEcho.c_str(),
         cmLocalUnixMakefileGenerator3::EchoBuild
@@ -528,7 +528,7 @@ cmMakefileTargetGenerator
         {
         cmSystemTools::ExpandListArgument(preprocessRule, commands);
 
-        vars.PreprocessedSource = relativeObjE.c_str();
+        vars.PreprocessedSource = relativeObjI.c_str();
 
         // Expand placeholders in the commands.
         for(std::vector<std::string>::iterator i = commands.begin();
@@ -545,14 +545,14 @@ cmMakefileTargetGenerator
         }
 
       this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                          relativeObjE.c_str(),
+                                          relativeObjI.c_str(),
                                           force_depends, commands, false);
       }
 
     if(do_assembly_rules)
       {
       commands.clear();
-      std::string relativeObjS = relativeObjBase + ".S";
+      std::string relativeObjS = relativeObjBase + ".s";
 
       std::string assemblyEcho = "Compiling ";
       assemblyEcho += lang;
