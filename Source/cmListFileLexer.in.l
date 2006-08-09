@@ -29,15 +29,11 @@ Modify cmListFileLexer.c:
   - add a statement "(void)yyscanner;" to the top of these methods:
       yy_fatal_error, cmListFileLexer_yyalloc, cmListFileLexer_yyrealloc, cmListFileLexer_yyfree
   - remove all YY_BREAK lines occurring right after return statements
+  - remove the isatty forward declaration
 
 */
 
 #include "cmStandardLexer.h"
-
-/* Disable features we do not need. */
-#define YY_NO_INPUT 1
-#define YY_NO_UNPUT 1
-#define YY_NO_UNISTD_H 1
 
 /* Setup the proper cmListFileLexer_yylex declaration.  */
 #define YY_EXTRA_TYPE cmListFileLexer*

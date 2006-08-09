@@ -503,15 +503,11 @@ Modify cmListFileLexer.c:
   - add a statement "(void)yyscanner;" to the top of these methods:
       yy_fatal_error, cmListFileLexer_yyalloc, cmListFileLexer_yyrealloc, cmListFileLexer_yyfree
   - remove all YY_BREAK lines occurring right after return statements
+  - remove the isatty forward declaration
 
 */
 
 #include "cmStandardLexer.h"
-
-/* Disable features we do not need. */
-#define YY_NO_INPUT 1
-#define YY_NO_UNPUT 1
-#define YY_NO_UNISTD_H 1
 
 /* Setup the proper cmListFileLexer_yylex declaration.  */
 #define YY_EXTRA_TYPE cmListFileLexer*
@@ -1513,10 +1509,6 @@ static void cmListFileLexer_yy_load_buffer_state  (yyscan_t yyscanner)
         cmListFileLexer_yyfree((void *) b ,yyscanner );
 }
 
-#ifndef __cplusplus
-extern int isatty (int );
-#endif /* __cplusplus */
-    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a cmListFileLexer_yyrestart() or at EOF.

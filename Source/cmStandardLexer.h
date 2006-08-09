@@ -33,19 +33,26 @@
 #if defined(__BORLANDC__)
 # pragma warn -8008 /* condition always returns true */
 # pragma warn -8066 /* unreachable code */
+#endif
+
 /* Borland system header defines these macros without first undef-ing them.  */
-# if __BORLANDC__ >= 0x580
-#  undef INT8_MIN
-#  undef INT16_MIN
-#  undef INT32_MIN
-#  undef INT8_MAX
-#  undef INT16_MAX
-#  undef INT32_MAX
-#  undef UINT8_MAX
-#  undef UINT16_MAX
-#  undef UINT32_MAX
-#  include <stdint.h>
-# endif
+#if defined(__BORLANDC__) && __BORLANDC__ >= 0x580
+# undef INT8_MIN
+# undef INT16_MIN
+# undef INT32_MIN
+# undef INT8_MAX
+# undef INT16_MAX
+# undef INT32_MAX
+# undef UINT8_MAX
+# undef UINT16_MAX
+# undef UINT32_MAX
+# include <stdint.h>
+#endif
+
+/* Make sure SGI termios does not define ECHO differently.  */
+#if defined(__sgi) && !defined(__GNUC__)
+# include <sys/termios.h>
+# undef ECHO
 #endif
 
 /* Define isatty on windows.  */
@@ -59,9 +66,8 @@
 
 /* Disable features we do not need. */
 #define YY_NEVER_INTERACTIVE 1
-
-/* Avoid display of input matches to standard output.  */
-#undef ECHO /* SGI termios defines this differently. */
+#define YY_NO_INPUT 1
+#define YY_NO_UNPUT 1
 #define ECHO
 
 #endif
