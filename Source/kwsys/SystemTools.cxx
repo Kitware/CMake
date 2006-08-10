@@ -1764,7 +1764,7 @@ long int SystemTools::CreationTime(const char* filename)
 
 bool SystemTools::ConvertDateMacroString(const char *str, time_t *tmt)
 {
-  if (!str || !tmt || strlen(str) < 12)
+  if (!str || !tmt || strlen(str) > 11)
     {
     return false;
     }
@@ -1812,7 +1812,7 @@ bool SystemTools::ConvertDateMacroString(const char *str, time_t *tmt)
 
 bool SystemTools::ConvertTimeStampMacroString(const char *str, time_t *tmt)
 {
-  if (!str || !tmt || strlen(str) < 27)
+  if (!str || !tmt || strlen(str) > 26)
     {
     return false;
     }
