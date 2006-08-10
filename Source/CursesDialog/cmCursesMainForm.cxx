@@ -810,8 +810,8 @@ void cmCursesMainForm::FillCacheManagerFromUI()
         {
         // The user has changed the value.  Mark it as modified.
         it.SetProperty("MODIFIED", true);
+        it.SetValue(fixedNewValue.c_str());
         }
-      it.SetValue(fixedNewValue.c_str());
       }
     }
 }
