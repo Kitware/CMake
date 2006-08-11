@@ -201,7 +201,7 @@ IF(UNIX AND NOT APPLE)
     else(NOT SKIP_TZ)
       message("compress found, but it was a script so dont use it")
       message("output from file command: [${output}]")
-    endif(NOT "${output}" MATCHES "script")
+    endif(NOT SKIP_TZ)
   ENDIF(found_compress)
   FIND_PROGRAM(found_bz2
     NAMES bzip2)
