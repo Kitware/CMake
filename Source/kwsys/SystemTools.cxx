@@ -1367,14 +1367,14 @@ kwsys_stl::string SystemTools::ConvertToUnixOutputPath(const char* path)
     ret.erase(pos, 1);
     }
   // now escape spaces if there is a space in the path
-  if(ret.find(" ") != kwsys_stl::string::npos)
+  if(ret.find_first_of(" ()") != kwsys_stl::string::npos)
     {
     kwsys_stl::string result = "";
     char lastch = 1;
     for(const char* ch = ret.c_str(); *ch != '\0'; ++ch)
       {
         // if it is already escaped then don't try to escape it again
-      if(*ch == ' ' && lastch != '\\')
+      if((*ch == ' ' || *ch == '(' || *ch == ')') && lastch != '\\')
         {
         result += '\\';
         }
