@@ -88,10 +88,16 @@ SET(CMAKE_CURL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/Utilities")
 SET(CMAKE_CURL_LIBRARIES "cmcurl")
 
 #-----------------------------------------------------------------------------
-# Build Curl library for CTest.
+# Build Tar library for CTest.
 SUBDIRS(Utilities/cmtar)
 SET(CMAKE_TAR_INCLUDES "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmtar")
 SET(CMAKE_TAR_LIBRARIES "cmtar")
+
+#-----------------------------------------------------------------------------
+# Build Compress library for CTest.
+SUBDIRS(Utilities/cmcompress)
+SET(CMAKE_COMPRESS_INCLUDES "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmcompress")
+SET(CMAKE_COMPRESS_LIBRARIES "cmcompress")
 
 #-----------------------------------------------------------------------------
 # Build expat library for CMake and CTest.
