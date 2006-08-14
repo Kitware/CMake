@@ -196,7 +196,6 @@ std::string cmGlobalXCodeGenerator
     makeCommand += " ";
     makeCommand += additionalOptions;
     }
-  makeCommand += " OBJROOT=.";
   return makeCommand;
 }
 
