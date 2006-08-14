@@ -173,7 +173,7 @@ void cmLocalUnixMakefileGenerator3::WriteAllProgressVariable()
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
 
   ruleFileStream << "CMAKE_ALL_PROGRESS = " 
-                 << gg->GetNumberOfProgressActionsInAll(this);
+                 << gg->GetNumberOfProgressActionsInAll(this) << "\n";
 }
 
 //----------------------------------------------------------------------------
