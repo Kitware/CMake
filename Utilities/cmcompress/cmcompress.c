@@ -439,7 +439,7 @@ int output(struct cmcompress_stream* cdata, code_int  code)
      * Since code is always >= 8 bits, only need to mask the first
      * hunk on the left.
      */
-    *bp = (*bp & rmask[r_off]) | ((code << r_off) & lmask[r_off]);
+    *bp = (char)((*bp & rmask[r_off]) | ((code << r_off) & lmask[r_off]));
     bp++;
     bits -= (8 - r_off);
     code >>= 8 - r_off;
