@@ -465,8 +465,6 @@ int output(struct cmcompress_stream* cdata, code_int  code)
       do
         {
         if ( cdata->output_stream(cdata, bp, 1) != 1 )
-          //putchar(*bp++);
-          //if (ferror(stdout))
           {
           return 0;
           }
@@ -489,7 +487,6 @@ int output(struct cmcompress_stream* cdata, code_int  code)
       if ( cdata->offset > 0 )
         {
         if ( cdata->output_stream(cdata, buf, cdata->n_bits) != cdata->n_bits )
-          //if( fwrite( buf, 1, cdata->n_bits, stdout ) != cdata->n_bits)
           {
           return 0;
           }
@@ -532,7 +529,6 @@ int output(struct cmcompress_stream* cdata, code_int  code)
       {
       cdata->offset = (cdata->offset + 7) / 8;
       if ( cdata->output_stream(cdata, buf, cdata->offset ) != cdata->offset )
-        //if( fwrite( buf, 1, cdata->offset, stdout ) != cdata->offset )
         {
         return 0;
         }
