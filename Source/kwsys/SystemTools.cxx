@@ -1366,17 +1366,31 @@ kwsys_stl::string SystemTools::ConvertToUnixOutputPath(const char* path)
     {
     ret.erase(pos, 1);
     }
-  // now escape spaces if there is a space in the path
+  // escape spaces and () in the path
   if(ret.find_first_of(" ()") != kwsys_stl::string::npos)
     {
     kwsys_stl::string result = "";
     char lastch = 1;
+    bool inDollarVariable = false;
     for(const char* ch = ret.c_str(); *ch != '\0'; ++ch)
       {
         // if it is already escaped then don't try to escape it again
       if((*ch == ' ' || *ch == '(' || *ch == ')') && lastch != '\\')
         {
-        result += '\\';
+        if(*ch == '(' && lastch == '$')
+          {
+          inDollarVariable = true;
+          }
+        // if we are in a $(..... and we get a ) then do not escape
+        // the ) and but set inDollarVariable to false
+        else if(*ch == ')' && inDollarVariable)
+          {
+          inDollarVariable = false;
+          }
+        else
+          {
+          result += '\\';
+          }
         }
       result += *ch;
       lastch = *ch;
