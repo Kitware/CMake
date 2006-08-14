@@ -91,7 +91,7 @@ extern "C"
 #ifdef PBITS    /* Preferred BITS for this memory size */
 # ifndef BITS
 #  define BITS PBITS
-# endif BITS
+# endif /* BITS */
 #endif /* PBITS */
 
 #if BITS == 16

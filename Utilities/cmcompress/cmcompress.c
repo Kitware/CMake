@@ -68,10 +68,11 @@ static const char_type magic_header[] = { "\037\235" };  /* 1F 9D */
 #define  CLEAR  256  /* table clear output code */
 
 static void cl_hash(struct cmcompress_stream* cdata, count_int hsize);    /* reset code table */
-static void cl_block (struct cmcompress_stream* cdata);    /* table clear for block compress */
+static int cl_block (struct cmcompress_stream* cdata);    /* table clear for block compress */
+static int output(struct cmcompress_stream* cdata, code_int  code);
+#ifdef DEBUG
 static void prratio( FILE *stream, long int num, long int den);
-static void output(struct cmcompress_stream* cdata, code_int  code);
-static void writeerr();
+#endif
 
 int cmcompress_compress_initialize(struct cmcompress_stream* cdata)
 {
@@ -204,7 +205,10 @@ probe:
       goto probe;
       }
 nomatch:
-    output(cdata, (code_int) cdata->ent );
+    if ( !output(cdata, (code_int) cdata->ent ) )
+      {
+      return 0;
+      }
     cdata->out_count++;
     cdata->ent = c;
     if (
@@ -220,7 +224,10 @@ nomatch:
       }
     else if ( (count_int)cdata->in_count >= cdata->checkpoint && cdata->block_compress )
       {
-      cl_block (cdata);
+      if ( !cl_block (cdata) )
+        {
+        return 0;
+        }
       }
     }
 
@@ -232,9 +239,15 @@ int cmcompress_compress_finalize(struct cmcompress_stream* cdata)
   /*
    * Put out the final code.
    */
-  output(cdata, (code_int)cdata->ent );
+  if ( !output(cdata, (code_int)cdata->ent ) )
+    {
+    return 0;
+    }
   cdata->out_count++;
-  output(cdata, (code_int)-1 );
+  if ( !output(cdata, (code_int)-1 ) )
+    {
+    return 0;
+    }
 
   if(cdata->bytes_out > cdata->in_count)  /* exit(2) if no savings */
     {
@@ -243,7 +256,7 @@ int cmcompress_compress_finalize(struct cmcompress_stream* cdata)
   return 1;
 }
 
-void cl_block (struct cmcompress_stream* cdata)    /* table clear for block compress */
+int cl_block (struct cmcompress_stream* cdata)    /* table clear for block compress */
 {
   register long int rat;
 
@@ -289,7 +302,10 @@ void cl_block (struct cmcompress_stream* cdata)    /* table clear for block comp
     cl_hash (cdata, (count_int) cdata->hsize );
     cdata->free_ent = FIRST;
     cdata->clear_flg = 1;
-    output (cdata, (code_int) CLEAR );
+    if ( !output (cdata, (code_int) CLEAR ) )
+      {
+      return 0;
+      }
 #ifdef DEBUG
     if(cdata->debug)
       {
@@ -297,6 +313,7 @@ void cl_block (struct cmcompress_stream* cdata)    /* table clear for block comp
       }
 #endif /* DEBUG */
     }
+  return 1;
 }
 
 void cl_hash(struct cmcompress_stream* cdata, count_int hsize)    /* reset code table */
@@ -377,7 +394,7 @@ char_type lmask[9] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00};
 char_type rmask[9] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
 #endif /* vax */
 
-void output(struct cmcompress_stream* cdata, code_int  code)
+int output(struct cmcompress_stream* cdata, code_int  code)
 {
 #ifdef DEBUG
   static int col = 0;
@@ -451,7 +468,7 @@ void output(struct cmcompress_stream* cdata, code_int  code)
           //putchar(*bp++);
           //if (ferror(stdout))
           {
-          writeerr();
+          return 0;
           }
         bp++;
         }
@@ -474,7 +491,7 @@ void output(struct cmcompress_stream* cdata, code_int  code)
         if ( cdata->output_stream(cdata, buf, cdata->n_bits) != cdata->n_bits )
           //if( fwrite( buf, 1, cdata->n_bits, stdout ) != cdata->n_bits)
           {
-          writeerr();
+          return 0;
           }
         cdata->bytes_out += cdata->n_bits;
         }
@@ -517,7 +534,7 @@ void output(struct cmcompress_stream* cdata, code_int  code)
       if ( cdata->output_stream(cdata, buf, cdata->offset ) != cdata->offset )
         //if( fwrite( buf, 1, cdata->offset, stdout ) != cdata->offset )
         {
-        writeerr();
+        return 0;
         }
       cdata->bytes_out += cdata->offset;
       }
@@ -525,7 +542,7 @@ void output(struct cmcompress_stream* cdata, code_int  code)
     (void)fflush( stdout );
     if( ferror( stdout ) )
       {
-      writeerr();
+      return 0;
       }
 #ifdef DEBUG
     if ( verbose )
@@ -534,12 +551,5 @@ void output(struct cmcompress_stream* cdata, code_int  code)
       }
 #endif
     }
+  return 1;
 }
-
-void writeerr()
-{
-  (void)fprintf(stderr, "compress: %s\n",
-    strerror(errno));
-  exit(1);
-}
-
