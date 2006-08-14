@@ -1187,6 +1187,7 @@ void cmMakefileTargetGenerator::WriteProgressVariables(unsigned long total,
       }
     *progressFileStream << "\n";
     }
+  *progressFileStream << "\n";
   current += this->NumberOfProgressActions;
   delete progressFileStream;
 }

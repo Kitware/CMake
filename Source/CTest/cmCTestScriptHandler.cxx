@@ -385,6 +385,11 @@ int cmCTestScriptHandler::ExtractVariables()
     = this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
   this->BinaryDir
     = this->Makefile->GetSafeDefinition("CTEST_BINARY_DIRECTORY");
+
+  // add in translations for src and bin
+  cmSystemTools::AddKeepPath(this->SourceDir.c_str());
+  cmSystemTools::AddKeepPath(this->BinaryDir.c_str());
+
   this->CTestCmd
     = this->Makefile->GetSafeDefinition("CTEST_COMMAND");
   this->CVSCheckOut
