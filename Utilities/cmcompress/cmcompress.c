@@ -114,7 +114,7 @@ int cmcompress_compress_start(struct cmcompress_stream* cdata)
   if (cdata->nomagic == 0)
     {
     char headLast = (char)(cdata->maxbits | cdata->block_compress);
-    cdata->output_stream(cdata, magic_header, 2);
+    cdata->output_stream(cdata, (const char*)magic_header, 2);
     cdata->output_stream(cdata, &headLast, 1);
     if(ferror(stdout))
       {
@@ -219,7 +219,7 @@ nomatch:
 #endif
     )
       {
-      codetabof (i) = cdata->free_ent++;  /* code -> hashtable */
+      codetabof (i) = (unsigned short)(cdata->free_ent++);  /* code -> hashtable */
       htabof (i) = cdata->fcode;
       }
     else if ( (count_int)cdata->in_count >= cdata->checkpoint && cdata->block_compress )
@@ -446,14 +446,14 @@ int output(struct cmcompress_stream* cdata, code_int  code)
     /* Get any 8 bit parts in the middle (<=1 for up to 16 bits). */
     if ( bits >= 8 )
       {
-      *bp++ = code;
+      *bp++ = (char)(code);
       code >>= 8;
       bits -= 8;
       }
     /* Last bits. */
     if(bits)
       {
-      *bp = code;
+      *bp = (char)(code);
       }
 #endif /* vax */
     cdata->offset += cdata->n_bits;
