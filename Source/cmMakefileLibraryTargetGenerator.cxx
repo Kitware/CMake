@@ -393,6 +393,19 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
           cmLocalGenerator::UNCHANGED));
       }
     }
+
+#ifdef _WIN32
+  // There may be a manifest file for this target.  Add it to the
+  // clean set just in case.
+  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    libCleanFiles.push_back(
+      this->Convert((targetFullPath+".manifest").c_str(),
+                    cmLocalGenerator::START_OUTPUT,
+                    cmLocalGenerator::UNCHANGED));
+    }
+#endif
+
   // Add a command to remove any existing files for this library.
   std::vector<std::string> commands1;
   this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
