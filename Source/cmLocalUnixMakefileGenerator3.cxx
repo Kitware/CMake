@@ -288,7 +288,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 
   // now write out the object rules
   // for each object file name
-  for (std::map<cmStdString,std::vector<cmTarget *> >::iterator lo = 
+  for (std::map<cmStdString, LocalObjectInfo>::iterator lo = 
          this->LocalObjectFiles.begin();
        lo != this->LocalObjectFiles.end(); ++lo)
     {
@@ -297,8 +297,20 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
                                      "target to build an object file",
                                      lo->first.c_str(), lo->second);
 
+    // Check whether preprocessing and assembly rules make sense.
+    // They make sense only for C and C++ sources.
+    bool lang_is_c_or_cxx = false;
+    for(std::vector<LocalObjectEntry>::const_iterator ei =
+          lo->second.begin(); ei != lo->second.end(); ++ei)
+      {
+      if(ei->Language == "C" || ei->Language == "CXX")
+        {
+        lang_is_c_or_cxx = true;
+        }
+      }
+
     // Add convenience rules for preprocessed and assembly files.
-    if(do_preprocess_rules || do_assembly_rules)
+    if(lang_is_c_or_cxx && (do_preprocess_rules || do_assembly_rules))
       {
       std::string::size_type dot_pos = lo->first.rfind(".");
       std::string base = lo->first.substr(0, dot_pos);
@@ -333,14 +345,15 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteObjectConvenienceRule(std::ostream& ruleFileStream,
                              const char* comment, const char* output,
-                             std::vector<cmTarget*>& targets)
+                             LocalObjectInfo const& targets)
 {
   // Recursively make the rule for each target using the object file.
   std::vector<std::string> commands;
-  for(std::vector<cmTarget*>::iterator t = targets.begin();
+  for(std::vector<LocalObjectEntry>::const_iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    std::string tgtMakefileName = this->GetRelativeTargetDirectory(**t);
+    std::string tgtMakefileName =
+      this->GetRelativeTargetDirectory(*(t->Target));
     std::string targetName = tgtMakefileName;
     tgtMakefileName += "/build.make";
     targetName += "/";

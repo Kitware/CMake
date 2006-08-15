@@ -202,7 +202,16 @@ public:
   // write the target rules for the local Makefile into the stream
   void WriteLocalAllRules(std::ostream& ruleFileStream);
   
-  std::map<cmStdString,std::vector<cmTarget *> > GetLocalObjectFiles()
+  struct LocalObjectEntry
+  {
+    cmTarget* Target;
+    std::string Language;
+    LocalObjectEntry(): Target(0), Language() {}
+    LocalObjectEntry(cmTarget* t, const char* lang):
+      Target(t), Language(lang) {}
+  };
+  class LocalObjectInfo: public std::vector<LocalObjectEntry> {};
+  std::map<cmStdString, LocalObjectInfo> const& GetLocalObjectFiles()
     { return this->LocalObjectFiles;}
 
   // return info about progress actions
@@ -276,7 +285,7 @@ protected:
                                const std::vector<std::string>& objects);
   void WriteObjectConvenienceRule(std::ostream& ruleFileStream,
                                   const char* comment, const char* output,
-                                  std::vector<cmTarget*>& targets);
+                                  LocalObjectInfo const& targets);
   
   std::string GetObjectFileName(cmTarget& target,
                                 const cmSourceFile& source,
@@ -336,7 +345,7 @@ private:
   bool SkipPreprocessedSourceRules;
   bool SkipAssemblySourceRules;
 
-  std::map<cmStdString,std::vector<cmTarget *> > LocalObjectFiles;
+  std::map<cmStdString, LocalObjectInfo> LocalObjectFiles;
 
   /* does the work for each target */
   std::vector<cmMakefileTargetGenerator *> TargetGenerators;

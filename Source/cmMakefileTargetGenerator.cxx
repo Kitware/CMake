@@ -350,7 +350,9 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     objNoTargetDir = cmSystemTools::GetFilenameName(objNoTargetDir);
     }
   this->LocalGenerator->LocalObjectFiles[objNoTargetDir].
-    push_back(this->Target);
+    push_back(
+      cmLocalUnixMakefileGenerator3::LocalObjectEntry(this->Target, lang)
+      );
 }
 
 //----------------------------------------------------------------------------
@@ -495,9 +497,11 @@ cmMakefileTargetGenerator
                                       relativeObj.c_str(),
                                       depends, commands, false);
 
-  bool do_preprocess_rules =
+  bool lang_is_c_or_cxx = ((strcmp(lang, "C") == 0) ||
+                           (strcmp(lang, "CXX") == 0));
+  bool do_preprocess_rules = lang_is_c_or_cxx &&
     this->LocalGenerator->GetCreatePreprocessedSourceRules();
-  bool do_assembly_rules =
+  bool do_assembly_rules = lang_is_c_or_cxx &&
     this->LocalGenerator->GetCreateAssemblySourceRules();
   if(do_preprocess_rules || do_assembly_rules)
     {
