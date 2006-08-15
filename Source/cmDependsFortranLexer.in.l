@@ -105,7 +105,7 @@ Modify cmDependsFortranLexer.h:
 }
 
 !.*\n                   { return EOSTMT; } /* Treat comments like */
-<fixed_fmt>^[cC*dD].*\n { return EOSTMT; } /* empty lines */
+^[cC*].*\n              { return EOSTMT; } /* empty lines */
 
 #[ \t]*include  { return CPP_INCLUDE; }
 \$[ \t]*include { return F90PPR_INCLUDE; }
