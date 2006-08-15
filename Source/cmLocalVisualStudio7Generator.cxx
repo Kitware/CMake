@@ -326,6 +326,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
 cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
 {
   // option flags (some flags map to the same option)
+  {"GenerateManifest", "MANIFEST:NO", "disable manifest generation", "FALSE"},
+  {"GenerateManifest", "MANIFEST", "enable manifest generation", "TRUE"},
   {"LinkIncremental", "INCREMENTAL:NO", "link incremental", "1"},
   {"LinkIncremental", "INCREMENTAL:YES", "link incremental", "2"},
   {0,0,0,0 }
