@@ -43,7 +43,7 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t; 
+typedef unsigned char flex_uint8_t;
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
 #endif /* ! C99 */
@@ -173,7 +173,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
         /* Whether to try to fill the input buffer when we reach the
          * end of it.
          */
@@ -185,16 +185,24 @@ struct yy_buffer_state
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
 void cmDependsFortran_yyrestart (FILE *input_file ,yyscan_t yyscanner );
-void cmDependsFortran_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmDependsFortran_yy_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void cmDependsFortran_yy_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmDependsFortran_yy_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmDependsFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void cmDependsFortran_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,
+  yyscan_t yyscanner );
+YY_BUFFER_STATE cmDependsFortran_yy_create_buffer (FILE *file,int size ,
+  yyscan_t yyscanner );
+void cmDependsFortran_yy_delete_buffer (YY_BUFFER_STATE b ,
+  yyscan_t yyscanner );
+void cmDependsFortran_yy_flush_buffer (YY_BUFFER_STATE b ,
+  yyscan_t yyscanner );
+void cmDependsFortran_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,
+  yyscan_t yyscanner );
 void cmDependsFortran_yypop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE cmDependsFortran_yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmDependsFortran_yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmDependsFortran_yy_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE cmDependsFortran_yy_scan_buffer (char *base,yy_size_t size ,
+  yyscan_t yyscanner );
+YY_BUFFER_STATE cmDependsFortran_yy_scan_string (yyconst char *yy_str ,
+  yyscan_t yyscanner );
+YY_BUFFER_STATE cmDependsFortran_yy_scan_bytes (yyconst char *bytes,int len ,
+  yyscan_t yyscanner );
 
 void *cmDependsFortran_yyalloc (yy_size_t ,yyscan_t yyscanner );
 void *cmDependsFortran_yyrealloc (void *,yy_size_t ,yyscan_t yyscanner );
@@ -220,7 +228,6 @@ void cmDependsFortran_yyfree (void * ,yyscan_t yyscanner );
 #define YY_EXTRA_TYPE void *
 #endif
 
-
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
@@ -232,7 +239,8 @@ void cmDependsFortran_yyset_debug (int debug_flag ,yyscan_t yyscanner );
 
 YY_EXTRA_TYPE cmDependsFortran_yyget_extra (yyscan_t yyscanner );
 
-void cmDependsFortran_yyset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void cmDependsFortran_yyset_extra (YY_EXTRA_TYPE user_defined ,
+  yyscan_t yyscanner );
 
 FILE *cmDependsFortran_yyget_in (yyscan_t yyscanner );
 
@@ -295,7 +303,8 @@ extern int cmDependsFortran_yylex (yyscan_t yyscanner);
 #define YY_DECL int cmDependsFortran_yylex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
-/* yy_get_previous_state - get the state just before the EOB char was reached */
+/* yy_get_previous_state - get the state just before the EOB char was reached
+ */
 
 #undef YY_NEW_FILE
 #undef YY_FLUSH_BUFFER
@@ -309,7 +318,6 @@ extern int cmDependsFortran_yylex (yyscan_t yyscanner);
 #undef YY_DECL_IS_OURS
 #undef YY_DECL
 #endif
-
 
 #undef cmDependsFortran_yyIN_HEADER
 #endif /* cmDependsFortran_yyHEADER_H */
