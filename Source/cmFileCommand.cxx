@@ -318,7 +318,8 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
 //----------------------------------------------------------------------------
 struct cmFileInstaller
 {
-  bool InstallFile(const char* fromFile, const char* toFile, bool always);
+  bool InstallFile(const char* fromFile, const char* toFile, bool always,
+                   bool no_permissions);
   bool InstallDirectory(const char* source,
                         const char* destination,
                         bool always,
@@ -334,7 +335,7 @@ struct cmFileInstaller
 
 //----------------------------------------------------------------------------
 bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
-                                  bool always)
+                                  bool always, bool no_permissions)
 {
   // Inform the user about this file installation.
   std::string message = "Installing ";
@@ -352,7 +353,10 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
     }
 
   // Set permissions of the destination file.
-  if(!cmSystemTools::SetPermissions(toFile, this->FilePermissions))
+  // TODO: Take out no_permissions and replace with a user option to
+  // preserve source permissions explicitly.
+  if(!no_permissions &&
+     !cmSystemTools::SetPermissions(toFile, this->FilePermissions))
     {
     cmOStringStream e;
     e << "Problem setting permissions on file \"" << toFile << "\"";
@@ -405,7 +409,7 @@ bool cmFileInstaller::InstallDirectory(const char* source,
         std::string toFile = destination;
         toFile += "/";
         toFile += dir.GetFile(fileNum);
-        if(this->InstallFile(fromPath.c_str(), toFile.c_str(), always))
+        if(this->InstallFile(fromPath.c_str(), toFile.c_str(), always, true))
           {
           smanifest_files += ";";
           smanifest_files += toFile.substr(destDirLength);
@@ -1081,7 +1085,7 @@ bool cmFileCommand::HandleInstallCommand(
         {
         // Install this file.
         if(!installer.InstallFile(fromFile.c_str(), toFile.c_str(),
-                                  copy_always))
+                                  copy_always, false))
           {
           return false;
           }
