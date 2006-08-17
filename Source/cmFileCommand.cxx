@@ -741,13 +741,20 @@ bool cmFileCommand::HandleInstallCommand(
   for ( i = 0; i < files.size(); i ++ )
     {
     // Split the input file into its directory and name components.
-    std::string fromDir = cmSystemTools::GetFilenamePath(files[i]);
-    std::string fromName = cmSystemTools::GetFilenameName(files[i]);
+    std::vector<std::string> fromPathComponents;
+    cmSystemTools::SplitPath(files[i].c_str(), fromPathComponents);
+    std::string fromName = *(fromPathComponents.end()-1);
+    std::string fromDir = cmSystemTools::JoinPath(fromPathComponents.begin(),
+                                                  fromPathComponents.end()-1);
 
     // Compute the full path to the destination file.
     std::string toFile = destination;
-    toFile += "/";
-    toFile += rename.empty()? fromName : rename;
+    std::string const& toName = rename.empty()? fromName : rename;
+    if(!toName.empty())
+      {
+      toFile += "/";
+      toFile += toName;
+      }
 
     // Handle type-specific installation details.
     switch(itype)
