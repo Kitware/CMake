@@ -256,7 +256,7 @@ int cmcompress_compress_finalize(struct cmcompress_stream* cdata)
   return 1;
 }
 
-int cl_block (struct cmcompress_stream* cdata)    /* table clear for block compress */
+static int cl_block (struct cmcompress_stream* cdata)    /* table clear for block compress */
 {
   register long int rat;
 
@@ -316,7 +316,7 @@ int cl_block (struct cmcompress_stream* cdata)    /* table clear for block compr
   return 1;
 }
 
-void cl_hash(struct cmcompress_stream* cdata, count_int hsize)    /* reset code table */
+static void cl_hash(struct cmcompress_stream* cdata, count_int hsize)    /* reset code table */
 {
   register count_int *htab_p = cdata->htab+hsize;
   register long i;
@@ -351,7 +351,7 @@ void cl_hash(struct cmcompress_stream* cdata, count_int hsize)    /* reset code 
 }
 
 #if defined(DEBUG)
-void prratio(FILE *stream, long int num, long int den)
+static void prratio(FILE *stream, long int num, long int den)
 {
   register int q;      /* Doesn't need to be long */
 
@@ -394,7 +394,7 @@ char_type lmask[9] = {0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00};
 char_type rmask[9] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
 #endif /* vax */
 
-int output(struct cmcompress_stream* cdata, code_int  code)
+static int output(struct cmcompress_stream* cdata, code_int  code)
 {
 #ifdef DEBUG
   static int col = 0;
