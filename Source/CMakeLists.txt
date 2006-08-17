@@ -122,6 +122,8 @@ SET(SRCS
   cmInstallScriptGenerator.cxx
   cmInstallTargetGenerator.h
   cmInstallTargetGenerator.cxx
+  cmInstallDirectoryGenerator.h
+  cmInstallDirectoryGenerator.cxx
   cmListFileCache.cxx
   cmListFileCache.h
   cmListFileLexer.c

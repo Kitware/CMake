@@ -191,6 +191,7 @@ private:
   bool HandleScriptMode(std::vector<std::string> const& args);
   bool HandleTargetsMode(std::vector<std::string> const& args);
   bool HandleFilesMode(std::vector<std::string> const& args);
+  bool HandleDirectoryMode(std::vector<std::string> const& args);
   void ComputeDestination(const char* destination, std::string& dest);
   bool CheckPermissions(std::string const& arg, std::string& permissions);
 };

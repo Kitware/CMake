@@ -14,34 +14,33 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#ifndef cmInstallFilesGenerator_h
-#define cmInstallFilesGenerator_h
+#ifndef cmInstallDirectoryGenerator_h
+#define cmInstallDirectoryGenerator_h
 
 #include "cmInstallGenerator.h"
 
-/** \class cmInstallFilesGenerator
- * \brief Generate file installation rules.
+/** \class cmInstallDirectoryGenerator
+ * \brief Generate directory installation rules.
  */
-class cmInstallFilesGenerator: public cmInstallGenerator
+class cmInstallDirectoryGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallFilesGenerator(std::vector<std::string> const& files,
-                          const char* dest, bool programs,
-                          const char* file_permissions,
-                          std::vector<std::string> const& configurations,
-                          const char* component,
-                          const char* rename);
-  virtual ~cmInstallFilesGenerator();
+  cmInstallDirectoryGenerator(std::vector<std::string> const& dirs,
+                              const char* dest,
+                              const char* file_permissions,
+                              const char* dir_permissions,
+                              std::vector<std::string> const& configurations,
+                              const char* component);
+  virtual ~cmInstallDirectoryGenerator();
 
 protected:
   virtual void GenerateScript(std::ostream& os);
-  std::vector<std::string> Files;
+  std::vector<std::string> Directories;
   std::string Destination;
-  bool Programs;
   std::string FilePermissions;
+  std::string DirPermissions;
   std::vector<std::string> Configurations;
   std::string Component;
-  std::string Rename;
 };
 
 #endif

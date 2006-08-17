@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmInstallCommand.h"
 
+#include "cmInstallDirectoryGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
@@ -50,6 +51,10 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args)
   else if(args[0] == "PROGRAMS")
     {
     return this->HandleFilesMode(args);
+    }
+  else if(args[0] == "DIRECTORY")
+    {
+    return this->HandleDirectoryMode(args);
     }
 
   // Unknown mode.
@@ -666,6 +671,180 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     new cmInstallFilesGenerator(files, dest.c_str(), programs,
                                 permissions.c_str(), configurations,
                                 component.c_str(), rename.c_str()));
+
+  // Tell the global generator about any installation component names
+  // specified.
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    ->AddInstallComponent(component.c_str());
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
+{
+  bool doing_dirs = true;
+  bool doing_destination = false;
+  bool doing_permissions_file = false;
+  bool doing_permissions_dir = false;
+  bool doing_configurations = false;
+  bool doing_component = false;
+  std::vector<std::string> dirs;
+  const char* destination = 0;
+  std::string permissions_file;
+  std::string permissions_dir;
+  std::vector<std::string> configurations;
+  std::string component;
+  for(unsigned int i=1; i < args.size(); ++i)
+    {
+    if(args[i] == "DESTINATION")
+      {
+      // Switch to setting the destination property.
+      doing_dirs = false;
+      doing_destination = true;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_configurations = false;
+      doing_component = false;
+      }
+    else if(args[i] == "FILE_PERMISSIONS")
+      {
+      // Switch to setting the file permissions property.
+      doing_dirs = false;
+      doing_destination = false;
+      doing_permissions_file = true;
+      doing_permissions_dir = false;
+      doing_configurations = false;
+      doing_component = false;
+      }
+    else if(args[i] == "DIRECTORY_PERMISSIONS")
+      {
+      // Switch to setting the directory permissions property.
+      doing_dirs = false;
+      doing_destination = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = true;
+      doing_configurations = false;
+      doing_component = false;
+      }
+    else if(args[i] == "CONFIGURATIONS")
+      {
+      // Switch to setting the configurations property.
+      doing_dirs = false;
+      doing_destination = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_configurations = true;
+      doing_component = false;
+      }
+    else if(args[i] == "COMPONENT")
+      {
+      // Switch to setting the component property.
+      doing_dirs = false;
+      doing_destination = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_configurations = false;
+      doing_component = true;
+      }
+    else if(doing_dirs)
+      {
+      // Convert this directory to a full path.
+      std::string dir = args[i];
+      if(!cmSystemTools::FileIsFullPath(dir.c_str()))
+        {
+        dir = this->Makefile->GetCurrentDirectory();
+        dir += "/";
+        dir += args[i];
+        }
+
+      // Make sure the name is a directory.
+      if(!cmSystemTools::FileIsDirectory(dir.c_str()))
+        {
+        cmOStringStream e;
+        e << args[0] << " given non-directory \""
+          << args[i] << "\" to install.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      // Store the directory for installation.
+      dirs.push_back(dir);
+      }
+    else if(doing_configurations)
+      {
+      configurations.push_back(args[i]);
+      }
+    else if(doing_destination)
+      {
+      destination = args[i].c_str();
+      doing_destination = false;
+      }
+    else if(doing_component)
+      {
+      component = args[i];
+      doing_component = false;
+      }
+    else if(doing_permissions_file)
+      {
+      // Check the requested permission.
+      if(!this->CheckPermissions(args[i], permissions_file))
+        {
+        cmOStringStream e;
+        e << args[0] << " given invalid file permission \""
+          << args[i] << "\".";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      }
+    else if(doing_permissions_dir)
+      {
+      // Check the requested permission.
+      if(!this->CheckPermissions(args[i], permissions_dir))
+        {
+        cmOStringStream e;
+        e << args[0] << " given invalid directory permission \""
+          << args[i] << "\".";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      }
+    else
+      {
+      // Unknown argument.
+      cmOStringStream e;
+      e << args[0] << " given unknown argument \"" << args[i] << "\".";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+
+  // Check if there is something to do.
+  if(dirs.empty())
+    {
+    return true;
+    }
+  if(!destination)
+    {
+    // A destination is required.
+    cmOStringStream e;
+    e << args[0] << " given no DESTINATION!";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  // Compute destination path.
+  std::string dest;
+  this->ComputeDestination(destination, dest);
+
+  // Create the directory install generator.
+  this->Makefile->AddInstallGenerator(
+    new cmInstallDirectoryGenerator(dirs, dest.c_str(),
+                                    permissions_file.c_str(),
+                                    permissions_dir.c_str(),
+                                    configurations,
+                                    component.c_str()));
 
   // Tell the global generator about any installation component names
   // specified.
