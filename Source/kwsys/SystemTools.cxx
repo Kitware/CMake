@@ -2813,20 +2813,36 @@ void SystemTools::SplitPath(const char* p,
 kwsys_stl::string
 SystemTools::JoinPath(const kwsys_stl::vector<kwsys_stl::string>& components)
 {
+  return SystemTools::JoinPath(components.begin(), components.end());
+}
+
+//----------------------------------------------------------------------------
+kwsys_stl::string
+SystemTools
+::JoinPath(kwsys_stl::vector<kwsys_stl::string>::const_iterator first,
+           kwsys_stl::vector<kwsys_stl::string>::const_iterator last)
+{
+  // Construct result in a single string.
   kwsys_stl::string result;
-  if(components.size() > 0)
+
+  // The first two components do not add a slash.
+  if(first != last)
     {
-    result += components[0];
+    result += *first++;
     }
-  if(components.size() > 1)
+  if(first != last)
     {
-    result += components[1];
+    result += *first++;
     }
-  for(unsigned int i=2; i < components.size(); ++i)
+
+  // All remaining components are always separated with a slash.
+  while(first != last)
     {
     result += "/";
-    result += components[i];
+    result += *first++;
     }
+
+  // Return the concatenated result.
   return result;
 }
 

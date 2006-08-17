@@ -364,6 +364,9 @@ public:
    */
   static kwsys_stl::string JoinPath(
     const kwsys_stl::vector<kwsys_stl::string>& components);
+  static kwsys_stl::string JoinPath(
+    kwsys_stl::vector<kwsys_stl::string>::const_iterator first,
+    kwsys_stl::vector<kwsys_stl::string>::const_iterator last);
 
   /**
    * Compare a path or components of a path.
