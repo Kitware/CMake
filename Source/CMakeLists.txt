@@ -594,7 +594,7 @@ IF(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/Complex"
       --build-two-config
       --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project complex
+      --build-project Complex
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"
       --build-options
@@ -607,7 +607,7 @@ IF(BUILD_TESTING)
       "${CMake_SOURCE_DIR}/Tests/ComplexOneConfig"
       "${CMake_BINARY_DIR}/Tests/ComplexOneConfig"
       --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project complex
+      --build-project Complex
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin"
       --build-options
@@ -693,7 +693,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Testing"
     "${CMake_BINARY_DIR}/Tests/Testing"
     --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project testing
+    --build-project Testing
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Testing/bin"
     --test-command testing
@@ -704,7 +704,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Wrapping"
     "${CMake_BINARY_DIR}/Tests/Wrapping"
     --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project wrapping
+    --build-project Wrapping
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --test-command wrapping
@@ -858,7 +858,7 @@ IF(BUILD_TESTING)
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LinkLine"
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Linkline
+    --build-project LinkLine
     --test-command Exec
     )
 
