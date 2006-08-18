@@ -35,7 +35,7 @@
 # pragma warn -8066 /* unreachable code */
 #endif
 
-/* Borland system header defines these macros without first undef-ing them.  */
+/* Borland system header defines these macros without first undef-ing them. */
 #if defined(__BORLANDC__) && __BORLANDC__ >= 0x580
 # undef INT8_MIN
 # undef INT16_MIN
