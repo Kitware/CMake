@@ -89,6 +89,12 @@ IF(STAGE2)
   IF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/TSD.h")
     MESSAGE(FATAL_ERROR "Directory installation did not install TSD.h")
   ENDIF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/TSD.h")
+  IF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/CVS")
+    MESSAGE(FATAL_ERROR "Directory installation installed CVS directory.")
+  ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/CVS")
+  IF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/CVS")
+    MESSAGE(FATAL_ERROR "Directory installation installed CVS directory.")
+  ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/CVS")
   EXECUTE_PROCESS(
     COMMAND "${CMAKE_INSTALL_PREFIX}/MyTest/share/sample_script${BAT}"
     RESULT_VARIABLE SAMPLE_SCRIPT_RESULT
