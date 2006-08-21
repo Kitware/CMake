@@ -2256,6 +2256,17 @@ kwsys_stl::string SystemTools
 
 bool SystemTools::FileIsDirectory(const char* name)
 {
+  // Remove any trailing slash from the name.
+  char buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
+  int last = static_cast<int>(strlen(name))-1;
+  if(last >= 0 && (name[last] == '/' || name[last] == '\\'))
+    {
+    memcpy(buffer, name, last);
+    buffer[last] = 0;
+    name = buffer;
+    }
+
+  // Now check the file node type.
   struct stat fs;
   if(stat(name, &fs) == 0)
     {
