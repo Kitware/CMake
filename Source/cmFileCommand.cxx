@@ -400,6 +400,13 @@ public:
   // Get the properties from rules matching this input file.
   MatchProperties CollectMatchProperties(const char* file)
     {
+    // Match rules are case-insensitive on some platforms.
+#if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
+    std::string lower = cmSystemTools::LowerCase(file);
+    file = lower.c_str();
+#endif
+
+    // Collect properties from all matching rules.
     MatchProperties result;
     for(std::vector<MatchRule>::iterator mr = this->MatchRules.begin();
         mr != this->MatchRules.end(); ++mr)

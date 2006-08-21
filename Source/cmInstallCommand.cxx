@@ -938,7 +938,12 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
     else if(doing_regex)
       {
       literal_args += " REGEX \"";
+    // Match rules are case-insensitive on some platforms.
+#if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
+      std::string regex = cmSystemTools::LowerCase(args[i]);
+#else
       std::string regex = args[i];
+#endif
       cmSystemTools::ReplaceString(regex, "\\", "\\\\");
       literal_args += regex;
       literal_args += "\"";
