@@ -81,11 +81,16 @@ IF(STAGE2)
   ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/include/Debug/lib1release.h")
 
   # Check for failure of directory installation.
+  IF(WIN32 AND NOT CYGWIN)
+    SET(BAT .bat)
+  ELSE(WIN32 AND NOT CYGWIN)
+    SET(BAT)
+  ENDIF(WIN32 AND NOT CYGWIN)
   IF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/TSD.h")
     MESSAGE(FATAL_ERROR "Directory installation did not install TSD.h")
   ENDIF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/TSD.h")
   EXECUTE_PROCESS(
-    COMMAND "${CMAKE_INSTALL_PREFIX}/MyTest/share/sample_script"
+    COMMAND "${CMAKE_INSTALL_PREFIX}/MyTest/share/sample_script${BAT}"
     RESULT_VARIABLE SAMPLE_SCRIPT_RESULT
     OUTPUT_VARIABLE SAMPLE_SCRIPT_OUTPUT
     )
