@@ -80,6 +80,22 @@ IF(STAGE2)
     MESSAGE(FATAL_ERROR "Release-configuration file installed for Debug!")
   ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/include/Debug/lib1release.h")
 
+  # Check for failure of directory installation.
+  IF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/TSD.h")
+    MESSAGE(FATAL_ERROR "Directory installation did not install TSD.h")
+  ENDIF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/TSD.h")
+  EXECUTE_PROCESS(
+    COMMAND "${CMAKE_INSTALL_PREFIX}/MyTest/share/sample_script"
+    RESULT_VARIABLE SAMPLE_SCRIPT_RESULT
+    OUTPUT_VARIABLE SAMPLE_SCRIPT_OUTPUT
+    )
+  IF(NOT "${SAMPLE_SCRIPT_RESULT}" MATCHES "^0$")
+    MESSAGE(FATAL_ERROR "Sample script failed: [${SAMPLE_SCRIPT_RESULT}]")
+  ENDIF(NOT "${SAMPLE_SCRIPT_RESULT}" MATCHES "^0$")
+  IF(NOT "${SAMPLE_SCRIPT_OUTPUT}" MATCHES "Sample Script Output")
+    MESSAGE(FATAL_ERROR "Bad sample script output: [${SAMPLE_SCRIPT_OUTPUT}]")
+  ENDIF(NOT "${SAMPLE_SCRIPT_OUTPUT}" MATCHES "Sample Script Output")
+
   # Make sure the test executable can run from the install tree.
   SET_TARGET_PROPERTIES(SimpleInstallS2 PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
@@ -136,6 +152,13 @@ ELSE(STAGE2)
     )
   INSTALL(FILES lib1.h RENAME lib1debug.h CONFIGURATIONS Debug
     DESTINATION MyTest/include/Debug
+    )
+
+  # Test directory installation.
+  INSTALL(
+    DIRECTORY TestSubDir scripts/ DESTINATION MyTest/share
+    PATTERN "CVS" EXCLUDE
+    PATTERN "scripts/*" PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
     )
 
   # Test user-specified install scripts.

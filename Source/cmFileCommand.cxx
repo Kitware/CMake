@@ -20,6 +20,34 @@
 #include <sys/stat.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/RegularExpression.hxx>
+
+// Table of permissions flags.
+#if defined(_WIN32) && !defined(__CYGWIN__)
+static mode_t mode_owner_read = S_IREAD;
+static mode_t mode_owner_write = S_IWRITE;
+static mode_t mode_owner_execute = S_IEXEC;
+static mode_t mode_group_read = 0;
+static mode_t mode_group_write = 0;
+static mode_t mode_group_execute = 0;
+static mode_t mode_world_read = 0;
+static mode_t mode_world_write = 0;
+static mode_t mode_world_execute = 0;
+static mode_t mode_setuid = 0;
+static mode_t mode_setgid = 0;
+#else
+static mode_t mode_owner_read = S_IRUSR;
+static mode_t mode_owner_write = S_IWUSR;
+static mode_t mode_owner_execute = S_IXUSR;
+static mode_t mode_group_read = S_IRGRP;
+static mode_t mode_group_write = S_IWGRP;
+static mode_t mode_group_execute = S_IXGRP;
+static mode_t mode_world_read = S_IROTH;
+static mode_t mode_world_write = S_IWOTH;
+static mode_t mode_world_execute = S_IXOTH;
+static mode_t mode_setuid = S_ISUID;
+static mode_t mode_setgid = S_ISGID;
+#endif
 
 // cmLibraryCommand
 bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
@@ -316,27 +344,120 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
 }
 
 //----------------------------------------------------------------------------
+// File installation helper class.
 struct cmFileInstaller
 {
-  bool InstallFile(const char* fromFile, const char* toFile, bool always,
-                   bool no_permissions);
-  bool InstallDirectory(const char* source,
-                        const char* destination,
-                        bool always,
-                        std::string& smanifest_files,
-                        int destDirLength);
+  // Methods to actually install files.
+  bool InstallFile(const char* fromFile, const char* toFile, bool always);
+  bool InstallDirectory(const char* source, const char* destination,
+                        bool always);
+
+  // All instances need the file command and makefile using them.
   cmFileInstaller(cmFileCommand* fc, cmMakefile* mf):
-    FileCommand(fc), Makefile(mf) {}
+    FileCommand(fc), Makefile(mf), DestDirLength(0)
+    {
+    // Get the current manifest.
+    this->Manifest =
+      this->Makefile->GetSafeDefinition("CMAKE_INSTALL_MANIFEST_FILES");
+    }
+  ~cmFileInstaller()
+    {
+    // Save the updated install manifest.
+    this->Makefile->AddDefinition("CMAKE_INSTALL_MANIFEST_FILES",
+                                  this->Manifest.c_str());
+    }
+
+private:
   cmFileCommand* FileCommand;
   cmMakefile* Makefile;
+public:
+
+  // The length of the destdir setting.
+  int DestDirLength;
+
+  // The current file manifest (semicolon separated list).
+  std::string Manifest;
+
+  // Permissions for files and directories installed by this object.
   mode_t FilePermissions;
   mode_t DirPermissions;
+
+  // Properties set by pattern and regex match rules.
+  struct MatchProperties
+  {
+    bool Exclude;
+    mode_t Permissions;
+    MatchProperties(): Exclude(false), Permissions(0) {}
+  };
+  struct MatchRule
+  {
+    cmsys::RegularExpression Regex;
+    MatchProperties Properties;
+    MatchRule(std::string const& regex): Regex(regex.c_str()) {}
+  };
+  std::vector<MatchRule> MatchRules;
+
+  // Get the properties from rules matching this input file.
+  MatchProperties CollectMatchProperties(const char* file)
+    {
+    MatchProperties result;
+    for(std::vector<MatchRule>::iterator mr = this->MatchRules.begin();
+        mr != this->MatchRules.end(); ++mr)
+      {
+      if(mr->Regex.find(file))
+        {
+        result.Exclude |= mr->Properties.Exclude;
+        result.Permissions |= mr->Properties.Permissions;
+        }
+      }
+    return result;
+    }
+
+  // Append a file to the installation manifest.
+  void ManifestAppend(std::string const& file)
+    {
+    this->Manifest += ";";
+    this->Manifest += file.substr(this->DestDirLength);
+    }
+
+  // Translate an argument to a permissions bit.
+  bool CheckPermissions(std::string const& arg, mode_t& permissions)
+    {
+    if(arg == "OWNER_READ")         { permissions |= mode_owner_read; }
+    else if(arg == "OWNER_WRITE")   { permissions |= mode_owner_write; }
+    else if(arg == "OWNER_EXECUTE") { permissions |= mode_owner_execute; }
+    else if(arg == "GROUP_READ")    { permissions |= mode_group_read; }
+    else if(arg == "GROUP_WRITE")   { permissions |= mode_group_write; }
+    else if(arg == "GROUP_EXECUTE") { permissions |= mode_group_execute; }
+    else if(arg == "WORLD_READ")    { permissions |= mode_world_read; }
+    else if(arg == "WORLD_WRITE")   { permissions |= mode_world_write; }
+    else if(arg == "WORLD_EXECUTE") { permissions |= mode_world_execute; }
+    else if(arg == "SETUID")        { permissions |= mode_setuid; }
+    else if(arg == "SETGID")        { permissions |= mode_setgid; }
+    else
+      {
+      cmOStringStream e;
+      e << "INSTALL given invalid permission \"" << arg << "\".";
+      this->FileCommand->SetError(e.str().c_str());
+      return false;
+      }
+    return true;
+    }
 };
 
 //----------------------------------------------------------------------------
 bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
-                                  bool always, bool no_permissions)
+                                  bool always)
 {
+  // Collect any properties matching this file name.
+  MatchProperties match_properties = this->CollectMatchProperties(fromFile);
+
+  // Skip the file if it is excluded.
+  if(match_properties.Exclude)
+    {
+    return true;
+    }
+
   // Inform the user about this file installation.
   std::string message = "Installing ";
   message += toFile;
@@ -352,11 +473,19 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
     return false;
     }
 
+  // Add the file to the manifest.
+  this->ManifestAppend(toFile);
+
   // Set permissions of the destination file.
-  // TODO: Take out no_permissions and replace with a user option to
-  // preserve source permissions explicitly.
-  if(!no_permissions &&
-     !cmSystemTools::SetPermissions(toFile, this->FilePermissions))
+  mode_t permissions = (match_properties.Permissions?
+                        match_properties.Permissions : this->FilePermissions);
+  if(!permissions)
+    {
+    // No permissions were explicitly provided but the user requested
+    // that the source file permissions be used.
+    cmSystemTools::GetPermissions(fromFile, permissions);
+    }
+  if(permissions && !cmSystemTools::SetPermissions(toFile, permissions))
     {
     cmOStringStream e;
     e << "Problem setting permissions on file \"" << toFile << "\"";
@@ -370,19 +499,67 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
 //----------------------------------------------------------------------------
 bool cmFileInstaller::InstallDirectory(const char* source,
                                        const char* destination,
-                                       bool always,
-                                       std::string& smanifest_files,
-                                       int destDirLength)
+                                       bool always)
 {
-  cmsys::Directory dir;
-  dir.Load(source);
+  // Collect any properties matching this directory name.
+  MatchProperties match_properties = this->CollectMatchProperties(source);
+
+  // Skip the directory if it is excluded.
+  if(match_properties.Exclude)
+    {
+    return true;
+    }
+
+  // Make sure the destination directory exists.
   if(!cmSystemTools::MakeDirectory(destination))
     {
     return false;
     }
-  // TODO: Make sure destination directory has write permissions
-  // before installing files.  User requested permissions may be
-  // restored later.
+
+  // Compute the requested permissions for the destination directory.
+  mode_t permissions = (match_properties.Permissions?
+                        match_properties.Permissions : this->DirPermissions);
+  if(!permissions)
+    {
+    // No permissions were explicitly provided but the user requested
+    // that the source directory permissions be used.
+    cmSystemTools::GetPermissions(source, permissions);
+    }
+
+  // Compute the set of permissions required on this directory to
+  // recursively install files and subdirectories safely.
+  mode_t required_permissions =
+    mode_owner_read | mode_owner_write | mode_owner_execute;
+
+  // If the required permissions are specified it is safe to set the
+  // final permissions now.  Otherwise we must add the required
+  // permissions temporarily during file installation.
+  mode_t permissions_before = 0;
+  mode_t permissions_after = 0;
+  if(permissions & required_permissions)
+    {
+    permissions_before = permissions;
+    }
+  else
+    {
+    permissions_before = permissions | required_permissions;
+    permissions_after = permissions;
+    }
+
+  // Set the required permissions of the destination directory.
+  if(permissions_before &&
+     !cmSystemTools::SetPermissions(destination, permissions_before))
+    {
+    cmOStringStream e;
+    e << "Problem setting permissions on directory \""
+      << destination << "\"";
+    this->FileCommand->SetError(e.str().c_str());
+    return false;
+    }
+
+  // Load the directory contents to traverse it recursively.
+  cmsys::Directory dir;
+  dir.Load(source);
   unsigned long numFiles = static_cast<unsigned long>(dir.GetNumberOfFiles());
   for(unsigned long fileNum = 0; fileNum < numFiles; ++fileNum)
     {
@@ -397,8 +574,7 @@ bool cmFileInstaller::InstallDirectory(const char* source,
         kwsys_stl::string toDir = destination;
         toDir += "/";
         toDir += dir.GetFile(fileNum);
-        if(!this->InstallDirectory(fromPath.c_str(), toDir.c_str(), always,
-                                   smanifest_files, destDirLength))
+        if(!this->InstallDirectory(fromPath.c_str(), toDir.c_str(), always))
           {
           return false;
           }
@@ -409,12 +585,7 @@ bool cmFileInstaller::InstallDirectory(const char* source,
         std::string toFile = destination;
         toFile += "/";
         toFile += dir.GetFile(fileNum);
-        if(this->InstallFile(fromPath.c_str(), toFile.c_str(), always, true))
-          {
-          smanifest_files += ";";
-          smanifest_files += toFile.substr(destDirLength);
-          }
-        else
+        if(!this->InstallFile(fromPath.c_str(), toFile.c_str(), always))
           {
           return false;
           }
@@ -422,8 +593,9 @@ bool cmFileInstaller::InstallDirectory(const char* source,
       }
     }
 
-  // Set the requested permissions on the destination directory.
-  if(!cmSystemTools::SetPermissions(destination, this->DirPermissions))
+  // Set the requested permissions of the destination directory.
+  if(permissions_after &&
+     !cmSystemTools::SetPermissions(destination, permissions_after))
     {
     cmOStringStream e;
     e << "Problem setting permissions on directory \"" << destination << "\"";
@@ -444,6 +616,9 @@ bool cmFileCommand::HandleInstallCommand(
     return false;
     }
 
+  // Construct a file installer object.
+  cmFileInstaller installer(this, this->Makefile);
+
   std::string rename = "";
   std::string destination = "";
   std::string stype = "FILES";
@@ -459,60 +634,52 @@ bool cmFileCommand::HandleInstallCommand(
 
   std::map<cmStdString, const char*> properties;
 
-  // Build a table of permissions flags.
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  mode_t mode_owner_read = S_IREAD;
-  mode_t mode_owner_write = S_IWRITE;
-  mode_t mode_owner_execute = S_IEXEC;
-  mode_t mode_group_read = 0;
-  mode_t mode_group_write = 0;
-  mode_t mode_group_execute = 0;
-  mode_t mode_world_read = 0;
-  mode_t mode_world_write = 0;
-  mode_t mode_world_execute = 0;
-  mode_t mode_setuid = 0;
-  mode_t mode_setgid = 0;
-#else
-  mode_t mode_owner_read = S_IRUSR;
-  mode_t mode_owner_write = S_IWUSR;
-  mode_t mode_owner_execute = S_IXUSR;
-  mode_t mode_group_read = S_IRGRP;
-  mode_t mode_group_write = S_IWGRP;
-  mode_t mode_group_execute = S_IXGRP;
-  mode_t mode_world_read = S_IROTH;
-  mode_t mode_world_write = S_IWOTH;
-  mode_t mode_world_execute = S_IXOTH;
-  mode_t mode_setuid = S_ISUID;
-  mode_t mode_setgid = S_ISGID;
-#endif
-
-  bool in_files = false;
-  bool in_properties = false;
-  bool in_permissions_file = false;
-  bool in_permissions_dir = false;
-  bool in_components = false;
-  bool in_configurations = false;
+  bool doing_files = false;
+  bool doing_properties = false;
+  bool doing_permissions_file = false;
+  bool doing_permissions_dir = false;
+  bool doing_permissions_match = false;
+  bool doing_components = false;
+  bool doing_configurations = false;
   bool use_given_permissions_file = false;
   bool use_given_permissions_dir = false;
+  bool use_source_permissions = false;
   mode_t permissions_file = 0;
   mode_t permissions_dir = 0;
   bool optional = false;
+  cmFileInstaller::MatchRule* current_match_rule = 0;
   for ( ; i != args.size(); ++i )
     {
     const std::string* cstr = &args[i];
     if ( *cstr == "DESTINATION" && i < args.size()-1 )
       {
+      if(current_match_rule)
+        {
+        cmOStringStream e;
+        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
       i++;
       destination = args[i];
-      in_files = false;
-      in_properties = false;
-      in_permissions_file = false;
-      in_permissions_dir = false;
-      in_components = false;
-      in_configurations = false;
+      doing_files = false;
+      doing_properties = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_components = false;
+      doing_configurations = false;
       }
     else if ( *cstr == "TYPE" && i < args.size()-1 )
       {
+      if(current_match_rule)
+        {
+        cmOStringStream e;
+        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
       i++;
       stype = args[i];
       if ( args[i+1] == "OPTIONAL" )
@@ -520,184 +687,226 @@ bool cmFileCommand::HandleInstallCommand(
         i++;
         optional = true;
         }
-      in_properties = false;
-      in_files = false;
-      in_permissions_file = false;
-      in_permissions_dir = false;
-      in_components = false;
-      in_configurations = false;
+      doing_properties = false;
+      doing_files = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_components = false;
+      doing_configurations = false;
       }
     else if ( *cstr == "RENAME" && i < args.size()-1 )
       {
+      if(current_match_rule)
+        {
+        cmOStringStream e;
+        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
       i++;
       rename = args[i];
-      in_properties = false;
-      in_files = false;
-      in_permissions_file = false;
-      in_permissions_dir = false;
-      in_components = false;
-      in_configurations = false;
+      doing_properties = false;
+      doing_files = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_components = false;
+      doing_configurations = false;
+      }
+    else if ( *cstr == "REGEX" && i < args.size()-1 )
+      {
+      i++;
+      installer.MatchRules.push_back(cmFileInstaller::MatchRule(args[i]));
+      current_match_rule = &*(installer.MatchRules.end()-1);
+      if(!current_match_rule->Regex.is_valid())
+        {
+        cmOStringStream e;
+        e << "INSTALL could not compile REGEX \"" << args[i] << "\".";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      doing_properties = false;
+      doing_files = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_components = false;
+      doing_configurations = false;
+      }
+    else if ( *cstr == "EXCLUDE"  )
+      {
+      // Add this property to the current match rule.
+      if(!current_match_rule)
+        {
+        cmOStringStream e;
+        e << "INSTALL does not allow \""
+          << *cstr << "\" before a REGEX is given.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      current_match_rule->Properties.Exclude = true;
+      doing_permissions_match = true;
       }
     else if ( *cstr == "PROPERTIES"  )
       {
-      in_properties = true;
-      in_files = false;
-      in_permissions_file = false;
-      in_permissions_dir = false;
-      in_components = false;
-      in_configurations = false;
+      if(current_match_rule)
+        {
+        cmOStringStream e;
+        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      doing_properties = true;
+      doing_files = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_components = false;
+      doing_configurations = false;
       }
     else if ( *cstr == "PERMISSIONS" )
       {
-      use_given_permissions_file = true;
-      in_properties = false;
-      in_files = false;
-      in_permissions_file = true;
-      in_permissions_dir = false;
-      in_components = false;
-      in_configurations = false;
+      if(current_match_rule)
+        {
+        doing_permissions_match = true;
+        doing_permissions_file = false;
+        }
+      else
+        {
+        doing_permissions_match = false;
+        doing_permissions_file = true;
+        use_given_permissions_file = true;
+        }
+      doing_properties = false;
+      doing_files = false;
+      doing_permissions_dir = false;
+      doing_components = false;
+      doing_configurations = false;
       }
     else if ( *cstr == "DIR_PERMISSIONS" )
       {
+      if(current_match_rule)
+        {
+        cmOStringStream e;
+        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
       use_given_permissions_dir = true;
-      in_properties = false;
-      in_files = false;
-      in_permissions_file = false;
-      in_permissions_dir = true;
-      in_components = false;
-      in_configurations = false;
+      doing_properties = false;
+      doing_files = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = true;
+      doing_components = false;
+      doing_configurations = false;
+      }
+    else if ( *cstr == "USE_SOURCE_PERMISSIONS" )
+      {
+      if(current_match_rule)
+        {
+        cmOStringStream e;
+        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      doing_properties = false;
+      doing_files = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_components = false;
+      doing_configurations = false;
+      use_source_permissions = true;
       }
     else if ( *cstr == "COMPONENTS"  )
       {
-      in_properties = false;
-      in_files = false;
-      in_permissions_file = false;
-      in_permissions_dir = false;
-      in_components = true;
-      in_configurations = false;
+      if(current_match_rule)
+        {
+        cmOStringStream e;
+        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      doing_properties = false;
+      doing_files = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_components = true;
+      doing_configurations = false;
       }
     else if ( *cstr == "CONFIGURATIONS"  )
       {
-      in_properties = false;
-      in_files = false;
-      in_permissions_file = false;
-      in_permissions_dir = false;
-      in_components = false;
-      in_configurations = true;
+      if(current_match_rule)
+        {
+        cmOStringStream e;
+        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      doing_properties = false;
+      doing_files = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_components = false;
+      doing_configurations = true;
       }
-    else if ( *cstr == "FILES" && !in_files)
+    else if ( *cstr == "FILES" && !doing_files)
       {
-      in_files = true;
-      in_properties = false;
-      in_permissions_file = false;
-      in_permissions_dir = false;
-      in_components = false;
-      in_configurations = false;
+      if(current_match_rule)
+        {
+        cmOStringStream e;
+        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      doing_files = true;
+      doing_properties = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_components = false;
+      doing_configurations = false;
       }
-    else if ( in_properties && i < args.size()-1 )
+    else if ( doing_properties && i < args.size()-1 )
       {
       properties[args[i]] = args[i+1].c_str();
       i++;
       }
-    else if ( in_files )
+    else if ( doing_files )
       {
       files.push_back(*cstr);
       }
-    else if ( in_components )
+    else if ( doing_components )
       {
       components.insert(*cstr);
       }
-    else if ( in_configurations )
+    else if ( doing_configurations )
       {
       configurations.insert(cmSystemTools::UpperCase(*cstr));
       }
-    else if(in_permissions_file && args[i] == "OWNER_READ")
+    else if(doing_permissions_file)
       {
-      permissions_file |= mode_owner_read;
+      if(!installer.CheckPermissions(args[i], permissions_file))
+        {
+        return false;
+        }
       }
-    else if(in_permissions_file && args[i] == "OWNER_WRITE")
+    else if(doing_permissions_dir)
       {
-      permissions_file |= mode_owner_write;
+      if(!installer.CheckPermissions(args[i], permissions_dir))
+        {
+        return false;
+        }
       }
-    else if(in_permissions_file && args[i] == "OWNER_EXECUTE")
+    else if(doing_permissions_match)
       {
-      permissions_file |= mode_owner_execute;
-      }
-    else if(in_permissions_file && args[i] == "GROUP_READ")
-      {
-      permissions_file |= mode_group_read;
-      }
-    else if(in_permissions_file && args[i] == "GROUP_WRITE")
-      {
-      permissions_file |= mode_group_write;
-      }
-    else if(in_permissions_file && args[i] == "GROUP_EXECUTE")
-      {
-      permissions_file |= mode_group_execute;
-      }
-    else if(in_permissions_file && args[i] == "WORLD_READ")
-      {
-      permissions_file |= mode_world_read;
-      }
-    else if(in_permissions_file && args[i] == "WORLD_WRITE")
-      {
-      permissions_file |= mode_world_write;
-      }
-    else if(in_permissions_file && args[i] == "WORLD_EXECUTE")
-      {
-      permissions_file |= mode_world_execute;
-      }
-    else if(in_permissions_file && args[i] == "SETUID")
-      {
-      permissions_file |= mode_setuid;
-      }
-    else if(in_permissions_file && args[i] == "SETGID")
-      {
-      permissions_file |= mode_setgid;
-      }
-    else if(in_permissions_dir && args[i] == "OWNER_READ")
-      {
-      permissions_dir |= mode_owner_read;
-      }
-    else if(in_permissions_dir && args[i] == "OWNER_WRITE")
-      {
-      permissions_dir |= mode_owner_write;
-      }
-    else if(in_permissions_dir && args[i] == "OWNER_EXECUTE")
-      {
-      permissions_dir |= mode_owner_execute;
-      }
-    else if(in_permissions_dir && args[i] == "GROUP_READ")
-      {
-      permissions_dir |= mode_group_read;
-      }
-    else if(in_permissions_dir && args[i] == "GROUP_WRITE")
-      {
-      permissions_dir |= mode_group_write;
-      }
-    else if(in_permissions_dir && args[i] == "GROUP_EXECUTE")
-      {
-      permissions_dir |= mode_group_execute;
-      }
-    else if(in_permissions_dir && args[i] == "WORLD_READ")
-      {
-      permissions_dir |= mode_world_read;
-      }
-    else if(in_permissions_dir && args[i] == "WORLD_WRITE")
-      {
-      permissions_dir |= mode_world_write;
-      }
-    else if(in_permissions_dir && args[i] == "WORLD_EXECUTE")
-      {
-      permissions_dir |= mode_world_execute;
-      }
-    else if(in_permissions_dir && args[i] == "SETUID")
-      {
-      permissions_dir |= mode_setuid;
-      }
-    else if(in_permissions_dir && args[i] == "SETGID")
-      {
-      permissions_dir |= mode_setgid;
+      if(!installer.CheckPermissions(
+           args[i], current_match_rule->Properties.Permissions))
+        {
+        return false;
+        }
       }
     else
       {
@@ -746,7 +955,6 @@ bool cmFileCommand::HandleInstallCommand(
       }
     }
 
-  int destDirLength = 0;
   if ( destdir && *destdir )
     {
     std::string sdestdir = destdir;
@@ -800,7 +1008,7 @@ bool cmFileCommand::HandleInstallCommand(
         }
       }
     destination = sdestdir + (destination.c_str() + skip);
-    destDirLength = int(sdestdir.size());
+    installer.DestDirLength = int(sdestdir.size());
     }
 
   if ( files.size() == 0 )
@@ -871,7 +1079,7 @@ bool cmFileCommand::HandleInstallCommand(
 
   // If file permissions were not specified set default permissions
   // for this target type.
-  if(!use_given_permissions_file)
+  if(!use_given_permissions_file && !use_source_permissions)
     {
     switch(itype)
       {
@@ -910,7 +1118,7 @@ bool cmFileCommand::HandleInstallCommand(
     }
 
   // If directory permissions were not specified set default permissions.
-  if(!use_given_permissions_dir)
+  if(!use_given_permissions_dir && !use_source_permissions)
     {
     // Use read/write/executable permissions.
     permissions_dir = 0;
@@ -923,19 +1131,9 @@ bool cmFileCommand::HandleInstallCommand(
     permissions_dir |= mode_world_execute;
     }
 
-  // Construct a file installer object.
-  cmFileInstaller installer(this, this->Makefile);
+  // Set the installer permissions.
   installer.FilePermissions = permissions_file;
   installer.DirPermissions = permissions_dir;
-
-  // Get the current manifest.
-  const char* manifest_files =
-    this->Makefile->GetDefinition("CMAKE_INSTALL_MANIFEST_FILES");
-  std::string smanifest_files;
-  if ( manifest_files )
-    {
-    smanifest_files = manifest_files;
-    }
 
   // Check whether files should be copied always or only if they have
   // changed.
@@ -1008,8 +1206,7 @@ bool cmFileCommand::HandleInstallCommand(
             this->SetError(errstring.c_str());
             return false;
             }
-          smanifest_files += ";";
-          smanifest_files += libname.substr(destDirLength);;
+          installer.ManifestAppend(libname);
           if ( toFile != soname )
             {
             if ( !cmSystemTools::CreateSymlink(fromName.c_str(), 
@@ -1020,8 +1217,7 @@ bool cmFileCommand::HandleInstallCommand(
               this->SetError(errstring.c_str());
               return false;
               }
-            smanifest_files += ";";
-            smanifest_files += soname.substr(destDirLength);
+            installer.ManifestAppend(soname);
             }
           }
         }
@@ -1056,8 +1252,7 @@ bool cmFileCommand::HandleInstallCommand(
             this->SetError(errstring.c_str());
             return false;
             }
-          smanifest_files += ";";
-          smanifest_files += exename.substr(destDirLength);
+          installer.ManifestAppend(exename);
           }
         }
         break;
@@ -1077,8 +1272,7 @@ bool cmFileCommand::HandleInstallCommand(
         {
         // Try installing this directory.
         if(!installer.InstallDirectory(fromFile.c_str(), toFile.c_str(),
-                                       copy_always, smanifest_files,
-                                       destDirLength))
+                                       copy_always))
           {
           return false;
           }
@@ -1087,7 +1281,7 @@ bool cmFileCommand::HandleInstallCommand(
         {
         // Install this file.
         if(!installer.InstallFile(fromFile.c_str(), toFile.c_str(),
-                                  copy_always, false))
+                                  copy_always))
           {
           return false;
           }
@@ -1109,10 +1303,6 @@ bool cmFileCommand::HandleInstallCommand(
             }
           }
 #endif
-
-        // Add the file to the manifest.
-        smanifest_files += ";";
-        smanifest_files += toFile.substr(destDirLength);
         }
       else if(!optional)
         {
@@ -1124,10 +1314,6 @@ bool cmFileCommand::HandleInstallCommand(
         }
       }
     }
-
-  // Save the updated install manifest.
-  this->Makefile->AddDefinition("CMAKE_INSTALL_MANIFEST_FILES",
-                            smanifest_files.c_str());
 
   return true;
 }

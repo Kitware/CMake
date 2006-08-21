@@ -43,7 +43,8 @@ public:
     std::vector<std::string> const& configurations 
     = std::vector<std::string>(),
     const char* component = 0,
-    const char* rename = 0
+    const char* rename = 0,
+    const char* literal_args = 0
     );
 
 protected:

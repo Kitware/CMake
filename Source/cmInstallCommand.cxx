@@ -21,6 +21,8 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 
+#include <cmsys/Glob.hxx>
+
 // cmInstallCommand
 bool cmInstallCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -686,33 +688,117 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 {
   bool doing_dirs = true;
   bool doing_destination = false;
+  bool doing_pattern = false;
+  bool doing_regex = false;
   bool doing_permissions_file = false;
   bool doing_permissions_dir = false;
+  bool doing_permissions_match = false;
   bool doing_configurations = false;
   bool doing_component = false;
+  bool in_match_mode = false;
   std::vector<std::string> dirs;
   const char* destination = 0;
   std::string permissions_file;
   std::string permissions_dir;
   std::vector<std::string> configurations;
   std::string component;
+  std::string literal_args;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "DESTINATION")
       {
+      if(in_match_mode)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
       // Switch to setting the destination property.
       doing_dirs = false;
       doing_destination = true;
+      doing_pattern = false;
+      doing_regex = false;
       doing_permissions_file = false;
       doing_permissions_dir = false;
       doing_configurations = false;
       doing_component = false;
       }
+    else if(args[i] == "PATTERN")
+      {
+      // Switch to a new pattern match rule.
+      doing_dirs = false;
+      doing_destination = false;
+      doing_pattern = true;
+      doing_regex = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_permissions_match = false;
+      doing_configurations = false;
+      doing_component = false;
+      in_match_mode = true;
+      }
+    else if(args[i] == "REGEX")
+      {
+      // Switch to a new regex match rule.
+      doing_dirs = false;
+      doing_destination = false;
+      doing_pattern = false;
+      doing_regex = true;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_permissions_match = false;
+      doing_configurations = false;
+      doing_component = false;
+      in_match_mode = true;
+      }
+    else if(args[i] == "EXCLUDE")
+      {
+      // Add this property to the current match rule.
+      if(!in_match_mode || doing_pattern || doing_regex)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" before a PATTERN or REGEX is given.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      literal_args += " EXCLUDE";
+      doing_permissions_match = false;
+      }
+    else if(args[i] == "PERMISSIONS")
+      {
+      if(!in_match_mode)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" before a PATTERN or REGEX is given.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      // Switch to setting the current match permissions property.
+      literal_args += " PERMISSIONS";
+      doing_permissions_match = true;
+      }
     else if(args[i] == "FILE_PERMISSIONS")
       {
+      if(in_match_mode)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
       // Switch to setting the file permissions property.
       doing_dirs = false;
       doing_destination = false;
+      doing_pattern = false;
+      doing_regex = false;
       doing_permissions_file = true;
       doing_permissions_dir = false;
       doing_configurations = false;
@@ -720,19 +806,63 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       }
     else if(args[i] == "DIRECTORY_PERMISSIONS")
       {
+      if(in_match_mode)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
       // Switch to setting the directory permissions property.
       doing_dirs = false;
       doing_destination = false;
+      doing_pattern = false;
+      doing_regex = false;
       doing_permissions_file = false;
       doing_permissions_dir = true;
       doing_configurations = false;
       doing_component = false;
       }
+    else if(args[i] == "USE_SOURCE_PERMISSIONS")
+      {
+      if(in_match_mode)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      // Add this option literally.
+      doing_dirs = false;
+      doing_destination = false;
+      doing_pattern = false;
+      doing_regex = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_configurations = false;
+      doing_component = false;
+      literal_args += " USE_SOURCE_PERMISSIONS";
+      }
     else if(args[i] == "CONFIGURATIONS")
       {
+      if(in_match_mode)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
       // Switch to setting the configurations property.
       doing_dirs = false;
       doing_destination = false;
+      doing_pattern = false;
+      doing_regex = false;
       doing_permissions_file = false;
       doing_permissions_dir = false;
       doing_configurations = true;
@@ -740,9 +870,20 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       }
     else if(args[i] == "COMPONENT")
       {
+      if(in_match_mode)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
       // Switch to setting the component property.
       doing_dirs = false;
       doing_destination = false;
+      doing_pattern = false;
+      doing_regex = false;
       doing_permissions_file = false;
       doing_permissions_dir = false;
       doing_configurations = false;
@@ -781,6 +922,28 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       destination = args[i].c_str();
       doing_destination = false;
       }
+    else if(doing_pattern)
+      {
+      // Convert the pattern to a regular expression.  Require a
+      // leading slash and trailing end-of-string in the matched
+      // string to make sure the pattern matches only whole file
+      // names.
+      literal_args += " REGEX \"/";
+      std::string regex = cmsys::Glob::PatternToRegex(args[i], false);
+      cmSystemTools::ReplaceString(regex, "\\", "\\\\");
+      literal_args += regex;
+      literal_args += "$\"";
+      doing_pattern = false;
+      }
+    else if(doing_regex)
+      {
+      literal_args += " REGEX \"";
+      std::string regex = args[i];
+      cmSystemTools::ReplaceString(regex, "\\", "\\\\");
+      literal_args += regex;
+      literal_args += "\"";
+      doing_regex = false;
+      }
     else if(doing_component)
       {
       component = args[i];
@@ -805,6 +968,18 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         {
         cmOStringStream e;
         e << args[0] << " given invalid directory permission \""
+          << args[i] << "\".";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      }
+    else if(doing_permissions_match)
+      {
+      // Check the requested permission.
+      if(!this->CheckPermissions(args[i], literal_args))
+        {
+        cmOStringStream e;
+        e << args[0] << " given invalid permission \""
           << args[i] << "\".";
         this->SetError(e.str().c_str());
         return false;
@@ -844,7 +1019,8 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
                                     permissions_file.c_str(),
                                     permissions_dir.c_str(),
                                     configurations,
-                                    component.c_str()));
+                                    component.c_str(),
+                                    literal_args.c_str()));
 
   // Tell the global generator about any installation component names
   // specified.

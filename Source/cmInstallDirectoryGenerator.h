@@ -30,7 +30,8 @@ public:
                               const char* file_permissions,
                               const char* dir_permissions,
                               std::vector<std::string> const& configurations,
-                              const char* component);
+                              const char* component,
+                              const char* literal_args);
   virtual ~cmInstallDirectoryGenerator();
 
 protected:
@@ -41,6 +42,7 @@ protected:
   std::string DirPermissions;
   std::vector<std::string> Configurations;
   std::string Component;
+  std::string LiteralArguments;
 };
 
 #endif

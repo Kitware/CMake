@@ -25,10 +25,12 @@ cmInstallDirectoryGenerator
                               const char* file_permissions,
                               const char* dir_permissions,
                               std::vector<std::string> const& configurations,
-                              const char* component):
+                              const char* component,
+                              const char* literal_args):
   Directories(dirs), Destination(dest),
   FilePermissions(file_permissions), DirPermissions(dir_permissions),
-  Configurations(configurations), Component(component)
+  Configurations(configurations), Component(component),
+  LiteralArguments(literal_args)
 {
 }
 
@@ -54,6 +56,6 @@ void cmInstallDirectoryGenerator::GenerateScript(std::ostream& os)
                          this->FilePermissions.c_str(),
                          this->DirPermissions.c_str(),
                          this->Configurations, this->Component.c_str(),
-                         no_rename);
+                         no_rename, this->LiteralArguments.c_str());
     }
 }

@@ -72,6 +72,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   std::string destination = this->Destination;
 
   // Setup special properties for some target types.
+  std::string literal_args;
   std::string props;
   const char* properties = 0;
   cmTarget::TargetType type = this->Target->GetType();
@@ -140,6 +141,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
                                      false, false);
         fromFile += ".app";
         type = cmTarget::INSTALL_DIRECTORY;
+        literal_args += " USE_SOURCE_PERMISSIONS";
         }
       }
       break;
@@ -159,11 +161,13 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 
   // Write code to install the target file.
   const char* no_dir_permissions = 0;
+  const char* no_rename = 0;
   this->AddInstallRule(os, destination.c_str(), type, fromFile.c_str(),
                        this->ImportLibrary, properties,
                        this->FilePermissions.c_str(), no_dir_permissions,
                        this->Configurations,
-                       this->Component.c_str());
+                       this->Component.c_str(),
+                       no_rename, literal_args.c_str());
 
   // Fix the install_name settings in installed binaries.
   if(type == cmTarget::SHARED_LIBRARY ||
