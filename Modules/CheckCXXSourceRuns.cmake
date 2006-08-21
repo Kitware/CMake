@@ -1,5 +1,6 @@
-# - Check if the source code provided in the SOURCE argument compiles and runs.# CHECK_CXX_SOURCE_RUNS(SOURCE VAR)
-# - macro which checks if the source code compiles\
+# - Check if the source code provided in the SOURCE argument compiles and runs.
+# CHECK_CXX_SOURCE_RUNS(SOURCE VAR)
+# - macro which checks if the source code compiles
 #  SOURCE - source code to try to compile
 #  VAR    - variable to store size if the type exists.
 #
@@ -40,13 +41,13 @@ MACRO(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
       "${CHECK_CXX_SOURCE_COMPILES_ADD_INCLUDES}"
       OUTPUT_VARIABLE OUTPUT)
     # if it did not compile make the return value fail code of 1
-    IF(NOT ${${VAR}_COMPILED})
+    IF(NOT ${VAR}_COMPILED)
       SET(${VAR} 1)
-    ENDIF(NOT ${${VAR}_COMPILED})
+    ENDIF(NOT ${VAR}_COMPILED)
     # if the return value was 0 then it worked
     SET(result_var ${${VAR}})
     IF("${result_var}" EQUAL 0)
-      SET(${VAR} 1 CACHE INTERNAL "Test ${FUNCTION}")
+      SET(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Performing C++ SOURCE FILE Test ${VAR} succeded with the following output:\n"
@@ -55,7 +56,7 @@ MACRO(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
         "Source file was:\n${SOURCE}\n")
     ELSE("${result_var}" EQUAL 0)
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
-      SET(${VAR} "" CACHE INTERNAL "Test ${FUNCTION}")
+      SET(${VAR} "" CACHE INTERNAL "Test ${VAR}")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Performing C++ SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"  
