@@ -61,6 +61,16 @@ public:
   void SetRelative(const char* dir);
   const char* GetRelative();
 
+  /** Convert the given globbing pattern to a regular expression.
+      There is no way to quote meta-characters.  The
+      require_whole_string argument specifies whether the regex is
+      automatically surrounded by "^" and "$" to match the whole
+      string.  This is on by default because patterns always match
+      whole strings, but may be disabled to support concatenating
+      expressions more easily (regex1|regex2|etc).  */
+  static kwsys_stl::string PatternToRegex(const kwsys_stl::string& pattern,
+                                          bool require_whole_string = true);
+
 protected:
   //! Process directory
   void ProcessDirectory(kwsys_stl::string::size_type start,
@@ -70,14 +80,6 @@ protected:
   // effectively like saying: /path/to/file/**/file
   void RecurseDirectory(kwsys_stl::string::size_type start,
     const kwsys_stl::string& dir, bool dir_only);
-
-  //! Escape all non-alphanumeric characters in pattern.
-  void Escape(int ch, char* buffer);
-
-  //!
-  // Translate a shell PATTERN to a regular expression.
-  // There is no way to quote meta-characters.
-  kwsys_stl::string ConvertExpression(const kwsys_stl::string& expr);
 
   //! Add regular expression
   void AddExpression(const char* expr);
