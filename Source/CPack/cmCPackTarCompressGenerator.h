@@ -42,6 +42,7 @@ protected:
   virtual const char* GetOutputExtension() { return "tar.Z"; }
 
   int RenameFile(const char* oldname, const char* newname);
+  int GenerateHeader(std::ostream* os);
 };
 
 #endif
