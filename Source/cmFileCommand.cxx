@@ -855,9 +855,11 @@ bool cmFileCommand::HandleInstallCommand(
   // Check rename form.
   if(!rename.empty())
     {
-    if(itype != cmTarget::INSTALL_FILES)
+    if(itype != cmTarget::INSTALL_FILES &&
+       itype != cmTarget::INSTALL_PROGRAMS)
       {
-      this->SetError("INSTALL option RENAME may be used only with FILES.");
+      this->SetError("INSTALL option RENAME may be used only with "
+                     "FILES or PROGRAMS.");
       return false;
       }
     if(files.size() > 1)
