@@ -241,6 +241,23 @@ IF(NOT KWSYS_IN_SOURCE_BUILD)
     ${PROJECT_BINARY_DIR}/kwsysPrivate.h COPY_ONLY IMMEDIATE)
 ENDIF(NOT KWSYS_IN_SOURCE_BUILD)
 
+
+IF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.4)
+  MESSAGE(STATUS "Skip large files support because CMake is earlier than 2.4")
+ELSE("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.4)
+  INCLUDE(CheckCXXSourceRuns)
+  FILE(READ "${CMAKE_CURRENT_SOURCE_DIR}/RequireLargeFilesSupport.cxx"
+    __kwsys_require_large_files_support)
+  CHECK_CXX_SOURCE_RUNS("${__kwsys_require_large_files_support}"
+    REQUIRE_LARGE_FILE_SUPPORT
+    "Support for 64 bit file systems")
+  IF(REQUIRE_LARGE_FILE_SUPPORT)
+    SET(KWSYS_REQUIRE_LARGE_FILE_SUPPORT 1)
+  ELSE(REQUIRE_LARGE_FILE_SUPPORT)
+    SET(KWSYS_REQUIRE_LARGE_FILE_SUPPORT 0)
+  ENDIF(REQUIRE_LARGE_FILE_SUPPORT)
+ENDIF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.4)
+
 #-----------------------------------------------------------------------------
 # We require ANSI support from the C compiler.  Add any needed flags.
 IF(CMAKE_ANSI_CFLAGS)

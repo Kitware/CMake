@@ -279,6 +279,7 @@ cmake_kwsys_config_replace_string ()
     cat "${INFILE}" | 
       sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
                 s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
+                s/@KWSYS_REQUIRE_LARGE_FILE_SUPPORT@/${KWSYS_REQUIRE_LARGE_FILE_SUPPORT}/g;
                 s/@KWSYS_NAME_IS_KWSYS@/${KWSYS_NAME_IS_KWSYS}/g;
                 s/@KWSYS_IOS_USE_ANSI@/${KWSYS_IOS_USE_ANSI}/g;
                 s/@KWSYS_IOS_HAVE_STD@/${KWSYS_IOS_HAVE_STD}/g;
@@ -821,6 +822,7 @@ fi
 # Test for kwsys features
 KWSYS_NAME_IS_KWSYS=0
 KWSYS_BUILD_SHARED=0
+KWSYS_REQUIRE_LARGE_FILE_SUPPORT=0
 KWSYS_IOS_USE_STRSTREAM_H=0
 KWSYS_IOS_USE_STRSTREA_H=0
 KWSYS_IOS_HAVE_STD=0

@@ -22,6 +22,20 @@
 # define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
 
+/* This is a support for files on the disk that are larger than 2GB.  Since
+   this is the first place that any include should happen, do this here. */
+#if @KWSYS_REQUIRE_LARGE_FILE_SUPPORT@
+#  ifndef _LARGEFILE_SOURCE
+#    define _LARGEFILE_SOURCE
+#  endif
+#  ifndef _LARGE_FILES
+#    define _LARGE_FILES
+#  endif
+#  ifndef _FILE_OFFSET_BITS
+#    define _FILE_OFFSET_BITS 64
+#  endif
+#endif
+
 /* Setup the export macro.  */
 #if defined(_WIN32) && @KWSYS_BUILD_SHARED@
 # if defined(@KWSYS_NAMESPACE@_EXPORTS)
