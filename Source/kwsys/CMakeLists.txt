@@ -245,7 +245,7 @@ ENDIF(NOT KWSYS_IN_SOURCE_BUILD)
 IF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.4)
   MESSAGE(STATUS "Skip large files support because CMake is earlier than 2.4")
 ELSE("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.4)
-  INCLUDE(CheckCXXSourceRuns)
+  INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CheckCXXSourceRuns.cmake)
   FILE(READ "${CMAKE_CURRENT_SOURCE_DIR}/RequireLargeFilesSupport.cxx"
     __kwsys_require_large_files_support)
   CHECK_CXX_SOURCE_RUNS("${__kwsys_require_large_files_support}"
