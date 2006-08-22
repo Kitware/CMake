@@ -840,13 +840,17 @@ void cmDocumentation::PrintParagraphHTML(std::ostream& os, const char* text)
 //----------------------------------------------------------------------------
 void cmDocumentation::PrintPreformattedMan(std::ostream& os, const char* text)
 {
-  os << text << "\n";
+  std::string man_text = text;
+  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
+  os << man_text << "\n";
 }
 
 //----------------------------------------------------------------------------
 void cmDocumentation::PrintParagraphMan(std::ostream& os, const char* text)
 {
-  os << text << "\n\n";
+  std::string man_text = text;
+  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
+  os << man_text << "\n\n";
 }
 
 //----------------------------------------------------------------------------
