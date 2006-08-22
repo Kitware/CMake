@@ -258,7 +258,7 @@ bool cmListCommand
 {
   if(args.size() < 3)
     {
-    this->SetError("sub-command REMOVE requires at least two arguments.");
+    this->SetError("sub-command REMOVE_ITEM requires at least two arguments.");
     return false;
     }
 
@@ -267,6 +267,7 @@ bool cmListCommand
   std::vector<std::string> varArgsExpanded;
   if ( !this->GetList(varArgsExpanded, listName.c_str()) )
     {
+    this->SetError("sub-command REMOVE_ITEM requires list to be present.");
     return false;
     }
 
@@ -280,7 +281,10 @@ bool cmListCommand
         {
         varArgsExpanded.erase(varArgsExpanded.begin()+kk);
         }
-      kk ++;
+      else
+        {
+        kk ++;
+        }
       }
     }
 
@@ -304,7 +308,7 @@ bool cmListCommand::HandleRemoveAtCommand(
 {
   if(args.size() < 3)
     {
-    this->SetError("sub-command REMOVE_ITEM requires at least "
+    this->SetError("sub-command REMOVE_AT requires at least "
                    "two arguments.");
     return false;
     }
@@ -314,6 +318,7 @@ bool cmListCommand::HandleRemoveAtCommand(
   std::vector<std::string> varArgsExpanded;
   if ( !this->GetList(varArgsExpanded, listName.c_str()) )
     {
+    this->SetError("sub-command REMOVE_AT requires list to be present.");
     return false;
     }
 
