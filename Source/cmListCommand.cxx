@@ -54,6 +54,14 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleRemoveItemCommand(args);
     }
+  if(subCommand == "SORT")
+    {
+    return this->HandleSortCommand(args);
+    }
+  if(subCommand == "REVERSE")
+    {
+    return this->HandleReverseCommand(args);
+    }
 
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
@@ -296,6 +304,76 @@ bool cmListCommand
       value += ";";
       }
     value += varArgsExpanded[cc];
+    }
+
+  this->Makefile->AddDefinition(listName.c_str(), value.c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmListCommand
+::HandleReverseCommand(std::vector<std::string> const& args)
+{
+  if(args.size() < 2)
+    {
+    this->SetError("sub-command REVERSE requires a list as an argument.");
+    return false;
+    }
+
+  const std::string& listName = args[1];
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if ( !this->GetList(varArgsExpanded, listName.c_str()) )
+    {
+    this->SetError("sub-command REVERSE requires list to be present.");
+    return false;
+    }
+
+  std::string value;
+  std::vector<std::string>::reverse_iterator it;
+  for ( it = varArgsExpanded.rbegin(); it != varArgsExpanded.rend(); ++ it )
+    {
+    if (value.size())
+      {
+      value += ";";
+      }
+    value += it->c_str();
+    }
+
+  this->Makefile->AddDefinition(listName.c_str(), value.c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmListCommand
+::HandleSortCommand(std::vector<std::string> const& args)
+{
+  if(args.size() < 2)
+    {
+    this->SetError("sub-command SORT requires a list as an argument.");
+    return false;
+    }
+
+  const std::string& listName = args[1];
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if ( !this->GetList(varArgsExpanded, listName.c_str()) )
+    {
+    this->SetError("sub-command SORT requires list to be present.");
+    return false;
+    }
+
+  std::sort(varArgsExpanded.begin(), varArgsExpanded.end());
+
+  std::string value;
+  std::vector<std::string>::iterator it;
+  for ( it = varArgsExpanded.begin(); it != varArgsExpanded.end(); ++ it )
+    {
+    if (value.size())
+      {
+      value += ";";
+      }
+    value += it->c_str();
     }
 
   this->Makefile->AddDefinition(listName.c_str(), value.c_str());
