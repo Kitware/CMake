@@ -35,11 +35,11 @@
 //----------------------------------------------------------------------
 class cmCPackTarCompressGeneratorForward
 {
-  public:
-    static int GenerateHeader(cmCPackTarCompressGenerator* gg, std::ostream* os)
-      {
-      return gg->GenerateHeader(os);
-      }
+public:
+  static int GenerateHeader(cmCPackTarCompressGenerator* gg, std::ostream* os)
+    {
+    return gg->GenerateHeader(os);
+    }
 };
 
 //----------------------------------------------------------------------
@@ -51,8 +51,6 @@ cmCPackTarCompressGenerator::cmCPackTarCompressGenerator()
 cmCPackTarCompressGenerator::~cmCPackTarCompressGenerator()
 {
 }
-
-static const size_t cmCPackTarCompress_Data_BlockSize = 16384;
 
 //----------------------------------------------------------------------
 class cmCPackTarCompress_Data
