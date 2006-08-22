@@ -150,20 +150,14 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
    SET(CMAKE_C_LINK_EXECUTABLE  "<CMAKE_C_COMPILER> <CMAKE_C_LINK_FLAGS> <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_SOURCE_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
 
    ADD_EXECUTABLE(${_exe_NAME} ${ARGN})
-
-#under win32 the ".exe" suffix is appended to the binary name, copy it so that it exists also without the prefix
-#otherwise the following custom commands don't work
-   IF(WIN32)
-      ADD_CUSTOM_COMMAND(TARGET ${_exe_NAME} POST_BUILD COMMAND cp ARGS ${_exe_NAME}.exe ${_exe_NAME}_ )
-      ADD_CUSTOM_COMMAND(TARGET ${_exe_NAME} POST_BUILD COMMAND mv ARGS ${_exe_NAME}_ ${_exe_NAME} )
-   ENDIF(WIN32)
+   SET_TARGET_PROPERTIES(${_exe_NAME} PROPERTIES SUFFIX ".elf")
 
 #create a binary file
    ADD_CUSTOM_COMMAND(
       TARGET ${_exe_NAME}
       POST_BUILD
       COMMAND ${ECOS_ARCH_PREFIX}objcopy
-      ARGS -O binary ${_exe_NAME} ${_exe_NAME}.bin
+      ARGS -O binary ${_exe_NAME}.elf ${_exe_NAME}.bin
    )
 
 #and an srec file
@@ -171,11 +165,11 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
       TARGET ${_exe_NAME}
       POST_BUILD
       COMMAND ${ECOS_ARCH_PREFIX}objcopy
-      ARGS -O srec ${_exe_NAME} ${_exe_NAME}.srec
+      ARGS -O srec ${_exe_NAME}.elf ${_exe_NAME}.srec
    )
 
 #add the created files to the make_clean_files
-   SET(ECOS_ADD_MAKE_CLEAN_FILES ${ECOS_ADD_MAKE_CLEAN_FILES};${_exe_NAME};${_exe_NAME}.bin;${_exe_NAME}.srec;${_exe_NAME}.lst;)
+   SET(ECOS_ADD_MAKE_CLEAN_FILES ${ECOS_ADD_MAKE_CLEAN_FILES};${_exe_NAME}.bin;${_exe_NAME}.srec;${_exe_NAME}.lst;)
 
    SET_DIRECTORY_PROPERTIES(
       PROPERTIES
@@ -192,11 +186,11 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
 
    ADD_CUSTOM_TARGET( listing
       COMMAND echo -e   \"\\n--- Symbols sorted by address ---\\n\" > ${_exe_NAME}.lst
-      COMMAND ${ECOS_ARCH_PREFIX}nm -S -C -n ${_exe_NAME} >> ${_exe_NAME}.lst
+      COMMAND ${ECOS_ARCH_PREFIX}nm -S -C -n ${_exe_NAME}.elf >> ${_exe_NAME}.lst
       COMMAND echo -e \"\\n--- Symbols sorted by size ---\\n\" >> ${_exe_NAME}.lst
-      COMMAND ${ECOS_ARCH_PREFIX}nm -S -C -r --size-sort ${_exe_NAME} >> ${_exe_NAME}.lst
+      COMMAND ${ECOS_ARCH_PREFIX}nm -S -C -r --size-sort ${_exe_NAME}.elf >> ${_exe_NAME}.lst
       COMMAND echo -e \"\\n--- Full assembly listing ---\\n\" >> ${_exe_NAME}.lst
-      COMMAND ${ECOS_ARCH_PREFIX}objdump -S -x -d -C ${_exe_NAME} >> ${_exe_NAME}.lst )
+      COMMAND ${ECOS_ARCH_PREFIX}objdump -S -x -d -C ${_exe_NAME}.elf >> ${_exe_NAME}.lst )
 
 ENDMACRO(ECOS_ADD_EXECUTABLE)
 
