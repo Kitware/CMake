@@ -73,7 +73,8 @@ public:
                      const char* target,
                      const std::vector<std::string>& depends,
                      const std::vector<std::string>& commands,
-                     bool symbolic);
+                     bool symbolic,
+                     bool in_help = false);
   
   // write the main variables used by the makefiles
   void WriteMakeVariables(std::ostream& makefileStream);
@@ -214,6 +215,8 @@ public:
   std::map<cmStdString, LocalObjectInfo> const& GetLocalObjectFiles()
     { return this->LocalObjectFiles;}
 
+  std::vector<cmStdString> const& GetLocalHelp() { return this->LocalHelp; }
+
   // return info about progress actions
   unsigned long GetNumberOfProgressActions();
   unsigned long GetNumberOfProgressActionsForTarget(const char *);
@@ -346,6 +349,7 @@ private:
   bool SkipAssemblySourceRules;
 
   std::map<cmStdString, LocalObjectInfo> LocalObjectFiles;
+  std::vector<cmStdString> LocalHelp;
 
   /* does the work for each target */
   std::vector<cmMakefileTargetGenerator *> TargetGenerators;

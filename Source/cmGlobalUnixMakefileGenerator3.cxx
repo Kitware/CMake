@@ -1231,15 +1231,13 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
             }
           }
         }
-      typedef cmLocalUnixMakefileGenerator3::LocalObjectInfo LocalObjectInfo;
-      std::map<cmStdString, LocalObjectInfo> const& objs =
-        lg->GetLocalObjectFiles();
-      for(std::map<cmStdString, LocalObjectInfo>::const_iterator o =
-            objs.begin(); o != objs.end(); ++o)
+      std::vector<cmStdString> const& localHelp = lg->GetLocalHelp();
+      for(std::vector<cmStdString>::const_iterator o = localHelp.begin();
+          o != localHelp.end(); ++o)
         {
-         path = "... ";
-         path += o->first;
-         lg->AppendEcho(commands, path.c_str());
+        path = "... ";
+        path += *o;
+        lg->AppendEcho(commands, path.c_str());
         }
       }
     }

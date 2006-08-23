@@ -369,7 +369,7 @@ cmLocalUnixMakefileGenerator3
   // Write the rule to the makefile.
   std::vector<std::string> no_depends;
   this->WriteMakeRule(ruleFileStream, comment,
-                      output, no_depends, commands, true);
+                      output, no_depends, commands, true, true);
 }
 
 //----------------------------------------------------------------------------
@@ -561,7 +561,8 @@ cmLocalUnixMakefileGenerator3
                 const char* target,
                 const std::vector<std::string>& depends,
                 const std::vector<std::string>& commands,
-                bool symbolic)
+                bool symbolic,
+                bool in_help)
 {
   // Make sure there is a target.
   if(!target || !*target)
@@ -637,6 +638,12 @@ cmLocalUnixMakefileGenerator3
     os << "\t" << replace.c_str() << "\n";
     }
   os << "\n";
+
+  // Add the output to the local help if requested.
+  if(in_help)
+    {
+    this->LocalHelp.push_back(target);
+    }
 }
 
 //----------------------------------------------------------------------------
