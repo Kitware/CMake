@@ -1,10 +1,13 @@
 # - This module defines variables and macros required to build eCos application.
 # This file contains the following macros:
 # ECOS_ADD_INCLUDE_DIRECTORIES() - add the eCos include dirs
+# ECOS_ADD_EXECUTABLE(name source1 ... sourceN ) - create an eCos executable
+# ECOS_ADJUST_DIRECTORY(VAR source1 ... sourceN ) - adjusts the path of the source files and puts the result into VAR
+#
+# Macros for selecting the toolchain:
 # ECOS_USE_ARM_ELF_TOOLS()       - enable the ARM ELF toolchain for the directory where it is called
+# ECOS_USE_I386_ELF_TOOLS()      - enable the i386 ELF toolchain for the directory where it is called
 # ECOS_USE_PPC_EABI_TOOLS()      - enable the PowerPC toolchain for the directory where it is called
-# ECOS_ADD_EXECUTABLE(name source1 ... sourceN ) - create an executable for eCos
-# ECOS_ADJUST_DIRECTORY(source1 ... sourceN )
 #
 # It contains the following variables:
 # ECOS_DEFINITIONS
@@ -77,6 +80,21 @@ MACRO (ECOS_USE_PPC_EABI_TOOLS)
 #for the obj-tools
    SET(ECOS_ARCH_PREFIX "powerpc-eabi-")
 ENDMACRO (ECOS_USE_PPC_EABI_TOOLS)
+
+#usage: ECOS_USE_I386_ELF_TOOLS()
+MACRO (ECOS_USE_I386_ELF_TOOLS)
+   SET(CMAKE_CXX_COMPILER "i386-elf-c++")
+   SET(CMAKE_COMPILER_IS_GNUCXX 1)
+   SET(CMAKE_C_COMPILER "i386-elf-gcc")
+   SET(CMAKE_AR "i386-elf-ar")
+   SET(CMAKE_RANLIB "i386-elf-ranlib")
+#for linking
+   SET(ECOS_LD_MCPU "")
+#for compiling
+   ADD_DEFINITIONS()
+#for the obj-tools
+   SET(ECOS_ARCH_PREFIX "i386-elf-")
+ENDMACRO (ECOS_USE_I386_ELF_TOOLS)
 
 
 #since the actual sources are located one level upwards
