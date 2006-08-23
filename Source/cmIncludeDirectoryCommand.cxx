@@ -48,22 +48,17 @@ bool cmIncludeDirectoryCommand
         ("Empty Include Directory Passed into INCLUDE_DIRECTORIES command.");
       }
     std::string unixPath = *i;
-    cmSystemTools::ConvertToUnixSlashes(unixPath);
-    if(!cmSystemTools::FileIsFullPath(unixPath.c_str()))
+    if (!cmSystemTools::IsOff(unixPath.c_str()))
       {
-      std::string tmp = this->Makefile->GetStartDirectory();
-      tmp += "/";
-      tmp += unixPath;
-      unixPath = tmp;
+      cmSystemTools::ConvertToUnixSlashes(unixPath);
+      if(!cmSystemTools::FileIsFullPath(unixPath.c_str()))
+        {
+        std::string tmp = this->Makefile->GetStartDirectory();
+        tmp += "/";
+        tmp += unixPath;
+        unixPath = tmp;
+        }
       }
-    /*
-    if ( !cmSystemTools::FileExists(unixPath.c_str()) )
-      {
-      std::string out = "Cannot find directory: " + unixPath;
-      this->SetError(out.c_str());
-      return false;
-      }
-      */
     this->Makefile->AddIncludeDirectory(unixPath.c_str(), before);
     }
   return true;
