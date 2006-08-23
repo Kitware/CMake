@@ -1,3 +1,4 @@
+#include "cmStandardIncludes.h"
 #line 2 "cmDependsJavaLexer.cxx"
 
 #line 4 "cmDependsJavaLexer.cxx"

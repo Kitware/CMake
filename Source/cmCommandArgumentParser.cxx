@@ -128,6 +128,8 @@ Modify cmCommandArgumentParser.cxx:
 
 */
 
+#include "cmStandardIncludes.h"
+
 /* Configure the parser to use a lexer object.  */
 #define YYPARSE_PARAM yyscanner
 #define YYLEX_PARAM yyscanner
