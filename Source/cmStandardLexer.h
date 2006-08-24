@@ -64,6 +64,11 @@
 # define YY_NO_UNISTD_H 1
 #endif
 
+/* Make sure malloc and free are available on QNX.  */
+#ifdef __QNX__
+# include <malloc.h>
+#endif
+
 /* Disable features we do not need. */
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
