@@ -38,6 +38,11 @@ Modify cmCommandArgumentParser.cxx:
         cmCommandArgumentError(yyscanner, x)
 #define yyGetParser (cmCommandArgument_yyget_extra(yyscanner))
 
+/* Make sure malloc and free are available on QNX.  */
+#ifdef __QNX__
+# include <malloc.h>
+#endif
+
 /* Make sure the parser uses standard memory allocation.  The default
    generated parser malloc/free declarations do not work on all
    platforms.  */
