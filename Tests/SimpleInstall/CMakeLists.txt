@@ -166,6 +166,8 @@ ELSE(STAGE2)
     )
 
   # Test directory installation.
+  FILE(REMOVE_RECURSE "${CMAKE_INSTALL_PREFIX}/MyTest/share/CVS")
+  FILE(REMOVE_RECURSE "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/CVS")
   INSTALL(
     DIRECTORY TestSubDir scripts/ DESTINATION MyTest/share
     PATTERN "CVS" EXCLUDE
