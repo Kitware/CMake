@@ -142,6 +142,9 @@ IF(KWSYS_STANDALONE)
   ENDIF(BUILD_TESTING)
 ENDIF(KWSYS_STANDALONE)
 
+# Include helper macros.
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformCxxTests.cmake)
+
 # Do full dependency headers.
 INCLUDE_REGULAR_EXPRESSION("^.*$")
 
@@ -241,22 +244,6 @@ IF(NOT KWSYS_IN_SOURCE_BUILD)
     ${PROJECT_BINARY_DIR}/kwsysPrivate.h COPY_ONLY IMMEDIATE)
 ENDIF(NOT KWSYS_IN_SOURCE_BUILD)
 
-
-SET(KWSYS_REQUIRE_LARGE_FILE_SUPPORT 0)
-IF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.4)
-  MESSAGE(STATUS "Skip large files support because CMake is earlier than 2.4")
-ELSE("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.4)
-  INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CheckCXXSourceRuns.cmake)
-  FILE(READ "${CMAKE_CURRENT_SOURCE_DIR}/RequireLargeFilesSupport.cxx"
-    __kwsys_require_large_files_support)
-  CHECK_CXX_SOURCE_RUNS("${__kwsys_require_large_files_support}"
-    REQUIRE_LARGE_FILE_SUPPORT
-    "Support for 64 bit file systems")
-  IF(REQUIRE_LARGE_FILE_SUPPORT)
-    SET(KWSYS_REQUIRE_LARGE_FILE_SUPPORT 1)
-  ENDIF(REQUIRE_LARGE_FILE_SUPPORT)
-ENDIF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.4)
-
 #-----------------------------------------------------------------------------
 # We require ANSI support from the C compiler.  Add any needed flags.
 IF(CMAKE_ANSI_CFLAGS)
@@ -281,10 +268,29 @@ IF(NOT CMAKE_COMPILER_IS_GNUCXX)
 ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
 
 #-----------------------------------------------------------------------------
+# Configure Large File Support.
+SET(KWSYS_LFS_REQUESTED 1)
+SET(KWSYS_LFS_AVAILABLE 0)
+IF(KWSYS_LFS_REQUESTED)
+  # Large File Support is requested.
+  SET(KWSYS_LFS_REQUESTED 1)
+
+  # Check for large file support.
+  KWSYS_PLATFORM_CXX_TEST_RUN(KWSYS_LFS_WORKS
+    "Checking for Large File Support" DIRECT)
+
+  IF(KWSYS_LFS_WORKS)
+    SET(KWSYS_LFS_AVAILABLE 1)
+  ENDIF(KWSYS_LFS_WORKS)
+ELSE(KWSYS_LFS_REQUESTED)
+  # Large File Support is not requested.
+  SET(KWSYS_LFS_REQUESTED 0)
+ENDIF(KWSYS_LFS_REQUESTED)
+
+#-----------------------------------------------------------------------------
 # Configure the standard library header wrappers based on compiler's
 # capabilities and parent project's request.  Enforce 0/1 as only
 # possible values for configuration into Configure.hxx.
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformCxxTests.cmake)
 
 KWSYS_PLATFORM_CXX_TEST(KWSYS_STL_HAVE_STD
   "Checking whether STL classes are in std namespace" DIRECT)
