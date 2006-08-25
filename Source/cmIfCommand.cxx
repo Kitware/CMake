@@ -226,7 +226,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
-      // does a file exist
+      // does a directory with this name exist
       if (*arg == "IS_DIRECTORY" && argP1  != newArgs.end())
         {
         if(cmSystemTools::FileIsDirectory((argP1)->c_str()))
@@ -237,6 +237,27 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           {
           *arg = "0";
           }
+        newArgs.erase(argP1);
+        argP1 = arg;
+        IncrementArguments(newArgs,argP1,argP2);
+        reducible = 1;
+        }
+      // is file A newer than file B
+      if (*arg == "FILE_IS_NEWER" && argP1  != newArgs.end() && argP2  != newArgs.end())
+        {
+        int fileIsNewer=0;
+        bool success=cmSystemTools::FileTimeCompare((argP1)->c_str(), (argP2)->c_str(),
+                              &fileIsNewer);
+        if(success==false || fileIsNewer==1 || fileIsNewer==0)
+          {
+          *arg = "1";
+          }
+        else 
+          {
+          *arg = "0";
+          }
+
+        newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
         IncrementArguments(newArgs,argP1,argP2);
