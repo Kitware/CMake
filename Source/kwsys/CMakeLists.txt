@@ -437,24 +437,8 @@ IF(KWSYS_USE_FundamentalType)
   ENDIF(KWSYS_USE___INT64)
 
   # Check signedness of "char" type.
-  IF("KWSYS_CHAR_IS_SIGNED" MATCHES "^KWSYS_CHAR_IS_SIGNED$")
-    MESSAGE(STATUS "Checking signedness of char")
-    TRY_RUN(KWSYS_CHAR_IS_SIGNED KWSYS_CHAR_IS_SIGNED_COMPILED
-      ${CMAKE_CURRENT_BINARY_DIR}
-      ${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformCxxTests.cxx
-      COMPILE_DEFINITIONS -DTEST_KWSYS_CHAR_IS_SIGNED)
-    IF(KWSYS_CHAR_IS_SIGNED_COMPILED)
-      IF(KWSYS_CHAR_IS_SIGNED)
-        MESSAGE(STATUS "Checking signedness of char -- signed")
-        SET(KWSYS_CHAR_IS_SIGNED 1 CACHE INTERNAL "Whether char is signed.")
-      ELSE(KWSYS_CHAR_IS_SIGNED)
-        MESSAGE(STATUS "Checking signedness of char -- unsigned")
-        SET(KWSYS_CHAR_IS_SIGNED 0 CACHE INTERNAL "Whether char is signed.")
-      ENDIF(KWSYS_CHAR_IS_SIGNED)
-    ELSE(KWSYS_CHAR_IS_SIGNED_COMPILED)
-      MESSAGE(FATAL_ERROR "Checking signedness of char -- failed")
-    ENDIF(KWSYS_CHAR_IS_SIGNED_COMPILED)
-  ENDIF("KWSYS_CHAR_IS_SIGNED" MATCHES "^KWSYS_CHAR_IS_SIGNED$")
+  KWSYS_PLATFORM_CXX_TEST_RUN(KWSYS_CHAR_IS_SIGNED
+    "Checking whether char is signed" DIRECT)
 ENDIF(KWSYS_USE_FundamentalType)
 
 IF(KWSYS_NAMESPACE MATCHES "^kwsys$")

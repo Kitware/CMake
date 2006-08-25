@@ -267,11 +267,11 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CHAR_IS_SIGNED
-/* Return 1 for char signed and 0 for char unsigned.  */
+/* Return 0 for char signed and 1 for char unsigned.  */
 int main()
 {
   unsigned char uc = 255;
-  return (*reinterpret_cast<char*>(&uc) < 0)?1:0;
+  return (*reinterpret_cast<char*>(&uc) < 0)?0:1;
 }
 #endif
 
