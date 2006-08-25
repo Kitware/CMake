@@ -92,12 +92,18 @@ kwsys_stl::string Glob::PatternToRegex(const kwsys_stl::string& pattern,
     if(c == '*')
       {
       // A '*' (not between brackets) matches any string.
-      regex += ".*";
+      // We modify this to not match slashes since the orignal glob
+      // pattern documentation was meant for matching file name
+      // components separated by slashes.
+      regex += "[^/]*";
       }
     else if(c == '?')
       {
       // A '?' (not between brackets) matches any single character.
-      regex += ".";
+      // We modify this to not match slashes since the orignal glob
+      // pattern documentation was meant for matching file name
+      // components separated by slashes.
+      regex += "[^/]";
       }
     else if(c == '[')
       {
