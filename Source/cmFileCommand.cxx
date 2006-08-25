@@ -393,7 +393,9 @@ public:
   {
     cmsys::RegularExpression Regex;
     MatchProperties Properties;
-    MatchRule(std::string const& regex): Regex(regex.c_str()) {}
+    std::string RegexString;
+    MatchRule(std::string const& regex):
+      Regex(regex.c_str()), RegexString(regex) {}
   };
   std::vector<MatchRule> MatchRules;
 
@@ -1268,8 +1270,11 @@ bool cmFileCommand::HandleInstallCommand(
     // Construct the full path to the source file.  The file name may
     // have been changed above.
     std::string fromFile = fromDir;
-    fromFile += "/";
-    fromFile += fromName;
+    if(!fromName.empty())
+      {
+      fromFile += "/";
+      fromFile += fromName;
+      }
 
     std::string message;
     if(!cmSystemTools::SameFile(fromFile.c_str(), toFile.c_str()))
