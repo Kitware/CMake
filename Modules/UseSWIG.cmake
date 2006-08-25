@@ -12,6 +12,8 @@
 # special flags to all swig calls.
 # Another special variable is CMAKE_SWIG_OUTDIR, it allows one to specify 
 # where to write all the swig generated module (swig -outdir option)
+# The name-specific variable SWIG_MODULE_<name>_EXTRA_DEPS may be used
+# to specify extra dependencies for the generated modules.
 
 SET(SWIG_CXX_EXTENSION "cxx")
 SET(SWIG_EXTRA_LIBRARIES "")
@@ -145,6 +147,7 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
       -o "${swig_generated_file_fullname}"
       "${swig_source_file_fullname}"
       MAIN_DEPENDENCY "${swig_source_file_fullname}"
+      DEPENDS ${SWIG_MODULE_${name}_EXTRA_DEPS}
       COMMENT "Swig source") 
   ELSE(CMAKE_SWIG_OUTDIR)
     ADD_CUSTOM_COMMAND(
@@ -160,6 +163,7 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
       -o "${swig_generated_file_fullname}"
       "${swig_source_file_fullname}"
       MAIN_DEPENDENCY "${swig_source_file_fullname}"
+      DEPENDS ${SWIG_MODULE_${name}_EXTRA_DEPS}
       COMMENT "Swig source") 
   ENDIF(CMAKE_SWIG_OUTDIR)
   SET_SOURCE_FILES_PROPERTIES("${swig_generated_file_fullname}"
