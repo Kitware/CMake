@@ -2617,11 +2617,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     {
     std::string tempOutputFile = soutfile;
     tempOutputFile += ".tmp";
-    std::ofstream fout(tempOutputFile.c_str()
-#if defined(_WIN32) || defined(__CYGWIN__)
-                       , std::ios::out | std::ios::binary
-#endif
-      );
+    std::ofstream fout(tempOutputFile.c_str());
     if(!fout)
       {
       cmSystemTools::Error(
@@ -2630,11 +2626,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
       cmSystemTools::ReportLastSystemError("");
       return 0;
       }
-    std::ifstream fin(sinfile.c_str()
-#if defined(_WIN32) || defined(__CYGWIN__)
-                      , std::ios::in | std::ios::binary
-#endif
-      );
+    std::ifstream fin(sinfile.c_str());
     if(!fin)
       {
       cmSystemTools::Error("Could not open file for read in copy operation ",
