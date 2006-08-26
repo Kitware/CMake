@@ -3416,39 +3416,49 @@ kwsys_stl::string SystemTools::MakeCindentifier(const char* s)
 // Due to a buggy stream library on the HP and another on Mac OSX, we
 // need this very carefully written version of getline.  Returns true
 // if any data were read before the end-of-file was reached.
-bool SystemTools::GetLineFromStream(kwsys_ios::istream& is, kwsys_stl::string& line,
-                                    bool *has_newline /* = 0 */)
+bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
+                                    kwsys_stl::string& line,
+                                    bool* has_newline /* = 0 */)
 {
   const int bufferSize = 1024;
   char buffer[bufferSize];
-  line = "";
   bool haveData = false;
-  if ( has_newline )
-    {
-    *has_newline = false;
-    }
+  bool haveNewline = false;
+
+  // Start with an empty line.
+  line = "";
 
   // If no characters are read from the stream, the end of file has
-  // been reached.
-  while((is.getline(buffer, bufferSize), is.gcount() > 0))
+  // been reached.  Clear the fail bit just before reading.
+  while(!haveNewline &&
+        (is.clear(is.rdstate() & ~kwsys_ios::ios::failbit),
+         is.getline(buffer, bufferSize), is.gcount() > 0))
     {
+    // We have read at least one byte.
     haveData = true;
-    line.append(buffer);
 
-    // If newline character was read, the gcount includes the
-    // character, but the buffer does not.  The end of line has been
-    // reached.
-    if(strlen(buffer) < static_cast<size_t>(is.gcount()))
+    // If newline character was read the gcount includes the character
+    // but the buffer does not: the end of line has been reached.
+    size_t length = strlen(buffer);
+    if(length < static_cast<size_t>(is.gcount()))
       {
-      if ( has_newline )
-        {
-        *has_newline = true;
-        }
-      break;
+      haveNewline = true;
       }
 
-    // The fail bit may be set.  Clear it.
-    is.clear(is.rdstate() & ~kwsys_ios::ios::failbit);
+    // Avoid storing a carriage return character.
+    if(length > 0 && buffer[length-1] == '\r')
+      {
+      buffer[length-1] = 0;
+      }
+
+    // Append the data read to the line.
+    line.append(buffer);
+    }
+
+  // Return the results.
+  if(has_newline)
+    {
+    *has_newline = haveNewline;
     }
   return haveData;
 }
