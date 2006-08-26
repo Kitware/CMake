@@ -44,7 +44,44 @@ void cmLocalVisualStudio7Generator::Generate()
   lang.insert("IDL");
   lang.insert("DEF");
   this->CreateCustomTargetsAndCommands(lang);
+  this->FixTargets();
   this->OutputVCProjFile();
+}
+
+void cmLocalVisualStudio7Generator::FixTargets()
+{
+  // Visual Studio .NET 2003 Service Pack 1 will not run post-build
+  // commands for targets in which no sources are built.  Add dummy
+  // rules to force these targets to build.
+  cmTargets &tgts = this->Makefile->GetTargets();
+  for(cmTargets::iterator l = tgts.begin();
+      l != tgts.end(); l++)
+    {
+    cmTarget& tgt = l->second;
+    if(tgt.GetType() == cmTarget::GLOBAL_TARGET ||
+       tgt.GetType() == cmTarget::UTILITY)
+      {
+      std::vector<std::string> no_depends;
+      cmCustomCommandLine force_command;
+      force_command.push_back(";");
+      cmCustomCommandLines force_commands;
+      force_commands.push_back(force_command);
+      const char* no_main_dependency = 0;
+      std::string force = this->Makefile->GetStartOutputDirectory();
+      force += cmake::GetCMakeFilesDirectory();
+      force += "/";
+      force += tgt.GetName();
+      force += "_force";
+      this->Makefile->AddCustomCommandToOutput(force.c_str(), no_depends,
+                                               no_main_dependency,
+                                               force_commands, " ", 0, true);
+      if(cmSourceFile* file =
+         this->Makefile->GetSourceFileWithOutput(force.c_str()))
+        {
+        tgt.GetSourceFiles().push_back(file);
+        }
+      }
+    }
 }
 
 // TODO
@@ -1268,15 +1305,29 @@ WriteCustomRule(std::ostream& fout,
          << "\t\t\t\t\tCommandLine=\"" 
          << this->EscapeForXML(command) << "\"\n"
          << "\t\t\t\t\tAdditionalDependencies=\"";
-    // Write out the dependencies for the rule.
-    std::string temp;
-    for(std::vector<std::string>::const_iterator d = depends.begin();
-        d != depends.end(); ++d)
+    if(depends.empty())
       {
-      // Lookup the real name of the dependency in case it is a CMake target.
-      std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
-      fout << this->ConvertToXMLOutputPath(dep.c_str())
-           << ";";
+      // There are no real dependencies.  Produce an artificial one to
+      // make sure the rule runs reliably.
+      if(!cmSystemTools::FileExists(source))
+        {
+        std::ofstream depout(source);
+        depout << "Artificial dependency for a custom command.\n";
+        }
+      fout << this->ConvertToXMLOutputPath(source);
+      }
+    else
+      {
+      // Write out the dependencies for the rule.
+      std::string temp;
+      for(std::vector<std::string>::const_iterator d = depends.begin();
+          d != depends.end(); ++d)
+        {
+        // Lookup the real name of the dependency in case it is a CMake target.
+        std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
+        fout << this->ConvertToXMLOutputPath(dep.c_str())
+             << ";";
+        }
       }
     fout << "\"\n";
     fout << "\t\t\t\t\tOutputs=\"";

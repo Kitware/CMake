@@ -71,6 +71,7 @@ private:
                                    std::string& flags);
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const char* configName);
+  void FixTargets();
   void OutputVCProjFile();
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
