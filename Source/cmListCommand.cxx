@@ -266,7 +266,7 @@ bool cmListCommand
 {
   if(args.size() < 3)
     {
-    this->SetError("sub-command REMOVE_ITEM requires at least two arguments.");
+    this->SetError("sub-command REMOVE_ITEM requires two or more arguments.");
     return false;
     }
 

@@ -243,11 +243,13 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         reducible = 1;
         }
       // is file A newer than file B
-      if (*arg == "FILE_IS_NEWER" && argP1  != newArgs.end() && argP2  != newArgs.end())
+      if (*arg == "FILE_IS_NEWER" &&
+          argP1  != newArgs.end() && argP2  != newArgs.end())
         {
         int fileIsNewer=0;
-        bool success=cmSystemTools::FileTimeCompare((argP1)->c_str(), (argP2)->c_str(),
-                              &fileIsNewer);
+        bool success=cmSystemTools::FileTimeCompare((argP1)->c_str(),
+                                                    (argP2)->c_str(),
+                                                    &fileIsNewer);
         if(success==false || fileIsNewer==1 || fileIsNewer==0)
           {
           *arg = "1";
