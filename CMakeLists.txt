@@ -15,9 +15,9 @@ SET(BUILD_SHARED_LIBS OFF)
 # install tree.
 SET(CMAKE_SKIP_RPATH ON CACHE INTERNAL "CMake does not need RPATHs.")
 
-SET(CMAKE_DATA_DIR "/share/CMake" CACHE STRING 
+SET(CMAKE_DATA_DIR "/share/cmake-${CMake_VERSION}" CACHE STRING
   "Install location for data (relative to prefix).")
-SET(CMAKE_DOC_DIR "/doc/CMake" CACHE STRING
+SET(CMAKE_DOC_DIR "/doc/cmake-${CMake_VERSION}" CACHE STRING
   "Install location for documentation (relative to prefix).")
 SET(CMAKE_MAN_DIR "/man" CACHE STRING
   "Install location for man pages (relative to prefix).")

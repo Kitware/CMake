@@ -17,14 +17,23 @@
 #
 #=========================================================================
 
+# Version number extraction function.
+cmake_version_component()
+{
+  cat "${cmake_source_dir}/CMakeLists.txt" | sed -n "
+/^SET(CMake_VERSION_${1}/ {s/SET(CMake_VERSION_${1} *\([0-9]*\))/\1/;p;}
+"
+}
+
 # Detect system and directory information.
 cmake_system=`uname`
 cmake_source_dir=`echo $0 | sed -n '/\//{s/\/[^\/]*$//;p;}'`
 cmake_source_dir=`(cd "${cmake_source_dir}";pwd)`
 cmake_binary_dir=`pwd`
 cmake_bootstrap_dir="${cmake_binary_dir}/Bootstrap.cmk"
-cmake_data_dir="/share/CMake"
-cmake_doc_dir="/doc/CMake"
+cmake_version="`cmake_version_component MAJOR`.`cmake_version_component MINOR`"
+cmake_data_dir="/share/cmake-${cmake_version}"
+cmake_doc_dir="/doc/cmake-${cmake_version}"
 cmake_man_dir="/man"
 cmake_init_file=""
 
