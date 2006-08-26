@@ -1323,7 +1323,7 @@ WriteCustomRule(std::ostream& fout,
       for(std::vector<std::string>::const_iterator d = depends.begin();
           d != depends.end(); ++d)
         {
-        // Lookup the real name of the dependency in case it is a CMake target.
+        // Get the real name of the dependency in case it is a CMake target.
         std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
         fout << this->ConvertToXMLOutputPath(dep.c_str())
              << ";";
