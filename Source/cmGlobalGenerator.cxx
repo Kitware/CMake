@@ -716,12 +716,13 @@ void cmGlobalGenerator::Generate()
     }
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    cmTargets* targets = 
-      &(this->LocalGenerators[i]->GetMakefile()->GetTargets());
+    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
+    cmTargets* targets = &(mf->GetTargets());
     cmTargets::iterator tit;
     for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
       {
       (*targets)[tit->first] = tit->second;
+      (*targets)[tit->first].SetMakefile(mf);
       }
     }
 
