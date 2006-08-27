@@ -248,7 +248,7 @@ bool cmCPackNSISGenerator::GetListOfSubdirectories(const char* topdir,
     if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&
         strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".."))
       {
-      kwsys_stl::string fullPath = topdir;
+      cmsys_stl::string fullPath = topdir;
       fullPath += "/";
       fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
       if(cmsys::SystemTools::FileIsDirectory(fullPath.c_str()) &&

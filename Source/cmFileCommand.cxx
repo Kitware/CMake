@@ -575,12 +575,12 @@ bool cmFileInstaller::InstallDirectory(const char* source,
     if(!(strcmp(dir.GetFile(fileNum), ".") == 0 ||
          strcmp(dir.GetFile(fileNum), "..") == 0))
       {
-      kwsys_stl::string fromPath = source;
+      cmsys_stl::string fromPath = source;
       fromPath += "/";
       fromPath += dir.GetFile(fileNum);
       if(cmSystemTools::FileIsDirectory(fromPath.c_str()))
         {
-        kwsys_stl::string toDir = destination;
+        cmsys_stl::string toDir = destination;
         toDir += "/";
         toDir += dir.GetFile(fileNum);
         if(!this->InstallDirectory(fromPath.c_str(), toDir.c_str(), always))
@@ -1336,7 +1336,7 @@ void cmFileCommand::ComputeVersionedName(std::string& name,
 {
 #if defined(__APPLE__)
   std::string ext;
-  kwsys_stl::string::size_type dot_pos = name.rfind(".");
+  cmsys_stl::string::size_type dot_pos = name.rfind(".");
   if(dot_pos != name.npos)
     {
     ext = name.substr(dot_pos, name.npos);
