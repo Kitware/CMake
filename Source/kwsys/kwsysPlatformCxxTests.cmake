@@ -68,6 +68,7 @@ MACRO(KWSYS_PLATFORM_CXX_TEST_RUN var description invert)
       FILE(APPEND
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "${description} failed to compile with the following output:\n${OUTPUT}\n\n")
+      SET(${var} -1 CACHE INTERNAL "${description} failed to compile.")
     ENDIF(${var}_COMPILED)
 
     IF(${invert} MATCHES INVERT)
