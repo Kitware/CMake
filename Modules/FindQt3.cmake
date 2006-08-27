@@ -2,7 +2,7 @@
 # This module defines:
 #  QT_INCLUDE_DIR - where to find qt.h, etc.
 #  QT_LIBRARIES   - the libraries to link against to use Qt.
-#  QT_DEFINITIONS - definitions to use when 
+#  QT_DEFINITIONS - definitions to use when
 #                   compiling code that uses Qt.
 #  QT_FOUND       - If false, don't try to use Qt.
 #
@@ -12,10 +12,10 @@
 #  QT_MOC_EXECUTABLE, where to find the moc tool.
 #  QT_UIC_EXECUTABLE, where to find the uic tool.
 #  QT_QT_LIBRARY, where to find the Qt library.
-#  QT_QTMAIN_LIBRARY, where to find the qtmain 
+#  QT_QTMAIN_LIBRARY, where to find the qtmain
 #   library. This is only required by Qt3 on Windows.
 
-# These are around for backwards compatibility 
+# These are around for backwards compatibility
 # they will be set
 #  QT_WRAP_CPP, set true if QT_MOC_EXECUTABLE is found
 #  QT_WRAP_UI set true if QT_UIC_EXECUTABLE is found
@@ -28,10 +28,8 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   $ENV{QTDIR}/include
   ${GLOB_PATHS_BIN}
   /usr/local/qt/include
-  /usr/local/include
   /usr/lib/qt/include
   /usr/include/qt
-  /usr/include
   /usr/share/qt3/include
   C:/Progra~1/qt/include
   /usr/include/qt3
@@ -61,7 +59,7 @@ IF (QT_MT_REQUIRED)
   FIND_LIBRARY(QT_QT_LIBRARY
     NAMES
     qt-mt qt-mt${qt_version_str_lib} qt-mtnc${qt_version_str_lib}
-    qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321
+    qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321 qt-mt3
     PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
@@ -69,9 +67,7 @@ IF (QT_MT_REQUIRED)
     $ENV{QTDIR}/lib
     ${GLOB_PATHS_LIB}
     /usr/local/qt/lib
-    /usr/local/lib
     /usr/lib/qt/lib
-    /usr/lib
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
     /usr/X11R6/lib
@@ -79,10 +75,10 @@ IF (QT_MT_REQUIRED)
 
 ELSE (QT_MT_REQUIRED)
   FIND_LIBRARY(QT_QT_LIBRARY
-    NAMES 
-    qt qt-${qt_version_str_lib} qt-edu${qt_version_str_lib} 
+    NAMES
+    qt qt-${qt_version_str_lib} qt-edu${qt_version_str_lib}
     qt-mt qt-mt${qt_version_str_lib} qt-mtnc${qt_version_str_lib}
-    qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321
+    qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321 qt-mt3
     PATHS
     "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
     "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
@@ -90,9 +86,7 @@ ELSE (QT_MT_REQUIRED)
     $ENV{QTDIR}/lib
     ${GLOB_PATHS_LIB}
     /usr/local/qt/lib
-    /usr/local/lib
     /usr/lib/qt/lib
-    /usr/lib
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
     /usr/X11R6/lib
@@ -113,28 +107,26 @@ FIND_LIBRARY(QT_QASSISTANTCLIENT_LIBRARY
   $ENV{QTDIR}/lib
   ${GLOB_PATHS_LIB}
   /usr/local/qt/lib
-  /usr/local/lib
-  /usr/lib
   /usr/share/qt3/lib
   C:/Progra~1/qt/lib
   /usr/X11R6/lib
   )
 
 # qt 3 should prefer QTDIR over the PATH
-FIND_PROGRAM(QT_MOC_EXECUTABLE 
+FIND_PROGRAM(QT_MOC_EXECUTABLE
   NAMES moc moc-qt3
-  PATHS 
-  $ENV{QTDIR}/bin 
+  PATHS
+  $ENV{QTDIR}/bin
   NO_DEFAULT_PATH
 )
 
-FIND_PROGRAM(QT_MOC_EXECUTABLE 
+FIND_PROGRAM(QT_MOC_EXECUTABLE
   NAMES moc moc-qt3
-  PATHS 
+  PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"
-  $ENV{QTDIR}/bin 
+  $ENV{QTDIR}/bin
   ${GLOB_PATHS_BIN}
   /usr/local/qt/bin
   /usr/lib/qt/bin
@@ -150,15 +142,15 @@ ENDIF(QT_MOC_EXECUTABLE)
 
 # qt 3 should prefer QTDIR over the PATH
 FIND_PROGRAM(QT_UIC_EXECUTABLE uic
-  PATHS 
-  $ENV{QTDIR}/bin 
+  PATHS
+  $ENV{QTDIR}/bin
   NO_DEFAULT_PATH
 )
 FIND_PROGRAM(QT_UIC_EXECUTABLE uic
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"
-  $ENV{QTDIR}/bin 
+  $ENV{QTDIR}/bin
   ${GLOB_PATHS_BIN}
   /usr/local/qt/bin
   /usr/lib/qt/bin
@@ -189,19 +181,19 @@ IF (QT_MIN_VERSION)
   STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" qt_major_vers "${qt_version_str}")
   STRING(REGEX REPLACE "[0-9]+\\.([0-9]+)\\.[0-9]+" "\\1" qt_minor_vers "${qt_version_str}")
   STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" qt_patch_vers "${qt_version_str}")
-  
-  #now parse the parts of the user given version string into variables 
+
+  #now parse the parts of the user given version string into variables
   STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+$" req_qt_major_vers "${QT_MIN_VERSION}")
   IF (NOT req_qt_major_vers)
     MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", expected e.g. \"3.1.5\"")
   ENDIF (NOT req_qt_major_vers)
-  
+
   STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_qt_major_vers "${QT_MIN_VERSION}")
   STRING(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_qt_minor_vers "${QT_MIN_VERSION}")
   STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
-  
+
   # req = "6.5.4", qt = "3.2.1"
-  
+
   IF (req_qt_major_vers GREATER qt_major_vers)                  # (6 > 3) ?
     MESSAGE(  FATAL_ERROR "Qt major version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")            # yes
   ELSE  (req_qt_major_vers GREATER qt_major_vers)               # no
@@ -235,7 +227,7 @@ ENDIF(QT_INCLUDE_DIR)
 IF(QT_FOUND)
   SET( QT_LIBRARIES ${QT_LIBRARIES} ${QT_QT_LIBRARY} )
   SET( QT_DEFINITIONS "")
-  
+
   IF (WIN32 AND NOT CYGWIN)
     IF (QT_QTMAIN_LIBRARY)
       # for version 3
@@ -248,18 +240,18 @@ IF(QT_FOUND)
     ENDIF (QT_QTMAIN_LIBRARY)
   ELSE (WIN32 AND NOT CYGWIN)
     SET (QT_LIBRARIES ${QT_QT_LIBRARY} )
-    
+
     SET (QT_DEFINITIONS -DQT_SHARED -DQT_NO_DEBUG)
     IF(QT_QT_LIBRARY MATCHES "qt-mt")
       SET (QT_DEFINITIONS ${QT_DEFINITIONS} -DQT_THREAD_SUPPORT -D_REENTRANT)
     ENDIF(QT_QT_LIBRARY MATCHES "qt-mt")
-    
+
   ENDIF (WIN32 AND NOT CYGWIN)
-  
+
   IF (QT_QASSISTANTCLIENT_LIBRARY)
     SET (QT_LIBRARIES ${QT_QASSISTANTCLIENT_LIBRARY} ${QT_LIBRARIES})
   ENDIF (QT_QASSISTANTCLIENT_LIBRARY)
-  
+
   # Backwards compatibility for CMake1.4 and 1.2
   SET (QT_MOC_EXE ${QT_MOC_EXECUTABLE} )
   SET (QT_UIC_EXE ${QT_UIC_EXECUTABLE} )
@@ -280,13 +272,13 @@ IF(QT_FOUND)
 ENDIF(QT_FOUND)
 
 
-IF (QT_MOC_EXECUTABLE)   
-  SET ( QT_WRAP_CPP "YES")   
-ENDIF (QT_MOC_EXECUTABLE)   
+IF (QT_MOC_EXECUTABLE)
+  SET ( QT_WRAP_CPP "YES")
+ENDIF (QT_MOC_EXECUTABLE)
 
-IF (QT_UIC_EXECUTABLE)   
-  SET ( QT_WRAP_UI "YES")   
-ENDIF (QT_UIC_EXECUTABLE)   
+IF (QT_UIC_EXECUTABLE)
+  SET ( QT_WRAP_UI "YES")
+ENDIF (QT_UIC_EXECUTABLE)
 
 
 
@@ -299,4 +291,4 @@ MARK_AS_ADVANCED(
   QT_MOC_EXECUTABLE
   QT_WRAP_CPP
   QT_WRAP_UI
-  ) 
+  )
