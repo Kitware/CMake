@@ -5,7 +5,7 @@
 # KDE3_INCLUDE_DIR         - the KDE include directory
 # KDE3_INCLUDE_DIRS        - the KDE and the Qt include directory, for use with INCLUDE_DIRECTORIES()
 # KDE3_LIB_DIR             - the directory where the KDE libraries are installed, for use with LINK_DIRECTORIES()
-# QT_AND_KDECORE_LIBRARIES - this contains both the Qt and the kdecore library
+# QT_AND_KDECORE_LIBS      - this contains both the Qt and the kdecore library
 # KDE3_DCOPIDL_EXECUTABLE  - the dcopidl executable
 # KDE3_DCOPIDL2CPP_EXECUTABLE - the dcopidl2cpp executable
 # KDE3_KCFGC_EXECUTABLE    - the kconfig_compiler executable
