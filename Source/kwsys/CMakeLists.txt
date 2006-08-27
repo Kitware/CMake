@@ -127,6 +127,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_CommandLineArguments 1)
   SET(KWSYS_USE_FundamentalType 1)
   SET(KWSYS_USE_Terminal 1)
+  SET(KWSYS_USE_IOStream 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
 #-----------------------------------------------------------------------------
@@ -144,6 +145,7 @@ ENDIF(KWSYS_STANDALONE)
 
 # Include helper macros.
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformCxxTests.cmake)
+INCLUDE(CheckTypeSize)
 
 # Do full dependency headers.
 INCLUDE_REGULAR_EXPRESSION("^.*$")
@@ -393,7 +395,6 @@ ENDIF(UNIX)
 
 IF(KWSYS_USE_FundamentalType)
   # Determine type sizes.
-  INCLUDE(CheckTypeSize)
   CHECK_TYPE_SIZE("char"      KWSYS_SIZEOF_CHAR)
   CHECK_TYPE_SIZE("short"     KWSYS_SIZEOF_SHORT)
   CHECK_TYPE_SIZE("int"       KWSYS_SIZEOF_INT)
@@ -446,6 +447,24 @@ IF(KWSYS_USE_FundamentalType)
   KWSYS_PLATFORM_CXX_TEST_RUN(KWSYS_CHAR_IS_SIGNED
     "Checking whether char is signed" DIRECT)
 ENDIF(KWSYS_USE_FundamentalType)
+
+IF(KWSYS_USE_IOStream)
+  # Determine whether iostreams support long long.
+  CHECK_TYPE_SIZE("long long" KWSYS_SIZEOF_LONG_LONG)
+  IF(KWSYS_SIZEOF_LONG_LONG)
+    SET(KWSYS_PLATFORM_CXX_TEST_DEFINES
+      -DKWSYS_IOS_USE_ANSI=${KWSYS_IOS_USE_ANSI}
+      -DKWSYS_IOS_HAVE_STD=${KWSYS_IOS_HAVE_STD})
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAS_ISTREAM_LONG_LONG
+      "Checking if istream supports long long" DIRECT)
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAS_OSTREAM_LONG_LONG
+      "Checking if ostream supports long long" DIRECT)
+    SET(KWSYS_PLATFORM_CXX_TEST_DEFINES)
+  ELSE(KWSYS_SIZEOF_LONG_LONG)
+    SET(KWSYS_IOS_HAS_ISTREAM_LONG_LONG 0)
+    SET(KWSYS_IOS_HAS_OSTREAM_LONG_LONG 0)
+  ENDIF(KWSYS_SIZEOF_LONG_LONG)
+ENDIF(KWSYS_USE_IOStream)
 
 IF(KWSYS_NAMESPACE MATCHES "^kwsys$")
   SET(KWSYS_NAME_IS_KWSYS 1)
@@ -560,7 +579,10 @@ IF(KWSYS_USE_Glob)
 ENDIF(KWSYS_USE_Glob)
 
 # Add selected C++ classes.
-SET(cppclasses Directory DynamicLoader Glob RegularExpression SystemTools CommandLineArguments Registry)
+SET(cppclasses
+  Directory DynamicLoader Glob RegularExpression SystemTools
+  CommandLineArguments Registry IOStream
+  )
 FOREACH(cpp ${cppclasses})
   IF(KWSYS_USE_${cpp})
     SET(KWSYS_CLASSES ${KWSYS_CLASSES} ${cpp})
