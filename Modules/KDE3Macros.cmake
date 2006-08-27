@@ -1,4 +1,4 @@
-# 
+#
 
 # See FindKDE3.cmake for documentation.
 #
@@ -163,13 +163,14 @@ MACRO(KDE3_ADD_UI_FILES _sources )
 
       ADD_CUSTOM_COMMAND(OUTPUT ${_header}
          COMMAND ${QT_UIC_EXECUTABLE}
-         ARGS  -nounload -o ${_header} ${CMAKE_CURRENT_SOURCE_DIR}/${_current_FILE}
+         ARGS  -L ${KDE3_LIB_DIR}/kde3/plugins/designer -nounload -o ${_header} ${CMAKE_CURRENT_SOURCE_DIR}/${_current_FILE}
          DEPENDS ${_tmp_FILE}
       )
 
       ADD_CUSTOM_COMMAND(OUTPUT ${_src}
          COMMAND ${CMAKE_COMMAND}
          ARGS
+         -DKDE_UIC_PLUGIN_DIR:FILEPATH=${KDE3_LIB_DIR}/kde3/plugins/designer
          -DKDE_UIC_EXECUTABLE:FILEPATH=${QT_UIC_EXECUTABLE}
          -DKDE_UIC_FILE:FILEPATH=${_tmp_FILE}
          -DKDE_UIC_CPP_FILE:FILEPATH=${_src}
@@ -278,8 +279,8 @@ MACRO (KDE3_INSTALL_ICONS _theme )
       STRING(REGEX REPLACE "^.*/[a-zA-Z]+([0-9]+)\\-([a-z]+)\\-(.+\\.png)$" "\\1" _size  "${_current_ICON}")
       STRING(REGEX REPLACE "^.*/[a-zA-Z]+([0-9]+)\\-([a-z]+)\\-(.+\\.png)$" "\\2" _group "${_current_ICON}")
       STRING(REGEX REPLACE "^.*/[a-zA-Z]+([0-9]+)\\-([a-z]+)\\-(.+\\.png)$" "\\3" _name  "${_current_ICON}")
-      _KDE3_ADD_ICON_INSTALL_RULE(${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake 
-         ${_defaultpath}/${_theme}/${_size}x${_size} 
+      _KDE3_ADD_ICON_INSTALL_RULE(${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake
+         ${_defaultpath}/${_theme}/${_size}x${_size}
          ${_group} ${_current_ICON} ${_name})
    ENDFOREACH (_current_ICON)
 
@@ -288,8 +289,8 @@ MACRO (KDE3_INSTALL_ICONS _theme )
    FOREACH (_current_ICON ${_icons} )
       STRING(REGEX REPLACE "^.*/crsc\\-([a-z]+)\\-(.+\\.svgz)$" "\\1" _group "${_current_ICON}")
       STRING(REGEX REPLACE "^.*/crsc\\-([a-z]+)\\-(.+\\.svgz)$" "\\2" _name "${_current_ICON}")
-      _KDE3_ADD_ICON_INSTALL_RULE(${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake 
-                                 ${_defaultpath}/${_theme}/scalable 
+      _KDE3_ADD_ICON_INSTALL_RULE(${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake
+                                 ${_defaultpath}/${_theme}/scalable
                                  ${_group} ${_current_ICON} ${_name})
    ENDFOREACH (_current_ICON)
 
