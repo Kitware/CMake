@@ -73,6 +73,14 @@ public:
 };
 #endif
 
+// Include stream compatibility layer from KWSys.
+// This is needed to work with large file support
+// on some platforms whose stream operators do not
+// support the large integer types.
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include <cmsys/IOStream.hxx>
+#endif
+
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
 #  include <fstream>
 #  include <iostream>
