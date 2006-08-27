@@ -94,4 +94,9 @@ protected:
 
 } // namespace @KWSYS_NAMESPACE@
 
+/* Undefine temporary macro.  */
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# undef kwsys_stl
+#endif
+
 #endif
