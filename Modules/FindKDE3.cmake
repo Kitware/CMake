@@ -142,7 +142,6 @@ FIND_PATH(KDE3_INCLUDE_DIR kpassdlg.h
   ${KDE3PREFIX}/include
   /opt/kde3/include
   /opt/kde/include
-  /usr/local/include
   /usr/include/kde
   /usr/local/include/kde
   NO_DEFAULT_PATH
