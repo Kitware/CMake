@@ -124,7 +124,8 @@ public:
    const char* config, bool ignoreErrors, bool fast);
 
   // returns some progress informaiton
-  int GetTargetTotalNumberOfActions(cmTarget& target);
+  int GetTargetTotalNumberOfActions(cmTarget& target,
+                                    std::set<cmStdString> &emitted);
   unsigned long GetNumberOfProgressActionsInAll
   (cmLocalUnixMakefileGenerator3 *lg);
 
