@@ -1495,6 +1495,20 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     this->CreateGlobalTarget(
       this->GetInstallTargetName(), "Install the project...",
       &cpackCommandLines, depends);
+
+  // install_local
+  if(const char* install_local = this->GetInstallLocalTargetName())
+    {
+    singleLine.insert(singleLine.begin()+1, "-DCMAKE_INSTALL_LOCAL_ONLY=1");
+    cpackCommandLines.erase(cpackCommandLines.begin(),
+                            cpackCommandLines.end());
+    cpackCommandLines.push_back(singleLine);
+
+    (*targets)[install_local] =
+      this->CreateGlobalTarget(
+        install_local, "Installing only the local directory...",
+        &cpackCommandLines, depends);
+    }
 }
 
 cmTarget cmGlobalGenerator::CreateGlobalTarget(

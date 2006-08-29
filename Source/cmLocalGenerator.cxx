@@ -397,7 +397,8 @@ void cmLocalGenerator::GenerateInstallRules()
   // Include install scripts from subdirectories.
   if(!this->Children.empty())
     {
-    fout << "# Include the install script for each subdirectory.\n";
+    fout << "IF(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
+    fout << "  # Include the install script for each subdirectory.\n";
     for(std::vector<cmLocalGenerator*>::const_iterator
           ci = this->Children.begin(); ci != this->Children.end(); ++ci)
       {
@@ -405,11 +406,12 @@ void cmLocalGenerator::GenerateInstallRules()
         {
         std::string odir = (*ci)->GetMakefile()->GetStartOutputDirectory();
         cmSystemTools::ConvertToUnixSlashes(odir);
-        fout << "INCLUDE(\"" <<  odir.c_str()
+        fout << "  INCLUDE(\"" <<  odir.c_str()
              << "/cmake_install.cmake\")" << std::endl;
         }
       }
     fout << "\n";
+    fout << "ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
     }
 
   // Record the install manifest.

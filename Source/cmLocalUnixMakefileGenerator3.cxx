@@ -1481,7 +1481,7 @@ void cmLocalUnixMakefileGenerator3
 
       // Provide a "/fast" version of the target.
       depends.clear();
-      if(targetName == "install")
+      if((targetName == "install") || (targetName == "install_local"))
         {
         // Provide a fast install target that does not depend on all
         // but has the same command.
