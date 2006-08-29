@@ -41,6 +41,7 @@
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )
 #pragma warning ( disable : 4503 )
+#pragma warning ( disable : 4512 ) /* operator=() could not be generated */
 #define CMAKE_NO_ANSI_FOR_SCOPE
 #endif
 
@@ -81,6 +82,11 @@ public:
 # include <cmsys/IOStream.hxx>
 #endif
 
+// Avoid warnings in system headers.
+#if defined(_MSC_VER)
+# pragma warning (push,1)
+#endif
+
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
 #  include <fstream>
 #  include <iostream>
@@ -109,6 +115,10 @@ public:
 #include <list>
 #include <set>
 #include <deque>
+
+#if defined(_MSC_VER)
+# pragma warning(pop)
+#endif
 
 // include the "c" string header
 #include <string.h>
