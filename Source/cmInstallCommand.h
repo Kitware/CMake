@@ -183,6 +183,8 @@ public:
       "avoid this because it leaves the last component empty.  "
       "Directory names given as relative paths are interpreted with "
       "respect to the current source directory.  "
+      "If no input directory names are given the destination directory "
+      "will be created but nothing will be installed into it.  "
       "The FILE_PERMISSIONS and DIRECTORY_PERMISSIONS options specify "
       "permissions given to files and directories in the destination.  "
       "If USE_SOURCE_PERMISSIONS is specified and FILE_PERMISSIONS is not, "
