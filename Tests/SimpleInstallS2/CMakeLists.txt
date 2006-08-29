@@ -107,6 +107,15 @@ IF(STAGE2)
     MESSAGE(FATAL_ERROR "Bad sample script output: [${SAMPLE_SCRIPT_OUTPUT}]")
   ENDIF(NOT "${SAMPLE_SCRIPT_OUTPUT}" MATCHES "Sample Script Output")
 
+  # Check for failure of empty directory installation.
+  IF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/empty")
+    MESSAGE(FATAL_ERROR "Empty directory installation did not install.")
+  ENDIF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/empty")
+  FILE(GLOB EMPTY_FILES "${CMAKE_INSTALL_PREFIX}/MyTest/share/empty/*")
+  IF(EMPTY_FILES)
+    MESSAGE(FATAL_ERROR "Empty directory installed [${EMPTY_FILES}].")
+  ENDIF(EMPTY_FILES)
+
   # Make sure the test executable can run from the install tree.
   SET_TARGET_PROPERTIES(SimpleInstallS2 PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
@@ -173,6 +182,9 @@ ELSE(STAGE2)
     PATTERN "CVS" EXCLUDE
     PATTERN "scripts/*" PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
     )
+
+  # Test empty directory installation.
+  INSTALL(DIRECTORY DESTINATION MyTest/share/empty)
 
   # Test user-specified install scripts.
   INSTALL(

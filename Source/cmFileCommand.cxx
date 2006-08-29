@@ -519,6 +519,11 @@ bool cmFileInstaller::InstallDirectory(const char* source,
     return true;
     }
 
+  // Inform the user about this directory installation.
+  std::string message = "Installing ";
+  message += destination;
+  this->Makefile->DisplayStatus(message.c_str(), -1);
+
   // Make sure the destination directory exists.
   if(!cmSystemTools::MakeDirectory(destination))
     {
@@ -568,7 +573,10 @@ bool cmFileInstaller::InstallDirectory(const char* source,
 
   // Load the directory contents to traverse it recursively.
   cmsys::Directory dir;
-  dir.Load(source);
+  if(source && *source)
+    {
+    dir.Load(source);
+    }
   unsigned long numFiles = static_cast<unsigned long>(dir.GetNumberOfFiles());
   for(unsigned long fileNum = 0; fileNum < numFiles; ++fileNum)
     {
@@ -1280,7 +1288,8 @@ bool cmFileCommand::HandleInstallCommand(
     if(!cmSystemTools::SameFile(fromFile.c_str(), toFile.c_str()))
       {
       if(itype == cmTarget::INSTALL_DIRECTORY &&
-        cmSystemTools::FileIsDirectory(fromFile.c_str()))
+         (fromFile.empty() ||
+          cmSystemTools::FileIsDirectory(fromFile.c_str())))
         {
         // Try installing this directory.
         if(!installer.InstallDirectory(fromFile.c_str(), toFile.c_str(),

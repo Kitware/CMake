@@ -1000,6 +1000,12 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       }
     }
 
+  // Support installing an empty directory.
+  if(dirs.empty() && destination)
+    {
+    dirs.push_back("");
+    }
+
   // Check if there is something to do.
   if(dirs.empty())
     {
