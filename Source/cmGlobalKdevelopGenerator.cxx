@@ -382,7 +382,7 @@ void cmGlobalKdevelopGenerator
   fout<<"    <run>\n";
   fout<<"      <mainprogram>"<<executable.c_str()<<"</mainprogram>\n";
   fout<<"      <directoryradio>custom</directoryradio>\n";
-  fout<<"      <customdirectory>/</customdirectory>\n";
+  fout<<"      <customdirectory>"<<outputDir.c_str()<<"</customdirectory>\n";
   fout<<"      <programargs></programargs>\n";
   fout<<"      <terminal>false</terminal>\n";
   fout<<"      <autocompile>true</autocompile>\n";
