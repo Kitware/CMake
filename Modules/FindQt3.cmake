@@ -29,6 +29,7 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   ${GLOB_PATHS_BIN}
   /usr/local/qt/include
   /usr/lib/qt/include
+  /usr/lib/qt3/include
   /usr/include/qt
   /usr/share/qt3/include
   C:/Progra~1/qt/include
@@ -68,6 +69,8 @@ IF (QT_MT_REQUIRED)
     ${GLOB_PATHS_LIB}
     /usr/local/qt/lib
     /usr/lib/qt/lib
+    /usr/lib/qt3/lib
+    /usr/lib/qt3/lib64
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
     /usr/X11R6/lib
@@ -87,6 +90,8 @@ ELSE (QT_MT_REQUIRED)
     ${GLOB_PATHS_LIB}
     /usr/local/qt/lib
     /usr/lib/qt/lib
+    /usr/lib/qt3/lib
+    /usr/lib/qt3/lib64
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
     /usr/X11R6/lib
@@ -107,6 +112,8 @@ FIND_LIBRARY(QT_QASSISTANTCLIENT_LIBRARY
   $ENV{QTDIR}/lib
   ${GLOB_PATHS_LIB}
   /usr/local/qt/lib
+  /usr/lib/qt3/lib
+  /usr/lib/qt3/lib64
   /usr/share/qt3/lib
   C:/Progra~1/qt/lib
   /usr/X11R6/lib
@@ -130,6 +137,7 @@ FIND_PROGRAM(QT_MOC_EXECUTABLE
   ${GLOB_PATHS_BIN}
   /usr/local/qt/bin
   /usr/lib/qt/bin
+  /usr/lib/qt3/bin
   /usr/share/qt3/bin
   C:/Progra~1/qt/bin
   /usr/X11R6/bin
@@ -154,6 +162,7 @@ FIND_PROGRAM(QT_UIC_EXECUTABLE uic
   ${GLOB_PATHS_BIN}
   /usr/local/qt/bin
   /usr/lib/qt/bin
+  /usr/lib/qt3/bin
   /usr/share/qt3/bin
   C:/Progra~1/qt/bin
   /usr/X11R6/bin
