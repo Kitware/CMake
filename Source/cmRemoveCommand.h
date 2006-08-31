@@ -56,7 +56,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Remove a value from a list in a variable.";
+    return "Old list item removal command.  Use the LIST command.";
     }
   
   /**
@@ -65,10 +65,18 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
+      "This command has been superceded by the LIST(REMOVE ...) command.  "
+      "It is provided for compatibility with older CMake code.\n"
       "  REMOVE(VAR VALUE VALUE ...)\n"
       "Removes VALUE from the variable VAR.  "
       "This is typically used to remove entries from a vector "
       "(e.g. semicolon separated list).  VALUE is expanded.";
+    }
+  
+  /** This command is only kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
     }
   
   cmTypeMacro(cmRemoveCommand, cmCommand);

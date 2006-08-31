@@ -88,6 +88,12 @@ public:
       ;
     }
   
+  /** This command is only kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmExecProgramCommand, cmCommand);
 };
 

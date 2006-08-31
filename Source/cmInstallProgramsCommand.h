@@ -90,6 +90,12 @@ public:
       "is stored in the variable CMAKE_INSTALL_PREFIX.";
     }
   
+  /** This command is only kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmInstallProgramsCommand, cmCommand);
 
 protected:
