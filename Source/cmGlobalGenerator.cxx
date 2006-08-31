@@ -42,6 +42,9 @@ cmGlobalGenerator::cmGlobalGenerator()
 
   // Relative paths are not configured in the constructor.
   this->RelativePathsConfigured = false;
+
+  // Whether an install target is needed.
+  this->InstallTargetEnabled = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -927,6 +930,11 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
     }
 }
 
+void cmGlobalGenerator::EnableInstallTarget()
+{
+  this->InstallTargetEnabled = true;
+}
+
 cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
 {
   cmLocalGenerator *lg = new cmLocalGenerator;
@@ -1448,66 +1456,69 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     }
 
   //Install
-  std::string cmd;
-  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
-  singleLine.erase(singleLine.begin(), singleLine.end());
-  depends.erase(depends.begin(), depends.end());
-  if ( this->GetPreinstallTargetName() )
+  if(this->InstallTargetEnabled)
     {
-    depends.push_back(this->GetPreinstallTargetName());
-    }
-  else
-    {
-    const char* noall =
-      mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-    if(!noall || cmSystemTools::IsOff(noall))
+    std::string cmd;
+    cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+    singleLine.erase(singleLine.begin(), singleLine.end());
+    depends.erase(depends.begin(), depends.end());
+    if ( this->GetPreinstallTargetName() )
       {
-      depends.push_back(this->GetAllTargetName());
+      depends.push_back(this->GetPreinstallTargetName());
       }
-    }
-  if(mf->GetDefinition("CMake_BINARY_DIR"))
-    {
-    // We are building CMake itself.  We cannot use the original
-    // executable to install over itself.
-    cmd = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-    if(cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.')
+    else
       {
-      cmd += "/";
-      cmd += cmakeCfgIntDir;
+      const char* noall =
+        mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
+      if(!noall || cmSystemTools::IsOff(noall))
+        {
+        depends.push_back(this->GetAllTargetName());
+        }
       }
-    cmd += "/cmake";
-    }
-  else
-    {
-    cmd = cmakeCommand;
-    }
-  singleLine.push_back(cmd.c_str());
-  if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.' )
-    {
-    std::string cfgArg = "-DBUILD_TYPE=";
-    cfgArg += mf->GetDefinition("CMAKE_CFG_INTDIR");
-    singleLine.push_back(cfgArg);
-    }
-  singleLine.push_back("-P");
-  singleLine.push_back("cmake_install.cmake");
-  cpackCommandLines.push_back(singleLine);
-  (*targets)[this->GetInstallTargetName()] =
-    this->CreateGlobalTarget(
-      this->GetInstallTargetName(), "Install the project...",
-      &cpackCommandLines, depends);
-
-  // install_local
-  if(const char* install_local = this->GetInstallLocalTargetName())
-    {
-    singleLine.insert(singleLine.begin()+1, "-DCMAKE_INSTALL_LOCAL_ONLY=1");
-    cpackCommandLines.erase(cpackCommandLines.begin(),
-                            cpackCommandLines.end());
+    if(mf->GetDefinition("CMake_BINARY_DIR"))
+      {
+      // We are building CMake itself.  We cannot use the original
+      // executable to install over itself.
+      cmd = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+      if(cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.')
+        {
+        cmd += "/";
+        cmd += cmakeCfgIntDir;
+        }
+      cmd += "/cmake";
+      }
+    else
+      {
+      cmd = cmakeCommand;
+      }
+    singleLine.push_back(cmd.c_str());
+    if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.' )
+      {
+      std::string cfgArg = "-DBUILD_TYPE=";
+      cfgArg += mf->GetDefinition("CMAKE_CFG_INTDIR");
+      singleLine.push_back(cfgArg);
+      }
+    singleLine.push_back("-P");
+    singleLine.push_back("cmake_install.cmake");
     cpackCommandLines.push_back(singleLine);
-
-    (*targets)[install_local] =
+    (*targets)[this->GetInstallTargetName()] =
       this->CreateGlobalTarget(
-        install_local, "Installing only the local directory...",
+        this->GetInstallTargetName(), "Install the project...",
         &cpackCommandLines, depends);
+
+    // install_local
+    if(const char* install_local = this->GetInstallLocalTargetName())
+      {
+      singleLine.insert(singleLine.begin()+1, "-DCMAKE_INSTALL_LOCAL_ONLY=1");
+      cpackCommandLines.erase(cpackCommandLines.begin(),
+                              cpackCommandLines.end());
+      cpackCommandLines.push_back(singleLine);
+
+      (*targets)[install_local] =
+        this->CreateGlobalTarget(
+          install_local, "Installing only the local directory...",
+          &cpackCommandLines, depends);
+      }
     }
 }
 

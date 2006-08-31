@@ -33,6 +33,10 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args)
     return true;
     }
 
+  // Enable the install target.
+  this->Makefile->GetLocalGenerator()
+    ->GetGlobalGenerator()->EnableInstallTarget();
+
   // Switch among the command modes.
   if(args[0] == "SCRIPT")
     {

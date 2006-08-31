@@ -26,6 +26,10 @@ bool cmInstallProgramsCommand
     return false;
     }
 
+  // Enable the install target.
+  this->Makefile->GetLocalGenerator()
+    ->GetGlobalGenerator()->EnableInstallTarget();
+
   // Create an INSTALL_PROGRAMS target specifically for this path.
   this->TargetName = "INSTALL_PROGRAMS_"+args[0];
   cmTarget& target = this->Makefile->GetTargets()[this->TargetName];

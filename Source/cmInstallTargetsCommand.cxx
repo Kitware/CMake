@@ -26,6 +26,10 @@ bool cmInstallTargetsCommand
     return false;
     }
 
+  // Enable the install target.
+  this->Makefile->GetLocalGenerator()
+    ->GetGlobalGenerator()->EnableInstallTarget();
+
   cmTargets &tgts = this->Makefile->GetTargets();
   std::vector<std::string>::const_iterator s = args.begin();
   ++s;

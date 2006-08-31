@@ -123,6 +123,7 @@ public:
   void AddLocalGenerator(cmLocalGenerator *lg);
 
   void AddInstallComponent(const char* component);
+  void EnableInstallTarget();
   
   static int s_TryCompileTimeout;
   
@@ -221,6 +222,7 @@ protected:
 
   // Set of named installation components requested by the project.
   std::set<cmStdString> InstallComponents;
+  bool InstallTargetEnabled;
 
   // Manifest of all targets that will be built for each configuration.
   // This is computed just before local generators generate.
