@@ -88,7 +88,7 @@ public:
       ;
     }
   
-  /** This command is only kept for compatibility with older CMake versions. */
+  /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged()
     {
     return true;

@@ -1459,7 +1459,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   if(this->InstallTargetEnabled)
     {
     std::string cmd;
-    cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+    cpackCommandLines.erase(cpackCommandLines.begin(),
+                            cpackCommandLines.end());
     singleLine.erase(singleLine.begin(), singleLine.end());
     depends.erase(depends.begin(), depends.end());
     if ( this->GetPreinstallTargetName() )

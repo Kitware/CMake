@@ -72,7 +72,7 @@ public:
       "CMAKE_SYSTEM and CMAKE_CXX_COMPILER variables.";
     }
 
-  /** This command is only kept for compatibility with older CMake versions. */
+  /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged()
     {
     return true;

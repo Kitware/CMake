@@ -72,7 +72,7 @@ public:
       "(Windows DLL), the files will be copied to that directory.";
     }
   
-  /** This command is only kept for compatibility with older CMake versions. */
+  /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged()
     {
     return true;
