@@ -1316,8 +1316,9 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
     if(lang == "C" || lang == "CXX" || lang == "RC")
       {
       std::string includeCacheFileName = dir;
-      includeCacheFileName += "/includecache.";
+      includeCacheFileName += "/";
       includeCacheFileName += lang;
+      includeCacheFileName += ".includecache";
       
       // TODO: Handle RC (resource files) dependencies correctly.
       scanner = new cmDependsC(includes,
