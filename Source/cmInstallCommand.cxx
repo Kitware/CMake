@@ -367,6 +367,11 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     return false;
     }
 
+  // Check whether this is a DLL platform.
+  bool dll_platform = (this->Makefile->IsOn("WIN32") ||
+                       this->Makefile->IsOn("CYGWIN") ||
+                       this->Makefile->IsOn("MINGW"));
+
   // Compute destination paths.
   std::string archive_dest;
   std::string library_dest;
@@ -389,46 +394,49 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // platforms.  All windows platforms are DLL platforms
         // including cygwin.  Currently no other platform is a DLL
         // platform.
-#if defined(_WIN32) || defined(__CYGWIN__)
-        // This is a DLL platform.
-        if(archive_destination)
+        if(dll_platform)
           {
-          // The import library uses the ARCHIVE properties.
-          this->Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, archive_dest.c_str(), true,
-                                         archive_permissions.c_str(),
-                                         archive_configurations,
-                                         archive_component.c_str()));
-          }
-        if(runtime_destination)
-          {
-          // The DLL uses the RUNTIME properties.
-          this->Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
-                                         runtime_permissions.c_str(),
-                                         runtime_configurations,
-                                         runtime_component.c_str()));
-          }
-#else
-        // This is a non-DLL platform.
-        if(library_destination)
-          {
-          // The shared library uses the LIBRARY properties.
-          this->Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, library_dest.c_str(), false,
-                                         library_permissions.c_str(),
-                                         library_configurations,
-                                         library_component.c_str()));
+          // This is a DLL platform.
+          if(archive_destination)
+            {
+            // The import library uses the ARCHIVE properties.
+            this->Makefile->AddInstallGenerator(
+              new cmInstallTargetGenerator(target, archive_dest.c_str(), true,
+                                           archive_permissions.c_str(),
+                                           archive_configurations,
+                                           archive_component.c_str()));
+            }
+          if(runtime_destination)
+            {
+            // The DLL uses the RUNTIME properties.
+            this->Makefile->AddInstallGenerator(
+              new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
+                                           runtime_permissions.c_str(),
+                                           runtime_configurations,
+                                           runtime_component.c_str()));
+            }
           }
         else
           {
-          cmOStringStream e;
-          e << "TARGETS given no LIBRARY DESTINATION for shared library "
-            "target \"" << target.GetName() << "\".";
-          this->SetError(e.str().c_str());
-          return false;
+          // This is a non-DLL platform.
+          if(library_destination)
+            {
+            // The shared library uses the LIBRARY properties.
+            this->Makefile->AddInstallGenerator(
+              new cmInstallTargetGenerator(target, library_dest.c_str(), false,
+                                           library_permissions.c_str(),
+                                           library_configurations,
+                                           library_component.c_str()));
+            }
+          else
+            {
+            cmOStringStream e;
+            e << "TARGETS given no LIBRARY DESTINATION for shared library "
+              "target \"" << target.GetName() << "\".";
+            this->SetError(e.str().c_str());
+            return false;
+            }
           }
-#endif
         }
         break;
       case cmTarget::STATIC_LIBRARY:
