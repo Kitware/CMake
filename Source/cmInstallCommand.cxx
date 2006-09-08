@@ -410,7 +410,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             {
             // The DLL uses the RUNTIME properties.
             this->Makefile->AddInstallGenerator(
-              new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
+              new cmInstallTargetGenerator(target, runtime_dest.c_str(),
+                                           false,
                                            runtime_permissions.c_str(),
                                            runtime_configurations,
                                            runtime_component.c_str()));
@@ -423,7 +424,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             {
             // The shared library uses the LIBRARY properties.
             this->Makefile->AddInstallGenerator(
-              new cmInstallTargetGenerator(target, library_dest.c_str(), false,
+              new cmInstallTargetGenerator(target, library_dest.c_str(),
+                                           false,
                                            library_permissions.c_str(),
                                            library_configurations,
                                            library_component.c_str()));
