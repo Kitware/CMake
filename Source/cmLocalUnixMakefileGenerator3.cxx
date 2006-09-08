@@ -256,12 +256,6 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
     ruleFileStream.SetCopyIfDifferent(true);
     }
   
-  // Include the progress variables for the target.
-  ruleFileStream
-    << "# Include the progress variables for this target.\n"
-    << this->IncludeDirective << " "
-    << "progress.make\n\n";
-  
   // write the all rules
   this->WriteLocalAllRules(ruleFileStream);
   
@@ -701,15 +695,28 @@ cmLocalUnixMakefileGenerator3
     << "# Special targets provided by cmake.\n"
     << "\n";
 
+  std::vector<std::string> no_commands;
+  std::vector<std::string> no_depends;
+
+  // Special target to cleanup operation of make tool.
+  // This should be the first target except for the default_target in
+  // the interface Makefile.
+  this->WriteMakeRule(
+    makefileStream, "Disable implicit rules so canoncical targets will work.",
+    ".SUFFIXES", no_depends, no_commands, false);
+
+  // Add a fake suffix to keep HP happy.  Must be max 32 chars for SGI make.
+  std::vector<std::string> depends;
+  depends.push_back(".hpux_make_needs_suffix_list");
+  this->WriteMakeRule(makefileStream, 0,
+                      ".SUFFIXES", depends, no_commands, false);
+
   // Write special target to silence make output.  This must be after
   // the default target in case VERBOSE is set (which changes the
   // name).  The setting of CMAKE_VERBOSE_MAKEFILE to ON will cause a
   // "VERBOSE=1" to be added as a make variable which will change the
   // name of this special target.  This gives a make-time choice to
   // the user.
-  std::vector<std::string> commands;
-  std::vector<std::string> no_depends;
-  commands.clear();
   if((this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE")) 
      || (this->ForceVerboseMakefiles))
     {
@@ -728,28 +735,11 @@ cmLocalUnixMakefileGenerator3
                         "Suppress display of executed commands.",
                         "$(VERBOSE).SILENT",
                         no_depends,
-                        commands, false);
+                        no_commands, false);
     }
 
-  // Special symbolic target that never exists to force dependers to
-  // run their rules.
-  std::vector<std::string> depends;
-  this->WriteMakeRule
-    (makefileStream,
-     "A target that is always out of date.",
-     "cmake_force", depends, commands, true);
-
-  // Special target to cleanup operation of make tool.
-  this->WriteMakeRule
-    (makefileStream,
-     "Disable implicit rules so canoncical targets will work.",
-     ".SUFFIXES",
-     depends, commands, false);
-
-  // Add a fake suffix to keep HP happy.  Must be max 32 chars for SGI make.
-  depends.push_back(".hpux_make_needs_suffix_list");
-  this->WriteMakeRule(makefileStream, 0,
-                      ".SUFFIXES", depends, commands, false);
+  // Variables for reference by other rules.
+  this->WriteMakeVariables(makefileStream);
 }
 
 //----------------------------------------------------------------------------
@@ -793,7 +783,16 @@ void cmLocalUnixMakefileGenerator3
                       commands, true);
   }
 
+  // Special symbolic target that never exists to force dependers to
+  // run their rules.
+  {
+  std::vector<std::string> no_depends;
   std::vector<std::string> no_commands;
+  this->WriteMakeRule
+    (makefileStream,
+     "A target that is always out of date.",
+     "cmake_force", no_depends, no_commands, true);
+  }
 }
 
 
@@ -1378,7 +1377,6 @@ void cmLocalUnixMakefileGenerator3
 ::WriteLocalAllRules(std::ostream& ruleFileStream)
 {
   this->WriteDisclaimer(ruleFileStream);
-  this->WriteMakeVariables(ruleFileStream);
 
   // Write the main entry point target.  This must be the VERY first
   // target so that make with no arguments will run it.
@@ -1397,7 +1395,19 @@ void cmLocalUnixMakefileGenerator3
                       no_commands, true);
   }
 
+  this->WriteSpecialTargetsTop(ruleFileStream);
+
+  // Include the progress variables for the target.
+  ruleFileStream
+    << "# Include the progress variables for this target.\n"
+    << this->IncludeDirective << " "
+    << "progress.make\n\n";
+  
   // Write all global targets
+  this->WriteDivider(ruleFileStream);
+  ruleFileStream
+    << "# Targets provided globally by CMake.\n"
+    << "\n";
   cmTargets* targets = &(this->Makefile->GetTargets());
   cmTargets::iterator glIt;
   for ( glIt = targets->begin(); glIt != targets->end(); ++ glIt )
@@ -1455,8 +1465,6 @@ void cmLocalUnixMakefileGenerator3
                           targetName.c_str(), depends, commands, true);
       }
     }
-
-  this->WriteSpecialTargetsTop(ruleFileStream);
 
   std::vector<std::string> depends;
   std::vector<std::string> commands;

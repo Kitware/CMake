@@ -105,7 +105,6 @@ void cmMakefileTargetGenerator::CreateRuleFile()
     }
   this->LocalGenerator->WriteDisclaimer(*this->BuildFileStream);
   this->LocalGenerator->WriteSpecialTargetsTop(*this->BuildFileStream);
-  this->LocalGenerator->WriteMakeVariables(*this->BuildFileStream);
 }
 
 //----------------------------------------------------------------------------

@@ -215,8 +215,6 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
                     "The main recursive preinstall target", "preinstall",
                     depends, no_commands, true);
 
-  lg->WriteMakeVariables(makefileStream);
-
   // Write out the "special" stuff
   lg->WriteSpecialTargetsTop(makefileStream);
   
