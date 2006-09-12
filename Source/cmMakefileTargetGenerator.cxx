@@ -1113,7 +1113,7 @@ void cmMakefileTargetGenerator
     // Don't emit the same library twice for this target.
     if(emitted.insert(lib->first).second)
       {
-      // Depend only on other CMake targets.
+      // Depend on other CMake targets.
       if(cmTarget* tgt =
          this->GlobalGenerator->FindTarget(0, lib->first.c_str()))
         {
@@ -1123,6 +1123,11 @@ void cmMakefileTargetGenerator
           depends.push_back(location);
           }
         }
+      }
+    // depend on full path libs as well
+    else if(cmSystemTools::FileIsFullPath(lib->first.c_str()))
+      {
+      depends.push_back(lib->first.c_str());
       }
     }
 }
