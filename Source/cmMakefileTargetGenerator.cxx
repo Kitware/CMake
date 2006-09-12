@@ -1123,11 +1123,11 @@ void cmMakefileTargetGenerator
           depends.push_back(location);
           }
         }
-      }
-    // depend on full path libs as well
-    else if(cmSystemTools::FileIsFullPath(lib->first.c_str()))
-      {
-      depends.push_back(lib->first.c_str());
+      // depend on full path libs as well
+      else if(cmSystemTools::FileIsFullPath(lib->first.c_str()))
+        {
+        depends.push_back(lib->first.c_str());
+        }
       }
     }
 }
