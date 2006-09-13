@@ -47,7 +47,7 @@ cmDependsC::~cmDependsC()
   this->WriteCacheFile();
 
   for (std::map<cmStdString, cmIncludeLines*>::iterator it=
-         this->fileCache.begin(); it!=this->fileCache.end(); ++it)
+         this->FileCache.begin(); it!=this->FileCache.end(); ++it)
     {
     delete it->second;
     }
@@ -84,6 +84,13 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
   std::set<cmStdString> dependencies;
   std::set<cmStdString> scanned;
 
+  // Use reserve to allocate enough memory for both strings,
+  // so that during the loops no memory is allocated or freed
+  std::string cacheKey;
+  cacheKey.reserve(4*1024);
+  std::string tempPathStr;
+  tempPathStr.reserve(4*1024);
+
   while(!this->Unscanned.empty())
     {
     // Get the next file to scan.
@@ -109,26 +116,48 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
       }
     else
       {
+      // With GCC distribution of STL, assigning to a string directly
+      // throws away the internal buffer of the left-hand-side.  We
+      // want to keep the pre-allocated buffer so we use C-style
+      // string assignment and then operator+=.  We could call
+      // .clear() instead of assigning to an empty string but the
+      // method does not exist on some older compilers.
+      cacheKey = "";
+      cacheKey += current.FileName;
+
       for(std::vector<std::string>::const_iterator i = 
+            this->IncludePath->begin(); i != this->IncludePath->end(); ++i)
+        {
+        cacheKey+=*i;
+        }
+      std::map<cmStdString, cmStdString>::iterator headerLocationIt=this->HeaderLocationCache.find(cacheKey);
+      if (headerLocationIt!=this->HeaderLocationCache.end())
+        {
+        fullName=headerLocationIt->second;
+        }
+      else for(std::vector<std::string>::const_iterator i =
             this->IncludePath->begin(); i != this->IncludePath->end(); ++i)
         {
         // Construct the name of the file as if it were in the current
         // include directory.  Avoid using a leading "./".
-        std::string temp = *i;
-        if(temp == ".")
+
+        tempPathStr = "";
+        if((*i) == ".")
           {
-          temp = "";
+          tempPathStr += current.FileName;
           }
         else
           {
-          temp += "/";
+            tempPathStr += *i;
+            tempPathStr+="/";
+            tempPathStr+=current.FileName;
           }
-        temp += current.FileName;
 
         // Look for the file in this location.
-        if(cmSystemTools::FileExists(temp.c_str()))
+        if(cmSystemTools::FileExists(tempPathStr.c_str()))
           {
-          fullName = temp;
+            fullName = tempPathStr;
+            HeaderLocationCache[cacheKey]=fullName;
           break;
           }
         }
@@ -152,8 +181,8 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
 
       // Check whether this file is already in the cache
       std::map<cmStdString, cmIncludeLines*>::iterator fileIt=
-        this->fileCache.find(fullName);
-      if (fileIt!=this->fileCache.end())
+        this->FileCache.find(fullName);
+      if (fileIt!=this->FileCache.end())
         {
         fileIt->second->Used=true;
         dependencies.insert(fullName);
@@ -248,7 +277,7 @@ void cmDependsC::ReadCacheFile()
       if ((res==true) && (newer==1)) //cache is newer than the parsed file
         {
         cacheEntry=new cmIncludeLines;
-        this->fileCache[line]=cacheEntry; 
+        this->FileCache[line]=cacheEntry;
         }
       }
     else if (cacheEntry!=0)
@@ -281,8 +310,8 @@ void cmDependsC::WriteCacheFile() const
     }
   
   for (std::map<cmStdString, cmIncludeLines*>::const_iterator fileIt=
-         this->fileCache.begin(); 
-       fileIt!=this->fileCache.end(); ++fileIt)
+         this->FileCache.begin();
+       fileIt!=this->FileCache.end(); ++fileIt)
     {
     if (fileIt->second->Used)
       {
@@ -313,7 +342,7 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
 {
   cmIncludeLines* newCacheEntry=new cmIncludeLines;
   newCacheEntry->Used=true;
-  this->fileCache[fullName]=newCacheEntry;
+  this->FileCache[fullName]=newCacheEntry;
   
   // Read one line at a time.
   std::string line;

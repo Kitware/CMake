@@ -80,7 +80,8 @@ protected:
   std::queue<UnscannedEntry> Unscanned;
   t_CharBuffer Buffer;
 
-  std::map<cmStdString, cmIncludeLines *> fileCache;
+  std::map<cmStdString, cmIncludeLines *> FileCache;
+  std::map<cmStdString, cmStdString> HeaderLocationCache;
 
   cmStdString CacheFileName;
 
