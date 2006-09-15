@@ -85,3 +85,12 @@ IF(NOT CMAKE_COMPILER_IS_GNUCXX)
     "rm -f `basename \"<SOURCE>\" | sed 's/\\.[^./]*$$//'`.o"
     )
 ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
+
+# Initialize C link type selection flags.  These flags are used when
+# building a shared library, shared module, or executable that links
+# to other libraries to select whether to use the static or shared
+# versions of the libraries.
+FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
+  SET(CMAKE_${type}_LINK_STATIC_C_FLAGS "-Wl,-a,archive")
+  SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-a,default")
+ENDFOREACH(type)
