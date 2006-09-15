@@ -1639,14 +1639,60 @@ void cmLocalGenerator
   const std::vector<std::string>&
     linkDirectories = target.GetLinkDirectories();
 
+  // Get the language used for linking.
+  const char* linkLanguage =
+    target.GetLinkerLanguage(this->GetGlobalGenerator());
+  if(!linkLanguage)
+    {
+    cmSystemTools::
+      Error("CMake can not determine linker language for target:",
+            target.GetName());
+    return;
+    }
+
+  // Lookup link type selection flags.
+  const char* static_link_type_flag = 0;
+  const char* shared_link_type_flag = 0;
+  const char* target_type_str = 0;
+  switch(target.GetType())
+    {
+    case cmTarget::EXECUTABLE:     target_type_str = "EXE"; break;
+    case cmTarget::SHARED_LIBRARY: target_type_str = "SHARED_LIBRARY"; break;
+    case cmTarget::MODULE_LIBRARY: target_type_str = "SHARED_MODULE"; break;
+    default: break;
+    }
+  if(target_type_str)
+    {
+    std::string static_link_type_flag_var = "CMAKE_";
+    static_link_type_flag_var += target_type_str;
+    static_link_type_flag_var += "_LINK_STATIC_";
+    static_link_type_flag_var += linkLanguage;
+    static_link_type_flag_var += "_FLAGS";
+    static_link_type_flag =
+      this->Makefile->GetDefinition(static_link_type_flag_var.c_str());
+
+    std::string shared_link_type_flag_var = "CMAKE_";
+    shared_link_type_flag_var += target_type_str;
+    shared_link_type_flag_var += "_LINK_DYNAMIC_";
+    shared_link_type_flag_var += linkLanguage;
+    shared_link_type_flag_var += "_FLAGS";
+    shared_link_type_flag =
+      this->Makefile->GetDefinition(shared_link_type_flag_var.c_str());
+    }
+
   // Compute the link directory order needed to link the libraries.
   cmOrderLinkDirectories orderLibs;
+  orderLibs.SetLinkTypeInformation(cmOrderLinkDirectories::LinkShared,
+                                   static_link_type_flag,
+                                   shared_link_type_flag);
   orderLibs.SetLinkPrefix(
     this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_PREFIX"));
   orderLibs.AddLinkExtension(
-    this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"));
+    this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"),
+    cmOrderLinkDirectories::LinkStatic);
   orderLibs.AddLinkExtension(
-    this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"));
+    this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"),
+    cmOrderLinkDirectories::LinkShared);
   orderLibs.AddLinkExtension(
     this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"));
   orderLibs.AddLinkExtension(
