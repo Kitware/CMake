@@ -86,10 +86,11 @@ IF(NOT CMAKE_COMPILER_IS_GNUCXX)
     )
 ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
 
-# Initialize C link type selection flags.  These flags are used when
-# building a shared library, shared module, or executable that links
-# to other libraries to select whether to use the static or shared
-# versions of the libraries.
+# Initialize C and CXX link type selection flags.  These flags are
+# used when building a shared library, shared module, or executable
+# that links to other libraries to select whether to use the static or
+# shared versions of the libraries.  Note that C modules and shared
+# libs are built using ld directly so we leave off the "-Wl," portion.
 FOREACH(type SHARED_LIBRARY SHARED_MODULE)
   SET(CMAKE_${type}_LINK_STATIC_C_FLAGS "-a archive")
   SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-a default")
