@@ -53,6 +53,13 @@ ELSE(${FOO_BAR_VAR} MATCHES "BAR")
   MESSAGE(SEND_ERROR "SET_TARGET_PROPERTIES or GET_TARGET_PROPERTY failed, FOO_BAR_VAR should be BAR, but is ${FOO_BAR_VAR}")
 ENDIF(${FOO_BAR_VAR} MATCHES "BAR")
 
+# Create static and shared lib of same name.
+IF(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
+  ADD_LIBRARY(CMakeTestLinkStatic STATIC TestLink.c)
+  ADD_LIBRARY(CMakeTestLinkShared SHARED TestLink.c)
+  SET_TARGET_PROPERTIES(CMakeTestLinkStatic CMakeTestLinkShared
+    PROPERTIES OUTPUT_NAME CMakeTestLink CLEAN_DIRECT_OUTPUT 1)
+ENDIF(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
 
 #
 # Attach pre-build/pre-link/post-build custom-commands to the lib.

@@ -23,6 +23,12 @@ extern "C" {
 #include <string.h>
 #endif
 
+#ifdef COMPLEX_TEST_LINK_STATIC
+extern "C"
+{
+  int TestLinkGetType();
+}
+#endif
 
 int cm_passed = 0;
 int cm_failed = 0;
@@ -1270,7 +1276,18 @@ int main()
   // Test the generated file stream.
   TestCMGeneratedFileSTream();
 #endif
-  
+
+#ifdef COMPLEX_TEST_LINK_STATIC
+  if(TestLinkGetType())
+    {
+    cmPassed("Link to static over shared worked.");
+    }
+  else
+    {
+    cmFailed("Link to static over shared failed.");
+    }
+#endif
+
   // ----------------------------------------------------------------------
   // Summary
 
