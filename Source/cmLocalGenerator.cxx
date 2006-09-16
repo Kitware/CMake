@@ -1639,17 +1639,6 @@ void cmLocalGenerator
   const std::vector<std::string>&
     linkDirectories = target.GetLinkDirectories();
 
-  // Get the language used for linking.
-  const char* linkLanguage =
-    target.GetLinkerLanguage(this->GetGlobalGenerator());
-  if(!linkLanguage)
-    {
-    cmSystemTools::
-      Error("CMake can not determine linker language for target:",
-            target.GetName());
-    return;
-    }
-
   // Lookup link type selection flags.
   const char* static_link_type_flag = 0;
   const char* shared_link_type_flag = 0;
@@ -1663,6 +1652,17 @@ void cmLocalGenerator
     }
   if(target_type_str)
     {
+    // Get the language used for linking.
+    const char* linkLanguage =
+      target.GetLinkerLanguage(this->GetGlobalGenerator());
+
+    if(!linkLanguage)
+      {
+      cmSystemTools::
+        Error("CMake can not determine linker language for target:",
+              target.GetName());
+      return;
+      }
     std::string static_link_type_flag_var = "CMAKE_";
     static_link_type_flag_var += target_type_str;
     static_link_type_flag_var += "_LINK_STATIC_";
