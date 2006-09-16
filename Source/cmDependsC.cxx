@@ -130,7 +130,8 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
         {
         cacheKey+=*i;
         }
-      std::map<cmStdString, cmStdString>::iterator headerLocationIt=this->HeaderLocationCache.find(cacheKey);
+      std::map<cmStdString, cmStdString>::iterator
+        headerLocationIt=this->HeaderLocationCache.find(cacheKey);
       if (headerLocationIt!=this->HeaderLocationCache.end())
         {
         fullName=headerLocationIt->second;
