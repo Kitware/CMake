@@ -164,3 +164,42 @@ TARGET_LINK_LIBRARIES(CustomCommand GeneratedHeader)
 # the CustomCommand executable really needs doc1.h
 ADD_DEPENDENCIES(CustomCommand TDocument)
 
+##############################################################################
+# Test non-trivial command line arguments in custom commands.
+SET(EXPECTED_ARGUMENTS)
+SET(CHECK_ARGS
+  c:/posix/path
+  c:\\windows\\path
+  'single-quotes'
+  single'quote
+  \"double-quotes\"
+  double\"quote
+  "\\;semi-colons\\;"
+  "semi\\;colon"
+  "c:/posix/path/with space"
+  "c:\\windows\\path\\with space"
+  "'single quotes with space'"
+  "single'quote with space"
+  "\"double-quotes with space\""
+  "double\"quote with space"
+  "\\;semi-colons with space\\;"
+  "semi\\;colon with space"
+  )
+FOREACH(arg ${CHECK_ARGS})
+  SET(ARG "${arg}")
+  STRING(REGEX REPLACE "\\\\" "\\\\\\\\" ARG "${ARG}")
+  STRING(REGEX REPLACE "\"" "\\\\\"" ARG "${ARG}")
+  SET(EXPECTED_ARGUMENTS
+    "${EXPECTED_ARGUMENTS}  \"${ARG}\",
+")
+ENDFOREACH(arg)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/check_command_line.c.in
+               ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c
+               @ONLY IMMEDIATE)
+ADD_EXECUTABLE(check_command_line
+  ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c)
+ADD_CUSTOM_TARGET(do_check_command_line ALL
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
+  ${CHECK_ARGS}
+  )
+ADD_DEPENDENCIES(do_check_command_line check_command_line)
