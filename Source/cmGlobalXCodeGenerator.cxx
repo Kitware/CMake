@@ -1037,7 +1037,8 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
         for(unsigned int j=1; j < commandLine.size(); ++j)
           {
           cmd += " ";
-          cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
+          cmd += (this->CurrentLocalGenerator
+                  ->EscapeForShell(commandLine[j].c_str()));
           }
         makefileStream << "\t" << cmd.c_str() << "\n";
         }

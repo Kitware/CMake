@@ -201,11 +201,11 @@ public:
     const char* LanguageCompileFlags;
   };
 
-protected:
-
   /** Escape the given string to be used as a command line argument in
       the native build system shell.  */
   std::string EscapeForShell(const char* str);
+
+protected:
 
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,
