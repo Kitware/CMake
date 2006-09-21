@@ -740,14 +740,10 @@ cmLocalUnixMakefileGenerator3
 
   // Special symbolic target that never exists to force dependers to
   // run their rules.
-  {
-  std::vector<std::string> no_depends;
-  std::vector<std::string> no_commands;
   this->WriteMakeRule
     (makefileStream,
      "A target that is always out of date.",
      "cmake_force", no_depends, no_commands, true);
-  }
 
   // Variables for reference by other rules.
   this->WriteMakeVariables(makefileStream);
