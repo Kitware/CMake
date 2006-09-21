@@ -91,20 +91,22 @@ int cmCPackZIPGenerator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {
   std::string tempFileName;
+  tempFileName = toplevel;
+  tempFileName += "/winZip.filelist";
+  bool needQuotesInFile = false;
   cmOStringStream dmgCmd;
   switch ( this->ZipStyle )
     {
   case cmCPackZIPGenerator::StyleWinZip:
-    tempFileName = toplevel;
-    tempFileName += "/winZip.filelist";
     dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
            << "\" -P \"" << outFileName
            << "\" @\"" << tempFileName.c_str() << "\"";
+    needQuotesInFile = true;
     break;
   case cmCPackZIPGenerator::StyleUnixZip:
     dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
-      << "\" \"" << outFileName
-      << "\"";
+      << "\" -r \"" << outFileName
+      << "\" . -i@winZip.filelist";
     break;
   default:
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Unknown ZIP style"
@@ -117,9 +119,16 @@ int cmCPackZIPGenerator::CompressFiles(const char* outFileName,
     std::vector<std::string>::const_iterator fileIt;
     for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
       {
-      out << "\""
-          << cmSystemTools::RelativePath(toplevel, fileIt->c_str())
-          << "\"" << std::endl;
+      if ( needQuotesInFile )
+        {
+        out << "\"";
+        }
+      out << cmSystemTools::RelativePath(toplevel, fileIt->c_str());
+      if ( needQuotesInFile )
+        {
+        out << "\"";
+        }
+      out << std::endl;
       }
     }
   else
