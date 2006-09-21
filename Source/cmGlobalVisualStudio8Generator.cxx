@@ -130,12 +130,12 @@ void cmGlobalVisualStudio8Generator::Generate()
         std::string argH = "-H";
         argH += lg->Convert(mf->GetHomeDirectory(),
                             cmLocalGenerator::START_OUTPUT,
-                            cmLocalGenerator::SHELL, true);
+                            cmLocalGenerator::UNCHANGED, true);
         commandLine.push_back(argH);
         std::string argB = "-B";
         argB += lg->Convert(mf->GetHomeOutputDirectory(),
                             cmLocalGenerator::START_OUTPUT,
-                            cmLocalGenerator::SHELL, true);
+                            cmLocalGenerator::UNCHANGED, true);
         commandLine.push_back(argB);
         cmCustomCommandLines commandLines;
         commandLines.push_back(commandLine);

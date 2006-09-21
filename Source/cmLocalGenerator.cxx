@@ -28,6 +28,8 @@
 #include "cmTest.h"
 #include "cmake.h"
 
+#include <cmsys/System.h>
+
 #include <ctype.h> // for isalpha
 
 cmLocalGenerator::cmLocalGenerator()
@@ -1898,56 +1900,6 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
-                                  const char* workingDirectory, 
-                                  const char* newline)
-                                  
-{
-  // Store the script in a string.
-  std::string script;
-  if(workingDirectory)
-    {
-    script += "cd ";
-    script += this->Convert(workingDirectory, START_OUTPUT, SHELL);
-    script += newline;
-    }
-  // for visual studio IDE add extra stuff to the PATH
-  // if CMAKE_MSVCIDE_RUN_PATH is set.
-  if(this->Makefile->GetDefinition("MSVC_IDE"))
-    {
-    const char* extraPath = 
-      this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
-    if(extraPath)
-      {
-      script += "set PATH=";
-      script += extraPath;
-      script += ";%PATH%";
-      script += newline;
-      }
-    }
-  // Write each command on a single line.
-  for(cmCustomCommandLines::const_iterator cl = commandLines.begin();
-      cl != commandLines.end(); ++cl)
-    {
-    // Start with the command name.
-    const cmCustomCommandLine& commandLine = *cl;
-    script += this->Convert(commandLine[0].c_str(),START_OUTPUT,SHELL);
-
-    // Add the arguments.
-    for(unsigned int j=1;j < commandLine.size(); ++j)
-      {
-      script += " ";
-      script += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
-      }
-
-    // End the line.
-    script += newline;
-    }
-  return script;
-}
-
-//----------------------------------------------------------------------------
-std::string
 cmLocalGenerator::ConstructComment(const cmCustomCommand& cc,
                                    const char* default_comment)
 {
@@ -2288,4 +2240,30 @@ cmLocalGenerator
   // Infer the language from the source file extension.
   return (this->GlobalGenerator
           ->GetLanguageFromExtension(source.GetSourceExtension().c_str()));
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::EscapeForShell(const char* str)
+{
+  std::string result;
+  if(this->WindowsShell)
+    {
+    int size = cmsysSystem_Windows_ShellArgumentSize(str);
+    std::vector<char> arg(size);
+    cmsysSystem_Windows_ShellArgument(str, &arg[0]);
+    result = &arg[0];
+    }
+  else
+    {
+    for(const char* c = str; *c; ++c)
+      {
+      if(*c == '\\' || *c == '\'' || *c == '"' || *c == ';' ||
+         *c == '(' || *c == ')')
+        {
+        result += "\\";
+        }
+      result += *c;
+      }
+    }
+  return result;
 }

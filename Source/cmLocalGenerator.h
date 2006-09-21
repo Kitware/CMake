@@ -202,10 +202,10 @@ public:
   };
 
 protected:
-  /** Construct a script from the given list of command lines.  */
-  std::string ConstructScript(const cmCustomCommandLines& commandLines,
-                              const char* workingDirectory,
-                              const char* newline = "\n");
+
+  /** Escape the given string to be used as a command line argument in
+      the native build system shell.  */
+  std::string EscapeForShell(const char* str);
 
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,

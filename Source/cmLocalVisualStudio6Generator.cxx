@@ -223,12 +223,12 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
   std::string args;
   args = "-H";
   args += this->Convert(this->Makefile->GetHomeDirectory(),
-                        START_OUTPUT, SHELL, true);
+                        START_OUTPUT, UNCHANGED, true);
   commandLine.push_back(args);
   args = "-B";
   args += 
     this->Convert(this->Makefile->GetHomeOutputDirectory(), 
-                  START_OUTPUT, SHELL, true);
+                  START_OUTPUT, UNCHANGED, true);
   commandLine.push_back(args);
 
   std::string configFile = 

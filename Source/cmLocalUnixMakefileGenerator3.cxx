@@ -931,16 +931,7 @@ cmLocalUnixMakefileGenerator3
       for(unsigned int j=1; j < commandLine.size(); ++j)
         {
         cmd += " ";
-        bool forceOn =  cmSystemTools::GetForceUnixPaths();
-        if(forceOn && this->WindowsShell)
-          {
-          cmSystemTools::SetForceUnixPaths(false);
-          }
-        cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
-        if(forceOn && this->WindowsShell)
-          {
-          cmSystemTools::SetForceUnixPaths(true);
-          }
+        cmd += this->EscapeForShell(commandLine[j].c_str());
         }
       commands1.push_back(cmd);
       }
