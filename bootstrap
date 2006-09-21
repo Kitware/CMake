@@ -156,7 +156,8 @@ CMAKE_C_SOURCES="\
 
 if ${cmake_system_mingw}; then
   KWSYS_C_SOURCES="\
-    ProcessWin32"
+    ProcessWin32 \
+    System"
   KWSYS_C_MINGW_SOURCES="\
     ProcessFwd9x \
     EncodeExecutable"
@@ -164,7 +165,8 @@ if ${cmake_system_mingw}; then
     cmsysProcessFwd9xEnc"
 else
   KWSYS_C_SOURCES="\
-    ProcessUNIX"
+    ProcessUNIX \
+    System"
   KWSYS_C_MINGW_SOURCES=""
   KWSYS_C_GENERATED_SOURCES=""
 fi
@@ -181,6 +183,7 @@ KWSYS_FILES="\
   Process.h \
   RegularExpression.hxx \
   String.hxx \
+  System.h \
   SystemTools.hxx"
 
 KWSYS_IOS_FILES="
