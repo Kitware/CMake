@@ -2257,8 +2257,7 @@ std::string cmLocalGenerator::EscapeForShell(const char* str)
     {
     for(const char* c = str; *c; ++c)
       {
-      if(*c == '\\' || *c == '\'' || *c == '"' || *c == ';' ||
-         *c == '(' || *c == ')')
+      if(*c == '\\' || *c == '\'' || *c == '"' || *c == ';')
         {
         result += "\\";
         }
