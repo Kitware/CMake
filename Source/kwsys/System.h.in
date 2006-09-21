@@ -1,0 +1,62 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef @KWSYS_NAMESPACE@_System_h
+#define @KWSYS_NAMESPACE@_System_h
+
+#include <@KWSYS_NAMESPACE@/Configure.h>
+
+/* Redefine all public interface symbol names to be in the proper
+   namespace.  These macros are used internally to kwsys only, and are
+   not visible to user code.  Use kwsysHeaderDump.pl to reproduce
+   these macros after making changes to the interface.  */
+#if !defined(KWSYS_NAMESPACE)
+# define kwsys_ns(x) @KWSYS_NAMESPACE@##x
+# define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
+#endif
+#define kwsysSystem_Windows_ShellArgument     kwsys_ns(System_Windows_ShellArgument)
+#define kwsysSystem_Windows_ShellArgumentSize kwsys_ns(System_Windows_ShellArgumentSize)
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
+/**
+ * Escape the given command line argument for use in a windows shell.
+ * Returns a pointer to the end of the command line argument in the
+ * given buffer.
+ */
+kwsysEXPORT char* kwsysSystem_Windows_ShellArgument(const char* in, char* out);
+
+/**
+ * Compute the size of the buffer needed to store the result of
+ * kwsysSystem_Windows_ShellArgument.  The return value includes space
+ * for a null-terminator.
+ */
+kwsysEXPORT int kwsysSystem_Windows_ShellArgumentSize(const char* in);
+
+#if defined(__cplusplus)
+} /* extern "C" */
+#endif
+
+/* If we are building a kwsys .c or .cxx file, let it use these macros.
+   Otherwise, undefine them to keep the namespace clean.  */
+#if !defined(KWSYS_NAMESPACE)
+# undef kwsys_ns
+# undef kwsysEXPORT
+# undef kwsysSystem_Windows_ShellArgument
+# undef kwsysSystem_Windows_ShellArgumentSize
+#endif
+
+#endif

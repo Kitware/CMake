@@ -123,6 +123,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_RegularExpression 1)
   SET(KWSYS_USE_Registry 1)
+  SET(KWSYS_USE_System 1)
   SET(KWSYS_USE_SystemTools 1)
   SET(KWSYS_USE_CommandLineArguments 1)
   SET(KWSYS_USE_FundamentalType 1)
@@ -580,6 +581,9 @@ IF(KWSYS_USE_Glob)
   SET(KWSYS_USE_SystemTools 1)
   SET(KWSYS_USE_RegularExpression 1)
 ENDIF(KWSYS_USE_Glob)
+IF(KWSYS_USE_Process)
+  SET(KWSYS_USE_System 1)
+ENDIF(KWSYS_USE_Process)
 
 # Add selected C++ classes.
 SET(cppclasses
@@ -593,7 +597,7 @@ FOREACH(cpp ${cppclasses})
 ENDFOREACH(cpp)
 
 # Add selected C components.
-FOREACH(c Process Base64 FundamentalType Terminal)
+FOREACH(c Process Base64 FundamentalType Terminal System)
   IF(KWSYS_USE_${c})
     SET(KWSYS_H_FILES ${KWSYS_H_FILES} ${c})
   ENDIF(KWSYS_USE_${c})
@@ -621,7 +625,7 @@ IF(KWSYS_USE_Process)
 ENDIF(KWSYS_USE_Process)
 
 # Add selected C sources.
-FOREACH(c Base64 Terminal)
+FOREACH(c Base64 Terminal System)
   IF(KWSYS_USE_${c})
     SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ${c}.c)
   ENDIF(KWSYS_USE_${c})

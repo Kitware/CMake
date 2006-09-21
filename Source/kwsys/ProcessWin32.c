@@ -13,11 +13,13 @@
 =========================================================================*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Process.h)
+#include KWSYS_HEADER(System.h)
 
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
 # include "Process.h.in"
+# include "System.h.in"
 #endif
 
 /*
@@ -2085,59 +2087,9 @@ int kwsysProcessComputeCommandLength(kwsysProcess* cp,
     char const* const* arg;
     for(arg = command; *arg; ++arg)
       {
-      /* Keep track of how many backslashes have been encountered in a
-         row in this argument.  */
-      int backslashes = 0;
-      int spaces = 0;
-      const char* c;
-
-      /* Scan the string for spaces.  If there are no spaces, we can
-         pass the argument verbatim.  */
-      for(c=*arg; *c; ++c)
-        {
-        if(*c == ' ' || *c == '\t')
-          {
-          spaces = 1;
-          break;
-          }
-        }
-
-      /* Add the length of the argument, plus 1 for the space
-         separating the arguments.  */
-      length += (int)strlen(*arg) + 1;
-
-      if(spaces)
-        {
-        /* Add 2 for double quotes since spaces are present.  */
-        length += 2;
-
-        /* Scan the string to find characters that need escaping.  */
-        for(c=*arg; *c; ++c)
-          {
-          if(*c == '\\')
-            {
-            /* Found a backslash.  It may need to be escaped later.  */
-            ++backslashes;
-            }
-          else if(*c == '"')
-            {
-            /* Found a double-quote.  We need to escape it and all
-               immediately preceding backslashes.  */
-            length += backslashes + 1;
-            backslashes = 0;
-            }
-          else
-            {
-            /* Found another character.  This eliminates the possibility
-               that any immediately preceding backslashes will be
-               escaped.  */
-            backslashes = 0;
-            }
-          }
-
-        /* We need to escape all ending backslashes. */
-        length += backslashes;
-        }
+      /* Add the length of this argument.  It already includes room
+         for a separating space or terminating null.  */
+      length += kwsysSystem_Windows_ShellArgumentSize(*arg);
       }
     }
 
@@ -2160,87 +2112,14 @@ void kwsysProcessComputeCommandLine(kwsysProcess* cp,
     char const* const* arg;
     for(arg = command; *arg; ++arg)
       {
-      /* Keep track of how many backslashes have been encountered in a
-         row in an argument.  */
-      int backslashes = 0;
-      int spaces = 0;
-      const char* c;
-
-      /* Scan the string for spaces.  If there are no spaces, we can
-         pass the argument verbatim.  */
-      for(c=*arg; *c; ++c)
-        {
-        if(*c == ' ' || *c == '\t')
-          {
-          spaces = 1;
-          break;
-          }
-        }
-
       /* Add the separating space if this is not the first argument.  */
       if(arg != command)
         {
         *cmd++ = ' ';
         }
 
-      if(spaces)
-        {
-        /* Add the opening double-quote for this argument.  */
-        *cmd++ = '"';
-
-        /* Add the characters of the argument, possibly escaping them.  */
-        for(c=*arg; *c; ++c)
-          {
-          if(*c == '\\')
-            {
-            /* Found a backslash.  It may need to be escaped later.  */
-            ++backslashes;
-            *cmd++ = '\\';
-            }
-          else if(*c == '"')
-            {
-            /* Add enough backslashes to escape any that preceded the
-               double-quote.  */
-            while(backslashes > 0)
-              {
-              --backslashes;
-              *cmd++ = '\\';
-              }
-
-            /* Add the backslash to escape the double-quote.  */
-            *cmd++ = '\\';
-
-            /* Add the double-quote itself.  */
-            *cmd++ = '"';
-            }
-          else
-            {
-            /* We encountered a normal character.  This eliminates any
-               escaping needed for preceding backslashes.  Add the
-               character.  */
-            backslashes = 0;
-            *cmd++ = *c;
-            }
-          }
-
-        /* Add enough backslashes to escape any trailing ones.  */
-        while(backslashes > 0)
-          {
-          --backslashes;
-          *cmd++ = '\\';
-          }
-
-        /* Add the closing double-quote for this argument.  */
-        *cmd++ = '"';
-        }
-      else
-        {
-        /* No spaces.  Add the argument verbatim.  */
-        for(c=*arg; *c; ++c)
-          {
-          *cmd++ = *c;
-          }
-        }
+      /* Add the current argument.  */
+      cmd = kwsysSystem_Windows_ShellArgument(*arg, cmd);
       }
 
     /* Add the terminating null character to the command line.  */
