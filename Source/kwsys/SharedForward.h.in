@@ -26,6 +26,7 @@
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_PATH_INSTALL "../lib/foo-1.2"
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_EXE_BUILD "foo-real"
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_EXE_INSTALL "../lib/foo-1.2/foo-real"
+  #define @KWSYS_NAMESPACE@_SHARED_FORWARD_OPTION_COMMAND "--command"
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_OPTION_PRINT "--print"
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_OPTION_LDD "--ldd"
   #if defined(CMAKE_INTDIR)
@@ -36,12 +37,32 @@
   {
     return @KWSYS_NAMESPACE@_shared_forward_to_real(argc, argv);
   }
- */
+
+  Specify search and executable paths relative to the forwarding
+  executable location or as full paths.  Include no trailing slash.
+  In the case of a multi-configuration build, when CMAKE_INTDIR is
+  defined, the build-tree paths should be specified relative to the
+  directory above the executable (the one containing the
+  per-configuration subdirectory specified by CMAKE_INTDIR).
+
+  Additional paths may be specified in the PATH_BUILD and PATH_INSTALL
+  variables by using comma-separated strings.  Paths pointing at build
+  trees should contain CMAKE_INTDIR as necessary.  For example:
+
+  #if defined(CMAKE_INTDIR)
+  # define CONFIG_DIR "/" CMAKE_INTDIR
+  #else
+  # define CONFIG_DIR ""
+  #endif
+  #define @KWSYS_NAMESPACE@_SHARED_FORWARD_PATH_BUILD \
+          "." CONFIG_DIR, "/path/to/bar-build" CONFIG_DIR
+  #define @KWSYS_NAMESPACE@_SHARED_FORWARD_PATH_INSTALL \
+          "../lib/foo-1.2", "../lib/bar-4.5"
+
+  See the comments below for specific explanations of each macro.
+*/
 
 /*--------------------------------------------------------------------------*/
-/* Configuration for this executable.  Specify search and executable
-   paths relative to the forwarding executable location or as full
-   paths.  Include no trailing slash.  */
 
 /* Full path to the directory in which this executable is built.  Do
    not include a trailing slash.  */
@@ -89,6 +110,15 @@
 # define KWSYS_SHARED_FORWARD_CONFIG_NAME @KWSYS_NAMESPACE@_SHARED_FORWARD_CONFIG_NAME
 #else
 # undef KWSYS_SHARED_FORWARD_CONFIG_NAME
+#endif
+
+/* Create command line option to replace executable.  */
+#if defined(@KWSYS_NAMESPACE@_SHARED_FORWARD_OPTION_COMMAND)
+# if !defined(KWSYS_SHARED_FORWARD_OPTION_COMMAND)
+#  define KWSYS_SHARED_FORWARD_OPTION_COMMAND @KWSYS_NAMESPACE@_SHARED_FORWARD_OPTION_COMMAND
+# endif
+#else
+# undef KWSYS_SHARED_FORWARD_OPTION_COMMAND
 #endif
 
 /* Create command line option to print environment setting and exit.  */
@@ -274,14 +304,6 @@ static void kwsys_shared_forward_strerror(char* message)
 
 /*--------------------------------------------------------------------------*/
 /* Functions to execute a child process.  */
-static void kwsys_shared_forward_execv(const char* cmd, char* const argv[])
-{
-#if defined(_MSC_VER)
-  _execv(cmd, argv);
-#else
-  execv(cmd, argv);
-#endif
-}
 static void kwsys_shared_forward_execvp(const char* cmd, char* const argv[])
 {
 #if defined(_MSC_VER)
@@ -611,6 +633,27 @@ static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv)
       /* Store the environment variable.  */
       putenv(kwsys_shared_forward_ldpath);
 
+#if defined(KWSYS_SHARED_FORWARD_OPTION_COMMAND)
+      /* Look for the command line replacement option.  */
+      if(argc > 1 && strcmp(argv[1], KWSYS_SHARED_FORWARD_OPTION_COMMAND) == 0)
+        {
+        if(argc > 2)
+          {
+          /* Use the command line given.  */
+          strcpy(exe, argv[2]);
+          argv += 2;
+          argc -= 2;
+          }
+        else
+          {
+          /* The option was not given an executable.  */
+          fprintf(stderr, "Option " KWSYS_SHARED_FORWARD_OPTION_COMMAND
+                  " must be followed by a command line.\n");
+          return 1;
+          }
+        }
+#endif
+
 #if defined(KWSYS_SHARED_FORWARD_OPTION_PRINT)
       /* Look for the print command line option.  */
       if(argc > 1 && strcmp(argv[1], KWSYS_SHARED_FORWARD_OPTION_PRINT) == 0)
@@ -644,7 +687,7 @@ static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv)
 
       /* Replace this process with the real executable.  */
       argv[0] = exe;
-      kwsys_shared_forward_execv(argv[0], argv);
+      kwsys_shared_forward_execvp(argv[0], argv);
 
       /* Report why execution failed.  */
       kwsys_shared_forward_print_failure(argv);
