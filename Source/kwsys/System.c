@@ -23,27 +23,39 @@
 #include <string.h> /* strlen */
 
 /*--------------------------------------------------------------------------*/
+static int kwsysSystemWindowsShellArgumentNeedsEscape(const char* in)
+{
+  /* Scan the string for characters that need escaping.  Note that
+     single quotes seem to need escaping for some windows shell
+     environments (mingw32-make shell for example).  Single quotes do
+     not actually need backslash escapes but must be in a
+     double-quoted argument.  */
+  const char* c;
+  for(c=in; *c; ++c)
+    {
+    if(*c == ' ' || *c == '\t' || *c == '"' || *c == '\'')
+      {
+      return 1;
+      }
+    }
+  return 0;
+}
+
+/*--------------------------------------------------------------------------*/
 int kwsysSystem_Windows_ShellArgumentSize(const char* in)
 {
   /* Start with the length of the original argument, plus one for
      either a terminating null or a separating space.  */
   int length = (int)strlen(in) + 1;
 
+  /* String iterator.  */
+  const char* c;
+
   /* Keep track of how many backslashes have been encountered in a row.  */
   int backslashes = 0;
 
-  /* Scan the string for spaces.  */
-  const char* c;
-  for(c=in; *c; ++c)
-    {
-    if(*c == ' ' || *c == '\t')
-      {
-      break;
-      }
-    }
-
-  /* If there are no spaces, we do not need any extra length. */
-  if(!*c)
+  /* If nothing needs escaping, we do not need any extra length. */
+  if(!kwsysSystemWindowsShellArgumentNeedsEscape(in))
     {
     return length;
     }
@@ -84,21 +96,14 @@ int kwsysSystem_Windows_ShellArgumentSize(const char* in)
 /*--------------------------------------------------------------------------*/
 char* kwsysSystem_Windows_ShellArgument(const char* in, char* out)
 {
+  /* String iterator.  */
+  const char* c;
+
   /* Keep track of how many backslashes have been encountered in a row.  */
   int backslashes = 0;
 
-  /* Scan the string for spaces.  */
-  const char* c;
-  for(c=in; *c; ++c)
-    {
-    if(*c == ' ' || *c == '\t')
-      {
-      break;
-      }
-    }
-
-  /* If there are no spaces, we can pass the argument verbatim. */
-  if(!*c)
+  /* If nothing needs escaping, we can pass the argument verbatim. */
+  if(!kwsysSystemWindowsShellArgumentNeedsEscape(in))
     {
     /* Just copy the string.  */
     for(c=in; *c; ++c)
