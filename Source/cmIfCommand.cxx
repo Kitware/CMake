@@ -29,22 +29,65 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
     }
   
   // watch for our ELSE or ENDIF
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else") || 
+  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else") ||
+      !cmSystemTools::Strucmp(lff.Name.c_str(),"elseif") ||
       !cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
     {
     // if it was an else statement then we should change state
     // and block this Else Command
     if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else"))
+      {
+      this->IsBlocking = this->HasRun;
+      return true;
+      }
+    // if it was an elseif statement then we should check state
+    // and possibly block this Else Command
+    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"elseif"))
+      {
+      if (!this->HasRun)
         {
-        this->IsBlocking = !this->IsBlocking;
-        return true;
+        char* errorString = 0;
+        
+        std::vector<std::string> expandedArguments;
+        mf.ExpandArguments(lff.Arguments, expandedArguments);
+        bool isTrue = 
+          cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
+        
+        if (errorString)
+          {
+          std::string err = "had incorrect arguments: ";
+          unsigned int i;
+          for(i =0; i < lff.Arguments.size(); ++i)
+            {
+            err += (lff.Arguments[i].Quoted?"\"":"");
+            err += lff.Arguments[i].Value;
+            err += (lff.Arguments[i].Quoted?"\"":"");
+            err += " ";
+            }
+          err += "(";
+          err += errorString;
+          err += ").";
+          cmSystemTools::Error(err.c_str());
+          delete [] errorString;
+          return false;
+          }
+        
+        if (isTrue)
+          {
+          this->IsBlocking = false;
+          this->HasRun = true;
+          return true;
+          }
         }
-     // otherwise it must be an ENDIF statement, in that case remove the
-     // function blocker
-     mf.RemoveFunctionBlocker(lff);
-     return true;
-   }
-   
+      this->IsBlocking = true;
+      return true;
+      }
+    // otherwise it must be an ENDIF statement, in that case remove the
+    // function blocker
+    mf.RemoveFunctionBlocker(lff);
+    return true;
+    }
+  
   return this->IsBlocking;
 }
 
@@ -113,6 +156,10 @@ bool cmIfCommand
   cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
   // if is isn't true block the commands
   f->IsBlocking = !isTrue;
+  if (isTrue)
+    {
+    f->HasRun = true;
+    }
   f->Args = args;
   this->Makefile->AddFunctionBlocker(f);
   

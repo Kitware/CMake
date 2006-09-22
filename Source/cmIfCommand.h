@@ -28,7 +28,7 @@
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmIfFunctionBlocker() {}
+  cmIfFunctionBlocker() {this->HasRun = false;}
   virtual ~cmIfFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf);
@@ -38,6 +38,7 @@ public:
   
   std::vector<cmListFileArgument> Args;
   bool IsBlocking;
+  bool HasRun;
 };
 
 /** \class cmIfCommand

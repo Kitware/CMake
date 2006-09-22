@@ -20,6 +20,7 @@
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildNameCommand.cxx"
 #include "cmCreateTestSourceList.cxx"
+#include "cmElseIfCommand.cxx"
 #include "cmEnableLanguageCommand.cxx"
 #include "cmEndWhileCommand.cxx"
 #include "cmExecuteProcessCommand.cxx"
@@ -73,6 +74,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildNameCommand);
   commands.push_back(new cmCreateTestSourceList);
+  commands.push_back(new cmElseIfCommand);
   commands.push_back(new cmEnableLanguageCommand);
   commands.push_back(new cmEndWhileCommand);
   commands.push_back(new cmExecuteProcessCommand);
