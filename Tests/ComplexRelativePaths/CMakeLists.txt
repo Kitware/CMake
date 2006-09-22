@@ -271,6 +271,44 @@ ENDWHILE(while_var LESS 1000)
 
 SET(SHOULD_BE_ZERO )
 SET(SHOULD_BE_ONE 1)
+
+# test elseif functionality, the mess below tries to catch problem 
+# of clauses being executed early or late etc
+set (RESULT 3)
+if (RESULT EQUAL 1)
+  if (RESULT EQUAL 2)
+    set (ELSEIF_RESULT 1)
+  elseif (RESULT EQUAL 3)
+    set (ELSEIF_RESULT 1)
+  endif (RESULT EQUAL 2)  
+elseif (RESULT EQUAL 2)
+  set (ELSEIF_RESULT 1)
+elseif (RESULT EQUAL 3)
+  if (RESULT EQUAL 2)
+    set (ELSEIF_RESULT 1)
+  elseif (RESULT EQUAL 3)
+    if (NOT ELSEIF_RESULT EQUAL 1)
+      set (ELSEIF_RESULT 2)
+    endif (NOT ELSEIF_RESULT EQUAL 1)      
+  endif (RESULT EQUAL 2)  
+elseif (RESULT EQUAL 4)
+  if (RESULT EQUAL 2)
+    set (ELSEIF_RESULT 1)
+  elseif (RESULT EQUAL 3)
+    set (ELSEIF_RESULT 1)
+  endif (RESULT EQUAL 2)  
+else (RESULT  EQUAL 1)
+  if (RESULT EQUAL 2)
+    set (ELSEIF_RESULT 1)
+  elseif (RESULT EQUAL 3)
+    set (ELSEIF_RESULT 1)
+  endif (RESULT EQUAL 2)  
+endif (RESULT EQUAL 1)
+
+if (NOT ELSEIF_RESULT EQUAL 2)
+  set (ELSEIF_RESULT 0)
+endif (NOT ELSEIF_RESULT EQUAL 2)
+
 #
 # Configure file 
 # (plug vars to #define so that they can be tested)
@@ -302,6 +340,7 @@ IF(NOT STRING_REGEX_PASSED)
   MESSAGE(SEND_ERROR
     "STRING(REGEX REPLACE ... ) test failed (\"${RESULT}\" v. \"a[b]c[d]e\")")
 ENDIF(NOT STRING_REGEX_PASSED)
+
 
 #
 # Create the libs and the main exe

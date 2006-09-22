@@ -444,6 +444,12 @@ int main()
   cmPassed("COMPILE_FLAGS did work with SET_TARGET_PROPERTIES");
 #endif
   
+#ifdef ELSEIF_RESULT
+  cmPassed("ELSEIF did work");
+#else
+  cmFailed("ELSEIF did not work");
+#endif
+
   if(file2() != 1)
     {
     cmFailed("Call to file2 function from library failed.");
