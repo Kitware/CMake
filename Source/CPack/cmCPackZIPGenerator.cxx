@@ -100,7 +100,7 @@ int cmCPackZIPGenerator::CompressFiles(const char* outFileName,
   case cmCPackZIPGenerator::StyleWinZip:
     dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
            << "\" -P \"" << outFileName
-           << "\" @\"" << tempFileName.c_str() << "\"";
+           << "\" @winZip.filelist";
     needQuotesInFile = true;
     break;
   case cmCPackZIPGenerator::StyleUnixZip:
