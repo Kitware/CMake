@@ -106,7 +106,7 @@ INSTALL_FILES(/tmp .cxx ${Complex_BINARY_DIR}/cmTestConfigure.h)
 # Test generation of preprocessed sources.
 IF("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
   IF(CMAKE_CXX_CREATE_PREPROCESSED_SOURCE)
-    ADD_CUSTOM_TARGET(test_preprocess ALL
+    ADD_CUSTOM_TARGET(test_preprocess #ALL
       COMMAND ${CMAKE_COMMAND} -E remove CMakeFiles/create_file.dir/create_file.i
       COMMAND ${CMAKE_MAKE_PROGRAM} create_file.i
       COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test_preprocess.cmake
