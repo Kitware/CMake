@@ -59,13 +59,13 @@ Modify cmCommandArgumentLexer.h:
 
 %%
 
-\$[A-Za-z0-9/_.-]+\{ { 
+\$[A-Za-z0-9/_.+-]+\{ { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
   return cal_NCURLY; 
 } 
 
-@[A-Za-z0-9/_.-]+@ { 
+@[A-Za-z0-9/_.+-]+@ { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
   return cal_ATNAME; 
@@ -74,25 +74,25 @@ Modify cmCommandArgumentLexer.h:
 "${" {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_DCURLYVariable;
+  yylvalp->str = yyextra->DCURLYVariable;
   return cal_DCURLY;
 }
 
 "}" {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_RCURLYVariable;
+  yylvalp->str = yyextra->RCURLYVariable;
   return cal_RCURLY;
 }
 
 "@" {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_ATVariable;
+  yylvalp->str = yyextra->ATVariable;
   return cal_AT;
 }
 
-[A-Za-z0-9/_.-]+ { 
+[A-Za-z0-9/_.+-]+ { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   return cal_NAME; 
@@ -114,19 +114,19 @@ Modify cmCommandArgumentLexer.h:
 
 "$" {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_DOLLARVariable;
+  yylvalp->str = yyextra->DOLLARVariable;
   return cal_DOLLAR; 
 }
 
 "{" {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_LCURLYVariable;
+  yylvalp->str = yyextra->LCURLYVariable;
   return cal_LCURLY; 
 }
 
 "\\" {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->m_BSLASHVariable;
+  yylvalp->str = yyextra->BSLASHVariable;
   return cal_BSLASH; 
 }
 

@@ -83,7 +83,8 @@ ENDIF(NOT FILE_IS_NEWER "${file}" "${CMAKE_CURRENT_SOURCE_DIR}/InputFile.h.in")
 # Test configuration of the string
 SET(TEST_DEFINED 123)
 SET(TEST_NOT_DEFINED)
-STRING(CONFIGURE "${infile}" infile @ONLY)
+STRING(CONFIGURE "${infile}" infile+-/out @ONLY)
+SET(infile "${infile+-/out}")
 
 # Write include file to a file
 STRING(REGEX REPLACE "includefile" "${file}" outfile "${infile}")
