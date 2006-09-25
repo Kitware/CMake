@@ -199,7 +199,7 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/check_command_line.c.in
                @ONLY IMMEDIATE)
 ADD_EXECUTABLE(check_command_line
   ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c)
-ADD_CUSTOM_TARGET(do_check_command_line ALL
+ADD_CUSTOM_TARGET(do_check_command_line #ALL
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
   ${CHECK_ARGS}
   )

@@ -2246,6 +2246,20 @@ cmLocalGenerator
 std::string cmLocalGenerator::EscapeForShell(const char* str)
 {
   std::string result;
+  // Temporarily use old shell escaping code until a means of backward
+  // compatibility can be established in the new implementation.
+#if 1
+  bool forceOn =  cmSystemTools::GetForceUnixPaths();
+  if(forceOn && this->WindowsShell)
+    {
+    cmSystemTools::SetForceUnixPaths(false);
+    }
+  result = cmSystemTools::EscapeSpaces(str);
+  if(forceOn && this->WindowsShell)
+    {
+    cmSystemTools::SetForceUnixPaths(true);
+    }
+#else
   if(this->WindowsShell)
     {
     int size = cmsysSystem_Windows_ShellArgumentSize(str);
@@ -2264,5 +2278,6 @@ std::string cmLocalGenerator::EscapeForShell(const char* str)
       result += *c;
       }
     }
+#endif
   return result;
 }
