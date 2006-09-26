@@ -33,7 +33,7 @@ cmDependsC::cmDependsC(std::vector<std::string> const& includes,
                        const char* scanRegex, const char* complainRegex,
                        const cmStdString& cacheFileName):
   IncludePath(&includes),
-  IncludeRegexLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)([\">])"),
+  IncludeRegexLine("^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"),
   IncludeRegexScan(scanRegex),
   IncludeRegexComplain(complainRegex),
   CacheFileName(cacheFileName)
@@ -354,8 +354,8 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
       {
       // Get the file being included.
       UnscannedEntry entry;
-      entry.FileName = this->IncludeRegexLine.match(1);
-      if(this->IncludeRegexLine.match(2) == "\"" &&
+      entry.FileName = this->IncludeRegexLine.match(2);
+      if(this->IncludeRegexLine.match(3) == "\"" &&
          !cmSystemTools::FileIsFullPath(entry.FileName.c_str()))
         {
         // This was a double-quoted include with a relative path.  We
