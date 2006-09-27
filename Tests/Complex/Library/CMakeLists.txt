@@ -106,7 +106,22 @@ INSTALL_FILES(/tmp .cxx ${Complex_BINARY_DIR}/cmTestConfigure.h)
 # Test generation of preprocessed sources.
 IF("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
   IF(CMAKE_CXX_CREATE_PREPROCESSED_SOURCE)
-    ADD_CUSTOM_TARGET(test_preprocess #ALL
+    # Skip running this part of the test on certain platforms
+    # until they are fixed.
+    SET(MAYBE_ALL ALL)
+    LIST(LENGTH CMAKE_OSX_ARCHITECTURES ARCH_COUNT)
+    IF(ARCH_COUNT GREATER 1)
+      # OSX does not support preprocessing more than one architecture.
+      SET(MAYBE_ALL)
+    ENDIF(ARCH_COUNT GREATER 1)
+    IF("${CMAKE_MAKE_PROGRAM}" MATCHES "msys")
+      # Executing make with a full path at an MSYS prompt produces
+      # a bad path conversion and breaks the child make.
+      SET(MAYBE_ALL)
+    ENDIF("${CMAKE_MAKE_PROGRAM}" MATCHES "msys")
+
+    # Custom target to try preprocessing invocation.
+    ADD_CUSTOM_TARGET(test_preprocess ${MAYBE_ALL}
       COMMAND ${CMAKE_COMMAND} -E remove CMakeFiles/create_file.dir/create_file.i
       COMMAND ${CMAKE_MAKE_PROGRAM} create_file.i
       COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test_preprocess.cmake
