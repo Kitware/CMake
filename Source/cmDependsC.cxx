@@ -33,7 +33,8 @@ cmDependsC::cmDependsC(std::vector<std::string> const& includes,
                        const char* scanRegex, const char* complainRegex,
                        const cmStdString& cacheFileName):
   IncludePath(&includes),
-  IncludeRegexLine("^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"),
+  IncludeRegexLine(
+    "^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"),
   IncludeRegexScan(scanRegex),
   IncludeRegexComplain(complainRegex),
   CacheFileName(cacheFileName)
