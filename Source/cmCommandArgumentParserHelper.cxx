@@ -172,6 +172,7 @@ bool cmCommandArgumentParserHelper::HandleEscapeSymbol
   case '(':
   case ')':
   case '$':
+  case '@':
   case '^':
     this->AllocateParserType(pt, &symbol, 1);
     break;
