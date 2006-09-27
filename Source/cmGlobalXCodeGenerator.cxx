@@ -962,7 +962,8 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
     cmCustomCommand const& cc = *i; 
     if(!cc.GetCommandLines().empty())
       {
-      
+      bool escapeOldStyle = cc.GetEscapeOldStyle();
+      bool escapeAllowMakeVars = cc.GetEscapeAllowMakeVars();
       makefileStream << "\n#" << "Custom command rule: " << 
         cc.GetComment() << "\n";
       const std::vector<std::string>& outputs = cc.GetOutputs();
@@ -1037,8 +1038,17 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
         for(unsigned int j=1; j < commandLine.size(); ++j)
           {
           cmd += " ";
-          cmd += (this->CurrentLocalGenerator
-                  ->EscapeForShell(commandLine[j].c_str()));
+          if(escapeOldStyle)
+            {
+            cmd += (this->CurrentLocalGenerator
+                    ->EscapeForShellOldStyle(commandLine[j].c_str()));
+            }
+          else
+            {
+            cmd += (this->CurrentLocalGenerator->
+                    EscapeForShell(commandLine[j].c_str(),
+                                   escapeAllowMakeVars));
+            }
           }
         makefileStream << "\t" << cmd.c_str() << "\n";
         }

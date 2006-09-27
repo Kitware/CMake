@@ -39,6 +39,7 @@ cmLocalGenerator::cmLocalGenerator()
   this->ExcludeFromAll = false;
   this->Parent = 0;
   this->WindowsShell = false;
+  this->WindowsVSIDE = false;
   this->IgnoreLibPrefix = false;
   this->UseRelativePaths = false;
   this->Configured = false;
@@ -2243,12 +2244,9 @@ cmLocalGenerator
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::EscapeForShell(const char* str)
+std::string cmLocalGenerator::EscapeForShellOldStyle(const char* str)
 {
   std::string result;
-  // Temporarily use old shell escaping code until a means of backward
-  // compatibility can be established in the new implementation.
-#if 1
   bool forceOn =  cmSystemTools::GetForceUnixPaths();
   if(forceOn && this->WindowsShell)
     {
@@ -2259,25 +2257,41 @@ std::string cmLocalGenerator::EscapeForShell(const char* str)
     {
     cmSystemTools::SetForceUnixPaths(true);
     }
-#else
-  if(this->WindowsShell)
+  return result;
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars)
+{
+  // Compute the flags for the target shell environment.
+  int flags = 0;
+  if(this->WindowsVSIDE)
     {
-    int size = cmsysSystem_Windows_ShellArgumentSize(str);
-    std::vector<char> arg(size);
-    cmsysSystem_Windows_ShellArgument(str, &arg[0]);
-    result = &arg[0];
+    flags |= cmsysSystem_Shell_Flag_VSIDE;
     }
   else
     {
-    for(const char* c = str; *c; ++c)
-      {
-      if(*c == '\\' || *c == '\'' || *c == '"' || *c == ';' || *c == ' ')
-        {
-        result += "\\";
-        }
-      result += *c;
-      }
+    flags |= cmsysSystem_Shell_Flag_Make;
     }
-#endif
-  return result;
+  if(makeVars)
+    {
+    flags |= cmsysSystem_Shell_Flag_AllowMakeVariables;
+    }
+
+  // Compute the buffer size needed.
+  int size = (this->WindowsShell ?
+              cmsysSystem_Shell_GetArgumentSizeForWindows(str, flags) :
+              cmsysSystem_Shell_GetArgumentSizeForUnix(str, flags));
+
+  // Compute the shell argument itself.
+  std::vector<char> arg(size);
+  if(this->WindowsShell)
+    {
+    cmsysSystem_Shell_GetArgumentForWindows(str, &arg[0], flags);
+    }
+  else
+    {
+    cmsysSystem_Shell_GetArgumentForUnix(str, &arg[0], flags);
+    }
+  return std::string(&arg[0]);
 }

@@ -24,8 +24,14 @@
 # define kwsys_ns(x) @KWSYS_NAMESPACE@##x
 # define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
-#define kwsysSystem_Windows_ShellArgument     kwsys_ns(System_Windows_ShellArgument)
-#define kwsysSystem_Windows_ShellArgumentSize kwsys_ns(System_Windows_ShellArgumentSize)
+#define kwsysSystem_Shell_GetArgumentForWindows      kwsys_ns(System_Shell_GetArgumentForWindows)
+#define kwsysSystem_Shell_GetArgumentForUnix         kwsys_ns(System_Shell_GetArgumentForUnix)
+#define kwsysSystem_Shell_GetArgumentSizeForWindows  kwsys_ns(System_Shell_GetArgumentSizeForWindows)
+#define kwsysSystem_Shell_GetArgumentSizeForUnix     kwsys_ns(System_Shell_GetArgumentSizeForUnix)
+#define kwsysSystem_Shell_Flag_e                     kwsys_ns(System_Shell_Flag_e)
+#define kwsysSystem_Shell_Flag_Make                  kwsys_ns(System_Shell_Flag_Make)
+#define kwsysSystem_Shell_Flag_VSIDE                 kwsys_ns(System_Shell_Flag_VSIDE)
+#define kwsysSystem_Shell_Flag_AllowMakeVariables    kwsys_ns(System_Shell_Flag_AllowMakeVariables)
 
 #if defined(__cplusplus)
 extern "C"
@@ -33,18 +39,52 @@ extern "C"
 #endif
 
 /**
- * Escape the given command line argument for use in a windows shell.
- * Returns a pointer to the end of the command line argument in the
- * given buffer.
+ * Transform the given command line argument for use in a Windows or
+ * Unix shell.  Returns a pointer to the end of the command line
+ * argument in the provided output buffer.  Flags may be passed to
+ * modify the generated quoting and escape sequences to work under
+ * alternative environments.
  */
-kwsysEXPORT char* kwsysSystem_Windows_ShellArgument(const char* in, char* out);
+kwsysEXPORT char* kwsysSystem_Shell_GetArgumentForWindows(const char* in,
+                                                          char* out,
+                                                          int flags);
+kwsysEXPORT char* kwsysSystem_Shell_GetArgumentForUnix(const char* in,
+                                                       char* out,
+                                                       int flags);
 
 /**
- * Compute the size of the buffer needed to store the result of
- * kwsysSystem_Windows_ShellArgument.  The return value includes space
- * for a null-terminator.
+ * Compute the size of the buffer required to store the output from
+ * kwsysSystem_Shell_GetArgumentForWindows or
+ * kwsysSystem_Shell_GetArgumentForUnix.  The flags passed must be
+ * identical between the two calls.
  */
-kwsysEXPORT int kwsysSystem_Windows_ShellArgumentSize(const char* in);
+kwsysEXPORT int kwsysSystem_Shell_GetArgumentSizeForWindows(const char* in,
+                                                            int flags);
+kwsysEXPORT int kwsysSystem_Shell_GetArgumentSizeForUnix(const char* in,
+                                                         int flags);
+
+/**
+ * Flags to pass to kwsysSystem_Shell_GetArgumentForWindows or
+ * kwsysSystem_Shell_GetArgumentForUnix.  These modify the generated
+ * quoting and escape sequences to work under alternative
+ * environments.
+ */
+enum kwsysSystem_Shell_Flag_e
+{
+  /** The target shell is in a makefile.  */
+  kwsysSystem_Shell_Flag_Make               = (1<<0),
+
+  /** The target shell is in a VS project file.  Do not use with
+      Shell_Flag_Make.  */
+  kwsysSystem_Shell_Flag_VSIDE              = (1<<1),
+
+  /** Make variable reference syntax $(MAKEVAR) should not be escaped
+      to allow a build tool to replace it.  Replacement values
+      containing spaces, quotes, backslashes, or other
+      non-alphanumeric characters that have significance to some makes
+      or shells produce undefined behavior.  */
+  kwsysSystem_Shell_Flag_AllowMakeVariables = (1<<2)
+};
 
 #if defined(__cplusplus)
 } /* extern "C" */
@@ -55,8 +95,14 @@ kwsysEXPORT int kwsysSystem_Windows_ShellArgumentSize(const char* in);
 #if !defined(KWSYS_NAMESPACE)
 # undef kwsys_ns
 # undef kwsysEXPORT
-# undef kwsysSystem_Windows_ShellArgument
-# undef kwsysSystem_Windows_ShellArgumentSize
+# undef kwsysSystem_Shell_GetArgumentForWindows
+# undef kwsysSystem_Shell_GetArgumentForUnix
+# undef kwsysSystem_Shell_GetArgumentSizeForWindows
+# undef kwsysSystem_Shell_GetArgumentSizeForUnix
+# undef kwsysSystem_Shell_Flag_e
+# undef kwsysSystem_Shell_Flag_Make
+# undef kwsysSystem_Shell_Flag_VSIDE
+# undef kwsysSystem_Shell_Flag_AllowMakeVariables
 #endif
 
 #endif

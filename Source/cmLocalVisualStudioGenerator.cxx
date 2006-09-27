@@ -24,6 +24,7 @@
 cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator()
 {
   this->WindowsShell = true;
+  this->WindowsVSIDE = true;
 }
 
 //----------------------------------------------------------------------------
@@ -110,6 +111,8 @@ std::string
 cmLocalVisualStudioGenerator
 ::ConstructScript(const cmCustomCommandLines& commandLines,
                   const char* workingDirectory,
+                  bool escapeOldStyle,
+                  bool escapeAllowMakeVars,
                   const char* newline)
 {
   // Store the script in a string.
@@ -146,7 +149,15 @@ cmLocalVisualStudioGenerator
     for(unsigned int j=1;j < commandLine.size(); ++j)
       {
       script += " ";
-      script += this->EscapeForShell(commandLine[j].c_str());
+      if(escapeOldStyle)
+        {
+        script += this->EscapeForShellOldStyle(commandLine[j].c_str());
+        }
+      else
+        {
+        script += this->EscapeForShell(commandLine[j].c_str(),
+                                       escapeAllowMakeVars);
+        }
       }
 
     // End the line.

@@ -202,8 +202,12 @@ public:
   };
 
   /** Escape the given string to be used as a command line argument in
-      the native build system shell.  */
-  std::string EscapeForShell(const char* str);
+      the native build system shell.  Optionally allow the build
+      system to replace make variable references.  */
+  std::string EscapeForShell(const char* str, bool makeVars = false);
+
+  /** Backwards-compatibility version of EscapeForShell.  */
+  std::string EscapeForShellOldStyle(const char* str);
 
 protected:
 
@@ -267,6 +271,7 @@ protected:
   std::map<cmStdString, cmStdString> LanguageToIncludeFlags;
   std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
   bool WindowsShell;
+  bool WindowsVSIDE;
   bool ForceUnixPath;
   bool UseRelativePaths;
   bool IgnoreLibPrefix;

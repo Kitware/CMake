@@ -461,6 +461,8 @@ void cmLocalVisualStudio6Generator
         std::string script =
           this->ConstructScript(command->GetCommandLines(), 
                                 command->GetWorkingDirectory(),
+                                command->GetEscapeOldStyle(),
+                                command->GetEscapeAllowMakeVars(),
                                 "\\\n\t");
         std::string comment =
           this->ConstructComment(*command,
@@ -775,6 +777,8 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
                                             cr->GetWorkingDirectory(),
+                                            cr->GetEscapeOldStyle(),
+                                            cr->GetEscapeAllowMakeVars(),
                                             prelink_newline);
     }
   for (std::vector<cmCustomCommand>::const_iterator cr =
@@ -787,6 +791,8 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
                                             cr->GetWorkingDirectory(),
+                                            cr->GetEscapeOldStyle(),
+                                            cr->GetEscapeAllowMakeVars(),
                                             prelink_newline);
     }
   if(prelink_total > 0)
@@ -814,6 +820,8 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
                                             cr->GetWorkingDirectory(),
+                                            cr->GetEscapeOldStyle(),
+                                            cr->GetEscapeAllowMakeVars(),
                                             postbuild_newline);
     }
   if(postbuild_total > 0)

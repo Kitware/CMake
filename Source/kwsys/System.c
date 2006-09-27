@@ -21,19 +21,164 @@
 #endif
 
 #include <string.h> /* strlen */
+#include <ctype.h>  /* isalpha */
+
+#include <stdio.h>
+
+/*
+
+Notes:
+
+Make variable replacements open a can of worms.  Sometimes they should
+be quoted and sometimes not.  Sometimes their replacement values are
+already quoted.
+
+VS variables cause problems.  In order to pass the referenced value
+with spaces the reference must be quoted.  If the variable value ends
+in a backslash then it will escape the ending quote!  In order to make
+the ending backslash appear we need this:
+
+  "$(InputDir)\"
+
+However if there is not a trailing backslash then this will put a
+quote in the value so we need:
+
+  "$(InputDir)"
+
+Make variable references are platform specific so we should probably
+just NOT quote them and let the listfile author deal with it.
+
+*/
 
 /*--------------------------------------------------------------------------*/
-static int kwsysSystemWindowsShellArgumentNeedsEscape(const char* in)
+static int kwsysSystem_Shell__CharIsWhitespace(char c)
 {
-  /* Scan the string for characters that need escaping.  Note that
-     single quotes seem to need escaping for some windows shell
-     environments (mingw32-make shell for example).  Single quotes do
-     not actually need backslash escapes but must be in a
-     double-quoted argument.  */
+  return ((c == ' ') || (c == '\t'));
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysSystem_Shell__CharNeedsQuotesOnUnix(char c)
+{
+  return ((c == '\'') || (c == '`') || (c == ';') ||
+          (c == '&') || (c == '$') || (c == '(') || (c == ')'));
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysSystem_Shell__CharNeedsQuotes(char c, int isUnix, int flags)
+{
+  /* On all platforms quotes are needed to preserve whitespace.  */
+  if(kwsysSystem_Shell__CharIsWhitespace(c))
+    {
+    return 1;
+    }
+
+  if(isUnix)
+    {
+    /* On UNIX several special characters need quotes to preserve them.  */
+    if(kwsysSystem_Shell__CharNeedsQuotesOnUnix(c))
+      {
+      return 1;
+      }
+    }
+  else
+    {
+    /* On Windows single-quotes must be escaped in some make
+       environments, such as in mingw32-make.  */
+    if(flags & kwsysSystem_Shell_Flag_Make)
+      {
+      if(c == '\'')
+        {
+        return 1;
+        }
+      }
+    }
+  return 0;
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysSystem_Shell__CharIsMakeVariableName(char c)
+{
+  return c && (c == '_' || isalpha(((int)c)));
+}
+
+/*--------------------------------------------------------------------------*/
+static const char* kwsysSystem_Shell__SkipMakeVariables(const char* c)
+{
+  while(*c == '$' && *(c+1) == '(')
+    {
+    const char* skip = c+2;
+    while(kwsysSystem_Shell__CharIsMakeVariableName(*skip))
+      {
+      ++skip;
+      }
+    if(*skip == ')')
+      {
+      c = skip+1;
+      }
+    else
+      {
+      break;
+      }
+    }
+  return c;
+}
+
+/*
+Allowing make variable replacements opens a can of worms.  Sometimes
+they should be quoted and sometimes not.  Sometimes their replacement
+values are already quoted or contain escapes.
+
+Some Visual Studio variables cause problems.  In order to pass the
+referenced value with spaces the reference must be quoted.  If the
+variable value ends in a backslash then it will escape the ending
+quote!  In order to make the ending backslash appear we need this:
+
+  "$(InputDir)\"
+
+However if there is not a trailing backslash then this will put a
+quote in the value so we need:
+
+  "$(InputDir)"
+
+This macro decides whether we quote an argument just because it
+contains a make variable reference.  This should be replaced with a
+flag later when we understand applications of this better.
+*/
+#define KWSYS_SYSTEM_SHELL_QUOTE_MAKE_VARIABLES 0
+
+/*--------------------------------------------------------------------------*/
+static int kwsysSystem_Shell__ArgumentNeedsQuotes(const char* in, int isUnix,
+                                                  int flags)
+{
+  /* Scan the string for characters that require quoting.  */
   const char* c;
   for(c=in; *c; ++c)
     {
-    if(*c == ' ' || *c == '\t' || *c == '"' || *c == '\'')
+    /* Look for $(MAKEVAR) syntax if requested.  */
+    if(flags & kwsysSystem_Shell_Flag_AllowMakeVariables)
+      {
+#if KWSYS_SYSTEM_SHELL_QUOTE_MAKE_VARIABLES
+      const char* skip = kwsysSystem_Shell__SkipMakeVariables(c);
+      if(skip != c)
+        {
+        /* We need to quote make variable references to preserve the
+           string with contents substituted in its place.  */
+        return 1;
+        }
+#else
+      /* Skip over the make variable references if any are present.  */
+      c = kwsysSystem_Shell__SkipMakeVariables(c);
+
+      /* Stop if we have reached the end of the string.  */
+      if(!*c)
+        {
+        break;
+        }
+#endif
+      }
+
+    /* Check whether this character needs quotes.  */
+    if(kwsysSystem_Shell__CharNeedsQuotes(*c, isUnix, flags))
       {
       return 1;
       }
@@ -42,130 +187,260 @@ static int kwsysSystemWindowsShellArgumentNeedsEscape(const char* in)
 }
 
 /*--------------------------------------------------------------------------*/
-int kwsysSystem_Windows_ShellArgumentSize(const char* in)
+static int kwsysSystem_Shell__GetArgumentSize(const char* in,
+                                              int isUnix, int flags)
 {
   /* Start with the length of the original argument, plus one for
      either a terminating null or a separating space.  */
-  int length = (int)strlen(in) + 1;
+  int size = (int)strlen(in) + 1;
 
   /* String iterator.  */
   const char* c;
 
   /* Keep track of how many backslashes have been encountered in a row.  */
-  int backslashes = 0;
+  int windows_backslashes = 0;
 
-  /* If nothing needs escaping, we do not need any extra length. */
-  if(!kwsysSystemWindowsShellArgumentNeedsEscape(in))
-    {
-    return length;
-    }
-
-  /* Add 2 for double quotes since spaces are present.  */
-  length += 2;
-
-  /* Scan the string to find characters that need escaping.  */
+  /* Scan the string for characters that require escaping or quoting.  */
   for(c=in; *c; ++c)
     {
-    if(*c == '\\')
+    /* Look for $(MAKEVAR) syntax if requested.  */
+    if(flags & kwsysSystem_Shell_Flag_AllowMakeVariables)
       {
-      /* Found a backslash.  It may need to be escaped later.  */
-      ++backslashes;
+      /* Skip over the make variable references if any are present.  */
+      c = kwsysSystem_Shell__SkipMakeVariables(c);
+
+      /* Stop if we have reached the end of the string.  */
+      if(!*c)
+        {
+        break;
+        }
       }
-    else if(*c == '"')
+
+    /* Check whether this character needs escaping.  */
+    if(isUnix)
       {
-      /* Found a double-quote.  We need to escape it and all
-         immediately preceding backslashes.  */
-      length += backslashes + 1;
-      backslashes = 0;
+      /* On Unix a few special characters need escaping even inside a
+         quoted argument.  */
+      if(*c == '\\' || *c == '"' || *c == '`' || *c == '$')
+        {
+        /* This character needs a backslash to escape it.  */
+        ++size;
+        }
       }
     else
       {
-      /* Found another character.  This eliminates the possibility
-         that any immediately preceding backslashes will be
-         escaped.  */
-      backslashes = 0;
+      /* On Windows only backslashes and double-quotes need escaping.  */
+      if(*c == '\\')
+        {
+        /* Found a backslash.  It may need to be escaped later.  */
+        ++windows_backslashes;
+        }
+      else if(*c == '"')
+        {
+        /* Found a double-quote.  We need to escape it and all
+           immediately preceding backslashes.  */
+        size += windows_backslashes + 1;
+        windows_backslashes = 0;
+        }
+      else
+        {
+        /* Found another character.  This eliminates the possibility
+           that any immediately preceding backslashes will be
+           escaped.  */
+        windows_backslashes = 0;
+        }
+      }
+
+    /* The dollar sign needs special handling in some environments.  */
+    if(*c == '$')
+      {
+      if(flags & kwsysSystem_Shell_Flag_Make)
+        {
+        /* In Makefiles a dollar is written $$ so we need one extra
+           character.  */
+        ++size;
+        }
+      else if(flags & kwsysSystem_Shell_Flag_VSIDE)
+        {
+        /* In a VS IDE a dollar is written "$" so we need two extra
+           characters.  */
+        size += 2;
+        }
       }
     }
 
-  /* We need to escape all ending backslashes. */
-  length += backslashes;
+  /* Check whether the argument needs surrounding quotes.  */
+  if(kwsysSystem_Shell__ArgumentNeedsQuotes(in, isUnix, flags))
+    {
+    /* Surrounding quotes are needed.  Allocate space for them.  */
+    size += 2;
 
-  return length;
+    /* We must escape all ending backslashes when quoting on windows.  */
+    size += windows_backslashes;
+    }
+
+  return size;
 }
 
 /*--------------------------------------------------------------------------*/
-char* kwsysSystem_Windows_ShellArgument(const char* in, char* out)
+static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
+                                            int isUnix, int flags)
 {
   /* String iterator.  */
   const char* c;
 
   /* Keep track of how many backslashes have been encountered in a row.  */
-  int backslashes = 0;
+  int windows_backslashes = 0;
 
-  /* If nothing needs escaping, we can pass the argument verbatim. */
-  if(!kwsysSystemWindowsShellArgumentNeedsEscape(in))
+  /* Whether the argument must be quoted.  */
+  int needQuotes = kwsysSystem_Shell__ArgumentNeedsQuotes(in, isUnix, flags);
+  if(needQuotes)
     {
-    /* Just copy the string.  */
-    for(c=in; *c; ++c)
-      {
-      *out++ = *c;
-      }
-
-    /* Store a terminating null without incrementing.  */
-    *out = 0;
-    return out;
+    /* Add the opening quote for this argument.  */
+    *out++ = '"';
     }
 
-  /* Add the opening double-quote for this argument.  */
-  *out++ = '"';
-
-  /* Add the characters of the argument, possibly escaping them.  */
+  /* Scan the string for characters that require escaping or quoting.  */
   for(c=in; *c; ++c)
     {
-    if(*c == '\\')
+    /* Look for $(MAKEVAR) syntax if requested.  */
+    if(flags & kwsysSystem_Shell_Flag_AllowMakeVariables)
       {
-      /* Found a backslash.  It may need to be escaped later.  */
-      ++backslashes;
-      *out++ = '\\';
-      }
-    else if(*c == '"')
-      {
-      /* Add enough backslashes to escape any that preceded the
-         double-quote.  */
-      while(backslashes > 0)
+      const char* skip = kwsysSystem_Shell__SkipMakeVariables(c);
+      if(skip != c)
         {
-        --backslashes;
+        /* Copy to the end of the make variable references.  */
+        while(c != skip)
+          {
+          *out++ = *c++;
+          }
+
+        /* Stop if we have reached the end of the string.  */
+        if(!*c)
+          {
+          break;
+          }
+        }
+      }
+
+    /* Check whether this character needs escaping.  */
+    if(isUnix)
+      {
+      /* On Unix a few special characters need escaping even inside a
+         quoted argument.  */
+      if(*c == '\\' || *c == '"' || *c == '`' || *c == '$')
+        {
+        /* This character needs a backslash to escape it.  */
         *out++ = '\\';
         }
-
-      /* Add the backslash to escape the double-quote.  */
-      *out++ = '\\';
-
-      /* Add the double-quote itself.  */
-      *out++ = '"';
       }
     else
       {
-      /* We encountered a normal character.  This eliminates any
-         escaping needed for preceding backslashes.  Add the
-         character.  */
-      backslashes = 0;
+      /* On Windows only backslashes and double-quotes need escaping.  */
+      if(*c == '\\')
+        {
+        /* Found a backslash.  It may need to be escaped later.  */
+        ++windows_backslashes;
+        }
+      else if(*c == '"')
+        {
+        /* Found a double-quote.  Escape all immediately preceding
+           backslashes.  */
+        while(windows_backslashes > 0)
+          {
+          --windows_backslashes;
+          *out++ = '\\';
+          }
+
+        /* Add the backslash to escape the double-quote.  */
+        *out++ = '\\';
+        }
+      else
+        {
+        /* We encountered a normal character.  This eliminates any
+           escaping needed for preceding backslashes.  */
+        windows_backslashes = 0;
+        }
+      }
+
+    /* The dollar sign needs special handling in some environments.  */
+    if(*c == '$')
+      {
+      if(flags & kwsysSystem_Shell_Flag_Make)
+        {
+        /* In Makefiles a dollar is written $$.  The make tool will
+           replace it with just $ before passing it to the shell.  */
+        *out++ = '$';
+        *out++ = '$';
+        }
+      else if(flags & kwsysSystem_Shell_Flag_VSIDE)
+        {
+        /* In a VS IDE a dollar is written "$".  If this is written in
+           an un-quoted argument it starts a quoted segment, inserts
+           the $ and ends the segment.  If it is written in a quoted
+           argument it ends quoting, inserts the $ and restarts
+           quoting.  Either way the $ is isolated from surrounding
+           text to avoid looking like a variable reference.  */
+        *out++ = '"';
+        *out++ = '$';
+        *out++ = '"';
+        }
+      else
+        {
+        /* Otherwise a dollar is written just $. */
+        *out++ = '$';
+        }
+      }
+    else
+      {
+      /* Store this character.  */
       *out++ = *c;
       }
     }
 
-  /* Add enough backslashes to escape any trailing ones.  */
-  while(backslashes > 0)
+  if(needQuotes)
     {
-    --backslashes;
-    *out++ = '\\';
-    }
+    /* Add enough backslashes to escape any trailing ones.  */
+    while(windows_backslashes > 0)
+      {
+      --windows_backslashes;
+      *out++ = '\\';
+      }
 
-  /* Add the closing double-quote for this argument.  */
-  *out++ = '"';
+    /* Add the closing quote for this argument.  */
+    *out++ = '"';
+    }
 
   /* Store a terminating null without incrementing.  */
   *out = 0;
 
   return out;
+}
+
+/*--------------------------------------------------------------------------*/
+char* kwsysSystem_Shell_GetArgumentForWindows(const char* in,
+                                              char* out,
+                                              int flags)
+{
+  return kwsysSystem_Shell__GetArgument(in, out, 0, flags);
+}
+
+/*--------------------------------------------------------------------------*/
+char* kwsysSystem_Shell_GetArgumentForUnix(const char* in,
+                                           char* out,
+                                           int flags)
+{
+  return kwsysSystem_Shell__GetArgument(in, out, 1, flags);
+}
+
+/*--------------------------------------------------------------------------*/
+int kwsysSystem_Shell_GetArgumentSizeForWindows(const char* in, int flags)
+{
+  return kwsysSystem_Shell__GetArgumentSize(in, 0, flags);
+}
+
+/*--------------------------------------------------------------------------*/
+int kwsysSystem_Shell_GetArgumentSizeForUnix(const char* in, int flags)
+{
+  return kwsysSystem_Shell__GetArgumentSize(in, 1, flags);
 }

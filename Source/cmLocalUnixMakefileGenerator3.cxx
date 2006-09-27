@@ -899,6 +899,8 @@ cmLocalUnixMakefileGenerator3
     {
     dir = workingDir;
     }
+  bool escapeOldStyle = cc.GetEscapeOldStyle();
+  bool escapeAllowMakeVars = cc.GetEscapeAllowMakeVars();
 
   // Add each command line to the set of commands.
   std::vector<std::string> commands1;
@@ -927,7 +929,15 @@ cmLocalUnixMakefileGenerator3
       for(unsigned int j=1; j < commandLine.size(); ++j)
         {
         cmd += " ";
-        cmd += this->EscapeForShell(commandLine[j].c_str());
+        if(escapeOldStyle)
+          {
+          cmd += this->EscapeForShellOldStyle(commandLine[j].c_str());
+          }
+        else
+          {
+          cmd += this->EscapeForShell(commandLine[j].c_str(),
+                                      escapeAllowMakeVars);
+          }
         }
       commands1.push_back(cmd);
       }

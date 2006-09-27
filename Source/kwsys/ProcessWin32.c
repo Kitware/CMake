@@ -2089,7 +2089,7 @@ int kwsysProcessComputeCommandLength(kwsysProcess* cp,
       {
       /* Add the length of this argument.  It already includes room
          for a separating space or terminating null.  */
-      length += kwsysSystem_Windows_ShellArgumentSize(*arg);
+      length += kwsysSystem_Shell_GetArgumentSizeForWindows(*arg, 0);
       }
     }
 
@@ -2119,7 +2119,7 @@ void kwsysProcessComputeCommandLine(kwsysProcess* cp,
         }
 
       /* Add the current argument.  */
-      cmd = kwsysSystem_Windows_ShellArgument(*arg, cmd);
+      cmd = kwsysSystem_Shell_GetArgumentForWindows(*arg, cmd, 0);
       }
 
     /* Add the terminating null character to the command line.  */

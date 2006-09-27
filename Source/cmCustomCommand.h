@@ -53,6 +53,15 @@ public:
   /** Get the comment string for the command.  */
   const char* GetComment() const;
 
+  /** Set/Get whether old-style escaping should be used.  */
+  bool GetEscapeOldStyle() const;
+  void SetEscapeOldStyle(bool b);
+
+  /** Set/Get whether the build tool can replace variables in
+      arguments to the command.  */
+  bool GetEscapeAllowMakeVars() const;
+  void SetEscapeAllowMakeVars(bool b);
+
   /** set get the used status of the command */ 
   void SetUsed() { this->Used = true;}; 
   bool IsUsed() { return this->Used;};
@@ -63,6 +72,8 @@ private:
   cmCustomCommandLines CommandLines;
   std::string Comment;
   std::string WorkingDirectory;
+  bool EscapeAllowMakeVars;
+  bool EscapeOldStyle;
   bool Used;
 };
 

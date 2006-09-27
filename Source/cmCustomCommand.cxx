@@ -19,6 +19,8 @@
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand()
 {
+  this->EscapeOldStyle = true;
+  this->EscapeAllowMakeVars = false;
   this->Used = false;
 }
 
@@ -30,6 +32,8 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   Comment(r.Comment),
   WorkingDirectory(r.WorkingDirectory)
 {
+  this->EscapeOldStyle = true;
+  this->EscapeAllowMakeVars = false;
   this->Used = false;
 }
 
@@ -45,6 +49,8 @@ cmCustomCommand::cmCustomCommand(const std::vector<std::string>& outputs,
   Comment(comment?comment:""),
   WorkingDirectory(workingDirectory?workingDirectory:"")
 {
+  this->EscapeOldStyle = true;
+  this->EscapeAllowMakeVars = false;
   this->Used = false;
 }
 
@@ -80,4 +86,28 @@ const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
 const char* cmCustomCommand::GetComment() const
 {
   return this->Comment.c_str();
+}
+
+//----------------------------------------------------------------------------
+bool cmCustomCommand::GetEscapeOldStyle() const
+{
+  return this->EscapeOldStyle;
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::SetEscapeOldStyle(bool b)
+{
+  this->EscapeOldStyle = b;
+}
+
+//----------------------------------------------------------------------------
+bool cmCustomCommand::GetEscapeAllowMakeVars() const
+{
+  return this->EscapeAllowMakeVars;
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::SetEscapeAllowMakeVars(bool b)
+{
+  this->EscapeAllowMakeVars = b;
 }

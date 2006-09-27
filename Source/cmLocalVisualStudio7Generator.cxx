@@ -1184,7 +1184,9 @@ void cmLocalVisualStudio7Generator
         // Construct the entire set of commands in one string.
         std::string script = 
           this->ConstructScript(command->GetCommandLines(),
-                                command->GetWorkingDirectory());
+                                command->GetWorkingDirectory(),
+                                command->GetEscapeOldStyle(),
+                                command->GetEscapeAllowMakeVars());
         std::string comment = this->ConstructComment(*command);
         const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
         this->WriteCustomRule(fout, source.c_str(), script.c_str(),
@@ -1391,8 +1393,11 @@ void cmLocalVisualStudio7Generator
       fout << "\nCommandLine=\"";
       init = true;
       }
-    std::string script = 
-      this->ConstructScript(cr->GetCommandLines(), cr->GetWorkingDirectory());
+    std::string script =
+      this->ConstructScript(cr->GetCommandLines(),
+                            cr->GetWorkingDirectory(),
+                            cr->GetEscapeOldStyle(),
+                            cr->GetEscapeAllowMakeVars());
     fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)
@@ -1413,8 +1418,11 @@ void cmLocalVisualStudio7Generator
       fout << "\nCommandLine=\"";
       init = true;
       }
-    std::string script = this->ConstructScript(cr->GetCommandLines(),
-                                               cr->GetWorkingDirectory());
+    std::string script =
+      this->ConstructScript(cr->GetCommandLines(),
+                            cr->GetWorkingDirectory(),
+                            cr->GetEscapeOldStyle(),
+                            cr->GetEscapeAllowMakeVars());
     fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)
@@ -1435,8 +1443,11 @@ void cmLocalVisualStudio7Generator
       fout << "\nCommandLine=\"";
       init = true;
       }
-    std::string script = 
-      this->ConstructScript(cr->GetCommandLines(), cr->GetWorkingDirectory());
+    std::string script =
+      this->ConstructScript(cr->GetCommandLines(),
+                            cr->GetWorkingDirectory(),
+                            cr->GetEscapeOldStyle(),
+                            cr->GetEscapeAllowMakeVars());
     fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)
