@@ -30,10 +30,10 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   Depends(r.Depends),
   CommandLines(r.CommandLines),
   Comment(r.Comment),
-  WorkingDirectory(r.WorkingDirectory)
+  WorkingDirectory(r.WorkingDirectory),
+  EscapeOldStyle(r.EscapeOldStyle),
+  EscapeAllowMakeVars(r.EscapeAllowMakeVars)
 {
-  this->EscapeOldStyle = true;
-  this->EscapeAllowMakeVars = false;
   this->Used = false;
 }
 
