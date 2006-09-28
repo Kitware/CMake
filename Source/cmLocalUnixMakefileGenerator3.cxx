@@ -161,8 +161,10 @@ void cmLocalUnixMakefileGenerator3
 void cmLocalUnixMakefileGenerator3::WriteAllProgressVariable()
 {
   // write the top level progress for the all target
+  std::string progressFile = cmake::GetCMakeFilesDirectory();
+  progressFile += "/progress.make";
   std::string progressFileNameFull = 
-    this->ConvertToFullPath("progress.make");
+    this->ConvertToFullPath(progressFile.c_str());
   cmGeneratedFileStream ruleFileStream(progressFileNameFull.c_str());
   if(!ruleFileStream)
     {
@@ -1395,10 +1397,16 @@ void cmLocalUnixMakefileGenerator3
   this->WriteSpecialTargetsTop(ruleFileStream);
 
   // Include the progress variables for the target.
+  std::string progressFile = cmake::GetCMakeFilesDirectory();
+  progressFile += "/progress.make";
+  std::string progressFileNameFull =
+    this->ConvertToFullPath(progressFile.c_str());
   ruleFileStream
     << "# Include the progress variables for this target.\n"
     << this->IncludeDirective << " "
-    << "progress.make\n\n";
+    << this->Convert(progressFileNameFull.c_str(),
+                     cmLocalGenerator::HOME_OUTPUT,
+                     cmLocalGenerator::MAKEFILE) << "\n\n";
   
   // Write all global targets
   this->WriteDivider(ruleFileStream);
