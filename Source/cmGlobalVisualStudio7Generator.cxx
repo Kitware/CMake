@@ -216,7 +216,6 @@ void cmGlobalVisualStudio7Generator::Generate()
 {
   // add a special target that depends on ALL projects for easy build
   // of one configuration only.
-  const char* no_output = 0;
   const char* no_working_dir = 0;
   std::vector<std::string> no_depends;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
@@ -227,7 +226,7 @@ void cmGlobalVisualStudio7Generator::Generate()
     if(gen.size())
       {
       gen[0]->GetMakefile()->
-        AddUtilityCommand("ALL_BUILD", false, no_output, no_depends,
+        AddUtilityCommand("ALL_BUILD", false, no_depends,
                           no_working_dir,
                           "echo", "Build all projects");
       std::string cmake_command = 

@@ -783,7 +783,6 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
 
 //----------------------------------------------------------------------------
 void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
-                                   const char* output,
                                    const std::vector<std::string>& depends,
                                    const char* workingDirectory,
                                    const char* command,
@@ -815,13 +814,12 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   commandLines.push_back(commandLine);
 
   // Call the real signature of this method.
-  this->AddUtilityCommand(utilityName, all, output, workingDirectory, 
+  this->AddUtilityCommand(utilityName, all, workingDirectory, 
                           depends, commandLines);
 }
 
 //----------------------------------------------------------------------------
 void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
-                                   const char* output,
                                    const char* workingDirectory,
                                    const std::vector<std::string>& depends,
                                    const cmCustomCommandLines& commandLines,
@@ -834,10 +832,6 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   target.SetMakefile(this);
   // Store the custom command in the target.
   std::vector<std::string> outputs;
-  if(output)
-    {
-    outputs.push_back(output);
-    }
   cmCustomCommand cc(outputs, depends, commandLines, 0, workingDirectory);
   cc.SetEscapeOldStyle(escapeOldStyle);
   target.GetPostBuildCommands().push_back(cc);

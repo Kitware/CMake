@@ -1300,7 +1300,6 @@ void cmGlobalGenerator::SetupTests()
     // If the file doesn't exist, then ENABLE_TESTING hasn't been run
     if (total_tests > 0)
       {
-      const char* no_output = 0;
       const char* no_working_dir = 0;
       std::vector<std::string> no_depends;
       std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
@@ -1313,7 +1312,7 @@ void cmGlobalGenerator::SetupTests()
           cmMakefile* mf = gen[0]->GetMakefile();
           if(const char* outDir = mf->GetDefinition("CMAKE_CFG_INTDIR"))
             {
-            mf->AddUtilityCommand("RUN_TESTS", false, no_output, no_depends,
+            mf->AddUtilityCommand("RUN_TESTS", false, no_depends,
                                   no_working_dir, 
                                   ctest.c_str(), "-C", outDir);
             }

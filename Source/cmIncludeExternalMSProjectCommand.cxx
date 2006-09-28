@@ -46,10 +46,9 @@ bool cmIncludeExternalMSProjectCommand
     utility_name += args[0];
     std::string path = args[1];
     cmSystemTools::ConvertToUnixSlashes(path);
-    const char* no_output = 0;
     const char* no_working_directory = 0;
     this->Makefile->AddUtilityCommand(utility_name.c_str(), true,
-                                  no_output, depends,
+                                  depends,
                                   no_working_directory,
                                   args[0].c_str(), path.c_str());
     

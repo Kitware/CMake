@@ -183,7 +183,6 @@ public:
    * is run every time the target is built.
    */
   void AddUtilityCommand(const char* utilityName, bool all,
-                         const char* output,
                          const std::vector<std::string>& depends,
                          const char* workingDirectory,
                          const char* command,
@@ -192,7 +191,6 @@ public:
                          const char* arg3=0,
                          const char* arg4=0);
   void AddUtilityCommand(const char* utilityName, bool all,
-                         const char* output,
                          const char* workingDirectory,
                          const std::vector<std::string>& depends,
                          const cmCustomCommandLines& commandLines,

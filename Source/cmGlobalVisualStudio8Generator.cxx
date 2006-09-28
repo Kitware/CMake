@@ -75,7 +75,6 @@ void cmGlobalVisualStudio8Generator::Generate()
 {
   // Add a special target on which all other targets depend that
   // checks the build system and optionally re-runs CMake.
-  const char* no_output = 0;
   const char* no_working_directory = 0;
   std::vector<std::string> no_depends;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
@@ -90,10 +89,10 @@ void cmGlobalVisualStudio8Generator::Generate()
         static_cast<cmLocalVisualStudio7Generator*>(generators[0]);
       cmMakefile* mf = lg->GetMakefile();
       std::string cmake_command = mf->GetRequiredDefinition("CMAKE_COMMAND");
+      cmCustomCommandLines noCommandLines;
       mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, true,
-                            no_output, no_depends,
-                            no_working_directory,
-                            "echo", "Checking build system");
+                            no_working_directory, no_depends,
+                            noCommandLines);
       cmTarget* tgt = mf->FindTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
       if(!tgt)
         {

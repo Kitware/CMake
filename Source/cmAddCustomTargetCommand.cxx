@@ -149,8 +149,7 @@ bool cmAddCustomTargetCommand::InitialPass(
 
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
-  const char* no_output = 0;
-  this->Makefile->AddUtilityCommand(args[0].c_str(), all, no_output,
+  this->Makefile->AddUtilityCommand(args[0].c_str(), all,
                                     working_directory.c_str(), depends,
                                     commandLines, escapeOldStyle);
 
