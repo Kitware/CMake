@@ -70,6 +70,7 @@ private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
+  bool HaveComment;
   std::string Comment;
   std::string WorkingDirectory;
   bool EscapeAllowMakeVars;

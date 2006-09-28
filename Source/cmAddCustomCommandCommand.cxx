@@ -32,8 +32,9 @@ bool cmAddCustomCommandCommand::InitialPass(
       return false;
     }
 
-  std::string source, target, comment, main_dependency,
-    working;
+  std::string source, target, main_dependency, working;
+  std::string comment_buffer;
+  const char* comment = 0;
   std::vector<std::string> depends, outputs, output;
   bool verbatim = false;
 
@@ -178,7 +179,8 @@ bool cmAddCustomCommandCommand::InitialPass(
            outputs.push_back(filename);
            break;
          case doing_comment:
-           comment = copy;
+           comment_buffer = copy;
+           comment = comment_buffer.c_str();
            break;
          default:
            this->SetError("Wrong syntax. Unknown type of argument.");
@@ -223,7 +225,7 @@ bool cmAddCustomCommandCommand::InitialPass(
     std::vector<std::string> no_depends;
     this->Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
                                              commandLines, cctype,
-                                             comment.c_str(), working.c_str(),
+                                             comment, working.c_str(),
                                              escapeOldStyle);
     }
   else if(target.empty())
@@ -231,7 +233,7 @@ bool cmAddCustomCommandCommand::InitialPass(
     // Target is empty, use the output.
     this->Makefile->AddCustomCommandToOutput(output, depends,
                                              main_dependency.c_str(),
-                                             commandLines, comment.c_str(),
+                                             commandLines, comment,
                                              working.c_str(), false,
                                              escapeOldStyle);
     }
@@ -240,7 +242,7 @@ bool cmAddCustomCommandCommand::InitialPass(
     // Use the old-style mode for backward compatibility.
     this->Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
                                              source.c_str(), commandLines,
-                                             comment.c_str());
+                                             comment);
     }
   return true;
 }

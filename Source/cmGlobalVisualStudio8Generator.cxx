@@ -227,20 +227,20 @@ cmGlobalVisualStudio8Generator
 //----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio8Generator
-::WriteProjectConfigurations(std::ostream& fout,
-                             const char* name, bool in_all_build)
+::WriteProjectConfigurations(std::ostream& fout, const char* name,
+                             int targetType)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    fout << "\t\t{" << guid << "}." << *i 
-         << "|" << this->PlatformName << ".ActiveCfg = " 
+    fout << "\t\t{" << guid << "}." << *i
+         << "|" << this->PlatformName << ".ActiveCfg = "
          << *i << "|" << this->PlatformName << "\n";
-    if (in_all_build)
+    if(targetType != cmTarget::GLOBAL_TARGET)
       {
-      fout << "\t\t{" << guid << "}." << *i 
-           << "|" << this->PlatformName << ".Build.0 = " 
+      fout << "\t\t{" << guid << "}." << *i
+           << "|" << this->PlatformName << ".Build.0 = "
            << *i << "|" << this->PlatformName << "\n";
       }
     }

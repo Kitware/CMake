@@ -44,11 +44,11 @@ void cmLocalVisualStudio7Generator::Generate()
   lang.insert("IDL");
   lang.insert("DEF");
   this->CreateCustomTargetsAndCommands(lang);
-  this->FixTargets();
+  this->FixGlobalTargets();
   this->OutputVCProjFile();
 }
 
-void cmLocalVisualStudio7Generator::FixTargets()
+void cmLocalVisualStudio7Generator::FixGlobalTargets()
 {
   // Visual Studio .NET 2003 Service Pack 1 will not run post-build
   // commands for targets in which no sources are built.  Add dummy
@@ -58,8 +58,7 @@ void cmLocalVisualStudio7Generator::FixTargets()
       l != tgts.end(); l++)
     {
     cmTarget& tgt = l->second;
-    if(tgt.GetType() == cmTarget::GLOBAL_TARGET ||
-       tgt.GetType() == cmTarget::UTILITY)
+    if(tgt.GetType() == cmTarget::GLOBAL_TARGET)
       {
       std::vector<std::string> no_depends;
       cmCustomCommandLine force_command;

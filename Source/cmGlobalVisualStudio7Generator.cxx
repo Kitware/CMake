@@ -536,14 +536,14 @@ void cmGlobalVisualStudio7Generator
         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string name = cmds[0][0];
-        this->WriteProjectConfigurations(fout, name.c_str(), 
-                                         l->second.IsInAll());
+        this->WriteProjectConfigurations(fout, name.c_str(),
+                                         l->second.GetType());
         }
       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
-        this->WriteProjectConfigurations(fout, si->c_str(), 
-                                         l->second.IsInAll());
+        this->WriteProjectConfigurations(fout, si->c_str(),
+                                         l->second.GetType());
         ++si;
         }
       }
@@ -651,19 +651,18 @@ cmGlobalVisualStudio7Generator
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
-::WriteProjectConfigurations(std::ostream& fout, 
-                             const char* name, 
-                             bool in_all_build)
+::WriteProjectConfigurations(std::ostream& fout, const char* name,
+                             int targetType)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    fout << "\t\t{" << guid << "}." << *i 
+    fout << "\t\t{" << guid << "}." << *i
          << ".ActiveCfg = " << *i << "|Win32\n";
-    if (in_all_build)
+    if(targetType != cmTarget::GLOBAL_TARGET)
       {
-      fout << "\t\t{" << guid << "}." << *i 
+      fout << "\t\t{" << guid << "}." << *i
            << ".Build.0 = " << *i << "|Win32\n";
       }
     }

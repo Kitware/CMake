@@ -107,6 +107,8 @@ protected:
   // write the driver rule to build target outputs
   void WriteTargetDriverRule(const char* main_output, bool relink);
 
+  void DriveCustomCommands(std::vector<std::string>& depends);
+
   // Return the a string with -F flags on apple
   std::string GetFrameworkFlags();
 
@@ -121,6 +123,8 @@ protected:
   cmLocalUnixMakefileGenerator3 *LocalGenerator;
   cmGlobalGenerator *GlobalGenerator;
   cmMakefile *Makefile;
+
+  bool DriveCustomCommandsOnDepends;
 
   // the full path to the build file
   std::string BuildFileName;

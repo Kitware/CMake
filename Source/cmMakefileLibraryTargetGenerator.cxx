@@ -27,6 +27,12 @@
 #include <memory> // auto_ptr
 
 //----------------------------------------------------------------------------
+cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator()
+{
+  this->DriveCustomCommandsOnDepends = true;
+}
+
+//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
 {
   // create the build.make file and directory, put in the common blocks

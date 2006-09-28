@@ -19,6 +19,7 @@
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand()
 {
+  this->HaveComment = false;
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
   this->Used = false;
@@ -29,6 +30,7 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   Outputs(r.Outputs),
   Depends(r.Depends),
   CommandLines(r.CommandLines),
+  HaveComment(r.HaveComment),
   Comment(r.Comment),
   WorkingDirectory(r.WorkingDirectory),
   EscapeAllowMakeVars(r.EscapeAllowMakeVars),
@@ -41,13 +43,16 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
 cmCustomCommand::cmCustomCommand(const std::vector<std::string>& outputs,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
-                                 const char* comment, 
+                                 const char* comment,
                                  const char* workingDirectory):
   Outputs(outputs),
   Depends(depends),
   CommandLines(commandLines),
+  HaveComment(comment?true:false),
   Comment(comment?comment:""),
-  WorkingDirectory(workingDirectory?workingDirectory:"")
+  WorkingDirectory(workingDirectory?workingDirectory:""),
+  EscapeAllowMakeVars(false),
+  EscapeOldStyle(true)
 {
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
@@ -85,7 +90,8 @@ const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
 //----------------------------------------------------------------------------
 const char* cmCustomCommand::GetComment() const
 {
-  return this->Comment.c_str();
+  const char* no_comment = 0;
+  return this->HaveComment? this->Comment.c_str() : no_comment;
 }
 
 //----------------------------------------------------------------------------

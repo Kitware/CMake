@@ -105,9 +105,9 @@ protected:
                             const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectDepends(std::ostream& fout, 
                            const char* name, const char* path, cmTarget &t);
-  virtual void WriteProjectConfigurations(std::ostream& fout, 
+  virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
-                                          bool in_all);
+                                          int targetType);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void AddPlatformDefinitions(cmMakefile* mf);

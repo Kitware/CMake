@@ -1910,7 +1910,7 @@ cmLocalGenerator::ConstructComment(const cmCustomCommand& cc,
                                    const char* default_comment)
 {
   // Check for a comment provided with the command.
-  if(cc.GetComment() && *cc.GetComment())
+  if(cc.GetComment())
     {
     return cc.GetComment();
     }

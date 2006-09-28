@@ -23,6 +23,8 @@ class cmMakefileLibraryTargetGenerator:
   public cmMakefileTargetGenerator
 {
 public:
+  cmMakefileLibraryTargetGenerator();
+
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
   virtual void WriteRuleFiles();  

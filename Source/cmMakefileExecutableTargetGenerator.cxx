@@ -25,6 +25,12 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
+cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator()
+{
+  this->DriveCustomCommandsOnDepends = true;
+}
+
+//----------------------------------------------------------------------------
 void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 {
   // create the build.make file and directory, put in the common blocks

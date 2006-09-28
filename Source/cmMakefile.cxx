@@ -830,11 +830,21 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   target.SetType(cmTarget::UTILITY, utilityName);
   target.SetInAll(all);
   target.SetMakefile(this);
+
   // Store the custom command in the target.
-  std::vector<std::string> outputs;
-  cmCustomCommand cc(outputs, depends, commandLines, 0, workingDirectory);
-  cc.SetEscapeOldStyle(escapeOldStyle);
-  target.GetPostBuildCommands().push_back(cc);
+  std::string force = this->GetStartOutputDirectory();
+  force += cmake::GetCMakeFilesDirectory();
+  force += "/";
+  force += utilityName;
+  const char* no_main_dependency = 0;
+  const char* empty_comment = "";
+  bool no_replace = false;
+  this->AddCustomCommandToOutput(force.c_str(), depends,
+                                 no_main_dependency,
+                                 commandLines, empty_comment,
+                                 workingDirectory, no_replace,
+                                 escapeOldStyle);
+  target.GetSourceLists().push_back(force);
 
   // Add the target to the set of targets.
   cmTargets::iterator it = 
