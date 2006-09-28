@@ -40,6 +40,7 @@ cmLocalGenerator::cmLocalGenerator()
   this->Parent = 0;
   this->WindowsShell = false;
   this->WindowsVSIDE = false;
+  this->MSYSShell = false;
   this->IgnoreLibPrefix = false;
   this->UseRelativePaths = false;
   this->Configured = false;
@@ -2006,6 +2007,18 @@ std::string cmLocalGenerator::Convert(const char* source,
     if(forceOn && this->WindowsShell)
       {
       cmSystemTools::SetForceUnixPaths(true);
+      }
+
+    // For the MSYS shell convert drive letters to posix paths, so
+    // that c:/some/path becomes /c/some/path.  This is needed to
+    // avoid problems with the shell path translation.
+    if(this->MSYSShell)
+      {
+      if(result.size() > 2 && result[1] == ':')
+        {
+        result[1] = result[0];
+        result[0] = '/';
+        }
       }
     }
   return result;

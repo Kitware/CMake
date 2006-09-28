@@ -274,6 +274,7 @@ protected:
   bool WindowsShell;
   bool WindowsVSIDE;
   bool ForceUnixPath;
+  bool MSYSShell;
   bool UseRelativePaths;
   bool IgnoreLibPrefix;
   bool Configured;

@@ -108,6 +108,13 @@ public:
   void SetWindowsShell(bool v)  {this->WindowsShell = v;}
 
   /**
+   * Set to true if the shell being used is the MSYS shell.
+   * This controls if statements in the makefile and the SHELL variable.
+   * The default is false.
+   */
+  void SetMSYSShell(bool v)  {this->MSYSShell = v;}
+
+  /**
    * If set to true, then NULL is set to nil for non Windows_NT.
    * This uses make syntax used by nmake and borland.
    * The default is false.
