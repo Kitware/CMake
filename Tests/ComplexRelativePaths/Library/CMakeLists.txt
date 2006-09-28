@@ -114,11 +114,6 @@ IF("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
       # OSX does not support preprocessing more than one architecture.
       SET(MAYBE_ALL)
     ENDIF(ARCH_COUNT GREATER 1)
-    IF("${CMAKE_MAKE_PROGRAM}" MATCHES "msys")
-      # Executing make with a full path at an MSYS prompt produces
-      # a bad path conversion and breaks the child make.
-      SET(MAYBE_ALL)
-    ENDIF("${CMAKE_MAKE_PROGRAM}" MATCHES "msys")
 
     # Custom target to try preprocessing invocation.
     ADD_CUSTOM_TARGET(test_preprocess ${MAYBE_ALL}
