@@ -65,8 +65,8 @@ public:
     return
       "  ADD_CUSTOM_TARGET(Name [ALL] [command1 [args1...]]\n"
       "                    [COMMAND command2 [args2...] ...]\n"
-      "                    [DEPENDS depend depend depend ... ])\n"
-      "                    [WORKING_DIRECTORY dir]\n"
+      "                    [DEPENDS depend depend depend ... ]\n"
+      "                    [WORKING_DIRECTORY dir] [VERBATIM])\n"
       "Adds a target with the given name that executes the given commands. "
       "The target has no output file and is ALWAYS CONSIDERED OUT OF DATE "
       "even if the commands try to create a file with the name of the "
@@ -82,7 +82,15 @@ public:
       "If WORKING_DIRECTORY is set, then the command will be run in that "
       "directory. "
       "Dependencies listed with the DEPENDS argument may reference files "
-      "and outputs of custom commands created with ADD_CUSTOM_COMMAND.";
+      "and outputs of custom commands created with ADD_CUSTOM_COMMAND.\n"
+      "If VERBATIM is given then all the arguments to the commands will be "
+      "passed exactly as specified no matter the build tool used. "
+      "Note that one level of escapes is still used by the CMake language "
+      "processor before ADD_CUSTOM_TARGET even sees the arguments. "
+      "Use of VERBATIM is recommended as it enables correct behavior. "
+      "When VERBATIM is not given the behavior is platform specific. "
+      "In the future VERBATIM may be enabled by default. The only reason "
+      "it is an option is to preserve compatibility with older CMake code.";
     }
   
   cmTypeMacro(cmAddCustomTargetCommand, cmCommand);

@@ -176,6 +176,17 @@ SET(CHECK_ARGS
   double\"quote
   "\\;semi-colons\\;"
   "semi\\;colon"
+  `back-ticks`
+  back`tick
+  "(parens)"
+  "(lparen"
+  "rparen)"
+  $dollar-signs$
+  dollar$sign
+  &ampersands&
+  amper&sand
+  \@two-ats\@
+  one@at
   "c:/posix/path/with space"
   "c:\\windows\\path\\with space"
   "'single quotes with space'"
@@ -184,6 +195,17 @@ SET(CHECK_ARGS
   "double\"quote with space"
   "\\;semi-colons with space\\;"
   "semi\\;colon with space"
+  "`back-ticks` with space"
+  "back`tick with space"
+  "(parens) with space"
+  "(lparen with space"
+  "rparen) with space"
+  "$dollar-signs$ with space"
+  "dollar$sign with space"
+  "&ampersands& with space"
+  "amper&sand with space"
+  "\@two-ats\@ with space"
+  "one@at with space"
   )
 FOREACH(arg ${CHECK_ARGS})
   SET(ARG "${arg}")
@@ -199,8 +221,18 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/check_command_line.c.in
                @ONLY IMMEDIATE)
 ADD_EXECUTABLE(check_command_line
   ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c)
-ADD_CUSTOM_TARGET(do_check_command_line #ALL
+ADD_CUSTOM_COMMAND(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/command_line_check
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
   ${CHECK_ARGS}
+  VERBATIM
+  COMMENT "Checking custom command line escapes"
+  )
+ADD_CUSTOM_TARGET(do_check_command_line ALL
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/command_line_check
+  COMMAND ${CMAKE_COMMAND} -E echo "Checking custom target command escapes"
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
+  ${CHECK_ARGS}
+  VERBATIM
   )
 ADD_DEPENDENCIES(do_check_command_line check_command_line)

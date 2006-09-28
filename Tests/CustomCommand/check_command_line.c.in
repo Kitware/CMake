@@ -20,7 +20,7 @@ int main(int argc, const char* argv[])
       }
     else
       {
-      printf("[%s]\n", *a);
+      /*printf("[%s]\n", *a);*/
       }
     }
   if(*a || *e)
@@ -28,5 +28,6 @@ int main(int argc, const char* argv[])
     fprintf(stderr, "Number of arguments does not match expected.\n");
     return 1;
     }
+  printf("Command line escapes work!\n");
   return 0;
 }

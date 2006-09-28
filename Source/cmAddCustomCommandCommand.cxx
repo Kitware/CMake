@@ -35,6 +35,7 @@ bool cmAddCustomCommandCommand::InitialPass(
   std::string source, target, comment, main_dependency,
     working;
   std::vector<std::string> depends, outputs, output;
+  bool verbatim = false;
 
   // Accumulate one command line at a time.
   cmCustomCommandLine currentLine;
@@ -89,6 +90,10 @@ bool cmAddCustomCommandCommand::InitialPass(
     else if(copy == "POST_BUILD")
       {
       cctype = cmTarget::POST_BUILD;
+      }
+    else if(copy == "VERBATIM")
+      {
+      verbatim = true;
       }
     else if(copy == "TARGET")
       {
@@ -211,28 +216,31 @@ bool cmAddCustomCommandCommand::InitialPass(
     }
 
   // Choose which mode of the command to use.
+  bool escapeOldStyle = !verbatim;
   if(source.empty() && output.empty())
     {
     // Source is empty, use the target.
     std::vector<std::string> no_depends;
     this->Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
-                                         commandLines, cctype,
-                                         comment.c_str(), working.c_str());
+                                             commandLines, cctype,
+                                             comment.c_str(), working.c_str(),
+                                             escapeOldStyle);
     }
   else if(target.empty())
     {
     // Target is empty, use the output.
     this->Makefile->AddCustomCommandToOutput(output, depends,
-                                         main_dependency.c_str(),
-                                         commandLines, comment.c_str(),
-                                         working.c_str());
+                                             main_dependency.c_str(),
+                                             commandLines, comment.c_str(),
+                                             working.c_str(), false,
+                                             escapeOldStyle);
     }
   else
     {
     // Use the old-style mode for backward compatibility.
     this->Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
-                                         source.c_str(), commandLines,
-                                         comment.c_str());
+                                             source.c_str(), commandLines,
+                                             comment.c_str());
     }
   return true;
 }

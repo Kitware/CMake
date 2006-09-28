@@ -143,19 +143,22 @@ public:
                                 const std::vector<std::string>& depends,
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
-                                const char* comment, const char* workingDir);
+                                const char* comment, const char* workingDir,
+                                bool escapeOldStyle = true);
   void AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
                                 const char* main_dependency,
                                 const cmCustomCommandLines& commandLines,
                                 const char* comment, const char* workingDir,
-                                bool replace = false);
+                                bool replace = false,
+                                bool escapeOldStyle = true);
   void AddCustomCommandToOutput(const char* output,
                                 const std::vector<std::string>& depends,
                                 const char* main_dependency,
                                 const cmCustomCommandLines& commandLines,
                                 const char* comment, const char* workingDir,
-                                bool replace = false);
+                                bool replace = false,
+                                bool escapeOldStyle = true);
   void AddCustomCommandOldStyle(const char* target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
@@ -192,7 +195,8 @@ public:
                          const char* output,
                          const char* workingDirectory,
                          const std::vector<std::string>& depends,
-                         const cmCustomCommandLines& commandLines);
+                         const cmCustomCommandLines& commandLines,
+                         bool escapeOldStyle = true);
 
   /**
    * Add a link library to the build.

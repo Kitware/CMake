@@ -72,7 +72,7 @@ public:
       "                     [MAIN_DEPENDENCY depend]\n"
       "                     [DEPENDS [depends...]]\n"
       "                     [WORKING_DIRECTORY dir]\n"
-      "                     [COMMENT comment])\n"
+      "                     [COMMENT comment] [VERBATIM])\n"
       "This defines a new command that can be executed during the build "
       "process. The outputs named should be listed as source files in the "
       "target for which they are to be generated. "
@@ -93,7 +93,7 @@ public:
       "                     COMMAND command1 [ARGS] [args1...]\n"
       "                     [COMMAND command2 [ARGS] [args2...] ...]\n"
       "                     [WORKING_DIRECTORY dir]\n"
-      "                     [COMMENT comment])\n"
+      "                     [COMMENT comment] [VERBATIM])\n"
       "This defines a new command that will be associated with "
       "building the specified target. When the command will "
       "happen is determined by which of the following is specified:\n"
@@ -104,7 +104,15 @@ public:
       "Studio 7 or later. For all other generators PRE_BUILD "
       "will be treated as PRE_LINK. "
       "If WORKING_DIRECTORY is specified the command will be executed "
-      "in the directory given.";
+      "in the directory given.\n"
+      "If VERBATIM is given then all the arguments to the commands will be "
+      "passed exactly as specified no matter the build tool used. "
+      "Note that one level of escapes is still used by the CMake language "
+      "processor before ADD_CUSTOM_TARGET even sees the arguments. "
+      "Use of VERBATIM is recommended as it enables correct behavior. "
+      "When VERBATIM is not given the behavior is platform specific. "
+      "In the future VERBATIM may be enabled by default. The only reason "
+      "it is an option is to preserve compatibility with older CMake code.";
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);
