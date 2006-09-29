@@ -907,7 +907,15 @@ const char *cmTarget::GetProperty(const char* prop)
     // variable in the location.
     this->SetProperty("LOCATION", this->GetLocation(0));
     }
-  
+
+  // Per-configuration location can be computed.
+  int len = static_cast<int>(strlen(prop));
+  if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
+    {
+    std::string configName(prop, len-9);
+    this->SetProperty(prop, this->GetLocation(configName.c_str()));
+    }
+
   // the type property returns what type the target is
   if (!strcmp(prop,"TYPE"))
     {
