@@ -1405,7 +1405,7 @@ void cmLocalUnixMakefileGenerator3
     << "# Include the progress variables for this target.\n"
     << this->IncludeDirective << " "
     << this->Convert(progressFileNameFull.c_str(),
-                     cmLocalGenerator::HOME_OUTPUT,
+                     cmLocalGenerator::START_OUTPUT,
                      cmLocalGenerator::MAKEFILE) << "\n\n";
   
   // Write all global targets
