@@ -23,6 +23,8 @@
 #include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
 
+#include <cmsys/SystemTools.hxx>
+
 cmGlobalKdevelopGenerator::cmGlobalKdevelopGenerator()
 {
   // This type of makefile always requires unix style paths
@@ -160,12 +162,32 @@ bool cmGlobalKdevelopGenerator
            si!=sources.end(); si++)
         {
         tmp=(*si)->GetFullPath();
+        std::string headerBasename=cmSystemTools::GetFilenamePath(tmp);
+        headerBasename+="/";
+        headerBasename+=cmSystemTools::GetFilenameWithoutExtension(tmp);
+
         cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
+
         if ((tmp[0]!='/')  && 
             (strstr(tmp.c_str(), 
-                    cmake::GetCMakeFilesDirectoryPostSlash())==0))
+                  cmake::GetCMakeFilesDirectoryPostSlash())==0) &&
+           (cmSystemTools::GetFilenameExtension(tmp)!=".moc"))
           {
           files.insert(tmp);
+
+          // check if there's a matching header around
+          for( std::vector<std::string>::const_iterator ext =  makefile->GetHeaderExtensions().begin();
+               ext !=  makefile->GetHeaderExtensions().end(); ++ext )
+            {
+            std::string hname=headerBasename;
+            hname += ".";
+            hname += *ext;
+            if(cmSystemTools::FileExists(hname.c_str()))
+              {
+              files.insert(hname);
+              break;
+              }
+            }
           }
         }
       for (std::vector<std::string>::const_iterator lt=listFiles.begin();
