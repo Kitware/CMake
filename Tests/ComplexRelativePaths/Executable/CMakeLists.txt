@@ -102,7 +102,7 @@ ADD_CUSTOM_COMMAND(
 )
 
 # Test creating an executable that is not built by default.
-ADD_EXECUTABLE(notInAllExe NOT_IN_ALL notInAllExe.cxx)
+ADD_EXECUTABLE(notInAllExe EXCLUDE_FROM_ALL notInAllExe.cxx)
 TARGET_LINK_LIBRARIES(notInAllExe notInAllLib)
 
 # Test creating a custom target that builds not-in-all targets.

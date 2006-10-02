@@ -44,7 +44,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
       ++s;
       use_macbundle = true;
       }
-    else if(*s == "NOT_IN_ALL")
+    else if(*s == "EXCLUDE_FROM_ALL")
       {
       ++s;
       in_all = false;

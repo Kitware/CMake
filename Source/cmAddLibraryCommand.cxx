@@ -57,7 +57,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
       ++s;
       shared = 2;
       }
-    else if(*s == "NOT_IN_ALL")
+    else if(*s == "EXCLUDE_FROM_ALL")
       {
       ++s;
       in_all = false;
