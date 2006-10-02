@@ -862,12 +862,25 @@ void cmMakefileTargetGenerator
   std::vector<std::string> depends;
   this->LocalGenerator->AppendCustomDepend(depends, cc);
 
+  // Check whether we need to bother checking for a symbolic output.
+  bool need_symbolic = this->GlobalGenerator->GetNeedSymbolicMark();
+
   // Write the rule.
   const std::vector<std::string>& outputs = cc.GetOutputs();
   std::vector<std::string>::const_iterator o = outputs.begin();
+  {
+  bool symbolic = false;
+  if(need_symbolic)
+    {
+    if(cmSourceFile* sf = this->Makefile->GetSource(o->c_str()))
+      {
+      symbolic = sf->GetPropertyAsBool("SYMBOLIC");
+      }
+    }
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       o->c_str(), depends, commands,
-                                      false);
+                                      symbolic);
+  }
 
   // If the rule has multiple outputs, add a rule for the extra
   // outputs to just depend on the first output with no command.  Also
@@ -887,9 +900,17 @@ void cmMakefileTargetGenerator
     }
   for(++o; o != outputs.end(); ++o)
     {
+    bool symbolic = false;
+    if(need_symbolic)
+      {
+      if(cmSourceFile* sf = this->Makefile->GetSource(o->c_str()))
+        {
+        symbolic = sf->GetPropertyAsBool("SYMBOLIC");
+        }
+      }
     this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                         o->c_str(), depends, commands,
-                                        false);
+                                        symbolic);
     gg->AddMultipleOutputPair(o->c_str(), depends[0].c_str());
     }
 }

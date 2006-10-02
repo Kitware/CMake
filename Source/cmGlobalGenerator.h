@@ -156,6 +156,10 @@ public:
   /** Get whether the generator should use a script for link commands.  */
   bool GetUseLinkScript() { return this->UseLinkScript; }
 
+  /** Get whether the generator should produce special marks on rules
+      producing symbolic (non-file) outputs.  */
+  bool GetNeedSymbolicMark() { return this->NeedSymbolicMark; }
+
   /*
    * Determine what program to use for building the project.
    */
@@ -210,6 +214,7 @@ protected:
     const cmCustomCommandLines* commandLines,
     std::vector<std::string> depends, bool depends_on_all = false);
 
+  bool NeedSymbolicMark;
   bool UseLinkScript;
   bool ForceUnixPaths;
   bool ToolSupportsColor;

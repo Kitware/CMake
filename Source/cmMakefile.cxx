@@ -846,6 +846,17 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
                                  escapeOldStyle);
   target.GetSourceLists().push_back(force);
 
+  // The output is not actually created so mark it symbolic.
+  if(cmSourceFile* sf = this->GetSource(force.c_str()))
+    {
+    sf->SetProperty("SYMBOLIC", "1");
+    }
+  else
+    {
+    cmSystemTools::Error("Could not get source file entry for ",
+                         force.c_str());
+    }
+
   // Add the target to the set of targets.
   cmTargets::iterator it = 
     this->Targets.insert(cmTargets::value_type(utilityName,target)).first;

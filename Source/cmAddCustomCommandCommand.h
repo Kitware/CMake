@@ -112,7 +112,10 @@ public:
       "Use of VERBATIM is recommended as it enables correct behavior. "
       "When VERBATIM is not given the behavior is platform specific. "
       "In the future VERBATIM may be enabled by default. The only reason "
-      "it is an option is to preserve compatibility with older CMake code.";
+      "it is an option is to preserve compatibility with older CMake code.\n"
+      "If the output of the custom command is not actually "
+      "created as a file on disk it should be marked as SYMBOLIC with "
+      "SET_SOURCE_FILES_PROPERTIES.";
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);

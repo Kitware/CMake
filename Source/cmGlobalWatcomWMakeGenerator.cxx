@@ -23,6 +23,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->FindMakeProgramFile = "CMakeFindWMake.cmake";
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
+  this->NeedSymbolicMark = true;
   this->EmptyCommandsHack = "@cd .";
 }
 

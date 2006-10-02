@@ -31,6 +31,9 @@ int cmGlobalGenerator::s_TryCompileTimeout = 0;
 
 cmGlobalGenerator::cmGlobalGenerator()
 {
+  // By default the .SYMBOLIC dependency is not needed on symbolic rules.
+  this->NeedSymbolicMark = false;
+
   // by default use the native paths
   this->ForceUnixPaths = false;
 
