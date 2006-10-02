@@ -228,6 +228,8 @@ ADD_CUSTOM_COMMAND(
   VERBATIM
   COMMENT "Checking custom command line escapes"
   )
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/command_line_check
+  PROPERTIES SYMBOLIC 1)
 ADD_CUSTOM_TARGET(do_check_command_line ALL
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/command_line_check
   COMMAND ${CMAKE_COMMAND} -E echo "Checking custom target command escapes"
