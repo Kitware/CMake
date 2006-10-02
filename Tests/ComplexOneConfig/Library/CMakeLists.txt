@@ -103,6 +103,9 @@ SET_SOURCE_FILES_PROPERTIES(file2 PROPERTIES ABSTRACT 1)
 INSTALL_FILES(/tmp .h ${Complex_BINARY_DIR}/cmTestConfigure.h)
 INSTALL_FILES(/tmp .cxx ${Complex_BINARY_DIR}/cmTestConfigure.h)
 
+# Test creating a library that is not built by default.
+ADD_LIBRARY(notInAllLib NOT_IN_ALL notInAllLib.cxx)
+
 # Test generation of preprocessed sources.
 IF("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
   IF(CMAKE_CXX_CREATE_PREPROCESSED_SOURCE)

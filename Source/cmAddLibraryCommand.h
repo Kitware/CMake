@@ -61,7 +61,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_LIBRARY(libname [SHARED | STATIC | MODULE]\n"
+      "  ADD_LIBRARY(libname [SHARED | STATIC | MODULE] [NOT_IN_ALL]\n"
       "              source1 source2 ... sourceN)\n"
       "Adds a library target.  SHARED, STATIC or MODULE keywords are used "
       "to set the library type.  If the keyword MODULE appears, the library "
@@ -69,7 +69,10 @@ public:
       "without dyld, MODULE is treated like SHARED.  If no keywords appear "
       " as the second argument, the type defaults to the current value of "
       "BUILD_SHARED_LIBS.  If this variable is not set, the type defaults "
-      "to STATIC.";
+      "to STATIC.\n"
+      "If NOT_IN_ALL is given the target will not be built by default. "
+      "It will be built only if the user explicitly builds the target or "
+      "another target that requires the target depends on it.";
     }
   
   cmTypeMacro(cmAddLibraryCommand, cmCommand);

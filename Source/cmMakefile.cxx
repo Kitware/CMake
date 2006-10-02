@@ -1281,7 +1281,8 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
 
 
 void cmMakefile::AddLibrary(const char* lname, int shared,
-                            const std::vector<std::string> &srcs)
+                            const std::vector<std::string> &srcs,
+                            bool in_all)
 {
   cmTarget target;
   switch (shared)
@@ -1303,7 +1304,7 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
   target.ClearDependencyInformation( *this, lname );
-  target.SetInAll(true);
+  target.SetInAll(in_all);
   target.GetSourceLists() = srcs;
   target.SetMakefile(this);
   this->AddGlobalLinkInformation(lname, target);
@@ -1313,11 +1314,12 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
 }
 
 cmTarget* cmMakefile::AddExecutable(const char *exeName, 
-                                    const std::vector<std::string> &srcs)
+                                    const std::vector<std::string> &srcs,
+                                    bool in_all)
 {
   cmTarget target;
   target.SetType(cmTarget::EXECUTABLE, exeName);
-  target.SetInAll(true);
+  target.SetInAll(in_all);
   target.GetSourceLists() = srcs;
   target.SetMakefile(this);
   this->AddGlobalLinkInformation(exeName, target);

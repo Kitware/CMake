@@ -62,8 +62,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_EXECUTABLE(exename [WIN32] [MACOSX_BUNDLE] source1\n"
-      "                 source2 ... sourceN)\n"
+      "  ADD_EXECUTABLE(exename [WIN32] [MACOSX_BUNDLE] [NOT_IN_ALL]\n"
+      "                 source1 source2 ... sourceN)\n"
       "This command adds an executable target to the current directory.  "
       "The executable will be built from the list of source files "
       "specified.\n"
@@ -86,6 +86,9 @@ public:
       "  MACOSX_BUNDLE_SHORT_VERSION_STRING\n"
       "  MACOSX_BUNDLE_BUNDLE_VERSION\n"
       "  MACOSX_BUNDLE_COPYRIGHT\n"
+      "If NOT_IN_ALL is given the target will not be built by default. "
+      "It will be built only if the user explicitly builds the target or "
+      "another target that requires the target depends on it."
       ;
     }
 

@@ -176,7 +176,8 @@ public:
    * Add an executable to the build.
    */
   cmTarget* AddExecutable(const char *exename, 
-                          const std::vector<std::string> &srcs);
+                          const std::vector<std::string> &srcs,
+                          bool in_all = true);
 
   /**
    * Add a utility to the build.  A utiltity target is a command that
@@ -285,7 +286,8 @@ public:
    * Set the name of the library.
    */
   void AddLibrary(const char *libname, int shared,
-                  const std::vector<std::string> &srcs);
+                  const std::vector<std::string> &srcs,
+                  bool in_all = true);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**

@@ -28,6 +28,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
   // otherwise it defaults to static library.
   int shared = 
     !cmSystemTools::IsOff(this->Makefile->GetDefinition("BUILD_SHARED_LIBS"));
+  bool in_all = true;
   
   std::vector<std::string>::const_iterator s = args.begin();
 
@@ -56,6 +57,11 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
       ++s;
       shared = 2;
       }
+    else if(*s == "NOT_IN_ALL")
+      {
+      ++s;
+      in_all = false;
+      }
     }
 
   if (s == args.end())
@@ -74,7 +80,8 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
     ++s;
     }
 
-  this->Makefile->AddLibrary(this->LibName.c_str(), shared, srclists);
+  this->Makefile->AddLibrary(this->LibName.c_str(), shared, srclists,
+                             in_all);
   
   return true;
 }

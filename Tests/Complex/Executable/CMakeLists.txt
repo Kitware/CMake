@@ -101,6 +101,14 @@ ADD_CUSTOM_COMMAND(
   DEPENDS ${CMAKE_COMMAND}
 )
 
+# Test creating an executable that is not built by default.
+ADD_EXECUTABLE(notInAllExe NOT_IN_ALL notInAllExe.cxx)
+TARGET_LINK_LIBRARIES(notInAllExe notInAllLib)
+
+# Test creating a custom target that builds not-in-all targets.
+ADD_CUSTOM_TARGET(notInAllCustom)
+ADD_DEPENDENCIES(notInAllCustom notInAllExe)
+
 #
 # Output the files required by 'complex' to a file.
 #
