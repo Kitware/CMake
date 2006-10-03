@@ -337,6 +337,10 @@ const char* SystemTools::GetExecutableExtension()
 
 bool SystemTools::MakeDirectory(const char* path)
 {
+  if(!path)
+    {
+    return false;
+    }
   if(SystemTools::FileExists(path))
     {
     return true;
