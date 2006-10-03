@@ -565,7 +565,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     flagMap.find("DebugInformationFormat");
   if(mi != flagMap.end() && mi->second != "1")
     {
-    fout <<  "\t\t\t\tProgramDatabaseFileName=\""
+    fout <<  "\t\t\t\tProgramDataBaseFileName=\""
          << this->LibraryOutputPath
          << "$(OutDir)/" << libName << ".pdb\"\n";
     }
@@ -803,7 +803,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += "$(OutDir)/";
     temp += libName;
     temp += ".pdb";
-    fout << "\t\t\t\tProgramDatabaseFile=\"" <<
+    fout << "\t\t\t\tProgramDataBaseFile=\"" <<
       this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
     if(strcmp(configName, "Debug") == 0
        || strcmp(configName, "RelWithDebInfo") == 0)
@@ -882,7 +882,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
     this->OutputLibraryDirectories(fout, linkDirs);
     fout << "\"\n";
-    fout << "\t\t\t\tProgramDatabaseFile=\"" << this->LibraryOutputPath
+    fout << "\t\t\t\tProgramDataBaseFile=\"" << this->LibraryOutputPath
          << "$(OutDir)\\" << libName << ".pdb\"\n";
     if(strcmp(configName, "Debug") == 0
        || strcmp(configName, "RelWithDebInfo") == 0)
