@@ -332,7 +332,31 @@ void CPropertyList::OnSelchange()
     }
         
   else
+    {
     DisplayButton(rect);
+    m_nLastBox = 1;
+    m_prevSel = m_curSel;
+    rect.bottom -= 3;
+    rect.right -= 25;
+    if (m_editBox)
+      {
+      m_editBox.MoveWindow(rect);
+      }
+    else
+      { 
+      m_editBox.Create(ES_LEFT | ES_AUTOHSCROLL | WS_VISIBLE 
+                       | WS_CHILD | WS_BORDER,
+                       rect,this,IDC_PROPEDITBOX);
+      m_editBox.SetFont(&m_SSerif8Font);
+      }
+    
+    lBoxSelText = pItem->m_curValue;
+    
+    m_editBox.ShowWindow(SW_SHOW);
+    m_editBox.SetFocus();
+    //set the text in the edit box to the property's current value
+    m_editBox.SetWindowText(lBoxSelText);
+    }
 }
 
 void CPropertyList::DisplayButton(CRect region)
