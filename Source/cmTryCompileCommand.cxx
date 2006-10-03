@@ -178,6 +178,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
         }
       err << "\nSee PROJECT command for help enabling other languages.";
       cmSystemTools::Error(err.str().c_str());
+      fclose(fout);
       return -1;
       }
     std::string langFlags = "CMAKE_";
