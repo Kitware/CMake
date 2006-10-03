@@ -102,6 +102,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
                               kwsysProcessCreateInformation* si, int* readEnd);
 static void kwsysProcessDestroy(kwsysProcess* cp);
 static int kwsysProcessSetupOutputPipeFile(int* p, const char* name);
+static int kwsysProcessSetupOutputPipeNative(int* p, int des[2]);
 static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
                                       kwsysProcessTime* timeoutTime);
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
@@ -216,6 +217,11 @@ struct kwsysProcess_s
   int PipeSharedSTDIN;
   int PipeSharedSTDOUT;
   int PipeSharedSTDERR;
+
+  /* Native pipes provided by the user.  */
+  int PipeNativeSTDIN[2];
+  int PipeNativeSTDOUT[2];
+  int PipeNativeSTDERR[2];
 
   /* The real working directory of this process.  */
   int RealWorkingDirectoryLength;
@@ -470,9 +476,11 @@ int kwsysProcess_SetPipeFile(kwsysProcess* cp, int prPipe, const char* file)
     strcpy(*pfile, file);
     }
 
-  /* If we are redirecting the pipe, do not share it.  */
+  /* If we are redirecting the pipe, do not share it or use a native
+     pipe.  */
   if(*pfile)
     {
+    kwsysProcess_SetPipeNative(cp, prPipe, 0);
     kwsysProcess_SetPipeShared(cp, prPipe, 0);
     }
   return 1;
@@ -494,10 +502,51 @@ void kwsysProcess_SetPipeShared(kwsysProcess* cp, int prPipe, int shared)
     default: return;
     }
 
-  /* If we are sharing the pipe, do not redirect it to a file.  */
+  /* If we are sharing the pipe, do not redirect it to a file or use a
+     native pipe.  */
   if(shared)
     {
     kwsysProcess_SetPipeFile(cp, prPipe, 0);
+    kwsysProcess_SetPipeNative(cp, prPipe, 0);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_SetPipeNative(kwsysProcess* cp, int prPipe, int p[2])
+{
+  int* pPipeNative = 0;
+
+  if(!cp)
+    {
+    return;
+    }
+
+  switch(prPipe)
+    {
+    case kwsysProcess_Pipe_STDIN: pPipeNative = cp->PipeNativeSTDIN; break;
+    case kwsysProcess_Pipe_STDOUT: pPipeNative = cp->PipeNativeSTDOUT; break;
+    case kwsysProcess_Pipe_STDERR: pPipeNative = cp->PipeNativeSTDERR; break;
+    default: return;
+    }
+
+  /* Copy the native pipe descriptors provided.  */
+  if(p)
+    {
+    pPipeNative[0] = p[0];
+    pPipeNative[1] = p[1];
+    }
+  else
+    {
+    pPipeNative[0] = -1;
+    pPipeNative[1] = -1;
+    }
+
+  /* If we are using a native pipe, do not share it or redirect it to
+     a file.  */
+  if(p)
+    {
+    kwsysProcess_SetPipeFile(cp, prPipe, 0);
+    kwsysProcess_SetPipeShared(cp, prPipe, 0);
     }
 }
 
@@ -682,6 +731,19 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     {
     kwsysProcessCleanupDescriptor(&si.StdErr);
     si.StdErr = 2;
+    }
+
+  /* Replace the stderr pipe with the native pipe provided if any.  In
+     this case the select call will report that stderr is closed
+     immediately.  */
+  if(cp->PipeNativeSTDERR[1] >= 0)
+    {
+    if(!kwsysProcessSetupOutputPipeNative(&si.StdErr, cp->PipeNativeSTDERR))
+      {
+      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanupDescriptor(&si.StdErr);
+      return;
+      }
     }
 
   /* The timeout period starts now.  */
@@ -1297,6 +1359,19 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
     {
     si->StdIn = 0;
     }
+  else if(cp->PipeNativeSTDIN[0] >= 0)
+    {
+    si->StdIn = cp->PipeNativeSTDIN[0];
+
+    /* Set close-on-exec flag on the pipe's ends.  The read end will
+       be dup2-ed into the stdin descriptor after the fork but before
+       the exec.  */
+    if((fcntl(cp->PipeNativeSTDIN[0], F_SETFD, FD_CLOEXEC) < 0) ||
+       (fcntl(cp->PipeNativeSTDIN[1], F_SETFD, FD_CLOEXEC) < 0))
+      {
+      return 0;
+      }
+    }
   else
     {
     si->StdIn = -1;
@@ -1338,6 +1413,17 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
     {
     kwsysProcessCleanupDescriptor(&si->StdOut);
     si->StdOut = 1;
+    }
+
+  /* Replace the stdout pipe with the native pipe provided if any.  In
+     this case the select call will report that stdout is closed
+     immediately.  */
+  if(prIndex == cp->NumberOfCommands-1 && cp->PipeNativeSTDOUT[1] >= 0)
+    {
+    if(!kwsysProcessSetupOutputPipeNative(&si->StdOut, cp->PipeNativeSTDOUT))
+      {
+      return 0;
+      }
     }
 
   /* Create the error reporting pipe.  */
@@ -1517,6 +1603,26 @@ static int kwsysProcessSetupOutputPipeFile(int* p, const char* name)
   /* Assign the replacement descriptor.  */
   *p = fout;
   return 1;  
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcessSetupOutputPipeNative(int* p, int des[2])
+{
+  /* Close the existing descriptor.  */
+  kwsysProcessCleanupDescriptor(p);
+
+  /* Set close-on-exec flag on the pipe's ends.  The proper end will
+     be dup2-ed into the standard descriptor number after fork but
+     before exec.  */
+  if((fcntl(des[0], F_SETFD, FD_CLOEXEC) < 0) ||
+     (fcntl(des[1], F_SETFD, FD_CLOEXEC) < 0))
+    {
+    return 0;
+    }
+
+  /* Assign the replacement descriptor.  */
+  *p = des[1];
+  return 1;
 }
 
 /*--------------------------------------------------------------------------*/

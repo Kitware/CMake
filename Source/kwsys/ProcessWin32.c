@@ -105,6 +105,8 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
 static void kwsysProcessDestroy(kwsysProcess* cp, int event);
 static int kwsysProcessSetupOutputPipeFile(PHANDLE handle, const char* name);
 static int kwsysProcessSetupSharedPipe(DWORD nStdHandle, PHANDLE handle);
+static int kwsysProcessSetupPipeNative(PHANDLE handle, HANDLE p[2],
+                                       int isWrite);
 static void kwsysProcessCleanupHandle(PHANDLE h);
 static void kwsysProcessCleanupHandleSafe(PHANDLE h, DWORD nStdHandle);
 static void kwsysProcessCleanup(kwsysProcess* cp, int error);
@@ -246,6 +248,11 @@ struct kwsysProcess_s
   int PipeSharedSTDIN;
   int PipeSharedSTDOUT;
   int PipeSharedSTDERR;
+
+  /* Native pipes provided by the user.  */
+  HANDLE PipeNativeSTDIN[2];
+  HANDLE PipeNativeSTDOUT[2];
+  HANDLE PipeNativeSTDERR[2];
 
   /* Handle to automatically delete the Win9x forwarding executable.  */
   HANDLE Win9xHandle;
@@ -790,9 +797,11 @@ int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, const char* file)
     strcpy(*pfile, file);
     }
 
-  /* If we are redirecting the pipe, do not share it.  */
+  /* If we are redirecting the pipe, do not share it or use a native
+     pipe.  */
   if(*pfile)
     {
+    kwsysProcess_SetPipeNative(cp, pipe, 0);
     kwsysProcess_SetPipeShared(cp, pipe, 0);
     }
 
@@ -815,10 +824,51 @@ void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe, int shared)
     default: return;
     }
 
-  /* If we are sharing the pipe, do not redirect it to a file.  */
+  /* If we are sharing the pipe, do not redirect it to a file or use a
+     native pipe.  */
   if(shared)
     {
     kwsysProcess_SetPipeFile(cp, pipe, 0);
+    kwsysProcess_SetPipeNative(cp, pipe, 0);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_SetPipeNative(kwsysProcess* cp, int pipe, HANDLE p[2])
+{
+  HANDLE* pPipeNative = 0;
+
+  if(!cp)
+    {
+    return;
+    }
+
+  switch(pipe)
+    {
+    case kwsysProcess_Pipe_STDIN: pPipeNative = cp->PipeNativeSTDIN; break;
+    case kwsysProcess_Pipe_STDOUT: pPipeNative = cp->PipeNativeSTDOUT; break;
+    case kwsysProcess_Pipe_STDERR: pPipeNative = cp->PipeNativeSTDERR; break;
+    default: return;
+    }
+
+  /* Copy the native pipe handles provided.  */
+  if(p)
+    {
+    pPipeNative[0] = p[0];
+    pPipeNative[1] = p[1];
+    }
+  else
+    {
+    pPipeNative[0] = 0;
+    pPipeNative[1] = 0;
+    }
+
+  /* If we are using a native pipe, do not share it or redirect it to
+     a file.  */
+  if(p)
+    {
+    kwsysProcess_SetPipeFile(cp, pipe, 0);
+    kwsysProcess_SetPipeShared(cp, pipe, 0);
     }
 }
 
@@ -1012,6 +1062,21 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     {
     if(!kwsysProcessSetupSharedPipe(STD_ERROR_HANDLE,
                                     &si.StartupInfo.hStdError))
+      {
+      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanupHandleSafe(&si.StartupInfo.hStdError,
+                                    STD_ERROR_HANDLE);
+      return;
+      }
+    }
+
+  /* Replace the stderr pipe with the native pipe provided if any.  In
+     this case the pipe thread will still run but never report
+     data.  */
+  if(cp->PipeNativeSTDERR[1])
+    {
+    if(!kwsysProcessSetupPipeNative(&si.StartupInfo.hStdError,
+                                    cp->PipeNativeSTDERR, 1))
       {
       kwsysProcessCleanup(cp, 1);
       kwsysProcessCleanupHandleSafe(&si.StartupInfo.hStdError,
@@ -1622,6 +1687,15 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
       return 0;
       }
     }
+  else if(cp->PipeNativeSTDIN[0])
+    {
+    /* Use the provided native pipe.  */
+    if(!kwsysProcessSetupPipeNative(&si->StartupInfo.hStdInput,
+                                    cp->PipeNativeSTDIN, 0))
+      {
+      return 0;
+      }
+    }
   else
     {
     /* Explicitly give the child no stdin.  */
@@ -1675,6 +1749,18 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     {
     if(!kwsysProcessSetupSharedPipe(STD_OUTPUT_HANDLE,
                                     &si->StartupInfo.hStdOutput))
+      {
+      return 0;
+      }
+    }
+
+  /* Replace the stdout pipe with the native pipe provided if any.  In
+     this case the pipe thread will still run but never report
+     data.  */
+  if(index == cp->NumberOfCommands-1 && cp->PipeNativeSTDOUT[1])
+    {
+    if(!kwsysProcessSetupPipeNative(&si->StartupInfo.hStdOutput,
+                                    cp->PipeNativeSTDOUT, 1))
       {
       return 0;
       }
@@ -1926,6 +2012,25 @@ int kwsysProcessSetupSharedPipe(DWORD nStdHandle, PHANDLE handle)
     *handle = emptyPipe[child_end];
     return 1;
     }
+}
+
+/*--------------------------------------------------------------------------*/
+int kwsysProcessSetupPipeNative(PHANDLE handle, HANDLE p[2], int isWrite)
+{
+  /* Close the existing inherited handle.  */
+  kwsysProcessCleanupHandle(handle);
+
+  /* Create an inherited duplicate of the handle.  This also closes
+     the non-inherited version.  */
+  if(!DuplicateHandle(GetCurrentProcess(), p[isWrite? 1:0],
+                      GetCurrentProcess(), handle,
+                      0, TRUE, (DUPLICATE_CLOSE_SOURCE |
+                                DUPLICATE_SAME_ACCESS)))
+    {
+    return 0;
+    }
+
+  return 1;
 }
 
 /*--------------------------------------------------------------------------*/
