@@ -200,6 +200,15 @@ IF (QT_QMAKE_EXECUTABLE)
    SET(QT4_QMAKE_FOUND FALSE)
    
    EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE} ARGS "-query QT_VERSION" OUTPUT_VARIABLE QTVERSION)
+   # check for qt3 qmake and then try and find qmake-qt4 in the path
+   IF("${QTVERSION}" MATCHES "Unknown")
+     SET(QT_QMAKE_EXECUTABLE NOTFOUND)
+     FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake-qt4 PATHS
+       "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
+       "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/bin"
+       $ENV{QTDIR}/bin
+       )
+   ENDIF("${QTVERSION}" MATCHES "Unknown")
 
    # check that we found the Qt4 qmake, Qt3 qmake output won't match here
    STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" qt_version_tmp "${QTVERSION}")
