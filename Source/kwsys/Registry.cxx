@@ -212,13 +212,13 @@ bool Registry::ReadValue(const char *subkey,
   const char *key,
   const char **value)
 {
-  *value = 0;
   bool res = false;
   bool open = false;
   if ( ! value )
     {
     return res;
     }
+  *value = 0;
   if ( !m_Opened )
     {
     if ( !this->Open(this->GetTopLevel(), subkey,
