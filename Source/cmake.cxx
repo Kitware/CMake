@@ -1331,6 +1331,11 @@ void cmake::SetHomeOutputDirectory(const char* lib)
 
 void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
 {
+  if(!gg)
+    {
+    cmSystemTools::Error("Error SetGlobalGenerator called with null");
+    return;
+    }
   // delete the old generator
   if (this->GlobalGenerator)
     {
