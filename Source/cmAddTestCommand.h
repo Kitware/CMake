@@ -66,7 +66,7 @@ public:
       "been run, this command does nothing.  "
       "The tests are run by the testing subsystem by executing Exename "
       "with the specified arguments.  Exename can be either an executable "
-      "built by built by this project or an arbitrary executable on the "
+      "built by this project or an arbitrary executable on the "
       "system (like tclsh).  The test will be run with the current working "
       "directory set to the CMakeList.txt files corresponding directory "
       "in the binary tree.";
