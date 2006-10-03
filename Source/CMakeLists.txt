@@ -224,7 +224,7 @@ TARGET_LINK_LIBRARIES(CMakeLib cmsys
 
 # On Apple we need Carbon
 IF(APPLE)
-  TARGET_LINK_LIBRARIES(CMakeLib "-framework Carbon")
+  TARGET_LINK_LIBRARIES(CMakeLib "-framework CoreFoundation")
 ENDIF(APPLE)
 
 # On some platforms we need the rpcrt4 library for the VS 7 generators.
