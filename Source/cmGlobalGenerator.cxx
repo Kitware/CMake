@@ -984,7 +984,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
       }
     cur = cur->GetParent();
     }
-  return false;
+  return gen->GetExcludeAll();
 }
 
 
