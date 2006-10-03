@@ -36,9 +36,10 @@ MACRO(KDE3_ADD_DCOP_SKELS _sources)
 
           ADD_CUSTOM_COMMAND(OUTPUT ${_kidl}
           COMMAND ${KDE3_DCOPIDL_EXECUTABLE}
-          ARGS ${CMAKE_CURRENT_SOURCE_DIR}/${_current_FILE} > ${_kidl}
+          ARGS ${_tmp_FILE} > ${_kidl}
           DEPENDS ${_tmp_FILE}
          )
+         
        ENDIF (NOT HAVE_${_basename}_KIDL_RULE)
 
       IF (NOT HAVE_${_basename}_SKEL_RULE)
@@ -75,8 +76,8 @@ MACRO(KDE3_ADD_DCOP_STUBS _sources)
 
         ADD_CUSTOM_COMMAND(OUTPUT ${_kidl}
            COMMAND ${KDE3_DCOPIDL_EXECUTABLE}
-           ARGS ${tmp_FILE} > ${_kidl}
-           DEPENDS ${tmp_FILE}
+           ARGS ${_tmp_FILE} > ${_kidl}
+           DEPENDS ${_tmp_FILE}
            )
 
       ENDIF (NOT HAVE_${_basename}_KIDL_RULE)
