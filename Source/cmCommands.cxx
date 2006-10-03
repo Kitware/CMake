@@ -22,6 +22,7 @@
 #include "cmCreateTestSourceList.cxx"
 #include "cmElseIfCommand.cxx"
 #include "cmEnableLanguageCommand.cxx"
+#include "cmEndMacroCommand.cxx"
 #include "cmEndWhileCommand.cxx"
 #include "cmExecuteProcessCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
@@ -76,6 +77,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmCreateTestSourceList);
   commands.push_back(new cmElseIfCommand);
   commands.push_back(new cmEnableLanguageCommand);
+  commands.push_back(new cmEndMacroCommand);
   commands.push_back(new cmEndWhileCommand);
   commands.push_back(new cmExecuteProcessCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
