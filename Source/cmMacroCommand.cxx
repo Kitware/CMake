@@ -235,6 +235,10 @@ bool cmMacroHelperCommand::InvokeInitialPass
       }
     if(!this->Makefile->ExecuteCommand(newLFF))
       {
+      if(!args[0].FilePath)
+        {
+        args[0].FilePath = "Unknown";
+        }
       cmOStringStream error;
       error << "Error in cmake code at\n"
             << args[0].FilePath << ":" << args[0].Line << ":\n"
