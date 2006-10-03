@@ -42,11 +42,16 @@ IF(NOT CMAKE_COMPILER_IS_GNUCXX)
   SET (CMAKE_CXX_CREATE_ASSEMBLY_SOURCE "<CMAKE_CXX_COMPILER> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
 ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
 
+
+# since .a can be a static or shared library on AIX, we can not do this.
+# at some point if we wanted it, we would have to figure out if a .a is
+# static or shared, then we could add this back:
+
 # Initialize C link type selection flags.  These flags are used when
 # building a shared library, shared module, or executable that links
 # to other libraries to select whether to use the static or shared
 # versions of the libraries.
-FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
-  SET(CMAKE_${type}_LINK_STATIC_C_FLAGS "-bstatic")
-  SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-bdynamic")
-ENDFOREACH(type)
+#FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
+#  SET(CMAKE_${type}_LINK_STATIC_C_FLAGS "-bstatic")
+#  SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-bdynamic")
+#ENDFOREACH(type)
