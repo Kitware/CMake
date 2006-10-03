@@ -72,6 +72,7 @@ void cmGlobalMSYSMakefileGenerator
     {
     gxx = tgxx;
     }
+  mf->AddDefinition("MSYS", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", gcc.c_str());
   mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx.c_str());
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf);
