@@ -95,6 +95,26 @@ const char* cmCustomCommand::GetComment() const
 }
 
 //----------------------------------------------------------------------------
+void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
+{
+  for(cmCustomCommandLines::const_iterator i=commandLines.begin();
+      i != commandLines.end(); ++i)
+    {
+    this->CommandLines.push_back(*i);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::AppendDepends(const std::vector<std::string>& depends)
+{
+  for(std::vector<std::string>::const_iterator i=depends.begin();
+      i != depends.end(); ++i)
+    {
+    this->Depends.push_back(*i);
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmCustomCommand::GetEscapeOldStyle() const
 {
   return this->EscapeOldStyle;

@@ -68,10 +68,12 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.dvi
   )
 
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.h
-  DEPENDS ${PROJECT_BINARY_DIR}/doc1.dvi
   COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1.dvi to doc1temp.h."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1.dvi
                                    ${PROJECT_BINARY_DIR}/doc1temp.h
+  )
+ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.h APPEND
+  DEPENDS ${PROJECT_BINARY_DIR}/doc1.dvi
   COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1temp.h to doc1.h."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1temp.h
                                    ${PROJECT_BINARY_DIR}/doc1.h

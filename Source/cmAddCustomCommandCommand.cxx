@@ -18,6 +18,8 @@
 
 #include "cmTarget.h"
 
+#include "cmSourceFile.h"
+
 // cmAddCustomCommandCommand
 bool cmAddCustomCommandCommand::InitialPass(
   std::vector<std::string> const& args)
@@ -37,6 +39,7 @@ bool cmAddCustomCommandCommand::InitialPass(
   const char* comment = 0;
   std::vector<std::string> depends, outputs, output;
   bool verbatim = false;
+  bool append = false;
 
   // Accumulate one command line at a time.
   cmCustomCommandLine currentLine;
@@ -95,6 +98,10 @@ bool cmAddCustomCommandCommand::InitialPass(
     else if(copy == "VERBATIM")
       {
       verbatim = true;
+      }
+    else if(copy == "APPEND")
+      {
+      append = true;
       }
     else if(copy == "TARGET")
       {
@@ -210,10 +217,38 @@ bool cmAddCustomCommandCommand::InitialPass(
       "Wrong syntax. A TARGET and OUTPUT can not both be specified.");
     return false;
     }
+  if(append && output.empty())
+    {
+    this->SetError("given APPEND option with no OUTPUT.");
+    return false;
+    }
 
   // Make sure the output names and locations are safe.
   if(!this->CheckOutputs(output) || !this->CheckOutputs(outputs))
     {
+    return false;
+    }
+
+  // Check for an append request.
+  if(append)
+    {
+    // Lookup an existing command.
+    if(cmSourceFile* sf =
+       this->Makefile->GetSourceFileWithOutput(output[0].c_str()))
+      {
+      if(cmCustomCommand* cc = sf->GetCustomCommand())
+        {
+        cc->AppendCommands(commandLines);
+        cc->AppendDepends(depends);
+        return true;
+        }
+      }
+
+    // No command for this output exists.
+    cmOStringStream e;
+    e << "given APPEND option with output \"" << output[0].c_str()
+      << "\" which is not already a custom command output.";
+    this->SetError(e.str().c_str());
     return false;
     }
 

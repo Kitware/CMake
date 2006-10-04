@@ -53,6 +53,12 @@ public:
   /** Get the comment string for the command.  */
   const char* GetComment() const;
 
+  /** Append to the list of command lines.  */
+  void AppendCommands(const cmCustomCommandLines& commandLines);
+
+  /** Append to the list of dependencies.  */
+  void AppendDepends(const std::vector<std::string>& depends);
+
   /** Set/Get whether old-style escaping should be used.  */
   bool GetEscapeOldStyle() const;
   void SetEscapeOldStyle(bool b);
