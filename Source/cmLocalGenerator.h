@@ -204,8 +204,11 @@ public:
 
   /** Escape the given string to be used as a command line argument in
       the native build system shell.  Optionally allow the build
-      system to replace make variable references.  */
-  std::string EscapeForShell(const char* str, bool makeVars = false);
+      system to replace make variable references.  Optionally adjust
+      escapes for the special case of passing to the native echo
+      command.  */
+  std::string EscapeForShell(const char* str, bool makeVars = false,
+                             bool forEcho = false);
 
   /** Backwards-compatibility version of EscapeForShell.  */
   std::string EscapeForShellOldStyle(const char* str);

@@ -97,9 +97,6 @@ public:
   void SetMakeSilentFlag(const char* s) { this->MakeSilentFlag = s; }
   std::string &GetMakeSilentFlag() { return this->MakeSilentFlag; }
 
-  /** Set whether the echo command needs its argument quoted.  */
-  void SetEchoNeedsQuote(bool b) { this->EchoNeedsQuote = b; }
-
   /**
    * Set to true if the shell being used is the windows shell.
    * This controls if statements in the makefile and the SHELL variable.
@@ -339,8 +336,6 @@ private:
   bool UnixCD;
   bool PassMakeflags;
   bool SilentNoColon;
-  // Flag for whether echo command needs quotes.
-  bool EchoNeedsQuote;
   //==========================================================================
 
   std::string HomeRelativeOutputPath;

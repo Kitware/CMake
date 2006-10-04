@@ -44,7 +44,6 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->MakefileVariableSize = 0;
   this->IgnoreLibPrefix = false;
   this->PassMakeflags = false;
-  this->EchoNeedsQuote = true;
   this->DefineWindowsNULL = false;
   this->UnixCD = true;
   this->ForceVerboseMakefiles=false;
@@ -1046,24 +1045,14 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
           {
           // Use the native echo command.
           cmd = "@echo ";
-          if(this->EchoNeedsQuote)
-            {
-            cmd += "\"";
-            }
-          cmd += line;
-          if(this->EchoNeedsQuote)
-            {
-            cmd += "\"";
-            }
+          cmd += this->EscapeForShell(line.c_str(), false, true);
           }
         else
           {
           // Use cmake to echo the text in color.
           cmd = "@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) ";
           cmd += color_name;
-          cmd += "\"";
-          cmd += line;
-          cmd += "\"";
+          cmd += this->EscapeForShell(line.c_str());
           }
         commands.push_back(cmd);
         }

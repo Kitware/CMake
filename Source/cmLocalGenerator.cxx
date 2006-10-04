@@ -2278,7 +2278,8 @@ std::string cmLocalGenerator::EscapeForShellOldStyle(const char* str)
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars)
+std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
+                                             bool forEcho)
 {
   // Compute the flags for the target shell environment.
   int flags = 0;
@@ -2293,6 +2294,10 @@ std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars)
   if(makeVars)
     {
     flags |= cmsysSystem_Shell_Flag_AllowMakeVariables;
+    }
+  if(forEcho)
+    {
+    flags |= cmsysSystem_Shell_Flag_EchoWindows;
     }
 
   // Compute the buffer size needed.

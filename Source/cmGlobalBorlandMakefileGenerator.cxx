@@ -43,7 +43,6 @@ void cmGlobalBorlandMakefileGenerator
 cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
 {
   cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetEchoNeedsQuote(false);
   lg->SetIncludeDirective("!include");
   lg->SetWindowsShell(true);
   lg->SetDefineWindowsNULL(true);
