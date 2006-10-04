@@ -47,6 +47,7 @@ do.
 
 */
 
+#include <stddef.h>    /* ptrdiff_t */
 #include <stdio.h>     /* snprintf */
 #include <stdlib.h>    /* malloc, free */
 #include <string.h>    /* strdup, strerror, memset */
@@ -61,6 +62,18 @@ do.
 #include <signal.h>    /* sigaction */
 #include <dirent.h>    /* DIR, dirent */
 #include <ctype.h>     /* isspace */
+
+#if defined(KWSYS_C_HAS_PTRDIFF_T) && KWSYS_C_HAS_PTRDIFF_T
+typedef ptrdiff_t kwsysProcess_ptrdiff_t;
+#else
+typedef int kwsysProcess_ptrdiff_t;
+#endif
+
+#if defined(KWSYS_C_HAS_SSIZE_T) && KWSYS_C_HAS_SSIZE_T
+typedef ssize_t kwsysProcess_ssize_t;
+#else
+typedef int kwsysProcess_ssize_t;
+#endif
 
 /* The number of pipes for the child's output.  The standard stdout
    and stderr pipes are the first two.  One more pipe is used to
@@ -368,8 +381,8 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
     {
     /* Copy each argument string individually.  */
     char const* const* c = command;
-    int n = 0;
-    int i = 0;
+    kwsysProcess_ptrdiff_t n = 0;
+    kwsysProcess_ptrdiff_t i = 0;
     while(*c++);
     n = c - command - 1;
     newCommands[cp->NumberOfCommands] = (char**)malloc((n+1)*sizeof(char*));
@@ -904,7 +917,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
       if(cp->PipeReadEnds[i] >= 0 &&
          FD_ISSET(cp->PipeReadEnds[i], &cp->PipeSet))
         {
-        int n;
+        kwsysProcess_ssize_t n;
 
         /* We are handling this pipe now.  Remove it from the set.  */
         FD_CLR(cp->PipeReadEnds[i], &cp->PipeSet);
@@ -1501,8 +1514,8 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
   /* Block until the child's exec call succeeds and closes the error
      pipe or writes data to the pipe to report an error.  */
   {
-  int total = 0;
-  int n = 1;
+  kwsysProcess_ssize_t total = 0;
+  kwsysProcess_ssize_t n = 1;
   /* Read the entire error message up to the length of our buffer.  */
   while(total < KWSYSPE_PIPE_BUFFER_SIZE && n > 0)
     {
@@ -2404,7 +2417,7 @@ static int kwsysProcessAppendByte(char* local,
   /* Allocate space for the character.  */
   if((*end - *begin) >= *size)
     {
-    int length = *end - *begin;
+    kwsysProcess_ptrdiff_t length = *end - *begin;
     char* newBuffer = (char*)malloc(*size*2);
     if(!newBuffer)
       {
@@ -2442,7 +2455,7 @@ static int kwsysProcessAppendArgument(char** local,
   /* Allocate space for the argument pointer.  */
   if((*end - *begin) >= *size)
     {
-    int length = *end - *begin;
+    kwsysProcess_ptrdiff_t length = *end - *begin;
     char** newPointers = (char**)malloc(*size*2*sizeof(char*));
     if(!newPointers)
       {
@@ -2615,14 +2628,14 @@ static char** kwsysProcessParseVerbatimCommand(const char* command)
      buffer.  */
   if(!failed)
     {
-    int n = pointer_end - pointer_begin;
+    kwsysProcess_ptrdiff_t n = pointer_end - pointer_begin;
     newCommand = (char**)malloc((n+1)*sizeof(char*));
     }
 
   if(newCommand)
     {
     /* Copy the arguments into the new command buffer.  */
-    int n = pointer_end - pointer_begin;
+    kwsysProcess_ptrdiff_t n = pointer_end - pointer_begin;
     memcpy(newCommand, pointer_begin, sizeof(char*)*n);
     newCommand[n] = 0;
     }

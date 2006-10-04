@@ -621,6 +621,15 @@ IF(KWSYS_USE_Process)
   ELSE(NOT UNIX)
     # Use the UNIX implementation.
     SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessUNIX.c)
+
+    # Help ProcessUNIX.c compile properly on all platforms.
+    KWSYS_PLATFORM_C_TEST(KWSYS_C_HAS_PTRDIFF_T
+      "Checking whether C compiler has ptrdiff_t in stddef.h" DIRECT)
+    KWSYS_PLATFORM_C_TEST(KWSYS_C_HAS_SSIZE_T
+      "Checking whether C compiler has ssize_t in unistd.h" DIRECT)
+    SET_SOURCE_FILES_PROPERTIES(ProcessUNIX.c PROPERTIES
+      COMPILE_FLAGS "-DKWSYS_C_HAS_PTRDIFF_T=${KWSYS_C_HAS_PTRDIFF_T} -DKWSYS_C_HAS_SSIZE_T=${KWSYS_C_HAS_SSIZE_T}"
+      )
   ENDIF(NOT UNIX)
 ENDIF(KWSYS_USE_Process)
 
