@@ -37,6 +37,7 @@ cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
   strcpy(this->BSLASHVariable, "\\");
 
   this->NoEscapeMode = false;
+  this->ReplaceAtSyntax = false;
 }
 
 
@@ -113,6 +114,21 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     return this->AddString(cmSystemTools::EscapeQuotes(value).c_str());
     }
   return this->AddString(value);
+}
+
+char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
+{
+  if(this->ReplaceAtSyntax)
+    {
+    return this->ExpandVariable(var);
+    }
+  else
+    {
+    std::string ref = "@";
+    ref += var;
+    ref += "@";
+    return this->AddString(ref.c_str());
+    }
 }
 
 char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)

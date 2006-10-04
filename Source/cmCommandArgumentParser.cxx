@@ -1320,7 +1320,7 @@ yyreduce:
   case 17:
 #line 178 "cmCommandArgumentParser.y"
     {
-  (yyval.str) = yyGetParser->ExpandVariable((yyvsp[0].str));
+  (yyval.str) = yyGetParser->ExpandVariableForAt((yyvsp[0].str));
 }
     break;
 

@@ -193,7 +193,7 @@ cal_DCURLY MultipleIds cal_RCURLY
 |
 cal_ATNAME
 {
-  $<str>$ = yyGetParser->ExpandVariable($<str>1);
+  $<str>$ = yyGetParser->ExpandVariableForAt($<str>1);
 }
 
 MultipleIds:

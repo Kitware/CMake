@@ -570,7 +570,8 @@ public:
                                       bool atOnly = false,
                                       const char* filename = 0,
                                       long line = -1,
-                                      bool removeEmpty = false) const;
+                                      bool removeEmpty = false,
+                                      bool replaceAt = true) const;
 
   /**
    * Remove any remaining variables in the string. Anything with ${var} or

@@ -1662,7 +1662,8 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 bool atOnly,
                                                 const char* filename,
                                                 long line,
-                                                bool removeEmpty) const
+                                                bool removeEmpty,
+                                                bool replaceAt) const
 {
   if ( source.empty() || source.find_first_of("$@\\") == source.npos)
     {
@@ -1681,6 +1682,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
     parser.SetLineFile(line, filename);
     parser.SetEscapeQuotes(escapeQuotes);
     parser.SetNoEscapeMode(noEscapes);
+    parser.SetReplaceAtSyntax(replaceAt);
     int res = parser.ParseString(source.c_str(), 0);
     if ( res )
       {
@@ -2022,7 +2024,8 @@ void cmMakefile::ExpandArguments(
     // Expand the variables in the argument.
     value = i->Value;
     this->ExpandVariablesInString(value, false, false, false, 
-                                  i->FilePath, i->Line);
+                                  i->FilePath, i->Line,
+                                  false, false);
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.

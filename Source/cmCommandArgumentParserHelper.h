@@ -59,6 +59,7 @@ public:
 
   char* ExpandSpecialVariable(const char* key, const char* var);
   char* ExpandVariable(const char* var);
+  char* ExpandVariableForAt(const char* var);
   void SetResult(const char* value);
 
   void SetMakefile(const cmMakefile* mf);
@@ -68,6 +69,7 @@ public:
   void SetLineFile(long line, const char* file);
   void SetEscapeQuotes(bool b) { this->EscapeQuotes = b; }
   void SetNoEscapeMode(bool b) { this->NoEscapeMode = b; }
+  void SetReplaceAtSyntax(bool b) { this->ReplaceAtSyntax = b; }
 
   const char* GetError() { return this->ErrorString.c_str(); } 
   char EmptyVariable[1];
@@ -101,6 +103,7 @@ private:
   bool EscapeQuotes;
   std::string ErrorString;
   bool NoEscapeMode;
+  bool ReplaceAtSyntax;
 };
 
 #endif

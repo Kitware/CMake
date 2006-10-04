@@ -185,7 +185,7 @@ SET(CHECK_ARGS
   dollar$sign
   &ampersands&
   amper&sand
-  \@two-ats\@
+  @two-ats@
   one@at
   "c:/posix/path/with space"
   "c:\\windows\\path\\with space"
@@ -204,7 +204,7 @@ SET(CHECK_ARGS
   "dollar$sign with space"
   "&ampersands& with space"
   "amper&sand with space"
-  "\@two-ats\@ with space"
+  "@two-ats@ with space"
   "one@at with space"
   )
 FOREACH(arg ${CHECK_ARGS})
