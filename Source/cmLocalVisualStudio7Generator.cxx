@@ -609,6 +609,17 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\t\t\t\tInterfaceIdentifierFileName=\"$(InputName)_i.c\"\n";
   fout << "\t\t\t\tProxyFileName=\"$(InputName)_p.c\"/>\n";
   // end of <Tool Name=VCMIDLTool
+  
+  // If we are building a version 8 project file, add a flag telling the
+  // manifest tool to use a workaround for FAT32 file systems, which can cause
+  // an empty manifest to be embedded into the resulting executable.
+  // See CMake bug #2617.
+  if ( this->Version == 8 )
+    {
+    fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCManifestTool\"\n"
+         << "\t\t\t\tUseFAT32Workaround=\"true\"\n"
+         << "\t\t\t/>\n";
+    }
 
   this->OutputTargetRules(fout, target, libName);
   this->OutputBuildTool(fout, configName, libName, target);
