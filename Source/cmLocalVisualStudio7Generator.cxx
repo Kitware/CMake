@@ -1020,7 +1020,7 @@ void cmLocalVisualStudio7Generator::OutputDefineFlags(const char* flags,
     // Double-quotes in the value of the definition must be escaped
     // with a backslash.  The entire definition should be quoted in
     // the generated xml attribute to avoid confusing the VS parser.
-    cmSystemTools::ReplaceString(define, "\"", "\\&quot;");
+    define = this->EscapeForXML(define.c_str());
     // if the define has something in it that is not a letter or a number
     // then quote it
     if(define.
