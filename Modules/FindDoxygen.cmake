@@ -13,8 +13,6 @@ FIND_PROGRAM(DOXYGEN_EXECUTABLE
   PATHS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\doxygen_is1;Inno Setup: App Path]/bin"
   /Applications/Doxygen.app/Contents/Resources
   /Applications/Doxygen.app/Contents/MacOS
-  /usr/bin
-  /usr/local/bin
   DOC "Doxygen documentation generation tool (http://www.doxygen.org)"
 )
 
@@ -48,8 +46,6 @@ FIND_PROGRAM(DOXYGEN_DOT_EXECUTABLE
   /Applications/Graphviz.app/Contents/MacOS
   /Applications/Doxygen.app/Contents/Resources
   /Applications/Doxygen.app/Contents/MacOS
-  /usr/bin
-  /us/local/bin
   DOC "Graphiz Dot tool for using Doxygen"
 )
 
@@ -71,8 +67,6 @@ FIND_PATH(DOXYGEN_DOT_PATH
   /Applications/Graphviz.app/Contents/MacOS
   /Applications/Doxygen.app/Contents/Resources
   /Applications/Doxygen.app/Contents/MacOS
-  /usr/bin
-  /usr/local/bin
   DOC "Path to the Graphviz Dot tool"
 )
 
