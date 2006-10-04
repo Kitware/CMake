@@ -145,7 +145,7 @@ IF(KWSYS_STANDALONE)
 ENDIF(KWSYS_STANDALONE)
 
 # Include helper macros.
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformCxxTests.cmake)
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformTests.cmake)
 INCLUDE(CheckTypeSize)
 
 # Do full dependency headers.
