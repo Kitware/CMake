@@ -1021,7 +1021,19 @@ void cmLocalVisualStudio7Generator::OutputDefineFlags(const char* flags,
     // with a backslash.  The entire definition should be quoted in
     // the generated xml attribute to avoid confusing the VS parser.
     cmSystemTools::ReplaceString(define, "\"", "\\&quot;");
-    fout << "&quot;" << define << "&quot;,";
+    // if the define has something in it that is not a letter or a number
+    // then quote it
+    if(define.
+       find_first_not_of(
+         "-_abcdefghigklmnopqrstuvwxyz1234567890ABCDEFGHIGKLMNOPQRSTUVWXYZ")
+       != define.npos)
+      {
+      fout << "&quot;" << define << "&quot;,";
+      }
+    else
+      {
+      fout << define << ",";
+      }
     if(!done)
       {
       pos = defs.find("-D", nextpos);
