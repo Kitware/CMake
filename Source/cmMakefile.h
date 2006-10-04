@@ -195,7 +195,8 @@ public:
                          const char* workingDirectory,
                          const std::vector<std::string>& depends,
                          const cmCustomCommandLines& commandLines,
-                         bool escapeOldStyle = true);
+                         bool escapeOldStyle = true,
+                         const char* comment = 0);
 
   /**
    * Add a link library to the build.

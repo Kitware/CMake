@@ -823,7 +823,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
                                    const char* workingDirectory,
                                    const std::vector<std::string>& depends,
                                    const cmCustomCommandLines& commandLines,
-                                   bool escapeOldStyle)
+                                   bool escapeOldStyle, const char* comment)
 {
   // Create a target instance for this utility.
   cmTarget target;
@@ -831,17 +831,22 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   target.SetInAll(all);
   target.SetMakefile(this);
 
+  if(!comment)
+    {
+    // Use an empty comment to avoid generation of default comment.
+    comment = "";
+    }
+
   // Store the custom command in the target.
   std::string force = this->GetStartOutputDirectory();
   force += cmake::GetCMakeFilesDirectory();
   force += "/";
   force += utilityName;
   const char* no_main_dependency = 0;
-  const char* empty_comment = "";
   bool no_replace = false;
   this->AddCustomCommandToOutput(force.c_str(), depends,
                                  no_main_dependency,
-                                 commandLines, empty_comment,
+                                 commandLines, comment,
                                  workingDirectory, no_replace,
                                  escapeOldStyle);
   target.GetSourceLists().push_back(force);

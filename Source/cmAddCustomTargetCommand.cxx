@@ -59,12 +59,15 @@ bool cmAddCustomTargetCommand::InitialPass(
   std::vector<std::string> depends;
   std::string working_directory;
   bool verbatim = false;
+  std::string comment_buffer;
+  const char* comment = 0;
 
   // Keep track of parser state.
   enum tdoing {
     doing_command,
     doing_depends,
     doing_working_directory,
+    doing_comment,
     doing_verbatim
   };
   tdoing doing = doing_command;
@@ -99,6 +102,10 @@ bool cmAddCustomTargetCommand::InitialPass(
       doing = doing_verbatim;
       verbatim = true;
       }
+    else if (copy == "COMMENT")
+      {
+      doing = doing_comment;
+      }
     else if(copy == "COMMAND")
       {
       doing = doing_command;
@@ -123,6 +130,10 @@ bool cmAddCustomTargetCommand::InitialPass(
         case doing_depends:
           depends.push_back(copy);
           break;
+         case doing_comment:
+           comment_buffer = copy;
+           comment = comment_buffer.c_str();
+           break;
         default:
           this->SetError("Wrong syntax. Unknown type of argument.");
           return false;
@@ -151,7 +162,7 @@ bool cmAddCustomTargetCommand::InitialPass(
   bool escapeOldStyle = !verbatim;
   this->Makefile->AddUtilityCommand(args[0].c_str(), all,
                                     working_directory.c_str(), depends,
-                                    commandLines, escapeOldStyle);
+                                    commandLines, escapeOldStyle, comment);
 
   return true;
 }

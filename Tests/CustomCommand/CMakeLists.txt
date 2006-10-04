@@ -98,6 +98,7 @@ ADD_CUSTOM_TARGET(TDocument ALL
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1.h
                                    ${PROJECT_BINARY_DIR}/doc2.h
   DEPENDS ${PROJECT_BINARY_DIR}/doc1.h
+  COMMENT "Running top-level TDocument commands"
   )
 
 # Setup a pre- and post-build pair that will fail if not run in the
