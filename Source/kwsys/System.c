@@ -66,6 +66,12 @@ static int kwsysSystem_Shell__CharNeedsQuotesOnUnix(char c)
 /*--------------------------------------------------------------------------*/
 static int kwsysSystem_Shell__CharNeedsQuotes(char c, int isUnix, int flags)
 {
+  /* On Windows the built-in command shell echo never needs quotes.  */
+  if(!isUnix && (flags & kwsysSystem_Shell_Flag_EchoWindows))
+    {
+    return 0;
+    }
+
   /* On all platforms quotes are needed to preserve whitespace.  */
   if(kwsysSystem_Shell__CharIsWhitespace(c))
     {
@@ -227,6 +233,10 @@ static int kwsysSystem_Shell__GetArgumentSize(const char* in,
         ++size;
         }
       }
+    else if(flags & kwsysSystem_Shell_Flag_EchoWindows)
+      {
+      /* On Windows the built-in command shell echo never needs escaping.  */
+      }
     else
       {
       /* On Windows only backslashes and double-quotes need escaping.  */
@@ -333,6 +343,10 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
         /* This character needs a backslash to escape it.  */
         *out++ = '\\';
         }
+      }
+    else if(flags & kwsysSystem_Shell_Flag_EchoWindows)
+      {
+      /* On Windows the built-in command shell echo never needs escaping.  */
       }
     else
       {
