@@ -1,4 +1,4 @@
-SET(KWSYS_PLATFORM_TEST_FILE_C kwsysPlatformTestsC.cxx)
+SET(KWSYS_PLATFORM_TEST_FILE_C kwsysPlatformTestsC.c)
 SET(KWSYS_PLATFORM_TEST_FILE_CXX kwsysPlatformTestsCXX.cxx)
 
 MACRO(KWSYS_PLATFORM_TEST lang var description invert)
