@@ -463,7 +463,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   // cmake
   std::string projectCompatibility = mf->GetDefinition("CMAKE_ROOT");
   projectCompatibility += "/Modules/";
-  projectCompatibility += mf->GetDefinition("PROJECT_NAME");
+  projectCompatibility += mf->GetSafeDefinition("PROJECT_NAME");
   projectCompatibility += "Compatibility.cmake";
   if(cmSystemTools::FileExists(projectCompatibility.c_str()))
     {
