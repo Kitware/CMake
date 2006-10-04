@@ -229,7 +229,7 @@ ADD_CUSTOM_COMMAND(
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
   ${CHECK_ARGS}
   VERBATIM
-  COMMENT "Checking custom command line escapes"
+  COMMENT "Checking custom command line escapes (single'quote)"
   )
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/command_line_check
   PROPERTIES SYMBOLIC 1)
@@ -239,5 +239,6 @@ ADD_CUSTOM_TARGET(do_check_command_line ALL
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
   ${CHECK_ARGS}
   VERBATIM
+  COMMENT "Checking custom target command line escapes ($dollar-signs$)"
   )
 ADD_DEPENDENCIES(do_check_command_line check_command_line)
