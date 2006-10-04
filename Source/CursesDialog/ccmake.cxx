@@ -110,11 +110,14 @@ int main(int argc, char** argv)
     {
     cmake hcm;
     std::vector<cmDocumentationEntry> commands;
+    std::vector<cmDocumentationEntry> generators;
     hcm.GetCommandDocumentation(commands);
+    hcm.GetGeneratorDocumentation(generators);
     doc.SetName("ccmake");
     doc.SetNameSection(cmDocumentationName);
     doc.SetUsageSection(cmDocumentationUsage);
     doc.SetDescriptionSection(cmDocumentationDescription);
+    doc.SetGeneratorsSection(&generators[0]);
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
