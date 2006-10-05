@@ -1716,14 +1716,18 @@ void cmLocalGenerator
     this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_PREFIX"));
   orderLibs.AddLinkPrefix(
     this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_PREFIX"));
+
+  // Import library names should be matched and treated as shared
+  // libraries for the purposes of linking.
+  orderLibs.AddLinkExtension(
+    this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
+    cmOrderLinkDirectories::LinkShared);
   orderLibs.AddLinkExtension(
     this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"),
     cmOrderLinkDirectories::LinkStatic);
   orderLibs.AddLinkExtension(
     this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"),
     cmOrderLinkDirectories::LinkShared);
-  orderLibs.AddLinkExtension(
-    this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"));
   orderLibs.AddLinkExtension(
     this->Makefile->GetDefinition("CMAKE_LINK_LIBRARY_SUFFIX"));
   if(const char* linkSuffixes =
