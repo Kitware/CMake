@@ -253,7 +253,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, " Cannot find any coverage files."
       << std::endl);
-    // No coverage files is a valid thing, so the exit code is 0
+    // No coverage files is a valid thing, so the exit code is 0 
+    cmSystemTools::ChangeDirectory(currentDirectory.c_str());
     return 0;
     }
 
@@ -602,7 +603,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot open coverage summary file." << std::endl);
-
+    cmSystemTools::ChangeDirectory(currentDirectory.c_str());
     return -1;
     }
 
@@ -615,6 +616,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   int logFileCount = 0;
   if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
     {
+    cmSystemTools::ChangeDirectory(currentDirectory.c_str());
     return -1;
     }
   totalCoverageMap::iterator fileIterator;
@@ -650,6 +652,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       logFileCount ++;
       if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
         {
+        cmSystemTools::ChangeDirectory(currentDirectory.c_str());
         return -1;
         }
       }
