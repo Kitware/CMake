@@ -442,26 +442,26 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
     free(s1);
     return TRUE;
     }
-  
-   LPVOID lpMsgBuf;
 
-  FormatMessage( 
-                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                NULL,
-                GetLastError(),
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-                (LPTSTR) &lpMsgBuf,
-                0,
-                NULL 
-                );
-  
-  // Free the buffer.
- 
-  char* str = strcpy(new char[strlen((char*)lpMsgBuf)+1], (char*)lpMsgBuf); 
-  LocalFree( lpMsgBuf );
-  
   output += "CreateProcessError: ";
-  output += str;
+  {
+  /* Format the error message.  */
+  char message[1024];
+  DWORD original = GetLastError();
+  DWORD length = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
+                               FORMAT_MESSAGE_IGNORE_INSERTS, 0, original,
+                               MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                               message, 1023, 0);
+  if(length < 1)
+    {
+    /* FormatMessage failed.  Use a default message.  */
+    _snprintf(message, 1023,
+              "Process execution failed with error 0x%X.  "
+              "FormatMessage failed with error 0x%X",
+              original, GetLastError());
+    }
+  output += message;
+  }
   output += "\n";
   output += "for command: ";
   output += s2;
@@ -471,7 +471,6 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
     output += path;
     }
   output += "\n";
-  delete [] str;
   free(s2);
   free(s1);
   return FALSE;
