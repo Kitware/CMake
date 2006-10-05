@@ -166,6 +166,9 @@ ELSE(STAGE2)
     )
   INSTALL_FILES(/MyTest/include FILES lib3.h)
 
+  # Test optional installation.
+  INSTALL(FILES does_not_exist.h DESTINATION MyTest/include/foo OPTIONAL)
+
   # Test configuration-specific installation.
   INSTALL(FILES lib1.h RENAME lib1release.h CONFIGURATIONS Release
     DESTINATION MyTest/include/Release

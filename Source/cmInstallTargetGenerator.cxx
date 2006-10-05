@@ -27,10 +27,10 @@ cmInstallTargetGenerator
 ::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
                            const char* file_permissions,
                            std::vector<std::string> const& configurations,
-                           const char* component):
+                           const char* component, bool optional):
   Target(&t), Destination(dest), ImportLibrary(implib),
   FilePermissions(file_permissions), Configurations(configurations),
-  Component(component)
+  Component(component), Optional(optional)
 {
   this->Target->SetHaveInstallRule(true);
 }
@@ -162,8 +162,9 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   // Write code to install the target file.
   const char* no_dir_permissions = 0;
   const char* no_rename = 0;
+  bool optional = this->Optional | this->ImportLibrary;
   this->AddInstallRule(os, destination.c_str(), type, fromFile.c_str(),
-                       this->ImportLibrary, properties,
+                       optional, properties,
                        this->FilePermissions.c_str(), no_dir_permissions,
                        this->Configurations,
                        this->Component.c_str(),

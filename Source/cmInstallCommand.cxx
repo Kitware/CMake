@@ -151,6 +151,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   std::vector<std::string> archive_configurations;
   std::vector<std::string> library_configurations;
   std::vector<std::string> runtime_configurations;
+  bool archive_optional = false;
+  bool library_optional = false;
+  bool runtime_optional = false;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "DESTINATION")
@@ -224,6 +227,27 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       archive_settings = false;
       library_settings = false;
       runtime_settings = true;
+      }
+    else if(args[i] == "OPTIONAL")
+      {
+      // Set the optional property.
+      doing_targets = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_component = false;
+      doing_configurations = false;
+      if(archive_settings)
+        {
+        archive_optional = true;
+        }
+      if(library_settings)
+        {
+        library_optional = true;
+        }
+      if(runtime_settings)
+        {
+        runtime_optional = true;
+        }
       }
     else if(doing_targets)
       {
@@ -404,7 +428,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
               new cmInstallTargetGenerator(target, archive_dest.c_str(), true,
                                            archive_permissions.c_str(),
                                            archive_configurations,
-                                           archive_component.c_str()));
+                                           archive_component.c_str(),
+                                           archive_optional));
             }
           if(runtime_destination)
             {
@@ -414,7 +439,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
                                            false,
                                            runtime_permissions.c_str(),
                                            runtime_configurations,
-                                           runtime_component.c_str()));
+                                           runtime_component.c_str(),
+                                           runtime_optional));
             }
           }
         else
@@ -428,7 +454,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
                                            false,
                                            library_permissions.c_str(),
                                            library_configurations,
-                                           library_component.c_str()));
+                                           library_component.c_str(),
+                                           library_optional));
             }
           else
             {
@@ -450,7 +477,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             new cmInstallTargetGenerator(target, archive_dest.c_str(), false,
                                          archive_permissions.c_str(),
                                          archive_configurations,
-                                         archive_component.c_str()));
+                                         archive_component.c_str(),
+                                         archive_optional));
           }
         else
           {
@@ -471,7 +499,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             new cmInstallTargetGenerator(target, library_dest.c_str(), false,
                                          library_permissions.c_str(),
                                          library_configurations,
-                                         library_component.c_str()));
+                                         library_component.c_str(),
+                                         library_optional));
           }
         else
           {
@@ -492,7 +521,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
                                          runtime_permissions.c_str(),
                                          runtime_configurations,
-                                         runtime_component.c_str()));
+                                         runtime_component.c_str(),
+                                         runtime_optional));
           }
         else
           {
@@ -540,6 +570,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   std::string permissions;
   std::vector<std::string> configurations;
   std::string component;
+  bool optional = false;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "DESTINATION")
@@ -591,6 +622,17 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
       doing_configurations = false;
       doing_component = false;
       doing_rename = true;
+      }
+    else if(args[i] == "OPTIONAL")
+      {
+      // Set the optional property.
+      doing_files = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_configurations = false;
+      doing_component = false;
+      doing_rename = false;
+      optional = true;
       }
     else if(doing_files)
       {
@@ -686,7 +728,8 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   this->Makefile->AddInstallGenerator(
     new cmInstallFilesGenerator(files, dest.c_str(), programs,
                                 permissions.c_str(), configurations,
-                                component.c_str(), rename.c_str()));
+                                component.c_str(), rename.c_str(),
+                                optional));
 
   // Tell the global generator about any installation component names
   // specified.

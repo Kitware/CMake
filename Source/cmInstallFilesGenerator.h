@@ -30,7 +30,8 @@ public:
                           const char* file_permissions,
                           std::vector<std::string> const& configurations,
                           const char* component,
-                          const char* rename);
+                          const char* rename,
+                          bool optional = false);
   virtual ~cmInstallFilesGenerator();
 
 protected:
@@ -42,6 +43,7 @@ protected:
   std::vector<std::string> Configurations;
   std::string Component;
   std::string Rename;
+  bool Optional;
 };
 
 #endif
