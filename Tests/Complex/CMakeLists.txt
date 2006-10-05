@@ -91,8 +91,8 @@ ENDIF(${fooCACHE_TEST_VAR2} MATCHES bar)
 # Specify include and lib dirs 
 # (BEFORE is for coverage)
 #
+INCLUDE_DIRECTORIES(SYSTEM Library)
 INCLUDE_DIRECTORIES(
-  Library
   ${Complex_SOURCE_DIR}/../../Source
   ${Complex_BINARY_DIR}/../../Source
 )
@@ -101,7 +101,7 @@ INCLUDE_DIRECTORIES(BEFORE
   ${Complex_BINARY_DIR}
 )
 
-INCLUDE_REGULAR_EXPRESSION("^(cmTest|file|sharedFile).*$" "^cmMissing")
+INCLUDE_REGULAR_EXPRESSION("^(cmTest|file|sharedFile|test).*$" "^cmMissing")
 
 LINK_DIRECTORIES(
   ${Complex_BINARY_DIR}/Library

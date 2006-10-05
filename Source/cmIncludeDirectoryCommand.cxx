@@ -28,6 +28,7 @@ bool cmIncludeDirectoryCommand
   std::vector<std::string>::const_iterator i = args.begin();
 
   bool before = this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_BEFORE");
+  bool system = false;
 
   if ((*i) == "BEFORE")
     {
@@ -42,6 +43,11 @@ bool cmIncludeDirectoryCommand
 
   for(; i != args.end(); ++i)
     {
+    if(*i == "SYSTEM")
+      {
+      system = true;
+      continue;
+      }
     if(i->size() == 0)
       {
       cmSystemTools::Error
@@ -60,6 +66,10 @@ bool cmIncludeDirectoryCommand
         }
       }
     this->Makefile->AddIncludeDirectory(unixPath.c_str(), before);
+    if(system)
+      {
+      this->Makefile->AddSystemIncludeDirectory(unixPath.c_str());
+      }
     }
   return true;
 }

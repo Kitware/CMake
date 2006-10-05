@@ -118,6 +118,11 @@ ADD_DEPENDENCIES(notInAllCustom notInAllExe)
 #
 ADD_SUBDIRECTORY(Temp)
 
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  ADD_EXECUTABLE(testSystemDir testSystemDir.cxx)
+  SET_TARGET_PROPERTIES(testSystemDir PROPERTIES COMPILE_FLAGS "-Werror")
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+
 #
 # Extra coverage.Not used.
 #

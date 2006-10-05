@@ -441,6 +441,12 @@ public:
       this->IncludeDirectories = vec;
     }
 
+  /**
+   * Mark include directories as system directories.
+   */
+  void AddSystemIncludeDirectory(const char* dir);
+  bool IsSystemIncludeDirectory(const char* dir);
+
   /** Expand out any arguements in the vector that have ; separated
    *  strings into multiple arguements.  A new vector is created 
    *  containing the expanded versions of all arguments in argsIn.
@@ -739,7 +745,11 @@ protected:
   // dependency, so they must be vectors (not set).
   std::vector<std::string> IncludeDirectories;
   std::vector<std::string> LinkDirectories;
-  
+
+  // The set of include directories that are marked as system include
+  // directories.
+  std::set<cmStdString> SystemIncludeDirectories;
+
   std::vector<std::string> ListFiles; // list of command files loaded
   std::vector<std::string> OutputFiles; // list of command files loaded
   

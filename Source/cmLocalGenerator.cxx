@@ -1044,6 +1044,17 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     // given once i.e.  -classpath a:b:c
     repeatFlag = false;
     }
+
+  // Support special system include flag if it is available and the
+  // normal flag is repeated for each directory.
+  std::string sysFlagVar = "CMAKE_INCLUDE_SYSTEM_FLAG_";
+  sysFlagVar += lang;
+  const char* sysIncludeFlag = 0;
+  if(repeatFlag)
+    {
+    sysIncludeFlag = this->Makefile->GetDefinition(sysFlagVar.c_str());
+    }
+
   bool flagUsed = false;
   std::set<cmStdString> emitted;
   for(i = includes.begin(); i != includes.end(); ++i)
@@ -1066,7 +1077,15 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     std::string include = *i;
     if(!flagUsed || repeatFlag)
       {
-      includeFlags << includeFlag;
+      if(sysIncludeFlag &&
+         this->Makefile->IsSystemIncludeDirectory(i->c_str()))
+        {
+        includeFlags << sysIncludeFlag;
+        }
+      else
+        {
+        includeFlags << includeFlag;
+        }
       flagUsed = true;
       }
     std::string includePath = this->ConvertToOutputForExisting(i->c_str());

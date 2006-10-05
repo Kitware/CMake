@@ -106,6 +106,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->Tests = mf.Tests;
   this->IncludeDirectories = mf.IncludeDirectories;
   this->LinkDirectories = mf.LinkDirectories;
+  this->SystemIncludeDirectories = mf.SystemIncludeDirectories;
   this->ListFiles = mf.ListFiles;
   this->OutputFiles = mf.OutputFiles;
   this->LinkLibraries = mf.LinkLibraries;
@@ -1025,6 +1026,7 @@ void cmMakefile::InitializeFromParent()
 
   // copy include paths
   this->IncludeDirectories = parent->IncludeDirectories;
+  this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
   
   // define flags
   this->DefineFlags = parent->DefineFlags;
@@ -1148,6 +1150,19 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
       this->IncludeDirectories.insert(this->IncludeDirectories.begin(), inc);
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::AddSystemIncludeDirectory(const char* dir)
+{
+  this->SystemIncludeDirectories.insert(dir);
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefile::IsSystemIncludeDirectory(const char* dir)
+{
+  return (this->SystemIncludeDirectories.find(dir) !=
+          this->SystemIncludeDirectories.end());
 }
 
 void cmMakefile::AddDefinition(const char* name, const char* value)
