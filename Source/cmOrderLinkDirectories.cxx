@@ -189,9 +189,10 @@ void cmOrderLinkDirectories::CreateRegularExpressions()
   // be the library name.  Match index 3 will be the library
   // extension.
   reg = "^(";
-  if(!this->LinkPrefix.empty())
+  for(std::set<cmStdString>::iterator p = this->LinkPrefixes.begin();
+      p != this->LinkPrefixes.end(); ++p)
     {
-    reg += this->LinkPrefix;
+    reg += *p;
     reg += "|";
     }
   reg += ")";

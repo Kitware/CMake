@@ -1712,8 +1712,10 @@ void cmLocalGenerator
   orderLibs.SetLinkTypeInformation(cmOrderLinkDirectories::LinkShared,
                                    static_link_type_flag,
                                    shared_link_type_flag);
-  orderLibs.SetLinkPrefix(
+  orderLibs.AddLinkPrefix(
     this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_PREFIX"));
+  orderLibs.AddLinkPrefix(
+    this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_PREFIX"));
   orderLibs.AddLinkExtension(
     this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"),
     cmOrderLinkDirectories::LinkStatic);

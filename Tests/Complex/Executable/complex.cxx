@@ -108,7 +108,7 @@ bool TestLibraryOrder(bool shouldFail)
   orderLibs.DebugOn();
   orderLibs.AddLinkExtension(".so");
   orderLibs.AddLinkExtension(".a");
-  orderLibs.SetLinkPrefix("lib");
+  orderLibs.AddLinkPrefix("lib");
   cmTargetManifest manifest;
   orderLibs.SetLinkInformation("test", linkLibraries, linkDirectories,
                                manifest, "");

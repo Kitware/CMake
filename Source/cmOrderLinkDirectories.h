@@ -83,11 +83,11 @@ public:
       }
     }
   // should be set from CMAKE_STATIC_LIBRARY_PREFIX
-  void SetLinkPrefix(const char* s)
+  void AddLinkPrefix(const char* s)
     {
     if(s)
       {
-      this->LinkPrefix = s;
+      this->LinkPrefixes.insert(s);
       }
     }
   // Return any warnings if the exist
@@ -164,7 +164,7 @@ private:
   std::vector<cmStdString> SharedLinkExtensions;
   std::vector<cmStdString> LinkExtensions;
   // the names of link prefixes
-  cmStdString LinkPrefix;
+  std::set<cmStdString> LinkPrefixes;
   // set of directories that can not be put in the correct order
   std::set<cmStdString> ImpossibleDirectories;
   // Name of target
