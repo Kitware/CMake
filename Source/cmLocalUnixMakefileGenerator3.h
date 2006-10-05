@@ -131,6 +131,14 @@ public:
   void SetSilentNoColon(bool v)  {this->SilentNoColon = v;}
 
   /**
+   * Set the command to use for native make shell echo.  The value
+   * should include all parts of the command up to the beginning of
+   * the message (including a whitespace separator).
+   */
+  void SetNativeEchoCommand(const char* cmd)
+    { this->NativeEchoCommand = cmd; }
+
+  /**
    * Set the string used to include one makefile into another default
    * is include.
    */
@@ -332,6 +340,7 @@ private:
   std::string ExecutableOutputPath;
   std::string LibraryOutputPath;
   std::string ConfigurationName;
+  std::string NativeEchoCommand;
   bool DefineWindowsNULL;
   bool UnixCD;
   bool PassMakeflags;

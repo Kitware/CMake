@@ -50,6 +50,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->ColorMakefile = false;
   this->SkipPreprocessedSourceRules = false;
   this->SkipAssemblySourceRules = false;
+  this->NativeEchoCommand = "@echo ";
 }
 
 //----------------------------------------------------------------------------
@@ -1044,7 +1045,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
         if(color_name.empty())
           {
           // Use the native echo command.
-          cmd = "@echo ";
+          cmd = this->NativeEchoCommand;
           cmd += this->EscapeForShell(line.c_str(), false, true);
           }
         else
