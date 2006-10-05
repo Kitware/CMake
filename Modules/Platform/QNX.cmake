@@ -1,6 +1,10 @@
 # GCC is the default compiler on QNX 6.3.
 INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)
 
+# The QNX GCC does not seem to have -isystem so remove the flag.
+SET(CMAKE_INCLUDE_SYSTEM_FLAG_C)
+SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
+
 SET(CMAKE_DL_LIBS "")
 SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")
 SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "")
