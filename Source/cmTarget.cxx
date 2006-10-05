@@ -1255,6 +1255,17 @@ void cmTarget::GetFullNameInternal(TargetType type,
   // Append the per-configuration postfix.
   outBase += configPostfix?configPostfix:"";
 
+  // Name shared libraries with their version number on some platforms.
+  if(const char* version = this->GetProperty("VERSION"))
+    {
+    if(type == cmTarget::SHARED_LIBRARY && !implib &&
+       this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION"))
+      {
+      outBase += "-";
+      outBase += version;
+      }
+    }
+
   // Append the suffix.
   outSuffix = targetSuffix?targetSuffix:"";
 }

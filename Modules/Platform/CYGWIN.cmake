@@ -28,6 +28,9 @@ SET(CMAKE_C_CREATE_SHARED_LIBRARY
 SET(CMAKE_CXX_CREATE_SHARED_LIBRARY
   "<CMAKE_CXX_COMPILER> <LANGUAGE_COMPILE_FLAGS> <CMAKE_SHARED_LIBRARY_CXX_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> <OBJECTS> <LINK_LIBRARIES>")
 
+# Shared libraries on cygwin can be named with their version number.
+SET(CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION 1)
+
 # Initialize C link type selection flags.  These flags are used when
 # building a shared library, shared module, or executable that links
 # to other libraries to select whether to use the static or shared
