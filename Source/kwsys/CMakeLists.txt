@@ -501,8 +501,25 @@ INCLUDE_DIRECTORIES(${KWSYS_HEADER_ROOT})
 # Create STL header wrappers to block warnings in the STL headers and
 # give standard names by which they may be included.
 SET(KWSYS_STL_HEADER_EXTRA_string 1)
-FOREACH(header algorithm deque iterator list map numeric queue set stack string
-               utility vector memory functional)
+FOREACH(header
+  algorithm
+  deque
+  exception
+  functional
+  iterator
+  list
+  map
+  memory
+  new
+  numeric
+  queue
+  set
+  stack
+  stdexcept
+  string
+  utility
+  vector
+  )
   # Configure the header wrapper.
   SET(KWSYS_STL_HEADER "${header}")
   IF(KWSYS_STL_HEADER_EXTRA_${header})
