@@ -111,6 +111,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 
 cmake::cmake()
 {
+  this->DebugOutput = false;
   this->DebugTryCompile = false;
   this->ClearBuildSystem = false;
   this->FileComparison = new cmFileTimeComparison;
@@ -445,6 +446,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       std::cout << "debug trycompile on\n";
       this->DebugTryCompileOn();
+      }
+    else if(arg.find("--debug-output",0) == 0)
+      {
+      std::cout << "Running with debug output on.\n";
+      this->DebugOutputOn();
       }
     else if(arg.find("-G",0) == 0)
       {

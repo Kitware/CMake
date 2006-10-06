@@ -59,8 +59,14 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
 
   if (send_error || fatal_error)
     {
-    //cmSystemTools::Error(message.c_str());
-    this->SetError(message.c_str());
+    if( !this->Makefile->GetCMakeInstance()->GetDebugOutput())
+      {
+      cmSystemTools::Error(message.c_str());
+      }
+    else
+      {
+      this->SetError(message.c_str());
+      }
     }
   else
     {
@@ -77,6 +83,11 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
     {
     cmSystemTools::SetFatalErrorOccured();
     }
-  return (!send_error && !fatal_error);
+  // if debug is on then retru
+  if(this->Makefile->GetCMakeInstance()->GetDebugOutput())
+    {
+    return (!send_error && !fatal_error);
+    }
+  return true;
 }
 

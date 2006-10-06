@@ -281,6 +281,9 @@ class cmake
   const char* GetCPackCommand();
   const char* GetCMakeCommand() { return this->CMakeCommand.c_str(); }
 
+  // Do we want debug output during the cmake run.
+  bool GetDebugOutput() { return this->DebugOutput; }
+  void DebugOutputOn() { this->DebugOutput = true;}
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString,
@@ -326,13 +329,14 @@ protected:
   static int ExecuteLinkScript(std::vector<std::string>& args);
   
   cmVariableWatch* VariableWatch;
-
+  
 private:
   ProgressCallbackType ProgressCallback;
   void* ProgressCallbackClientData;
   bool Verbose;
   bool InTryCompile;
   bool ScriptMode;
+  bool DebugOutput;
   std::string CMakeCommand;
   std::string CXXEnvironment;
   std::string CCEnvironment;
