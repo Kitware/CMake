@@ -1235,7 +1235,10 @@ void cmDocumentation::CreateManDocumentation()
     }
 
   this->AddSection("COPYRIGHT", cmDocumentationCopyright);
-  this->AddSection("SEE ALSO", &this->SeeAlsoSection[0]);
+  if(!this->SeeAlsoSection.empty())
+    {
+    this->AddSection("SEE ALSO", &this->SeeAlsoSection[0]);
+    }
   this->AddSection("AUTHOR", cmDocumentationAuthor);
 }
 
