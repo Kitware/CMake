@@ -65,6 +65,7 @@ Q190351 and Q150956.
 #endif
 
 #if defined(__BORLANDC__)
+# pragma warn -8004 /* assigned a value that is never used  */
 # pragma warn -8060 /* Assignment inside if() condition.  */
 #endif
 
