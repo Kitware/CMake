@@ -464,9 +464,6 @@ cmGlobalUnixMakefileGenerator3
   std::string makeTarget = lg->GetMakefile()->GetStartOutputDirectory();
   makeTarget += "/";
   makeTarget += pass;
-  makeTarget = lg->Convert(makeTarget.c_str(),
-                           cmLocalGenerator::HOME_OUTPUT,
-                           cmLocalGenerator::MAKEFILE);
 
   // The directory-level rule should depend on the target-level rules
   // for all targets in the directory.
@@ -502,9 +499,6 @@ cmGlobalUnixMakefileGenerator3
     std::string subdir = slg->GetMakefile()->GetStartOutputDirectory();
     subdir += "/";
     subdir += pass;
-    subdir = slg->Convert(subdir.c_str(),
-                          cmLocalGenerator::HOME_OUTPUT,
-                          cmLocalGenerator::MAKEFILE);
     depends.push_back(subdir);
     }
 

@@ -1465,10 +1465,11 @@ void cmLocalUnixMakefileGenerator3
   std::vector<std::string> commands;
 
   // Write the all rule.
-  std::string dir = this->Makefile->GetStartOutputDirectory();
-  dir += "/all";
+  std::string dir;
+  std::string recursiveTarget = this->Makefile->GetStartOutputDirectory();
+  recursiveTarget += "/all";
 
-  dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
+  dir = this->Convert(recursiveTarget.c_str(),HOME_OUTPUT,MAKEFILE);
 
   depends.push_back("cmake_check_build_system");
 
@@ -1487,7 +1488,7 @@ void cmLocalUnixMakefileGenerator3
   std::string mf2Dir = cmake::GetCMakeFilesDirectoryPostSlash();
   mf2Dir += "Makefile2";
   commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),
-                                                dir.c_str()));  
+                                                recursiveTarget.c_str()));
   this->CreateCDCommand(commands,
                         this->Makefile->GetHomeOutputDirectory(),
                         this->Makefile->GetStartOutputDirectory());
@@ -1504,13 +1505,13 @@ void cmLocalUnixMakefileGenerator3
                       depends, commands, true);
 
   // Write the clean rule.
-  dir = this->Makefile->GetStartOutputDirectory();
-  dir += "/clean";
-  dir = this->Convert(dir.c_str(),HOME_OUTPUT,MAKEFILE);
+  recursiveTarget = this->Makefile->GetStartOutputDirectory();
+  recursiveTarget += "/clean";
+  dir = this->Convert(recursiveTarget.c_str(),HOME_OUTPUT,MAKEFILE);
   commands.clear();
   depends.clear();
   commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),
-                                                dir.c_str()));  
+                                                recursiveTarget.c_str()));
   this->CreateCDCommand(commands,
                                 this->Makefile->GetHomeOutputDirectory(),
                                 this->Makefile->GetStartOutputDirectory());
@@ -1523,9 +1524,9 @@ void cmLocalUnixMakefileGenerator3
                       depends, commands, true);
 
   // Write the preinstall rule.
-  dir = this->Makefile->GetStartOutputDirectory();
-  dir += "/preinstall";
-  dir = this->Convert(dir.c_str(), HOME_OUTPUT,MAKEFILE);
+  recursiveTarget = this->Makefile->GetStartOutputDirectory();
+  recursiveTarget += "/preinstall";
+  dir = this->Convert(recursiveTarget.c_str(), HOME_OUTPUT,MAKEFILE);
   commands.clear();
   depends.clear();
   const char* noall =
@@ -1541,7 +1542,7 @@ void cmLocalUnixMakefileGenerator3
     depends.push_back("cmake_check_build_system");
     }
   commands.push_back
-    (this->GetRecursiveMakeCall(mf2Dir.c_str(), dir.c_str()));
+    (this->GetRecursiveMakeCall(mf2Dir.c_str(), recursiveTarget.c_str()));
   this->CreateCDCommand(commands,
                         this->Makefile->GetHomeOutputDirectory(),
                         this->Makefile->GetStartOutputDirectory());
