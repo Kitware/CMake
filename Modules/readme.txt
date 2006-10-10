@@ -16,7 +16,7 @@ XXX_WRAP_YY		If False, do not try to use the relevent CMake wrapping command.
 XXX_YY_FOUND           	If False, optional YY part of XXX sytem is not available.
 XXX_FOUND              	Set to false, or undefined, if we haven't found, or don't want to use XXX.
 
-You do not have to provide all of the above variables. You should provide XXX_FOUND under most circumstances. If XXX is a library, then  XXX_LIBRARIES, should also be defined, and XXX_INCLUDE_DIR should usually be defined (I guess libm.a might be an exception)
+You do not have to provide all of the above variables. You should provide XXX_FOUND under most circumstances. If XXX is a library, then  XXX_LIBRARIES, should also be defined, and XXX_INCLUDE_DIRS should usually be defined (I guess libm.a might be an exception)
 
 The following names should not usually be used in CMakeLists.txt files, but they may be usefully modified in users' CMake Caches to control stuff.
 
