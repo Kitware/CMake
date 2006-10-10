@@ -1048,9 +1048,8 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
                                                       bool relink)
 {
   // Compute the name of the driver target.
-  std::string dir = this->Makefile->GetStartOutputDirectory();
-  dir += "/";
-  dir += this->LocalGenerator->GetTargetDirectory(*this->Target);
+  std::string dir =
+    this->LocalGenerator->GetRelativeTargetDirectory(*this->Target);
   std::string buildTargetRuleName = dir;
   buildTargetRuleName += relink?"/preinstall":"/build";
   buildTargetRuleName = this->Convert(buildTargetRuleName.c_str(),
