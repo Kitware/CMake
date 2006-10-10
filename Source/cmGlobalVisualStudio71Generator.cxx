@@ -294,10 +294,10 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
                                               const char* dir,
                                               cmTarget& t)
 {
-  std::string d = cmSystemTools::ConvertToOutputPath(dir);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << dspname << "\", \""
-       << d << "\\" << dspname << ".vcproj\", \"{"
+       << this->ConvertToSolutionPath(dir)
+       << "\\" << dspname << ".vcproj\", \"{"
        << this->GetGUID(dspname) << "}\"\n";
   fout << "\tProjectSection(ProjectDependencies) = postProject\n";
   this->WriteProjectDepends(fout, dspname, dir, t);
@@ -379,10 +379,9 @@ void cmGlobalVisualStudio71Generator
                        const char* location,
                        const std::vector<std::string>& depends)
 { 
-    std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << name << "\", \""
-       << d << "\", \"{"
+       << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)
        << "}\"\n";
   

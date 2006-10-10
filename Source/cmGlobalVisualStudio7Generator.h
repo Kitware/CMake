@@ -118,6 +118,7 @@ protected:
                             const char* name, const char* path,
                             const std::vector<std::string>& dependencies);
 
+  std::string ConvertToSolutionPath(const char* path);
 
   std::vector<std::string> Configurations;
   std::map<cmStdString, cmStdString> GUIDMap;

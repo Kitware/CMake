@@ -554,6 +554,21 @@ void cmGlobalVisualStudio7Generator
   this->WriteSLNFooter(fout);
 }
 
+//----------------------------------------------------------------------------
+std::string
+cmGlobalVisualStudio7Generator::ConvertToSolutionPath(const char* path)
+{
+  // Convert to backslashes.  Do not use ConvertToOutputPath because
+  // we will add quoting ourselves, and we know these projects always
+  // use windows slashes.
+  std::string d = path;
+  std::string::size_type pos = 0;
+  while((pos = d.find('/', pos)) != d.npos)
+    {
+    d[pos++] = '\\';
+    }
+  return d;
+}
 
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 
@@ -562,10 +577,10 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
                                const char* dspname,
                                const char* dir, cmTarget&)
 {
-  std::string d = cmSystemTools::ConvertToOutputPath(dir);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << dspname << "\", \""
-       << d << "\\" << dspname << ".vcproj\", \"{"
+       << this->ConvertToSolutionPath(dir)
+       << "\\" << dspname << ".vcproj\", \"{"
        << this->GetGUID(dspname) << "}\"\nEndProject\n";
 }
 
@@ -681,7 +696,7 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
   std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << name << "\", \""
-       << d << "\", \"{"
+       << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)
        << "}\"\n";
   fout << "EndProject\n";
