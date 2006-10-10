@@ -819,8 +819,8 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         targetQuoted = '\"';
         targetQuoted += replaceValues.Target;
         targetQuoted += '\"';
-        return targetQuoted;
         }
+      return targetQuoted;
       }
     if(replaceValues.LanguageCompileFlags)
       {
