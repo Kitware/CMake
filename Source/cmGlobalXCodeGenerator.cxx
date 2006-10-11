@@ -1432,18 +1432,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string install_name_dir;
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    // Select whether to generate an install_name directory for the
-    // install tree or the build tree.
-    if(target.GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
-      {
-      install_name_dir =
-        target.GetInstallNameDirForInstallTree(configName);
-      }
-    else
-      {
-      install_name_dir =
-        target.GetInstallNameDirForBuildTree(configName);
-      }
+    // Get the install_name directory for the build tree.
+    install_name_dir = target.GetInstallNameDirForBuildTree(configName);
 
     if(install_name_dir.empty())
       {
