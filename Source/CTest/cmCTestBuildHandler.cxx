@@ -99,6 +99,7 @@ static const char* cmCTestErrorExceptions[] = {
   "candidates are:",
   ": warning",
   ": \\(Warning\\)",
+  ": note",
   "makefile:",
   "Makefile:",
   ":[ \\t]+Where:",
@@ -109,6 +110,7 @@ static const char* cmCTestErrorExceptions[] = {
 
 static const char* cmCTestWarningMatches[] = {
   "([^ :]+):([0-9]+): warning:",
+  "([^ :]+):([0-9]+): note:",
   "^cc[^C]*CC: WARNING File = ([^,]+), Line = ([0-9]+)",
   "^ld([^:])*:([ \\t])*WARNING([^:])*:",
   "([^:]+): warning ([0-9]+):",
