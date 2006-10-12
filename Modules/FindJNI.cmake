@@ -17,9 +17,15 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/local/lib
   /usr/lib/java/jre/lib/i386
   /usr/local/lib/java/jre/lib/i386
+  /usr/local/share/java/jre/lib/i386
   /usr/lib/j2sdk1.4-sun/jre/lib/i386
   /usr/lib/j2sdk1.5-sun/jre/lib/i386
   /opt/sun-jdk-1.5.0.04/jre/lib/amd64
+  /usr/lib/java/jre/lib/amd64
+  /usr/local/lib/java/jre/lib/amd64
+  /usr/local/share/java/jre/lib/amd64
+  /usr/lib/j2sdk1.4-sun/jre/lib/amd64
+  /usr/lib/j2sdk1.5-sun/jre/lib/amd64
   )
 
 SET(JAVA_AWT_INCLUDE_DIRECTORIES
@@ -30,6 +36,7 @@ SET(JAVA_AWT_INCLUDE_DIRECTORIES
   /usr/local/include
   /usr/lib/java/include
   /usr/local/lib/java/include
+  /usr/local/share/java/include
   /usr/lib/j2sdk1.4-sun/include
   /usr/lib/j2sdk1.5-sun/include
   /opt/sun-jdk-1.5.0.04/include

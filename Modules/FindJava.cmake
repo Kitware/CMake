@@ -22,6 +22,7 @@ SET(JAVA_BIN_PATH
   /usr/share/java/bin
   /usr/local/bin
   /usr/local/java/bin
+  /usr/local/java/share/bin
   /usr/java/j2sdk1.4.2_04
   /usr/lib/j2sdk1.4-sun/bin
   /usr/java/j2sdk1.4.2_09/bin
