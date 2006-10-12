@@ -866,6 +866,10 @@ std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
   std::string::size_type pos = flags.find(flag);
   if(pos != flags.npos)
     {
+    if(flags[pos + strlen(flag)] != ' ')
+      {
+      return flags;
+      }
     retFlag = flag;
     // remove the flag
     flags[pos]=' ';
