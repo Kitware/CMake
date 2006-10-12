@@ -232,6 +232,7 @@ int cmCPackNSISGenerator::InitializeInternal()
     this->SetOptionIfNotSet("CPACK_NSIS_DELETE_ICONS", 
                             deleteStr.str().c_str());
     }
+  this->SetOptionIfNotSet("CPACK_NSIS_COMPRESSOR", "lzma");
 
   return this->Superclass::InitializeInternal();
 }
