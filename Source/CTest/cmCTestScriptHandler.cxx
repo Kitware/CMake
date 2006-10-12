@@ -364,7 +364,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->Makefile->AddFunctionBlocker(f);
 
   // finally read in the script
-  if (!this->Makefile->ReadListFile(0, script.c_str()))
+  if (!this->Makefile->ReadListFile(0, script.c_str()) ||
+    cmSystemTools::GetErrorOccuredFlag())
     {
     return 2;
     }
