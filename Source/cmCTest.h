@@ -53,7 +53,7 @@ public:
   typedef std::set<cmStdString> SetOfStrings;
 
   ///! Process Command line arguments
-  int Run(std::vector<std::string>const&, std::string* output = 0);
+  int Run(std::vector<std::string> &, std::string* output = 0);
 
   /**
    * Initialize and finalize testing
@@ -368,6 +368,18 @@ private:
 
   void BlockTestErrorDiagnostics();
 
+
+  //! parse the option after -D and convert it into the appropriate steps
+  bool AddTestsForDashboardType(std::string &targ);
+
+  //! parse and process most common command line arguments
+  void HandleCommandLineArguments(size_t &i, 
+                                  std::vector<std::string> &args);
+
+  //! hande the -S -SP and -SR arguments
+  void HandleScriptArguments(size_t &i, 
+                             std::vector<std::string> &args,
+                             bool &SRArgumentSpecified);
 
   //! Reread the configuration file
   bool UpdateCTestConfiguration();

@@ -1300,6 +1300,218 @@ bool cmCTest::SubmitExtraFiles(const char* cfiles)
   return this->SubmitExtraFiles(files);
 }
 
+
+//-------------------------------------------------------
+// for a -D argument convert the next argument into 
+// the proper list of dashboard steps via SetTest
+bool cmCTest::AddTestsForDashboardType(std::string &targ)
+{
+  if ( targ == "Experimental" )
+    {
+    this->SetTestModel(cmCTest::EXPERIMENTAL);
+    this->SetTest("Start");
+    this->SetTest("Configure");
+    this->SetTest("Build");
+    this->SetTest("Test");
+    this->SetTest("Coverage");
+    this->SetTest("Submit");
+    }
+  else if ( targ == "ExperimentalStart" )
+    {
+    this->SetTestModel(cmCTest::EXPERIMENTAL);
+    this->SetTest("Start");
+    }
+  else if ( targ == "ExperimentalUpdate" )
+    {
+    this->SetTestModel(cmCTest::EXPERIMENTAL);
+    this->SetTest("Update");
+    }
+  else if ( targ == "ExperimentalConfigure" )
+    {
+    this->SetTestModel(cmCTest::EXPERIMENTAL);
+    this->SetTest("Configure");
+    }
+  else if ( targ == "ExperimentalBuild" )
+    {
+    this->SetTestModel(cmCTest::EXPERIMENTAL);
+    this->SetTest("Build");
+    }
+  else if ( targ == "ExperimentalTest" )
+    {
+    this->SetTestModel(cmCTest::EXPERIMENTAL);
+    this->SetTest("Test");
+    }
+  else if ( targ == "ExperimentalMemCheck"
+            || targ == "ExperimentalPurify" )
+    {
+    this->SetTestModel(cmCTest::EXPERIMENTAL);
+    this->SetTest("MemCheck");
+    }
+  else if ( targ == "ExperimentalCoverage" )
+    {
+    this->SetTestModel(cmCTest::EXPERIMENTAL);
+    this->SetTest("Coverage");
+    }
+  else if ( targ == "ExperimentalSubmit" )
+    {
+    this->SetTestModel(cmCTest::EXPERIMENTAL);
+    this->SetTest("Submit");
+    }
+  else if ( targ == "Continuous" )
+    {
+    this->SetTestModel(cmCTest::CONTINUOUS);
+    this->SetTest("Start");
+    this->SetTest("Update");
+    this->SetTest("Configure");
+    this->SetTest("Build");
+    this->SetTest("Test");
+    this->SetTest("Coverage");
+    this->SetTest("Submit");
+    }
+  else if ( targ == "ContinuousStart" )
+    {
+    this->SetTestModel(cmCTest::CONTINUOUS);
+    this->SetTest("Start");
+    }
+  else if ( targ == "ContinuousUpdate" )
+    {
+    this->SetTestModel(cmCTest::CONTINUOUS);
+    this->SetTest("Update");
+    }
+  else if ( targ == "ContinuousConfigure" )
+    {
+    this->SetTestModel(cmCTest::CONTINUOUS);
+    this->SetTest("Configure");
+    }
+  else if ( targ == "ContinuousBuild" )
+    {
+    this->SetTestModel(cmCTest::CONTINUOUS);
+    this->SetTest("Build");
+    }
+  else if ( targ == "ContinuousTest" )
+    {
+    this->SetTestModel(cmCTest::CONTINUOUS);
+    this->SetTest("Test");
+    }
+  else if ( targ == "ContinuousMemCheck"
+        || targ == "ContinuousPurify" )
+    {
+    this->SetTestModel(cmCTest::CONTINUOUS);
+    this->SetTest("MemCheck");
+    }
+  else if ( targ == "ContinuousCoverage" )
+    {
+    this->SetTestModel(cmCTest::CONTINUOUS);
+    this->SetTest("Coverage");
+    }
+  else if ( targ == "ContinuousSubmit" )
+    {
+    this->SetTestModel(cmCTest::CONTINUOUS);
+    this->SetTest("Submit");
+    }
+  else if ( targ == "Nightly" )
+    {
+    this->SetTestModel(cmCTest::NIGHTLY);
+    this->SetTest("Start");
+    this->SetTest("Update");
+    this->SetTest("Configure");
+    this->SetTest("Build");
+    this->SetTest("Test");
+    this->SetTest("Coverage");
+    this->SetTest("Submit");
+    }
+  else if ( targ == "NightlyStart" )
+    {
+    this->SetTestModel(cmCTest::NIGHTLY);
+    this->SetTest("Start");
+    }
+  else if ( targ == "NightlyUpdate" )
+    {
+    this->SetTestModel(cmCTest::NIGHTLY);
+    this->SetTest("Update");
+    }
+  else if ( targ == "NightlyConfigure" )
+    {
+    this->SetTestModel(cmCTest::NIGHTLY);
+    this->SetTest("Configure");
+    }
+  else if ( targ == "NightlyBuild" )
+    {
+    this->SetTestModel(cmCTest::NIGHTLY);
+    this->SetTest("Build");
+    }
+  else if ( targ == "NightlyTest" )
+    {
+    this->SetTestModel(cmCTest::NIGHTLY);
+    this->SetTest("Test");
+    }
+  else if ( targ == "NightlyMemCheck"
+            || targ == "NightlyPurify" )
+    {
+    this->SetTestModel(cmCTest::NIGHTLY);
+    this->SetTest("MemCheck");
+    }
+  else if ( targ == "NightlyCoverage" )
+    {
+    this->SetTestModel(cmCTest::NIGHTLY);
+    this->SetTest("Coverage");
+    }
+  else if ( targ == "NightlySubmit" )
+    {
+    this->SetTestModel(cmCTest::NIGHTLY);
+    this->SetTest("Submit");
+    }
+  else if ( targ == "MemoryCheck" )
+    {
+    this->SetTestModel(cmCTest::EXPERIMENTAL);
+    this->SetTest("Start");
+    this->SetTest("Configure");
+    this->SetTest("Build");
+    this->SetTest("MemCheck");
+    this->SetTest("Coverage");
+    this->SetTest("Submit");
+    }
+  else if ( targ == "NightlyMemoryCheck" )
+    {
+    this->SetTestModel(cmCTest::NIGHTLY);
+    this->SetTest("Start");
+    this->SetTest("Update");
+    this->SetTest("Configure");
+    this->SetTest("Build");
+    this->SetTest("MemCheck");
+    this->SetTest("Coverage");
+    this->SetTest("Submit");
+    }
+  else
+    {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "CTest -D called with incorrect option: " << targ << std::endl);
+    cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
+               << "  " << "ctest" << " -D Continuous" << std::endl
+               << "  " << "ctest"
+               << " -D Continuous(Start|Update|Configure|Build)" << std::endl
+               << "  " << "ctest"
+               << " -D Continuous(Test|Coverage|MemCheck|Submit)" 
+               << std::endl
+               << "  " << "ctest" << " -D Experimental" << std::endl
+               << "  " << "ctest"
+               << " -D Experimental(Start|Update|Configure|Build)" 
+               << std::endl
+               << "  " << "ctest"
+               << " -D Experimental(Test|Coverage|MemCheck|Submit)" 
+               << std::endl
+               << "  " << "ctest" << " -D Nightly" << std::endl
+               << "  " << "ctest"
+               << " -D Nightly(Start|Update|Configure|Build)" << std::endl
+               << "  " << "ctest"
+               << " -D Nightly(Test|Coverage|MemCheck|Submit)" << std::endl
+               << "  " << "ctest" << " -D NightlyMemoryCheck" << std::endl);
+    return false;
+    }
+  return true;
+}
+
+
 //----------------------------------------------------------------------
 bool cmCTest::CheckArgument(const std::string& arg, const char* varg1,
   const char* varg2)
@@ -1311,8 +1523,194 @@ bool cmCTest::CheckArgument(const std::string& arg, const char* varg1,
   return false;
 }
 
+
 //----------------------------------------------------------------------
-int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
+// Processes one command line argument (and its arguments if any) 
+// for many simple options and then returns
+void cmCTest::HandleCommandLineArguments(size_t &i, 
+                                         std::vector<std::string> &args)
+{
+  std::string arg = args[i];
+  if(this->CheckArgument(arg, "--ctest-config") && i < args.size() - 1)
+    {
+    i++;
+    this->CTestConfigFile= args[i];
+    }
+  
+  if(this->CheckArgument(arg, "-C", "--build-config") &&
+     i < args.size() - 1)
+    {
+    i++;
+    this->ConfigType = args[i];
+    cmSystemTools::ReplaceString(this->ConfigType, ".\\", "");
+    if ( !this->ConfigType.empty() )
+      {
+      std::string confTypeEnv
+        = "CMAKE_CONFIG_TYPE=" + this->ConfigType;
+      cmSystemTools::PutEnv(confTypeEnv.c_str());
+      }
+    }
+  
+  if(this->CheckArgument(arg, "--debug"))
+    {
+    this->Debug = true;
+    this->ShowLineNumbers = true;
+    }
+  if(this->CheckArgument(arg, "--track") && i < args.size() - 1)
+    {
+    i++;
+    this->SpecificTrack = args[i];
+    }
+  if(this->CheckArgument(arg, "--show-line-numbers"))
+    {
+    this->ShowLineNumbers = true;
+    }
+  if(this->CheckArgument(arg, "-Q", "--quiet"))
+    {
+    this->Quiet = true;
+    }
+  if(this->CheckArgument(arg, "-V", "--verbose"))
+    {
+    this->Verbose = true;
+    }
+  if(this->CheckArgument(arg, "-VV", "--extra-verbose"))
+    {
+    this->ExtraVerbose = true;
+    this->Verbose = true;
+    }
+  
+  if(this->CheckArgument(arg, "-N", "--show-only"))
+    {
+    this->ShowOnly = true;
+    }
+
+  if(this->CheckArgument(arg, "-O", "--output-log") && i < args.size() - 1 )
+    {
+    i++;
+    this->SetOutputLogFileName(args[i].c_str());
+    }
+
+  if(this->CheckArgument(arg, "--tomorrow-tag"))
+    {
+    this->TomorrowTag = true;
+    }
+  if(this->CheckArgument(arg, "--force-new-ctest-process"))
+    {
+    this->ForceNewCTestProcess = true;
+    }
+  if(this->CheckArgument(arg, "--interactive-debug-mode") &&
+     i < args.size() - 1 )
+    {
+    i++;
+    this->InteractiveDebugMode = cmSystemTools::IsOn(args[i].c_str());
+    }
+  if(this->CheckArgument(arg, "--submit-index") && i < args.size() - 1 )
+    {
+    i++;
+    this->SubmitIndex = atoi(args[i].c_str());
+    if ( this->SubmitIndex < 0 )
+      {
+      this->SubmitIndex = 0;
+      }
+    }
+  
+  if(this->CheckArgument(arg, "--overwrite") && i < args.size() - 1)
+    {
+    i++;
+    this->AddCTestConfigurationOverwrite(args[i].c_str());
+    }
+  if(this->CheckArgument(arg, "-A", "--add-notes") && i < args.size() - 1)
+    {
+    this->ProduceXML = true;
+    this->SetTest("Notes");
+    i++;
+    this->SetNotesFiles(args[i].c_str());
+    }
+
+  // options that control what tests are run
+  if(this->CheckArgument(arg, "-I", "--tests-information") &&
+     i < args.size() - 1)
+    {
+    i++;
+    this->GetHandler("test")->SetPersistentOption("TestsToRunInformation",
+                                                  args[i].c_str());
+    this->GetHandler("memcheck")->
+      SetPersistentOption("TestsToRunInformation",args[i].c_str());
+    }
+  if(this->CheckArgument(arg, "-U", "--union"))
+    {
+    this->GetHandler("test")->SetPersistentOption("UseUnion", "true");
+    this->GetHandler("memcheck")->SetPersistentOption("UseUnion", "true");
+    }
+  if(this->CheckArgument(arg, "-R", "--tests-regex") && i < args.size() - 1)
+    {
+    i++;
+    this->GetHandler("test")->
+      SetPersistentOption("IncludeRegularExpression", args[i].c_str());
+    this->GetHandler("memcheck")->
+      SetPersistentOption("IncludeRegularExpression", args[i].c_str());
+    }
+  
+  if(this->CheckArgument(arg, "-E", "--exclude-regex") &&
+     i < args.size() - 1)
+    {
+    i++;
+    this->GetHandler("test")->
+      SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
+    this->GetHandler("memcheck")->
+      SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
+    }  
+}
+
+//----------------------------------------------------------------------
+// handle the -S -SR and -SP arguments
+void cmCTest::HandleScriptArguments(size_t &i, 
+                                    std::vector<std::string> &args,
+                                    bool &SRArgumentSpecified)
+{
+  std::string arg = args[i];
+  if(this->CheckArgument(arg, "-SP", "--script-new-process") && 
+     i < args.size() - 1 )
+    {
+    this->RunConfigurationScript = true;
+    i++;
+    cmCTestScriptHandler* ch
+      = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+    // -SR is an internal argument, -SP should be ignored when it is passed
+    if (!SRArgumentSpecified)
+      {
+      ch->AddConfigurationScript(args[i].c_str(),false);
+      }
+    }
+  
+  if(this->CheckArgument(arg, "-SR", "--script-run") && 
+     i < args.size() - 1 )
+    {
+    SRArgumentSpecified = true;
+    this->RunConfigurationScript = true;
+    i++;
+    cmCTestScriptHandler* ch
+      = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+    ch->AddConfigurationScript(args[i].c_str(),true);
+    }
+  
+  if(this->CheckArgument(arg, "-S", "--script") && i < args.size() - 1 )
+    {
+    this->RunConfigurationScript = true;
+    i++;
+    cmCTestScriptHandler* ch
+      = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+    // -SR is an internal argument, -S should be ignored when it is passed
+    if (!SRArgumentSpecified)
+      {
+      ch->AddConfigurationScript(args[i].c_str(),true);
+      }
+    }
+}
+
+//----------------------------------------------------------------------
+// the main entry point of ctest, called from main
+int cmCTest::Run(std::vector<std::string> &args, std::string* output)
 {
   this->FindRunningCMake(args[0].c_str());
   const char* ctestExec = "ctest";
@@ -1325,332 +1723,28 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     {
     this->InitialCommandLineArguments.push_back(args[i]);
     }
+
+  // process the command line arguments
   for(size_t i=1; i < args.size(); ++i)
     {
+    // handle the simple commandline arguments
+    this->HandleCommandLineArguments(i,args);
+
+    // handle the script arguments -S -SR -SP
+    this->HandleScriptArguments(i,args,SRArgumentSpecified);
+
+    // handle a request for a dashboard
     std::string arg = args[i];
-    if(this->CheckArgument(arg, "--ctest-config") && i < args.size() - 1)
-      {
-      i++;
-      this->CTestConfigFile= args[i];
-      }
-
-    if(this->CheckArgument(arg, "-C", "--build-config") &&
-      i < args.size() - 1)
-      {
-      i++;
-      this->ConfigType = args[i];
-      cmSystemTools::ReplaceString(this->ConfigType, ".\\", "");
-      if ( !this->ConfigType.empty() )
-        {
-        std::string confTypeEnv
-          = "CMAKE_CONFIG_TYPE=" + this->ConfigType;
-        cmSystemTools::PutEnv(confTypeEnv.c_str());
-        }
-      }
-
-    if(this->CheckArgument(arg, "--debug"))
-      {
-      this->Debug = true;
-      this->ShowLineNumbers = true;
-      }
-    if(this->CheckArgument(arg, "--track") && i < args.size() - 1)
-      {
-      i++;
-      this->SpecificTrack = args[i];
-      }
-    if(this->CheckArgument(arg, "--show-line-numbers"))
-      {
-      this->ShowLineNumbers = true;
-      }
-    if(this->CheckArgument(arg, "-Q", "--quiet"))
-      {
-      this->Quiet = true;
-      }
-    if(this->CheckArgument(arg, "-V", "--verbose"))
-      {
-      this->Verbose = true;
-      }
-    if(this->CheckArgument(arg, "-VV", "--extra-verbose"))
-      {
-      this->ExtraVerbose = true;
-      this->Verbose = true;
-      }
-
-    if(this->CheckArgument(arg, "-N", "--show-only"))
-      {
-      this->ShowOnly = true;
-      }
-
-    if(this->CheckArgument(arg, "-SP", "--script-new-process") && 
-       i < args.size() - 1 )
-      {
-      this->RunConfigurationScript = true;
-      i++;
-      cmCTestScriptHandler* ch
-        = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
-      // -SR is an internal argument, -SP should be ignored when it is passed
-      if (!SRArgumentSpecified)
-        {
-        ch->AddConfigurationScript(args[i].c_str(),false);
-        }
-      }
-
-    if(this->CheckArgument(arg, "-SR", "--script-run") && 
-       i < args.size() - 1 )
-      {
-      SRArgumentSpecified = true;
-      this->RunConfigurationScript = true;
-      i++;
-      cmCTestScriptHandler* ch
-        = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
-      ch->AddConfigurationScript(args[i].c_str(),true);
-      }
-
-    if(this->CheckArgument(arg, "-S", "--script") && i < args.size() - 1 )
-      {
-      this->RunConfigurationScript = true;
-      i++;
-      cmCTestScriptHandler* ch
-        = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
-      // -SR is an internal argument, -S should be ignored when it is passed
-      if (!SRArgumentSpecified)
-        {
-        ch->AddConfigurationScript(args[i].c_str(),true);
-        }
-      }
-
-    if(this->CheckArgument(arg, "-O", "--output-log") && i < args.size() - 1 )
-      {
-      i++;
-      this->SetOutputLogFileName(args[i].c_str());
-      }
-
-    if(this->CheckArgument(arg, "--tomorrow-tag"))
-      {
-      this->TomorrowTag = true;
-      }
-    if(this->CheckArgument(arg, "--force-new-ctest-process"))
-      {
-      this->ForceNewCTestProcess = true;
-      }
-    if(this->CheckArgument(arg, "--interactive-debug-mode") &&
-      i < args.size() - 1 )
-      {
-      i++;
-      this->InteractiveDebugMode = cmSystemTools::IsOn(args[i].c_str());
-      }
-    if(this->CheckArgument(arg, "--submit-index") && i < args.size() - 1 )
-      {
-      i++;
-      this->SubmitIndex = atoi(args[i].c_str());
-      if ( this->SubmitIndex < 0 )
-        {
-        this->SubmitIndex = 0;
-        }
-      }
     if(this->CheckArgument(arg, "-D", "--dashboard") && i < args.size() - 1 )
       {
       this->ProduceXML = true;
       i++;
       std::string targ = args[i];
-      if ( targ == "Experimental" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        this->SetTest("Start");
-        this->SetTest("Configure");
-        this->SetTest("Build");
-        this->SetTest("Test");
-        this->SetTest("Coverage");
-        this->SetTest("Submit");
-        }
-      else if ( targ == "ExperimentalStart" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        this->SetTest("Start");
-        }
-      else if ( targ == "ExperimentalUpdate" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        this->SetTest("Update");
-        }
-      else if ( targ == "ExperimentalConfigure" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        this->SetTest("Configure");
-        }
-      else if ( targ == "ExperimentalBuild" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        this->SetTest("Build");
-        }
-      else if ( targ == "ExperimentalTest" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        this->SetTest("Test");
-        }
-      else if ( targ == "ExperimentalMemCheck"
-        || targ == "ExperimentalPurify" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        this->SetTest("MemCheck");
-        }
-      else if ( targ == "ExperimentalCoverage" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        this->SetTest("Coverage");
-        }
-      else if ( targ == "ExperimentalSubmit" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        this->SetTest("Submit");
-        }
-      else if ( targ == "Continuous" )
-        {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-        this->SetTest("Start");
-        this->SetTest("Update");
-        this->SetTest("Configure");
-        this->SetTest("Build");
-        this->SetTest("Test");
-        this->SetTest("Coverage");
-        this->SetTest("Submit");
-        }
-      else if ( targ == "ContinuousStart" )
-        {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-        this->SetTest("Start");
-        }
-      else if ( targ == "ContinuousUpdate" )
-        {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-        this->SetTest("Update");
-        }
-      else if ( targ == "ContinuousConfigure" )
-        {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-        this->SetTest("Configure");
-        }
-      else if ( targ == "ContinuousBuild" )
-        {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-        this->SetTest("Build");
-        }
-      else if ( targ == "ContinuousTest" )
-        {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-        this->SetTest("Test");
-        }
-      else if ( targ == "ContinuousMemCheck"
-        || targ == "ContinuousPurify" )
-        {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-        this->SetTest("MemCheck");
-        }
-      else if ( targ == "ContinuousCoverage" )
-        {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-        this->SetTest("Coverage");
-        }
-      else if ( targ == "ContinuousSubmit" )
-        {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-        this->SetTest("Submit");
-        }
-      else if ( targ == "Nightly" )
-        {
-        this->SetTestModel(cmCTest::NIGHTLY);
-        this->SetTest("Start");
-        this->SetTest("Update");
-        this->SetTest("Configure");
-        this->SetTest("Build");
-        this->SetTest("Test");
-        this->SetTest("Coverage");
-        this->SetTest("Submit");
-        }
-      else if ( targ == "NightlyStart" )
-        {
-        this->SetTestModel(cmCTest::NIGHTLY);
-        this->SetTest("Start");
-        }
-      else if ( targ == "NightlyUpdate" )
-        {
-        this->SetTestModel(cmCTest::NIGHTLY);
-        this->SetTest("Update");
-        }
-      else if ( targ == "NightlyConfigure" )
-        {
-        this->SetTestModel(cmCTest::NIGHTLY);
-        this->SetTest("Configure");
-        }
-      else if ( targ == "NightlyBuild" )
-        {
-        this->SetTestModel(cmCTest::NIGHTLY);
-        this->SetTest("Build");
-        }
-      else if ( targ == "NightlyTest" )
-        {
-        this->SetTestModel(cmCTest::NIGHTLY);
-        this->SetTest("Test");
-        }
-      else if ( targ == "NightlyMemCheck"
-        || targ == "NightlyPurify" )
-        {
-        this->SetTestModel(cmCTest::NIGHTLY);
-        this->SetTest("MemCheck");
-        }
-      else if ( targ == "NightlyCoverage" )
-        {
-        this->SetTestModel(cmCTest::NIGHTLY);
-        this->SetTest("Coverage");
-        }
-      else if ( targ == "NightlySubmit" )
-        {
-        this->SetTestModel(cmCTest::NIGHTLY);
-        this->SetTest("Submit");
-        }
-      else if ( targ == "MemoryCheck" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        this->SetTest("Start");
-        this->SetTest("Configure");
-        this->SetTest("Build");
-        this->SetTest("MemCheck");
-        this->SetTest("Coverage");
-        this->SetTest("Submit");
-        }
-      else if ( targ == "NightlyMemoryCheck" )
-        {
-        this->SetTestModel(cmCTest::NIGHTLY);
-        this->SetTest("Start");
-        this->SetTest("Update");
-        this->SetTest("Configure");
-        this->SetTest("Build");
-        this->SetTest("MemCheck");
-        this->SetTest("Coverage");
-        this->SetTest("Submit");
-        }
-      else
+      // AddTestsForDashboard parses the dashborad type and converts it
+      // into the seperate stages
+      if (!this->AddTestsForDashboardType(targ))
         {
         performSomeTest = false;
-        cmCTestLog(this, ERROR_MESSAGE,
-          "CTest -D called with incorrect option: " << targ << std::endl);
-        cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
-          << "  " << ctestExec << " -D Continuous" << std::endl
-          << "  " << ctestExec
-          << " -D Continuous(Start|Update|Configure|Build)" << std::endl
-          << "  " << ctestExec
-          << " -D Continuous(Test|Coverage|MemCheck|Submit)" << std::endl
-          << "  " << ctestExec << " -D Experimental" << std::endl
-          << "  " << ctestExec
-          << " -D Experimental(Start|Update|Configure|Build)" << std::endl
-          << "  " << ctestExec
-          << " -D Experimental(Test|Coverage|MemCheck|Submit)" << std::endl
-          << "  " << ctestExec << " -D Nightly" << std::endl
-          << "  " << ctestExec
-          << " -D Nightly(Start|Update|Configure|Build)" << std::endl
-          << "  " << ctestExec
-          << " -D Nightly(Test|Coverage|MemCheck|Submit)" << std::endl
-          << "  " << ctestExec << " -D NightlyMemoryCheck" << std::endl);
         }
       }
 
@@ -1679,6 +1773,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         }
       }
 
+    // what type of test model
     if(this->CheckArgument(arg, "-M", "--test-model") &&
       (i < args.size() -1) )
       {
@@ -1705,55 +1800,10 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
           << "  " << ctestExec << " -M Continuous" << std::endl
           << "  " << ctestExec << " -M Experimental" << std::endl
-          << "  " << ctestExec << " -M Nightly" << std::endl);
+                   << "  " << ctestExec << " -M Nightly" << std::endl);
         }
       }
 
-    if(this->CheckArgument(arg, "-I", "--tests-information") &&
-      i < args.size() - 1)
-      {
-      i++;
-      this->GetHandler("test")->SetPersistentOption("TestsToRunInformation",
-        args[i].c_str());
-      this->GetHandler("memcheck")->
-        SetPersistentOption("TestsToRunInformation",args[i].c_str());
-      }
-    if(this->CheckArgument(arg, "-U", "--union"))
-      {
-      this->GetHandler("test")->SetPersistentOption("UseUnion", "true");
-      this->GetHandler("memcheck")->SetPersistentOption("UseUnion", "true");
-      }
-    if(this->CheckArgument(arg, "-R", "--tests-regex") && i < args.size() - 1)
-      {
-      i++;
-      this->GetHandler("test")->
-        SetPersistentOption("IncludeRegularExpression", args[i].c_str());
-      this->GetHandler("memcheck")->
-        SetPersistentOption("IncludeRegularExpression", args[i].c_str());
-      }
-
-    if(this->CheckArgument(arg, "-E", "--exclude-regex") &&
-      i < args.size() - 1)
-      {
-      i++;
-      this->GetHandler("test")->
-        SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
-      this->GetHandler("memcheck")->
-        SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
-      }
-
-    if(this->CheckArgument(arg, "--overwrite") && i < args.size() - 1)
-      {
-      i++;
-      this->AddCTestConfigurationOverwrite(args[i].c_str());
-      }
-    if(this->CheckArgument(arg, "-A", "--add-notes") && i < args.size() - 1)
-      {
-      this->ProduceXML = true;
-      this->SetTest("Notes");
-      i++;
-      this->SetNotesFiles(args[i].c_str());
-      }
     if(this->CheckArgument(arg, "--extra-submit") && i < args.size() - 1)
       {
       this->ProduceXML = true;
@@ -1764,11 +1814,16 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         return 0;
         }
       }
+
     // --build-and-test options
     if(this->CheckArgument(arg, "--build-and-test") && i < args.size() - 1)
       {
       cmakeAndTest = true;
       }
+
+    // pass the argument to all the handlers as well, but i may no longer be
+    // set to what it was originally so I'm not sure this is working as
+    // intended
     cmCTest::t_TestingHandlers::iterator it;
     for ( it = this->TestingHandlers.begin();
       it != this->TestingHandlers.end();
@@ -1781,16 +1836,19 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         return 0;
         }
       }
-    }
+    } // the close of the for argument loop
 
-  // default to the build type of ctest itself
+
+  // default to the build type of ctest itself if there is one
+#ifdef  CMAKE_INTDIR
   if(this->ConfigType.size() == 0)
     {
-#ifdef  CMAKE_INTDIR
     this->ConfigType = CMAKE_INTDIR;
-#endif
     }
+#endif
 
+  // now what sould cmake do? if --build-and-test was specified then 
+  // we run the build and test handler and return
   if(cmakeAndTest)
     {
     this->Verbose = true;
@@ -1804,7 +1862,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     return retv;
     }
 
-  if(performSomeTest )
+  // if some tests must be run 
+  if(performSomeTest)
     {
     int res;
     // call process directory
@@ -1837,11 +1896,9 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         it->second->SetVerbose(this->Verbose);
         it->second->SetSubmitIndex(this->SubmitIndex);
         }
-      cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
       if ( !this->Initialize(
           cmSystemTools::GetCurrentWorkingDirectory().c_str()) )
         {
-        cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
         res = 12;
         cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard."
           << std::endl);
@@ -1854,6 +1911,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       }
     return res;
     }
+
   return 1;
 }
 
