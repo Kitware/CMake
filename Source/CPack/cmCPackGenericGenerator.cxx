@@ -184,6 +184,14 @@ int cmCPackGenericGenerator::InstallProject()
     return 0;
     }
 
+  // If the CPackConfig file sets CPACK_INSTALL_SCRIPT then run them
+  // as listed
+  if ( !this->InstallProjectViaInstallScript(
+      movable, tempInstallDirectory) )
+    {
+    return 0;
+    }
+
   // If the CPackConfig file sets CPACK_INSTALLED_DIRECTORIES
   // then glob it and copy it to CPACK_TEMPORARY_DIRECTORY
   // This is used in Source packageing
@@ -258,6 +266,9 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCommands(
   const char* installCommands = this->GetOption("CPACK_INSTALL_COMMANDS");
   if ( installCommands && *installCommands )
     {
+    std::string tempInstallDirectoryEnv = "CMAKE_INSTALL_PREFIX=";
+    tempInstallDirectoryEnv += tempInstallDirectory;
+    cmSystemTools::PutEnv(tempInstallDirectoryEnv.c_str());
     std::vector<std::string> installCommandsVector;
     cmSystemTools::ExpandListArgument(installCommands,installCommandsVector);
     std::vector<std::string>::iterator it;
@@ -384,6 +395,46 @@ int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(
             << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
           return 0;
           }
+        }
+      }
+    }
+  return 1;
+}
+
+//----------------------------------------------------------------------
+int cmCPackGenericGenerator::InstallProjectViaInstallScript(
+  bool movable, const char* tempInstallDirectory)
+{
+  const char* cmakeScripts
+    = this->GetOption("CPACK_INSTALL_SCRIPT");
+  std::string currentWorkingDirectory =
+    cmSystemTools::GetCurrentWorkingDirectory();
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+    "- Install scripts: " << cmakeScripts << std::endl);
+  if ( cmakeScripts && *cmakeScripts )
+    {
+    std::vector<std::string> cmakeScriptsVector;
+    cmSystemTools::ExpandListArgument(cmakeScripts,
+      cmakeScriptsVector);
+    std::vector<std::string>::iterator it;
+    for ( it = cmakeScriptsVector.begin();
+      it != cmakeScriptsVector.end();
+      ++it )
+      {
+      std::string installScript = it->c_str();
+
+      cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+        "- Install script: " << installScript << std::endl);
+      if ( movable )
+        {
+        this->SetOption("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
+        }
+      this->SetOptionIfNotSet("CMAKE_CURRENT_BINARY_DIR", tempInstallDirectory);
+      this->SetOptionIfNotSet("CMAKE_CURRENT_SOURCE_DIR", tempInstallDirectory);
+      int res = this->MakefileMap->ReadListFile(0, installScript.c_str());
+      if ( cmSystemTools::GetErrorOccuredFlag() || !res )
+        {
+        return 0;
         }
       }
     }
@@ -535,7 +586,8 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
 void cmCPackGenericGenerator::SetOptionIfNotSet(const char* op,
   const char* value)
 {
-  if ( this->MakefileMap->GetDefinition(op) )
+  const char* def = this->MakefileMap->GetDefinition(op);
+  if ( def && *def )
     {
     return;
     }
