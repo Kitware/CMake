@@ -568,6 +568,11 @@ bool cmCTest::UpdateCTestConfiguration()
       }
     fin.close();
     }
+  if ( !this->GetCTestConfiguration("BuildDirectory").empty() )
+    {
+    this->BinaryDir = this->GetCTestConfiguration("BuildDirectory");
+    cmSystemTools::ChangeDirectory(this->BinaryDir.c_str());
+    }
   this->TimeOut = atoi(this->GetCTestConfiguration("TimeOut").c_str());
   if ( this->ProduceXML )
     {

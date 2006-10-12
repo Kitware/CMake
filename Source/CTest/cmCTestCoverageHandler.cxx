@@ -251,7 +251,7 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   if ( files.size() == 0 )
     {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, " Cannot find any coverage files."
+    cmCTestLog(this->CTest, WARNING, " Cannot find any coverage files. Ignoring Coverage request."
       << std::endl);
     // No coverage files is a valid thing, so the exit code is 0 
     cmSystemTools::ChangeDirectory(currentDirectory.c_str());
