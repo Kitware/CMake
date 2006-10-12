@@ -29,16 +29,22 @@ ENDIF(CTEST_NEW_FORMAT)
 # These should NOT need to be modified from project to project.
 #
 
+SET(__conf_types "")
+IF(CMAKE_CONFIGURATION_TYPES)
+  # We need to pass the configuration type on the test command line.
+  SET(__conf_types -C "${CMAKE_CFG_INTDIR}")
+ENDIF(CMAKE_CONFIGURATION_TYPES)
+
 # add testing targets
 IF(${CMAKE_MAKE_PROGRAM} MATCHES make)
   FOREACH(mode Experimental Nightly Continuous NightlyMemoryCheck)
-    ADD_CUSTOM_TARGET(${mode} ${CMAKE_CTEST_COMMAND} -D ${mode})
+    ADD_CUSTOM_TARGET(${mode} ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode})
   ENDFOREACH(mode)
 ELSE(${CMAKE_MAKE_PROGRAM} MATCHES make)
   # for IDE only add them once for nested projects
   IF (NOT DART_COMMON_TARGETS_ADDED)
     FOREACH(mode Experimental Nightly Continuous NightlyMemoryCheck)
-      ADD_CUSTOM_TARGET(${mode} ${CMAKE_CTEST_COMMAND} -D ${mode})
+      ADD_CUSTOM_TARGET(${mode} ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode})
     ENDFOREACH(mode)
     SET (DART_COMMON_TARGETS_ADDED 1)
   ENDIF (NOT DART_COMMON_TARGETS_ADDED)
@@ -53,7 +59,7 @@ IF(${CMAKE_MAKE_PROGRAM} MATCHES make)
     FOREACH(testtype Start Update Configure Build Test Coverage MemCheck Submit)
       # missing purify
       ADD_CUSTOM_TARGET(${mode}${testtype} 
-        ${CMAKE_CTEST_COMMAND} -D ${mode}${testtype})
+        ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode}${testtype})
     ENDFOREACH(testtype)
   ENDFOREACH(mode)
 ENDIF (${CMAKE_MAKE_PROGRAM} MATCHES make)
