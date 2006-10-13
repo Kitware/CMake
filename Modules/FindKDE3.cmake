@@ -5,7 +5,7 @@
 # KDE3_INCLUDE_DIR         - the KDE include directory
 # KDE3_INCLUDE_DIRS        - the KDE and the Qt include directory, for use with INCLUDE_DIRECTORIES()
 # KDE3_LIB_DIR             - the directory where the KDE libraries are installed, for use with LINK_DIRECTORIES()
-# QT_AND_KDECORE_LIBRARIES - this contains both the Qt and the kdecore library
+# QT_AND_KDECORE_LIBS      - this contains both the Qt and the kdecore library
 # KDE3_DCOPIDL_EXECUTABLE  - the dcopidl executable
 # KDE3_DCOPIDL2CPP_EXECUTABLE - the dcopidl2cpp executable
 # KDE3_KCFGC_EXECUTABLE    - the kconfig_compiler executable
@@ -98,56 +98,101 @@ ENDIF (CMAKE_SYSTEM_NAME MATCHES BSD)
 #SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--fatal-warnings -avoid-version -Wl,--no-undefined -lc")
 #SET(CMAKE_MODULE_LINKER_FLAGS "-Wl,--fatal-warnings -avoid-version -Wl,--no-undefined -lc")
 
-#now try to find some kde stuff
+# all calls to FIND_PROGRAM/PATH/LIBRARY() follow the same scheme:
+# at first try some special paths with the argument "NO_DEFAULT_PATH"
+# so only these paths are checked
+# this is followed by a second call to FIND_PROGRAM/PATH/LIBRARY()
+# but this time without any paths and without NO_DEFAULT_PATH
+# this second call will do nothing if the first call already found
+# what it was looking for, if not, it will search only in the default
+# directories (/usr, /usr/local, etc.)
 
-#at first the KDE include direcory
+#now try to find some kde stuff
+FIND_PROGRAM(KDECONFIG_EXECUTABLE NAMES kde-config PATHS
+   $ENV{KDEDIR}/bin
+  /opt/kde3/bin
+  /opt/kde/bin
+  NO_DEFAULT_PATH
+  )
+
+
+FIND_PROGRAM(KDECONFIG_EXECUTABLE kde-config)
+
+
+SET(KDE3PREFIX)
+IF(KDECONFIG_EXECUTABLE)
+   EXECUTE_PROCESS(COMMAND ${KDECONFIG_EXECUTABLE} --version
+                   OUTPUT_VARIABLE kde_config_version )
+
+   STRING(REGEX MATCH "KDE: .\\." kde_version ${kde_config_version})
+   IF (${kde_version} MATCHES "KDE: 3\\.")
+      EXECUTE_PROCESS(COMMAND ${KDECONFIG_EXECUTABLE} --prefix
+                        OUTPUT_VARIABLE kdedir )
+      STRING(REGEX REPLACE "\n" "" KDE3PREFIX "${kdedir}")
+
+    ENDIF (${kde_version} MATCHES "KDE: 3\\.")
+ENDIF(KDECONFIG_EXECUTABLE)
+
+
+
+# at first the KDE include direcory
 # kpassdlg.h comes from kdeui and doesn't exist in KDE4 anymore
 FIND_PATH(KDE3_INCLUDE_DIR kpassdlg.h
   $ENV{KDEDIR}/include
-  /opt/kde/include
+  ${KDE3PREFIX}/include
   /opt/kde3/include
-  /usr/local/include
-  /usr/include/
+  /opt/kde/include
   /usr/include/kde
   /usr/local/include/kde
-)
+  NO_DEFAULT_PATH
+  )
+
+FIND_PATH(KDE3_INCLUDE_DIR kpassdlg.h)
 
 #now the KDE library directory
 FIND_LIBRARY(KDE3_KDECORE_LIBRARY NAMES kdecore
   PATHS
   $ENV{KDEDIR}/lib
-  /opt/kde/lib
+  ${KDE3PREFIX}/lib
   /opt/kde3/lib
-  /usr/lib
-  /usr/local/lib
+  /opt/kde/lib
+  NO_DEFAULT_PATH
 )
+
+FIND_LIBRARY(KDE3_KDECORE_LIBRARY NAMES kdecore)
 
 GET_FILENAME_COMPONENT(KDE3_LIB_DIR ${KDE3_KDECORE_LIBRARY} PATH )
 
-#now the KDE service types directory
-#FIND_PATH(KDE3_SERVICETYPES_DIR ktexteditor.desktop
-#  $ENV{KDEDIR}/share/servicetypes/
-#  /opt/kde/share/servicetypes/
-#  /opt/kde3/share/servicetypes/
-#)
-
 #now search for the dcop utilities
-FIND_PROGRAM(KDE3_DCOPIDL_EXECUTABLE NAME dcopidl PATHS
+FIND_PROGRAM(KDE3_DCOPIDL_EXECUTABLE NAMES dcopidl PATHS
   $ENV{KDEDIR}/bin
-  /opt/kde/bin
+  ${KDE3PREFIX}/bin
   /opt/kde3/bin
+  /opt/kde/bin
+  NO_DEFAULT_PATH
   )
 
-FIND_PROGRAM(KDE3_DCOPIDL2CPP_EXECUTABLE NAME dcopidl2cpp PATHS
-  $ENV{KDEDIR}/bin
-  /opt/kde/bin
-  /opt/kde3/bin)
+FIND_PROGRAM(KDE3_DCOPIDL_EXECUTABLE NAMES dcopidl)
 
-FIND_PROGRAM(KDE3_KCFGC_EXECUTABLE NAME kconfig_compiler PATHS
+FIND_PROGRAM(KDE3_DCOPIDL2CPP_EXECUTABLE NAMES dcopidl2cpp PATHS
   $ENV{KDEDIR}/bin
+  ${KDE3PREFIX}/bin
+  /opt/kde3/bin
   /opt/kde/bin
-  /opt/kde3/bin)
+  NO_DEFAULT_PATH
+  )
 
+FIND_PROGRAM(KDE3_DCOPIDL2CPP_EXECUTABLE NAMES dcopidl2cpp)
+
+FIND_PROGRAM(KDE3_KCFGC_EXECUTABLE NAMES kconfig_compiler PATHS
+  $ENV{KDEDIR}/bin
+  ${KDE3PREFIX}/bin
+  /opt/kde3/bin
+  /opt/kde/bin
+  NO_DEFAULT_PATH
+  )
+
+FIND_PROGRAM(KDE3_KCFGC_EXECUTABLE NAMES kconfig_compiler)
 
 # KDE3Macros.cmake contains all the KDE specific macros
 INCLUDE(KDE3Macros)

@@ -19,6 +19,7 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_ZLIB_INCLUDES}
   ${CMAKE_EXPAT_INCLUDES}
   ${CMAKE_TAR_INCLUDES}
+  ${CMAKE_COMPRESS_INCLUDES}
   )
 
 # let cmake know it is supposed to use it
@@ -122,6 +123,8 @@ SET(SRCS
   cmInstallScriptGenerator.cxx
   cmInstallTargetGenerator.h
   cmInstallTargetGenerator.cxx
+  cmInstallDirectoryGenerator.h
+  cmInstallDirectoryGenerator.cxx
   cmListFileCache.cxx
   cmListFileCache.h
   cmListFileLexer.c
@@ -215,11 +218,13 @@ ENDIF (WIN32)
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
-TARGET_LINK_LIBRARIES(CMakeLib cmsys ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES} ${CMAKE_TAR_LIBRARIES})
+TARGET_LINK_LIBRARIES(CMakeLib cmsys
+  ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
+  ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES})
 
 # On Apple we need Carbon
 IF(APPLE)
-  TARGET_LINK_LIBRARIES(CMakeLib "-framework Carbon")
+  TARGET_LINK_LIBRARIES(CMakeLib "-framework CoreFoundation")
 ENDIF(APPLE)
 
 # On some platforms we need the rpcrt4 library for the VS 7 generators.
@@ -592,7 +597,7 @@ IF(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/Complex"
       --build-two-config
       --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project complex
+      --build-project Complex
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"  
       --build-options
@@ -605,7 +610,7 @@ IF(BUILD_TESTING)
       "${CMake_SOURCE_DIR}/Tests/ComplexOneConfig"
       "${CMake_BINARY_DIR}/Tests/ComplexOneConfig"
       --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project complex
+      --build-project Complex
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin" 
       --build-options
@@ -691,7 +696,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Testing"
     "${CMake_BINARY_DIR}/Tests/Testing"
     --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project testing
+    --build-project Testing
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Testing/bin"
     --test-command testing
@@ -702,7 +707,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Wrapping"
     "${CMake_BINARY_DIR}/Tests/Wrapping"
     --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project wrapping
+    --build-project Wrapping
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --test-command wrapping
@@ -856,7 +861,7 @@ IF(BUILD_TESTING)
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LinkLine"
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Linkline
+    --build-project LinkLine
     --test-command Exec
     )
 

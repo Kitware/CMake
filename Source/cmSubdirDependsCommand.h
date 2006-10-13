@@ -67,6 +67,12 @@ public:
       "parallel builds correctly.  This functionality is now automatic.";
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmSubdirDependsCommand, cmCommand);
 };
 

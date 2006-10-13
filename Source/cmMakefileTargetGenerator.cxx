@@ -35,6 +35,7 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator()
   this->BuildFileStream = 0;
   this->InfoFileStream = 0;
   this->FlagFileStream = 0;
+  this->DriveCustomCommandsOnDepends = false;
 }
 
 cmMakefileTargetGenerator *
@@ -58,7 +59,7 @@ cmMakefileTargetGenerator::New(cmLocalUnixMakefileGenerator3 *lg,
       break;
     default:
       return result;
-      break;
+      // break; /* unreachable */
     }
 
   result->TargetName = tgtName;
@@ -105,7 +106,6 @@ void cmMakefileTargetGenerator::CreateRuleFile()
     }
   this->LocalGenerator->WriteDisclaimer(*this->BuildFileStream);
   this->LocalGenerator->WriteSpecialTargetsTop(*this->BuildFileStream);
-  this->LocalGenerator->WriteMakeVariables(*this->BuildFileStream);
 }
 
 //----------------------------------------------------------------------------
@@ -350,7 +350,9 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     objNoTargetDir = cmSystemTools::GetFilenameName(objNoTargetDir);
     }
   this->LocalGenerator->LocalObjectFiles[objNoTargetDir].
-    push_back(this->Target);
+    push_back(
+      cmLocalUnixMakefileGenerator3::LocalObjectEntry(this->Target, lang)
+      );
 }
 
 //----------------------------------------------------------------------------
@@ -494,6 +496,106 @@ cmMakefileTargetGenerator
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       relativeObj.c_str(),
                                       depends, commands, false);
+
+  bool lang_is_c_or_cxx = ((strcmp(lang, "C") == 0) ||
+                           (strcmp(lang, "CXX") == 0));
+  bool do_preprocess_rules = lang_is_c_or_cxx &&
+    this->LocalGenerator->GetCreatePreprocessedSourceRules();
+  bool do_assembly_rules = lang_is_c_or_cxx &&
+    this->LocalGenerator->GetCreateAssemblySourceRules();
+  if(do_preprocess_rules || do_assembly_rules)
+    {
+    std::vector<std::string> force_depends;
+    force_depends.push_back("cmake_force");
+    std::string::size_type dot_pos = relativeObj.rfind(".");
+    std::string relativeObjBase = relativeObj.substr(0, dot_pos);
+
+    if(do_preprocess_rules)
+      {
+      commands.clear();
+      std::string relativeObjI = relativeObjBase + ".i";
+
+      std::string preprocessEcho = "Preprocessing ";
+      preprocessEcho += lang;
+      preprocessEcho += " source to ";
+      preprocessEcho += relativeObjI;
+      this->LocalGenerator->AppendEcho(
+        commands, preprocessEcho.c_str(),
+        cmLocalUnixMakefileGenerator3::EchoBuild
+        );
+
+      std::string preprocessRuleVar = "CMAKE_";
+      preprocessRuleVar += lang;
+      preprocessRuleVar += "_CREATE_PREPROCESSED_SOURCE";
+      if(const char* preprocessRule =
+         this->Makefile->GetDefinition(preprocessRuleVar.c_str()))
+        {
+        cmSystemTools::ExpandListArgument(preprocessRule, commands);
+
+        vars.PreprocessedSource = relativeObjI.c_str();
+
+        // Expand placeholders in the commands.
+        for(std::vector<std::string>::iterator i = commands.begin();
+            i != commands.end(); ++i)
+          {
+          this->LocalGenerator->ExpandRuleVariables(*i, vars);
+          }
+        }
+      else
+        {
+        std::string cmd = "$(CMAKE_COMMAND) -E cmake_unimplemented_variable ";
+        cmd += preprocessRuleVar;
+        commands.push_back(cmd);
+        }
+
+      this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+                                          relativeObjI.c_str(),
+                                          force_depends, commands, false);
+      }
+
+    if(do_assembly_rules)
+      {
+      commands.clear();
+      std::string relativeObjS = relativeObjBase + ".s";
+
+      std::string assemblyEcho = "Compiling ";
+      assemblyEcho += lang;
+      assemblyEcho += " source to assembly ";
+      assemblyEcho += relativeObjS;
+      this->LocalGenerator->AppendEcho(
+        commands, assemblyEcho.c_str(),
+        cmLocalUnixMakefileGenerator3::EchoBuild
+        );
+
+      std::string assemblyRuleVar = "CMAKE_";
+      assemblyRuleVar += lang;
+      assemblyRuleVar += "_CREATE_ASSEMBLY_SOURCE";
+      if(const char* assemblyRule =
+         this->Makefile->GetDefinition(assemblyRuleVar.c_str()))
+        {
+        cmSystemTools::ExpandListArgument(assemblyRule, commands);
+
+        vars.AssemblySource = relativeObjS.c_str();
+
+        // Expand placeholders in the commands.
+        for(std::vector<std::string>::iterator i = commands.begin();
+            i != commands.end(); ++i)
+          {
+          this->LocalGenerator->ExpandRuleVariables(*i, vars);
+          }
+        }
+      else
+        {
+        std::string cmd = "$(CMAKE_COMMAND) -E cmake_unimplemented_variable ";
+        cmd += assemblyRuleVar;
+        commands.push_back(cmd);
+        }
+
+      this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+                                          relativeObjS.c_str(),
+                                          force_depends, commands, false);
+      }
+    }
 
   // If the language needs provides-requires mode, create the
   // corresponding targets.
@@ -673,10 +775,39 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL);
   commands.push_back(depCmd.str());
   
+  // Make sure all custom command outputs in this target are built.
+  if(this->DriveCustomCommandsOnDepends)
+    {
+    this->DriveCustomCommands(depends);
+    }
+
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       depMark.c_str(),
                                       depends, commands, false);
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefileTargetGenerator
+::DriveCustomCommands(std::vector<std::string>& depends)
+{
+  // Depend on all custom command outputs.
+  const std::vector<cmSourceFile*>& sources =
+    this->Target->GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
+      source != sources.end(); ++source)
+    {
+    if(cmCustomCommand* cc = (*source)->GetCustomCommand())
+      {
+      const std::vector<std::string>& outputs = cc->GetOutputs();
+      for(std::vector<std::string>::const_iterator o = outputs.begin();
+          o != outputs.end(); ++o)
+        {
+        depends.push_back(*o);
+        }
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -731,12 +862,25 @@ void cmMakefileTargetGenerator
   std::vector<std::string> depends;
   this->LocalGenerator->AppendCustomDepend(depends, cc);
 
+  // Check whether we need to bother checking for a symbolic output.
+  bool need_symbolic = this->GlobalGenerator->GetNeedSymbolicMark();
+
   // Write the rule.
   const std::vector<std::string>& outputs = cc.GetOutputs();
   std::vector<std::string>::const_iterator o = outputs.begin();
+  {
+  bool symbolic = false;
+  if(need_symbolic)
+    {
+    if(cmSourceFile* sf = this->Makefile->GetSource(o->c_str()))
+      {
+      symbolic = sf->GetPropertyAsBool("SYMBOLIC");
+      }
+    }
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       o->c_str(), depends, commands,
-                                      false);
+                                      symbolic);
+  }
 
   // If the rule has multiple outputs, add a rule for the extra
   // outputs to just depend on the first output with no command.  Also
@@ -756,9 +900,17 @@ void cmMakefileTargetGenerator
     }
   for(++o; o != outputs.end(); ++o)
     {
+    bool symbolic = false;
+    if(need_symbolic)
+      {
+      if(cmSourceFile* sf = this->Makefile->GetSource(o->c_str()))
+        {
+        symbolic = sf->GetPropertyAsBool("SYMBOLIC");
+        }
+      }
     this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                         o->c_str(), depends, commands,
-                                        false);
+                                        symbolic);
     gg->AddMultipleOutputPair(o->c_str(), depends[0].c_str());
     }
 }
@@ -896,9 +1048,8 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
                                                       bool relink)
 {
   // Compute the name of the driver target.
-  std::string dir = this->Makefile->GetStartOutputDirectory();
-  dir += "/";
-  dir += this->LocalGenerator->GetTargetDirectory(*this->Target);
+  std::string dir =
+    this->LocalGenerator->GetRelativeTargetDirectory(*this->Target);
   std::string buildTargetRuleName = dir;
   buildTargetRuleName += relink?"/preinstall":"/build";
   buildTargetRuleName = this->Convert(buildTargetRuleName.c_str(),
@@ -924,20 +1075,9 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
     comment = "Rule to build all files generated by this target.";
 
     // Make sure all custom command outputs in this target are built.
-    const std::vector<cmSourceFile*>& sources = 
-      this->Target->GetSourceFiles();
-    for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
-        source != sources.end(); ++source)
-      {
-      if(cmCustomCommand* cc = (*source)->GetCustomCommand())
-        {
-        const std::vector<std::string>& outputs = cc->GetOutputs();
-        for(std::vector<std::string>::const_iterator o = outputs.begin();
-            o != outputs.end(); ++o)
+    if(!this->DriveCustomCommandsOnDepends)
           {
-          depends.push_back(*o);
-          }
-        }
+      this->DriveCustomCommands(depends);
       }
     }
 
@@ -1012,7 +1152,7 @@ void cmMakefileTargetGenerator
     // Don't emit the same library twice for this target.
     if(emitted.insert(lib->first).second)
       {
-      // Depend only on other CMake targets.
+      // Depend on other CMake targets.
       if(cmTarget* tgt = 
          this->GlobalGenerator->FindTarget(0, lib->first.c_str()))
         {
@@ -1021,6 +1161,11 @@ void cmMakefileTargetGenerator
           {
           depends.push_back(location);
           }
+        }
+      // depend on full path libs as well
+      else if(cmSystemTools::FileIsFullPath(lib->first.c_str()))
+        {
+        depends.push_back(lib->first.c_str());
         }
       }
     }
@@ -1089,6 +1234,7 @@ void cmMakefileTargetGenerator::WriteProgressVariables(unsigned long total,
       }
     *progressFileStream << "\n";
     }
+  *progressFileStream << "\n";
   current += this->NumberOfProgressActions;
   delete progressFileStream;
 }

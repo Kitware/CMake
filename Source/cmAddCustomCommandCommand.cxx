@@ -18,6 +18,8 @@
 
 #include "cmTarget.h"
 
+#include "cmSourceFile.h"
+
 // cmAddCustomCommandCommand
 bool cmAddCustomCommandCommand::InitialPass(
   std::vector<std::string> const& args)
@@ -32,9 +34,12 @@ bool cmAddCustomCommandCommand::InitialPass(
       return false;
     }
 
-  std::string source, target, comment, main_dependency,
-    working;
+  std::string source, target, main_dependency, working;
+  std::string comment_buffer;
+  const char* comment = 0;
   std::vector<std::string> depends, outputs, output;
+  bool verbatim = false;
+  bool append = false;
 
   // Accumulate one command line at a time.
   cmCustomCommandLine currentLine;
@@ -89,6 +94,14 @@ bool cmAddCustomCommandCommand::InitialPass(
     else if(copy == "POST_BUILD")
       {
       cctype = cmTarget::POST_BUILD;
+      }
+    else if(copy == "VERBATIM")
+      {
+      verbatim = true;
+      }
+    else if(copy == "APPEND")
+      {
+      append = true;
       }
     else if(copy == "TARGET")
       {
@@ -173,7 +186,8 @@ bool cmAddCustomCommandCommand::InitialPass(
            outputs.push_back(filename);
            break;
          case doing_comment:
-           comment = copy;
+           comment_buffer = copy;
+           comment = comment_buffer.c_str();
            break;
          default:
            this->SetError("Wrong syntax. Unknown type of argument.");
@@ -203,6 +217,11 @@ bool cmAddCustomCommandCommand::InitialPass(
       "Wrong syntax. A TARGET and OUTPUT can not both be specified.");
     return false;
     }
+  if(append && output.empty())
+    {
+    this->SetError("given APPEND option with no OUTPUT.");
+    return false;
+    }
 
   // Make sure the output names and locations are safe.
   if(!this->CheckOutputs(output) || !this->CheckOutputs(outputs))
@@ -210,29 +229,55 @@ bool cmAddCustomCommandCommand::InitialPass(
     return false;
     }
 
+  // Check for an append request.
+  if(append)
+    {
+    // Lookup an existing command.
+    if(cmSourceFile* sf =
+       this->Makefile->GetSourceFileWithOutput(output[0].c_str()))
+      {
+      if(cmCustomCommand* cc = sf->GetCustomCommand())
+        {
+        cc->AppendCommands(commandLines);
+        cc->AppendDepends(depends);
+        return true;
+        }
+      }
+
+    // No command for this output exists.
+    cmOStringStream e;
+    e << "given APPEND option with output \"" << output[0].c_str()
+      << "\" which is not already a custom command output.";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
   // Choose which mode of the command to use.
+  bool escapeOldStyle = !verbatim;
   if(source.empty() && output.empty())
     {
     // Source is empty, use the target.
     std::vector<std::string> no_depends;
     this->Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
                                          commandLines, cctype,
-                                         comment.c_str(), working.c_str());
+                                             comment, working.c_str(),
+                                             escapeOldStyle);
     }
   else if(target.empty())
     {
     // Target is empty, use the output.
     this->Makefile->AddCustomCommandToOutput(output, depends,
                                          main_dependency.c_str(),
-                                         commandLines, comment.c_str(),
-                                         working.c_str());
+                                             commandLines, comment,
+                                             working.c_str(), false,
+                                             escapeOldStyle);
     }
   else
     {
     // Use the old-style mode for backward compatibility.
     this->Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
                                          source.c_str(), commandLines,
-                                         comment.c_str());
+                                             comment);
     }
   return true;
 }

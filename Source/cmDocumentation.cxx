@@ -69,12 +69,33 @@ static const cmDocumentationEntry cmDocumentationGeneratorsHeader[] =
 };
 
 //----------------------------------------------------------------------------
-const cmDocumentationEntry cmDocumentationMailingList[] =
+static const cmDocumentationEntry cmDocumentationStandardSeeAlso[] =
 {
   {0,
-   "For help and discussion about using cmake, a mailing list is provided "
-   "at cmake@www.cmake.org.  Please first read the full documentation at "
-   "http://www.cmake.org before posting questions to the list.", 0},
+   "The following resources are available to get help using CMake:", 0},
+  {"Home Page",
+   "http://www.cmake.org",
+   "The primary starting point for learning about CMake."},
+  {"Frequently Asked Questions",
+   "http://www.cmake.org/Wiki/CMake_FAQ",
+   "A Wiki is provided containing answers to frequently asked questions. "},
+  {"Online Documentation",
+   "http://www.cmake.org/HTML/Documentation.html",
+   "Links to available documentation may be found on this web page."},
+  {"Mailing List",
+   "http://www.cmake.org/HTML/MailingLists.html",
+   "For help and discussion about using cmake, a mailing list is provided at "
+   "cmake@cmake.org. "
+   "The list is member-post-only but one may sign up on the CMake web page. "
+   "Please first read the full documentation at "
+   "http://www.cmake.org before posting questions to the list."},
+  {0,
+   "Summary of helpful links:\n"
+   "  Home: http://www.cmake.org\n"
+   "  Docs: http://www.cmake.org/HTML/Documentation.html\n"
+   "  Mail: http://www.cmake.org/HTML/MailingLists.html\n"
+   "  FAQ:  http://www.cmake.org/Wiki/CMake_FAQ\n"
+   , 0},
   {0,0,0}
 };
 
@@ -545,6 +566,7 @@ void cmDocumentation
 //----------------------------------------------------------------------------
 void cmDocumentation::SetSeeAlsoList(const cmDocumentationEntry* also)
 {
+  this->SeeAlsoSection.clear();
   this->SeeAlsoString = ".B ";
   for(const cmDocumentationEntry* i = also; i->brief; ++i)
     {
@@ -554,6 +576,11 @@ void cmDocumentation::SetSeeAlsoList(const cmDocumentationEntry* also)
   cmDocumentationEntry e = {0, 0, 0};
   e.brief = this->SeeAlsoString.c_str();
   this->SeeAlsoSection.push_back(e);
+  for(const cmDocumentationEntry* i = cmDocumentationStandardSeeAlso;
+      i->brief; ++i)
+    {
+    this->SeeAlsoSection.push_back(*i);
+    }
   e.brief = 0;
   this->SeeAlsoSection.push_back(e);  
 }
@@ -840,13 +867,17 @@ void cmDocumentation::PrintParagraphHTML(std::ostream& os, const char* text)
 //----------------------------------------------------------------------------
 void cmDocumentation::PrintPreformattedMan(std::ostream& os, const char* text)
 {
-  os << text << "\n";
+  std::string man_text = text;
+  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
+  os << man_text << "\n";
 }
 
 //----------------------------------------------------------------------------
 void cmDocumentation::PrintParagraphMan(std::ostream& os, const char* text)
 {
-  os << text << "\n\n";
+  std::string man_text = text;
+  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
+  os << man_text << "\n\n";
 }
 
 //----------------------------------------------------------------------------
@@ -1166,7 +1197,7 @@ void cmDocumentation::CreateFullDocumentation()
     this->AddSection("Standard CMake Modules", &this->ModulesSection[0]);
     }
   this->AddSection("Copyright", cmDocumentationCopyright);
-  this->AddSection("Mailing List", cmDocumentationMailingList);
+  this->AddSection("See Also", cmDocumentationStandardSeeAlso);
 }
 
 //----------------------------------------------------------------------------
@@ -1204,7 +1235,6 @@ void cmDocumentation::CreateManDocumentation()
     }
 
   this->AddSection("COPYRIGHT", cmDocumentationCopyright);
-  this->AddSection("MAILING LIST", cmDocumentationMailingList);  
   if(!this->SeeAlsoSection.empty())
     {
     this->AddSection("SEE ALSO", &this->SeeAlsoSection[0]);

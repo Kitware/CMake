@@ -908,6 +908,14 @@ const char *cmTarget::GetProperty(const char* prop)
     this->SetProperty("LOCATION", this->GetLocation(0));
     }
   
+  // Per-configuration location can be computed.
+  int len = static_cast<int>(strlen(prop));
+  if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
+    {
+    std::string configName(prop, len-9);
+    this->SetProperty(prop, this->GetLocation(configName.c_str()));
+    }
+
   // the type property returns what type the target is
   if (!strcmp(prop,"TYPE"))
     {
@@ -915,31 +923,31 @@ const char *cmTarget::GetProperty(const char* prop)
       {
       case cmTarget::STATIC_LIBRARY:
         return "STATIC_LIBRARY";
-        break;
+        // break; /* unreachable */
       case cmTarget::MODULE_LIBRARY:
         return "MODULE_LIBRARY";
-        break;
+        // break; /* unreachable */
       case cmTarget::SHARED_LIBRARY:
         return "SHARED_LIBRARY";
-        break;
+        // break; /* unreachable */
       case cmTarget::EXECUTABLE:
         return "EXECUTABLE";
-        break;
+        // break; /* unreachable */
       case cmTarget::UTILITY:
         return "UTILITY";
-        break;
+        // break; /* unreachable */
       case cmTarget::GLOBAL_TARGET:
         return "GLOBAL_TARGET";
-        break;
+        // break; /* unreachable */
       case cmTarget::INSTALL_FILES:
         return "INSTALL_FILES";
-        break;
+        // break; /* unreachable */
       case cmTarget::INSTALL_PROGRAMS:
         return "INSTALL_PROGRAMS";
-        break;
+        // break; /* unreachable */
       case cmTarget::INSTALL_DIRECTORY:
         return "INSTALL_DIRECTORY";
-        break;
+        // break; /* unreachable */
       }
     return 0;
     }
@@ -1158,6 +1166,17 @@ void cmTarget::GetFullNameInternal(TargetType type,
     return;
     }
 
+  // Return an empty name for the import library if this platform
+  // does not support import libraries.
+  if(implib &&
+     !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
+    {
+    outPrefix = "";
+    outBase = "";
+    outSuffix = "";
+    return;
+    }
+
   // The implib option is only allowed for shared libraries.
   if(type != cmTarget::SHARED_LIBRARY)
     {
@@ -1235,6 +1254,17 @@ void cmTarget::GetFullNameInternal(TargetType type,
 
   // Append the per-configuration postfix.
   outBase += configPostfix?configPostfix:"";
+
+  // Name shared libraries with their version number on some platforms.
+  if(const char* version = this->GetProperty("VERSION"))
+    {
+    if(type == cmTarget::SHARED_LIBRARY && !implib &&
+       this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION"))
+      {
+      outBase += "-";
+      outBase += version;
+      }
+    }
 
   // Append the suffix.
   outSuffix = targetSuffix?targetSuffix:"";

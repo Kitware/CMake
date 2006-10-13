@@ -12,8 +12,10 @@ INCLUDE(CMakeFindFrameworks)
 
 IF(WIN32)
   FIND_LIBRARY(PYTHON_DEBUG_LIBRARY
-    NAMES python24_d python23_d python22_d python21_d python20_d python
+    NAMES python25_d python24_d python23_d python22_d python21_d python20_d python
     PATHS
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.5\\InstallPath]/libs/Debug
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.5\\InstallPath]/libs
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs/Debug
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs/Debug
@@ -32,7 +34,8 @@ IF(WIN32)
 ENDIF(WIN32)
 
 FIND_LIBRARY(PYTHON_LIBRARY
-  NAMES python24 python2.4
+  NAMES python25 python2.5
+        python24 python2.4
         python23 python2.3
         python22 python2.2
         python21 python2.1
@@ -41,6 +44,7 @@ FIND_LIBRARY(PYTHON_LIBRARY
         python15 python1.5
 
   PATHS
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.5\\InstallPath]/libs
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/libs
@@ -50,6 +54,7 @@ FIND_LIBRARY(PYTHON_LIBRARY
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/libs
 
   PATH_SUFFIXES
+    python2.5/config
     python2.4/config
     python2.3/config
     python2.2/config
@@ -67,7 +72,7 @@ CMAKE_FIND_FRAMEWORKS(Python)
 SET(PYTHON_FRAMEWORK_INCLUDES)
 IF(Python_FRAMEWORKS)
   IF(NOT PYTHON_INCLUDE_PATH)
-    FOREACH(version 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
+    FOREACH(version 2.5 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
       FOREACH(dir ${Python_FRAMEWORKS})
         SET(PYTHON_FRAMEWORK_INCLUDES ${PYTHON_FRAMEWORK_INCLUDES}
           ${dir}/Versions/${version}/include/python${version})
@@ -81,6 +86,7 @@ FIND_PATH(PYTHON_INCLUDE_PATH
 
   PATHS
     ${PYTHON_FRAMEWORK_INCLUDES}
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.5\\InstallPath]/include
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/include
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/include
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/include
@@ -90,6 +96,7 @@ FIND_PATH(PYTHON_INCLUDE_PATH
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/include
 
   PATH_SUFFIXES
+    python2.5
     python2.4
     python2.3
     python2.2

@@ -1,6 +1,8 @@
+#include "cmStandardIncludes.h"
 
+#line 2 "cmCommandArgumentLexer.cxx"
 
-
+#line 4 "cmCommandArgumentLexer.cxx"
 
 #define  YY_INT_ALIGNED short int
 
@@ -9,7 +11,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 31
+#define YY_FLEX_SUBMINOR_VERSION 33
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -31,7 +33,15 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
+#if __STDC_VERSION__ >= 199901L
+
+/* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
+ * if you want the limit (max/min) macros for int types. 
+ */
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS 1
+#endif
+
 #include <inttypes.h>
 typedef int8_t flex_int8_t;
 typedef uint8_t flex_uint8_t;
@@ -154,6 +164,10 @@ int cmCommandArgument_yylex_init (yyscan_t* scanner);
 #define YY_BUF_SIZE 16384
 #endif
 
+/* The state buf must be large enough to hold one state per character in the main buffer.
+ */
+#define YY_STATE_BUF_SIZE   ((YY_BUF_SIZE + 2) * sizeof(yy_state_type))
+
 #ifndef YY_TYPEDEF_YY_BUFFER_STATE
 #define YY_TYPEDEF_YY_BUFFER_STATE
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
@@ -165,8 +179,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
     #define YY_LESS_LINENO(n)
     
-/* Return all but the first "n" matched characters back to the input
-   stream. */
+/* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
   do \
     { \
@@ -179,6 +192,8 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
     YY_DO_BEFORE_ACTION; /* set up yytext again */ \
     } \
   while ( 0 )
+
+#define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
 
 /* The following is because we cannot portably get our hands on size_t
  * (without autoconf's help, which isn't available because we want
@@ -246,9 +261,9 @@ struct yy_buffer_state
    * still have a bunch of tokens to match, though, because of
    * possible backing-up.
    *
-   * When we actually see the EOF, we change the status to "new" (via
-   * cmCommandArgument_yyrestart()), so that the user can continue scanning
-   * by just pointing yyin at a new input file.
+         * When we actually see the EOF, we change the status to "new"
+         * (via cmCommandArgument_yyrestart()), so that the user can continue scanning by
+         * just pointing yyin at a new input file.
    */
 #define YY_BUFFER_EOF_PENDING 2
 
@@ -265,29 +280,22 @@ struct yy_buffer_state
                           ? yyg->yy_buffer_stack[yyg->yy_buffer_stack_top] \
                           : NULL)
 
-/* Same as previous macro, but useful when we know that the buffer stack is
- * not NULL or when we need an lvalue. For internal use only.
+/* Same as previous macro, but useful when we know that the buffer stack is not
+ * NULL or when we need an lvalue. For internal use only.
  */
 #define YY_CURRENT_BUFFER_LVALUE yyg->yy_buffer_stack[yyg->yy_buffer_stack_top]
 
 void cmCommandArgument_yyrestart (FILE *input_file ,yyscan_t yyscanner );
-void cmCommandArgument_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,
-                                            yyscan_t yyscanner );
-YY_BUFFER_STATE cmCommandArgument_yy_create_buffer (FILE *file,int size ,
-                                                    yyscan_t yyscanner );
-void cmCommandArgument_yy_delete_buffer (YY_BUFFER_STATE b ,
-                                         yyscan_t yyscanner );
-void cmCommandArgument_yy_flush_buffer (YY_BUFFER_STATE b ,
-                                        yyscan_t yyscanner );
-void cmCommandArgument_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,
-                                            yyscan_t yyscanner );
+void cmCommandArgument_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE cmCommandArgument_yy_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void cmCommandArgument_yy_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void cmCommandArgument_yy_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void cmCommandArgument_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
 void cmCommandArgument_yypop_buffer_state (yyscan_t yyscanner );
 
 static void cmCommandArgument_yyensure_buffer_stack (yyscan_t yyscanner );
 static void cmCommandArgument_yy_load_buffer_state (yyscan_t yyscanner );
-static void cmCommandArgument_yy_init_buffer (YY_BUFFER_STATE b,
-                                              FILE *file ,
-                                              yyscan_t yyscanner );
+static void cmCommandArgument_yy_init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
 
 #define YY_FLUSH_BUFFER cmCommandArgument_yy_flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
 
@@ -370,7 +378,7 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    3,    1,    1,    1,    1,
-        1,    1,    1,    1,    4,    4,    4,    4,    4,    4,
+        1,    1,    4,    1,    4,    4,    4,    4,    4,    4,
         4,    4,    4,    4,    4,    4,    4,    1,    1,    1,
         1,    1,    1,    5,    4,    4,    4,    4,    4,    4,
         4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
@@ -436,8 +444,8 @@ static yyconst flex_int16_t yy_chk[30] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-
-
+#line 1 "cmCommandArgumentLexer.in.l"
+#line 2 "cmCommandArgumentLexer.in.l"
 /*=========================================================================
 
   Program:   CMake - Cross-Platform Makefile Generator
@@ -477,25 +485,9 @@ Modify cmCommandArgumentLexer.h:
 
 */
 
+#include "cmStandardLexer.h"
+
 #include "cmCommandArgumentParserHelper.h"
-
-/* Disable some warnings.  */
-#if defined(_MSC_VER)
-# pragma warning ( disable : 4127 )
-# pragma warning ( disable : 4131 )
-# pragma warning ( disable : 4244 )
-# pragma warning ( disable : 4251 )
-# pragma warning ( disable : 4267 )
-# pragma warning ( disable : 4305 )
-# pragma warning ( disable : 4309 )
-# pragma warning ( disable : 4706 )
-# pragma warning ( disable : 4786 )
-#endif
-
-/* Disable features we do not need. */
-#define YY_NEVER_INTERACTIVE 1
-#undef ECHO /* SGI termios defines this differently. */
-#define ECHO
 
 /* Replace the lexer input function.  */
 #undef YY_INPUT
@@ -505,18 +497,8 @@ Modify cmCommandArgumentLexer.h:
 /* Include the set of tokens from the parser.  */
 #include "cmCommandArgumentParserTokens.h"
 
-
-#if defined( _WIN32 ) && !defined( __CYGWIN__ )
-/* Handle Windows properly */
-#  include <io.h>
-#  if defined( _MSC_VER )
-#    define isatty _isatty
-#  endif
-#  define YY_NO_UNISTD_H 1
-#endif
-
 /*--------------------------------------------------------------------------*/
-
+#line 500 "cmCommandArgumentLexer.cxx"
 
 #define INITIAL 0
 
@@ -565,6 +547,8 @@ struct yyguts_t
     int yy_more_len;
 
     }; /* end struct yyguts_t */
+
+static int yy_init_globals (yyscan_t yyscanner );
 
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
@@ -638,8 +622,8 @@ static int input (yyscan_t yyscanner );
 #define ECHO (void) fwrite( yytext, yyleng, 1, yyout )
 #endif
 
-/* Gets input and stuffs it into "buf".  number of characters read, or
- * YY_NULL, is returned in "result".
+/* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
+ * is returned in "result".
  */
 #ifndef YY_INPUT
 #define YY_INPUT(buf,result,max_size) \
@@ -729,14 +713,14 @@ YY_DECL
   register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
+#line 60 "cmCommandArgumentLexer.in.l"
 
 
+#line 720 "cmCommandArgumentLexer.cxx"
 
-
-
-  if ( yyg->yy_init )
+        if ( !yyg->yy_init )
     {
-    yyg->yy_init = 0;
+                yyg->yy_init = 1;
 
 #ifdef YY_USER_INIT
     YY_USER_INIT;
@@ -817,7 +801,7 @@ do_action:  /* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-
+#line 62 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
@@ -825,7 +809,7 @@ YY_RULE_SETUP
 } 
 case 2:
 YY_RULE_SETUP
-
+#line 68 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
@@ -833,7 +817,7 @@ YY_RULE_SETUP
 } 
 case 3:
 YY_RULE_SETUP
-
+#line 74 "cmCommandArgumentLexer.in.l"
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
@@ -842,7 +826,7 @@ YY_RULE_SETUP
 }
 case 4:
 YY_RULE_SETUP
-
+#line 81 "cmCommandArgumentLexer.in.l"
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
@@ -851,7 +835,7 @@ YY_RULE_SETUP
 }
 case 5:
 YY_RULE_SETUP
-
+#line 88 "cmCommandArgumentLexer.in.l"
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
@@ -860,7 +844,7 @@ YY_RULE_SETUP
 }
 case 6:
 YY_RULE_SETUP
-
+#line 95 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
@@ -868,7 +852,7 @@ YY_RULE_SETUP
 }
 case 7:
 YY_RULE_SETUP
-
+#line 101 "cmCommandArgumentLexer.in.l"
 {
   if ( !yyextra->HandleEscapeSymbol(yylvalp, *(yytext+1)) )
     {
@@ -879,7 +863,7 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-
+#line 109 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
@@ -887,7 +871,7 @@ YY_RULE_SETUP
 }
 case 9:
 YY_RULE_SETUP
-
+#line 115 "cmCommandArgumentLexer.in.l"
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->DOLLARVariable;
@@ -895,7 +879,7 @@ YY_RULE_SETUP
 }
 case 10:
 YY_RULE_SETUP
-
+#line 121 "cmCommandArgumentLexer.in.l"
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->LCURLYVariable;
@@ -903,7 +887,7 @@ YY_RULE_SETUP
 }
 case 11:
 YY_RULE_SETUP
-
+#line 127 "cmCommandArgumentLexer.in.l"
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->BSLASHVariable;
@@ -911,10 +895,10 @@ YY_RULE_SETUP
 }
 case 12:
 YY_RULE_SETUP
-
+#line 133 "cmCommandArgumentLexer.in.l"
 ECHO;
   YY_BREAK
-
+#line 913 "cmCommandArgumentLexer.cxx"
 case YY_STATE_EOF(INITIAL):
   yyterminate();
 
@@ -1101,10 +1085,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
   else
     {
-      size_t nuto_read =
+                        int num_to_read =
       YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
-    while ( nuto_read <= 0 )
+                while ( num_to_read <= 0 )
       { /* Not enough room in the buffer - grow it. */
 
       /* just a shorter name for the current buffer */
@@ -1136,17 +1120,17 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
       yyg->yy_c_buf_p = &b->yy_ch_buf[yy_c_buf_p_offset];
 
-      nuto_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
+                        num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
             number_to_move - 1;
 
       }
 
-    if ( nuto_read > YY_READ_BUF_SIZE )
-      nuto_read = YY_READ_BUF_SIZE;
+                if ( num_to_read > YY_READ_BUF_SIZE )
+                        num_to_read = YY_READ_BUF_SIZE;
 
     /* Read in more data. */
     YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-      yyg->yy_n_chars, nuto_read );
+                        yyg->yy_n_chars, (size_t) num_to_read );
 
     YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
     }
@@ -1179,8 +1163,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
   return ret_val;
 }
 
-/* yy_get_previous_state - get the state just before the EOB char was
-   reached */
+/* yy_get_previous_state - get the state just before the EOB char was reached */
 
     static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
 {
@@ -1218,7 +1201,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
     static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state , yyscan_t yyscanner)
 {
   register int yy_is_jam;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner; /* This var may be unused depending upon options. */
   register char *yy_cp = yyg->yy_c_buf_p;
 
   register YY_CHAR yy_c = 1;
@@ -1361,10 +1344,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
   YY_CURRENT_BUFFER_LVALUE = new_buffer;
   cmCommandArgument_yy_load_buffer_state(yyscanner );
 
-  /* We don't actually know whether we did this switch during EOF
-   * (cmCommandArgument_yywrap()) processing, but the only time this flag is
-   * looked at is after cmCommandArgument_yywrap() is called, so it's safe to
-   * go ahead and always set it.
+        /* We don't actually know whether we did this switch during
+         * EOF (cmCommandArgument_yywrap()) processing, but the only time this flag
+         * is looked at is after cmCommandArgument_yywrap() is called, so it's safe
+         * to go ahead and always set it.
    */
   yyg->yy_did_buffer_switch_on_eof = 1;
 }
@@ -1378,10 +1361,11 @@ static void cmCommandArgument_yy_load_buffer_state  (yyscan_t yyscanner)
   yyg->yy_hold_char = *yyg->yy_c_buf_p;
 }
 
-/** Allocate and initialize an input buffer state.  @param file A readable
- * stream.  @param size The character buffer size in bytes. When in doubt,
- * use @c YY_BUF_SIZE.  @param yyscanner The scanner object.  @return the
- * allocated buffer state.
+/** Allocate and initialize an input buffer state.
+ * @param file A readable stream.
+ * @param size The character buffer size in bytes. When in doubt, use @c YY_BUF_SIZE.
+ * @param yyscanner The scanner object.
+ * @return the allocated buffer state.
  */
     YY_BUFFER_STATE cmCommandArgument_yy_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
 {
@@ -1446,10 +1430,9 @@ extern int isatty (int );
   b->yy_input_file = file;
   b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then cmCommandArgument_yy_init_buffer was
-     * _probably_ called from cmCommandArgument_yyrestart() or through
-     * yy_get_next_buffer.  In that case, we don't want to reset the lineno
-     * or column.
+    /* If b is the current buffer, then cmCommandArgument_yy_init_buffer was _probably_
+     * called from cmCommandArgument_yyrestart() or through yy_get_next_buffer.
+     * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
         b->yy_bs_lineno = 1;
@@ -1461,9 +1444,9 @@ extern int isatty (int );
   errno = oerrno;
 }
 
-/** Discard all buffered characters. On the next scan, YY_INPUT will be
- * called.  @param b the buffer state to be flushed, usually @c
- * YY_CURRENT_BUFFER.  @param yyscanner The scanner object.
+/** Discard all buffered characters. On the next scan, YY_INPUT will be called.
+ * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
+ * @param yyscanner The scanner object.
  */
     void cmCommandArgument_yy_flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
@@ -1548,7 +1531,7 @@ void cmCommandArgument_yypop_buffer_state (yyscan_t yyscanner)
  */
 static void cmCommandArgument_yyensure_buffer_stack (yyscan_t yyscanner)
 {
-  int nuto_alloc;
+        int num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
   if (!yyg->yy_buffer_stack) {
@@ -1557,14 +1540,14 @@ static void cmCommandArgument_yyensure_buffer_stack (yyscan_t yyscanner)
      * scanner will even need a stack. We use 2 instead of 1 to avoid an
      * immediate realloc on the next call.
          */
-    nuto_alloc = 1;
+                num_to_alloc = 1;
     yyg->yy_buffer_stack = (struct yy_buffer_state**)cmCommandArgument_yyalloc
-                (nuto_alloc * sizeof(struct yy_buffer_state*)
+                                                                (num_to_alloc * sizeof(struct yy_buffer_state*)
                 , yyscanner);
     
-    memset(yyg->yy_buffer_stack, 0, nuto_alloc * sizeof(struct yy_buffer_state*));
+                memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
         
-    yyg->yy_buffer_stack_max = nuto_alloc;
+                yyg->yy_buffer_stack_max = num_to_alloc;
     yyg->yy_buffer_stack_top = 0;
     return;
   }
@@ -1574,21 +1557,22 @@ static void cmCommandArgument_yyensure_buffer_stack (yyscan_t yyscanner)
     /* Increase the buffer to prepare for a possible push. */
     int grow_size = 8 /* arbitrary grow size */;
 
-    nuto_alloc = yyg->yy_buffer_stack_max + grow_size;
+                num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
     yyg->yy_buffer_stack = (struct yy_buffer_state**)cmCommandArgument_yyrealloc
                 (yyg->yy_buffer_stack,
-                nuto_alloc * sizeof(struct yy_buffer_state*)
+                                                                num_to_alloc * sizeof(struct yy_buffer_state*)
                 , yyscanner);
 
     /* zero only the new slots.*/
     memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
-    yyg->yy_buffer_stack_max = nuto_alloc;
+                yyg->yy_buffer_stack_max = num_to_alloc;
   }
 }
 
-/** Setup the input buffer state to scan directly from a user-specified
- * character buffer.  @param base the character buffer @param size the size
- * in bytes of the character buffer @param yyscanner The scanner object.
+/** Setup the input buffer state to scan directly from a user-specified character buffer.
+ * @param base the character buffer
+ * @param size the size in bytes of the character buffer
+ * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object. 
  */
 YY_BUFFER_STATE cmCommandArgument_yy_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
@@ -1620,26 +1604,28 @@ YY_BUFFER_STATE cmCommandArgument_yy_scan_buffer  (char * base, yy_size_t  size 
   return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to
- * cmCommandArgument_yylex() will scan from a @e copy of @a str.  @param str
- * a NUL-terminated string to scan @param yyscanner The scanner object.
- * @return the newly allocated buffer state object.  @note If you want to
- * scan bytes that may contain NUL values, then use
+/** Setup the input buffer state to scan a string. The next call to cmCommandArgument_yylex() will
+ * scan from a @e copy of @a str.
+ * @param yystr a NUL-terminated string to scan
+ * @param yyscanner The scanner object.
+ * @return the newly allocated buffer state object.
+ * @note If you want to scan bytes that may contain NUL values, then use
  *       cmCommandArgument_yy_scan_bytes() instead.
  */
-YY_BUFFER_STATE cmCommandArgument_yy_scan_string (yyconst char * yy_str , yyscan_t yyscanner)
+YY_BUFFER_STATE cmCommandArgument_yy_scan_string (yyconst char * yystr , yyscan_t yyscanner)
 {
     
-  return cmCommandArgument_yy_scan_bytes(yy_str,strlen(yy_str) ,yyscanner);
+        return cmCommandArgument_yy_scan_bytes(yystr,strlen(yystr) ,yyscanner);
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to
- * cmCommandArgument_yylex() will scan from a @e copy of @a bytes.  @param
- * bytes the byte buffer to scan @param len the number of bytes in the buffer
- * pointed to by @a bytes.  @param yyscanner The scanner object.  @return the
- * newly allocated buffer state object.
+/** Setup the input buffer state to scan the given bytes. The next call to cmCommandArgument_yylex() will
+ * scan from a @e copy of @a bytes.
+ * @param bytes the byte buffer to scan
+ * @param len the number of bytes in the buffer pointed to by @a bytes.
+ * @param yyscanner The scanner object.
+ * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE cmCommandArgument_yy_scan_bytes  (yyconst char * bytes, int  len , yyscan_t yyscanner)
+YY_BUFFER_STATE cmCommandArgument_yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
   YY_BUFFER_STATE b;
   char *buf;
@@ -1647,15 +1633,15 @@ YY_BUFFER_STATE cmCommandArgument_yy_scan_bytes  (yyconst char * bytes, int  len
   int i;
     
   /* Get memory for full buffer, including space for trailing EOB's. */
-  n = len + 2;
+        n = _yybytes_len + 2;
   buf = (char *) cmCommandArgument_yyalloc(n ,yyscanner );
   if ( ! buf )
     YY_FATAL_ERROR( "out of dynamic memory in cmCommandArgument_yy_scan_bytes()" );
 
-  for ( i = 0; i < len; ++i )
-    buf[i] = bytes[i];
+        for ( i = 0; i < _yybytes_len; ++i )
+                buf[i] = yybytes[i];
 
-  buf[len] = buf[len+1] = YY_END_OF_BUFFER_CHAR;
+        buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
   b = cmCommandArgument_yy_scan_buffer(buf,n ,yyscanner);
   if ( ! b )
@@ -1805,12 +1791,7 @@ void cmCommandArgument_yyset_column (int  column_no , yyscan_t yyscanner)
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-          {
-          yy_fatal_error
-            ("cmCommandArgument_yyset_column called with no buffer" , 
-             yyscanner); 
-          }
-        
+           yy_fatal_error( "cmCommandArgument_yyset_column called with no buffer" , yyscanner); 
     
     yycolumn = column_no;
 }
@@ -1847,43 +1828,11 @@ void cmCommandArgument_yyset_debug (int  bdebug , yyscan_t yyscanner)
 
 /* Accessor methods for yylval and yylloc */
 
-static int yy_init_globals (yyscan_t yyscanner)
-{
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    /* Initialization is the same as for the non-reentrant scanner.
-       This function is called once per scanner lifetime. */
-
-    yyg->yy_buffer_stack = 0;
-    yyg->yy_buffer_stack_top = 0;
-    yyg->yy_buffer_stack_max = 0;
-    yyg->yy_c_buf_p = (char *) 0;
-    yyg->yy_init = 1;
-    yyg->yy_start = 0;
-    yyg->yy_start_stack_ptr = 0;
-    yyg->yy_start_stack_depth = 0;
-    yyg->yy_start_stack = (int *) 0;
-
-/* Defined in main.c */
-#ifdef YY_STDINIT
-    yyin = stdin;
-    yyout = stdout;
-#else
-    yyin = (FILE *) 0;
-    yyout = (FILE *) 0;
-#endif
-
-    /* For future reference: Set errno on error, since we are called by
-     * cmCommandArgument_yylex_init()
-     */
-    return 0;
-}
-
 /* User-visible API */
 
-/* cmCommandArgument_yylex_init is special because it creates the scanner
- * itself, so it is the ONLY reentrant function that doesn't take the scanner
- * as the last argument.  That's why we explicitly handle the declaration,
- * instead of using our macros.
+/* cmCommandArgument_yylex_init is special because it creates the scanner itself, so it is
+ * the ONLY reentrant function that doesn't take the scanner as the last argument.
+ * That's why we explicitly handle the declaration, instead of using our macros.
  */
 
 int cmCommandArgument_yylex_init(yyscan_t* ptr_yy_globals)
@@ -1901,13 +1850,46 @@ int cmCommandArgument_yylex_init(yyscan_t* ptr_yy_globals)
         return 1;
     }
 
-    memset(*ptr_yy_globals,0,sizeof(struct yyguts_t));
+    /* By setting to 0xAA, we expose bugs in yy_init_globals. Leave at 0x00 for releases. */
+    memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
 
     return yy_init_globals ( *ptr_yy_globals );
 }
 
-/* cmCommandArgument_yylex_destroy is for both reentrant and non-reentrant
-   scanners. */
+static int yy_init_globals (yyscan_t yyscanner)
+{
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+    /* Initialization is the same as for the non-reentrant scanner.
+     * This function is called from cmCommandArgument_yylex_destroy(), so don't allocate here.
+     */
+
+    yyg->yy_buffer_stack = 0;
+    yyg->yy_buffer_stack_top = 0;
+    yyg->yy_buffer_stack_max = 0;
+    yyg->yy_c_buf_p = (char *) 0;
+    yyg->yy_init = 0;
+    yyg->yy_start = 0;
+
+    yyg->yy_start_stack_ptr = 0;
+    yyg->yy_start_stack_depth = 0;
+    yyg->yy_start_stack =  NULL;
+
+/* Defined in main.c */
+#ifdef YY_STDINIT
+    yyin = stdin;
+    yyout = stdout;
+#else
+    yyin = (FILE *) 0;
+    yyout = (FILE *) 0;
+#endif
+
+    /* For future reference: Set errno on error, since we are called by
+     * cmCommandArgument_yylex_init()
+     */
+    return 0;
+}
+
+/* cmCommandArgument_yylex_destroy is for both reentrant and non-reentrant scanners. */
 int cmCommandArgument_yylex_destroy  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
@@ -1927,8 +1909,13 @@ int cmCommandArgument_yylex_destroy  (yyscan_t yyscanner)
         cmCommandArgument_yyfree(yyg->yy_start_stack ,yyscanner );
         yyg->yy_start_stack = NULL;
 
+    /* Reset the globals. This is important in a non-reentrant scanner so the next time
+     * cmCommandArgument_yylex() is called, initialization will occur. */
+    yy_init_globals( yyscanner);
+
     /* Destroy the main struct (reentrant only). */
     cmCommandArgument_yyfree ( yyscanner , yyscanner );
+    yyscanner = NULL;
     return 0;
 }
 
@@ -1937,11 +1924,9 @@ int cmCommandArgument_yylex_destroy  (yyscan_t yyscanner)
  */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , 
-                             yyscan_t yyscanner)
+static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yyscanner)
 {
   register int i;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
   for ( i = 0; i < n; ++i )
     s1[i] = s2[i];
 }
@@ -1951,7 +1936,6 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n ,
 static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 {
   register int n;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
   for ( n = 0; s[n]; ++n )
     ;
 
@@ -1978,25 +1962,12 @@ void *cmCommandArgument_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t)
 
 void cmCommandArgument_yyfree (void * ptr , yyscan_t)
 {
-  free( (char *) ptr );  
-  /* see cmCommandArgument_yyrealloc() for (char *) cast */
+        free( (char *) ptr );   /* see cmCommandArgument_yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
 
-#undef YY_NEW_FILE
-#undef YY_FLUSH_BUFFER
-#undef yy_set_bol
-#undef yy_new_buffer
-#undef yy_set_interactive
-#undef yytext_ptr
-#undef YY_DO_BEFORE_ACTION
-
-#ifdef YY_DECL_IS_OURS
-#undef YY_DECL_IS_OURS
-#undef YY_DECL
-#endif
-
+#line 133 "cmCommandArgumentLexer.in.l"
 
 
 

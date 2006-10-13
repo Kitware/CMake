@@ -85,6 +85,9 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"--debug-trycompile", "Do not delete the try compile directories..",
    "Do not delete the files and directories created for try_compile calls. "
    "This is useful in debugging failed try_compiles."},
+  {"--debug-output", "Put cmake in a debug mode.",
+   "Print extra stuff during the cmake run like stack traces with "
+   "message(send_error ) calls."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed."},
   {"--help-command-list [file]", "List available listfile commands and exit.",

@@ -80,6 +80,42 @@ IF(STAGE2)
     MESSAGE(FATAL_ERROR "Release-configuration file installed for Debug!")
   ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/include/Debug/lib1release.h")
 
+  # Check for failure of directory installation.
+  IF(WIN32 AND NOT CYGWIN)
+    SET(BAT .bat)
+  ELSE(WIN32 AND NOT CYGWIN)
+    SET(BAT)
+  ENDIF(WIN32 AND NOT CYGWIN)
+  IF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/TSD.h")
+    MESSAGE(FATAL_ERROR "Directory installation did not install TSD.h")
+  ENDIF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/TSD.h")
+  IF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/CVS")
+    MESSAGE(FATAL_ERROR "Directory installation installed CVS directory.")
+  ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/CVS")
+  IF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/CVS")
+    MESSAGE(FATAL_ERROR "Directory installation installed CVS directory.")
+  ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/CVS")
+  EXECUTE_PROCESS(
+    COMMAND "${CMAKE_INSTALL_PREFIX}/MyTest/share/sample_script${BAT}"
+    RESULT_VARIABLE SAMPLE_SCRIPT_RESULT
+    OUTPUT_VARIABLE SAMPLE_SCRIPT_OUTPUT
+    )
+  IF(NOT "${SAMPLE_SCRIPT_RESULT}" MATCHES "^0$")
+    MESSAGE(FATAL_ERROR "Sample script failed: [${SAMPLE_SCRIPT_RESULT}]")
+  ENDIF(NOT "${SAMPLE_SCRIPT_RESULT}" MATCHES "^0$")
+  IF(NOT "${SAMPLE_SCRIPT_OUTPUT}" MATCHES "Sample Script Output")
+    MESSAGE(FATAL_ERROR "Bad sample script output: [${SAMPLE_SCRIPT_OUTPUT}]")
+  ENDIF(NOT "${SAMPLE_SCRIPT_OUTPUT}" MATCHES "Sample Script Output")
+
+  # Check for failure of empty directory installation.
+  IF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/empty")
+    MESSAGE(FATAL_ERROR "Empty directory installation did not install.")
+  ENDIF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/empty")
+  FILE(GLOB EMPTY_FILES "${CMAKE_INSTALL_PREFIX}/MyTest/share/empty/*")
+  IF(EMPTY_FILES)
+    MESSAGE(FATAL_ERROR "Empty directory installed [${EMPTY_FILES}].")
+  ENDIF(EMPTY_FILES)
+
   # Make sure the test executable can run from the install tree.
   SET_TARGET_PROPERTIES(SimpleInstallS2 PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
@@ -130,6 +166,9 @@ ELSE(STAGE2)
     )
   INSTALL_FILES(/MyTest/include FILES lib3.h)
 
+  # Test optional installation.
+  INSTALL(FILES does_not_exist.h DESTINATION MyTest/include/foo OPTIONAL)
+
   # Test configuration-specific installation.
   INSTALL(FILES lib1.h RENAME lib1release.h CONFIGURATIONS Release
     DESTINATION MyTest/include/Release
@@ -137,6 +176,18 @@ ELSE(STAGE2)
   INSTALL(FILES lib1.h RENAME lib1debug.h CONFIGURATIONS Debug
     DESTINATION MyTest/include/Debug
     )
+
+  # Test directory installation.
+  FILE(REMOVE_RECURSE "${CMAKE_INSTALL_PREFIX}/MyTest/share/CVS")
+  FILE(REMOVE_RECURSE "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/CVS")
+  INSTALL(
+    DIRECTORY TestSubDir scripts/ DESTINATION MyTest/share
+    PATTERN "CVS" EXCLUDE
+    PATTERN "scripts/*" PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+    )
+
+  # Test empty directory installation.
+  INSTALL(DIRECTORY DESTINATION MyTest/share/empty)
 
   # Test user-specified install scripts.
   INSTALL(
@@ -154,7 +205,8 @@ ELSE(STAGE2)
     ${CMAKE_CURRENT_SOURCE_DIR}/PreInstall.cmake)
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES POST_INSTALL_SCRIPT 
     ${CMAKE_CURRENT_SOURCE_DIR}/PostInstall.cmake)
-  SET_TARGET_PROPERTIES(test4 PROPERTIES VERSION 1.2 SOVERSION 3)
+  SET_TARGET_PROPERTIES(test4 PROPERTIES VERSION 1.2 SOVERSION 3
+        INSTALL_NAME_DIR @executable_path/../lib)
 ENDIF(STAGE2)
 
 IF(CMAKE_CONFIGURATION_TYPES)
@@ -176,6 +228,39 @@ IF(WIN32 AND NOT UNIX)
     SET(CPACK_GENERATOR TGZ)
   ENDIF(NOT NSIS_MAKENSIS)
 ENDIF(WIN32 AND NOT UNIX)
+IF(UNIX AND NOT APPLE)
+  #  SET(CPACK_GENERATOR "TGZ;STGZ")
+  #  FIND_PROGRAM(found_compress
+  #    NAMES compress)
+  #  IF(found_compress)
+  #    FIND_PROGRAM(file_command NAMES file)
+  #    IF(NOT file_command)
+  #      set(file_command file)
+  #    ENDIF(NOT file_command)
+  #    EXECUTE_PROCESS(COMMAND ${file_command} ${found_compress}
+  #      OUTPUT_VARIABLE output)
+  #    set(SKIP_TZ FALSE)
+  #    if("${output}" MATCHES "script")
+  #      set(SKIP_TZ TRUE)
+  #    endif("${output}" MATCHES "script")
+  #    if("${output}" MATCHES "dummy.sh")
+  #      set(SKIP_TZ TRUE)
+  #    endif("${output}" MATCHES "dummy.sh")
+  #    if(NOT SKIP_TZ)
+  #      message("compress found and it was not a script")
+  #      message("output from file command: [${output}]")
+  #      SET(CPACK_GENERATOR "${CPACK_GENERATOR};TZ")
+  #    else(NOT SKIP_TZ)
+  #      message("compress found, but it was a script so dont use it")
+  #      message("output from file command: [${output}]")
+  #    endif(NOT SKIP_TZ)
+  #  ENDIF(found_compress)
+  FIND_PROGRAM(found_bz2
+    NAMES bzip2)
+  IF(found_bz2)
+    SET(CPACK_GENERATOR "${CPACK_GENERATOR};TBZ2")
+  ENDIF(found_bz2)
+ENDIF(UNIX AND NOT APPLE)
 
 SET(CPACK_PACKAGE_EXECUTABLES "SimpleInstall" "Simple Install")
 SET(CMAKE_INSTALL_MFC_LIBRARIES 1)

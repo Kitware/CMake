@@ -337,6 +337,10 @@ const char* SystemTools::GetExecutableExtension()
 
 bool SystemTools::MakeDirectory(const char* path)
 {
+  if(!path)
+    {
+    return false;
+    }
   if(SystemTools::FileExists(path))
     {
     return true;
@@ -1366,17 +1370,31 @@ kwsys_stl::string SystemTools::ConvertToUnixOutputPath(const char* path)
     {
     ret.erase(pos, 1);
     }
-  // now escape spaces if there is a space in the path
-  if(ret.find(" ") != kwsys_stl::string::npos)
+  // escape spaces and () in the path
+  if(ret.find_first_of(" ()") != kwsys_stl::string::npos)
     {
     kwsys_stl::string result = "";
     char lastch = 1;
+    bool inDollarVariable = false;
     for(const char* ch = ret.c_str(); *ch != '\0'; ++ch)
       {
         // if it is already escaped then don't try to escape it again
-      if(*ch == ' ' && lastch != '\\')
+      if((*ch == ' ' || *ch == '(' || *ch == ')') && lastch != '\\')
+        {
+        if(*ch == '(' && lastch == '$')
+          {
+          inDollarVariable = true;
+          }
+        // if we are in a $(..... and we get a ) then do not escape
+        // the ) and but set inDollarVariable to false
+        else if(*ch == ')' && inDollarVariable)
+          {
+          inDollarVariable = false;
+          }
+        else
         {
         result += '\\';
+        }
         }
       result += *ch;
       lastch = *ch;
@@ -1764,7 +1782,7 @@ long int SystemTools::CreationTime(const char* filename)
 
 bool SystemTools::ConvertDateMacroString(const char *str, time_t *tmt)
 {
-  if (!str || !tmt || strlen(str) < 12)
+  if (!str || !tmt || strlen(str) > 11)
     {
     return false;
     }
@@ -1812,7 +1830,7 @@ bool SystemTools::ConvertDateMacroString(const char *str, time_t *tmt)
 
 bool SystemTools::ConvertTimeStampMacroString(const char *str, time_t *tmt)
 {
-  if (!str || !tmt || strlen(str) < 27)
+  if (!str || !tmt || strlen(str) > 26)
     {
     return false;
     }
@@ -2242,6 +2260,17 @@ kwsys_stl::string SystemTools
 
 bool SystemTools::FileIsDirectory(const char* name)
 {
+  // Remove any trailing slash from the name.
+  char buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
+  int last = static_cast<int>(strlen(name))-1;
+  if(last >= 0 && (name[last] == '/' || name[last] == '\\'))
+    {
+    memcpy(buffer, name, last);
+    buffer[last] = 0;
+    name = buffer;
+    }
+
+  // Now check the file node type.
   struct stat fs;
   if(stat(name, &fs) == 0)
     {
@@ -2441,7 +2470,8 @@ void SystemTools::AddTranslationPath(const char * a, const char * b)
 
 void SystemTools::AddKeepPath(const char* dir)
 {
-  kwsys_stl::string cdir = SystemTools::CollapseFullPath(dir);
+  kwsys_stl::string cdir;
+  Realpath(SystemTools::CollapseFullPath(dir).c_str(), cdir);
   SystemTools::AddTranslationPath(cdir.c_str(), dir);
 }
 
@@ -2798,20 +2828,36 @@ void SystemTools::SplitPath(const char* p,
 kwsys_stl::string
 SystemTools::JoinPath(const kwsys_stl::vector<kwsys_stl::string>& components)
 {
+  return SystemTools::JoinPath(components.begin(), components.end());
+}
+
+//----------------------------------------------------------------------------
+kwsys_stl::string
+SystemTools
+::JoinPath(kwsys_stl::vector<kwsys_stl::string>::const_iterator first,
+           kwsys_stl::vector<kwsys_stl::string>::const_iterator last)
+{
+  // Construct result in a single string.
   kwsys_stl::string result;
-  if(components.size() > 0)
+
+  // The first two components do not add a slash.
+  if(first != last)
     {
-    result += components[0];
+    result += *first++;
     }
-  if(components.size() > 1)
+  if(first != last)
     {
-    result += components[1];
+    result += *first++;
     }
-  for(unsigned int i=2; i < components.size(); ++i)
+
+  // All remaining components are always separated with a slash.
+  while(first != last)
     {
     result += "/";
-    result += components[i];
+    result += *first++;
     }
+
+  // Return the concatenated result.
   return result;
 }
 
@@ -3348,7 +3394,7 @@ kwsys_stl::string SystemTools::GetCurrentDateTime(const char* format)
   time_t t;
   time(&t);
   strftime(buf, sizeof(buf), format, localtime(&t));
-  return buf;
+  return kwsys_stl::string(buf);
 }
 
 kwsys_stl::string SystemTools::MakeCindentifier(const char* s)
@@ -3374,39 +3420,49 @@ kwsys_stl::string SystemTools::MakeCindentifier(const char* s)
 // Due to a buggy stream library on the HP and another on Mac OSX, we
 // need this very carefully written version of getline.  Returns true
 // if any data were read before the end-of-file was reached.
-bool SystemTools::GetLineFromStream(kwsys_ios::istream& is, kwsys_stl::string& line,
-                                    bool *has_newline /* = 0 */)
+bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
+                                    kwsys_stl::string& line,
+                                    bool* has_newline /* = 0 */)
 {
   const int bufferSize = 1024;
   char buffer[bufferSize];
-  line = "";
   bool haveData = false;
-  if ( has_newline )
-    {
-    *has_newline = false;
-    }
+  bool haveNewline = false;
+
+  // Start with an empty line.
+  line = "";
 
   // If no characters are read from the stream, the end of file has
-  // been reached.
-  while((is.getline(buffer, bufferSize), is.gcount() > 0))
+  // been reached.  Clear the fail bit just before reading.
+  while(!haveNewline &&
+        (is.clear(is.rdstate() & ~kwsys_ios::ios::failbit),
+         is.getline(buffer, bufferSize), is.gcount() > 0))
     {
+    // We have read at least one byte.
     haveData = true;
-    line.append(buffer);
 
-    // If newline character was read, the gcount includes the
-    // character, but the buffer does not.  The end of line has been
-    // reached.
-    if(strlen(buffer) < static_cast<size_t>(is.gcount()))
+    // If newline character was read the gcount includes the character
+    // but the buffer does not: the end of line has been reached.
+    size_t length = strlen(buffer);
+    if(length < static_cast<size_t>(is.gcount()))
       {
-      if ( has_newline )
-        {
-        *has_newline = true;
-        }
-      break;
+      haveNewline = true;
       }
 
-    // The fail bit may be set.  Clear it.
-    is.clear(is.rdstate() & ~kwsys_ios::ios::failbit);
+    // Avoid storing a carriage return character.
+    if(length > 0 && buffer[length-1] == '\r')
+        {
+      buffer[length-1] = 0;
+        }
+
+    // Append the data read to the line.
+    line.append(buffer);
+      }
+
+  // Return the results.
+  if(has_newline)
+    {
+    *has_newline = haveNewline;
     }
   return haveData;
 }

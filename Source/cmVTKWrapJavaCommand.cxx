@@ -190,9 +190,8 @@ void cmVTKWrapJavaCommand::FinalPass()
     alldepends.push_back(res2);
     }
 
-  const char* no_output = 0;
   const char* no_working_directory = 0;
-  this->Makefile->AddUtilityCommand((this->LibraryName+"JavaClasses").c_str(),
-                                true, no_output, 
-                                alldepends, no_working_directory, "");
+  this->Makefile->AddUtilityCommand(
+    (this->LibraryName+"JavaClasses").c_str(),
+    true, alldepends, no_working_directory, "");
 }

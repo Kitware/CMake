@@ -72,6 +72,12 @@ public:
       "(Windows DLL), the files will be copied to that directory.";
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmInstallTargetsCommand, cmCommand);
 };
 

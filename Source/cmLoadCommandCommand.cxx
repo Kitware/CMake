@@ -21,6 +21,12 @@
 
 #include <cmsys/DynamicLoader.hxx>
 
+#include <stdlib.h>
+
+#ifdef __QNX__
+# include <malloc.h> /* for malloc/free on QNX */
+#endif
+
 #include <signal.h>
 extern "C" void TrapsForSignalsCFunction(int sig);
 

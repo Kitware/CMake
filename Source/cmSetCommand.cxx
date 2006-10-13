@@ -92,7 +92,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   // collect any values into a single semi-colon seperated value list
-  if(args.size() > 
+  if(static_cast<unsigned short>(args.size()) >
      static_cast<unsigned short>(1 + (cache ? 3 : 0) + (force ? 1 : 0)))
     {
     value = args[1];

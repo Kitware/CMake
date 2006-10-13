@@ -44,7 +44,43 @@ void cmLocalVisualStudio7Generator::Generate()
   lang.insert("IDL");
   lang.insert("DEF");
   this->CreateCustomTargetsAndCommands(lang);
+  this->FixGlobalTargets();
   this->OutputVCProjFile();
+}
+
+void cmLocalVisualStudio7Generator::FixGlobalTargets()
+{
+  // Visual Studio .NET 2003 Service Pack 1 will not run post-build
+  // commands for targets in which no sources are built.  Add dummy
+  // rules to force these targets to build.
+  cmTargets &tgts = this->Makefile->GetTargets();
+  for(cmTargets::iterator l = tgts.begin();
+      l != tgts.end(); l++)
+    {
+    cmTarget& tgt = l->second;
+    if(tgt.GetType() == cmTarget::GLOBAL_TARGET)
+      {
+      std::vector<std::string> no_depends;
+      cmCustomCommandLine force_command;
+      force_command.push_back(";");
+      cmCustomCommandLines force_commands;
+      force_commands.push_back(force_command);
+      const char* no_main_dependency = 0;
+      std::string force = this->Makefile->GetStartOutputDirectory();
+      force += cmake::GetCMakeFilesDirectory();
+      force += "/";
+      force += tgt.GetName();
+      force += "_force";
+      this->Makefile->AddCustomCommandToOutput(force.c_str(), no_depends,
+                                               no_main_dependency,
+                                               force_commands, " ", 0, true);
+      if(cmSourceFile* file =
+         this->Makefile->GetSourceFileWithOutput(force.c_str()))
+        {
+        tgt.GetSourceFiles().push_back(file);
+        }
+      }
+    }
 }
 
 // TODO
@@ -182,12 +218,12 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmTarget& tgt)
   std::string args;
   args = "-H";
   args += this->Convert(this->Makefile->GetHomeDirectory(), 
-                        START_OUTPUT, SHELL, true);
+                        START_OUTPUT, UNCHANGED, true);
   commandLine.push_back(args);
   args = "-B";
   args +=
     this->Convert(this->Makefile->GetHomeOutputDirectory(),
-                  START_OUTPUT, SHELL, true);
+                  START_OUTPUT, UNCHANGED, true);
   commandLine.push_back(args);
 
   std::string configFile =
@@ -326,6 +362,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
 cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
 {
   // option flags (some flags map to the same option)
+  {"GenerateManifest", "MANIFEST:NO", "disable manifest generation", "FALSE"},
+  {"GenerateManifest", "MANIFEST", "enable manifest generation", "TRUE"},
   {"LinkIncremental", "INCREMENTAL:NO", "link incremental", "1"},
   {"LinkIncremental", "INCREMENTAL:YES", "link incremental", "2"},
   {0,0,0,0 }
@@ -527,7 +565,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     flagMap.find("DebugInformationFormat");
   if(mi != flagMap.end() && mi->second != "1")
     {
-    fout <<  "\t\t\t\tProgramDatabaseFileName=\""
+    fout <<  "\t\t\t\tProgramDataBaseFileName=\""
          << this->LibraryOutputPath
          << "$(OutDir)/" << libName << ".pdb\"\n";
     }
@@ -571,6 +609,17 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\t\t\t\tInterfaceIdentifierFileName=\"$(InputName)_i.c\"\n";
   fout << "\t\t\t\tProxyFileName=\"$(InputName)_p.c\"/>\n";
   // end of <Tool Name=VCMIDLTool
+
+  // If we are building a version 8 project file, add a flag telling the
+  // manifest tool to use a workaround for FAT32 file systems, which can cause
+  // an empty manifest to be embedded into the resulting executable.
+  // See CMake bug #2617.
+  if ( this->Version == 8 )
+    {
+    fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCManifestTool\"\n"
+         << "\t\t\t\tUseFAT32Workaround=\"true\"\n"
+         << "\t\t\t/>\n";
+    }
 
   this->OutputTargetRules(fout, target, libName);
   this->OutputBuildTool(fout, configName, libName, target);
@@ -765,7 +814,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += "$(OutDir)/";
     temp += libName;
     temp += ".pdb";
-    fout << "\t\t\t\tProgramDatabaseFile=\"" <<
+    fout << "\t\t\t\tProgramDataBaseFile=\"" <<
       this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
     if(strcmp(configName, "Debug") == 0
        || strcmp(configName, "RelWithDebInfo") == 0)
@@ -844,7 +893,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
     this->OutputLibraryDirectories(fout, linkDirs);
     fout << "\"\n";
-    fout << "\t\t\t\tProgramDatabaseFile=\"" << this->LibraryOutputPath
+    fout << "\t\t\t\tProgramDataBaseFile=\"" << this->LibraryOutputPath
          << "$(OutDir)\\" << libName << ".pdb\"\n";
     if(strcmp(configName, "Debug") == 0
        || strcmp(configName, "RelWithDebInfo") == 0)
@@ -982,8 +1031,20 @@ void cmLocalVisualStudio7Generator::OutputDefineFlags(const char* flags,
     // Double-quotes in the value of the definition must be escaped
     // with a backslash.  The entire definition should be quoted in
     // the generated xml attribute to avoid confusing the VS parser.
-    cmSystemTools::ReplaceString(define, "\"", "\\&quot;");
+    define = this->EscapeForXML(define.c_str());
+    // if the define has something in it that is not a letter or a number
+    // then quote it
+    if(define.
+       find_first_not_of(
+         "-_abcdefghigklmnopqrstuvwxyz1234567890ABCDEFGHIGKLMNOPQRSTUVWXYZ")
+       != define.npos)
+      {
     fout << "&quot;" << define << "&quot;,";
+      }
+    else
+      {
+      fout << define << ",";
+      }
     if(!done)
       {
       pos = defs.find("-D", nextpos);
@@ -1145,7 +1206,9 @@ void cmLocalVisualStudio7Generator
         // Construct the entire set of commands in one string.
         std::string script = 
           this->ConstructScript(command->GetCommandLines(),
-                                                   command->GetWorkingDirectory());
+                                command->GetWorkingDirectory(),
+                                command->GetEscapeOldStyle(),
+                                command->GetEscapeAllowMakeVars());
         std::string comment = this->ConstructComment(*command);
         const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
         this->WriteCustomRule(fout, source.c_str(), script.c_str(),
@@ -1266,15 +1329,29 @@ WriteCustomRule(std::ostream& fout,
          << "\t\t\t\t\tCommandLine=\"" 
          << this->EscapeForXML(command) << "\"\n"
          << "\t\t\t\t\tAdditionalDependencies=\"";
+    if(depends.empty())
+      {
+      // There are no real dependencies.  Produce an artificial one to
+      // make sure the rule runs reliably.
+      if(!cmSystemTools::FileExists(source))
+        {
+        std::ofstream depout(source);
+        depout << "Artificial dependency for a custom command.\n";
+        }
+      fout << this->ConvertToXMLOutputPath(source);
+      }
+    else
+      {
     // Write out the dependencies for the rule.
     std::string temp;
     for(std::vector<std::string>::const_iterator d = depends.begin();
         d != depends.end(); ++d)
       {
-      // Lookup the real name of the dependency in case it is a CMake target.
+        // Get the real name of the dependency in case it is a CMake target.
       std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
       fout << this->ConvertToXMLOutputPath(dep.c_str())
            << ";";
+      }
       }
     fout << "\"\n";
     fout << "\t\t\t\t\tOutputs=\"";
@@ -1339,7 +1416,10 @@ void cmLocalVisualStudio7Generator
       init = true;
       }
     std::string script = 
-      this->ConstructScript(cr->GetCommandLines(), cr->GetWorkingDirectory());
+      this->ConstructScript(cr->GetCommandLines(),
+                            cr->GetWorkingDirectory(),
+                            cr->GetEscapeOldStyle(),
+                            cr->GetEscapeAllowMakeVars());
     fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)
@@ -1360,8 +1440,11 @@ void cmLocalVisualStudio7Generator
       fout << "\nCommandLine=\"";
       init = true;
       }
-    std::string script = this->ConstructScript(cr->GetCommandLines(),
-                                               cr->GetWorkingDirectory());
+    std::string script =
+      this->ConstructScript(cr->GetCommandLines(),
+                            cr->GetWorkingDirectory(),
+                            cr->GetEscapeOldStyle(),
+                            cr->GetEscapeAllowMakeVars());
     fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)
@@ -1383,7 +1466,10 @@ void cmLocalVisualStudio7Generator
       init = true;
       }
     std::string script = 
-      this->ConstructScript(cr->GetCommandLines(), cr->GetWorkingDirectory());
+      this->ConstructScript(cr->GetCommandLines(),
+                            cr->GetWorkingDirectory(),
+                            cr->GetEscapeOldStyle(),
+                            cr->GetEscapeAllowMakeVars());
     fout << this->EscapeForXML(script.c_str()).c_str();
     }
   if (init)

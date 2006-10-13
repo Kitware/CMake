@@ -27,6 +27,12 @@
 #include <memory> // auto_ptr
 
 //----------------------------------------------------------------------------
+cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator()
+{
+  this->DriveCustomCommandsOnDepends = true;
+}
+
+//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
 {
   // create the build.make file and directory, put in the common blocks
@@ -305,7 +311,41 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Construct a list of files associated with this library that may
   // need to be cleaned.
   std::vector<std::string> libCleanFiles;
+  if(this->Target->GetPropertyAsBool("CLEAN_DIRECT_OUTPUT"))
   {
+    // The user has requested that only the files directly built
+    // by this target be cleaned instead of all possible names.
+    libCleanFiles.push_back(this->Convert(targetFullPath.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+    if(targetNameReal != targetName)
+      {
+      libCleanFiles.push_back(this->Convert(targetFullPathReal.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+      }
+    if(targetNameSO != targetName &&
+       targetNameSO != targetNameReal)
+      {
+      libCleanFiles.push_back(this->Convert(targetFullPathSO.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+      }
+    if(!targetNameImport.empty() &&
+       targetNameImport != targetName &&
+       targetNameImport != targetNameReal &&
+       targetNameImport != targetNameSO)
+      {
+      libCleanFiles.push_back(this->Convert(targetFullPathImport.c_str(),
+          cmLocalGenerator::START_OUTPUT,
+          cmLocalGenerator::UNCHANGED));
+      }
+    }
+  else
+    {
+    // This target may switch between static and shared based
+    // on a user option or the BUILD_SHARED_LIBS switch.  Clean
+    // all possible names.
   std::string cleanStaticName;
   std::string cleanSharedName;
   std::string cleanSharedSOName;
@@ -324,7 +364,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
   std::string cleanFullImportName = outpath + cleanImportName;
   libCleanFiles.push_back
-    (this->Convert(cleanFullStaticName.c_str(),cmLocalGenerator::START_OUTPUT,
+      (this->Convert(cleanFullStaticName.c_str(),
+                     cmLocalGenerator::START_OUTPUT,
                    cmLocalGenerator::UNCHANGED));
   if(cleanSharedRealName != cleanStaticName)
     {
@@ -358,6 +399,19 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                                           cmLocalGenerator::UNCHANGED));
     }
   }
+
+#ifdef _WIN32
+  // There may be a manifest file for this target.  Add it to the
+  // clean set just in case.
+  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    libCleanFiles.push_back(
+      this->Convert((targetFullPath+".manifest").c_str(),
+                    cmLocalGenerator::START_OUTPUT,
+                    cmLocalGenerator::UNCHANGED));
+    }
+#endif
+
   // Add a command to remove any existing files for this library.
   std::vector<std::string> commands1;
   this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
@@ -494,19 +548,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string install_name_dir;
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
     {
-    // Select whether to generate an install_name directory for the
-    // install tree or the build tree.
+    // Get the install_name directory for the build tree.
     const char* config = this->LocalGenerator->ConfigurationName.c_str();
-    if(this->Target->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
-      {
-      install_name_dir =
-        this->Target->GetInstallNameDirForInstallTree(config);
-      }
-    else
-      {
-      install_name_dir =
-        this->Target->GetInstallNameDirForBuildTree(config);
-      }
+    install_name_dir = this->Target->GetInstallNameDirForBuildTree(config);
 
     // Set the rule variable replacement value.
     if(install_name_dir.empty())
@@ -518,13 +562,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       // Convert to a path for the native build tool.
       install_name_dir =
         this->LocalGenerator->Convert(install_name_dir.c_str(),
-                                      cmLocalGenerator::FULL,
+                                      cmLocalGenerator::NONE,
                                       cmLocalGenerator::SHELL, false);
-
-      // The Convert method seems to strip trailing slashes, which should
-      // probably be fixed.  Since the only platform supporting install_name
-      // right now uses forward slashes just add one.
-      install_name_dir += "/";
       vars.TargetInstallNameDir = install_name_dir.c_str();
       }
     }

@@ -13,11 +13,13 @@
 =========================================================================*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Process.h)
+#include KWSYS_HEADER(System.h)
 
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
 # include "Process.h.in"
+# include "System.h.in"
 #endif
 
 /*
@@ -63,6 +65,7 @@ Q190351 and Q150956.
 #endif
 
 #if defined(__BORLANDC__)
+# pragma warn -8004 /* assigned a value that is never used  */
 # pragma warn -8060 /* Assignment inside if() condition.  */
 #endif
 
@@ -103,6 +106,8 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
 static void kwsysProcessDestroy(kwsysProcess* cp, int event);
 static int kwsysProcessSetupOutputPipeFile(PHANDLE handle, const char* name);
 static int kwsysProcessSetupSharedPipe(DWORD nStdHandle, PHANDLE handle);
+static int kwsysProcessSetupPipeNative(PHANDLE handle, HANDLE p[2],
+                                       int isWrite);
 static void kwsysProcessCleanupHandle(PHANDLE h);
 static void kwsysProcessCleanupHandleSafe(PHANDLE h, DWORD nStdHandle);
 static void kwsysProcessCleanup(kwsysProcess* cp, int error);
@@ -244,6 +249,11 @@ struct kwsysProcess_s
   int PipeSharedSTDIN;
   int PipeSharedSTDOUT;
   int PipeSharedSTDERR;
+
+  /* Native pipes provided by the user.  */
+  HANDLE PipeNativeSTDIN[2];
+  HANDLE PipeNativeSTDOUT[2];
+  HANDLE PipeNativeSTDERR[2];
 
   /* Handle to automatically delete the Win9x forwarding executable.  */
   HANDLE Win9xHandle;
@@ -788,9 +798,11 @@ int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, const char* file)
     strcpy(*pfile, file);
     }
 
-  /* If we are redirecting the pipe, do not share it.  */
+  /* If we are redirecting the pipe, do not share it or use a native
+     pipe.  */
   if(*pfile)
     {
+    kwsysProcess_SetPipeNative(cp, pipe, 0);
     kwsysProcess_SetPipeShared(cp, pipe, 0);
     }
 
@@ -813,10 +825,51 @@ void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe, int shared)
     default: return;
     }
 
-  /* If we are sharing the pipe, do not redirect it to a file.  */
+  /* If we are sharing the pipe, do not redirect it to a file or use a
+     native pipe.  */
   if(shared)
     {
     kwsysProcess_SetPipeFile(cp, pipe, 0);
+    kwsysProcess_SetPipeNative(cp, pipe, 0);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_SetPipeNative(kwsysProcess* cp, int pipe, HANDLE p[2])
+{
+  HANDLE* pPipeNative = 0;
+
+  if(!cp)
+    {
+    return;
+    }
+
+  switch(pipe)
+    {
+    case kwsysProcess_Pipe_STDIN: pPipeNative = cp->PipeNativeSTDIN; break;
+    case kwsysProcess_Pipe_STDOUT: pPipeNative = cp->PipeNativeSTDOUT; break;
+    case kwsysProcess_Pipe_STDERR: pPipeNative = cp->PipeNativeSTDERR; break;
+    default: return;
+    }
+
+  /* Copy the native pipe handles provided.  */
+  if(p)
+    {
+    pPipeNative[0] = p[0];
+    pPipeNative[1] = p[1];
+    }
+  else
+    {
+    pPipeNative[0] = 0;
+    pPipeNative[1] = 0;
+    }
+
+  /* If we are using a native pipe, do not share it or redirect it to
+     a file.  */
+  if(p)
+    {
+    kwsysProcess_SetPipeFile(cp, pipe, 0);
+    kwsysProcess_SetPipeShared(cp, pipe, 0);
     }
 }
 
@@ -1010,6 +1063,21 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     {
     if(!kwsysProcessSetupSharedPipe(STD_ERROR_HANDLE,
                                     &si.StartupInfo.hStdError))
+      {
+      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanupHandleSafe(&si.StartupInfo.hStdError,
+                                    STD_ERROR_HANDLE);
+      return;
+      }
+    }
+
+  /* Replace the stderr pipe with the native pipe provided if any.  In
+     this case the pipe thread will still run but never report
+     data.  */
+  if(cp->PipeNativeSTDERR[1])
+    {
+    if(!kwsysProcessSetupPipeNative(&si.StartupInfo.hStdError,
+                                    cp->PipeNativeSTDERR, 1))
       {
       kwsysProcessCleanup(cp, 1);
       kwsysProcessCleanupHandleSafe(&si.StartupInfo.hStdError,
@@ -1620,6 +1688,15 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
       return 0;
       }
     }
+  else if(cp->PipeNativeSTDIN[0])
+    {
+    /* Use the provided native pipe.  */
+    if(!kwsysProcessSetupPipeNative(&si->StartupInfo.hStdInput,
+                                    cp->PipeNativeSTDIN, 0))
+      {
+      return 0;
+      }
+    }
   else
     {
     /* Explicitly give the child no stdin.  */
@@ -1673,6 +1750,18 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     {
     if(!kwsysProcessSetupSharedPipe(STD_OUTPUT_HANDLE,
                                     &si->StartupInfo.hStdOutput))
+      {
+      return 0;
+      }
+    }
+
+  /* Replace the stdout pipe with the native pipe provided if any.  In
+     this case the pipe thread will still run but never report
+     data.  */
+  if(index == cp->NumberOfCommands-1 && cp->PipeNativeSTDOUT[1])
+    {
+    if(!kwsysProcessSetupPipeNative(&si->StartupInfo.hStdOutput,
+                                    cp->PipeNativeSTDOUT, 1))
       {
       return 0;
       }
@@ -1927,6 +2016,25 @@ int kwsysProcessSetupSharedPipe(DWORD nStdHandle, PHANDLE handle)
 }
 
 /*--------------------------------------------------------------------------*/
+int kwsysProcessSetupPipeNative(PHANDLE handle, HANDLE p[2], int isWrite)
+{
+  /* Close the existing inherited handle.  */
+  kwsysProcessCleanupHandle(handle);
+
+  /* Create an inherited duplicate of the handle.  This also closes
+     the non-inherited version.  */
+  if(!DuplicateHandle(GetCurrentProcess(), p[isWrite? 1:0],
+                      GetCurrentProcess(), handle,
+                      0, TRUE, (DUPLICATE_CLOSE_SOURCE |
+                                DUPLICATE_SAME_ACCESS)))
+    {
+    return 0;
+    }
+
+  return 1;
+}
+
+/*--------------------------------------------------------------------------*/
 
 /* Close the given handle if it is open.  Reset its value to 0.  */
 void kwsysProcessCleanupHandle(PHANDLE h)
@@ -2085,59 +2193,9 @@ int kwsysProcessComputeCommandLength(kwsysProcess* cp,
     char const* const* arg;
     for(arg = command; *arg; ++arg)
       {
-      /* Keep track of how many backslashes have been encountered in a
-         row in this argument.  */
-      int backslashes = 0;
-      int spaces = 0;
-      const char* c;
-
-      /* Scan the string for spaces.  If there are no spaces, we can
-         pass the argument verbatim.  */
-      for(c=*arg; *c; ++c)
-        {
-        if(*c == ' ' || *c == '\t')
-          {
-          spaces = 1;
-          break;
-          }
-        }
-
-      /* Add the length of the argument, plus 1 for the space
-         separating the arguments.  */
-      length += (int)strlen(*arg) + 1;
-
-      if(spaces)
-        {
-        /* Add 2 for double quotes since spaces are present.  */
-        length += 2;
-
-        /* Scan the string to find characters that need escaping.  */
-        for(c=*arg; *c; ++c)
-          {
-          if(*c == '\\')
-            {
-            /* Found a backslash.  It may need to be escaped later.  */
-            ++backslashes;
-            }
-          else if(*c == '"')
-            {
-            /* Found a double-quote.  We need to escape it and all
-               immediately preceding backslashes.  */
-            length += backslashes + 1;
-            backslashes = 0;
-            }
-          else
-            {
-            /* Found another character.  This eliminates the possibility
-               that any immediately preceding backslashes will be
-               escaped.  */
-            backslashes = 0;
-            }
-          }
-
-        /* We need to escape all ending backslashes. */
-        length += backslashes;
-        }
+      /* Add the length of this argument.  It already includes room
+         for a separating space or terminating null.  */
+      length += kwsysSystem_Shell_GetArgumentSizeForWindows(*arg, 0);
       }
     }
 
@@ -2160,87 +2218,14 @@ void kwsysProcessComputeCommandLine(kwsysProcess* cp,
     char const* const* arg;
     for(arg = command; *arg; ++arg)
       {
-      /* Keep track of how many backslashes have been encountered in a
-         row in an argument.  */
-      int backslashes = 0;
-      int spaces = 0;
-      const char* c;
-
-      /* Scan the string for spaces.  If there are no spaces, we can
-         pass the argument verbatim.  */
-      for(c=*arg; *c; ++c)
-        {
-        if(*c == ' ' || *c == '\t')
-          {
-          spaces = 1;
-          break;
-          }
-        }
-
       /* Add the separating space if this is not the first argument.  */
       if(arg != command)
         {
         *cmd++ = ' ';
         }
 
-      if(spaces)
-        {
-        /* Add the opening double-quote for this argument.  */
-        *cmd++ = '"';
-
-        /* Add the characters of the argument, possibly escaping them.  */
-        for(c=*arg; *c; ++c)
-          {
-          if(*c == '\\')
-            {
-            /* Found a backslash.  It may need to be escaped later.  */
-            ++backslashes;
-            *cmd++ = '\\';
-            }
-          else if(*c == '"')
-            {
-            /* Add enough backslashes to escape any that preceded the
-               double-quote.  */
-            while(backslashes > 0)
-              {
-              --backslashes;
-              *cmd++ = '\\';
-              }
-
-            /* Add the backslash to escape the double-quote.  */
-            *cmd++ = '\\';
-
-            /* Add the double-quote itself.  */
-            *cmd++ = '"';
-            }
-          else
-            {
-            /* We encountered a normal character.  This eliminates any
-               escaping needed for preceding backslashes.  Add the
-               character.  */
-            backslashes = 0;
-            *cmd++ = *c;
-            }
-          }
-
-        /* Add enough backslashes to escape any trailing ones.  */
-        while(backslashes > 0)
-          {
-          --backslashes;
-          *cmd++ = '\\';
-          }
-
-        /* Add the closing double-quote for this argument.  */
-        *cmd++ = '"';
-        }
-      else
-        {
-        /* No spaces.  Add the argument verbatim.  */
-        for(c=*arg; *c; ++c)
-          {
-          *cmd++ = *c;
-          }
-        }
+      /* Add the current argument.  */
+      cmd = kwsysSystem_Shell_GetArgumentForWindows(*arg, cmd, 0);
       }
 
     /* Add the terminating null character to the command line.  */

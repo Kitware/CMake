@@ -25,6 +25,12 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
+cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator()
+{
+  this->DriveCustomCommandsOnDepends = true;
+}
+
+//----------------------------------------------------------------------------
 void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 {
   // create the build.make file and directory, put in the common blocks
@@ -272,6 +278,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   exeCleanFiles.push_back(this->Convert(cleanFullName.c_str(),
                                         cmLocalGenerator::START_OUTPUT,
                                         cmLocalGenerator::UNCHANGED));
+#ifdef _WIN32
+  // There may be a manifest file for this target.  Add it to the
+  // clean set just in case.
+  exeCleanFiles.push_back(this->Convert((cleanFullName+".manifest").c_str(),
+                                        cmLocalGenerator::START_OUTPUT,
+                                        cmLocalGenerator::UNCHANGED));
+#endif
   if(cleanRealName != cleanName)
     {
     exeCleanFiles.push_back(this->Convert(cleanFullRealName.c_str(),

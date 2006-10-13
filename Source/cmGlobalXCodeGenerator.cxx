@@ -196,7 +196,6 @@ std::string cmGlobalXCodeGenerator
     makeCommand += " ";
     makeCommand += additionalOptions;
     }
-  makeCommand += " OBJROOT=.";
   return makeCommand;
 }
 
@@ -282,10 +281,9 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
 {
   cmMakefile* mf = root->GetMakefile();
   // Add ALL_BUILD
-  const char* no_output = 0;
   const char* no_working_directory = 0;
   std::vector<std::string> no_depends;
-  mf->AddUtilityCommand("ALL_BUILD", false, no_output, no_depends,
+  mf->AddUtilityCommand("ALL_BUILD", false, no_depends,
                         no_working_directory,
                         "echo", "Build all projects");
   cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
@@ -308,7 +306,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     }
   cmCustomCommandLines commandLines;
   commandLines.push_back(makecommand);
-  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false, no_output,
+  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false,
                         no_working_directory,
                         no_depends,
                         commandLines);
@@ -956,16 +954,20 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       }
     }
   makefileStream << "\n\n";
-  
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
     cmCustomCommand const& cc = *i; 
     if(!cc.GetCommandLines().empty())
       {
-      
-      makefileStream << "\n#" << "Custom command rule: " << 
-        cc.GetComment() << "\n";
+      bool escapeOldStyle = cc.GetEscapeOldStyle();
+      bool escapeAllowMakeVars = cc.GetEscapeAllowMakeVars();
+      makefileStream << "\n#" << "Custom command rule: ";
+      if(cc.GetComment())
+        {
+        makefileStream << cc.GetComment();
+        }
+      makefileStream << "\n";
       const std::vector<std::string>& outputs = cc.GetOutputs();
       if(!outputs.empty())
         {
@@ -1038,7 +1040,17 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
         for(unsigned int j=1; j < commandLine.size(); ++j)
           {
           cmd += " ";
-          cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
+          if(escapeOldStyle)
+            {
+            cmd += (this->CurrentLocalGenerator
+                    ->EscapeForShellOldStyle(commandLine[j].c_str()));
+            }
+          else
+            {
+            cmd += (this->CurrentLocalGenerator->
+                    EscapeForShell(commandLine[j].c_str(),
+                                   escapeAllowMakeVars));
+            }
           }
         makefileStream << "\t" << cmd.c_str() << "\n";
         }
@@ -1420,18 +1432,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string install_name_dir;
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    // Select whether to generate an install_name directory for the
-    // install tree or the build tree.
-    if(target.GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
-      {
-      install_name_dir =
-        target.GetInstallNameDirForInstallTree(configName);
-      }
-    else
-      {
-      install_name_dir =
-        target.GetInstallNameDirForBuildTree(configName);
-      }
+    // Get the install_name directory for the build tree.
+    install_name_dir = target.GetInstallNameDirForBuildTree(configName);
 
     if(install_name_dir.empty())
       {

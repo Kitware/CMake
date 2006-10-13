@@ -23,6 +23,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->FindMakeProgramFile = "CMakeFindWMake.cmake";
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
+  this->NeedSymbolicMark = true;
   this->EmptyCommandsHack = "@cd .";
 }
 
@@ -47,7 +48,6 @@ cmLocalGenerator *cmGlobalWatcomWMakeGenerator::CreateLocalGenerator()
 {
   cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
   lg->SetSilentNoColon(true);
-  lg->SetEchoNeedsQuote(false);
   lg->SetDefineWindowsNULL(true);
   lg->SetWindowsShell(true);
   lg->SetMakeSilentFlag("-s -h");

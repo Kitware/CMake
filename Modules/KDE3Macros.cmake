@@ -1,4 +1,4 @@
-
+#
 
 # See FindKDE3.cmake for documentation.
 #
@@ -36,9 +36,10 @@ MACRO(KDE3_ADD_DCOP_SKELS _sources)
 
           ADD_CUSTOM_COMMAND(OUTPUT ${_kidl}
           COMMAND ${KDE3_DCOPIDL_EXECUTABLE}
-          ARGS ${CMAKE_CURRENT_SOURCE_DIR}/${_current_FILE} > ${_kidl}
+          ARGS ${_tmp_FILE} > ${_kidl}
           DEPENDS ${_tmp_FILE}
          )
+         
        ENDIF (NOT HAVE_${_basename}_KIDL_RULE)
 
       IF (NOT HAVE_${_basename}_SKEL_RULE)
@@ -75,8 +76,8 @@ MACRO(KDE3_ADD_DCOP_STUBS _sources)
 
         ADD_CUSTOM_COMMAND(OUTPUT ${_kidl}
            COMMAND ${KDE3_DCOPIDL_EXECUTABLE}
-           ARGS ${tmp_FILE} > ${_kidl}
-           DEPENDS ${tmp_FILE}
+           ARGS ${_tmp_FILE} > ${_kidl}
+           DEPENDS ${_tmp_FILE}
            )
 
       ENDIF (NOT HAVE_${_basename}_KIDL_RULE)
@@ -163,13 +164,14 @@ MACRO(KDE3_ADD_UI_FILES _sources )
 
       ADD_CUSTOM_COMMAND(OUTPUT ${_header}
          COMMAND ${QT_UIC_EXECUTABLE}
-         ARGS  -nounload -o ${_header} ${CMAKE_CURRENT_SOURCE_DIR}/${_current_FILE}
+         ARGS  -L ${KDE3_LIB_DIR}/kde3/plugins/designer -nounload -o ${_header} ${CMAKE_CURRENT_SOURCE_DIR}/${_current_FILE}
          DEPENDS ${_tmp_FILE}
       )
 
       ADD_CUSTOM_COMMAND(OUTPUT ${_src}
          COMMAND ${CMAKE_COMMAND}
          ARGS
+         -DKDE_UIC_PLUGIN_DIR:FILEPATH=${KDE3_LIB_DIR}/kde3/plugins/designer
          -DKDE_UIC_EXECUTABLE:FILEPATH=${QT_UIC_EXECUTABLE}
          -DKDE_UIC_FILE:FILEPATH=${_tmp_FILE}
          -DKDE_UIC_CPP_FILE:FILEPATH=${_src}
@@ -236,49 +238,64 @@ MACRO(KDE3_AUTOMOC)
    ENDFOREACH (_current_FILE)
 ENDMACRO(KDE3_AUTOMOC)
 
+# only used internally by KDE3_INSTALL_ICONS
+MACRO (_KDE3_ADD_ICON_INSTALL_RULE _install_SCRIPT _install_PATH _group _orig_NAME _install_NAME)
 
-MACRO(KDE3_INSTALL_ICONS _theme)
-   ADD_CUSTOM_TARGET(install_icons )
-   SET_TARGET_PROPERTIES(install_icons PROPERTIES POST_INSTALL_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake )
-   FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake "# icon installations rules\n")
-   FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake "SET(CMAKE_BACKWARDS_COMPATIBILITY \"2.2\") \n")
-
-   FILE(GLOB _icons *.png)
-   FOREACH(_current_ICON ${_icons} )
-      STRING(REGEX REPLACE "^.*/[a-zA-Z]+([0-9]+)\\-([a-z]+)\\-(.+\\.png)$" "\\1" _size "${_current_ICON}")
-      STRING(REGEX REPLACE "^.*/[a-zA-Z]+([0-9]+)\\-([a-z]+)\\-(.+\\.png)$" "\\2" _group "${_current_ICON}")
-      STRING(REGEX REPLACE "^.*/[a-zA-Z]+([0-9]+)\\-([a-z]+)\\-(.+\\.png)$" "\\3" _name "${_current_ICON}")
-
+   # if the string doesn't match the pattern, the result is the full string, so all three have the same content
+   IF (NOT ${_group} STREQUAL ${_install_NAME} )
       SET(_icon_GROUP "actions")
 
-      IF(${_group} STREQUAL "mime")
+      IF (${_group} STREQUAL "mime")
          SET(_icon_GROUP  "mimetypes")
-      ENDIF(${_group} STREQUAL "mime")
+      ENDIF (${_group} STREQUAL "mime")
 
-      IF(${_group} STREQUAL "filesys")
+      IF (${_group} STREQUAL "filesys")
          SET(_icon_GROUP  "filesystems")
-      ENDIF(${_group} STREQUAL "filesys")
+      ENDIF (${_group} STREQUAL "filesys")
 
-      IF(${_group} STREQUAL "device")
+      IF (${_group} STREQUAL "device")
          SET(_icon_GROUP  "devices")
-      ENDIF(${_group} STREQUAL "device")
+      ENDIF (${_group} STREQUAL "device")
 
-      IF(${_group} STREQUAL "app")
+      IF (${_group} STREQUAL "app")
          SET(_icon_GROUP  "apps")
-      ENDIF(${_group} STREQUAL "app")
+      ENDIF (${_group} STREQUAL "app")
 
-      IF(${_group} STREQUAL "action")
+      IF (${_group} STREQUAL "action")
          SET(_icon_GROUP  "actions")
-      ENDIF(${_group} STREQUAL "action")
+      ENDIF (${_group} STREQUAL "action")
 
 #      message(STATUS "icon: ${_current_ICON} size: ${_size} group: ${_group} name: ${_name}" )
-      SET(_ICON_INSTALL_NAME ${CMAKE_INSTALL_PREFIX}/share/icons/${_theme}/${_size}x${_size}/${_icon_GROUP}/${_name})
-      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake "message(STATUS \"Installing ${_ICON_INSTALL_NAME}\") \n")
-      FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake "CONFIGURE_FILE( ${_current_ICON} ${_ICON_INSTALL_NAME} COPYONLY) \n")
+   INSTALL(FILES ${_orig_NAME} DESTINATION ${_install_PATH}/${_icon_GROUP}/ RENAME ${_install_NAME} )
+   ENDIF (NOT ${_group} STREQUAL ${_install_NAME} )
 
+ENDMACRO (_KDE3_ADD_ICON_INSTALL_RULE)
+
+
+MACRO (KDE3_INSTALL_ICONS _theme )
+   SET(_defaultpath "${CMAKE_INSTALL_PREFIX}/share/icons")
+   # first the png icons
+   FILE(GLOB _icons *.png)
+   FOREACH (_current_ICON ${_icons} )
+      STRING(REGEX REPLACE "^.*/[a-zA-Z]+([0-9]+)\\-([a-z]+)\\-(.+\\.png)$" "\\1" _size  "${_current_ICON}")
+      STRING(REGEX REPLACE "^.*/[a-zA-Z]+([0-9]+)\\-([a-z]+)\\-(.+\\.png)$" "\\2" _group "${_current_ICON}")
+      STRING(REGEX REPLACE "^.*/[a-zA-Z]+([0-9]+)\\-([a-z]+)\\-(.+\\.png)$" "\\3" _name  "${_current_ICON}")
+      _KDE3_ADD_ICON_INSTALL_RULE(${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake
+         ${_defaultpath}/${_theme}/${_size}x${_size}
+         ${_group} ${_current_ICON} ${_name})
    ENDFOREACH (_current_ICON)
-ENDMACRO(KDE3_INSTALL_ICONS)
 
+   # and now the svg icons
+   FILE(GLOB _icons *.svgz)
+   FOREACH (_current_ICON ${_icons} )
+      STRING(REGEX REPLACE "^.*/crsc\\-([a-z]+)\\-(.+\\.svgz)$" "\\1" _group "${_current_ICON}")
+      STRING(REGEX REPLACE "^.*/crsc\\-([a-z]+)\\-(.+\\.svgz)$" "\\2" _name "${_current_ICON}")
+      _KDE3_ADD_ICON_INSTALL_RULE(${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake
+                                 ${_defaultpath}/${_theme}/scalable
+                                 ${_group} ${_current_ICON} ${_name})
+   ENDFOREACH (_current_ICON)
+
+ENDMACRO (KDE3_INSTALL_ICONS)
 
 MACRO(KDE3_INSTALL_LIBTOOL_FILE _target)
    GET_TARGET_PROPERTY(_target_location ${_target} LOCATION)

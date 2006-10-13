@@ -451,7 +451,8 @@ int cmCTestTestHandler::ProcessHandler()
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
     (this->MemCheck ? "Memory check" : "Test")
-    << " project" << std::endl);
+             << " project " << cmSystemTools::GetCurrentWorkingDirectory()
+             << std::endl);
   if ( ! this->PreProcessHandler() )
     {
     return -1;

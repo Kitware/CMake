@@ -53,6 +53,21 @@ public:
   /** Get the comment string for the command.  */
   const char* GetComment() const;
 
+  /** Append to the list of command lines.  */
+  void AppendCommands(const cmCustomCommandLines& commandLines);
+
+  /** Append to the list of dependencies.  */
+  void AppendDepends(const std::vector<std::string>& depends);
+
+  /** Set/Get whether old-style escaping should be used.  */
+  bool GetEscapeOldStyle() const;
+  void SetEscapeOldStyle(bool b);
+
+  /** Set/Get whether the build tool can replace variables in
+      arguments to the command.  */
+  bool GetEscapeAllowMakeVars() const;
+  void SetEscapeAllowMakeVars(bool b);
+
   /** set get the used status of the command */ 
   void SetUsed() { this->Used = true;}; 
   bool IsUsed() { return this->Used;};
@@ -61,8 +76,11 @@ private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
+  bool HaveComment;
   std::string Comment;
   std::string WorkingDirectory;
+  bool EscapeAllowMakeVars;
+  bool EscapeOldStyle;
   bool Used;
 };
 

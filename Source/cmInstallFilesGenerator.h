@@ -27,10 +27,11 @@ class cmInstallFilesGenerator: public cmInstallGenerator
 public:
   cmInstallFilesGenerator(std::vector<std::string> const& files,
                           const char* dest, bool programs,
-                          const char* permissions,
+                          const char* file_permissions,
                           std::vector<std::string> const& configurations,
                           const char* component,
-                          const char* rename);
+                          const char* rename,
+                          bool optional = false);
   virtual ~cmInstallFilesGenerator();
 
 protected:
@@ -38,10 +39,11 @@ protected:
   std::vector<std::string> Files;
   std::string Destination;
   bool Programs;
-  std::string Permissions;
+  std::string FilePermissions;
   std::vector<std::string> Configurations;
   std::string Component;
   std::string Rename;
+  bool Optional;
 };
 
 #endif

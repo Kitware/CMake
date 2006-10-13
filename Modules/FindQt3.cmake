@@ -28,10 +28,9 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   $ENV{QTDIR}/include
   ${GLOB_PATHS_BIN}
   /usr/local/qt/include
-  /usr/local/include
   /usr/lib/qt/include
+  /usr/lib/qt3/include
   /usr/include/qt
-  /usr/include
   /usr/share/qt3/include
   C:/Progra~1/qt/include
   /usr/include/qt3
@@ -61,7 +60,7 @@ IF (QT_MT_REQUIRED)
   FIND_LIBRARY(QT_QT_LIBRARY
     NAMES
     qt-mt qt-mt${qt_version_str_lib} qt-mtnc${qt_version_str_lib}
-    qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321
+    qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321 qt-mt3
     PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
@@ -69,9 +68,9 @@ IF (QT_MT_REQUIRED)
     $ENV{QTDIR}/lib
     ${GLOB_PATHS_LIB}
     /usr/local/qt/lib
-    /usr/local/lib
     /usr/lib/qt/lib
-    /usr/lib
+    /usr/lib/qt3/lib
+    /usr/lib/qt3/lib64
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
     /usr/X11R6/lib
@@ -82,7 +81,7 @@ ELSE (QT_MT_REQUIRED)
     NAMES 
     qt qt-${qt_version_str_lib} qt-edu${qt_version_str_lib} 
     qt-mt qt-mt${qt_version_str_lib} qt-mtnc${qt_version_str_lib}
-    qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321
+    qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321 qt-mt3
     PATHS
     "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
     "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
@@ -90,9 +89,9 @@ ELSE (QT_MT_REQUIRED)
     $ENV{QTDIR}/lib
     ${GLOB_PATHS_LIB}
     /usr/local/qt/lib
-    /usr/local/lib
     /usr/lib/qt/lib
-    /usr/lib
+    /usr/lib/qt3/lib
+    /usr/lib/qt3/lib64
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
     /usr/X11R6/lib
@@ -113,8 +112,8 @@ FIND_LIBRARY(QT_QASSISTANTCLIENT_LIBRARY
   $ENV{QTDIR}/lib
   ${GLOB_PATHS_LIB}
   /usr/local/qt/lib
-  /usr/local/lib
-  /usr/lib
+  /usr/lib/qt3/lib
+  /usr/lib/qt3/lib64
   /usr/share/qt3/lib
   C:/Progra~1/qt/lib
   /usr/X11R6/lib
@@ -138,6 +137,7 @@ FIND_PROGRAM(QT_MOC_EXECUTABLE
   ${GLOB_PATHS_BIN}
   /usr/local/qt/bin
   /usr/lib/qt/bin
+  /usr/lib/qt3/bin
   /usr/share/qt3/bin
   C:/Progra~1/qt/bin
   /usr/X11R6/bin
@@ -162,6 +162,7 @@ FIND_PROGRAM(QT_UIC_EXECUTABLE uic
   ${GLOB_PATHS_BIN}
   /usr/local/qt/bin
   /usr/lib/qt/bin
+  /usr/lib/qt3/bin
   /usr/share/qt3/bin
   C:/Progra~1/qt/bin
   /usr/X11R6/bin

@@ -55,9 +55,9 @@
                                        "\\|" "[ \t\r\n]"
                                        "\\)*"))
 (defconst cmake-regex-block-open
-  "^\\(IF\\|MACRO\\|FOREACH\\|ELSE\\|WHILE\\)$")
+  "^\\(IF\\|MACRO\\|FOREACH\\|ELSE\\|ELSEIF\\|WHILE\\)$")
 (defconst cmake-regex-block-close
-  "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\|ENDWHILE\\)[ \t]*(")
+  "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\|ELSEIF\\|ENDWHILE\\)[ \t]*(")
 
 ;------------------------------------------------------------------------------
 

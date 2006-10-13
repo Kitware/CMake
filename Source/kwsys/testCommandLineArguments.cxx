@@ -23,6 +23,9 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
+#include <stddef.h> /* size_t */
+#include <string.h> /* strcmp */
+
 void* random_ptr = reinterpret_cast<void*>(0x123);
 
 int argument(const char* arg, const char* value, void* call_data)

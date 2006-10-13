@@ -55,10 +55,12 @@ void cmInstallGenerator
                                         const char* file,
                                         bool optional /* = false */,
                                         const char* properties /* = 0 */,
-                                        const char* permissions /* = 0 */,
+                 const char* permissions_file /* = 0 */,
+                 const char* permissions_dir /* = 0 */,
                  std::vector<std::string> const& configurations,
                                         const char* component /* = 0 */,
-  const char* rename /* = 0 */
+                 const char* rename /* = 0 */,
+                 const char* literal_args /* = 0 */
   )
 {
   // Use the FILE command to install the file.
@@ -83,9 +85,13 @@ void cmInstallGenerator
     {
     os << " PROPERTIES" << properties;
     }
-  if(permissions && *permissions)
+  if(permissions_file && *permissions_file)
     {
-    os << " PERMISSIONS" << permissions;
+    os << " PERMISSIONS" << permissions_file;
+    }
+  if(permissions_dir && *permissions_dir)
+    {
+    os << " DIR_PERMISSIONS" << permissions_dir;
     }
   if(rename && *rename)
     {
@@ -104,5 +110,10 @@ void cmInstallGenerator
     {
     os << " COMPONENTS \"" << component << "\"";
     }
-  os << " FILES \"" << file << "\")\n";
+  os << " FILES \"" << file << "\"";
+  if(literal_args && *literal_args)
+    {
+    os << literal_args;
+    }
+  os << ")\n";
 }

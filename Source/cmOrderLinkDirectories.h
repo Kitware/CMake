@@ -66,25 +66,39 @@ public:
   // should be set from CMAKE_STATIC_LIBRARY_SUFFIX,
   // CMAKE_SHARED_LIBRARY_SUFFIX
   // CMAKE_LINK_LIBRARY_SUFFIX
-  void AddLinkExtension(const char* e)
+  enum LinkType { LinkUnknown, LinkStatic, LinkShared };
+  void AddLinkExtension(const char* e, LinkType type = LinkUnknown)
     {
     if(e && *e)
       {
+      if(type == LinkStatic)
+        {
+        this->StaticLinkExtensions.push_back(e);
+        }
+      if(type == LinkShared)
+        {
+        this->SharedLinkExtensions.push_back(e);
+        }
       this->LinkExtensions.push_back(e);
       }
     }
   // should be set from CMAKE_STATIC_LIBRARY_PREFIX
-  void SetLinkPrefix(const char* s)
+  void AddLinkPrefix(const char* s)
     {
     if(s)
       {
-      this->LinkPrefix = s;
+      this->LinkPrefixes.insert(s);
       }
     }
   // Return any warnings if the exist
   std::string GetWarnings();
   // return a list of all full path libraries
   void GetFullPathLibraries(std::vector<cmStdString>& libs);
+
+  // Provide flags for switching library link type.
+  void SetLinkTypeInformation(LinkType start_link_type,
+                              const char* static_link_type_flag,
+                              const char* shared_link_type_flag);
 
   // structure to hold a full path library link item
   struct Library
@@ -101,6 +115,7 @@ public:
   
 private:
   void CreateRegularExpressions();
+  std::string CreateExtensionRegex(std::vector<cmStdString> const& exts);
   void DetermineLibraryPathOrder(std::vector<cmStdString>& searchPaths,
                                  std::vector<cmStdString>& libs,
                                  std::vector<cmStdString>& sortedPaths);
@@ -145,19 +160,31 @@ private:
   // This is the set of -L paths unsorted, but unique
   std::set<cmStdString> LinkPathSet;
   // the names of link extensions
+  std::vector<cmStdString> StaticLinkExtensions;
+  std::vector<cmStdString> SharedLinkExtensions;
   std::vector<cmStdString> LinkExtensions;
   // the names of link prefixes
-  cmStdString LinkPrefix;
+  std::set<cmStdString> LinkPrefixes;
   // set of directories that can not be put in the correct order
   std::set<cmStdString> ImpossibleDirectories;
   // Name of target
   cmStdString TargetName;
   // Subdirectory used for this configuration if any.
   cmStdString ConfigSubdir;
+
+  // Link type adjustment.
+  LinkType StartLinkType;
+  LinkType CurrentLinkType;
+  cmStdString StaticLinkTypeFlag;
+  cmStdString SharedLinkTypeFlag;
+  bool LinkTypeEnabled;
+  void SetCurrentLinkType(LinkType lt);
+
   // library regular expressions
   cmsys::RegularExpression RemoveLibraryExtension;
-  cmsys::RegularExpression ExtractBaseLibraryName;
-  cmsys::RegularExpression ExtractBaseLibraryNameNoPrefix;
+  cmsys::RegularExpression ExtractStaticLibraryName;
+  cmsys::RegularExpression ExtractSharedLibraryName;
+  cmsys::RegularExpression ExtractAnyLibraryName;
   cmsys::RegularExpression SplitFramework;
   bool Debug;
 };

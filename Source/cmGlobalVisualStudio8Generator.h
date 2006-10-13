@@ -56,7 +56,8 @@ protected:
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProjectConfigurations(std::ostream& fout,
-                                          const char* name, bool in_all);
+                                          const char* name,
+                                          int targetType);
   std::string PlatformName; // Win32 or x64 
 };
 #endif

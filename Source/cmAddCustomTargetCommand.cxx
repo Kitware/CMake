@@ -26,6 +26,29 @@ bool cmAddCustomTargetCommand::InitialPass(
     return false;
     }
 
+  // Check the target name.
+  if(args[0].find_first_of("/\\") != args[0].npos)
+    {
+    int major = 0;
+    int minor = 0;
+    if(const char* versionValue =
+       this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY"))
+      {
+      sscanf(versionValue, "%d.%d", &major, &minor);
+      }
+    if(!major || major > 3 || (major == 2 && minor > 2))
+      {
+      cmOStringStream e;
+      e << "called with invalid target name \"" << args[0]
+        << "\".  Target names may not contain a slash.  "
+        << "Use ADD_CUSTOM_COMMAND to generate files.  "
+        << "Set CMAKE_BACKWARDS_COMPATIBILITY to 2.2 "
+        << "or lower to skip this check.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+
   // Accumulate one command line at a time.
   cmCustomCommandLine currentLine;
 
@@ -35,12 +58,17 @@ bool cmAddCustomTargetCommand::InitialPass(
   // Accumulate dependencies.
   std::vector<std::string> depends;
   std::string working_directory;
+  bool verbatim = false;
+  std::string comment_buffer;
+  const char* comment = 0;
 
   // Keep track of parser state.
   enum tdoing {
     doing_command,
     doing_depends,
-    doing_working_directory
+    doing_working_directory,
+    doing_comment,
+    doing_verbatim
   };
   tdoing doing = doing_command;
 
@@ -69,6 +97,15 @@ bool cmAddCustomTargetCommand::InitialPass(
       {
       doing = doing_working_directory;
       }
+    else if(copy == "VERBATIM")
+      {
+      doing = doing_verbatim;
+      verbatim = true;
+      }
+    else if (copy == "COMMENT")
+      {
+      doing = doing_comment;
+      }
     else if(copy == "COMMAND")
       {
       doing = doing_command;
@@ -93,6 +130,10 @@ bool cmAddCustomTargetCommand::InitialPass(
         case doing_depends:
           depends.push_back(copy);
           break;
+         case doing_comment:
+           comment_buffer = copy;
+           comment = comment_buffer.c_str();
+           break;
         default:
           this->SetError("Wrong syntax. Unknown type of argument.");
           return false;
@@ -118,10 +159,10 @@ bool cmAddCustomTargetCommand::InitialPass(
     }
 
   // Add the utility target to the makefile.
-  const char* no_output = 0;
-  this->Makefile->AddUtilityCommand(args[0].c_str(), all, no_output,
+  bool escapeOldStyle = !verbatim;
+  this->Makefile->AddUtilityCommand(args[0].c_str(), all,
                                     working_directory.c_str(), depends,
-                                    commandLines);
+                                    commandLines, escapeOldStyle, comment);
 
   return true;
 }

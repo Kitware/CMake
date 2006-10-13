@@ -170,7 +170,11 @@ public:
                               std::vector<cmStdString>* fullPathLibs=0);
 
   /** Get the include flags for the current makefile and language.  */
-  void GetIncludeDirectories(std::vector<std::string>& dirs);
+  void GetIncludeDirectories(std::vector<std::string>& dirs,
+                             bool filter_system_dirs = true);
+
+  /** Compute the language used to compile the given source file.  */
+  const char* GetSourceFileLanguage(const cmSourceFile& source);
 
   // Create a struct to hold the varibles passed into
   // ExpandRuleVariables
@@ -178,18 +182,7 @@ public:
   {
     RuleVariables()
       {
-        this->Language= 0;
-        this->Objects= 0;
-        this->Target= 0;
-        this->LinkLibraries= 0;
-        this->Source= 0;
-        this->Object= 0;
-        this->ObjectDir= 0;
-        this->Flags= 0;
-        this->ObjectsQuoted= 0;
-        this->TargetSOName= 0;
-        this->TargetInstallNameDir = 0;
-        this->LinkFlags= 0;
+        memset(this, 0,  sizeof(*this));
       }
     const char* TargetPDB;
     const char* Language;
@@ -197,6 +190,8 @@ public:
     const char* Target;
     const char* LinkLibraries;
     const char* Source;
+    const char* AssemblySource;
+    const char* PreprocessedSource;
     const char* Object;
     const char* ObjectDir;
     const char* Flags;
@@ -207,11 +202,18 @@ public:
     const char* LanguageCompileFlags;
   };
 
+  /** Escape the given string to be used as a command line argument in
+      the native build system shell.  Optionally allow the build
+      system to replace make variable references.  Optionally adjust
+      escapes for the special case of passing to the native echo
+      command.  */
+  std::string EscapeForShell(const char* str, bool makeVars = false,
+                             bool forEcho = false);
+
+  /** Backwards-compatibility version of EscapeForShell.  */
+  std::string EscapeForShellOldStyle(const char* str);
+
 protected:
-  /** Construct a script from the given list of command lines.  */
-  std::string ConstructScript(const cmCustomCommandLines& commandLines,
-                              const char* workingDirectory,
-                              const char* newline = "\n");
 
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,
@@ -273,7 +275,9 @@ protected:
   std::map<cmStdString, cmStdString> LanguageToIncludeFlags;
   std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
   bool WindowsShell;
+  bool WindowsVSIDE;
   bool ForceUnixPath;
+  bool MSYSShell;
   bool UseRelativePaths;
   bool IgnoreLibPrefix;
   bool Configured;

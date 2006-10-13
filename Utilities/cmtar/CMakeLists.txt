@@ -6,6 +6,11 @@ INCLUDE_REGULAR_EXPRESSION("^.*$")
 SET(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
 SET(CMAKE_REQUIRED_FLAGS ${CMAKE_ANSI_CFLAGS})
 
+# Disable warnings on Borland to avoid changing 3rd party code.
+IF(BORLAND)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
+ENDIF(BORLAND)
+
 # If we are on AIX, do the _ALL_SOURCE magic
 IF(${CMAKE_SYSTEM_NAME} MATCHES AIX)
   SET(_ALL_SOURCE 1)
@@ -231,7 +236,13 @@ SET (HAVE_LIBZ 1)
 #SET (HAVE_UNISTD_H 1)
 SET (MAJOR_IN_MKDEV 0)
 SET (MAJOR_IN_SYSMACROS 0)
+
+# for most systems makedev is two args on qnx it is three
+# try run is nothing but trouble so just hard code it 
 SET (MAKEDEV_THREE_ARGS 0)
+IF(QNXNTO)
+  SET(MAKEDEV_THREE_ARGS 1)
+ENDIF(QNXNTO)
 #SET (NEED_BASENAME 0)
 #SET (NEED_DIRNAME 0)
 #SET (NEED_FNMATCH 1)

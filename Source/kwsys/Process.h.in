@@ -33,6 +33,7 @@
 #define kwsysProcess_SetTimeout          kwsys_ns(Process_SetTimeout)
 #define kwsysProcess_SetWorkingDirectory kwsys_ns(Process_SetWorkingDirectory)
 #define kwsysProcess_SetPipeFile         kwsys_ns(Process_SetPipeFile)
+#define kwsysProcess_SetPipeNative       kwsys_ns(Process_SetPipeNative)
 #define kwsysProcess_SetPipeShared       kwsys_ns(Process_SetPipeShared)
 #define kwsysProcess_Option_Detach       kwsys_ns(Process_Option_Detach)
 #define kwsysProcess_Option_HideWindow   kwsys_ns(Process_Option_HideWindow)
@@ -71,6 +72,7 @@
 #define kwsysProcess_Pipe_STDOUT         kwsys_ns(Process_Pipe_STDOUT)
 #define kwsysProcess_Pipe_STDERR         kwsys_ns(Process_Pipe_STDERR)
 #define kwsysProcess_Pipe_Timeout        kwsys_ns(Process_Pipe_Timeout)
+#define kwsysProcess_Pipe_Handle         kwsys_ns(Process_Pipe_Handle)
 #define kwsysProcess_WaitForExit         kwsys_ns(Process_WaitForExit)
 #define kwsysProcess_Kill                kwsys_ns(Process_Kill)
 
@@ -83,6 +85,13 @@ extern "C"
  * Process control data structure.
  */
 typedef struct kwsysProcess_s kwsysProcess;
+
+/* Platform-specific pipe handle type.  */
+#if defined(_WIN32) && !defined(__CYGWIN__)
+typedef void* kwsysProcess_Pipe_Handle;
+#else
+typedef int kwsysProcess_Pipe_Handle;
+#endif
 
 /**
  * Create a new Process instance.
@@ -144,6 +153,27 @@ kwsysEXPORT int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe,
  */
 kwsysEXPORT void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe,
                                             int shared);
+
+/**
+ * Specify a platform-specific native pipe for use as one of the child
+ * interface pipes.  The native pipe is specified by an array of two
+ * descriptors or handles.  The first entry in the array (index 0)
+ * should be the read end of the pipe.  The second entry in the array
+ * (index 1) should be the write end of the pipe.  If a null pointer
+ * is given the option will be disabled.
+ *
+ * For Pipe_STDIN the native pipe is connected to the first child in
+ * the pipeline as its stdin.  After the children are created the
+ * write end of the pipe will be closed in the child process and the
+ * read end will be closed in the parent process.
+ *
+ * For Pipe_STDOUT and Pipe_STDERR the pipe is connected to the last
+ * child as its stdout or stderr.  After the children are created the
+ * write end of the pipe will be closed in the parent process and the
+ * read end will be closed in the child process.
+ */
+kwsysEXPORT void kwsysProcess_SetPipeNative(kwsysProcess* cp, int pipe,
+                                            kwsysProcess_Pipe_Handle p[2]);
 
 /**
  * Get/Set a possibly platform-specific option.  Possible options are:
@@ -349,6 +379,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_SetTimeout
 # undef kwsysProcess_SetWorkingDirectory
 # undef kwsysProcess_SetPipeFile
+# undef kwsysProcess_SetPipeNative
 # undef kwsysProcess_SetPipeShared
 # undef kwsysProcess_Option_Detach
 # undef kwsysProcess_Option_HideWindow
@@ -387,6 +418,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_Pipe_STDOUT
 # undef kwsysProcess_Pipe_STDERR
 # undef kwsysProcess_Pipe_Timeout
+# undef kwsysProcess_Pipe_Handle
 # undef kwsysProcess_WaitForExit
 # undef kwsysProcess_Kill
 #endif

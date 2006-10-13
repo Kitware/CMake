@@ -32,7 +32,6 @@ public:
   cmDependsC();
   cmDependsC(std::vector<std::string> const& includes,
              const char* scanRegex, const char* complainRegex,
-             std::set<cmStdString> const& generatedFiles,
              const cmStdString& cachFileName);
 
   /** Virtual destructor to cleanup subclasses properly.  */
@@ -51,14 +50,6 @@ protected:
   void Scan(std::istream& is, const char* directory,
     const cmStdString& fullName);
 
-  // Method to test for the existence of a file.
-  bool FileExistsOrIsGenerated(const std::string& fname,
-                               std::set<cmStdString>& scanned,
-                               std::set<cmStdString>& dependencies);
-  bool FileIsGenerated(const std::string& fname,
-                       std::set<cmStdString>& scanned,
-                       std::set<cmStdString>& dependencies);
-
   // The include file search path.
   std::vector<std::string> const* IncludePath;
 
@@ -70,8 +61,6 @@ protected:
   cmsys::RegularExpression IncludeRegexScan;
   cmsys::RegularExpression IncludeRegexComplain;
 
-  // Set of generated files available.
-  std::set<cmStdString> const* GeneratedFiles;
 public:
   // Data structures for dependency graph walk.
   struct UnscannedEntry
@@ -91,7 +80,8 @@ protected:
   std::queue<UnscannedEntry> Unscanned;
   t_CharBuffer Buffer;
 
-  std::map<cmStdString, cmIncludeLines *> fileCache;
+  std::map<cmStdString, cmIncludeLines *> FileCache;
+  std::map<cmStdString, cmStdString> HeaderLocationCache;
 
   cmStdString CacheFileName;
 

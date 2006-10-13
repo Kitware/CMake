@@ -28,7 +28,7 @@
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmIfFunctionBlocker() {}
+  cmIfFunctionBlocker() {this->HasRun = false;}
   virtual ~cmIfFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf);
@@ -38,6 +38,7 @@ public:
   
   std::vector<cmListFileArgument> Args;
   bool IsBlocking;
+  bool HasRun;
 };
 
 /** \class cmIfCommand
@@ -127,6 +128,10 @@ public:
       "  IF(EXISTS file-name)\n"
       "  IF(EXISTS directory-name)\n"
       "True if the named file or directory exists.  "
+      "Behavior is well-defined only for full paths.\n"
+      "  IF(FILE_IS_NEWER file1 file2)\n"
+      "True if file1 is newer than file2 or if one of the two files "
+      "doesn't exist. "
       "Behavior is well-defined only for full paths.\n"
       "  IF(IS_DIRECTORY directory-name)\n"
       "True if the given name is a directory.  "

@@ -19,7 +19,7 @@ ENDIF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 LINK_LIBRARIES(${COMPLEX_LIBS})
 
-ADD_EXECUTABLE(A A.cxx)
+ADD_EXECUTABLE(A A.cxx A.hh A.h A.txt)
 ADD_EXECUTABLE(complex complex testcflags.c )
 #  Sub1/NameConflictTest.c Sub2/NameConflictTest.c)
 ADD_EXECUTABLE(complex.file complex.file.cxx)
@@ -36,6 +36,12 @@ ELSE(UNIX)
     ENDIF(NOT MINGW)
   ENDIF(NOT BORLAND)
 ENDIF (UNIX)
+
+# Test linking to static lib when a shared lib has the same name.
+IF(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
+  ADD_DEFINITIONS(-DCOMPLEX_TEST_LINK_STATIC)
+  TARGET_LINK_LIBRARIES(complex CMakeTestLinkStatic)
+ENDIF(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
 
 # can we get the path to a source file
 GET_SOURCE_FILE_PROPERTY(A_LOCATION A.cxx LOCATION)
@@ -95,6 +101,14 @@ ADD_CUSTOM_COMMAND(
   DEPENDS ${CMAKE_COMMAND}
 )
 
+# Test creating an executable that is not built by default.
+ADD_EXECUTABLE(notInAllExe EXCLUDE_FROM_ALL notInAllExe.cxx)
+TARGET_LINK_LIBRARIES(notInAllExe notInAllLib)
+
+# Test creating a custom target that builds not-in-all targets.
+ADD_CUSTOM_TARGET(notInAllCustom)
+ADD_DEPENDENCIES(notInAllCustom notInAllExe)
+
 #
 # Output the files required by 'complex' to a file.
 #
@@ -103,6 +117,11 @@ ADD_CUSTOM_COMMAND(
 # due to source list expansion done twice).
 #
 ADD_SUBDIRECTORY(Temp)
+
+IF(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
+  ADD_EXECUTABLE(testSystemDir testSystemDir.cxx)
+  SET_TARGET_PROPERTIES(testSystemDir PROPERTIES COMPILE_FLAGS "-Werror")
+ENDIF(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
 
 #
 # Extra coverage.Not used.

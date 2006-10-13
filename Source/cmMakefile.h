@@ -143,19 +143,22 @@ public:
                                 const std::vector<std::string>& depends,
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
-                                const char* comment, const char* workingDir);
+                                const char* comment, const char* workingDir,
+                                bool escapeOldStyle = true);
   void AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
                                 const char* main_dependency,
                                 const cmCustomCommandLines& commandLines,
                                 const char* comment, const char* workingDir,
-                                bool replace = false);
+                                bool replace = false,
+                                bool escapeOldStyle = true);
   void AddCustomCommandToOutput(const char* output,
                                 const std::vector<std::string>& depends,
                                 const char* main_dependency,
                                 const cmCustomCommandLines& commandLines,
                                 const char* comment, const char* workingDir,
-                                bool replace = false);
+                                bool replace = false,
+                                bool escapeOldStyle = true);
   void AddCustomCommandOldStyle(const char* target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
@@ -173,14 +176,14 @@ public:
    * Add an executable to the build.
    */
   cmTarget* AddExecutable(const char *exename, 
-                          const std::vector<std::string> &srcs);
+                          const std::vector<std::string> &srcs,
+                          bool in_all = true);
 
   /**
    * Add a utility to the build.  A utiltity target is a command that
    * is run every time the target is built.
    */
   void AddUtilityCommand(const char* utilityName, bool all,
-                         const char* output,
                          const std::vector<std::string>& depends,
                          const char* workingDirectory,
                          const char* command,
@@ -189,10 +192,11 @@ public:
                          const char* arg3=0,
                          const char* arg4=0);
   void AddUtilityCommand(const char* utilityName, bool all,
-                         const char* output,
                          const char* workingDirectory,
                          const std::vector<std::string>& depends,
-                         const cmCustomCommandLines& commandLines);
+                         const cmCustomCommandLines& commandLines,
+                         bool escapeOldStyle = true,
+                         const char* comment = 0);
 
   /**
    * Add a link library to the build.
@@ -283,7 +287,8 @@ public:
    * Set the name of the library.
    */
   void AddLibrary(const char *libname, int shared,
-                  const std::vector<std::string> &srcs);
+                  const std::vector<std::string> &srcs,
+                  bool in_all = true);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
@@ -436,6 +441,12 @@ public:
       this->IncludeDirectories = vec;
     }
 
+  /**
+   * Mark include directories as system directories.
+   */
+  void AddSystemIncludeDirectory(const char* dir);
+  bool IsSystemIncludeDirectory(const char* dir);
+
   /** Expand out any arguements in the vector that have ; separated
    *  strings into multiple arguements.  A new vector is created 
    *  containing the expanded versions of all arguments in argsIn.
@@ -566,7 +577,8 @@ public:
                                       bool atOnly = false,
                                       const char* filename = 0,
                                       long line = -1,
-                                      bool removeEmpty = false) const;
+                                      bool removeEmpty = false,
+                                      bool replaceAt = true) const;
 
   /**
    * Remove any remaining variables in the string. Anything with ${var} or
@@ -734,6 +746,10 @@ protected:
   std::vector<std::string> IncludeDirectories;
   std::vector<std::string> LinkDirectories;
   
+  // The set of include directories that are marked as system include
+  // directories.
+  std::set<cmStdString> SystemIncludeDirectories;
+
   std::vector<std::string> ListFiles; // list of command files loaded
   std::vector<std::string> OutputFiles; // list of command files loaded
   

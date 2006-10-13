@@ -15,9 +15,9 @@ SET(BUILD_SHARED_LIBS OFF)
 # install tree.
 SET(CMAKE_SKIP_RPATH ON CACHE INTERNAL "CMake does not need RPATHs.")
 
-SET(CMAKE_DATA_DIR "/share/CMake" CACHE STRING 
+SET(CMAKE_DATA_DIR "/share/cmake-${CMake_VERSION}" CACHE STRING
   "Install location for data (relative to prefix).")
-SET(CMAKE_DOC_DIR "/doc/CMake" CACHE STRING
+SET(CMAKE_DOC_DIR "/doc/cmake-${CMake_VERSION}" CACHE STRING
   "Install location for documentation (relative to prefix).")
 SET(CMAKE_MAN_DIR "/man" CACHE STRING
   "Install location for man pages (relative to prefix).")
@@ -88,10 +88,16 @@ SET(CMAKE_CURL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/Utilities")
 SET(CMAKE_CURL_LIBRARIES "cmcurl")
 
 #-----------------------------------------------------------------------------
-# Build Curl library for CTest.
+# Build Tar library for CTest.
 SUBDIRS(Utilities/cmtar)
 SET(CMAKE_TAR_INCLUDES "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmtar")
 SET(CMAKE_TAR_LIBRARIES "cmtar")
+
+#-----------------------------------------------------------------------------
+# Build Compress library for CTest.
+SUBDIRS(Utilities/cmcompress)
+SET(CMAKE_COMPRESS_INCLUDES "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmcompress")
+SET(CMAKE_COMPRESS_LIBRARIES "cmcompress")
 
 #-----------------------------------------------------------------------------
 # Build expat library for CMake and CTest.

@@ -589,7 +589,10 @@ rpcCreate(xmlrpc_env *             const envP,
                     destroyCurlTransaction(rpcP->curlTransactionP);
         }
         if (envP->fault_occurred)
-            free(rpcP);
+          {
+          free(rpcP);
+          rpcP = 0; /* set this to null as it is used later on */
+          }
     }
     *rpcPP = rpcP;
 }

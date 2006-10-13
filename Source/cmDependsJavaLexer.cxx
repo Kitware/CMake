@@ -1,3 +1,4 @@
+#include "cmStandardIncludes.h"
 #line 2 "cmDependsJavaLexer.cxx"
 
 #line 4 "cmDependsJavaLexer.cxx"
@@ -671,28 +672,13 @@ Modify cmDependsJavaLexer.h:
   - remove TABs
   - remove the yy_init_globals function
   - remove the block that includes unistd.h
+  - remove #line directives (avoids bogus warning on old Sun)
 
 */
 
+#include "cmStandardLexer.h"
+
 #include "cmDependsJavaParserHelper.h"
-
-/* Disable some warnings.  */
-#if defined(_MSC_VER)
-# pragma warning ( disable : 4127 )
-# pragma warning ( disable : 4131 )
-# pragma warning ( disable : 4244 )
-# pragma warning ( disable : 4251 )
-# pragma warning ( disable : 4267 )
-# pragma warning ( disable : 4305 )
-# pragma warning ( disable : 4309 )
-# pragma warning ( disable : 4706 )
-# pragma warning ( disable : 4786 )
-#endif
-
-/* Disable features we do not need. */
-#define YY_NEVER_INTERACTIVE 1
-#undef ECHO /* SGI termios defines this differently. */
-#define ECHO
 
 /* Replace the lexer input function.  */
 #undef YY_INPUT
@@ -701,16 +687,6 @@ Modify cmDependsJavaLexer.h:
 
 /* Include the set of tokens from the parser.  */
 #include "cmDependsJavaParserTokens.h"
-
-
-#if defined( _WIN32 ) && !defined( __CYGWIN__ )
-/* Handle Windows properly */
-#  include <io.h>
-#  if defined( _MSC_VER )
-#    define isatty _isatty
-#  endif
-#  define YY_NO_UNISTD_H 1
-#endif
 
 #define KEYWORD yylvalp->str = 0
 #define SYMBOL yylvalp->str = 0

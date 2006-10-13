@@ -235,9 +235,14 @@ bool cmMacroHelperCommand::InvokeInitialPass
       }
     if(!this->Makefile->ExecuteCommand(newLFF))
       {
+      const char* filePath = args[0].FilePath;
+      if(!filePath)
+        {
+        filePath = "Unknown";
+        }
       cmOStringStream error;
       error << "Error in cmake code at\n"
-            << args[0].FilePath << ":" << args[0].Line << ":\n"
+            << filePath << ":" << args[0].Line << ":\n"
             << "A command failed during the invocation of macro \""
             << this->Args[0].c_str() << "\".";
       cmSystemTools::Error(error.str().c_str());

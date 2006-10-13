@@ -25,10 +25,10 @@ IF(NOT CMAKE_Fortran_COMPILER)
     ENDIF(NOT CMAKE_Fortran_COMPILER_INIT)
   ENDIF(CMAKE_GENERATOR_FC)
   
-  
-  # if no compiler has been specified yet, then look for one
-  IF(NOT CMAKE_Fortran_COMPILER_INIT)
-    # if not in the envionment then search for the compiler in the path
+  # finally list compilers to try
+  IF(CMAKE_Fortran_COMPILER_INIT)
+    SET(CMAKE_Fortran_COMPILER_LIST ${CMAKE_Fortran_COMPILER_INIT})
+  ELSE(CMAKE_Fortran_COMPILER_INIT)
     # Known compilers:
     #  f77/f90/f95: generic compiler names
     #  g77: GNU Fortran 77 compiler
@@ -51,16 +51,17 @@ IF(NOT CMAKE_Fortran_COMPILER)
     # NOTE for testing purposes this list is DUPLICATED in
     # CMake/Source/CMakeLists.txt, IF YOU CHANGE THIS LIST,
     # PLEASE UPDATE THAT FILE AS WELL!
-    SET(CMAKE_Fortran_COMPILER_LIST ifort ifc efc f95 pgf95
-          lf95 xlf95 fort gfortran f90  pgf90   xlf90   epcf90 fort77 frt pgf77  xlf  fl32 af77 g77 f77  )
-    FIND_PROGRAM(CMAKE_Fortran_COMPILER_FULLPATH NAMES ${CMAKE_Fortran_COMPILER_LIST} )
-    GET_FILENAME_COMPONENT(CMAKE_Fortran_COMPILER_INIT
-      ${CMAKE_Fortran_COMPILER_FULLPATH} NAME)
-    SET(CMAKE_Fortran_COMPILER_FULLPATH "${CMAKE_Fortran_COMPILER_FULLPATH}" 
-      CACHE INTERNAL "full path to the compiler cmake found")
-  ENDIF(NOT CMAKE_Fortran_COMPILER_INIT)
+    SET(CMAKE_Fortran_COMPILER_LIST
+      ifort ifc efc f95 pgf95 lf95 xlf95 fort gfortran f90
+      pgf90 xlf90 epcf90 fort77 frt pgf77 xlf fl32 af77 g77 f77
+      )
+  ENDIF(CMAKE_Fortran_COMPILER_INIT)
 
-  SET(CMAKE_Fortran_COMPILER ${CMAKE_Fortran_COMPILER_INIT} CACHE STRING "Fortran compiler")
+  # Find the compiler.
+  FIND_PROGRAM(CMAKE_Fortran_COMPILER NAMES ${CMAKE_Fortran_COMPILER_LIST} DOC "Fortran compiler")
+  IF(CMAKE_Fortran_COMPILER_INIT AND NOT CMAKE_Fortran_COMPILER)
+    SET(CMAKE_Fortran_COMPILER "${CMAKE_Fortran_COMPILER_INIT}" CACHE FILEPATH "Fortran compiler" FORCE)
+  ENDIF(CMAKE_Fortran_COMPILER_INIT AND NOT CMAKE_Fortran_COMPILER)
 ENDIF(NOT CMAKE_Fortran_COMPILER)
 
 MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER)  

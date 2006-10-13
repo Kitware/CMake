@@ -39,7 +39,6 @@ void cmGlobalNMakeMakefileGenerator
 cmLocalGenerator *cmGlobalNMakeMakefileGenerator::CreateLocalGenerator()
 {
   cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetEchoNeedsQuote(false);
   lg->SetDefineWindowsNULL(true);
   lg->SetWindowsShell(true);
   lg->SetMakeSilentFlag("/nologo");

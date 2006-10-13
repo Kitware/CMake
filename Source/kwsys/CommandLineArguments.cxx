@@ -216,7 +216,7 @@ int CommandLineArguments::Parse()
       // additional value
       CommandLineArgumentsCallbackStructure *cs 
         = &this->Internals->Callbacks[matches[maxidx]];
-      const CommandLineArguments::Internal::String& sarg = matches[maxidx];
+      const kwsys_stl::string& sarg = matches[maxidx];
       if ( cs->Argument != sarg )
         {
         abort();

@@ -48,7 +48,9 @@ bool cmCTestHandlerCommand::InitialPass(
   cmCTestGenericHandler* handler = this->InitializeHandler();
   if ( !handler )
     {
-    this->SetError("internal CTest error. Cannot instantiate test handler");
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot instantiate test handler " << this->GetName()
+               << std::endl);
     return false;
     }
 

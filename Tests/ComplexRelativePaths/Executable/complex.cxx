@@ -23,6 +23,12 @@ extern "C" {
 #include <string.h>
 #endif
 
+#ifdef COMPLEX_TEST_LINK_STATIC
+extern "C"
+{
+  int TestLinkGetType();
+}
+#endif
 
 int cm_passed = 0;
 int cm_failed = 0;
@@ -102,7 +108,7 @@ bool TestLibraryOrder(bool shouldFail)
   orderLibs.DebugOn();
   orderLibs.AddLinkExtension(".so");
   orderLibs.AddLinkExtension(".a");
-  orderLibs.SetLinkPrefix("lib");
+  orderLibs.AddLinkPrefix("lib");
   cmTargetManifest manifest;
   orderLibs.SetLinkInformation("test", linkLibraries, linkDirectories,
                                manifest, "");
@@ -438,6 +444,12 @@ int main()
   cmPassed("COMPILE_FLAGS did work with SET_TARGET_PROPERTIES");
 #endif
   
+#ifdef ELSEIF_RESULT
+  cmPassed("ELSEIF did work");
+#else
+  cmFailed("ELSEIF did not work");
+#endif
+
   if(file2() != 1)
     {
     cmFailed("Call to file2 function from library failed.");
@@ -1270,7 +1282,18 @@ int main()
   // Test the generated file stream.
   TestCMGeneratedFileSTream();
 #endif
-  
+
+#ifdef COMPLEX_TEST_LINK_STATIC
+  if(TestLinkGetType())
+    {
+    cmPassed("Link to static over shared worked.");
+    }
+  else
+    {
+    cmFailed("Link to static over shared failed.");
+    }
+#endif
+
   // ----------------------------------------------------------------------
   // Summary
 

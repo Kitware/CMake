@@ -25,12 +25,12 @@
 //----------------------------------------------------------------------------
 cmInstallTargetGenerator
 ::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
-                           const char* permissions,
+                           const char* file_permissions,
                            std::vector<std::string> const& configurations,
-                           const char* component):
+                           const char* component, bool optional):
   Target(&t), Destination(dest), ImportLibrary(implib),
-  Permissions(permissions), Configurations(configurations),
-  Component(component)
+  FilePermissions(file_permissions), Configurations(configurations),
+  Component(component), Optional(optional)
 {
   this->Target->SetHaveInstallRule(true);
 }
@@ -72,6 +72,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   std::string destination = this->Destination;
 
   // Setup special properties for some target types.
+  std::string literal_args;
   std::string props;
   const char* properties = 0;
   cmTarget::TargetType type = this->Target->GetType();
@@ -81,16 +82,26 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
       {
       // Add shared library installation properties if this platform
       // supports them.
-      const char* lib_version = this->Target->GetProperty("VERSION");
-      const char* lib_soversion = this->Target->GetProperty("SOVERSION");
-      if(!this->Target->GetMakefile()
-         ->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
-        {
+      const char* lib_version = 0;
+      const char* lib_soversion = 0;
+
         // Versioning is supported only for shared libraries and modules,
         // and then only when the platform supports an soname flag.
-        lib_version = 0;
-        lib_soversion = 0;
+      cmGlobalGenerator* gg =
+        (this->Target->GetMakefile()
+         ->GetLocalGenerator()->GetGlobalGenerator());
+      if(const char* linkLanguage = this->Target->GetLinkerLanguage(gg))
+        {
+        std::string sonameFlagVar = "CMAKE_SHARED_LIBRARY_SONAME_";
+        sonameFlagVar += linkLanguage;
+        sonameFlagVar += "_FLAG";
+        if(this->Target->GetMakefile()->GetDefinition(sonameFlagVar.c_str()))
+          {
+          lib_version = this->Target->GetProperty("VERSION");
+          lib_soversion = this->Target->GetProperty("SOVERSION");
         }
+        }
+
       if(lib_version)
         {
         props += " VERSION ";
@@ -130,6 +141,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
                                      false, false);
         fromFile += ".app";
         type = cmTarget::INSTALL_DIRECTORY;
+        literal_args += " USE_SOURCE_PERMISSIONS";
         }
       }
       break;
@@ -148,11 +160,15 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
     }
 
   // Write code to install the target file.
+  const char* no_dir_permissions = 0;
+  const char* no_rename = 0;
+  bool optional = this->Optional | this->ImportLibrary;
   this->AddInstallRule(os, destination.c_str(), type, fromFile.c_str(),
-                       this->ImportLibrary, properties,
-                       this->Permissions.c_str(),
+                       optional, properties,
+                       this->FilePermissions.c_str(), no_dir_permissions,
                        this->Configurations,
-                       this->Component.c_str());
+                       this->Component.c_str(),
+                       no_rename, literal_args.c_str());
 
   // Fix the install_name settings in installed binaries.
   if(type == cmTarget::SHARED_LIBRARY ||

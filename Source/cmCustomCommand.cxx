@@ -19,6 +19,9 @@
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand()
 {
+  this->HaveComment = false;
+  this->EscapeOldStyle = true;
+  this->EscapeAllowMakeVars = false;
   this->Used = false;
 }
 
@@ -27,8 +30,11 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   Outputs(r.Outputs),
   Depends(r.Depends),
   CommandLines(r.CommandLines),
+  HaveComment(r.HaveComment),
   Comment(r.Comment),
-  WorkingDirectory(r.WorkingDirectory)
+  WorkingDirectory(r.WorkingDirectory),
+  EscapeAllowMakeVars(r.EscapeAllowMakeVars),
+  EscapeOldStyle(r.EscapeOldStyle)
 {
   this->Used = false;
 }
@@ -42,9 +48,14 @@ cmCustomCommand::cmCustomCommand(const std::vector<std::string>& outputs,
   Outputs(outputs),
   Depends(depends),
   CommandLines(commandLines),
+  HaveComment(comment?true:false),
   Comment(comment?comment:""),
-  WorkingDirectory(workingDirectory?workingDirectory:"")
+  WorkingDirectory(workingDirectory?workingDirectory:""),
+  EscapeAllowMakeVars(false),
+  EscapeOldStyle(true)
 {
+  this->EscapeOldStyle = true;
+  this->EscapeAllowMakeVars = false;
   this->Used = false;
 }
 
@@ -79,5 +90,50 @@ const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
 //----------------------------------------------------------------------------
 const char* cmCustomCommand::GetComment() const
 {
-  return this->Comment.c_str();
+  const char* no_comment = 0;
+  return this->HaveComment? this->Comment.c_str() : no_comment;
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
+{
+  for(cmCustomCommandLines::const_iterator i=commandLines.begin();
+      i != commandLines.end(); ++i)
+    {
+    this->CommandLines.push_back(*i);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::AppendDepends(const std::vector<std::string>& depends)
+{
+  for(std::vector<std::string>::const_iterator i=depends.begin();
+      i != depends.end(); ++i)
+    {
+    this->Depends.push_back(*i);
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmCustomCommand::GetEscapeOldStyle() const
+{
+  return this->EscapeOldStyle;
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::SetEscapeOldStyle(bool b)
+{
+  this->EscapeOldStyle = b;
+}
+
+//----------------------------------------------------------------------------
+bool cmCustomCommand::GetEscapeAllowMakeVars() const
+{
+  return this->EscapeAllowMakeVars;
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::SetEscapeAllowMakeVars(bool b)
+{
+  this->EscapeAllowMakeVars = b;
 }

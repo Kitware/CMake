@@ -4,7 +4,7 @@ IF ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
   SET(BUILD_SHARED_LIBS 1)
   ADD_LIBRARY(testlib testlib.cxx)
   ADD_EXECUTABLE (simple simple.cxx ../simple.cxx)
-  TARGET_LINK_LIBRARIES(simple testlib)
+  TARGET_LINK_LIBRARIES(simple testlib outlib)
 ENDIF ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
 
 # test getting a definition from a subdir

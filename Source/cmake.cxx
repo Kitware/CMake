@@ -111,6 +111,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 
 cmake::cmake()
 {
+  this->DebugOutput = false;
   this->DebugTryCompile = false;
   this->ClearBuildSystem = false;
   this->FileComparison = new cmFileTimeComparison;
@@ -445,6 +446,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       std::cout << "debug trycompile on\n";
       this->DebugTryCompileOn();
+      }
+    else if(arg.find("--debug-output",0) == 0)
+      {
+      std::cout << "Running with debug output on.\n";
+      this->DebugOutputOn();
       }
     else if(arg.find("-G",0) == 0)
       {
@@ -1184,6 +1190,18 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       return cmake::ExecuteLinkScript(args);
       }
 
+    // Internal CMake unimplemented feature notification.
+    else if (args[1] == "cmake_unimplemented_variable")
+      {
+      std::cerr << "Feature not implemented for this platform.";
+      if(args.size() == 3)
+        {
+        std::cerr << "  Variable " << args[2] << " is not set.";
+        }
+      std::cerr << std::endl;
+      return 1;
+      }
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
     // Internal CMake color makefile support.
     else if (args[1] == "cmake_echo_color")
@@ -1319,6 +1337,11 @@ void cmake::SetHomeOutputDirectory(const char* lib)
 
 void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
 {
+  if(!gg)
+    {
+    cmSystemTools::Error("Error SetGlobalGenerator called with null");
+    return;
+    }
   // delete the old generator
   if (this->GlobalGenerator)
     {

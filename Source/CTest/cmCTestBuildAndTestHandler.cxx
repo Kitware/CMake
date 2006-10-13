@@ -117,6 +117,9 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
       return 1;
       }
     }
+  out << "======== CMake output     ======\n";
+  out << cmakeOutString;
+  out << "======== End CMake output ======\n";
   return 0;
 }
 

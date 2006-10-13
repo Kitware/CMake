@@ -31,6 +31,9 @@ int cmGlobalGenerator::s_TryCompileTimeout = 0;
 
 cmGlobalGenerator::cmGlobalGenerator()
 {
+  // By default the .SYMBOLIC dependency is not needed on symbolic rules.
+  this->NeedSymbolicMark = false;
+
   // by default use the native paths
   this->ForceUnixPaths = false;
 
@@ -42,6 +45,9 @@ cmGlobalGenerator::cmGlobalGenerator()
 
   // Relative paths are not configured in the constructor.
   this->RelativePathsConfigured = false;
+
+  // Whether an install target is needed.
+  this->InstallTargetEnabled = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -457,7 +463,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   // cmake
   std::string projectCompatibility = mf->GetDefinition("CMAKE_ROOT");
   projectCompatibility += "/Modules/";
-  projectCompatibility += mf->GetDefinition("PROJECT_NAME");
+  projectCompatibility += mf->GetSafeDefinition("PROJECT_NAME");
   projectCompatibility += "Compatibility.cmake";
   if(cmSystemTools::FileExists(projectCompatibility.c_str()))
     {
@@ -716,12 +722,13 @@ void cmGlobalGenerator::Generate()
     }
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    cmTargets* targets = 
-      &(this->LocalGenerators[i]->GetMakefile()->GetTargets());
+    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
+    cmTargets* targets = &(mf->GetTargets());
     cmTargets::iterator tit;
     for ( tit = globalTargets.begin(); tit != globalTargets.end(); ++ tit )
       {
       (*targets)[tit->first] = tit->second;
+      (*targets)[tit->first].SetMakefile(mf);
       }
     }
 
@@ -926,6 +933,11 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
     }
 }
 
+void cmGlobalGenerator::EnableInstallTarget()
+{
+  this->InstallTargetEnabled = true;
+}
+
 cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
 {
   cmLocalGenerator *lg = new cmLocalGenerator;
@@ -963,6 +975,10 @@ void cmGlobalGenerator::GetDocumentation(cmDocumentationEntry& entry) const
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root, 
                                    cmLocalGenerator* gen)
 {
+  if(gen == root)
+    {
+    return false;
+    }
   cmLocalGenerator* cur = gen->GetParent();
   while(cur && cur != root)
     {
@@ -972,7 +988,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
       }
     cur = cur->GetParent();
     }
-  return false;
+  return gen->GetExcludeAll();
 }
 
 
@@ -1291,7 +1307,6 @@ void cmGlobalGenerator::SetupTests()
     // If the file doesn't exist, then ENABLE_TESTING hasn't been run
     if (total_tests > 0)
       {
-      const char* no_output = 0;
       const char* no_working_dir = 0;
       std::vector<std::string> no_depends;
       std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
@@ -1304,7 +1319,7 @@ void cmGlobalGenerator::SetupTests()
           cmMakefile* mf = gen[0]->GetMakefile();
           if(const char* outDir = mf->GetDefinition("CMAKE_CFG_INTDIR"))
             {
-            mf->AddUtilityCommand("RUN_TESTS", false, no_output, no_depends,
+            mf->AddUtilityCommand("RUN_TESTS", false, no_depends,
                                   no_working_dir, 
                                   ctest.c_str(), "-C", outDir);
             }
@@ -1447,8 +1462,11 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     }
 
   //Install
+  if(this->InstallTargetEnabled)
+    {
   std::string cmd;
-  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
+    cpackCommandLines.erase(cpackCommandLines.begin(),
+                            cpackCommandLines.end());
   singleLine.erase(singleLine.begin(), singleLine.end());
   depends.erase(depends.begin(), depends.end());
   if ( this->GetPreinstallTargetName() )
@@ -1494,6 +1512,21 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     this->CreateGlobalTarget(
       this->GetInstallTargetName(), "Install the project...",
       &cpackCommandLines, depends);
+
+    // install_local
+    if(const char* install_local = this->GetInstallLocalTargetName())
+      {
+      singleLine.insert(singleLine.begin()+1, "-DCMAKE_INSTALL_LOCAL_ONLY=1");
+      cpackCommandLines.erase(cpackCommandLines.begin(),
+                              cpackCommandLines.end());
+      cpackCommandLines.push_back(singleLine);
+
+      (*targets)[install_local] =
+        this->CreateGlobalTarget(
+          install_local, "Installing only the local directory...",
+          &cpackCommandLines, depends);
+      }
+    }
 }
 
 cmTarget cmGlobalGenerator::CreateGlobalTarget(

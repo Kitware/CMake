@@ -79,6 +79,12 @@ public:
       "Create Tcl wrappers for VTK classes.";
     }
 
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   /**
    * Helper methods
    */

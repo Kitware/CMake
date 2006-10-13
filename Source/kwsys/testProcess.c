@@ -30,6 +30,10 @@
 # include <unistd.h>
 #endif
 
+#if defined(__BORLANDC__)
+# pragma warn -8060 /* possibly incorrect assignment */
+#endif
+
 int runChild(const char* cmd[], int state, int exception, int value,
              int share, int output, int delay, double timeout, int poll,
              int repeat, int disown);
@@ -196,7 +200,6 @@ int test8_grandchild(int argc, const char* argv[])
   return 0;
 }
 
-
 int runChild2(kwsysProcess* kp,
               const char* cmd[], int state, int exception, int value,
               int share, int output, int delay, double timeout,
@@ -273,14 +276,14 @@ int runChild2(kwsysProcess* kp,
         }
       }
     }
-  
+
   if(disown)
     {
     kwsysProcess_Disown(kp);
     }
   else
     {
-  kwsysProcess_WaitForExit(kp, 0);
+    kwsysProcess_WaitForExit(kp, 0);
     }
 
   switch (kwsysProcess_GetState(kp))

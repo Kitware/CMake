@@ -76,6 +76,10 @@ bool cmCTestStartCommand::InitialPass(
       "as an argument or set CTEST_BINARY_DIRECTORY");
     return false;
     }
+
+  cmSystemTools::AddKeepPath(src_dir);
+  cmSystemTools::AddKeepPath(bld_dir);
+
   this->CTest->EmptyCTestConfiguration();
   this->CTest->SetCTestConfiguration("SourceDirectory",
     cmSystemTools::CollapseFullPath(src_dir).c_str());

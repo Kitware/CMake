@@ -37,6 +37,9 @@
 #include <math.h>
 #include <float.h>
 
+#if defined(__BORLANDC__)
+# pragma warn -8060 /* possibly incorrect assignment */
+#endif
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",
@@ -72,7 +75,7 @@ static const char* cmCTestErrorMatches[] = {
   ": Can't find library for",
   ": internal link edit command failed",
   ": Unrecognized option \\`.*\\'",
-  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([^W]\\)",
+  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([^WI]\\)",
   "ld: 0706-006 Cannot find or open library file: -l ",
   "ild: \\(argument error\\) can't find library argument ::",
   "^could not be found and will not be loaded.",
@@ -116,7 +119,7 @@ static const char* cmCTestWarningMatches[] = {
   "WARNING: ",
   "([^ :]+) : warning",
   "([^:]+): warning",
-  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\(W\\)",
+  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([WI]\\)",
   "^cxx: Warning:",
   ".*file: .* has no symbols",
   "([^ :]+):([0-9]+): (Warning|Warnung)",

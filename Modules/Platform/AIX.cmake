@@ -31,3 +31,27 @@ ELSE(CMAKE_COMPILER_IS_GNUCC)
   SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "-O -DNDEBUG")
   SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "-g")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
+
+IF(NOT CMAKE_COMPILER_IS_GNUCC)
+  SET (CMAKE_C_CREATE_PREPROCESSED_SOURCE "<CMAKE_C_COMPILER> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
+  SET (CMAKE_C_CREATE_ASSEMBLY_SOURCE "<CMAKE_C_COMPILER> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
+ENDIF(NOT CMAKE_COMPILER_IS_GNUCC)
+
+IF(NOT CMAKE_COMPILER_IS_GNUCXX)
+  SET (CMAKE_CXX_CREATE_PREPROCESSED_SOURCE "<CMAKE_CXX_COMPILER> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
+  SET (CMAKE_CXX_CREATE_ASSEMBLY_SOURCE "<CMAKE_CXX_COMPILER> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
+ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
+
+
+# since .a can be a static or shared library on AIX, we can not do this.
+# at some point if we wanted it, we would have to figure out if a .a is
+# static or shared, then we could add this back:
+
+# Initialize C link type selection flags.  These flags are used when
+# building a shared library, shared module, or executable that links
+# to other libraries to select whether to use the static or shared
+# versions of the libraries.
+#FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
+#  SET(CMAKE_${type}_LINK_STATIC_C_FLAGS "-bstatic")
+#  SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-bdynamic")
+#ENDFOREACH(type)

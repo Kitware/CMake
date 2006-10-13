@@ -63,6 +63,7 @@ cmMakefile::cmMakefile()
   this->SourceFileExtensions.push_back( "mm" );
 
   this->HeaderFileExtensions.push_back( "h" );
+  this->HeaderFileExtensions.push_back( "hh" );
   this->HeaderFileExtensions.push_back( "h++" );
   this->HeaderFileExtensions.push_back( "hm" );
   this->HeaderFileExtensions.push_back( "hpp" );
@@ -79,7 +80,7 @@ cmMakefile::cmMakefile()
     ("Source Files",
                        "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat)$");
   this->AddSourceGroup("Header Files", 
-                       "\\.(h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
+                       "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddSourceGroup("Resources", "\\.plist$");
 #endif
@@ -105,6 +106,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->Tests = mf.Tests;
   this->IncludeDirectories = mf.IncludeDirectories;
   this->LinkDirectories = mf.LinkDirectories;
+  this->SystemIncludeDirectories = mf.SystemIncludeDirectories;
   this->ListFiles = mf.ListFiles;
   this->OutputFiles = mf.OutputFiles;
   this->LinkLibraries = mf.LinkLibraries;
@@ -553,7 +555,8 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
                                      const cmCustomCommandLines& commandLines,
                                      cmTarget::CustomCommandType type,
                                      const char* comment,
-                                     const char* workingDir)
+                                     const char* workingDir,
+                                     bool escapeOldStyle)
 {
   // Find the target to which to add the custom command.
   cmTargets::iterator ti = this->Targets.find(target);
@@ -562,6 +565,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
     // Add the command to the appropriate build step for the target.
     std::vector<std::string> no_output;
     cmCustomCommand cc(no_output, depends, commandLines, comment, workingDir);
+    cc.SetEscapeOldStyle(escapeOldStyle);
     switch(type)
       {
       case cmTarget::PRE_BUILD:
@@ -597,7 +601,8 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                      const cmCustomCommandLines& commandLines,
                                      const char* comment,
                                      const char* workingDir,
-                                     bool replace)
+                                     bool replace,
+                                     bool escapeOldStyle)
 {
   // Make sure there is at least one output.
   if(outputs.empty())
@@ -685,6 +690,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     cmCustomCommand* cc =
       new cmCustomCommand(outputs, depends2, commandLines,
                           comment, workingDir);
+    cc->SetEscapeOldStyle(escapeOldStyle);
     file->SetCustomCommand(cc);
     }
 }
@@ -697,13 +703,14 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
                                      const cmCustomCommandLines& commandLines,
                                      const char* comment,
                                      const char* workingDir,
-                                     bool replace)
+                                     bool replace,
+                                     bool escapeOldStyle)
 {
   std::vector<std::string> outputs;
   outputs.push_back(output);
   this->AddCustomCommandToOutput(outputs, depends, main_dependency,
                                  commandLines, comment, workingDir,
-                                 replace);
+                                 replace, escapeOldStyle);
 }
 
 //----------------------------------------------------------------------------
@@ -777,7 +784,6 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
 
 //----------------------------------------------------------------------------
 void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
-                                   const char* output,
                                    const std::vector<std::string>& depends,
                                    const char* workingDirectory,
                                    const char* command,
@@ -809,30 +815,53 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   commandLines.push_back(commandLine);
 
   // Call the real signature of this method.
-  this->AddUtilityCommand(utilityName, all, output, workingDirectory, 
+  this->AddUtilityCommand(utilityName, all, workingDirectory, 
                           depends, commandLines);
 }
 
 //----------------------------------------------------------------------------
 void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
-                                   const char* output,
                                    const char* workingDirectory,
                                    const std::vector<std::string>& depends,
-                                   const cmCustomCommandLines& commandLines)
+                                   const cmCustomCommandLines& commandLines,
+                                   bool escapeOldStyle, const char* comment)
 {
   // Create a target instance for this utility.
   cmTarget target;
   target.SetType(cmTarget::UTILITY, utilityName);
   target.SetInAll(all);
   target.SetMakefile(this);
-  // Store the custom command in the target.
-  std::vector<std::string> outputs;
-  if(output)
+
+  if(!comment)
     {
-    outputs.push_back(output);
+    // Use an empty comment to avoid generation of default comment.
+    comment = "";
     }
-  cmCustomCommand cc(outputs, depends, commandLines, 0, workingDirectory);
-  target.GetPostBuildCommands().push_back(cc);
+
+  // Store the custom command in the target.
+  std::string force = this->GetStartOutputDirectory();
+  force += cmake::GetCMakeFilesDirectory();
+  force += "/";
+  force += utilityName;
+  const char* no_main_dependency = 0;
+  bool no_replace = false;
+  this->AddCustomCommandToOutput(force.c_str(), depends,
+                                 no_main_dependency,
+                                 commandLines, comment,
+                                 workingDirectory, no_replace,
+                                 escapeOldStyle);
+  target.GetSourceLists().push_back(force);
+
+  // The output is not actually created so mark it symbolic.
+  if(cmSourceFile* sf = this->GetSource(force.c_str()))
+    {
+    sf->SetProperty("SYMBOLIC", "1");
+    }
+  else
+    {
+    cmSystemTools::Error("Could not get source file entry for ",
+                         force.c_str());
+    }
 
   // Add the target to the set of targets.
   cmTargets::iterator it = 
@@ -997,6 +1026,7 @@ void cmMakefile::InitializeFromParent()
 
   // copy include paths
   this->IncludeDirectories = parent->IncludeDirectories;
+  this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
   
   // define flags
   this->DefineFlags = parent->DefineFlags;
@@ -1120,6 +1150,19 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
       this->IncludeDirectories.insert(this->IncludeDirectories.begin(), inc);
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::AddSystemIncludeDirectory(const char* dir)
+{
+  this->SystemIncludeDirectories.insert(dir);
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefile::IsSystemIncludeDirectory(const char* dir)
+{
+  return (this->SystemIncludeDirectories.find(dir) !=
+          this->SystemIncludeDirectories.end());
 }
 
 void cmMakefile::AddDefinition(const char* name, const char* value)
@@ -1258,7 +1301,8 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
 
 
 void cmMakefile::AddLibrary(const char* lname, int shared,
-                            const std::vector<std::string> &srcs)
+                            const std::vector<std::string> &srcs,
+                            bool in_all)
 {
   cmTarget target;
   switch (shared)
@@ -1280,7 +1324,7 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
   target.ClearDependencyInformation( *this, lname );
-  target.SetInAll(true);
+  target.SetInAll(in_all);
   target.GetSourceLists() = srcs;
   target.SetMakefile(this);
   this->AddGlobalLinkInformation(lname, target);
@@ -1290,11 +1334,12 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
 }
 
 cmTarget* cmMakefile::AddExecutable(const char *exeName, 
-                                    const std::vector<std::string> &srcs)
+                                    const std::vector<std::string> &srcs,
+                                    bool in_all)
 {
   cmTarget target;
   target.SetType(cmTarget::EXECUTABLE, exeName);
-  target.SetInAll(true);
+  target.SetInAll(in_all);
   target.GetSourceLists() = srcs;
   target.SetMakefile(this);
   this->AddGlobalLinkInformation(exeName, target);
@@ -1637,7 +1682,8 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 bool atOnly,
                                                 const char* filename,
                                                 long line,
-                                                bool removeEmpty) const
+                                                bool removeEmpty,
+                                                bool replaceAt) const
 {
   if ( source.empty() || source.find_first_of("$@\\") == source.npos)
     {
@@ -1656,6 +1702,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
     parser.SetLineFile(line, filename);
     parser.SetEscapeQuotes(escapeQuotes);
     parser.SetNoEscapeMode(noEscapes);
+    parser.SetReplaceAtSyntax(replaceAt);
     int res = parser.ParseString(source.c_str(), 0);
     if ( res )
       {
@@ -1906,6 +1953,9 @@ void cmMakefile::AddDefaultDefinitions()
 #if defined(__APPLE__)
   this->AddDefinition("APPLE", "1");
 #endif
+#if defined(__QNXNTO__)
+  this->AddDefinition("QNXNTO", "1");
+#endif
 
   char temp[1024];
   sprintf(temp, "%d", cmMakefile::GetMinorVersion());
@@ -1994,7 +2044,8 @@ void cmMakefile::ExpandArguments(
     // Expand the variables in the argument.
     value = i->Value;
     this->ExpandVariablesInString(value, false, false, false, 
-                                  i->FilePath, i->Line);
+                                  i->FilePath, i->Line,
+                                  false, false);
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.

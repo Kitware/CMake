@@ -107,7 +107,7 @@ protected:
                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(std::ostream& fout, 
                                           const char* name,
-                                          bool in_all);
+                                          int targetType);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
@@ -118,6 +118,7 @@ protected:
                             const char* name, const char* path,
                             const std::vector<std::string>& dependencies);
 
+  std::string ConvertToSolutionPath(const char* path);
 
   std::vector<std::string> Configurations;
   std::map<cmStdString, cmStdString> GUIDMap;

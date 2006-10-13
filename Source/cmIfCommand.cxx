@@ -30,13 +30,56 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
   
   // watch for our ELSE or ENDIF
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else") || 
+      !cmSystemTools::Strucmp(lff.Name.c_str(),"elseif") ||
       !cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
       {
       // if it was an else statement then we should change state
       // and block this Else Command
     if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else"))
         {
-        this->IsBlocking = !this->IsBlocking;
+      this->IsBlocking = this->HasRun;
+      return true;
+      }
+    // if it was an elseif statement then we should check state
+    // and possibly block this Else Command
+    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"elseif"))
+      {
+      if (!this->HasRun)
+        {
+        char* errorString = 0;
+        
+        std::vector<std::string> expandedArguments;
+        mf.ExpandArguments(lff.Arguments, expandedArguments);
+        bool isTrue = 
+          cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
+        
+        if (errorString)
+          {
+          std::string err = "had incorrect arguments: ";
+          unsigned int i;
+          for(i =0; i < lff.Arguments.size(); ++i)
+            {
+            err += (lff.Arguments[i].Quoted?"\"":"");
+            err += lff.Arguments[i].Value;
+            err += (lff.Arguments[i].Quoted?"\"":"");
+            err += " ";
+            }
+          err += "(";
+          err += errorString;
+          err += ").";
+          cmSystemTools::Error(err.c_str());
+          delete [] errorString;
+          return false;
+          }
+        
+        if (isTrue)
+          {
+          this->IsBlocking = false;
+          this->HasRun = true;
+          return true;
+          }
+        }
+      this->IsBlocking = true;
         return true;
         }
       // otherwise it must be an ENDIF statement, in that case remove the
@@ -113,6 +156,10 @@ bool cmIfCommand
   cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
   // if is isn't true block the commands
   f->IsBlocking = !isTrue;
+  if (isTrue)
+    {
+    f->HasRun = true;
+    }
   f->Args = args;
   this->Makefile->AddFunctionBlocker(f);
   
@@ -226,7 +273,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
-      // does a file exist
+      // does a directory with this name exist
       if (*arg == "IS_DIRECTORY" && argP1  != newArgs.end())
         {
         if(cmSystemTools::FileIsDirectory((argP1)->c_str()))
@@ -237,6 +284,29 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           {
           *arg = "0";
           }
+        newArgs.erase(argP1);
+        argP1 = arg;
+        IncrementArguments(newArgs,argP1,argP2);
+        reducible = 1;
+        }
+      // is file A newer than file B
+      if (*arg == "FILE_IS_NEWER" &&
+          argP1  != newArgs.end() && argP2  != newArgs.end())
+        {
+        int fileIsNewer=0;
+        bool success=cmSystemTools::FileTimeCompare((argP1)->c_str(),
+                                                    (argP2)->c_str(),
+                                                    &fileIsNewer);
+        if(success==false || fileIsNewer==1 || fileIsNewer==0)
+          {
+          *arg = "1";
+          }
+        else 
+          {
+          *arg = "0";
+          }
+
+        newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
         IncrementArguments(newArgs,argP1,argP2);

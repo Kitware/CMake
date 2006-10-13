@@ -5,7 +5,7 @@
 
 
 EXECUTE_PROCESS(COMMAND ${KDE_UIC_EXECUTABLE}
-   -nounload -tr tr2i18n
+   -L ${KDE_UIC_PLUGIN_DIR} -nounload -tr tr2i18n
    -impl ${KDE_UIC_H_FILE}
    ${KDE_UIC_FILE}
    OUTPUT_VARIABLE _uic_CONTENTS

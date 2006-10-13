@@ -36,6 +36,8 @@
 
 #include <ctype.h> // for isspace
 #include <stdio.h>
+#include <string.h> /* strlen, strncpy */
+#include <stdlib.h> /* getenv */
 
 #ifdef _WIN32
 # include <windows.h>
@@ -210,13 +212,13 @@ bool Registry::ReadValue(const char *subkey,
   const char *key,
   const char **value)
 {
-  *value = 0;
   bool res = false;
   bool open = false;
   if ( ! value )
     {
     return res;
     }
+  *value = 0;
   if ( !m_Opened )
     {
     if ( !this->Open(this->GetTopLevel(), subkey,

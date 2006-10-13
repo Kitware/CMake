@@ -77,6 +77,12 @@ public:
       "Create Java wrappers for VTK classes.";
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
 private:
   std::vector<cmSourceFile> WrapClasses;
   std::vector<std::string> WrapHeaders;

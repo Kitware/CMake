@@ -128,6 +128,8 @@ Modify cmCommandArgumentParser.cxx:
 
 */
 
+#include "cmStandardIncludes.h"
+
 /* Configure the parser to use a lexer object.  */
 #define YYPARSE_PARAM yyscanner
 #define YYLEX_PARAM yyscanner
@@ -135,6 +137,11 @@ Modify cmCommandArgumentParser.cxx:
 #define cmCommandArgument_yyerror(x) \
         cmCommandArgumentError(yyscanner, x)
 #define yyGetParser (cmCommandArgument_yyget_extra(yyscanner))
+
+/* Make sure malloc and free are available on QNX.  */
+#ifdef __QNX__
+# include <malloc.h>
+#endif
 
 /* Make sure the parser uses standard memory allocation.  The default
    generated parser malloc/free declarations do not work on all
@@ -162,6 +169,9 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 /* Disable some warnings in the generated code.  */
 #ifdef __BORLANDC__
 # pragma warn -8004 /* Variable assigned a value that is not used.  */
+# pragma warn -8008 /* condition always returns true */
+# pragma warn -8060 /* possibly incorrect assignment */
+# pragma warn -8066 /* unreachable code */
 #endif
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
@@ -1310,7 +1320,7 @@ yyreduce:
   case 17:
 #line 178 "cmCommandArgumentParser.y"
     {
-  (yyval.str) = yyGetParser->ExpandVariable((yyvsp[0].str));
+  (yyval.str) = yyGetParser->ExpandVariableForAt((yyvsp[0].str));
 }
     break;
 

@@ -80,6 +80,12 @@ public:
       "top level project or be built each time make is run from the top.";
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmSubdirCommand, cmCommand);
 };
 

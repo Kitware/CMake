@@ -1,8 +1,8 @@
 # - Check if the source code provided in the SOURCE argument compiles.
 # CHECK_CXX_SOURCE_COMPILES(SOURCE VAR)
-# - macro which checks if the source code compiles\
+# - macro which checks if the source code compiles
 #  SOURCE - source code to try to compile
-#  VAR    - variable to store size if the type exists.
+#  VAR    - variable to store whether the source code compiled
 #
 # The following variables may be set before calling this macro to
 # modify the way the check is run:
@@ -41,7 +41,7 @@ MACRO(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
       "${CHECK_CXX_SOURCE_COMPILES_ADD_INCLUDES}"
       OUTPUT_VARIABLE OUTPUT)
     IF(${VAR})
-      SET(${VAR} 1 CACHE INTERNAL "Test ${FUNCTION}")
+      SET(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Performing C++ SOURCE FILE Test ${VAR} succeded with the following output:\n"
@@ -49,7 +49,7 @@ MACRO(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
         "Source file was:\n${SOURCE}\n")
     ELSE(${VAR})
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
-      SET(${VAR} "" CACHE INTERNAL "Test ${FUNCTION}")
+      SET(${VAR} "" CACHE INTERNAL "Test ${VAR}")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Performing C++ SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"

@@ -597,14 +597,6 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   pos_form_cursor(this->Form);
 }
 
-void cmCursesMainForm::UpdateProgressOld(const char *msg, float prog, void*)
-{
-  if ( prog < 0 )
-    {
-    std::cout << "-- " << msg << std::endl;
-    }
-}
-
 void cmCursesMainForm::UpdateProgress(const char *msg, float prog, void* vp)
 {
   cmCursesMainForm* cm = static_cast<cmCursesMainForm*>(vp);
@@ -810,8 +802,8 @@ void cmCursesMainForm::FillCacheManagerFromUI()
         {
         // The user has changed the value.  Mark it as modified.
         it.SetProperty("MODIFIED", true);
-        }
       it.SetValue(fixedNewValue.c_str());
+        }
       }
     }
 }

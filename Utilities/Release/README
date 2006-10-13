@@ -1,29 +1,21 @@
 1. Update Version information
   - change version in CMakeLists.txt
-  - build release on windows, and do a make; make install; make release // this step tags 
-    - this changes cmake_release.sh
-      -winzip command line, nullsoft installer
-
   * for major release edit   Source/cmCPluginAPI.h 
+  cvs tag CMake-2-4-3 in a check out of the release branch
 
-2. UNIX builds:
-  Log into hythloth as kingb.
-  cd ~kingb/Programs/releases/CMake/Utilities/Release
-# build the binaries
-  ./release_dispatch.sh clean
-  ./release_dispatch.sh binary
-  ./release_dispatch.sh logs
-# build a second sgi for 64 bit
-  ./cmake_release.sh remote_binary dashsgi1
-# now build source tar ball
-  ./cmake_release.sh remote_source localhost
-# not upload the whole thing to public
-  ./cmake_release.sh upload
-
+2. Log into hythloth as hoffman
+  - cvs checkout CMake and build it.
+  - cd CMake/Utilities/Release 
+     - mkdir 2-4-3
+     - cd 2-4-3
+     - ~/CMake-build/bin/cmake -DCMAKE_VERSION=CMake-2-4-3 -P ../create-cmake-release.cmake
+     - ./create-CMake-2-4-3.sh
+     - ~/CMake-build/bin/cmake -P ../upload_release.cmake
 
 3. Cygwin build:
   Checkout release branch.
   cd Utilities/Release
+  update the version in cmake_release.sh, and move the tag  cvs tag -F CMake-2-4-3
   ./cmake_release.sh  cygwin_package
   ./cmake_release.sh cygwin_upload
   (now you have to send email to cygwin-apps to get it uploaded to cygwin site.)

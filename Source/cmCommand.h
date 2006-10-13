@@ -102,6 +102,15 @@ public:
     }
 
   /**
+   * This determines if usage of the method is discouraged or not.
+   * This is currently only used for generating the documentation.
+   */
+  virtual bool IsDiscouraged()
+    {
+    return false;
+    }
+
+  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() = 0;

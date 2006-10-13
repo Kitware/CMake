@@ -124,7 +124,8 @@ public:
    const char* config, bool ignoreErrors, bool fast);
 
   // returns some progress informaiton
-  int GetTargetTotalNumberOfActions(cmTarget& target);
+  int GetTargetTotalNumberOfActions(cmTarget& target,
+                                    std::set<cmStdString> &emitted);
   unsigned long GetNumberOfProgressActionsInAll
   (cmLocalUnixMakefileGenerator3 *lg);
 
@@ -159,6 +160,7 @@ protected:
   // Setup target names
   virtual const char* GetAllTargetName()          { return "all"; }
   virtual const char* GetInstallTargetName()      { return "install"; }
+  virtual const char* GetInstallLocalTargetName() { return "install/local"; }
   virtual const char* GetPreinstallTargetName()   { return "preinstall"; }
   virtual const char* GetTestTargetName()         { return "test"; }
   virtual const char* GetPackageTargetName()      { return "package"; }

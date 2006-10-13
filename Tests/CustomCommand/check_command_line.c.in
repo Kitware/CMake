@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include <string.h>
+
+const char* expected_arguments[] =
+{
+@EXPECTED_ARGUMENTS@  0
+};
+
+int main(int argc, const char* argv[])
+{
+  const char** a = argv+1;
+  const char** e = expected_arguments;
+  (void)argc;
+  for(;*a && *e; ++a, ++e)
+    {
+    if(strcmp(*a, *e) != 0)
+      {
+      fprintf(stderr, "Argument [%s] does not match expected [%s].\n",
+              *a, *e);
+      return 1;
+      }
+    else
+      {
+      /*printf("[%s]\n", *a);*/
+      }
+    }
+  if(*a || *e)
+    {
+    fprintf(stderr, "Number of arguments does not match expected.\n");
+    return 1;
+    }
+  printf("Command line escapes work!\n");
+  return 0;
+}

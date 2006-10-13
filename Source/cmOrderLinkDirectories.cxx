@@ -3,11 +3,60 @@
 #include "cmsys/RegularExpression.hxx"
 #include <ctype.h>
 
+//#define CM_ORDER_LINK_DIRECTORIES_DEBUG
 
 //-------------------------------------------------------------------
 cmOrderLinkDirectories::cmOrderLinkDirectories()
 {
+  this->StartLinkType = LinkUnknown;
+  this->LinkTypeEnabled = false;
   this->Debug = false;
+}
+
+//-------------------------------------------------------------------
+void
+cmOrderLinkDirectories
+::SetLinkTypeInformation(LinkType start_link_type,
+                         const char* static_link_type_flag,
+                         const char* shared_link_type_flag)
+{
+  // We can support link type switching only if all needed flags are
+  // known.
+  this->StartLinkType = start_link_type;
+  if(static_link_type_flag && *static_link_type_flag &&
+     shared_link_type_flag && *shared_link_type_flag)
+    {
+    this->LinkTypeEnabled = true;
+    this->StaticLinkTypeFlag = static_link_type_flag;
+    this->SharedLinkTypeFlag = shared_link_type_flag;
+    }
+  else
+    {
+    this->LinkTypeEnabled = false;
+    this->StaticLinkTypeFlag = "";
+    this->SharedLinkTypeFlag = "";
+    }
+}
+
+//-------------------------------------------------------------------
+void cmOrderLinkDirectories::SetCurrentLinkType(LinkType lt)
+{
+  if(this->CurrentLinkType != lt)
+    {
+    this->CurrentLinkType = lt;
+
+    if(this->LinkTypeEnabled)
+      {
+      switch(this->CurrentLinkType)
+        {
+        case LinkStatic:
+          this->LinkItems.push_back(this->StaticLinkTypeFlag); break;
+        case LinkShared:
+          this->LinkItems.push_back(this->SharedLinkTypeFlag); break;
+        default: break;
+        }
+      }
+    }
 }
 
 //-------------------------------------------------------------------
@@ -126,16 +175,76 @@ std::string cmOrderLinkDirectories::NoCaseExpression(const char* str)
 void cmOrderLinkDirectories::CreateRegularExpressions()
 {
   this->SplitFramework.compile("(.*)/(.*)\\.framework$");
-  cmStdString libext = "(";
-  bool first = true;
-  for(std::vector<cmStdString>::iterator i = this->LinkExtensions.begin();
-      i != this->LinkExtensions.end(); ++i)
+
+  // Compute a regex to match link extensions.
+  cmStdString libext = this->CreateExtensionRegex(this->LinkExtensions);
+
+  // Create regex to remove any library extension.
+  cmStdString reg("(.*)");
+  reg += libext;
+  this->RemoveLibraryExtension.compile(reg.c_str());
+
+  // Create a regex to match a library name.  Match index 1 will be
+  // the prefix if it exists and empty otherwise.  Match index 2 will
+  // be the library name.  Match index 3 will be the library
+  // extension.
+  reg = "^(";
+  for(std::set<cmStdString>::iterator p = this->LinkPrefixes.begin();
+      p != this->LinkPrefixes.end(); ++p)
     {
-    if(!first)
+    reg += *p;
+    reg += "|";
+    }
+  reg += ")";
+  reg += "([^/]*)";
+
+  // Create a regex to match any library name.
+  cmStdString reg_any = reg;
+  reg_any += libext;
+#ifdef CM_ORDER_LINK_DIRECTORIES_DEBUG
+  fprintf(stderr, "any regex [%s]\n", reg_any.c_str());
+#endif
+  this->ExtractAnyLibraryName.compile(reg_any.c_str());
+
+  // Create a regex to match static library names.
+  if(!this->StaticLinkExtensions.empty())
+    {
+    cmStdString reg_static = reg;
+    reg_static += this->CreateExtensionRegex(this->StaticLinkExtensions);
+#ifdef CM_ORDER_LINK_DIRECTORIES_DEBUG
+  fprintf(stderr, "static regex [%s]\n", reg_static.c_str());
+#endif
+    this->ExtractStaticLibraryName.compile(reg_static.c_str());
+    }
+
+  // Create a regex to match shared library names.
+  if(!this->SharedLinkExtensions.empty())
       {
-      libext += "|";
+    cmStdString reg_shared = reg;
+    reg_shared += this->CreateExtensionRegex(this->SharedLinkExtensions);
+#ifdef CM_ORDER_LINK_DIRECTORIES_DEBUG
+  fprintf(stderr, "shared regex [%s]\n", reg_shared.c_str());
+#endif
+    this->ExtractSharedLibraryName.compile(reg_shared.c_str());
       }
-    first = false;
+}
+
+//-------------------------------------------------------------------
+std::string
+cmOrderLinkDirectories::CreateExtensionRegex(
+  std::vector<cmStdString> const& exts)
+{
+  // Build a list of extension choices.
+  cmStdString libext = "(";
+  const char* sep = "";
+  for(std::vector<cmStdString>::const_iterator i = exts.begin();
+      i != exts.end(); ++i)
+    {
+    // Separate this choice from the previous one.
+    libext += sep;
+    sep = "|";
+
+    // Store this extension choice with the "." escaped.
     libext += "\\";
 #if defined(_WIN32) && !defined(__CYGWIN__)
     libext += this->NoCaseExpression(i->c_str());
@@ -143,41 +252,74 @@ void cmOrderLinkDirectories::CreateRegularExpressions()
     libext += *i;
 #endif
     }
-  libext += ").*";
-  cmStdString reg("(.*)");
-  reg += libext;
-  this->RemoveLibraryExtension.compile(reg.c_str());
-  reg = "";
-  if(this->LinkPrefix.size())
-    {
-    reg = "^";
-    reg += this->LinkPrefix;
-    }
-  reg += "([^/]*)";
-  reg += libext;
-  this->ExtractBaseLibraryName.compile(reg.c_str());
-  reg = "([^/]*)";
-  reg += libext;
-  this->ExtractBaseLibraryNameNoPrefix.compile(reg.c_str());
-}
 
+  // Finish the list.
+  libext += ").*";
+  return libext;
+}
 
 //-------------------------------------------------------------------
 void cmOrderLinkDirectories::PrepareLinkTargets()
 {
-  for(std::vector<cmStdString>::iterator i = this->LinkItems.begin();
-      i != this->LinkItems.end(); ++i)
+  std::vector<cmStdString> originalLinkItems = this->LinkItems;
+  this->LinkItems.clear();
+  this->CurrentLinkType = this->StartLinkType;
+  for(std::vector<cmStdString>::iterator i = originalLinkItems.begin();
+      i != originalLinkItems.end(); ++i)
     {
-    // separate the library name from libfoo.a or foo.a
-    if(this->ExtractBaseLibraryName.find(*i))
+    // Parse out the prefix, base, and suffix components of the
+    // library name.  If the name matches that of a shared or static
+    // library then set the link type accordingly.
+    //
+    // Search for shared library names first because some platforms
+    // have shared libraries with names that match the static library
+    // pattern.  For example cygwin and msys use the convention
+    // libfoo.dll.a for import libraries and libfoo.a for static
+    // libraries.  On AIX a library with the name libfoo.a can be
+    // shared!
+    if(this->ExtractSharedLibraryName.find(*i))
       {
-      *i = this->ExtractBaseLibraryName.match(1);
+#ifdef CM_ORDER_LINK_DIRECTORIES_DEBUG
+      fprintf(stderr, "shared regex matched [%s] [%s] [%s]\n",
+              this->ExtractSharedLibraryName.match(1).c_str(),
+              this->ExtractSharedLibraryName.match(2).c_str(),
+              this->ExtractSharedLibraryName.match(3).c_str());
+#endif
+      this->SetCurrentLinkType(LinkShared);
+      this->LinkItems.push_back(this->ExtractSharedLibraryName.match(2));
       }
-    else if(this->ExtractBaseLibraryNameNoPrefix.find(*i))
+    else if(this->ExtractStaticLibraryName.find(*i))
+    {
+#ifdef CM_ORDER_LINK_DIRECTORIES_DEBUG
+      fprintf(stderr, "static regex matched [%s] [%s] [%s]\n",
+              this->ExtractStaticLibraryName.match(1).c_str(),
+              this->ExtractStaticLibraryName.match(2).c_str(),
+              this->ExtractStaticLibraryName.match(3).c_str());
+#endif
+      this->SetCurrentLinkType(LinkStatic);
+      this->LinkItems.push_back(this->ExtractStaticLibraryName.match(2));
+      }
+    else if(this->ExtractAnyLibraryName.find(*i))
       {
-      *i = this->ExtractBaseLibraryNameNoPrefix.match(1);
+#ifdef CM_ORDER_LINK_DIRECTORIES_DEBUG
+      fprintf(stderr, "any regex matched [%s] [%s] [%s]\n",
+              this->ExtractAnyLibraryName.match(1).c_str(),
+              this->ExtractAnyLibraryName.match(2).c_str(),
+              this->ExtractAnyLibraryName.match(3).c_str());
+#endif
+      this->SetCurrentLinkType(this->StartLinkType);
+      this->LinkItems.push_back(this->ExtractAnyLibraryName.match(2));
+      }
+    else
+      {
+      this->SetCurrentLinkType(this->StartLinkType);
+      this->LinkItems.push_back(*i);
       }
     }
+
+  // Restore the original linking type so system runtime libraries are
+  // linked properly.
+  this->SetCurrentLinkType(this->StartLinkType);
 }
 
 //-------------------------------------------------------------------
@@ -318,6 +460,9 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
   for(unsigned int i=0; i < this->RawLinkItems.size(); ++i)
     {
     bool framework = false;
+#ifdef CM_ORDER_LINK_DIRECTORIES_DEBUG
+    fprintf(stderr, "Raw link item [%s]\n", this->RawLinkItems[i].c_str());
+#endif
     if(cmSystemTools::FileIsFullPath(this->RawLinkItems[i].c_str()))
       {
       if(cmSystemTools::FileIsDirectory(this->RawLinkItems[i].c_str()))
@@ -378,6 +523,9 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
         aLib.File = file;
         aLib.Path = dir;
         this->FullPathLibraries[aLib.FullPath] = aLib;
+#ifdef CM_ORDER_LINK_DIRECTORIES_DEBUG
+        fprintf(stderr, "Storing item [%s]\n", file.c_str());
+#endif
         this->LinkItems.push_back(file);
         }
       }

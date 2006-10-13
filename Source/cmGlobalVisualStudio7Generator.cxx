@@ -216,7 +216,6 @@ void cmGlobalVisualStudio7Generator::Generate()
 {
   // add a special target that depends on ALL projects for easy build
   // of one configuration only.
-  const char* no_output = 0;
   const char* no_working_dir = 0;
   std::vector<std::string> no_depends;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
@@ -227,7 +226,7 @@ void cmGlobalVisualStudio7Generator::Generate()
     if(gen.size())
       {
       gen[0]->GetMakefile()->
-        AddUtilityCommand("ALL_BUILD", false, no_output, no_depends,
+        AddUtilityCommand("ALL_BUILD", false, no_depends,
                           no_working_dir,
                           "echo", "Build all projects");
       std::string cmake_command = 
@@ -538,13 +537,13 @@ void cmGlobalVisualStudio7Generator
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string name = cmds[0][0];
         this->WriteProjectConfigurations(fout, name.c_str(), 
-                                         l->second.IsInAll());
+                                         l->second.GetType());
         }
       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
         this->WriteProjectConfigurations(fout, si->c_str(), 
-                                         l->second.IsInAll());
+                                         l->second.GetType());
         ++si;
         }
       }
@@ -555,6 +554,21 @@ void cmGlobalVisualStudio7Generator
   this->WriteSLNFooter(fout);
 }
 
+//----------------------------------------------------------------------------
+std::string
+cmGlobalVisualStudio7Generator::ConvertToSolutionPath(const char* path)
+{
+  // Convert to backslashes.  Do not use ConvertToOutputPath because
+  // we will add quoting ourselves, and we know these projects always
+  // use windows slashes.
+  std::string d = path;
+  std::string::size_type pos = 0;
+  while((pos = d.find('/', pos)) != d.npos)
+    {
+    d[pos++] = '\\';
+    }
+  return d;
+}
 
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 
@@ -563,10 +577,10 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
                                const char* dspname,
                                const char* dir, cmTarget&)
 {
-  std::string d = cmSystemTools::ConvertToOutputPath(dir);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << dspname << "\", \""
-       << d << "\\" << dspname << ".vcproj\", \"{"
+       << this->ConvertToSolutionPath(dir)
+       << "\\" << dspname << ".vcproj\", \"{"
        << this->GetGUID(dspname) << "}\"\nEndProject\n";
 }
 
@@ -652,9 +666,8 @@ cmGlobalVisualStudio7Generator
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
-::WriteProjectConfigurations(std::ostream& fout, 
-                                                           const char* name, 
-                                                           bool in_all_build)
+::WriteProjectConfigurations(std::ostream& fout, const char* name,
+                             int targetType)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -662,7 +675,7 @@ void cmGlobalVisualStudio7Generator
     {
     fout << "\t\t{" << guid << "}." << *i 
          << ".ActiveCfg = " << *i << "|Win32\n";
-    if (in_all_build)
+    if(targetType != cmTarget::GLOBAL_TARGET)
       {
       fout << "\t\t{" << guid << "}." << *i 
            << ".Build.0 = " << *i << "|Win32\n";
@@ -683,7 +696,7 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
   std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << name << "\", \""
-       << d << "\", \"{"
+       << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)
        << "}\"\n";
   fout << "EndProject\n";

@@ -27,6 +27,7 @@
 // include configure generated  header to define CMAKE_NO_ANSI_STREAM_HEADERS,
 // CMAKE_NO_STD_NAMESPACE, and other macros.
 #include "cmConfigure.h"
+#include <cmsys/Configure.hxx>
 
 #define CMake_VERSION \
   CMAKE_TO_STRING(CMake_VERSION_MAJOR) "." \
@@ -40,7 +41,12 @@
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )
 #pragma warning ( disable : 4503 )
+#pragma warning ( disable : 4512 ) /* operator=() could not be generated */
 #define CMAKE_NO_ANSI_FOR_SCOPE
+#endif
+
+#ifdef __BORLANDC__
+#pragma warn -8030 /* Temporary used for parameter */
 #endif
 
 #ifdef __ICL
@@ -66,6 +72,19 @@ public:
     Ref6 = sizeof(cfsetispeed(0,0))
   };
 };
+#endif
+
+// Include stream compatibility layer from KWSys.
+// This is needed to work with large file support
+// on some platforms whose stream operators do not
+// support the large integer types.
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include <cmsys/IOStream.hxx>
+#endif
+
+// Avoid warnings in system headers.
+#if defined(_MSC_VER)
+# pragma warning (push,1)
 #endif
 
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
@@ -96,6 +115,10 @@ public:
 #include <list>
 #include <set>
 #include <deque>
+
+#if defined(_MSC_VER)
+# pragma warning(pop)
+#endif
 
 // include the "c" string header
 #include <string.h>

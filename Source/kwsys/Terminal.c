@@ -144,14 +144,17 @@ static const char* kwsysTerminalVT100Names[] =
   "console",
   "cygwin",
   "konsole",
+  "konsole-256color",
   "linux",
   "msys",
   "rxvt",
   "rxvt-unicode",
   "screen",
+  "screen-256color",
   "vt100",
   "xterm",
   "xterm-color",
+  "xterm-256color",
   0
 };
 

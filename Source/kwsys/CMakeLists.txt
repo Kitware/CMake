@@ -123,10 +123,12 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_RegularExpression 1)
   SET(KWSYS_USE_Registry 1)
+  SET(KWSYS_USE_System 1)
   SET(KWSYS_USE_SystemTools 1)
   SET(KWSYS_USE_CommandLineArguments 1)
   SET(KWSYS_USE_FundamentalType 1)
   SET(KWSYS_USE_Terminal 1)
+  SET(KWSYS_USE_IOStream 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
 #-----------------------------------------------------------------------------
@@ -141,6 +143,10 @@ IF(KWSYS_STANDALONE)
     ENABLE_TESTING()
   ENDIF(BUILD_TESTING)
 ENDIF(KWSYS_STANDALONE)
+
+# Include helper macros.
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformTests.cmake)
+INCLUDE(CheckTypeSize)
 
 # Do full dependency headers.
 INCLUDE_REGULAR_EXPRESSION("^.*$")
@@ -262,13 +268,35 @@ IF(NOT CMAKE_COMPILER_IS_GNUCXX)
       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no_implicit_include")
     ENDIF(NOT KWSYS_CXX_FLAGS_HAVE_NO_IMPLICIT_INCLUDE)
   ENDIF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
+  IF(CMAKE_SYSTEM MATCHES "HP-UX")
+    SET(KWSYS_PLATFORM_CXX_TEST_EXTRA_FLAGS "+p")
+  ENDIF(CMAKE_SYSTEM MATCHES "HP-UX")
 ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
+
+#-----------------------------------------------------------------------------
+# Configure Large File Support.
+SET(KWSYS_LFS_REQUESTED 1)
+SET(KWSYS_LFS_AVAILABLE 0)
+IF(KWSYS_LFS_REQUESTED)
+  # Large File Support is requested.
+  SET(KWSYS_LFS_REQUESTED 1)
+
+  # Check for large file support.
+  KWSYS_PLATFORM_CXX_TEST_RUN(KWSYS_LFS_WORKS
+    "Checking for Large File Support" DIRECT)
+
+  IF(KWSYS_LFS_WORKS)
+    SET(KWSYS_LFS_AVAILABLE 1)
+  ENDIF(KWSYS_LFS_WORKS)
+ELSE(KWSYS_LFS_REQUESTED)
+  # Large File Support is not requested.
+  SET(KWSYS_LFS_REQUESTED 0)
+ENDIF(KWSYS_LFS_REQUESTED)
 
 #-----------------------------------------------------------------------------
 # Configure the standard library header wrappers based on compiler's
 # capabilities and parent project's request.  Enforce 0/1 as only
 # possible values for configuration into Configure.hxx.
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformCxxTests.cmake)
 
 KWSYS_PLATFORM_CXX_TEST(KWSYS_STL_HAVE_STD
   "Checking whether STL classes are in std namespace" DIRECT)
@@ -371,7 +399,6 @@ ENDIF(UNIX)
 
 IF(KWSYS_USE_FundamentalType)
   # Determine type sizes.
-  INCLUDE(CheckTypeSize)
   CHECK_TYPE_SIZE("char"      KWSYS_SIZEOF_CHAR)
   CHECK_TYPE_SIZE("short"     KWSYS_SIZEOF_SHORT)
   CHECK_TYPE_SIZE("int"       KWSYS_SIZEOF_INT)
@@ -421,25 +448,27 @@ IF(KWSYS_USE_FundamentalType)
   ENDIF(KWSYS_USE___INT64)
 
   # Check signedness of "char" type.
-  IF("KWSYS_CHAR_IS_SIGNED" MATCHES "^KWSYS_CHAR_IS_SIGNED$")
-    MESSAGE(STATUS "Checking signedness of char")
-    TRY_RUN(KWSYS_CHAR_IS_SIGNED KWSYS_CHAR_IS_SIGNED_COMPILED
-      ${CMAKE_CURRENT_BINARY_DIR}
-      ${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformCxxTests.cxx
-      COMPILE_DEFINITIONS -DTEST_KWSYS_CHAR_IS_SIGNED)
-    IF(KWSYS_CHAR_IS_SIGNED_COMPILED)
-      IF(KWSYS_CHAR_IS_SIGNED)
-        MESSAGE(STATUS "Checking signedness of char -- signed")
-        SET(KWSYS_CHAR_IS_SIGNED 1 CACHE INTERNAL "Whether char is signed.")
-      ELSE(KWSYS_CHAR_IS_SIGNED)
-        MESSAGE(STATUS "Checking signedness of char -- unsigned")
-        SET(KWSYS_CHAR_IS_SIGNED 0 CACHE INTERNAL "Whether char is signed.")
-      ENDIF(KWSYS_CHAR_IS_SIGNED)
-    ELSE(KWSYS_CHAR_IS_SIGNED_COMPILED)
-      MESSAGE(FATAL_ERROR "Checking signedness of char -- failed")
-    ENDIF(KWSYS_CHAR_IS_SIGNED_COMPILED)
-  ENDIF("KWSYS_CHAR_IS_SIGNED" MATCHES "^KWSYS_CHAR_IS_SIGNED$")
+  KWSYS_PLATFORM_CXX_TEST_RUN(KWSYS_CHAR_IS_SIGNED
+    "Checking whether char is signed" DIRECT)
 ENDIF(KWSYS_USE_FundamentalType)
+
+IF(KWSYS_USE_IOStream)
+  # Determine whether iostreams support long long.
+  CHECK_TYPE_SIZE("long long" KWSYS_SIZEOF_LONG_LONG)
+  IF(KWSYS_SIZEOF_LONG_LONG)
+    SET(KWSYS_PLATFORM_CXX_TEST_DEFINES
+      -DKWSYS_IOS_USE_ANSI=${KWSYS_IOS_USE_ANSI}
+      -DKWSYS_IOS_HAVE_STD=${KWSYS_IOS_HAVE_STD})
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAS_ISTREAM_LONG_LONG
+      "Checking if istream supports long long" DIRECT)
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAS_OSTREAM_LONG_LONG
+      "Checking if ostream supports long long" DIRECT)
+    SET(KWSYS_PLATFORM_CXX_TEST_DEFINES)
+  ELSE(KWSYS_SIZEOF_LONG_LONG)
+    SET(KWSYS_IOS_HAS_ISTREAM_LONG_LONG 0)
+    SET(KWSYS_IOS_HAS_OSTREAM_LONG_LONG 0)
+  ENDIF(KWSYS_SIZEOF_LONG_LONG)
+ENDIF(KWSYS_USE_IOStream)
 
 IF(KWSYS_NAMESPACE MATCHES "^kwsys$")
   SET(KWSYS_NAME_IS_KWSYS 1)
@@ -472,8 +501,25 @@ INCLUDE_DIRECTORIES(${KWSYS_HEADER_ROOT})
 # Create STL header wrappers to block warnings in the STL headers and
 # give standard names by which they may be included.
 SET(KWSYS_STL_HEADER_EXTRA_string 1)
-FOREACH(header algorithm deque iterator list map numeric queue set stack string
-               utility vector memory functional)
+FOREACH(header
+  algorithm
+  deque
+  exception
+  functional
+  iterator
+  list
+  map
+  memory
+  new
+  numeric
+  queue
+  set
+  stack
+  stdexcept
+  string
+  utility
+  vector
+  )
   # Configure the header wrapper.
   SET(KWSYS_STL_HEADER "${header}")
   IF(KWSYS_STL_HEADER_EXTRA_${header})
@@ -552,9 +598,15 @@ IF(KWSYS_USE_Glob)
   SET(KWSYS_USE_SystemTools 1)
   SET(KWSYS_USE_RegularExpression 1)
 ENDIF(KWSYS_USE_Glob)
+IF(KWSYS_USE_Process)
+  SET(KWSYS_USE_System 1)
+ENDIF(KWSYS_USE_Process)
 
 # Add selected C++ classes.
-SET(cppclasses Directory DynamicLoader Glob RegularExpression SystemTools CommandLineArguments Registry)
+SET(cppclasses
+  Directory DynamicLoader Glob RegularExpression SystemTools
+  CommandLineArguments Registry IOStream
+  )
 FOREACH(cpp ${cppclasses})
   IF(KWSYS_USE_${cpp})
     SET(KWSYS_CLASSES ${KWSYS_CLASSES} ${cpp})
@@ -562,7 +614,7 @@ FOREACH(cpp ${cppclasses})
 ENDFOREACH(cpp)
 
 # Add selected C components.
-FOREACH(c Process Base64 FundamentalType Terminal)
+FOREACH(c Process Base64 FundamentalType Terminal System)
   IF(KWSYS_USE_${c})
     SET(KWSYS_H_FILES ${KWSYS_H_FILES} ${c})
   ENDIF(KWSYS_USE_${c})
@@ -586,11 +638,20 @@ IF(KWSYS_USE_Process)
   ELSE(NOT UNIX)
     # Use the UNIX implementation.
     SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessUNIX.c)
+
+    # Help ProcessUNIX.c compile properly on all platforms.
+    KWSYS_PLATFORM_C_TEST(KWSYS_C_HAS_PTRDIFF_T
+      "Checking whether C compiler has ptrdiff_t in stddef.h" DIRECT)
+    KWSYS_PLATFORM_C_TEST(KWSYS_C_HAS_SSIZE_T
+      "Checking whether C compiler has ssize_t in unistd.h" DIRECT)
+    SET_SOURCE_FILES_PROPERTIES(ProcessUNIX.c PROPERTIES
+      COMPILE_FLAGS "-DKWSYS_C_HAS_PTRDIFF_T=${KWSYS_C_HAS_PTRDIFF_T} -DKWSYS_C_HAS_SSIZE_T=${KWSYS_C_HAS_SSIZE_T}"
+      )
   ENDIF(NOT UNIX)
 ENDIF(KWSYS_USE_Process)
 
 # Add selected C sources.
-FOREACH(c Base64 Terminal)
+FOREACH(c Base64 Terminal System)
   IF(KWSYS_USE_${c})
     SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ${c}.c)
   ENDIF(KWSYS_USE_${c})

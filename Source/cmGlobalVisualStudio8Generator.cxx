@@ -75,7 +75,6 @@ void cmGlobalVisualStudio8Generator::Generate()
 {
   // Add a special target on which all other targets depend that
   // checks the build system and optionally re-runs CMake.
-  const char* no_output = 0;
   const char* no_working_directory = 0;
   std::vector<std::string> no_depends;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
@@ -90,10 +89,10 @@ void cmGlobalVisualStudio8Generator::Generate()
         static_cast<cmLocalVisualStudio7Generator*>(generators[0]);
       cmMakefile* mf = lg->GetMakefile();
       std::string cmake_command = mf->GetRequiredDefinition("CMAKE_COMMAND");
+      cmCustomCommandLines noCommandLines;
       mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, true,
-                            no_output, no_depends,
-                            no_working_directory,
-                            "echo", "Checking build system");
+                            no_working_directory, no_depends,
+                            noCommandLines);
       cmTarget* tgt = mf->FindTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
       if(!tgt)
         {
@@ -130,12 +129,12 @@ void cmGlobalVisualStudio8Generator::Generate()
         std::string argH = "-H";
         argH += lg->Convert(mf->GetHomeDirectory(),
                             cmLocalGenerator::START_OUTPUT,
-                            cmLocalGenerator::SHELL, true);
+                            cmLocalGenerator::UNCHANGED, true);
         commandLine.push_back(argH);
         std::string argB = "-B";
         argB += lg->Convert(mf->GetHomeOutputDirectory(),
                             cmLocalGenerator::START_OUTPUT,
-                            cmLocalGenerator::SHELL, true);
+                            cmLocalGenerator::UNCHANGED, true);
         commandLine.push_back(argB);
         cmCustomCommandLines commandLines;
         commandLines.push_back(commandLine);
@@ -228,8 +227,8 @@ cmGlobalVisualStudio8Generator
 //----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio8Generator
-::WriteProjectConfigurations(std::ostream& fout,
-                             const char* name, bool in_all_build)
+::WriteProjectConfigurations(std::ostream& fout, const char* name,
+                             int targetType)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -238,7 +237,7 @@ cmGlobalVisualStudio8Generator
     fout << "\t\t{" << guid << "}." << *i 
          << "|" << this->PlatformName << ".ActiveCfg = " 
            << *i << "|" << this->PlatformName << "\n";
-    if (in_all_build)
+    if(targetType != cmTarget::GLOBAL_TARGET)
       {
       fout << "\t\t{" << guid << "}." << *i 
            << "|" << this->PlatformName << ".Build.0 = " 

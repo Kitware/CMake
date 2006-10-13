@@ -68,10 +68,12 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.dvi
   )
 
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.h
-  DEPENDS ${PROJECT_BINARY_DIR}/doc1.dvi
   COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1.dvi to doc1temp.h."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1.dvi
                                    ${PROJECT_BINARY_DIR}/doc1temp.h
+  )
+ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.h APPEND
+  DEPENDS ${PROJECT_BINARY_DIR}/doc1.dvi
   COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1temp.h to doc1.h."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1temp.h
                                    ${PROJECT_BINARY_DIR}/doc1.h
@@ -96,6 +98,7 @@ ADD_CUSTOM_TARGET(TDocument ALL
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1.h
                                    ${PROJECT_BINARY_DIR}/doc2.h
   DEPENDS ${PROJECT_BINARY_DIR}/doc1.h
+  COMMENT "Running top-level TDocument commands"
   )
 
 # Setup a pre- and post-build pair that will fail if not run in the
@@ -164,3 +167,78 @@ TARGET_LINK_LIBRARIES(CustomCommand GeneratedHeader)
 # the CustomCommand executable really needs doc1.h
 ADD_DEPENDENCIES(CustomCommand TDocument)
 
+##############################################################################
+# Test non-trivial command line arguments in custom commands.
+SET(EXPECTED_ARGUMENTS)
+SET(CHECK_ARGS
+  c:/posix/path
+  c:\\windows\\path
+  'single-quotes'
+  single'quote
+  \"double-quotes\"
+  double\"quote
+  "\\;semi-colons\\;"
+  "semi\\;colon"
+  `back-ticks`
+  back`tick
+  "(parens)"
+  "(lparen"
+  "rparen)"
+  $dollar-signs$
+  dollar$sign
+  &ampersands&
+  amper&sand
+  @two-ats@
+  one@at
+  "c:/posix/path/with space"
+  "c:\\windows\\path\\with space"
+  "'single quotes with space'"
+  "single'quote with space"
+  "\"double-quotes with space\""
+  "double\"quote with space"
+  "\\;semi-colons with space\\;"
+  "semi\\;colon with space"
+  "`back-ticks` with space"
+  "back`tick with space"
+  "(parens) with space"
+  "(lparen with space"
+  "rparen) with space"
+  "$dollar-signs$ with space"
+  "dollar$sign with space"
+  "&ampersands& with space"
+  "amper&sand with space"
+  "@two-ats@ with space"
+  "one@at with space"
+  )
+FOREACH(arg ${CHECK_ARGS})
+  SET(ARG "${arg}")
+  STRING(REGEX REPLACE "\\\\" "\\\\\\\\" ARG "${ARG}")
+  STRING(REGEX REPLACE "\"" "\\\\\"" ARG "${ARG}")
+  SET(EXPECTED_ARGUMENTS
+    "${EXPECTED_ARGUMENTS}  \"${ARG}\",
+")
+ENDFOREACH(arg)
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/check_command_line.c.in
+               ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c
+               @ONLY IMMEDIATE)
+ADD_EXECUTABLE(check_command_line
+  ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c)
+ADD_CUSTOM_COMMAND(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/command_line_check
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
+  ${CHECK_ARGS}
+  VERBATIM
+  COMMENT "Checking custom command line escapes (single'quote)"
+  )
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/command_line_check
+  PROPERTIES SYMBOLIC 1)
+ADD_CUSTOM_TARGET(do_check_command_line ALL
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/command_line_check
+  COMMAND ${CMAKE_COMMAND} -E echo "Checking custom target command escapes"
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
+  ${CHECK_ARGS}
+  VERBATIM
+  COMMENT "Checking custom target command line escapes ($dollar-signs$)"
+  )
+ADD_DEPENDENCIES(do_check_command_line check_command_line)

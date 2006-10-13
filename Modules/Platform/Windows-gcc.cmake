@@ -34,3 +34,14 @@ SET(CMAKE_C_CREATE_SHARED_LIBRARY
   "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> <OBJECTS> <LINK_LIBRARIES>")
 SET(CMAKE_CXX_CREATE_SHARED_LIBRARY
   "<CMAKE_CXX_COMPILER> <CMAKE_SHARED_LIBRARY_CXX_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> <OBJECTS> <LINK_LIBRARIES>")
+
+# Initialize C link type selection flags.  These flags are used when
+# building a shared library, shared module, or executable that links
+# to other libraries to select whether to use the static or shared
+# versions of the libraries.
+IF(MSYS OR MINGW)
+  FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
+    SET(CMAKE_${type}_LINK_STATIC_C_FLAGS "-Wl,-Bstatic")
+    SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-Bdynamic")
+  ENDFOREACH(type)
+ENDIF(MSYS OR MINGW)

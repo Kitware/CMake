@@ -123,6 +123,7 @@ public:
   void AddLocalGenerator(cmLocalGenerator *lg);
 
   void AddInstallComponent(const char* component);
+  void EnableInstallTarget();
   
   static int s_TryCompileTimeout;
   
@@ -155,6 +156,10 @@ public:
   /** Get whether the generator should use a script for link commands.  */
   bool GetUseLinkScript() { return this->UseLinkScript; }
 
+  /** Get whether the generator should produce special marks on rules
+      producing symbolic (non-file) outputs.  */
+  bool GetNeedSymbolicMark() { return this->NeedSymbolicMark; }
+
   /*
    * Determine what program to use for building the project.
    */
@@ -186,6 +191,7 @@ public:
 
   virtual const char* GetAllTargetName()          { return "ALL_BUILD"; }
   virtual const char* GetInstallTargetName()      { return "INSTALL"; }
+  virtual const char* GetInstallLocalTargetName() { return 0; }
   virtual const char* GetPreinstallTargetName()   { return 0; }
   virtual const char* GetTestTargetName()         { return "RUN_TESTS"; }
   virtual const char* GetPackageTargetName()      { return "PACKAGE"; }
@@ -208,6 +214,7 @@ protected:
     const cmCustomCommandLines* commandLines,
     std::vector<std::string> depends, bool depends_on_all = false);
 
+  bool NeedSymbolicMark;
   bool UseLinkScript;
   bool ForceUnixPaths;
   bool ToolSupportsColor;
@@ -220,6 +227,7 @@ protected:
 
   // Set of named installation components requested by the project.
   std::set<cmStdString> InstallComponents;
+  bool InstallTargetEnabled;
 
   // Manifest of all targets that will be built for each configuration.
   // This is computed just before local generators generate.

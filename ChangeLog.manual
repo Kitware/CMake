@@ -1,3 +1,112 @@
+Changes in CMake 2.4.4
+
+* CMake Version numbers on module directory
+
+* elseif added
+
+* Fix docs in CheckCSourceCompiles CheckCXXSourceCompiles and diagnostic 
+  output.
+
+* added Check(C/CXX)SourceRuns.cmake, CheckCXXCompilerFlag.cmake, Check
+
+* add static and shared flags to make sure the specified versions of 
+  libraries are used with -static -lfoo -shared -lbar
+
+*  Search for the compiler only once and store a full path. avoids problems
+  with PATH changes in cmake re-runs.
+
+* make sure manifest files are generated with VS 8
+
+* added FindASPELL.cmake, FindBZip2.cmake FindHPELL.cmake, FindJasper.cmake
+  FindLibXml2.cmake, FindLibXslt.cmake, FindOpenSSL.cmake
+
+* fix for bug#3646 GLUT not Glut for framework name
+
+* many fixes for FindKDE3.cmake
+
+* Better FindPNG that honors REQUIRED and looks in more places.
+
+* Support to find python 2.5
+
+* Find Qt3 better
+
+* Find Qt4 better and work with qmake and qmake-qt4 on the same machine.
+
+* Much better FindRuby.cmake
+
+* More stuff marked as advanced in FindTcl and FindSDL
+
+* FindwxWidgets runs shell script wx-config with sh
+
+* Support for cpack and vs8 install libraries
+
+* Darwin shared library create and Fortran now work
+
+* Support for isystem directories INCLUDE_DIRECTORIES (SYSTEM)
+
+* Targets in makefiles to create pre-processed files and assembly files
+  can be turned off with these variables:
+   CMAKE_SKIP_PREPROCESSED_SOURCE_RULES CMAKE_SKIP_ASSEMBLY_SOURCE_RULES
+
+* Support for QNX
+
+* Better default search paths for unix and FIND_* stuff
+
+* Use link /lib and not lib to create static libraries with MS
+
+* Useqt4 works with static qt4 and other fixes
+
+* UseSwig.cmake interface to add extra dependencies.
+
+* Added APPEND option to ADD_CUSTOM_COMMAND, Added VERBATIM option to 
+  ADD_CUSTOM_COMMAND and ADD_CUSTOM_TARGET
+
+* add NOT_IN_ALL option  for ADD_LIBRARY and ADD_EXECUTABLE
+
+* Fix automatic computation of binary path to work for subdirectories of out
+  of source directories.  This addresses bug#3592.
+
+* --debug-ouput to cmake that gives stack trace to message send error commands.
+  The stack trace is no longer there without it.
+
+* + can be in a variable
+
+* Do not replace @VAR@ syntax in list files.  This addresses bug #2722
+
+* much faster depend scanning
+
+* do depends on system include directories
+
+* Permission and install directory fixes
+
+* New target property <CONFIG>_LOCATION (Debug, Release, etc)
+
+* fix exclude from all in VS
+
+* fix code completion problem in KDevelop
+
+* Define MSYS when using msys generator
+
+* fix referencece to projects outside the build tree VS 7,8
+
+* Fix ZERO_CHECK to not always try and rebuild
+
+* Fix Xcode universal binary rebuild problem
+
+* add FILE_IS_NEWER to if command
+
+* Add OPTIONAL to INSTALL command fix bug@2922
+
+* add SORT and REVERSE to LIST command
+
+* fix for seg fault bug #3815
+
+* add SYBOLIC as a source file property see SET_SOURCE_FILES_PROPERTIES
+
+* fix ctest valgrind if no coverage is done
+
+* better message if bogus generator is specified.
+
 Changes in CMake 2.4.3
 
 * fix for 3557 - Under MSVC8 hardcoded TargetEnvironment for MIDL Compiler 

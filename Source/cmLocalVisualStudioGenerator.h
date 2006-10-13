@@ -35,8 +35,17 @@ public:
   virtual ~cmLocalVisualStudioGenerator();
 
 protected:
+
+  /** Construct a script from the given list of command lines.  */
+  std::string ConstructScript(const cmCustomCommandLines& commandLines,
+                              const char* workingDirectory,
+                              bool escapeOldStyle,
+                              bool escapeAllowMakeVars,
+                              const char* newline = "\n");
+
   // Safe object file name generation.
   void ComputeObjectNameRequirements(std::vector<cmSourceGroup> const&);
+  bool SourceFileCompiles(const cmSourceFile* sf);
   std::set<const cmSourceFile*> NeedObjectName;
 };
 

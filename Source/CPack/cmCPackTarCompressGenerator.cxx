@@ -26,19 +26,25 @@
 #include "cmCPackLog.h"
 
 #include <cmsys/SystemTools.hxx>
+#include <cmcompress/cmcompress.h>
+#include <libtar/libtar.h>
+#include <memory> // auto_ptr
+#include <fcntl.h>
+#include <errno.h>
 
-// Includes needed for implementation of RenameFile.  This is not in
-// system tools because it is not implemented robustly enough to move
-// files across directories.
-#ifdef _WIN32
-# include <windows.h>
-# include <sys/stat.h>
-#endif
+//----------------------------------------------------------------------
+class cmCPackTarCompressGeneratorForward
+{
+public:
+  static int GenerateHeader(cmCPackTarCompressGenerator* gg, std::ostream* os)
+    {
+    return gg->GenerateHeader(os);
+    }
+};
 
 //----------------------------------------------------------------------
 cmCPackTarCompressGenerator::cmCPackTarCompressGenerator()
 {
-  this->Compress = false;
 }
 
 //----------------------------------------------------------------------
@@ -47,21 +53,101 @@ cmCPackTarCompressGenerator::~cmCPackTarCompressGenerator()
 }
 
 //----------------------------------------------------------------------
+class cmCPackTarCompress_Data
+{
+public:
+  cmCPackTarCompress_Data(cmCPackTarCompressGenerator* gen) :
+    OutputStream(0), Generator(gen) {}
+  std::ostream* OutputStream;
+  cmCPackTarCompressGenerator* Generator;
+  cmcompress_stream CMCompressStream;
+};
+
+//----------------------------------------------------------------------
+extern "C" {
+  // For cmTar
+  int cmCPackTarCompress_Data_Open(void *client_data, const char* name,
+    int oflags, mode_t mode);
+  ssize_t cmCPackTarCompress_Data_Write(void *client_data, void *buff,
+    size_t n);
+  int cmCPackTarCompress_Data_Close(void *client_data);
+
+  // For cmCompress
+  int cmCPackTarCompress_Compress_Output(void* cdata, const char* data,
+    int len);
+}
+
+
+//----------------------------------------------------------------------
+int cmCPackTarCompress_Data_Open(void *client_data, const char* pathname,
+  int, mode_t)
+{
+  cmCPackTarCompress_Data *mydata = (cmCPackTarCompress_Data*)client_data;
+
+  if ( !cmcompress_compress_initialize(&mydata->CMCompressStream) )
+    {
+    return -1;
+    }
+
+  mydata->CMCompressStream.client_data = mydata;
+  mydata->CMCompressStream.output_stream = cmCPackTarCompress_Compress_Output;
+
+  cmGeneratedFileStream* gf = new cmGeneratedFileStream;
+  // Open binary
+  gf->Open(pathname, false, true);
+  mydata->OutputStream = gf;
+  if ( !*mydata->OutputStream )
+    {
+    return -1;
+    }
+
+  if ( !cmcompress_compress_start(&mydata->CMCompressStream) )
+    {
+    return -1;
+      }
+
+
+  if ( !cmCPackTarCompressGeneratorForward::GenerateHeader(
+      mydata->Generator,gf))
+    {
+    return -1;
+    }
+
+  return 0;
+}
+
+//----------------------------------------------------------------------
+ssize_t cmCPackTarCompress_Data_Write(void *client_data, void *buff, size_t n)
+{
+  cmCPackTarCompress_Data *mydata = (cmCPackTarCompress_Data*)client_data;
+
+  if ( !cmcompress_compress(&mydata->CMCompressStream, buff, n) )
+    {
+    return 0;
+    }
+  return n;
+}
+
+//----------------------------------------------------------------------
+int cmCPackTarCompress_Data_Close(void *client_data)
+{
+  cmCPackTarCompress_Data *mydata = (cmCPackTarCompress_Data*)client_data;
+
+  if ( !cmcompress_compress_finalize(&mydata->CMCompressStream) )
+      {
+    delete mydata->OutputStream;
+    return -1;
+      }
+
+  delete mydata->OutputStream;
+  mydata->OutputStream = 0;
+  return (0);
+}
+
+//----------------------------------------------------------------------
 int cmCPackTarCompressGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "1");
-  std::vector<std::string> path;
-  std::string pkgPath = cmSystemTools::FindProgram("compress", path, false);
-  if ( pkgPath.empty() )
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find Compress" << std::endl);
-    return 0;
-    }
-  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Found Compress program: "
-    << pkgPath.c_str()
-    << std::endl);
-
   return this->Superclass::InitializeInternal();
 }
 
@@ -69,101 +155,90 @@ int cmCPackTarCompressGenerator::InitializeInternal()
 int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {
-  std::string packageDirFileName
-    = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  packageDirFileName += ".tar";
-  std::string output;
-  int retVal = -1;
-  if ( !this->Superclass::CompressFiles(packageDirFileName.c_str(), 
-                                        toplevel, files) )
-    {
-    return 0;
-    }
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: " << toplevel << std::endl);
+  cmCPackTarCompress_Data mydata(this);
+  TAR *t;
+  char buf[TAR_MAXPATHLEN];
+  char pathname[TAR_MAXPATHLEN];
 
-  cmOStringStream dmgCmd1;
-  dmgCmd1 << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
-    << "\" \"" << packageDirFileName
-    << "\"";
-  retVal = -1;
-  int res = cmSystemTools::RunSingleCommand(dmgCmd1.str().c_str(), &output,
-    &retVal, toplevel, this->GeneratorVerbose, 0);
-  if ( !res || retVal )
-    {
-    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    tmpFile += "/CompressCompress.log";
-    cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << dmgCmd1.str().c_str() << std::endl
-      << "# Output:" << std::endl
-      << output.c_str() << std::endl;
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running Compress command: "
-      << dmgCmd1.str().c_str() << std::endl
-      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
-    return 0;
-    }
+  tartype_t compressType = {
+    (openfunc_t)cmCPackTarCompress_Data_Open,
+    (closefunc_t)cmCPackTarCompress_Data_Close,
+    (readfunc_t)0,
+    (writefunc_t)cmCPackTarCompress_Data_Write,
+    &mydata
+  };
 
-  std::string compressOutFile = packageDirFileName + ".Z";
-  if ( !cmSystemTools::SameFile(compressOutFile.c_str(), outFileName ) )
-    {
-    if ( !this->RenameFile(compressOutFile.c_str(), outFileName) )
+  // Ok, this libtar is not const safe. for now use auto_ptr hack
+  char* realName = new char[ strlen(outFileName) + 1 ];
+  std::auto_ptr<char> realNamePtr(realName);
+  strcpy(realName, outFileName);
+  int flags = O_WRONLY | O_CREAT;
+  if (tar_open(&t, realName,
+      &compressType,
+      flags, 0644,
+      (this->GeneratorVerbose?TAR_VERBOSE:0)
+      | 0) == -1)
       {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem renaming: \""
-        << compressOutFile.c_str() << "\" to \""
-        << outFileName << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): "
+      << strerror(errno) << std::endl);
+    return 0;
+      }
+
+  std::vector<std::string>::const_iterator fileIt;
+  for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
+      {
+    std::string rp = cmSystemTools::RelativePath(toplevel, fileIt->c_str());
+    strncpy(pathname, fileIt->c_str(), sizeof(pathname));
+    pathname[sizeof(pathname)-1] = 0;
+    strncpy(buf, rp.c_str(), sizeof(buf));
+    buf[sizeof(buf)-1] = 0;
+    if (tar_append_tree(t, pathname, buf) != 0)
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Problem with tar_append_tree(\"" << buf << "\", \""
+        << pathname << "\"): "
+        << strerror(errno) << std::endl);
+      tar_close(t);
       return 0;
       }
     }
+  if (tar_append_eof(t) != 0)
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_append_eof(): "
+      << strerror(errno) << std::endl);
+    tar_close(t);
+    return 0;
+      }
 
+  if (tar_close(t) != 0)
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_close(): "
+      << strerror(errno) << std::endl);
+    return 0;
+    }
   return 1;
 }
 
-//----------------------------------------------------------------------------
-int cmCPackTarCompressGenerator::RenameFile(const char* oldname,
-                                          const char* newname)
+//----------------------------------------------------------------------
+int cmCPackTarCompress_Compress_Output(void* client_data,
+  const char* data, int data_length)
 {
-#ifdef _WIN32
-  /* On Windows the move functions will not replace existing files.
-     Check if the destination exists.  */
-  struct stat newFile;
-  if(stat(newname, &newFile) == 0)
-    {
-    /* The destination exists.  We have to replace it carefully.  The
-       MoveFileEx function does what we need but is not available on
-       Win9x.  */
-    OSVERSIONINFO osv;
-    DWORD attrs;
+  cmcompress_stream *cstream = static_cast<cmcompress_stream*>(client_data);
+  cmCPackTarCompress_Data *mydata
+    = static_cast<cmCPackTarCompress_Data*>(cstream->client_data);
+  mydata->OutputStream->write(data, data_length);
 
-    /* Make sure the destination is not read only.  */
-    attrs = GetFileAttributes(newname);
-    if(attrs & FILE_ATTRIBUTE_READONLY)
-      {
-      SetFileAttributes(newname, attrs & ~FILE_ATTRIBUTE_READONLY);
-      }
-
-    /* Check the windows version number.  */
-    osv.dwOSVersionInfoSize = sizeof(osv);
-    GetVersionEx(&osv);
-    if(osv.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-      {
-      /* This is Win9x.  There is no MoveFileEx implementation.  We
-         cannot quite rename the file atomically.  Just delete the
-         destination and then move the file.  */
-      DeleteFile(newname);
-      return MoveFile(oldname, newname);
-      }
-    else
-      {
-      /* This is not Win9x.  Use the MoveFileEx implementation.  */
-      return MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING);
-      }
-    }
-  else
+  if ( !mydata->OutputStream )
     {
-    /* The destination does not exist.  Just move the file.  */
-    return MoveFile(oldname, newname);
+    return 0;
     }
-#else
-  /* On UNIX we have an OS-provided call to do this atomically.  */
-  return rename(oldname, newname) == 0;
-#endif
+  return data_length;
 }
 
+//----------------------------------------------------------------------
+int cmCPackTarCompressGenerator::GenerateHeader(std::ostream* os)
+{
+ (void)os;
+  return 1;
+}

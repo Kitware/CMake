@@ -215,8 +215,6 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
                     "The main recursive preinstall target", "preinstall",
                     depends, no_commands, true);
 
-  lg->WriteMakeVariables(makefileStream);
-
   // Write out the "special" stuff
   lg->WriteSpecialTargetsTop(makefileStream);
   
@@ -466,9 +464,6 @@ cmGlobalUnixMakefileGenerator3
   std::string makeTarget = lg->GetMakefile()->GetStartOutputDirectory();
   makeTarget += "/";
   makeTarget += pass;
-  makeTarget = lg->Convert(makeTarget.c_str(),
-                           cmLocalGenerator::HOME_OUTPUT,
-                           cmLocalGenerator::MAKEFILE);
 
   // The directory-level rule should depend on the target-level rules
   // for all targets in the directory.
@@ -504,9 +499,6 @@ cmGlobalUnixMakefileGenerator3
     std::string subdir = slg->GetMakefile()->GetStartOutputDirectory();
     subdir += "/";
     subdir += pass;
-    subdir = slg->Convert(subdir.c_str(),
-                          cmLocalGenerator::HOME_OUTPUT,
-                          cmLocalGenerator::MAKEFILE);
     depends.push_back(subdir);
     }
 
@@ -823,8 +815,10 @@ cmGlobalUnixMakefileGenerator3
                                cmLocalGenerator::FULL,
                                cmLocalGenerator::SHELL);
         //
+        std::set<cmStdString> emitted;
         progCmd << " " 
-                << this->GetTargetTotalNumberOfActions(t->second);
+                << this->GetTargetTotalNumberOfActions(t->second,
+                                                       emitted);
         commands.push_back(progCmd.str());
         }
         std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
@@ -895,18 +889,26 @@ cmGlobalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 int cmGlobalUnixMakefileGenerator3
-::GetTargetTotalNumberOfActions(cmTarget& target)
+::GetTargetTotalNumberOfActions(cmTarget& target, 
+                                std::set<cmStdString> &emitted)
 {
+  // do not double count
+  int result = 0;
+
+  if(emitted.insert(target.GetName()).second)
+    {
   cmLocalUnixMakefileGenerator3 *lg = 
     static_cast<cmLocalUnixMakefileGenerator3 *>
     (target.GetMakefile()->GetLocalGenerator());
-  int result = static_cast<int>(lg->ProgressFiles[target.GetName()].size());
+    result = static_cast<int>(lg->ProgressFiles[target.GetName()].size());
+    
   std::vector<cmTarget *>& depends = this->GetTargetDepends(target);
 
   std::vector<cmTarget *>::iterator i;
   for (i = depends.begin(); i != depends.end(); ++i)
     {
-    result += this->GetTargetTotalNumberOfActions(**i);
+      result += this->GetTargetTotalNumberOfActions(**i, emitted);
+      }
     }
   
   return result;
@@ -1231,13 +1233,12 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
             }
           }
         }
-      std::map<cmStdString,std::vector<cmTarget *> > const& objs =
-        lg->GetLocalObjectFiles();
-      for(std::map<cmStdString,std::vector<cmTarget *> >::const_iterator o =
-            objs.begin(); o != objs.end(); ++o)
+      std::vector<cmStdString> const& localHelp = lg->GetLocalHelp();
+      for(std::vector<cmStdString>::const_iterator o = localHelp.begin();
+          o != localHelp.end(); ++o)
         {
          path = "... ";
-         path += o->first;
+        path += *o;
          lg->AppendEcho(commands, path.c_str());
         }
       }

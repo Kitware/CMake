@@ -28,6 +28,8 @@
 #include "cmTest.h"
 #include "cmake.h"
 
+#include <cmsys/System.h>
+
 #include <ctype.h> // for isalpha
 
 cmLocalGenerator::cmLocalGenerator()
@@ -37,6 +39,8 @@ cmLocalGenerator::cmLocalGenerator()
   this->ExcludeFromAll = false;
   this->Parent = 0;
   this->WindowsShell = false;
+  this->WindowsVSIDE = false;
+  this->MSYSShell = false;
   this->IgnoreLibPrefix = false;
   this->UseRelativePaths = false;
   this->Configured = false;
@@ -397,7 +401,8 @@ void cmLocalGenerator::GenerateInstallRules()
   // Include install scripts from subdirectories.
   if(!this->Children.empty())
     {
-    fout << "# Include the install script for each subdirectory.\n";
+    fout << "IF(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
+    fout << "  # Include the install script for each subdirectory.\n";
     for(std::vector<cmLocalGenerator*>::const_iterator
           ci = this->Children.begin(); ci != this->Children.end(); ++ci)
       {
@@ -405,11 +410,12 @@ void cmLocalGenerator::GenerateInstallRules()
         {
         std::string odir = (*ci)->GetMakefile()->GetStartOutputDirectory();
         cmSystemTools::ConvertToUnixSlashes(odir);
-        fout << "INCLUDE(\"" <<  odir.c_str()
+        fout << "  INCLUDE(\"" <<  odir.c_str()
              << "/cmake_install.cmake\")" << std::endl;
         }
       }
     fout << "\n";
+    fout << "ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
     }
 
   // Record the install manifest.
@@ -618,6 +624,10 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   vars.Flags = flags.c_str();
   vars.LinkFlags = linkFlags.c_str();
 
+  std::string langFlags;
+  this->AddLanguageFlags(langFlags, llang, 0);
+  vars.LanguageCompileFlags = langFlags.c_str();
+  
   cmCustomCommandLines commandLines;
   std::vector<std::string> rules;
   rules.push_back(this->Makefile->GetRequiredDefinition(createRule.c_str()));
@@ -749,6 +759,20 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       return replaceValues.Source;
       }
     }
+  if(replaceValues.PreprocessedSource)
+    {
+    if(variable == "PREPROCESSED_SOURCE")
+      {
+      return replaceValues.PreprocessedSource;
+      }
+    }
+  if(replaceValues.AssemblySource)
+    {
+    if(variable == "ASSEMBLY_SOURCE")
+      {
+      return replaceValues.AssemblySource;
+      }
+    }
   if(replaceValues.Object)
     {
     if(variable == "OBJECT")
@@ -795,21 +819,29 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         targetQuoted = '\"';
         targetQuoted += replaceValues.Target;
         targetQuoted += '\"';
-        return targetQuoted;
         }
+      return targetQuoted;
       }
+    if(replaceValues.LanguageCompileFlags)
+      {
     if(variable == "LANGUAGE_COMPILE_FLAGS")
       {
       return replaceValues.LanguageCompileFlags;
       }
+      }
+    if(replaceValues.Target)
+      {
     if(variable == "TARGET")
       {
       return replaceValues.Target;
+      }
       }
     if(variable == "TARGET_IMPLIB")
       {
       return this->TargetImplib;
       }
+    if(replaceValues.Target)
+      {
     if(variable == "TARGET_BASE")
       {
       // Strip the last extension off the target name.
@@ -824,6 +856,7 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         return targetBase;
         }
       }
+    }
     }
   if(replaceValues.TargetSOName)
     {
@@ -1011,6 +1044,17 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     // given once i.e.  -classpath a:b:c
     repeatFlag = false;
     }
+
+  // Support special system include flag if it is available and the
+  // normal flag is repeated for each directory.
+  std::string sysFlagVar = "CMAKE_INCLUDE_SYSTEM_FLAG_";
+  sysFlagVar += lang;
+  const char* sysIncludeFlag = 0;
+  if(repeatFlag)
+    {
+    sysIncludeFlag = this->Makefile->GetDefinition(sysFlagVar.c_str());
+    }
+
   bool flagUsed = false;
   std::set<cmStdString> emitted;
   for(i = includes.begin(); i != includes.end(); ++i)
@@ -1033,7 +1077,15 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     std::string include = *i;
     if(!flagUsed || repeatFlag)
       {
+      if(sysIncludeFlag &&
+         this->Makefile->IsSystemIncludeDirectory(i->c_str()))
+        {
+        includeFlags << sysIncludeFlag;
+        }
+      else
+        {
       includeFlags << includeFlag;
+        }
       flagUsed = true;
       }
     std::string includePath = this->ConvertToOutputForExisting(i->c_str());
@@ -1064,7 +1116,8 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
+void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
+                                             bool filter_system_dirs)
 {
   // Need to decide whether to automatically include the source and
   // binary directories at the beginning of the include path.
@@ -1138,6 +1191,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
       }
     }
 
+  if(filter_system_dirs)
+    {
   // Do not explicitly add the standard include path "/usr/include".
   // This can cause problems with certain standard library
   // implementations because the wrong headers may be found first.
@@ -1151,6 +1206,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
       {
       emitted.insert(implicitIncludeVec[k]);
       }
+    }
     }
 
   // Get the project-specified include directories.
@@ -1610,16 +1666,68 @@ void cmLocalGenerator
   const std::vector<std::string>&
     linkDirectories = target.GetLinkDirectories();
 
+  // Lookup link type selection flags.
+  const char* static_link_type_flag = 0;
+  const char* shared_link_type_flag = 0;
+  const char* target_type_str = 0;
+  switch(target.GetType())
+    {
+    case cmTarget::EXECUTABLE:     target_type_str = "EXE"; break;
+    case cmTarget::SHARED_LIBRARY: target_type_str = "SHARED_LIBRARY"; break;
+    case cmTarget::MODULE_LIBRARY: target_type_str = "SHARED_MODULE"; break;
+    default: break;
+    }
+  if(target_type_str)
+    {
+    // Get the language used for linking.
+    const char* linkLanguage =
+      target.GetLinkerLanguage(this->GetGlobalGenerator());
+
+    if(!linkLanguage)
+      {
+      cmSystemTools::
+        Error("CMake can not determine linker language for target:",
+              target.GetName());
+      return;
+      }
+    std::string static_link_type_flag_var = "CMAKE_";
+    static_link_type_flag_var += target_type_str;
+    static_link_type_flag_var += "_LINK_STATIC_";
+    static_link_type_flag_var += linkLanguage;
+    static_link_type_flag_var += "_FLAGS";
+    static_link_type_flag =
+      this->Makefile->GetDefinition(static_link_type_flag_var.c_str());
+
+    std::string shared_link_type_flag_var = "CMAKE_";
+    shared_link_type_flag_var += target_type_str;
+    shared_link_type_flag_var += "_LINK_DYNAMIC_";
+    shared_link_type_flag_var += linkLanguage;
+    shared_link_type_flag_var += "_FLAGS";
+    shared_link_type_flag =
+      this->Makefile->GetDefinition(shared_link_type_flag_var.c_str());
+    }
+
   // Compute the link directory order needed to link the libraries.
   cmOrderLinkDirectories orderLibs;
-  orderLibs.SetLinkPrefix(
+  orderLibs.SetLinkTypeInformation(cmOrderLinkDirectories::LinkShared,
+                                   static_link_type_flag,
+                                   shared_link_type_flag);
+  orderLibs.AddLinkPrefix(
     this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_PREFIX"));
+  orderLibs.AddLinkPrefix(
+    this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_PREFIX"));
+
+  // Import library names should be matched and treated as shared
+  // libraries for the purposes of linking.
   orderLibs.AddLinkExtension(
-    this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"));
+    this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
+    cmOrderLinkDirectories::LinkShared);
   orderLibs.AddLinkExtension(
-    this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"));
+    this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"),
+    cmOrderLinkDirectories::LinkStatic);
   orderLibs.AddLinkExtension(
-    this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"));
+    this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"),
+    cmOrderLinkDirectories::LinkShared);
   orderLibs.AddLinkExtension(
     this->Makefile->GetDefinition("CMAKE_LINK_LIBRARY_SUFFIX"));
   if(const char* linkSuffixes =
@@ -1823,61 +1931,11 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
-                                  const char* workingDirectory, 
-                                  const char* newline)
-                                  
-{
-  // Store the script in a string.
-  std::string script;
-  if(workingDirectory)
-    {
-    script += "cd ";
-    script += this->Convert(workingDirectory, START_OUTPUT, SHELL);
-    script += newline;
-    }
-  // for visual studio IDE add extra stuff to the PATH
-  // if CMAKE_MSVCIDE_RUN_PATH is set.
-  if(this->Makefile->GetDefinition("MSVC_IDE"))
-    {
-    const char* extraPath = 
-      this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
-    if(extraPath)
-      {
-      script += "set PATH=";
-      script += extraPath;
-      script += ";%PATH%";
-      script += newline;
-      }
-    }
-  // Write each command on a single line.
-  for(cmCustomCommandLines::const_iterator cl = commandLines.begin();
-      cl != commandLines.end(); ++cl)
-    {
-    // Start with the command name.
-    const cmCustomCommandLine& commandLine = *cl;
-    script += this->Convert(commandLine[0].c_str(),START_OUTPUT,SHELL);
-
-    // Add the arguments.
-    for(unsigned int j=1;j < commandLine.size(); ++j)
-      {
-      script += " ";
-      script += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
-      }
-
-    // End the line.
-    script += newline;
-    }
-  return script;
-}
-
-//----------------------------------------------------------------------------
-std::string
 cmLocalGenerator::ConstructComment(const cmCustomCommand& cc,
                                    const char* default_comment)
 {
   // Check for a comment provided with the command.
-  if(cc.GetComment() && *cc.GetComment())
+  if(cc.GetComment())
     {
     return cc.GetComment();
     }
@@ -1974,6 +2032,18 @@ std::string cmLocalGenerator::Convert(const char* source,
     if(forceOn && this->WindowsShell)
       {
       cmSystemTools::SetForceUnixPaths(true);
+      }
+
+    // For the MSYS shell convert drive letters to posix paths, so
+    // that c:/some/path becomes /c/some/path.  This is needed to
+    // avoid problems with the shell path translation.
+    if(this->MSYSShell)
+      {
+      if(result.size() > 2 && result[1] == ':')
+        {
+        result[1] = result[0];
+        result[0] = '/';
+        }
       }
     }
   return result;
@@ -2197,4 +2267,78 @@ cmLocalGenerator::GetObjectFileNameWithoutTarget(const cmSourceFile& source)
 
   // Convert to a safe name.
   return this->CreateSafeUniqueObjectFileName(objectName.c_str());
+}
+
+//----------------------------------------------------------------------------
+const char*
+cmLocalGenerator
+::GetSourceFileLanguage(const cmSourceFile& source)
+{
+  // Check for an explicitly assigned language.
+  if(const char* lang = source.GetProperty("LANGUAGE"))
+    {
+    return lang;
+    }
+
+  // Infer the language from the source file extension.
+  return (this->GlobalGenerator
+          ->GetLanguageFromExtension(source.GetSourceExtension().c_str()));
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::EscapeForShellOldStyle(const char* str)
+{
+  std::string result;
+  bool forceOn =  cmSystemTools::GetForceUnixPaths();
+  if(forceOn && this->WindowsShell)
+    {
+    cmSystemTools::SetForceUnixPaths(false);
+    }
+  result = cmSystemTools::EscapeSpaces(str);
+  if(forceOn && this->WindowsShell)
+    {
+    cmSystemTools::SetForceUnixPaths(true);
+    }
+  return result;
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
+                                             bool forEcho)
+{
+  // Compute the flags for the target shell environment.
+  int flags = 0;
+  if(this->WindowsVSIDE)
+    {
+    flags |= cmsysSystem_Shell_Flag_VSIDE;
+    }
+  else
+    {
+    flags |= cmsysSystem_Shell_Flag_Make;
+    }
+  if(makeVars)
+    {
+    flags |= cmsysSystem_Shell_Flag_AllowMakeVariables;
+    }
+  if(forEcho)
+    {
+    flags |= cmsysSystem_Shell_Flag_EchoWindows;
+    }
+
+  // Compute the buffer size needed.
+  int size = (this->WindowsShell ?
+              cmsysSystem_Shell_GetArgumentSizeForWindows(str, flags) :
+              cmsysSystem_Shell_GetArgumentSizeForUnix(str, flags));
+
+  // Compute the shell argument itself.
+  std::vector<char> arg(size);
+  if(this->WindowsShell)
+    {
+    cmsysSystem_Shell_GetArgumentForWindows(str, &arg[0], flags);
+    }
+  else
+    {
+    cmsysSystem_Shell_GetArgumentForUnix(str, &arg[0], flags);
+    }
+  return std::string(&arg[0]);
 }

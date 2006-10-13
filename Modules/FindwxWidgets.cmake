@@ -539,8 +539,8 @@ ELSE(WIN32_STYLE_FIND)
       SET(wxWidgets_FOUND TRUE)
 
       # run the wx-config program to get cxxflags
-      EXEC_PROGRAM(${wxWidgets_CONFIG_EXECUTABLE}
-        ARGS "--cxxflags"
+      EXEC_PROGRAM(sh
+        ARGS "${wxWidgets_CONFIG_EXECUTABLE} --cxxflags"
         OUTPUT_VARIABLE wxWidgets_CXX_FLAGS
         RETURN_VALUE RET)
       IF(RET EQUAL 0)
@@ -583,8 +583,8 @@ ELSE(WIN32_STYLE_FIND)
       #         be useful here...
       #STRING(REPLACE ";" "," wxWidgets_USE_LIBS "${wxWidgets_USE_LIBS}")
       STRING(REGEX REPLACE ";" "," wxWidgets_USE_LIBS "${wxWidgets_USE_LIBS}")
-      EXEC_PROGRAM(${wxWidgets_CONFIG_EXECUTABLE}
-        ARGS "--libs ${wxWidgets_USE_LIBS}"
+      EXEC_PROGRAM(sh
+        ARGS "${wxWidgets_CONFIG_EXECUTABLE} --libs ${wxWidgets_USE_LIBS}"
         OUTPUT_VARIABLE wxWidgets_LIBRARIES
         RETURN_VALUE RET)
       IF(RET EQUAL 0)
