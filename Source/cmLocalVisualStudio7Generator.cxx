@@ -1148,7 +1148,6 @@ void cmLocalVisualStudio7Generator
       {
       objectName = "";
       }
-
     // Add per-source flags.
     const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
     if(cflags)
@@ -1160,6 +1159,12 @@ void cmLocalVisualStudio7Generator
       ((*sf)->GetSourceExtension().c_str());
     const char* linkLanguage = target.GetLinkerLanguage
       (this->GetGlobalGenerator());
+
+    // If lang is set, the compiler will generate code automatically.
+    // If HEADER_FILE_ONLY is set, we must suppress this generation in
+    // the project file
+    bool excludedFromBuild = 
+      (lang && (*sf)->GetPropertyAsBool("HEADER_FILE_ONLY")); 
 
     // if the source file does not match the linker language
     // then force c or c++
@@ -1216,7 +1221,7 @@ void cmLocalVisualStudio7Generator
                               command->GetOutputs(), flags);
         }
       else if(compileFlags.size() || additionalDeps.length() 
-              || objectName.size())
+              || objectName.size() || excludedFromBuild)
         {
         const char* aCompilerTool = "VCCLCompilerTool";
         std::string ext = (*sf)->GetSourceExtension();
@@ -1238,8 +1243,13 @@ void cmLocalVisualStudio7Generator
           {
           fout << "\t\t\t\t<FileConfiguration\n"
                << "\t\t\t\t\tName=\""  << *i 
-               << "|" << this->PlatformName << "\">\n"
-               << "\t\t\t\t\t<Tool\n"
+               << "|" << this->PlatformName << "\"";
+          if(excludedFromBuild)
+            {
+            fout << " ExcludedFromBuild=\"true\"";
+            }
+          fout << ">\n";
+          fout << "\t\t\t\t\t<Tool\n"
                << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
           if(compileFlags.size())
             { 
