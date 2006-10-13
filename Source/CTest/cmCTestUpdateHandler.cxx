@@ -744,7 +744,7 @@ int cmCTestUpdateHandler::ProcessHandler()
           ofs << output << std::endl;
           }
         }
-      if ( res && retVal == 0)
+      if ( res )
         {
         cmCTestLog(this->CTest, DEBUG, output << std::endl);
         std::string::size_type sline = 0;
@@ -1090,7 +1090,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   os << "</UpdateReturnStatus>" << std::endl;
   os << "</Update>" << std::endl;
 
-  if (! res || retVal )
+  if (! res  )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Error(s) when updating the project" << std::endl);

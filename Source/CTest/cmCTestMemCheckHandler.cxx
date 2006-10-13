@@ -334,7 +334,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     }
   else
     {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
+    cmCTestLog(this->CTest, WARNING,
       "Memory checker (MemoryCheckCommand) "
       "not set, or cannot find the specified program."
       << std::endl);
