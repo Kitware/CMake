@@ -75,7 +75,6 @@ public:
 
   void Initialize();
 
-protected:
   struct cmCTestTestProperties
   {
     cmStdString Name;
@@ -103,7 +102,7 @@ protected:
     cmCTestTestProperties* Properties;
   };
 
-
+protected:
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
   virtual void GenerateTestCommand(std::vector<const char*>& args);
