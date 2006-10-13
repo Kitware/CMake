@@ -866,17 +866,11 @@ std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
   std::string::size_type pos = flags.find(flag);
   if(pos != flags.npos)
     {
-    retFlag = flag;
-    // remove the flag
-    flags[pos]=' ';
-    flags[pos+1]=' ';
-    char pos2 = flags[pos+2];
-    // if the pos after the option 
-    if(pos2 != ' ' && pos2 != 0 )
+    while(pos < flags.size() && flags[pos] != ' ')
       {
-      retFlag += pos2;
-      // remove the next part of the flag
-      flags[pos+2] = ' ';
+      retFlag += flags[pos];
+      flags[pos] = ' ';
+      pos++;
       }
     }
   return retFlag;
@@ -1392,7 +1386,19 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     optLevel[0] = '1';
     }
   std::string gflagc = this->ExtractFlag("-g", cflags);
+  // put back gdwarf-2 if used since there is no way
+  // to represent it in the gui, but we still want debug yes
+  if(gflagc == "-gdwarf-2")
+    {
+    cflags += " ";
+    cflags += gflagc;
+    }
   std::string gflag = this->ExtractFlag("-g", flags);
+  if(gflag == "-gdwarf-2")
+    {
+    flags += " ";
+    flags += gflag;
+    }
   const char* debugStr = "YES";
   if(gflagc.size() ==0  && gflag.size() == 0)
     {
