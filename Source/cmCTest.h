@@ -269,6 +269,9 @@ public:
   //! Set the output log file name
   void SetOutputLogFileName(const char* name);
 
+  //! Set the visual studio or Xcode config type
+  void SetConfigType(const char* ct);
+
   //! Various log types
   enum {
     DEBUG = 0,

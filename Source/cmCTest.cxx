@@ -1546,14 +1546,7 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
      i < args.size() - 1)
     {
     i++;
-    this->ConfigType = args[i];
-    cmSystemTools::ReplaceString(this->ConfigType, ".\\", "");
-    if ( !this->ConfigType.empty() )
-      {
-      std::string confTypeEnv
-        = "CMAKE_CONFIG_TYPE=" + this->ConfigType;
-      cmSystemTools::PutEnv(confTypeEnv.c_str());
-      }
+    this->SetConfigType(args[i].c_str());
     }
   
   if(this->CheckArgument(arg, "--debug"))
@@ -1848,7 +1841,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
 #ifdef  CMAKE_INTDIR
   if(this->ConfigType.size() == 0)
     {
-    this->ConfigType = CMAKE_INTDIR;
+    this->SetConfigType(CMAKE_INTDIR);
     }
 #endif
 
@@ -2290,6 +2283,16 @@ void cmCTest::AddCTestConfigurationOverwrite(const char* encstr)
   std::string key = overStr.substr(0, epos);
   std::string value = overStr.substr(epos+1, overStr.npos);
   this->CTestConfigurationOverwrites[key] = value;
+}
+
+//----------------------------------------------------------------------
+void cmCTest::SetConfigType(const char* ct)
+{
+  this->ConfigType = ct?ct:"";
+  cmSystemTools::ReplaceString(this->ConfigType, ".\\", "");
+  std::string confTypeEnv
+    = "CMAKE_CONFIG_TYPE=" + this->ConfigType;
+  cmSystemTools::PutEnv(confTypeEnv.c_str());
 }
 
 //----------------------------------------------------------------------
