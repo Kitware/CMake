@@ -135,8 +135,8 @@ public:
    * should include all parts of the command up to the beginning of
    * the message (including a whitespace separator).
    */
-  void SetNativeEchoCommand(const char* cmd)
-    { this->NativeEchoCommand = cmd; }
+  void SetNativeEchoCommand(const char* cmd, bool isWindows)
+    { this->NativeEchoCommand = cmd; this->NativeEchoWindows = isWindows; }
 
   /**
    * Set the string used to include one makefile into another default
@@ -341,6 +341,7 @@ private:
   std::string LibraryOutputPath;
   std::string ConfigurationName;
   std::string NativeEchoCommand;
+  bool NativeEchoWindows;
   bool DefineWindowsNULL;
   bool UnixCD;
   bool PassMakeflags;
