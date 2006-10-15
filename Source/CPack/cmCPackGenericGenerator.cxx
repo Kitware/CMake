@@ -429,8 +429,10 @@ int cmCPackGenericGenerator::InstallProjectViaInstallScript(
         {
         this->SetOption("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
         }
-      this->SetOptionIfNotSet("CMAKE_CURRENT_BINARY_DIR", tempInstallDirectory);
-      this->SetOptionIfNotSet("CMAKE_CURRENT_SOURCE_DIR", tempInstallDirectory);
+      this->SetOptionIfNotSet("CMAKE_CURRENT_BINARY_DIR",
+        tempInstallDirectory);
+      this->SetOptionIfNotSet("CMAKE_CURRENT_SOURCE_DIR",
+        tempInstallDirectory);
       int res = this->MakefileMap->ReadListFile(0, installScript.c_str());
       if ( cmSystemTools::GetErrorOccuredFlag() || !res )
         {
