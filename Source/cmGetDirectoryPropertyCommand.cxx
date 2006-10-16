@@ -53,6 +53,10 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
       sd += "/";
       sd += *i;
       }
+
+    // The local generators are associated with collapsed paths.
+    sd = cmSystemTools::CollapseFullPath(sd.c_str());
+
     // lookup the makefile from the directory name
     cmLocalGenerator *lg = 
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
