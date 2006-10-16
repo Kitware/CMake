@@ -20,6 +20,11 @@ if [ ! -z "@CC@" ]; then
     check_exit_value $? "set CC compiler env var" || exit 1
 fi
 
+if [ ! -z "@FC@" ]; then
+    export FC="@FC@"
+    check_exit_value $? "set FC compiler env var" || exit 1
+fi
+
 if [ ! -z "@CXX@" ]; then
     export CXX="@CXX@"
     check_exit_value $? "set CC compiler env var" || exit 1
