@@ -185,6 +185,8 @@ public:
         memset(this, 0,  sizeof(*this));
       }
     const char* TargetPDB;
+    const char* TargetVersionMajor;
+    const char* TargetVersionMinor;
     const char* Language;
     const char* Objects;
     const char* Target;

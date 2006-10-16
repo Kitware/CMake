@@ -176,6 +176,11 @@ public:
       target property.  */
   const char* GetLocation(const char* config);
 
+  /** Get the target major and minor version numbers interpreted from
+      the VERSION property.  Version 0 is returned if the property is
+      not set or cannot be parsed.  */
+  void GetTargetVersion(int& major, int& minor);
+
   /**
    * Trace through the source files in this target and add al source files
    * that they depend on, used by the visual studio generators

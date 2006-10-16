@@ -801,6 +801,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += targetFullName;
     fout << "\t\t\t\tOutputFile=\""
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
+    this->WriteTargetVersionAttribute(fout, target);
     for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
         i != flagMap.end(); ++i)
       {
@@ -885,6 +886,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += targetFullName;
     fout << "\t\t\t\tOutputFile=\"" 
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
+    this->WriteTargetVersionAttribute(fout, target);
     for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
         i != flagMap.end(); ++i)
       {
@@ -923,6 +925,17 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     case cmTarget::GLOBAL_TARGET:
       break;
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalVisualStudio7Generator
+::WriteTargetVersionAttribute(std::ostream& fout, cmTarget& target)
+{
+  int major;
+  int minor;
+  target.GetTargetVersion(major, minor);
+  fout << "\t\t\t\tVersion=\"" << major << "." << minor << "\"\n";
 }
 
 void cmLocalVisualStudio7Generator

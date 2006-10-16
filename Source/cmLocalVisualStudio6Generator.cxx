@@ -1131,6 +1131,20 @@ void cmLocalVisualStudio6Generator
       }
     }
 
+  // Compute version number information.
+  std::string targetVersionFlag;
+  if(target.GetType() == cmTarget::EXECUTABLE ||
+     target.GetType() == cmTarget::SHARED_LIBRARY ||
+     target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    int major;
+    int minor;
+    target.GetTargetVersion(major, minor);
+    cmOStringStream targetVersionStream;
+    targetVersionStream << "/version:" << major << "." << minor;
+    targetVersionFlag = targetVersionStream.str();
+    }
+
   // Compute the real name of the target.
   std::string outputName = 
     "(OUTPUT_NAME is for libraries and executables only)";
@@ -1279,6 +1293,8 @@ void cmLocalVisualStudio6Generator
 
     cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                  this->IncludeOptions.c_str());
+    cmSystemTools::ReplaceString(line, "TARGET_VERSION_FLAG",
+                                 targetVersionFlag.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
     // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH 
     // are already quoted in the template file,

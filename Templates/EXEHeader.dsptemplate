@@ -68,7 +68,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32  /nologo /subsystem:console /machine:I386 /IGNORE:4089
-# ADD LINK32  /nologo /subsystem:console /machine:I386 /IGNORE:4089
+# ADD LINK32  /nologo /subsystem:console /machine:I386 /IGNORE:4089 TARGET_VERSION_FLAG
 # ADD LINK32 /out:"EXECUTABLE_OUTPUT_PATHRelease\OUTPUT_NAME_RELEASE"
 CM_MULTILINE_OPTIONS_RELEASE
 
@@ -100,7 +100,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32  /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /IGNORE:4089
-# ADD LINK32 /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /IGNORE:4089
+# ADD LINK32 /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /IGNORE:4089 TARGET_VERSION_FLAG
 # ADD LINK32 /out:"EXECUTABLE_OUTPUT_PATHDebug\OUTPUT_NAME_DEBUG"
 CM_MULTILINE_OPTIONS_DEBUG
 
@@ -129,7 +129,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:console /machine:I386 /IGNORE:4089
-# ADD LINK32 /nologo /subsystem:console /machine:I386 /IGNORE:4089
+# ADD LINK32 /nologo /subsystem:console /machine:I386 /IGNORE:4089 TARGET_VERSION_FLAG
 # ADD LINK32 /out:"EXECUTABLE_OUTPUT_PATHMinSizeRel\OUTPUT_NAME_MINSIZEREL"
 CM_MULTILINE_OPTIONS_MINSIZEREL
 
@@ -159,7 +159,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:console /debug /machine:I386 /IGNORE:4089
-# ADD LINK32  /nologo /subsystem:console /debug /machine:I386 /IGNORE:4089
+# ADD LINK32  /nologo /subsystem:console /debug /machine:I386 /IGNORE:4089 TARGET_VERSION_FLAG
 # ADD LINK32 /out:"EXECUTABLE_OUTPUT_PATHRelWithDebInfo\OUTPUT_NAME_RELWITHDEBINFO"
 CM_MULTILINE_OPTIONS_RELWITHDEBINFO
 

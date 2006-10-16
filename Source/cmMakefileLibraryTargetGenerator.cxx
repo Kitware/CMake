@@ -531,6 +531,24 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   cleanObjs += ")";
   cmLocalGenerator::RuleVariables vars;
   vars.TargetPDB = targetOutPathPDB.c_str();
+
+  // Setup the target version.
+  std::string targetVersionMajor;
+  std::string targetVersionMinor;
+  {
+  cmOStringStream majorStream;
+  cmOStringStream minorStream;
+  int major;
+  int minor;
+  this->Target->GetTargetVersion(major, minor);
+  majorStream << major;
+  minorStream << minor;
+  targetVersionMajor = majorStream.str();
+  targetVersionMinor = minorStream.str();
+  }
+  vars.TargetVersionMajor = targetVersionMajor.c_str();
+  vars.TargetVersionMinor = targetVersionMinor.c_str();
+
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
   std::string objdir = cmake::GetCMakeFilesDirectoryPostSlash();

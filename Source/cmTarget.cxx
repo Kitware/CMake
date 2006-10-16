@@ -890,6 +890,29 @@ const char* cmTarget::GetLocation(const char* config)
   return this->Location.c_str();
 }
 
+//----------------------------------------------------------------------------
+void cmTarget::GetTargetVersion(int& major, int& minor)
+{
+  // Set the default values.
+  major = 0;
+  minor = 0;
+
+  // Look for a VERSION property.
+  if(const char* version = this->GetProperty("VERSION"))
+    {
+    // Try to parse the version number and store the results that were
+    // successfully parsed.
+    int parsed_major;
+    int parsed_minor;
+    switch(sscanf(version, "%d.%d", &parsed_major, &parsed_minor))
+      {
+      case 2: minor = parsed_minor; // no break!
+      case 1: major = parsed_major; // no break!
+      default: break;
+      }
+    }
+}
+
 const char *cmTarget::GetProperty(const char* prop)
 {
   // watch for special "computed" properties that are dependent on other
@@ -1442,16 +1465,29 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
     }
 #endif
 
+  // Get the components of the executable name.
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->GetFullNameInternal(type, config, false, prefix, base, suffix);
+
   // The executable name.
-  name = this->GetFullNameInternal(type, config, false);
+  name = prefix+base+suffix;
 
   // The executable's real name on disk.
+#if defined(__CYGWIN__)
+  realName = prefix+base;
+#else
   realName = name;
+#endif
   if(version)
     {
     realName += "-";
     realName += version;
     }
+#if defined(__CYGWIN__)
+  realName += suffix;
+#endif
 }
 
 //----------------------------------------------------------------------------

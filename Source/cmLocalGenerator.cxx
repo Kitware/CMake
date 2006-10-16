@@ -840,6 +840,28 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       {
       return this->TargetImplib;
       }
+    if(variable == "TARGET_VERSION_MAJOR")
+      {
+      if(replaceValues.TargetVersionMajor)
+        {
+        return replaceValues.TargetVersionMajor;
+        }
+      else
+        {
+        return "0";
+        }
+      }
+    if(variable == "TARGET_VERSION_MINOR")
+      {
+      if(replaceValues.TargetVersionMinor)
+        {
+        return replaceValues.TargetVersionMinor;
+        }
+      else
+        {
+        return "0";
+        }
+      }
     if(replaceValues.Target)
       {
       if(variable == "TARGET_BASE")
