@@ -301,7 +301,8 @@ int main (int argc, char *argv[])
       globalMF->AddDefinition(cdit->first.c_str(), cdit->second.c_str());
       }
 
-    const char* cpackModulesPath = globalMF->GetDefinition("CPACK_MODULE_PATH");
+    const char* cpackModulesPath =
+      globalMF->GetDefinition("CPACK_MODULE_PATH");
     if ( cpackModulesPath )
       {
       globalMF->AddDefinition("CMAKE_MODULE_PATH", cpackModulesPath);
