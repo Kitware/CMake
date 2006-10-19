@@ -17,9 +17,6 @@
 #                            FIND_PACKAGE(wxWidgets REQUIRED
 #                                         <components>)
 #
-#  HAVE_ISYSTEM            - if true wx warnings are suppressed on g++
-#                            by replacing -I with -isystem
-#
 # The following are set after configuration is done:
 #
 #  wxWidgets_FOUND            - Set to TRUE if wxWidgets was found.
@@ -117,7 +114,7 @@ IF (NOT wxWidgets_FIND_COMPONENTS)
       jpeg
       html
       media
-      msw msw26 msw27 msw28
+      msw msw28 msw27 msw26
       mono
       net
       odbc
@@ -215,6 +212,8 @@ IF(WIN32_STYLE_FIND)
     # Find wxWidgets multilib base libraries
     FIND_LIBRARY(WX_base${_DBG}
       NAMES
+      wxbase28${_UCD}${_DBG}
+      wxbase27${_UCD}${_DBG}
       wxbase26${_UCD}${_DBG}
       wxbase25${_UCD}${_DBG}
       PATHS ${WX_LIB_DIR}
@@ -224,6 +223,8 @@ IF(WIN32_STYLE_FIND)
     FOREACH(LIB net odbc xml)
       FIND_LIBRARY(WX_${LIB}${_DBG}
         NAMES
+        wxbase28${_UCD}${_DBG}_${LIB}
+        wxbase27${_UCD}${_DBG}_${LIB}
         wxbase26${_UCD}${_DBG}_${LIB}
         wxbase25${_UCD}${_DBG}_${LIB}
         PATHS ${WX_LIB_DIR}
@@ -235,6 +236,8 @@ IF(WIN32_STYLE_FIND)
     # Find wxWidgets monolithic library
     FIND_LIBRARY(WX_mono${_DBG}
       NAMES
+      wxmsw${_UNV}28${_UCD}${_DBG}
+      wxmsw${_UNV}27${_UCD}${_DBG}
       wxmsw${_UNV}26${_UCD}${_DBG}
       wxmsw${_UNV}25${_UCD}${_DBG}
       PATHS ${WX_LIB_DIR}
@@ -246,6 +249,8 @@ IF(WIN32_STYLE_FIND)
     FOREACH(LIB core adv html media xrc dbgrid gl qa)
       FIND_LIBRARY(WX_${LIB}${_DBG}
         NAMES
+        wxmsw${_UNV}28${_UCD}${_DBG}_${LIB}
+        wxmsw${_UNV}27${_UCD}${_DBG}_${LIB}
         wxmsw${_UNV}26${_UCD}${_DBG}_${LIB}
         wxmsw${_UNV}25${_UCD}${_DBG}_${LIB}
         PATHS ${WX_LIB_DIR}
@@ -357,30 +362,38 @@ IF(WIN32_STYLE_FIND)
   #
   # Look for an installation tree.
   #
-  FIND_PATH(wxWidgets_ROOT_DIR include/wx/wx.h
+  FIND_PATH(wxWidgets_ROOT_DIR 
+    NAMES include/wx/wx.h
+    PATHS
+    $ENV{wxWidgets_ROOT_DIR}
     $ENV{WXWIN}
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWidgets_is1;Inno Setup: App Path]"  ## WX 2.6.x
-    C:/wxWidgets-2.6.3
-    D:/wxWidgets-2.6.3
-    C:/wxWidgets-2.6.2
-    D:/wxWidgets-2.6.2
-    C:/wxWidgets-2.6.1
-    D:/wxWidgets-2.6.1
-    C:/wxWidgets-2.6.0
-    D:/wxWidgets-2.6.0
-    C:/wxWidgets-2.5.5
-    D:/wxWidgets-2.5.5
-    C:/wxWidgets-2.5.4
-    D:/wxWidgets-2.5.4
-    C:/wxWidgets-2.5.3
-    D:/wxWidgets-2.5.3
-    C:/wxWidgets-2.5.2
-    D:/wxWidgets-2.5.2
-    C:/wxWidgets-2.5.1
-    D:/wxWidgets-2.5.1
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWidgets_is1;Inno Setup: App Path]"  # WX 2.6.x
+    C:/
+    D:/
+    $ENV{ProgramFiles}
+    PATH_SUFFIXES 
+    wxWidgets-2.8.4
+    wxWidgets-2.8.3
+    wxWidgets-2.8.2
+    wxWidgets-2.8.1
+    wxWidgets-2.8.0
+    wxWidgets-2.7.4
+    wxWidgets-2.7.3
+    wxWidgets-2.7.2
+    wxWidgest-2.7.1
+    wxWidgets-2.7.0
+    wxWidgets-2.7.0-1
+    wxWidgets-2.6.3
+    wxWidgets-2.6.2
+    wxWidgets-2.6.1
+    wxWidgets-2.5.4
+    wxWidgets-2.5.3
+    wxWidgets-2.5.2
+    wxWidgets-2.5.1
+    wxWidgets
     DOC "wxWidgets base/installation directory?"
     )
-
+  
   # If wxWidgets_ROOT_DIR changed, clear all libraries and lib dir.
   IF(NOT WX_ROOT_DIR STREQUAL wxWidgets_ROOT_DIR)
     SET(WX_ROOT_DIR ${wxWidgets_ROOT_DIR} CACHE INTERNAL "wxWidgets_ROOT_DIR")
@@ -555,21 +568,6 @@ ELSE(WIN32_STYLE_FIND)
         STRING(REGEX REPLACE "-I" ""  wxWidgets_INCLUDE_DIRS "${wxWidgets_INCLUDE_DIRS}")
         # convert space to semicolons for list
         STRING(REGEX REPLACE " " ";" wxWidgets_INCLUDE_DIRS "${wxWidgets_INCLUDE_DIRS}")
-
-        # drop -I* from CXXFLAGS - postponed until -isystem is available to INCLUDE_DIRECTORIES to avoid pedantic warnings
-        #STRING(REGEX REPLACE "-I[^ ;]*" ""  wxWidgets_CXX_FLAGS  ${wxWidgets_CXX_FLAGS})
-
-        IF (HAVE_ISYSTEM) # does the compiler support -isystem ?
-          IF (NOT APPLE)  # -isystem seem unsuppored on Mac
-            IF(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX )
-              IF   (CMAKE_CXX_COMPILER MATCHES g\\+\\+) # just to be sure
-                # handle WX include dirs as system directories - ignores pedantic warnings with gcc
-                # replace -I by -isystem
-                STRING(REGEX REPLACE "-I" "-isystem" wxWidgets_CXX_FLAGS  ${wxWidgets_CXX_FLAGS})
-              ENDIF(CMAKE_CXX_COMPILER MATCHES g\\+\\+)
-            ENDIF(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX )
-          ENDIF(NOT APPLE)
-        ENDIF(HAVE_ISYSTEM)
 
       ELSE(RET EQUAL 0)
         DBG_MSG("${wxWidgets_CONFIG_EXECUTABLE} --cxxflags FAILED with RET=${RET}")
