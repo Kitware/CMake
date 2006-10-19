@@ -180,6 +180,12 @@ int cmCTestCoverageHandler::ProcessHandler()
 {
   int error = 0;
 
+  // do we have time for this
+  if (this->CTest->GetRemainingTimeAllowed() < 120)
+    {
+    return error;
+    }
+  
   std::string sourceDir
     = this->CTest->GetCTestConfiguration("SourceDirectory");
   std::string binaryDir

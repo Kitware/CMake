@@ -605,6 +605,14 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       {
       inREcnt++;
       }
+
+    // if we are out of time then skip this test, we leave two minutes 
+    // to submit results
+    if (this->CTest->GetRemainingTimeAllowed() - 120 <= 0)
+      {
+      continue;
+      }
+
     const std::string& testname = it->Name;
     std::vector<std::string>& args = it->Args;
     cmCTestTestResult cres;

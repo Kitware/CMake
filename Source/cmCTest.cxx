@@ -792,7 +792,8 @@ int cmCTest::ProcessTests()
       break;
       }
     }
-  if ( this->Tests[UPDATE_TEST] || this->Tests[ALL_TEST] )
+  if (( this->Tests[UPDATE_TEST] || this->Tests[ALL_TEST] ) &&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     cmCTestGenericHandler* uphandler = this->GetHandler("update");
     uphandler->SetPersistentOption("SourceDirectory",
@@ -807,14 +808,16 @@ int cmCTest::ProcessTests()
     {
     return 0;
     }
-  if ( this->Tests[CONFIGURE_TEST] || this->Tests[ALL_TEST] )
+  if (( this->Tests[CONFIGURE_TEST] || this->Tests[ALL_TEST] )&&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     if (this->GetHandler("configure")->ProcessHandler() < 0)
       {
       res |= cmCTest::CONFIGURE_ERRORS;
       }
     }
-  if ( this->Tests[BUILD_TEST] || this->Tests[ALL_TEST] )
+  if (( this->Tests[BUILD_TEST] || this->Tests[ALL_TEST] )&&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("build")->ProcessHandler() < 0)
@@ -822,7 +825,8 @@ int cmCTest::ProcessTests()
       res |= cmCTest::BUILD_ERRORS;
       }
     }
-  if ( this->Tests[TEST_TEST] || this->Tests[ALL_TEST] || notest )
+  if (( this->Tests[TEST_TEST] || this->Tests[ALL_TEST] || notest ) &&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("test")->ProcessHandler() < 0)
@@ -830,7 +834,8 @@ int cmCTest::ProcessTests()
       res |= cmCTest::TEST_ERRORS;
       }
     }
-  if ( this->Tests[COVERAGE_TEST] || this->Tests[ALL_TEST] )
+  if (( this->Tests[COVERAGE_TEST] || this->Tests[ALL_TEST] ) &&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("coverage")->ProcessHandler() < 0)
@@ -838,7 +843,8 @@ int cmCTest::ProcessTests()
       res |= cmCTest::COVERAGE_ERRORS;
       }
     }
-  if ( this->Tests[MEMCHECK_TEST] || this->Tests[ALL_TEST] )
+  if (( this->Tests[MEMCHECK_TEST] || this->Tests[ALL_TEST] )&&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("memcheck")->ProcessHandler() < 0)
@@ -1109,6 +1115,19 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
     }
+
+  // do we have time for
+  double timeout = this->GetRemainingTimeAllowed() - 120;
+  if (this->TimeOut && this->TimeOut < timeout)
+    {
+    timeout = this->TimeOut;
+    }
+  // always have at least 1 second if we got to here
+  if (timeout <= 0)
+    {
+    timeout = 1;
+    }
+
   cmsysProcess_SetTimeout(cp, this->TimeOut);
   cmsysProcess_Execute(cp);
 
@@ -2547,3 +2566,16 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg)
     }
 }
 
+//-------------------------------------------------------------------------
+double cmCTest::GetRemainingTimeAllowed()
+{
+  if (!this->GetHandler("script"))
+    {
+    return 1.0e7;
+    }
+
+  cmCTestScriptHandler* ch
+    = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+
+  return ch->GetRemainingTimeAllowed();
+}

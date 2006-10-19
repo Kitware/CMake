@@ -250,6 +250,12 @@ int cmCTestBuildHandler::ProcessHandler()
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "Build project" << std::endl);
 
+  // do we have time for this
+  if (this->CTest->GetRemainingTimeAllowed() < 120)
+    {
+    return 0;
+    }
+
   int entry;
   for ( entry = 0;
     cmCTestWarningErrorFileLine[entry].RegularExpressionString;
