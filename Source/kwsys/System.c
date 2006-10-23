@@ -59,7 +59,7 @@ static int kwsysSystem_Shell__CharIsWhitespace(char c)
 /*--------------------------------------------------------------------------*/
 static int kwsysSystem_Shell__CharNeedsQuotesOnUnix(char c)
 {
-  return ((c == '\'') || (c == '`') || (c == ';') ||
+  return ((c == '\'') || (c == '`') || (c == ';') || (c == '#') ||
           (c == '&') || (c == '$') || (c == '(') || (c == ')'));
 }
 
