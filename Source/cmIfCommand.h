@@ -129,7 +129,6 @@ public:
       "  IF(EXISTS directory-name)\n"
       "True if the named file or directory exists.  "
       "Behavior is well-defined only for full paths.\n"
-      "  IF(FILE_IS_NEWER file1 file2)\n"
       "  IF(file1 IS_NEWER_THAN file2)\n"
       "True if file1 is newer than file2 or if one of the two files "
       "doesn't exist. "
