@@ -1718,7 +1718,6 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   this->SetArgs(args);
   if(cmSystemTools::GetErrorOccuredFlag())
     {
-    CMakeCommandUsage(args[0].c_str());
     return -1;
     }
 
