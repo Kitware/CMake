@@ -79,6 +79,9 @@ ENDFOREACH(var)
 IF(NOT FILE_IS_NEWER "${file}" "${CMAKE_CURRENT_SOURCE_DIR}/InputFile.h.in")
   MESSAGE(FATAL_ERROR "IF(FILE_IS_NEWER) does not seem to work.")
 ENDIF(NOT FILE_IS_NEWER "${file}" "${CMAKE_CURRENT_SOURCE_DIR}/InputFile.h.in")
+IF(NOT "${file}" IS_NEWER_THAN "${CMAKE_CURRENT_SOURCE_DIR}/InputFile.h.in")
+  MESSAGE(FATAL_ERROR "IF(FILE_IS_NEWER) does not seem to work.")
+ENDIF(NOT "${file}" IS_NEWER_THAN "${CMAKE_CURRENT_SOURCE_DIR}/InputFile.h.in")
 
 # Test configuration of the string
 SET(TEST_DEFINED 123)
