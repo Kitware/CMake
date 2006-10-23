@@ -3,7 +3,11 @@
 # With the OS X GUI version, it likes to be installed to /Applications and
 # it contains the doxygen executable in the bundle. In the versions I've 
 # seen, it is located in Resources, but in general, more often binaries are 
-# located in MacOS.
+# located in MacOS. This code sets the following variables:
+#  DOXYGEN_EXECUTABLE     = The path to the doxygen command.
+#  DOXYGEN_DOT_EXECUTABLE = The path to the dot program used by doxygen.
+#  DOXYGEN = same as DOXYGEN_EXECUTABLE for backwards compatibility
+#  DOT = same as DOXYGEN_DOT_EXECUTABLE for backwards compatibility
 
 # The official Doxygen.app that is distributed for OS X uses non-standard 
 # conventions. Instead of the command-line "doxygen" tool being placed in
@@ -87,10 +91,14 @@ FIND_PATH(DOXYGEN_DOT_PATH
 # Restore the old app-bundle setting setting
 SET(CMAKE_FIND_APPBUNDLE ${TEMP_DOXYGEN_SAVE_CMAKE_FIND_APPBUNDLE})
 
+# Backwards compatibility for CMake4.3 and less
+SET (DOXYGEN ${DOXYGEN_EXECUTABLE} )
+SET (DOT ${DOXYGEN_DOT_EXECUTABLE} )
+
 MARK_AS_ADVANCED(
-  DOXYGEN_FOUND,
-  DOXYGEN_EXECUTABLE,
-  DOXYGEN_DOT_FOUND,
-  DOXYGEN_DOT_EXECUTABLE,
-  DOXYGEN_DOT_PATH,
+  DOXYGEN_FOUND
+  DOXYGEN_EXECUTABLE
+  DOXYGEN_DOT_FOUND
+  DOXYGEN_DOT_EXECUTABLE
+  DOXYGEN_DOT_PATH
   )
