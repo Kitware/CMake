@@ -190,8 +190,8 @@ SET(CHECK_ARGS
   amper&sand
   @two-ats@
   one@at
-  "#two-pounds#"
-  "one#pound"
+  #"#two-pounds#"
+  #"one#pound"
   "c:/posix/path/with space"
   "c:\\windows\\path\\with space"
   "'single quotes with space'"
@@ -211,8 +211,8 @@ SET(CHECK_ARGS
   "amper&sand with space"
   "@two-ats@ with space"
   "one@at with space"
-  "#two-pounds# with space"
-  "one#pound with space"
+  #"#two-pounds# with space"
+  #"one#pound with space"
   )
 FOREACH(arg ${CHECK_ARGS})
   SET(ARG "${arg}")
