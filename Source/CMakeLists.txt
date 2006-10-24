@@ -1010,21 +1010,21 @@ IF(BUILD_TESTING)
       -S "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" -V
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest/testOutput.log"
       )
+    SET(ANDY_EVER_FIXES_THIS_TEST FALSE)
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest2/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
     ADD_TEST(CTestTest2 ${CMAKE_CTEST_COMMAND}
       -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
       )
-    SET(ANDY_EVERY_FIXES_THIS_TEST FALSE)
-    IF(ANDY_EVERY_FIXES_THIS)
+    IF(ANDY_EVER_FIXES_THIS)
       CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest3/test.cmake.in"
         "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" @ONLY ESCAPE_QUOTES)
       ADD_TEST(CTestTest3 ${CMAKE_CTEST_COMMAND}
         -S "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" -V
         --output-log "${CMake_BINARY_DIR}/Tests/CTestTest3/testOutput.log"
         )
-    ENDIF(ANDY_EVERY_FIXES_THIS)
+    ENDIF(ANDY_EVER_FIXES_THIS)
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
 
   IF("${CMAKE_TEST_GENERATOR}" MATCHES Xcode)
