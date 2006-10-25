@@ -804,7 +804,6 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
   int postbuild_total = 
     static_cast<int>(target.GetPostBuildCommands().size());
   int postbuild_count = 0;
-  const char* postbuild_newline = "\\\n\t";
   if(postbuild_total > 0)
     {
     customRuleCode += "PostBuild_Cmds=";
