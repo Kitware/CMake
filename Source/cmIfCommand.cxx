@@ -395,26 +395,13 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
         def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
         double lhs;
-        if(sscanf(def, "%lg", &lhs) != 1)
-          {
-          cmOStringStream error;
-          error << "could not convert \"" << def << "\" to a number";
-          delete [] *errorString;
-          *errorString = new char[error.str().size() + 1];
-          strcpy(*errorString, error.str().c_str());
-          return false;
-          }
         double rhs;
-        if(sscanf(def2, "%lg", &rhs) != 1)
+        if(sscanf(def, "%lg", &lhs) != 1 ||
+           sscanf(def2, "%lg", &rhs) != 1)
           {
-          cmOStringStream error;
-          error << "could not convert \"" << def2 << "\" to a number";
-          delete [] *errorString;
-          *errorString = new char[error.str().size() + 1];
-          strcpy(*errorString, error.str().c_str());
-          return false;
+          *arg = "0";
           }
-        if (*(argP1) == "LESS")
+        else if (*(argP1) == "LESS")
           {
           if(lhs < rhs)
             {
