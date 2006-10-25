@@ -717,7 +717,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     std::string line;
     for ( cc= 0; cc < fcov.size(); cc ++ )
       {
-      if ( !cmSystemTools::GetLineFromStream(ifs, line) && cc != fcov.size() -1 )
+      if ( !cmSystemTools::GetLineFromStream(ifs, line) &&
+        cc != fcov.size() -1 )
         {
         cmOStringStream ostr;
         ostr << "Problem reading source file: " << fullFileName.c_str()
