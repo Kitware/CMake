@@ -394,9 +394,29 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
         def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
+        double lhs;
+        if(sscanf(def, "%lg", &lhs) != 1)
+          {
+          cmOStringStream error;
+          error << "could not convert \"" << def << "\" to a number";
+          delete [] *errorString;
+          *errorString = new char[error.str().size() + 1];
+          strcpy(*errorString, error.str().c_str());
+          return false;
+          }
+        double rhs;
+        if(sscanf(def2, "%lg", &rhs) != 1)
+          {
+          cmOStringStream error;
+          error << "could not convert \"" << def2 << "\" to a number";
+          delete [] *errorString;
+          *errorString = new char[error.str().size() + 1];
+          strcpy(*errorString, error.str().c_str());
+          return false;
+          }
         if (*(argP1) == "LESS")
           {
-          if(atof(def) < atof(def2))
+          if(lhs < rhs)
             {
             *arg = "1";
             }
@@ -407,7 +427,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }
         else if (*(argP1) == "GREATER")
           {
-          if(atof(def) > atof(def2))
+          if(lhs > rhs)
             {
             *arg = "1";
             }
@@ -418,7 +438,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }          
         else
           {
-          if(atof(def) == atof(def2))
+          if(lhs == rhs)
             {
             *arg = "1";
             }
