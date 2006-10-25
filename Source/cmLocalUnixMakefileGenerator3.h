@@ -105,6 +105,11 @@ public:
   void SetWindowsShell(bool v)  {this->WindowsShell = v;}
 
   /**
+   * Set to true if the make tool being used is Watcom WMake.
+   */
+  void SetWatcomWMake(bool v)  {this->WatcomWMake = v;}
+
+  /**
    * Set to true if the shell being used is the MSYS shell.
    * This controls if statements in the makefile and the SHELL variable.
    * The default is false.

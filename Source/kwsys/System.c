@@ -222,7 +222,7 @@ static int kwsysSystem_Shell__GetArgumentSize(const char* in,
         }
       }
 
-    /* Check whether this character needs escaping.  */
+    /* Check whether this character needs escaping for the shell.  */
     if(isUnix)
       {
       /* On Unix a few special characters need escaping even inside a
@@ -261,7 +261,7 @@ static int kwsysSystem_Shell__GetArgumentSize(const char* in,
         }
       }
 
-    /* The dollar sign needs special handling in some environments.  */
+    /* Check whether this character needs escaping for a make tool.  */
     if(*c == '$')
       {
       if(flags & kwsysSystem_Shell_Flag_Make)
@@ -275,6 +275,16 @@ static int kwsysSystem_Shell__GetArgumentSize(const char* in,
         /* In a VS IDE a dollar is written "$" so we need two extra
            characters.  */
         size += 2;
+        }
+      }
+    else if(*c == '#')
+      {
+      if((flags & kwsysSystem_Shell_Flag_Make) &&
+         (flags & kwsysSystem_Shell_Flag_WatcomWMake))
+        {
+        /* In Watcom WMake makefiles a pound is written $# so we need
+           one extra character.  */
+        ++size;
         }
       }
     }
@@ -333,7 +343,7 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
         }
       }
 
-    /* Check whether this character needs escaping.  */
+    /* Check whether this character needs escaping for the shell.  */
     if(isUnix)
       {
       /* On Unix a few special characters need escaping even inside a
@@ -377,7 +387,7 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
         }
       }
 
-    /* The dollar sign needs special handling in some environments.  */
+    /* Check whether this character needs escaping for a make tool.  */
     if(*c == '$')
       {
       if(flags & kwsysSystem_Shell_Flag_Make)
@@ -403,6 +413,23 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
         {
         /* Otherwise a dollar is written just $. */
         *out++ = '$';
+        }
+      }
+    else if(*c == '#')
+      {
+      if((flags & kwsysSystem_Shell_Flag_Make) &&
+         (flags & kwsysSystem_Shell_Flag_WatcomWMake))
+        {
+        /* In Watcom WMake makefiles a pound is written $#.  The make
+           tool will replace it with just # before passing it to the
+           shell.  */
+        *out++ = '$';
+        *out++ = '#';
+        }
+      else
+        {
+        /* Otherwise a pound is written just #. */
+        *out++ = '#';
         }
       }
     else

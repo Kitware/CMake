@@ -278,6 +278,7 @@ protected:
   std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
   bool WindowsShell;
   bool WindowsVSIDE;
+  bool WatcomWMake;
   bool ForceUnixPath;
   bool MSYSShell;
   bool UseRelativePaths;
