@@ -766,34 +766,33 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
     // header stuff
     customRuleCode += "PreLink_Cmds=";
     }
-  const char* prelink_newline = "\\\n\t";
   for (std::vector<cmCustomCommand>::const_iterator cr =
          target.GetPreBuildCommands().begin();
        cr != target.GetPreBuildCommands().end(); ++cr)
     {
-    if(++prelink_count == prelink_total)
+    if(prelink_count++ > 0)
       {
-      prelink_newline = "";
+      customRuleCode += "\\\n\t";
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
                                             cr->GetWorkingDirectory(),
                                             cr->GetEscapeOldStyle(),
                                             cr->GetEscapeAllowMakeVars(),
-                                            prelink_newline);
+                                            "\\\n\t");
     }
   for (std::vector<cmCustomCommand>::const_iterator cr =
          target.GetPreLinkCommands().begin();
        cr != target.GetPreLinkCommands().end(); ++cr)
     {
-    if(++prelink_count == prelink_total)
+    if(prelink_count++ > 0)
       {
-      prelink_newline = "";
+      customRuleCode += "\\\n\t";
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
                                             cr->GetWorkingDirectory(),
                                             cr->GetEscapeOldStyle(),
                                             cr->GetEscapeAllowMakeVars(),
-                                            prelink_newline);
+                                            "\\\n\t");
     }
   if(prelink_total > 0)
     {
@@ -814,15 +813,15 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
          target.GetPostBuildCommands().begin();
        cr != target.GetPostBuildCommands().end(); ++cr)
     {
-    if(++postbuild_count == postbuild_total)
+    if(postbuild_count++ > 0)
       {
-      postbuild_newline = "";
+      customRuleCode += "\\\n\t";
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
                                             cr->GetWorkingDirectory(),
                                             cr->GetEscapeOldStyle(),
                                             cr->GetEscapeAllowMakeVars(),
-                                            postbuild_newline);
+                                            "\\\n\t");
     }
   if(postbuild_total > 0)
     {

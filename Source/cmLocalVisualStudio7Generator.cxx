@@ -1438,6 +1438,10 @@ void cmLocalVisualStudio7Generator
       fout << "\nCommandLine=\"";
       init = true;
       }
+    else
+      {
+      fout << "\n";
+      }
     std::string script =
       this->ConstructScript(cr->GetCommandLines(),
                             cr->GetWorkingDirectory(),
@@ -1463,6 +1467,10 @@ void cmLocalVisualStudio7Generator
       fout << "\nCommandLine=\"";
       init = true;
       }
+    else
+      {
+      fout << "\n";
+      }
     std::string script =
       this->ConstructScript(cr->GetCommandLines(),
                             cr->GetWorkingDirectory(),
@@ -1487,6 +1495,10 @@ void cmLocalVisualStudio7Generator
       {
       fout << "\nCommandLine=\"";
       init = true;
+      }
+    else
+      {
+      fout << "\n";
       }
     std::string script =
       this->ConstructScript(cr->GetCommandLines(),
