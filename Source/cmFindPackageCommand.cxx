@@ -54,80 +54,80 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
 
+  // Record options.
   this->Name = args[0];
-
-  // Build a list of required components.
-  std::string components;
-  const char* components_sep = "";
   bool quiet = false;
   bool required = false;
-  if(args.size() > 1)
+  bool no_module = false;
+  std::string components;
+  const char* components_sep = "";
+
+  // Parse the arguments.
+  bool doing_components = false;
+  cmsys::RegularExpression version("^[0-9.]+$");
+  bool haveVersion = false;
+  for(unsigned int i=1; i < args.size(); ++i)
     {
-    cmsys::RegularExpression version("^[0-9.]+$");
-    bool haveVersion = false;
-    for(unsigned int i=1; i < args.size(); ++i)
+    if(args[i] == "QUIET")
       {
-      if(!haveVersion && version.find(args[i].c_str()))
-        {
-        haveVersion = true;
-        }
-      else if(args[i] == "QUIET")
-        {
-        quiet = true;
-        }
-      else if(args[i] == "REQUIRED")
-        {
-        // The package is required.
-        required = true;
-
-        // Look for a list of required components.
-        while(++i < args.size())
-          {
-          // Stop looking when a known keyword argument is
-          // encountered.
-          if((args[i] == "QUIET") ||
-             (args[i] == "REQUIRED"))
-            {
-            --i;
-            break;
-            }
-          else
-            {
-            // Set a variable telling the find script this component
-            // is required.
-            std::string req_var = Name + "_FIND_REQUIRED_" + args[i];
-            this->Makefile->AddDefinition(req_var.c_str(), "1");
-
-            // Append to the list of required components.
-            components += components_sep;
-            components += args[i];
-            components_sep = ";";
-            }
-          }
-        }
-      else
-        {
-        cmOStringStream e;
-        e << "called with invalid argument \"" << args[i].c_str() << "\"";
-        this->SetError(e.str().c_str());
-        return false;
-        }
+      quiet = true;
+      doing_components = false;
       }
+    else if(args[i] == "NO_MODULE")
+      {
+      no_module = true;
+      doing_components = false;
+      }
+    else if(args[i] == "REQUIRED")
+      {
+      required = true;
+      doing_components = true;
+      }
+    else if(args[i] == "COMPONENTS")
+      {
+      doing_components = true;
+      }
+    else if(doing_components)
+      {
+      // Set a variable telling the find script this component
+      // is required.
+      std::string req_var = Name + "_FIND_REQUIRED_" + args[i];
+      this->Makefile->AddDefinition(req_var.c_str(), "1");
 
-    // Store the list of components.
-    std::string components_var = Name + "_FIND_COMPONENTS";
-    this->Makefile->AddDefinition(components_var.c_str(), components.c_str());
+      // Append to the list of required components.
+      components += components_sep;
+      components += args[i];
+      components_sep = ";";
+      }
+    else if(!haveVersion && version.find(args[i].c_str()))
+      {
+      haveVersion = true;
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "called with invalid argument \"" << args[i].c_str() << "\"";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     }
+
+  // Store the list of components.
+  std::string components_var = Name + "_FIND_COMPONENTS";
+  this->Makefile->AddDefinition(components_var.c_str(), components.c_str());
 
   // See if there is a Find<name>.cmake module.
-  bool foundModule = false;
-  if(!this->FindModule(foundModule, quiet, required))
+  if(!no_module)
     {
-    return false;
-    }
-  if(foundModule)
-    {
-    return true;
+    bool foundModule = false;
+    if(!this->FindModule(foundModule, quiet, required))
+      {
+      return false;
+      }
+    if(foundModule)
+      {
+      return true;
+      }
     }
 
   // No find module.  Assume the project has a CMake config file.  Use
