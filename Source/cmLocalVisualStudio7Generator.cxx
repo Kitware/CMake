@@ -1440,7 +1440,7 @@ void cmLocalVisualStudio7Generator
       }
     else
       {
-      fout << "\n";
+      fout << this->EscapeForXML("\n");
       }
     std::string script =
       this->ConstructScript(cr->GetCommandLines(),
@@ -1469,7 +1469,7 @@ void cmLocalVisualStudio7Generator
       }
     else
       {
-      fout << "\n";
+      fout << this->EscapeForXML("\n");
       }
     std::string script =
       this->ConstructScript(cr->GetCommandLines(),
@@ -1498,7 +1498,7 @@ void cmLocalVisualStudio7Generator
       }
     else
       {
-      fout << "\n";
+      fout << this->EscapeForXML("\n");
       }
     std::string script =
       this->ConstructScript(cr->GetCommandLines(),
