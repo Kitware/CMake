@@ -278,7 +278,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   if ( initialCheckoutCommand )
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
-      "   First perform the initil checkout: " << initialCheckoutCommand
+      "   First perform the initial checkout: " << initialCheckoutCommand
       << std::endl);
     cmStdString parent = cmSystemTools::GetParentDirectory(sourceDirectory);
     if ( parent.empty() )
