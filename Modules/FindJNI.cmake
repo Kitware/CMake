@@ -28,6 +28,17 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/j2sdk1.5-sun/jre/lib/amd64
   )
 
+SET(JAVA_JVM_LIBRARY_DIRECTORIES)
+FOREACH(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
+  SET(JAVA_JVM_LIBRARY_DIRECTORIES
+    ${JAVA_JVM_LIBRARY_DIRECTORIES}
+    "${dir}"
+    "${dir}/client"
+    "${dir}/server"
+    )
+ENDFOREACH(dir)
+
+
 SET(JAVA_AWT_INCLUDE_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
@@ -70,6 +81,9 @@ IF(APPLE)
     IF(NOT JAVA_AWT_LIBRARY)
       SET (JAVA_AWT_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
     ENDIF(NOT JAVA_AWT_LIBRARY)
+    IF(NOT JAVA_JVM_LIBRARY)
+      SET (JAVA_JVM_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
+    ENDIF(NOT JAVA_JVM_LIBRARY)
     SET(JAVA_AWT_INCLUDE_DIRECTORIES ${JAVA_AWT_INCLUDE_DIRECTORIES}
       ~/Library/Frameworks/JavaVM.framework/Headers
       /Library/Frameworks/JavaVM.framework/Headers
@@ -79,6 +93,9 @@ IF(APPLE)
 ELSE(APPLE)
   FIND_LIBRARY(JAVA_AWT_LIBRARY jawt 
     PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
+  )
+  FIND_LIBRARY(JAVA_JVM_LIBRARY jvm 
+    PATHS ${JAVA_JVM_LIBRARY_DIRECTORIES}
   )
 ENDIF(APPLE)
 
