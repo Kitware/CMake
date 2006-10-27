@@ -4,7 +4,9 @@
 # the library is. This code sets the following variables:
 #   
 #  JAVA_AWT_LIB_PATH     = the path to the jawt library
+#  JAVA_JVM_LIB_PATH     = the path to the jvm library
 #  JAVA_INCLUDE_PATH     = the include path to jni.h
+#  JAVA_INCLUDE_PATH2    = the include path to jni.h
 #  JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
 # 
 
@@ -115,6 +117,7 @@ FIND_PATH(JAVA_AWT_INCLUDE_PATH jawt.h
 
 MARK_AS_ADVANCED(
   JAVA_AWT_LIBRARY
+  JAVA_JVM_LIBRARY
   JAVA_AWT_INCLUDE_PATH
   JAVA_INCLUDE_PATH
   JAVA_INCLUDE_PATH2
