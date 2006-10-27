@@ -60,12 +60,12 @@ FOREACH(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
 ENDFOREACH(JAVA_PROG)
 
 IF(APPLE)
-  IF(EXISTS ~/Library/Frameworks/JavaEmbedding.framework)
+  IF(EXISTS ~/Library/Frameworks/JavaVM.framework)
     SET(JAVA_HAVE_FRAMEWORK 1)
-  ENDIF(EXISTS ~/Library/Frameworks/JavaEmbedding.framework)
-  IF(EXISTS /Library/Frameworks/JavaEmbedding.framework)
+  ENDIF(EXISTS ~/Library/Frameworks/JavaVM.framework)
+  IF(EXISTS /Library/Frameworks/JavaVM.framework)
     SET(JAVA_HAVE_FRAMEWORK 1)
-  ENDIF(EXISTS /Library/Frameworks/JavaEmbedding.framework)
+  ENDIF(EXISTS /Library/Frameworks/JavaVM.framework)
   IF(JAVA_HAVE_FRAMEWORK)
     IF(NOT JAVA_AWT_LIBRARY)
       SET (JAVA_AWT_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
@@ -74,9 +74,6 @@ IF(APPLE)
       ~/Library/Frameworks/JavaVM.framework/Headers
       /Library/Frameworks/JavaVM.framework/Headers
       /System/Library/Frameworks/JavaVM.framework/Headers
-      ~/Library/Frameworks/JavaEmbedding.framework/Headers
-      /Library/Frameworks/JavaEmbedding.framework/Headers
-      /System/Library/Frameworks/JavaEmbedding.framework/Headers
       )
   ENDIF(JAVA_HAVE_FRAMEWORK)
 ELSE(APPLE)
