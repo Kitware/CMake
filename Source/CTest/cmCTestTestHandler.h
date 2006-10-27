@@ -73,6 +73,20 @@ public:
    */
   bool SetTestsProperties(const std::vector<std::string>& args);
 
+  void Initialize();
+
+  struct cmCTestTestProperties
+  {
+    cmStdString Name;
+    cmStdString Directory;
+    std::vector<std::string> Args;
+    std::vector<cmsys::RegularExpression> ErrorRegularExpressions;
+    std::vector<cmsys::RegularExpression> RequiredRegularExpressions;
+    std::map<cmStdString, cmStdString> Measurements;
+    bool IsInBasedOnREOptions;
+    bool WillFail;
+  };
+
   struct cmCTestTestResult
   {
     std::string Name;
@@ -85,23 +99,10 @@ public:
     std::string Output;
     std::string RegressionImages;
     int         TestCount;
+    cmCTestTestProperties* Properties;
   };
-
-  void Initialize();
 
 protected:
-  struct cmCTestTestProperties
-  {
-    cmStdString Name;
-    cmStdString Directory;
-    std::vector<std::string> Args;
-    std::vector<cmsys::RegularExpression> ErrorRegularExpressions;
-    std::vector<cmsys::RegularExpression> RequiredRegularExpressions;
-    bool IsInBasedOnREOptions;
-    bool WillFail;
-  };
-
-
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
   virtual void GenerateTestCommand(std::vector<const char*>& args);

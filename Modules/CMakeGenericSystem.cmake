@@ -41,6 +41,14 @@ IF(CMAKE_GENERATOR MATCHES "Makefiles")
   MARK_AS_ADVANCED(CMAKE_COLOR_MAKEFILE)
 ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
 
+# Set a variable to indicate whether the value of CMAKE_INSTALL_PREFIX
+# was initialized by the block below.  This is useful for user
+# projects to change the default prefix while still allowing the
+# command line to override it.
+IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
+  SET(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 1)
+ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
+
 # Choose a default install prefix for this platform.
 IF(UNIX)
   SET(CMAKE_INSTALL_PREFIX "/usr/local"

@@ -32,6 +32,7 @@
 #define kwsysSystem_Shell_Flag_Make                  kwsys_ns(System_Shell_Flag_Make)
 #define kwsysSystem_Shell_Flag_VSIDE                 kwsys_ns(System_Shell_Flag_VSIDE)
 #define kwsysSystem_Shell_Flag_EchoWindows           kwsys_ns(System_Shell_Flag_EchoWindows)
+#define kwsysSystem_Shell_Flag_WatcomWMake           kwsys_ns(System_Shell_Flag_WatcomWMake)
 #define kwsysSystem_Shell_Flag_AllowMakeVariables    kwsys_ns(System_Shell_Flag_AllowMakeVariables)
 
 #if defined(__cplusplus)
@@ -82,12 +83,15 @@ enum kwsysSystem_Shell_Flag_e
   /** In a windows whell the argument is being passed to "echo".  */
   kwsysSystem_Shell_Flag_EchoWindows        = (1<<2),
 
+  /** The target shell is in a Watcom WMake makefile.  */
+  kwsysSystem_Shell_Flag_WatcomWMake        = (1<<3),
+
   /** Make variable reference syntax $(MAKEVAR) should not be escaped
       to allow a build tool to replace it.  Replacement values
       containing spaces, quotes, backslashes, or other
       non-alphanumeric characters that have significance to some makes
       or shells produce undefined behavior.  */
-  kwsysSystem_Shell_Flag_AllowMakeVariables = (1<<3)
+  kwsysSystem_Shell_Flag_AllowMakeVariables = (1<<4)
 };
 
 #if defined(__cplusplus)
@@ -107,6 +111,7 @@ enum kwsysSystem_Shell_Flag_e
 # undef kwsysSystem_Shell_Flag_Make
 # undef kwsysSystem_Shell_Flag_VSIDE
 # undef kwsysSystem_Shell_Flag_EchoWindows
+# undef kwsysSystem_Shell_Flag_WatcomWMake
 # undef kwsysSystem_Shell_Flag_AllowMakeVariables
 #endif
 

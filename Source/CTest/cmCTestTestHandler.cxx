@@ -605,9 +605,18 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       {
       inREcnt++;
       }
+
+    // if we are out of time then skip this test, we leave two minutes 
+    // to submit results
+    if (this->CTest->GetRemainingTimeAllowed() - 120 <= 0)
+      {
+      continue;
+      }
+
     const std::string& testname = it->Name;
     std::vector<std::string>& args = it->Args;
     cmCTestTestResult cres;
+    cres.Properties = &*it;
     cres.ExecutionTime = 0;
     cres.ReturnValue = -1;
     cres.Status = cmCTestTestHandler::NOT_RUN;
@@ -999,6 +1008,20 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
         << "\t\t\t<NamedMeasurement type=\"text/string\" "
         << "name=\"Completion Status\"><Value>"
         << result->CompletionStatus << "</Value></NamedMeasurement>\n";
+      }
+    os
+      << "\t\t\t<NamedMeasurement type=\"text/string\" "
+      << "name=\"Command Line\"><Value>"
+      << result->FullCommandLine << "</Value></NamedMeasurement>\n";
+    std::map<cmStdString,cmStdString>::iterator measureIt;
+    for ( measureIt = result->Properties->Measurements.begin();
+      measureIt != result->Properties->Measurements.end();
+      ++ measureIt )
+      {
+      os
+        << "\t\t\t<NamedMeasurement type=\"text/string\" "
+        << "name=\"" << measureIt->first.c_str() << "\"><Value>"
+        << measureIt->second.c_str() << "</Value></NamedMeasurement>\n";
       }
     os
       << "\t\t\t<Measurement>\n"
@@ -1633,6 +1656,20 @@ bool cmCTestTestHandler::SetTestsProperties(
               {
               rtit->ErrorRegularExpressions.push_back(
                 cmsys::RegularExpression(crit->c_str()));
+              }
+            }
+          if ( key == "MEASUREMENT" )
+            {
+            size_t pos = val.find_first_of("=");
+            if ( pos != val.npos )
+              {
+              std::string mKey = val.substr(0, pos);
+              const char* mVal = val.c_str() + pos + 1;
+              rtit->Measurements[mKey] = mVal;
+              }
+            else
+              {
+              rtit->Measurements[val] = "1";
               }
             }
           if ( key == "PASS_REGULAR_EXPRESSION" )

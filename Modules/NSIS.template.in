@@ -27,6 +27,16 @@
   InstallDir "$PROGRAMFILES\@CPACK_PACKAGE_INSTALL_DIRECTORY@"  
 
 ;--------------------------------
+;General
+
+  ;Name and file
+  Name "@CPACK_PACKAGE_INSTALL_DIRECTORY@"
+  OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
+
+  ;Set compression
+  SetCompressor @CPACK_NSIS_COMPRESSOR@
+
+;--------------------------------
 ; determine admin versus local install
 ; Is install for "AllUsers" or "JustMe"?
 ; Default to "JustMe" - set to "AllUsers" if admin or on Win9x
@@ -70,13 +80,6 @@ Function .onInit
 
   noOptionsPage:
 FunctionEnd
-
-;--------------------------------
-;General
-
-  ;Name and file
-  Name "@CPACK_PACKAGE_INSTALL_DIRECTORY@"
-  OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
 
 ;--------------------------------
 ;Interface Settings

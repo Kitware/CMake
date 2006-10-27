@@ -28,7 +28,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <expat.h>
+#include <cm_expat.h>
 
 #include "xmlrpc.h"
 #include "xmlrpc_int.h"

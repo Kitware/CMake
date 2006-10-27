@@ -364,7 +364,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->Makefile->AddFunctionBlocker(f);
 
   // finally read in the script
-  if (!this->Makefile->ReadListFile(0, script.c_str()))
+  if (!this->Makefile->ReadListFile(0, script.c_str()) ||
+    cmSystemTools::GetErrorOccuredFlag())
     {
     return 2;
     }
@@ -963,4 +964,25 @@ bool cmCTestScriptHandler::EmptyBinaryDirectory(const char *sname)
     return false;
     }
   return true;
+}
+
+//-------------------------------------------------------------------------
+double cmCTestScriptHandler::GetRemainingTimeAllowed()
+{
+  if (!this->Makefile)
+    {
+    return 1.0e7;
+    }
+
+  const char *timelimitS
+    = this->Makefile->GetDefinition("CTEST_TIME_LIMIT");
+  
+  if (!timelimitS)
+    {
+    return 1.0e7;
+    }
+
+  double timelimit = atof(timelimitS);
+  
+  return timelimit - cmSystemTools::GetTime() + this->ScriptStartTime;
 }

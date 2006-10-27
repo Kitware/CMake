@@ -531,13 +531,45 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   cleanObjs += ")";
   cmLocalGenerator::RuleVariables vars;
   vars.TargetPDB = targetOutPathPDB.c_str();
+
+  // Setup the target version.
+  std::string targetVersionMajor;
+  std::string targetVersionMinor;
+  {
+  cmOStringStream majorStream;
+  cmOStringStream minorStream;
+  int major;
+  int minor;
+  this->Target->GetTargetVersion(major, minor);
+  majorStream << major;
+  minorStream << minor;
+  targetVersionMajor = majorStream.str();
+  targetVersionMinor = minorStream.str();
+  }
+  vars.TargetVersionMajor = targetVersionMajor.c_str();
+  vars.TargetVersionMinor = targetVersionMinor.c_str();
+
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
   std::string objdir = cmake::GetCMakeFilesDirectoryPostSlash();
   objdir += this->Target->GetName();
   objdir += ".dir";
   vars.ObjectDir = objdir.c_str(); 
+  std::string targetLinkScriptPathReal;
+  if(useLinkScript)
+    {
+    // Paths in the link script are interpreted directly by the shell
+    // and not make.
+    targetLinkScriptPathReal =
+      this->Convert(targetFullPathReal.c_str(),
+                    cmLocalGenerator::START_OUTPUT,
+                    cmLocalGenerator::SHELL);
+    vars.Target = targetLinkScriptPathReal.c_str();
+    }
+  else
+    {
   vars.Target = targetOutPathReal.c_str();
+    }
   std::string linkString = linklibs.str();
   vars.LinkLibraries = linkString.c_str();
   vars.ObjectsQuoted = buildObjs.c_str();

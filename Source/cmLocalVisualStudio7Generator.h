@@ -112,6 +112,7 @@ private:
                        const std::vector<std::string>& depends,
                        const std::vector<std::string>& outputs,
                        const char* extraFlags);
+  void WriteTargetVersionAttribute(std::ostream& fout, cmTarget& target);
 
   void WriteGroup(const cmSourceGroup *sg, 
                   cmTarget target, std::ostream &fout, 

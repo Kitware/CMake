@@ -110,6 +110,8 @@ protected:
   //! Run install commands if specified
   virtual int InstallProjectViaInstallCommands(
     bool movable, const char* tempInstallDirectory);
+  virtual int InstallProjectViaInstallScript(
+    bool movable, const char* tempInstallDirectory);
   virtual int InstallProjectViaInstalledDirectories(
     bool movable, const char* tempInstallDirectory);
   virtual int InstallProjectViaInstallCMakeProjects(

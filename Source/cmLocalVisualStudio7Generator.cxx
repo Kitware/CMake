@@ -801,6 +801,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += targetFullName;
     fout << "\t\t\t\tOutputFile=\""
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
+    this->WriteTargetVersionAttribute(fout, target);
     for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
         i != flagMap.end(); ++i)
       {
@@ -885,6 +886,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += targetFullName;
     fout << "\t\t\t\tOutputFile=\"" 
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
+    this->WriteTargetVersionAttribute(fout, target);
     for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
         i != flagMap.end(); ++i)
       {
@@ -923,6 +925,17 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     case cmTarget::GLOBAL_TARGET:
       break;
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalVisualStudio7Generator
+::WriteTargetVersionAttribute(std::ostream& fout, cmTarget& target)
+{
+  int major;
+  int minor;
+  target.GetTargetVersion(major, minor);
+  fout << "\t\t\t\tVersion=\"" << major << "." << minor << "\"\n";
 }
 
 void cmLocalVisualStudio7Generator
@@ -1148,7 +1161,6 @@ void cmLocalVisualStudio7Generator
       {
       objectName = "";
       }
-
     // Add per-source flags.
     const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
     if(cflags)
@@ -1160,6 +1172,12 @@ void cmLocalVisualStudio7Generator
       ((*sf)->GetSourceExtension().c_str());
     const char* linkLanguage = target.GetLinkerLanguage
       (this->GetGlobalGenerator());
+
+    // If lang is set, the compiler will generate code automatically.
+    // If HEADER_FILE_ONLY is set, we must suppress this generation in
+    // the project file
+    bool excludedFromBuild = 
+      (lang && (*sf)->GetPropertyAsBool("HEADER_FILE_ONLY")); 
 
     // if the source file does not match the linker language
     // then force c or c++
@@ -1216,7 +1234,7 @@ void cmLocalVisualStudio7Generator
                               command->GetOutputs(), flags);
         }
       else if(compileFlags.size() || additionalDeps.length() 
-              || objectName.size())
+              || objectName.size() || excludedFromBuild)
         {
         const char* aCompilerTool = "VCCLCompilerTool";
         std::string ext = (*sf)->GetSourceExtension();
@@ -1238,8 +1256,13 @@ void cmLocalVisualStudio7Generator
           {
           fout << "\t\t\t\t<FileConfiguration\n"
                << "\t\t\t\t\tName=\""  << *i 
-               << "|" << this->PlatformName << "\">\n"
-               << "\t\t\t\t\t<Tool\n"
+               << "|" << this->PlatformName << "\"";
+          if(excludedFromBuild)
+            {
+            fout << " ExcludedFromBuild=\"true\"";
+            }
+          fout << ">\n";
+          fout << "\t\t\t\t\t<Tool\n"
                << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
           if(compileFlags.size())
             {
@@ -1415,6 +1438,10 @@ void cmLocalVisualStudio7Generator
       fout << "\nCommandLine=\"";
       init = true;
       }
+    else
+      {
+      fout << this->EscapeForXML("\n");
+      }
     std::string script = 
       this->ConstructScript(cr->GetCommandLines(),
                             cr->GetWorkingDirectory(),
@@ -1440,6 +1467,10 @@ void cmLocalVisualStudio7Generator
       fout << "\nCommandLine=\"";
       init = true;
       }
+    else
+      {
+      fout << this->EscapeForXML("\n");
+      }
     std::string script =
       this->ConstructScript(cr->GetCommandLines(),
                             cr->GetWorkingDirectory(),
@@ -1464,6 +1495,10 @@ void cmLocalVisualStudio7Generator
       {
       fout << "\nCommandLine=\"";
       init = true;
+      }
+    else
+      {
+      fout << this->EscapeForXML("\n");
       }
     std::string script = 
       this->ConstructScript(cr->GetCommandLines(),

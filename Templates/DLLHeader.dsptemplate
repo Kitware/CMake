@@ -71,7 +71,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /dll /machine:I386
-# ADD LINK32 /nologo /dll /machine:I386 /out:"LIBRARY_OUTPUT_PATHRelease/OUTPUT_NAME_RELEASE"
+# ADD LINK32 /nologo /dll TARGET_VERSION_FLAG /machine:I386 /out:"LIBRARY_OUTPUT_PATHRelease/OUTPUT_NAME_RELEASE"
 CM_MULTILINE_OPTIONS_RELEASE
 
 CMAKE_CUSTOM_RULE_CODE
@@ -103,7 +103,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 /nologo /dll /debug /machine:I386 /out:"LIBRARY_OUTPUT_PATHDebug/OUTPUT_NAME_DEBUG" /pdbtype:sept
+# ADD LINK32 /nologo /dll TARGET_VERSION_FLAG /debug /machine:I386 /out:"LIBRARY_OUTPUT_PATHDebug/OUTPUT_NAME_DEBUG" /pdbtype:sept
 CM_MULTILINE_OPTIONS_DEBUG
 
 CMAKE_CUSTOM_RULE_CODE
@@ -137,7 +137,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32  /nologo /dll /machine:I386 
-# ADD LINK32 /nologo /dll /machine:I386 /out:"LIBRARY_OUTPUT_PATHMinSizeRel/OUTPUT_NAME_MINSIZEREL"
+# ADD LINK32 /nologo /dll TARGET_VERSION_FLAG /machine:I386 /out:"LIBRARY_OUTPUT_PATHMinSizeRel/OUTPUT_NAME_MINSIZEREL"
 CM_MULTILINE_OPTIONS_MINSIZEREL
 
 CMAKE_CUSTOM_RULE_CODE
@@ -169,7 +169,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /dll /machine:I386 /pdbtype:sept
-# ADD LINK32 /nologo /dll /debug /machine:I386 /pdbtype:sept /out:"LIBRARY_OUTPUT_PATHRelWithDebInfo/OUTPUT_NAME_RELWITHDEBINFO"
+# ADD LINK32 /nologo /dll TARGET_VERSION_FLAG /debug /machine:I386 /pdbtype:sept /out:"LIBRARY_OUTPUT_PATHRelWithDebInfo/OUTPUT_NAME_RELWITHDEBINFO"
 CM_MULTILINE_OPTIONS_RELWITHDEBINFO
 
 CMAKE_CUSTOM_RULE_CODE

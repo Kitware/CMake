@@ -180,6 +180,12 @@ int cmCTestCoverageHandler::ProcessHandler()
 {
   int error = 0;
 
+  // do we have time for this
+  if (this->CTest->GetRemainingTimeAllowed() < 120)
+    {
+    return error;
+    }
+  
   std::string sourceDir
     = this->CTest->GetCTestConfiguration("SourceDirectory");
   std::string binaryDir
@@ -251,7 +257,8 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   if ( files.size() == 0 )
     {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, " Cannot find any coverage files."
+    cmCTestLog(this->CTest, WARNING,
+      " Cannot find any coverage files. Ignoring Coverage request."
       << std::endl);
     // No coverage files is a valid thing, so the exit code is 0
     cmSystemTools::ChangeDirectory(currentDirectory.c_str());
@@ -710,7 +717,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     std::string line;
     for ( cc= 0; cc < fcov.size(); cc ++ )
       {
-      if ( !cmSystemTools::GetLineFromStream(ifs, line) )
+      if ( !cmSystemTools::GetLineFromStream(ifs, line) &&
+        cc != fcov.size() -1 )
         {
         cmOStringStream ostr;
         ostr << "Problem reading source file: " << fullFileName.c_str()

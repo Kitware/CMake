@@ -27,7 +27,7 @@
 #ifndef  _XMLRPC_SERVER_H_
 #define  _XMLRPC_SERVER_H_ 1
 
-#include <xmlrpc.h>
+#include <cmxmlrpc/xmlrpc.h>
 
 #ifdef __cplusplus
 extern "C" {

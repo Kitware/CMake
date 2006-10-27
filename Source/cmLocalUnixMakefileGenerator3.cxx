@@ -51,6 +51,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->SkipPreprocessedSourceRules = false;
   this->SkipAssemblySourceRules = false;
   this->NativeEchoCommand = "@echo ";
+  this->NativeEchoWindows = true;
 }
 
 //----------------------------------------------------------------------------
@@ -1046,7 +1047,8 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
           {
           // Use the native echo command.
           cmd = this->NativeEchoCommand;
-          cmd += this->EscapeForShell(line.c_str(), false, true);
+          cmd += this->EscapeForShell(line.c_str(), false,
+                                      this->NativeEchoWindows);
           }
         else
           {

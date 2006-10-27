@@ -352,6 +352,13 @@ IF(BUILD_TESTING)
     SET(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
   ENDIF(NOT CMAKE_TEST_GENERATOR)
 
+  SET(CMAKE_TEST_SYSTEM_LIBRARIES 0)
+  FOREACH(util CURL EXPAT XMLRPC ZLIB)
+    IF(CMAKE_USE_SYSTEM_${util})
+      SET(CMAKE_TEST_SYSTEM_LIBRARIES 1)
+    ENDIF(CMAKE_USE_SYSTEM_${util})
+  ENDFOREACH(util)
+
   # This variable is set by cmake, however to
   # test cmake we want to make sure that 
   # the ctest from this cmake is used for testing
@@ -602,6 +609,7 @@ IF(BUILD_TESTING)
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"  
       --build-options
       -DCMAKE_TEST_DIFFERENT_GENERATOR:BOOL=${CMAKE_TEST_DIFFERENT_GENERATOR}
+      -DCMAKE_TEST_SYSTEM_LIBRARIES:BOOL=${CMAKE_TEST_SYSTEM_LIBRARIES}
       --test-command complex 
       )
 
@@ -615,6 +623,7 @@ IF(BUILD_TESTING)
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin" 
       --build-options
       -DCMAKE_TEST_DIFFERENT_GENERATOR:BOOL=${CMAKE_TEST_DIFFERENT_GENERATOR}
+      -DCMAKE_TEST_SYSTEM_LIBRARIES:BOOL=${CMAKE_TEST_SYSTEM_LIBRARIES}
       --test-command complex)
 
 #    ADD_TEST(complexRelativePaths  ${CMAKE_CTEST_COMMAND}

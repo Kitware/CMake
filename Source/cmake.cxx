@@ -996,6 +996,9 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string dirName = args[2];
       dirName += "/Progress";
       cmSystemTools::RemoveADirectory(dirName.c_str());
+      int count = atoi(args[3].c_str());
+      if (count)
+        {
       cmSystemTools::MakeDirectory(dirName.c_str());
       // write the count into the directory
       std::string fName = dirName;
@@ -1003,9 +1006,9 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       FILE *progFile = fopen(fName.c_str(),"w");
       if (progFile)
         {
-        int count = atoi(args[3].c_str());
         fprintf(progFile,"%i\n",count);
         fclose(progFile);
+        }
         }
       return 0;
       }
@@ -1017,6 +1020,21 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       dirName += "/Progress";
       std::string fName;
       FILE *progFile;
+
+      // read the count
+      fName = dirName;
+      fName += "/count.txt";
+      progFile = fopen(fName.c_str(),"r");
+      int count = 0;
+      if (!progFile)
+        {
+        return 0;
+        }
+      else
+        {
+        fscanf(progFile,"%i",&count);
+        fclose(progFile);
+        }
       unsigned int i;
       for (i = 3; i < args.size(); ++i)
         {
@@ -1032,20 +1050,10 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       int fileNum = static_cast<int>
         (cmsys::Directory::GetNumberOfFilesInDirectory(dirName.c_str()));
-      // read the count
-      fName = dirName;
-      fName += "/count.txt";
-      progFile = fopen(fName.c_str(),"r");
-      if (progFile)
-        {
-        int count = 0;
-        fscanf(progFile,"%i",&count);
         if (count > 0)
           {
           // print the progress
           fprintf(stdout,"[%3i%%] ",((fileNum-3)*100)/count);
-          }
-        fclose(progFile);
         }
       return 0;
       }
@@ -1710,7 +1718,6 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   this->SetArgs(args);
   if(cmSystemTools::GetErrorOccuredFlag())
     {
-    CMakeCommandUsage(args[0].c_str());
     return -1;
     }
 

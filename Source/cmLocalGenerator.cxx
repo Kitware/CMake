@@ -40,6 +40,7 @@ cmLocalGenerator::cmLocalGenerator()
   this->Parent = 0;
   this->WindowsShell = false;
   this->WindowsVSIDE = false;
+  this->WatcomWMake = false;
   this->MSYSShell = false;
   this->IgnoreLibPrefix = false;
   this->UseRelativePaths = false;
@@ -840,6 +841,28 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       {
       return this->TargetImplib;
       }
+    if(variable == "TARGET_VERSION_MAJOR")
+      {
+      if(replaceValues.TargetVersionMajor)
+        {
+        return replaceValues.TargetVersionMajor;
+        }
+      else
+        {
+        return "0";
+        }
+      }
+    if(variable == "TARGET_VERSION_MINOR")
+      {
+      if(replaceValues.TargetVersionMinor)
+        {
+        return replaceValues.TargetVersionMinor;
+        }
+      else
+        {
+        return "0";
+        }
+      }
     if(replaceValues.Target)
       {
     if(variable == "TARGET_BASE")
@@ -1629,7 +1652,9 @@ void cmLocalGenerator
       {
       // Compute the proper name to use to link this library.
       cmTarget* tgt = this->GlobalGenerator->FindTarget(0, lib.c_str());
-      if(tgt)
+      if(tgt && (tgt->GetType() == cmTarget::STATIC_LIBRARY ||
+                 tgt->GetType() == cmTarget::SHARED_LIBRARY ||
+                 tgt->GetType() == cmTarget::MODULE_LIBRARY))
         {
         // This is a CMake target.  Ask the target for its real name.
         // Pass the full path to the target file but purposely leave
@@ -2323,6 +2348,10 @@ std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
   if(forEcho)
     {
     flags |= cmsysSystem_Shell_Flag_EchoWindows;
+    }
+  if(this->WatcomWMake)
+    {
+    flags |= cmsysSystem_Shell_Flag_WatcomWMake;
     }
 
   // Compute the buffer size needed.

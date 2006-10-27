@@ -26,7 +26,7 @@
 #include "cmCPackLog.h"
 
 #include <cmsys/SystemTools.hxx>
-#include <cmzlib/zutil.h>
+#include <cm_zlib.h>
 #include <libtar/libtar.h>
 #include <memory> // auto_ptr
 #include <fcntl.h>
@@ -94,7 +94,7 @@ int cmCPackTGZ_Data_Open(void *client_data, const char* pathname,
     mydata->ZLibStream.opaque = Z_NULL;
     int strategy = Z_DEFAULT_STRATEGY;
     if ( deflateInit2(&mydata->ZLibStream, mydata->CompressionLevel,
-        Z_DEFLATED, -MAX_WBITS, DEF_MEM_LEVEL, strategy) != Z_OK )
+        Z_DEFLATED, -MAX_WBITS, 8, strategy) != Z_OK )
       {
       return -1;
       }
@@ -281,7 +281,8 @@ int cmCPackTGZGenerator::GenerateHeader(std::ostream* os)
     const int gz_magic[2] = {0x1f, 0x8b}; /* gzip magic header */
     char header[11];
     sprintf(header, "%c%c%c%c%c%c%c%c%c%c", gz_magic[0], gz_magic[1],
-      Z_DEFLATED, 0 /*flags*/, 0,0,0,0 /*time*/, 0 /*xflags*/, OS_CODE);
+            Z_DEFLATED, 0 /*flags*/, 0,0,0,0 /*time*/, 0 /*xflags*/,
+            3 /* zlib os code for UNIX, not really used anyway */);
     os->write(header, 10);
     }
   return 1;

@@ -29,7 +29,7 @@
 
 #include <stddef.h>
 #include <stdarg.h>
-#include <xmlrpc_config.h>
+#include <cmxmlrpc/xmlrpc_config.h>
 
 #ifdef HAVE_UNICODE_WCHAR
 #include <wchar.h>
@@ -778,7 +778,7 @@ char *xmlrpc_authcookie(void);
    in here.  For backward compatibility, we need to include it here, even
    though it really isn't logical to do so.
 */
-#include <xmlrpc_server.h>
+#include <cmxmlrpc/xmlrpc_server.h>
 
 #endif
 

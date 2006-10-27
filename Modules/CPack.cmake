@@ -56,6 +56,8 @@ cpack_set_if_not_set(CPACK_RESOURCE_FILE_README
 cpack_set_if_not_set(CPACK_RESOURCE_FILE_WELCOME
   "${CMAKE_ROOT}/Templates/CPack.GenericWelcome.txt")
 
+cpack_set_if_not_set(CPACK_MODULE_PATH "${CMAKE_MODULE_PATH}")
+
 IF(CPACK_NSIS_MODIFY_PATH)
   SET(CPACK_NSIS_MODIFY_PATH ON)
 ENDIF(CPACK_NSIS_MODIFY_PATH)

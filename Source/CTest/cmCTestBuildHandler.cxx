@@ -99,6 +99,7 @@ static const char* cmCTestErrorExceptions[] = {
   "candidates are:",
   ": warning",
   ": \\(Warning\\)",
+  ": note",
   "makefile:",
   "Makefile:",
   ":[ \\t]+Where:",
@@ -109,6 +110,7 @@ static const char* cmCTestErrorExceptions[] = {
 
 static const char* cmCTestWarningMatches[] = {
   "([^ :]+):([0-9]+): warning:",
+  "([^ :]+):([0-9]+): note:",
   "^cc[^C]*CC: WARNING File = ([^,]+), Line = ([0-9]+)",
   "^ld([^:])*:([ \\t])*WARNING([^:])*:",
   "([^:]+): warning ([0-9]+):",
@@ -247,6 +249,12 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 int cmCTestBuildHandler::ProcessHandler()
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "Build project" << std::endl);
+
+  // do we have time for this
+  if (this->CTest->GetRemainingTimeAllowed() < 120)
+    {
+    return 0;
+    }
 
   int entry;
   for ( entry = 0;

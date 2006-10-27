@@ -25,11 +25,10 @@ PURPOSE.  See the above copyright notices for more information.
 #include <cmsys/Base64.h>
 
 // For XML-RPC submission
-#include "xmlrpc.h"
-#include "xmlrpc_client.h"
+#include "cm_xmlrpc.h"
 
 // For curl submission
-#include "cmcurl/curl/curl.h"
+#include "cm_curl.h"
 
 #include <sys/stat.h>
 
@@ -644,12 +643,14 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
   const cmStdString& url)
 {
   xmlrpc_env env;
-  std::string ctestVersion = cmVersion::GetCMakeVersion();
+  char ctestString[] = "CTest";
+  std::string ctestVersionString = cmVersion::GetCMakeVersion();
+  char* ctestVersion = const_cast<char*>(ctestVersionString.c_str());
 
   cmStdString realURL = url + "/" + remoteprefix + "/Command/";
 
   /* Start up our XML-RPC client library. */
-  xmlrpc_client_init(XMLRPC_CLIENT_NO_FLAGS, "CTest", ctestVersion.c_str());
+  xmlrpc_client_init(XMLRPC_CLIENT_NO_FLAGS, ctestString, ctestVersion);
 
   /* Initialize our error-handling environment. */
   xmlrpc_env_init(&env);
@@ -697,9 +698,9 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
       }
     fclose(fp);
 
-    std::string remoteCommand = "Submit.put";
-    result = xmlrpc_client_call(&env, realURL.c_str(),
-      remoteCommand.c_str(),
+    char remoteCommand[] = "Submit.put";
+    char* pRealURL = const_cast<char*>(realURL.c_str());
+    result = xmlrpc_client_call(&env, pRealURL, remoteCommand,
       "(6)", fileBuffer, (xmlrpc_int32)fileSize );
 
     delete [] fileBuffer;

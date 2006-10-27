@@ -372,6 +372,24 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   vars.Objects = buildObjs.c_str();
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();
+
+  // Setup the target version.
+  std::string targetVersionMajor;
+  std::string targetVersionMinor;
+  {
+  cmOStringStream majorStream;
+  cmOStringStream minorStream;
+  int major;
+  int minor;
+  this->Target->GetTargetVersion(major, minor);
+  majorStream << major;
+  minorStream << minor;
+  targetVersionMajor = majorStream.str();
+  targetVersionMinor = minorStream.str();
+  }
+  vars.TargetVersionMajor = targetVersionMajor.c_str();
+  vars.TargetVersionMinor = targetVersionMinor.c_str();
+
   std::string linkString = linklibs.str();
   vars.LinkLibraries = linkString.c_str();
   vars.Flags = flags.c_str();

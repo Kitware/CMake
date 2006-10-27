@@ -14,7 +14,7 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include "cmcurl/curl/curl.h"
+#include "cm_curl.h"
 
 #include "cmCTest.h"
 #include "cmake.h"
@@ -568,6 +568,11 @@ bool cmCTest::UpdateCTestConfiguration()
       }
     fin.close();
     }
+  if ( !this->GetCTestConfiguration("BuildDirectory").empty() )
+    {
+    this->BinaryDir = this->GetCTestConfiguration("BuildDirectory");
+    cmSystemTools::ChangeDirectory(this->BinaryDir.c_str());
+    }
   this->TimeOut = atoi(this->GetCTestConfiguration("TimeOut").c_str());
   if ( this->ProduceXML )
     {
@@ -787,7 +792,8 @@ int cmCTest::ProcessTests()
       break;
       }
     }
-  if ( this->Tests[UPDATE_TEST] || this->Tests[ALL_TEST] )
+  if (( this->Tests[UPDATE_TEST] || this->Tests[ALL_TEST] ) &&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     cmCTestGenericHandler* uphandler = this->GetHandler("update");
     uphandler->SetPersistentOption("SourceDirectory",
@@ -802,14 +808,16 @@ int cmCTest::ProcessTests()
     {
     return 0;
     }
-  if ( this->Tests[CONFIGURE_TEST] || this->Tests[ALL_TEST] )
+  if (( this->Tests[CONFIGURE_TEST] || this->Tests[ALL_TEST] )&&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     if (this->GetHandler("configure")->ProcessHandler() < 0)
       {
       res |= cmCTest::CONFIGURE_ERRORS;
       }
     }
-  if ( this->Tests[BUILD_TEST] || this->Tests[ALL_TEST] )
+  if (( this->Tests[BUILD_TEST] || this->Tests[ALL_TEST] )&&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("build")->ProcessHandler() < 0)
@@ -817,7 +825,8 @@ int cmCTest::ProcessTests()
       res |= cmCTest::BUILD_ERRORS;
       }
     }
-  if ( this->Tests[TEST_TEST] || this->Tests[ALL_TEST] || notest )
+  if (( this->Tests[TEST_TEST] || this->Tests[ALL_TEST] || notest ) &&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("test")->ProcessHandler() < 0)
@@ -825,7 +834,8 @@ int cmCTest::ProcessTests()
       res |= cmCTest::TEST_ERRORS;
       }
     }
-  if ( this->Tests[COVERAGE_TEST] || this->Tests[ALL_TEST] )
+  if (( this->Tests[COVERAGE_TEST] || this->Tests[ALL_TEST] ) &&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("coverage")->ProcessHandler() < 0)
@@ -833,7 +843,8 @@ int cmCTest::ProcessTests()
       res |= cmCTest::COVERAGE_ERRORS;
       }
     }
-  if ( this->Tests[MEMCHECK_TEST] || this->Tests[ALL_TEST] )
+  if (( this->Tests[MEMCHECK_TEST] || this->Tests[ALL_TEST] )&&
+      (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("memcheck")->ProcessHandler() < 0)
@@ -1104,6 +1115,19 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
     }
+
+  // do we have time for
+  double timeout = this->GetRemainingTimeAllowed() - 120;
+  if (this->TimeOut && this->TimeOut < timeout)
+    {
+    timeout = this->TimeOut;
+    }
+  // always have at least 1 second if we got to here
+  if (timeout <= 0)
+    {
+    timeout = 1;
+    }
+
   cmsysProcess_SetTimeout(cp, this->TimeOut);
   cmsysProcess_Execute(cp);
 
@@ -1300,159 +1324,12 @@ bool cmCTest::SubmitExtraFiles(const char* cfiles)
   return this->SubmitExtraFiles(files);
 }
 
-//----------------------------------------------------------------------
-bool cmCTest::CheckArgument(const std::string& arg, const char* varg1,
-  const char* varg2)
+
+//-------------------------------------------------------
+// for a -D argument convert the next argument into 
+// the proper list of dashboard steps via SetTest
+bool cmCTest::AddTestsForDashboardType(std::string &targ)
 {
-  if ( varg1 && arg == varg1 || varg2 && arg == varg2 )
-    {
-    return true;
-    }
-  return false;
-}
-
-//----------------------------------------------------------------------
-int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
-{
-  this->FindRunningCMake(args[0].c_str());
-  const char* ctestExec = "ctest";
-  bool cmakeAndTest = false;
-  bool performSomeTest = true;
-  bool SRArgumentSpecified = false;
-
-  // copy the command line
-  for(size_t i=0; i < args.size(); ++i)
-    {
-    this->InitialCommandLineArguments.push_back(args[i]);
-    }
-  for(size_t i=1; i < args.size(); ++i)
-    {
-    std::string arg = args[i];
-    if(this->CheckArgument(arg, "--ctest-config") && i < args.size() - 1)
-      {
-      i++;
-      this->CTestConfigFile= args[i];
-      }
-
-    if(this->CheckArgument(arg, "-C", "--build-config") &&
-      i < args.size() - 1)
-      {
-      i++;
-      this->ConfigType = args[i];
-      cmSystemTools::ReplaceString(this->ConfigType, ".\\", "");
-      if ( !this->ConfigType.empty() )
-        {
-        std::string confTypeEnv
-          = "CMAKE_CONFIG_TYPE=" + this->ConfigType;
-        cmSystemTools::PutEnv(confTypeEnv.c_str());
-        }
-      }
-
-    if(this->CheckArgument(arg, "--debug"))
-      {
-      this->Debug = true;
-      this->ShowLineNumbers = true;
-      }
-    if(this->CheckArgument(arg, "--track") && i < args.size() - 1)
-      {
-      i++;
-      this->SpecificTrack = args[i];
-      }
-    if(this->CheckArgument(arg, "--show-line-numbers"))
-      {
-      this->ShowLineNumbers = true;
-      }
-    if(this->CheckArgument(arg, "-Q", "--quiet"))
-      {
-      this->Quiet = true;
-      }
-    if(this->CheckArgument(arg, "-V", "--verbose"))
-      {
-      this->Verbose = true;
-      }
-    if(this->CheckArgument(arg, "-VV", "--extra-verbose"))
-      {
-      this->ExtraVerbose = true;
-      this->Verbose = true;
-      }
-
-    if(this->CheckArgument(arg, "-N", "--show-only"))
-      {
-      this->ShowOnly = true;
-      }
-
-    if(this->CheckArgument(arg, "-SP", "--script-new-process") && 
-       i < args.size() - 1 )
-      {
-      this->RunConfigurationScript = true;
-      i++;
-      cmCTestScriptHandler* ch
-        = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
-      // -SR is an internal argument, -SP should be ignored when it is passed
-      if (!SRArgumentSpecified)
-        {
-        ch->AddConfigurationScript(args[i].c_str(),false);
-        }
-      }
-
-    if(this->CheckArgument(arg, "-SR", "--script-run") && 
-       i < args.size() - 1 )
-      {
-      SRArgumentSpecified = true;
-      this->RunConfigurationScript = true;
-      i++;
-      cmCTestScriptHandler* ch
-        = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
-      ch->AddConfigurationScript(args[i].c_str(),true);
-      }
-
-    if(this->CheckArgument(arg, "-S", "--script") && i < args.size() - 1 )
-      {
-      this->RunConfigurationScript = true;
-      i++;
-      cmCTestScriptHandler* ch
-        = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
-      // -SR is an internal argument, -S should be ignored when it is passed
-      if (!SRArgumentSpecified)
-        {
-        ch->AddConfigurationScript(args[i].c_str(),true);
-        }
-      }
-
-    if(this->CheckArgument(arg, "-O", "--output-log") && i < args.size() - 1 )
-      {
-      i++;
-      this->SetOutputLogFileName(args[i].c_str());
-      }
-
-    if(this->CheckArgument(arg, "--tomorrow-tag"))
-      {
-      this->TomorrowTag = true;
-      }
-    if(this->CheckArgument(arg, "--force-new-ctest-process"))
-      {
-      this->ForceNewCTestProcess = true;
-      }
-    if(this->CheckArgument(arg, "--interactive-debug-mode") &&
-      i < args.size() - 1 )
-      {
-      i++;
-      this->InteractiveDebugMode = cmSystemTools::IsOn(args[i].c_str());
-      }
-    if(this->CheckArgument(arg, "--submit-index") && i < args.size() - 1 )
-      {
-      i++;
-      this->SubmitIndex = atoi(args[i].c_str());
-      if ( this->SubmitIndex < 0 )
-        {
-        this->SubmitIndex = 0;
-        }
-      }
-    if(this->CheckArgument(arg, "-D", "--dashboard") && i < args.size() - 1 )
-      {
-      this->ProduceXML = true;
-      i++;
-      std::string targ = args[i];
       if ( targ == "Experimental" )
         {
         this->SetTestModel(cmCTest::EXPERIMENTAL);
@@ -1631,84 +1508,144 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         }
       else
         {
-        performSomeTest = false;
         cmCTestLog(this, ERROR_MESSAGE,
-          "CTest -D called with incorrect option: " << targ << std::endl);
+               "CTest -D called with incorrect option: "
+               << targ << std::endl);
         cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
-          << "  " << ctestExec << " -D Continuous" << std::endl
-          << "  " << ctestExec
+               << "  " << "ctest" << " -D Continuous" << std::endl
+               << "  " << "ctest"
           << " -D Continuous(Start|Update|Configure|Build)" << std::endl
-          << "  " << ctestExec
-          << " -D Continuous(Test|Coverage|MemCheck|Submit)" << std::endl
-          << "  " << ctestExec << " -D Experimental" << std::endl
-          << "  " << ctestExec
-          << " -D Experimental(Start|Update|Configure|Build)" << std::endl
-          << "  " << ctestExec
-          << " -D Experimental(Test|Coverage|MemCheck|Submit)" << std::endl
-          << "  " << ctestExec << " -D Nightly" << std::endl
-          << "  " << ctestExec
+               << "  " << "ctest"
+               << " -D Continuous(Test|Coverage|MemCheck|Submit)"
+               << std::endl
+               << "  " << "ctest" << " -D Experimental" << std::endl
+               << "  " << "ctest"
+               << " -D Experimental(Start|Update|Configure|Build)"
+               << std::endl
+               << "  " << "ctest"
+               << " -D Experimental(Test|Coverage|MemCheck|Submit)"
+               << std::endl
+               << "  " << "ctest" << " -D Nightly" << std::endl
+               << "  " << "ctest"
           << " -D Nightly(Start|Update|Configure|Build)" << std::endl
-          << "  " << ctestExec
+               << "  " << "ctest"
           << " -D Nightly(Test|Coverage|MemCheck|Submit)" << std::endl
-          << "  " << ctestExec << " -D NightlyMemoryCheck" << std::endl);
+               << "  " << "ctest" << " -D NightlyMemoryCheck" << std::endl);
+    return false;
         }
-      }
+  return true;
+}
 
-    if(this->CheckArgument(arg, "-T", "--test-action") &&
-      (i < args.size() -1) )
-      {
-      this->ProduceXML = true;
-      i++;
-      if ( !this->SetTest(args[i].c_str(), false) )
-        {
-        performSomeTest = false;
-        cmCTestLog(this, ERROR_MESSAGE,
-          "CTest -T called with incorrect option: "
-          << args[i].c_str() << std::endl);
-        cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
-          << "  " << ctestExec << " -T all" << std::endl
-          << "  " << ctestExec << " -T start" << std::endl
-          << "  " << ctestExec << " -T update" << std::endl
-          << "  " << ctestExec << " -T configure" << std::endl
-          << "  " << ctestExec << " -T build" << std::endl
-          << "  " << ctestExec << " -T test" << std::endl
-          << "  " << ctestExec << " -T coverage" << std::endl
-          << "  " << ctestExec << " -T memcheck" << std::endl
-          << "  " << ctestExec << " -T notes" << std::endl
-          << "  " << ctestExec << " -T submit" << std::endl);
-        }
-      }
 
-    if(this->CheckArgument(arg, "-M", "--test-model") &&
-      (i < args.size() -1) )
+//----------------------------------------------------------------------
+bool cmCTest::CheckArgument(const std::string& arg, const char* varg1,
+  const char* varg2)
+{
+  if ( varg1 && arg == varg1 || varg2 && arg == varg2 )
+    {
+    return true;
+      }
+  return false;
+}
+
+
+//----------------------------------------------------------------------
+// Processes one command line argument (and its arguments if any) 
+// for many simple options and then returns
+void cmCTest::HandleCommandLineArguments(size_t &i, 
+                                         std::vector<std::string> &args)
+{
+  std::string arg = args[i];
+  if(this->CheckArgument(arg, "--ctest-config") && i < args.size() - 1)
       {
       i++;
-      std::string const& str = args[i];
-      if ( cmSystemTools::LowerCase(str) == "nightly" )
+    this->CTestConfigFile= args[i];
+    }
+  
+  if(this->CheckArgument(arg, "-C", "--build-config") &&
+     i < args.size() - 1)
         {
-        this->SetTestModel(cmCTest::NIGHTLY);
+    i++;
+    this->SetConfigType(args[i].c_str());
+    }
+  
+  if(this->CheckArgument(arg, "--debug"))
+    {
+    this->Debug = true;
+    this->ShowLineNumbers = true;
+    }
+  if(this->CheckArgument(arg, "--track") && i < args.size() - 1)
+    {
+    i++;
+    this->SpecificTrack = args[i];
+    }
+  if(this->CheckArgument(arg, "--show-line-numbers"))
+    {
+    this->ShowLineNumbers = true;
+    }
+  if(this->CheckArgument(arg, "-Q", "--quiet"))
+    {
+    this->Quiet = true;
         }
-      else if ( cmSystemTools::LowerCase(str) == "continuous" )
-        {
-        this->SetTestModel(cmCTest::CONTINUOUS);
-        }
-      else if ( cmSystemTools::LowerCase(str) == "experimental" )
-        {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
-        }
-      else
-        {
-        performSomeTest = false;
-        cmCTestLog(this, ERROR_MESSAGE,
-          "CTest -M called with incorrect option: " << str.c_str()
-          << std::endl);
-        cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
-          << "  " << ctestExec << " -M Continuous" << std::endl
-          << "  " << ctestExec << " -M Experimental" << std::endl
-          << "  " << ctestExec << " -M Nightly" << std::endl);
-        }
+  if(this->CheckArgument(arg, "-V", "--verbose"))
+    {
+    this->Verbose = true;
+    }
+  if(this->CheckArgument(arg, "-VV", "--extra-verbose"))
+    {
+    this->ExtraVerbose = true;
+    this->Verbose = true;
       }
 
+  if(this->CheckArgument(arg, "-N", "--show-only"))
+    {
+    this->ShowOnly = true;
+    }
+
+  if(this->CheckArgument(arg, "-O", "--output-log") && i < args.size() - 1 )
+      {
+      i++;
+    this->SetOutputLogFileName(args[i].c_str());
+    }
+
+  if(this->CheckArgument(arg, "--tomorrow-tag"))
+        {
+    this->TomorrowTag = true;
+        }
+  if(this->CheckArgument(arg, "--force-new-ctest-process"))
+        {
+    this->ForceNewCTestProcess = true;
+        }
+  if(this->CheckArgument(arg, "--interactive-debug-mode") &&
+     i < args.size() - 1 )
+        {
+    i++;
+    this->InteractiveDebugMode = cmSystemTools::IsOn(args[i].c_str());
+        }
+  if(this->CheckArgument(arg, "--submit-index") && i < args.size() - 1 )
+        {
+    i++;
+    this->SubmitIndex = atoi(args[i].c_str());
+    if ( this->SubmitIndex < 0 )
+      {
+      this->SubmitIndex = 0;
+      }
+    }
+  
+  if(this->CheckArgument(arg, "--overwrite") && i < args.size() - 1)
+    {
+    i++;
+    this->AddCTestConfigurationOverwrite(args[i].c_str());
+        }
+  if(this->CheckArgument(arg, "-A", "--add-notes") && i < args.size() - 1)
+    {
+    this->ProduceXML = true;
+    this->SetTest("Notes");
+    i++;
+    this->SetNotesFiles(args[i].c_str());
+      }
+
+  // options that control what tests are run
     if(this->CheckArgument(arg, "-I", "--tests-information") &&
       i < args.size() - 1)
       {
@@ -1741,19 +1678,150 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       this->GetHandler("memcheck")->
         SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
       }
+}
 
-    if(this->CheckArgument(arg, "--overwrite") && i < args.size() - 1)
+//----------------------------------------------------------------------
+// handle the -S -SR and -SP arguments
+void cmCTest::HandleScriptArguments(size_t &i, 
+                                    std::vector<std::string> &args,
+                                    bool &SRArgumentSpecified)
+{
+  std::string arg = args[i];
+  if(this->CheckArgument(arg, "-SP", "--script-new-process") && 
+     i < args.size() - 1 )
       {
+    this->RunConfigurationScript = true;
       i++;
-      this->AddCTestConfigurationOverwrite(args[i].c_str());
+    cmCTestScriptHandler* ch
+      = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+    // -SR is an internal argument, -SP should be ignored when it is passed
+    if (!SRArgumentSpecified)
+      {
+      ch->AddConfigurationScript(args[i].c_str(),false);
       }
-    if(this->CheckArgument(arg, "-A", "--add-notes") && i < args.size() - 1)
+    }
+  
+  if(this->CheckArgument(arg, "-SR", "--script-run") && 
+     i < args.size() - 1 )
+    {
+    SRArgumentSpecified = true;
+    this->RunConfigurationScript = true;
+    i++;
+    cmCTestScriptHandler* ch
+      = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+    ch->AddConfigurationScript(args[i].c_str(),true);
+    }
+  
+  if(this->CheckArgument(arg, "-S", "--script") && i < args.size() - 1 )
+    {
+    this->RunConfigurationScript = true;
+    i++;
+    cmCTestScriptHandler* ch
+      = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+    // -SR is an internal argument, -S should be ignored when it is passed
+    if (!SRArgumentSpecified)
+      {
+      ch->AddConfigurationScript(args[i].c_str(),true);
+      }
+    }
+}
+
+//----------------------------------------------------------------------
+// the main entry point of ctest, called from main
+int cmCTest::Run(std::vector<std::string> &args, std::string* output)
+{
+  this->FindRunningCMake(args[0].c_str());
+  const char* ctestExec = "ctest";
+  bool cmakeAndTest = false;
+  bool performSomeTest = true;
+  bool SRArgumentSpecified = false;
+
+  // copy the command line
+  for(size_t i=0; i < args.size(); ++i)
+    {
+    this->InitialCommandLineArguments.push_back(args[i]);
+    }
+
+  // process the command line arguments
+  for(size_t i=1; i < args.size(); ++i)
+    {
+    // handle the simple commandline arguments
+    this->HandleCommandLineArguments(i,args);
+
+    // handle the script arguments -S -SR -SP
+    this->HandleScriptArguments(i,args,SRArgumentSpecified);
+
+    // handle a request for a dashboard
+    std::string arg = args[i];
+    if(this->CheckArgument(arg, "-D", "--dashboard") && i < args.size() - 1 )
       {
       this->ProduceXML = true;
-      this->SetTest("Notes");
       i++;
-      this->SetNotesFiles(args[i].c_str());
+      std::string targ = args[i];
+      // AddTestsForDashboard parses the dashborad type and converts it
+      // into the seperate stages
+      if (!this->AddTestsForDashboardType(targ))
+        {
+        performSomeTest = false;
+        }
       }
+
+    if(this->CheckArgument(arg, "-T", "--test-action") &&
+      (i < args.size() -1) )
+      {
+      this->ProduceXML = true;
+      i++;
+      if ( !this->SetTest(args[i].c_str(), false) )
+        {
+        performSomeTest = false;
+        cmCTestLog(this, ERROR_MESSAGE,
+          "CTest -T called with incorrect option: "
+          << args[i].c_str() << std::endl);
+        cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
+          << "  " << ctestExec << " -T all" << std::endl
+          << "  " << ctestExec << " -T start" << std::endl
+          << "  " << ctestExec << " -T update" << std::endl
+          << "  " << ctestExec << " -T configure" << std::endl
+          << "  " << ctestExec << " -T build" << std::endl
+          << "  " << ctestExec << " -T test" << std::endl
+          << "  " << ctestExec << " -T coverage" << std::endl
+          << "  " << ctestExec << " -T memcheck" << std::endl
+          << "  " << ctestExec << " -T notes" << std::endl
+          << "  " << ctestExec << " -T submit" << std::endl);
+        }
+      }
+
+    // what type of test model
+    if(this->CheckArgument(arg, "-M", "--test-model") &&
+      (i < args.size() -1) )
+      {
+      i++;
+      std::string const& str = args[i];
+      if ( cmSystemTools::LowerCase(str) == "nightly" )
+        {
+        this->SetTestModel(cmCTest::NIGHTLY);
+        }
+      else if ( cmSystemTools::LowerCase(str) == "continuous" )
+        {
+        this->SetTestModel(cmCTest::CONTINUOUS);
+        }
+      else if ( cmSystemTools::LowerCase(str) == "experimental" )
+        {
+        this->SetTestModel(cmCTest::EXPERIMENTAL);
+        }
+      else
+        {
+        performSomeTest = false;
+        cmCTestLog(this, ERROR_MESSAGE,
+          "CTest -M called with incorrect option: " << str.c_str()
+          << std::endl);
+        cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
+          << "  " << ctestExec << " -M Continuous" << std::endl
+          << "  " << ctestExec << " -M Experimental" << std::endl
+                   << "  " << ctestExec << " -M Nightly" << std::endl);
+        }
+      }
+
     if(this->CheckArgument(arg, "--extra-submit") && i < args.size() - 1)
       {
       this->ProduceXML = true;
@@ -1764,11 +1832,16 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         return 0;
         }
       }
+
     // --build-and-test options
     if(this->CheckArgument(arg, "--build-and-test") && i < args.size() - 1)
       {
       cmakeAndTest = true;
       }
+
+    // pass the argument to all the handlers as well, but i may no longer be
+    // set to what it was originally so I'm not sure this is working as
+    // intended
     cmCTest::t_TestingHandlers::iterator it;
     for ( it = this->TestingHandlers.begin();
       it != this->TestingHandlers.end();
@@ -1781,16 +1854,19 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         return 0;
         }
       }
-    }
+    } // the close of the for argument loop
 
-  // default to the build type of ctest itself
+
+  // default to the build type of ctest itself if there is one
+#ifdef  CMAKE_INTDIR
   if(this->ConfigType.size() == 0)
     {
-#ifdef  CMAKE_INTDIR
-    this->ConfigType = CMAKE_INTDIR;
-#endif
+    this->SetConfigType(CMAKE_INTDIR);
     }
+#endif
 
+  // now what sould cmake do? if --build-and-test was specified then 
+  // we run the build and test handler and return
   if(cmakeAndTest)
     {
     this->Verbose = true;
@@ -1804,7 +1880,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     return retv;
     }
 
-  if(performSomeTest )
+  // if some tests must be run 
+  if(performSomeTest)
     {
     int res;
     // call process directory
@@ -1837,11 +1914,9 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         it->second->SetVerbose(this->Verbose);
         it->second->SetSubmitIndex(this->SubmitIndex);
         }
-      cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
       if ( !this->Initialize(
           cmSystemTools::GetCurrentWorkingDirectory().c_str()) )
         {
-        cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
         res = 12;
         cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard."
           << std::endl);
@@ -1854,6 +1929,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       }
     return res;
     }
+
   return 1;
 }
 
@@ -2230,6 +2306,16 @@ void cmCTest::AddCTestConfigurationOverwrite(const char* encstr)
 }
 
 //----------------------------------------------------------------------
+void cmCTest::SetConfigType(const char* ct)
+{
+  this->ConfigType = ct?ct:"";
+  cmSystemTools::ReplaceString(this->ConfigType, ".\\", "");
+  std::string confTypeEnv
+    = "CMAKE_CONFIG_TYPE=" + this->ConfigType;
+  cmSystemTools::PutEnv(confTypeEnv.c_str());
+}
+
+//----------------------------------------------------------------------
 bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
   const char* dconfig, const char* cmake_var)
 {
@@ -2480,3 +2566,16 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg)
     }
 }
 
+//-------------------------------------------------------------------------
+double cmCTest::GetRemainingTimeAllowed()
+{
+  if (!this->GetHandler("script"))
+    {
+    return 1.0e7;
+    }
+
+  cmCTestScriptHandler* ch
+    = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+
+  return ch->GetRemainingTimeAllowed();
+}

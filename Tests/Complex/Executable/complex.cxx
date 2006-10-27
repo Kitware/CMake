@@ -8,7 +8,7 @@
 extern "C" {
 #include "testConly.h"
 }
-#ifndef CMAKE_TEST_DIFFERENT_GENERATOR
+#ifdef COMPLEX_TEST_CMAKELIB
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 #include "cmDynamicLoader.h"
@@ -64,7 +64,7 @@ void cmPassed(const char* Message, const char* m2="")
 This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
 #endif
 
-#ifndef CMAKE_TEST_DIFFERENT_GENERATOR
+#ifdef COMPLEX_TEST_CMAKELIB
 // Here is a stupid function that tries to use std::string methods
 // so that the dec cxx compiler will instantiate the stuff that
 // we are using from the CMakeLib library....
@@ -327,7 +327,7 @@ int main()
 #endif
   std::string exe = lib;
 
-#ifndef CMAKE_TEST_DIFFERENT_GENERATOR  
+#ifdef COMPLEX_TEST_CMAKELIB  
   // Test a single character executable to test a: in makefiles
   exe += "A";
   exe += cmSystemTools::GetExecutableExtension();
@@ -1059,7 +1059,7 @@ int main()
     }
 #endif
 
-#ifndef CMAKE_TEST_DIFFERENT_GENERATOR  
+#ifdef COMPLEX_TEST_CMAKELIB  
   // ----------------------------------------------------------------------
   // Some pre-build/pre-link/post-build custom-commands have been
   // attached to the lib (see Library/).
@@ -1257,7 +1257,7 @@ int main()
   cmPassed("CMake SET CACHE FORCE");
 #endif
 
-#ifndef CMAKE_TEST_DIFFERENT_GENERATOR
+#ifdef COMPLEX_TEST_CMAKELIB
   // first run with shouldFail = true, this will
   // run with A B C as set by the CMakeList.txt file.
   if(!TestLibraryOrder(true))

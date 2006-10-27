@@ -48,7 +48,7 @@
 #  include <libtar/libtar.h>
 #  include <memory> // auto_ptr
 #  include <fcntl.h>
-#  include <cmzlib/zlib.h>
+#  include <cm_zlib.h>
 #endif
 
 #if defined(__sgi) && !defined(__GNUC__)
@@ -1439,7 +1439,7 @@ int cmSystemToolsGZStructOpen(void* call_data, const char *pathname,
     }
 #endif
 
-  gzf->GZFile = cm_zlib_gzdopen(fd, gzoflags);
+  gzf->GZFile = gzdopen(fd, gzoflags);
   if (!gzf->GZFile)
   {
     errno = ENOMEM;
@@ -1452,20 +1452,20 @@ int cmSystemToolsGZStructOpen(void* call_data, const char *pathname,
 int cmSystemToolsGZStructClose(void* call_data)
 {
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
-  return cm_zlib_gzclose(gzf->GZFile);
+  return gzclose(gzf->GZFile);
 }
 
 ssize_t cmSystemToolsGZStructRead(void* call_data, void* buf, size_t count)
 {
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
-  return cm_zlib_gzread(gzf->GZFile, buf, count);
+  return gzread(gzf->GZFile, buf, count);
 }
 
 ssize_t cmSystemToolsGZStructWrite(void* call_data, const void* buf,
                                    size_t count)
 {
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
-  return cm_zlib_gzwrite(gzf->GZFile, (void*)buf, count);
+  return gzwrite(gzf->GZFile, (void*)buf, count);
 }
 
 #endif

@@ -71,27 +71,116 @@ SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
 SUBDIRS(Source/kwsys)
 
 #-----------------------------------------------------------------------------
-# Build zlib library for Curl, CMake, and CTest.
-SUBDIRS(Utilities/cmzlib)
-SET(CMAKE_ZLIB_INCLUDES
-  "${CMAKE_CURRENT_BINARY_DIR}/Utilities"
+# Setup third-party libraries.
+
+# Everything in the tree should be able to include files from the
+# Utilities directory.
+INCLUDE_DIRECTORIES(
+  ${CMake_SOURCE_DIR}/Utilities
+  ${CMake_BINARY_DIR}/Utilities
   )
-SET(CMAKE_ZLIB_LIBRARIES "cmzlib")
-SET(CURL_SPECIAL_LIBZ ${CMAKE_ZLIB_LIBRARIES})
-SET(CURL_SPECIAL_LIBZ_INCLUDES ${CMAKE_ZLIB_INCLUDES})
-SET(CURL_SPECIAL_ZLIB_H "cmzlib/zlib.h")
+
+# Third party libraries must be something that can be found.
+IF(EXISTS ${CMAKE_ROOT}/Modules/FindXMLRPC.cmake)
+  SET(CMAKE_ALLOW_SYSTEM_LIBRARIES 1)
+ELSE(EXISTS ${CMAKE_ROOT}/Modules/FindXMLRPC.cmake)
+  SET(CMAKE_ALLOW_SYSTEM_LIBRARIES 0)
+ENDIF(EXISTS ${CMAKE_ROOT}/Modules/FindXMLRPC.cmake)
+
+IF(CMAKE_ALLOW_SYSTEM_LIBRARIES)
+  # Options have dependencies.
+  INCLUDE(CMakeDependentOption)
+
+  # Allow the user to enable/disable all system utility library options
+  # by setting CMAKE_USE_SYSTEM_LIBRARIES on the command line.
+  IF(DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
+    SET(CMAKE_USE_SYSTEM_LIBRARIES_USER 1)
+  ENDIF(DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
+  IF(CMAKE_USE_SYSTEM_LIBRARIES)
+    SET(CMAKE_USE_SYSTEM_LIBRARIES ON)
+  ELSE(CMAKE_USE_SYSTEM_LIBRARIES)
+    SET(CMAKE_USE_SYSTEM_LIBRARIES OFF)
+  ENDIF(CMAKE_USE_SYSTEM_LIBRARIES)
+  IF(CMAKE_USE_SYSTEM_LIBRARIES_USER)
+    SET(CMAKE_USE_SYSTEM_CURL "${CMAKE_USE_SYSTEM_LIBRARIES}" CACHE BOOL "Use system-installed curl" FORCE)
+    SET(CMAKE_USE_SYSTEM_EXPAT "${CMAKE_USE_SYSTEM_LIBRARIES}" CACHE BOOL "Use system-installed expat" FORCE)
+    SET(CMAKE_USE_SYSTEM_XMLRPC "${CMAKE_USE_SYSTEM_LIBRARIES}" CACHE BOOL "Use system-installed xmlrpc" FORCE)
+    SET(CMAKE_USE_SYSTEM_ZLIB "${CMAKE_USE_SYSTEM_LIBRARIES}" CACHE BOOL "Use system-installed zlib" FORCE)
+  ENDIF(CMAKE_USE_SYSTEM_LIBRARIES_USER)
+
+  # Optionally use system utility libraries.
+  OPTION(CMAKE_USE_SYSTEM_CURL   "Use system-installed curl" ${CMAKE_USE_SYSTEM_LIBRARIES})
+  OPTION(CMAKE_USE_SYSTEM_XMLRPC "Use system-installed xmlrpc" ${CMAKE_USE_SYSTEM_LIBRARIES})
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat"
+    ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_XMLRPC" ON)
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
+    ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_CURL" ON)
+
+  # There is currently no option for system tar because the upstream
+  # libtar does not have our modifications to allow reentrant
+  # object-oriented use of the library.
+  # OPTION(CMAKE_USE_SYSTEM_TAR    "Use system-installed tar"   OFF)
+ELSE(CMAKE_ALLOW_SYSTEM_LIBRARIES)
+  SET(CMAKE_USE_SYSTEM_CURL 0)
+  SET(CMAKE_USE_SYSTEM_EXPAT 0)
+  SET(CMAKE_USE_SYSTEM_XMLRPC 0)
+  SET(CMAKE_USE_SYSTEM_ZLIB 0)
+ENDIF(CMAKE_ALLOW_SYSTEM_LIBRARIES)
+
+# Inform utility library header wrappers whether to use system versions.
+CONFIGURE_FILE(${CMake_SOURCE_DIR}/Utilities/cmThirdParty.h.in
+               ${CMake_BINARY_DIR}/Utilities/cmThirdParty.h
+               @ONLY IMMEDIATE)
+
+# Mention to the user what system libraries are being used.
+FOREACH(util CURL EXPAT XMLRPC ZLIB)
+  IF(CMAKE_USE_SYSTEM_${util})
+    MESSAGE(STATUS "Using system-installed ${util}")
+  ENDIF(CMAKE_USE_SYSTEM_${util})
+ENDFOREACH(util)
+
+#-----------------------------------------------------------------------------
+# Build zlib library for Curl, CMake, and CTest.
+SET(CMAKE_ZLIB_HEADER "cm_zlib.h")
+IF(CMAKE_USE_SYSTEM_ZLIB)
+  FIND_PACKAGE(ZLIB)
+  IF(NOT ZLIB_FOUND)
+    MESSAGE(FATAL_ERROR "CMAKE_USE_SYSTEM_ZLIB is ON but a zlib is not found!")
+  ENDIF(NOT ZLIB_FOUND)
+  SET(CMAKE_ZLIB_INCLUDES ${ZLIB_INCLUDE_DIR})
+  SET(CMAKE_ZLIB_LIBRARIES ${ZLIB_LIBRARIES})
+ELSE(CMAKE_USE_SYSTEM_ZLIB)
+  SUBDIRS(Utilities/cmzlib)
+  SET(CMAKE_ZLIB_INCLUDES)
+  SET(CMAKE_ZLIB_LIBRARIES cmzlib)
+ENDIF(CMAKE_USE_SYSTEM_ZLIB)
 
 #-----------------------------------------------------------------------------
 # Build Curl library for CTest.
-SUBDIRS(Utilities/cmcurl)
-SET(CMAKE_CURL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/Utilities")
-SET(CMAKE_CURL_LIBRARIES "cmcurl")
+IF(CMAKE_USE_SYSTEM_CURL)
+  FIND_PACKAGE(CURL)
+  IF(NOT CURL_FOUND)
+    MESSAGE(FATAL_ERROR "CMAKE_USE_SYSTEM_CURL is ON but a curl is not found!")
+  ENDIF(NOT CURL_FOUND)
+  SET(CMAKE_CURL_INCLUDES ${CURL_INCLUDE_DIRS})
+  SET(CMAKE_CURL_LIBRARIES ${CURL_LIBRARIES})
+ELSE(CMAKE_USE_SYSTEM_CURL)
+  SET(CURL_SPECIAL_ZLIB_H ${CMAKE_ZLIB_HEADER})
+  SET(CURL_SPECIAL_LIBZ_INCLUDES ${CMAKE_ZLIB_INCLUDES})
+  SET(CURL_SPECIAL_LIBZ ${CMAKE_ZLIB_LIBRARIES})
+  SUBDIRS(Utilities/cmcurl)
+  SET(CMAKE_CURL_INCLUDES)
+  SET(CMAKE_CURL_LIBRARIES cmcurl)
+ENDIF(CMAKE_USE_SYSTEM_CURL)
 
 #-----------------------------------------------------------------------------
 # Build Tar library for CTest.
+SET(CMTAR_ZLIB_HEADER ${CMAKE_ZLIB_HEADER})
+SET(CMTAR_ZLIB_LIBRARIES ${CMAKE_ZLIB_LIBRARIES})
+SET(CMTAR_ZLIB_INCLUDE_DIRS ${CMAKE_ZLIB_INCLUDES})
 SUBDIRS(Utilities/cmtar)
-SET(CMAKE_TAR_INCLUDES "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmtar")
-SET(CMAKE_TAR_LIBRARIES "cmtar")
+SET(CMAKE_TAR_INCLUDES ${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmtar)
+SET(CMAKE_TAR_LIBRARIES cmtar)
 
 #-----------------------------------------------------------------------------
 # Build Compress library for CTest.
@@ -101,19 +190,33 @@ SET(CMAKE_COMPRESS_LIBRARIES "cmcompress")
 
 #-----------------------------------------------------------------------------
 # Build expat library for CMake and CTest.
-SUBDIRS(Utilities/cmexpat)
-SET(CMAKE_EXPAT_INCLUDES
-  "${CMAKE_CURRENT_BINARY_DIR}/Utilities"
-  "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmexpat"
-  )
-SET(CMAKE_EXPAT_LIBRARIES "cmexpat")
+IF(CMAKE_USE_SYSTEM_EXPAT)
+  FIND_PACKAGE(EXPAT)
+  IF(NOT EXPAT_FOUND)
+    MESSAGE(FATAL_ERROR
+      "CMAKE_USE_SYSTEM_EXPAT is ON but a expat is not found!")
+  ENDIF(NOT EXPAT_FOUND)
+  SET(CMAKE_EXPAT_INCLUDES ${EXPAT_INCLUDE_DIRS})
+  SET(CMAKE_EXPAT_LIBRARIES ${EXPAT_LIBRARIES})
+ELSE(CMAKE_USE_SYSTEM_EXPAT)
+  SUBDIRS(Utilities/cmexpat)
+  SET(CMAKE_EXPAT_INCLUDES)
+  SET(CMAKE_EXPAT_LIBRARIES cmexpat)
+ENDIF(CMAKE_USE_SYSTEM_EXPAT)
 
-SUBDIRS(Utilities/cmxmlrpc)
-SET(CMAKE_XMLRPC_INCLUDES
-  "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmxmlrpc"
-  "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmxmlrpc"
-  )
-SET(CMAKE_XMLRPC_LIBRARIES "cmXMLRPC")
+IF(CMAKE_USE_SYSTEM_XMLRPC)
+  FIND_PACKAGE(XMLRPC QUIET REQUIRED libwww-client)
+  IF(NOT XMLRPC_FOUND)
+    MESSAGE(FATAL_ERROR
+      "CMAKE_USE_SYSTEM_XMLRPC is ON but a xmlrpc is not found!")
+  ENDIF(NOT XMLRPC_FOUND)
+  SET(CMAKE_XMLRPC_INCLUDES ${XMLRPC_INCLUDE_DIRS})
+  SET(CMAKE_XMLRPC_LIBRARIES ${XMLRPC_LIBRARIES})
+ELSE(CMAKE_USE_SYSTEM_XMLRPC)
+  SUBDIRS(Utilities/cmxmlrpc)
+  SET(CMAKE_XMLRPC_INCLUDES)
+  SET(CMAKE_XMLRPC_LIBRARIES cmXMLRPC)
+ENDIF(CMAKE_USE_SYSTEM_XMLRPC)
 
 IF (UNIX)
   FIND_PACKAGE(Curses QUIET)

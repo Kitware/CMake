@@ -107,6 +107,52 @@ Changes in CMake 2.4.4
 
 * better message if bogus generator is specified.
 
+* Better FindJava and FindJNI
+
+* Fix doxygen.config for CMake
+
+* add CPACK_MODULE_PATH
+
+* Fix configuration for ctest dashboard targets Experimental, Nightly, etc
+
+* Fix FindDoxygen for mac and app-bundles
+
+* Fix CPack simple install test with NSIS
+
+* Allow EXECUTE_PROCESS to strip trailing white space
+
+* Fix mingw echo in makefiles
+
+* Fix Xcode to not mess up -gdwarf-2
+
+* Fix crash when "linking" to custom targets.
+
+* Allow HEADER_FILE_ONLY to not compile the file in VS 7 and 8
+
+* Fix mingw out of binary with spaces in the path.
+
+* Fix for sudo make install (partial)
+
+* Allow installed zlib, curl, expat, xmlrpc to be used.
+
+* Add CMakeDependentOption.cmake module
+
+* Allow projects to set install prefix default
+
+* improved Find/Use wxWidgets
+
+* add support for windows dll version numbers
+
+* Fix message for -G when generator does not exist
+
+* Fix html references in help
+
+* Fix version on .exe cygwin
+
+* allow global timeout in ctest
+
+* Fix some odd cases with custom commands in VS 6
+
 Changes in CMake 2.4.3
 
 * fix for 3557 - Under MSVC8 hardcoded TargetEnvironment for MIDL Compiler 

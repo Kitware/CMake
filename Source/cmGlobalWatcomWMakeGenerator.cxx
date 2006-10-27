@@ -50,6 +50,7 @@ cmLocalGenerator *cmGlobalWatcomWMakeGenerator::CreateLocalGenerator()
   lg->SetSilentNoColon(true);
   lg->SetDefineWindowsNULL(true);
   lg->SetWindowsShell(true);
+  lg->SetWatcomWMake(true);
   lg->SetMakeSilentFlag("-s -h");
   lg->SetGlobalGenerator(this);
   lg->SetIgnoreLibPrefix(true);

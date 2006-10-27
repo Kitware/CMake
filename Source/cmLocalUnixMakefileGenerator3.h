@@ -105,6 +105,11 @@ public:
   void SetWindowsShell(bool v)  {this->WindowsShell = v;}
 
   /**
+   * Set to true if the make tool being used is Watcom WMake.
+   */
+  void SetWatcomWMake(bool v)  {this->WatcomWMake = v;}
+
+  /**
    * Set to true if the shell being used is the MSYS shell.
    * This controls if statements in the makefile and the SHELL variable.
    * The default is false.
@@ -135,8 +140,8 @@ public:
    * should include all parts of the command up to the beginning of
    * the message (including a whitespace separator).
    */
-  void SetNativeEchoCommand(const char* cmd)
-    { this->NativeEchoCommand = cmd; }
+  void SetNativeEchoCommand(const char* cmd, bool isWindows)
+    { this->NativeEchoCommand = cmd; this->NativeEchoWindows = isWindows; }
 
   /**
    * Set the string used to include one makefile into another default
@@ -341,6 +346,7 @@ private:
   std::string LibraryOutputPath;
   std::string ConfigurationName;
   std::string NativeEchoCommand;
+  bool NativeEchoWindows;
   bool DefineWindowsNULL;
   bool UnixCD;
   bool PassMakeflags;

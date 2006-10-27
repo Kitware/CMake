@@ -76,6 +76,8 @@
 #                            
 #  QT_LIBRARY_DIR              Path to "lib" of Qt4
 #                            
+#  QT_PLUGINS_DIR              Path to "plugins" for Qt4
+#                            
 # For every library of Qt there are three variables:
 #  QT_QTFOO_LIBRARY_RELEASE, which contains the full path to the release version
 #  QT_QTFOO_LIBRARY_DEBUG, which contains the full path to the debug version
@@ -317,6 +319,13 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_MKSPECS_DIR ${qt_mkspecs_dir} CACHE PATH "The location of the Qt mkspecs")
   ENDIF (NOT QT_MKSPECS_DIR)
 
+  # ask qmake for the plugins directory
+  IF (NOT QT_PLUGINS_DIR)
+    EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
+      ARGS "-query QT_INSTALL_PLUGINS"
+      OUTPUT_VARIABLE qt_plugins_dir )
+    SET(QT_PLUGINS_DIR ${qt_plugins_dir} CACHE PATH "The location of the Qt plugins")
+  ENDIF (NOT QT_PLUGINS_DIR)
   ########################################
   #
   #       Setting the INCLUDE-Variables

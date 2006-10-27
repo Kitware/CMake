@@ -289,29 +289,6 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
-      // is file A newer than file B
-      if (*arg == "FILE_IS_NEWER" &&
-          argP1  != newArgs.end() && argP2  != newArgs.end())
-        {
-        int fileIsNewer=0;
-        bool success=cmSystemTools::FileTimeCompare((argP1)->c_str(),
-                                                    (argP2)->c_str(),
-                                                    &fileIsNewer);
-        if(success==false || fileIsNewer==1 || fileIsNewer==0)
-          {
-          *arg = "1";
-          }
-        else 
-          {
-          *arg = "0";
-          }
-
-        newArgs.erase(argP2);
-        newArgs.erase(argP1);
-        argP1 = arg;
-        IncrementArguments(newArgs,argP1,argP2);
-        reducible = 1;
-        }
       // does a command exist
       if (*arg == "COMMAND" && argP1  != newArgs.end())
         {
@@ -417,9 +394,16 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
         def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
-        if (*(argP1) == "LESS")
+        double lhs;
+        double rhs;
+        if(sscanf(def, "%lg", &lhs) != 1 ||
+           sscanf(def2, "%lg", &rhs) != 1)
           {
-          if(atof(def) < atof(def2))
+          *arg = "0";
+          }
+        else if (*(argP1) == "LESS")
+          {
+          if(lhs < rhs)
             {
             *arg = "1";
             }
@@ -430,7 +414,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }
         else if (*(argP1) == "GREATER")
           {
-          if(atof(def) > atof(def2))
+          if(lhs > rhs)
             {
             *arg = "1";
             }
@@ -441,7 +425,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }          
         else
           {
-          if(atof(def) == atof(def2))
+          if(lhs == rhs)
             {
             *arg = "1";
             }
@@ -479,6 +463,29 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           result = (val == 0);
           }
         if(result)
+          {
+          *arg = "1";
+          }
+        else
+          {
+          *arg = "0";
+          }
+        newArgs.erase(argP2);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        IncrementArguments(newArgs,argP1,argP2);
+        reducible = 1;
+        }
+
+      // is file A newer than file B
+      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
+          *(argP1) == "IS_NEWER_THAN")
+        {
+        int fileIsNewer=0;
+        bool success=cmSystemTools::FileTimeCompare(arg->c_str(),
+            (argP2)->c_str(),
+            &fileIsNewer);
+        if(success==false || fileIsNewer==1 || fileIsNewer==0)
           {
           *arg = "1";
           }

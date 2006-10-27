@@ -65,8 +65,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  FIND_PACKAGE(<name> [major.minor] [QUIET]\n"
-      "               [REQUIRED [componets...]])\n"
+      "  FIND_PACKAGE(<name> [major.minor] [QUIET] [NO_MODULE]\n"
+      "               [[REQUIRED|COMPONENTS] [componets...]])\n"
       "Finds and loads settings from an external project.  <name>_FOUND will "
       "be set to indicate whether the package was found.  Settings that "
       "can be used when <name>_FOUND is true are package-specific.  The "
@@ -74,6 +74,7 @@ public:
       "Directories listed in CMAKE_MODULE_PATH are searched for files called "
       "\"Find<name>.cmake\".  If such a file is found, it is read and "
       "processed by CMake, and is responsible for finding the package.  "
+      "This first step may be skipped by using the NO_MODULE option.  "
       "If no such file is found, it is expected that the package is another "
       "project built by CMake that has a \"<name>Config.cmake\" file.  "
       "A cache entry called <name>_DIR is created and is expected to be set "
@@ -84,9 +85,10 @@ public:
       "argument is specified.  If <name>_DIR has been set to a directory "
       "not containing a \"<name>Config.cmake\" file, an error is always "
       "generated.  If REQUIRED is specified and the package is not found, "
-      "a FATAL_ERROR is generated and the configure step stops executing."
-      "  A package-specific list of components may be listed after the "
-      "REQUIRED option.";
+      "a FATAL_ERROR is generated and the configure step stops executing.  "
+      "A package-specific list of components may be listed after the "
+      "REQUIRED option, or after the COMPONENTS option if no REQUIRED "
+      "option is given.";
     }
   
   cmTypeMacro(cmFindPackageCommand, cmCommand);

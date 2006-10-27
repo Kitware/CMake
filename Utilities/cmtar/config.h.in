@@ -42,9 +42,6 @@
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine HAVE_LIBZ @HAVE_LIBZ@
 
-/* Define to 1 if you have the VTK's `z' library */
-#cmakedefine HAVE_VTK_LIBZ @HAVE_VTK_LIBZ@
-
 /* Define to 1 if the system has the type `major_t'. */
 #cmakedefine HAVE_MAJOR_T @HAVE_MAJOR_T@
 
@@ -209,3 +206,5 @@
 
 /* Define to `long long' if not defined in system header files. */
 #cmakedefine uint64_t @uint64_t@
+
+#define CMTAR_ZLIB_HEADER "@CMTAR_ZLIB_HEADER@"

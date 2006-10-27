@@ -113,15 +113,19 @@ cmLocalVisualStudioGenerator
                   const char* workingDirectory,
                   bool escapeOldStyle,
                   bool escapeAllowMakeVars,
-                  const char* newline)
+                  const char* newline_text)
 {
+  // Avoid leading or trailing newlines.
+  const char* newline = "";
+
   // Store the script in a string.
   std::string script;
   if(workingDirectory)
     {
+    script += newline;
+    newline = newline_text;
     script += "cd ";
     script += this->Convert(workingDirectory, START_OUTPUT, SHELL);
-    script += newline;
     }
   // for visual studio IDE add extra stuff to the PATH
   // if CMAKE_MSVCIDE_RUN_PATH is set.
@@ -131,16 +135,21 @@ cmLocalVisualStudioGenerator
       this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
     if(extraPath)
       {
+      script += newline;
+      newline = newline_text;
       script += "set PATH=";
       script += extraPath;
       script += ";%PATH%";
-      script += newline;
       }
     }
   // Write each command on a single line.
   for(cmCustomCommandLines::const_iterator cl = commandLines.begin();
       cl != commandLines.end(); ++cl)
     {
+    // Start a new line.
+    script += newline;
+    newline = newline_text;
+
     // Start with the command name.
     const cmCustomCommandLine& commandLine = *cl;
     script += this->Convert(commandLine[0].c_str(),START_OUTPUT,SHELL);
@@ -159,9 +168,6 @@ cmLocalVisualStudioGenerator
                                        escapeAllowMakeVars);
         }
       }
-
-    // End the line.
-    script += newline;
     }
   return script;
 }

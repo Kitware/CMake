@@ -70,13 +70,9 @@ cmLocalGenerator *cmGlobalMinGWMakefileGenerator::CreateLocalGenerator()
   //
   //  @echo "message with spaces"
   //
-  // it runs but the quotes are displayed.  Instead we can separate
-  // with a semicolon
-  //
-  //  @echo;message with spaces
-  //
-  // to hack around the problem.
-  lg->SetNativeEchoCommand("@echo;");
+  // it runs but the quotes are displayed.  Instead just use cmake to
+  // echo.
+  lg->SetNativeEchoCommand("@$(CMAKE_COMMAND) -E echo ", false);
   return lg;
 }
 

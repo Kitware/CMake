@@ -54,44 +54,40 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
 
+  // Record options.
   this->Name = args[0];
-
-  // Build a list of required components.
-  std::string components;
-  const char* components_sep = "";
   bool quiet = false;
   bool required = false;
-  if(args.size() > 1)
-    {
+  bool no_module = false;
+  std::string components;
+  const char* components_sep = "";
+
+  // Parse the arguments.
+  bool doing_components = false;
     cmsys::RegularExpression version("^[0-9.]+$");
     bool haveVersion = false;
     for(unsigned int i=1; i < args.size(); ++i)
       {
-      if(!haveVersion && version.find(args[i].c_str()))
+    if(args[i] == "QUIET")
         {
-        haveVersion = true;
+      quiet = true;
+      doing_components = false;
         }
-      else if(args[i] == "QUIET")
+    else if(args[i] == "NO_MODULE")
         {
-        quiet = true;
+      no_module = true;
+      doing_components = false;
         }
       else if(args[i] == "REQUIRED")
         {
-        // The package is required.
         required = true;
-
-        // Look for a list of required components.
-        while(++i < args.size())
-          {
-          // Stop looking when a known keyword argument is
-          // encountered.
-          if((args[i] == "QUIET") ||
-             (args[i] == "REQUIRED"))
+      doing_components = true;
+      }
+    else if(args[i] == "COMPONENTS")
             {
-            --i;
-            break;
+      doing_components = true;
             }
-          else
+    else if(doing_components)
           {
             // Set a variable telling the find script this component
             // is required.
@@ -103,7 +99,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
             components += args[i];
             components_sep = ";";
             }
-          }
+    else if(!haveVersion && version.find(args[i].c_str()))
+      {
+      haveVersion = true;
         }
       else
         {
@@ -117,9 +115,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     // Store the list of components.
     std::string components_var = Name + "_FIND_COMPONENTS";
     this->Makefile->AddDefinition(components_var.c_str(), components.c_str());
-    }
 
   // See if there is a Find<name>.cmake module.
+  if(!no_module)
+    {
   bool foundModule = false;
   if(!this->FindModule(foundModule, quiet, required))
     {
@@ -128,6 +127,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   if(foundModule)
     {
     return true;
+    }
     }
 
   // No find module.  Assume the project has a CMake config file.  Use

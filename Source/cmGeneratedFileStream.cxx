@@ -27,7 +27,7 @@
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-# include <cmzlib/zlib.h>
+# include <cm_zlib.h>
 #endif
 
 //----------------------------------------------------------------------------
@@ -213,7 +213,7 @@ void cmGeneratedFileStreamBase::Close()
 int cmGeneratedFileStreamBase::CompressFile(const char* oldname,
                                             const char* newname)
 {
-  gzFile gf = cm_zlib_gzopen(newname, "w");
+  gzFile gf = gzopen(newname, "w");
   if ( !gf )
     {
     return 0;
@@ -228,15 +228,15 @@ int cmGeneratedFileStreamBase::CompressFile(const char* oldname,
   char buffer[BUFFER_SIZE];
   while ( (res = fread(buffer, 1, BUFFER_SIZE, ifs)) > 0 )
     {
-    if ( !cm_zlib_gzwrite(gf, buffer, res) )
+    if ( !gzwrite(gf, buffer, res) )
       {
       fclose(ifs);
-      cm_zlib_gzclose(gf);
+      gzclose(gf);
       return 0;
       }
     }
   fclose(ifs);
-  cm_zlib_gzclose(gf);
+  gzclose(gf);
   return 1;
 }
 #else

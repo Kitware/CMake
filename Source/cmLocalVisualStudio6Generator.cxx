@@ -766,34 +766,33 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
     // header stuff
     customRuleCode += "PreLink_Cmds=";
     }
-  const char* prelink_newline = "\\\n\t";
   for (std::vector<cmCustomCommand>::const_iterator cr =
          target.GetPreBuildCommands().begin();
        cr != target.GetPreBuildCommands().end(); ++cr)
     {
-    if(++prelink_count == prelink_total)
+    if(prelink_count++ > 0)
       {
-      prelink_newline = "";
+      customRuleCode += "\\\n\t";
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
                                             cr->GetWorkingDirectory(),
                                             cr->GetEscapeOldStyle(),
                                             cr->GetEscapeAllowMakeVars(),
-                                            prelink_newline);
+                                            "\\\n\t");
     }
   for (std::vector<cmCustomCommand>::const_iterator cr =
          target.GetPreLinkCommands().begin();
        cr != target.GetPreLinkCommands().end(); ++cr)
     {
-    if(++prelink_count == prelink_total)
+    if(prelink_count++ > 0)
       {
-      prelink_newline = "";
+      customRuleCode += "\\\n\t";
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
                                             cr->GetWorkingDirectory(),
                                             cr->GetEscapeOldStyle(),
                                             cr->GetEscapeAllowMakeVars(),
-                                            prelink_newline);
+                                            "\\\n\t");
     }
   if(prelink_total > 0)
     {
@@ -805,7 +804,6 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
   int postbuild_total = 
     static_cast<int>(target.GetPostBuildCommands().size());
   int postbuild_count = 0;
-  const char* postbuild_newline = "\\\n\t";
   if(postbuild_total > 0)
     {
     customRuleCode += "PostBuild_Cmds=";
@@ -814,15 +812,15 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
          target.GetPostBuildCommands().begin();
        cr != target.GetPostBuildCommands().end(); ++cr)
     {
-    if(++postbuild_count == postbuild_total)
+    if(postbuild_count++ > 0)
       {
-      postbuild_newline = "";
+      customRuleCode += "\\\n\t";
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(),
                                             cr->GetWorkingDirectory(),
                                             cr->GetEscapeOldStyle(),
                                             cr->GetEscapeAllowMakeVars(),
-                                            postbuild_newline);
+                                            "\\\n\t");
     }
   if(postbuild_total > 0)
     {
@@ -1131,6 +1129,20 @@ void cmLocalVisualStudio6Generator
       }
     }
 
+  // Compute version number information.
+  std::string targetVersionFlag;
+  if(target.GetType() == cmTarget::EXECUTABLE ||
+     target.GetType() == cmTarget::SHARED_LIBRARY ||
+     target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    int major;
+    int minor;
+    target.GetTargetVersion(major, minor);
+    cmOStringStream targetVersionStream;
+    targetVersionStream << "/version:" << major << "." << minor;
+    targetVersionFlag = targetVersionStream.str();
+    }
+
   // Compute the real name of the target.
   std::string outputName = 
     "(OUTPUT_NAME is for libraries and executables only)";
@@ -1279,6 +1291,8 @@ void cmLocalVisualStudio6Generator
 
     cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                  this->IncludeOptions.c_str());
+    cmSystemTools::ReplaceString(line, "TARGET_VERSION_FLAG",
+                                 targetVersionFlag.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
     // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH 
     // are already quoted in the template file,
