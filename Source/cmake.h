@@ -284,6 +284,12 @@ class cmake
   // Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
   void DebugOutputOn() { this->DebugOutput = true;}
+
+  //! Add or get installation components
+  void AddInstallComponent(const char* component);
+  std::set<cmStdString>* GetInstallComponents()
+  { return &this->InstallComponents; }
+
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString,
@@ -301,6 +307,8 @@ protected:
   std::string StartOutputDirectory;
 
   std::set<cmStdString> WrittenFiles;
+
+  std::set<cmStdString> InstallComponents;
 
   ///! return true if the same cmake was used to make the cache.
   bool CacheVersionMatches();

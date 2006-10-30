@@ -1307,6 +1307,18 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
   return 1;
 }
 
+//----------------------------------------------------------------------------
+void cmake::AddInstallComponent(const char* component)
+{
+  if ( !component )
+    {
+    return;
+    }
+  this->InstallComponents.insert(component);
+}
+
+
+//----------------------------------------------------------------------------
 void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 {
   for(RegisteredGeneratorsMap::const_iterator i = this->Generators.begin();
