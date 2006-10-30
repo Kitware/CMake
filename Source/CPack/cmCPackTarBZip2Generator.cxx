@@ -108,7 +108,7 @@ int cmCPackTarBZip2Generator::CompressFiles(const char* outFileName,
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem renaming: \""
         << compressOutFile.c_str() << "\" to \""
-        << outFileName << std::endl);
+        << (outFileName ? outFileName : "(NULL)") << std::endl);
       return 0;
       }
     }

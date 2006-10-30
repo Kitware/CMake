@@ -208,7 +208,8 @@ int cmCPackTGZGenerator::InitializeInternal()
 int cmCPackTGZGenerator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: " << toplevel << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: "
+                << (toplevel ? toplevel : "(NULL)") << std::endl);
   cmCPackTGZ_Data mydata(this, this->Compress);
   TAR *t;
   char buf[TAR_MAXPATHLEN];

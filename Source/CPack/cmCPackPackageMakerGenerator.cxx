@@ -236,14 +236,17 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name)
   if ( !inFileName )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack option: " << cpackVar.c_str()
-      << " not specified. It should point to " << name << ".rtf, " << name
-      << ".html, or " << name << ".txt file" << std::endl);
+                  << " not specified. It should point to " 
+                  << (name ? name : "(NULL)")
+                  << ".rtf, " << name
+                  << ".html, or " << name << ".txt file" << std::endl);
     return false;
     }
   if ( !cmSystemTools::FileExists(inFileName) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find " << name
-      << " resource file: " << inFileName << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find " 
+                  << (name ? name : "(NULL)")
+                  << " resource file: " << inFileName << std::endl);
     return false;
     }
   std::string ext = cmSystemTools::GetFilenameLastExtension(inFileName);
@@ -260,8 +263,9 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name)
   destFileName += name + ext;
 
 
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << inFileName
-    << " to " << destFileName.c_str() << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " 
+                << (inFileName ? inFileName : "(NULL)")
+                << " to " << destFileName.c_str() << std::endl);
   this->ConfigureFile(inFileName, destFileName.c_str());
   return true;
 }
