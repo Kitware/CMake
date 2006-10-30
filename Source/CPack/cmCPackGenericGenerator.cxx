@@ -99,10 +99,10 @@ int cmCPackGenericGenerator::PrepareNames()
     "Look for: CPACK_PACKAGE_DESCRIPTION_FILE" << std::endl);
   const char* descFileName
     = this->GetOption("CPACK_PACKAGE_DESCRIPTION_FILE");
-  cmCPackLogger(cmCPackLog::LOG_DEBUG,
-    "Look for: " << descFileName << std::endl);
   if ( descFileName )
     {
+    cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                  "Look for: " << descFileName << std::endl);
     if ( !cmSystemTools::FileExists(descFileName) )
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -158,7 +158,8 @@ int cmCPackGenericGenerator::InstallProject()
   if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Problem creating temporary directory: " << tempInstallDirectory
+      "Problem creating temporary directory: " 
+                  << (tempInstallDirectory ? tempInstallDirectory : "(NULL}")
       << std::endl);
     return 0;
     }
@@ -409,10 +410,10 @@ int cmCPackGenericGenerator::InstallProjectViaInstallScript(
     = this->GetOption("CPACK_INSTALL_SCRIPT");
   std::string currentWorkingDirectory =
     cmSystemTools::GetCurrentWorkingDirectory();
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-    "- Install scripts: " << cmakeScripts << std::endl);
   if ( cmakeScripts && *cmakeScripts )
     {
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                  "- Install scripts: " << cmakeScripts << std::endl);
     std::vector<std::string> cmakeScriptsVector;
     cmSystemTools::ExpandListArgument(cmakeScripts,
       cmakeScriptsVector);
@@ -667,7 +668,7 @@ int cmCPackGenericGenerator::ProcessGenerator()
 
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Compress package" << std::endl);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Compress files to: "
-    << tempPackageFileName << std::endl);
+    << (tempPackageFileName ? tempPackageFileName : "(NULL)") << std::endl);
   if ( cmSystemTools::FileExists(tempPackageFileName) )
     {
     cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Remove old package file"
@@ -689,16 +690,23 @@ int cmCPackGenericGenerator::ProcessGenerator()
 
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Finalize package" << std::endl);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Copy final package: "
-    << tempPackageFileName << " to " << packageFileName << std::endl);
+                << (tempPackageFileName ? tempPackageFileName : "(NULL)" )
+                << " to " 
+                << (packageFileName ? packageFileName : "(NULL)")
+                << std::endl);
   if ( !cmSystemTools::CopyFileIfDifferent(tempPackageFileName,
       packageFileName) )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the package: "
-      << tempPackageFileName << " to " << packageFileName << std::endl);
+                  << (tempPackageFileName ? tempPackageFileName : "(NULL)" )
+                  << " to " 
+                  << (packageFileName ? packageFileName : "(NULL)")
+                  << std::endl);
     return 0;
     }
 
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Package " << packageFileName
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Package " 
+                << (packageFileName ? packageFileName : "(NULL)")
     << " generated." << std::endl);
   return 1;
 }
@@ -939,7 +947,7 @@ const char* cmCPackGenericGenerator::GetInstallPath()
 std::string cmCPackGenericGenerator::FindTemplate(const char* name)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for template: "
-    << name << std::endl);
+    << (name ? name : "(NULL)") << std::endl);
   std::string ffile = this->MakefileMap->GetModulesFile(name);
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Found template: "
     << ffile.c_str() << std::endl);
