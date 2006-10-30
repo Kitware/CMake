@@ -4,7 +4,9 @@
 # the library is. This code sets the following variables:
 #   
 #  JAVA_AWT_LIB_PATH     = the path to the jawt library
+#  JAVA_JVM_LIB_PATH     = the path to the jvm library
 #  JAVA_INCLUDE_PATH     = the include path to jni.h
+#  JAVA_INCLUDE_PATH2    = the include path to jni.h
 #  JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
 # 
 
@@ -27,6 +29,17 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/j2sdk1.4-sun/jre/lib/amd64
   /usr/lib/j2sdk1.5-sun/jre/lib/amd64
   )
+
+SET(JAVA_JVM_LIBRARY_DIRECTORIES)
+FOREACH(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
+  SET(JAVA_JVM_LIBRARY_DIRECTORIES
+    ${JAVA_JVM_LIBRARY_DIRECTORIES}
+    "${dir}"
+    "${dir}/client"
+    "${dir}/server"
+    )
+ENDFOREACH(dir)
+
 
 SET(JAVA_AWT_INCLUDE_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/include"
@@ -70,6 +83,9 @@ IF(APPLE)
     IF(NOT JAVA_AWT_LIBRARY)
       SET (JAVA_AWT_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
     ENDIF(NOT JAVA_AWT_LIBRARY)
+    IF(NOT JAVA_JVM_LIBRARY)
+      SET (JAVA_JVM_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
+    ENDIF(NOT JAVA_JVM_LIBRARY)
     SET(JAVA_AWT_INCLUDE_DIRECTORIES ${JAVA_AWT_INCLUDE_DIRECTORIES}
       ~/Library/Frameworks/JavaVM.framework/Headers
       /Library/Frameworks/JavaVM.framework/Headers
@@ -79,6 +95,9 @@ IF(APPLE)
 ELSE(APPLE)
   FIND_LIBRARY(JAVA_AWT_LIBRARY jawt 
     PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
+  )
+  FIND_LIBRARY(JAVA_JVM_LIBRARY jvm 
+    PATHS ${JAVA_JVM_LIBRARY_DIRECTORIES}
   )
 ENDIF(APPLE)
 
@@ -98,6 +117,7 @@ FIND_PATH(JAVA_AWT_INCLUDE_PATH jawt.h
 
 MARK_AS_ADVANCED(
   JAVA_AWT_LIBRARY
+  JAVA_JVM_LIBRARY
   JAVA_AWT_INCLUDE_PATH
   JAVA_INCLUDE_PATH
   JAVA_INCLUDE_PATH2
