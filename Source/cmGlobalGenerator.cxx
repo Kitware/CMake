@@ -1470,8 +1470,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     {
     if(!cmakeCfgIntDir || !*cmakeCfgIntDir || cmakeCfgIntDir[0] == '.')
       {
-      std::set<cmStdString>* componentsSet
-        = this->GetCMakeInstance()->GetInstallComponents();
+      std::set<cmStdString>* componentsSet = &this->InstallComponents;
       cpackCommandLines.erase(cpackCommandLines.begin(), 
         cpackCommandLines.end());
       depends.erase(depends.begin(), depends.end());
@@ -1493,7 +1492,6 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
         ostr << "Only default component available";
         }
       singleLine.push_back(ostr.str().c_str());
-      //cpackCommandLines.push_back(singleLine);
       (*targets)["list_install_components"]
         = this->CreateGlobalTarget("list_install_components",
           ostr.str().c_str(),

@@ -33,8 +33,6 @@ cmInstallTargetGenerator
   Component(component), Optional(optional)
 {
   this->Target->SetHaveInstallRule(true);
-  this->Target->GetMakefile()->GetCMakeInstance()->AddInstallComponent(
-    component);
 }
 
 //----------------------------------------------------------------------------
