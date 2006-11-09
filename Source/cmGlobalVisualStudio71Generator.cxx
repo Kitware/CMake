@@ -254,13 +254,16 @@ void cmGlobalVisualStudio71Generator
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string project = cmds[0][0];
         this->WriteProjectConfigurations(fout, project.c_str(),
-                                         l->second.GetType());
+                                         true);
         }
       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
                && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
+        bool partOfDefaultBuild = this->IsPartOfDefaultBuild(
+          root->GetMakefile()->GetProjectName(),
+          &l->second);
         this->WriteProjectConfigurations(fout, si->c_str(),
-                                         l->second.GetType());
+                                         partOfDefaultBuild);
         ++si;
         }
       }
@@ -415,15 +418,15 @@ void cmGlobalVisualStudio71Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             int targetType)
+                             bool partOfDefaultBuild)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    fout << "\t\t{" << guid << "}." << *i
+    fout << "\t\t{" << guid << "}." << *i 
          << ".ActiveCfg = " << *i << "|Win32\n";
-    if(targetType != cmTarget::GLOBAL_TARGET)
+    if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i
            << ".Build.0 = " << *i << "|Win32\n";

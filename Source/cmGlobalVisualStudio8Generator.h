@@ -57,7 +57,7 @@ protected:
   virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
-                                          int targetType);
+                                          bool partOfDefaultBuild);
   std::string PlatformName; // Win32 or x64 
 };
 #endif

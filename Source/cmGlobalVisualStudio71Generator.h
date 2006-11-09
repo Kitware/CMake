@@ -55,7 +55,7 @@ protected:
                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
-                                          int targetType);
+                                          bool partOfDefaultBuild);
   virtual void WriteExternalProject(std::ostream& fout, const char* name,
                                     const char* path,
                                     const std::vector<std::string>& depends);

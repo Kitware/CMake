@@ -149,6 +149,10 @@ public:
         "installing a target.  They are used only when the old "
         "INSTALL_TARGETS command is used to install the target.  Use the "
         "INSTALL command instead."
+        "\n"
+        "The EXCLUDE_FROM_DEFAULT_BUILD property is used by the visual "
+        "studio generators.  If it is set to 1 the target will not be "
+        "part of the default build when you select \"Build Solution\"."
         ;
     }
   

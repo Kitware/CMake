@@ -537,13 +537,16 @@ void cmGlobalVisualStudio7Generator
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string name = cmds[0][0];
         this->WriteProjectConfigurations(fout, name.c_str(),
-                                         l->second.GetType());
+                                         true);
         }
       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
-        {
+        {    
+        bool partOfDefaultBuild = this->IsPartOfDefaultBuild(
+          root->GetMakefile()->GetProjectName(),
+          &l->second);
         this->WriteProjectConfigurations(fout, si->c_str(),
-                                         l->second.GetType());
+                                         partOfDefaultBuild);
         ++si;
         }
       }
@@ -667,7 +670,7 @@ cmGlobalVisualStudio7Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             int targetType)
+                             bool partOfDefaultBuild)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -675,7 +678,7 @@ void cmGlobalVisualStudio7Generator
     {
     fout << "\t\t{" << guid << "}." << *i
          << ".ActiveCfg = " << *i << "|Win32\n";
-    if(targetType != cmTarget::GLOBAL_TARGET)
+    if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i
            << ".Build.0 = " << *i << "|Win32\n";
@@ -798,4 +801,26 @@ cmGlobalVisualStudio7Generator
     dir += config;
     dir += suffix;
     }
+}
+
+bool cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,
+                                                          cmTarget* target)
+{
+  if(target->GetPropertyAsBool("EXCLUDE_FROM_DEFAULT_BUILD"))
+    {
+    return false;
+    }
+  // if it is a utilitiy target then only make it part of the 
+  // default build if another target depends on it
+  int type = target->GetType();
+  if (type == cmTarget::GLOBAL_TARGET)
+    {
+    return false;
+    }
+  if(type == cmTarget::UTILITY)
+    {
+    return this->IsDependedOn(project, target);
+    } 
+  // default is to be part of the build
+  return true;
 }

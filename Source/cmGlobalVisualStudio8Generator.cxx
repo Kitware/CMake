@@ -228,7 +228,7 @@ cmGlobalVisualStudio8Generator
 void
 cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             int targetType)
+                             bool partOfDefaultBuild)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -237,7 +237,7 @@ cmGlobalVisualStudio8Generator
     fout << "\t\t{" << guid << "}." << *i
          << "|" << this->PlatformName << ".ActiveCfg = "
          << *i << "|" << this->PlatformName << "\n";
-    if(targetType != cmTarget::GLOBAL_TARGET)
+    if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i
            << "|" << this->PlatformName << ".Build.0 = "
