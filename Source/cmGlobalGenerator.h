@@ -168,6 +168,9 @@ public:
   ///! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const char* project, const char* name);
 
+  /** If check to see if the target is linked to by any other
+      target in the project */
+  bool IsDependedOn(const char* project, cmTarget* target);
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const char* start_dir);
 

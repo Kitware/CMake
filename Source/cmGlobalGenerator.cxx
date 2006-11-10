@@ -591,6 +591,30 @@ void cmGlobalGenerator::ClearEnabledLanguages()
   this->LanguageEnabled.clear();
 }
 
+bool cmGlobalGenerator::IsDependedOn(const char* project,
+                                     cmTarget* targetIn)
+{
+  // Get all local gens for this project
+  std::vector<cmLocalGenerator*>* gens = &this->ProjectMap[project];
+  // loop over local gens and get the targets for each one
+  for(unsigned int i = 0; i < gens->size(); ++i)
+    {
+    cmTargets& targets = (*gens)[i]->GetMakefile()->GetTargets(); 
+    for (cmTargets::iterator l = targets.begin();
+         l != targets.end(); l++)
+      { 
+      cmTarget& target = l->second;
+      std::set<cmStdString>::const_iterator i = 
+        target.GetUtilities().find(targetIn->GetName());
+      if(i != target.GetUtilities().end())
+        {
+        return true;
+        }
+      }
+    }
+  return false; 
+}
+
 void cmGlobalGenerator::Configure()
 {
   // Delete any existing cmLocalGenerators
@@ -1395,12 +1419,16 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     singleLine.erase(singleLine.begin(), singleLine.end());
     depends.erase(depends.begin(), depends.end());
     singleLine.push_back(this->GetCMakeInstance()->GetCTestCommand());
+    singleLine.push_back("--force-new-ctest-process");
     if(cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.')
       {
       singleLine.push_back("-C");
       singleLine.push_back(mf->GetDefinition("CMAKE_CFG_INTDIR"));
       }
-    singleLine.push_back("--force-new-ctest-process");
+    else // TODO: This is a hack. Should be something to do with the generator
+      {
+      singleLine.push_back("$(ARGS)");
+      }
     cpackCommandLines.push_back(singleLine);
     (*targets)[this->GetTestTargetName()]
       = this->CreateGlobalTarget(this->GetTestTargetName(),
@@ -1464,6 +1492,35 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   //Install
   if(this->InstallTargetEnabled)
     {
+    if(!cmakeCfgIntDir || !*cmakeCfgIntDir || cmakeCfgIntDir[0] == '.')
+      {
+      std::set<cmStdString>* componentsSet = &this->InstallComponents;
+      cpackCommandLines.erase(cpackCommandLines.begin(), 
+        cpackCommandLines.end());
+      depends.erase(depends.begin(), depends.end());
+      cmOStringStream ostr;
+      if ( componentsSet->size() > 0 )
+        {
+        ostr << "Available install components are:";
+        std::set<cmStdString>::iterator it;
+        for (
+          it = componentsSet->begin();
+          it != componentsSet->end();
+          ++ it )
+          {
+          ostr << " \"" << it->c_str() << "\"";
+          }
+        }
+      else
+        {
+        ostr << "Only default component available";
+        }
+      singleLine.push_back(ostr.str().c_str());
+      (*targets)["list_install_components"]
+        = this->CreateGlobalTarget("list_install_components",
+          ostr.str().c_str(),
+          &cpackCommandLines, depends);
+      }
   std::string cmd;
     cpackCommandLines.erase(cpackCommandLines.begin(),
                             cpackCommandLines.end());

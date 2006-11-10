@@ -53,6 +53,17 @@ ENDMACRO(TEST_VAR_ARG)
 
 TEST_VAR_ARG(1 2 3)
 
+# Floating-point comparison test.
+IF(2.4 LESS 2.4)
+  MESSAGE(FATAL_ERROR "Failed: 2.4 LESS 2.4")
+ENDIF(2.4 LESS 2.4)
+IF(2.4 GREATER 2.4)
+  MESSAGE(FATAL_ERROR "Failed: 2.4 GREATER 2.4")
+ENDIF(2.4 GREATER 2.4)
+IF(NOT 2.4 EQUAL 2.4)
+  MESSAGE(FATAL_ERROR "Failed: NOT 2.4 EQUAL 2.4")
+ENDIF(NOT 2.4 EQUAL 2.4)
+
 #
 # Use the ansi CXX compile flag for building cmake
 #

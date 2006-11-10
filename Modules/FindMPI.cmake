@@ -10,13 +10,15 @@ FIND_PATH(MPI_INCLUDE_PATH mpi.h
           /usr/include/mpi
           /usr/local/mpi/include
           "$ENV{ProgramFiles}/MPICH/SDK/Include"
+          "$ENV{ProgramFiles}/MPICH2/include"
           "C:/Program Files/MPICH/SDK/Include" 
 )
 
 FIND_LIBRARY(MPI_LIBRARY 
-             NAMES mpi mpich
+             NAMES mpich2 mpi mpich 
              PATHS /usr/lib /usr/local/lib /usr/local/mpi/lib
              "$ENV{ProgramFiles}/MPICH/SDK/Lib"
+             "$ENV{ProgramFiles}/MPICH2/Lib"
              "C:/Program Files/MPICH/SDK/Lib" 
 )
 

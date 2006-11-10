@@ -284,6 +284,7 @@ class cmake
   // Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
   void DebugOutputOn() { this->DebugOutput = true;}
+
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString,
