@@ -604,8 +604,9 @@ bool cmGlobalGenerator::IsDependedOn(const char* project,
          l != targets.end(); l++)
       { 
       cmTarget& target = l->second;
-      if(target.GetUtilities().find(targetIn->GetName()) !=
-         target.GetUtilities().end())
+      std::set<cmStdString>::const_iterator i = 
+        target.GetUtilities().find(targetIn->GetName());
+      if(i != target.GetUtilities().end())
         {
         return true;
         }
