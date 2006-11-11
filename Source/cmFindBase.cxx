@@ -621,20 +621,18 @@ void cmFindBase::ExpandRegistryAndCleanPath()
         j != this->SearchPathSuffixes.end(); ++j)
       {
       std::string p = *i + std::string("/") + *j;
-      if(cmSystemTools::FileIsDirectory(p.c_str()))
-        {
-        this->SearchPaths.push_back(p);
-        }
+      // add to all paths because the search path may be modified 
+      // later with lib being replaced for lib64 which may exist
+      this->SearchPaths.push_back(p);
       }
     }
   // now put the path without the path suffixes in the SearchPaths
   for(i = finalPath.begin();
       i != finalPath.end(); ++i)
     {
-    if(cmSystemTools::FileIsDirectory(i->c_str()))
-      {
-      this->SearchPaths.push_back(*i);
-      }
+    // put all search paths in because it may later be replaced
+    // by lib64 stuff fixes bug 4009
+    this->SearchPaths.push_back(*i);
     }
 }
 
