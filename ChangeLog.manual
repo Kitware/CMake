@@ -159,7 +159,9 @@ Changes in CMake 2.4.4
 
 * Fix debug stl run of ctest on Mac
 
-* Use #2 for manifest command on dll and #1 on exe
+* Use #2 for manifest nt command on dll and #1 on exe
+
+* Add depends from files inside qrc files in qt
 
 Changes in CMake 2.4.3
 
