@@ -736,6 +736,12 @@ void CPropertyList::OnDelete()
   this->HideControls();
   this->SetTopIndex(0);
   InvalidateList();
+  m_curSel += 1;
+  if(m_curSel > this->GetCount())
+    {
+    m_curSel = this->GetCount();
+    }
+  this->SetCurSel(m_curSel);
 }
 
 void CPropertyList::OnHelp()

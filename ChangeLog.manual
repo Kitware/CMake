@@ -153,6 +153,14 @@ Changes in CMake 2.4.4
 
 * Fix some odd cases with custom commands in VS 6
 
+* Fix path suffix stuff with lib64 in FIND_* stuff.
+
+* Fix delete in CMakeSetup to not change the current position in the list
+
+* Fix debug stl run of ctest on Mac
+
+* Use #2 for manifest command on dll and #1 on exe
+
 Changes in CMake 2.4.3
 
 * fix for 3557 - Under MSVC8 hardcoded TargetEnvironment for MIDL Compiler 
