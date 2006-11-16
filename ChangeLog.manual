@@ -163,6 +163,8 @@ Changes in CMake 2.4.4
 
 * Add depends from files inside qrc files in qt
 
+* Fix explort_library_depends to work with optimized and debug
+
 Changes in CMake 2.4.3
 
 * fix for 3557 - Under MSVC8 hardcoded TargetEnvironment for MIDL Compiler 
