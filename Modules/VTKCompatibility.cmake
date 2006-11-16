@@ -17,3 +17,5 @@ SET(VTK_GLXEXT_FILE "${VTK_SOURCE_DIR}/Utilities/ParseOGLExt/headers/glxext.h" C
 SET(VTK_WGLEXT_FILE "${VTK_SOURCE_DIR}/Utilities/ParseOGLExt/headers/wglext.h" CACHE FILEPATH
   "Location of the WGL extensions header file (wglext.h).")
 
+# work around an old bug in VTK
+SET(TIFF_RIGHT_VERSION 1)
