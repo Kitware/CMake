@@ -737,7 +737,9 @@ void cmTarget::Emit( const std::string& lib,
 {
   // It's already been emitted
   if( emitted.find(lib) != emitted.end() )
+    {
     return;
+    }
 
   // Emit the dependencies only if this library node hasn't been
   // visited before. If it has, then we have a cycle. The recursion
@@ -797,7 +799,9 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
   // If the library is already in the dependency map, then it has
   // already been fully processed.
   if( dep_map.find(lib) != dep_map.end() )
+    {
     return;
+    }
 
   const char* deps = mf.GetDefinition( (lib+"_LIB_DEPENDS").c_str() );
   if( deps && strcmp(deps,"") != 0 )

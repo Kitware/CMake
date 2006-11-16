@@ -954,6 +954,21 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
           }
         }
       }
+    // make sure the tpye is correct
+    std::string linkType = lib;
+    linkType += "_LINK_TYPE";
+    const char* linkTypeString = this->GetDefinition( linkType.c_str() );
+    if(linkTypeString)
+      {
+      if(strcmp(linkTypeString, "debug") == 0)
+        {
+        llt = cmTarget::DEBUG;
+        }
+      if(strcmp(linkTypeString, "optimized") == 0)
+        {
+        llt = cmTarget::OPTIMIZED;
+        }
+      }
     i->second.AddLinkLibrary( *this, target, lib, llt );
     }
   else
