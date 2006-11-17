@@ -147,8 +147,12 @@ int cmCPackNSISGenerator::InitializeInternal()
   if ( !cmsys::SystemTools::ReadRegistryValue(
       "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find NSIS registry value. This is usually caused by NSIS not being installed. Please install NSIS from http://nsis.sourceforge.org"
-      << std::endl);
+    cmCPackLogger
+      (cmCPackLog::LOG_ERROR, 
+       "Cannot find NSIS registry value. This is usually caused by NSIS "
+       "not being installed. Please install NSIS from "
+       "http://nsis.sourceforge.org"
+       << std::endl);
     return 0;
     }
   path.push_back(nsisPath);
