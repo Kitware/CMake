@@ -2060,7 +2060,7 @@ void cmMakefile::ExpandArguments(
     value = i->Value;
     this->ExpandVariablesInString(value, false, false, false, 
                                   i->FilePath, i->Line,
-                                  false, false);
+                                  false, true);
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
