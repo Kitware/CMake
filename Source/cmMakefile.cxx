@@ -954,11 +954,16 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
         }
       }
       }
-    // make sure the tpye is correct
+    // make sure the type is correct if it is currently
+    // general.  So if you do a 
+    // target_link_libraries(foo optimized bar) it will stay
+    // optimized and not use the lookup.   As there maybe the
+    // case where someone has specifed that a library is both
+    // debug and optimized.
     std::string linkType = lib;
     linkType += "_LINK_TYPE";
     const char* linkTypeString = this->GetDefinition( linkType.c_str() );
-    if(linkTypeString)
+    if(llt == cmTarget::GENERAL &&  linkTypeString)
       {
       if(strcmp(linkTypeString, "debug") == 0)
         {
