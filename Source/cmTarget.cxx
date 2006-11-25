@@ -229,16 +229,42 @@ void cmTarget::TraceVSDependencies(std::string projFile,
       // add its dependencies to the list to check
       unsigned int i;
       for (i = 0; i < outsf->GetCustomCommand()->GetDepends().size(); ++i)
-        {
+        { 
         std::string dep = cmSystemTools::GetFilenameName(
           outsf->GetCustomCommand()->GetDepends()[i]);
         if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
           {
           dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
           }
-        // watch for target dependencies,
-        if(this->Makefile->GetLocalGenerator()->
-           GetGlobalGenerator()->FindTarget(0, dep.c_str()))
+        bool isUtility = false;
+        // see if we can find a target with this name
+        cmTarget* t =  this->Makefile->GetLocalGenerator()->
+          GetGlobalGenerator()->FindTarget(0, dep.c_str());
+        if(t)
+          {
+          // if we find the target and the dep was given as a full
+          // path, then make sure it was not a full path to something
+          // else, and the fact that the name matched a target was 
+          // just a coincident 
+          if(cmSystemTools::FileIsFullPath(
+               outsf->GetCustomCommand()->GetDepends()[i].c_str()))
+            {
+            std::string tLocation = t->GetLocation(0);
+            tLocation = cmSystemTools::GetFilenamePath(tLocation);
+            std::string depLocation = cmSystemTools::GetFilenamePath(
+              std::string(outsf->GetCustomCommand()->GetDepends()[i].c_str()));
+            if(depLocation == tLocation)
+              {
+              isUtility = true;
+              }
+            }
+          // if it was not a full path then it must be a target
+          else
+            {
+            isUtility = true;
+            }
+          }
+        if(isUtility)
           {
           // add the depend as a utility on the target
           this->AddUtility(dep.c_str());

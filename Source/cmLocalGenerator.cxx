@@ -1857,6 +1857,22 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
   // Look for a CMake target with the given name.
   if(cmTarget* target = this->GlobalGenerator->FindTarget(0, name.c_str()))
     {
+    // make sure it is not just a coincidence that the target name
+    // found is part of the inName
+    if(cmSystemTools::FileIsFullPath(inName))
+      {
+      std::string tLocation = target->GetLocation(config);
+      tLocation = cmSystemTools::GetFilenamePath(tLocation);
+      std::string depLocation = cmSystemTools::GetFilenamePath(
+        std::string(inName));
+      if(depLocation != tLocation)
+        {
+        // it is a full path to a depend that has the same name
+        // as a target but is in a different location so do not use
+        // the target as the depend
+        return inName;
+        }
+      }
     switch (target->GetType())
       {
       case cmTarget::EXECUTABLE:
