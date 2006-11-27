@@ -390,6 +390,18 @@ IF(BUILD_TESTING)
     --build-project TestTar
     --test-command TestTarExec)
 
+  ADD_TEST(TargetName ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/TargetName"
+    "${CMake_BINARY_DIR}/Tests/TargetName"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-project TestTar
+    --test-command ${CMAKE_COMMAND} -E compare_files 
+    ${CMake_SOURCE_DIR}/Tests/TargetName/scripts/hello_world
+    ${CMake_BINARY_DIR}/Tests/TargetName/scripts/hello_world)
+
   ADD_TEST(CustomCommand  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/CustomCommand"
