@@ -887,7 +887,8 @@ const char* cmTarget::GetDirectory(const char* config)
         this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
       break;
     default:
-      return 0;
+      this->Directory = this->Makefile->GetStartOutputDirectory();
+      break;
     }
   if(this->Directory.empty())
     {
