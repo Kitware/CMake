@@ -397,7 +397,7 @@ IF(BUILD_TESTING)
     --build-two-config
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project TestTar
+    --build-project TargetName
     --test-command ${CMAKE_COMMAND} -E compare_files 
     ${CMake_SOURCE_DIR}/Tests/TargetName/scripts/hello_world
     ${CMake_BINARY_DIR}/Tests/TargetName/scripts/hello_world)
