@@ -1136,7 +1136,13 @@ void cmMakefileTargetGenerator
     {
     return;
     }
-
+  // Compute which library configuration to link.
+  cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
+  if(cmSystemTools::UpperCase(
+       this->LocalGenerator->ConfigurationName.c_str()) == "DEBUG")
+    {
+    linkType = cmTarget::DEBUG;
+    }
   // Keep track of dependencies already listed.
   std::set<cmStdString> emitted;
 
@@ -1149,6 +1155,14 @@ void cmMakefileTargetGenerator
   for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
       lib != tlibs.end(); ++lib)
     {
+    // skip the library if it is not general and the link type
+    // does not match the current target
+    if(lib->second != cmTarget::GENERAL &&
+       lib->second != linkType)
+      {
+      continue;
+      }
+       
     // Don't emit the same library twice for this target.
     if(emitted.insert(lib->first).second)
       {
