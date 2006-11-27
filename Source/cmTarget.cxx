@@ -229,9 +229,10 @@ void cmTarget::TraceVSDependencies(std::string projFile,
       // add its dependencies to the list to check
       unsigned int i;
       for (i = 0; i < outsf->GetCustomCommand()->GetDepends().size(); ++i)
-        { 
-        std::string dep = cmSystemTools::GetFilenameName(
-          outsf->GetCustomCommand()->GetDepends()[i]);
+        {
+        const std::string& fullName 
+          = outsf->GetCustomCommand()->GetDepends()[i];
+        std::string dep = cmSystemTools::GetFilenameName(fullName);
         if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
           {
           dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
@@ -246,13 +247,12 @@ void cmTarget::TraceVSDependencies(std::string projFile,
           // path, then make sure it was not a full path to something
           // else, and the fact that the name matched a target was 
           // just a coincident 
-          if(cmSystemTools::FileIsFullPath(
-               outsf->GetCustomCommand()->GetDepends()[i].c_str()))
+          if(cmSystemTools::FileIsFullPath(fullName.c_str()))
             {
             std::string tLocation = t->GetLocation(0);
             tLocation = cmSystemTools::GetFilenamePath(tLocation);
             std::string depLocation = cmSystemTools::GetFilenamePath(
-              std::string(outsf->GetCustomCommand()->GetDepends()[i].c_str()));
+              std::string(fullName));
             if(depLocation == tLocation)
               {
               isUtility = true;
