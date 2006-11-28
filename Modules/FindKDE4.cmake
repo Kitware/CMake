@@ -12,8 +12,8 @@
 
 FILE(TO_CMAKE_PATH "$ENV{KDEDIRS}" _KDEDIRS)
 
-# First try to find kde-config, for KDE4 soon to be renamed to kde4-config
-FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config kde-config
+# For KDE4 kde-config has been renamed to kde4-config
+FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config
    PATHS
    ${CMAKE_INSTALL_PREFIX}/bin
    ${_KDEDIRS}
@@ -23,11 +23,11 @@ FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config kde-config
 
 
 IF (NOT KDE4_KDECONFIG_EXECUTABLE)
-   FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config kde-config )
+   FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config )
 ENDIF (NOT KDE4_KDECONFIG_EXECUTABLE)
 
 IF (KDE4_KDECONFIG_EXECUTABLE)
-   # then ask kde-config for the kde data dirs
+   # then ask kde4-config for the kde data dirs
    EXEC_PROGRAM(${KDE4_KDECONFIG_EXECUTABLE} ARGS --path data OUTPUT_VARIABLE _data_DIR )
 
    FILE(TO_CMAKE_PATH "${_data_DIR}" _data_DIR)
@@ -58,7 +58,7 @@ IF (KDE4_KDECONFIG_EXECUTABLE)
 
 ELSE (KDE4_KDECONFIG_EXECUTABLE)
    IF (KDE4_FIND_REQUIRED)
-      MESSAGE(FATAL_ERROR "ERROR: Could not find KDE4 kde-config")
+      MESSAGE(FATAL_ERROR "ERROR: Could not find KDE4 kde4-config")
    ENDIF (KDE4_FIND_REQUIRED)
 ENDIF (KDE4_KDECONFIG_EXECUTABLE)
 

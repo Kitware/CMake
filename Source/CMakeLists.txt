@@ -365,6 +365,7 @@ IF(BUILD_TESTING)
   # and not the ctest from the cmake building and testing
   # cmake.
   SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
+  SET(CMAKE_CMAKE_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cmake")
 
   # Should the long tests be run?
   OPTION(CMAKE_RUN_LONG_TESTS "Should the long tests be run (such as Bootstrap)." ON)
@@ -389,6 +390,18 @@ IF(BUILD_TESTING)
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project TestTar
     --test-command TestTarExec)
+
+  ADD_TEST(TargetName ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/TargetName"
+    "${CMake_BINARY_DIR}/Tests/TargetName"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-project TargetName
+    --test-command ${CMAKE_CMAKE_COMMAND} -E compare_files 
+    ${CMake_SOURCE_DIR}/Tests/TargetName/scripts/hello_world
+    ${CMake_BINARY_DIR}/Tests/TargetName/scripts/hello_world)
 
   ADD_TEST(CustomCommand  ${CMAKE_CTEST_COMMAND}
     --build-and-test 
@@ -729,7 +742,7 @@ IF(BUILD_TESTING)
     QT_QT_LIBRARY
     QT_UIC_EXE)
 
-  IF (QT_FOUND AND QT_UIC_EXECUTABLE)
+  IF (QT_FOUND AND QT_WRAP_UI)
     ADD_TEST(qtwrapping  ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/Wrapping"
@@ -740,7 +753,7 @@ IF(BUILD_TESTING)
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
       --test-command qtwrapping
       )
-  ENDIF (QT_FOUND AND QT_UIC_EXECUTABLE)
+  ENDIF (QT_FOUND AND QT_WRAP_UI)
 
   ADD_TEST(testdriver1 ${CMAKE_CTEST_COMMAND}
     --build-and-test

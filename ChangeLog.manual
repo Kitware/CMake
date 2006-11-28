@@ -1,3 +1,13 @@
+Changes in CMake 2.4.5
+
+* Do not depend on optimized libraries for a debug build and visa versa.
+
+* Fix target name matching custom command output
+   
+* Fix FindQt3 so that it does not find qt4
+
+* Fix FindKDE4 so that it only looks for kde4-config
+
 Changes in CMake 2.4.4
 
 * CMake Version numbers on module directory
@@ -61,7 +71,7 @@ Changes in CMake 2.4.4
 * Added APPEND option to ADD_CUSTOM_COMMAND, Added VERBATIM option to 
   ADD_CUSTOM_COMMAND and ADD_CUSTOM_TARGET
 
-* add NOT_IN_ALL option  for ADD_LIBRARY and ADD_EXECUTABLE
+* add EXCLUDE_FROM_ALL option  for ADD_LIBRARY and ADD_EXECUTABLE
 
 * Fix automatic computation of binary path to work for subdirectories of out
   of source directories.  This addresses bug#3592.
