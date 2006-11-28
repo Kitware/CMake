@@ -10,7 +10,8 @@ set(RELEASE_SCRIPTS
   dashsgi1_release.cmake      # IRIX
   dashsgi1_release64.cmake    # IRIX 64
   vogon_release.cmake         # Windows
-  r36n11_aix_release.cmake   # AIX
+#  r36n11_aix_release.cmake   # AIX 5.3
+  r15n65_aix_release.cmake   # AIX 5.2
 )
 
 file(WRITE create-${CMAKE_VERSION}.sh "#!/bin/sh")
