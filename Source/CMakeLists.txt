@@ -365,6 +365,7 @@ IF(BUILD_TESTING)
   # and not the ctest from the cmake building and testing
   # cmake.
   SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
+  SET(CMAKE_CMAKE_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cmake")
 
   # Should the long tests be run?
   OPTION(CMAKE_RUN_LONG_TESTS "Should the long tests be run (such as Bootstrap)." ON)
@@ -398,7 +399,7 @@ IF(BUILD_TESTING)
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project TargetName
-    --test-command ${CMAKE_COMMAND} -E compare_files 
+    --test-command ${CMAKE_CMAKE_COMMAND} -E compare_files 
     ${CMake_SOURCE_DIR}/Tests/TargetName/scripts/hello_world
     ${CMake_BINARY_DIR}/Tests/TargetName/scripts/hello_world)
 
