@@ -127,6 +127,7 @@ CMAKE_CXX_SOURCES="\
   cmInstallTargetGenerator \
   cmSourceFile \
   cmSystemTools \
+  cmVersion \
   cmFileTimeComparison \
   cmGlobalUnixMakefileGenerator3 \
   cmLocalUnixMakefileGenerator3 \

@@ -1,3 +1,7 @@
-__declspec(dllexport) void foo()
+#ifdef _WIN32
+__declspec(dllexport) 
+#endif
+  
+  void foo()
 {
 }
