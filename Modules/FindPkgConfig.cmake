@@ -360,10 +360,15 @@ macro(PKGCONFIG _package _include_DIR _link_DIR _link_FLAGS _cflags)
   message(STATUS "WARNING: you are using the obsolete 'PKGCONFIG' macro")
   _pkg_check_modules_internal(0 0 _PKGCONFIG_TMP "${_package}")
   if (_PKGCONFIG_TMP_FOUND)
-    set(${_include_DIR} ${_PKGCONFIG_TMP_INCLUDEDIR})
-    set(${_link_DIR}    ${_PKGCONFIG_TMP_LIBDIR})
-    set(${_link_FLAGS}  ${_PKGCONFIG_TMP_LDFLAGS})
-    set(${_cflags}      ${_PKGCONFIG_TMP_CFLAGS})
+    # To be compatible with obsolete module must return blank-delimited strings.
+    # Also, lead with a blank (for TRUE/FALSE compatibility, 2.4.4 appears to
+    # have returned a blank sometimes followed by nl for the situation
+    # where the pkg-config  module has been found [e.g., _PKGCONFIG_TMP_FOUND]
+    # but does not define the desired quantity.
+    string(REGEX REPLACE ";" " " ${_include_DIR} " ${_PKGCONFIG_TMP_INCLUDE_DIRS}")
+    string(REGEX REPLACE ";" " " ${_link_DIR}    " ${_PKGCONFIG_TMP_LIBRARY_DIRS}")
+    string(REGEX REPLACE ";" " " ${_link_FLAGS}  " ${_PKGCONFIG_TMP_LDFLAGS}")
+    string(REGEX REPLACE ";" " " ${_cflags}      " ${_PKGCONFIG_TMP_CFLAGS}")
     set(_return_VALUE 0)
   else(_PKGCONFIG_TMP_FOUND)
     set(${_include_DIR})
