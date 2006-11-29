@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "../cmCacheManager.h"
 #include "../cmSystemTools.h"
+#include "../cmVersion.h"
 #include "../cmake.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStringWidget.h"
@@ -579,8 +580,8 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   // We want to display this on the right
   char version[cmCursesMainForm::MAX_WIDTH];
   char vertmp[128];
-  sprintf(vertmp,"CMake Version %d.%d - %s", cmake::GetMajorVersion(),
-          cmake::GetMinorVersion(),cmake::GetReleaseVersion());
+  sprintf(vertmp,"CMake Version %d.%d - %s", cmVersion::GetMajorVersion(),
+          cmVersion::GetMinorVersion(),cmVersion::GetReleaseVersion().c_str());
   int sideSpace = (width-strlen(vertmp));
   for(i=0; i<sideSpace; i++) { version[i] = ' '; }
   sprintf(version+sideSpace, "%s", vertmp);
