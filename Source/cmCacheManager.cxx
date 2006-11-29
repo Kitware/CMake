@@ -20,6 +20,7 @@
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
 #include "cmake.h"
+#include "cmVersion.h"
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
@@ -370,17 +371,17 @@ bool cmCacheManager::SaveCache(const char* path)
   // before writing the cache, update the version numbers
   // to the
   char temp[1024];
-  sprintf(temp, "%d", cmMakefile::GetMinorVersion());
+  sprintf(temp, "%d", cmVersion::GetMinorVersion());
   this->AddCacheEntry("CMAKE_CACHE_MINOR_VERSION", temp,
                       "Minor version of cmake used to create the "
                       "current loaded cache", cmCacheManager::INTERNAL);
-  sprintf(temp, "%d", cmMakefile::GetMajorVersion());
+  sprintf(temp, "%d", cmVersion::GetMajorVersion());
   this->AddCacheEntry("CMAKE_CACHE_MAJOR_VERSION", temp,
                       "Major version of cmake used to create the "
                       "current loaded cache", cmCacheManager::INTERNAL);
 
   this->AddCacheEntry("CMAKE_CACHE_RELEASE_VERSION",
-                      cmMakefile::GetReleaseVersion(),
+                      cmVersion::GetReleaseVersion().c_str(),
                       "Major version of cmake used to create the "
                       "current loaded cache", cmCacheManager::INTERNAL);
 

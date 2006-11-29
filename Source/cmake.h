@@ -60,13 +60,6 @@ class cmake
   ///! destruct an instance of cmake
   ~cmake();
 
-  /**
-   * Return major and minor version numbers for cmake.
-   */
-  static unsigned int GetMajorVersion(); 
-  static unsigned int GetMinorVersion(); 
-  static const char *GetReleaseVersion();
-
   ///! construct an instance of cmake
   static const char *GetCMakeFilesDirectory() {return "/CMakeFiles";};
   static const char *GetCMakeFilesDirectoryPostSlash() {

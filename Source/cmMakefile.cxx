@@ -15,7 +15,7 @@
 
 =========================================================================*/
 #include "cmMakefile.h"
-
+#include "cmVersion.h"
 #include "cmCommand.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
@@ -133,23 +133,6 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->ListFileStack = mf.ListFileStack;
 }
 
-const char* cmMakefile::GetReleaseVersion()
-{
-#if CMake_VERSION_MINOR & 1
-  return "development";
-#else
-# if CMake_VERSION_PATCH == 1
-  return "1-beta";
-# else
-#   ifdef CMake_VERSION_RC
-  return "patch " CMAKE_TO_STRING(CMake_VERSION_PATCH) " RC-" 
-    CMAKE_TO_STRING(CMake_VERSION_RC);
-#   else
-  return "patch " CMAKE_TO_STRING(CMake_VERSION_PATCH);
-# endif  
-# endif  
-#endif
-}
 
 unsigned int cmMakefile::GetCacheMajorVersion()
 {
@@ -1965,11 +1948,11 @@ void cmMakefile::AddDefaultDefinitions()
 #endif
 
   char temp[1024];
-  sprintf(temp, "%d", cmMakefile::GetMinorVersion());
+  sprintf(temp, "%d", cmVersion::GetMinorVersion());
   this->AddDefinition("CMAKE_MINOR_VERSION", temp);
-  sprintf(temp, "%d", cmMakefile::GetMajorVersion());
+  sprintf(temp, "%d", cmVersion::GetMajorVersion());
   this->AddDefinition("CMAKE_MAJOR_VERSION", temp);
-  sprintf(temp, "%d", cmMakefile::GetPatchVersion());
+  sprintf(temp, "%d", cmVersion::GetPatchVersion());
   this->AddDefinition("CMAKE_PATCH_VERSION", temp);
 
   this->AddDefinition("CMAKE_FILES_DIRECTORY", 

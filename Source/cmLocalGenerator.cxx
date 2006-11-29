@@ -1643,7 +1643,6 @@ void cmLocalGenerator
       {
       continue;
       }
-
     // Link to a library if it is not the same target and is meant for
     // this configuration type.
     if((target.GetType() == cmTarget::EXECUTABLE ||
@@ -1664,7 +1663,6 @@ void cmLocalGenerator
         linkItem += "/";
         linkItem += tgt->GetFullName(config);
         linkLibraries.push_back(linkItem);
-
         // For full path, use the true location.
         if(fullPathLibs)
           {

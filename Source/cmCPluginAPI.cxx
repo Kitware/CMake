@@ -21,6 +21,7 @@
 
 #include "cmMakefile.h"
 #include "cmCPluginAPI.h"
+#include "cmVersion.h"
 
 #include "cmSourceFile.h"
 
@@ -65,12 +66,12 @@ unsigned int CCONV cmGetCacheMinorVersion(void *arg)
 
 unsigned int CCONV cmGetMajorVersion(void *)
 {
-  return cmMakefile::GetMajorVersion();
+  return cmVersion::GetMajorVersion();
 }
 
 unsigned int CCONV cmGetMinorVersion(void *)
 {
-  return cmMakefile::GetMinorVersion();
+  return cmVersion::GetMinorVersion();
 }
 
 void CCONV cmAddDefinition(void *arg, const char* name, const char* value)

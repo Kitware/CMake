@@ -7,6 +7,7 @@
 #undef DEBUG
 #include "CMakeSetup.h"
 #include "MakeHelp.h"
+#include "cmVersion.h"
 #include "PathDialog.h"
 #include "CMakeSetupDialog.h"
 #include "CMakeCommandLineInfo.h"
@@ -323,8 +324,9 @@ BOOL CMakeSetupDialog::OnInitDialog()
     
   // Set the version number
   char tmp[1024];
-  sprintf(tmp,"CMake %d.%d - %s", cmake::GetMajorVersion(),
-          cmake::GetMinorVersion(), cmake::GetReleaseVersion());
+  sprintf(tmp,"CMake %d.%d - %s", cmVersion::GetMajorVersion(),
+          cmVersion::GetMinorVersion(), 
+          cmVersion::GetReleaseVersion().c_str());
   SetDlgItemText(IDC_PROGRESS, "");
   this->SetWindowText(tmp);
   this->UpdateData(FALSE);

@@ -18,6 +18,7 @@
 #include "cmLocalGenerator.h"
 #include "cmake.h"
 #include "cmMakefile.h"
+#include "cmVersion.h"
 
 #include <stdlib.h> // required for atof
 
@@ -270,8 +271,8 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     // to avoid duplicate compiler tests.
     unsigned int cacheMajor = mf->GetCacheMajorVersion();
     unsigned int cacheMinor = mf->GetCacheMinorVersion();
-    unsigned int selfMajor = cmMakefile::GetMajorVersion();
-    unsigned int selfMinor = cmMakefile::GetMinorVersion();
+    unsigned int selfMajor = cmVersion::GetMajorVersion();
+    unsigned int selfMinor = cmVersion::GetMinorVersion();
     if((this->CMakeInstance->GetIsInTryCompile() ||
         (selfMajor == cacheMajor && selfMinor == cacheMinor))
        && !mf->GetDefinition(loadedLang.c_str()))

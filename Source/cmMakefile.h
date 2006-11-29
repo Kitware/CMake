@@ -50,14 +50,6 @@ class cmMakefile
 {
 public:
   /**
-   * Return major and minor version numbers for cmake.
-   */
-  static unsigned int GetMajorVersion() { return CMake_VERSION_MAJOR; }
-  static unsigned int GetMinorVersion() { return CMake_VERSION_MINOR; }
-  static unsigned int GetPatchVersion() { return CMake_VERSION_PATCH; }
-  static const char* GetReleaseVersion();
-  
-  /**
    * Return the major and minor version of the cmake that
    * was used to write the currently loaded cache, note
    * this method will not work before the cache is loaded.
