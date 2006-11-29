@@ -16,16 +16,6 @@
 
 #include KWSYS_HEADER(Configure.hxx)
 
-#ifdef __APPLE__
-#if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
-#include <string.h> // for strlen
-#endif //MAC_OS_X_VERSION_MIN_REQUIRED < 1030
-#endif // __APPLE__
-
-#ifdef __hpux
-#include <errno.h>
-#endif //__hpux
-
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
@@ -59,6 +49,7 @@ DynamicLoader::~DynamicLoader()
 // ---------------------------------------------------------------
 // 1. Implementation for HPUX  machines
 #ifdef __hpux
+#include <errno.h>
 #include <dl.h>
 #define DYNAMICLOADER_DEFINED 1
 
@@ -141,7 +132,8 @@ const char* DynamicLoader::LastError()
 // ---------------------------------------------------------------
 // 2. Implementation for Mac OS X 10.2.x and earlier
 #ifdef __APPLE__
-#if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
+#include <string.h> // for strlen
 #include <mach-o/dyld.h>
 #define DYNAMICLOADER_DEFINED 1
 
@@ -223,7 +215,7 @@ const char* DynamicLoader::LastError()
 
 } // namespace KWSYS_NAMESPACE
 
-#endif //MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+#endif // MAC_OS_X_VERSION_MAX_ALLOWED < 1030
 #endif // __APPLE__
 
 // ---------------------------------------------------------------

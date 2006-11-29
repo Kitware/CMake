@@ -22,7 +22,7 @@
   #include <windows.h>
 #elif defined(__APPLE__)
   #include <AvailabilityMacros.h>
-  #if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+  #if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
     #include <mach-o/dyld.h>
   #endif
 #endif
@@ -57,7 +57,7 @@ public:
 #elif defined(_WIN32)
   typedef HMODULE LibraryHandle;
 #elif defined(__APPLE__)
-  #if MAC_OS_X_VERSION_MIN_REQUIRED < 1030
+  #if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
     typedef NSModule LibraryHandle;
   #else
     typedef void* LibraryHandle;
