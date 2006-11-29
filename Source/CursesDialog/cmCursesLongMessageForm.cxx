@@ -81,7 +81,7 @@ void cmCursesLongMessageForm::UpdateStatusBar()
   char version[cmCursesMainForm::MAX_WIDTH];
   char vertmp[128];
   sprintf(vertmp,"CMake Version %d.%d - %s", cmVersion::GetMajorVersion(),
-          cmVersion::GetMinorVersion(),cmVersion::GetReleaseVersion());
+          cmVersion::GetMinorVersion(),cmVersion::GetReleaseVersion().c_str());
   int sideSpace = (width-strlen(vertmp));
   for(int i=0; i<sideSpace; i++) { version[i] = ' '; }
   sprintf(version+sideSpace, "%s", vertmp);
