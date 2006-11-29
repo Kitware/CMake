@@ -402,6 +402,10 @@ IF(BUILD_TESTING)
     --test-command ${CMAKE_CMAKE_COMMAND} -E compare_files 
     ${CMake_SOURCE_DIR}/Tests/TargetName/scripts/hello_world
     ${CMake_BINARY_DIR}/Tests/TargetName/scripts/hello_world)
+  SET(LIBNAME_DIR)
+  IF(CMAKE_CONFIGURATION_TYPES)
+    SET(LIBNAME_DIR Debug)
+  ENDIF(CMAKE_CONFIGURATION_TYPES)
 
   ADD_TEST(LibName ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -411,7 +415,7 @@ IF(BUILD_TESTING)
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project LibName 
-    --build-run-dir "${CMake_BINARY_DIR}/Tests/LibName/lib"
+    --build-run-dir "${CMake_BINARY_DIR}/Tests/LibName/lib/${LIBNAME_DIR}"
     --test-command foobar
     )
 
