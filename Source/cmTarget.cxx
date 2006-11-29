@@ -464,7 +464,7 @@ void cmTarget::AddLinkLibrary(const std::string& lib,
                               LinkLibraryType llt)
 {
   this->AddFramework(lib.c_str(), llt);
-  std::pair<std::string, cmTarget::LinkLibraryType> tmp;
+  cmTarget::LibraryID tmp;
   tmp.first = lib;
   tmp.second = llt;
   this->LinkLibraries.push_back(tmp);
@@ -499,7 +499,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     return;
     }
   this->AddFramework(lib, llt);
-  std::pair<std::string,  cmTarget::LinkLibraryType> tmp;
+  cmTarget::LibraryID tmp;
   tmp.first = lib;
   tmp.second = llt;
   this->LinkLibraries.push_back( tmp );
