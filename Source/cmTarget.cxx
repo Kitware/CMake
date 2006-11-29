@@ -500,58 +500,6 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   this->LinkLibraries.push_back( std::pair<std::string, 
                                  cmTarget::LinkLibraryType>(lib,llt) );
 
-  if(llt != cmTarget::GENERAL)
-    {
-    // Store the library's link type in the cache.  If it is a
-    // conflicting type then assume it is always used.  This is the
-    // case when the user sets the cache entries for debug and
-    // optimized versions of the library to the same value.
-    std::string linkTypeName = lib;
-    linkTypeName += "_LINK_TYPE";
-    switch(llt)
-      {
-      case cmTarget::DEBUG:
-        {
-        const char* def = mf.GetDefinition(linkTypeName.c_str());
-        if(!def || strcmp(def, "debug") == 0)
-          {
-          mf.AddCacheDefinition(linkTypeName.c_str(),
-                                "debug", 
-                                "Library is used for debug links only",
-                                cmCacheManager::STATIC);
-          }
-        else
-          {
-          mf.AddCacheDefinition
-            (linkTypeName.c_str(), "general", 
-             "Library is used for both debug and optimized links",
-             cmCacheManager::STATIC);
-          }
-        }
-        break;
-      case cmTarget::OPTIMIZED:
-        {
-        const char* def = mf.GetDefinition(linkTypeName.c_str());
-        if(!def || strcmp(def, "optimized") == 0)
-          {
-          mf.AddCacheDefinition
-            (linkTypeName.c_str(), "optimized", 
-             "Library is used for debug links only",
-             cmCacheManager::STATIC);
-          }
-        else
-          {
-          mf.AddCacheDefinition
-            (linkTypeName.c_str(), "general", 
-             "Library is used for both debug and optimized links",
-             cmCacheManager::STATIC);
-          }
-        }
-        break;
-      case cmTarget::GENERAL:
-        break;
-      }
-    }
   // Add the explicit dependency information for this target. This is
   // simply a set of libraries separated by ";". There should always
   // be a trailing ";". These library names are not canonical, in that
@@ -570,6 +518,19 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
       {
       dependencies += old_val;
       }
+    switch (llt)
+      {
+      case cmTarget::GENERAL:
+        dependencies += "general";
+        break;
+      case cmTarget::DEBUG:
+        dependencies += "debug";
+        break;
+      case cmTarget::OPTIMIZED:
+        dependencies += "optimized";
+        break;
+      }
+    dependencies += ";";
     dependencies += lib;
     dependencies += ";";
     mf.AddCacheDefinition( targetEntry.c_str(), dependencies.c_str(),
@@ -667,7 +628,7 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
         = this->LinkLibraries.rbegin();
       lib != this->LinkLibraries.rend(); ++lib)
     {
-    this->GatherDependencies( mf, lib->first, dep_map );
+    this->GatherDependencies( mf, *lib, dep_map);
     }
 
   // 2. Remove any dependencies that are already satisfied in the original
@@ -679,7 +640,7 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
     for( LinkLibraryVectorType::iterator lib2 = lib;
       lib2 != this->LinkLibraries.end(); ++lib2)
       {
-      DeleteDependency( dep_map, lib->first, lib2->first );
+      this->DeleteDependency( dep_map, *lib, *lib2);
       }
     }
 
@@ -687,8 +648,8 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // 3. Create the new link line by simply emitting any dependencies that are
   // missing.  Start from the back and keep adding.
   //
-  std::set<cmStdString> done, visited;
-  std::vector<std::string> newLinkLibraries;
+  std::set<DependencyMap::key_type> done, visited;
+  std::vector<DependencyMap::key_type> newLinkLibraries;
   for(LinkLibraryVectorType::reverse_iterator lib = 
         this->LinkLibraries.rbegin();
       lib != this->LinkLibraries.rend(); ++lib)
@@ -697,47 +658,33 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
     // if a variable expands to nothing.
     if (lib->first.size() != 0)
       {
-      Emit( lib->first, dep_map, done, visited, newLinkLibraries );
+      this->Emit( *lib, dep_map, done, visited, newLinkLibraries );
       }
     }
 
   // 4. Add the new libraries to the link line.
   //
-  for( std::vector<std::string>::reverse_iterator k = 
+  for( std::vector<DependencyMap::key_type>::reverse_iterator k = 
          newLinkLibraries.rbegin();
        k != newLinkLibraries.rend(); ++k )
     {
-    std::string linkType = *k;
-    linkType += "_LINK_TYPE";
-    cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
-    const char* linkTypeString = mf.GetDefinition( linkType.c_str() );
-    if(linkTypeString)
-      {
-      if(strcmp(linkTypeString, "debug") == 0)
-        {
-        llt = cmTarget::DEBUG;
-        }
-      if(strcmp(linkTypeString, "optimized") == 0)
-        {
-        llt = cmTarget::OPTIMIZED;
-        }
-      }
-    this->LinkLibraries.push_back( std::make_pair(*k,llt) );
+    // get the llt from the dep_map    
+    this->LinkLibraries.push_back( std::make_pair(k->first,k->second) );
     }
   this->LinkLibrariesAnalyzed = true;
 }
 
 
 void cmTarget::InsertDependency( DependencyMap& depMap,
-                                 const cmStdString& lib,
-                                 const cmStdString& dep ) 
+                                 const LibraryID& lib,
+                                 const LibraryID& dep) 
 {
   depMap[lib].push_back(dep);
 }
 
 void cmTarget::DeleteDependency( DependencyMap& depMap,
-                                 const cmStdString& lib,
-                                 const cmStdString& dep ) 
+                                 const LibraryID& lib,
+                                 const LibraryID& dep) 
 {
   // Make sure there is an entry in the map for lib. If so, delete all
   // dependencies to dep. There may be repeated entries because of
@@ -755,11 +702,11 @@ void cmTarget::DeleteDependency( DependencyMap& depMap,
     }
 }
 
-void cmTarget::Emit( const std::string& lib,
-                     const DependencyMap& dep_map,
-                     std::set<cmStdString>& emitted,
-                     std::set<cmStdString>& visited,
-                     std::vector<std::string>& link_line )
+void cmTarget::Emit(const LibraryID lib,
+                    const DependencyMap& dep_map,
+                    std::set<LibraryID>& emitted,
+                    std::set<LibraryID>& visited,
+                    DependencyList& link_line )
 {
   // It's already been emitted
   if( emitted.find(lib) != emitted.end() )
@@ -790,7 +737,7 @@ void cmTarget::Emit( const std::string& lib,
       // recursive call. This way, if we come across a library that
       // has already been emitted, we repeat it iff it has been
       // emitted here.
-      std::set<cmStdString> emitted_here;
+      std::set<DependencyMap::key_type> emitted_here;
       for( i = dep_on.rbegin(); i != dep_on.rend(); ++i )
         {
         if( emitted_here.find(*i) != emitted_here.end() )
@@ -819,8 +766,8 @@ void cmTarget::Emit( const std::string& lib,
 
 
 void cmTarget::GatherDependencies( const cmMakefile& mf,
-                                   const std::string& lib,
-                                   DependencyMap& dep_map )
+                                   const LibraryID& lib,
+                                   DependencyMap& dep_map)
 {
   // If the library is already in the dependency map, then it has
   // already been fully processed.
@@ -829,7 +776,7 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
     return;
     }
 
-  const char* deps = mf.GetDefinition( (lib+"_LIB_DEPENDS").c_str() );
+  const char* deps = mf.GetDefinition( (lib.first+"_LIB_DEPENDS").c_str() );
   if( deps && strcmp(deps,"") != 0 )
     {
     // Make sure this library is in the map, even if it has an empty
@@ -837,8 +784,9 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
     // no dependencies with that of unspecified dependencies.
     dep_map[lib];
 
-    // Parse the dependency information, which is simply a set of
-    // libraries separated by ";". There is always a trailing ";".
+    // Parse the dependency information, which is a set of
+    // type, library pairs separated by ";". There is always a trailing ";".
+    cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
     std::string depline = deps;
     std::string::size_type start = 0;
     std::string::size_type end;
@@ -848,13 +796,31 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
       std::string l = depline.substr( start, end-start );
       if( l.size() != 0 )
         {
-        InsertDependency( dep_map, lib, l );
-        GatherDependencies( mf, l, dep_map );
+        if (l == "debug")
+          {
+          llt = cmTarget::DEBUG;
+          }
+        else if (l == "optimized")
+          {
+          llt = cmTarget::OPTIMIZED;
+          }
+        else if (l == "general")
+          {
+          llt = cmTarget::GENERAL;
+          }
+        else
+          {
+          LibraryID lib2(l,llt);
+          this->InsertDependency( dep_map, lib, lib2);
+          this->GatherDependencies( mf, lib2, dep_map);
+          llt = cmTarget::GENERAL;
+          }
         }
       start = end+1; // skip the ;
       end = depline.find( ";", start );
       }
-    DeleteDependency( dep_map, lib, lib); // cannot depend on itself
+    // cannot depend on itself
+    this->DeleteDependency( dep_map, lib, lib); 
     }
 }
 

@@ -64,12 +64,13 @@ public:
     {
     return
       "  TARGET_LINK_LIBRARIES(target library1\n"
-      "                        <debug | optimized> library2\n"
+      "                        <debug | optimized | general> library2\n"
       "                        ...)\n"
       "Specify a list of libraries to be linked into the specified target.  "
       "The debug and optimized strings may be used to indicate that "
       "the next library listed is to be used only for that specific "
-      "type of build";
+      "type of build. general indicates it is used for all build types "
+      "and is assumed if not specified.";
     }
   
   cmTypeMacro(cmTargetLinkLibrariesCommand, cmCommand);

@@ -95,8 +95,10 @@ public:
    */
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
 
-  typedef std::vector<std::pair<std::string,LinkLibraryType> > 
-  LinkLibraryVectorType;
+  //* how we identify a library, by name and type
+  typedef std::pair<cmStdString, LinkLibraryType> LibraryID;
+
+  typedef std::vector<LibraryID > LinkLibraryVectorType;
   const LinkLibraryVectorType &GetLinkLibraries() {
     return this->LinkLibraries;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() 
@@ -251,7 +253,7 @@ private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
    */
-  typedef std::vector<cmStdString> DependencyList;
+  typedef std::vector< LibraryID > DependencyList;
 
   /**
    * This map holds the dependency graph. map[x] returns a set of
@@ -259,27 +261,21 @@ private:
    * ordered. This is necessary to handle direct dependencies that
    * themselves have no dependency information.
    */
-  typedef std::map< cmStdString, std::vector< cmStdString > > DependencyMap;
-
-  /**
-   * Maps a library name to its internal structure
-   */
-  typedef std::map< cmStdString, std::pair<cmStdString,LinkLibraryType> >
-  LibTypeMap;
+  typedef std::map< LibraryID, DependencyList > DependencyMap;
 
   /**
    * Inserts \a dep at the end of the dependency list of \a lib.
    */
   void InsertDependency( DependencyMap& depMap,
-                         const cmStdString& lib,
-                         const cmStdString& dep );
+                         const LibraryID& lib,
+                         const LibraryID& dep);
 
   /*
    * Deletes \a dep from the dependency list of \a lib.
    */
   void DeleteDependency( DependencyMap& depMap,
-                         const cmStdString& lib,
-                         const cmStdString& dep );
+                         const LibraryID& lib,
+                         const LibraryID& dep);
 
   /**
    * Emits the library \a lib and all its dependencies into link_line.
@@ -289,18 +285,19 @@ private:
    * link_line is in reverse order, in that the dependencies of a
    * library are listed before the library itself.
    */
-  void Emit( const std::string& lib,
+  void Emit( const LibraryID lib,
              const DependencyMap& dep_map,
-             std::set<cmStdString>& emitted,
-             std::set<cmStdString>& visited,
-             std::vector<std::string>& link_line );
+             std::set<LibraryID>& emitted,
+             std::set<LibraryID>& visited,
+             DependencyList& link_line);
 
   /**
    * Finds the dependencies for \a lib and inserts them into \a
    * dep_map.
    */
-  void GatherDependencies( const cmMakefile& mf, const std::string& lib,
-                           DependencyMap& dep_map ); 
+  void GatherDependencies( const cmMakefile& mf, 
+                           const LibraryID& lib,
+                           DependencyMap& dep_map); 
 
   const char* GetSuffixVariableInternal(TargetType type, bool implib);
   const char* GetPrefixVariableInternal(TargetType type, bool implib);
