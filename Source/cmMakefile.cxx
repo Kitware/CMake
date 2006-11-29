@@ -911,8 +911,10 @@ void cmMakefile::RemoveDefineFlag(const char* flag)
 void cmMakefile::AddLinkLibrary(const char* lib, 
                                 cmTarget::LinkLibraryType llt)
 {
-  this->LinkLibraries.push_back(
-    std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt));
+  std::pair<std::string, cmTarget::LinkLibraryType> tmp;
+  tmp.first = lib;
+  tmp.second = llt;
+  this->LinkLibraries.push_back(tmp);
 }
 
 void cmMakefile::AddLinkLibraryForTarget(const char *target,

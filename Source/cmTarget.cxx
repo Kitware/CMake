@@ -464,8 +464,10 @@ void cmTarget::AddLinkLibrary(const std::string& lib,
                               LinkLibraryType llt)
 {
   this->AddFramework(lib.c_str(), llt);
-  this->LinkLibraries.push_back( std::pair<std::string, 
-                                 cmTarget::LinkLibraryType>(lib,llt) );
+  std::pair<std::string, cmTarget::LinkLibraryType> tmp;
+  tmp.first = lib;
+  tmp.second = llt;
+  this->LinkLibraries.push_back(tmp);
 }
 
 bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
@@ -497,8 +499,10 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     return;
     }
   this->AddFramework(lib, llt);
-  this->LinkLibraries.push_back( std::pair<std::string, 
-                                 cmTarget::LinkLibraryType>(lib,llt) );
+  std::pair<std::string,  cmTarget::LinkLibraryType> tmp;
+  tmp.first = lib;
+  tmp.second = llt;
+  this->LinkLibraries.push_back( tmp );
 
   // Add the explicit dependency information for this target. This is
   // simply a set of libraries separated by ";". There should always
