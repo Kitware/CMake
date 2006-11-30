@@ -466,8 +466,9 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
     // check to see if the file is a full path or just contains 
     // a / in it and is a path to something
     cmStdString& item = this->RawLinkItems[i];
-    if(cmSystemTools::FileIsFullPath(item.c_str())
-       || item.find("/") != item.npos)
+    // if it is a full path to an item then separate it from the path
+    // this only works with files and paths
+    if(cmSystemTools::FileIsFullPath(item.c_str()))
       {
       if(cmSystemTools::FileIsDirectory(this->RawLinkItems[i].c_str()))
         {

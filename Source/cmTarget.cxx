@@ -864,7 +864,14 @@ const char* cmTarget::GetDirectory(const char* config)
     {
     this->Directory = this->Makefile->GetStartOutputDirectory();
     }
-
+  // if LIBRARY_OUTPUT_PATH or EXECUTABLE_OUTPUT_PATH was relative
+  // then make them full paths because this directory MUST 
+  // be a full path or things will not work!!!
+  if(!cmSystemTools::FileIsFullPath(this->Directory.c_str()))
+    {
+    this->Directory = this->Makefile->GetCurrentOutputDirectory() + 
+      std::string("/") + this->Directory;
+    }
   if(config)
     {
     // Add the configuration's subdirectory.
