@@ -1,8 +1,10 @@
 Changes in CMake 2.4.5
+* Fix problem with LIBRARY_OUTPUT_PATH and linking to a dll foo.dll.lib 
+  instead of foo.lib
 
 * Do not depend on optimized libraries for a debug build and visa versa.
 
-* Fix target name matching custom command output
+* Fix target name matching custom command output conflict.
    
 * Fix FindQt3 so that it does not find qt4
 
