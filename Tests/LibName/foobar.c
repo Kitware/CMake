@@ -3,7 +3,7 @@ __declspec(dllimport)
 #endif
 extern  void bar();
 
-int main(int ac, char** av)
+int main()
 {
   bar();
   return 0;
