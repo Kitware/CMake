@@ -463,18 +463,16 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
 #ifdef CM_ORDER_LINK_DIRECTORIES_DEBUG
     fprintf(stderr, "Raw link item [%s]\n", this->RawLinkItems[i].c_str());
 #endif
-    // check to see if the file is a full path or just contains 
-    // a / in it and is a path to something
-    cmStdString& item = this->RawLinkItems[i];
     // if it is a full path to an item then separate it from the path
     // this only works with files and paths
+    cmStdString& item = this->RawLinkItems[i];
     if(cmSystemTools::FileIsFullPath(item.c_str()))
       {
-      if(cmSystemTools::FileIsDirectory(this->RawLinkItems[i].c_str()))
+      if(cmSystemTools::FileIsDirectory(item.c_str()))
         {
-        if(cmSystemTools::IsPathToFramework(this->RawLinkItems[i].c_str()))
+        if(cmSystemTools::IsPathToFramework(item.c_str()))
           {
-          this->SplitFramework.find(this->RawLinkItems[i]);
+          this->SplitFramework.find(item.c_str());
           cmStdString path = this->SplitFramework.match(1);
           // Add the -F path if we have not yet done so
           if(this->EmittedFrameworkPaths.insert(path).second)
