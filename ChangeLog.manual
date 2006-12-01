@@ -1,4 +1,6 @@
 Changes in CMake 2.4.5
+* Fix for seg fault when a macro runs a bad command BUG# 3815
+
 * Fix fix for foo.dll.lib that does not brea -L/usr/lib in link names
 
 * Fix problem with LIBRARY_OUTPUT_PATH and linking to a dll foo.dll.lib 
