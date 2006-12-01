@@ -235,7 +235,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
       }
     if(!this->Makefile->ExecuteCommand(newLFF))
       {
-      cmListFileArgument arg;
       if(args.size())
         {
         arg.FilePath = args[0].FilePath;
