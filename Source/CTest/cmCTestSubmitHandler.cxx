@@ -200,14 +200,19 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
         cmCTestLog(this->CTest, ERROR_MESSAGE, "   Error message was: "
           << error_buffer << std::endl);
         *this->LogFile << "   Error when uploading file: "
-          << local_file.c_str()
-          << std::endl
-          << "   Error message was: " << error_buffer << std::endl
-          << "   Curl output was: "
-          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << std::endl;
-        cmCTestLog(this->CTest, ERROR_MESSAGE, "CURL output: ["
-          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
-          << std::endl);
+                       << local_file.c_str()
+                       << std::endl
+                       << "   Error message was: " << error_buffer << std::endl
+                       << "   Curl output was: ";
+        // avoid dereference of empty vector
+        if(chunk.size())
+          {
+          *this->LogFile << cmCTestLogWrite(&*chunk.begin(), chunk.size());
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "CURL output: ["
+                     << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
+                     << std::endl);
+          }
+        *this->LogFile << std::endl;
         ::curl_easy_cleanup(curl);
         ::curl_global_cleanup();
         return false;
@@ -379,14 +384,20 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
         cmCTestLog(this->CTest, ERROR_MESSAGE, "   Error message was: "
           << error_buffer << std::endl);
         *this->LogFile << "   Error when uploading file: "
-          << local_file.c_str()
-          << std::endl
-          << "   Error message was: " << error_buffer << std::endl
-          << "   Curl output was: "
-          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << std::endl;
-        cmCTestLog(this->CTest, ERROR_MESSAGE, "CURL output: ["
-          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
-          << std::endl);
+                       << local_file.c_str()
+                       << std::endl
+                       << "   Error message was: " << error_buffer 
+                       << std::endl;
+        // avoid deref of begin for zero size array
+        if(chunk.size())
+          {
+          *this->LogFile << "   Curl output was: "
+                         << cmCTestLogWrite(&*chunk.begin(), chunk.size())
+                         << std::endl;
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "CURL output: ["
+                     << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
+                     << std::endl);
+          }
         ::curl_easy_cleanup(curl);
         ::curl_global_cleanup();
         return false;
@@ -499,13 +510,18 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
         cmCTestLog(this->CTest, ERROR_MESSAGE, "   Error message was: "
           << error_buffer << std::endl);
         *this->LogFile << "\tTrigerring failed with error: " << error_buffer
-          << std::endl
-          << "   Error message was: " << error_buffer << std::endl
-          << "   Curl output was: "
-          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << std::endl;
-        cmCTestLog(this->CTest, ERROR_MESSAGE, "CURL output: ["
-          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
-          << std::endl);
+                       << std::endl
+                       << "   Error message was: " << error_buffer 
+                       << std::endl;
+        if(chunk.size())
+          {
+          *this->LogFile
+            << "   Curl output was: "
+            << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << std::endl;
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "CURL output: ["
+                     << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
+                     << std::endl);
+          }
         ::curl_easy_cleanup(curl);
         ::curl_global_cleanup();
         return false;
