@@ -110,6 +110,8 @@ SET(SRCS
   cmExprLexer.cxx
   cmExprParser.cxx
   cmExprParserHelper.cxx
+  cmFileTimeComparison.cxx
+  cmFileTimeComparison.h
   cmGeneratedFileStream.cxx
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
@@ -140,8 +142,14 @@ SET(SRCS
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
   cmOrderLinkDirectories.cxx
-  cmFileTimeComparison.cxx
-  cmFileTimeComparison.h
+  cmProperty.cxx
+  cmProperty.h
+  cmPropertyDefinition.cxx
+  cmPropertyDefinition.h
+  cmPropertyDefinitionMap.cxx
+  cmPropertyDefinitionMap.h
+  cmPropertyMap.cxx
+  cmPropertyMap.h
   cmSourceFile.cxx
   cmSourceFile.h
   cmSourceGroup.cxx
