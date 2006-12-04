@@ -19,7 +19,8 @@
 
 #include "cmPropertyDefinition.h"
 
-class cmPropertyDefinitionMap : public std::map<cmStdString,cmPropertyDefinition>
+class cmPropertyDefinitionMap : 
+public std::map<cmStdString,cmPropertyDefinition>
 {
 public:
   // define the property
