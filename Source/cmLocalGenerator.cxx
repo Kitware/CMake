@@ -361,7 +361,7 @@ void cmLocalGenerator::GenerateInstallRules()
   // Write support code for generating per-configuration install rules.
   fout <<
     "# Set the install configuration name.\n"
-    "IF(NOT CMAKE_INSTALL_CONFIG_NAME)\n"
+    "IF(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)\n"
     "  IF(BUILD_TYPE)\n"
     "    STRING(REGEX REPLACE \"^[^A-Za-z0-9_]+\" \"\"\n"
     "           CMAKE_INSTALL_CONFIG_NAME \"${BUILD_TYPE}\")\n"
@@ -370,7 +370,7 @@ void cmLocalGenerator::GenerateInstallRules()
     "  ENDIF(BUILD_TYPE)\n"
     "  MESSAGE(STATUS \"Install configuration: "
     "\\\"${CMAKE_INSTALL_CONFIG_NAME}\\\"\")\n"
-    "ENDIF(NOT CMAKE_INSTALL_CONFIG_NAME)\n"
+    "ENDIF(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)\n"
     "\n";
 
   // Write support code for dealing with component-specific installs.
