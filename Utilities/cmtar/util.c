@@ -100,6 +100,13 @@ mkdirhier(char *path)
     if (*dirp == '\0')
       continue;
 
+    /*
+     * Don't try to build current or parent dir. It doesn't make sense anyhow,
+     *  but it also returns EINVAL instead of EEXIST on BeOS!
+     */
+    if ((strcmp(dirp, ".") == 0) || (strcmp(dirp, "..") == 0))
+        continue;
+
     if (dst[0] != '\0')
       strcat(dst, "/");
     strcat(dst, dirp);

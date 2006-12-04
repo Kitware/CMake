@@ -1946,6 +1946,9 @@ void cmMakefile::AddDefaultDefinitions()
 #if defined(__QNXNTO__)
   this->AddDefinition("QNXNTO", "1");
 #endif
+#if defined(__BEOS__)
+  this->AddDefinition("BEOS", "1");
+#endif
 
   char temp[1024];
   sprintf(temp, "%d", cmVersion::GetMinorVersion());

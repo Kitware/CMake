@@ -99,8 +99,13 @@ static int libtar_gzopen(void* call_data, const char *pathname,
     return -1;
     }
 
-#if !defined(_WIN32) || defined(__CYGWIN__)
-  if ((oflags & O_CREAT) && fchmod(fd, mode))
+#if defined(__BEOS__) && !defined(__ZETA__)  // no fchmod on BeOS...do pathname instead.
+  if ((oflags & O_CREAT) && chmod(pathname, mode & 07777))
+    {
+    return -1;
+    }
+#elif !defined(_WIN32) || defined(__CYGWIN__)
+  if ((oflags & O_CREAT) && fchmod(fd, mode & 07777))
     {
     return -1;
     }

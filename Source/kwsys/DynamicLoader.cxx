@@ -319,7 +319,112 @@ const char* DynamicLoader::LastError()
 #endif //_WIN32
 
 // ---------------------------------------------------------------
-// 4. Implementation for default UNIX machines.
+// 4. Implementation for BeOS
+#ifdef __BEOS__
+#include <string.h> // for strerror()
+#include <be/kernel/image.h>
+#include <be/support/Errors.h>
+#define DYNAMICLOADER_DEFINED 1
+
+namespace KWSYS_NAMESPACE
+{
+
+static image_id last_dynamic_err = B_OK;
+
+//----------------------------------------------------------------------------
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const char* libname )
+{
+  // image_id's are integers, errors are negative. Add one just in case we
+  //  get a valid image_id of zero (is that even possible?).
+  image_id rc = load_add_on(libname);
+  if (rc < 0)
+    {
+    last_dynamic_err = rc;
+    return 0;
+    }
+
+  return rc+1;
+}
+
+//----------------------------------------------------------------------------
+int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
+{
+  if (!lib)
+    {
+      last_dynamic_err = B_BAD_VALUE;
+      return 0;
+    }
+  else
+    {
+    // The function dlclose() returns 0 on success, and non-zero on error.
+    status_t rc = unload_add_on(lib-1);
+    if (rc != B_OK)
+      {
+      last_dynamic_err = rc;
+      return 0;
+      }
+    }
+
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
+  DynamicLoader::LibraryHandle lib, const char* sym)
+{
+  // Hack to cast pointer-to-data to pointer-to-function.
+  union 
+  {
+    void* pvoid;
+    DynamicLoader::SymbolPointer psym;
+  } result;
+
+  result.psym = NULL;
+
+  if (!lib)
+    {
+      last_dynamic_err = B_BAD_VALUE;
+    }
+  else
+    {
+    // !!! FIXME: BeOS can do function-only lookups...does this ever
+    // !!! FIXME:  actually _want_ a data symbol lookup, or was this union
+    // !!! FIXME:  a leftover of dlsym()? (s/ANY/TEXT for functions only).
+    status_t rc = get_image_symbol(lib-1,sym,B_SYMBOL_TYPE_ANY,&result.pvoid);
+    if (rc != B_OK)
+      {
+      last_dynamic_err = rc;
+      result.psym = NULL;
+      }
+    }
+  return result.psym;
+}
+
+//----------------------------------------------------------------------------
+const char* DynamicLoader::LibPrefix()
+{
+  return "lib";
+}
+
+//----------------------------------------------------------------------------
+const char* DynamicLoader::LibExtension()
+{
+  return ".so";
+}
+
+//----------------------------------------------------------------------------
+const char* DynamicLoader::LastError()
+{
+  const char *retval = strerror(last_dynamic_err);
+  last_dynamic_err = B_OK;
+  return retval;
+}
+
+} // namespace KWSYS_NAMESPACE
+#endif
+
+// ---------------------------------------------------------------
+// 5. Implementation for default UNIX machines.
 // if nothing has been defined then use this
 #ifndef DYNAMICLOADER_DEFINED
 #define DYNAMICLOADER_DEFINED 1

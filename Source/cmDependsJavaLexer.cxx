@@ -23,6 +23,10 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#if defined(__BEOS__)
+#include <unistd.h>   /* prevents a conflict with a #define later on... */
+#endif
+
 /* end standard C headers. */
 
 /* flex integer type definitions */

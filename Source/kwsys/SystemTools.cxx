@@ -108,6 +108,34 @@ public:
 #define _chdir chdir
 #endif
 
+#if defined(__BEOS__) && !defined(__ZETA__)
+#include <be/kernel/OS.h>
+#include <be/storage/Path.h>
+
+// BeOS 5 doesn't have usleep(), but it has snooze(), which is identical.
+static inline void usleep(unsigned int msec)
+{
+  ::snooze(msec);
+}
+
+// BeOS 5 also doesn't have realpath(), but its C++ API offers something close.
+static inline char *realpath(const char *path, char *resolved_path)
+{
+  const size_t maxlen = KWSYS_SYSTEMTOOLS_MAXPATH;
+  snprintf(resolved_path, maxlen, "%s", path);
+  BPath normalized(resolved_path, NULL, true);
+  const char *resolved = normalized.Path();
+  if (resolved != NULL)   // NULL == No such file. 
+    {
+    if (snprintf(resolved_path, maxlen, "%s", resolved) < maxlen) 
+      {
+      return resolved_path;
+      }
+    }
+  return NULL;   // something went wrong.
+}
+#endif
+
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__MINGW32__)) 
 inline int Mkdir(const char* dir)
 {
@@ -291,7 +319,9 @@ void SystemTools::GetPath(kwsys_stl::vector<kwsys_stl::string>& path, const char
     kwsys_stl::string::size_type endpos = pathEnv.find(pathSep, start);
     if(endpos != kwsys_stl::string::npos)
       {
-      path.push_back(pathEnv.substr(start, endpos-start));
+      kwsys_stl::string convertedPath;
+      Realpath(pathEnv.substr(start, endpos-start).c_str(), convertedPath);
+      path.push_back(convertedPath);
       start = endpos+1;
       }
     else

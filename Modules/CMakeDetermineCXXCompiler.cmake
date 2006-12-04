@@ -59,6 +59,14 @@ IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   SET(CMAKE_COMPILER_IS_GNUCXX_RUN 1)
 ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 
+# The g++ that comes with BeOS 5 segfaults if you run "g++ -E"
+#  ("gcc -E" is fine), which throws up a system dialog box that hangs cmake
+#  until the user clicks "OK"...so for now, we just assume it's g++.
+IF(BEOS)
+  SET(CMAKE_COMPILER_IS_GNUCXX 1)
+  SET(CMAKE_COMPILER_IS_GNUCXX_RUN 1)
+ENDIF(BEOS)
+
 IF(NOT CMAKE_COMPILER_IS_GNUCXX_RUN)
   # test to see if the cxx compiler is gnu
   SET(CMAKE_COMPILER_IS_GNUCXX_RUN 1)

@@ -52,6 +52,13 @@ else
   cmake_system_darwin=false
 fi
 
+# Determine whether this is BeOS 
+if echo "${cmake_system}" | grep BeOS >/dev/null 2>&1; then
+  cmake_system_beos=true
+else
+  cmake_system_beos=false
+fi
+
 # Choose the generator to use for bootstrapping.
 if ${cmake_system_mingw}; then
   # Bootstrapping from an MSYS prompt.
@@ -545,6 +552,13 @@ cmake_cxx_flags=${CXXFLAGS}
 # Add Carbon framework on Darwin
 if ${cmake_system_darwin}; then
   cmake_ld_flags="${LDFLAGS} -framework Carbon"  
+else
+  cmake_ld_flags=${LDFLAGS}
+fi
+
+# Add BeOS toolkits...
+if ${cmake_system_beos}; then
+  cmake_ld_flags="${LDFLAGS} -lroot -lbe"
 else
   cmake_ld_flags=${LDFLAGS}
 fi

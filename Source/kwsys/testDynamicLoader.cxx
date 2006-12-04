@@ -17,6 +17,10 @@
 #include KWSYS_HEADER(ios/iostream)
 #include KWSYS_HEADER(stl/string)
 
+#if defined(__BEOS__)
+#include <be/kernel/OS.h>  /* disable_debugger() API. */
+#endif
+
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
@@ -88,6 +92,8 @@ int main(int argc, char *argv[])
 {
 #if defined(_WIN32)
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+#elif defined(__BEOS__)
+  disable_debugger(1);
 #endif
   int res;
   if( argc == 3 )

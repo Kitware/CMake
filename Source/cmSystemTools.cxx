@@ -1432,7 +1432,12 @@ int cmSystemToolsGZStructOpen(void* call_data, const char *pathname,
     return -1;
     }
 
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#if defined(__BEOS__) && !defined(__ZETA__) // no fchmod on BeOS 5...do pathname instead.
+  if ((oflags & O_CREAT) && chmod(pathname, mode))
+    {
+    return -1;
+    }
+#elif !defined(_WIN32) || defined(__CYGWIN__)
   if ((oflags & O_CREAT) && fchmod(fd, mode))
     {
     return -1;

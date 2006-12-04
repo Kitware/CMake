@@ -10,6 +10,11 @@
 
 #include "xmlrpc_config.h"
 
+#if defined(__BEOS__)
+/* Some helpful system header has char==bool, then bool.h does int==bool. */
+#define HAVE_BOOL 1
+#endif
+
 #include "bool.h"
 #include "mallocvar.h"
 #include "linklist.h"

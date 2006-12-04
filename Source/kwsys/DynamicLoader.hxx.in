@@ -25,6 +25,8 @@
   #if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
     #include <mach-o/dyld.h>
   #endif
+#elif defined(__BEOS__)
+  #include <be/kernel/image.h>
 #endif
 
 namespace @KWSYS_NAMESPACE@
@@ -62,6 +64,8 @@ public:
   #else
     typedef void* LibraryHandle;
   #endif
+#elif defined(__BEOS__)
+  typedef image_id LibraryHandle;
 #else
   typedef void* LibraryHandle;
 #endif
