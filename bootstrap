@@ -548,19 +548,16 @@ rm -f "${cmake_bootstrap_dir}/cmConfigure.h.tmp"
 # If exist compiler flags, set them
 cmake_c_flags=${CFLAGS}
 cmake_cxx_flags=${CXXFLAGS}
+cmake_ld_flags=${LDFLAGS}
 
 # Add Carbon framework on Darwin
 if ${cmake_system_darwin}; then
   cmake_ld_flags="${LDFLAGS} -framework Carbon"  
-else
-  cmake_ld_flags=${LDFLAGS}
 fi
 
 # Add BeOS toolkits...
 if ${cmake_system_beos}; then
   cmake_ld_flags="${LDFLAGS} -lroot -lbe"
-else
-  cmake_ld_flags=${LDFLAGS}
 fi
 
 # Test C compiler
