@@ -29,20 +29,20 @@ cmDocumentationEntry cmPropertyDefinition::GetDocumentation() const
 
 void cmPropertyDefinition
 ::DefineProperty(const char *name, cmProperty::ScopeType scope,
-                 const char *ShortDescription,
-                 const char *FullDescription,
+                 const char *shortDescription,
+                 const char *fullDescription,
                  bool chain)
 {
   this->Name = name;
   this->Scope = scope;
   this->Chained = chain;
-  if (ShortDescription)
+  if (shortDescription)
     {
-    this->ShortDescription = ShortDescription;
+    this->ShortDescription = shortDescription;
     }
-  if (FullDescription)
+  if (fullDescription)
     {
-    this->FullDescription = FullDescription;
+    this->FullDescription = fullDescription;
     }
   this->LongName = this->Name;
   switch (this->Scope)
