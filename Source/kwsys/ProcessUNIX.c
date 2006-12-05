@@ -959,10 +959,10 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
       0,
       kwsysProcess_Pipe_None,
       0,
-      userTimeout,
+      0,
       {0, 0}
     };
-
+  wd.UserTimeout = userTimeout;
   /* Make sure we are executing a process.  */
   if(!cp || cp->State != kwsysProcess_State_Executing || cp->Killed ||
      cp->TimeoutExpired)
