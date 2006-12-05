@@ -2440,7 +2440,6 @@ static int kwsysProcessesAdd(kwsysProcess* cp)
      given process object that a child has exited.  */
   {
   /* Create the pipe.  */
-  int oldfl[2];
   int p[2];
   if(pipe(p) < 0)
     {
