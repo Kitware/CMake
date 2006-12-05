@@ -202,7 +202,8 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
         *this->LogFile << "   Error when uploading file: "
                        << local_file.c_str()
                        << std::endl
-                       << "   Error message was: " << error_buffer << std::endl
+                       << "   Error message was: " 
+                       << error_buffer << std::endl
                        << "   Curl output was: ";
         // avoid dereference of empty vector
         if(chunk.size())
