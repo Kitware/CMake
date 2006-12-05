@@ -53,6 +53,10 @@ void cmPropertyDefinition
       break;
     case cmProperty::DIRECTORY: this->LongName += " on a directory";
       break;
+    case cmProperty::GLOBAL: this->LongName += " globaly";
+      break;
+    case cmProperty::TEST: this->LongName += " on CTest";
+      break;
     }
 }
 
