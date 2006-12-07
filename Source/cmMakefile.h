@@ -22,6 +22,7 @@
 #include "cmTarget.h"
 #include "cmListFileCache.h"
 #include "cmCacheManager.h"
+#include "cmPropertyMap.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmSourceGroup.h"
@@ -697,7 +698,12 @@ public:
   ///! Set/Get a property of this directory 
   void SetProperty(const char *prop, const char *value);
   const char *GetProperty(const char *prop);
-  bool GetPropertyAsBool(const char *prop) const;
+  const char *GetPropertyOrDefinition(const char *prop);
+  const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
+  bool GetPropertyAsBool(const char *prop);
+
+  // Get the properties
+  cmPropertyMap &GetProperties() { return this->Properties; };
 
   typedef std::map<cmStdString, cmStdString> DefinitionMap;
   ///! Initialize a makefile from its parent
@@ -711,6 +717,10 @@ public:
     { this->InstallGenerators.push_back(g); }
   std::vector<cmInstallGenerator*>& GetInstallGenerators()
     { return this->InstallGenerators; }
+
+  // Define the properties
+  static void DefineProperties(cmake *cm);
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -791,7 +801,7 @@ private:
   cmsys::RegularExpression cmDefineRegex;
   cmsys::RegularExpression cmDefine01Regex;
 
-  std::map<cmStdString,cmStdString> Properties;
+  cmPropertyMap Properties;
 
   // should this makefile be processed before or after processing the parent
   bool PreOrder;

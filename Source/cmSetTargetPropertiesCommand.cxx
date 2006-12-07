@@ -71,27 +71,14 @@ bool cmSetTargetPropertiesCommand::InitialPass(
      return false;
     }
   
-  cmTargets& targets = this->Makefile->GetTargets();
   // now loop over all the targets
   int i;
-  unsigned int k;
   for(i = 0; i < numFiles; ++i)
     {   
-    // if the file is already in the makefile just set properites on it
-    cmTargets::iterator t = targets.find(args[i]);
-    if ( t != targets.end())
+    bool ret = cmSetTargetPropertiesCommand::SetOneTarget
+      (args[i].c_str(),propertyPairs,this->Makefile);
+    if (!ret)
       {
-      cmTarget& target = t->second;
-      // now loop through all the props and set them
-      for (k = 0; k < propertyPairs.size(); k = k + 2)
-        {
-        target.SetProperty(propertyPairs[k].c_str(),
-                           propertyPairs[k+1].c_str());
-        }
-      }
-    // if file is not already in the makefile, then add it
-    else
-      { 
       std::string message = "Can not find target to add properties to: ";
       message += args[i];
       this->SetError(message.c_str());
@@ -101,3 +88,30 @@ bool cmSetTargetPropertiesCommand::InitialPass(
   return true;
 }
 
+bool cmSetTargetPropertiesCommand
+::SetOneTarget(const char *tname, 
+               std::vector<std::string> &propertyPairs,
+               cmMakefile *mf)
+{
+  cmTargets& targets = mf->GetTargets();
+
+  // if the file is already in the makefile just set properites on it
+  cmTargets::iterator t = targets.find(tname);
+  if ( t != targets.end())
+    {
+    cmTarget& target = t->second;
+    // now loop through all the props and set them
+    unsigned int k;
+    for (k = 0; k < propertyPairs.size(); k = k + 2)
+      {
+      target.SetProperty(propertyPairs[k].c_str(),
+                         propertyPairs[k+1].c_str());
+      }
+    }
+  // if file is not already in the makefile, then add it
+  else
+    { 
+    return false;
+    }
+  return true;
+}

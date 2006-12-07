@@ -18,7 +18,9 @@
 #define cmTarget_h
 
 #include "cmCustomCommand.h"
+#include "cmPropertyMap.h"
 
+class cmake;
 class cmMakefile;
 class cmSourceFile;
 class cmGlobalGenerator;
@@ -165,6 +167,7 @@ public:
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);
   const char *GetProperty(const char *prop);
+  const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);
 
   /** Get the directory in which this target will be built.  If the
@@ -249,6 +252,12 @@ public:
   std::string GetInstallNameDirForBuildTree(const char* config);
   std::string GetInstallNameDirForInstallTree(const char* config);
 
+  // Get the properties
+  cmPropertyMap &GetProperties() { return this->Properties; };
+
+  // Define the properties
+  static void DefineProperties(cmake *cm);
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -320,6 +329,7 @@ private:
   // Use a makefile variable to set a default for the given property.
   // If the variable is not defined use the given default instead.
   void SetPropertyDefault(const char* property, const char* default_value);
+
 private:
   std::string Name;
   std::vector<cmCustomCommand> PreBuildCommands;
@@ -342,7 +352,7 @@ private:
   std::string Location;
   std::set<cmStdString> Utilities;
   bool RecordDependencies; 
-  std::map<cmStdString,cmStdString> Properties;
+  cmPropertyMap Properties;
   LinkLibraryVectorType OriginalLinkLibraries;
 
   // The cmMakefile instance that owns this target.  This should

@@ -96,7 +96,8 @@ bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
 {
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
     {
-    if (mf.IsOn("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS") 
+    if (cmSystemTools::IsOn
+        (mf.GetPropertyOrDefinition("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS"))
         || lff.Arguments == this->Args)
       {
       return true;

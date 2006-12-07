@@ -816,9 +816,9 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
 {
   // Create a target instance for this utility.
   cmTarget target;
+  target.SetMakefile(this);
   target.SetType(cmTarget::UTILITY, utilityName);
   target.SetInAll(all);
-  target.SetMakefile(this);
 
   if(!comment)
     {
@@ -1309,6 +1309,7 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     default:
       target.SetType(cmTarget::STATIC_LIBRARY, lname);
     }
+  target.SetMakefile(this);
 
   // Clear its dependencies. Otherwise, dependencies might persist
   // over changes in CMakeLists.txt, making the information stale and
@@ -1316,7 +1317,6 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   target.ClearDependencyInformation( *this, lname );
   target.SetInAll(in_all);
   target.GetSourceLists() = srcs;
-  target.SetMakefile(this);
   this->AddGlobalLinkInformation(lname, target);
   cmTargets::iterator it = 
     this->Targets.insert(cmTargets::value_type(lname,target)).first;
@@ -1329,9 +1329,9 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
 {
   cmTarget target;
   target.SetType(cmTarget::EXECUTABLE, exeName);
+  target.SetMakefile(this);
   target.SetInAll(in_all);
   target.GetSourceLists() = srcs;
-  target.SetMakefile(this);
   this->AddGlobalLinkInformation(exeName, target);
   cmTargets::iterator it = 
     this->Targets.insert(cmTargets::value_type(exeName,target)).first;
@@ -2281,6 +2281,7 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
 
   // we must create one
   cmSourceFile file; 
+  file.GetProperties().SetCMakeInstance(this->GetCMakeInstance());
   std::string path = cmSystemTools::GetFilenamePath(src);
   if(generated)
     {
@@ -2328,6 +2329,7 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
   this->AddSource(file);
   src = file.GetFullPath();
   ret = this->GetSource(src.c_str());
+  ret->GetProperties().SetCMakeInstance(this->GetCMakeInstance());
   if (!ret)
     {
     cmSystemTools::Error(
@@ -2738,10 +2740,27 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     {
     value = "NOTFOUND";
     }
-  this->Properties[prop] = value;
+
+  this->Properties.SetProperty(prop,value,cmProperty::DIRECTORY);
+}
+
+const char *cmMakefile::GetPropertyOrDefinition(const char* prop)
+{
+  const char *ret = this->GetProperty(prop, cmProperty::DIRECTORY);
+  if (!ret)
+    {
+    ret = this->GetDefinition(prop);
+    }
+  return ret;
 }
 
 const char *cmMakefile::GetProperty(const char* prop)
+{
+  return this->GetProperty(prop, cmProperty::DIRECTORY);
+}
+
+const char *cmMakefile::GetProperty(const char* prop,
+                                    cmProperty::ScopeType scope)
 {
   // watch for specific properties
   if (!strcmp("PARENT_DIRECTORY",prop))
@@ -2764,24 +2783,21 @@ const char *cmMakefile::GetProperty(const char* prop)
       }
     this->SetProperty("LISTFILE_STACK",tmp.c_str());
     }
-  std::map<cmStdString,cmStdString>::const_iterator i = 
-    this->Properties.find(prop);
-  if (i != this->Properties.end())
+  
+  bool chain = false;
+  const char *retVal = 
+    this->Properties.GetPropertyValue(prop, scope, chain);
+  if (chain)
     {
-    return i->second.c_str();
+    return this->GetCMakeInstance()->GetProperty(prop,scope);
     }
-  return 0;
+
+  return retVal;    
 }
 
-bool cmMakefile::GetPropertyAsBool(const char* prop) const
+bool cmMakefile::GetPropertyAsBool(const char* prop)
 {
-  std::map<cmStdString,cmStdString>::const_iterator i = 
-    this->Properties.find(prop);
-  if (i != this->Properties.end())
-    {
-    return cmSystemTools::IsOn(i->second.c_str());
-    }
-  return false;
+  return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
 
@@ -2810,6 +2826,7 @@ cmTest* cmMakefile::CreateTest(const char* testName)
     }
   test = new cmTest;
   test->SetName(testName);
+  test->SetMakefile(this);
   this->Tests.push_back(test);
   return test;
 }
@@ -2854,4 +2871,44 @@ std::string cmMakefile::GetListFileStack()
     tmp += *i;
     }
   return tmp;
+}
+
+// define properties
+void cmMakefile::DefineProperties(cmake *cm)
+{
+  cm->DefineProperty
+    ("ADDITIONAL_MAKE_CLEAN_FILES", cmProperty::DIRECTORY, 
+     "Addditional files to clean during the make clean stage.",
+     "A list of files that will be cleaned as a part of the "
+     "\"make clean\" stage. ");
+
+  cm->DefineProperty
+    ("CLEAN_NO_CUSTOM", cmProperty::DIRECTORY, 
+     "Should the output of custom commands be left.",
+     "If this is true then the outputs of custom commands for this "
+     "directory will not be removed during the \"make clean\" stage. ");
+
+  cm->DefineProperty
+    ("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS", cmProperty::DIRECTORY, 
+     "Allow loops to have non-matching closing statements.",
+     "If this is set then the closing statement of control "
+     "structures in CMake will not require an exact match to the "
+     "opening statement. For example  IF(foo) will not require "
+     "ENDIF(foo) but simple ENDIF() will work.",
+     true);
+
+  cm->DefineProperty
+    ("LISTFILE_STACK", cmProperty::DIRECTORY, 
+     "The current stack of listfiles being processed.",
+     "This property is mainly useful when trying to debug errors "
+     "in your CMake scripts. It returns a list of what list files "
+     "are currently being processed, in order. So if one listfile "
+     "does an INCLUDE command then that is effectively pushing "
+     "the included listfile onto the stack.");
+
+  cm->DefineProperty
+    ("TEST_INCLUDE_FILE", cmProperty::DIRECTORY, 
+     "A cmake file that will be included when ctest is run.",
+     "If you specify TEST_INCLUDE_FILE, that file will be "
+     "included and processed when ctest is run on the directory.");
 }

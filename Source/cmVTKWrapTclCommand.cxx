@@ -106,6 +106,8 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
       if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
         {
         cmSourceFile file;
+        file.GetProperties().SetCMakeInstance
+          (this->Makefile->GetCMakeInstance());
         std::string srcDir = cdir;
         if (curr)
           {
@@ -128,6 +130,8 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
       }
     // add the init file
     cmSourceFile cfile;
+    cfile.GetProperties().SetCMakeInstance
+      (this->Makefile->GetCMakeInstance());
     cfile.SetProperty("ABSTRACT","0");
     std::string newName = this->LibraryName;
     newName += "Init";

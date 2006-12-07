@@ -52,6 +52,14 @@ public:
     }
   
   /**
+   * Static entry point for use by other commands
+   */
+  static bool RunCommand(cmMakefile *mf,
+                         std::vector<std::string>::const_iterator ait,
+                         std::vector<std::string>::const_iterator aitend,
+                         std::string &errors);
+
+  /**
    * Longer documentation.
    */
   virtual const char* GetFullDocumentation()

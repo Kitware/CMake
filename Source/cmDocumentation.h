@@ -29,7 +29,8 @@ public:
   // High-level interface for standard documents:
   
   /** Types of help provided.  */
-  enum Type { None, Usage, Single, SingleModule, List, ModuleList,
+  enum Type { None, Usage, Single, SingleModule, SingleProperty,
+              List, ModuleList, PropertyList,
               Full, HTML, Man, Copyright, Version };
   
   /**
@@ -70,6 +71,9 @@ public:
   /** Set the listfile commands for standard document generation.  */
   void SetCommandsSection(const cmDocumentationEntry*);
   
+  /** Set the properties for standard document generation.  */
+  void SetPropertiesSection(const cmDocumentationEntry*);
+
   /** Set the generator descriptions for standard document generation.  */
   void SetGeneratorsSection(const cmDocumentationEntry*);
   
@@ -132,8 +136,10 @@ private:
   bool PrintVersion(std::ostream& os);
   bool PrintDocumentationList(std::ostream& os);
   bool PrintModuleList(std::ostream& os);
+  bool PrintPropertyList(std::ostream& os);
   bool PrintDocumentationSingle(std::ostream& os);
   bool PrintDocumentationSingleModule(std::ostream& os);
+  bool PrintDocumentationSingleProperty(std::ostream& os);
   bool PrintDocumentationUsage(std::ostream& os);
   bool PrintDocumentationFull(std::ostream& os);
   bool PrintDocumentationHTML(std::ostream& os);
@@ -159,11 +165,13 @@ private:
   std::vector<cmDocumentationEntry> OptionsSection;
   std::vector<cmDocumentationEntry> CommandsSection;
   std::vector<cmDocumentationEntry> ModulesSection;
+  std::vector<cmDocumentationEntry> PropertiesSection;
   std::vector<cmDocumentationEntry> GeneratorsSection;
   std::vector<cmDocumentationEntry> SeeAlsoSection;
   std::string SeeAlsoString;
   std::string SingleCommand;
   std::string SingleModuleName;
+  std::string SinglePropertyName;
   std::string CMakeRoot;
   std::vector< char* > ModuleStrings;
   std::vector< const char* > Names;

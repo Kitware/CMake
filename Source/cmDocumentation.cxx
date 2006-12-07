@@ -52,6 +52,14 @@ static const cmDocumentationEntry cmDocumentationCommandsHeader[] =
 };
 
 //----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationPropertiesHeader[] =
+{
+  {0,
+   "The following properties are available in CMakeLists.txt code:", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationModulesHeader[] =
 {
   {0,
@@ -226,8 +234,11 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return this->PrintDocumentationSingle(os);
     case cmDocumentation::SingleModule:  
       return this->PrintDocumentationSingleModule(os);
+    case cmDocumentation::SingleProperty:  
+      return this->PrintDocumentationSingleProperty(os);
     case cmDocumentation::List:      return this->PrintDocumentationList(os);
     case cmDocumentation::ModuleList: return this->PrintModuleList(os);
+    case cmDocumentation::PropertyList: return this->PrintPropertyList(os);
     case cmDocumentation::Full:      return this->PrintDocumentationFull(os);
     case cmDocumentation::HTML:      return this->PrintDocumentationHTML(os);
     case cmDocumentation::Man:       return this->PrintDocumentationMan(os);
@@ -470,6 +481,15 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
         i = i+1;
         }
       }
+    else if(strcmp(argv[i], "--help-property") == 0)
+      {
+      type = cmDocumentation::SingleProperty;
+      if((i+1 < argc) && !this->IsOption(argv[i+1]))
+        {
+        this->SinglePropertyName = argv[i+1];
+        i = i+1;
+        }
+      }
     else if(strcmp(argv[i], "--help-command-list") == 0)
       {
       type = cmDocumentation::List;
@@ -477,6 +497,10 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
     else if(strcmp(argv[i], "--help-module-list") == 0)
       {
       type = cmDocumentation::ModuleList;
+      }
+    else if(strcmp(argv[i], "--help-property-list") == 0)
+      {
+      type = cmDocumentation::PropertyList;
       }
     else if(strcmp(argv[i], "--copyright") == 0)
       {
@@ -553,6 +577,13 @@ void cmDocumentation::SetCommandsSection(const cmDocumentationEntry* section)
 {
   this->SetSection(cmDocumentationCommandsHeader, section, 0,
                    this->CommandsSection);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::SetPropertiesSection(const cmDocumentationEntry* section)
+{
+  this->SetSection(cmDocumentationPropertiesHeader, section, 0,
+                   this->PropertiesSection);
 }
 
 //----------------------------------------------------------------------------
@@ -1119,6 +1150,35 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationSingleProperty(std::ostream& os)
+{
+  if(this->PropertiesSection.empty())
+    {
+    os << "Internal error: properties list is empty." << std::endl;
+    return false;
+    }
+  if(this->SinglePropertyName.length() == 0)
+    {
+    os << "Argument --help-property needs a property name.\n";
+    return false;
+    }
+  for(cmDocumentationEntry* entry = &this->PropertiesSection[0];
+      entry->brief; ++entry)
+    {
+    if(entry->name && this->SinglePropertyName == entry->name)
+      {
+      this->PrintDocumentationCommand(os, entry);
+      return true;
+      }
+    }
+  // Argument was not a command.  Complain.
+  os << "Argument \"" << this->SinglePropertyName.c_str()
+     << "\" to --help-property is not a CMake property.  "
+     << "Use --help-property-list to see all properties.\n";
+  return false;
+}
+
+//----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationList(std::ostream& os)
 {
   if(this->CommandsSection.empty())
@@ -1127,6 +1187,25 @@ bool cmDocumentation::PrintDocumentationList(std::ostream& os)
     return false;
     }
   for(cmDocumentationEntry* entry = &this->CommandsSection[0];
+      entry->brief; ++entry)
+    {
+    if(entry->name)
+      {
+      os << entry->name << std::endl;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintPropertyList(std::ostream& os)
+{
+  if(this->PropertiesSection.empty())
+    {
+    os << "Internal error: properties list is empty." << std::endl;
+    return false;
+    }
+  for(cmDocumentationEntry* entry = &this->PropertiesSection[0];
       entry->brief; ++entry)
     {
     if(entry->name)
@@ -1260,6 +1339,10 @@ void cmDocumentation::CreateFullDocumentation()
   if(!this->ModulesSection.empty())
     {
     this->AddSection("Standard CMake Modules", &this->ModulesSection[0]);
+    }
+  if(!this->PropertiesSection.empty())
+    {
+    this->AddSection("Standard Properties", &this->PropertiesSection[0]);
     }
   this->AddSection("Copyright", cmDocumentationCopyright);
   this->AddSection("See Also", cmDocumentationStandardSeeAlso);

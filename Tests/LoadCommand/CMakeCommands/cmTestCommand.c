@@ -99,18 +99,24 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
     }
   info->CAPI->AddDefineFlag(mf, "-DADDED_DEFINITION");
 
-  source_file = info->CAPI->CreateSourceFile();
+  source_file = info->CAPI->CreateNewSourceFile(mf);
   cstr = info->CAPI->SourceFileGetSourceName(source_file);
   sprintf(buffer, "Shold be empty (source file name): [%s]", cstr);
   info->CAPI->DisplaySatus(mf, buffer);
   cstr = info->CAPI->SourceFileGetFullPath(source_file);
-  sprintf(buffer, "Shold be empty (source file full path): [%s]", cstr);
+  sprintf(buffer, "Should be empty (source file full path): [%s]", cstr);
   info->CAPI->DisplaySatus(mf, buffer);
+  info->CAPI->DefineSourceFileProperty(mf,"SOME_PROPERTY","unused old prop",
+                                       "This property is no longer used",
+                                       0);
   if ( info->CAPI->SourceFileGetPropertyAsBool(source_file, "SOME_PROPERTY") )
     {
     info->CAPI->SetError(mf, "Property SOME_PROPERTY should not be defined");
     return 0;
     }
+  info->CAPI->DefineSourceFileProperty(mf,"SOME_PROPERTY2","nice prop",
+                                       "This property is for testing.",
+                                       0);
   info->CAPI->SourceFileSetProperty(source_file, "SOME_PROPERTY2", "HERE");
   cstr = info->CAPI->SourceFileGetProperty(source_file, "ABSTRACT");
   sprintf(buffer, "Should be 0 (source file abstract property): [%p]", cstr);

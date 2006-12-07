@@ -36,8 +36,9 @@ bool cmInstallFilesCommand
   // Create an INSTALL_FILES target specifically for this path.
   this->TargetName = "INSTALL_FILES_"+args[0];
   cmTarget& target = this->Makefile->GetTargets()[this->TargetName];
-  target.SetInAll(false);
   target.SetType(cmTarget::INSTALL_FILES, this->TargetName.c_str());
+  target.SetMakefile(this->Makefile);
+  target.SetInAll(false);
   target.SetInstallPath(args[0].c_str());
   
   if((args.size() > 1) && (args[1] == "FILES"))

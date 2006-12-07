@@ -164,6 +164,8 @@ cmVTKMakeInstantiatorCommand
   
   // Add the generated source file into the source list.
   cmSourceFile file;
+  file.GetProperties().SetCMakeInstance
+    (this->Makefile->GetCMakeInstance());
   file.SetProperty("WRAP_EXCLUDE","1");
   file.SetProperty("ABSTRACT","0");
   file.SetName(fileName.c_str(), filePath.c_str(),
@@ -204,6 +206,8 @@ cmVTKMakeInstantiatorCommand
       
       // Add the generated source file into the source list.
       cmSourceFile file;
+      file.GetProperties().SetCMakeInstance
+        (this->Makefile->GetCMakeInstance());
       file.SetProperty("WRAP_EXCLUDE","1");
       file.SetProperty("ABSTRACT","0");
       file.SetName(fileName.c_str(), filePath.c_str(),

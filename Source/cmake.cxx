@@ -23,7 +23,9 @@
 #include "cmCommand.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
+#include "cmSourceFile.h"
 #include "cmVersion.h"
+#include "cmTest.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
@@ -115,6 +117,14 @@ cmake::cmake()
   this->DebugTryCompile = false;
   this->ClearBuildSystem = false;
   this->FileComparison = new cmFileTimeComparison;
+
+  this->Properties.SetCMakeInstance(this);
+
+  // initialize properties
+  cmSourceFile::DefineProperties(this);
+  cmTarget::DefineProperties(this);
+  cmMakefile::DefineProperties(this);
+  cmTest::DefineProperties(this);
 
 #ifdef __APPLE__
   struct rlimit rlp;
@@ -1990,6 +2000,28 @@ void cmake::GetCommandDocumentation(
   v.push_back(empty);
 }
 
+void cmake::GetPropertiesDocumentation(std::vector<cmDocumentationEntry>& v)
+{
+  // get the properties for cmake
+  
+  // get them for any generators
+
+  // get them for Directories
+  this->DirectoryProperties.GetPropertiesDocumentation(v);
+
+  // get them for targets
+  this->TargetProperties.GetPropertiesDocumentation(v);
+  
+  // get them for source files
+  this->SourceFileProperties.GetPropertiesDocumentation(v);
+  
+  // get them for tests
+  this->TestProperties.GetPropertiesDocumentation(v);
+
+  cmDocumentationEntry empty = {0,0,0};
+  v.push_back(empty);
+}
+
 void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
 {
   for(RegisteredGeneratorsMap::const_iterator i = this->Generators.begin();
@@ -2765,4 +2797,112 @@ int cmake::ExecuteLinkScript(std::vector<std::string>& args)
 
   // Return the final resulting return value.
   return result;
+}
+
+void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
+                           const char *ShortDescription,
+                           const char *FullDescription,
+                           bool chained)
+{
+  switch (scope)
+    {
+    case cmProperty::GLOBAL:
+      this->GlobalProperties.DefineProperty(name,scope,ShortDescription,
+                                            FullDescription, chained);
+      break;
+    case cmProperty::TARGET:
+      this->TargetProperties.DefineProperty(name,scope,ShortDescription,
+                                            FullDescription, chained);
+      break;
+    case cmProperty::SOURCE_FILE:
+      this->SourceFileProperties.DefineProperty(name,scope,ShortDescription,
+                                                FullDescription, chained);
+      break;
+    case cmProperty::DIRECTORY:
+      this->DirectoryProperties.DefineProperty(name,scope,ShortDescription,
+                                               FullDescription, chained);
+      break;
+    case cmProperty::TEST:
+      this->TestProperties.DefineProperty(name,scope,ShortDescription,
+                                          FullDescription, chained);
+      break;
+    }
+}
+
+bool cmake::IsPropertyDefined(const char *name, cmProperty::ScopeType scope)
+{
+  switch (scope)
+    {
+    case cmProperty::GLOBAL:
+      return this->GlobalProperties.IsPropertyDefined(name);
+      break;
+    case cmProperty::TARGET:
+      return this->TargetProperties.IsPropertyDefined(name);
+      break;
+    case cmProperty::SOURCE_FILE:
+      return this->SourceFileProperties.IsPropertyDefined(name);
+      break;
+    case cmProperty::DIRECTORY:
+      return this->DirectoryProperties.IsPropertyDefined(name);
+      break;
+    case cmProperty::TEST:
+      return this->TestProperties.IsPropertyDefined(name);
+      break;
+    }
+
+  return false;
+}
+
+bool cmake::IsPropertyChained(const char *name, cmProperty::ScopeType scope)
+{
+  switch (scope)
+    {
+    case cmProperty::GLOBAL:
+      return this->GlobalProperties.IsPropertyChained(name);
+      break;
+    case cmProperty::TARGET:
+      return this->TargetProperties.IsPropertyChained(name);
+      break;
+    case cmProperty::SOURCE_FILE:
+      return this->SourceFileProperties.IsPropertyChained(name);
+      break;
+    case cmProperty::DIRECTORY:
+      return this->DirectoryProperties.IsPropertyChained(name);
+      break;  
+    case cmProperty::TEST:
+      return this->DirectoryProperties.IsPropertyChained(name);
+      break;
+  }
+
+  return false;
+}
+
+void cmake::SetProperty(const char* prop, const char* value)
+{
+  if (!prop)
+    {
+    return;
+    }
+  if (!value)
+    {
+    value = "NOTFOUND";
+    }
+
+  this->Properties.SetProperty(prop, value, cmProperty::TARGET);
+}
+
+const char *cmake::GetProperty(const char* prop)
+{
+  return this->GetProperty(prop, cmProperty::GLOBAL);
+}
+
+const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
+{
+  bool chain = false;
+  return this->Properties.GetPropertyValue(prop, scope, chain);
+}
+
+bool cmake::GetPropertyAsBool(const char* prop)
+{
+  return cmSystemTools::IsOn(this->GetProperty(prop));
 }

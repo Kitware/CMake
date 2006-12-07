@@ -17,9 +17,12 @@
 #include "cmTest.h"
 #include "cmSystemTools.h"
 
+#include "cmake.h"
+#include "cmMakefile.h"
 
 cmTest::cmTest() 
 {
+  this->Makefile = 0;
 }
 
 cmTest::~cmTest()
@@ -52,24 +55,18 @@ void cmTest::SetArguments(const std::vector<cmStdString>& args)
 
 const char *cmTest::GetProperty(const char* prop) const
 {
-  std::map<cmStdString,cmStdString>::const_iterator i = 
-    this->Properties.find(prop);
-  if (i != this->Properties.end())
+  bool chain = false;
+  const char *retVal = 
+    this->Properties.GetPropertyValue(prop, cmProperty::TEST, chain);
+  if (chain)
     {
-    return i->second.c_str();
+    return this->Makefile->GetProperty(prop,cmProperty::TEST);
     }
-  return 0;
 }
 
 bool cmTest::GetPropertyAsBool(const char* prop) const
 {
-  std::map<cmStdString,cmStdString>::const_iterator i = 
-    this->Properties.find(prop);
-  if (i != this->Properties.end())
-    {
-    return cmSystemTools::IsOn(i->second.c_str());
-    }
-  return false;
+  return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
 void cmTest::SetProperty(const char* prop, const char* value)
@@ -82,6 +79,46 @@ void cmTest::SetProperty(const char* prop, const char* value)
     {
     value = "NOTFOUND";
     }
-  this->Properties[prop] = value;
+
+  this->Properties.SetProperty(prop, value, cmProperty::TEST);
 }
 
+//----------------------------------------------------------------------------
+void cmTest::SetMakefile(cmMakefile* mf)
+{
+  // Set our makefile.
+  this->Makefile = mf;
+  this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
+}
+
+// define properties
+void cmTest::DefineProperties(cmake *cm)
+{
+  // define properties
+  cm->DefineProperty
+    ("FAIL_REGULAR_EXPRESSION", cmProperty::TEST, 
+     "If the output matches this regular expression tes test will fail.",
+     "If set, if the output matches one of "
+     "specified regular expressions, the test will fail."
+     "For example: PASS_REGULAR_EXPRESSION \"[^a-z]Error;ERROR;Failed\"");
+
+  cm->DefineProperty
+    ("MEASUREMENT", cmProperty::TEST, 
+     "Specify a DART meansurement and value to be reported for a test.",
+     "If set to a name then that name will be reported to DART as a "
+     "named measurement with a value of 1. You may also specify a value "
+     "by setting MEASUREMENT to \"measurement=value\".");
+
+  cm->DefineProperty
+    ("PASS_REGULAR_EXPRESSION", cmProperty::TEST, 
+     "The output must match this regular expression for the test to pass.",
+     "If set, the test output will be checked "
+     "against the specified regular expressions and at least one of the"
+     " regular expressions has to match, otherwise the test will fail.");
+
+  cm->DefineProperty
+    ("WILL_FAIL", cmProperty::TEST, 
+     "If set to true, this will invert the pass/fail flag of the test.",
+     "This property can be used for tests that are expected to fail and "
+     "return a non zero return code.");
+}

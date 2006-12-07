@@ -20,6 +20,7 @@
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildNameCommand.cxx"
 #include "cmCreateTestSourceList.cxx"
+#include "cmDefinePropertyCommand.cxx"
 #include "cmElseIfCommand.cxx"
 #include "cmEnableLanguageCommand.cxx"
 #include "cmEndMacroCommand.cxx"
@@ -44,6 +45,7 @@
 #include "cmRemoveDefinitionsCommand.cxx"
 #include "cmSeparateArgumentsCommand.cxx"
 #include "cmSetDirectoryPropertiesCommand.cxx"
+#include "cmSetPropertiesCommand.cxx"
 #include "cmSetTargetPropertiesCommand.cxx"
 #include "cmSetTestsPropertiesCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
@@ -75,6 +77,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildNameCommand);
   commands.push_back(new cmCreateTestSourceList);
+  commands.push_back(new cmDefinePropertyCommand);
   commands.push_back(new cmElseIfCommand);
   commands.push_back(new cmEnableLanguageCommand);
   commands.push_back(new cmEndMacroCommand);
@@ -100,6 +103,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmRemoveDefinitionsCommand);
   commands.push_back(new cmSeparateArgumentsCommand);
   commands.push_back(new cmSetDirectoryPropertiesCommand);
+  commands.push_back(new cmSetPropertiesCommand);
   commands.push_back(new cmSetTargetPropertiesCommand);
   commands.push_back(new cmSetTestsPropertiesCommand);
   commands.push_back(new cmSourceGroupCommand);

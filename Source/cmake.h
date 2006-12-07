@@ -41,6 +41,8 @@
 #define cmake_h
 
 #include "cmSystemTools.h"
+#include "cmPropertyDefinitionMap.h"
+#include "cmPropertyMap.h"
 
 class cmGlobalGenerator;
 class cmLocalGenerator;
@@ -235,7 +237,17 @@ class cmake
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
 
   void GetCommandDocumentation(std::vector<cmDocumentationEntry>&) const;
+  void GetPropertiesDocumentation(std::vector<cmDocumentationEntry>&);
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
+
+  ///! Set/Get a property of this target file
+  void SetProperty(const char *prop, const char *value);
+  const char *GetProperty(const char *prop);
+  const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
+  bool GetPropertyAsBool(const char *prop);
+
+  // Get the properties
+  cmPropertyMap &GetProperties() { return this->Properties; };
 
   ///! Do all the checks before running configure
   int DoPreConfigureChecks();
@@ -278,7 +290,24 @@ class cmake
   bool GetDebugOutput() { return this->DebugOutput; }
   void DebugOutputOn() { this->DebugOutput = true;}
 
+  // Define a property
+  void DefineProperty(const char *name, cmProperty::ScopeType scope,
+                      const char *ShortDescription,
+                      const char *FullDescription,
+                      bool chain = false);
+
+  // Is a property defined?
+  bool IsPropertyDefined(const char *name, cmProperty::ScopeType scope);
+  bool IsPropertyChained(const char *name, cmProperty::ScopeType scope);
+
 protected:
+  cmPropertyMap Properties;
+  cmPropertyDefinitionMap TargetProperties;
+  cmPropertyDefinitionMap SourceFileProperties;
+  cmPropertyDefinitionMap DirectoryProperties;
+  cmPropertyDefinitionMap TestProperties;
+  cmPropertyDefinitionMap GlobalProperties;
+  
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString,
                    CreateGeneratorFunctionType> RegisteredGeneratorsMap;

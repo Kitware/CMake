@@ -316,7 +316,8 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
     mf.ExpandArguments(lff.Arguments, expandedArguments);
     if ((!expandedArguments.empty() && 
         (expandedArguments[0] == this->Args[0]))
-        || mf.IsOn("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS"))
+        || cmSystemTools::IsOn
+        (mf.GetPropertyOrDefinition("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS")))
       {
       return true;
       }

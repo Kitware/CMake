@@ -36,7 +36,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "SET_TARGET_PROPERTIES";}
+  virtual const char* GetName() { return "SET_TARGET_PROPERTIES";}  
 
   /**
    * Succinct documentation.
@@ -46,6 +46,13 @@ public:
     return "Targets can have properties that affect how they are built.";
     }
   
+  /**
+   *  Used by this command and cmSetPropertiesCommand
+   */
+  static bool SetOneTarget(const char *tname, 
+                           std::vector<std::string> &propertyPairs, 
+                           cmMakefile *mf);
+
   /**
    * Longer documentation.
    */

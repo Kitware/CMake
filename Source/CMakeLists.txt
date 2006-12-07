@@ -146,10 +146,10 @@ SET(SRCS
   cmProperty.h
   cmPropertyDefinition.cxx
   cmPropertyDefinition.h
-#  cmPropertyDefinitionMap.cxx
-#  cmPropertyDefinitionMap.h
-#  cmPropertyMap.cxx
-#  cmPropertyMap.h
+  cmPropertyDefinitionMap.cxx
+  cmPropertyDefinitionMap.h
+  cmPropertyMap.cxx
+  cmPropertyMap.h
   cmSourceFile.cxx
   cmSourceFile.h
   cmSourceGroup.cxx

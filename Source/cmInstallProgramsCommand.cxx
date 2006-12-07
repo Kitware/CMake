@@ -33,8 +33,9 @@ bool cmInstallProgramsCommand
   // Create an INSTALL_PROGRAMS target specifically for this path.
   this->TargetName = "INSTALL_PROGRAMS_"+args[0];
   cmTarget& target = this->Makefile->GetTargets()[this->TargetName];
-  target.SetInAll(false);
   target.SetType(cmTarget::INSTALL_PROGRAMS, this->TargetName.c_str());
+  target.SetMakefile(this->Makefile);
+  target.SetInAll(false);
   target.SetInstallPath(args[0].c_str());
 
   std::vector<std::string>::const_iterator s = args.begin();

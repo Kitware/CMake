@@ -81,7 +81,8 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
   if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endwhile"))
     {
     if (lff.Arguments == this->Args
-        || mf.IsOn("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS"))
+        || cmSystemTools::IsOn
+        (mf.GetPropertyOrDefinition("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS")))
       {
       return true;
       }

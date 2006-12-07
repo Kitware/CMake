@@ -507,6 +507,14 @@ void * CCONV cmCreateSourceFile()
   return (void *)(new cmSourceFile);
 }
 
+void * CCONV cmCreateNewSourceFile(void *arg)
+{
+  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  cmSourceFile *sf = new cmSourceFile;
+  sf->GetProperties().SetCMakeInstance(mf->GetCMakeInstance());
+  return (void *)sf;
+}
+
 void CCONV cmDestroySourceFile(void *arg)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
@@ -624,6 +632,16 @@ void CCONV cmFree(void *data)
   free(data);
 }
 
+void CCONV DefineSourceFileProperty (void *arg, const char *name,
+  const char *briefDocs, 
+  const char *longDocs,
+  int chained)
+{
+  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  mf->GetCMakeInstance()->DefineProperty(name,cmProperty::SOURCE_FILE,
+                                         briefDocs, longDocs,chained);
+}
+
 } // close the extern "C" scope
 
 cmCAPI cmStaticCAPI =
@@ -683,5 +701,7 @@ cmCAPI cmStaticCAPI =
   cmAddCustomCommandToOutput,
   cmAddCustomCommandToTarget,
   cmDisplayStatus,
+  cmCreateNewSourceFile,
+  DefineSourceFileProperty,
 };
 

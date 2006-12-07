@@ -70,6 +70,8 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const&
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
       {
       cmSourceFile file;
+      file.GetProperties().SetCMakeInstance
+        (this->Makefile->GetCMakeInstance());
       if (curr)
         {
         file.SetProperty("ABSTRACT",curr->GetProperty("ABSTRACT"));
@@ -90,6 +92,8 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const&
     }
   
   cmSourceFile cfile;
+  cfile.GetProperties().SetCMakeInstance
+    (this->Makefile->GetCMakeInstance());
   cfile.SetProperty("ABSTRACT","0");
   this->CreateInitFile(res);
   cfile.SetName(initName.c_str(), this->Makefile->GetCurrentOutputDirectory(),

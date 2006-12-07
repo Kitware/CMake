@@ -18,6 +18,7 @@
 #include "cmCacheManager.h"
 #include "cmListFileCache.h"
 #include "cmakewizard.h"
+#include "cmSourceFile.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmDynamicLoader.h"
@@ -100,6 +101,13 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "The list contains all modules for which help may be obtained by using "
    "the --help-module argument followed by a module name.  If a file is "
    "specified, the help is written into it."},
+  {"--help-property prop [file]", 
+   "Print help for a single property and exit.",
+   "Full documentation specific to the given module is displayed."},
+  {"--help-property-list [file]", "List available properties and exit.",
+   "The list contains all properties for which help may be obtained by using "
+   "the --help-property argument followed by a property name.  If a file is "
+   "specified, the help is written into it."},
   {0,0,0}
 };
 
@@ -157,8 +165,10 @@ int do_cmake(int ac, char** av)
     hcm.AddCMakePaths(av[0]);
     doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
     std::vector<cmDocumentationEntry> commands;
+    std::vector<cmDocumentationEntry> properties;
     std::vector<cmDocumentationEntry> generators;
     hcm.GetCommandDocumentation(commands);
+    hcm.GetPropertiesDocumentation(properties);
     hcm.GetGeneratorDocumentation(generators);
     doc.SetName("cmake");
     doc.SetNameSection(cmDocumentationName);
@@ -167,6 +177,7 @@ int do_cmake(int ac, char** av)
     doc.SetGeneratorsSection(&generators[0]);
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
+    doc.SetPropertiesSection(&properties[0]);
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
     int result = doc.PrintRequestedDocumentation(std::cout)? 0:1;
     

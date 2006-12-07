@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmTarget.h"
+#include "cmake.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmLocalGenerator.h"
@@ -36,6 +37,230 @@ cmTarget::cmTarget()
   this->LinkLibrariesAnalyzed = false;
   this->LinkDirectoriesComputed = false;
   this->HaveInstallRule = false;
+
+}
+
+// define properties
+void cmTarget::DefineProperties(cmake *cm)
+{
+  cm->DefineProperty
+    ("BUILD_WITH_INSTALL_RPATH", cmProperty::TARGET, 
+     "Should build tree targets have install tree rpaths.",
+     "BUILD_WITH_INSTALL_RPATH is a boolean specifying whether to link "
+     "the target in the build tree with the INSTALL_RPATH.  This takes "
+     "precedence over SKIP_BUILD_RPATH and avoids the need for relinking "
+     "before installation.");
+
+  cm->DefineProperty
+    ("CLEAN_DIRECT_OUTPUT", cmProperty::TARGET, 
+     "Do not delete other varients of this target.",
+     "When a library is built CMake by default generates code to remove "
+     "any existing library using all possible names.  This is needed "
+     "to support libraries that switch between STATIC and SHARED by "
+     "a user option.  However when using OUTPUT_NAME to build a static "
+     "and shared library of the same name using different logical target "
+     "names the two targets will remove each other's files.  This can be "
+     "prevented by setting the CLEAN_DIRECT_OUTPUT property to 1.");
+
+  cm->DefineProperty
+    ("COMPILE_FLAGS", cmProperty::TARGET, 
+     "Additional flags to yse when compiling this target's sources.",
+     "The COMPILE_FLAGS property sets additional compiler flags used "
+     "to build sources within the target.  It may also be used to pass "
+     "additional preprocessor definitions.");
+     
+  cm->DefineProperty
+    ("DEFINE_SYMBOL", cmProperty::TARGET, 
+     "Define a symbol when compiling this target's sources.",
+     "DEFINE_SYMBOL sets the name of the preprocessor symbol defined when "
+     "compiling sources in a shared library. "
+     "If not set here then it is set to target_EXPORTS by default "
+     "(with some substitutions if the target is not a valid C "
+     "identifier). This is useful for headers to know whether they are "
+     "being included from inside their library our outside to properly "
+     "setup dllexport/dllimport decorations. ");
+     
+  cm->DefineProperty
+    ("DEBUG_POSTFIX", cmProperty::TARGET, 
+     "A postfix that will be applied to this target when build debug.",
+     "A property on a target that sepcifies a postfix to add to the "
+     "target name when built in debug mode. For example foo.dll "
+     "versus fooD.dll");
+
+  cm->DefineProperty
+    ("EchoString", cmProperty::TARGET, 
+     "A message to be displayed when the target it built.",
+     "A message to display on some generaters (such as makefiles) when "
+     "the target is built.");
+
+  cm->DefineProperty
+    ("HAS_CXX", cmProperty::TARGET, 
+     "Force a target to use the CXX linker.",
+     "Setting HAS_CXX on a target will force the target to use the "
+     "C++ linker (and C++ runtime libraries) for linking even if the "
+     "target has no C++ code in it.");
+
+  cm->DefineProperty
+    ("IMPORT_PREFIX", cmProperty::TARGET, 
+     "What comes before the import library name.",
+     "Similar to the target property PREFIX, but used for import libraries "
+     "(typically corresponding to a DLL) instead of regular libraries. "
+     "A target property that can be set to override the prefix "
+     "(such as \"lib\") on an import library name.");
+
+  cm->DefineProperty
+    ("IMPORT_SUFFIX", cmProperty::TARGET, 
+     "What comes after the import library name.",
+     "Similar to the target property SUFFIX, but used for import libraries "
+     "(typically corresponding to a DLL) instead of regular libraries. "
+     "A target property that can be set to override the suffix "
+     "(such as \".lib\") on an import library name.");
+
+  cm->DefineProperty
+    ("IN_ALL", cmProperty::TARGET, 
+     "Is this target part of the all target.",
+     "A property on a target that indicates if the target is included as "
+     "part of the default build target. If it is, then with a Makefile "
+     "for example typing make will couse this target to be built as well. "
+     "The same concept applies to the default build of other generators.");
+
+  cm->DefineProperty
+    ("INSTALL_NAME_DIR", cmProperty::TARGET, 
+     "Mac OSX directory name for installed targets.",
+     "INSTALL_NAME_DIR is a string specifying the "
+     "directory portion of the \"install_name\" field of shared libraries "
+     "on Mac OSX to use in the installed targets. ");
+
+  cm->DefineProperty
+    ("INSTALL_RPATH", cmProperty::TARGET, 
+     "The rpath to use for installed targets.",
+     "A semicolon-separated list specifying the rpath "
+     "to use in installed targets (for platforms that support it).");
+
+  cm->DefineProperty
+    ("INSTALL_RPATH_USE_LINK_PATH", cmProperty::TARGET, 
+     "Add paths to linker search and installed rpath.",
+     "INSTALL_RPATH_USE_LINK_PATH is a boolean that if set to true will "
+     "append directories in the linker search path and outside the "
+     "project to the INSTALL_RPATH. ");
+
+  cm->DefineProperty
+    ("LINK_FLAGS", cmProperty::TARGET, 
+     "Additional flags to use when linking this target.",
+     "The LINK_FLAGS property can be used to add extra flags to the "
+     "link step of a target. LINK_FLAGS_<CONFIG> will add to the "
+     "configuration <CONFIG>, "
+     "for example, DEBUG, RELEASE, MINSIZEREL, RELWITHDEBINFO. ");
+
+  cm->DefineProperty
+    ("LINKER_LANGUAGE", cmProperty::TARGET, 
+     "What tool to use for linking, based on language.",
+     "The LINKER_LANGUAGE property is used to change the tool "
+     "used to link an executable or shared library. The default is "
+     "set the language to match the files in the library. CXX and C "
+     "are common values for this property.");
+
+  cm->DefineProperty
+    ("LOCATION", cmProperty::TARGET, 
+     "Where a target will be written on disk.",
+     "A read only property on a target that indicates where that target "
+     "will be written. For libraries and execuatables this will be where "
+     "the file is written on disk. This property is computed based on a "
+     "number of other settings.");
+
+  cm->DefineProperty
+    ("OUTPUT_NAME", cmProperty::TARGET, 
+     "Sets the real name of a target when it is built.",
+     "Sets the real name of a target when it is built and "
+     "can be used to help create two targets of the same name even though "
+     "CMake requires unique logical target names.  There is also a "
+     "<CONFIG>_OUTPUT_NAME that can set the output name on a "
+     "per-configuration basis.");
+
+  cm->DefineProperty
+    ("PRE_INSTALL_SCRIPT", cmProperty::TARGET, 
+     "Deprecated install support.",
+     "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
+     "old way to specify CMake scripts to run before and after "
+     "installing a target.  They are used only when the old "
+     "INSTALL_TARGETS command is used to install the target.  Use the "
+     "INSTALL command instead.");
+
+  cm->DefineProperty
+    ("PREFIX", cmProperty::TARGET, 
+     "What comes before the library name.",
+     "A target property that can be set to override the prefix "
+     "(such as \"lib\") on a library name.");
+
+  cm->DefineProperty
+    ("POST_INSTALL_SCRIPT", cmProperty::TARGET, 
+     "Deprecated install support.",
+     "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
+     "old way to specify CMake scripts to run before and after "
+     "installing a target.  They are used only when the old "
+     "INSTALL_TARGETS command is used to install the target.  Use the "
+     "INSTALL command instead.");
+
+  cm->DefineProperty
+    ("SKIP_BUILD_RPATH", cmProperty::TARGET, 
+     "Should rpaths be used for the build tree.",
+     "SKIP_BUILD_RPATH is a boolean specifying whether to skip automatic "
+     "generation of an rpath allowing the target to run from the "
+     "build tree. ");
+
+  cm->DefineProperty
+    ("SOVERSION", cmProperty::TARGET, 
+     "What version number is this target.",
+     "For shared libraries VERSION and SOVERSION can be used to specify "
+     "the build version and api version respectively. When building or "
+     "installing appropriate symlinks are created if the platform "
+     "supports symlinks and the linker supports so-names. "
+     "If only one of both is specified the missing is assumed to have "
+     "the same version number. "
+     "For shared libraries and executables on Windows the VERSION "
+     "attribute is parsed to extract a \"major.minor\" version number. "
+     "These numbers are used as the image version of the binary. ");
+
+  cm->DefineProperty
+    ("STATIC_LIBRARY_FLAGS", cmProperty::TARGET, 
+     "Extra flags to use when linking static libraries.",
+     "Extra flags to use when linking a static library.");
+
+  cm->DefineProperty
+    ("SUFFIX", cmProperty::TARGET, 
+     "What comes after the library name.",
+     "A target property that can be set to override the suffix "
+     "(such as \".so\") on a library name.");
+
+  cm->DefineProperty
+    ("VERSION", cmProperty::TARGET, 
+     "What version number is this target.",
+     "For shared libraries VERSION and SOVERSION can be used to specify "
+     "the build version and api version respectively. When building or "
+     "installing appropriate symlinks are created if the platform "
+     "supports symlinks and the linker supports so-names. "
+     "If only one of both is specified the missing is assumed to have "
+     "the same version number. "
+     "For executables VERSION can be used to specify the build version. "
+     "When building or installing appropriate symlinks are created if "
+     "the platform supports symlinks. "
+     "For shared libraries and executables on Windows the VERSION "
+     "attribute is parsed to extract a \"major.minor\" version number. "
+     "These numbers are used as the image version of the binary. ");
+
+
+  cm->DefineProperty
+    ("WIN32_EXECUTABLE", cmProperty::TARGET, 
+     "Used to specify Windows executable with a WinMain entry point.",
+     "This can be set to indicate that a target is a Windows executable "
+     "in contrast to a console application for example. This changes "
+     "how the executable will be linked.");
+
+
+  // define some properties without documentation
+  cm->DefineProperty("DEBUG_OUTPUT_NAME", cmProperty::TARGET,0,0);
+  cm->DefineProperty("RELEASE_OUTPUT_NAME", cmProperty::TARGET,0,0);
+  cm->DefineProperty("LINK_FLAGS_DEBUG", cmProperty::TARGET,0,0);
 }
 
 void cmTarget::SetType(TargetType type, const char* name)
@@ -59,6 +284,9 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 {
   // Set our makefile.
   this->Makefile = mf;
+
+  // set the cmake instance of the properties
+  this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
 
   // Setup default property values.
   this->SetPropertyDefault("INSTALL_NAME_DIR", "");
@@ -332,6 +560,8 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
     if (!done)
       {
       cmSourceFile file;
+      file.GetProperties().
+        SetCMakeInstance(this->Makefile->GetCMakeInstance());
       file.SetProperty("ABSTRACT","0");
       file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
                    mf.GetSourceExtensions(),
@@ -841,7 +1071,8 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     {
     value = "NOTFOUND";
     }
-  this->Properties[prop] = value;
+
+  this->Properties.SetProperty(prop, value, cmProperty::TARGET);
 }
 
 const char* cmTarget::GetDirectory(const char* config)
@@ -925,6 +1156,12 @@ void cmTarget::GetTargetVersion(int& major, int& minor)
 
 const char *cmTarget::GetProperty(const char* prop)
 {
+  return this->GetProperty(prop, cmProperty::TARGET);
+}
+
+const char *cmTarget::GetProperty(const char* prop,
+                                  cmProperty::ScopeType scope)
+{
   // watch for special "computed" properties that are dependent on other
   // properties or variables, always recompute them
   if (!strcmp(prop,"LOCATION"))
@@ -984,25 +1221,21 @@ const char *cmTarget::GetProperty(const char* prop)
       }
     return 0;
     }
-      
-  std::map<cmStdString,cmStdString>::const_iterator i = 
-    this->Properties.find(prop);
-  if (i != this->Properties.end())
+  
+  bool chain = false;
+  const char *retVal = 
+    this->Properties.GetPropertyValue(prop, scope, chain);
+  if (chain)
     {
-    return i->second.c_str();
+    return this->Makefile->GetProperty(prop,scope);
     }
-  return 0;
+
+  return retVal;    
 }
 
 bool cmTarget::GetPropertyAsBool(const char* prop)
 {
-  std::map<cmStdString,cmStdString>::const_iterator i = 
-    this->Properties.find(prop);
-  if (i != this->Properties.end())
-    {
-    return cmSystemTools::IsOn(i->second.c_str());
-    }
-  return false;
+  return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
 const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)

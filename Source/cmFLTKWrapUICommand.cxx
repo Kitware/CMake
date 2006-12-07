@@ -54,6 +54,8 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
       {
       cmSourceFile header_file;
+      header_file.GetProperties().SetCMakeInstance
+        (this->Makefile->GetCMakeInstance());
       std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*i);
       const bool headerFileOnly = true;
       header_file.SetName(srcName.c_str(), 

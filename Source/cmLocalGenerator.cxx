@@ -117,6 +117,7 @@ void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
   this->GlobalGenerator = gg;
 
   // setup the home directories
+  this->Makefile->GetProperties().SetCMakeInstance(gg->GetCMakeInstance());
   this->Makefile->SetHomeDirectory(
     gg->GetCMakeInstance()->GetHomeDirectory());
   this->Makefile->SetHomeOutputDirectory(
@@ -200,15 +201,15 @@ void cmLocalGenerator::GenerateTestFiles()
       fout << "\"";
       }
     fout << ")" << std::endl;
-    std::map<cmStdString,cmStdString>::const_iterator pit;
-    const std::map<cmStdString,cmStdString>* mpit = &test->GetProperties();
+    cmPropertyMap::const_iterator pit;
+    cmPropertyMap* mpit = &test->GetProperties();
     if ( mpit->size() )
       {
       fout << "SET_TESTS_PROPERTIES(" << test->GetName() << " PROPERTIES ";
       for ( pit = mpit->begin(); pit != mpit->end(); ++ pit )
         {
         fout << " " << pit->first.c_str() << " \"";
-        const char* value = pit->second.c_str();
+        const char* value = pit->second.GetValue();
         for ( ; *value; ++ value )
           {
           switch ( *value )

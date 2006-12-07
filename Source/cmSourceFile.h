@@ -18,6 +18,9 @@
 #define cmSourceFile_h
 
 #include "cmCustomCommand.h"
+#include "cmPropertyMap.h"
+
+class cmake;
 
 /** \class cmSourceFile
  * \brief Represent a class loaded from a makefile.
@@ -32,10 +35,7 @@ public:
    * Construct instance as a concrete class with both a
    * .h and .cxx file.
    */
-  cmSourceFile()
-    {
-      this->CustomCommand = 0;
-    }
+  cmSourceFile();
   ~cmSourceFile()
     {
       this->SetCustomCommand(0);
@@ -108,8 +108,14 @@ public:
    */
   const std::string& GetSourceNameWithoutLastExtension();
 
+  // Get the properties
+  cmPropertyMap &GetProperties() { return this->Properties; };
+
+  // Define the properties
+  static void DefineProperties(cmake *cm);
+
 private:
-  std::map<cmStdString,cmStdString> Properties;
+  cmPropertyMap Properties;
   cmCustomCommand *CustomCommand;
   std::string FullPath;
   std::string SourceName;

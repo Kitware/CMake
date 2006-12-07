@@ -18,6 +18,8 @@
 #define cmTest_h
 
 #include "cmCustomCommand.h"
+#include "cmPropertyMap.h"
+class cmMakefile;
 
 /** \class cmTest
  * \brief Represent a test
@@ -52,16 +54,24 @@ public:
   void SetProperty(const char *prop, const char *value);
   const char *GetProperty(const char *prop) const;
   bool GetPropertyAsBool(const char *prop) const;
-  const std::map<cmStdString,cmStdString>& GetProperties() const
-    {
-    return this->Properties;
-    }
+  cmPropertyMap &GetProperties() { return this->Properties; };
     
+  // Define the properties
+  static void DefineProperties(cmake *cm);
+
+  ///! Set the cmMakefile that owns this test
+  void SetMakefile(cmMakefile *mf);
+  cmMakefile *GetMakefile() { return this->Makefile;};
+
 private:
-  std::map<cmStdString,cmStdString> Properties;
+  cmPropertyMap Properties;
   cmStdString Name;
   cmStdString Command;
   std::vector<cmStdString> Args;
+
+  // The cmMakefile instance that owns this target.  This should
+  // always be set.
+  cmMakefile* Makefile;  
 };
 
 #endif

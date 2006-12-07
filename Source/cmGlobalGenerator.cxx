@@ -1595,6 +1595,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
 {
   // Package
   cmTarget target;
+  target.GetProperties().SetCMakeInstance(this->CMakeInstance);
   target.SetType(cmTarget::GLOBAL_TARGET, name);
   target.SetInAll(false);
 

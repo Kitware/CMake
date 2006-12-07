@@ -18,6 +18,9 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+// define STRICT to get checking of all set and get property calls
+//#define STRICT 
+
 cmProperty *cmPropertyMap::GetOrCreateProperty(const char *name)
 {
   cmPropertyMap::iterator it = this->find(name);
@@ -41,7 +44,7 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
     return;
     }
 
-#if 0
+#ifdef STRICT
   if (!this->CMakeInstance)
     {
     cmSystemTools::Error("CMakeInstance not set on a property map!"); 
@@ -92,7 +95,7 @@ const char *cmPropertyMap
     }
 
   // has the property been defined?
-#if 0
+#ifdef STRICT
   if (!this->CMakeInstance)
     {
     cmSystemTools::Error("CMakeInstance not set on a property map!"); 
@@ -131,7 +134,10 @@ const char *cmPropertyMap
   if (it == this->end())
     {
     // should we chain up?
-    chain = this->CMakeInstance->IsPropertyChained(name,scope);
+    if (this->CMakeInstance)
+      {
+      chain = this->CMakeInstance->IsPropertyChained(name,scope);
+      }
     return 0;
     }
 

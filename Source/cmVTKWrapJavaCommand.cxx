@@ -70,6 +70,8 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& argsIn)
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
       {
       cmSourceFile file;
+      file.GetProperties().SetCMakeInstance
+        (this->Makefile->GetCMakeInstance());
       if (curr)
         {
         file.SetProperty("ABSTRACT",curr->GetProperty("ABSTRACT"));
