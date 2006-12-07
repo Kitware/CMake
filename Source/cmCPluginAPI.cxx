@@ -639,7 +639,8 @@ void CCONV DefineSourceFileProperty (void *arg, const char *name,
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   mf->GetCMakeInstance()->DefineProperty(name,cmProperty::SOURCE_FILE,
-                                         briefDocs, longDocs,chained);
+                                         briefDocs, longDocs, 
+                                         chained != 0);
 }
 
 } // close the extern "C" scope
