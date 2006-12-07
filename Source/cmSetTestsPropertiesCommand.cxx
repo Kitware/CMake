@@ -109,7 +109,7 @@ bool cmSetTestsPropertiesCommand
   for ( it = tests.begin(); it != tests.end(); ++ it )
     {
     cmTest* test = *it;
-    if ( test->GetName() == tname )
+    if ( !strcmp(test->GetName(),tname ))
       {
       // now loop through all the props and set them
       for (k = 0; k < propertyPairs.size(); k = k + 2)
