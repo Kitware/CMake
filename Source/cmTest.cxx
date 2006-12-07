@@ -62,6 +62,7 @@ const char *cmTest::GetProperty(const char* prop) const
     {
     return this->Makefile->GetProperty(prop,cmProperty::TEST);
     }
+  return retVal;
 }
 
 bool cmTest::GetPropertyAsBool(const char* prop) const
