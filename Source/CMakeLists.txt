@@ -410,16 +410,17 @@ IF(BUILD_TESTING)
     --test-command ${CMAKE_CMAKE_COMMAND} -E compare_files 
     ${CMake_SOURCE_DIR}/Tests/TargetName/scripts/hello_world
     ${CMake_BINARY_DIR}/Tests/TargetName/scripts/hello_world)
-  ADD_TEST(LibName ${CMAKE_CTEST_COMMAND}
+
+  ADD_TEST(CustComDepend ${CMAKE_CTEST_COMMAND}
     --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/LibName"
-    "${CMake_BINARY_DIR}/Tests/LibName"
+    "${CMake_SOURCE_DIR}/Tests/CustComDepend"
+    "${CMake_BINARY_DIR}/Tests/CustComDepend"
     --build-two-config
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project LibName 
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/LibName/lib"
-    --test-command foobar
+    --build-project CustComDepend 
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustComDepend/bin"
+    --test-command foo bar.c
     )
 
   ADD_TEST(CustomCommand  ${CMAKE_CTEST_COMMAND}
