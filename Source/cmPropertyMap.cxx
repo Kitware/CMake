@@ -77,6 +77,8 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
       }
     cmSystemTools::Error(msg.c_str()); 
     }
+#else
+  (void)scope;
 #endif
 
   cmProperty *prop = this->GetOrCreateProperty(name);

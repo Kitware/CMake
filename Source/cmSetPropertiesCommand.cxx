@@ -125,7 +125,6 @@ bool cmSetPropertiesCommand::InitialPass(
       break;
     case cmProperty::GLOBAL:
       {
-      std::vector<std::string>::const_iterator j;
       for(j= propertyPairs.begin(); j != propertyPairs.end(); ++j)
         {
         this->Makefile->GetCMakeInstance()->SetProperty(j->c_str(),
