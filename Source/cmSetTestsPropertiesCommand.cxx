@@ -74,38 +74,61 @@ bool cmSetTestsPropertiesCommand::InitialPass(
     return false;
     }
 
+
   std::vector<cmTest*> &tests = *this->Makefile->GetTests();
   // now loop over all the targets
   int i;
-  unsigned int k;
   for(i = 0; i < numFiles; ++i)
     {   
-    bool found = false;
-    // if the file is already in the makefile just set properites on it
-    std::vector<cmTest*>::iterator it;
-    for ( it = tests.begin(); it != tests.end(); ++ it )
+    std::string errors;
+    bool ret = 
+      cmSetTestsPropertiesCommand::SetOneTest(args[i].c_str(), 
+                                              propertyPairs,
+                                              this->Makefile, errors);
+    if (!ret)
       {
-      cmTest* test = *it;
-      if ( test->GetName() == args[i] )
-        {
-        // now loop through all the props and set them
-        for (k = 0; k < propertyPairs.size(); k = k + 2)
-          {
-          test->SetProperty(propertyPairs[k].c_str(),
-                            propertyPairs[k+1].c_str());
-          }
-        found = true;
-        break;
-        }
+      this->SetError(errors.c_str());
+      return ret;
       }
+    }
 
-    // if file is not already in the makefile, then add it
-    if ( ! found )
-      { 
-      std::string message = "Can not find test to add properties to: ";
-      message += args[i];
-      this->SetError(message.c_str());
+  return true;
+}
+
+
+bool cmSetTestsPropertiesCommand
+::SetOneTest(const char *tname, 
+             std::vector<std::string> &propertyPairs,
+             cmMakefile *mf, std::string &errors)
+{
+  std::vector<cmTest*> &tests = *mf->GetTests();
+  // now loop over all the targets
+  unsigned int k;
+  bool found = false;
+  // if the file is already in the makefile just set properites on it
+  std::vector<cmTest*>::iterator it;
+  for ( it = tests.begin(); it != tests.end(); ++ it )
+    {
+    cmTest* test = *it;
+    if ( test->GetName() == tname )
+      {
+      // now loop through all the props and set them
+      for (k = 0; k < propertyPairs.size(); k = k + 2)
+        {
+        test->SetProperty(propertyPairs[k].c_str(),
+                          propertyPairs[k+1].c_str());
+        }
+      found = true;
+      break;
       }
+    }
+  
+  // if file is not already in the makefile, then add it
+  if ( ! found )
+    { 
+    errors = "Can not find test to add properties to: ";
+    errors += tname;
+    return false;
     } 
 
   return true;

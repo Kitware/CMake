@@ -56,7 +56,7 @@ public:
         "                 PROPERTIES prop1 value1\n"
         "                 prop2 value2 ...)\n"
         "Set properties on something. The scope_value is either GLOBAL "
-        "DIRECTORY dir_name> or TARGET tgt_name."
+        "DIRECTORY dir_name, TARGET tgt_name, or TEST test_name."
         ;
     }
   

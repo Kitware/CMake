@@ -71,6 +71,11 @@ public:
     }
 
   cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);
+
+  static bool SetOneTest(const char *tname, 
+                         std::vector<std::string> &propertyPairs,
+                         cmMakefile *mf,
+                         std::string &errors);
 };
 
 

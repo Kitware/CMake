@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmSetPropertiesCommand.h"
 #include "cmSetTargetPropertiesCommand.h"
+#include "cmSetTestsPropertiesCommand.h"
 
 // cmSetPropertiesCommand
 bool cmSetPropertiesCommand::InitialPass(
@@ -87,6 +88,11 @@ bool cmSetPropertiesCommand::InitialPass(
     scope = cmProperty::TARGET;
     scopeName = args[1].c_str();
     }
+  else if (args[0] == "TEST" && numFiles == 2)
+    {
+    scope = cmProperty::TEST;
+    scopeName = args[1].c_str();
+    }
   else
     {
     this->SetError("called with illegal arguments.");
@@ -133,6 +139,17 @@ bool cmSetPropertiesCommand::InitialPass(
       }
       break;
     case cmProperty::TEST:
+      {
+      std::string errors;
+      bool ret = cmSetTestsPropertiesCommand::
+        SetOneTest(scopeName,propertyPairs, this->Makefile, errors);
+      if (!ret)
+        {
+        this->SetError(errors.c_str());
+        }
+      return ret;
+      }
+      break;
     case cmProperty::SOURCE_FILE:
       // not implemented yet
       break;
