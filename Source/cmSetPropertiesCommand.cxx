@@ -133,6 +133,10 @@ bool cmSetPropertiesCommand::InitialPass(
         }
       }
       break;
+    case cmProperty::TEST:
+    case cmProperty::SOURCE_FILE:
+      // not implemented yet
+      break;
     }
 
   return true;
