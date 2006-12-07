@@ -75,7 +75,6 @@ bool cmSetTestsPropertiesCommand::InitialPass(
     }
 
 
-  std::vector<cmTest*> &tests = *this->Makefile->GetTests();
   // now loop over all the targets
   int i;
   for(i = 0; i < numFiles; ++i)
