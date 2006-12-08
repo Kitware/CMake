@@ -220,7 +220,7 @@ const char* DynamicLoader::LastError()
 
 // ---------------------------------------------------------------
 // 3. Implementation for Windows win32 code
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 #include <windows.h>
 #define DYNAMICLOADER_DEFINED 1
 

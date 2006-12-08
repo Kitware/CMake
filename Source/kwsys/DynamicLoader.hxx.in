@@ -18,7 +18,7 @@
 
 #if defined(__hpux)
   #include <dl.h>
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
   #include <windows.h>
 #elif defined(__APPLE__)
   #include <AvailabilityMacros.h>
@@ -56,7 +56,7 @@ public:
 // They are different on several different OS's
 #if defined(__hpux)
   typedef shl_t LibraryHandle;
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
   typedef HMODULE LibraryHandle;
 #elif defined(__APPLE__)
   #if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
