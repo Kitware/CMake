@@ -580,7 +580,8 @@ void cmDocumentation::SetCommandsSection(const cmDocumentationEntry* section)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetPropertiesSection(const cmDocumentationEntry* section)
+void cmDocumentation
+::SetPropertiesSection(const cmDocumentationEntry* section)
 {
   this->SetSection(cmDocumentationPropertiesHeader, section, 0,
                    this->PropertiesSection);

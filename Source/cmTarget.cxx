@@ -481,7 +481,8 @@ void cmTarget::TraceVSDependencies(std::string projFile,
             tLocation = cmSystemTools::GetFilenamePath(tLocation);
             std::string depLocation = cmSystemTools::GetFilenamePath(
               std::string(fullName));
-            depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
+            depLocation = 
+              cmSystemTools::CollapseFullPath(depLocation.c_str());
             tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
             if(depLocation == tLocation)
               {

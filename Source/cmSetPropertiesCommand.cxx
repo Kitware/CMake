@@ -110,8 +110,8 @@ bool cmSetPropertiesCommand::InitialPass(
         std::string message = "Can not find target to add properties to: ";
         message += scopeName;
         this->SetError(message.c_str());
+        return ret;
         }
-      return ret;
       }
       break;
     case cmProperty::DIRECTORY:
@@ -146,8 +146,8 @@ bool cmSetPropertiesCommand::InitialPass(
       if (!ret)
         {
         this->SetError(errors.c_str());
+        return ret;
         }
-      return ret;
       }
       break;
     case cmProperty::SOURCE_FILE:

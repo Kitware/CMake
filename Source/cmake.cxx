@@ -2835,19 +2835,14 @@ bool cmake::IsPropertyDefined(const char *name, cmProperty::ScopeType scope)
     {
     case cmProperty::GLOBAL:
       return this->GlobalProperties.IsPropertyDefined(name);
-      break;
     case cmProperty::TARGET:
       return this->TargetProperties.IsPropertyDefined(name);
-      break;
     case cmProperty::SOURCE_FILE:
       return this->SourceFileProperties.IsPropertyDefined(name);
-      break;
     case cmProperty::DIRECTORY:
       return this->DirectoryProperties.IsPropertyDefined(name);
-      break;
     case cmProperty::TEST:
       return this->TestProperties.IsPropertyDefined(name);
-      break;
     }
 
   return false;
