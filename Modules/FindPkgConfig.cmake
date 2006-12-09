@@ -355,31 +355,6 @@ macro(pkg_search_module _prefix _module0)
   endif(NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})  
 endmacro(pkg_search_module)
 
-### 
-macro(PKGCONFIG _package _include_DIR _link_DIR _link_FLAGS _cflags)
-  message(STATUS "WARNING: you are using the obsolete 'PKGCONFIG' macro")
-  _pkg_check_modules_internal(0 0 _PKGCONFIG_TMP "${_package}")
-  if (_PKGCONFIG_TMP_FOUND)
-    # To be compatible with obsolete module must return blank-delimited strings.
-    # Also, lead with a blank (for TRUE/FALSE compatibility, 2.4.4 appears to
-    # have returned a blank sometimes followed by nl for the situation
-    # where the pkg-config  module has been found [e.g., _PKGCONFIG_TMP_FOUND]
-    # but does not define the desired quantity.
-    string(REGEX REPLACE ";" " " ${_include_DIR} " ${_PKGCONFIG_TMP_INCLUDE_DIRS}")
-    string(REGEX REPLACE ";" " " ${_link_DIR}    " ${_PKGCONFIG_TMP_LIBRARY_DIRS}")
-    string(REGEX REPLACE ";" " " ${_link_FLAGS}  " ${_PKGCONFIG_TMP_LDFLAGS}")
-    string(REGEX REPLACE ";" " " ${_cflags}      " ${_PKGCONFIG_TMP_CFLAGS}")
-    set(_return_VALUE 0)
-  else(_PKGCONFIG_TMP_FOUND)
-    set(${_include_DIR})
-    set(${_link_DIR})
-    set(${_link_FLAGS})
-    set(${_cflags})
-    set(_return_VALUE 1)
-  endif(_PKGCONFIG_TMP_FOUND)
-endmacro(PKGCONFIG)
-
-
 ### Local Variables:
 ### mode: cmake
 ### End:

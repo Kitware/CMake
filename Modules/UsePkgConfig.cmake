@@ -1,6 +1,6 @@
 # - obsolete pkg-config module for CMake
 #
-# Includes FindPkgConfig.cmake which defines 
+# Defines the following macros:
 #
 # PKGCONFIG(package includedir libdir linkflags cflags)
 #
@@ -10,11 +10,39 @@
 # variable will be empty when the function returns, otherwise they will contain the respective information
 #
 
-INCLUDE(FindPkgConfig)
-# Retain backwards compatibility with old PKGCONFIG_EXECUTABLE name.
-IF(PKG_CONFIG_EXECUTABLE)
-  SET(PKGCONFIG_EXECUTABLE ${PKG_CONFIG_EXECUTABLE})
-ELSE(PKG_CONFIG_EXECUTABLE)
-  SET(PKGCONFIG_EXECUTABLE PKGCONFIG_EXECUTABLE-NOTFOUND)
-ENDIF(PKG_CONFIG_EXECUTABLE)
 
+
+FIND_PROGRAM(PKGCONFIG_EXECUTABLE NAMES pkg-config PATHS /usr/local/bin )
+
+MACRO(PKGCONFIG _package _include_DIR _link_DIR _link_FLAGS _cflags)
+  message(STATUS
+    "WARNING: you are using the obsolete 'PKGCONFIG' macro use FindPkgConfig")
+# reset the variables at the beginning
+  SET(${_include_DIR})
+  SET(${_link_DIR})
+  SET(${_link_FLAGS})
+  SET(${_cflags})
+
+  # if pkg-config has been found
+  IF(PKGCONFIG_EXECUTABLE)
+
+    EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --exists RETURN_VALUE _return_VALUE OUTPUT_VARIABLE _pkgconfigDevNull )
+
+    # and if the package of interest also exists for pkg-config, then get the information
+    IF(NOT _return_VALUE)
+
+      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --variable=includedir OUTPUT_VARIABLE ${_include_DIR} )
+
+      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --variable=libdir OUTPUT_VARIABLE ${_link_DIR} )
+
+      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --libs OUTPUT_VARIABLE ${_link_FLAGS} )
+
+      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --cflags OUTPUT_VARIABLE ${_cflags} )
+
+    ENDIF(NOT _return_VALUE)
+
+  ENDIF(PKGCONFIG_EXECUTABLE)
+
+ENDMACRO(PKGCONFIG _include_DIR _link_DIR _link_FLAGS _cflags)
+
+MARK_AS_ADVANCED(PKGCONFIG_EXECUTABLE)
