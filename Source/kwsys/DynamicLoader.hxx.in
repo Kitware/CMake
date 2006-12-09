@@ -18,7 +18,7 @@
 
 #if defined(__hpux)
   #include <dl.h>
-#elif defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#elif defined(_WIN32) && !defined(__CYGWIN__)
   #include <windows.h>
 #elif defined(__APPLE__)
   #include <AvailabilityMacros.h>
@@ -47,6 +47,9 @@ namespace @KWSYS_NAMESPACE@
  * Whereas this distinction does not exist on Win32. Therefore ideally you
  * should be doing full path to garantee to have a consistent way of dealing
  * with dynamic loading of shared library.
+ *
+ * \warning the Cygwin implementation do not use the Win32 HMODULE. Put extra
+ * condition so that we can include the correct declaration (POSIX)
  */
 
 class @KWSYS_NAMESPACE@_EXPORT DynamicLoader
@@ -56,7 +59,7 @@ public:
 // They are different on several different OS's
 #if defined(__hpux)
   typedef shl_t LibraryHandle;
-#elif defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#elif defined(_WIN32) && !defined(__CYGWIN__)
   typedef HMODULE LibraryHandle;
 #elif defined(__APPLE__)
   #if MAC_OS_X_VERSION_MAX_ALLOWED < 1030
@@ -66,7 +69,7 @@ public:
   #endif
 #elif defined(__BEOS__)
   typedef image_id LibraryHandle;
-#else
+#else  // POSIX
   typedef void* LibraryHandle;
 #endif
 

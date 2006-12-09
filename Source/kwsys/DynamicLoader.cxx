@@ -219,8 +219,8 @@ const char* DynamicLoader::LastError()
 #endif // __APPLE__
 
 // ---------------------------------------------------------------
-// 3. Implementation for Windows win32 code
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+// 3. Implementation for Windows win32 code but not cygwin
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
 #define DYNAMICLOADER_DEFINED 1
 
