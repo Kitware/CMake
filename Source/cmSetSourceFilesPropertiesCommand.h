@@ -82,6 +82,13 @@ public:
     }
   
   cmTypeMacro(cmSetSourceFilesPropertiesCommand, cmCommand);
+
+  static bool RunCommand(cmMakefile *mf,
+                         std::vector<std::string>::const_iterator filebeg,
+                         std::vector<std::string>::const_iterator fileend,
+                         std::vector<std::string>::const_iterator propbeg,
+                         std::vector<std::string>::const_iterator propend,
+                         std::string &errors);
 };
 
 

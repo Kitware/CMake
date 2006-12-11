@@ -2854,19 +2854,14 @@ bool cmake::IsPropertyChained(const char *name, cmProperty::ScopeType scope)
     {
     case cmProperty::GLOBAL:
       return this->GlobalProperties.IsPropertyChained(name);
-      break;
     case cmProperty::TARGET:
       return this->TargetProperties.IsPropertyChained(name);
-      break;
     case cmProperty::SOURCE_FILE:
       return this->SourceFileProperties.IsPropertyChained(name);
-      break;
     case cmProperty::DIRECTORY:
       return this->DirectoryProperties.IsPropertyChained(name);
-      break;  
     case cmProperty::TEST:
       return this->DirectoryProperties.IsPropertyChained(name);
-      break;
   }
 
   return false;
