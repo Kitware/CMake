@@ -31,3 +31,7 @@ SET(VTK_WGLEXT_FILE "${VTK_SOURCE_DIR}/Utilities/ParseOGLExt/headers/wglext.h"
 # work around an old bug in VTK
 SET(TIFF_RIGHT_VERSION 1)
 
+# for very old VTK (versions prior to 4.2)
+if (NOT VTK_MAJOR_VERSION)
+  message (FATAL_ERROR "You are trying to build a very old version of VTK (prior to VTK 4.2). To do this you need to use CMake 2.0 as it was the last version of CMake to support VTK 4.0.")
+endif (NOT VTK_MAJOR_VERSION)
