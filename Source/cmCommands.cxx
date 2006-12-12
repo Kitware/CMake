@@ -52,10 +52,6 @@
 #include "cmSubdirDependsCommand.cxx"
 #include "cmUseMangledMesaCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
-#include "cmVTKMakeInstantiatorCommand.cxx"
-#include "cmVTKWrapJavaCommand.cxx"
-#include "cmVTKWrapPythonCommand.cxx"
-#include "cmVTKWrapTclCommand.cxx"
 #include "cmVariableRequiresCommand.cxx"
 #include "cmWhileCommand.cxx"
 #include "cmWriteFileCommand.cxx"
@@ -110,10 +106,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmSubdirDependsCommand);
   commands.push_back(new cmUseMangledMesaCommand);
   commands.push_back(new cmUtilitySourceCommand);
-  commands.push_back(new cmVTKMakeInstantiatorCommand);
-  commands.push_back(new cmVTKWrapJavaCommand);
-  commands.push_back(new cmVTKWrapPythonCommand);
-  commands.push_back(new cmVTKWrapTclCommand);
   commands.push_back(new cmVariableRequiresCommand);
   commands.push_back(new cmWhileCommand);
   commands.push_back(new cmWriteFileCommand);
