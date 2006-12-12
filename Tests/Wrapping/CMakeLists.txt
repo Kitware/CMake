@@ -39,64 +39,6 @@ ENDIF(WIN32)
 SET(WRAP ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/Wrap${EXE_EXT})
 
 #
-# Test VTK wrappers
-#
-SET (SRCS
-  vtkExcluded.cxx
-  vtkIncluded.cxx
-  )
-
-SET_SOURCE_FILES_PROPERTIES(vtkExcluded PROPERTIES WRAP_EXCLUDE 1)
-
-#
-# Specify (empty) VTK hint files
-#
-FIND_FILE(VTK_WRAP_HINTS hints ${Wrapping_SOURCE_DIR})
-
-#
-# Wrap VTK -> Tcl
-#
-SET (VTK_WRAP_TCL "On")
-SET (VTK_WRAP_TCL_EXE "${WRAP}")
-VTK_WRAP_TCL (wraplibTCL TCL_SRCS ${SRCS})
-ADD_CUSTOM_TARGET(wraplibTCL ALL 
-  ${CMAKE_COMMAND} -E echo "dummy target"  
-  ) 
-ADD_DEPENDENCIES(wraplibTCL Wrap)
-
-#
-# Wrap VTK -> Python
-#
-SET (VTK_WRAP_PYTHON "On")
-SET (VTK_WRAP_PYTHON_EXE "${WRAP}")
-VTK_WRAP_PYTHON (wraplibPython Python_SRCS ${SRCS})
-ADD_CUSTOM_TARGET(wraplibPython ALL 
-  ${CMAKE_COMMAND} -E echo "dummy target"  
-  ) 
-ADD_DEPENDENCIES(wraplibPython Wrap)
-
-#
-# Wrap VTK -> Java
-#
-# VTK_WRAP_JAVA puts dependencie between wraplibJavaJavaClasses (in ALL)
-# and each Java wrapped class (here, vtkIncluded, so let's create a dummy one
-# so that the build succeeds.
-#
-SET (VTK_WRAP_JAVA "On")
-SET (VTK_WRAP_JAVA_EXE "${WRAP}")
-SET (VTK_PARSE_JAVA_EXE "${WRAP}")
-SET (VTK_JAVA_HOME "${Wrapping_BINARY_DIR}/java")
-VTK_WRAP_JAVA (wraplibJava Java_SRCS ${SRCS})
-CONFIGURE_FILE(
-  ${Wrapping_SOURCE_DIR}/dummy
-  ${VTK_JAVA_HOME}/vtkIncluded.java
-  COPYONLY IMMEDIATE)
-ADD_CUSTOM_TARGET(wraplibJava ALL 
-  ${CMAKE_COMMAND} -E echo "dummy target"  
-  ) 
-ADD_DEPENDENCIES(wraplibJava Wrap)
-
-#
 # QT Wrappers
 #
 
@@ -164,12 +106,3 @@ CONFIGURE_FILE(
   COPYONLY IMMEDIATE)
 USE_MANGLED_MESA (${Wrapping_BINARY_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
 
-#
-# Instantiator
-#
-VTK_MAKE_INSTANTIATOR(vtkWraplibInstantiator 
-  Instantiator_SRCS
-  ${SRCS}
-  EXPORT_MACRO VTK_WRAPLIB_EXPORT
-  HEADER_LOCATION ${Wrapping_BINARY_DIR}
-  GROUP_SIZE 5)
