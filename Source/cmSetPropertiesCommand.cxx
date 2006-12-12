@@ -167,8 +167,8 @@ bool cmSetPropertiesCommand::InitialPass(
       if (!ret)
         {
         this->SetError(errors.c_str());
+        return ret;
         }
-      return ret;
       }
       break;
     }

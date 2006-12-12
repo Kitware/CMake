@@ -22,12 +22,26 @@
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
-  // always let if statements through
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"if"))
+  // if we are blocking then all we need to do is keep track of 
+  // scope depth of nested if statements
+  if (this->IsBlocking)
     {
-    return false;
+    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"if"))
+      {
+      this->ScopeDepth++;
+      return true;
+      }
     }
-  
+
+  if (this->IsBlocking && this->ScopeDepth)
+    {
+    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
+      {
+      this->ScopeDepth--;
+      }
+    return true;
+    }
+      
   // watch for our ELSE or ENDIF
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else") ||
       !cmSystemTools::Strucmp(lff.Name.c_str(),"elseif") ||
