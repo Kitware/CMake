@@ -55,7 +55,8 @@ CTEST_MEMCHECK(BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE res)
 CTEST_COVERAGE(BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE res)
 CTEST_SUBMIT(RETURN_VALUE res)
 
-SET(svncommand "@SVNCOMMAND@")
+#SET(svncommand "@SVNCOMMAND@")
+set(svncommand FALSE) # turn this off until namic svn cmake is back
 IF(svncommand)
   # Project 2
   PROJECT_START("KWSys from SVN")
