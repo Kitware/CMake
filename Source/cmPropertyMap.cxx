@@ -19,7 +19,7 @@
 #include "cmake.h"
 
 // define STRICT to get checking of all set and get property calls
-#define STRICT 
+//#define STRICT 
 
 cmProperty *cmPropertyMap::GetOrCreateProperty(const char *name)
 {
