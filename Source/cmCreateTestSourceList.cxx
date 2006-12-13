@@ -172,7 +172,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
 
   // Create the source list
   cmSourceFile cfile;
-  cfile.GetProperties().SetCMakeInstance(this->Makefile->GetCMakeInstance());
+  cfile.SetMakefile(this->Makefile);
   std::string sourceListValue;
 
   cfile.SetProperty("ABSTRACT","0");
@@ -186,8 +186,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
   for(i = testsBegin; i != tests.end(); ++i)
     {
     cmSourceFile icfile;
-    icfile.GetProperties().
-      SetCMakeInstance(this->Makefile->GetCMakeInstance());
+    icfile.SetMakefile(this->Makefile);
     icfile.SetProperty("ABSTRACT","0");
     icfile.SetName(i->c_str(),
                   this->Makefile->GetCurrentDirectory(),

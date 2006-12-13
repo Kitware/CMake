@@ -21,6 +21,7 @@
 #include "cmPropertyMap.h"
 
 class cmake;
+class cmMakefile;
 
 /** \class cmSourceFile
  * \brief Represent a class loaded from a makefile.
@@ -114,6 +115,10 @@ public:
   // Define the properties
   static void DefineProperties(cmake *cm);
 
+  ///! Set the cmMakefile that owns this target
+  void SetMakefile(cmMakefile *mf);
+  cmMakefile *GetMakefile() { return this->Makefile;};
+
 private:
   cmPropertyMap Properties;
   cmCustomCommand *CustomCommand;
@@ -122,6 +127,10 @@ private:
   std::string SourceExtension;
   std::vector<std::string> Depends;
   std::string SourceNameWithoutLastExtension;
+
+  // The cmMakefile instance that owns this source file.  This should
+  // always be set.
+  cmMakefile* Makefile;
 };
 
 #endif

@@ -69,8 +69,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass
           // add the file as a class file so 
           // depends can be done
           cmSourceFile cmfile;
-          cmfile.GetProperties().SetCMakeInstance
-            (this->Makefile->GetCMakeInstance());
+          cmfile.SetMakefile(this->Makefile);
           cmfile.SetName(fullname.c_str(), 
                          this->Makefile->GetCurrentDirectory(),
                          this->Makefile->GetSourceExtensions(),

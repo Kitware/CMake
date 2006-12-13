@@ -2281,7 +2281,7 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
 
   // we must create one
   cmSourceFile file; 
-  file.GetProperties().SetCMakeInstance(this->GetCMakeInstance());
+  file.SetMakefile(this);
   std::string path = cmSystemTools::GetFilenamePath(src);
   if(generated)
     {
@@ -2329,11 +2329,14 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
   this->AddSource(file);
   src = file.GetFullPath();
   ret = this->GetSource(src.c_str());
-  ret->GetProperties().SetCMakeInstance(this->GetCMakeInstance());
   if (!ret)
     {
     cmSystemTools::Error(
       "CMake failed to properly look up cmSourceFile: ", sourceName);
+    }
+  else
+    {
+    ret->SetMakefile(this);
     }
   return ret;
 }

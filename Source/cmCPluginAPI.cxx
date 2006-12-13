@@ -511,7 +511,7 @@ void * CCONV cmCreateNewSourceFile(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   cmSourceFile *sf = new cmSourceFile;
-  sf->GetProperties().SetCMakeInstance(mf->GetCMakeInstance());
+  sf->SetMakefile(mf);
   return (void *)sf;
 }
 

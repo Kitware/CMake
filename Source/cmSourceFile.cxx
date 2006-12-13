@@ -18,6 +18,7 @@
 #include "cmSystemTools.h"
 
 #include "cmake.h"
+#include "cmMakefile.h"
 
 // Set the name of the class and the full path to the file.
 // The class must be found in dir and end in name.cxx, name.txx, 
@@ -193,8 +194,14 @@ const char *cmSourceFile::GetProperty(const char* prop) const
     }
 
   bool chain = false;
-  return this->Properties.GetPropertyValue(prop,cmProperty::SOURCE_FILE, 
-                                           chain);
+  const char *retVal = 
+    this->Properties.GetPropertyValue(prop, cmProperty::SOURCE_FILE, chain);
+  if (chain)
+    {
+    return this->Makefile->GetProperty(prop,cmProperty::SOURCE_FILE);
+    }
+
+  return retVal;    
 }
 
 bool cmSourceFile::GetPropertyAsBool(const char* prop) const
@@ -223,7 +230,18 @@ const std::string& cmSourceFile::GetSourceNameWithoutLastExtension()
 
 cmSourceFile::cmSourceFile()
 {
+  this->Makefile = 0;
   this->CustomCommand = 0; 
+}
+
+//----------------------------------------------------------------------------
+void cmSourceFile::SetMakefile(cmMakefile* mf)
+{
+  // Set our makefile.
+  this->Makefile = mf;
+
+  // set the cmake instance of the properties
+  this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
 }
 
 // define properties
