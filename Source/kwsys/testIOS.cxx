@@ -13,8 +13,36 @@
 
 int main()
 {
+  const char refstring[] =  "Hello, World!";
   kwsys_ios::ostringstream ostr;
-  ostr << "Hello, World!";
+  ostr << refstring;
   kwsys_ios::cout << ostr.str() << kwsys_ios::endl;
+  if( ostr.str() != refstring )
+    {
+    return 1;
+    }
+
+
+  kwsys_ios::istringstream istr;
+  istr.str( refstring );
+  kwsys_ios::cout << istr.str() << kwsys_ios::endl;
+  if( istr.str() != refstring )
+    {
+    return 1;
+    }
+
+
+  const int val = 12345;
+  const char valstr[] = "12345";
+  kwsys_ios::stringstream sstr;
+  sstr << val;
+  int v = 0;
+  sstr >> v;
+  if(v != val || sstr.str() != valstr)
+    {
+    return 1;
+    }
+  kwsys_ios::cout << sstr.str() << kwsys_ios::endl;
+
   return 0;
 }

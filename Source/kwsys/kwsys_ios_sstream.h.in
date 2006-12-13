@@ -64,6 +64,7 @@ using @KWSYS_NAMESPACE@_ios_namespace::ostream;
 using @KWSYS_NAMESPACE@_ios_namespace::istream;
 using @KWSYS_NAMESPACE@_ios_namespace::istrstream;
 using @KWSYS_NAMESPACE@_ios_namespace::ostrstream;
+using @KWSYS_NAMESPACE@_ios_namespace::strstream;
 using @KWSYS_NAMESPACE@_ios_namespace::ios;
 using @KWSYS_NAMESPACE@_ios_namespace::endl;
 using @KWSYS_NAMESPACE@_ios_namespace::ends;
@@ -91,9 +92,9 @@ public:
     {
     ostringstream_cleanup cleanup(*this);
     ostringstream_cleanup::IgnoreUnusedVariable(cleanup);
-    int pcount = this->pcount();
+    int count = this->pcount();
     const char* ptr = this->Superclass::str();
-    return kwsys_stl::string(ptr?ptr:"", pcount);
+    return kwsys_stl::string(ptr?ptr:"", count);
     }
   void str(const kwsys_stl::string& s)
     {
@@ -133,6 +134,17 @@ private:
 #if defined(_MSC_VER)
 # pragma warning (pop)
 #endif
+
+class stringstream: public istringstream, public ostringstream
+{
+public:
+  stringstream():istringstream(),ostringstream() {}
+  kwsys_stl::string str() const { return istringstream::str(); }
+  kwsys_stl::string str() { return ostringstream::str(); }
+private:
+  stringstream(const stringstream&);
+  void operator=(const stringstream&);
+};
 
 } // namespace @KWSYS_NAMESPACE@_ios
 
