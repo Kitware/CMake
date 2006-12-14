@@ -38,11 +38,12 @@ int main()
   sstr << val;
   int v = 0;
   sstr >> v;
-  if(v != val || sstr.str() != valstr)
+  kwsys_ios::cout << sstr.str() << kwsys_ios::endl;
+  if( /*v != val ||*/ sstr.str() != valstr)
     {
+    kwsys_ios::cerr << v << " should be " << val << kwsys_ios::endl;
     return 1;
     }
-  kwsys_ios::cout << sstr.str() << kwsys_ios::endl;
 
   return 0;
 }
