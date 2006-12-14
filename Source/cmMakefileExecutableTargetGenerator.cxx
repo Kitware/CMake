@@ -17,7 +17,7 @@
 #include "cmMakefileExecutableTargetGenerator.h"
 
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"

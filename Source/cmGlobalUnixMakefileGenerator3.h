@@ -115,6 +115,9 @@ public:
       no rule.  This is used for multiple output dependencies.  */
   std::string GetEmptyCommandHack() { return this->EmptyCommandsHack; }
 
+  /** Get the fake dependency to use when a rule has no real commands
+      or dependencies.  */
+  std::string GetEmptyRuleHackDepends() { return this->EmptyRuleHackDepends; }
 
   // change the build command for speed
   virtual std::string GenerateBuildCommand

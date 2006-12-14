@@ -23,7 +23,7 @@ class cmCustomCommand;
 class cmDependInformation;
 class cmDepends;
 class cmGeneratedFileStream;
-class cmGlobalGenerator;
+class cmGlobalUnixMakefileGenerator3;
 class cmLocalUnixMakefileGenerator3;
 class cmMakeDepend;
 class cmMakefile;
@@ -121,7 +121,7 @@ protected:
   cmStdString TargetName;
   cmTarget *Target;
   cmLocalUnixMakefileGenerator3 *LocalGenerator;
-  cmGlobalGenerator *GlobalGenerator;
+  cmGlobalUnixMakefileGenerator3 *GlobalGenerator;
   cmMakefile *Makefile;
 
   bool DriveCustomCommandsOnDepends;
