@@ -62,12 +62,49 @@ namespace @KWSYS_NAMESPACE@_ios
 using @KWSYS_NAMESPACE@_ios_namespace::streambuf;
 using @KWSYS_NAMESPACE@_ios_namespace::ostream;
 using @KWSYS_NAMESPACE@_ios_namespace::istream;
+using @KWSYS_NAMESPACE@_ios_namespace::strstream;
 using @KWSYS_NAMESPACE@_ios_namespace::istrstream;
 using @KWSYS_NAMESPACE@_ios_namespace::ostrstream;
 using @KWSYS_NAMESPACE@_ios_namespace::ios;
 using @KWSYS_NAMESPACE@_ios_namespace::endl;
 using @KWSYS_NAMESPACE@_ios_namespace::ends;
 using @KWSYS_NAMESPACE@_ios_namespace::flush;
+
+class stringstream_cleanup
+{
+public:
+  stringstream_cleanup(strstream& str): m_StrStream(str) {}
+  ~stringstream_cleanup() { m_StrStream.rdbuf()->freeze(0); }
+  static void IgnoreUnusedVariable(const stringstream_cleanup&) {}
+protected:
+  strstream& m_StrStream;
+private:
+  void operator=(stringstream_cleanup const&);
+};
+
+class stringstream: public strstream
+{
+public:
+  typedef strstream Superclass;
+  stringstream() {}
+  stringstream(const kwsys_stl::string& s) { *this << s.c_str(); }
+  kwsys_stl::string str()
+    {
+    stringstream_cleanup cleanup(*this);
+    stringstream_cleanup::IgnoreUnusedVariable(cleanup);
+    int count = this->pcount();
+    const char* ptr = this->Superclass::str();
+    return kwsys_stl::string(ptr?ptr:"", count);
+    }
+  void str(const kwsys_stl::string& s)
+    {
+    this->~stringstream();
+    new (this) stringstream(s);
+    }
+private:
+  stringstream(const stringstream&);
+  void operator=(const stringstream&);
+};
 
 class ostringstream_cleanup
 {
@@ -91,9 +128,9 @@ public:
     {
     ostringstream_cleanup cleanup(*this);
     ostringstream_cleanup::IgnoreUnusedVariable(cleanup);
-    int pcount = this->pcount();
+    int count = this->pcount();
     const char* ptr = this->Superclass::str();
-    return kwsys_stl::string(ptr?ptr:"", pcount);
+    return kwsys_stl::string(ptr?ptr:"", count);
     }
   void str(const kwsys_stl::string& s)
     {
