@@ -713,6 +713,22 @@ bool RunCommandViaSystem(const char* command,
 
 #else // We have popen
 
+// BeOS seems to return from a successful pclose() before the process has
+//  legitimately exited, or at least before SIGCHLD is thrown...the signal may
+//  come quite some time after pclose returns! This causes havoc with later
+//  parts of CMake that expect to catch the signal from other child processes,
+//  so we explicitly wait to catch it here. This should be safe to do with
+//  popen() so long as we don't actually collect the zombie process ourselves.
+#ifdef __BEOS__
+#include <signal.h>
+#undef SIGBUS  // this is the same as SIGSEGV on BeOS and causes issues below.
+static volatile bool beos_seen_signal = false;
+static void beos_popen_workaround(int sig)
+{
+  beos_seen_signal = true;
+}
+#endif
+
 bool RunCommandViaPopen(const char* command,
                         const char* dir,
                         std::string& output,
@@ -745,9 +761,18 @@ bool RunCommandViaPopen(const char* command,
     }
   fflush(stdout);
   fflush(stderr);
+
+#ifdef __BEOS__
+  beos_seen_signal = false;
+  signal(SIGCHLD, beos_popen_workaround);
+#endif
+
   FILE* cpipe = popen(command, "r");
   if(!cpipe)
     {
+#ifdef __BEOS__
+    signal(SIGCHLD, SIG_DFL);
+#endif
     return false;
     }
   fgets(buffer, BUFFER_SIZE, cpipe);
@@ -762,6 +787,19 @@ bool RunCommandViaPopen(const char* command,
     }
 
   retVal = pclose(cpipe);
+
+#ifdef __BEOS__
+  for (int i = 0; (!beos_seen_signal) && (i < 3); i++)
+    {
+    ::sleep(1);   // signals should interrupt this...
+    }
+
+  if (!beos_seen_signal)
+    {
+    signal(SIGCHLD, SIG_DFL);  // oh well, didn't happen. Go on anyhow.
+    }
+#endif
+
   if (WIFEXITED(retVal))
     {
     retVal = WEXITSTATUS(retVal);
