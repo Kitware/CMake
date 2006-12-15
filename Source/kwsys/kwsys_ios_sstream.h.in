@@ -92,7 +92,7 @@ public:
     {
     stringstream_cleanup cleanup(*this);
     stringstream_cleanup::IgnoreUnusedVariable(cleanup);
-    int count = this->pcount();
+    int count = this->rdbuf()->pcount();
     const char* ptr = this->Superclass::str();
     return kwsys_stl::string(ptr?ptr:"", count);
     }
