@@ -92,7 +92,12 @@ public:
     {
     stringstream_cleanup cleanup(*this);
     stringstream_cleanup::IgnoreUnusedVariable(cleanup);
+// Visual Studio 6 has a strstream::pcount, but this is not rdbuf()->pcount()
+#if (@KWSYS_NAMESPACE@_IOS_USE_STRSTREA_H) && defined(_MSC_VER) && (_MSC_VER == 1200)
+    int count = this->pcount();
+#else
     int count = this->rdbuf()->pcount();
+#endif
     const char* ptr = this->Superclass::str();
     return kwsys_stl::string(ptr?ptr:"", count);
     }
