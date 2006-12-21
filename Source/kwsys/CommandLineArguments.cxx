@@ -306,6 +306,7 @@ int CommandLineArguments::Parse()
           this->Internals->LastArgument --;
           return 0;
           }
+        return 1;
         }
       else if ( this->StoreUnusedArgumentsFlag )
         {
