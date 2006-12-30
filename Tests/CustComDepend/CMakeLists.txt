@@ -1,4 +1,5 @@
 project(CustComDepend)
+include_directories("${CustComDepend_SOURCE_DIR}")
 add_definitions(-D_CRT_SECURE_NO_DEPRECATE=1)
 set(EXECUTABLE_OUTPUT_PATH ${CustComDepend_BINARY_DIR}/bin)
 add_executable(foo foo.cxx)

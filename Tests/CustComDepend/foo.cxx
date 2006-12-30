@@ -8,7 +8,7 @@ int main(int ac, char** av)
     {
     return -1;
     }
-  fprintf(fout, "int bar(){ return 10;}\n");
+  fprintf(fout, "#include <bar.h>\nBAR_EXPORT int bar(){ return 10;}\n");
   fclose(fout);
   return 0;
 }
