@@ -17,7 +17,7 @@
 #include "cmMakefileUtilityTargetGenerator.h"
 
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
@@ -57,6 +57,17 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   std::string objTarget = relPath;
   objTarget += this->BuildFileName;
   this->LocalGenerator->AppendRuleDepend(depends, objTarget.c_str());
+
+  // If the rule is empty add the special empty rule dependency needed
+  // by some make tools.
+  if(depends.empty() && commands.empty())
+    {
+    std::string hack = this->GlobalGenerator->GetEmptyRuleHackDepends();
+    if(!hack.empty())
+      {
+      depends.push_back(hack);
+      }
+    }
 
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,

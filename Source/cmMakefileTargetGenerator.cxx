@@ -65,7 +65,8 @@ cmMakefileTargetGenerator::New(cmLocalUnixMakefileGenerator3 *lg,
   result->TargetName = tgtName;
   result->Target = tgt;
   result->LocalGenerator = lg;
-  result->GlobalGenerator = lg->GetGlobalGenerator();
+  result->GlobalGenerator =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(lg->GetGlobalGenerator());
   result->Makefile = lg->GetMakefile();
   return result;
 }
@@ -891,9 +892,7 @@ void cmMakefileTargetGenerator
   depends.clear();
   depends.push_back(*o);
   commands.clear();
-  cmGlobalUnixMakefileGenerator3* gg =
-    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  std::string emptyCommand = gg->GetEmptyCommandHack();
+  std::string emptyCommand = this->GlobalGenerator->GetEmptyCommandHack();
   if(!emptyCommand.empty())
     {
     commands.push_back(emptyCommand);
@@ -911,7 +910,8 @@ void cmMakefileTargetGenerator
     this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                         o->c_str(), depends, commands,
                                         symbolic);
-    gg->AddMultipleOutputPair(o->c_str(), depends[0].c_str());
+    this->GlobalGenerator->AddMultipleOutputPair(o->c_str(),
+                                                 depends[0].c_str());
     }
 }
 

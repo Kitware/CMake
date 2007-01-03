@@ -1,3 +1,9 @@
+Changes in CMake 2.4.6
+* Fix for finding custom commands from a full path with CMAKE_CFG_INTDIR.
+
+* Fix for Borland make and custom commands that do nothing
+
+
 Changes in CMake 2.4.5
 * Fix for seg fault when a macro runs a bad command BUG# 3815
 
