@@ -39,7 +39,9 @@
 #  QT_QTGUI_FOUND         True if QtGui was found.
 #  QT_QT3SUPPORT_FOUND    True if Qt3Support was found.
 #  QT_QTASSISTANT_FOUND   True if QtAssistant was found.
+#  QT_QTDBUS_FOUND        True if QtDBus was found.
 #  QT_QTDESIGNER_FOUND    True if QtDesigner was found.
+#  QT_QTDESIGNERCOMPONENTS True if QtDesignerComponents was found.
 #  QT_QTMOTIF_FOUND       True if QtMotif was found.
 #  QT_QTNETWORK_FOUND     True if QtNetwork was found.
 #  QT_QTNSPLUGIN_FOUND    True if QtNsPlugin was found.
@@ -64,6 +66,8 @@
 #  QT_QTASSISTANT_INCLUDE_DIR  Path to "include/QtAssistant" 
 #  QT_QTCORE_INCLUDE_DIR       Path to "include/QtCore"         
 #  QT_QTDESIGNER_INCLUDE_DIR   Path to "include/QtDesigner" 
+#  QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR   Path to "include/QtDesigner"
+#  QT_QTDBUS_INCLUDE_DIR       Path to "include/QtDBus" 
 #  QT_QTGUI_INCLUDE_DIR        Path to "include/QtGui" 
 #  QT_QTMOTIF_INCLUDE_DIR      Path to "include/QtMotif" 
 #  QT_QTNETWORK_INCLUDE_DIR    Path to "include/QtNetwork" 
@@ -96,9 +100,17 @@
 #                             QT_QTCORE_LIBRARY_RELEASE
 #                             QT_QTCORE_LIBRARY_DEBUG
 #
+# The QtDBus library:         QT_QTDBUS_LIBRARY
+#                             QT_QTDBUS_LIBRARY_RELEASE
+#                             QT_QTDBUS_LIBRARY_DEBUG
+#
 # The QtDesigner library:     QT_QTDESIGNER_LIBRARY
 #                             QT_QTDESIGNER_LIBRARY_RELEASE
 #                             QT_QTDESIGNER_LIBRARY_DEBUG
+#
+# The QtDesignerComponents library:     QT_QTDESIGNERCOMPONENTS_LIBRARY
+#                             QT_QTDESIGNERCOMPONENTS_LIBRARY_RELEASE
+#                             QT_QTDESIGNERCOMPONENTS_LIBRARY_DEBUG
 #
 # The QtGui library:          QT_QTGUI_LIBRARY
 #                             QT_QTGUI_LIBRARY_RELEASE
@@ -140,7 +152,7 @@
 #                             QT_QTMAIN_LIBRARY_RELEASE
 #                             QT_QTMAIN_LIBRARY_DEBUG
 #
-#The QtUiTools library:       QT_QTUITOOLS_LIBRARY
+# The QtUiTools library:      QT_QTUITOOLS_LIBRARY
 #                             QT_QTUITOOLS_LIBRARY_RELEASE
 #                             QT_QTUITOOLS_LIBRARY_DEBUG
 #  
@@ -180,7 +192,7 @@ FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake qmake-qt4 PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/bin"
   $ENV{QTDIR}/bin
-  )
+)
 
 SET(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
 
@@ -225,31 +237,31 @@ IF (QT_QMAKE_EXECUTABLE)
     IF (NOT QT_MIN_VERSION)
       SET(QT_MIN_VERSION "4.0.0")
     ENDIF (NOT QT_MIN_VERSION)
-    
+
     #now parse the parts of the user given version string into variables
     STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" req_qt_major_vers "${QT_MIN_VERSION}")
     IF (NOT req_qt_major_vers)
       MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", expected e.g. \"4.0.1\"")
     ENDIF (NOT req_qt_major_vers)
-    
+
     # now parse the parts of the user given version string into variables
     STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_qt_major_vers "${QT_MIN_VERSION}")
     STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_qt_minor_vers "${QT_MIN_VERSION}")
     STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
-    
+
     IF (NOT req_qt_major_vers EQUAL 4)
       MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", major version 4 is required, e.g. \"4.0.1\"")
     ENDIF (NOT req_qt_major_vers EQUAL 4)
-    
+
     # and now the version string given by qmake
     STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" found_qt_major_vers "${QTVERSION}")
     STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+.*" "\\1" found_qt_minor_vers "${QTVERSION}")
     STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" found_qt_patch_vers "${QTVERSION}")
-    
+
     # compute an overall version number which can be compared at once
     MATH(EXPR req_vers "${req_qt_major_vers}*10000 + ${req_qt_minor_vers}*100 + ${req_qt_patch_vers}")
     MATH(EXPR found_vers "${found_qt_major_vers}*10000 + ${found_qt_minor_vers}*100 + ${found_qt_patch_vers}")
-    
+
     IF (found_vers LESS req_vers)
       SET(QT4_QMAKE_FOUND FALSE)
       SET(QT4_INSTALLED_VERSION_TOO_OLD TRUE)
@@ -497,6 +509,23 @@ IF (QT4_QMAKE_FOUND)
     NO_DEFAULT_PATH
     )
 
+  # Set QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR
+  FIND_PATH(QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR QDesignerComponents
+    PATHS
+    ${QT_INCLUDE_DIR}/QtDesigner
+    ${QT_HEADERS_DIR}/QtDesigner
+    NO_DEFAULT_PATH
+    )
+
+
+  # Set QT_QTDBUS_INCLUDE_DIR
+  FIND_PATH(QT_QTDBUS_INCLUDE_DIR QtDBus
+    PATHS
+    ${QT_INCLUDE_DIR}/QtDBus
+    ${QT_HEADERS_DIR}/QtDBus
+    NO_DEFAULT_PATH
+    )
+
   # Make variables changeble to the advanced user
   MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_INCLUDE_DIR QT_QT_INCLUDE_DIR QT_DOC_DIR)
 
@@ -553,6 +582,13 @@ IF (QT4_QMAKE_FOUND)
   FIND_LIBRARY(QT_QTTEST_LIBRARY_RELEASE NAMES QtTest QtTest4 PATHS ${QT_LIBRARY_DIR}                      NO_DEFAULT_PATH)
   FIND_LIBRARY(QT_QTTEST_LIBRARY_DEBUG   NAMES QtTest_debug QtTest_debug4 QtTestd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
 
+  # Set QT_QTDBUS_LIBRARY
+  # This was introduced with Qt 4.2, where also the naming scheme for debug libs was changed
+  # So does any of the debug lib names listed here actually exist ?
+  FIND_LIBRARY(QT_QTDBUS_LIBRARY_RELEASE NAMES QtDBus QtDBus4 PATHS ${QT_LIBRARY_DIR}                       NO_DEFAULT_PATH)
+  FIND_LIBRARY(QT_QTDBUS_LIBRARY_DEBUG   NAMES QtDBus_debug QtDBus_debug4 QtDBusd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
+
+
   MARK_AS_ADVANCED(QT_QT3SUPPORT_LIBRARY QT_QTGUI_LIBRARY )
 
   IF( NOT QT_QTCORE_LIBRARY_DEBUG AND NOT QT_QTCORE_LIBRARY_RELEASE )
@@ -568,6 +604,10 @@ IF (QT4_QMAKE_FOUND)
   # Set QT_QTDESIGNER_LIBRARY
   FIND_LIBRARY(QT_QTDESIGNER_LIBRARY_RELEASE NAMES QtDesigner QtDesigner4 PATHS ${QT_LIBRARY_DIR}        NO_DEFAULT_PATH)
   FIND_LIBRARY(QT_QTDESIGNER_LIBRARY_DEBUG   NAMES QtDesigner_debug QtDesignerd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
+
+  # Set QT_QTDESIGNERCOMPONENTS_LIBRARY
+  FIND_LIBRARY(QT_QTDESIGNERCOMPONENTS_LIBRARY_RELEASE NAMES QtDesignerComponents QtDesignerComponents4 PATHS ${QT_LIBRARY_DIR}        NO_DEFAULT_PATH)
+  FIND_LIBRARY(QT_QTDESIGNERCOMPONENTS_LIBRARY_DEBUG   NAMES QtDesigner_debug QtDesignerd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
 
   # Set QT_QTMAIN_LIBRARY
   IF(WIN32)
@@ -639,9 +679,7 @@ IF (QT4_QMAKE_FOUND)
   _QT4_ADJUST_LIB_VARS(QT3SUPPORT)
   _QT4_ADJUST_LIB_VARS(QTASSISTANT)
   _QT4_ADJUST_LIB_VARS(QTDESIGNER)
-  IF(Q_WS_X11)
-    _QT4_ADJUST_LIB_VARS(QTMOTIF)
-  ENDIF(Q_WS_X11)
+  _QT4_ADJUST_LIB_VARS(QTDESIGNERCOMPONENTS)
   _QT4_ADJUST_LIB_VARS(QTNETWORK)
   _QT4_ADJUST_LIB_VARS(QTNSPLUGIN)
   _QT4_ADJUST_LIB_VARS(QTOPENGL)
@@ -650,7 +688,13 @@ IF (QT4_QMAKE_FOUND)
   _QT4_ADJUST_LIB_VARS(QTSVG)
   _QT4_ADJUST_LIB_VARS(QTUITOOLS)
   _QT4_ADJUST_LIB_VARS(QTTEST)
-
+  _QT4_ADJUST_LIB_VARS(QTDBUS)
+  
+  
+  # platform dependent libraries
+  IF(Q_WS_X11)
+    _QT4_ADJUST_LIB_VARS(QTMOTIF)
+  ENDIF(Q_WS_X11)
 
 
   #######################################
