@@ -42,13 +42,15 @@ public:
 protected:
   void PrintFindStuff();
   void ExpandPaths(std::vector<std::string> userPaths);
+  // add to the SearchPaths
+  void AddPaths(std::vector<std::string>& paths);
   void AddFrameWorkPaths();
   void AddAppBundlePaths();
   void AddEnvironmentVairables();
   void AddCMakeVairables();
   void AddSystemEnvironmentVairables();
   void AddCMakeSystemVariables();
-  void ExpandRegistryAndCleanPath();
+  void ExpandRegistryAndCleanPath(std::vector<std::string>& paths);
   // see if the VariableName is already set in the cache,
   // also copy the documentation from the cache to VariableDocumentation
   // if it has documentation in the cache

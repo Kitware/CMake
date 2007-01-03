@@ -46,7 +46,7 @@ FIND_PATH(RUBY_INCLUDE_PATH
   /usr/lib/ruby/1.8/i586-linux-gnu/ )
 
 FIND_LIBRARY(RUBY_LIBRARY
-  NAMES ruby
+  NAMES ruby ruby1.8
   PATHS ${RUBY_POSSIBLE_LIB_PATH}
   )
 

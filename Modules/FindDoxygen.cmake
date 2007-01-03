@@ -23,6 +23,13 @@
 SET(TEMP_DOXYGEN_SAVE_CMAKE_FIND_APPBUNDLE ${CMAKE_FIND_APPBUNDLE})
 # Disable the App-bundle detection feature
 SET(CMAKE_FIND_APPBUNDLE "NEVER")
+# For backwards compatibility support
+# DOXYGEN_FIND_QUIETLY, but it should have been
+# Doxygen_FIND_QUIETLY.  
+IF(Doxygen_FIND_QUIETLY)
+  SET(DOXYGEN_FIND_QUIETLY TRUE)
+ENDIF(Doxygen_FIND_QUIETLY)
+
 IF (NOT DOXYGEN_FIND_QUIETLY)
   MESSAGE(STATUS "Looking for doxygen...")
 ENDIF (NOT DOXYGEN_FIND_QUIETLY)

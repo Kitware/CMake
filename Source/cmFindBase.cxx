@@ -444,14 +444,13 @@ void cmFindBase::ExpandPaths(std::vector<std::string> userPaths)
       this->AddFrameWorkPaths();
       }
     }
+  std::vector<std::string> paths;
   // add the paths specified in the FIND_* call 
   for(unsigned int i =0; i < userPaths.size(); ++i)
     {
-    this->SearchPaths.push_back(userPaths[i]);
+    paths.push_back(userPaths[i]);
     }
-
-  // clean things up
-  this->ExpandRegistryAndCleanPath();
+  this->AddPaths(paths);
 }
 
 void cmFindBase::AddEnvironmentVairables()
@@ -459,16 +458,17 @@ void cmFindBase::AddEnvironmentVairables()
   std::string var = "CMAKE_";
   var += this->CMakePathName;
   var += "_PATH";
-  cmSystemTools::GetPath(this->SearchPaths, var.c_str());
+  std::vector<std::string> paths;
+  cmSystemTools::GetPath(paths, var.c_str());
   if(this->SearchAppBundleLast)
     {
-    cmSystemTools::GetPath(this->SearchPaths, "CMAKE_APPBUNDLE_PATH");
+    cmSystemTools::GetPath(paths, "CMAKE_APPBUNDLE_PATH");
     }
   if(this->SearchFrameworkLast)
     {
-    cmSystemTools::GetPath(this->SearchPaths, "CMAKE_FRAMEWORK_PATH");
+    cmSystemTools::GetPath(paths, "CMAKE_FRAMEWORK_PATH");
     }
-
+   this->AddPaths(paths);
 }
 
 void cmFindBase::AddFrameWorkPaths()
@@ -477,10 +477,11 @@ void cmFindBase::AddFrameWorkPaths()
     {
     return;
     }
+  std::vector<std::string> paths;
   // first environment variables
   if(!this->NoCMakeEnvironmentPath)
     {
-    cmSystemTools::GetPath(this->SearchPaths, "CMAKE_FRAMEWORK_PATH");
+    cmSystemTools::GetPath(paths, "CMAKE_FRAMEWORK_PATH");
     }
   // add cmake variables
   if(!this->NoCMakePath)
@@ -488,7 +489,7 @@ void cmFindBase::AddFrameWorkPaths()
     if(const char* path = 
        this->Makefile->GetDefinition("CMAKE_FRAMEWORK_PATH"))
       {
-      cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+      cmSystemTools::ExpandListArgument(path, paths);
       }
     }
   // AddCMakeSystemVariables
@@ -497,9 +498,20 @@ void cmFindBase::AddFrameWorkPaths()
      if(const char* path = 
         this->Makefile->GetDefinition("CMAKE_SYSTEM_FRAMEWORK_PATH"))
        {
-       cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+       cmSystemTools::ExpandListArgument(path, paths);
        }
      }
+   this->AddPaths(paths);
+}
+
+void cmFindBase::AddPaths(std::vector<std::string> & paths)
+{
+  // add suffixes and clean up paths
+  this->ExpandRegistryAndCleanPath(paths);
+  // add the paths to the search paths
+  this->SearchPaths.insert(this->SearchPaths.end(),
+                           paths.begin(),
+                           paths.end());
 }
 
 void cmFindBase::AddAppBundlePaths()
@@ -508,10 +520,11 @@ void cmFindBase::AddAppBundlePaths()
     {
     return;
     }
+  std::vector<std::string> paths;
   // first environment variables
   if(!this->NoCMakeEnvironmentPath)
     {
-    cmSystemTools::GetPath(this->SearchPaths, "CMAKE_APPBUNDLE_PATH");
+    cmSystemTools::GetPath(paths, "CMAKE_APPBUNDLE_PATH");
     }
   // add cmake variables
   if(!this->NoCMakePath)
@@ -519,7 +532,7 @@ void cmFindBase::AddAppBundlePaths()
     if(const char* path = 
        this->Makefile->GetDefinition("CMAKE_APPBUNDLE_PATH"))
       {
-      cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+      cmSystemTools::ExpandListArgument(path, paths);
       }
     }
   // AddCMakeSystemVariables
@@ -528,9 +541,10 @@ void cmFindBase::AddAppBundlePaths()
      if(const char* path = 
         this->Makefile->GetDefinition("CMAKE_SYSTEM_APPBUNDLE_PATH"))
        {
-       cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+       cmSystemTools::ExpandListArgument(path, paths);
        }
      }
+   this->AddPaths(paths);
 }
 
 void cmFindBase::AddCMakeVairables()
@@ -538,16 +552,17 @@ void cmFindBase::AddCMakeVairables()
   std::string var = "CMAKE_";
   var += this->CMakePathName;
   var += "_PATH";
+  std::vector<std::string> paths;
   if(const char* path = this->Makefile->GetDefinition(var.c_str()))
     {
-    cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+    cmSystemTools::ExpandListArgument(path, paths);
     } 
   if(this->SearchAppBundleLast)
     {
     if(const char* path = 
        this->Makefile->GetDefinition("CMAKE_APPBUNDLE_PATH"))
       {
-      cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+      cmSystemTools::ExpandListArgument(path, paths);
       }
     }
   if(this->SearchFrameworkLast)
@@ -555,20 +570,23 @@ void cmFindBase::AddCMakeVairables()
     if(const char* path = 
        this->Makefile->GetDefinition("CMAKE_FRAMEWORK_PATH"))
       {
-      cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+      cmSystemTools::ExpandListArgument(path, paths);
       }
     }
+  this->AddPaths(paths);
 }
 
 void cmFindBase::AddSystemEnvironmentVairables()
 {
   // Add LIB or INCLUDE
+  std::vector<std::string> paths;
   if(this->EnvironmentPath.size())
     {
-    cmSystemTools::GetPath(this->SearchPaths, this->EnvironmentPath.c_str());
+    cmSystemTools::GetPath(paths, this->EnvironmentPath.c_str());
     }
   // Add PATH 
-  cmSystemTools::GetPath(this->SearchPaths);
+  cmSystemTools::GetPath(paths);
+  this->AddPaths(paths);
 }
 
 void cmFindBase::AddCMakeSystemVariables()
@@ -576,16 +594,17 @@ void cmFindBase::AddCMakeSystemVariables()
   std::string var = "CMAKE_SYSTEM_";
   var += this->CMakePathName;
   var += "_PATH";
+  std::vector<std::string> paths;
   if(const char* path = this->Makefile->GetDefinition(var.c_str()))
     {
-    cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+    cmSystemTools::ExpandListArgument(path, paths);
     }  
   if(this->SearchAppBundleLast)
     {
     if(const char* path = 
        this->Makefile->GetDefinition("CMAKE_SYSTEM_APPBUNDLE_PATH"))
       {
-      cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+      cmSystemTools::ExpandListArgument(path, paths);
       }
     }
   if(this->SearchFrameworkLast)
@@ -593,23 +612,28 @@ void cmFindBase::AddCMakeSystemVariables()
     if(const char* path = 
        this->Makefile->GetDefinition("CMAKE_SYSTEM_FRAMEWORK_PATH"))
       {
-      cmSystemTools::ExpandListArgument(path, this->SearchPaths);
+      cmSystemTools::ExpandListArgument(path, paths);
       }
     }
+  this->AddPaths(paths);
 }
 
-void cmFindBase::ExpandRegistryAndCleanPath()
+void cmFindBase::ExpandRegistryAndCleanPath(std::vector<std::string>& paths)
 {
   std::vector<std::string> finalPath;
   std::vector<std::string>::iterator i;
-  for(i = this->SearchPaths.begin();
-      i != this->SearchPaths.end(); ++i)
+  // glob and expand registry stuff from paths and put
+  // into finalPath
+  for(i = paths.begin();
+      i != paths.end(); ++i)
     {
     cmSystemTools::ExpandRegistryValues(*i);
     cmSystemTools::GlobDirs(i->c_str(), finalPath);
     }
-  this->SearchPaths.clear();
-  // convert all paths to unix slashes
+  // clear the path
+  paths.clear();
+  // convert all paths to unix slashes and add search path suffixes
+  // if there are any
   for(i = finalPath.begin();
       i != finalPath.end(); ++i)
     {
@@ -623,7 +647,7 @@ void cmFindBase::ExpandRegistryAndCleanPath()
       std::string p = *i + std::string("/") + *j;
       // add to all paths because the search path may be modified 
       // later with lib being replaced for lib64 which may exist
-        this->SearchPaths.push_back(p);
+      paths.push_back(p);
         }
       }
   // now put the path without the path suffixes in the SearchPaths
@@ -632,7 +656,7 @@ void cmFindBase::ExpandRegistryAndCleanPath()
     {
     // put all search paths in because it may later be replaced
     // by lib64 stuff fixes bug 4009
-      this->SearchPaths.push_back(*i);
+    paths.push_back(*i);
       }
 }
 

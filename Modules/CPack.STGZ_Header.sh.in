@@ -58,7 +58,7 @@ for a in "$@CPACK_AT_SIGN@"; do
   fi
 done
 
-if [ "x${cpack_include_subdir}x" != "xx" -o "x${cpack_skip_license}x" == "xTRUEx" ]
+if [ "x${cpack_include_subdir}x" != "xx" -o "x${cpack_skip_license}x" = "xTRUEx" ]
 then
   interactive=FALSE
 fi
@@ -73,7 +73,7 @@ fi
 
 echo "The archive will be extracted to: ${toplevel}"
 
-if [ "x${interactive}x" == "xTRUEx" ]
+if [ "x${interactive}x" = "xTRUEx" ]
 then
   echo ""
   echo "If you want to stop extracting, please press <ctrl-C>."
@@ -95,7 +95,7 @@ ____cpack__here_doc____
     esac
   fi
 
-  if [ "x${cpack_include_subdir}x" == "xx" ]
+  if [ "x${cpack_include_subdir}x" = "xx" ]
   then
     echo "By default the @CPACK_PACKAGE_NAME@ will be installed in:"
     echo "  \"${toplevel}/@CPACK_PACKAGE_FILE_NAME@\""
@@ -110,7 +110,7 @@ ____cpack__here_doc____
   fi
 fi
 
-if [ "x${cpack_include_subdir}x" == "xTRUEx" ]
+if [ "x${cpack_include_subdir}x" = "xTRUEx" ]
 then
   toplevel="${toplevel}/@CPACK_PACKAGE_FILE_NAME@"
   mkdir -p "${toplevel}"

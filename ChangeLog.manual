@@ -1,4 +1,17 @@
 Changes in CMake 2.4.6
+
+* Remove svn test in ctestctest3 
+
+* Fix for FIND_* order and framworks with PREFIX usage.
+
+* Fix for FindDoxygen and quiet mode.
+
+* Find JavaVM as well as jvm
+
+* Look for ruby1.8 and ruby
+
+* Fix for cpack .tgz.sh and dash
+
 * Fix for finding custom commands from a full path with CMAKE_CFG_INTDIR.
 
 * Fix for Borland make and custom commands that do nothing
