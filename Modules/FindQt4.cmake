@@ -34,7 +34,7 @@
 #  
 #  QT_FOUND         If false, don't try to use Qt.
 #  QT4_FOUND        If false, don't try to use Qt 4.
-#                      
+#
 #  QT_QTCORE_FOUND        True if QtCore was found.
 #  QT_QTGUI_FOUND         True if QtGui was found.
 #  QT_QT3SUPPORT_FOUND    True if Qt3Support was found.
@@ -149,6 +149,8 @@
 #  QT_UIC_EXECUTABLE          Where to find the uic tool.
 #  QT_UIC3_EXECUTABLE         Where to find the uic3 tool.
 #  QT_RCC_EXECUTABLE          Where to find the rcc tool
+#  QT_DBUSCPP2XML_EXECUTABLE  Where to find the qdbuscpp2xml tool.
+#  QT_DBUSXML2CPP_EXECUTABLE  Where to find the qdbusxml2cpp tool.
 #  
 #  QT_DOC_DIR                 Path to "doc" of Qt4
 #  QT_MKSPECS_DIR             Path to "mkspecs" of Qt4
@@ -288,18 +290,18 @@ IF (QT4_QMAKE_FOUND)
   
   # ask qmake for the binary dir
   IF (NOT QT_BINARY_DIR)
-    EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
-      ARGS "-query QT_INSTALL_BINS"
-      OUTPUT_VARIABLE qt_bins )
-    SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "")
+     EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
+        ARGS "-query QT_INSTALL_BINS"
+        OUTPUT_VARIABLE qt_bins )
+     SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "")
   ENDIF (NOT QT_BINARY_DIR)
 
   # ask qmake for the include dir
   IF (NOT QT_HEADERS_DIR)
-    EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
-      ARGS "-query QT_INSTALL_HEADERS" 
-      OUTPUT_VARIABLE qt_headers )
-    SET(QT_HEADERS_DIR ${qt_headers} CACHE INTERNAL "")
+      EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
+        ARGS "-query QT_INSTALL_HEADERS" 
+        OUTPUT_VARIABLE qt_headers )
+      SET(QT_HEADERS_DIR ${qt_headers} CACHE INTERNAL "")
   ENDIF(NOT QT_HEADERS_DIR)
 
 
@@ -369,10 +371,10 @@ IF (QT4_QMAKE_FOUND)
   CHECK_SYMBOL_EXISTS(Q_WS_WIN "QtCore/qglobal.h" Q_WS_WIN)
 
   IF (QT_QTCOPY_REQUIRED)
-    CHECK_SYMBOL_EXISTS(QT_IS_QTCOPY "QtCore/qglobal.h" QT_KDE_QT_COPY)
-    IF (NOT QT_IS_QTCOPY)
-      MESSAGE(FATAL_ERROR "qt-copy is required, but hasn't been found")
-    ENDIF (NOT QT_IS_QTCOPY)
+     CHECK_SYMBOL_EXISTS(QT_IS_QTCOPY "QtCore/qglobal.h" QT_KDE_QT_COPY)
+     IF (NOT QT_IS_QTCOPY)
+        MESSAGE(FATAL_ERROR "qt-copy is required, but hasn't been found")
+     ENDIF (NOT QT_IS_QTCOPY)
   ENDIF (QT_QTCOPY_REQUIRED)
 
   # Restore CMAKE_REQUIRED_INCLUDES variable
@@ -685,12 +687,24 @@ IF (QT4_QMAKE_FOUND)
     NO_DEFAULT_PATH
     )
 
+  FIND_PROGRAM(QT_DBUSCPP2XML_EXECUTABLE 
+    NAMES qdbuscpp2xml
+    PATHS ${QT_BINARY_DIR}
+    NO_DEFAULT_PATH
+    )
+
+  FIND_PROGRAM(QT_DBUSXML2CPP_EXECUTABLE 
+    NAMES qdbusxml2cpp
+    PATHS ${QT_BINARY_DIR}
+    NO_DEFAULT_PATH
+    )
+
   IF (QT_MOC_EXECUTABLE)
-    SET(QT_WRAP_CPP "YES")
+     SET(QT_WRAP_CPP "YES")
   ENDIF (QT_MOC_EXECUTABLE)
 
   IF (QT_UIC_EXECUTABLE)
-    SET(QT_WRAP_UI "YES")
+     SET(QT_WRAP_UI "YES")
   ENDIF (QT_UIC_EXECUTABLE)
 
 
@@ -704,12 +718,12 @@ IF (QT4_QMAKE_FOUND)
   ######################################
 
   MACRO (QT4_GET_MOC_INC_DIRS _moc_INC_DIRS)
-    SET(${_moc_INC_DIRS})
-    GET_DIRECTORY_PROPERTY(_inc_DIRS INCLUDE_DIRECTORIES)
+     SET(${_moc_INC_DIRS})
+     GET_DIRECTORY_PROPERTY(_inc_DIRS INCLUDE_DIRECTORIES)
 
-    FOREACH(_current ${_inc_DIRS})
-      SET(${_moc_INC_DIRS} ${${_moc_INC_DIRS}} "-I" ${_current})
-    ENDFOREACH(_current ${_inc_DIRS})
+     FOREACH(_current ${_inc_DIRS})
+        SET(${_moc_INC_DIRS} ${${_moc_INC_DIRS}} "-I" ${_current})
+     ENDFOREACH(_current ${_inc_DIRS})
   ENDMACRO(QT4_GET_MOC_INC_DIRS)
 
 
