@@ -196,17 +196,20 @@ FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake qmake-qt4 PATHS
 
 SET(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
 
-##  macro for asking qmake to process pro files
+#  macro for asking qmake to process pro files
 MACRO(QT_QUERY_QMAKE outvar invar)
   FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake/tmp.pro
     "message(CMAKE_MESSAGE<$$${invar}>)")
+
   EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
     WORKING_DIRECTORY  
     ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake
     OUTPUT_VARIABLE _qmake_query_output
     ERROR_VARIABLE _qmake_query_output )
+
   FILE(REMOVE_RECURSE 
     "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake")
+
   STRING(REGEX REPLACE ".*CMAKE_MESSAGE<([^>]*).*" "\\1" ${outvar} "${_qmake_query_output}")
 ENDMACRO(QT_QUERY_QMAKE)
 
