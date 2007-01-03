@@ -627,7 +627,7 @@ IF (QT4_QMAKE_FOUND)
   ############################################
 
   MACRO (_QT4_ADJUST_LIB_VARS basename)
-    IF (QT_${basename}_INCLUDE_DIR)
+    IF (QT_${basename}_LIBRARY_RELEASE OR QT_${basename}_LIBRARY_DEBUG)
 
       # if only the release version was found, set the debug variable also to the release version
       IF (QT_${basename}_LIBRARY_RELEASE AND NOT QT_${basename}_LIBRARY_DEBUG)
@@ -642,6 +642,7 @@ IF (QT4_QMAKE_FOUND)
         SET(QT_${basename}_LIBRARY         ${QT_${basename}_LIBRARY_DEBUG})
         SET(QT_${basename}_LIBRARIES       ${QT_${basename}_LIBRARY_DEBUG})
       ENDIF (QT_${basename}_LIBRARY_DEBUG AND NOT QT_${basename}_LIBRARY_RELEASE)
+
       IF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
         # if the generator supports configuration types then set
         # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
@@ -661,22 +662,20 @@ IF (QT4_QMAKE_FOUND)
         SET(QT_${basename}_FOUND 1)
       ENDIF (QT_${basename}_LIBRARY)
 
+    ENDIF (QT_${basename}_LIBRARY_RELEASE OR QT_${basename}_LIBRARY_DEBUG)
+
+    IF (QT_${basename}_INCLUDE_DIR)
       #add the include directory to QT_INCLUDES
       SET(QT_INCLUDES ${QT_INCLUDES} "${QT_${basename}_INCLUDE_DIR}")
-    ENDIF (QT_${basename}_INCLUDE_DIR )
+    ENDIF (QT_${basename}_INCLUDE_DIR)
 
     # Make variables changeble to the advanced user
     MARK_AS_ADVANCED(QT_${basename}_LIBRARY QT_${basename}_LIBRARY_RELEASE QT_${basename}_LIBRARY_DEBUG QT_${basename}_INCLUDE_DIR)
   ENDMACRO (_QT4_ADJUST_LIB_VARS)
 
-  IF(WIN32)
-    # there is no include for qtmain but adjust macro needs it set
-    SET(QT_QTMAIN_INCLUDE_DIR 1)
-    _QT4_ADJUST_LIB_VARS(QTMAIN)
-    SET(QT_QTMAIN_INCLUDE_DIR )
-  ENDIF(WIN32)
 
-
+  # Set QT_xyz_LIBRARY variable and add 
+  # library include path to QT_INCLUDES
   _QT4_ADJUST_LIB_VARS(QTCORE)
   _QT4_ADJUST_LIB_VARS(QTGUI)
   _QT4_ADJUST_LIB_VARS(QT3SUPPORT)
@@ -698,7 +697,10 @@ IF (QT4_QMAKE_FOUND)
   IF(Q_WS_X11)
     _QT4_ADJUST_LIB_VARS(QTMOTIF)
   ENDIF(Q_WS_X11)
-
+  IF(WIN32)
+    _QT4_ADJUST_LIB_VARS(QTMAIN)
+  ENDIF(WIN32)
+  
 
   #######################################
   #
