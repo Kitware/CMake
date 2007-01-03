@@ -31,7 +31,30 @@
 #  macro QT4_ADD_RESOURCE(outfiles inputfile ... )
 #  macro QT4_AUTOMOC(inputfile ... )
 #  macro QT4_GENERATE_MOC(inputfile outputfile )
-#  
+#
+#  macro QT4_ADD_DBUS_INTERFACE(outfiles interface basename)
+#        create a the interface header and implementation files with the 
+#        given basename from the given interface xml file and add it to 
+#        the list of sources
+#
+#  macro QT4_ADD_DBUS_INTERFACES(outfiles inputfile ... )
+#        create the interface header and implementation files 
+#        for all listed interface xml files
+#        the name will be automatically determined from the name of the xml file
+#
+#  macro QT4_ADD_DBUS_ADAPTOR(outfiles xmlfile parentheader parentclassname [basename] )
+#        create a dbus adaptor (header and implementation file) from the xml file
+#        describing the interface, and add it to the list of sources. The adaptor
+#        forwards the calls to a parent class, defined in parentheader and named
+#        parentclassname. The name of the generated files will be
+#        <basename>adaptor.{cpp,h} where basename is the basename of the xml file.
+#
+#  macro QT4_GENERATE_DBUS_INTERFACE( header [interfacename] )
+#        generate the xml interface file from the given header.
+#        If the optional argument interfacename is omitted, the name of the 
+#        interface file is constructed from the basename of the header with
+#        the suffix .xml appended.
+#
 #  QT_FOUND         If false, don't try to use Qt.
 #  QT4_FOUND        If false, don't try to use Qt 4.
 #
@@ -859,50 +882,135 @@ IF (QT4_QMAKE_FOUND)
 
   ENDMACRO (QT4_ADD_RESOURCES)
 
+  MACRO(QT4_ADD_DBUS_INTERFACE _sources _interface _basename)
+    GET_FILENAME_COMPONENT(_infile ${_interface} ABSOLUTE)
+    SET(_header ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.h)
+    SET(_impl   ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.cpp)
+    SET(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.moc)
+  
+    ADD_CUSTOM_COMMAND(OUTPUT ${_impl} ${_header}
+        COMMAND ${QT_DBUSXML2CPP_EXECUTABLE} -m -p ${_basename} ${_infile}
+        DEPENDS ${_infile})
+  
+    SET_SOURCE_FILES_PROPERTIES(${_impl} PROPERTIES SKIP_AUTOMOC TRUE)
+    
+    QT4_GENERATE_MOC(${_header} ${_moc})
+  
+    SET(${_sources} ${${_sources}} ${_impl} ${_header} ${_moc})
+    MACRO_ADD_FILE_DEPENDENCIES(${_impl} ${_moc})
+  
+  ENDMACRO(QT4_ADD_DBUS_INTERFACE)
+  
+  
+  MACRO(QT4_ADD_DBUS_INTERFACES _sources)
+     FOREACH (_current_FILE ${ARGN})
+        GET_FILENAME_COMPONENT(_infile ${_current_FILE} ABSOLUTE)
+  
+  # get the part before the ".xml" suffix
+        STRING(REGEX REPLACE "(.*[/\\.])?([^\\.]+)\\.xml" "\\2" _basename ${_current_FILE})
+        STRING(TOLOWER ${_basename} _basename)
+  
+        QT4_ADD_DBUS_INTERFACE(${_sources} ${_infile} ${_basename}interface)
+     ENDFOREACH (_current_FILE)
+  ENDMACRO(QT4_ADD_DBUS_INTERFACES)
+  
+  
+  MACRO(QT4_GENERATE_DBUS_INTERFACE _header) # _customName )
+    SET(_customName "${ARGV1}")
+    GET_FILENAME_COMPONENT(_in_file ${_header} ABSOLUTE)
+    GET_FILENAME_COMPONENT(_basename ${_header} NAME_WE)
+    
+    IF (_customName)
+      SET(_target ${CMAKE_CURRENT_BINARY_DIR}/${_customName})
+    ELSE (_customName)
+      SET(_target ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.xml)
+    ENDIF (_customName)
+  
+    ADD_CUSTOM_COMMAND(OUTPUT ${_target}
+        COMMAND ${QT_DBUSCPP2XML_EXECUTABLE} ${_in_file} > ${_target}
+        DEPENDS ${_in_file}
+    )
+  ENDMACRO(QT4_GENERATE_DBUS_INTERFACE)
+  
+  
+  MACRO(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optionalBasename )
+    GET_FILENAME_COMPONENT(_infile ${_xml_file} ABSOLUTE)
+    
+    SET(_optionalBasename "${ARGV4}")
+    IF (_optionalBasename)
+       SET(_basename ${_optionalBasename} )
+    ELSE (_optionalBasename)
+       STRING(REGEX REPLACE "(.*[/\\.])?([^\\.]+)\\.xml" "\\2adaptor" _basename ${_infile})
+       STRING(TOLOWER ${_basename} _basename)
+    ENDIF (_optionalBasename)
 
-  MACRO(QT4_AUTOMOC)
-    QT4_GET_MOC_INC_DIRS(_moc_INCS)
+    SET(_optionalClassName "${ARGV5}")
+    SET(_header ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.h)
+    SET(_impl   ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.cpp)
+    SET(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.moc)
 
-    SET(_matching_FILES )
-    FOREACH (_current_FILE ${ARGN})
+    IF(_optionalClassName)
+       ADD_CUSTOM_COMMAND(OUTPUT ${_impl} ${_header}
+          COMMAND ${QT_DBUSXML2CPP_EXECUTABLE} -m -a ${_basename} -c ${_optionalClassName} -i ${_include} -l ${_parentClass} ${_infile}
+          DEPENDS ${_infile}
+        )
+    ELSE(_optionalClassName)
+       ADD_CUSTOM_COMMAND(OUTPUT ${_impl} ${_header}
+          COMMAND ${QT_DBUSXML2CPP_EXECUTABLE} -m -a ${_basename} -i ${_include} -l ${_parentClass} ${_infile}
+          DEPENDS ${_infile}
+        )
+    ENDIF(_optionalClassName)
 
-      GET_FILENAME_COMPONENT(_abs_FILE ${_current_FILE} ABSOLUTE)
-      # if "SKIP_AUTOMOC" is set to true, we will not handle this file here.
-      # here. this is required to make bouic work correctly:
-      # we need to add generated .cpp files to the sources (to compile them),
-      # but we cannot let automoc handle them, as the .cpp files don't exist yet when
-      # cmake is run for the very first time on them -> however the .cpp files might
-      # exist at a later run. at that time we need to skip them, so that we don't add two
-      # different rules for the same moc file
-      GET_SOURCE_FILE_PROPERTY(_skip ${_abs_FILE} SKIP_AUTOMOC)
+    QT4_GENERATE_MOC(${_header} ${_moc})
+    SET_SOURCE_FILES_PROPERTIES(${_impl} PROPERTIES SKIP_AUTOMOC TRUE)
+    MACRO_ADD_FILE_DEPENDENCIES(${_impl} ${_moc})
 
-      IF ( NOT _skip AND EXISTS ${_abs_FILE} )
+    SET(${_sources} ${${_sources}} ${_impl} ${_header} ${_moc})
+  ENDMACRO(QT4_ADD_DBUS_ADAPTOR)
 
-        FILE(READ ${_abs_FILE} _contents)
+   MACRO(QT4_AUTOMOC)
+      QT4_GET_MOC_INC_DIRS(_moc_INCS)
 
-        GET_FILENAME_COMPONENT(_abs_PATH ${_abs_FILE} PATH)
+      SET(_matching_FILES )
+      FOREACH (_current_FILE ${ARGN})
 
-        STRING(REGEX MATCHALL "#include +[^ ]+\\.moc[\">]" _match "${_contents}")
-        IF(_match)
-          FOREACH (_current_MOC_INC ${_match})
-            STRING(REGEX MATCH "[^ <\"]+\\.moc" _current_MOC "${_current_MOC_INC}")
+         GET_FILENAME_COMPONENT(_abs_FILE ${_current_FILE} ABSOLUTE)
+         # if "SKIP_AUTOMOC" is set to true, we will not handle this file here.
+         # here. this is required to make bouic work correctly:
+         # we need to add generated .cpp files to the sources (to compile them),
+         # but we cannot let automoc handle them, as the .cpp files don't exist yet when
+         # cmake is run for the very first time on them -> however the .cpp files might
+         # exist at a later run. at that time we need to skip them, so that we don't add two
+         # different rules for the same moc file
+         GET_SOURCE_FILE_PROPERTY(_skip ${_abs_FILE} SKIP_AUTOMOC)
 
-            GET_filename_component(_basename ${_current_MOC} NAME_WE)
-            # SET(_header ${CMAKE_CURRENT_SOURCE_DIR}/${_basename}.h)
-            SET(_header ${_abs_PATH}/${_basename}.h)
-            SET(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_current_MOC})
-            ADD_CUSTOM_COMMAND(OUTPUT ${_moc}
-              COMMAND ${QT_MOC_EXECUTABLE}
-              ARGS ${_moc_INCS} ${_header} -o ${_moc}
-              DEPENDS ${_header}
-              )
+         IF ( NOT _skip AND EXISTS ${_abs_FILE} )
 
-            MACRO_ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
-          ENDFOREACH (_current_MOC_INC)
-        ENDIF(_match)
-      ENDIF ( NOT _skip AND EXISTS ${_abs_FILE} )
-    ENDFOREACH (_current_FILE)
-  ENDMACRO(QT4_AUTOMOC)
+            FILE(READ ${_abs_FILE} _contents)
+
+            GET_FILENAME_COMPONENT(_abs_PATH ${_abs_FILE} PATH)
+
+            STRING(REGEX MATCHALL "#include +[^ ]+\\.moc[\">]" _match "${_contents}")
+            IF(_match)
+               FOREACH (_current_MOC_INC ${_match})
+                  STRING(REGEX MATCH "[^ <\"]+\\.moc" _current_MOC "${_current_MOC_INC}")
+
+                  GET_filename_component(_basename ${_current_MOC} NAME_WE)
+   #               SET(_header ${CMAKE_CURRENT_SOURCE_DIR}/${_basename}.h)
+                  SET(_header ${_abs_PATH}/${_basename}.h)
+                  SET(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_current_MOC})
+                  ADD_CUSTOM_COMMAND(OUTPUT ${_moc}
+                     COMMAND ${QT_MOC_EXECUTABLE}
+                     ARGS ${_moc_INCS} ${_header} -o ${_moc}
+                     DEPENDS ${_header}
+                  )
+
+                  MACRO_ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
+               ENDFOREACH (_current_MOC_INC)
+            ENDIF(_match)
+         ENDIF ( NOT _skip AND EXISTS ${_abs_FILE} )
+      ENDFOREACH (_current_FILE)
+   ENDMACRO(QT4_AUTOMOC)
 
 
 
