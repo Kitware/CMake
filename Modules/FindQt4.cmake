@@ -775,17 +775,19 @@ IF (QT4_QMAKE_FOUND)
 
 
   MACRO (QT4_GENERATE_MOC infile outfile )
-    # get include dirs
-    QT4_GET_MOC_INC_DIRS(moc_includes)
+  # get include dirs
+     QT4_GET_MOC_INC_DIRS(moc_includes)
 
-    GET_FILENAME_COMPONENT(infile ${infile} ABSOLUTE)
+     GET_FILENAME_COMPONENT(abs_infile ${infile} ABSOLUTE)
 
-    ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
-      COMMAND ${QT_MOC_EXECUTABLE}
-      ARGS ${moc_includes} -o ${outfile} ${infile}
-      DEPENDS ${infile})
+     ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
+        COMMAND ${QT_MOC_EXECUTABLE}
+        ARGS ${moc_includes} -o ${outfile} ${abs_infile}
+        DEPENDS ${abs_infile})
 
-    MACRO_ADD_FILE_DEPENDENCIES(${infile} ${outfile})
+     SET_SOURCE_FILES_PROPERTIES(${outfile} PROPERTIES SKIP_AUTOMOC TRUE)  # dont run automoc on this file
+
+     MACRO_ADD_FILE_DEPENDENCIES(${abs_infile} ${outfile})
   ENDMACRO (QT4_GENERATE_MOC)
 
 
