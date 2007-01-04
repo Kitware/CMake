@@ -19,7 +19,7 @@
 #include "cmake.h"
 
 // define STRICT to get checking of all set and get property calls
-//#define STRICT 
+//#define CMAKE_STRICT 
 
 cmProperty *cmPropertyMap::GetOrCreateProperty(const char *name)
 {
@@ -44,7 +44,7 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
     return;
     }
 
-#ifdef STRICT
+#ifdef CMAKE_STRICT
   if (!this->CMakeInstance)
     {
     cmSystemTools::Error("CMakeInstance not set on a property map!"); 
@@ -97,7 +97,7 @@ const char *cmPropertyMap
     }
 
   // has the property been defined?
-#ifdef STRICT
+#ifdef CMAKE_STRICT
   if (!this->CMakeInstance)
     {
     cmSystemTools::Error("CMakeInstance not set on a property map!"); 
