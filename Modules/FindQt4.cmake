@@ -22,6 +22,7 @@
 #                    QT_USE_QTSVG
 #                    QT_USE_QTTEST
 #                    QT_USE_QTUITOOLS
+#                    QT_USE_QTDBUS
 #
 # All the libraries required are stored in a variable called QT_LIBRARIES.  
 # Add this variable to your TARGET_LINK_LIBRARIES.
