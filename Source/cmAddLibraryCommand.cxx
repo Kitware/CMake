@@ -38,8 +38,8 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
   
   // If the second argument is "SHARED" or "STATIC", then it controls
   // the type of library.  Otherwise, it is treated as a source or
-  // source list name.
-  if(s != args.end())
+  // source list name. There man be two keyword arguments, check for them
+  while ( s != args.end() )
     {
     std::string libType = *s;
     if(libType == "STATIC")
@@ -61,6 +61,10 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
       {
       ++s;
       in_all = false;
+      }
+    else
+      {
+      break;
       }
     }
 
