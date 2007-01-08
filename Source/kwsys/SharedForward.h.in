@@ -21,10 +21,17 @@
   shared libraries that will run from any install directory.  Typical
   usage:
 
+  #if defined(CMAKE_INTDIR)
+  # define CONFIG_DIR_PRE CMAKE_INTDIR "/"
+  # define CONFIG_DIR_POST "/" CMAKE_INTDIR
+  #else
+  # define CONFIG_DIR_PRE ""
+  # define CONFIG_DIR_POST ""
+  #endif
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_DIR_BUILD "/path/to/foo-build/bin"
-  #define @KWSYS_NAMESPACE@_SHARED_FORWARD_PATH_BUILD "."
+  #define @KWSYS_NAMESPACE@_SHARED_FORWARD_PATH_BUILD "." CONFIG_DIR_POST
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_PATH_INSTALL "../lib/foo-1.2"
-  #define @KWSYS_NAMESPACE@_SHARED_FORWARD_EXE_BUILD "foo-real"
+  #define @KWSYS_NAMESPACE@_SHARED_FORWARD_EXE_BUILD CONFIG_DIR_PRE "foo-real"
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_EXE_INSTALL "../lib/foo-1.2/foo-real"
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_OPTION_COMMAND "--command"
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_OPTION_PRINT "--print"
@@ -41,21 +48,19 @@
   Specify search and executable paths relative to the forwarding
   executable location or as full paths.  Include no trailing slash.
   In the case of a multi-configuration build, when CMAKE_INTDIR is
-  defined, the build-tree paths should be specified relative to the
-  directory above the executable (the one containing the
-  per-configuration subdirectory specified by CMAKE_INTDIR).
+  defined, the DIR_BUILD setting should point at the directory above
+  the executable (the one containing the per-configuration
+  subdirectory specified by CMAKE_INTDIR).  Then PATH_BUILD entries
+  and EXE_BUILD should be specified relative to this location and use
+  CMAKE_INTDIR as necessary.  In the above example imagine appending
+  the PATH_BUILD or EXE_BUILD setting to the DIR_BUILD setting.  The
+  result should form a valid path with per-configuration subdirectory.
 
   Additional paths may be specified in the PATH_BUILD and PATH_INSTALL
-  variables by using comma-separated strings.  Paths pointing at build
-  trees should contain CMAKE_INTDIR as necessary.  For example:
+  variables by using comma-separated strings.    For example:
 
-  #if defined(CMAKE_INTDIR)
-  # define CONFIG_DIR "/" CMAKE_INTDIR
-  #else
-  # define CONFIG_DIR ""
-  #endif
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_PATH_BUILD \
-          "." CONFIG_DIR, "/path/to/bar-build" CONFIG_DIR
+          "." CONFIG_DIR_POST, "/path/to/bar-build" CONFIG_DIR_POST
   #define @KWSYS_NAMESPACE@_SHARED_FORWARD_PATH_INSTALL \
           "../lib/foo-1.2", "../lib/bar-4.5"
 
