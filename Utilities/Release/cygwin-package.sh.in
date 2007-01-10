@@ -65,8 +65,6 @@ install()
   make install DESTDIR="${INSTALL_DIR}" &&
   mkdir -p ${INSTALL_DIR}${PREFIX}/share/doc/Cygwin &&
   mkdir -p ${INSTALL_DIR}${PREFIX}/share/doc/${PKG}-${VER} &&
-  cp ${SOURCE_DIR}/CMake.pdf     ${INSTALL_DIR}${PREFIX}/share/doc/${PKG}-${VER} &&
-  cp ${SOURCE_DIR}/CMake.rtf     ${INSTALL_DIR}${PREFIX}/share/doc/${PKG}-${VER} &&
   cp ${SOURCE_DIR}/CYGWIN-PATCHES/cmake.README \
      ${INSTALL_DIR}${PREFIX}/share/doc/Cygwin/${FULLPKG}.README &&
   touch ${INSTALL_DIR}${PREFIX}/share/doc/${PKG}-${VER}/MANIFEST &&
