@@ -22,12 +22,17 @@ else
     echo \$DISPLAY > "$TMP/display"
 fi
 __END_OF_GETDISPLAY_SCRIPT__
+chmod +x "$TMP/getdisplay.sh"
 rm -f $TMP/display
 open-x11 $TMP/getdisplay.sh || \
 open -a XDarwin $TMP/getdisplay.sh || \
 echo ":0" > $TMP/display
 
-while [ "$?" == "0" -a ! -f $TMP/display ]; do sleep 1; done
+while [ "$?" == "0" -a ! -f $TMP/display ];
+do
+  #echo "Waiting for display $TMP/display"
+  sleep 1;
+done
 export "DISPLAY=`cat $TMP/display`"
 
 ps -wx -ocommand | grep -e '[X]11' > /dev/null || exit 11
