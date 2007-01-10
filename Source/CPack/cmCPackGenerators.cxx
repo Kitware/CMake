@@ -23,8 +23,13 @@
 #include "cmCPackTarCompressGenerator.h"
 #include "cmCPackZIPGenerator.h"
 #include "cmCPackSTGZGenerator.h"
-#include "cmCPackNSISGenerator.h"
-#include "cmCPackPackageMakerGenerator.h"
+#ifdef _WIN32
+#  include "cmCPackNSISGenerator.h"
+#endif
+#ifdef __APPLE__
+#  include "cmCPackPackageMakerGenerator.h"
+#  include "cmCPackOSXX11Generator.h"
+#endif
 
 #include "cmCPackLog.h"
 
@@ -46,8 +51,10 @@ cmCPackGenerators::cmCPackGenerators()
   this->RegisterGenerator("TZ", "Tar Compress compression",
     cmCPackTarCompressGenerator::CreateGenerator);
 #ifdef __APPLE__
-  this->RegisterGenerator("PackageMaker", "Mac OSX Package Maker compression",
+  this->RegisterGenerator("PackageMaker", "Mac OSX Package Maker installer",
     cmCPackPackageMakerGenerator::CreateGenerator);
+  this->RegisterGenerator("OSXX11", "Mac OSX X11 bundle",
+    cmCPackOSXX11Generator::CreateGenerator);
 #endif
 }
 

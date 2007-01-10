@@ -286,15 +286,16 @@ TARGET_LINK_LIBRARIES(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_L
 #
 SET(CPACK_SRCS
   CPack/cmCPackGenerators.cxx
-  CPack/cmCPackSTGZGenerator.cxx
-  CPack/cmCPackTGZGenerator.cxx
-  CPack/cmCPackNSISGenerator.cxx
-  CPack/cmCPackPackageMakerGenerator.cxx
-  CPack/cmCPackZIPGenerator.cxx
-  CPack/cmCPackTarBZip2Generator.cxx
-  CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackGenericGenerator.cxx
   CPack/cmCPackLog.cxx
+  CPack/cmCPackNSISGenerator.cxx
+  CPack/cmCPackOSXX11Generator.cxx
+  CPack/cmCPackPackageMakerGenerator.cxx
+  CPack/cmCPackSTGZGenerator.cxx
+  CPack/cmCPackTGZGenerator.cxx
+  CPack/cmCPackTarBZip2Generator.cxx
+  CPack/cmCPackTarCompressGenerator.cxx
+  CPack/cmCPackZIPGenerator.cxx
   )
 # Build CPackLib
 ADD_LIBRARY(CPackLib ${CPACK_SRCS})
@@ -303,6 +304,10 @@ TARGET_LINK_LIBRARIES(CPackLib CMakeLib)
 IF(APPLE)
   ADD_EXECUTABLE(cmakexbuild cmakexbuild.cxx)
   TARGET_LINK_LIBRARIES(cmakexbuild CMakeLib)
+  ADD_EXECUTABLE(OSXScriptLauncher
+    MACOSX_BUNDLE CPack/OSXScriptLauncher.cxx)
+  TARGET_LINK_LIBRARIES(OSXScriptLauncher cmsys)
+  TARGET_LINK_LIBRARIES(OSXScriptLauncher "-framework Carbon")
 ENDIF(APPLE)
 
 # Build CMake executable

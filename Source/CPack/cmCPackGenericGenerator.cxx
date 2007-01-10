@@ -152,8 +152,10 @@ int cmCPackGenericGenerator::InstallProject()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Install projects" << std::endl);
   this->CleanTemporaryDirectory();
-  const char* tempInstallDirectory
+  std::string tempInstallDirectoryWithPostfix
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
+  tempInstallDirectoryWithPostfix += this->GetTemporaryInstallDirectoryPostfix();
+  const char* tempInstallDirectory = tempInstallDirectoryWithPostfix.c_str();
   int res = 1;
   if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory))
     {
@@ -965,17 +967,19 @@ bool cmCPackGenericGenerator::ConfigureString(const std::string& inString,
 
 //----------------------------------------------------------------------
 bool cmCPackGenericGenerator::ConfigureFile(const char* inName,
-  const char* outName)
+  const char* outName, bool copyOnly /* = false */)
 {
   return this->MakefileMap->ConfigureFile(inName, outName,
-    false, true, false) == 1;
+    copyOnly, true, false) == 1;
 }
 
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::CleanTemporaryDirectory()
 {
-  const char* tempInstallDirectory
+  std::string tempInstallDirectoryWithPostfix
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
+  tempInstallDirectoryWithPostfix += this->GetTemporaryInstallDirectoryPostfix();
+  const char* tempInstallDirectory = tempInstallDirectoryWithPostfix.c_str();
   if(cmsys::SystemTools::FileExists(tempInstallDirectory))
     {
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
