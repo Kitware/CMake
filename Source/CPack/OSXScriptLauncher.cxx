@@ -69,10 +69,12 @@ int main(int argc, char* argv[])
     return 1;
     }
 
-  OSErr err = noErr;
-
   //create file reference from file spec
-  if (err = FSpMakeFSRef(&fileSpec, &fileRef)) return err;
+  OSErr err = FSpMakeFSRef(&fileSpec, &fileRef);
+  if(err) 
+    {
+    return err;
+    }
 
   // and then convert the FSRef to a path
   if ( FSRefMakePath(&fileRef, path, MaximumPathLength) )
