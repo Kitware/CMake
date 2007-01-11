@@ -103,7 +103,8 @@ protected:
   virtual const char* GetTemporaryInstallDirectoryPostfix() { return ""; }
 
   virtual std::string FindTemplate(const char* name);
-  virtual bool ConfigureFile(const char* inName, const char* outName, bool copyOnly = false);
+  virtual bool ConfigureFile(const char* inName, const char* outName,
+    bool copyOnly = false);
   virtual bool ConfigureString(const std::string& input, std::string& output);
   virtual int InitializeInternal();
 

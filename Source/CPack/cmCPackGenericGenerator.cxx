@@ -154,7 +154,8 @@ int cmCPackGenericGenerator::InstallProject()
   this->CleanTemporaryDirectory();
   std::string tempInstallDirectoryWithPostfix
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
-  tempInstallDirectoryWithPostfix += this->GetTemporaryInstallDirectoryPostfix();
+  tempInstallDirectoryWithPostfix
+    += this->GetTemporaryInstallDirectoryPostfix();
   const char* tempInstallDirectory = tempInstallDirectoryWithPostfix.c_str();
   int res = 1;
   if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory))
