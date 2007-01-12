@@ -2829,6 +2829,19 @@ void SystemTools::SplitPath(const char* p,
     components.push_back(root);
     c += 2;
     }
+  else if(c[0] == '~')
+    {
+    const char* homepath = getenv("HOME");
+    if(homepath)
+      {
+      kwsys_stl::vector<kwsys_stl::string> home_components;
+      SystemTools::SplitPath(homepath, home_components);
+      components.insert(components.end(), 
+                        home_components.begin(), 
+                        home_components.end());
+      }
+    c += 1;
+    }
   else
     {
     // Relative path.
