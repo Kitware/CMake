@@ -366,6 +366,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
   {"GenerateManifest", "MANIFEST", "enable manifest generation", "TRUE"},
   {"LinkIncremental", "INCREMENTAL:NO", "link incremental", "1"},
   {"LinkIncremental", "INCREMENTAL:YES", "link incremental", "2"},
+  {"IgnoreDefaultLibraryNames", "NODEFAULTLIB:", "USER_VALUE", ""},
   {0,0,0,0 }
 };
 
@@ -625,6 +626,36 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   this->OutputBuildTool(fout, configName, libName, target);
   fout << "\t\t</Configuration>\n";
 }
+void cmLocalVisualStudio7Generator::ReplaceFlagSetMap(std::string& flags, 
+                                                      cmVS7FlagTable* flagTable,
+                                                      std::map<cmStdString, 
+                                                      cmStdString>& flagMap,
+                                                      std::string& option,
+                                                      std::string::size_type pos)
+{  
+  std::string value = flagTable->value;
+  if(strcmp(flagTable->comment, "USER_VALUE") == 0)
+    {
+    std::string::size_type len = flags.find(" ", pos);
+    if(len != flags.npos)
+      {
+      len -= option.size();
+      }
+    value = flags.substr(pos+option.size(), len);
+    std::string fullflag = option;
+    fullflag += value;
+    // remove everything
+    cmSystemTools::ReplaceString(flags, fullflag.c_str(), "");
+    }
+  else
+    {
+    cmSystemTools::ReplaceString(flags, option.c_str(), "");
+    }
+  // now put value into flag map
+  
+  flagMap[flagTable->IDEName] = value;
+}
+
 
 void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
   std::map<cmStdString, cmStdString>& flagMap,
@@ -639,21 +670,21 @@ void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
     // first do the - version
     option = "-";
     option += flagTable->commandFlag;
-    while(flags.find(option) != flags.npos)
+    std::string::size_type pos = flags.find(option);
+    while(pos != flags.npos)
       {
-      // replace the flag
-      cmSystemTools::ReplaceString(flags, option.c_str(), "");
-      // now put value into flag map
-      flagMap[flagTable->IDEName] = flagTable->value;
+      this->ReplaceFlagSetMap(flags, flagTable, flagMap, 
+                              option, pos);
+      pos = flags.find(option);
       }
     // now do the / version
     option[0] = '/';
-    while(flags.find(option) != flags.npos)
+    pos = flags.find(option);
+    while(pos != flags.npos)
       {
-      // replace the flag
-      cmSystemTools::ReplaceString(flags, option.c_str(), "");
-      // now put value into flag map
-      flagMap[flagTable->IDEName] = flagTable->value;
+      this->ReplaceFlagSetMap(flags, flagTable, flagMap,
+                              option, pos);
+      pos = flags.find(option);
       }
     // move to next flag
     flagTable++;
@@ -737,7 +768,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
   this->FillFlagMapFromCommandFlags
     (flagMap, &cmLocalVisualStudio7GeneratorLinkFlagTable[0],
      extraLinkOptions);
-
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:

@@ -65,6 +65,12 @@ public:
   void SetPlatformName(const char* n) { this->PlatformName = n;}
   virtual void ConfigureFinalPass();
 private:
+  void ReplaceFlagSetMap(std::string& flags, 
+                         cmVS7FlagTable* flagTable,
+                         std::map<cmStdString, 
+                         cmStdString>& flagMap, 
+                         std::string& option,
+                         std::string::size_type pos);
   void FillFlagMapFromCommandFlags(std::map<cmStdString, 
                                    cmStdString>& flagMap,
                                    cmVS7FlagTable* flagTable,
