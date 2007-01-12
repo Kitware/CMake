@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TOP_DIR=`cd \`echo "$0" | sed -n '/\//{s/\/[^\/]*$//;p;}'\`;pwd`
+TOP_DIR=`cd \`echo "$0" | sed -n '/\//{s/\/[^\/]*$//;p;}'\`;pwd|dos2unix`
 SELF_NAME=`basename "$0" .sh`
 PKG=`echo ${SELF_NAME} | sed -e 's/\-[^\-]*\-[^\-]*$//'`
 VER=`echo ${SELF_NAME} | sed -e 's/^[^\-]*\-//' -e 's/\-[^\-]*$//'`
