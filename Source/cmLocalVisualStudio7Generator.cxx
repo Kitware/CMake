@@ -627,11 +627,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\t\t</Configuration>\n";
 }
 void cmLocalVisualStudio7Generator::ReplaceFlagSetMap(std::string& flags, 
-                                                      cmVS7FlagTable* flagTable,
+                                                      cmVS7FlagTable* 
+                                                      flagTable,
                                                       std::map<cmStdString, 
                                                       cmStdString>& flagMap,
                                                       std::string& option,
-                                                      std::string::size_type pos)
+                                                      std::string::size_type 
+                                                      pos)
 {  
   std::string value = flagTable->value;
   if(strcmp(flagTable->comment, "USER_VALUE") == 0)
