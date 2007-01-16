@@ -55,6 +55,7 @@
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <pwd.h>
 #include <termios.h>
 #include <signal.h>    /* sigprocmask */
 #endif
@@ -1367,7 +1368,7 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
     {
     // if there is a tilda ~ then replace it with HOME
     pathCString = path.c_str();
-    if(*pathCString == '~')
+    if(pathCString[0] == '~' && (pathCString[1] == '/' || pathCString[1] == '\0'))
       {
       const char* homeEnv = SystemTools::GetEnv("HOME");
       if (homeEnv)
@@ -1375,6 +1376,18 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
         path.replace(0,1,homeEnv);
         }
       }
+#if !defined(_WIN32)
+    else if(pathCString[0] == '~')
+      {
+      kwsys_stl::string::size_type idx = path.find_first_of("/\0");
+      kwsys_stl::string user = path.substr(1, idx-1);
+      passwd* pw = getpwnam(user.c_str());
+      if(pw)
+        {
+        path.replace(0, idx, pw->pw_dir);
+        }
+      }
+#endif
     // remove trailing slash if the path is more than 
     // a single /
     pathCString = path.c_str();
@@ -2829,19 +2842,42 @@ void SystemTools::SplitPath(const char* p,
     components.push_back(root);
     c += 2;
     }
+#if !defined(_WIN32)
   else if(c[0] == '~')
     {
-    const char* homepath = getenv("HOME");
-    if(homepath)
+    int numChars = 1;
+    while(c[numChars] && c[numChars] != '/')
       {
-      kwsys_stl::vector<kwsys_stl::string> home_components;
-      SystemTools::SplitPath(homepath, home_components);
-      components.insert(components.end(), 
-                        home_components.begin(), 
-                        home_components.end());
+      numChars++;
       }
-    c += 1;
+    const char* homedir;
+    if(numChars == 1)
+      {
+      homedir = getenv("HOME");
+      }
+    else
+      {
+      char user[PATH_MAX];
+      strncpy(user, c+1, numChars-1);
+      user[numChars] = '\0';
+      passwd* pw = getpwnam(user);
+      if(p)
+        {
+        homedir = pw->pw_dir;
+        }
+      else
+        {
+        homedir = "";
+        }
+      }
+    kwsys_stl::vector<kwsys_stl::string> home_components;
+    SystemTools::SplitPath(homedir, home_components);
+    components.insert(components.end(), 
+                      home_components.begin(), 
+                      home_components.end());
+    c += numChars;
     }
+#endif
   else
     {
     // Relative path.
@@ -3312,6 +3348,12 @@ bool SystemTools::FileIsFullPath(const char* in_name)
   if(name.length() < 1)
     {
     return false;
+    }
+#endif
+#if !defined(_WIN32)
+  if(name[0] == '~')
+    {
+    return true;
     }
 #endif
   // On UNIX, the name must begin in a '/'.
