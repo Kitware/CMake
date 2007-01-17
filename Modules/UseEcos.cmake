@@ -53,7 +53,7 @@ MACRO(ECOS_ADD_INCLUDE_DIRECTORIES)
    ENDIF (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../ProjectSources.txt)
 
 #the ecos include directory
-   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/ecos/install/include/)
+   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/ecos/install/include/ ${CMAKE_CURRENT_BINARY_DIR}/ecos/install/include/)
 
 ENDMACRO(ECOS_ADD_INCLUDE_DIRECTORIES)
 
@@ -130,9 +130,14 @@ SET(ECOS_CONFIG_FILE ecos.ecc)
 #creates the dependancy from all source files on the ecos target.ld,
 #adds the command for compiling ecos and adds target.ld to the make_clean_files
 MACRO(ECOS_ADD_TARGET_LIB)
+# when building out-of-source, create the ecos/ subdir
+    IF(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/ecos)
+        FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ecos)
+    ENDIF(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/ecos)
+
 #sources depend on target.ld
     FOREACH (_current_FILE ${ARGN})
-      ADD_FILE_DEPENDENCIES(${_current_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/ecos/install/lib/target.ld)
+      ADD_FILE_DEPENDENCIES(${_current_FILE} ${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib/target.ld)
     ENDFOREACH (_current_FILE)
 
 #use a variable for the make_clean_files since later on even more files are added
@@ -141,19 +146,19 @@ MACRO(ECOS_ADD_TARGET_LIB)
       PROPERTIES
        ADDITIONAL_MAKE_CLEAN_FILES "${ECOS_ADD_MAKE_CLEAN_FILES}" )
 
-   ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ecos/install/lib/target.ld
+   ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib/target.ld
       COMMAND sh
       ARGS -c \"make -C ecos || exit -1\; if [ -e ecos/install/lib/target.ld ] \; then touch ecos/install/lib/target.ld\; fi\"
-      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ecos/makefile
+      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/ecos/makefile
    )
 
-   ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ecos/makefile
+   ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ecos/makefile
       COMMAND sh
-      ARGS -c \" cd ecos\; ${ECOSCONFIG_EXECUTABLE} --config=${ECOS_CONFIG_FILE} tree || exit -1\;\"
+      ARGS -c \" cd ${CMAKE_CURRENT_BINARY_DIR}/ecos\; ${ECOSCONFIG_EXECUTABLE} --config=${CMAKE_CURRENT_SOURCE_DIR}/ecos/${ECOS_CONFIG_FILE} tree || exit -1\;\"
       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ecos/${ECOS_CONFIG_FILE}
    )
 
-   ADD_CUSTOM_TARGET( ecos make -C ${CMAKE_CURRENT_SOURCE_DIR}/ecos/ DEPENDS  ${CMAKE_CURRENT_SOURCE_DIR}/ecos/makefile )
+   ADD_CUSTOM_TARGET( ecos make -C ${CMAKE_CURRENT_BINARY_DIR}/ecos/ DEPENDS  ${CMAKE_CURRENT_BINARY_DIR}/ecos/makefile )
 ENDMACRO(ECOS_ADD_TARGET_LIB)
 
 
@@ -176,8 +181,8 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
    ECOS_ADD_TARGET_LIB(${ARGN})
 
 #special link commands for ecos-executables
-   SET(CMAKE_CXX_LINK_EXECUTABLE  "<CMAKE_CXX_COMPILER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_SOURCE_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
-   SET(CMAKE_C_LINK_EXECUTABLE  "<CMAKE_C_COMPILER> <CMAKE_C_LINK_FLAGS> <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_SOURCE_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
+   SET(CMAKE_CXX_LINK_EXECUTABLE  "<CMAKE_CXX_COMPILER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
+   SET(CMAKE_C_LINK_EXECUTABLE  "<CMAKE_C_COMPILER> <CMAKE_C_LINK_FLAGS> <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
 
    ADD_EXECUTABLE(${_exe_NAME} ${ARGN})
    SET_TARGET_PROPERTIES(${_exe_NAME} PROPERTIES SUFFIX ".elf")
@@ -207,8 +212,8 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
    )
 
 #cd $1; ls -a  | grep --invert-match -e "\(.*CVS\)\|\(.*ecos\.ecc\)" | xargs rm -rf;  touch ecos.ecc
-   ADD_CUSTOM_TARGET(ecosclean sh -c \"cd ${CMAKE_CURRENT_SOURCE_DIR}/ecos\; ls | grep --invert-match -e \\\"\\\(.*CVS\\\)\\|\\\(.*ecos\\.ecc\\\)\\\" |xargs rm -rf\; touch ${ECOS_CONFIG_FILE} \")
-   ADD_CUSTOM_TARGET(normalclean ${CMAKE_MAKE_PROGRAM} clean -C ${CMAKE_CURRENT_SOURCE_DIR})
+   ADD_CUSTOM_TARGET(ecosclean sh -c \"cd ${CMAKE_CURRENT_BINARY_DIR}/ecos\; ls | grep --invert-match -e \\\"\\\(.*CVS\\\)\\|\\\(.*ecos\\.ecc\\\)\\\" |xargs rm -rf\; touch ${ECOS_CONFIG_FILE} \")
+   ADD_CUSTOM_TARGET(normalclean ${CMAKE_MAKE_PROGRAM} clean -C ${CMAKE_CURRENT_BINARY_DIR})
    ADD_DEPENDENCIES (ecosclean normalclean)
 
    ADD_DEPENDENCIES(ecosclean clean)
