@@ -12,13 +12,14 @@
 # It contains the following variables:
 # ECOS_DEFINITIONS
 # ECOSCONFIG_EXECUTABLE
+# ECOS_CONFIG_FILE               - defaults to ecos.ecc, if your eCos configuration file has a different name, adjust this variable
 # for internal use only:
 #  ECOS_ADD_TARGET_LIB
 
 INCLUDE(AddFileDependencies)
 
 
-#first check that ecosconfig is available
+# first check that ecosconfig is available
 FIND_PROGRAM(ECOSCONFIG_EXECUTABLE NAMES ecosconfig)
 IF(NOT ECOSCONFIG_EXECUTABLE)
    MESSAGE(SEND_ERROR "ecosconfig was not found. Either include it in the system path or set it manually using ccmake.")
@@ -26,13 +27,20 @@ ELSE(NOT ECOSCONFIG_EXECUTABLE)
    MESSAGE(STATUS "Found ecosconfig: ${ECOSCONFIG_EXECUTABLE}")
 ENDIF(NOT ECOSCONFIG_EXECUTABLE)
 
-#check that ECOS_REPOSITORY is set correctly
+# check that ECOS_REPOSITORY is set correctly
 IF (NOT EXISTS $ENV{ECOS_REPOSITORY}/ecos.db)
    MESSAGE(SEND_ERROR "The environment variable ECOS_REPOSITORY is not set correctly. Set it to the directory which contains the file ecos.db")
 ELSE (NOT EXISTS $ENV{ECOS_REPOSITORY}/ecos.db)
    MESSAGE(STATUS "ECOS_REPOSITORY is set to $ENV{ECOS_REPOSITORY}")
 ENDIF (NOT EXISTS $ENV{ECOS_REPOSITORY}/ecos.db)
 
+# check that tclsh (coming with TCL) is available, otherwise ecosconfig doesn't work
+FIND_PACKAGE(Tclsh)
+IF (NOT TCL_TCLSH)
+   MESSAGE(SEND_ERROR "The TCL tclsh was not found. Please install TCL, it is required for building eCos applications.")
+ELSE (NOT TCL_TCLSH)
+   MESSAGE(STATUS "tlcsh found: ${TCL_TCLSH}")
+ENDIF (NOT TCL_TCLSH)
 
 #add the globale include-diretories
 #usage: ECOS_ADD_INCLUDE_DIRECTORIES()
@@ -115,6 +123,10 @@ MACRO(ECOS_ADJUST_DIRECTORY _target_FILES )
    ENDFOREACH (_current_FILE)
 ENDMACRO(ECOS_ADJUST_DIRECTORY)
 
+# the default ecos config file name
+# maybe in the future also out-of-source builds may be possible
+SET(ECOS_CONFIG_FILE ecos.ecc)
+
 #creates the dependancy from all source files on the ecos target.ld,
 #adds the command for compiling ecos and adds target.ld to the make_clean_files
 MACRO(ECOS_ADD_TARGET_LIB)
@@ -137,8 +149,8 @@ MACRO(ECOS_ADD_TARGET_LIB)
 
    ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/ecos/makefile
       COMMAND sh
-      ARGS -c \" cd ecos\; ${ECOSCONFIG_EXECUTABLE} tree || exit -1\;\"
-      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ecos/ecos.ecc
+      ARGS -c \" cd ecos\; ${ECOSCONFIG_EXECUTABLE} --config=${ECOS_CONFIG_FILE} tree || exit -1\;\"
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ecos/${ECOS_CONFIG_FILE}
    )
 
    ADD_CUSTOM_TARGET( ecos make -C ${CMAKE_CURRENT_SOURCE_DIR}/ecos/ DEPENDS  ${CMAKE_CURRENT_SOURCE_DIR}/ecos/makefile )
@@ -194,8 +206,8 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
        ADDITIONAL_MAKE_CLEAN_FILES "${ECOS_ADD_MAKE_CLEAN_FILES}"
    )
 
-#cd $1; ls -a  | grep --invert-match -e "\(.*CVS\)\|\(.*ecos\.ecc\)\|\(.*\.cvsignore\)\|\(\.\.\?\)" | xargs rm -rf;  touch ecos.ecc
-   ADD_CUSTOM_TARGET(ecosclean sh -c \"cd ${CMAKE_CURRENT_SOURCE_DIR}/ecos\; ls -a | grep --invert-match -e \\\"\\\(.*CVS\\\)\\|\\\(.*ecos\\.ecc\\\)\\|\\\(.*\\.cvsignore\\\)\\|\\\(^\\.\\.\\?\\\)\\\" |xargs rm -rf\; touch ecos.ecc \")
+#cd $1; ls -a  | grep --invert-match -e "\(.*CVS\)\|\(.*ecos\.ecc\)" | xargs rm -rf;  touch ecos.ecc
+   ADD_CUSTOM_TARGET(ecosclean sh -c \"cd ${CMAKE_CURRENT_SOURCE_DIR}/ecos\; ls | grep --invert-match -e \\\"\\\(.*CVS\\\)\\|\\\(.*ecos\\.ecc\\\)\\\" |xargs rm -rf\; touch ${ECOS_CONFIG_FILE} \")
    ADD_CUSTOM_TARGET(normalclean ${CMAKE_MAKE_PROGRAM} clean -C ${CMAKE_CURRENT_SOURCE_DIR})
    ADD_DEPENDENCIES (ecosclean normalclean)
 
