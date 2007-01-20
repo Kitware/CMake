@@ -871,7 +871,7 @@ IF (QT4_QMAKE_FOUND)
       STRING(REGEX MATCHALL "<file[^<]*>" _RC_FILES "${_RC_FILE_CONTENTS}")
       SET(_RC_DEPENDS)
       FOREACH(_RC_FILE ${_RC_FILES})
-        STRING(REGEX REPLACE "^<file[^<]*>"" "" _RC_FILE "${_RC_FILE}")
+        STRING(REGEX REPLACE "^<file[^<]*>" "" _RC_FILE "${_RC_FILE}")
         SET(_RC_DEPENDS ${_RC_DEPENDS} "${rc_path}/${_RC_FILE}")
       ENDFOREACH(_RC_FILE)
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
