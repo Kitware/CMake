@@ -76,6 +76,12 @@ public:
       "input files to CMake.";
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmWriteFileCommand, cmCommand);
 };
 
