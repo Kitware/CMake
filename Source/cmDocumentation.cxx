@@ -1424,7 +1424,7 @@ void cmDocumentation::SetSection(const cmDocumentationEntry* header,
 }
 
 //----------------------------------------------------------------------------
-const char* cmDocumentation::GetNameString()
+const char* cmDocumentation::GetNameString() const
 {
   if(this->NameString.length() > 0)
     {
@@ -1437,7 +1437,7 @@ const char* cmDocumentation::GetNameString()
 }
 
 //----------------------------------------------------------------------------
-bool cmDocumentation::IsOption(const char* arg)
+bool cmDocumentation::IsOption(const char* arg) const
 {
   return ((arg[0] == '-') || (strcmp(arg, "/V") == 0) || 
           (strcmp(arg, "/?") == 0));

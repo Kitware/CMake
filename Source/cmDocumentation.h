@@ -155,8 +155,8 @@ private:
                   const cmDocumentationEntry* section,
                   const cmDocumentationEntry* footer,
                   std::vector<cmDocumentationEntry>&);
-  const char* GetNameString();
-  bool IsOption(const char* arg);
+  const char* GetNameString() const;
+  bool IsOption(const char* arg) const;
 
   std::string NameString;
   std::vector<cmDocumentationEntry> NameSection;
