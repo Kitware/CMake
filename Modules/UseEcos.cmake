@@ -116,7 +116,6 @@ MACRO(ECOS_ADJUST_DIRECTORY _target_FILES )
       ENDIF (NOT ${_abs_FILE} STREQUAL ${_current_FILE})
       LIST(APPEND ${_target_FILES} ${_abs_FILE})
    ENDFOREACH (_current_FILE)
-   LIST(APPEND ${_target_FILES} ${CMAKE_SOURCE_DIR}/firmware/common/utils/src/reent.c)
 ENDMACRO(ECOS_ADJUST_DIRECTORY)
 
 # the default ecos config file name
@@ -176,7 +175,7 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
 # special link commands for ecos-executables
    SET(CMAKE_CXX_LINK_EXECUTABLE  "<CMAKE_CXX_COMPILER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
    SET(CMAKE_C_LINK_EXECUTABLE    "<CMAKE_C_COMPILER>   <CMAKE_C_LINK_FLAGS>   <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
-# some strict compiler flags   
+# some strict compiler flags
    SET (CMAKE_C_FLAGS "-Wstrict-prototypes")
    SET (CMAKE_CXX_FLAGS "-Woverloaded-virtual -fno-rtti -Wctor-dtor-privacy -fno-strict-aliasing -fno-exceptions")
 
