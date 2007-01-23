@@ -1077,7 +1077,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
   const char* sysIncludeFlag = 0;
   if(repeatFlag)
     {
-    sysIncludeFlag = this->Makefile->GetSafeDefinition(sysFlagVar.c_str());
+    sysIncludeFlag = this->Makefile->GetDefinition(sysFlagVar.c_str());
     }
 
   bool flagUsed = false;
