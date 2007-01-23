@@ -16,9 +16,6 @@
 # for internal use only:
 #  ECOS_ADD_TARGET_LIB
 
-INCLUDE(AddFileDependencies)
-
-
 # first check that ecosconfig is available
 FIND_PROGRAM(ECOSCONFIG_EXECUTABLE NAMES ecosconfig)
 IF(NOT ECOSCONFIG_EXECUTABLE)
@@ -113,14 +110,13 @@ ENDMACRO (ECOS_USE_I386_ELF_TOOLS)
 #usage: ECOS_ADJUST_DIRECTORY(adjusted_SRCS ${my_srcs})
 MACRO(ECOS_ADJUST_DIRECTORY _target_FILES )
    FOREACH (_current_FILE ${ARGN})
-      IF (${_current_FILE} MATCHES "^/.+")  # don't adjust for absolute paths
-         SET(tmp ${_current_FILE})
-      ELSE (${_current_FILE} MATCHES "^/.+")
-         SET(tmp ${CMAKE_CURRENT_SOURCE_DIR}/../${_current_FILE})
-         GET_FILENAME_COMPONENT(tmp ${tmp} ABSOLUTE)
-      ENDIF (${_current_FILE} MATCHES "^/.+")
-      SET(${_target_FILES} ${${_target_FILES}} ${tmp})
+      GET_FILENAME_COMPONENT(_abs_FILE ${_current_FILE} ABSOLUTE)
+      IF (NOT ${_abs_FILE} STREQUAL ${_current_FILE})
+         GET_FILENAME_COMPONENT(_abs_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../${_current_FILE} ABSOLUTE)
+      ENDIF (NOT ${_abs_FILE} STREQUAL ${_current_FILE})
+      LIST(APPEND ${_target_FILES} ${_abs_FILE})
    ENDFOREACH (_current_FILE)
+   LIST(APPEND ${_target_FILES} ${CMAKE_SOURCE_DIR}/firmware/common/utils/src/reent.c)
 ENDMACRO(ECOS_ADJUST_DIRECTORY)
 
 # the default ecos config file name
@@ -128,7 +124,7 @@ ENDMACRO(ECOS_ADJUST_DIRECTORY)
 SET(ECOS_CONFIG_FILE ecos.ecc)
 
 #creates the dependancy from all source files on the ecos target.ld,
-#adds the command for compiling ecos and adds target.ld to the make_clean_files
+#adds the command for compiling ecos
 MACRO(ECOS_ADD_TARGET_LIB)
 # when building out-of-source, create the ecos/ subdir
     IF(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/ecos)
@@ -136,25 +132,20 @@ MACRO(ECOS_ADD_TARGET_LIB)
     ENDIF(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/ecos)
 
 #sources depend on target.ld
-    FOREACH (_current_FILE ${ARGN})
-      ADD_FILE_DEPENDENCIES(${_current_FILE} ${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib/target.ld)
-    ENDFOREACH (_current_FILE)
-
-#use a variable for the make_clean_files since later on even more files are added
-   SET(ECOS_ADD_MAKE_CLEAN_FILES ${ECOS_ADD_MAKE_CLEAN_FILES};ecos/install/lib/target.ld)
-   SET_DIRECTORY_PROPERTIES(
+   SET_SOURCE_FILES_PROPERTIES(
+      ${ARGN}
       PROPERTIES
-       ADDITIONAL_MAKE_CLEAN_FILES "${ECOS_ADD_MAKE_CLEAN_FILES}" )
+      OBJECT_DEPENDS
+      ${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib/target.ld
+   )
 
    ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib/target.ld
-      COMMAND sh
-      ARGS -c \"make -C ecos || exit -1\; if [ -e ecos/install/lib/target.ld ] \; then touch ecos/install/lib/target.ld\; fi\"
+      COMMAND sh -c \"make -C ${CMAKE_CURRENT_BINARY_DIR}/ecos || exit -1\; if [ -e ${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib/target.ld ] \; then touch ${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib/target.ld\; fi\"
       DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/ecos/makefile
    )
 
    ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ecos/makefile
-      COMMAND sh
-      ARGS -c \" cd ${CMAKE_CURRENT_BINARY_DIR}/ecos\; ${ECOSCONFIG_EXECUTABLE} --config=${CMAKE_CURRENT_SOURCE_DIR}/ecos/${ECOS_CONFIG_FILE} tree || exit -1\;\"
+      COMMAND sh -c \" cd ${CMAKE_CURRENT_BINARY_DIR}/ecos\; ${ECOSCONFIG_EXECUTABLE} --config=${CMAKE_CURRENT_SOURCE_DIR}/ecos/${ECOS_CONFIG_FILE} tree || exit -1\;\"
       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ecos/${ECOS_CONFIG_FILE}
    )
 
@@ -174,15 +165,20 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
    ADD_DEFINITIONS(-D__ECOS__=1 -D__ECOS=1)
    SET(ECOS_DEFINITIONS -Wall -Wno-long-long -pipe -fno-builtin)
 
-   SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes")
-   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Woverloaded-virtual -fno-rtti -Wctor-dtor-privacy -fno-strict-aliasing -fno-exceptions")
-
 #the executable depends on ecos target.ld
    ECOS_ADD_TARGET_LIB(${ARGN})
 
-#special link commands for ecos-executables
+# when using nmake makefiles, the custom buildtype supresses the default cl.exe flags
+# and the rules for creating objects are adjusted for gcc
+   SET(CMAKE_BUILD_TYPE CUSTOM_ECOS_BUILD)
+   SET(CMAKE_C_COMPILE_OBJECT     "<CMAKE_C_COMPILER>   <FLAGS> -o <OBJECT> -c <SOURCE>")
+   SET(CMAKE_CXX_COMPILE_OBJECT   "<CMAKE_CXX_COMPILER> <FLAGS> -o <OBJECT> -c <SOURCE>")
+# special link commands for ecos-executables
    SET(CMAKE_CXX_LINK_EXECUTABLE  "<CMAKE_CXX_COMPILER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
-   SET(CMAKE_C_LINK_EXECUTABLE  "<CMAKE_C_COMPILER> <CMAKE_C_LINK_FLAGS> <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
+   SET(CMAKE_C_LINK_EXECUTABLE    "<CMAKE_C_COMPILER>   <CMAKE_C_LINK_FLAGS>   <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
+# some strict compiler flags   
+   SET (CMAKE_C_FLAGS "-Wstrict-prototypes")
+   SET (CMAKE_CXX_FLAGS "-Woverloaded-virtual -fno-rtti -Wctor-dtor-privacy -fno-strict-aliasing -fno-exceptions")
 
    ADD_EXECUTABLE(${_exe_NAME} ${ARGN})
    SET_TARGET_PROPERTIES(${_exe_NAME} PROPERTIES SUFFIX ".elf")
@@ -192,7 +188,7 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
       TARGET ${_exe_NAME}
       POST_BUILD
       COMMAND ${ECOS_ARCH_PREFIX}objcopy
-      ARGS -O binary ${_exe_NAME}.elf ${_exe_NAME}.bin
+      ARGS -O binary ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.elf ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.bin
    )
 
 #and an srec file
@@ -200,15 +196,13 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
       TARGET ${_exe_NAME}
       POST_BUILD
       COMMAND ${ECOS_ARCH_PREFIX}objcopy
-      ARGS -O srec ${_exe_NAME}.elf ${_exe_NAME}.srec
+      ARGS -O srec ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.elf ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.srec
    )
 
-#add the created files to the make_clean_files
-   SET(ECOS_ADD_MAKE_CLEAN_FILES ${ECOS_ADD_MAKE_CLEAN_FILES};${_exe_NAME}.bin;${_exe_NAME}.srec;${_exe_NAME}.lst;)
-
+#add the created files to the clean-files
    SET_DIRECTORY_PROPERTIES(
       PROPERTIES
-       ADDITIONAL_MAKE_CLEAN_FILES "${ECOS_ADD_MAKE_CLEAN_FILES}"
+       ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.bin;${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.srec;${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst;"
    )
 
 #cd $1; ls -a  | grep --invert-match -e "\(.*CVS\)\|\(.*ecos\.ecc\)" | xargs rm -rf;  touch ecos.ecc
@@ -220,12 +214,12 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
 
 
    ADD_CUSTOM_TARGET( listing
-      COMMAND echo -e   \"\\n--- Symbols sorted by address ---\\n\" > ${_exe_NAME}.lst
-      COMMAND ${ECOS_ARCH_PREFIX}nm -S -C -n ${_exe_NAME}.elf >> ${_exe_NAME}.lst
-      COMMAND echo -e \"\\n--- Symbols sorted by size ---\\n\" >> ${_exe_NAME}.lst
-      COMMAND ${ECOS_ARCH_PREFIX}nm -S -C -r --size-sort ${_exe_NAME}.elf >> ${_exe_NAME}.lst
-      COMMAND echo -e \"\\n--- Full assembly listing ---\\n\" >> ${_exe_NAME}.lst
-      COMMAND ${ECOS_ARCH_PREFIX}objdump -S -x -d -C ${_exe_NAME}.elf >> ${_exe_NAME}.lst )
+      COMMAND echo -e   \"\\n--- Symbols sorted by address ---\\n\" > ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst
+      COMMAND ${ECOS_ARCH_PREFIX}nm -S -C -n ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.elf >> ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst
+      COMMAND echo -e \"\\n--- Symbols sorted by size ---\\n\" >> ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst
+      COMMAND ${ECOS_ARCH_PREFIX}nm -S -C -r --size-sort ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.elf >> ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst
+      COMMAND echo -e \"\\n--- Full assembly listing ---\\n\" >> ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst
+      COMMAND ${ECOS_ARCH_PREFIX}objdump -S -x -d -C ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.elf >> ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst )
 
 ENDMACRO(ECOS_ADD_EXECUTABLE)
 
