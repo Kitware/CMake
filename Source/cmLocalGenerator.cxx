@@ -1047,7 +1047,8 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
   flagVar += lang;
-  const char* includeFlag = this->Makefile->GetDefinition(flagVar.c_str());
+  const char* includeFlag = 
+    this->Makefile->GetRequiredDefinition(flagVar.c_str());
   flagVar = "CMAKE_INCLUDE_FLAG_SEP_";
   flagVar += lang;
   const char* sep = this->Makefile->GetDefinition(flagVar.c_str());
@@ -1076,7 +1077,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
   const char* sysIncludeFlag = 0;
   if(repeatFlag)
     {
-    sysIncludeFlag = this->Makefile->GetDefinition(sysFlagVar.c_str());
+    sysIncludeFlag = this->Makefile->GetSafeDefinition(sysFlagVar.c_str());
     }
 
   bool flagUsed = false;
