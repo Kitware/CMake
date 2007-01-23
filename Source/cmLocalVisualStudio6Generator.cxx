@@ -1076,10 +1076,6 @@ void cmLocalVisualStudio6Generator
 
   // Get extra linker options for this target type.
   std::string extraLinkOptions;
-  std::string extraLinkOptionsDebug;
-  std::string extraLinkOptionsRelease;
-  std::string extraLinkOptionsMinSizeRel;
-  std::string extraLinkOptionsRelWithDebInfo;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
     extraLinkOptions = 
@@ -1102,33 +1098,6 @@ void cmLocalVisualStudio6Generator
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
     }
-
-  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_DEBUG"))
-    {
-    extraLinkOptionsDebug += " ";
-    extraLinkOptionsDebug += targetLinkFlags;
-    }
-
-  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_RELEASE"))
-    {
-    extraLinkOptionsRelease += " ";
-    extraLinkOptionsRelease += targetLinkFlags;
-    }
-
-  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_MINSIZEREL"))
-    {
-    extraLinkOptionsMinSizeRel += " ";
-    extraLinkOptionsMinSizeRel += targetLinkFlags;
-    }
-
-  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_RELWITHDEBINFO"))
-    {
-    extraLinkOptionsRelWithDebInfo += " ";
-    extraLinkOptionsRelWithDebInfo += targetLinkFlags;
-    }
-
-
-
 
   // Get standard libraries for this language.
   if(target.GetType() >= cmTarget::EXECUTABLE && 
@@ -1202,13 +1171,13 @@ void cmLocalVisualStudio6Generator
      target.GetType() == cmTarget::SHARED_LIBRARY ||
      target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    this->ComputeLinkOptions(target, "Debug", extraLinkOptionsDebug,
+    this->ComputeLinkOptions(target, "Debug", extraLinkOptions,
                              optionsDebug);
-    this->ComputeLinkOptions(target, "Release", extraLinkOptionsRelease,
+    this->ComputeLinkOptions(target, "Release", extraLinkOptions,
                              optionsRelease);
-    this->ComputeLinkOptions(target, "MinSizeRel", extraLinkOptionsMinSizeRel,
+    this->ComputeLinkOptions(target, "MinSizeRel", extraLinkOptions,
                              optionsMinSizeRel);
-    this->ComputeLinkOptions(target, "RelWithDebInfo", extraLinkOptionsRelWithDebInfo,
+    this->ComputeLinkOptions(target, "RelWithDebInfo", extraLinkOptions,
                              optionsRelWithDebInfo);
     }
 
@@ -1372,18 +1341,41 @@ void cmLocalVisualStudio6Generator
       std::string flagVar = baseFlagVar + "_RELEASE";
       flagsRelease = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
-
+      if(const char* targetLinkFlags = 
+         target.GetProperty("LINK_FLAGS_RELEASE"))
+        {
+        flagsRelease += targetLinkFlags;
+        flagsRelease += " ";
+        }
       flagVar = baseFlagVar + "_MINSIZEREL";
       flagsMinSize = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
-
+      if(const char* targetLinkFlags = 
+         target.GetProperty("LINK_FLAGS_MINSIZEREL"))
+        {
+        flagsMinSize += targetLinkFlags;
+        flagsMinSize += " ";
+        }
+      
       flagVar = baseFlagVar + "_DEBUG";
       flagsDebug = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
+      if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_DEBUG"))
+        {
+        flagsDebug += targetLinkFlags;
+        flagsDebug += " ";
+        }
 
       flagVar = baseFlagVar + "_RELWITHDEBINFO";
       flagsDebugRel = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
+      if(const char* targetLinkFlags = 
+         target.GetProperty("LINK_FLAGS_RELWITHDEBINFO"))
+        {
+        flagsDebugRel += targetLinkFlags;
+        flagsDebugRel += " ";
+        }
+
       }
     
     // if unicode is not found, then add -D_MBCS
