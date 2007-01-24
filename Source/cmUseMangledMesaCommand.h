@@ -72,6 +72,12 @@ public:
       "being added to the include directory path earlier.";
     }
 
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
 protected:
   void CopyAndFullPathMesaHeader(const char* source,
                                  const char* outdir);
