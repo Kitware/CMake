@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Link libraries to all targets added later.";
+    return "Deprecated. Use the TARGET_LINK_LIBRARIES() command instead.";
     }
   
   /**
@@ -62,10 +62,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
+      "Link libraries to all targets added later.\n"
       "  LINK_LIBRARIES(library1 <debug | optimized> library2 ...)\n"
-      "This is an old CMake command for linking libraries.  Use "
-      "TARGET_LINK_LIBRARIES unless you have a good reason for every target "
-      "to link to the same set of libraries.\n"
       "Specify a list of libraries to be linked into "
       "any following targets (typically added with the ADD_EXECUTABLE "
       "or ADD_LIBRARY calls).  This command is passed "

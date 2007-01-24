@@ -60,7 +60,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Old directory creation command.  Use the FILE command.";
+    return "Deprecated. Use the FILE(MAKE_DIRECTORY ) command instead.";
     }
   
   /**
@@ -69,9 +69,6 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "This command has been superceded by the FILE(MAKE_DIRECTORY ...) "
-      "command.  "
-      "It is provided for compatibility with older CMake code.\n"
       "  MAKE_DIRECTORY(directory)\n"
       "Creates the specified directory.  Full paths should be given.  Any "
       "parent directories that do not exist will also be created.  Use with "

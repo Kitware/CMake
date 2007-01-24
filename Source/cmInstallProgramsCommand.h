@@ -52,7 +52,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Old installation command.  Use the INSTALL command.";
+    return "Deprecated. Use the INSTALL(PROGRAMS ) command instead.";
     }
   
   /**

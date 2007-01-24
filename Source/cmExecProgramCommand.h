@@ -60,8 +60,7 @@ public:
   virtual const char* GetTerseDocumentation() 
     {
     return 
-      "Run and executable program during the processing of the CMakeList.txt"
-      " file.";
+      "Deprecated.  Use the EXECUTE_PROCESS() command instead.";
     }
   
   /**
@@ -70,6 +69,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
+      "Run and executable program during the processing of the CMakeList.txt"
+      " file.\n"
       "  EXEC_PROGRAM(Executable [directory in which to run]\n"
       "               [ARGS <arguments to executable>]\n"
       "               [OUTPUT_VARIABLE <var>]\n"
@@ -83,8 +84,6 @@ public:
       "To capture the return value of the execution, provide a RETURN_VALUE. "
       "If OUTPUT_VARIABLE is specified, then no output will go to the "
       "stdout/stderr of the console running cmake.\n"
-      "The EXECUTE_PROCESS command is a newer more powerful version of "
-      "EXEC_PROGRAM, but the old command has been kept for compatibility."
       ;
     }
   

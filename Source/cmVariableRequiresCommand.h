@@ -50,7 +50,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Assert satisfaction of an option's required variables.";
+    return "Deprecated. Use the IF() command instead.";
     }
   
   /**
@@ -59,6 +59,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
+      "Assert satisfaction of an option's required variables.\n"
       "  VARIABLE_REQUIRES(TEST_VARIABLE RESULT_VARIABLE\n"
       "                    REQUIRED_VARIABLE1\n"
       "                    REQUIRED_VARIABLE2 ...)\n"

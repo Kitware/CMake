@@ -56,7 +56,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Old list item removal command.  Use the LIST command.";
+    return "Deprecated. Use the LIST(REMOVE_ITEM ) command instead.";
     }
   
   /**
@@ -65,8 +65,6 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "This command has been superceded by the LIST(REMOVE ...) command.  "
-      "It is provided for compatibility with older CMake code.\n"
       "  REMOVE(VAR VALUE VALUE ...)\n"
       "Removes VALUE from the variable VAR.  "
       "This is typically used to remove entries from a vector "

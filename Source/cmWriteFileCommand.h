@@ -55,7 +55,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Write a message to a file.";
+    return "Deprecated. Use the FILE(WRITE ) command instead.";
     }
   
   /**

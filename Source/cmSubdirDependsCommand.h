@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Legacy command.  Does nothing.";
+    return "Deprecated.  Does nothing.";
     }
   
   /**
