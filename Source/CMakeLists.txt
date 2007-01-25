@@ -175,8 +175,7 @@ SET(SRCS
 # Kdevelop only works on UNIX and not windows
 IF(UNIX)
   SET(SRCS ${SRCS}
-    cmGlobalKdevelopGenerator.cxx
-    cmLocalKdevelopGenerator.cxx)
+    cmGlobalKdevelopGenerator.cxx)
 ENDIF(UNIX)
 # XCode only works on apple
 IF(APPLE)
