@@ -1074,7 +1074,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
 //----------------------------------------------------------------------
 int cmCTest::RunTest(std::vector<const char*> argv,
                      std::string* output, int *retVal,
-                     std::ostream* log)
+                     std::ostream* log, double testTimeOut)
 {
   if(cmSystemTools::SameFile(argv[0], this->CTestSelf.c_str()) &&
      !this->ForceNewCTestProcess)
@@ -1087,6 +1087,14 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       {
       if(argv[i])
         {
+        // if this test has a test command make sure we pass the timeout in
+        if (strcmp(argv[i],"--test-command") == 0 && testTimeOut)
+          {
+          args.push_back("--test-timeout");
+          cmOStringStream msg;
+          msg << testTimeOut;
+          args.push_back(msg.str());
+          }
         args.push_back(argv[i]);
         }
       }
@@ -1127,6 +1135,12 @@ int cmCTest::RunTest(std::vector<const char*> argv,
   if (this->TimeOut && this->TimeOut < timeout)
     {
     timeout = this->TimeOut;
+    }
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "-- timeout set to "
+             << testTimeOut << std::endl);
+  if (testTimeOut && testTimeOut < timeout)
+    {
+    timeout = testTimeOut;
     }
   // always have at least 1 second if we got to here
   if (timeout <= 0)

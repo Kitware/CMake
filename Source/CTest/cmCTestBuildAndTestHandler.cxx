@@ -29,6 +29,7 @@ cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
   this->BuildTwoConfig         = false;
   this->BuildNoClean           = false;
   this->BuildNoCMake           = false;
+  this->Timeout = 0;
 }
 
 //----------------------------------------------------------------------
@@ -146,7 +147,6 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   cmSystemTools::SetErrorCallback(CMakeMessageCallback, &cmakeOutString);
   cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
   cmOStringStream out;
-  // What is this? double timeout = this->CTest->GetTimeOut();
 
   // if the generator and make program are not specified then it is an error
   if (!this->BuildGenerator.size() || !this->BuildMakeProgram.size())
@@ -217,7 +217,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     *outstring =  out.str();
     }
 
-  // if not test was specified then we are done
+  // if no test was specified then we are done
   if (!this->TestCommand.size())
     {
     return 0;
@@ -361,8 +361,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     out << this->TestCommandArgs[k] << " ";
     }
   out << "\n";
-  // What is this? this->TimeOut = timeout;
-  int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, 0);
+  int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, 0, 
+                                        this->Timeout);
   if(runTestRes != cmsysProcess_State_Exited || retval != 0)
     {
     out << "Failed to run test command: " << testCommand[0] << "\n";
@@ -431,6 +431,11 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
     {
     idx++;
     this->ExecutableDirectory = allArgs[idx];
+    }
+  if(currentArg.find("--test-timeout",0) == 0 && idx < allArgs.size() - 1)
+    {
+    idx++;
+    this->Timeout = atof(allArgs[idx].c_str());
     }
   if(currentArg.find("--build-generator",0) == 0 && idx < allArgs.size() - 1)
     {

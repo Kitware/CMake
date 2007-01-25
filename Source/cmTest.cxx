@@ -118,6 +118,15 @@ void cmTest::DefineProperties(cmake *cm)
      " regular expressions has to match, otherwise the test will fail.");
 
   cm->DefineProperty
+    ("TIMEOUT", cmProperty::TEST, 
+     "How many seconds to allow for this test.",
+     "This property if set will limit a test to nto take more than "
+     "the specified number of seconds to run. If it exceeds that the "
+     "test process will be killed and ctest will move to the next test. "
+     "This setting takes precedence over DART_TESTING_TIMEOUT and "
+     "CTEST_TESTING_TIMOUT.");
+
+  cm->DefineProperty
     ("WILL_FAIL", cmProperty::TEST, 
      "If set to true, this will invert the pass/fail flag of the test.",
      "This property can be used for tests that are expected to fail and "

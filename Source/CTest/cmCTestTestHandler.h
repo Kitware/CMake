@@ -85,6 +85,7 @@ public:
     std::map<cmStdString, cmStdString> Measurements;
     bool IsInBasedOnREOptions;
     bool WillFail;
+    double Timeout;
   };
 
   struct cmCTestTestResult
@@ -145,11 +146,18 @@ private:
   virtual void GenerateDartOutput(std::ostream& os);
 
   /**
-   * Run the test for a directory and any subdirectories
+   * Run the tests for a directory and any subdirectories
    */
   void ProcessDirectory(std::vector<cmStdString> &passed,
                         std::vector<cmStdString> &failed);
 
+  /**
+   *  Run one test
+   */
+  void ProcessOneTest(cmCTestTestProperties *props,
+                      std::vector<cmStdString> &passed,
+                      std::vector<cmStdString> &failed,
+                      int count, int tmsize);
 
   typedef std::vector<cmCTestTestProperties> ListOfTests;
   /**

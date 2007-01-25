@@ -232,7 +232,7 @@ public:
   //! Run command specialized for tests. Returns process status and retVal is
   // return value or exception.
   int RunTest(std::vector<const char*> args, std::string* output, int *retVal,
-    std::ostream* logfile);
+    std::ostream* logfile, double testTimeOut);
 
   /**
    * Execute handler and return its result. If the handler fails, it returns

@@ -75,6 +75,7 @@ protected:
   std::vector<std::string> TestCommandArgs;
   std::vector<std::string> BuildTargets;
   bool                     BuildNoCMake;
+  double                   Timeout;
 };
 
 #endif
