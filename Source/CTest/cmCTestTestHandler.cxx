@@ -932,7 +932,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       }
     
     // process this one test
-    this->ProcessOneTest(&(*it), passed, failed, cnt, tmsize);
+    this->ProcessOneTest(&(*it), passed, failed, cnt, 
+                         static_cast<int>(tmsize));
     }
 
   this->EndTest = this->CTest->CurrentTime();
