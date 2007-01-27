@@ -80,7 +80,7 @@ enum kwsysSystem_Shell_Flag_e
       Shell_Flag_Make.  */
   kwsysSystem_Shell_Flag_VSIDE              = (1<<1),
 
-  /** In a windows whell the argument is being passed to "echo".  */
+  /** In a windows shell the argument is being passed to "echo".  */
   kwsysSystem_Shell_Flag_EchoWindows        = (1<<2),
 
   /** The target shell is in a Watcom WMake makefile.  */
