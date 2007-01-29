@@ -1136,8 +1136,6 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     {
     timeout = this->TimeOut;
     }
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "-- timeout set to "
-             << testTimeOut << std::endl);
   if (testTimeOut && testTimeOut < timeout)
     {
     timeout = testTimeOut;
@@ -1148,7 +1146,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     timeout = 1;
     }
 
-  cmsysProcess_SetTimeout(cp, this->TimeOut);
+  cmsysProcess_SetTimeout(cp, timeout);
   cmsysProcess_Execute(cp);
 
   char* data;
