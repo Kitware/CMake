@@ -65,6 +65,8 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       = this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
     const char* cmakeBuildAdditionalFlags
       = this->Makefile->GetDefinition("CTEST_BUILD_FLAGS");
+    const char* cmakeBuildTarget
+      = this->Makefile->GetDefinition("CTEST_BUILD_TARGET");
     if ( cmakeGeneratorName && *cmakeGeneratorName &&
       cmakeProjectName && *cmakeProjectName )
       {
@@ -93,7 +95,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       std::string buildCommand
         = this->GlobalGenerator->GenerateBuildCommand(cmakeMakeProgram,
           cmakeProjectName,
-          cmakeBuildAdditionalFlags, 0, cmakeBuildConfiguration, true, false);
+          cmakeBuildAdditionalFlags, cmakeBuildTarget, cmakeBuildConfiguration, true, false);
       this->CTest->SetCTestConfiguration("MakeCommand", buildCommand.c_str());
       }
     else
