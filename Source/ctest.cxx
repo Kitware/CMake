@@ -148,7 +148,7 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "complete. Other options that affect this mode are --build-target "
    "--build-nocmake, --build-run-dir, "
    "--build-two-config, --build-exe-dir, --build-project,"
-   "--build-noclean, --build-options, --test-timeout"},
+   "--build-noclean, --build-options"},
   {"--build-target", "Specify a specific target to build.",
    "This option goes with the --build-and-test option, if left out the all "
    "target is built." },
@@ -168,7 +168,7 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
 
   {"--test-command", "The test to run with the --build-and-test option.", ""
   },
-  {"--test-timeout", "The time limit in seconds for --test-command.", ""
+  {"--test-timeout", "The time limit in seconds, internal use only.", ""
   },
   {"--tomorrow-tag", "Nightly or experimental starts with next day tag.",
    "This is useful if the build will not finish in one day." },

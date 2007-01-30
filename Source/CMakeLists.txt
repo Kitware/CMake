@@ -383,6 +383,13 @@ IF(BUILD_TESTING)
   OPTION(CMAKE_RUN_LONG_TESTS "Should the long tests be run (such as Bootstrap)." ON)
   MARK_AS_ADVANCED(CMAKE_RUN_LONG_TESTS)
 
+  IF (CMAKE_RUN_LONG_TESTS)
+    OPTION(CTEST_TEST_CTEST 
+      "Should the tests that run a full sub ctest process be run?" 
+      OFF)
+    MARK_AS_ADVANCED(CTEST_TEST_CTEST)
+  ENDIF (CMAKE_RUN_LONG_TESTS)
+    
   ADD_TEST(CommandLineTest ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/CommandLineTest"
@@ -1070,6 +1077,10 @@ IF(BUILD_TESTING)
     ADD_TEST(CTestTest3 ${CMAKE_CTEST_COMMAND}
       -S "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" -V
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest3/testOutput.log"
+      )
+    # these tests take a log time, make sure they have it
+    SET_TESTS_PROPERTIES ( CTestTest CTestTest2 CTestTest3 
+      PROPERTIES TIMEOUT 1500
       )
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
 

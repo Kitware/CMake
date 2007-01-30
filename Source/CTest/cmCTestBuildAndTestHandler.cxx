@@ -161,6 +161,10 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     return 1;
     }
 
+  // we need to honor the timeout specified, the timeout include cmake, build
+  // and test time
+  double clock_start = cmSystemTools::GetTime();
+
   // make sure the binary dir is there
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   out << "Internal cmake changing into directory: "
@@ -178,7 +182,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   if(!this->BuildNoCMake)
     {
-    // do the cmake step
+    // do the cmake step, no timeout here since it is not a sub process
     if (this->RunCMake(outstring,out,cmakeOutString,cwd,&cm))
       {
       return 1;
@@ -194,12 +198,27 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   for ( tarIt = this->BuildTargets.begin(); tarIt != this->BuildTargets.end();
     ++ tarIt )
     {
+    double remainingTime = 0;
+    if (this->Timeout)
+      {
+      remainingTime = this->Timeout - cmSystemTools::GetTime() + clock_start;
+      if (remainingTime <= 0)
+        {
+        if(outstring)
+          {
+          *outstring = "--build-and-test timeout exceeded. ";
+          }
+        return 1;
+        }
+      }
     std::string output;
     int retVal = cm.GetGlobalGenerator()->Build(
       this->SourceDir.c_str(), this->BinaryDir.c_str(),
       this->BuildProject.c_str(), tarIt->c_str(),
       &output, this->BuildMakeProgram.c_str(),
-      this->CTest->GetConfigType().c_str(),!this->BuildNoClean, false);
+      this->CTest->GetConfigType().c_str(),
+      !this->BuildNoClean, 
+      false, remainingTime);
 
     out << output;
     // if the build failed then return
@@ -361,8 +380,25 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     out << this->TestCommandArgs[k] << " ";
     }
   out << "\n";
+
+  // how much time is remaining
+    double remainingTime = 0;
+    if (this->Timeout)
+      {
+      remainingTime = this->Timeout - cmSystemTools::GetTime() + clock_start;
+      if (remainingTime <= 0)
+        {
+        if(outstring)
+          {
+          *outstring = "--build-and-test timeout exceeded. ";
+          }
+        return 1;
+        }
+      }
+  
   int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, 0, 
-                                        this->Timeout);
+                                        remainingTime);
+
   if(runTestRes != cmsysProcess_State_Exited || retval != 0)
     {
     out << "Failed to run test command: " << testCommand[0] << "\n";

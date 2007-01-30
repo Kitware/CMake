@@ -100,7 +100,8 @@ public:
                     const char *projectName, const char *targetName,
                     std::string *output, 
                     const char *makeProgram, const char *config,
-                    bool clean, bool fast);
+                    bool clean, bool fast,
+                    double timeout);
   virtual std::string GenerateBuildCommand
   (const char* makeProgram,
    const char *projectName, const char* additionalOptions, 
@@ -125,7 +126,7 @@ public:
   void AddInstallComponent(const char* component);
   void EnableInstallTarget();
   
-  static int s_TryCompileTimeout;
+  int TryCompileTimeout;
   
   bool GetForceUnixPaths() {return this->ForceUnixPaths;}
   bool GetToolSupportsColor() { return this->ToolSupportsColor; }

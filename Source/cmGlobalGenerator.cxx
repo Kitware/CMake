@@ -28,8 +28,6 @@
 
 #include <assert.h>
 
-int cmGlobalGenerator::s_TryCompileTimeout = 0;
-
 cmGlobalGenerator::cmGlobalGenerator()
 {
   // By default the .SYMBOLIC dependency is not needed on symbolic rules.
@@ -49,6 +47,9 @@ cmGlobalGenerator::cmGlobalGenerator()
 
   // Whether an install target is needed.
   this->InstallTargetEnabled = false;
+
+  // how long to let try compiles run
+  this->TryCompileTimeout = 0;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -808,7 +809,8 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
   const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   return this->Build(srcdir,bindir,projectName,
                      newTarget.c_str(),
-                     output,makeCommand.c_str(),config,false,true);
+                     output,makeCommand.c_str(),config,false,true, 
+                     this->TryCompileTimeout);
 }
 
 std::string cmGlobalGenerator
@@ -852,7 +854,8 @@ int cmGlobalGenerator::Build(
   std::string *output, 
   const char *makeCommandCSTR,
   const char *config,
-  bool clean, bool fast)
+  bool clean, bool fast,
+  double timeout)
 {
   *output += "\nTesting TryCompileWithoutMakefile\n";
   
@@ -863,7 +866,6 @@ int cmGlobalGenerator::Build(
   cmSystemTools::ChangeDirectory(bindir);
 
   int retVal;
-  int timeout = cmGlobalGenerator::s_TryCompileTimeout;
   bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
   cmSystemTools::SetRunCommandHideConsole(true);
 
