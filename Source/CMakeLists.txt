@@ -1079,9 +1079,11 @@ IF(BUILD_TESTING)
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest3/testOutput.log"
       )
     # these tests take a log time, make sure they have it
-    SET_TESTS_PROPERTIES ( CTestTest CTestTest2 CTestTest3 
-      PROPERTIES TIMEOUT 1500
-      )
+    IF(COMMAND SET_TESTS_PROPERTIES)
+      SET_TESTS_PROPERTIES ( CTestTest CTestTest2 CTestTest3 
+        PROPERTIES TIMEOUT 1500
+        )
+    ENDIF(COMMAND SET_TESTS_PROPERTIES)
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
 
   IF("${CMAKE_TEST_GENERATOR}" MATCHES Xcode)
