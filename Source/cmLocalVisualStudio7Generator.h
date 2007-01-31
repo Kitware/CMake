@@ -65,6 +65,8 @@ public:
   void SetPlatformName(const char* n) { this->PlatformName = n;}
   virtual void ConfigureFinalPass();
 private:
+  void ReadAndStoreExternalGUID(const char* name,
+                                const char* path);
   void ReplaceFlagSetMap(std::string& flags, 
                          cmVS7FlagTable* flagTable,
                          std::map<cmStdString, 

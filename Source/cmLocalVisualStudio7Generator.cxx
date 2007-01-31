@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmLocalVisualStudio7Generator.h"
+#include "cmXMLParser.h"
+#include <cm_expat.h>
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
@@ -1637,6 +1639,84 @@ std::string cmLocalVisualStudio7Generator
   return ret;
 }
 
+
+// This class is used to parse an existing vs 7 project
+// and extract the GUID 
+class cmVS7XMLParser : public cmXMLParser
+{
+public:
+  virtual void EndElement(const char* name)
+    {
+    }
+  virtual void StartElement(const char* name, const char** atts)
+    {
+      // once the GUID is found do nothing
+      if(this->GUID.size())
+        {
+        return;
+        }
+      int i =0;
+      if(strcmp("VisualStudioProject", name) == 0)
+        {
+        while(atts[i])
+          {
+          if(strcmp(atts[i], "ProjectGUID") == 0)
+            { 
+            if(atts[i+1])
+              {
+              this->GUID =  atts[i+1];
+              this->GUID = this->GUID.substr(1, this->GUID.size()-2);
+              }
+            else
+              {
+              this->GUID = "";
+              }
+            return;
+            }
+          ++i;
+          }
+        } 
+    }
+  int InitializeParser()
+    {
+      int ret = cmXMLParser::InitializeParser();
+      if(ret == 0)
+        {
+        return ret;
+        }
+      // visual studio projects have a strange encoding, but it is 
+      // really utf-8
+      XML_SetEncoding(static_cast<XML_Parser>(this->Parser), "utf-8");
+      return 1;
+    }
+  std::string GUID;
+};
+
+void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
+  const char* name,
+  const char* path)
+{
+  cmVS7XMLParser parser;
+  parser.ParseFile(path);
+  // if we can not find a GUID then create one
+  if(parser.GUID.size() == 0)
+    {
+    cmGlobalVisualStudio7Generator* gg =
+      static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
+    gg->CreateGUID(name);
+    return;
+    }
+  std::string guidStoreName = name;
+  guidStoreName += "_GUID_CMAKE";
+  // save the GUID in the cache
+  this->GlobalGenerator->GetCMakeInstance()->
+    AddCacheEntry(guidStoreName.c_str(),
+                  parser.GUID.c_str(),
+                  "Stored GUID",
+                  cmCacheManager::INTERNAL);
+}
+
+
 void cmLocalVisualStudio7Generator::ConfigureFinalPass()
 {
   cmLocalGenerator::ConfigureFinalPass();
@@ -1651,7 +1731,7 @@ void cmLocalVisualStudio7Generator::ConfigureFinalPass()
       cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
       const cmCustomCommandLines& cmds = cc.GetCommandLines();
       std::string project_name = cmds[0][0];
-      gg->CreateGUID(project_name.c_str());
+      this->ReadAndStoreExternalGUID(project_name.c_str(), cmds[0][1].c_str());
       }
     else
       {
