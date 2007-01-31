@@ -1,0 +1,13 @@
+tdir=`pwd`
+tar xvfj @CYGWIN_SRC_PACKAGE_NAME@.tar.bz2 &&
+cd @CYGWIN_SRC_PACKAGE_NAME@ && 
+mkdir .build &&
+cd .build &&
+../bootstrap --parallel=2 && 
+make -j2 && 
+make test && 
+./bin/cpack && 
+./bin/cpack --config  CPackSourceConfig.cmake
+
+mv @CYGWIN_SRC_PACKAGE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@-src.tar.bz2 "$tdir"
+mv @CYGWIN_PACKAGE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.tar.bz2 "$tdir"
