@@ -2286,6 +2286,16 @@ cmLocalGenerator::GetObjectFileNameWithoutTarget(const cmSourceFile& source)
       objectName = relFromSource;
       }
     }
+  // if it is still a full path check for the try compile case
+  // try compile never have in source sources, and should not
+  // have conflicting source file names in the same target
+  if(cmSystemTools::FileIsFullPath(objectName.c_str()))
+    {
+    if(this->GetGlobalGenerator()->GetCMakeInstance()->GetIsInTryCompile())
+      {
+      objectName = cmSystemTools::GetFilenameName(source.GetFullPath());
+      }
+    }
 
   // Replace the original source file extension with the object file
   // extension.
