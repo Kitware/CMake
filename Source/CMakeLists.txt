@@ -304,7 +304,7 @@ IF(APPLE)
   ADD_EXECUTABLE(cmakexbuild cmakexbuild.cxx)
   TARGET_LINK_LIBRARIES(cmakexbuild CMakeLib)
   ADD_EXECUTABLE(OSXScriptLauncher
-    MACOSX_BUNDLE CPack/OSXScriptLauncher.cxx)
+    CPack/OSXScriptLauncher.cxx)
   TARGET_LINK_LIBRARIES(OSXScriptLauncher cmsys)
   TARGET_LINK_LIBRARIES(OSXScriptLauncher "-framework Carbon")
 ENDIF(APPLE)
