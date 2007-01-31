@@ -6,7 +6,8 @@
 #include <Carbon/Carbon.h>
 #include <CoreFoundation/CoreFoundation.h>
 
-#define MaximumPathLength 1024
+// For the PATH_MAX constant
+#include <sys/syslimits.h>
 
 #define DebugError(x) \
   ofs << x << cmsys_ios::endl; \
@@ -21,8 +22,6 @@ int main(int argc, char* argv[])
   CFStringRef fileName;
   CFBundleRef appBundle;
   CFURLRef scriptFileURL;
-  FSRef fileRef;
-  FSSpec fileSpec;
   UInt8 *path;
 
   //get CF URL for script
@@ -31,12 +30,7 @@ int main(int argc, char* argv[])
     DebugError("Cannot get main bundle");
     return 1;
     }
-  if (! (fileName = CFStringCreateWithCString(NULL, "RuntimeScript",
-        kCFStringEncodingASCII)))
-    {
-    DebugError("CFStringCreateWithCString failed");
-    return 1;
-    }
+  fileName = CFSTR("RuntimeScript");
   if (! (scriptFileURL = CFBundleCopyResourceURL(appBundle, fileName, NULL,
         NULL)))
     {
@@ -44,44 +38,24 @@ int main(int argc, char* argv[])
     return 1;
     }
 
-  //Get file reference from Core Foundation URL
-  if (! CFURLGetFSRef(scriptFileURL, &fileRef))
-    {
-    DebugError("CFURLGetFSRef failed");
-    return 1;
-    }
-
-  //dispose of the CF variables
-  CFRelease(scriptFileURL);
-  CFRelease(fileName);
-
-  //convert FSRef to FSSpec
-  if (FSGetCatalogInfo(&fileRef, kFSCatInfoNone, NULL, NULL, &fileSpec,
-      NULL))
-    {
-    DebugError("FSGetCatalogInfo failed");
-    return 1;
-    }
-
   //create path string
-  if (! (path = new UInt8[MaximumPathLength]))
+  if (! (path = new UInt8[PATH_MAX]))
     {
     return 1;
     }
 
-  //create file reference from file spec
-  OSErr err = FSpMakeFSRef(&fileSpec, &fileRef);
-  if(err) 
+  //get the file system path of the url as a cstring
+  //in an encoding suitable for posix apis
+  if ( CFURLGetFileSystemRepresentation(scriptFileURL, true, path,
+        PATH_MAX) == false)
     {
-    return err;
-    }
-
-  // and then convert the FSRef to a path
-  if ( FSRefMakePath(&fileRef, path, MaximumPathLength) )
-    {
-    DebugError("FSRefMakePath failed");
+    DebugError("CFURLGetFileSystemRepresentation failed");
     return 1;
     }
+
+  //dispose of the CF variable
+  CFRelease(scriptFileURL);
+
   cmsys_stl::string fullScriptPath = reinterpret_cast<char*>(path);
   delete [] path;
 
