@@ -6,7 +6,7 @@ TRY_COMPILE(SHOULD_PASS
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(NOT SHOULD_PASS)
-  MESSAGE(SEND_ERROR "should pass failed ")
+  MESSAGE(SEND_ERROR "should pass failed ${TRY_OUT}")
 ENDIF(NOT SHOULD_PASS)
 
 # try to compile a file that should not compile
@@ -15,7 +15,7 @@ TRY_COMPILE(SHOULD_FAIL
     ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(SHOULD_FAIL)
-   MESSAGE(SEND_ERROR "Should fail passed")
+   MESSAGE(SEND_ERROR "Should fail passed ${TRY_OUT}")
 ENDIF(SHOULD_FAIL)
 
 # try to compile a file that should compile
@@ -24,7 +24,7 @@ TRY_COMPILE(SHOULD_PASS
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(NOT SHOULD_PASS)
-  MESSAGE(SEND_ERROR "should pass failed ")
+  MESSAGE(SEND_ERROR "should pass failed ${TRY_OUT}")
 ENDIF(NOT SHOULD_PASS)
 
 # try to compile a file that should not compile
@@ -33,7 +33,7 @@ TRY_COMPILE(SHOULD_FAIL
     ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(SHOULD_FAIL)
-   MESSAGE(SEND_ERROR "Should fail passed")
+   MESSAGE(SEND_ERROR "Should fail passed ${TRY_OUT}")
 ENDIF(SHOULD_FAIL)
 
 IF(NOT SHOULD_FAIL)
