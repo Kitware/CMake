@@ -320,6 +320,7 @@ IF(WIN32)
   IF(NOT UNIX)
     ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
     TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
+    INSTALL_TARGETS(/bin cmw9xcom)
   ENDIF(NOT UNIX)
 ENDIF(WIN32)
 
