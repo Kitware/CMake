@@ -70,16 +70,6 @@ private:
   typedef cmLocalVisualStudio7GeneratorOptions Options;
   void ReadAndStoreExternalGUID(const char* name,
                                 const char* path);
-  void ReplaceFlagSetMap(std::string& flags, 
-                         cmVS7FlagTable* flagTable,
-                         std::map<cmStdString, 
-                         cmStdString>& flagMap, 
-                         std::string& option,
-                         std::string::size_type pos);
-  void FillFlagMapFromCommandFlags(std::map<cmStdString, 
-                                   cmStdString>& flagMap,
-                                   cmVS7FlagTable* flagTable,
-                                   std::string& flags);
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const char* configName);
   void FixGlobalTargets();
