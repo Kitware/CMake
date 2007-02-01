@@ -291,12 +291,18 @@ struct cmVS7FlagTable
   const char* commandFlag; // command line flag
   const char* comment;     // comment
   const char* value; // string value
-};
+  unsigned int special; // flags for special handling requests
+  enum
+  {
+    UserValue    = (1<<0), // flag contains a user-specified value
+    UserIgnored  = (1<<1), // ignore any user value
+    UserRequired = (1<<2), // match only when user value is non-empty
+    Continue     = (1<<3), // continue looking for matching entries
 
-// A statically allocated string so that user value options can be
-// identified with a single pointer comparison and can never be
-// confused with actual values.
-static const char CMFLAG_USER_VALUE[] = "<USER_VALUE>";
+    UserValueIgnored  = UserValue | UserIgnored,
+    UserValueRequired = UserValue | UserRequired
+  };
+};
 
 // fill the table here currently the comment field is not used for
 // anything other than documentation NOTE: Make sure the longer
@@ -304,83 +310,108 @@ static const char CMFLAG_USER_VALUE[] = "<USER_VALUE>";
 cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
 {
   // option flags (some flags map to the same option)
-  {"BasicRuntimeChecks", "GZ", "Stack frame checks", "1"},
-  {"BasicRuntimeChecks", "RTCsu", "Both stack and uninitialized checks", "3"},
-  {"BasicRuntimeChecks", "RTCs", "Stack frame checks", "1"},
-  {"BasicRuntimeChecks", "RTCu", "Uninitialized Variables ", "2"},
-  {"BasicRuntimeChecks", "RTC1", "Both stack and uninitialized checks ", "3"},
-  {"DebugInformationFormat", "Z7", "debug format", "1"},
-  {"DebugInformationFormat", "Zd", "debug format", "2"},
-  {"DebugInformationFormat", "Zi", "debug format", "3"},
-  {"DebugInformationFormat", "ZI", "debug format", "4"},
-  {"EnableEnhancedInstructionSet", "arch:SSE2", "Use sse2 instructions", "2"},
-  {"EnableEnhancedInstructionSet", "arch:SSE", "Use sse instructions",   "1"},
-  {"FavorSizeOrSpeed",  "Ot", "Favor fast code",  "1"},
-  {"FavorSizeOrSpeed",  "Os", "Favor small code", "2"},
-  {"CompileAs", "TC", "Compile as c code",        "1"},
-  {"CompileAs", "TP", "Compile as c++ code",      "2"},
-  {"Optimization", "Od", "Non Debug",        "0"},
-  {"Optimization", "O1", "Min Size",         "1"},
-  {"Optimization", "O2", "Max Speed",        "2"},
-  {"Optimization", "Ox", "Max Optimization", "3"},
-  {"OptimizeForProcessor", "GB", "Blended processor mode", "0"},
-  {"OptimizeForProcessor", "G5", "Pentium",                "1"},
-  {"OptimizeForProcessor", "G6", "PPro PII PIII",          "2"},
-  {"OptimizeForProcessor", "G7", "Pentium 4 or Athlon",    "3"},
-  {"InlineFunctionExpansion", "Ob0", "no inlines",              "0"},
-  {"InlineFunctionExpansion", "Ob1", "when inline keyword",     "1"},
-  {"InlineFunctionExpansion", "Ob2", "any time you can inline", "2"},
-  {"RuntimeLibrary", "MTd", "Multithreded debug",     "1"},
-  {"RuntimeLibrary", "MT", "Multithreded", "0"},
-  {"RuntimeLibrary", "MDd", "Multithreded dll debug", "3"},
-  {"RuntimeLibrary", "MD", "Multithreded dll",        "2"},
-  {"RuntimeLibrary", "MLd", "Sinble Thread debug",    "5"},
-  {"RuntimeLibrary", "ML", "Sinble Thread",           "4"},
-  {"StructMemberAlignment", "Zp16", "struct align 16 byte ",   "5"},
-  {"StructMemberAlignment", "Zp1", "struct align 1 byte ",     "1"},
-  {"StructMemberAlignment", "Zp2", "struct align 2 byte ",     "2"},
-  {"StructMemberAlignment", "Zp4", "struct align 4 byte ",     "3"},
-  {"StructMemberAlignment", "Zp8", "struct align 8 byte ",     "4"},
-  {"WarningLevel", "W1", "Warning level", "1"},
-  {"WarningLevel", "W2", "Warning level", "2"},
-  {"WarningLevel", "W3", "Warning level", "3"},
-  {"WarningLevel", "W4", "Warning level", "4"},
+  {"BasicRuntimeChecks", "GZ", "Stack frame checks", "1", 0},
+  {"BasicRuntimeChecks", "RTCsu",
+   "Both stack and uninitialized checks", "3", 0},
+  {"BasicRuntimeChecks", "RTCs", "Stack frame checks", "1", 0},
+  {"BasicRuntimeChecks", "RTCu", "Uninitialized Variables ", "2", 0},
+  {"BasicRuntimeChecks", "RTC1",
+   "Both stack and uninitialized checks", "3", 0},
+  {"DebugInformationFormat", "Z7", "debug format", "1", 0},
+  {"DebugInformationFormat", "Zd", "debug format", "2", 0},
+  {"DebugInformationFormat", "Zi", "debug format", "3", 0},
+  {"DebugInformationFormat", "ZI", "debug format", "4", 0},
+  {"EnableEnhancedInstructionSet", "arch:SSE2",
+   "Use sse2 instructions", "2", 0},
+  {"EnableEnhancedInstructionSet", "arch:SSE",
+   "Use sse instructions",   "1", 0},
+  {"FavorSizeOrSpeed",  "Ot", "Favor fast code",  "1", 0},
+  {"FavorSizeOrSpeed",  "Os", "Favor small code", "2", 0},
+  {"CompileAs", "TC", "Compile as c code",        "1", 0},
+  {"CompileAs", "TP", "Compile as c++ code",      "2", 0},
+  {"Optimization", "Od", "Non Debug",        "0", 0},
+  {"Optimization", "O1", "Min Size",         "1", 0},
+  {"Optimization", "O2", "Max Speed",        "2", 0},
+  {"Optimization", "Ox", "Max Optimization", "3", 0},
+  {"OptimizeForProcessor", "GB", "Blended processor mode", "0", 0},
+  {"OptimizeForProcessor", "G5", "Pentium",                "1", 0},
+  {"OptimizeForProcessor", "G6", "PPro PII PIII",          "2", 0},
+  {"OptimizeForProcessor", "G7", "Pentium 4 or Athlon",    "3", 0},
+  {"InlineFunctionExpansion", "Ob0", "no inlines",              "0", 0},
+  {"InlineFunctionExpansion", "Ob1", "when inline keyword",     "1", 0},
+  {"InlineFunctionExpansion", "Ob2", "any time you can inline", "2", 0},
+  {"RuntimeLibrary", "MTd", "Multithreded debug",     "1", 0},
+  {"RuntimeLibrary", "MT", "Multithreded", "0", 0},
+  {"RuntimeLibrary", "MDd", "Multithreded dll debug", "3", 0},
+  {"RuntimeLibrary", "MD", "Multithreded dll",        "2", 0},
+  {"RuntimeLibrary", "MLd", "Sinble Thread debug",    "5", 0},
+  {"RuntimeLibrary", "ML", "Sinble Thread",           "4", 0},
+  {"StructMemberAlignment", "Zp16", "struct align 16 byte ",   "5", 0},
+  {"StructMemberAlignment", "Zp1", "struct align 1 byte ",     "1", 0},
+  {"StructMemberAlignment", "Zp2", "struct align 2 byte ",     "2", 0},
+  {"StructMemberAlignment", "Zp4", "struct align 4 byte ",     "3", 0},
+  {"StructMemberAlignment", "Zp8", "struct align 8 byte ",     "4", 0},
+  {"WarningLevel", "W1", "Warning level", "1", 0},
+  {"WarningLevel", "W2", "Warning level", "2", 0},
+  {"WarningLevel", "W3", "Warning level", "3", 0},
+  {"WarningLevel", "W4", "Warning level", "4", 0},
+
+  // Precompiled header and related options.  Note that the
+  // UsePrecompiledHeader entries are marked as "Continue" so that the
+  // corresponding PrecompiledHeaderThrough entry can be found.
+  {"UsePrecompiledHeader", "Yc", "Create Precompiled Header", "1",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
+  {"PrecompiledHeaderThrough", "Yc", "Precompiled Header Name", "",
+   cmVS7FlagTable::UserValueRequired},
+  {"UsePrecompiledHeader", "YX", "Automatically Generate", "2",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
+  {"PrecompiledHeaderThrough", "YX", "Precompiled Header Name", "",
+   cmVS7FlagTable::UserValueRequired},
+  {"UsePrecompiledHeader", "Yu", "Use Precompiled Header", "3",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
+  {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
+   cmVS7FlagTable::UserValueRequired},
+  {"PrecompiledHeaderFile", "Fp", "Generated Precompiled Header", "",
+   cmVS7FlagTable::UserValue},
+  {"ForcedIncludeFiles", "FI", "Forced include files", "",
+   cmVS7FlagTable::UserValueRequired},
 
   // boolean flags
-  {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE"},
-  {"EnableFibreSafeOptimization", "GT", "OmitFramePointers", "TRUE"},
-  {"EnableFunctionLevelLinking", "Gy", "EnableFunctionLevelLinking", "TRUE"},
-  {"EnableIntrinsicFunctions", "Oi", "EnableIntrinsicFunctions", "TRUE"},
-  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "TRUE"},
-  {"ExceptionHandling", "EHa", "enable c++ exceptions", "2"},
-  {"ExceptionHandling", "GX", "enable c++ exceptions", "TRUE"},
-  {"GlobalOptimizations", "Og", "Global Optimize", "TRUE"},
-  {"ImproveFloatingPointConsistency", "Op", 
-   "ImproveFloatingPointConsistency", "TRUE"},
-  {"MinimalRebuild", "Gm", "minimal rebuild", "TRUE"},
-  {"OmitFramePointers", "Oy", "OmitFramePointers", "TRUE"},
-  {"OptimizeForWindowsApplication", "GA", "Optimize for windows", "TRUE"},
-  {"RuntimeTypeInfo", "GR", 
-   "Turn on Run time type information for c++", "TRUE"},
-  {"SmallerTypeCheck", "RTCc", "smaller type check", "TRUE"},
-  {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "TRUE"},
-  {"WarnAsError", "WX", "Treat warnings as errors", "TRUE"},
-  {0,0,0,0 }
+  {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE", 0},
+  {"EnableFibreSafeOptimization", "GT", "OmitFramePointers", "TRUE", 0},
+  {"EnableFunctionLevelLinking", "Gy",
+   "EnableFunctionLevelLinking", "TRUE", 0},
+  {"EnableIntrinsicFunctions", "Oi", "EnableIntrinsicFunctions", "TRUE", 0},
+  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "TRUE", 0},
+  {"ExceptionHandling", "EHa", "enable c++ exceptions", "2", 0},
+  {"ExceptionHandling", "GX", "enable c++ exceptions", "TRUE", 0},
+  {"GlobalOptimizations", "Og", "Global Optimize", "TRUE", 0},
+  {"ImproveFloatingPointConsistency", "Op",
+   "ImproveFloatingPointConsistency", "TRUE", 0},
+  {"MinimalRebuild", "Gm", "minimal rebuild", "TRUE", 0},
+  {"OmitFramePointers", "Oy", "OmitFramePointers", "TRUE", 0},
+  {"OptimizeForWindowsApplication", "GA", "Optimize for windows", "TRUE", 0},
+  {"RuntimeTypeInfo", "GR",
+   "Turn on Run time type information for c++", "TRUE", 0},
+  {"SmallerTypeCheck", "RTCc", "smaller type check", "TRUE", 0},
+  {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "TRUE", 0},
+  {"WarnAsError", "WX", "Treat warnings as errors", "TRUE", 0},
+  {0,0,0,0,0}
 };
-
 
 cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
 {
   // option flags (some flags map to the same option)
-  {"GenerateManifest", "MANIFEST:NO", "disable manifest generation", "FALSE"},
-  {"GenerateManifest", "MANIFEST", "enable manifest generation", "TRUE"},
-  {"LinkIncremental", "INCREMENTAL:NO", "link incremental", "1"},
-  {"LinkIncremental", "INCREMENTAL:YES", "link incremental", "2"},
-  {"IgnoreDefaultLibraryNames", "NODEFAULTLIB:", "default libs to ignore",
-   CMFLAG_USER_VALUE},
+  {"GenerateManifest", "MANIFEST:NO",
+   "disable manifest generation", "FALSE", 0},
+  {"GenerateManifest", "MANIFEST", "enable manifest generation", "TRUE", 0},
+  {"LinkIncremental", "INCREMENTAL:NO", "link incremental", "1", 0},
+  {"LinkIncremental", "INCREMENTAL:YES", "link incremental", "2", 0},
+  {"IgnoreDefaultLibraryNames", "NODEFAULTLIB:", "default libs to ignore", "",
+   cmVS7FlagTable::UserValue},
   {"IgnoreAllDefaultLibraries", "NODEFAULTLIB", "ignore all default libs",
-   "TRUE"},
-  {0,0,0,0 }
+   "TRUE", 0},
+  {0,0,0,0,0}
 };
 
 //----------------------------------------------------------------------------
@@ -1790,25 +1821,56 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
     else if(this->FlagTable)
       {
       // Look for an entry in the flag table matching this flag.
+      bool flag_handled = false;
       for(cmVS7FlagTable const* entry = this->FlagTable;
           entry->IDEName; ++entry)
         {
-        if(entry->value == CMFLAG_USER_VALUE)
+        bool entry_found = false;
+        if(entry->special & cmVS7FlagTable::UserValue)
           {
-          // This flag table entry accepts a user value.
+          // This flag table entry accepts a user-specified value.  If
+          // the entry specifies UserRequired we must match only if a
+          // non-empty value is given.
           int n = static_cast<int>(strlen(entry->commandFlag));
-          if(strncmp(flag+1, entry->commandFlag, n) == 0)
+          if(strncmp(flag+1, entry->commandFlag, n) == 0 &&
+             (!(entry->special & cmVS7FlagTable::UserRequired) ||
+              static_cast<int>(strlen(flag+1)) > n))
             {
-            this->FlagMap[entry->IDEName] = flag+1+n;
-            return;
+            if(entry->special & cmVS7FlagTable::UserIgnored)
+              {
+              // Ignore the user-specified value.
+              this->FlagMap[entry->IDEName] = entry->value;
+              }
+            else
+              {
+              // Use the user-specified value.
+              this->FlagMap[entry->IDEName] = flag+1+n;
+              }
+            entry_found = true;
             }
           }
         else if(strcmp(flag+1, entry->commandFlag) == 0)
           {
           // This flag table entry provides a fixed value.
           this->FlagMap[entry->IDEName] = entry->value;
+          entry_found = true;
+          }
+
+        // If the flag has been handled by an entry not requesting a
+        // search continuation we are done.
+        if(entry_found && !(entry->special & cmVS7FlagTable::Continue))
+          {
           return;
           }
+
+        // If the entry was found the flag has been handled.
+        flag_handled |= entry_found;
+        }
+
+      // If any map entry handled the flag we are done.
+      if(flag_handled)
+        {
+        return;
         }
       }
     }
