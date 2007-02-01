@@ -105,6 +105,12 @@ ADD_CUSTOM_COMMAND(
 ADD_EXECUTABLE(notInAllExe EXCLUDE_FROM_ALL notInAllExe.cxx)
 TARGET_LINK_LIBRARIES(notInAllExe notInAllLib)
 
+# Test user-value flag mapping for the VS IDE.
+IF(MSVC)
+  SET_TARGET_PROPERTIES(notInAllExe PROPERTIES
+    LINK_FLAGS "/NODEFAULTLIB:LIBC;LIBCMT;MSVCRT")
+ENDIF(MSVC)
+
 # Test creating a custom target that builds not-in-all targets.
 ADD_CUSTOM_TARGET(notInAllCustom)
 ADD_DEPENDENCIES(notInAllCustom notInAllExe)
