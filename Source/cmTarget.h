@@ -205,6 +205,9 @@ public:
   void GetFullName(std::string& prefix, 
                    std::string& base, std::string& suffix,
                    const char* config=0, bool implib = false);
+
+  /** Get the name of the pdb file for the target.  */
+  std::string GetPDBName(const char* config=0);
   
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */

@@ -1376,6 +1376,17 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type,
 }
 
 //----------------------------------------------------------------------------
+std::string cmTarget::GetPDBName(const char* config)
+{
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->GetFullNameInternal(this->GetType(), config, false,
+                            prefix, base, suffix);
+  return prefix+base+".pdb";
+}
+
+//----------------------------------------------------------------------------
 std::string cmTarget::GetFullName(const char* config, bool implib)
 {
   return this->GetFullNameInternal(this->GetType(), config, implib);

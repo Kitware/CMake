@@ -638,29 +638,17 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     if(target.GetType() == cmTarget::EXECUTABLE)
       {
-      std::string targetName;
-      std::string targetNameFull;
-      std::string targetNamePDB;
-      target.GetExecutableNames(targetName, targetNameFull,
-                                targetNamePDB, configName);
       fout <<  "\t\t\t\tProgramDataBaseFileName=\""
            << this->ExecutableOutputPath
-           << "$(OutDir)/" << targetNamePDB << "\"\n";
+           << "$(OutDir)/" << target.GetPDBName(configName) << "\"\n";
       }
     else if(target.GetType() == cmTarget::STATIC_LIBRARY ||
             target.GetType() == cmTarget::SHARED_LIBRARY ||
             target.GetType() == cmTarget::MODULE_LIBRARY)
       {
-      std::string targetName;
-      std::string targetNameSO;
-      std::string targetNameFull;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      target.GetLibraryNames(targetName, targetNameSO, targetNameFull,
-                             targetNameImport, targetNamePDB, configName);
       fout <<  "\t\t\t\tProgramDataBaseFileName=\""
            << this->LibraryOutputPath
-           << "$(OutDir)/" << targetNamePDB << "\"\n";
+           << "$(OutDir)/" << target.GetPDBName(configName) << "\"\n";
       }
     }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
