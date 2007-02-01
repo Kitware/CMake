@@ -293,7 +293,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
     }
-  exeCleanFiles.push_back(this->Convert(cleanPDBName.c_str(),
+  exeCleanFiles.push_back(this->Convert(cleanFullPDBName.c_str(),
                                         cmLocalGenerator::START_OUTPUT,
                                         cmLocalGenerator::UNCHANGED));
   }
