@@ -208,8 +208,9 @@ cmInstallTargetGenerator
     std::string targetNameSO;
     std::string targetNameReal;
     std::string targetNameImport;
+    std::string targetNamePDB;
     target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
-                            targetNameImport, i->c_str());
+                            targetNameImport, targetNamePDB, i->c_str());
     if(this->ImportLibrary)
       {
       // Use the import library name.
@@ -245,8 +246,10 @@ std::string cmInstallTargetGenerator::GetScriptReference(cmTarget* target,
     std::string targetNameSO;
     std::string targetNameReal;
     std::string targetNameImport;
+    std::string targetNamePDB;
     target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
-                            targetNameImport, this->ConfigurationName);
+                            targetNameImport, targetNamePDB,
+                            this->ConfigurationName);
     if(this->ImportLibrary)
       {
       // Use the import library name.

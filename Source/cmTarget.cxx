@@ -1541,10 +1541,11 @@ void cmTarget::GetLibraryNames(std::string& name,
                                std::string& soName,
                                std::string& realName,
                                std::string& impName,
+                               std::string& pdbName,
                                const char* config)
 {
   // Get the names based on the real type of the library.
-  this->GetLibraryNamesInternal(name, soName, realName, impName,
+  this->GetLibraryNamesInternal(name, soName, realName, impName, pdbName,
                                 this->GetType(), config);
 }
 
@@ -1553,6 +1554,7 @@ void cmTarget::GetLibraryCleanNames(std::string& staticName,
                                     std::string& sharedSOName,
                                     std::string& sharedRealName,
                                     std::string& importName,
+                                    std::string& pdbName,
                                     const char* config)
 {
   // Get the name as if this were a static library.
@@ -1560,7 +1562,7 @@ void cmTarget::GetLibraryCleanNames(std::string& staticName,
   std::string realName;
   std::string impName;
   this->GetLibraryNamesInternal(staticName, soName, realName, impName,
-                                cmTarget::STATIC_LIBRARY, config);
+                                pdbName, cmTarget::STATIC_LIBRARY, config);
 
   // Get the names as if this were a shared library.
   if(this->GetType() == cmTarget::STATIC_LIBRARY)
@@ -1571,14 +1573,15 @@ void cmTarget::GetLibraryCleanNames(std::string& staticName,
     // type will never be MODULE.  Either way the only names that
     // might have to be cleaned are the shared library names.
     this->GetLibraryNamesInternal(sharedName, sharedSOName, sharedRealName,
-                                  importName, cmTarget::SHARED_LIBRARY,
-                                  config);
+                                  importName, pdbName,
+                                  cmTarget::SHARED_LIBRARY, config);
     }
   else
     {
     // Use the name of the real type of the library (shared or module).
     this->GetLibraryNamesInternal(sharedName, sharedSOName, sharedRealName,
-                                  importName, this->GetType(), config);
+                                  importName, pdbName, this->GetType(),
+                                  config);
     }
 }
 
@@ -1586,6 +1589,7 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
                                        std::string& soName,
                                        std::string& realName,
                                        std::string& impName,
+                                       std::string& pdbName,
                                        TargetType type,
                                        const char* config)
 {
@@ -1672,27 +1676,34 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
     {
     impName = "";
     }
+
+  // The program database file name.
+  pdbName = prefix+base+".pdb";
 }
 
 void cmTarget::GetExecutableNames(std::string& name,
                                   std::string& realName,
+                                  std::string& pdbName,
                                   const char* config)
 {
   // Get the names based on the real type of the executable.
-  this->GetExecutableNamesInternal(name, realName, this->GetType(), config);
+  this->GetExecutableNamesInternal(name, realName, pdbName,
+                                   this->GetType(), config);
 }
 
 void cmTarget::GetExecutableCleanNames(std::string& name,
                                        std::string& realName,
+                                       std::string& pdbName,
                                        const char* config)
 {
   // Get the name and versioned name of this executable.
-  this->GetExecutableNamesInternal(name, realName, cmTarget::EXECUTABLE,
-                                   config);
+  this->GetExecutableNamesInternal(name, realName, pdbName,
+                                   cmTarget::EXECUTABLE, config);
 }
 
 void cmTarget::GetExecutableNamesInternal(std::string& name,
                                           std::string& realName,
+                                          std::string& pdbName,
                                           TargetType type,
                                           const char* config)
 {
@@ -1732,6 +1743,9 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
 #if defined(__CYGWIN__)
   realName += suffix;
 #endif
+
+  // The program database file name.
+  pdbName = prefix+base+".pdb";
 }
 
 //----------------------------------------------------------------------------

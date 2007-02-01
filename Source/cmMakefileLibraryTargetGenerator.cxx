@@ -239,8 +239,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string targetNameSO;
   std::string targetNameReal;
   std::string targetNameImport;
+  std::string targetNamePDB;
   this->Target->GetLibraryNames(
-    targetName, targetNameSO, targetNameReal, targetNameImport,
+    targetName, targetNameSO, targetNameReal, targetNameImport, targetNamePDB,
     this->LocalGenerator->ConfigurationName.c_str());
 
   // Construct the full path version of the names.
@@ -259,8 +260,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     outpath += "/";
     }
   std::string targetFullPath = outpath + targetName;
-  std::string targetFullPathPDB = 
-    outpath + this->Target->GetName() + std::string(".pdb");
+  std::string targetFullPathPDB = outpath + targetNamePDB;
   std::string targetFullPathSO = outpath + targetNameSO;
   std::string targetFullPathReal = outpath + targetNameReal;
   std::string targetFullPathImport = outpath + targetNameImport;
@@ -351,18 +351,21 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     std::string cleanSharedSOName;
     std::string cleanSharedRealName;
     std::string cleanImportName;
+    std::string cleanPDBName;
     this->Target->GetLibraryCleanNames(
       cleanStaticName,
       cleanSharedName,
       cleanSharedSOName,
       cleanSharedRealName,
       cleanImportName,
+      cleanPDBName,
       this->LocalGenerator->ConfigurationName.c_str());
     std::string cleanFullStaticName = outpath + cleanStaticName;
     std::string cleanFullSharedName = outpath + cleanSharedName;
     std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
     std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
     std::string cleanFullImportName = outpath + cleanImportName;
+    std::string cleanFullPDBName = outpath + cleanPDBName;
     libCleanFiles.push_back
       (this->Convert(cleanFullStaticName.c_str(),
                      cmLocalGenerator::START_OUTPUT,
@@ -398,6 +401,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
           cmLocalGenerator::START_OUTPUT,
           cmLocalGenerator::UNCHANGED));
       }
+    libCleanFiles.push_back
+      (this->Convert(cleanFullPDBName.c_str(),
+                     cmLocalGenerator::START_OUTPUT,
+                     cmLocalGenerator::UNCHANGED));
     }
 
 #ifdef _WIN32

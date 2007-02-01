@@ -568,9 +568,32 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     flagMap.find("DebugInformationFormat");
   if(mi != flagMap.end() && mi->second != "1")
     {
-    fout <<  "\t\t\t\tProgramDataBaseFileName=\""
-         << this->LibraryOutputPath
-         << "$(OutDir)/" << libName << ".pdb\"\n";
+    if(target.GetType() == cmTarget::EXECUTABLE)
+      {
+      std::string targetName;
+      std::string targetNameFull;
+      std::string targetNamePDB;
+      target.GetExecutableNames(targetName, targetNameFull,
+                                targetNamePDB, configName);
+      fout <<  "\t\t\t\tProgramDataBaseFileName=\""
+           << this->ExecutableOutputPath
+           << "$(OutDir)/" << targetNamePDB << "\"\n";
+      }
+    else if(target.GetType() == cmTarget::STATIC_LIBRARY ||
+            target.GetType() == cmTarget::SHARED_LIBRARY ||
+            target.GetType() == cmTarget::MODULE_LIBRARY)
+      {
+      std::string targetName;
+      std::string targetNameSO;
+      std::string targetNameFull;
+      std::string targetNameImport;
+      std::string targetNamePDB;
+      target.GetLibraryNames(targetName, targetNameSO, targetNameFull,
+                             targetNameImport, targetNamePDB, configName);
+      fout <<  "\t\t\t\tProgramDataBaseFileName=\""
+           << this->LibraryOutputPath
+           << "$(OutDir)/" << targetNamePDB << "\"\n";
+      }
     }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
@@ -625,7 +648,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
 
   this->OutputTargetRules(fout, target, libName);
-  this->OutputBuildTool(fout, configName, libName, target);
+  this->OutputBuildTool(fout, configName, target);
   fout << "\t\t</Configuration>\n";
 }
 void cmLocalVisualStudio7Generator::ReplaceFlagSetMap(std::string& flags, 
@@ -725,10 +748,8 @@ cmLocalVisualStudio7Generator
 
 void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                                                     const char* configName,
-                                                    const char *libName,
                                                     cmTarget &target)
 {
-  std::string targetFullName = target.GetFullName(configName);
   std::string temp;
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
@@ -776,8 +797,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     {
     case cmTarget::STATIC_LIBRARY:
     {
+    std::string targetNameFull = target.GetFullName(configName);
     std::string libpath = this->LibraryOutputPath +
-      "$(OutDir)/" + targetFullName;
+      "$(OutDir)/" + targetNameFull;
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"VCLibrarianTool\"\n";
     if(const char* libflags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
@@ -791,6 +813,25 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
     {
+    std::string targetName;
+    std::string targetNameSO;
+    std::string targetNameFull;
+    std::string targetNameImport;
+    std::string targetNamePDB;
+    target.GetLibraryNames(targetName, targetNameSO, targetNameFull,
+                           targetNameImport, targetNamePDB, configName);
+
+    // VS does not distinguish between shared libraries and module
+    // libraries so it still wants to be given the name of an import
+    // library for modules.
+    if(targetNameImport.empty() &&
+       target.GetType() == cmTarget::MODULE_LIBRARY)
+      {
+      targetNameImport =
+        cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
+      targetNameImport += ".lib";
+      }
+
     // Compute the link library and directory information.
     std::vector<cmStdString> linkLibs;
     std::vector<cmStdString> linkDirs;
@@ -832,7 +873,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp = this->LibraryOutputPath;
     temp += configName;
     temp += "/";
-    temp += targetFullName;
+    temp += targetNameFull;
     fout << "\t\t\t\tOutputFile=\""
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
     this->WriteTargetVersionAttribute(fout, target);
@@ -847,8 +888,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     this->OutputModuleDefinitionFile(fout, target);
     temp = this->LibraryOutputPath;
     temp += "$(OutDir)/";
-    temp += libName;
-    temp += ".pdb";
+    temp += targetNamePDB;
     fout << "\t\t\t\tProgramDataBaseFile=\"" <<
       this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
     if(strcmp(configName, "Debug") == 0
@@ -867,15 +907,19 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp = this->LibraryOutputPath;
     temp += configName;
     temp += "/";
-    temp += 
-      cmSystemTools::GetFilenameWithoutLastExtension(targetFullName.c_str());
-    temp += ".lib";
-    fout << "\t\t\t\tImportLibrary=\"" 
+    temp += targetNameImport;
+    fout << "\t\t\t\tImportLibrary=\""
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
     }
     break;
     case cmTarget::EXECUTABLE:
     {
+    std::string targetName;
+    std::string targetNameFull;
+    std::string targetNamePDB;
+    target.GetExecutableNames(targetName, targetNameFull,
+                              targetNamePDB, configName);
+
     // Compute the link library and directory information.
     std::vector<cmStdString> linkLibs;
     std::vector<cmStdString> linkDirs;
@@ -917,7 +961,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp = this->ExecutableOutputPath;
     temp += configName;
     temp += "/";
-    temp += targetFullName;
+    temp += targetNameFull;
     fout << "\t\t\t\tOutputFile=\"" 
          << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
     this->WriteTargetVersionAttribute(fout, target);
@@ -929,8 +973,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
     this->OutputLibraryDirectories(fout, linkDirs);
     fout << "\"\n";
-    fout << "\t\t\t\tProgramDataBaseFile=\"" << this->LibraryOutputPath
-         << "$(OutDir)\\" << libName << ".pdb\"\n";
+    fout << "\t\t\t\tProgramDataBaseFile=\"" << this->ExecutableOutputPath
+         << "$(OutDir)\\" << targetNamePDB << "\"\n";
     if(strcmp(configName, "Debug") == 0
        || strcmp(configName, "RelWithDebInfo") == 0)
       {
