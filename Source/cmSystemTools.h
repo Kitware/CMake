@@ -211,7 +211,16 @@ public:
    * Parse arguments out of a single string command
    */
   static std::vector<cmStdString> ParseArguments(const char* command);
-    
+
+  /** Parse arguments out of a windows command line string.  */
+  static void ParseWindowsCommandLine(const char* command,
+                                      std::vector<std::string>& args);
+
+  /** Compute an escaped version of the given argument for use in a
+      windows shell.  See kwsys/System.h.in for details.  */
+  static std::string EscapeWindowsShellArgument(const char* arg,
+                                                int shell_flags);
+
   static void EnableMessages() { s_DisableMessages = false; }
   static void DisableMessages() { s_DisableMessages = true; }
   static void DisableRunCommandOutput() {s_DisableRunCommandOutput = true; }
