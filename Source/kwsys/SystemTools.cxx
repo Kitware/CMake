@@ -2645,21 +2645,8 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
                               path_components.begin(),
                               path_components.end());
 
-  // remove any . components as they do nothing
-  kwsys_stl::vector<kwsys_stl::string> clean_components;
-  kwsys_stl::vector<kwsys_stl::string>::iterator i = 
-    out_components.begin();
-  for (; i != out_components.end(); ++i)
-    {
-    if (*i != ".")
-      {
-      clean_components.push_back(*i);
-      }
-    }
-
-
   // Transform the path back to a string.
-  kwsys_stl::string newPath = SystemTools::JoinPath(clean_components);
+  kwsys_stl::string newPath = SystemTools::JoinPath(out_components);
 
   // Update the translation table with this potentially new path.  I am not
   // sure why this line is here, it seems really questionable, but yet I
