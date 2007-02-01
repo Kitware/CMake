@@ -1661,7 +1661,8 @@ void cmLocalVisualStudio7Generator::ConfigureFinalPass()
       cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
       const cmCustomCommandLines& cmds = cc.GetCommandLines();
       std::string project_name = cmds[0][0];
-      this->ReadAndStoreExternalGUID(project_name.c_str(), cmds[0][1].c_str());
+      this->ReadAndStoreExternalGUID(project_name.c_str(),
+                                     cmds[0][1].c_str());
       }
     else
       {
