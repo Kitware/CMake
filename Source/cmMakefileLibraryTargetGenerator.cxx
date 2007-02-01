@@ -401,7 +401,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
           cmLocalGenerator::START_OUTPUT,
           cmLocalGenerator::UNCHANGED));
       }
-    libCleanFiles.push_back
+
+    // List the PDB for cleaning only when the whole target is
+    // cleaned.  We do not want to delete the .pdb file just before
+    // linking the target.
+    this->CleanFiles.push_back
       (this->Convert(cleanFullPDBName.c_str(),
                      cmLocalGenerator::START_OUTPUT,
                      cmLocalGenerator::UNCHANGED));
