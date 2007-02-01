@@ -85,6 +85,47 @@ public:
   /** Forms of documentation output.  */
   enum Form { TextForm, HTMLForm, ManForm, UsageForm };
   
+  
+  /** Internal class representing a section of the documentation.
+   * Cares e.g. for the different section titles in the different
+   * output formats.
+   */
+  class cmSection
+  {
+    public:
+      /** Create a cmSection, with a special name for man-output mode. */
+      cmSection(const char* name, const char* manName)
+                :Name(name), ManName(manName)       {}
+
+      /** Has any content been added to this section or is it empty ? */
+      bool IsEmpty() const                          {return Entries.empty();}
+
+      /** Clear contents. */
+      void Clear()                                  {Entries.clear();}
+
+      /** Return the name of this section for the given output form. */
+      const char* GetName(Form form) const          {return (form==ManForm?ManName.c_str():Name.c_str());}
+
+      /** Return a pointer to the first entry of this section. */
+      cmDocumentationEntry *GetEntries()            {return &Entries[0];}
+
+      /** Return a pointer to the first entry of this section. */
+      const cmDocumentationEntry *GetEntries() const {return &Entries[0];}
+
+      /** Append an entry to this section. */
+      void Append(const cmDocumentationEntry& entry){Entries.push_back(entry);}
+
+      /** Set the contents of this section. */
+      void Set(const cmDocumentationEntry* header,
+               const cmDocumentationEntry* section,
+               const cmDocumentationEntry* footer);
+
+    private:
+      std::string Name;
+      std::string ManName;
+      std::vector<cmDocumentationEntry> Entries;
+  };
+
   /**
    * Print documentation in the given form.  All previously added
    * sections will be generated.
@@ -92,18 +133,30 @@ public:
   void Print(Form f, std::ostream& os);
   
   /**
+   * Print documentation in the current form.  All previously added
+   * sections will be generated.
+   */
+  void Print(std::ostream& os);
+
+  /**
    * Add a section of documentation.  The cmDocumentationEntry pointer
    * should point at an array terminated by an all zero ({0,0,0})
    * entry.  This can be used to generate custom help documents.
    */
   void AddSection(const char* name, const cmDocumentationEntry* d);
   
+  /** Convenience function, does the same as above */
+  void AddSection(const cmSection& section);
+
   /** Clear all previously added sections of help.  */
   void ClearSections();  
   
   /** Set cmake root so we can find installed files */
   void SetCMakeRoot(const char* root)  { this->CMakeRoot = root;}
 private:
+  void PrintHeader(const char* title, std::ostream& os);
+  void PrintFooter(std::ostream& os);
+
   void PrintSection(std::ostream& os,
                     const cmDocumentationEntry* section,
                     const char* name);
@@ -142,14 +195,11 @@ private:
   bool PrintDocumentationSingleProperty(std::ostream& os);
   bool PrintDocumentationUsage(std::ostream& os);
   bool PrintDocumentationFull(std::ostream& os);
-  bool PrintDocumentationHTML(std::ostream& os);
-  bool PrintDocumentationMan(std::ostream& os);
   void PrintDocumentationCommand(std::ostream& os,
                                  cmDocumentationEntry* entry);
   
   void CreateUsageDocumentation();
   void CreateFullDocumentation();
-  void CreateManDocumentation();
 
   void SetSection(const cmDocumentationEntry* header,
                   const cmDocumentationEntry* section,
@@ -159,15 +209,19 @@ private:
   bool IsOption(const char* arg) const;
 
   std::string NameString;
-  std::vector<cmDocumentationEntry> NameSection;
-  std::vector<cmDocumentationEntry> UsageSection;
-  std::vector<cmDocumentationEntry> DescriptionSection;
-  std::vector<cmDocumentationEntry> OptionsSection;
-  std::vector<cmDocumentationEntry> CommandsSection;
-  std::vector<cmDocumentationEntry> ModulesSection;
-  std::vector<cmDocumentationEntry> PropertiesSection;
-  std::vector<cmDocumentationEntry> GeneratorsSection;
-  std::vector<cmDocumentationEntry> SeeAlsoSection;
+  cmSection NameSection;
+  cmSection UsageSection;
+  cmSection DescriptionSection;
+  cmSection OptionsSection;
+  cmSection CommandsSection;
+  cmSection CompatCommandsSection;
+  cmSection ModulesSection;
+  cmSection PropertiesSection;
+  cmSection GeneratorsSection;
+  cmSection SeeAlsoSection;
+  cmSection CopyrightSection;
+  cmSection AuthorSection;
+
   std::string SeeAlsoString;
   std::string SingleCommand;
   std::string SingleModuleName;
