@@ -378,6 +378,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
   {"LinkIncremental", "INCREMENTAL:YES", "link incremental", "2"},
   {"IgnoreDefaultLibraryNames", "NODEFAULTLIB:", "default libs to ignore",
    CMFLAG_USER_VALUE},
+  {"IgnoreAllDefaultLibraries", "NODEFAULTLIB", "ignore all default libs",
+   "TRUE"},
   {0,0,0,0 }
 };
 
