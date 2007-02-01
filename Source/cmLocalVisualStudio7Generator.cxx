@@ -1716,7 +1716,6 @@ void cmLocalVisualStudio7GeneratorOptions::AddFlag(const char* flag,
 bool cmLocalVisualStudio7GeneratorOptions::UsingUnicode()
 {
   // Look for the a _UNICODE definition.
-  bool use_unicode = false;
   for(std::vector<cmStdString>::const_iterator di = this->Defines.begin();
       di != this->Defines.end(); ++di)
     {
