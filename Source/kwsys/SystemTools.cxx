@@ -2607,8 +2607,6 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
   // Split the input path components.
   kwsys_stl::vector<kwsys_stl::string> path_components;
   SystemTools::SplitPath(in_path, path_components);
-  
-  // clean the input path to remove any /./ 
 
   // If the input path is relative, start with a base path.
   if(path_components[0].length() == 0)
