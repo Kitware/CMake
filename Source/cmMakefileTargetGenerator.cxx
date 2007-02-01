@@ -279,6 +279,15 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 
     *this->FlagFileStream << lang << "_FLAGS = " << flags << "\n\n";
     }
+
+  // Add target-specific flags.
+  if(this->Target->GetProperty("COMPILE_FLAGS"))
+    {
+    std::string flags;    
+    this->LocalGenerator->AppendFlags
+      (flags, this->Target->GetProperty("COMPILE_FLAGS"));
+    *this->FlagFileStream << "# TARGET_FLAGS = " << flags << "\n\n";
+    }
 }
 
 //----------------------------------------------------------------------------
