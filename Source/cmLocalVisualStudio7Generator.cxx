@@ -1864,7 +1864,7 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
           }
 
         // If the entry was found the flag has been handled.
-        flag_handled |= entry_found;
+        flag_handled = flag_handled || entry_found;
         }
 
       // If any map entry handled the flag we are done.
