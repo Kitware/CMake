@@ -119,7 +119,7 @@ public:
 
       /** Append an entry to this section. */
       void Append(const cmDocumentationEntry& entry)
-        { return this->Entries.push_back(entry); }
+        { this->Entries.push_back(entry); }
 
       /** Set the contents of this section. */
       void Set(const cmDocumentationEntry* header,
