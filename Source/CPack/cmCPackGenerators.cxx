@@ -31,6 +31,11 @@
 #  include "cmCPackOSXX11Generator.h"
 #endif
 
+#ifdef __CYGWIN__
+#  include "cmCPackCygwinBinaryGenerator.h"
+#  include "cmCPackCygwinSourceGenerator.h"
+#endif
+
 #include "cmCPackLog.h"
 
 //----------------------------------------------------------------------
@@ -44,6 +49,13 @@ cmCPackGenerators::cmCPackGenerators()
   this->RegisterGenerator("NSIS", "Null Soft Installer",
     cmCPackNSISGenerator::CreateGenerator);
 #endif
+#ifdef __CYGWIN__
+  this->RegisterGenerator("CygwinBinary", "Cygwin Binary Installer",
+                          cmCPackCygwinBinaryGenerator::CreateGenerator);
+  this->RegisterGenerator("CygwinSource", "Cygwin Source Installer",
+                          cmCPackCygwinSourceGenerator::CreateGenerator);
+#endif
+
   this->RegisterGenerator("ZIP", "ZIP file format",
     cmCPackZIPGenerator::CreateGenerator);
   this->RegisterGenerator("TBZ2", "Tar BZip2 compression",

@@ -41,7 +41,7 @@ protected:
     const std::vector<std::string>& files);
   virtual int InitializeInternal();
   int GenerateHeader(std::ostream* os);
-  virtual const char* GetOutputExtension() { return "sh"; }
+  virtual const char* GetOutputExtension() { return ".sh"; }
 };
 
 #endif

@@ -14,9 +14,9 @@ MESSAGE(STATUS "Using curses version: libncurses${MAX}")
 CONFIGURE_FILE("${CMake_SOURCE_DIR}/Utilities/Release/Cygwin/cygwin-setup.hint.in"
   "${CMake_BINARY_DIR}/setup.hint")
 CONFIGURE_FILE("${CMake_SOURCE_DIR}/Utilities/Release/Cygwin/README.cygwin.in"
-  "${CMake_BINARY_DIR}/Docs/@CYGWIN_PACKAGE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.README")
+  "${CMake_BINARY_DIR}/Docs/@CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.README")
 INSTALL_FILES(/share/doc/Cygwin FILES
-  ${CMake_BINARY_DIR}/Docs/@CYGWIN_PACKAGE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.README
+  ${CMake_BINARY_DIR}/Docs/@CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.README
   )
 CONFIGURE_FILE("${CMake_SOURCE_DIR}/Utilities/Release/Cygwin/cygwin-package.sh.in"
   ${CPACK_CYGWIN_BUILD_SCRIPT})

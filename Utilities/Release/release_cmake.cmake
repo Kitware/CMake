@@ -76,8 +76,12 @@ configure_file(${SCRIPT_PATH}/release_cmake.sh.in ${SCRIPT_FILE} @ONLY)
 
 # run the script by starting a shell on the remote machine
 # then using the script file as input to the shell
-remote_command("run release_cmake-${HOST}.sh on server"
-  "${RUN_SHELL}" ${SCRIPT_FILE})
+IF(RUN_LOCAL)
+  message(FATAL_ERROR "run this command: ${RUN_SHELL} ${SCRIPT_FILE}")
+ELSE(RUN_LOCAL)
+  remote_command("run release_cmake-${HOST}.sh on server"
+    "${RUN_SHELL}" ${SCRIPT_FILE})
+ENDIF(RUN_LOCAL)
 
 # now figure out which types of packages were created 
 set(generators ${CPACK_BINARY_GENERATORS} ${CPACK_SOURCE_GENERATORS})
@@ -95,6 +99,9 @@ foreach(gen ${generators})
   if("${gen}" STREQUAL "TBZ2")
     set(SUFFIXES ${SUFFIXES} "*.tar.bz2")
   endif("${gen}" STREQUAL "TBZ2")
+  if("${gen}" MATCHES "Cygwin")
+    set(SUFFIXES ${SUFFIXES} "*.tar.bz2")
+  endif("${gen}" STREQUAL "Cygwin")
   if("${gen}" STREQUAL "TZ")
     set(SUFFIXES ${SUFFIXES} "*.tar.Z")
   endif("${gen}" STREQUAL "TZ")

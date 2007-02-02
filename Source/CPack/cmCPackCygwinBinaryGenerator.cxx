@@ -41,7 +41,7 @@ cmCPackCygwinBinaryGenerator::~cmCPackCygwinBinaryGenerator()
 //----------------------------------------------------------------------
 int cmCPackCygwinBinaryGenerator::InitializeInternal()
 {
-  this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "1");
+  this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "0");
   std::vector<std::string> path;
   std::string pkgPath = cmSystemTools::FindProgram("bzip2", path, false);
   if ( pkgPath.empty() )
@@ -62,13 +62,16 @@ int cmCPackCygwinBinaryGenerator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {
   std::string packageName = this->GetOption("CPACK_PACKAGE_NAME");
+  packageName += "-";
   packageName += this->GetOption("CPACK_PACKAGE_VERSION");
   packageName = cmsys::SystemTools::LowerCase(packageName);
-  std::string manifest = "/share/doc/";
+  std::string manifest = "/usr/share/doc/";
   manifest += packageName;
   manifest += "/MANIFEST";
   std::string manifestFile 
     = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+  // Create a MANIFEST file that contains all of the files in
+  // the tar file
   std::string tempdir = manifestFile;
   manifestFile += manifest;
   // create an extra scope to force the stream
@@ -78,18 +81,23 @@ int cmCPackCygwinBinaryGenerator::CompressFiles(const char* outFileName,
   for(std::vector<std::string>::const_iterator i = files.begin();
       i != files.end(); ++i)
     {
-#undef cerr
     // remove the temp dir and replace with /usr
-    ofs << "/usr" << (*i).substr(tempdir.size()) << "\n";
-    std::cerr << "/usr" << (*i).substr(tempdir.size()) << "\n";
-    
+    ofs << (*i).substr(tempdir.size()) << "\n";
     }
-  ofs << "/usr" << manifest << "\n";
+  ofs << manifest << "\n";
   }
-  // Now compress up everything
+  // add the manifest file to the list of all files
   std::vector<std::string> filesWithManifest = files;
   filesWithManifest.push_back(manifestFile);
+  // create the bzip2 tar file 
   return this->Superclass::CompressFiles(outFileName, toplevel, 
                                          filesWithManifest);
 }
 
+const char* cmCPackCygwinBinaryGenerator::GetOutputExtension()
+{
+  this->OutputExtension = "-";
+  this->OutputExtension += this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
+  this->OutputExtension += ".tar.bz2";
+  return this->OutputExtension.c_str();
+}

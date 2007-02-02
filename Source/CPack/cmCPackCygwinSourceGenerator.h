@@ -26,7 +26,7 @@
 class cmCPackCygwinSourceGenerator : public cmCPackTarBZip2Generator
 {
 public:
-  cmCPackTypeMacro(cmCPackCygwinSourceGenerator, cmCPackTGZGenerator);
+  cmCPackTypeMacro(cmCPackCygwinSourceGenerator, cmCPackTarBZip2Generator);
 
   /**
    * Construct generator

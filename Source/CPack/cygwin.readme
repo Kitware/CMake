@@ -37,8 +37,8 @@ normal binary release with use as the root of the tree:
 
 Here is the bootstrap command used:
 
-  ${SOURCE_DIR}/bootstrap --prefix=${PREFIX} --datadir=/share/${PKG}-${VER} \
-                          --docdir=/share/doc/${PKG}-${VER} --mandir=/share/man
+  ${SOURCE_DIR}/bootstrap --prefix=/usr --datadir=/share/cmake-${VER} \
+                          --docdir=/share/doc/cmake-${VER} --mandir=/share/man
 
 CMAKE_DOC_DIR    /share/doc/${PKG}-${VER}
 CMAKE_MAN_DIR    /share/man

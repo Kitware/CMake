@@ -39,7 +39,7 @@ protected:
   virtual int InitializeInternal();
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
-  virtual const char* GetOutputExtension() { return "tar.Z"; }
+  virtual const char* GetOutputExtension() { return ".tar.Z"; }
 
   int RenameFile(const char* oldname, const char* newname);
   int GenerateHeader(std::ostream* os);

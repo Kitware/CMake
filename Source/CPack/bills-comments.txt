@@ -6,6 +6,7 @@ cmCPackGenerators  -- creates cmCPackGenericGenerator's via NewGenerator
 
 cmCPackGenericGenerator::Initialize
    this->InitializeInternal
+     CPACK_INCLUDE_TOPLEVEL_DIRECTORY = 0 turns off 
 
 
 // binary package run
@@ -64,3 +65,4 @@ break up cmCPackGenerator::InstallProject so it calls the following:
 // run the cmake install scripts if provided
   cmCPackGenerator::RunCMakeInstallScripts()  
 
+-

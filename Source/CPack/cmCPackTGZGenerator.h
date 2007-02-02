@@ -44,7 +44,7 @@ protected:
   virtual int GenerateHeader(std::ostream* os);
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
-  virtual const char* GetOutputExtension() { return "tar.gz"; }
+  virtual const char* GetOutputExtension() { return ".tar.gz"; }
 
   bool Compress;
 };

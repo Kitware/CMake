@@ -66,6 +66,34 @@ int cmCPackTarBZip2Generator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
+int cmCPackTarBZip2Generator::BZip2File(const char* packageDirFileName)
+{
+  int retVal = 0;
+  cmOStringStream dmgCmd1;
+  dmgCmd1 << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
+    << "\" \"" << packageDirFileName
+    << "\"";
+  retVal = -1;
+  std::string output;
+  int res = cmSystemTools::RunSingleCommand(dmgCmd1.str().c_str(), &output,
+    &retVal, 0, this->GeneratorVerbose, 0);
+  if ( !res || retVal )
+    {
+    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    tmpFile += "/CompressBZip2.log";
+    cmGeneratedFileStream ofs(tmpFile.c_str());
+    ofs << "# Run command: " << dmgCmd1.str().c_str() << std::endl
+      << "# Output:" << std::endl
+      << output.c_str() << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running BZip2 command: "
+      << dmgCmd1.str().c_str() << std::endl
+      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+    return 0;
+    }
+  return 1;
+}
+
+//----------------------------------------------------------------------
 int cmCPackTarBZip2Generator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {
@@ -80,27 +108,11 @@ int cmCPackTarBZip2Generator::CompressFiles(const char* outFileName,
     return 0;
     }
 
-  cmOStringStream dmgCmd1;
-  dmgCmd1 << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
-    << "\" \"" << packageDirFileName
-    << "\"";
-  retVal = -1;
-  int res = cmSystemTools::RunSingleCommand(dmgCmd1.str().c_str(), &output,
-    &retVal, toplevel, this->GeneratorVerbose, 0);
-  if ( !res || retVal )
+  if(!this->BZip2File(packageDirFileName.c_str()))
     {
-    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    tmpFile += "/CompressBZip2.log";
-    cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << dmgCmd1.str().c_str() << std::endl
-      << "# Output:" << std::endl
-      << output.c_str() << std::endl;
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running BZip2 command: "
-      << dmgCmd1.str().c_str() << std::endl
-      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
     return 0;
     }
-
+  
   std::string compressOutFile = packageDirFileName + ".bz2";
   if ( !cmSystemTools::SameFile(compressOutFile.c_str(), outFileName ) )
     {
