@@ -98,22 +98,28 @@ public:
                 :Name(name), ManName(manName)       {}
 
       /** Has any content been added to this section or is it empty ? */
-      bool IsEmpty() const                          {return Entries.empty();}
+      bool IsEmpty() const
+        { return this->Entries.empty(); }
 
       /** Clear contents. */
-      void Clear()                                  {Entries.clear();}
+      void Clear()
+        { this->Entries.clear(); }
 
       /** Return the name of this section for the given output form. */
-      const char* GetName(Form form) const          {return (form==ManForm?ManName.c_str():Name.c_str());}
+      const char* GetName(Form form) const
+        { return (form==ManForm?this->ManName.c_str():this->Name.c_str()); }
 
       /** Return a pointer to the first entry of this section. */
-      cmDocumentationEntry *GetEntries()            {return &Entries[0];}
+      cmDocumentationEntry *GetEntries()
+        { return &this->Entries[0]; }
 
       /** Return a pointer to the first entry of this section. */
-      const cmDocumentationEntry *GetEntries() const {return &Entries[0];}
+      const cmDocumentationEntry *GetEntries() const
+        { return &this->Entries[0]; }
 
       /** Append an entry to this section. */
-      void Append(const cmDocumentationEntry& entry){Entries.push_back(entry);}
+      void Append(const cmDocumentationEntry& entry)
+        { return this->Entries.push_back(entry); }
 
       /** Set the contents of this section. */
       void Set(const cmDocumentationEntry* header,
