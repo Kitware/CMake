@@ -101,7 +101,6 @@ int cmCPackTarBZip2Generator::CompressFiles(const char* outFileName,
     = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   packageDirFileName += ".tar";
   std::string output;
-  int retVal = -1;
   if ( !this->Superclass::CompressFiles(packageDirFileName.c_str(),
       toplevel, files) )
     {

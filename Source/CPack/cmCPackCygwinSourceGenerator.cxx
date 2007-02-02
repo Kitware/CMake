@@ -74,7 +74,6 @@ int cmCPackCygwinSourceGenerator::CompressFiles(const char* outFileName,
     = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   packageDirFileName += ".tar";
   std::string output;
-  int retVal = -1;
   // skip one parent up to the cmCPackTGZGenerator to create tar file
   this->Compress = false; // just create tar not tar.gz
   if ( !this->cmCPackTGZGenerator::CompressFiles(packageDirFileName.c_str(),
