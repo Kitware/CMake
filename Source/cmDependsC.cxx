@@ -22,6 +22,13 @@
 
 #include <ctype.h> // isspace
 
+
+#define INCLUDE_REGEX_LINE "^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"
+
+#define INCLUDE_REGEX_LINE_MARKER "#IncludeRegexLine: "
+#define INCLUDE_REGEX_SCAN_MARKER "#IncludeRegexScan: "
+#define INCLUDE_REGEX_COMPLAIN_MARKER "#IncludeRegexComplain: "
+
 //----------------------------------------------------------------------------
 cmDependsC::cmDependsC():
   IncludePath(0)
@@ -33,10 +40,12 @@ cmDependsC::cmDependsC(std::vector<std::string> const& includes,
                        const char* scanRegex, const char* complainRegex,
                        const cmStdString& cacheFileName):
   IncludePath(&includes),
-  IncludeRegexLine(
-    "^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"),
+  IncludeRegexLine(INCLUDE_REGEX_LINE),
   IncludeRegexScan(scanRegex),
   IncludeRegexComplain(complainRegex),
+  IncludeRegexLineString(INCLUDE_REGEX_LINE_MARKER INCLUDE_REGEX_LINE),
+  IncludeRegexScanString(std::string(INCLUDE_REGEX_SCAN_MARKER)+scanRegex),
+  IncludeRegexComplainString(std::string(INCLUDE_REGEX_COMPLAIN_MARKER)+complainRegex),
   CacheFileName(cacheFileName)
 {
   this->ReadCacheFile();
@@ -281,6 +290,31 @@ void cmDependsC::ReadCacheFile()
         cacheEntry=new cmIncludeLines;
         this->FileCache[line]=cacheEntry;
         }
+      // file doesn't exist, check that the regular expressions haven't changed
+      else if (res==false)
+        {
+        if (line.find(INCLUDE_REGEX_LINE_MARKER) == 0)
+          {
+          if (line != this->IncludeRegexLineString)
+            {
+            return;
+            }
+          }
+        else if (line.find(INCLUDE_REGEX_SCAN_MARKER) == 0)
+          {
+          if (line != this->IncludeRegexScanString)
+            {
+            return;
+            }
+          }
+        else if (line.find(INCLUDE_REGEX_COMPLAIN_MARKER) == 0)
+          {
+          if (line != this->IncludeRegexComplainString)
+            {
+            return;
+            }
+          }
+        }
       }
     else if (cacheEntry!=0)
       {
@@ -311,6 +345,10 @@ void cmDependsC::WriteCacheFile() const
     return;
     }
   
+  cacheOut << this->IncludeRegexLineString << "\n\n";
+  cacheOut << this->IncludeRegexScanString << "\n\n";
+  cacheOut << this->IncludeRegexComplainString << "\n\n";
+
   for (std::map<cmStdString, cmIncludeLines*>::const_iterator fileIt=
          this->FileCache.begin();
        fileIt!=this->FileCache.end(); ++fileIt)

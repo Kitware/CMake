@@ -60,6 +60,9 @@ protected:
   // recursively and which to complain about not finding.
   cmsys::RegularExpression IncludeRegexScan;
   cmsys::RegularExpression IncludeRegexComplain;
+  const std::string IncludeRegexLineString;
+  const std::string IncludeRegexScanString;
+  const std::string IncludeRegexComplainString;
 
 public:
   // Data structures for dependency graph walk.
