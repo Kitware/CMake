@@ -426,6 +426,17 @@ void CMakeSetupDialog::SaveToRegistry()
     {
     // save some values
     CString regvalue;
+
+    // write the size of the dialog
+    CRect size;
+    this->GetClientRect(&size);
+    unsigned long width = size.Width();
+    unsigned long height = size.Height();    
+    RegSetValueEx(hKey, _T("Width"), 0, REG_DWORD, 
+                  (CONST BYTE *)(&width),4);
+    RegSetValueEx(hKey, _T("Height"), 0, REG_DWORD, 
+                  (CONST BYTE *)(&height),4);
+
     this->ReadRegistryValue(hKey, &(regvalue),"WhereSource1","C:\\");
     int shiftEnd = 9;
     if(m_WhereSource != regvalue)
@@ -542,6 +553,17 @@ void CMakeSetupDialog::LoadFromRegistry()
   else
     {
     // load some values
+    DWORD dwSize = 4;
+    DWORD width, height;
+    
+    if (RegQueryValueEx(hKey,_T("Width"), NULL, NULL, 
+                        (BYTE *)&width, &dwSize) == ERROR_SUCCESS &&      
+        RegQueryValueEx(hKey,_T("Height"), NULL, NULL, 
+                        (BYTE *)&height, &dwSize) == ERROR_SUCCESS)
+      {
+      this->SetWindowPos(0,0,0,width,height,SWP_NOZORDER | SWP_NOMOVE);
+      }
+
     if (m_WhereSource.IsEmpty()) 
       {
       this->ReadRegistryValue(hKey, &(m_WhereSource),"WhereSource1","C:\\");
@@ -1175,6 +1197,10 @@ void CMakeSetupDialog::OnOk()
   cmSystemTools::EnableMessages();
   m_CacheEntriesList.ClearDirty();
   this->RunCMake(true);
+
+  // save the size of the dialog
+  
+
   if (!(::GetKeyState(VK_SHIFT) & 0x1000))
     {
     CDialog::OnOK();

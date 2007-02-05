@@ -1109,6 +1109,8 @@ IF(BUILD_TESTING)
     SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)
   ENDIF(EXISTS "${CMAKE_BINARY_DIR}/CMakeLists.txt")
   IF(UNIX AND CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
+
+
     ADD_TEST(BootstrapTest ${CMAKE_CTEST_COMMAND}
       --build-and-test
       ${CMake_SOURCE_DIR}
@@ -1117,7 +1119,17 @@ IF(BUILD_TESTING)
       --build-noclean
       --build-makeprogram ${CMake_SOURCE_DIR}/bootstrap
       --build-generator "${CMAKE_TEST_GENERATOR}"
-      --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
+      --test-command 
+      ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
+
+    # provide more time for the bootstrap test
+    IF (COMMAND GET_TEST_PROPERTY)
+      GET_TEST_PROPERTY(BootstrapTest TIMEOUT PREVIOUS_TIMEOUT)
+      IF ("${PREVIOUS_TIMEOUT}" MATCHES NOT_FOUND)
+        SET_TESTS_PROPERTIES ( BootstrapTest PROPERTIES TIMEOUT 1500)
+      ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOT_FOUND)
+    ENDIF (COMMAND GET_TEST_PROPERTY)
+      
   ENDIF(UNIX AND CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
 
   # fortran does not work for IDE builds because
