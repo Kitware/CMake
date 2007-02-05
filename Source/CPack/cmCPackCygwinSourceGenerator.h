@@ -15,38 +15,32 @@
 
 =========================================================================*/
 
-#ifndef cmCPackTGZGenerator_h
-#define cmCPackTGZGenerator_h
+#ifndef cmCPackCygwinSourceGenerator_h
+#define cmCPackCygwinSourceGenerator_h
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackTarBZip2Generator.h"
 
-class cmCPackTGZGeneratorForward;
-
-/** \class cmCPackTGZGenerator
- * \brief A generator for TGZ files
- *
- * http://people.freebsd.org/~kientzle/libarchive/
+/** \class cmCPackCygwinSourceGenerator
+ * \brief A generator for cygwin source files
  */
-class cmCPackTGZGenerator : public cmCPackGenericGenerator
+class cmCPackCygwinSourceGenerator : public cmCPackTarBZip2Generator
 {
 public:
-  friend class cmCPackTGZGeneratorForward;
-  cmCPackTypeMacro(cmCPackTGZGenerator, cmCPackGenericGenerator);
+  cmCPackTypeMacro(cmCPackCygwinSourceGenerator, cmCPackTarBZip2Generator);
 
   /**
    * Construct generator
    */
-  cmCPackTGZGenerator();
-  virtual ~cmCPackTGZGenerator();
-
+  cmCPackCygwinSourceGenerator();
+  virtual ~cmCPackCygwinSourceGenerator();
 protected:
+  const char* GetInstallPrefix();
   virtual int InitializeInternal();
-  virtual int GenerateHeader(std::ostream* os);
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
-  virtual const char* GetOutputExtension() { return ".tar.gz"; }
-
-  bool Compress;
+  virtual const char* GetOutputExtension();
+  std::string InstallPrefix;
+  std::string OutputExtension;
 };
 
 #endif

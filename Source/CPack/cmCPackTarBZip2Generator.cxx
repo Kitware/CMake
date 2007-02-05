@@ -66,27 +66,17 @@ int cmCPackTarBZip2Generator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-int cmCPackTarBZip2Generator::CompressFiles(const char* outFileName,
-  const char* toplevel, const std::vector<std::string>& files)
+int cmCPackTarBZip2Generator::BZip2File(const char* packageDirFileName)
 {
-  std::string packageDirFileName
-    = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  packageDirFileName += ".tar";
-  std::string output;
-  int retVal = -1;
-  if ( !this->Superclass::CompressFiles(packageDirFileName.c_str(),
-      toplevel, files) )
-    {
-    return 0;
-    }
-
+  int retVal = 0;
   cmOStringStream dmgCmd1;
   dmgCmd1 << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
     << "\" \"" << packageDirFileName
     << "\"";
   retVal = -1;
+  std::string output;
   int res = cmSystemTools::RunSingleCommand(dmgCmd1.str().c_str(), &output,
-    &retVal, toplevel, this->GeneratorVerbose, 0);
+    &retVal, 0, this->GeneratorVerbose, 0);
   if ( !res || retVal )
     {
     std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -98,6 +88,27 @@ int cmCPackTarBZip2Generator::CompressFiles(const char* outFileName,
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running BZip2 command: "
       << dmgCmd1.str().c_str() << std::endl
       << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+    return 0;
+    }
+  return 1;
+}
+
+//----------------------------------------------------------------------
+int cmCPackTarBZip2Generator::CompressFiles(const char* outFileName,
+  const char* toplevel, const std::vector<std::string>& files)
+{
+  std::string packageDirFileName
+    = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+  packageDirFileName += ".tar";
+  std::string output;
+  if ( !this->Superclass::CompressFiles(packageDirFileName.c_str(),
+      toplevel, files) )
+    {
+    return 0;
+    }
+
+  if(!this->BZip2File(packageDirFileName.c_str()))
+    {
     return 0;
     }
 

@@ -1464,10 +1464,33 @@ kwsys_stl::string SystemTools::ConvertToWindowsOutputPath(const char* path)
 bool SystemTools::CopyFileIfDifferent(const char* source,
                                       const char* destination)
 {
+  // special check for a destination that is a directory
+  // FilesDiffer does not handle file to directory compare
+  if(SystemTools::FileIsDirectory(destination))
+    {
+    kwsys_stl::string new_destination = destination;
+    SystemTools::ConvertToUnixSlashes(new_destination);
+    new_destination += '/';
+    kwsys_stl::string source_name = source;
+    new_destination += SystemTools::GetFilenameName(source_name);
+    if(SystemTools::FilesDiffer(source, new_destination.c_str()))
+      {
+      return SystemTools::CopyFileAlways(source, destination);
+      }
+    else
+      {
+      // the files are the same so the copy is done return
+      // true
+      return true;
+      }
+    }
+  // source and destination are files so do a copy if they
+  // are different
   if(SystemTools::FilesDiffer(source, destination))
     {
     return SystemTools::CopyFileAlways(source, destination);
     }
+  // at this point the files must be the same so return true
   return true;
 }
 
@@ -1556,7 +1579,6 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
     {
     return true;
     }
-
   mode_t perm = 0;
   bool perms = SystemTools::GetPermissions(source, perm);
 

@@ -26,6 +26,8 @@ class cmCustomCommand;
 class cmSourceGroup;
 struct cmVS7FlagTable;
 
+class cmLocalVisualStudio7GeneratorOptions;
+
 /** \class cmLocalVisualStudio7Generator
  * \brief Write Visual Studio .NET project files.
  *
@@ -65,10 +67,9 @@ public:
   void SetPlatformName(const char* n) { this->PlatformName = n;}
   virtual void ConfigureFinalPass();
 private:
-  void FillFlagMapFromCommandFlags(std::map<cmStdString, 
-                                   cmStdString>& flagMap,
-                                   cmVS7FlagTable* flagTable,
-                                   std::string& flags);
+  typedef cmLocalVisualStudio7GeneratorOptions Options;
+  void ReadAndStoreExternalGUID(const char* name,
+                                const char* path);
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const char* configName);
   void FixGlobalTargets();
@@ -88,12 +89,10 @@ private:
   std::string EscapeForXML(const char* s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
-  void OutputDefineFlags(const char* flags,
-                         std::ostream& fout);
   void OutputTargetRules(std::ostream& fout, cmTarget &target, 
                          const char *libName);
   void OutputBuildTool(std::ostream& fout, const char* configName,
-                       const char* libname, cmTarget& t);
+                       cmTarget& t);
   void OutputLibraries(std::ostream& fout,
                        std::vector<cmStdString> const& libs);
   void OutputLibraryDirectories(std::ostream& fout,

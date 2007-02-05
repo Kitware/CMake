@@ -104,6 +104,7 @@ IF(XMLRPC_FOUND)
         PATHS ${XMLRPC_LIBRARY_DIRS}
         NO_DEFAULT_PATH
         )
+      FIND_LIBRARY(XMLRPC_${name}_LIBRARY NAMES ${name})
       MARK_AS_ADVANCED(XMLRPC_${name}_LIBRARY)
 
       # If any library is not found then the whole package is not found.

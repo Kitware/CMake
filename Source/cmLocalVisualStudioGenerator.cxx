@@ -152,7 +152,14 @@ cmLocalVisualStudioGenerator
 
     // Start with the command name.
     const cmCustomCommandLine& commandLine = *cl;
+    if(!workingDirectory)
+      {
     script += this->Convert(commandLine[0].c_str(),START_OUTPUT,SHELL);
+      }
+    else
+      {
+      script += this->Convert(commandLine[0].c_str(),NONE,SHELL);
+      }
 
     // Add the arguments.
     for(unsigned int j=1;j < commandLine.size(); ++j)

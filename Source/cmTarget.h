@@ -201,6 +201,9 @@ public:
                    std::string& base, std::string& suffix,
                    const char* config=0, bool implib = false);
 
+  /** Get the name of the pdb file for the target.  */
+  std::string GetPDBName(const char* config=0);
+  
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(const char* config=0, bool implib = false);
@@ -210,7 +213,7 @@ public:
       should be called only on a library target.  */
   void GetLibraryNames(std::string& name, std::string& soName,
                        std::string& realName, std::string& impName,
-                       const char* config);
+                       std::string& pdbName, const char* config);
 
   /** Get the names of the library used to remove existing copies of
       the library from the build tree either before linking or during
@@ -221,20 +224,21 @@ public:
                             std::string& sharedSOName,
                             std::string& sharedRealName,
                             std::string& importName,
+                            std::string& pdbName,
                             const char* config);
 
   /** Get the names of the executable needed to generate a build rule
       that takes into account executable version numbers.  This should
       be called only on an executable target.  */
   void GetExecutableNames(std::string& name, std::string& realName,
-                          const char* config);
+                          std::string& pdbName, const char* config);
 
   /** Get the names of the executable used to remove existing copies
       of the executable from the build tree either before linking or
       during a clean step.  This should be called only on an
       executable target.  */
   void GetExecutableCleanNames(std::string& name, std::string& realName,
-                               const char* config);
+                               std::string& pdbName, const char* config);
 
   /**
    * Compute whether this target must be relinked before installing.
@@ -313,10 +317,12 @@ private:
                                std::string& soName,
                                std::string& realName,
                                std::string& impName,
+                               std::string& pdbName,
                                TargetType type,
                                const char* config);
   void GetExecutableNamesInternal(std::string& name,
                                   std::string& realName,
+                                  std::string& pdbName,
                                   TargetType type,
                                   const char* config);
 

@@ -23,8 +23,18 @@
 #include "cmCPackTarCompressGenerator.h"
 #include "cmCPackZIPGenerator.h"
 #include "cmCPackSTGZGenerator.h"
-#include "cmCPackNSISGenerator.h"
-#include "cmCPackPackageMakerGenerator.h"
+#ifdef _WIN32
+#  include "cmCPackNSISGenerator.h"
+#endif
+#ifdef __APPLE__
+#  include "cmCPackPackageMakerGenerator.h"
+#  include "cmCPackOSXX11Generator.h"
+#endif
+
+#ifdef __CYGWIN__
+#  include "cmCPackCygwinBinaryGenerator.h"
+#  include "cmCPackCygwinSourceGenerator.h"
+#endif
 
 #include "cmCPackLog.h"
 
@@ -39,6 +49,13 @@ cmCPackGenerators::cmCPackGenerators()
   this->RegisterGenerator("NSIS", "Null Soft Installer",
     cmCPackNSISGenerator::CreateGenerator);
 #endif
+#ifdef __CYGWIN__
+  this->RegisterGenerator("CygwinBinary", "Cygwin Binary Installer",
+                          cmCPackCygwinBinaryGenerator::CreateGenerator);
+  this->RegisterGenerator("CygwinSource", "Cygwin Source Installer",
+                          cmCPackCygwinSourceGenerator::CreateGenerator);
+#endif
+
   this->RegisterGenerator("ZIP", "ZIP file format",
     cmCPackZIPGenerator::CreateGenerator);
   this->RegisterGenerator("TBZ2", "Tar BZip2 compression",
@@ -46,7 +63,7 @@ cmCPackGenerators::cmCPackGenerators()
   this->RegisterGenerator("TZ", "Tar Compress compression",
     cmCPackTarCompressGenerator::CreateGenerator);
 #ifdef __APPLE__
-  this->RegisterGenerator("PackageMaker", "Mac OSX Package Maker compression",
+  this->RegisterGenerator("PackageMaker", "Mac OSX Package Maker installer",
     cmCPackPackageMakerGenerator::CreateGenerator);
 #endif
 }

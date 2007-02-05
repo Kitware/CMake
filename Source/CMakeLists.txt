@@ -167,8 +167,7 @@ SET(SRCS
 # Kdevelop only works on UNIX and not windows
 IF(UNIX)
   SET(SRCS ${SRCS}
-    cmGlobalKdevelopGenerator.cxx
-    cmLocalKdevelopGenerator.cxx)
+    cmGlobalKdevelopGenerator.cxx)
 ENDIF(UNIX)
 # XCode only works on apple
 IF(APPLE)
@@ -278,15 +277,17 @@ TARGET_LINK_LIBRARIES(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_L
 #
 SET(CPACK_SRCS
   CPack/cmCPackGenerators.cxx
-  CPack/cmCPackSTGZGenerator.cxx
-  CPack/cmCPackTGZGenerator.cxx
-  CPack/cmCPackNSISGenerator.cxx
-  CPack/cmCPackPackageMakerGenerator.cxx
-  CPack/cmCPackZIPGenerator.cxx
-  CPack/cmCPackTarBZip2Generator.cxx
-  CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackGenericGenerator.cxx
   CPack/cmCPackLog.cxx
+  CPack/cmCPackNSISGenerator.cxx
+  CPack/cmCPackPackageMakerGenerator.cxx
+  CPack/cmCPackSTGZGenerator.cxx
+  CPack/cmCPackTGZGenerator.cxx
+  CPack/cmCPackTarBZip2Generator.cxx
+  CPack/cmCPackTarCompressGenerator.cxx
+  CPack/cmCPackZIPGenerator.cxx
+  CPack/cmCPackCygwinBinaryGenerator.cxx
+  CPack/cmCPackCygwinSourceGenerator.cxx
   )
 # Build CPackLib
 ADD_LIBRARY(CPackLib ${CPACK_SRCS})
@@ -308,6 +309,7 @@ IF(WIN32)
   IF(NOT UNIX)
     ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
     TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
+    INSTALL_TARGETS(/bin cmw9xcom)
   ENDIF(NOT UNIX)
 ENDIF(WIN32)
 

@@ -42,7 +42,7 @@ protected:
   virtual int InitializeInternal();
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
-  virtual const char* GetOutputExtension() { return "dmg"; }
+  virtual const char* GetOutputExtension() { return ".dmg"; }
   virtual const char* GetOutputPostfix() { return "darwin"; }
   virtual const char* GetInstallPrefix() { return "/usr"; }
 

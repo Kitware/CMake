@@ -15,38 +15,31 @@
 
 =========================================================================*/
 
-#ifndef cmCPackTGZGenerator_h
-#define cmCPackTGZGenerator_h
+#ifndef cmCPackCygwinBinaryGenerator_h
+#define cmCPackCygwinBinaryGenerator_h
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackTarBZip2Generator.h"
 
-class cmCPackTGZGeneratorForward;
-
-/** \class cmCPackTGZGenerator
- * \brief A generator for TGZ files
- *
- * http://people.freebsd.org/~kientzle/libarchive/
+/** \class cmCPackCygwinBinaryGenerator
+ * \brief A generator for TarBZip2 files
  */
-class cmCPackTGZGenerator : public cmCPackGenericGenerator
+class cmCPackCygwinBinaryGenerator : public cmCPackTarBZip2Generator
 {
 public:
-  friend class cmCPackTGZGeneratorForward;
-  cmCPackTypeMacro(cmCPackTGZGenerator, cmCPackGenericGenerator);
+  cmCPackTypeMacro(cmCPackCygwinBinaryGenerator, cmCPackTarBZip2Generator);
 
   /**
    * Construct generator
    */
-  cmCPackTGZGenerator();
-  virtual ~cmCPackTGZGenerator();
-
+  cmCPackCygwinBinaryGenerator();
+  virtual ~cmCPackCygwinBinaryGenerator();
 protected:
+  virtual const char* GetInstallPrefix() { return "/usr"; }
   virtual int InitializeInternal();
-  virtual int GenerateHeader(std::ostream* os);
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
-  virtual const char* GetOutputExtension() { return ".tar.gz"; }
-
-  bool Compress;
+  virtual const char* GetOutputExtension();
+  std::string OutputExtension;
 };
 
 #endif

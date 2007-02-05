@@ -1,3 +1,23 @@
+Changes in CMake 2.4.7
+
+* Add support for cygwin setup packages to setup
+
+* Fix uninstall with DESTDIR
+
+* If COMPILE_FLAGS is changed on a target the object files will now recompile
+
+* Fix Bug 3512 - precompiled header flag mapping on VS.
+
+* Do not run custom commands with relative paths if the working directory is set.
+
+* Fix bugs 3277, 4341, 4341 make pdb files match the target name correctly
+
+* handle user set NODEFAULTLIB correctly in VS projects
+
+* Fix external project for VS 2005 service pack 1 GUID not set correctly
+
+* Fix Kdevelop problem where files could end up duplicated
+
 Changes in CMake 2.4.6
 
 * Remove svn test in ctestctest3 

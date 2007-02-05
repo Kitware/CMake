@@ -279,6 +279,15 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 
     *this->FlagFileStream << lang << "_FLAGS = " << flags << "\n\n";
     }
+
+  // Add target-specific flags.
+  if(this->Target->GetProperty("COMPILE_FLAGS"))
+    {
+    std::string flags;    
+    this->LocalGenerator->AppendFlags
+      (flags, this->Target->GetProperty("COMPILE_FLAGS"));
+    *this->FlagFileStream << "# TARGET_FLAGS = " << flags << "\n\n";
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -457,15 +466,29 @@ cmMakefileTargetGenerator
     this->Makefile->GetRequiredDefinition(compileRuleVar.c_str());
   cmSystemTools::ExpandListArgument(compileRule, commands);
 
-  std::string outpath = this->Makefile->GetStartOutputDirectory();
-  outpath += "/";
-  outpath += this->Target->GetName();
-  outpath += ".pdb";
-  outpath = this->Convert(outpath.c_str(), cmLocalGenerator::FULL,
+  std::string targetOutPathPDB;
+  {
+  std::string targetFullPathPDB;
+  const char* configName = this->LocalGenerator->ConfigurationName.c_str();
+  if(this->Target->GetType() == cmTarget::EXECUTABLE)
+    {
+    targetFullPathPDB = this->LocalGenerator->ExecutableOutputPath;
+    targetFullPathPDB += this->Target->GetPDBName(configName);
+    }
+  else if(this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
+          this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    targetFullPathPDB = this->LocalGenerator->LibraryOutputPath;
+    targetFullPathPDB += this->Target->GetPDBName(configName);
+    }
+  targetOutPathPDB =
+    this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::FULL,
                           cmLocalGenerator::MAKEFILE);
+  }
   cmLocalGenerator::RuleVariables vars;
   vars.Language = lang;
-  vars.TargetPDB = outpath.c_str();
+  vars.TargetPDB = targetOutPathPDB.c_str();
   vars.Source = sourceFile.c_str();
   vars.Object = relativeObj.c_str();
   std::string objdir = this->LocalGenerator->GetHomeRelativeOutputPath();

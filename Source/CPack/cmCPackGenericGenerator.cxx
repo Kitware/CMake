@@ -74,7 +74,6 @@ int cmCPackGenericGenerator::PrepareNames()
 
   std::string outName = this->GetOption("CPACK_PACKAGE_FILE_NAME");
   tempDirectory += "/" + outName;
-  outName += ".";
   outName += this->GetOutputExtension();
 
   std::string destFile = this->GetOption("CPACK_PACKAGE_DIRECTORY");
@@ -82,7 +81,6 @@ int cmCPackGenericGenerator::PrepareNames()
 
   std::string outFile = topDirectory + "/" + outName;
   std::string installPrefix = tempDirectory + this->GetInstallPrefix();
-
   this->SetOptionIfNotSet("CPACK_TOPLEVEL_DIRECTORY", topDirectory.c_str());
   this->SetOptionIfNotSet("CPACK_TEMPORARY_DIRECTORY", tempDirectory.c_str());
   this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_NAME", outName.c_str());
@@ -106,7 +104,8 @@ int cmCPackGenericGenerator::PrepareNames()
     if ( !cmSystemTools::FileExists(descFileName) )
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-        "Cannot find description file name: " << descFileName << std::endl);
+                    "Cannot find description file name: [" 
+                    << descFileName << "]" << std::endl);
       return 0;
       }
     std::ifstream ifs(descFileName);
@@ -152,8 +151,11 @@ int cmCPackGenericGenerator::InstallProject()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Install projects" << std::endl);
   this->CleanTemporaryDirectory();
-  const char* tempInstallDirectory
+  std::string tempInstallDirectoryWithPostfix
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
+  tempInstallDirectoryWithPostfix
+    += this->GetTemporaryInstallDirectoryPostfix();
+  const char* tempInstallDirectory = tempInstallDirectoryWithPostfix.c_str();
   int res = 1;
   if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory))
     {
@@ -232,6 +234,7 @@ int cmCPackGenericGenerator::InstallProject()
       {
       std::string fileName = tempInstallDirectory;
       fileName += "/" + *it;
+      fileName += cmSystemTools::GetExecutableExtension();
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
         "    Strip file: " << fileName.c_str()
         << std::endl);
@@ -341,7 +344,8 @@ int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(
       return 0;
       }
     std::vector<std::string>::iterator it;
-    const char* tempDir = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+    const char* tempDir = tempInstallDirectory;
+// this->GetOption("CPACK_TEMPORARY_DIRECTORY");
     for ( it = installDirectoriesVector.begin();
       it != installDirectoriesVector.end();
       ++it )
@@ -965,17 +969,20 @@ bool cmCPackGenericGenerator::ConfigureString(const std::string& inString,
 
 //----------------------------------------------------------------------
 bool cmCPackGenericGenerator::ConfigureFile(const char* inName,
-  const char* outName)
+  const char* outName, bool copyOnly /* = false */)
 {
   return this->MakefileMap->ConfigureFile(inName, outName,
-    false, true, false) == 1;
+    copyOnly, true, false) == 1;
 }
 
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::CleanTemporaryDirectory()
 {
-  const char* tempInstallDirectory
+  std::string tempInstallDirectoryWithPostfix
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
+  tempInstallDirectoryWithPostfix
+    += this->GetTemporaryInstallDirectoryPostfix();
+  const char* tempInstallDirectory = tempInstallDirectoryWithPostfix.c_str();
   if(cmsys::SystemTools::FileExists(tempInstallDirectory))
     { 
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
