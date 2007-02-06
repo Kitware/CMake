@@ -252,16 +252,20 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 
   switch (ht)
     {
-    case cmDocumentation::Full: this->CurrentForm = TextForm; break;
-    case cmDocumentation::HTML: this->CurrentForm = HTMLForm; break;
-    case cmDocumentation::Man: this->CurrentForm = ManForm; break;
-    case cmDocumentation::Usage:
+    case cmDocumentation::Full:
     case cmDocumentation::Single:
     case cmDocumentation::SingleModule:
     case cmDocumentation::SingleProperty:
     case cmDocumentation::List:
     case cmDocumentation::ModuleList:
     case cmDocumentation::PropertyList:
+      this->CurrentForm = TextForm;
+      break;
+
+    case cmDocumentation::HTML: this->CurrentForm = HTMLForm; break;
+    case cmDocumentation::Man: this->CurrentForm = ManForm; break;
+
+    case cmDocumentation::Usage:
     case cmDocumentation::Copyright:
     case cmDocumentation::Version:
       this->CurrentForm = UsageForm;
