@@ -28,7 +28,6 @@
 #endif
 #ifdef __APPLE__
 #  include "cmCPackPackageMakerGenerator.h"
-#  include "cmCPackOSXX11Generator.h"
 #endif
 
 #ifdef __CYGWIN__
