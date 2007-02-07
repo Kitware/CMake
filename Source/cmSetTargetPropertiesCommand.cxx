@@ -15,6 +15,8 @@
 
 =========================================================================*/
 #include "cmSetTargetPropertiesCommand.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
 
 // cmSetTargetPropertiesCommand
 bool cmSetTargetPropertiesCommand::InitialPass(
@@ -93,19 +95,16 @@ bool cmSetTargetPropertiesCommand
                std::vector<std::string> &propertyPairs,
                cmMakefile *mf)
 {
-  cmTargets& targets = mf->GetTargets();
-
-  // if the file is already in the makefile just set properites on it
-  cmTargets::iterator t = targets.find(tname);
-  if ( t != targets.end())
+  cmTarget* target = 
+    mf->GetLocalGenerator()->GetGlobalGenerator()->FindTarget(0, tname);
+  if ( target)
     {
-    cmTarget& target = t->second;
     // now loop through all the props and set them
     unsigned int k;
     for (k = 0; k < propertyPairs.size(); k = k + 2)
       {
-      target.SetProperty(propertyPairs[k].c_str(),
-                         propertyPairs[k+1].c_str());
+      target->SetProperty(propertyPairs[k].c_str(),
+                          propertyPairs[k+1].c_str());
       }
     }
   // if file is not already in the makefile, then add it
