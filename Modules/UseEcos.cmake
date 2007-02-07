@@ -151,6 +151,8 @@ MACRO(ECOS_ADD_TARGET_LIB)
    ADD_CUSTOM_TARGET( ecos make -C ${CMAKE_CURRENT_BINARY_DIR}/ecos/ DEPENDS  ${CMAKE_CURRENT_BINARY_DIR}/ecos/makefile )
 ENDMACRO(ECOS_ADD_TARGET_LIB)
 
+# get the directory of the current file, used later on in the file
+GET_FILENAME_COMPONENT( ECOS_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
 
 #macro for creating an executable ecos application
 #the first parameter is the name of the executable,
@@ -204,12 +206,9 @@ MACRO(ECOS_ADD_EXECUTABLE _exe_NAME )
        ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.bin;${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.srec;${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst;"
    )
 
-#cd $1; ls -a  | grep --invert-match -e "\(.*CVS\)\|\(.*ecos\.ecc\)" | xargs rm -rf;  touch ecos.ecc
-   ADD_CUSTOM_TARGET(ecosclean sh -c \"cd ${CMAKE_CURRENT_BINARY_DIR}/ecos\; ls | grep --invert-match -e \\\"\\\(.*CVS\\\)\\|\\\(.*ecos\\.ecc\\\)\\\" |xargs rm -rf\; touch ${ECOS_CONFIG_FILE} \")
-   ADD_CUSTOM_TARGET(normalclean ${CMAKE_MAKE_PROGRAM} clean -C ${CMAKE_CURRENT_BINARY_DIR})
+   ADD_CUSTOM_TARGET(ecosclean ${CMAKE_COMMAND} -DECOS_DIR=${CMAKE_CURRENT_BINARY_DIR}/ecos/ -P ${ECOS_CMAKE_MODULE_DIR}/ecos_clean.cmake  )
+   ADD_CUSTOM_TARGET(normalclean ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
    ADD_DEPENDENCIES (ecosclean normalclean)
-
-   ADD_DEPENDENCIES(ecosclean clean)
 
 
    ADD_CUSTOM_TARGET( listing
