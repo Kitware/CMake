@@ -23,7 +23,8 @@
 #include <ctype.h> // isspace
 
 
-#define INCLUDE_REGEX_LINE "^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"
+#define INCLUDE_REGEX_LINE \
+  "^[ \t]*#[ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"
 
 #define INCLUDE_REGEX_LINE_MARKER "#IncludeRegexLine: "
 #define INCLUDE_REGEX_SCAN_MARKER "#IncludeRegexScan: "
@@ -45,7 +46,8 @@ cmDependsC::cmDependsC(std::vector<std::string> const& includes,
   IncludeRegexComplain(complainRegex),
   IncludeRegexLineString(INCLUDE_REGEX_LINE_MARKER INCLUDE_REGEX_LINE),
   IncludeRegexScanString(std::string(INCLUDE_REGEX_SCAN_MARKER)+scanRegex),
-  IncludeRegexComplainString(std::string(INCLUDE_REGEX_COMPLAIN_MARKER)+complainRegex),
+  IncludeRegexComplainString(
+    std::string(INCLUDE_REGEX_COMPLAIN_MARKER)+complainRegex),
   CacheFileName(cacheFileName)
 {
   this->ReadCacheFile();
@@ -290,7 +292,8 @@ void cmDependsC::ReadCacheFile()
         cacheEntry=new cmIncludeLines;
         this->FileCache[line]=cacheEntry;
         }
-      // file doesn't exist, check that the regular expressions haven't changed
+      // file doesn't exist, check that the regular expressions
+      // haven't changed
       else if (res==false)
         {
         if (line.find(INCLUDE_REGEX_LINE_MARKER) == 0)
