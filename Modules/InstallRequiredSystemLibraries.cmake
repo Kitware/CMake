@@ -51,6 +51,9 @@ IF(MSVC)
       SET(__install__libs ${__install__libs}
         "${MSVC80_MFC_DIR}/Microsoft.VC80.MFC.manifest"
         "${MSVC80_MFC_DIR}/mfc80.dll"
+        "${MSVC80_MFC_DIR}/mfc80u.dll"
+        "${MSVC80_MFC_DIR}/mfcm80.dll"
+        "${MSVC80_MFC_DIR}/mfcm80u.dll"
         )
     ENDIF(MSVC80)
   ENDIF(CMAKE_INSTALL_MFC_LIBRARIES)
