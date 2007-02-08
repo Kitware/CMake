@@ -367,6 +367,18 @@ IF(BUILD_TESTING)
     SET(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
   ENDIF(NOT CMAKE_TEST_GENERATOR)
 
+  # Are we testing with the MSVC compiler?
+  SET(CMAKE_TEST_MSVC 0)
+  IF(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+    SET(CMAKE_TEST_MSVC 1)
+  ELSE(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+    IF("${CMAKE_TEST_GENERATOR}" MATCHES "NMake" OR
+        "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio")
+      SET(CMAKE_TEST_MSVC 1)
+    ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES "NMake" OR
+      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio")
+  ENDIF(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+
   SET(CMAKE_TEST_SYSTEM_LIBRARIES 0)
   FOREACH(util CURL EXPAT XMLRPC ZLIB)
     IF(CMAKE_USE_SYSTEM_${util})
@@ -1007,6 +1019,18 @@ IF(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.o"
       )
   ENDIF (WIN32)
+
+  IF(CMAKE_TEST_MSVC)
+    ADD_TEST(PrecompiledHeader ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/PrecompiledHeader"
+      "${CMake_BINARY_DIR}/Tests/PrecompiledHeader"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project PrecompiledHeader
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-two-config
+      --test-command foo)
+  ENDIF(CMAKE_TEST_MSVC)
 
   IF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
     ADD_TEST(MakeClean ${CMAKE_CTEST_COMMAND}
