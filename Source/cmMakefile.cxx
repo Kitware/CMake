@@ -1684,214 +1684,45 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   // It also supports the $ENV{VAR} syntax where VAR is looked up in
   // the current environment variables.
   
-  bool notParsed = true;
-  if ( !atOnly )
+  cmCommandArgumentParserHelper parser;
+  parser.SetMakefile(this);
+  parser.SetLineFile(line, filename);
+  parser.SetEscapeQuotes(escapeQuotes);
+  parser.SetNoEscapeMode(noEscapes);
+  parser.SetReplaceAtSyntax(replaceAt);
+  parser.SetRemoveEmpty(removeEmpty);
+  parser.SetAtOnly(atOnly);
+  int res = parser.ParseString(source.c_str(), 0);
+  if ( res )
     {
-    cmCommandArgumentParserHelper parser;
-    parser.SetMakefile(this);
-    parser.SetLineFile(line, filename);
-    parser.SetEscapeQuotes(escapeQuotes);
-    parser.SetNoEscapeMode(noEscapes);
-    parser.SetReplaceAtSyntax(replaceAt);
-    int res = parser.ParseString(source.c_str(), 0);
-    if ( res )
-      {
-      source = parser.GetResult();
-      notParsed = false;
-      }
-    else
-      {
-      cmOStringStream error;
-      error << "Syntax error in cmake code at\n"
-            << (filename?filename:"(no filename given)") 
-            << ":" << line << ":\n"
-            << parser.GetError() << ", when parsing string \"" 
-            << source.c_str() << "\"";
-      const char* versionValue
-        = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-      int major = 0;
-      int minor = 0;
-      if ( versionValue )
-        {
-        sscanf(versionValue, "%d.%d", &major, &minor);
-        }
-      if ( major < 2 || major == 2 && minor < 1 )
-        {
-        cmSystemTools::Error(error.str().c_str());
-        cmSystemTools::SetFatalErrorOccured();
-        return source.c_str();
-        }
-      else
-        {
-        cmSystemTools::Message(error.str().c_str());
-        }
-      }
+    source = parser.GetResult();
     }
-
-  if ( notParsed )
+  else
     {
-
-    // start by look for $ or @ in the string
-    std::string::size_type markerPos;
-    if(atOnly)
+    cmOStringStream error;
+    error << "Syntax error in cmake code at\n"
+          << (filename?filename:"(no filename given)") 
+          << ":" << line << ":\n"
+          << parser.GetError() << ", when parsing string \"" 
+          << source.c_str() << "\"";
+    const char* versionValue
+      = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+    int major = 0;
+    int minor = 0;
+    if ( versionValue )
       {
-      markerPos = source.find_first_of("@");
+      sscanf(versionValue, "%d.%d", &major, &minor);
       }
-    else
+    if ( major < 2 || major == 2 && minor < 1 )
       {
-      markerPos = source.find_first_of("$@");
-      }
-    // if not found, or found as the last character, then leave quickly as
-    // nothing needs to be expanded
-    if((markerPos == std::string::npos) || (markerPos >= source.size()-1))
-      {
+      cmSystemTools::Error(error.str().c_str());
+      cmSystemTools::SetFatalErrorOccured();
       return source.c_str();
       }
-    // current position
-    std::string::size_type currentPos =0; // start at 0
-    std::string result; // string with replacements
-    // go until the the end of the string
-    while((markerPos != std::string::npos) && (markerPos < source.size()-1))
+    else
       {
-      // grab string from currentPos to the start of the variable
-      // and add it to the result
-      result += source.substr(currentPos, markerPos - currentPos);
-      char endVariableMarker;     // what is the end of the variable @ or }
-      int markerStartSize = 1;    // size of the start marker 1 or 2 or 5
-      if(!atOnly && source[markerPos] == '$')
-        {
-        // ${var} case
-        if(source[markerPos+1] == '{')
-          {
-          endVariableMarker = '}';
-          markerStartSize = 2;
-          }
-        // $ENV{var} case
-        else if(markerPos+4 < source.size() &&
-                source[markerPos+4] == '{' &&
-                !source.substr(markerPos+1, 3).compare("ENV"))
-          {
-          endVariableMarker = '}';
-          markerStartSize = 5;
-          }
-        else
-          {
-          // bogus $ with no { so add $ to result and move on
-          result += '$'; // add bogus $ back into string
-          currentPos = markerPos+1; // move on
-          // set end var to space so we can tell bogus
-          endVariableMarker = ' '; 
-          }
-        }
-      else
-        {
-        // @VAR case
-        endVariableMarker = '@';
-        }
-      // if it was a valid variable (started with @ or ${ or $ENV{ )
-      if(endVariableMarker != ' ')
-        {
-        markerPos += markerStartSize; // move past marker
-        // find the end variable marker starting at the markerPos
-        // make sure it is a valid variable between 
-        std::string::size_type endVariablePos =
-          source.find_first_not_of(
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_",
-            markerPos);
-        if(endVariablePos != std::string::npos && 
-          source[endVariablePos] != endVariableMarker)
-          {
-          endVariablePos = std::string::npos;
-          }
-        if(endVariablePos == std::string::npos)
-          {
-          // no end marker found so add the bogus start
-          if(endVariableMarker == '@')
-            {
-            result += '@';
-            }
-          else
-            {
-            result += (markerStartSize == 5 ? "$ENV{" : "${");
-            }
-          currentPos = markerPos;
-          }
-        else
-          {
-          // good variable remove it
-          std::string var = 
-            source.substr(markerPos, endVariablePos - markerPos);
-          bool found = false;
-          if (markerStartSize == 5) // $ENV{
-            {
-            char *ptr = getenv(var.c_str());
-            if (ptr)
-              {
-              if (escapeQuotes)
-                {
-                result += cmSystemTools::EscapeQuotes(ptr);
-                }
-              else
-                {
-                result += ptr;
-                }
-              found = true;
-              }
-            }
-          else
-            {
-            const char* lookup = this->GetDefinition(var.c_str());
-            if(lookup)
-              {
-              if (escapeQuotes)
-                {
-                result += cmSystemTools::EscapeQuotes(lookup);
-                }
-              else
-                {
-                result += lookup;
-                }
-              found = true;
-              }
-            else if(filename && (var == "CMAKE_CURRENT_LIST_FILE"))
-              {
-              result += filename;
-              found = true;
-              }
-            else if(line >= 0 && (var == "CMAKE_CURRENT_LIST_LINE"))
-              {
-              cmOStringStream ostr;
-              ostr << line;
-              result += ostr.str();
-              found = true;
-              }
-            }
-          // if found add to result, if not, then it gets blanked
-          if (!found)
-            {
-            // if no definition is found then add the var back
-            if(!removeEmpty && endVariableMarker == '@')
-              {
-              result += "@";
-              result += var;
-              result += "@";
-              }
-            }
-          // lookup var, and replace it
-          currentPos = endVariablePos+1;
-          }
-        }
-      if(atOnly)
-        {
-        markerPos = source.find_first_of("@", currentPos);
-        }
-      else
-        {
-        markerPos = source.find_first_of("$@", currentPos);
-        }
+      cmSystemTools::Message(error.str().c_str());
       }
-    result += source.substr(currentPos); // pick up the rest of the string
-    source = result;
     }
   return source.c_str();
 }

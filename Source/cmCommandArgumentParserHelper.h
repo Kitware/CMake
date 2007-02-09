@@ -58,7 +58,7 @@ public:
   char* CombineUnions(char* in1, char* in2);
 
   char* ExpandSpecialVariable(const char* key, const char* var);
-  char* ExpandVariable(const char* var);
+  char* ExpandVariable(const char* var, bool doingAt=false);
   char* ExpandVariableForAt(const char* var);
   void SetResult(const char* value);
 
@@ -70,7 +70,9 @@ public:
   void SetEscapeQuotes(bool b) { this->EscapeQuotes = b; }
   void SetNoEscapeMode(bool b) { this->NoEscapeMode = b; }
   void SetReplaceAtSyntax(bool b) { this->ReplaceAtSyntax = b; }
-
+  void SetRemoveEmpty(bool b) { this->RemoveEmpty = b; }
+  void SetAtOnly(bool b) { this->AtOnly = b; }
+  
   const char* GetError() { return this->ErrorString.c_str(); } 
   char EmptyVariable[1];
   char DCURLYVariable[3];
@@ -104,6 +106,8 @@ private:
   std::string ErrorString;
   bool NoEscapeMode;
   bool ReplaceAtSyntax;
+  bool RemoveEmpty; 
+  bool AtOnly;
 };
 
 #endif
