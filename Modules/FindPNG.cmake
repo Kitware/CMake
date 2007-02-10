@@ -1,6 +1,5 @@
 # - Find the native PNG includes and library
 #
-
 # This module defines
 #  PNG_INCLUDE_DIR, where to find png.h, etc.
 #  PNG_LIBRARIES, the libraries to link against to use PNG.
