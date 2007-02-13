@@ -75,7 +75,16 @@ int cmCPackOSXX11Generator::CompressFiles(const char* outFileName,
       }
     }
 
+  // Disk image directories
+  std::string diskImageDirectory = toplevel;
+  std::string diskImageBackgroundImageDir
+    = diskImageDirectory + "/.background";
+
+
+  // App bundle directories
   std::string packageDirFileName = toplevel;
+  packageDirFileName += "/";
+  packageDirFileName += this->GetOption("CPACK_PACKAGE_FILE_NAME");
   packageDirFileName += ".app";
   std::string contentsDirectory = packageDirFileName + "/Contents";
   std::string resourcesDirectory = contentsDirectory + "/Resources";
@@ -84,7 +93,33 @@ int cmCPackOSXX11Generator::CompressFiles(const char* outFileName,
   const char* dir = resourcesDirectory.c_str();
   const char* appdir = appDirectory.c_str();
   const char* contDir = contentsDirectory.c_str();
+  const char* iconFile = this->GetOption("CPACK_PACKAGE_ICON");
+  if ( iconFile )
+    {
+    std::string iconFileName = cmsys::SystemTools::GetFilenameName(
+      iconFile);
+    if ( !cmSystemTools::FileExists(iconFile) )
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find icon file: "
+        << iconFile << ". Please check CPACK_PACKAGE_ICON setting."
+        << std::endl);
+      return 0;
+      }
+    std::string destFileName = resourcesDirectory + "/" + iconFileName;
+    this->ConfigureFile(iconFile, destFileName.c_str(), true);
+    this->SetOptionIfNotSet("CPACK_APPLE_GUI_ICON", iconFileName.c_str());
+    }
+
+  std::string applicationsLinkName = diskImageDirectory + "/Applications";
+  cmSystemTools::CreateSymlink("/Applications", applicationsLinkName.c_str());
+
   if (
+    !this->CopyResourcePlistFile("VolumeIcon.icns", diskImageDirectory.c_str(),
+      ".VolumeIcon.icns", true ) ||
+    !this->CopyResourcePlistFile("DS_Store", diskImageDirectory.c_str(),
+      ".DS_Store", true ) ||
+    !this->CopyResourcePlistFile("background.png",
+      diskImageBackgroundImageDir.c_str(), "background.png", true ) ||
     !this->CopyResourcePlistFile("RuntimeScript", dir) ||
     !this->CopyResourcePlistFile("OSXX11.Info.plist", contDir,
       "Info.plist" ) ||
@@ -102,9 +137,11 @@ int cmCPackOSXX11Generator::CompressFiles(const char* outFileName,
   tmpFile += "/hdiutilOutput.log";
   cmOStringStream dmgCmd;
   dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE")
-    << "\" create -ov -format UDZO -srcfolder \"" << packageDirFileName
+    << "\" create -ov -format UDZO -srcfolder \"" << diskImageDirectory.c_str() 
     << "\" \"" << outFileName << "\"";
   int retVal = 1;
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+    "Compress disk image using command: " << dmgCmd.str().c_str() << std::endl);
   bool res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
     &retVal, 0, this->GeneratorVerbose, 0);
   if ( !res || retVal )
@@ -218,3 +255,11 @@ bool cmCPackOSXX11Generator::CopyResourcePlistFile(const char* name,
   return true;
 }
 
+//----------------------------------------------------------------------
+const char* cmCPackOSXX11Generator::GetInstallPrefix()
+{
+  this->InstallPrefix = "/";
+  this->InstallPrefix += this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  this->InstallPrefix += ".app/Contents/Resources";
+  return this->InstallPrefix.c_str();
+}

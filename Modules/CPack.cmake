@@ -123,6 +123,9 @@ cpack_set_if_not_set(CPACK_OUTPUT_CONFIG_FILE
 cpack_set_if_not_set(CPACK_SOURCE_OUTPUT_CONFIG_FILE
   "${CMAKE_BINARY_DIR}/CPackSourceConfig.cmake")
 
+cpack_set_if_not_set(CPACK_USE_DESTDIR ON)
+cpack_set_if_not_set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+
 cpack_encode_variables()
 CONFIGURE_FILE("${cpack_input_file}" "${CPACK_OUTPUT_CONFIG_FILE}" @ONLY IMMEDIATE)
 
