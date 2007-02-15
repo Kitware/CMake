@@ -2599,8 +2599,20 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
   // Transform the path back to a string.
   kwsys_stl::string newPath = SystemTools::JoinPath(out_components);
 
-  // Update the translation table with this potentially new path.
-  SystemTools::AddTranslationPath(newPath.c_str(), in_path);
+  // Update the translation table with this potentially new path.  I am not
+  // sure why this line is here, it seems really questionable, but yet I
+  // would put good money that if I remove it something will break, basically
+  // from what I can see it created a mapping from the collapsed path, to be
+  // replaced by the input path, which almost completely does the opposite of
+  // this function, the only thing preventing this from happening a lot is
+  // that if the in_path has a .. in it, then it is not added to the
+  // translation table. So for most calls this either does nothing due to the
+  // ..  or it adds a translation between identical paths as nothing was
+  // collapsed, so I am going to try to comment it out, and see what hits the
+  // fan, hopefully quickly.
+  // Commented out line below:
+  //SystemTools::AddTranslationPath(newPath.c_str(), in_path);
+
   SystemTools::CheckTranslationPath(newPath);
 #ifdef _WIN32
   newPath = SystemTools::GetActualCaseForPath(newPath.c_str());

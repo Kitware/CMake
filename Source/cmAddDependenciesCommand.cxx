@@ -15,6 +15,8 @@
 
 =========================================================================*/
 #include "cmAddDependenciesCommand.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
 
 // cmDependenciesCommand
 bool cmAddDependenciesCommand::InitialPass(
@@ -28,14 +30,16 @@ bool cmAddDependenciesCommand::InitialPass(
 
   std::string target_name = args[0];
 
-  cmTargets &tgts = this->Makefile->GetTargets();
-  if (tgts.find(target_name) != tgts.end())
+  cmTarget* target = 
+    this->GetMakefile()->GetLocalGenerator()->
+    GetGlobalGenerator()->FindTarget(0, target_name.c_str());
+  if(target)
     {
     std::vector<std::string>::const_iterator s = args.begin();
-    ++s;
+    ++s; // skip over target_name
     for (; s != args.end(); ++s)
       {
-      tgts[target_name].AddUtility(s->c_str());
+      target->AddUtility(s->c_str());
       }
     }
   else
@@ -45,7 +49,6 @@ bool cmAddDependenciesCommand::InitialPass(
     this->SetError(error.c_str());
     return false;
     }
-
 
   return true;
 }

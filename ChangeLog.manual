@@ -1,4 +1,15 @@
 Changes in CMake 2.4.7
+* Fix for if command scope issues
+
+* Fix for relative path issue with paths ending in /.
+
+* CMakeSetup saves the size of the dialog from the last run
+
+* Fix for bug 4399, find qt designer on mac
+
+* Fix for bug 4420 include unicode libs in cpack for vs8
+
+* Fix for bug 4414 add_dependencies and set_target_properties can set any target not just the ones in the current directory.
 
 * Add support for cygwin setup packages to setup
 
