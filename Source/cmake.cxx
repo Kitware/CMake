@@ -1072,6 +1072,22 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     // supporting them.
     else if (args[1] == "create_symlink" && args.size() == 4)
       {
+      const char* destinationFileName = args[3].c_str();
+      if ( cmSystemTools::FileExists(destinationFileName) )
+        {
+        if ( cmSystemTools::FileIsSymlink(destinationFileName) )
+          {
+          if ( !cmSystemTools::RemoveFile(destinationFileName) ||
+            cmSystemTools::FileExists(destinationFileName) )
+            {
+            return 0;
+            }
+          }
+        else
+          {
+          return 0;
+          }
+        }
       return cmSystemTools::CreateSymlink(args[2].c_str(),
                                           args[3].c_str())? 0:1;
       }
