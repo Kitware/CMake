@@ -27,7 +27,7 @@ cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
 {
   this->FileLine = -1;
   this->FileName = 0;
-
+  this->RemoveEmpty = true;
   this->EmptyVariable[0] = 0;
   strcpy(this->DCURLYVariable, "${");
   strcpy(this->RCURLYVariable, "}");
@@ -38,6 +38,7 @@ cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
 
   this->NoEscapeMode = false;
   this->ReplaceAtSyntax = false;
+  this->AtOnly = false;
 }
 
 
@@ -71,6 +72,18 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
     {
     return this->ExpandVariable(var);
     }
+  if(this->AtOnly)
+    {
+    std::string ref = "$";
+    ref += key;
+    ref += "{";
+    if(var)
+      {
+      ref += var;
+      }
+    ref += "}";
+    return this->AddString(ref.c_str());
+    }
   if ( strcmp(key, "ENV") == 0 )
     {
     char *ptr = getenv(var);
@@ -92,8 +105,21 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
   return 0;
 }
 
-char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
+char* cmCommandArgumentParserHelper::ExpandVariable(const char* var,
+                                                    bool doingAt)
 {
+  // if we are in AtOnly mode, and we are not expanding an @ variable
+  // then put back the ${var} unexpanded
+  if(!doingAt && this->AtOnly)
+    {
+    std::string ref = "${";
+    if(var)
+      {
+      ref += var;
+      }
+    ref += "}";
+    return this->AddString(ref.c_str());
+    }
   if(!var)
     {
     return 0;
@@ -109,6 +135,10 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     return this->AddString(ostr.str().c_str());
     } 
   const char* value = this->Makefile->GetDefinition(var);
+  if(!value && !this->RemoveEmpty)
+    {
+    return 0;
+    }
   if (this->EscapeQuotes && value)
     {
     return this->AddString(cmSystemTools::EscapeQuotes(value).c_str());
@@ -120,15 +150,28 @@ char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
 {
   if(this->ReplaceAtSyntax)
     {
-    return this->ExpandVariable(var);
+    // try to expand the variable
+    char* ret = this->ExpandVariable(var, true);
+    // if the return was 0 and we want to replace empty strings
+    // then return an empty string 
+    if(!ret && this->RemoveEmpty)
+      {
+      return this->AddString(ret);
     }
-  else
+    // if the ret was not 0, then return it
+    if(ret)
     {
+      return ret;
+      }
+    }
+  // at this point we want to put it back because of one of these cases:
+  // - this->ReplaceAtSyntax is false  
+  // - this->ReplaceAtSyntax is true, but this->RemoveEmpty is false,
+  //   and the variable was not defined
     std::string ref = "@";
     ref += var;
     ref += "@";
     return this->AddString(ref.c_str());
-    }
 }
 
 char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)

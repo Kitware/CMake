@@ -1,4 +1,6 @@
 Changes in CMake 2.4.7
+* Fix for @@ in file names
+
 * Fix for if command scope issues
 
 * Fix for relative path issue with paths ending in /.
