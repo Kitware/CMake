@@ -429,6 +429,9 @@ public:
   // Store options from command line flags.
   void Parse(const char* flags);
 
+  // Fix the ExceptionHandling option to default to off.
+  void FixExceptionHandlingDefault();
+
   // Store options for verbose builds.
   void SetVerboseMakefile(bool verbose);
 
@@ -554,6 +557,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 
   // Construct a set of build options for this target.
   Options targetOptions(Options::Compiler);
+  targetOptions.FixExceptionHandlingDefault();
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
   targetOptions.SetVerboseMakefile(
@@ -1696,7 +1700,11 @@ cmLocalVisualStudio7GeneratorOptions
       this->FlagTable = cmLocalVisualStudio7GeneratorLinkFlagTable; break;
     default: break;
     }
+}
 
+//----------------------------------------------------------------------------
+void cmLocalVisualStudio7GeneratorOptions::FixExceptionHandlingDefault()
+{
   // Exception handling is on by default because the platform file has
   // "/EHsc" in the flags.  Normally, that will override this
   // initialization to off, but the user has the option of removing
