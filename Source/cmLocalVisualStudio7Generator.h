@@ -68,7 +68,9 @@ public:
   virtual void ConfigureFinalPass();
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& 
-                                      dirs);
+                                      dirs); 
+  // return the source name for the object file
+  virtual std::string GetSourceObjectName(cmSourceFile& );
 
 private:
   typedef cmLocalVisualStudio7GeneratorOptions Options;

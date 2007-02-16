@@ -25,11 +25,11 @@ int main()
     }
   if(car() == 30)
     {
-    printf("bar is 30!\n");
+    printf("car is 30!\n");
     }
   else
     {
-    printf("bar is not 30 error!\n");
+    printf("car is not 30 error!\n");
     return -1;
     }
   printf("Test past\n");
