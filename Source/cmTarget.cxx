@@ -256,6 +256,14 @@ void cmTarget::DefineProperties(cmake *cm)
      "in contrast to a console application for example. This changes "
      "how the executable will be linked.");
 
+  cm->DefineProperty
+    ("OBJECT_FILES", cmProperty::TARGET, 
+     "Used to get the resulting list of object files that make up a "
+     "target.",
+     "This can be used to put object files from one library "
+     "into another library. It is a read only property.  It "
+     "converts the source list for the target into a list of full "
+     "paths to object names that will be produced by the target.");
 
   // define some properties without documentation
   cm->DefineProperty("DEBUG_OUTPUT_NAME", cmProperty::TARGET,0,0);
@@ -529,13 +537,20 @@ void cmTarget::TraceVSDependencies(std::string projFile,
 
 void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
 {
+  // only allow this to be called once
+  // there is a lazy evaluation of this in ComputeObjectFiles,
+  // that could break backwards compatibility with projects that
+  // use old style source lists.  
+  if(this->SourceFiles.size() != 0)
+    {
+    return;
+    }
   // this is only done for non install targets
   if ((this->TargetTypeValue == cmTarget::INSTALL_FILES)
       || (this->TargetTypeValue == cmTarget::INSTALL_PROGRAMS))
     {
     return;
     }
-
   // for each src lists add the classes
   for (std::vector<std::string>::const_iterator s = this->SourceLists.begin();
        s != this->SourceLists.end(); ++s)
@@ -1160,6 +1175,49 @@ const char *cmTarget::GetProperty(const char* prop)
   return this->GetProperty(prop, cmProperty::TARGET);
 }
 
+void cmTarget::ComputeObjectFiles()
+{
+  // Force the SourceFiles vector to be populated
+  this->GenerateSourceFilesFromSourceLists(*this->Makefile);
+  std::vector<std::string> dirs;
+  this->Makefile->GetLocalGenerator()->
+    GetTargetObjectFileDirectories(this,
+                                   dirs);
+  std::string objectFiles;
+  std::string objExtensionLookup1 = "CMAKE_";
+  std::string objExtensionLookup2 = "_OUTPUT_EXTENSION";
+  
+  for(std::vector<std::string>::iterator d = dirs.begin();
+      d != dirs.end(); ++d)
+    {
+    for(std::vector<cmSourceFile*>::iterator s = this->SourceFiles.begin();
+        s != this->SourceFiles.end(); ++s)
+      {
+      cmSourceFile* sf = *s;
+      const char* lang = this->Makefile->GetLocalGenerator()->
+        GetGlobalGenerator()->GetLanguageFromExtension(sf->GetSourceExtension().c_str());
+      std::string lookupObj = objExtensionLookup1 + lang;
+      lookupObj += objExtensionLookup2;
+      const char* obj = this->Makefile->GetDefinition(lookupObj.c_str());
+      if(obj)
+        {
+        if(objectFiles.size())
+          {
+          objectFiles += ";";
+          }
+        std::string objFile = *d;
+        objFile += "/";
+        objFile += this->Makefile->GetLocalGenerator()->
+          GetSourceObjectName(*sf);
+        objFile += obj;
+        objectFiles += objFile;
+        }
+      }
+    }
+  this->SetProperty("OBJECT_FILES", objectFiles.c_str());
+}
+
+
 const char *cmTarget::GetProperty(const char* prop,
                                   cmProperty::ScopeType scope)
 {
@@ -1178,7 +1236,10 @@ const char *cmTarget::GetProperty(const char* prop,
     // variable in the location.
     this->SetProperty("LOCATION", this->GetLocation(0));
     }
-
+  if(strcmp(prop, "OBJECT_FILES") == 0)
+    {
+    this->ComputeObjectFiles();
+    }
   // Per-configuration location can be computed.
   int len = static_cast<int>(strlen(prop));
   if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
@@ -1186,7 +1247,6 @@ const char *cmTarget::GetProperty(const char* prop,
     std::string configName(prop, len-9);
     this->SetProperty(prop, this->GetLocation(configName.c_str()));
     }
-
   // the type property returns what type the target is
   if (!strcmp(prop,"TYPE"))
     {

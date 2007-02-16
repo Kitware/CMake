@@ -261,6 +261,9 @@ public:
 
   // Define the properties
   static void DefineProperties(cmake *cm);
+  
+  // Compute the OBJECT_FILES property only when requested
+  void ComputeObjectFiles();
 
 private:
   /**

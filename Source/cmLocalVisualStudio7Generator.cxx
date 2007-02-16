@@ -1949,3 +1949,16 @@ cmLocalVisualStudio7GeneratorOptions
     fout << "\"" << suffix;
     }
 }
+void cmLocalVisualStudio7Generator::
+GetTargetObjectFileDirectories(cmTarget* target,
+                               std::vector<std::string>& 
+                               dirs)
+{
+  std::string dir = this->Makefile->GetCurrentOutputDirectory();
+  dir += "/";
+  dir += this->GetTargetDirectory(*target);
+  dir += "/";
+  dir += this->GetGlobalGenerator()->GetCMakeCFGInitDirectory();
+  std::cerr << dir << "\n";
+  dirs.push_back(dir);
+}

@@ -246,7 +246,9 @@ public:
     {
     return !this->SkipAssemblySourceRules;
     }
-
+  // Get the directories into which the .o files will go for this target
+  void GetTargetObjectFileDirectories(cmTarget* target,
+                                      std::vector<std::string>& dirs);
 protected:
   // these two methods just compute reasonable values for LibraryOutputPath
   // and ExecutableOutputPath

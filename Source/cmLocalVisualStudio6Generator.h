@@ -61,7 +61,9 @@ public:
     {
     return this->CreatedProjectNames;
     }
-
+  void GetTargetObjectFileDirectories(cmTarget* target,
+                                      std::vector<std::string>& 
+                                      dirs);
 private:
   std::string DSPHeaderTemplate;
   std::string DSPFooterTemplate;

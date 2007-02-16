@@ -124,6 +124,20 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
+    const char* osxArch = 
+      mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
+  const char* sysroot = 
+      mf->GetDefinition("CMAKE_OSX_SYSROOT");
+  if(osxArch && sysroot)
+    {
+    std::cerr <<"EnableLanguage archs\n";
+    this->Architectures.clear();
+    cmSystemTools::ExpandListArgument(std::string(osxArch),
+                                      this->Architectures);
+    }
+  else
+    std::cerr <<"no EnableLanguage archs\n";
+
 }
 
 //----------------------------------------------------------------------------
@@ -2156,9 +2170,6 @@ void cmGlobalXCodeGenerator
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
   if(osxArch && sysroot)
     {
-    this->Architectures.clear();
-    cmSystemTools::ExpandListArgument(std::string(osxArch),
-                                      this->Architectures);
     if(this->Architectures.size() > 1)
       {
       buildSettings->AddAttribute("SDKROOT", 
@@ -2216,7 +2227,6 @@ void cmGlobalXCodeGenerator
     }
   this->RootObject->AddAttribute("targets", allTargets);
 }
-
 
 //----------------------------------------------------------------------------
 void 
@@ -2555,6 +2565,52 @@ std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
   return ret;
 }
 
+void cmGlobalXCodeGenerator::
+GetTargetObjectFileDirectories(cmTarget* target,
+                               std::vector<std::string>& 
+                               dirs)
+{
+  std::string dir = this->CurrentMakefile->GetCurrentOutputDirectory();
+  dir += "/";
+  dir += target->GetName();
+  dir += ".build/";
+  dir += this->GetCMakeCFGInitDirectory();
+  dir += "/";
+  if(target->GetType() != cmTarget::EXECUTABLE)
+    {
+    dir += "lib";
+    }
+  dir += target->GetName();
+  if(target->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    dir += ".a";
+    }
+  if(target->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    dir += ".dylib";
+    }
+  if(target->GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    dir += ".so";
+    }
+  dir += ".build/Objects-normal/";
+  std::string dirsave = dir;
+  if(this->Architectures.size())
+    {
+    for(std::vector<std::string>::iterator i = this->Architectures.begin(); 
+        i != this->Architectures.end(); ++i)
+      {
+      dir += *i;
+      dirs.push_back(dir);
+      dir = dirsave;
+      }
+    }
+  else
+    {
+    dirs.push_back(dir);
+    }
+}
+
 //----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator
@@ -2567,6 +2623,7 @@ cmGlobalXCodeGenerator
     {
     if(config)
       {
+
       dir += prefix;
       dir += config;
       dir += suffix;

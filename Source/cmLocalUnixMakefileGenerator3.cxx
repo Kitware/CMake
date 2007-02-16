@@ -1920,3 +1920,14 @@ void cmLocalUnixMakefileGenerator3
       }
     }
 }
+
+
+void cmLocalUnixMakefileGenerator3
+::GetTargetObjectFileDirectories(cmTarget* target,
+                                 std::vector<std::string>& dirs)
+{
+  std::string dir = this->Makefile->GetCurrentOutputDirectory();
+  dir += "/";
+  dir += this->GetTargetDirectory(*target);
+  dirs.push_back(dir);
+}

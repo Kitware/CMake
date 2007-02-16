@@ -82,13 +82,16 @@ public:
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGInitDirectory()  { return "."; }
 
+  void GetTargetObjectFileDirectories(cmTarget* target,
+                                      std::vector<std::string>& 
+                                      dirs);
+  void SetCurrentLocalGenerator(cmLocalGenerator*);
 private: 
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
                                      cmSourceGroup* sg);
   void CreateGroups(cmLocalGenerator* root,
                     std::vector<cmLocalGenerator*>&
                     generators);
-  void SetCurrentLocalGenerator(cmLocalGenerator*);
   std::string XCodeEscapePath(const char* p);
   std::string ConvertToRelativeForXCode(const char* p);
   std::string ConvertToRelativeForMake(const char* p);
@@ -158,6 +161,7 @@ private:
                           const char* varNameLang,
                           const char* varNameSuffix,
                           const char* default_flags);
+
 protected:
   virtual const char* GetInstallTargetName()      { return "install"; }
   virtual const char* GetPackageTargetName()      { return "package"; }

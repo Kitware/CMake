@@ -66,6 +66,10 @@ public:
   void SetVersion8() {this->Version = 8;}
   void SetPlatformName(const char* n) { this->PlatformName = n;}
   virtual void ConfigureFinalPass();
+  void GetTargetObjectFileDirectories(cmTarget* target,
+                                      std::vector<std::string>& 
+                                      dirs);
+
 private:
   typedef cmLocalVisualStudio7GeneratorOptions Options;
   void ReadAndStoreExternalGUID(const char* name,

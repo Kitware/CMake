@@ -214,7 +214,17 @@ public:
 
   /** Backwards-compatibility version of EscapeForShell.  */
   std::string EscapeForShellOldStyle(const char* str);
-
+  
+  /** Return the directories into which object files will be put.
+   *  There maybe more than one for fat binary systems like OSX.
+   */
+  virtual void 
+  GetTargetObjectFileDirectories(cmTarget* target,
+                                 std::vector<std::string>& 
+                                 dirs);
+  // return the source name for the object file
+  virtual std::string GetSourceObjectName(cmSourceFile& );
+  
 protected:
 
   /** Construct a comment for a custom command.  */

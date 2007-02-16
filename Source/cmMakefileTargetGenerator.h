@@ -60,7 +60,7 @@ public:
     return this->NumberOfProgressActions;}
 
   const char *GetTargetName() { return this->TargetName.c_str(); }
-
+  cmTarget* GetTarget() { return this->Target;}
 protected:
 
   // create the file and directory etc

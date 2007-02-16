@@ -1275,4 +1275,3 @@ void cmMakefileTargetGenerator::WriteProgressVariables(unsigned long total,
   current += this->NumberOfProgressActions;
   delete progressFileStream;
 }
-

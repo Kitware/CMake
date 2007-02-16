@@ -15,7 +15,7 @@
 
 =========================================================================*/
 #include "cmLocalVisualStudioGenerator.h"
-
+#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
@@ -178,3 +178,4 @@ cmLocalVisualStudioGenerator
     }
   return script;
 }
+
