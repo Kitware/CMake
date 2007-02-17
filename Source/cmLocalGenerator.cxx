@@ -2400,9 +2400,9 @@ std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
   return std::string(&arg[0]);
 }
 void 
-cmLocalGenerator::GetTargetObjectFileDirectories(cmTarget* target,
+cmLocalGenerator::GetTargetObjectFileDirectories(cmTarget* ,
                                                  std::vector<std::string>& 
-                                                 dirs)
+                                                 )
 {
   cmSystemTools::Error("GetTargetObjectFileDirectories called on cmLocalGenerator");
 }

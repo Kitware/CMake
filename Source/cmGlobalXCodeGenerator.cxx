@@ -130,14 +130,10 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
       mf->GetDefinition("CMAKE_OSX_SYSROOT");
   if(osxArch && sysroot)
     {
-    std::cerr <<"EnableLanguage archs\n";
     this->Architectures.clear();
     cmSystemTools::ExpandListArgument(std::string(osxArch),
                                       this->Architectures);
     }
-  else
-    std::cerr <<"no EnableLanguage archs\n";
-
 }
 
 //----------------------------------------------------------------------------
