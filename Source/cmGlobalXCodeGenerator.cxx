@@ -123,6 +123,8 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
   mf->AddDefinition("CMAKE_GENERATOR_CC", "gcc");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
+  // initialize Architectures so it can be used by 
+  //  GetTargetObjectFileDirectories
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
     const char* osxArch = 
       mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
@@ -2166,6 +2168,10 @@ void cmGlobalXCodeGenerator
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
   if(osxArch && sysroot)
     {
+    // recompute this as it may have been changed since enable language
+    this->Architectures.clear();
+    cmSystemTools::ExpandListArgument(std::string(osxArch),
+                                      this->Architectures);
     if(this->Architectures.size() > 1)
       {
       buildSettings->AddAttribute("SDKROOT", 
