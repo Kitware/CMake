@@ -114,8 +114,9 @@ int cmCPackOSXX11Generator::CompressFiles(const char* outFileName,
   cmSystemTools::CreateSymlink("/Applications", applicationsLinkName.c_str());
 
   if (
-    !this->CopyResourcePlistFile("VolumeIcon.icns", diskImageDirectory.c_str(),
-      ".VolumeIcon.icns", true ) ||
+    !this->CopyResourcePlistFile("VolumeIcon.icns", 
+                                 diskImageDirectory.c_str(),
+                                 ".VolumeIcon.icns", true ) ||
     !this->CopyResourcePlistFile("DS_Store", diskImageDirectory.c_str(),
       ".DS_Store", true ) ||
     !this->CopyResourcePlistFile("background.png",

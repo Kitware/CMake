@@ -1965,7 +1965,8 @@ GetTargetObjectFileDirectories(cmTarget* target,
 
   
   // return the source name for the object file
-std::string cmLocalVisualStudio7Generator::GetSourceObjectName(cmSourceFile& sf )
+std::string 
+cmLocalVisualStudio7Generator::GetSourceObjectName(cmSourceFile& sf )
 {
   std::string ret = sf.GetSourceName();
   std::string::size_type pos = ret.find("/");

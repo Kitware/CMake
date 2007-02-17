@@ -18,7 +18,8 @@ GetTargetObjectFileDirectories(cmTarget* target,
                                std::vector<std::string>& 
                                dirs)
 {
-  cmGlobalXCodeGenerator* g = (cmGlobalXCodeGenerator*)this->GetGlobalGenerator();
+  cmGlobalXCodeGenerator* g = 
+    (cmGlobalXCodeGenerator*)this->GetGlobalGenerator();
   g->SetCurrentLocalGenerator(this);
   g->GetTargetObjectFileDirectories(target,
                                     dirs);

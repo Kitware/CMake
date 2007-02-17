@@ -2404,7 +2404,8 @@ cmLocalGenerator::GetTargetObjectFileDirectories(cmTarget* ,
                                                  std::vector<std::string>& 
                                                  )
 {
-  cmSystemTools::Error("GetTargetObjectFileDirectories called on cmLocalGenerator");
+  cmSystemTools::Error("GetTargetObjectFileDirectories"
+                       " called on cmLocalGenerator");
 }
 
 std::string cmLocalGenerator::GetSourceObjectName(cmSourceFile& sf)
