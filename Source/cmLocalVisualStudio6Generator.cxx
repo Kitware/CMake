@@ -1475,7 +1475,7 @@ void cmLocalVisualStudio6Generator
 
 
 void cmLocalVisualStudio6Generator
-::GetTargetObjectFileDirectories(cmTarget* target,
+::GetTargetObjectFileDirectories(cmTarget* ,
                                  std::vector<std::string>& 
                                  dirs)
 {
