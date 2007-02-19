@@ -1077,7 +1077,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
   buildTargetRuleName += relink?"/preinstall":"/build";
   buildTargetRuleName = this->Convert(buildTargetRuleName.c_str(),
                                       cmLocalGenerator::HOME_OUTPUT,
-                                      cmLocalGenerator::MAKEFILE);
+                                      cmLocalGenerator::UNCHANGED);
 
   // Build the list of target outputs to drive.
   std::vector<std::string> depends;

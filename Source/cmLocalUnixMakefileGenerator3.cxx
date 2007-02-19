@@ -827,7 +827,7 @@ cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(cmTarget& target)
 {
   std::string dir = this->HomeRelativeOutputPath;
   dir += this->GetTargetDirectory(target);
-  return this->Convert(dir.c_str(),NONE,MAKEFILE);
+  return this->Convert(dir.c_str(),NONE,UNCHANGED);
 }
 
 
