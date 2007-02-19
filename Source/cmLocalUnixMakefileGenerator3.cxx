@@ -421,6 +421,7 @@ void cmLocalUnixMakefileGenerator3
       // Add a fast rule to build the target
       std::string makefileName = this->GetRelativeTargetDirectory(t->second);
       makefileName += "/build.make";
+      // make sure the makefile name is suitable for a makefile
       std::string makeTargetName = 
         this->GetRelativeTargetDirectory(t->second);
       makeTargetName += "/build";
@@ -1742,7 +1743,7 @@ cmLocalUnixMakefileGenerator3
   // Call make on the given file.
   std::string cmd;
   cmd += "$(MAKE) -f ";
-  cmd += makefile;
+  cmd += this->Convert(makefile,NONE,MAKEFILE);
   cmd += " ";
   
   // Passg down verbosity level.

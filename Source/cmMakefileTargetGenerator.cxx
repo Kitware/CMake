@@ -490,7 +490,11 @@ cmMakefileTargetGenerator
   vars.Language = lang;
   vars.TargetPDB = targetOutPathPDB.c_str();
   vars.Source = sourceFile.c_str();
-  vars.Object = relativeObj.c_str();
+  std::string shellrelativeObj = 
+    this->Convert(relativeObj.c_str(), 
+                  cmLocalGenerator::NONE, 
+                  cmLocalGenerator::SHELL).c_str();
+  vars.Object = shellrelativeObj.c_str();
   std::string objdir = this->LocalGenerator->GetHomeRelativeOutputPath();
   objdir = this->Convert(objdir.c_str(),
                          cmLocalGenerator::START_OUTPUT,
