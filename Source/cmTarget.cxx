@@ -233,12 +233,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \".so\") on a library name.");
 
   cm->DefineProperty
-    ("TEST_LOCATION", cmProperty::TARGET, 
-     "Where a target will be written on disk for ctest.",
-     "Much like the LOCATION property but makes use of "
-     "CTEST_TEST_CONFIGURATION to handle the build configuration.");
-
-  cm->DefineProperty
     ("VERSION", cmProperty::TARGET, 
      "What version number is this target.",
      "For shared libraries VERSION and SOVERSION can be used to specify "
@@ -1153,25 +1147,6 @@ const char* cmTarget::GetLocation(const char* config)
   return this->Location.c_str();
 }
 
-const char* cmTarget::GetTestLocation(const char* config)
-{
-  this->Location = this->GetDirectory();
-  if(!this->Location.empty())
-    {
-    this->Location += "/";
-    }
-  const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
-  // if this platform has configurations, then use the ctest var
-  if(cfgid && strcmp(cfgid, ".") != 0)
-    {
-    this->Location += "${CTEST_CONFIGURATION_TYPE}";
-    this->Location += "/";
-    }
-  this->Location += this->GetFullName(config, false);
-  return this->Location.c_str();
-}
-
-
 //----------------------------------------------------------------------------
 void cmTarget::GetTargetVersion(int& major, int& minor)
 {
@@ -1263,38 +1238,19 @@ const char *cmTarget::GetProperty(const char* prop,
     this->SetProperty("LOCATION", this->GetLocation(0));
     }
 
-  if (!strcmp(prop,"TEST_LOCATION"))
+  // Per-configuration location can be computed.
+  int len = static_cast<int>(strlen(prop));
+  if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
     {
-    // Set the LOCATION property of the target.  Note that this cannot take
-    // into account the per-configuration name of the target because the
-    // configuration type may not be known at CMake time.  We should
-    // deprecate this feature and instead support transforming an executable
-    // target name given as the command part of custom commands into the
-    // proper path at build time.  Alternatively we could put environment
-    // variable settings in all custom commands that hold the name of the
-    // target for each configuration and then give a reference to the
-    // variable in the location.
-    this->SetProperty("TEST_LOCATION", this->GetTestLocation(0));
+    std::string configName(prop, len-9);
+    this->SetProperty(prop, this->GetLocation(configName.c_str()));
     }
-  else
-
+  
   if(strcmp(prop, "OBJECT_FILES") == 0)
     {
     this->ComputeObjectFiles();
     }
 
-  // Per-configuration location can be computed.
-  int len = static_cast<int>(strlen(prop));
-  if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
-    {
-    // Per-configuration location can be computed.
-    int len = static_cast<int>(strlen(prop));
-    if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
-      {
-      std::string configName(prop, len-9);
-      this->SetProperty(prop, this->GetLocation(configName.c_str()));
-      }
-    }
   // the type property returns what type the target is
   if (!strcmp(prop,"TYPE"))
     {

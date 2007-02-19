@@ -181,10 +181,6 @@ public:
       target property.  */
   const char* GetLocation(const char* config);
 
-  /** Get the location of the target in the build tree for use by ctest.
-      May make use of the CTEST_TEST_CONFIGURATION variable in ctest. */
-  const char* GetTestLocation(const char* config);
-
   /** Get the target major and minor version numbers interpreted from
       the VERSION property.  Version 0 is returned if the property is
       not set or cannot be parsed.  */
