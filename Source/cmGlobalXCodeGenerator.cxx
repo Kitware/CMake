@@ -2574,7 +2574,7 @@ GetTargetObjectFileDirectories(cmTarget* target,
 {
   std::string dir = this->CurrentMakefile->GetCurrentOutputDirectory();
   dir += "/";
-  dir += target->GetName();
+  dir += this->CurrentMakefile->GetProjectName();
   dir += ".build/";
   dir += this->GetCMakeCFGInitDirectory();
   dir += "/";
