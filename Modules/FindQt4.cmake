@@ -222,12 +222,18 @@ MACRO(QT_QUERY_QMAKE outvar invar)
     WORKING_DIRECTORY  
     ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake
     OUTPUT_VARIABLE _qmake_query_output
-    ERROR_VARIABLE _qmake_query_output )
-
+    RESULT_VARIABLE _qmake_result
+    ERROR_VARIABLE _qmake_error_output )
+  
   FILE(REMOVE_RECURSE 
     "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake")
 
-  STRING(REGEX REPLACE ".*CMAKE_MESSAGE<([^>]*).*" "\\1" ${outvar} "${_qmake_query_output}")
+  IF(_qmake_result)
+    MESSAGE(WARNING " querying qmake for ${invar}.  qmake reported:\n${_qmake_error_output}")
+  ELSE(_qmake_result)
+    STRING(REGEX REPLACE ".*CMAKE_MESSAGE<([^>]*).*" "\\1" ${outvar} "${_qmake_query_output}")
+  ENDIF(_qmake_result)
+
 ENDMACRO(QT_QUERY_QMAKE)
 
 # check for qmake
