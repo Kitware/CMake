@@ -429,7 +429,7 @@ void CMakeSetupDialog::SaveToRegistry()
 
     // write the size of the dialog
     CRect size;
-    this->GetClientRect(&size);
+    this->GetWindowRect(&size);
     unsigned long width = size.Width();
     unsigned long height = size.Height();    
     RegSetValueEx(hKey, _T("Width"), 0, REG_DWORD, 
