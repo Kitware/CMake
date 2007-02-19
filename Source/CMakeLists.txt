@@ -1001,11 +1001,12 @@ IF(BUILD_TESTING)
       )
   ENDIF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
 
+
   ADD_TEST(SubDirSpaces ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/SubDirSpaces"
     "${CMake_BINARY_DIR}/Tests/SubDirSpaces"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDirSpaces/Executable"
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDirSpaces/Executable Sources"
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project SUBDIR
