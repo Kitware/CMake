@@ -1,4 +1,4 @@
-project(foo)
+project(ConvLibrary)
 
 # create a source list
 set(foo_sources foo.cxx bar.c sub1/car.cxx) 
