@@ -485,7 +485,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   buildFile->AddAttribute("settings", settings);
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
   const char* lang = 
-    this->GetLanguageFromExtension(sf->GetSourceExtension().c_str());
+    this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
   std::string sourcecode = "sourcecode";
   std::string ext = sf->GetSourceExtension();
   ext = cmSystemTools::LowerCase(ext);
