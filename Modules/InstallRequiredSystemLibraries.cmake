@@ -56,6 +56,24 @@ IF(MSVC)
         "${MSVC80_MFC_DIR}/mfcm80u.dll"
         )
     ENDIF(MSVC80)
+    IF(MSVC80)
+      # include the language dll's for vs8 as well as the actuall dll's
+      SET(MSVC80_MFCLOC_DIR "${MSVC80_REDIST_DIR}/x86/Microsoft.VC80.MFCLOC")
+      # Install the manifest that allows DLLs to be loaded from the
+      # directory containing the executable.
+      SET(__install__libs ${__install__libs}
+        "${MSVC80_MFCLOC_DIR}/Microsoft.VC80.MFCLOC.manifest"
+        "${MSVC80_MFCLOC_DIR}/mfc80chs.dll"
+        "${MSVC80_MFCLOC_DIR}/mfc80cht.dll"
+        "${MSVC80_MFCLOC_DIR}/mfc80enu.dll"
+        "${MSVC80_MFCLOC_DIR}/mfc80esp.dll"
+        "${MSVC80_MFCLOC_DIR}/mfc80deu.dll"
+        "${MSVC80_MFCLOC_DIR}/mfc80fra.dll"
+        "${MSVC80_MFCLOC_DIR}/mfc80ita.dll"
+        "${MSVC80_MFCLOC_DIR}/mfc80jpn.dll"
+        "${MSVC80_MFCLOC_DIR}/mfc80kor.dll"
+        )
+    ENDIF(MSVC80)
   ENDIF(CMAKE_INSTALL_MFC_LIBRARIES)
   FOREACH(lib
       ${__install__libs}
