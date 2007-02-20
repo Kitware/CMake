@@ -1,20 +1,19 @@
 # - Find the KDE3 include and library dirs, KDE preprocessors and define a some macros
 #
 # This module defines the following variables:
-# KDE3_DEFINITIONS         - compiler definitions required for compiling KDE software
-# KDE3_INCLUDE_DIR         - the KDE include directory
-# KDE3_INCLUDE_DIRS        - the KDE and the Qt include directory, for use with INCLUDE_DIRECTORIES()
-# KDE3_LIB_DIR             - the directory where the KDE libraries are installed, for use with LINK_DIRECTORIES()
-# QT_AND_KDECORE_LIBS      - this contains both the Qt and the kdecore library
-# KDE3_DCOPIDL_EXECUTABLE  - the dcopidl executable
-# KDE3_DCOPIDL2CPP_EXECUTABLE - the dcopidl2cpp executable
-# KDE3_KCFGC_EXECUTABLE    - the kconfig_compiler executable
-# KDE3_FOUND               - set to TRUE if all of the above has been found
+#  KDE3_DEFINITIONS         - compiler definitions required for compiling KDE software
+#  KDE3_INCLUDE_DIR         - the KDE include directory
+#  KDE3_INCLUDE_DIRS        - the KDE and the Qt include directory, for use with INCLUDE_DIRECTORIES()
+#  KDE3_LIB_DIR             - the directory where the KDE libraries are installed, for use with LINK_DIRECTORIES()
+#  QT_AND_KDECORE_LIBS      - this contains both the Qt and the kdecore library
+#  KDE3_DCOPIDL_EXECUTABLE  - the dcopidl executable
+#  KDE3_DCOPIDL2CPP_EXECUTABLE - the dcopidl2cpp executable
+#  KDE3_KCFGC_EXECUTABLE    - the kconfig_compiler executable
+#  KDE3_FOUND               - set to TRUE if all of the above has been found
 #
 # The following user adjustable options are provided:
 #
-# KDE3_ENABLE_FINAL - enable this for KDE-style enable-final all-in-one compilation
-# KDE3_BUILD_TESTS - enable this to build KDE testcases
+#  KDE3_BUILD_TESTS - enable this to build KDE testcases
 #
 #
 # It also adds the following macros (from KDE3Macros.cmake)
@@ -47,18 +46,20 @@
 #    This will create and install a simple libtool file for the given target.
 #
 # KDE3_ADD_EXECUTABLE(name file1 ... fileN )
-#    Equivalent to ADD_EXECUTABLE(), but additionally supports KDE3_ENABLE_FINAL
+#    Currently identical to ADD_EXECUTABLE(), may provide some advanced features in the future.
 #
 # KDE3_ADD_KPART(name [WITH_PREFIX] file1 ... fileN )
 #    Create a KDE plugin (KPart, kioslave, etc.) from the given source files.
-#    It supports KDE3_ENABLE_FINAL
 #    If WITH_PREFIX is given, the resulting plugin will have the prefix "lib", otherwise it won't.
 #    It creates and installs an appropriate libtool la-file.
 #
 # KDE3_ADD_KDEINIT_EXECUTABLE(name file1 ... fileN )
 #    Create a KDE application in the form of a module loadable via kdeinit.
 #    A library named kdeinit_<name> will be created and a small executable which links to it.
-#    It supports KDE3_ENABLE_FINAL
+#
+# The option KDE3_ENABLE_FINAL to enable all-in-one compilation is
+# no longer supported.
+#
 #
 # Author: Alexander Neundorf <neundorf@kde.org>
 
