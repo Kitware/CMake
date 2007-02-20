@@ -385,10 +385,6 @@ cmMakefileTargetGenerator
     relativeObj = "";
     }
   relativeObj += obj;
-  if(this->Makefile->GetDefinition("CMAKE_WINDOWS_OBJECT_PATH"))
-    {
-    relativeObj = cmSystemTools::ConvertToOutputPath(relativeObj.c_str());
-    }
   // Write the build rule.
 
   // Build the set of compiler flags.
