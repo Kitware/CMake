@@ -22,3 +22,6 @@ FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
   SET(CMAKE_${type}_LINK_STATIC_C_FLAGS "-Wl,-Bstatic")
   SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-Bdynamic")
 ENDFOREACH(type)
+# force the language to be c++ since qnx only has gcc and not g++ and c++?
+SET(CMAKE_CXX_COMPILE_OBJECT
+  "<CMAKE_CXX_COMPILER> -x c++ <FLAGS> -o <OBJECT> -c <SOURCE>")
