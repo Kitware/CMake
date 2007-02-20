@@ -5,9 +5,6 @@
 #  LIBXML2_INCLUDE_DIR - the LibXml2 include directory
 #  LIBXML2_LIBRARIES - the libraries needed to use LibXml2
 #  LIBXML2_DEFINITIONS - Compiler switches required for using LibXml2
-#
-# Copyright (c) 2006, Alexander Neundorf <neundorf@kde.org>
-# This code is available under the BSD license, see licenses/BSD for details.
 
 # Copyright (c) 2006, Alexander Neundorf, <neundorf@kde.org>
 #
