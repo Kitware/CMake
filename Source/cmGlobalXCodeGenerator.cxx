@@ -515,11 +515,16 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     {
     sourcecode += ".c.c";
     }
-  else
+  else if(strcmp(lang, "CXX") == 0)
     {
     sourcecode += ".cpp.cpp";
     }
-
+  else
+    {
+    sourcecode += ext;
+    sourcecode += ".";
+    sourcecode += ext;
+    }
   fileRef->AddAttribute("lastKnownFileType", 
                         this->CreateString(sourcecode.c_str()));
   std::string path = 
