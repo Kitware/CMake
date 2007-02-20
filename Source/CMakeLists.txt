@@ -697,6 +697,16 @@ IF(BUILD_TESTING)
       -DCMAKE_TEST_SYSTEM_LIBRARIES:BOOL=${CMAKE_TEST_SYSTEM_LIBRARIES}
       --test-command complex)
 
+    ADD_TEST(SetLang ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/SetLang"
+      "${CMake_BINARY_DIR}/Tests/SetLang"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-project SetLang
+      --test-command bar)
+
 #     ADD_TEST(ConvLibrary ${CMAKE_CTEST_COMMAND}
 #       --build-and-test
 #       "${CMake_SOURCE_DIR}/Tests/ConvLibrary"
@@ -706,6 +716,7 @@ IF(BUILD_TESTING)
 #       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
 #       --build-project ConvLibrary
 #       --test-command bartest)
+
 
 #    ADD_TEST(complexRelativePaths  ${CMAKE_CTEST_COMMAND}
 #      --build-and-test

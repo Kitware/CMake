@@ -1148,9 +1148,16 @@ void cmLocalVisualStudio7Generator
       }
     const char* lang = this->GlobalGenerator->GetLanguageFromExtension
       ((*sf)->GetSourceExtension().c_str());
+    const char* sourceLang = this->GetSourceFileLanguage(*(*sf));
     const char* linkLanguage = target.GetLinkerLanguage
       (this->GetGlobalGenerator());
-
+    bool needForceLang = false;
+    // source file does not match its extension language
+    if(lang && sourceLang && strcmp(lang, sourceLang) != 0)
+      {
+      needForceLang = true;
+      lang = sourceLang;
+      }
     // If lang is set, the compiler will generate code automatically.
     // If HEADER_FILE_ONLY is set, we must suppress this generation in
     // the project file
@@ -1159,7 +1166,7 @@ void cmLocalVisualStudio7Generator
 
     // if the source file does not match the linker language
     // then force c or c++
-    if(linkLanguage && lang && strcmp(lang, linkLanguage) != 0)
+    if(needForceLang || (linkLanguage && lang && strcmp(lang, linkLanguage) != 0))
       {
       if(strcmp(lang, "CXX") == 0)
         {
