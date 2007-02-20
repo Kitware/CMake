@@ -29,7 +29,7 @@
 #  
 #  macro QT4_WRAP_CPP(outfiles inputfile ... )
 #  macro QT4_WRAP_UI(outfiles inputfile ... )
-#  macro QT4_ADD_RESOURCE(outfiles inputfile ... )
+#  macro QT4_ADD_RESOURCES(outfiles inputfile ... )
 #  macro QT4_AUTOMOC(inputfile ... )
 #  macro QT4_GENERATE_MOC(inputfile outputfile )
 #
@@ -864,7 +864,7 @@ IF (QT4_QMAKE_FOUND)
   ENDMACRO (QT4_WRAP_UI)
 
 
-  # QT4_ADD_RESOURCE(outfiles inputfile ... )
+  # QT4_ADD_RESOURCES(outfiles inputfile ... )
   # TODO  perhaps consider adding support for compression and root options to rcc
 
   MACRO (QT4_ADD_RESOURCES outfiles )
