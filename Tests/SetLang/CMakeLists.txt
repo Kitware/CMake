@@ -1,5 +1,7 @@
 # test forcing a source file language to c++ from c
 project(SetLang)
+# force this to be verbose so I can debug a dashboard entry
+SET(CMAKE_VERBOSE_MAKEFILE 1)
 add_library(foo foo.c)
 add_executable(bar bar.c)
 set_source_files_properties(foo.c bar.c PROPERTIES LANGUAGE CXX)
