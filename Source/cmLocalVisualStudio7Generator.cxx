@@ -1166,7 +1166,8 @@ void cmLocalVisualStudio7Generator
 
     // if the source file does not match the linker language
     // then force c or c++
-    if(needForceLang || (linkLanguage && lang && strcmp(lang, linkLanguage) != 0))
+    if(needForceLang || (linkLanguage && lang 
+                         && strcmp(lang, linkLanguage) != 0))
       {
       if(strcmp(lang, "CXX") == 0)
         {
