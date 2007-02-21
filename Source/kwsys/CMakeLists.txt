@@ -135,6 +135,13 @@ ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 # The project name is that of the specified namespace.
 PROJECT(${KWSYS_NAMESPACE})
 
+# Setup the large file support default.
+IF(KWSYS_LFS_DISABLE)
+  SET(KWSYS_LFS_REQUESTED 0)
+ELSE(KWSYS_LFS_DISABLE)
+  SET(KWSYS_LFS_REQUESTED 1)
+ENDIF(KWSYS_LFS_DISABLE)
+
 # Enable testing if building standalone.
 IF(KWSYS_STANDALONE)
   INCLUDE(Dart)
@@ -283,7 +290,6 @@ ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
 
 #-----------------------------------------------------------------------------
 # Configure Large File Support.
-SET(KWSYS_LFS_REQUESTED 1)
 SET(KWSYS_LFS_AVAILABLE 0)
 IF(KWSYS_LFS_REQUESTED)
   # Large File Support is requested.
