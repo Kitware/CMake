@@ -1366,9 +1366,6 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   cmCustomCommandLines cpackCommandLines;
   std::vector<std::string> depends;
   cmCustomCommandLine singleLine;
-  cpackCommandLines.erase(cpackCommandLines.begin(), cpackCommandLines.end());
-  singleLine.erase(singleLine.begin(), singleLine.end());
-  depends.erase(depends.begin(), depends.end());
   singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
   if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.' )
     {
