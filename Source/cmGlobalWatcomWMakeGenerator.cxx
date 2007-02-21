@@ -34,7 +34,6 @@ void cmGlobalWatcomWMakeGenerator
   mf->AddDefinition("WATCOM", "1");
   mf->AddDefinition("CMAKE_QUOTE_INCLUDE_PATHS", "1");
   mf->AddDefinition("CMAKE_MANGLE_OBJECT_FILE_NAMES", "1");
-  mf->AddDefinition("CMAKE_WINDOWS_OBJECT_PATH", "1");
   mf->AddDefinition("CMAKE_MAKE_LINE_CONTINUE", "&");
   mf->AddDefinition("CMAKE_MAKE_SYMBOLIC_RULE", ".SYMBOLIC");
   mf->AddDefinition("CMAKE_NO_QUOTED_OBJECTS", "1");
