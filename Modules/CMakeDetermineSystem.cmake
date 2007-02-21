@@ -25,20 +25,25 @@
 # Ultrix                        ULTRIX  
 # cygwin                        CYGWIN_NT-5.1
 # MacOSX                        Darwin
-  
 IF(UNIX)
   FIND_PROGRAM(CMAKE_UNAME uname /bin /usr/bin /usr/local/bin )
   IF(CMAKE_UNAME)
     EXEC_PROGRAM(uname ARGS -s OUTPUT_VARIABLE CMAKE_SYSTEM_NAME)
     EXEC_PROGRAM(uname ARGS -r OUTPUT_VARIABLE CMAKE_SYSTEM_VERSION)
-    EXEC_PROGRAM(uname ARGS -p OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR
-      RETURN_VALUE val)
-    IF("${val}" GREATER 0)
+    IF(CMAKE_SYSTEM_NAME MATCHES "Linux")
       EXEC_PROGRAM(uname ARGS -m OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR
         RETURN_VALUE val)
-    ENDIF("${val}" GREATER 0)
+    ELSE(CMAKE_SYSTEM_NAME MATCHES "Linux")
+      EXEC_PROGRAM(uname ARGS -p OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR
+        RETURN_VALUE val)
+      IF("${val}" GREATER 0)
+        EXEC_PROGRAM(uname ARGS -m OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR
+          RETURN_VALUE val)
+      ENDIF("${val}" GREATER 0)
+    ENDIF(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    # check the return of the last uname -m or -p 
     IF("${val}" GREATER 0)
-      SET(CMAKE_SYSTEM_PROCESSOR "unknown")
+        SET(CMAKE_SYSTEM_PROCESSOR "unknown")
     ENDIF("${val}" GREATER 0)
     SET(CMAKE_UNAME ${CMAKE_UNAME} CACHE INTERNAL "uname command")
     # processor may have double quote in the name, and that needs to be removed
