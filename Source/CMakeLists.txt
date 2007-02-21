@@ -1015,7 +1015,8 @@ IF(BUILD_TESTING)
 
   # only add this test on platforms that support it
   # some old versions of make simply cannot handle spaces in paths
-  IF (${CMAKE_TEST_MAKEPROGRAM} MATCHES "nmake|gmake|wmake")
+  IF ("${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
+      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode")
     ADD_TEST(SubDirSpaces ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/SubDirSpaces"
@@ -1029,7 +1030,8 @@ IF(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/SubDirSpaces/ShouldBeHere"
       "${CMake_BINARY_DIR}/Tests/SubDirSpaces/testfromsubdir.obj"
       )
-  ENDIF (${CMAKE_TEST_MAKEPROGRAM} MATCHES "nmake|gmake|wmake")
+  ENDIF ("${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
+    "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode")
 
   IF (WIN32)
     ADD_TEST(SubDir ${CMAKE_CTEST_COMMAND}
