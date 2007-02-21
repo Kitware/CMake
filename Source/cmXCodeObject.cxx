@@ -190,6 +190,8 @@ void cmXCodeObject::SetString(const char* s)
     this->String = "\"\"";
     return;
     }
+  // escape quotes
+  cmSystemTools::ReplaceString(ss, "\"", "\\\"");
   bool needQuote = false;
   this->String = "";
   if(ss.find_first_of(" <>.+-=") != ss.npos)
@@ -200,7 +202,7 @@ void cmXCodeObject::SetString(const char* s)
     {
     this->String = "\"";
     }
-  this->String += s;
+  this->String += ss;
   if(needQuote)
     {
     this->String += "\"";

@@ -1156,7 +1156,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     buildSettings->AddAttribute
       ("GCC_PREPROCESSOR_DEFINITIONS", 
-       this->CreateString("CMAKE_INTDIR=\\\\\\\"$(CONFIGURATION)\\\\\\\""));
+       this->CreateString("CMAKE_INTDIR=\\\\\"$(CONFIGURATION)\\\\\""));
     }
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
@@ -2565,9 +2565,9 @@ std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
   if(ret.find(' ') != ret.npos)
     {
     std::string t = ret;
-    ret = "\\\"";
+    ret = "\"";
     ret += t;
-    ret += "\\\"";
+    ret += "\"";
     }
   return ret;
 }
