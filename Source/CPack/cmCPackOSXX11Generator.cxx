@@ -138,11 +138,13 @@ int cmCPackOSXX11Generator::CompressFiles(const char* outFileName,
   tmpFile += "/hdiutilOutput.log";
   cmOStringStream dmgCmd;
   dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE")
-    << "\" create -ov -format UDZO -srcfolder \"" << diskImageDirectory.c_str() 
-    << "\" \"" << outFileName << "\"";
+         << "\" create -ov -format UDZO -srcfolder \"" 
+         << diskImageDirectory.c_str() 
+         << "\" \"" << outFileName << "\"";
   int retVal = 1;
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-    "Compress disk image using command: " << dmgCmd.str().c_str() << std::endl);
+                "Compress disk image using command: " 
+                << dmgCmd.str().c_str() << std::endl);
   bool res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
     &retVal, 0, this->GeneratorVerbose, 0);
   if ( !res || retVal )
