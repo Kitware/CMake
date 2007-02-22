@@ -1011,12 +1011,24 @@ IF(BUILD_TESTING)
       --test-command  testIOS
       )
   ENDIF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
-
+  SET(MAKE_IS_GNU )
+  IF(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
+    EXECUTE_PROCESS(COMMAND ${CMAKE_TEST_MAKEPROGRAM} --version
+      RESULT_VARIABLE res OUTPUT_VARIABLE out
+      ERROR_QUIET
+      OUTPUT_QUIET)
+    IF("${res}" EQUAL 0)
+      IF("${out}" MATCHES "GNU")
+        SET(MAKE_IS_GNU 1)
+      ENDIF("${out}" MATCHES "GNU")
+    ENDIF("${res}" EQUAL 0)
+  ENDIF(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
 
   # only add this test on platforms that support it
   # some old versions of make simply cannot handle spaces in paths
-  IF ("${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
-      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|Xcode")
+  IF (MAKE_IS_GNU OR 
+      "${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
+      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode")
     ADD_TEST(SubDirSpaces ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/SubDirSpaces"
@@ -1030,8 +1042,9 @@ IF(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/SubDirSpaces/ShouldBeHere"
       "${CMake_BINARY_DIR}/Tests/SubDirSpaces/testfromsubdir.obj"
       )
-  ENDIF ("${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
-    "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|Xcode")
+  ENDIF (MAKE_IS_GNU OR
+    "${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
+    "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode")
 
   IF (WIN32)
     ADD_TEST(SubDir ${CMAKE_CTEST_COMMAND}

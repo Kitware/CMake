@@ -1023,7 +1023,7 @@ cmLocalGenerator::ConvertToOutputForExisting(const char* p)
       {
       if(!cmSystemTools::GetShortPath(ret.c_str(), ret))
         {
-        ret = this->Convert(p,START_OUTPUT,MAKEFILE,true);
+        ret = this->Convert(p,START_OUTPUT,SHELL,true);
         }
       }
     }
@@ -2087,6 +2087,14 @@ std::string cmLocalGenerator::Convert(const char* source,
         result[1] = result[0];
         result[0] = '/';
         }
+      }
+    // if this is unix then we need to escape () in the shell
+#if !defined(WIN32) || defined(CYGWIN)
+    forceOn = true;
+#endif
+    if(forceOn )
+      {
+      result = cmSystemTools::EscapeForUnixShell(result);
       }
     }
   return result;

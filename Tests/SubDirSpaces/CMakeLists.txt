@@ -1,5 +1,5 @@
 PROJECT(SUBDIR)
-SUBDIRS("Executable Sources" EXCLUDE_FROM_ALL "Some Examples")
+SUBDIRS("Executable Sources" "Some(x86) Sources" EXCLUDE_FROM_ALL "Some Examples")
 WRITE_FILE(${SUBDIR_BINARY_DIR}/ShouldBeHere "This file should exist.")
 #WATCOM WMAKE does not support + in the name of a file!
 IF(WATCOM)
@@ -41,3 +41,5 @@ ELSE(WATCOM)
     vcl_algorithm+vcl_pair+double.foo.c)
 ENDIF(WATCOM)  
 ADD_EXECUTABLE(TestWithAuxSourceDir ${SOURCES})
+target_link_libraries(TestWithAuxSourceDir testOddPath)
+

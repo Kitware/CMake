@@ -1341,6 +1341,64 @@ std::string cmSystemTools::ConvertToOutputPath(const char* path)
 #endif
 }
 
+std::string cmSystemTools::EscapeForUnixShell(std::string& result)
+{
+  // For UNIX Shell paths we need to escape () in the path
+  if(result.find_first_of("()") != result.npos)
+    {
+    std::string newResult = "";
+    char lastch = 1;
+    bool inDollarVariable = false;
+    for(const char* ch = result.c_str(); *ch != '\0'; ++ch)
+      {
+      // if it is already escaped then don't try to escape it again
+      if((*ch == ' ' || *ch == '(' || *ch == ')') && lastch != '\\')
+        {
+        if(*ch == '(' && lastch == '$')
+          {
+          inDollarVariable = true;
+          }
+        // if we are in a $(..... and we get a ) then do not escape
+        // the ) and but set inDollarVariable to false
+        else if(*ch == ')' && inDollarVariable)
+          {
+          inDollarVariable = false;
+          }
+        else
+          {
+          newResult += '\\';
+          }
+        }
+      newResult += *ch;
+      lastch = *ch;
+      }
+    return newResult;
+    }
+  return result;
+}
+
+std::string cmSystemTools::ConvertToShellPath(const char* path)
+{
+  bool useUnix = false; // assume windows
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  // if windows and force paths but not cygwin useUnix is on
+  if(s_ForceUnixPaths)
+    {
+    useUnix = true;
+    }
+#else
+  // if not win32 and maybe cygwin then unix is true
+  useUnix = true;
+#endif
+  // if unix we need to call EscapeForUnixShell as well
+  if(useUnix)
+    {
+    std::string result = cmSystemTools::ConvertToUnixOutputPath(path);
+    return cmSystemTools::EscapeForUnixShell(result);
+    }
+  return cmSystemTools::ConvertToWindowsOutputPath(path);
+}
+
 std::string cmSystemTools::ConvertToRunCommandPath(const char* path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)

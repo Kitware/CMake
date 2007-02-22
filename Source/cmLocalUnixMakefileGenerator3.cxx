@@ -1743,7 +1743,7 @@ cmLocalUnixMakefileGenerator3
   // Call make on the given file.
   std::string cmd;
   cmd += "$(MAKE) -f ";
-  cmd += this->Convert(makefile,NONE,MAKEFILE);
+  cmd += this->Convert(makefile,NONE,SHELL);
   cmd += " ";
   
   // Passg down verbosity level.
@@ -1765,7 +1765,7 @@ cmLocalUnixMakefileGenerator3
   // Add the target.
   if (tgt && tgt[0] != '\0')
     {
-    std::string tgt2 = this->Convert(tgt,HOME_OUTPUT,MAKEFILE);
+    std::string tgt2 = this->Convert(tgt,HOME_OUTPUT,SHELL);
     tgt2 = this->ConvertToMakeTarget(tgt2.c_str());
     cmd += tgt2;
     }
