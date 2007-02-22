@@ -1,4 +1,5 @@
 PROJECT(SUBDIR)
+SET(CMAKE_VERBOSE_MAKEFILE 1)
 SUBDIRS("Executable Sources" "Some(x86) Sources" EXCLUDE_FROM_ALL "Some Examples")
 WRITE_FILE(${SUBDIR_BINARY_DIR}/ShouldBeHere "This file should exist.")
 #WATCOM WMAKE does not support + in the name of a file!
