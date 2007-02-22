@@ -377,7 +377,7 @@ void cmake::ReadListFile(const char *path)
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     if (!lg->GetMakefile()->ReadListFile(0, path))
       {
-      std::cerr << "Error processing file:" << path << "\n";
+      cmSystemTools::Error("Error processing file:", path);
       }
     }
 
