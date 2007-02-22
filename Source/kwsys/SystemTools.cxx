@@ -1418,7 +1418,6 @@ kwsys_stl::string SystemTools::ConvertToUnixOutputPath(const char* path)
     {
     kwsys_stl::string result = "";
     char lastch = 1;
-    bool inDollarVariable = false;
     for(const char* ch = ret.c_str(); *ch != '\0'; ++ch)
       {
         // if it is already escaped then don't try to escape it again
