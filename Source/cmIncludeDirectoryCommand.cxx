@@ -50,8 +50,19 @@ bool cmIncludeDirectoryCommand
       }
     if(i->size() == 0)
       {
-      cmSystemTools::Error
-        ("Empty Include Directory Passed into INCLUDE_DIRECTORIES command.");
+      const char* versionValue =
+        this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+      const char* errorMessage
+        = "Empty Include Directory Passed into INCLUDE_DIRECTORIES command.";
+      if(atof(versionValue) < 2.5)
+        {
+        cmSystemTools::Error(errorMessage);
+        }
+      else
+        {
+        this->SetError(errorMessage);
+        return 0;
+        }
       }
     std::string unixPath = *i;
     if (!cmSystemTools::IsOff(unixPath.c_str()))
