@@ -117,10 +117,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \".lib\") on an import library name.");
 
   cm->DefineProperty
-    ("IN_ALL", cmProperty::TARGET, 
-     "Is this target part of the all target.",
-     "A property on a target that indicates if the target is included as "
-     "part of the default build target. If it is, then with a Makefile "
+    ("EXCLUDE_FROM_ALL", cmProperty::TARGET, 
+     "Exclude the target from the all target.",
+     "A property on a target that indicates if the target is excluded "
+     "from the default build target. If it is not, then with a Makefile "
      "for example typing make will couse this target to be built as well. "
      "The same concept applies to the default build of other generators.");
 

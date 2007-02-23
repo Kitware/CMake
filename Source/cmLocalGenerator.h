@@ -114,14 +114,8 @@ public:
   std::string ConvertToOptionallyRelativeOutputPath(const char* remote);
 
   // flag to determine if this project should be included in a parent project
-  bool GetExcludeAll()
-    {
-      return this->ExcludeFromAll;
-    }
-  void SetExcludeAll(bool b)
-    {
-      this->ExcludeFromAll = b;
-    }
+  bool GetExcludeAll();
+  void SetExcludeAll(bool b);
   
   ///! set/get the parent generator 
   cmLocalGenerator* GetParent(){return this->Parent;}
@@ -281,7 +275,6 @@ protected:
   std::vector<std::string> StartDirectoryComponents;
   std::vector<std::string> HomeOutputDirectoryComponents;
   std::vector<std::string> StartOutputDirectoryComponents;
-  bool ExcludeFromAll;
   cmLocalGenerator* Parent;
   std::vector<cmLocalGenerator*> Children;
   std::map<cmStdString, cmStdString> LanguageToIncludeFlags;

@@ -2745,4 +2745,12 @@ void cmMakefile::DefineProperties(cmake *cm)
      "A cmake file that will be included when ctest is run.",
      "If you specify TEST_INCLUDE_FILE, that file will be "
      "included and processed when ctest is run on the directory.");
+
+  cm->DefineProperty
+    ("EXCLUDE_FROM_ALL", cmProperty::DIRECTORY, 
+     "Exclude the target from the all target.",
+     "A property on a target that indicates if the target is excluded "
+     "from the default build target. If it is not, then with a Makefile "
+     "for example typing make will couse this target to be built as well. "
+     "The same concept applies to the default build of other generators.");
 }

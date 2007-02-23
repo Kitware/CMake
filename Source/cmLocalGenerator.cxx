@@ -36,7 +36,6 @@ cmLocalGenerator::cmLocalGenerator()
 {
   this->Makefile = new cmMakefile;
   this->Makefile->SetLocalGenerator(this);
-  this->ExcludeFromAll = false;
   this->Parent = 0;
   this->WindowsShell = false;
   this->WindowsVSIDE = false;
@@ -2406,4 +2405,14 @@ cmLocalGenerator::GetTargetObjectFileDirectories(cmTarget* ,
 std::string cmLocalGenerator::GetSourceObjectName(cmSourceFile& sf)
 {
   return sf.GetSourceName();
+}
+
+bool cmLocalGenerator::GetExcludeAll()
+{
+  return this->Makefile->GetPropertyAsBool("EXCLUDE_FROM_ALL"); 
+}
+
+void cmLocalGenerator::SetExcludeAll(bool b)
+{
+  this->Makefile->SetProperty("EXCLUDE_FROM_ALL", b?"TRUE":"FALSE");
 }

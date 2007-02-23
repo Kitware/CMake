@@ -60,10 +60,10 @@ public:
   /**
    * Indicate whether the target is part of the all target
    */
-  bool IsInAll() { return this->GetPropertyAsBool("IN_ALL"); }
-  bool GetInAll() { return this->GetPropertyAsBool("IN_ALL"); }
+  bool IsInAll() { return !this->GetPropertyAsBool("EXCLUDE_FROM_ALL"); }
+  bool GetInAll() { return !this->GetPropertyAsBool("EXCLUDE_FROM_ALL"); }
   void SetInAll(bool f) { 
-    this->SetProperty("IN_ALL", (f) ?"TRUE" : "FALSE"); }
+    this->SetProperty("EXCLUDE_FROM_ALL", (f) ?"FALSE" : "TRUE"); }
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
