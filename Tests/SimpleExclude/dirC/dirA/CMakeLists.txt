@@ -1,6 +1,6 @@
-add_library(t1 t1.c)
+add_library(t1 STATIC t1.c)
 
-add_library(t2 t2.c)
+add_library(t2 STATIC t2.c)
 
 add_executable(t3 t3.c)
 
