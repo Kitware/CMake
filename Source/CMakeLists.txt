@@ -553,9 +553,10 @@ IF(BUILD_TESTING)
     --build-project SimpleExclude
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
-    --test-command "${CMAKE_COMMAND}"
-    "-DCONFIGURATION=\${CTEST_CONFIGURATION_TYPE}"
-    -P "${CMAKE_BINARY_DIR}/Tests/SimpleExclude/run.cmake"
+    --test-command t4
+    #--test-command "${CMAKE_COMMAND}"
+    #"-DCONFIGURATION=\${CTEST_CONFIGURATION_TYPE}"
+    #-P "${CMAKE_BINARY_DIR}/Tests/SimpleExclude/run.cmake"
     )
 
 #  ADD_TEST(SameName  ${CMAKE_CTEST_COMMAND}
