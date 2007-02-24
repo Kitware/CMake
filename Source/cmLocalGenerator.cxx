@@ -1587,7 +1587,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
         s += "\"";
         std::cout << itr->c_str() << "\n";
         std::cout << this->Convert(s.c_str(), NONE, SHELL, false) << "\n";
-        fout << runtimeSep << this->Convert(s.c_str(), NONE, SHELL, false) << ;
+        fout << runtimeSep << this->Convert(s.c_str(), NONE, SHELL, false);
 #else
         fout << runtimeSep << *itr;
 #endif
