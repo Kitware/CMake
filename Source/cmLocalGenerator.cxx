@@ -2066,21 +2066,6 @@ std::string cmLocalGenerator::Convert(const char* source,
     }
   if( output == SHELL)
     {
-    // for shell commands if force unix is on, but this->WindowsShell
-    // is true, then turn off force unix paths for the output path
-    // so that the path is windows style and will work with windows
-    // cmd.exe.
-    bool forceOn =  cmSystemTools::GetForceUnixPaths();
-    if(forceOn && this->WindowsShell)
-      {
-      cmSystemTools::SetForceUnixPaths(false);
-      }
-    result = cmSystemTools::ConvertToOutputPath(result.c_str());
-    if(forceOn && this->WindowsShell)
-      {
-      cmSystemTools::SetForceUnixPaths(true);
-      }
-
     // For the MSYS shell convert drive letters to posix paths, so
     // that c:/some/path becomes /c/some/path.  This is needed to
     // avoid problems with the shell path translation.
@@ -2092,18 +2077,19 @@ std::string cmLocalGenerator::Convert(const char* source,
         result[0] = '/';
         }
       }
-    // if this is unix then we need to escape () in the shell
-#if !defined(WIN32) || defined(CYGWIN)
-    forceOn = true;
-#endif
-    if(forceOn )
+    if(this->WindowsShell)
       {
-      result = cmSystemTools::EscapeForUnixShell(result);
+      std::string::size_type pos = 0;
+      while((pos = result.find('/', pos)) != std::string::npos)
+        {
+        result[pos] = '\\';
+        pos++;
+        }
       }
+    result = this->EscapeForShell(result.c_str(), true, false);
     }
   return result;
 }
-
 
 //----------------------------------------------------------------------------
 void
