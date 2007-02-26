@@ -1,4 +1,10 @@
 PROJECT(SUBDIR)
+
+# Some systems do not seem to support rpath with spaces.
+IF("${CMAKE_SYSTEM}" MATCHES "IRIX|QNX")
+  SET(CMAKE_SKIP_BUILD_RPATH 1)
+ENDIF("${CMAKE_SYSTEM}" MATCHES "IRIX|QNX")
+
 # be able to see output from make on dashboards
 SET(CMAKE_VERBOSE_MAKEFILE 1)
 SUBDIRS("Executable Sources" "Some(x86) Sources" EXCLUDE_FROM_ALL "Some Examples")
