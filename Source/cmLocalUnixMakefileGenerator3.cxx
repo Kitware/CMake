@@ -1766,8 +1766,15 @@ cmLocalUnixMakefileGenerator3
   if (tgt && tgt[0] != '\0')
     {
     std::string tgt2 = this->Convert(tgt,HOME_OUTPUT,MAKEFILE);
-    tgt2 = this->ConvertToMakeTarget(tgt2.c_str());
-    tgt2 = this->EscapeForShell(tgt2.c_str());
+    tgt2 = this->ConvertToMakeTarget(tgt2.c_str()); 
+    bool forceOn =  cmSystemTools::GetForceUnixPaths();
+#if !defined(WIN32) || defined(CYGWIN)
+    forceOn = true;
+#endif 
+    if(forceOn )
+      {
+      tgt2 = cmSystemTools::EscapeForUnixShell(tgt2);
+      }
     cmd += tgt2;
     }
   return cmd;
