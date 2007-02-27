@@ -2953,7 +2953,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   if (args.size() == 1)
     {
     resultFile = cwd;
-    resultFile += "__cmake_systeminformation/results.txt";
+    resultFile += "/__cmake_systeminformation/results.txt";
     }
   else
     {
