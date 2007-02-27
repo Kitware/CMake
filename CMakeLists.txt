@@ -430,3 +430,7 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Templates/CTestScript.cmake.in"
   "${CMAKE_CURRENT_BINARY_DIR}/CTestScript.cmake"
   @ONLY IMMEDIATE)
 
+ADD_TEST(SystemInformationNew 
+  "${EXECUTABLE_OUTPUT_PATH}/cmake" --system-information
+  )
+
