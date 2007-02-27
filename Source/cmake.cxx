@@ -2975,7 +2975,13 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   resultArg += resultFile;
   args2.push_back(resultArg);
   int res = cm.Run(args2, false);
-  
+
+  if (res != 0)
+    {
+    std::cerr << "Error: --system-information failed on internal CMake!\n";
+    return res;
+    }
+
   // change back to the original directory
   cmSystemTools::ChangeDirectory(cwd.c_str());
   
