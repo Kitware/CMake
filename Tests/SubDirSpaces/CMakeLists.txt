@@ -7,7 +7,20 @@ ENDIF("${CMAKE_SYSTEM}" MATCHES "IRIX|QNX")
 
 # be able to see output from make on dashboards
 SET(CMAKE_VERBOSE_MAKEFILE 1)
-SUBDIRS("Executable Sources" "Some(x86) Sources" EXCLUDE_FROM_ALL "Some Examples")
+message("${CMAKE_MAKE_PROGRAM}")
+set(CMAKE_PAREN TRUE)
+IF("${CMAKE_MAKE_PROGRAM}" MATCHES "wmake")
+  message("wmake does not support () in path")
+  set(CMAKE_PAREN FALSE)
+ENDIF("${CMAKE_MAKE_PROGRAM}" MATCHES "wmake")
+
+IF(CMAKE_PAREN)
+  ADD_DEFINITIONS(-DCMAKE_PAREN=1)
+  SUBDIRS("Executable Sources" "Some(x86) Sources" EXCLUDE_FROM_ALL "Some Examples")
+ELSE(CMAKE_PAREN)
+  SUBDIRS("Executable Sources" EXCLUDE_FROM_ALL "Some Examples")
+ENDIF(CMAKE_PAREN)
+
 WRITE_FILE(${SUBDIR_BINARY_DIR}/ShouldBeHere "This file should exist.")
 #WATCOM WMAKE does not support + in the name of a file!
 IF(WATCOM)
@@ -49,5 +62,7 @@ ELSE(WATCOM)
     vcl_algorithm+vcl_pair+double.foo.c)
 ENDIF(WATCOM)  
 ADD_EXECUTABLE(TestWithAuxSourceDir ${SOURCES})
-target_link_libraries(TestWithAuxSourceDir testOddPath)
+IF(CMAKE_PAREN)
+  target_link_libraries(TestWithAuxSourceDir testOddPath)
+ENDIF(CMAKE_PAREN)
 
