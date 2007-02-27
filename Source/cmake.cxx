@@ -2912,3 +2912,95 @@ bool cmake::GetPropertyAsBool(const char* prop)
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
+
+int cmake::GetSystemInformation(std::vector<std::string>& args)
+{
+  // we must create a temporary directory, copy some files to it
+  // run cmake on it, and then collect the results.
+  
+  // so create the directory
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  std::string destPath = cwd + "/__cmake_systeminformation";
+  cmSystemTools::RemoveADirectory(destPath.c_str());
+  if (!cmSystemTools::MakeDirectory(destPath.c_str()))
+    {
+    std::cerr << "Error: --system-information must be run from a "
+      "writable directory!\n";
+    return 1;
+    }
+  
+  // we have to find the module directory, so we can copy the files
+  this->AddCMakePaths(args[0].c_str());
+  std::string modulesPath = 
+    this->CacheManager->GetCacheValue("CMAKE_ROOT");
+  modulesPath += "/Modules";
+  std::string inFile = modulesPath;
+  inFile += "/SystemInformation.cmake";
+  std::string outFile = destPath;
+  outFile += "/CMakeLists.txt";
+  
+  // Copy file
+  if(!cmSystemTools::cmCopyFile(inFile.c_str(), outFile.c_str()))
+    {
+    std::cerr << "Error copying file \"" << inFile.c_str()
+              << "\" to \"" << outFile.c_str() << "\".\n";
+    return 1;
+    }
+  
+  // do we write to a file or to stdout?
+  std::string resultFile;
+
+  if (args.size() == 1)
+    {
+    resultFile = cwd;
+    resultFile += "__cmake_systeminformation/results.txt";
+    }
+  else
+    {
+    if (!cmSystemTools::FileIsFullPath(args[1].c_str()))
+      {
+      resultFile += cwd;
+      resultFile += "/";
+      }
+    resultFile = args[1];
+    }
+
+  // now run cmake on the CMakeLists file
+  cmSystemTools::ChangeDirectory(destPath.c_str());
+  cmake cm;
+  std::vector<std::string> args2;
+  args2.push_back(args[0]);
+  args2.push_back(destPath);
+  std::string resultArg = "-DRESULT_FILE=";
+  resultArg += resultFile;
+  args2.push_back(resultArg);
+  int res = cm.Run(args2, false);
+  
+  // change back to the original directory
+  cmSystemTools::ChangeDirectory(cwd.c_str());
+  
+  // echo results to stdout if needed
+  if (args.size() == 1)
+    {
+    FILE* fin = fopen(resultFile.c_str(), "r");
+    if(fin)
+      {
+      const int bufferSize = 4096;
+      char buffer[bufferSize];
+      int n;
+      while((n = fread(buffer, 1, bufferSize, fin)) > 0)
+        {
+        for(char* c = buffer; c < buffer+n; ++c)
+          {
+          putc(*c, stdout);
+          }
+        fflush(stdout);
+        }
+      fclose(fin);
+      }
+    }
+  
+  // clean up the directory
+  cmSystemTools::RemoveADirectory(destPath.c_str());
+  return 0;
+}

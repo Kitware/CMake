@@ -189,6 +189,11 @@ class cmake
    */
   static int ExecuteCMakeCommand(std::vector<std::string>&);
 
+  /** 
+   * Get the system information and write it to the file specified
+   */
+  int GetSystemInformation(std::vector<std::string>&);
+
   /**
    * Add a command to this cmake instance
    */

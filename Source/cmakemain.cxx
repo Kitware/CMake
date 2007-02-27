@@ -83,6 +83,10 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"--graphviz=[file]", "Generate graphviz of dependencies.",
    "Generate a graphviz input file that will contain all the library and "
    "executable dependencies in the project."},
+  {"--system-information [file]", "Dump information about this system.",
+   "Dump a wide range of information about the current system. If run "
+   "from the top of a binary tree for a CMake project it will dump "
+   "additional information such as the cache, log files etc."},
   {"--debug-trycompile", "Do not delete the try compile directories..",
    "Do not delete the files and directories created for try_compile calls. "
    "This is useful in debugging failed try_compiles."},
@@ -206,6 +210,7 @@ int do_cmake(int ac, char** av)
 #endif
   
   bool wiz = false;
+  bool sysinfo = false;
   bool command = false;
   bool list_cached = false;
   bool list_all_cached = false;
@@ -218,6 +223,10 @@ int do_cmake(int ac, char** av)
     if(strcmp(av[i], "-i") == 0)
       {
       wiz = true;
+      }
+    else if(!command && strcmp(av[i], "--system-information") == 0)
+      {
+      sysinfo = true;
       }
     // if command has already been set, then
     // do not eat the -E 
@@ -276,6 +285,12 @@ int do_cmake(int ac, char** av)
     {
     cmakewizard wizard;
     return wizard.RunWizard(args); 
+    }
+  if (sysinfo)
+    {
+    cmake cm;
+    int ret = cm.GetSystemInformation(args);
+    return ret; 
     }
   cmake cm;  
   cm.SetProgressCallback(updateProgress, 0);

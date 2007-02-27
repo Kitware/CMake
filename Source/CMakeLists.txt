@@ -505,6 +505,11 @@ IF(BUILD_TESTING)
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --test-command DumpInformation)
 
+  ADD_TEST(SystemInformationNew 
+    ${CMAKE_CMAKE_COMMAND} -E chdir "${CMake_BINARY_DIR}"
+    ${CMAKE_CMAKE_COMMAND} --system-information
+    )
+
   ADD_TEST(StringFileTest ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/StringFileTest"
