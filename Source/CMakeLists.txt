@@ -507,7 +507,7 @@ IF(BUILD_TESTING)
 
   ADD_TEST(SystemInformationNew 
     ${CMAKE_CMAKE_COMMAND} -E chdir "${CMake_BINARY_DIR}"
-    ${CMAKE_CMAKE_COMMAND} --system-information
+    "${CMAKE_CMAKE_COMMAND}" --system-information
     )
 
   ADD_TEST(StringFileTest ${CMAKE_CTEST_COMMAND}
