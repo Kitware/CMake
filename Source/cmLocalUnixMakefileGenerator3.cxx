@@ -1765,8 +1765,9 @@ cmLocalUnixMakefileGenerator3
   // Add the target.
   if (tgt && tgt[0] != '\0')
     {
-    std::string tgt2 = this->Convert(tgt,HOME_OUTPUT,SHELL);
+    std::string tgt2 = this->Convert(tgt,HOME_OUTPUT,MAKEFILE);
     tgt2 = this->ConvertToMakeTarget(tgt2.c_str());
+    tgt2 = this->EscapeForShell(tgt2.c_str());
     cmd += tgt2;
     }
   return cmd;
