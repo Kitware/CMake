@@ -1581,16 +1581,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
       {
       if(runtimeConcatenate)
         {
-#ifdef __QNX__
-        std::string s = "\"";
-        s += *itr;
-        s += "\"";
-        std::cout << itr->c_str() << "\n";
-        std::cout << this->Convert(s.c_str(), NONE, SHELL, false) << "\n";
-        fout << runtimeSep << this->Convert(s.c_str(), NONE, SHELL, false);
-#else
         fout << runtimeSep << *itr;
-#endif
         }
       else
         {
