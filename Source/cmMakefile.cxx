@@ -1994,6 +1994,7 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
       path += cmSystemTools::GetFilenamePath(sourceName);
       }
     }
+  path = cmSystemTools::CollapseFullPath(path.c_str());
 
   std::string sname = 
     cmSystemTools::GetFilenameWithoutLastExtension(sourceName);
