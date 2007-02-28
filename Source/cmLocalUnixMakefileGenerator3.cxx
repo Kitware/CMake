@@ -743,6 +743,16 @@ cmLocalUnixMakefileGenerator3
                         no_commands, false);
     }
 
+  // Work-around for makes that drop rules that have no dependencies
+  // or commands.
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  std::string hack = gg->GetEmptyRuleHackDepends();
+  if(!hack.empty())
+    {
+    no_depends.push_back(hack);
+    }
+
   // Special symbolic target that never exists to force dependers to
   // run their rules.
   this->WriteMakeRule
