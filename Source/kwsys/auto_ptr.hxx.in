@@ -17,15 +17,20 @@
 namespace @KWSYS_NAMESPACE@
 {
 
+template <class X> class auto_ptr;
+
+// The auto_ptr_ref template is supposed to be a private member of
+// auto_ptr but Borland 5.8 cannot handle it.
+template <class Y> struct auto_ptr_ref
+{
+  auto_ptr<Y>& p_;
+  explicit auto_ptr_ref(auto_ptr<Y>& p): p_(p) {}
+};
+
 // C++98 Standard Section 20.4.5 - Template class auto_ptr.
 template <class X>
 class auto_ptr
 {
-  template <class Y> struct auto_ptr_ref
-  {
-    auto_ptr<Y>& p_;
-    explicit auto_ptr_ref(auto_ptr<Y>& p): p_(p) {}
-  };
   X* x_;
 public:
   typedef X element_type;
