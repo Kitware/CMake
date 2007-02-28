@@ -2915,10 +2915,8 @@ bool cmake::GetPropertyAsBool(const char* prop)
 
 int cmake::GetSystemInformation(std::vector<std::string>& args)
 {
-  // we must create a temporary directory, copy some files to it
-  // run cmake on it, and then collect the results.
-  
   // so create the directory
+  std::string resultFile;
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   std::string destPath = cwd + "/__cmake_systeminformation";
   cmSystemTools::RemoveADirectory(destPath.c_str());
@@ -2928,7 +2926,53 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
       "writable directory!\n";
     return 1;
     }
-  
+
+  // process the arguments
+  for(unsigned int i=1; i < args.size(); ++i)
+    {
+    std::string arg = args[i];
+    if(arg.find("-V",0) == 0)
+      {
+      this->Verbose = true;
+      }
+    else if(arg.find("-G",0) == 0)
+      {
+      std::string value = arg.substr(2);
+      if(value.size() == 0)
+        {
+        ++i;
+        if(i >= args.size())
+          {
+          cmSystemTools::Error("No generator specified for -G");
+          return -1;
+          }
+        value = args[i];
+        }
+      cmGlobalGenerator* gen =
+        this->CreateGlobalGenerator(value.c_str());
+      if(!gen)
+        {
+        cmSystemTools::Error("Could not create named generator ",
+                             value.c_str());
+        }
+      else
+        {
+        this->SetGlobalGenerator(gen);
+        }
+      }
+    // no option assume it is the output file
+    else
+      {
+      if (!cmSystemTools::FileIsFullPath(arg.c_str()))
+        {
+        resultFile += cwd;
+        resultFile += "/";
+        }
+      resultFile = arg;
+      }
+    }
+
+
   // we have to find the module directory, so we can copy the files
   this->AddCMakePaths(args[0].c_str());
   std::string modulesPath = 
@@ -2948,21 +2992,10 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
     }
   
   // do we write to a file or to stdout?
-  std::string resultFile;
-
-  if (args.size() == 1)
+  if (resultFile.size() == 0)
     {
     resultFile = cwd;
     resultFile += "/__cmake_systeminformation/results.txt";
-    }
-  else
-    {
-    if (!cmSystemTools::FileIsFullPath(args[1].c_str()))
-      {
-      resultFile += cwd;
-      resultFile += "/";
-      }
-    resultFile = args[1];
     }
 
   // now run cmake on the CMakeLists file
