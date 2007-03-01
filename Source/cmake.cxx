@@ -2928,6 +2928,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
     }
 
   // process the arguments
+  bool writeToStdout = true;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
@@ -2965,10 +2966,11 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
       {
       if (!cmSystemTools::FileIsFullPath(arg.c_str()))
         {
-        resultFile += cwd;
+        resultFile = cwd;
         resultFile += "/";
         }
-      resultFile = arg;
+      resultFile += arg;
+      writeToStdout = false;
       }
     }
 
@@ -3000,14 +3002,13 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
 
   // now run cmake on the CMakeLists file
   cmSystemTools::ChangeDirectory(destPath.c_str());
-  cmake cm;
   std::vector<std::string> args2;
   args2.push_back(args[0]);
   args2.push_back(destPath);
   std::string resultArg = "-DRESULT_FILE=";
   resultArg += resultFile;
   args2.push_back(resultArg);
-  int res = cm.Run(args2, false);
+  int res = this->Run(args2, false);
 
   if (res != 0)
     {
@@ -3019,7 +3020,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   cmSystemTools::ChangeDirectory(cwd.c_str());
   
   // echo results to stdout if needed
-  if (args.size() == 1)
+  if (writeToStdout)
     {
     FILE* fin = fopen(resultFile.c_str(), "r");
     if(fin)
