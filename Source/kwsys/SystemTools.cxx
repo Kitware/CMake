@@ -3582,7 +3582,7 @@ bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
     // if we read too much then truncate the buffer
     if (leftToRead > 0)
       {
-      if (length > leftToRead)
+      if (static_cast<long>(length) > leftToRead)
         {
         buffer[leftToRead-1] = 0;
         leftToRead = 0;
