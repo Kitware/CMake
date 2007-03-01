@@ -218,18 +218,21 @@ MACRO(QT_QUERY_QMAKE outvar invar)
   FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake/tmp.pro
     "message(CMAKE_MESSAGE<$$${invar}>)")
 
+  # Invoke qmake with the tmp.pro program to get the desired
+  # information.  Use the same variable for both stdout and stderr
+  # to make sure we get the output on all platforms.
   EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
     WORKING_DIRECTORY  
     ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake
     OUTPUT_VARIABLE _qmake_query_output
     RESULT_VARIABLE _qmake_result
-    ERROR_VARIABLE _qmake_error_output )
+    ERROR_VARIABLE _qmake_query_output )
   
   FILE(REMOVE_RECURSE 
     "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake")
 
   IF(_qmake_result)
-    MESSAGE(WARNING " querying qmake for ${invar}.  qmake reported:\n${_qmake_error_output}")
+    MESSAGE(WARNING " querying qmake for ${invar}.  qmake reported:\n${_qmake_query_output}")
   ELSE(_qmake_result)
     STRING(REGEX REPLACE ".*CMAKE_MESSAGE<([^>]*).*" "\\1" ${outvar} "${_qmake_query_output}")
   ENDIF(_qmake_result)
