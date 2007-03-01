@@ -190,9 +190,10 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
 //----------------------------------------------------------------------------
 bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 {
-  if ( args.size() != 3 )
+  if ( args.size() < 3 )
     {
-    this->SetError("READ must be called with two additional arguments");
+    this->SetError("READ must be called with at least two additional "
+                   "arguments");
     return false;
     }
 
@@ -214,11 +215,32 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
     return false;
     }
 
+  // if there a limit?
+  long sizeLimit = -1;
+  if (args.size() >= 5 && args[3] == "LIMIT")
+    {
+    sizeLimit = atof(args[4].c_str());
+    }
+
   std::string output;
   std::string line;
   bool has_newline = false;
-  while ( cmSystemTools::GetLineFromStream(file, line, &has_newline) )
+  while (sizeLimit != 0 &&
+         cmSystemTools::GetLineFromStream(file, line, &has_newline, 
+                                          sizeLimit) )
     {
+    if (sizeLimit > 0)
+      {
+      sizeLimit -= line.size();
+      if (has_newline)
+        {
+        sizeLimit--;
+        }
+      if (sizeLimit < 0)
+        {
+        sizeLimit = 0;
+        }
+      }
     output += line;
     if ( has_newline )
       {

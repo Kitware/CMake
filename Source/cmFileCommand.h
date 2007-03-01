@@ -66,7 +66,7 @@ public:
     return
       "  FILE(WRITE filename \"message to write\"... )\n"
       "  FILE(APPEND filename \"message to write\"... )\n"
-      "  FILE(READ filename variable)\n"
+      "  FILE(READ filename variable [LIMIT numBytes])\n"
       "  FILE(GLOB variable [RELATIVE path] [globbing expressions]...)\n"
       "  FILE(GLOB_RECURSE variable [RELATIVE path] \n"
       "       [globbing expressions]...)\n"
