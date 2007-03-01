@@ -219,7 +219,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   long sizeLimit = -1;
   if (args.size() >= 5 && args[3] == "LIMIT")
     {
-    sizeLimit = atof(args[4].c_str());
+    sizeLimit = atoi(args[4].c_str());
     }
 
   std::string output;
