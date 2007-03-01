@@ -3542,7 +3542,8 @@ kwsys_stl::string SystemTools::MakeCindentifier(const char* s)
 // if any data were read before the end-of-file was reached.
 bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
                                     kwsys_stl::string& line,
-                                    bool* has_newline /* = 0 */)
+                                    bool* has_newline /* = 0 */,
+                                    long sizeLimit /* = -1 */)
 {
   const int bufferSize = 1024;
   char buffer[bufferSize];
@@ -3552,9 +3553,12 @@ bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
   // Start with an empty line.
   line = "";
 
+  long leftToRead = sizeLimit;
+  
   // If no characters are read from the stream, the end of file has
   // been reached.  Clear the fail bit just before reading.
   while(!haveNewline &&
+        leftToRead != 0 &&
         (is.clear(is.rdstate() & ~kwsys_ios::ios::failbit),
          is.getline(buffer, bufferSize), is.gcount() > 0))
     {
@@ -3575,8 +3579,23 @@ bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
       buffer[length-1] = 0;
       }
 
+    // if we read too much then truncate the buffer
+    if (leftToRead > 0)
+      {
+      if (length > leftToRead)
+        {
+        buffer[leftToRead-1] = 0;
+        leftToRead = 0;
+        }
+      else
+        {
+        leftToRead -= length;
+        }
+      }
+
     // Append the data read to the line.
     line.append(buffer);
+    sizeLimit -= length;
     }
 
   // Return the results.

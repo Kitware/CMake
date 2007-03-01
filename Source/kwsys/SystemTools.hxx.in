@@ -434,7 +434,8 @@ public:
    */
   static bool GetLineFromStream(kwsys_ios::istream& istr, 
                                 kwsys_stl::string& line,
-                                bool* has_newline=0);
+                                bool* has_newline=0,
+                                long sizeLimit=-1);
 
   /**
    * Get the parent directory of the directory or file
