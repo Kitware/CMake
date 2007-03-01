@@ -475,6 +475,6 @@ ENDIF(BUILD_TESTING)
 
 ADD_TEST(SystemInformationNew 
   "${CMAKE_CMAKE_COMMAND}" --system-information
-  -G "${CMAKE_TEST_GENERATOR}"
+  -G"${CMAKE_TEST_GENERATOR}"
   )
 
