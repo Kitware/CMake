@@ -20,11 +20,14 @@ namespace @KWSYS_NAMESPACE@
 template <class X> class auto_ptr;
 
 // The auto_ptr_ref template is supposed to be a private member of
-// auto_ptr but Borland 5.8 cannot handle it.
+// auto_ptr but Borland 5.8 cannot handle it.  The extra constructor
+// argument prevents implicit conversion to auto_ptr_ref from auto_ptr
+// through the constructor.  This avoids problems on Borland compilers
+// when returning auto_ptr by value from a function.
 template <class Y> struct auto_ptr_ref
 {
   auto_ptr<Y>& p_;
-  explicit auto_ptr_ref(auto_ptr<Y>& p): p_(p) {}
+  auto_ptr_ref(auto_ptr<Y>& p, int): p_(p) {}
 };
 
 // C++98 Standard Section 20.4.5 - Template class auto_ptr.
@@ -53,7 +56,7 @@ public:
   void reset(X* p=0) throw() { if(get() != p) { delete get(); x_ = p; } }
 
   auto_ptr(auto_ptr_ref<X> r) throw(): x_(r.p_.release()) {}
-  template <class Y> operator auto_ptr_ref<Y>() throw() { return auto_ptr_ref<Y>(*this); }
+  template <class Y> operator auto_ptr_ref<Y>() throw() { return auto_ptr_ref<Y>(*this, 1); }
   template <class Y> operator auto_ptr<Y>() throw() { return release(); }
   auto_ptr& operator=(auto_ptr_ref<X> r) throw() { reset(r.p_.release()); return *this; }
 };
