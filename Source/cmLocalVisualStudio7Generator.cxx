@@ -1587,7 +1587,7 @@ std::string cmLocalVisualStudio7Generator
 class cmVS7XMLParser : public cmXMLParser
 {
 public:
-  virtual void EndElement(const char* name)
+  virtual void EndElement(const char* /* name */)
     {
     }
   virtual void StartElement(const char* name, const char** atts)

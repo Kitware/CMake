@@ -502,6 +502,10 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
   saAttr.bInheritHandle = TRUE;
   saAttr.lpSecurityDescriptor = NULL;
   
+  fd1 = 0;
+  fd2 = 0;
+  fd3 = 0;
+
   if (!CreatePipe(&this->hChildStdinRd, &this->hChildStdinWr, &saAttr, 0))
     {
     this->Output += "CreatePipeError\n";
