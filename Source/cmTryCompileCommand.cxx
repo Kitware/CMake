@@ -204,6 +204,11 @@ int cmTryCompileCommand::CoreTryCompileCode(
         }
       fprintf(fout, ")\n");
       }
+    const char* platformOptions = mf->GetDefinition("CMAKE_TRY_COMPILE_PLATFORM_OPTIONS");
+    if ( platformOptions )
+      {
+      fprintf(fout, "%s\n", platformOptions);
+      }
     
     fprintf(fout, "ADD_EXECUTABLE(cmTryCompileExec \"%s\")\n",source.c_str());
     fprintf(fout, 
