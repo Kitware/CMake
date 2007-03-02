@@ -231,7 +231,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
     {
     if (sizeLimit > 0)
       {
-      sizeLimit -= line.size();
+      sizeLimit = sizeLimit - static_cast<long>(line.size());
       if (has_newline)
         {
         sizeLimit--;

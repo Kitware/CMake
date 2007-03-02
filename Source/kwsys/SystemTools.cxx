@@ -3589,13 +3589,13 @@ bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
         }
       else
         {
-        leftToRead -= length;
+        leftToRead -= static_cast<long>(length);
         }
       }
 
     // Append the data read to the line.
     line.append(buffer);
-    sizeLimit -= length;
+    sizeLimit = sizeLimit - static_cast<long>(length);
     }
 
   // Return the results.
