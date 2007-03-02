@@ -72,7 +72,7 @@ MACRO(DUMP_FILE THE_FILE)
     FILE(APPEND "${RESULT_FILE}" 
       "=================================================================\n")
   
-    FILE(READ "${THE_FILE}" FILE_CONTENTS)
+    FILE(READ "${THE_FILE}" FILE_CONTENTS LIMIT 50000)
     FILE(APPEND "${RESULT_FILE}" "${FILE_CONTENTS}")
   ENDIF (EXISTS "${THE_FILE}")
 ENDMACRO(DUMP_FILE)
