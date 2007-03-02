@@ -3027,7 +3027,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
       {
       const int bufferSize = 4096;
       char buffer[bufferSize];
-      int n;
+      size_t n;
       while((n = fread(buffer, 1, bufferSize, fin)) > 0)
         {
         for(char* c = buffer; c < buffer+n; ++c)
