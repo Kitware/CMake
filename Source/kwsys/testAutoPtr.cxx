@@ -122,12 +122,14 @@ int testAutoPtr(int, char*[])
            "from factory function");
     }
 
+#if 0
     {
     int received = function_call(generate_auto_ptr_B());
     ASSERT(received,
            "auto_ptr in called function did not take ownership "
            "from factory function with conversion");
     }
+#endif
 
     {
     kwsys::auto_ptr<A> pa(generate_auto_ptr_A());
