@@ -14,6 +14,8 @@
 #ifndef @KWSYS_NAMESPACE@_auto_ptr_hxx
 #define @KWSYS_NAMESPACE@_auto_ptr_hxx
 
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
+
 namespace @KWSYS_NAMESPACE@
 {
 
