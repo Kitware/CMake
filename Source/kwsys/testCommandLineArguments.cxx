@@ -58,7 +58,7 @@ bool CompareTwoItemsOnList(const char* i1,
 bool CompareTwoItemsOnList(const kwsys_stl::string& i1,
   const kwsys_stl::string& i2) { return i1 == i2; }
 
-int main(int argc, char* argv[])
+int testCommandLineArguments(int argc, char* argv[])
 {
   // Example run: ./testCommandLineArguments --some-int-variable 4
   // --another-bool-variable --some-bool-variable=yes

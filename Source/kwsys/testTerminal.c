@@ -20,8 +20,10 @@
 # include "Terminal.h.in"
 #endif
 
-int main()
+int testTerminal(int argc, char* argv[])
 {
+  (void)argc;
+  (void)argv;
   kwsysTerminal_cfprintf(kwsysTerminal_Color_ForegroundYellow |
                          kwsysTerminal_Color_BackgroundBlue |
                          kwsysTerminal_Color_AssumeTTY,

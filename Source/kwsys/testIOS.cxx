@@ -11,7 +11,7 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
-int main()
+int testIOS(int, char*[])
 {
   kwsys_ios::ostringstream ostr;
   ostr << "Hello, World!";

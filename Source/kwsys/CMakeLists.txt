@@ -112,6 +112,11 @@ IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_STANDALONE 1)
 ENDIF(NOT KWSYS_NAMESPACE)
 
+#-----------------------------------------------------------------------------
+# The project name is that of the specified namespace.
+PROJECT(${KWSYS_NAMESPACE})
+
+# Select library components.
 IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_ENABLE_C 1)
 
@@ -131,9 +136,14 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_IOStream 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
-#-----------------------------------------------------------------------------
-# The project name is that of the specified namespace.
-PROJECT(${KWSYS_NAMESPACE})
+# Disable deprecation warnings for standard C and STL functions in
+# VS2005 and later.
+IF(KWSYS_STANDALONE)
+  IF(MSVC80)
+    ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+    ADD_DEFINITIONS(-D_SCL_SECURE_NO_DEPRECATE)
+  ENDIF(MSVC80)
+ENDIF(KWSYS_STANDALONE)
 
 # Setup the large file support default.
 IF(KWSYS_LFS_DISABLE)
@@ -836,41 +846,49 @@ ENDIF(KWSYS_USE_Process)
 # Setup testing if not being built as part of another project.
 IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   IF(BUILD_TESTING)
-    # C++ tests
-    IF(KWSYS_USE_DynamicLoader)
-      SET(EXTRA_TESTS
-        testDynamicLoader
-        )
-      # If kwsys contains the DynamicLoader, need extra library
-      ADD_LIBRARY(testDynload MODULE testDynload.c)
-    ENDIF(KWSYS_USE_DynamicLoader)
-    FOREACH(test
-        testSystemTools
-        testIOS
-        testHashSTL
-        testCommandLineArguments
-        testCommandLineArguments1
-        testRegistry
-        ${EXTRA_TESTS}
-        )
-      ADD_EXECUTABLE(${test} ${test}.cxx)
-      TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE})
-    ENDFOREACH(test)
-    # C tests
-    FOREACH(test
-        testProcess
-        testFail
-        testTerminal
-        )
-      ADD_EXECUTABLE(${test} ${test}.c)
-      TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE}_c)
-    ENDFOREACH(test)
-
+    # Compute the location of executables.
     SET(EXEC_DIR "${CMAKE_CURRENT_BINARY_DIR}")
     IF(EXECUTABLE_OUTPUT_PATH)
       SET(EXEC_DIR "${EXECUTABLE_OUTPUT_PATH}")
     ENDIF(EXECUTABLE_OUTPUT_PATH)
 
+    # C tests
+    SET(KWSYS_C_TESTS
+      testTerminal
+      )
+    IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY AND KWSYS_STANDALONE)
+      SET(KWSYS_C_TESTS ${KWSYS_C_TESTS} testFail)
+    ENDIF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY AND KWSYS_STANDALONE)
+    CREATE_TEST_SOURCELIST(
+      KWSYS_C_TEST_SRCS ${KWSYS_NAMESPACE}TestsC.c
+      ${KWSYS_C_TESTS}
+      )
+    ADD_EXECUTABLE(${KWSYS_NAMESPACE}TestsC ${KWSYS_C_TEST_SRCS})
+    TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE}TestsC ${KWSYS_NAMESPACE}_c)
+    FOREACH(test ${KWSYS_C_TESTS})
+      ADD_TEST(kwsys.${test} ${EXEC_DIR}/${KWSYS_NAMESPACE}TestsC ${test} ${KWSYS_TEST_ARGS_${test}})
+    ENDFOREACH(test)
+
+    # C++ tests
+    SET(KWSYS_CXX_TESTS
+      testHashSTL
+      testRegistry
+      testIOS
+      testSystemTools
+      testCommandLineArguments
+      testCommandLineArguments1
+      )
+    IF(KWSYS_USE_DynamicLoader)
+      SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS} testDynamicLoader)
+      # If kwsys contains the DynamicLoader, need extra library
+      ADD_LIBRARY(${KWSYS_NAMESPACE}TestDynload MODULE testDynload.c)
+    ENDIF(KWSYS_USE_DynamicLoader)
+    CREATE_TEST_SOURCELIST(
+      KWSYS_CXX_TEST_SRCS ${KWSYS_NAMESPACE}TestsCxx.cxx
+      ${KWSYS_CXX_TESTS}
+      )
+    ADD_EXECUTABLE(${KWSYS_NAMESPACE}TestsCxx ${KWSYS_CXX_TEST_SRCS})
+    TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE}TestsCxx ${KWSYS_NAMESPACE})
 
     SET(TEST_SYSTEMTOOLS_BIN_FILE
       "${CMAKE_CURRENT_SOURCE_DIR}/testSystemTools.bin")
@@ -886,22 +904,8 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
         "${CMAKE_CURRENT_BINARY_DIR}/ExtraTest.cmake")
       SET_DIRECTORY_PROPERTIES(PROPERTIES TEST_INCLUDE_FILE "${CMAKE_CURRENT_BINARY_DIR}/ExtraTest.cmake")
     ENDIF(CTEST_TEST_KWSYS)
-    ADD_TEST(kwsys.testSystemTools ${EXEC_DIR}/testSystemTools)
-    IF(KWSYS_USE_DynamicLoader)
-      ADD_TEST(kwsys.testDynamicLoader ${EXEC_DIR}/testDynamicLoader)
-    ENDIF(KWSYS_USE_DynamicLoader)
-    ADD_TEST(kwsys.testProcess-1 ${EXEC_DIR}/testProcess 1)
-    ADD_TEST(kwsys.testProcess-2 ${EXEC_DIR}/testProcess 2)
-    ADD_TEST(kwsys.testProcess-3 ${EXEC_DIR}/testProcess 3)
-    ADD_TEST(kwsys.testProcess-4 ${EXEC_DIR}/testProcess 4)
-    ADD_TEST(kwsys.testProcess-5 ${EXEC_DIR}/testProcess 5)
-    ADD_TEST(kwsys.testProcess-6 ${EXEC_DIR}/testProcess 6)
-    IF(NOT CYGWIN)
-      ADD_TEST(kwsys.testProcess-7 ${EXEC_DIR}/testProcess 7)
-    ENDIF(NOT CYGWIN)
-    ADD_TEST(kwsys.testHashSTL ${EXEC_DIR}/testHashSTL)
-    ADD_TEST(kwsys.testRegistry ${EXEC_DIR}/testRegistry)
-    ADD_TEST(kwsys.testCommandLineArguments ${EXEC_DIR}/testCommandLineArguments
+
+    SET(KWSYS_TEST_ARGS_testCommandLineArguments
       --another-bool-variable
       --long3=opt
       --set-bool-arg1
@@ -913,22 +917,38 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       --some-multi-argument 5 1 8 3 7 1 3 9 7 1
       -N 12.5 -SS=andy -N 1.31 -N 22
       -SS=bill -BBtrue -SS=brad
-      -BBtrue 
+      -BBtrue
       -BBfalse
       -SS=ken
       -A
       -C=test
-      --long2 hello)
-    ADD_TEST(kwsys.testCommandLineArguments1 ${EXEC_DIR}/testCommandLineArguments1
+      --long2 hello
+      )
+    SET(KWSYS_TEST_ARGS_testCommandLineArguments1
       --ignored
       -n 24
       --second-ignored
       "-m=test value"
       third-ignored
       -p
-      some junk at the end)
+      some junk at the end
+      )
+    FOREACH(test ${KWSYS_CXX_TESTS})
+      ADD_TEST(kwsys.${test} ${EXEC_DIR}/${KWSYS_NAMESPACE}TestsCxx ${test} ${KWSYS_TEST_ARGS_${test}})
+    ENDFOREACH(test)
+
+    # Process tests.
+    ADD_EXECUTABLE(${KWSYS_NAMESPACE}TestProcess testProcess.c)
+    TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE}TestProcess ${KWSYS_NAMESPACE}_c)
+    IF(NOT CYGWIN)
+      SET(KWSYS_TEST_PROCESS_7 7)
+    ENDIF(NOT CYGWIN)
+    FOREACH(n 1 2 3 4 5 6 ${KWSYS_TEST_PROCESS_7})
+      ADD_TEST(kwsys.testProcess-${n} ${EXEC_DIR}/${KWSYS_NAMESPACE}TestProcess ${n})
+    ENDFOREACH(n)
+
+    # Configure some test properties.
     IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY AND KWSYS_STANDALONE)
-      ADD_TEST(kwsys.testFail ${EXEC_DIR}/testFail)
       # We expect test to fail
       SET_TESTS_PROPERTIES(kwsys.testFail PROPERTIES WILL_FAIL ON)
       GET_TEST_PROPERTY(kwsys.testFail WILL_FAIL wfv)

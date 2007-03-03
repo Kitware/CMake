@@ -42,7 +42,7 @@
   kwsys_ios::cout << "Error, " << x << " != " << y << kwsys_ios::endl;        \
   }
 
-int main(int, char**)
+int testRegistry(int, char*[])
 {
   int res = 0;
   

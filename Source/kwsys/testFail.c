@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int main(int argc, char* argv[])
+int testFail(int argc, char* argv[])
 {
   char* env = getenv("DASHBOARD_TEST_FROM_CTEST");
   int oldCtest = 0;

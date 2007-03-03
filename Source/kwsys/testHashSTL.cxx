@@ -68,7 +68,7 @@ bool test_hash_set()
   return sum == 3;
 }
 
-int main()
+int testHashSTL(int, char*[])
 {
   bool result = true;
   result = test_hash_map() && result;

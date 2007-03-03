@@ -25,7 +25,7 @@
 
 #include <string.h> /* strcmp */
 
-int main(int argc, char* argv[])
+int testCommandLineArguments1(int argc, char* argv[])
 {
   kwsys::CommandLineArguments arg;
   arg.Initialize(argc, argv);

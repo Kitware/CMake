@@ -982,7 +982,7 @@ IF(BUILD_TESTING)
       --build-generator ${CMAKE_TEST_GENERATOR}
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-project kwsys
-      --test-command  testIOS
+      --test-command kwsysTestsCxx testIOS
       )
   ENDIF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
   SET(MAKE_IS_GNU )

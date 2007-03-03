@@ -328,7 +328,7 @@ bool CheckStringOperations()
 }
 
 //----------------------------------------------------------------------------
-int main(/*int argc, char* argv*/)
+int testSystemTools(int, char*[])
 {
   bool res = true;
 
