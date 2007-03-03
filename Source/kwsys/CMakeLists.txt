@@ -871,7 +871,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
     # C++ tests
     SET(KWSYS_CXX_TESTS
-      testAutoPtr
+      #      testAutoPtr
       testHashSTL
       testRegistry
       testIOS
