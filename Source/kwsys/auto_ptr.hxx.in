@@ -19,46 +19,150 @@ namespace @KWSYS_NAMESPACE@
 
 template <class X> class auto_ptr;
 
+namespace detail
+{
 // The auto_ptr_ref template is supposed to be a private member of
-// auto_ptr but Borland 5.8 cannot handle it.  The extra constructor
-// argument prevents implicit conversion to auto_ptr_ref from auto_ptr
-// through the constructor.  This avoids problems on Borland compilers
-// when returning auto_ptr by value from a function.
+// auto_ptr but Borland 5.8 cannot handle it.  Instead put it in
+// a private namespace.
 template <class Y> struct auto_ptr_ref
 {
   auto_ptr<Y>& p_;
+
+  // The extra constructor argument prevents implicit conversion to
+  // auto_ptr_ref from auto_ptr through the constructor.  Normally
+  // this should be done with the explicit keyword but Borland 5.x
+  // generates code in the conversion operator to call itself
+  // infinately.
   auto_ptr_ref(auto_ptr<Y>& p, int): p_(p) {}
 };
+}
 
-// C++98 Standard Section 20.4.5 - Template class auto_ptr.
+/** C++98 Standard Section 20.4.5 - Template class auto_ptr.  */
 template <class X>
 class auto_ptr
 {
   X* x_;
 public:
+  /** The type of object held by the auto_ptr.  */
   typedef X element_type;
 
+  /** Construct from an auto_ptr holding a compatible object.  This
+      transfers ownership to the newly constructed auto_ptr.  */
   template <class Y>
-  auto_ptr(auto_ptr<Y>& a) throw(): x_(a.release()) {}
+  auto_ptr(auto_ptr<Y>& a) throw(): x_(a.release())
+    {
+    }
+
+  /** Assign from an auto_ptr holding a compatible object.  This
+      transfers ownership to the left-hand-side of the assignment.  */
   template <class Y>
   auto_ptr& operator=(auto_ptr<Y>& a) throw()
-    { reset(a.release()); return *this; }
+    {
+    this->reset(a.release());
+    return *this;
+    }
 
-  explicit auto_ptr(X* p=0) throw(): x_(p) {}
-  auto_ptr(auto_ptr& a) throw(): x_(a.release()) {}
-  auto_ptr& operator=(auto_ptr& a) throw() { reset(a.release()); return *this; }
-  ~auto_ptr() throw() { delete get(); }
+  /**
+   * Explicitly construct from a raw pointer.  This is typically
+   * called with the result of operator new.  For example:
+   *
+   *   auto_ptr<X> ptr(new X());
+   */
+  explicit auto_ptr(X* p=0) throw(): x_(p)
+    {
+    }
 
-  X& operator*() const throw() { return *get(); }
-  X* operator->() const throw() { return get(); }
-  X* get() const throw() { return x_; }
-  X* release() throw() { X* x = x_; x_ = 0; return x; }
-  void reset(X* p=0) throw() { if(get() != p) { delete get(); x_ = p; } }
+  /** Construct from another auto_ptr holding an object of the same
+      type.  This transfers ownership to the newly constructed
+      auto_ptr.  */
+  auto_ptr(auto_ptr& a) throw(): x_(a.release())
+    {
+    }
 
-  auto_ptr(auto_ptr_ref<X> r) throw(): x_(r.p_.release()) {}
-  template <class Y> operator auto_ptr_ref<Y>() throw() { return auto_ptr_ref<Y>(*this, 1); }
-  template <class Y> operator auto_ptr<Y>() throw() { return release(); }
-  auto_ptr& operator=(auto_ptr_ref<X> r) throw() { reset(r.p_.release()); return *this; }
+  /** Assign from another auto_ptr holding an object of the same type.
+      This transfers ownership to the newly constructed auto_ptr.  */
+  auto_ptr& operator=(auto_ptr& a) throw()
+    {
+    this->reset(a.release());
+    return *this;
+    }
+
+  /** Destruct and delete the object held.  */
+  ~auto_ptr() throw()
+    {
+    // Assume object destructor is nothrow.
+    delete this->x_;
+    }
+
+  /** Dereference and return a reference to the object held.  */
+  X& operator*() const throw()
+    {
+    return *this->x_;
+    }
+
+  /** Return a pointer to the object held.  */
+  X* operator->() const throw()
+    {
+    return this->x_;
+    }
+
+  /** Return a pointer to the object held.  */
+  X* get() const throw()
+    {
+    return this->x_;
+    }
+
+  /** Return a pointer to the object held and reset to hold no object.
+      This transfers ownership to the caller.  */
+  X* release() throw()
+    {
+    X* x = this->x_;
+    this->x_ = 0;
+    return x;
+    }
+
+  /** Assume ownership of the given object.  The object previously
+      held is deleted.  */
+  void reset(X* p=0) throw()
+    {
+    if(this->x_ != p)
+      {
+      // Assume object destructor is nothrow.
+      delete this->x_;
+      this->x_ = p;
+      }
+    }
+
+  /** Construct from an auto_ptr_ref.  This is used when the
+      constructor argument is a call to a function returning an
+      auto_ptr.  */
+  auto_ptr(detail::auto_ptr_ref<X> r) throw(): x_(r.p_.release())
+    {
+    }
+
+  /** Convert to an auto_ptr_ref.  This is used when a function
+      returning an auto_ptr is the argument to the constructor of
+      another auto_ptr.  */
+  template <class Y> operator detail::auto_ptr_ref<Y>() throw()
+    {
+    return detail::auto_ptr_ref<Y>(*this, 1);
+    }
+
+  /** Convert to an auto_ptr holding an object of a compatible type.
+      This transfers ownership to the returned auto_ptr.  */
+  template <class Y> operator auto_ptr<Y>() throw()
+    {
+    return auto_ptr<Y>(this->release());
+    }
+
+  /** Assign from an auto_ptr_ref.  This is used when a function
+      returning an auto_ptr is passed on the right-hand-side of an
+      assignment.  */
+  auto_ptr& operator=(detail::auto_ptr_ref<X> r) throw()
+    {
+    this->reset(r.p_.release());
+    return *this;
+    }
 };
 
 } // namespace @KWSYS_NAMESPACE@
