@@ -29,6 +29,7 @@
 #include "cmBuildCommand.cxx"
 #include "cmCMakeMinimumRequired.cxx"
 #include "cmConfigureFileCommand.cxx"
+#include "cmCreateTestSourceList.cxx"
 #include "cmElseCommand.cxx"
 #include "cmEnableTestingCommand.cxx"
 #include "cmEndForEachCommand.cxx"
@@ -79,6 +80,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmBuildCommand);
   commands.push_back(new cmCMakeMinimumRequired);
   commands.push_back(new cmConfigureFileCommand);
+  commands.push_back(new cmCreateTestSourceList);
   commands.push_back(new cmElseCommand);
   commands.push_back(new cmEnableTestingCommand);  
   commands.push_back(new cmEndForEachCommand);
