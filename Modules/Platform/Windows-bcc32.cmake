@@ -26,23 +26,27 @@ SET(CMAKE_FIND_LIBRARY_SUFFIXES "-bcc.lib" ".lib")
 # Borland cannot handle + in the file name, so mangle object file name
 SET (CMAKE_MANGLE_OBJECT_FILE_NAMES "ON")
 
-# create a shared C++ library
-SET(CMAKE_CXX_CREATE_SHARED_LIBRARY 
+# Create a C++ module library.
+SET(CMAKE_CXX_CREATE_SHARED_MODULE
  "<CMAKE_CXX_COMPILER>  ${CMAKE_START_TEMP_FILE}-e<TARGET>  -tWD  <LINK_FLAGS> -tWR <LINK_LIBRARIES> <OBJECTS>${CMAKE_END_TEMP_FILE}"
- "implib -c -w <TARGET_IMPLIB> <TARGET>"
 )
 
-SET(CMAKE_CXX_CREATE_SHARED_MODULE ${CMAKE_CXX_CREATE_SHARED_LIBRARY})
+# Create a C++ shared library.
+# First create a module and then its import library.
+SET(CMAKE_CXX_CREATE_SHARED_LIBRARY ${CMAKE_CXX_CREATE_SHARED_MODULE}
+ "implib -c -w <TARGET_IMPLIB> <TARGET>"
+  )
 
-# create a C shared library
-SET(CMAKE_C_CREATE_SHARED_LIBRARY 
+# Create a C module library.
+SET(CMAKE_C_CREATE_SHARED_MODULE
  "<CMAKE_C_COMPILER> ${CMAKE_START_TEMP_FILE}-e<TARGET> -tWD  <LINK_FLAGS> -tWR <LINK_LIBRARIES> <OBJECTS>${CMAKE_END_TEMP_FILE}"
- "implib -c -w <TARGET_IMPLIB> <TARGET>"
 )
 
-# create a C shared module just copy the shared library rule
-SET(CMAKE_C_CREATE_SHARED_MODULE ${CMAKE_C_CREATE_SHARED_LIBRARY})
-
+# Create a C shared library.
+# First create a module and then its import library.
+SET(CMAKE_C_CREATE_SHARED_LIBRARY ${CMAKE_C_CREATE_SHARED_MODULE}
+ "implib -c -w <TARGET_IMPLIB> <TARGET>"
+  )
 
 # create a C++ static library
 SET(CMAKE_CXX_CREATE_STATIC_LIBRARY  "tlib ${CMAKE_START_TEMP_FILE}/p512 <LINK_FLAGS> /a <TARGET_QUOTED> <OBJECTS_QUOTED>${CMAKE_END_TEMP_FILE}")
