@@ -26,14 +26,14 @@ namespace detail
 // a private namespace.
 template <class Y> struct auto_ptr_ref
 {
-  auto_ptr<Y>& p_;
+  Y* p_;
 
   // The extra constructor argument prevents implicit conversion to
   // auto_ptr_ref from auto_ptr through the constructor.  Normally
   // this should be done with the explicit keyword but Borland 5.x
   // generates code in the conversion operator to call itself
   // infinately.
-  auto_ptr_ref(auto_ptr<Y>& p, int): p_(p) {}
+  auto_ptr_ref(Y* p, int): p_(p) {}
 };
 }
 
@@ -136,7 +136,7 @@ public:
   /** Construct from an auto_ptr_ref.  This is used when the
       constructor argument is a call to a function returning an
       auto_ptr.  */
-  auto_ptr(detail::auto_ptr_ref<X> r) throw(): x_(r.p_.release())
+  auto_ptr(detail::auto_ptr_ref<X> r) throw(): x_(r.p_)
     {
     }
 
@@ -145,7 +145,7 @@ public:
       another auto_ptr.  */
   template <class Y> operator detail::auto_ptr_ref<Y>() throw()
     {
-    return detail::auto_ptr_ref<Y>(*this, 1);
+    return detail::auto_ptr_ref<Y>(this->release(), 1);
     }
 
   /** Convert to an auto_ptr holding an object of a compatible type.
@@ -160,7 +160,7 @@ public:
       assignment.  */
   auto_ptr& operator=(detail::auto_ptr_ref<X> r) throw()
     {
-    this->reset(r.p_.release());
+    this->reset(r.p_);
     return *this;
     }
 };

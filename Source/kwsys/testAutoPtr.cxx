@@ -123,6 +123,7 @@ int testAutoPtr(int, char*[])
     }
 
 #if 0
+    // Is this allowed by the standard?
     {
     int received = function_call(generate_auto_ptr_B());
     ASSERT(received,
@@ -144,22 +145,18 @@ int testAutoPtr(int, char*[])
       "auto_ptr empty after assignment from factory function");
     }
 
-#if 0
     {
     kwsys::auto_ptr<A> pa(generate_auto_ptr_B());
     ASSERT(pa.get(),
       "auto_ptr empty after construction from compatible factory function");
     }
-#endif
 
-#if 0
     {
     kwsys::auto_ptr<A> pa;
     pa = generate_auto_ptr_B();
     ASSERT(pa.get(),
       "auto_ptr empty after assignment from compatible factory function");
     }
-#endif
   }
 
   ASSERT(instances == 0, "auto_ptr leaked an object");
