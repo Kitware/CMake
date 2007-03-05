@@ -205,7 +205,7 @@ int CPathDialog::DoModal()
   return iResult;
 }
 
-BOOL CPathDialog::IsFileNameValid(LPCTSTR lpFileName)
+BOOL CPathDialog::IsFileNameValid(LPCTSTR /* lpFileName */)
 {
   return TRUE;
 }
@@ -232,7 +232,7 @@ const TCHAR c_szErrCreatePath[] = _T(
 int CPathDialog::MakeSurePathExists(LPCTSTR lpPath)
 {
   CString strMsg;
-  int iRet;
+  int iRet = -1;
   try
     {
     //validate path
@@ -273,7 +273,6 @@ int CPathDialog::MakeSurePathExists(LPCTSTR lpPath)
       }
 
     AfxMessageBox(strMsg, MB_OK|MB_ICONEXCLAMATION);
-
     }
 
   return iRet;

@@ -677,7 +677,7 @@ CPropertyItem* CPropertyList::GetItem(int index)
   return (CPropertyItem*)GetItemDataPtr(index);
 }
 
-void CPropertyList::OnRButtonUp( UINT nFlags, CPoint point )
+void CPropertyList::OnRButtonUp( UINT /* nFlags */, CPoint point )
 {
   CMenu menu;
   CRect rect;
@@ -759,7 +759,6 @@ void CPropertyList::RemoveAll()
   int c = this->GetCount();
   for(int i =0; i < c; ++i)
     {
-    CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(0);
     this->DeleteString(0);
     }
   for(std::set<CPropertyItem*>::iterator ii = m_PropertyItems.begin();

@@ -807,7 +807,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 { 
   cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
   cmCacheManager::CacheIterator it = cachem->NewIterator();
-  size_t size = m_CacheEntriesList.GetItems().size();
+
   // if there are already entries in the cache, then
   // put the new ones in the top, so they show up first
   bool reverseOrder = false;
