@@ -33,6 +33,11 @@
    define necessary library symbols; they are noted "INFRINGES ON
    USER NAME SPACE" below.  */
 
+/* turn off some warning as this is generated code */
+#if defined(_MSC_VER)
+#  pragma warning ( disable : 4702 ) /* unreachable code */
+#endif
+
 /* Identify Bison output.  */
 #define YYBISON 1
 
