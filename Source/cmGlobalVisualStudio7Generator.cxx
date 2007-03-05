@@ -235,9 +235,6 @@ void cmGlobalVisualStudio7Generator::Generate()
       }
     }
 
-  // add the Run Tests command
-  this->SetupTests();
-  
   // first do the superclass method
   this->cmGlobalGenerator::Generate();
   

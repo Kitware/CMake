@@ -211,7 +211,6 @@ protected:
 
   void ConfigureRelativePaths();
   bool RelativePathsConfigured;
-  void SetupTests();
 
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const char* name, const char* message,
