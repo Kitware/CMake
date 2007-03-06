@@ -84,7 +84,7 @@ then
 @CPACK_RESOURCE_FILE_LICENSE_CONTENT@
 ____cpack__here_doc____
     echo
-    echo "Do you accept the license? [Yn]: "
+    echo "Do you accept the license? [yN]: "
     read line leftover
     case ${line} in
       y* | Y*)
