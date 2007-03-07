@@ -2086,19 +2086,58 @@ std::string cmLocalGenerator::Convert(const char* source,
 //----------------------------------------------------------------------------
 void cmLocalGenerator::ConfigureRelativePaths()
 {
+  // Find the highest parent source directory containing the local
+  // source directory.  This is the top of safe relative path
+  // conversion.
+  cmLocalGenerator* srcTop = this;
+  while(cmLocalGenerator* next = srcTop->GetParent())
+    {
+    if(cmSystemTools::IsSubDirectory(
+         this->Makefile->GetStartDirectory(),
+         next->Makefile->GetStartDirectory()))
+      {
+      srcTop = next;
+      }
+    else
+      {
+      break;
+      }
+    }
+
+  // Relative path conversion inside the source tree is not used to
+  // construct relative paths passed to build tools so it is safe to
+  // even when the source is a network path.
+  std::string source = srcTop->Makefile->GetStartDirectory();
+  this->RelativePathTopSource = source;
+
+  // Find the highest parent binary directory containing the local
+  // binary directory.  This is the top of safe relative path
+  // conversion.
+  cmLocalGenerator* binTop = this;
+  while(cmLocalGenerator* next = binTop->GetParent())
+    {
+    if(cmSystemTools::IsSubDirectory(
+         this->Makefile->GetStartOutputDirectory(),
+         next->Makefile->GetStartOutputDirectory()))
+      {
+      binTop = next;
+      }
+    else
+      {
+      break;
+      }
+    }
+
   // The current working directory on Windows cannot be a network
-  // path.  Therefore relative paths cannot work when the build tree
+  // path.  Therefore relative paths cannot work when the binary tree
   // is a network path.
-  std::string source = this->Makefile->GetHomeDirectory();
-  std::string binary = this->Makefile->GetHomeOutputDirectory();
+  std::string binary = binTop->Makefile->GetStartOutputDirectory();
   if(binary.size() < 2 || binary.substr(0, 2) != "//")
     {
-    this->RelativePathTopSource = source;
     this->RelativePathTopBinary = binary;
     }
   else
     {
-    this->RelativePathTopSource = "";
     this->RelativePathTopBinary = "";
     }
 }
