@@ -576,7 +576,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/NewlineArgs"
     "${CMake_BINARY_DIR}/Tests/NewlineArgs"
     --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project cxxonly
+    --build-project newlineargs
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command cxxonly)
