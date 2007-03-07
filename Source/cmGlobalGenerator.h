@@ -144,16 +144,6 @@ public:
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGInitDirectory()  { return "."; }
 
-  /**
-   * Convert the given remote path to a relative path with respect to
-   * the given local path.  The local path must be given in component
-   * form (see SystemTools::SplitPath) without a trailing slash.  The
-   * remote path must use forward slashes and not already be escaped
-   * or quoted.
-   */
-  std::string ConvertToRelativePath(const std::vector<std::string>& local,
-                                    const char* remote);
-
   /** Get whether the generator should use a script for link commands.  */
   bool GetUseLinkScript() { return this->UseLinkScript; }
 
@@ -209,9 +199,6 @@ protected:
   void FillProjectMap();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
 
-  void ConfigureRelativePaths();
-  bool RelativePathsConfigured;
-
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const char* name, const char* message,
     const cmCustomCommandLines* commandLines,
@@ -245,14 +232,6 @@ private:
   std::map<cmStdString, cmStdString> LanguageToOutputExtension;
   std::map<cmStdString, cmStdString> ExtensionToLanguage;
   std::map<cmStdString, cmStdString> LanguageToLinkerPreference; 
-
-  // The paths to the tops of the source and binary trees used for
-  // relative path computation.  A path must be either in the source
-  // tree or the build tree to be converted to a relative path.  The
-  // ConfigureRelativePaths method may set these to be empty when
-  // using relative paths is unsafe.
-  std::string RelativePathTopSource;
-  std::string RelativePathTopBinary;
 
   // this is used to improve performance 
   std::map<cmStdString,cmTarget *> TotalTargets;
