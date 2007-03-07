@@ -29,7 +29,9 @@
 # include "kwsys_stl_string.hxx.in"
 #endif
 
-#include "testSystemTools.h"
+// Include with <> instead of "" to avoid getting any in-source copy
+// left on disk.
+#include <testSystemTools.h>
 
 kwsys_stl::string GetLibName(const char* lname)
 {
