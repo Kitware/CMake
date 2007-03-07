@@ -587,17 +587,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     targetOptions.AddDefine(exportSymbol);
     }
 
-  // Override the flag map with cmake-specific settings.
-  if(this->Makefile->IsOn("CMAKE_CXX_USE_RTTI"))
-    {
-    targetOptions.AddFlag("RuntimeTypeInfo", "TRUE");
-    }
-  if(const char* warningLevel =
-     this->Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL"))
-    {
-    targetOptions.AddFlag("WarningLevel", warningLevel);
-    }
-
   // The intermediate directory name consists of a directory for the
   // target and a subdirectory for the configuration name.
   std::string intermediateDir = this->GetTargetDirectory(target);
