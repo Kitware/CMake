@@ -115,14 +115,12 @@ int testAutoPtr(int, char*[])
            "auto_ptr did not release ownership to called function");
     }
 
-#if !defined(__HP_aCC)
     {
     int received = function_call(generate_auto_ptr_A());
     ASSERT(received,
            "auto_ptr in called function did not take ownership "
            "from factory function");
     }
-#endif
 
 #if 0
     // Is this allowed by the standard?

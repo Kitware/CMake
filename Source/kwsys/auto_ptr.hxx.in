@@ -16,11 +16,25 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
+// The HP compiler cannot handle the conversions necessary to use
+// auto_ptr_ref to pass an auto_ptr returned from one function
+// directly to another function as in use_auto_ptr(get_auto_ptr()).
+// We instead use const_cast to achieve the syntax on that platform.
+// We do not use const_cast on other platforms to maintain the C++
+// standard design and guarantee that if an auto_ptr is bound
+// to a reference-to-const then ownership will be maintained.
+#if defined(__HP_aCC)
+# define @KWSYS_NAMESPACE@_AUTO_PTR_REF 0
+#else
+# define @KWSYS_NAMESPACE@_AUTO_PTR_REF 1
+#endif
+
 namespace @KWSYS_NAMESPACE@
 {
 
 template <class X> class auto_ptr;
 
+#if @KWSYS_NAMESPACE@_AUTO_PTR_REF
 namespace detail
 {
 // The auto_ptr_ref template is supposed to be a private member of
@@ -38,12 +52,24 @@ template <class Y> struct auto_ptr_ref
   auto_ptr_ref(Y* p, int): p_(p) {}
 };
 }
+#endif
 
 /** C++98 Standard Section 20.4.5 - Template class auto_ptr.  */
 template <class X>
 class auto_ptr
 {
+#if @KWSYS_NAMESPACE@_AUTO_PTR_REF
+  typedef auto_ptr auto_ptr_source;
+  static inline auto_ptr& cast(auto_ptr_source& a) { return a; }
+#else
+  typedef auto_ptr const auto_ptr_source;
+  static inline auto_ptr& cast(auto_ptr_source& a)
+    { return const_cast<auto_ptr&>(a); }
+#endif
+
+  /** The pointer to the object held.  */
   X* x_;
+
 public:
   /** The type of object held by the auto_ptr.  */
   typedef X element_type;
@@ -73,19 +99,19 @@ public:
   explicit auto_ptr(X* p=0) throw(): x_(p)
     {
     }
-
+ 
   /** Construct from another auto_ptr holding an object of the same
       type.  This transfers ownership to the newly constructed
       auto_ptr.  */
-  auto_ptr(auto_ptr& a) throw(): x_(a.release())
+  auto_ptr(auto_ptr_source& a) throw(): x_(cast(a).release())
     {
     }
 
   /** Assign from another auto_ptr holding an object of the same type.
       This transfers ownership to the newly constructed auto_ptr.  */
-  auto_ptr& operator=(auto_ptr& a) throw()
+  auto_ptr& operator=(auto_ptr_source& a) throw()
     {
-    this->reset(a.release());
+    this->reset(cast(a).release());
     return *this;
     }
 
@@ -135,26 +161,19 @@ public:
       }
     }
 
-  /** Construct from an auto_ptr_ref.  This is used when the
-      constructor argument is a call to a function returning an
-      auto_ptr.  */
-  auto_ptr(detail::auto_ptr_ref<X> r) throw(): x_(r.p_)
-    {
-    }
-
-  /** Convert to an auto_ptr_ref.  This is used when a function
-      returning an auto_ptr is the argument to the constructor of
-      another auto_ptr.  */
-  template <class Y> operator detail::auto_ptr_ref<Y>() throw()
-    {
-    return detail::auto_ptr_ref<Y>(this->release(), 1);
-    }
-
   /** Convert to an auto_ptr holding an object of a compatible type.
       This transfers ownership to the returned auto_ptr.  */
   template <class Y> operator auto_ptr<Y>() throw()
     {
     return auto_ptr<Y>(this->release());
+    }
+
+#if @KWSYS_NAMESPACE@_AUTO_PTR_REF
+  /** Construct from an auto_ptr_ref.  This is used when the
+      constructor argument is a call to a function returning an
+      auto_ptr.  */
+  auto_ptr(detail::auto_ptr_ref<X> r) throw(): x_(r.p_)
+    {
     }
 
   /** Assign from an auto_ptr_ref.  This is used when a function
@@ -165,6 +184,15 @@ public:
     this->reset(r.p_);
     return *this;
     }
+
+  /** Convert to an auto_ptr_ref.  This is used when a function
+      returning an auto_ptr is the argument to the constructor of
+      another auto_ptr.  */
+  template <class Y> operator detail::auto_ptr_ref<Y>() throw()
+    {
+    return detail::auto_ptr_ref<Y>(this->release(), 1);
+    }
+#endif
 };
 
 } // namespace @KWSYS_NAMESPACE@
