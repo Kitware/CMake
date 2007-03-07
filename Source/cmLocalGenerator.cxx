@@ -2461,21 +2461,20 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(const char* sin)
 std::string
 cmLocalGenerator::GetObjectFileNameWithoutTarget(const cmSourceFile& source)
 {
-  // If the source file is located below the current binary directory
-  // then use that relative path for the object file name.
+  // Construct the object file name using the full path to the source
+  // file which is its only unique identification.  Convert the path
+  // to be relative to the current binary directory if possible.
   std::string objectName = this->Convert(source.GetFullPath().c_str(),
                                          START_OUTPUT);
-  if(cmSystemTools::FileIsFullPath(objectName.c_str()) ||
-     objectName.empty() || objectName[0] == '.')
+  if(cmSystemTools::FileIsFullPath(objectName.c_str()) || objectName.empty())
     {
-    // If the source file is located below the current source
-    // directory then use that relative path for the object file name.
-    // Otherwise just use the relative path from the current binary
-    // directory.
+    // If the source file can be referenced as a relative path from
+    // the source tree use that relative path to construct the object
+    // name.
     std::string relFromSource = this->Convert(source.GetFullPath().c_str(),
                                               START);
     if(!cmSystemTools::FileIsFullPath(relFromSource.c_str()) &&
-       !relFromSource.empty() && relFromSource[0] != '.')
+       !relFromSource.empty())
       {
       objectName = relFromSource;
       }
