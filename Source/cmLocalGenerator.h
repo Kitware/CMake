@@ -219,6 +219,16 @@ public:
   // return the source name for the object file
   virtual std::string GetSourceObjectName(cmSourceFile& );
   
+  /**
+   * Convert the given remote path to a relative path with respect to
+   * the given local path.  The local path must be given in component
+   * form (see SystemTools::SplitPath) without a trailing slash.  The
+   * remote path must use forward slashes and not already be escaped
+   * or quoted.
+   */
+  std::string ConvertToRelativePath(const std::vector<std::string>& local,
+                                    const char* remote);
+
 protected:
 
   /** Construct a comment for a custom command.  */
@@ -267,16 +277,6 @@ protected:
   std::string& CreateSafeUniqueObjectFileName(const char* sin);
 
   void ConfigureRelativePaths();
-
-  /**
-   * Convert the given remote path to a relative path with respect to
-   * the given local path.  The local path must be given in component
-   * form (see SystemTools::SplitPath) without a trailing slash.  The
-   * remote path must use forward slashes and not already be escaped
-   * or quoted.
-   */
-  std::string ConvertToRelativePath(const std::vector<std::string>& local,
-                                    const char* remote);
 
   cmMakefile *Makefile;
   cmGlobalGenerator *GlobalGenerator;
