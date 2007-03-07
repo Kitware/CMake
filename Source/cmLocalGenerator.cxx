@@ -32,6 +32,8 @@
 
 #include <ctype.h> // for isalpha
 
+#include <assert.h>
+
 cmLocalGenerator::cmLocalGenerator()
 {
   this->Makefile = new cmMakefile;
