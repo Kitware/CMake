@@ -39,11 +39,6 @@
 #ifndef @KWSYS_NAMESPACE@_hashtable_hxx
 #define @KWSYS_NAMESPACE@_hashtable_hxx
 
-/* turn off no assignment warning */
-#if defined(_MSC_VER)
-#  pragma warning ( disable : 4512 ) /* no assignment operator for class */
-#endif
-
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
 #include <@KWSYS_NAMESPACE@/cstddef>        // size_t
@@ -58,6 +53,7 @@
 # pragma warning (push)
 # pragma warning (disable:4284)
 # pragma warning (disable:4786)
+# pragma warning (disable:4512) /* no assignment operator for class */
 #endif
 
 #if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_TEMPLATE
