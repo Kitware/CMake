@@ -2084,54 +2084,58 @@ std::string cmLocalGenerator::Convert(const char* source,
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::ConfigureRelativePaths()
+std::string cmLocalGenerator::FindRelativePathTopSource()
 {
-  // Find the highest parent source directory containing the local
-  // source directory.  This is the top of safe relative path
-  // conversion.
-  cmLocalGenerator* srcTop = this;
-  while(cmLocalGenerator* next = srcTop->GetParent())
+  // Relative path conversion within a single tree managed by CMake is
+  // safe.  We can use our parent relative path top if and only if
+  // this is a subdirectory of that top.
+  if(cmLocalGenerator* parent = this->GetParent())
     {
+    std::string parentTop = parent->FindRelativePathTopSource();
     if(cmSystemTools::IsSubDirectory(
-         this->Makefile->GetStartDirectory(),
-         next->Makefile->GetStartDirectory()))
+         this->Makefile->GetStartDirectory(), parentTop.c_str()))
       {
-      srcTop = next;
-      }
-    else
-      {
-      break;
+      return parentTop;
       }
     }
 
+  // Otherwise this directory itself is the new top.
+  return this->Makefile->GetStartDirectory();
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::FindRelativePathTopBinary()
+{
+  // Relative path conversion within a single tree managed by CMake is
+  // safe.  We can use our parent relative path top if and only if
+  // this is a subdirectory of that top.
+  if(cmLocalGenerator* parent = this->GetParent())
+    {
+    std::string parentTop = parent->FindRelativePathTopBinary();
+    if(cmSystemTools::IsSubDirectory(
+         this->Makefile->GetStartOutputDirectory(), parentTop.c_str()))
+      {
+      return parentTop;
+      }
+    }
+
+  // Otherwise this directory itself is the new top.
+  return this->Makefile->GetStartOutputDirectory();
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::ConfigureRelativePaths()
+{
   // Relative path conversion inside the source tree is not used to
   // construct relative paths passed to build tools so it is safe to
   // even when the source is a network path.
-  std::string source = srcTop->Makefile->GetStartDirectory();
+  std::string source = this->FindRelativePathTopSource();
   this->RelativePathTopSource = source;
-
-  // Find the highest parent binary directory containing the local
-  // binary directory.  This is the top of safe relative path
-  // conversion.
-  cmLocalGenerator* binTop = this;
-  while(cmLocalGenerator* next = binTop->GetParent())
-    {
-    if(cmSystemTools::IsSubDirectory(
-         this->Makefile->GetStartOutputDirectory(),
-         next->Makefile->GetStartOutputDirectory()))
-      {
-      binTop = next;
-      }
-    else
-      {
-      break;
-      }
-    }
 
   // The current working directory on Windows cannot be a network
   // path.  Therefore relative paths cannot work when the binary tree
   // is a network path.
-  std::string binary = binTop->Makefile->GetStartOutputDirectory();
+  std::string binary = this->FindRelativePathTopBinary();
   if(binary.size() < 2 || binary.substr(0, 2) != "//")
     {
     this->RelativePathTopBinary = binary;

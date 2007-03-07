@@ -277,6 +277,8 @@ protected:
   std::string& CreateSafeUniqueObjectFileName(const char* sin);
 
   void ConfigureRelativePaths();
+  std::string FindRelativePathTopSource();
+  std::string FindRelativePathTopBinary();
 
   cmMakefile *Makefile;
   cmGlobalGenerator *GlobalGenerator;
