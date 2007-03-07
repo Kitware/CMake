@@ -74,6 +74,10 @@ public:
     }
   
   cmTypeMacro(cmIncludeDirectoryCommand, cmCommand);
+
+protected:
+  // used internally
+  void AddDirectory(const char *arg, bool before, bool system);
 };
 
 

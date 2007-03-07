@@ -859,8 +859,28 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
 
 void cmMakefile::AddDefineFlag(const char* flag)
 {
+  if (!flag)
+    {
+    return;
+    }
+
+  // remove any \n\r
+  std::string ret = flag;
+  std::string::size_type pos = 0;
+  while((pos = ret.find('\n', pos)) != std::string::npos)
+    {
+    ret[pos] = ' ';
+    pos++;
+    }
+  pos = 0;
+  while((pos = ret.find('\r', pos)) != std::string::npos)
+    {
+    ret[pos] = ' ';
+    pos++;
+    }
+
   this->DefineFlags += " ";
-  this->DefineFlags += flag;
+  this->DefineFlags += ret;
 }
 
 
@@ -1111,6 +1131,12 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
 
 void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 {
+  // if there is a newline then break it into multiple arguments
+  if (!inc)
+    {
+    return;
+    }
+
   // Don't add an include directory that is already present.  Yes,
   // this linear search results in n^2 behavior, but n won't be
   // getting much bigger than 20.  We cannot use a set because of

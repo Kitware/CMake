@@ -571,6 +571,16 @@ IF(BUILD_TESTING)
     --build-two-config
     --test-command cxxonly)
 
+  ADD_TEST(NewlineArgs  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/NewlineArgs"
+    "${CMake_BINARY_DIR}/Tests/NewlineArgs"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project cxxonly
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-two-config
+    --test-command cxxonly)
+
   ADD_TEST(MacroTest ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/MacroTest"

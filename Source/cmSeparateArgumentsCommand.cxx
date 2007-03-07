@@ -31,8 +31,7 @@ bool cmSeparateArgumentsCommand
     return true;
     }
   std::string value = cacheValue;
-  cmSystemTools::ReplaceString(value,
-                               " ", ";");
+  cmSystemTools::ReplaceString(value," ", ";");
   this->Makefile->AddDefinition(args[0].c_str(), value.c_str());
   return true;
 }
