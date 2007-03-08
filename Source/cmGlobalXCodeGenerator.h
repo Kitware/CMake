@@ -146,7 +146,6 @@ private:
                           std::vector<cmXCodeObject*>&);
   void AddDependTarget(cmXCodeObject* target,
                        cmXCodeObject* dependTarget);
-  void ConfigureOutputPaths();
   void CreateXCodeDependHackTarget(std::vector<cmXCodeObject*>& targets);
   bool SpecialTargetEmitted(std::string const& tname);
   void AddExtraTargets(cmLocalGenerator* root, 
@@ -179,8 +178,6 @@ private:
   std::string CurrentXCodeHackMakefile;
   std::string CurrentProject;
   std::string OutputDir; 
-  std::string LibraryOutputPath;
-  std::string ExecutableOutputPath;
   std::set<cmStdString> TargetDoneSet;
   std::vector<std::string> CurrentOutputDirectoryComponents;
   std::vector<std::string> ProjectOutputDirectoryComponents;

@@ -212,49 +212,6 @@ std::string cmGlobalXCodeGenerator
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::ConfigureOutputPaths()
-{
-  // Format the library and executable output paths.
-  this->LibraryOutputPath = 
-    this->CurrentMakefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
-  if(this->LibraryOutputPath.size() == 0)
-    {
-    this->LibraryOutputPath = 
-      this->CurrentMakefile->GetCurrentOutputDirectory();
-    }
-  // make sure there is a trailing slash
-  if(this->LibraryOutputPath.size() && 
-     this->LibraryOutputPath[this->LibraryOutputPath.size()-1] != '/')
-    {
-    this->LibraryOutputPath += "/";
-    if(!cmSystemTools::MakeDirectory(this->LibraryOutputPath.c_str()))
-      {
-      cmSystemTools::Error("Error creating directory ",
-                           this->LibraryOutputPath.c_str());
-      }
-    }
-  this->CurrentMakefile->AddLinkDirectory(this->LibraryOutputPath.c_str());
-  this->ExecutableOutputPath = 
-    this->CurrentMakefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-  if(this->ExecutableOutputPath.size() == 0)
-    {
-    this->ExecutableOutputPath = 
-      this->CurrentMakefile->GetCurrentOutputDirectory();
-    }
-  // make sure there is a trailing slash
-  if(this->ExecutableOutputPath.size() && 
-     this->ExecutableOutputPath[this->ExecutableOutputPath.size()-1] != '/')
-    {
-    this->ExecutableOutputPath += "/";
-    if(!cmSystemTools::MakeDirectory(this->ExecutableOutputPath.c_str()))
-      {
-      cmSystemTools::Error("Error creating directory ",
-                           this->ExecutableOutputPath.c_str());
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalXCodeGenerator::CreateLocalGenerator()
 {
@@ -1108,7 +1065,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                                  std::string& productName,
                                                  const char* configName)
 {
-  this->ConfigureOutputPaths();
   std::string flags;
   std::string defFlags;
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
