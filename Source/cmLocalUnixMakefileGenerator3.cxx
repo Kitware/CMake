@@ -1745,17 +1745,15 @@ cmLocalUnixMakefileGenerator3
   // Add the target.
   if (tgt && tgt[0] != '\0')
     {
-    std::string tgt2 = this->Convert(tgt,HOME_OUTPUT,MAKEFILE);
-    // for make -f foo bar, foo is a file but bar (tgt2) is 
-    // a make target.  make targets should be escaped with "" 
-    // and not \, so if we find a "\ " in the path then remove
-    // the \ and quote the whole string
-    if(tgt2.find("\\ ") != tgt2.npos)
-      {
-      cmSystemTools::ReplaceString(tgt2, "\\", "");
-      tgt2 = std::string("\"") + tgt2 + std::string("\"");
-      }
-    cmd += tgt2;
+    // The make target is always relative to the top of the build tree.
+    std::string tgt2 = this->Convert(tgt, HOME_OUTPUT);
+
+    // The target may have been written with windows paths.
+    cmSystemTools::ConvertToOutputSlashes(tgt2);
+
+    // The target name is now a string that should be passed verbatim
+    // on the command line.
+    cmd += this->EscapeForShell(tgt2.c_str(), true, false);
     }
   return cmd;
 }
