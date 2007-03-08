@@ -1936,18 +1936,17 @@ const char* cmTarget::GetOutputDir()
   if(this->OutputDir.empty())
     {
     // Lookup the output path for this target type.
-    switch(this->GetType())
+    if(this->GetType() == cmTarget::EXECUTABLE)
       {
-      case cmTarget::STATIC_LIBRARY:
-      case cmTarget::MODULE_LIBRARY:
-      case cmTarget::SHARED_LIBRARY:
-        this->OutputDir =
-          this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
-        break;
-      case cmTarget::EXECUTABLE:
-        this->OutputDir =
-          this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-        break;
+      this->OutputDir =
+        this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+      }
+    else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
+            this->GetType() == cmTarget::SHARED_LIBRARY ||
+            this->GetType() == cmTarget::MODULE_LIBRARY)
+      {
+      this->OutputDir =
+        this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
       }
     if(this->OutputDir.empty())
       {
@@ -1968,10 +1967,16 @@ const char* cmTarget::GetOutputDir()
                            this->OutputDir.c_str());
       }
 
-    // TODO: This came from cmLocalUnixMakefileGenerator3::FormatOutputPath.
-    // Where should it go.  Is it still needed?
+    // This came from cmLocalUnixMakefileGenerator3::FormatOutputPath.
+    // Where should it go?  Is it still needed?  I do not think so
+    // because target full paths are split into -Ldir -llib
+    // automatically.
+    //
     // Add this as a link directory automatically.
     // this->Makefile->AddLinkDirectory(path.c_str());
+    //
+    // Should it be this?
+    // this->AddLinkDirectory(this->OutputDir.c_str());
     }
 
   return this->OutputDir.c_str();
