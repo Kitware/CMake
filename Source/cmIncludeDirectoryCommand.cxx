@@ -98,7 +98,8 @@ void cmIncludeDirectoryCommand::AddDirectory(const char *i,
       }
     if (ret.size()-pos-1)
       {
-      this->AddDirectory(ret.substr(pos+1,ret.size()-pos-1).c_str(), before, system);
+      this->AddDirectory(ret.substr(pos+1,ret.size()-pos-1).c_str(),
+                         before, system);
       }
     return;
     }
