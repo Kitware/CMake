@@ -996,17 +996,17 @@ IF(BUILD_TESTING)
       )
   ENDIF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
   SET(MAKE_IS_GNU )
-  IF(COMMAND EXECUTE_PROCESS AND ${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
-    EXECUTE_PROCESS(COMMAND ${CMAKE_TEST_MAKEPROGRAM} --version
-      RESULT_VARIABLE res OUTPUT_VARIABLE out
-      ERROR_QUIET
+  IF(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
+    EXEC_PROGRAM(
+      ${CMAKE_TEST_MAKEPROGRAM} ARGS --version
+      RETURN_VALUE res OUTPUT_VARIABLE out
       )
     IF("${res}" EQUAL 0)
       IF("${out}" MATCHES "GNU")
         SET(MAKE_IS_GNU 1)
       ENDIF("${out}" MATCHES "GNU")
     ENDIF("${res}" EQUAL 0)
-  ENDIF(COMMAND EXECUTE_PROCESS AND ${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
+  ENDIF(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
 
   # only add this test on platforms that support it
   # some old versions of make simply cannot handle spaces in paths
