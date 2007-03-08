@@ -1483,8 +1483,6 @@ void cmLocalUnixMakefileGenerator3
   std::string recursiveTarget = this->Makefile->GetStartOutputDirectory();
   recursiveTarget += "/all";
 
-  dir = this->Convert(recursiveTarget.c_str(),HOME_OUTPUT,MAKEFILE);
-
   depends.push_back("cmake_check_build_system");
 
   std::string progressDir = this->Makefile->GetHomeOutputDirectory();
@@ -1521,7 +1519,6 @@ void cmLocalUnixMakefileGenerator3
   // Write the clean rule.
   recursiveTarget = this->Makefile->GetStartOutputDirectory();
   recursiveTarget += "/clean";
-  dir = this->Convert(recursiveTarget.c_str(),HOME_OUTPUT,MAKEFILE);
   commands.clear();
   depends.clear();
   commands.push_back(this->GetRecursiveMakeCall(mf2Dir.c_str(),
@@ -1540,7 +1537,6 @@ void cmLocalUnixMakefileGenerator3
   // Write the preinstall rule.
   recursiveTarget = this->Makefile->GetStartOutputDirectory();
   recursiveTarget += "/preinstall";
-  dir = this->Convert(recursiveTarget.c_str(), HOME_OUTPUT,MAKEFILE);
   commands.clear();
   depends.clear();
   const char* noall =
@@ -1571,8 +1567,6 @@ void cmLocalUnixMakefileGenerator3
   commands.clear();
   std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
   cmakefileName += "Makefile.cmake";
-  this->Convert(cmakefileName.c_str(),HOME_OUTPUT,
-                cmLocalGenerator::MAKEFILE);  
   std::string runRule =
     "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
