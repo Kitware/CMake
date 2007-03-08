@@ -597,7 +597,6 @@ std::string cmGlobalUnixMakefileGenerator3
       lg->GetMakefile()->MakeStartDirectoriesCurrent();
       }
     
-    lg->SetupPathConversions();
     makeCommand += " \"";
     std::string tname = targetName;
     if(fast)

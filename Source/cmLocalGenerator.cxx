@@ -48,6 +48,7 @@ cmLocalGenerator::cmLocalGenerator()
   this->Configured = false;
   this->EmitUniversalBinaryFlags = true;
   this->RelativePathsConfigured = false;
+  this->PathConversionsSetup = false;
 }
 
 cmLocalGenerator::~cmLocalGenerator()
@@ -80,9 +81,7 @@ void cmLocalGenerator::Configure()
       this->Makefile->ConfigureSubDirectory(*sdi);
       }
     }  
-  
-  this->SetupPathConversions();
-  
+
   // Check whether relative paths should be used for optionally
   // relative paths.
   this->UseRelativePaths = this->Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
@@ -2014,6 +2013,13 @@ std::string cmLocalGenerator::Convert(const char* source,
                                       OutputFormat output,
                                       bool optional)
 {
+  // Make sure the relative path conversion components are set.
+  if(!this->PathConversionsSetup)
+    {
+    this->SetupPathConversions();
+    this->PathConversionsSetup = true;
+    }
+
   // Convert the path to a relative path.
   std::string result = source;
 

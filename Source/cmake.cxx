@@ -1210,7 +1210,6 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         lgd->GetMakefile()->SetStartDirectory(startDir.c_str());
         lgd->GetMakefile()->SetStartOutputDirectory(startOutDir.c_str());
         lgd->GetMakefile()->MakeStartDirectoriesCurrent();
-        lgd->SetupPathConversions();
 
         // Actually scan dependencies.
         return lgd->ScanDependencies(depInfo.c_str())? 0 : 2;

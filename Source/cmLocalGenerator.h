@@ -102,9 +102,6 @@ public:
                       OutputFormat output = UNCHANGED,
                       bool optional = false);
   
-  ///! Call this prior to using Convert
-  void SetupPathConversions();
-  
   /**
    * Convert the given path to an output path that is optionally
    * relative based on the cache option CMAKE_USE_RELATIVE_PATHS.  The
@@ -279,6 +276,7 @@ protected:
   void ConfigureRelativePaths();
   std::string FindRelativePathTopSource();
   std::string FindRelativePathTopBinary();
+  void SetupPathConversions();
 
   cmMakefile *Makefile;
   cmGlobalGenerator *GlobalGenerator;
@@ -314,6 +312,7 @@ protected:
   std::string RelativePathTopSource;
   std::string RelativePathTopBinary;
   bool RelativePathsConfigured;
+  bool PathConversionsSetup;
 };
 
 #endif
