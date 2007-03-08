@@ -293,12 +293,8 @@ public:
   // be used when RunCommand is called from cmake, because the 
   // running cmake needs paths to be in its format
   static std::string ConvertToRunCommandPath(const char* path);
-  // convert to a shell path
-  static std::string ConvertToShellPath(const char* path);
   //! Check if the first string ends with the second one.
   static bool StringEndsWith(const char* str1, const char* str2);
-  // escape for unix shells
-  static std::string EscapeForUnixShell(std::string& result);
   static bool CreateSymlink(const char* origName, const char* newName);
   
   /** compute the relative path from local to remote.  local must 
