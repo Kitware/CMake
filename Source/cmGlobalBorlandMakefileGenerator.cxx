@@ -50,6 +50,7 @@ cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
   lg->SetPassMakeflags(true);
   lg->SetGlobalGenerator(this);
   lg->SetUnixCD(false);
+  lg->SetMakeCommandEscapeTargetTwice(true);
   return lg;
 }
 

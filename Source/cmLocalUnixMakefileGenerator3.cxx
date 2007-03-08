@@ -53,6 +53,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->SkipAssemblySourceRules = false;
   this->NativeEchoCommand = "@echo ";
   this->NativeEchoWindows = true;
+  this->MakeCommandEscapeTargetTwice = false;
 }
 
 //----------------------------------------------------------------------------
@@ -1750,6 +1751,12 @@ cmLocalUnixMakefileGenerator3
 
     // The target may have been written with windows paths.
     cmSystemTools::ConvertToOutputSlashes(tgt2);
+
+    // Escape one extra time if the make tool requires it.
+    if(this->MakeCommandEscapeTargetTwice)
+      {
+      tgt2 = this->EscapeForShell(tgt2.c_str(), true, false);
+      }
 
     // The target name is now a string that should be passed verbatim
     // on the command line.

@@ -158,6 +158,13 @@ public:
    */
   void SetIgnoreLibPrefix(bool s) { this->IgnoreLibPrefix = s; }
 
+  /**
+   * Set whether passing a make target on a command line requires an
+   * extra level of escapes.
+   */
+  void SetMakeCommandEscapeTargetTwice(bool b)
+    { this->MakeCommandEscapeTargetTwice = b; }
+
   // used in writing out Cmake files such as WriteDirectoryInformation
   static void WriteCMakeArgument(std::ostream& os, const char* s);
 
@@ -334,6 +341,7 @@ private:
   bool UnixCD;
   bool PassMakeflags;
   bool SilentNoColon;
+  bool MakeCommandEscapeTargetTwice;
   //==========================================================================
 
   std::string HomeRelativeOutputPath;
