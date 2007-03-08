@@ -480,7 +480,7 @@ cmMakefileTargetGenerator
     }
   targetOutPathPDB =
     this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::FULL,
-                  cmLocalGenerator::MAKEFILE);
+                  cmLocalGenerator::SHELL);
   }
   cmLocalGenerator::RuleVariables vars;
   vars.Language = lang;

@@ -192,16 +192,16 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetOutPathPDB = 
     this->Convert(targetFullPathPDB.c_str(),
                   cmLocalGenerator::FULL,
-                  cmLocalGenerator::MAKEFILE); 
+                  cmLocalGenerator::SHELL);
   // Convert to the output path to use in constructing commands.
   std::string targetOutPath =
     this->Convert(targetFullPath.c_str(),
                   cmLocalGenerator::START_OUTPUT,
-                  cmLocalGenerator::MAKEFILE); 
+                  cmLocalGenerator::SHELL);
   std::string targetOutPathReal =
     this->Convert(targetFullPathReal.c_str(),
                   cmLocalGenerator::START_OUTPUT,
-                  cmLocalGenerator::MAKEFILE);
+                  cmLocalGenerator::SHELL);
   
   // Get the language to use for linking this executable.
   const char* linkLanguage =

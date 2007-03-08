@@ -148,7 +148,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
         extraFlags += 
           this->Convert((*i)->GetFullPath().c_str(),
                         cmLocalGenerator::START_OUTPUT,
-                        cmLocalGenerator::MAKEFILE);
+                        cmLocalGenerator::SHELL);
         }
       }
     }
@@ -269,19 +269,19 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // arguments.
   std::string targetOutPathPDB = 
     this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::FULL,
-                  cmLocalGenerator::MAKEFILE);
+                  cmLocalGenerator::SHELL);
   std::string targetOutPath = 
     this->Convert(targetFullPath.c_str(),cmLocalGenerator::START_OUTPUT,
-                  cmLocalGenerator::MAKEFILE);
+                  cmLocalGenerator::SHELL);
   std::string targetOutPathSO = 
     this->Convert(targetFullPathSO.c_str(),cmLocalGenerator::START_OUTPUT,
-                  cmLocalGenerator::MAKEFILE);
+                  cmLocalGenerator::SHELL);
   std::string targetOutPathReal = 
     this->Convert(targetFullPathReal.c_str(),cmLocalGenerator::START_OUTPUT,
-                  cmLocalGenerator::MAKEFILE);
+                  cmLocalGenerator::SHELL);
   std::string targetOutPathImport =
     this->Convert(targetFullPathImport.c_str(),cmLocalGenerator::START_OUTPUT,
-                  cmLocalGenerator::MAKEFILE);
+                  cmLocalGenerator::SHELL);
 
   // Add the link message.
   std::string buildEcho = "Linking ";
@@ -566,21 +566,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   objdir += this->Target->GetName();
   objdir += ".dir";
   vars.ObjectDir = objdir.c_str(); 
-  std::string targetLinkScriptPathReal;
-  if(useLinkScript)
-    {
-    // Paths in the link script are interpreted directly by the shell
-    // and not make.
-    targetLinkScriptPathReal =
-      this->Convert(targetFullPathReal.c_str(),
-                    cmLocalGenerator::START_OUTPUT,
-                    cmLocalGenerator::SHELL);
-    vars.Target = targetLinkScriptPathReal.c_str();
-    }
-  else
-    {
-    vars.Target = targetOutPathReal.c_str();
-    }
+  vars.Target = targetOutPathReal.c_str();
   std::string linkString = linklibs.str();
   vars.LinkLibraries = linkString.c_str();
   vars.ObjectsQuoted = buildObjs.c_str();
