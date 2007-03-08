@@ -1679,12 +1679,8 @@ cmLocalUnixMakefileGenerator3
     if ( target.GetPropertyAsBool("MACOSX_BUNDLE") )
       {
       // Construct the full path version of the names.
-      obj = this->ExecutableOutputPath;
-      if(obj.empty())
-        {
-        obj = this->Makefile->GetStartOutputDirectory();
-        obj += "/";
-        }
+      obj = target.GetDirectory();
+      obj += "/";
       obj += targetName + ".app/Contents/";
       obj += fileTargetDirectory;
       }
