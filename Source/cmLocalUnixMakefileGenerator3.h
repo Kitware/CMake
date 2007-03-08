@@ -254,11 +254,6 @@ public:
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& dirs);
 protected:
-  // these two methods just compute reasonable values for LibraryOutputPath
-  // and ExecutableOutputPath
-  void ConfigureOutputPaths();
-  void FormatOutputPath(std::string& path, const char* name);
-
   void WriteLocalMakefile();
   
   
@@ -332,8 +327,6 @@ private:
   int MakefileVariableSize;
   std::string IncludeDirective;
   std::string MakeSilentFlag;
-  std::string ExecutableOutputPath;
-  std::string LibraryOutputPath;
   std::string ConfigurationName;
   std::string NativeEchoCommand;
   bool NativeEchoWindows;

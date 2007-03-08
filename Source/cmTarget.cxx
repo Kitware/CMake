@@ -1093,34 +1093,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
 
 const char* cmTarget::GetDirectory(const char* config)
 {
-  switch( this->GetType() )
-    {
-    case cmTarget::STATIC_LIBRARY:
-    case cmTarget::MODULE_LIBRARY:
-    case cmTarget::SHARED_LIBRARY:
-      this->Directory = 
-        this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
-      break;
-    case cmTarget::EXECUTABLE:
-      this->Directory = 
-        this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-      break;
-    default:
-      this->Directory = this->Makefile->GetStartOutputDirectory();
-      break;
-    }
-  if(this->Directory.empty())
-    {
-    this->Directory = this->Makefile->GetStartOutputDirectory();
-    }
-  // if LIBRARY_OUTPUT_PATH or EXECUTABLE_OUTPUT_PATH was relative
-  // then make them full paths because this directory MUST 
-  // be a full path or things will not work!!!
-  if(!cmSystemTools::FileIsFullPath(this->Directory.c_str()))
-    {
-    this->Directory = this->Makefile->GetCurrentOutputDirectory() + 
-      std::string("/") + this->Directory;
-    }
+  this->Directory = this->GetOutputDir();
   if(config)
     {
     // Add the configuration's subdirectory.
@@ -1955,4 +1928,51 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char*)
     {
     return "";
     }
+}
+
+//----------------------------------------------------------------------------
+const char* cmTarget::GetOutputDir()
+{
+  if(this->OutputDir.empty())
+    {
+    // Lookup the output path for this target type.
+    switch(this->GetType())
+      {
+      case cmTarget::STATIC_LIBRARY:
+      case cmTarget::MODULE_LIBRARY:
+      case cmTarget::SHARED_LIBRARY:
+        this->OutputDir =
+          this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
+        break;
+      case cmTarget::EXECUTABLE:
+        this->OutputDir =
+          this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+        break;
+      }
+    if(this->OutputDir.empty())
+      {
+      this->OutputDir = ".";
+      }
+
+    // Convert the output path to a full path in case it is
+    // specified as a relative path.  Treat a relative path as
+    // relative to the current output directory for this makefile.
+    this->OutputDir =
+      cmSystemTools::CollapseFullPath
+      (this->OutputDir.c_str(), this->Makefile->GetStartOutputDirectory());
+
+    // Make sure the output path exists on disk.
+    if(!cmSystemTools::MakeDirectory(this->OutputDir.c_str()))
+      {
+      cmSystemTools::Error("Error failed to create output directory:",
+                           this->OutputDir.c_str());
+      }
+
+    // TODO: This came from cmLocalUnixMakefileGenerator3::FormatOutputPath.
+    // Where should it go.  Is it still needed?
+    // Add this as a link directory automatically.
+    // this->Makefile->AddLinkDirectory(path.c_str());
+    }
+
+  return this->OutputDir.c_str();
 }

@@ -78,8 +78,17 @@ void cmLocalUnixMakefileGenerator3::Configure()
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::Generate()
 {
-  // Setup our configuration variables for this directory.
-  this->ConfigureOutputPaths();
+  // Store the configuration name that will be generated.
+  if(const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
+    {
+    // Use the build type given by the user.
+    this->ConfigurationName = config;
+    }
+  else
+    {
+    // No configuration type given.
+    this->ConfigurationName = "";
+    }
 
   // Record whether some options are enabled to avoid checking many
   // times later.
@@ -179,66 +188,6 @@ void cmLocalUnixMakefileGenerator3::WriteAllProgressVariable()
 
   ruleFileStream << "CMAKE_ALL_PROGRESS = " 
                  << gg->GetNumberOfProgressActionsInAll(this) << "\n";
-}
-
-//----------------------------------------------------------------------------
-void cmLocalUnixMakefileGenerator3::ConfigureOutputPaths()
-{
-  // Format the library and executable output paths.
-  if(const char* libOut = 
-     this->Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
-    {
-    this->LibraryOutputPath = libOut;
-    this->FormatOutputPath(this->LibraryOutputPath, "LIBRARY");
-    }
-  if(const char* exeOut = 
-     this->Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
-    {
-    this->ExecutableOutputPath = exeOut;
-    this->FormatOutputPath(this->ExecutableOutputPath, "EXECUTABLE");
-    }
-
-  // Store the configuration name that will be generated.
-  if(const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
-    {
-    // Use the build type given by the user.
-    this->ConfigurationName = config;
-    }
-  else
-    {
-    // No configuration type given.
-    this->ConfigurationName = "";
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmLocalUnixMakefileGenerator3::FormatOutputPath(std::string& path,
-                                                     const char* name)
-{
-  if(!path.empty())
-    {
-    // Convert the output path to a full path in case it is
-    // specified as a relative path.  Treat a relative path as
-    // relative to the current output directory for this makefile.
-    path = cmSystemTools::CollapseFullPath
-      (path.c_str(), this->Makefile->GetStartOutputDirectory());
-
-    // Add a trailing slash for easy appending later.
-    if(path.empty() || path[path.size()-1] != '/')
-      {
-      path += "/";
-      }
-
-    // Make sure the output path exists on disk.
-    if(!cmSystemTools::MakeDirectory(path.c_str()))
-      {
-      cmSystemTools::Error("Error failed to create ",
-                           name, "_OUTPUT_PATH directory:", path.c_str());
-      }
-
-    // Add this as a link directory automatically.
-    this->Makefile->AddLinkDirectory(path.c_str());
-    }
 }
 
 //----------------------------------------------------------------------------

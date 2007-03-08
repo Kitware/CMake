@@ -213,6 +213,9 @@ public:
       makefile and the configuration type.  */
   std::string GetFullPath(const char* config=0, bool implib = false);
 
+  /** Get the full path to the target output directory.  */
+  const char* GetOutputDir();
+
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
       should be called only on a library target.  */
@@ -357,6 +360,7 @@ private:
   bool HaveInstallRule;
   std::string InstallPath;
   std::string RuntimeInstallPath;
+  std::string OutputDir;
   std::string Directory;
   std::string Location;
   std::set<cmStdString> Utilities;

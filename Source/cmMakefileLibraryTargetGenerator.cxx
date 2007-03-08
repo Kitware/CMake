@@ -245,18 +245,18 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     this->LocalGenerator->ConfigurationName.c_str());
 
   // Construct the full path version of the names.
-  std::string outpath = this->LocalGenerator->LibraryOutputPath;
-  if(outpath.length() == 0)
-    {
-    outpath = this->Makefile->GetStartOutputDirectory();
-    outpath += "/";
-    }
+  std::string outpath;
   if(relink)
     {
     outpath = this->Makefile->GetStartOutputDirectory();
     outpath += cmake::GetCMakeFilesDirectory();
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath.c_str());
+    outpath += "/";
+    }
+  else
+    {
+    outpath = this->Target->GetOutputDir();
     outpath += "/";
     }
   std::string targetFullPath = outpath + targetName;

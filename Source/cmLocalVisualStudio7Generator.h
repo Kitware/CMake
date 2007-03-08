@@ -125,8 +125,6 @@ private:
   virtual std::string GetTargetDirectory(cmTarget&);
 
   std::vector<std::string> CreatedProjectNames;
-  std::string LibraryOutputPath;
-  std::string ExecutableOutputPath;
   std::string ModuleDefinitionFile;
   int Version;
   std::string PlatformName; // Win32 or x64 

@@ -466,16 +466,13 @@ cmMakefileTargetGenerator
   {
   std::string targetFullPathPDB;
   const char* configName = this->LocalGenerator->ConfigurationName.c_str();
-  if(this->Target->GetType() == cmTarget::EXECUTABLE)
+  if(this->Target->GetType() == cmTarget::EXECUTABLE ||
+     this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
+     this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->Target->GetType() == cmTarget::MODULE_LIBRARY)
     {
-    targetFullPathPDB = this->LocalGenerator->ExecutableOutputPath;
-    targetFullPathPDB += this->Target->GetPDBName(configName);
-    }
-  else if(this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
-          this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-          this->Target->GetType() == cmTarget::MODULE_LIBRARY)
-    {
-    targetFullPathPDB = this->LocalGenerator->LibraryOutputPath;
+    targetFullPathPDB = this->Target->GetOutputDir();
+    targetFullPathPDB += "/";
     targetFullPathPDB += this->Target->GetPDBName(configName);
     }
   targetOutPathPDB =
