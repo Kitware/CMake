@@ -1341,6 +1341,23 @@ std::string cmSystemTools::ConvertToOutputPath(const char* path)
 #endif
 }
 
+void cmSystemTools::ConvertToOutputSlashes(std::string& path)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  if(!s_ForceUnixPaths)
+    {
+    // Convert to windows slashes.
+    std::string::size_type pos = 0;
+    while((pos = path.find('/', pos)) != std::string::npos)
+      {
+      path[pos++] = '\\';
+      }
+    }
+#else
+  static_cast<void>(path);
+#endif
+}
+
 std::string cmSystemTools::ConvertToRunCommandPath(const char* path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)

@@ -289,6 +289,8 @@ public:
 
   // ConvertToOutputPath use s_ForceUnixPaths
   static std::string ConvertToOutputPath(const char* path);
+  static void ConvertToOutputSlashes(std::string& path);
+
   // ConvertToRunCommandPath does not use s_ForceUnixPaths and should
   // be used when RunCommand is called from cmake, because the 
   // running cmake needs paths to be in its format
