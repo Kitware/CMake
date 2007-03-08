@@ -64,11 +64,11 @@ cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3()
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::Configure()
 {
-  // Include the rule file for each object.
-  this->HomeRelativeOutputPath = 
-    cmSystemTools::RelativePath(this->Makefile->GetHomeOutputDirectory(),
-                                this->Makefile->GetStartOutputDirectory());
-  if (this->HomeRelativeOutputPath.size())
+  // Compute the path to use when referencing the current output
+  // directory from the top output directory.
+  this->HomeRelativeOutputPath =
+    this->Convert(this->Makefile->GetStartOutputDirectory(), HOME_OUTPUT);
+  if(!this->HomeRelativeOutputPath.empty())
     {
     this->HomeRelativeOutputPath += "/";
     }
