@@ -186,9 +186,6 @@ public:
 
   std::string CreateMakeVariable(const char* sin, const char* s2in);
 
-  // cleanup the name of a potential target
-  std::string ConvertToMakeTarget(const char* tgt);
-
   /** Called from command-line hook to scan dependencies.  */
   virtual bool ScanDependencies(const char* tgtInfo);
 

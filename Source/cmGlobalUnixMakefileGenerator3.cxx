@@ -605,7 +605,6 @@ std::string cmGlobalUnixMakefileGenerator3
       }
     tname = lg->Convert(tname.c_str(),cmLocalGenerator::HOME_OUTPUT,
                         cmLocalGenerator::MAKEFILE);
-    tname = lg->ConvertToMakeTarget(tname.c_str());
     makeCommand += tname.c_str();
     makeCommand += "\"";
     if (!this->LocalGenerators.size())

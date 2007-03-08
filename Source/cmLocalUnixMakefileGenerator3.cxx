@@ -564,7 +564,6 @@ cmLocalUnixMakefileGenerator3
   // Construct the left hand side of the rule.
   replace = target;
   std::string tgt = this->Convert(replace.c_str(),HOME_OUTPUT,MAKEFILE);
-  tgt = this->ConvertToMakeTarget(tgt.c_str());
   const char* space = "";
   if(tgt.size() == 1)
     {
@@ -598,7 +597,6 @@ cmLocalUnixMakefileGenerator3
       {
       replace = *dep;
       replace = this->Convert(replace.c_str(),HOME_OUTPUT,MAKEFILE);
-      replace = this->ConvertToMakeTarget(replace.c_str());
       os << tgt.c_str() << space << ": " << replace.c_str() << "\n";
       }
     }
@@ -1087,28 +1085,6 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
       line += *c;
       }
     }
-}
-
-//----------------------------------------------------------------------------
-//take a tgt path and convert it into a make target, it could be full, or
-//relative
-std::string cmLocalUnixMakefileGenerator3
-::ConvertToMakeTarget(const char* tgt)
-{
-  // Make targets should not have a leading './' for a file in the
-  // directory containing the makefile.
-  std::string ret = tgt;
-  if(ret.size() > 2 && (ret[0] == '.') &&
-     ( (ret[1] == '/') || ret[1] == '\\'))
-    {
-    std::string upath = ret;
-    cmSystemTools::ConvertToUnixSlashes(upath);
-    if(upath.find(2, '/') == upath.npos)
-      {
-      ret = ret.substr(2, ret.size()-2);
-      }
-    }
-  return ret;
 }
 
 //----------------------------------------------------------------------------
@@ -1770,7 +1746,6 @@ cmLocalUnixMakefileGenerator3
   if (tgt && tgt[0] != '\0')
     {
     std::string tgt2 = this->Convert(tgt,HOME_OUTPUT,MAKEFILE);
-    tgt2 = this->ConvertToMakeTarget(tgt2.c_str());
     // for make -f foo bar, foo is a file but bar (tgt2) is 
     // a make target.  make targets should be escaped with "" 
     // and not \, so if we find a "\ " in the path then remove
