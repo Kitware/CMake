@@ -605,7 +605,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       target.GetType() == cmTarget::MODULE_LIBRARY))
     {
     fout <<  "\t\t\t\tProgramDataBaseFileName=\""
-         << target.GetOutputDir() << "/$(OutDir)/"
+         << target.GetDirectory() << "/$(OutDir)/"
          << target.GetPDBName(configName) << "\"\n";
     }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
@@ -728,7 +728,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     case cmTarget::STATIC_LIBRARY:
     {
     std::string targetNameFull = target.GetFullName(configName);
-    std::string libpath = target.GetOutputDir();
+    std::string libpath = target.GetDirectory();
     libpath += "/$(OutDir)/";
     libpath += targetNameFull;
     fout << "\t\t\t<Tool\n"
@@ -795,7 +795,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
          << " ";
     this->OutputLibraries(fout, linkLibs);
     fout << "\"\n";
-    temp = target.GetOutputDir();
+    temp = target.GetDirectory();
     temp += "/";
     temp += configName;
     temp += "/";
@@ -808,7 +808,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     this->OutputLibraryDirectories(fout, linkDirs);
     fout << "\"\n";
     this->OutputModuleDefinitionFile(fout, target);
-    temp = target.GetOutputDir();
+    temp = target.GetDirectory();
     temp += "/$(OutDir)/";
     temp += targetNamePDB;
     fout << "\t\t\t\tProgramDataBaseFile=\"" <<
@@ -826,7 +826,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\tStackReserveSize=\"" << stackVal  << "\"\n";
       }
-    temp = target.GetOutputDir();
+    temp = target.GetDirectory();
     temp += "/";
     temp += configName;
     temp += "/";
@@ -875,7 +875,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
          << " ";
     this->OutputLibraries(fout, linkLibs);
     fout << "\"\n";
-    temp = target.GetOutputDir();
+    temp = target.GetDirectory();
     temp += "/";
     temp += configName;
     temp += "/";
@@ -888,7 +888,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     this->OutputLibraryDirectories(fout, linkDirs);
     fout << "\"\n";
     fout << "\t\t\t\tProgramDataBaseFile=\""
-         << target.GetOutputDir() << "\\$(OutDir)\\" << targetNamePDB
+         << target.GetDirectory() << "\\$(OutDir)\\" << targetNamePDB
          << "\"\n";
     if(strcmp(configName, "Debug") == 0
        || strcmp(configName, "RelWithDebInfo") == 0)

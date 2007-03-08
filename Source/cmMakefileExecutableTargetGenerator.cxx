@@ -116,7 +116,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
      this->LocalGenerator->ConfigurationName.c_str());
 
   // Construct the full path version of the names.
-  std::string outpath = this->Target->GetOutputDir();
+  std::string outpath = this->Target->GetDirectory();
   outpath += "/";
 #ifdef __APPLE__
   if(this->Target->GetPropertyAsBool("MACOSX_BUNDLE"))

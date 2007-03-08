@@ -256,7 +256,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
   else
     {
-    outpath = this->Target->GetOutputDir();
+    outpath = this->Target->GetDirectory();
     outpath += "/";
     }
   std::string targetFullPath = outpath + targetName;

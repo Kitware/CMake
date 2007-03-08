@@ -1093,14 +1093,18 @@ void cmTarget::SetProperty(const char* prop, const char* value)
 
 const char* cmTarget::GetDirectory(const char* config)
 {
-  this->Directory = this->GetOutputDir();
   if(config)
     {
+    this->Directory = this->GetOutputDir();
     // Add the configuration's subdirectory.
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", config, "", this->Directory);
+    return this->Directory.c_str();
     }
-  return this->Directory.c_str();
+  else
+    {
+    return this->GetOutputDir();
+    }
 }
 
 const char* cmTarget::GetLocation(const char* config)

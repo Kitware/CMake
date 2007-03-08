@@ -213,9 +213,6 @@ public:
       makefile and the configuration type.  */
   std::string GetFullPath(const char* config=0, bool implib = false);
 
-  /** Get the full path to the target output directory.  */
-  const char* GetOutputDir();
-
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
       should be called only on a library target.  */
@@ -341,6 +338,9 @@ private:
   // Use a makefile variable to set a default for the given property.
   // If the variable is not defined use the given default instead.
   void SetPropertyDefault(const char* property, const char* default_value);
+
+  // Get the full path to the target output directory.
+  const char* GetOutputDir();
 
 private:
   std::string Name;
