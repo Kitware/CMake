@@ -851,7 +851,7 @@ inline std::string removeQuotes(const std::string& s)
 // Code in blocks surrounded by a test for this definition is needed
 // only for compatibility with user project's replacement DSP
 // templates.  The CMake templates no longer use them.
-//#define CM_USE_OLD_VS6
+#define CM_USE_OLD_VS6
 
 void cmLocalVisualStudio6Generator
 ::WriteDSPHeader(std::ostream& fout, 
