@@ -903,20 +903,8 @@ void cmMakefileTargetGenerator
                                       symbolic);
   }
 
-  // If the rule has multiple outputs, add a rule for the extra
-  // outputs to just depend on the first output with no command.  Also
-  // register the extra outputs as paired with the first output so
-  // that the check-build-system step will remove the primary output
-  // if any extra outputs are missing, forcing the rule to regenerate
-  // all outputs.
-  depends.clear();
-  depends.push_back(*o);
-  commands.clear();
-  std::string emptyCommand = this->GlobalGenerator->GetEmptyCommandHack();
-  if(!emptyCommand.empty())
-    {
-    commands.push_back(emptyCommand);
-    }
+  // Write rules to drive building any outputs beyond the first.
+  const char* in = o->c_str();
   for(++o; o != outputs.end(); ++o)
     {
     bool symbolic = false;
@@ -927,12 +915,34 @@ void cmMakefileTargetGenerator
         symbolic = sf->GetPropertyAsBool("SYMBOLIC");
         }
       }
-    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                        o->c_str(), depends, commands,
-                                        symbolic);
-    this->GlobalGenerator->AddMultipleOutputPair(o->c_str(),
-                                                 depends[0].c_str());
+    this->GenerateExtraOutput(o->c_str(), in, symbolic);
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefileTargetGenerator
+::GenerateExtraOutput(const char* out, const char* in, bool symbolic)
+{
+  // Add a rule to build the primary output if the extra output needs
+  // to be created.
+  std::vector<std::string> commands;
+  std::vector<std::string> depends;
+  std::string emptyCommand = this->GlobalGenerator->GetEmptyCommandHack();
+  if(!emptyCommand.empty())
+    {
+    commands.push_back(emptyCommand);
+    }
+  depends.push_back(in);
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+                                      out, depends, commands,
+                                      symbolic);
+
+  // Register the extra output as paired with the first output so that
+  // the check-build-system step will remove the primary output if any
+  // extra outputs are missing.  This forces the rule to regenerate
+  // all outputs.
+  this->GlobalGenerator->AddMultipleOutputPair(out, in);
 }
 
 //----------------------------------------------------------------------------

@@ -99,6 +99,11 @@ protected:
   // write the build rule for a custom command
   void GenerateCustomRuleFile(const cmCustomCommand& cc);
 
+  // write a rule to drive building of more than one output from
+  // another rule
+  void GenerateExtraOutput(const char* out, const char* in,
+                           bool symbolic = false);
+
   // write out the variable that lists the objects for this target
   void WriteObjectsVariable(std::string& variableName,
                             std::string& variableNameExternal);

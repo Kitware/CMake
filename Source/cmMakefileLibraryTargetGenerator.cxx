@@ -653,26 +653,19 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                                       targetFullPathReal.c_str(),
                                       depends, commands, false);
 
-  // The symlink names for the target should depend on the real target
-  // so if the target version changes it rebuilds and recreates the
-  // symlinks.
-  if(targetFullPathSO != targetFullPathReal)
+  // Some targets have more than one output file.  Create rules to
+  // drive the build if any extra outputs are missing.
+  std::vector<std::string> extraOutputs;
+  if(targetNameSO != targetNameReal)
     {
-    depends.clear();
-    commands.clear();
-    depends.push_back(targetFullPathReal.c_str());
-    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                        targetFullPathSO.c_str(),
-                                        depends, commands, false);
+    this->GenerateExtraOutput(targetFullPathSO.c_str(),
+                              targetFullPathReal.c_str());
     }
-  if(targetFullPath != targetFullPathSO)
+  if(targetName != targetNameSO &&
+     targetName != targetNameReal)
     {
-    depends.clear();
-    commands.clear();
-    depends.push_back(targetFullPathSO.c_str());
-    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                        targetFullPath.c_str(),
-                                        depends, commands, false);
+    this->GenerateExtraOutput(targetFullPath.c_str(),
+                              targetFullPathReal.c_str());
     }
 
   // Write the main driver rule to build everything in this target.
