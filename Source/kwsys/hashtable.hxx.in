@@ -83,7 +83,11 @@ namespace @KWSYS_NAMESPACE@
 // Utility functions to convert item counts.
 inline size_t hash_sizeof(void*) { return sizeof(char); }
 inline size_t hash_sizeof(const void*) { return sizeof(char); }
-template <class TPtr> inline size_t hash_sizeof(TPtr p) { return sizeof(*p); }
+template <class TPtr> inline size_t hash_sizeof(TPtr p)
+{
+  static_cast<void>(p);
+  return sizeof(*p);
+}
 template <class POut, class PIn, class TSize>
 inline TSize hash_allocator_n(POut out, PIn in, TSize n)
 {
