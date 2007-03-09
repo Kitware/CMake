@@ -174,7 +174,7 @@ public:
       configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical
       output directory is given.  */
-  const char* GetDirectory(const char* config = 0);
+  const char* GetDirectory(const char* config = 0, bool implib = false);
 
   /** Get the location of the target in the build tree for the given
       configuration.  This location is suitable for use as the LOCATION
@@ -340,7 +340,7 @@ private:
   void SetPropertyDefault(const char* property, const char* default_value);
 
   // Get the full path to the target output directory.
-  const char* GetOutputDir();
+  const char* GetOutputDir(bool implib);
 
 private:
   std::string Name;

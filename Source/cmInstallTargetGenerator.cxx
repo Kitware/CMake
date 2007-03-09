@@ -54,7 +54,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
     }
   else
     {
-    fromDir = this->Target->GetDirectory();
+    fromDir = this->Target->GetDirectory(0, this->ImportLibrary);
     fromDir += "/";
     }
 

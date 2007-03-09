@@ -1619,6 +1619,10 @@ void cmLocalGenerator
     linkType = cmTarget::DEBUG;
     }
 
+  // Check whether we should use an import library for linking a target.
+  bool implib =
+    this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")?true:false;
+
   // Get the list of libraries against which this target wants to link.
   std::vector<std::string> linkLibraries;
   const cmTarget::LinkLibraryVectorType& inLibs = target.GetLinkLibraries();
@@ -1658,9 +1662,9 @@ void cmLocalGenerator
         // Pass the full path to the target file but purposely leave
         // off the per-configuration subdirectory.  The link directory
         // ordering knows how to deal with this.
-        std::string linkItem = tgt->GetDirectory(0);
+        std::string linkItem = tgt->GetDirectory(0, implib);
         linkItem += "/";
-        linkItem += tgt->GetFullName(config);
+        linkItem += tgt->GetFullName(config, implib);
         linkLibraries.push_back(linkItem);
         // For full path, use the true location.
         if(fullPathLibs)

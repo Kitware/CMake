@@ -661,7 +661,7 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
         // Add the directory only if it is not already present.  This
         // is an N^2 algorithm for adding the directories, but N
         // should not get very big.
-        const char* libpath = tgt->GetDirectory();
+        const char* libpath = tgt->GetDirectory(0, true);
         if(std::find(this->LinkDirectories.begin(), 
                      this->LinkDirectories.end(),
                      libpath) == this->LinkDirectories.end())
@@ -1091,11 +1091,11 @@ void cmTarget::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
 }
 
-const char* cmTarget::GetDirectory(const char* config)
+const char* cmTarget::GetDirectory(const char* config, bool implib)
 {
   if(config)
     {
-    this->Directory = this->GetOutputDir();
+    this->Directory = this->GetOutputDir(implib);
     // Add the configuration's subdirectory.
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", config, "", this->Directory);
@@ -1103,7 +1103,7 @@ const char* cmTarget::GetDirectory(const char* config)
     }
   else
     {
-    return this->GetOutputDir();
+    return this->GetOutputDir(implib);
     }
 }
 
@@ -1446,7 +1446,7 @@ void cmTarget::GetFullName(std::string& prefix, std::string& base,
 std::string cmTarget::GetFullPath(const char* config, bool implib)
 {
   // Start with the output directory for the target.
-  std::string fpath = this->GetDirectory(config);
+  std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
 
   // Add the full name of the target.
@@ -1935,8 +1935,17 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char*)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetOutputDir()
+const char* cmTarget::GetOutputDir(bool implib)
 {
+  // The implib option is only allowed for shared libraries.
+  if(this->GetType() != cmTarget::SHARED_LIBRARY)
+    {
+    implib = false;
+    }
+
+  // For now the import library is always in the same directory as the DLL.
+  static_cast<void>(implib);
+
   if(this->OutputDir.empty())
     {
     // Lookup the output path for this target type.

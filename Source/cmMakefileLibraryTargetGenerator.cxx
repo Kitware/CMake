@@ -246,6 +246,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Construct the full path version of the names.
   std::string outpath;
+  std::string outpathImp;
   if(relink)
     {
     outpath = this->Makefile->GetStartOutputDirectory();
@@ -253,17 +254,20 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
+    outpathImp = outpath;
     }
   else
     {
     outpath = this->Target->GetDirectory();
     outpath += "/";
+    outpathImp = this->Target->GetDirectory(0, true);
+    outpathImp += "/";
     }
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathPDB = outpath + targetNamePDB;
   std::string targetFullPathSO = outpath + targetNameSO;
   std::string targetFullPathReal = outpath + targetNameReal;
-  std::string targetFullPathImport = outpath + targetNameImport;
+  std::string targetFullPathImport = outpathImp + targetNameImport;
 
   // Construct the output path version of the names for use in command
   // arguments.
