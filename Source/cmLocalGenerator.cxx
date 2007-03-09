@@ -2157,6 +2157,13 @@ void cmLocalGenerator::ConfigureRelativePaths()
 }
 
 //----------------------------------------------------------------------------
+static bool cmLocalGeneratorNotAbove(const char* a, const char* b)
+{
+  return (cmSystemTools::ComparePath(a, b) ||
+          cmSystemTools::IsSubDirectory(a, b));
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator
 ::ConvertToRelativePath(const std::vector<std::string>& local,
@@ -2181,47 +2188,17 @@ cmLocalGenerator
     this->RelativePathsConfigured = true;
     }
 
-  std::string original = in_remote;
-
-  // Skip conversion if the path and local are not both in the source or both
-  // in the binary tree
+  // Skip conversion if the path and local are not both in the source
+  // or both in the binary tree.
   std::string local_path = cmSystemTools::JoinPath(local);
-  bool should_convert = false;
-
-  // A relative path is safe if both the local and remote locations
-  // are underneath the current relative path top in the binary tree.
-  if (local_path.size() >= this->RelativePathTopBinary.size() &&
-      cmSystemTools::ComparePath
-      (local_path.substr(0, this->RelativePathTopBinary.size()).c_str(),
-       this->RelativePathTopBinary.c_str()))
-    {
-    if (original.size() >= this->RelativePathTopBinary.size() &&
-        cmSystemTools::ComparePath
-        (original.substr(0, this->RelativePathTopBinary.size()).c_str(),
-         this->RelativePathTopBinary.c_str()))
-      {
-      should_convert = true;
-      }
-    }
-
-  // A relative path is safe if both the local and remote locations
-  // are underneath the current relative path top in the source tree.
-  if (local_path.size() >= this->RelativePathTopSource.size() &&
-      cmSystemTools::ComparePath
-      (local_path.substr(0, this->RelativePathTopSource.size()).c_str(),
-       this->RelativePathTopSource.c_str()))
-    {
-    if (original.size() >= this->RelativePathTopSource.size() &&
-        cmSystemTools::ComparePath
-        (original.substr(0, this->RelativePathTopSource.size()).c_str(),
-         this->RelativePathTopSource.c_str()))
-      {
-      should_convert = true;
-      }
-    }
-
-  // Do not convert if it is not safe.
-  if(!should_convert)
+  if(!((cmLocalGeneratorNotAbove(local_path.c_str(),
+                                 this->RelativePathTopBinary.c_str()) &&
+        cmLocalGeneratorNotAbove(in_remote,
+                                 this->RelativePathTopBinary.c_str())) ||
+       (cmLocalGeneratorNotAbove(local_path.c_str(),
+                                 this->RelativePathTopSource.c_str()) &&
+        cmLocalGeneratorNotAbove(in_remote,
+                                 this->RelativePathTopSource.c_str()))))
     {
     return in_remote;
     }
