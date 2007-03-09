@@ -851,13 +851,17 @@ inline std::string removeQuotes(const std::string& s)
 // Code in blocks surrounded by a test for this definition is needed
 // only for compatibility with user project's replacement DSP
 // templates.  The CMake templates no longer use them.
-#define CM_USE_OLD_VS6
+//#define CM_USE_OLD_VS6
 
 void cmLocalVisualStudio6Generator
 ::WriteDSPHeader(std::ostream& fout, 
                  const char *libName, cmTarget &target, 
                  std::vector<cmSourceGroup> &)
 {
+  // Lookup the output directory for the target.
+  std::string outPath = target.GetDirectory();
+
+#ifdef CM_USE_OLD_VS6
   // Lookup the library and executable output directories.
   std::string libPath;
   if(this->Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
@@ -886,7 +890,6 @@ void cmLocalVisualStudio6Generator
       }
     }
 
-#ifdef CM_USE_OLD_VS6
   std::set<std::string> pathEmitted;
   
   // determine the link directories
@@ -1188,6 +1191,42 @@ void cmLocalVisualStudio6Generator
                              optionsRelWithDebInfo);
     }
 
+  // Compute the path of the import library.
+  std::string targetImplibFlagDebug;
+  std::string targetImplibFlagRelease;
+  std::string targetImplibFlagMinSizeRel;
+  std::string targetImplibFlagRelWithDebInfo;
+  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    std::string fullPathImpDebug = target.GetDirectory("Debug", true);
+    std::string fullPathImpRelease = target.GetDirectory("Release", true);
+    std::string fullPathImpMinSizeRel = target.GetDirectory("MinSizeRel", true);
+    std::string fullPathImpRelWithDebInfo = target.GetDirectory("RelWithDebInfo", true);
+    fullPathImpDebug += "/";
+    fullPathImpRelease += "/";
+    fullPathImpMinSizeRel += "/";
+    fullPathImpRelWithDebInfo += "/";
+    fullPathImpDebug += target.GetFullName("Debug", true);
+    fullPathImpRelease += target.GetFullName("Release", true);
+    fullPathImpMinSizeRel += target.GetFullName("MinSizeRel", true);
+    fullPathImpRelWithDebInfo += target.GetFullName("RelWithDebInfo", true);
+
+    targetImplibFlagDebug = "/implib:";
+    targetImplibFlagRelease = "/implib:";
+    targetImplibFlagMinSizeRel = "/implib:";
+    targetImplibFlagRelWithDebInfo = "/implib:";
+    targetImplibFlagDebug +=
+      this->ConvertToOptionallyRelativeOutputPath(fullPathImpDebug.c_str());
+    targetImplibFlagRelease +=
+      this->ConvertToOptionallyRelativeOutputPath(fullPathImpRelease.c_str());
+    targetImplibFlagMinSizeRel +=
+      this->ConvertToOptionallyRelativeOutputPath(
+        fullPathImpMinSizeRel.c_str());
+    targetImplibFlagRelWithDebInfo +=
+      this->ConvertToOptionallyRelativeOutputPath(
+        fullPathImpRelWithDebInfo.c_str());
+    }
+
 #ifdef CM_USE_OLD_VS6
   // Compute link information for the target.
   if(extraLinkOptions.size())
@@ -1300,7 +1339,16 @@ void cmLocalVisualStudio6Generator
                                  this->IncludeOptions.c_str());
     cmSystemTools::ReplaceString(line, "TARGET_VERSION_FLAG",
                                  targetVersionFlag.c_str());
+    cmSystemTools::ReplaceString(line, "TARGET_IMPLIB_FLAG_DEBUG",
+                                 targetImplibFlagDebug.c_str());
+    cmSystemTools::ReplaceString(line, "TARGET_IMPLIB_FLAG_RELEASE",
+                                 targetImplibFlagRelease.c_str());
+    cmSystemTools::ReplaceString(line, "TARGET_IMPLIB_FLAG_MINSIZEREL",
+                                 targetImplibFlagMinSizeRel.c_str());
+    cmSystemTools::ReplaceString(line, "TARGET_IMPLIB_FLAG_RELWITHDEBINFO",
+                                 targetImplibFlagRelWithDebInfo.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
+#ifdef CM_USE_OLD_VS6
     // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH 
     // are already quoted in the template file,
     // we need to remove the quotes here, we still need
@@ -1313,6 +1361,11 @@ void cmLocalVisualStudio6Generator
       (line, "EXECUTABLE_OUTPUT_PATH",
        removeQuotes(this->ConvertToOptionallyRelativeOutputPath
                     (exePath.c_str())).c_str());
+#endif
+    cmSystemTools::ReplaceString
+      (line, "OUTPUT_DIRECTORY",
+       removeQuotes(this->ConvertToOptionallyRelativeOutputPath
+                    (outPath.c_str())).c_str());
 
     cmSystemTools::ReplaceString(line, 
                                  "EXTRA_DEFINES", 

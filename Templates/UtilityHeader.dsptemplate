@@ -38,7 +38,7 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHRelease"
+# PROP Output_Dir "OUTPUT_DIRECTORY\Release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 
@@ -53,7 +53,7 @@ CMAKE_CUSTOM_RULE_CODE
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHDebug"
+# PROP Output_Dir "OUTPUT_DIRECTORY\Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 
@@ -68,7 +68,7 @@ CMAKE_CUSTOM_RULE_CODE
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHMinSizeRel"
+# PROP Output_Dir "OUTPUT_DIRECTORY\MinSizeRel"
 # PROP Intermediate_Dir "MinSizeRel"
 # PROP Target_Dir ""
 
@@ -83,7 +83,7 @@ CMAKE_CUSTOM_RULE_CODE
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHRelWithDebInfo"
+# PROP Output_Dir "OUTPUT_DIRECTORY\RelWithDebInfo"
 # PROP Intermediate_Dir "RelWithDebInfo"
 # PROP Target_Dir ""
 
