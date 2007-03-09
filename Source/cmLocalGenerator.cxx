@@ -2472,23 +2472,41 @@ std::string
 cmLocalGenerator::GetObjectFileNameWithoutTarget(const cmSourceFile& source)
 {
   // Construct the object file name using the full path to the source
-  // file which is its only unique identification.  Convert the path
-  // to be relative to the current binary directory if possible.
-  std::string objectName = this->Convert(source.GetFullPath().c_str(),
-                                         START_OUTPUT);
-  if(cmSystemTools::FileIsFullPath(objectName.c_str()) || objectName.empty())
+  // file which is its only unique identification.
+  const char* fullPath = source.GetFullPath().c_str();
+
+  // Try referencing the source relative to the source tree.
+  std::string relFromSource = this->Convert(fullPath, START);
+  assert(!relFromSource.empty());
+  bool relSource = !cmSystemTools::FileIsFullPath(relFromSource.c_str());
+  bool subSource = relSource && relFromSource[0] != '.';
+
+  // Try referencing the source relative to the binary tree.
+  std::string relFromBinary = this->Convert(fullPath, START_OUTPUT);
+  assert(!relFromBinary.empty());
+  bool relBinary = !cmSystemTools::FileIsFullPath(relFromBinary.c_str());
+  bool subBinary = relBinary && relFromBinary[0] != '.';
+
+  // Select a nice-looking reference to the source file to construct
+  // the object file name.
+  std::string objectName;
+  if((relSource && !relBinary) || (subSource && !subBinary))
     {
-    // If the source file can be referenced as a relative path from
-    // the source tree use that relative path to construct the object
-    // name.
-    std::string relFromSource = this->Convert(source.GetFullPath().c_str(),
-                                              START);
-    if(!cmSystemTools::FileIsFullPath(relFromSource.c_str()) &&
-       !relFromSource.empty())
-      {
-      objectName = relFromSource;
-      }
+    objectName = relFromSource;
     }
+  else if((relBinary && !relSource) || (subBinary && !subSource))
+    {
+    objectName = relFromBinary;
+    }
+  else if(relFromBinary.length() < relFromSource.length())
+    {
+    objectName = relFromBinary;
+    }
+  else
+    {
+    objectName = relFromSource;
+    }
+
   // if it is still a full path check for the try compile case
   // try compile never have in source sources, and should not
   // have conflicting source file names in the same target
