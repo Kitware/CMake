@@ -16,17 +16,21 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
-// The HP compiler cannot handle the conversions necessary to use
+// The HP compiler and VS6 cannot handle the conversions necessary to use
 // auto_ptr_ref to pass an auto_ptr returned from one function
 // directly to another function as in use_auto_ptr(get_auto_ptr()).
-// We instead use const_cast to achieve the syntax on that platform.
+// We instead use const_cast to achieve the syntax on those platforms.
 // We do not use const_cast on other platforms to maintain the C++
 // standard design and guarantee that if an auto_ptr is bound
 // to a reference-to-const then ownership will be maintained.
-#if defined(__HP_aCC)
+#if defined(__HP_aCC) || (defined(_MSC_VER) && _MSC_VER <= 1200)
 # define @KWSYS_NAMESPACE@_AUTO_PTR_REF 0
+# define @KWSYS_NAMESPACE@_AUTO_PTR_CONST const
+# define @KWSYS_NAMESPACE@_AUTO_PTR_CAST(a) cast(a)
 #else
 # define @KWSYS_NAMESPACE@_AUTO_PTR_REF 1
+# define @KWSYS_NAMESPACE@_AUTO_PTR_CONST
+# define @KWSYS_NAMESPACE@_AUTO_PTR_CAST(a) a
 #endif
 
 namespace @KWSYS_NAMESPACE@
@@ -58,13 +62,10 @@ template <class Y> struct auto_ptr_ref
 template <class X>
 class auto_ptr
 {
-#if @KWSYS_NAMESPACE@_AUTO_PTR_REF
-  typedef auto_ptr auto_ptr_source;
-  static inline auto_ptr& cast(auto_ptr_source& a) { return a; }
-#else
-  typedef auto_ptr const auto_ptr_source;
-  static inline auto_ptr& cast(auto_ptr_source& a)
-    { return const_cast<auto_ptr&>(a); }
+#if !@KWSYS_NAMESPACE@_AUTO_PTR_REF
+  template <typename Y>
+  static inline auto_ptr<Y>& cast(auto_ptr<Y> const& a)
+    { return const_cast<auto_ptr<Y>&>(a); }
 #endif
 
   /** The pointer to the object held.  */
@@ -77,16 +78,17 @@ public:
   /** Construct from an auto_ptr holding a compatible object.  This
       transfers ownership to the newly constructed auto_ptr.  */
   template <class Y>
-  auto_ptr(auto_ptr<Y>& a) throw(): x_(a.release())
+  auto_ptr(auto_ptr<Y> @KWSYS_NAMESPACE@_AUTO_PTR_CONST& a) throw():
+    x_(@KWSYS_NAMESPACE@_AUTO_PTR_CAST(a).release())
     {
     }
 
   /** Assign from an auto_ptr holding a compatible object.  This
       transfers ownership to the left-hand-side of the assignment.  */
   template <class Y>
-  auto_ptr& operator=(auto_ptr<Y>& a) throw()
+  auto_ptr& operator=(auto_ptr<Y> @KWSYS_NAMESPACE@_AUTO_PTR_CONST& a) throw()
     {
-    this->reset(a.release());
+    this->reset(@KWSYS_NAMESPACE@_AUTO_PTR_CAST(a).release());
     return *this;
     }
 
@@ -99,19 +101,20 @@ public:
   explicit auto_ptr(X* p=0) throw(): x_(p)
     {
     }
- 
+
   /** Construct from another auto_ptr holding an object of the same
       type.  This transfers ownership to the newly constructed
       auto_ptr.  */
-  auto_ptr(auto_ptr_source& a) throw(): x_(cast(a).release())
+  auto_ptr(auto_ptr @KWSYS_NAMESPACE@_AUTO_PTR_CONST& a) throw():
+    x_(@KWSYS_NAMESPACE@_AUTO_PTR_CAST(a).release())
     {
     }
 
   /** Assign from another auto_ptr holding an object of the same type.
       This transfers ownership to the newly constructed auto_ptr.  */
-  auto_ptr& operator=(auto_ptr_source& a) throw()
+  auto_ptr& operator=(auto_ptr @KWSYS_NAMESPACE@_AUTO_PTR_CONST& a) throw()
     {
-    this->reset(cast(a).release());
+    this->reset(@KWSYS_NAMESPACE@_AUTO_PTR_CAST(a).release());
     return *this;
     }
 
