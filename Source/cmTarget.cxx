@@ -265,6 +265,44 @@ void cmTarget::DefineProperties(cmake *cm)
      "converts the source list for the target into a list of full "
      "paths to object names that will be produced by the target.");
 
+#define CM_TARGET_FILE_TYPES_DOC                                            \
+     "There are three kinds of target files that may be built: "            \
+     "archive, library, and runtime.  "                                     \
+     "Executables are always treated as runtime targets. "                  \
+     "Static libraries are always treated as archive targets. "             \
+     "Module libraries are always treated as library targets. "             \
+     "For non-DLL platforms shared libraries are treated as library "       \
+     "targets. "                                                            \
+     "For DLL platforms the DLL part of a shared library is treated as "    \
+     "a runtime target and the corresponding import library is treated as " \
+     "an archive target. "                                                  \
+     "All Windows-based systems including Cygwin are DLL platforms."
+
+  cm->DefineProperty
+    ("ARCHIVE_OUTPUT_DIRECTORY", cmProperty::TARGET,
+     "Output directory in which to build ARCHIVE target files.",
+     "This property specifies the directory into which archive target files "
+     "should be built. "
+     CM_TARGET_FILE_TYPES_DOC " "
+     "This property is initialized by the value of the variable "
+     "CMAKE_ARCHIVE_OUTPUT_DIRECTORY if it is set when a target is created.");
+  cm->DefineProperty
+    ("LIBRARY_OUTPUT_DIRECTORY", cmProperty::TARGET,
+     "Output directory in which to build LIBRARY target files.",
+     "This property specifies the directory into which library target files "
+     "should be built. "
+     CM_TARGET_FILE_TYPES_DOC " "
+     "This property is initialized by the value of the variable "
+     "CMAKE_LIBRARY_OUTPUT_DIRECTORY if it is set when a target is created.");
+  cm->DefineProperty
+    ("RUNTIME_OUTPUT_DIRECTORY", cmProperty::TARGET,
+     "Output directory in which to build RUNTIME target files.",
+     "This property specifies the directory into which runtime target files "
+     "should be built. "
+     CM_TARGET_FILE_TYPES_DOC " "
+     "This property is initialized by the value of the variable "
+     "CMAKE_RUNTIME_OUTPUT_DIRECTORY if it is set when a target is created.");
+
   // define some properties without documentation
   cm->DefineProperty("DEBUG_OUTPUT_NAME", cmProperty::TARGET,0,0);
   cm->DefineProperty("RELEASE_OUTPUT_NAME", cmProperty::TARGET,0,0);
@@ -302,6 +340,9 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");
   this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
   this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
+  this->SetPropertyDefault("ARCHIVE_OUTPUT_DIRECTORY", 0);
+  this->SetPropertyDefault("LIBRARY_OUTPUT_DIRECTORY", 0);
+  this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
@@ -639,6 +680,10 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
   // Make sure the complete set of link directories has been computed.
   if(!this->LinkDirectoriesComputed)
     {
+    // Check whether we should use an import library for linking a target.
+    bool implib =
+      this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX") != 0;
+
     // Compute the full set of link directories including the
     // locations of targets that have been linked in.  Start with the
     // link directories given explicitly.
@@ -661,7 +706,7 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
         // Add the directory only if it is not already present.  This
         // is an N^2 algorithm for adding the directories, but N
         // should not get very big.
-        const char* libpath = tgt->GetDirectory(0, true);
+        const char* libpath = tgt->GetDirectory(0, implib);
         if(std::find(this->LinkDirectories.begin(), 
                      this->LinkDirectories.end(),
                      libpath) == this->LinkDirectories.end())
@@ -1199,6 +1244,11 @@ void cmTarget::ComputeObjectFiles()
 const char *cmTarget::GetProperty(const char* prop,
                                   cmProperty::ScopeType scope)
 {
+  if(!prop)
+    {
+    return 0;
+    }
+
   // watch for special "computed" properties that are dependent on other
   // properties or variables, always recompute them
   if (!strcmp(prop,"LOCATION"))
@@ -1943,54 +1993,110 @@ const char* cmTarget::GetOutputDir(bool implib)
     implib = false;
     }
 
-  // For now the import library is always in the same directory as the DLL.
-  static_cast<void>(implib);
-
-  if(this->OutputDir.empty())
+  // Sanity check.  Only generators on platforms supporting import
+  // libraries should be asking for the import library output
+  // directory.
+  if(implib &&
+     !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
     {
-    // Lookup the output path for this target type.
-    if(this->GetType() == cmTarget::EXECUTABLE)
+    abort();
+    }
+
+  // Select whether we are constructing the directory for the main
+  // target or the import library.
+  std::string& out = implib? this->OutputDirImplib : this->OutputDir;
+
+  if(out.empty())
+    {
+    // Look for a target property defining the target output directory
+    // based on the target type.
+    const char* propertyName = 0;
+    switch(this->GetType())
       {
-      this->OutputDir =
-        this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+      case cmTarget::SHARED_LIBRARY:
+        {
+        // For non-DLL platforms shared libraries are treated as
+        // library targets.  For DLL platforms the DLL part of a
+        // shared library is treated as a runtime target and the
+        // corresponding import library is treated as an archive
+        // target.
+
+        // Check whether this is a DLL platform.
+        bool dll_platform = (this->Makefile->IsOn("WIN32") ||
+                             this->Makefile->IsOn("CYGWIN") ||
+                             this->Makefile->IsOn("MINGW"));
+        if(dll_platform)
+          {
+          if(implib)
+            {
+            propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
+            }
+          else
+            {
+            propertyName = "RUNTIME_OUTPUT_DIRECTORY";
+            }
+          }
+        else
+          {
+          propertyName = "LIBRARY_OUTPUT_DIRECTORY";
+          }
+        } break;
+      case cmTarget::STATIC_LIBRARY:
+        {
+        // Static libraries are always treated as archive targets.
+        propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
+        } break;
+      case cmTarget::MODULE_LIBRARY:
+        {
+        // Module libraries are always treated as library targets.
+        propertyName = "LIBRARY_OUTPUT_DIRECTORY";
+        } break;
+      case cmTarget::EXECUTABLE:
+        {
+        // Executables are always treated as runtime targets.
+        propertyName = "RUNTIME_OUTPUT_DIRECTORY";
+        } break;
+      default: break;
+      }
+
+    // Select an output directory.
+    if(const char* outdir = this->GetProperty(propertyName))
+      {
+      // Use the user-specified output directory.
+      out = outdir;
+      }
+    else if(this->GetType() == cmTarget::EXECUTABLE)
+      {
+      // Lookup the output path for executables.
+      out = this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
       }
     else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
             this->GetType() == cmTarget::SHARED_LIBRARY ||
             this->GetType() == cmTarget::MODULE_LIBRARY)
       {
-      this->OutputDir =
-        this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
+      // Lookup the output path for libraries.
+      out = this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
       }
-    if(this->OutputDir.empty())
+    if(out.empty())
       {
-      this->OutputDir = ".";
+      // Default to the current output directory.
+      out = ".";
       }
 
     // Convert the output path to a full path in case it is
     // specified as a relative path.  Treat a relative path as
     // relative to the current output directory for this makefile.
-    this->OutputDir =
+    out =
       cmSystemTools::CollapseFullPath
-      (this->OutputDir.c_str(), this->Makefile->GetStartOutputDirectory());
+      (out.c_str(), this->Makefile->GetStartOutputDirectory());
 
     // Make sure the output path exists on disk.
-    if(!cmSystemTools::MakeDirectory(this->OutputDir.c_str()))
+    if(!cmSystemTools::MakeDirectory(out.c_str()))
       {
       cmSystemTools::Error("Error failed to create output directory:",
-                           this->OutputDir.c_str());
+                           out.c_str());
       }
-
-    // This came from cmLocalUnixMakefileGenerator3::FormatOutputPath.
-    // Where should it go?  Is it still needed?  I do not think so
-    // because target full paths are split into -Ldir -llib
-    // automatically.
-    //
-    // Add this as a link directory automatically.
-    // this->Makefile->AddLinkDirectory(path.c_str());
-    //
-    // Should it be this?
-    // this->AddLinkDirectory(this->OutputDir.c_str());
     }
 
-  return this->OutputDir.c_str();
+  return out.c_str();
 }

@@ -361,6 +361,7 @@ private:
   std::string InstallPath;
   std::string RuntimeInstallPath;
   std::string OutputDir;
+  std::string OutputDirImplib;
   std::string Directory;
   std::string Location;
   std::set<cmStdString> Utilities;
