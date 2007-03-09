@@ -254,14 +254,20 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
-    outpathImp = outpath;
+    if(!targetNameImport.empty())
+      {
+      outpathImp = outpath;
+      }
     }
   else
     {
     outpath = this->Target->GetDirectory();
     outpath += "/";
-    outpathImp = this->Target->GetDirectory(0, true);
-    outpathImp += "/";
+    if(!targetNameImport.empty())
+      {
+      outpathImp = this->Target->GetDirectory(0, true);
+      outpathImp += "/";
+      }
     }
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathPDB = outpath + targetNamePDB;
