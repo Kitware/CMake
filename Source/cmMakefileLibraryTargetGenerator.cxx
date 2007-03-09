@@ -368,7 +368,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     std::string cleanFullSharedName = outpath + cleanSharedName;
     std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
     std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
-    std::string cleanFullImportName = outpath + cleanImportName;
+    std::string cleanFullImportName = outpathImp + cleanImportName;
     std::string cleanFullPDBName = outpath + cleanPDBName;
     libCleanFiles.push_back
       (this->Convert(cleanFullStaticName.c_str(),
