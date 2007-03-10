@@ -1200,8 +1200,10 @@ void cmLocalVisualStudio6Generator
     {
     std::string fullPathImpDebug = target.GetDirectory("Debug", true);
     std::string fullPathImpRelease = target.GetDirectory("Release", true);
-    std::string fullPathImpMinSizeRel = target.GetDirectory("MinSizeRel", true);
-    std::string fullPathImpRelWithDebInfo = target.GetDirectory("RelWithDebInfo", true);
+    std::string fullPathImpMinSizeRel =
+      target.GetDirectory("MinSizeRel", true);
+    std::string fullPathImpRelWithDebInfo =
+      target.GetDirectory("RelWithDebInfo", true);
     fullPathImpDebug += "/";
     fullPathImpRelease += "/";
     fullPathImpMinSizeRel += "/";
