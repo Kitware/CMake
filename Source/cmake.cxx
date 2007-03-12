@@ -801,6 +801,7 @@ void CMakeCommandUsage(const char* program)
     " line\n"
     << "  environment             - display the current enviroment\n"
     << "  make_directory dir      - create a directory\n"
+    << "  remove_directory dir    - remove a directory and its contents\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
     << "  tar [cxt][vfz] file.tar file/dir1 file/dir2 ... - create a tar.\n"
     << "  time command [args] ... - run command and return elapsed time\n"
@@ -914,11 +915,22 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
 #endif
     
-    if (args[1] == "make_directory" && args.size() == 3)
+    else if (args[1] == "make_directory" && args.size() == 3)
       {
       if(!cmSystemTools::MakeDirectory(args[2].c_str()))
         {
         std::cerr << "Error making directory \"" << args[2].c_str()
+                  << "\".\n";
+        return 1;
+        }
+      return 0;
+      }
+
+    else if (args[1] == "remove_directory" && args.size() == 3)
+      {
+      if(!cmSystemTools::RemoveADirectory(args[2].c_str()))
+        {
+        std::cerr << "Error removing directory \"" << args[2].c_str()
                   << "\".\n";
         return 1;
         }
