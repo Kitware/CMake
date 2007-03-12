@@ -305,7 +305,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
         {
         target.AddUtility("XCODE_DEPEND_HELPER");
         }
-      if(target.IsInAll())
+      if(!target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
         allbuild->AddUtility(target.GetName());
         }
