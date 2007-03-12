@@ -47,6 +47,12 @@ ELSE(PCH_USE_TARGET)
   SET(PCH_TARGETS foo)
 ENDIF(PCH_USE_TARGET)
 
+# Add the PCH to the list of files to clean.  It is created as a
+# side-effect so CMake does not know about it.
+SET_DIRECTORY_PROPERTIES(PROPERTIES
+  ADDITIONAL_MAKE_CLEAN_FILES ${PCH_DIR}/foo_precompiled.pch
+  )
+
 # Setup flags on the two targets to create and use the precompiled header.
 SET_TARGET_PROPERTIES(${PCH_TARGETS} PROPERTIES COMPILE_FLAGS
   "/Yufoo_precompiled.h /FIfoo_precompiled.h ${PCH_FILE}")
