@@ -13,21 +13,24 @@ ELSE(CMAKE_CONFIGURATION_TYPES)
 ENDIF(CMAKE_CONFIGURATION_TYPES)
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/PCH)
 
+# The VS6 IDE does not support renaming .pch files so we cannot use a
+# separate target.
+IF("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+  SET(PCH_USE_TARGET 0)
+  SET(PCH_USE_INCLUDE_DIR 1)
+ELSE("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+  SET(PCH_USE_TARGET 1)
+  SET(PCH_USE_INCLUDE_DIR 0)
+ENDIF("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+
 # Choose between an explicit include path and using /I during
 # precompilation.  The /I form is used to test that the PCH is
 # actually used.  In practice the include path form would be used.
-SET(PCH_USE_INCLUDE_DIR 0)
 IF(PCH_USE_INCLUDE_DIR)
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 ELSE(PCH_USE_INCLUDE_DIR)
   SET(PCH_INCLUDE_DIR "\"/I${CMAKE_CURRENT_SOURCE_DIR}/include\"")
 ENDIF(PCH_USE_INCLUDE_DIR)
-
-# The VS6 IDE does not support renaming .pch files so we cannot use a
-# separate target.
-IF(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
-  SET(PCH_USE_TARGET 1)
-ENDIF(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
 
 # Create a target that will use a precompiled header.
 SET(foo_SRCS foo1.c foo2.c)
