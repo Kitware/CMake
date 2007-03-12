@@ -7,6 +7,7 @@ REMOVE_DEFINITIONS(-DCMAKE_IS_REALLY_FUN)
 #
 UTILITY_SOURCE(CREATE_FILE_EXE create_file "." create_file.cxx)
 ADD_EXECUTABLE(create_file create_file.cxx)
+SET_TARGET_PROPERTIES(create_file PROPERTIES RUNTIME_OUTPUT_DIRECTORY ".")
 
 #
 # Create static library

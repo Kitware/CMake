@@ -137,13 +137,9 @@ SET(FORCE_TEST 0 CACHE STRING "a test" FORCE)
 #
 # Lib and exe path
 #
-SET (LIBRARY_OUTPUT_PATH 
-     ${Complex_BINARY_DIR}/bin/ CACHE INTERNAL
-     "Single output directory for building all libraries.")
-
-SET (EXECUTABLE_OUTPUT_PATH 
-     ${Complex_BINARY_DIR}/bin/ CACHE INTERNAL
-     "Single output directory for building all executables.")
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${Complex_BINARY_DIR}/lib/static")
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${Complex_BINARY_DIR}/lib")
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${Complex_BINARY_DIR}/bin")
 
 MESSAGE (Test " " escape " " semi-colon " " \; \;)
 #

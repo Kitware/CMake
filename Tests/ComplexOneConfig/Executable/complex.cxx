@@ -320,12 +320,17 @@ extern "C" int NameConflictTest2();
 int main()
 {
   std::string lib = BINARY_DIR;
-  lib += "/bin/";
+  lib += "/lib/";
 #ifdef  CMAKE_INTDIR
   lib += CMAKE_INTDIR;
   lib += "/";
 #endif
-  std::string exe = lib;
+  std::string exe = BINARY_DIR;
+  exe += "/bin/";
+#ifdef  CMAKE_INTDIR
+  exe += CMAKE_INTDIR;
+  exe += "/";
+#endif
 
 #ifdef COMPLEX_TEST_CMAKELIB  
   // Test a single character executable to test a: in makefiles
