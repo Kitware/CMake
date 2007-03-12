@@ -28,11 +28,14 @@
 
 #include <ctype.h> // for isspace
 
+extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
+
 //----------------------------------------------------------------------------
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
 {
   this->Version = 7;
   this->PlatformName = "Win32";
+  this->ExtraFlagTable = 0;
 }
 
 cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
@@ -255,26 +258,6 @@ void cmLocalVisualStudio7Generator::WriteConfigurations(std::ostream& fout,
   fout << "\t</Configurations>\n";
 }
 
-// This is a table mapping XML tag IDE names to command line options
-struct cmVS7FlagTable
-{
-  const char* IDEName;  // name used in the IDE xml file
-  const char* commandFlag; // command line flag
-  const char* comment;     // comment
-  const char* value; // string value
-  unsigned int special; // flags for special handling requests
-  enum
-  {
-    UserValue    = (1<<0), // flag contains a user-specified value
-    UserIgnored  = (1<<1), // ignore any user value
-    UserRequired = (1<<2), // match only when user value is non-empty
-    Continue     = (1<<3), // continue looking for matching entries
-
-    UserValueIgnored  = UserValue | UserIgnored,
-    UserValueRequired = UserValue | UserRequired
-  };
-};
-
 // fill the table here currently the comment field is not used for
 // anything other than documentation NOTE: Make sure the longer
 // commandFlag comes FIRST!
@@ -334,16 +317,10 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
    cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"PrecompiledHeaderThrough", "Yc", "Precompiled Header Name", "",
    cmVS7FlagTable::UserValueRequired},
-  {"UsePrecompiledHeader", "YX", "Automatically Generate", "2",
-   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
-  {"PrecompiledHeaderThrough", "YX", "Precompiled Header Name", "",
-   cmVS7FlagTable::UserValueRequired},
-  {"UsePrecompiledHeader", "Yu", "Use Precompiled Header", "3",
-   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
-  {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
-   cmVS7FlagTable::UserValueRequired},
   {"PrecompiledHeaderFile", "Fp", "Generated Precompiled Header", "",
    cmVS7FlagTable::UserValue},
+  // The YX and Yu options are in a per-global-generator table because
+  // their values differ based on the VS IDE version.
   {"ForcedIncludeFiles", "FI", "Forced include files", "",
    cmVS7FlagTable::UserValueRequired},
 
@@ -395,7 +372,8 @@ public:
     Compiler,
     Linker
   };
-  cmLocalVisualStudio7GeneratorOptions(Tool tool);
+  cmLocalVisualStudio7GeneratorOptions(Tool tool,
+                                       cmVS7FlagTable const* extraTable = 0);
 
   // Store options from command line flags.
   void Parse(const char* flags);
@@ -441,7 +419,10 @@ private:
 
   bool DoingDefine;
   cmVS7FlagTable const* FlagTable;
+  cmVS7FlagTable const* ExtraFlagTable;
   void HandleFlag(const char* flag);
+  bool CheckFlagTable(cmVS7FlagTable const* table, const char* flag,
+                      bool& flag_handled);
 };
 
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
@@ -527,7 +508,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::string defineFlags = this->Makefile->GetDefineFlags();
 
   // Construct a set of build options for this target.
-  Options targetOptions(Options::Compiler);
+  Options targetOptions(Options::Compiler, this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
@@ -1204,7 +1185,7 @@ void cmLocalVisualStudio7Generator
                << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
           if(!compileFlags.empty())
             {
-            Options fileOptions(Options::Compiler);
+            Options fileOptions(Options::Compiler, this->ExtraFlagTable);
             fileOptions.Parse(compileFlags.c_str());
             fileOptions.OutputAdditionalOptions(fout, "\t\t\t\t\t", "\n");
             fileOptions.OutputFlagMap(fout, "\t\t\t\t\t");
@@ -1648,8 +1629,9 @@ std::string cmLocalVisualStudio7Generator
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudio7GeneratorOptions
-::cmLocalVisualStudio7GeneratorOptions(Tool tool):
-  DoingDefine(false), FlagTable(0)
+::cmLocalVisualStudio7GeneratorOptions(Tool tool,
+                                       cmVS7FlagTable const* extraTable):
+  DoingDefine(false), FlagTable(0), ExtraFlagTable(extraTable)
 {
   // Choose the flag table for the requested tool.
   switch(tool)
@@ -1761,6 +1743,7 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
   // Look for known arguments.
   if(flag[0] == '-' || flag[0] == '/')
     {
+    // Look for preprocessor definitions.
     if(flag[1] == 'D')
       {
       if(flag[2] == '\0')
@@ -1775,60 +1758,24 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
         }
       return;
       }
-    else if(this->FlagTable)
+
+    // Look through the available flag tables.
+    bool flag_handled = false;
+    if(this->FlagTable &&
+       this->CheckFlagTable(this->FlagTable, flag, flag_handled))
       {
-      // Look for an entry in the flag table matching this flag.
-      bool flag_handled = false;
-      for(cmVS7FlagTable const* entry = this->FlagTable;
-          entry->IDEName; ++entry)
-        {
-        bool entry_found = false;
-        if(entry->special & cmVS7FlagTable::UserValue)
-          {
-          // This flag table entry accepts a user-specified value.  If
-          // the entry specifies UserRequired we must match only if a
-          // non-empty value is given.
-          int n = static_cast<int>(strlen(entry->commandFlag));
-          if(strncmp(flag+1, entry->commandFlag, n) == 0 &&
-             (!(entry->special & cmVS7FlagTable::UserRequired) ||
-              static_cast<int>(strlen(flag+1)) > n))
-            {
-            if(entry->special & cmVS7FlagTable::UserIgnored)
-              {
-              // Ignore the user-specified value.
-              this->FlagMap[entry->IDEName] = entry->value;
-              }
-            else
-              {
-              // Use the user-specified value.
-              this->FlagMap[entry->IDEName] = flag+1+n;
-              }
-            entry_found = true;
-            }
-          }
-        else if(strcmp(flag+1, entry->commandFlag) == 0)
-          {
-          // This flag table entry provides a fixed value.
-          this->FlagMap[entry->IDEName] = entry->value;
-          entry_found = true;
-          }
+      return;
+      }
+    if(this->ExtraFlagTable &&
+       this->CheckFlagTable(this->ExtraFlagTable, flag, flag_handled))
+      {
+      return;
+      }
 
-        // If the flag has been handled by an entry not requesting a
-        // search continuation we are done.
-        if(entry_found && !(entry->special & cmVS7FlagTable::Continue))
-          {
-          return;
-          }
-
-        // If the entry was found the flag has been handled.
-        flag_handled = flag_handled || entry_found;
-        }
-
-      // If any map entry handled the flag we are done.
-      if(flag_handled)
-        {
-        return;
-        }
+    // If any map entry handled the flag we are done.
+    if(flag_handled)
+      {
+      return;
       }
     }
 
@@ -1837,6 +1784,60 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
   this->FlagString +=
     cmSystemTools::EscapeWindowsShellArgument(flag,
                                               cmsysSystem_Shell_Flag_VSIDE);
+}
+
+//----------------------------------------------------------------------------
+bool
+cmLocalVisualStudio7GeneratorOptions
+::CheckFlagTable(cmVS7FlagTable const* table, const char* flag,
+                 bool& flag_handled)
+{
+  // Look for an entry in the flag table matching this flag.
+  for(cmVS7FlagTable const* entry = table; entry->IDEName; ++entry)
+    {
+    bool entry_found = false;
+    if(entry->special & cmVS7FlagTable::UserValue)
+      {
+      // This flag table entry accepts a user-specified value.  If
+      // the entry specifies UserRequired we must match only if a
+      // non-empty value is given.
+      int n = static_cast<int>(strlen(entry->commandFlag));
+      if(strncmp(flag+1, entry->commandFlag, n) == 0 &&
+         (!(entry->special & cmVS7FlagTable::UserRequired) ||
+          static_cast<int>(strlen(flag+1)) > n))
+        {
+        if(entry->special & cmVS7FlagTable::UserIgnored)
+          {
+          // Ignore the user-specified value.
+          this->FlagMap[entry->IDEName] = entry->value;
+          }
+        else
+          {
+          // Use the user-specified value.
+          this->FlagMap[entry->IDEName] = flag+1+n;
+          }
+        entry_found = true;
+        }
+      }
+    else if(strcmp(flag+1, entry->commandFlag) == 0)
+      {
+      // This flag table entry provides a fixed value.
+      this->FlagMap[entry->IDEName] = entry->value;
+      entry_found = true;
+      }
+
+    // If the flag has been handled by an entry not requesting a
+    // search continuation we are done.
+    if(entry_found && !(entry->special & cmVS7FlagTable::Continue))
+      {
+      return true;
+      }
+
+    // If the entry was found the flag has been handled.
+    flag_handled = flag_handled || entry_found;
+    }
+
+  return false;
 }
 
 //----------------------------------------------------------------------------

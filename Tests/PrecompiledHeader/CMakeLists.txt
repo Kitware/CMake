@@ -14,9 +14,9 @@ ENDIF(CMAKE_CONFIGURATION_TYPES)
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/PCH)
 
 # Choose between an explicit include path and using /I during
-# precompilation.  The /I form is provided as an example.  In practice
-# the include path form would be used.
-SET(PCH_USE_INCLUDE_DIR 1)
+# precompilation.  The /I form is used to test that the PCH is
+# actually used.  In practice the include path form would be used.
+SET(PCH_USE_INCLUDE_DIR 0)
 IF(PCH_USE_INCLUDE_DIR)
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 ELSE(PCH_USE_INCLUDE_DIR)

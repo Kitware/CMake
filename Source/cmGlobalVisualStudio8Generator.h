@@ -50,6 +50,7 @@ public:
   virtual void Configure();
   virtual void Generate();
 protected:
+  static cmVS7FlagTable const* GetExtraFlagTableVS8();
   virtual void AddPlatformDefinitions(cmMakefile* mf);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
