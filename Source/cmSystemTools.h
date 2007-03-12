@@ -297,7 +297,6 @@ public:
   static std::string ConvertToRunCommandPath(const char* path);
   //! Check if the first string ends with the second one.
   static bool StringEndsWith(const char* str1, const char* str2);
-  static bool CreateSymlink(const char* origName, const char* newName);
   
   /** compute the relative path from local to remote.  local must 
       be a directory.  remote can be a file or a directory.  

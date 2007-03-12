@@ -2356,6 +2356,44 @@ bool SystemTools::FileIsSymlink(const char* name)
 #endif
 }
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+bool SystemTools::CreateSymlink(const char*, const char*)
+{
+  return false;
+}
+#else
+bool SystemTools::CreateSymlink(const char* origName, const char* newName)
+{
+  return symlink(origName, newName) >= 0;
+}
+#endif
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+bool SystemTools::ReadSymlink(const char*, kwsys_stl::string&)
+{
+  return false;
+}
+#else
+bool SystemTools::ReadSymlink(const char* newName,
+                              kwsys_stl::string& origName)
+{
+  char buf[KWSYS_SYSTEMTOOLS_MAXPATH+1];
+  int count =
+    static_cast<int>(readlink(newName, buf, KWSYS_SYSTEMTOOLS_MAXPATH));
+  if(count >= 0)
+    {
+    // Add null-terminator.
+    buf[count] = 0;
+    origName = buf;
+    return true;
+    }
+  else
+    {
+    return false;
+    }
+}
+#endif
+
 int SystemTools::ChangeDirectory(const char *dir)
 {
   return Chdir(dir);

@@ -589,6 +589,18 @@ public:
     double percent_bin = 0.05);
 
   /**
+   * Create a symbolic link if the platform supports it.  Returns whether
+   * creation succeded.
+   */
+  static bool CreateSymlink(const char* origName, const char* newName);
+
+  /**
+   * Read the contents of a symbolic link.  Returns whether reading
+   * succeded.
+   */
+  static bool ReadSymlink(const char* newName, kwsys_stl::string& origName);
+
+  /**
    * Try to locate the file 'filename' in the directory 'dir'.
    * If 'filename' is a fully qualified filename, the basename of the file is
    * used to check for its existence in 'dir'.

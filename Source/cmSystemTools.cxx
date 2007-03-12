@@ -1376,20 +1376,6 @@ bool cmSystemTools::StringEndsWith(const char* str1, const char* str2)
   return !strncmp(str1 + (strlen(str1)-strlen(str2)), str2, strlen(str2));
 }
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-bool cmSystemTools::CreateSymlink(const char*, const char*)
-{
-  // Should we create a copy here?
-  return false;
-}
-#else
-bool cmSystemTools::CreateSymlink(const char* origName, const char* newName)
-{
-  return (symlink(origName, newName) >= 0);
-}
-#endif
-
-
 // compute the relative path from here to there
 std::string cmSystemTools::RelativePath(const char* local, const char* remote)
 {
