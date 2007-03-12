@@ -28,7 +28,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
   // otherwise it defaults to static library.
   int shared = 
     !cmSystemTools::IsOff(this->Makefile->GetDefinition("BUILD_SHARED_LIBS"));
-  bool in_all = true;
+  bool excludeFromAll = false;
   
   std::vector<std::string>::const_iterator s = args.begin();
 
@@ -60,7 +60,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
     else if(*s == "EXCLUDE_FROM_ALL")
       {
       ++s;
-      in_all = false;
+      excludeFromAll = true;
       }
     else
       {
@@ -85,7 +85,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   this->Makefile->AddLibrary(this->LibName.c_str(), shared, srclists,
-                             in_all);
+                             excludeFromAll);
   
   return true;
 }

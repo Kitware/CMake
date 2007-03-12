@@ -339,7 +339,7 @@ void cmGlobalVisualStudio7Generator
             for(cmTargets::iterator al = atgts.begin();
                 al != atgts.end(); ++al)
               {
-              if (al->second.IsInAll())
+              if (!al->second.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
                 {
                 if (al->second.GetType() == cmTarget::UTILITY ||
                     al->second.GetType() == cmTarget::GLOBAL_TARGET)

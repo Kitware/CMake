@@ -25,7 +25,7 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
   bool res = true;
-  bool intoplevel = true;
+  bool excludeFromAll = false;
   bool preorder = false;
 
   for(std::vector<std::string>::const_iterator i = args.begin();
@@ -33,7 +33,7 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
     {
     if(*i == "EXCLUDE_FROM_ALL")
       {
-      intoplevel = false;
+      excludeFromAll = true;
       continue;
       }
     if(*i == "PREORDER")
@@ -52,7 +52,7 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
         std::string(this->Makefile->GetCurrentOutputDirectory()) + 
         "/" + i->c_str();
       this->Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
-                                  intoplevel, preorder, false);
+                                  excludeFromAll, preorder, false);
       }
     // otherwise it is a full path
     else if ( cmSystemTools::FileIsDirectory(i->c_str()) )
@@ -63,7 +63,7 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
         std::string(this->Makefile->GetCurrentOutputDirectory()) + 
         "/" + cmSystemTools::GetFilenameName(i->c_str());
       this->Makefile->AddSubDirectory(i->c_str(), binPath.c_str(),
-                                  intoplevel, preorder, false);
+                                  excludeFromAll, preorder, false);
       }
     else
       {

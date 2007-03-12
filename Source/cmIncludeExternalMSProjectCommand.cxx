@@ -52,7 +52,7 @@ bool cmIncludeExternalMSProjectCommand
     // Create a target instance for this utility.
     cmTarget target;
     target.SetType(cmTarget::UTILITY, utility_name.c_str());
-    target.SetInAll(true);
+    target.SetProperty("EXCLUDE_FROM_ALL","FALSE");
     target.SetMakefile(this->Makefile);
     std::vector<std::string> no_outputs;
     cmCustomCommandLines commandLines;

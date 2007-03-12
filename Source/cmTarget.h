@@ -57,14 +57,6 @@ public:
   ///! Set/Get the name of the target
   const char* GetName() {return this->Name.c_str();}
 
-  /**
-   * Indicate whether the target is part of the all target
-   */
-  bool IsInAll() { return !this->GetPropertyAsBool("EXCLUDE_FROM_ALL"); }
-  bool GetInAll() { return !this->GetPropertyAsBool("EXCLUDE_FROM_ALL"); }
-  void SetInAll(bool f) { 
-    this->SetProperty("EXCLUDE_FROM_ALL", (f) ?"FALSE" : "TRUE"); }
-
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
   cmMakefile *GetMakefile() { return this->Makefile;};

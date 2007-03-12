@@ -170,7 +170,7 @@ public:
    */
   cmTarget* AddExecutable(const char *exename, 
                           const std::vector<std::string> &srcs,
-                          bool in_all = true);
+                          bool excludeFromAll = false);
 
   /**
    * Add a utility to the build.  A utiltity target is a command that
@@ -224,10 +224,10 @@ public:
   /**
    * Add a subdirectory to the build.
    */
-  void AddSubDirectory(const char*, bool includeTopLevel=true, 
+  void AddSubDirectory(const char*, bool excludeFromAll=false, 
                        bool preorder = false);
   void AddSubDirectory(const char* fullSrcDir,const char *fullBinDir, 
-                       bool includeTopLevel, bool preorder,
+                       bool excludeFromAll, bool preorder,
                        bool immediate);
 
   /**
@@ -281,7 +281,7 @@ public:
    */
   void AddLibrary(const char *libname, int shared,
                   const std::vector<std::string> &srcs,
-                  bool in_all = true);
+                  bool excludeFromAll = false);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**

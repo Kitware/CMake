@@ -110,10 +110,6 @@ public:
    */
   std::string ConvertToOptionallyRelativeOutputPath(const char* remote);
 
-  // flag to determine if this project should be included in a parent project
-  bool GetExcludeAll();
-  void SetExcludeAll(bool b);
-  
   ///! set/get the parent generator 
   cmLocalGenerator* GetParent(){return this->Parent;}
   void SetParent(cmLocalGenerator* g) { this->Parent = g; g->AddChild(this); }

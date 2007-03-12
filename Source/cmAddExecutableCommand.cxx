@@ -31,7 +31,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
   ++s;
   bool use_win32 = false;
   bool use_macbundle = false;
-  bool in_all = true;
+  bool excludeFromAll = false;
   while ( s != args.end() )
     {
     if (*s == "WIN32")
@@ -47,7 +47,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
     else if(*s == "EXCLUDE_FROM_ALL")
       {
       ++s;
-      in_all = false;
+      excludeFromAll = true;
       }
     else
       {
@@ -64,7 +64,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
 
   std::vector<std::string> srclists(s, args.end());
   cmTarget* tgt = this->Makefile->AddExecutable(exename.c_str(), srclists,
-                                                in_all);
+                                                excludeFromAll);
   if ( use_win32 )
     {
     tgt->SetProperty("WIN32_EXECUTABLE", "ON");

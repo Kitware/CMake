@@ -409,7 +409,7 @@ void cmLocalGenerator::GenerateInstallRules()
     for(std::vector<cmLocalGenerator*>::const_iterator
           ci = this->Children.begin(); ci != this->Children.end(); ++ci)
       {
-      if(!(*ci)->GetExcludeAll())
+      if(!(*ci)->GetMakefile()->GetProperty("EXCLUDE_FROM_ALL"))
         {
         std::string odir = (*ci)->GetMakefile()->GetStartOutputDirectory();
         cmSystemTools::ConvertToUnixSlashes(odir);
@@ -2609,14 +2609,4 @@ cmLocalGenerator::GetTargetObjectFileDirectories(cmTarget* ,
 std::string cmLocalGenerator::GetSourceObjectName(cmSourceFile& sf)
 {
   return sf.GetSourceName();
-}
-
-bool cmLocalGenerator::GetExcludeAll()
-{
-  return this->Makefile->GetPropertyAsBool("EXCLUDE_FROM_ALL"); 
-}
-
-void cmLocalGenerator::SetExcludeAll(bool b)
-{
-  this->Makefile->SetProperty("EXCLUDE_FROM_ALL", b?"TRUE":"FALSE");
 }

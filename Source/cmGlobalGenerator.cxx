@@ -1006,13 +1006,13 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
   cmLocalGenerator* cur = gen->GetParent();
   while(cur && cur != root)
     {
-    if(cur->GetExcludeAll())
+    if(cur->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
       {
       return true;
       }
     cur = cur->GetParent();
     }
-  return gen->GetExcludeAll();
+  return gen->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL");
 }
 
 
@@ -1359,7 +1359,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   cmTarget target;
   target.GetProperties().SetCMakeInstance(this->CMakeInstance);
   target.SetType(cmTarget::GLOBAL_TARGET, name);
-  target.SetInAll(false);
+  target.SetProperty("EXCLUDE_FROM_ALL","TRUE");
 
   std::vector<std::string> no_outputs;
   std::vector<std::string> no_depends;

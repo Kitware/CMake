@@ -30,7 +30,7 @@ bool cmAddSubDirectoryCommand::InitialPass
   std::string srcArg = args[0];
   std::string binArg;
   
-  bool intoplevel = true;
+  bool excludeFromAll = false;
 
   // process the rest of the arguments looking for optional args
   std::vector<std::string>::const_iterator i = args.begin();
@@ -39,7 +39,7 @@ bool cmAddSubDirectoryCommand::InitialPass
     {
     if(*i == "EXCLUDE_FROM_ALL")
       {
-      intoplevel = false;
+      excludeFromAll = true;
       continue;
       }
     else if (!binArg.size())
@@ -122,7 +122,7 @@ bool cmAddSubDirectoryCommand::InitialPass
 
   // Add the subdirectory using the computed full paths.
   this->Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
-                                  intoplevel, false, true);
+                                  excludeFromAll, false, true);
 
   return true;
 }

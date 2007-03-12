@@ -818,7 +818,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   cmTarget target;
   target.SetMakefile(this);
   target.SetType(cmTarget::UTILITY, utilityName);
-  target.SetInAll(all);
+  target.SetProperty("EXCLUDE_FROM_ALL", (all) ?"FALSE" : "TRUE");
 
   if(!comment)
     {
@@ -1066,7 +1066,7 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
 }
 
 void cmMakefile::AddSubDirectory(const char* sub, 
-                                 bool topLevel, bool preorder)
+                                 bool excludeFromAll, bool preorder)
 {
   // the source path must be made full if it isn't already
   std::string srcPath = sub;
@@ -1088,12 +1088,12 @@ void cmMakefile::AddSubDirectory(const char* sub,
   
   
   this->AddSubDirectory(srcPath.c_str(), binPath.c_str(), 
-                        topLevel, preorder, false);
+                        excludeFromAll, preorder, false);
 }
 
                         
 void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
-                                 bool topLevel, bool preorder, 
+                                 bool excludeFromAll, bool preorder, 
                                  bool immediate)
 {
   std::vector<cmLocalGenerator *>& children = 
@@ -1120,7 +1120,8 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
   // set the subdirs start dirs
   lg2->GetMakefile()->SetStartDirectory(srcPath);
   lg2->GetMakefile()->SetStartOutputDirectory(binPath);
-  lg2->SetExcludeAll(!topLevel);
+  lg2->GetMakefile()->SetProperty("EXCLUDE_FROM_ALL",
+                                  (excludeFromAll) ? "TRUE" : "FALSE");
   lg2->GetMakefile()->SetPreOrder(preorder);
   
   if (immediate)
@@ -1318,7 +1319,7 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
 
 void cmMakefile::AddLibrary(const char* lname, int shared,
                             const std::vector<std::string> &srcs,
-                            bool in_all)
+                            bool excludeFromAll)
 {
   cmTarget target;
   switch (shared)
@@ -1341,7 +1342,8 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
   target.ClearDependencyInformation( *this, lname );
-  target.SetInAll(in_all);
+  target.SetProperty("EXCLUDE_FROM_ALL", 
+                     (excludeFromAll) ? "TRUE" : "FALSE");
   target.GetSourceLists() = srcs;
   this->AddGlobalLinkInformation(lname, target);
   cmTargets::iterator it = 
@@ -1351,12 +1353,13 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
 
 cmTarget* cmMakefile::AddExecutable(const char *exeName, 
                                     const std::vector<std::string> &srcs,
-                                    bool in_all)
+                                    bool excludeFromAll)
 {
   cmTarget target;
   target.SetType(cmTarget::EXECUTABLE, exeName);
   target.SetMakefile(this);
-  target.SetInAll(in_all);
+  target.SetProperty("EXCLUDE_FROM_ALL", 
+                     (excludeFromAll) ?"TRUE" : "FALSE");
   target.GetSourceLists() = srcs;
   this->AddGlobalLinkInformation(exeName, target);
   cmTargets::iterator it = 

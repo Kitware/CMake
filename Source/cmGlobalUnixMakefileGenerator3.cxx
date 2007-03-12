@@ -229,7 +229,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     cmLocalGenerator *lg3 = lg;
     while (lg3)
       {
-      if (lg3->GetExcludeAll())
+      if (lg3->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
         exclude = true;
         break;
@@ -478,7 +478,7 @@ cmGlobalUnixMakefileGenerator3
        (l->second.GetType() == cmTarget::UTILITY))
       {
       // Add this to the list of depends rules in this directory.
-      if((!check_all || l->second.IsInAll()) &&
+      if((!check_all || !l->second.GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
          (!check_relink || l->second.NeedRelinkBeforeInstall()))
         {
         std::string tname = lg->GetRelativeTargetDirectory(l->second);
@@ -790,7 +790,7 @@ cmGlobalUnixMakefileGenerator3
                           localName.c_str(), depends, commands, true);
         
         // add the all/all dependency
-        if (!exclude && t->second.IsInAll())
+        if (!exclude && !t->second.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
           {
           depends.clear();
           depends.push_back(localName);
@@ -937,7 +937,7 @@ GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
            (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
            (t->second.GetType() == cmTarget::UTILITY))
           {
-          if (t->second.IsInAll())
+          if (!t->second.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
             {
             std::vector<int> &progFiles = lg3->ProgressFiles[t->first];
             result += static_cast<unsigned long>(progFiles.size());
@@ -966,7 +966,7 @@ GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
            (l->second.GetType() == cmTarget::UTILITY))
           {
           // Add this to the list of depends rules in this directory.
-          if (l->second.IsInAll() && 
+          if (!l->second.GetPropertyAsBool("EXCLUDE_FROM_ALL") && 
               targets.find(&l->second) == targets.end())
             {
             std::deque<cmTarget *> activeTgts;
