@@ -252,7 +252,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   // Add ALL_BUILD
   const char* no_working_directory = 0;
   std::vector<std::string> no_depends;
-  mf->AddUtilityCommand("ALL_BUILD", false, no_depends,
+  mf->AddUtilityCommand("ALL_BUILD", true, no_depends,
                         no_working_directory,
                         "echo", "Build all projects");
   cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
@@ -275,7 +275,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     }
   cmCustomCommandLines commandLines;
   commandLines.push_back(makecommand);
-  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false,
+  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", true,
                         no_working_directory,
                         no_depends,
                         commandLines);

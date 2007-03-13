@@ -91,7 +91,7 @@ void cmGlobalVisualStudio8Generator::Generate()
       cmMakefile* mf = lg->GetMakefile();
       std::string cmake_command = mf->GetRequiredDefinition("CMAKE_COMMAND");
       cmCustomCommandLines noCommandLines;
-      mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, true,
+      mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
                             no_working_directory, no_depends,
                             noCommandLines);
       cmTarget* tgt = mf->FindTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET);

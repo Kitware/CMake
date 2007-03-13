@@ -771,7 +771,8 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
+void cmMakefile::AddUtilityCommand(const char* utilityName, 
+                                   bool excludeFromAll,
                                    const std::vector<std::string>& depends,
                                    const char* workingDirectory,
                                    const char* command,
@@ -803,12 +804,13 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   commandLines.push_back(commandLine);
 
   // Call the real signature of this method.
-  this->AddUtilityCommand(utilityName, all, workingDirectory, 
+  this->AddUtilityCommand(utilityName, excludeFromAll, workingDirectory, 
                           depends, commandLines);
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
+void cmMakefile::AddUtilityCommand(const char* utilityName, 
+                                   bool excludeFromAll,
                                    const char* workingDirectory,
                                    const std::vector<std::string>& depends,
                                    const cmCustomCommandLines& commandLines,
@@ -818,8 +820,10 @@ void cmMakefile::AddUtilityCommand(const char* utilityName, bool all,
   cmTarget target;
   target.SetMakefile(this);
   target.SetType(cmTarget::UTILITY, utilityName);
-  target.SetProperty("EXCLUDE_FROM_ALL", (all) ?"FALSE" : "TRUE");
-
+  if (excludeFromAll)
+    {
+    target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+    }
   if(!comment)
     {
     // Use an empty comment to avoid generation of default comment.

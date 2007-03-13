@@ -171,7 +171,7 @@ void cmGlobalVisualStudio6Generator::Generate()
     // add the ALL_BUILD to the first local generator of each project
     if(gen.size())
       {
-      gen[0]->GetMakefile()->AddUtilityCommand("ALL_BUILD", false, 
+      gen[0]->GetMakefile()->AddUtilityCommand("ALL_BUILD", true, 
                                                no_depends, 
                                                no_working_dir,
                                                "echo", "Build all projects");

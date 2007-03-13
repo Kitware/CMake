@@ -73,13 +73,13 @@ bool cmAddCustomTargetCommand::InitialPass(
   tdoing doing = doing_command;
 
   // Look for the ALL option.
-  bool all = false;
+  bool excludeFromAll = true;
   unsigned int start = 1;
   if(args.size() > 1)
     {
     if(args[1] == "ALL")
       {
-      all = true;
+      excludeFromAll = false;
       start = 2;
       }
     }
@@ -160,7 +160,7 @@ bool cmAddCustomTargetCommand::InitialPass(
 
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
-  this->Makefile->AddUtilityCommand(args[0].c_str(), all,
+  this->Makefile->AddUtilityCommand(args[0].c_str(), excludeFromAll,
                                     working_directory.c_str(), depends,
                                     commandLines, escapeOldStyle, comment);
 

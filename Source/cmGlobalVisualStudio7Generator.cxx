@@ -226,7 +226,7 @@ void cmGlobalVisualStudio7Generator::Generate()
     if(gen.size())
       {
       gen[0]->GetMakefile()->
-        AddUtilityCommand("ALL_BUILD", false, no_depends,
+        AddUtilityCommand("ALL_BUILD", true, no_depends,
                           no_working_dir,
                           "echo", "Build all projects");
       std::string cmake_command = 
