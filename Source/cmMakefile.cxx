@@ -1120,8 +1120,10 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
   // set the subdirs start dirs
   lg2->GetMakefile()->SetStartDirectory(srcPath);
   lg2->GetMakefile()->SetStartOutputDirectory(binPath);
-  lg2->GetMakefile()->SetProperty("EXCLUDE_FROM_ALL",
-                                  (excludeFromAll) ? "TRUE" : "FALSE");
+  if(excludeFromAll)
+    {
+    lg2->GetMakefile()->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+    }
   lg2->GetMakefile()->SetPreOrder(preorder);
   
   if (immediate)
@@ -1342,8 +1344,10 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
   target.ClearDependencyInformation( *this, lname );
-  target.SetProperty("EXCLUDE_FROM_ALL", 
-                     (excludeFromAll) ? "TRUE" : "FALSE");
+  if(excludeFromAll)
+    {
+    target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+    }
   target.GetSourceLists() = srcs;
   this->AddGlobalLinkInformation(lname, target);
   cmTargets::iterator it = 
@@ -1358,8 +1362,10 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
   cmTarget target;
   target.SetType(cmTarget::EXECUTABLE, exeName);
   target.SetMakefile(this);
-  target.SetProperty("EXCLUDE_FROM_ALL", 
-                     (excludeFromAll) ?"TRUE" : "FALSE");
+  if(excludeFromAll)
+    {
+    target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+    }
   target.GetSourceLists() = srcs;
   this->AddGlobalLinkInformation(exeName, target);
   cmTargets::iterator it = 
@@ -2600,11 +2606,6 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     {
     return;
     }
-  if (!value)
-    {
-    value = "NOTFOUND";
-    }
-
   this->Properties.SetProperty(prop,value,cmProperty::DIRECTORY);
 }
 
@@ -2653,6 +2654,11 @@ const char *cmMakefile::GetProperty(const char* prop,
     this->Properties.GetPropertyValue(prop, scope, chain);
   if (chain)
     {
+    if(this->LocalGenerator->GetParent())
+      {
+      return this->LocalGenerator->GetParent()->GetMakefile()->
+        GetProperty(prop, scope);
+      }
     return this->GetCMakeInstance()->GetProperty(prop,scope);
     }
 
@@ -2782,5 +2788,6 @@ void cmMakefile::DefineProperties(cmake *cm)
      "A property on a target that indicates if the target is excluded "
      "from the default build target. If it is not, then with a Makefile "
      "for example typing make will couse this target to be built as well. "
-     "The same concept applies to the default build of other generators.");
+     "The same concept applies to the default build of other generators.",
+     true);
 }

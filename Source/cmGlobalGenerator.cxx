@@ -1055,6 +1055,116 @@ void cmGlobalGenerator::FillProjectMap()
       }
     while (lg);
     }
+  // now create project to target map 
+  // This will make sure that targets have all the 
+  // targets they depend on as part of the build.
+  this->FillProjectToTargetMap();
+}
+
+
+// Build a map that contains a the set of targets used by each project
+void cmGlobalGenerator::FillProjectToTargetMap()
+{
+  // loop over each project in the build
+  for(std::map<cmStdString, 
+        std::vector<cmLocalGenerator*> >::iterator m = 
+        this->ProjectMap.begin();
+      m != this->ProjectMap.end(); ++m)
+    {
+    std::vector<cmLocalGenerator*>& lgs = m->second;
+    if(lgs.size() == 0)
+      {
+      continue;
+      }
+    cmStdString const & projectName = m->first;
+    cmMakefile* projectMakefile = lgs[0]->GetMakefile();
+    // get the current EXCLUDE_FROM_ALL value from projectMakefile
+    const char* exclude = 0;
+    std::string excludeSave;
+    bool chain = false;
+    exclude = 
+      projectMakefile->GetProperties().
+      GetPropertyValue("EXCLUDE_FROM_ALL", 
+                       cmProperty::DIRECTORY, chain);
+    if(exclude)
+      {
+      excludeSave = exclude;
+      }
+    // Set EXCLUDE_FROM_ALL to FALSE for the top level makefile because
+    // in the current project nothing is excluded yet
+    projectMakefile->SetProperty("EXCLUDE_FROM_ALL", "FALSE");
+    // now loop over all cmLocalGenerators in this project and pull
+    // out all the targets that depend on each other, even if those
+    // targets come from a target that is excluded.
+    for(std::vector<cmLocalGenerator*>::iterator lg = 
+          lgs.begin(); lg != lgs.end(); ++lg)
+      {
+      cmMakefile* mf = (*lg)->GetMakefile();
+      cmTargets& targets = mf->GetTargets();
+      for(cmTargets::iterator t = targets.begin();
+          t != targets.end(); ++t)
+        {
+        cmTarget& target = t->second;
+        // if the target is in all then add it to the project 
+        if(!target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+          {
+          // add this target to the project
+          this->ProjectToTargetMap[projectName].insert(&target);
+          // now get all the targets that link to this target and
+          // add them
+          cmTarget::LinkLibraryVectorType::const_iterator j, jend;
+          j = target.GetLinkLibraries().begin();
+          jend = target.GetLinkLibraries().end();
+          for(;j!= jend; ++j)
+            {
+            cmTarget* depTarget = this->FindTarget(0, j->first.c_str());
+            if(depTarget)
+              {
+              this->ProjectToTargetMap[projectName].insert(depTarget);
+              }
+            }
+          // Now add any utility targets used by this target
+          std::set<cmStdString>::const_iterator i, end;
+          i = target.GetUtilities().begin();
+          end = target.GetUtilities().end(); 
+          for(;i!= end; ++i)
+            {
+            cmTarget* depTarget = this->FindTarget(0, i->c_str());
+            if(depTarget)
+              {
+              this->ProjectToTargetMap[projectName].insert(depTarget);
+              }
+            }
+          }
+        } 
+      }
+    // Now restore the EXCLUDE_FROM_ALL property on the project top 
+    // makefile
+    if(exclude)
+      {
+      exclude = excludeSave.c_str();
+      }
+    projectMakefile->SetProperty("EXCLUDE_FROM_ALL", exclude);
+    }
+  // dump the map for debug purposes 
+  // right now this map is not being used, but it was 
+  // checked in to avoid constant conflicts.  
+  // It is also the first step to creating sub projects
+  // that contain all of the targets they need.
+#if 0
+  std::map<cmStdString, std::set<cmTarget*> >::iterator i = 
+    this->ProjectToTargetMap.begin();
+  for(; i != this->ProjectToTargetMap.end(); ++i)
+    {
+    std::cerr << i->first << "\n";
+    std::set<cmTarget*>::iterator t = i->second.begin();
+    for(; t != i->second.end(); ++t)
+      {
+      cmTarget* target = *t;
+      std::cerr << "\t" << target->GetName() << "\n";
+      }
+    }
+#endif
 }
 
 

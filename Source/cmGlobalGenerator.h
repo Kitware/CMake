@@ -198,7 +198,7 @@ protected:
   // has been populated.
   void FillProjectMap();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
-
+  void FillProjectToTargetMap();
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const char* name, const char* message,
     const cmCustomCommandLines* commandLines,
@@ -214,6 +214,7 @@ protected:
   std::vector<cmLocalGenerator *> LocalGenerators;
   // map from project name to vector of local generators in that project
   std::map<cmStdString, std::vector<cmLocalGenerator*> > ProjectMap;
+  std::map<cmStdString, std::set<cmTarget*> > ProjectToTargetMap;
 
   // Set of named installation components requested by the project.
   std::set<cmStdString> InstallComponents;

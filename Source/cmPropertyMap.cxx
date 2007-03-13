@@ -43,7 +43,11 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
     {
     return;
     }
-
+  if(!value)
+    {
+    this->erase(name);
+    return;
+    }
 #ifdef CMAKE_STRICT
   if (!this->CMakeInstance)
     {
@@ -89,7 +93,7 @@ const char *cmPropertyMap
 ::GetPropertyValue(const char *name, 
                    cmProperty::ScopeType scope, 
                    bool &chain) const
-{
+{ 
   chain = false;
   if (!name)
     {
@@ -142,7 +146,6 @@ const char *cmPropertyMap
       }
     return 0;
     }
-
   return it->second.GetValue();
 }
 

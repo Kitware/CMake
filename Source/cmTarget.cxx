@@ -122,7 +122,8 @@ void cmTarget::DefineProperties(cmake *cm)
      "A property on a target that indicates if the target is excluded "
      "from the default build target. If it is not, then with a Makefile "
      "for example typing make will couse this target to be built as well. "
-     "The same concept applies to the default build of other generators.");
+     "The same concept applies to the default build of other generators.",
+     true);
 
   cm->DefineProperty
     ("INSTALL_NAME_DIR", cmProperty::TARGET, 
@@ -1313,7 +1314,6 @@ const char *cmTarget::GetProperty(const char* prop,
       }
     return 0;
     }
-  
   bool chain = false;
   const char *retVal = 
     this->Properties.GetPropertyValue(prop, scope, chain);
@@ -1321,7 +1321,6 @@ const char *cmTarget::GetProperty(const char* prop,
     {
     return this->Makefile->GetProperty(prop,scope);
     }
-
   return retVal;    
 }
 
