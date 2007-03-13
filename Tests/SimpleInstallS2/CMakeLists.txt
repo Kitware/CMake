@@ -1,11 +1,11 @@
 PROJECT (TestSimpleInstall)
 SET(CMAKE_VERBOSE_MAKEFILE 1)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY
-  "${TestSimpleInstall_BINARY_DIR}/bin dir")
+  "${TestSimpleInstall_BINARY_DIR}/bin")
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
-  "${TestSimpleInstall_BINARY_DIR}/lib static")
+  "${TestSimpleInstall_BINARY_DIR}/lib/static")
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY
-  "${TestSimpleInstall_BINARY_DIR}/lib dir")
+  "${TestSimpleInstall_BINARY_DIR}/lib")
 
 # Skip generating the rpath pointing at the build tree to make sure
 # the executable is installed with the proper rpath in the install
