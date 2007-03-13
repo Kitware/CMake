@@ -409,7 +409,7 @@ void cmLocalGenerator::GenerateInstallRules()
     for(std::vector<cmLocalGenerator*>::const_iterator
           ci = this->Children.begin(); ci != this->Children.end(); ++ci)
       {
-      if(!(*ci)->GetMakefile()->GetProperty("EXCLUDE_FROM_ALL"))
+      if(!(*ci)->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
         std::string odir = (*ci)->GetMakefile()->GetStartOutputDirectory();
         cmSystemTools::ConvertToUnixSlashes(odir);
