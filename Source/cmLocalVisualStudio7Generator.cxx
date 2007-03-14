@@ -390,7 +390,6 @@ public:
 
   // Check for specific options.
   bool UsingUnicode();
-  bool UsingDebugPDB();
 
   // Write options to output.
   void OutputPreprocessorDefinitions(std::ostream& fout,
@@ -579,12 +578,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
-  if(targetOptions.UsingDebugPDB() &&
-     (target.GetType() == cmTarget::EXECUTABLE ||
-      target.GetType() == cmTarget::STATIC_LIBRARY ||
-      target.GetType() == cmTarget::SHARED_LIBRARY ||
-      target.GetType() == cmTarget::MODULE_LIBRARY))
+  if(target.GetType() == cmTarget::EXECUTABLE ||
+     target.GetType() == cmTarget::STATIC_LIBRARY ||
+     target.GetType() == cmTarget::SHARED_LIBRARY ||
+     target.GetType() == cmTarget::MODULE_LIBRARY)
     {
+    // We need to specify a program database file name even for
+    // non-debug configurations because VS still creates .idb files.
     fout <<  "\t\t\t\tProgramDataBaseFileName=\""
          << target.GetDirectory(configName) << "/"
          << target.GetPDBName(configName) << "\"\n";
@@ -1695,21 +1695,6 @@ bool cmLocalVisualStudio7GeneratorOptions::UsingUnicode()
       }
     }
   return false;
-}
-
-//----------------------------------------------------------------------------
-bool cmLocalVisualStudio7GeneratorOptions::UsingDebugPDB()
-{
-  std::map<cmStdString, cmStdString>::iterator mi =
-    this->FlagMap.find("DebugInformationFormat");
-  if(mi != this->FlagMap.end() && mi->second != "1")
-    {
-    return true;
-    }
-  else
-    {
-    return false;
-    }
 }
 
 //----------------------------------------------------------------------------
