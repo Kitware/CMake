@@ -2222,11 +2222,11 @@ cmLocalGenerator
     return in_remote;
     }
 
-  // If the entire path is in common then just return a ".".
+  // If the entire path is in common then just return an empty string.
   if(common == remote.size() &&
      common == local.size())
     {
-    return ".";
+    return "";
     }
 
   // If the entire path is in common except for a trailing slash then
