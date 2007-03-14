@@ -68,6 +68,10 @@ void cmLocalUnixMakefileGenerator3::Configure()
   // directory from the top output directory.
   this->HomeRelativeOutputPath =
     this->Convert(this->Makefile->GetStartOutputDirectory(), HOME_OUTPUT);
+  if(this->HomeRelativeOutputPath == ".")
+    {
+    this->HomeRelativeOutputPath = "";
+    }
   if(!this->HomeRelativeOutputPath.empty())
     {
     this->HomeRelativeOutputPath += "/";

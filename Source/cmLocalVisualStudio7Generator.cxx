@@ -963,10 +963,6 @@ cmLocalVisualStudio7Generator
     if(cmSystemTools::FileIsFullPath(dir.c_str()))
       {
       std::string rel = this->Convert(dir.c_str(), START_OUTPUT, UNCHANGED);
-      if(rel.empty())
-        {
-        rel = ".";
-        }
       if(rel.size() < dir.size())
         {
         dir = rel;
