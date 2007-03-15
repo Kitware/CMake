@@ -14,7 +14,13 @@
 
 MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
   IF("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
-    SET(MACRO_CHECK_FUNCTION_DEFINITIONS 
+    SET(message "${VAR}")
+    # If the number of arguments is greater than 2 (SOURCE VAR)
+    IF(${ARGC} GREATER 2)
+      # then add the third argument as a message
+      SET(message "${ARGV2} (${VAR})")
+    ENDIF(${ARGC} GREATER 2)
+    SET(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
     IF(CMAKE_REQUIRED_LIBRARIES)
       SET(CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES
@@ -37,12 +43,11 @@ MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
     ENDFOREACH(inc)
 
     SET(src "${src}\nint main() { ${SOURCE} ; return 0; }")
-    FILE(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src2.c"
-      "${src}\n")
-    EXEC_PROGRAM("${CMAKE_COMMAND}" 
-      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp"
-      ARGS -E copy src2.c src.c)
-    MESSAGE(STATUS "Performing Test ${VAR}")
+    SET(CMAKE_CONFIGURABLE_FILE_CONTENT "${src}")
+    CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c"
+      IMMEDIATE)
+    MESSAGE(STATUS "Performing Test ${message}")
     TRY_RUN(${VAR} ${VAR}_COMPILED
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c
@@ -58,18 +63,18 @@ MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
     # if the return value was 0 then it worked
     SET(result_var ${${VAR}})
     IF("${result_var}" EQUAL 0)
-      SET(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
-      MESSAGE(STATUS "Performing Test ${VAR} - Success")
+      SET(${VAR} 1 CACHE INTERNAL "Test ${message}")
+      MESSAGE(STATUS "Performing Test ${message} - Success")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Performing C SOURCE FILE Test ${VAR} succeded with the following output:\n"
+        "Performing C SOURCE FILE Test ${message} succeded with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${${VAR}}\n"
         "Source file was:\n${src}\n")
     ELSE("${result_var}" EQUAL 0)
-      MESSAGE(STATUS "Performing Test ${VAR} - Failed")
-      SET(${VAR} "" CACHE INTERNAL "Test ${VAR}")
+      MESSAGE(STATUS "Performing Test ${message} - Failed")
+      SET(${VAR} "" CACHE INTERNAL "Test ${message}")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Performing C SOURCE FILE Test ${VAR} failed with the following output:\n"
+        "Performing C SOURCE FILE Test ${message} failed with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${result_var}\n"
         "Source file was:\n${src}\n")
