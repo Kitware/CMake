@@ -1,16 +1,16 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -45,7 +45,7 @@
 
 #include "strequal.h"
 #include "strtok.h"
-#include "curl_memory.h"
+#include "memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -83,7 +83,7 @@ int Curl_parsenetrc(char *host,
   FILE *file;
   int retcode=1;
   int specific_login = (login[0] != 0);
-  char *home = NULL; 
+  char *home = NULL;
   bool home_alloc = FALSE;
   bool netrc_alloc = FALSE;
   int state=NOTHING;
@@ -103,7 +103,7 @@ int Curl_parsenetrc(char *host,
     char *override = curl_getenv("CURL_DEBUG_NETRC");
 
     if (override) {
-      printf("NETRC: overridden " NETRC " file: %s\n", home);
+      fprintf(stderr, "NETRC: overridden " NETRC " file: %s\n", override);
       netrcfile = override;
       netrc_alloc = TRUE;
     }
@@ -171,7 +171,7 @@ int Curl_parsenetrc(char *host,
             /* and yes, this is our host! */
             state=HOSTVALID;
 #ifdef _NETRC_DEBUG
-            printf("HOST: %s\n", tok);
+            fprintf(stderr, "HOST: %s\n", tok);
 #endif
             retcode=0; /* we did find our host */
           }
@@ -188,7 +188,7 @@ int Curl_parsenetrc(char *host,
             else {
               strncpy(login, tok, LOGINSIZE-1);
 #ifdef _NETRC_DEBUG
-              printf("LOGIN: %s\n", login);
+              fprintf(stderr, "LOGIN: %s\n", login);
 #endif
             }
             state_login=0;
@@ -197,7 +197,7 @@ int Curl_parsenetrc(char *host,
             if (state_our_login || !specific_login) {
               strncpy(password, tok, PASSWORDSIZE-1);
 #ifdef _NETRC_DEBUG
-              printf("PASSWORD: %s\n", password);
+              fprintf(stderr, "PASSWORD: %s\n", password);
 #endif
             }
             state_password=0;

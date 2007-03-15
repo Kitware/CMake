@@ -5,7 +5,7 @@ INCLUDE_REGULAR_EXPRESSION("^.*$")
 
 # Setup package meta-data
 SET(PACKAGE "curl")
-SET(VERSION "7.12.1")
+SET(VERSION "7.16.1")
 SET(PACKAGE_TARNAME "curl")
 SET(PACKAGE_BUGREPORT " ")
 SET(PACKAGE_NAME "curl")
@@ -38,6 +38,7 @@ INCLUDE (CheckSymbolExists)
 INCLUDE (CheckTypeSize)
 
 SET(libCurl_SRCS
+  #  amigaos.c - does not build on AmigaOS
   base64.c
   connect.c
   content_encoding.c
@@ -48,15 +49,15 @@ SET(libCurl_SRCS
   file.c
   formdata.c
   ftp.c
-  getdate.c
   getenv.c
   getinfo.c
+  gtls.c
   hash.c
   hostares.c
   hostasyn.c
-  hostip.c
   hostip4.c
   hostip6.c
+  hostip.c
   hostsyn.c
   hostthre.c
   http.c
@@ -68,20 +69,33 @@ SET(libCurl_SRCS
   inet_ntop.c
   inet_pton.c
   krb4.c
+  ldap.c
   llist.c
   md5.c
   memdebug.c
   mprintf.c
   multi.c
   netrc.c
+  # nwlib.c - Not used
+  parsedate.c
   progress.c
+  security.c
+  select.c
   sendf.c
   share.c
+  socks.c
   speedcheck.c
+  splay.c
+  ssh.c
+  sslgen.c
   ssluse.c
+  strdup.c
   strequal.c
   strerror.c
+  # strtok.c - specify later
+  strtoofft.c
   telnet.c
+  tftp.c
   timeval.c
   transfer.c
   url.c
@@ -152,12 +166,15 @@ IF(NOT CURL_SPECIAL_LIBZ)
   CHECK_LIBRARY_EXISTS_CONCAT("z"      inflateEnd   HAVE_LIBZ)
 ENDIF(NOT CURL_SPECIAL_LIBZ)
 
-#OPTION(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" OFF)
+OPTION(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ON)
 MARK_AS_ADVANCED(CMAKE_USE_OPENSSL)
 IF(CMAKE_USE_OPENSSL)
   CHECK_LIBRARY_EXISTS_CONCAT("crypto" CRYPTO_lock  HAVE_LIBCRYPTO)
   CHECK_LIBRARY_EXISTS_CONCAT("ssl"    SSL_connect  HAVE_LIBSSL)
 ENDIF(CMAKE_USE_OPENSSL)
+
+# Check for idn
+CHECK_LIBRARY_EXISTS_CONCAT("idn" idna_to_ascii_lz HAVE_LIBIDN)
 
 # Check for symbol dlopen (same as HAVE_LIBDL)
 CHECK_LIBRARY_EXISTS("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
@@ -202,7 +219,11 @@ MACRO(CHECK_INCLUDE_FILE_CONCAT FILE VARIABLE)
 ENDMACRO(CHECK_INCLUDE_FILE_CONCAT)
 
 # Check for header files
+CHECK_INCLUDE_FILE_CONCAT("ws2tcpip.h"       HAVE_WS2TCPIP_H)
+CHECK_INCLUDE_FILE_CONCAT("winsock2.h"       HAVE_WINSOCK2_H)
 CHECK_INCLUDE_FILE_CONCAT("stdio.h"          HAVE_STDIO_H)
+CHECK_INCLUDE_FILE_CONCAT("windows.h"        HAVE_WINDOWS_H)
+CHECK_INCLUDE_FILE_CONCAT("winsock.h"        HAVE_WINSOCK_H)
 CHECK_INCLUDE_FILE_CONCAT("stddef.h"         HAVE_STDDEF_H)
 CHECK_INCLUDE_FILE_CONCAT("sys/types.h"      HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE_CONCAT("inttypes.h"       HAVE_INTTYPES_H)
@@ -226,6 +247,7 @@ IF(CMAKE_USE_OPENSSL)
   CHECK_INCLUDE_FILE_CONCAT("openssl/ssl.h"    HAVE_OPENSSL_SSL_H)
   CHECK_INCLUDE_FILE_CONCAT("openssl/err.h"    HAVE_OPENSSL_ERR_H)
   CHECK_INCLUDE_FILE_CONCAT("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
+  CHECK_INCLUDE_FILE_CONCAT("openssl/pkcs12.h" HAVE_OPENSSL_PKCS12_H)
 ENDIF(CMAKE_USE_OPENSSL)
 
 IF(NOT CURL_SPECIAL_LIBZ)
@@ -250,26 +272,35 @@ CHECK_INCLUDE_FILE_CONCAT("strings.h"       HAVE_STRINGS_H)
 CHECK_INCLUDE_FILE_CONCAT("sys/param.h"     HAVE_SYS_PARAM_H)
 CHECK_INCLUDE_FILE_CONCAT("sys/stat.h"      HAVE_SYS_STAT_H)
 CHECK_INCLUDE_FILE_CONCAT("sys/time.h"      HAVE_SYS_TIME_H)
+CHECK_INCLUDE_FILE_CONCAT("sys/resource.h"  HAVE_SYS_RESOURCE_H)
 CHECK_INCLUDE_FILE_CONCAT("termios.h"       HAVE_TERMIOS_H)
 CHECK_INCLUDE_FILE_CONCAT("termio.h"        HAVE_TERMIO_H)
 CHECK_INCLUDE_FILE_CONCAT("io.h"            HAVE_IO_H)
 CHECK_INCLUDE_FILE_CONCAT("time.h"          HAVE_TIME_H)
 CHECK_INCLUDE_FILE_CONCAT("unistd.h"        HAVE_UNISTD_H)
 CHECK_INCLUDE_FILE_CONCAT("sys/utime.h"     HAVE_SYS_UTIME_H)
-CHECK_INCLUDE_FILE_CONCAT("winsock.h"       HAVE_WINSOCK_H)
 CHECK_INCLUDE_FILE_CONCAT("sockio.h"        HAVE_SOCKIO_H)
 CHECK_INCLUDE_FILE_CONCAT("sys/sockio.h"    HAVE_SYS_SOCKIO_H)
 CHECK_INCLUDE_FILE_CONCAT("x509.h"          HAVE_X509_H)
+CHECK_INCLUDE_FILE_CONCAT("locale.h"        HAVE_LOCALE_H)
 CHECK_INCLUDE_FILE_CONCAT("setjmp.h"        HAVE_SETJMP_H)
 CHECK_INCLUDE_FILE_CONCAT("signal.h"        HAVE_SIGNAL_H)
 CHECK_INCLUDE_FILE_CONCAT("sys/ioctl.h"     HAVE_SYS_IOCTL_H)
 CHECK_INCLUDE_FILE_CONCAT("sys/utsname.h"   HAVE_SYS_UTSNAME_H)
+CHECK_INCLUDE_FILE_CONCAT("idn-free.h"      HAVE_IDN_FREE_H)
+CHECK_INCLUDE_FILE_CONCAT("idna.h"          HAVE_IDNA_H)
+CHECK_INCLUDE_FILE_CONCAT("tld.h"           HAVE_TLD_H)
+CHECK_INCLUDE_FILE_CONCAT("arpa/tftp.h"     HAVE_ARPA_TFTP_H)
+CHECK_INCLUDE_FILE_CONCAT("errno.h"         HAVE_ERRNO_H)
+CHECK_INCLUDE_FILE_CONCAT("libgen.h"        HAVE_LIBGEN_H)
+CHECK_INCLUDE_FILE_CONCAT("sys/filio.h"     HAVE_SYS_FILIO_H)
 CHECK_TYPE_SIZE(size_t  SIZEOF_SIZE_T)
 CHECK_TYPE_SIZE(ssize_t  SIZEOF_SSIZE_T)
 CHECK_TYPE_SIZE("long long"  SIZEOF_LONG_LONG)
 CHECK_TYPE_SIZE("long"  SIZEOF_LONG)
 CHECK_TYPE_SIZE("__int64"  SIZEOF___INT64)
 CHECK_TYPE_SIZE("long double"  SIZEOF_LONG_DOUBLE)
+CHECK_TYPE_SIZE("time_t"  SIZEOF_TIME_T)
 IF(NOT HAVE_SIZEOF_SSIZE_T)
   IF(SIZEOF_LONG EQUAL SIZEOF_SIZE_T)
     SET(ssize_t long)
@@ -281,10 +312,48 @@ ENDIF(NOT HAVE_SIZEOF_SSIZE_T)
 
 IF(HAVE_SIZEOF_LONG_LONG)
   SET(HAVE_LONGLONG 1)
+  SET(HAVE_LL 1)
 ENDIF(HAVE_SIZEOF_LONG_LONG)
 
 FIND_FILE(RANDOM_FILE urandom /dev)
 MARK_AS_ADVANCED(RANDOM_FILE)
+
+#strtoll \
+#socket \
+#select \
+#strdup \
+#strstr \
+#strtok_r \
+#uname \
+#strcasecmp \
+#stricmp \
+#strcmpi \
+#gethostbyaddr \
+#gettimeofday \
+#inet_addr \
+#inet_ntoa \
+#inet_pton \
+#perror \
+#closesocket \
+#siginterrupt \
+#sigaction \
+#signal \
+#getpass_r \
+#strlcat \
+#getpwuid \
+#geteuid \
+#dlopen \
+#utime \
+#sigsetjmp \
+#basename \
+#setlocale \
+#ftruncate \
+#pipe \
+#poll \
+#getprotobyname \
+#getrlimit \
+#setrlimit \
+#fork
 
 # Check for some functions that are used
 CHECK_SYMBOL_EXISTS(socket        "${CURL_INCLUDES}" HAVE_SOCKET)
@@ -338,12 +407,22 @@ CHECK_SYMBOL_EXISTS(SIGALRM       "${CURL_INCLUDES}" HAVE_SIGNAL_MACRO)
 IF(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
   SET(HAVE_SIGNAL 1)
 ENDIF(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
-CHECK_SYMBOL_EXISTS(uname         "${CURL_INCLUDES}" HAVE_UNAME)
-CHECK_SYMBOL_EXISTS(strtoll       "${CURL_INCLUDES}" HAVE_STRTOLL)
-CHECK_SYMBOL_EXISTS(_strtoi64     "${CURL_INCLUDES}" HAVE__STRTOI64)
-CHECK_SYMBOL_EXISTS(strerror_r    "${CURL_INCLUDES}" HAVE_STRERROR_R)
-CHECK_SYMBOL_EXISTS(siginterrupt  "${CURL_INCLUDES}" HAVE_SIGINTERRUPT)
-CHECK_SYMBOL_EXISTS(perror        "${CURL_INCLUDES}" HAVE_PERROR)
+CHECK_SYMBOL_EXISTS(uname          "${CURL_INCLUDES}" HAVE_UNAME)
+CHECK_SYMBOL_EXISTS(strtoll        "${CURL_INCLUDES}" HAVE_STRTOLL)
+CHECK_SYMBOL_EXISTS(_strtoi64      "${CURL_INCLUDES}" HAVE__STRTOI64)
+CHECK_SYMBOL_EXISTS(strerror_r     "${CURL_INCLUDES}" HAVE_STRERROR_R)
+CHECK_SYMBOL_EXISTS(siginterrupt   "${CURL_INCLUDES}" HAVE_SIGINTERRUPT)
+CHECK_SYMBOL_EXISTS(perror         "${CURL_INCLUDES}" HAVE_PERROR)
+CHECK_SYMBOL_EXISTS(fork           "${CURL_INCLUDES}" HAVE_FORK)
+CHECK_SYMBOL_EXISTS(pipe           "${CURL_INCLUDES}" HAVE_PIPE)
+CHECK_SYMBOL_EXISTS(ftruncate      "${CURL_INCLUDES}" HAVE_FTRUNCATE)
+CHECK_SYMBOL_EXISTS(getprotobyname "${CURL_INCLUDES}" HAVE_GETPROTOBYNAME)
+CHECK_SYMBOL_EXISTS(getrlimit      "${CURL_INCLUDES}" HAVE_GETRLIMIT)
+CHECK_SYMBOL_EXISTS(idn_free       "${CURL_INCLUDES}" HAVE_IDN_FREE)
+CHECK_SYMBOL_EXISTS(idna_strerror  "${CURL_INCLUDES}" HAVE_IDNA_STRERROR)
+CHECK_SYMBOL_EXISTS(tld_strerror   "${CURL_INCLUDES}" HAVE_TLD_STRERROR)
+CHECK_SYMBOL_EXISTS(setlocale      "${CURL_INCLUDES}" HAVE_SETLOCALE)
+CHECK_SYMBOL_EXISTS(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 
 # only build compat strtok if we need to
 IF (NOT HAVE_STRTOK_R)
@@ -588,11 +667,14 @@ IF(CMAKE_COMPILER_IS_GNUCC AND APPLE)
     COMPILE_FLAGS ${MPRINTF_COMPILE_FLAGS})
 ENDIF(CMAKE_COMPILER_IS_GNUCC AND APPLE)
 
+INCLUDE(CMake/OtherTests.cmake)
+
 # The rest of the build
 
 INCLUDE_DIRECTORIES(${LIBCURL_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${LIBCURL_BINARY_DIR})
-ADD_DEFINITIONS(-DHAVE_CONFIG_H)
+ADD_DEFINITIONS(-DHAVE_CONFIG_H
+  -DCURL_STATICLIB)
 CONFIGURE_FILE(${LIBCURL_SOURCE_DIR}/config.h.in
   ${LIBCURL_BINARY_DIR}/config.h)
 

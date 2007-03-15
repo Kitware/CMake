@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -79,7 +79,19 @@
 #ifdef ENABLE_CURLX_PRINTF
 /* If this define is set, we define all "standard" printf() functions to use
    the curlx_* version instead. It makes the source code transparant and
-   easier to understand/patch. */
+   easier to understand/patch. Undefine them first in case _MPRINTF_REPLACE
+   is set. */
+# undef printf
+# undef fprintf
+# undef sprintf
+# undef snprintf
+# undef vprintf
+# undef vfprintf
+# undef vsprintf
+# undef vsnprintf
+# undef aprintf
+# undef vaprintf
+
 # define printf curlx_mprintf
 # define fprintf curlx_mfprintf
 # define sprintf curlx_msprintf

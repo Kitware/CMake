@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,13 +24,10 @@
 #include "setup.h"
 
 #include <string.h>
-#include <errno.h>
 
-#define _REENTRANT
-
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#ifdef NEED_MALLOC_H
 #include <malloc.h>
-#else
+#endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -57,13 +54,12 @@
 #include <inet.h>
 #include <stdlib.h>
 #endif
-#endif
 
 #ifdef HAVE_SETJMP_H
 #include <setjmp.h>
 #endif
 
-#ifdef WIN32
+#ifdef HAVE_PROCESS_H
 #include <process.h>
 #endif
 
@@ -79,6 +75,8 @@
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
+#include "multiif.h"
+#include "connect.h" /* for the Curl_sockerrno() proto */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -87,7 +85,7 @@
 #include "inet_ntoa_r.h"
 #endif
 
-#include "curl_memory.h"
+#include "memory.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -99,7 +97,7 @@
 #ifdef CURLRES_ARES
 
 /*
- * Curl_fdset() is called when someone from the outside world (using
+ * Curl_resolv_fdset() is called when someone from the outside world (using
  * curl_multi_fdset()) wants to get our fd_set setup and we're talking with
  * ares. The caller must make sure that this function is only called when we
  * have a working ares channel.
@@ -107,17 +105,26 @@
  * Returns: CURLE_OK always!
  */
 
-CURLcode Curl_fdset(struct connectdata *conn,
-                    fd_set *read_fd_set,
-                    fd_set *write_fd_set,
-                    int *max_fdp)
+int Curl_resolv_getsock(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks)
 
 {
-  int max = ares_fds(conn->data->state.areschannel,
-                     read_fd_set, write_fd_set);
-  *max_fdp = max;
+  struct timeval maxtime;
+  struct timeval timeout;
+  int max = ares_getsock(conn->data->state.areschannel,
+                         (int *)socks, numsocks);
 
-  return CURLE_OK;
+
+  maxtime.tv_sec = CURL_TIMEOUT_RESOLVE;
+  maxtime.tv_usec = 0;
+
+  ares_timeout(conn->data->state.areschannel, &maxtime, &timeout);
+
+  Curl_expire(conn->data,
+              (timeout.tv_sec * 1000) + (timeout.tv_usec/1000) );
+
+  return max;
 }
 
 /*
@@ -213,7 +220,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       break;
     tvp = ares_timeout(data->state.areschannel, &store, &tv);
     count = select(nfds, &read_fds, &write_fds, NULL, tvp);
-    if (count < 0 && errno != EINVAL)
+    if (count < 0 && Curl_sockerrno() != EINVAL)
       break;
 
     ares_process(data->state.areschannel, &read_fds, &write_fds);
@@ -249,7 +256,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
     /* close the connection, since we can't return failure here without
        cleaning up this connection properly */
-    Curl_disconnect(conn);
+    conn->bits.close = TRUE;
   }
 
   return rc;
@@ -264,7 +271,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
  * Curl_freeaddrinfo(), nothing else.
  */
 Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
-                                char *hostname,
+                                const char *hostname,
                                 int port,
                                 int *waitp)
 {
@@ -291,11 +298,10 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
     /* areschannel is already setup in the Curl_open() function */
     ares_gethostbyname(data->state.areschannel, hostname, PF_INET,
-                       Curl_addrinfo4_callback, conn);
+                       (ares_host_callback)Curl_addrinfo4_callback, conn);
 
     *waitp = TRUE; /* please wait for the response */
   }
   return NULL; /* no struct yet */
 }
-
 #endif /* CURLRES_ARES */

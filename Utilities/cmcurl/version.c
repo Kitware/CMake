@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 
 #include <curl/curl.h>
 #include "urldata.h"
+#include "sslgen.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -40,88 +41,28 @@
 #include <stringprep.h>
 #endif
 
-#ifdef USE_SSLEAY
-static int getssl_version(char *ptr, size_t left, long *num)
-{
-
-#if (SSLEAY_VERSION_NUMBER >= 0x905000)
-  {
-    char sub[2];
-    unsigned long ssleay_value;
-    sub[1]='\0';
-    ssleay_value=SSLeay();
-    *num = (long)ssleay_value;
-    if(ssleay_value < 0x906000) {
-      ssleay_value=SSLEAY_VERSION_NUMBER;
-      sub[0]='\0';
-    }
-    else {
-      if(ssleay_value&0xff0) {
-        sub[0]=(char)((ssleay_value>>4)&0xff) + 'a' -1;
-      }
-      else
-        sub[0]='\0';
-    }
-
-    return snprintf(ptr, left, " OpenSSL/%lx.%lx.%lx%s",
-                    (ssleay_value>>28)&0xf,
-                    (ssleay_value>>20)&0xff,
-                    (ssleay_value>>12)&0xff,
-                    sub);
-  }
-
-#else
-  *num = SSLEAY_VERSION_NUMBER;
-#if (SSLEAY_VERSION_NUMBER >= 0x900000)
-  return snprintf(ptr, left, " OpenSSL/%lx.%lx.%lx",
-                  (SSLEAY_VERSION_NUMBER>>28)&0xff,
-                  (SSLEAY_VERSION_NUMBER>>20)&0xff,
-                  (SSLEAY_VERSION_NUMBER>>12)&0xf);
-#else
-  {
-    char sub[2];
-    sub[1]='\0';
-    if(SSLEAY_VERSION_NUMBER&0x0f) {
-      sub[0]=(SSLEAY_VERSION_NUMBER&0x0f) + 'a' -1;
-    }
-    else
-      sub[0]='\0';
-
-    return snprintf(ptr, left, " SSL/%x.%x.%x%s",
-                    (SSLEAY_VERSION_NUMBER>>12)&0xff,
-                    (SSLEAY_VERSION_NUMBER>>8)&0xf,
-                    (SSLEAY_VERSION_NUMBER>>4)&0xf, sub);
-  }
+#if defined(HAVE_ICONV) && defined(CURL_DOES_CONVERSIONS)
+#include <iconv.h>
 #endif
-#endif
-}
 
+#ifdef USE_LIBSSH2
+#include <libssh2.h>
 #endif
+
 
 char *curl_version(void)
 {
   static char version[200];
   char *ptr=version;
-  /* to prevent compier warnings, we only declare len if we have code
-     that uses it */
-#if defined(USE_SSLEAY) || defined(HAVE_LIBZ) || defined(USE_ARES) || \
-  defined(USE_LIBIDN)
-  int len;
-#endif
+  size_t len;
   size_t left = sizeof(version);
   strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION );
   ptr=strchr(ptr, '\0');
   left -= strlen(ptr);
-  (void)left;
 
-#ifdef USE_SSLEAY
-  {
-    long num;
-    len = getssl_version(ptr, left, &num);
-    left -= len;
-    ptr += len;
-  }
-#endif
+  len = Curl_ssl_version(ptr, left);
+  left -= len;
+  ptr += len;
 
 #ifdef HAVE_LIBZ
   len = snprintf(ptr, left, " zlib/%s", zlibVersion());
@@ -141,18 +82,34 @@ char *curl_version(void)
     ptr += len;
   }
 #endif
+#if defined(HAVE_ICONV) && defined(CURL_DOES_CONVERSIONS)
+#ifdef _LIBICONV_VERSION
+  len = snprintf(ptr, left, " iconv/%d.%d",
+                 _LIBICONV_VERSION >> 8, _LIBICONV_VERSION & 255);
+#else
+  /* version unknown */
+  len = snprintf(ptr, left, " iconv");
+#endif /* _LIBICONV_VERSION */
+  left -= len;
+  ptr += len;
+#endif
+#ifdef USE_LIBSSH2
+  len = snprintf(ptr, left, " libssh2/%s", LIBSSH2_VERSION);
+  left -= len;
+  ptr += len;
+#endif
 
   return version;
 }
 
 /* data for curl_version_info */
 
-static const char *protocols[] = {
+static const char * const protocols[] = {
+#ifndef CURL_DISABLE_TFTP
+  "tftp",
+#endif
 #ifndef CURL_DISABLE_FTP
   "ftp",
-#endif
-#ifndef CURL_DISABLE_GOPHER
-  "gopher",
 #endif
 #ifndef CURL_DISABLE_TELNET
   "telnet",
@@ -170,7 +127,7 @@ static const char *protocols[] = {
   "file",
 #endif
 
-#ifdef USE_SSLEAY
+#ifdef USE_SSL
 #ifndef CURL_DISABLE_HTTP
   "https",
 #endif
@@ -178,6 +135,12 @@ static const char *protocols[] = {
   "ftps",
 #endif
 #endif
+
+#ifdef USE_LIBSSH2
+  "scp",
+  "sftp",
+#endif
+
   NULL
 };
 
@@ -193,9 +156,14 @@ static curl_version_info_data version_info = {
 #ifdef HAVE_KRB4
   | CURL_VERSION_KERBEROS4
 #endif
-#ifdef USE_SSLEAY
+#ifdef USE_SSL
   | CURL_VERSION_SSL
-  | CURL_VERSION_NTLM /* since this requires OpenSSL */
+#endif
+#ifdef USE_NTLM
+  | CURL_VERSION_NTLM
+#endif
+#ifdef USE_WINDOWS_SSPI
+  | CURL_VERSION_SSPI
 #endif
 #ifdef HAVE_LIBZ
   | CURL_VERSION_LIBZ
@@ -215,26 +183,31 @@ static curl_version_info_data version_info = {
 #if defined(ENABLE_64BIT) && (SIZEOF_CURL_OFF_T > 4)
   | CURL_VERSION_LARGEFILE
 #endif
+#if defined(CURL_DOES_CONVERSIONS)
+  | CURL_VERSION_CONV
+#endif
   ,
   NULL, /* ssl_version */
-  0,    /* ssl_version_num */
+  0,    /* ssl_version_num, this is kept at zero */
   NULL, /* zlib_version */
   protocols,
   NULL, /* c-ares version */
   0,    /* c-ares version numerical */
   NULL, /* libidn version */
+  0,    /* iconv version */
+  NULL, /* ssh lib version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
 {
-#ifdef USE_SSLEAY
-  static char ssl_buffer[80];
-  long num;
-  getssl_version(ssl_buffer, sizeof(ssl_buffer), &num);
+#ifdef USE_LIBSSH2
+  static char ssh_buffer[80];
+#endif
 
+#ifdef USE_SSL
+  static char ssl_buffer[80];
+  Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
   version_info.ssl_version = ssl_buffer;
-  version_info.ssl_version_num = num;
-  /* SSL stuff is left zero if undefined */
 #endif
 
 #ifdef HAVE_LIBZ
@@ -255,6 +228,21 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   if(version_info.libidn)
     version_info.features |= CURL_VERSION_IDN;
 #endif
+
+#if defined(HAVE_ICONV) && defined(CURL_DOES_CONVERSIONS)
+#ifdef _LIBICONV_VERSION
+  version_info.iconv_ver_num = _LIBICONV_VERSION;
+#else
+  /* version unknown */
+  version_info.iconv_ver_num = -1;
+#endif /* _LIBICONV_VERSION */
+#endif
+
+#ifdef USE_LIBSSH2
+  snprintf(ssh_buffer, sizeof(ssh_buffer), "libssh2/%s", LIBSSH2_VERSION);
+  version_info.libssh_version = ssh_buffer;
+#endif
+
   (void)stamp; /* avoid compiler warnings, we don't use this */
 
   return &version_info;

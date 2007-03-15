@@ -1,18 +1,18 @@
 #ifndef __TIMEVAL_H
 #define __TIMEVAL_H
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -30,20 +30,22 @@
 
 #include "setup.h"
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-#include <time.h>
-#else
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#ifdef TIME_WITH_SYS_TIME
+#include <time.h>
+#endif
+#else
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
 #endif
 
-#ifndef HAVE_GETTIMEOFDAY
-#if !defined(_WINSOCKAPI_) && !defined(__WATCOMC__) && !defined(__MINGW32__) && !defined(_AMIGASF) && \
-    !defined(__LCC__)
+#ifndef HAVE_STRUCT_TIMEVAL
 struct timeval {
  long tv_sec;
  long tv_usec;
 };
-#endif
 #endif
 
 struct timeval curlx_tvnow(void);

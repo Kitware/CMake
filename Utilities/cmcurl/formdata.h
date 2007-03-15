@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,8 +25,10 @@
  ***************************************************************************/
 
 enum formtype {
-  FORM_DATA, /* regular data */
-  FORM_FILE  /* 'line' points to a file name we should read from */
+  FORM_DATA,    /* form metadata (convert to network encoding if necessary) */
+  FORM_CONTENT, /* form content  (never convert) */
+  FORM_FILE     /* 'line' points to a file name we should read from 
+                    to create the form data (never convert) */
 };
 
 /* plain and simple linked list with lines to send */
@@ -69,6 +71,7 @@ int Curl_FormInit(struct Form *form, struct FormData *formdata );
 CURLcode
 Curl_getFormData(struct FormData **,
                  struct curl_httppost *post,
+                 const char *custom_contenttype,
                  curl_off_t *size);
 
 /* fread() emulation */
@@ -86,7 +89,9 @@ char *Curl_formpostheader(void *formp, size_t *len);
 
 char *Curl_FormBoundary(void);
 
-void Curl_formclean(struct FormData *);
+void Curl_formclean(struct FormData **);
+
+CURLcode Curl_formconvert(struct SessionHandle *, struct FormData *);
 
 #endif
 

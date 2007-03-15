@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,14 +34,13 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <errno.h>
 
 #include "urldata.h"
 #include "sendf.h"
 #include "strequal.h"
 #include "base64.h"
 #include "http_negotiate.h"
-#include "curl_memory.h"
+#include "memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -111,7 +110,7 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
     gss_release_buffer(&min_stat, &status_string);
   } while (!GSS_ERROR(maj_stat) && msg_ctx != 0);
 
-  infof(conn->data, buf);
+  infof(conn->data, "%s", buf);
 }
 
 int Curl_input_negotiate(struct connectdata *conn, char *header)
@@ -125,7 +124,7 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
   bool gss;
   const char* protocol;
 
-  while(*header && isspace((int)*header))
+  while(*header && ISSPACE(*header))
     header++;
   if(checkprefix("GSS-Negotiate", header)) {
     protocol = "GSS-Negotiate";
@@ -161,17 +160,12 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
     return ret;
 
   header += strlen(neg_ctx->protocol);
-  while(*header && isspace((int)*header))
+  while(*header && ISSPACE(*header))
     header++;
 
   len = strlen(header);
   if (len > 0) {
-    int rawlen;
-    input_token.length = (len+3)/4 * 3;
-    input_token.value = malloc(input_token.length);
-    if (input_token.value == NULL)
-      return ENOMEM;
-    rawlen = Curl_base64_decode(header, input_token.value);
+    int rawlen = Curl_base64_decode(header, (unsigned char **)&input_token.value);
     if (rawlen < 0)
       return -1;
     input_token.length = rawlen;
@@ -211,7 +205,7 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
           input_token.length = mechTokenLength;
           free(mechToken);
           mechToken = NULL;
-          infof(conn->data, "Parse SPNEGO Target Token succeded\n");
+          infof(conn->data, "Parse SPNEGO Target Token succeeded\n");
         }
     }
 #endif
@@ -292,11 +286,12 @@ CURLcode Curl_output_negotiate(struct connectdata *conn)
       neg_ctx->output_token.length = spnegoTokenLength;
       free(spnegoToken);
       spnegoToken = NULL;
-      infof(conn->data, "Make SPNEGO Initial Token succeded\n");
+      infof(conn->data, "Make SPNEGO Initial Token succeeded\n");
     }
   }
 #endif
-  len = Curl_base64_encode(neg_ctx->output_token.value,
+  len = Curl_base64_encode(conn->data,
+                           neg_ctx->output_token.value,
                            neg_ctx->output_token.length,
                            &encoded);
 

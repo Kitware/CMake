@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,9 +53,9 @@ static int gettimeofday(struct timeval *tp, void *nothing)
    ** of multimedia apis offer a better time resolution
    ** of 1ms.Need to link against winmm.lib for this
    **/
-  unsigned long Ticks;
-  unsigned long Sec;
-  unsigned long Usec;
+  unsigned long Ticks = 0;
+  unsigned long Sec =0;
+  unsigned long Usec = 0;
   Ticks = timeGetTime();
 
   Sec = Ticks/1000;

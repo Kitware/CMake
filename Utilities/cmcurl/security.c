@@ -46,7 +46,6 @@
 #define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
 
-#include "security.h"
 #include <stdlib.h>
 #include <string.h>
 #include <netdb.h>
@@ -55,17 +54,19 @@
 #include <unistd.h>
 #endif
 
+#include "urldata.h"
+#include "krb4.h"
 #include "base64.h"
 #include "sendf.h"
 #include "ftp.h"
-#include "curl_memory.h"
+#include "memory.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
 
 #define min(a, b)   ((a) < (b) ? (a) : (b))
 
-static struct {
+static const struct {
     enum protection_level level;
     const char *name;
 } level_names[] = {
@@ -80,12 +81,12 @@ name_to_level(const char *name)
 {
   int i;
   for(i = 0; i < (int)sizeof(level_names)/(int)sizeof(level_names[0]); i++)
-    if(!strncasecmp(level_names[i].name, name, strlen(name)))
+    if(curl_strnequal(level_names[i].name, name, strlen(name)))
       return level_names[i].level;
   return (enum protection_level)-1;
 }
 
-static struct Curl_sec_client_mech *mechs[] = {
+static const struct Curl_sec_client_mech * const mechs[] = {
 #ifdef KRB5
   /* not supported */
 #endif
@@ -277,6 +278,13 @@ Curl_sec_write(struct connectdata *conn, int fd, char *buffer, int length)
   return tx;
 }
 
+ssize_t
+Curl_sec_send(struct connectdata *conn, int num, char *buffer, int length)
+{
+  curl_socket_t fd = conn->sock[num];
+  return (ssize_t)Curl_sec_write(conn, fd, buffer, length);
+}
+
 int
 Curl_sec_putc(struct connectdata *conn, int c, FILE *F)
 {
@@ -297,13 +305,15 @@ int
 Curl_sec_read_msg(struct connectdata *conn, char *s, int level)
 {
   int len;
-  char *buf;
+  unsigned char *buf;
   int code;
 
-  buf = malloc(strlen(s));
-  len = Curl_base64_decode(s + 4, buf); /* XXX */
+  len = Curl_base64_decode(s + 4, &buf); /* XXX */
+  if(len > 0)
+    len = (conn->mech->decode)(conn->app_data, buf, len, level, conn);
+  else
+    return -1;
 
-  len = (conn->mech->decode)(conn->app_data, buf, len, level, conn);
   if(len < 0) {
     free(buf);
     return -1;
@@ -314,10 +324,10 @@ Curl_sec_read_msg(struct connectdata *conn, char *s, int level)
   if(buf[3] == '-')
     code = 0;
   else
-    sscanf(buf, "%d", &code);
+    sscanf((char *)buf, "%d", &code);
   if(buf[len-1] == '\n')
     buf[len-1] = '\0';
-  strcpy(s, buf);
+  strcpy(s, (char *)buf);
   free(buf);
   return code;
 }
@@ -400,7 +410,7 @@ int
 Curl_sec_login(struct connectdata *conn)
 {
   int ret;
-  struct Curl_sec_client_mech **m;
+  const struct Curl_sec_client_mech * const *m;
   ssize_t nread;
   struct SessionHandle *data=conn->data;
   int ftpcode;

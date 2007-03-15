@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,7 +28,7 @@
 
 #include "strequal.h"
 
-#ifdef HAVE_STRCASECMP
+#if defined(HAVE_STRCASECMP) && defined(__STRICT_ANSI__)
 /* this is for "-ansi -Wall -pedantic" to stop complaining! */
 extern int (strcasecmp)(const char *s1, const char *s2);
 extern int (strncasecmp)(const char *s1, const char *s2, size_t n);
@@ -38,10 +38,10 @@ int curl_strequal(const char *first, const char *second)
 {
 #if defined(HAVE_STRCASECMP)
   return !(strcasecmp)(first, second);
-#elif defined(HAVE_STRICMP)
-  return !(stricmp)(first, second);
 #elif defined(HAVE_STRCMPI)
   return !(strcmpi)(first, second);
+#elif defined(HAVE_STRICMP)
+  return !(stricmp)(first, second);
 #else
   while (*first && *second) {
     if (toupper(*first) != toupper(*second)) {
@@ -58,10 +58,10 @@ int curl_strnequal(const char *first, const char *second, size_t max)
 {
 #if defined(HAVE_STRCASECMP)
   return !strncasecmp(first, second, max);
-#elif defined(HAVE_STRICMP)
-  return !strnicmp(first, second, max);
 #elif defined(HAVE_STRCMPI)
   return !strncmpi(first, second, max);
+#elif defined(HAVE_STRICMP)
+  return !strnicmp(first, second, max);
 #else
   while (*first && *second && max) {
     if (toupper(*first) != toupper(*second)) {

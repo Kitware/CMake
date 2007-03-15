@@ -1,16 +1,16 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -18,21 +18,32 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * $Id$
  ***************************************************************************/
 
 #include "setup.h"
+
+#ifdef HAVE_STRERROR_R
+#if !defined(HAVE_POSIX_STRERROR_R) && !defined(HAVE_GLIBC_STRERROR_R)
+#error "you MUST have either POSIX or glibc strerror_r if strerror_r is found"
+#endif /* !POSIX && !glibc */
+#endif /* HAVE_STRERROR_R */
 
 #include <curl/curl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
+#ifdef USE_LIBIDN
+#include <idna.h>
+#endif
+
 #include "strerror.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#ifdef HAVE_NO_STRERROR_R_DECL
+#if defined(HAVE_STRERROR_R) && defined(HAVE_NO_STRERROR_R_DECL)
 #ifdef HAVE_POSIX_STRERROR_R
 /* seen on AIX 5100-02 gcc 2.9 */
 extern int strerror_r(int errnum, char *strerrbuf, size_t buflen);
@@ -44,6 +55,7 @@ extern char *strerror_r(int errnum, char *buf, size_t buflen);
 const char *
 curl_easy_strerror(CURLcode error)
 {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (error) {
   case CURLE_OK:
     return "no error";
@@ -58,22 +70,19 @@ curl_easy_strerror(CURLcode error)
     return "URL using bad/illegal format or missing URL";
 
   case CURLE_COULDNT_RESOLVE_PROXY:
-    return "couldnt resolve proxy";
+    return "couldn't resolve proxy name";
 
   case CURLE_COULDNT_RESOLVE_HOST:
-    return "couldnt resolve host";
+    return "couldn't resolve host name";
 
   case CURLE_COULDNT_CONNECT:
-    return "couldn't connect";
+    return "couldn't connect to server";
 
   case CURLE_FTP_WEIRD_SERVER_REPLY:
     return "FTP: weird server reply";
 
   case CURLE_FTP_ACCESS_DENIED:
     return "FTP: access denied";
-
-  case CURLE_FTP_USER_PASSWORD_INCORRECT:
-    return "FTP: user and/or password incorrect";
 
   case CURLE_FTP_WEIRD_PASS_REPLY:
     return "FTP: unknown PASS reply";
@@ -121,7 +130,11 @@ curl_easy_strerror(CURLcode error)
     return "failed to open/read local data from file/application";
 
   case CURLE_OUT_OF_MEMORY:
+#ifdef CURL_DOES_CONVERSIONS
+    return "conversion failed -or- out of memory";
+#else
     return "out of memory";
+#endif /* CURL_DOES_CONVERSIONS */
 
   case CURLE_OPERATION_TIMEOUTED:
     return "a timeout was reached";
@@ -147,8 +160,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_SSL_CONNECT_ERROR:
     return "SSL connect error";
 
-  case CURLE_FTP_BAD_DOWNLOAD_RESUME:
-    return "couldn't resume FTP download";
+  case CURLE_BAD_DOWNLOAD_RESUME:
+    return "couldn't resume download";
 
   case CURLE_FILE_COULDNT_READ_FILE:
     return "couldn't read a file:// file";
@@ -195,6 +208,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_SSL_ENGINE_SETFAILED:
     return "can not set SSL crypto engine as default";
 
+  case CURLE_SSL_ENGINE_INITFAILED:
+    return "failed to initialise SSL crypto engine";
+
   case CURLE_SEND_ERROR:
     return "failed sending data to the peer";
 
@@ -211,6 +227,9 @@ curl_easy_strerror(CURLcode error)
     return "couldn't use specified SSL cipher";
 
   case CURLE_SSL_CACERT:
+    return "peer certificate cannot be authenticated with known CA certificates";
+
+  case CURLE_SSL_CACERT_BADFILE:
     return "problem with the SSL CA cert (path? access rights?)";
 
   case CURLE_BAD_CONTENT_ENCODING:
@@ -225,11 +244,55 @@ curl_easy_strerror(CURLcode error)
   case CURLE_FTP_SSL_FAILED:
     return "Requested FTP SSL level failed";
 
-  case CURLE_URL_MALFORMAT_USER: /* not used by current libcurl */
-  case CURLE_MALFORMAT_USER:     /* not used by current libcurl */
-  case CURLE_BAD_CALLING_ORDER:  /* not used by current libcurl */
-  case CURLE_BAD_PASSWORD_ENTERED:/* not used by current libcurl */
-  case CURLE_OBSOLETE:           /* not used by current libcurl */
+  case CURLE_SSL_SHUTDOWN_FAILED:
+    return "Failed to shut down the SSL connection";
+
+  case CURLE_SEND_FAIL_REWIND:
+    return "Send failed since rewinding of the data stream failed";
+
+  case CURLE_LOGIN_DENIED:
+    return "FTP: login denied";
+
+  case CURLE_TFTP_NOTFOUND:
+    return "TFTP: File Not Found";
+
+  case CURLE_TFTP_PERM:
+    return "TFTP: Access Violation";
+
+  case CURLE_TFTP_DISKFULL:
+    return "TFTP: Disk full or allocation exceeded";
+
+  case CURLE_TFTP_ILLEGAL:
+    return "TFTP: Illegal operation";
+
+  case CURLE_TFTP_UNKNOWNID:
+    return "TFTP: Unknown transfer ID";
+
+  case CURLE_TFTP_EXISTS:
+    return "TFTP: File already exists";
+
+  case CURLE_TFTP_NOSUCHUSER:
+    return "TFTP: No such user";
+
+  case CURLE_CONV_FAILED:
+    return "conversion failed";
+
+  case CURLE_CONV_REQD:
+    return "caller must register CURLOPT_CONV_ callback options";
+
+  case CURLE_REMOTE_FILE_NOT_FOUND:
+    return "Remote file not found";
+
+  case CURLE_SSH:
+    return "Error in the SSH layer";
+
+    /* error codes not used by current libcurl */
+  case CURLE_URL_MALFORMAT_USER:
+  case CURLE_FTP_USER_PASSWORD_INCORRECT:
+  case CURLE_MALFORMAT_USER:
+  case CURLE_BAD_CALLING_ORDER:
+  case CURLE_BAD_PASSWORD_ENTERED:
+  case CURLE_OBSOLETE:
   case CURL_LAST:
     break;
   }
@@ -248,18 +311,25 @@ curl_easy_strerror(CURLcode error)
    * is why it is here, and not at the start of the switch.
    */
   return "unknown error";
+#else
+  if (error == CURLE_OK)
+    return "no error";
+  else
+    return "error";
+#endif
 }
 
 const char *
 curl_multi_strerror(CURLMcode error)
 {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (error) {
   case CURLM_CALL_MULTI_PERFORM:
     return "please call curl_multi_perform() soon";
-    
+
   case CURLM_OK:
     return "no error";
-    
+
   case CURLM_BAD_HANDLE:
     return "invalid multi handle";
 
@@ -272,16 +342,29 @@ curl_multi_strerror(CURLMcode error)
   case CURLM_INTERNAL_ERROR:
     return "internal error";
 
+  case CURLM_BAD_SOCKET:
+    return "invalid socket argument";
+
+  case CURLM_UNKNOWN_OPTION:
+    return "unknown option";
+
   case CURLM_LAST:
     break;
   }
 
   return "unknown error";
+#else
+  if (error == CURLM_OK)
+    return "no error";
+  else
+    return "error";
+#endif
 }
 
 const char *
 curl_share_strerror(CURLSHcode error)
 {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (error) {
   case CURLSHE_OK:
     return "no error";
@@ -303,17 +386,24 @@ curl_share_strerror(CURLSHcode error)
   }
 
   return "CURLSH unknown";
+#else
+  if (error == CURLSHE_OK)
+    return "no error";
+  else
+    return "error";
+#endif
 }
 
-#if defined(WIN32) && !defined(__CYGWIN__)
+#ifdef USE_WINSOCK
 
 /* This function handles most / all (?) Winsock errors cURL is able to produce.
  */
 static const char *
 get_winsock_error (int err, char *buf, size_t len)
 {
-  char *p;
+  const char *p;
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (err) {
   case WSAEINTR:
     p = "Call interrupted.";
@@ -442,16 +532,17 @@ get_winsock_error (int err, char *buf, size_t len)
   case WSAEREMOTE:
     p = "Remote error";
     break;
+#ifdef WSAEDISCON  /* missing in SalfordC! */
   case WSAEDISCON:
     p = "Disconnected";
     break;
-
+#endif
     /* Extended Winsock errors */
   case WSASYSNOTREADY:
     p = "Winsock library is not ready";
     break;
   case WSANOTINITIALISED:
-    p = "Winsock library not initalised";
+    p = "Winsock library not initialised";
     break;
   case WSAVERNOTSUPPORTED:
     p = "Winsock version not supported.";
@@ -481,11 +572,17 @@ get_winsock_error (int err, char *buf, size_t len)
   default:
     return NULL;
   }
+#else
+  if (error == CURLE_OK)
+    return NULL;
+  else
+    p = "error";
+#endif
   strncpy (buf, p, len);
   buf [len-1] = '\0';
   return buf;
 }
-#endif   /* WIN32 && !__CYGWIN__ */
+#endif   /* USE_WINSOCK */
 
 /*
  * Our thread-safe and smart strerror() replacement.
@@ -510,24 +607,38 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   max = sizeof(conn->syserr_buf)-1;
   *buf = '\0';
 
-#if defined(WIN32) && !defined(__CYGWIN__)
+#ifdef USE_WINSOCK
+
+#ifdef _WIN32_WCE
+  buf[0]=0;
+  {
+    wchar_t wbuf[256];
+
+    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+                  LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL);
+    wcstombs(buf,wbuf,max);
+  }
+
+#else
+
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if (err >= 0 && err < sys_nerr)
     strncpy(buf, strerror(err), max);
   else {
-    if (!get_winsock_error (err, buf, max) &&
-        !FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
-                        LANG_NEUTRAL, buf, max, NULL))
+    if (!get_winsock_error(err, buf, max) &&
+        !FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+                       LANG_NEUTRAL, buf, (DWORD)max, NULL))
       snprintf(buf, max, "Unknown error %d (%#x)", err, err);
   }
-#else /* not native Windows coming up */
-    
+#endif
+#else /* not USE_WINSOCK coming up */
+
   /* These should be atomic and hopefully thread-safe */
 #ifdef HAVE_STRERROR_R
   /* There are two different APIs for strerror_r(). The POSIX and the GLIBC
      versions. */
 #ifdef HAVE_POSIX_STRERROR_R
-  strerror_r(err, buf, max); 
+  strerror_r(err, buf, max);
   /* this may set errno to ERANGE if insufficient storage was supplied via
      'strerrbuf' and 'buflen' to contain the generated message string, or
      EINVAL if the value of 'errnum' is not a valid error number.*/
@@ -538,25 +649,17 @@ const char *Curl_strerror(struct connectdata *conn, int err)
     char *msg = strerror_r(err, buffer, sizeof(buffer));
     /* this version of strerror_r() only *might* use the buffer we pass to
        the function, but it always returns the error message as a pointer,
-       so we must copy that string unconditionally */
-    if ( !msg )
-      {
-      msg = "Unknown System Error";
-      }
-    strncpy(buf, msg, max);
+       so we must copy that string unconditionally (if non-NULL) */
+    if(msg)
+      strncpy(buf, msg, max);
+    else
+      snprintf(buf, max, "Unknown error %d", err);
   }
 #endif /* end of HAVE_GLIBC_STRERROR_R */
 #else /* HAVE_STRERROR_R */
-  {
-    char *msg = strerror(err);
-    if ( !msg )
-      {
-      msg = "Unknown System Error";
-      }
-    strncpy(buf, msg, max);
-  }
+  strncpy(buf, strerror(err), max);
 #endif /* end of HAVE_STRERROR_R */
-#endif /* end of ! Windows */
+#endif /* end of ! USE_WINSOCK */
 
   buf[max] = '\0'; /* make sure the string is zero terminated */
 
@@ -567,3 +670,79 @@ const char *Curl_strerror(struct connectdata *conn, int err)
      *p = '\0';
   return buf;
 }
+
+#ifdef USE_LIBIDN
+/*
+ * Return error-string for libidn status as returned from idna_to_ascii_lz().
+ */
+const char *Curl_idn_strerror (struct connectdata *conn, int err)
+{
+#ifdef HAVE_IDNA_STRERROR
+  (void)conn;
+  return idna_strerror((Idna_rc) err);
+#else
+  const char *str;
+  char *buf;
+  size_t max;
+
+  curlassert(conn);
+
+  buf = conn->syserr_buf;
+  max = sizeof(conn->syserr_buf)-1;
+
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  switch ((Idna_rc)err) {
+    case IDNA_SUCCESS:
+      str = "No error";
+      break;
+    case IDNA_STRINGPREP_ERROR:
+      str = "Error in string preparation";
+      break;
+    case IDNA_PUNYCODE_ERROR:
+      str = "Error in Punycode operation";
+      break;
+    case IDNA_CONTAINS_NON_LDH:
+      str = "Illegal ASCII characters";
+      break;
+    case IDNA_CONTAINS_MINUS:
+      str = "Contains minus";
+      break;
+    case IDNA_INVALID_LENGTH:
+      str = "Invalid output length";
+      break;
+    case IDNA_NO_ACE_PREFIX:
+      str = "No ACE prefix (\"xn--\")";
+      break;
+    case IDNA_ROUNDTRIP_VERIFY_ERROR:
+      str = "Roundtrip verify error";
+      break;
+    case IDNA_CONTAINS_ACE_PREFIX:
+      str = "Already have ACE prefix (\"xn--\")";
+      break;
+    case IDNA_ICONV_ERROR:
+      str = "Locale conversion failed";
+      break;
+    case IDNA_MALLOC_ERROR:
+      str = "Allocation failed";
+      break;
+    case IDNA_DLOPEN_ERROR:
+      str = "dlopen() error";
+      break;
+    default:
+      snprintf(buf, max, "error %d", (int)err);
+      str = NULL;
+      break;
+  }
+#else
+  if ((Idna_rc)err == IDNA_SUCCESS)
+    str = "No error";
+  else
+    str = "error";
+#endif
+  if (str)
+    strncpy(buf, str, max);
+  buf[max] = '\0';
+  return (buf);
+#endif
+}
+#endif  /* USE_LIBIDN */

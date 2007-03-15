@@ -1,16 +1,16 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -23,6 +23,14 @@
 
 #include "setup.h"
 #include "strtoofft.h"
+
+/*
+ * NOTE:
+ *
+ * In the ISO C standard (IEEE Std 1003.1), there is a strtoimax() function we
+ * could use in case strtoll() doesn't exist...  See
+ * http://www.opengroup.org/onlinepubs/009695399/functions/strtoimax.html
+ */
 
 #ifdef NEED_CURL_STRTOLL
 #include <stdlib.h>
@@ -47,7 +55,7 @@ curlx_strtoll(const char *nptr, char **endptr, int base)
 
   /* Skip leading whitespace. */
   end = (char *)nptr;
-  while (isspace((int)end[0])) {
+  while (ISSPACE(end[0])) {
     end++;
   }
 
@@ -111,17 +119,10 @@ curlx_strtoll(const char *nptr, char **endptr, int base)
     }
   }
   else {
-#ifdef HAVE_LONG_LONG_CONSTANT
     if (is_negative)
-      value = 0x8000000000000000LL;
+      value = CURL_LLONG_MIN;
     else
-      value = 0x7FFFFFFFFFFFFFFFLL;
-#else
-    if (is_negative)
-      value = 0x8000000000000000L;
-    else
-      value = 0x7FFFFFFFFFFFFFFFL;
-#endif
+      value = CURL_LLONG_MAX;
 
     errno = ERANGE;
   }

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,22 +24,21 @@
  ***************************************************************************/
 CURLcode Curl_perform(struct SessionHandle *data);
 CURLcode Curl_pretransfer(struct SessionHandle *data);
-CURLcode Curl_pretransfersec(struct connectdata *conn);
+CURLcode Curl_second_connect(struct connectdata *conn);
 CURLcode Curl_posttransfer(struct SessionHandle *data);
-CURLcode Curl_follow(struct SessionHandle *data, char *newurl);
+CURLcode Curl_follow(struct SessionHandle *data, char *newurl, bool retry);
 CURLcode Curl_readwrite(struct connectdata *conn, bool *done);
-void Curl_single_fdset(struct connectdata *conn,
-                       fd_set *read_fd_set,
-                       fd_set *write_fd_set,
-                       fd_set *exc_fd_set,
-                       int *max_fd);
+int Curl_single_getsock(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks);
 CURLcode Curl_readwrite_init(struct connectdata *conn);
-
+CURLcode Curl_readrewind(struct connectdata *conn);
 CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp);
+bool Curl_retry_request(struct connectdata *conn, char **url);
 
 /* This sets up a forthcoming transfer */
 CURLcode
-Curl_Transfer (struct connectdata *data,
+Curl_setup_transfer (struct connectdata *data,
                int sockindex,           /* socket index to read from or -1 */
                curl_off_t size,         /* -1 if unknown at this point */
                bool getheader,          /* TRUE if header parsing is wanted */

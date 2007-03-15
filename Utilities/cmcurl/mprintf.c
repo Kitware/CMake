@@ -38,6 +38,10 @@
 #include <ctype.h>
 #include <string.h>
 
+#if defined(DJGPP) && (DJGPP_MINOR < 4)
+#undef _MPRINTF_REPLACE /* don't use x_was_used() here */
+#endif
+
 #include <curl/mprintf.h>
 
 #ifndef SIZEOF_LONG_DOUBLE
@@ -55,7 +59,7 @@
 #define ENABLE_64BIT
 #endif
 
-#include "curl_memory.h"
+#include "memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -75,6 +79,9 @@
 # define BOOL char
 #endif
 
+#ifdef _AMIGASF
+# undef FORMAT_INT
+#endif
 
 /* Lower-case digits.  */
 static const char lower_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
@@ -164,7 +171,7 @@ int curl_msprintf(char *buffer, const char *format, ...);
 static long dprintf_DollarString(char *input, char **end)
 {
   int number=0;
-  while(isdigit((int)*input)) {
+  while(ISDIGIT(*input)) {
     number *= 10;
     number += *input-'0';
     input++;
@@ -619,10 +626,10 @@ static int dprintf_formatf(
     char alt;
 
     /* Width of a field.  */
-    ssize_t width;
+    long width;
 
     /* Precision of a field.  */
-    ssize_t prec;
+    long prec;
 
     /* Decimal integer is negative.  */
     char is_neg;
@@ -759,8 +766,8 @@ static int dprintf_formatf(
           *w-- = digits[num % base];
           num /= base;
         }
-        width -= workend - w;
-        prec -= workend - w;
+        width -= (long)(workend - w);
+        prec -= (long)(workend - w);
 
         if (alt && base == 8 && prec <= 0) {
           *w-- = '0';
@@ -816,8 +823,8 @@ static int dprintf_formatf(
     case FORMAT_STRING:
             /* String.  */
       {
-        static char null[] = "(nil)";
-        char *str;
+        static const char null[] = "(nil)";
+        const char *str;
         size_t len;
 
         str = (char *) p->data.str;
@@ -830,7 +837,7 @@ static int dprintf_formatf(
             p->flags &= (~FLAGS_ALT);
           }
           else {
-            str = (char *)"";
+            str = "";
             len = 0;
           }
         }
@@ -839,7 +846,7 @@ static int dprintf_formatf(
 
         if (prec != -1 && (size_t) prec < len)
           len = prec;
-        width -= len;
+        width -= (long)len;
 
         if (p->flags & FLAGS_ALT)
           OUTCHAR('"');
@@ -869,14 +876,14 @@ static int dprintf_formatf(
           base = 16;
           digits = (p->flags & FLAGS_UPPER)? upper_digits : lower_digits;
           alt = 1;
-          num = (unsigned long) ptr;
+          num = (size_t) ptr;
           is_neg = 0;
           goto number;
         }
         else {
           /* Write "(nil)" for a nil pointer.  */
-          static char strnil[] = "(nil)";
-          char *point;
+          static const char strnil[] = "(nil)";
+          const char *point;
 
           width -= sizeof(strnil) - 1;
           if (p->flags & FLAGS_LEFT)
@@ -933,7 +940,6 @@ static int dprintf_formatf(
           fptr += len;
           left -= len;
         }
-        (void)left;
         if (p->flags & FLAGS_LONG)
           *fptr++ = 'l';
 
@@ -1134,15 +1140,12 @@ int curl_msprintf(char *buffer, const char *format, ...)
   return retcode;
 }
 
-#if !(defined( WIN32) || defined(__UCLIBC__)) /* not needed on win32 */
-extern int fputc(int, FILE *);
-#endif
-
 int curl_mprintf(const char *format, ...)
 {
   int retcode;
   va_list ap_save; /* argument pointer */
   va_start(ap_save, format);
+
   retcode = dprintf_formatf(stdout, fputc, format, ap_save);
   va_end(ap_save);
   return retcode;

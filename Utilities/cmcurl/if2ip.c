@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,8 +31,15 @@
 #include <unistd.h>
 #endif
 
-#if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN32__) && \
-    !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE)
+#include "if2ip.h"
+
+/*
+ * This test can probably be simplified to #if defined(SIOCGIFADDR) and
+ * moved after the following includes.
+ */
+#if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN__) && \
+    !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE) && \
+    !defined(_AMIGASF) && !defined(__minix)
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -55,7 +62,6 @@
 #include <sys/ioctl.h>
 #endif
 
-/* -- if2ip() -- */
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -64,16 +70,12 @@
 #include <sys/sockio.h>
 #endif
 
-#if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
-#include "inet_ntoa_r.h"
-#endif
-
-#ifdef  VMS
+#ifdef VMS
 #include <inet.h>
 #endif
 
-#include "if2ip.h"
-#include "curl_memory.h"
+#include "inet_ntop.h"
+#include "memory.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -100,7 +102,7 @@ char *Curl_if2ip(const char *interface, char *buf, int buf_size)
       return NULL; /* this can't be a fine interface name */
     memcpy(req.ifr_name, interface, len+1);
     req.ifr_addr.sa_family = AF_INET;
-#ifdef  IOCTL_3_ARGS
+#ifdef IOCTL_3_ARGS
     if (SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req)) {
 #else
     if (SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req, sizeof(req))) {
@@ -111,19 +113,9 @@ char *Curl_if2ip(const char *interface, char *buf, int buf_size)
     else {
       struct in_addr in;
 
-      union {
-        struct sockaddr_in *sin;
-        struct sockaddr *s;
-      } soadd;
-
-      soadd.s = &req.ifr_dstaddr;
-      memcpy(&in, &(soadd.sin->sin_addr.s_addr), sizeof(in));
-#if defined(HAVE_INET_NTOA_R)
-      ip = inet_ntoa_r(in,buf,buf_size);
-#else
-      ip = strncpy(buf,inet_ntoa(in),buf_size);
-      ip[buf_size - 1] = 0;
-#endif
+      struct sockaddr_in *s = (struct sockaddr_in *)&req.ifr_dstaddr;
+      memcpy(&in, &s->sin_addr, sizeof(in));
+      ip = (char *) Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
     }
     sclose(dummy);
   }
@@ -132,9 +124,9 @@ char *Curl_if2ip(const char *interface, char *buf, int buf_size)
 
 /* -- end of if2ip() -- */
 #else
-char *Curl_if2ip(const char *interface, char *buf, int buf_size)
+char *Curl_if2ip(const char *interf, char *buf, int buf_size)
 {
-    (void) interface;
+    (void) interf;
     (void) buf;
     (void) buf_size;
     return NULL;

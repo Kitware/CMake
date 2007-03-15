@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,10 +24,12 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#ifdef WIN32
+#if defined(WIN32)
 #include <time.h>
 #else
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 #endif
 
 #include <curl/curl.h>
@@ -38,7 +40,7 @@ struct Cookie {
   char *value;       /* name = <this> */
   char *path;         /* path = <this> */
   char *domain;      /* domain = <this> */
-  long expires;    /* expires = <this> */
+  curl_off_t expires;  /* expires = <this> */
   char *expirestr;   /* the plain text version */
   bool tailmatch;    /* weather we do tail-matchning of the domain name */
 
@@ -89,7 +91,17 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
                                     char *, struct CookieInfo *, bool);
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *, char *, char *, bool);
 void Curl_cookie_freelist(struct Cookie *);
+void Curl_cookie_clearall(struct CookieInfo *cookies);
+void Curl_cookie_clearsess(struct CookieInfo *cookies);
 void Curl_cookie_cleanup(struct CookieInfo *);
 int Curl_cookie_output(struct CookieInfo *, char *);
+
+#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
+#define Curl_cookie_list(x) NULL
+#define Curl_cookie_loadfiles(x) do { } while (0)
+#else
+struct curl_slist *Curl_cookie_list(struct SessionHandle *data);
+void Curl_cookie_loadfiles(struct SessionHandle *data);
+#endif
 
 #endif

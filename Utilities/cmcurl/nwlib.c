@@ -30,7 +30,7 @@
 #include <nks/thread.h>
 #include <nks/synch.h>
 
-#include "curl_memory.h"
+#include "memory.h"
 #include "memdebug.h"
 
 typedef struct
