@@ -1241,7 +1241,8 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
 
     }
   this->GetCacheManager()->AddCacheEntry(name, val, doc, type);
-  this->AddDefinition(name, val);
+  // if there was a definition then remove it
+  this->Definitions.erase( DefinitionMap::key_type(name));
 }
 
 
