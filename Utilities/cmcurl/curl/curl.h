@@ -139,6 +139,10 @@ extern "C" {
 #define WIN32 1
 #endif
 
+#ifdef __cplusplus
+}
+#endif
+
 #if defined(WIN32) && !defined(_WIN32_WCE) && !defined(__GNUC__) && \
   !defined(__CYGWIN__) || defined(__MINGW32__)
 #if !(defined(_WINSOCKAPI_) || defined(_WINSOCK_H))
@@ -162,6 +166,10 @@ extern "C" {
 #include <sys/time.h>
 #endif
 #include <sys/types.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #ifndef curl_socket_typedef
@@ -1121,10 +1129,17 @@ typedef enum {
   CURL_TIMECOND_LAST
 } curl_TimeCond;
 
+#ifdef __cplusplus
+}
+#endif
+
 #ifdef __BEOS__
 #include <support/SupportDefs.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* curl_strequal() and curl_strnequal() are subject for removal in a future
    libcurl, see lib/README.curlx for details */
