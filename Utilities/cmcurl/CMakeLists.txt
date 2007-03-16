@@ -93,7 +93,7 @@ SET(libCurl_SRCS
   strequal.c
   strerror.c
   # strtok.c - specify later
-  strtoofft.c
+  # strtoofft.c - specify later
   telnet.c
   tftp.c
   timeval.c
@@ -219,11 +219,15 @@ MACRO(CHECK_INCLUDE_FILE_CONCAT FILE VARIABLE)
 ENDMACRO(CHECK_INCLUDE_FILE_CONCAT)
 
 # Check for header files
-CHECK_INCLUDE_FILE_CONCAT("ws2tcpip.h"       HAVE_WS2TCPIP_H)
-CHECK_INCLUDE_FILE_CONCAT("winsock2.h"       HAVE_WINSOCK2_H)
+IF(NOT UNIX)
+  CHECK_INCLUDE_FILE_CONCAT("ws2tcpip.h"     HAVE_WS2TCPIP_H)
+  CHECK_INCLUDE_FILE_CONCAT("winsock2.h"     HAVE_WINSOCK2_H)
+ENDIF(NOT UNIX)
 CHECK_INCLUDE_FILE_CONCAT("stdio.h"          HAVE_STDIO_H)
-CHECK_INCLUDE_FILE_CONCAT("windows.h"        HAVE_WINDOWS_H)
-CHECK_INCLUDE_FILE_CONCAT("winsock.h"        HAVE_WINSOCK_H)
+IF(NOT UNIX)
+  CHECK_INCLUDE_FILE_CONCAT("windows.h"      HAVE_WINDOWS_H)
+  CHECK_INCLUDE_FILE_CONCAT("winsock.h"      HAVE_WINSOCK_H)
+ENDIF(NOT UNIX)
 CHECK_INCLUDE_FILE_CONCAT("stddef.h"         HAVE_STDDEF_H)
 CHECK_INCLUDE_FILE_CONCAT("sys/types.h"      HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE_CONCAT("inttypes.h"       HAVE_INTTYPES_H)
@@ -430,6 +434,8 @@ IF (NOT HAVE_STRTOK_R)
     strtok.c
     )
 ENDIF (NOT HAVE_STRTOK_R)
+
+# only build compat strtoofft if we need to
 IF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
   SET(libCurl_SRCS ${libCurl_SRCS}
     strtoofft.c
