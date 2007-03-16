@@ -411,6 +411,15 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
   // Write the do not edit header.
   this->WriteDisclaimer(infoFileStream);
 
+  // Setup relative path conversion tops.
+  infoFileStream
+    << "# Relative path conversion top directories.\n"
+    << "SET(CMAKE_RELATIVE_PATH_TOP_SOURCE \"" << this->RelativePathTopSource
+    << "\")\n"
+    << "SET(CMAKE_RELATIVE_PATH_TOP_BINARY \"" << this->RelativePathTopBinary
+    << "\")\n"
+    << "\n";
+
   // Tell the dependency scanner to use unix paths if necessary.
   if(cmSystemTools::GetForceUnixPaths())
     {
@@ -1155,16 +1164,30 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
     {
     cmSystemTools::Error("Target DependInfo.cmake file not found");    
     }
-  
-  // Test whether we need to force Unix paths.
+
+  // Lookup useful directory information.
   if(haveDirectoryInfo)
     {
+    // Test whether we need to force Unix paths.
     if(const char* force = mf->GetDefinition("CMAKE_FORCE_UNIX_PATHS"))
       {
       if(!cmSystemTools::IsOff(force))
         {
         cmSystemTools::SetForceUnixPaths(true);
         }
+      }
+
+    // Setup relative path top directories.
+    this->RelativePathsConfigured = true;
+    if(const char* relativePathTopSource =
+       mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_SOURCE"))
+      {
+      this->RelativePathTopSource = relativePathTopSource;
+      }
+    if(const char* relativePathTopBinary =
+       mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_BINARY"))
+      {
+      this->RelativePathTopBinary = relativePathTopBinary;
       }
     }
   else
