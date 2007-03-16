@@ -104,7 +104,7 @@ public:
       "MAKE_DIRECTORY will create a directory at the specified location\n"
       "RELATIVE_PATH will determine relative path from directory to the given"
       " file.\n"
-      "TO_CMAKE_PATH will convert path into a cmake sytle path with unix /. "
+      "TO_CMAKE_PATH will convert path into a cmake style path with unix /. "
       " The input can be a single path or a system path like \"$ENV{PATH}\". "
       " Note the double quotes around the ENV call TO_CMAKE_PATH only takes "
       " one argument.\n"

@@ -28,11 +28,14 @@
 
 #include <ctype.h> // for isspace
 
+extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
+
 //----------------------------------------------------------------------------
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
 {
   this->Version = 7;
   this->PlatformName = "Win32";
+  this->ExtraFlagTable = 0;
 }
 
 cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
@@ -284,26 +287,6 @@ void cmLocalVisualStudio7Generator::WriteConfigurations(std::ostream& fout,
   fout << "\t</Configurations>\n";
 }
 
-// This is a table mapping XML tag IDE names to command line options
-struct cmVS7FlagTable
-{
-  const char* IDEName;  // name used in the IDE xml file
-  const char* commandFlag; // command line flag
-  const char* comment;     // comment
-  const char* value; // string value
-  unsigned int special; // flags for special handling requests
-  enum
-  {
-    UserValue    = (1<<0), // flag contains a user-specified value
-    UserIgnored  = (1<<1), // ignore any user value
-    UserRequired = (1<<2), // match only when user value is non-empty
-    Continue     = (1<<3), // continue looking for matching entries
-
-    UserValueIgnored  = UserValue | UserIgnored,
-    UserValueRequired = UserValue | UserRequired
-  };
-};
-
 // fill the table here currently the comment field is not used for
 // anything other than documentation NOTE: Make sure the longer
 // commandFlag comes FIRST!
@@ -363,16 +346,10 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
    cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"PrecompiledHeaderThrough", "Yc", "Precompiled Header Name", "",
    cmVS7FlagTable::UserValueRequired},
-  {"UsePrecompiledHeader", "YX", "Automatically Generate", "2",
-   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
-  {"PrecompiledHeaderThrough", "YX", "Precompiled Header Name", "",
-   cmVS7FlagTable::UserValueRequired},
-  {"UsePrecompiledHeader", "Yu", "Use Precompiled Header", "3",
-   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
-  {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
-   cmVS7FlagTable::UserValueRequired},
   {"PrecompiledHeaderFile", "Fp", "Generated Precompiled Header", "",
    cmVS7FlagTable::UserValue},
+  // The YX and Yu options are in a per-global-generator table because
+  // their values differ based on the VS IDE version.
   {"ForcedIncludeFiles", "FI", "Forced include files", "",
    cmVS7FlagTable::UserValueRequired},
 
@@ -424,7 +401,8 @@ public:
     Compiler,
     Linker
   };
-  cmLocalVisualStudio7GeneratorOptions(Tool tool);
+  cmLocalVisualStudio7GeneratorOptions(Tool tool,
+                                       cmVS7FlagTable const* extraTable = 0);
 
   // Store options from command line flags.
   void Parse(const char* flags);
@@ -441,7 +419,6 @@ public:
 
   // Check for specific options.
   bool UsingUnicode();
-  bool UsingDebugPDB();
 
   // Write options to output.
   void OutputPreprocessorDefinitions(std::ostream& fout,
@@ -470,7 +447,10 @@ private:
 
   bool DoingDefine;
   cmVS7FlagTable const* FlagTable;
+  cmVS7FlagTable const* ExtraFlagTable;
   void HandleFlag(const char* flag);
+  bool CheckFlagTable(cmVS7FlagTable const* table, const char* flag,
+                      bool& flag_handled);
 };
 
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
@@ -556,7 +536,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::string defineFlags = this->Makefile->GetDefineFlags();
 
   // Construct a set of build options for this target.
-  Options targetOptions(Options::Compiler);
+  Options targetOptions(Options::Compiler, this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
@@ -585,17 +565,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       exportSymbol = cmSystemTools::MakeCindentifier(id.c_str());
       }
     targetOptions.AddDefine(exportSymbol);
-    }
-
-  // Override the flag map with cmake-specific settings.
-  if(this->Makefile->IsOn("CMAKE_CXX_USE_RTTI"))
-    {
-    targetOptions.AddFlag("RuntimeTypeInfo", "TRUE");
-    }
-  if(const char* warningLevel =
-     this->Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL"))
-    {
-    targetOptions.AddFlag("WarningLevel", warningLevel);
     }
 
   // The intermediate directory name consists of a directory for the
@@ -638,22 +607,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
-  if(targetOptions.UsingDebugPDB())
-    {
-    if(target.GetType() == cmTarget::EXECUTABLE)
-      {
-      fout <<  "\t\t\t\tProgramDataBaseFileName=\""
-           << this->ExecutableOutputPath
-           << "$(OutDir)/" << target.GetPDBName(configName) << "\"\n";
-      }
-    else if(target.GetType() == cmTarget::STATIC_LIBRARY ||
+  if(target.GetType() == cmTarget::EXECUTABLE ||
+     target.GetType() == cmTarget::STATIC_LIBRARY ||
             target.GetType() == cmTarget::SHARED_LIBRARY ||
             target.GetType() == cmTarget::MODULE_LIBRARY)
       {
+    // We need to specify a program database file name even for
+    // non-debug configurations because VS still creates .idb files.
     fout <<  "\t\t\t\tProgramDataBaseFileName=\""
-         << this->LibraryOutputPath
-           << "$(OutDir)/" << target.GetPDBName(configName) << "\"\n";
-      }
+         << target.GetDirectory(configName) << "/"
+         << target.GetPDBName(configName) << "\"\n";
     }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
@@ -1148,9 +1111,16 @@ void cmLocalVisualStudio7Generator
       }
     const char* lang = this->GlobalGenerator->GetLanguageFromExtension
       ((*sf)->GetSourceExtension().c_str());
+    const char* sourceLang = this->GetSourceFileLanguage(*(*sf));
     const char* linkLanguage = target.GetLinkerLanguage
       (this->GetGlobalGenerator());
-
+    bool needForceLang = false;
+    // source file does not match its extension language
+    if(lang && sourceLang && strcmp(lang, sourceLang) != 0)
+      {
+      needForceLang = true;
+      lang = sourceLang;
+      }
     // If lang is set, the compiler will generate code automatically.
     // If HEADER_FILE_ONLY is set, we must suppress this generation in
     // the project file
@@ -1159,7 +1129,8 @@ void cmLocalVisualStudio7Generator
 
     // if the source file does not match the linker language
     // then force c or c++
-    if(linkLanguage && lang && strcmp(lang, linkLanguage) != 0)
+    if(needForceLang || (linkLanguage && lang 
+                         && strcmp(lang, linkLanguage) != 0))
       {
       if(strcmp(lang, "CXX") == 0)
       {
@@ -1244,7 +1215,7 @@ void cmLocalVisualStudio7Generator
                << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
           if(!compileFlags.empty())
             {
-            Options fileOptions(Options::Compiler);
+            Options fileOptions(Options::Compiler, this->ExtraFlagTable);
             fileOptions.Parse(compileFlags.c_str());
             fileOptions.OutputAdditionalOptions(fout, "\t\t\t\t\t", "\n");
             fileOptions.OutputFlagMap(fout, "\t\t\t\t\t");
@@ -1579,7 +1550,7 @@ std::string cmLocalVisualStudio7Generator
 class cmVS7XMLParser : public cmXMLParser
 {
 public:
-  virtual void EndElement(const char* name)
+  virtual void EndElement(const char* /* name */)
     {
     }
   virtual void StartElement(const char* name, const char** atts)
@@ -1688,8 +1659,9 @@ std::string cmLocalVisualStudio7Generator
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudio7GeneratorOptions
-::cmLocalVisualStudio7GeneratorOptions(Tool tool):
-  DoingDefine(false), FlagTable(0)
+::cmLocalVisualStudio7GeneratorOptions(Tool tool,
+                                       cmVS7FlagTable const* extraTable):
+  DoingDefine(false), FlagTable(0), ExtraFlagTable(extraTable)
 {
   // Choose the flag table for the requested tool.
   switch(tool)
@@ -1756,21 +1728,6 @@ bool cmLocalVisualStudio7GeneratorOptions::UsingUnicode()
 }
 
 //----------------------------------------------------------------------------
-bool cmLocalVisualStudio7GeneratorOptions::UsingDebugPDB()
-{
-  std::map<cmStdString, cmStdString>::iterator mi =
-    this->FlagMap.find("DebugInformationFormat");
-  if(mi != this->FlagMap.end() && mi->second != "1")
-    {
-    return true;
-    }
-  else
-    {
-    return false;
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmLocalVisualStudio7GeneratorOptions::Parse(const char* flags)
 {
   // Parse the input string as a windows command line since the string
@@ -1801,6 +1758,7 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
   // Look for known arguments.
   if(flag[0] == '-' || flag[0] == '/')
     {
+    // Look for preprocessor definitions.
     if(flag[1] == 'D')
       {
       if(flag[2] == '\0')
@@ -1815,12 +1773,42 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
         }
       return;
       }
-    else if(this->FlagTable)
+
+    // Look through the available flag tables.
+    bool flag_handled = false;
+    if(this->FlagTable &&
+       this->CheckFlagTable(this->FlagTable, flag, flag_handled))
       {
+      return;
+      }
+    if(this->ExtraFlagTable &&
+       this->CheckFlagTable(this->ExtraFlagTable, flag, flag_handled))
+      {
+      return;
+      }
+
+    // If any map entry handled the flag we are done.
+    if(flag_handled)
+      {
+      return;
+      }
+    }
+
+  // This option is not known.  Store it in the output flags.
+  this->FlagString += " ";
+  this->FlagString +=
+    cmSystemTools::EscapeWindowsShellArgument(flag,
+                                              cmsysSystem_Shell_Flag_VSIDE);
+}
+
+//----------------------------------------------------------------------------
+bool
+cmLocalVisualStudio7GeneratorOptions
+::CheckFlagTable(cmVS7FlagTable const* table, const char* flag,
+                 bool& flag_handled)
+{
       // Look for an entry in the flag table matching this flag.
-      bool flag_handled = false;
-      for(cmVS7FlagTable const* entry = this->FlagTable;
-          entry->IDEName; ++entry)
+  for(cmVS7FlagTable const* entry = table; entry->IDEName; ++entry)
         {
         bool entry_found = false;
         if(entry->special & cmVS7FlagTable::UserValue)
@@ -1857,26 +1845,14 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
         // search continuation we are done.
         if(entry_found && !(entry->special & cmVS7FlagTable::Continue))
           {
-          return;
+      return true;
           }
 
         // If the entry was found the flag has been handled.
         flag_handled = flag_handled || entry_found;
         }
 
-      // If any map entry handled the flag we are done.
-      if(flag_handled)
-        {
-        return;
-        }
-      }
-    }
-
-  // This option is not known.  Store it in the output flags.
-  this->FlagString += " ";
-  this->FlagString +=
-    cmSystemTools::EscapeWindowsShellArgument(flag,
-                                              cmsysSystem_Shell_Flag_VSIDE);
+  return false;
 }
 
 //----------------------------------------------------------------------------

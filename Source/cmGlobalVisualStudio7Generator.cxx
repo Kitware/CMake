@@ -138,7 +138,8 @@ std::string cmGlobalVisualStudio7Generator
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
 {
-  cmLocalGenerator *lg = new cmLocalVisualStudio7Generator;
+  cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
+  lg->SetExtraFlagTable(this->GetExtraFlagTableVS7());
   lg->SetGlobalGenerator(this);
   return lg;
 }
@@ -235,9 +236,6 @@ void cmGlobalVisualStudio7Generator::Generate()
       }
     }
 
-  // add the Run Tests command
-  this->SetupTests();
-  
   // first do the superclass method
   this->cmGlobalGenerator::Generate();
   
@@ -823,4 +821,25 @@ bool cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,
     } 
   // default is to be part of the build
   return true;
+}
+
+//----------------------------------------------------------------------------
+static cmVS7FlagTable cmVS7ExtraFlagTable[] =
+{
+  // Precompiled header and related options.  Note that the
+  // UsePrecompiledHeader entries are marked as "Continue" so that the
+  // corresponding PrecompiledHeaderThrough entry can be found.
+  {"UsePrecompiledHeader", "YX", "Automatically Generate", "2",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
+  {"PrecompiledHeaderThrough", "YX", "Precompiled Header Name", "",
+   cmVS7FlagTable::UserValueRequired},
+  {"UsePrecompiledHeader", "Yu", "Use Precompiled Header", "3",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
+  {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
+   cmVS7FlagTable::UserValueRequired},
+  {0,0,0,0,0}
+};
+cmVS7FlagTable const* cmGlobalVisualStudio7Generator::GetExtraFlagTableVS7()
+{
+  return cmVS7ExtraFlagTable;
 }

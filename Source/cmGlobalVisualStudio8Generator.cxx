@@ -36,6 +36,7 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 {
   cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
   lg->SetVersion8();
+  lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   lg->SetGlobalGenerator(this);
   return lg;
 }
@@ -244,4 +245,22 @@ cmGlobalVisualStudio8Generator
              << *i << "|" << this->PlatformName << "\n";
       }
     }
+}
+
+//----------------------------------------------------------------------------
+static cmVS7FlagTable cmVS8ExtraFlagTable[] =
+{
+  // Precompiled header and related options.  Note that the
+  // UsePrecompiledHeader entries are marked as "Continue" so that the
+  // corresponding PrecompiledHeaderThrough entry can be found.
+  {"UsePrecompiledHeader", "Yu", "Use Precompiled Header", "2",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
+  {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
+   cmVS7FlagTable::UserValueRequired},
+  // There is no YX option in the VS8 IDE.
+  {0,0,0,0,0}
+};
+cmVS7FlagTable const* cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8()
+{
+  return cmVS8ExtraFlagTable;
 }

@@ -345,34 +345,17 @@ IF (NOT DART_ROOT)
 ENDIF (NOT DART_ROOT)
 
 IF(BUILD_TESTING)
-  SET(CMAKE_TEST_GENERATOR "" CACHE STRING "Generator used when running tests")
-  SET(CMAKE_TEST_MAKEPROGRAM "" CACHE FILEPATH "Generator used when running tests")
-  IF(NOT CMAKE_TEST_GENERATOR)
-    SET(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
-    SET(CMAKE_TEST_MAKEPROGRAM "${MAKEPROGRAM}")
-  ELSE(NOT CMAKE_TEST_GENERATOR)
-    SET(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
-  ENDIF(NOT CMAKE_TEST_GENERATOR)
-
-  SET(CMAKE_TEST_SYSTEM_LIBRARIES 0)
-  FOREACH(util CURL EXPAT XMLRPC ZLIB)
-    IF(CMAKE_USE_SYSTEM_${util})
-      SET(CMAKE_TEST_SYSTEM_LIBRARIES 1)
-    ENDIF(CMAKE_USE_SYSTEM_${util})
-  ENDFOREACH(util)
-
-  # This variable is set by cmake, however to
-  # test cmake we want to make sure that 
-  # the ctest from this cmake is used for testing
-  # and not the ctest from the cmake building and testing
-  # cmake.
-  SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
-  SET(CMAKE_CMAKE_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cmake")
-
   # Should the long tests be run?
   OPTION(CMAKE_RUN_LONG_TESTS "Should the long tests be run (such as Bootstrap)." ON)
   MARK_AS_ADVANCED(CMAKE_RUN_LONG_TESTS)
 
+  IF (CMAKE_RUN_LONG_TESTS)
+    OPTION(CTEST_TEST_CTEST 
+      "Should the tests that run a full sub ctest process be run?" 
+      OFF)
+    MARK_AS_ADVANCED(CTEST_TEST_CTEST)
+  ENDIF (CMAKE_RUN_LONG_TESTS)
+    
   ADD_TEST(CommandLineTest ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/CommandLineTest"
@@ -664,6 +647,27 @@ IF(BUILD_TESTING)
       -DCMAKE_TEST_DIFFERENT_GENERATOR:BOOL=${CMAKE_TEST_DIFFERENT_GENERATOR}
       -DCMAKE_TEST_SYSTEM_LIBRARIES:BOOL=${CMAKE_TEST_SYSTEM_LIBRARIES}
       --test-command complex)
+
+    ADD_TEST(SetLang ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/SetLang"
+      "${CMake_BINARY_DIR}/Tests/SetLang"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-project SetLang
+      --test-command bar)
+
+#     ADD_TEST(ConvLibrary ${CMAKE_CTEST_COMMAND}
+#       --build-and-test
+#       "${CMake_SOURCE_DIR}/Tests/ConvLibrary"
+#       "${CMake_BINARY_DIR}/Tests/ConvLibrary"
+#       --build-two-config
+#       --build-generator ${CMAKE_TEST_GENERATOR}
+#       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+#       --build-project ConvLibrary
+#       --test-command bartest)
+
 
 #    ADD_TEST(complexRelativePaths  ${CMAKE_CTEST_COMMAND}
 #      --build-and-test
@@ -987,6 +991,18 @@ IF(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.o"
       )
   ENDIF (WIN32)    
+
+  IF(CMAKE_TEST_MSVC)
+    ADD_TEST(PrecompiledHeader ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/PrecompiledHeader"
+      "${CMake_BINARY_DIR}/Tests/PrecompiledHeader"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project PrecompiledHeader
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-two-config
+      --test-command foo)
+  ENDIF(CMAKE_TEST_MSVC)
 
   IF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
     ADD_TEST(MakeClean ${CMAKE_CTEST_COMMAND}

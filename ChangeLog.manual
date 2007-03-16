@@ -1,4 +1,23 @@
 Changes in CMake 2.4.7
+
+* Fix for bug# 4423, LANGUAGE property now works in VS IDE
+
+* Fix for RUN_TESTS running the tests twice in VS IDE
+
+* Do not create import libraries for modules on borland
+
+* Fix for FILE(RELATIVE_PATH) # 4482
+
+* Fix for apple lack of support for isystem flag
+
+* Fix for Borland skipping make rules with no depends
+
+* Fix for bug #4423 set source file properties LANGUAGE not always working
+
+* Fix for bug #4462 isystem not supported on OSX
+
+* Fix bug in save of resize of CMakeSetup
+
 * Fix for @@ in file names
 
 * Fix for if command scope issues
@@ -297,7 +316,7 @@ default.
 
 * Add target/fast rules in the sub directories
 
-* Fix Visual stuido C and C++ targets to not add /TP and /TC
+* Fix Visual studio C and C++ targets to not add /TP and /TC
 
 * print a context when cmake errors occur
 

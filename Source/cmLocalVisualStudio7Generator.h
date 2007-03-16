@@ -66,6 +66,9 @@ public:
   void SetVersion8() {this->Version = 8;}
   void SetPlatformName(const char* n) { this->PlatformName = n;}
   virtual void ConfigureFinalPass();
+  
+  void SetExtraFlagTable(cmVS7FlagTable const* table)
+    { this->ExtraFlagTable = table; }
 private:
   typedef cmLocalVisualStudio7GeneratorOptions Options;
   void ReadAndStoreExternalGUID(const char* name,
@@ -118,12 +121,33 @@ private:
                   const char *libName, std::vector<std::string> *configs);
   virtual std::string GetTargetDirectory(cmTarget&);
 
+  cmVS7FlagTable const* ExtraFlagTable;
   std::vector<std::string> CreatedProjectNames;
   std::string LibraryOutputPath;
   std::string ExecutableOutputPath;
   std::string ModuleDefinitionFile;
   int Version;
   std::string PlatformName; // Win32 or x64 
+};
+
+// This is a table mapping XML tag IDE names to command line options
+struct cmVS7FlagTable
+{
+  const char* IDEName;  // name used in the IDE xml file
+  const char* commandFlag; // command line flag
+  const char* comment;     // comment
+  const char* value; // string value
+  unsigned int special; // flags for special handling requests
+  enum
+  {
+    UserValue    = (1<<0), // flag contains a user-specified value
+    UserIgnored  = (1<<1), // ignore any user value
+    UserRequired = (1<<2), // match only when user value is non-empty
+    Continue     = (1<<3), // continue looking for matching entries
+
+    UserValueIgnored  = UserValue | UserIgnored,
+    UserValueRequired = UserValue | UserRequired
+  };
 };
 
 #endif

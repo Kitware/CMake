@@ -20,6 +20,7 @@
 #include "cmGlobalGenerator.h"
 
 class cmTarget;
+struct cmVS7FlagTable;
 
 /** \class cmGlobalVisualStudio7Generator
  * \brief Write a Unix makefiles.
@@ -97,6 +98,7 @@ public:
   virtual const char* GetCMakeCFGInitDirectory()  { return "$(OutDir)"; }
 
 protected:
+  static cmVS7FlagTable const* GetExtraFlagTableVS7();
   virtual void OutputSLNFile(cmLocalGenerator* root, 
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
