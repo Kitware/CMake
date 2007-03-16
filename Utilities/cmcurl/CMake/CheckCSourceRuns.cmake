@@ -44,7 +44,7 @@ MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
 
     SET(src "${src}\nint main() { ${SOURCE} ; return 0; }")
     SET(CMAKE_CONFIGURABLE_FILE_CONTENT "${src}")
-    CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/CMake/CMakeConfigurableFile.in
       "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c"
       IMMEDIATE)
     MESSAGE(STATUS "Performing Test ${message}")
