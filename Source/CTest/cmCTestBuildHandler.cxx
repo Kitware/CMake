@@ -91,7 +91,7 @@ static const char* cmCTestErrorMatches[] = {
   "Makefile:[0-9]+: \\*\\*\\* .*  Stop\\.",
   ": No such file or directory",
   ": Invalid argument",
-  "^The project cannot be built\.",
+  "^The project cannot be built\\.",
   0
 };
 
