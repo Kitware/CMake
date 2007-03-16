@@ -1610,25 +1610,22 @@ cmLocalUnixMakefileGenerator3
                     const cmSourceFile& source,
                     std::string* nameWithoutTargetDir)
 {
-  // Get the object file name independent of target.
-  std::string objectName = this->GetObjectFileNameWithoutTarget(source);
-  if(nameWithoutTargetDir)
+  if(const char* fileTargetDirectory =
+     source.GetProperty("MACOSX_PACKAGE_LOCATION"))
     {
-    *nameWithoutTargetDir = objectName;
-    }
-
-  // Prepend the target directory.
-  std::string obj;
-  const char* fileTargetDirectory = 
-    source.GetProperty("MACOSX_PACKAGE_LOCATION");
-  if ( fileTargetDirectory )
-    {
+    // Special handling for OSX package files.
+    std::string objectName = this->GetObjectFileNameWithoutTarget(source, 0);
+    if(nameWithoutTargetDir)
+      {
+      *nameWithoutTargetDir = objectName;
+      }
     objectName = cmSystemTools::GetFilenameName(objectName.c_str());
     std::string targetName;
     std::string targetNameReal;
     std::string targetNamePDB;
     target.GetExecutableNames(targetName, targetNameReal,
                               targetNamePDB, this->ConfigurationName.c_str());
+    std::string obj;
     if ( target.GetPropertyAsBool("MACOSX_BUNDLE") )
       {
       // Construct the full path version of the names.
@@ -1644,14 +1641,32 @@ cmLocalUnixMakefileGenerator3
       }
     obj = cmSystemTools::RelativePath
       (this->Makefile->GetHomeOutputDirectory(), obj.c_str());
+    obj += "/";
+    obj += objectName;
+    return obj;
     }
   else
     {
-    obj = this->GetTargetDirectory(target);
+    // Start with the target directory.
+    std::string obj = this->GetTargetDirectory(target);
+    obj += "/";
+
+    // Get the object file name without the target directory.
+    std::string::size_type dir_len = 0;
+    dir_len += strlen(this->Makefile->GetCurrentOutputDirectory());
+    dir_len += 1;
+    dir_len += obj.size();
+    std::string objectName =
+      this->GetObjectFileNameWithoutTarget(source, dir_len);
+    if(nameWithoutTargetDir)
+      {
+      *nameWithoutTargetDir = objectName;
+      }
+
+    // Append the object name to the target directory.
+    obj += objectName;
+    return obj;
     }
-  obj += "/";
-  obj += objectName;
-  return obj;
 }
 
 //----------------------------------------------------------------------------

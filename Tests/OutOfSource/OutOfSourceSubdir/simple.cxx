@@ -5,6 +5,7 @@
 #include "testdp.h"
 
 extern int simple();
+extern int simple2();
 extern "C" int outlib();
 
 int main ()
@@ -25,6 +26,10 @@ int main ()
   if(outlib() != 456)
     {
     return -4;
+    }
+  if(simple2() != 789)
+    {
+    return -5;
     }
   return 0;
 }

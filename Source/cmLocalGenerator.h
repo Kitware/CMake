@@ -266,8 +266,10 @@ protected:
     std::vector<std::string> const& configurationTypes);
 
   // Compute object file names.
-  std::string GetObjectFileNameWithoutTarget(const cmSourceFile& source);
-  std::string& CreateSafeUniqueObjectFileName(const char* sin);
+  std::string GetObjectFileNameWithoutTarget(const cmSourceFile& source,
+                                             std::string::size_type dir_len);
+  std::string& CreateSafeUniqueObjectFileName(const char* sin,
+                                              std::string::size_type dir_len);
 
   void ConfigureRelativePaths();
   std::string FindRelativePathTopSource();

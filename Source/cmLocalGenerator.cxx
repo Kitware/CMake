@@ -28,6 +28,11 @@
 #include "cmTest.h"
 #include "cmake.h"
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# define CM_LG_ENCODE_OBJECT_NAMES
+# include <cmsys/MD5.h>
+#endif
+
 #include <cmsys/System.h>
 
 #include <ctype.h> // for isalpha
@@ -2376,8 +2381,81 @@ cmLocalGenerator
     }
 }
 
+#if defined(CM_LG_ENCODE_OBJECT_NAMES)
+static std::string cmLocalGeneratorMD5(const char* input)
+{
+  char md5out[32];
+  cmsysMD5* md5 = cmsysMD5_New();
+  cmsysMD5_Initialize(md5);
+  cmsysMD5_Append(md5, reinterpret_cast<unsigned char const*>(input), -1);
+  cmsysMD5_FinalizeHex(md5, md5out);
+  cmsysMD5_Delete(md5);
+  return std::string(md5out, 32);
+}
+
+static bool
+cmLocalGeneratorShortenObjectName(std::string& objName,
+                                  std::string::size_type max_len)
+{
+  // Replace the beginning of the path portion of the object name with
+  // its own md5 sum.
+  std::string::size_type pos = objName.find('/', objName.size()-max_len+32);
+  if(pos != objName.npos)
+    {
+    std::string md5name = cmLocalGeneratorMD5(objName.substr(0, pos).c_str());
+    md5name += objName.substr(pos);
+    objName = md5name;
+
+    // The object name is now short enough.
+    return true;
+    }
+  else
+    {
+    // The object name could not be shortened enough.
+    return false;
+    }
+}
+
+static bool cmLocalGeneratorCheckObjectName(std::string& objName,
+                                            std::string::size_type dir_len)
+{
+  // Choose a maximum file name length.
+#if defined(_WIN32) || defined(__CYGWIN__)
+  std::string::size_type const max_total_len = 250;
+#else
+  std::string::size_type const max_total_len = 1000;
+#endif
+
+  // Enforce the maximum file name length if possible.
+  std::string::size_type max_obj_len = max_total_len;
+  if(dir_len < max_total_len)
+    {
+    max_obj_len = max_total_len - dir_len;
+    if(objName.size() > max_obj_len)
+      {
+      // The current object file name is too long.  Try to shorten it.
+      return cmLocalGeneratorShortenObjectName(objName, max_obj_len);
+      }
+    else
+      {
+      // The object file name is short enough.
+      return true;
+      }
+    }
+  else
+    {
+    // The build directory in which the object will be stored is
+    // already too deep.
+    return false;
+    }
+}
+#endif
+
 //----------------------------------------------------------------------------
-std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(const char* sin)
+std::string&
+cmLocalGenerator
+::CreateSafeUniqueObjectFileName(const char* sin,
+                                 std::string::size_type dir_len)
 {
   // Look for an existing mapped name for this object file.
   std::map<cmStdString,cmStdString>::iterator it =
@@ -2435,6 +2513,12 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(const char* sin)
       while ( !done );
       }
 
+#if defined(CM_LG_ENCODE_OBJECT_NAMES)
+    cmLocalGeneratorCheckObjectName(ssin, dir_len);
+#else
+    (void)dir_len;
+#endif
+
     // Insert the newly mapped object file name.
     std::map<cmStdString, cmStdString>::value_type e(sin, ssin);
     it = this->UniqueObjectNamesMap.insert(e).first;
@@ -2446,7 +2530,9 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(const char* sin)
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::GetObjectFileNameWithoutTarget(const cmSourceFile& source)
+cmLocalGenerator
+::GetObjectFileNameWithoutTarget(const cmSourceFile& source,
+                                 std::string::size_type dir_len)
 {
   // Construct the object file name using the full path to the source
   // file which is its only unique identification.
@@ -2517,7 +2603,7 @@ cmLocalGenerator::GetObjectFileNameWithoutTarget(const cmSourceFile& source)
     }
 
   // Convert to a safe name.
-  return this->CreateSafeUniqueObjectFileName(objectName.c_str());
+  return this->CreateSafeUniqueObjectFileName(objectName.c_str(), dir_len);
 }
 
 //----------------------------------------------------------------------------
