@@ -422,15 +422,18 @@ void cmLocalVisualStudio6Generator
       }
 
     const char* lang = this->GetSourceFileLanguage(*(*sf));
-    if(lang && strcmp(lang, "CXX") == 0)
+    if(lang)
       {
-      // force a C++ file type
-      compileFlags += " /TP ";
-      }
-    else if(lang && strcmp(lang, "C") == 0)
-      {
-      // force to c file type
-      compileFlags += " /TC ";
+      if(strcmp(lang, "CXX") == 0)
+        {
+        // force a C++ file type
+        compileFlags += " /TP ";
+        }
+      else if(strcmp(lang, "C") == 0)
+        {
+        // force to c file type
+        compileFlags += " /TC ";
+        }
       }
       
     // Check for extra object-file dependencies.
