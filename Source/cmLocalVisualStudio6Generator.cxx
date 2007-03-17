@@ -427,7 +427,7 @@ void cmLocalVisualStudio6Generator
       // force a C++ file type
       compileFlags += " /TP ";
       }
-    else if(strcmp(lang, "C") == 0)
+    else if(lang && strcmp(lang, "C") == 0)
       {
       // force to c file type
       compileFlags += " /TC ";
