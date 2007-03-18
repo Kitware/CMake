@@ -184,10 +184,10 @@ void tftp_set_timeouts(tftp_state_data_t *state)
     timeout = maxtime ;
 
     /* Average restart after 5 seconds */
-    state->retry_max = timeout/5;
+    state->retry_max = (int)(timeout/5);
 
     /* Compute the re-start interval to suit the timeout */
-    state->retry_time = timeout/state->retry_max;
+    state->retry_time = (int)(timeout/state->retry_max);
     if(state->retry_time<1)
       state->retry_time=1;
 
@@ -202,7 +202,7 @@ void tftp_set_timeouts(tftp_state_data_t *state)
     timeout = maxtime/10 ;
 
     /* Average reposting an ACK after 15 seconds */
-    state->retry_max = timeout/15;
+    state->retry_max = (int)(timeout/15);
   }
   /* But bound the total number  */
   if(state->retry_max<3)
@@ -212,7 +212,7 @@ void tftp_set_timeouts(tftp_state_data_t *state)
     state->retry_max=50;
 
   /* Compute the re-ACK interval to suit the timeout */
-  state->retry_time = timeout/state->retry_max;
+  state->retry_time = (int)(timeout/state->retry_max);
   if(state->retry_time<1)
     state->retry_time=1;
 
