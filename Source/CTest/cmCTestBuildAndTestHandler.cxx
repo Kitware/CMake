@@ -22,6 +22,7 @@
 #include "cmake.h"
 #include "cmGlobalGenerator.h"
 #include <cmsys/Process.h>
+#include "cmCTestTestHandler.h"
 
 //----------------------------------------------------------------------
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
@@ -161,6 +162,28 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     return 1;
     }
 
+  if ( this->CTest->GetConfigType().size() == 0 &&
+       this->ConfigSample.size())
+    {
+    // use the config sample to set the ConfigType
+    std::string fullPath;
+    std::string resultingConfig;
+    std::vector<std::string> extraPaths;
+    std::vector<std::string> failed;
+    fullPath = 
+      cmCTestTestHandler::FindExecutable(this->CTest, 
+                                         this->ConfigSample.c_str(),
+                                         resultingConfig,
+                                         extraPaths,
+                                         failed);
+    if (fullPath.size() && resultingConfig.size())
+      {
+      this->CTest->SetConfigType(resultingConfig.c_str());
+      }
+    out << "Using config sample with results: "
+        << fullPath << " and " << resultingConfig << std::endl;
+    }
+  
   // we need to honor the timeout specified, the timeout include cmake, build
   // and test time
   double clock_start = cmSystemTools::GetTime();
@@ -243,99 +266,26 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     }
 
   // now run the compiled test if we can find it
-  std::vector<std::string> attempted;
-  std::vector<std::string> failed;
-  std::string tempPath;
-  std::string filepath =
-    cmSystemTools::GetFilenamePath(this->TestCommand);
-  std::string filename =
-    cmSystemTools::GetFilenameName(this->TestCommand);
-  // if full path specified then search that first
-  if (filepath.size())
-    {
-    tempPath = filepath;
-    tempPath += "/";
-    tempPath += filename;
-    attempted.push_back(tempPath);
-    if(this->CTest->GetConfigType().size())
-      {
-      tempPath = filepath;
-      tempPath += "/";
-      tempPath += this->CTest->GetConfigType();
-      tempPath += "/";
-      tempPath += filename;
-      attempted.push_back(tempPath);
-      // If the file is an OSX bundle then the configtyp
-      // will be at the start of the path
-      tempPath = this->CTest->GetConfigType();
-      tempPath += "/";
-      tempPath += filepath;
-      tempPath += "/";
-      tempPath += filename;
-      attempted.push_back(tempPath);
-      }
-    }
-  // otherwise search local dirs
-  else
-    {
-    attempted.push_back(filename);
-    if(this->CTest->GetConfigType().size())
-      {
-      tempPath = this->CTest->GetConfigType();
-      tempPath += "/";
-      tempPath += filename;
-      attempted.push_back(tempPath);
-      }
-    }
+  // store the final location in fullPath
+  std::string fullPath;
+  std::string resultingConfig;
+  std::vector<std::string> extraPaths;
   // if this->ExecutableDirectory is set try that as well
   if (this->ExecutableDirectory.size())
     {
-    tempPath = this->ExecutableDirectory;
+    std::string tempPath = this->ExecutableDirectory;
     tempPath += "/";
     tempPath += this->TestCommand;
-    attempted.push_back(tempPath);
-    if(this->CTest->GetConfigType().size())
-      {
-      tempPath = this->ExecutableDirectory;
-      tempPath += "/";
-      tempPath += this->CTest->GetConfigType();
-      tempPath += "/";
-      tempPath += filename;
-      attempted.push_back(tempPath);
-      }
+    extraPaths.push_back(tempPath);
     }
-
-  // store the final location in fullPath
-  std::string fullPath;
-
-  // now look in the paths we specified above
-  for(unsigned int ai=0;
-      ai < attempted.size() && fullPath.size() == 0; ++ai)
-    {
-    // first check without exe extension
-    if(cmSystemTools::FileExists(attempted[ai].c_str())
-       && !cmSystemTools::FileIsDirectory(attempted[ai].c_str()))
-      {
-      fullPath = cmSystemTools::CollapseFullPath(attempted[ai].c_str());
-      }
-    // then try with the exe extension
-    else
-      {
-      failed.push_back(attempted[ai].c_str());
-      tempPath = attempted[ai];
-      tempPath += cmSystemTools::GetExecutableExtension();
-      if(cmSystemTools::FileExists(tempPath.c_str())
-         && !cmSystemTools::FileIsDirectory(tempPath.c_str()))
-        {
-        fullPath = cmSystemTools::CollapseFullPath(tempPath.c_str());
-        }
-      else
-        {
-        failed.push_back(tempPath.c_str());
-        }
-      }
-    }
-
+  std::vector<std::string> failed;
+  fullPath = 
+    cmCTestTestHandler::FindExecutable(this->CTest, 
+                                       this->TestCommand.c_str(),
+                                       resultingConfig,
+                                       extraPaths,
+                                       failed);
+  
   if(!cmSystemTools::FileExists(fullPath.c_str()))
     {
     out << "Could not find path to executable, perhaps it was not built: "
@@ -489,6 +439,12 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
     idx++;
     this->BuildMakeProgram = allArgs[idx];
     }
+  if(currentArg.find("--build-config-sample",0) == 0 &&
+    idx < allArgs.size() - 1)
+    {
+    idx++;
+    this->ConfigSample = allArgs[idx];
+    }
   if(currentArg.find("--build-noclean",0) == 0)
     {
     this->BuildNoClean = true;
@@ -524,5 +480,4 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
     }
   return 1;
 }
-
 

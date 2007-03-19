@@ -653,11 +653,12 @@ IF(BUILD_TESTING)
     SET(COMPILER_IS_COMO 1)
   ENDIF(CMAKE_BASE_NAME MATCHES "^como$")
   IF(NOT COMPILER_IS_COMO)
-    ADD_TEST(complex   ${CMAKE_CTEST_COMMAND}
+    ADD_TEST(complex  ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/Complex"
       "${CMake_BINARY_DIR}/Tests/Complex"
       --build-two-config
+      --build-config-sample "${CMAKE_CTEST_COMMAND}"
       --build-generator ${CMAKE_TEST_GENERATOR}
       --build-project Complex
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}

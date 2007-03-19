@@ -65,6 +65,7 @@ protected:
   std::vector<std::string> BuildOptions;
   bool                     BuildTwoConfig;
   std::string              BuildMakeProgram;
+  std::string              ConfigSample;
   std::string              SourceDir;
   std::string              BinaryDir;
   std::string              BuildProject;

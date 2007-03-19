@@ -218,8 +218,10 @@ bool cmCTestSetTestsPropertiesCommand::InitialPass(
 // of where it was found. The directory and filename to search for are passed
 // in as well an a subdir (typically used for configuraitons such as
 // Release/Debug/etc)
-bool TryExecutable(const char *dir, const char *file,
-                   std::string *fullPath, const char *subdir)
+bool cmCTestTestHandler::TryExecutable(const char *dir, 
+                                       const char *file,
+                                       std::string *fullPath, 
+                                       const char *subdir)
 {
   // try current directory
   std::string tryPath;
@@ -1080,88 +1082,171 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<cmStdString>& vec)
 // Find the appropriate executable to run for a test
 std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
 {
-  std::string fullPath = "";
-  std::string dir;
-  std::string file;
+  std::string resConfig;
+  std::vector<std::string> extraPaths;
+  std::vector<std::string> failedPaths;
+  return cmCTestTestHandler::FindExecutable(this->CTest,
+                                            exe, resConfig,
+                                            extraPaths,
+                                            failedPaths);
+}
 
-  cmSystemTools::SplitProgramPath(exe, dir, file);
-  // first try to find the executable given a config type subdir if there is
-  // one
-  if(this->CTest->GetConfigType() != "" &&
-    ::TryExecutable(dir.c_str(), file.c_str(), &fullPath,
-      this->CTest->GetConfigType().c_str()))
+// add additional configuraitons to the search path
+void cmCTestTestHandler
+::AddConfigurations(cmCTest *ctest, 
+                    std::vector<std::string> &attempted,
+                    std::vector<std::string> &attemptedConfigs,
+                    std::string filepath,
+                    std::string &filename)
+{   
+  std::string tempPath;
+
+  if (filepath.size())
     {
-    return fullPath;
+    filepath += "/";
+    }
+  tempPath = filepath + filename;
+  attempted.push_back(tempPath);
+  attemptedConfigs.push_back("");
+  
+  if(ctest->GetConfigType().size())
+    {
+    tempPath = filepath;
+    tempPath += ctest->GetConfigType();
+    tempPath += "/";
+    tempPath += filename;
+    attempted.push_back(tempPath);
+    attemptedConfigs.push_back(ctest->GetConfigType());
+    // If the file is an OSX bundle then the configtyp
+    // will be at the start of the path
+    tempPath = ctest->GetConfigType();
+    tempPath += "/";
+    tempPath += filepath;
+    tempPath += filename;
+    attempted.push_back(tempPath);
+    attemptedConfigs.push_back(ctest->GetConfigType());
+    }
+  else
+    {
+    // no config specified to try some options
+    tempPath = filepath;
+    tempPath += "Deployment/";
+    tempPath += filename;
+    attempted.push_back(tempPath);
+    attemptedConfigs.push_back("Deployment");
+    tempPath = filepath;
+    tempPath += "Development/";
+    tempPath += filename;
+    attempted.push_back(tempPath);
+    attemptedConfigs.push_back("Deployment");
+    tempPath = filepath;
+    tempPath += "Release/";
+    tempPath += filename;
+    attempted.push_back(tempPath);
+    attemptedConfigs.push_back("Release");
+    tempPath = filepath;
+    tempPath += "Debug/";
+    tempPath += filename;
+    attempted.push_back(tempPath);
+    attemptedConfigs.push_back("Debug");
+    tempPath = filepath;
+    tempPath += "MinSizeRel/";
+    tempPath += filename;
+    attempted.push_back(tempPath);
+    attemptedConfigs.push_back("MinSizeRel");
+    tempPath = filepath;
+    tempPath += "RelWithDebInfo/";
+    tempPath += filename;
+    attempted.push_back(tempPath);    
+    attemptedConfigs.push_back("RelWithDebInfo");
+    }
+}
+
+
+//----------------------------------------------------------------------
+// Find the appropriate executable to run for a test
+std::string cmCTestTestHandler
+::FindExecutable(cmCTest *ctest,
+                 const char *testCommand,
+                 std::string &resultingConfig,
+                 std::vector<std::string> &extraPaths,
+                 std::vector<std::string> &failed)
+{
+  // now run the compiled test if we can find it
+  std::vector<std::string> attempted;
+  std::vector<std::string> attemptedConfigs;
+  std::string tempPath;
+  std::string filepath =
+    cmSystemTools::GetFilenamePath(testCommand);
+  std::string filename =
+    cmSystemTools::GetFilenameName(testCommand);
+
+  cmCTestTestHandler::AddConfigurations(ctest, attempted,
+                                        attemptedConfigs,
+                                        filepath,filename);
+
+  // if extraPaths are provided and we were not passed a full path, try them,
+  // try any extra paths
+  if (filepath.size() == 0)
+    {
+    for (unsigned int i = 0; i < extraPaths.size(); ++i)
+      {
+      std::string filepathExtra =
+        cmSystemTools::GetFilenamePath(extraPaths[i]);
+      std::string filenameExtra =
+        cmSystemTools::GetFilenameName(extraPaths[i]);
+      cmCTestTestHandler::AddConfigurations(ctest,attempted,
+                                            attemptedConfigs,
+                                            filepathExtra,
+                                            filenameExtra);
+      }
     }
 
-  // next try the current directory as the subdir
-  if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"."))
+  // store the final location in fullPath
+  std::string fullPath;
+
+  // now look in the paths we specified above
+  for(unsigned int ai=0;
+      ai < attempted.size() && fullPath.size() == 0; ++ai)
     {
-    return fullPath;
-    }
-
-  // try without the config subdir
-  if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,""))
-    {
-    return fullPath;
-    }
-
-  if ( this->CTest->GetConfigType() == "" )
-    {
-    // No config type, so try to guess it
-    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Deployment"))
+    // first check without exe extension
+    if(cmSystemTools::FileExists(attempted[ai].c_str())
+       && !cmSystemTools::FileIsDirectory(attempted[ai].c_str()))
       {
-      return fullPath;
+      fullPath = cmSystemTools::CollapseFullPath(attempted[ai].c_str());
+      resultingConfig = attemptedConfigs[ai];
       }
-
-    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Development"))
+    // then try with the exe extension
+    else
       {
-      return fullPath;
-      }
-
-    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Release"))
-      {
-      return fullPath;
-      }
-
-    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Debug"))
-      {
-      return fullPath;
-      }
-
-    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"MinSizeRel"))
-      {
-      return fullPath;
-      }
-
-    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"RelWithDebInfo"))
-      {
-      return fullPath;
+      failed.push_back(attempted[ai].c_str());
+      tempPath = attempted[ai];
+      tempPath += cmSystemTools::GetExecutableExtension();
+      if(cmSystemTools::FileExists(tempPath.c_str())
+         && !cmSystemTools::FileIsDirectory(tempPath.c_str()))
+        {
+        fullPath = cmSystemTools::CollapseFullPath(tempPath.c_str());
+        resultingConfig = attemptedConfigs[ai];
+        }
+      else
+        {
+        failed.push_back(tempPath.c_str());
+        }
       }
     }
-
+  
   // if everything else failed, check the users path, but only if a full path
-  // wasn;t specified
-  if (dir.size() == 0)
+  // wasn't specified
+  if (fullPath.size() == 0 && filepath.size() == 0)
     {
-    std::string path = cmSystemTools::FindProgram(file.c_str());
+    std::string path = cmSystemTools::FindProgram(filename.c_str());
     if (path != "")
       {
+      resultingConfig = "";
       return path;
       }
     }
-
-  if ( this->CTest->GetConfigType() != "" )
-    {
-    dir += "/";
-    dir += this->CTest->GetConfigType();
-    dir += "/";
-    dir += file;
-    cmSystemTools::Error("config type specified on the command line, but "
-      "test executable not found.",
-      dir.c_str());
-    return "";
-    }
+  
   return fullPath;
 }
 

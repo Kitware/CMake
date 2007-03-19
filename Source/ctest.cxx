@@ -162,6 +162,10 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"--build-project", "Specify the name of the project to build.", "" },
   {"--build-makeprogram", "Specify the make program to use.", "" },
   {"--build-noclean", "Skip the make clean step.", "" },
+  {"--build-config-sample", 
+   "A sample executable to use to determine the configuraiton", 
+   "A sample executable to use to determine the configuraiton that "
+   "should be used. e.g. Debug/Release/etc" },
   {"--build-options", "Add extra options to the build step.",
    "This option must be the last option with the exception of --test-command"
   },
