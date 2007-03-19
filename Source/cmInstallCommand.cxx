@@ -532,6 +532,20 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           this->SetError(e.str().c_str());
           return false;
           }
+
+        // On DLL platforms an executable may also have an import
+        // library.  Install it to the archive destination if it
+        // exists.
+        if(dll_platform && archive_destination)
+          {
+          // The import library uses the ARCHIVE properties.
+          this->Makefile->AddInstallGenerator(
+            new cmInstallTargetGenerator(target, archive_dest.c_str(), true,
+                                         archive_permissions.c_str(),
+                                         archive_configurations,
+                                         archive_component.c_str(),
+                                         true));
+          }
         }
         break;
       default:

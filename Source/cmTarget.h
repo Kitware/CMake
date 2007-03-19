@@ -228,6 +228,7 @@ public:
       that takes into account executable version numbers.  This should
       be called only on an executable target.  */
   void GetExecutableNames(std::string& name, std::string& realName,
+                          std::string& impName,
                           std::string& pdbName, const char* config);
 
   /** Get the names of the executable used to remove existing copies
@@ -235,6 +236,7 @@ public:
       during a clean step.  This should be called only on an
       executable target.  */
   void GetExecutableCleanNames(std::string& name, std::string& realName,
+                               std::string& impName,
                                std::string& pdbName, const char* config);
 
   /**
@@ -323,6 +325,7 @@ private:
                                const char* config);
   void GetExecutableNamesInternal(std::string& name,
                                   std::string& realName,
+                                  std::string& impName,
                                   std::string& pdbName,
                                   TargetType type,
                                   const char* config);
@@ -360,6 +363,7 @@ private:
   bool RecordDependencies; 
   cmPropertyMap Properties;
   LinkLibraryVectorType OriginalLinkLibraries;
+  bool DLLPlatform;
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.

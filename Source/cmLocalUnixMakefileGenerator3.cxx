@@ -1645,8 +1645,9 @@ cmLocalUnixMakefileGenerator3
     objectName = cmSystemTools::GetFilenameName(objectName.c_str());
     std::string targetName;
     std::string targetNameReal;
+    std::string targetNameImport;
     std::string targetNamePDB;
-    target.GetExecutableNames(targetName, targetNameReal,
+    target.GetExecutableNames(targetName, targetNameReal, targetNameImport,
                               targetNamePDB, this->ConfigurationName.c_str());
     std::string obj;
     if ( target.GetPropertyAsBool("MACOSX_BUNDLE") )

@@ -341,10 +341,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
           cmLocalGenerator::START_OUTPUT,
           cmLocalGenerator::UNCHANGED));
       }
-    if(!targetNameImport.empty() &&
-       targetNameImport != targetName &&
-       targetNameImport != targetNameReal &&
-       targetNameImport != targetNameSO)
+    if(!targetNameImport.empty())
       {
       libCleanFiles.push_back(this->Convert(targetFullPathImport.c_str(),
           cmLocalGenerator::START_OUTPUT,
@@ -401,11 +398,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
           cmLocalGenerator::START_OUTPUT,
           cmLocalGenerator::UNCHANGED));
       }
-    if(!cleanImportName.empty() &&
-      cleanImportName != cleanStaticName &&
-      cleanImportName != cleanSharedSOName &&
-      cleanImportName != cleanSharedRealName &&
-      cleanImportName != cleanSharedName)
+    if(!cleanImportName.empty())
       {
       libCleanFiles.push_back(this->Convert(cleanFullImportName.c_str(),
           cmLocalGenerator::START_OUTPUT,

@@ -1221,7 +1221,9 @@ void cmLocalVisualStudio6Generator
   std::string targetImplibFlagRelease;
   std::string targetImplibFlagMinSizeRel;
   std::string targetImplibFlagRelWithDebInfo;
-  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+  if(target.GetType() == cmTarget::SHARED_LIBRARY ||
+     target.GetType() == cmTarget::MODULE_LIBRARY ||
+     target.GetType() == cmTarget::EXECUTABLE)
     {
     std::string fullPathImpDebug = target.GetDirectory("Debug", true);
     std::string fullPathImpRelease = target.GetDirectory("Release", true);

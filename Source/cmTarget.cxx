@@ -37,6 +37,7 @@ cmTarget::cmTarget()
   this->LinkLibrariesAnalyzed = false;
   this->LinkDirectoriesComputed = false;
   this->HaveInstallRule = false;
+  this->DLLPlatform = false;
 
 }
 
@@ -334,6 +335,11 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
   // set the cmake instance of the properties
   this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
+
+  // Check whether this is a DLL platform.
+  this->DLLPlatform = (this->Makefile->IsOn("WIN32") ||
+                       this->Makefile->IsOn("CYGWIN") ||
+                       this->Makefile->IsOn("MINGW"));
 
   // Setup default property values.
   this->SetPropertyDefault("INSTALL_NAME_DIR", "");
@@ -1427,9 +1433,13 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type,
               ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
               : "CMAKE_SHARED_LIBRARY_SUFFIX");
     case cmTarget::MODULE_LIBRARY:
-      return "CMAKE_SHARED_MODULE_SUFFIX";
+      return (implib
+              ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
+              : "CMAKE_SHARED_MODULE_SUFFIX");
     case cmTarget::EXECUTABLE:
-      return "CMAKE_EXECUTABLE_SUFFIX";
+      return (implib
+              ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
+              : "CMAKE_EXECUTABLE_SUFFIX");
     case cmTarget::UTILITY:
     case cmTarget::GLOBAL_TARGET:
     case cmTarget::INSTALL_FILES:
@@ -1453,8 +1463,11 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type,
               ? "CMAKE_IMPORT_LIBRARY_PREFIX"
               : "CMAKE_SHARED_LIBRARY_PREFIX");
     case cmTarget::MODULE_LIBRARY:
-      return "CMAKE_SHARED_MODULE_PREFIX";
+      return (implib
+              ? "CMAKE_IMPORT_LIBRARY_PREFIX"
+              : "CMAKE_SHARED_MODULE_PREFIX");
     case cmTarget::EXECUTABLE:
+      return (implib? "CMAKE_IMPORT_LIBRARY_PREFIX" : "");
     case cmTarget::UTILITY:
     case cmTarget::GLOBAL_TARGET:
     case cmTarget::INSTALL_FILES:
@@ -1545,8 +1558,11 @@ void cmTarget::GetFullNameInternal(TargetType type,
     return;
     }
 
-  // The implib option is only allowed for shared libraries.
-  if(type != cmTarget::SHARED_LIBRARY)
+  // The implib option is only allowed for shared libraries, module
+  // libraries, and executables.
+  if(type != cmTarget::SHARED_LIBRARY &&
+     type != cmTarget::MODULE_LIBRARY &&
+     type != cmTarget::EXECUTABLE)
     {
     implib = false;
     }
@@ -1769,7 +1785,8 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
 #endif
 
   // The import library name.
-  if(type == cmTarget::SHARED_LIBRARY)
+  if(type == cmTarget::SHARED_LIBRARY ||
+     type == cmTarget::MODULE_LIBRARY)
     {
     impName = this->GetFullNameInternal(type, config, true);
     }
@@ -1784,26 +1801,29 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
 
 void cmTarget::GetExecutableNames(std::string& name,
                                   std::string& realName,
+                                  std::string& impName,
                                   std::string& pdbName,
                                   const char* config)
 {
   // Get the names based on the real type of the executable.
-  this->GetExecutableNamesInternal(name, realName, pdbName,
+  this->GetExecutableNamesInternal(name, realName, impName, pdbName,
                                    this->GetType(), config);
 }
 
 void cmTarget::GetExecutableCleanNames(std::string& name,
                                        std::string& realName,
+                                       std::string& impName,
                                        std::string& pdbName,
                                        const char* config)
 {
   // Get the name and versioned name of this executable.
-  this->GetExecutableNamesInternal(name, realName, pdbName,
+  this->GetExecutableNamesInternal(name, realName, impName, pdbName,
                                    cmTarget::EXECUTABLE, config);
 }
 
 void cmTarget::GetExecutableNamesInternal(std::string& name,
                                           std::string& realName,
+                                          std::string& impName,
                                           std::string& pdbName,
                                           TargetType type,
                                           const char* config)
@@ -1844,6 +1864,9 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
 #if defined(__CYGWIN__)
   realName += suffix;
 #endif
+
+  // The import library name.
+  impName = this->GetFullNameInternal(type, config, true);
 
   // The program database file name.
   pdbName = prefix+base+".pdb";
@@ -1986,8 +2009,11 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char*)
 //----------------------------------------------------------------------------
 const char* cmTarget::GetOutputDir(bool implib)
 {
-  // The implib option is only allowed for shared libraries.
-  if(this->GetType() != cmTarget::SHARED_LIBRARY)
+  // The implib option is only allowed for shared libraries, module
+  // libraries, and executables.
+  if(this->GetType() != cmTarget::SHARED_LIBRARY &&
+     this->GetType() != cmTarget::MODULE_LIBRARY &&
+     this->GetType() != cmTarget::EXECUTABLE)
     {
     implib = false;
     }
@@ -1997,6 +2023,10 @@ const char* cmTarget::GetOutputDir(bool implib)
   // directory.
   if(implib &&
      !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
+    {
+    abort();
+    }
+  if(implib && !this->DLLPlatform)
     {
     abort();
     }
@@ -2019,12 +2049,7 @@ const char* cmTarget::GetOutputDir(bool implib)
         // shared library is treated as a runtime target and the
         // corresponding import library is treated as an archive
         // target.
-
-        // Check whether this is a DLL platform.
-        bool dll_platform = (this->Makefile->IsOn("WIN32") ||
-                             this->Makefile->IsOn("CYGWIN") ||
-                             this->Makefile->IsOn("MINGW"));
-        if(dll_platform)
+        if(this->DLLPlatform)
           {
           if(implib)
             {
@@ -2048,12 +2073,28 @@ const char* cmTarget::GetOutputDir(bool implib)
       case cmTarget::MODULE_LIBRARY:
         {
         // Module libraries are always treated as library targets.
-        propertyName = "LIBRARY_OUTPUT_DIRECTORY";
+        // Module import libraries are treated as archive targets.
+        if(implib)
+          {
+          propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
+          }
+        else
+          {
+          propertyName = "LIBRARY_OUTPUT_DIRECTORY";
+          }
         } break;
       case cmTarget::EXECUTABLE:
         {
         // Executables are always treated as runtime targets.
-        propertyName = "RUNTIME_OUTPUT_DIRECTORY";
+        // Executable import libraries are treated as archive targets.
+        if(implib)
+          {
+          propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
+          }
+        else
+          {
+          propertyName = "RUNTIME_OUTPUT_DIRECTORY";
+          }
         } break;
       default: break;
       }

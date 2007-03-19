@@ -208,11 +208,21 @@ cmInstallTargetGenerator
       {
       std::string targetName;
       std::string targetNameReal;
+      std::string targetNameImport;
       std::string targetNamePDB;
       target->GetExecutableNames(targetName, targetNameReal,
-                                 targetNamePDB, i->c_str());
-      // Use the canonical name.
-      fname += targetName;
+                                 targetNameImport, targetNamePDB,
+                                 i->c_str());
+      if(this->ImportLibrary)
+        {
+        // Use the import library name.
+        fname += targetNameImport;
+        }
+      else
+        {
+        // Use the canonical name.
+        fname += targetName;
+        }
       }
     else
       {
@@ -259,11 +269,21 @@ std::string cmInstallTargetGenerator::GetScriptReference(cmTarget* target,
       {
       std::string targetName;
       std::string targetNameReal;
+      std::string targetNameImport;
       std::string targetNamePDB;
       target->GetExecutableNames(targetName, targetNameReal,
-                                 targetNamePDB, this->ConfigurationName);
-      // Use the canonical name.
-      return targetName;
+                                 targetNameImport, targetNamePDB,
+                                 this->ConfigurationName);
+      if(this->ImportLibrary)
+        {
+        // Use the import library name.
+        return targetNameImport;
+        }
+      else
+        {
+        // Use the canonical name.
+        return targetName;
+        }
       }
     else
       {

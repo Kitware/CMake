@@ -110,9 +110,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Get the name of the executable to generate.
   std::string targetName;
   std::string targetNameReal;
+  std::string targetNameImport;
   std::string targetNamePDB;
   this->Target->GetExecutableNames
-    (targetName, targetNameReal, targetNamePDB,
+    (targetName, targetNameReal, targetNameImport, targetNamePDB,
      this->LocalGenerator->ConfigurationName.c_str());
 
   // Construct the full path version of the names.
@@ -167,6 +168,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                   false, false, false);
     }
 #endif
+  std::string outpathImp;
   if(relink)
     {
     outpath = this->Makefile->GetStartOutputDirectory();
@@ -174,10 +176,23 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
+    if(!targetNameImport.empty())
+      {
+      outpathImp = outpath;
+      }
+    }
+  else
+    {
+    if(!targetNameImport.empty())
+      {
+      outpathImp = this->Target->GetDirectory(0, true);
+      outpathImp += "/";
+      }
     }
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathReal = outpath + targetNameReal;
   std::string targetFullPathPDB = outpath + targetNamePDB;
+  std::string targetFullPathImport = outpathImp + targetNameImport;
   std::string targetOutPathPDB = 
     this->Convert(targetFullPathPDB.c_str(),
                   cmLocalGenerator::FULL,
@@ -191,7 +206,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->Convert(targetFullPathReal.c_str(),
                   cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
-  
+  std::string targetOutPathImport =
+    this->Convert(targetFullPathImport.c_str(),
+                  cmLocalGenerator::START_OUTPUT,
+                  cmLocalGenerator::SHELL);
+
   // Get the language to use for linking this executable.
   const char* linkLanguage =
     this->Target->GetLinkerLanguage(this->GlobalGenerator);
@@ -258,14 +277,16 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   {
   std::string cleanName;
   std::string cleanRealName;
+  std::string cleanImportName;
   std::string cleanPDBName;
   this->Target->GetExecutableCleanNames
-    (cleanName, cleanRealName, cleanPDBName,
+    (cleanName, cleanRealName, cleanImportName, cleanPDBName,
      this->LocalGenerator->ConfigurationName.c_str());
 
   std::string cleanFullName = outpath + cleanName;
   std::string cleanFullRealName = outpath + cleanRealName;
   std::string cleanFullPDBName = outpath + cleanPDBName;
+  std::string cleanFullImportName = outpathImp + cleanImportName;
   exeCleanFiles.push_back(this->Convert(cleanFullName.c_str(),
                                         cmLocalGenerator::START_OUTPUT,
                                         cmLocalGenerator::UNCHANGED));
@@ -279,6 +300,12 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if(cleanRealName != cleanName)
     {
     exeCleanFiles.push_back(this->Convert(cleanFullRealName.c_str(),
+                                          cmLocalGenerator::START_OUTPUT,
+                                          cmLocalGenerator::UNCHANGED));
+    }
+  if(!cleanImportName.empty())
+    {
+    exeCleanFiles.push_back(this->Convert(cleanFullImportName.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
     }
@@ -394,11 +421,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   vars.Flags = flags.c_str();
   vars.LinkFlags = linkFlags.c_str();
   // Expand placeholders in the commands.
+  this->LocalGenerator->TargetImplib = targetOutPathImport;
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
     this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
+  this->LocalGenerator->TargetImplib = "";
 
   // Write the build rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream,

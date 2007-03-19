@@ -733,17 +733,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     target.GetLibraryNames(targetName, targetNameSO, targetNameFull,
                            targetNameImport, targetNamePDB, configName);
 
-    // VS does not distinguish between shared libraries and module
-    // libraries so it still wants to be given the name of an import
-    // library for modules.
-    if(targetNameImport.empty() &&
-       target.GetType() == cmTarget::MODULE_LIBRARY)
-      {
-      targetNameImport =
-        cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
-      targetNameImport += ".lib";
-      }
-
     // Compute the link library and directory information.
     std::vector<cmStdString> linkLibs;
     std::vector<cmStdString> linkDirs;
@@ -816,9 +805,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     {
     std::string targetName;
     std::string targetNameFull;
+    std::string targetNameImport;
     std::string targetNamePDB;
     target.GetExecutableNames(targetName, targetNameFull,
-                              targetNamePDB, configName);
+                              targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
     std::vector<cmStdString> linkLibs;
@@ -886,7 +876,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"";
       }
-    fout << "/>\n";
+    temp = target.GetDirectory(configName, true);
+    temp += "/";
+    temp += targetNameImport;
+    fout << "\t\t\t\tImportLibrary=\""
+         << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
     break;
     }
     case cmTarget::UTILITY:
