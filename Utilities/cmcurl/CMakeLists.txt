@@ -189,6 +189,8 @@ IF(CURL_SPECIAL_LIBZ)
   SET(HAVE_ZLIB_H 0)
 ENDIF(CURL_SPECIAL_LIBZ)
 
+# do we have process.h
+CHECK_INCLUDE_FILE("process.h" HAVE_PROCESS_H)
 
 # If we have features.h, then do the _BSD_SOURCE magic
 CHECK_INCLUDE_FILE("features.h"       HAVE_FEATURES_H)

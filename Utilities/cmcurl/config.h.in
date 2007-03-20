@@ -354,6 +354,9 @@
 /* we have a POSIX-style strerror_r() */
 #cmakedefine HAVE_POSIX_STRERROR_R ${HAVE_POSIX_STRERROR_R}
 
+/* Define to 1 if you have the <process.h> header file. */
+#cmakedefine HAVE_PROCESS_H ${HAVE_PROCESS_H}
+
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine HAVE_PWD_H ${HAVE_PWD_H}
 
