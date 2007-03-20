@@ -709,8 +709,6 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
       this->ErrorsAndWarnings.push_back(errorwarning);
       this->TotalWarnings ++;
       }
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "There was an error: "
-               << cmsysProcess_GetErrorString(cp) << std::endl);
     }
   else if(result == cmsysProcess_State_Exception)
     {
