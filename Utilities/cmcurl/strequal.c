@@ -25,7 +25,7 @@
 
 #include <string.h>
 #include <ctype.h>
-#ifdef  __QNX__
+#ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
 
