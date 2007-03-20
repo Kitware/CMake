@@ -25,6 +25,9 @@
 
 #include <string.h>
 #include <ctype.h>
+#ifdef  __QNX__
+#include <strings.h>
+#endif
 
 #include "strequal.h"
 
