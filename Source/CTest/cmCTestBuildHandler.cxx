@@ -70,6 +70,7 @@ static const char* cmCTestErrorMatches[] = {
   ":[ \\t]cannot find",
   ":[ \\t]can't find",
   ": \\*\\*\\* No rule to make target \\`.*\\'.  Stop",
+  ": \\*\\*\\* No targets specified and no makefile found",
   ": Invalid loader fixup for symbol",
   ": Invalid fixups exist",
   ": Can't find library for",
