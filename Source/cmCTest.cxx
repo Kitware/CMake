@@ -1057,6 +1057,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
     {
     *output += "\n*** ERROR executing: ";
     *output += cmsysProcess_GetErrorString(cp);
+    *output += "\n***The build process failed.";
     cmCTestLog(this, ERROR_MESSAGE, "There was an error: "
       << cmsysProcess_GetErrorString(cp) << std::endl);
     }
