@@ -695,6 +695,22 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     *retVal = cmsysProcess_GetExitValue(cp);
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "Command exited with the value: " << *retVal << std::endl);
+    // if a non zero return value
+    if (retVal)
+      {
+      // If there was an error running command, report that on the dashboard.
+      cmCTestBuildErrorWarning errorwarning;
+      errorwarning.LogLine     = 1;
+      errorwarning.Text        = "*** WARNING non-zero return value from: ";
+      errorwarning.Text        += argv[0];
+      errorwarning.PreContext  = "";
+      errorwarning.PostContext = "";
+      errorwarning.Error       = false;
+      this->ErrorsAndWarnings.push_back(errorwarning);
+      this->TotalWarnings ++;
+      }
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "There was an error: "
+               << cmsysProcess_GetErrorString(cp) << std::endl);
     }
   else if(result == cmsysProcess_State_Exception)
     {
