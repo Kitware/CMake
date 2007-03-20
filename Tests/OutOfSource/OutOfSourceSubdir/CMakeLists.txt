@@ -21,6 +21,13 @@ IF ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
     MATH(EXPR MAXPATH "${MAXPATH} - 46")
   ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio 8")
 
+  # Watcom WMake seems to have problems with long command lines.  This
+  # limit should still be big enough to require special object file name
+  # conversion.
+  IF(${CMAKE_GENERATOR} MATCHES "Watcom WMake")
+    SET(MAXPATH 180)
+  ENDIF(${CMAKE_GENERATOR} MATCHES "Watcom WMake")
+
   # MAXPATH less 25 for last /and/deeper/simple.cxx part and small safety
   MATH(EXPR MAXPATH "${MAXPATH} - 25")
   STRING(LENGTH "${DEEPDIR}" DEEPDIR_LEN)
