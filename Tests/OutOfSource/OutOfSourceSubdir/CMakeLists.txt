@@ -9,8 +9,20 @@ IF ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
   # test cmLocalGenerator::CreateSafeUniqueObjectFileName.
   GET_FILENAME_COMPONENT(DEEPDIR
     ${OutOfSource_BINARY_DIR}/../OutOfSourceDeep/deeper ABSOLUTE)
-  # MAXPATH = 250 less 25 for /and/deeper/simple.cxx part and small safety
-  MATH(EXPR MAXPATH "250 - 25")
+
+  # The maximum allowed path length on Windows is near this value.
+  SET(MAXPATH "250")
+
+  # VS8 adds "OutOfSource/SubDir/OutOfSourceSubdir/../../../" to the
+  # path of the source file for no good reason.  Reduce the length
+  # limit by 46 characters to account for it.  It should still be long
+  # enough to require special object file name conversion.
+  IF(${CMAKE_GENERATOR} MATCHES "Visual Studio 8")
+    MATH(EXPR MAXPATH "${MAXPATH} - 46")
+  ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio 8")
+
+  # MAXPATH less 25 for last /and/deeper/simple.cxx part and small safety
+  MATH(EXPR MAXPATH "${MAXPATH} - 25")
   STRING(LENGTH "${DEEPDIR}" DEEPDIR_LEN)
   WHILE("${DEEPDIR_LEN}" LESS "${MAXPATH}")
     SET(DEEPDIR ${DEEPDIR}/and/deeper)
