@@ -5,7 +5,9 @@
 #include "testdp.h"
 
 extern int simple();
+#ifndef NO_DEEPSRC
 extern int simple2();
+#endif
 extern "C" int outlib();
 
 int main ()
@@ -27,9 +29,11 @@ int main ()
     {
     return -4;
     }
+#ifndef NO_DEEPSRC
   if(simple2() != 789)
     {
     return -5;
     }
+#endif
   return 0;
 }
