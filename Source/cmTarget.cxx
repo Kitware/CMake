@@ -259,6 +259,23 @@ void cmTarget::DefineProperties(cmake *cm)
      "how the executable will be linked.");
 
   cm->DefineProperty
+    ("ENABLE_EXPORTS", cmProperty::TARGET,
+     "Specify whether an executable exports symbols for loadable modules.",
+     "Normally an executable does not export any symbols because it is "
+     "the final program.  It is possible for an executable to export "
+     "symbols to be used by loadable modules.  When this property is "
+     "set to true CMake will allow other targets to \"link\" to the "
+     "executable with the TARGET_LINK_LIBRARIES command.  "
+     "On all platforms a target-level dependency on the executable is "
+     "created for targets that link to it.  "
+     "For non-DLL platforms the link rule is simply ignored since "
+     "the dynamic loader will automatically bind symbols when the "
+     "module is loaded.  "
+     "For DLL platforms an import library will be created for the "
+     "exported symbols and then used for linking.  "
+     "All Windows-based systems including Cygwin are DLL platforms.");
+
+  cm->DefineProperty
     ("OBJECT_FILES", cmProperty::TARGET, 
      "Used to get the resulting list of object files that make up a "
      "target.",

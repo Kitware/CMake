@@ -1659,9 +1659,19 @@ void cmLocalGenerator
       {
       // Compute the proper name to use to link this library.
       cmTarget* tgt = this->GlobalGenerator->FindTarget(0, lib.c_str());
-      if(tgt && (tgt->GetType() == cmTarget::STATIC_LIBRARY ||
-                 tgt->GetType() == cmTarget::SHARED_LIBRARY ||
-                 tgt->GetType() == cmTarget::MODULE_LIBRARY))
+      bool impexe = (tgt &&
+                     tgt->GetType() == cmTarget::EXECUTABLE &&
+                     tgt->GetPropertyAsBool("ENABLE_EXPORTS"));
+      if(impexe && !implib)
+        {
+        // Skip linking to executables on platforms with no import
+        // libraries.
+        continue;
+        }
+      else if(tgt && (tgt->GetType() == cmTarget::STATIC_LIBRARY ||
+                      tgt->GetType() == cmTarget::SHARED_LIBRARY ||
+                      tgt->GetType() == cmTarget::MODULE_LIBRARY ||
+                      impexe))
         {
         // This is a CMake target.  Ask the target for its real name.
         // Pass the full path to the target file but purposely leave

@@ -347,6 +347,19 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string linkRule =
     this->Makefile->GetRequiredDefinition(linkRuleVar.c_str());
   cmSystemTools::ExpandListArgument(linkRule, commands1);
+  if(this->Target->GetPropertyAsBool("ENABLE_EXPORTS"))
+    {
+    // If a separate rule for creating an import library is specified
+    // add it now.
+    std::string implibRuleVar = "CMAKE_";
+    implibRuleVar += linkLanguage;
+    implibRuleVar += "_CREATE_IMPORT_LIBRARY";
+    if(const char* rule =
+       this->Makefile->GetDefinition(implibRuleVar.c_str()))
+      {
+      cmSystemTools::ExpandListArgument(rule, commands1);
+      }
+    }
   this->LocalGenerator->CreateCDCommand
     (commands1,
      this->Makefile->GetStartOutputDirectory(),

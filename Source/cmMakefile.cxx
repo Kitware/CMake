@@ -944,13 +944,16 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
         }
       // if it is not a static or shared library then you can not link to it
       if(!((tgt->GetType() == cmTarget::STATIC_LIBRARY) ||
-           (tgt->GetType() == cmTarget::SHARED_LIBRARY)))
+           (tgt->GetType() == cmTarget::SHARED_LIBRARY) ||
+           (tgt->GetType() == cmTarget::EXECUTABLE &&
+            tgt->GetPropertyAsBool("ENABLE_EXPORTS"))))
         {
         cmOStringStream e;
         e << "Attempt to add link target " << lib << " of type: "
           << cmTarget::TargetTypeNames[static_cast<int>(tgt->GetType())]
           << "\nto target " << target
-          << ". You can only link to STATIC or SHARED libraries.";
+          << ". One can only link to STATIC or SHARED libraries, or "
+          << "to executables with the ENABLE_EXPORTS property set.";
         // in older versions of cmake linking to modules was allowed
         if( tgt->GetType() == cmTarget::MODULE_LIBRARY )
           {
