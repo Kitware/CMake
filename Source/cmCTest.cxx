@@ -61,6 +61,12 @@ struct tm* cmCTest::GetNightlyTime(std::string str,
 {
   struct tm* lctime;
   time_t tctime = time(0);
+  lctime = gmtime(&tctime);
+  char buf[1024];
+  // add todays year day and month to the time in str because
+  // curl_getdate no longer assumes the day is today
+  sprintf(buf, "%d%02d%02d %s", lctime->tm_year+1900, lctime->tm_mday,
+          lctime->tm_mon, str.c_str());
   cmCTestLog(this, OUTPUT, "Determine Nightly Start Time" << std::endl
     << "   Specified time: " << str.c_str() << std::endl);
   //Convert the nightly start time to seconds. Since we are
@@ -69,7 +75,7 @@ struct tm* cmCTest::GetNightlyTime(std::string str,
   //is the time at which the nightly dashboard was opened or
   //will be opened on the date of the current client machine.
   //As such, this time may be in the past or in the future.
-  time_t ntime = curl_getdate(str.c_str(), &tctime);
+  time_t ntime = curl_getdate(buf, &tctime);
   cmCTestLog(this, DEBUG, "   Get curl time: " << ntime << std::endl);
   tctime = time(0);
   cmCTestLog(this, DEBUG, "   Get the current time: " << tctime << std::endl);
