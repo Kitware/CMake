@@ -2157,3 +2157,30 @@ const char* cmTarget::GetOutputDir(bool implib)
 
   return out.c_str();
 }
+
+//----------------------------------------------------------------------------
+const char* cmTarget::GetExportMacro()
+{
+  // Define the symbol for targets that export symbols.
+  if(this->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->GetType() == cmTarget::MODULE_LIBRARY ||
+     this->GetType() == cmTarget::EXECUTABLE &&
+     this->GetPropertyAsBool("ENABLE_EXPORTS"))
+    {
+    if(const char* custom_export_name = this->GetProperty("DEFINE_SYMBOL"))
+      {
+      this->ExportMacro = custom_export_name;
+      }
+    else
+      {
+      std::string in = this->GetName();
+      in += "_EXPORTS";
+      this->ExportMacro = cmSystemTools::MakeCindentifier(in.c_str());
+      }
+    return this->ExportMacro.c_str();
+    }
+  else
+    {
+    return 0;
+    }
+}

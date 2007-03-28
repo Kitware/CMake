@@ -243,23 +243,14 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     {
     const char *lang = l->first.c_str();
     std::string flags;
-    // Add the export symbol definition for shared library objects.
     bool shared = ((this->Target->GetType() == cmTarget::SHARED_LIBRARY) ||
                    (this->Target->GetType() == cmTarget::MODULE_LIBRARY));
-    if(shared)
+
+    // Add the export symbol definition for shared library objects.
+    if(const char* exportMacro = this->Target->GetExportMacro())
       {
       flags += "-D";
-      if(const char* custom_export_name =
-         this->Target->GetProperty("DEFINE_SYMBOL"))
-        {
-        flags += custom_export_name;
-        }
-      else
-        {
-        std::string in = this->Target->GetName();
-        in += "_EXPORTS";
-        flags += cmSystemTools::MakeCindentifier(in.c_str());
-        }
+      flags += exportMacro;
       }
 
     // Add language-specific flags.

@@ -520,22 +520,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   configDefine += "\\\"";
   targetOptions.AddDefine(configDefine);
 
-  // Add a definition for the export macro.
-  if(target.GetType() == cmTarget::SHARED_LIBRARY ||
-     target.GetType() == cmTarget::MODULE_LIBRARY)
+  // Add the export symbol definition for shared library objects.
+  if(const char* exportMacro = target.GetExportMacro())
     {
-    std::string exportSymbol;
-    if(const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
-      {
-      exportSymbol = custom_export_name;
-      }
-    else
-      {
-      std::string id = libName;
-      id += "_EXPORTS";
-      exportSymbol = cmSystemTools::MakeCindentifier(id.c_str());
-      }
-    targetOptions.AddDefine(exportSymbol);
+    targetOptions.AddDefine(exportMacro);
     }
 
   // The intermediate directory name consists of a directory for the

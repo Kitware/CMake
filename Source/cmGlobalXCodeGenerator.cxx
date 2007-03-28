@@ -1067,21 +1067,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 {
   std::string flags;
   std::string defFlags;
-  bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
-                 (target.GetType() == cmTarget::MODULE_LIBRARY));
-  if(shared)
+  // Add the export symbol definition for shared library objects.
+  if(const char* exportMacro = target.GetExportMacro())
     {
     defFlags += "-D";
-    if(const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
-      {
-      defFlags += custom_export_name;
-      }
-    else
-      {
-      std::string in = target.GetName();
-      in += "_EXPORTS";
-      defFlags += cmSystemTools::MakeCindentifier(in.c_str());
-      }
+    defFlags += exportMacro;
     }
   const char* lang = target.GetLinkerLanguage(this);
   std::string cflags;

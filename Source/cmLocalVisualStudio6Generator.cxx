@@ -1289,18 +1289,13 @@ void cmLocalVisualStudio6Generator
       staticLibOptions = libflags;
       }
     }
-  std::string exportSymbol;
-  if (const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
-    {
-    exportSymbol = custom_export_name;
-    }
-  else
-    {
-    std::string in = libName;
-    in += "_EXPORTS";
-    exportSymbol = cmSystemTools::MakeCindentifier(in.c_str());
-    }
 
+  // Add the export symbol definition for shared library objects.
+  std::string exportSymbol;
+  if(const char* exportMacro = target.GetExportMacro())
+    {
+    exportSymbol = exportMacro;
+    }
 
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))

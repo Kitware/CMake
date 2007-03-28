@@ -259,6 +259,10 @@ public:
   // Compute the OBJECT_FILES property only when requested
   void ComputeObjectFiles();
 
+  /** Get the macro to define when building sources in this target.
+      If no macro should be defined null is returned.  */
+  const char* GetExportMacro();
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -359,6 +363,7 @@ private:
   std::string OutputDirImplib;
   std::string Directory;
   std::string Location;
+  std::string ExportMacro;
   std::set<cmStdString> Utilities;
   bool RecordDependencies; 
   cmPropertyMap Properties;
