@@ -696,12 +696,13 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "Command exited with the value: " << *retVal << std::endl);
     // if a non zero return value
-    if (retVal)
+    if (retVal && *retVal)
       {
       // If there was an error running command, report that on the dashboard.
       cmCTestBuildErrorWarning errorwarning;
       errorwarning.LogLine     = 1;
-      errorwarning.Text        = "*** WARNING non-zero return value from: ";
+      errorwarning.Text 
+        = "*** WARNING non-zero return value in ctest from: ";
       errorwarning.Text        += argv[0];
       errorwarning.PreContext  = "";
       errorwarning.PostContext = "";
