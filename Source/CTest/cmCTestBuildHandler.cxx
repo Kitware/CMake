@@ -713,14 +713,15 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
         this->TotalWarnings ++;
         }
       }
-    else if(result == cmsysProcess_State_Exception)
+    }
+  else if(result == cmsysProcess_State_Exception)
+    {
+    if (retVal)
       {
-      if (retVal)
-        {
-        *retVal = cmsysProcess_GetExitException(cp);
-        cmCTestLog(this->CTest, WARNING, "There was an exception: " << *retVal
-                   << std::endl);
-        }
+      *retVal = cmsysProcess_GetExitException(cp);
+      cmCTestLog(this->CTest, WARNING, "There was an exception: " << *retVal
+                 << std::endl);
+      }
     }
   else if(result == cmsysProcess_State_Expired)
     {
