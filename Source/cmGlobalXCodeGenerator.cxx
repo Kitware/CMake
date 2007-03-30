@@ -1287,6 +1287,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::vector<std::string>::iterator i = includes.begin();
   std::string fdirs;
   std::set<cmStdString> emitted;
+  emitted.insert("/System/Library/Frameworks");
   for(;i != includes.end(); ++i)
     {
     if(cmSystemTools::IsPathToFramework(i->c_str()))

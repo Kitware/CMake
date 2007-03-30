@@ -1084,6 +1084,9 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 
   bool flagUsed = false;
   std::set<cmStdString> emitted;
+#ifdef __APPLE__
+  emitted.insert("/System/Library/Frameworks");
+#endif
   for(i = includes.begin(); i != includes.end(); ++i)
     {
 #ifdef __APPLE__

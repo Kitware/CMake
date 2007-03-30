@@ -1116,6 +1116,7 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags()
   return std::string();
 #else
   std::set<cmStdString> emitted;
+  emitted.insert("/System/Library/Frameworks");
   std::vector<std::string> includes;
   this->LocalGenerator->GetIncludeDirectories(includes);
   std::vector<std::string>::iterator i;
