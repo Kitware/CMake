@@ -13,7 +13,7 @@
 #  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
-  IF("${VAR}" MATCHES "^${VAR}$")
+  IF("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
     SET(MACRO_CHECK_FUNCTION_DEFINITIONS 
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
     IF(CMAKE_REQUIRED_LIBRARIES)
@@ -28,9 +28,20 @@ MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
     ELSE(CMAKE_REQUIRED_INCLUDES)
       SET(CHECK_C_SOURCE_COMPILES_ADD_INCLUDES)
     ENDIF(CMAKE_REQUIRED_INCLUDES)
-    FILE(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c"
-      "${SOURCE}\n")
+    SET(src "")
+    FOREACH(def ${EXTRA_DEFINES})
+      SET(src "${src}#define ${def} 1\n")
+    ENDFOREACH(def)
+    FOREACH(inc ${HEADER_INCLUDES})
+      SET(src "${src}#include <${inc}>\n")
+    ENDFOREACH(inc)
 
+    SET(src "${src}\nint main() { ${SOURCE} ; return 0; }")
+    FILE(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src2.c"
+      "${src}\n")
+    EXEC_PROGRAM("${CMAKE_COMMAND}" 
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp"
+      ARGS -E copy src2.c src.c)
     MESSAGE(STATUS "Performing Test ${VAR}")
     TRY_RUN(${VAR} ${VAR}_COMPILED
       ${CMAKE_BINARY_DIR}
@@ -49,20 +60,19 @@ MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
     IF("${result_var}" EQUAL 0)
       SET(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C SOURCE FILE Test ${VAR} succeded with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${${VAR}}\n"
-        "Source file was:\n${SOURCE}\n")
+        "Source file was:\n${src}\n")
     ELSE("${result_var}" EQUAL 0)
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
       SET(${VAR} "" CACHE INTERNAL "Test ${VAR}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing C SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${result_var}\n"
-        "Source file was:\n${SOURCE}\n")
+        "Source file was:\n${src}\n")
     ENDIF("${result_var}" EQUAL 0)
-  ENDIF("${VAR}" MATCHES "^${VAR}$")
+  ENDIF("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
 ENDMACRO(CHECK_C_SOURCE_RUNS)
-
