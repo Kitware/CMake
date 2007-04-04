@@ -372,7 +372,10 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
 bool cmMakefile::ReadListFile(const char* filename_in, 
                               const char *external_in)
 {
-  std::string currentFile = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
+  std::string currentParentFile
+    = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
+  std::string currentFile
+    = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
 
   // used to watch for blockers going out of scope
@@ -423,6 +426,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     {
     filenametoread= external;
     }
+
+  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
+
   // try to see if the list file is the top most
   // list file for a project, and if it is, then it
   // must have a project command.   If there is not
@@ -444,7 +450,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   cmListFile cacheFile;
   if( !cacheFile.ParseFile(filenametoread, requireProjectCommand) )
     {
-    this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());
+    this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+    this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
     return false;
     }
   // add this list file to the list of dependencies
@@ -457,7 +464,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       {
       // pop the listfile off the stack
       this->ListFileStack.pop_back();
-      this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());
+      this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+      this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
       return true;
       }
     }
@@ -479,7 +487,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       }
     }
   
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
 
   // pop the listfile off the stack
   this->ListFileStack.pop_back();
