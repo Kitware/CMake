@@ -44,8 +44,8 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args)
   // after 2.0 it only does InitialPass
   this->Immediate = false;
   const char* versionValue
-    = this->Makefile->GetRequiredDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-  if (atof(versionValue) > 2.0)
+    = this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  if (versionValue && atof(versionValue) > 2.0)
     {
     this->Immediate = true;
     }
