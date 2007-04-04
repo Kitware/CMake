@@ -17,7 +17,7 @@
 #ifndef cmGlobalVisualStudio7Generator_h
 #define cmGlobalVisualStudio7Generator_h
 
-#include "cmGlobalGenerator.h"
+#include "cmGlobalVisualStudioGenerator.h"
 
 class cmTarget;
 struct cmVS7FlagTable;
@@ -27,7 +27,7 @@ struct cmVS7FlagTable;
  *
  * cmGlobalVisualStudio7Generator manages UNIX build process for a tree
  */
-class cmGlobalVisualStudio7Generator : public cmGlobalGenerator
+class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
   cmGlobalVisualStudio7Generator();

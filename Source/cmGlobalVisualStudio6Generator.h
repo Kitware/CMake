@@ -17,7 +17,7 @@
 #ifndef cmGlobalVisualStudio6Generator_h
 #define cmGlobalVisualStudio6Generator_h
 
-#include "cmGlobalGenerator.h"
+#include "cmGlobalVisualStudioGenerator.h"
 
 class cmTarget;
 
@@ -26,7 +26,7 @@ class cmTarget;
  *
  * cmGlobalVisualStudio6Generator manages UNIX build process for a tree
  */
-class cmGlobalVisualStudio6Generator : public cmGlobalGenerator
+class cmGlobalVisualStudio6Generator : public cmGlobalVisualStudioGenerator
 {
 public:
   cmGlobalVisualStudio6Generator();
