@@ -177,7 +177,10 @@ void cmGlobalVisualStudio6Generator::Generate()
                                                "echo", "Build all projects");
       }
     }
-  
+
+  // Fix utility dependencies to avoid linking to libraries.
+  this->FixUtilityDepends();
+
   // first do the superclass method
   this->cmGlobalGenerator::Generate();
   
@@ -438,12 +441,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
     {
     if(*i != dspname)
       {
-      std::string depName = *i;
-      if(strncmp(depName.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
-        {
-        depName.erase(depName.begin(), depName.begin() + 27);
-        }
-          
+      std::string depName = this->GetUtilityForTarget(target, i->c_str());
       fout << "Begin Project Dependency\n";
       fout << "Project_Dep_Name " << depName << "\n";
       fout << "End Project Dependency\n";

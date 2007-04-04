@@ -30,6 +30,15 @@ class cmGlobalVisualStudioGenerator : public cmGlobalGenerator
 public:
   cmGlobalVisualStudioGenerator();
   virtual ~cmGlobalVisualStudioGenerator();
+
+protected:
+  virtual void CreateGUID(const char*) {}
+  virtual void FixUtilityDepends();
+  const char* GetUtilityForTarget(cmTarget& target, const char*);
+private:
+  void FixUtilityDependsForTarget(cmTarget& target);
+  void CreateUtilityDependTarget(cmTarget& target);
+  bool CheckTargetLinks(cmTarget& target, const char* name);
 };
 
 #endif

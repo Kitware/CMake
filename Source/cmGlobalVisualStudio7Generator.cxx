@@ -235,6 +235,9 @@ void cmGlobalVisualStudio7Generator::Generate()
       }
     }
 
+  // Fix utility dependencies to avoid linking to libraries.
+  this->FixUtilityDepends();
+
   // first do the superclass method
   this->cmGlobalGenerator::Generate();
   
@@ -634,17 +637,7 @@ cmGlobalVisualStudio7Generator
     {
     if(*i != dspname)
       {
-      std::string name = *i;
-      if(strncmp(name.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
-        {
-        // kind of weird removing the first 27 letters.  my
-        // recommendatsions: use cmCustomCommand::GetCommand() to get the
-        // project name or get rid of the target name starting with
-        // "INCLUDE_EXTERNAL_MSPROJECT_" and use another indicator/flag
-        // somewhere.  These external project names shouldn't conflict
-        // with cmake target names anyways.
-        name.erase(name.begin(), name.begin() + 27);
-        }
+      std::string name = this->GetUtilityForTarget(target, i->c_str());
       std::string guid = this->GetGUID(name.c_str());
       if(guid.size() == 0)
         {

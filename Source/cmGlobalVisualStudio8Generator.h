@@ -50,6 +50,10 @@ public:
   virtual void Configure();
   virtual void Generate();
 protected:
+
+  // Utility target fix is not needed for VS8.
+  virtual void FixUtilityDepends() {}
+
   static cmVS7FlagTable const* GetExtraFlagTableVS8();
   virtual void AddPlatformDefinitions(cmMakefile* mf);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,

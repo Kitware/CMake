@@ -1,4 +1,4 @@
-void ThreeFunction();
+#include <two-test.h>
 
 void TwoFunction()
 {
