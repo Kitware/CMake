@@ -700,7 +700,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
       // if a non zero return value
       if (*retVal)
         {
-        // If there was an error running command, report that on the dashboard.
+        // If there was an error running command, report that on the
+        // dashboard.
         cmCTestBuildErrorWarning errorwarning;
         errorwarning.LogLine     = 1;
         errorwarning.Text 
