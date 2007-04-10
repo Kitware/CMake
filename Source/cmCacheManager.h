@@ -19,6 +19,7 @@
 
 #include "cmStandardIncludes.h"
 class cmMakefile;
+class cmMarkAsAdvancedCommand;
 
 /** \class cmCacheManager
  * \brief Control class for cmake's cache
@@ -164,6 +165,7 @@ private:
   friend class cmMakefile; // allow access to add cache values
   friend class cmake; // allow access to add cache values
   friend class cmakewizard; // allow access to add cache values
+  friend class cmMarkAsAdvancedCommand; // allow access to add cache values
 };
 
 #endif
