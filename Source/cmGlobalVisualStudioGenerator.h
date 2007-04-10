@@ -31,6 +31,11 @@ public:
   cmGlobalVisualStudioGenerator();
   virtual ~cmGlobalVisualStudioGenerator();
 
+  /**
+   * Basic generate implementation for all VS generators.
+   */
+  virtual void Generate();
+
 protected:
   virtual void CreateGUID(const char*) {}
   virtual void FixUtilityDepends();

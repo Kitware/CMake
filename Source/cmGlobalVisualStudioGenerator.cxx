@@ -31,6 +31,37 @@ cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::Generate()
+{
+  // Add a special target that depends on ALL projects for easy build
+  // of one configuration only.
+  const char* no_working_dir = 0;
+  std::vector<std::string> no_depends;
+  cmCustomCommandLines no_commands;
+  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
+    {
+    std::vector<cmLocalGenerator*>& gen = it->second;
+    // add the ALL_BUILD to the first local generator of each project
+    if(gen.size())
+      {
+      // Use no actual command lines so that the target itself is not
+      // considered always out of date.
+      gen[0]->GetMakefile()->
+        AddUtilityCommand("ALL_BUILD", true, no_working_dir,
+                          no_depends, no_commands, false,
+                          "Build all projects");
+      }
+    }
+
+  // Fix utility dependencies to avoid linking to libraries.
+  this->FixUtilityDepends();
+
+  // Run all the local generators.
+  this->cmGlobalGenerator::Generate();
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::FixUtilityDepends()
 {
   // For VS versions before 8:

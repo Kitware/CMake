@@ -214,33 +214,9 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
 
 void cmGlobalVisualStudio7Generator::Generate()
 {
-  // add a special target that depends on ALL projects for easy build
-  // of one configuration only.
-  const char* no_working_dir = 0;
-  std::vector<std::string> no_depends;
-  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
-    {
-    std::vector<cmLocalGenerator*>& gen = it->second;
-    // add the ALL_BUILD to the first local generator of each project
-    if(gen.size())
-      {
-      gen[0]->GetMakefile()->
-        AddUtilityCommand("ALL_BUILD", true, no_depends,
-                          no_working_dir,
-                          "echo", "Build all projects");
-      std::string cmake_command = 
-        this->LocalGenerators[0]->GetMakefile()->
-        GetRequiredDefinition("CMAKE_COMMAND");
-      }
-    }
-
-  // Fix utility dependencies to avoid linking to libraries.
-  this->FixUtilityDepends();
-
   // first do the superclass method
-  this->cmGlobalGenerator::Generate();
-  
+  this->cmGlobalVisualStudioGenerator::Generate();
+
   // Now write out the DSW
   this->OutputSLNFile();
 }
