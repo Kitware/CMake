@@ -24,9 +24,6 @@ IF(BUILD_TESTING)
   INCLUDE(CTest)
   SET(RUN_FROM_DART)
 
-  # Project Home Page
-  SET (PROJECT_URL "http://www.kitware.com")
-
   FIND_PROGRAM(COMPRESSIONCOMMAND NAMES gzip compress zip 
     DOC "Path to program used to compress files for transfer to the dart server")
   FIND_PROGRAM(GUNZIPCOMMAND gunzip DOC "Path to gunzip executable")
