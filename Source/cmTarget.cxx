@@ -276,6 +276,12 @@ void cmTarget::DefineProperties(cmake *cm)
      "All Windows-based systems including Cygwin are DLL platforms.");
 
   cm->DefineProperty
+    ("GENERATOR_FILE_NAME", cmProperty::TARGET, 
+     "Generator's file for this target.",
+     "An internal property used by some generators to record the name of "
+     "project or dsp file associated with this target.");
+
+  cm->DefineProperty
     ("OBJECT_FILES", cmProperty::TARGET, 
      "Used to get the resulting list of object files that make up a "
      "target.",

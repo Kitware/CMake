@@ -110,9 +110,6 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
 
   // Create the VCProj or set of VCProj's for libraries and executables
 
-  // clear project names
-  this->CreatedProjectNames.clear();
-
   // Call TraceVSDependencies on all targets
   cmTargets &tgts = this->Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin();
@@ -158,7 +155,7 @@ void cmLocalVisualStudio7Generator
 {
   // add to the list of projects
   std::string pname = lname;
-  this->CreatedProjectNames.push_back(pname);
+  target.SetProperty("GENERATOR_FILE_NAME",lname);
   // create the dsp.cmake file
   std::string fname;
   fname = this->Makefile->GetStartOutputDirectory();

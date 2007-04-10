@@ -184,9 +184,6 @@ void cmGlobalVisualStudio8Generator::WriteSLNFile(
       continue;
       }
     cmMakefile* mf = generators[i]->GetMakefile();
-    std::vector<std::string> dspnames =
-      static_cast<cmLocalVisualStudio7Generator*>(generators[i])
-      ->GetCreatedProjectNames();
     cmTargets& tgts = mf->GetTargets();
     for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
       {

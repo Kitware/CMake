@@ -54,14 +54,6 @@ public:
    */
   void SetBuildType(BuildType,const char *name);
 
-  /**
-   * Return array of created DSP names in a STL vector.
-   * Each executable must have its own dsp.
-   */
-  std::vector<std::string> GetCreatedProjectNames() 
-    {
-    return this->CreatedProjectNames;
-    }
   void SetVersion71() {this->Version = 71;}
   void SetVersion8() {this->Version = 8;}
   void SetPlatformName(const char* n) { this->PlatformName = n;}
@@ -127,7 +119,6 @@ private:
   virtual std::string GetTargetDirectory(cmTarget&);
 
   cmVS7FlagTable const* ExtraFlagTable;
-  std::vector<std::string> CreatedProjectNames;
   std::string ModuleDefinitionFile;
   int Version;
   std::string PlatformName; // Win32 or x64 

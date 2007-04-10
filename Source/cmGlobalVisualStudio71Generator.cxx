@@ -85,13 +85,9 @@ void cmGlobalVisualStudio71Generator
     // Get the list of create dsp files names from the cmVCProjWriter, more
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target
-    std::vector<std::string> dspnames = 
-      static_cast<cmLocalVisualStudio7Generator *>(generators[i])
-      ->GetCreatedProjectNames();
     cmTargets &tgts = generators[i]->GetMakefile()->GetTargets();
     cmTargets::iterator l = tgts.begin();
-    for(std::vector<std::string>::iterator si = dspnames.begin(); 
-        l != tgts.end() && si != dspnames.end(); ++l)
+    for(; l != tgts.end(); ++l)
       {
       // special handling for the current makefile
       if(mf == generators[0]->GetMakefile())
@@ -221,9 +217,13 @@ void cmGlobalVisualStudio71Generator
             }
           if(!skip)
             {
-            this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
+            const char *dspname = 
+              l->second.GetProperty("GENERATOR_FILE_NAME");
+            if (dspname)
+              {
+              this->WriteProject(fout, dspname, dir.c_str(),l->second);
+              }
             }
-          ++si;
           }
         }
       }
@@ -241,13 +241,10 @@ void cmGlobalVisualStudio71Generator
     // Get the list of create dsp files names from the cmVCProjWriter, more
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target
-    std::vector<std::string> dspnames = 
-      pg->GetCreatedProjectNames();
     cmTargets &tgts = pg->GetMakefile()->GetTargets();
     cmTargets::iterator l = tgts.begin();
     std::string dir = mf->GetStartDirectory();
-    for(std::vector<std::string>::iterator si = dspnames.begin(); 
-        l != tgts.end() && si != dspnames.end(); ++l)
+    for(; l != tgts.end(); ++l)
       {
       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
@@ -263,9 +260,13 @@ void cmGlobalVisualStudio71Generator
         bool partOfDefaultBuild = this->IsPartOfDefaultBuild(
           root->GetMakefile()->GetProjectName(),
           &l->second);
-        this->WriteProjectConfigurations(fout, si->c_str(),
-                                         partOfDefaultBuild);
-        ++si;
+        const char *dspname = 
+          l->second.GetProperty("GENERATOR_FILE_NAME");
+        if (dspname)
+          {
+          this->WriteProjectConfigurations(fout, dspname,
+                                           partOfDefaultBuild);
+          }
         }
       }
     }
