@@ -1166,6 +1166,8 @@ cmGlobalUnixMakefileGenerator3
     depends.push_back(tgtName);
     if(result->GetType() == cmTarget::STATIC_LIBRARY)
       {
+      // Since the static library itself does not list dependencies we
+      // need to chain its dependencies here.
       const cmTarget::LinkLibraryVectorType& tlibs 
         = result->GetLinkLibraries();
       for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
