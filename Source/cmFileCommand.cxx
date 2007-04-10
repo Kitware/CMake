@@ -1184,6 +1184,9 @@ bool cmFileCommand::HandleInstallCommand(
       }
     }
 
+  // Choose a default for shared library permissions.
+  bool install_so_no_exe = this->Makefile->IsOn("CMAKE_INSTALL_SO_NO_EXE");
+
   // If file permissions were not specified set default permissions
   // for this target type.
   if(!use_given_permissions_file && !use_source_permissions)
@@ -1192,15 +1195,16 @@ bool cmFileCommand::HandleInstallCommand(
       {
       case cmTarget::SHARED_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
-#if defined(__linux__)
-        // Use read/write permissions.
-        permissions_file = 0;
-        permissions_file |= mode_owner_read;
-        permissions_file |= mode_owner_write;
-        permissions_file |= mode_group_read;
-        permissions_file |= mode_world_read;
-        break;
-#endif
+        if(install_so_no_exe)
+          {
+          // Use read/write permissions.
+          permissions_file = 0;
+          permissions_file |= mode_owner_read;
+          permissions_file |= mode_owner_write;
+          permissions_file |= mode_group_read;
+          permissions_file |= mode_world_read;
+          break;
+          }
       case cmTarget::EXECUTABLE:
       case cmTarget::INSTALL_PROGRAMS:
         // Use read/write/executable permissions.
