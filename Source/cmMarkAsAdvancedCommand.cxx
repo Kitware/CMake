@@ -46,8 +46,8 @@ bool cmMarkAsAdvancedCommand
       manager->GetCacheIterator(variable.c_str());
     if ( it.IsAtEnd() )
       {
-      this->Makefile->AddCacheDefinition(variable.c_str(), 0, 0,
-                                     cmCacheManager::UNINITIALIZED);
+      this->Makefile->GetCacheManager()
+        ->AddCacheEntry(variable.c_str(), 0, 0, cmCacheManager::UNINITIALIZED);
       overwrite = true;
       }
     it.Find(variable.c_str());
