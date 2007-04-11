@@ -88,7 +88,7 @@
 #include <memory> // auto_ptr
 
 void cmNeedBackwardsCompatibility(const std::string& variable,
-                                  int access_type, void* )
+  int access_type, void*, const char*, const cmMakefile*)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   if (access_type == cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS)

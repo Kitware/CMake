@@ -52,6 +52,8 @@
 #include "cmUseMangledMesaCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
 #include "cmVariableRequiresCommand.cxx"
+#include "cmVariableWatchCommand.cxx"
+
 #include "cmWhileCommand.cxx"
 #include "cmWriteFileCommand.cxx"
 
@@ -105,6 +107,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmUseMangledMesaCommand);
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmVariableRequiresCommand);
+  commands.push_back(new cmVariableWatchCommand);
   commands.push_back(new cmWhileCommand);
   commands.push_back(new cmWriteFileCommand);
 #endif

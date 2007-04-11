@@ -1215,7 +1215,9 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
   if ( vv )
     {
     vv->VariableAccessed(this->TemporaryDefinitionKey, 
-                         cmVariableWatch::VARIABLE_MODIFIED_ACCESS);
+                         cmVariableWatch::VARIABLE_MODIFIED_ACCESS,
+                         value,
+                         this);
     }
 #endif
 }
@@ -1275,7 +1277,8 @@ void cmMakefile::AddDefinition(const char* name, bool value)
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
     {
-    vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS);
+    vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS,
+      value?"ON":"OFF", this);
     }
 #endif
 }
@@ -1304,7 +1307,8 @@ void cmMakefile::RemoveDefinition(const char* name)
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
     {
-    vv->VariableAccessed(name, cmVariableWatch::VARIABLE_REMOVED_ACCESS);
+    vv->VariableAccessed(name, cmVariableWatch::VARIABLE_REMOVED_ACCESS,
+      0, this);
     }
 #endif
 }
@@ -1649,7 +1653,8 @@ const char* cmMakefile::GetDefinition(const char* name) const
     {
     if ( def )
       {
-      vv->VariableAccessed(name, cmVariableWatch::VARIABLE_READ_ACCESS);
+      vv->VariableAccessed(name, cmVariableWatch::VARIABLE_READ_ACCESS,
+        def, this);
       }
     else 
       {
@@ -1659,13 +1664,13 @@ const char* cmMakefile::GetDefinition(const char* name) const
       if (pos2 != this->Definitions.end() && 
           cmSystemTools::IsOn((*pos2).second.c_str())) 
         {
-        vv->VariableAccessed
-          (name, cmVariableWatch::ALLOWED_UNKNOWN_VARIABLE_READ_ACCESS);
+        vv->VariableAccessed(name,
+          cmVariableWatch::ALLOWED_UNKNOWN_VARIABLE_READ_ACCESS, def, this);
         }
       else
         {
-        vv->VariableAccessed(name, cmVariableWatch::
-                             UNKNOWN_VARIABLE_READ_ACCESS);
+        vv->VariableAccessed(name,
+          cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS, def, this);
         }
       }
     }

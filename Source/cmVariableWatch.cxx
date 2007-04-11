@@ -16,6 +16,25 @@
 =========================================================================*/
 #include "cmVariableWatch.h"
 
+static const char* const cmVariableWatchAccessStrings[] =
+{
+    "READ_ACCESS",
+    "UNKNOWN_READ_ACCESS",
+    "ALLOWED_UNKNOWN_READ_ACCESS",
+    "MODIFIED_ACCESS",
+    "REMOVED_ACCESS",
+    "NO_ACCESS"
+};
+
+const char* cmVariableWatch::GetAccessAsString(int access_type)
+{
+  if ( access_type < 0 || access_type >= cmVariableWatch::NO_ACCESS )
+    {
+    return "NO_ACCESS";
+    }
+  return cmVariableWatchAccessStrings[access_type];
+}
+
 cmVariableWatch::cmVariableWatch()
 {
 }
@@ -60,7 +79,9 @@ void cmVariableWatch::RemoveWatch(const std::string& variable,
 }
 
 void  cmVariableWatch::VariableAccessed(const std::string& variable, 
-                                        int access_type) const
+                                        int access_type,
+                                        const char* newValue,
+                                        const cmMakefile* mf) const
 {
   cmVariableWatch::StringToVectorOfPairs::const_iterator mit = 
     this->WatchMap.find(variable);
@@ -70,7 +91,8 @@ void  cmVariableWatch::VariableAccessed(const std::string& variable,
     cmVariableWatch::VectorOfPairs::const_iterator it;
     for ( it = vp->begin(); it != vp->end(); it ++ )
       {
-      it->Method(variable, access_type, it->ClientData);
+      it->Method(variable, access_type, it->ClientData,
+        newValue, mf);
       }
     }
 }
