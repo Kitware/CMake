@@ -23,7 +23,8 @@ static void cmVariableWatchCommandVariableAccessed(
   const std::string& variable, int access_type, void* client_data,
   const char* newValue, const cmMakefile* mf)
 {
-  cmVariableWatchCommand* command = static_cast<cmVariableWatchCommand*>(client_data);
+  cmVariableWatchCommand* command
+    = static_cast<cmVariableWatchCommand*>(client_data);
   command->VariableAccessed(variable, access_type, newValue, mf);
 }
 
@@ -88,11 +89,16 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
     {
     std::string command = *it;
     newLFF.Arguments.clear();
-    newLFF.Arguments.push_back(cmListFileArgument(variable, true, "unknown", 9999));
-    newLFF.Arguments.push_back(cmListFileArgument(accessString, true, "unknown", 9999));
-    newLFF.Arguments.push_back(cmListFileArgument(newValue?newValue:"", true, "unknown", 9999));
-    newLFF.Arguments.push_back(cmListFileArgument(currentListFile, true, "unknown", 9999));
-    newLFF.Arguments.push_back(cmListFileArgument(stack, true, "unknown", 9999));
+    newLFF.Arguments.push_back(
+      cmListFileArgument(variable, true, "unknown", 9999));
+    newLFF.Arguments.push_back(
+      cmListFileArgument(accessString, true, "unknown", 9999));
+    newLFF.Arguments.push_back(
+      cmListFileArgument(newValue?newValue:"", true, "unknown", 9999));
+    newLFF.Arguments.push_back(
+      cmListFileArgument(currentListFile, true, "unknown", 9999));
+    newLFF.Arguments.push_back(
+      cmListFileArgument(stack, true, "unknown", 9999));
     newLFF.Name = command; 
     newLFF.FilePath = "Some weird path";
     newLFF.Line = 9999;
@@ -128,7 +134,8 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
         {
         continue;
         }
-      msg2 << vars[cc] << " = \"" << makefile->GetDefinition(vars[cc].c_str()) << "\"" << std::endl;
+      msg2 << vars[cc] << " = \""
+        << makefile->GetDefinition(vars[cc].c_str()) << "\"" << std::endl;
       }
     //cmSystemTools::Message(msg2.str().c_str());
     }
