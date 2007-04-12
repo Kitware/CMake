@@ -132,9 +132,6 @@ public:
   unsigned long GetNumberOfProgressActionsInAll
   (cmLocalUnixMakefileGenerator3 *lg);
 
-  // what targets does the specified target depend on
-  std::vector<cmTarget *>& GetTargetDepends(cmTarget& target);
-
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
@@ -187,7 +184,6 @@ protected:
   typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
 
-  std::map<cmStdString, std::vector<cmTarget *> > TargetDependencies;
   std::map<cmStdString, int > TargetSourceFileCount;
 };
 

@@ -1110,31 +1110,10 @@ void cmGlobalGenerator::FillProjectToTargetMap()
           {
           // add this target to the project
           this->ProjectToTargetMap[projectName].insert(&target);
-          // now get all the targets that link to this target and
-          // add them
-          cmTarget::LinkLibraryVectorType::const_iterator j, jend;
-          j = target.GetLinkLibraries().begin();
-          jend = target.GetLinkLibraries().end();
-          for(;j!= jend; ++j)
-            {
-            cmTarget* depTarget = this->FindTarget(0, j->first.c_str());
-            if(depTarget)
-              {
-              this->ProjectToTargetMap[projectName].insert(depTarget);
-              }
-            }
-          // Now add any utility targets used by this target
-          std::set<cmStdString>::const_iterator i, end;
-          i = target.GetUtilities().begin();
-          end = target.GetUtilities().end(); 
-          for(;i!= end; ++i)
-            {
-            cmTarget* depTarget = this->FindTarget(0, i->c_str());
-            if(depTarget)
-              {
-              this->ProjectToTargetMap[projectName].insert(depTarget);
-              }
-            }
+          // get the target's dependencies
+          std::vector<cmTarget *>& tgtdeps = this->GetTargetDepends(target);
+          this->ProjectToTargetMap[projectName].insert(tgtdeps.begin(),
+                                                       tgtdeps.end());
           }
         } 
       }
@@ -1504,3 +1483,80 @@ void cmGlobalGenerator::CheckMultipleOutputs(cmMakefile*, bool)
   // Only certain generators need this check.  They define this
   // method.
 }
+
+//----------------------------------------------------------------------------
+std::vector<cmTarget *>& cmGlobalGenerator
+::GetTargetDepends(cmTarget& target)
+{
+  // if the depends are already in the map then return
+  std::map<cmStdString, std::vector<cmTarget *> >::iterator tgtI = 
+    this->TargetDependencies.find(target.GetName());
+  if (tgtI != this->TargetDependencies.end())
+    {
+    return tgtI->second;
+    }
+  
+  // A target should not depend on itself.
+  std::set<cmStdString> emitted;
+  emitted.insert(target.GetName());
+  
+  // the vector of results
+  std::vector<cmTarget *>& result = 
+    this->TargetDependencies[target.GetName()];
+  
+  // Loop over all library dependencies but not for static libs
+  if (target.GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    const cmTarget::LinkLibraryVectorType& tlibs = target.GetLinkLibraries();
+    for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
+        lib != tlibs.end(); ++lib)
+      {
+      // Don't emit the same library twice for this target.
+      if(emitted.insert(lib->first).second)
+        {
+        cmTarget *target2 = 
+          target.GetMakefile()->FindTarget(lib->first.c_str());
+        
+        // search each local generator until a match is found
+        if (!target2)
+          {
+          target2 = this->FindTarget(0,lib->first.c_str());
+          }
+        
+        // if a match was found then ...
+        if (target2)
+          {
+          // Add this dependency.
+          result.push_back(target2);
+          }
+        }
+      }
+    }
+  
+  // Loop over all utility dependencies.
+  const std::set<cmStdString>& tutils = target.GetUtilities();
+  for(std::set<cmStdString>::const_iterator util = tutils.begin();
+      util != tutils.end(); ++util)
+    {
+    // Don't emit the same utility twice for this target.
+    if(emitted.insert(*util).second)
+      {
+      cmTarget *target2 = target.GetMakefile()->FindTarget(util->c_str());
+      
+      // search each local generator until a match is found
+      if (!target2)
+        {
+        target2 = this->FindTarget(0,util->c_str());
+        }
+      
+      // if a match was found then ...
+      if (target2)
+        {
+        // Add this dependency.
+        result.push_back(target2);
+        }
+      }
+    }
+  return result;
+}
+

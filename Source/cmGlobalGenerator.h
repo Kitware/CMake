@@ -193,6 +193,9 @@ public:
   virtual const char* GetEditCacheTargetName()    { return 0; }
   virtual const char* GetRebuildCacheTargetName() { return 0; }
 
+  // what targets does the specified target depend on
+  std::vector<cmTarget *>& GetTargetDepends(cmTarget& target);
+
 protected:
   // Fill the ProjectMap, this must be called after LocalGenerators 
   // has been populated.
@@ -236,6 +239,8 @@ private:
 
   // this is used to improve performance 
   std::map<cmStdString,cmTarget *> TotalTargets;
+  
+  std::map<cmStdString, std::vector<cmTarget *> > TargetDependencies;
 };
 
 #endif
