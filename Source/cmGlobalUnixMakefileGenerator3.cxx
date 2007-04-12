@@ -912,40 +912,29 @@ int cmGlobalUnixMakefileGenerator3
   return result;
 }
 
-unsigned long cmGlobalUnixMakefileGenerator3::
-GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
+unsigned long cmGlobalUnixMakefileGenerator3
+::GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
 {
   unsigned long result = 0;
 
   // for every target in the top level all
   if (!lg->GetParent())
     {
-    // loop over the generators and targets
-    unsigned int i;
-    cmLocalUnixMakefileGenerator3 *lg3;
-    for (i = 0; i < this->LocalGenerators.size(); ++i)
+    // use the new project to target map   
+    std::set<cmTarget*> &targets = 
+      this->ProjectToTargetMap[lg->GetMakefile()->GetProjectName()];
+    std::set<cmTarget*>::iterator t = targets.begin();
+    for(; t != targets.end(); ++t)
       {
-      lg3 = static_cast<cmLocalUnixMakefileGenerator3 *>
-        (this->LocalGenerators[i]);
-      // for each target Generate the rule files for each target.
-      cmTargets& targets = lg3->GetMakefile()->GetTargets();
-      for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
-        {
-        if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-           (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-           (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-           (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
-           (t->second.GetType() == cmTarget::UTILITY))
-          {
-          if (!t->second.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
-            {
-            std::vector<int> &progFiles = lg3->ProgressFiles[t->first];
-            result += static_cast<unsigned long>(progFiles.size());
-            }
-          }
-        }
+      cmTarget* target = *t;
+      cmLocalUnixMakefileGenerator3 *lg3 = 
+        static_cast<cmLocalUnixMakefileGenerator3 *>
+        (target->GetMakefile()->GetLocalGenerator());
+      std::vector<int> &progFiles = lg3->ProgressFiles[target->GetName()];
+      result += static_cast<unsigned long>(progFiles.size());
       }
     }
+  // for subdirectories
   else
     {
     std::deque<cmLocalUnixMakefileGenerator3 *> lg3Stack;
