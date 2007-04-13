@@ -917,8 +917,10 @@ unsigned long cmGlobalUnixMakefileGenerator3
 {
   unsigned long result = 0;
 
-  // for every target in the top level all
-  if (!lg->GetParent())
+  // if this is a project
+  if (!lg->GetParent() || 
+      strcmp(lg->GetMakefile()->GetProjectName(), 
+             lg->GetParent()->GetMakefile()->GetProjectName()))
     {
     // use the new project to target map   
     std::set<cmTarget*> &targets = 
