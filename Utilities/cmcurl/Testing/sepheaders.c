@@ -42,7 +42,7 @@ int main(int argc, char **argv)
   curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1);
 
   /* shut up completely */
-  curl_easy_setopt(curl_handle, CURLOPT_MUTE, 1);
+  //curl_easy_setopt(curl_handle, CURLOPT_MUTE, 1);
 
   /* send all data to this function  */
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
