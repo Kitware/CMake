@@ -9,6 +9,8 @@ SET(CMAKE_CXX_LINK_FLAGS "-headerpad_max_install_names")
 SET(CMAKE_PLATFORM_HAS_INSTALLNAME 1)
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-dynamiclib -headerpad_max_install_names")
 SET(CMAKE_SHARED_MODULE_CREATE_C_FLAGS "-bundle -headerpad_max_install_names")
+SET(CMAKE_SHARED_MODULE_LOADER_C_FLAG "-Wl,-bundle_loader,")
+SET(CMAKE_SHARED_MODULE_LOADER_CXX_FLAG "-Wl,-bundle_loader,")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib" ".so" ".a")
 
 # setup for universal binaries if sysroot exists
