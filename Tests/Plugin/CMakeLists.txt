@@ -11,6 +11,13 @@ SET(KWSYS_NAMESPACE kwsys)
 SET(KWSYS_HEADER_ROOT ${Plugin_BINARY_DIR}/include)
 SET(KWSYS_USE_DynamicLoader 1)
 ADD_SUBDIRECTORY(${Plugin_SOURCE_DIR}/../../Source/kwsys src/kwsys)
+
+# Configure the location of plugins.
+CONFIGURE_FILE(${Plugin_SOURCE_DIR}/src/example_exe.h.in
+               ${Plugin_BINARY_DIR}/include/example_exe.h @ONLY)
+
+# We need to include headers from the source tree and configured
+# headers in the build tree.
 INCLUDE_DIRECTORIES(
   ${Plugin_BINARY_DIR}/include
   ${Plugin_SOURCE_DIR}/include

@@ -1,5 +1,7 @@
 #include <example.h>
 
+#include <example_exe.h>
+
 #include <kwsys/DynamicLoader.hxx>
 #include <kwsys/ios/iostream>
 #include <kwsys/stl/string>
@@ -21,7 +23,7 @@ extern "C" int example_exe_function()
 
 int main()
 {
-  kwsys_stl::string libName = "lib/plugin" CONFIG_DIR "/";
+  kwsys_stl::string libName = EXAMPLE_EXE_PLUGIN_DIR CONFIG_DIR "/";
   libName += kwsys::DynamicLoader::LibPrefix();
   libName += "example_mod_1";
   libName += kwsys::DynamicLoader::LibExtension();
