@@ -1585,7 +1585,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   for(std::vector<cmStdString>::iterator lib = libNames.begin();
       lib != libNames.end(); ++lib)
     {
-    linkLibs += *lib;
+    linkLibs += this->Convert(lib->c_str(), NONE, SHELL, false);
     linkLibs += " ";
     }
 
@@ -1639,9 +1639,32 @@ void cmLocalGenerator
     linkType = cmTarget::DEBUG;
     }
 
+  // Get the language used for linking.
+  const char* linkLanguage =
+    target.GetLinkerLanguage(this->GetGlobalGenerator());
+  if(!linkLanguage)
+    {
+    cmSystemTools::
+      Error("CMake can not determine linker language for target:",
+            target.GetName());
+    return;
+    }
+
   // Check whether we should use an import library for linking a target.
   bool implib =
     this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")?true:false;
+
+  // On platforms without import libraries there may be a special flag
+  // to use when creating a plugin (module) that obtains symbols from
+  // the program that will load it.
+  const char* loader_flag = 0;
+  if(!implib && target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    std::string loader_flag_var = "CMAKE_SHARED_MODULE_LOADER_";
+    loader_flag_var += linkLanguage;
+    loader_flag_var += "_FLAG";
+    loader_flag = this->Makefile->GetDefinition(loader_flag_var.c_str());
+    }
 
   // Get the list of libraries against which this target wants to link.
   std::vector<std::string> linkLibraries;
@@ -1677,10 +1700,10 @@ void cmLocalGenerator
       bool impexe = (tgt &&
                      tgt->GetType() == cmTarget::EXECUTABLE &&
                      tgt->GetPropertyAsBool("ENABLE_EXPORTS"));
-      if(impexe && !implib)
+      if(impexe && !implib && !loader_flag)
         {
         // Skip linking to executables on platforms with no import
-        // libraries.
+        // libraries or loader flags.
         continue;
         }
       else if(tgt && (tgt->GetType() == cmTarget::STATIC_LIBRARY ||
@@ -1692,7 +1715,15 @@ void cmLocalGenerator
         // Pass the full path to the target file but purposely leave
         // off the per-configuration subdirectory.  The link directory
         // ordering knows how to deal with this.
-        std::string linkItem = tgt->GetDirectory(0, implib);
+        std::string linkItem;
+        if(impexe && loader_flag)
+          {
+          // This link item is an executable that may provide symbols
+          // used by this target.  A special flag is needed on this
+          // platform.  Add it now.
+          linkItem += loader_flag;
+          }
+        linkItem += tgt->GetDirectory(0, implib);
         linkItem += "/";
         linkItem += tgt->GetFullName(config, implib);
         linkLibraries.push_back(linkItem);
@@ -1735,17 +1766,6 @@ void cmLocalGenerator
     }
   if(target_type_str)
     {
-    // Get the language used for linking.
-    const char* linkLanguage =
-      target.GetLinkerLanguage(this->GetGlobalGenerator());
-
-    if(!linkLanguage)
-      {
-      cmSystemTools::
-        Error("CMake can not determine linker language for target:",
-              target.GetName());
-      return;
-      }
     std::string static_link_type_flag_var = "CMAKE_";
     static_link_type_flag_var += target_type_str;
     static_link_type_flag_var += "_LINK_STATIC_";
