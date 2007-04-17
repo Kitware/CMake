@@ -986,8 +986,8 @@ IF(BUILD_TESTING)
     --test-command executable
     )
 
-  # Disable this test by default until it works everywhere.
-  IF(CMAKE_TEST_ENABLE_Plugin)
+  # Disable this test on QNX until support is implemented.
+  IF(NOT QNXNTO)
   ADD_TEST(Plugin ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Plugin"
@@ -997,7 +997,7 @@ IF(BUILD_TESTING)
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command bin/example)
-  ENDIF(CMAKE_TEST_ENABLE_Plugin)
+  ENDIF(NOT QNXNTO)
 
   IF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
     ADD_TEST(kwsys ${CMAKE_CTEST_COMMAND}
