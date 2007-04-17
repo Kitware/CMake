@@ -987,7 +987,7 @@ IF(BUILD_TESTING)
     )
 
   # Disable this test on QNX until support is implemented.
-  IF(NOT QNXNTO AND NOT CYGWIN)
+  IF(NOT QNXNTO)
   ADD_TEST(Plugin ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Plugin"
@@ -997,7 +997,7 @@ IF(BUILD_TESTING)
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command bin/example)
-  ENDIF(NOT QNXNTO AND NOT CYGWIN)
+  ENDIF(NOT QNXNTO)
 
   IF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
     ADD_TEST(kwsys ${CMAKE_CTEST_COMMAND}
