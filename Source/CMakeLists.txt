@@ -986,6 +986,16 @@ IF(BUILD_TESTING)
     --test-command executable
     )
 
+  ADD_TEST(Plugin ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/Plugin"
+    "${CMake_BINARY_DIR}/Tests/Plugin"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project Plugin
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-two-config
+    --test-command bin/example)
+
   IF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
     ADD_TEST(kwsys ${CMAKE_CTEST_COMMAND}
       --build-and-test
