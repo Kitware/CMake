@@ -1585,7 +1585,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   for(std::vector<cmStdString>::iterator lib = libNames.begin();
       lib != libNames.end(); ++lib)
     {
-    linkLibs += this->Convert(lib->c_str(), NONE, SHELL, false);
+    linkLibs += *lib;
     linkLibs += " ";
     }
 
@@ -1715,17 +1715,17 @@ void cmLocalGenerator
         // Pass the full path to the target file but purposely leave
         // off the per-configuration subdirectory.  The link directory
         // ordering knows how to deal with this.
-        std::string linkItem;
+        std::string linkItem = tgt->GetDirectory(0, implib);
+        linkItem += "/";
+        linkItem += tgt->GetFullName(config, implib);
         if(impexe && loader_flag)
           {
           // This link item is an executable that may provide symbols
           // used by this target.  A special flag is needed on this
           // platform.  Add it now.
-          linkItem += loader_flag;
+          linkItem = loader_flag +
+            this->Convert(linkItem.c_str(), NONE, SHELL, false);
           }
-        linkItem += tgt->GetDirectory(0, implib);
-        linkItem += "/";
-        linkItem += tgt->GetFullName(config, implib);
         linkLibraries.push_back(linkItem);
         // For full path, use the true location.
         if(fullPathLibs)
