@@ -13,6 +13,8 @@ SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
 SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
 SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,-soname,")
 SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-Wl,-soname,")
+SET(CMAKE_EXE_EXPORTS_C_FLAG "-Wl,--export-dynamic")
+SET(CMAKE_EXE_EXPORTS_CXX_FLAG "-Wl,--export-dynamic")
 
 # Initialize C link type selection flags.  These flags are used when
 # building a shared library, shared module, or executable that links
