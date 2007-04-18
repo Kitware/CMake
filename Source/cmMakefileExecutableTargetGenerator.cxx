@@ -257,6 +257,16 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       (linkFlags, this->Makefile->GetDefinition("CMAKE_CREATE_CONSOLE_EXE"));
     }
 
+  // Add symbol export flags if necessary.
+  if(this->Target->GetPropertyAsBool("ENABLE_EXPORTS"))
+    {
+    std::string export_flag_var = "CMAKE_EXE_EXPORTS_";
+    export_flag_var += linkLanguage;
+    export_flag_var += "_FLAG";
+    this->LocalGenerator->AppendFlags
+      (linkFlags, this->Makefile->GetDefinition(export_flag_var.c_str()));
+    }
+
   // Add language-specific flags.
   this->LocalGenerator
     ->AddLanguageFlags(flags, linkLanguage,
