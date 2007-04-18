@@ -1642,13 +1642,6 @@ void cmLocalGenerator
   // Get the language used for linking.
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
-  if(!linkLanguage)
-    {
-    cmSystemTools::
-      Error("CMake can not determine linker language for target:",
-            target.GetName());
-    return;
-    }
 
   // Check whether we should use an import library for linking a target.
   bool implib =
@@ -1660,6 +1653,13 @@ void cmLocalGenerator
   const char* loader_flag = 0;
   if(!implib && target.GetType() == cmTarget::MODULE_LIBRARY)
     {
+    if(!linkLanguage)
+      {
+      cmSystemTools::
+        Error("CMake can not determine linker language for target:",
+          target.GetName());
+      return;
+      }
     std::string loader_flag_var = "CMAKE_SHARED_MODULE_LOADER_";
     loader_flag_var += linkLanguage;
     loader_flag_var += "_FLAG";
@@ -1766,6 +1766,13 @@ void cmLocalGenerator
     }
   if(target_type_str)
     {
+    if(!linkLanguage)
+      {
+      cmSystemTools::
+        Error("CMake can not determine linker language for target:",
+          target.GetName());
+      return;
+      }
     std::string static_link_type_flag_var = "CMAKE_";
     static_link_type_flag_var += target_type_str;
     static_link_type_flag_var += "_LINK_STATIC_";
