@@ -1712,25 +1712,30 @@ void cmLocalGenerator
                       impexe))
         {
         // This is a CMake target.  Ask the target for its real name.
-        // Pass the full path to the target file but purposely leave
-        // off the per-configuration subdirectory.  The link directory
-        // ordering knows how to deal with this.
-        std::string linkItem = tgt->GetDirectory(0, implib);
-        linkItem += "/";
-        linkItem += tgt->GetFullName(config, implib);
+        std::string linkItem;
         if(impexe && loader_flag)
           {
           // This link item is an executable that may provide symbols
           // used by this target.  A special flag is needed on this
           // platform.  Add it now.
-          linkItem = loader_flag +
-            this->Convert(linkItem.c_str(), NONE, SHELL, false);
+          std::string exe = tgt->GetFullPath(config, implib);
+          linkItem += loader_flag;
+          linkItem += this->Convert(exe.c_str(), NONE, SHELL, false);
+          }
+        else
+          {
+          // Pass the full path to the target file but purposely leave
+          // off the per-configuration subdirectory.  The link directory
+          // ordering knows how to deal with this.
+          linkItem += tgt->GetDirectory(0, implib);
+          linkItem += "/";
+          linkItem += tgt->GetFullName(config, implib);
           }
         linkLibraries.push_back(linkItem);
         // For full path, use the true location.
         if(fullPathLibs)
           {
-          fullPathLibs->push_back(tgt->GetFullPath(config));
+          fullPathLibs->push_back(tgt->GetFullPath(config, implib));
           }
         }
       else
