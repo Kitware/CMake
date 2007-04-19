@@ -8,9 +8,15 @@
 # define MODULE_EXPORT
 #endif
 
-MODULE_EXPORT int example_mod_1_function()
+#ifdef __WATCOMC__
+# define MODULE_CCONV __cdecl
+#else
+# define MODULE_CCONV
+#endif
+
+MODULE_EXPORT int MODULE_CCONV example_mod_1_function(int n)
 {
-  int result = example_exe_function() + 456;
+  int result = example_exe_function() + n;
   printf("world\n");
   return result;
 }

@@ -44,8 +44,12 @@ int main()
       << kwsys_ios::endl;
     return 1;
     }
-  int(*f)() = reinterpret_cast<int(*)()>(sym);
-  if(f() != (123+456))
+#ifdef __WATCOMC__
+  int(__cdecl *f)(int) = (int(__cdecl *)(int))(sym);
+#else
+  int(*f)(int) = reinterpret_cast<int(*)(int)>(sym);
+#endif
+  if(f(456) != (123+456))
     {
     kwsys_ios::cerr << "Incorrect return value from plugin!"
                     << kwsys_ios::endl;
