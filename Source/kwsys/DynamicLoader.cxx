@@ -251,13 +251,35 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
   DynamicLoader::LibraryHandle lib, const char* sym)
 {
+  // TODO: The calling convention affects the name of the symbol.  We
+  // should have a tool to help get the symbol with the desired
+  // calling convention.  Currently we assume cdecl.
+  //
+  // Borland:
+  //   __cdecl    = "_func" (default)
+  //   __fastcall = "@_func"
+  //   __stdcall  = "func"
+  //
+  // Watcom:
+  //   __cdecl    = "_func"
+  //   __fastcall = "@_func@X"
+  //   __stdcall  = "_func@X"
+  //   __watcall  = "func_" (default)
+  //
+  // MSVC:
+  //   __cdecl    = "func" (default)
+  //   __fastcall = "@_func@X"
+  //   __stdcall  = "_func@X"
+  //
+  // Note that the "@X" part of the name above is the total size (in
+  // bytes) of the arguments on the stack.
   void *result;
-#ifdef __BORLANDC__
-  // Need to prepend symbols with '_' on borland compilers
+#if defined(__BORLANDC__) || defined(__WATCOMC__)
+  // Need to prepend symbols with '_'
   size_t len = strlen(sym);
   char *rsym = new char[len + 1 + 1];
   strcpy(rsym, "_");
-  strcat(rsym+1, sym);
+  strcat(rsym, sym);
 #else
   const char *rsym = sym;
 #endif
@@ -268,11 +290,15 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
 #else
   result = (void*)GetProcAddress(lib, rsym);
 #endif
-#ifdef __BORLANDC__
+#if defined(__BORLANDC__) || defined(__WATCOMC__)
   delete[] rsym;
 #endif
   // Hack to cast pointer-to-data to pointer-to-function.
+#ifdef __WATCOMC__
+  return *(DynamicLoader::SymbolPointer*)(&result);
+#else
   return *reinterpret_cast<DynamicLoader::SymbolPointer*>(&result);
+#endif
 }
 
 //----------------------------------------------------------------------------
