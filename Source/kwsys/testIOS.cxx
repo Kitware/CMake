@@ -68,6 +68,12 @@ int testIOS(int, char*[])
     kwsys_ios::cerr << "Able to read past end of stream" << kwsys_ios::endl;
     return 1;
     }
+  else
+    {
+    // Clear the failure.
+    istr.clear(istr.rdstate() & ~kwsys_ios::ios::eofbit);
+    istr.clear(istr.rdstate() & ~kwsys_ios::ios::failbit);
+    }
   istr.str("30");
   if(istr >> x)
     {
