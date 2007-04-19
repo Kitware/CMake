@@ -872,9 +872,13 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     ENDFOREACH(test)
 
     # C++ tests
-    SET(KWSYS_CXX_TESTS
-      testAutoPtr
-      testHashSTL
+    IF(NOT WATCOM)
+      SET(KWSYS_CXX_TESTS
+        testAutoPtr
+        testHashSTL
+        )
+    ENDIF(NOT WATCOM)
+    SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
       testRegistry
       testIOS
       testSystemTools
