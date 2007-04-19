@@ -76,7 +76,7 @@ operator>>(@KWSYS_NAMESPACE@_ios::istream& is,
 
     // Set flags for resulting state.
     if(is.peek() == EOF) { state |= @KWSYS_NAMESPACE@_ios::ios::eofbit; }
-    if(success) { state |= @KWSYS_NAMESPACE@_ios::ios::failbit; }
+    if(!success) { state |= @KWSYS_NAMESPACE@_ios::ios::failbit; }
     }
 
   // Set the final result state.
