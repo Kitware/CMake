@@ -54,6 +54,14 @@ public:
     stl_string(s, pos, n) {}
 }; // End Class: String
 
+#if defined(__WATCOMC__)
+inline bool operator<(String const& l, String const& r)
+  {
+  return (static_cast<@KWSYS_NAMESPACE@_stl::string const&>(l) <
+          static_cast<@KWSYS_NAMESPACE@_stl::string const&>(r));
+  }
+#endif
+
 } // namespace @KWSYS_NAMESPACE@
 
 #endif

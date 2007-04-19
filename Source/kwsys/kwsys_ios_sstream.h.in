@@ -95,6 +95,8 @@ public:
 // Visual Studio 6 has a strstream::pcount, but this is not rdbuf()->pcount()
 #if (@KWSYS_NAMESPACE@_IOS_USE_STRSTREA_H) && defined(_MSC_VER) && (_MSC_VER == 1200)
     int count = this->pcount();
+#elif defined(__WATCOMC__)
+    int count = this->rdbuf()->out_waiting();
 #else
     int count = this->rdbuf()->pcount();
 #endif
@@ -151,6 +153,10 @@ private:
 # pragma warning (push)
 # pragma warning (disable: 4097) /* typedef-name used as synonym for class */
 #endif
+#if defined(__WATCOMC__)
+// W728: class modifiers for 'A' conflict with class modifiers for 'B'
+# pragma warning 728 10
+#endif
 
 class istringstream: private kwsys_stl::string, public istrstream
 {
@@ -172,6 +178,9 @@ private:
   void operator=(const istringstream&);
 };
 
+#if defined(__WATCOMC__)
+# pragma warning 728 9
+#endif
 #if defined(_MSC_VER)
 # pragma warning (pop)
 #endif
