@@ -29,6 +29,13 @@
 # define @KWSYS_NAMESPACE@_STL_STRING_ISTREAM_DEFINED
 # include <ctype.h> // isspace
 # include <@KWSYS_NAMESPACE@/ios/iostream>
+# if defined(__WATCOMC__)
+namespace @KWSYS_NAMESPACE@
+{
+struct ios_istream_hack: public kwsys_ios::istream
+{ void eatwhite() { this->@KWSYS_NAMESPACE@_ios::istream::eatwhite(); } };
+}
+# endif
 inline @KWSYS_NAMESPACE@_ios::istream&
 operator>>(@KWSYS_NAMESPACE@_ios::istream& is,
            @KWSYS_NAMESPACE@_stl::string& s)
@@ -43,8 +50,12 @@ operator>>(@KWSYS_NAMESPACE@_ios::istream& is,
   s.erase();
 
   // Skip leading whitespace.
+#if defined(__WATCOMC__)
+  static_cast<@KWSYS_NAMESPACE@::ios_istream_hack&>(is).eatwhite();
+#else
   is.eatwhite();
-  istream& okay = is;
+#endif
+  @KWSYS_NAMESPACE@_ios::istream& okay = is;
 
   if(okay)
     {
