@@ -173,6 +173,10 @@ public:
     this->~istringstream();
     new (this) istringstream(s);
     }
+  void clear(int flags)
+    {
+    this->IStrStream::clear(flags);
+    }
 private:
   istringstream(const istringstream&);
   void operator=(const istringstream&);
