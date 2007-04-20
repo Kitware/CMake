@@ -290,7 +290,14 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
   CM_INIT_FUNCTION initFunction
     = (CM_INIT_FUNCTION)
     cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName.c_str());
-
+  if ( !initFunction )
+    {
+    initFuncName = "_";
+    initFuncName += args[0];
+    initFuncName += "Init";
+    initFunction = (CM_INIT_FUNCTION)(
+      cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName.c_str()));
+    }
   // if the symbol is found call it to set the name on the 
   // function blocker
   if(initFunction)
