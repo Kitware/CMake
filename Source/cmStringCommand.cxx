@@ -66,6 +66,10 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleSubstringCommand(args);
     }
+  else if(subCommand == "RANDOM")
+    {
+    return this->HandleRandomCommand(args);
+    }
   
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
@@ -604,5 +608,73 @@ bool cmStringCommand
   sprintf(buffer, "%d", static_cast<int>(length));
 
   this->Makefile->AddDefinition(variableName.c_str(), buffer);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand
+::HandleRandomCommand(std::vector<std::string> const& args)
+{
+  if(args.size() < 2 || args.size() == 3 || args.size() == 5)
+    {
+    this->SetError("sub-command RANDOM requires at least one argument.");
+    return false;
+    }
+
+  int length = 5;
+  const char cmStringCommandDefaultAlphabet[] = "qwertyuiopasdfghjklzxcvbnm"
+    "QWERTYUIOPASDFGHJKLZXCVBNM"
+    "0123456789";
+  std::string alphabet;
+
+  if ( args.size() > 3 )
+    {
+    size_t i = 1;
+    size_t stopAt = args.size() - 2;
+
+    for ( ; i < stopAt; ++i )
+      {
+      if ( args[i] == "LENGTH" )
+        {
+        ++i;
+        length = atoi(args[i].c_str());
+        }
+      else if ( args[i] == "ALPHABET" )
+        {
+        ++i;
+        alphabet = args[i];
+        }
+      }
+    }
+  if ( !alphabet.size() )
+    {
+    alphabet = cmStringCommandDefaultAlphabet;
+    }
+
+  double sizeofAlphabet = alphabet.size();
+  if ( sizeofAlphabet < 1 )
+    {
+    this->SetError("sub-command RANDOM invoked with bad alphabet.");
+    return false;
+    }
+  if ( length < 1 )
+    {
+    this->SetError("sub-command RANDOM invoked with bad length.");
+    return false;
+    }
+  const std::string& variableName = args[args.size()-1];
+
+  std::vector<char> result;
+  srand((int)time(NULL));
+  const char* alphaPtr = alphabet.c_str();
+  int cc;
+  for ( cc = 0; cc < length; cc ++ )
+    {
+    int idx=(int) (sizeofAlphabet* rand()/(RAND_MAX+1.0));
+    result.push_back(*(alphaPtr + idx));
+    }
+  result.push_back(0);
+
+  this->Makefile->AddDefinition(variableName.c_str(), &*result.begin());
   return true;
 }
