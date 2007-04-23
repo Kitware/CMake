@@ -20,6 +20,8 @@
 
 #include <stdlib.h> // required for atoi
 #include <ctype.h>
+#include <time.h>
+
 //----------------------------------------------------------------------------
 bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
 {
