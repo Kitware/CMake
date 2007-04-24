@@ -54,7 +54,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Set a name for the entire project.";
+    return "Enable a language (CXX/C/Fortran/etc)";
     }
   
   /**
@@ -64,7 +64,10 @@ public:
     {
     return
       "  ENABLE_LANGUAGE(languageName)\n"
-      "This command enables support for the named language in CMake.";
+      "This command enables support for the named language in CMake. "
+      "This is the same as the project command but does not create "
+      "any of the extra varaibles that are created by the project command. "
+      "Example languages are CXX, C, Fortran.";
     }
   
   cmTypeMacro(cmEnableLanguageCommand, cmCommand);
