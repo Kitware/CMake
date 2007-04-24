@@ -623,9 +623,11 @@ void cmGlobalGenerator::Configure()
     delete this->LocalGenerators[i];
     }
   this->LocalGenerators.clear();
-
+  this->TargetDependencies.clear();
   this->TotalTargets.clear();
-  
+  this->ProjectToTargetMap.clear();
+  this->ProjectMap.clear();
+
   // start with this directory
   cmLocalGenerator *lg = this->CreateLocalGenerator();
   this->LocalGenerators.push_back(lg);
