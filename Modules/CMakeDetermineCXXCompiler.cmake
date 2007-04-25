@@ -5,6 +5,13 @@
 # use environment variable CXX first if defined by user, next use 
 # the cmake variable CMAKE_GENERATOR_CXX which can be defined by a generator
 # as a default compiler
+#
+# Sets the following variables:
+#   CMAKE_CXX_COMPILER
+#   CMAKE_COMPILER_IS_GNUCXX
+#   CMAKE_AR
+#   CMAKE_RANLIB
+
 
 IF(NOT CMAKE_CXX_COMPILER)
   SET(CMAKE_CXX_COMPILER_INIT NOTFOUND)
