@@ -67,6 +67,10 @@ public:
       "  FILE(WRITE filename \"message to write\"... )\n"
       "  FILE(APPEND filename \"message to write\"... )\n"
       "  FILE(READ filename variable [LIMIT numBytes])\n"
+      "  FILE(STRINGS filename variable [LIMIT_COUNT num]\n"
+      "       [LIMIT_INPUT numBytes] [LIMIT_OUTPUT numBytes]\n"
+      "       [LENGTH_MINIMUM numBytes] [LENGTH_MAXIMUM numBytes]\n"
+      "       [NEWLINE_CONSUME] [REGEX regex])\n"
       "  FILE(GLOB variable [RELATIVE path] [globbing expressions]...)\n"
       "  FILE(GLOB_RECURSE variable [RELATIVE path] \n"
       "       [globbing expressions]...)\n"
@@ -87,6 +91,26 @@ public:
       "want to generate input files to CMake.\n"
       "READ will read the content of a file and store it into the "
       "variable.\n"
+      "STRINGS will parse a list of ASCII strings from a file and store it "
+      "in a variable. Binary data in the file are ignored. Carriage return "
+      "(CR) characters are ignored. "
+      "LIMIT_COUNT sets the maximum number of strings to return. "
+      "LIMIT_INPUT sets the maximum number of bytes to read from "
+      "the input file. "
+      "LIMIT_OUTPUT sets the maximum number of bytes to store in the "
+      "output variable. "
+      "LENGTH_MINIMUM sets the minimum length of a string to return. "
+      "Shorter strings are ignored. "
+      "LENGTH_MAXIMUM sets the maximum length of a string to return.  Longer "
+      "strings are split into strings no longer than the maximum length. "
+      "NEWLINE_CONSUME allows newlines to be included in strings instead "
+      "of terminating them. "
+      "REGEX specifies a regular expression that a string must match to be "
+      "returned. "
+      "Typical usage \n"
+      "  FILE(STRINGS myfile.txt myfile)\n"
+      "stores a list in the variable \"myfile\" in which each item is "
+      "a line from the input file.\n"
       "GLOB will generate a list of all files that match the globbing "
       "expressions and store it into the variable. Globbing expressions "
       "are similar to regular expressions, but much simpler. If RELATIVE "
@@ -119,6 +143,7 @@ protected:
   bool HandleRemove(std::vector<std::string> const& args, bool recurse);
   bool HandleWriteCommand(std::vector<std::string> const& args, bool append);
   bool HandleReadCommand(std::vector<std::string> const& args);
+  bool HandleStringsCommand(std::vector<std::string> const& args);
   bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse);
   bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);
   bool HandleInstallCommand(std::vector<std::string> const& args);

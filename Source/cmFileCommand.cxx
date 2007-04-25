@@ -70,6 +70,10 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleReadCommand(args);
     }
+  else if ( subCommand == "STRINGS" )
+    {
+    return this->HandleStringsCommand(args);
+    }
   else if ( subCommand == "GLOB" )
     {
     return this->HandleGlobCommand(args, false);
@@ -248,6 +252,306 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
       }
     }
   this->Makefile->AddDefinition(variable.c_str(), output.c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
+{
+  if(args.size() < 3)
+    {
+    this->SetError("STRINGS requires a file name and output variable");
+    return false;
+    }
+
+  // Get the file to read.
+  std::string fileName = args[1];
+  if(!cmsys::SystemTools::FileIsFullPath(fileName.c_str()))
+    {
+    fileName = this->Makefile->GetCurrentDirectory();
+    fileName += "/" + args[1];
+    }
+
+  // Get the variable in which to store the results.
+  std::string outVar = args[2];
+
+  // Parse the options.
+  enum { arg_none,
+         arg_limit_input,
+         arg_limit_output,
+         arg_limit_count,
+         arg_length_minimum,
+         arg_length_maximum,
+         arg__maximum,
+         arg_regex };
+  unsigned int minlen = 0;
+  unsigned int maxlen = 0;
+  int limit_input = -1;
+  int limit_output = -1;
+  unsigned int limit_count = 0;
+  cmsys::RegularExpression regex;
+  bool have_regex = false;
+  bool newline_consume = false;
+  int arg_mode = arg_none;
+  for(unsigned int i=3; i < args.size(); ++i)
+    {
+    if(args[i] == "LIMIT_INPUT")
+      {
+      arg_mode = arg_limit_input;
+      }
+    else if(args[i] == "LIMIT_OUTPUT")
+      {
+      arg_mode = arg_limit_output;
+      }
+    else if(args[i] == "LIMIT_COUNT")
+      {
+      arg_mode = arg_limit_count;
+      }
+    else if(args[i] == "LENGTH_MINIMUM")
+      {
+      arg_mode = arg_length_minimum;
+      }
+    else if(args[i] == "LENGTH_MAXIMUM")
+      {
+      arg_mode = arg_length_maximum;
+      }
+    else if(args[i] == "REGEX")
+      {
+      arg_mode = arg_regex;
+      }
+    else if(args[i] == "NEWLINE_CONSUME")
+      {
+      newline_consume = true;
+      arg_mode = arg_none;
+      }
+    else if(arg_mode == arg_limit_input)
+      {
+      if(sscanf(args[i].c_str(), "%d", &limit_input) != 1 ||
+         limit_input < 0)
+        {
+        cmOStringStream e;
+        e << "STRINGS option LIMIT_INPUT value \""
+          << args[i] << "\" is not an unsigned integer.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      arg_mode = arg_none;
+      }
+    else if(arg_mode == arg_limit_output)
+      {
+      if(sscanf(args[i].c_str(), "%d", &limit_output) != 1 ||
+         limit_output < 0)
+        {
+        cmOStringStream e;
+        e << "STRINGS option LIMIT_OUTPUT value \""
+          << args[i] << "\" is not an unsigned integer.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      arg_mode = arg_none;
+      }
+    else if(arg_mode == arg_limit_count)
+      {
+      int count;
+      if(sscanf(args[i].c_str(), "%d", &count) != 1 || count < 0)
+        {
+        cmOStringStream e;
+        e << "STRINGS option LIMIT_COUNT value \""
+          << args[i] << "\" is not an unsigned integer.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      limit_count = count;
+      arg_mode = arg_none;
+      }
+    else if(arg_mode == arg_length_minimum)
+      {
+      int len;
+      if(sscanf(args[i].c_str(), "%d", &len) != 1 || len < 0)
+        {
+        cmOStringStream e;
+        e << "STRINGS option LENGTH_MINIMUM value \""
+          << args[i] << "\" is not an unsigned integer.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      minlen = len;
+      arg_mode = arg_none;
+      }
+    else if(arg_mode == arg_length_maximum)
+      {
+      int len;
+      if(sscanf(args[i].c_str(), "%d", &len) != 1 || len < 0)
+        {
+        cmOStringStream e;
+        e << "STRINGS option LENGTH_MAXIMUM value \""
+          << args[i] << "\" is not an unsigned integer.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      maxlen = len;
+      arg_mode = arg_none;
+      }
+    else if(arg_mode == arg_regex)
+      {
+      if(!regex.compile(args[i].c_str()))
+        {
+        cmOStringStream e;
+        e << "STRINGS option REGEX value \""
+          << args[i] << "\" could not be compiled.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      have_regex = true;
+      arg_mode = arg_none;
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "STRINGS given unknown argument \""
+        << args[i] << "\"";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+
+  // Open the specified file.
+#if defined(_WIN32) || defined(__CYGWIN__)
+  std::ifstream fin(fileName.c_str(), std::ios::in | std::ios::binary);
+#else
+  std::ifstream fin(fileName.c_str(), std::ios::in);
+#endif
+  if(!fin)
+    {
+    cmOStringStream e;
+    e << "STRINGS file \"" << fileName << "\" cannot be read.";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  // Parse strings out of the file.
+  int output_size = 0;
+  std::vector<std::string> strings;
+  std::string s;
+  int c;
+  while((!limit_count || strings.size() < limit_count) &&
+        (limit_input < 0 || static_cast<int>(fin.tellg()) < limit_input) &&
+        (c = fin.get(), fin))
+    {
+    if(c == '\0')
+      {
+      // A terminating null character has been found.  Check if the
+      // current string matches the requirements.  Since it was
+      // terminated by a null character, we require that the length be
+      // at least one no matter what the user specified.
+      if(s.length() >= minlen && s.length() >= 1 &&
+         (!have_regex || regex.find(s.c_str())))
+        {
+        output_size += s.size() + 1;
+        if(limit_output >= 0 && output_size >= limit_output)
+          {
+          s = "";
+          break;
+          }
+        strings.push_back(s);
+        }
+
+      // Reset the string to empty.
+      s = "";
+      }
+    else if(c == '\n' && !newline_consume)
+      {
+      // The current line has been terminated.  Check if the current
+      // string matches the requirements.  The length may now be as
+      // low as zero since blank lines are allowed.
+      if(s.length() >= minlen &&
+         (!have_regex || regex.find(s.c_str())))
+        {
+        output_size += s.size() + 1;
+        if(limit_output >= 0 && output_size >= limit_output)
+          {
+          s = "";
+          break;
+          }
+        strings.push_back(s);
+        }
+
+      // Reset the string to empty.
+      s = "";
+      }
+    else if(c == '\r')
+      {
+      // Ignore CR character to make output always have UNIX newlines.
+      }
+    else if(c >= 0x20 && c < 0x7F || c == '\t' ||
+            (c == '\n' && newline_consume))
+      {
+      // This is an ASCII character that may be part of a string.
+      s += c;
+      }
+    else
+      {
+      // This is a non-string character.  Reset the string to emtpy.
+      s = "";
+      }
+
+    // Terminate a string if the maximum length is reached.
+    if(maxlen > 0 && s.size() == maxlen)
+      {
+      if(s.length() >= minlen &&
+         (!have_regex || regex.find(s.c_str())))
+        {
+        output_size += s.size() + 1;
+        if(limit_output >= 0 && output_size >= limit_output)
+          {
+          s = "";
+          break;
+          }
+        strings.push_back(s);
+        }
+      s = "";
+      }
+    }
+
+  // If there is a non-empty current string we have hit the end of the
+  // input file or the input size limit.  Check if the current string
+  // matches the requirements.
+  if((!limit_count || strings.size() < limit_count) &&
+     !s.empty() && s.length() >= minlen &&
+     (!have_regex || regex.find(s.c_str())))
+    {
+    output_size += s.size() + 1;
+    if(limit_output < 0 || output_size < limit_output)
+      {
+      strings.push_back(s);
+      }
+    }
+
+  // Encode the result in a CMake list.
+  const char* sep = "";
+  std::string output;
+  for(std::vector<std::string>::const_iterator si = strings.begin();
+      si != strings.end(); ++si)
+    {
+    // Separate the strings in the output to make it a list.
+    output += sep;
+    sep = ";";
+
+    // Store the string in the output, but escape semicolons to
+    // make sure it is a list.
+    std::string const& sr = *si;
+    for(unsigned int i=0; i < sr.size(); ++i)
+      {
+      if(sr[i] == ';')
+        {
+        output += '\\';
+        }
+      output += sr[i];
+      }
+    }
+
+  // Save the output in a makefile variable.
+  this->Makefile->AddDefinition(outVar.c_str(), output.c_str());
   return true;
 }
 

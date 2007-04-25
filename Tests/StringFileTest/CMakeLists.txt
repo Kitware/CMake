@@ -4,6 +4,18 @@ INCLUDE_DIRECTORIES(${StringFileTest_BINARY_DIR})
 # Read file test
 FILE(READ "${CMAKE_CURRENT_SOURCE_DIR}/InputFile.h.in" infile)
 
+# FILE(STRINGS) test
+FILE(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/InputFile.h.in" infile_strings
+  LIMIT_COUNT 1 LIMIT_INPUT 1024 LIMIT_OUTPUT 1024
+  LENGTH_MINIMUM 10 LENGTH_MAXIMUM 23 REGEX include NEWLINE_CONSUME)
+SET(infile_strings_goal "#include \"includefile\"\n")
+IF("${infile_strings}" STREQUAL "${infile_strings_goal}")
+  MESSAGE("FILE(STRINGS) correctly read [${infile_strings}]")
+ELSE("${infile_strings}" STREQUAL "${infile_strings_goal}")
+  MESSAGE(SEND_ERROR
+    "FILE(STRINGS) incorrectly read [${infile_strings}]")
+ENDIF("${infile_strings}" STREQUAL "${infile_strings_goal}")
+
 # String test
 STRING(REGEX MATCH "[cC][mM][aA][kK][eE]" rmvar "CMake is great")
 STRING(REGEX MATCHALL "[cC][mM][aA][kK][eE]" rmallvar "CMake is better than cmake or CMake")
