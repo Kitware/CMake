@@ -447,7 +447,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       if(s.length() >= minlen && s.length() >= 1 &&
          (!have_regex || regex.find(s.c_str())))
         {
-        output_size += s.size() + 1;
+        output_size += static_cast<int>(s.size()) + 1;
         if(limit_output >= 0 && output_size >= limit_output)
           {
           s = "";
@@ -467,7 +467,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       if(s.length() >= minlen &&
          (!have_regex || regex.find(s.c_str())))
         {
-        output_size += s.size() + 1;
+        output_size += static_cast<int>(s.size()) + 1;
         if(limit_output >= 0 && output_size >= limit_output)
           {
           s = "";
@@ -501,7 +501,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       if(s.length() >= minlen &&
          (!have_regex || regex.find(s.c_str())))
         {
-        output_size += s.size() + 1;
+        output_size += static_cast<int>(s.size()) + 1;
         if(limit_output >= 0 && output_size >= limit_output)
           {
           s = "";
@@ -520,7 +520,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
      !s.empty() && s.length() >= minlen &&
      (!have_regex || regex.find(s.c_str())))
     {
-    output_size += s.size() + 1;
+    output_size += static_cast<int>(s.size()) + 1;
     if(limit_output < 0 || output_size < limit_output)
       {
       strings.push_back(s);
