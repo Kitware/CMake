@@ -25,6 +25,7 @@
 #include <cmsys/RegularExpression.hxx>
 
 class cmGeneratedFileStream;
+class cmCTestCoverageHandlerContainer;
 
 /** \class cmCTestCoverageHandler
  * \brief A class that handles coverage computaiton for ctest
@@ -54,6 +55,12 @@ private:
     const char* binDir);
   bool StartCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
   void EndCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
+
+  int HandleGCovCoverage(cmCTestCoverageHandlerContainer* cont);
+  int HandleTracePyCoverage(cmCTestCoverageHandlerContainer* cont);
+
+  std::string FindFile(cmCTestCoverageHandlerContainer* cont,
+    std::string fileName);
 
   struct cmCTestCoverage
     {
