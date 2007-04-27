@@ -68,6 +68,10 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleSubstringCommand(args);
     }
+  else if(subCommand == "STRIP")
+    {
+    return this->HandleStripCommand(args);
+    }
   else if(subCommand == "RANDOM")
     {
     return this->HandleRandomCommand(args);
@@ -610,6 +614,43 @@ bool cmStringCommand
   sprintf(buffer, "%d", static_cast<int>(length));
 
   this->Makefile->AddDefinition(variableName.c_str(), buffer);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleStripCommand(
+  std::vector<std::string> const& args)
+{
+ if(args.size() != 3)
+    {
+    this->SetError("sub-command LENGTH requires two arguments.");
+    return false;
+    }
+
+  const std::string& stringValue = args[1];
+  const std::string& variableName = args[2];
+  size_t inStringLength = stringValue.size();
+  size_t startPos = inStringLength + 1;
+  size_t endPos = 0;
+  const char* ptr = stringValue.c_str();
+  size_t cc;
+  for ( cc = 0; cc < inStringLength; ++ cc )
+    {
+    if ( !isspace(*ptr) )
+      {
+      if ( startPos > inStringLength )
+        {
+        startPos = cc;
+        }
+      endPos = cc;
+      }
+    ++ ptr;
+    }
+
+  size_t outLength = endPos - startPos + 1;
+ 
+  this->Makefile->AddDefinition(variableName.c_str(),
+    stringValue.substr(startPos, outLength).c_str());
   return true;
 }
 

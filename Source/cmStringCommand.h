@@ -85,6 +85,7 @@ public:
       "  STRING(TOLOWER <string1> <output variable>)\n"
       "  STRING(LENGTH <string> <output variable>)\n"
       "  STRING(SUBSTRING <string> <begin> <length> <output variable>)\n"
+      "  STRING(STRIP <string> <output variable>)\n"
       "  STRING(RANDOM [LENGTH <length>] [ALPHABET <alphabet>]\n"
       "         <output variable>)\n"
       "REGEX MATCH will match the regular expression once and store the "
@@ -111,6 +112,8 @@ public:
       "TOUPPER/TOLOWER will convert string to upper/lower characters.\n"
       "LENGTH will return a given string's length.\n"
       "SUBSTRING will return a substring of a given string.\n"
+      "STRIP will return a substring of a given string with leading "
+      "and trailing spaces removed.\n"
       "RANDOM will return a random string of given length consisting of "
       "characters from the given alphabet. Default length is 5 "
       "characters and default alphabet is all numbers and upper and "
@@ -131,6 +134,7 @@ protected:
   bool HandleReplaceCommand(std::vector<std::string> const& args);
   bool HandleLengthCommand(std::vector<std::string> const& args);
   bool HandleSubstringCommand(std::vector<std::string> const& args);
+  bool HandleStripCommand(std::vector<std::string> const& args);
   bool HandleRandomCommand(std::vector<std::string> const& args);
   
   class RegexReplacement

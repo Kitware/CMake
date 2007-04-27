@@ -34,6 +34,20 @@ STRING(TOUPPER "CMake" tuvar)
 STRING(TOLOWER "CMake" tlvar)
 STRING(REPLACE "Autoconf" "CMake" repvar "People should use Autoconf")
 
+STRING(STRIP "
+  ST1
+  " ST1)
+STRING(STRIP "ST2 " ST2)
+STRING(STRIP " 	ST3" ST3)
+
+FOREACH(var ST1 ST2 ST3)
+  IF("${var}" STREQUAL "${${var}}")
+    MESSAGE("[${var}] == [${${var}}]")
+  ELSE("${var}" STREQUAL "${${var}}")
+    MESSAGE(SEND_ERROR "Problem with the STRIP command for ${var}: [${${var}}]")
+  ENDIF("${var}" STREQUAL "${${var}}")
+ENDFOREACH(var)
+
 STRING(SUBSTRING "People should use Autoconf" 7 10 substringres)
 SET(substringres "Everybody ${substringres} CMake")
 
