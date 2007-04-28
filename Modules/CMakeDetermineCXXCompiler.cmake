@@ -61,42 +61,45 @@ IF(NOT CMAKE_RANLIB)
 ENDIF(NOT CMAKE_RANLIB)
 MARK_AS_ADVANCED(CMAKE_RANLIB)
 
-# do not test for GNU if the generator is visual studio
-IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
-  SET(CMAKE_COMPILER_IS_GNUCXX_RUN 1)
-ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
-
+# This block was used before the compiler was identified by building a
+# source file.  Unless g++ crashes when building a small C++
+# executable this should no longer be needed.
+#
 # The g++ that comes with BeOS 5 segfaults if you run "g++ -E"
 #  ("gcc -E" is fine), which throws up a system dialog box that hangs cmake
 #  until the user clicks "OK"...so for now, we just assume it's g++.
-IF(BEOS)
-  SET(CMAKE_COMPILER_IS_GNUCXX 1)
-  SET(CMAKE_COMPILER_IS_GNUCXX_RUN 1)
-ENDIF(BEOS)
+# IF(BEOS)
+#   SET(CMAKE_COMPILER_IS_GNUCXX 1)
+#   SET(CMAKE_COMPILER_IS_GNUCXX_RUN 1)
+# ENDIF(BEOS)
 
-IF(NOT CMAKE_COMPILER_IS_GNUCXX_RUN)
-  # test to see if the cxx compiler is gnu
-  SET(CMAKE_COMPILER_IS_GNUCXX_RUN 1)
-  EXEC_PROGRAM(${CMAKE_CXX_COMPILER} ARGS -E "\"${CMAKE_ROOT}/Modules/CMakeTestGNU.c\"" OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RETURN_VALUE CMAKE_COMPILER_RETURN)
-  IF(NOT CMAKE_COMPILER_RETURN)
-    IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
-      SET(CMAKE_COMPILER_IS_GNUCXX 1)
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if the C++ compiler is GNU succeeded with "
-        "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
-    ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if the C++ compiler is GNU failed with "
-        "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
-    ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" ) 
-    IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_MINGW.*" )
-      SET(CMAKE_COMPILER_IS_MINGW 1)
-    ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_MINGW.*" )
-    IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_CYGWIN.*" )
-      SET(CMAKE_COMPILER_IS_CYGWIN 1)
-    ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_CYGWIN.*" )
-  ENDIF(NOT CMAKE_COMPILER_RETURN)
-ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX_RUN)
+# Build a small source file to identify the compiler.
+IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  SET(CMAKE_CXX_COMPILER_ID_RUN 1)
+  SET(CMAKE_CXX_PLATFORM_ID "Windows")
+
+  # TODO: Set the compiler id.  It is probably MSVC but
+  # the user may be using an integrated Intel compiler.
+  # SET(CMAKE_CXX_COMPILER_ID "MSVC")
+ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+IF(NOT CMAKE_CXX_COMPILER_ID_RUN)
+  SET(CMAKE_CXX_COMPILER_ID_RUN 1)
+
+  # Try to identify the compiler.
+  SET(CMAKE_CXX_COMPILER_ID)
+  INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
+  CMAKE_DETERMINE_COMPILER_ID(CXX ${CMAKE_ROOT}/Modules/CMakeCXXCompilerId.cpp)
+
+  # Set old compiler and platform id variables.
+  IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+    SET(CMAKE_COMPILER_IS_GNUCXX 1)
+  ENDIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+  IF("${CMAKE_CXX_PLATFORM_ID}" MATCHES "MinGW")
+    SET(CMAKE_COMPILER_IS_MINGW 1)
+  ELSEIF("${CMAKE_CXX_PLATFORM_ID}" MATCHES "Cygwin")
+    SET(CMAKE_COMPILER_IS_CYGWIN 1)
+  ENDIF("${CMAKE_CXX_PLATFORM_ID}" MATCHES "MinGW")
+ENDIF(NOT CMAKE_CXX_COMPILER_ID_RUN)
 
 # configure all variables set in this file
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in 
