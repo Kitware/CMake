@@ -882,9 +882,11 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
             cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "File: ["
               << sourceFile.c_str() << "]" << std::endl);
             cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "s: ["
-              << sourceFile.substr(0, cont->SourceDir.size()) << "]" << std::endl);
+              << sourceFile.substr(0, cont->SourceDir.size()) << "]"
+              << std::endl);
             cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "b: ["
-              << sourceFile.substr(0, cont->BinaryDir.size()) << "]" << std::endl);
+              << sourceFile.substr(0, cont->BinaryDir.size()) << "]"
+              << std::endl);
             *cont->OFS << "  Something went wrong. Cannot find: "
               << sourceFile.c_str()
               << " in source dir: " << cont->SourceDir.c_str()
