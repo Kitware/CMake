@@ -1,6 +1,8 @@
 
 # Macro to compile a source file to identify the compiler.  This is
 # used internally by CMake and should not be included by user code.
+# If successful, sets CMAKE_<lang>_COMPILER_ID and CMAKE_<lang>_PLATFORM_ID
+
 MACRO(CMAKE_DETERMINE_COMPILER_ID lang src)
   # Store the compiler identification source file.
   SET(CMAKE_${lang}_COMPILER_ID_SRC "${src}")
