@@ -10,6 +10,7 @@ SET(CMAKE_SYSTEM_INCLUDE_PATH ${CMAKE_SYSTEM_INCLUDE_PATH}
 
   # Other
   /opt/local/include /usr/pkg/include
+  /opt/csw/include /opt/include
   )
 
 SET(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
