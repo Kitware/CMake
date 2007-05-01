@@ -22,7 +22,7 @@ static char const info_compiler[] = "INFO:compiler["
 #elif defined(__IBMC__)
 "VisualAge"
 #elif defined(__GNUC__)
-"GNUC"
+"GNU"
 #elif defined(_MSC_VER)
 "MSVC"
 #elif defined(_COMPILER_VERSION)
