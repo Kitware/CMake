@@ -29,7 +29,7 @@
 //----------------------------------------------------------------------------
 cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator()
 {
-  this->DriveCustomCommandsOnDepends = true;
+  this->CustomCommandDriver = OnDepends;
 }
 
 //----------------------------------------------------------------------------

@@ -129,7 +129,8 @@ protected:
   cmGlobalUnixMakefileGenerator3 *GlobalGenerator;
   cmMakefile *Makefile;
 
-  bool DriveCustomCommandsOnDepends;
+  enum CustomCommandDriveType { OnBuild, OnDepends, OnUtility };
+  CustomCommandDriveType CustomCommandDriver;
 
   // the full path to the build file
   std::string BuildFileName;

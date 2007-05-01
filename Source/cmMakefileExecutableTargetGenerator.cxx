@@ -27,7 +27,7 @@
 //----------------------------------------------------------------------------
 cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator()
 {
-  this->DriveCustomCommandsOnDepends = true;
+  this->CustomCommandDriver = OnDepends;
 }
 
 //----------------------------------------------------------------------------

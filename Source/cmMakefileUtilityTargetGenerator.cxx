@@ -26,9 +26,8 @@
 //----------------------------------------------------------------------------
 cmMakefileUtilityTargetGenerator::cmMakefileUtilityTargetGenerator()
 {
-  this->DriveCustomCommandsOnDepends = true;
+  this->CustomCommandDriver = OnUtility;
 }
-
 
 //----------------------------------------------------------------------------
 void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
@@ -49,39 +48,24 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   this->LocalGenerator->AppendCustomDepends
     (depends, this->Target->GetPreBuildCommands());
 
-  // Build list of dependencies.
-  std::string relPath = this->LocalGenerator->GetHomeRelativeOutputPath();
-  std::string objTarget;
-
   this->LocalGenerator->AppendCustomDepends
     (depends, this->Target->GetPostBuildCommands());
 
   this->LocalGenerator->AppendCustomCommands
     (commands, this->Target->GetPreBuildCommands());
-  
+
   // Depend on all custom command outputs for sources
-  const std::vector<cmSourceFile*>& sources =
-    this->Target->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
-      source != sources.end(); ++source)
-    {
-    if(cmCustomCommand* cc = (*source)->GetCustomCommand())
-      {
-      this->LocalGenerator->AppendCustomCommand(commands, *cc);
-      this->LocalGenerator->AppendCustomDepend(depends, *cc);
-      }
-    }
+  this->DriveCustomCommands(depends);
 
   this->LocalGenerator->AppendCustomCommands
     (commands, this->Target->GetPostBuildCommands());
 
   // Add dependencies on targets that must be built first.
   this->AppendTargetDepends(depends);
-  
+
   // Add a dependency on the rule file itself.
-  objTarget = relPath;
-  objTarget += this->BuildFileName;
-  this->LocalGenerator->AppendRuleDepend(depends, objTarget.c_str());
+  this->LocalGenerator->AppendRuleDepend(depends,
+                                         this->BuildFileNameFull.c_str());
 
   // If the rule is empty add the special empty rule dependency needed
   // by some make tools.
