@@ -230,6 +230,8 @@ ADD_EXECUTABLE(check_command_line
   ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c)
 ADD_CUSTOM_COMMAND(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/command_line_check
+  COMMAND ${CMAKE_COMMAND} -DMARK_FILE=${CMAKE_CURRENT_BINARY_DIR}/check_mark.txt
+  -P ${CMAKE_CURRENT_SOURCE_DIR}/check_mark.cmake
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
   ${CHECK_ARGS}
   VERBATIM
@@ -246,3 +248,8 @@ ADD_CUSTOM_TARGET(do_check_command_line ALL
   COMMENT "Checking custom target command line escapes ($dollar-signs$)"
   )
 ADD_DEPENDENCIES(do_check_command_line check_command_line)
+
+ADD_CUSTOM_TARGET(pre_check_command_line
+  COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_BINARY_DIR}/check_mark.txt
+  )
+ADD_DEPENDENCIES(do_check_command_line pre_check_command_line)
