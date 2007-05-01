@@ -446,10 +446,12 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       
   // push the listfile onto the stack
   this->ListFileStack.push_back(filenametoread);
-  
+
   cmListFile cacheFile;
   if( !cacheFile.ParseFile(filenametoread, requireProjectCommand) )
     {
+    // pop the listfile off the stack
+    this->ListFileStack.pop_back();
     this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
     this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
     return false;
@@ -2753,17 +2755,20 @@ std::vector<cmTest*> *cmMakefile::GetTests()
 
 std::string cmMakefile::GetListFileStack()
 {
-  std::string tmp;
-  for (std::deque<cmStdString>::iterator i = this->ListFileStack.begin();
-    i != this->ListFileStack.end(); ++i)
+  cmOStringStream tmp;
+  unsigned int depth = this->ListFileStack.size();
+  std::deque<cmStdString>::iterator it = this->ListFileStack.end();
+  do
     {
-    if (i != this->ListFileStack.begin())
-      {
-      tmp += ";";
-      }
-    tmp += *i;
+    --it;
+    tmp << "\n[";
+    tmp << depth;
+    tmp << "]\t";
+    tmp << *it;
+    depth--;
     }
-  return tmp;
+  while (it != this->ListFileStack.begin());
+  return tmp.str();
 }
 
 // define properties
