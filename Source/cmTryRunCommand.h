@@ -68,7 +68,7 @@ public:
       "Try compiling a srcfile.  Return the success or failure in "
       "COMPILE_RESULT_VAR.  Then if the compile succeeded, run the "
       "executable and return the result in RUN_RESULT_VAR. "
-      "If the executable was built, but failed for to run for some "
+      "If the executable was built, but failed to run for some"
       "reason, then RUN_RESULT_VAR will be set to FAILED_TO_RUN, and "
       "the output will be in the COMPILE_RESULT_VAR. OUTPUT_VARIABLE "
       "specifies the name of the variable to put all of the standard "
