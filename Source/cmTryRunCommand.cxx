@@ -76,6 +76,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
     int retVal = -1;
     std::string output;
     std::string command1 = binaryDirectory;
+    std::vector<std::string> attemptedPaths;
     command1 += "/cmTryCompileExec";
     command1 += cmSystemTools::GetExecutableExtension();
     std::string fullPath;
@@ -83,34 +84,68 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
       {
       fullPath = cmSystemTools::CollapseFullPath(command1.c_str());
       }
-    else
+    attemptedPaths.push_back(command1);
+    command1 = binaryDirectory;
+    // try CMAKE_TRY_COMPILE_CONFIGURATION if it is set
+    if (fullPath.empty())
       {
-      std::string command2 = binaryDirectory;
-      command2 += "/Debug/cmTryCompileExec";
-      command2 += cmSystemTools::GetExecutableExtension();
-      if(cmSystemTools::FileExists(command2.c_str()))
+      const char* config = 
+        this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+      // if a config was specified try that first
+      if (config && config[0])
         {
-        fullPath = cmSystemTools::CollapseFullPath(command2.c_str());
-        }
-      else
-        {
-        std::string command3 = binaryDirectory;
-        command3 += "/Development/cmTryCompileExec";
-        command3 += cmSystemTools::GetExecutableExtension();
-        if(cmSystemTools::FileExists(command3.c_str()))
+        command1 += "/";
+        command1 += config;
+        command1 += "/cmTryCompileExec";
+        command1 += cmSystemTools::GetExecutableExtension();
+        if(cmSystemTools::FileExists(command1.c_str()))
           {
-          fullPath = cmSystemTools::CollapseFullPath(command3.c_str());
+          fullPath = cmSystemTools::CollapseFullPath(command1.c_str());
+          }
+        attemptedPaths.push_back(command1);
+        }
+      }
+    // try Debug if still not found
+    if (fullPath.empty())
+      {
+      command1 = binaryDirectory;
+      command1 += "/Debug/cmTryCompileExec";
+      command1 += cmSystemTools::GetExecutableExtension();
+      if(cmSystemTools::FileExists(command1.c_str()))
+        {
+        fullPath = cmSystemTools::CollapseFullPath(command1.c_str());
+        }
+      attemptedPaths.push_back(command1);
+      }
+    // try Deployment if still not found
+    if (fullPath.empty())
+      {
+      command1 = binaryDirectory;
+      command1 += "/Development/cmTryCompileExec";
+      command1 += cmSystemTools::GetExecutableExtension();
+      if(cmSystemTools::FileExists(command1.c_str()))
+        {
+        fullPath = cmSystemTools::CollapseFullPath(command1.c_str());
+        }
+      attemptedPaths.push_back(command1);
+      }
+    if (fullPath.empty())
+      {
+      cmOStringStream emsg;
+      emsg << "Unable to find executable for TRY_RUN: tried \"";
+      for (i = 0; i < attemptedPaths.size(); ++i)
+        {
+        emsg << attemptedPaths[i];
+        if (i < attemptedPaths.size() - 1)
+          {
+          emsg << "\" and \"";
           }
         else
           {
-          cmOStringStream emsg;
-          emsg << "Unable to find executable for TRY_RUN: tried \""
-               << command1 << "\" and \""
-               << command2 << "\" and \""
-               << command3 << "\".";
-          cmSystemTools::Error(emsg.str().c_str());
+          emsg << "\".";
           }
         }
+      cmSystemTools::Error(emsg.str().c_str());
       }
     if (fullPath.size() > 1)
       {
@@ -148,7 +183,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         }
       this->Makefile->AddCacheDefinition(argv[0].c_str(), retChar,
                                      "Result of TRY_RUN",
-                                     cmCacheManager::INTERNAL);
+                                         cmCacheManager::INTERNAL);
       }
     }
   
