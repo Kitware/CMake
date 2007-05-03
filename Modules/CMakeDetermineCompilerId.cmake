@@ -3,7 +3,7 @@
 # used internally by CMake and should not be included by user code.
 # If successful, sets CMAKE_<lang>_COMPILER_ID and CMAKE_<lang>_PLATFORM_ID
 
-MACRO(CMAKE_DETERMINE_COMPILER_ID lang src)
+MACRO(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # Store the compiler identification source file.
   SET(CMAKE_${lang}_COMPILER_ID_SRC "${src}")
   IF(WIN32 AND NOT CYGWIN)
@@ -18,7 +18,7 @@ MACRO(CMAKE_DETERMINE_COMPILER_ID lang src)
   IF(CMAKE_${lang}_FLAGS)
     SET(CMAKE_${lang}_COMPILER_ID_FLAGS ${CMAKE_${lang}_FLAGS})
   ELSE(CMAKE_${lang}_FLAGS)
-    SET(CMAKE_${lang}_COMPILER_ID_FLAGS $ENV{${lang}FLAGS})
+    SET(CMAKE_${lang}_COMPILER_ID_FLAGS $ENV{${flagvar}})
   ENDIF(CMAKE_${lang}_FLAGS)
 
   # Create an empty directory in which to run the test.
@@ -81,13 +81,14 @@ MACRO(CMAKE_DETERMINE_COMPILER_ID lang src)
       FILE(STRINGS ${CMAKE_${lang}_COMPILER_ID_EXE}
         CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 2 REGEX "INFO:")
       FOREACH(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
-        IF("${info}" MATCHES ".*INFO:compiler\\[(.*)\\].*")
-          STRING(REGEX REPLACE ".*INFO:compiler\\[(.*)\\].*" "\\1"
+        IF("${info}" MATCHES ".*INFO:compiler\\[([^]]*)\\].*")
+          STRING(REGEX REPLACE ".*INFO:compiler\\[([^]]*)\\].*" "\\1"
             CMAKE_${lang}_COMPILER_ID "${info}")
-        ELSEIF("${info}" MATCHES ".*INFO:platform\\[(.*)\\].*")
-          STRING(REGEX REPLACE ".*INFO:platform\\[(.*)\\].*" "\\1"
+        ENDIF("${info}" MATCHES ".*INFO:compiler\\[([^]]*)\\].*")
+        IF("${info}" MATCHES ".*INFO:platform\\[([^]]*)\\].*")
+          STRING(REGEX REPLACE ".*INFO:platform\\[([^]]*)\\].*" "\\1"
             CMAKE_${lang}_PLATFORM_ID "${info}")
-        ENDIF("${info}" MATCHES ".*INFO:compiler\\[(.*)\\].*")
+        ENDIF("${info}" MATCHES ".*INFO:platform\\[([^]]*)\\].*")
       ENDFOREACH(info)
 
       # Check the compiler identification string.

@@ -74,41 +74,61 @@ IF(NOT CMAKE_RANLIB)
 ENDIF(NOT CMAKE_RANLIB)
 MARK_AS_ADVANCED(CMAKE_RANLIB)
 
-# do not test for GNU if the generator is visual studio
+# Build a small source file to identify the compiler.
 IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
-  SET(CMAKE_COMPILER_IS_GNUG77_RUN 1)
-ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio") 
+  SET(CMAKE_Fortran_COMPILER_ID_RUN 1)
+  SET(CMAKE_Fortran_PLATFORM_ID "Windows")
 
-IF(NOT CMAKE_COMPILER_IS_GNUG77_RUN)
-  # test to see if the Fortran compiler is gnu
-  
-  IF(CMAKE_Fortran_FLAGS)
-    SET(CMAKE_BOOT_Fortran_FLAGS ${CMAKE_Fortran_FLAGS})
-  ELSE(CMAKE_Fortran_FLAGS)
-    SET(CMAKE_BOOT_Fortran_FLAGS $ENV{FFLAGS})
-  ENDIF(CMAKE_Fortran_FLAGS)
-  EXEC_PROGRAM(${CMAKE_Fortran_COMPILER} ARGS ${CMAKE_BOOT_Fortran_FLAGS} -E "\"${CMAKE_ROOT}/Modules/CMakeTestGNU.c\"" OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RETURN_VALUE CMAKE_COMPILER_RETURN)
-  SET(CMAKE_COMPILER_IS_GNUG77_RUN 1)
-  IF(NOT CMAKE_COMPILER_RETURN)
-    IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
-      SET(CMAKE_COMPILER_IS_GNUG77 1)
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if the Fortran compiler is GNU succeeded with "
-        "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
-    ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if the Fortran compiler is GNU failed with "
-        "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
-    ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
-    IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_MINGW.*" )
-      SET(CMAKE_COMPILER_IS_MINGW 1)
-    ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_MINGW.*" )
-    IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_CYGWIN.*" )
-      SET(CMAKE_COMPILER_IS_CYGWIN 1)
-    ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_CYGWIN.*" )
-  ENDIF(NOT CMAKE_COMPILER_RETURN)
-ENDIF(NOT CMAKE_COMPILER_IS_GNUG77_RUN)
+  # TODO: Set the compiler id.  It is probably MSVC but
+  # the user may be using an integrated Intel compiler.
+  # SET(CMAKE_Fortran_COMPILER_ID "MSVC")
+ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 
+IF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
+  SET(CMAKE_Fortran_COMPILER_ID_RUN 1)
+
+  # Try to identify the compiler.
+  SET(CMAKE_Fortran_COMPILER_ID)
+  INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
+  CMAKE_DETERMINE_COMPILER_ID(Fortran FFLAGS ${CMAKE_ROOT}/Modules/CMakeFortranCompilerId.F90)
+
+  # Fall back to old is-GNU test.
+  IF(NOT CMAKE_Fortran_COMPILER_ID)
+    EXEC_PROGRAM(${CMAKE_Fortran_COMPILER}
+      ARGS ${CMAKE_Fortran_COMPILER_ID_FLAGS_LIST} -E "\"${CMAKE_ROOT}/Modules/CMakeTestGNU.c\""
+      OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RETURN_VALUE CMAKE_COMPILER_RETURN)
+    IF(NOT CMAKE_COMPILER_RETURN)
+      IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
+        SET(CMAKE_Fortran_COMPILER_ID "GNU")
+        FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+          "Determining if the Fortran compiler is GNU succeeded with "
+          "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
+      ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
+        FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+          "Determining if the Fortran compiler is GNU failed with "
+          "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
+      ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
+      IF(NOT CMAKE_Fortran_PLATFORM_ID)
+        IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_MINGW.*" )
+          SET(CMAKE_Fortran_PLATFORM_ID "MinGW")
+        ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_MINGW.*" )
+        IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_CYGWIN.*" )
+          SET(CMAKE_Fortran_PLATFORM_ID "Cygwin")
+        ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_CYGWIN.*" )
+      ENDIF(NOT CMAKE_Fortran_PLATFORM_ID)
+    ENDIF(NOT CMAKE_COMPILER_RETURN)
+  ENDIF(NOT CMAKE_Fortran_COMPILER_ID)
+
+  # Set old compiler and platform id variables.
+  IF("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+    SET(CMAKE_COMPILER_IS_GNUG77 1)
+  ENDIF("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+  IF("${CMAKE_Fortran_PLATFORM_ID}" MATCHES "MinGW")
+    SET(CMAKE_COMPILER_IS_MINGW 1)
+  ELSEIF("${CMAKE_Fortran_PLATFORM_ID}" MATCHES "Cygwin")
+    SET(CMAKE_COMPILER_IS_CYGWIN 1)
+  ENDIF("${CMAKE_Fortran_PLATFORM_ID}" MATCHES "MinGW")
+ENDIF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
 
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in 
