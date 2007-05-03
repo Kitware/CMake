@@ -192,7 +192,7 @@ RETSIGTYPE alarmfunc(int sig)
 #ifdef HAVE_SIGSETJMP
   siglongjmp(curl_jmpenv, 1);
 #endif
-  return;
+  /*return;*/ /* not reahed, and has no effect anyway */
 }
 #endif /* SIGALRM */
 #endif /* WIN32 */

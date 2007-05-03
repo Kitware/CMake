@@ -2228,6 +2228,12 @@ static void kwsysProcessRestoreDefaultSignalHandlers(void)
 }
 
 /*--------------------------------------------------------------------------*/
+static void kwsysProcessExit(void)
+{
+  _exit(0);
+}
+
+/*--------------------------------------------------------------------------*/
 static pid_t kwsysProcessFork(kwsysProcess* cp,
                               kwsysProcessCreateInformation* si)
 {
@@ -2257,7 +2263,7 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
               (errno == EINTR));
 
         /* Exit without cleanup.  The parent holds all resources.  */
-        _exit(0);
+        kwsysProcessExit();
         return 0; /* Never reached, but avoids SunCC warning.  */
         }
       }
