@@ -2756,7 +2756,7 @@ std::vector<cmTest*> *cmMakefile::GetTests()
 std::string cmMakefile::GetListFileStack()
 {
   cmOStringStream tmp;
-  unsigned int depth = this->ListFileStack.size();
+  size_t depth = this->ListFileStack.size();
   std::deque<cmStdString>::iterator it = this->ListFileStack.end();
   do
     {
