@@ -1272,7 +1272,6 @@ WriteCustomRule(std::ostream& fout,
     else
       {
       // Write out the dependencies for the rule.
-      std::string temp;
       for(std::vector<std::string>::const_iterator d = depends.begin();
           d != depends.end(); ++d)
         {
