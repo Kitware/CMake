@@ -34,27 +34,17 @@ IF(DEFINED CMAKE_INSTALL_SO_NO_EXE)
   SET(CMAKE_INSTALL_SO_NO_EXE "${CMAKE_INSTALL_SO_NO_EXE}" CACHE INTERNAL
     "Install .so files without execute permission.")
 ELSE(DEFINED CMAKE_INSTALL_SO_NO_EXE)
-  # Detect the linux distribution.
-  SET(CMAKE_LINUX_DISTRO)
-  IF(EXISTS "/proc/version")
-    FILE(READ "/proc/version" CMAKE_LINUX_DISTRO)
-  ENDIF(EXISTS "/proc/version")
-
-  # List the distributions that require shared libraries to not have
-  # execute permission.
-  SET(CMAKE_INSTALL_SO_NO_EXE_DISTRO "(Debian|Ubuntu)")
-
   # Store the decision variable as an internal cache entry to avoid
   # checking the platform every time.  This option is advanced enough
   # that only package maintainers should need to adjust it.  They are
   # capable of providing a setting on the command line.
-  IF("${CMAKE_LINUX_DISTRO}" MATCHES "${CMAKE_INSTALL_SO_NO_EXE_DISTRO}")
+  IF(EXISTS "/etc/debian_version")
     SET(CMAKE_INSTALL_SO_NO_EXE 1 CACHE INTERNAL
       "Install .so files without execute permission.")
-  ELSE("${CMAKE_LINUX_DISTRO}" MATCHES "${CMAKE_INSTALL_SO_NO_EXE_DISTRO}")
+  ELSE(EXISTS "/etc/debian_version")
     SET(CMAKE_INSTALL_SO_NO_EXE 0 CACHE INTERNAL
       "Install .so files without execute permission.")
-  ENDIF("${CMAKE_LINUX_DISTRO}" MATCHES "${CMAKE_INSTALL_SO_NO_EXE_DISTRO}")
+  ENDIF(EXISTS "/etc/debian_version")
 ENDIF(DEFINED CMAKE_INSTALL_SO_NO_EXE)
 
 INCLUDE(Platform/UnixPaths)
