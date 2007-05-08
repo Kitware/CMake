@@ -1151,6 +1151,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
      target.GetType() == cmTarget::EXECUTABLE)
     {
     std::string pndir = target.GetDirectory();
+    if(target.GetPropertyAsBool("FRAMEWORK"))
+      {
+      pndir += "/..";
+      pndir = cmSystemTools::CollapseFullPath(pndir.c_str());
+      }
     buildSettings->AddAttribute("SYMROOT", 
                                 this->CreateString(pndir.c_str()));
     buildSettings->AddAttribute("EXECUTABLE_PREFIX", 
@@ -1213,6 +1218,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     }
     case cmTarget::SHARED_LIBRARY:
     {
+    if(target.GetPropertyAsBool("FRAMEWORK"))
+      {
+      fileType = "wrapper.framework";
+      productType = "com.apple.product-type.framework";
+      break;
+      }
     fileType = "compiled.mach-o.dylib";
     productType = "com.apple.product-type.library.dynamic";
 
@@ -1873,11 +1884,41 @@ void cmGlobalXCodeGenerator
     // now add the link libraries
     if(cmtarget->GetType() != cmTarget::STATIC_LIBRARY)
       {
+      std::string fdirs;
+      std::set<cmStdString> emitted;
+      emitted.insert("/System/Library/Frameworks");
       for(std::vector<cmStdString>::iterator lib = libNames.begin();
           lib != libNames.end(); ++lib)
         {
-        this->AppendBuildSettingAttribute(target, "OTHER_LDFLAGS",
-                                          lib->c_str(), configName);
+        std::string& libString = *lib;
+        // check to see if this is a -F framework path and extract it if it is
+        // -F framework stuff should be in the FRAMEWORK_SEARCH_PATHS and not
+        // OTHER_LDFLAGS
+        if(libString.size() > 2 && libString[0] == '-'
+           && libString[1] == 'F')
+          {
+          std::string path = libString.substr(2);
+          // remove escaped spaces from the path
+          cmSystemTools::ReplaceString(path, "\\ ", " ");
+          if(emitted.insert(path).second)
+            {
+            if(fdirs.size())
+              {
+              fdirs += " ";
+              }
+            fdirs += this->XCodeEscapePath(path.c_str());
+            }
+          }
+        else
+          {
+          this->AppendBuildSettingAttribute(target, "OTHER_LDFLAGS",
+                                            lib->c_str(), configName);
+          }
+        }
+      if(fdirs.size())
+        {
+        this->AppendBuildSettingAttribute(target, "FRAMEWORK_SEARCH_PATHS",
+                                          fdirs.c_str(), configName);
         }
       }
     }
