@@ -1107,6 +1107,15 @@ IF(BUILD_TESTING)
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --test-command VSExternalInclude)
   ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
+  ADD_TEST(FrameworkTest ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Framework"
+      "${CMake_BINARY_DIR}/Tests/Framework"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-project Framework
+      --test-command bar)
 
   IF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
     SET(BundleTestInstallDir
