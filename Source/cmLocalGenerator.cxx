@@ -1728,7 +1728,12 @@ void cmLocalGenerator
           // off the per-configuration subdirectory.  The link directory
           // ordering knows how to deal with this.
           linkItem += tgt->GetDirectory(0, implib);
+          // on apple if the FRAMEWORK prop is set, then
+          // do not add the target full name but just use the directory
+          // name
+#ifdef __APPLE__
           if(!tgt->GetPropertyAsBool("FRAMEWORK"))
+#endif
             { 
             linkItem += "/";
             linkItem += tgt->GetFullName(config, implib);
