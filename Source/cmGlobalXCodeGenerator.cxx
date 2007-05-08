@@ -2623,10 +2623,22 @@ cmGlobalXCodeGenerator
     {
     if(config)
       {
-
-      dir += prefix;
-      dir += config;
-      dir += suffix;
+      if(dir.find(".framework") != dir.npos)
+        {
+        std::string::size_type pos = dir.rfind("/");
+        std::string framework = dir.substr(pos);
+        std::string newDir;
+        newDir = dir.substr(0, pos);
+        newDir += "/";
+        newDir += config;
+        dir = newDir;
+        }
+      else
+        {
+        dir += prefix;
+        dir += config;
+        dir += suffix;
+        }
       }
     }
 }
