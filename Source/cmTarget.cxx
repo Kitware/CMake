@@ -1634,6 +1634,14 @@ void cmTarget::GetFullNameInternal(TargetType type,
     {
     targetSuffix = this->Makefile->GetSafeDefinition(suffixVar);
     }
+#if defined(__APPLE__)
+  // frameworks do not have a prefix or a suffix
+  if(this->GetPropertyAsBool("FRAMEWORK"))
+    {
+    targetPrefix = 0;
+    targetSuffix = 0;
+    }
+#endif
 
   // Begin the final name with the prefix.
   outPrefix = targetPrefix?targetPrefix:"";
@@ -2145,13 +2153,22 @@ const char* cmTarget::GetOutputDir(bool implib)
       // Default to the current output directory.
       out = ".";
       }
-
     // Convert the output path to a full path in case it is
     // specified as a relative path.  Treat a relative path as
     // relative to the current output directory for this makefile.
     out =
       cmSystemTools::CollapseFullPath
       (out.c_str(), this->Makefile->GetStartOutputDirectory());
+
+#if defined(__APPLE__)
+    // frameworks do not have a prefix or a suffix
+    if(this->GetPropertyAsBool("FRAMEWORK"))
+      {
+      out += "/";
+      out += this->GetFullName(0, implib);
+      out += ".framework";
+      }
+#endif
 
     // Make sure the output path exists on disk.
     if(!cmSystemTools::MakeDirectory(out.c_str()))

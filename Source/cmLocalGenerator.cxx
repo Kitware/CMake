@@ -1728,8 +1728,11 @@ void cmLocalGenerator
           // off the per-configuration subdirectory.  The link directory
           // ordering knows how to deal with this.
           linkItem += tgt->GetDirectory(0, implib);
-          linkItem += "/";
-          linkItem += tgt->GetFullName(config, implib);
+          if(!tgt->GetPropertyAsBool("FRAMEWORK"))
+            { 
+            linkItem += "/";
+            linkItem += tgt->GetFullName(config, implib);
+            }
           }
         linkLibraries.push_back(linkItem);
         // For full path, use the true location.

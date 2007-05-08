@@ -35,6 +35,19 @@ protected:
   void WriteModuleLibraryRules(bool relink);
   void WriteLibraryRules(const char *linkRule, const char *extraFlags,
                          bool relink);
+  // MacOSX Framework support methods
+  void WriteFrameworkRules(bool relink);
+  void CreateFramework(std::string& targetName,
+                             std::string& outpath);
+  void CreateFrameworkLinksAndDirs(std::string& targetName,
+                                         std::string& outpath,
+                                         const char* version);
+  void CopyFrameworkPublicHeaders(std::string& targetName,
+                         std::string& outpath,
+                         const char* version);
+  void CopyFrameworkResources(std::string& targetName,
+                         std::string& outpath,
+                         const char* version);
 };
 
 #endif
