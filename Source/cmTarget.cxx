@@ -410,7 +410,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
 
 void 
-cmTarget::checkForTargetsAsCommand(const std::vector<cmCustomCommand>& commands)
+cmTarget::CheckForTargetsAsCommand(const std::vector<cmCustomCommand>& commands)
 {
   for ( std::vector<cmCustomCommand>::const_iterator cli = commands.begin();
         cli != commands.end();
@@ -529,10 +529,10 @@ void cmTarget::TraceVSDependencies(std::string projFile,
         }
       }
     }
-    
-  checkForTargetsAsCommand(this->GetPreBuildCommands());
-  checkForTargetsAsCommand(this->GetPreLinkCommands());
-  checkForTargetsAsCommand(this->GetPostBuildCommands());
+
+  CheckForTargetsAsCommand(this->GetPreBuildCommands());
+  CheckForTargetsAsCommand(this->GetPreLinkCommands());
+  CheckForTargetsAsCommand(this->GetPostBuildCommands());
 
   while (!srcFilesToProcess.empty())
     {

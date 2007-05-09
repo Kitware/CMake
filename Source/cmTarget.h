@@ -295,7 +295,7 @@ private:
    * Checks the prebuild, prelink and postbuild custom commands for known
    * targets and adds them to the dependencies.
    */
-  void checkForTargetsAsCommand(const std::vector<cmCustomCommand>& commands);
+  void CheckForTargetsAsCommand(const std::vector<cmCustomCommand>& commands);
   
   
   /**
