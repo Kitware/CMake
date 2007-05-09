@@ -84,10 +84,7 @@ private:
   void AddDSPBuildRule(cmTarget& tgt);
   void WriteCustomRule(std::ostream& fout,
                        const char* source,
-                       const char* command,
-                       const char* comment,
-                       const std::vector<std::string>& depends,
-                       const std::vector<std::string>& outputs,
+                       const cmCustomCommand& command,
                        const char* flags);
   void AddUtilityCommandHack(cmTarget& target, int count,
                              std::vector<std::string>& depends,
@@ -95,6 +92,7 @@ private:
   void WriteGroup(const cmSourceGroup *sg, cmTarget target,
                   std::ostream &fout, const char *libName);
   std::string CreateTargetRules(cmTarget &target, 
+                                const char* configName, 
                                 const char *libName);
   void ComputeLinkOptions(cmTarget& target, const char* configName,
                           const std::string extraOptions,

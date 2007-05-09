@@ -408,6 +408,31 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     }
 }
 
+
+void 
+cmTarget::checkForTargetsAsCommand(const std::vector<cmCustomCommand>& commands)
+{
+  for ( std::vector<cmCustomCommand>::const_iterator cli = commands.begin();
+        cli != commands.end();
+        ++cli )
+    {
+    for ( cmCustomCommandLines::const_iterator cit=cli->GetCommandLines().begin();
+          cit!=cli->GetCommandLines().end();
+          ++cit )
+      {
+      std::string command = *cit->begin();
+      // see if we can find a target with this name
+      cmTarget* t =  this->Makefile->GetLocalGenerator()->
+                     GetGlobalGenerator()->FindTarget ( 0, command.c_str() );
+      if ( ( t ) && ( t->GetType() ==cmTarget::EXECUTABLE ) )
+        {
+        this->AddUtility ( command.c_str() );
+        }
+      }
+    }
+}
+
+
 void cmTarget::TraceVSDependencies(std::string projFile, 
                                    cmMakefile *makefile)
 { 
@@ -504,6 +529,11 @@ void cmTarget::TraceVSDependencies(std::string projFile,
         }
       }
     }
+    
+  checkForTargetsAsCommand(this->GetPreBuildCommands());
+  checkForTargetsAsCommand(this->GetPreLinkCommands());
+  checkForTargetsAsCommand(this->GetPostBuildCommands());
+
   while (!srcFilesToProcess.empty())
     {
     // is this source the output of a custom command
@@ -533,9 +563,28 @@ void cmTarget::TraceVSDependencies(std::string projFile,
           srcFilesQueued.insert(temp);
           }
         }
+
+      // check if commands for this custom commands are names of targets and
+      // if that's the case add these targets as dependencies
+      std::vector<std::string> automaticTargetDepends;
+      for(cmCustomCommandLines::const_iterator it=
+          outsf->GetCustomCommand()->GetCommandLines().begin();
+          it!=outsf->GetCustomCommand()->GetCommandLines().end();
+          ++it)
+        {
+        const std::string& currentCommand = (*it)[0];
+        // see if we can find a target with this name
+        cmTarget* t =  this->Makefile->GetLocalGenerator()->
+            GetGlobalGenerator()->FindTarget(0, currentCommand.c_str());
+        if (( t) && (t->GetType()==cmTarget::EXECUTABLE))
+          {
+          automaticTargetDepends.push_back(currentCommand);
+          }
+        }
+        outsf->GetCustomCommand()->AppendDepends(automaticTargetDepends);
+
       // add its dependencies to the list to check
-      unsigned int i;
-      for (i = 0; i < outsf->GetCustomCommand()->GetDepends().size(); ++i)
+      for (unsigned int i = 0; i < outsf->GetCustomCommand()->GetDepends().size(); ++i)
         {
         const std::string& fullName 
           = outsf->GetCustomCommand()->GetDepends()[i];
@@ -590,6 +639,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
             }
           }
         }
+
       }
     // finished with this SF move to the next
     srcFilesToProcess.pop();

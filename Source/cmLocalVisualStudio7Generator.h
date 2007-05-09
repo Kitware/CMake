@@ -89,8 +89,8 @@ private:
   std::string EscapeForXML(const char* s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
-  void OutputTargetRules(std::ostream& fout, cmTarget &target, 
-                         const char *libName);
+  void OutputTargetRules(std::ostream& fout, const char* configName, 
+                         cmTarget &target, const char *libName);
   void OutputBuildTool(std::ostream& fout, const char* configName,
                        cmTarget& t);
   void OutputLibraries(std::ostream& fout,
@@ -104,12 +104,10 @@ private:
                           const char* group,
                           const char* filter);
   void WriteVCProjEndGroup(std::ostream& fout);
+  
   void WriteCustomRule(std::ostream& fout,
                        const char* source,
-                       const char* command,
-                       const char* comment,
-                       const std::vector<std::string>& depends,
-                       const std::vector<std::string>& outputs,
+                       const cmCustomCommand& command,
                        const char* extraFlags);
   void WriteTargetVersionAttribute(std::ostream& fout, cmTarget& target);
 

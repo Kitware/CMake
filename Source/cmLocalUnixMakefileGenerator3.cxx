@@ -54,6 +54,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->NativeEchoCommand = "@echo ";
   this->NativeEchoWindows = true;
   this->MakeCommandEscapeTargetTwice = false;
+  this->IsMakefileGenerator = true;
 }
 
 //----------------------------------------------------------------------------
@@ -112,7 +113,7 @@ void cmLocalUnixMakefileGenerator3::Generate()
     if (tg)
       {
       this->TargetGenerators.push_back(tg);
-      t->second.TraceVSDependencies(empty, this->Makefile);
+//      t->second.TraceVSDependencies(empty, this->Makefile);
       tg->WriteRuleFiles();
       }
     }
@@ -885,7 +886,8 @@ cmLocalUnixMakefileGenerator3
     {
     // Build the command line in a single string.
     const cmCustomCommandLine& commandLine = *cl;
-    std::string cmd = commandLine[0];
+    std::string cmd = GetRealLocation(commandLine[0].c_str(), 
+                                      this->ConfigurationName.c_str());
     if (cmd.size())
       {
       cmSystemTools::ReplaceString(cmd, "/./", "/");

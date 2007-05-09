@@ -52,6 +52,7 @@ cmLocalGenerator::cmLocalGenerator()
   this->UseRelativePaths = false;
   this->Configured = false;
   this->EmitUniversalBinaryFlags = true;
+  this->IsMakefileGenerator = false;
   this->RelativePathsConfigured = false;
   this->PathConversionsSetup = false;
 }
@@ -133,6 +134,30 @@ void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
 void cmLocalGenerator::ConfigureFinalPass()
 {
   this->Makefile->ConfigureFinalPass();
+}
+
+void cmLocalGenerator::TraceDependencies()
+{
+  // Generate the rule files for each target.
+  cmTargets& targets = this->Makefile->GetTargets();
+  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
+    {
+    // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
+    // so don't build a projectfile for it
+    if ((t->second.GetType() != cmTarget::INSTALL_FILES)
+        && (t->second.GetType() != cmTarget::INSTALL_PROGRAMS)
+        && (t->second.GetType() != cmTarget::INSTALL_DIRECTORY)
+        && (strncmp(t->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
+        && (t->second.GetPropertyAsBool("IMPORTED") == false))
+      {
+      std::string projectFilename;
+      if (this->IsMakefileGenerator == false)  // only use of this variable
+        {
+        projectFilename=t->second.GetName();
+        }
+      t->second.TraceVSDependencies(projectFilename, this->Makefile);
+      }
+    }
 }
 
 void cmLocalGenerator::GenerateTestFiles()
@@ -1984,6 +2009,20 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
   name += "/";
   name += inName;
   return name;
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::GetRealLocation(const char* inName,
+                                              const char* config)
+{
+  std::string outName=inName;
+  // Look for a CMake target with the given name.
+  cmTarget* target = this->GlobalGenerator->FindTarget(0, inName);
+  if ((target!=0) && (target->GetType()==cmTarget::EXECUTABLE))
+    {
+    outName = target->GetLocation( config );
+    }
+  return outName;
 }
 
 //----------------------------------------------------------------------------

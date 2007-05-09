@@ -1056,7 +1056,7 @@ cmGlobalUnixMakefileGenerator3
 {
   cmTarget *result;
   cmLocalUnixMakefileGenerator3 *lg3;
- 
+
   // first check the same dir as the current target
   lg3 = static_cast<cmLocalUnixMakefileGenerator3 *>
     (target.GetMakefile()->GetLocalGenerator());

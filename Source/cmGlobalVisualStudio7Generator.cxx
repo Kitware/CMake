@@ -294,8 +294,7 @@ void cmGlobalVisualStudio7Generator
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target
     cmTargets &tgts = generators[i]->GetMakefile()->GetTargets();
-    cmTargets::iterator l = tgts.begin();
-    for(; l != tgts.end(); ++l)
+    for (cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
       {
       // special handling for the current makefile
       if(mf == generators[0]->GetMakefile())

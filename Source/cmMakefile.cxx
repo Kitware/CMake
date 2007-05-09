@@ -578,18 +578,6 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
         ti->second.GetPostBuildCommands().push_back(cc);
         break;
       }
-
-    // Add dependencies on commands CMake knows how to build.
-    for(cmCustomCommandLines::const_iterator cli = commandLines.begin();
-        cli != commandLines.end(); ++cli)
-      {
-      std::string cacheCommand = *cli->begin();
-      if(const char* knownTarget =
-         this->GetCacheManager()->GetCacheValue(cacheCommand.c_str()))
-        {
-        ti->second.AddUtility(knownTarget);
-        }
-      }
     }
 }
 

@@ -106,6 +106,15 @@ private:
                                std::vector<cmCustomCommand> 
                                const & commands,
                                const char* commandFileName);
+  
+  void CreateCustomRulesMakefile(const char* makefileBasename, 
+                                 cmTarget& target,
+                                 std::vector<cmCustomCommand> const & commands, 
+                                 const char* configName,
+                                 const std::map<cmStdString, cmStdString>& 
+                                     multipleOutputPairs
+                                );
+  
   cmXCodeObject* FindXCodeTarget(cmTarget*);
   // create cmXCodeObject from these functions so that memory can be managed
   // correctly.  All objects created are stored in this->XCodeObjects.

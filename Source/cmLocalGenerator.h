@@ -42,7 +42,7 @@ public:
   /**
    * Generate the makefile for this directory. 
    */
-  virtual void Generate() {};
+  virtual void Generate() {}
 
   /**
    * Process the CMakeLists files for this directory to fill in the
@@ -50,6 +50,11 @@ public:
    */
   virtual void Configure();
 
+  /** 
+   * Calls TraceVSDependencies() on all targets of this generator.
+   */
+  virtual void TraceDependencies();
+  
   /**
    * Perform any final calculations prior to generation
    */
@@ -137,6 +142,11 @@ public:
       the source directory of this generator.  This should only be
       used for dependencies of custom commands.  */
   std::string GetRealDependency(const char* name, const char* config);
+  
+  /** Translate a command as given in CMake code to the location of the 
+      executable if the command is the name of a CMake executable target.
+      If that's not the case, just return the original name. */
+  std::string GetRealLocation(const char* inName, const char* config);
 
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char* p);
@@ -298,6 +308,8 @@ protected:
   bool IgnoreLibPrefix;
   bool Configured;
   bool EmitUniversalBinaryFlags;
+  // A type flag is not nice. It's used only in TraceDependencies().
+  bool IsMakefileGenerator;
   // Hack for ExpandRuleVariable until object-oriented version is
   // committed.
   std::string TargetImplib;

@@ -55,7 +55,7 @@ public:
   void SetType(TargetType f, const char* name);
 
   ///! Set/Get the name of the target
-  const char* GetName() {return this->Name.c_str();}
+  const char* GetName() const {return this->Name.c_str();}
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
@@ -180,7 +180,7 @@ public:
 
   /**
    * Trace through the source files in this target and add al source files
-   * that they depend on, used by the visual studio generators
+   * that they depend on, used by all generators
    */
   void TraceVSDependencies(std::string projName, cmMakefile *mf);  
 
@@ -291,6 +291,13 @@ private:
                          const LibraryID& lib,
                          const LibraryID& dep);
 
+  /*
+   * Checks the prebuild, prelink and postbuild custom commands for known
+   * targets and adds them to the dependencies.
+   */
+  void checkForTargetsAsCommand(const std::vector<cmCustomCommand>& commands);
+  
+  
   /**
    * Emits the library \a lib and all its dependencies into link_line.
    * \a emitted keeps track of the libraries that have been emitted to

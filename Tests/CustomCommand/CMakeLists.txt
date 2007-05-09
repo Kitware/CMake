@@ -168,6 +168,31 @@ TARGET_LINK_LIBRARIES(CustomCommand GeneratedHeader)
 ADD_DEPENDENCIES(CustomCommand TDocument)
 
 ##############################################################################
+# Test for using just the target name as executable in the COMMAND
+# section. Has to be recognized and replaced by CMake with the output
+# actual location of the executable.
+# Additionally the generator is created in an extra subdir after the 
+# ADD_CUSTOM_COMMAND() is used.
+#
+# Test the same for ADD_CUSTOM_TARGET()
+
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generated_extern.cxx
+  COMMAND generator_extern ${CMAKE_CURRENT_BINARY_DIR}/generated_extern.cxx
+  )
+
+ADD_EXECUTABLE(CustomCommandUsingTargetTest main.cxx ${CMAKE_CURRENT_BINARY_DIR}/generated_extern.cxx )
+
+ADD_CUSTOM_TARGET(RunTarget 
+  COMMAND generator_extern ${CMAKE_CURRENT_BINARY_DIR}/run_target.cxx
+  )
+
+ADD_CUSTOM_COMMAND(TARGET CustomCommandUsingTargetTest POST_BUILD 
+                   COMMAND dummy_generator ${CMAKE_CURRENT_BINARY_DIR}/generated_dummy.cxx)
+
+ADD_SUBDIRECTORY(GeneratorInExtraDir)
+
+
+##############################################################################
 # Test non-trivial command line arguments in custom commands.
 SET(EXPECTED_ARGUMENTS)
 SET(CHECK_ARGS

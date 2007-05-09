@@ -111,6 +111,7 @@ std::string
 cmLocalVisualStudioGenerator
 ::ConstructScript(const cmCustomCommandLines& commandLines,
                   const char* workingDirectory,
+                  const char* configName,
                   bool escapeOldStyle,
                   bool escapeAllowMakeVars,
                   const char* newline_text)
@@ -152,13 +153,15 @@ cmLocalVisualStudioGenerator
 
     // Start with the command name.
     const cmCustomCommandLine& commandLine = *cl;
+    std::string commandName = this->GetRealLocation(commandLine[0].c_str(), 
+                                                    configName);
     if(!workingDirectory)
       {
-      script += this->Convert(commandLine[0].c_str(),START_OUTPUT,SHELL);
+      script += this->Convert(commandName.c_str(),START_OUTPUT,SHELL);
       }
     else
       {
-      script += this->Convert(commandLine[0].c_str(),NONE,SHELL);
+      script += this->Convert(commandName.c_str(),NONE,SHELL);
       }
 
     // Add the arguments.

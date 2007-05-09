@@ -41,6 +41,7 @@ protected:
   /** Construct a script from the given list of command lines.  */
   std::string ConstructScript(const cmCustomCommandLines& commandLines,
                               const char* workingDirectory,
+                              const char* configName,
                               bool escapeOldStyle,
                               bool escapeAllowMakeVars,
                               const char* newline = "\n");

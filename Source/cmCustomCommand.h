@@ -69,8 +69,8 @@ public:
   void SetEscapeAllowMakeVars(bool b);
 
   /** set get the used status of the command */ 
-  void SetUsed() { this->Used = true;}; 
-  bool IsUsed() { return this->Used;};
+  void SetUsed() { this->Used = true;}
+  bool IsUsed() const { return this->Used;}
  
 private:
   std::vector<std::string> Outputs;

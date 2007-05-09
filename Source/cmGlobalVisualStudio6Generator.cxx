@@ -208,9 +208,8 @@ void cmGlobalVisualStudio6Generator
       static_cast<cmLocalVisualStudio6Generator *>(generators[i])
       ->GetCreatedProjectNames();
     cmTargets &tgts = generators[i]->GetMakefile()->GetTargets();
-    cmTargets::iterator l = tgts.begin();
-    for(std::vector<std::string>::iterator si = dspnames.begin(); 
-        l != tgts.end(); ++l)
+    std::vector<std::string>::iterator si = dspnames.begin(); 
+    for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
       {
       // special handling for the current makefile
       if(mf == generators[0]->GetMakefile())
