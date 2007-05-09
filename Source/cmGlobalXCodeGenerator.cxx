@@ -1467,7 +1467,16 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     // Get the install_name directory for the build tree.
     install_name_dir = target.GetInstallNameDirForBuildTree(configName);
-
+    if(target.GetPropertyAsBool("FRAMEWORK"))
+      {
+      if(install_name_dir.find(".framework") != install_name_dir.npos)
+        {
+        install_name_dir = install_name_dir + "/..";
+        install_name_dir = cmSystemTools::CollapseFullPath(install_name_dir.c_str());
+        std::cerr << "new install name " << install_name_dir << "\n";
+        }
+      }
+    
     if(install_name_dir.empty())
       {
       // Xcode will not pass the -install_name option at all if INSTALL_PATH
