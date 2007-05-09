@@ -54,7 +54,9 @@ public:
    * Calls TraceVSDependencies() on all targets of this generator.
    */
   virtual void TraceDependencies();
-  
+
+  virtual void AddHelperCommands() {}
+
   /**
    * Perform any final calculations prior to generation
    */

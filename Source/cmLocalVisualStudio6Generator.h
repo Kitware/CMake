@@ -38,7 +38,9 @@ public:
   cmLocalVisualStudio6Generator();
 
   virtual ~cmLocalVisualStudio6Generator();
-  
+
+  virtual void AddHelperCommands();
+
   /**
    * Generate the makefile for this directory. 
    */

@@ -202,8 +202,6 @@ protected:
   void FillProjectMap();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
   void FillProjectToTargetMap();
-  // Calls TraceVSDependencies() on all targets
-  void TraceDependencies();
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const char* name, const char* message,
     const cmCustomCommandLines* commandLines,

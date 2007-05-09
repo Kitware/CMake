@@ -42,8 +42,7 @@ cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
 {
 }
 
-
-void cmLocalVisualStudio7Generator::Generate()
+void cmLocalVisualStudio7Generator::AddHelperCommands()
 {
   std::set<cmStdString> lang;
   lang.insert("C");
@@ -53,6 +52,10 @@ void cmLocalVisualStudio7Generator::Generate()
   lang.insert("DEF");
   this->CreateCustomTargetsAndCommands(lang);
   this->FixGlobalTargets();
+}
+
+void cmLocalVisualStudio7Generator::Generate()
+{
   this->OutputVCProjFile();
 }
 

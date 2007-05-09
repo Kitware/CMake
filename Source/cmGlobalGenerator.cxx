@@ -717,14 +717,12 @@ void cmGlobalGenerator::Configure()
     }
   // at this point this->LocalGenerators has been filled,
   // so create the map from project name to vector of local generators
-  this->FillProjectMap();
+    this->FillProjectMap();
   // now create project to target map 
   // This will make sure that targets have all the 
   // targets they depend on as part of the build.
-  this->FillProjectToTargetMap();
-  // now trace all dependencies
-  this->TraceDependencies();
-  
+    this->FillProjectToTargetMap();
+
   if ( !this->CMakeInstance->GetScriptMode() )
     {
     this->CMakeInstance->UpdateProgress("Configuring done", -1);
@@ -735,6 +733,19 @@ void cmGlobalGenerator::Generate()
 {
   // For each existing cmLocalGenerator
   unsigned int i;
+ 
+  // Add generator specific helper commands
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    this->LocalGenerators[i]->AddHelperCommands();
+    }
+
+  // Trace the dependencies, after that no custom commands should be added
+  // because their dependencies might not be handled correctly
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    this->LocalGenerators[i]->TraceDependencies();
+    }
 
   // Consolidate global targets
   cmTargets globalTargets;
@@ -1041,14 +1052,6 @@ const char* cmGlobalGenerator::GetLinkerPreference(const char* lang)
     return this->LanguageToLinkerPreference[lang].c_str();
     }
   return "None";
-}
-
-void cmGlobalGenerator::TraceDependencies()
-{ 
-  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    this->LocalGenerators[i]->TraceDependencies();
-    }
 }
 
 void cmGlobalGenerator::FillProjectMap()

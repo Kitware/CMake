@@ -41,7 +41,9 @@ public:
   cmLocalVisualStudio7Generator();
 
   virtual ~cmLocalVisualStudio7Generator();
-  
+
+  virtual void AddHelperCommands();
+
   /**
    * Generate the makefile for this directory. 
    */
