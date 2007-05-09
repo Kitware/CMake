@@ -1139,6 +1139,19 @@ int main()
   cmPassed("SET_SOURCE_FILES_PROPERTIES succeeded in setting FILE_HAS_EXTRA_COMPILE_FLAGS flag");
 #endif
 
+#ifndef FILE_DEFINE_STRING
+  cmFailed("SET_SOURCE_FILES_PROPERTIES failed at setting FILE_DEFINE_STRING flag");
+#else
+  if(strcmp(FILE_DEFINE_STRING, "hello") != 0)
+    {
+    cmFailed("SET_SOURCE_FILES_PROPERTIES failed at setting FILE_DEFINE_STRING flag correctly");
+    }
+  else
+    {
+    cmPassed("SET_SOURCE_FILES_PROPERTIES succeeded in setting FILE_DEFINE_STRING flag");
+    }
+#endif
+
 #ifndef FILE_HAS_ABSTRACT
   cmFailed("SET_SOURCE_FILES_PROPERTIES failed at setting ABSTRACT flag");
 #else
