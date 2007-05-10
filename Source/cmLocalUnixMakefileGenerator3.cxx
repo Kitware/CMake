@@ -806,6 +806,23 @@ cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(cmTarget& target)
 
 
 //----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
+                                                const char* newFlags)
+{
+  if(this->WatcomWMake && newFlags && *newFlags)
+    {
+    std::string newf = newFlags;
+    if(newf.find("\\\"") != newf.npos)
+      {
+      cmSystemTools::ReplaceString(newf, "\\\"", "\"");
+      this->cmLocalGenerator::AppendFlags(flags, newf.c_str());
+      return;
+      }
+    }
+  this->cmLocalGenerator::AppendFlags(flags, newFlags);
+}
+
+//----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
 ::AppendRuleDepend(std::vector<std::string>& depends,

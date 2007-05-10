@@ -177,6 +177,9 @@ public:
   /** used to create a recursive make call */
   std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);    
   
+  // append flags to a string
+  virtual void AppendFlags(std::string& flags, const char* newFlags);
+
   // append an echo command
   enum EchoColor { EchoNormal, EchoDepend, EchoBuild, EchoLink,
                    EchoGenerate, EchoGlobal };
