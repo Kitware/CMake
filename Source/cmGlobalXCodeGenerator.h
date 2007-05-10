@@ -109,7 +109,7 @@ private:
   
   void CreateCustomRulesMakefile(const char* makefileBasename, 
                                  cmTarget& target,
-                                 std::vector<cmCustomCommand> const & commands, 
+                                 std::vector<cmCustomCommand> const & commands,
                                  const char* configName,
                                  const std::map<cmStdString, cmStdString>& 
                                      multipleOutputPairs

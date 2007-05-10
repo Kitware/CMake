@@ -416,7 +416,7 @@ cmTarget::CheckForTargetsAsCommand(const std::vector<cmCustomCommand>& commands)
         cli != commands.end();
         ++cli )
     {
-    for ( cmCustomCommandLines::const_iterator cit=cli->GetCommandLines().begin();
+    for(cmCustomCommandLines::const_iterator cit=cli->GetCommandLines().begin();
           cit!=cli->GetCommandLines().end();
           ++cit )
       {
@@ -584,7 +584,9 @@ void cmTarget::TraceVSDependencies(std::string projFile,
         outsf->GetCustomCommand()->AppendDepends(automaticTargetDepends);
 
       // add its dependencies to the list to check
-      for (unsigned int i = 0; i < outsf->GetCustomCommand()->GetDepends().size(); ++i)
+      for (unsigned int i = 0; 
+           i < outsf->GetCustomCommand()->GetDepends().size(); 
+           ++i)
         {
         const std::string& fullName 
           = outsf->GetCustomCommand()->GetDepends()[i];

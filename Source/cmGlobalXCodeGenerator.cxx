@@ -959,7 +959,8 @@ void  cmGlobalXCodeGenerator
                             std::vector<cmCustomCommand> 
                             const & commands,
                             const char* configName,
-                            const std::map<cmStdString, cmStdString>& multipleOutputPairs
+                            const std::map<cmStdString, 
+                            cmStdString>& multipleOutputPairs
                            )
 {
   std::string makefileName=makefileBasename;
@@ -1487,7 +1488,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       if(install_name_dir.find(".framework") != install_name_dir.npos)
         {
         install_name_dir = install_name_dir + "/..";
-        install_name_dir = cmSystemTools::CollapseFullPath(install_name_dir.c_str());
+        install_name_dir = 
+            cmSystemTools::CollapseFullPath(install_name_dir.c_str());
         std::cerr << "new install name " << install_name_dir << "\n";
         }
       }
