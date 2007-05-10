@@ -23,40 +23,8 @@ SET(CMAKE_MAN_DIR "/man" CACHE STRING
   "Install location for man pages (relative to prefix).")
 MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
 
-IF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 1.4)
-  IF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
-    SET(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
-  ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
-  IF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
-    SET(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
-  ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
-  INCLUDE (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
-ENDIF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 1.4)
-
-# Disable deprecation warnings for standard C functions.
-IF(CMAKE_COMPILER_2005)
-  ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
-ENDIF(CMAKE_COMPILER_2005)
-
-#silence duplicate symbol warnings on AIX
-IF(CMAKE_SYSTEM MATCHES "AIX.*")
-  IF(NOT CMAKE_COMPILER_IS_GNUCXX)
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -bhalt:5 ")
-  ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
-ENDIF(CMAKE_SYSTEM MATCHES "AIX.*")
-
-IF(CMAKE_SYSTEM MATCHES "IRIX.*")
-  IF(NOT CMAKE_COMPILER_IS_GNUCXX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-woff84 -no_auto_include")
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-woff15")
-  ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
-ENDIF(CMAKE_SYSTEM MATCHES "IRIX.*")
-
-IF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
-  IF(NOT CMAKE_COMPILER_IS_GNUCXX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -timplicit_local -no_implicit_include ")
-  ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
-ENDIF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
+# include special compile flags for osme compilers
+INCLUDE(CompileFlags.cmake)
 
 #-----------------------------------------------------------------------------
 # Create the kwsys library for CMake.
@@ -116,7 +84,7 @@ IF(CMAKE_ALLOW_SYSTEM_LIBRARIES)
     ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_XMLRPC" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
     ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_CURL" ON)
-
+  
   # There is currently no option for system tar because the upstream
   # libtar does not have our modifications to allow reentrant
   # object-oriented use of the library.
@@ -130,8 +98,8 @@ ENDIF(CMAKE_ALLOW_SYSTEM_LIBRARIES)
 
 # Inform utility library header wrappers whether to use system versions.
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Utilities/cmThirdParty.h.in
-               ${CMake_BINARY_DIR}/Utilities/cmThirdParty.h
-               @ONLY IMMEDIATE)
+  ${CMake_BINARY_DIR}/Utilities/cmThirdParty.h
+  @ONLY IMMEDIATE)
 
 # Mention to the user what system libraries are being used.
 FOREACH(util CURL EXPAT XMLRPC ZLIB)
@@ -206,6 +174,8 @@ ELSE(CMAKE_USE_SYSTEM_EXPAT)
   SET(CMAKE_EXPAT_LIBRARIES cmexpat)
 ENDIF(CMAKE_USE_SYSTEM_EXPAT)
 
+#-----------------------------------------------------------------------------
+# Build XMLRPC library for CMake and CTest.
 IF(CMAKE_USE_SYSTEM_XMLRPC)
   FIND_PACKAGE(XMLRPC QUIET REQUIRED libwww-client)
   IF(NOT XMLRPC_FOUND)
@@ -244,18 +214,7 @@ SUBDIRS(Source Modules Templates Utilities Tests/CMakeTests)
 ENABLE_TESTING()
 
 # Include the standard Dart testing module
-#SET(DART_ROOT "" CACHE INTERNAL "" FORCE)
 INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
-
-# use the ansi CXX compile flag for building cmake
-
-IF (CMAKE_ANSI_CXXFLAGS)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")  
-ENDIF (CMAKE_ANSI_CXXFLAGS)
-
-IF (CMAKE_ANSI_CFLAGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")  
-ENDIF (CMAKE_ANSI_CFLAGS)
 
 # add some testing dependencies
 IF(BUILD_TESTING)
@@ -275,24 +234,19 @@ SET(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL
 
 INCLUDE_REGULAR_EXPRESSION("^.*$")
 
+# configure some files for testing
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
   ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
   ${CMake_BINARY_DIR}/Modules/.NoDartCoverage)
-
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/CTestCustom.ctest.in
   ${CMake_BINARY_DIR}/CTestCustom.ctest @ONLY)
 
 SET(CMAKE_BUILD_ON_VISUAL_STUDIO 0)
-IF(WIN32)
-  IF(NOT UNIX)
-    IF(NOT BORLAND)
-      IF(NOT MINGW )
-        SET(CMAKE_BUILD_ON_VISUAL_STUDIO 1)
-      ENDIF(NOT MINGW )
-    ENDIF(NOT BORLAND)
-  ENDIF(NOT UNIX)
-ENDIF(WIN32)
+IF(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW )
+  SET(CMAKE_BUILD_ON_VISUAL_STUDIO 1)
+ENDIF(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW )
+
 IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
   IF("CMake_HAVE_MFC" MATCHES "^CMake_HAVE_MFC$")
     SET(CHECK_INCLUDE_FILE_VAR "afxwin.h")
@@ -341,91 +295,8 @@ ADD_CUSTOM_TARGET(uninstall
 # include support for making the release
 INCLUDE (${CMake_SOURCE_DIR}/Utilities/Release/Release.cmake)
 
-# If the cmake version includes cpack, use it
-IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
-  IF(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
-    SET(CMAKE_INSTALL_MFC_LIBRARIES 1)
-    INCLUDE(InstallRequiredSystemLibraries)
-  ENDIF(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
-  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CMake is a build tool")
-  SET(CPACK_PACKAGE_VENDOR "Kitware")
-  SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
-  SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
-  SET(CPACK_PACKAGE_VERSION_MAJOR "${CMake_VERSION_MAJOR}")
-  SET(CPACK_PACKAGE_VERSION_MINOR "${CMake_VERSION_MINOR}")
-  SET(CPACK_PACKAGE_VERSION_PATCH "${CMake_VERSION_PATCH}")
-  SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
-  SET(CPACK_SOURCE_PACKAGE_FILE_NAME
-    "cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
-  IF(CMake_VERSION_RC)
-    SET(CPACK_SOURCE_PACKAGE_FILE_NAME
-      "${CPACK_SOURCE_PACKAGE_FILE_NAME}-RC-${CMake_VERSION_RC}")
-  ENDIF(CMake_VERSION_RC)
-  IF(NOT DEFINED CPACK_SYSTEM_NAME)
-    SET(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
-  ENDIF(NOT DEFINED CPACK_SYSTEM_NAME)
-  IF(${CPACK_SYSTEM_NAME} MATCHES Windows)
-    IF(CMAKE_CL_64)
-      SET(CPACK_SYSTEM_NAME win64-${CMAKE_SYSTEM_PROCESSOR})
-    ELSE(CMAKE_CL_64)
-      SET(CPACK_SYSTEM_NAME win32-${CMAKE_SYSTEM_PROCESSOR})
-    ENDIF(CMAKE_CL_64)
-  ENDIF(${CPACK_SYSTEM_NAME} MATCHES Windows)
-  IF(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
-    SET(CPACK_PACKAGE_FILE_NAME "${CPACK_SOURCE_PACKAGE_FILE_NAME}-${CPACK_SYSTEM_NAME}")
-  ENDIF(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
-  IF(WIN32 AND NOT UNIX)
-    # There is a bug in NSI that does not handle full unix paths properly. Make
-    # sure there is at least one set of four (4) backlasshes.
-    SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\CMakeInstall.bmp")
-    SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMake")
-    SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\CMakeSetup.exe")
-    SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} a cross-platform, open-source build system")
-    SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.cmake.org")
-    SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.kitware.com")
-    SET(CPACK_NSIS_CONTACT "cmake@cmake.org")
-    SET(CPACK_NSIS_MODIFY_PATH ON)
-  ELSE(WIN32 AND NOT UNIX)
-    SET(CPACK_STRIP_FILES "bin/ccmake;bin/cmake;bin/cpack;bin/ctest")
-    SET(CPACK_SOURCE_STRIP_FILES "")
-    SET(CPACK_PACKAGE_EXECUTABLES "ccmake" "CMake")
-  ENDIF(WIN32 AND NOT UNIX)
-# cygwin specific packaging stuff
-  IF(CYGWIN)
-    SET(CPACK_PACKAGE_NAME cmake)
-    # setup the name of the package for cygwin cmake-2.4.3
-    SET(CPACK_PACKAGE_FILE_NAME
-      "${CPACK_PACKAGE_NAME}-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
-    # the source has the same name as the binary
-    SET(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_FILE_NAME})
-    # Create a cygwin version number in case there are changes for cygwin
-    # that are not reflected upstream in CMake
-    SET(CPACK_CYGWIN_PATCH_NUMBER 1)
-    # if we are on cygwin and have cpack, then force the 
-    # doc, data and man dirs to conform to cygwin style directories
-    SET(CMAKE_DOC_DIR "/share/doc/${CPACK_PACKAGE_FILE_NAME}")
-    SET(CMAKE_DATA_DIR "/share/${CPACK_PACKAGE_FILE_NAME}")
-    SET(CMAKE_MAN_DIR "/share/man")
-    # let the user know we just forced these values
-    MESSAGE(STATUS "Setup for Cygwin packaging")
-    MESSAGE(STATUS "Override cache CMAKE_DOC_DIR = ${CMAKE_DOC_DIR}")
-    MESSAGE(STATUS "Override cache CMAKE_DATA_DIR = ${CMAKE_DATA_DIR}")
-    MESSAGE(STATUS "Override cache CMAKE_MAN_DIR = ${CMAKE_MAN_DIR}")
-    # These files are required by the cmCPackCygwinSourceGenerator and the files
-    # put into the release tar files.
-    SET(CPACK_CYGWIN_BUILD_SCRIPT 
-      "${CMake_BINARY_DIR}/@CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.sh")
-    SET(CPACK_CYGWIN_PATCH_FILE 
-      "${CMake_BINARY_DIR}/@CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.patch")
-    # include the sub directory for cygwin releases
-    SUBDIRS(Utilities/Release/Cygwin)
-    # when packaging source make sure the .build directory is not included
-    SET(CPACK_SOURCE_IGNORE_FILES
-      "/CVS/" "/\\\\.build/" "/\\\\.svn/" "\\\\.swp$" "\\\\.#" "/#" "~$")
-  ENDIF(CYGWIN)
-  # include CPack model once all variables are set
-  INCLUDE(CPack)
-ENDIF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
+# include CPack Support
+INCLUDE (CMakeCPack.cmake)
 
 # configure the CTestScript.cmake file into the binary directory
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Templates/CTestScript.cmake.in"
