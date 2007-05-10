@@ -593,6 +593,15 @@ IF(BUILD_TESTING)
     --build-two-config
     --test-command   miniMacroTest)
 
+  ADD_TEST(BuildDepends ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/BuildDepends"
+    "${CMake_BINARY_DIR}/Tests/BuildDepends"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project BuildDepends
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+   )
+
   SET(SimpleInstallInstallDir
     "${CMake_BINARY_DIR}/Tests/SimpleInstall/InstallDirectory")
   ADD_TEST(SimpleInstall ${CMAKE_CTEST_COMMAND}
