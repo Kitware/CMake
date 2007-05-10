@@ -433,6 +433,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     lg->AppendFlags(flags, cmtarget.GetProperty("COMPILE_FLAGS"));
     }
   lg->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
+  cmSystemTools::ReplaceString(flags, "\"", "\\\"");
   cmXCodeObject* fileRef = 
     this->CreateObject(cmXCodeObject::PBXFileReference);
 
