@@ -3,6 +3,9 @@
 const char* foo();
 int main()
 {
-  printf("%s", foo());
+  int i;
+  printf("%s\n", foo());
+  fflush(stdout);
+  for(;;);
   return 0;
 }

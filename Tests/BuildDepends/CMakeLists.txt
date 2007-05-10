@@ -13,19 +13,24 @@ try_compile(RESULT
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
   OUTPUT_VARIABLE OUTPUT)
-
-set(bar ${BuildDepends_BINARY_DIR}/Project/bar.exe)
-if(EXISTS ${BuildDepends_BINARY_DIR}/Project/Debug/bar.exe )
-  set(bar ${BuildDepends_BINARY_DIR}/Project/Debug/bar.exe)
-endif(EXISTS ${BuildDepends_BINARY_DIR}/Project/Debug/bar.exe )
-  
-execute_process(COMMAND ${bar} OUTPUT_VARIABLE out)
+set(bar ${BuildDepends_BINARY_DIR}/Project/bar${CMAKE_EXECUTABLE_SUFFIX})
+message("${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
+if(EXISTS 
+    "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
+  message("found debug")
+  set(bar 
+    "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
+endif(EXISTS 
+  "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
+message("running ${bar}  ")
+execute_process(COMMAND ${bar} OUTPUT_VARIABLE out TIMEOUT 3)
+string(REGEX REPLACE "[\r\n]" " " out "${out}")
 message("${out}")
-if("${out}" STREQUAL "foo")
+if("${out}" STREQUAL "foo ")
   message("Worked!")
-else("${out}" STREQUAL "foo")
-  message(SEND_ERROR "Program did not rebuild with changed file")
-endif("${out}" STREQUAL "foo")
+else("${out}" STREQUAL "foo ")
+  message(SEND_ERROR "Program did not rebuild with changed file: ${out}")
+endif("${out}" STREQUAL "foo ")
 
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.c 
   "const char* foo() { return \"foo changed\";}" )
@@ -35,11 +40,18 @@ try_compile(RESULT
   testRebuild
   OUTPUT_VARIABLE OUTPUT)
 
-execute_process(COMMAND ${bar} OUTPUT_VARIABLE out)
+if(EXISTS 
+    "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
+  message("found debug")
+endif(EXISTS 
+  "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
+
+execute_process(COMMAND ${bar} OUTPUT_VARIABLE out TIMEOUT 3)
+string(REGEX REPLACE "[\r\n]" " " out "${out}")
 message("${out}")
 
-if("${out}" STREQUAL "foo changed")
+if("${out}" STREQUAL "foo changed ")
   message("Worked!")
-else("${out}" STREQUAL "foo changed")
+else("${out}" STREQUAL "foo changed ")
   message(SEND_ERROR "Program did not rebuild with changed file")
-endif("${out}" STREQUAL "foo changed")
+endif("${out}" STREQUAL "foo changed ")
