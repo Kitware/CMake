@@ -223,8 +223,9 @@ cmLocalGenerator *cmGlobalXCodeGenerator::CreateLocalGenerator()
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::Generate()
 {
-  this->cmGlobalGenerator::Generate();
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  // make sure extra targets are added before calling
+  // the parent generate which will call trace depends
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     { 
     cmLocalGenerator* root = it->second[0];
@@ -238,6 +239,19 @@ void cmGlobalXCodeGenerator::Generate()
     this->CurrentLocalGenerator = root;
     // add ALL_BUILD, INSTALL, etc
     this->AddExtraTargets(root, it->second);
+    }
+  this->cmGlobalGenerator::Generate();
+  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
+    { 
+    cmLocalGenerator* root = it->second[0];
+    this->CurrentProject = root->GetMakefile()->GetProjectName();
+    this->SetCurrentLocalGenerator(root);
+    this->OutputDir = this->CurrentMakefile->GetHomeOutputDirectory();
+    this->OutputDir = 
+      cmSystemTools::CollapseFullPath(this->OutputDir.c_str());
+    cmSystemTools::SplitPath(this->OutputDir.c_str(),
+                             this->ProjectOutputDirectoryComponents);
+    this->CurrentLocalGenerator = root;
     // now create the project
     this->OutputXCodeProject(root, it->second);
     }
