@@ -229,14 +229,7 @@ void cmGlobalXCodeGenerator::Generate()
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     { 
     cmLocalGenerator* root = it->second[0];
-    this->CurrentProject = root->GetMakefile()->GetProjectName();
-    this->SetCurrentLocalGenerator(root);
-    this->OutputDir = this->CurrentMakefile->GetHomeOutputDirectory();
-    this->OutputDir = 
-      cmSystemTools::CollapseFullPath(this->OutputDir.c_str());
-    cmSystemTools::SplitPath(this->OutputDir.c_str(),
-                             this->ProjectOutputDirectoryComponents);
-    this->CurrentLocalGenerator = root;
+    this->SetGenerationRoot(root);
     // add ALL_BUILD, INSTALL, etc
     this->AddExtraTargets(root, it->second);
     }
@@ -244,17 +237,27 @@ void cmGlobalXCodeGenerator::Generate()
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     { 
     cmLocalGenerator* root = it->second[0];
-    this->CurrentProject = root->GetMakefile()->GetProjectName();
-    this->SetCurrentLocalGenerator(root);
-    this->OutputDir = this->CurrentMakefile->GetHomeOutputDirectory();
-    this->OutputDir = 
-      cmSystemTools::CollapseFullPath(this->OutputDir.c_str());
-    cmSystemTools::SplitPath(this->OutputDir.c_str(),
-                             this->ProjectOutputDirectoryComponents);
-    this->CurrentLocalGenerator = root;
+    this->SetGenerationRoot(root);
     // now create the project
     this->OutputXCodeProject(root, it->second);
     }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
+{
+  this->CurrentProject = root->GetMakefile()->GetProjectName();
+  this->SetCurrentLocalGenerator(root);
+  std::string outDir = this->CurrentMakefile->GetHomeOutputDirectory();
+  outDir =cmSystemTools::CollapseFullPath(outDir.c_str());
+  cmSystemTools::SplitPath(outDir.c_str(),
+                           this->ProjectOutputDirectoryComponents);
+
+  this->CurrentXCodeHackMakefile =
+    root->GetMakefile()->GetCurrentOutputDirectory();
+  this->CurrentXCodeHackMakefile += "/CMakeScripts";
+  cmSystemTools::MakeDirectory(this->CurrentXCodeHackMakefile.c_str());
+  this->CurrentXCodeHackMakefile += "/XCODE_DEPEND_HELPER.make";
 }
 
 //----------------------------------------------------------------------------
@@ -273,10 +276,6 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   
   // Add XCODE depend helper 
   std::string dir = mf->GetCurrentOutputDirectory();
-  this->CurrentXCodeHackMakefile = dir;
-  this->CurrentXCodeHackMakefile += "/CMakeScripts";
-  cmSystemTools::MakeDirectory(this->CurrentXCodeHackMakefile.c_str());
-  this->CurrentXCodeHackMakefile += "/XCODE_DEPEND_HELPER.make";
   cmCustomCommandLine makecommand;
   makecommand.push_back("make");
   makecommand.push_back("-C");

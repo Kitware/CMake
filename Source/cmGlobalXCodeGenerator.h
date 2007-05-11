@@ -157,6 +157,7 @@ private:
                        cmXCodeObject* dependTarget);
   void CreateXCodeDependHackTarget(std::vector<cmXCodeObject*>& targets);
   bool SpecialTargetEmitted(std::string const& tname);
+  void SetGenerationRoot(cmLocalGenerator* root);
   void AddExtraTargets(cmLocalGenerator* root, 
                        std::vector<cmLocalGenerator*>& gens);
   cmXCodeObject* CreateBuildPhase(const char* name, 
@@ -186,7 +187,6 @@ private:
   std::string CurrentReRunCMakeMakefile;
   std::string CurrentXCodeHackMakefile;
   std::string CurrentProject;
-  std::string OutputDir; 
   std::set<cmStdString> TargetDoneSet;
   std::vector<std::string> CurrentOutputDirectoryComponents;
   std::vector<std::string> ProjectOutputDirectoryComponents;
