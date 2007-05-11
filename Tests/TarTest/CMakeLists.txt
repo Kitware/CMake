@@ -1,4 +1,4 @@
-PROJECT(TestTar)
+PROJECT(TarTest)
 
 # this is macro that we will be running
 MACRO(EXEC_TAR_COMMAND DIR ARGS)
@@ -54,5 +54,5 @@ ENDMACRO(CHECK_DIR_STRUCTURE)
 
 CHECK_DIR_STRUCTURE("${CMAKE_CURRENT_BINARY_DIR}/test_output_tar/tar_dir")
 
-ADD_EXECUTABLE(TestTarExec TestTarExec.cxx)
+ADD_EXECUTABLE(TarTest TestTarExec.cxx)
 

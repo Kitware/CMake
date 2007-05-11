@@ -1,3 +1,18 @@
+# a macro for tests that have a simple format where the name matches the
+# directory and project
+MACRO(ADD_TEST_MACRO NAME)
+  ADD_TEST(${NAME} ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/${NAME}"
+    "${CMake_BINARY_DIR}/Tests/${NAME}"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-project ${NAME}
+    --test-command ${NAME})
+ENDMACRO(ADD_TEST_MACRO)
+
+
 # Testing
 IF(BUILD_TESTING)
   # Should the long tests be run?
@@ -12,25 +27,19 @@ IF(BUILD_TESTING)
     MARK_AS_ADVANCED(CTEST_TEST_CTEST)
   ENDIF (CMAKE_RUN_LONG_TESTS)
   
-  ADD_TEST(CommandLineTest ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/CommandLineTest"
-    "${CMake_BINARY_DIR}/Tests/CommandLineTest"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project CommandLineTest
-    --test-command CommandLineTest)
-
-  ADD_TEST(TarTest ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/TarTest"
-    "${CMake_BINARY_DIR}/Tests/TarTest"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project TestTar
-    --test-command TestTarExec)
+  ADD_TEST_MACRO(CommandLineTest CommandLineTest)
+  ADD_TEST_MACRO(FindPackageTest FindPackageTest)
+  ADD_TEST_MACRO(StringFileTest StringFileTest)
+  ADD_TEST_MACRO(TryCompile TryCompile)
+  ADD_TEST_MACRO(TarTest TarTest)
+  ADD_TEST_MACRO(SystemInformation SystemInformation)
+  ADD_TEST_MACRO(MathTest MathTest)
+  ADD_TEST_MACRO(Simple Simple)
+  ADD_TEST_MACRO(PreOrder PreOrder)
+  ADD_TEST_MACRO(COnly COnly)
+  ADD_TEST_MACRO(CxxOnly CxxOnly)
+  ADD_TEST_MACRO(NewlineArgs NewlineArgs)
+  ADD_TEST_MACRO(SetLang SetLang)
 
   ADD_TEST(TargetName ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -92,66 +101,6 @@ IF(BUILD_TESTING)
     --test-command working
     )
 
-  ADD_TEST(FindPackageTest ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPackageTest"
-    "${CMake_BINARY_DIR}/Tests/FindPackageTest"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project FindPackageTest
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --test-command FindPackageTest)
-
-  ADD_TEST(SystemInformation ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/SystemInformation"
-    "${CMake_BINARY_DIR}/Tests/SystemInformation"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project DumpInformation
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --test-command DumpInformation)
-
-  ADD_TEST(StringFileTest ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/StringFileTest"
-    "${CMake_BINARY_DIR}/Tests/StringFileTest"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project StringFileTest
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --test-command StringFileTest)
-
-  ADD_TEST(MathTest ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/MathTest"
-    "${CMake_BINARY_DIR}/Tests/MathTest"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project MathTest
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --test-command MathTestExec)
-
-  ADD_TEST(TryCompile ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/TryCompile"
-    "${CMake_BINARY_DIR}/Tests/TryCompile"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project TryCompile
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-two-config
-    --test-command TryCompile)
-
-  ADD_TEST(simple ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Simple"
-    "${CMake_BINARY_DIR}/Tests/Simple"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project Simple
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-two-config
-    --test-command simple)
-
   ADD_TEST(SimpleExclude ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/SimpleExclude"
@@ -187,46 +136,6 @@ IF(BUILD_TESTING)
     --build-two-config
     --test-command
     "${CMake_BINARY_DIR}/Tests/OutOfSource/SubDir/OutOfSourceSubdir/simple")
-
-  ADD_TEST(PreOrder ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/PreOrder"
-    "${CMake_BINARY_DIR}/Tests/PreOrder"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project PreOrder
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-two-config
-    --test-command simple)
-
-  ADD_TEST(conly  ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/COnly"
-    "${CMake_BINARY_DIR}/Tests/COnly"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project conly
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-two-config
-    --test-command   conly)
-
-  ADD_TEST(CxxOnly  ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/CxxOnly"
-    "${CMake_BINARY_DIR}/Tests/CxxOnly"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project cxxonly
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-two-config
-    --test-command cxxonly)
-
-  ADD_TEST(NewlineArgs  ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/NewlineArgs"
-    "${CMake_BINARY_DIR}/Tests/NewlineArgs"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project newlineargs
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-two-config
-    --test-command cxxonly)
 
   ADD_TEST(MacroTest ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -337,16 +246,6 @@ IF(BUILD_TESTING)
       -DCMAKE_TEST_DIFFERENT_GENERATOR:BOOL=${CMAKE_TEST_DIFFERENT_GENERATOR}
       -DCMAKE_TEST_SYSTEM_LIBRARIES:BOOL=${CMAKE_TEST_SYSTEM_LIBRARIES}
       --test-command complex)
-
-    ADD_TEST(SetLang ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/SetLang"
-      "${CMake_BINARY_DIR}/Tests/SetLang"
-      --build-two-config
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-project SetLang
-      --test-command bar)
 
 #     ADD_TEST(ConvLibrary ${CMAKE_CTEST_COMMAND}
 #       --build-and-test
@@ -789,15 +688,7 @@ IF(BUILD_TESTING)
       --test-command
       ${BundleTestInstallDir}/Application/SecondBundleExe.app/Contents/MacOS/SecondBundleExe)
 
-    ADD_TEST(objc++ ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/ObjC++"
-      "${CMake_BINARY_DIR}/Tests/ObjC++"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-project  objc++
-      --test-command  objc++
-      )
+    ADD_TEST_MACRO(ObjC++ ObjC++)
   ENDIF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
 
   IF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
@@ -947,3 +838,5 @@ IF(BUILD_TESTING)
   ENDIF(UNIX)
 
 ENDIF(BUILD_TESTING)
+
+ADD_SUBDIRECTORY(CMakeTests)

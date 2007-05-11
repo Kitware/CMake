@@ -1,17 +1,17 @@
-PROJECT(DumpInformation)
+PROJECT(SystemInformation)
 
 INCLUDE_DIRECTORIES("This does not exists")
 GET_DIRECTORY_PROPERTY(incl INCLUDE_DIRECTORIES)
-SET_DIRECTORY_PROPERTIES(PROPERTIES INCLUDE_DIRECTORIES "${DumpInformation_BINARY_DIR};${DumpInformation_SOURCE_DIR}")
+SET_DIRECTORY_PROPERTIES(PROPERTIES INCLUDE_DIRECTORIES "${SystemInformation_BINARY_DIR};${SystemInformation_SOURCE_DIR}")
 
 MESSAGE("To prevent CTest from stripping output, you have to display: CTEST_FULL_OUTPUT")
 
 
-CONFIGURE_FILE(${DumpInformation_SOURCE_DIR}/SystemInformation.in 
-${DumpInformation_BINARY_DIR}/SystemInformation.out)
-CONFIGURE_FILE(${DumpInformation_SOURCE_DIR}/DumpInformation.h.in 
-${DumpInformation_BINARY_DIR}/DumpInformation.h)
-ADD_EXECUTABLE(DumpInformation DumpInformation.cxx)
+CONFIGURE_FILE(${SystemInformation_SOURCE_DIR}/SystemInformation.in 
+${SystemInformation_BINARY_DIR}/SystemInformation.out)
+CONFIGURE_FILE(${SystemInformation_SOURCE_DIR}/DumpInformation.h.in 
+${SystemInformation_BINARY_DIR}/DumpInformation.h)
+ADD_EXECUTABLE(SystemInformation DumpInformation.cxx)
 
 MACRO(FOO args)
   MESSAGE("Test macro")

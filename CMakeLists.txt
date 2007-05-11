@@ -403,7 +403,6 @@ ADD_SUBDIRECTORY(Modules)
 ADD_SUBDIRECTORY(Templates)
 ADD_SUBDIRECTORY(Utilities)
 ADD_SUBDIRECTORY(Tests)
-ADD_SUBDIRECTORY(Tests/CMakeTests)
 
 # add a test
 ADD_TEST(SystemInformationNew "${CMAKE_CMAKE_COMMAND}" 
