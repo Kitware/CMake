@@ -101,19 +101,19 @@ IF(BUILD_TESTING)
     --test-command working
     )
 
-  ADD_TEST(SimpleExclude ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/SimpleExclude"
-    "${CMake_BINARY_DIR}/Tests/SimpleExclude"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project SimpleExclude
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-two-config
-    --test-command t4
+   #ADD_TEST(SimpleExclude ${CMAKE_CTEST_COMMAND}
+   #  --build-and-test
+   #  "${CMake_SOURCE_DIR}/Tests/SimpleExclude"
+   #  "${CMake_BINARY_DIR}/Tests/SimpleExclude"
+   #  --build-generator ${CMAKE_TEST_GENERATOR}
+   #  --build-project SimpleExclude
+   #  --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+   #  --build-two-config
+   #  --test-command t4
    #--test-command "${CMAKE_COMMAND}"
    #"-DCONFIGURATION=\${CTEST_CONFIGURATION_TYPE}"
    #-P "${CMAKE_BINARY_DIR}/Tests/SimpleExclude/run.cmake"
-   )
+   #)
 
 #  ADD_TEST(SameName  ${CMAKE_CTEST_COMMAND}
 #    --build-and-test

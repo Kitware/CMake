@@ -226,6 +226,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     )
   
   # check for the use of system libraries versus builtin ones
+  # (a macro defined in this file)
   CMAKE_HANDLE_SYSTEM_LIBRARIES()
   
   #---------------------------------------------------------------------
