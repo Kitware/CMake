@@ -52,7 +52,7 @@ struct cmListFileFunction
 {
   std::string Name;
   std::vector<cmListFileArgument> Arguments;
-  const char* FilePath;
+  std::string FilePath;
   long Line;
 };
 
