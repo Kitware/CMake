@@ -16,7 +16,6 @@
 =========================================================================*/
 #include "cmCommands.h"
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmAddSubDirectoryCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildNameCommand.cxx"
 #include "cmDefinePropertyCommand.cxx"
@@ -70,7 +69,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   )
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  commands.push_back(new cmAddSubDirectoryCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildNameCommand);
   commands.push_back(new cmDefinePropertyCommand);
