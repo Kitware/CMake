@@ -1,5 +1,5 @@
 PROJECT(CMake)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4) # Need 2.4 for ADD_SUBDIRECTORY
+CMAKE_MINIMUM_REQUIRED(VERSION 2.2) # Need 2.4 for SUBDIRS
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 
 
@@ -214,7 +214,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_CommandLineArguments 1)
   SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
-  ADD_SUBDIRECTORY(Source/kwsys)
+  SUBDIRS(Source/kwsys)
   
   #---------------------------------------------------------------------
   # Setup third-party libraries.
@@ -243,7 +243,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   ELSE(CMAKE_USE_SYSTEM_ZLIB)
     SET(CMAKE_ZLIB_INCLUDES)
     SET(CMAKE_ZLIB_LIBRARIES cmzlib)
-    ADD_SUBDIRECTORY(Utilities/cmzlib)
+    SUBDIRS(Utilities/cmzlib)
   ENDIF(CMAKE_USE_SYSTEM_ZLIB)
   
   #---------------------------------------------------------------------
@@ -263,7 +263,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     ADD_DEFINITIONS(-DCURL_STATICLIB)
     SET(CMAKE_CURL_INCLUDES)
     SET(CMAKE_CURL_LIBRARIES cmcurl)
-    ADD_SUBDIRECTORY(Utilities/cmcurl)
+    SUBDIRS(Utilities/cmcurl)
   ENDIF(CMAKE_USE_SYSTEM_CURL)
 
   #---------------------------------------------------------------------
@@ -273,14 +273,14 @@ MACRO (CMAKE_BUILD_UTILITIES)
   SET(CMTAR_ZLIB_INCLUDE_DIRS ${CMAKE_ZLIB_INCLUDES})
   SET(CMAKE_TAR_INCLUDES ${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmtar)
   SET(CMAKE_TAR_LIBRARIES cmtar)
-  ADD_SUBDIRECTORY(Utilities/cmtar)
+  SUBDIRS(Utilities/cmtar)
   
   #---------------------------------------------------------------------
   # Build Compress library for CTest.
   SET(CMAKE_COMPRESS_INCLUDES 
     "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmcompress")
   SET(CMAKE_COMPRESS_LIBRARIES "cmcompress")
-  ADD_SUBDIRECTORY(Utilities/cmcompress)
+  SUBDIRS(Utilities/cmcompress)
   
   #---------------------------------------------------------------------
   # Build expat library for CMake and CTest.
@@ -295,7 +295,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   ELSE(CMAKE_USE_SYSTEM_EXPAT)
     SET(CMAKE_EXPAT_INCLUDES)
     SET(CMAKE_EXPAT_LIBRARIES cmexpat)
-    ADD_SUBDIRECTORY(Utilities/cmexpat)
+    SUBDIRS(Utilities/cmexpat)
   ENDIF(CMAKE_USE_SYSTEM_EXPAT)
   
   #---------------------------------------------------------------------
@@ -311,7 +311,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   ELSE(CMAKE_USE_SYSTEM_XMLRPC)
     SET(CMAKE_XMLRPC_INCLUDES)
     SET(CMAKE_XMLRPC_LIBRARIES cmXMLRPC)
-    ADD_SUBDIRECTORY(Utilities/cmxmlrpc)
+    SUBDIRS(Utilities/cmxmlrpc)
   ENDIF(CMAKE_USE_SYSTEM_XMLRPC)
   
   #---------------------------------------------------------------------
@@ -328,7 +328,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     SET(BUILD_CursesDialog 0)
   ENDIF (UNIX)
   IF(BUILD_CursesDialog)
-    ADD_SUBDIRECTORY(Source/CursesDialog/form)
+    SUBDIRS(Source/CursesDialog/form)
   ENDIF(BUILD_CursesDialog)
 ENDMACRO (CMAKE_BUILD_UTILITIES)
 
@@ -399,11 +399,11 @@ INCLUDE (CMakeCPack.cmake)
 CMAKE_SETUP_TESTING()
 
 # build the remaining subdirectories
-ADD_SUBDIRECTORY(Source)
-ADD_SUBDIRECTORY(Modules)
-ADD_SUBDIRECTORY(Templates)
-ADD_SUBDIRECTORY(Utilities)
-ADD_SUBDIRECTORY(Tests)
+SUBDIRS(Source)
+SUBDIRS(Modules)
+SUBDIRS(Templates)
+SUBDIRS(Utilities)
+SUBDIRS(Tests)
 
 # add a test
 ADD_TEST(SystemInformationNew "${CMAKE_CMAKE_COMMAND}" 
