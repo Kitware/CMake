@@ -618,7 +618,8 @@ cmLocalVisualStudio6Generator
       }
     // Write out the dependencies for the rule.
     fout << "USERDEP__HACK=";
-    for(std::vector<std::string>::const_iterator d=command.GetDepends().begin();
+    for(std::vector<std::string>::const_iterator d = 
+          command.GetDepends().begin();
         d != command.GetDepends().end(); 
         ++d)
       {

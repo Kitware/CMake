@@ -410,15 +410,17 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
 
 void 
-cmTarget::CheckForTargetsAsCommand(const std::vector<cmCustomCommand>& commands)
+cmTarget
+::CheckForTargetsAsCommand(const std::vector<cmCustomCommand>& commands)
 {
   for ( std::vector<cmCustomCommand>::const_iterator cli = commands.begin();
         cli != commands.end();
         ++cli )
     {
-    for(cmCustomCommandLines::const_iterator cit=cli->GetCommandLines().begin();
-          cit!=cli->GetCommandLines().end();
-          ++cit )
+    for(cmCustomCommandLines::const_iterator cit = 
+          cli->GetCommandLines().begin();
+        cit!=cli->GetCommandLines().end();
+        ++cit )
       {
       std::string command = *cit->begin();
       // see if we can find a target with this name

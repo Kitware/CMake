@@ -906,7 +906,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
         std::string primaryOutput = this->ConvertToRelativeForMake(o->c_str());
         for(++o; o != outputs.end(); ++o)
           {
-          std::string currentOutput =this->ConvertToRelativeForMake(o->c_str());
+          std::string currentOutput=this->ConvertToRelativeForMake(o->c_str());
           multipleOutputPairs[currentOutput] = primaryOutput;
           }
         }
@@ -940,7 +940,8 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
   std::string makecmd = "make -C ";
   makecmd += cdir;
   makecmd += " -f ";
-  makecmd += this->ConvertToRelativeForMake((makefile+"$CONFIGURATION").c_str());
+  makecmd += this->ConvertToRelativeForMake(
+                                          (makefile+"$CONFIGURATION").c_str());
   if(!multipleOutputPairs.empty())
     {
     makecmd += " cmake_check_multiple_outputs";
