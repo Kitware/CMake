@@ -1303,21 +1303,24 @@ void cmTarget::ComputeObjectFiles()
       const char* lang = this->Makefile->GetLocalGenerator()->
         GetGlobalGenerator()->
         GetLanguageFromExtension(sf->GetSourceExtension().c_str());
-      std::string lookupObj = objExtensionLookup1 + lang;
-      lookupObj += objExtensionLookup2;
-      const char* obj = this->Makefile->GetDefinition(lookupObj.c_str());
-      if(obj)
+      if (lang)
         {
-        if(objectFiles.size())
+        std::string lookupObj = objExtensionLookup1 + lang;
+        lookupObj += objExtensionLookup2;
+        const char* obj = this->Makefile->GetDefinition(lookupObj.c_str());
+        if(obj)
           {
-          objectFiles += ";";
+          if(objectFiles.size())
+            {
+            objectFiles += ";";
+            }
+          std::string objFile = *d;
+          objFile += "/";
+          objFile += this->Makefile->GetLocalGenerator()->
+            GetSourceObjectName(*sf);
+          objFile += obj;
+          objectFiles += objFile;
           }
-        std::string objFile = *d;
-        objFile += "/";
-        objFile += this->Makefile->GetLocalGenerator()->
-          GetSourceObjectName(*sf);
-        objFile += obj;
-        objectFiles += objFile;
         }
       }
     }
