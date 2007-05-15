@@ -1,8 +1,18 @@
-# - setup for using Dart.
+# - Configure a project for testing with CTest or old Dart Tcl Client
+# This file is the backwards-compatibility version of the CTest module.
+# It supports using the old Dart 1 Tcl client for driving dashboard
+# submissions as well as testing with CTest.  This module should be included
+# in the CMakeLists.txt file at the top of a project.  Typical usage:
+#  INCLUDE(Dart)
+#  IF(BUILD_TESTING)
+#    # ... testing related CMake code ...
+#  ENDIF(BUILD_TESTING)
+# The BUILD_TESTING option is created by the Dart module to determine
+# whether testing support should be enabled.  The default is ON.
+
 # This file configures a project to use the Dart testing/dashboard process.
 # It is broken into 3 sections.
-
-# 
+#
 #  Section #1: Locate programs on the client and determine site and build name
 #  Section #2: Configure or copy Tcl scripts from the source tree to build tree
 #  Section #3: Custom targets for performing dashboard builds.

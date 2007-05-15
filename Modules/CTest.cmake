@@ -1,6 +1,14 @@
-# - setup CTest 
+# - Configure a project for testing with CTest/Dart
 # This file configures a project to use the CTest/Dart
-# testing/dashboard process.  
+# testing/dashboard process.  This module should be included
+# in the CMakeLists.txt file at the top of a project.  Typical usage:
+#  INCLUDE(CTest)
+#  IF(BUILD_TESTING)
+#    # ... testing related CMake code ...
+#  ENDIF(BUILD_TESTING)
+# The BUILD_TESTING option is created by the CTest module to determine
+# whether testing support should be enabled.  The default is ON.
+
 OPTION(BUILD_TESTING "Build the testing tree." ON)
 
 IF(BUILD_TESTING)
