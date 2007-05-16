@@ -287,6 +287,15 @@ static int kwsysSystem_Shell__GetArgumentSize(const char* in,
         ++size;
         }
       }
+    else if(*c == '%')
+      {
+      if(flags & kwsysSystem_Shell_Flag_VSIDE)
+        {
+        /* In a VS IDE a percent is written %% so we need one extra
+           characters.  */
+        size += 1;
+        }
+      }
     }
 
   /* Check whether the argument needs surrounding quotes.  */
@@ -430,6 +439,20 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
         {
         /* Otherwise a pound is written just #. */
         *out++ = '#';
+        }
+      }
+    else if(*c == '%')
+      {
+      if(flags & kwsysSystem_Shell_Flag_VSIDE)
+        {
+        /* In a VS IDE a percent is written %%.  */
+        *out++ = '%';
+        *out++ = '%';
+        }
+      else
+        {
+        /* Otherwise a percent is written just %. */
+        *out++ = '%';
         }
       }
     else
