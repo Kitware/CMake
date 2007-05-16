@@ -1511,6 +1511,8 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   // Some search paths should never be emitted
   emitted.insert("");
   emitted.insert("/usr/lib");
+  emitted.insert("/usr/lib32");
+  emitted.insert("/usr/lib64");
   std::string libPathFlag = 
     this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
   std::string libLinkFlag = 
