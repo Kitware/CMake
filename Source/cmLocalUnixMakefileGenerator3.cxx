@@ -714,6 +714,11 @@ cmLocalUnixMakefileGenerator3
     {
     no_depends.push_back(hack);
     }
+  std::string hack_cmd = gg->GetEmptyRuleHackCommand();
+  if(!hack_cmd.empty())
+    {
+    no_commands.push_back(hack_cmd);
+    }
 
   // Special symbolic target that never exists to force dependers to
   // run their rules.

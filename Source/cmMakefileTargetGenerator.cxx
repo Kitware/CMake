@@ -923,7 +923,7 @@ cmMakefileTargetGenerator
   // to be created.
   std::vector<std::string> commands;
   std::vector<std::string> depends;
-  std::string emptyCommand = this->GlobalGenerator->GetEmptyCommandHack();
+  std::string emptyCommand = this->GlobalGenerator->GetEmptyRuleHackCommand();
   if(!emptyCommand.empty())
     {
     commands.push_back(emptyCommand);

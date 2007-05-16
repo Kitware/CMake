@@ -24,7 +24,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
   this->NeedSymbolicMark = true;
-  this->EmptyCommandsHack = "@cd .";
+  this->EmptyRuleHackCommand = "@cd .";
 }
 
 void cmGlobalWatcomWMakeGenerator

@@ -111,9 +111,9 @@ public:
       check-build-system step.  */
   virtual void CheckMultipleOutputs(cmMakefile* mf, bool verbose);
 
-  /** Get the command to use for a non-symbolic target file that has
-      no rule.  This is used for multiple output dependencies.  */
-  std::string GetEmptyCommandHack() { return this->EmptyCommandsHack; }
+  /** Get the command to use for a target that has no rule.  This is
+      used for multiple output dependencies and for cmake_force.  */
+  std::string GetEmptyRuleHackCommand() { return this->EmptyRuleHackCommand; }
 
   /** Get the fake dependency to use when a rule has no real commands
       or dependencies.  */
@@ -175,11 +175,10 @@ protected:
   // that can be added.
   std::string EmptyRuleHackDepends;
 
-  // Some make programs (Watcom) do not like rules with no commands
-  // for non-symbolic targets.  If non-empty this variable holds a
-  // bogus command that may be put in the rule to satisfy the make
-  // program.
-  std::string EmptyCommandsHack;
+  // Some make programs (Watcom) do not like rules with no commands.
+  // If non-empty this variable holds a bogus command that may be put
+  // in the rule to satisfy the make program.
+  std::string EmptyRuleHackCommand;
 
   typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
