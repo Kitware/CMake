@@ -6,13 +6,17 @@
 # and source files for the test project. 
 project(BuildDepends)
 make_directory(${BuildDepends_BINARY_DIR}/Project)
-write_file(${BuildDepends_BINARY_DIR}/Project/foo.c 
+write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx 
   "const char* foo() { return \"foo\";}" )
 try_compile(RESULT 
   ${BuildDepends_BINARY_DIR}/Project
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
   OUTPUT_VARIABLE OUTPUT)
+if(NOT RESULT)
+  message(SEND_ERROR "Could not build test project: ${OUTPUT}")
+endif(NOT RESULT)
+
 set(bar ${BuildDepends_BINARY_DIR}/Project/bar${CMAKE_EXECUTABLE_SUFFIX})
 message("${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
 if(EXISTS 
@@ -32,7 +36,7 @@ else("${out}" STREQUAL "foo ")
   message(SEND_ERROR "Program did not rebuild with changed file: ${out}")
 endif("${out}" STREQUAL "foo ")
 
-write_file(${BuildDepends_BINARY_DIR}/Project/foo.c 
+write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
   "const char* foo() { return \"foo changed\";}" )
 try_compile(RESULT 
   ${BuildDepends_BINARY_DIR}/Project
@@ -40,6 +44,9 @@ try_compile(RESULT
   testRebuild
   OUTPUT_VARIABLE OUTPUT)
 
+if(NOT RESULT)
+  message(SEND_ERROR "Could not build test project: ${OUTPUT}")
+endif(NOT RESULT)
 if(EXISTS 
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
