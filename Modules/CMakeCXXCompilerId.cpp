@@ -48,9 +48,5 @@ static char const info_compiler[] = "INFO:compiler["
 /* Make sure the information strings are referenced.  */
 int main()
 {
-  if(&info_compiler[0] != &info_platform[0])
-    {
-    return 1;
-    }
-  return 0;
+  return (&info_compiler[0] != &info_platform[0]);
 }
