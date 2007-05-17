@@ -19,7 +19,6 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmTarget.h"
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
@@ -171,12 +170,21 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
                        no_rename, literal_args.c_str());
 
   // Fix the install_name settings in installed binaries.
-  if(type == cmTarget::SHARED_LIBRARY ||
+  if((type == cmTarget::SHARED_LIBRARY ||
      type == cmTarget::MODULE_LIBRARY ||
-     type == cmTarget::EXECUTABLE)
+     type == cmTarget::EXECUTABLE) &&
+     this->Target->GetMakefile()->IsSet("CMAKE_INSTALL_NAME_TOOL"))
     {
     this->AddInstallNamePatchRule(os, destination.c_str());
     }
+
+    std::string destinationFilename = destination;
+    destinationFilename += "/";
+    destinationFilename += cmSystemTools::GetFilenameName(fromFile);
+
+    this->AddRanlibRule(os, type, destinationFilename);
+
+    this->AddStripRule(os, destinationFilename);
 }
 
 //----------------------------------------------------------------------------
@@ -417,7 +425,9 @@ void cmInstallTargetGenerator
     component_test += this->Component;
     component_test += ")$\"";
     os << "IF(" << component_test << ")\n";
-    os << "  EXECUTE_PROCESS(COMMAND install_name_tool";
+    os << "  EXECUTE_PROCESS(COMMAND \"";
+    os <<this->Target->GetMakefile()->GetDefinition("CMAKE_INSTALL_NAME_TOOL");
+    os << "\"";
     if(!new_id.empty())
       {
       os << "\n    -id \"" << new_id << "\"";
@@ -432,4 +442,55 @@ void cmInstallTargetGenerator
        << this->GetScriptReference(this->Target, "REMAPPED", true) << "\")\n";
     os << "ENDIF(" << component_test << ")\n";
     }
+}
+
+void cmInstallTargetGenerator::AddStripRule(std::ostream& os, 
+                                            const std::string& destinationFilename)
+{
+
+  // Don't handle OSX Bundles.
+  if(this->Target->GetMakefile()->IsOn("APPLE") &&
+     this->Target->GetPropertyAsBool("MACOSX_BUNDLE"))
+    {
+    return;
+    }
+
+  if(! this->Target->GetMakefile()->IsSet("CMAKE_STRIP"))
+    {
+    return;
+    }
+
+  os << "IF(CMAKE_INSTALL_DO_STRIP)\n";
+  os << "  EXECUTE_PROCESS(COMMAND \"";
+  os << this->Target->GetMakefile()->GetDefinition("CMAKE_STRIP");
+  os << "\" \"$ENV{DESTDIR}" << destinationFilename << "\" )\n";
+  os << "ENDIF(CMAKE_INSTALL_DO_STRIP)\n";
+}
+
+void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os, 
+                                             cmTarget::TargetType type,
+                                             const std::string& destinationFilename)
+{
+  // Static libraries need ranlib on this platform.
+  if(type != cmTarget::STATIC_LIBRARY)
+    {
+    return;
+    }
+
+  // Perform post-installation processing on the file depending
+  // on its type.
+  if(!this->Target->GetMakefile()->IsOn("APPLE"))
+    {
+    return;
+    }
+
+  std::string ranlib = this->Target->GetMakefile()->GetRequiredDefinition("CMAKE_RANLIB");
+  if (!ranlib.size())
+    {
+    return;
+    }
+
+  os << "EXECUTE_PROCESS(COMMAND \"";
+  os << ranlib;
+  os << "\" \"$ENV{DESTDIR}" << destinationFilename << "\" )\n";
 }

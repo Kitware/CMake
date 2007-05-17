@@ -1,0 +1,83 @@
+############################################################
+# some preparations so that the CMakeDetermineXXX.cmake files will work in scripted mode
+
+# overwrite MARK_AS_ADVANCED(), since this is used in CMakeDetermineCCompiler.cmake
+# which will complain that it can"t be used in script mode
+macro(MARK_AS_ADVANCED)
+endmacro(MARK_AS_ADVANCED)
+
+# set this to a place where we are allowed to write
+set(CMAKE_PLATFORM_ROOT_BIN "${CMAKE_CURRENT_BINARY_DIR}")
+
+# don't run the compiler detection
+set(CMAKE_C_COMPILER_ID_RUN 1)
+set(CMAKE_CXX_COMPILER_ID_RUN 1)
+
+set(MY_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
+
+############################################################
+
+# now define a toolchain file and check that everything is 
+# detected correctly and nothing predefined is overwritten
+
+set(CMAKE_TOOLCHAIN_FILE "${MY_SOURCE_DIR}/DummyToolchain.cmake")
+
+include(CMakeDetermineSystem)
+include(CMakeDetermineCCompiler)
+include(CMakeDetermineCXXCompiler)
+
+#############################################################
+
+# check the results from DetermineSystem
+
+if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Dumdidum")
+   message(FATAL_ERROR "CMAKE_SYSTEM_NAME overwritten: \"${CMAKE_SYSTEM_NAME}\", was: \"Dumdidum\"")
+endif(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Dumdidum")
+
+if(NOT "${CMAKE_SYSTEM}" STREQUAL "Dumdidum-1.0")
+   message(FATAL_ERROR "CMAKE_SYSTEM wrong: \"${CMAKE_SYSTEM}\", expected: \"Dumdidum-1.0\"")
+endif(NOT "${CMAKE_SYSTEM}" STREQUAL "Dumdidum-1.0")
+
+if(NOT "${_INCLUDED_TOOLCHAIN_FILE}" STREQUAL "${MY_SOURCE_DIR}/DummyToolchain.cmake")
+   message(FATAL_ERROR "wrong toolchain file loaded: \"${_INCLUDED_TOOLCHAIN_FILE}\", expected: \"${MY_SOURCE_DIR}/DummyToolchain.cmake\"")
+endif(NOT "${_INCLUDED_TOOLCHAIN_FILE}" STREQUAL "${MY_SOURCE_DIR}/DummyToolchain.cmake")
+
+#############################################################
+
+# check the results from DetermineCCompiler
+
+if(NOT "${_CMAKE_TOOLCHAIN_PREFIX}" STREQUAL "arm-elf-")
+   message(FATAL_ERROR "wrong toolchain prefix detected: \"${_CMAKE_TOOLCHAIN_PREFIX}\", expected: \"arm-elf-\"")
+endif(NOT "${_CMAKE_TOOLCHAIN_PREFIX}" STREQUAL "arm-elf-")
+
+if(NOT "${_CMAKE_USER_C_COMPILER_PATH}" STREQUAL "/opt/foo/bin")
+   message(FATAL_ERROR "wrong C compiler location detected: \"${_CMAKE_USER_C_COMPILER_PATH}\", expected: \"/opt/foo/bin\"")
+endif(NOT "${_CMAKE_USER_C_COMPILER_PATH}" STREQUAL "/opt/foo/bin")
+
+if(NOT "${CMAKE_C_OUTPUT_EXTENSION}" STREQUAL ".foo")
+   message(FATAL_ERROR "C output extension overwritten: \"${CMAKE_C_OUTPUT_EXTENSION}\", was: \".foo\"")
+endif(NOT "${CMAKE_C_OUTPUT_EXTENSION}" STREQUAL ".foo")
+
+#############################################################
+
+# check the results from DetermineCXXCompiler
+
+if(NOT "${_CMAKE_TOOLCHAIN_SUFFIX}" STREQUAL "arm")
+   message(FATAL_ERROR "wrong toolchain suffix detected: \"${_CMAKE_TOOLCHAIN_SUFFIX}\", expected: \"arm\"")
+endif(NOT "${_CMAKE_TOOLCHAIN_SUFFIX}" STREQUAL "arm")
+
+if(NOT "${_CMAKE_USER_CXX_COMPILER_PATH}" STREQUAL "/opt/bar/bin")
+   message(FATAL_ERROR "wrong CXX compiler location detected: \"${_CMAKE_USER_CXX_COMPILER_PATH}\", expected: \"/opt/bar/bin\"")
+endif(NOT "${_CMAKE_USER_CXX_COMPILER_PATH}" STREQUAL "/opt/bar/bin")
+
+if(NOT "${CMAKE_CXX_OUTPUT_EXTENSION}" STREQUAL ".bar")
+   message(FATAL_ERROR "C output extension overwritten: \"${CMAKE_CXX_OUTPUT_EXTENSION}\", was: \".bar\"")
+endif(NOT "${CMAKE_CXX_OUTPUT_EXTENSION}" STREQUAL ".bar")
+
+message(STATUS "CMAKE_SYSTEM: \"${CMAKE_SYSTEM}\"")
+message(STATUS "_CMAKE_TOOLCHAIN_SUFFIX: \"${_CMAKE_TOOLCHAIN_SUFFIX}\"")
+message(STATUS "_CMAKE_TOOLCHAIN_PREFIX: \"${_CMAKE_TOOLCHAIN_PREFIX}\"")
+message(STATUS "_CMAKE_USER_C_COMPILER_PATH: \"${_CMAKE_USER_C_COMPILER_PATH}\"")
+message(STATUS "_CMAKE_USER_CXX_COMPILER_PATH: \"${_CMAKE_USER_CXX_COMPILER_PATH}\"")
+message(STATUS "CMAKE_C_OUTPUT_EXTENSION: \"${CMAKE_C_OUTPUT_EXTENSION}\"")
+message(STATUS "CMAKE_CXX_OUTPUT_EXTENSION: \"${CMAKE_CXX_OUTPUT_EXTENSION}\"")

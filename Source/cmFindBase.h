@@ -39,16 +39,20 @@ public:
   virtual const char* GetFullDocumentation()
     {return this->GenericDocumentation.c_str();}
 
+  enum RootPathMode { RootPathModeBoth, RootPathModeOnlyRootPath, RootPathModeNoRootPath };
+  
 protected:
   void PrintFindStuff();
   void ExpandPaths(std::vector<std::string> userPaths);
+  void HandleCMakeFindRootPath();
+  
   // add to the SearchPaths
   void AddPaths(std::vector<std::string>& paths);
   void AddFrameWorkPaths();
   void AddAppBundlePaths();
-  void AddEnvironmentVairables();
-  void AddCMakeVairables();
-  void AddSystemEnvironmentVairables();
+  void AddEnvironmentVariables();
+  void AddCMakeVariables();
+  void AddSystemEnvironmentVariables();
   void AddCMakeSystemVariables();
   void ExpandRegistryAndCleanPath(std::vector<std::string>& paths);
   // see if the VariableName is already set in the cache,
@@ -75,6 +79,7 @@ protected:
   bool NoCMakeEnvironmentPath;
   bool NoSystemEnvironmentPath;
   bool NoCMakeSystemPath;
+  RootPathMode FindRootPathMode;
   
   bool SearchFrameworkFirst;
   bool SearchFrameworkOnly;

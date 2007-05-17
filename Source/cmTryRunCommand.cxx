@@ -18,11 +18,18 @@
 #include "cmCacheManager.h"
 #include "cmTryCompileCommand.h"
 
-// cmExecutableCommand
+// cmTryRunCommand
 bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
 {
   if(argv.size() < 4)
     {
+    return false;
+    }
+    
+  if (this->Makefile->IsOn("CMAKE_CROSSCOMPILING"))
+    {
+    this->SetError("doesn't work when crosscompiling.");
+    cmSystemTools::SetFatalErrorOccured();
     return false;
     }
 
@@ -75,10 +82,11 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
     {
     int retVal = -1;
     std::string output;
+    std::string executableSuffix=this->Makefile->GetDefinition("CMAKE_EXECUTABLE_SUFFIX");
     std::string command1 = binaryDirectory;
     std::vector<std::string> attemptedPaths;
     command1 += "/cmTryCompileExec";
-    command1 += cmSystemTools::GetExecutableExtension();
+    command1 += executableSuffix;
     std::string fullPath;
     if(cmSystemTools::FileExists(command1.c_str()))
       {
@@ -97,7 +105,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         command1 += "/";
         command1 += config;
         command1 += "/cmTryCompileExec";
-        command1 += cmSystemTools::GetExecutableExtension();
+        command1 += executableSuffix;
         if(cmSystemTools::FileExists(command1.c_str()))
           {
           fullPath = cmSystemTools::CollapseFullPath(command1.c_str());
@@ -110,7 +118,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
       {
       command1 = binaryDirectory;
       command1 += "/Debug/cmTryCompileExec";
-      command1 += cmSystemTools::GetExecutableExtension();
+      command1 += executableSuffix;
       if(cmSystemTools::FileExists(command1.c_str()))
         {
         fullPath = cmSystemTools::CollapseFullPath(command1.c_str());
@@ -122,7 +130,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
       {
       command1 = binaryDirectory;
       command1 += "/Development/cmTryCompileExec";
-      command1 += cmSystemTools::GetExecutableExtension();
+      command1 += executableSuffix;
       if(cmSystemTools::FileExists(command1.c_str()))
         {
         fullPath = cmSystemTools::CollapseFullPath(command1.c_str());

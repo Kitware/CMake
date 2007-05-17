@@ -103,11 +103,6 @@ public:
     cmCTestTestProperties* Properties;
   };
 
-  // useful function for looking for a test
-  static bool TryExecutable(const char *dir, const char *file,
-                            std::string *fullPath, 
-                            const char *subdir);
-
   // add configuraitons to a search path for an executable
   static void AddConfigurations(cmCTest *ctest, 
                                 std::vector<std::string> &attempted,

@@ -1,4 +1,6 @@
 # just install the modules
+# new file added, force rerunning cmake
+
 SUBDIRS(Platform)
 INSTALL_FILES(${CMAKE_DATA_DIR}/Modules .*\\.cmake$)
 INSTALL_FILES(${CMAKE_DATA_DIR}/Modules .*\\.cpp$)

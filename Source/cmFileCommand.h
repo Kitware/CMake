@@ -19,6 +19,8 @@
 
 #include "cmCommand.h"
 
+struct cmFileInstaller;
+
 /** \class cmFileCommand
  * \brief Command for manipulation of files
  *
@@ -146,11 +148,45 @@ protected:
   bool HandleStringsCommand(std::vector<std::string> const& args);
   bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse);
   bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);
-  bool HandleInstallCommand(std::vector<std::string> const& args);
+  
   bool HandleRelativePathCommand(std::vector<std::string> const& args);
   bool HandleCMakePathCommand(std::vector<std::string> const& args,
                               bool nativePath);
   void ComputeVersionedName(std::string& name, const char* version);
+  
+  // FILE(INSTALL ...) related functions
+  bool HandleInstallCommand(std::vector<std::string> const& args);
+  bool ParseInstallArgs(std::vector<std::string> const& args,
+                        cmFileInstaller& installer,
+                        std::set<cmStdString>& components,
+                        std::set<cmStdString>& configurations,
+                        std::map<cmStdString, const char*>& properties,
+                        int& itype,
+                        std::string& destination,
+                        std::string& rename,
+                        std::vector<std::string>& files,
+                        bool& optional
+                       );
+  bool DoInstall(cmFileInstaller& installer,
+                 const std::set<cmStdString>& components,
+                 const std::set<cmStdString>& configurations,
+                 std::map<cmStdString, const char*>& properties,
+                 const int itype,
+                 const std::string& rename,
+                 const std::string& destination,
+                 const std::vector<std::string>& files,
+                 const bool optional
+                );
+  void GetTargetTypeFromString(const std::string& stype, int& itype) const;
+  bool HandleInstallDestination(cmFileInstaller& installer, 
+                                std::string& destination);
+  void HandleInstallPermissions(cmFileInstaller& installer, 
+                                mode_t& permissions_file,
+                                mode_t& permissions_dir,
+                                int itype,
+                                bool use_given_permissions_file,
+                                bool use_given_permissions_dir,
+                                bool use_source_permissions) const;
 };
 
 

@@ -2,9 +2,26 @@
 # determine the compiler to use for C programs
 # NOTE, a generator may set CMAKE_C_COMPILER before
 # loading this file to force a compiler.
-# use environment variable CCC first if defined by user, next use 
+# use environment variable CC first if defined by user, next use 
 # the cmake variable CMAKE_GENERATOR_CC which can be defined by a generator
 # as a default compiler
+# If the internal cmake variable _CMAKE_TOOLCHAIN_PREFIX is set, this is used 
+# as prefix for the tools (e.g. arm-elf-gcc, arm-elf-ar etc.). This works
+# currently with the GNU crosscompilers.
+# It also tries to detect a MS crosscompiler and find out its 
+# suffix (clarm.exe), which will be stored in _CMAKE_TOOLCHAIN_SUFFIX and
+# reused for the CXX compiler.
+#
+#
+# Sets the following variables: 
+#   CMAKE_C_COMPILER
+#   CMAKE_AR
+#   CMAKE_RANLIB
+#   CMAKE_COMPILER_IS_GNUCC
+#
+# If not already set before, it also sets
+#   _CMAKE_TOOLCHAIN_PREFIX
+#   _CMAKE_TOOLCHAIN_SUFFIX
 
 IF(NOT CMAKE_C_COMPILER)
   SET(CMAKE_CXX_COMPILER_INIT NOTFOUND)
@@ -15,10 +32,9 @@ IF(NOT CMAKE_C_COMPILER)
     IF(CMAKE_C_FLAGS_ENV_INIT)
       SET(CMAKE_C_COMPILER_ARG1 "${CMAKE_C_FLAGS_ENV_INIT}" CACHE STRING "First argument to C compiler")
     ENDIF(CMAKE_C_FLAGS_ENV_INIT)
-    IF(EXISTS ${CMAKE_C_COMPILER_INIT})
-    ELSE(EXISTS ${CMAKE_C_COMPILER_INIT})
+    IF(NOT EXISTS ${CMAKE_C_COMPILER_INIT})
       MESSAGE(FATAL_ERROR "Could not find compiler set in environment variable CC:\n$ENV{CC}.") 
-    ENDIF(EXISTS ${CMAKE_C_COMPILER_INIT})
+    ENDIF(NOT EXISTS ${CMAKE_C_COMPILER_INIT})
   ENDIF($ENV{CC} MATCHES ".+")
 
   # next try prefer the compiler specified by the generator
@@ -32,26 +48,64 @@ IF(NOT CMAKE_C_COMPILER)
   IF(CMAKE_C_COMPILER_INIT)
     SET(CMAKE_C_COMPILER_LIST ${CMAKE_C_COMPILER_INIT})
   ELSE(CMAKE_C_COMPILER_INIT)
-    SET(CMAKE_C_COMPILER_LIST gcc cc cl bcc xlc)
+    SET(CMAKE_C_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}gcc ${_CMAKE_TOOLCHAIN_PREFIX}cc cl${_CMAKE_TOOLCHAIN_SUFFIX} bcc xlc)
   ENDIF(CMAKE_C_COMPILER_INIT)
 
   # Find the compiler.
+  IF (_CMAKE_USER_CXX_COMPILER_PATH)
+    FIND_PROGRAM(CMAKE_C_COMPILER NAMES ${CMAKE_C_COMPILER_LIST} PATHS ${_CMAKE_USER_CXX_COMPILER_PATH} DOC "C compiler" NO_DEFAULT_PATH)
+  ENDIF (_CMAKE_USER_CXX_COMPILER_PATH)
   FIND_PROGRAM(CMAKE_C_COMPILER NAMES ${CMAKE_C_COMPILER_LIST} DOC "C compiler")
+  
   IF(CMAKE_C_COMPILER_INIT AND NOT CMAKE_C_COMPILER)
     SET(CMAKE_C_COMPILER "${CMAKE_C_COMPILER_INIT}" CACHE FILEPATH "C compiler" FORCE)
   ENDIF(CMAKE_C_COMPILER_INIT AND NOT CMAKE_C_COMPILER)
+ELSE(NOT CMAKE_C_COMPILER)
+
+  # if a compiler was specified by the user but without path, 
+  # now try to find it with the full path and force it into the cache
+  GET_FILENAME_COMPONENT(_CMAKE_USER_C_COMPILER_PATH "${CMAKE_C_COMPILER}" PATH)
+  IF(NOT _CMAKE_USER_C_COMPILER_PATH)
+    FIND_PROGRAM(CMAKE_C_COMPILER_WITH_PATH NAMES ${CMAKE_C_COMPILER})
+    MARK_AS_ADVANCED(CMAKE_C_COMPILER_WITH_PATH)
+    SET(CMAKE_C_COMPILER ${CMAKE_C_COMPILER_WITH_PATH} CACHE FILEPATH "C compiler" FORCE)
+  ENDIF(NOT _CMAKE_USER_C_COMPILER_PATH)
 ENDIF(NOT CMAKE_C_COMPILER)
-MARK_AS_ADVANCED(CMAKE_C_COMPILER)  
-GET_FILENAME_COMPONENT(COMPILER_LOCATION "${CMAKE_C_COMPILER}"
-  PATH)
+MARK_AS_ADVANCED(CMAKE_C_COMPILER)
 
-FIND_PROGRAM(CMAKE_AR NAMES ar PATHS ${COMPILER_LOCATION} )
+IF (NOT _CMAKE_TOOLCHAIN_LOCATION)
+  GET_FILENAME_COMPONENT(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_C_COMPILER}" PATH)
+ENDIF (NOT _CMAKE_TOOLCHAIN_LOCATION)
 
-FIND_PROGRAM(CMAKE_RANLIB NAMES ranlib)
-IF(NOT CMAKE_RANLIB)
-   SET(CMAKE_RANLIB : CACHE INTERNAL "noop for ranlib")
-ENDIF(NOT CMAKE_RANLIB)
-MARK_AS_ADVANCED(CMAKE_RANLIB)
+# if we have a gcc cross compiler, they have usually some prefix, like 
+# e.g. powerpc-linux-gcc, arm-elf-gcc or i586-mingw32msvc-gcc
+# the other tools of the toolchain usually have the same prefix
+IF (NOT _CMAKE_TOOLCHAIN_PREFIX)
+  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME_WE)
+  IF (COMPILER_BASENAME MATCHES "^(.+-)g?cc")
+    STRING(REGEX REPLACE "^(.+-)g?cc"  "\\1" _CMAKE_TOOLCHAIN_PREFIX "${COMPILER_BASENAME}")
+  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)g?cc")
+ENDIF (NOT _CMAKE_TOOLCHAIN_PREFIX)
+
+# if we have a MS cross compiler, it usually has a suffix, like 
+# e.g. clarm.exe or clmips.exe. Use this suffix for the CXX compiler too.
+IF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
+  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
+  IF (COMPILER_BASENAME MATCHES "^cl(.+)\\.exe$")
+    STRING(REGEX REPLACE "^cl(.+)\\.exe$"  "\\1" _CMAKE_TOOLCHAIN_SUFFIX "${COMPILER_BASENAME}")
+  ENDIF (COMPILER_BASENAME MATCHES "^cl(.+)\\.exe$")
+ENDIF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
+
+# some exotic compilers have different extensions (e.g. sdcc uses .rel)
+# so don't overwrite it if it has been already defined by the user
+IF(NOT CMAKE_C_OUTPUT_EXTENSION)
+  IF(UNIX)
+    SET(CMAKE_C_OUTPUT_EXTENSION .o)
+  ELSE(UNIX)
+    SET(CMAKE_C_OUTPUT_EXTENSION .obj)
+  ENDIF(UNIX)
+ENDIF(NOT CMAKE_C_OUTPUT_EXTENSION)
+
 
 # Build a small source file to identify the compiler.
 IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
@@ -62,6 +116,7 @@ IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   # the user may be using an integrated Intel compiler.
   # SET(CMAKE_C_COMPILER_ID "MSVC")
 ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+
 IF(NOT CMAKE_C_COMPILER_ID_RUN)
   SET(CMAKE_C_COMPILER_ID_RUN 1)
 
@@ -81,9 +136,10 @@ IF(NOT CMAKE_C_COMPILER_ID_RUN)
   ENDIF("${CMAKE_C_PLATFORM_ID}" MATCHES "MinGW")
 ENDIF(NOT CMAKE_C_COMPILER_ID_RUN)
 
+INCLUDE(CMakeFindBinUtils)
+
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in 
                "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCCompiler.cmake" IMMEDIATE)
-MARK_AS_ADVANCED(CMAKE_AR)
 
 SET(CMAKE_C_COMPILER_ENV_VAR "CC")

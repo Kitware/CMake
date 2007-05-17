@@ -18,8 +18,7 @@
 #define cmInstallTargetGenerator_h
 
 #include "cmInstallGenerator.h"
-
-class cmTarget;
+#include "cmTarget.h"
 
 /** \class cmInstallTargetGenerator
  * \brief Generate target installation rules.
@@ -45,6 +44,10 @@ protected:
   std::string GetScriptReference(cmTarget* target, const char* place,
                                  bool useSOName);
   void AddInstallNamePatchRule(std::ostream& os, const char* destination);
+  void AddStripRule(std::ostream& os, const std::string& destinationFilename);
+  void AddRanlibRule(std::ostream& os, cmTarget::TargetType type,
+                     const std::string& destinationFilename);
+
   cmTarget* Target;
   std::string Destination;
   bool ImportLibrary;

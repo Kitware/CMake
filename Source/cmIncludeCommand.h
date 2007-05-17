@@ -68,12 +68,14 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  INCLUDE(file1 [OPTIONAL])\n"
-      "  INCLUDE(module [OPTIONAL])\n"
+      "  INCLUDE(file1 [OPTIONAL] [RESULT_VARIABLE <VAR>])\n"
+      "  INCLUDE(module [OPTIONAL] [RESULT_VARIABLE <VAR>])\n"
       "Reads CMake listfile code from the given file.  Commands in the file "
       "are processed immediately as if they were written in place of the "
       "INCLUDE command.  If OPTIONAL is present, then no error "
-      "is raised if the file does not exist.\n"
+      "is raised if the file does not exist.  If RESULT_VARIABLE is given "
+      "the variable will be set to the full filename which "
+      "has been included or NOTFOUND if it failed.\n"
       "If a module is specified instead of a file, the file with name "
       "<modulename>.cmake is searched in the CMAKE_MODULE_PATH.";
     }

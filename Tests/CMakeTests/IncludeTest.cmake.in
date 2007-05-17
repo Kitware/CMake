@@ -1,0 +1,22 @@
+# this one must silently fail
+include(I_am_not_here OPTIONAL)
+
+# this one must be found and the result must be put into _includedFile
+include(CMake RESULT_VARIABLE _includedFile)
+if(NOT "${_includedFile}"   STREQUAL "${CMAKE_ROOT}/Modules/CMake.cmake")
+   message(FATAL_ERROR "Wrong CMake.cmake was included: \"${_includedFile}\"")
+endif(NOT "${_includedFile}"   STREQUAL "${CMAKE_ROOT}/Modules/CMake.cmake")
+
+# this one must return NOTFOUND in _includedFile
+include(I_do_not_exist OPTIONAL RESULT_VARIABLE _includedFile)
+
+if(_includedFile)
+   message(FATAL_ERROR "File \"I_do_not_exist\" was included, although it shouldn't exist,\nIncluded file is \"${_includedFile}\"")
+endif(_includedFile)
+
+# and this one must succeed too
+include(CMake OPTIONAL RESULT_VARIABLE _includedFile)
+
+if(NOT "${_includedFile}"   STREQUAL "${CMAKE_ROOT}/Modules/CMake.cmake")
+   message(FATAL_ERROR "Wrong CMake.cmake was included: \"${_includedFile}\"")
+endif(NOT "${_includedFile}"   STREQUAL "${CMAKE_ROOT}/Modules/CMake.cmake")

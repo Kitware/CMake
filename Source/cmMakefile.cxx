@@ -370,7 +370,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
 // Parse the given CMakeLists.txt file executing all commands
 //
 bool cmMakefile::ReadListFile(const char* filename_in, 
-                              const char *external_in)
+                              const char *external_in,
+                              std::string* fullPath)
 {
   std::string currentParentFile
     = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
@@ -446,12 +447,19 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       
   // push the listfile onto the stack
   this->ListFileStack.push_back(filenametoread);
-
+  if(fullPath!=0)
+    {
+    *fullPath=filenametoread;
+    }
   cmListFile cacheFile;
   if( !cacheFile.ParseFile(filenametoread, requireProjectCommand) )
     {
     // pop the listfile off the stack
     this->ListFileStack.pop_back();
+    if(fullPath!=0)
+      {
+      fullPath->clear();
+      }
     this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
     this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
     return false;

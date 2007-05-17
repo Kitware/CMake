@@ -7,10 +7,13 @@
 INCLUDE(CMakeGenericSystem)
 
 # 2. now include SystemName.cmake file to set the system specific information
-SET(CMAKE_SYSTEM_INFO_FILE ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}.cmake)
-IF(EXISTS ${CMAKE_SYSTEM_INFO_FILE})
-  INCLUDE(Platform/${CMAKE_SYSTEM_NAME} OPTIONAL)
-ELSE(EXISTS ${CMAKE_SYSTEM_INFO_FILE})
+IF(NOT CMAKE_SYSTEM_INFO_FILE)
+  SET(CMAKE_SYSTEM_INFO_FILE Platform/${CMAKE_SYSTEM_NAME})
+ENDIF(NOT CMAKE_SYSTEM_INFO_FILE)
+
+INCLUDE(${CMAKE_SYSTEM_INFO_FILE} OPTIONAL RESULT_VARIABLE _INCLUDED_SYSTEM_INFO_FILE)
+
+IF(NOT _INCLUDED_SYSTEM_INFO_FILE)
   MESSAGE("System is unknown to cmake, create:\n${CMAKE_SYSTEM_INFO_FILE}"
           " to use this system, please send your config file to "
           "cmake@www.cmake.org so it can be added to cmake")
@@ -20,7 +23,7 @@ ELSE(EXISTS ${CMAKE_SYSTEM_INFO_FILE})
     MESSAGE("You CMakeCache.txt file was copied to CopyOfCMakeCache.txt. " 
             "Please send that file to cmake@www.cmake.org.")
    ENDIF(EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
-ENDIF(EXISTS ${CMAKE_SYSTEM_INFO_FILE})
+ENDIF(NOT _INCLUDED_SYSTEM_INFO_FILE)
 
 
 # for most systems a module is the same as a shared library

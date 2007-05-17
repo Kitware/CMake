@@ -25,6 +25,7 @@ cmFindBase::cmFindBase()
   this->NoCMakeEnvironmentPath = false;
   this->NoSystemEnvironmentPath = false;
   this->NoCMakeSystemPath = false;
+  this->FindRootPathMode = RootPathModeBoth;
   // default is to search frameworks first on apple
 #if defined(__APPLE__)
   this->SearchFrameworkFirst = true;
@@ -250,6 +251,24 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     return true;
     }
   this->AlreadyInCache = false; 
+  
+  
+  std::string findRootPathVar = "CMAKE_FIND_ROOT_PATH_MODE_";
+  findRootPathVar += this->CMakePathName;
+  std::string rootPathMode = this->Makefile->GetSafeDefinition(findRootPathVar.c_str());
+  if (rootPathMode=="NEVER")
+    {
+    this->FindRootPathMode = RootPathModeNoRootPath;
+    }
+  else if (rootPathMode=="ONLY")
+    {
+    this->FindRootPathMode = RootPathModeOnlyRootPath;
+    }
+  else if (rootPathMode=="BOTH")
+    {
+    this->FindRootPathMode = RootPathModeBoth;
+    }
+
   std::vector<std::string> userPaths;
   std::string doc;
   bool doingNames = true; // assume it starts with a name
@@ -328,6 +347,21 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       doingNames = false;
       this->NoCMakeSystemPath = true;
       }
+    else if (args[j] == "NO_CMAKE_FIND_ROOT_PATH")
+      {
+      compatibility = false;
+      this->FindRootPathMode = RootPathModeNoRootPath;
+      }
+    else if (args[j] == "ONLY_CMAKE_FIND_ROOT_PATH")
+      {
+      compatibility = false;
+      this->FindRootPathMode = RootPathModeOnlyRootPath;
+      }
+    else if (args[j] == "CMAKE_FIND_ROOT_PATH_BOTH")
+      {
+      compatibility = false;
+      this->FindRootPathMode = RootPathModeBoth;
+      }
     else
       {
       if(doingNames)
@@ -358,7 +392,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 
   if(this->VariableDocumentation.size() == 0)
     {
-    this->VariableDocumentation = "Whare can ";
+    this->VariableDocumentation = "Where can ";
     if(this->Names.size() == 0)
       {
       this->VariableDocumentation += "the (unknown) library be found";
@@ -392,6 +426,8 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       }
     }
   this->ExpandPaths(userPaths);
+  
+  this->HandleCMakeFindRootPath();
   return true;
 }
 
@@ -413,7 +449,7 @@ void cmFindBase::ExpandPaths(std::vector<std::string> userPaths)
        !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
       {
       // Add CMAKE_*_PATH environment variables
-      this->AddEnvironmentVairables();
+      this->AddEnvironmentVariables();
       }
     if(!this->NoCMakePath && 
        !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
@@ -421,13 +457,13 @@ void cmFindBase::ExpandPaths(std::vector<std::string> userPaths)
       // Add CMake varibles of the same name as the previous environment
       // varibles CMAKE_*_PATH to be used most of the time with -D
       // command line options
-      this->AddCMakeVairables();
+      this->AddCMakeVariables();
       }
     if(!this->NoSystemEnvironmentPath && 
        !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
       {
       // add System environment PATH and (LIB or INCLUDE)
-      this->AddSystemEnvironmentVairables();
+      this->AddSystemEnvironmentVariables();
       }
     if(!this->NoCMakeSystemPath && 
        !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
@@ -453,7 +489,46 @@ void cmFindBase::ExpandPaths(std::vector<std::string> userPaths)
   this->AddPaths(paths);
 }
 
-void cmFindBase::AddEnvironmentVairables()
+void cmFindBase::HandleCMakeFindRootPath()
+{
+  if (this->FindRootPathMode == RootPathModeNoRootPath)
+    {
+    return;
+    }
+
+  const char* rootPath =  this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
+  if ((rootPath == 0) || (strlen(rootPath) == 0))
+    {
+    return;
+    }
+
+  std::vector<std::string> prefixes;
+  cmSystemTools::ExpandListArgument(rootPath, prefixes);
+
+  std::vector<std::string> unprefixedPaths=this->SearchPaths;
+  this->SearchPaths.clear();
+
+  for (std::vector<std::string>::const_iterator prefixIt = prefixes.begin();
+       prefixIt != prefixes.end();
+       ++prefixIt )
+    {
+    for (std::vector<std::string>::const_iterator it = unprefixedPaths.begin();
+       it != unprefixedPaths.end();
+       ++it )
+      {
+      std::string prefixedDir=*prefixIt;
+      prefixedDir+=*it;
+      this->SearchPaths.push_back(prefixedDir);
+      }
+    }
+
+  if (this->FindRootPathMode == RootPathModeBoth)
+    {
+    this->AddPaths(unprefixedPaths);
+    }
+}
+
+void cmFindBase::AddEnvironmentVariables()
 { 
   std::string var = "CMAKE_";
   var += this->CMakePathName;
@@ -547,7 +622,7 @@ void cmFindBase::AddAppBundlePaths()
    this->AddPaths(paths);
 }
 
-void cmFindBase::AddCMakeVairables()
+void cmFindBase::AddCMakeVariables()
 { 
   std::string var = "CMAKE_";
   var += this->CMakePathName;
@@ -576,7 +651,7 @@ void cmFindBase::AddCMakeVairables()
   this->AddPaths(paths);
 }
 
-void cmFindBase::AddSystemEnvironmentVairables()
+void cmFindBase::AddSystemEnvironmentVariables()
 {
   // Add LIB or INCLUDE
   std::vector<std::string> paths;

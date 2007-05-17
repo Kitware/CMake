@@ -9,3 +9,6 @@ ENDMACRO(AddCMakeTest)
 
 AddCMakeTest(List "")
 AddCMakeTest(VariableWatch "")
+AddCMakeTest(Include "")
+AddCMakeTest(FindBase "")
+AddCMakeTest(Toolchain "")

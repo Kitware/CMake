@@ -66,14 +66,6 @@ ENDIF(NOT CMAKE_Fortran_COMPILER)
 
 MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER)  
 
-FIND_PROGRAM(CMAKE_AR NAMES ar )
-
-FIND_PROGRAM(CMAKE_RANLIB NAMES ranlib)
-IF(NOT CMAKE_RANLIB)
-   SET(CMAKE_RANLIB : CACHE INTERNAL "noop for ranlib")
-ENDIF(NOT CMAKE_RANLIB)
-MARK_AS_ADVANCED(CMAKE_RANLIB)
-
 # Build a small source file to identify the compiler.
 IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   SET(CMAKE_Fortran_COMPILER_ID_RUN 1)
@@ -130,8 +122,9 @@ IF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   ENDIF("${CMAKE_Fortran_PLATFORM_ID}" MATCHES "MinGW")
 ENDIF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
 
+INCLUDE(CMakeFindBinUtils)
+
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in 
   ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake IMMEDIATE)
-MARK_AS_ADVANCED(CMAKE_AR)
 SET(CMAKE_Fortran_COMPILER_ENV_VAR "FC")

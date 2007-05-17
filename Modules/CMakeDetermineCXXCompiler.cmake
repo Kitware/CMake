@@ -5,13 +5,21 @@
 # use environment variable CXX first if defined by user, next use 
 # the cmake variable CMAKE_GENERATOR_CXX which can be defined by a generator
 # as a default compiler
+# If the internal cmake variable _CMAKE_TOOLCHAIN_PREFIX is set, this is used 
+# as prefix for the tools (e.g. arm-elf-g++, arm-elf-ar etc.)
+# It also tries to detect a MS crosscompiler and find out its 
+# suffix (clarm.exe), which will be stored in _CMAKE_TOOLCHAIN_SUFFIX and
+# reused for the C compiler.
 #
 # Sets the following variables:
 #   CMAKE_CXX_COMPILER
 #   CMAKE_COMPILER_IS_GNUCXX
 #   CMAKE_AR
 #   CMAKE_RANLIB
-
+#
+# If not already set before, it also sets
+#   _CMAKE_TOOLCHAIN_PREFIX
+#   _CMAKE_TOOLCHAIN_SUFFIX
 
 IF(NOT CMAKE_CXX_COMPILER)
   SET(CMAKE_CXX_COMPILER_INIT NOTFOUND)
@@ -22,10 +30,9 @@ IF(NOT CMAKE_CXX_COMPILER)
     IF(CMAKE_CXX_FLAGS_ENV_INIT)
       SET(CMAKE_CXX_COMPILER_ARG1 "${CMAKE_CXX_FLAGS_ENV_INIT}" CACHE STRING "First argument to CXX compiler")
     ENDIF(CMAKE_CXX_FLAGS_ENV_INIT)
-    IF(EXISTS ${CMAKE_CXX_COMPILER_INIT})
-    ELSE(EXISTS ${CMAKE_CXX_COMPILER_INIT})
+    IF(NOT EXISTS ${CMAKE_CXX_COMPILER_INIT})
       MESSAGE(FATAL_ERROR "Could not find compiler set in environment variable CXX:\n$ENV{CXX}.\n${CMAKE_CXX_COMPILER_INIT}")
-    ENDIF(EXISTS ${CMAKE_CXX_COMPILER_INIT})
+    ENDIF(NOT EXISTS ${CMAKE_CXX_COMPILER_INIT})
   ENDIF($ENV{CXX} MATCHES ".+")
 
   # next prefer the generator specified compiler
@@ -39,27 +46,65 @@ IF(NOT CMAKE_CXX_COMPILER)
   IF(CMAKE_CXX_COMPILER_INIT)
     SET(CMAKE_CXX_COMPILER_LIST ${CMAKE_CXX_COMPILER_INIT})
   ELSE(CMAKE_CXX_COMPILER_INIT)
-    SET(CMAKE_CXX_COMPILER_LIST c++ g++ CC aCC cl bcc xlC)
+    SET(CMAKE_CXX_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ CC aCC cl${_CMAKE_TOOLCHAIN_SUFFIX} bcc xlC)
   ENDIF(CMAKE_CXX_COMPILER_INIT)
 
   # Find the compiler.
+  IF (_CMAKE_USER_C_COMPILER_PATH)
+    FIND_PROGRAM(CMAKE_CXX_COMPILER NAMES ${CMAKE_CXX_COMPILER_LIST} PATHS ${_CMAKE_USER_C_COMPILER_PATH} DOC "C++ compiler" NO_DEFAULT_PATH)
+  ENDIF (_CMAKE_USER_C_COMPILER_PATH)
   FIND_PROGRAM(CMAKE_CXX_COMPILER NAMES ${CMAKE_CXX_COMPILER_LIST} DOC "C++ compiler")
+  
   IF(CMAKE_CXX_COMPILER_INIT AND NOT CMAKE_CXX_COMPILER)
     SET(CMAKE_CXX_COMPILER "${CMAKE_CXX_COMPILER_INIT}" CACHE FILEPATH "C++ compiler" FORCE)
   ENDIF(CMAKE_CXX_COMPILER_INIT AND NOT CMAKE_CXX_COMPILER)
+ELSE(NOT CMAKE_CXX_COMPILER)
+
+# if a compiler was specified by the user but without path, 
+# now try to find it with the full path and force it into the cache
+  GET_FILENAME_COMPONENT(_CMAKE_USER_CXX_COMPILER_PATH "${CMAKE_CXX_COMPILER}" PATH)
+  IF(NOT _CMAKE_USER_CXX_COMPILER_PATH)
+    FIND_PROGRAM(CMAKE_CXX_COMPILER_WITH_PATH NAMES ${CMAKE_CXX_COMPILER})
+    MARK_AS_ADVANCED(CMAKE_CXX_COMPILER_WITH_PATH)
+    SET(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER_WITH_PATH} CACHE FILEPATH "CXX compiler" FORCE)
+  ENDIF(NOT _CMAKE_USER_CXX_COMPILER_PATH)
 ENDIF(NOT CMAKE_CXX_COMPILER)
 MARK_AS_ADVANCED(CMAKE_CXX_COMPILER)
 
-GET_FILENAME_COMPONENT(COMPILER_LOCATION "${CMAKE_CXX_COMPILER}" PATH)
+IF (NOT _CMAKE_TOOLCHAIN_LOCATION)
+  GET_FILENAME_COMPONENT(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_CXX_COMPILER}" PATH)
+ENDIF (NOT _CMAKE_TOOLCHAIN_LOCATION)
 
-FIND_PROGRAM(CMAKE_AR NAMES ar PATHS ${COMPILER_LOCATION})
-MARK_AS_ADVANCED(CMAKE_AR)
+# if we have a g++ cross compiler, they have usually some prefix, like 
+# e.g. powerpc-linux-g++, arm-elf-g++ or i586-mingw32msvc-g++
+# the other tools of the toolchain usually have the same prefix
+IF (NOT _CMAKE_TOOLCHAIN_PREFIX)
+  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME_WE)
+  IF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+")
+    STRING(REGEX REPLACE "^(.+-)[gc]\\+\\+"  "\\1" _CMAKE_TOOLCHAIN_PREFIX "${COMPILER_BASENAME}")
+  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+")
+ENDIF (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
-FIND_PROGRAM(CMAKE_RANLIB NAMES ranlib)
-IF(NOT CMAKE_RANLIB)
-   SET(CMAKE_RANLIB : CACHE INTERNAL "noop for ranlib")
-ENDIF(NOT CMAKE_RANLIB)
-MARK_AS_ADVANCED(CMAKE_RANLIB)
+# if we have a MS cross compiler, it usually has a suffix, like 
+# e.g. clarm.exe or clmips.exe. Use this suffix for the CXX compiler too.
+IF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
+  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
+  IF (COMPILER_BASENAME MATCHES "^cl(.+)\\.exe$")
+    STRING(REGEX REPLACE "^cl(.+)\\.exe$"  "\\1" _CMAKE_TOOLCHAIN_SUFFIX "${COMPILER_BASENAME}")
+  ENDIF (COMPILER_BASENAME MATCHES "^cl(.+)\\.exe$")
+ENDIF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
+
+
+# some exotic compilers have different extensions (e.g. sdcc uses .rel)
+# so don't overwrite it if it has been already defined by the user
+IF(NOT CMAKE_CXX_OUTPUT_EXTENSION)
+  IF(UNIX)
+    SET(CMAKE_CXX_OUTPUT_EXTENSION .o)
+  ELSE(UNIX)
+    SET(CMAKE_CXX_OUTPUT_EXTENSION .obj)
+  ENDIF(UNIX)
+ENDIF(NOT CMAKE_CXX_OUTPUT_EXTENSION)
+
 
 # This block was used before the compiler was identified by building a
 # source file.  Unless g++ crashes when building a small C++
@@ -100,6 +145,8 @@ IF(NOT CMAKE_CXX_COMPILER_ID_RUN)
     SET(CMAKE_COMPILER_IS_CYGWIN 1)
   ENDIF("${CMAKE_CXX_PLATFORM_ID}" MATCHES "MinGW")
 ENDIF(NOT CMAKE_CXX_COMPILER_ID_RUN)
+
+INCLUDE(CMakeFindBinUtils)
 
 # configure all variables set in this file
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in 

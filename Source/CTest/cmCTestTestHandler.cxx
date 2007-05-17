@@ -214,51 +214,6 @@ bool cmCTestSetTestsPropertiesCommand::InitialPass(
 }
 
 //----------------------------------------------------------------------
-// Try to find an executable, if found fullPath will be set to the full path
-// of where it was found. The directory and filename to search for are passed
-// in as well an a subdir (typically used for configuraitons such as
-// Release/Debug/etc)
-bool cmCTestTestHandler::TryExecutable(const char *dir, 
-                                       const char *file,
-                                       std::string *fullPath, 
-                                       const char *subdir)
-{
-  // try current directory
-  std::string tryPath;
-  if (dir && strcmp(dir,""))
-    {
-    tryPath = dir;
-    tryPath += "/";
-    }
-
-  if (subdir && strcmp(subdir,""))
-    {
-    tryPath += subdir;
-    tryPath += "/";
-    }
-
-  tryPath += file;
-
-  // find the file without an executable extension
-  if(cmSystemTools::FileExists(tryPath.c_str()))
-    {
-    *fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-    return true;
-    }
-
-  // if not found try it with the executable extension
-  tryPath += cmSystemTools::GetExecutableExtension();
-  if(cmSystemTools::FileExists(tryPath.c_str()))
-    {
-    *fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-    return true;
-    }
-
-  // not found at all, return false
-  return false;
-}
-
-//----------------------------------------------------------------------
 // get the next number in a string with numbers separated by ,
 // pos is the start of the search and pos2 is the end of the search
 // pos becomes pos2 after a call to GetNextNumber.

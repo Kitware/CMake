@@ -1018,479 +1018,16 @@ bool cmFileInstaller::InstallDirectory(const char* source,
 }
 
 //----------------------------------------------------------------------------
-bool cmFileCommand::HandleInstallCommand(
-  std::vector<std::string> const& args)
+void cmFileCommand::HandleInstallPermissions(cmFileInstaller& installer, 
+                              mode_t& permissions_file,
+                              mode_t& permissions_dir,
+                              int itype,
+                              bool use_given_permissions_file,
+                              bool use_given_permissions_dir,
+                              bool use_source_permissions) const
 {
-  if ( args.size() < 6 )
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
-
-  // Construct a file installer object.
-  cmFileInstaller installer(this, this->Makefile);
-
-  std::string rename = "";
-  std::string destination = "";
-  std::string stype = "FILES";
-  const char* destdir = cmSystemTools::GetEnv("DESTDIR");
-
-  std::set<cmStdString> components;
-  std::set<cmStdString> configurations;
-  std::vector<std::string> files;
-  int itype = cmTarget::INSTALL_FILES;
-
-  std::vector<std::string>::size_type i = 0;
-  i++; // Get rid of subcommand
-
-  std::map<cmStdString, const char*> properties;
-
-  bool doing_files = false;
-  bool doing_properties = false;
-  bool doing_permissions_file = false;
-  bool doing_permissions_dir = false;
-  bool doing_permissions_match = false;
-  bool doing_components = false;
-  bool doing_configurations = false;
-  bool use_given_permissions_file = false;
-  bool use_given_permissions_dir = false;
-  bool use_source_permissions = false;
-  mode_t permissions_file = 0;
-  mode_t permissions_dir = 0;
-  bool optional = false;
-  cmFileInstaller::MatchRule* current_match_rule = 0;
-  for ( ; i != args.size(); ++i )
-    {
-    const std::string* cstr = &args[i];
-    if ( *cstr == "DESTINATION" && i < args.size()-1 )
-      {
-      if(current_match_rule)
-        {
-        cmOStringStream e;
-        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      i++;
-      destination = args[i];
-      doing_files = false;
-      doing_properties = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_components = false;
-      doing_configurations = false;
-      }
-    else if ( *cstr == "TYPE" && i < args.size()-1 )
-      {
-      if(current_match_rule)
-        {
-        cmOStringStream e;
-        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      i++;
-      stype = args[i];
-      if ( args[i+1] == "OPTIONAL" )
-        {
-        i++;
-        optional = true;
-        }
-      doing_properties = false;
-      doing_files = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_components = false;
-      doing_configurations = false;
-      }
-    else if ( *cstr == "RENAME" && i < args.size()-1 )
-      {
-      if(current_match_rule)
-        {
-        cmOStringStream e;
-        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      i++;
-      rename = args[i];
-      doing_properties = false;
-      doing_files = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_components = false;
-      doing_configurations = false;
-      }
-    else if ( *cstr == "REGEX" && i < args.size()-1 )
-      {
-      i++;
-      installer.MatchRules.push_back(cmFileInstaller::MatchRule(args[i]));
-      current_match_rule = &*(installer.MatchRules.end()-1);
-      if(!current_match_rule->Regex.is_valid())
-        {
-        cmOStringStream e;
-        e << "INSTALL could not compile REGEX \"" << args[i] << "\".";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-      doing_properties = false;
-      doing_files = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_components = false;
-      doing_configurations = false;
-      }
-    else if ( *cstr == "EXCLUDE"  )
-      {
-      // Add this property to the current match rule.
-      if(!current_match_rule)
-        {
-        cmOStringStream e;
-        e << "INSTALL does not allow \""
-          << *cstr << "\" before a REGEX is given.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-      current_match_rule->Properties.Exclude = true;
-      doing_permissions_match = true;
-      }
-    else if ( *cstr == "PROPERTIES"  )
-      {
-      if(current_match_rule)
-        {
-        cmOStringStream e;
-        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      doing_properties = true;
-      doing_files = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_components = false;
-      doing_configurations = false;
-      }
-    else if ( *cstr == "PERMISSIONS" )
-      {
-      if(current_match_rule)
-        {
-        doing_permissions_match = true;
-        doing_permissions_file = false;
-        }
-      else
-        {
-        doing_permissions_match = false;
-        doing_permissions_file = true;
-        use_given_permissions_file = true;
-        }
-      doing_properties = false;
-      doing_files = false;
-      doing_permissions_dir = false;
-      doing_components = false;
-      doing_configurations = false;
-      }
-    else if ( *cstr == "DIR_PERMISSIONS" )
-      {
-      if(current_match_rule)
-        {
-        cmOStringStream e;
-        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      use_given_permissions_dir = true;
-      doing_properties = false;
-      doing_files = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = true;
-      doing_components = false;
-      doing_configurations = false;
-      }
-    else if ( *cstr == "USE_SOURCE_PERMISSIONS" )
-      {
-      if(current_match_rule)
-        {
-        cmOStringStream e;
-        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      doing_properties = false;
-      doing_files = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_components = false;
-      doing_configurations = false;
-      use_source_permissions = true;
-      }
-    else if ( *cstr == "COMPONENTS"  )
-      {
-      if(current_match_rule)
-        {
-        cmOStringStream e;
-        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      doing_properties = false;
-      doing_files = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_components = true;
-      doing_configurations = false;
-      }
-    else if ( *cstr == "CONFIGURATIONS"  )
-      {
-      if(current_match_rule)
-        {
-        cmOStringStream e;
-        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      doing_properties = false;
-      doing_files = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_components = false;
-      doing_configurations = true;
-      }
-    else if ( *cstr == "FILES" && !doing_files)
-      {
-      if(current_match_rule)
-        {
-        cmOStringStream e;
-        e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      doing_files = true;
-      doing_properties = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_components = false;
-      doing_configurations = false;
-      }
-    else if ( doing_properties && i < args.size()-1 )
-      {
-      properties[args[i]] = args[i+1].c_str();
-      i++;
-      }
-    else if ( doing_files )
-      {
-      files.push_back(*cstr);
-      }
-    else if ( doing_components )
-      {
-      components.insert(*cstr);
-      }
-    else if ( doing_configurations )
-      {
-      configurations.insert(cmSystemTools::UpperCase(*cstr));
-      }
-    else if(doing_permissions_file)
-      {
-      if(!installer.CheckPermissions(args[i], permissions_file))
-        {
-        return false;
-        }
-      }
-    else if(doing_permissions_dir)
-      {
-      if(!installer.CheckPermissions(args[i], permissions_dir))
-        {
-        return false;
-        }
-      }
-    else if(doing_permissions_match)
-      {
-      if(!installer.CheckPermissions(
-           args[i], current_match_rule->Properties.Permissions))
-        {
-        return false;
-        }
-      }
-    else
-      {
-      this->SetError("called with inappropriate arguments");
-      return false;
-      }
-    }
-
-  if ( destination.size() < 2 )
-    {
-    this->SetError("called with inapropriate arguments. "
-      "No DESTINATION provided or .");
-    return false;
-    }
-
-  // Check for component-specific installation.
-  const char* cmake_install_component =
-    this->Makefile->GetDefinition("CMAKE_INSTALL_COMPONENT");
-  if(cmake_install_component && *cmake_install_component)
-    {
-    // This install rule applies only if it is associated with the
-    // current component.
-    if(components.find(cmake_install_component) == components.end())
-      {
-      return true;
-      }
-    }
-
-  // Check for configuration-specific installation.
-  if(!configurations.empty())
-    {
-    std::string cmake_install_configuration =
-      cmSystemTools::UpperCase(
-        this->Makefile->GetSafeDefinition("CMAKE_INSTALL_CONFIG_NAME"));
-    if(cmake_install_configuration.empty())
-      {
-      // No configuration specified for installation but this install
-      // rule is configuration-specific.  Skip it.
-      return true;
-      }
-    else if(configurations.find(cmake_install_configuration) ==
-            configurations.end())
-      {
-      // This rule is specific to a configuration not being installed.
-      return true;
-      }
-    }
-
-  if ( destdir && *destdir )
-    {
-    std::string sdestdir = destdir;
-    cmSystemTools::ConvertToUnixSlashes(sdestdir);
-
-    char ch1 = destination[0];
-    char ch2 = destination[1];
-    char ch3 = 0;
-    if ( destination.size() > 2 )
-      {
-      ch3 = destination[2];
-      }
-    int skip = 0;
-    if ( ch1 != '/' )
-      {
-      int relative = 0;
-      if ( ( ch1 >= 'a' && ch1 <= 'z' || ch1 >= 'A' && ch1 <= 'Z' ) &&
-        ch2 == ':' )
-        {
-        // Assume windows
-        // let's do some destdir magic:
-        skip = 2;
-        if ( ch3 != '/' )
-          {
-          relative = 1;
-          }
-        }
-      else
-        {
-        relative = 1;
-        }
-      if ( relative )
-        {
-        // This is relative path on unix or windows. Since we are doing
-        // destdir, this case does not make sense.
-        this->SetError("called with relative DESTINATION. This "
-          "does not make sense when using DESTDIR. Specify "
-          "absolute path or remove DESTDIR environment variable.");
-        return false;
-        }
-      }
-    else
-      {
-      if ( ch2 == '/' )
-        {
-        // looks like a network path.
-        this->SetError("called with network path DESTINATION. This "
-          "does not make sense when using DESTDIR. Specify local "
-          "absolute path or remove DESTDIR environment variable.");
-        return false;
-        }
-      }
-    destination = sdestdir + (destination.c_str() + skip);
-    installer.DestDirLength = int(sdestdir.size());
-    }
-
-  if ( files.size() == 0 )
-    {
-    this->SetError(
-      "called with inapropriate arguments. No FILES provided.");
-    return false;
-    }
-  if ( stype == "EXECUTABLE" )
-    {
-    itype = cmTarget::EXECUTABLE;
-    }
-  else if ( stype == "PROGRAM" )
-    {
-    itype = cmTarget::INSTALL_PROGRAMS;
-    }
-  else if ( stype == "STATIC_LIBRARY" )
-    {
-    itype = cmTarget::STATIC_LIBRARY;
-    }
-  else if ( stype == "SHARED_LIBRARY" )
-    {
-    itype = cmTarget::SHARED_LIBRARY;
-    }
-  else if ( stype == "MODULE" )
-    {
-    itype = cmTarget::MODULE_LIBRARY;
-    }
-  else if ( stype == "DIRECTORY" )
-    {
-    itype = cmTarget::INSTALL_DIRECTORY;
-    }
-
-  if ( !cmSystemTools::FileExists(destination.c_str()) )
-    {
-    if ( !cmSystemTools::MakeDirectory(destination.c_str()) )
-      {
-      std::string errstring = "cannot create directory: " + destination +
-        ". Maybe need administrative privileges.";
-      this->SetError(errstring.c_str());
-      return false;
-      }
-    }
-  if ( !cmSystemTools::FileIsDirectory(destination.c_str()) )
-    {
-    std::string errstring = "INSTALL destination: " + destination +
-      " is not a directory.";
-    this->SetError(errstring.c_str());
-    return false;
-    }
-
-  // Check rename form.
-  if(!rename.empty())
-    {
-    if(itype != cmTarget::INSTALL_FILES &&
-       itype != cmTarget::INSTALL_PROGRAMS)
-      {
-      this->SetError("INSTALL option RENAME may be used only with "
-                     "FILES or PROGRAMS.");
-      return false;
-      }
-    if(files.size() > 1)
-      {
-      this->SetError("INSTALL option RENAME may be used only with one file.");
-      return false;
-      }
-    }
-
   // Choose a default for shared library permissions.
   bool install_so_no_exe = this->Makefile->IsOn("CMAKE_INSTALL_SO_NO_EXE");
-
   // If file permissions were not specified set default permissions
   // for this target type.
   if(!use_given_permissions_file && !use_source_permissions)
@@ -1545,10 +1082,543 @@ bool cmFileCommand::HandleInstallCommand(
     permissions_dir |= mode_world_read;
     permissions_dir |= mode_world_execute;
     }
-
   // Set the installer permissions.
   installer.FilePermissions = permissions_file;
   installer.DirPermissions = permissions_dir;
+}
+
+//----------------------------------------------------------------------------
+void cmFileCommand::GetTargetTypeFromString(const std::string& stype, int& itype) const
+{
+  if ( stype == "EXECUTABLE" )
+    {
+    itype = cmTarget::EXECUTABLE;
+    }
+  else if ( stype == "PROGRAM" )
+    {
+    itype = cmTarget::INSTALL_PROGRAMS;
+    }
+  else if ( stype == "STATIC_LIBRARY" )
+    {
+    itype = cmTarget::STATIC_LIBRARY;
+    }
+  else if ( stype == "SHARED_LIBRARY" )
+    {
+    itype = cmTarget::SHARED_LIBRARY;
+    }
+  else if ( stype == "MODULE" )
+    {
+    itype = cmTarget::MODULE_LIBRARY;
+    }
+  else if ( stype == "DIRECTORY" )
+    {
+    itype = cmTarget::INSTALL_DIRECTORY;
+    }
+}
+
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer, std::string& destination)
+{
+  if ( destination.size() < 2 )
+    {
+    this->SetError("called with inapropriate arguments. "
+        "No DESTINATION provided or .");
+    return false;
+    }
+    
+  const char* destdir = cmSystemTools::GetEnv("DESTDIR");
+  if ( destdir && *destdir )
+    {
+    std::string sdestdir = destdir;
+    cmSystemTools::ConvertToUnixSlashes(sdestdir);
+
+    char ch1 = destination[0];
+    char ch2 = destination[1];
+    char ch3 = 0;
+    if ( destination.size() > 2 )
+      {
+      ch3 = destination[2];
+      }
+    int skip = 0;
+    if ( ch1 != '/' )
+      {
+      int relative = 0;
+      if ( ( ch1 >= 'a' && ch1 <= 'z' || ch1 >= 'A' && ch1 <= 'Z' ) &&
+             ch2 == ':' )
+        {
+        // Assume windows
+        // let's do some destdir magic:
+        skip = 2;
+        if ( ch3 != '/' )
+          {
+          relative = 1;
+          }
+        }
+      else
+        {
+        relative = 1;
+        }
+      if ( relative )
+        {
+        // This is relative path on unix or windows. Since we are doing
+        // destdir, this case does not make sense.
+        this->SetError("called with relative DESTINATION. This "
+            "does not make sense when using DESTDIR. Specify "
+            "absolute path or remove DESTDIR environment variable.");
+        return false;
+        }
+      }
+    else
+      {
+      if ( ch2 == '/' )
+        {
+        // looks like a network path.
+        this->SetError("called with network path DESTINATION. This "
+            "does not make sense when using DESTDIR. Specify local "
+            "absolute path or remove DESTDIR environment variable.");
+        return false;
+        }
+      }
+    destination = sdestdir + (destination.c_str() + skip);
+    installer.DestDirLength = int(sdestdir.size());
+    }
+
+  if ( !cmSystemTools::FileExists(destination.c_str()) )
+    {
+    if ( !cmSystemTools::MakeDirectory(destination.c_str()) )
+      {
+      std::string errstring = "cannot create directory: " + destination +
+          ". Maybe need administrative privileges.";
+      this->SetError(errstring.c_str());
+      return false;
+      }
+    }
+  if ( !cmSystemTools::FileIsDirectory(destination.c_str()) )
+    {
+    std::string errstring = "INSTALL destination: " + destination +
+        " is not a directory.";
+    this->SetError(errstring.c_str());
+    return false;
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
+{
+  if ( args.size() < 6 )
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+
+  // Construct a file installer object.
+  cmFileInstaller installer(this, this->Makefile);
+
+  std::string rename = "";
+  std::string destination = "";
+
+  std::set<cmStdString> components;
+  std::set<cmStdString> configurations;
+  std::vector<std::string> files;
+  int itype = cmTarget::INSTALL_FILES;
+
+  std::map<cmStdString, const char*> properties;
+  bool optional = false;
+  bool result = this->ParseInstallArgs(args, installer, components, 
+                                       configurations, properties, 
+                                       itype, rename, destination, files, 
+                                       optional);
+  if (result == true)
+    {
+    result = this->DoInstall(installer, components, configurations, properties,
+                             itype, rename, destination, files, optional);
+    }
+  return result;
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
+                                       cmFileInstaller& installer,
+                                       std::set<cmStdString>& components,
+                                       std::set<cmStdString>& configurations,
+                                       std::map<cmStdString, const char*>& properties,
+                                       int& itype,
+                                       std::string& rename,
+                                       std::string& destination,
+                                       std::vector<std::string>& files,
+                                       bool& optional)
+{
+    std::string stype = "FILES";
+    bool doing_files = false;
+    bool doing_properties = false;
+    bool doing_permissions_file = false;
+    bool doing_permissions_dir = false;
+    bool doing_permissions_match = false;
+    bool doing_components = false;
+    bool doing_configurations = false;
+    bool use_given_permissions_file = false;
+    bool use_given_permissions_dir = false;
+    bool use_source_permissions = false;
+    mode_t permissions_file = 0;
+    mode_t permissions_dir = 0;
+
+    cmFileInstaller::MatchRule* current_match_rule = 0;
+    std::vector<std::string>::size_type i = 0;
+    i++; // Get rid of subcommand
+    for ( ; i != args.size(); ++i )
+      {
+      const std::string* cstr = &args[i];
+      if ( *cstr == "DESTINATION" && i < args.size()-1 )
+        {
+        if(current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+
+        i++;
+        destination = args[i];
+        doing_files = false;
+        doing_properties = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = false;
+        doing_components = false;
+        doing_configurations = false;
+        }
+      else if ( *cstr == "TYPE" && i < args.size()-1 )
+        {
+        if(current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+
+        i++;
+        stype = args[i];
+        if ( args[i+1] == "OPTIONAL" )
+          {
+          i++;
+          optional = true;
+          }
+        doing_properties = false;
+        doing_files = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = false;
+        doing_components = false;
+        doing_configurations = false;
+        }
+      else if ( *cstr == "RENAME" && i < args.size()-1 )
+        {
+        if(current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+
+        i++;
+        rename = args[i];
+        doing_properties = false;
+        doing_files = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = false;
+        doing_components = false;
+        doing_configurations = false;
+        }
+      else if ( *cstr == "REGEX" && i < args.size()-1 )
+        {
+        i++;
+        installer.MatchRules.push_back(cmFileInstaller::MatchRule(args[i]));
+        current_match_rule = &*(installer.MatchRules.end()-1);
+        if(!current_match_rule->Regex.is_valid())
+          {
+          cmOStringStream e;
+          e << "INSTALL could not compile REGEX \"" << args[i] << "\".";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+        doing_properties = false;
+        doing_files = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = false;
+        doing_components = false;
+        doing_configurations = false;
+        }
+      else if ( *cstr == "EXCLUDE"  )
+        {
+      // Add this property to the current match rule.
+        if(!current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \""
+              << *cstr << "\" before a REGEX is given.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+        current_match_rule->Properties.Exclude = true;
+        doing_permissions_match = true;
+        }
+      else if ( *cstr == "PROPERTIES"  )
+        {
+        if(current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+
+        doing_properties = true;
+        doing_files = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = false;
+        doing_components = false;
+        doing_configurations = false;
+        }
+      else if ( *cstr == "PERMISSIONS" )
+        {
+        if(current_match_rule)
+          {
+          doing_permissions_match = true;
+          doing_permissions_file = false;
+          }
+        else
+          {
+          doing_permissions_match = false;
+          doing_permissions_file = true;
+          use_given_permissions_file = true;
+          }
+        doing_properties = false;
+        doing_files = false;
+        doing_permissions_dir = false;
+        doing_components = false;
+        doing_configurations = false;
+        }
+      else if ( *cstr == "DIR_PERMISSIONS" )
+        {
+        if(current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+
+        use_given_permissions_dir = true;
+        doing_properties = false;
+        doing_files = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = true;
+        doing_components = false;
+        doing_configurations = false;
+        }
+      else if ( *cstr == "USE_SOURCE_PERMISSIONS" )
+        {
+        if(current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+
+        doing_properties = false;
+        doing_files = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = false;
+        doing_components = false;
+        doing_configurations = false;
+        use_source_permissions = true;
+        }
+      else if ( *cstr == "COMPONENTS"  )
+        {
+        if(current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+
+        doing_properties = false;
+        doing_files = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = false;
+        doing_components = true;
+        doing_configurations = false;
+        }
+      else if ( *cstr == "CONFIGURATIONS"  )
+        {
+        if(current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+
+        doing_properties = false;
+        doing_files = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = false;
+        doing_components = false;
+        doing_configurations = true;
+        }
+      else if ( *cstr == "FILES" && !doing_files)
+        {
+        if(current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+
+        doing_files = true;
+        doing_properties = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = false;
+        doing_components = false;
+        doing_configurations = false;
+        }
+      else if ( doing_properties && i < args.size()-1 )
+        {
+        properties[args[i]] = args[i+1].c_str();
+        i++;
+        }
+      else if ( doing_files )
+        {
+        files.push_back(*cstr);
+        }
+      else if ( doing_components )
+        {
+        components.insert(*cstr);
+        }
+      else if ( doing_configurations )
+        {
+        configurations.insert(cmSystemTools::UpperCase(*cstr));
+        }
+      else if(doing_permissions_file)
+        {
+        if(!installer.CheckPermissions(args[i], permissions_file))
+          {
+          return false;
+          }
+        }
+      else if(doing_permissions_dir)
+        {
+        if(!installer.CheckPermissions(args[i], permissions_dir))
+          {
+          return false;
+          }
+        }
+      else if(doing_permissions_match)
+        {
+        if(!installer.CheckPermissions(
+            args[i], current_match_rule->Properties.Permissions))
+          {
+          return false;
+          }
+        }
+      else
+        {
+        this->SetError("called with inappropriate arguments");
+        return false;
+        }
+      }
+
+    // now check and postprocess what has been parsed
+    if ( files.size() == 0 )
+      {
+      this->SetError(
+                     "called with inapropriate arguments. No FILES provided.");
+      return false;
+      }
+
+    // Check rename form.
+    if(!rename.empty())
+      {
+      if(itype != cmTarget::INSTALL_FILES &&
+         itype != cmTarget::INSTALL_PROGRAMS)
+        {
+        this->SetError("INSTALL option RENAME may be used only with "
+            "FILES or PROGRAMS.");
+        return false;
+        }
+      if(files.size() > 1)
+        {
+        this->SetError("INSTALL option RENAME may be used only with one file.");
+        return false;
+        }
+      }
+
+      if (this->HandleInstallDestination(installer, destination) == false)
+      {
+      return false;
+      }
+
+    this->GetTargetTypeFromString(stype, itype);
+
+    this->HandleInstallPermissions(installer, 
+                             permissions_file,
+                             permissions_dir,
+                             itype,
+                             use_given_permissions_file,
+                             use_given_permissions_dir,
+                             use_source_permissions);
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::DoInstall( cmFileInstaller& installer,
+                              const std::set<cmStdString>& components,
+                              const std::set<cmStdString>& configurations,
+                              std::map<cmStdString, const char*>& properties,
+                              const int itype,
+                              const std::string& rename,
+                              const std::string& destination,
+                              const std::vector<std::string>& files,
+                              const bool optional)
+{
+  // Check for component-specific installation.
+  const char* cmake_install_component =
+    this->Makefile->GetDefinition("CMAKE_INSTALL_COMPONENT");
+  if(cmake_install_component && *cmake_install_component)
+    {
+    // This install rule applies only if it is associated with the
+    // current component.
+    if(components.find(cmake_install_component) == components.end())
+      {
+      return true;
+      }
+    }
+
+  // Check for configuration-specific installation.
+  if(!configurations.empty())
+    {
+    std::string cmake_install_configuration = cmSystemTools::UpperCase(
+        this->Makefile->GetSafeDefinition("CMAKE_INSTALL_CONFIG_NAME"));
+    if(cmake_install_configuration.empty())
+      {
+      // No configuration specified for installation but this install
+      // rule is configuration-specific.  Skip it.
+      return true;
+      }
+    else if(configurations.find(cmake_install_configuration) ==
+            configurations.end())
+      {
+      // This rule is specific to a configuration not being installed.
+      return true;
+      }
+    }
 
   // Check whether files should be copied always or only if they have
   // changed.
@@ -1556,7 +1626,7 @@ bool cmFileCommand::HandleInstallCommand(
     cmSystemTools::IsOn(cmSystemTools::GetEnv("CMAKE_INSTALL_ALWAYS"));
 
   // Handle each file listed.
-  for ( i = 0; i < files.size(); i ++ )
+  for (std::vector<std::string>::size_type i = 0; i < files.size(); i ++ )
     {
     // Split the input file into its directory and name components.
     std::vector<std::string> fromPathComponents;
@@ -1704,24 +1774,6 @@ bool cmFileCommand::HandleInstallCommand(
           {
           return false;
           }
-
-        // Perform post-installation processing on the file depending
-        // on its type.
-#if defined(__APPLE_CC__)
-        // Static libraries need ranlib on this platform.
-        if(itype == cmTarget::STATIC_LIBRARY)
-          {
-          std::string ranlib = "ranlib ";
-          ranlib += cmSystemTools::ConvertToOutputPath(toFile.c_str());
-          if(!cmSystemTools::RunSingleCommand(ranlib.c_str()))
-            {
-            std::string err = "ranlib failed: ";
-            err += ranlib;
-            this->SetError(err.c_str());
-            return false;
-            }
-          }
-#endif
         }
       else if(!optional)
         {

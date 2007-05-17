@@ -88,7 +88,7 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
   // Construct the cache entry for the executable's location.
   std::string utilityExecutable =
     utilityDirectory+"/"+cmakeCFGout+"/"
-    +utilityName+cmSystemTools::GetExecutableExtension();
+    +utilityName+this->Makefile->GetDefinition("CMAKE_EXECUTABLE_SUFFIX");
 
   // make sure we remove any /./ in the name
   cmSystemTools::ReplaceString(utilityExecutable, "/./", "/");

@@ -72,7 +72,14 @@ public:
       "is assumed that the source tree of the utility will have been built "
       "before it is needed.";
     }
-  
+
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
+
   cmTypeMacro(cmUtilitySourceCommand, cmCommand);
 };
 

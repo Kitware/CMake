@@ -72,7 +72,9 @@ public:
   /**
    * Read and parse a CMakeLists.txt file.
    */
-  bool ReadListFile(const char* listfile, const char* external= 0); 
+  bool ReadListFile(const char* listfile, 
+                    const char* external= 0, 
+                    std::string* fullPath= 0); 
 
   /**
    * Add a function blocker to this makefile
