@@ -1222,7 +1222,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
 
 const char* cmTarget::GetDirectory(const char* config, bool implib)
 {
-  if(config)
+  if(config && *config)
     {
     this->Directory = this->GetOutputDir(implib);
     // Add the configuration's subdirectory.
