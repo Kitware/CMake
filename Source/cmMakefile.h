@@ -492,9 +492,9 @@ public:
    * cache is then queried.
    */
   const char* GetDefinition(const char*) const;
-  const char* GetDefinitionNoWatch(const char*) const;
   const char* GetSafeDefinition(const char*) const;
   const char* GetRequiredDefinition(const char* name) const;
+  bool IsDefinitionSet(const char*) const;
   /**
    * Get the list of all variables in the current space. If argument
    * cacheonly is specified and is greater than 0, then only cache

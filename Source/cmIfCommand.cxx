@@ -307,17 +307,18 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
       if (*arg == "DEFINED" && argP1  != newArgs.end())
         {
         size_t argP1len = argP1->size();
+        bool bdef = false;
         if(argP1len > 4 && argP1->substr(0, 4) == "ENV{" &&
            argP1->operator[](argP1len-1) == '}')
           {
           std::string env = argP1->substr(4, argP1len-5);
-          def = cmSystemTools::GetEnv(env.c_str());
+          bdef = cmSystemTools::GetEnv(env.c_str())?true:false;
           }
         else
           {
-          def = makefile->GetDefinitionNoWatch((argP1)->c_str());
+          bdef = makefile->IsDefinitionSet((argP1)->c_str());
           }
-        if(def)
+        if(bdef)
           {
           *arg = "1";
           }

@@ -1633,7 +1633,7 @@ const char* cmMakefile::GetRequiredDefinition(const char* name) const
   return ret;
 }
 
-const char* cmMakefile::GetDefinitionNoWatch(const char* name) const
+bool cmMakefile::IsDefinitionSet(const char* name) const
 {
   const char* def = 0;
   DefinitionMap::const_iterator pos = this->Definitions.find(name);
@@ -1645,12 +1645,32 @@ const char* cmMakefile::GetDefinitionNoWatch(const char* name) const
     {
     def = this->GetCacheManager()->GetCacheValue(name);
     }
-  return def;
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  if(cmVariableWatch* vv = this->GetVariableWatch())
+    {
+    if(!def)
+      {
+      vv->VariableAccessed
+        (name, cmVariableWatch::UNKNOWN_VARIABLE_DEFINED_ACCESS,
+         def, this);
+      }
+    }
+#endif
+  return def?true:false;
 }
 
 const char* cmMakefile::GetDefinition(const char* name) const
 {
-  const char* def = this->GetDefinitionNoWatch(name);
+  const char* def = 0;
+  DefinitionMap::const_iterator pos = this->Definitions.find(name);
+  if(pos != this->Definitions.end())
+    {
+    def = (*pos).second.c_str();
+    }
+  else
+    {
+    def = this->GetCacheManager()->GetCacheValue(name);
+    }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
