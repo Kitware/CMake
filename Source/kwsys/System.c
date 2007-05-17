@@ -50,6 +50,15 @@ just NOT quote them and let the listfile author deal with it.
 
 */
 
+/*
+TODO: For windows echo:
+
+To display a pipe (|) or redirection character (< or >) when using the
+echo command, use a caret character immediately before the pipe or
+redirection character (for example, ^>, ^<, or ^| ). If you need to
+use the caret character itself (^), use two in a row (^^).
+*/
+
 /*--------------------------------------------------------------------------*/
 static int kwsysSystem_Shell__CharIsWhitespace(char c)
 {
@@ -159,6 +168,7 @@ static int kwsysSystem_Shell__ArgumentNeedsQuotes(const char* in, int isUnix,
                                                   int flags)
 {
   /* Scan the string for characters that require quoting.  */
+  {
   const char* c;
   for(c=in; *c; ++c)
     {
@@ -191,6 +201,18 @@ static int kwsysSystem_Shell__ArgumentNeedsQuotes(const char* in, int isUnix,
       return 1;
       }
     }
+  }
+
+  /* On Windows some single character arguments need quotes.  */
+  if(!isUnix && *in && !*(in+1))
+    {
+    char c = *in;
+    if((c == '?') || (c == '&') || (c == '^') || (c == '|') || (c == '#'))
+      {
+      return 1;
+      }
+    }
+
   return 0;
 }
 
