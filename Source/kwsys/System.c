@@ -60,7 +60,9 @@ static int kwsysSystem_Shell__CharIsWhitespace(char c)
 static int kwsysSystem_Shell__CharNeedsQuotesOnUnix(char c)
 {
   return ((c == '\'') || (c == '`') || (c == ';') || (c == '#') ||
-          (c == '&') || (c == '$') || (c == '(') || (c == ')'));
+          (c == '&') || (c == '$') || (c == '(') || (c == ')') ||
+          (c == '~') || (c == '<') || (c == '>') || (c == '|') ||
+          (c == '*') || (c == '\\'));
 }
 
 /*--------------------------------------------------------------------------*/
@@ -289,10 +291,12 @@ static int kwsysSystem_Shell__GetArgumentSize(const char* in,
       }
     else if(*c == '%')
       {
-      if(flags & kwsysSystem_Shell_Flag_VSIDE)
+      if((flags & kwsysSystem_Shell_Flag_VSIDE) ||
+         ((flags & kwsysSystem_Shell_Flag_Make) &&
+          (flags & kwsysSystem_Shell_Flag_MinGWMake)))
         {
-        /* In a VS IDE a percent is written %% so we need one extra
-           characters.  */
+        /* In the VS IDE or MinGW make a percent is written %% so we
+           need one extra characters.  */
         size += 1;
         }
       }
@@ -443,9 +447,11 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
       }
     else if(*c == '%')
       {
-      if(flags & kwsysSystem_Shell_Flag_VSIDE)
+      if((flags & kwsysSystem_Shell_Flag_VSIDE) ||
+         ((flags & kwsysSystem_Shell_Flag_Make) &&
+          (flags & kwsysSystem_Shell_Flag_MinGWMake)))
         {
-        /* In a VS IDE a percent is written %%.  */
+        /* In the VS IDE or MinGW make a percent is written %%.  */
         *out++ = '%';
         *out++ = '%';
         }
