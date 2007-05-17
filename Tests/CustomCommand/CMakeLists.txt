@@ -305,11 +305,14 @@ SET(CHECK_ARGS
   "one#pound with space"
   ~ ` ! @ \# $ % ^ & _ - + = | : "\;" \" ' , . ? "(" ")" { } []
 #  < > << >> &> 2>&1 1>&2
-# *  # MSys make always expands the wildcard
-# /  # MSys make converts a leading slash to the mingw home directory
 # \\ # Need to test last to avoid ; escape in list.
 #    # Make tools need help when this is the last argument.
   )
+IF(NOT MINGW)
+  # *  # MinGW programs on windows always expands the wildcard!
+  # /  # MSys make converts a leading slash to the mingw home directory
+  LIST(APPEND CHECK_ARGS * /)
+ENDIF(NOT MINGW)
 FOREACH(arg ${CHECK_ARGS})
   SET(ARG "${arg}")
   STRING(REGEX REPLACE "\\\\" "\\\\\\\\" ARG "${ARG}")
