@@ -485,15 +485,17 @@ void cmGlobalKdevelopGenerator
   fout<<"</kdevelop>\n";
   
   if (sessionFilename.empty())
-     return;
+    {
+    return;
+    }
 
   // and a session file, so that kdevelop opens a file if it opens the
   // project the first time
   cmGeneratedFileStream devses(sessionFilename.c_str());
   if(!devses)
-  {
-     return;
-  }
+    {
+    return;
+    }
   devses<<"<?xml version = '1.0' encoding = \'UTF-8\'?>\n";
   devses<<"<!DOCTYPE KDevPrjSession>\n";
   devses<<"<KDevPrjSession>\n";
