@@ -544,9 +544,9 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
 
   // Add a definition for the configuration name.
-  std::string configDefine = "CMAKE_INTDIR=\\\"";
+  std::string configDefine = "CMAKE_INTDIR=\"";
   configDefine += configName;
-  configDefine += "\\\"";
+  configDefine += "\"";
   targetOptions.AddDefine(configDefine);
 
   // Add a definition for the export macro.
@@ -1872,14 +1872,13 @@ cmLocalVisualStudio7GeneratorOptions
   for(std::vector<cmStdString>::const_iterator di = this->Defines.begin();
       di != this->Defines.end(); ++di)
     {
-    // Escape this flag for the IDE.
-    std::string define =
-      cmLocalVisualStudio7GeneratorEscapeForXML(di->c_str());
-
-    // Old comment:
     // Double-quotes in the value of the definition must be escaped
-    // with a backslash.  The entire definition should be quoted in
-    // the generated xml attribute to avoid confusing the VS parser.
+    // with a backslash.
+    std::string define = di->c_str();
+    cmSystemTools::ReplaceString(define, "\"", "\\\"");
+
+    // Escape this flag for the IDE.
+    define = cmLocalVisualStudio7GeneratorEscapeForXML(define.c_str());
 
     // Write this flag.  Quote it if the definition is not
     // alphanumeric.

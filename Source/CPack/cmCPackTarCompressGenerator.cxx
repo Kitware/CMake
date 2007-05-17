@@ -225,15 +225,18 @@ int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
 int cmCPackTarCompress_Compress_Output(void* client_data,
   const char* data, int data_length)
 {
+  if(!client_data)
+    {
+    return 0;
+    }
   cmcompress_stream *cstream = static_cast<cmcompress_stream*>(client_data);
   cmCPackTarCompress_Data *mydata
     = static_cast<cmCPackTarCompress_Data*>(cstream->client_data);
-  mydata->OutputStream->write(data, data_length);
-
   if ( !mydata->OutputStream )
     {
     return 0;
     }
+  mydata->OutputStream->write(data, data_length);
   return data_length;
 }
 

@@ -28,7 +28,7 @@
 
 struct cmListFileArgument
 {
-  cmListFileArgument(): Value(), Quoted(false), FilePath(0), Line(0) {}
+  cmListFileArgument(): Value(), Quoted(false), FilePath(), Line(0) {}
   cmListFileArgument(const cmListFileArgument& r):
     Value(r.Value), Quoted(r.Quoted), FilePath(r.FilePath), Line(r.Line) {}
   cmListFileArgument(const std::string& v, bool q, const char* file,
@@ -44,7 +44,7 @@ struct cmListFileArgument
     }
   std::string Value;
   bool Quoted;
-  const char* FilePath;
+  std::string FilePath;
   long Line;
 };
 

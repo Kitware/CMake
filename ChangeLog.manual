@@ -1,5 +1,14 @@
 Changes in CMake 2.4.7
+--- RC 6 ---
+* Fix stack reporting bug in macros and include
 
+* Fix double quote in -D flags for vs broken in RC 5
+
+* Fix problem with newer curl and curl_getdate changes
+
+* Do not emit link paths /usr/lib32 and /usr/lib64 with -L
+
+---RC 5 ----
 * Fix for bug# 4423, LANGUAGE property now works in VS IDE
 
 * Fix for RUN_TESTS running the tests twice in VS IDE

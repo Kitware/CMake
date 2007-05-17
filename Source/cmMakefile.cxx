@@ -461,7 +461,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   cmListFile cacheFile;
   if( !cacheFile.ParseFile(filenametoread, requireProjectCommand) )
     {
-    this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentFile.c_str());
+    // pop the listfile off the stack
+    this->ListFileStack.pop_back();
+    this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
     return false;
     }
   // add this list file to the list of dependencies
@@ -1900,7 +1902,7 @@ void cmMakefile::ExpandArguments(
     // Expand the variables in the argument.
     value = i->Value;
     this->ExpandVariablesInString(value, false, false, false, 
-                                  i->FilePath, i->Line,
+                                  i->FilePath.c_str(), i->Line,
                                   false, true);
 
     // If the argument is quoted, it should be one argument.
@@ -2706,15 +2708,18 @@ std::vector<cmTest*> *cmMakefile::GetTests()
 
 std::string cmMakefile::GetListFileStack()
 {
-  std::string tmp;
-  for (std::deque<cmStdString>::iterator i = this->ListFileStack.begin();
-    i != this->ListFileStack.end(); ++i)
+  cmOStringStream tmp;
+  size_t depth = this->ListFileStack.size();
+  std::deque<cmStdString>::iterator it = this->ListFileStack.end();
+  do
     {
-    if (i != this->ListFileStack.begin())
-      {
-      tmp += ";";
-      }
-    tmp += *i;
+    --it;
+    tmp << "\n[";
+    tmp << depth;
+    tmp << "]\t";
+    tmp << *it;
+    depth--;
     }
-  return tmp;
+  while (it != this->ListFileStack.begin());
+  return tmp.str();
 }
