@@ -1152,6 +1152,11 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
             {
             newArgVec.push_back(*c);
             }
+          else
+            {
+            // Terminate the loop properly.
+            --c;
+            }
           }
         } break;
       case '[':
