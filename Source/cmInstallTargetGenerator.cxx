@@ -346,8 +346,8 @@ void cmInstallTargetGenerator
 ::AddInstallNamePatchRule(std::ostream& os,
                           const char* destination)
 {
-  std::string installNameTool = this->Target->GetMakefile()->GetDefinition(
-                                "CMAKE_INSTALL_NAME_TOOL");
+  std::string installNameTool =
+    this->Target->GetMakefile()->GetSafeDefinition("CMAKE_INSTALL_NAME_TOOL");
   
   // hack: if a new cmake runs on an old build tree, CMAKE_INSTALL_NAME_TOOL
   // isn't in the cache, because it was simply hardcoded. To make this work
