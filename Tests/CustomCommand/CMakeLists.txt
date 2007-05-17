@@ -247,8 +247,10 @@ SET(CHECK_ARGS
   one.period
   |two-pipes|
   one|pipe
+  |nopipe
   "#two-pounds#"
   "one#pound"
+  "#nocomment"
   "c:/posix/path/with space"
   "c:\\windows\\path\\with space"
   "'single quotes with space'"
@@ -301,10 +303,12 @@ SET(CHECK_ARGS
   "one|pipe with space"
   "#two-pounds# with space"
   "one#pound with space"
-#  ~ ` ! @ \# $ % ^ & * _ - + = | : \" ' < > , . ? /
-#  "("  ")"  {  }  []
-#  >>  <<  &>  2>&1  1>&2
-#  \\ \\;
+  ~ ` ! @ \# $ % ^ & _ - + = | : "\;" \" ' , . ? "(" ")" { } []
+#  < > << >> &> 2>&1 1>&2
+# *  # MSys make always expands the wildcard
+# /  # MSys make converts a leading slash to the mingw home directory
+# \\ # Need to test last to avoid ; escape in list.
+#    # Make tools need help when this is the last argument.
   )
 FOREACH(arg ${CHECK_ARGS})
   SET(ARG "${arg}")
