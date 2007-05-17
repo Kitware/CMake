@@ -172,19 +172,18 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   // Fix the install_name settings in installed binaries.
   if((type == cmTarget::SHARED_LIBRARY ||
      type == cmTarget::MODULE_LIBRARY ||
-     type == cmTarget::EXECUTABLE) &&
-     this->Target->GetMakefile()->IsSet("CMAKE_INSTALL_NAME_TOOL"))
+     type == cmTarget::EXECUTABLE))
     {
     this->AddInstallNamePatchRule(os, destination.c_str());
     }
 
-    std::string destinationFilename = destination;
-    destinationFilename += "/";
-    destinationFilename += cmSystemTools::GetFilenameName(fromFile);
+  std::string destinationFilename = destination;
+  destinationFilename += "/";
+  destinationFilename += cmSystemTools::GetFilenameName(fromFile);
 
-    this->AddRanlibRule(os, type, destinationFilename);
+  this->AddRanlibRule(os, type, destinationFilename);
 
-    this->AddStripRule(os, destinationFilename);
+  this->AddStripRule(os, destinationFilename);
 }
 
 //----------------------------------------------------------------------------
@@ -347,6 +346,22 @@ void cmInstallTargetGenerator
 ::AddInstallNamePatchRule(std::ostream& os,
                           const char* destination)
 {
+  std::string installNameTool = this->Target->GetMakefile()->GetDefinition(
+                                "CMAKE_INSTALL_NAME_TOOL");
+  
+  // hack: if a new cmake runs on an old build tree, CMAKE_INSTALL_NAME_TOOL
+  // isn't in the cache, because it was simply hardcoded. To make this work
+  // adjust it here.
+  if((this->Target->GetMakefile()->IsOn("APPLE")) && (!installNameTool.size()))
+    {
+    installNameTool = "install_name_tool";
+    }
+
+  if(!installNameTool.size())
+    {
+    return;
+    }
+
   // Build a map of build-tree install_name to install-tree install_name for
   // shared libraries linked to this target.
   std::map<cmStdString, cmStdString> install_name_remap;
@@ -425,8 +440,7 @@ void cmInstallTargetGenerator
     component_test += this->Component;
     component_test += ")$\"";
     os << "IF(" << component_test << ")\n";
-    os << "  EXECUTE_PROCESS(COMMAND \"";
-    os <<this->Target->GetMakefile()->GetDefinition("CMAKE_INSTALL_NAME_TOOL");
+    os << "  EXECUTE_PROCESS(COMMAND \"" << installNameTool;
     os << "\"";
     if(!new_id.empty())
       {
