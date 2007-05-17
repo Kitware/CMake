@@ -1633,7 +1633,7 @@ const char* cmMakefile::GetRequiredDefinition(const char* name) const
   return ret;
 }
 
-const char* cmMakefile::GetDefinition(const char* name) const
+const char* cmMakefile::GetDefinitionNoWatch(const char* name) const
 {
   const char* def = 0;
   DefinitionMap::const_iterator pos = this->Definitions.find(name);
@@ -1645,6 +1645,12 @@ const char* cmMakefile::GetDefinition(const char* name) const
     {
     def = this->GetCacheManager()->GetCacheValue(name);
     }
+  return def;
+}
+
+const char* cmMakefile::GetDefinition(const char* name) const
+{
+  const char* def = this->GetDefinitionNoWatch(name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )

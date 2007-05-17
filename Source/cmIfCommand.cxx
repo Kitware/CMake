@@ -315,7 +315,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }
         else
           {
-          def = makefile->GetDefinition((argP1)->c_str());
+          def = makefile->GetDefinitionNoWatch((argP1)->c_str());
           }
         if(def)
           {
