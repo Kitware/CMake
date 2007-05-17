@@ -213,9 +213,9 @@ SET(CHECK_ARGS
   {curly}
   {lcurly}
   rcurly}
-  <angle>
-  <langle
-  rangle>
+  #<angle> # angle-brackets are inconsistent on windows right now
+  #<langle
+  #rangle>
   [square]
   [lsquare # these have funny behavior due to special cases for
   rsquare] # windows registry value names in list expansion
@@ -265,9 +265,9 @@ SET(CHECK_ARGS
   "{curly} with space"
   "{lcurly with space"
   "rcurly} with space"
-  "<angle> with space"
-  "<langle with space"
-  "rangle> with space"
+  #"<angle> with space" # angle-brackets are inconsistent on windows right now
+  #"<langle with space"
+  #"rangle> with space"
   "[square] with space"
   "[lsquare with space" # these have funny behavior due to special cases for
   "rsquare] with space" # windows registry value names in list expansion
