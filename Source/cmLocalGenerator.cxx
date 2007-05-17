@@ -47,6 +47,7 @@ cmLocalGenerator::cmLocalGenerator()
   this->WindowsShell = false;
   this->WindowsVSIDE = false;
   this->WatcomWMake = false;
+  this->MinGWMake = false;
   this->MSYSShell = false;
   this->IgnoreLibPrefix = false;
   this->UseRelativePaths = false;
@@ -2771,6 +2772,10 @@ std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
   if(this->WatcomWMake)
     {
     flags |= cmsysSystem_Shell_Flag_WatcomWMake;
+    }
+  if(this->MinGWMake)
+    {
+    flags |= cmsysSystem_Shell_Flag_MinGWMake;
     }
 
   // Compute the buffer size needed.

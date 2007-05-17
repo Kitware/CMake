@@ -61,6 +61,7 @@ cmLocalGenerator *cmGlobalMinGWMakefileGenerator::CreateLocalGenerator()
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(false);
   lg->SetUnixCD(true);
+  lg->SetMinGWMake(true);
 
   // mingw32-make has trouble running code like
   //

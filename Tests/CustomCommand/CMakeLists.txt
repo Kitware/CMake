@@ -195,6 +195,7 @@ ADD_SUBDIRECTORY(GeneratorInExtraDir)
 ##############################################################################
 # Test non-trivial command line arguments in custom commands.
 SET(EXPECTED_ARGUMENTS)
+# TODO: Check shell operators < > << >> | 2>&1 1>&2 &> ! &
 SET(CHECK_ARGS
   c:/posix/path
   c:\\windows\\path
@@ -209,12 +210,43 @@ SET(CHECK_ARGS
   "(parens)"
   "(lparen"
   "rparen)"
+  {curly}
+  {lcurly}
+  rcurly}
+  <angle>
+  <langle
+  rangle>
+  [square]
+  [lsquare # these have funny behavior due to special cases for
+  rsquare] # windows registry value names in list expansion
   $dollar-signs$
   dollar$sign
   &ampersands&
-  amper&sand
+  one&ampersand
   @two-ats@
   one@at
+  ~two-tilda~
+  one~tilda
+  ^two-carrots^
+  one^carrot
+  %two-percents%
+  one%percent
+  !two-exclamations!
+  one!exclamation
+  ?two-questions?
+  one?question
+  *two-stars*
+  one*star
+  =two+equals=
+  one=equals
+  _two-underscores_
+  one_underscore
+  ,two-commas,
+  one,comma
+  .two-periods.
+  one.period
+  |two-pipes|
+  one|pipe
   "#two-pounds#"
   "one#pound"
   "c:/posix/path/with space"
@@ -230,14 +262,49 @@ SET(CHECK_ARGS
   "(parens) with space"
   "(lparen with space"
   "rparen) with space"
+  "{curly} with space"
+  "{lcurly with space"
+  "rcurly} with space"
+  "<angle> with space"
+  "<langle with space"
+  "rangle> with space"
+  "[square] with space"
+  "[lsquare with space" # these have funny behavior due to special cases for
+  "rsquare] with space" # windows registry value names in list expansion
   "$dollar-signs$ with space"
   "dollar$sign with space"
   "&ampersands& with space"
-  "amper&sand with space"
+  "one&ampersand with space"
   "@two-ats@ with space"
   "one@at with space"
+  "~two-tilda~ with space"
+  "one~tilda with space"
+  "^two-carrots^ with space"
+  "one^carrot with space"
+  "%two-percents% with space"
+  "one%percent with space"
+  "!two-exclamations! with space"
+  "one!exclamation with space"
+  "*two-stars* with space"
+  "one*star with space"
+  "=two+equals= with space"
+  "one=equals with space"
+  "_two-underscores_ with space"
+  "one_underscore with space"
+  "?two-questions? with space"
+  "one?question with space"
+  ",two-commas, with space"
+  "one,comma with space"
+  ".two-periods. with space"
+  "one.period with space"
+  "|two-pipes| with space"
+  "one|pipe with space"
   "#two-pounds# with space"
   "one#pound with space"
+#  ~ ` ! @ \# $ % ^ & * _ - + = | : \" ' < > , . ? /
+#  "("  ")"  {  }  []
+#  >>  <<  &>  2>&1  1>&2
+#  \\ \\;
   )
 FOREACH(arg ${CHECK_ARGS})
   SET(ARG "${arg}")

@@ -55,6 +55,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->NativeEchoWindows = true;
   this->MakeCommandEscapeTargetTwice = false;
   this->IsMakefileGenerator = true;
+  this->BorlandMakeCurlyHack = false;
 }
 
 //----------------------------------------------------------------------------
@@ -937,6 +938,27 @@ cmLocalUnixMakefileGenerator3
           {
           cmd += this->EscapeForShell(commandLine[j].c_str(),
                                       escapeAllowMakeVars);
+          }
+        }
+      if(this->BorlandMakeCurlyHack)
+        {
+        // Borland Make has a very strange bug.  If the first curly
+        // brace anywhere in the command string is a left curly, it
+        // must be written {{} instead of just {.  Otherwise some
+        // curly braces are removed.  The hack can be skipped if the
+        // first curly brace is the last character.
+        std::string::size_type lcurly = cmd.find("{");
+        if(lcurly != cmd.npos && lcurly < (cmd.size()-1))
+          {
+          std::string::size_type rcurly = cmd.find("}");
+          if(rcurly == cmd.npos || rcurly > lcurly)
+            {
+            // The first curly is a left curly.  Use the hack.
+            std::string hack_cmd = cmd.substr(0, lcurly);
+            hack_cmd += "{{}";
+            hack_cmd += cmd.substr(lcurly+1);
+            cmd = hack_cmd;
+            }
           }
         }
       commands1.push_back(cmd);

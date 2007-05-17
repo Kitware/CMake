@@ -98,6 +98,11 @@ public:
   void SetWatcomWMake(bool v)  {this->WatcomWMake = v;}
 
   /**
+   * Set to true if the make tool being used is MinGW Make.
+   */
+  void SetMinGWMake(bool v)  {this->MinGWMake = v;}
+
+  /**
    * Set to true if the shell being used is the MSYS shell.
    * This controls if statements in the makefile and the SHELL variable.
    * The default is false.
@@ -164,6 +169,13 @@ public:
    */
   void SetMakeCommandEscapeTargetTwice(bool b)
     { this->MakeCommandEscapeTargetTwice = b; }
+
+  /**
+   * Set whether the Borland curly brace command line hack should be
+   * applied.
+   */
+  void SetBorlandMakeCurlyHack(bool b)
+    { this->BorlandMakeCurlyHack = b; }
 
   // used in writing out Cmake files such as WriteDirectoryInformation
   static void WriteCMakeArgument(std::ostream& os, const char* s);
@@ -338,6 +350,7 @@ private:
   bool PassMakeflags;
   bool SilentNoColon;
   bool MakeCommandEscapeTargetTwice;
+  bool BorlandMakeCurlyHack;
   //==========================================================================
 
   std::string HomeRelativeOutputPath;

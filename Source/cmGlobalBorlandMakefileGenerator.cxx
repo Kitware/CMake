@@ -51,6 +51,7 @@ cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
   lg->SetGlobalGenerator(this);
   lg->SetUnixCD(false);
   lg->SetMakeCommandEscapeTargetTwice(true);
+  lg->SetBorlandMakeCurlyHack(true);
   return lg;
 }
 
