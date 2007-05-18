@@ -2,6 +2,14 @@ SET(CMAKE_LIBRARY_PATH_FLAG "-LIBPATH:")
 SET(CMAKE_LINK_LIBRARY_FLAG "")
 SET(MSVC 1)
 
+# hack: if a new cmake (which uses CMAKE__LINKER) runs on an old build tree
+# (where link was hardcoded) and where CMAKE_LINKER isn't in the cache
+# and still cmake didn't fail in CMakeFindBinUtils.cmake (because it isn't rerun)
+# hardcode CMAKE_LINKER here to link, so it behaves as it did before, Alex
+IF(NOT DEFINED CMAKE_LINKER)
+   SET(CMAKE_LINKER link)
+ENDIF(NOT DEFINED CMAKE_LINKER)
+
 IF(CMAKE_VERBOSE_MAKEFILE)
   SET(CMAKE_CL_NOLOGO)
 ELSE(CMAKE_VERBOSE_MAKEFILE)
