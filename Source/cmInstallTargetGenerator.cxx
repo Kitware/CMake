@@ -349,14 +349,6 @@ void cmInstallTargetGenerator
   std::string installNameTool =
     this->Target->GetMakefile()->GetSafeDefinition("CMAKE_INSTALL_NAME_TOOL");
   
-  // hack: if a new cmake runs on an old build tree, CMAKE_INSTALL_NAME_TOOL
-  // isn't in the cache, because it was simply hardcoded. To make this work
-  // adjust it here.
-  if((this->Target->GetMakefile()->IsOn("APPLE")) && (!installNameTool.size()))
-    {
-    installNameTool = "install_name_tool";
-    }
-
   if(!installNameTool.size())
     {
     return;

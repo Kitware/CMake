@@ -13,6 +13,15 @@ SET(CMAKE_SHARED_MODULE_LOADER_C_FLAG "-Wl,-bundle_loader,")
 SET(CMAKE_SHARED_MODULE_LOADER_CXX_FLAG "-Wl,-bundle_loader,")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib" ".so" ".a")
 
+# hack: if a new cmake (which uses CMAKE_INSTALL_NAME_TOOL) runs on an old build tree
+# (where install_name_tool was hardcoded) and where CMAKE_INSTALL_NAME_TOOL isn't in the cache
+# and still cmake didn't fail in CMakeFindBinUtils.cmake (because it isn't rerun)
+# hardcode CMAKE_INSTALL_NAME_TOOL here to install_name_tool, so it behaves as it did before, Alex
+IF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
+  SET(CMAKE_INSTALL_NAME_TOOL install_name_tool)
+ENDIF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
+
+
 # setup for universal binaries if sysroot exists
 IF(EXISTS /Developer/SDKs/MacOSX10.4u.sdk)
   # set the sysroot to be used if CMAKE_OSX_ARCHITECTURES
