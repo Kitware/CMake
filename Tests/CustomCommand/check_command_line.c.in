@@ -21,7 +21,9 @@ int main(int argc, const char* argv[])
       }
     else
       {
-      /*printf("[%s]\n", *a);*/
+#if defined(CHECK_COMMAND_LINE_VERBOSE)
+      printf("[%s]\n", *a);
+#endif
       }
     }
   if(*a || *e)
