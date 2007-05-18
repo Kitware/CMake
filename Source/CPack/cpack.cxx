@@ -454,6 +454,5 @@ int main (int argc, char *argv[])
 #define cout no_cout_use_cmCPack_Log
     }
 
-
   return 0;
 }
