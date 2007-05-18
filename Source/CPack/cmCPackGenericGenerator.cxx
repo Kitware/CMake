@@ -135,12 +135,6 @@ int cmCPackGenericGenerator::PrepareNames()
     return 0;
     }
 
-  std::vector<std::string> path;
-  std::string pkgPath = cmSystemTools::FindProgram("strip", path, false);
-  if ( !pkgPath.empty() )
-    {
-    this->SetOptionIfNotSet("CPACK_STRIP_COMMAND", pkgPath.c_str());
-    }
   this->SetOptionIfNotSet("CPACK_REMOVE_TOPLEVEL_DIRECTORY", "1");
 
   return 1;
@@ -218,46 +212,6 @@ int cmCPackGenericGenerator::InstallProject()
     cmSystemTools::PutEnv("DESTDIR=");
     }
 
-  const char* stripExecutable = this->GetOption("CPACK_STRIP_COMMAND");
-  const char* stripFiles
-    = this->GetOption("CPACK_STRIP_FILES");
-  if ( stripFiles && *stripFiles && stripExecutable && *stripExecutable )
-    {
-    cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Strip files" << std::endl);
-    std::vector<std::string> stripFilesVector;
-    cmSystemTools::ExpandListArgument(stripFiles,
-      stripFilesVector);
-    std::vector<std::string>::iterator it;
-    for ( it = stripFilesVector.begin();
-      it != stripFilesVector.end();
-      ++it )
-      {
-      std::string fileName = tempInstallDirectory;
-      fileName += "/" + *it;
-      fileName += cmSystemTools::GetExecutableExtension();
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-        "    Strip file: " << fileName.c_str()
-        << std::endl);
-      std::string stripCommand = stripExecutable;
-      stripCommand += " \"";
-      stripCommand += fileName + "\"";
-      int retVal = 1;
-      std::string output;
-      bool resB =
-        cmSystemTools::RunSingleCommand(stripCommand.c_str(), &output,
-                                        &retVal, 0,
-                                        this->GeneratorVerbose, 0);
-      if ( !resB || retVal )
-        {
-        cmCPackLogger(cmCPackLog::LOG_ERROR,
-          "Problem running install command: " << stripCommand.c_str()
-          << std::endl
-          << "Error was: \"" << output.c_str() << "\""
-          << std::endl);
-        return 0;
-        }
-      }
-    }
   return res;
 }
 
@@ -577,6 +531,13 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
         {
         mf->AddDefinition("CMAKE_INSTALL_COMPONENT",
                           installComponent.c_str());
+        }
+
+      // strip on TRUE, ON, 1, one or several file names, but not on 
+      // FALSE, OFF, 0 and an empty string
+      if (!cmSystemTools::IsOff(this->GetOption("CPACK_STRIP_FILES")))
+        {
+        mf->AddDefinition("CMAKE_INSTALL_DO_STRIP", "1");
         }
 
       int res = mf->ReadListFile(0, installFile.c_str());

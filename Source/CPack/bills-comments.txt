@@ -45,7 +45,7 @@ InstallProject
              - set CMAKE_INSTALL_PREFIX to the temp directory
              - CPACK_BUILD_CONFIG check this and set the BUILD_TYPE to it
               - ReadListFile on the install script  cmake_install.cmake
-         - run strip on the files in this var: CPACK_STRIP_FILES
+         - run strip on the executables and libraries if CPACK_STRIP_FILES is TRUE
 
 Recommendations:
 
