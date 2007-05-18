@@ -1,10 +1,11 @@
 
-# determine the compiler to use for C programs
-# NOTE, a generator may set CMAKE_C_COMPILER before
+# determine the compiler to use for Fortran programs
+# NOTE, a generator may set CMAKE_Fortran_COMPILER before
 # loading this file to force a compiler.
-# use environment variable CCC first if defined by user, next use 
-# the cmake variable CMAKE_GENERATOR_CC which can be defined by a generator
+# use environment variable FC first if defined by user, next use 
+# the cmake variable CMAKE_GENERATOR_FC which can be defined by a generator
 # as a default compiler
+
 IF(NOT CMAKE_Fortran_COMPILER)
   # prefer the environment variable CC
   IF($ENV{FC} MATCHES ".+")
