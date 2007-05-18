@@ -81,6 +81,7 @@ IF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
 
   # Try to identify the compiler.
   SET(CMAKE_Fortran_COMPILER_ID)
+  SET(CMAKE_Fortran_COMPILER_ID_ALLOW_FAIL 1)
   INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(Fortran FFLAGS ${CMAKE_ROOT}/Modules/CMakeFortranCompilerId.F90)
 

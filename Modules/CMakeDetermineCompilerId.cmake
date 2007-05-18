@@ -53,10 +53,12 @@ MACRO(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       "${CMAKE_${lang}_COMPILER_ID_SRC}\" failed with the following output:\n"
       "${CMAKE_${lang}_COMPILER_ID_RESULT}\n"
       "${CMAKE_${lang}_COMPILER_ID_OUTPUT}\n\n")
-    MESSAGE(FATAL_ERROR "Compiling the ${lang} compiler identification source file \""
-      "${CMAKE_${lang}_COMPILER_ID_SRC}\" failed with the following output:\n"
-      "${CMAKE_${lang}_COMPILER_ID_RESULT}\n"
-      "${CMAKE_${lang}_COMPILER_ID_OUTPUT}\n\n")
+    IF(NOT CMAKE_${lang}_COMPILER_ID_ALLOW_FAIL)
+      MESSAGE(FATAL_ERROR "Compiling the ${lang} compiler identification source file \""
+        "${CMAKE_${lang}_COMPILER_ID_SRC}\" failed with the following output:\n"
+        "${CMAKE_${lang}_COMPILER_ID_RESULT}\n"
+        "${CMAKE_${lang}_COMPILER_ID_OUTPUT}\n\n")
+    ENDIF(NOT CMAKE_${lang}_COMPILER_ID_ALLOW_FAIL)
   ELSE(CMAKE_${lang}_COMPILER_ID_RESULT)
     # Compilation succeeded.
     FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
