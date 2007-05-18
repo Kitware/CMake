@@ -186,6 +186,7 @@ public:
   virtual const char* GetAllTargetName()          { return "ALL_BUILD"; }
   virtual const char* GetInstallTargetName()      { return "INSTALL"; }
   virtual const char* GetInstallLocalTargetName() { return 0; }
+  virtual const char* GetInstallStripTargetName() { return 0; }
   virtual const char* GetPreinstallTargetName()   { return 0; }
   virtual const char* GetTestTargetName()         { return "RUN_TESTS"; }
   virtual const char* GetPackageTargetName()      { return "PACKAGE"; }

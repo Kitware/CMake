@@ -1440,14 +1440,33 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     // install_local
     if(const char* install_local = this->GetInstallLocalTargetName())
       {
-      singleLine.insert(singleLine.begin()+1, "-DCMAKE_INSTALL_LOCAL_ONLY=1");
+      cmCustomCommandLine localCmdLine = singleLine;
+
+      localCmdLine.insert(localCmdLine.begin()+1, "-DCMAKE_INSTALL_LOCAL_ONLY=1");
       cpackCommandLines.erase(cpackCommandLines.begin(),
         cpackCommandLines.end());
-      cpackCommandLines.push_back(singleLine);
+      cpackCommandLines.push_back(localCmdLine);
 
       (*targets)[install_local] =
         this->CreateGlobalTarget(
           install_local, "Installing only the local directory...",
+          &cpackCommandLines, depends);
+      }
+
+    // install_strip
+    const char* install_strip = this->GetInstallStripTargetName();
+    if((install_strip !=0) && (mf->IsSet("CMAKE_STRIP")))
+      {
+      cmCustomCommandLine stripCmdLine = singleLine;
+
+      stripCmdLine.insert(stripCmdLine.begin()+1,"-DCMAKE_INSTALL_DO_STRIP=1");
+      cpackCommandLines.erase(cpackCommandLines.begin(),
+        cpackCommandLines.end());
+      cpackCommandLines.push_back(stripCmdLine);
+
+      (*targets)[install_strip] =
+        this->CreateGlobalTarget(
+          install_strip, "Installing the project stripped...",
           &cpackCommandLines, depends);
       }
     }

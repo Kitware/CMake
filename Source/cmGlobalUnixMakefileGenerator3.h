@@ -161,6 +161,7 @@ protected:
   virtual const char* GetAllTargetName()          { return "all"; }
   virtual const char* GetInstallTargetName()      { return "install"; }
   virtual const char* GetInstallLocalTargetName() { return "install/local"; }
+  virtual const char* GetInstallStripTargetName() { return "install/strip"; }
   virtual const char* GetPreinstallTargetName()   { return "preinstall"; }
   virtual const char* GetTestTargetName()         { return "test"; }
   virtual const char* GetPackageTargetName()      { return "package"; }
