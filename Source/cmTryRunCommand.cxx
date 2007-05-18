@@ -82,7 +82,8 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
     {
     int retVal = -1;
     std::string output;
-    std::string executableSuffix=this->Makefile->GetDefinition("CMAKE_EXECUTABLE_SUFFIX");
+    std::string executableSuffix=this->Makefile->GetDefinition(
+                                                 "CMAKE_EXECUTABLE_SUFFIX");
     std::string command1 = binaryDirectory;
     std::vector<std::string> attemptedPaths;
     command1 += "/cmTryCompileExec";

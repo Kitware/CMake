@@ -1088,7 +1088,8 @@ void cmFileCommand::HandleInstallPermissions(cmFileInstaller& installer,
 }
 
 //----------------------------------------------------------------------------
-void cmFileCommand::GetTargetTypeFromString(const std::string& stype, int& itype) const
+void cmFileCommand
+::GetTargetTypeFromString(const std::string& stype, int& itype) const
 {
   if ( stype == "EXECUTABLE" )
     {
@@ -1118,7 +1119,8 @@ void cmFileCommand::GetTargetTypeFromString(const std::string& stype, int& itype
 
 
 //----------------------------------------------------------------------------
-bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer, std::string& destination)
+bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer, 
+                                             std::string& destination)
 {
   if ( destination.size() < 2 )
     {
@@ -1240,15 +1242,15 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
 
 //----------------------------------------------------------------------------
 bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
-                                       cmFileInstaller& installer,
-                                       std::set<cmStdString>& components,
-                                       std::set<cmStdString>& configurations,
-                                       std::map<cmStdString, const char*>& properties,
-                                       int& itype,
-                                       std::string& rename,
-                                       std::string& destination,
-                                       std::vector<std::string>& files,
-                                       bool& optional)
+                                cmFileInstaller& installer,
+                                std::set<cmStdString>& components,
+                                std::set<cmStdString>& configurations,
+                                std::map<cmStdString, const char*>& properties,
+                                int& itype,
+                                std::string& rename,
+                                std::string& destination,
+                                std::vector<std::string>& files,
+                                bool& optional)
 {
     std::string stype = "FILES";
     bool doing_files = false;
@@ -1554,7 +1556,8 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         }
       if(files.size() > 1)
         {
-        this->SetError("INSTALL option RENAME may be used only with one file.");
+        this->SetError("INSTALL option RENAME may be used only with "
+                       "one file.");
         return false;
         }
       }

@@ -459,7 +459,7 @@ void cmInstallTargetGenerator
 }
 
 void cmInstallTargetGenerator::AddStripRule(std::ostream& os, 
-                                            const std::string& destinationFilename)
+                                        const std::string& destinationFilename)
 {
 
   // Don't handle OSX Bundles.
@@ -482,8 +482,8 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os,
 }
 
 void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os, 
-                                             cmTarget::TargetType type,
-                                             const std::string& destinationFilename)
+                                        cmTarget::TargetType type,
+                                        const std::string& destinationFilename)
 {
   // Static libraries need ranlib on this platform.
   if(type != cmTarget::STATIC_LIBRARY)
@@ -498,7 +498,8 @@ void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
     return;
     }
 
-  std::string ranlib = this->Target->GetMakefile()->GetRequiredDefinition("CMAKE_RANLIB");
+  std::string ranlib = this->Target->GetMakefile()->GetRequiredDefinition(
+                                                    "CMAKE_RANLIB");
   if (!ranlib.size())
     {
     return;

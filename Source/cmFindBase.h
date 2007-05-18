@@ -39,7 +39,9 @@ public:
   virtual const char* GetFullDocumentation()
     {return this->GenericDocumentation.c_str();}
 
-  enum RootPathMode { RootPathModeBoth, RootPathModeOnlyRootPath, RootPathModeNoRootPath };
+  enum RootPathMode { RootPathModeBoth, 
+                      RootPathModeOnlyRootPath, 
+                      RootPathModeNoRootPath };
   
 protected:
   void PrintFindStuff();

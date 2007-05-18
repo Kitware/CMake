@@ -252,10 +252,10 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     }
   this->AlreadyInCache = false; 
   
-  
   std::string findRootPathVar = "CMAKE_FIND_ROOT_PATH_MODE_";
   findRootPathVar += this->CMakePathName;
-  std::string rootPathMode = this->Makefile->GetSafeDefinition(findRootPathVar.c_str());
+  std::string rootPathMode = 
+              this->Makefile->GetSafeDefinition(findRootPathVar.c_str());
   if (rootPathMode=="NEVER")
     {
     this->FindRootPathMode = RootPathModeNoRootPath;
@@ -496,7 +496,7 @@ void cmFindBase::HandleCMakeFindRootPath()
     return;
     }
 
-  const char* rootPath =  this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
+  const char* rootPath = this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
   if ((rootPath == 0) || (strlen(rootPath) == 0))
     {
     return;
