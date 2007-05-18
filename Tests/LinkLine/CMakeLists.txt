@@ -8,5 +8,5 @@ ADD_LIBRARY( One One.c )
 ADD_LIBRARY( Two Two.c )
 
 LINK_LIBRARIES( One Two )
-ADD_EXECUTABLE( Exec Exec.c )
+ADD_EXECUTABLE( LinkLine Exec.c )
 LINK_LIBRARIES( One )

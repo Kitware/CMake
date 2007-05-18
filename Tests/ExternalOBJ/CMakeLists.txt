@@ -61,4 +61,4 @@ ADD_CUSTOM_COMMAND(
   )
 
 # Build an executable using the external object file.
-ADD_EXECUTABLE(executable executable.cxx ${CUSTOM_OBJECT})
+ADD_EXECUTABLE(ExternalOBJ executable.cxx ${CUSTOM_OBJECT})

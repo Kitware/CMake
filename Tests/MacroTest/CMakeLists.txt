@@ -1,5 +1,5 @@
 # a simple C only test case
-PROJECT (littleMacroTest)
+PROJECT (MacroTest)
 
 SET(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
 

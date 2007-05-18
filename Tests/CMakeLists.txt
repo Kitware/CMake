@@ -1,6 +1,6 @@
 # a macro for tests that have a simple format where the name matches the
 # directory and project
-MACRO(ADD_TEST_MACRO NAME)
+MACRO(ADD_TEST_MACRO NAME COMMAND)
   ADD_TEST(${NAME} ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/${NAME}"
@@ -9,7 +9,7 @@ MACRO(ADD_TEST_MACRO NAME)
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project ${NAME}
-    --test-command ${NAME})
+    --test-command ${COMMAND})
 ENDMACRO(ADD_TEST_MACRO)
 
 
@@ -26,7 +26,8 @@ IF(BUILD_TESTING)
       OFF)
     MARK_AS_ADVANCED(CTEST_TEST_CTEST)
   ENDIF (CMAKE_RUN_LONG_TESTS)
-  
+
+  # add a bunch of standard build-and-test style tests
   ADD_TEST_MACRO(CommandLineTest CommandLineTest)
   ADD_TEST_MACRO(FindPackageTest FindPackageTest)
   ADD_TEST_MACRO(StringFileTest StringFileTest)
@@ -40,7 +41,13 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(CxxOnly CxxOnly)
   ADD_TEST_MACRO(NewlineArgs NewlineArgs)
   ADD_TEST_MACRO(SetLang SetLang)
+  ADD_TEST_MACRO(ExternalOBJ ExternalOBJ)
+  ADD_TEST_MACRO(LoadCommand LoadedCommand)
+  ADD_TEST_MACRO(LinkLine LinkLine)
+  ADD_TEST_MACRO(MacroTest miniMacroTest)
+  ADD_TEST_MACRO(Framework bar)
 
+  # add tests with more complex invocations
   ADD_TEST(TargetName ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TargetName"
@@ -97,7 +104,6 @@ IF(BUILD_TESTING)
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project TestWorkingDir
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustomCommandWorkingDirectory"
     --test-command working
     )
 
@@ -136,16 +142,6 @@ IF(BUILD_TESTING)
     --build-two-config
     --test-command
     "${CMake_BINARY_DIR}/Tests/OutOfSource/SubDir/OutOfSourceSubdir/simple")
-
-  ADD_TEST(MacroTest ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/MacroTest"
-    "${CMake_BINARY_DIR}/Tests/MacroTest"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project littleMacroTest
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-two-config
-    --test-command   miniMacroTest)
 
   ADD_TEST(BuildDepends ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -191,16 +187,6 @@ IF(BUILD_TESTING)
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
     --test-command  UseX11)
-
-  ADD_TEST(LoadedCommand  ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/LoadCommand"
-    "${CMake_BINARY_DIR}/Tests/LoadCommand"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project LoadedCommand
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-two-config
-    --test-command  LoadedCommand)
 
   ADD_TEST(LoadedCommandOneConfig  ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -282,55 +268,18 @@ IF(BUILD_TESTING)
     --test-command helloDemo
     )
 
-  ADD_TEST(TutorialStep1 ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Tutorial/Step1"
-    "${CMake_BINARY_DIR}/Tests/Tutorial/Step1"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Tutorial
-    --test-command Tutorial 25.0)
-
-  ADD_TEST(TutorialStep2 ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Tutorial/Step2"
-    "${CMake_BINARY_DIR}/Tests/Tutorial/Step2"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Tutorial
-    --test-command Tutorial 25.0)
-
-  ADD_TEST(TutorialStep3 ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Tutorial/Step3"
-    "${CMake_BINARY_DIR}/Tests/Tutorial/Step3"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Tutorial
-    --test-command Tutorial 25.0)
-
-  ADD_TEST(TutorialStep4 ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Tutorial/Step4"
-    "${CMake_BINARY_DIR}/Tests/Tutorial/Step4"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Tutorial
-    --test-command Tutorial 25.0)
-
-  ADD_TEST(TutorialStep5 ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Tutorial/Step5"
-    "${CMake_BINARY_DIR}/Tests/Tutorial/Step5"
-    --build-two-config
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Tutorial
-    --test-command Tutorial 25.0)
+  # do the five tutorial steps
+  FOREACH (STP RANGE 1 5)
+    ADD_TEST(TutorialStep${STP} ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Tutorial/Step${STP}"
+      "${CMake_BINARY_DIR}/Tests/Tutorial/Step${STP}"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-project Tutorial
+      --test-command Tutorial 25.0)
+  ENDFOREACH(STP)
 
   ADD_TEST(testing ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -495,24 +444,12 @@ IF(BUILD_TESTING)
     --test-command jumpExecutable
     )
 
-  ADD_TEST(linkline   ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/LinkLine"
-    "${CMake_BINARY_DIR}/Tests/LinkLine"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/LinkLine"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project LinkLine
-    --test-command Exec
-    )
-
   ADD_TEST(linkorder1 ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/LinkLineOrder"
     "${CMake_BINARY_DIR}/Tests/LinkLineOrder"
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/LinkLineOrder"
     --build-project LinkLineOrder
     --test-command Exec1
     )
@@ -521,22 +458,10 @@ IF(BUILD_TESTING)
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/LinkLineOrder"
     "${CMake_BINARY_DIR}/Tests/LinkLineOrder"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/LinkLineOrder"
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project LinkLineOrder
     --test-command Exec2
-    )
-
-  ADD_TEST(ExternalOBJ ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/ExternalOBJ"
-    "${CMake_BINARY_DIR}/Tests/ExternalOBJ"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project ExternalOBJ
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-exe-dir "${CMake_BINARY_DIR}/ExternalOBJ"
-    --test-command executable
     )
 
   ADD_TEST(Plugin ${CMAKE_CTEST_COMMAND}
@@ -554,7 +479,6 @@ IF(BUILD_TESTING)
       --build-and-test
       "${CMake_SOURCE_DIR}/Source/kwsys"
       "${CMake_BINARY_DIR}/Tests/kwsys"
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/kwsys"
       --build-generator ${CMAKE_TEST_GENERATOR}
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-project kwsys
@@ -625,15 +549,7 @@ IF(BUILD_TESTING)
   ENDIF (WIN32)
 
   IF(CMAKE_TEST_MSVC)
-    ADD_TEST(PrecompiledHeader ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/PrecompiledHeader"
-      "${CMake_BINARY_DIR}/Tests/PrecompiledHeader"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project PrecompiledHeader
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-two-config
-      --test-command foo)
+    ADD_TEST_MACRO(PrecompiledHeader foo)
   ENDIF(CMAKE_TEST_MSVC)
 
   IF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
@@ -660,15 +576,6 @@ IF(BUILD_TESTING)
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --test-command VSExternalInclude)
   ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
-  ADD_TEST(FrameworkTest ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/Framework"
-      "${CMake_BINARY_DIR}/Tests/Framework"
-      --build-two-config
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-project Framework
-      --test-command bar)
 
   IF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
     SET(BundleTestInstallDir
