@@ -2,8 +2,10 @@
 <Description>
 <LineLength>79</LineLength>
 <Header>"@CMAKE_SOURCE_DIR@/Utilities/KWStyle/Headers",false,true</Header>
+<!--
 <Functions>
 <regex>[A-Z]</regex>
 <length>100</length>
 </Functions>
+-->
 </Description>
