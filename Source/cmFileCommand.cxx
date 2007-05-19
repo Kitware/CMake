@@ -1591,6 +1591,7 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
                               const std::vector<std::string>& files,
                               const bool optional)
 {
+  typedef std::set<cmStdString>::const_iterator iter_type;
   // Check for component-specific installation.
   const char* cmake_install_component =
     this->Makefile->GetDefinition("CMAKE_INSTALL_COMPONENT");
@@ -1598,7 +1599,8 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
     {
     // This install rule applies only if it is associated with the
     // current component.
-    if(components.find(cmake_install_component) == components.end())
+    if(iter_type(components.find(cmake_install_component)) ==
+       components.end())
       {
       return true;
       }
@@ -1615,7 +1617,7 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
       // rule is configuration-specific.  Skip it.
       return true;
       }
-    else if(configurations.find(cmake_install_configuration) ==
+    else if(iter_type(configurations.find(cmake_install_configuration)) ==
             configurations.end())
       {
       // This rule is specific to a configuration not being installed.
