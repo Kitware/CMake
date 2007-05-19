@@ -1,4 +1,4 @@
-PROJECT(LoadedCommand)
+PROJECT(LoadCommand)
 
 # set a definition
 SET (TEST_COMMAND_TEST1 1)
