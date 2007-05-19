@@ -17,25 +17,25 @@ CHECK_INCLUDE_FILE("sys/prctl.h"    HAVE_SYS_PRCTL_H)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
 CHECK_LIBRARY_EXISTS(m ceil "" HAVE_LIBM)
 
-CONFIGURE_FILE(${LoadedCommand_SOURCE_DIR}/LoadedCommand.h.in
-               ${LoadedCommand_BINARY_DIR}/LoadedCommand.h)
+CONFIGURE_FILE(${LoadCommand_SOURCE_DIR}/LoadedCommand.h.in
+               ${LoadCommand_BINARY_DIR}/LoadedCommand.h)
 
-INCLUDE_DIRECTORIES(${LoadedCommand_BINARY_DIR})
+INCLUDE_DIRECTORIES(${LoadCommand_BINARY_DIR})
 
 # try to compile the command
 # make sure it is not already loaded
 IF(COMMAND CMAKE_TEST_COMMAND)
 ELSE(COMMAND CMAKE_TEST_COMMAND)
   TRY_COMPILE(COMPILE_OK 
-    ${LoadedCommand_BINARY_DIR}/CMakeCommands 
-    ${LoadedCommand_SOURCE_DIR}/CMakeCommands 
+    ${LoadCommand_BINARY_DIR}/CMakeCommands 
+    ${LoadCommand_SOURCE_DIR}/CMakeCommands 
     CMAKE_LOADED_COMMANDS CMAKE_FLAGS -DMUDSLIDE_TYPE:STRING=MUCHO
     OUTPUT_VARIABLE OUTPUT )
 # do another TRY_COMPILE to get around make
 # problem on hp
   TRY_COMPILE(COMPILE_OK 
-    ${LoadedCommand_BINARY_DIR}/CMakeCommands 
-    ${LoadedCommand_SOURCE_DIR}/CMakeCommands 
+    ${LoadCommand_BINARY_DIR}/CMakeCommands 
+    ${LoadCommand_SOURCE_DIR}/CMakeCommands 
     CMAKE_LOADED_COMMANDS CMAKE_FLAGS -DMUDSLIDE_TYPE:STRING=MUCHO
     OUTPUT_VARIABLE OUTPUT )
 ENDIF(COMMAND CMAKE_TEST_COMMAND)
@@ -45,16 +45,16 @@ MESSAGE("Output from try compile: ${OUTPUT}")
 # if the compile was OK, try loading the command
 IF (COMPILE_OK)
   LOAD_COMMAND(CMAKE_TEST_COMMAND 
-    ${LoadedCommand_BINARY_DIR}/CMakeCommands 
-    ${LoadedCommand_BINARY_DIR}/CMakeCommands/Debug
-    ${LoadedCommand_BINARY_DIR}/CMakeCommands/Development
+    ${LoadCommand_BINARY_DIR}/CMakeCommands 
+    ${LoadCommand_BINARY_DIR}/CMakeCommands/Debug
+    ${LoadCommand_BINARY_DIR}/CMakeCommands/Development
     )
   # if the command loaded, execute the command
   IF (COMMAND CMAKE_TEST_COMMAND)
     CMAKE_TEST_COMMAND(
-      "${LoadedCommand_SOURCE_DIR}/LoadedCommand.cxx.in"
-      "${LoadedCommand_BINARY_DIR}/LoadedCommand2.cxx.in"
-      "${LoadedCommand_BINARY_DIR}/LoadedCommand3.cxx"
+      "${LoadCommand_SOURCE_DIR}/LoadedCommand.cxx.in"
+      "${LoadCommand_BINARY_DIR}/LoadedCommand2.cxx.in"
+      "${LoadCommand_BINARY_DIR}/LoadedCommand3.cxx"
       )
   ENDIF (COMMAND CMAKE_TEST_COMMAND)
 ELSE (COMPILE_OK)
