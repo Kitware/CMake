@@ -108,5 +108,5 @@ FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
 # configure variables set in this file for fast reload
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in 
                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
-               IMMEDIATE)
+               IMMEDIATE @ONLY)
 
