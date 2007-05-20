@@ -193,7 +193,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/LoadCommandOneConfig"
     "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig"
     --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project LoadedCommand
+    --build-project LoadCommand
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --test-command  LoadedCommand
     )
