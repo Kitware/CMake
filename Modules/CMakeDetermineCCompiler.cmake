@@ -62,6 +62,9 @@ IF(NOT CMAKE_C_COMPILER)
   ENDIF(CMAKE_C_COMPILER_INIT AND NOT CMAKE_C_COMPILER)
 ELSE(NOT CMAKE_C_COMPILER)
 
+  # we only get here if CMAKE_C_COMPILER was specified using -D or a pre-made CMakeCache.txt
+  # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
+  #
   # if a compiler was specified by the user but without path, 
   # now try to find it with the full path
   # if it is found, force it into the cache, 

@@ -26,6 +26,10 @@
 # cygwin                        CYGWIN_NT-5.1
 # MacOSX                        Darwin
 
+
+#set the source file which will be configured to become CMakeSystem.cmake
+SET(_CMAKE_SYSTEM_TEMPLATE_FILE ${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in )
+
 IF(CMAKE_TOOLCHAIN_FILE)
   # at first try to load it as path relative to the directory from which cmake has been run
   INCLUDE("${CMAKE_BINARY_DIR}/${CMAKE_TOOLCHAIN_FILE}" OPTIONAL RESULT_VARIABLE _INCLUDED_TOOLCHAIN_FILE)
@@ -39,6 +43,9 @@ IF(CMAKE_TOOLCHAIN_FILE)
   ELSE(_INCLUDED_TOOLCHAIN_FILE)
     MESSAGE(FATAL_ERROR "Could not find toolchain file: ${CMAKE_TOOLCHAIN_FILE}") 
   ENDIF(_INCLUDED_TOOLCHAIN_FILE)
+
+  # use a different source file for CMakeSystem.cmake, since it has to hold a bit more information
+  SET(_CMAKE_SYSTEM_TEMPLATE_FILE ${CMAKE_ROOT}/Modules/CMakeSystemWithToolchainFile.cmake.in )
 
   IF(NOT DEFINED CMAKE_CROSSCOMPILING)
     SET(CMAKE_CROSSCOMPILING TRUE)
@@ -105,8 +112,8 @@ ENDIF(CMAKE_SYSTEM_VERSION)
 FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
   "The system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
 
-# configure variables set in this file for fast reload
-CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in 
+# configure variables set in this file for fast reload, the template file is defined at the top of this file
+CONFIGURE_FILE(${_CMAKE_SYSTEM_TEMPLATE_FILE}
                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
                IMMEDIATE @ONLY)
 
