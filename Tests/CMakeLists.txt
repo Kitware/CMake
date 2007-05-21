@@ -670,7 +670,8 @@ IF(BUILD_TESTING)
 
   # fortran does not work for IDE builds because
   # CMAKE_STANDARD_LIBRARIES needs to be per language
-  IF(CMAKE_TEST_GENERATOR MATCHES "Makefiles")
+  IF(CMAKE_TEST_GENERATOR MATCHES "Makefiles"
+     OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
     # see if we can find a fortran compiler on the machine
     # if so, add the fortran test and see if it works.
     SET(CMAKE_Fortran_COMPILER_LIST ifort ifc efc f95 pgf95
@@ -690,7 +691,8 @@ IF(BUILD_TESTING)
         --build-two-config
         --test-command testf)
     ENDIF(CMAKE_Fortran_COMPILER_FULLPATH)
-  ENDIF(CMAKE_TEST_GENERATOR MATCHES "Makefiles")
+  ENDIF(CMAKE_TEST_GENERATOR MATCHES "Makefiles"
+     OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
   IF(NOT CMAKE_TEST_GENERATOR MATCHES "Xcode")
     INCLUDE(FindJava)
     IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
