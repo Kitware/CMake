@@ -60,13 +60,21 @@ IF(NOT CMAKE_CXX_COMPILER)
   ENDIF(CMAKE_CXX_COMPILER_INIT AND NOT CMAKE_CXX_COMPILER)
 ELSE(NOT CMAKE_CXX_COMPILER)
 
+# we only get here if CMAKE_CXX_COMPILER was specified using -D or a pre-made CMakeCache.txt
+# (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
+#
 # if a compiler was specified by the user but without path, 
-# now try to find it with the full path and force it into the cache
+# now try to find it with the full path
+# if it is found, force it into the cache, 
+# if not, don't overwrite the setting (which was given by the user) with "NOTFOUND"
+# if the CXX compiler already had a path, reuse it for searching the C compiler
   GET_FILENAME_COMPONENT(_CMAKE_USER_CXX_COMPILER_PATH "${CMAKE_CXX_COMPILER}" PATH)
   IF(NOT _CMAKE_USER_CXX_COMPILER_PATH)
     FIND_PROGRAM(CMAKE_CXX_COMPILER_WITH_PATH NAMES ${CMAKE_CXX_COMPILER})
     MARK_AS_ADVANCED(CMAKE_CXX_COMPILER_WITH_PATH)
-    SET(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER_WITH_PATH} CACHE FILEPATH "CXX compiler" FORCE)
+    IF(CMAKE_CXX_COMPILER_WITH_PATH)
+      SET(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER_WITH_PATH} CACHE FILEPATH "CXX compiler" FORCE)
+    ENDIF(CMAKE_CXX_COMPILER_WITH_PATH)
   ENDIF(NOT _CMAKE_USER_CXX_COMPILER_PATH)
 ENDIF(NOT CMAKE_CXX_COMPILER)
 MARK_AS_ADVANCED(CMAKE_CXX_COMPILER)
