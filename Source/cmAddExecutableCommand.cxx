@@ -63,7 +63,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
     
   if (importTarget)
     {
-    cmTarget* target = this->Makefile->AddNewTarget(cmTarget::EXECUTABLE, exename.c_str(), true);
+    this->Makefile->AddNewTarget(cmTarget::EXECUTABLE, exename.c_str(), true);
     return true;
     }
 

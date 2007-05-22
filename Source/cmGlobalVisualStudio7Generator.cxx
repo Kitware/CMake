@@ -589,8 +589,7 @@ cmGlobalVisualStudio7Generator
         {
         // is the library part of this SLN ? If so add dependency
         if(this->FindTarget(this->CurrentProject.c_str(), 
-                            j->first.c_str()), 
-                            false)
+                            j->first.c_str(), false))
           {
           std::string guid = this->GetGUID(j->first.c_str());
           if(guid.size() == 0)
