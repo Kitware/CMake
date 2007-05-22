@@ -401,7 +401,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
       if(j->first != dspname)
         {
         // is the library part of this DSW ? If so add dependency
-        if(this->FindTarget(0, j->first.c_str()))
+        if(this->FindTarget(0, j->first.c_str()), false)
           {
           fout << "Begin Project Dependency\n";
           fout << "Project_Dep_Name " << j->first.c_str() << "\n";

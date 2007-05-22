@@ -44,7 +44,7 @@ public:
   /**
    * Return the type of target.
    */
-  TargetType GetType()
+  TargetType GetType() const
     {
       return this->TargetTypeValue;
     }
@@ -54,6 +54,8 @@ public:
    */
   void SetType(TargetType f, const char* name);
 
+  void MarkAsImported();
+  
   ///! Set/Get the name of the target
   const char* GetName() const {return this->Name.c_str();}
 
@@ -161,6 +163,8 @@ public:
   const char *GetProperty(const char *prop);
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);
+  
+  bool IsImported() const {return this->IsImportedTarget;}
 
   /** Get the directory in which this target will be built.  If the
       configuration name is given then the generator will add its
@@ -327,6 +331,7 @@ private:
   void GetFullNameInternal(TargetType type, const char* config, bool implib,
                            std::string& outPrefix, std::string& outBase,
                            std::string& outSuffix);
+  
   void GetLibraryNamesInternal(std::string& name,
                                std::string& soName,
                                std::string& realName,
@@ -348,6 +353,19 @@ private:
   // Get the full path to the target output directory.
   const char* GetOutputDir(bool implib);
 
+  const char* ImportedGetLocation(const char* config);
+  const char* NormalGetLocation(const char* config);
+  
+  void NormalGetFullNameInternal(TargetType type, const char* config, bool implib,
+                           std::string& outPrefix, std::string& outBase,
+                           std::string& outSuffix);
+  void ImportedGetFullNameInternal(TargetType type, const char* config, bool implib,
+                           std::string& outPrefix, std::string& outBase,
+                           std::string& outSuffix);
+  
+  const char* ImportedGetDirectory(const char* config, bool implib);
+  const char* NormalGetDirectory(const char* config, bool implib);
+  
 private:
   std::string Name;
   std::vector<cmCustomCommand> PreBuildCommands;
@@ -376,6 +394,7 @@ private:
   cmPropertyMap Properties;
   LinkLibraryVectorType OriginalLinkLibraries;
   bool DLLPlatform;
+  bool IsImportedTarget;
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.

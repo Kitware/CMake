@@ -825,12 +825,10 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
                                    bool escapeOldStyle, const char* comment)
 {
   // Create a target instance for this utility.
-  cmTarget target;
-  target.SetMakefile(this);
-  target.SetType(cmTarget::UTILITY, utilityName);
+  cmTarget* target = this->AddNewTarget(cmTarget::UTILITY, utilityName, false);
   if (excludeFromAll)
     {
-    target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+    target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
   if(!comment)
     {
@@ -850,7 +848,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
                                  commandLines, comment,
                                  workingDirectory, no_replace,
                                  escapeOldStyle);
-  target.GetSourceLists().push_back(force);
+  target->GetSourceLists().push_back(force);
 
   // The output is not actually created so mark it symbolic.
   if(cmSourceFile* sf = this->GetSource(force.c_str()))
@@ -862,11 +860,6 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
     cmSystemTools::Error("Could not get source file entry for ",
                          force.c_str());
     }
-
-  // Add the target to the set of targets.
-  cmTargets::iterator it = 
-    this->Targets.insert(cmTargets::value_type(utilityName,target)).first;
-  this->LocalGenerator->GetGlobalGenerator()->AddTarget(*it);
 }
 
 void cmMakefile::AddDefineFlag(const char* flag)
@@ -940,7 +933,7 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
   if ( i != this->Targets.end())
     {
     cmTarget* tgt = 
-      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0, lib);
+      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0, lib, false);
     if(tgt)
       {
       bool allowModules = true;
@@ -1343,53 +1336,64 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
                             const std::vector<std::string> &srcs,
                             bool excludeFromAll)
 {
-  cmTarget target;
+  cmTarget* target=0;
   switch (shared)
     {
     case 0:
-      target.SetType(cmTarget::STATIC_LIBRARY, lname);
+      target=this->AddNewTarget(cmTarget::STATIC_LIBRARY, lname, false);
       break;
     case 1:
-      target.SetType(cmTarget::SHARED_LIBRARY, lname);
+      target=this->AddNewTarget(cmTarget::SHARED_LIBRARY, lname, false);
       break;
     case 2:
-      target.SetType(cmTarget::MODULE_LIBRARY, lname);
+      target=this->AddNewTarget(cmTarget::MODULE_LIBRARY, lname, false);
       break;
     default:
-      target.SetType(cmTarget::STATIC_LIBRARY, lname);
+      target=this->AddNewTarget(cmTarget::STATIC_LIBRARY, lname, false);
     }
-  target.SetMakefile(this);
 
   // Clear its dependencies. Otherwise, dependencies might persist
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
-  target.ClearDependencyInformation( *this, lname );
+  target->ClearDependencyInformation( *this, lname );
   if(excludeFromAll)
     {
-    target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+    target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
-  target.GetSourceLists() = srcs;
-  this->AddGlobalLinkInformation(lname, target);
-  cmTargets::iterator it = 
-    this->Targets.insert(cmTargets::value_type(lname,target)).first;
-  this->LocalGenerator->GetGlobalGenerator()->AddTarget(*it);
+  target->GetSourceLists() = srcs;
+  this->AddGlobalLinkInformation(lname, *target);
 }
 
 cmTarget* cmMakefile::AddExecutable(const char *exeName, 
                                     const std::vector<std::string> &srcs,
                                     bool excludeFromAll)
 {
-  cmTarget target;
-  target.SetType(cmTarget::EXECUTABLE, exeName);
-  target.SetMakefile(this);
+  cmTarget* target = this->AddNewTarget(cmTarget::EXECUTABLE, exeName, false);
   if(excludeFromAll)
     {
-    target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+    target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
-  target.GetSourceLists() = srcs;
-  this->AddGlobalLinkInformation(exeName, target);
-  cmTargets::iterator it = 
-    this->Targets.insert(cmTargets::value_type(exeName,target)).first;
+  target->GetSourceLists() = srcs;
+  this->AddGlobalLinkInformation(exeName, *target);
+  return target;
+}
+
+
+cmTarget* cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name, bool isImported)
+{
+  cmTargets::iterator it;
+  cmTarget target;
+  target.SetType(type, name);
+  target.SetMakefile(this);
+  if (isImported)
+  {
+    target.MarkAsImported();
+    it=this->ImportedTargets.insert(cmTargets::value_type(target.GetName(), target)).first;
+  }
+  else
+  {
+    it=this->Targets.insert(cmTargets::value_type(target.GetName(), target)).first;
+  }
   this->LocalGenerator->GetGlobalGenerator()->AddTarget(*it);
   return &it->second;
 }
@@ -2709,7 +2713,7 @@ const char *cmMakefile::GetProperty(const char* prop,
     return this->GetCMakeInstance()->GetProperty(prop,scope);
     }
 
-  return retVal;    
+  return retVal;
 }
 
 bool cmMakefile::GetPropertyAsBool(const char* prop)
@@ -2718,16 +2722,26 @@ bool cmMakefile::GetPropertyAsBool(const char* prop)
 }
 
 
-cmTarget* cmMakefile::FindTarget(const char* name)
+cmTarget* cmMakefile::FindTarget(const char* name, bool useImportedTargets)
 {
   cmTargets& tgts = this->GetTargets();
-  
-  cmTargets::iterator i = tgts.find(name);
-  if (i == tgts.end())
+
+  cmTargets::iterator i = tgts.find ( name );
+  if ( i != tgts.end() )
     {
-    return 0;
+    return &i->second;
     }
-  return &i->second;
+
+  if (useImportedTargets)
+    {
+    cmTargets::iterator impTarget = this->ImportedTargets.find(name);
+    if (impTarget != this->ImportedTargets.end())
+      {
+      return &impTarget->second;
+      }
+    }
+
+  return 0;
 }
 
 cmTest* cmMakefile::CreateTest(const char* testName)

@@ -32,6 +32,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
   bool use_win32 = false;
   bool use_macbundle = false;
   bool excludeFromAll = false;
+  bool importTarget = false;
   while ( s != args.end() )
     {
     if (*s == "WIN32")
@@ -49,10 +50,21 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
       ++s;
       excludeFromAll = true;
       }
+    else if(*s == "IMPORT")
+     {
+     ++s;
+     importTarget = true;
+     }
     else
       {
       break;
       }
+    }
+    
+  if (importTarget)
+    {
+    cmTarget* target = this->Makefile->AddNewTarget(cmTarget::EXECUTABLE, exename.c_str(), true);
+    return true;
     }
 
   if (s == args.end())

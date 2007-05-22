@@ -376,7 +376,7 @@ void cmInstallTargetGenerator
       {
       if(cmTarget* tgt = this->Target->GetMakefile()->
          GetLocalGenerator()->GetGlobalGenerator()->
-         FindTarget(0, lib.c_str()))
+         FindTarget(0, lib.c_str(), false))
         {
         if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
           {

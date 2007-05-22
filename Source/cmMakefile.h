@@ -167,6 +167,8 @@ public:
   void AddDefineFlag(const char* definition);
   void RemoveDefineFlag(const char* definition);
 
+  cmTarget* AddNewTarget(cmTarget::TargetType type, const char* name, bool isImported);
+  
   /**
    * Add an executable to the build.
    */
@@ -416,8 +418,9 @@ public:
    * Get the list of targets
    */
   cmTargets &GetTargets() { return this->Targets; }
+  const cmTargets &GetImportedTargets() const { return this->ImportedTargets; }
 
-  cmTarget* FindTarget(const char* name);
+  cmTarget* FindTarget(const char* name, bool useImportedTargets);
 
 
   /**
@@ -741,6 +744,7 @@ protected:
 
   // libraries, classes, and executables
   cmTargets Targets;
+  cmTargets ImportedTargets;
   std::vector<cmSourceFile*> SourceFiles;
 
   // Tests

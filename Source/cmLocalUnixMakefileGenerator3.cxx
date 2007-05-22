@@ -114,7 +114,6 @@ void cmLocalUnixMakefileGenerator3::Generate()
     if (tg)
       {
       this->TargetGenerators.push_back(tg);
-//      t->second.TraceVSDependencies(empty, this->Makefile);
       tg->WriteRuleFiles();
       }
     }

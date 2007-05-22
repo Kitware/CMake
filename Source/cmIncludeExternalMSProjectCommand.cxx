@@ -50,10 +50,8 @@ bool cmIncludeExternalMSProjectCommand
     cmSystemTools::ConvertToUnixSlashes(path);
 
     // Create a target instance for this utility.
-    cmTarget target;
-    target.SetType(cmTarget::UTILITY, utility_name.c_str());
-    target.SetProperty("EXCLUDE_FROM_ALL","FALSE");
-    target.SetMakefile(this->Makefile);
+    cmTarget* target=this->Makefile->AddNewTarget(cmTarget::UTILITY, utility_name.c_str());
+    target->SetProperty("EXCLUDE_FROM_ALL","FALSE");
     std::vector<std::string> no_outputs;
     cmCustomCommandLines commandLines;
     cmCustomCommandLine commandLine;
@@ -61,13 +59,7 @@ bool cmIncludeExternalMSProjectCommand
     commandLine.push_back(path);
     commandLines.push_back(commandLine);
     cmCustomCommand cc(no_outputs, depends, commandLines, 0, 0);
-    target.GetPostBuildCommands().push_back(cc);
-
-    // Add the target to the set of targets.
-    cmTargets::iterator it =
-      this->Makefile->GetTargets()
-      .insert(cmTargets::value_type(utility_name.c_str(),target)).first;
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->AddTarget(*it);
+    target->GetPostBuildCommands().push_back(cc);
     }
 #endif
   return true;

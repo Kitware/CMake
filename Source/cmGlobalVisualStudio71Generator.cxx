@@ -333,7 +333,9 @@ cmGlobalVisualStudio71Generator
       if(j->first != dspname)
         {
         // is the library part of this SLN ? If so add dependency
-        if(this->FindTarget(this->CurrentProject.c_str(), j->first.c_str()))
+        if(this->FindTarget(this->CurrentProject.c_str(), 
+                            j->first.c_str()), 
+                            false)
           {
           fout << "\t\t{" << this->GetGUID(j->first.c_str()) << "} = {"
                << this->GetGUID(j->first.c_str()) << "}\n";

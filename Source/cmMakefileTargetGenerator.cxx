@@ -1194,7 +1194,7 @@ void cmMakefileTargetGenerator
       {
       // Depend on other CMake targets.
       if(cmTarget* tgt =
-         this->GlobalGenerator->FindTarget(0, lib->first.c_str()))
+         this->GlobalGenerator->FindTarget(0, lib->first.c_str(), false))
         {
         if(const char* location =
            tgt->GetLocation(this->LocalGenerator->ConfigurationName.c_str()))

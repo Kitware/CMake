@@ -96,7 +96,7 @@ bool cmSetTargetPropertiesCommand
                cmMakefile *mf)
 {
   cmTarget* target = 
-    mf->GetLocalGenerator()->GetGlobalGenerator()->FindTarget(0, tname);
+    mf->GetLocalGenerator()->GetGlobalGenerator()->FindTarget(0, tname, true);
   if ( target)
     {
     // now loop through all the props and set them

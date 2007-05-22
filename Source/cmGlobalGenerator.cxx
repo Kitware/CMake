@@ -625,6 +625,7 @@ void cmGlobalGenerator::Configure()
   this->LocalGenerators.clear();
   this->TargetDependencies.clear();
   this->TotalTargets.clear();
+  this->ImportedTotalTargets.clear();
   this->ProjectToTargetMap.clear();
   this->ProjectMap.clear();
 
@@ -1179,7 +1180,8 @@ cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(const char* start_dir)
 
 
 cmTarget* cmGlobalGenerator::FindTarget(const char* project, 
-                                        const char* name)
+                                        const char* name,
+                                        bool useImportedTargets)
 {
   // if project specific
   if(project)
@@ -1187,7 +1189,8 @@ cmTarget* cmGlobalGenerator::FindTarget(const char* project,
     std::vector<cmLocalGenerator*>* gens = &this->ProjectMap[project];
     for(unsigned int i = 0; i < gens->size(); ++i)
       {
-      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name);
+      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name, 
+                                                            useImportedTargets);
       if(ret)
         {
         return ret;
@@ -1197,13 +1200,22 @@ cmTarget* cmGlobalGenerator::FindTarget(const char* project,
   // if all projects/directories
   else
     {
-    std::map<cmStdString,cmTarget *>::iterator i = 
-      this->TotalTargets.find(name);
-    if (i == this->TotalTargets.end())
+    std::map<cmStdString,cmTarget *>::iterator i =
+      this->TotalTargets.find ( name );
+    if ( i != this->TotalTargets.end() )
       {
-      return 0;
+      return i->second;
       }
-    return i->second;
+    
+    if ( useImportedTargets )
+      {
+      std::map<cmStdString,cmTarget *>::iterator importedTarget =
+        this->ImportedTotalTargets.find ( name );
+      if ( importedTarget != this->ImportedTotalTargets.end() )
+        {
+        return importedTarget->second;
+        }
+      }
     }
   return 0;
 }
@@ -1549,12 +1561,12 @@ std::vector<cmTarget *>& cmGlobalGenerator
       if(emitted.insert(lib->first).second)
         {
         cmTarget *target2 = 
-          target.GetMakefile()->FindTarget(lib->first.c_str());
-        
+          target.GetMakefile()->FindTarget(lib->first.c_str(), false);
+
         // search each local generator until a match is found
         if (!target2)
           {
-          target2 = this->FindTarget(0,lib->first.c_str());
+          target2 = this->FindTarget(0,lib->first.c_str(), false);
           }
         
         // if a match was found then ...
@@ -1575,12 +1587,12 @@ std::vector<cmTarget *>& cmGlobalGenerator
     // Don't emit the same utility twice for this target.
     if(emitted.insert(*util).second)
       {
-      cmTarget *target2 = target.GetMakefile()->FindTarget(util->c_str());
+      cmTarget *target2 = target.GetMakefile()->FindTarget(util->c_str(), false);
       
       // search each local generator until a match is found
       if (!target2)
         {
-        target2 = this->FindTarget(0,util->c_str());
+        target2 = this->FindTarget(0,util->c_str(), false);
         }
       
       // if a match was found then ...
@@ -1594,3 +1606,14 @@ std::vector<cmTarget *>& cmGlobalGenerator
   return result;
 }
 
+void cmGlobalGenerator::AddTarget(cmTargets::value_type &v)
+{
+  if (v.second.IsImported())
+    {
+    this->ImportedTotalTargets[v.first] = &v.second;
+    }
+  else
+    {
+    this->TotalTargets[v.first] = &v.second;
+    }
+}

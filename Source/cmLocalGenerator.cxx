@@ -148,8 +148,7 @@ void cmLocalGenerator::TraceDependencies()
     if ((t->second.GetType() != cmTarget::INSTALL_FILES)
         && (t->second.GetType() != cmTarget::INSTALL_PROGRAMS)
         && (t->second.GetType() != cmTarget::INSTALL_DIRECTORY)
-        && (strncmp(t->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
-        && (t->second.GetPropertyAsBool("IMPORTED") == false))
+        && (strncmp(t->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0))
       {
       std::string projectFilename;
       if (this->IsMakefileGenerator == false)  // only use of this variable
@@ -1733,7 +1732,7 @@ void cmLocalGenerator
        (j->second == cmTarget::GENERAL || j->second == linkType))
       {
       // Compute the proper name to use to link this library.
-      cmTarget* tgt = this->GlobalGenerator->FindTarget(0, lib.c_str());
+      cmTarget* tgt = this->GlobalGenerator->FindTarget(0, lib.c_str(), false);
       bool impexe = (tgt &&
                      tgt->GetType() == cmTarget::EXECUTABLE &&
                      tgt->GetPropertyAsBool("ENABLE_EXPORTS"));
@@ -1963,7 +1962,7 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
     }
 
   // Look for a CMake target with the given name.
-  if(cmTarget* target = this->GlobalGenerator->FindTarget(0, name.c_str()))
+  if(cmTarget* target = this->GlobalGenerator->FindTarget(0,name.c_str(),false))
     {
     // make sure it is not just a coincidence that the target name
     // found is part of the inName
@@ -2029,8 +2028,8 @@ std::string cmLocalGenerator::GetRealLocation(const char* inName,
 {
   std::string outName=inName;
   // Look for a CMake target with the given name.
-  cmTarget* target = this->GlobalGenerator->FindTarget(0, inName);
-  if ((target!=0) && (target->GetType()==cmTarget::EXECUTABLE))
+  cmTarget* target = this->GlobalGenerator->FindTarget(0, inName, true);
+  if ((target != 0) && (target->GetType() == cmTarget::EXECUTABLE))
     {
     outName = target->GetLocation( config );
     }

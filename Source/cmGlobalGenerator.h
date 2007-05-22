@@ -157,7 +157,7 @@ public:
   void FindMakeProgram(cmMakefile*);
 
   ///! Find a target by name by searching the local generators.
-  cmTarget* FindTarget(const char* project, const char* name);
+  cmTarget* FindTarget(const char* project, const char* name, bool useImportedTargets);
 
   /** If check to see if the target is linked to by any other
       target in the project */
@@ -177,9 +177,8 @@ public:
       configuration.  This is valid during generation only.  */
   cmTargetManifest const& GetTargetManifest() { return this->TargetManifest; }
 
-  void AddTarget(cmTargets::value_type &v) { 
-    this->TotalTargets[v.first] = &v.second;};
-  
+  void AddTarget(cmTargets::value_type &v);
+
   /** Support for multiple custom command outputs.  */
   virtual void CheckMultipleOutputs(cmMakefile* mf, bool verbose);
 
@@ -240,6 +239,7 @@ private:
 
   // this is used to improve performance 
   std::map<cmStdString,cmTarget *> TotalTargets;
+  std::map<cmStdString,cmTarget *> ImportedTotalTargets;
   
   std::map<cmStdString, std::vector<cmTarget *> > TargetDependencies;
 };

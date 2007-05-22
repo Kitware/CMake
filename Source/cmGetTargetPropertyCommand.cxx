@@ -29,7 +29,7 @@ bool cmGetTargetPropertyCommand::InitialPass(
   const char* targetName = args[1].c_str();
 
   cmTarget *tgt = this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-    ->FindTarget(0,targetName);
+    ->FindTarget(0, targetName, true);
   if (tgt)
     {
     cmTarget& target = *tgt;

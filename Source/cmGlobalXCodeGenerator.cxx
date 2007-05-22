@@ -272,7 +272,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   mf->AddUtilityCommand("ALL_BUILD", true, no_depends,
                         no_working_directory,
                         "echo", "Build all projects");
-  cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
+  cmTarget* allbuild = mf->FindTarget("ALL_BUILD", false);
   
   // Add XCODE depend helper 
   std::string dir = mf->GetCurrentOutputDirectory();
@@ -1035,8 +1035,7 @@ void  cmGlobalXCodeGenerator
           cc.GetDepends().begin();
           d != cc.GetDepends().end(); ++d)
         {
-        if(!this->FindTarget(this->CurrentProject.c_str(),
-            d->c_str()))
+        if(!this->FindTarget(this->CurrentProject.c_str(), d->c_str(), false))
           {
           // if the depend is not a target but
           // is a full path then use it, if not then
@@ -1860,7 +1859,7 @@ void cmGlobalXCodeGenerator
         {
         // Add this dependency.
         cmTarget* t = this->FindTarget(this->CurrentProject.c_str(),
-                                       lib->first.c_str());
+                                       lib->first.c_str(), false);
         cmXCodeObject* dptarget = this->FindXCodeTarget(t);
         if(dptarget)
           {
@@ -1876,7 +1875,7 @@ void cmGlobalXCodeGenerator
       i != cmtarget->GetUtilities().end(); ++i)
     {
     cmTarget* t = this->FindTarget(this->CurrentProject.c_str(),
-                                   i->c_str());
+                                   i->c_str(), false);
     // if the target is in this project then make target depend
     // on it.  It may not be in this project if this is a sub
     // project from the top.

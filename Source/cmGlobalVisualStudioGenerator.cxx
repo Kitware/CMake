@@ -104,7 +104,7 @@ cmGlobalVisualStudioGenerator::FixUtilityDependsForTarget(cmTarget& target)
         target.GetUtilities().begin();
       ui != target.GetUtilities().end(); ++ui)
     {
-    if(cmTarget* depTarget = this->FindTarget(0, ui->c_str()))
+    if(cmTarget* depTarget = this->FindTarget(0, ui->c_str(), false))
       {
       if(depTarget->GetType() == cmTarget::STATIC_LIBRARY ||
          depTarget->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -149,7 +149,7 @@ cmGlobalVisualStudioGenerator::CreateUtilityDependTarget(cmTarget& target)
     this->CreateGUID(altNameStr.c_str());
 
     // The intermediate target should depend on the original target.
-    if(cmTarget* alt = this->FindTarget(0, altNameStr.c_str()))
+    if(cmTarget* alt = this->FindTarget(0, altNameStr.c_str(), false))
       {
       alt->AddUtility(target.GetName());
       }
@@ -205,7 +205,7 @@ cmGlobalVisualStudioGenerator::GetUtilityForTarget(cmTarget& target,
     {
     // The depender is a target that links.  Lookup the dependee to
     // see if it provides an alternative dependency name.
-    if(cmTarget* depTarget = this->FindTarget(0, name))
+    if(cmTarget* depTarget = this->FindTarget(0, name, false))
       {
       // Check for an alternative name created by FixUtilityDepends.
       if(const char* altName =

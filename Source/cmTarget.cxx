@@ -38,7 +38,7 @@ cmTarget::cmTarget()
   this->LinkDirectoriesComputed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
-
+  this->IsImportedTarget = false;
 }
 
 // define properties
@@ -90,7 +90,7 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("EchoString", cmProperty::TARGET, 
-     "A message to be displayed when the target it built.",
+     "A message to be displayed when the target is built.",
      "A message to display on some generaters (such as makefiles) when "
      "the target is built.");
 
@@ -424,8 +424,8 @@ cmTarget
       {
       std::string command = *cit->begin();
       // see if we can find a target with this name
-      cmTarget* t =  this->Makefile->GetLocalGenerator()->
-                     GetGlobalGenerator()->FindTarget ( 0, command.c_str() );
+      cmTarget* t = this->Makefile->GetLocalGenerator()->
+                    GetGlobalGenerator()->FindTarget(0, command.c_str(), false);
       if ( ( t ) && ( t->GetType() ==cmTarget::EXECUTABLE ) )
         {
         this->AddUtility ( command.c_str() );
@@ -577,7 +577,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
         const std::string& currentCommand = (*it)[0];
         // see if we can find a target with this name
         cmTarget* t =  this->Makefile->GetLocalGenerator()->
-            GetGlobalGenerator()->FindTarget(0, currentCommand.c_str());
+            GetGlobalGenerator()->FindTarget(0, currentCommand.c_str(), false);
         if (( t) && (t->GetType()==cmTarget::EXECUTABLE))
           {
           automaticTargetDepends.push_back(currentCommand);
@@ -600,7 +600,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
         bool isUtility = false;
         // see if we can find a target with this name
         cmTarget* t =  this->Makefile->GetLocalGenerator()->
-          GetGlobalGenerator()->FindTarget(0, dep.c_str());
+          GetGlobalGenerator()->FindTarget(0, dep.c_str(), false);
         if(t)
           {
           // if we find the target and the dep was given as a full
@@ -783,7 +783,7 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
          this->Makefile->GetLocalGenerator()->GetGlobalGenerator())
         {
         tgt = (this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-               ->FindTarget(0, lib.c_str()));
+               ->FindTarget(0, lib.c_str(), false));
         }
       if(tgt)
         {
@@ -1220,7 +1220,31 @@ void cmTarget::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
 }
 
+void cmTarget::MarkAsImported()
+{
+  this->IsImportedTarget = true;
+}
+
 const char* cmTarget::GetDirectory(const char* config, bool implib)
+{
+  if (this->IsImported())
+    {
+    return this->ImportedGetDirectory(config, implib);
+    }
+  else
+    {
+    return this->NormalGetDirectory(config, implib);
+    }
+}
+
+const char* cmTarget::ImportedGetDirectory(const char* config, bool implib)
+{
+  const char* location=this->GetLocation(config);
+  std::string directory=cmSystemTools::GetFilenamePath(location);
+  return directory.c_str();
+}
+
+const char* cmTarget::NormalGetDirectory(const char* config, bool implib)
 {
   if(config && *config)
     {
@@ -1237,6 +1261,34 @@ const char* cmTarget::GetDirectory(const char* config, bool implib)
 }
 
 const char* cmTarget::GetLocation(const char* config)
+{
+  if (this->IsImported())
+    {
+    return this->ImportedGetLocation(config);
+    }
+  else
+    {
+    return this->NormalGetLocation(config);
+    }
+}
+
+const char* cmTarget::ImportedGetLocation(const char* config)
+{
+  if ((config) && (strlen(config)))
+    {
+    std::string propertyName=config;
+    propertyName+="_LOCATION";
+    const char* configLocation=this->GetProperty(propertyName.c_str());
+    if ((configLocation) && (strlen(configLocation)))
+      {
+      return configLocation;
+      }
+    }
+    
+  return this->GetProperty("LOCATION");  
+}
+
+const char* cmTarget::NormalGetLocation(const char* config)
 {
   this->Location = this->GetDirectory();
   if(!this->Location.empty())
@@ -1283,6 +1335,11 @@ const char *cmTarget::GetProperty(const char* prop)
 
 void cmTarget::ComputeObjectFiles()
 {
+  if (this->IsImported())
+    {
+    return;
+    }
+
   // Force the SourceFiles vector to be populated
   this->GenerateSourceFilesFromSourceLists(*this->Makefile);
   std::vector<std::string> dirs;
@@ -1336,33 +1393,43 @@ const char *cmTarget::GetProperty(const char* prop,
     return 0;
     }
 
-  // watch for special "computed" properties that are dependent on other
-  // properties or variables, always recompute them
-  if (!strcmp(prop,"LOCATION"))
+    // don't use GetLocation() for imported targets, because there this
+    // calls GetProperty() to get the location...
+    if (!this->IsImported())
+      {
+      // watch for special "computed" properties that are dependent on other
+      // properties or variables, always recompute them
+      if (!strcmp(prop,"LOCATION"))
+        {
+        // Set the LOCATION property of the target.  Note that this cannot take
+        // into account the per-configuration name of the target because the
+        // configuration type may not be known at CMake time.  We should
+        // deprecate this feature and instead support transforming an executable
+        // target name given as the command part of custom commands into the
+        // proper path at build time.  Alternatively we could put environment
+        // variable settings in all custom commands that hold the name of the
+        // target for each configuration and then give a reference to the
+        // variable in the location.
+        this->SetProperty("LOCATION", this->GetLocation(0));
+        }
+    
+      // Per-configuration location can be computed.
+      int len = static_cast<int>(strlen(prop));
+      if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
+        {
+        std::string configName(prop, len-9);
+        this->SetProperty(prop, this->GetLocation(configName.c_str()));
+        }
+      
+      if(strcmp(prop, "OBJECT_FILES") == 0)
+        {
+        this->ComputeObjectFiles();
+        }
+      }
+    
+  if (strcmp(prop,"IMPORTED") == 0)
     {
-    // Set the LOCATION property of the target.  Note that this cannot take
-    // into account the per-configuration name of the target because the
-    // configuration type may not be known at CMake time.  We should
-    // deprecate this feature and instead support transforming an executable
-    // target name given as the command part of custom commands into the
-    // proper path at build time.  Alternatively we could put environment
-    // variable settings in all custom commands that hold the name of the
-    // target for each configuration and then give a reference to the
-    // variable in the location.
-    this->SetProperty("LOCATION", this->GetLocation(0));
-    }
-
-  // Per-configuration location can be computed.
-  int len = static_cast<int>(strlen(prop));
-  if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
-    {
-    std::string configName(prop, len-9);
-    this->SetProperty(prop, this->GetLocation(configName.c_str()));
-    }
-  
-  if(strcmp(prop, "OBJECT_FILES") == 0)
-    {
-    this->ComputeObjectFiles();
+    return this->IsImported()?"TRUE":"FALSE";
     }
 
   // the type property returns what type the target is
@@ -1607,13 +1674,48 @@ std::string cmTarget::GetFullNameInternal(TargetType type, const char* config,
   return prefix+base+suffix;
 }
 
-//----------------------------------------------------------------------------
 void cmTarget::GetFullNameInternal(TargetType type,
-                                   const char* config,
-                                   bool implib,
-                                   std::string& outPrefix,
-                                   std::string& outBase,
-                                   std::string& outSuffix)
+                                         const char* config,
+                                         bool implib,
+                                         std::string& outPrefix,
+                                         std::string& outBase,
+                                         std::string& outSuffix)
+{
+  if (this->IsImported())
+    {
+    this->ImportedGetFullNameInternal(type, config, implib,
+                                      outPrefix, outBase, outSuffix);
+    }
+  else
+    {
+    this->NormalGetFullNameInternal(type, config, implib,
+                                    outPrefix, outBase, outSuffix);
+    }
+}
+
+void cmTarget::ImportedGetFullNameInternal(TargetType type,
+                                         const char* config,
+                                         bool implib,
+                                         std::string& outPrefix,
+                                         std::string& outBase,
+                                         std::string& outSuffix)
+{
+  // find the basename, suffix and prefix from getLocation()
+  // implib ?
+  std::string location=this->GetLocation(config);
+  outBase=cmSystemTools::GetFilenameWithoutExtension(location);
+  outSuffix = cmSystemTools::GetFilenameExtension(location);
+  outPrefix.clear();
+}
+
+
+//----------------------------------------------------------------------------
+void cmTarget::NormalGetFullNameInternal(TargetType type,
+                                         const char* config,
+                                         bool implib,
+                                         std::string& outPrefix,
+                                         std::string& outBase,
+                                         std::string& outSuffix)
 {
   // Use just the target name for non-main target types.
   if(type != cmTarget::STATIC_LIBRARY &&
