@@ -1,5 +1,5 @@
-
-INCLUDE("@CMAKE_TOOLCHAIN_FILE@")
+# the following file has been configured from @CMAKE_TOOLCHAIN_FILE@ 
+INCLUDE(@_OWN_DIR@/CMakeToolchainFile.cmake)
 
 # set CMAKE_SYSTEM to the CMAKE_SYSTEM_NAME
 SET(CMAKE_SYSTEM  ${CMAKE_SYSTEM_NAME})

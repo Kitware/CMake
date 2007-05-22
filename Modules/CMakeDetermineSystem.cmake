@@ -27,9 +27,6 @@
 # MacOSX                        Darwin
 
 
-#set the source file which will be configured to become CMakeSystem.cmake
-SET(_CMAKE_SYSTEM_TEMPLATE_FILE ${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in )
-
 IF(CMAKE_TOOLCHAIN_FILE)
   # at first try to load it as path relative to the directory from which cmake has been run
   INCLUDE("${CMAKE_BINARY_DIR}/${CMAKE_TOOLCHAIN_FILE}" OPTIONAL RESULT_VARIABLE _INCLUDED_TOOLCHAIN_FILE)
@@ -43,9 +40,6 @@ IF(CMAKE_TOOLCHAIN_FILE)
   ELSE(_INCLUDED_TOOLCHAIN_FILE)
     MESSAGE(FATAL_ERROR "Could not find toolchain file: ${CMAKE_TOOLCHAIN_FILE}") 
   ENDIF(_INCLUDED_TOOLCHAIN_FILE)
-
-  # use a different source file for CMakeSystem.cmake, since it has to hold a bit more information
-  SET(_CMAKE_SYSTEM_TEMPLATE_FILE ${CMAKE_ROOT}/Modules/CMakeSystemWithToolchainFile.cmake.in )
 
   IF(NOT DEFINED CMAKE_CROSSCOMPILING)
     SET(CMAKE_CROSSCOMPILING TRUE)
@@ -112,8 +106,23 @@ ENDIF(CMAKE_SYSTEM_VERSION)
 FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
   "The system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
 
-# configure variables set in this file for fast reload, the template file is defined at the top of this file
-CONFIGURE_FILE(${_CMAKE_SYSTEM_TEMPLATE_FILE}
+# if a toolchain file is used use configure_file() to copy it into the 
+# build tree, because this way e.g. ${CMAKE_SOURCE_DIR} will be replaced
+# with its full path, and so it will also work when used in try_compile()
+IF (CMAKE_TOOLCHAIN_FILE)
+  SET(_OWN_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY})
+  CONFIGURE_FILE(${CMAKE_TOOLCHAIN_FILE}
+               ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeToolchainFile.cmake)
+
+  CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystemWithToolchainFile.cmake.in
                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
                IMMEDIATE @ONLY)
 
+ELSE (CMAKE_TOOLCHAIN_FILE)
+
+  # configure variables set in this file for fast reload, the template file is defined at the top of this file
+  CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in
+                 ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
+                 IMMEDIATE @ONLY)
+
+ENDIF (CMAKE_TOOLCHAIN_FILE)
