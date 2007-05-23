@@ -13,6 +13,19 @@ try_compile(RESULT
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
   OUTPUT_VARIABLE OUTPUT)
+IF("${CMAKE_GENERATOR}" MATCHES "Xcode")
+  try_compile(RESULT 
+    ${BuildDepends_BINARY_DIR}/Project
+    ${BuildDepends_SOURCE_DIR}/Project
+    testRebuild
+    OUTPUT_VARIABLE OUTPUT)
+  try_compile(RESULT 
+    ${BuildDepends_BINARY_DIR}/Project
+    ${BuildDepends_SOURCE_DIR}/Project
+    testRebuild
+    OUTPUT_VARIABLE OUTPUT)
+ENDIF("${CMAKE_GENERATOR}" MATCHES "Xcode")
+
 if(NOT RESULT)
   message(SEND_ERROR "Could not build test project: ${OUTPUT}")
 endif(NOT RESULT)
@@ -33,7 +46,7 @@ message("${out}")
 if("${out}" STREQUAL "foo ")
   message("Worked!")
 else("${out}" STREQUAL "foo ")
-  message(SEND_ERROR "Program did not rebuild with changed file: ${out}")
+  message(SEND_ERROR "Project did not initially build properly: ${out}")
 endif("${out}" STREQUAL "foo ")
 
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
@@ -43,6 +56,20 @@ try_compile(RESULT
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
   OUTPUT_VARIABLE OUTPUT)
+
+# Xcode is in serious need of help here
+IF("${CMAKE_GENERATOR}" MATCHES "Xcode")
+  try_compile(RESULT 
+    ${BuildDepends_BINARY_DIR}/Project
+    ${BuildDepends_SOURCE_DIR}/Project
+    testRebuild
+    OUTPUT_VARIABLE OUTPUT)
+  try_compile(RESULT 
+    ${BuildDepends_BINARY_DIR}/Project
+    ${BuildDepends_SOURCE_DIR}/Project
+    testRebuild
+    OUTPUT_VARIABLE OUTPUT)
+ENDIF("${CMAKE_GENERATOR}" MATCHES "Xcode")
 
 if(NOT RESULT)
   message(SEND_ERROR "Could not build test project: ${OUTPUT}")
