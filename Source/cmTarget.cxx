@@ -409,7 +409,29 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 }
 
 
-void 
+void cmTarget::CheckForTargetsAsCommand(const cmCustomCommand& cc)
+{
+  for(cmCustomCommandLines::const_iterator cit = cc.GetCommandLines().begin();
+      cit != cc.GetCommandLines().end(); ++cit )
+    {
+    std::string const& command = *cit->begin();
+    // Look for a non-imported target with this name.
+    if(cmTarget* t = this->Makefile->GetLocalGenerator()->
+       GetGlobalGenerator()->FindTarget(0, command.c_str(), false))
+      {
+      if(t->GetType() == cmTarget::EXECUTABLE)
+        {
+        // The command refers to an executable target built in
+        // this project.  Add the target-level dependency to make
+        // sure the executable is up to date before this custom
+        // command possibly runs.
+        this->AddUtility(command.c_str());
+        }
+      }
+    }
+}
+
+void
 cmTarget
 ::CheckForTargetsAsCommand(const std::vector<cmCustomCommand>& commands)
 {
@@ -417,20 +439,7 @@ cmTarget
         cli != commands.end();
         ++cli )
     {
-    for(cmCustomCommandLines::const_iterator cit = 
-          cli->GetCommandLines().begin();
-        cit!=cli->GetCommandLines().end();
-        ++cit )
-      {
-      std::string command = *cit->begin();
-      // see if we can find a target with this name
-      cmTarget* t = this->Makefile->GetLocalGenerator()->
-                    GetGlobalGenerator()->FindTarget(0, command.c_str(), false);
-      if ( ( t ) && ( t->GetType() ==cmTarget::EXECUTABLE ) )
-        {
-        this->AddUtility ( command.c_str() );
-        }
-      }
+    this->CheckForTargetsAsCommand(*cli);
     }
 }
 
@@ -566,24 +575,8 @@ void cmTarget::TraceVSDependencies(std::string projFile,
           }
         }
 
-      // check if commands for this custom commands are names of targets and
-      // if that's the case add these targets as dependencies
-      std::vector<std::string> automaticTargetDepends;
-      for(cmCustomCommandLines::const_iterator it=
-          outsf->GetCustomCommand()->GetCommandLines().begin();
-          it!=outsf->GetCustomCommand()->GetCommandLines().end();
-          ++it)
-        {
-        const std::string& currentCommand = (*it)[0];
-        // see if we can find a target with this name
-        cmTarget* t =  this->Makefile->GetLocalGenerator()->
-            GetGlobalGenerator()->FindTarget(0, currentCommand.c_str(), false);
-        if (( t) && (t->GetType()==cmTarget::EXECUTABLE))
-          {
-          automaticTargetDepends.push_back(currentCommand);
-          }
-        }
-        outsf->GetCustomCommand()->AppendDepends(automaticTargetDepends);
+      // Add target-level dependencies for the commands.
+      this->CheckForTargetsAsCommand(*outsf->GetCustomCommand());
 
       // add its dependencies to the list to check
       for (unsigned int i = 0; 
@@ -598,10 +591,9 @@ void cmTarget::TraceVSDependencies(std::string projFile,
           dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
           }
         bool isUtility = false;
-        // see if we can find a target with this name
-        cmTarget* t =  this->Makefile->GetLocalGenerator()->
-          GetGlobalGenerator()->FindTarget(0, dep.c_str(), false);
-        if(t)
+        // Check for a non-imported target with this name.
+        if(cmTarget* t =  this->Makefile->GetLocalGenerator()->
+           GetGlobalGenerator()->FindTarget(0, dep.c_str(), false))
           {
           // if we find the target and the dep was given as a full
           // path, then make sure it was not a full path to something
@@ -629,7 +621,9 @@ void cmTarget::TraceVSDependencies(std::string projFile,
           }
         if(isUtility)
           {
-          // add the depend as a utility on the target
+          // The dependency refers to a target built in this project.
+          // Add the target-level dependency to make sure the target
+          // is up to date before this custom command possibly runs.
           this->AddUtility(dep.c_str());
           }
         else

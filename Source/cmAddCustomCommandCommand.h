@@ -124,7 +124,23 @@ public:
       "it is an option is to preserve compatibility with older CMake code.\n"
       "If the output of the custom command is not actually "
       "created as a file on disk it should be marked as SYMBOLIC with "
-      "SET_SOURCE_FILES_PROPERTIES.";
+      "SET_SOURCE_FILES_PROPERTIES.\n"
+
+      "If COMMAND specifies an executable target (created by "
+      "ADD_EXECUTABLE) it will automatically be replaced by the location "
+      "of the executable created at build time.  Additionally a "
+      "target-level dependency will be added so that the executable target "
+      "will be built before any target using this custom command.  However "
+      "this does NOT add a file-level dependency that would cause the "
+      "custom command to re-run whenever the executable is recompiled.\n"
+
+      "If DEPENDS specifies any target (created by an ADD_* command) "
+      "a target-level dependency is created to make sure the target is "
+      "built before any target using this custom command.  Additionally, "
+      "if the target is an executable or library a file-level dependency "
+      "is created to cause the custom command to re-run whenever the target "
+      "is recompiled.\n"
+      ;
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);

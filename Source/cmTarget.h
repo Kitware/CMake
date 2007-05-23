@@ -296,9 +296,10 @@ private:
                          const LibraryID& dep);
 
   /*
-   * Checks the prebuild, prelink and postbuild custom commands for known
-   * targets and adds them to the dependencies.
+   * Check custom commands for known targets and add a target-level
+   * dependency.
    */
+  void CheckForTargetsAsCommand(const cmCustomCommand& cc);
   void CheckForTargetsAsCommand(const std::vector<cmCustomCommand>& commands);
   
   
