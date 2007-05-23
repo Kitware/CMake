@@ -1237,7 +1237,7 @@ const char* cmTarget::GetDirectory(const char* config, bool implib)
     }
 }
 
-const char* cmTarget::ImportedGetDirectory(const char* config, bool implib)
+const char* cmTarget::ImportedGetDirectory(const char* config, bool)
 {
   const char* location=this->GetLocation(config);
   std::string directory=cmSystemTools::GetFilenamePath(location);
@@ -1693,9 +1693,9 @@ void cmTarget::GetFullNameInternal(TargetType type,
     }
 }
 
-void cmTarget::ImportedGetFullNameInternal(TargetType type,
+void cmTarget::ImportedGetFullNameInternal(TargetType ,
                                          const char* config,
-                                         bool implib,
+                                         bool ,
                                          std::string& outPrefix,
                                          std::string& outBase,
                                          std::string& outSuffix)
@@ -1705,7 +1705,7 @@ void cmTarget::ImportedGetFullNameInternal(TargetType type,
   std::string location=this->GetLocation(config);
   outBase=cmSystemTools::GetFilenameWithoutExtension(location);
   outSuffix = cmSystemTools::GetFilenameExtension(location);
-  outPrefix.clear();
+  outPrefix = "";
 }
 
 
