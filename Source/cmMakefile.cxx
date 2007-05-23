@@ -1317,8 +1317,6 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
     {
     case cmTarget::UTILITY: 
     case cmTarget::GLOBAL_TARGET: 
-    case cmTarget::INSTALL_FILES: 
-    case cmTarget::INSTALL_PROGRAMS: 
       return;
     default:;
     }

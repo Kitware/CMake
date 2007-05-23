@@ -134,9 +134,6 @@ void cmGlobalVisualStudio71Generator
         }
       else 
         {
-        if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-            && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
-          {
           bool skip = false;
           if(l->first == "ALL_BUILD" )
             {
@@ -224,7 +221,6 @@ void cmGlobalVisualStudio71Generator
               this->WriteProject(fout, dspname, dir.c_str(),l->second);
               }
             }
-          }
         }
       }
     }
@@ -254,8 +250,7 @@ void cmGlobalVisualStudio71Generator
         this->WriteProjectConfigurations(fout, project.c_str(),
                                          true);
         }
-      else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-               && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
+      else
         {
         bool partOfDefaultBuild = this->IsPartOfDefaultBuild(
           root->GetMakefile()->GetProjectName(),

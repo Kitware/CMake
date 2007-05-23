@@ -94,28 +94,24 @@ void cmExportLibraryDependenciesCommand::FinalPass()
     for(cmTargets::iterator l = tgts.begin();
         l != tgts.end(); ++l)
       {
-      if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-          && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
+      libDepName = l->first;
+      libDepName += "_LIB_DEPENDS";
+      const char* def = this->Makefile->GetDefinition(libDepName.c_str());
+      if(def)
         {
-        libDepName = l->first;
-        libDepName += "_LIB_DEPENDS";
-        const char* def = this->Makefile->GetDefinition(libDepName.c_str());
-        if(def)
+        fout << "SET(" << libDepName << " \"" << def << "\")\n";
+        // now for each dependency, check for link type
+        cmSystemTools::ExpandListArgument(def, depends);
+        for(std::vector<std::string>::const_iterator d = depends.begin();
+            d != depends.end(); ++d)
           {
-          fout << "SET(" << libDepName << " \"" << def << "\")\n";
-          // now for each dependency, check for link type
-          cmSystemTools::ExpandListArgument(def, depends);
-          for(std::vector<std::string>::const_iterator d = depends.begin();
-              d != depends.end(); ++d)
+          libDepName = *d;
+          libDepName += "_LINK_TYPE";
+          defType = this->Makefile->GetDefinition(libDepName.c_str());
+          libDepName = cmSystemTools::EscapeSpaces(libDepName.c_str());
+          if(defType)
             {
-            libDepName = *d;
-            libDepName += "_LINK_TYPE";
-            defType = this->Makefile->GetDefinition(libDepName.c_str());
-            libDepName = cmSystemTools::EscapeSpaces(libDepName.c_str());
-            if(defType)
-              {
-              fout << "SET(" << libDepName << " \"" << defType << "\")\n";
-              }
+            fout << "SET(" << libDepName << " \"" << defType << "\")\n";
             }
           }
         }

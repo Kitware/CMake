@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmInstallFilesCommand.h"
 
+#include "cmInstallFilesGenerator.h"
+
 // cmExecutableCommand
 bool cmInstallFilesCommand
 ::InitialPass(std::vector<std::string> const& argsIn)
@@ -33,14 +35,8 @@ bool cmInstallFilesCommand
   std::vector<std::string> args;
   this->Makefile->ExpandSourceListArguments(argsIn, args, 2);
 
-  // Create an INSTALL_FILES target specifically for this path.
-  this->TargetName = "INSTALL_FILES_"+args[0];
-  cmTarget& target = this->Makefile->GetTargets()[this->TargetName];
-  target.SetType(cmTarget::INSTALL_FILES, this->TargetName.c_str());
-  target.SetMakefile(this->Makefile);
-  target.SetProperty("EXCLUDE_FROM_ALL","TRUE");
-  target.SetInstallPath(args[0].c_str());
-  
+  this->Destination = args[0];
+
   if((args.size() > 1) && (args[1] == "FILES"))
     {
     this->IsFilesForm = true;    
@@ -49,7 +45,7 @@ bool cmInstallFilesCommand
       {
       // Find the source location for each file listed.
       std::string f = this->FindInstallSource(s->c_str());
-      target.GetSourceLists().push_back(f);
+      this->Files.push_back(f);
       }
     }
   else
@@ -75,8 +71,6 @@ void cmInstallFilesCommand::FinalPass()
   
   std::string testf;
   std::string ext = this->FinalArgs[0];
-  std::vector<std::string>& targetSourceLists =
-    this->Makefile->GetTargets()[this->TargetName].GetSourceLists();
   
   // two different options
   if (this->FinalArgs.size() > 1)
@@ -100,7 +94,7 @@ void cmInstallFilesCommand::FinalPass()
         }
       
       // add to the result
-      targetSourceLists.push_back(this->FindInstallSource(testf.c_str()));
+      this->Files.push_back(this->FindInstallSource(testf.c_str()));
       }
     }
   else     // reg exp list
@@ -114,9 +108,20 @@ void cmInstallFilesCommand::FinalPass()
     // for each argument, get the files 
     for (;s != files.end(); ++s)
       {
-      targetSourceLists.push_back(this->FindInstallSource(s->c_str()));
+      this->Files.push_back(this->FindInstallSource(s->c_str()));
       }
     }
+
+  // Use a file install generator.
+  const char* no_permissions = "";
+  const char* no_rename = "";
+  const char* no_component = "";
+  std::vector<std::string> no_configurations;
+  this->Makefile->AddInstallGenerator(
+    new cmInstallFilesGenerator(this->Files,
+                                this->Destination.c_str(), false,
+                                no_permissions, no_configurations,
+                                no_component, no_rename));
 }
 
 /**

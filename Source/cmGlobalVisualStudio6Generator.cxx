@@ -256,9 +256,6 @@ void cmGlobalVisualStudio6Generator
         }
       else 
         {
-        if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-            && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
-          {
           bool skip = false;
           // skip ALL_BUILD and RUN_TESTS if they have already been added
           if(l->first == "ALL_BUILD" )
@@ -332,7 +329,6 @@ void cmGlobalVisualStudio6Generator
             this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
             }
           ++si;
-          }
         }
       }
     }

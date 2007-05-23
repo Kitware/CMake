@@ -596,12 +596,6 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
        cmtarget.GetType() == cmTarget::GLOBAL_TARGET)
       {
       targets.push_back(this->CreateUtilityTarget(cmtarget));
-      }
-    if(cmtarget.GetType() == cmTarget::UTILITY ||
-       cmtarget.GetType() == cmTarget::GLOBAL_TARGET ||
-       cmtarget.GetType() == cmTarget::INSTALL_FILES ||
-       cmtarget.GetType() == cmTarget::INSTALL_PROGRAMS)
-      {
       continue;
       }
 
@@ -2498,9 +2492,7 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
         for(cmTargets::iterator l = tgts.begin(); 
             l != tgts.end(); l++)
           {
-          if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-              && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
-              && (strncmp(l->first.c_str(), 
+          if ((strncmp(l->first.c_str(), 
                           "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
               && banned.find(l->second.GetName()) == banned.end())
             {

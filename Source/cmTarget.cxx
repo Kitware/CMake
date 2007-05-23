@@ -337,6 +337,12 @@ void cmTarget::DefineProperties(cmake *cm)
 void cmTarget::SetType(TargetType type, const char* name)
 {
   this->Name = name;
+  if(type == cmTarget::INSTALL_FILES ||
+     type == cmTarget::INSTALL_PROGRAMS ||
+     type == cmTarget::INSTALL_DIRECTORY)
+    {
+    abort();
+    }
   // only add dependency information for library targets
   this->TargetTypeValue = type;
   if(this->TargetTypeValue >= STATIC_LIBRARY 
@@ -661,12 +667,6 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
   // that could break backwards compatibility with projects that
   // use old style source lists.  
   if(this->SourceFiles.size() != 0)
-    {
-    return;
-    }
-  // this is only done for non install targets
-  if ((this->TargetTypeValue == cmTarget::INSTALL_FILES)
-      || (this->TargetTypeValue == cmTarget::INSTALL_PROGRAMS))
     {
     return;
     }

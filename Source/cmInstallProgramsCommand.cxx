@@ -30,13 +30,7 @@ bool cmInstallProgramsCommand
   this->Makefile->GetLocalGenerator()
     ->GetGlobalGenerator()->EnableInstallTarget();
 
-  // Create an INSTALL_PROGRAMS target specifically for this path.
-  this->TargetName = "INSTALL_PROGRAMS_"+args[0];
-  cmTarget& target = this->Makefile->GetTargets()[this->TargetName];
-  target.SetType(cmTarget::INSTALL_PROGRAMS, this->TargetName.c_str());
-  target.SetMakefile(this->Makefile);
-  target.SetProperty("EXCLUDE_FROM_ALL","TRUE");
-  target.SetInstallPath(args[0].c_str());
+  this->Destination = args[0];
 
   std::vector<std::string>::const_iterator s = args.begin();
   for (++s;s != args.end(); ++s)
@@ -49,9 +43,6 @@ bool cmInstallProgramsCommand
 
 void cmInstallProgramsCommand::FinalPass() 
 {
-  std::vector<std::string>& targetSourceLists =
-    this->Makefile->GetTargets()[this->TargetName].GetSourceLists();
-
   bool files_mode = false;
   if(!this->FinalArgs.empty() && this->FinalArgs[0] == "FILES")
     {
@@ -71,7 +62,7 @@ void cmInstallProgramsCommand::FinalPass()
     for(;s != this->FinalArgs.end(); ++s)
       {
       // add to the result
-      targetSourceLists.push_back(this->FindInstallSource(s->c_str()));
+      this->Files.push_back(this->FindInstallSource(s->c_str()));
       }
     }
   else     // reg exp list
@@ -84,9 +75,20 @@ void cmInstallProgramsCommand::FinalPass()
     // for each argument, get the programs 
     for (;s != programs.end(); ++s)
       {
-      targetSourceLists.push_back(this->FindInstallSource(s->c_str()));
+      this->Files.push_back(this->FindInstallSource(s->c_str()));
       }
     }
+
+  // Use a file install generator.
+  const char* no_permissions = "";
+  const char* no_rename = "";
+  const char* no_component = "";
+  std::vector<std::string> no_configurations;
+  this->Makefile->AddInstallGenerator(
+    new cmInstallFilesGenerator(this->Files,
+                                this->Destination.c_str(), true,
+                                no_permissions, no_configurations,
+                                no_component, no_rename));
 }
 
 /**

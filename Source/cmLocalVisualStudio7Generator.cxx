@@ -134,9 +134,7 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
     {
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
-    if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-        && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
-        && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0))
+    if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
       {
       this->CreateSingleVCProj(l->first.c_str(),l->second);
       }

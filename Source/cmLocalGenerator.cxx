@@ -145,10 +145,7 @@ void cmLocalGenerator::TraceDependencies()
     {
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
-    if ((t->second.GetType() != cmTarget::INSTALL_FILES)
-        && (t->second.GetType() != cmTarget::INSTALL_PROGRAMS)
-        && (t->second.GetType() != cmTarget::INSTALL_DIRECTORY)
-        && (strncmp(t->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0))
+    if (strncmp(t->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
       {
       std::string projectFilename;
       if (this->IsMakefileGenerator == false)  // only use of this variable
