@@ -27,4 +27,3 @@ add_executable(bar bar.cxx
   ${CMAKE_CURRENT_BINARY_DIR}/regen.h
   ${CMAKE_CURRENT_BINARY_DIR}/noregen.h
   )
-target_link_libraries(bar foo)
