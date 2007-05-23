@@ -2451,34 +2451,6 @@ cmLocalGenerator
 #endif
           }
           break;
-        case cmTarget::INSTALL_FILES:
-          {
-          // Use a file install generator.
-          const char* no_permissions = "";
-          const char* no_rename = "";
-          const char* no_component = "";
-          std::vector<std::string> no_configurations;
-          cmInstallFilesGenerator g(l->second.GetSourceLists(),
-                                    destination.c_str(), false,
-                                    no_permissions, no_configurations,
-                                    no_component, no_rename);
-          g.Generate(os, config, configurationTypes);
-          }
-          break;
-        case cmTarget::INSTALL_PROGRAMS:
-          {
-          // Use a file install generator.
-          const char* no_permissions = "";
-          const char* no_rename = "";
-          const char* no_component = "";
-          std::vector<std::string> no_configurations;
-          cmInstallFilesGenerator g(l->second.GetSourceLists(),
-                                    destination.c_str(), true,
-                                    no_permissions, no_configurations,
-                                    no_component, no_rename);
-          g.Generate(os, config, configurationTypes);
-          }
-          break;
         case cmTarget::UTILITY:
         default:
           break;
