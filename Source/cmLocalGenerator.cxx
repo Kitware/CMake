@@ -2451,7 +2451,6 @@ cmLocalGenerator
 #endif
           }
           break;
-        case cmTarget::UTILITY:
         default:
           break;
         }
