@@ -5,42 +5,54 @@
 # error "A C compiler has been selected for C++."
 #endif
 
-static char const info_compiler[] = "INFO:compiler["
 #if defined(__COMO__)
-"Comeau"
+# define COMPILER_ID "Comeau"
+
 #elif defined(__INTEL_COMPILER) || defined(__ICC)
-"Intel"
+# define COMPILER_ID "Intel"
+
 #elif defined(__BORLANDC__)
-"Borland"
+# define COMPILER_ID "Borland"
+
 #elif defined(__WATCOMC__)
-"Watcom"
+# define COMPILER_ID "Watcom"
+
 #elif defined(__SUNPRO_CC)
-"SunPro"
+# define COMPILER_ID "SunPro"
+
 #elif defined(__HP_aCC)
-"HP"
+# define COMPILER_ID "HP"
+
 #elif defined(__DECCXX)
-"Compaq"
+# define COMPILER_ID "Compaq"
+
 #elif defined(__IBMCPP__)
-"VisualAge"
+# define COMPILER_ID "VisualAge"
+
 #elif defined(__GNUC__)
-"GNU"
+# define COMPILER_ID "GNU"
+
 #elif defined(_MSC_VER)
-"MSVC"
+# define COMPILER_ID "MSVC"
+
 #elif defined(_COMPILER_VERSION)
-"MIPSpro"
+# define COMPILER_ID "MIPSpro"
 
 /* This compiler is either not known or is too old to define an
    identification macro.  Try to identify the platform and guess that
    it is the native compiler.  */
 #elif defined(__sgi)
-"MIPSpro"
+# define COMPILER_ID "MIPSpro"
+
 #elif defined(__hpux) || defined(__hpua)
-"HP"
+# define COMPILER_ID "HP"
 
 #else /* unknown compiler */
-""
+# define COMPILER_ID ""
+
 #endif
-"]";
+
+static char const info_compiler[] = "INFO:compiler[" COMPILER_ID "]";
 
 /* Include the platform identification source.  */
 #include "CMakePlatformId.h"

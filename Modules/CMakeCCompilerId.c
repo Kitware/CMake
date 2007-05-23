@@ -7,49 +7,50 @@
 #endif
 
 #if defined(__INTEL_COMPILER) || defined(__ICC)
-#define _COMPILER_ID "Intel"
+# define COMPILER_ID "Intel"
 
 #elif defined(__BORLANDC__)
-#define _COMPILER_ID "Borland"
+# define COMPILER_ID "Borland"
 
 #elif defined(__WATCOMC__)
-#define _COMPILER_ID "Watcom"
+# define COMPILER_ID "Watcom"
 
 #elif defined(__SUNPRO_C)
-#define _COMPILER_ID "SunPro"
+# define COMPILER_ID "SunPro"
 
 #elif defined(__HP_cc)
-#define _COMPILER_ID "HP"
+# define COMPILER_ID "HP"
 
 #elif defined(__DECC)
-#define _COMPILER_ID "Compaq"
+# define COMPILER_ID "Compaq"
 
 #elif defined(__IBMC__)
-#define _COMPILER_ID "VisualAge"
+# define COMPILER_ID "VisualAge"
 
 #elif defined(__GNUC__)
-#define _COMPILER_ID "GNU"
+# define COMPILER_ID "GNU"
 
 #elif defined(_MSC_VER)
-#define _COMPILER_ID "MSVC"
+# define COMPILER_ID "MSVC"
 
 #elif defined(_COMPILER_VERSION)
-#define _COMPILER_ID "MIPSpro"
+# define COMPILER_ID "MIPSpro"
 
 /* This compiler is either not known or is too old to define an
    identification macro.  Try to identify the platform and guess that
    it is the native compiler.  */
 #elif defined(__sgi)
-#define _COMPILER_ID "MIPSpro"
+# define COMPILER_ID "MIPSpro"
 
 #elif defined(__hpux) || defined(__hpua)
-#define _COMPILER_ID "HP"
+# define COMPILER_ID "HP"
 
 #else /* unknown compiler */
-#define _COMPILER_ID ""
+# define COMPILER_ID ""
+
 #endif
 
-static char const info_compiler[] = "INFO:compiler[" _COMPILER_ID "]";
+static char const info_compiler[] = "INFO:compiler[" COMPILER_ID "]";
 
 /* Include the platform identification source.  */
 #include "CMakePlatformId.h"
