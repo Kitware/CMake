@@ -915,14 +915,17 @@ cmLocalUnixMakefileGenerator3
       cmSystemTools::ReplaceString(cmd, "/./", "/");
       // Convert the command to a relative path only if the current
       // working directory will be the start-output directory.
+      bool had_slash = cmd.find("/") != cmd.npos;
       if(!workingDir)
         {
         cmd = this->Convert(cmd.c_str(),START_OUTPUT);
         }
-      if(cmd.find("/") == cmd.npos &&
-         commandLine[0].find("/") != cmd.npos)
+      bool has_slash = cmd.find("/") != cmd.npos;
+      if(had_slash && !has_slash)
         {
-        // Add a leading "./" for executables in the current directory.
+        // This command was specified as a path to a file in the
+        // current directory.  Add a leading "./" so it can run
+        // without the current directory being in the search path.
         cmd = "./" + cmd;
         }
       cmd = this->Convert(cmd.c_str(),NONE,SHELL);
