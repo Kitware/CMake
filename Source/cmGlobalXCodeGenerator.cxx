@@ -1029,24 +1029,11 @@ void  cmGlobalXCodeGenerator
           cc.GetDepends().begin();
           d != cc.GetDepends().end(); ++d)
         {
-        if(!this->FindTarget(this->CurrentProject.c_str(), d->c_str(), false))
-          {
-          // if the depend is not a target but
-          // is a full path then use it, if not then
-          // just skip it
-          if(cmSystemTools::FileIsFullPath(d->c_str()))
-            {
-            makefileStream << "\\\n" << this
-                ->ConvertToRelativeForMake(d->c_str());
-            }
-          }
-        else
-          {
-          // if the depend is a target then make 
-          // the target with the source that is a custom command
-          // depend on the that target via a AddUtility call
-          target.AddUtility(d->c_str());
-          }
+        std::string dep =
+          this->CurrentLocalGenerator->GetRealDependency(d->c_str(),
+                                                         configName);
+        makefileStream << "\\\n" << this
+          ->ConvertToRelativeForMake(dep.c_str());
         }
       makefileStream << "\n";
 
