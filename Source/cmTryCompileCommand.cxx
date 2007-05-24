@@ -22,7 +22,8 @@
 #include <cmsys/Directory.hxx>
 
 int cmTryCompileCommand::CoreTryCompileCode(
-  cmMakefile *mf, std::vector<std::string> const& argv, bool clean)
+  cmMakefile *mf, std::vector<std::string> const& argv, bool clean, 
+  const char* cmakeCommand, std::string& outputFile)
 {
   // which signature were we called with ?
   bool srcFileSignature = false;
@@ -257,11 +258,18 @@ int cmTryCompileCommand::CoreTryCompileCode(
     }
   
   // if They specified clean then we clean up what we can
-  if (srcFileSignature && clean)
-    {    
-    if(!mf->GetCMakeInstance()->GetDebugTryCompile())
-      {
-      cmTryCompileCommand::CleanupFiles(binaryDirectory);
+  if (srcFileSignature)
+    {
+    std::string errorMessage;
+    outputFile = cmTryCompileCommand::GetOutputFile(mf, binaryDirectory, 
+                                                    targetName, cmakeCommand,
+                                                    errorMessage);
+    if (clean)
+      {    
+      if(!mf->GetCMakeInstance()->GetDebugTryCompile())
+        {
+        cmTryCompileCommand::CleanupFiles(binaryDirectory);
+        }
       }
     }
   return res;
@@ -275,7 +283,9 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
     return false;
     }
 
-  cmTryCompileCommand::CoreTryCompileCode(this->Makefile,argv,true);
+  std::string dummy;
+  cmTryCompileCommand::CoreTryCompileCode(this->Makefile,argv, true, 
+                                          this->GetName(), dummy);
   
   return true;
 }
@@ -329,4 +339,63 @@ void cmTryCompileCommand::CleanupFiles(const char* binDir)
         }
       }
     }
+}
+
+const char* cmTryCompileCommand::GetOutputFile(cmMakefile* mf, 
+                                               const char* binaryDirectory, 
+                                               const char* targetName,
+                                               const char* cmakeCommand,
+                                               std::string& errorMessage)
+{
+  errorMessage = "";
+  std::string outputFile = "/";
+  outputFile += targetName;
+  outputFile += mf->GetSafeDefinition("CMAKE_EXECUTABLE_SUFFIX");
+
+  // a list of directories where to search for the compilation result
+  // at first directly in the binary dir
+  std::vector<std::string> searchDirs;
+  searchDirs.push_back("");
+
+  const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+  // if a config was specified try that first
+  if (config && config[0])
+    {
+    std::string tmp = "/";
+    tmp += config;
+    searchDirs.push_back(tmp);
+    }
+  searchDirs.push_back("/Debug");
+  searchDirs.push_back("/Development");
+
+  for(std::vector<std::string>::const_iterator it = searchDirs.begin();
+      it != searchDirs.end();
+      ++it)
+    {
+    std::string command = binaryDirectory;
+    command += *it;
+    command += outputFile;
+    if(cmSystemTools::FileExists(command.c_str()))
+      {
+      outputFile = cmSystemTools::CollapseFullPath(command.c_str());
+      return outputFile.c_str();
+      }
+    }
+
+  cmOStringStream emsg;
+  emsg << "Unable to find executable for " << cmakeCommand << ": tried \"";
+  for (unsigned int i = 0; i < searchDirs.size(); ++i)
+    {
+    emsg << binaryDirectory << searchDirs[i] << outputFile;
+    if (i < searchDirs.size() - 1)
+      {
+      emsg << "\" and \"";
+      }
+    else
+      {
+      emsg << "\".";
+      }
+    }
+  errorMessage = emsg.str();
+  return "";
 }

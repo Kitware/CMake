@@ -59,8 +59,11 @@ public:
    * commands, such as TryRun can access the same logic without
    * duplication. 
    */
-  static int CoreTryCompileCode(
-    cmMakefile *mf, std::vector<std::string> const& argv, bool clean);
+  static int CoreTryCompileCode(cmMakefile *mf, 
+                                std::vector<std::string> const& argv, 
+                                bool clean, 
+                                const char* cmakeCommand, 
+                                std::string& outputFile);
 
   /** 
    * This deletes all the files created by TRY_COMPILE or TRY_RUN
@@ -68,7 +71,15 @@ public:
    * dependencies of makefiles.
    */
   static void CleanupFiles(const char* binDir);
-  
+
+  /** 
+   * This tries to find the (executable) file created by TRY_COMPILE or 
+   * TRY_RUN. If nothing is found an empty string will be returned.
+   */
+  static const char* GetOutputFile(cmMakefile* mf, const char* binaryDirectory, 
+                             const char* targetName, const char* cmakeCommand, 
+                             std::string& errorMessage);
+
   /**
    * More documentation.  */
   virtual const char* GetFullDocumentation()

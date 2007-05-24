@@ -71,140 +71,62 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
       }
     }
   // do the try compile
-  int res = cmTryCompileCommand::CoreTryCompileCode(this->Makefile, 
-                                                    tryCompile, false);
-  
+  std::string fullPath;
+  int res = cmTryCompileCommand::CoreTryCompileCode(this->Makefile, tryCompile, 
+                                             false, this->GetName(), fullPath);
+
   // now try running the command if it compiled
-  std::string binaryDirectory = argv[2];
-  binaryDirectory += cmake::GetCMakeFilesDirectory();
-  binaryDirectory += "/CMakeTmp";
-  if (!res)
+  if (!res==0)
+  {
+    if (fullPath.size() > 0)
     {
     int retVal = -1;
     std::string output;
-    std::string executableSuffix=this->Makefile->GetDefinition(
-                                                 "CMAKE_EXECUTABLE_SUFFIX");
-    std::string command1 = binaryDirectory;
-    std::vector<std::string> attemptedPaths;
-    command1 += "/cmTryCompileExec";
-    command1 += executableSuffix;
-    std::string fullPath;
-    if(cmSystemTools::FileExists(command1.c_str()))
+    std::string finalCommand = fullPath;
+    finalCommand = cmSystemTools::ConvertToRunCommandPath(fullPath.c_str());
+    if(runArgs.size())
       {
-      fullPath = cmSystemTools::CollapseFullPath(command1.c_str());
+      finalCommand += runArgs;
       }
-    attemptedPaths.push_back(command1);
-    command1 = binaryDirectory;
-    // try CMAKE_TRY_COMPILE_CONFIGURATION if it is set
-    if (fullPath.empty())
+    int timeout = 0;
+    bool worked = cmSystemTools::RunSingleCommand(finalCommand.c_str(),
+                                                  &output, &retVal,
+                                                  0, false, timeout);
+    if(outputVariable.size())
       {
-      const char* config = 
-        this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
-      // if a config was specified try that first
-      if (config && config[0])
+      // if the TryCompileCore saved output in this outputVariable then
+      // prepend that output to this output
+      const char* compileOutput
+        = this->Makefile->GetDefinition(outputVariable.c_str());
+      if(compileOutput)
         {
-        command1 += "/";
-        command1 += config;
-        command1 += "/cmTryCompileExec";
-        command1 += executableSuffix;
-        if(cmSystemTools::FileExists(command1.c_str()))
-          {
-          fullPath = cmSystemTools::CollapseFullPath(command1.c_str());
-          }
-        attemptedPaths.push_back(command1);
+        output = std::string(compileOutput) + output;
         }
+      this->Makefile->AddDefinition(outputVariable.c_str(), output.c_str());
       }
-    // try Debug if still not found
-    if (fullPath.empty())
+    // set the run var
+    char retChar[1000];
+    if(worked)
       {
-      command1 = binaryDirectory;
-      command1 += "/Debug/cmTryCompileExec";
-      command1 += executableSuffix;
-      if(cmSystemTools::FileExists(command1.c_str()))
-        {
-        fullPath = cmSystemTools::CollapseFullPath(command1.c_str());
-        }
-      attemptedPaths.push_back(command1);
+      sprintf(retChar,"%i",retVal);
       }
-    // try Deployment if still not found
-    if (fullPath.empty())
+    else
       {
-      command1 = binaryDirectory;
-      command1 += "/Development/cmTryCompileExec";
-      command1 += executableSuffix;
-      if(cmSystemTools::FileExists(command1.c_str()))
-        {
-        fullPath = cmSystemTools::CollapseFullPath(command1.c_str());
-        }
-      attemptedPaths.push_back(command1);
+      strcpy(retChar, "FAILED_TO_RUN");
       }
-    if (fullPath.empty())
-      {
-      cmOStringStream emsg;
-      emsg << "Unable to find executable for TRY_RUN: tried \"";
-      for (i = 0; i < attemptedPaths.size(); ++i)
-        {
-        emsg << attemptedPaths[i];
-        if (i < attemptedPaths.size() - 1)
-          {
-          emsg << "\" and \"";
-          }
-        else
-          {
-          emsg << "\".";
-          }
-        }
-      cmSystemTools::Error(emsg.str().c_str());
-      }
-    if (fullPath.size() > 1)
-      {
-      std::string finalCommand = fullPath;
-      finalCommand = cmSystemTools::ConvertToRunCommandPath(fullPath.c_str());
-      if(runArgs.size())
-        {
-        finalCommand += runArgs;
-        }
-      int timeout = 0;
-      bool worked = cmSystemTools::RunSingleCommand(finalCommand.c_str(),
-                                                    &output, &retVal,
-                                                    0, false, timeout);
-      if(outputVariable.size())
-        {
-        // if the TryCompileCore saved output in this outputVariable then
-        // prepend that output to this output
-        const char* compileOutput
-          = this->Makefile->GetDefinition(outputVariable.c_str());
-        if(compileOutput)
-          {
-          output = std::string(compileOutput) + output;
-          }
-        this->Makefile->AddDefinition(outputVariable.c_str(), output.c_str());
-        }
-      // set the run var
-      char retChar[1000];
-      if(worked)
-        {
-        sprintf(retChar,"%i",retVal);
-        }
-      else
-        {
-        strcpy(retChar, "FAILED_TO_RUN");
-        }
-      this->Makefile->AddCacheDefinition(argv[0].c_str(), retChar,
-                                     "Result of TRY_RUN",
-                                         cmCacheManager::INTERNAL);
-      }
+    this->Makefile->AddCacheDefinition(argv[0].c_str(), retChar,
+                                    "Result of TRY_RUN",
+                                        cmCacheManager::INTERNAL);
     }
-  
-  // if we created a directory etc, then cleanup after ourselves  
-  std::string cacheFile = binaryDirectory;
-  cacheFile += "/CMakeLists.txt";
+  }
+    
+  // if we created a directory etc, then cleanup after ourselves
   if(!this->Makefile->GetCMakeInstance()->GetDebugTryCompile())
     {
+    std::string binaryDirectory = argv[2];
+    binaryDirectory += cmake::GetCMakeFilesDirectory();
+    binaryDirectory += "/CMakeTmp"; 
     cmTryCompileCommand::CleanupFiles(binaryDirectory.c_str());
     }
   return true;
 }
-
-
-      
