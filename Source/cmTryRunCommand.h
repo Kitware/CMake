@@ -17,14 +17,14 @@
 #ifndef cmTryRunCommand_h
 #define cmTryRunCommand_h
 
-#include "cmCommand.h"
+#include "cmCoreTryCompile.h"
 
 /** \class cmTryRunCommand
  * \brief Specifies where to install some files
  *
  * cmTryRunCommand is used to test if soucre code can be compiled
  */
-class cmTryRunCommand : public cmCommand
+class cmTryRunCommand : public cmCoreTryCompile
 {
 public:
   /**
@@ -75,7 +75,7 @@ public:
       "output and standard error into.";
     }
   
-  cmTypeMacro(cmTryRunCommand, cmCommand);
+  cmTypeMacro(cmTryRunCommand, cmCoreTryCompile);
 
 };
 

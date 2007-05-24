@@ -17,14 +17,14 @@
 #ifndef cmTryCompileCommand_h
 #define cmTryCompileCommand_h
 
-#include "cmCommand.h"
+#include "cmCoreTryCompile.h"
 
 /** \class cmTryCompileCommand
  * \brief Specifies where to install some files
  *
  * cmTryCompileCommand is used to test if soucre code can be compiled
  */
-class cmTryCompileCommand : public cmCommand
+class cmTryCompileCommand : public cmCoreTryCompile
 {
 public:
   /**
@@ -53,32 +53,6 @@ public:
     {
     return "Try compiling some code.";
     }
-
-  /**
-   * This is the core code for try compile. It is here so that other
-   * commands, such as TryRun can access the same logic without
-   * duplication. 
-   */
-  static int CoreTryCompileCode(cmMakefile *mf, 
-                                std::vector<std::string> const& argv, 
-                                bool clean, 
-                                const char* cmakeCommand, 
-                                std::string& outputFile);
-
-  /** 
-   * This deletes all the files created by TRY_COMPILE or TRY_RUN
-   * code. This way we do not have to rely on the timing and
-   * dependencies of makefiles.
-   */
-  static void CleanupFiles(const char* binDir);
-
-  /** 
-   * This tries to find the (executable) file created by TRY_COMPILE or 
-   * TRY_RUN. If nothing is found an empty string will be returned.
-   */
-  static const char* GetOutputFile(cmMakefile* mf, const char* binaryDirectory, 
-                             const char* targetName, const char* cmakeCommand, 
-                             std::string& errorMessage);
 
   /**
    * More documentation.  */
@@ -125,7 +99,7 @@ public:
       "";
     }
   
-  cmTypeMacro(cmTryCompileCommand, cmCommand);
+  cmTypeMacro(cmTryCompileCommand, cmCoreTryCompile);
 
 };
 

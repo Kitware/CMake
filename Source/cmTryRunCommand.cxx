@@ -71,62 +71,62 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
       }
     }
   // do the try compile
-  std::string fullPath;
-  int res = cmTryCompileCommand::CoreTryCompileCode(this->Makefile, tryCompile, 
-                                             false, this->GetName(), fullPath);
+  int res = this->TryCompileCode(tryCompile);
 
   // now try running the command if it compiled
-  if (!res==0)
-  {
-    if (fullPath.size() > 0)
+  if (!res)
     {
-    int retVal = -1;
-    std::string output;
-    std::string finalCommand = fullPath;
-    finalCommand = cmSystemTools::ConvertToRunCommandPath(fullPath.c_str());
-    if(runArgs.size())
+      fprintf(stderr, "running %s\n", this->OutputFile.c_str());
+    if (this->OutputFile.size() == 0)
       {
-      finalCommand += runArgs;
-      }
-    int timeout = 0;
-    bool worked = cmSystemTools::RunSingleCommand(finalCommand.c_str(),
-                                                  &output, &retVal,
-                                                  0, false, timeout);
-    if(outputVariable.size())
-      {
-      // if the TryCompileCore saved output in this outputVariable then
-      // prepend that output to this output
-      const char* compileOutput
-        = this->Makefile->GetDefinition(outputVariable.c_str());
-      if(compileOutput)
-        {
-        output = std::string(compileOutput) + output;
-        }
-      this->Makefile->AddDefinition(outputVariable.c_str(), output.c_str());
-      }
-    // set the run var
-    char retChar[1000];
-    if(worked)
-      {
-      sprintf(retChar,"%i",retVal);
+      cmSystemTools::Error(this->FindErrorMessage.c_str());
       }
     else
       {
-      strcpy(retChar, "FAILED_TO_RUN");
+      int retVal = -1;
+      std::string output;
+      std::string finalCommand = cmSystemTools::ConvertToRunCommandPath(
+                                                     this->OutputFile.c_str());
+      if(runArgs.size())
+        {
+        finalCommand += runArgs;
+        }
+      int timeout = 0;
+      bool worked = cmSystemTools::RunSingleCommand(finalCommand.c_str(),
+                                                    &output, &retVal,
+                                                    0, false, timeout);
+      if(outputVariable.size())
+        {
+        // if the TryCompileCore saved output in this outputVariable then
+        // prepend that output to this output
+        const char* compileOutput
+          = this->Makefile->GetDefinition(outputVariable.c_str());
+        if(compileOutput)
+          {
+          output = std::string(compileOutput) + output;
+          }
+        this->Makefile->AddDefinition(outputVariable.c_str(), output.c_str());
+        }
+      // set the run var
+      char retChar[1000];
+      if(worked)
+        {
+        sprintf(retChar,"%i",retVal);
+        }
+      else
+        {
+        strcpy(retChar, "FAILED_TO_RUN");
+        }
+      this->Makefile->AddCacheDefinition(argv[0].c_str(), retChar,
+                                      "Result of TRY_RUN",
+                                          cmCacheManager::INTERNAL);
       }
-    this->Makefile->AddCacheDefinition(argv[0].c_str(), retChar,
-                                    "Result of TRY_RUN",
-                                        cmCacheManager::INTERNAL);
-    }
   }
     
   // if we created a directory etc, then cleanup after ourselves
   if(!this->Makefile->GetCMakeInstance()->GetDebugTryCompile())
     {
-    std::string binaryDirectory = argv[2];
-    binaryDirectory += cmake::GetCMakeFilesDirectory();
-    binaryDirectory += "/CMakeTmp"; 
-    cmTryCompileCommand::CleanupFiles(binaryDirectory.c_str());
+    this->CleanupFiles(this->BinaryDirectory.c_str());
     }
   return true;
 }

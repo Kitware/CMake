@@ -66,6 +66,7 @@
 #include "cmStringCommand.cxx"
 #include "cmSubdirCommand.cxx"
 #include "cmTargetLinkLibrariesCommand.cxx"
+#include "cmCoreTryCompile.cxx"
 #include "cmTryCompileCommand.cxx"
 #include "cmTryRunCommand.cxx"
 
