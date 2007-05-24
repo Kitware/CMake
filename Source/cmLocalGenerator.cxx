@@ -2024,9 +2024,13 @@ std::string cmLocalGenerator::GetRealLocation(const char* inName,
                                               const char* config)
 {
   std::string outName=inName;
-  // Look for a CMake target with the given name.
+  // Look for a CMake target with the given name, which is an executable 
+  // and which can be run
   cmTarget* target = this->GlobalGenerator->FindTarget(0, inName, true);
-  if ((target != 0) && (target->GetType() == cmTarget::EXECUTABLE))
+  if ((target != 0)
+       && (target->GetType() == cmTarget::EXECUTABLE)
+       && ((this->Makefile->IsOn("CMAKE_CROSSCOMPILING") == false) 
+            || (target->IsImported() == true)))
     {
     outName = target->GetLocation( config );
     }

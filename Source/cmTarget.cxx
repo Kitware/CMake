@@ -547,9 +547,9 @@ void cmTarget::TraceVSDependencies(std::string projFile,
       }
     }
 
-  CheckForTargetsAsCommand(this->GetPreBuildCommands());
-  CheckForTargetsAsCommand(this->GetPreLinkCommands());
-  CheckForTargetsAsCommand(this->GetPostBuildCommands());
+  this->CheckForTargetsAsCommand(this->GetPreBuildCommands());
+  this->CheckForTargetsAsCommand(this->GetPreLinkCommands());
+  this->CheckForTargetsAsCommand(this->GetPostBuildCommands());
 
   while (!srcFilesToProcess.empty())
     {

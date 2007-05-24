@@ -113,7 +113,6 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
 
   // Create the VCProj or set of VCProj's for libraries and executables
 
-  // Call TraceVSDependencies on all targets
   cmTargets &tgts = this->Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin();
       l != tgts.end(); l++)

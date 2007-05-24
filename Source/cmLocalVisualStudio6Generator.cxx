@@ -106,7 +106,6 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
 
   // clear project names
   this->CreatedProjectNames.clear();
-  // Call TraceVSDependencies on all targets
   cmTargets &tgts = this->Makefile->GetTargets(); 
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
