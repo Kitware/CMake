@@ -729,6 +729,51 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         buildFiles->AddObject(xsf);
         }
       }
+    if(cmtarget.GetPropertyAsBool("FRAMEWORK"))
+      {
+      this->AddFrameworkPhases(&cmtarget, buildPhases);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::AddFrameworkPhases(cmTarget* target,
+                                                cmXCodeObject* buildPhases)
+{
+  const char* headers = target->GetProperty("FRAMEWORK_PUBLIC_HEADERS");
+  if(!headers)
+    {
+    return;
+    }
+  
+  cmXCodeObject* copyHeaders =
+    this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
+  copyHeaders->SetComment("Copy files");
+  copyHeaders->AddAttribute("buildActionMask",
+                            this->CreateString("2147483647"));
+  copyHeaders->AddAttribute("dstSubfolderSpec",
+                            this->CreateString("6"));
+  copyHeaders->AddAttribute("dstPath",
+                                    this->CreateString("Headers"));
+  buildPhases->AddObject(copyHeaders);
+  cmXCodeObject* headersToCopy = 
+    this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  copyHeaders->AddAttribute("files", headersToCopy);
+  std::vector<std::string> headersVec;
+  cmSystemTools::ExpandListArgument(headers,
+                                    headersVec);
+  cmCustomCommandLines commandLines;
+  std::vector<std::string> depends;
+  for(std::vector<std::string>::iterator i = headersVec.begin();
+      i != headersVec.end(); ++i)
+    {
+    cmCustomCommandLine line;
+    cmSourceFile* sf = this->CurrentMakefile->GetOrCreateSource(i->c_str());
+    cmXCodeObject* xsf =
+      this->CreateXCodeSourceFile(this->CurrentLocalGenerator, 
+                                  sf, *target);
+    std::cerr << "copy header " << sf->GetFullPath() << "\n";
+    headersToCopy->AddObject(xsf);
     }
 }
 
@@ -2008,8 +2053,28 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         cmtarget.GetSourceFiles().push_back
           (this->CurrentMakefile->AddSource(file));
         }
-
-      std::vector<cmSourceFile*> & classes = cmtarget.GetSourceFiles();
+      std::vector<cmSourceFile*>  classes = cmtarget.GetSourceFiles();
+      // add framework copy headers
+      if(cmtarget.GetPropertyAsBool("FRAMEWORK"))
+        {
+        const char* headers = cmtarget.GetProperty("FRAMEWORK_PUBLIC_HEADERS");
+        if(!headers)
+          {
+          return;
+          }
+        std::vector<std::string> headersVec;
+        cmSystemTools::ExpandListArgument(headers,
+                                          headersVec);
+        cmCustomCommandLines commandLines;
+        std::vector<std::string> depends;
+        for(std::vector<std::string>::iterator i = headersVec.begin();
+            i != headersVec.end(); ++i)
+          {
+          cmSourceFile* sf 
+            = this->CurrentMakefile->GetOrCreateSource(i->c_str());
+          classes.push_back(sf);
+          }
+        }
       for(std::vector<cmSourceFile*>::const_iterator s = classes.begin(); 
           s != classes.end(); s++)
         {

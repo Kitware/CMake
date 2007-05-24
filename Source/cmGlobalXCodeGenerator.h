@@ -65,6 +65,9 @@ public:
                                            const char* config, 
                                            bool ignoreErrors,
                                            bool fast);
+  
+  // add extra build phases for a framework target
+  void AddFrameworkPhases(cmTarget*, cmXCodeObject* buildPhases);
 
   /**
    * Generate the all required files for building this project/tree. This
