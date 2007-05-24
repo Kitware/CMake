@@ -33,6 +33,10 @@
 #elif defined(_MSC_VER)
 # define COMPILER_ID "MSVC"
 
+/*IAR Systems compiler for embedded systems, beside this id not yet supported*/
+#elif defined(__IAR_SYSTEMS_ICC__)
+# define COMPILER_ID "IAR"
+
 #elif defined(_COMPILER_VERSION)
 # define COMPILER_ID "MIPSpro"
 

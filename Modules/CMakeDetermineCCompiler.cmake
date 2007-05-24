@@ -97,6 +97,7 @@ ENDIF (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
 # if we have a MS cross compiler, it usually has a suffix, like 
 # e.g. clarm.exe or clmips.exe. Use this suffix for the CXX compiler too.
+# the same is true e.g. for the IAR cross compiler, which is "icc<suffix>"
 IF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
   GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
   IF (COMPILER_BASENAME MATCHES "^cl(.+)\\.exe$")
