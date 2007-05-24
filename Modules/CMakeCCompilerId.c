@@ -41,9 +41,14 @@
 
 /* sdcc, the small devices C compiler for embedded systems, 
    http://sdcc.sourceforge.net 
-   Beside this id not supported yet by CMake */
+   Beside this id not supported yet by CMake 
+   Unfortunately this doesn't work because SDCC (and other embedded compilers 
+   too) produce not binary files, but e.g. Intel hex files by default. 
+   This also means it has a different suffix (.ihx) so the file isn't even
+   found. */
+/*
 #elif defined(SDCC)
-# define COMPILER_ID "SDCC"
+# define COMPILER_ID "SDCC" */
 
 #elif defined(_COMPILER_VERSION)
 # define COMPILER_ID "MIPSpro"
