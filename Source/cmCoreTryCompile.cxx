@@ -90,6 +90,24 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       }
     }
 
+  // look for COPY_FILE
+  std::string copyFile;
+  for (i = 3; i < argv.size(); ++i)
+    {
+    if (argv[i] == "COPY_FILE")
+      {
+      if ( argv.size() <= (i+1) )
+        {
+        cmSystemTools::Error(
+          "COPY_FILE specified but there is no variable");
+        return -1;
+        }
+      extraArgs += 2;
+      copyFile = argv[i+1];
+      break;
+      }
+    }
+    
   // do we have a srcfile signature
   if (argv.size() - extraArgs == 3)
     {
@@ -110,6 +128,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       {
       cmSystemTools::Error(
         "COMPILE_FLAGS specified on a srcdir type TRY_COMPILE");
+      return -1;
+      }
+    if (copyFile.size())
+      {
+      cmSystemTools::Error("COPY_FILE specified on a srcdir type TRY_COMPILE");
       return -1;
       }
     }
@@ -262,6 +285,15 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   if (this->SrcFileSignature)
     {
     this->FindOutputFile(targetName);
+    if ((res==0) && (copyFile.size()))
+      {
+      if(!cmSystemTools::CopyFileAlways(this->OutputFile.c_str(), 
+                                        copyFile.c_str()))
+        {
+        cmSystemTools::Error("Could not COPY_FILE");
+        return -1;
+        }
+      }
     }
   return res;
 }

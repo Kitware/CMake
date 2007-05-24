@@ -76,7 +76,6 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
   // now try running the command if it compiled
   if (!res)
     {
-      fprintf(stderr, "running %s\n", this->OutputFile.c_str());
     if (this->OutputFile.size() == 0)
       {
       cmSystemTools::Error(this->FindErrorMessage.c_str());

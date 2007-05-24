@@ -1,13 +1,22 @@
 PROJECT(TryCompile)
 
 # try to compile a file that should compile
+# also check that COPY_FILE works
 TRY_COMPILE(SHOULD_PASS
     ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
     ${TryCompile_SOURCE_DIR}/pass.c
-    OUTPUT_VARIABLE TRY_OUT)
+    OUTPUT_VARIABLE TRY_OUT
+    COPY_FILE ${TryCompile_BINARY_DIR}/CopyOfPass
+    )
+
 IF(NOT SHOULD_PASS)
   MESSAGE(SEND_ERROR "should pass failed ${TRY_OUT}")
 ENDIF(NOT SHOULD_PASS)
+IF(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
+   MESSAGE(SEND_ERROR "COPY_FILE to \"${TryCompile_BINARY_DIR}/CopyOfPass\" failed")
+ELSE(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
+   FILE(REMOVE "${TryCompile_BINARY_DIR}/CopyOfPass")
+ENDIF(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
 
 # try to compile a file that should not compile
 TRY_COMPILE(SHOULD_FAIL
