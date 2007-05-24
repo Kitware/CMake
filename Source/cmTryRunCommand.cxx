@@ -73,6 +73,8 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
   // do the try compile
   int res = this->TryCompileCode(tryCompile);
 
+  printf("TryCompile: %d outputFile: -%s-\n", res, this->OutputFile.c_str());
+  
   // now try running the command if it compiled
   if (!res)
     {
@@ -94,6 +96,10 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
       bool worked = cmSystemTools::RunSingleCommand(finalCommand.c_str(),
                                                     &output, &retVal,
                                                     0, false, timeout);
+      
+  printf("worked: %d output: -%s-\n", worked?1:0, output.c_str());
+      
+      
       if(outputVariable.size())
         {
         // if the TryCompileCore saved output in this outputVariable then
