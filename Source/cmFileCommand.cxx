@@ -76,6 +76,10 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleStringsCommand(args);
     }
+/*  else if ( subCommand == "HEX_TO_BIN" )
+    {
+    return this->HandleHex2BinCommand(args);
+    }*/
   else if ( subCommand == "GLOB" )
     {
     return this->HandleGlobCommand(args, false);
@@ -258,6 +262,53 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
+/*bool cmFileCommand::HandleHex2BinCommand(std::vector<std::string> const& args)
+{
+  if(args.size() != 3)
+    {
+    this->SetError("HEX_TO_BIN requires an input and an output file name");
+    return false;
+    }
+  // Get the file to read.
+  std::string inFileName = args[1];
+  if(!cmsys::SystemTools::FileIsFullPath(inFileName.c_str()))
+    {
+    inFileName = this->Makefile->GetCurrentDirectory();
+    inFileName += "/" + args[1];
+    }
+
+  // Get the file to write.
+  std::string outFileName = args[2];
+  if(!cmsys::SystemTools::FileIsFullPath(outFileName.c_str()))
+    {
+    outFileName = this->Makefile->GetCurrentDirectory();
+    outFileName += "/" + args[2];
+    }
+
+  if ( !this->Makefile->CanIWriteThisFile(outFileName.c_str()) )
+    {
+    std::string e
+      = "attempted to write a file: " + outFileName +
+      " into a source directory.";
+    this->SetError(e.c_str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+
+  std::string dir = cmSystemTools::GetFilenamePath(outFileName);
+  cmSystemTools::MakeDirectory(dir.c_str());
+
+  bool success = cmHexFileConverter::TryConvert(inFileName.c_str(), 
+                                                outFileName.c_str());
+  if (!success)
+    {
+    success = cmSystemTools::CopyFileAlways(inFileName.c_str(), 
+                                            outFileName.c_str());
+    }
+  return success;
+} */
+
+//----------------------------------------------------------------------------
 bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
 {
   if(args.size() < 3)
@@ -294,6 +345,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   cmsys::RegularExpression regex;
   bool have_regex = false;
   bool newline_consume = false;
+  bool hex_conversion_enabled = true;
   int arg_mode = arg_none;
   for(unsigned int i=3; i < args.size(); ++i)
     {
@@ -324,6 +376,11 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
     else if(args[i] == "NEWLINE_CONSUME")
       {
       newline_consume = true;
+      arg_mode = arg_none;
+      }
+    else if(args[i] == "NO_HEX_CONVERSION")
+      {
+      hex_conversion_enabled = false;
       arg_mode = arg_none;
       }
     else if(arg_mode == arg_limit_input)
@@ -416,15 +473,19 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       return false;
       }
     }
-    
-  std::string binaryFileName = this->Makefile->GetCurrentOutputDirectory();
-  binaryFileName += cmake::GetCMakeFilesDirectory();
-  binaryFileName += "/FileCommandStringsBinaryFile";
-  if (cmHexFileConverter::TryConvert(fileName.c_str(), binaryFileName.c_str()))
-    {
-    fileName = binaryFileName;
-    }
 
+  if (hex_conversion_enabled)
+    {
+    // TODO: should work without temp file, but just on a memory buffer
+    std::string binaryFileName = this->Makefile->GetCurrentOutputDirectory();
+    binaryFileName += cmake::GetCMakeFilesDirectory();
+    binaryFileName += "/FileCommandStringsBinaryFile";
+    if (cmHexFileConverter::TryConvert(fileName.c_str(), binaryFileName.c_str()))
+      {
+      fileName = binaryFileName;
+      }
+    }
+    
   // Open the specified file.
 #if defined(_WIN32) || defined(__CYGWIN__)
   std::ifstream fin(fileName.c_str(), std::ios::in | std::ios::binary);

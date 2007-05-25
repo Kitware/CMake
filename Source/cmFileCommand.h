@@ -72,7 +72,9 @@ public:
       "  FILE(STRINGS filename variable [LIMIT_COUNT num]\n"
       "       [LIMIT_INPUT numBytes] [LIMIT_OUTPUT numBytes]\n"
       "       [LENGTH_MINIMUM numBytes] [LENGTH_MAXIMUM numBytes]\n"
-      "       [NEWLINE_CONSUME] [REGEX regex])\n"
+      "       [NEWLINE_CONSUME] [REGEX regex]\n"
+      "       [NO_HEX_CONVERSION])\n"
+      "  FILE(HEX_TO_BIN inputfile outputfile)\n"
       "  FILE(GLOB variable [RELATIVE path] [globbing expressions]...)\n"
       "  FILE(GLOB_RECURSE variable [RELATIVE path] \n"
       "       [globbing expressions]...)\n"
@@ -93,10 +95,14 @@ public:
       "want to generate input files to CMake.\n"
       "READ will read the content of a file and store it into the "
       "variable.\n"
-      "STRINGS will parse a list of ASCII strings from a binary file and "
+      "STRINGS will parse a list of ASCII strings from a file and "
       "store it in a variable. Binary data in the file are ignored. Carriage "
       "return (CR) characters are ignored. It works also for Intel Hex and "
-      "Motorola S-record files.\n "
+      "Motorola S-record files, which are automatically converted to binary "
+      "format when reading them. Disable this using NO_HEX_CONVERSION.\n "
+/*      "HEX_TO_BIN will convert an Intel hex file or Motorola S-record file "
+      "to a binary file. If the input file is no such file it will simply "
+      "be copied. \n"*/
       "LIMIT_COUNT sets the maximum number of strings to return. "
       "LIMIT_INPUT sets the maximum number of bytes to read from "
       "the input file. "
@@ -147,6 +153,7 @@ protected:
   bool HandleWriteCommand(std::vector<std::string> const& args, bool append);
   bool HandleReadCommand(std::vector<std::string> const& args);
   bool HandleStringsCommand(std::vector<std::string> const& args);
+//  bool HandleHex2BinCommand(std::vector<std::string> const& args);
   bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse);
   bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);
   
