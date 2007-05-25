@@ -79,6 +79,12 @@ void cmInstallProgramsCommand::FinalPass()
       }
     }
 
+  // Construct the destination.  This command always installs under
+  // the prefix.
+  std::string destination = "${CMAKE_INSTALL_PREFIX}";
+  destination += this->Destination;
+  cmSystemTools::ConvertToUnixSlashes(destination);
+
   // Use a file install generator.
   const char* no_permissions = "";
   const char* no_rename = "";
@@ -86,7 +92,7 @@ void cmInstallProgramsCommand::FinalPass()
   std::vector<std::string> no_configurations;
   this->Makefile->AddInstallGenerator(
     new cmInstallFilesGenerator(this->Files,
-                                this->Destination.c_str(), true,
+                                destination.c_str(), true,
                                 no_permissions, no_configurations,
                                 no_component, no_rename));
 }
