@@ -57,7 +57,7 @@ static bool OutputBin(FILE* file, const char * buf,
   char hexNumber[3];
   hexNumber[2] = '\0';
   char outBuf[256];
-  int outBufCount = 0;
+  unsigned int outBufCount = 0;
   for (unsigned int i = startIndex; i < stopIndex; i += 2)
     {
     hexNumber[0] = buf[i];
@@ -198,7 +198,7 @@ cmHexFileConverter::FileType cmHexFileConverter::DetermineFileType(
     return Binary;
     }
 
-  int slen = ChompStrlen(buf);
+  unsigned int slen = ChompStrlen(buf);
   if ((slen < minLineLength) || (slen > maxLineLength))
     {
     return Binary;
