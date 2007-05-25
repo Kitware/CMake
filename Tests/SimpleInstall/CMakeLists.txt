@@ -84,11 +84,6 @@ IF(STAGE2)
   ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/include/Debug/lib1release.h")
 
   # Check for failure of directory installation.
-  IF(WIN32 AND NOT CYGWIN)
-    SET(BAT .bat)
-  ELSE(WIN32 AND NOT CYGWIN)
-    SET(BAT)
-  ENDIF(WIN32 AND NOT CYGWIN)
   IF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/TSD.h")
     MESSAGE(FATAL_ERROR "Directory installation did not install TSD.h")
   ENDIF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/TSD.h")
@@ -98,17 +93,32 @@ IF(STAGE2)
   IF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/CVS")
     MESSAGE(FATAL_ERROR "Directory installation installed CVS directory.")
   ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/CVS")
-  EXECUTE_PROCESS(
-    COMMAND "${CMAKE_INSTALL_PREFIX}/MyTest/share/sample_script${BAT}"
-    RESULT_VARIABLE SAMPLE_SCRIPT_RESULT
-    OUTPUT_VARIABLE SAMPLE_SCRIPT_OUTPUT
-    )
-  IF(NOT "${SAMPLE_SCRIPT_RESULT}" MATCHES "^0$")
-    MESSAGE(FATAL_ERROR "Sample script failed: [${SAMPLE_SCRIPT_RESULT}]")
-  ENDIF(NOT "${SAMPLE_SCRIPT_RESULT}" MATCHES "^0$")
-  IF(NOT "${SAMPLE_SCRIPT_OUTPUT}" MATCHES "Sample Script Output")
-    MESSAGE(FATAL_ERROR "Bad sample script output: [${SAMPLE_SCRIPT_OUTPUT}]")
-  ENDIF(NOT "${SAMPLE_SCRIPT_OUTPUT}" MATCHES "Sample Script Output")
+  IF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/CMakeLists.txt")
+    MESSAGE(FATAL_ERROR "Directory installation installed CMakeLists.txt.")
+  ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/CMakeLists.txt")
+
+  # Check that scripts properly installed.
+  IF(WIN32 AND NOT CYGWIN)
+    SET(BAT .bat)
+  ELSE(WIN32 AND NOT CYGWIN)
+    SET(BAT)
+  ENDIF(WIN32 AND NOT CYGWIN)
+  FOREACH(loc share share/old1 share/old2 share/old3)
+    SET(CUR_SCRIPT "${CMAKE_INSTALL_PREFIX}/MyTest/${loc}/sample_script${BAT}")
+    EXECUTE_PROCESS(
+      COMMAND ${CUR_SCRIPT}
+      RESULT_VARIABLE SAMPLE_SCRIPT_RESULT
+      OUTPUT_VARIABLE SAMPLE_SCRIPT_OUTPUT
+      )
+    IF(NOT "${SAMPLE_SCRIPT_RESULT}" MATCHES "^0$")
+      MESSAGE(FATAL_ERROR
+        "Sample script [${CUR_SCRIPT}] failed: [${SAMPLE_SCRIPT_RESULT}]")
+    ENDIF(NOT "${SAMPLE_SCRIPT_RESULT}" MATCHES "^0$")
+    IF(NOT "${SAMPLE_SCRIPT_OUTPUT}" MATCHES "Sample Script Output")
+      MESSAGE(FATAL_ERROR
+        "Bad sample script [${CUR_SCRIPT}] output: [${SAMPLE_SCRIPT_OUTPUT}]")
+    ENDIF(NOT "${SAMPLE_SCRIPT_OUTPUT}" MATCHES "Sample Script Output")
+  ENDFOREACH(loc)
 
   # Check for failure of empty directory installation.
   IF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/empty")
@@ -125,6 +135,9 @@ IF(STAGE2)
 
   INSTALL_TARGETS(/MyTest/bin SimpleInstallS2)
 ELSE(STAGE2)
+  # Wipe out the install directory to do a fresh test.
+  FILE(REMOVE_RECURSE ${CMAKE_INSTALL_PREFIX}/MyTest)
+
   # this is stage 1, so create libraries and modules and install everything
   ADD_LIBRARY(test1 STATIC lib1.cxx)
   ADD_LIBRARY(test2 SHARED lib2.cxx)
@@ -167,7 +180,16 @@ ELSE(STAGE2)
     PERMISSIONS OWNER_READ OWNER_WRITE
     RENAME lib2renamed.h
     )
+
+  # Test old-style install commands.
   INSTALL_FILES(/MyTest/include FILES lib3.h)
+  INSTALL_FILES(/MyTest/include/old .h lib3)
+  INSTALL_FILES(/MyTest/include/old "^lib2.h$")
+  INSTALL_PROGRAMS(/MyTest/share/old1 FILES
+    scripts/sample_script scripts/sample_script.bat)
+  INSTALL_PROGRAMS(/MyTest/share/old2
+    scripts/sample_script scripts/sample_script.bat)
+  ADD_SUBDIRECTORY(scripts)
 
   # Test optional installation.
   INSTALL(FILES does_not_exist.h DESTINATION MyTest/include/foo OPTIONAL)
@@ -186,6 +208,7 @@ ELSE(STAGE2)
   INSTALL(
     DIRECTORY TestSubDir scripts/ DESTINATION MyTest/share
     PATTERN "CVS" EXCLUDE
+    REGEX "\\.txt$" EXCLUDE
     PATTERN "scripts/*" PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
     )
 
