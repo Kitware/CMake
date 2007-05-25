@@ -734,19 +734,6 @@ void cmGlobalGenerator::Generate()
 {
   // For each existing cmLocalGenerator
   unsigned int i;
- 
-  // Add generator specific helper commands
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    this->LocalGenerators[i]->AddHelperCommands();
-    }
-
-  // Trace the dependencies, after that no custom commands should be added
-  // because their dependencies might not be handled correctly
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    this->LocalGenerators[i]->TraceDependencies();
-    }
 
   // Consolidate global targets
   cmTargets globalTargets;
@@ -774,6 +761,19 @@ void cmGlobalGenerator::Generate()
       (*targets)[tit->first] = tit->second;
       (*targets)[tit->first].SetMakefile(mf);
       }
+    }
+ 
+  // Add generator specific helper commands
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    this->LocalGenerators[i]->AddHelperCommands();
+    }
+
+  // Trace the dependencies, after that no custom commands should be added
+  // because their dependencies might not be handled correctly
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    this->LocalGenerators[i]->TraceDependencies();
     }
 
   // Compute the manifest of main targets generated.
