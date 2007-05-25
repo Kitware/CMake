@@ -15,6 +15,8 @@
 
 =========================================================================*/
 #include "cmFileCommand.h"
+#include "cmake.h"
+#include "cmHexFileConverter.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -413,6 +415,14 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       this->SetError(e.str().c_str());
       return false;
       }
+    }
+    
+  std::string binaryFileName = this->Makefile->GetCurrentOutputDirectory();
+  binaryFileName += cmake::GetCMakeFilesDirectory();
+  binaryFileName += "/FileCommandStringsBinaryFile";
+  if (cmHexFileConverter::TryConvert(fileName.c_str(), binaryFileName.c_str()))
+    {
+    fileName = binaryFileName;
     }
 
   // Open the specified file.

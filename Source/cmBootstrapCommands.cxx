@@ -30,6 +30,7 @@
 #include "cmBuildCommand.cxx"
 #include "cmCMakeMinimumRequired.cxx"
 #include "cmConfigureFileCommand.cxx"
+#include "cmCoreTryCompile.cxx"
 #include "cmCreateTestSourceList.cxx"
 #include "cmElseCommand.cxx"
 #include "cmEnableTestingCommand.cxx"
@@ -47,6 +48,7 @@
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
 #include "cmGetSourceFilePropertyCommand.cxx"
+#include "cmHexFileConverter.cxx"
 #include "cmIfCommand.cxx"
 #include "cmIncludeCommand.cxx"
 #include "cmIncludeDirectoryCommand.cxx"
@@ -66,7 +68,6 @@
 #include "cmStringCommand.cxx"
 #include "cmSubdirCommand.cxx"
 #include "cmTargetLinkLibrariesCommand.cxx"
-#include "cmCoreTryCompile.cxx"
 #include "cmTryCompileCommand.cxx"
 #include "cmTryRunCommand.cxx"
 

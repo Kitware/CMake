@@ -16,6 +16,28 @@ ELSE("${infile_strings}" STREQUAL "${infile_strings_goal}")
     "FILE(STRINGS) incorrectly read [${infile_strings}]")
 ENDIF("${infile_strings}" STREQUAL "${infile_strings_goal}")
 
+
+# test that FILE(STRINGS) also work with Intel hex and Motorola S-record files
+# this file has been created with "sdcc main.c"
+FILE(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/main.ihx" infile_strings REGEX INFO)
+SET(infile_strings_goal "INFO:compiler\\[SDCC-HEX\\]")
+IF("${infile_strings}" MATCHES "${infile_strings_goal}")
+  MESSAGE("FILE(STRINGS) correctly read from hex file [${infile_strings}]")
+ELSE("${infile_strings}" MATCHES "${infile_strings_goal}")
+  MESSAGE(SEND_ERROR
+    "FILE(STRINGS) incorrectly read from hex file [${infile_strings}]")
+ENDIF("${infile_strings}" MATCHES "${infile_strings_goal}")
+
+# this file has been created with "sdcc main.c --out-fmt-s19"
+FILE(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/main.srec" infile_strings REGEX INFO)
+SET(infile_strings_goal "INFO:compiler\\[SDCC-SREC\\]")
+IF("${infile_strings}" MATCHES "${infile_strings_goal}")
+  MESSAGE("FILE(STRINGS) correctly read from srec file [${infile_strings}]")
+ELSE("${infile_strings}" MATCHES "${infile_strings_goal}")
+  MESSAGE(SEND_ERROR
+    "FILE(STRINGS) incorrectly read from srec file [${infile_strings}]")
+ENDIF("${infile_strings}" MATCHES "${infile_strings_goal}")
+
 # String test
 STRING(REGEX MATCH "[cC][mM][aA][kK][eE]" rmvar "CMake is great")
 STRING(REGEX MATCHALL "[cC][mM][aA][kK][eE]" rmallvar "CMake is better than cmake or CMake")

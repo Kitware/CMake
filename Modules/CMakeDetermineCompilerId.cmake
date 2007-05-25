@@ -66,56 +66,52 @@ MACRO(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       "${CMAKE_${lang}_COMPILER_ID_SRC}\" succeeded with the following output:\n"
       "${CMAKE_${lang}_COMPILER_ID_OUTPUT}\n\n")
 
-    # Find the executable produced by the compiler.
-    SET(CMAKE_${lang}_COMPILER_ID_EXE)
-    GET_FILENAME_COMPONENT(CMAKE_${lang}_COMPILER_ID_SRC_BASE ${CMAKE_${lang}_COMPILER_ID_SRC} NAME_WE)
-    FOREACH(name a.out a.exe ${CMAKE_${lang}_COMPILER_ID_SRC_BASE}.exe)
-      IF(EXISTS ${CMAKE_${lang}_COMPILER_ID_DIR}/${name})
-        SET(CMAKE_${lang}_COMPILER_ID_EXE ${CMAKE_${lang}_COMPILER_ID_DIR}/${name})
-      ENDIF(EXISTS ${CMAKE_${lang}_COMPILER_ID_DIR}/${name})
-    ENDFOREACH(name)
-
-    # Check if the executable was found.
-    IF(CMAKE_${lang}_COMPILER_ID_EXE)
-      # The executable was found.
+    # Find the executable produced by the compiler, try all files in the binary dir
+    SET(CMAKE_${lang}_COMPILER_ID)
+    FILE(GLOB COMPILER_${lang}_PRODUCED_FILES ${CMAKE_${lang}_COMPILER_ID_DIR}/*)
+    FOREACH(CMAKE_${lang}_COMPILER_ID_EXE ${COMPILER_${lang}_PRODUCED_FILES})
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Compilation of the ${lang} compiler identification source \""
         "${CMAKE_${lang}_COMPILER_ID_SRC}\" produced \""
         "${CMAKE_${lang}_COMPILER_ID_EXE}\"\n\n")
+      # only check if we don't have it yet 
+      IF(NOT CMAKE_${lang}_COMPILER_ID)
+        # Read the compiler identification string from the executable file.
+        FILE(STRINGS ${CMAKE_${lang}_COMPILER_ID_EXE}
+          CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 2 REGEX "INFO:")
+        FOREACH(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
+          IF("${info}" MATCHES ".*INFO:compiler\\[([^]]*)\\].*")
+            STRING(REGEX REPLACE ".*INFO:compiler\\[([^]]*)\\].*" "\\1"
+              CMAKE_${lang}_COMPILER_ID "${info}")
+          ENDIF("${info}" MATCHES ".*INFO:compiler\\[([^]]*)\\].*")
+          IF("${info}" MATCHES ".*INFO:platform\\[([^]]*)\\].*")
+            STRING(REGEX REPLACE ".*INFO:platform\\[([^]]*)\\].*" "\\1"
+              CMAKE_${lang}_PLATFORM_ID "${info}")
+          ENDIF("${info}" MATCHES ".*INFO:platform\\[([^]]*)\\].*")
+        ENDFOREACH(info)
 
-      # Read the compiler identification string from the executable file.
-      FILE(STRINGS ${CMAKE_${lang}_COMPILER_ID_EXE}
-        CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 2 REGEX "INFO:")
-      FOREACH(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
-        IF("${info}" MATCHES ".*INFO:compiler\\[([^]]*)\\].*")
-          STRING(REGEX REPLACE ".*INFO:compiler\\[([^]]*)\\].*" "\\1"
-            CMAKE_${lang}_COMPILER_ID "${info}")
-        ENDIF("${info}" MATCHES ".*INFO:compiler\\[([^]]*)\\].*")
-        IF("${info}" MATCHES ".*INFO:platform\\[([^]]*)\\].*")
-          STRING(REGEX REPLACE ".*INFO:platform\\[([^]]*)\\].*" "\\1"
-            CMAKE_${lang}_PLATFORM_ID "${info}")
-        ENDIF("${info}" MATCHES ".*INFO:platform\\[([^]]*)\\].*")
-      ENDFOREACH(info)
+        # Check the compiler identification string.
+        IF(CMAKE_${lang}_COMPILER_ID)
+          # The compiler identification was found.
+          FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            "The ${lang} compiler identification is ${CMAKE_${lang}_COMPILER_ID}, found in \""
+            "${CMAKE_${lang}_COMPILER_ID_EXE}\"\n\n")
+        ELSE(CMAKE_${lang}_COMPILER_ID)
+          # The compiler identification could not be found.
+          FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+            "The ${lang} compiler identification could not be found in \""
+            "${CMAKE_${lang}_COMPILER_ID_EXE}\"\n\n")
+        ENDIF(CMAKE_${lang}_COMPILER_ID)
+      ENDIF(NOT CMAKE_${lang}_COMPILER_ID)
+    ENDFOREACH(CMAKE_${lang}_COMPILER_ID_EXE)
 
-      # Check the compiler identification string.
-      IF(CMAKE_${lang}_COMPILER_ID)
-        # The compiler identification was found.
-        FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "The ${lang} compiler identification is ${CMAKE_${lang}_COMPILER_ID}\n\n")
-      ELSE(CMAKE_${lang}_COMPILER_ID)
-        # The compiler identification could not be found.
-        FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "The ${lang} compiler identification could not be found in \""
-          "${CMAKE_${lang}_COMPILER_ID_EXE}\"\n\n")
-      ENDIF(CMAKE_${lang}_COMPILER_ID)
-    ELSE(CMAKE_${lang}_COMPILER_ID_EXE)
-      # The executable was not found.
+    IF(NOT COMPILER_${lang}_PRODUCED_FILES)
+      # No executable was found.
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Compilation of the ${lang} compiler identification source \""
         "${CMAKE_${lang}_COMPILER_ID_SRC}\" did not produce an executable in "
-        "${CMAKE_${lang}_COMPILER_ID_DIR} "
-        "with a name known to CMake.\n\n")
-    ENDIF(CMAKE_${lang}_COMPILER_ID_EXE)
+        "${CMAKE_${lang}_COMPILER_ID_DIR} .\n\n")
+    ENDIF(NOT COMPILER_${lang}_PRODUCED_FILES)
 
     IF(CMAKE_${lang}_COMPILER_ID)
       MESSAGE(STATUS "The ${lang} compiler identification is "
