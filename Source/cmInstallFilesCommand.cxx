@@ -47,6 +47,7 @@ bool cmInstallFilesCommand
       std::string f = this->FindInstallSource(s->c_str());
       this->Files.push_back(f);
       }
+    this->CreateInstallGenerator();
     }
   else
     {
@@ -112,6 +113,11 @@ void cmInstallFilesCommand::FinalPass()
       }
     }
 
+  this->CreateInstallGenerator();
+}
+
+void cmInstallFilesCommand::CreateInstallGenerator() const
+{
   // Construct the destination.  This command always installs under
   // the prefix.
   std::string destination = "${CMAKE_INSTALL_PREFIX}";
@@ -129,6 +135,7 @@ void cmInstallFilesCommand::FinalPass()
                                 no_permissions, no_configurations,
                                 no_component, no_rename));
 }
+
 
 /**
  * Find a file in the build or source tree for installation given a

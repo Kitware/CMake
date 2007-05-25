@@ -103,6 +103,7 @@ public:
   cmTypeMacro(cmInstallFilesCommand, cmCommand);
 
 protected:
+  void CreateInstallGenerator() const;
   std::string FindInstallSource(const char* name) const;
   
  private:
