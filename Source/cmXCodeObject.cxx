@@ -194,7 +194,7 @@ void cmXCodeObject::SetString(const char* s)
   cmSystemTools::ReplaceString(ss, "\"", "\\\"");
   bool needQuote = false;
   this->String = "";
-  if(ss.find_first_of(" <>.+-=") != ss.npos)
+  if(ss.find_first_of(" <>.+-=@") != ss.npos)
     {
     needQuote = true;
     }
