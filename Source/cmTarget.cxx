@@ -694,15 +694,7 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
       this->SourceFiles.push_back(mf.AddSource(file));
       }
     }
-  
-  // expand any link library variables whle we are at it
-  LinkLibraryVectorType::iterator p = this->LinkLibraries.begin();
-  for (;p != this->LinkLibraries.end(); ++p)
-    {
-    mf.ExpandVariablesInString(p->first, true, true);
-    }
 }
-
 
 void cmTarget::MergeLinkLibraries( cmMakefile& mf,
                                    const char *selfname,
@@ -976,6 +968,19 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   //    cycles at an aribtrary point. The majority of projects won't have
   //    cyclic dependencies, so this is probably not a big deal. Note that
   //    the link line is always correct, just not necessary optimal.
+
+  {
+  // Expand variables in link library names.  This is for backwards
+  // compatibility with very early CMake versions and should
+  // eventually be removed.  This code was moved here from the end of
+  // old source list processing code which was called just before this
+  // method.
+  for(LinkLibraryVectorType::iterator p = this->LinkLibraries.begin();
+      p != this->LinkLibraries.end(); ++p)
+    {
+    this->Makefile->ExpandVariablesInString(p->first, true, true);
+    }
+  }
 
   typedef std::vector< std::string > LinkLine;
 
