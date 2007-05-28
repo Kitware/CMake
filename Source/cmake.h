@@ -129,14 +129,7 @@ class cmake
   int Run(const std::vector<std::string>&args, bool noconfigure);
 
   /**
-   * Generate the SourceFilesList from the SourceLists. This should only be
-   * done once to be safe.  The argument is a list of command line
-   * arguments.  The first argument should be the name or full path
-   * to the command line version of cmake.  For building a GUI,
-   * you would pass in the following arguments:
-   * /path/to/cmake -H/path/to/source -B/path/to/build 
-   * If you only want to parse the CMakeLists.txt files,
-   * but not actually generate the makefiles, use buildMakefiles = false.
+   * Run the global generator Generate step.
    */
   int Generate();
 
