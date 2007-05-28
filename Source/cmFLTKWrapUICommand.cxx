@@ -158,8 +158,8 @@ void cmFLTKWrapUICommand::FinalPass()
     // Generate code for all the .fl files
     for(size_t classNum = 0; classNum < lastHeadersClass; classNum++)
       {
-      this->Makefile->GetTargets()[this->Target].GetSourceFiles().
-        push_back(this->GeneratedSourcesClasses[classNum]);
+      this->Makefile->GetTargets()[this->Target]
+        .AddSourceFile(this->GeneratedSourcesClasses[classNum]);
       }
     }
 }

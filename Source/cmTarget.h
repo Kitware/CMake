@@ -89,7 +89,9 @@ public:
   /**
    * Get the list of the source files used by this target
    */
-  std::vector<cmSourceFile*> &GetSourceFiles() {return this->SourceFiles;}
+  std::vector<cmSourceFile*> const &GetSourceFiles()
+    {return this->SourceFiles;}
+  void AddSourceFile(cmSourceFile* sf) { this->SourceFiles.push_back(sf); }
 
   /**
    * Get the list of the source files used by this target

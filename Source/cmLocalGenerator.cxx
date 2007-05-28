@@ -622,8 +622,8 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   cmStdString objs;
   std::vector<std::string> objVector;
   // Add all the sources outputs to the depends of the target
-  std::vector<cmSourceFile*>& classes = target.GetSourceFiles();
-  for(std::vector<cmSourceFile*>::iterator i = classes.begin();
+  std::vector<cmSourceFile*> const& classes = target.GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); ++i)
     { 
     if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY") && 
@@ -706,7 +706,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
     comment.c_str(),
     this->Makefile->GetStartOutputDirectory()
     );
-  target.GetSourceFiles().push_back
+  target.AddSourceFile
     (this->Makefile->GetSource(targetFullPath.c_str()));
 }
 

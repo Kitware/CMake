@@ -454,7 +454,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
                                    cmMakefile *makefile)
 { 
   // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile*> & classes = this->GetSourceFiles();
+  std::vector<cmSourceFile*> & classes = this->SourceFiles;
   // use a deck to keep track of processed source files
   std::queue<std::string> srcFilesToProcess;
   std::set<cmStdString> srcFilesQueued;
