@@ -139,7 +139,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       cmSystemTools::Error("could not find Mac OSX bundle template file.");
       }
 
-    std::vector<cmSourceFile*>::iterator sourceIt;
+    std::vector<cmSourceFile*>::const_iterator sourceIt;
     for ( sourceIt = this->Target->GetSourceFiles().begin();
       sourceIt != this->Target->GetSourceFiles().end();
       ++ sourceIt )
