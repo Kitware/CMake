@@ -49,7 +49,7 @@ ENDMACRO(SWIG_MODULE_INITIALIZE)
 
 MACRO(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
   FOREACH(it ${SWIG_PYTHON_EXTRA_FILE_EXTENSION})
-    SET(outfiles ${outfiles}
+    SET(${outfiles} ${${outfiles}}
       "${generatedpath}/${infile}.${it}")
   ENDFOREACH(it)
 ENDMACRO(SWIG_GET_EXTRA_OUTPUT_FILES)
@@ -96,9 +96,15 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     SET(swig_generated_file_fullname
       "${swig_generated_file_fullname}/${swig_source_file_relative_path}")
   ENDIF(swig_source_file_relative_path)
+  # If CMAKE_SWIG_OUTDIR was specified then pass it to -outdir
+  IF(CMAKE_SWIG_OUTDIR)
+    SET(swig_outdir ${CMAKE_SWIG_OUTDIR})
+  ELSE(CMAKE_SWIG_OUTDIR)
+    SET(swig_outdir ${CMAKE_CURRENT_BINARY_DIR})
+  ENDIF(CMAKE_SWIG_OUTDIR)
   SWIG_GET_EXTRA_OUTPUT_FILES(${SWIG_MODULE_${name}_LANGUAGE}
     swig_extra_generated_files
-    "${swig_generated_file_fullname}"
+    "${swig_outdir}"
     "${swig_source_file_name_we}")
   SET(swig_generated_file_fullname
     "${swig_generated_file_fullname}/${swig_source_file_name_we}")
@@ -132,15 +138,13 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   IF(SWIG_MODULE_${name}_EXTRA_FLAGS)
     SET(swig_extra_flags ${swig_extra_flags} ${SWIG_MODULE_${name}_EXTRA_FLAGS})
   ENDIF(SWIG_MODULE_${name}_EXTRA_FLAGS)
-  # If CMAKE_SWIG_OUTDIR was specified then pass it to -outdir
-  IF(CMAKE_SWIG_OUTDIR)
     ADD_CUSTOM_COMMAND(
-      OUTPUT "${swig_generated_file_fullname}"
+    OUTPUT "${swig_generated_file_fullname}" ${swig_extra_generated_files}
       COMMAND "${SWIG_EXECUTABLE}"
       ARGS "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
       ${swig_source_file_flags}
       ${CMAKE_SWIG_FLAGS}
-      -outdir ${CMAKE_SWIG_OUTDIR}
+    -outdir ${swig_outdir}
       ${swig_special_flags}
       ${swig_extra_flags}
       ${swig_include_dirs}
@@ -149,26 +153,9 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
       MAIN_DEPENDENCY "${swig_source_file_fullname}"
       DEPENDS ${SWIG_MODULE_${name}_EXTRA_DEPS}
       COMMENT "Swig source") 
-  ELSE(CMAKE_SWIG_OUTDIR)
-    ADD_CUSTOM_COMMAND(
-      OUTPUT "${swig_generated_file_fullname}"
-      COMMAND "${SWIG_EXECUTABLE}"
-      ARGS "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
-      ${swig_source_file_flags}
-      ${CMAKE_SWIG_FLAGS}
-      ${swig_outdir_flags}
-      ${swig_special_flags}
-      ${swig_extra_flags}
-      ${swig_include_dirs}
-      -o "${swig_generated_file_fullname}"
-      "${swig_source_file_fullname}"
-      MAIN_DEPENDENCY "${swig_source_file_fullname}"
-      DEPENDS ${SWIG_MODULE_${name}_EXTRA_DEPS}
-      COMMENT "Swig source") 
-  ENDIF(CMAKE_SWIG_OUTDIR)
-  SET_SOURCE_FILES_PROPERTIES("${swig_generated_file_fullname}"
+  SET_SOURCE_FILES_PROPERTIES("${swig_generated_file_fullname}" ${swig_extra_generated_files}
     PROPERTIES GENERATED 1)
-  SET(${outfiles} "${swig_generated_file_fullname}")
+  SET(${outfiles} "${swig_generated_file_fullname}" ${swig_extra_generated_files})
 ENDMACRO(SWIG_ADD_SOURCE_TO_MODULE)
 
 #

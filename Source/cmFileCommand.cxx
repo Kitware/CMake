@@ -452,7 +452,63 @@ public:
       }
     return true;
     }
+
+private:
+  bool InstallSymlink(const char* fromFile, const char* toFile, bool always);
 };
+
+//----------------------------------------------------------------------------
+bool cmFileInstaller::InstallSymlink(const char* fromFile, const char* toFile,
+                                     bool always)
+{
+  // Inform the user about this file installation.
+  std::string message = "Installing ";
+  message += toFile;
+  this->Makefile->DisplayStatus(message.c_str(), -1);
+
+  // Read the original symlink.
+  std::string symlinkTarget;
+  if(!cmSystemTools::ReadSymlink(fromFile, symlinkTarget))
+    {
+    cmOStringStream e;
+    e << "INSTALL cannot read symlink \"" << fromFile
+      << "\" to duplicate at \"" << toFile << "\".";
+    this->FileCommand->SetError(e.str().c_str());
+    return false;
+    }
+
+  // Compare the symlink value to that at the destination if not
+  // always installing.
+  if(!always)
+    {
+    std::string oldSymlinkTarget;
+    if(cmSystemTools::ReadSymlink(toFile, oldSymlinkTarget))
+      {
+      if(symlinkTarget == oldSymlinkTarget)
+        {
+        return true;
+        }
+      }
+    }
+
+  // Remove the destination file so we can always create the symlink.
+  cmSystemTools::RemoveFile(toFile);
+
+  // Create the symlink.
+  if(!cmSystemTools::CreateSymlink(symlinkTarget.c_str(), toFile))
+    {
+    cmOStringStream e;
+    e << "INSTALL cannot duplicate symlink \"" << fromFile
+      << "\" at \"" << toFile << "\".";
+    this->FileCommand->SetError(e.str().c_str());
+    return false;
+    }
+
+  // Add the file to the manifest.
+  this->ManifestAppend(toFile);
+
+  return true;
+}
 
 //----------------------------------------------------------------------------
 bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
@@ -465,6 +521,12 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
   if(match_properties.Exclude)
     {
     return true;
+    }
+
+  // Short-circuit for symbolic links.
+  if(cmSystemTools::FileIsSymlink(fromFile))
+    {
+    return this->InstallSymlink(fromFile, toFile, always);
     }
 
   // Inform the user about this file installation.
@@ -517,6 +579,12 @@ bool cmFileInstaller::InstallDirectory(const char* source,
   if(match_properties.Exclude)
     {
     return true;
+    }
+
+  // Short-circuit for symbolic links.
+  if(cmSystemTools::FileIsSymlink(source))
+    {
+    return this->InstallSymlink(source, destination, always);
     }
 
   // Inform the user about this directory installation.

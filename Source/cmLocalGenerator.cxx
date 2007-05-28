@@ -1466,9 +1466,17 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
 
   // Some search paths should never be emitted
   emitted.insert("");
-  emitted.insert("/usr/lib");
-  emitted.insert("/usr/lib32");
-  emitted.insert("/usr/lib64");
+  if(const char* implicitLinks =
+     (this->Makefile->GetDefinition
+      ("CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES")))
+    {
+    std::vector<std::string> implicitLinkVec;
+    cmSystemTools::ExpandListArgument(implicitLinks, implicitLinkVec);
+    for(unsigned int k = 0; k < implicitLinkVec.size(); ++k)
+      {
+      emitted.insert(implicitLinkVec[k]);
+      }
+    }
   std::string libPathFlag = 
     this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
   std::string libLinkFlag = 

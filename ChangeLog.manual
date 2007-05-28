@@ -1,4 +1,19 @@
 Changes in CMake 2.4.7
+--- RC 7 ---
+* Fix @ in Xcode projects
+
+* add some fixes for FindSWIG.cmake
+
+* Fix new line stuff in UsePkgConfig.cmake
+
+* Add new FindPkgConfig.cmake from CVS 
+
+* improve docs for try_compile and list commands
+
+* fix for bug 4384, preserve sym links in install directory
+
+* Use platform variable for link path exclusion added in RC6
+
 --- RC 6 ---
 * Fix stack reporting bug in macros and include
 
