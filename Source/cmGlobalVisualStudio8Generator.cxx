@@ -153,7 +153,7 @@ void cmGlobalVisualStudio8Generator::Generate()
         if(cmSourceFile* file = mf->GetSource(CMAKE_CHECK_BUILD_SYSTEM_TARGET 
                                               ".vcproj.cmake.rule"))
           {
-          tgt->GetSourceFiles().push_back(file);
+          tgt->AddSourceFile(file);
           }
         else
           {

@@ -244,7 +244,7 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
                                            no_working_directory, true);
   if(cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str()))
     {
-    tgt.GetSourceFiles().push_back(file);
+    tgt.AddSourceFile(file);
     }
   else
     {
@@ -309,11 +309,11 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
   
   // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile*> & classes = target.GetSourceFiles();
+  std::vector<cmSourceFile*> const & classes = target.GetSourceFiles();
 
   // now all of the source files have been properly assigned to the target
   // now stick them into source groups using the reg expressions
-  for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
+  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
     // Add the file to the list of sources.
@@ -564,7 +564,7 @@ cmLocalVisualStudio6Generator
 
   // Add a source file representing this output to the project.
   cmSourceFile* outsf = this->Makefile->GetSourceFileWithOutput(output);
-  target.GetSourceFiles().push_back(outsf);
+  target.AddSourceFile(outsf);
 
   // Free the fake output name.
   delete [] output;

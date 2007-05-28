@@ -88,7 +88,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       if(cmSourceFile* file =
          this->Makefile->GetSourceFileWithOutput(force.c_str()))
         {
-        tgt.GetSourceFiles().push_back(file);
+        tgt.AddSourceFile(file);
         }
       }
     }
@@ -219,7 +219,7 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmTarget& tgt)
                                            no_working_directory, true);
   if(cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str()))
     {
-    tgt.GetSourceFiles().push_back(file);
+    tgt.AddSourceFile(file);
     }
   else
     {
@@ -963,7 +963,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
 
   // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile*> & classes = target.GetSourceFiles();
+  std::vector<cmSourceFile*>const & classes = target.GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); i++)
     {
