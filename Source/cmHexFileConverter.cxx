@@ -38,7 +38,7 @@ static unsigned int ChompStrlen(const char* line)
     {
     return 0;
     }
-  unsigned int length = strlen(line);
+  size_t length = strlen(line);
   if ((line[length-1] == '\n') || (line[length-1] == '\r'))
     {
     length--;
