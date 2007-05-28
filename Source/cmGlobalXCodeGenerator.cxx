@@ -2067,11 +2067,11 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
                                           headersVec);
         cmCustomCommandLines commandLines;
         std::vector<std::string> depends;
-        for(std::vector<std::string>::iterator i = headersVec.begin();
-            i != headersVec.end(); ++i)
+        for(std::vector<std::string>::iterator h = headersVec.begin();
+            h != headersVec.end(); ++i)
           {
           cmSourceFile* sf 
-            = this->CurrentMakefile->GetOrCreateSource(i->c_str());
+            = this->CurrentMakefile->GetOrCreateSource(h->c_str());
           classes.push_back(sf);
           }
         }
