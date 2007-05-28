@@ -610,12 +610,12 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     sourceBuildPhase->AddAttribute("files", buildFiles);
     sourceBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing", 
                                    this->CreateString("0"));
-    std::vector<cmSourceFile*> &classes = l->second.GetSourceFiles();
+    std::vector<cmSourceFile*> const &classes = l->second.GetSourceFiles();
     // add all the sources
     std::vector<cmXCodeObject*> externalObjFiles;
     std::vector<cmXCodeObject*> headerFiles;
     std::vector<cmXCodeObject*> specialBundleFiles;
-    for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
+    for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
       cmXCodeObject* xsf =
@@ -679,7 +679,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     typedef std::map<cmStdString, std::vector<cmSourceFile*> >
       mapOfVectorOfSourceFiles;
     mapOfVectorOfSourceFiles bundleFiles;
-    for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
+    for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
       const char* resLoc = (*i)->GetProperty("MACOSX_PACKAGE_LOCATION");
@@ -822,10 +822,10 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     = cmtarget.GetPreLinkCommands();
   std::vector<cmCustomCommand> const & postbuild 
     = cmtarget.GetPostBuildCommands();
-  std::vector<cmSourceFile*> &classes = cmtarget.GetSourceFiles();
+  std::vector<cmSourceFile*>const &classes = cmtarget.GetSourceFiles();
   // add all the sources
   std::vector<cmCustomCommand> commands;
-  for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
+  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
       i != classes.end(); ++i)
     {
     if((*i)->GetCustomCommand())
@@ -2050,7 +2050,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         file.SetName("Info",
                      this->CurrentMakefile->GetCurrentOutputDirectory(),
                      "plist", false);
-        cmtarget.GetSourceFiles().push_back
+        cmtarget.AddSourceFile
           (this->CurrentMakefile->AddSource(file));
         }
       std::vector<cmSourceFile*>  classes = cmtarget.GetSourceFiles();
@@ -2562,7 +2562,7 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
               }
             if(!sameAsTarget)
               {
-              target.GetSourceFiles().push_back(*i);
+              target.AddSourceFile(*i);
               }
             }
           }
