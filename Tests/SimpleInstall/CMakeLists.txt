@@ -103,7 +103,7 @@ IF(STAGE2)
   ELSE(WIN32 AND NOT CYGWIN)
     SET(BAT)
   ENDIF(WIN32 AND NOT CYGWIN)
-  FOREACH(loc share share/old1 share/old2 share/old3)
+  FOREACH(loc share share/old1 share/old2 share/old3 share/alt)
     SET(CUR_SCRIPT "${CMAKE_INSTALL_PREFIX}/MyTest/${loc}/sample_script${BAT}")
     EXECUTE_PROCESS(
       COMMAND ${CUR_SCRIPT}
@@ -173,10 +173,12 @@ ELSE(STAGE2)
     RUNTIME DESTINATION MyTest/bin
     LIBRARY DESTINATION MyTest/lib
     ARCHIVE DESTINATION MyTest/lib/static
+    OPTIONAL # for coverage...target should always exist
     )
   INSTALL(FILES lib1.h DESTINATION MyTest/include/foo)
   INSTALL(FILES lib2.h
     DESTINATION MyTest/include/foo
+    COMPONENT Development
     PERMISSIONS OWNER_READ OWNER_WRITE
     RENAME lib2renamed.h
     )
@@ -207,9 +209,21 @@ ELSE(STAGE2)
   FILE(REMOVE_RECURSE "${CMAKE_INSTALL_PREFIX}/MyTest/share/TestSubDir/CVS")
   INSTALL(
     DIRECTORY TestSubDir scripts/ DESTINATION MyTest/share
+    FILE_PERMISSIONS OWNER_READ OWNER_WRITE
+    DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                          GROUP_READ GROUP_EXECUTE
     PATTERN "CVS" EXCLUDE
     REGEX "\\.txt$" EXCLUDE
     PATTERN "scripts/*" PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+    )
+
+  # Alternate directory installation for coverage.
+  INSTALL(
+    DIRECTORY scripts/ DESTINATION MyTest/share/alt
+    COMPONENT Development
+    USE_SOURCE_PERMISSIONS
+    PATTERN "CVS" EXCLUDE
+    REGEX "\\.txt$" EXCLUDE
     )
 
   # Test empty directory installation.
