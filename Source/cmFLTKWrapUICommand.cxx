@@ -123,7 +123,7 @@ void cmFLTKWrapUICommand::FinalPass()
   // people should add the srcs to the target themselves, but the old command
   // didn't support that, so check and see if they added the files in and if
   // they didn;t then print a warning and add then anyhow
-  std::vector<std::string> srcs = 
+  std::vector<std::string> const& srcs = 
     this->Makefile->GetTargets()[this->Target].GetSourceLists();
   bool found = false;
   for (unsigned int i = 0; i < srcs.size(); ++i)

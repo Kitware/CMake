@@ -766,7 +766,7 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
       {
       if (this->Targets.find(target) != this->Targets.end())
         {
-        this->Targets[target].GetSourceLists().push_back(source);
+        this->Targets[target].AddSourceListEntry(source);
         }
       else
         {
@@ -848,7 +848,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
                                  commandLines, comment,
                                  workingDirectory, no_replace,
                                  escapeOldStyle);
-  target->GetSourceLists().push_back(force);
+  target->AddSourceListEntry(force.c_str());
 
   // The output is not actually created so mark it symbolic.
   if(cmSourceFile* sf = this->GetSource(force.c_str()))
@@ -1358,7 +1358,7 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
-  target->GetSourceLists() = srcs;
+  target->SetSourceList(srcs);
   this->AddGlobalLinkInformation(lname, *target);
 }
 
@@ -1371,7 +1371,7 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
     {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
-  target->GetSourceLists() = srcs;
+  target->SetSourceList(srcs);
   this->AddGlobalLinkInformation(exeName, *target);
   return target;
 }

@@ -76,7 +76,12 @@ public:
   /**
    * Get the list of the source lists used by this target
    */
-  std::vector<std::string> &GetSourceLists() {return this->SourceLists;}
+  std::vector<std::string> const& GetSourceLists() {return this->SourceLists;}
+
+  void AddSourceListEntry(const char* src)
+    { this->SourceLists.push_back(src); }
+  void SetSourceList(std::vector<std::string> const& srcs)
+    { this->SourceLists = srcs; }
 
   ///! Return the list of frameworks being linked to this target
   std::vector<std::string> &GetFrameworks() {return this->Frameworks;}
