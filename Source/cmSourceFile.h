@@ -82,21 +82,18 @@ public:
    * The full path to the file.
    */
   const std::string &GetFullPath() const {return this->FullPath;}
-  void SetFullPath(const char *name) {this->FullPath = name;}
 
   /**
    * The file name associated with stripped off directory and extension.
    * (In most cases this is the name of the class.)
    */
   const std::string &GetSourceName() const {return this->SourceName;}
-  void SetSourceName(const char *name) {this->SourceName = name;}
 
   /**
    * The file extension associated with source file
    */
   const std::string &GetSourceExtension() const {
     return this->SourceExtension;}
-  void SetSourceExtension(const char *name) {this->SourceExtension = name;}
 
   /**
    * Return the vector that holds the list of dependencies
