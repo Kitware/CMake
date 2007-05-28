@@ -772,7 +772,7 @@ void cmGlobalXCodeGenerator::AddFrameworkPhases(cmTarget* target,
     cmXCodeObject* xsf =
       this->CreateXCodeSourceFile(this->CurrentLocalGenerator, 
                                   sf, *target);
-    std::cerr << "copy header " << sf->GetFullPath() << "\n";
+    //std::cerr << "copy header " << sf->GetFullPath() << "\n";
     headersToCopy->AddObject(xsf);
     }
 }
@@ -1515,7 +1515,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
         install_name_dir = install_name_dir + "/..";
         install_name_dir = 
             cmSystemTools::CollapseFullPath(install_name_dir.c_str());
-        std::cerr << "new install name " << install_name_dir << "\n";
+        //std::cerr << "new install name " << install_name_dir << "\n";
         }
       }
     
@@ -2513,9 +2513,7 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
     {
     return;
     }
-#if 1
-  // TODO: This block should be moved to a central location for all
-  // generators.  It is duplicated in every generator.
+  // Skip local generators that are excluded from this project.
   for(std::vector<cmLocalGenerator*>::iterator g = generators.begin();
       g != generators.end(); ++g)
     {
@@ -2523,54 +2521,8 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
       {
       continue;
       }
-    cmMakefile* mf = (*g)->GetMakefile();
-    std::vector<cmSourceGroup> sourceGroups = mf->GetSourceGroups();
-    cmTargets &tgts = mf->GetTargets();
-  // now for all custom commands that are not used directly in a 
-  // target, add them to all targets in the current directory or
-  // makefile
-  std::set<cmStdString> banned;
-  banned.insert("ALL_BUILD");
-  banned.insert("XCODE_DEPEND_HELPER");
-  banned.insert("install");
-  std::vector<cmSourceFile*> & classesmf = mf->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator i = classesmf.begin(); 
-      i != classesmf.end(); i++)
-    {
-    if(cmCustomCommand* cc = (*i)->GetCustomCommand())
-      {
-      if(!cc->IsUsed())
-        {
-        for(cmTargets::iterator l = tgts.begin(); 
-            l != tgts.end(); l++)
-          {
-          if ((strncmp(l->first.c_str(), 
-                          "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
-              && banned.find(l->second.GetName()) == banned.end())
-            {
-            cmTarget& target = l->second;
-            bool sameAsTarget = false;
-            // make sure we don't add a custom command that depends on
-            // this target
-            for(unsigned int k =0; k < cc->GetDepends().size(); k++)
-              {
-              if(cmSystemTools::GetFilenameName
-                 (cc->GetDepends()[k]) == target.GetFullName())
-                {
-                sameAsTarget = true;
-                }
-              }
-            if(!sameAsTarget)
-              {
-              target.AddSourceFile(*i);
-              }
-            }
-          }
-        }
-      }
     }
-    }
-#endif
+
   this->CreateXCodeObjects(root,
                            generators);
   std::string xcodeDir = root->GetMakefile()->GetStartOutputDirectory();
