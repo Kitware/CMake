@@ -22,7 +22,6 @@ cmCustomCommand::cmCustomCommand()
   this->HaveComment = false;
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
-  this->Used = false;
 }
 
 //----------------------------------------------------------------------------
@@ -36,7 +35,6 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   EscapeAllowMakeVars(r.EscapeAllowMakeVars),
   EscapeOldStyle(r.EscapeOldStyle)
 {
-  this->Used = false;
 }
 
 //----------------------------------------------------------------------------
@@ -56,7 +54,6 @@ cmCustomCommand::cmCustomCommand(const std::vector<std::string>& outputs,
 {
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
-  this->Used = false;
 }
 
 //----------------------------------------------------------------------------

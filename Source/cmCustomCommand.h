@@ -68,10 +68,6 @@ public:
   bool GetEscapeAllowMakeVars() const;
   void SetEscapeAllowMakeVars(bool b);
 
-  /** set get the used status of the command */ 
-  void SetUsed() { this->Used = true;}
-  bool IsUsed() const { return this->Used;}
- 
 private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Depends;
@@ -81,7 +77,6 @@ private:
   std::string WorkingDirectory;
   bool EscapeAllowMakeVars;
   bool EscapeOldStyle;
-  bool Used;
 };
 
 #endif
