@@ -82,7 +82,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
         }
       this->WrapHeaders.push_back(hname);
       // add starting depends
-      file.GetDepends().push_back(hname);
+      file.AddDepend(hname.c_str());
       this->WrapClasses.push_back(file);
       if (sourceListValue.size() > 0)
         {

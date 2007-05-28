@@ -86,10 +86,10 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
       std::string hname = header_file.GetFullPath();
       this->WrapUserInterface.push_back(origname);
       // add starting depends
-      moc_file.GetDepends().push_back(hname);
-      source_file.GetDepends().push_back(hname);
-      source_file.GetDepends().push_back(origname);
-      header_file.GetDepends().push_back(origname);
+      moc_file.AddDepend(hname.c_str());
+      source_file.AddDepend(hname.c_str());
+      source_file.AddDepend(origname.c_str());
+      header_file.AddDepend(origname.c_str());
       this->WrapHeadersClasses.push_back(header_file);
       this->WrapSourcesClasses.push_back(source_file);
       this->WrapMocClasses.push_back(moc_file);

@@ -555,7 +555,7 @@ void CCONV cmSourceFileSetProperty(void *arg,const char *prop,
 void CCONV cmSourceFileAddDepend(void *arg, const char *depend)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
-  sf->GetDepends().push_back(depend);
+  sf->AddDepend(depend);
 }
 
 void CCONV cmSourceFileSetName(void *arg, const char* name, const char* dir,

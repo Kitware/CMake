@@ -94,8 +94,8 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
                                            no_working_dir);
 
       cmSourceFile *sf = this->Makefile->GetSource(cxxres.c_str());
-      sf->GetDepends().push_back(hname);
-      sf->GetDepends().push_back(origname);
+      sf->AddDepend(hname.c_str());
+      sf->AddDepend(origname.c_str());
       this->GeneratedSourcesClasses.push_back(sf);
       }
     }

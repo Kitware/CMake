@@ -102,7 +102,7 @@ public:
    * Return the vector that holds the list of dependencies
    */
   const std::vector<std::string> &GetDepends() const {return this->Depends;}
-  std::vector<std::string> &GetDepends() {return this->Depends;}
+  void AddDepend(const char* d) { this->Depends.push_back(d); }
 
   /**
    * Get the source name without last extension
