@@ -25,7 +25,7 @@ bool cmGetTargetPropertyCommand::InitialPass(
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  const char* var = args[0].c_str();
+  std::string var = args[0].c_str();
   const char* targetName = args[1].c_str();
 
   cmTarget *tgt = this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
@@ -36,11 +36,11 @@ bool cmGetTargetPropertyCommand::InitialPass(
     const char *prop = target.GetProperty(args[2].c_str());
     if (prop)
       {
-      this->Makefile->AddDefinition(var, prop);
+      this->Makefile->AddDefinition(var.c_str(), prop);
       return true;
       }
     }
-  this->Makefile->AddDefinition(var, "NOTFOUND");
+  this->Makefile->AddDefinition(var.c_str(), (var+"-NOTFOUND").c_str());
   return true;
 }
 
