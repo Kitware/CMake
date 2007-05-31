@@ -46,6 +46,7 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(LinkLine LinkLine)
   ADD_TEST_MACRO(MacroTest miniMacroTest)
   ADD_TEST_MACRO(Framework bar)
+  ADD_TEST_MACRO(Properties Properties)
 
   # add tests with more complex invocations
   ADD_TEST(TargetName ${CMAKE_CTEST_COMMAND}
