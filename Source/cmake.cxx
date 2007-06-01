@@ -299,7 +299,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         {
         this->CacheManager->AddCacheEntry(var.c_str(), value.c_str(),
           "No help, variable specified on the command line.",
-          type);
+          type==cmCacheManager::UNINITIALIZED?cmCacheManager::STRING:type);
         }
       else
         {
@@ -307,6 +307,49 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
                   << "Should be: VAR:type=value\n";
         cmSystemTools::Error("No cmake scrpt provided.");
         return false;
+        }
+      }
+    else if(arg.find("-U",0) == 0)
+      {
+      std::string entryPattern = arg.substr(2);
+      if(entryPattern.size() == 0)
+        {
+        ++i;
+        if(i < args.size())
+          {
+          entryPattern = args[i];
+          }
+        else
+          {
+          cmSystemTools::Error("-U must be followed with VAR.");
+          return false;
+          }
+        }
+
+      //go through all cache entries and collect the vars which will be removed
+      std::vector<std::string> entriesToDelete;
+      cmCacheManager::CacheIterator it = 
+                                    this->CacheManager->GetCacheIterator();
+      for ( it.Begin(); !it.IsAtEnd(); it.Next() )
+        {
+        cmCacheManager::CacheEntryType t = it.GetType();
+        if(t != cmCacheManager::STATIC &&  t != cmCacheManager::UNINITIALIZED)
+          {
+          std::string entryName = it.GetName();
+          if (entryName.find(entryPattern) != std::string::npos)
+            {
+            entriesToDelete.push_back(entryName);
+            }
+          }
+        }
+
+      // now remove them from the cache
+      for(std::vector<std::string>::const_iterator currentEntry = 
+          entriesToDelete.begin(); 
+          currentEntry != entriesToDelete.end();
+          ++currentEntry)
+        {
+        this->CacheManager->RemoveCacheEntry(currentEntry->c_str());
         }
       }
     else if(arg.find("-C",0) == 0)
@@ -429,6 +472,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         this->Verbose = true;
       }
     else if(arg.find("-D",0) == 0)
+      {
+      // skip for now
+      }
+    else if(arg.find("-U",0) == 0)
       {
       // skip for now
       }
