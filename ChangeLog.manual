@@ -1,4 +1,8 @@
 Changes in CMake 2.4.7
+--- RC 8 ---
+* Fix bug 5121 crash with build test on and vs 
+
+* Fix bug 5096 add_library and EXCLUDE_FROM_ALL not working 
 --- RC 7 ---
 * Fix @ in Xcode projects
 
