@@ -56,7 +56,7 @@ ELSE(CMAKE_HAVE_SPROC_H)
           ${CMAKE_BINARY_DIR}
           ${CMAKE_ROOT}/Modules/CheckForPthreads.c
           CMAKE_FLAGS -DLINK_LIBRARIES:STRING=-pthread
-          OUTPUT_VARIABLE OUTPUT)
+          COMPILE_OUTPUT_VARIABLE OUTPUT)
         IF(THREADS_HAVE_PTHREAD_ARG)
           IF(THREADS_PTHREAD_ARG MATCHES "^2$")
             MESSAGE(STATUS "Check if compiler accepts -pthread - yes")

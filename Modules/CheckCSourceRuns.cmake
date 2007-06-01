@@ -2,7 +2,7 @@
 # CHECK_C_SOURCE_RUNS(SOURCE VAR)
 # - macro which checks if the source code runs
 #  SOURCE   - source code to try to compile
-#  VAR - variable to store size if the type exists.
+#  VAR      - variable to store the result, 1 for success, empty for failure
 #
 # The following variables may be set before calling this macro to
 # modify the way the check is run:
@@ -39,7 +39,7 @@ MACRO(CHECK_C_SOURCE_RUNS SOURCE VAR)
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
       "${CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES}"
       "${CHECK_C_SOURCE_COMPILES_ADD_INCLUDES}"
-      OUTPUT_VARIABLE OUTPUT)
+      COMPILE_OUTPUT_VARIABLE OUTPUT)
     # if it did not compile make the return value fail code of 1
     IF(NOT ${VAR}_COMPILED)
       SET(${VAR} 1)
