@@ -1302,7 +1302,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     if(cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.')
       {
       singleLine.push_back("-C");
-      singleLine.push_back(mf->GetDefinition("CMAKE_CFG_INTDIR"));
+      singleLine.push_back(cmakeCfgIntDir);
       }
     else // TODO: This is a hack. Should be something to do with the generator
       {
