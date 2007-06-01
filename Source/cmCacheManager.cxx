@@ -224,7 +224,15 @@ bool cmCacheManager::LoadCache(const char* path,
       }
     while(realbuffer[0] == '/' && realbuffer[1] == '/')
       {
-      e.Properties["HELPSTRING"] += &realbuffer[2];
+      if ((realbuffer[2] == '\\') && (realbuffer[3]=='n'))
+        {
+        e.Properties["HELPSTRING"] += "\n";
+        e.Properties["HELPSTRING"] += &realbuffer[4];
+        }
+      else
+        {
+        e.Properties["HELPSTRING"] += &realbuffer[2];
+        }
       cmSystemTools::GetLineFromStream(fin, buffer);
       realbuffer = buffer.c_str();
       if(!fin)
@@ -657,27 +665,22 @@ void cmCacheManager::OutputHelpString(std::ofstream& fout,
     }
   std::string oneLine;
   std::string::size_type pos = 0;
-  std::string::size_type nextBreak = 60;
-  bool done = false;
-
-  while(!done)
+  for (std::string::size_type i=0; i<=end; i++)
     {
-    if(nextBreak >= end)
+    if ((i==end) 
+        || (helpString[i]=='\n')
+        || ((i-pos >= 60) && (helpString[i]==' ')))
       {
-      nextBreak = end;
-      done = true;
-      }
-    else
-      {
-      while(nextBreak < end && helpString[nextBreak] != ' ')
+      fout << "//";
+      if (helpString[pos] == '\n')
         {
-        nextBreak++;
+        pos++;
+        fout << "\\n";
         }
+      oneLine = helpString.substr(pos, i - pos);
+      fout << oneLine.c_str() << "\n";
+      pos = i;
       }
-    oneLine = helpString.substr(pos, nextBreak - pos);
-    fout << "//" << oneLine.c_str() << "\n";
-    pos = nextBreak;
-    nextBreak += 60;
     }
 }
 
