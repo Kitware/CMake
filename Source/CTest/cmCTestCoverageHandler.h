@@ -59,6 +59,29 @@ private:
   //! Handle coverage using GCC's GCov
   int HandleGCovCoverage(cmCTestCoverageHandlerContainer* cont);
 
+  //! Handle coverage using Bullseye
+  int HandleBullseyeCoverage(cmCTestCoverageHandlerContainer* cont);
+  int RunBullseyeSourceSummary(cmCTestCoverageHandlerContainer* cont);
+  int RunBullseyeCoverageBranch(cmCTestCoverageHandlerContainer* cont,
+                                std::vector<std::string>& files,
+                                std::vector<std::string>& filesFullPath);
+  int RunBullseyeCommand(
+    cmCTestCoverageHandlerContainer* cont,
+    const char* cmd,
+    const char* arg,
+    std::string& outputFile);
+  bool ParseBullsEyeCovsrcLine(
+    std::string const& inputLine,
+    std::string& sourceFile,
+    int& functionsCalled,
+    int& totalFunctions,
+    int& percentFunction,
+    int& branchCovered,
+    int& totalBranches,
+    int& percentBranch);
+  bool GetNextInt(std::string const& inputLine,
+                  std::string::size_type& pos,
+                  int& value);
   //! Handle Python coverage using Python's Trace.py
   int HandleTracePyCoverage(cmCTestCoverageHandlerContainer* cont);
 

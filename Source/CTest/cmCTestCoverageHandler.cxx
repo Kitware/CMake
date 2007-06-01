@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:   CMake - Cross-Platform Makefile Generator
+  program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
@@ -14,9 +14,7 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-
 #include "cmCTestCoverageHandler.h"
-
 #include "cmCTest.h"
 #include "cmake.h"
 #include "cmSystemTools.h"
@@ -31,6 +29,96 @@
 #include <float.h>
 
 #define SAFEDIV(x,y) (((y)!=0)?((x)/(y)):(0))
+#include <iostream> // remove me*****
+#undef cerr
+
+class cmCTestRunProcess
+{
+public:
+  cmCTestRunProcess()
+    {
+      this->Process = cmsysProcess_New();
+      this->PipeState = -1;
+    }
+  ~cmCTestRunProcess()
+    {
+      if(!(this->PipeState == -1)
+         && !(this->PipeState == cmsysProcess_Pipe_None )
+         && !(this->PipeState == cmsysProcess_Pipe_Timeout))
+        {
+        this->WaitForExit();
+        }
+      cmsysProcess_Delete(this->Process);
+    }
+  void SetCommand(const char* command)
+    {
+      this->CommandLineStrings.clear();
+      this->CommandLineStrings.push_back(command);;
+    }
+  void AddArgument(const char* arg)
+    {
+      this->CommandLineStrings.push_back(arg);
+    }
+  void SetWorkingDirectory(const char* dir)
+    {
+      this->WorkingDirectory = dir;
+    }
+  void SetTimeout(double t)
+    {
+      this->TimeOut = t;
+    }
+  bool StartProcess()
+    {
+      std::vector<const char*> args;
+      for(std::vector<std::string>::iterator i =
+            this->CommandLineStrings.begin();
+          i != this->CommandLineStrings.end(); ++i)
+        {
+        args.push_back(i->c_str());
+        }
+      args.push_back(0); // null terminate 
+      cmsysProcess_SetCommand(this->Process, &*args.begin());
+      cmsysProcess_SetWorkingDirectory(this->Process,
+                                       this->WorkingDirectory.c_str());
+      cmsysProcess_SetOption(this->Process, 
+                             cmsysProcess_Option_HideWindow, 1);
+      if(this->TimeOut != -1)
+        {
+        cmsysProcess_SetTimeout(this->Process, this->TimeOut);
+        }
+      cmsysProcess_Execute(this->Process);
+      this->PipeState = cmsysProcess_GetState(this->Process);
+      // if the process is running or exited return true
+      if(this->PipeState == cmsysProcess_State_Executing
+         || this->PipeState == cmsysProcess_State_Exited)
+        {
+        return true;
+        }
+      return false;
+    }
+  void SetStdoutFile(const char* fname)
+    {
+    cmsysProcess_SetPipeFile(this->Process, cmsysProcess_Pipe_STDOUT, fname);
+    }
+  void SetStderrFile(const char* fname)
+    {
+    cmsysProcess_SetPipeFile(this->Process, cmsysProcess_Pipe_STDERR, fname);
+    }
+  int WaitForExit(double* timeout =0) 
+    {
+      this->PipeState = cmsysProcess_WaitForExit(this->Process,
+                                                 timeout);
+      return this->PipeState;
+    }
+  int GetProcessState() { return this->PipeState;}
+private:
+  int PipeState;
+  cmsysProcess* Process;
+  std::vector<std::string> CommandLineStrings;
+  std::string WorkingDirectory;
+  double TimeOut;
+};
+
 
 //----------------------------------------------------------------------
 //**********************************************************************
@@ -158,8 +246,16 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
   // By now checkDir should be set to parent directory of the file.
   // Get the relative path to the file an apply it to the opposite directory.
   // If it is the same as fileDir, then ignore, otherwise check.
-  std::string relPath = cmSystemTools::RelativePath(checkDir.c_str(),
-    fFile.c_str());
+  std::string relPath;
+  if(checkDir.size() )
+    {
+    relPath = cmSystemTools::RelativePath(checkDir.c_str(),
+                                          fFile.c_str());
+    }
+  else
+    {
+    relPath = fFile;
+    }
   if ( checkDir == fSrcDir )
     {
     checkDir = fBinDir;
@@ -195,7 +291,8 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
 int cmCTestCoverageHandler::ProcessHandler()
 {
   int error = 0;
-
+  cmCTestLog(this->CTest, ERROR_MESSAGE,
+             "ProcessHandler cmCTestCoverageHandler " << std::endl);
   // do we have time for this
   if (this->CTest->GetRemainingTimeAllowed() < 120)
     {
@@ -233,8 +330,11 @@ int cmCTestCoverageHandler::ProcessHandler()
   cont.BinaryDir = binaryDir;
   cont.OFS = &ofs;
 
+  if(this->HandleBullseyeCoverage(&cont))
+    {
+    return cont.Error;
+    }
   int file_count = 0;
-
   file_count += this->HandleGCovCoverage(&cont);
   if ( file_count < 0 )
     {
@@ -1060,4 +1160,423 @@ std::string cmCTestCoverageHandler::FindFile(
     return fullName;
     }
   return "";
+}
+
+// This is a header put on each marked up source file
+namespace
+{
+  const char* bullseyeHelp[] = 
+  {"    Coverage produced by bullseye covbr tool: ",
+   "      www.bullseye.com/help/ref_covbr.html",
+   "    * An arrow --> indicates incomplete coverage.",
+   "    * An X indicates a function that was invoked, a switch label that ",
+   "      was exercised, a try-block that finished, or an exception handler ",
+   "      that was invoked.",
+   "    * A T or F indicates a boolean decision that evaluated true or false,",
+   "      respectively.",
+   "    * A t or f indicates a boolean condition within a decision if the ",
+   "      condition evaluated true or false, respectively.",
+   "    * A k indicates a constant decision or condition.",
+   "    * The slash / means this probe is excluded from summary results. ",
+   0};
+}
+
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
+  cmCTestCoverageHandlerContainer* cont,
+  std::vector<std::string>& files,
+  std::vector<std::string>& filesFullPath)
+{
+  if(files.size() != filesFullPath.size())
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, 
+               "Files and full path files not the same size?:\n");
+    return 0;
+    }
+  // create the output stream for the CoverageLog-N.xml file
+  cmGeneratedFileStream covLogFile;
+  int logFileCount = 0;
+  if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
+    {
+    return -1;
+    }
+  int count =0; // keep count of the number of files 
+  // loop over all files
+  std::vector<std::string>::iterator fp = filesFullPath.begin();
+  for(std::vector<std::string>::iterator f = files.begin();
+      f != files.end(); ++f, ++fp)
+    {
+    // only allow 100 files in each log file
+    if ( count != 0 && count % 100 == 0 )
+      {
+      this->EndCoverageLogFile(covLogFile, logFileCount);
+      logFileCount ++;
+      if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
+        {
+        return -1;
+        }
+      }
+    // for each file run covbr on that file to get the coverage
+    // information for that file
+    std::string outputFile;
+    if(!this->RunBullseyeCommand(cont, "covbr", f->c_str(), outputFile))
+      {
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "error running covbr for:" <<
+                 f->c_str() << "\n");
+      continue;
+      }
+    // open the output file
+    std::ifstream fin(outputFile.c_str());
+    if(!fin)
+      {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Cannot open coverage file: " <<
+                 outputFile.c_str() << std::endl);
+      return 0;
+      }
+    // we have good data so we can count it
+    count++;
+    // start the file output
+    covLogFile << "\t<File Name=\""
+      << this->CTest->MakeXMLSafe(f->c_str())
+      << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
+        this->CTest->GetShortPathToFile(
+          fp->c_str())) << "\">" << std::endl
+      << "\t\t<Report>" << std::endl;
+    // write the bullseye header
+    int line =0;
+    for(int k =0; bullseyeHelp[k] != 0; ++k)
+      {
+      covLogFile << "\t\t<Line Number=\"" << line << "\" Count=\"-1\">"
+                 << this->CTest->MakeXMLSafe(bullseyeHelp[k]) 
+                 << "</Line>" << std::endl;
+      line++;
+      }
+    // Now copy each line from the bullseye file into the cov log file
+    std::string lineIn;
+    while(cmSystemTools::GetLineFromStream(fin, lineIn))
+      {
+      covLogFile << "\t\t<Line Number=\"" << line << "\" Count=\"-1\">"
+                 << this->CTest->MakeXMLSafe(lineIn.c_str()) 
+                 << "</Line>" << std::endl;
+      line++;
+      }
+    covLogFile << "\t\t</Report>" << std::endl
+               << "\t</File>" << std::endl;
+    }
+  this->EndCoverageLogFile(covLogFile, logFileCount);
+  return 1;
+}
+
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::RunBullseyeCommand(
+  cmCTestCoverageHandlerContainer* cont,
+  const char* cmd,
+  const char* arg,
+  std::string& outputFile)
+{
+  std::string program = cmSystemTools::FindProgram(cmd);
+  if(program.size() == 0)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot find :" << cmd << "\n");
+    return 0;
+    }
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "Run : " << program.c_str() << " " << arg << "\n");
+  // create a process object and start it
+  cmCTestRunProcess runCoverageSrc;
+  runCoverageSrc.SetCommand(program.c_str());
+  runCoverageSrc.AddArgument(arg);
+  std::string stdoutFile = cont->BinaryDir + "/Testing/Temporary/";
+  stdoutFile += this->GetCTestInstance()->GetCurrentTag();
+  stdoutFile + "-";
+  stdoutFile += cmd;
+  std::string stderrFile = stdoutFile;
+  stdoutFile + ".stdout";
+  stderrFile += ".stderr";
+  runCoverageSrc.SetStdoutFile(stdoutFile.c_str());
+  runCoverageSrc.SetStderrFile(stderrFile.c_str());
+  if(!runCoverageSrc.StartProcess())
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Could not run : "
+               << program.c_str() << " " << arg << "\n"
+               << "kwsys process state : "
+               << runCoverageSrc.GetProcessState());
+    return 0;
+    }
+  // since we set the output file names wait for it to end
+  runCoverageSrc.WaitForExit();
+  outputFile = stdoutFile;
+  return 1;
+}
+
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::RunBullseyeSourceSummary(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  // Run the covsrc command and create a temp outputfile
+  std::string outputFile;
+  if(!this->RunBullseyeCommand(cont, "covsrc", "-c", outputFile))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "error running covsrc:\n");
+    return 0;
+    }
+  
+  std::ostream& tmpLog = *cont->OFS;
+  // copen the Coverage.xml file in the Testing directory
+  cmGeneratedFileStream covSumFile; 
+  if (!this->StartResultingXML("Coverage", covSumFile))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+      "Cannot open coverage summary file." << std::endl);
+    return 0;
+    }
+  this->CTest->StartXML(covSumFile); 
+  double elapsed_time_start = cmSystemTools::GetTime();
+  std::string coverage_start_time = this->CTest->CurrentTime();
+  covSumFile << "<Coverage>" << std::endl
+             << "\t<StartDateTime>" 
+             << coverage_start_time << "</StartDateTime>"
+             << std::endl;
+  std::string stdline;
+  std::string errline;
+  // expected output:
+  // first line is:
+  // "Source","Function Coverage","out of","%","C/D Coverage","out of","%"
+  // after that data follows in that format
+  std::string sourceFile;
+  int functionsCalled = 0;
+  int totalFunctions = 0;
+  int percentFunction = 0;
+  int branchCovered = 0;
+  int totalBranches = 0;
+  int percentBranch = 0;
+  double total_tested = 0;
+  double total_untested = 0;
+  double total_functions = 0;
+  double percent_coverage =0;
+  double number_files  = 0;
+  std::vector<std::string> coveredFiles;
+  std::vector<std::string> coveredFilesFullPath;
+  // Read and parse the summary output file
+  std::ifstream fin(outputFile.c_str());
+  if(!fin)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot open coverage summary file: " <<
+               outputFile.c_str() << std::endl);
+    return 0;
+    }
+  while(cmSystemTools::GetLineFromStream(fin, stdline))
+    {
+    // if we have a line of output from stdout
+    if(stdline.size())
+      {
+      // parse the comma separated output
+      this->ParseBullsEyeCovsrcLine(stdline,
+                                    sourceFile, 
+                                    functionsCalled,
+                                    totalFunctions,
+                                    percentFunction,
+                                    branchCovered,
+                                    totalBranches,
+                                    percentBranch);
+      // The first line is the header
+      if(sourceFile == "Source" || sourceFile == "Total")
+        {
+        continue;
+        }
+      std::string file = sourceFile;
+      if(!cmSystemTools::FileIsFullPath(sourceFile.c_str()))
+        {
+        // file will be relative to the binary dir
+        file = cont->BinaryDir;
+        file += "/";
+        file += sourceFile;
+        }
+      file = cmSystemTools::CollapseFullPath(file.c_str());
+      bool shouldIDoCoverage
+        = this->ShouldIDoCoverage(file.c_str(),
+                                  cont->SourceDir.c_str(), 
+                                  cont->BinaryDir.c_str());
+      if ( !shouldIDoCoverage )
+        {
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                   ".NoDartCoverage found, so skip coverage check for: "
+                   << file.c_str()
+                   << std::endl);
+        continue;
+        }
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                 "Doing coverage for: "
+                 << file.c_str()
+                 << std::endl);
+
+      coveredFiles.push_back(sourceFile);
+      number_files++;
+      total_functions += totalFunctions;
+      total_tested += functionsCalled;
+      total_untested += (totalFunctions - functionsCalled);
+      std::string fileName = cmSystemTools::GetFilenameName(file.c_str());
+      // get file relative to the source dir
+      file = cmSystemTools::RelativePath(cont->SourceDir.c_str(),
+                                         file.c_str());
+      coveredFilesFullPath.push_back(file);
+      float cper = percentBranch + percentFunction;
+      if(totalBranches > 0)
+        {
+        cper /= 2.0;
+        }
+      percent_coverage += cper;
+      float cmet = percentFunction + percentBranch;
+      if(totalBranches > 0)
+        {
+        cmet /= 2.0;
+        }
+      cmet /= 100.0;
+      // Hack for conversion of function to loc assume a function
+      // has 100 lines of code
+      functionsCalled *=100;
+      totalFunctions *=100;
+      tmpLog << stdline.c_str() << "\n";
+      tmpLog << fileName << "\n";
+      tmpLog << "functionsCalled: " << functionsCalled/100 << "\n";
+      tmpLog << "totalFunctions: " << totalFunctions/100 << "\n";
+      tmpLog << "percentFunction: " << percentFunction << "\n";
+      tmpLog << "branchCovered: " << branchCovered << "\n";
+      tmpLog << "totalBranches: " << totalBranches << "\n";
+      tmpLog << "percentBranch: " << percentBranch << "\n";
+      tmpLog << "percentCoverage: " << percent_coverage << "\n";
+      tmpLog << "coverage metric: " << cmet << "\n";
+      covSumFile << "\t<File Name=\"" << this->CTest->MakeXMLSafe(fileName)
+                 << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
+                   this->CTest->GetShortPathToFile(file.c_str()))
+                 << "\" Covered=\"" << (cmet>0?"true":"false") << "\">\n"
+                 << "\t\t<LOCTested>" << functionsCalled << "</LOCTested>\n"
+                 << "\t\t<LOCUnTested>" 
+                 << totalFunctions - functionsCalled << "</LOCUnTested>\n"
+                 << "\t\t<PercentCoverage>";
+      covSumFile.setf(std::ios::fixed, std::ios::floatfield);
+      covSumFile.precision(2);
+      covSumFile << (cper) << "</PercentCoverage>\n"
+                 << "\t\t<CoverageMetric>";
+      covSumFile.setf(std::ios::fixed, std::ios::floatfield);
+      covSumFile.precision(2);
+      covSumFile << (cmet) << "</CoverageMetric>\n"
+                 << "\t</File>" << std::endl;
+      }
+    }
+  std::string end_time = this->CTest->CurrentTime();
+  covSumFile << "\t<LOCTested>" << total_tested << "</LOCTested>\n"
+    << "\t<LOCUntested>" << total_untested << "</LOCUntested>\n"
+    << "\t<LOC>" << total_functions << "</LOC>\n"
+    << "\t<PercentCoverage>";
+  covSumFile.setf(std::ios::fixed, std::ios::floatfield);
+  covSumFile.precision(2);
+  covSumFile << (percent_coverage/number_files)<< "</PercentCoverage>\n"
+    << "\t<EndDateTime>" << end_time << "</EndDateTime>\n";
+  covSumFile << "<ElapsedMinutes>" <<
+    static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0
+    << "</ElapsedMinutes>"
+    << "</Coverage>" << std::endl;
+  this->CTest->EndXML(covSumFile);
+  // Now create the coverage information for each file
+  return this->RunBullseyeCoverageBranch(cont,
+                                         coveredFiles,
+                                         coveredFilesFullPath);
+}
+
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::HandleBullseyeCoverage(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  const char* covfile = cmSystemTools::GetEnv("COVFILE");
+  if(!covfile)
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+               " COVFILE environment variable not found, not running " 
+               " bullseye\n");
+    return 0;
+    }
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+             " run covsrc with COVFILE=[" 
+             << covfile
+             << "]" << std::endl);
+  if(!this->RunBullseyeSourceSummary(cont))
+    { 
+    cmCTestLog(this->CTest, ERROR_MESSAGE, 
+               "Error running bullseye summary.\n");
+    return 0;
+    }
+  return 1;
+}
+
+bool cmCTestCoverageHandler::GetNextInt(std::string const& inputLine,
+                                        std::string::size_type& pos,
+                                        int& value)
+{ 
+  std::string::size_type start = pos;
+  pos = inputLine.find(',', start);
+  value = atoi(inputLine.substr(start, pos).c_str());
+  if(pos == inputLine.npos)
+    {
+    return true;
+    }
+  pos++;
+  return true;
+}
+                                                 
+bool cmCTestCoverageHandler::ParseBullsEyeCovsrcLine(
+  std::string const& inputLine,
+  std::string& sourceFile,
+  int& functionsCalled,
+  int& totalFunctions,
+  int& percentFunction,
+  int& branchCovered,
+  int& totalBranches,
+  int& percentBranch)
+{
+  // find the first comma
+  std::string::size_type pos = inputLine.find(',');
+  if(pos == inputLine.npos)
+    { 
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error parsing string : "
+               << inputLine.c_str() << "\n");
+    return false;
+    }
+  // the source file has "" around it so extract out the file name
+  sourceFile = inputLine.substr(1,pos-2);
+  pos++;
+  if(!this->GetNextInt(inputLine, pos, functionsCalled))
+    {
+    return false;
+    }
+  if(!this->GetNextInt(inputLine, pos, totalFunctions))
+    {
+    return false;
+    }
+  if(!this->GetNextInt(inputLine, pos, percentFunction))
+    {
+    return false;
+    }
+  if(!this->GetNextInt(inputLine, pos, branchCovered))
+    {
+    return false;
+    }
+  if(!this->GetNextInt(inputLine, pos, totalBranches))
+    {
+    return false;
+    }
+  if(!this->GetNextInt(inputLine, pos, percentBranch))
+    {
+    return false;
+    }
+  // should be at the end now
+  if(pos != inputLine.npos)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error parsing input : "
+               << inputLine.c_str() << " last pos not npos =  " << pos << 
+               "\n");
+    }
+  return true;
 }
