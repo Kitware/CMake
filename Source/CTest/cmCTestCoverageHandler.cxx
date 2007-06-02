@@ -29,8 +29,6 @@
 #include <float.h>
 
 #define SAFEDIV(x,y) (((y)!=0)?((x)/(y)):(0))
-#include <iostream> // remove me*****
-#undef cerr
 
 class cmCTestRunProcess
 {
