@@ -289,8 +289,6 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
 int cmCTestCoverageHandler::ProcessHandler()
 {
   int error = 0;
-  cmCTestLog(this->CTest, ERROR_MESSAGE,
-             "ProcessHandler cmCTestCoverageHandler " << std::endl);
   // do we have time for this
   if (this->CTest->GetRemainingTimeAllowed() < 120)
     {
