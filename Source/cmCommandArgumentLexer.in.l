@@ -56,6 +56,8 @@ Modify cmCommandArgumentLexer.h:
 %option reentrant
 %option noyywrap
 %pointer
+%s ESCAPES
+%s NOESCAPES
 
 %%
 
@@ -98,7 +100,7 @@ Modify cmCommandArgumentLexer.h:
   return cal_NAME; 
 }
 
-\\. {
+<ESCAPES>\\. {
   if ( !yyextra->HandleEscapeSymbol(yylvalp, *(yytext+1)) )
     {
     return cal_ERROR;
@@ -124,10 +126,31 @@ Modify cmCommandArgumentLexer.h:
   return cal_LCURLY; 
 }
 
-"\\" {
+<ESCAPES>"\\" {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->BSLASHVariable;
   return cal_BSLASH; 
 }
 
+<NOESCAPES>"\\" {
+  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
+  yylvalp->str = yyextra->BSLASHVariable;
+  return cal_SYMBOL;
+}
+
 %%
+
+/*--------------------------------------------------------------------------*/
+void cmCommandArgument_SetupEscapes(yyscan_t yyscanner, bool noEscapes)
+{
+  /* Hack into the internal flex-generated scanner to set the state.  */
+  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+  if(noEscapes)
+    {
+    BEGIN(NOESCAPES);
+    }
+  else
+    {
+    BEGIN(ESCAPES);
+    }
+}

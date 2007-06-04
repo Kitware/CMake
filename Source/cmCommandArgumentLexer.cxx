@@ -1,5 +1,3 @@
-#include "cmStandardIncludes.h"
-
 #line 2 "cmCommandArgumentLexer.cxx"
 
 #line 4 "cmCommandArgumentLexer.cxx"
@@ -357,8 +355,8 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
         *yy_cp = '\0'; \
         yyg->yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 12
-#define YY_END_OF_BUFFER 13
+#define YY_NUM_RULES 13
+#define YY_END_OF_BUFFER 14
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -366,10 +364,11 @@ struct yy_trans_info
         flex_int32_t yy_verify;
         flex_int32_t yy_nxt;
         };
-static yyconst flex_int16_t yy_accept[20] =
+static yyconst flex_int16_t yy_accept[26] =
     {   0,
-        0,    0,   13,    8,    9,    6,    5,   11,   10,    4,
-        8,    0,    3,    6,    0,    7,    1,    2,    0
+        0,    0,    0,    0,    0,    0,   14,    8,    9,    6,
+        5,   13,   10,    4,   11,   12,    8,    0,    3,    6,
+        0,    7,    1,    2,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -409,32 +408,34 @@ static yyconst flex_int32_t yy_meta[9] =
         1,    2,    3,    1,    3,    3,    3,    3
     } ;
 
-static yyconst flex_int16_t yy_base[22] =
+static yyconst flex_int16_t yy_base[28] =
     {   0,
-        0,    0,   20,    0,    5,   14,    7,    0,   21,   21,
-        0,    3,   21,    0,    9,   21,   21,   21,   21,   14,
-       16
+        0,    0,   18,   17,   16,   15,   20,    0,    5,   14,
+        7,   25,   25,   25,    0,   25,    0,    3,   25,    0,
+        9,   25,   25,   25,   25,   14,   16
     } ;
 
-static yyconst flex_int16_t yy_def[22] =
+static yyconst flex_int16_t yy_def[28] =
     {   0,
-       19,    1,   19,   20,   19,   20,   19,   21,   19,   19,
-       20,    5,   19,    6,   19,   19,   19,   19,    0,   19,
-       19
+       25,    1,    1,    1,    1,    1,   25,   26,   25,   26,
+       25,   25,   25,   25,   27,   25,   26,    9,   25,   10,
+       25,   25,   25,   25,    0,   25,   25
     } ;
 
-static yyconst flex_int16_t yy_nxt[30] =
+static yyconst flex_int16_t yy_nxt[34] =
     {   0,
-        4,    4,    5,    6,    7,    8,    9,   10,   12,   17,
-       15,   13,   15,   18,   11,   11,   16,   14,   16,   19,
-        3,   19,   19,   19,   19,   19,   19,   19,   19
+        8,    8,    9,   10,   11,   12,   13,   14,   18,   23,
+       21,   19,   21,   24,   17,   17,   22,   20,   22,   25,
+       16,   16,   15,   15,    7,   25,   25,   25,   25,   25,
+       25,   25,   25
     } ;
 
-static yyconst flex_int16_t yy_chk[30] =
+static yyconst flex_int16_t yy_chk[34] =
     {   0,
-        1,    1,    1,    1,    1,    1,    1,    1,    5,   12,
-        7,    5,   15,   15,   20,   20,   21,    6,   21,    3,
-       19,   19,   19,   19,   19,   19,   19,   19,   19
+        1,    1,    1,    1,    1,    1,    1,    1,    9,   18,
+       11,    9,   21,   21,   26,   26,   27,   10,   27,    7,
+        6,    5,    4,    3,   25,   25,   25,   25,   25,   25,
+       25,   25,   25
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -498,9 +499,13 @@ Modify cmCommandArgumentLexer.h:
 #include "cmCommandArgumentParserTokens.h"
 
 /*--------------------------------------------------------------------------*/
-#line 500 "cmCommandArgumentLexer.cxx"
+
+
+#line 505 "cmCommandArgumentLexer.cxx"
 
 #define INITIAL 0
+#define ESCAPES 1
+#define NOESCAPES 2
 
 #ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
@@ -713,10 +718,10 @@ YY_DECL
         register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 60 "cmCommandArgumentLexer.in.l"
+#line 62 "cmCommandArgumentLexer.in.l"
 
 
-#line 720 "cmCommandArgumentLexer.cxx"
+#line 727 "cmCommandArgumentLexer.cxx"
 
         if ( !yyg->yy_init )
                 {
@@ -769,13 +774,13 @@ yy_match:
                         while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                                 {
                                 yy_current_state = (int) yy_def[yy_current_state];
-                                if ( yy_current_state >= 20 )
+                                if ( yy_current_state >= 26 )
                                         yy_c = yy_meta[(unsigned int) yy_c];
                                 }
                         yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
                         ++yy_cp;
                         }
-                while ( yy_base[yy_current_state] != 21 );
+                while ( yy_base[yy_current_state] != 25 );
 
 yy_find_action:
                 yy_act = yy_accept[yy_current_state];
@@ -801,7 +806,7 @@ do_action:      /* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 62 "cmCommandArgumentLexer.in.l"
+#line 64 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
@@ -809,7 +814,7 @@ YY_RULE_SETUP
 } 
 case 2:
 YY_RULE_SETUP
-#line 68 "cmCommandArgumentLexer.in.l"
+#line 70 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
@@ -817,7 +822,7 @@ YY_RULE_SETUP
 } 
 case 3:
 YY_RULE_SETUP
-#line 74 "cmCommandArgumentLexer.in.l"
+#line 76 "cmCommandArgumentLexer.in.l"
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
@@ -826,7 +831,7 @@ YY_RULE_SETUP
 }
 case 4:
 YY_RULE_SETUP
-#line 81 "cmCommandArgumentLexer.in.l"
+#line 83 "cmCommandArgumentLexer.in.l"
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
@@ -835,7 +840,7 @@ YY_RULE_SETUP
 }
 case 5:
 YY_RULE_SETUP
-#line 88 "cmCommandArgumentLexer.in.l"
+#line 90 "cmCommandArgumentLexer.in.l"
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
@@ -844,7 +849,7 @@ YY_RULE_SETUP
 }
 case 6:
 YY_RULE_SETUP
-#line 95 "cmCommandArgumentLexer.in.l"
+#line 97 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
@@ -852,7 +857,7 @@ YY_RULE_SETUP
 }
 case 7:
 YY_RULE_SETUP
-#line 101 "cmCommandArgumentLexer.in.l"
+#line 103 "cmCommandArgumentLexer.in.l"
 {
   if ( !yyextra->HandleEscapeSymbol(yylvalp, *(yytext+1)) )
     {
@@ -863,7 +868,7 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 109 "cmCommandArgumentLexer.in.l"
+#line 111 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
@@ -871,7 +876,7 @@ YY_RULE_SETUP
 }
 case 9:
 YY_RULE_SETUP
-#line 115 "cmCommandArgumentLexer.in.l"
+#line 117 "cmCommandArgumentLexer.in.l"
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->DOLLARVariable;
@@ -879,7 +884,7 @@ YY_RULE_SETUP
 }
 case 10:
 YY_RULE_SETUP
-#line 121 "cmCommandArgumentLexer.in.l"
+#line 123 "cmCommandArgumentLexer.in.l"
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->LCURLYVariable;
@@ -887,7 +892,7 @@ YY_RULE_SETUP
 }
 case 11:
 YY_RULE_SETUP
-#line 127 "cmCommandArgumentLexer.in.l"
+#line 129 "cmCommandArgumentLexer.in.l"
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->BSLASHVariable;
@@ -895,11 +900,21 @@ YY_RULE_SETUP
 }
 case 12:
 YY_RULE_SETUP
-#line 133 "cmCommandArgumentLexer.in.l"
+#line 135 "cmCommandArgumentLexer.in.l"
+{
+  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
+  yylvalp->str = yyextra->BSLASHVariable;
+  return cal_SYMBOL;
+}
+case 13:
+YY_RULE_SETUP
+#line 141 "cmCommandArgumentLexer.in.l"
 ECHO;
         YY_BREAK
-#line 913 "cmCommandArgumentLexer.cxx"
+#line 929 "cmCommandArgumentLexer.cxx"
 case YY_STATE_EOF(INITIAL):
+case YY_STATE_EOF(ESCAPES):
+case YY_STATE_EOF(NOESCAPES):
         yyterminate();
 
         case YY_END_OF_BUFFER:
@@ -1184,7 +1199,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
                 while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                         {
                         yy_current_state = (int) yy_def[yy_current_state];
-                        if ( yy_current_state >= 20 )
+                        if ( yy_current_state >= 26 )
                                 yy_c = yy_meta[(unsigned int) yy_c];
                         }
                 yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1213,11 +1228,11 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
         while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                 {
                 yy_current_state = (int) yy_def[yy_current_state];
-                if ( yy_current_state >= 20 )
+                if ( yy_current_state >= 26 )
                         yy_c = yy_meta[(unsigned int) yy_c];
                 }
         yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-        yy_is_jam = (yy_current_state == 19);
+        yy_is_jam = (yy_current_state == 25);
 
         return yy_is_jam ? 0 : yy_current_state;
 }
@@ -1967,7 +1982,22 @@ void cmCommandArgument_yyfree (void * ptr , yyscan_t)
 
 #define YYTABLES_NAME "yytables"
 
-#line 133 "cmCommandArgumentLexer.in.l"
+#line 141 "cmCommandArgumentLexer.in.l"
 
 
+
+/*--------------------------------------------------------------------------*/
+void cmCommandArgument_SetupEscapes(yyscan_t yyscanner, bool noEscapes)
+{
+  /* Hack into the internal flex-generated scanner to set the state.  */
+  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+  if(noEscapes)
+    {
+    BEGIN(NOESCAPES);
+    }
+  else
+    {
+    BEGIN(ESCAPES);
+    }
+}
 
