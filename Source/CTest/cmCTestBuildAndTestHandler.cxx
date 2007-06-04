@@ -457,8 +457,8 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
       {
       this->BuildOptions.push_back(allArgs[idx]);
       if(idx+1 < allArgs.size()
-        && (allArgs[idx+1] == "--build-target" ||
-          allArgs[idx+1] == "--test-command"))
+         && (allArgs[idx+1] == "--build-target" ||
+             allArgs[idx+1] == "--test-command"))
         {
         done = true;
         }

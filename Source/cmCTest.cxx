@@ -1094,8 +1094,10 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       {
       if(argv[i])
         {
-        // if this test has a test command make sure we pass the timeout in
-        if (strcmp(argv[i],"--test-command") == 0 && testTimeOut)
+        // make sure we pass the timeout in for any build and test 
+        // invocations. Since --build-generator is required this is a 
+        // good place to check for it, and to add the arguments in
+        if (strcmp(argv[i],"--build-generator") == 0 && testTimeOut)
           {
           args.push_back("--test-timeout");
           cmOStringStream msg;
