@@ -290,7 +290,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           }
         else
           {
-          cmSystemTools::Error("-D  must be followed with VAR=VALUE.");
+          cmSystemTools::Error("-D must be followed with VAR=VALUE.");
           return false;
           }
         }
