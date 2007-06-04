@@ -340,6 +340,12 @@ void cmMakefileLibraryTargetGenerator::CopyFrameworkResources(
     {
     cmCustomCommandLine line;
     cmSourceFile* sf = this->Makefile->GetOrCreateSource(i->c_str());
+    if(!sf)
+      {
+      cmSystemTools::Error(
+        "could not find resource file.", i->c_str());
+      continue;
+      }
     std::string dest = outpath + "Resources/";
     dest += sf->GetSourceName();
     std::string ext = sf->GetSourceExtension();
