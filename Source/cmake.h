@@ -388,11 +388,11 @@ private:
    "for the project.  This option may be used to specify a setting " \
    "that takes priority over the project's default value.  The option " \
    "may be repeated for as many cache entries as desired."}, \
-  {"-U <var>", "Remove one or more cmake cache entries.", \
+  {"-U <globbing_expr>", "Remove matching entries from CMake cache.", \
    "This option may be used to remove one or more variables from the " \
-   "CMakeCache.txt file, so that CMake will search them again. All " \
-   "variables which contain \"<var>\" will be removed. The option may be "\
-   "repeated for as many cache entries as desired."}, \
+   "CMakeCache.txt file, globbing expressions using * and ? are supported. "\
+   "The option may be repeated for as many cache entries as desired.\n" \
+   "Use with care, you can make your CMakeCache.txt non-working."}, \
   {"-G <generator-name>", "Specify a makefile generator.", \
    "CMake may support multiple native build systems on certain platforms.  " \
    "A makefile generator is responsible for generating a particular build " \

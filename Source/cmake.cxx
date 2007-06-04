@@ -33,8 +33,10 @@
 # include <cmsys/Terminal.h>
 #endif
 
-# include <cmsys/Directory.hxx>
+#include <cmsys/Directory.hxx>
 #include <cmsys/Process.h>
+#include <cmsys/Glob.hxx>
+#include <cmsys/RegularExpression.hxx>
 
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
@@ -288,7 +290,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           }
         else
           {
-          cmSystemTools::Error("-D must be followed with VAR=VALUE.");
+          cmSystemTools::Error("-D  must be followed with VAR=VALUE.");
           return false;
           }
         }
@@ -298,8 +300,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         cmCacheManager::ParseEntry(entry.c_str(), var, value))
         {
         this->CacheManager->AddCacheEntry(var.c_str(), value.c_str(),
-          "No help, variable specified on the command line.",
-          type==cmCacheManager::UNINITIALIZED?cmCacheManager::STRING:type);
+          "No help, variable specified on the command line.", type);
         }
       else
         {
@@ -325,7 +326,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           return false;
           }
         }
-
+      cmsys::RegularExpression regex(
+              cmsys::Glob::PatternToRegex(entryPattern.c_str(), true).c_str());
       //go through all cache entries and collect the vars which will be removed
       std::vector<std::string> entriesToDelete;
       cmCacheManager::CacheIterator it = 
@@ -336,7 +338,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         if(t != cmCacheManager::STATIC &&  t != cmCacheManager::UNINITIALIZED)
           {
           std::string entryName = it.GetName();
-          if (entryName.find(entryPattern) != std::string::npos)
+          if (regex.find(entryName.c_str()))
             {
             entriesToDelete.push_back(entryName);
             }

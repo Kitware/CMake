@@ -439,7 +439,7 @@ bool cmCacheManager::SaveCache(const char* path)
     {
     const CacheEntry& ce = (*i).second; 
     CacheEntryType t = ce.Type;
-    if(t == cmCacheManager::UNINITIALIZED || !ce.Initialized)
+    if(!ce.Initialized)
       {
       /*
         // This should be added in, but is not for now.
