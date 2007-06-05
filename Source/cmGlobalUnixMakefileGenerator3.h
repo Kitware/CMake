@@ -132,14 +132,13 @@ public:
   unsigned long GetNumberOfProgressActionsInAll
   (cmLocalUnixMakefileGenerator3 *lg);
 
-  /** Get whether the generator should use a script for link commands.  */
-  bool GetForceVerboseMakefiles() { return this->ForceVerboseMakefiles; }
   /**
-   * If set to true, the CMake variable CMAKE_VERBOSE_MAKEFILES doesn't have
+   * If true, the CMake variable CMAKE_VERBOSE_MAKEFILES doesn't have effect
    * anymore. Set it to true when writing a generator where short output
    * doesn't make sense, e.g. because the full output is parsed by an
    * IDE/editor.
    */
+  bool GetForceVerboseMakefiles() { return this->ForceVerboseMakefiles; }
   void SetForceVerboseMakefiles(bool enable) 
     {this->ForceVerboseMakefiles=enable;}
 
