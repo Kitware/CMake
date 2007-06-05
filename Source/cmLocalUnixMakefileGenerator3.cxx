@@ -47,7 +47,6 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->PassMakeflags = false;
   this->DefineWindowsNULL = false;
   this->UnixCD = true;
-  this->ForceVerboseMakefiles=false;
   this->ColorMakefile = false;
   this->SkipPreprocessedSourceRules = false;
   this->SkipAssemblySourceRules = false;
@@ -678,6 +677,8 @@ cmLocalUnixMakefileGenerator3
   this->WriteMakeRule(makefileStream, 0,
                       ".SUFFIXES", depends, no_commands, false);
 
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   // Write special target to silence make output.  This must be after
   // the default target in case VERBOSE is set (which changes the
   // name).  The setting of CMAKE_VERBOSE_MAKEFILE to ON will cause a
@@ -685,7 +686,7 @@ cmLocalUnixMakefileGenerator3
   // name of this special target.  This gives a make-time choice to
   // the user.
   if((this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE")) 
-     || (this->ForceVerboseMakefiles))
+     || (gg->GetForceVerboseMakefiles()))
     {
     makefileStream
       << "# Produce verbose output by default.\n"
@@ -707,8 +708,6 @@ cmLocalUnixMakefileGenerator3
 
   // Work-around for makes that drop rules that have no dependencies
   // or commands.
-  cmGlobalUnixMakefileGenerator3* gg =
-    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   std::string hack = gg->GetEmptyRuleHackDepends();
   if(!hack.empty())
     {

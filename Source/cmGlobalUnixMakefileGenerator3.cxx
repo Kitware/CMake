@@ -29,6 +29,8 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
   this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeUnixFindMake.cmake";
   this->ToolSupportsColor = true;
+  this->ForceVerboseMakefiles = false;
+
 #ifdef _WIN32
   this->UseLinkScript = false;
 #else

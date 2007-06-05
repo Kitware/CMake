@@ -45,9 +45,6 @@ public:
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
   
-  ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator();
-
  /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and

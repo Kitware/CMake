@@ -132,6 +132,17 @@ public:
   unsigned long GetNumberOfProgressActionsInAll
   (cmLocalUnixMakefileGenerator3 *lg);
 
+  /** Get whether the generator should use a script for link commands.  */
+  bool GetForceVerboseMakefiles() { return this->ForceVerboseMakefiles; }
+  /**
+   * If set to true, the CMake variable CMAKE_VERBOSE_MAKEFILES doesn't have
+   * anymore. Set it to true when writing a generator where short output
+   * doesn't make sense, e.g. because the full output is parsed by an
+   * IDE/editor.
+   */
+  void SetForceVerboseMakefiles(bool enable) 
+    {this->ForceVerboseMakefiles=enable;}
+
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
@@ -185,6 +196,7 @@ protected:
   MultipleOutputPairsType MultipleOutputPairs;
 
   std::map<cmStdString, int > TargetSourceFileCount;
+  bool ForceVerboseMakefiles;
 };
 
 #endif

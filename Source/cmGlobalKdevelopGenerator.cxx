@@ -31,15 +31,7 @@ cmGlobalKdevelopGenerator::cmGlobalKdevelopGenerator()
   this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeUnixFindMake.cmake";
   this->ToolSupportsColor = false;
-}
-
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalKdevelopGenerator::CreateLocalGenerator()
-{
-  cmLocalUnixMakefileGenerator3 *lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetForceVerboseMakefiles(true);
-  lg->SetGlobalGenerator(this);
-  return lg;
+  this->SetForceVerboseMakefiles(true);
 }
 
 //----------------------------------------------------------------------------
