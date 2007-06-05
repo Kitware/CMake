@@ -35,15 +35,15 @@
 
 /* IAR Systems compiler for embedded systems.
    http://www.iar.com
-   Beside this id not supported yet by CMake */
+   Not supported yet by CMake
 #elif defined(__IAR_SYSTEMS_ICC__)
-# define COMPILER_ID "IAR"
+# define COMPILER_ID "IAR" */
 
 /* sdcc, the small devices C compiler for embedded systems, 
    http://sdcc.sourceforge.net 
-   Beside this id not supported yet by CMake. */
+   Not supported yet by CMake.
 #elif defined(SDCC)
-# define COMPILER_ID "SDCC"
+# define COMPILER_ID "SDCC" */
 
 #elif defined(_COMPILER_VERSION)
 # define COMPILER_ID "MIPSpro"
