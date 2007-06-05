@@ -16,8 +16,6 @@
 
 @CHECK_TYPE_SIZE_PREMAIN@
 
-#include <stdio.h>
-
 #ifdef __CLASSIC_C__
 # define const
 #endif
@@ -39,7 +37,6 @@ int main(){
 #else
 int main(int ac, char*av[]){
 #endif
-   printf("sizeinfo: -%s-\n", info_sizeof);
   return (&info_sizeof[0] != &info_sizeof[0]);
 }
 
