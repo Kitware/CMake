@@ -18,6 +18,10 @@
 
 #include <stdio.h>
 
+#ifdef __CLASSIC_C__
+# define const
+#endif
+
 #define SIZE (sizeof(@CHECK_TYPE_SIZE_TYPE@))
 const char info_sizeof[] =  {'I', 'N', 'F', 'O', ':', 's','i','z','e','o','f','[',
   ('0' + ((SIZE / 10000)%10)),
