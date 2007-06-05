@@ -213,15 +213,6 @@ void cmCommandArgumentParserHelper::AllocateParserType
 bool cmCommandArgumentParserHelper::HandleEscapeSymbol
 (cmCommandArgumentParserHelper::ParserType* pt, char symbol)
 {
-  if ( this->NoEscapeMode )
-    {
-    char buffer[3];
-    buffer[0] = '\\';
-    buffer[1] = symbol;
-    buffer[2] = 0;
-    this->AllocateParserType(pt, buffer, 2);
-    return true;
-    }
   switch ( symbol )
     {
   case '\\':
@@ -260,6 +251,8 @@ bool cmCommandArgumentParserHelper::HandleEscapeSymbol
   return true;
 }
 
+void cmCommandArgument_SetupEscapes(yyscan_t yyscanner, bool noEscapes);
+
 int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
 {
   if ( !str)
@@ -276,6 +269,7 @@ int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
   yyscan_t yyscanner;
   cmCommandArgument_yylex_init(&yyscanner);
   cmCommandArgument_yyset_extra(this, yyscanner);
+  cmCommandArgument_SetupEscapes(yyscanner, this->NoEscapeMode);
   int res = cmCommandArgument_yyparse(yyscanner);
   cmCommandArgument_yylex_destroy(yyscanner);
   if ( res != 0 )

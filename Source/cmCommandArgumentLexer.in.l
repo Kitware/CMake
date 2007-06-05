@@ -24,6 +24,7 @@ Run flex like this:
   flex --prefix=cmCommandArgument_yy --header-file=cmCommandArgumentLexer.h -ocmCommandArgumentLexer.cxx cmCommandArgumentLexer.in.l
 
 Modify cmCommandArgumentLexer.cxx:
+  - add #include "cmStandardIncludes.h" to top of file
   - remove TABs
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, cmCommandArgument_yyalloc, cmCommandArgument_yyrealloc, cmCommandArgument_yyfree
@@ -56,6 +57,8 @@ Modify cmCommandArgumentLexer.h:
 %option reentrant
 %option noyywrap
 %pointer
+%s ESCAPES
+%s NOESCAPES
 
 %%
 
@@ -98,7 +101,7 @@ Modify cmCommandArgumentLexer.h:
   return cal_NAME; 
 }
 
-\\. {
+<ESCAPES>\\. {
   if ( !yyextra->HandleEscapeSymbol(yylvalp, *(yytext+1)) )
     {
     return cal_ERROR;
@@ -124,10 +127,31 @@ Modify cmCommandArgumentLexer.h:
   return cal_LCURLY; 
 }
 
-"\\" {
+<ESCAPES>"\\" {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->BSLASHVariable;
   return cal_BSLASH; 
 }
 
+<NOESCAPES>"\\" {
+  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
+  yylvalp->str = yyextra->BSLASHVariable;
+  return cal_SYMBOL;
+}
+
 %%
+
+/*--------------------------------------------------------------------------*/
+void cmCommandArgument_SetupEscapes(yyscan_t yyscanner, bool noEscapes)
+{
+  /* Hack into the internal flex-generated scanner to set the state.  */
+  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+  if(noEscapes)
+    {
+    BEGIN(NOESCAPES);
+    }
+  else
+    {
+    BEGIN(ESCAPES);
+    }
+}

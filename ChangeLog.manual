@@ -1,4 +1,6 @@
 Changes in CMake 2.4.7
+--- RC 9 ---
+* Fix problem with \@ in configure files bug# 5130 
 --- RC 8 ---
 * Fix bug 5121 crash with build test on and vs 
 
