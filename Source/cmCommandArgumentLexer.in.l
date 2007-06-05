@@ -24,6 +24,7 @@ Run flex like this:
   flex --prefix=cmCommandArgument_yy --header-file=cmCommandArgumentLexer.h -ocmCommandArgumentLexer.cxx cmCommandArgumentLexer.in.l
 
 Modify cmCommandArgumentLexer.cxx:
+  - add #include "cmStandardIncludes.h" to top of file
   - remove TABs
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, cmCommandArgument_yyalloc, cmCommandArgument_yyrealloc, cmCommandArgument_yyfree

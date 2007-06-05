@@ -1,3 +1,5 @@
+#include "cmStandardIncludes.h"
+
 #line 2 "cmCommandArgumentLexer.cxx"
 
 #line 4 "cmCommandArgumentLexer.cxx"
