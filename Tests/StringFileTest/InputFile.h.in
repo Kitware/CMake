@@ -5,6 +5,10 @@
 /* This should be configured to a commented undef with the curlies in place */
 #cmakedefine TEST_NOT_DEFINED ${TEST_NOT_DEFINED} 
 
+/* This complicated line should be configured unchanged: */
+static const char* configvar =
+"@$@$junk =~ s/#$xyz#/$foo_bar{$wibble}->{$xyz}/;@@";
+
 int CheckMethod(const char* var, const char* val )
 {
   if ( !var )

@@ -87,7 +87,7 @@ cmMakefile::cmMakefile()
   this->AddDefaultDefinitions();
   this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
   this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
-
+  this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
   this->PreOrder = false;
 }
 
@@ -1745,7 +1745,7 @@ std::vector<std::string> cmMakefile
 }
 
 
-const char *cmMakefile::ExpandVariablesInString(std::string& source) const
+const char *cmMakefile::ExpandVariablesInString(std::string& source)
 {
   return this->ExpandVariablesInString(source, false, false);
 }
@@ -1757,12 +1757,65 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 const char* filename,
                                                 long line,
                                                 bool removeEmpty,
-                                                bool replaceAt) const
+                                                bool replaceAt)
 {
   if ( source.empty() || source.find_first_of("$@\\") == source.npos)
     {
     return source.c_str();
     }
+
+  // Special-case the @ONLY mode.
+  if(atOnly)
+    {
+    if(!noEscapes || !removeEmpty || !replaceAt)
+      {
+      // This case should never be called.  At-only is for
+      // configure-file/string which always does no escapes.
+      abort();
+      }
+
+    // Store an original copy of the input.
+    std::string input = source;
+
+    // Start with empty output.
+    source = "";
+
+    // Look for one @VAR@ at a time.
+    const char* in = input.c_str();
+    while(this->cmAtVarRegex.find(in))
+      {
+      // Get the range of the string to replace.
+      const char* first = in + this->cmAtVarRegex.start();
+      const char* last =  in + this->cmAtVarRegex.end();
+
+      // Store the unchanged part of the string now.
+      source.append(in, first-in);
+
+      // Lookup the definition of VAR.
+      std::string var(first+1, last-first-2);
+      if(const char* val = this->GetDefinition(var.c_str()))
+        {
+        // Store the value in the output escaping as requested.
+        if(escapeQuotes)
+          {
+          source.append(cmSystemTools::EscapeQuotes(val));
+          }
+        else
+          {
+          source.append(val);
+          }
+        }
+
+      // Continue looking for @VAR@ further along the string.
+      in = last;
+      }
+
+    // Append the rest of the unchanged part of the string.
+    source.append(in);
+
+    return source.c_str();
+    }
+
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
   // with GetDefinition(), if not found in the map, nothing is expanded.
   // It also supports the $ENV{VAR} syntax where VAR is looked up in
@@ -1775,7 +1828,6 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   parser.SetNoEscapeMode(noEscapes);
   parser.SetReplaceAtSyntax(replaceAt);
   parser.SetRemoveEmpty(removeEmpty);
-  parser.SetAtOnly(atOnly);
   int res = parser.ParseString(source.c_str(), 0);
   if ( res )
     {

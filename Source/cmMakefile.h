@@ -570,14 +570,14 @@ public:
    * entry in the this->Definitions map.  Also @var@ is
    * expanded to match autoconf style expansions.
    */
-  const char *ExpandVariablesInString(std::string& source) const;
+  const char *ExpandVariablesInString(std::string& source);
   const char *ExpandVariablesInString(std::string& source, bool escapeQuotes,
                                       bool noEscapes,
                                       bool atOnly = false,
                                       const char* filename = 0,
                                       long line = -1,
                                       bool removeEmpty = false,
-                                      bool replaceAt = true) const;
+                                      bool replaceAt = true);
 
   /**
    * Remove any remaining variables in the string. Anything with ${var} or
@@ -807,6 +807,7 @@ private:
 
   cmsys::RegularExpression cmDefineRegex;
   cmsys::RegularExpression cmDefine01Regex;
+  cmsys::RegularExpression cmAtVarRegex;
 
   cmPropertyMap Properties;
 
