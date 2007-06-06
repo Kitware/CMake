@@ -31,21 +31,6 @@
 // (default) Each part of the ifdef contains a complete implementation for
 // the static methods of DynamicLoader.
 
-namespace KWSYS_NAMESPACE
-{
-
-//----------------------------------------------------------------------------
-DynamicLoader::DynamicLoader()
-{
-}
-
-//----------------------------------------------------------------------------
-DynamicLoader::~DynamicLoader()
-{
-}
-
-}
-
 // ---------------------------------------------------------------
 // 1. Implementation for HPUX  machines
 #ifdef __hpux

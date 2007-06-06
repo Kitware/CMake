@@ -76,9 +76,6 @@ public:
   // Return type from DynamicLoader::GetSymbolAddress.
   typedef void (*SymbolPointer)();
 
-  DynamicLoader();
-  ~DynamicLoader();
-
   /** Load a dynamic library into the current process.
    * The returned LibraryHandle can be used to access the symbols in the
    * library. */
