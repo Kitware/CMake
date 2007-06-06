@@ -3,9 +3,17 @@ include(I_am_not_here OPTIONAL)
 
 # this one must be found and the result must be put into _includedFile
 include(CMake RESULT_VARIABLE _includedFile)
-if(NOT "${_includedFile}"   STREQUAL "${CMAKE_ROOT}/Modules/CMake.cmake")
-   message(FATAL_ERROR "Wrong CMake.cmake was included: \"${_includedFile}\"")
-endif(NOT "${_includedFile}"   STREQUAL "${CMAKE_ROOT}/Modules/CMake.cmake")
+
+set(fileOne "${_includedFile}")
+set(fileTwo "${CMAKE_ROOT}/Modules/CMake.cmake")
+if(WIN32)
+  string(TOLOWER "${fileOne}" fileOne)
+  string(TOLOWER "${fileTwo}" fileOne)
+endif(WIN32)
+
+if(NOT "${fileOne}"   STREQUAL "${fileTwo}")
+   message(FATAL_ERROR "Wrong CMake.cmake was included: \"${$fileOne}\" expected \"${$fileTwo}\"")
+endif(NOT "${fileOne}"   STREQUAL "${fileTwo}")
 
 # this one must return NOTFOUND in _includedFile
 include(I_do_not_exist OPTIONAL RESULT_VARIABLE _includedFile)
@@ -16,7 +24,13 @@ endif(_includedFile)
 
 # and this one must succeed too
 include(CMake OPTIONAL RESULT_VARIABLE _includedFile)
+set(fileOne "${_includedFile}")
+set(fileTwo "${CMAKE_ROOT}/Modules/CMake.cmake")
+if(WIN32)
+  string(TOLOWER "${fileOne}" fileOne)
+  string(TOLOWER "${fileTwo}" fileOne)
+endif(WIN32)
+if(NOT "${fileOne}"   STREQUAL "${fileTwo}")
+   message(FATAL_ERROR "Wrong CMake.cmake was included: \"${$fileOne}\" expected \"${$fileTwo}\"")
+endif(NOT "${fileOne}"   STREQUAL "${fileTwo}")
 
-if(NOT "${_includedFile}"   STREQUAL "${CMAKE_ROOT}/Modules/CMake.cmake")
-   message(FATAL_ERROR "Wrong CMake.cmake was included: \"${_includedFile}\"")
-endif(NOT "${_includedFile}"   STREQUAL "${CMAKE_ROOT}/Modules/CMake.cmake")
