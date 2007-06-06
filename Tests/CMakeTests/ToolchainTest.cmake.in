@@ -80,11 +80,11 @@ set(fileOne "${_INCLUDED_TOOLCHAIN_FILE}")
 set(fileTwo "${MY_SOURCE_DIR}/DummyToolchain.cmake")
 if(WIN32)
   string(TOLOWER "${fileOne}" fileOne)
-  string(TOLOWER "${fileTwo}" fileOne)
+  string(TOLOWER "${fileTwo}" fileTwo)
 endif(WIN32)
 
 if(NOT "${fileOne}"   STREQUAL "${fileTwo}")
-   message(FATAL_ERROR "Wrong toolchain was loaded: \"${$fileOne}\" expected \"${$fileTwo}\"")
+   message(FATAL_ERROR "Wrong toolchain was loaded: \"${fileOne}\" expected \"${fileTwo}\"")
 endif(NOT "${fileOne}"   STREQUAL "${fileTwo}")
 
 # check that CMAKE_HOST_SYSTEM_XXX and _SYSTEM_xxx detected above are identical
