@@ -218,8 +218,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     {
     this->BuildTargets.push_back("");
     }
-  for ( tarIt = this->BuildTargets.begin(); tarIt != this->BuildTargets.end();
-    ++ tarIt )
+  for ( tarIt = this->BuildTargets.begin(); 
+        tarIt != this->BuildTargets.end(); ++ tarIt )
     {
     double remainingTime = 0;
     if (this->Timeout)
@@ -332,19 +332,19 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   out << "\n";
 
   // how much time is remaining
-    double remainingTime = 0;
-    if (this->Timeout)
+  double remainingTime = 0;
+  if (this->Timeout)
+    {
+    remainingTime = this->Timeout - cmSystemTools::GetTime() + clock_start;
+    if (remainingTime <= 0)
       {
-      remainingTime = this->Timeout - cmSystemTools::GetTime() + clock_start;
-      if (remainingTime <= 0)
+      if(outstring)
         {
-        if(outstring)
-          {
-          *outstring = "--build-and-test timeout exceeded. ";
-          }
-        return 1;
+        *outstring = "--build-and-test timeout exceeded. ";
         }
+      return 1;
       }
+    }
   
   int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, 0, 
                                         remainingTime);

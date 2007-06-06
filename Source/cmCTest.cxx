@@ -1083,12 +1083,28 @@ int cmCTest::RunTest(std::vector<const char*> argv,
                      std::string* output, int *retVal,
                      std::ostream* log, double testTimeOut)
 {
+  // determine how much time we have
+  double timeout = this->GetRemainingTimeAllowed() - 120;
+  if (this->TimeOut && this->TimeOut < timeout)
+    {
+    timeout = this->TimeOut;
+    }
+  if (testTimeOut && testTimeOut < timeout)
+    {
+    timeout = testTimeOut;
+    }
+  // always have at least 1 second if we got to here
+  if (timeout <= 0)
+    {
+    timeout = 1;
+    }
+
   if(cmSystemTools::SameFile(argv[0], this->CTestSelf.c_str()) &&
      !this->ForceNewCTestProcess)
     {
     cmCTest inst;
     inst.ConfigType = this->ConfigType;
-    inst.TimeOut = this->TimeOut;
+    inst.TimeOut = timeout;
     std::vector<std::string> args;
     for(unsigned int i =0; i < argv.size(); ++i)
       {
@@ -1101,7 +1117,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
           {
           args.push_back("--test-timeout");
           cmOStringStream msg;
-          msg << testTimeOut;
+          msg << timeout;
           args.push_back(msg.str());
           }
         args.push_back(argv[i]);
@@ -1137,22 +1153,6 @@ int cmCTest::RunTest(std::vector<const char*> argv,
   if(cmSystemTools::GetRunCommandHideConsole())
     {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
-    }
-
-  // do we have time for
-  double timeout = this->GetRemainingTimeAllowed() - 120;
-  if (this->TimeOut && this->TimeOut < timeout)
-    {
-    timeout = this->TimeOut;
-    }
-  if (testTimeOut && testTimeOut < timeout)
-    {
-    timeout = testTimeOut;
-    }
-  // always have at least 1 second if we got to here
-  if (timeout <= 0)
-    {
-    timeout = 1;
     }
 
   cmsysProcess_SetTimeout(cp, timeout);
