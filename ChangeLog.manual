@@ -1,4 +1,6 @@
 Changes in CMake 2.4.7
+--- RC 10 ----
+* Fix rebuild problem with makefiles and cmake vs CMakeSetup 
 --- RC 9 ---
 * Fix problem with \@ in configure files bug# 5130 
 --- RC 8 ---
