@@ -234,7 +234,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     cmOStringStream windowsVersionString;
     windowsVersionString << osvi.dwMajorVersion << "." << osvi.dwMinorVersion;
     windowsVersionString.str();
-    mf->AddDefinition("CMAKE_SYSTEM_VERSION", 
+    mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION", 
                       windowsVersionString.str().c_str());
 #endif
     // Read the DetermineSystem file
