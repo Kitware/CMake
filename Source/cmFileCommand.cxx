@@ -76,10 +76,6 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleStringsCommand(args);
     }
-/*  else if ( subCommand == "HEX_TO_BIN" )
-    {
-    return this->HandleHex2BinCommand(args);
-    }*/
   else if ( subCommand == "GLOB" )
     {
     return this->HandleGlobCommand(args, false);
@@ -236,7 +232,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   std::string line;
   bool has_newline = false;
   while (sizeLimit != 0 &&
-         cmSystemTools::GetLineFromStream(file, line, &has_newline, 
+         cmSystemTools::GetLineFromStream(file, line, &has_newline,
                                           sizeLimit) )
     {
     if (sizeLimit > 0)
@@ -260,53 +256,6 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   this->Makefile->AddDefinition(variable.c_str(), output.c_str());
   return true;
 }
-
-//----------------------------------------------------------------------------
-/*bool cmFileCommand::HandleHex2BinCommand(std::vector<std::string> const& args)
-{
-  if(args.size() != 3)
-    {
-    this->SetError("HEX_TO_BIN requires an input and an output file name");
-    return false;
-    }
-  // Get the file to read.
-  std::string inFileName = args[1];
-  if(!cmsys::SystemTools::FileIsFullPath(inFileName.c_str()))
-    {
-    inFileName = this->Makefile->GetCurrentDirectory();
-    inFileName += "/" + args[1];
-    }
-
-  // Get the file to write.
-  std::string outFileName = args[2];
-  if(!cmsys::SystemTools::FileIsFullPath(outFileName.c_str()))
-    {
-    outFileName = this->Makefile->GetCurrentDirectory();
-    outFileName += "/" + args[2];
-    }
-
-  if ( !this->Makefile->CanIWriteThisFile(outFileName.c_str()) )
-    {
-    std::string e
-      = "attempted to write a file: " + outFileName +
-      " into a source directory.";
-    this->SetError(e.c_str());
-    cmSystemTools::SetFatalErrorOccured();
-    return false;
-    }
-
-  std::string dir = cmSystemTools::GetFilenamePath(outFileName);
-  cmSystemTools::MakeDirectory(dir.c_str());
-
-  bool success = cmHexFileConverter::TryConvert(inFileName.c_str(), 
-                                                outFileName.c_str());
-  if (!success)
-    {
-    success = cmSystemTools::CopyFileAlways(inFileName.c_str(), 
-                                            outFileName.c_str());
-    }
-  return success;
-} */
 
 //----------------------------------------------------------------------------
 bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
@@ -485,7 +434,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       fileName = binaryFileName;
       }
     }
-    
+
   // Open the specified file.
 #if defined(_WIN32) || defined(__CYGWIN__)
   std::ifstream fin(fileName.c_str(), std::ios::in | std::ios::binary);
@@ -1089,7 +1038,7 @@ bool cmFileInstaller::InstallDirectory(const char* source,
 }
 
 //----------------------------------------------------------------------------
-void cmFileCommand::HandleInstallPermissions(cmFileInstaller& installer, 
+void cmFileCommand::HandleInstallPermissions(cmFileInstaller& installer,
                               mode_t& permissions_file,
                               mode_t& permissions_dir,
                               int itype,
@@ -1190,7 +1139,7 @@ void cmFileCommand
 
 
 //----------------------------------------------------------------------------
-bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer, 
+bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer,
                                              std::string& destination)
 {
   if ( destination.size() < 2 )
@@ -1199,7 +1148,7 @@ bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer,
         "No DESTINATION provided or .");
     return false;
     }
-    
+
   const char* destdir = cmSystemTools::GetEnv("DESTDIR");
   if ( destdir && *destdir )
     {
@@ -1299,9 +1248,9 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
 
   std::map<cmStdString, const char*> properties;
   bool optional = false;
-  bool result = this->ParseInstallArgs(args, installer, components, 
-                                       configurations, properties, 
-                                       itype, rename, destination, files, 
+  bool result = this->ParseInstallArgs(args, installer, components,
+                                       configurations, properties,
+                                       itype, rename, destination, files,
                                        optional);
   if (result == true)
     {
@@ -1640,7 +1589,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
 
     this->GetTargetTypeFromString(stype, itype);
 
-    this->HandleInstallPermissions(installer, 
+    this->HandleInstallPermissions(installer,
                              permissions_file,
                              permissions_dir,
                              itype,
@@ -1759,10 +1708,10 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
           cmSystemTools::RemoveFile(soname.c_str());
           cmSystemTools::RemoveFile(libname.c_str());
 
-          if (!cmSystemTools::CreateSymlink(soname_nopath.c_str(), 
+          if (!cmSystemTools::CreateSymlink(soname_nopath.c_str(),
                                             libname.c_str()) )
             {
-            std::string errstring = "error when creating symlink from: " 
+            std::string errstring = "error when creating symlink from: "
               + libname + " to " + soname_nopath;
             this->SetError(errstring.c_str());
             return false;
@@ -1770,10 +1719,10 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
           installer.ManifestAppend(libname);
           if ( toFile != soname )
             {
-            if ( !cmSystemTools::CreateSymlink(fromName.c_str(), 
+            if ( !cmSystemTools::CreateSymlink(fromName.c_str(),
                                                soname.c_str()) )
               {
-              std::string errstring = "error when creating symlink from: " 
+              std::string errstring = "error when creating symlink from: "
                 + soname + " to " + fromName;
               this->SetError(errstring.c_str());
               return false;
@@ -1805,10 +1754,10 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
 
           cmSystemTools::RemoveFile(exename.c_str());
 
-          if (!cmSystemTools::CreateSymlink(exename_nopath.c_str(), 
+          if (!cmSystemTools::CreateSymlink(exename_nopath.c_str(),
                                             exename.c_str()) )
             {
-            std::string errstring = "error when creating symlink from: " 
+            std::string errstring = "error when creating symlink from: "
               + exename + " to " + exename_nopath;
             this->SetError(errstring.c_str());
             return false;
@@ -1901,22 +1850,22 @@ bool cmFileCommand::HandleRelativePathCommand(
 
   if(!cmSystemTools::FileIsFullPath(directoryName.c_str()))
     {
-    std::string errstring = 
-      "RelativePath must be passed a full path to the directory: " 
+    std::string errstring =
+      "RelativePath must be passed a full path to the directory: "
       + directoryName;
     this->SetError(errstring.c_str());
     return false;
     }
   if(!cmSystemTools::FileIsFullPath(fileName.c_str()))
     {
-    std::string errstring = 
-      "RelativePath must be passed a full path to the file: " 
+    std::string errstring =
+      "RelativePath must be passed a full path to the file: "
       + fileName;
     this->SetError(errstring.c_str());
     return false;
     }
 
-  std::string res = cmSystemTools::RelativePath(directoryName.c_str(), 
+  std::string res = cmSystemTools::RelativePath(directoryName.c_str(),
                                                 fileName.c_str());
   this->Makefile->AddDefinition(outVar.c_str(),
     res.c_str());
@@ -1949,7 +1898,7 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
 
 //----------------------------------------------------------------------------
 bool cmFileCommand::HandleCMakePathCommand(std::vector<std::string>
-                                           const& args, 
+                                           const& args,
                                            bool nativePath)
 {
   std::vector<std::string>::const_iterator i = args.begin();
@@ -1965,7 +1914,7 @@ bool cmFileCommand::HandleCMakePathCommand(std::vector<std::string>
 #else
   char pathSep = ':';
 #endif
-  std::vector<cmsys::String> path = cmSystemTools::SplitString(i->c_str(), 
+  std::vector<cmsys::String> path = cmSystemTools::SplitString(i->c_str(),
                                                              pathSep);
   i++;
   const char* var =  i->c_str();
@@ -1986,7 +1935,7 @@ bool cmFileCommand::HandleCMakePathCommand(std::vector<std::string>
       *j = cmSystemTools::ConvertToOutputPath(j->c_str());
       // remove double quotes in the path
       cmsys::String& s = *j;
-      
+
       if(s.size() > 1 && s[0] == '\"' && s[s.size()-1] == '\"')
         {
         s = s.substr(1,s.size()-2);

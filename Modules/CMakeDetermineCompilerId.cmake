@@ -74,10 +74,8 @@ MACRO(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
         "Compilation of the ${lang} compiler identification source \""
         "${CMAKE_${lang}_COMPILER_ID_SRC}\" produced \""
         "${CMAKE_${lang}_COMPILER_ID_EXE}\"\n\n")
-      # only check if we don't have it yet 
+      # only check if we don't have it yet
       IF(NOT CMAKE_${lang}_COMPILER_ID)
-#        SET(CMAKE_${lang}_COMPILER_ID_EXE "${CMAKE_${lang}_COMPILER_ID_DIR}/ConvertedToBinary")
-#        FILE(HEX_TO_BIN "${CMAKE_${lang}_COMPILER_ID_EXE_TRY}" "${CMAKE_${lang}_COMPILER_ID_EXE}")
         # Read the compiler identification string from the executable file.
         FILE(STRINGS ${CMAKE_${lang}_COMPILER_ID_EXE}
           CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 2 REGEX "INFO:")

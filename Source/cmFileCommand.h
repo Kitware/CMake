@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -31,7 +31,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmFileCommand;
     }
@@ -55,11 +55,11 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "File manipulation command.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -74,7 +74,6 @@ public:
       "       [LENGTH_MINIMUM numBytes] [LENGTH_MAXIMUM numBytes]\n"
       "       [NEWLINE_CONSUME] [REGEX regex]\n"
       "       [NO_HEX_CONVERSION])\n"
-      "  FILE(HEX_TO_BIN inputfile outputfile)\n"
       "  FILE(GLOB variable [RELATIVE path] [globbing expressions]...)\n"
       "  FILE(GLOB_RECURSE variable [RELATIVE path] \n"
       "       [globbing expressions]...)\n"
@@ -100,9 +99,6 @@ public:
       "return (CR) characters are ignored. It works also for Intel Hex and "
       "Motorola S-record files, which are automatically converted to binary "
       "format when reading them. Disable this using NO_HEX_CONVERSION.\n "
-/*      "HEX_TO_BIN will convert an Intel hex file or Motorola S-record file "
-      "to a binary file. If the input file is no such file it will simply "
-      "be copied. \n"*/
       "LIMIT_COUNT sets the maximum number of strings to return. "
       "LIMIT_INPUT sets the maximum number of bytes to read from "
       "the input file. "
@@ -145,7 +141,7 @@ public:
       " a cmake style path into the native path style \\ for windows and / "
       "for UNIX.";
     }
-  
+
   cmTypeMacro(cmFileCommand, cmCommand);
 
 protected:
@@ -153,15 +149,14 @@ protected:
   bool HandleWriteCommand(std::vector<std::string> const& args, bool append);
   bool HandleReadCommand(std::vector<std::string> const& args);
   bool HandleStringsCommand(std::vector<std::string> const& args);
-//  bool HandleHex2BinCommand(std::vector<std::string> const& args);
   bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse);
   bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);
-  
+
   bool HandleRelativePathCommand(std::vector<std::string> const& args);
   bool HandleCMakePathCommand(std::vector<std::string> const& args,
                               bool nativePath);
   void ComputeVersionedName(std::string& name, const char* version);
-  
+
   // FILE(INSTALL ...) related functions
   bool HandleInstallCommand(std::vector<std::string> const& args);
   bool ParseInstallArgs(std::vector<std::string> const& args,
@@ -186,9 +181,9 @@ protected:
                  const bool optional
                 );
   void GetTargetTypeFromString(const std::string& stype, int& itype) const;
-  bool HandleInstallDestination(cmFileInstaller& installer, 
+  bool HandleInstallDestination(cmFileInstaller& installer,
                                 std::string& destination);
-  void HandleInstallPermissions(cmFileInstaller& installer, 
+  void HandleInstallPermissions(cmFileInstaller& installer,
                                 mode_t& permissions_file,
                                 mode_t& permissions_dir,
                                 int itype,
