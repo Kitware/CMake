@@ -22,13 +22,9 @@
 
 #include <cmsys/auto_ptr.hxx>
 
-// cmExecutableCommand
 bool cmExportLibraryDependenciesCommand
 ::InitialPass(std::vector<std::string> const& args)
 {
-  // First argument is the name of the test Second argument is the name of
-  // the executable to run (a target or external program) Remaining arguments
-  // are the arguments to pass to the executable
   if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
