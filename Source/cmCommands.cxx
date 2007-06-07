@@ -27,7 +27,6 @@
 #include "cmExportLibraryDependencies.cxx"
 #include "cmFLTKWrapUICommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"
-#include "cmGetTargetPropertyCommand.cxx"
 #include "cmGetTestPropertyCommand.cxx"
 #include "cmIncludeExternalMSProjectCommand.cxx"
 #include "cmInstallCommand.cxx"
@@ -80,7 +79,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetDirectoryPropertyCommand);
-  commands.push_back(new cmGetTargetPropertyCommand);
   commands.push_back(new cmGetTestPropertyCommand);
   commands.push_back(new cmIncludeExternalMSProjectCommand);
   commands.push_back(new cmInstallCommand);
