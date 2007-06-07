@@ -1,19 +1,12 @@
 SUBDIRS(Doxygen KWStyle)
 
-SET(CMD_DIR ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR})
-IF(WIN32)
-  SET(CMD_EXT ".exe")
-ELSE(WIN32)
-  SET(CMD_EXT "")
-ENDIF(WIN32)
-
 MAKE_DIRECTORY(${CMake_BINARY_DIR}/Docs)
 
 # Add a documentation target.
 SET(DOC_FILES "")
 
 # Generate documentation for "cmake" executable.
-SET(CMD ${CMD_DIR}/cmake${CMD_EXT})
+GET_TARGET_PROPERTY(CMD cmake LOCATION)
 ADD_CUSTOM_COMMAND(
   OUTPUT ${CMake_BINARY_DIR}/Docs/cmake.txt
   COMMAND ${CMD}
@@ -33,7 +26,7 @@ INSTALL_FILES(${CMAKE_DOC_DIR} FILES
 SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt)
 
 # Generate documentation for "ctest" executable.
-SET(CMD ${CMD_DIR}/ctest${CMD_EXT})
+GET_TARGET_PROPERTY(CMD ctest LOCATION)
 ADD_CUSTOM_COMMAND(
   OUTPUT ${CMake_BINARY_DIR}/Docs/ctest.txt
   COMMAND ${CMD}
@@ -52,7 +45,7 @@ SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/ctest.txt)
 
 # Generate documentation for "ccmake" executable.
 IF(BUILD_CursesDialog)
-  SET(CMD ${CMD_DIR}/ccmake${CMD_EXT})
+  GET_TARGET_PROPERTY(CMD ccmake LOCATION)
   ADD_CUSTOM_COMMAND(
     OUTPUT ${CMake_BINARY_DIR}/Docs/ccmake.txt
     COMMAND ${CMD}
@@ -73,7 +66,7 @@ IF(BUILD_CursesDialog)
 ENDIF(BUILD_CursesDialog)
 
 IF(BUILD_MFCDialog)
-  SET(CMD ${CMD_DIR}/CMakeSetup${CMD_EXT})
+  GET_TARGET_PROPERTY(CMD CMakeSetup LOCATION)
   ADD_CUSTOM_COMMAND(
     OUTPUT ${CMake_BINARY_DIR}/Docs/CMakeSetup.txt
     COMMAND ${CMD}
@@ -94,6 +87,6 @@ IF(BUILD_MFCDialog)
 ENDIF(BUILD_MFCDialog)
 
 # Drive documentation generation.
-ADD_CUSTOM_TARGET(documentation ALL   
-  DEPENDS ${DOC_FILES} 
+ADD_CUSTOM_TARGET(documentation ALL
+  DEPENDS ${DOC_FILES}
   )
