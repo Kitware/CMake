@@ -335,7 +335,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       for ( it.Begin(); !it.IsAtEnd(); it.Next() )
         {
         cmCacheManager::CacheEntryType t = it.GetType();
-        if(t != cmCacheManager::STATIC &&  t != cmCacheManager::UNINITIALIZED)
+        if(t != cmCacheManager::STATIC)
           {
           std::string entryName = it.GetName();
           if (regex.find(entryName.c_str()))
