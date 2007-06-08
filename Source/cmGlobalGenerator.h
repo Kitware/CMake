@@ -138,7 +138,7 @@ public:
   
   bool GetForceUnixPaths() {return this->ForceUnixPaths;}
   bool GetToolSupportsColor() { return this->ToolSupportsColor; }
-  bool SetToolSupportsColor(bool enable) { this->ToolSupportsColor = enable; }
+  void SetToolSupportsColor(bool enable) { this->ToolSupportsColor = enable; }
 
   ///! return the language for the given extension
   const char* GetLanguageFromExtension(const char* ext);

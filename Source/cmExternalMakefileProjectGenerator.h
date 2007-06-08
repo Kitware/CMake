@@ -39,6 +39,9 @@ class cmGlobalGenerator;
 class cmExternalMakefileProjectGenerator
 {
 public:
+
+  virtual ~cmExternalMakefileProjectGenerator() {}
+
   ///! Get the name for this generator.
   virtual const char* GetName() const = 0;
   /** Get the documentation entry for this generator.  */
