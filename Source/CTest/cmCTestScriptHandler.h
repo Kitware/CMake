@@ -108,6 +108,9 @@ public:
 
   void Initialize();
 
+  void CreateCMake();
+  void GetCommandDocumentation(std::vector<cmDocumentationEntry>& v) const;
+
 private:
   // reads in a script
   int ReadInScript(const std::string& total_script_arg);

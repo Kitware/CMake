@@ -21,6 +21,7 @@
 #include "cmake.h"
 #include "cmDocumentation.h"
 
+#include "CTest/cmCTestScriptHandler.h"
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
@@ -236,11 +237,18 @@ int main (int argc, char *argv[])
     if(doc.CheckOptions(argc, argv) || nocwd)
       {
       // Construct and print requested documentation.
+      std::vector<cmDocumentationEntry> commands;
+      cmCTestScriptHandler* ch =
+                 static_cast<cmCTestScriptHandler*>(inst.GetHandler("script"));
+      ch->CreateCMake();
+      ch->GetCommandDocumentation(commands);
+
       doc.SetName("ctest");
       doc.SetNameSection(cmDocumentationName);
       doc.SetUsageSection(cmDocumentationUsage);
       doc.SetDescriptionSection(cmDocumentationDescription);
       doc.SetOptionsSection(cmDocumentationOptions);
+      doc.SetCommandsSection(&commands[0]);
       doc.SetSeeAlsoList(cmDocumentationSeeAlso);
 #ifdef cout
 #  undef cout

@@ -283,6 +283,46 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   return retVal;
 }
 
+void cmCTestScriptHandler::CreateCMake()
+{
+  // create a cmake instance to read the configuration script
+  if (this->CMake)
+    {
+    delete this->CMake;
+    delete this->GlobalGenerator;
+    delete this->LocalGenerator;
+    }
+  this->CMake = new cmake;
+  this->CMake->AddCMakePaths(this->CTest->GetCTestExecutable());
+  this->GlobalGenerator = new cmGlobalGenerator;
+  this->GlobalGenerator->SetCMakeInstance(this->CMake);
+
+  this->LocalGenerator = this->GlobalGenerator->CreateLocalGenerator();
+  this->LocalGenerator->SetGlobalGenerator(this->GlobalGenerator);
+  this->Makefile = this->LocalGenerator->GetMakefile();
+
+
+  // add any ctest specific commands, probably should have common superclass
+  // for ctest commands to clean this up. If a couple more commands are
+  // created with the same format lets do that - ken
+  this->AddCTestCommand(new cmCTestBuildCommand);
+  this->AddCTestCommand(new cmCTestConfigureCommand);
+  this->AddCTestCommand(new cmCTestCoverageCommand);
+  this->AddCTestCommand(new cmCTestEmptyBinaryDirectoryCommand);
+  this->AddCTestCommand(new cmCTestMemCheckCommand);
+  this->AddCTestCommand(new cmCTestReadCustomFilesCommand);
+  this->AddCTestCommand(new cmCTestRunScriptCommand);
+  this->AddCTestCommand(new cmCTestSleepCommand);
+  this->AddCTestCommand(new cmCTestStartCommand);
+  this->AddCTestCommand(new cmCTestSubmitCommand);
+  this->AddCTestCommand(new cmCTestTestCommand);
+  this->AddCTestCommand(new cmCTestUpdateCommand);
+}
+
+void cmCTestScriptHandler::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v) const
+{
+  this->CMake->GetCommandDocumentation(v);
+}
 
 //----------------------------------------------------------------------
 // this sets up some variables for the script to use, creates the required
@@ -307,22 +347,9 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     return 1;
     }
 
-  // create a cmake instance to read the configuration script
   // read in the list file to fill the cache
-  if (this->CMake)
-    {
-    delete this->CMake;
-    delete this->GlobalGenerator;
-    delete this->LocalGenerator;
-    }
-  this->CMake = new cmake;
-  this->CMake->AddCMakePaths(this->CTest->GetCTestExecutable());
-  this->GlobalGenerator = new cmGlobalGenerator;
-  this->GlobalGenerator->SetCMakeInstance(this->CMake);
-
-  this->LocalGenerator = this->GlobalGenerator->CreateLocalGenerator();
-  this->LocalGenerator->SetGlobalGenerator(this->GlobalGenerator);
-  this->Makefile = this->LocalGenerator->GetMakefile();
+  // create a cmake instance to read the configuration script
+  this->CreateCMake();
 
   // set a variable with the path to the current script
   this->Makefile->AddDefinition("CTEST_SCRIPT_DIRECTORY",
@@ -335,22 +362,6 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
                             this->CTest->GetCMakeExecutable());
   this->Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", true);
   this->UpdateElapsedTime();
-
-  // add any ctest specific commands, probably should have common superclass
-  // for ctest commands to clean this up. If a couple more commands are
-  // created with the same format lets do that - ken
-  this->AddCTestCommand(new cmCTestBuildCommand);
-  this->AddCTestCommand(new cmCTestConfigureCommand);
-  this->AddCTestCommand(new cmCTestCoverageCommand);
-  this->AddCTestCommand(new cmCTestEmptyBinaryDirectoryCommand);
-  this->AddCTestCommand(new cmCTestMemCheckCommand);
-  this->AddCTestCommand(new cmCTestReadCustomFilesCommand);
-  this->AddCTestCommand(new cmCTestRunScriptCommand);
-  this->AddCTestCommand(new cmCTestSleepCommand);
-  this->AddCTestCommand(new cmCTestStartCommand);
-  this->AddCTestCommand(new cmCTestSubmitCommand);
-  this->AddCTestCommand(new cmCTestTestCommand);
-  this->AddCTestCommand(new cmCTestUpdateCommand);
 
   // add the script arg if defined
   if (script_arg.size())

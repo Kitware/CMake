@@ -301,28 +301,31 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::CreateModulesSection()
 {
-  this->ModulesSection.Append(cmDocumentationModulesHeader[0]);
   std::string cmakeModules = this->CMakeRoot;
   cmakeModules += "/Modules";
   cmsys::Directory dir;
   dir.Load(cmakeModules.c_str());
-  for(unsigned int i = 0; i < dir.GetNumberOfFiles(); ++i)
+  if (dir.GetNumberOfFiles() > 0)
     {
-    std::string fname = dir.GetFile(i);
-    if(fname.length() > 6)
+    this->ModulesSection.Append(cmDocumentationModulesHeader[0]);
+    for(unsigned int i = 0; i < dir.GetNumberOfFiles(); ++i)
       {
-      if(fname.substr(fname.length()-6, 6) == ".cmake")
+      std::string fname = dir.GetFile(i);
+      if(fname.length() > 6)
         {
-        std::string moduleName = fname.substr(0, fname.length()-6);
-        std::string path = cmakeModules;
-        path += "/";
-        path += fname;
-        this->CreateSingleModule(path.c_str(), moduleName.c_str());
+        if(fname.substr(fname.length()-6, 6) == ".cmake")
+          {
+          std::string moduleName = fname.substr(0, fname.length()-6);
+          std::string path = cmakeModules;
+          path += "/";
+          path += fname;
+          this->CreateSingleModule(path.c_str(), moduleName.c_str());
+          }
         }
-      }
-    } 
-  cmDocumentationEntry e = { 0, 0, 0 };
-  this->ModulesSection.Append(e);
+      } 
+    cmDocumentationEntry e = { 0, 0, 0 };
+    this->ModulesSection.Append(e);
+    }
   return true;
 }
 
