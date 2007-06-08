@@ -6,33 +6,32 @@
 #
 # and also the following more fine grained variables:
 # Include paths: X11_ICE_INCLUDE_PATH,          X11_ICE_LIB,        X11_ICE_FOUND
-#                X11_Xaccessrules_INCLUDE_PATH, X11_Xaccess_FOUND
-#                X11_Xaccessstr_INCLUDE_PATH,   X11_Xaccess_FOUND
+#                X11_Xaccessrules_INCLUDE_PATH,                     X11_Xaccess_FOUND
+#                X11_Xaccessstr_INCLUDE_PATH,                       X11_Xaccess_FOUND
 #                X11_Xau_INCLUDE_PATH,          X11_Xau_LIB,        X11_Xau_FOUND
 #                X11_Xcomposite_INCLUDE_PATH,   X11_Xcomposite_LIB, X11_Xcomposite_FOUND
 #                X11_Xcursor_INCLUDE_PATH,      X11_Xcursor_LIB,    X11_Xcursor_FOUND
 #                X11_Xdamage_INCLUDE_PATH,      X11_Xdamage_LIB,    X11_Xdamage_FOUND
 #                X11_Xdmcp_INCLUDE_PATH,        X11_Xdmcp_LIB,      X11_Xdmcp_FOUND
-#                X11_dpms_INCLUDE_PATH,                             X11_dpms_FOUND
 #                                               X11_Xext_LIB,       X11_Xext_FOUND
+#                X11_dpms_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_dpms_FOUND
+#                X11_XShm_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_XShm_FOUND
+#                X11_Xshape_INCLUDE_PATH,       (in X11_Xext_LIB),  X11_Xshape_FOUND
 #                X11_Xf86misc_INCLUDE_PATH,     X11_Xxf86misc_LIB,  X11_Xf86misc_FOUND
-#                X11_xf86vmode_INCLUDE_PATH,    X11_Xf86vmode_FOUND
+#                X11_xf86vmode_INCLUDE_PATH,                        X11_Xf86vmode_FOUND
 #                X11_Xfixes_INCLUDE_PATH,       X11_Xfixes_LIB,     X11_Xfixes_FOUND
 #                X11_Xft_INCLUDE_PATH,          X11_Xft_LIB,        X11_Xft_FOUND
 #                X11_Xinerama_INCLUDE_PATH,     X11_Xinerama_LIB,   X11_Xinerama_FOUND
 #                X11_Xinput_INCLUDE_PATH,       X11_Xinput_LIB,     X11_Xinput_FOUND
-#                X11_Xkb_INCLUDE_PATH,          X11_Xkb_FOUND
-#                X11_Xkblib_INCLUDE_PATH,       X11_Xkb_FOUND
+#                X11_Xkb_INCLUDE_PATH,                              X11_Xkb_FOUND
+#                X11_Xkblib_INCLUDE_PATH,                           X11_Xkb_FOUND
 #                X11_Xpm_INCLUDE_PATH,          X11_Xpm_LIB,        X11_Xpm_FOUND
 #                X11_XTest_INCLUDE_PATH,        X11_XTest_LIB,      X11_XTest_FOUND
-#                X11_XShm_INCLUDE_PATH,         X11_XShm_FOUND
 #                X11_Xrandr_INCLUDE_PATH,       X11_Xrandr_LIB,     X11_Xrandr_FOUND
 #                X11_Xrender_INCLUDE_PATH,      X11_Xrender_LIB,    X11_Xrender_FOUND
-#                X11_Xscreensaver_INCLUDE_PATH, X11_Xscreensaver_FOUND
-#                X11_Xshape_INCLUDE_PATH,       X11_Xshape_FOUND
-#                                               X11_Xss_LIB,        X11_Xss_FOUND
-#                                               X11_Xt_LIB,         X11_Xt_FOUND
-#                X11_Xutil_INCLUDE_PATH,        X11_Xutil_FOUND
+#                X11_Xscreensaver_INCLUDE_PATH, X11_Xscreensaver_LIB, X11_Xscreensaver_FOUND
+#                X11_Xt_INCLUDE_PATH,           X11_Xt_LIB,         X11_Xt_FOUND
+#                X11_Xutil_INCLUDE_PATH,                            X11_Xutil_FOUND
 #                X11_Xv_INCLUDE_PATH,           X11_Xv_LIB,         X11_Xv_FOUND
 
 # Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
@@ -95,6 +94,7 @@ IF (UNIX)
   FIND_PATH(X11_Xscreensaver_INCLUDE_PATH X11/extensions/scrnsaver.h ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xshape_INCLUDE_PATH X11/extensions/shape.h           ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xutil_INCLUDE_PATH X11/Xutil.h                       ${X11_INC_SEARCH_PATH})
+  FIND_PATH(X11_Xt_INCLUDE_PATH X11/Intrinsic.h                      ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xv_INCLUDE_PATH X11/extensions/Xvlib.h               ${X11_INC_SEARCH_PATH})
 
 
@@ -115,7 +115,7 @@ IF (UNIX)
   FIND_LIBRARY(X11_Xpm_LIB Xpm               ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xrandr_LIB Xrandr         ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xrender_LIB Xrender       ${X11_LIB_SEARCH_PATH})
-  FIND_LIBRARY(X11_Xss_LIB Xss               ${X11_LIB_SEARCH_PATH})
+  FIND_LIBRARY(X11_Xscreensaver_LIB Xss      ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xt_LIB Xt                 ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_XTest_LIB Xtst            ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xv_LIB Xv                 ${X11_LIB_SEARCH_PATH})
@@ -153,13 +153,9 @@ IF (UNIX)
     SET(X11_LIBRARIES ${X11_LIBRARIES} ${X11_Xext_LIB})
   ENDIF(X11_Xext_LIB)
 
-  IF(X11_Xss_LIB)
-    SET(X11_Xss_FOUND TRUE)
-  ENDIF(X11_Xss_LIB)
-
-  IF(X11_Xt_LIB)
+  IF(X11_Xt_LIB AND X11_Xt_INCLUDE_PATH)
     SET(X11_Xt_FOUND TRUE)
-  ENDIF(X11_Xt_LIB)
+  ENDIF(X11_Xt_LIB AND X11_Xt_INCLUDE_PATH)
 
   IF(X11_Xft_LIB AND X11_Xft_INCLUDE_PATH)
     SET(X11_Xft_FOUND TRUE)
@@ -246,10 +242,10 @@ IF (UNIX)
      SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xcursor_INCLUDE_PATH})
   ENDIF (X11_Xcursor_INCLUDE_PATH AND X11_Xcursor_LIB)
 
-  IF (X11_Xscreensaver_INCLUDE_PATH)
+  IF (X11_Xscreensaver_INCLUDE_PATH AND X11_Xscreensaver_LIB)
      SET(X11_Xscreensaver_FOUND TRUE)
      SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xscreensaver_INCLUDE_PATH})
-  ENDIF (X11_Xscreensaver_INCLUDE_PATH)
+  ENDIF (X11_Xscreensaver_INCLUDE_PATH AND X11_Xscreensaver_LIB)
 
   IF (X11_dpms_INCLUDE_PATH)
      SET(X11_dpms_FOUND TRUE)
@@ -366,6 +362,7 @@ IF (UNIX)
     X11_X11_LIB
     X11_Xext_LIB
     X11_Xau_LIB
+    X11_Xau_INCLUDE_PATH
     X11_Xlib_INCLUDE_PATH
     X11_Xutil_INCLUDE_PATH
     X11_Xcomposite_INCLUDE_PATH
@@ -390,7 +387,7 @@ IF (UNIX)
     X11_Xcursor_INCLUDE_PATH
     X11_dpms_INCLUDE_PATH
     X11_Xt_LIB
-    X11_Xss_LIB
+    X11_Xt_INCLUDE_PATH
     X11_Xdmcp_LIB
     X11_LIBRARIES
     X11_Xaccessrules_INCLUDE_PATH
@@ -400,6 +397,7 @@ IF (UNIX)
     X11_Xkb_INCLUDE_PATH
     X11_Xkblib_INCLUDE_PATH
     X11_Xscreensaver_INCLUDE_PATH
+    X11_Xscreensaver_LIB
     X11_Xpm_INCLUDE_PATH
     X11_Xpm_LIB
     X11_Xinput_LIB
