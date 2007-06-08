@@ -37,6 +37,7 @@ public:
     {
       this->Process = cmsysProcess_New();
       this->PipeState = -1;
+      this->TimeOut = -1;
     }
   ~cmCTestRunProcess()
     {
@@ -55,7 +56,10 @@ public:
     }
   void AddArgument(const char* arg)
     {
-      this->CommandLineStrings.push_back(arg);
+      if(arg)
+        {
+        this->CommandLineStrings.push_back(arg);
+        }
     }
   void SetWorkingDirectory(const char* dir)
     {
@@ -325,6 +329,18 @@ int cmCTestCoverageHandler::ProcessHandler()
   cont.SourceDir = sourceDir;
   cont.BinaryDir = binaryDir;
   cont.OFS = &ofs;
+
+  // setup the regex exclude stuff
+  this->CustomCoverageExcludeRegex.empty();
+  std::vector<cmStdString>::iterator rexIt;
+  for ( rexIt = this->CustomCoverageExclude.begin();
+    rexIt != this->CustomCoverageExclude.end();
+    ++ rexIt )
+    {
+    this->CustomCoverageExcludeRegex.push_back(
+      cmsys::RegularExpression(rexIt->c_str()));
+    }
+
 
   if(this->HandleBullseyeCoverage(&cont))
     {
@@ -664,16 +680,6 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::MakeDirectory(tempDir.c_str());
   cmSystemTools::ChangeDirectory(tempDir.c_str());
-
-  this->CustomCoverageExcludeRegex.empty();
-  std::vector<cmStdString>::iterator rexIt;
-  for ( rexIt = this->CustomCoverageExclude.begin();
-    rexIt != this->CustomCoverageExclude.end();
-    ++ rexIt )
-    {
-    this->CustomCoverageExcludeRegex.push_back(
-      cmsys::RegularExpression(rexIt->c_str()));
-    }
 
   int gcovStyle = 0;
 
@@ -1176,10 +1182,11 @@ namespace
    "    * The slash / means this probe is excluded from summary results. ",
    0};
 }
-
+  
 //----------------------------------------------------------------------
 int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
   cmCTestCoverageHandlerContainer* cont,
+  std::set<cmStdString>& coveredFileNames,
   std::vector<std::string>& files,
   std::vector<std::string>& filesFullPath)
 {
@@ -1196,67 +1203,125 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
     {
     return -1;
     }
-  int count =0; // keep count of the number of files 
-  // loop over all files
+  // for each file run covbr on that file to get the coverage
+  // information for that file
+  std::string outputFile;
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                 "run covbr: "
+                 << std::endl);
+
+  if(!this->RunBullseyeCommand(cont, "covbr", 0, outputFile))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "error running covbr for." << "\n");
+    return -1;
+    }
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "covbr output in  " << outputFile
+             << std::endl);
+  // open the output file
+  std::ifstream fin(outputFile.c_str());
+  if(!fin)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot open coverage file: " <<
+               outputFile.c_str() << std::endl);
+    return 0;
+    }
+  std::map<cmStdString, cmStdString> fileMap;
   std::vector<std::string>::iterator fp = filesFullPath.begin();
-  for(std::vector<std::string>::iterator f = files.begin();
+  for(std::vector<std::string>::iterator f =  files.begin(); 
       f != files.end(); ++f, ++fp)
     {
-    // only allow 100 files in each log file
-    if ( count != 0 && count % 100 == 0 )
+    fileMap[*f] = *fp;
+    }
+
+  int count =0; // keep count of the number of files 
+  // Now parse each line from the bullseye cov log file
+  std::string lineIn;
+  bool valid = false; // are we in a valid output file
+  int line = 0; // line of the current file
+  cmStdString file;
+  while(cmSystemTools::GetLineFromStream(fin, lineIn))
+    {
+    bool startFile = false;
+    if(lineIn.size() > 1 && lineIn[lineIn.size()-1] == ':')
       {
-      this->EndCoverageLogFile(covLogFile, logFileCount);
-      logFileCount ++;
-      if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
+      file = lineIn.substr(0, lineIn.size()-1);
+      if(coveredFileNames.find(file) != coveredFileNames.end())
         {
-        return -1;
+        startFile = true;
         }
       }
-    // for each file run covbr on that file to get the coverage
-    // information for that file
-    std::string outputFile;
-    if(!this->RunBullseyeCommand(cont, "covbr", f->c_str(), outputFile))
+    if(startFile)
       {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "error running covbr for:" <<
-                 f->c_str() << "\n");
-      continue;
+      // if we are in a valid file close it because a new one started
+      if(valid)
+        {
+        covLogFile << "\t\t</Report>" << std::endl
+                   << "\t</File>" << std::endl;
+        }
+      // only allow 100 files in each log file
+      if ( count != 0 && count % 100 == 0 )
+        {
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                   "start a new log file: "
+                   << count
+                   << std::endl);
+        this->EndCoverageLogFile(covLogFile, logFileCount);
+        logFileCount ++;
+        if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
+          {
+          return -1;
+          }
+        count++; // move on one 
+        }
+      std::map<cmStdString, cmStdString>::iterator 
+        i = fileMap.find(file);
+      // if the file should be covered write out the header for that file
+      if(i != fileMap.end())
+        {
+        // we have a new file so count it in the output
+        count++;
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                   "Produce coverage for file: "
+                   << file.c_str() << " " << count
+                   << std::endl);
+        // start the file output
+        covLogFile << "\t<File Name=\""
+                   << this->CTest->MakeXMLSafe(file.c_str())
+                   << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
+                     this->CTest->GetShortPathToFile(
+                       i->second.c_str())) << "\">" << std::endl
+                   << "\t\t<Report>" << std::endl;
+        // write the bullseye header
+        line =0;
+        for(int k =0; bullseyeHelp[k] != 0; ++k)
+          {
+          covLogFile << "\t\t<Line Number=\"" << line << "\" Count=\"-1\">"
+                     << this->CTest->MakeXMLSafe(bullseyeHelp[k]) 
+                     << "</Line>" << std::endl;
+          line++;
+          }
+        valid = true; // we are in a valid file section
+        }
+      else
+        {
+        // this is not a file that we want coverage for
+        valid = false;
+        }
       }
-    // open the output file
-    std::ifstream fin(outputFile.c_str());
-    if(!fin)
-      {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Cannot open coverage file: " <<
-                 outputFile.c_str() << std::endl);
-      return 0;
-      }
-    // we have good data so we can count it
-    count++;
-    // start the file output
-    covLogFile << "\t<File Name=\""
-      << this->CTest->MakeXMLSafe(f->c_str())
-      << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
-        this->CTest->GetShortPathToFile(
-          fp->c_str())) << "\">" << std::endl
-      << "\t\t<Report>" << std::endl;
-    // write the bullseye header
-    int line =0;
-    for(int k =0; bullseyeHelp[k] != 0; ++k)
-      {
-      covLogFile << "\t\t<Line Number=\"" << line << "\" Count=\"-1\">"
-                 << this->CTest->MakeXMLSafe(bullseyeHelp[k]) 
-                 << "</Line>" << std::endl;
-      line++;
-      }
-    // Now copy each line from the bullseye file into the cov log file
-    std::string lineIn;
-    while(cmSystemTools::GetLineFromStream(fin, lineIn))
+    // we are not at a start file, and we are in a valid file output the line
+    else if(valid)
       {
       covLogFile << "\t\t<Line Number=\"" << line << "\" Count=\"-1\">"
                  << this->CTest->MakeXMLSafe(lineIn.c_str()) 
                  << "</Line>" << std::endl;
       line++;
       }
+    }
+  // if we ran out of lines a valid file then close that file
+  if(valid)
+    {
     covLogFile << "\t\t</Report>" << std::endl
                << "\t</File>" << std::endl;
     }
@@ -1277,18 +1342,26 @@ int cmCTestCoverageHandler::RunBullseyeCommand(
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot find :" << cmd << "\n");
     return 0;
     }
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-             "Run : " << program.c_str() << " " << arg << "\n");
+  if(arg)
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "Run : " << program.c_str() << " " << arg << "\n");
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "Run : " << program.c_str() << "\n");
+    }
   // create a process object and start it
   cmCTestRunProcess runCoverageSrc;
   runCoverageSrc.SetCommand(program.c_str());
   runCoverageSrc.AddArgument(arg);
   std::string stdoutFile = cont->BinaryDir + "/Testing/Temporary/";
   stdoutFile += this->GetCTestInstance()->GetCurrentTag();
-  stdoutFile + "-";
+  stdoutFile += "-";
   stdoutFile += cmd;
   std::string stderrFile = stdoutFile;
-  stdoutFile + ".stdout";
+  stdoutFile += ".stdout";
   stderrFile += ".stderr";
   runCoverageSrc.SetStdoutFile(stdoutFile.c_str());
   runCoverageSrc.SetStderrFile(stderrFile.c_str());
@@ -1363,6 +1436,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
                outputFile.c_str() << std::endl);
     return 0;
     }
+  std::set<cmStdString> coveredFileNames;
   while(cmSystemTools::GetLineFromStream(fin, stdline))
     {
     // if we have a line of output from stdout
@@ -1383,6 +1457,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
         continue;
         }
       std::string file = sourceFile;
+      coveredFileNames.insert(file);
       if(!cmSystemTools::FileIsFullPath(sourceFile.c_str()))
         {
         // file will be relative to the binary dir
@@ -1478,6 +1553,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
   this->CTest->EndXML(covSumFile);
   // Now create the coverage information for each file
   return this->RunBullseyeCoverageBranch(cont,
+                                         coveredFileNames,
                                          coveredFiles,
                                          coveredFilesFullPath);
 }

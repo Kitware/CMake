@@ -63,6 +63,7 @@ private:
   int HandleBullseyeCoverage(cmCTestCoverageHandlerContainer* cont);
   int RunBullseyeSourceSummary(cmCTestCoverageHandlerContainer* cont);
   int RunBullseyeCoverageBranch(cmCTestCoverageHandlerContainer* cont,
+                                std::set<cmStdString>& coveredFileNames,
                                 std::vector<std::string>& files,
                                 std::vector<std::string>& filesFullPath);
   int RunBullseyeCommand(
