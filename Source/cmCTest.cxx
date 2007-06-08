@@ -1098,7 +1098,8 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     {
     timeout = 1;
     }
-
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+             "Test timeout computed to be: " << timeout << "\n");
   if(cmSystemTools::SameFile(argv[0], this->CTestSelf.c_str()) &&
      !this->ForceNewCTestProcess)
     {
@@ -1113,7 +1114,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
         // make sure we pass the timeout in for any build and test 
         // invocations. Since --build-generator is required this is a 
         // good place to check for it, and to add the arguments in
-        if (strcmp(argv[i],"--build-generator") == 0 && testTimeOut)
+        if (strcmp(argv[i],"--build-generator") == 0 && timeout)
           {
           args.push_back("--test-timeout");
           cmOStringStream msg;
