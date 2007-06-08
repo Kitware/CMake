@@ -101,9 +101,25 @@ bool cmExportCommand
       currentTarget != targets.end();
       ++currentTarget)
     {
+    cmTarget* target = this->Makefile->GetLocalGenerator()->
+             GetGlobalGenerator()->FindTarget(0, currentTarget->c_str(), true);
+    if (target == 0)
+      {
+      std::string e = "detected unknown target: " + *currentTarget;
+      this->SetError(e.c_str());
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+      }
+    }
+
+  for(std::vector<std::string>::const_iterator currentTarget = targets.begin();
+      currentTarget != targets.end();
+      ++currentTarget)
+    {
     // Look for a CMake target with the given name, which is an executable
     // and which can be run
-    cmTarget* target = this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->FindTarget(0, currentTarget->c_str(), true);
+    cmTarget* target = this->Makefile->GetLocalGenerator()->
+             GetGlobalGenerator()->FindTarget(0, currentTarget->c_str(), true);
     if ((target != 0)
        && ((target->GetType() == cmTarget::EXECUTABLE)
         || (target->GetType() == cmTarget::STATIC_LIBRARY)
@@ -113,24 +129,30 @@ bool cmExportCommand
       switch (target->GetType())
         {
         case cmTarget::EXECUTABLE:
-          fout << "ADD_EXECUTABLE(" << prefix.c_str() << currentTarget->c_str() << " IMPORT )\n";
+          fout << "ADD_EXECUTABLE(" << prefix.c_str() << currentTarget->c_str()
+                                                              << " IMPORT )\n";
           break;
         case cmTarget::STATIC_LIBRARY:
-          fout << "ADD_LIBRARY(" << prefix.c_str() << currentTarget->c_str() << " STATIC IMPORT )\n";
+          fout << "ADD_LIBRARY(" << prefix.c_str() << currentTarget->c_str()
+                                                       << " STATIC IMPORT )\n";
           break;
         case cmTarget::SHARED_LIBRARY:
-          fout << "ADD_LIBRARY(" << prefix.c_str() << currentTarget->c_str() << " SHARED IMPORT )\n";
+          fout << "ADD_LIBRARY(" << prefix.c_str() << currentTarget->c_str()
+                                                       << " SHARED IMPORT )\n";
           break;
         case cmTarget::MODULE_LIBRARY:
-          fout << "ADD_LIBRARY(" << prefix.c_str() << currentTarget->c_str() << " MODULE IMPORT )\n";
+          fout << "ADD_LIBRARY(" << prefix.c_str() << currentTarget->c_str()
+                                                       << " MODULE IMPORT )\n";
           break;
         default:  // should never happen
           break;
         }
 
-      fout << "SET_TARGET_PROPERTIES(" << prefix.c_str() << currentTarget->c_str() << " PROPERTIES \n";
-      fout << "                      LOCATION " << target->GetLocation(0) << "\n";
-      for(std::vector<std::string>::const_iterator currentConfig = configurationTypes.begin();
+      fout << "SET_TARGET_PROPERTIES(" << prefix.c_str()
+                                 << currentTarget->c_str() << " PROPERTIES \n"
+        << "                      LOCATION " << target->GetLocation(0) << "\n";
+      for(std::vector<std::string>::const_iterator
+          currentConfig = configurationTypes.begin();
           currentConfig != configurationTypes.end();
           ++currentConfig)
         {
@@ -139,14 +161,12 @@ bool cmExportCommand
           const char* loc = target->GetLocation(currentConfig->c_str());
           if (loc && *loc)
             {
-            fout << "                      " << currentConfig->c_str()<< "_LOCATION " << loc << "\n";
+            fout << "                      " << currentConfig->c_str()
+                                                << "_LOCATION " << loc << "\n";
             }
           }
         }
       fout << "                     )\n\n";
-      }
-    else
-      {
       }
     }
 
