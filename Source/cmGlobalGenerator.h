@@ -19,6 +19,7 @@
 #define cmGlobalGenerator_h
 
 #include "cmStandardIncludes.h"
+#include "cmExternalMakefileProjectGenerator.h"
 
 #include "cmTarget.h" // For cmTargets
 
@@ -123,6 +124,13 @@ public:
 
   void AddLocalGenerator(cmLocalGenerator *lg);
 
+  ///! Set an generator for an "external makefile based project"
+  void SetExternalMakefileProjectGenerator(
+                           cmExternalMakefileProjectGenerator *extraGenerator);
+
+  const char* GetExtraGeneratorName() const
+          {return this->ExtraGenerator!=0 ? this->ExtraGenerator->GetName():0;}
+
   void AddInstallComponent(const char* component);
   void EnableInstallTarget();
   
@@ -130,6 +138,8 @@ public:
   
   bool GetForceUnixPaths() {return this->ForceUnixPaths;}
   bool GetToolSupportsColor() { return this->ToolSupportsColor; }
+  bool SetToolSupportsColor(bool enable) { this->ToolSupportsColor = enable; }
+
   ///! return the language for the given extension
   const char* GetLanguageFromExtension(const char* ext);
   ///! is an extension to be ignored
@@ -196,6 +206,7 @@ public:
   // what targets does the specified target depend on
   std::vector<cmTarget *>& GetTargetDepends(cmTarget& target);
 
+  const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap() const {return this->ProjectMap;}
 protected:
   // Fill the ProjectMap, this must be called after LocalGenerators 
   // has been populated.
@@ -242,6 +253,8 @@ private:
   std::map<cmStdString,cmTarget *> ImportedTotalTargets;
   
   std::map<cmStdString, std::vector<cmTarget *> > TargetDependencies;
+
+  cmExternalMakefileProjectGenerator* ExtraGenerator;
 };
 
 #endif

@@ -51,6 +51,7 @@ class cmMakefile;
 class cmCommand;
 class cmVariableWatch;
 class cmFileTimeComparison;
+class cmExternalMakefileProjectGenerator;
 
 class cmake
 {
@@ -305,14 +306,22 @@ protected:
   cmPropertyDefinitionMap DirectoryProperties;
   cmPropertyDefinitionMap TestProperties;
   cmPropertyDefinitionMap GlobalProperties;
-  
+
+  typedef 
+     cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();
+  typedef std::map<cmStdString,
+                CreateExtraGeneratorFunctionType> RegisteredExtraGeneratorsMap;
+
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString,
                    CreateGeneratorFunctionType> RegisteredGeneratorsMap;
   RegisteredCommandsMap Commands;
   RegisteredGeneratorsMap Generators;
+  RegisteredExtraGeneratorsMap ExtraGenerators;
   void AddDefaultCommands();
   void AddDefaultGenerators();
+  void AddDefaultExtraGenerators();
+  void AddExtraGenerator(const char* name, CreateExtraGeneratorFunctionType newFunction);
 
   cmGlobalGenerator *GlobalGenerator;
   cmCacheManager *CacheManager;

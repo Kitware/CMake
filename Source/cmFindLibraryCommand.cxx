@@ -32,6 +32,10 @@ cmFindLibraryCommand::cmFindLibraryCommand()
                                "SEARCH_XXX_DESC", "library");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "SEARCH_XXX", "library");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_FIND_ROOT_PATH_MODE_XXX", 
+                               "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY");
+
   this->GenericDocumentation += 
     "\n"
     "If the library found is a framework, then VAR will be set to "

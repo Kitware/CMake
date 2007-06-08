@@ -169,6 +169,7 @@ cmake::cmake()
 #endif
 
   this->AddDefaultGenerators();
+  this->AddDefaultExtraGenerators();
   this->AddDefaultCommands();
 
   // Make sure we can capture the build tool output.
@@ -1405,6 +1406,40 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
   return 1;
 }
 
+void cmake::AddExtraGenerator(const char* name, 
+                              CreateExtraGeneratorFunctionType newFunction)
+{
+  this->ExtraGenerators[name] = newFunction;
+  cmExternalMakefileProjectGenerator* extraGenerator = newFunction();
+  const std::vector<std::string>& supportedGlobalGenerators =
+                                extraGenerator->GetSupportedGlobalGenerators();
+
+  for(std::vector<std::string>::const_iterator 
+      it = supportedGlobalGenerators.begin();
+      it != supportedGlobalGenerators.end();
+      ++it )
+    {
+    std::string fullName = cmExternalMakefileProjectGenerator::
+                                    CreateFullGeneratorName(it->c_str(), name);
+    this->ExtraGenerators[fullName.c_str()] = newFunction;
+    }
+  delete extraGenerator;
+}
+
+void cmake::AddDefaultExtraGenerators()
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# if !defined(CMAKE_BOOT_MINGW)
+  // e.g. codeblocks, kdevelop4 ?
+# endif
+#endif
+// e.g. eclipse ?
+#ifdef CMAKE_USE_KDEVELOP
+  this->AddExtraGenerator(cmGlobalKdevelopGenerator::GetActualName(), &cmGlobalKdevelopGenerator::New);
+#endif
+}
+
+
 //----------------------------------------------------------------------------
 void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 {
@@ -1417,17 +1452,30 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 
 cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
 {
-  RegisteredGeneratorsMap::const_iterator i = this->Generators.find(name);
-  if(i != this->Generators.end())
+  cmGlobalGenerator* generator = 0;
+  cmExternalMakefileProjectGenerator* extraGenerator = 0;
+  RegisteredGeneratorsMap::const_iterator genIt = this->Generators.find(name);
+  if(genIt == this->Generators.end())
     {
-    cmGlobalGenerator* generator = (i->second)();
-    generator->SetCMakeInstance(this);
-    return generator;
-    }
-  else
-    {
-    return 0;
-    }
+    RegisteredExtraGeneratorsMap::const_iterator extraGenIt =
+                                              this->ExtraGenerators.find(name);
+    if (extraGenIt == this->ExtraGenerators.end())
+      {
+      return 0;
+      }
+    extraGenerator = (extraGenIt->second)();
+    genIt=this->Generators.find(extraGenerator->GetGlobalGeneratorName(name));
+    if(genIt == this->Generators.end())
+      {
+      delete extraGenerator;
+      return 0;
+      }
+  }
+
+  generator = (genIt->second)();
+  generator->SetCMakeInstance(this);
+  generator->SetExternalMakefileProjectGenerator(extraGenerator);
+  return generator;
 }
 
 void cmake::SetHomeDirectory(const char* dir)
@@ -1599,9 +1647,13 @@ int cmake::Configure()
     {
     const char* genName = 
       this->CacheManager->GetCacheValue("CMAKE_GENERATOR");
+    const char* extraGenName = 
+      this->CacheManager->GetCacheValue("CMAKE_EXTRA_GENERATOR");
     if(genName)
       {
-      this->GlobalGenerator = this->CreateGlobalGenerator(genName);
+      std::string fullName = cmExternalMakefileProjectGenerator::
+                                CreateFullGeneratorName(genName, extraGenName);
+      this->GlobalGenerator = this->CreateGlobalGenerator(fullName.c_str());
       }
     if(this->GlobalGenerator)
       {
@@ -1688,6 +1740,10 @@ int cmake::Configure()
                                       this->GlobalGenerator->GetName(),
                                       "Name of generator.",
                                       cmCacheManager::INTERNAL);
+    this->CacheManager->AddCacheEntry("CMAKE_EXTRA_GENERATOR", 
+                                this->GlobalGenerator->GetExtraGeneratorName(),
+                                "Name of external makefile project generator.",
+                                cmCacheManager::INTERNAL);
     }
 
   // reset any system configuration information, except for when we are
@@ -1750,6 +1806,7 @@ int cmake::Configure()
     // We must have a bad generator selection.  Wipe the cache entry so the
     // user can select another.
     this->CacheManager->RemoveCacheEntry("CMAKE_GENERATOR");
+    this->CacheManager->RemoveCacheEntry("CMAKE_EMP_GENERATOR");
     }
   // only save the cache if there were no fatal errors
   if ( !this->ScriptMode )
@@ -2001,10 +2058,6 @@ void cmake::AddDefaultGenerators()
   this->Generators[cmGlobalXCodeGenerator::GetActualName()] =
     &cmGlobalXCodeGenerator::New;
 #endif
-#ifdef CMAKE_USE_KDEVELOP
-  this->Generators[cmGlobalKdevelopGenerator::GetActualName()] =
-     &cmGlobalKdevelopGenerator::New;
-#endif
 }
 
 int cmake::LoadCache()
@@ -2118,6 +2171,16 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
     cmDocumentationEntry e;
     cmGlobalGenerator* generator = (i->second)();
     generator->GetDocumentation(e);
+    delete generator;
+    v.push_back(e);
+    }
+  for(RegisteredExtraGeneratorsMap::const_iterator 
+      i = this->ExtraGenerators.begin(); i != this->ExtraGenerators.end(); ++i)
+    {
+    cmDocumentationEntry e;
+    cmExternalMakefileProjectGenerator* generator = (i->second)();
+    generator->GetDocumentation(e, i->first.c_str());
+    e.name = i->first.c_str();
     delete generator;
     v.push_back(e);
     }

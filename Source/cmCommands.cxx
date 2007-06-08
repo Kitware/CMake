@@ -24,6 +24,7 @@
 #include "cmEndMacroCommand.cxx"
 #include "cmEndWhileCommand.cxx"
 #include "cmExecuteProcessCommand.cxx"
+#include "cmExportCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
 #include "cmFLTKWrapUICommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"
@@ -76,6 +77,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmEndMacroCommand);
   commands.push_back(new cmEndWhileCommand);
   commands.push_back(new cmExecuteProcessCommand);
+  commands.push_back(new cmExportCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetDirectoryPropertyCommand);

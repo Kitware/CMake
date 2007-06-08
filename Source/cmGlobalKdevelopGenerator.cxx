@@ -17,6 +17,7 @@
 =========================================================================*/
 
 #include "cmGlobalKdevelopGenerator.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmake.h"
@@ -25,18 +26,9 @@
 
 #include <cmsys/SystemTools.hxx>
 
-cmGlobalKdevelopGenerator::cmGlobalKdevelopGenerator()
-{
-  // This type of makefile always requires unix style paths
-  this->ForceUnixPaths = true;
-  this->FindMakeProgramFile = "CMakeUnixFindMake.cmake";
-  this->ToolSupportsColor = false;
-  this->SetForceVerboseMakefiles(true);
-}
-
 //----------------------------------------------------------------------------
 void cmGlobalKdevelopGenerator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry, const char*) const
 {
   entry.name = this->GetName();
   entry.brief = "Generates KDevelop 3 project files.";
@@ -52,13 +44,31 @@ void cmGlobalKdevelopGenerator
     "default make target.  A \"make install\" target is also provided.";
 }
 
+cmGlobalKdevelopGenerator::cmGlobalKdevelopGenerator()
+:cmExternalMakefileProjectGenerator()
+{
+  this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+}
+
+
+void cmGlobalKdevelopGenerator::SetGlobalGenerator(
+                                                  cmGlobalGenerator* generator)
+{
+  cmExternalMakefileProjectGenerator::SetGlobalGenerator(generator);
+  cmGlobalUnixMakefileGenerator3* mf = (cmGlobalUnixMakefileGenerator3*)
+                                                                     generator;
+  mf->SetToolSupportsColor(false);
+  mf->SetForceVerboseMakefiles(true);
+}
+
 void cmGlobalKdevelopGenerator::Generate()
 {
-  this->cmGlobalUnixMakefileGenerator3::Generate();
   // for each sub project in the project create 
   // a kdevelop project
-  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
+  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator 
+       it = this->GlobalGenerator->GetProjectMap().begin(); 
+      it!= this->GlobalGenerator->GetProjectMap().end(); 
+      ++it)
     {
     cmMakefile* mf = it->second[0]->GetMakefile();
     std::string outputDir=mf->GetStartOutputDirectory();
@@ -66,10 +76,9 @@ void cmGlobalKdevelopGenerator::Generate()
     std::string projectName=mf->GetProjectName();
     std::string cmakeFilePattern("CMakeLists.txt;*.cmake;");
     std::string fileToOpen;
-    std::vector<cmLocalGenerator*>& lgs= it->second;
+    const std::vector<cmLocalGenerator*>& lgs= it->second;
     // create the project.kdevelop.filelist file
-    if(!this->CreateFilelistFile(it->second[0], lgs,
-                                 outputDir, projectDir,
+    if(!this->CreateFilelistFile(lgs, outputDir, projectDir,
                                  projectName, cmakeFilePattern, fileToOpen))
       {
       cmSystemTools::Error("Can not create filelist file");
@@ -104,8 +113,7 @@ void cmGlobalKdevelopGenerator::Generate()
 }
 
 bool cmGlobalKdevelopGenerator
-::CreateFilelistFile(cmLocalGenerator* ,
-                     std::vector<cmLocalGenerator*>& lgs,
+::CreateFilelistFile(const std::vector<cmLocalGenerator*>& lgs,
                      const std::string& outputDir, 
                      const std::string& projectDirIn,
                      const std::string& projectname,
@@ -252,7 +260,7 @@ bool cmGlobalKdevelopGenerator
       }
     }
   return true;
-}                             
+}
 
 
 /* create the project file, if it already exists, merge it with the

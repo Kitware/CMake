@@ -36,6 +36,10 @@ cmFindPathCommand::cmFindPathCommand()
                                "directory containing the named file");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "SEARCH_XXX", "file in a directory");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_FIND_ROOT_PATH_MODE_XXX", 
+                               "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE");
+
   this->ExtraDocAdded = false;
 }
 

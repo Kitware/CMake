@@ -37,6 +37,7 @@
 #include "cmEndForEachCommand.cxx"
 #include "cmEndIfCommand.cxx"
 #include "cmExecProgramCommand.cxx"
+#include "cmExternalMakefileProjectGenerator.cxx"
 #include "cmFindBase.cxx"
 #include "cmFileCommand.cxx"
 #include "cmFindFileCommand.cxx"
