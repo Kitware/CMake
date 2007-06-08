@@ -69,7 +69,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "Run and executable program during the processing of the CMakeList.txt"
+      "Run an executable program during the processing of the CMakeList.txt"
       " file.\n"
       "  EXEC_PROGRAM(Executable [directory in which to run]\n"
       "               [ARGS <arguments to executable>]\n"
