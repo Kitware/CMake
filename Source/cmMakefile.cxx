@@ -131,6 +131,9 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
   this->ListFileStack = mf.ListFileStack;
+  this->cmDefineRegex = mf.cmDefineRegex;
+  this->cmDefine01Regex = mf.cmDefine01Regex;
+  this->cmAtVarRegex = mf.cmAtVarRegex;
 }
 
 
