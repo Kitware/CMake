@@ -385,6 +385,10 @@ void cmGlobalKdevelopGenerator
     return;
     }
 
+  // check for a version control system
+  bool hasSvn = cmSystemTools::FileExists((projectDir + "/.svn").c_str());
+  bool hasCvs = cmSystemTools::FileExists((projectDir + "/CVS").c_str());
+
   fout<<"<?xml version = '1.0'?>\n";
   fout<<"<kdevelop>\n";
   fout<<"  <general>\n";
@@ -400,6 +404,16 @@ void cmGlobalKdevelopGenerator
   fout<<"  <secondaryLanguages>\n";
   fout<<"     <language>C</language>\n";
   fout<<"  </secondaryLanguages>\n";
+
+  if (hasSvn)
+    {
+    fout << "  <versioncontrol>kdevsubversion</versioncontrol>\n";
+    }
+  else if (hasCvs)
+    {
+    fout << "  <versioncontrol>kdevcvsservice</versioncontrol>\n";
+    }
+
   fout<<"  </general>\n";
   fout<<"  <kdevcustomproject>\n";
   fout<<"    <filelistdirectory>"<<outputDir.c_str()
