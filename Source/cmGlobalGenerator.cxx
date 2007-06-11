@@ -268,7 +268,6 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       this->SetLanguageEnabled("NONE", mf);
       continue;
       }
-    bool determineLanguageCalled = false;
     std::string loadedLang = "CMAKE_";
     loadedLang +=  lang;
     loadedLang += "_COMPILER_LOADED";
@@ -324,7 +323,6 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
                              determineFile.c_str());
         }
       needTestLanguage[lang] = true;
-      determineLanguageCalled = true;
       // Some generators like visual studio should not use the env variables
       // So the global generator can specify that in this variable
       if(!mf->GetDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV"))
@@ -346,11 +344,9 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         env += envVarValue;
         cmSystemTools::PutEnv(env.c_str());
         }
-      } // end if(!this->GetLanguageEnabled(lang) )
-    // if determineLanguage was called then load the file it
-    // configures CMake(LANG)Compiler.cmake
-    if(determineLanguageCalled)
-      {
+
+      // if determineLanguage was called then load the file it
+      // configures CMake(LANG)Compiler.cmake
       fpath = rootBin;
       fpath += "/CMake";
       fpath += lang;
@@ -366,7 +362,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       // not know if it is a working compiler yet so set the test language
       // flag
       needTestLanguage[lang] = true;
-      }
+      } // end if(!this->GetLanguageEnabled(lang) )
     }  // end loop over languages
 
   // **** Load the system specific information if not yet loaded
