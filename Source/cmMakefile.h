@@ -783,6 +783,7 @@ protected:
   bool IsFunctionBlocked(const cmListFileFunction& lff);
   
 private:
+  void Initialize();
 
   void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;    // make depend needs direct access

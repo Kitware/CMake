@@ -85,9 +85,7 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("Resources", "\\.plist$");
 #endif
   this->AddDefaultDefinitions();
-  this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
-  this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
-  this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
+  this->Initialize();
   this->PreOrder = false;
 }
 
@@ -131,11 +129,16 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
   this->ListFileStack = mf.ListFileStack;
-  this->cmDefineRegex = mf.cmDefineRegex;
-  this->cmDefine01Regex = mf.cmDefine01Regex;
-  this->cmAtVarRegex = mf.cmAtVarRegex;
+  this->Initialize();
 }
 
+//----------------------------------------------------------------------------
+void cmMakefile::Initialize()
+{
+  this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
+  this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
+  this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
+}
 
 unsigned int cmMakefile::GetCacheMajorVersion()
 {
