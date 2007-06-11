@@ -2204,17 +2204,25 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
     {
     res = &bldRelpath;
     }
+
+  std::string path;
+
   if ( !res )
     {
-    return fname;
+    path = fname;
     }
-  cmSystemTools::ConvertToUnixSlashes(*res);
-
-  std::string path = "./" + *res;
-  if ( path[path.size()-1] == '/' )
+  else
     {
-    path = path.substr(0, path.size()-1);
+    cmSystemTools::ConvertToUnixSlashes(*res);
+
+    path = "./" + *res;
+    if ( path[path.size()-1] == '/' )
+      {
+      path = path.substr(0, path.size()-1);
+      }
     }
+
+  cmsys::SystemTools::ReplaceString(path, ":", "_");
   return path;
 }
 

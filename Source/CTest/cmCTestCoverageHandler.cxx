@@ -1288,7 +1288,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
                    << std::endl);
         // start the file output
         covLogFile << "\t<File Name=\""
-                   << this->CTest->MakeXMLSafe(file.c_str())
+                   << this->CTest->MakeXMLSafe(i->first.c_str())
                    << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
                      this->CTest->GetShortPathToFile(
                        i->second.c_str())) << "\">" << std::endl
@@ -1478,21 +1478,22 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
                    << std::endl);
         continue;
         }
+
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "Doing coverage for: "
                  << file.c_str()
                  << std::endl);
 
       coveredFiles.push_back(sourceFile);
+      coveredFilesFullPath.push_back(file);
+
       number_files++;
       total_functions += totalFunctions;
       total_tested += functionsCalled;
       total_untested += (totalFunctions - functionsCalled);
+
       std::string fileName = cmSystemTools::GetFilenameName(file.c_str());
-      // get file relative to the source dir
-      file = cmSystemTools::RelativePath(cont->SourceDir.c_str(),
-                                         file.c_str());
-      coveredFilesFullPath.push_back(file);
+
       float cper = percentBranch + percentFunction;
       if(totalBranches > 0)
         {
@@ -1519,7 +1520,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
       tmpLog << "percentBranch: " << percentBranch << "\n";
       tmpLog << "percentCoverage: " << percent_coverage << "\n";
       tmpLog << "coverage metric: " << cmet << "\n";
-      covSumFile << "\t<File Name=\"" << this->CTest->MakeXMLSafe(fileName)
+      covSumFile << "\t<File Name=\"" << this->CTest->MakeXMLSafe(sourceFile)
                  << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
                    this->CTest->GetShortPathToFile(file.c_str()))
                  << "\" Covered=\"" << (cmet>0?"true":"false") << "\">\n"
