@@ -27,15 +27,6 @@ ADD_EXECUTABLE(generator generator.cxx)
 GET_TARGET_PROPERTY(generator_PATH generator LOCATION)
 MESSAGE("Location ${generator_PATH}")
 
-# the folowing assumes that a cmSourceFile
-# is instantiated for the output, with GENERATED 1
-# at the end of the day this becomes a what in VS ?
-ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/generated.c
-  DEPENDS generator
-  COMMAND ${generator_PATH}
-  ARGS ${PROJECT_BINARY_DIR}/generated.c
-  )
-
 ################################################################
 #
 #  Test using a wrapper to wrap a header file
@@ -44,9 +35,6 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/generated.c
 # add the executable that will generate the file
 ADD_EXECUTABLE(wrapper wrapper.cxx)
 
-# the following assumes that a cmSourceFile
-# is instantiated for the output, with GENERATED 1
-# at the end of the day this becomes a what in VS ?
 ADD_CUSTOM_COMMAND(
   OUTPUT ${PROJECT_BINARY_DIR}/wrapped.c ${PROJECT_BINARY_DIR}/wrapped_help.c
   DEPENDS wrapper
@@ -159,6 +147,15 @@ ADD_EXECUTABLE(CustomCommand
   ${PROJECT_BINARY_DIR}/wrapped_help.c
   ${PROJECT_BINARY_DIR}/generated.c
   ${PROJECT_BINARY_DIR}/not_included.h
+  )
+
+# Add the rule to create generated.c at build time.  This is placed
+# here to test adding the generation rule after referencing the
+# generated source in a target.
+ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/generated.c
+  DEPENDS generator
+  COMMAND ${generator_PATH}
+  ARGS ${PROJECT_BINARY_DIR}/generated.c
   )
 
 TARGET_LINK_LIBRARIES(CustomCommand GeneratedHeader)
