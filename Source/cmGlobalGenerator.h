@@ -208,6 +208,9 @@ public:
 
   const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap() const {return this->ProjectMap;}
 protected:
+  void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
+  void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);
+
   // Fill the ProjectMap, this must be called after LocalGenerators 
   // has been populated.
   void FillProjectMap();

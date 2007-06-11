@@ -103,17 +103,6 @@ IF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
 ENDIF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
 
 
-# some exotic compilers have different extensions (e.g. sdcc uses .rel)
-# so don't overwrite it if it has been already defined by the user
-IF(NOT CMAKE_CXX_OUTPUT_EXTENSION)
-  IF(UNIX)
-    SET(CMAKE_CXX_OUTPUT_EXTENSION .o)
-  ELSE(UNIX)
-    SET(CMAKE_CXX_OUTPUT_EXTENSION .obj)
-  ENDIF(UNIX)
-ENDIF(NOT CMAKE_CXX_OUTPUT_EXTENSION)
-
-
 # This block was used before the compiler was identified by building a
 # source file.  Unless g++ crashes when building a small C++
 # executable this should no longer be needed.

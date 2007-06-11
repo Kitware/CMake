@@ -5,6 +5,15 @@
 # It also loads a system - compiler - processor (or target hardware)
 # specific file, which is mainly useful for crosscompiling and embedded systems.
 
+# some compilers use different extensions (e.g. sdcc uses .rel)
+# so set the extension here first so it can be overridden by the compiler specific file
+IF(UNIX)
+  SET(CMAKE_CXX_OUTPUT_EXTENSION .o)
+ELSE(UNIX)
+  SET(CMAKE_CXX_OUTPUT_EXTENSION .obj)
+ENDIF(UNIX)
+
+
 GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_CXX_COMPILER} NAME_WE)
 # since the gnu compiler has several names force g++
 IF(CMAKE_COMPILER_IS_GNUCXX)

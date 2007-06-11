@@ -105,17 +105,6 @@ IF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
   ENDIF (COMPILER_BASENAME MATCHES "^cl(.+)\\.exe$")
 ENDIF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
 
-# some exotic compilers have different extensions (e.g. sdcc uses .rel)
-# so don't overwrite it if it has been already defined by the user
-IF(NOT CMAKE_C_OUTPUT_EXTENSION)
-  IF(UNIX)
-    SET(CMAKE_C_OUTPUT_EXTENSION .o)
-  ELSE(UNIX)
-    SET(CMAKE_C_OUTPUT_EXTENSION .obj)
-  ENDIF(UNIX)
-ENDIF(NOT CMAKE_C_OUTPUT_EXTENSION)
-
-
 # Build a small source file to identify the compiler.
 IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   SET(CMAKE_C_COMPILER_ID_RUN 1)
