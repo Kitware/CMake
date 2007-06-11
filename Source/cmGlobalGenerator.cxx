@@ -534,6 +534,13 @@ const char* cmGlobalGenerator::GetLanguageFromExtension(const char* ext)
   return 0;
 }
 
+/* SetLanguageEnabled() is now split in two parts:
+at first the enabled-flag is set. This can then be used in EnabledLanguage()
+for checking whether the language is already enabled. After setting this
+flag still the values from the cmake variables have to be copied into the
+internal maps, this is done in SetLanguageEnabledMaps() which is called
+after the system- and compiler specific files have been loaded.
+*/
 void cmGlobalGenerator::SetLanguageEnabled(const char* l, cmMakefile* mf)
 {
   this->SetLanguageEnabledFlag(l, mf);
