@@ -23,8 +23,7 @@
  * \brief Set the regular expression for following #includes.
  *
  * cmIncludeRegularExpressionCommand is used to specify the regular expression
- * used by cmMakeDepend to determine whether to follow a #include file in
- * dependency checking.
+ * that determines whether to follow a #include file in dependency checking.
  */
 class cmIncludeRegularExpressionCommand : public cmCommand
 {

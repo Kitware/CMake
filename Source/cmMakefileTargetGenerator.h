@@ -25,7 +25,6 @@ class cmDepends;
 class cmGeneratedFileStream;
 class cmGlobalUnixMakefileGenerator3;
 class cmLocalUnixMakefileGenerator3;
-class cmMakeDepend;
 class cmMakefile;
 class cmTarget;
 class cmSourceFile;

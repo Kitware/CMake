@@ -22,7 +22,6 @@
 class cmCustomCommand;
 class cmDependInformation;
 class cmDepends;
-class cmMakeDepend;
 class cmMakefileTargetGenerator;
 class cmTarget;
 class cmSourceFile;

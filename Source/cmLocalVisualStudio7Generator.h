@@ -19,7 +19,6 @@
 
 #include "cmLocalVisualStudioGenerator.h"
 
-class cmMakeDepend;
 class cmTarget;
 class cmSourceFile;
 class cmCustomCommand;
