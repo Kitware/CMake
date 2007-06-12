@@ -2219,6 +2219,7 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
     }
 
   cmsys::SystemTools::ReplaceString(path, ":", "_");
+  cmsys::SystemTools::ReplaceString(path, " ", "_");
   return path;
 }
 
