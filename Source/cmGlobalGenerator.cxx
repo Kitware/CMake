@@ -547,7 +547,7 @@ void cmGlobalGenerator::SetLanguageEnabled(const char* l, cmMakefile* mf)
   this->SetLanguageEnabledMaps(l, mf);
 }
 
-void cmGlobalGenerator::SetLanguageEnabledFlag(const char* l, cmMakefile* mf)
+void cmGlobalGenerator::SetLanguageEnabledFlag(const char* l, cmMakefile*)
 {
   this->LanguageEnabled[l] = true;
 }
