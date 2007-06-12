@@ -80,8 +80,12 @@ public:
         }
       args.push_back(0); // null terminate 
       cmsysProcess_SetCommand(this->Process, &*args.begin());
-      cmsysProcess_SetWorkingDirectory(this->Process,
-                                       this->WorkingDirectory.c_str());
+      if(this->WorkingDirectory.size())
+        {
+        cmsysProcess_SetWorkingDirectory(this->Process,
+                                         this->WorkingDirectory.c_str());
+        }
+      
       cmsysProcess_SetOption(this->Process, 
                              cmsysProcess_Option_HideWindow, 1);
       if(this->TimeOut != -1)
