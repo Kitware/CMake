@@ -2040,8 +2040,7 @@ void cmCTest::SetNotesFiles(const char* notes)
 }
 
 //----------------------------------------------------------------------
-int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf,
-  bool fast /* = false */)
+int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
 {
   bool found = false;
   VectorOfStrings dirs;
@@ -2074,34 +2073,31 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf,
       }
     }
 
-  if ( !fast )
+  std::string rexpr = dir;
+  rexpr += "/CTestCustom.ctest";
+  cmCTestLog(this, DEBUG, "* Check for file: "
+    << rexpr.c_str() << std::endl);
+  if ( !found && cmSystemTools::FileExists(rexpr.c_str()) )
     {
-    std::string rexpr = dir;
-    rexpr += "/CTestCustom.ctest";
-    cmCTestLog(this, DEBUG, "* Check for file: "
-      << rexpr.c_str() << std::endl);
-    if ( !found && cmSystemTools::FileExists(rexpr.c_str()) )
+    cmsys::Glob gl;
+    gl.RecurseOn();
+    gl.FindFiles(rexpr);
+    std::vector<std::string>& files = gl.GetFiles();
+    std::vector<std::string>::iterator fileIt;
+    for ( fileIt = files.begin(); fileIt != files.end();
+      ++ fileIt )
       {
-      cmsys::Glob gl;
-      gl.RecurseOn();
-      gl.FindFiles(rexpr);
-      std::vector<std::string>& files = gl.GetFiles();
-      std::vector<std::string>::iterator fileIt;
-      for ( fileIt = files.begin(); fileIt != files.end();
-        ++ fileIt )
+      cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
+        << fileIt->c_str() << std::endl);
+      if ( !mf->ReadListFile(0, fileIt->c_str()) ||
+        cmSystemTools::GetErrorOccuredFlag() )
         {
-        cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
+        cmCTestLog(this, ERROR_MESSAGE,
+          "Problem reading custom configuration: "
           << fileIt->c_str() << std::endl);
-        if ( !mf->ReadListFile(0, fileIt->c_str()) ||
-          cmSystemTools::GetErrorOccuredFlag() )
-          {
-          cmCTestLog(this, ERROR_MESSAGE,
-            "Problem reading custom configuration: "
-            << fileIt->c_str() << std::endl);
-          }
         }
-      found = true;
       }
+    found = true;
     }
 
   if ( found )

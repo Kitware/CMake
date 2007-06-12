@@ -301,8 +301,7 @@ public:
   SetOfStrings* GetSubmitFiles() { return &this->SubmitFiles; }
 
   //! Read the custom configuration files and apply them to the current ctest
-  int ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf,
-    bool fast = false);
+  int ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf);
 
   std::vector<cmStdString> &GetInitialCommandLineArguments()
   { return this->InitialCommandLineArguments; };
