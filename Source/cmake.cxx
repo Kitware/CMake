@@ -260,6 +260,17 @@ void cmake::RenameCommand(const char*oldName, const char* newName)
   this->Commands.erase(pos);
 }
 
+void cmake::RemoveCommand(const char* name)
+{
+  std::string sName = cmSystemTools::LowerCase(name);
+  RegisteredCommandsMap::iterator pos = this->Commands.find(sName);
+  if ( pos != this->Commands.end() )
+    {
+    delete pos->second;
+    this->Commands.erase(pos);
+    }
+}
+
 void cmake::AddCommand(cmCommand* wg)
 {
   std::string name = cmSystemTools::LowerCase(wg->GetName());

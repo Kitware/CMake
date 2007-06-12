@@ -301,6 +301,27 @@ void cmCTestScriptHandler::CreateCMake()
   this->LocalGenerator->SetGlobalGenerator(this->GlobalGenerator);
   this->Makefile = this->LocalGenerator->GetMakefile();
 
+  // remove all cmake commands which are not scriptable, since they can't be 
+  // used in ctest scripts
+  std::vector<std::string> unscriptableCommands;
+  cmake::RegisteredCommandsMap* commands = this->CMake->GetCommands();
+  for (cmake::RegisteredCommandsMap::const_iterator pos = commands->begin();
+       pos != commands->end();
+       ++pos)
+    {
+    if (!pos->second->IsScriptable())
+      {
+      unscriptableCommands.push_back(pos->first);
+      }
+    }
+
+  for(std::vector<std::string>::const_iterator it=unscriptableCommands.begin();
+      it != unscriptableCommands.end();
+      ++it)
+    {
+//    fprintf(stderr, "Removing %s\n", it->c_str());
+    this->CMake->RemoveCommand(it->c_str());
+    }
 
   // add any ctest specific commands, probably should have common superclass
   // for ctest commands to clean this up. If a couple more commands are
