@@ -5,15 +5,20 @@
 # value.  The subdir Project contains the CMakelists.txt
 # and source files for the test project. 
 project(BuildDepends)
-make_directory(${BuildDepends_BINARY_DIR}/Project)
+
+file(REMOVE_RECURSE ${BuildDepends_BINARY_DIR}/Project)
+file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
+message("Creating Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx 
   "const char* foo() { return \"foo\";}" )
+
+message("Building project first time")
 try_compile(RESULT 
   ${BuildDepends_BINARY_DIR}/Project
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
   OUTPUT_VARIABLE OUTPUT)
-IF("${CMAKE_GENERATOR}" MATCHES "Xcode")
+if("${CMAKE_GENERATOR}" MATCHES "Xcode")
   try_compile(RESULT 
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
@@ -24,14 +29,13 @@ IF("${CMAKE_GENERATOR}" MATCHES "Xcode")
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
     OUTPUT_VARIABLE OUTPUT)
-ENDIF("${CMAKE_GENERATOR}" MATCHES "Xcode")
+endif("${CMAKE_GENERATOR}" MATCHES "Xcode")
 
 if(NOT RESULT)
   message(SEND_ERROR "Could not build test project: ${OUTPUT}")
 endif(NOT RESULT)
 
 set(bar ${BuildDepends_BINARY_DIR}/Project/bar${CMAKE_EXECUTABLE_SUFFIX})
-message("${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
 if(EXISTS 
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
@@ -39,18 +43,27 @@ if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
 endif(EXISTS 
   "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
-message("running ${bar}  ")
-execute_process(COMMAND ${bar} OUTPUT_VARIABLE out TIMEOUT 3)
+
+message("Running ${bar}  ")
+execute_process(COMMAND ${bar} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
 string(REGEX REPLACE "[\r\n]" " " out "${out}")
-message("${out}")
+message("Run result: ${runResult} Output: \"${out}\"")
+
 if("${out}" STREQUAL "foo ")
   message("Worked!")
 else("${out}" STREQUAL "foo ")
   message(SEND_ERROR "Project did not initially build properly: ${out}")
 endif("${out}" STREQUAL "foo ")
 
+message("Waiting 3 seconds...")
+# any additional argument will cause ${bar} to wait forever
+execute_process(COMMAND ${bar} -infinite TIMEOUT 3 OUTPUT_VARIABLE out)
+
+message("Modifying Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
   "const char* foo() { return \"foo changed\";}" )
+
+message("Building project second time")
 try_compile(RESULT 
   ${BuildDepends_BINARY_DIR}/Project
   ${BuildDepends_SOURCE_DIR}/Project
@@ -58,7 +71,7 @@ try_compile(RESULT
   OUTPUT_VARIABLE OUTPUT)
 
 # Xcode is in serious need of help here
-IF("${CMAKE_GENERATOR}" MATCHES "Xcode")
+if("${CMAKE_GENERATOR}" MATCHES "Xcode")
   try_compile(RESULT 
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
@@ -69,7 +82,7 @@ IF("${CMAKE_GENERATOR}" MATCHES "Xcode")
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
     OUTPUT_VARIABLE OUTPUT)
-ENDIF("${CMAKE_GENERATOR}" MATCHES "Xcode")
+endif("${CMAKE_GENERATOR}" MATCHES "Xcode")
 
 if(NOT RESULT)
   message(SEND_ERROR "Could not build test project: ${OUTPUT}")
@@ -80,9 +93,10 @@ if(EXISTS
 endif(EXISTS 
   "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
 
-execute_process(COMMAND ${bar} OUTPUT_VARIABLE out TIMEOUT 3)
+message("Running ${bar}  ")
+execute_process(COMMAND ${bar} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
 string(REGEX REPLACE "[\r\n]" " " out "${out}")
-message("${out}")
+message("Run result: ${runResult} Output: \"${out}\"")
 
 if("${out}" STREQUAL "foo changed ")
   message("Worked!")
