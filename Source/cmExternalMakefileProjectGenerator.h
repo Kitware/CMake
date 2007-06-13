@@ -17,8 +17,7 @@
 #ifndef cmExternalMakefileProjectGenerator_h
 #define cmExternalMakefileProjectGenerator_h
 
-#include <vector>
-#include <string>
+#include "cmStandardIncludes.h"
 
 #include "cmDocumentation.h"
 
