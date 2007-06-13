@@ -69,9 +69,18 @@ public:
       "If FORCE is the first argument, then the variable is made advanced.  "
       "If neither FORCE nor CLEAR is specified, new values will be marked as "
       "advanced, but if the variable already has an advanced/non-advanced "
-      "state, it will not be changed.";
+      "state, it will not be changed.\n"
+      "It does nothing in script mode.";
     }
-  
+
+  /**
+   * This determines if the command is invoked when in script mode.
+   * MARK_AS_ADVANCED() will have no effect in script mode, but this will
+   * make many of the modules usable in cmake/ctest scripts, (among them
+   * FindUnixMake.cmake used by the CTEST_BUILD command.
+  */
+  virtual bool IsScriptable() { return true; }
+
   cmTypeMacro(cmMarkAsAdvancedCommand, cmCommand);
 };
 
