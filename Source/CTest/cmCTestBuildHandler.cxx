@@ -283,6 +283,9 @@ int cmCTestBuildHandler::ProcessHandler()
   // Determine build command and build directory
   const std::string &makeCommand
     = this->CTest->GetCTestConfiguration("MakeCommand");
+  cmCTestLog(this->CTest,
+             HANDLER_VERBOSE_OUTPUT, "MakeCommand:" << makeCommand << 
+             "\n");
   if ( makeCommand.size() == 0 )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,

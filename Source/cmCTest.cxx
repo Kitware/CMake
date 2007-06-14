@@ -524,6 +524,8 @@ bool cmCTest::UpdateCTestConfiguration()
       fileName = this->BinaryDir + "/CTestConfiguration.ini";
       }
     }
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "UpdateCTestConfiguration  from :"
+             << fileName.c_str() << "\n");
   if ( !cmSystemTools::FileExists(fileName.c_str()) )
     {
     // No need to exit if we are not producing XML
@@ -536,6 +538,8 @@ bool cmCTest::UpdateCTestConfiguration()
     }
   else
     {
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Parse Config file:" 
+               << fileName.c_str() << "\n");
     // parse the dart test file
     std::ifstream fin(fileName.c_str());
     if(!fin)
@@ -2243,6 +2247,9 @@ void cmCTest::EmptyCTestConfiguration()
 //----------------------------------------------------------------------
 void cmCTest::SetCTestConfiguration(const char *name, const char* value)
 {
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "SetCTestConfiguration:"
+             << name << ":" << value << "\n");
+
   if ( !name )
     {
     return;
@@ -2358,6 +2365,9 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
     {
     return false;
     }
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+             "SetCTestConfigurationFromCMakeVariable:"
+             << dconfig << ":" << cmake_var);
   this->SetCTestConfiguration(dconfig, ctvar);
   return true;
 }
