@@ -41,7 +41,8 @@ public:
     {
     StyleUnkown,
     StyleWinZip,
-    StyleUnixZip
+    StyleUnixZip,
+    Style7Zip
     };
 
 protected:

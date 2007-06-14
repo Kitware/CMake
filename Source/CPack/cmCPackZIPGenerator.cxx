@@ -56,6 +56,25 @@ int cmCPackZIPGenerator::InitializeInternal()
     this->ZipStyle = cmCPackZIPGenerator::StyleWinZip;
     found = true;
     }
+
+  if ( !found )
+    {
+    pkgPath = "c:/Program Files/7-Zip";
+    path.push_back(pkgPath);
+    pkgPath = cmSystemTools::FindProgram("7z", path, false);
+
+    if ( pkgPath.empty() )
+      {
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Cannot find 7ZIP"
+        << std::endl);
+      }
+    else
+      {
+      this->ZipStyle = cmCPackZIPGenerator::Style7Zip;
+      found = true;
+      }
+    }
+
   if ( !found )
     {
     path.erase(path.begin(), path.end());
@@ -100,6 +119,13 @@ int cmCPackZIPGenerator::CompressFiles(const char* outFileName,
   case cmCPackZIPGenerator::StyleWinZip:
     dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
            << "\" -P \"" << outFileName
+           << "\" @winZip.filelist";
+    needQuotesInFile = true;
+    break;
+  case cmCPackZIPGenerator::Style7Zip:
+    // this is the zip generator, so tell 7zip to generate zip files
+    dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
+           << "\" a -tzip \"" << outFileName
            << "\" @winZip.filelist";
     needQuotesInFile = true;
     break;
