@@ -94,7 +94,7 @@ int cmCPackZIPGenerator::InitializeInternal()
     }
   if ( !found )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find a sutable ZIP program"
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find a suitable ZIP program"
       << std::endl);
     return 0;
     }
