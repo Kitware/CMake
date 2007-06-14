@@ -6,7 +6,6 @@
 # and source files for the test project. 
 project(BuildDepends)
 
-file(REMOVE_RECURSE ${BuildDepends_BINARY_DIR}/Project)
 file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
 message("Creating Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx 
