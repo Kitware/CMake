@@ -36,6 +36,9 @@ public:
     );
   virtual ~cmInstallTargetGenerator();
 
+  static std::string GetInstallFilename(cmTarget*target, const char* config, 
+                                        bool implib, bool useSOName);
+
 protected:
   virtual void GenerateScript(std::ostream& os);
   void PrepareScriptReference(std::ostream& os, cmTarget* target,
