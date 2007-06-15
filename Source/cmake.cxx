@@ -19,6 +19,7 @@
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
+#include "cmExternalMakefileProjectGenerator.h"
 #include "cmCommands.h"
 #include "cmCommand.h"
 #include "cmFileTimeComparison.h"
