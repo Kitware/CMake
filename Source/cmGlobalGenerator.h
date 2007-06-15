@@ -117,10 +117,8 @@ public:
   cmake *GetCMakeInstance() { return this->CMakeInstance; };
 
   void SetConfiguredFilesPath(const char* s){this->ConfiguredFilesPath = s;}
-  cmLocalGenerator* GetLocalGenerator(int p) { 
-    return this->LocalGenerators[p];}
-  void GetLocalGenerators(std::vector<cmLocalGenerator *>&g) { 
-    g = this->LocalGenerators;}
+  const std::vector<cmLocalGenerator *>& GetLocalGenerators() const { 
+    return this->LocalGenerators;}
 
   void AddLocalGenerator(cmLocalGenerator *lg);
 

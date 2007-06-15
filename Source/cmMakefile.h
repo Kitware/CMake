@@ -418,6 +418,10 @@ public:
    * Get the list of targets
    */
   cmTargets &GetTargets() { return this->Targets; }
+  /**
+   * Get the list of targets, const version
+   */
+  const cmTargets &GetTargets() const { return this->Targets; }
   const cmTargets &GetImportedTargets() const { return this->ImportedTargets; }
 
   cmTarget* FindTarget(const char* name, bool useImportedTargets);

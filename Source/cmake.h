@@ -155,7 +155,10 @@ class cmake
   cmGlobalGenerator* CreateGlobalGenerator(const char* name);
 
   ///! Return the global generator assigned to this instance of cmake
-  cmGlobalGenerator* GetGlobalGenerator() { return this->GlobalGenerator; };
+  cmGlobalGenerator* GetGlobalGenerator()     { return this->GlobalGenerator; }
+  ///! Return the global generator assigned to this instance of cmake, const
+  const cmGlobalGenerator* GetGlobalGenerator() const 
+                                              { return this->GlobalGenerator; }
 
   ///! Return the global generator assigned to this instance of cmake
   void SetGlobalGenerator(cmGlobalGenerator *);
@@ -284,7 +287,7 @@ class cmake
    */
   const char* GetCTestCommand();
   const char* GetCPackCommand();
-  const char* GetCMakeCommand() { return this->CMakeCommand.c_str(); }
+  const char* GetCMakeCommand() const { return this->CMakeCommand.c_str(); }
 
   // Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
@@ -354,13 +357,15 @@ protected:
   //macros.
   void CleanupCommandsAndMacros();
 
-  void GenerateGraphViz(const char* fileName);
+  void GenerateGraphViz(const char* fileName) const;
 
   static int ExecuteEchoColor(std::vector<std::string>& args);
   static int ExecuteLinkScript(std::vector<std::string>& args);
   
   cmVariableWatch* VariableWatch;
   
+  ///! Find the full path to one of the cmake programs like ctest, cpack, etc.
+  std::string FindCMakeProgram(const char* name) const;
 private:
   ProgressCallbackType ProgressCallback;
   void* ProgressCallbackClientData;

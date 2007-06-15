@@ -32,38 +32,40 @@ bool cmExportLibraryDependenciesCommand
     }
   
   // store the arguments for the final pass
-  // also expand any CMake variables
-
-  this->Args = args;
+  this->Filename = args[0];
+  this->Append = false;
+  if(args.size() > 1)
+    {
+    if(args[1] == "APPEND")
+      {
+      this->Append = true;
+      }
+    }
   return true;
 }
 
 
 void cmExportLibraryDependenciesCommand::FinalPass()
 {
-  // Create a full path filename for output
-  std::string fname = this->Args[0];
-  bool append = false;
-  if(this->Args.size() > 1)
-    {
-    if(this->Args[1] == "APPEND")
-      {
-      append = true;
-      }
-    }
+  // export_library_dependencies() shouldn't modify anything
+  // ensure this by calling a const method
+  this->ConstFinalPass();
+}
 
+void cmExportLibraryDependenciesCommand::ConstFinalPass() const
+{
   // Use copy-if-different if not appending.
   cmsys::auto_ptr<std::ofstream> foutPtr;
-  if(append)
+  if(this->Append)
     {
     cmsys::auto_ptr<std::ofstream> ap(
-      new std::ofstream(fname.c_str(), std::ios::app));
+      new std::ofstream(this->Filename.c_str(), std::ios::app));
     foutPtr = ap;
     }
   else
     {
     cmsys::auto_ptr<cmGeneratedFileStream> ap(
-      new cmGeneratedFileStream(fname.c_str(), true));
+      new cmGeneratedFileStream(this->Filename.c_str(), true));
     ap->SetCopyIfDifferent(true);
     foutPtr = ap;
     }
@@ -71,23 +73,22 @@ void cmExportLibraryDependenciesCommand::FinalPass()
 
   if (!fout)
     {
-    cmSystemTools::Error("Error Writing ", fname.c_str());
+    cmSystemTools::Error("Error Writing ", this->Filename.c_str());
     cmSystemTools::ReportLastSystemError("");
     return;
     }
-  cmake* cm = this->Makefile->GetCMakeInstance();
-  cmGlobalGenerator* global = cm->GetGlobalGenerator();
-  std::vector<cmLocalGenerator *> locals;
-  global->GetLocalGenerators(locals);
+  const cmake* cm = this->Makefile->GetCMakeInstance();
+  const cmGlobalGenerator* global = cm->GetGlobalGenerator();
+  const std::vector<cmLocalGenerator *>& locals = global->GetLocalGenerators();
   std::string libDepName;
-  for(std::vector<cmLocalGenerator *>::iterator i = locals.begin();
+  for(std::vector<cmLocalGenerator *>::const_iterator i = locals.begin();
       i != locals.end(); ++i)
     {
-    cmLocalGenerator* gen = *i;
-    cmTargets &tgts = gen->GetMakefile()->GetTargets();  
+    const cmLocalGenerator* gen = *i;
+    const cmTargets &tgts = gen->GetMakefile()->GetTargets();  
     std::vector<std::string> depends;
     const char *defType;
-    for(cmTargets::iterator l = tgts.begin();
+    for(cmTargets::const_iterator l = tgts.begin();
         l != tgts.end(); ++l)
       {
       libDepName = l->first;

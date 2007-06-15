@@ -102,9 +102,9 @@ public:
   typedef std::pair<cmStdString, LinkLibraryType> LibraryID;
 
   typedef std::vector<LibraryID > LinkLibraryVectorType;
-  const LinkLibraryVectorType &GetLinkLibraries() {
+  const LinkLibraryVectorType &GetLinkLibraries() const {
     return this->LinkLibraries;}
-  const LinkLibraryVectorType &GetOriginalLinkLibraries() 
+  const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
   
   /**

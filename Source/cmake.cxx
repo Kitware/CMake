@@ -2402,47 +2402,52 @@ inline std::string removeQuotes(const std::string& s)
   return s;
 }
 
-const char* cmake::GetCTestCommand()
+std::string cmake::FindCMakeProgram(const char* name) const
 {
-  if ( !this->CTestCommand.empty() )
+  std::string path;
+  if ((name) && (*name))
     {
-    return this->CTestCommand.c_str();
-    }
-
-  cmMakefile* mf
-    = this->GetGlobalGenerator()->GetLocalGenerator(0)->GetMakefile();
+    const cmMakefile* mf
+        = this->GetGlobalGenerator()->GetLocalGenerators()[0]->GetMakefile();
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  this->CTestCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-  this->CTestCommand = removeQuotes(this->CTestCommand);
-  this->CTestCommand = 
-    cmSystemTools::GetFilenamePath(this->CTestCommand.c_str());
-  this->CTestCommand += "/";
-  this->CTestCommand += "ctest";
-  this->CTestCommand += cmSystemTools::GetExecutableExtension();
-  if(!cmSystemTools::FileExists(this->CTestCommand.c_str()))
+    path = mf->GetRequiredDefinition("CMAKE_COMMAND");
+    path = removeQuotes(path);
+    path = cmSystemTools::GetFilenamePath(path.c_str());
+    path += "/";
+    path += name;
+    path += cmSystemTools::GetExecutableExtension();
+    if(!cmSystemTools::FileExists(path.c_str()))
     {
-    this->CTestCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-    this->CTestCommand = 
-      cmSystemTools::GetFilenamePath(this->CTestCommand.c_str());
-    this->CTestCommand += "/Debug/";
-    this->CTestCommand += "ctest";
-    this->CTestCommand += cmSystemTools::GetExecutableExtension();
+      path = mf->GetRequiredDefinition("CMAKE_COMMAND");
+      path = cmSystemTools::GetFilenamePath(path.c_str());
+      path += "/Debug/";
+      path += name;
+      path += cmSystemTools::GetExecutableExtension();
     }
-  if(!cmSystemTools::FileExists(this->CTestCommand.c_str()))
+    if(!cmSystemTools::FileExists(path.c_str()))
     {
-    this->CTestCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-    this->CTestCommand = 
-      cmSystemTools::GetFilenamePath(this->CTestCommand.c_str());
-    this->CTestCommand += "/Release/";
-    this->CTestCommand += "ctest";
-    this->CTestCommand += cmSystemTools::GetExecutableExtension();
+      path = mf->GetRequiredDefinition("CMAKE_COMMAND");
+      path = cmSystemTools::GetFilenamePath(path.c_str());
+      path += "/Release/";
+      path += name;
+      path += cmSystemTools::GetExecutableExtension();
     }
 #else
-  // Only for bootstrap
-  this->CTestCommand += mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-  this->CTestCommand += "/ctest";
-  this->CTestCommand += cmSystemTools::GetExecutableExtension();
+    // Only for bootstrap
+    path += mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+    path += name;
+    path += cmSystemTools::GetExecutableExtension();
 #endif
+    }
+  return path;
+}
+
+const char* cmake::GetCTestCommand()
+{
+  if ( this->CTestCommand.empty() )
+    {
+    this->CTestCommand = this->FindCMakeProgram("ctest");
+    }
   if ( this->CTestCommand.empty() )
     {
     cmSystemTools::Error("Cannot find the CTest executable");
@@ -2453,55 +2458,19 @@ const char* cmake::GetCTestCommand()
 
 const char* cmake::GetCPackCommand()
 {
-  if ( !this->CPackCommand.empty() )
+  if ( this->CPackCommand.empty() )
     {
-    return this->CPackCommand.c_str();
+    this->CPackCommand = this->FindCMakeProgram("cpack");
     }
-
-  cmMakefile* mf
-    = this->GetGlobalGenerator()->GetLocalGenerator(0)->GetMakefile();
-
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  this->CPackCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-  this->CPackCommand = removeQuotes(this->CPackCommand);
-  this->CPackCommand = 
-    cmSystemTools::GetFilenamePath(this->CPackCommand.c_str());
-  this->CPackCommand += "/";
-  this->CPackCommand += "cpack";
-  this->CPackCommand += cmSystemTools::GetExecutableExtension();
-  if(!cmSystemTools::FileExists(this->CPackCommand.c_str()))
-    {
-    this->CPackCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-    this->CPackCommand = 
-      cmSystemTools::GetFilenamePath(this->CPackCommand.c_str());
-    this->CPackCommand += "/Debug/";
-    this->CPackCommand += "cpack";
-    this->CPackCommand += cmSystemTools::GetExecutableExtension();
-    }
-  if(!cmSystemTools::FileExists(this->CPackCommand.c_str()))
-    {
-    this->CPackCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
-    this->CPackCommand = 
-      cmSystemTools::GetFilenamePath(this->CPackCommand.c_str());
-    this->CPackCommand += "/Release/";
-    this->CPackCommand += "cpack";
-    this->CPackCommand += cmSystemTools::GetExecutableExtension();
-    }
-  if (!cmSystemTools::FileExists(this->CPackCommand.c_str()))
+  if ( this->CPackCommand.empty() )
     {
     cmSystemTools::Error("Cannot find the CPack executable");
     this->CPackCommand = "CPACK-COMMAND-NOT-FOUND";
     }
-#else
-  // Only for bootstrap
-  this->CPackCommand += mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-  this->CPackCommand += "/cpack";
-  this->CPackCommand += cmSystemTools::GetExecutableExtension();
-#endif
-  return this->CPackCommand.c_str();
+    return this->CPackCommand.c_str();
 }
 
-void cmake::GenerateGraphViz(const char* fileName)
+void cmake::GenerateGraphViz(const char* fileName) const
 {
   cmGeneratedFileStream str(fileName);
   if ( !str )
@@ -2568,23 +2537,23 @@ void cmake::GenerateGraphViz(const char* fileName)
   str << graphType << " " << graphName << " {" << std::endl;
   str << graphHeader << std::endl;
 
-  cmGlobalGenerator* gg = this->GetGlobalGenerator();
-  std::vector<cmLocalGenerator*> localGenerators;
-  gg->GetLocalGenerators(localGenerators);
-  std::vector<cmLocalGenerator*>::iterator lit;
+  const cmGlobalGenerator* gg = this->GetGlobalGenerator();
+  const std::vector<cmLocalGenerator*>& localGenerators = 
+      gg->GetLocalGenerators();
+  std::vector<cmLocalGenerator*>::const_iterator lit;
   // for target deps
   // 1 - cmake target
   // 2 - external target
   // 0 - no deps
   std::map<cmStdString, int> targetDeps;
-  std::map<cmStdString, cmTarget*> targetPtrs;
+  std::map<cmStdString, const cmTarget*> targetPtrs;
   std::map<cmStdString, cmStdString> targetNamesNodes;
   int cnt = 0;
   // First pass get the list of all cmake targets
   for ( lit = localGenerators.begin(); lit != localGenerators.end(); ++ lit )
     {
-    cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
-    cmTargets::iterator tit;
+    const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
+    cmTargets::const_iterator tit;
     for ( tit = targets->begin(); tit != targets->end(); ++ tit )
       {
       const char* realTargetName = tit->first.c_str();
@@ -2603,8 +2572,8 @@ void cmake::GenerateGraphViz(const char* fileName)
   // Ok, now find all the stuff we link to that is not in cmake
   for ( lit = localGenerators.begin(); lit != localGenerators.end(); ++ lit )
     {
-    cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
-    cmTargets::iterator tit;
+    const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
+    cmTargets::const_iterator tit;
     for ( tit = targets->begin(); tit != targets->end(); ++ tit )
       {
       const cmTarget::LinkLibraryVectorType* ll
@@ -2623,7 +2592,7 @@ void cmake::GenerateGraphViz(const char* fileName)
       for ( llit = ll->begin(); llit != ll->end(); ++ llit )
         {
         const char* libName = llit->first.c_str();
-        std::map<cmStdString, cmStdString>::iterator tarIt
+        std::map<cmStdString, cmStdString>::const_iterator tarIt
           = targetNamesNodes.find(libName);
         if ( ignoreTargetsSet.find(libName) != ignoreTargetsSet.end() )
           {
@@ -2641,7 +2610,7 @@ void cmake::GenerateGraphViz(const char* fileName)
           }
         else
           {
-          std::map<cmStdString, int>::iterator depIt
+          std::map<cmStdString, int>::const_iterator depIt
             = targetDeps.find(libName);
           if ( depIt == targetDeps.end() )
             {
@@ -2653,11 +2622,11 @@ void cmake::GenerateGraphViz(const char* fileName)
     }
 
   // Write out nodes
-  std::map<cmStdString, int>::iterator depIt;
+  std::map<cmStdString, int>::const_iterator depIt;
   for ( depIt = targetDeps.begin(); depIt != targetDeps.end(); ++ depIt )
     {
     const char* newTargetName = depIt->first.c_str();
-    std::map<cmStdString, cmStdString>::iterator tarIt
+    std::map<cmStdString, cmStdString>::const_iterator tarIt
       = targetNamesNodes.find(newTargetName);
     if ( tarIt == targetNamesNodes.end() )
       {
@@ -2671,8 +2640,8 @@ void cmake::GenerateGraphViz(const char* fileName)
       << newTargetName <<  "\" shape=\"";
     if ( depIt->second == 1 )
       {
-      std::map<cmStdString, cmTarget*>::iterator tarTypeIt= targetPtrs.find(
-        newTargetName);
+      std::map<cmStdString, const cmTarget*>::const_iterator tarTypeIt = 
+                                                targetPtrs.find(newTargetName);
       if ( tarTypeIt == targetPtrs.end() )
         {
         // We should not be here.
@@ -2680,7 +2649,7 @@ void cmake::GenerateGraphViz(const char* fileName)
           << " even though it was added in the previous pass" << std::endl;
         abort();
         }
-      cmTarget* tg = tarTypeIt->second;
+      const cmTarget* tg = tarTypeIt->second;
       switch ( tg->GetType() )
         {
       case cmTarget::EXECUTABLE:
@@ -2709,8 +2678,8 @@ void cmake::GenerateGraphViz(const char* fileName)
   // Now generate the connectivity
   for ( lit = localGenerators.begin(); lit != localGenerators.end(); ++ lit )
     {
-    cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
-    cmTargets::iterator tit;
+    const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
+    cmTargets::const_iterator tit;
     for ( tit = targets->begin(); tit != targets->end(); ++ tit )
       {
       std::map<cmStdString, int>::iterator dependIt
@@ -2727,7 +2696,7 @@ void cmake::GenerateGraphViz(const char* fileName)
       for ( llit = ll->begin(); llit != ll->end(); ++ llit )
         {
         const char* libName = llit->first.c_str();
-        std::map<cmStdString, cmStdString>::iterator tarIt
+        std::map<cmStdString, cmStdString>::const_iterator tarIt
           = targetNamesNodes.find(libName);
         if ( tarIt == targetNamesNodes.end() )
           {

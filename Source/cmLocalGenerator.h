@@ -81,6 +81,10 @@ public:
   cmMakefile *GetMakefile() {
     return this->Makefile; };
   
+  ///! Get the makefile for this generator, const version
+    const cmMakefile *GetMakefile() const {
+      return this->Makefile; };
+  
   ///! Get the GlobalGenerator this is associated with
   cmGlobalGenerator *GetGlobalGenerator() {
     return this->GlobalGenerator; };

@@ -81,7 +81,9 @@ public:
   cmTypeMacro(cmExportLibraryDependenciesCommand, cmCommand);
 
 private:
-  std::vector<std::string> Args;
+  std::string Filename;
+  bool Append;
+  void ConstFinalPass() const;
 };
 
 
