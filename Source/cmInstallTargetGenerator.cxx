@@ -189,6 +189,63 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
+std::string cmInstallTargetGenerator::GetInstallFilename(cmTarget* target,
+                                                         const char* config,
+                                                         bool implib,
+                                                         bool useSOName)
+{
+  std::string fname;
+  // Compute the name of the library.
+  if(target->GetType() == cmTarget::EXECUTABLE)
+    {
+    std::string targetName;
+    std::string targetNameReal;
+    std::string targetNameImport;
+    std::string targetNamePDB;
+    target->GetExecutableNames(targetName, targetNameReal,
+                               targetNameImport, targetNamePDB,
+                               config);
+    if(implib)
+      {
+      // Use the import library name.
+      fname = targetNameImport;
+      }
+    else
+      {
+      // Use the canonical name.
+      fname = targetName;
+      }
+    }
+  else
+    {
+    std::string targetName;
+    std::string targetNameSO;
+    std::string targetNameReal;
+    std::string targetNameImport;
+    std::string targetNamePDB;
+    target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
+                            targetNameImport, targetNamePDB, config);
+    if(implib)
+      {
+      // Use the import library name.
+      fname = targetNameImport;
+      }
+    else if(useSOName)
+      {
+      // Use the soname.
+      fname = targetNameSO;
+      }
+    else
+      {
+      // Use the canonical name.
+      fname = targetName;
+      }
+    }
+
+  return fname;
+}
+
+//----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
 ::PrepareScriptReference(std::ostream& os, cmTarget* target,
@@ -212,52 +269,8 @@ cmInstallTargetGenerator
         AppendDirectoryForConfig("", i->c_str(), "/", fname);
       }
 
-    // Compute the name of the library.
-    if(target->GetType() == cmTarget::EXECUTABLE)
-      {
-      std::string targetName;
-      std::string targetNameReal;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      target->GetExecutableNames(targetName, targetNameReal,
-                                 targetNameImport, targetNamePDB,
-                                 i->c_str());
-      if(this->ImportLibrary)
-        {
-        // Use the import library name.
-        fname += targetNameImport;
-        }
-      else
-        {
-        // Use the canonical name.
-        fname += targetName;
-        }
-      }
-    else
-      {
-      std::string targetName;
-      std::string targetNameSO;
-      std::string targetNameReal;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
-                              targetNameImport, targetNamePDB, i->c_str());
-      if(this->ImportLibrary)
-        {
-        // Use the import library name.
-        fname += targetNameImport;
-        }
-      else if(useSOName)
-        {
-        // Use the soname.
-        fname += targetNameSO;
-        }
-      else
-        {
-        // Use the canonical name.
-        fname += targetName;
-        }
-      }
+    fname += this->GetInstallFilename(target, i->c_str(), 
+                                      this->ImportLibrary, useSOName);
 
     // Set a variable with the target name for this configuration.
     os << "SET(" << target->GetName() << "_" << place
@@ -274,52 +287,8 @@ std::string cmInstallTargetGenerator::GetScriptReference(cmTarget* target,
   if(this->ConfigurationTypes->empty())
     {
     // Reference the target by its one configuration name.
-    if(target->GetType() == cmTarget::EXECUTABLE)
-      {
-      std::string targetName;
-      std::string targetNameReal;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      target->GetExecutableNames(targetName, targetNameReal,
-                                 targetNameImport, targetNamePDB,
-                                 this->ConfigurationName);
-      if(this->ImportLibrary)
-        {
-        // Use the import library name.
-        return targetNameImport;
-        }
-      else
-        {
-        // Use the canonical name.
-        return targetName;
-        }
-      }
-    else
-      {
-      std::string targetName;
-      std::string targetNameSO;
-      std::string targetNameReal;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
-                              targetNameImport, targetNamePDB,
-                              this->ConfigurationName);
-      if(this->ImportLibrary)
-        {
-        // Use the import library name.
-        return targetNameImport;
-        }
-      else if(useSOName)
-        {
-        // Use the soname.
-        return targetNameSO;
-        }
-      else
-        {
-        // Use the canonical name.
-        return targetName;
-        }
-      }
+    return this->GetInstallFilename(target, this->ConfigurationName, 
+                                    this->ImportLibrary, useSOName);
     }
   else
     {
