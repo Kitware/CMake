@@ -19,13 +19,13 @@
 #define cmGlobalGenerator_h
 
 #include "cmStandardIncludes.h"
-#include "cmExternalMakefileProjectGenerator.h"
 
 #include "cmTarget.h" // For cmTargets
 
 class cmake;
 class cmMakefile;
 class cmLocalGenerator;
+class cmExternalMakefileProjectGenerator;
 class cmTarget;
 
 /** \class cmGlobalGenerator
@@ -126,8 +126,7 @@ public:
   void SetExternalMakefileProjectGenerator(
                            cmExternalMakefileProjectGenerator *extraGenerator);
 
-  const char* GetExtraGeneratorName() const
-          {return this->ExtraGenerator!=0 ? this->ExtraGenerator->GetName():0;}
+  const char* GetExtraGeneratorName() const;
 
   void AddInstallComponent(const char* component);
   void EnableInstallTarget();

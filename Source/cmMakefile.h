@@ -721,10 +721,10 @@ public:
   
   ///! Set/Get the preorder flag
   void SetPreOrder(bool p) { this->PreOrder = p; }
-  bool GetPreOrder() { return this->PreOrder; }
+  bool GetPreOrder() const { return this->PreOrder; }
 
   void AddInstallGenerator(cmInstallGenerator* g)
-    { this->InstallGenerators.push_back(g); }
+    { if(g) this->InstallGenerators.push_back(g); }
   std::vector<cmInstallGenerator*>& GetInstallGenerators()
     { return this->InstallGenerators; }
 

@@ -1670,3 +1670,7 @@ void cmGlobalGenerator::SetExternalMakefileProjectGenerator(
     }
 }
 
+const char* cmGlobalGenerator::GetExtraGeneratorName() const
+{
+  return this->ExtraGenerator==0 ? 0 : this->ExtraGenerator->GetName();
+}

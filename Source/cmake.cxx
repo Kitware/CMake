@@ -1817,7 +1817,7 @@ int cmake::Configure()
     // We must have a bad generator selection.  Wipe the cache entry so the
     // user can select another.
     this->CacheManager->RemoveCacheEntry("CMAKE_GENERATOR");
-    this->CacheManager->RemoveCacheEntry("CMAKE_EMP_GENERATOR");
+    this->CacheManager->RemoveCacheEntry("CMAKE_EXTRA_GENERATOR");
     }
   // only save the cache if there were no fatal errors
   if ( !this->ScriptMode )
