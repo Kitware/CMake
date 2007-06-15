@@ -182,10 +182,10 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   quotedFullDestinationFilename += "/";
   quotedFullDestinationFilename += cmSystemTools::GetFilenameName(fromFile);
   quotedFullDestinationFilename += "\"";
-  
+
   this->AddRanlibRule(os, type, quotedFullDestinationFilename);
 
-  this->AddStripRule(os, quotedFullDestinationFilename, optional);
+  this->AddStripRule(os, type, quotedFullDestinationFilename, optional);
 }
 
 //----------------------------------------------------------------------------
@@ -453,9 +453,17 @@ void cmInstallTargetGenerator
 }
 
 void cmInstallTargetGenerator::AddStripRule(std::ostream& os, 
+                              cmTarget::TargetType type,
                               const std::string& quotedFullDestinationFilename,
                               bool optional)
 {
+
+  // don't strip static libraries, because it removes the only symbol table
+  // they have so you can't link to them anymore
+  if(type == cmTarget::STATIC_LIBRARY)
+    {
+    return;
+    }
 
   // Don't handle OSX Bundles.
   if(this->Target->GetMakefile()->IsOn("APPLE") &&
@@ -469,21 +477,18 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os,
     return;
     }
 
-  os << "IF(CMAKE_INSTALL_DO_STRIP";
+  std::string optionalString;
   if (optional)
     {
-    os << " AND EXISTS " << quotedFullDestinationFilename;
+    optionalString = " AND EXISTS ";
+    optionalString += quotedFullDestinationFilename;
     }
-  os << ")\n";
+
+  os << "IF(CMAKE_INSTALL_DO_STRIP" << optionalString << ")\n";
   os << "  EXECUTE_PROCESS(COMMAND \""
      << this->Target->GetMakefile()->GetDefinition("CMAKE_STRIP")
      << "\" " << quotedFullDestinationFilename << " )\n";
-  os << "ENDIF(CMAKE_INSTALL_DO_STRIP";
-  if (optional)
-    {
-    os << " AND EXISTS " << quotedFullDestinationFilename;
-    }
-  os << ")\n";
+  os << "ENDIF(CMAKE_INSTALL_DO_STRIP" << optionalString << ")\n";
 }
 
 void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os, 

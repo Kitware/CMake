@@ -45,6 +45,7 @@ protected:
                                  bool useSOName);
   void AddInstallNamePatchRule(std::ostream& os, const char* destination);
   void AddStripRule(std::ostream& os, 
+                    cmTarget::TargetType type,
                     const std::string& quotedFullDestinationFilename, 
                     bool optional);
   void AddRanlibRule(std::ostream& os, 
