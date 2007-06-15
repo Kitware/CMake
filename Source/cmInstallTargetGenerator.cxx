@@ -177,13 +177,15 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
     this->AddInstallNamePatchRule(os, destination.c_str());
     }
 
-  std::string destinationFilename = destination;
-  destinationFilename += "/";
-  destinationFilename += cmSystemTools::GetFilenameName(fromFile);
+  std::string quotedFullDestinationFilename = "\"$ENV{DESTDIR}";
+  quotedFullDestinationFilename += destination;
+  quotedFullDestinationFilename += "/";
+  quotedFullDestinationFilename += cmSystemTools::GetFilenameName(fromFile);
+  quotedFullDestinationFilename += "\"";
+  
+  this->AddRanlibRule(os, type, quotedFullDestinationFilename);
 
-  this->AddRanlibRule(os, type, destinationFilename);
-
-  this->AddStripRule(os, destinationFilename);
+  this->AddStripRule(os, quotedFullDestinationFilename, optional);
 }
 
 //----------------------------------------------------------------------------
@@ -451,7 +453,8 @@ void cmInstallTargetGenerator
 }
 
 void cmInstallTargetGenerator::AddStripRule(std::ostream& os, 
-                                        const std::string& destinationFilename)
+                              const std::string& quotedFullDestinationFilename,
+                              bool optional)
 {
 
   // Don't handle OSX Bundles.
@@ -466,16 +469,26 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os,
     return;
     }
 
-  os << "IF(CMAKE_INSTALL_DO_STRIP)\n";
-  os << "  EXECUTE_PROCESS(COMMAND \"";
-  os << this->Target->GetMakefile()->GetDefinition("CMAKE_STRIP");
-  os << "\" \"$ENV{DESTDIR}" << destinationFilename << "\" )\n";
-  os << "ENDIF(CMAKE_INSTALL_DO_STRIP)\n";
+  os << "IF(CMAKE_INSTALL_DO_STRIP";
+  if (optional)
+    {
+    os << " AND EXISTS " << quotedFullDestinationFilename;
+    }
+  os << ")\n";
+  os << "  EXECUTE_PROCESS(COMMAND \""
+     << this->Target->GetMakefile()->GetDefinition("CMAKE_STRIP")
+     << "\" " << quotedFullDestinationFilename << " )\n";
+  os << "ENDIF(CMAKE_INSTALL_DO_STRIP";
+  if (optional)
+    {
+    os << " AND EXISTS " << quotedFullDestinationFilename;
+    }
+  os << ")\n";
 }
 
 void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os, 
-                                        cmTarget::TargetType type,
-                                        const std::string& destinationFilename)
+                              cmTarget::TargetType type,
+                              const std::string& quotedFullDestinationFilename)
 {
   // Static libraries need ranlib on this platform.
   if(type != cmTarget::STATIC_LIBRARY)
@@ -499,5 +512,5 @@ void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
 
   os << "EXECUTE_PROCESS(COMMAND \"";
   os << ranlib;
-  os << "\" \"$ENV{DESTDIR}" << destinationFilename << "\" )\n";
+  os << "\" " << quotedFullDestinationFilename << " )\n";
 }

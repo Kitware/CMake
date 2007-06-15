@@ -44,9 +44,12 @@ protected:
   std::string GetScriptReference(cmTarget* target, const char* place,
                                  bool useSOName);
   void AddInstallNamePatchRule(std::ostream& os, const char* destination);
-  void AddStripRule(std::ostream& os, const std::string& destinationFilename);
-  void AddRanlibRule(std::ostream& os, cmTarget::TargetType type,
-                     const std::string& destinationFilename);
+  void AddStripRule(std::ostream& os, 
+                    const std::string& quotedFullDestinationFilename, 
+                    bool optional);
+  void AddRanlibRule(std::ostream& os, 
+                     cmTarget::TargetType type,
+                     const std::string& quotedFullDestinationFilename);
 
   cmTarget* Target;
   std::string Destination;
