@@ -29,6 +29,13 @@
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
 
+/* NSIS uses different command line syntax on Windows and others */
+#ifdef _WIN32
+# define NSIS_OPT "/"
+#else
+# define NSIS_OPT "-"
+#endif
+
 //----------------------------------------------------------------------
 cmCPackNSISGenerator::cmCPackNSISGenerator()
 {
@@ -144,6 +151,8 @@ int cmCPackNSISGenerator::InitializeInternal()
     << std::endl);
   std::vector<std::string> path;
   std::string nsisPath;
+
+#ifdef _WIN32
   if ( !cmsys::SystemTools::ReadRegistryValue(
       "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath) )
     {
@@ -156,6 +165,7 @@ int cmCPackNSISGenerator::InitializeInternal()
     return 0;
     }
   path.push_back(nsisPath);
+#endif
   nsisPath = cmSystemTools::FindProgram("makensis", path, false);
   if ( nsisPath.empty() )
     {
@@ -163,7 +173,7 @@ int cmCPackNSISGenerator::InitializeInternal()
       << std::endl);
     return 0;
     }
-  std::string nsisCmd = "\"" + nsisPath + "\" /VERSION";
+  std::string nsisCmd = "\"" + nsisPath + "\" " NSIS_OPT "VERSION";
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Test NSIS version: "
     << nsisCmd.c_str() << std::endl);
   std::string output;

@@ -23,9 +23,7 @@
 #include "cmCPackTarCompressGenerator.h"
 #include "cmCPackZIPGenerator.h"
 #include "cmCPackSTGZGenerator.h"
-#ifdef _WIN32
-#  include "cmCPackNSISGenerator.h"
-#endif
+#include "cmCPackNSISGenerator.h"
 #ifdef __APPLE__
 #  include "cmCPackPackageMakerGenerator.h"
 #  include "cmCPackOSXX11Generator.h"
@@ -45,10 +43,8 @@ cmCPackGenerators::cmCPackGenerators()
     cmCPackTGZGenerator::CreateGenerator);
   this->RegisterGenerator("STGZ", "Self extracting Tar GZip compression",
     cmCPackSTGZGenerator::CreateGenerator);
-#ifdef _WIN32
   this->RegisterGenerator("NSIS", "Null Soft Installer",
     cmCPackNSISGenerator::CreateGenerator);
-#endif
 #ifdef __CYGWIN__
   this->RegisterGenerator("CygwinBinary", "Cygwin Binary Installer",
                           cmCPackCygwinBinaryGenerator::CreateGenerator);
