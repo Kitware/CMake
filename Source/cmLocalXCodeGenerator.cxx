@@ -24,16 +24,3 @@ GetTargetObjectFileDirectories(cmTarget* target,
   g->GetTargetObjectFileDirectories(target,
                                     dirs);
 }
-  
-  // return the source name for the object file
-std::string cmLocalXCodeGenerator::GetSourceObjectName(cmSourceFile& sf )
-{
-  std::string ret = sf.GetSourceName();
-  std::string::size_type pos = ret.find("/");
-  if(pos == ret.npos)
-    {
-    return ret;
-    }
-  return ret.substr(pos+1);
-}
-  

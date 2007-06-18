@@ -73,16 +73,6 @@ public:
   std::vector<cmCustomCommand> &GetPostBuildCommands() 
     {return this->PostBuildCommands;}
 
-  /**
-   * Get the list of the source lists used by this target
-   */
-  std::vector<std::string> const& GetSourceLists() {return this->SourceLists;}
-
-  void AddSourceListEntry(const char* src)
-    { this->SourceLists.push_back(src); }
-  void SetSourceList(std::vector<std::string> const& srcs)
-    { this->SourceLists = srcs; }
-
   ///! Return the list of frameworks being linked to this target
   std::vector<std::string> &GetFrameworks() {return this->Frameworks;}
   
@@ -92,6 +82,12 @@ public:
   std::vector<cmSourceFile*> const &GetSourceFiles()
     {return this->SourceFiles;}
   void AddSourceFile(cmSourceFile* sf) { this->SourceFiles.push_back(sf); }
+
+  /**
+   * Add sources to the target.
+   */
+  void AddSources(std::vector<std::string> const& srcs);
+  cmSourceFile* AddSource(const char* src);
 
   /**
    * Get the list of the source files used by this target
@@ -149,12 +145,6 @@ public:
   bool GetHaveInstallRule() { return this->HaveInstallRule; }
   void SetHaveInstallRule(bool h) { this->HaveInstallRule = h; }
 
-  /**
-   * Generate the SourceFilesList from the SourceLists. This should only be
-   * done once to be safe.  
-   */
-  void GenerateSourceFilesFromSourceLists(cmMakefile &mf);
-
   /** Add a utility on which this project depends. A utility is an executable
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
    * commands. It is not a full path nor does it have an extension.  
@@ -193,7 +183,7 @@ public:
    * Trace through the source files in this target and add al source files
    * that they depend on, used by all generators
    */
-  void TraceVSDependencies(std::string projName, cmMakefile *mf);  
+  void TraceDependencies(const char* vsProjectFile);
 
   ///! Return the prefered linker language for this target
   const char* GetLinkerLanguage(cmGlobalGenerator*);
@@ -302,14 +292,6 @@ private:
                          const LibraryID& lib,
                          const LibraryID& dep);
 
-  /*
-   * Check custom commands for known targets and add a target-level
-   * dependency.
-   */
-  void CheckForTargetsAsCommand(const cmCustomCommand& cc);
-  void CheckForTargetsAsCommand(const std::vector<cmCustomCommand>& commands);
-  
-  
   /**
    * Emits the library \a lib and all its dependencies into link_line.
    * \a emitted keeps track of the libraries that have been emitted to
@@ -379,7 +361,6 @@ private:
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;
-  std::vector<std::string> SourceLists;
   TargetType TargetTypeValue;
   std::vector<cmSourceFile*> SourceFiles;
   LinkLibraryVectorType LinkLibraries;

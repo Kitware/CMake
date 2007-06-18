@@ -225,8 +225,6 @@ public:
   GetTargetObjectFileDirectories(cmTarget* target,
                                  std::vector<std::string>& 
                                  dirs);
-  // return the source name for the object file
-  virtual std::string GetSourceObjectName(cmSourceFile& );
   
   /**
    * Convert the given remote path to a relative path with respect to

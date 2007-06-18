@@ -170,29 +170,17 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     res = false;
     }
 
-  // Create the source list
-  cmSourceFile cfile;
-  cfile.SetMakefile(this->Makefile);
+  // Construct the source list.
   std::string sourceListValue;
-
-  cfile.SetProperty("ABSTRACT","0");
-  cfile.SetName(cmSystemTools::GetFilenameWithoutExtension(args[1]).c_str(),
-                this->Makefile->GetCurrentOutputDirectory(),
-                cmSystemTools::GetFilenameExtension(args[1]).c_str()+1,
-                false);
-  this->Makefile->AddSource(cfile);
+  {
+  cmSourceFile* sf = this->Makefile->GetOrCreateSource(driver.c_str());
+  sf->SetProperty("ABSTRACT","0");
   sourceListValue = args[1];
-
+  }
   for(i = testsBegin; i != tests.end(); ++i)
     {
-    cmSourceFile icfile;
-    icfile.SetMakefile(this->Makefile);
-    icfile.SetProperty("ABSTRACT","0");
-    icfile.SetName(i->c_str(),
-                  this->Makefile->GetCurrentDirectory(),
-                  this->Makefile->GetSourceExtensions(),
-                  this->Makefile->GetHeaderExtensions());
-    this->Makefile->AddSource(icfile);
+    cmSourceFile* sf = this->Makefile->GetOrCreateSource(i->c_str());
+    sf->SetProperty("ABSTRACT","0");
     sourceListValue += ";";
     sourceListValue += *i;
     }

@@ -43,14 +43,6 @@ public:
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args);
-  
-  /**
-   * This is called at the end after all the information
-   * specified by the command is accumulated. Most commands do
-   * not implement this method.  At this point, reading and
-   * writing to the cache can be done.
-   */
-  virtual void FinalPass();
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -80,21 +72,6 @@ public:
       "The .cxx files will be added to the library using the SourcesDestName"
       "source list.";
     }
-  
-private:
-  /**
-   * List of produced files.
-   */
-  std::vector<cmSourceFile> WrapSourcesClasses;
-  std::vector<cmSourceFile> WrapHeadersClasses;
-  std::vector<cmSourceFile> WrapMocClasses;
-  /**
-   * List of header files that pprovide the source for WrapClasses.
-   */
-  std::vector<std::string> WrapUserInterface;
-  std::string LibraryName;
-  std::string HeaderList;
-  std::string SourceList;
 };
 
 

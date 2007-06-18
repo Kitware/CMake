@@ -223,13 +223,6 @@ ListDependencies(cmDependInformation const *info,
 
 void cmOutputRequiredFilesCommand::FinalPass()
 {
-  
-  cmTargets &tgts = this->Makefile->GetTargets();
-  for (cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
-    {
-    l->second.GenerateSourceFilesFromSourceLists(*this->Makefile);
-    }
-
   // compute the list of files
   cmLBDepend md;
   md.SetMakefile(this->Makefile);

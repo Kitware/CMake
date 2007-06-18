@@ -24,120 +24,96 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+
+  // This command supports source list inputs for compatibility.
   std::vector<std::string> args;
   this->Makefile->ExpandSourceListArguments(argsIn, args, 2);
 
-  // what is the current source dir
-  std::string cdir = this->Makefile->GetCurrentDirectory();
+  // Get the moc executable to run in the custom command.
+  const char* moc_exe =
+    this->Makefile->GetRequiredDefinition("QT_MOC_EXECUTABLE");
 
-  // keep the library name
-  this->LibraryName = args[0];
-  this->SourceList = args[1];
-  
-  std::string sourceListValue;
+  // Get the variable holding the list of sources.
+  std::string const& sourceList = args[1];
+  std::string sourceListValue =
+    this->Makefile->GetSafeDefinition(sourceList.c_str());
 
-  // was the list already populated
-  const char *def = this->Makefile->GetDefinition(this->SourceList.c_str());  
-  if (def)
-    {
-    sourceListValue = def;
-    }
-
-  // get the list of classes for this library
+  // Create a rule for all sources listed.
   for(std::vector<std::string>::iterator j = (args.begin() + 2);
       j != args.end(); ++j)
-    {   
+    {
     cmSourceFile *curr = this->Makefile->GetSource(j->c_str());
-    
     // if we should wrap the class
-    if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
+    if(!(curr && curr->GetPropertyAsBool("WRAP_EXCLUDE")))
       {
-      cmSourceFile file;
+      // Compute the name of the file to generate.
+      std::string srcName =
+        cmSystemTools::GetFilenameWithoutLastExtension(*j);
+      std::string newName = this->Makefile->GetCurrentOutputDirectory();
+      newName += "/moc_";
+      newName += srcName;
+      newName += ".cxx";
+      cmSourceFile* sf =
+        this->Makefile->GetOrCreateSource(newName.c_str(), true);
       if (curr)
         {
-        file.SetProperty("ABSTRACT",curr->GetProperty("ABSTRACT"));
+        sf->SetProperty("ABSTRACT", curr->GetProperty("ABSTRACT"));
         }
-      std::string srcName = 
-        cmSystemTools::GetFilenameWithoutLastExtension(*j);
-      std::string newName = "moc_" + srcName;
-      file.SetName(newName.c_str(), 
-                   this->Makefile->GetCurrentOutputDirectory(),
-                   "cxx",false);
+
+      // Compute the name of the header from which to generate the file.
       std::string hname;
-      if ( (*j)[0] == '/' || (*j)[1] == ':' )
+      if(cmSystemTools::FileIsFullPath(j->c_str()))
         {
         hname = *j;
         }
       else
         {
-        if ( curr && curr->GetPropertyAsBool("GENERATED") )
+        if(curr && curr->GetPropertyAsBool("GENERATED"))
           {
-          hname = std::string(this->Makefile->GetCurrentOutputDirectory()) 
-            + "/" + *j;
+          hname = this->Makefile->GetCurrentOutputDirectory();
           }
         else
           {
-          hname = cdir + "/" + *j;
+          hname = this->Makefile->GetCurrentDirectory();
           }
+        hname += "/";
+        hname += *j;
         }
-      this->WrapHeaders.push_back(hname);
-      // add starting depends
-      file.AddDepend(hname.c_str());
-      this->WrapClasses.push_back(file);
-      if (sourceListValue.size() > 0)
+
+      // Append the generated source file to the list.
+      if(!sourceListValue.empty())
         {
         sourceListValue += ";";
         }
-      sourceListValue += newName + ".cxx";
+      sourceListValue += newName;
+
+      // Create the custom command to generate the file.
+      cmCustomCommandLine commandLine;
+      commandLine.push_back(moc_exe);
+      commandLine.push_back("-o");
+      commandLine.push_back(newName);
+      commandLine.push_back(hname);
+
+      cmCustomCommandLines commandLines;
+      commandLines.push_back(commandLine);
+
+      std::vector<std::string> depends;
+      depends.push_back(moc_exe);
+      depends.push_back(hname);
+
+      const char* no_main_dependency = 0;
+      const char* no_working_dir = 0;
+      this->Makefile->AddCustomCommandToOutput(newName.c_str(),
+                                               depends,
+                                               no_main_dependency,
+                                               commandLines,
+                                               "QT Wrapped File",
+                                               no_working_dir);
       }
     }
-  
-  this->Makefile->AddDefinition(this->SourceList.c_str(), 
+
+  // Store the final list of source files.
+  this->Makefile->AddDefinition(sourceList.c_str(),
                                 sourceListValue.c_str());
   return true;
-}
-
-void cmQTWrapCPPCommand::FinalPass() 
-{
-
-  // first we add the rules for all the .h to Moc files
-  size_t lastClass = this->WrapClasses.size();
-  std::vector<std::string> depends;
-  const char* moc_exe = 
-    this->Makefile->GetRequiredDefinition("QT_MOC_EXECUTABLE");
-
-  // wrap all the .h files
-  depends.push_back(moc_exe);
-
-  for(size_t classNum = 0; classNum < lastClass; classNum++)
-    {
-    // Add output to build list
-    this->Makefile->AddSource(this->WrapClasses[classNum]);
-
-    // set up moc command
-    std::string res = this->Makefile->GetCurrentOutputDirectory();
-    res += "/";
-    res += this->WrapClasses[classNum].GetSourceName() + ".cxx";
-
-    cmCustomCommandLine commandLine;
-    commandLine.push_back(moc_exe);
-    commandLine.push_back("-o");
-    commandLine.push_back(res);
-    commandLine.push_back(this->WrapHeaders[classNum]);
-
-    cmCustomCommandLines commandLines;
-    commandLines.push_back(commandLine);
-
-    std::vector<std::string> realdepends = depends;
-    realdepends.push_back(this->WrapHeaders[classNum]);
-
-    const char* no_main_dependency = 0;
-    const char* no_working_dir = 0;
-    this->Makefile->AddCustomCommandToOutput(res.c_str(),
-                                         realdepends,
-                                         no_main_dependency,
-                                         commandLines,
-                                         "QT Wrapped File",
-                                         no_working_dir);
-    }
 }

@@ -56,9 +56,9 @@ bool cmAuxSourceDirectoryCommand::InitialPass
       if( dotpos != std::string::npos )
         {
         std::string ext = file.substr(dotpos+1);
-        file = file.substr(0, dotpos);
+        std::string base = file.substr(0, dotpos);
         // Process only source files
-        if( file.size() != 0
+        if( base.size() != 0
             && std::find( this->Makefile->GetSourceExtensions().begin(),
                           this->Makefile->GetSourceExtensions().end(), ext )
                  != this->Makefile->GetSourceExtensions().end() )
@@ -68,21 +68,14 @@ bool cmAuxSourceDirectoryCommand::InitialPass
           fullname += file;
           // add the file as a class file so 
           // depends can be done
-          cmSourceFile cmfile;
-          cmfile.SetMakefile(this->Makefile);
-          cmfile.SetName(fullname.c_str(), 
-                         this->Makefile->GetCurrentDirectory(),
-                         this->Makefile->GetSourceExtensions(),
-                         this->Makefile->GetHeaderExtensions());
-          cmfile.SetProperty("ABSTRACT","0");
-          this->Makefile->AddSource(cmfile);
-          if (sourceListValue.size() > 0)
+          cmSourceFile* sf =
+            this->Makefile->GetOrCreateSource(fullname.c_str());
+          sf->SetProperty("ABSTRACT","0");
+          if(!sourceListValue.empty())
             {
             sourceListValue += ";";
             }
-          sourceListValue += cmfile.GetSourceName();
-          sourceListValue += ".";
-          sourceListValue += cmfile.GetSourceExtension();
+          sourceListValue += fullname;
           }
         }
       }

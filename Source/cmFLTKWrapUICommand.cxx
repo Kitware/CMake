@@ -53,20 +53,17 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
     // to generate .cxx and .h files
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
       {
-      cmSourceFile header_file;
-      header_file.SetMakefile(this->Makefile);
-      std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*i);
-      const bool headerFileOnly = true;
-      header_file.SetName(srcName.c_str(), 
-                  outputDirectory.c_str(), "h",headerFileOnly);
+      std::string outName = outputDirectory;
+      outName += "/";
+      outName += cmSystemTools::GetFilenameWithoutExtension(*i);
+      std::string hname = outName;
+      hname += ".h";
       std::string origname = cdir + "/" + *i;
-      std::string hname   = header_file.GetFullPath();
       // add starting depends
       std::vector<std::string> depends;
       depends.push_back(origname);
       depends.push_back(fluid_exe);
-      std::string cxxres = outputDirectory.c_str();
-      cxxres += "/" + srcName;
+      std::string cxxres = outName;
       cxxres += ".cxx";
 
       cmCustomCommandLine commandLine;
@@ -123,12 +120,12 @@ void cmFLTKWrapUICommand::FinalPass()
   // people should add the srcs to the target themselves, but the old command
   // didn't support that, so check and see if they added the files in and if
   // they didn;t then print a warning and add then anyhow
-  std::vector<std::string> const& srcs = 
-    this->Makefile->GetTargets()[this->Target].GetSourceLists();
+  std::vector<cmSourceFile*> const& srcs = 
+    this->Makefile->GetTargets()[this->Target].GetSourceFiles();
   bool found = false;
   for (unsigned int i = 0; i < srcs.size(); ++i)
     {
-    if (srcs[i] == 
+    if (srcs[i]->GetFullPath() == 
         this->GeneratedSourcesClasses[0]->GetFullPath())
       {
       found = true;

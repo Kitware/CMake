@@ -38,6 +38,11 @@ bool cmGetSourceFilePropertyCommand::InitialPass(
     }
   if(sf)
     {
+    if(args[2] == "LOCATION")
+      {
+      // Make sure the location is known.
+      sf->GetFullPath();
+      }
     const char *prop = sf->GetProperty(args[2].c_str());
     if (prop)
       {

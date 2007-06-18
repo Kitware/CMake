@@ -62,8 +62,6 @@ public:
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& 
                                       dirs); 
-  // return the source name for the object file
-  virtual std::string GetSourceObjectName(cmSourceFile& );
 
   void SetExtraFlagTable(cmVS7FlagTable const* table)
     { this->ExtraFlagTable = table; }

@@ -17,11 +17,11 @@
 #ifndef cmSourceFile_h
 #define cmSourceFile_h
 
+#include "cmSourceFileLocation.h"
 #include "cmCustomCommand.h"
 #include "cmPropertyMap.h"
 
 class cmake;
-class cmMakefile;
 
 /** \class cmSourceFile
  * \brief Represent a class loaded from a makefile.
@@ -33,67 +33,41 @@ class cmSourceFile
 {
 public:
   /**
-   * Construct instance as a concrete class with both a
-   * .h and .cxx file.
+   * Construct with the makefile storing the source and the initial
+   * name referencing it.
    */
-  cmSourceFile();
-  ~cmSourceFile()
-    {
-      this->SetCustomCommand(0);
-    }
-  
-  /**
-   * Set the name of the file, given the directory the file should be
-   * in.  The various extensions provided are tried on the name
-   * (e.g., cxx, cpp) in the directory to find the actual file.
-   */
-  bool SetName(const char* name, const char* dir,
-               const std::vector<std::string>& sourceExts,
-               const std::vector<std::string>& headerExts,
-               const char* target = 0);
+  cmSourceFile(cmMakefile* mf, const char* name);
+
+  ~cmSourceFile();
 
   /**
    * Get the list of the custom commands for this source file
    */
-  const cmCustomCommand *GetCustomCommand() const 
-    {return this->CustomCommand;}
-  cmCustomCommand *GetCustomCommand() {return this->CustomCommand;}
+  cmCustomCommand* GetCustomCommand();
+  cmCustomCommand const* GetCustomCommand() const;
   void SetCustomCommand(cmCustomCommand *cc);
-    
-  /**
-   * Set the name of the file, given the directory the file should be in.  IN
-   * this version the extension is provided in the call. This is useful for
-   * generated files that do not exist prior to the build.  
-   */
-  void SetName(const char* name, const char* dir, const char *ext, 
-               bool headerFileOnly);
-
-  /**
-   * Print the structure to std::cout.
-   */
-  void Print() const;
 
   ///! Set/Get a property of this source file
   void SetProperty(const char *prop, const char *value);
   const char *GetProperty(const char *prop) const;
   bool GetPropertyAsBool(const char *prop) const;
-    
+
   /**
    * The full path to the file.
    */
-  const std::string &GetFullPath() const {return this->FullPath;}
+  std::string const& GetFullPath();
+  std::string const& GetFullPath() const;
 
   /**
-   * The file name associated with stripped off directory and extension.
-   * (In most cases this is the name of the class.)
+   * Get the file extension of this source file.
    */
-  const std::string &GetSourceName() const {return this->SourceName;}
+  std::string const& GetExtension() const;
 
   /**
-   * The file extension associated with source file
+   * Get the language of the compiler to use for this source file.
    */
-  const std::string &GetSourceExtension() const {
-    return this->SourceExtension;}
+  const char* GetLanguage();
+  const char* GetLanguage() const;
 
   /**
    * Return the vector that holds the list of dependencies
@@ -101,33 +75,32 @@ public:
   const std::vector<std::string> &GetDepends() const {return this->Depends;}
   void AddDepend(const char* d) { this->Depends.push_back(d); }
 
-  /**
-   * Get the source name without last extension
-   */
-  const std::string& GetSourceNameWithoutLastExtension();
-
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
 
   // Define the properties
   static void DefineProperties(cmake *cm);
 
-  ///! Set the cmMakefile that owns this target
-  void SetMakefile(cmMakefile *mf);
-  cmMakefile *GetMakefile() { return this->Makefile;};
+  /**
+   * Check whether the given source file location could refer to this
+   * source.
+   */
+  bool Matches(cmSourceFileLocation const&);
 
 private:
+  cmSourceFileLocation Location;
   cmPropertyMap Properties;
-  cmCustomCommand *CustomCommand;
+  cmCustomCommand* CustomCommand;
+  std::string Extension;
+  std::string Language;
   std::string FullPath;
-  std::string SourceName;
-  std::string SourceExtension;
-  std::vector<std::string> Depends;
-  std::string SourceNameWithoutLastExtension;
+  bool FindFullPathFailed;
 
-  // The cmMakefile instance that owns this source file.  This should
-  // always be set.
-  cmMakefile* Makefile;
+  bool FindFullPath();
+  bool TryFullPath(const char* tryPath, const char* ext);
+  void CheckExtension();
+
+  std::vector<std::string> Depends;
 };
 
 #endif

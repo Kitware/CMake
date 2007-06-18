@@ -148,6 +148,8 @@ SET(SRCS
   cmPropertyMap.h
   cmSourceFile.cxx
   cmSourceFile.h
+  cmSourceFileLocation.cxx
+  cmSourceFileLocation.h
   cmSourceGroup.cxx
   cmSourceGroup.h
   cmSystemTools.cxx

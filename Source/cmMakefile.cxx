@@ -18,6 +18,7 @@
 #include "cmVersion.h"
 #include "cmCommand.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocation.h"
 #include "cmSystemTools.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -557,7 +558,6 @@ void cmMakefile::ConfigureFinalPass()
   for (cmTargets::iterator l = this->Targets.begin();
        l != this->Targets.end(); l++)
     {
-    l->second.GenerateSourceFilesFromSourceLists(*this);
     l->second.AnalyzeLibDependencies(*this);
     }
 }
@@ -772,7 +772,7 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
       {
       if (this->Targets.find(target) != this->Targets.end())
         {
-        this->Targets[target].AddSourceListEntry(source);
+        this->Targets[target].AddSource(source);
         }
       else
         {
@@ -854,10 +854,10 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
                                  commandLines, comment,
                                  workingDirectory, no_replace,
                                  escapeOldStyle);
-  target->AddSourceListEntry(force.c_str());
+  cmSourceFile* sf = target->AddSource(force.c_str());
 
   // The output is not actually created so mark it symbolic.
-  if(cmSourceFile* sf = this->GetSource(force.c_str()))
+  if(sf)
     {
     sf->SetProperty("SYMBOLIC", "1");
     }
@@ -1364,7 +1364,7 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
-  target->SetSourceList(srcs);
+  target->AddSources(srcs);
   this->AddGlobalLinkInformation(lname, *target);
 }
 
@@ -1377,7 +1377,7 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
     {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
-  target->SetSourceList(srcs);
+  target->AddSources(srcs);
   this->AddGlobalLinkInformation(exeName, *target);
   return target;
 }
@@ -2116,218 +2116,42 @@ cmData* cmMakefile::LookupData(const char* name) const
     }
 }
 
-cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
+//----------------------------------------------------------------------------
+cmSourceFile* cmMakefile::GetSource(const char* sourceName)
 {
-  // if the source is provided with a full path use it, otherwise
-  // by default it is in the current source dir
-  std::string path;
-  if (cmSystemTools::FileIsFullPath(sourceName))
+  cmSourceFileLocation sfl(this, sourceName);
+  for(std::vector<cmSourceFile*>::const_iterator
+        sfi = this->SourceFiles.begin();
+      sfi != this->SourceFiles.end(); ++sfi)
     {
-    path = cmSystemTools::GetFilenamePath(sourceName);
-    }
-  else
-    {
-    path = this->GetCurrentDirectory();
-    // even though it is not a full path, it may still be relative
-    std::string subpath = cmSystemTools::GetFilenamePath(sourceName);
-    if (!subpath.empty())
+    cmSourceFile* sf = *sfi;
+    if(sf->Matches(sfl))
       {
-      path += "/";
-      path += cmSystemTools::GetFilenamePath(sourceName);
+      return sf;
       }
     }
-  path = cmSystemTools::CollapseFullPath(path.c_str());
-
-  std::string sname =
-    cmSystemTools::GetFilenameWithoutLastExtension(sourceName);
-
-  // compute the extension
-  std::string ext
-    = cmSystemTools::GetFilenameLastExtension(sourceName);
-  if ( ext.length() && ext[0] == '.' )
-    {
-    ext = ext.substr(1);
-    }
-
-  for(std::vector<cmSourceFile*>::const_iterator i =
-        this->SourceFiles.begin();
-      i != this->SourceFiles.end(); ++i)
-    {
-    if ((*i)->GetSourceNameWithoutLastExtension() == sname &&
-        cmSystemTools::GetFilenamePath((*i)->GetFullPath()) == path &&
-        (ext.size() == 0 || (ext == (*i)->GetSourceExtension())))
-      {
-      return *i;
-      }
-    }
-
-  // geeze, if it wasn't found maybe it is listed under the output dir
-  if (!cmSystemTools::GetFilenamePath(sourceName).empty())
-    {
-    return 0;
-    }
-
-  path = this->GetCurrentOutputDirectory();
-  for(std::vector<cmSourceFile*>::const_iterator i =
-        this->SourceFiles.begin();
-      i != this->SourceFiles.end(); ++i)
-    {
-    if ((*i)->GetSourceName() == sname &&
-        cmSystemTools::GetFilenamePath((*i)->GetFullPath()) == path &&
-        (ext.size() == 0 || (ext == (*i)->GetSourceExtension())))
-      {
-      return *i;
-      }
-    }
-
   return 0;
 }
 
+//----------------------------------------------------------------------------
 cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
                                             bool generated)
 {
-  // make it a full path first
-  std::string src = sourceName;
-  bool relative = !cmSystemTools::FileIsFullPath(sourceName);
-  std::string srcTreeFile = this->GetCurrentDirectory();
-  srcTreeFile += "/";
-  srcTreeFile += sourceName;
-
-  if(relative)
+  if(cmSourceFile* esf = this->GetSource(sourceName))
     {
-    src = srcTreeFile;
-    }
-
-  // check to see if it exists
-  cmSourceFile* ret = this->GetSource(src.c_str());
-  if (ret)
-    {
-    return ret;
-    }
-
-  // OK a source file object doesn't exist for the source
-  // maybe we made a bad call on assuming it was in the src tree
-  std::string buildTreeFile = this->GetCurrentOutputDirectory();
-  buildTreeFile += "/";
-  buildTreeFile += sourceName;
-
-  if (relative)
-    {
-    src = buildTreeFile;
-    ret = this->GetSource(src.c_str());
-    if (ret)
-      {
-      return ret;
-      }
-    // if it has not been marked generated check to see if it exists in the
-    // src tree
-    if(!generated)
-      {
-      // see if the file is in the source tree, otherwise assume it
-      // is in the binary tree
-      if (cmSystemTools::FileExists(srcTreeFile.c_str()) &&
-          !cmSystemTools::FileIsDirectory(srcTreeFile.c_str()))
-        {
-        src = srcTreeFile;
-        }
-      else
-        {
-        if ( cmSystemTools::GetFilenameLastExtension
-             (srcTreeFile.c_str()).size() == 0)
-          {
-          if (cmSystemTools::DoesFileExistWithExtensions(
-            srcTreeFile.c_str(), this->GetSourceExtensions()))
-            {
-            src = srcTreeFile;
-            }
-          else if (cmSystemTools::DoesFileExistWithExtensions(
-            srcTreeFile.c_str(), this->GetHeaderExtensions()))
-            {
-            src = srcTreeFile;
-            }
-          }
-        }
-      }
-    }
-
-  // a cmSourceFile instance does not exist yet so we must create one
-  // go back to looking in the source directory for it
-
-  // we must create one
-  cmSourceFile file;
-  file.SetMakefile(this);
-  std::string path = cmSystemTools::GetFilenamePath(src);
-  if(generated)
-    {
-    std::string ext = cmSystemTools::GetFilenameLastExtension(src);
-    std::string name_no_ext = cmSystemTools::GetFilenameName(src.c_str());
-    name_no_ext = name_no_ext.substr(0, name_no_ext.length()-ext.length());
-    if ( ext.length() && ext[0] == '.' )
-      {
-      ext = ext.substr(1);
-      }
-    bool headerFile =
-      !(std::find( this->HeaderFileExtensions.begin(),
-                   this->HeaderFileExtensions.end(), ext ) ==
-        this->HeaderFileExtensions.end());
-    file.SetName(name_no_ext.c_str(), path.c_str(), ext.c_str(), headerFile);
+    return esf;
     }
   else
     {
-    std::string relPath = cmSystemTools::GetFilenamePath(sourceName);
-    if (relative && relPath.size())
+    cmSourceFile* sf = new cmSourceFile(this, sourceName);
+    if(generated)
       {
-      // we need to keep the relative part of the filename
-      std::string fullPathLessRel = path;
-      std::string::size_type pos = fullPathLessRel.rfind(relPath);
-      if (pos == std::string::npos)
-        {
-        cmSystemTools::Error(
-          "CMake failed to properly look up relative cmSourceFile: ",
-          sourceName);
-        }
-      fullPathLessRel.erase(pos-1);
-      file.SetName(sourceName, fullPathLessRel.c_str(),
-                   this->GetSourceExtensions(),
-                   this->GetHeaderExtensions());
+      sf->SetProperty("GENERATED", "1");
       }
-    else
-      {
-      file.SetName(cmSystemTools::GetFilenameName(src.c_str()).c_str(),
-                   path.c_str(),
-                   this->GetSourceExtensions(),
-                   this->GetHeaderExtensions());
-      }
+    this->SourceFiles.push_back(sf);
+    return sf;
     }
-  // add the source file to the makefile
-  this->AddSource(file);
-  src = file.GetFullPath();
-  ret = this->GetSource(src.c_str());
-  if (!ret)
-    {
-    cmSystemTools::Error(
-      "CMake failed to properly look up cmSourceFile: ", sourceName);
-    }
-  else
-    {
-    ret->SetMakefile(this);
-    }
-  return ret;
 }
-
-cmSourceFile* cmMakefile::AddSource(cmSourceFile const&sf)
-{
-  // check to see if it exists
-  cmSourceFile* ret = this->GetSource(sf.GetFullPath().c_str());
-  if(ret)
-    {
-    return ret;
-    }
-  ret = new cmSourceFile(sf);
-  this->SourceFiles.push_back(ret);
-  return ret;
-}
-
 
 void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang)
 {

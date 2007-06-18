@@ -883,10 +883,11 @@ void cmLocalVisualStudio7Generator
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); i++)
     {
-    if(cmSystemTools::UpperCase((*i)->GetSourceExtension()) == "DEF")
+    cmSourceFile* sf = *i;
+    if(cmSystemTools::UpperCase(sf->GetExtension()) == "DEF")
       {
       fout << "\t\t\t\tModuleDefinitionFile=\""
-           << this->ConvertToXMLOutputPath((*i)->GetFullPath().c_str())
+           << this->ConvertToXMLOutputPath(sf->GetFullPath().c_str())
            << "\"\n";
       return;
       }
@@ -969,7 +970,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     {
     // Add the file to the list of sources.
     std::string source = (*i)->GetFullPath();
-    if(cmSystemTools::UpperCase((*i)->GetSourceExtension()) == "DEF")
+    if(cmSystemTools::UpperCase((*i)->GetExtension()) == "DEF")
       {
       this->ModuleDefinitionFile = (*i)->GetFullPath();
       }
@@ -1070,8 +1071,9 @@ void cmLocalVisualStudio7Generator
       compileFlags += " ";
       compileFlags += cflags;
       }
-    const char* lang = this->GlobalGenerator->GetLanguageFromExtension
-      ((*sf)->GetSourceExtension().c_str());
+    const char* lang =
+      this->GlobalGenerator->GetLanguageFromExtension
+      ((*sf)->GetExtension().c_str());
     const char* sourceLang = this->GetSourceFileLanguage(*(*sf));
     const char* linkLanguage = target.GetLinkerLanguage
       (this->GetGlobalGenerator());
@@ -1138,7 +1140,7 @@ void cmLocalVisualStudio7Generator
               || objectName.size() || excludedFromBuild)
         {
         const char* aCompilerTool = "VCCLCompilerTool";
-        std::string ext = (*sf)->GetSourceExtension();
+        std::string ext = (*sf)->GetExtension();
         ext = cmSystemTools::LowerCase(ext);
         if(ext == "idl")
           {
@@ -1902,18 +1904,3 @@ GetTargetObjectFileDirectories(cmTarget* target,
   std::cerr << dir << "\n";
   dirs.push_back(dir);
 }
-
-  
-  // return the source name for the object file
-std::string 
-cmLocalVisualStudio7Generator::GetSourceObjectName(cmSourceFile& sf )
-{
-  std::string ret = sf.GetSourceName();
-  std::string::size_type pos = ret.find("/");
-  if(pos == ret.npos)
-    {
-    return ret;
-    }
-  return ret.substr(pos+1);
-}
-  

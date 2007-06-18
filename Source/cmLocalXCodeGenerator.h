@@ -35,8 +35,6 @@ public:
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& 
                                       dirs);
-  // return the source name for the object file
-  virtual std::string GetSourceObjectName(cmSourceFile& );
 private:
 
 };

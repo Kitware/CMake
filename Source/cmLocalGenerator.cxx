@@ -147,12 +147,12 @@ void cmLocalGenerator::TraceDependencies()
     // so don't build a projectfile for it
     if (strncmp(t->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
       {
-      std::string projectFilename;
+      const char* projectFilename = 0;
       if (this->IsMakefileGenerator == false)  // only use of this variable
         {
-        projectFilename=t->second.GetName();
+        projectFilename = t->second.GetName();
         }
-      t->second.TraceVSDependencies(projectFilename, this->Makefile);
+      t->second.TraceDependencies(projectFilename);
       }
     }
 }
@@ -625,18 +625,21 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   std::vector<cmSourceFile*> const& classes = target.GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); ++i)
-    { 
-    if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY") && 
-       !(*i)->GetCustomCommand())
+    {
+    cmSourceFile* sf = *i;
+    if(!sf->GetCustomCommand() &&
+       !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
+       !sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
       {
-      std::string outExt = 
-        this->GlobalGenerator->GetLanguageOutputExtensionFromExtension(
-          (*i)->GetSourceExtension().c_str());
-      if(outExt.size() && !(*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
+      std::string::size_type dir_len = 0;
+      dir_len += strlen(this->Makefile->GetCurrentOutputDirectory());
+      dir_len += 1;
+      std::string obj = this->GetObjectFileNameWithoutTarget(*sf, dir_len);
+      if(!obj.empty())
         {
         std::string ofname = this->Makefile->GetCurrentOutputDirectory();
         ofname += "/";
-        ofname += (*i)->GetSourceName() + outExt;
+        ofname += obj;
         objVector.push_back(ofname);
         this->AddCustomCommandToCreateObject(ofname.c_str(), 
                                              llang, *(*i), target);
@@ -1358,11 +1361,12 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
             i != sources.end(); ++i)
           {
-          if((*i)->GetSourceExtension() == "def")
+          cmSourceFile* sf = *i;
+          if(sf->GetExtension() == "def")
             {
             linkFlags += 
               this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-            linkFlags += this->Convert((*i)->GetFullPath().c_str(),
+            linkFlags += this->Convert(sf->GetFullPath().c_str(),
                                        START_OUTPUT, SHELL);
             linkFlags += " ";
             }
@@ -2672,23 +2676,18 @@ cmLocalGenerator
 
   // Replace the original source file extension with the object file
   // extension.
-  std::string::size_type dot_pos = objectName.rfind(".");
-  if(dot_pos != std::string::npos)
+  if(!source.GetPropertyAsBool("KEEP_EXTENSION"))
     {
-    objectName = objectName.substr(0, dot_pos);
-    }
-  if ( source.GetPropertyAsBool("KEEP_EXTENSION") )
-    {
-    if ( !source.GetSourceExtension().empty() )
+    // Remove the original extension.
+    std::string::size_type dot_pos = objectName.rfind(".");
+    if(dot_pos != std::string::npos)
       {
-      objectName += "." + source.GetSourceExtension();
+      objectName = objectName.substr(0, dot_pos);
       }
-    }
-  else
-    {
+
+    // Store the new extension.
     objectName +=
-      this->GlobalGenerator->GetLanguageOutputExtensionFromExtension(
-        source.GetSourceExtension().c_str());
+      this->GlobalGenerator->GetLanguageOutputExtension(source);
     }
 
   // Convert to a safe name.
@@ -2700,15 +2699,7 @@ const char*
 cmLocalGenerator
 ::GetSourceFileLanguage(const cmSourceFile& source)
 {
-  // Check for an explicitly assigned language.
-  if(const char* lang = source.GetProperty("LANGUAGE"))
-    {
-    return lang;
-    }
-
-  // Infer the language from the source file extension.
-  return (this->GlobalGenerator
-          ->GetLanguageFromExtension(source.GetSourceExtension().c_str()));
+  return source.GetLanguage();
 }
 
 //----------------------------------------------------------------------------
@@ -2783,9 +2774,4 @@ cmLocalGenerator::GetTargetObjectFileDirectories(cmTarget* ,
 {
   cmSystemTools::Error("GetTargetObjectFileDirectories"
                        " called on cmLocalGenerator");
-}
-
-std::string cmLocalGenerator::GetSourceObjectName(cmSourceFile& sf)
-{
-  return sf.GetSourceName();
 }

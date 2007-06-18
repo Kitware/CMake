@@ -152,7 +152,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     else if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY"))
       {
       if(!this->GlobalGenerator->IgnoreFile
-         ((*source)->GetSourceExtension().c_str()))
+         ((*source)->GetExtension().c_str()))
         {
         // Generate this object file's rule file.
         this->WriteObjectRuleFiles(*(*source));
@@ -307,8 +307,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     {
     cmOStringStream err;
     err << "Warning: Source file \""
-        << source.GetSourceName().c_str() << "."
-        << source.GetSourceExtension().c_str()
+        << source.GetFullPath()
         << "\" is listed multiple times for target \""
         << this->Target->GetName()
         << "\".";

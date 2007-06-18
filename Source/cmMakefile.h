@@ -463,19 +463,16 @@ public:
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then a null pointer is returned.
    */
-  cmSourceFile* GetSource(const char* sourceName) const;
-
-  ///! Add a new cmSourceFile to the list of sources for this makefile.
-  cmSourceFile* AddSource(cmSourceFile const&);
+  cmSourceFile* GetSource(const char* sourceName);
 
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then create the source file and return it. generated 
    * indicates if it is a generated file, this is used in determining
    * how to create the source file instance e.g. name
    */
-  cmSourceFile* GetOrCreateSource(const char* sourceName, 
+  cmSourceFile* GetOrCreateSource(const char* sourceName,
                                   bool generated = false);
-  
+
   /**
    * Obtain a list of auxiliary source directories.
    */

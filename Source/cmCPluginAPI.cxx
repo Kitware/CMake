@@ -488,104 +488,341 @@ int CCONV cmGetTotalArgumentSize(int argc, char **argv)
   return result;
 }
 
+// Source file proxy object to support the old cmSourceFile/cmMakefile
+// API for source files.
+struct cmCPluginAPISourceFile
+{
+  cmCPluginAPISourceFile(): RealSourceFile(0) {}
+  cmSourceFile* RealSourceFile;
+  std::string SourceName;
+  std::string SourceExtension;
+  std::string FullPath;
+  std::vector<std::string> Depends;
+  cmPropertyMap Properties;
+};
+
+// Keep a map from real cmSourceFile instances stored in a makefile to
+// the CPluginAPI proxy source file.
+class cmCPluginAPISourceFileMap:
+  public std::map<cmSourceFile*, cmCPluginAPISourceFile*>
+{
+public:
+  typedef std::map<cmSourceFile*, cmCPluginAPISourceFile*> derived;
+  typedef derived::iterator iterator;
+  typedef derived::value_type value_type;
+  ~cmCPluginAPISourceFileMap()
+    {
+    for(iterator i=this->begin(); i != this->end(); ++i)
+      {
+      delete i->second;
+      }
+    }
+};
+static cmCPluginAPISourceFileMap cmCPluginAPISourceFiles;
+
+void * CCONV cmCreateSourceFile()
+{
+  return (void*)new cmCPluginAPISourceFile;
+}
+
+void * CCONV cmCreateNewSourceFile(void *arg)
+{
+  (void)arg; // no longer needed
+  return (void*)new cmCPluginAPISourceFile;
+}
+
+void CCONV cmDestroySourceFile(void *arg)
+{
+  cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
+  // Only delete if it was created by cmCreateSourceFile or
+  // cmCreateNewSourceFile and is therefore not in the map.
+  if(!sf->RealSourceFile)
+    {
+    delete sf;
+    }
+}
+
 void CCONV *cmGetSource(void *arg, const char *name)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  return (void *)mf->GetSource(name);
+  if(cmSourceFile* rsf = mf->GetSource(name))
+    {
+    // Lookup the proxy source file object for this source.
+    cmCPluginAPISourceFileMap::iterator i = cmCPluginAPISourceFiles.find(rsf);
+    if(i == cmCPluginAPISourceFiles.end())
+      {
+      // Create a proxy source file object for this source.
+      cmCPluginAPISourceFile* sf = new cmCPluginAPISourceFile;
+      sf->RealSourceFile = rsf;
+      sf->FullPath = rsf->GetFullPath();
+      sf->SourceName =
+        cmSystemTools::GetFilenameWithoutLastExtension(sf->FullPath.c_str());
+      sf->SourceExtension =
+        cmSystemTools::GetFilenameLastExtension(sf->FullPath.c_str());
+
+      // Store the proxy in the map so it can be re-used and deleted later.
+      cmCPluginAPISourceFileMap::value_type entry(rsf, sf);
+      i = cmCPluginAPISourceFiles.insert(entry).first;
+      }
+    return (void *)i->second;
+    }
+  else
+    {
+    return 0;
+    }
 }
 
 void * CCONV cmAddSource(void *arg, void *arg2)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  cmSourceFile *sf = static_cast<cmSourceFile *>(arg2);
-  return (void *)mf->AddSource(*sf);
-}
+  cmCPluginAPISourceFile* osf = static_cast<cmCPluginAPISourceFile*>(arg2);
+  if(osf->FullPath.empty())
+    {
+    return 0;
+    }
 
+  // Create the real cmSourceFile instance and copy over saved information.
+  cmSourceFile* rsf = mf->GetOrCreateSource(osf->FullPath.c_str());
+  rsf->GetProperties() = osf->Properties;
+  for(std::vector<std::string>::iterator i = osf->Depends.begin();
+      i != osf->Depends.end(); ++i)
+    {
+    rsf->AddDepend(i->c_str());
+    }
 
-void * CCONV cmCreateSourceFile()
-{
-  return (void *)(new cmSourceFile);
-}
+  // Create the proxy for the real source file.
+  cmCPluginAPISourceFile* sf = new cmCPluginAPISourceFile;
+  sf->RealSourceFile = rsf;
+  sf->FullPath = osf->FullPath;
+  sf->SourceName = osf->SourceName;
+  sf->SourceExtension = osf->SourceExtension;
 
-void * CCONV cmCreateNewSourceFile(void *arg)
-{
-  cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  cmSourceFile *sf = new cmSourceFile;
-  sf->SetMakefile(mf);
+  // Store the proxy in the map so it can be re-used and deleted later.
+  cmCPluginAPISourceFiles[rsf] = sf;
   return (void *)sf;
-}
-
-void CCONV cmDestroySourceFile(void *arg)
-{
-  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
-  delete sf;
 }
 
 const char * CCONV cmSourceFileGetSourceName(void *arg)
 {
-  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
-  return sf->GetSourceName().c_str();
+  cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
+  return sf->SourceName.c_str();
 }
 
 const char * CCONV  cmSourceFileGetFullPath(void *arg)
 {
-  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
-  return sf->GetFullPath().c_str();
+  cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
+  return sf->FullPath.c_str();
 }
 
 const char * CCONV  cmSourceFileGetProperty(void *arg,const char *prop)
 {
-  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
-  return sf->GetProperty(prop);
+  cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
+  if(cmSourceFile* rsf = sf->RealSourceFile)
+    {
+    return rsf->GetProperty(prop);
+    }
+  else
+    {
+    if(!strcmp(prop,"LOCATION"))
+      {
+      return sf->FullPath.c_str();
+      }
+    bool chain = false;
+    // Ignore chain because old code will not expect it and it is a
+    // pain to implement here anyway.
+    return sf->Properties.GetPropertyValue(prop, cmProperty::SOURCE_FILE,
+                                           chain);
+    }
 }
 
 int CCONV cmSourceFileGetPropertyAsBool(void *arg,const char *prop)
 {
-  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
-  return (sf->GetPropertyAsBool(prop) ? 1: 0);
+  cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
+  if(cmSourceFile* rsf = sf->RealSourceFile)
+    {
+    return rsf->GetPropertyAsBool(prop) ? 1:0;
+    }
+  else
+    {
+    return cmSystemTools::IsOn(cmSourceFileGetProperty(arg, prop))? 1:0;
+    }
 }
 
 void CCONV cmSourceFileSetProperty(void *arg,const char *prop,
-  const char *val)
+                                   const char *value)
 {
-  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
-  sf->SetProperty(prop,val);
+  cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
+  if(cmSourceFile* rsf = sf->RealSourceFile)
+    {
+    rsf->SetProperty(prop, value);
+    }
+  else if(prop)
+    {
+    if(!value) { value = "NOTFOUND"; }
+    sf->Properties.SetProperty(prop, value, cmProperty::SOURCE_FILE);
+    }
 }
 
 void CCONV cmSourceFileAddDepend(void *arg, const char *depend)
 {
-  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
-  sf->AddDepend(depend);
+  cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
+  if(cmSourceFile* rsf = sf->RealSourceFile)
+    {
+    rsf->AddDepend(depend);
+    }
+  else
+    {
+    sf->Depends.push_back(depend);
+    }
 }
 
 void CCONV cmSourceFileSetName(void *arg, const char* name, const char* dir,
-                         int numSourceExtensions,
-                         const char **sourceExtensions,
-                         int numHeaderExtensions,
-                         const char **headerExtensions)
+                               int numSourceExtensions,
+                               const char **sourceExtensions,
+                               int numHeaderExtensions,
+                               const char **headerExtensions)
 {
-  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
-  std::vector<std::string> srcs;
-  std::vector<std::string> hdrs;
+  cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
+  if(sf->RealSourceFile)
+    {
+    // SetName is allowed only on temporary source files created by
+    // the command for building and passing to AddSource.
+    return;
+    }
+  std::vector<std::string> sourceExts;
+  std::vector<std::string> headerExts;
   int i;
   for (i = 0; i < numSourceExtensions; ++i)
     {
-    srcs.push_back(sourceExtensions[i]);
+    sourceExts.push_back(sourceExtensions[i]);
     }
   for (i = 0; i < numHeaderExtensions; ++i)
     {
-    hdrs.push_back(headerExtensions[i]);
+    headerExts.push_back(headerExtensions[i]);
     }
-  sf->SetName(name,dir, srcs, hdrs);
+
+  // Implement the old SetName method code here.
+  sf->Properties.SetProperty("HEADER_FILE_ONLY", "1",
+                             cmProperty::SOURCE_FILE);
+
+  // Save the original name given.
+  sf->SourceName = name;
+
+  // Convert the name to a full path in case the given name is a
+  // relative path.
+  std::string pathname = cmSystemTools::CollapseFullPath(name, dir);
+
+  // First try and see whether the listed file can be found
+  // as is without extensions added on.
+  std::string hname = pathname;
+  if(cmSystemTools::FileExists(hname.c_str()))
+    {
+    sf->SourceName = cmSystemTools::GetFilenamePath(name);
+    if ( sf->SourceName.size() > 0 )
+      {
+      sf->SourceName += "/";
+      }
+    sf->SourceName += cmSystemTools::GetFilenameWithoutLastExtension(name);
+    std::string::size_type pos = hname.rfind('.');
+    if(pos != std::string::npos)
+      {
+      sf->SourceExtension = hname.substr(pos+1, hname.size()-pos);
+      if ( cmSystemTools::FileIsFullPath(name) )
+        {
+        std::string::size_type pos2 = hname.rfind('/');
+        if(pos2 != std::string::npos)
+          {
+          sf->SourceName = hname.substr(pos2+1, pos - pos2-1);
+          }
+        }
+      }
+
+    // See if the file is a header file
+    if(std::find( headerExts.begin(), headerExts.end(),
+                  sf->SourceExtension ) == headerExts.end())
+      {
+      sf->Properties.SetProperty("HEADER_FILE_ONLY", "0",
+                                 cmProperty::SOURCE_FILE);
+      }
+    sf->FullPath = hname;
+    return;
+    }
+
+  // Next, try the various source extensions
+  for( std::vector<std::string>::const_iterator ext = sourceExts.begin();
+       ext != sourceExts.end(); ++ext )
+    {
+    hname = pathname;
+    hname += ".";
+    hname += *ext;
+    if(cmSystemTools::FileExists(hname.c_str()))
+      {
+      sf->SourceExtension = *ext;
+      sf->Properties.SetProperty("HEADER_FILE_ONLY", "0",
+                                 cmProperty::SOURCE_FILE);
+      sf->FullPath = hname;
+      return;
+      }
+    }
+
+  // Finally, try the various header extensions
+  for( std::vector<std::string>::const_iterator ext = headerExts.begin();
+       ext != headerExts.end(); ++ext )
+    {
+    hname = pathname;
+    hname += ".";
+    hname += *ext;
+    if(cmSystemTools::FileExists(hname.c_str()))
+      {
+      sf->SourceExtension = *ext;
+      sf->FullPath = hname;
+      return;
+      }
+    }
+
+  cmOStringStream e;
+  e << "Cannot find source file \"" << pathname << "\"";
+  e << "\n\nTried extensions";
+  for( std::vector<std::string>::const_iterator ext = sourceExts.begin();
+       ext != sourceExts.end(); ++ext )
+    {
+    e << " ." << *ext;
+    }
+  for( std::vector<std::string>::const_iterator ext = headerExts.begin();
+       ext != headerExts.end(); ++ext )
+    {
+    e << " ." << *ext;
+    }
+  cmSystemTools::Error(e.str().c_str());
+  return;
 }
 
 void CCONV cmSourceFileSetName2(void *arg, const char* name, const char* dir,
-                          const char *ext, int headerFileOnly)
+                                const char *ext, int headerFileOnly)
 {
-  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
-  sf->SetName(name,dir,ext,(headerFileOnly ? true : false));
-}
+  cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
+  if(sf->RealSourceFile)
+    {
+    // SetName is allowed only on temporary source files created by
+    // the command for building and passing to AddSource.
+    return;
+    }
 
+  // Implement the old SetName method code here.
+  sf->Properties.SetProperty("HEADER_FILE_ONLY",
+                             headerFileOnly? "1" : "0",
+                             cmProperty::SOURCE_FILE);
+  sf->SourceName = name;
+  std::string fname = sf->SourceName;
+  if(ext && strlen(ext))
+    {
+    fname += ".";
+    fname += ext;
+    }
+  sf->FullPath = cmSystemTools::CollapseFullPath(fname.c_str(), dir);
+  cmSystemTools::ConvertToUnixSlashes(sf->FullPath);
+  sf->SourceExtension = ext;
+}
 
 char * CCONV cmGetFilenameWithoutExtension(const char *name)
 {

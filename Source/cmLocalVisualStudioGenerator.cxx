@@ -73,7 +73,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
         std::string objectName =
           cmSystemTools::LowerCase(
             cmSystemTools::GetFilenameWithoutLastExtension(
-              sf->GetFullPath().c_str()));
+              sf->GetFullPath()));
         objectName += ".obj";
         objectNameCounts[objectName] += 1;
         }
@@ -95,7 +95,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
         std::string objectName =
           cmSystemTools::LowerCase(
             cmSystemTools::GetFilenameWithoutLastExtension(
-              sf->GetFullPath().c_str()));
+              sf->GetFullPath()));
         objectName += ".obj";
         if(objectNameCounts[objectName] > 1)
           {

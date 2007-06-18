@@ -440,9 +440,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   cmXCodeObject* children = group->GetObject("children");
   children->AddObject(fileRef);
   cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
-  std::string fname = sf->GetSourceName();
-  fname += ".";
-  fname += sf->GetSourceExtension();
+  std::string fname = sf->GetFullPath();
   std::string comment = fname;
   comment += " in ";
   std::string gname = group->GetObject("name")->GetString();
@@ -458,7 +456,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   const char* lang = 
     this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
   std::string sourcecode = "sourcecode";
-  std::string ext = sf->GetSourceExtension();
+  std::string ext = sf->GetExtension();
   ext = cmSystemTools::LowerCase(ext);
   if(ext == "o")
     {
@@ -2046,12 +2044,12 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
       // MACOSX_BUNDLE file
       if(cmtarget.GetPropertyAsBool("MACOSX_BUNDLE"))
         {
-        cmSourceFile file;
-        file.SetName("Info",
-                     this->CurrentMakefile->GetCurrentOutputDirectory(),
-                     "plist", false);
-        cmtarget.AddSourceFile
-          (this->CurrentMakefile->AddSource(file));
+        std::string plistFile =
+          this->CurrentMakefile->GetCurrentOutputDirectory();
+        plistFile += "/Info.plist";
+        cmSourceFile* sf =
+          this->CurrentMakefile->GetOrCreateSource(plistFile.c_str(), true);
+        cmtarget.AddSourceFile(sf);
         }
       std::vector<cmSourceFile*>  classes = cmtarget.GetSourceFiles();
       // add framework copy headers

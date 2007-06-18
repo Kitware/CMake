@@ -19,6 +19,7 @@
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmake.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
 #include "cmVersion.h"
 
 #include <stdlib.h> // required for atof
@@ -483,39 +484,32 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     }
 }
 
-const char* cmGlobalGenerator
-::GetLanguageOutputExtensionForLanguage(const char* lang)
+//----------------------------------------------------------------------------
+const char*
+cmGlobalGenerator::GetLanguageOutputExtension(cmSourceFile const& source)
 {
-  if(!lang)
+  if(const char* lang = source.GetLanguage())
     {
-    return "";
+    if(this->LanguageToOutputExtension.count(lang) > 0)
+      {
+      return this->LanguageToOutputExtension[lang].c_str();
+      }
     }
-  if(this->LanguageToOutputExtension.count(lang) > 0)
-    {
-    return this->LanguageToOutputExtension[lang].c_str();
-    }
-  return "";
-}
-
-const char* cmGlobalGenerator
-::GetLanguageOutputExtensionFromExtension(const char* ext)
-{
-  if(!ext)
-    {
-    return "";
-    }
-  const char* lang = this->GetLanguageFromExtension(ext);
-  if(!lang || *lang == 0)
+  else
     {
     // if no language is found then check to see if it is already an
     // ouput extension for some language.  In that case it should be ignored
     // and in this map, so it will not be compiled but will just be used.
-    if(this->OutputExtensions.count(ext))
+    std::string const& ext = source.GetExtension();
+    if(!ext.empty())
       {
-      return ext;
+      if(this->OutputExtensions.count(ext))
+        {
+        return ext.c_str();
+        }
       }
     }
-  return this->GetLanguageOutputExtensionForLanguage(lang);
+  return "";
 }
 
 

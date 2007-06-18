@@ -147,13 +147,14 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
     for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
         i != sources.end(); ++i)
       {
-      if((*i)->GetSourceExtension() == "def")
+      cmSourceFile* sf = *i;
+      if(sf->GetExtension() == "def")
         {
         extraFlags += " ";
         extraFlags += 
           this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
         extraFlags += 
-          this->Convert((*i)->GetFullPath().c_str(),
+          this->Convert(sf->GetFullPath().c_str(),
                         cmLocalGenerator::START_OUTPUT,
                         cmLocalGenerator::SHELL);
         }
@@ -290,13 +291,7 @@ void cmMakefileLibraryTargetGenerator::CopyFrameworkPublicHeaders(
     cmCustomCommandLine line;
     cmSourceFile* sf = this->Makefile->GetOrCreateSource(i->c_str());
     std::string dest = outpath + "Headers/";
-    dest += sf->GetSourceName();
-    std::string ext = sf->GetSourceExtension();
-    if(ext.size())
-      {
-      dest += ".";
-      dest += sf->GetSourceExtension();
-      }
+    dest += cmSystemTools::GetFilenameName(sf->GetFullPath());
     line.push_back("$(CMAKE_COMMAND)");
     line.push_back("-E");
     line.push_back("copy_if_different");
@@ -347,13 +342,7 @@ void cmMakefileLibraryTargetGenerator::CopyFrameworkResources(
       continue;
       }
     std::string dest = outpath + "Resources/";
-    dest += sf->GetSourceName();
-    std::string ext = sf->GetSourceExtension();
-    if(ext.size())
-      {
-      dest += ".";
-      dest += sf->GetSourceExtension();
-      }
+    dest += cmSystemTools::GetFilenameName(sf->GetFullPath());
     line.push_back("$(CMAKE_COMMAND)");
     line.push_back("-E");
     line.push_back("copy_if_different");
