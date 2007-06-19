@@ -161,7 +161,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   // for the case that somebody exports the same set with the same file name 
   // to different locations make the temp filename unique
   char buf[64];
-  snprintf(buf, 64, "%p", this);
+  sprintf(buf, "%p", this);
   this->ExportFilename = this->TempOutputDir;
   this->ExportFilename += "/";
   this->ExportFilename += this->Filename;
