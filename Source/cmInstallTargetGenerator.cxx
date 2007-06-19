@@ -27,7 +27,7 @@ cmInstallTargetGenerator
                            const char* file_permissions,
                            std::vector<std::string> const& configurations,
                            const char* component, bool optional):
-  Target(&t), Destination(dest), ImportLibrary(implib),
+  cmInstallGenerator(dest), Target(&t), ImportLibrary(implib),
   FilePermissions(file_permissions), Configurations(configurations),
   Component(component), Optional(optional)
 {
@@ -58,11 +58,11 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
     }
 
   // Write variable settings to do per-configuration references.
-  this->PrepareScriptReference(os, this->Target, "BUILD", true, false);
+  this->PrepareScriptReference(os, this->Target, "BUILD", true, this->ImportLibrary, false);
 
   // Create the per-configuration reference.
   std::string fromName = this->GetScriptReference(this->Target, "BUILD",
-                                                  false);
+                                                  this->ImportLibrary, false);
   std::string fromFile = fromDir;
   fromFile += fromName;
 
@@ -137,7 +137,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
         // Compute the source locations of the bundle executable and
         // Info.plist file.
         this->PrepareScriptReference(os, this->Target, "INSTALL",
-                                     false, false);
+                                     false, this->ImportLibrary, false);
         fromFile += ".app";
         type = cmTarget::INSTALL_DIRECTORY;
         literal_args += " USE_SOURCE_PERMISSIONS";
@@ -186,6 +186,12 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   this->AddRanlibRule(os, type, quotedFullDestinationFilename);
 
   this->AddStripRule(os, type, quotedFullDestinationFilename, optional);
+}
+
+
+std::string cmInstallTargetGenerator::GetInstallFilename(const char* config) const
+{
+  return cmInstallTargetGenerator::GetInstallFilename(this->Target, config, this->ImportLibrary, false);
 }
 
 //----------------------------------------------------------------------------
@@ -250,7 +256,7 @@ void
 cmInstallTargetGenerator
 ::PrepareScriptReference(std::ostream& os, cmTarget* target,
                          const char* place, bool useConfigDir,
-                         bool useSOName)
+                         bool implib, bool useSOName)
 {
   // If the target name may vary with the configuration type then
   // store all possible names ahead of time in variables.
@@ -270,11 +276,11 @@ cmInstallTargetGenerator
       }
 
     fname += this->GetInstallFilename(target, i->c_str(), 
-                                      this->ImportLibrary, useSOName);
+                                      implib, useSOName);
 
     // Set a variable with the target name for this configuration.
     os << "SET(" << target->GetName() << "_" << place
-       << (this->ImportLibrary? "_IMPNAME_" : "_NAME_") << *i
+       << (implib? "_IMPNAME_" : "_NAME_") << *i
        << " \"" << fname << "\")\n";
     }
 }
@@ -282,20 +288,20 @@ cmInstallTargetGenerator
 //----------------------------------------------------------------------------
 std::string cmInstallTargetGenerator::GetScriptReference(cmTarget* target,
                                                          const char* place,
-                                                         bool useSOName)
+                                                         bool implib, bool useSOName)
 {
   if(this->ConfigurationTypes->empty())
     {
     // Reference the target by its one configuration name.
     return this->GetInstallFilename(target, this->ConfigurationName, 
-                                    this->ImportLibrary, useSOName);
+                                    implib, useSOName);
     }
   else
     {
     // Reference the target using the per-configuration variable.
     std::string ref = "${";
     ref += target->GetName();
-    if(this->ImportLibrary)
+    if(implib)
       {
       ref += "_";
       ref += place;
@@ -361,13 +367,13 @@ void cmInstallTargetGenerator
             {
             // Map from the build-tree install_name.
             this->PrepareScriptReference(os, tgt, "REMAP_FROM",
-                                         !for_build.empty(), true);
-            for_build += this->GetScriptReference(tgt, "REMAP_FROM", true);
+                                         !for_build.empty(), false, true);
+            for_build += this->GetScriptReference(tgt, "REMAP_FROM", false, true);
 
             // Map to the install-tree install_name.
             this->PrepareScriptReference(os, tgt, "REMAP_TO",
-                                         false, true);
-            for_install += this->GetScriptReference(tgt, "REMAP_TO", true);
+                                         false, false, true);
+            for_install += this->GetScriptReference(tgt, "REMAP_TO", false, true);
 
             // Store the mapping entry.
             install_name_remap[for_build] = for_install;
@@ -378,7 +384,7 @@ void cmInstallTargetGenerator
     }
 
   // Edit the install_name of the target itself if necessary.
-  this->PrepareScriptReference(os, this->Target, "REMAPPED", false, true);
+  this->PrepareScriptReference(os, this->Target, "REMAPPED", false, this->ImportLibrary, true);
   std::string new_id;
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
     {
@@ -390,7 +396,7 @@ void cmInstallTargetGenerator
       {
       // Prepare to refer to the install-tree install_name.
       new_id = for_install;
-      new_id += this->GetScriptReference(this->Target, "REMAPPED", true);
+      new_id += this->GetScriptReference(this->Target, "REMAPPED", this->ImportLibrary, true);
       }
     }
 
@@ -416,7 +422,7 @@ void cmInstallTargetGenerator
       os << "\n    -change \"" << i->first << "\" \"" << i->second << "\"";
       }
     os << "\n    \"$ENV{DESTDIR}" << destination << "/"
-       << this->GetScriptReference(this->Target, "REMAPPED", true) << "\")\n";
+       << this->GetScriptReference(this->Target, "REMAPPED", this->ImportLibrary, true) << "\")\n";
     os << "ENDIF(" << component_test << ")\n";
     }
 }

@@ -27,7 +27,7 @@ cmInstallFilesGenerator
                           const char* component,
                           const char* rename,
                           bool optional):
-  Files(files), Destination(dest), Programs(programs),
+  cmInstallGenerator(dest), Files(files), Programs(programs),
   FilePermissions(file_permissions), Configurations(configurations),
   Component(component), Rename(rename), Optional(optional)
 {

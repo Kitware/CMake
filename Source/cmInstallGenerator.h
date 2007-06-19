@@ -29,6 +29,7 @@ class cmInstallGenerator
 {
 public:
   cmInstallGenerator();
+  cmInstallGenerator(const char* dest):Destination(dest?dest:"") {}
   virtual ~cmInstallGenerator();
 
   void Generate(std::ostream& os, const char* config,
@@ -47,11 +48,13 @@ public:
     const char* literal_args = 0
     );
 
+  const char* GetDestination() const        {return this->Destination.c_str();}
 protected:
   virtual void GenerateScript(std::ostream& os)=0;
 
   const char* ConfigurationName;
   std::vector<std::string> const* ConfigurationTypes;
+  std::string Destination;
 };
 
 #endif

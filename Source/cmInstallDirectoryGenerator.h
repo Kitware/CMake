@@ -37,7 +37,6 @@ public:
 protected:
   virtual void GenerateScript(std::ostream& os);
   std::vector<std::string> Directories;
-  std::string Destination;
   std::string FilePermissions;
   std::string DirPermissions;
   std::vector<std::string> Configurations;

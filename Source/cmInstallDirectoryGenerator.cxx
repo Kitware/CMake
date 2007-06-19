@@ -27,7 +27,7 @@ cmInstallDirectoryGenerator
                               std::vector<std::string> const& configurations,
                               const char* component,
                               const char* literal_args):
-  Directories(dirs), Destination(dest),
+  cmInstallGenerator(dest), Directories(dirs),
   FilePermissions(file_permissions), DirPermissions(dir_permissions),
   Configurations(configurations), Component(component),
   LiteralArguments(literal_args)

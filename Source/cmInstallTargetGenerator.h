@@ -36,16 +36,19 @@ public:
     );
   virtual ~cmInstallTargetGenerator();
 
+  std::string GetInstallFilename(const char* config) const;
   static std::string GetInstallFilename(cmTarget*target, const char* config, 
                                         bool implib, bool useSOName);
 
+  const std::vector<std::string>& GetConfigurations() const {return this->Configurations;}
+  
 protected:
   virtual void GenerateScript(std::ostream& os);
   void PrepareScriptReference(std::ostream& os, cmTarget* target,
                               const char* place, bool useConfigDir,
-                              bool useSOName);
+                              bool implib, bool useSOName);
   std::string GetScriptReference(cmTarget* target, const char* place,
-                                 bool useSOName);
+                                 bool implib, bool useSOName);
   void AddInstallNamePatchRule(std::ostream& os, const char* destination);
   void AddStripRule(std::ostream& os, 
                     cmTarget::TargetType type,
@@ -56,7 +59,6 @@ protected:
                      const std::string& quotedFullDestinationFilename);
 
   cmTarget* Target;
-  std::string Destination;
   bool ImportLibrary;
   std::string FilePermissions;
   std::vector<std::string> Configurations;

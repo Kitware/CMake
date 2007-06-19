@@ -410,6 +410,10 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     {
     // Handle each target type.
     cmTarget& target = *(*ti);
+    cmInstallTargetGenerator* archiveGenerator = 0;
+    cmInstallTargetGenerator* runtimeGenerator = 0;
+    cmInstallTargetGenerator* libraryGenerator = 0;
+
     switch(target.GetType())
       {
       case cmTarget::SHARED_LIBRARY:
@@ -424,23 +428,24 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           if(archive_destination)
             {
             // The import library uses the ARCHIVE properties.
-            this->Makefile->AddInstallGenerator(
-              new cmInstallTargetGenerator(target, archive_dest.c_str(), true,
+            archiveGenerator = new cmInstallTargetGenerator(target, 
+                                           archive_dest.c_str(), 
+                                           true,
                                            archive_permissions.c_str(),
                                            archive_configurations,
                                            archive_component.c_str(),
-                                           archive_optional));
+                                           archive_optional);
             }
           if(runtime_destination)
             {
             // The DLL uses the RUNTIME properties.
-            this->Makefile->AddInstallGenerator(
-              new cmInstallTargetGenerator(target, runtime_dest.c_str(),
+            runtimeGenerator = new cmInstallTargetGenerator(target, 
+                                           runtime_dest.c_str(),
                                            false,
                                            runtime_permissions.c_str(),
                                            runtime_configurations,
                                            runtime_component.c_str(),
-                                           runtime_optional));
+                                           runtime_optional);
             }
           }
         else
@@ -449,13 +454,13 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           if(library_destination)
             {
             // The shared library uses the LIBRARY properties.
-            this->Makefile->AddInstallGenerator(
-              new cmInstallTargetGenerator(target, library_dest.c_str(),
+            libraryGenerator = new cmInstallTargetGenerator(target, 
+                                           library_dest.c_str(),
                                            false,
                                            library_permissions.c_str(),
                                            library_configurations,
                                            library_component.c_str(),
-                                           library_optional));
+                                           library_optional);
             }
           else
             {
@@ -473,12 +478,13 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Static libraries use ARCHIVE properties.
         if(archive_destination)
           {
-          this->Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, archive_dest.c_str(), false,
+          archiveGenerator = new cmInstallTargetGenerator(target, 
+                                         archive_dest.c_str(), 
+                                         false,
                                          archive_permissions.c_str(),
                                          archive_configurations,
                                          archive_component.c_str(),
-                                         archive_optional));
+                                         archive_optional);
           }
         else
           {
@@ -495,12 +501,13 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Modules use LIBRARY properties.
         if(library_destination)
           {
-          this->Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, library_dest.c_str(), false,
+          libraryGenerator = new cmInstallTargetGenerator(target, 
+                                         library_dest.c_str(), 
+                                         false,
                                          library_permissions.c_str(),
                                          library_configurations,
                                          library_component.c_str(),
-                                         library_optional));
+                                         library_optional);
           }
         else
           {
@@ -517,12 +524,13 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Executables use the RUNTIME properties.
         if(runtime_destination)
           {
-          this->Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, runtime_dest.c_str(), false,
+          runtimeGenerator = new cmInstallTargetGenerator(target, 
+                                         runtime_dest.c_str(), 
+                                         false,
                                          runtime_permissions.c_str(),
                                          runtime_configurations,
                                          runtime_component.c_str(),
-                                         runtime_optional));
+                                         runtime_optional);
           }
         else
           {
@@ -539,12 +547,13 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         if(dll_platform && archive_destination)
           {
           // The import library uses the ARCHIVE properties.
-          this->Makefile->AddInstallGenerator(
-            new cmInstallTargetGenerator(target, archive_dest.c_str(), true,
+          archiveGenerator = new cmInstallTargetGenerator(target, 
+                                         archive_dest.c_str(), 
+                                         true,
                                          archive_permissions.c_str(),
                                          archive_configurations,
                                          archive_component.c_str(),
-                                         true));
+                                         true);
           }
         }
         break;
@@ -553,6 +562,10 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Ignore the case.
         break;
       }
+    this->Makefile->AddInstallGenerator(archiveGenerator);
+    this->Makefile->AddInstallGenerator(runtimeGenerator);
+    this->Makefile->AddInstallGenerator(libraryGenerator);
+
     }
 
   // Tell the global generator about any installation component names
@@ -1114,7 +1127,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 
 //----------------------------------------------------------------------------
 void cmInstallCommand::ComputeDestination(const char* destination,
-                                          std::string& dest)
+                                          std::string& dest) const
 {
   if(destination)
     {
@@ -1142,7 +1155,7 @@ void cmInstallCommand::ComputeDestination(const char* destination,
 
 //----------------------------------------------------------------------------
 bool cmInstallCommand::CheckPermissions(std::string const& arg,
-                                        std::string& permissions)
+                                        std::string& permissions) const
 {
   // Table of valid permissions.
   const char* table[] =
