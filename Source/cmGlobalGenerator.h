@@ -27,6 +27,8 @@ class cmMakefile;
 class cmLocalGenerator;
 class cmExternalMakefileProjectGenerator;
 class cmTarget;
+class cmTargetExport;
+class cmInstallTargetGenerator;
 
 /** \class cmGlobalGenerator
  * \brief Responable for overseeing the generation process for the entire tree
@@ -129,8 +131,17 @@ public:
   const char* GetExtraGeneratorName() const;
 
   void AddInstallComponent(const char* component);
+
+  ///! Add one installed target to the sets of the exports
+  void AddTargetToExports(const char* exportSet, cmTarget* target, 
+                          cmInstallTargetGenerator* archive,
+                          cmInstallTargetGenerator* runTime,
+                          cmInstallTargetGenerator* library);
+  ///! Get the export target set with the   given name
+  const std::vector<cmTargetExport*>* GetExportSet(const char* name) const;
+
   void EnableInstallTarget();
-  
+
   int TryCompileTimeout;
   
   bool GetForceUnixPaths() {return this->ForceUnixPaths;}
@@ -231,6 +242,8 @@ protected:
   // Set of named installation components requested by the project.
   std::set<cmStdString> InstallComponents;
   bool InstallTargetEnabled;
+  // Sets of named target exports
+  std::map<cmStdString, std::vector<cmTargetExport*> > ExportSets;
 
   // Manifest of all targets that will be built for each configuration.
   // This is computed just before local generators generate.

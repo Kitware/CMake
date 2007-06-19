@@ -21,6 +21,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
+#include "cmInstallExportGenerator.h"
 
 #include <stdlib.h> // required for atof
 
@@ -56,8 +57,7 @@ cmGlobalGenerator::cmGlobalGenerator()
 cmGlobalGenerator::~cmGlobalGenerator()
 {
   // Delete any existing cmLocalGenerators
-  unsigned int i;
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
     delete this->LocalGenerators[i];
     }
@@ -66,6 +66,17 @@ cmGlobalGenerator::~cmGlobalGenerator()
   if (this->ExtraGenerator)
     {
     delete this->ExtraGenerator;
+    }
+
+  for (std::map<cmStdString, std::vector<cmTargetExport*> >::iterator 
+       setIt = this->ExportSets.begin();
+       setIt != this->ExportSets.end();
+       ++setIt)
+    {
+      for (unsigned int i = 0; i < setIt->second.size(); ++i)
+        {
+        delete setIt->second[i];
+        }
     }
 }
 
@@ -1013,6 +1024,33 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
     this->InstallComponents.insert(component);
     }
 }
+
+void cmGlobalGenerator::AddTargetToExports(const char* exportSetName, 
+                                           cmTarget* target, 
+                                           cmInstallTargetGenerator* archive,
+                                           cmInstallTargetGenerator* runTime,
+                                           cmInstallTargetGenerator* library)
+{
+  if ((exportSetName) && (*exportSetName) && (target))
+    {
+    cmTargetExport* te = new cmTargetExport(target, archive, runTime, library);
+    this->ExportSets[exportSetName].push_back(te);
+    }
+}
+
+const std::vector<cmTargetExport*>* cmGlobalGenerator::GetExportSet(
+                                                        const char* name) const
+{
+  std::map<cmStdString, std::vector<cmTargetExport*> >::const_iterator 
+                                     exportSetIt = this->ExportSets.find(name);
+  if (exportSetIt != this->ExportSets.end())
+    {
+    return &exportSetIt->second;
+    }
+
+  return 0;
+}
+
 
 void cmGlobalGenerator::EnableInstallTarget()
 {

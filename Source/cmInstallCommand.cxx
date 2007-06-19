@@ -20,6 +20,7 @@
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmInstallExportGenerator.h"
 
 #include <cmsys/Glob.hxx>
 
@@ -61,6 +62,10 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args)
   else if(args[0] == "DIRECTORY")
     {
     return this->HandleDirectoryMode(args);
+    }
+  else if(args[0] == "EXPORT")
+    {
+    return this->HandleExportMode(args);
     }
 
   // Unknown mode.
@@ -135,6 +140,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   bool doing_permissions = false;
   bool doing_component = false;
   bool doing_configurations = false;
+  bool doing_export = false;
   bool archive_settings = true;
   bool library_settings = true;
   bool runtime_settings = true;
@@ -148,6 +154,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   std::string archive_component;
   std::string library_component;
   std::string runtime_component;
+  std::string exportName;
   std::vector<std::string> archive_configurations;
   std::vector<std::string> library_configurations;
   std::vector<std::string> runtime_configurations;
@@ -164,6 +171,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_permissions = false;
       doing_component = false;
       doing_configurations = false;
+      doing_export = false;
       }
     else if(args[i] == "PERMISSIONS")
       {
@@ -173,6 +181,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_permissions = true;
       doing_component = false;
       doing_configurations = false;
+      doing_export = false;
       }
     else if(args[i] == "COMPONENT")
       {
@@ -182,6 +191,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_permissions = false;
       doing_component = true;
       doing_configurations = false;
+      doing_export = false;
       }
     else if(args[i] == "CONFIGURATIONS")
       {
@@ -191,6 +201,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_permissions = false;
       doing_component = false;
       doing_configurations = true;
+      doing_export = false;
       }
     else if(args[i] == "ARCHIVE")
       {
@@ -200,6 +211,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_permissions = false;
       doing_component = false;
       doing_configurations = false;
+      doing_export = false;
       archive_settings = true;
       library_settings = false;
       runtime_settings = false;
@@ -212,6 +224,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_permissions = false;
       doing_component = false;
       doing_configurations = false;
+      doing_export = false;
       archive_settings = false;
       library_settings = true;
       runtime_settings = false;
@@ -224,9 +237,20 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       doing_permissions = false;
       doing_component = false;
       doing_configurations = false;
+      doing_export = false;
       archive_settings = false;
       library_settings = false;
       runtime_settings = true;
+      }
+    else if(args[i] == "EXPORT")
+      {
+      // Switch to setting only runtime properties.
+      doing_targets = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_component = false;
+      doing_configurations = false;
+      doing_export = true;
       }
     else if(args[i] == "OPTIONAL")
       {
@@ -369,6 +393,11 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         {
         runtime_configurations.push_back(args[i]);
         }
+      }
+    else if(doing_export)
+      {
+      exportName = args[i];
+      doing_export = false;
       }
     else
       {
@@ -566,6 +595,15 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     this->Makefile->AddInstallGenerator(runtimeGenerator);
     this->Makefile->AddInstallGenerator(libraryGenerator);
 
+    if (!exportName.empty())
+      {
+      this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                                       ->AddTargetToExports(exportName.c_str(),
+                                                            &target,
+                                                            archiveGenerator,
+                                                            runtimeGenerator,
+                                                            libraryGenerator);
+      }
     }
 
   // Tell the global generator about any installation component names
@@ -1121,6 +1159,154 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
   // specified.
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
     ->AddInstallComponent(component.c_str());
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
+{
+  // This is the EXPORT mode.
+  bool doing_exports = true;
+  bool doing_destination = false;
+  bool doing_permissions = false;
+  bool doing_configurations = false;
+  bool doing_filename = false;
+  bool doing_prefix = false;
+  std::vector<std::string> exports;
+  const char* destination = 0;
+  std::string filename;
+  std::string permissions;
+  std::string prefix;
+  std::vector<std::string> configurations;
+  for(unsigned int i=1; i < args.size(); ++i)
+    {
+    if(args[i] == "DESTINATION")
+      {
+      // Switch to setting the destination property.
+      doing_exports = false;
+      doing_destination = true;
+      doing_permissions = false;
+      doing_configurations = false;
+      doing_filename = false;
+      doing_prefix = false;
+      }
+    else if(args[i] == "PERMISSIONS")
+      {
+      // Switch to setting the permissions property.
+      doing_exports = false;
+      doing_destination = false;
+      doing_permissions = true;
+      doing_configurations = false;
+      doing_filename = false;
+      doing_prefix = false;
+      }
+    else if(args[i] == "CONFIGURATIONS")
+      {
+      // Switch to setting the configurations property.
+      doing_exports = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_configurations = true;
+      doing_filename = false;
+      doing_prefix = false;
+      }
+    else if(args[i] == "FILENAME")
+      {
+      // Switch to setting the rename property.
+      doing_exports = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_configurations = false;
+      doing_filename = true;
+      doing_prefix = false;
+      }
+    else if(args[i] == "PREFIX")
+      {
+      // Switch to setting the rename property.
+      doing_exports = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_configurations = false;
+      doing_filename = false;
+      doing_prefix = true;
+      }
+    else if(doing_exports)
+      {
+      // Store the file for installation.
+      exports.push_back(args[i]);
+      }
+    else if(doing_configurations)
+      {
+      configurations.push_back(args[i]);
+      }
+    else if(doing_destination)
+      {
+      destination = args[i].c_str();
+      doing_destination = false;
+      }
+    else if(doing_permissions)
+      {
+      // Check the requested permission.
+      if(!this->CheckPermissions(args[i], permissions))
+        {
+        cmOStringStream e;
+        e << args[0] << " given invalid permission \""
+          << args[i] << "\".";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      }
+    else if(doing_filename)
+      {
+      filename = args[i];
+      doing_filename = false;
+      }
+    else if(doing_prefix)
+      {
+      prefix = args[i];
+      doing_prefix = false;
+      }
+    else
+      {
+      // Unknown argument.
+      cmOStringStream e;
+      e << args[0] << " given unknown argument \"" << args[i] << "\".";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+
+  std::string cmakeDir = this->Makefile->GetHomeOutputDirectory();
+  cmakeDir += cmake::GetCMakeFilesDirectory();
+  for(std::vector<std::string>::const_iterator exportIt = exports.begin();
+      exportIt != exports.end();
+      ++exportIt)
+    {
+
+    const std::vector<cmTargetExport*>* exportSet = this->
+                          Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+                          GetExportSet(exportIt->c_str());
+    if (exportSet == 0)
+      {
+      return false;
+      }
+
+    // Create the export install generator.
+    cmInstallExportGenerator* exportGenerator = new cmInstallExportGenerator(
+                          destination, permissions.c_str(), configurations, 
+                          filename.c_str(), prefix.c_str(), cmakeDir.c_str());
+
+    if (exportGenerator->SetExportSet(exportIt->c_str(),exportSet))
+      {
+      this->Makefile->AddInstallGenerator(exportGenerator);
+      }
+    else
+      {
+      delete exportGenerator;
+      return false;
+      }
+    }
 
   return true;
 }
