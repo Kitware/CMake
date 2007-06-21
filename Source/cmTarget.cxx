@@ -538,9 +538,9 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     util = cmSystemTools::GetFilenameWithoutLastExtension(util);
     }
 
-  // Check for a non-imported target with this name.
+  // Check for a target with this name.
   if(cmTarget* t =
-     this->GlobalGenerator->FindTarget(0, util.c_str(), false))
+     this->GlobalGenerator->FindTarget(0, util.c_str(), true))
     {
     // If we find the target and the dep was given as a full path,
     // then make sure it was not a full path to something else, and

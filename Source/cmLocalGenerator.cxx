@@ -1964,7 +1964,7 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
     }
 
   // Look for a CMake target with the given name.
-  if(cmTarget* target = this->GlobalGenerator->FindTarget(0,name.c_str(),false))
+  if(cmTarget* target = this->GlobalGenerator->FindTarget(0,name.c_str(),true))
     {
     // make sure it is not just a coincidence that the target name
     // found is part of the inName
