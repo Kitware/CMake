@@ -19,6 +19,9 @@ SET(CMAKE_DL_LIBS "dl")
 SET(CMAKE_FIND_LIBRARY_PREFIXES "lib")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
 
+# basically all general purpose OSs support shared libs
+SET(CMAKE_TARGET_SUPPORTS_ONLY_STATIC_LIBS FALSE)
+
 SET (CMAKE_SKIP_RPATH "NO" CACHE BOOL
      "If set, runtime paths are not added when using shared libraries.")
 

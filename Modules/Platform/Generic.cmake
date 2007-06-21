@@ -6,3 +6,7 @@
 # about the platform. So everything has to be specified
 # in the system/compiler files ${CMAKE_SYSTEM_NAME}-<compiler_basename>.cmake
 # and/or ${CMAKE_SYSTEM_NAME}-<compiler_basename>-${CMAKE_SYSTEM_PROCESSOR}.cmake
+
+# (embedded) targets without operating system usually don't support shared libraries
+SET(CMAKE_TARGET_SUPPORTS_ONLY_STATIC_LIBS TRUE)
+
