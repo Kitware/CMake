@@ -275,7 +275,7 @@ public:
   /**
    * Get the name of the project for this build.
    */
-  const char* GetProjectName()
+  const char* GetProjectName() const
     {
       return this->ProjectName.c_str();
     }
