@@ -391,8 +391,6 @@ CONFIGURE_FILE(
 ADD_CUSTOM_TARGET(uninstall
   "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
-# include support for making the release
-INCLUDE (${CMake_SOURCE_DIR}/Utilities/Release/Release.cmake)
 INCLUDE (CMakeCPack.cmake)
 
 # setup some Testing support (a macro defined in this file)

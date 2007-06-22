@@ -1,58 +1,24 @@
-1. Update Version information
-  - change version in CMakeLists.txt
-  - build on windows, and do a make; make install; make release // this step tags 
-    - this changes cmake_release.sh
-  * for major release edit   Source/cmCPluginAPI.h 
+To create a cmake release, first test the branch:
 
-2. Update the FAQ with the current release.
-3. Update hythloth:~kingb/Nightly/Scripts/util.CMakeWeb to generate web page docs for the new version.
+mkdir 2-4
+cd 2-4
+cmake -DCMAKE_VERSION=CMake-2-4 -P ../create-cmake-release.cmake
+./create-CMake-2-4.sh
 
+If that works:
 
-NOTES from Brad:
+Then tag the minor release:
+cvs tag 2-4-7
 
-The release scripts are located in CMake and ParaView under the Utilities/Release directory.  It is important to run the script obtained by checking out a copy of the corresponding release branch from CVS. Here is a summary of how to use them:
-
-
-The release_dispatch.sh script has a list of machine names at the top. When run, this script will automatically ssh to these machines to build the releases.  Run it like this:
-
-
-./release_dispatch.sh clean
-./release_dispatch.sh binary
-./release_dispatch.sh logs
+Then create a release from the tag:
+mkdir 2-4-7
+cd 2-4-7
+cmake -DCMAKE_VERSION=CMake-2-4-7 -P ../create-cmake-release.cmake
+./create-CMake-2-4.sh
 
 
-The first line will ssh to all the machines and wipe out any existing release build.  The second will ssh to the machines and start the release scripts with output going to a log file.  The third line will bring up a whole bunch of xterm windows each showing the log from one of the machines.  Therefore you should run this from a prompt with access to an X display.  Alternatively you can just look at the log files manually.
+create-cmake-release.cmake:  script to run to create release sh script
+Cygwin -> directory that contains cpack cygwin package files used in
+ CMakeCPack.cmake)
 
-
-After the logs report the job is complete, then the binaries should be sitting on the local machine in the same directory as the scripts.  You can run
-
-
-./cmake_release.sh remote_source localhost
-
-
-to get the source tarballs.  Then run
-
-
-./cmake_release.sh upload
-
-
-to upload the files to public in the proper FTP directory.
-
-
-For shannara, the home directory does not have enough disk space to build ParaView.  After the "clean" step, you should manually log into the machine and do
-
-
-rm -rf /disk2/ParaViewReleaseRoot
-ln -s /disk2/ParaViewReleaseRoot ~/
-
-
-For the aix build, you need to manually login to the box and checkout a copy of the Utilities/Release directory.  Then run the release script by hand:
-
-
-./cmake_release.sh binary_tarball
-./paraview_release.sh binary_tarball
-
-
-Then in the release root directory there will be a Tarballs subdirectory with the binaries.
-
-
+machine_release.cmake : config files for each machine
