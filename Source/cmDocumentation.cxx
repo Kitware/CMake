@@ -44,6 +44,48 @@ static const cmDocumentationEntry cmDocumentationStandardOptions[] =
 };
 
 //----------------------------------------------------------------------------
+static const cmDocumentationEntry cmModulesDocumentationDescription[] =
+{
+  {0,
+  "  CMake Modules - Modules coming with CMake, the Cross-Platform Makefile Generator.", 0},
+//  CMAKE_DOCUMENTATION_OVERVIEW,
+  {0,
+  "This is the documentation for the modules and scripts coming with CMake. "
+  "Using these modules you can check the computer system for "
+  "installed software packages, features of the compiler and the "
+  "existance of headers to name just a few.", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmPropertiesDocumentationDescription[] =
+{
+  {0,
+   "  CMake Properties - Properties supported by CMake, the Cross-Platform Makefile Generator.", 0},
+//  CMAKE_DOCUMENTATION_OVERVIEW,
+  {0,
+   "This is the documentation for the properties supported by CMake. "
+  "Properties can have different scopes. They can either be assigned to a source file, "
+  "a directory, a target or globally to CMake. "
+  "By modifying the values of properties the behaviour of the buildsystem can be "
+  "customized.", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmCompatCommandsDocumentationDescription[] =
+{
+  {0,
+   "  CMake Compatibility Listfile Commands - Obsolete commands supported by CMake for compatibility.", 0},
+//  CMAKE_DOCUMENTATION_OVERVIEW,
+  {0,
+  "This is the documentation for now obsolete listfile commands from "
+  "previous CMake versions, which are still supported for compatibility reasons. "
+  "You should instead use the newer, faster and shinier new commands. ;-)", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationCommandsHeader[] =
 {
   {0,
@@ -229,10 +271,10 @@ void cmDocumentation::AddSection(const char* name,
 void cmDocumentation::AddSection(const cmSection& section)
 {
   if (!section.IsEmpty())
-  {
-     this->Names.push_back(section.GetName(this->CurrentForm));
-     this->Sections.push_back(section.GetEntries());
-  }
+    {
+    this->Names.push_back(section.GetName(this->CurrentForm));
+    this->Sections.push_back(section.GetEntries());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -634,6 +676,13 @@ void cmDocumentation::SetOptionsSection(const cmDocumentationEntry* section)
 void cmDocumentation::SetCommandsSection(const cmDocumentationEntry* section)
 {
   this->CommandsSection.Set(cmDocumentationCommandsHeader, section, 0);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::SetCompatCommandsSection(const cmDocumentationEntry* 
+                                               section)
+{
+  this->CompatCommandsSection.Set(cmDocumentationCommandsHeader, section, 0);
 }
 
 //----------------------------------------------------------------------------
@@ -1171,6 +1220,16 @@ bool cmDocumentation::PrintDocumentationSingle(std::ostream& os)
       return true;
       }
     }
+  for(cmDocumentationEntry* entry = this->CompatCommandsSection.GetEntries();
+      entry->brief; ++entry)
+    {
+    if(entry->name && this->SingleCommand == entry->name)
+      {
+      this->PrintDocumentationCommand(os, entry);
+      return true;
+      }
+    }
+
   // Argument was not a command.  Complain.
   os << "Argument \"" << this->SingleCommand.c_str()
      << "\" to --help-command is not a CMake command.  "
@@ -1380,6 +1439,7 @@ void cmDocumentation::CreateFullDocumentation()
   this->AddSection(this->OptionsSection);
   this->AddSection(this->GeneratorsSection);
   this->AddSection(this->CommandsSection);
+  this->AddSection(this->CompatCommandsSection);
   this->AddSection(this->ModulesSection);
   this->AddSection(this->PropertiesSection);
   this->AddSection(this->CopyrightSection.GetName(this->CurrentForm),
@@ -1396,6 +1456,44 @@ void cmDocumentation::CreateFullDocumentation()
     this->AddSection(this->SeeAlsoSection.GetName(TextForm),
                      cmDocumentationStandardSeeAlso);
     }
+}
+
+void cmDocumentation::CreateCurrentCommandDocumentation()
+{
+  this->ClearSections();
+  this->AddSection(this->DescriptionSection.GetName(CurrentForm), cmCompatCommandsDocumentationDescription);
+  this->AddSection(this->CompatCommandsSection);
+  this->AddSection(this->CopyrightSection.GetName(CurrentForm), cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), cmDocumentationStandardSeeAlso);
+}
+
+void cmDocumentation::CreateCompatCommandDocumentation()
+{
+  this->ClearSections();
+  this->AddSection(this->DescriptionSection.GetName(CurrentForm), cmCompatCommandsDocumentationDescription);
+  this->AddSection(this->CompatCommandsSection);
+  this->AddSection(this->CopyrightSection.GetName(CurrentForm), cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), cmDocumentationStandardSeeAlso);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::CreateModulesDocumentation()
+ {
+   this->ClearSections();
+  this->AddSection(this->DescriptionSection.GetName(CurrentForm), cmModulesDocumentationDescription);
+  this->AddSection(this->ModulesSection);
+  this->AddSection(this->CopyrightSection.GetName(CurrentForm), cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), cmDocumentationStandardSeeAlso);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::CreatePropertiesDocumentation()
+{
+  this->ClearSections();
+  this->AddSection(this->DescriptionSection.GetName(CurrentForm), cmPropertiesDocumentationDescription);
+  this->AddSection(this->PropertiesSection);
+  this->AddSection(this->CopyrightSection.GetName(CurrentForm), cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), cmDocumentationStandardSeeAlso);
 }
 
 //----------------------------------------------------------------------------

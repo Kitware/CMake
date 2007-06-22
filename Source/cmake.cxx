@@ -2135,12 +2135,19 @@ void cmake::UpdateProgress(const char *msg, float prog)
     }
 }
 
-void cmake::GetCommandDocumentation(
-  std::vector<cmDocumentationEntry>& v) const
+void cmake::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v, 
+                                    bool withCurrentCommands, 
+                                    bool withCompatCommands) const
 {
   for(RegisteredCommandsMap::const_iterator j = this->Commands.begin();
       j != this->Commands.end(); ++j)
     {
+      if (((  withCompatCommands == false) && ( (*j).second->IsDiscouraged()))
+        || ((withCurrentCommands == false) && (!(*j).second->IsDiscouraged())))
+        {
+        continue;
+        }
+
     cmDocumentationEntry e =
       {
         (*j).second->GetName(),

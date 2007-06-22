@@ -71,6 +71,9 @@ public:
   /** Set the listfile commands for standard document generation.  */
   void SetCommandsSection(const cmDocumentationEntry*);
   
+  /** Set the listfile compat. commands for standard document generation.  */
+  void SetCompatCommandsSection(const cmDocumentationEntry*);
+  
   /** Set the properties for standard document generation.  */
   void SetPropertiesSection(const cmDocumentationEntry*);
 
@@ -206,6 +209,10 @@ private:
   
   void CreateUsageDocumentation();
   void CreateFullDocumentation();
+  void CreateCurrentCommandDocumentation();
+  void CreateCompatCommandDocumentation();
+  void CreateModulesDocumentation();
+  void CreatePropertiesDocumentation();
 
   void SetSection(const cmDocumentationEntry* header,
                   const cmDocumentationEntry* section,
