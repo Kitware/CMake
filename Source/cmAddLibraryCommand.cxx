@@ -26,46 +26,77 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
     }
   // Library type defaults to value of BUILD_SHARED_LIBS, if it exists,
   // otherwise it defaults to static library.
-  int shared = 
-    !cmSystemTools::IsOff(this->Makefile->GetDefinition("BUILD_SHARED_LIBS"));
+  cmTarget::TargetType type = cmTarget::SHARED_LIBRARY;
+  if (cmSystemTools::IsOff(this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+    {
+    type = cmTarget::STATIC_LIBRARY;
+    }
   bool excludeFromAll = false;
+  bool importTarget = false;
   
   std::vector<std::string>::const_iterator s = args.begin();
 
-  this->LibName = *s;
+  std::string libName = *s;
 
   ++s;
   
   // If the second argument is "SHARED" or "STATIC", then it controls
   // the type of library.  Otherwise, it is treated as a source or
-  // source list name. There man be two keyword arguments, check for them
+  // source list name. There may be two keyword arguments, check for them
   while ( s != args.end() )
     {
     std::string libType = *s;
     if(libType == "STATIC")
       {
       ++s;
-      shared = 0;
+      type = cmTarget::STATIC_LIBRARY;
       }
     else if(libType == "SHARED")
       {
       ++s;
-      shared = 1;
+      type = cmTarget::SHARED_LIBRARY;
       }
     else if(libType == "MODULE")
       {
       ++s;
-      shared = 2;
+      type = cmTarget::MODULE_LIBRARY;
       }
     else if(*s == "EXCLUDE_FROM_ALL")
       {
       ++s;
       excludeFromAll = true;
       }
+    else if(*s == "IMPORT")
+      {
+      ++s;
+      importTarget = true;
+      }
     else
       {
       break;
       }
+    }
+
+  /* ideally we should check whether for the linker language of the target 
+    CMAKE_${LANG}_CREATE_SHARED_LIBRARY is defined and if not default to
+    STATIC. But at this point we know only the name of the target, but not 
+    yet its linker language. */
+  if ((type != cmTarget::STATIC_LIBRARY) && 
+       (this->Makefile->IsOn("CMAKE_TARGET_SUPPORTS_ONLY_STATIC_LIBS")))
+    {
+    std::string msg = "ADD_LIBRARY for library ";
+    msg += args[0];
+    msg += " is used with the SHARED or MODULE option, but the target "
+        "platform supports only STATIC libraries. Building it STATIC instead. "
+        "This may lead to problems.";
+    cmSystemTools::Message(msg.c_str() ,"Warning");
+    type = cmTarget::STATIC_LIBRARY;
+    }
+
+  if (importTarget)
+    {
+    this->Makefile->AddNewTarget(type, libName.c_str(), true);
+    return true;
     }
 
   if (s == args.end())
@@ -77,22 +108,6 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
     cmSystemTools::Message(msg.c_str() ,"Warning");
     }
 
-  /* ideally we should check whether for the linker language of the target 
-    CMAKE_${LANG}_CREATE_SHARED_LIBRARY is defined and if not default to
-    STATIC. But at this point we know only the name of the target, but not 
-    yet its linker language. */
-  if ((shared != 0) && 
-       (this->Makefile->IsOn("CMAKE_TARGET_SUPPORTS_ONLY_STATIC_LIBS")))
-    {
-    std::string msg = "ADD_LIBRARY for library ";
-    msg += args[0];
-    msg += " is used with the SHARED or MODULE option, but the target "
-        "platform supports only STATIC libraries. Building it STATIC instead. "
-        "This may lead to problems.";
-    cmSystemTools::Message(msg.c_str() ,"Warning");
-    shared = 0;
-    }
-
   std::vector<std::string> srclists;
   while (s != args.end()) 
     {
@@ -100,7 +115,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
     ++s;
     }
 
-  this->Makefile->AddLibrary(this->LibName.c_str(), shared, srclists,
+  this->Makefile->AddLibrary(libName.c_str(), type, srclists,
                              excludeFromAll);
   
   return true;

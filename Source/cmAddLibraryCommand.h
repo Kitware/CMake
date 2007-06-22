@@ -76,9 +76,6 @@ public:
     }
   
   cmTypeMacro(cmAddLibraryCommand, cmCommand);
-
-private:
-  std::string LibName;
 };
 
 

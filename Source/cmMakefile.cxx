@@ -1336,26 +1336,19 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
 }
 
 
-void cmMakefile::AddLibrary(const char* lname, int shared,
+void cmMakefile::AddLibrary(const char* lname, cmTarget::TargetType type,
                             const std::vector<std::string> &srcs,
                             bool excludeFromAll)
 {
-  cmTarget* target=0;
-  switch (shared)
+  // wrong type ? default to STATIC
+  if (    (type != cmTarget::STATIC_LIBRARY) 
+       && (type != cmTarget::SHARED_LIBRARY) 
+       && (type != cmTarget::MODULE_LIBRARY))
     {
-    case 0:
-      target=this->AddNewTarget(cmTarget::STATIC_LIBRARY, lname, false);
-      break;
-    case 1:
-      target=this->AddNewTarget(cmTarget::SHARED_LIBRARY, lname, false);
-      break;
-    case 2:
-      target=this->AddNewTarget(cmTarget::MODULE_LIBRARY, lname, false);
-      break;
-    default:
-      target=this->AddNewTarget(cmTarget::STATIC_LIBRARY, lname, false);
+    type = cmTarget::STATIC_LIBRARY;
     }
 
+  cmTarget* target = this->AddNewTarget(type, lname, false);
   // Clear its dependencies. Otherwise, dependencies might persist
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
@@ -1383,21 +1376,25 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
 }
 
 
-cmTarget* cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name, bool isImported)
+cmTarget* cmMakefile::AddNewTarget(cmTarget::TargetType type, 
+                                   const char* name, 
+                                   bool isImported)
 {
   cmTargets::iterator it;
   cmTarget target;
   target.SetType(type, name);
   target.SetMakefile(this);
   if (isImported)
-  {
+    {
     target.MarkAsImported();
-    it=this->ImportedTargets.insert(cmTargets::value_type(target.GetName(), target)).first;
-  }
+    it=this->ImportedTargets.insert(
+                        cmTargets::value_type(target.GetName(), target)).first;
+    }
   else
-  {
-    it=this->Targets.insert(cmTargets::value_type(target.GetName(), target)).first;
-  }
+    {
+    it=this->Targets.insert(
+                        cmTargets::value_type(target.GetName(), target)).first;
+    }
   this->LocalGenerator->GetGlobalGenerator()->AddTarget(*it);
   return &it->second;
 }

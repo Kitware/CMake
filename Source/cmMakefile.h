@@ -283,7 +283,7 @@ public:
   /**
    * Set the name of the library.
    */
-  void AddLibrary(const char *libname, int shared,
+  void AddLibrary(const char *libname, cmTarget::TargetType type,
                   const std::vector<std::string> &srcs,
                   bool excludeFromAll = false);
 
