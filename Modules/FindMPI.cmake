@@ -13,7 +13,7 @@ FIND_PATH(MPI_INCLUDE_PATH NAMES mpi.h
 )
 
 FIND_LIBRARY(MPI_LIBRARY 
-             NAMES mpich2 mpi mpich 
+             NAMES mpich2 mpi mpich mpich.rts
              PATH_SUFFIXES mpi/lib
              PATHS
              "$ENV{ProgramFiles}/MPICH/SDK/Lib"
@@ -28,5 +28,10 @@ FIND_LIBRARY(MPI_EXTRA_LIBRARY
              "$ENV{ProgramFiles}/MPICH/SDK/Lib"
              "C:/Program Files/MPICH/SDK/Lib" 
              DOC "If a second mpi library is necessary, specify it here.")
+
+# on BlueGene/L the MPI lib is named libmpich.rts.a, there also these additional libs are required
+IF("${MPI_LIBRARY}" MATCHES "mpich.rts")
+   SET(MPI_EXTRA_LIBRARY msglayer.rts devices.rts rts.rts devices.rts CACHE STRING "Additional MPI libs" FORCE)
+ENDIF("${MPI_LIBRARY}" MATCHES "mpich.rts")
 
 MARK_AS_ADVANCED(MPI_INCLUDE_PATH MPI_LIBRARY MPI_EXTRA_LIBRARY)
