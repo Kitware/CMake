@@ -199,6 +199,10 @@ bool cmSetPropertiesCommand::InitialPass(
         }
       }
       break;
+    case cmProperty::VARIABLE:
+    case cmProperty::CACHED_VARIABLE:
+      // not handled by SetProperty
+      break;
     }
 
   return true;

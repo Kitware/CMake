@@ -152,6 +152,10 @@ bool cmGetPropertyCommand::InitialPass(
         }
       }
       break;
+    case cmProperty::VARIABLE:
+    case cmProperty::CACHED_VARIABLE:
+      // not handled by GetProperty
+      break;
     }
 
   this->Makefile->AddDefinition(args[0].c_str(), output.c_str());
