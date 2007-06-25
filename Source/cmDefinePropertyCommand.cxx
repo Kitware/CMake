@@ -49,6 +49,14 @@ bool cmDefinePropertyCommand::InitialPass(
     {
     scope = cmProperty::TEST;
     }
+  else if (args[1] == "VARIABLE")
+    {
+    scope = cmProperty::VARIABLE;
+    }
+  else if (args[1] == "CACHED_VARIABLE")
+    {
+    scope = cmProperty::CACHED_VARIABLE;
+    }
   else
     {
     this->SetError("called with illegal arguments.");

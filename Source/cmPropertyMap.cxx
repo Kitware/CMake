@@ -75,6 +75,12 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
       case cmProperty::TEST:
         msg += "test.";
         break;
+      case cmProperty::VARIABLE:
+        msg += "variable.";
+        break;
+      case cmProperty::CACHED_VARIABLE:
+        msg += "cached variable.";
+        break;
       default:
         msg += "unknown.";
         break;
@@ -127,6 +133,12 @@ const char *cmPropertyMap
         break;
       case cmProperty::TEST:
         msg += "test.";
+        break;
+      case cmProperty::VARIABLE:
+        msg += "variable.";
+        break;
+      case cmProperty::CACHED_VARIABLE:
+        msg += "cached variable.";
         break;
       default:
         msg += "unknown.";

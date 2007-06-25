@@ -57,6 +57,11 @@ void cmPropertyDefinition
       break;
     case cmProperty::TEST: this->LongName += " on CTest";
       break;
+    case cmProperty::VARIABLE: this->LongName += " as a variable";
+      break;
+    case cmProperty::CACHED_VARIABLE: this->LongName += 
+                                        " as a cached variable";
+      break;
     }
 }
 

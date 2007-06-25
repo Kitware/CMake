@@ -22,7 +22,8 @@
 class cmProperty 
 {
 public:
-  enum ScopeType { TARGET, SOURCE_FILE, DIRECTORY, GLOBAL, TEST };
+  enum ScopeType { TARGET, SOURCE_FILE, DIRECTORY, GLOBAL, 
+                   TEST, VARIABLE, CACHED_VARIABLE };
 
   // set this property
   void Set(const char *name, const char *value);

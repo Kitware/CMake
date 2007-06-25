@@ -314,11 +314,9 @@ class cmake
 
 protected:
   cmPropertyMap Properties;
-  cmPropertyDefinitionMap TargetProperties;
-  cmPropertyDefinitionMap SourceFileProperties;
-  cmPropertyDefinitionMap DirectoryProperties;
-  cmPropertyDefinitionMap TestProperties;
-  cmPropertyDefinitionMap GlobalProperties;
+
+  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> 
+  PropertyDefinitions;
 
   typedef 
      cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();
