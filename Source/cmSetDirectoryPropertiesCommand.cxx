@@ -67,35 +67,7 @@ bool cmSetDirectoryPropertiesCommand
         "Commands and macros cannot be set using SET_CMAKE_PROPERTIES";
       return false;
       }
-    else if ( prop == "INCLUDE_DIRECTORIES" )
-      {
-      std::vector<std::string> varArgsExpanded;
-      cmSystemTools::ExpandListArgument(value, varArgsExpanded);
-      mf->SetIncludeDirectories(varArgsExpanded);
-      }
-    else if ( prop == "LINK_DIRECTORIES" )
-      {
-      std::vector<std::string> varArgsExpanded;
-      cmSystemTools::ExpandListArgument(value, varArgsExpanded);
-      mf->SetLinkDirectories(varArgsExpanded);
-      }
-    else if ( prop == "INCLUDE_REGULAR_EXPRESSION" )
-      {
-      mf->SetIncludeRegularExpression(value.c_str());
-      }
-    else
-      {
-      if ( prop == "ADDITIONAL_MAKE_CLEAN_FILES" )
-        {
-        // This property is not inherrited
-        if ( strcmp(mf->GetCurrentDirectory(), 
-                    mf->GetStartDirectory()) != 0 )
-          {
-          continue;
-          }
-        }
-      mf->SetProperty(prop.c_str(), value.c_str());
-      }
+    mf->SetProperty(prop.c_str(), value.c_str());
     }
   
   return true;

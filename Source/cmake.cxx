@@ -3028,6 +3028,40 @@ const char *cmake::GetProperty(const char* prop)
 const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
 {
   bool chain = false;
+
+  // watch for special properties
+  std::string propname = prop;
+  std::string output = "";
+  if ( propname == "CACHE_VARIABLES" )
+    {
+    cmCacheManager::CacheIterator cit =
+      this->GetCacheManager()->GetCacheIterator();
+    for ( cit.Begin(); !cit.IsAtEnd(); cit.Next() )
+      {
+      if ( output.size() )
+        {
+        output += ";";
+        }
+      output += cit.GetName();
+      }
+    this->SetProperty("CACHE_VARIABLES", output.c_str());
+    }
+  else if ( propname == "COMMANDS" )
+    {
+    cmake::RegisteredCommandsMap::iterator cmds 
+        = this->GetCommands()->begin();
+    for (unsigned int cc=0 ; cmds != this->GetCommands()->end(); ++ cmds )
+      {
+      if ( cc > 0 )
+        {
+        output += ";";
+        }
+      output += cmds->first.c_str();
+      cc++;
+      }
+    this->SetProperty("COMMANDS",output.c_str());
+    }
+  
   return this->Properties.GetPropertyValue(prop, scope, chain);
 }
 

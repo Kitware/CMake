@@ -30,15 +30,11 @@ bool cmGetCMakePropertyCommand::InitialPass(
   
   std::vector<std::string>::size_type cc;
   std::string variable = args[0];
-  std::string output = "";
+  std::string output = "NOTFOUND";
 
-  if ( args[1] == "VARIABLES" || args[1] == "CACHE_VARIABLES" )
+  if ( args[1] == "VARIABLES")
     {
     int cacheonly = 0;
-    if ( args[1] == "CACHE_VARIABLES" )
-      {
-      cacheonly = 1;
-      }
     std::vector<std::string> vars = this->Makefile->GetDefinitions(cacheonly);
     for ( cc = 0; cc < vars.size(); cc ++ )
       {
@@ -49,31 +45,18 @@ bool cmGetCMakePropertyCommand::InitialPass(
       output += vars[cc];
       }
     }
-  else if ( args[1] == "COMMANDS" )
-    {
-    cmake::RegisteredCommandsMap::iterator cmds 
-        = this->Makefile->GetCMakeInstance()->GetCommands()->begin();
-    for (cc=0 ; 
-      cmds != this->Makefile->GetCMakeInstance()->GetCommands()->end(); 
-      ++ cmds )
-      {
-      if ( cc > 0 )
-        {
-        output += ";";
-        }
-      output += cmds->first.c_str();
-      cc++;
-      }
-    }
   else if ( args[1] == "MACROS" )
     {
     this->Makefile->GetListOfMacros(output);
     }
   else
     {
-    std::string emsg = "Unknown CMake property: " + args[1];
-    this->SetError(emsg.c_str());
-    return false;
+    const char *prop = 
+      this->Makefile->GetCMakeInstance()->GetProperty(args[1].c_str());
+    if (prop)
+      {
+      output = prop;
+      }
     }
   this->Makefile->AddDefinition(variable.c_str(), output.c_str());
   

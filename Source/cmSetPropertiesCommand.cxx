@@ -80,9 +80,13 @@ bool cmSetPropertiesCommand::InitialPass(
     {
     scope = cmProperty::GLOBAL;
     }
-  else if (args[0] == "DIRECTORY" && numFiles == 1)
+  else if (args[0] == "DIRECTORY" && numFiles >= 1)
     {
     scope = cmProperty::DIRECTORY;
+    if (numFiles == 2)
+      {
+      scopeName = args[1].c_str();
+      }
     }
   else if (args[0] == "TARGET" && numFiles == 2)
     {
@@ -122,16 +126,39 @@ bool cmSetPropertiesCommand::InitialPass(
       break;
     case cmProperty::DIRECTORY:
       {
-      std::string errors;
-      bool ret = 
-        cmSetDirectoryPropertiesCommand::RunCommand(this->Makefile,
-                                                    args.begin() + 2,
-                                                    args.end(),
-                                                    errors);
-      if (!ret)
+      // lookup the makefile from the directory name
+      cmLocalGenerator *lg = this->Makefile->GetLocalGenerator();
+      if (numFiles == 2)
         {
-        this->SetError(errors.c_str());
-        return ret;
+        std::string sd = scopeName;
+        // make sure the start dir is a full path
+        if (!cmSystemTools::FileIsFullPath(sd.c_str()))
+          {
+          sd = this->Makefile->GetStartDirectory();
+          sd += "/";
+          sd += scopeName;
+          }
+        
+        // The local generators are associated with collapsed paths.
+        sd = cmSystemTools::CollapseFullPath(sd.c_str());
+        
+        lg = this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+          FindLocalGenerator(sd.c_str());
+        }
+      if (!lg)
+        {
+        this->SetError
+          ("DIRECTORY argument provided but requested directory not found. "
+           "This could be because the directory argument was invalid or, "
+           "it is valid but has not been processed yet.");
+        return false;
+        }
+      
+      for(j= propertyPairs.begin(); j != propertyPairs.end(); ++j)
+        {
+        const char *pn = j->c_str();
+        ++j;
+        lg->GetMakefile()->SetProperty(pn,j->c_str());
         }
       }
       break;
@@ -139,8 +166,9 @@ bool cmSetPropertiesCommand::InitialPass(
       {
       for(j= propertyPairs.begin(); j != propertyPairs.end(); ++j)
         {
-        this->Makefile->GetCMakeInstance()->SetProperty(j->c_str(),
-                                                        (++j)->c_str());
+        const char *pn = j->c_str();
+        ++j;
+        this->Makefile->GetCMakeInstance()->SetProperty(pn, j->c_str());
         }
       }
       break;
