@@ -696,6 +696,7 @@ IF(BUILD_TESTING)
     ENDIF(CMAKE_Fortran_COMPILER_FULLPATH)
   ENDIF(CMAKE_TEST_GENERATOR MATCHES "Makefiles"
      OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
+
   IF(NOT CMAKE_TEST_GENERATOR MATCHES "Xcode")
     INCLUDE(FindJava)
     IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
@@ -720,6 +721,24 @@ IF(BUILD_TESTING)
       ENDIF(JNI_H)
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
   ENDIF(NOT CMAKE_TEST_GENERATOR MATCHES "Xcode")
+
+  # if it's a makefile based generator and sdcc is found, build the SimpleCOnly project with sdcc
+  IF(CMAKE_TEST_GENERATOR MATCHES "Makefiles" OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
+    FIND_PROGRAM(SDCC_EXECUTABLE sdcc)
+    IF(SDCC_EXECUTABLE)
+      ADD_TEST(SimpleCOnly ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/SimpleCOnly"
+        "${CMake_BINARY_DIR}/Tests/SimpleCOnly"
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-project SimpleC
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-options
+        "-DCMAKE_SYSTEM_NAME=Generic"
+        "-DCMAKE_C_COMPILER=${SDCC_EXECUTABLE}")
+    ENDIF(SDCC_EXECUTABLE)
+  ENDIF(CMAKE_TEST_GENERATOR MATCHES "Makefiles" OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
+
 
   IF(BUILD_WXDialog AND wxWidgets_CONFIG_EXECUTABLE)
     # Will be set if the WX gui is on
