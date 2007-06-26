@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmAddLibraryCommand.h"
 
+#include "cmake.h"
+
 // cmLibraryCommand
 bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -82,7 +84,8 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
     STATIC. But at this point we know only the name of the target, but not 
     yet its linker language. */
   if ((type != cmTarget::STATIC_LIBRARY) && 
-       (this->Makefile->IsOn("CMAKE_TARGET_SUPPORTS_ONLY_STATIC_LIBS")))
+       (this->Makefile->GetCMakeInstance()->GetPropertyAsBool(
+                                      "TARGET_SUPPORTS_SHARED_LIBS") == false))
     {
     std::string msg = "ADD_LIBRARY for library ";
     msg += args[0];

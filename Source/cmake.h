@@ -312,6 +312,9 @@ class cmake
   bool IsPropertyDefined(const char *name, cmProperty::ScopeType scope);
   bool IsPropertyChained(const char *name, cmProperty::ScopeType scope);
 
+  // Define the properties
+  static void DefineProperties(cmake *cm);
+
 protected:
   cmPropertyMap Properties;
 
