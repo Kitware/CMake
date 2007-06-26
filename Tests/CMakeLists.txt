@@ -722,14 +722,16 @@ IF(BUILD_TESTING)
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
   ENDIF(NOT CMAKE_TEST_GENERATOR MATCHES "Xcode")
 
-  # if it's a makefile based generator and sdcc is found, build the SimpleCOnly project with sdcc
+  # add some cross compiler tests, for now only with makefile based generators
   IF(CMAKE_TEST_GENERATOR MATCHES "Makefiles" OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
+
+    # if sdcc is found, build the SimpleCOnly project with sdcc
     FIND_PROGRAM(SDCC_EXECUTABLE sdcc)
     IF(SDCC_EXECUTABLE)
-      ADD_TEST(SimpleCOnly ${CMAKE_CTEST_COMMAND}
+      ADD_TEST(SimpleCOnly_sdcc ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/SimpleCOnly"
-        "${CMake_BINARY_DIR}/Tests/SimpleCOnly"
+        "${CMake_BINARY_DIR}/Tests/SimpleCOnly_sdcc"
         --build-generator ${CMAKE_TEST_GENERATOR}
         --build-project SimpleC
         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
@@ -737,8 +739,24 @@ IF(BUILD_TESTING)
         "-DCMAKE_SYSTEM_NAME=Generic"
         "-DCMAKE_C_COMPILER=${SDCC_EXECUTABLE}")
     ENDIF(SDCC_EXECUTABLE)
+    
+    
+    FIND_PROGRAM(MINGW_LINUX2WIN_EXECUTABLE i586-mingw32msvc-gcc)
+    IF(MINGW_LINUX2WIN_EXECUTABLE)
+      ADD_TEST(Simple_Mingw_Linux2Win ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Simple"
+        "${CMake_BINARY_DIR}/Tests/Simple_Mingw_Linux2Win"
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-project Simple
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-options
+        "-DCMAKE_SYSTEM_NAME=Windows"
+        "-DCMAKE_C_COMPILER=${MINGW_LINUX2WIN_EXECUTABLE}")
+    ENDIF(MINGW_LINUX2WIN_EXECUTABLE)
+    
+    
   ENDIF(CMAKE_TEST_GENERATOR MATCHES "Makefiles" OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
-
 
   IF(BUILD_WXDialog AND wxWidgets_CONFIG_EXECUTABLE)
     # Will be set if the WX gui is on
