@@ -44,7 +44,6 @@
 #include "cmRemoveDefinitionsCommand.cxx"
 #include "cmSeparateArgumentsCommand.cxx"
 #include "cmSetDirectoryPropertiesCommand.cxx"
-#include "cmSetPropertiesCommand.cxx"
 #include "cmSetTargetPropertiesCommand.cxx"
 #include "cmSetTestsPropertiesCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
@@ -99,7 +98,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmRemoveDefinitionsCommand);
   commands.push_back(new cmSeparateArgumentsCommand);
   commands.push_back(new cmSetDirectoryPropertiesCommand);
-  commands.push_back(new cmSetPropertiesCommand);
   commands.push_back(new cmSetTargetPropertiesCommand);
   commands.push_back(new cmSetTestsPropertiesCommand);
   commands.push_back(new cmSourceGroupCommand);
