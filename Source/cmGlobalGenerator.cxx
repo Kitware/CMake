@@ -160,7 +160,7 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
 //
 // CMakeSystem.cmake - configured file created by CMakeDetermineSystem.cmake
 //   CMakeDetermineSystem.cmake - figure out os info and create
-//                                CMakeSystem.cmake IF CMAKE_SYSTEM_NAME
+//                                CMakeSystem.cmake IF CMAKE_SYSTEM
 //                                not set
 //   CMakeSystem.cmake - configured file created by
 //                       CMakeDetermineSystem.cmake IF CMAKE_SYSTEM_LOADED
@@ -243,7 +243,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     }
   //  Load the CMakeDetermineSystem.cmake file and find out
   // what platform we are running on
-  if (!mf->GetDefinition("CMAKE_SYSTEM_NAME"))
+  if (!mf->GetDefinition("CMAKE_SYSTEM"))
     {
 #if defined(_WIN32) && !defined(__CYGWIN__)
     /* Windows version number data.  */
