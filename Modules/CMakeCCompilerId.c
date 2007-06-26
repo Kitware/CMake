@@ -40,10 +40,9 @@
 # define COMPILER_ID "IAR" */
 
 /* sdcc, the small devices C compiler for embedded systems, 
-   http://sdcc.sourceforge.net 
-   Not supported yet by CMake.
+   http://sdcc.sourceforge.net  */
 #elif defined(SDCC)
-# define COMPILER_ID "SDCC" */
+# define COMPILER_ID "SDCC"
 
 #elif defined(_COMPILER_VERSION)
 # define COMPILER_ID "MIPSpro"
