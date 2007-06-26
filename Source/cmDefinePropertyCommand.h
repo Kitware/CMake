@@ -54,16 +54,15 @@ public:
       return
         "  DEFINE_PROPERTY(property_name scope_value\n"
         "                  short_description\n"
-        "                  full_description chain)\n"
-        "Define a property for a scope. The scope_value is either GLOBAL "
-        "DIRECTORY, TARGET, TEST, SOURCE_FILE, VARIABLE, CACHED_VARIABLE. "
-        "The short and full "
-        "descriptions are used to document the property, chain indicates "
-        "if that property chains such that a request for the property "
-        "on a target will chain up to the directory if it is not set on the "
-        "target. In such cases the property's scope is the most specific. "
-        "In that example the scope would be TARGET even though it can "
-        "chain up to DIRECTORY and GLOBAL."
+        "                  full_description inherit)\n"
+        "Define a property for a scope. scope_value is either GLOBAL, "
+        "DIRECTORY, TARGET, TEST, SOURCE_FILE, VARIABLE or CACHED_VARIABLE. "
+        "The short and full descriptions are used to document the property. "
+        "If inherit is TRUE, it will inherit its value from the next more "
+        "global property if it hasn't been set at the specified scope. "
+        "This means that e.g. a TARGET property inherits it's value from the "
+        "DIRECTORY property with the same name if it hasn't been set for the "
+        "target, and then from GLOBAL if it hasn't been set for the directory."
         ;
     }
   

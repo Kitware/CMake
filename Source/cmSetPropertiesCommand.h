@@ -55,7 +55,7 @@ public:
         "  SET_PROPERTIES(scope_value\n"
         "                 PROPERTIES prop1 value1\n"
         "                 prop2 value2 ...)\n"
-        "Set properties on something. The scope_value is either GLOBAL "
+        "Set properties on something. The scope_value is either GLOBAL, "
         "DIRECTORY dir_name, TARGET tgt_name, SOURCE_FILE src_name, "
         "or TEST test_name."
         ;

@@ -58,7 +58,7 @@ public:
     {
       return
         "  GET_PROPERTY(VAR scope_value property)\n"
-        "Get a property from cmake.  The scope_value is either GLOBAL "
+        "Get a property from cmake.  The scope_value is either GLOBAL, "
         "DIRECTORY dir_name, TARGET tgt_name, SOURCE_FILE src_name, "
         "or TEST test_name. The resulting value is "
         "stored in the variable VAR. If the property is not found, "
