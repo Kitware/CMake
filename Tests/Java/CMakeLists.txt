@@ -34,7 +34,7 @@ ELSE(NOT OLD_CUSTOM_COMMAND_WAY)
     ${CMAKE_Java_ARCHIVE}
     -cvf hello.jar *.class)
   
-  ADD_CUSTOM_TARGET(hello.jar ALL 
+  ADD_CUSTOM_TARGET(hello_jar ALL 
     DEPENDS ${hello_BINARY_DIR}/hello.jar)
 
 ENDIF(NOT OLD_CUSTOM_COMMAND_WAY)
