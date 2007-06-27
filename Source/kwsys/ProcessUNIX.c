@@ -100,8 +100,8 @@ static inline void kwsysProcess_usleep(unsigned int msec)
 # define KWSYSPE_USE_SELECT 1
 #endif
 
-/* BeOS does not have siginfo on its signal handlers.  */
-#if !defined(__BEOS__)
+/* Some platforms do not have siginfo on their signal handlers.  */
+#if defined(SA_SIGINFO) && !defined(__BEOS__)
 # define KWSYSPE_USE_SIGINFO 1
 #endif
 
