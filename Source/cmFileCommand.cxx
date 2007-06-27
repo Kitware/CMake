@@ -1700,10 +1700,10 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
           std::string libname = toFile;
           std::string soname = toFile;
           std::string soname_nopath = fromName;
-          this->ComputeVersionedName(soname, lib_soversion);
-          this->ComputeVersionedName(soname_nopath, lib_soversion);
-          this->ComputeVersionedName(fromName, lib_version);
-          this->ComputeVersionedName(toFile, lib_version);
+          this->ComputeVersionedLibName(soname, lib_soversion);
+          this->ComputeVersionedLibName(soname_nopath, lib_soversion);
+          this->ComputeVersionedLibName(fromName, lib_version);
+          this->ComputeVersionedLibName(toFile, lib_version);
 
           cmSystemTools::RemoveFile(soname.c_str());
           cmSystemTools::RemoveFile(libname.c_str());
@@ -1743,22 +1743,14 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
         if ( exe_version )
           {
           std::string exename = toFile;
-          std::string exename_nopath = fromName;
-          exename_nopath += "-";
-          exename_nopath += exe_version;
-
-          fromName += "-";
-          fromName += exe_version;
-          toFile += "-";
-          toFile += exe_version;
-
+          this->ComputeVersionedExeName(fromName, exe_version);
+          this->ComputeVersionedExeName(toFile, exe_version);
           cmSystemTools::RemoveFile(exename.c_str());
-
-          if (!cmSystemTools::CreateSymlink(exename_nopath.c_str(),
-                                            exename.c_str()) )
+          if(!cmSystemTools::CreateSymlink(fromName.c_str(),
+                                           exename.c_str()))
             {
             std::string errstring = "error when creating symlink from: "
-              + exename + " to " + exename_nopath;
+              + exename + " to " + fromName;
             this->SetError(errstring.c_str());
             return false;
             }
@@ -1815,8 +1807,8 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
 }
 
 //----------------------------------------------------------------------------
-void cmFileCommand::ComputeVersionedName(std::string& name,
-                                         const char* version)
+void cmFileCommand::ComputeVersionedLibName(std::string& name,
+                                            const char* version)
 {
 #if defined(__APPLE__)
   std::string ext;
@@ -1832,6 +1824,21 @@ void cmFileCommand::ComputeVersionedName(std::string& name,
 #if defined(__APPLE__)
   name += ext;
 #endif
+}
+
+//----------------------------------------------------------------------------
+void cmFileCommand::ComputeVersionedExeName(std::string& name,
+                                            const char* version)
+{
+  std::string ext;
+  if(name.size() > 4 && name.substr(name.size()-4) == ".exe")
+    {
+    ext = ".exe";
+    name = name.substr(0, name.size()-4);
+    }
+  name += "-";
+  name += version;
+  name += ext;
 }
 
 //----------------------------------------------------------------------------
