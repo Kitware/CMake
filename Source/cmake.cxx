@@ -2940,6 +2940,13 @@ void cmake::DefineProperties(cmake *cm)
      "platform supports shared libraries. Basically all current general "
      "general purpose OS do so, the exception are usually embedded systems "
      "with no or special OSs.");
+  cm->DefineProperty
+    ("FIND_LIBRARY_USE_LIB64_PATHS", cmProperty::GLOBAL,
+     "Whether FIND_LIBRARY should automatically search lib64 directories.",
+     "FIND_LIBRARY_USE_LIB64_PATHS is a boolean specifying whether the "
+     "FIND_LIBRARY command should automatically search the lib64 variant of "
+     "directories called lib in the search path when building 64-bit "
+     "binaries.");
 }
 
 

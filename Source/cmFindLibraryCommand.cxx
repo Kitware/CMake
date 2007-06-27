@@ -67,8 +67,14 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
       }
     return true;
     }
-  // add special 64 bit paths if this is a 64 bit compile.
-  this->AddLib64Paths();
+
+  if(this->Makefile->GetCMakeInstance()
+     ->GetPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
+    {
+    // add special 64 bit paths if this is a 64 bit compile.
+    this->AddLib64Paths();
+    }
+
   std::string library;
   for(std::vector<std::string>::iterator i = this->Names.begin();
       i != this->Names.end() ; ++i)

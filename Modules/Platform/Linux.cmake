@@ -48,3 +48,9 @@ ELSE(DEFINED CMAKE_INSTALL_SO_NO_EXE)
 ENDIF(DEFINED CMAKE_INSTALL_SO_NO_EXE)
 
 INCLUDE(Platform/UnixPaths)
+
+# Debian has lib64 paths only for compatibility so they should not be
+# searched.
+IF(EXISTS "/etc/debian_version")
+  SET_PROPERTIES(GLOBAL PROPERTIES FIND_LIBRARY_USE_LIB64_PATHS FALSE)
+ENDIF(EXISTS "/etc/debian_version")

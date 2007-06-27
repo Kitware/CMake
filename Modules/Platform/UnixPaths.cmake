@@ -37,3 +37,5 @@ SET(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
   /lib /usr/lib /usr/lib32 /usr/lib64
   )
 
+# Enable use of lib64 search path variants by default.
+SET_PROPERTIES(GLOBAL PROPERTIES FIND_LIBRARY_USE_LIB64_PATHS TRUE)
