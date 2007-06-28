@@ -27,7 +27,7 @@ cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
 void cmGlobalVisualStudio6Generator
 ::EnableLanguage(std::vector<std::string>const& lang, 
                  cmMakefile *mf, 
-                 bool options)
+                 bool optional)
 {
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
