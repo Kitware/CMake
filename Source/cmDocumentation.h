@@ -31,7 +31,8 @@ public:
   /** Types of help provided.  */
   enum Type { None, Usage, Single, SingleModule, SingleProperty,
               List, ModuleList, PropertyList,
-              Full, Copyright, Version };
+              Full, Properties, Modules, Commands, CompatCommands,
+              Copyright, Version };
   
   /**
    * Check command line arguments for documentation options.  Returns
@@ -205,13 +206,17 @@ private:
   bool PrintDocumentationSingleProperty(std::ostream& os);
   bool PrintDocumentationUsage(std::ostream& os);
   bool PrintDocumentationFull(std::ostream& os);
+  bool PrintDocumentationModules(std::ostream& os);
+  bool PrintDocumentationProperties(std::ostream& os);
+  bool PrintDocumentationCurrentCommands(std::ostream& os);
+  bool PrintDocumentationCompatCommands(std::ostream& os);
   void PrintDocumentationCommand(std::ostream& os,
                                  const cmDocumentationEntry* entry);
   
   void CreateUsageDocumentation();
   void CreateFullDocumentation();
-  void CreateCurrentCommandDocumentation();
-  void CreateCompatCommandDocumentation();
+  void CreateCurrentCommandsDocumentation();
+  void CreateCompatCommandsDocumentation();
   void CreateModulesDocumentation();
   void CreatePropertiesDocumentation();
 

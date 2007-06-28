@@ -305,14 +305,28 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return this->PrintDocumentationSingleModule(os);
     case cmDocumentation::SingleProperty:
       return this->PrintDocumentationSingleProperty(os);
-    case cmDocumentation::List:      return this->PrintDocumentationList(os);
-    case cmDocumentation::ModuleList: return this->PrintModuleList(os);
-    case cmDocumentation::PropertyList: return this->PrintPropertyList(os);
+    case cmDocumentation::List:      
+      return this->PrintDocumentationList(os);
+    case cmDocumentation::ModuleList: 
+      return this->PrintModuleList(os);
+    case cmDocumentation::PropertyList: 
+      return this->PrintPropertyList(os);
 
-    case cmDocumentation::Full: return this->PrintDocumentationFull(os);
+    case cmDocumentation::Full: 
+      return this->PrintDocumentationFull(os);
+    case cmDocumentation::Modules: 
+      return this->PrintDocumentationModules(os);
+    case cmDocumentation::Properties: 
+      return this->PrintDocumentationProperties(os);
+    case cmDocumentation::Commands: 
+      return this->PrintDocumentationCurrentCommands(os);
+    case cmDocumentation::CompatCommands: 
+      return this->PrintDocumentationCompatCommands(os);
 
-    case cmDocumentation::Copyright: return this->PrintCopyright(os);
-    case cmDocumentation::Version:   return true;
+    case cmDocumentation::Copyright: 
+      return this->PrintCopyright(os);
+    case cmDocumentation::Version:   
+      return true;
     default: return false;
     }
 }
@@ -548,6 +562,30 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
         {
         help.Type = cmDocumentation::Single;
         }
+      }
+    else if(strcmp(argv[i], "--help-properties") == 0)
+      {
+      help.Type = cmDocumentation::Properties;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = this->GetFormFromFilename(help.Filename);
+      }
+    else if(strcmp(argv[i], "--help-modules") == 0)
+      {
+      help.Type = cmDocumentation::Modules;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = this->GetFormFromFilename(help.Filename);
+      }
+    else if(strcmp(argv[i], "--help-commands") == 0)
+      {
+      help.Type = cmDocumentation::Commands;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = this->GetFormFromFilename(help.Filename);
+      }
+    else if(strcmp(argv[i], "--help-compatcommands") == 0)
+      {
+      help.Type = cmDocumentation::CompatCommands;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-full") == 0)
       {
@@ -1388,6 +1426,46 @@ bool cmDocumentation::PrintDocumentationFull(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationModules(std::ostream& os)
+{
+  this->CreateModulesDocumentation();
+  this->PrintHeader(GetNameString(), os);
+  this->Print(os);
+  this->PrintFooter(os);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationProperties(std::ostream& os)
+{
+  this->CreatePropertiesDocumentation();
+  this->PrintHeader(GetNameString(), os);
+  this->Print(os);
+  this->PrintFooter(os);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationCurrentCommands(std::ostream& os)
+{
+  this->CreateCurrentCommandsDocumentation();
+  this->PrintHeader(GetNameString(), os);
+  this->Print(os);
+  this->PrintFooter(os);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationCompatCommands(std::ostream& os)
+{
+  this->CreateCompatCommandsDocumentation();
+  this->PrintHeader(GetNameString(), os);
+  this->Print(os);
+  this->PrintFooter(os);
+  return true;
+}
+
+//----------------------------------------------------------------------------
 void cmDocumentation::PrintHeader(const char* name, std::ostream& os)
 {
   switch(this->CurrentForm)
@@ -1476,19 +1554,17 @@ void cmDocumentation::CreateFullDocumentation()
     }
 }
 
-void cmDocumentation::CreateCurrentCommandDocumentation()
+void cmDocumentation::CreateCurrentCommandsDocumentation()
 {
   this->ClearSections();
-  this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
-                   cmCompatCommandsDocumentationDescription);
-  this->AddSection(this->CompatCommandsSection);
+  this->AddSection(this->CommandsSection);
   this->AddSection(this->CopyrightSection.GetName(CurrentForm), 
                    cmDocumentationCopyright);
   this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), 
                    cmDocumentationStandardSeeAlso);
 }
 
-void cmDocumentation::CreateCompatCommandDocumentation()
+void cmDocumentation::CreateCompatCommandsDocumentation()
 {
   this->ClearSections();
   this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
@@ -1502,8 +1578,9 @@ void cmDocumentation::CreateCompatCommandDocumentation()
 
 //----------------------------------------------------------------------------
 void cmDocumentation::CreateModulesDocumentation()
- {
-   this->ClearSections();
+{
+  this->ClearSections();
+  this->CreateModulesSection();
   this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
                    cmModulesDocumentationDescription);
   this->AddSection(this->ModulesSection);

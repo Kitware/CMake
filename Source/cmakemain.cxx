@@ -100,12 +100,18 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "The list contains all commands for which help may be obtained by using "
    "the --help-command argument followed by a command name.  If a file is "
    "specified, the help is written into it."},
+  {"--help-commands [file]", "Print help for all commands and exit.",
+   "Full documentation specific for all current command is displayed."},
+  {"--help-compatcommands [file]", "Print help for compatibility commands. ",
+   "Full documentation specific for all compatibility commands is displayed."},
   {"--help-module module [file]", "Print help for a single module and exit.",
    "Full documentation specific to the given module is displayed."},
   {"--help-module-list [file]", "List available modules and exit.",
    "The list contains all modules for which help may be obtained by using "
    "the --help-module argument followed by a module name.  If a file is "
    "specified, the help is written into it."},
+  {"--help-modules [file]", "Print help for all modules and exit.",
+   "Full documentation for all modules is displayed."},
   {"--help-property prop [file]", 
    "Print help for a single property and exit.",
    "Full documentation specific to the given module is displayed."},
@@ -113,6 +119,8 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "The list contains all properties for which help may be obtained by using "
    "the --help-property argument followed by a property name.  If a file is "
    "specified, the help is written into it."},
+  {"--help-properties [file]", "Print help for all properties and exit.",
+   "Full documentation for all properties is displayed."},
   {0,0,0}
 };
 

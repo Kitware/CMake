@@ -29,22 +29,56 @@ MACRO(ADD_DOCS target dependency)
 ENDMACRO(ADD_DOCS target dependency)
 
 # add the docs for the executables
-ADD_DOCS(cmake      ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt)
 ADD_DOCS(ctest      ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt)
 ADD_DOCS(cpack      ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt)
 ADD_DOCS(ccmake     ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt)
 ADD_DOCS(CMakeSetup ${CMake_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in)
 
-# add the Copyright file
+# add the documentation for cmake itself
+SET(CMAKE_DOC_FILES 
+    ${CMake_BINARY_DIR}/Docs/cmake.txt
+    ${CMake_BINARY_DIR}/Docs/cmake.html
+    ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
+    ${CMake_BINARY_DIR}/Docs/cmake-properties.html
+    ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
+    ${CMake_BINARY_DIR}/Docs/cmake-modules.html
+    ${CMake_BINARY_DIR}/Docs/cmake-commands.txt
+    ${CMake_BINARY_DIR}/Docs/cmake-commands.html
+    ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.txt
+    ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html )
+
+
 GET_TARGET_PROPERTY(CMD cmake LOCATION)
 ADD_CUSTOM_COMMAND(
-  OUTPUT ${CMake_BINARY_DIR}/Docs/Copyright.txt
+  OUTPUT ${CMAKE_DOC_FILES}
   COMMAND ${CMD} --copyright ${CMake_BINARY_DIR}/Docs/Copyright.txt
+       --help-full ${CMake_BINARY_DIR}/Docs/cmake.txt
+       --help-full ${CMake_BINARY_DIR}/Docs/cmake.html
+       --help-full ${CMake_BINARY_DIR}/Docs/cmake.1
+       --help-properties ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
+       --help-properties ${CMake_BINARY_DIR}/Docs/cmake-properties.html
+       --help-properties ${CMake_BINARY_DIR}/Docs/cmprops.1
+       --help-modules ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
+       --help-modules ${CMake_BINARY_DIR}/Docs/cmake-modules.html
+       --help-modules ${CMake_BINARY_DIR}/Docs/cmmodules.1
+       --help-commands ${CMake_BINARY_DIR}/Docs/cmake-commands.txt
+       --help-commands ${CMake_BINARY_DIR}/Docs/cmake-commands.html
+       --help-commands ${CMake_BINARY_DIR}/Docs/cmcommands.1
+       --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.txt
+       --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html
+       --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmcompat.1
   DEPENDS ${target}
   MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
   )
-INSTALL_FILES(${CMAKE_DOC_DIR} FILES ${CMake_BINARY_DIR}/Docs/Copyright.txt )
-SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/Copyright.txt)
+
+INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
+              ${CMake_BINARY_DIR}/Docs/cmake.1
+              ${CMake_BINARY_DIR}/Docs/cmcommands.1
+              ${CMake_BINARY_DIR}/Docs/cmcompat.1
+              ${CMake_BINARY_DIR}/Docs/cmprops.1
+              ${CMake_BINARY_DIR}/Docs/cmmodules.1)
+
+INSTALL_FILES(${CMAKE_DOC_DIR} FILES ${CMAKE_DOC_FILES} )
 
 # Drive documentation generation.
-ADD_CUSTOM_TARGET(documentation ALL DEPENDS ${DOC_FILES} )
+ADD_CUSTOM_TARGET(documentation ALL DEPENDS ${DOC_FILES} ${CMAKE_DOC_FILES} )
