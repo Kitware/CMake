@@ -44,18 +44,15 @@ cmInstallDirectoryGenerator
 void cmInstallDirectoryGenerator::GenerateScript(std::ostream& os)
 {
   // Write code to install the directories.
-  for(std::vector<std::string>::const_iterator di = this->Directories.begin();
-      di != this->Directories.end(); ++di)
-    {
-    bool not_optional = false;
-    const char* no_properties = 0;
-    const char* no_rename = 0;
-    this->AddInstallRule(os, this->Destination.c_str(),
-                         cmTarget::INSTALL_DIRECTORY, di->c_str(),
-                         not_optional, no_properties,
-                         this->FilePermissions.c_str(),
-                         this->DirPermissions.c_str(),
-                         this->Configurations, this->Component.c_str(),
-                         no_rename, this->LiteralArguments.c_str());
-    }
+  bool not_optional = false;
+  const char* no_properties = 0;
+  const char* no_rename = 0;
+  this->AddInstallRule(os, this->Destination.c_str(),
+                       cmTarget::INSTALL_DIRECTORY,
+                       this->Directories,
+                       not_optional, no_properties,
+                       this->FilePermissions.c_str(),
+                       this->DirPermissions.c_str(),
+                       this->Configurations, this->Component.c_str(),
+                       no_rename, this->LiteralArguments.c_str());
 }

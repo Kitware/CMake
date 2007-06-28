@@ -44,19 +44,15 @@ public:
   
 protected:
   virtual void GenerateScript(std::ostream& os);
-  void PrepareScriptReference(std::ostream& os, cmTarget* target,
-                              const char* place, bool useConfigDir,
-                              bool implib, bool useSOName);
-  std::string GetScriptReference(cmTarget* target, const char* place,
-                                 bool implib, bool useSOName);
-  void AddInstallNamePatchRule(std::ostream& os, const char* destination);
-  void AddStripRule(std::ostream& os, 
-                    cmTarget::TargetType type,
-                    const std::string& quotedFullDestinationFilename, 
-                    bool optional);
-  void AddRanlibRule(std::ostream& os, 
-                     cmTarget::TargetType type,
-                     const std::string& quotedFullDestinationFilename);
+  void GenerateScriptForConfig(std::ostream& os,
+                               const char* fromDir,
+                               const char* config);
+  void AddInstallNamePatchRule(std::ostream& os, const char* config,
+                               const std::string& toFullPath);
+  void AddStripRule(std::ostream& os, cmTarget::TargetType type,
+                    const std::string& toFullPath);
+  void AddRanlibRule(std::ostream& os, cmTarget::TargetType type,
+                     const std::string& toFullPath);
 
   cmTarget* Target;
   bool ImportLibrary;

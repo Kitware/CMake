@@ -43,19 +43,16 @@ cmInstallFilesGenerator
 void cmInstallFilesGenerator::GenerateScript(std::ostream& os)
 {
   // Write code to install the files.
-  for(std::vector<std::string>::const_iterator fi = this->Files.begin();
-      fi != this->Files.end(); ++fi)
-    {
-    const char* no_properties = 0;
-    const char* no_dir_permissions = 0;
-    this->AddInstallRule(os, this->Destination.c_str(),
-                         (this->Programs
-                          ? cmTarget::INSTALL_PROGRAMS
-                          : cmTarget::INSTALL_FILES), fi->c_str(),
-                         this->Optional, no_properties,
-                         this->FilePermissions.c_str(), no_dir_permissions,
-                         this->Configurations,
-                         this->Component.c_str(),
-                         this->Rename.c_str());
-    }
+  const char* no_properties = 0;
+  const char* no_dir_permissions = 0;
+  this->AddInstallRule(os, this->Destination.c_str(),
+                       (this->Programs
+                        ? cmTarget::INSTALL_PROGRAMS
+                        : cmTarget::INSTALL_FILES),
+                       this->Files,
+                       this->Optional, no_properties,
+                       this->FilePermissions.c_str(), no_dir_permissions,
+                       this->Configurations,
+                       this->Component.c_str(),
+                       this->Rename.c_str());
 }

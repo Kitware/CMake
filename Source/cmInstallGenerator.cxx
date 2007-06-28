@@ -52,7 +52,7 @@ void cmInstallGenerator
                  std::ostream& os,
                  const char* dest,
                  int type,
-                 const char* file,
+                 std::vector<std::string> const& files,
                  bool optional /* = false */,
                  const char* properties /* = 0 */,
                  const char* permissions_file /* = 0 */,
@@ -110,7 +110,24 @@ void cmInstallGenerator
     {
     os << " COMPONENTS \"" << component << "\"";
     }
-  os << " FILES \"" << file << "\"";
+  os << " FILES";
+  if(files.size() == 1)
+    {
+    os << " \"" << files[0] << "\"";
+    }
+  else
+    {
+    for(std::vector<std::string>::const_iterator fi = files.begin();
+        fi != files.end(); ++fi)
+      {
+      os << "\n  \"" << *fi << "\"";
+      }
+    os << "\n ";
+    if(!(literal_args && *literal_args))
+      {
+      os << " ";
+      }
+    }
   if(literal_args && *literal_args)
     {
     os << literal_args;

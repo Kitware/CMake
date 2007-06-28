@@ -222,8 +222,10 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
     }
 
   // install rule for the file created above
+  std::vector<std::string> exportFile;
+  exportFile.push_back(this->ExportFilename);
   this->AddInstallRule(os, this->Destination.c_str(), cmTarget::INSTALL_FILES, 
-                       this->ExportFilename.c_str(), false, 0, 
+                       exportFile, false, 0, 
                        this->FilePermissions.c_str(), 0, this->Configurations, 
                        0, this->Filename.c_str(), 0);
 
