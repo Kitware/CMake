@@ -77,7 +77,7 @@ public:
    * extension, pthreads, byte order etc.  
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
-                              cmMakefile *);
+                              cmMakefile *, bool optional);
 
   /**
    * Generate the all required files for building this project/tree. This

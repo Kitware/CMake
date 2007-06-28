@@ -72,7 +72,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
     languages.push_back("C");
     languages.push_back("CXX");
     }
-  this->Makefile->EnableLanguage(languages);
+  this->Makefile->EnableLanguage(languages, false);
   return true;
 }
 

@@ -2150,11 +2150,13 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
     }
 }
 
-void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang)
+void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang, 
+                               bool optional)
 {
   this->AddDefinition("CMAKE_CFG_INTDIR",
-    this->LocalGenerator->GetGlobalGenerator()->GetCMakeCFGInitDirectory());
-  this->LocalGenerator->GetGlobalGenerator()->EnableLanguage(lang, this);
+  this->LocalGenerator->GetGlobalGenerator()->GetCMakeCFGInitDirectory());
+  this->LocalGenerator->GetGlobalGenerator()->EnableLanguage(lang, this, 
+                                                             optional);
 }
 
 void cmMakefile::ExpandSourceListArguments(

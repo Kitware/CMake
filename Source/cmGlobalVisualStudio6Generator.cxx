@@ -25,7 +25,9 @@ cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
 }
 
 void cmGlobalVisualStudio6Generator
-::EnableLanguage(std::vector<std::string>const& lang, cmMakefile *mf)
+::EnableLanguage(std::vector<std::string>const& lang, 
+                 cmMakefile *mf, 
+                 bool options)
 {
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
@@ -34,7 +36,7 @@ void cmGlobalVisualStudio6Generator
   mf->AddDefinition("CMAKE_GENERATOR_Fortran", "ifort");
   mf->AddDefinition("MSVC60", "1");
   this->GenerateConfigurations(mf);
-  this->cmGlobalGenerator::EnableLanguage(lang, mf);
+  this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
 }
 
 void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)

@@ -39,9 +39,11 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
 }
 
 void cmGlobalUnixMakefileGenerator3
-::EnableLanguage(std::vector<std::string>const& languages, cmMakefile *mf)
+::EnableLanguage(std::vector<std::string>const& languages, 
+                 cmMakefile *mf, 
+                 bool optional)
 {
-  this->cmGlobalGenerator::EnableLanguage(languages, mf);
+  this->cmGlobalGenerator::EnableLanguage(languages, mf, optional);
   std::string path;
   for(std::vector<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
@@ -70,7 +72,8 @@ void cmGlobalUnixMakefileGenerator3
       {
       path = name;
       }
-    if(path.size() == 0 || !cmSystemTools::FileExists(path.c_str()))
+    if((path.size() == 0 || !cmSystemTools::FileExists(path.c_str())) 
+        && (optional==false))
       {
       std::string message = "your ";
       message += lang;

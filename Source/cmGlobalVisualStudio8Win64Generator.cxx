@@ -49,8 +49,8 @@ void cmGlobalVisualStudio8Win64Generator
 
 void cmGlobalVisualStudio8Win64Generator
 ::EnableLanguage(std::vector<std::string>const &  lang, 
-                 cmMakefile *mf)
+                 cmMakefile *mf, bool optional)
 {
   mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
-  cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf);
+  cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
 }

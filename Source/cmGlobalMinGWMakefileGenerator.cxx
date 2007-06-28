@@ -27,7 +27,9 @@ cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator()
 }
 
 void cmGlobalMinGWMakefileGenerator
-::EnableLanguage(std::vector<std::string>const& l, cmMakefile *mf)
+::EnableLanguage(std::vector<std::string>const& l, 
+                 cmMakefile *mf, 
+                 bool optional)
 { 
   this->FindMakeProgram(mf);
   std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
@@ -49,7 +51,7 @@ void cmGlobalMinGWMakefileGenerator
     }
   mf->AddDefinition("CMAKE_GENERATOR_CC", gcc.c_str());
   mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx.c_str());
-  this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf);
+  this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
 ///! Create a local generator appropriate to this Global Generator

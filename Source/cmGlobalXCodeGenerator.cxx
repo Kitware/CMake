@@ -104,7 +104,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
                                             lang,
-                                            cmMakefile * mf)
+                                            cmMakefile * mf, bool optional)
 { 
   mf->AddDefinition("XCODE","1");
   if(this->XcodeVersion == 15)
@@ -125,7 +125,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   // initialize Architectures so it can be used by 
   //  GetTargetObjectFileDirectories
-  this->cmGlobalGenerator::EnableLanguage(lang, mf);
+  this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
     const char* osxArch = 
       mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
   const char* sysroot = 

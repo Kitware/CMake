@@ -28,7 +28,9 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
 }
 
 void cmGlobalWatcomWMakeGenerator
-::EnableLanguage(std::vector<std::string>const& l, cmMakefile *mf)
+::EnableLanguage(std::vector<std::string>const& l, 
+                 cmMakefile *mf, 
+                 bool optional)
 {
   // pick a default 
   mf->AddDefinition("WATCOM", "1");
@@ -39,7 +41,7 @@ void cmGlobalWatcomWMakeGenerator
   mf->AddDefinition("CMAKE_NO_QUOTED_OBJECTS", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "wcl386");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "wcl386");
-  this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf);
+  this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
 ///! Create a local generator appropriate to this Global Generator

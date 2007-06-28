@@ -1044,7 +1044,7 @@ void cmLocalVisualStudio6Generator
       // Compute the proper name to use to link this library.
       std::string lib;
       std::string libDebug;
-      cmTarget* tgt = this->GlobalGenerator->FindTarget(0, j->first.c_str(), 
+      cmTarget* tgt = this->GlobalGenerator->FindTarget(0, j->first.c_str(),
                                                         false);
       if(tgt)
         {

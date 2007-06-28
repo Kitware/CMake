@@ -29,7 +29,7 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator()
 
 void cmGlobalVisualStudio7Generator
 ::EnableLanguage(std::vector<std::string>const &  lang, 
-                 cmMakefile *mf)
+                 cmMakefile *mf, bool optional)
 {
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
@@ -40,7 +40,7 @@ void cmGlobalVisualStudio7Generator
   this->AddPlatformDefinitions(mf);
   
   // Create list of configurations requested by user's cache, if any.
-  this->cmGlobalGenerator::EnableLanguage(lang, mf);
+  this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
   this->GenerateConfigurations(mf);
   
   // if this environment variable is set, then copy it to
