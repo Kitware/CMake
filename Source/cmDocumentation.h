@@ -31,7 +31,7 @@ public:
   /** Types of help provided.  */
   enum Type { None, Usage, Single, SingleModule, SingleProperty,
               List, ModuleList, PropertyList,
-              Full, HTML, Man, Copyright, Version };
+              Full, Copyright, Version };
   
   /**
    * Check command line arguments for documentation options.  Returns
@@ -113,12 +113,8 @@ public:
         { return (form==ManForm?this->ManName.c_str():this->Name.c_str()); }
 
       /** Return a pointer to the first entry of this section. */
-      cmDocumentationEntry *GetEntries()
-        { return &this->Entries[0]; }
-
-      /** Return a pointer to the first entry of this section. */
       const cmDocumentationEntry *GetEntries() const
-        { return &this->Entries[0]; }
+        { return this->Entries.empty()?&this->EmptySection:&this->Entries[0];}
 
       /** Append an entry to this section. */
       void Append(const cmDocumentationEntry& entry)
@@ -133,6 +129,8 @@ public:
       std::string Name;
       std::string ManName;
       std::vector<cmDocumentationEntry> Entries;
+      static const cmDocumentationEntry EmptySection;
+
   };
 
   /**
@@ -162,6 +160,9 @@ public:
   
   /** Set cmake root so we can find installed files */
   void SetCMakeRoot(const char* root)  { this->CMakeRoot = root;}
+  
+  static Form GetFormFromFilename(const std::string& filename);
+
 private:
   void PrintHeader(const char* title, std::ostream& os);
   void PrintFooter(std::ostream& os);
@@ -205,7 +206,7 @@ private:
   bool PrintDocumentationUsage(std::ostream& os);
   bool PrintDocumentationFull(std::ostream& os);
   void PrintDocumentationCommand(std::ostream& os,
-                                 cmDocumentationEntry* entry);
+                                 const cmDocumentationEntry* entry);
   
   void CreateUsageDocumentation();
   void CreateFullDocumentation();
@@ -236,19 +237,25 @@ private:
   cmSection AuthorSection;
 
   std::string SeeAlsoString;
-  std::string SingleCommand;
-  std::string SingleModuleName;
-  std::string SinglePropertyName;
   std::string CMakeRoot;
   std::vector< char* > ModuleStrings;
   std::vector< const char* > Names;
   std::vector< const cmDocumentationEntry* > Sections;
   Form CurrentForm;
+  std::string CurrentArgument;
   const char* TextIndent;
   int TextWidth;
-  
-  typedef std::map<Type, cmStdString> RequestedMapType;
-  RequestedMapType RequestedMap;
+
+  struct RequestedHelpItem
+  {
+    RequestedHelpItem():Form(TextForm), Type(None) {}
+    cmDocumentation::Form Form;
+    cmDocumentation::Type Type;
+    std::string Filename;
+    std::string Argument;
+  };
+
+  std::vector<RequestedHelpItem> RequestedHelpItems;
 };
 
 #endif

@@ -110,8 +110,10 @@ int main(int argc, char** argv)
     {
     cmake hcm;
     std::vector<cmDocumentationEntry> commands;
+    std::vector<cmDocumentationEntry> compatCommands;
     std::vector<cmDocumentationEntry> generators;
-    hcm.GetCommandDocumentation(commands);
+    hcm.GetCommandDocumentation(commands, true, false);
+    hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetGeneratorDocumentation(generators);
     doc.SetName("ccmake");
     doc.SetNameSection(cmDocumentationName);
@@ -120,6 +122,7 @@ int main(int argc, char** argv)
     doc.SetGeneratorsSection(&generators[0]);
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
+    doc.SetCompatCommandsSection(&compatCommands[0]);
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
     return doc.PrintRequestedDocumentation(std::cout)? 0:1;
     }  

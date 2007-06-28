@@ -170,9 +170,11 @@ int do_cmake(int ac, char** av)
     hcm.AddCMakePaths(av[0]);
     doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
     std::vector<cmDocumentationEntry> commands;
+    std::vector<cmDocumentationEntry> compatCommands;
     std::vector<cmDocumentationEntry> properties;
     std::vector<cmDocumentationEntry> generators;
-    hcm.GetCommandDocumentation(commands);
+    hcm.GetCommandDocumentation(commands, true, false);
+    hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetPropertiesDocumentation(properties);
     hcm.GetGeneratorDocumentation(generators);
     doc.SetName("cmake");
@@ -182,6 +184,7 @@ int do_cmake(int ac, char** av)
     doc.SetGeneratorsSection(&generators[0]);
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
+    doc.SetCompatCommandsSection(&compatCommands[0]);
     doc.SetPropertiesSection(&properties[0]);
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
     int result = doc.PrintRequestedDocumentation(std::cout)? 0:1;

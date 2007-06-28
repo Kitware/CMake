@@ -14,8 +14,8 @@ MACRO(ADD_DOCS target dependency)
       OUTPUT ${CMake_BINARY_DIR}/Docs/${target}.txt
       COMMAND ${CMD}
       ARGS --help-full ${CMake_BINARY_DIR}/Docs/${target}.txt
-           --help-html ${CMake_BINARY_DIR}/Docs/${target}.html
-           --help-man ${CMake_BINARY_DIR}/Docs/${target}.1
+           --help-full ${CMake_BINARY_DIR}/Docs/${target}.html
+           --help-full ${CMake_BINARY_DIR}/Docs/${target}.1
       DEPENDS ${target}
       MAIN_DEPENDENCY ${dependency}
       )

@@ -96,8 +96,6 @@ int DumpForCoverageToStream(std::ostream& out)
   doc.SetGeneratorsSection(&generators[0]);
   doc.PrintDocumentation(cmDocumentation::Usage, out);
   doc.PrintDocumentation(cmDocumentation::Full, out);
-  doc.PrintDocumentation(cmDocumentation::HTML, out);
-  doc.PrintDocumentation(cmDocumentation::Man, out);
   return 0;
 }
 

@@ -20,6 +20,9 @@
 #include "cmVersion.h"
 #include <cmsys/Directory.hxx>
 
+
+const cmDocumentationEntry cmDocumentation::cmSection::EmptySection ={0,0,0};
+
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationStandardOptions[] =
 {
@@ -35,7 +38,7 @@ static const cmDocumentationEntry cmDocumentationStandardOptions[] =
   {"--help-html [file]", "Print full help in HTML format.",
    "This option is used by CMake authors to help produce web pages.  "
    "If a file is specified, the help is written into it."},
-  {"--help-man [file]", "Print a UNIX man page and exit.",
+  {"--help-man [file]", "Print full help as a UNIX man page and exit.",
    "This option is used by the cmake build to generate the UNIX man page.  "
    "If a file is specified, the help is written into it."},
   {"--version [file]", "Show program name/version banner and exit.",
@@ -287,33 +290,9 @@ void cmDocumentation::ClearSections()
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 {
-  if(ht != cmDocumentation::HTML && ht != cmDocumentation::Man)
+  if ((this->CurrentForm != HTMLForm) && (this->CurrentForm != ManForm))
     {
     this->PrintVersion(os);
-    }
-
-  switch (ht)
-    {
-    case cmDocumentation::Full:
-    case cmDocumentation::Single:
-    case cmDocumentation::SingleModule:
-    case cmDocumentation::SingleProperty:
-    case cmDocumentation::List:
-    case cmDocumentation::ModuleList:
-    case cmDocumentation::PropertyList:
-      this->CurrentForm = TextForm;
-      break;
-
-    case cmDocumentation::HTML: this->CurrentForm = HTMLForm; break;
-    case cmDocumentation::Man: this->CurrentForm = ManForm; break;
-
-    case cmDocumentation::Usage:
-    case cmDocumentation::Copyright:
-    case cmDocumentation::Version:
-      this->CurrentForm = UsageForm;
-      break;
-    case cmDocumentation::None:
-      break;
     }
 
   switch (ht)
@@ -330,9 +309,7 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
     case cmDocumentation::ModuleList: return this->PrintModuleList(os);
     case cmDocumentation::PropertyList: return this->PrintPropertyList(os);
 
-    case cmDocumentation::Full:
-    case cmDocumentation::HTML:
-    case cmDocumentation::Man: return this->PrintDocumentationFull(os);
+    case cmDocumentation::Full: return this->PrintDocumentationFull(os);
 
     case cmDocumentation::Copyright: return this->PrintCopyright(os);
     case cmDocumentation::Version:   return true;
@@ -463,38 +440,20 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
   bool result = true;
   
   // Loop over requested documentation types.
-  for(RequestedMapType::const_iterator i = this->RequestedMap.begin();
-      i != this->RequestedMap.end(); ++i)
+  for(std::vector<RequestedHelpItem>::const_iterator 
+      i = this->RequestedHelpItems.begin();
+      i != this->RequestedHelpItems.end(); 
+      ++i)
     {
-    // Special case for printing help for a single command.
-    if(i->first == cmDocumentation::Usage && i->second.length() > 0 &&
-       !this->CommandsSection.IsEmpty())
-      {
-      // Check if the argument to the usage request was a command.
-      for(cmDocumentationEntry* entry = this->CommandsSection.GetEntries();
-          entry->brief; ++entry)
-        {
-        if(entry->name && (strcmp(entry->name, i->second.c_str()) == 0))
-          {
-          this->PrintDocumentationCommand(os, entry);
-          return true;
-          }
-        }
-      
-      // Argument was not a command.  Complain.
-      os << "Help argument \"" << i->second.c_str()
-         << "\" is not a CMake command.  "
-         << "Use --help-command-list to see all commands.\n";
-      return false;
-      }
-    
+    this->CurrentForm = i->Form;
+    this->CurrentArgument = i->Argument;
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
     std::ofstream* fout = 0;
     std::ostream* s = &os;
-    if(i->second.length() > 0)
+    if(i->Filename.length() > 0)
       {
-      fout = new std::ofstream(i->second.c_str(), std::ios::out);
+      fout = new std::ofstream(i->Filename.c_str(), std::ios::out);
       if(fout)
         {
         s = fout;
@@ -506,7 +465,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
       }
     
     // Print this documentation type to the stream.
-    if(!this->PrintDocumentation(i->first, *s) || !*s)
+    if(!this->PrintDocumentation(i->Type, *s) || !*s)
       {
       result = false;
       }
@@ -520,22 +479,60 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
   return result;
 }
 
+#define GET_OPT_COMMAND(target)                       \
+     if((i+1 < argc) && !this->IsOption(argv[i+1]))   \
+        {                                             \
+        target = cmSystemTools::UpperCase(argv[i+1]); \
+        i = i+1;                                      \
+        };
+
+#define GET_OPT_FILENAME(target)                      \
+     if((i+1 < argc) && !this->IsOption(argv[i+1]))   \
+        {                                             \
+        target = argv[i+1];                           \
+        i = i+1;                                      \
+        };
+
+
+cmDocumentation::Form cmDocumentation::GetFormFromFilename(
+                                                   const std::string& filename)
+{
+  std::string ext = cmSystemTools::GetFilenameExtension(filename);
+  ext = cmSystemTools::UpperCase(ext);
+  if ((ext == ".HTM") || (ext == ".HTML"))
+    {
+    return cmDocumentation::HTMLForm;
+    }
+
+  // ".1" to ".9" should be manpages
+  if ((ext.length()==2) && (ext[1] >='1') && (ext[1]<='9'))
+    {
+    return cmDocumentation::ManForm;
+    }
+
+  return cmDocumentation::TextForm;
+}
+
 //----------------------------------------------------------------------------
 bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
 {
   // Providing zero arguments gives usage information.
   if(argc == 1)
     {
-    this->RequestedMap[cmDocumentation::Usage] = "";
+    RequestedHelpItem help;
+    help.Type = cmDocumentation::Usage;
+    help.Form = cmDocumentation::UsageForm;
+    this->RequestedHelpItems.push_back(help);
     return true;
     }
-  
+
   // Search for supported help options.
+
   bool result = false;
   for(int i=1; i < argc; ++i)
     {
+    RequestedHelpItem help;
     // Check if this is a supported help option.
-    Type type = cmDocumentation::None;
     if((strcmp(argv[i], "-help") == 0) ||
        (strcmp(argv[i], "--help") == 0) ||
        (strcmp(argv[i], "/?") == 0) ||
@@ -543,83 +540,91 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
        (strcmp(argv[i], "-h") == 0) ||
        (strcmp(argv[i], "-H") == 0))
       {
-      type = cmDocumentation::Usage;
+      help.Type = cmDocumentation::Usage;
+      help.Form = cmDocumentation::UsageForm;
+      GET_OPT_COMMAND(help.Argument);
+      // special case for single command
+      if (!help.Argument.empty())
+        {
+        help.Type = cmDocumentation::Single;
+        }
       }
     else if(strcmp(argv[i], "--help-full") == 0)
       {
-      type = cmDocumentation::Full;
+      help.Type = cmDocumentation::Full;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-html") == 0)
       {
-      type = cmDocumentation::HTML;
+      help.Type = cmDocumentation::Full;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = cmDocumentation::HTMLForm;
       }
     else if(strcmp(argv[i], "--help-man") == 0)
       {
-      type = cmDocumentation::Man;
+      help.Type = cmDocumentation::Full;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = cmDocumentation::ManForm;
       }
     else if(strcmp(argv[i], "--help-command") == 0)
       {
-      type = cmDocumentation::Single;
-      if((i+1 < argc) && !this->IsOption(argv[i+1]))
-        {
-        this->SingleCommand = argv[i+1];
-        this->SingleCommand = cmSystemTools::UpperCase(this->SingleCommand);
-        i = i+1;
-        }
+      help.Type = cmDocumentation::Single;
+      GET_OPT_COMMAND(help.Argument);
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-module") == 0)
       {
-      type = cmDocumentation::SingleModule;
-      if((i+1 < argc) && !this->IsOption(argv[i+1]))
-        {
-        this->SingleModuleName = argv[i+1];
-        i = i+1;
-        }
+      help.Type = cmDocumentation::SingleModule;
+      GET_OPT_COMMAND(help.Argument);
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-property") == 0)
       {
-      type = cmDocumentation::SingleProperty;
-      if((i+1 < argc) && !this->IsOption(argv[i+1]))
-        {
-        this->SinglePropertyName = argv[i+1];
-        i = i+1;
-        }
+      help.Type = cmDocumentation::SingleProperty;
+      GET_OPT_COMMAND(help.Argument);
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-command-list") == 0)
       {
-      type = cmDocumentation::List;
+      help.Type = cmDocumentation::List;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--help-module-list") == 0)
       {
-      type = cmDocumentation::ModuleList;
+      help.Type = cmDocumentation::ModuleList;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--help-property-list") == 0)
       {
-      type = cmDocumentation::PropertyList;
+      help.Type = cmDocumentation::PropertyList;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--copyright") == 0)
       {
-      type = cmDocumentation::Copyright;
+      help.Type = cmDocumentation::Copyright;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = cmDocumentation::UsageForm;
       }
     else if((strcmp(argv[i], "--version") == 0) || 
             (strcmp(argv[i], "-version") == 0) || 
             (strcmp(argv[i], "/V") == 0))
       {
-      type = cmDocumentation::Version;
+      help.Type = cmDocumentation::Version;
+      GET_OPT_FILENAME(help.Filename);
+      help.Form = cmDocumentation::UsageForm;
       }
-    if(type)
+    if(help.Type != None)
       {
       // This is a help option.  See if there is a file name given.
       result = true;
-      if((i+1 < argc) && !this->IsOption(argv[i+1]))
-        {
-        this->RequestedMap[type] = argv[i+1];
-        i = i+1;
-        }
-      else
-        {
-        this->RequestedMap[type] = "";
-        }
+      this->RequestedHelpItems.push_back(help);
       }
     }
   return result;
@@ -1206,24 +1211,26 @@ bool cmDocumentation::PrintDocumentationSingle(std::ostream& os)
     os << "Internal error: commands list is empty." << std::endl;
     return false;
     }
-  if(this->SingleCommand.length() == 0)
+  if(this->CurrentArgument.length() == 0)
     {
     os << "Argument --help-command needs a command name.\n";
     return false;
     }
-  for(cmDocumentationEntry* entry = this->CommandsSection.GetEntries();
+  for(const cmDocumentationEntry* entry = this->CommandsSection.GetEntries();
       entry->brief; ++entry)
     {
-    if(entry->name && this->SingleCommand == entry->name)
+    if(entry->name && this->CurrentArgument == entry->name)
       {
       this->PrintDocumentationCommand(os, entry);
       return true;
       }
     }
-  for(cmDocumentationEntry* entry = this->CompatCommandsSection.GetEntries();
-      entry->brief; ++entry)
+  for(const cmDocumentationEntry* 
+      entry = this->CompatCommandsSection.GetEntries();
+      entry->brief; 
+      ++entry)
     {
-    if(entry->name && this->SingleCommand == entry->name)
+    if(entry->name && this->CurrentArgument == entry->name)
       {
       this->PrintDocumentationCommand(os, entry);
       return true;
@@ -1231,7 +1238,7 @@ bool cmDocumentation::PrintDocumentationSingle(std::ostream& os)
     }
 
   // Argument was not a command.  Complain.
-  os << "Argument \"" << this->SingleCommand.c_str()
+  os << "Argument \"" << this->CurrentArgument.c_str()
      << "\" to --help-command is not a CMake command.  "
      << "Use --help-command-list to see all commands.\n";
   return false;
@@ -1240,18 +1247,18 @@ bool cmDocumentation::PrintDocumentationSingle(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
 {
-  if(this->SingleModuleName.length() == 0)
+  if(this->CurrentArgument.length() == 0)
     {
     os << "Argument --help-module needs a module name.\n";
     return false;
     }
   std::string cmakeModules = this->CMakeRoot;
   cmakeModules += "/Modules/";
-  cmakeModules += this->SingleModuleName;
+  cmakeModules += this->CurrentArgument;
   cmakeModules += ".cmake";
   if(cmSystemTools::FileExists(cmakeModules.c_str())
      && this->CreateSingleModule(cmakeModules.c_str(), 
-                                 this->SingleModuleName.c_str()))
+                                 this->CurrentArgument.c_str()))
     {
     this->PrintDocumentationCommand(os, this->ModulesSection.GetEntries());
     os <<  "\n       Defined in: ";
@@ -1259,7 +1266,7 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
     return true;
     }
   // Argument was not a module.  Complain.
-  os << "Argument \"" << this->SingleModuleName.c_str()
+  os << "Argument \"" << this->CurrentArgument.c_str()
      << "\" to --help-module is not a CMake module.";
   return false;
 }
@@ -1272,22 +1279,22 @@ bool cmDocumentation::PrintDocumentationSingleProperty(std::ostream& os)
     os << "Internal error: properties list is empty." << std::endl;
     return false;
     }
-  if(this->SinglePropertyName.length() == 0)
+  if(this->CurrentArgument.length() == 0)
     {
     os << "Argument --help-property needs a property name.\n";
     return false;
     }
-  for(cmDocumentationEntry* entry = this->PropertiesSection.GetEntries();
+  for(const cmDocumentationEntry* entry = this->PropertiesSection.GetEntries();
       entry->brief; ++entry)
     {
-    if(entry->name && this->SinglePropertyName == entry->name)
+    if(entry->name && this->CurrentArgument == entry->name)
       {
       this->PrintDocumentationCommand(os, entry);
       return true;
       }
     }
   // Argument was not a command.  Complain.
-  os << "Argument \"" << this->SinglePropertyName.c_str()
+  os << "Argument \"" << this->CurrentArgument.c_str()
      << "\" to --help-property is not a CMake property.  "
      << "Use --help-property-list to see all properties.\n";
   return false;
@@ -1301,8 +1308,19 @@ bool cmDocumentation::PrintDocumentationList(std::ostream& os)
     os << "Internal error: commands list is empty." << std::endl;
     return false;
     }
-  for(cmDocumentationEntry* entry = this->CommandsSection.GetEntries();
+  for(const cmDocumentationEntry* entry = this->CommandsSection.GetEntries();
       entry->brief; ++entry)
+    {
+    if(entry->name)
+      {
+      os << entry->name << std::endl;
+      }
+    }
+  os << "\nCompatibility commands:" << std::endl;
+  for(const cmDocumentationEntry* 
+      entry = this->CompatCommandsSection.GetEntries();
+      entry->brief; 
+      ++entry)
     {
     if(entry->name)
       {
@@ -1320,7 +1338,7 @@ bool cmDocumentation::PrintPropertyList(std::ostream& os)
     os << "Internal error: properties list is empty." << std::endl;
     return false;
     }
-  for(cmDocumentationEntry* entry = this->PropertiesSection.GetEntries();
+  for(const cmDocumentationEntry* entry = this->PropertiesSection.GetEntries();
       entry->brief; ++entry)
     {
     if(entry->name)
@@ -1340,7 +1358,7 @@ bool cmDocumentation::PrintModuleList(std::ostream& os)
     os << "Internal error: modules list is empty." << std::endl;
     return false;
     }
-  for(cmDocumentationEntry* entry = this->ModulesSection.GetEntries();
+  for(const cmDocumentationEntry* entry = this->ModulesSection.GetEntries();
       entry->brief; ++entry)
     {
     if(entry->name)
@@ -1407,7 +1425,7 @@ void cmDocumentation::PrintFooter(std::ostream& os)
 
 //----------------------------------------------------------------------------
 void cmDocumentation::PrintDocumentationCommand(std::ostream& os,
-                                                cmDocumentationEntry* entry)
+                                             const cmDocumentationEntry* entry)
 {
   cmDocumentationEntry singleCommandSection[3] =
     {
@@ -1461,39 +1479,51 @@ void cmDocumentation::CreateFullDocumentation()
 void cmDocumentation::CreateCurrentCommandDocumentation()
 {
   this->ClearSections();
-  this->AddSection(this->DescriptionSection.GetName(CurrentForm), cmCompatCommandsDocumentationDescription);
+  this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
+                   cmCompatCommandsDocumentationDescription);
   this->AddSection(this->CompatCommandsSection);
-  this->AddSection(this->CopyrightSection.GetName(CurrentForm), cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), cmDocumentationStandardSeeAlso);
+  this->AddSection(this->CopyrightSection.GetName(CurrentForm), 
+                   cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), 
+                   cmDocumentationStandardSeeAlso);
 }
 
 void cmDocumentation::CreateCompatCommandDocumentation()
 {
   this->ClearSections();
-  this->AddSection(this->DescriptionSection.GetName(CurrentForm), cmCompatCommandsDocumentationDescription);
+  this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
+                   cmCompatCommandsDocumentationDescription);
   this->AddSection(this->CompatCommandsSection);
-  this->AddSection(this->CopyrightSection.GetName(CurrentForm), cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), cmDocumentationStandardSeeAlso);
+  this->AddSection(this->CopyrightSection.GetName(CurrentForm), 
+                   cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), 
+                   cmDocumentationStandardSeeAlso);
 }
 
 //----------------------------------------------------------------------------
 void cmDocumentation::CreateModulesDocumentation()
  {
    this->ClearSections();
-  this->AddSection(this->DescriptionSection.GetName(CurrentForm), cmModulesDocumentationDescription);
+  this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
+                   cmModulesDocumentationDescription);
   this->AddSection(this->ModulesSection);
-  this->AddSection(this->CopyrightSection.GetName(CurrentForm), cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), cmDocumentationStandardSeeAlso);
+  this->AddSection(this->CopyrightSection.GetName(CurrentForm), 
+                   cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), 
+                   cmDocumentationStandardSeeAlso);
 }
 
 //----------------------------------------------------------------------------
 void cmDocumentation::CreatePropertiesDocumentation()
 {
   this->ClearSections();
-  this->AddSection(this->DescriptionSection.GetName(CurrentForm), cmPropertiesDocumentationDescription);
+  this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
+                   cmPropertiesDocumentationDescription);
   this->AddSection(this->PropertiesSection);
-  this->AddSection(this->CopyrightSection.GetName(CurrentForm), cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), cmDocumentationStandardSeeAlso);
+  this->AddSection(this->CopyrightSection.GetName(CurrentForm), 
+                   cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), 
+                   cmDocumentationStandardSeeAlso);
 }
 
 //----------------------------------------------------------------------------
