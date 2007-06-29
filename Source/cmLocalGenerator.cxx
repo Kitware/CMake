@@ -386,6 +386,18 @@ void cmLocalGenerator::GenerateInstallRules()
     "ENDIF(NOT CMAKE_INSTALL_COMPONENT)\n"
     "\n";
 
+  // Copy user-specified install options to the install code.
+  if(const char* so_no_exe =
+     this->Makefile->GetDefinition("CMAKE_INSTALL_SO_NO_EXE"))
+    {
+    fout <<
+      "# Install shared libraries without execute permission?\n"
+      "IF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)\n"
+      "  SET(CMAKE_INSTALL_SO_NO_EXE \"" << so_no_exe << "\")\n"
+      "ENDIF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)\n"
+      "\n";
+    }
+
   // Ask each install generator to write its code.
   std::vector<cmInstallGenerator*> const& installers =
     this->Makefile->GetInstallGenerators();

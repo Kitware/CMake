@@ -125,7 +125,8 @@ protected:
   bool HandleRelativePathCommand(std::vector<std::string> const& args);
   bool HandleCMakePathCommand(std::vector<std::string> const& args,
                               bool nativePath);
-  void ComputeVersionedName(std::string& name, const char* version);
+  void ComputeVersionedLibName(std::string& name, const char* version);
+  void ComputeVersionedExeName(std::string& name, const char* version);
 };
 
 

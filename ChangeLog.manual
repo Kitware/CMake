@@ -1,4 +1,12 @@
 Changes in CMake 2.4.7
+--- RC 11 ----
+* Fix bug 5238 for cygwin versioned executables 
+
+* Allow for platform choice of executable shared libs install
+
+* Fix @ONLY issues with RC 10
+
+* Add -E make_directory to cmake executable
 --- RC 10 ----
 * Fix rebuild problem with makefiles and cmake vs CMakeSetup 
 --- RC 9 ---

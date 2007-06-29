@@ -38,7 +38,6 @@ cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
 
   this->NoEscapeMode = false;
   this->ReplaceAtSyntax = false;
-  this->AtOnly = false;
 }
 
 
@@ -72,18 +71,6 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
     {
     return this->ExpandVariable(var);
     }
-  if(this->AtOnly)
-    {
-    std::string ref = "$";
-    ref += key;
-    ref += "{";
-    if(var)
-      {
-      ref += var;
-      }
-    ref += "}";
-    return this->AddString(ref.c_str());
-    }
   if ( strcmp(key, "ENV") == 0 )
     {
     char *ptr = getenv(var);
@@ -108,18 +95,6 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
 char* cmCommandArgumentParserHelper::ExpandVariable(const char* var,
                                                     bool doingAt)
 {
-  // if we are in AtOnly mode, and we are not expanding an @ variable
-  // then put back the ${var} unexpanded
-  if(!doingAt && this->AtOnly)
-    {
-    std::string ref = "${";
-    if(var)
-      {
-      ref += var;
-      }
-    ref += "}";
-    return this->AddString(ref.c_str());
-    }
   if(!var)
     {
     return 0;

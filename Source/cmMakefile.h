@@ -571,14 +571,14 @@ public:
    * entry in the this->Definitions map.  Also @var@ is
    * expanded to match autoconf style expansions.
    */
-  const char *ExpandVariablesInString(std::string& source) const;
+  const char *ExpandVariablesInString(std::string& source);
   const char *ExpandVariablesInString(std::string& source, bool escapeQuotes,
                                       bool noEscapes,
                                       bool atOnly = false,
                                       const char* filename = 0,
                                       long line = -1,
                                       bool removeEmpty = false,
-                                      bool replaceAt = true) const;
+                                      bool replaceAt = true);
 
   /**
    * Remove any remaining variables in the string. Anything with ${var} or
@@ -774,7 +774,8 @@ protected:
   bool IsFunctionBlocked(const cmListFileFunction& lff);
   
 private:
-
+  void Initialize();
+  
   void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;    // make depend needs direct access
                                 // to the Sources array 
@@ -798,7 +799,8 @@ private:
 
   cmsys::RegularExpression cmDefineRegex;
   cmsys::RegularExpression cmDefine01Regex;
-
+  cmsys::RegularExpression cmAtVarRegex;
+  
   std::map<cmStdString,cmStdString> Properties;
 
   // should this makefile be processed before or after processing the parent

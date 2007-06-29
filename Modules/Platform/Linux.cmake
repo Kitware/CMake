@@ -18,4 +18,31 @@ FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
   SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-Bdynamic")
 ENDFOREACH(type)
 
+# Debian policy requires that shared libraries be installed without
+# executable permission.  Fedora policy requires that shared libraries
+# be installed with the executable permission.  Since the native tools
+# create shared libraries with execute permission in the first place a
+# reasonable policy seems to be to install with execute permission by
+# default.  In order to support debian packages we provide an option
+# here.  The option default is based on the current distribution, but
+# packagers can set it explicitly on the command line.
+IF(DEFINED CMAKE_INSTALL_SO_NO_EXE)
+  # Store the decision variable in the cache.  This preserves any
+  # setting the user provides on the command line.
+  SET(CMAKE_INSTALL_SO_NO_EXE "${CMAKE_INSTALL_SO_NO_EXE}" CACHE INTERNAL
+    "Install .so files without execute permission.")
+ELSE(DEFINED CMAKE_INSTALL_SO_NO_EXE)
+  # Store the decision variable as an internal cache entry to avoid
+  # checking the platform every time.  This option is advanced enough
+  # that only package maintainers should need to adjust it.  They are
+  # capable of providing a setting on the command line.
+  IF(EXISTS "/etc/debian_version")
+    SET(CMAKE_INSTALL_SO_NO_EXE 1 CACHE INTERNAL
+      "Install .so files without execute permission.")
+  ELSE(EXISTS "/etc/debian_version")
+    SET(CMAKE_INSTALL_SO_NO_EXE 0 CACHE INTERNAL
+      "Install .so files without execute permission.")
+  ENDIF(EXISTS "/etc/debian_version")
+ENDIF(DEFINED CMAKE_INSTALL_SO_NO_EXE)
+
 INCLUDE(Platform/UnixPaths)

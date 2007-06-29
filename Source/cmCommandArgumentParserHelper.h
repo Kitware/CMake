@@ -71,7 +71,6 @@ public:
   void SetNoEscapeMode(bool b) { this->NoEscapeMode = b; }
   void SetReplaceAtSyntax(bool b) { this->ReplaceAtSyntax = b; }
   void SetRemoveEmpty(bool b) { this->RemoveEmpty = b; }
-  void SetAtOnly(bool b) { this->AtOnly = b; }
 
   const char* GetError() { return this->ErrorString.c_str(); } 
   char EmptyVariable[1];
@@ -107,7 +106,6 @@ private:
   bool NoEscapeMode;
   bool ReplaceAtSyntax;
   bool RemoveEmpty; 
-  bool AtOnly;
 };
 
 #endif

@@ -1162,6 +1162,9 @@ bool cmFileCommand::HandleInstallCommand(
       }
     }
 
+  // Choose a default for shared library permissions.
+  bool install_so_no_exe = this->Makefile->IsOn("CMAKE_INSTALL_SO_NO_EXE");
+
   // If file permissions were not specified set default permissions
   // for this target type.
   if(!use_given_permissions_file && !use_source_permissions)
@@ -1170,15 +1173,16 @@ bool cmFileCommand::HandleInstallCommand(
       {
       case cmTarget::SHARED_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
-#if defined(__linux__)
-        // Use read/write permissions.
-        permissions_file = 0;
-        permissions_file |= mode_owner_read;
-        permissions_file |= mode_owner_write;
-        permissions_file |= mode_group_read;
-        permissions_file |= mode_world_read;
-        break;
-#endif
+        if(install_so_no_exe)
+          {
+          // Use read/write permissions.
+          permissions_file = 0;
+          permissions_file |= mode_owner_read;
+          permissions_file |= mode_owner_write;
+          permissions_file |= mode_group_read;
+          permissions_file |= mode_world_read;
+          break;
+          }
       case cmTarget::EXECUTABLE:
       case cmTarget::INSTALL_PROGRAMS:
         // Use read/write/executable permissions.
@@ -1275,10 +1279,10 @@ bool cmFileCommand::HandleInstallCommand(
           std::string libname = toFile;
           std::string soname = toFile;
           std::string soname_nopath = fromName;
-          this->ComputeVersionedName(soname, lib_soversion);
-          this->ComputeVersionedName(soname_nopath, lib_soversion);
-          this->ComputeVersionedName(fromName, lib_version);
-          this->ComputeVersionedName(toFile, lib_version);
+          this->ComputeVersionedLibName(soname, lib_soversion);
+          this->ComputeVersionedLibName(soname_nopath, lib_soversion);
+          this->ComputeVersionedLibName(fromName, lib_version);
+          this->ComputeVersionedLibName(toFile, lib_version);
 
           cmSystemTools::RemoveFile(soname.c_str());
           cmSystemTools::RemoveFile(libname.c_str());
@@ -1318,22 +1322,14 @@ bool cmFileCommand::HandleInstallCommand(
         if ( exe_version )
           {
           std::string exename = toFile;
-          std::string exename_nopath = fromName;
-          exename_nopath += "-";
-          exename_nopath += exe_version;
-
-          fromName += "-";
-          fromName += exe_version;
-          toFile += "-";
-          toFile += exe_version;
-
+          this->ComputeVersionedExeName(fromName, exe_version);
+          this->ComputeVersionedExeName(toFile, exe_version);
           cmSystemTools::RemoveFile(exename.c_str());
-
-          if (!cmSystemTools::CreateSymlink(exename_nopath.c_str(), 
-                                            exename.c_str()) )
+          if(!cmSystemTools::CreateSymlink(fromName.c_str(),
+                                           exename.c_str()))
             {
-            std::string errstring = "error when creating symlink from: " 
-              + exename + " to " + exename_nopath;
+            std::string errstring = "error when creating symlink from: "
+              + exename + " to " + fromName;
             this->SetError(errstring.c_str());
             return false;
             }
@@ -1408,8 +1404,8 @@ bool cmFileCommand::HandleInstallCommand(
 }
 
 //----------------------------------------------------------------------------
-void cmFileCommand::ComputeVersionedName(std::string& name,
-                                         const char* version)
+void cmFileCommand::ComputeVersionedLibName(std::string& name,
+                                            const char* version)
 {
 #if defined(__APPLE__)
   std::string ext;
@@ -1425,6 +1421,21 @@ void cmFileCommand::ComputeVersionedName(std::string& name,
 #if defined(__APPLE__)
   name += ext;
 #endif
+}
+
+//----------------------------------------------------------------------------
+void cmFileCommand::ComputeVersionedExeName(std::string& name,
+                                            const char* version)
+{
+  std::string ext;
+  if(name.size() > 4 && name.substr(name.size()-4) == ".exe")
+    {
+    ext = ".exe";
+    name = name.substr(0, name.size()-4);
+    }
+  name += "-";
+  name += version;
+  name += ext;
 }
 
 //----------------------------------------------------------------------------
