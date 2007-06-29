@@ -1,0 +1,120 @@
+ExpectedBuilds: \
+{ARRAKIS.kitware Win32-bcc551} \
+{ARRAKIS.kitware Win32-cygwin} \
+{ARRAKIS.kitware Win32-mingw} \
+{dash1win64.kitware Win64-vs80} \
+{DASH1.kitware Win32-nmake71} \
+{DASH1.kitware Win32-vs71Rel} \
+{DASH1.kitware Win32-vs71} \
+{DASH1.kitware zRel24-Win32-nmake71} \
+{DASH1.kitware zRel24-Win32-vs71} \
+{DASH11.kitware zRel24-Win32-nmake71} \
+{DASH2.kitware Win32-nmake70} \
+{DASH2.kitware Win32-vs70-InPlace} \
+{DASH2.kitware Win32-vs70} \
+{DASH2.kitware zRel24-Win32-nmake70} \
+{DASH2.kitware zRel24-Win32-vs70} \
+{DASH3.kitware Win32-nmake60} \
+{DASH3.kitware Win32-vs60} \
+{DASH3.kitware zRel24-Win32-nmake60} \
+{DASH3.kitware zRel24-Win32-vs60} \
+{DASH5.kitware Linux-gcc332-InPlace} \
+{DASH5.kitware zRel24-Linix-gcc332} \
+{DASH6.kitware zRel24-Linix-gcc332} \
+{andoria.kitware Linux-g++3.4-KDevelop} \
+{andoria.kitware Linux-g++3.4-SVN} \
+{dash14.kitware Win32-bcc5.6} \
+{dash14.kitware Win32-cygwin331} \
+{dash14.kitware Win32-mingw} \
+{dash17.kitware Linux-g++4.0} \
+{dash8.kitware Linux64-g++332} \
+{dash8.kitware Linux64-g++341} \
+{dash8.kitware Linux64-g++} \
+{dash8.kitware zRel24-Linux64-g++332} \
+{dash8.kitware zRel24-Linux64-g++} \
+{dashmacmini2.kitware DarwinIntel-g++} \
+{dashmacmini2.kitware Darwin-Tiger-Xcode21-univ} \
+{dashmacmini2.kitware DarwinIntel-Universal} \
+{dashmacmini1.kitware Darwin-Tiger-Xcode21} \
+{dashmacmini1.kitware zRel24-Darwin-Tiger-g++} \
+{dashsgi1.kitware IRIX32-CC} \
+{dashsgi1.kitware IRIX64-CC} \
+{dashsun1.kitware SunOS-CC-64} \
+{dashsun1.kitware SunOS-CC} \
+{dashsun1.kitware SunOS-gcc34-64} \
+{destiny.kitware HP-UX-aCC-gmake} \
+{destiny.kitware HP-UX-aCC} \
+{acdc HP-UX9000-8-aCC} \
+{iris.elemtech IRIX64-CC-7.4} \
+{iris.elemtech IRIX64-CC64-7.4} \
+{krondor.kitware Darwin-c++} \
+{krondor.kitware zRel24-Darwin-c++} \
+{midworld.kitware DarwinG5-XCode15} \
+{midworld.kitware DarwinG5-g++} \
+{midworld.kitware zRel24-DarwinG5-g++} \
+{perelandra.kitware Win32-vs60} \
+{perelandra.kitware zRel24-Win32-vs60} \
+{Superior Win32-BCB-5.8} \
+{tick.rz.uni-augsburg.de LinuxPPC-g++3.3} \
+{tick.rz.uni-augsburg.de LinuxPPC-g++3.4} \
+{trinsic.kitware Win32-mingw} \
+{r36n11.pbm.ihost.com AIX53-xlC} \
+{valhalla.kitware Win32-wcl386} \
+{RogueResearch1 Darwin-ppc-gcc4.0.1} \
+{RogueResearch1 Darwin-ppc-xcode2.4} \
+{RogueResearch2 Darwin-i386-gcc4.0.1-univ} \
+{RogueResearch2 Darwin-i386-xcode2.4-univ} \
+{grayson.kitware Win32-nmake80} \
+{dash4.kitware Win32-bcc5.8} \
+{insight.journal.kitware KWStyle} \
+{pre.vision.cs.rpi.edu FreeBSD-CC-gmake} \
+{pre.vision.cs.rpi.edu FreeBSD-CC-make} \
+{r36n11.pbm.ihost.com zRel24-AIX53-xlC} 
+
+#{devqnx.acfr.usyd.edu.au qnx-V3.3.5-gcc_ntox86 } \
+#{mr-orange.obtech.net gentoo-linux-x86\_64-gcc-4.0.2 } \
+#{RogueResearchPPC Darwin8.8-ppc-gcc4.0.1} \
+#{RogueResearchPPC Darwin8.8-ppc-xcode2.4} \
+#{G5.Nfsnet.Org Darwin8.3-gcc4} \
+
+# commas in names do not work for expected builds....
+
+#{G4.Nfsnet.Org Darwin-c++} \
+#{salmon.nlm.nih.gov Darwin8.7-gcc4} \
+
+#{crd.ge.com Solaris-gcc343} \
+#{crd.ge.com Linux-icc81} \
+#{crd.ge.com Windows-bcc32} \
+#{crd.ge.com Windows-nmake71} \
+#{crd.ge.com Windows-nmake60} \
+
+#{dash16.kitware Linux-g++4.0} \
+#{styx Linuxia64-g++} \
+#{crd.ge.com Cygwin-gcc344} \
+#{valhalla.kitware Win32-bccRel} \
+#{valhalla.kitware Win32-bcc} \
+#{valhalla.kitware Win32-g++} \
+#{valhalla.kitware Win32-nmake60} \
+#{valhalla.kitware Win32-nmake70} \
+#{valhalla.kitware Win32-vs60} \
+#{valhalla.kitware Win32-vs70}
+#{crd.ge.com FreeBSD-gcc321} \
+#{crd.ge.com Linux-gcc320} \
+
+
+#{cogattaca.kitware LinuxWin32-g++-Werror} \
+#{cogattaca.kitware LinuxWin32-g++} \
+#{caladan.kitware Darwin-Xcode} \
+
+
+
+#{dash8.kitware Win64-icl80} \
+#{dash8.kitware zLRB-Win64-icl80} \
+
+#{TIAMAT.kitware Darwin-c++} \
+
+#{hythloth.kitware Linux-icc-8.1} \
+
+CompressionMode: ALL
+CompressionCommand: /bin/gzip
+CompressionType: gzip

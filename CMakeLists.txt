@@ -395,6 +395,10 @@ INCLUDE (CMakeCPack.cmake)
 
 # setup some Testing support (a macro defined in this file)
 CMAKE_SETUP_TESTING()
+CONFIGURE_FILE(
+  "${CMAKE_CURRENT_SOURCE_DIR}/DartLocal.conf.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/DartLocal.conf"
+  COPYONLY)
 
 # build the remaining subdirectories
 SUBDIRS(Source)
