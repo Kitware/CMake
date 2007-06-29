@@ -52,8 +52,6 @@ ExpectedBuilds: \
 {midworld.kitware DarwinG5-XCode15} \
 {midworld.kitware DarwinG5-g++} \
 {midworld.kitware zRel24-DarwinG5-g++} \
-{perelandra.kitware Win32-vs60} \
-{perelandra.kitware zRel24-Win32-vs60} \
 {Superior Win32-BCB-5.8} \
 {tick.rz.uni-augsburg.de LinuxPPC-g++3.3} \
 {tick.rz.uni-augsburg.de LinuxPPC-g++3.4} \
