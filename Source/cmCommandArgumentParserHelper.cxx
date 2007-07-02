@@ -92,8 +92,7 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
   return 0;
 }
 
-char* cmCommandArgumentParserHelper::ExpandVariable(const char* var,
-                                                    bool doingAt)
+char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
 {
   if(!var)
     {
@@ -126,7 +125,7 @@ char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
   if(this->ReplaceAtSyntax)
     {
     // try to expand the variable
-    char* ret = this->ExpandVariable(var, true);
+    char* ret = this->ExpandVariable(var);
     // if the return was 0 and we want to replace empty strings
     // then return an empty string 
     if(!ret && this->RemoveEmpty)

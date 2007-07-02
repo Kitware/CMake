@@ -58,7 +58,7 @@ public:
   char* CombineUnions(char* in1, char* in2);
 
   char* ExpandSpecialVariable(const char* key, const char* var);
-  char* ExpandVariable(const char* var, bool doingAt=false);
+  char* ExpandVariable(const char* var);
   char* ExpandVariableForAt(const char* var);
   void SetResult(const char* value);
 
