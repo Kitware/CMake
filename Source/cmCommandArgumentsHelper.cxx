@@ -189,7 +189,7 @@ cmCAEnabler::cmCAEnabler(cmCommandArgumentsHelper* args,
 ,Enabled(false) 
 {}
 
-bool cmCAEnabler::DoConsume(const std::string& arg, unsigned int index)
+bool cmCAEnabler::DoConsume(const std::string&, unsigned int index)
 {
   if (index==0)
     {
@@ -210,7 +210,7 @@ cmCADisabler::cmCADisabler(cmCommandArgumentsHelper* args,
 ,Enabled(true) 
 {}
 
-bool cmCADisabler::DoConsume(const std::string& arg, unsigned int index)
+bool cmCADisabler::DoConsume(const std::string&, unsigned int index)
 {
   if (index==0)
     {

@@ -25,10 +25,10 @@
 cmExportCommand::cmExportCommand()
 :cmCommand()
 ,ArgumentGroup()
-,Targets(&this->Helper, "TARGETS")
-,Append(&this->Helper, "APPEND", &ArgumentGroup)
-,Prefix(&this->Helper, "PREFIX", &ArgumentGroup)
-,Filename(&this->Helper, "FILE", &ArgumentGroup)
+,Targets(&Helper, "TARGETS")
+,Append(&Helper, "APPEND", &ArgumentGroup)
+,Prefix(&Helper, "PREFIX", &ArgumentGroup)
+,Filename(&Helper, "FILE", &ArgumentGroup)
 {
   // at first TARGETS
   this->Targets.Follows(0);
