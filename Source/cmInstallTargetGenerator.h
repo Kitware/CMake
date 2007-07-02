@@ -43,15 +43,24 @@ public:
   const std::vector<std::string>& GetConfigurations() const {return this->Configurations;}
   
 protected:
+  typedef cmInstallGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);
   void GenerateScriptForConfig(std::ostream& os,
                                const char* fromDir,
-                               const char* config);
-  void AddInstallNamePatchRule(std::ostream& os, const char* config,
+                               const char* config,
+                               Indent const& indent);
+  void GenerateScriptForConfigDir(std::ostream& os,
+                                  const char* fromDirConfig,
+                                  const char* config,
+                                  Indent const& indent);
+  void AddInstallNamePatchRule(std::ostream& os, Indent const& indent,
+                               const char* config,
                                const std::string& toFullPath);
-  void AddStripRule(std::ostream& os, cmTarget::TargetType type,
+  void AddStripRule(std::ostream& os, Indent const& indent,
+                    cmTarget::TargetType type,
                     const std::string& toFullPath);
-  void AddRanlibRule(std::ostream& os, cmTarget::TargetType type,
+  void AddRanlibRule(std::ostream& os, Indent const& indent,
+                     cmTarget::TargetType type,
                      const std::string& toFullPath);
 
   cmTarget* Target;

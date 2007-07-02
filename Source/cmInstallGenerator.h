@@ -21,6 +21,32 @@
 
 class cmLocalGenerator;
 
+class cmInstallGeneratorIndent
+{
+public:
+  cmInstallGeneratorIndent(): Level(0) {}
+  cmInstallGeneratorIndent(int level): Level(level) {}
+  void Write(std::ostream& os) const
+    {
+    for(int i=0; i < this->Level; ++i)
+      {
+      os << " ";
+      }
+    }
+  cmInstallGeneratorIndent Next(int step = 2) const
+    {
+    return cmInstallGeneratorIndent(this->Level + step);
+    }
+private:
+  int Level;
+};
+inline std::ostream& operator<<(std::ostream& os,
+                                cmInstallGeneratorIndent const& indent)
+{
+  indent.Write(os);
+  return os;
+}
+
 /** \class cmInstallGenerator
  * \brief Support class for generating install scripts.
  *
@@ -46,7 +72,8 @@ public:
     = std::vector<std::string>(),
     const char* component = 0,
     const char* rename = 0,
-    const char* literal_args = 0
+    const char* literal_args = 0,
+    cmInstallGeneratorIndent const& indent = cmInstallGeneratorIndent()
     );
 
   const char* GetDestination() const        {return this->Destination.c_str();}

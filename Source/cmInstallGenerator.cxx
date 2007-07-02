@@ -60,7 +60,8 @@ void cmInstallGenerator
                  std::vector<std::string> const& configurations,
                  const char* component /* = 0 */,
                  const char* rename /* = 0 */,
-                 const char* literal_args /* = 0 */
+                 const char* literal_args /* = 0 */,
+                 cmInstallGeneratorIndent const& indent
                  )
 {
   // Use the FILE command to install the file.
@@ -76,6 +77,7 @@ void cmInstallGenerator
     case cmTarget::INSTALL_FILES:
     default:                         stype = "FILE"; break;
     }
+  os << indent;
   os << "FILE(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype.c_str();
   if(optional)
     {
@@ -120,9 +122,9 @@ void cmInstallGenerator
     for(std::vector<std::string>::const_iterator fi = files.begin();
         fi != files.end(); ++fi)
       {
-      os << "\n  \"" << *fi << "\"";
+      os << "\n" << indent << "  \"" << *fi << "\"";
       }
-    os << "\n ";
+    os << "\n" << indent << " ";
     if(!(literal_args && *literal_args))
       {
       os << " ";
