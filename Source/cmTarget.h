@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -28,7 +28,7 @@ class cmGlobalGenerator;
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.
  *
- * cmTarget represents a target loaded from 
+ * cmTarget represents a target loaded from
  * a makefile.
  */
 class cmTarget
@@ -46,36 +46,36 @@ public:
    */
   TargetType GetType() const
     {
-      return this->TargetTypeValue;
+    return this->TargetTypeValue;
     }
-  
+
   /**
    * Set the target type
    */
   void SetType(TargetType f, const char* name);
 
   void MarkAsImported();
-  
+
   ///! Set/Get the name of the target
   const char* GetName() const {return this->Name.c_str();}
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
   cmMakefile *GetMakefile() { return this->Makefile;};
-  
+
   /**
    * Get the list of the custom commands for this target
    */
-  std::vector<cmCustomCommand> &GetPreBuildCommands() 
+  std::vector<cmCustomCommand> &GetPreBuildCommands()
     {return this->PreBuildCommands;}
-  std::vector<cmCustomCommand> &GetPreLinkCommands() 
+  std::vector<cmCustomCommand> &GetPreLinkCommands()
     {return this->PreLinkCommands;}
-  std::vector<cmCustomCommand> &GetPostBuildCommands() 
+  std::vector<cmCustomCommand> &GetPostBuildCommands()
     {return this->PostBuildCommands;}
 
   ///! Return the list of frameworks being linked to this target
   std::vector<std::string> &GetFrameworks() {return this->Frameworks;}
-  
+
   /**
    * Get the list of the source files used by this target
    */
@@ -99,10 +99,10 @@ public:
 
   typedef std::vector<LibraryID > LinkLibraryVectorType;
   const LinkLibraryVectorType &GetLinkLibraries() const {
-    return this->LinkLibraries;}
+  return this->LinkLibraries;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
-  
+
   /**
    * Clear the dependency information recorded for this target, if any.
    */
@@ -111,13 +111,13 @@ public:
   // Check to see if a library is a framework and treat it different on Mac
   bool AddFramework(const std::string& lib, LinkLibraryType llt);
   void AddLinkLibrary(cmMakefile& mf,
-                      const char *target, const char* lib, 
+                      const char *target, const char* lib,
                       LinkLibraryType llt);
 
-  void AddLinkLibrary(const std::string& lib, 
+  void AddLinkLibrary(const std::string& lib,
                       LinkLibraryType llt);
 
-  void MergeLinkLibraries( cmMakefile& mf, const char* selfname, 
+  void MergeLinkLibraries( cmMakefile& mf, const char* selfname,
                            const LinkLibraryVectorType& libs );
 
   const std::vector<std::string>& GetLinkDirectories();
@@ -130,14 +130,14 @@ public:
    */
   std::string GetInstallPath() {return this->InstallPath;}
   void SetInstallPath(const char *name) {this->InstallPath = name;}
-  
+
   /**
    * Set the path where this target (if it has a runtime part) should be
    * installed. This is relative to INSTALL_PREFIX
    */
   std::string GetRuntimeInstallPath() {return this->RuntimeInstallPath;}
   void SetRuntimeInstallPath(const char *name) {
-    this->RuntimeInstallPath = name;}
+  this->RuntimeInstallPath = name;}
 
   /**
    * Get/Set whether there is an install rule for this target.
@@ -147,7 +147,7 @@ public:
 
   /** Add a utility on which this project depends. A utility is an executable
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
-   * commands. It is not a full path nor does it have an extension.  
+   * commands. It is not a full path nor does it have an extension.
    */
   void AddUtility(const char* u) { this->Utilities.insert(u);}
   ///! Get the utilities used by this target
@@ -160,7 +160,7 @@ public:
   const char *GetProperty(const char *prop);
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);
-  
+
   bool IsImported() const {return this->IsImportedTarget;}
 
   /** Get the directory in which this target will be built.  If the
@@ -187,21 +187,21 @@ public:
 
   ///! Return the prefered linker language for this target
   const char* GetLinkerLanguage(cmGlobalGenerator*);
-  
-  ///! Return the rule variable used to create this type of target, 
+
+  ///! Return the rule variable used to create this type of target,
   //  need to add CMAKE_(LANG) for full name.
   const char* GetCreateRuleVariable();
 
   /** Get the full name of the target according to the settings in its
       makefile.  */
   std::string GetFullName(const char* config=0, bool implib = false);
-  void GetFullName(std::string& prefix, 
+  void GetFullName(std::string& prefix,
                    std::string& base, std::string& suffix,
                    const char* config=0, bool implib = false);
 
   /** Get the name of the pdb file for the target.  */
   std::string GetPDBName(const char* config=0);
-  
+
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(const char* config=0, bool implib = false);
@@ -256,7 +256,7 @@ public:
 
   // Define the properties
   static void DefineProperties(cmake *cm);
-  
+
   // Compute the OBJECT_FILES property only when requested
   void ComputeObjectFiles();
 
@@ -310,9 +310,9 @@ private:
    * Finds the dependencies for \a lib and inserts them into \a
    * dep_map.
    */
-  void GatherDependencies( const cmMakefile& mf, 
+  void GatherDependencies( const cmMakefile& mf,
                            const LibraryID& lib,
-                           DependencyMap& dep_map); 
+                           DependencyMap& dep_map);
 
   const char* GetSuffixVariableInternal(TargetType type, bool implib);
   const char* GetPrefixVariableInternal(TargetType type, bool implib);
@@ -321,7 +321,7 @@ private:
   void GetFullNameInternal(TargetType type, const char* config, bool implib,
                            std::string& outPrefix, std::string& outBase,
                            std::string& outSuffix);
-  
+
   void GetLibraryNamesInternal(std::string& name,
                                std::string& soName,
                                std::string& realName,
@@ -345,17 +345,21 @@ private:
 
   const char* ImportedGetLocation(const char* config);
   const char* NormalGetLocation(const char* config);
-  
-  void NormalGetFullNameInternal(TargetType type, const char* config, bool implib,
-                           std::string& outPrefix, std::string& outBase,
-                           std::string& outSuffix);
-  void ImportedGetFullNameInternal(TargetType type, const char* config, bool implib,
-                           std::string& outPrefix, std::string& outBase,
-                           std::string& outSuffix);
-  
+
+  void NormalGetFullNameInternal(TargetType type, const char* config,
+                                 bool implib,
+                                 std::string& outPrefix,
+                                 std::string& outBase,
+                                 std::string& outSuffix);
+  void ImportedGetFullNameInternal(TargetType type, const char* config,
+                                   bool implib,
+                                   std::string& outPrefix,
+                                   std::string& outBase,
+                                   std::string& outSuffix);
+
   const char* ImportedGetDirectory(const char* config, bool implib);
   const char* NormalGetDirectory(const char* config, bool implib);
-  
+
 private:
   std::string Name;
   std::vector<cmCustomCommand> PreBuildCommands;
@@ -379,7 +383,7 @@ private:
   std::string Location;
   std::string ExportMacro;
   std::set<cmStdString> Utilities;
-  bool RecordDependencies; 
+  bool RecordDependencies;
   cmPropertyMap Properties;
   LinkLibraryVectorType OriginalLinkLibraries;
   bool DLLPlatform;

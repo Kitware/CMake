@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -41,11 +41,11 @@ cmTarget::cmTarget()
   this->IsImportedTarget = false;
 }
 
-// define properties
+//----------------------------------------------------------------------------
 void cmTarget::DefineProperties(cmake *cm)
 {
   cm->DefineProperty
-    ("BUILD_WITH_INSTALL_RPATH", cmProperty::TARGET, 
+    ("BUILD_WITH_INSTALL_RPATH", cmProperty::TARGET,
      "Should build tree targets have install tree rpaths.",
      "BUILD_WITH_INSTALL_RPATH is a boolean specifying whether to link "
      "the target in the build tree with the INSTALL_RPATH.  This takes "
@@ -53,7 +53,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "before installation.");
 
   cm->DefineProperty
-    ("CLEAN_DIRECT_OUTPUT", cmProperty::TARGET, 
+    ("CLEAN_DIRECT_OUTPUT", cmProperty::TARGET,
      "Do not delete other varients of this target.",
      "When a library is built CMake by default generates code to remove "
      "any existing library using all possible names.  This is needed "
@@ -64,14 +64,14 @@ void cmTarget::DefineProperties(cmake *cm)
      "prevented by setting the CLEAN_DIRECT_OUTPUT property to 1.");
 
   cm->DefineProperty
-    ("COMPILE_FLAGS", cmProperty::TARGET, 
+    ("COMPILE_FLAGS", cmProperty::TARGET,
      "Additional flags to yse when compiling this target's sources.",
      "The COMPILE_FLAGS property sets additional compiler flags used "
      "to build sources within the target.  It may also be used to pass "
      "additional preprocessor definitions.");
-     
+
   cm->DefineProperty
-    ("DEFINE_SYMBOL", cmProperty::TARGET, 
+    ("DEFINE_SYMBOL", cmProperty::TARGET,
      "Define a symbol when compiling this target's sources.",
      "DEFINE_SYMBOL sets the name of the preprocessor symbol defined when "
      "compiling sources in a shared library. "
@@ -80,29 +80,29 @@ void cmTarget::DefineProperties(cmake *cm)
      "identifier). This is useful for headers to know whether they are "
      "being included from inside their library our outside to properly "
      "setup dllexport/dllimport decorations. ");
-     
+
   cm->DefineProperty
-    ("DEBUG_POSTFIX", cmProperty::TARGET, 
+    ("DEBUG_POSTFIX", cmProperty::TARGET,
      "A postfix that will be applied to this target when build debug.",
      "A property on a target that sepcifies a postfix to add to the "
      "target name when built in debug mode. For example foo.dll "
      "versus fooD.dll");
 
   cm->DefineProperty
-    ("EchoString", cmProperty::TARGET, 
+    ("EchoString", cmProperty::TARGET,
      "A message to be displayed when the target is built.",
      "A message to display on some generaters (such as makefiles) when "
      "the target is built.");
 
   cm->DefineProperty
-    ("HAS_CXX", cmProperty::TARGET, 
+    ("HAS_CXX", cmProperty::TARGET,
      "Force a target to use the CXX linker.",
      "Setting HAS_CXX on a target will force the target to use the "
      "C++ linker (and C++ runtime libraries) for linking even if the "
      "target has no C++ code in it.");
 
   cm->DefineProperty
-    ("IMPORT_PREFIX", cmProperty::TARGET, 
+    ("IMPORT_PREFIX", cmProperty::TARGET,
      "What comes before the import library name.",
      "Similar to the target property PREFIX, but used for import libraries "
      "(typically corresponding to a DLL) instead of regular libraries. "
@@ -110,7 +110,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \"lib\") on an import library name.");
 
   cm->DefineProperty
-    ("IMPORT_SUFFIX", cmProperty::TARGET, 
+    ("IMPORT_SUFFIX", cmProperty::TARGET,
      "What comes after the import library name.",
      "Similar to the target property SUFFIX, but used for import libraries "
      "(typically corresponding to a DLL) instead of regular libraries. "
@@ -118,7 +118,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \".lib\") on an import library name.");
 
   cm->DefineProperty
-    ("EXCLUDE_FROM_ALL", cmProperty::TARGET, 
+    ("EXCLUDE_FROM_ALL", cmProperty::TARGET,
      "Exclude the target from the all target.",
      "A property on a target that indicates if the target is excluded "
      "from the default build target. If it is not, then with a Makefile "
@@ -127,27 +127,27 @@ void cmTarget::DefineProperties(cmake *cm)
      true);
 
   cm->DefineProperty
-    ("INSTALL_NAME_DIR", cmProperty::TARGET, 
+    ("INSTALL_NAME_DIR", cmProperty::TARGET,
      "Mac OSX directory name for installed targets.",
      "INSTALL_NAME_DIR is a string specifying the "
      "directory portion of the \"install_name\" field of shared libraries "
      "on Mac OSX to use in the installed targets. ");
 
   cm->DefineProperty
-    ("INSTALL_RPATH", cmProperty::TARGET, 
+    ("INSTALL_RPATH", cmProperty::TARGET,
      "The rpath to use for installed targets.",
      "A semicolon-separated list specifying the rpath "
      "to use in installed targets (for platforms that support it).");
 
   cm->DefineProperty
-    ("INSTALL_RPATH_USE_LINK_PATH", cmProperty::TARGET, 
+    ("INSTALL_RPATH_USE_LINK_PATH", cmProperty::TARGET,
      "Add paths to linker search and installed rpath.",
      "INSTALL_RPATH_USE_LINK_PATH is a boolean that if set to true will "
      "append directories in the linker search path and outside the "
      "project to the INSTALL_RPATH. ");
 
   cm->DefineProperty
-    ("LINK_FLAGS", cmProperty::TARGET, 
+    ("LINK_FLAGS", cmProperty::TARGET,
      "Additional flags to use when linking this target.",
      "The LINK_FLAGS property can be used to add extra flags to the "
      "link step of a target. LINK_FLAGS_<CONFIG> will add to the "
@@ -155,7 +155,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "for example, DEBUG, RELEASE, MINSIZEREL, RELWITHDEBINFO. ");
 
   cm->DefineProperty
-    ("LINKER_LANGUAGE", cmProperty::TARGET, 
+    ("LINKER_LANGUAGE", cmProperty::TARGET,
      "What tool to use for linking, based on language.",
      "The LINKER_LANGUAGE property is used to change the tool "
      "used to link an executable or shared library. The default is "
@@ -163,7 +163,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "are common values for this property.");
 
   cm->DefineProperty
-    ("LOCATION", cmProperty::TARGET, 
+    ("LOCATION", cmProperty::TARGET,
      "Where a target will be written on disk.",
      "A read only property on a target that indicates where that target "
      "will be written. For libraries and execuatables this will be where "
@@ -171,7 +171,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "number of other settings.");
 
   cm->DefineProperty
-    ("OUTPUT_NAME", cmProperty::TARGET, 
+    ("OUTPUT_NAME", cmProperty::TARGET,
      "Sets the real name of a target when it is built.",
      "Sets the real name of a target when it is built and "
      "can be used to help create two targets of the same name even though "
@@ -180,7 +180,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "per-configuration basis.");
 
   cm->DefineProperty
-    ("PRE_INSTALL_SCRIPT", cmProperty::TARGET, 
+    ("PRE_INSTALL_SCRIPT", cmProperty::TARGET,
      "Deprecated install support.",
      "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
      "old way to specify CMake scripts to run before and after "
@@ -189,13 +189,13 @@ void cmTarget::DefineProperties(cmake *cm)
      "INSTALL command instead.");
 
   cm->DefineProperty
-    ("PREFIX", cmProperty::TARGET, 
+    ("PREFIX", cmProperty::TARGET,
      "What comes before the library name.",
      "A target property that can be set to override the prefix "
      "(such as \"lib\") on a library name.");
 
   cm->DefineProperty
-    ("POST_INSTALL_SCRIPT", cmProperty::TARGET, 
+    ("POST_INSTALL_SCRIPT", cmProperty::TARGET,
      "Deprecated install support.",
      "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
      "old way to specify CMake scripts to run before and after "
@@ -204,14 +204,14 @@ void cmTarget::DefineProperties(cmake *cm)
      "INSTALL command instead.");
 
   cm->DefineProperty
-    ("SKIP_BUILD_RPATH", cmProperty::TARGET, 
+    ("SKIP_BUILD_RPATH", cmProperty::TARGET,
      "Should rpaths be used for the build tree.",
      "SKIP_BUILD_RPATH is a boolean specifying whether to skip automatic "
      "generation of an rpath allowing the target to run from the "
      "build tree. ");
 
   cm->DefineProperty
-    ("SOVERSION", cmProperty::TARGET, 
+    ("SOVERSION", cmProperty::TARGET,
      "What version number is this target.",
      "For shared libraries VERSION and SOVERSION can be used to specify "
      "the build version and api version respectively. When building or "
@@ -224,18 +224,18 @@ void cmTarget::DefineProperties(cmake *cm)
      "These numbers are used as the image version of the binary. ");
 
   cm->DefineProperty
-    ("STATIC_LIBRARY_FLAGS", cmProperty::TARGET, 
+    ("STATIC_LIBRARY_FLAGS", cmProperty::TARGET,
      "Extra flags to use when linking static libraries.",
      "Extra flags to use when linking a static library.");
 
   cm->DefineProperty
-    ("SUFFIX", cmProperty::TARGET, 
+    ("SUFFIX", cmProperty::TARGET,
      "What comes after the library name.",
      "A target property that can be set to override the suffix "
      "(such as \".so\") on a library name.");
 
   cm->DefineProperty
-    ("VERSION", cmProperty::TARGET, 
+    ("VERSION", cmProperty::TARGET,
      "What version number is this target.",
      "For shared libraries VERSION and SOVERSION can be used to specify "
      "the build version and api version respectively. When building or "
@@ -252,7 +252,7 @@ void cmTarget::DefineProperties(cmake *cm)
 
 
   cm->DefineProperty
-    ("WIN32_EXECUTABLE", cmProperty::TARGET, 
+    ("WIN32_EXECUTABLE", cmProperty::TARGET,
      "Used to specify Windows executable with a WinMain entry point.",
      "This can be set to indicate that a target is a Windows executable "
      "in contrast to a console application for example. This changes "
@@ -276,14 +276,14 @@ void cmTarget::DefineProperties(cmake *cm)
      "All Windows-based systems including Cygwin are DLL platforms.");
 
   cm->DefineProperty
-    ("GENERATOR_FILE_NAME", cmProperty::TARGET, 
+    ("GENERATOR_FILE_NAME", cmProperty::TARGET,
      "Generator's file for this target.",
      "An internal property used by some generators to record the name of "
      "project or dsp file associated with this target.");
 
 #if 0
   cm->DefineProperty
-    ("OBJECT_FILES", cmProperty::TARGET, 
+    ("OBJECT_FILES", cmProperty::TARGET,
      "Used to get the resulting list of object files that make up a "
      "target.",
      "This can be used to put object files from one library "
@@ -347,12 +347,12 @@ void cmTarget::SetType(TargetType type, const char* name)
     }
   // only add dependency information for library targets
   this->TargetTypeValue = type;
-  if(this->TargetTypeValue >= STATIC_LIBRARY 
-     && this->TargetTypeValue <= MODULE_LIBRARY) 
+  if(this->TargetTypeValue >= STATIC_LIBRARY
+     && this->TargetTypeValue <= MODULE_LIBRARY)
     {
     this->RecordDependencies = true;
-    } 
-  else 
+    }
+  else
     {
     this->RecordDependencies = false;
     }
@@ -666,6 +666,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
     }
 }
 
+//----------------------------------------------------------------------------
 cmSourceFile* cmTarget::AddSource(const char* s)
 {
   std::string src = s;
@@ -679,6 +680,7 @@ cmSourceFile* cmTarget::AddSource(const char* s)
   return sf;
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::MergeLinkLibraries( cmMakefile& mf,
                                    const char *selfname,
                                    const LinkLibraryVectorType& libs )
@@ -750,7 +752,7 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
         // is an N^2 algorithm for adding the directories, but N
         // should not get very big.
         const char* libpath = tgt->GetDirectory(0, implib);
-        if(std::find(this->LinkDirectories.begin(), 
+        if(std::find(this->LinkDirectories.begin(),
                      this->LinkDirectories.end(),
                      libpath) == this->LinkDirectories.end())
           {
@@ -767,7 +769,8 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
   return this->LinkDirectories;
 }
 
-void cmTarget::ClearDependencyInformation( cmMakefile& mf, 
+//----------------------------------------------------------------------------
+void cmTarget::ClearDependencyInformation( cmMakefile& mf,
                                            const char* target )
 {
   // Clear the dependencies. The cache variable must exist iff we are
@@ -789,14 +792,13 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
       message += "Your cache is probably stale. Please remove the entry\n  ";
       message += depname;
       message += "\nfrom the cache.";
-      cmSystemTools::Error( message.c_str() );  
+      cmSystemTools::Error( message.c_str() );
       }
     }
 }
 
-
-
-void cmTarget::AddLinkLibrary(const std::string& lib, 
+//----------------------------------------------------------------------------
+void cmTarget::AddLinkLibrary(const std::string& lib,
                               LinkLibraryType llt)
 {
   this->AddFramework(lib.c_str(), llt);
@@ -806,6 +808,7 @@ void cmTarget::AddLinkLibrary(const std::string& lib,
   this->LinkLibraries.push_back(tmp);
 }
 
+//----------------------------------------------------------------------------
 bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
 {
   (void)llt; // TODO: What is this?
@@ -814,7 +817,7 @@ bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
     std::string frameworkDir = libname;
     frameworkDir += "/../";
     frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
-    std::vector<std::string>::iterator i = 
+    std::vector<std::string>::iterator i =
       std::find(this->Frameworks.begin(),
                 this->Frameworks.end(), frameworkDir);
     if(i == this->Frameworks.end())
@@ -825,8 +828,10 @@ bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
     }
   return false;
 }
+
+//----------------------------------------------------------------------------
 void cmTarget::AddLinkLibrary(cmMakefile& mf,
-                              const char *target, const char* lib, 
+                              const char *target, const char* lib,
                               LinkLibraryType llt)
 {
   // Never add a self dependency, even if the user asks for it.
@@ -874,12 +879,13 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     dependencies += lib;
     dependencies += ";";
     mf.AddCacheDefinition( targetEntry.c_str(), dependencies.c_str(),
-                           "Dependencies for the target", 
+                           "Dependencies for the target",
                            cmCacheManager::STATIC );
     }
-  
+
 }
 
+//----------------------------------------------------------------------------
 void
 cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 {
@@ -893,7 +899,7 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // The former is a more thorny issue, since it is not clear how to
   // determine if two libraries listed on the link line refer to the a
   // single library or not. For example, consider the link "libraries"
-  //    /usr/lib/libtiff.so -ltiff 
+  //    /usr/lib/libtiff.so -ltiff
   // Is this one library or two? The solution implemented here is the
   // simplest (and probably the only practical) one: two libraries are
   // the same if their "link strings" are identical. Thus, the two
@@ -952,92 +958,93 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   //    cyclic dependencies, so this is probably not a big deal. Note that
   //    the link line is always correct, just not necessary optimal.
 
-  {
-  // Expand variables in link library names.  This is for backwards
-  // compatibility with very early CMake versions and should
-  // eventually be removed.  This code was moved here from the end of
-  // old source list processing code which was called just before this
-  // method.
-  for(LinkLibraryVectorType::iterator p = this->LinkLibraries.begin();
-      p != this->LinkLibraries.end(); ++p)
-    {
-    this->Makefile->ExpandVariablesInString(p->first, true, true);
-    }
-  }
+ {
+ // Expand variables in link library names.  This is for backwards
+ // compatibility with very early CMake versions and should
+ // eventually be removed.  This code was moved here from the end of
+ // old source list processing code which was called just before this
+ // method.
+ for(LinkLibraryVectorType::iterator p = this->LinkLibraries.begin();
+     p != this->LinkLibraries.end(); ++p)
+   {
+   this->Makefile->ExpandVariablesInString(p->first, true, true);
+   }
+ }
 
-  typedef std::vector< std::string > LinkLine;
+ typedef std::vector< std::string > LinkLine;
 
-  // The dependency map.
-  DependencyMap dep_map;
+ // The dependency map.
+ DependencyMap dep_map;
 
-  if ( this->OriginalLinkLibraries.size() == 0 )
-    {
-    this->OriginalLinkLibraries = this->LinkLibraries;
-    }
+ if ( this->OriginalLinkLibraries.size() == 0 )
+   {
+   this->OriginalLinkLibraries = this->LinkLibraries;
+   }
 
-  // 1. Build the dependency graph
-  //
-  for(LinkLibraryVectorType::reverse_iterator lib 
-        = this->LinkLibraries.rbegin();
-      lib != this->LinkLibraries.rend(); ++lib)
-    {
-    this->GatherDependencies( mf, *lib, dep_map);
-    }
+ // 1. Build the dependency graph
+ //
+ for(LinkLibraryVectorType::reverse_iterator lib
+       = this->LinkLibraries.rbegin();
+     lib != this->LinkLibraries.rend(); ++lib)
+   {
+   this->GatherDependencies( mf, *lib, dep_map);
+   }
 
-  // 2. Remove any dependencies that are already satisfied in the original
-  // link line.
-  //
-  for(LinkLibraryVectorType::iterator lib = this->LinkLibraries.begin();
-      lib != this->LinkLibraries.end(); ++lib)
-    {
-    for( LinkLibraryVectorType::iterator lib2 = lib;
-      lib2 != this->LinkLibraries.end(); ++lib2)
-      {
-      this->DeleteDependency( dep_map, *lib, *lib2);
-      }
-    }
+ // 2. Remove any dependencies that are already satisfied in the original
+ // link line.
+ //
+ for(LinkLibraryVectorType::iterator lib = this->LinkLibraries.begin();
+     lib != this->LinkLibraries.end(); ++lib)
+   {
+   for( LinkLibraryVectorType::iterator lib2 = lib;
+        lib2 != this->LinkLibraries.end(); ++lib2)
+     {
+     this->DeleteDependency( dep_map, *lib, *lib2);
+     }
+   }
 
-  
-  // 3. Create the new link line by simply emitting any dependencies that are
-  // missing.  Start from the back and keep adding.
-  //
-  std::set<DependencyMap::key_type> done, visited;
-  std::vector<DependencyMap::key_type> newLinkLibraries;
-  for(LinkLibraryVectorType::reverse_iterator lib = 
-        this->LinkLibraries.rbegin();
-      lib != this->LinkLibraries.rend(); ++lib)
-    {
-    // skip zero size library entries, this may happen
-    // if a variable expands to nothing.
-    if (lib->first.size() != 0)
-      {
-      this->Emit( *lib, dep_map, done, visited, newLinkLibraries );
-      }
-    }
 
-  // 4. Add the new libraries to the link line.
-  //
-  for( std::vector<DependencyMap::key_type>::reverse_iterator k = 
-         newLinkLibraries.rbegin();
-       k != newLinkLibraries.rend(); ++k )
-    {
-    // get the llt from the dep_map    
-    this->LinkLibraries.push_back( std::make_pair(k->first,k->second) );
-    }
-  this->LinkLibrariesAnalyzed = true;
+ // 3. Create the new link line by simply emitting any dependencies that are
+ // missing.  Start from the back and keep adding.
+ //
+ std::set<DependencyMap::key_type> done, visited;
+ std::vector<DependencyMap::key_type> newLinkLibraries;
+ for(LinkLibraryVectorType::reverse_iterator lib =
+       this->LinkLibraries.rbegin();
+     lib != this->LinkLibraries.rend(); ++lib)
+   {
+   // skip zero size library entries, this may happen
+   // if a variable expands to nothing.
+   if (lib->first.size() != 0)
+     {
+     this->Emit( *lib, dep_map, done, visited, newLinkLibraries );
+     }
+   }
+
+ // 4. Add the new libraries to the link line.
+ //
+ for( std::vector<DependencyMap::key_type>::reverse_iterator k =
+        newLinkLibraries.rbegin();
+      k != newLinkLibraries.rend(); ++k )
+   {
+   // get the llt from the dep_map
+   this->LinkLibraries.push_back( std::make_pair(k->first,k->second) );
+   }
+ this->LinkLibrariesAnalyzed = true;
 }
 
-
+//----------------------------------------------------------------------------
 void cmTarget::InsertDependency( DependencyMap& depMap,
                                  const LibraryID& lib,
-                                 const LibraryID& dep) 
+                                 const LibraryID& dep)
 {
   depMap[lib].push_back(dep);
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::DeleteDependency( DependencyMap& depMap,
                                  const LibraryID& lib,
-                                 const LibraryID& dep) 
+                                 const LibraryID& dep)
 {
   // Make sure there is an entry in the map for lib. If so, delete all
   // dependencies to dep. There may be repeated entries because of
@@ -1047,7 +1054,7 @@ void cmTarget::DeleteDependency( DependencyMap& depMap,
     {
     DependencyList& depList = map_itr->second;
     DependencyList::iterator itr;
-    while( (itr = std::find(depList.begin(), depList.end(), dep)) != 
+    while( (itr = std::find(depList.begin(), depList.end(), dep)) !=
            depList.end() )
       {
       depList.erase( itr );
@@ -1055,6 +1062,7 @@ void cmTarget::DeleteDependency( DependencyMap& depMap,
     }
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::Emit(const LibraryID lib,
                     const DependencyMap& dep_map,
                     std::set<LibraryID>& emitted,
@@ -1117,7 +1125,7 @@ void cmTarget::Emit(const LibraryID lib,
     }
 }
 
-
+//----------------------------------------------------------------------------
 void cmTarget::GatherDependencies( const cmMakefile& mf,
                                    const LibraryID& lib,
                                    DependencyMap& dep_map)
@@ -1173,11 +1181,11 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
       end = depline.find( ";", start );
       }
     // cannot depend on itself
-    this->DeleteDependency( dep_map, lib, lib); 
+    this->DeleteDependency( dep_map, lib, lib);
     }
 }
 
-
+//----------------------------------------------------------------------------
 void cmTarget::SetProperty(const char* prop, const char* value)
 {
   if (!prop)
@@ -1192,11 +1200,13 @@ void cmTarget::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::MarkAsImported()
 {
   this->IsImportedTarget = true;
 }
 
+//----------------------------------------------------------------------------
 const char* cmTarget::GetDirectory(const char* config, bool implib)
 {
   if (this->IsImported())
@@ -1209,6 +1219,7 @@ const char* cmTarget::GetDirectory(const char* config, bool implib)
     }
 }
 
+//----------------------------------------------------------------------------
 const char* cmTarget::ImportedGetDirectory(const char* config, bool)
 {
   const char* location=this->GetLocation(config);
@@ -1216,6 +1227,7 @@ const char* cmTarget::ImportedGetDirectory(const char* config, bool)
   return directory.c_str();
 }
 
+//----------------------------------------------------------------------------
 const char* cmTarget::NormalGetDirectory(const char* config, bool implib)
 {
   if(config && *config)
@@ -1232,6 +1244,7 @@ const char* cmTarget::NormalGetDirectory(const char* config, bool implib)
     }
 }
 
+//----------------------------------------------------------------------------
 const char* cmTarget::GetLocation(const char* config)
 {
   if (this->IsImported())
@@ -1244,6 +1257,7 @@ const char* cmTarget::GetLocation(const char* config)
     }
 }
 
+//----------------------------------------------------------------------------
 const char* cmTarget::ImportedGetLocation(const char* config)
 {
   if ((config) && (strlen(config)))
@@ -1256,10 +1270,11 @@ const char* cmTarget::ImportedGetLocation(const char* config)
       return configLocation;
       }
     }
-    
-  return this->GetProperty("LOCATION");  
+
+  return this->GetProperty("LOCATION");
 }
 
+//----------------------------------------------------------------------------
 const char* cmTarget::NormalGetLocation(const char* config)
 {
   this->Location = this->GetDirectory();
@@ -1300,11 +1315,13 @@ void cmTarget::GetTargetVersion(int& major, int& minor)
     }
 }
 
+//----------------------------------------------------------------------------
 const char *cmTarget::GetProperty(const char* prop)
 {
   return this->GetProperty(prop, cmProperty::TARGET);
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::ComputeObjectFiles()
 {
   if (this->IsImported())
@@ -1319,7 +1336,7 @@ void cmTarget::ComputeObjectFiles()
   std::string objectFiles;
   std::string objExtensionLookup1 = "CMAKE_";
   std::string objExtensionLookup2 = "_OUTPUT_EXTENSION";
-  
+
   for(std::vector<std::string>::iterator d = dirs.begin();
       d != dirs.end(); ++d)
     {
@@ -1352,7 +1369,7 @@ void cmTarget::ComputeObjectFiles()
 #endif
 }
 
-
+//----------------------------------------------------------------------------
 const char *cmTarget::GetProperty(const char* prop,
                                   cmProperty::ScopeType scope)
 {
@@ -1361,40 +1378,41 @@ const char *cmTarget::GetProperty(const char* prop,
     return 0;
     }
 
-    // don't use GetLocation() for imported targets, because there this
-    // calls GetProperty() to get the location...
-    if (!this->IsImported())
+  // don't use GetLocation() for imported targets, because there this
+  // calls GetProperty() to get the location...
+  if (!this->IsImported())
+    {
+    // watch for special "computed" properties that are dependent on other
+    // properties or variables, always recompute them
+    if (!strcmp(prop,"LOCATION"))
       {
-      // watch for special "computed" properties that are dependent on other
-      // properties or variables, always recompute them
-      if (!strcmp(prop,"LOCATION"))
-        {
-        // Set the LOCATION property of the target.  Note that this cannot take
-        // into account the per-configuration name of the target because the
-        // configuration type may not be known at CMake time.  We should
-        // deprecate this feature and instead support transforming an executable
-        // target name given as the command part of custom commands into the
-        // proper path at build time.  Alternatively we could put environment
-        // variable settings in all custom commands that hold the name of the
-        // target for each configuration and then give a reference to the
-        // variable in the location.
-        this->SetProperty("LOCATION", this->GetLocation(0));
-        }
-    
-      // Per-configuration location can be computed.
-      int len = static_cast<int>(strlen(prop));
-      if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
-        {
-        std::string configName(prop, len-9);
-        this->SetProperty(prop, this->GetLocation(configName.c_str()));
-        }
-      
-      if(strcmp(prop, "OBJECT_FILES") == 0)
-        {
-        this->ComputeObjectFiles();
-        }
+      // Set the LOCATION property of the target.  Note that this
+      // cannot take into account the per-configuration name of the
+      // target because the configuration type may not be known at
+      // CMake time.  We should deprecate this feature and instead
+      // support transforming an executable target name given as the
+      // command part of custom commands into the proper path at
+      // build time.  Alternatively we could put environment
+      // variable settings in all custom commands that hold the name
+      // of the target for each configuration and then give a
+      // reference to the variable in the location.
+      this->SetProperty("LOCATION", this->GetLocation(0));
       }
-    
+
+    // Per-configuration location can be computed.
+    int len = static_cast<int>(strlen(prop));
+    if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
+      {
+      std::string configName(prop, len-9);
+      this->SetProperty(prop, this->GetLocation(configName.c_str()));
+      }
+
+    if(strcmp(prop, "OBJECT_FILES") == 0)
+      {
+      this->ComputeObjectFiles();
+      }
+    }
+
   if (strcmp(prop,"IMPORTED") == 0)
     {
     return this->IsImported()?"TRUE":"FALSE";
@@ -1436,20 +1454,22 @@ const char *cmTarget::GetProperty(const char* prop,
     return 0;
     }
   bool chain = false;
-  const char *retVal = 
+  const char *retVal =
     this->Properties.GetPropertyValue(prop, scope, chain);
   if (chain)
     {
     return this->Makefile->GetProperty(prop,scope);
     }
-  return retVal;    
+  return retVal;
 }
 
+//----------------------------------------------------------------------------
 bool cmTarget::GetPropertyAsBool(const char* prop)
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
+//----------------------------------------------------------------------------
 const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
 {
   if(this->GetProperty("HAS_CXX"))
@@ -1462,7 +1482,7 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
     return linkerLang;
     }
   std::set<cmStdString> languages;
-  for(std::vector<cmSourceFile*>::const_iterator i 
+  for(std::vector<cmSourceFile*>::const_iterator i
         = this->SourceFiles.begin();
       i != this->SourceFiles.end(); ++i)
     {
@@ -1477,12 +1497,12 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
     }
   if(languages.size() == 1)
     {
-    const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", 
+    const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE",
                                              languages.begin()->c_str());
     return this->GetProperty("LINKER_LANGUAGE");
     }
   const char* prefLang = 0;
-  for(std::set<cmStdString>::const_iterator s = languages.begin(); 
+  for(std::set<cmStdString>::const_iterator s = languages.begin();
       s != languages.end(); ++s)
     {
     const char* lpref = gg->GetLinkerPreference(s->c_str());
@@ -1512,10 +1532,11 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
   return this->GetProperty("LINKER_LANGUAGE");
 }
 
+//----------------------------------------------------------------------------
 const char* cmTarget::GetCreateRuleVariable()
 {
   switch(this->GetType())
-    { 
+    {
     case cmTarget::STATIC_LIBRARY:
       return "_CREATE_STATIC_LIBRARY";
     case cmTarget::SHARED_LIBRARY:
@@ -1534,6 +1555,7 @@ const char* cmTarget::GetCreateRuleVariable()
   return "";
 }
 
+//----------------------------------------------------------------------------
 const char* cmTarget::GetSuffixVariableInternal(TargetType type,
                                                 bool implib)
 {
@@ -1564,6 +1586,7 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type,
 }
 
 
+//----------------------------------------------------------------------------
 const char* cmTarget::GetPrefixVariableInternal(TargetType type,
                                                 bool implib)
 {
@@ -1640,12 +1663,13 @@ std::string cmTarget::GetFullNameInternal(TargetType type, const char* config,
   return prefix+base+suffix;
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::GetFullNameInternal(TargetType type,
-                                         const char* config,
-                                         bool implib,
-                                         std::string& outPrefix,
-                                         std::string& outBase,
-                                         std::string& outSuffix)
+                                   const char* config,
+                                   bool implib,
+                                   std::string& outPrefix,
+                                   std::string& outBase,
+                                   std::string& outSuffix)
 {
   if (this->IsImported())
     {
@@ -1659,12 +1683,13 @@ void cmTarget::GetFullNameInternal(TargetType type,
     }
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::ImportedGetFullNameInternal(TargetType ,
-                                         const char* config,
-                                         bool ,
-                                         std::string& outPrefix,
-                                         std::string& outBase,
-                                         std::string& outSuffix)
+                                           const char* config,
+                                           bool ,
+                                           std::string& outPrefix,
+                                           std::string& outBase,
+                                           std::string& outSuffix)
 {
   // find the basename, suffix and prefix from getLocation()
   // implib ?
@@ -1810,6 +1835,7 @@ void cmTarget::NormalGetFullNameInternal(TargetType type,
   outSuffix = targetSuffix?targetSuffix:"";
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::GetLibraryNames(std::string& name,
                                std::string& soName,
                                std::string& realName,
@@ -1822,6 +1848,7 @@ void cmTarget::GetLibraryNames(std::string& name,
                                 this->GetType(), config);
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::GetLibraryCleanNames(std::string& staticName,
                                     std::string& sharedName,
                                     std::string& sharedSOName,
@@ -1858,6 +1885,7 @@ void cmTarget::GetLibraryCleanNames(std::string& staticName,
     }
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::GetLibraryNamesInternal(std::string& name,
                                        std::string& soName,
                                        std::string& realName,
@@ -1955,6 +1983,7 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
   pdbName = prefix+base+".pdb";
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::GetExecutableNames(std::string& name,
                                   std::string& realName,
                                   std::string& impName,
@@ -1966,6 +1995,7 @@ void cmTarget::GetExecutableNames(std::string& name,
                                    this->GetType(), config);
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::GetExecutableCleanNames(std::string& name,
                                        std::string& realName,
                                        std::string& impName,
@@ -1977,6 +2007,7 @@ void cmTarget::GetExecutableCleanNames(std::string& name,
                                    cmTarget::EXECUTABLE, config);
 }
 
+//----------------------------------------------------------------------------
 void cmTarget::GetExecutableNamesInternal(std::string& name,
                                           std::string& realName,
                                           std::string& impName,
