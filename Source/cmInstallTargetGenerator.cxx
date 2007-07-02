@@ -100,7 +100,6 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   this->Target->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()
     ->AppendDirectoryForConfig("", config, "/", fromDirConfig);
 
-  std::string config_test;
   if(config && *config)
     {
     std::string config_upper = cmSystemTools::UpperCase(config);
