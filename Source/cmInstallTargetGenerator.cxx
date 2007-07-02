@@ -178,6 +178,13 @@ cmInstallTargetGenerator
                              const char* config,
                              Indent const& indent)
 {
+  // Compute the full path to the main installed file for this target.
+  std::string toFullPath = "$ENV{DESTDIR}";
+  toFullPath += this->Destination;
+  toFullPath += "/";
+  toFullPath += this->GetInstallFilename(this->Target, config,
+                                         this->ImportLibrary, false);
+
   // Compute the list of files to install for this target.
   std::vector<std::string> files;
   std::string literal_args;
@@ -214,6 +221,9 @@ cmInstallTargetGenerator
         from1 += ".app";
         files.push_back(from1);
         type = cmTarget::INSTALL_DIRECTORY;
+        toFullPath += ".app/Contents/MacOS/";
+        toFullPath += this->GetInstallFilename(this->Target, config,
+                                               this->ImportLibrary, false);
         literal_args += " USE_SOURCE_PERMISSIONS";
         // TODO: Still need to apply install_name_tool and stripping
         // to binaries inside bundle.
@@ -283,12 +293,6 @@ cmInstallTargetGenerator
                        no_configurations, no_component,
                        no_rename, literal_args.c_str(),
                        indent);
-
-  std::string toFullPath = "$ENV{DESTDIR}";
-  toFullPath += this->Destination;
-  toFullPath += "/";
-  toFullPath += this->GetInstallFilename(this->Target, config,
-                                         this->ImportLibrary, false);
 
   os << indent << "IF(EXISTS \"" << toFullPath << "\")\n";
   this->AddInstallNamePatchRule(os, indent.Next(), config, toFullPath);
