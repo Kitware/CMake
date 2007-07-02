@@ -28,6 +28,7 @@
 class cmExportCommand : public cmCommand
 {
 public:
+  cmExportCommand();
   /**
    * This is a virtual constructor for the command.
    */
@@ -75,10 +76,11 @@ public:
   cmTypeMacro(cmExportCommand, cmCommand);
 
 private:
-  bool ParseArgs(const std::vector<std::string>& args, std::string& filename,
-                 std::string& prefix, std::string& exportName,
-                 std::vector<std::string>& targets, bool& append ) const;
-
+  cmCommandArgumentGroup ArgumentGroup;
+  cmCAStringVector Targets;
+  cmCAEnabler Append;
+  cmCAString Prefix;
+  cmCAString Filename;
 };
 
 

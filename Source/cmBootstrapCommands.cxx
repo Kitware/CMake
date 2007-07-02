@@ -29,6 +29,7 @@
 #include "cmAddTestCommand.cxx"
 #include "cmBuildCommand.cxx"
 #include "cmCMakeMinimumRequired.cxx"
+#include "cmCommandArgumentsHelper.cxx"
 #include "cmConfigureFileCommand.cxx"
 #include "cmCoreTryCompile.cxx"
 #include "cmCreateTestSourceList.cxx"

@@ -20,6 +20,7 @@
 #include "cmObject.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmCommandArgumentsHelper.h"
 
 /** \class cmCommand
  * \brief Superclass for all commands in CMake.
@@ -174,6 +175,7 @@ public:
 
 protected:
   cmMakefile* Makefile;
+  cmCommandArgumentsHelper Helper;
 
 private:
   bool Enabled;

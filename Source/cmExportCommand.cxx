@@ -22,6 +22,21 @@
 
 #include <cmsys/auto_ptr.hxx>
 
+cmExportCommand::cmExportCommand()
+:cmCommand()
+,ArgumentGroup()
+,Targets(&this->Helper, "TARGETS")
+,Append(&this->Helper, "APPEND", &ArgumentGroup)
+,Prefix(&this->Helper, "PREFIX", &ArgumentGroup)
+,Filename(&this->Helper, "FILE", &ArgumentGroup)
+{
+  // at first TARGETS
+  this->Targets.Follows(0);
+  // and after that the other options in any order
+  this->ArgumentGroup.Follows(&this->Targets);
+}
+
+
 // cmExportCommand
 bool cmExportCommand
 ::InitialPass(std::vector<std::string> const& args)
@@ -32,42 +47,50 @@ bool cmExportCommand
     return false;
     }
 
-  std::string filename;
-  std::string prefix;
-  std::string exportName;
-  std::vector<std::string> targets;
-  bool append = false;
-  if (!this->ParseArgs(args, filename, prefix, exportName, targets, append))
+  std::vector<std::string> unknownArgs;
+  this->Helper.Parse(&args, &unknownArgs);
+
+  if (!unknownArgs.empty())
     {
+    this->SetError("Unknown arguments.");
+    cmSystemTools::SetFatalErrorOccured();
     return false;
     }
 
-  if ( !this->Makefile->CanIWriteThisFile(filename.c_str()) )
+  if (this->Targets.WasFound() == false)
     {
-    std::string e = "attempted to write a file: " + filename
+    this->SetError("TARGETS option missing.");
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+
+
+  if ( !this->Makefile->CanIWriteThisFile(this->Filename.GetString().c_str()) )
+    {
+    std::string e = "attempted to write a file: " + this->Filename.GetString()
       + " into a source directory.";
     this->SetError(e.c_str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
     }
 
-  if ((targets.empty()) || (filename.empty()))
+  if((this->Targets.GetVector().empty())||(this->Filename.GetString().empty()))
     {
     return true;
     }
 
   // Use copy-if-different if not appending.
   cmsys::auto_ptr<std::ofstream> foutPtr;
-  if(append)
+  if(this->Append.IsEnabled())
     {
     cmsys::auto_ptr<std::ofstream> ap(
-      new std::ofstream(filename.c_str(), std::ios::app));
+      new std::ofstream(this->Filename.GetString().c_str(), std::ios::app));
     foutPtr = ap;
     }
   else
     {
     cmsys::auto_ptr<cmGeneratedFileStream> ap(
-      new cmGeneratedFileStream(filename.c_str(), true));
+      new cmGeneratedFileStream(this->Filename.GetString().c_str(), true));
     ap->SetCopyIfDifferent(true);
     foutPtr = ap;
     }
@@ -75,7 +98,7 @@ bool cmExportCommand
 
   if (!fout)
     {
-    cmSystemTools::Error("Error Writing ", filename.c_str());
+    cmSystemTools::Error("Error Writing ", this->Filename.GetString().c_str());
     cmSystemTools::ReportLastSystemError("");
     return true;
     }
@@ -97,8 +120,9 @@ bool cmExportCommand
       }
     }
 
-  for(std::vector<std::string>::const_iterator currentTarget = targets.begin();
-      currentTarget != targets.end();
+  for(std::vector<std::string>::const_iterator 
+      currentTarget = this->Targets.GetVector().begin();
+      currentTarget != this->Targets.GetVector().end();
       ++currentTarget)
     {
     cmTarget* target = this->Makefile->GetLocalGenerator()->
@@ -112,8 +136,9 @@ bool cmExportCommand
       }
     }
 
-  for(std::vector<std::string>::const_iterator currentTarget = targets.begin();
-      currentTarget != targets.end();
+  for(std::vector<std::string>::const_iterator 
+      currentTarget = this->Targets.GetVector().begin();
+      currentTarget != this->Targets.GetVector().end();
       ++currentTarget)
     {
     // Look for a CMake target with the given name, which is an executable
@@ -129,26 +154,30 @@ bool cmExportCommand
       switch (target->GetType())
         {
         case cmTarget::EXECUTABLE:
-          fout << "ADD_EXECUTABLE(" << prefix.c_str() << currentTarget->c_str()
-                                                              << " IMPORT )\n";
+          fout << "ADD_EXECUTABLE(" 
+               << this->Prefix.GetString().c_str() << currentTarget->c_str()
+               << " IMPORT )\n";
           break;
         case cmTarget::STATIC_LIBRARY:
-          fout << "ADD_LIBRARY(" << prefix.c_str() << currentTarget->c_str()
-                                                       << " STATIC IMPORT )\n";
+          fout << "ADD_LIBRARY(" 
+               << this->Prefix.GetString().c_str() << currentTarget->c_str()
+               << " STATIC IMPORT )\n";
           break;
         case cmTarget::SHARED_LIBRARY:
-          fout << "ADD_LIBRARY(" << prefix.c_str() << currentTarget->c_str()
-                                                       << " SHARED IMPORT )\n";
+          fout << "ADD_LIBRARY(" 
+               << this->Prefix.GetString().c_str() << currentTarget->c_str()
+               << " SHARED IMPORT )\n";
           break;
         case cmTarget::MODULE_LIBRARY:
-          fout << "ADD_LIBRARY(" << prefix.c_str() << currentTarget->c_str()
-                                                       << " MODULE IMPORT )\n";
+          fout << "ADD_LIBRARY(" 
+               << this->Prefix.GetString().c_str() << currentTarget->c_str()
+               << " MODULE IMPORT )\n";
           break;
         default:  // should never happen
           break;
         }
 
-      fout << "SET_TARGET_PROPERTIES(" << prefix.c_str()
+      fout << "SET_TARGET_PROPERTIES(" << this->Prefix.GetString().c_str()
                                  << currentTarget->c_str() << " PROPERTIES \n"
         << "                      LOCATION " << target->GetLocation(0) << "\n";
       for(std::vector<std::string>::const_iterator
@@ -170,84 +199,5 @@ bool cmExportCommand
       }
     }
 
-  return true;
-}
-
-bool cmExportCommand::ParseArgs(const std::vector<std::string>& args,
-                                std::string& filename,
-                                std::string& prefix,
-                                std::string& exportName,
-                                std::vector<std::string>& targets,
-                                bool& append) const
-{
-  bool doingFile = false;
-  bool doingPrefix = false;
-  bool doingTargets = false;
-  bool doingName = true;
-  for(std::vector<std::string>::const_iterator it = args.begin();
-      it != args.end();
-      ++it)
-    {
-    if (*it == "FILE")
-      {
-      doingFile = true;
-      doingPrefix = false;
-      doingName = false;
-      doingTargets = false;
-      }
-    else if (*it == "PREFIX")
-      {
-      doingFile = false;
-      doingPrefix = true;
-      doingName = false;
-      doingTargets = false;
-      }
-    else if (*it == "TARGETS")
-      {
-      doingFile = false;
-      doingPrefix = false;
-      doingName = false;
-      doingTargets = true;
-      }
-    else if (*it == "APPEND")
-      {
-      append = true;
-      doingFile = false;
-      doingPrefix = false;
-      doingName = false;
-      doingTargets = false;
-      }
-    else if (doingFile)
-      {
-      filename = *it;
-      doingFile = false;
-      doingPrefix = false;
-      doingName = false;
-      doingTargets = false;
-      }
-    else if (doingPrefix)
-      {
-      prefix = *it;
-      doingFile = false;
-      doingPrefix = false;
-      doingName = false;
-      doingTargets = false;
-      }
-    else if (doingTargets)
-      {
-      targets.push_back(*it);
-      }
-    else if (doingName)
-      {
-      exportName = *it;
-      doingFile = false;
-      doingPrefix = false;
-      doingName = false;
-      doingTargets = false;
-      }
-    else
-      {
-      }
-    }
   return true;
 }
