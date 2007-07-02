@@ -19,20 +19,35 @@
 
 #include "cmStandardIncludes.h"
 
+/** This is just a helper class to make it build with MSVC 6.0.
+Actually the enums and internal classes could directly go into
+cmDocumentation, but then MSVC6 complains in RequestedHelpItem that 
+cmDocumentation is an undefined type and so it doesn't know the enums.
+Moving the enums to a class which is then already completely parsed helps. 
+against this. */
+class cmDocumentationEnums
+{
+public:
+  /** Types of help provided.  */
+  enum Type 
+     { None, Usage, Single, SingleModule, SingleProperty,
+       List, ModuleList, PropertyList,
+       Full, Properties, Modules, Commands, CompatCommands,
+       Copyright, Version };
+
+  /** Forms of documentation output.  */
+  enum Form { TextForm, HTMLForm, ManForm, UsageForm };
+};
+
+
 /** Class to generate documentation.  */
-class cmDocumentation
+class cmDocumentation: public cmDocumentationEnums
 {
 public:
   cmDocumentation();
   
   ~cmDocumentation();
   // High-level interface for standard documents:
-  
-  /** Types of help provided.  */
-  enum Type { None, Usage, Single, SingleModule, SingleProperty,
-              List, ModuleList, PropertyList,
-              Full, Properties, Modules, Commands, CompatCommands,
-              Copyright, Version };
   
   /**
    * Check command line arguments for documentation options.  Returns
@@ -85,11 +100,6 @@ public:
   void SetSeeAlsoList(const cmDocumentationEntry*);
   
   // Low-level interface for custom documents:
-  
-  /** Forms of documentation output.  */
-  enum Form { TextForm, HTMLForm, ManForm, UsageForm };
-  
-  
   /** Internal class representing a section of the documentation.
    * Cares e.g. for the different section titles in the different
    * output formats.
@@ -131,7 +141,6 @@ public:
       std::string ManName;
       std::vector<cmDocumentationEntry> Entries;
       static const cmDocumentationEntry EmptySection;
-
   };
 
   /**
@@ -254,8 +263,8 @@ private:
   struct RequestedHelpItem
   {
     RequestedHelpItem():Form(TextForm), Type(None) {}
-    cmDocumentation::Form Form;
-    cmDocumentation::Type Type;
+    cmDocumentationEnums::Form Form;
+    cmDocumentationEnums::Type Type;
     std::string Filename;
     std::string Argument;
   };
