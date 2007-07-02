@@ -7,9 +7,6 @@
 # as a default compiler
 # If the internal cmake variable _CMAKE_TOOLCHAIN_PREFIX is set, this is used 
 # as prefix for the tools (e.g. arm-elf-g++, arm-elf-ar etc.)
-# It also tries to detect a MS crosscompiler and find out its 
-# suffix (clarm.exe), which will be stored in _CMAKE_TOOLCHAIN_SUFFIX and
-# reused for the C compiler.
 #
 # Sets the following variables:
 #   CMAKE_CXX_COMPILER
@@ -19,7 +16,6 @@
 #
 # If not already set before, it also sets
 #   _CMAKE_TOOLCHAIN_PREFIX
-#   _CMAKE_TOOLCHAIN_SUFFIX
 
 IF(NOT CMAKE_CXX_COMPILER)
   SET(CMAKE_CXX_COMPILER_INIT NOTFOUND)
@@ -46,7 +42,7 @@ IF(NOT CMAKE_CXX_COMPILER)
   IF(CMAKE_CXX_COMPILER_INIT)
     SET(CMAKE_CXX_COMPILER_LIST ${CMAKE_CXX_COMPILER_INIT})
   ELSE(CMAKE_CXX_COMPILER_INIT)
-    SET(CMAKE_CXX_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ CC aCC cl${_CMAKE_TOOLCHAIN_SUFFIX} bcc xlC)
+    SET(CMAKE_CXX_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ CC aCC cl bcc xlC)
   ENDIF(CMAKE_CXX_COMPILER_INIT)
 
   # Find the compiler.
@@ -92,16 +88,6 @@ IF (NOT _CMAKE_TOOLCHAIN_PREFIX)
     STRING(REGEX REPLACE "^(.+-)[gc]\\+\\+"  "\\1" _CMAKE_TOOLCHAIN_PREFIX "${COMPILER_BASENAME}")
   ENDIF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+")
 ENDIF (NOT _CMAKE_TOOLCHAIN_PREFIX)
-
-# if we have a MS cross compiler, it usually has a suffix, like 
-# e.g. clarm.exe or clmips.exe. Use this suffix for the CXX compiler too.
-IF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
-  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
-  IF (COMPILER_BASENAME MATCHES "^cl(.+)\\.exe$")
-    STRING(REGEX REPLACE "^cl(.+)\\.exe$"  "\\1" _CMAKE_TOOLCHAIN_SUFFIX "${COMPILER_BASENAME}")
-  ENDIF (COMPILER_BASENAME MATCHES "^cl(.+)\\.exe$")
-ENDIF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
-
 
 # This block was used before the compiler was identified by building a
 # source file.  Unless g++ crashes when building a small C++

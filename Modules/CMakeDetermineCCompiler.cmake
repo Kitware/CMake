@@ -8,10 +8,6 @@
 # If the internal cmake variable _CMAKE_TOOLCHAIN_PREFIX is set, this is used 
 # as prefix for the tools (e.g. arm-elf-gcc, arm-elf-ar etc.). This works
 # currently with the GNU crosscompilers.
-# It also tries to detect a MS crosscompiler and find out its 
-# suffix (clarm.exe), which will be stored in _CMAKE_TOOLCHAIN_SUFFIX and
-# reused for the CXX compiler.
-#
 #
 # Sets the following variables: 
 #   CMAKE_C_COMPILER
@@ -21,7 +17,6 @@
 #
 # If not already set before, it also sets
 #   _CMAKE_TOOLCHAIN_PREFIX
-#   _CMAKE_TOOLCHAIN_SUFFIX
 
 IF(NOT CMAKE_C_COMPILER)
   SET(CMAKE_CXX_COMPILER_INIT NOTFOUND)
@@ -48,7 +43,7 @@ IF(NOT CMAKE_C_COMPILER)
   IF(CMAKE_C_COMPILER_INIT)
     SET(CMAKE_C_COMPILER_LIST ${CMAKE_C_COMPILER_INIT})
   ELSE(CMAKE_C_COMPILER_INIT)
-    SET(CMAKE_C_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}gcc ${_CMAKE_TOOLCHAIN_PREFIX}cc cl${_CMAKE_TOOLCHAIN_SUFFIX} bcc xlc)
+    SET(CMAKE_C_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}gcc ${_CMAKE_TOOLCHAIN_PREFIX}cc cl bcc xlc)
   ENDIF(CMAKE_C_COMPILER_INIT)
 
   # Find the compiler.
@@ -95,15 +90,6 @@ IF (NOT _CMAKE_TOOLCHAIN_PREFIX)
   ENDIF (COMPILER_BASENAME MATCHES "^(.+-)g?cc")
 ENDIF (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
-# if we have a MS cross compiler, it usually has a suffix, like 
-# e.g. clarm.exe or clmips.exe. Use this suffix for the CXX compiler too.
-# the same is true e.g. for the IAR cross compiler, which is "icc<suffix>"
-IF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
-  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
-  IF (COMPILER_BASENAME MATCHES "^cl(.+)\\.exe$")
-    STRING(REGEX REPLACE "^cl(.+)\\.exe$"  "\\1" _CMAKE_TOOLCHAIN_SUFFIX "${COMPILER_BASENAME}")
-  ENDIF (COMPILER_BASENAME MATCHES "^cl(.+)\\.exe$")
-ENDIF (NOT _CMAKE_TOOLCHAIN_SUFFIX)
 
 # Build a small source file to identify the compiler.
 IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")

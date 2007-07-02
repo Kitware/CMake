@@ -121,10 +121,6 @@ endif(NOT "${CMAKE_C_OUTPUT_EXTENSION}" STREQUAL ".foo")
 
 # check the results from DetermineCXXCompiler
 
-if(NOT "${_CMAKE_TOOLCHAIN_SUFFIX}" STREQUAL "arm")
-   message(FATAL_ERROR "wrong toolchain suffix detected: \"${_CMAKE_TOOLCHAIN_SUFFIX}\", expected: \"arm\"")
-endif(NOT "${_CMAKE_TOOLCHAIN_SUFFIX}" STREQUAL "arm")
-
 if(NOT "${_CMAKE_USER_CXX_COMPILER_PATH}" STREQUAL "/opt/bar/bin")
    message(FATAL_ERROR "wrong CXX compiler location detected: \"${_CMAKE_USER_CXX_COMPILER_PATH}\", expected: \"/opt/bar/bin\"")
 endif(NOT "${_CMAKE_USER_CXX_COMPILER_PATH}" STREQUAL "/opt/bar/bin")
@@ -134,7 +130,6 @@ if(NOT "${CMAKE_CXX_OUTPUT_EXTENSION}" STREQUAL ".bar")
 endif(NOT "${CMAKE_CXX_OUTPUT_EXTENSION}" STREQUAL ".bar")
 
 message(STATUS "CMAKE_SYSTEM: \"${CMAKE_SYSTEM}\"")
-message(STATUS "_CMAKE_TOOLCHAIN_SUFFIX: \"${_CMAKE_TOOLCHAIN_SUFFIX}\"")
 message(STATUS "_CMAKE_TOOLCHAIN_PREFIX: \"${_CMAKE_TOOLCHAIN_PREFIX}\"")
 message(STATUS "_CMAKE_USER_C_COMPILER_PATH: \"${_CMAKE_USER_C_COMPILER_PATH}\"")
 message(STATUS "_CMAKE_USER_CXX_COMPILER_PATH: \"${_CMAKE_USER_CXX_COMPILER_PATH}\"")
