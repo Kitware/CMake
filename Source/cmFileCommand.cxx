@@ -1241,20 +1241,17 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
   std::string rename = "";
   std::string destination = "";
 
-  std::set<cmStdString> components;
-  std::set<cmStdString> configurations;
   std::vector<std::string> files;
   int itype = cmTarget::INSTALL_FILES;
 
   std::map<cmStdString, const char*> properties;
   bool optional = false;
-  bool result = this->ParseInstallArgs(args, installer, components,
-                                       configurations, properties,
+  bool result = this->ParseInstallArgs(args, installer, properties,
                                        itype, rename, destination, files,
                                        optional);
   if (result == true)
     {
-    result = this->DoInstall(installer, components, configurations, properties,
+    result = this->DoInstall(installer, properties,
                              itype, rename, destination, files, optional);
     }
   return result;
@@ -1263,8 +1260,6 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
                                 cmFileInstaller& installer,
-                                std::set<cmStdString>& components,
-                                std::set<cmStdString>& configurations,
                                 std::map<cmStdString, const char*>& properties,
                                 int& itype,
                                 std::string& rename,
@@ -1278,8 +1273,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
     bool doing_permissions_file = false;
     bool doing_permissions_dir = false;
     bool doing_permissions_match = false;
-    bool doing_components = false;
-    bool doing_configurations = false;
     bool use_given_permissions_file = false;
     bool use_given_permissions_dir = false;
     bool use_source_permissions = false;
@@ -1308,8 +1301,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         doing_properties = false;
         doing_permissions_file = false;
         doing_permissions_dir = false;
-        doing_components = false;
-        doing_configurations = false;
         }
       else if ( *cstr == "TYPE" && i < args.size()-1 )
         {
@@ -1332,8 +1323,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         doing_files = false;
         doing_permissions_file = false;
         doing_permissions_dir = false;
-        doing_components = false;
-        doing_configurations = false;
         }
       else if ( *cstr == "RENAME" && i < args.size()-1 )
         {
@@ -1351,8 +1340,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         doing_files = false;
         doing_permissions_file = false;
         doing_permissions_dir = false;
-        doing_components = false;
-        doing_configurations = false;
         }
       else if ( *cstr == "REGEX" && i < args.size()-1 )
         {
@@ -1370,8 +1357,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         doing_files = false;
         doing_permissions_file = false;
         doing_permissions_dir = false;
-        doing_components = false;
-        doing_configurations = false;
         }
       else if ( *cstr == "EXCLUDE"  )
         {
@@ -1401,8 +1386,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         doing_files = false;
         doing_permissions_file = false;
         doing_permissions_dir = false;
-        doing_components = false;
-        doing_configurations = false;
         }
       else if ( *cstr == "PERMISSIONS" )
         {
@@ -1420,8 +1403,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         doing_properties = false;
         doing_files = false;
         doing_permissions_dir = false;
-        doing_components = false;
-        doing_configurations = false;
         }
       else if ( *cstr == "DIR_PERMISSIONS" )
         {
@@ -1438,8 +1419,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         doing_files = false;
         doing_permissions_file = false;
         doing_permissions_dir = true;
-        doing_components = false;
-        doing_configurations = false;
         }
       else if ( *cstr == "USE_SOURCE_PERMISSIONS" )
         {
@@ -1455,43 +1434,25 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         doing_files = false;
         doing_permissions_file = false;
         doing_permissions_dir = false;
-        doing_components = false;
-        doing_configurations = false;
         use_source_permissions = true;
         }
       else if ( *cstr == "COMPONENTS"  )
         {
-        if(current_match_rule)
-          {
-          cmOStringStream e;
-          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-          this->SetError(e.str().c_str());
-          return false;
-          }
-
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
-        doing_components = true;
-        doing_configurations = false;
+        cmOStringStream e;
+        e << "INSTALL called with old-style COMPONENTS argument.  "
+          << "This script was generated with an older version of CMake.  "
+          << "Re-run this cmake version on your build tree.";
+        this->SetError(e.str().c_str());
+        return false;
         }
       else if ( *cstr == "CONFIGURATIONS"  )
         {
-        if(current_match_rule)
-          {
-          cmOStringStream e;
-          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-          this->SetError(e.str().c_str());
-          return false;
-          }
-
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
-        doing_components = false;
-        doing_configurations = true;
+        cmOStringStream e;
+        e << "INSTALL called with old-style CONFIGURATIONS argument.  "
+          << "This script was generated with an older version of CMake.  "
+          << "Re-run this cmake version on your build tree.";
+        this->SetError(e.str().c_str());
+        return false;
         }
       else if ( *cstr == "FILES" && !doing_files)
         {
@@ -1507,8 +1468,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         doing_properties = false;
         doing_permissions_file = false;
         doing_permissions_dir = false;
-        doing_components = false;
-        doing_configurations = false;
         }
       else if ( doing_properties && i < args.size()-1 )
         {
@@ -1518,14 +1477,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
       else if ( doing_files )
         {
         files.push_back(*cstr);
-        }
-      else if ( doing_components )
-        {
-        components.insert(*cstr);
-        }
-      else if ( doing_configurations )
-        {
-        configurations.insert(cmSystemTools::UpperCase(*cstr));
         }
       else if(doing_permissions_file)
         {
@@ -1587,6 +1538,25 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
       return false;
       }
 
+    if(properties.find("VERSION") != properties.end())
+      {
+      cmOStringStream e;
+      e << "INSTALL called with old-style VERSION property.  "
+        << "This script was generated with an older version of CMake.  "
+        << "Re-run this cmake version on your build tree.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    if(properties.find("SOVERSION") != properties.end())
+      {
+      cmOStringStream e;
+      e << "INSTALL called with old-style SOVERSION property.  "
+        << "This script was generated with an older version of CMake.  "
+        << "Re-run this cmake version on your build tree.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
     this->GetTargetTypeFromString(stype, itype);
 
     this->HandleInstallPermissions(installer,
@@ -1602,8 +1572,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
 
 //----------------------------------------------------------------------------
 bool cmFileCommand::DoInstall( cmFileInstaller& installer,
-                              const std::set<cmStdString>& components,
-                              const std::set<cmStdString>& configurations,
                               std::map<cmStdString, const char*>& properties,
                               const int itype,
                               const std::string& rename,
@@ -1612,38 +1580,6 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
                               const bool optional)
 {
   typedef std::set<cmStdString>::const_iterator iter_type;
-  // Check for component-specific installation.
-  const char* cmake_install_component =
-    this->Makefile->GetDefinition("CMAKE_INSTALL_COMPONENT");
-  if(cmake_install_component && *cmake_install_component)
-    {
-    // This install rule applies only if it is associated with the
-    // current component.
-    if(iter_type(components.find(cmake_install_component)) ==
-       components.end())
-      {
-      return true;
-      }
-    }
-
-  // Check for configuration-specific installation.
-  if(!configurations.empty())
-    {
-    std::string cmake_install_configuration = cmSystemTools::UpperCase(
-        this->Makefile->GetSafeDefinition("CMAKE_INSTALL_CONFIG_NAME"));
-    if(cmake_install_configuration.empty())
-      {
-      // No configuration specified for installation but this install
-      // rule is configuration-specific.  Skip it.
-      return true;
-      }
-    else if(iter_type(configurations.find(cmake_install_configuration)) ==
-            configurations.end())
-      {
-      // This rule is specific to a configuration not being installed.
-      return true;
-      }
-    }
 
   // Check whether files should be copied always or only if they have
   // changed.
@@ -1667,97 +1603,6 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
       {
       toFile += "/";
       toFile += toName;
-      }
-
-    // Handle type-specific installation details.
-    switch(itype)
-      {
-      case cmTarget::MODULE_LIBRARY:
-      case cmTarget::STATIC_LIBRARY:
-      case cmTarget::SHARED_LIBRARY:
-        {
-        // Handle shared library versioning
-        const char* lib_version = 0;
-        const char* lib_soversion = 0;
-        if ( properties.find("VERSION") != properties.end() )
-          {
-          lib_version = properties["VERSION"];
-          }
-        if ( properties.find("SOVERSION") != properties.end() )
-          {
-          lib_soversion = properties["SOVERSION"];
-          }
-        if ( !lib_version && lib_soversion )
-          {
-          lib_version = lib_soversion;
-          }
-        if ( !lib_soversion && lib_version )
-          {
-          lib_soversion = lib_version;
-          }
-        if ( lib_version && lib_soversion )
-          {
-          std::string libname = toFile;
-          std::string soname = toFile;
-          std::string soname_nopath = fromName;
-          this->ComputeVersionedLibName(soname, lib_soversion);
-          this->ComputeVersionedLibName(soname_nopath, lib_soversion);
-          this->ComputeVersionedLibName(fromName, lib_version);
-          this->ComputeVersionedLibName(toFile, lib_version);
-
-          cmSystemTools::RemoveFile(soname.c_str());
-          cmSystemTools::RemoveFile(libname.c_str());
-
-          if (!cmSystemTools::CreateSymlink(soname_nopath.c_str(),
-                                            libname.c_str()) )
-            {
-            std::string errstring = "error when creating symlink from: "
-              + libname + " to " + soname_nopath;
-            this->SetError(errstring.c_str());
-            return false;
-            }
-          installer.ManifestAppend(libname);
-          if ( toFile != soname )
-            {
-            if ( !cmSystemTools::CreateSymlink(fromName.c_str(),
-                                               soname.c_str()) )
-              {
-              std::string errstring = "error when creating symlink from: "
-                + soname + " to " + fromName;
-              this->SetError(errstring.c_str());
-              return false;
-              }
-            installer.ManifestAppend(soname);
-            }
-          }
-        }
-        break;
-      case cmTarget::EXECUTABLE:
-        {
-        // Handle executable versioning
-        const char* exe_version = 0;
-        if ( properties.find("VERSION") != properties.end() )
-          {
-          exe_version = properties["VERSION"];
-          }
-        if ( exe_version )
-          {
-          std::string exename = toFile;
-          this->ComputeVersionedExeName(fromName, exe_version);
-          this->ComputeVersionedExeName(toFile, exe_version);
-          cmSystemTools::RemoveFile(exename.c_str());
-          if(!cmSystemTools::CreateSymlink(fromName.c_str(),
-                                           exename.c_str()))
-            {
-            std::string errstring = "error when creating symlink from: "
-              + exename + " to " + fromName;
-            this->SetError(errstring.c_str());
-            return false;
-            }
-          installer.ManifestAppend(exename);
-          }
-        }
-        break;
       }
 
     // Construct the full path to the source file.  The file name may
@@ -1804,41 +1649,6 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
     }
 
   return true;
-}
-
-//----------------------------------------------------------------------------
-void cmFileCommand::ComputeVersionedLibName(std::string& name,
-                                            const char* version)
-{
-#if defined(__APPLE__)
-  std::string ext;
-  cmsys_stl::string::size_type dot_pos = name.rfind(".");
-  if(dot_pos != name.npos)
-    {
-    ext = name.substr(dot_pos, name.npos);
-    name = name.substr(0, dot_pos);
-    }
-#endif
-  name += ".";
-  name += version;
-#if defined(__APPLE__)
-  name += ext;
-#endif
-}
-
-//----------------------------------------------------------------------------
-void cmFileCommand::ComputeVersionedExeName(std::string& name,
-                                            const char* version)
-{
-  std::string ext;
-  if(name.size() > 4 && name.substr(name.size()-4) == ".exe")
-    {
-    ext = ".exe";
-    name = name.substr(0, name.size()-4);
-    }
-  name += "-";
-  name += version;
-  name += ext;
 }
 
 //----------------------------------------------------------------------------

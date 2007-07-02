@@ -55,6 +55,7 @@ class cmInstallExportGenerator: public cmInstallGenerator
 public:
   cmInstallExportGenerator(const char* dest, const char* file_permissions,
                            const std::vector<std::string>& configurations,
+                           const char* component,
                            const char* filename, const char* prefix, 
                            const char* tempOutputDir);
 
@@ -73,14 +74,15 @@ protected:
     cmTargetWithProperties();
   };
 
+  typedef cmInstallGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);
+  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
   static bool AddInstallLocations(cmTargetWithProperties *twp, 
                                   cmInstallTargetGenerator* generator,
                                   const char* prefix);
 
   std::string Name;
   std::string FilePermissions;
-  const std::vector<std::string> Configurations;
   std::string Filename;
   std::string Prefix;
   std::string TempOutputDir;

@@ -23,13 +23,14 @@
 
 #include "cmInstallExportGenerator.h"
 
-cmInstallExportGenerator::cmInstallExportGenerator(const char* destination,
-    const char* file_permissions,
-    std::vector<std::string> const& configurations,
-    const char* filename, const char* prefix, const char* tempOutputDir)
-  :cmInstallGenerator(destination)
+cmInstallExportGenerator::cmInstallExportGenerator(
+  const char* destination,
+  const char* file_permissions,
+  std::vector<std::string> const& configurations,
+  const char* component,
+  const char* filename, const char* prefix, const char* tempOutputDir)
+  :cmInstallGenerator(destination, configurations, component)
   ,FilePermissions(file_permissions)
-  ,Configurations(configurations)
   ,Filename(filename)
   ,Prefix(prefix)
   ,TempOutputDir(tempOutputDir)
@@ -221,13 +222,19 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
       exportFileStream << "                      )\n\n";
     }
 
+  // Perform the main install script generation.
+  this->cmInstallGenerator::GenerateScript(os);
+}
+
+//----------------------------------------------------------------------------
+void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
+                                                     Indent const& indent)
+{
   // install rule for the file created above
   std::vector<std::string> exportFile;
   exportFile.push_back(this->ExportFilename);
-  this->AddInstallRule(os, this->Destination.c_str(), cmTarget::INSTALL_FILES, 
-                       exportFile, false, 0, 
-                       this->FilePermissions.c_str(), 0, this->Configurations, 
-                       0, this->Filename.c_str(), 0);
-
+  this->AddInstallRule(os, this->Destination.c_str(), cmTarget::INSTALL_FILES,
+                       exportFile, false, 0,
+                       this->FilePermissions.c_str(),
+                       0, this->Filename.c_str(), 0, indent);
 }
-

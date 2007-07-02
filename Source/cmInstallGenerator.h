@@ -54,8 +54,9 @@ inline std::ostream& operator<<(std::ostream& os,
 class cmInstallGenerator
 {
 public:
-  cmInstallGenerator();
-  cmInstallGenerator(const char* dest):Destination(dest?dest:"") {}
+  cmInstallGenerator(const char* destination,
+                     std::vector<std::string> const& configurations,
+                     const char* component);
   virtual ~cmInstallGenerator();
 
   void Generate(std::ostream& os, const char* config,
@@ -68,21 +69,33 @@ public:
     const char* properties = 0,
     const char* permissions_file = 0,
     const char* permissions_dir = 0,
-    std::vector<std::string> const& configurations 
-    = std::vector<std::string>(),
-    const char* component = 0,
     const char* rename = 0,
     const char* literal_args = 0,
     cmInstallGeneratorIndent const& indent = cmInstallGeneratorIndent()
     );
 
-  const char* GetDestination() const        {return this->Destination.c_str();}
+  const char* GetDestination() const
+    { return this->Destination.c_str(); }
+  const std::vector<std::string>& GetConfigurations() const
+    { return this->Configurations; }
 protected:
-  virtual void GenerateScript(std::ostream& os)=0;
+  typedef cmInstallGeneratorIndent Indent;
+  virtual void GenerateScript(std::ostream& os);
+  virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
+  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
 
+  std::string CreateConfigTest(const char* config);
+  std::string CreateConfigTest(std::vector<std::string> const& configs);
+  std::string CreateComponentTest(const char* component);
+
+  // Information shared by most generator types.
+  std::string Destination;
+  std::vector<std::string> const Configurations;
+  std::string Component;
+
+  // Information used during generation.
   const char* ConfigurationName;
   std::vector<std::string> const* ConfigurationTypes;
-  std::string Destination;
 };
 
 #endif

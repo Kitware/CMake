@@ -35,12 +35,11 @@ public:
   virtual ~cmInstallFilesGenerator();
 
 protected:
-  virtual void GenerateScript(std::ostream& os);
+  typedef cmInstallGeneratorIndent Indent;
+  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
   std::vector<std::string> Files;
   bool Programs;
   std::string FilePermissions;
-  std::vector<std::string> Configurations;
-  std::string Component;
   std::string Rename;
   bool Optional;
 };

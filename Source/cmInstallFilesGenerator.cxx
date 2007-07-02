@@ -27,9 +27,10 @@ cmInstallFilesGenerator
                           const char* component,
                           const char* rename,
                           bool optional):
-  cmInstallGenerator(dest), Files(files), Programs(programs),
-  FilePermissions(file_permissions), Configurations(configurations),
-  Component(component), Rename(rename), Optional(optional)
+  cmInstallGenerator(dest, configurations, component),
+  Files(files), Programs(programs),
+  FilePermissions(file_permissions),
+  Rename(rename), Optional(optional)
 {
 }
 
@@ -40,7 +41,8 @@ cmInstallFilesGenerator
 }
 
 //----------------------------------------------------------------------------
-void cmInstallFilesGenerator::GenerateScript(std::ostream& os)
+void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
+                                                    Indent const& indent)
 {
   // Write code to install the files.
   const char* no_properties = 0;
@@ -52,7 +54,5 @@ void cmInstallFilesGenerator::GenerateScript(std::ostream& os)
                        this->Files,
                        this->Optional, no_properties,
                        this->FilePermissions.c_str(), no_dir_permissions,
-                       this->Configurations,
-                       this->Component.c_str(),
-                       this->Rename.c_str());
+                       this->Rename.c_str(), 0, indent);
 }

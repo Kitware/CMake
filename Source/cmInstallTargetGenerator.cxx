@@ -22,8 +22,6 @@
 #include "cmake.h"
 
 // TODO:
-//   - Consolidate component/configuration checks across multiple
-//     install generators
 //   - Skip IF(EXISTS) checks if nothing is done with the installed file
 
 //----------------------------------------------------------------------------
@@ -32,9 +30,8 @@ cmInstallTargetGenerator
                            const char* file_permissions,
                            std::vector<std::string> const& configurations,
                            const char* component, bool optional):
-  cmInstallGenerator(dest), Target(&t), ImportLibrary(implib),
-  FilePermissions(file_permissions), Configurations(configurations),
-  Component(component), Optional(optional)
+  cmInstallGenerator(dest, configurations, component), Target(&t),
+  ImportLibrary(implib), FilePermissions(file_permissions), Optional(optional)
 {
   this->Target->SetHaveInstallRule(true);
 }
@@ -52,10 +49,8 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   Indent indent;
 
   // Begin this block of installation.
-  std::string component_test = "NOT CMAKE_INSTALL_COMPONENT OR "
-    "\"${CMAKE_INSTALL_COMPONENT}\" MATCHES \"^(";
-  component_test += this->Component;
-  component_test += ")$\"";
+  std::string component_test =
+    this->CreateComponentTest(this->Component.c_str());
   os << indent << "IF(" << component_test << ")\n";
 
   // Compute the build tree directory from which to copy the target.
@@ -95,34 +90,6 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-static std::string cmInstallTargetGeneratorEncodeConfig(const char* config)
-{
-  std::string result;
-  for(const char* c = config; *c; ++c)
-    {
-    if(*c >= 'a' && *c <= 'z')
-      {
-      result += "[";
-      result += *c + ('A' - 'a');
-      result += *c;
-      result += "]";
-      }
-    else if(*c >= 'A' && *c <= 'Z')
-      {
-      result += "[";
-      result += *c;
-      result += *c + ('a' - 'A');
-      result += "]";
-      }
-    else
-      {
-      result += *c;
-      }
-    }
-  return result;
-}
-
-//----------------------------------------------------------------------------
 void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
                                                        const char* fromDir,
                                                        const char* config,
@@ -155,9 +122,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       }
 
     // Generate a per-configuration block.
-    config_test = "\"${CMAKE_INSTALL_CONFIG_NAME}\" MATCHES \"^(";
-    config_test += cmInstallTargetGeneratorEncodeConfig(config);
-    config_test += ")$\"";
+    std::string config_test = this->CreateConfigTest(config);
     os << indent << "IF(" << config_test << ")\n";
     this->GenerateScriptForConfigDir(os, fromDirConfig.c_str(), config,
                                      indent.Next());
@@ -221,12 +186,12 @@ cmInstallTargetGenerator
         from1 += ".app";
         files.push_back(from1);
         type = cmTarget::INSTALL_DIRECTORY;
+        // Need to apply install_name_tool and stripping to binary
+        // inside bundle.
         toFullPath += ".app/Contents/MacOS/";
         toFullPath += this->GetInstallFilename(this->Target, config,
                                                this->ImportLibrary, false);
         literal_args += " USE_SOURCE_PERMISSIONS";
-        // TODO: Still need to apply install_name_tool and stripping
-        // to binaries inside bundle.
         }
       else
         {
@@ -284,13 +249,10 @@ cmInstallTargetGenerator
   const char* no_dir_permissions = 0;
   const char* no_rename = 0;
   const char* no_properties = 0;
-  const char* no_component = 0;
-  std::vector<std::string> no_configurations;
   bool optional = this->Optional || this->ImportLibrary;
   this->AddInstallRule(os, this->Destination.c_str(), type, files,
                        optional, no_properties,
                        this->FilePermissions.c_str(), no_dir_permissions,
-                       no_configurations, no_component,
                        no_rename, literal_args.c_str(),
                        indent);
 

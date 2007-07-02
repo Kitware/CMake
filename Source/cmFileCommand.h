@@ -159,15 +159,11 @@ protected:
   bool HandleRelativePathCommand(std::vector<std::string> const& args);
   bool HandleCMakePathCommand(std::vector<std::string> const& args,
                               bool nativePath);
-  void ComputeVersionedLibName(std::string& name, const char* version);
-  void ComputeVersionedExeName(std::string& name, const char* version);
 
   // FILE(INSTALL ...) related functions
   bool HandleInstallCommand(std::vector<std::string> const& args);
   bool ParseInstallArgs(std::vector<std::string> const& args,
                         cmFileInstaller& installer,
-                        std::set<cmStdString>& components,
-                        std::set<cmStdString>& configurations,
                         std::map<cmStdString, const char*>& properties,
                         int& itype,
                         std::string& destination,
@@ -176,8 +172,6 @@ protected:
                         bool& optional
                        );
   bool DoInstall(cmFileInstaller& installer,
-                 const std::set<cmStdString>& components,
-                 const std::set<cmStdString>& configurations,
                  std::map<cmStdString, const char*>& properties,
                  const int itype,
                  const std::string& rename,

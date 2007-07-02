@@ -40,8 +40,6 @@ public:
   static std::string GetInstallFilename(cmTarget*target, const char* config, 
                                         bool implib, bool useSOName);
 
-  const std::vector<std::string>& GetConfigurations() const {return this->Configurations;}
-  
 protected:
   typedef cmInstallGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);
@@ -66,8 +64,6 @@ protected:
   cmTarget* Target;
   bool ImportLibrary;
   std::string FilePermissions;
-  std::vector<std::string> Configurations;
-  std::string Component;
   bool Optional;
 };
 

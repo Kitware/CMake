@@ -19,6 +19,7 @@
 //----------------------------------------------------------------------------
 cmInstallScriptGenerator
 ::cmInstallScriptGenerator(const char* script, bool code):
+  cmInstallGenerator(0, std::vector<std::string>(), 0),
   Script(script), Code(code)
 {
 }

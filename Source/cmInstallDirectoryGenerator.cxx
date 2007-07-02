@@ -27,9 +27,8 @@ cmInstallDirectoryGenerator
                               std::vector<std::string> const& configurations,
                               const char* component,
                               const char* literal_args):
-  cmInstallGenerator(dest), Directories(dirs),
+  cmInstallGenerator(dest, configurations, component), Directories(dirs),
   FilePermissions(file_permissions), DirPermissions(dir_permissions),
-  Configurations(configurations), Component(component),
   LiteralArguments(literal_args)
 {
 }
@@ -41,7 +40,9 @@ cmInstallDirectoryGenerator
 }
 
 //----------------------------------------------------------------------------
-void cmInstallDirectoryGenerator::GenerateScript(std::ostream& os)
+void
+cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
+                                                   Indent const& indent)
 {
   // Write code to install the directories.
   bool not_optional = false;
@@ -53,6 +54,6 @@ void cmInstallDirectoryGenerator::GenerateScript(std::ostream& os)
                        not_optional, no_properties,
                        this->FilePermissions.c_str(),
                        this->DirPermissions.c_str(),
-                       this->Configurations, this->Component.c_str(),
-                       no_rename, this->LiteralArguments.c_str());
+                       no_rename, this->LiteralArguments.c_str(),
+                       indent);
 }

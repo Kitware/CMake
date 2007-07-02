@@ -21,10 +21,15 @@
 
 //----------------------------------------------------------------------------
 cmInstallGenerator
-::cmInstallGenerator()
+::cmInstallGenerator(const char* destination,
+                     std::vector<std::string> const& configurations,
+                     const char* component):
+  Destination(destination? destination:""),
+  Configurations(configurations),
+  Component(component? component:""),
+  ConfigurationName(0),
+  ConfigurationTypes(0)
 {
-  this->ConfigurationName = 0;
-  this->ConfigurationTypes = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -57,8 +62,6 @@ void cmInstallGenerator
                  const char* properties /* = 0 */,
                  const char* permissions_file /* = 0 */,
                  const char* permissions_dir /* = 0 */,
-                 std::vector<std::string> const& configurations,
-                 const char* component /* = 0 */,
                  const char* rename /* = 0 */,
                  const char* literal_args /* = 0 */,
                  cmInstallGeneratorIndent const& indent
@@ -99,19 +102,6 @@ void cmInstallGenerator
     {
     os << " RENAME \"" << rename << "\"";
     }
-  if(!configurations.empty())
-    {
-    os << " CONFIGURATIONS";
-    for(std::vector<std::string>::const_iterator c = configurations.begin();
-        c != configurations.end(); ++c)
-      {
-      os << " \"" << *c << "\"";
-      }
-    }
-  if(component && *component)
-    {
-    os << " COMPONENTS \"" << component << "\"";
-    }
   os << " FILES";
   if(files.size() == 1)
     {
@@ -135,4 +125,116 @@ void cmInstallGenerator
     os << literal_args;
     }
   os << ")\n";
+}
+
+//----------------------------------------------------------------------------
+static void cmInstallGeneratorEncodeConfig(const char* config,
+                                           std::string& result)
+{
+  for(const char* c = config; *c; ++c)
+    {
+    if(*c >= 'a' && *c <= 'z')
+      {
+      result += "[";
+      result += *c + ('A' - 'a');
+      result += *c;
+      result += "]";
+      }
+    else if(*c >= 'A' && *c <= 'Z')
+      {
+      result += "[";
+      result += *c;
+      result += *c + ('a' - 'A');
+      result += "]";
+      }
+    else
+      {
+      result += *c;
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmInstallGenerator::CreateConfigTest(const char* config)
+{
+  std::string result = "\"${CMAKE_INSTALL_CONFIG_NAME}\" MATCHES \"^(";
+  if(config && *config)
+    {
+    cmInstallGeneratorEncodeConfig(config, result);
+    }
+  result += ")$\"";
+  return result;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmInstallGenerator::CreateConfigTest(std::vector<std::string> const& configs)
+{
+  std::string result = "\"${CMAKE_INSTALL_CONFIG_NAME}\" MATCHES \"^(";
+  const char* sep = "";
+  for(std::vector<std::string>::const_iterator ci = configs.begin();
+      ci != configs.end(); ++ci)
+    {
+    result += sep;
+    sep = "|";
+    cmInstallGeneratorEncodeConfig(ci->c_str(), result);
+    }
+  result += ")$\"";
+  return result;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmInstallGenerator::CreateComponentTest(const char* component)
+{
+  std::string result = "NOT CMAKE_INSTALL_COMPONENT OR "
+    "\"${CMAKE_INSTALL_COMPONENT}\" MATCHES \"^(";
+  result += component;
+  result += ")$\"";
+  return result;
+}
+
+//----------------------------------------------------------------------------
+void cmInstallGenerator::GenerateScript(std::ostream& os)
+{
+  // Track indentation.
+  Indent indent;
+
+  // Begin this block of installation.
+  std::string component_test =
+    this->CreateComponentTest(this->Component.c_str());
+  os << indent << "IF(" << component_test << ")\n";
+
+  // Generate the script possibly with per-configuration code.
+  this->GenerateScriptConfigs(os, indent.Next());
+
+  // End this block of installation.
+  os << indent << "ENDIF(" << component_test << ")\n";
+}
+
+//----------------------------------------------------------------------------
+void
+cmInstallGenerator::GenerateScriptConfigs(std::ostream& os,
+                                          Indent const& indent)
+{
+  if(this->Configurations.empty())
+    {
+    // This rule is for all configurations.
+    this->GenerateScriptActions(os, indent);
+    }
+  else
+    {
+    // Generate a per-configuration block.
+    std::string config_test = this->CreateConfigTest(this->Configurations);
+    os << indent << "IF(" << config_test << ")\n";
+    this->GenerateScriptActions(os, indent.Next());
+    os << indent << "ENDIF(" << config_test << ")\n";
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmInstallGenerator::GenerateScriptActions(std::ostream&, Indent const&)
+{
+  // No actions for this generator.
 }

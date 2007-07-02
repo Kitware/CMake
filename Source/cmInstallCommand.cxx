@@ -1295,7 +1295,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 
     // Create the export install generator.
     cmInstallExportGenerator* exportGenerator = new cmInstallExportGenerator(
-                          destination, permissions.c_str(), configurations, 
+                          destination, permissions.c_str(), configurations, 0,
                           filename.c_str(), prefix.c_str(), cmakeDir.c_str());
 
     if (exportGenerator->SetExportSet(exportIt->c_str(),exportSet))

@@ -35,12 +35,11 @@ public:
   virtual ~cmInstallDirectoryGenerator();
 
 protected:
-  virtual void GenerateScript(std::ostream& os);
+  typedef cmInstallGeneratorIndent Indent;
+  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
   std::vector<std::string> Directories;
   std::string FilePermissions;
   std::string DirPermissions;
-  std::vector<std::string> Configurations;
-  std::string Component;
   std::string LiteralArguments;
 };
 
