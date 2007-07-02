@@ -172,7 +172,6 @@ protected:
                         bool& optional
                        );
   bool DoInstall(cmFileInstaller& installer,
-                 std::map<cmStdString, const char*>& properties,
                  const int itype,
                  const std::string& rename,
                  const std::string& destination,

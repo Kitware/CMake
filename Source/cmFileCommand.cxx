@@ -1251,7 +1251,7 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
                                        optional);
   if (result == true)
     {
-    result = this->DoInstall(installer, properties,
+    result = this->DoInstall(installer,
                              itype, rename, destination, files, optional);
     }
   return result;
@@ -1572,7 +1572,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
 
 //----------------------------------------------------------------------------
 bool cmFileCommand::DoInstall( cmFileInstaller& installer,
-                              std::map<cmStdString, const char*>& properties,
                               const int itype,
                               const std::string& rename,
                               const std::string& destination,
