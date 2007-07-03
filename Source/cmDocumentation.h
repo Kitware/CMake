@@ -262,9 +262,9 @@ private:
 
   struct RequestedHelpItem
   {
-    RequestedHelpItem():Form(TextForm), Type(None) {}
-    cmDocumentationEnums::Form Form;
-    cmDocumentationEnums::Type Type;
+    RequestedHelpItem():HelpForm(TextForm), HelpType(None) {}
+    cmDocumentationEnums::Form HelpForm;
+    cmDocumentationEnums::Type HelpType;
     std::string Filename;
     std::string Argument;
   };
