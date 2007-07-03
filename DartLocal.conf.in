@@ -45,6 +45,8 @@ ExpectedBuilds: \
 {destiny.kitware HP-UX-aCC-gmake} \
 {destiny.kitware HP-UX-aCC} \
 {acdc HP-UX9000-8-aCC} \
+{hythloth.kitware Linux64-bullseye-cov} \
+{hythloth.kitware Linux64-suncc-5.9} \
 {iris.elemtech IRIX64-CC-7.4} \
 {iris.elemtech IRIX64-CC64-7.4} \
 {krondor.kitware Darwin-c++} \
