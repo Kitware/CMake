@@ -123,6 +123,7 @@ cmCAStringVector::cmCAStringVector(cmCommandArgumentsHelper* args,
                                    const char* key, 
                                    cmCommandArgumentGroup* group)
 :cmCommandArgument(args, key, group)
+,Ignore(0)
 {
   if ((key==0) || (*key==0))
     {

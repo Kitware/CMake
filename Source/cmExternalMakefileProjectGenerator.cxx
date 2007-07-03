@@ -26,12 +26,12 @@ std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
   std::string fullName;
   if (globalGenerator)
     {
-    fullName = globalGenerator;
     if (extraGenerator && *extraGenerator)
       {
+      fullName = extraGenerator;
       fullName += " - ";
-      fullName += extraGenerator;
       }
+    fullName += globalGenerator;
     }
   return fullName;
 }

@@ -1422,7 +1422,6 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
 void cmake::AddExtraGenerator(const char* name, 
                               CreateExtraGeneratorFunctionType newFunction)
 {
-  this->ExtraGenerators[name] = newFunction;
   cmExternalMakefileProjectGenerator* extraGenerator = newFunction();
   const std::vector<std::string>& supportedGlobalGenerators =
                                 extraGenerator->GetSupportedGlobalGenerators();
@@ -1448,7 +1447,12 @@ void cmake::AddDefaultExtraGenerators()
 #endif
 // e.g. eclipse ?
 #ifdef CMAKE_USE_KDEVELOP
-  this->AddExtraGenerator(cmGlobalKdevelopGenerator::GetActualName(), &cmGlobalKdevelopGenerator::New);
+  this->AddExtraGenerator(cmGlobalKdevelopGenerator::GetActualName(), 
+                          &cmGlobalKdevelopGenerator::New);
+  // for kdevelop also add the generator with just the name of the 
+  // extra generator, since it was this way since cmake 2.2
+  this->ExtraGenerators[cmGlobalKdevelopGenerator::GetActualName()] 
+                                             = &cmGlobalKdevelopGenerator::New;
 #endif
 }
 
