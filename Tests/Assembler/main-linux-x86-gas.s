@@ -1,4 +1,3 @@
-	.file	"main.c"
 	.section	.rodata
 	.align 4
 .LC0:
