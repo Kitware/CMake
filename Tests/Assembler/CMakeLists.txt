@@ -2,6 +2,8 @@ project(Assembler)
 
 set(SRCS)
 
+message(STATUS "Testing assembler support, system: ${CMAKE_SYSTEM_NAME} processor: ${CMAKE_SYSTEM_PROCESSOR}")
+
 # if no file has been set as source and we are on linux with an x86 processor try to use the gas/as assembler
 if(NOT SRCS AND NOT APPLE AND CMAKE_SYSTEM_PROCESSOR MATCHES "[ix].?86$")
 # if(NOT SRCS AND CMAKE_SYSTEM_NAME MATCHES Linux AND CMAKE_SYSTEM_PROCESSOR MATCHES "[ix].?86$")
