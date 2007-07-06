@@ -56,7 +56,7 @@ ADD_CUSTOM_COMMAND(
        --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.txt
        --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html
        --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmcompat.1
-  DEPENDS ${target}
+  DEPENDS cmake
   MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
   )
 
