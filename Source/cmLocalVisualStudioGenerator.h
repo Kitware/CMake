@@ -33,9 +33,6 @@ class cmLocalVisualStudioGenerator : public cmLocalGenerator
 public:
   cmLocalVisualStudioGenerator();
   virtual ~cmLocalVisualStudioGenerator();
-  /** Return the directories into which object files will be put.
-   *  There maybe more than one for fat binary systems like OSX.
-   */
 protected:
 
   /** Construct a script from the given list of command lines.  */
