@@ -28,7 +28,6 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     return false;
     }
   
-  std::vector<std::string>::size_type cc;
   std::vector<std::string>::const_iterator i = args.begin();
   std::string variable = *i;
   ++i;
@@ -76,72 +75,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
   // OK, now we have the directory to process, we just get the requested
   // information out of it
   
-  if ( *i == "VARIABLES" || *i == "CACHE_VARIABLES" )
-    {
-    int cacheonly = 0;
-    if ( *i == "CACHE_VARIABLES" )
-      {
-      cacheonly = 1;
-      }
-    std::vector<std::string> vars = dir->GetDefinitions(cacheonly);
-    for ( cc = 0; cc < vars.size(); cc ++ )
-      {
-      if ( cc > 0 )
-        {
-        output += ";";
-        }
-      output += vars[cc];
-      }
-    }
-  else if ( *i == "MACROS" )
-    {
-    dir->GetListOfMacros(output);
-    }
-  else if ( *i == "DEFINITIONS" )
-    {
-    output = dir->GetDefineFlags();
-    }
-  else if ( *i == "INCLUDE_DIRECTORIES" )
-    {
-    std::vector<std::string>::iterator it;
-    int first = 1;
-    cmOStringStream str;
-    for ( it = dir->GetIncludeDirectories().begin();
-      it != dir->GetIncludeDirectories().end();
-      ++ it )
-      {
-      if ( !first )
-        {
-        str << ";";
-        }
-      str << it->c_str();
-      first = 0;
-      }
-    output = str.str();
-    }
-  else if ( *i == "INCLUDE_REGULAR_EXPRESSION" )
-    {
-    output = dir->GetIncludeRegularExpression();
-    }
-  else if ( *i == "LINK_DIRECTORIES" )
-    {
-    std::vector<std::string>::iterator it;
-    int first = 1;
-    cmOStringStream str;
-    for ( it = dir->GetLinkDirectories().begin();
-      it != dir->GetLinkDirectories().end();
-      ++ it )
-      {
-      if ( !first )
-        {
-        str << ";";
-        }
-      str << it->c_str();
-      first = 0;
-      }
-    output = str.str();
-    }
-  else if ( *i == "DEFINITION" )
+  if ( *i == "DEFINITION" )
     {
     ++i;
     if (i == args.end())
@@ -151,20 +85,16 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
       return false;
       }
     output = dir->GetSafeDefinition(i->c_str());
+    this->Makefile->AddDefinition(variable.c_str(), output.c_str());
     }
-  else
+
+  const char *prop = dir->GetProperty(i->c_str());
+  if (prop)
     {
-    const char *prop = dir->GetProperty(i->c_str());
-    if (prop)
-      {
-      this->Makefile->AddDefinition(variable.c_str(), prop);
-      return true;
-      }
-    this->Makefile->AddDefinition(variable.c_str(), "");
+    this->Makefile->AddDefinition(variable.c_str(), prop);
     return true;
     }
-  this->Makefile->AddDefinition(variable.c_str(), output.c_str());
-  
+  this->Makefile->AddDefinition(variable.c_str(), "");
   return true;
 }
 

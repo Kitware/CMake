@@ -2614,6 +2614,79 @@ const char *cmMakefile::GetProperty(const char* prop,
     this->SetProperty("LISTFILE_STACK",tmp.c_str());
     }
 
+  // some other special properties sigh
+  std::string output = "";
+  if (!strcmp("VARIABLES",prop) || !strcmp("CACHE_VARIABLES",prop))
+    {
+    int cacheonly = 0;
+    if ( !strcmp("CACHE_VARIABLES",prop) )
+      {
+      cacheonly = 1;
+      }
+    std::vector<std::string> vars = this->GetDefinitions(cacheonly);
+    for (unsigned int cc = 0; cc < vars.size(); cc ++ )
+      {
+      if ( cc > 0 )
+        {
+        output += ";";
+        }
+      output += vars[cc];
+      }
+    this->SetProperty(prop, output.c_str());
+    }
+  else if (!strcmp("MACROS",prop))
+    {
+    this->GetListOfMacros(output);
+    this->SetProperty(prop, output.c_str());
+    }
+  else if (!strcmp("DEFINITIONS",prop))
+    {
+    output = this->GetDefineFlags();
+    this->SetProperty(prop, output.c_str());
+    }
+  else if (!strcmp("INCLUDE_DIRECTORIES",prop) )
+    {
+    std::vector<std::string>::iterator it;
+    int first = 1;
+    cmOStringStream str;
+    for ( it = this->GetIncludeDirectories().begin();
+      it != this->GetIncludeDirectories().end();
+      ++ it )
+      {
+      if ( !first )
+        {
+        str << ";";
+        }
+      str << it->c_str();
+      first = 0;
+      }
+    output = str.str();
+    this->SetProperty(prop, output.c_str());
+    }
+  else if (!strcmp("INCLUDE_REGULAR_EXPRESSION",prop) )
+    {
+    return this->GetIncludeRegularExpression();
+    }
+  else if (!strcmp("LINK_DIRECTORIES",prop))
+    {
+    std::vector<std::string>::iterator it;
+    int first = 1;
+    cmOStringStream str;
+    for ( it = this->GetLinkDirectories().begin();
+      it != this->GetLinkDirectories().end();
+      ++ it )
+      {
+      if ( !first )
+        {
+        str << ";";
+        }
+      str << it->c_str();
+      first = 0;
+      }
+    output = str.str();
+    this->SetProperty(prop, output.c_str());
+    }
+
   bool chain = false;
   const char *retVal =
     this->Properties.GetPropertyValue(prop, scope, chain);
