@@ -40,7 +40,14 @@ bool cmGetSourceFilePropertyCommand::InitialPass(
     {
     if(args[2] == "LOCATION")
       {
-      // Make sure the location is known.
+      // Make sure the location is known.  Update: this is a hack to work
+      // around a problem with const methods in cmSourceFile, by design
+      // GetProperty("LOCATION") should work but right now it has to be
+      // "primed" by calling GetFullPath() first on a non-const cmSourceFile
+      // instance. This is because LOCATION is a computed-on-demand
+      // property. Either GetProperty needs to be non-const or the map
+      // needs to be changed to be mutable etc. for computed properties to
+      // work properly.
       sf->GetFullPath();
       }
     const char *prop = sf->GetProperty(args[2].c_str());
