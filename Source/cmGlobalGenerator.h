@@ -153,7 +153,7 @@ public:
   ///! is an extension to be ignored
   bool IgnoreFile(const char* ext);
   ///! What is the preference for linkers and this language (None or Prefered)
-  const char* GetLinkerPreference(const char* lang);
+  int GetLinkerPreference(const char* lang);
   ///! What is the object file extension for a given source file?
   const char* GetLanguageOutputExtension(cmSourceFile const&);
 
@@ -257,7 +257,7 @@ private:
   std::map<cmStdString, cmStdString> OutputExtensions;
   std::map<cmStdString, cmStdString> LanguageToOutputExtension;
   std::map<cmStdString, cmStdString> ExtensionToLanguage;
-  std::map<cmStdString, cmStdString> LanguageToLinkerPreference; 
+  std::map<cmStdString, int> LanguageToLinkerPreference; 
 
   // this is used to improve performance 
   std::map<cmStdString,cmTarget *> TotalTargets;

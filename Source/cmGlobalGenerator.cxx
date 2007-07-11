@@ -570,12 +570,35 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const char* l, cmMakefile* mf)
   std::string linkerPrefVar = std::string("CMAKE_") +
     std::string(l) + std::string("_LINKER_PREFERENCE");
   const char* linkerPref = mf->GetDefinition(linkerPrefVar.c_str());
-  if(!linkerPref)
+  int preference = 0;
+  if(linkerPref)
     {
-    linkerPref = "None";
+    if (sscanf(linkerPref, "%d", &preference)!=1)
+      {
+      // backward compatibility: before 2.6 LINKER_PREFERENCE
+      // was either "None" or "Prefered", and only the first character was 
+      // tested. So if there is a custom language out there and it is 
+      // "Prefered", set its preference high
+      if (linkerPref[0]=='P')
+        {
+        preference = 100;
+        }
+      else
+        {
+        preference = 0;
+        }
+      }
     }
-  this->LanguageToLinkerPreference[l] = linkerPref;
 
+  if (preference < 0)
+    {
+    std::string msg = linkerPrefVar;
+    msg += " is negative, adjusting it to 0";
+    cmSystemTools::Message(msg.c_str(), "Warning");
+    preference = 0;
+    }
+
+  this->LanguageToLinkerPreference[l] = preference;
 
   std::string outputExtensionVar = std::string("CMAKE_") +
     std::string(l) + std::string("_OUTPUT_EXTENSION");
@@ -752,10 +775,6 @@ void cmGlobalGenerator::Configure()
         }
       notFoundVars += "\n";
       }
-    cmSystemTools::Error("This project requires some variables to be set,\n"
-                         "and cmake can not find them.\n"
-                         "Please set the following variables:\n",
-                         notFoundVars.c_str());
     }
   // at this point this->LocalGenerators has been filled,
   // so create the map from project name to vector of local generators
@@ -1120,13 +1139,14 @@ void cmGlobalGenerator::GetEnabledLanguages(std::vector<std::string>& lang)
     }
 }
 
-const char* cmGlobalGenerator::GetLinkerPreference(const char* lang)
+int cmGlobalGenerator::GetLinkerPreference(const char* lang)
 {
-  if(this->LanguageToLinkerPreference.count(lang))
+  std::map<cmStdString, int>::const_iterator it = this->LanguageToLinkerPreference.find(lang);
+  if (it != this->LanguageToLinkerPreference.end())
     {
-    return this->LanguageToLinkerPreference[lang].c_str();
+    return it->second;
     }
-  return "None";
+  return 0;
 }
 
 void cmGlobalGenerator::FillProjectMap()

@@ -1477,59 +1477,57 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
     const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", "CXX");
     }
   const char* linkerLang = this->GetProperty("LINKER_LANGUAGE");
-  if(linkerLang)
+  if (linkerLang==0)
     {
-    return linkerLang;
-    }
-  std::set<cmStdString> languages;
-  for(std::vector<cmSourceFile*>::const_iterator i
-        = this->SourceFiles.begin();
-      i != this->SourceFiles.end(); ++i)
-    {
-    if(const char* lang = (*i)->GetLanguage())
+    // if the property has not yet been set, collect all languages in the
+    // target and then find the language with the highest preference value
+    std::set<cmStdString> languages;
+    for(std::vector<cmSourceFile*>::const_iterator 
+        i = this->SourceFiles.begin(); i != this->SourceFiles.end(); ++i)
       {
-      languages.insert(lang);
-      }
-    }
-  if(languages.size() == 0)
-    {
-    return 0;
-    }
-  if(languages.size() == 1)
-    {
-    const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE",
-                                             languages.begin()->c_str());
-    return this->GetProperty("LINKER_LANGUAGE");
-    }
-  const char* prefLang = 0;
-  for(std::set<cmStdString>::const_iterator s = languages.begin();
-      s != languages.end(); ++s)
-    {
-    const char* lpref = gg->GetLinkerPreference(s->c_str());
-    if(lpref[0] == 'P')
-      {
-      if(prefLang && !(*s == prefLang))
+      if(const char* lang = (*i)->GetLanguage())
         {
-        std::string m = "Error Target: ";
-        m += this->Name + " Contains more than one Prefered language: ";
-        m += *s;
-        m += " and ";
-        m += prefLang;
-        m += "\nYou must set the LINKER_LANGUAGE property for this target.";
-        cmSystemTools::Error(m.c_str());
-        }
-      else
-        {
-        prefLang = s->c_str();
+        languages.insert(lang);
         }
       }
+
+    std::string linkerLangList;              // only used for the error message
+    int maxLinkerPref = 0;
+    bool multiplePreferedLanguages = false;
+    for(std::set<cmStdString>::const_iterator sit = languages.begin();
+        sit != languages.end(); ++sit)
+      {
+      int linkerPref = gg->GetLinkerPreference(sit->c_str());
+      if ((linkerPref > maxLinkerPref) || (linkerLang==0))
+        {
+        maxLinkerPref = linkerPref;
+        linkerLang = sit->c_str();
+        linkerLangList = *sit;
+        multiplePreferedLanguages = false;
+        }
+      else if (linkerPref == maxLinkerPref)
+        {
+        linkerLangList += "; ";
+        linkerLangList += *sit;
+        multiplePreferedLanguages = true;
+        }
+      }
+
+    if (linkerLang!=0)
+      {
+      const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", linkerLang);
+      }
+    if (multiplePreferedLanguages)
+      {
+      cmOStringStream err;
+      err << "Error: Target " << this->Name << " contains multiple languages "
+          << "with the highest linker preference (" << maxLinkerPref << "): " 
+          << linkerLangList << "\n"
+          << "You must set the LINKER_LANGUAGE property for this target.";
+      cmSystemTools::Error(err.str().c_str());
+      }
     }
-  if(!prefLang)
-    {
-    prefLang = languages.begin()->c_str();
-    }
-  const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", prefLang);
-  return this->GetProperty("LINKER_LANGUAGE");
+  return linkerLang;
 }
 
 //----------------------------------------------------------------------------
