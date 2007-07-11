@@ -64,7 +64,8 @@ static const cmDocumentationEntry cmModulesDocumentationDescription[] =
 static const cmDocumentationEntry cmPropertiesDocumentationDescription[] =
 {
   {0,
-   "  CMake Properties - Properties supported by CMake, the Cross-Platform Makefile Generator.", 0},
+   "  CMake Properties - Properties supported by CMake, "
+   "the Cross-Platform Makefile Generator.", 0},
 //  CMAKE_DOCUMENTATION_OVERVIEW,
   {0,
    "This is the documentation for the properties supported by CMake. "
@@ -79,7 +80,8 @@ static const cmDocumentationEntry cmPropertiesDocumentationDescription[] =
 static const cmDocumentationEntry cmCompatCommandsDocumentationDescription[] =
 {
   {0,
-   "  CMake Compatibility Listfile Commands - Obsolete commands supported by CMake for compatibility.", 0},
+   "  CMake Compatibility Listfile Commands - "
+   "Obsolete commands supported by CMake for compatibility.", 0},
 //  CMAKE_DOCUMENTATION_OVERVIEW,
   {0,
   "This is the documentation for now obsolete listfile commands from "
@@ -97,10 +99,60 @@ static const cmDocumentationEntry cmDocumentationCommandsHeader[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationPropertiesHeader[] =
+static const cmDocumentationEntry cmDocumentationGlobalPropertiesHeader[] =
 {
   {0,
-   "The following properties are available in CMakeLists.txt code:", 0},
+   "The following global properties are available in CMakeLists.txt code:", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationDirectoryPropertiesHeader[] =
+{
+  {0
+   ,"The following directory properties are available in CMakeLists.txt code:"
+   ,0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationTargetPropertiesHeader[] =
+{
+  {0,
+   "The following target properties are available in CMakeLists.txt code:", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationTestPropertiesHeader[] =
+{
+  {0
+   ,"The following properties for tests are available in CMakeLists.txt code:"
+   ,0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationSourceFilePropertiesHeader[] =
+{
+  {0
+  ,"The following source file properties are available in CMakeLists.txt code:"
+  , 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationVariablePropertiesHeader[] =
+{
+  {0, "The following variables are available in CMakeLists.txt code:", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry 
+                             cmDocumentationCachedVariablePropertiesHeader[] =
+{
+  {0,"The following cache variables are available in CMakeLists.txt code:", 0},
   {0,0,0}
 };
 
@@ -211,15 +263,35 @@ cmDocumentation::cmDocumentation()
 ,CompatCommandsSection("Compatibility Listfile Commands",
                        "COMPATIBILITY COMMANDS")
 ,ModulesSection       ("Standard CMake Modules",          "MODULES")
-,PropertiesSection    ("Standard Properties",             "PROPERTIES")
 ,GeneratorsSection    ("Generators",                      "GENERATORS")
 ,SeeAlsoSection       ("See Also",                        "SEE ALSO")
 ,CopyrightSection     ("Copyright",                       "COPYRIGHT")
 ,AuthorSection        ("Author",                          "AUTHOR")
+,GlobalPropertiesSection        ("Standard Properties",   "GLOBAL PROPERTIES")
+,DirectoryPropertiesSection     ("Directory Properties",  
+                                 "DIRECTORY PROPERTIES")
+,TargetPropertiesSection        ("Target Properties",     "TARGET PROPERTIES")
+,TestPropertiesSection          ("Test Properties",       "TEST PROPERTIES")
+,SourceFilePropertiesSection    ("Sourcefile Properties", 
+                                 "SOURCEFILE PROPERTIES")
+,VariablePropertiesSection      ("Variables",             "VARIABLES")
+,CachedVariablePropertiesSection("Cached Variables",      "CACHE VARIABLES")
 {
   this->CurrentForm = TextForm;
   this->TextIndent = "";
   this->TextWidth = 77;
+  
+  this->PropertySections[cmProperty::GLOBAL] = &this->GlobalPropertiesSection;
+  this->PropertySections[cmProperty::DIRECTORY] = 
+                                             &this->DirectoryPropertiesSection;
+  this->PropertySections[cmProperty::TARGET] = &this->TargetPropertiesSection;
+  this->PropertySections[cmProperty::TEST] = &this->TestPropertiesSection;
+  this->PropertySections[cmProperty::SOURCE_FILE] = 
+                                            &this->SourceFilePropertiesSection;
+  this->PropertySections[cmProperty::VARIABLE] = 
+                                              &this->VariablePropertiesSection;
+  this->PropertySections[cmProperty::CACHED_VARIABLE] = 
+                                        &this->CachedVariablePropertiesSection;
 }
 
 //----------------------------------------------------------------------------
@@ -730,9 +802,42 @@ void cmDocumentation::SetCompatCommandsSection(const cmDocumentationEntry*
 
 //----------------------------------------------------------------------------
 void cmDocumentation
-::SetPropertiesSection(const cmDocumentationEntry* section)
+::SetPropertiesSection(const cmDocumentationEntry* section, 
+                       cmProperty::ScopeType type)
 {
-  this->PropertiesSection.Set(cmDocumentationPropertiesHeader, section, 0);
+  switch(type)
+  {
+  case cmProperty::GLOBAL:
+    this->GlobalPropertiesSection.Set(
+                            cmDocumentationGlobalPropertiesHeader, section, 0);
+    break;
+  case cmProperty::DIRECTORY:
+    this->DirectoryPropertiesSection.Set(
+                          cmDocumentationDirectoryPropertiesHeader, section, 0);
+    break;
+  case cmProperty::TARGET:
+    this->TargetPropertiesSection.Set(
+                            cmDocumentationTargetPropertiesHeader, section, 0);
+    break;
+  case cmProperty::TEST:
+    this->TestPropertiesSection.Set(
+                              cmDocumentationTestPropertiesHeader, section, 0);
+    break;
+  case cmProperty::SOURCE_FILE:
+    this->SourceFilePropertiesSection.Set(
+                        cmDocumentationSourceFilePropertiesHeader, section, 0);
+    break;
+  case cmProperty::VARIABLE:
+    this->VariablePropertiesSection.Set(
+                        cmDocumentationVariablePropertiesHeader, section, 0);
+    break;
+  case cmProperty::CACHED_VARIABLE:
+    this->CachedVariablePropertiesSection.Set(
+                    cmDocumentationCachedVariablePropertiesHeader, section, 0);
+    break;
+  default:
+    break;
+  }
 }
 
 //----------------------------------------------------------------------------
@@ -1312,7 +1417,7 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationSingleProperty(std::ostream& os)
 {
-  if(this->PropertiesSection.IsEmpty())
+  if(this->GlobalPropertiesSection.IsEmpty())
     {
     os << "Internal error: properties list is empty." << std::endl;
     return false;
@@ -1322,13 +1427,20 @@ bool cmDocumentation::PrintDocumentationSingleProperty(std::ostream& os)
     os << "Argument --help-property needs a property name.\n";
     return false;
     }
-  for(const cmDocumentationEntry* entry = this->PropertiesSection.GetEntries();
-      entry->brief; ++entry)
+
+  for(std::map<cmProperty::ScopeType, cmSection*>::const_iterator 
+      sectionIt = this->PropertySections.begin();
+      sectionIt != this->PropertySections.end();
+      ++sectionIt)
     {
-    if(entry->name && this->CurrentArgument == entry->name)
+    for(const cmDocumentationEntry* 
+        entry = sectionIt->second->GetEntries(); entry->brief; ++entry)
       {
-      this->PrintDocumentationCommand(os, entry);
-      return true;
+      if(entry->name && this->CurrentArgument == entry->name)
+        {
+        this->PrintDocumentationCommand(os, entry);
+        return true;
+        }
       }
     }
   // Argument was not a command.  Complain.
@@ -1371,19 +1483,37 @@ bool cmDocumentation::PrintDocumentationList(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintPropertyList(std::ostream& os)
 {
-  if(this->PropertiesSection.IsEmpty())
+  if(this->GlobalPropertiesSection.IsEmpty())
     {
     os << "Internal error: properties list is empty." << std::endl;
     return false;
     }
-  for(const cmDocumentationEntry* entry = this->PropertiesSection.GetEntries();
-      entry->brief; ++entry)
+  for(const cmDocumentationEntry* 
+      entry = this->GlobalPropertiesSection.GetEntries();
+      entry->brief; 
+      ++entry)
     {
     if(entry->name)
       {
       os << entry->name << std::endl;
       }
     }
+
+  for(std::map<cmProperty::ScopeType, cmSection*>::const_iterator 
+      sectionIt = this->PropertySections.begin();
+      sectionIt != this->PropertySections.end();
+      ++sectionIt)
+    {
+    for(const cmDocumentationEntry* 
+        entry = sectionIt->second->GetEntries(); entry->brief; ++entry)
+      {
+      if(entry->name)
+        {
+        os << entry->name << std::endl;
+        }
+      }
+    }
+
   return true;
 }
 
@@ -1537,7 +1667,14 @@ void cmDocumentation::CreateFullDocumentation()
   this->AddSection(this->CommandsSection);
   this->AddSection(this->CompatCommandsSection);
   this->AddSection(this->ModulesSection);
-  this->AddSection(this->PropertiesSection);
+  this->AddSection(this->GlobalPropertiesSection);
+  this->AddSection(this->DirectoryPropertiesSection);
+  this->AddSection(this->TargetPropertiesSection);
+  this->AddSection(this->TestPropertiesSection);
+  this->AddSection(this->SourceFilePropertiesSection);
+  this->AddSection(this->VariablePropertiesSection);
+  this->AddSection(this->CachedVariablePropertiesSection);
+  
   this->AddSection(this->CopyrightSection.GetName(this->CurrentForm),
                    cmDocumentationCopyright);
 
@@ -1596,7 +1733,13 @@ void cmDocumentation::CreatePropertiesDocumentation()
   this->ClearSections();
   this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
                    cmPropertiesDocumentationDescription);
-  this->AddSection(this->PropertiesSection);
+  this->AddSection(this->GlobalPropertiesSection);
+  this->AddSection(this->DirectoryPropertiesSection);
+  this->AddSection(this->TargetPropertiesSection);
+  this->AddSection(this->TestPropertiesSection);
+  this->AddSection(this->SourceFilePropertiesSection);
+  this->AddSection(this->VariablePropertiesSection);
+  this->AddSection(this->CachedVariablePropertiesSection);
   this->AddSection(this->CopyrightSection.GetName(CurrentForm), 
                    cmDocumentationCopyright);
   this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), 

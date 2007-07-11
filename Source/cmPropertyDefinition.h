@@ -39,7 +39,6 @@ public:
 
 protected:
   std::string Name;
-  std::string LongName;
   std::string ShortDescription;
   std::string FullDescription;
   cmProperty::ScopeType Scope; 

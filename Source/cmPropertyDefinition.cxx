@@ -20,7 +20,7 @@
 cmDocumentationEntry cmPropertyDefinition::GetDocumentation() const
 {
   cmDocumentationEntry e;
-  e.name = this->LongName.c_str();
+  e.name = this->Name.c_str();
   e.brief = 
     this->ShortDescription.size() ? this->ShortDescription.c_str() : 0;
   e.full = this->FullDescription.size() ? this->FullDescription.c_str() : 0;
@@ -43,25 +43,6 @@ void cmPropertyDefinition
   if (fullDescription)
     {
     this->FullDescription = fullDescription;
-    }
-  this->LongName = this->Name;
-  switch (this->Scope)
-    {
-    case cmProperty::TARGET: this->LongName += " on a target";
-      break;
-    case cmProperty::SOURCE_FILE: this->LongName += " on a source file";
-      break;
-    case cmProperty::DIRECTORY: this->LongName += " on a directory";
-      break;
-    case cmProperty::GLOBAL: this->LongName += " globally";
-      break;
-    case cmProperty::TEST: this->LongName += " on CTest";
-      break;
-    case cmProperty::VARIABLE: this->LongName += " as a variable";
-      break;
-    case cmProperty::CACHED_VARIABLE: this->LongName += 
-                                        " as a cached variable";
-      break;
     }
 }
 

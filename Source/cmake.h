@@ -249,7 +249,8 @@ class cmake
   void GetCommandDocumentation(std::vector<cmDocumentationEntry>& entries, 
                                bool withCurrentCommands = true, 
                                bool withCompatCommands = true) const;
-  void GetPropertiesDocumentation(std::vector<cmDocumentationEntry>&);
+  void GetPropertiesDocumentation(std::vector<cmDocumentationEntry>&,
+                                  cmProperty::ScopeType type);
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
 
   ///! Set/Get a property of this target file

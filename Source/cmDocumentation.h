@@ -18,6 +18,7 @@
 #define _cmDocumentation_h
 
 #include "cmStandardIncludes.h"
+#include "cmProperty.h"
 
 /** This is just a helper class to make it build with MSVC 6.0.
 Actually the enums and internal classes could directly go into
@@ -83,22 +84,23 @@ public:
 
   /** Set the program options for standard document generation.  */
   void SetOptionsSection(const cmDocumentationEntry*);
-  
+
   /** Set the listfile commands for standard document generation.  */
   void SetCommandsSection(const cmDocumentationEntry*);
-  
+
   /** Set the listfile compat. commands for standard document generation.  */
   void SetCompatCommandsSection(const cmDocumentationEntry*);
-  
-  /** Set the properties for standard document generation.  */
-  void SetPropertiesSection(const cmDocumentationEntry*);
+
+  /** Set the global properties for standard document generation.  */
+  void SetPropertiesSection(const cmDocumentationEntry*, 
+                            cmProperty::ScopeType type);
 
   /** Set the generator descriptions for standard document generation.  */
   void SetGeneratorsSection(const cmDocumentationEntry*);
-  
+
   /** Set the see-also list of references to the other tools.  */
   void SetSeeAlsoList(const cmDocumentationEntry*);
-  
+
   // Low-level interface for custom documents:
   /** Internal class representing a section of the documentation.
    * Cares e.g. for the different section titles in the different
@@ -244,12 +246,19 @@ private:
   cmSection CommandsSection;
   cmSection CompatCommandsSection;
   cmSection ModulesSection;
-  cmSection PropertiesSection;
   cmSection GeneratorsSection;
   cmSection SeeAlsoSection;
   cmSection CopyrightSection;
   cmSection AuthorSection;
-
+  cmSection GlobalPropertiesSection;
+  cmSection DirectoryPropertiesSection;
+  cmSection TargetPropertiesSection;
+  cmSection TestPropertiesSection;
+  cmSection SourceFilePropertiesSection;
+  cmSection VariablePropertiesSection;
+  cmSection CachedVariablePropertiesSection;
+  std::map<cmProperty::ScopeType, cmSection*> PropertySections;
+  
   std::string SeeAlsoString;
   std::string CMakeRoot;
   std::vector< char* > ModuleStrings;

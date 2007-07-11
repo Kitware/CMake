@@ -95,32 +95,60 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "Print extra stuff during the cmake run like stack traces with "
    "message(send_error ) calls."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
-   "Full documentation specific to the given command is displayed."},
+   "Full documentation specific to the given command is displayed. "
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {"--help-command-list [file]", "List available listfile commands and exit.",
    "The list contains all commands for which help may be obtained by using "
-   "the --help-command argument followed by a command name.  If a file is "
-   "specified, the help is written into it."},
+   "the --help-command argument followed by a command name. "
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {"--help-commands [file]", "Print help for all commands and exit.",
-   "Full documentation specific for all current command is displayed."},
+   "Full documentation specific for all current command is displayed."
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {"--help-compatcommands [file]", "Print help for compatibility commands. ",
-   "Full documentation specific for all compatibility commands is displayed."},
+   "Full documentation specific for all compatibility commands is displayed."
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {"--help-module module [file]", "Print help for a single module and exit.",
-   "Full documentation specific to the given module is displayed."},
+   "Full documentation specific to the given module is displayed."
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {"--help-module-list [file]", "List available modules and exit.",
    "The list contains all modules for which help may be obtained by using "
-   "the --help-module argument followed by a module name.  If a file is "
-   "specified, the help is written into it."},
+   "the --help-module argument followed by a module name. "
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {"--help-modules [file]", "Print help for all modules and exit.",
-   "Full documentation for all modules is displayed."},
+   "Full documentation for all modules is displayed. "
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {"--help-property prop [file]", 
    "Print help for a single property and exit.",
-   "Full documentation specific to the given module is displayed."},
+   "Full documentation specific to the given module is displayed."
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {"--help-property-list [file]", "List available properties and exit.",
    "The list contains all properties for which help may be obtained by using "
    "the --help-property argument followed by a property name.  If a file is "
-   "specified, the help is written into it."},
+   "specified, the help is written into it."
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {"--help-properties [file]", "Print help for all properties and exit.",
-   "Full documentation for all properties is displayed."},
+   "Full documentation for all properties is displayed."
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {0,0,0}
 };
 
@@ -179,11 +207,26 @@ int do_cmake(int ac, char** av)
     doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
     std::vector<cmDocumentationEntry> commands;
     std::vector<cmDocumentationEntry> compatCommands;
-    std::vector<cmDocumentationEntry> properties;
+    std::vector<cmDocumentationEntry> globalProperties;
+    std::vector<cmDocumentationEntry> dirProperties;
+    std::vector<cmDocumentationEntry> targetProperties;
+    std::vector<cmDocumentationEntry> testProperties;
+    std::vector<cmDocumentationEntry> sourceFileProperties;
+    std::vector<cmDocumentationEntry> variableProperties;
+    std::vector<cmDocumentationEntry> cachedVariableProperties;
+
     std::vector<cmDocumentationEntry> generators;
     hcm.GetCommandDocumentation(commands, true, false);
     hcm.GetCommandDocumentation(compatCommands, false, true);
-    hcm.GetPropertiesDocumentation(properties);
+    hcm.GetPropertiesDocumentation(globalProperties, cmProperty::GLOBAL);
+    hcm.GetPropertiesDocumentation(dirProperties, cmProperty::DIRECTORY);
+    hcm.GetPropertiesDocumentation(targetProperties, cmProperty::TARGET);
+    hcm.GetPropertiesDocumentation(testProperties, cmProperty::TEST);
+    hcm.GetPropertiesDocumentation(sourceFileProperties, 
+                                   cmProperty::SOURCE_FILE);
+    hcm.GetPropertiesDocumentation(variableProperties, cmProperty::VARIABLE);
+    hcm.GetPropertiesDocumentation(cachedVariableProperties, 
+                                   cmProperty::CACHED_VARIABLE);
     hcm.GetGeneratorDocumentation(generators);
     doc.SetName("cmake");
     doc.SetNameSection(cmDocumentationName);
@@ -193,10 +236,17 @@ int do_cmake(int ac, char** av)
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
     doc.SetCompatCommandsSection(&compatCommands[0]);
-    doc.SetPropertiesSection(&properties[0]);
+    doc.SetPropertiesSection(&globalProperties[0], cmProperty::GLOBAL);
+    doc.SetPropertiesSection(&dirProperties[0], cmProperty::DIRECTORY);
+    doc.SetPropertiesSection(&targetProperties[0], cmProperty::TARGET);
+    doc.SetPropertiesSection(&testProperties[0], cmProperty::TEST);
+    doc.SetPropertiesSection(&sourceFileProperties[0],cmProperty::SOURCE_FILE);
+    doc.SetPropertiesSection(&variableProperties[0],cmProperty::VARIABLE);
+    doc.SetPropertiesSection(&cachedVariableProperties[0],
+                             cmProperty::CACHED_VARIABLE);
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
     int result = doc.PrintRequestedDocumentation(std::cout)? 0:1;
-    
+
     // If we were run with no arguments, but a CMakeLists.txt file
     // exists, the user may have been trying to use the old behavior
     // of cmake to build a project in-source.  Print a message

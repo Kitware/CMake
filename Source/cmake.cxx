@@ -2165,16 +2165,11 @@ void cmake::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v,
   v.push_back(empty);
 }
 
-void cmake::GetPropertiesDocumentation(std::vector<cmDocumentationEntry>& v)
+void cmake::GetPropertiesDocumentation(std::vector<cmDocumentationEntry>& v, 
+                                       cmProperty::ScopeType type)
 {
   // get the properties for cmake
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::iterator i = 
-    this->PropertyDefinitions.begin();
-  for (; i != this->PropertyDefinitions.end(); ++i)
-    {
-    i->second.GetPropertiesDocumentation(v);
-    }
-
+  this->PropertyDefinitions[type].GetPropertiesDocumentation(v);
   cmDocumentationEntry empty = {0,0,0};
   v.push_back(empty);
 }
