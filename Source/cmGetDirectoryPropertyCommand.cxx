@@ -86,6 +86,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
       }
     output = dir->GetSafeDefinition(i->c_str());
     this->Makefile->AddDefinition(variable.c_str(), output.c_str());
+    return true;
     }
 
   const char *prop = dir->GetProperty(i->c_str());
