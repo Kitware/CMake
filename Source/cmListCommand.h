@@ -68,20 +68,24 @@ public:
       "  LIST(GET <list> <element index> [<element index> ...] "
       "<output variable>)\n"
       "  LIST(APPEND <list> <element> [<element> ...])\n"
+      "  LIST(CONTAINS <list> <value> <output variable>)\n"
       "  LIST(INSERT <list> <element_index> <element> [<element> ...])\n"
       "  LIST(REMOVE_ITEM <list> <value> [<value> ...])\n"
       "  LIST(REMOVE_AT <list> <index> [<index> ...])\n"
-      "  LIST(SORT <list>)\n"
       "  LIST(REVERSE <list>)\n"
+      "  LIST(SORT <list>)\n"
       "LENGTH will return a given list's length.\n"
       "GET will return list of elements specified by indices from the list.\n"
       "APPEND will append elements to the list.\n"
+      "CONTAINS will return TRUE if the element specified is in the list.\n"
       "INSERT will insert elements to the list to the specified location.\n"
       "When specifying an index, negative value corresponds to index from the"
       " end of the list.\n"
       "REMOVE_AT and REMOVE_ITEM will remove items from the list. The "
       "difference is that REMOVE_ITEM will remove the given items, while "
       "REMOVE_AT will remove the items at the given indices.\n"
+      "REVERSE reverses the contents of the list in-place.\n"
+      "SORT sorts the list in-place alphabetically.\n"
       ;
     }
 
@@ -90,6 +94,7 @@ protected:
   bool HandleLengthCommand(std::vector<std::string> const& args);
   bool HandleGetCommand(std::vector<std::string> const& args);
   bool HandleAppendCommand(std::vector<std::string> const& args);
+  bool HandleContainsCommand(std::vector<std::string> const& args);
   bool HandleInsertCommand(std::vector<std::string> const& args);
   bool HandleRemoveAtCommand(std::vector<std::string> const& args);
   bool HandleRemoveItemCommand(std::vector<std::string> const& args);

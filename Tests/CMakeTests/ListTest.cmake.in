@@ -66,3 +66,17 @@ TEST("REMOVE_ITEM result bob" "andy;bill;brad;ken")
 SET(result andy bill bob brad ken peter)
 LIST(REMOVE_AT result 2 -1)
 TEST("REMOVE_AT result 2 -1" "andy;bill;brad;ken")
+
+LIST(CONTAINS mylist ken result)
+TEST("CONTAINS mylist ken result" "TRUE")
+
+LIST(CONTAINS mylist nobody result)
+TEST("CONTAINS mylist nobody result" "FALSE")
+
+SET(result ken bill andy brad)
+LIST(SORT result)
+TEST("SORT result" "andy;bill;brad;ken")
+
+SET(result andy bill brad ken)
+LIST(REVERSE result)
+TEST("REVERSE result" "ken;brad;bill;andy")

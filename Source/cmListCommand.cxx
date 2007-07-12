@@ -42,6 +42,10 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleAppendCommand(args);
     }
+  if(subCommand == "CONTAINS")
+    {
+    return this->HandleContainsCommand(args);
+    }
   if(subCommand == "INSERT")
     {
     return this->HandleInsertCommand(args);
@@ -196,6 +200,39 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
     }
 
   this->Makefile->AddDefinition(listName.c_str(), listString.c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmListCommand::HandleContainsCommand(std::vector<std::string> const& args)
+{
+  if(args.size() != 4)
+    {
+    this->SetError("sub-command CONTAINS requires three arguments.");
+    return false;
+    }
+
+  const std::string& listName = args[1];
+  const std::string& variableName = args[args.size() - 1];
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if ( !this->GetList(varArgsExpanded, listName.c_str()) )
+    {
+    this->Makefile->AddDefinition(variableName.c_str(), "FALSE");
+    return true;
+    }
+
+  std::vector<std::string>::iterator it;
+  for ( it = varArgsExpanded.begin(); it != varArgsExpanded.end(); ++ it )
+    {
+    if ( *it == args[2] )
+      {
+      this->Makefile->AddDefinition(variableName.c_str(), "TRUE");
+      return true;
+      }
+    }
+
+  this->Makefile->AddDefinition(variableName.c_str(), "FALSE");
   return true;
 }
 
