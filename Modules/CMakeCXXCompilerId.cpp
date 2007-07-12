@@ -35,6 +35,11 @@
 #elif defined(_MSC_VER)
 # define COMPILER_ID "MSVC"
 
+#elif defined(__ADSPBLACKFIN__) || defined(__ADSPTS__) || defined(__ADSP21000__)
+/* Analog Devices C++ compiler for Blackfin, TigerSHARC and 
+   SHARC (21000) DSPs */
+# define COMPILER_ID "ADSP"
+
 #elif defined(_COMPILER_VERSION)
 # define COMPILER_ID "MIPSpro"
 
