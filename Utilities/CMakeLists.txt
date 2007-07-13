@@ -46,26 +46,26 @@ ADD_CUSTOM_COMMAND(
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.1
        --help-properties ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
        --help-properties ${CMake_BINARY_DIR}/Docs/cmake-properties.html
-       --help-properties ${CMake_BINARY_DIR}/Docs/cmprops.1
+       --help-properties ${CMake_BINARY_DIR}/Docs/cmakeprops.1
        --help-modules ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
        --help-modules ${CMake_BINARY_DIR}/Docs/cmake-modules.html
-       --help-modules ${CMake_BINARY_DIR}/Docs/cmmodules.1
+       --help-modules ${CMake_BINARY_DIR}/Docs/cmakemodules.1
        --help-commands ${CMake_BINARY_DIR}/Docs/cmake-commands.txt
        --help-commands ${CMake_BINARY_DIR}/Docs/cmake-commands.html
-       --help-commands ${CMake_BINARY_DIR}/Docs/cmcommands.1
+       --help-commands ${CMake_BINARY_DIR}/Docs/cmakecommands.1
        --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.txt
        --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html
-       --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmcompat.1
+       --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmakecompat.1
   DEPENDS cmake
   MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
   )
 
 INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
               ${CMake_BINARY_DIR}/Docs/cmake.1
-              ${CMake_BINARY_DIR}/Docs/cmcommands.1
-              ${CMake_BINARY_DIR}/Docs/cmcompat.1
-              ${CMake_BINARY_DIR}/Docs/cmprops.1
-              ${CMake_BINARY_DIR}/Docs/cmmodules.1)
+              ${CMake_BINARY_DIR}/Docs/cmakecommands.1
+              ${CMake_BINARY_DIR}/Docs/cmakecompat.1
+              ${CMake_BINARY_DIR}/Docs/cmakeprops.1
+              ${CMake_BINARY_DIR}/Docs/cmakemodules.1)
 
 INSTALL_FILES(${CMAKE_DOC_DIR} FILES
     ${CMake_BINARY_DIR}/Docs/cmake.txt

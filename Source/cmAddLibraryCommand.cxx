@@ -89,9 +89,10 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
     {
     std::string msg = "ADD_LIBRARY for library ";
     msg += args[0];
-    msg += " is used with the SHARED or MODULE option, but the target "
-        "platform supports only STATIC libraries. Building it STATIC instead. "
-        "This may lead to problems.";
+    msg += " is used with the ";
+    msg += type==cmTarget::SHARED_LIBRARY ? "SHARED" : "MODULE";
+    msg += " option, but the target platform supports only STATIC libraries. "
+           "Building it STATIC instead. This may lead to problems.";
     cmSystemTools::Message(msg.c_str() ,"Warning");
     type = cmTarget::STATIC_LIBRARY;
     }
