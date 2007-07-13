@@ -72,6 +72,7 @@
 
 #ifdef CMAKE_USE_KDEVELOP
 # include "cmGlobalKdevelopGenerator.h"
+# include "cmExtraCodeBlocksGenerator.h"
 #endif
 
 #include <stdlib.h> // required for atoi
@@ -1447,6 +1448,8 @@ void cmake::AddDefaultExtraGenerators()
 #endif
 // e.g. eclipse ?
 #ifdef CMAKE_USE_KDEVELOP
+  this->AddExtraGenerator(cmExtraCodeBlocksGenerator::GetActualName(), 
+                          &cmExtraCodeBlocksGenerator::New);
   this->AddExtraGenerator(cmGlobalKdevelopGenerator::GetActualName(), 
                           &cmGlobalKdevelopGenerator::New);
   // for kdevelop also add the generator with just the name of the 
