@@ -46,3 +46,9 @@ ENDIF ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
 
 # test getting a definition from a subdir
 SET (WEASELS SIZZLING)
+
+GET_DIRECTORY_PROPERTY(incDirs INCLUDE_DIRECTORIES)
+message(STATUS "incDirs: -${incDirs}")
+IF(NOT incDirs)
+   MESSAGE(FATAL_ERROR "GET_DIRECTORY_PROPERTY(INCLUDE_DIRECTORIES) returned empty list")
+ENDIF(NOT incDirs)

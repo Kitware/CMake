@@ -2592,30 +2592,33 @@ const char *cmMakefile::GetProperty(const char* prop,
                                     cmProperty::ScopeType scope)
 {
   // watch for specific properties
+  static std::string output;
+  output = "";
   if (!strcmp("PARENT_DIRECTORY",prop))
     {
-    return this->LocalGenerator->GetParent()
+    output = this->LocalGenerator->GetParent()
       ->GetMakefile()->GetStartDirectory();
+    return output.c_str();
     }
-  // watch for specific properties
-  if (!strcmp("LISTFILE_STACK",prop))
+  else if (!strcmp("INCLUDE_REGULAR_EXPRESSION",prop) )
     {
-    std::string tmp;
-    for (std::deque<cmStdString>::iterator i = this->ListFileStack.begin();
+    output = this->GetIncludeRegularExpression();
+    return output.c_str();
+    }
+  else if (!strcmp("LISTFILE_STACK",prop))
+    {
+    for (std::deque<cmStdString>::const_iterator i = this->ListFileStack.begin();
          i != this->ListFileStack.end(); ++i)
       {
       if (i != this->ListFileStack.begin())
         {
-        tmp += ";";
+        output += ";";
         }
-      tmp += *i;
+      output += *i;
       }
-    this->SetProperty("LISTFILE_STACK",tmp.c_str());
+    return output.c_str();
     }
-
-  // some other special properties sigh
-  std::string output = "";
-  if (!strcmp("VARIABLES",prop) || !strcmp("CACHE_VARIABLES",prop))
+  else if (!strcmp("VARIABLES",prop) || !strcmp("CACHE_VARIABLES",prop))
     {
     int cacheonly = 0;
     if ( !strcmp("CACHE_VARIABLES",prop) )
@@ -2631,59 +2634,51 @@ const char *cmMakefile::GetProperty(const char* prop,
         }
       output += vars[cc];
       }
-    this->SetProperty(prop, output.c_str());
+    return output.c_str();
     }
   else if (!strcmp("MACROS",prop))
     {
     this->GetListOfMacros(output);
-    this->SetProperty(prop, output.c_str());
+    return output.c_str();
     }
   else if (!strcmp("DEFINITIONS",prop))
     {
     output = this->GetDefineFlags();
-    this->SetProperty(prop, output.c_str());
+    return output.c_str();
     }
   else if (!strcmp("INCLUDE_DIRECTORIES",prop) )
     {
-    std::vector<std::string>::iterator it;
-    int first = 1;
     cmOStringStream str;
-    for ( it = this->GetIncludeDirectories().begin();
-      it != this->GetIncludeDirectories().end();
-      ++ it )
+    for (std::vector<std::string>::const_iterator 
+         it = this->GetIncludeDirectories().begin();
+         it != this->GetIncludeDirectories().end();
+         ++ it )
       {
-      if ( !first )
+      if ( it != this->GetIncludeDirectories().begin())
         {
         str << ";";
         }
       str << it->c_str();
-      first = 0;
       }
     output = str.str();
-    this->SetProperty(prop, output.c_str());
-    }
-  else if (!strcmp("INCLUDE_REGULAR_EXPRESSION",prop) )
-    {
-    return this->GetIncludeRegularExpression();
+    return output.c_str();
     }
   else if (!strcmp("LINK_DIRECTORIES",prop))
     {
-    std::vector<std::string>::iterator it;
-    int first = 1;
     cmOStringStream str;
-    for ( it = this->GetLinkDirectories().begin();
-      it != this->GetLinkDirectories().end();
-      ++ it )
+    for (std::vector<std::string>::const_iterator 
+         it = this->GetLinkDirectories().begin();
+         it != this->GetLinkDirectories().end();
+         ++ it )
       {
-      if ( !first )
+      if ( it != this->GetLinkDirectories().begin())
         {
         str << ";";
         }
       str << it->c_str();
-      first = 0;
       }
     output = str.str();
-    this->SetProperty(prop, output.c_str());
+    return output.c_str();
     }
 
   bool chain = false;
