@@ -165,6 +165,9 @@ public:
   static bool CopyFileIfDifferent(const char* source, 
     const char* destination);
 
+  ///! Compute the md5sum of a file
+  static bool ComputeFileMD5(const char* source, char* md5out);
+
   /**
    * Run an executable command and put the stdout in output.
    * A temporary file is created in the binaryDir for storing the

@@ -22,6 +22,7 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/System.h>
+#include <cmsys/MD5.h>
 
 // support for realpath call
 #ifndef _WIN32
@@ -1044,6 +1045,52 @@ bool cmSystemTools::CopyFileIfDifferent(const char* source,
   const char* destination)
 {
   return Superclass::CopyFileIfDifferent(source, destination);
+}
+
+bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
+{
+  if(!cmSystemTools::FileExists(source))
+    {
+    return false;
+    }
+
+  // Open files
+#if defined(_WIN32) || defined(__CYGWIN__)
+  cmsys_ios::ifstream fin(source, cmsys_ios::ios::binary | cmsys_ios::ios::in);
+#else
+  cmsys_ios::ifstream fin(source);
+#endif
+  if(!fin)
+    {
+    return false;
+    }
+
+  cmsysMD5* md5 = cmsysMD5_New();
+  cmsysMD5_Initialize(md5);
+
+  // Should be efficient enough on most system:
+  const int bufferSize = 4096;
+  char buffer[bufferSize];
+  // This copy loop is very sensitive on certain platforms with
+  // slightly broken stream libraries (like HPUX).  Normally, it is
+  // incorrect to not check the error condition on the fin.read()
+  // before using the data, but the fin.gcount() will be zero if an
+  // error occurred.  Therefore, the loop should be safe everywhere.
+  while(fin)
+    {
+    fin.read(buffer, bufferSize);
+    if(fin.gcount())
+      {
+      cmsysMD5_Append(md5, reinterpret_cast<unsigned char const*>(buffer), 
+                      fin.gcount());
+      }
+    }
+  cmsysMD5_FinalizeHex(md5, md5out);
+  cmsysMD5_Delete(md5);
+
+  fin.close();
+
+  return true;
 }
 
 void cmSystemTools::Glob(const char *directory, const char *regexp,

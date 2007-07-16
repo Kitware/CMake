@@ -865,6 +865,7 @@ void CMakeCommandUsage(const char* program)
     " line\n"
     << "  environment             - display the current enviroment\n"
     << "  make_directory dir      - create a directory\n"
+    << "  md5sum file1 [...]      - compute md5sum of files\n"
     << "  remove_directory dir    - remove a directory and its contents\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
     << "  tar [cxt][vfz] file.tar file/dir1 file/dir2 ... - create a tar.\n"
@@ -1055,6 +1056,31 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         << "\n";
       return 0;
     }
+
+    // Command to calculate the md5sum of a file
+    else if (args[1] == "md5sum" && args.size() >= 3)
+      {
+      char md5out[32];
+      for (std::string::size_type cc = 2; cc < args.size(); cc ++)
+        {
+        const char *filename = args[cc].c_str();
+        // Cannot compute md5sum of a directory
+        if(cmSystemTools::FileIsDirectory(filename))
+          {
+          std::cerr << "Error: " << filename << " is a directory" << std::endl;
+          }
+        else if(!cmSystemTools::ComputeFileMD5(filename, md5out))
+          {
+          // To mimic md5sum behavior in a shell:
+          std::cerr << filename << ": No such file or directory" << std::endl;
+          }
+        else
+          {
+          std::cout << std::string(md5out,32) << "  " << filename << std::endl;
+          }
+        }
+      return 1;
+      }
 
     // Command to change directory and run a program.
     else if (args[1] == "chdir" && args.size() >= 4)
