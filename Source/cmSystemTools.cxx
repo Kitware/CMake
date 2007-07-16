@@ -22,7 +22,6 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/System.h>
-#include <cmsys/MD5.h>
 
 // support for realpath call
 #ifndef _WIN32
@@ -51,6 +50,7 @@
 #  include <memory> // auto_ptr
 #  include <fcntl.h>
 #  include <cm_zlib.h>
+#  include <cmsys/MD5.h>
 #endif
 
 #if defined(__sgi) && !defined(__GNUC__)
@@ -1049,6 +1049,7 @@ bool cmSystemTools::CopyFileIfDifferent(const char* source,
 
 bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
 {
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   if(!cmSystemTools::FileExists(source))
     {
     return false;
@@ -1089,8 +1090,11 @@ bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
   cmsysMD5_Delete(md5);
 
   fin.close();
-
   return true;
+#else  
+  cmSystemTools::Message("md5sum not supported in bootstrapping mode","Error");
+  return false;
+#endif
 }
 
 void cmSystemTools::Glob(const char *directory, const char *regexp,
