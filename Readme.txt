@@ -47,8 +47,8 @@ below.
 You already have a version of CMake installed
 ---------------------------------------------
 
-You can build CMake as any other project with a CMake-based buildsystem:
-run the installed CMake on the sources of this CMake with your prefered
+You can build CMake as any other project with a CMake-based build system:
+run the installed CMake on the sources of this CMake with your preferred
 options and generators. Then build it and install it.
 For instructions how to do this, see http://www.cmake.org/HTML/RunningCMake.html 
 
