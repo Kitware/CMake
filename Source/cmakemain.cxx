@@ -211,12 +211,14 @@ static std::string cmakemainGetStack(void *clientdata)
   return msg;
 }
 
-static void cmakemainErrorCallback(const char* m, const char* title, bool& nomore, void *clientdata)
+static void cmakemainErrorCallback(const char* m, const char* title, 
+                                   bool& nomore, void *clientdata)
 {
   std::cerr << m << cmakemainGetStack(clientdata) << std::endl << std::flush;
 }
 
-static void cmakemainProgressCallback(const char *m, float prog, void* clientdata)
+static void cmakemainProgressCallback(const char *m, float prog, 
+                                      void* clientdata)
 {
   cmMakefile* mf = cmakemainGetMakefile(clientdata);
   std::string dir;
@@ -233,7 +235,7 @@ static void cmakemainProgressCallback(const char *m, float prog, void* clientdat
 
   if ((prog < 0) || (!dir.empty()))
     {
-    std::cout << "-- " << m << dir << cmakemainGetStack(clientdata) << std::endl;
+    std::cout << "-- " << m << dir << cmakemainGetStack(clientdata)<<std::endl;
     }
 
   std::cout.flush();

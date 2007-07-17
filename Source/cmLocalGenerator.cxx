@@ -65,7 +65,8 @@ cmLocalGenerator::~cmLocalGenerator()
 
 void cmLocalGenerator::Configure()
 {
-  cmLocalGenerator* previousLg = this->GetGlobalGenerator()->GetCurrentLocalGenerator();
+  cmLocalGenerator* previousLg = 
+                        this->GetGlobalGenerator()->GetCurrentLocalGenerator();
   this->GetGlobalGenerator()->SetCurrentLocalGenerator(this);
 
   // make sure the CMakeFiles dir is there
