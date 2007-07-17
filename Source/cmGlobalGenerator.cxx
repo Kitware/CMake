@@ -52,6 +52,7 @@ cmGlobalGenerator::cmGlobalGenerator()
   this->TryCompileTimeout = 0;
 
   this->ExtraGenerator = 0;
+  this->CurrentLocalGenerator = 0;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -845,12 +846,14 @@ void cmGlobalGenerator::Generate()
   // Generate project files
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
+    this->SetCurrentLocalGenerator(this->LocalGenerators[i]);
     this->LocalGenerators[i]->Generate();
     this->LocalGenerators[i]->GenerateInstallRules();
     this->LocalGenerators[i]->GenerateTestFiles();
     this->CMakeInstance->UpdateProgress("Generating",
                                     (i+1.0f)/this->LocalGenerators.size());
     }
+  this->SetCurrentLocalGenerator(0);
 
   if (this->ExtraGenerator != 0)
     {

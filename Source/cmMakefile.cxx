@@ -306,7 +306,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
       error << "Error in cmake code at\n"
             << lff.FilePath << ":" << lff.Line << ":\n"
             << rm->GetError() << std::endl
-            << "Current CMake stack: " << this->GetListFileStack().c_str();
+            << "Called from: " << this->GetListFileStack().c_str();
       cmSystemTools::Error(error.str().c_str());
       return false;
       }
@@ -323,7 +323,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
         error << "Error in cmake code at\n"
               << lff.FilePath << ":" << lff.Line << ":\n"
               << usedCommand->GetError() << std::endl
-              << "Current CMake stack: " << this->GetListFileStack().c_str();
+              << "Called from: " << this->GetListFileStack().c_str();
         cmSystemTools::Error(error.str().c_str());
         result = false;
         if ( this->GetCMakeInstance()->GetScriptMode() )
@@ -2607,7 +2607,7 @@ const char *cmMakefile::GetProperty(const char* prop,
     }
   else if (!strcmp("LISTFILE_STACK",prop))
     {
-    for (std::deque<cmStdString>::const_iterator i = this->ListFileStack.begin();
+    for (std::deque<cmStdString>::iterator i = this->ListFileStack.begin();
          i != this->ListFileStack.end(); ++i)
       {
       if (i != this->ListFileStack.begin())
@@ -2774,17 +2774,24 @@ std::string cmMakefile::GetListFileStack()
 {
   cmOStringStream tmp;
   size_t depth = this->ListFileStack.size();
-  std::deque<cmStdString>::iterator it = this->ListFileStack.end();
-  do
+  if (depth > 0)
     {
-    --it;
-    tmp << "\n[";
-    tmp << depth;
-    tmp << "]\t";
-    tmp << *it;
-    depth--;
+    std::deque<cmStdString>::iterator it = this->ListFileStack.end();
+    do
+      {
+      if (depth != this->ListFileStack.size())
+        {
+        tmp << "\n             ";
+        }
+      --it;
+      tmp << "[";
+      tmp << depth;
+      tmp << "]\t";
+      tmp << *it;
+      depth--;
+      }
+    while (it != this->ListFileStack.begin());
     }
-  while (it != this->ListFileStack.begin());
   return tmp.str();
 }
 

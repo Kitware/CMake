@@ -65,6 +65,9 @@ cmLocalGenerator::~cmLocalGenerator()
 
 void cmLocalGenerator::Configure()
 {
+  cmLocalGenerator* previousLg = this->GetGlobalGenerator()->GetCurrentLocalGenerator();
+  this->GetGlobalGenerator()->SetCurrentLocalGenerator(this);
+
   // make sure the CMakeFiles dir is there
   std::string filesDir = this->Makefile->GetStartOutputDirectory();
   filesDir += cmake::GetCMakeFilesDirectory();
@@ -94,6 +97,8 @@ void cmLocalGenerator::Configure()
   this->UseRelativePaths = this->Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
 
   this->Configured = true;
+
+  this->GetGlobalGenerator()->SetCurrentLocalGenerator(previousLg);
 }
 
 void cmLocalGenerator::SetupPathConversions()

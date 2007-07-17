@@ -19,6 +19,9 @@
 #include "cmListFileCache.h"
 #include "cmakewizard.h"
 #include "cmSourceFile.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmDynamicLoader.h"
@@ -172,7 +175,70 @@ static const cmDocumentationEntry cmDocumentationNOTE[] =
 #endif
 
 int do_cmake(int ac, char** av);
-void updateProgress(const char *msg, float prog, void *cd);
+
+static cmMakefile* cmakemainGetMakefile(void *clientdata)
+{
+  cmake* cm = (cmake *)clientdata;
+  if(cm && cm->GetDebugOutput())
+    {
+    cmGlobalGenerator* gg=cm->GetGlobalGenerator();
+    if (gg)
+      {
+      cmLocalGenerator* lg=gg->GetCurrentLocalGenerator();
+      if (lg)
+        {
+        cmMakefile* mf = lg->GetMakefile();
+        return mf;
+        }
+      }
+    }
+  return 0;
+}
+
+static std::string cmakemainGetStack(void *clientdata)
+{
+  std::string msg;
+  cmMakefile* mf=cmakemainGetMakefile(clientdata);
+  if (mf)
+    {
+    msg = mf->GetListFileStack();
+    if (!msg.empty())
+      {
+      msg = "\nCalled from: " + msg;
+      }
+    }
+
+  return msg;
+}
+
+static void cmakemainErrorCallback(const char* m, const char* title, bool& nomore, void *clientdata)
+{
+  std::cerr << m << cmakemainGetStack(clientdata) << std::endl << std::flush;
+}
+
+static void cmakemainProgressCallback(const char *m, float prog, void* clientdata)
+{
+  cmMakefile* mf = cmakemainGetMakefile(clientdata);
+  std::string dir;
+  if ((mf) && (strstr(m, "Configuring")==m))
+    {
+    dir = " ";
+    dir += mf->GetCurrentDirectory();
+    }
+  else if ((mf) && (strstr(m, "Generating")==m))
+    {
+    dir = " ";
+    dir += mf->GetCurrentOutputDirectory();
+    }
+
+  if ((prog < 0) || (!dir.empty()))
+    {
+    std::cout << "-- " << m << dir << cmakemainGetStack(clientdata) << std::endl;
+    }
+
+  std::cout.flush();
+}
+
 
 int main(int ac, char** av)
 {
@@ -355,8 +421,10 @@ int do_cmake(int ac, char** av)
     return ret; 
     }
   cmake cm;  
-  cm.SetProgressCallback(updateProgress, 0);
+  cmSystemTools::SetErrorCallback(cmakemainErrorCallback, (void *)&cm);
+  cm.SetProgressCallback(cmakemainProgressCallback, (void *)&cm);
   cm.SetScriptMode(script_mode);
+
   int res = cm.Run(args, view_only);
   if ( list_cached || list_all_cached )
     {
@@ -390,14 +458,3 @@ int do_cmake(int ac, char** av)
   return res;
 }
 
-void updateProgress(const char *msg, float prog, void*)
-{
-  if ( prog < 0 )
-    {
-    std::cout << "-- " << msg << std::endl;
-    }
-  //else
-  //{
-  //std::cout << "-- " << msg << " " << prog << std::endl;
-  //}
-}

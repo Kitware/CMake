@@ -122,6 +122,12 @@ public:
   const std::vector<cmLocalGenerator *>& GetLocalGenerators() const { 
     return this->LocalGenerators;}
 
+  cmLocalGenerator* GetCurrentLocalGenerator() 
+                                          {return this->CurrentLocalGenerator;}
+
+  void SetCurrentLocalGenerator(cmLocalGenerator* lg) 
+                                            {this->CurrentLocalGenerator = lg;}
+
   void AddLocalGenerator(cmLocalGenerator *lg);
 
   ///! Set an generator for an "external makefile based project"
@@ -235,6 +241,7 @@ protected:
   cmStdString ConfiguredFilesPath;
   cmake *CMakeInstance;
   std::vector<cmLocalGenerator *> LocalGenerators;
+  cmLocalGenerator* CurrentLocalGenerator;
   // map from project name to vector of local generators in that project
   std::map<cmStdString, std::vector<cmLocalGenerator*> > ProjectMap;
   std::map<cmStdString, std::set<cmTarget*> > ProjectToTargetMap;
