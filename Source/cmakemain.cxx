@@ -215,8 +215,8 @@ static std::string cmakemainGetStack(void *clientdata)
   return msg;
 }
 
-static void cmakemainErrorCallback(const char* m, const char* title, 
-                                   bool& nomore, void *clientdata)
+static void cmakemainErrorCallback(const char* m, const char*, bool&, 
+                                   void *clientdata)
 {
   std::cerr << m << cmakemainGetStack(clientdata) << std::endl << std::flush;
 }
