@@ -14,6 +14,13 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
+// include these first, otherwise there will be problems on Windows 
+// with GetCurrentDirectory() being redefined 
+#ifdef CMAKE_BUILD_WITH_CMAKE
+#include "cmDynamicLoader.h"
+#include "cmDocumentation.h"
+#endif
+
 #include "cmake.h"
 #include "cmCacheManager.h"
 #include "cmListFileCache.h"
@@ -24,9 +31,6 @@
 #include "cmMakefile.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-#include "cmDynamicLoader.h"
-#include "cmDocumentation.h"
-
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
 {

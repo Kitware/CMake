@@ -1063,6 +1063,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "md5sum" && args.size() >= 3)
       {
       char md5out[32];
+      int retval = 0;
       for (std::string::size_type cc = 2; cc < args.size(); cc ++)
         {
         const char *filename = args[cc].c_str();
@@ -1070,18 +1071,20 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         if(cmSystemTools::FileIsDirectory(filename))
           {
           std::cerr << "Error: " << filename << " is a directory" << std::endl;
+          retval++;
           }
         else if(!cmSystemTools::ComputeFileMD5(filename, md5out))
           {
           // To mimic md5sum behavior in a shell:
           std::cerr << filename << ": No such file or directory" << std::endl;
+          retval++;
           }
         else
           {
           std::cout << std::string(md5out,32) << "  " << filename << std::endl;
           }
         }
-      return 1;
+      return retval;
       }
 
     // Command to change directory and run a program.
