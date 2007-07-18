@@ -35,8 +35,6 @@ SET (TCLTK_POSSIBLE_LIB_PATHS
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/lib
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/lib
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/lib
-  /usr/lib 
-  /usr/local/lib
 )
 
 FIND_LIBRARY(TCL_LIBRARY

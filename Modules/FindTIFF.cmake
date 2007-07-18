@@ -7,21 +7,16 @@
 # also defined, but not for general use are
 #  TIFF_LIBRARY, where to find the TIFF library.
 
-FIND_PATH(TIFF_INCLUDE_DIR tiff.h
-  /usr/local/include
-  /usr/include
-)
+FIND_PATH(TIFF_INCLUDE_DIR tiff.h)
 
 SET(TIFF_NAMES ${TIFF_NAMES} tiff)
-FIND_LIBRARY(TIFF_LIBRARY
-  NAMES ${TIFF_NAMES}
-  PATHS /usr/lib /usr/local/lib
-  )
+FIND_LIBRARY(TIFF_LIBRARY NAMES ${TIFF_NAMES} )
 
-IF(TIFF_INCLUDE_DIR)
-  IF(TIFF_LIBRARY)
-    SET( TIFF_FOUND "YES" )
-    SET( TIFF_LIBRARIES ${TIFF_LIBRARY} )
-  ENDIF(TIFF_LIBRARY)
-ENDIF(TIFF_INCLUDE_DIR)
+# handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(TIFF TIFF_LIBRARY TIFF_INCLUDE_DIR)
 
+IF(TIFF_FOUND)
+  SET( TIFF_LIBRARIES ${TIFF_LIBRARY} )
+ENDIF(TIFF_FOUND)

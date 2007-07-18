@@ -15,30 +15,15 @@
 # Tiger will include OpenAL as part of the System.
 # But for now, we have to look around.
 # Other (Unix) systems should be able to utilize the non-framework paths.
-FIND_PATH(OPENAL_INCLUDE_DIR al.h
+FIND_PATH(OPENAL_INCLUDE_DIR NAMES al.h
+  PATH_SUFFIXES AL OpenAL
+  PATHS 
   $ENV{OPENALDIR}/include
   ~/Library/Frameworks/OpenAL.framework/Headers
   /Library/Frameworks/OpenAL.framework/Headers
   /System/Library/Frameworks/OpenAL.framework/Headers # Tiger
-  /usr/local/include/AL
-  /usr/local/include/OpenAL
-  /usr/local/include
-  /usr/include/AL
-  /usr/include/OpenAL
-  /usr/include
-  /sw/include/AL # Fink
-  /sw/include/OpenAL 
-  /sw/include
-  /opt/local/include/AL # DarwinPorts
-  /opt/local/include/OpenAL
-  /opt/local/include
-  /opt/csw/include/AL # Blastwave
-  /opt/csw/include/OpenAL
-  /opt/csw/include
-  /opt/include/AL
-  /opt/include/OpenAL
-  /opt/include
   )
+
 # I'm not sure if I should do a special casing for Apple. It is 
 # unlikely that other Unix systems will find the framework path.
 # But if they do ([Next|Open|GNU]Step?), 
@@ -67,18 +52,11 @@ ELSE(${OPENAL_INCLUDE_DIR} MATCHES ".framework")
     PATHS
     $ENV{OPENALDIR}/lib
     $ENV{OPENALDIR}/libs
-    /usr/local/lib
-    /usr/lib
-    /sw/lib
-    /opt/local/lib
-    /opt/csw/lib
-    /opt/lib
     )
 ENDIF(${OPENAL_INCLUDE_DIR} MATCHES ".framework")
 
-SET(OPENAL_FOUND "NO")
-IF(OPENAL_LIBRARY)
-  SET(OPENAL_FOUND "YES")
-ENDIF(OPENAL_LIBRARY)
 
-
+# handle the QUIETLY and REQUIRED arguments and set OPENAL_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenAL OPENAL_LIBRARY OPENAL_INCLUDE_DIR)

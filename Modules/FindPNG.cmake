@@ -11,26 +11,18 @@
 # PNG depends on Zlib
 INCLUDE(FindZLIB)
 
-SET(PNG_FOUND "NO")
-
 IF(ZLIB_FOUND)
   FIND_PATH(PNG_PNG_INCLUDE_DIR png.h
-  /usr/local/include
-  /usr/include
   /usr/local/include/libpng             # OpenBSD
   )
 
   SET(PNG_NAMES ${PNG_NAMES} png libpng)
-  FIND_LIBRARY(PNG_LIBRARY
-    NAMES ${PNG_NAMES}
-    PATHS /usr/lib /usr/local/lib
-  )
+  FIND_LIBRARY(PNG_LIBRARY NAMES ${PNG_NAMES} )
 
   IF (PNG_LIBRARY AND PNG_PNG_INCLUDE_DIR)
       # png.h includes zlib.h. Sigh.
       SET(PNG_INCLUDE_DIR ${PNG_PNG_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} )
       SET(PNG_LIBRARIES ${PNG_LIBRARY} ${ZLIB_LIBRARY})
-      SET(PNG_FOUND "YES")
 
       IF (CYGWIN)
         IF(BUILD_SHARED_LIBS)
@@ -44,14 +36,9 @@ IF(ZLIB_FOUND)
 
 ENDIF(ZLIB_FOUND)
 
-IF (PNG_FOUND)
-  IF (NOT PNG_FIND_QUIETLY)
-    MESSAGE(STATUS "Found PNG: ${PNG_LIBRARY}")
-  ENDIF (NOT PNG_FIND_QUIETLY)
-ELSE (PNG_FOUND)
-  IF (PNG_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could not find PNG library")
-  ENDIF (PNG_FIND_REQUIRED)
-ENDIF (PNG_FOUND)
+# handle the QUIETLY and REQUIRED arguments and set PNG_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PNG PNG_LIBRARY PNG_PNG_INCLUDE_DIR)
 
 MARK_AS_ADVANCED(PNG_PNG_INCLUDE_DIR PNG_LIBRARY )
