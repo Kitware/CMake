@@ -3,6 +3,7 @@
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
 #
+#  PYTHONLIBS_FOUND     = have the Python libs been found
 #  PYTHON_LIBRARIES     = path to the python library
 #  PYTHON_INCLUDE_PATH  = path to where Python.h is found
 #  PYTHON_DEBUG_LIBRARIES = path to the debug library
@@ -136,3 +137,7 @@ ENDIF(Python_FRAMEWORKS)
 # module.
 SET(PYTHON_LIBRARIES "${PYTHON_LIBRARY}")
 SET(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
+
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs PYTHON_LIBRARIES PYTHON_INCLUDE_PATH)
