@@ -59,6 +59,15 @@ ELSE(NOT CMAKE_CXX_COMPILER)
 # we only get here if CMAKE_CXX_COMPILER was specified using -D or a pre-made CMakeCache.txt
 # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
 #
+# if CMAKE_CXX_COMPILER is a list of length 2, use the first item as 
+# CMAKE_CXX_COMPILER and the 2nd one as CMAKE_CXX_COMPILER_ARG1
+
+  LIST(LENGTH CMAKE_CXX_COMPILER _CMAKE_CXX_COMPILER_LIST_LENGTH)
+  IF("${_CMAKE_CXX_COMPILER_LIST_LENGTH}" EQUAL 2)
+    LIST(GET CMAKE_CXX_COMPILER 1 CMAKE_CXX_COMPILER_ARG1)
+    LIST(GET CMAKE_CXX_COMPILER 0 CMAKE_CXX_COMPILER)
+  ENDIF("${_CMAKE_CXX_COMPILER_LIST_LENGTH}" EQUAL 2)
+
 # if a compiler was specified by the user but without path, 
 # now try to find it with the full path
 # if it is found, force it into the cache, 
