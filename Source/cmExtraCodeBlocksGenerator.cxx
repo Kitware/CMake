@@ -37,15 +37,19 @@ void cmExtraCodeBlocksGenerator
     "Project files for CodeBlocks will be created in the top directory "
     "and in every subdirectory which features a CMakeLists.txt file "
     "containing a PROJECT() call. "
-    "Additionally a hierarchy of UNIX makefiles is generated into the "
-    "build tree.  Any "
-    "standard UNIX-style make program can build the project through the "
-    "default make target.  A \"make install\" target is also provided.";
+    "Additionally a hierarchy of makefiles is generated into the "
+    "build tree.  The appropriate make program can build the project through "
+    "the default make target.  A \"make install\" target is also provided.";
 }
 
 cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
 :cmExternalMakefileProjectGenerator()
 {
+#if defined(_WIN32)
+  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
+  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
+  this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
+#endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
 }
 

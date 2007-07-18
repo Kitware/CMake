@@ -70,9 +70,12 @@
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
 
+#if !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
+# include "cmExtraCodeBlocksGenerator.h"
+#endif
+
 #ifdef CMAKE_USE_KDEVELOP
 # include "cmGlobalKdevelopGenerator.h"
-# include "cmExtraCodeBlocksGenerator.h"
 #endif
 
 #include <stdlib.h> // required for atoi
@@ -1472,21 +1475,25 @@ void cmake::AddExtraGenerator(const char* name,
 
 void cmake::AddDefaultExtraGenerators()
 {
+#if defined(CMAKE_BUILD_WITH_CMAKE)
 #if defined(_WIN32) && !defined(__CYGWIN__)
-# if !defined(CMAKE_BOOT_MINGW)
-  // e.g. codeblocks, kdevelop4 ?
-# endif
+  // e.g. kdevelop4 ?
 #endif
-// e.g. eclipse ?
-#ifdef CMAKE_USE_KDEVELOP
-  this->AddExtraGenerator(cmExtraCodeBlocksGenerator::GetActualName(), 
+
+#if !defined(__CYGWIN__)
+  this->AddExtraGenerator(cmExtraCodeBlocksGenerator::GetActualName(),
                           &cmExtraCodeBlocksGenerator::New);
+#endif
+
+#ifdef CMAKE_USE_KDEVELOP
   this->AddExtraGenerator(cmGlobalKdevelopGenerator::GetActualName(), 
                           &cmGlobalKdevelopGenerator::New);
   // for kdevelop also add the generator with just the name of the 
   // extra generator, since it was this way since cmake 2.2
   this->ExtraGenerators[cmGlobalKdevelopGenerator::GetActualName()] 
                                              = &cmGlobalKdevelopGenerator::New;
+#endif
+
 #endif
 }
 

@@ -173,10 +173,13 @@ SET(SRCS
 
 # Kdevelop only works on UNIX and not windows
 IF(UNIX)
-  SET(SRCS ${SRCS}
-    cmGlobalKdevelopGenerator.cxx
-    cmExtraCodeBlocksGenerator.cxx)
+  SET(SRCS ${SRCS} cmGlobalKdevelopGenerator.cxx)
 ENDIF(UNIX)
+
+IF(NOT CYGWIN)
+  SET(SRCS ${SRCS} cmExtraCodeBlocksGenerator.cxx)
+ENDIF(NOT CYGWIN)
+
 # XCode only works on apple
 IF(APPLE)
   SET(SRCS ${SRCS}
