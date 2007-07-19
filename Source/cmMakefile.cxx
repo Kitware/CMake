@@ -306,7 +306,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
       error << "Error in cmake code at\n"
             << lff.FilePath << ":" << lff.Line << ":\n"
             << rm->GetError() << std::endl
-            << "Called from: " << this->GetListFileStack().c_str();
+            << "   Called from: " << this->GetListFileStack().c_str();
       cmSystemTools::Error(error.str().c_str());
       return false;
       }
@@ -323,7 +323,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
         error << "Error in cmake code at\n"
               << lff.FilePath << ":" << lff.Line << ":\n"
               << usedCommand->GetError() << std::endl
-              << "Called from: " << this->GetListFileStack().c_str();
+              << "   Called from: " << this->GetListFileStack().c_str();
         cmSystemTools::Error(error.str().c_str());
         result = false;
         if ( this->GetCMakeInstance()->GetScriptMode() )
@@ -2781,7 +2781,7 @@ std::string cmMakefile::GetListFileStack()
       {
       if (depth != this->ListFileStack.size())
         {
-        tmp << "\n             ";
+        tmp << "\n                ";
         }
       --it;
       tmp << "[";

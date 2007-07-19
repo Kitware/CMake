@@ -208,7 +208,7 @@ static std::string cmakemainGetStack(void *clientdata)
     msg = mf->GetListFileStack();
     if (!msg.empty())
       {
-      msg = "\nCalled from: " + msg;
+      msg = "\n   Called from: " + msg;
       }
     }
 
@@ -226,7 +226,7 @@ static void cmakemainProgressCallback(const char *m, float prog,
 {
   cmMakefile* mf = cmakemainGetMakefile(clientdata);
   std::string dir;
-  if ((mf) && (strstr(m, "Configuring")==m))
+  if ((mf) && (strstr(m, "Configuring")==m) && (prog<0))
     {
     dir = " ";
     dir += mf->GetCurrentDirectory();

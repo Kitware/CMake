@@ -253,7 +253,7 @@ int main (int argc, char *argv[])
       if ( !globalMF->ReadListFile(0, cpackConfigFile.c_str()) )
         {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-          "Problem reding CPack config file: \""
+          "Problem reading CPack config file: \""
           << cpackConfigFile.c_str() << "\"" << std::endl);
         return 1;
         }

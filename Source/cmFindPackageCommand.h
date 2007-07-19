@@ -66,7 +66,7 @@ public:
     {
     return
       "  FIND_PACKAGE(<name> [major.minor] [QUIET] [NO_MODULE]\n"
-      "               [[REQUIRED|COMPONENTS] [componets...]])\n"
+      "               [[REQUIRED|COMPONENTS] [components...]])\n"
       "Finds and loads settings from an external project.  <name>_FOUND will "
       "be set to indicate whether the package was found.  Settings that "
       "can be used when <name>_FOUND is true are package-specific.  The "
