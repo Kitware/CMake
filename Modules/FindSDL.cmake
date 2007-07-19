@@ -29,27 +29,15 @@
 # This needed to change because "proper" SDL convention
 # is #include "SDL.h", not <SDL/SDL.h>. This is done for portability
 # reasons because not all systems place things in SDL/ (see FreeBSD).
-FIND_PATH(SDL_INCLUDE_DIR SDL.h
+
+FIND_PATH(SDL_INCLUDE_DIR NAMES SDL.h
+  PATH_SUFFIXES SDL SDL12 SDL11
+  PATHS
   $ENV{SDLDIR}/include
   ~/Library/Frameworks/SDL.framework/Headers
   /Library/Frameworks/SDL.framework/Headers
-  /usr/local/include/SDL
-  /usr/include/SDL
-  /usr/local/include/SDL12
-  /usr/local/include/SDL11 # FreeBSD ports
-  /usr/include/SDL12
-  /usr/include/SDL11
-  /usr/local/include
-  /usr/include
-  /sw/include/SDL # Fink
-  /sw/include
-  /opt/local/include/SDL # DarwinPorts
-  /opt/local/include
-  /opt/csw/include/SDL # Blastwave
-  /opt/csw/include 
-  /opt/include/SDL
-  /opt/include
   )
+
 # I'm not sure if I should do a special casing for Apple. It is 
 # unlikely that other Unix systems will find the framework path.
 # But if they do ([Next|Open|GNU]Step?), 
@@ -86,13 +74,8 @@ ELSE(${SDL_INCLUDE_DIR} MATCHES ".framework")
     NAMES SDL SDL-1.1
     PATHS
     $ENV{SDLDIR}/lib
-    /usr/local/lib
-    /usr/lib
-    /sw/lib
-    /opt/local/lib
-    /opt/csw/lib
-    /opt/lib
     )
+
   # Non-OS X framework versions expect you to also dynamically link to 
   # SDLmain. This is mainly for Windows and OS X. Other platforms 
   # seem to provide SDLmain for compatibility even though they don't
@@ -101,12 +84,6 @@ ELSE(${SDL_INCLUDE_DIR} MATCHES ".framework")
     NAMES SDLmain SDLmain-1.1
     PATHS
     $ENV{SDLDIR}/lib
-    /usr/local/lib
-    /usr/lib
-    /sw/lib
-    /opt/local/lib
-    /opt/csw/lib
-    /opt/lib
     )
 ENDIF(${SDL_INCLUDE_DIR} MATCHES ".framework")
 
@@ -125,7 +102,6 @@ IF(MINGW)
   SET(MINGW32_LIBRARY mingw32 CACHE STRING "mwindows for MinGW")
 ENDIF(MINGW)
 
-SET(SDL_FOUND "NO")
 IF(SDL_LIBRARY_TEMP)
   # For SDLmain
   IF(SDLMAIN_LIBRARY)
@@ -156,7 +132,11 @@ IF(SDL_LIBRARY_TEMP)
   # Set the final string here so the GUI reflects the final state.
   SET(SDL_LIBRARY ${SDL_LIBRARY_TEMP} CACHE STRING "Where the SDL Library can be found")
 
-  SET(SDL_FOUND "YES")
 ENDIF(SDL_LIBRARY_TEMP)
+
+# handle the QUIETLY and REQUIRED arguments and set SDL_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL SDL_LIBRARY_TEMP)
 
 MARK_AS_ADVANCED(SDL_LIBRARY_TEMP)

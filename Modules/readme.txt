@@ -53,7 +53,7 @@ For example:
 # 
 # It even needs to paragraphs to tell you about it.
 # And it defines the following variables:
-#  VAR_COOL - this is greate isn't it?
+#  VAR_COOL - this is great isn't it?
 #  VAR_REALLY_COOL - cool right?
 #
 
@@ -68,7 +68,7 @@ A FindXXX.cmake module will typically be loaded by the command
 If the QUIET option is given to the command it will set the variable
 XXX_FIND_QUIETLY to true before loading the FindXXX.cmake module.  If
 this variable is set the module should not complain about not being
-able to find the package and should never issue a FATAL_ERROR.  If the
+able to find the package.  If the
 REQUIRED option is given to the command it will set the variable
 XXX_FIND_REQUIRED to true before loading the FindXXX.cmake module.  If
 this variable is set the module should issue a FATAL_ERROR if the
@@ -80,3 +80,6 @@ module to determine which sub-components of the package must be found.
 If neither the QUIET nor REQUIRED options are given then the
 FindXXX.cmake module should look for the package and complain without
 error if the module is not found.
+
+To get this behaviour you can use the FIND_PACKAGE_HANDLE_STANDARD_ARGS() 
+macro, as an example see FindJPEG.cmake.

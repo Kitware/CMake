@@ -1,35 +1,13 @@
 # - Find the curses include file and library
 #
 
-FIND_PATH(CURSES_INCLUDE_PATH 
-  curses.h
-  /usr/local/include 
-  /usr/include
-)
+FIND_PATH(CURSES_INCLUDE_PATH curses.h )
 
-FIND_LIBRARY(CURSES_LIBRARY 
-  NAMES curses ncurses
-  PATHS 
-    /usr/local/lib 
-    /usr/lib 
-    /lib
-)
+FIND_LIBRARY(CURSES_LIBRARY NAMES curses ncurses )
 
-FIND_LIBRARY(CURSES_EXTRA_LIBRARY 
-  cur_colr
-  PATHS 
-    /usr/local/lib 
-    /usr/lib 
-    /lib
-)
+FIND_LIBRARY(CURSES_EXTRA_LIBRARY cur_colr )
 
-FIND_LIBRARY(FORM_LIBRARY 
-  form
-  PATHS 
-    /usr/local/lib 
-    /usr/lib 
-    /lib
-)
+FIND_LIBRARY(FORM_LIBRARY form )
 
 # Need to provide the *_LIBRARIES
 SET(CURSES_LIBRARIES ${CURSES_LIBRARY})
@@ -44,6 +22,12 @@ ENDIF(FORM_LIBRARY)
 
 # Proper name is *_INCLUDE_DIR
 SET(CURSES_INCLUDE_DIR ${CURSES_INCLUDE_PATH})
+
+# handle the QUIETLY and REQUIRED arguments and set CURSES_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Curses CURSES_LIBRARY CURSES_INCLUDE_PATH)
+
 
 MARK_AS_ADVANCED(
   CURSES_INCLUDE_PATH

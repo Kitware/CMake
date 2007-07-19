@@ -16,9 +16,6 @@ FIND_PATH(PIKE_INCLUDE_PATH program.h
 
 FIND_PROGRAM(PIKE_EXECUTABLE
   NAMES pike7.4
-  PATHS
-  /usr/bin
-  /usr/local/bin
   )
 
 MARK_AS_ADVANCED(

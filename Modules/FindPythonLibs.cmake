@@ -10,110 +10,53 @@
 #
 
 INCLUDE(CMakeFindFrameworks)
-
-IF(WIN32)
-  FIND_LIBRARY(PYTHON_DEBUG_LIBRARY
-    NAMES python25_d python24_d python23_d python22_d python21_d python20_d python
-    PATHS
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.5\\InstallPath]/libs/Debug
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.5\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs/Debug
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs/Debug
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/libs/Debug
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/libs/Debug
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/libs/Debug
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.6\\InstallPath]/libs/Debug
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.6\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/libs/Debug
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/libs
-  )
-ENDIF(WIN32)
-
-FIND_LIBRARY(PYTHON_LIBRARY
-  NAMES python25 python2.5
-        python24 python2.4
-        python23 python2.3
-        python22 python2.2
-        python21 python2.1
-        python20 python2.0
-        python16 python1.6
-        python15 python1.5
-
-  PATHS
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.5\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.6\\InstallPath]/libs
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/libs
-
-  PATH_SUFFIXES
-    python2.5/config
-    python2.4/config
-    python2.3/config
-    python2.2/config
-    python2.1/config
-    python2.0/config
-    python1.6/config
-    python1.5/config
-
-  # Avoid finding the .dll in the PATH.  We want the .lib.
-  NO_SYSTEM_ENVIRONMENT_PATH
-)
-
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
-SET(PYTHON_FRAMEWORK_INCLUDES)
-IF(Python_FRAMEWORKS)
-  IF(NOT PYTHON_INCLUDE_PATH)
-    FOREACH(version 2.5 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
-      FOREACH(dir ${Python_FRAMEWORKS})
-        SET(PYTHON_FRAMEWORK_INCLUDES ${PYTHON_FRAMEWORK_INCLUDES}
-          ${dir}/Versions/${version}/include/python${version})
-      ENDFOREACH(dir)
-    ENDFOREACH(version)
-  ENDIF(NOT PYTHON_INCLUDE_PATH)
-ENDIF(Python_FRAMEWORKS)
 
-FIND_PATH(PYTHON_INCLUDE_PATH
-  NAMES Python.h
+FOREACH(_CURRENT_VERSION 2.5 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
+  STRING(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
+  IF(WIN32)
+    FIND_LIBRARY(PYTHON_DEBUG_LIBRARY
+      NAMES python${_CURRENT_VERSION_NO_DOTS}_d python
+      PATHS
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs )
+  ENDIF(WIN32)
 
-  PATHS
-    ${PYTHON_FRAMEWORK_INCLUDES}
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.5\\InstallPath]/include
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/include
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/include
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/include
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/include
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/include
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.6\\InstallPath]/include
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/include
-
-  PATH_SUFFIXES
-    python2.5
-    python2.4
-    python2.3
-    python2.2
-    python2.1
-    python2.0
-    python1.6
-    python1.5
-)
-
-IF (WIN32)
-  MARK_AS_ADVANCED(
-    PYTHON_DEBUG_LIBRARY
-    PYTHON_LIBRARY
-    PYTHON_INCLUDE_PATH
+  FIND_LIBRARY(PYTHON_LIBRARY
+    NAMES python${_CURRENT_VERSION_NO_DOTS} python${_CURRENT_VERSION}
+    PATHS
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+    PATH_SUFFIXES
+      python${_CURRENT_VERSION}/config
+    # Avoid finding the .dll in the PATH.  We want the .lib.
+    NO_SYSTEM_ENVIRONMENT_PATH
   )
-ENDIF(WIN32)
+
+  SET(PYTHON_FRAMEWORK_INCLUDES)
+  IF(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_PATH)
+    FOREACH(dir ${Python_FRAMEWORKS})
+      SET(PYTHON_FRAMEWORK_INCLUDES ${PYTHON_FRAMEWORK_INCLUDES}
+        ${dir}/Versions/${_CURRENT_VERSION}/include/python${_CURRENT_VERSION})
+    ENDFOREACH(dir)
+  ENDIF(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_PATH)
+
+  FIND_PATH(PYTHON_INCLUDE_PATH
+    NAMES Python.h
+    PATHS
+      ${PYTHON_FRAMEWORK_INCLUDES}
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+    PATH_SUFFIXES
+      python${_CURRENT_VERSION}
+  )
+  
+ENDFOREACH(_CURRENT_VERSION)
+
+MARK_AS_ADVANCED(
+  PYTHON_DEBUG_LIBRARY
+  PYTHON_LIBRARY
+  PYTHON_INCLUDE_PATH
+)
 
 # Python Should be built and installed as a Framework on OSX
 IF(Python_FRAMEWORKS)
@@ -141,3 +84,44 @@ SET(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs PYTHON_LIBRARIES PYTHON_INCLUDE_PATH)
+
+MACRO(PYTHON_ADD_MODULE _NAME )
+  OPTION(PYTHON_ENABLE_MODULE_${_NAME} "Add module ${_NAME}" TRUE)
+
+  IF(PYTHON_ENABLE_MODULE_${_NAME})
+    OPTION(PYTHON_MODULE_${_NAME}_SHARED "Add module ${_NAME} shared" FALSE)
+    IF(PYTHON_MODULE_${_NAME}_SHARED)
+      SET(PY_MODULE_TYPE MODULE)
+    ELSE(PYTHON_MODULE_${_NAME}_SHARED)
+      SET(PY_MODULE_TYPE STATIC)
+    ENDIF(PYTHON_MODULE_${_NAME}_SHARED)
+
+    SET(PY_MODULES_LIST  ${PY_MODULES_LIST} ${_NAME})
+    ADD_LIBRARY(${_NAME} ${PY_MODULE_TYPE} ${ARGN})
+    TARGET_LINK_LIBRARIES(${_NAME} ${PYTHON_LIBRARIES})
+  ENDIF(PYTHON_ENABLE_MODULE_${_NAME})
+ENDMACRO(PYTHON_ADD_MODULE)
+
+MACRO(PYTHON_WRITE_MODULES_HEADER _filename)
+  GET_FILENAME_COMPONENT(_name "${_filename}" NAME)
+  STRING(REPLACE "." "_" _name "${_name}")
+  STRING(TOUPPER ${_name} _name)
+  FILE(WRITE ${_filename} "/*Created by cmake, do not edit, changes will be lost*/\n")
+  FILE(APPEND ${_filename} "#ifndef ${_name}\n")
+  FILE(APPEND ${_filename} "#define ${_name}\n\n")
+  FILE(APPEND ${_filename} "#include <Python.h>\n\n")
+
+  FOREACH(_currentModule ${PY_MODULES_LIST})
+    FILE(APPEND ${_filename} "extern void init${_currentModule}(void);\n\n")
+  ENDFOREACH(_currentModule ${PY_MODULES_LIST})
+
+  FOREACH(_currentModule ${PY_MODULES_LIST})
+    FILE(APPEND ${_filename} "int CMakeLoadPythonModule_${_currentModule}(void) \n{\n  return PyImport_AppendInittab(\"${_currentModule}\", init${_currentModule});\n}\n\n")
+  ENDFOREACH(_currentModule ${PY_MODULES_LIST})
+
+  FILE(APPEND ${_filename} "#ifndef EXCLUDE_LOAD_ALL_FUNCTION\nvoid CMakeLoadAllPythonModules(void)\n{\n")
+  FOREACH(_currentModule ${PY_MODULES_LIST})
+    FILE(APPEND ${_filename} "  CMakeLoadPythonModule_${_currentModule}();\n")
+  ENDFOREACH(_currentModule ${PY_MODULES_LIST})
+  FILE(APPEND ${_filename} "}\n#endif\n\n#endif\n")
+ENDMACRO(PYTHON_WRITE_MODULES_HEADER)

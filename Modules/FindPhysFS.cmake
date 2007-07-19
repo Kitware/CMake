@@ -14,23 +14,15 @@
 # On OSX, this will prefer the Framework version (if found) over others.
 # People will have to manually change the cache values of 
 # PHYSFS_LIBRARY to override this selection.
-FIND_PATH(PHYSFS_INCLUDE_DIR physfs.h
+
+FIND_PATH(PHYSFS_INCLUDE_DIR NAMES physfs.h
+  PATH_SUFFIXES physfs
+  PATHS
   $ENV{PHYSFSDIR}/include
   ~/Library/Frameworks/PhysFS.framework/Headers
   /Library/Frameworks/PhysFS.framework/Headers
-  /usr/local/include/physfs
-  /usr/local/include
-  /usr/include/physfs
-  /usr/include
-  /sw/include/physfs # Fink
-  /sw/include
-  /opt/local/include/physfs # DarwinPorts
-  /opt/local/include
-  /opt/csw/include/physfs # Blastwave
-  /opt/csw/include
-  /opt/include/physfs
-  /opt/include
   )
+
 # I'm not sure if I should do a special casing for Apple. It is 
 # unlikely that other Unix systems will find the framework path.
 # But if they do ([Next|Open|GNU]Step?), 
@@ -58,17 +50,11 @@ ELSE(${PHYSFS_INCLUDE_DIR} MATCHES ".framework")
     NAMES physfs PhysFS
     PATHS
     $ENV{PHYSFSDIR}/lib
-    /usr/local/lib
-    /usr/lib
-    /sw/lib
-    /opt/local/lib
-    /opt/csw/lib
-    /opt/lib
     )
+
 ENDIF(${PHYSFS_INCLUDE_DIR} MATCHES ".framework")
 
-SET(PHYSFS_FOUND "NO")
-IF(PHYSFS_LIBRARY)
-  SET(PHYSFS_FOUND "YES")
-ENDIF(PHYSFS_LIBRARY)
-
+# handle the QUIETLY and REQUIRED arguments and set PHYSFS_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PhysFS PHYSFS_LIBRARY PHYSFS_INCLUDE_DIR)

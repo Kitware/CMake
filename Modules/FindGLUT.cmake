@@ -11,16 +11,10 @@ IF (WIN32)
 
   IF(CYGWIN)
 
-    FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
-      /usr/include
-    )
+    FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h )
 
     FIND_LIBRARY( GLUT_glut_LIBRARY glut32
       ${OPENGL_LIBRARY_DIR}
-      /usr/lib
-      /usr/lib/w32api
-      /usr/local/lib
-      /usr/X11R6/lib
     )
 
 
@@ -50,36 +44,23 @@ ELSE (WIN32)
   ELSE (APPLE)
 
     FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
-      /usr/include
       /usr/include/GL
-      /usr/local/include
       /usr/openwin/share/include
       /usr/openwin/include
-      /usr/X11R6/include
-      /usr/include/X11
       /opt/graphics/OpenGL/include
       /opt/graphics/OpenGL/contrib/libglut
     )
 
     FIND_LIBRARY( GLUT_glut_LIBRARY glut
-      /usr/lib
-      /usr/local/lib
       /usr/openwin/lib
-      /usr/X11R6/lib
     )
 
     FIND_LIBRARY( GLUT_Xi_LIBRARY Xi
-      /usr/lib
-      /usr/local/lib
       /usr/openwin/lib
-      /usr/X11R6/lib
     )
 
     FIND_LIBRARY( GLUT_Xmu_LIBRARY Xmu
-      /usr/lib
-      /usr/local/lib
       /usr/openwin/lib
-      /usr/X11R6/lib
     )
 
   ENDIF (APPLE)

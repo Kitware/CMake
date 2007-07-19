@@ -8,28 +8,22 @@
 #  MPEG_vo_LIBRARY, where to find the vo library.
 
 FIND_PATH(MPEG_INCLUDE_DIR mpeg2dec/include/video_out.h
-  /usr/local/include
-  /usr/include
   /usr/local/livid
 )
 
 FIND_LIBRARY(MPEG_mpeg2_LIBRARY mpeg2
-  /usr/local/lib
-  /usr/lib
   /usr/local/livid/mpeg2dec/libmpeg2/.libs
 )
 
 FIND_LIBRARY( MPEG_vo_LIBRARY vo
-  /usr/local/lib
-  /usr/lib
   /usr/local/livid/mpeg2dec/libvo/.libs
 )
 
-SET( MPEG_FOUND "NO" )
-IF(MPEG_INCLUDE_DIR)
-  IF(MPEG_mpeg2_LIBRARY)
-    SET( MPEG_FOUND "YES" )
-    SET( MPEG_LIBRARIES ${MPEG_mpeg2_LIBRARY} ${MPEG_vo_LIBRARY} )
-  ENDIF(MPEG_mpeg2_LIBRARY)
-ENDIF(MPEG_INCLUDE_DIR)
+# handle the QUIETLY and REQUIRED arguments and set MPEG2_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(MPEG MPEG_INCLUDE_DIR MPEG_mpeg2_LIBRARY)
 
+IF(MPEG_FOUND)
+  SET( MPEG_LIBRARIES ${MPEG_mpeg2_LIBRARY} ${MPEG_vo_LIBRARY} )
+ENDIF(MPEG_FOUND)
