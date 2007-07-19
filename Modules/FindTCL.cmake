@@ -2,6 +2,9 @@
 # This module finds if TCL is installed and determines where the
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
+#  TCL_FOUND          = Tcl was found
+#  TK_FOUND           = Tk was found
+#  TCLTK_FOUND        = Tcl and Tk were found
 #  TCL_LIBRARY        = path to Tcl library (tcl tcl80)
 #  TCL_LIBRARY_DEBUG  = path to Tcl library (debug)
 #  TCL_STUB_LIBRARY   = path to Tcl stub library
@@ -139,6 +142,19 @@ IF (WIN32)
   MARK_AS_ADVANCED(TK_INTERNAL_PATH)
 ENDIF(WIN32)
 
+# handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(TCL TCL_LIBRARY TCL_INCLUDE_PATH)
+SET(TCLTK_FIND_REQUIRED ${TCL_FIND_REQUIRED})
+SET(TCLTK_FIND_QUIETLY  ${TCL_FIND_QUIETLY})
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(TCLTK TCL_LIBRARY TCL_INCLUDE_PATH TK_LIBRARY TK_INCLUDE_PATH)
+SET(TK_FIND_REQUIRED ${TCL_FIND_REQUIRED})
+SET(TK_FIND_QUIETLY  ${TCL_FIND_QUIETLY})
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(TK TK_LIBRARY TK_INCLUDE_PATH)
+
+
 MARK_AS_ADVANCED(
   TCL_TCLSH_PATH
   TK_WISH_PATH
@@ -154,13 +170,4 @@ MARK_AS_ADVANCED(
   TK_STUB_LIBRARY
   TK_STUB_LIBRARY_DEBUG
   )
- 
-IF(TCL_INCLUDE_PATH)
-  IF(TK_INCLUDE_PATH)
-    IF(TCL_LIBRARY)
-      IF(TK_LIBRARY)
-        SET(TCL_FOUND 1)
-      ENDIF(TK_LIBRARY)
-    ENDIF(TCL_LIBRARY)
-  ENDIF(TK_INCLUDE_PATH)
-ENDIF(TCL_INCLUDE_PATH)
+
