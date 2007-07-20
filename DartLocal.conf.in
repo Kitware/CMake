@@ -58,7 +58,7 @@ ExpectedBuilds: \
 {tick.rz.uni-augsburg.de LinuxPPC-g++3.3} \
 {tick.rz.uni-augsburg.de LinuxPPC-g++3.4} \
 {trinsic.kitware Win32-mingw} \
-{r36n11.pbm.ihost.com AIX53-xlC} \
+{v80n05.pbm.ihost.com AIX53-xlC} \
 {valhalla.kitware Win32-wcl386} \
 {RogueResearch1 Darwin-ppc-gcc4.0.1} \
 {RogueResearch1 Darwin-ppc-xcode2.4} \
