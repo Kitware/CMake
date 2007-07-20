@@ -1074,9 +1074,20 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
   // copy our variables from the child makefile
   lg2->GetMakefile()->InitializeFromParent();
   lg2->GetMakefile()->MakeStartDirectoriesCurrent();
-
+  if (this->GetCMakeInstance()->GetDebugOutput())
+    {
+    std::string msg="   Entering             ";
+    msg += lg2->GetMakefile()->GetCurrentDirectory();
+    cmSystemTools::Message(msg.c_str());
+    }
   // finally configure the subdir
   lg2->Configure();
+  if (this->GetCMakeInstance()->GetDebugOutput())
+    {
+    std::string msg="   Returning to         ";
+    msg += this->GetCurrentDirectory();
+    cmSystemTools::Message(msg.c_str());
+    }
 }
 
 void cmMakefile::AddSubDirectory(const char* sub,
