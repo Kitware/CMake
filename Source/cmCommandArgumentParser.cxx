@@ -167,8 +167,9 @@ YY_DECL;
 static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 
 #define YYDEBUG 1
-//#define YYMAXDEPTH 100000
-//#define YYINITDEPTH 10000
+// Set these high so that
+#define YYMAXDEPTH 100000
+#define YYINITDEPTH 10000
 
 
 /* Disable some warnings in the generated code.  */
