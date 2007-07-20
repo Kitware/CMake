@@ -1549,7 +1549,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
     << "\t<PercentCoverage>";
   covSumFile.setf(std::ios::fixed, std::ios::floatfield);
   covSumFile.precision(2);
-  covSumFile << (percent_coverage/number_files)<< "</PercentCoverage>\n"
+  covSumFile << SAFEDIV(percent_coverage,number_files)<< "</PercentCoverage>\n"
     << "\t<EndDateTime>" << end_time << "</EndDateTime>\n";
   covSumFile << "<ElapsedMinutes>" <<
     static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0
