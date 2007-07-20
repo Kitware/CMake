@@ -102,8 +102,11 @@ public:
 
   cmTypeMacro(cmTryRunCommand, cmCoreTryCompile);
 private:
-  void RunExecutable(const std::string& runArgs, std::string* runOutputContents);
-  void DoNotRunExecutable(const std::string& runArgs, const std::string& srcFile, std::string* runOutputContents);
+  void RunExecutable(const std::string& runArgs, 
+                     std::string* runOutputContents);
+  void DoNotRunExecutable(const std::string& runArgs, 
+                          const std::string& srcFile, 
+                          std::string* runOutputContents);
 
   std::string CompileResultVariable;
   std::string RunResultVariable;

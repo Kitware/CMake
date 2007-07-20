@@ -179,7 +179,9 @@ public:
   void FindMakeProgram(cmMakefile*);
 
   ///! Find a target by name by searching the local generators.
-  cmTarget* FindTarget(const char* project, const char* name, bool useImportedTargets);
+  cmTarget* FindTarget(const char* project, 
+                       const char* name, 
+                       bool useImportedTargets);
 
   /** If check to see if the target is linked to by any other
       target in the project */
@@ -218,7 +220,8 @@ public:
   // what targets does the specified target depend on
   std::vector<cmTarget *>& GetTargetDepends(cmTarget& target);
 
-  const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap() const {return this->ProjectMap;}
+  const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
+                                               const {return this->ProjectMap;}
 protected:
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);

@@ -340,7 +340,8 @@ void cmCTestScriptHandler::CreateCMake()
   this->AddCTestCommand(new cmCTestUpdateCommand);
 }
 
-void cmCTestScriptHandler::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v) const
+void cmCTestScriptHandler::GetCommandDocumentation(
+                                    std::vector<cmDocumentationEntry>& v) const
 {
   this->CMake->GetCommandDocumentation(v);
 }

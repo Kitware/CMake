@@ -336,7 +336,8 @@ protected:
   void AddDefaultCommands();
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
-  void AddExtraGenerator(const char* name, CreateExtraGeneratorFunctionType newFunction);
+  void AddExtraGenerator(const char* name, 
+                         CreateExtraGeneratorFunctionType newFunction);
 
   cmGlobalGenerator *GlobalGenerator;
   cmCacheManager *CacheManager;

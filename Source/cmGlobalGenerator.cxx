@@ -1144,7 +1144,8 @@ void cmGlobalGenerator::GetEnabledLanguages(std::vector<std::string>& lang)
 
 int cmGlobalGenerator::GetLinkerPreference(const char* lang)
 {
-  std::map<cmStdString, int>::const_iterator it = this->LanguageToLinkerPreference.find(lang);
+  std::map<cmStdString, int>::const_iterator it = 
+                                   this->LanguageToLinkerPreference.find(lang);
   if (it != this->LanguageToLinkerPreference.end())
     {
     return it->second;
@@ -1287,7 +1288,7 @@ cmTarget* cmGlobalGenerator::FindTarget(const char* project,
     for(unsigned int i = 0; i < gens->size(); ++i)
       {
       cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name,
-                                                            useImportedTargets);
+                                                           useImportedTargets);
       if(ret)
         {
         return ret;
@@ -1551,9 +1552,10 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       {
       cmCustomCommandLine localCmdLine = singleLine;
 
-      localCmdLine.insert(localCmdLine.begin()+1, "-DCMAKE_INSTALL_LOCAL_ONLY=1");
+      localCmdLine.insert(localCmdLine.begin()+1,
+                                               "-DCMAKE_INSTALL_LOCAL_ONLY=1");
       cpackCommandLines.erase(cpackCommandLines.begin(),
-        cpackCommandLines.end());
+                                                      cpackCommandLines.end());
       cpackCommandLines.push_back(localCmdLine);
 
       (*targets)[install_local] =
@@ -1684,7 +1686,7 @@ std::vector<cmTarget *>& cmGlobalGenerator
     // Don't emit the same utility twice for this target.
     if(emitted.insert(*util).second)
       {
-      cmTarget *target2 = target.GetMakefile()->FindTarget(util->c_str(), false);
+      cmTarget *target2=target.GetMakefile()->FindTarget(util->c_str(), false);
 
       // search each local generator until a match is found
       if (!target2)

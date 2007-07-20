@@ -50,7 +50,8 @@ static const cmDocumentationEntry cmDocumentationStandardOptions[] =
 static const cmDocumentationEntry cmModulesDocumentationDescription[] =
 {
   {0,
-  "  CMake Modules - Modules coming with CMake, the Cross-Platform Makefile Generator.", 0},
+  "  CMake Modules - Modules coming with CMake, the Cross-Platform Makefile "
+  "Generator.", 0},
 //  CMAKE_DOCUMENTATION_OVERVIEW,
   {0,
   "This is the documentation for the modules and scripts coming with CMake. "
@@ -69,10 +70,10 @@ static const cmDocumentationEntry cmPropertiesDocumentationDescription[] =
 //  CMAKE_DOCUMENTATION_OVERVIEW,
   {0,
    "This is the documentation for the properties supported by CMake. "
-  "Properties can have different scopes. They can either be assigned to a source file, "
-  "a directory, a target or globally to CMake. "
-  "By modifying the values of properties the behaviour of the buildsystem can be "
-  "customized.", 0},
+   "Properties can have different scopes. They can either be assigned to a "
+   "source file, a directory, a target or globally to CMake. By modifying the "
+   "values of properties the behaviour of the buildsystem can be customized.",
+   0},
   {0,0,0}
 };
 
@@ -84,9 +85,9 @@ static const cmDocumentationEntry cmCompatCommandsDocumentationDescription[] =
    "Obsolete commands supported by CMake for compatibility.", 0},
 //  CMAKE_DOCUMENTATION_OVERVIEW,
   {0,
-  "This is the documentation for now obsolete listfile commands from "
-  "previous CMake versions, which are still supported for compatibility reasons. "
-  "You should instead use the newer, faster and shinier new commands. ;-)", 0},
+  "This is the documentation for now obsolete listfile commands from previous "
+  "CMake versions, which are still supported for compatibility reasons. You "
+  "should instead use the newer, faster and shinier new commands. ;-)", 0},
   {0,0,0}
 };
 
@@ -813,7 +814,7 @@ void cmDocumentation
     break;
   case cmProperty::DIRECTORY:
     this->DirectoryPropertiesSection.Set(
-                          cmDocumentationDirectoryPropertiesHeader, section, 0);
+                         cmDocumentationDirectoryPropertiesHeader, section, 0);
     break;
   case cmProperty::TARGET:
     this->TargetPropertiesSection.Set(

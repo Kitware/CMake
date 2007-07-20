@@ -167,7 +167,9 @@ public:
   void AddDefineFlag(const char* definition);
   void RemoveDefineFlag(const char* definition);
 
-  cmTarget* AddNewTarget(cmTarget::TargetType type, const char* name, bool isImported);
+  cmTarget* AddNewTarget(cmTarget::TargetType type, 
+                         const char* name, 
+                         bool isImported);
   
   /**
    * Add an executable to the build.

@@ -63,7 +63,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  EXPORT(TARGETS tgt1 tgt2 ...  [PREFIX <prefix>] FILE <filename> [APPEND])\n"
+      "  EXPORT(TARGETS tgt1 tgt2 ...  [PREFIX <prefix>] FILE <filename> "
+      "[APPEND])\n"
       "Create a file that can be included into a CMake listfile with the "
       "INCLUDE command.  The file will contain a number of SET commands "
       "that will set all the variables needed for library dependency "

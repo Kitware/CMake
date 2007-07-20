@@ -35,10 +35,10 @@ public:
   virtual void SetGlobalGenerator(cmGlobalGenerator* generator);
 
   virtual const char* GetName() const
-                          { return cmExtraCodeBlocksGenerator::GetActualName();}
-  static const char* GetActualName()                     { return "CodeBlocks";}
+                         { return cmExtraCodeBlocksGenerator::GetActualName();}
+  static const char* GetActualName()                    { return "CodeBlocks";}
   static cmExternalMakefileProjectGenerator* New() 
-                                      { return new cmExtraCodeBlocksGenerator; }
+                                     { return new cmExtraCodeBlocksGenerator; }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry, 
                                 const char* fullName) const;

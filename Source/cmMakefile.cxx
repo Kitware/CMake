@@ -939,7 +939,7 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
   if ( i != this->Targets.end())
     {
     cmTarget* tgt =
-      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0, lib, false);
+      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0,lib,false);
     if(tgt)
       {
       bool allowModules = true;

@@ -153,7 +153,8 @@ static bool ConvertIntelHexLine(const char* buf, FILE* outFile)
     dataStart = 9;
     }
   // ignore extra address records
-  else if ((buf[8] == '2') || (buf[8] == '3') || (buf[8] == '4') || (buf[8] == '5'))
+  else if ((buf[8] == '2') || (buf[8] == '3') || (buf[8] == '4') 
+            || (buf[8] == '5'))
     {
     return true;
     }

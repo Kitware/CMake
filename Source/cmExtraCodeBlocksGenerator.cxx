@@ -67,7 +67,8 @@ void cmExtraCodeBlocksGenerator::SetGlobalGenerator(
 void cmExtraCodeBlocksGenerator::Generate()
 {
 
-  const cmMakefile* topLevelMakefile = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+  const cmMakefile* topLevelMakefile = 
+                 this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
 
   std::string workspaceName = topLevelMakefile->GetProjectName();
   std::string outputDir=topLevelMakefile->GetStartOutputDirectory();
@@ -119,7 +120,8 @@ void cmExtraCodeBlocksGenerator::Generate()
 
 /* create the project file, if it already exists, merge it with the
 existing one, otherwise create a new one */
-void cmExtraCodeBlocksGenerator::CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs)
+void cmExtraCodeBlocksGenerator::CreateProjectFile(
+                                     const std::vector<cmLocalGenerator*>& lgs)
 {
   const cmMakefile* mf=lgs[0]->GetMakefile();
   std::string outputDir=mf->GetStartOutputDirectory();
@@ -245,7 +247,7 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::SHARED_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
         {
-          const std::vector<cmSourceFile*>& sources=ti->second.GetSourceFiles();
+          const std::vector<cmSourceFile*>&sources=ti->second.GetSourceFiles();
           for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
                si!=sources.end(); si++)
           {
@@ -258,7 +260,8 @@ void cmExtraCodeBlocksGenerator
     }
   }
   
-  for (std::map<std::string, std::string>::const_iterator sit=sourceFiles.begin();
+  for (std::map<std::string, std::string>::const_iterator 
+       sit=sourceFiles.begin();
        sit!=sourceFiles.end();
        ++sit)
   {
