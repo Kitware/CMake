@@ -65,7 +65,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 
-SET(BOOST_INCLUDE_PATH_DESCRIPTION "directory containing the boost include files. E.g /usr/local/include/boost-1_33_1 or c:\\boost\\include\\boost-1_33_1")
+SET(BOOST_INCLUDE_PATH_DESCRIPTION "directory containing the boost include files, e.g. /usr/local/include/boost-1_33_1 or c:/boost/include/boost-1_33_1")
 
 SET(BOOST_DIR_MESSAGE "Set the Boost_INCLUDE_DIR cmake cache entry to the ${BOOST_INCLUDE_PATH_DESCRIPTION}")
 
@@ -103,8 +103,7 @@ FIND_PATH(Boost_INCLUDE_DIR NAMES boost/config.hpp PATH_SUFFIXES ${SUFFIX_FOR_PA
   DOC "The ${BOOST_INCLUDE_PATH_DESCRIPTION}"
 )
 
-# Assume we didn't find it.
-SET(Boost_FOUND 0)
+SET(Boost_INCLUDE_DIRS ${Boost_INCLUDE_DIR})
 
 # Now try to get the include and library path.
 IF(Boost_INCLUDE_DIR)
@@ -133,25 +132,17 @@ IF(Boost_INCLUDE_DIR)
     ENDIF(EXISTS "${Boost_LIBRARY_DIR}/stage/lib")
   ENDIF(EXISTS "${Boost_LIBRARY_DIR}/lib")
 
-  IF(EXISTS "${Boost_INCLUDE_DIR}")
-    SET(Boost_INCLUDE_DIRS ${Boost_INCLUDE_DIR})
-    # We have found boost. It is possible that the user has not
-    # compiled any libraries so we set Boost_FOUND to be true here.
-    SET(Boost_FOUND 1)
-  ENDIF(EXISTS "${Boost_INCLUDE_DIR}")
-
   IF(Boost_LIBRARY_DIR AND EXISTS "${Boost_LIBRARY_DIR}")
     SET(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIR})
   ENDIF(Boost_LIBRARY_DIR AND EXISTS "${Boost_LIBRARY_DIR}")
 ENDIF(Boost_INCLUDE_DIR)
 
-IF(NOT Boost_FOUND)
-  IF(NOT Boost_FIND_QUIETLY)
-    MESSAGE(STATUS "Boost was not found. ${BOOST_DIR_MESSAGE}")
-  ELSE(NOT Boost_FIND_QUIETLY)
-    IF(Boost_FIND_REQUIRED)
-      MESSAGE(FATAL_ERROR "Boost was not found. ${BOOST_DIR_MESSAGE}")
-    ENDIF(Boost_FIND_REQUIRED)
-  ENDIF(NOT Boost_FIND_QUIETLY)
-ENDIF(NOT Boost_FOUND)
+# We have found boost. It is possible that the user has not
+# compiled any libraries so we set Boost_FOUND to be true here.
+# handle the QUIETLY and REQUIRED arguments and set BOOST_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Boost "Boost was not found. ${BOOST_DIR_MESSAGE}" Boost_INCLUDE_DIR )
+SET(Boost_FOUND ${BOOST_FOUND})
 
+MARK_AS_ADVANCED(Boost_INCLUDE_DIR)
