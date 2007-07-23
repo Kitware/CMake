@@ -272,6 +272,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
     error = true;
     }
 
+  // is the output from the executable used ?
   if (out!=0)
     {
     if (this->Makefile->GetDefinition(internalRunOutputName.c_str()) == 0)
@@ -312,6 +313,25 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
 
   if (error)
     {
+    static bool firstRun = true;
+    std::string fileName =  this->Makefile->GetHomeOutputDirectory();
+    fileName += "/TryRunResults.cmake";
+    std::ofstream file(fileName.c_str(), firstRun?std::ios::out : std::ios::app);
+    if ( file )
+      {
+      file << "SET( " << internalRunOutputName << " \""
+           << this->Makefile->GetDefinition(this->RunResultVariable.c_str())
+           << "\" CACHE STRING \"Result from TRY_RUN\" )\n\n";
+      if (out!=0)
+        {
+        file << "SET( " << this->RunResultVariable << " \""
+            << this->Makefile->GetDefinition(internalRunOutputName.c_str())
+            << "\" CACHE STRING \"Output from TRY_RUN\" )\n\n";
+        }
+      file.close();
+      }
+    firstRun = false;
+
     std::string errorMessage = "TRY_RUN() invoked in cross-compiling mode, "
                                "please set the following cache variables "
                                "appropriatly:\n";
