@@ -1344,8 +1344,7 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
       }
 
     // Also, reuse the loop to check for slash followed by another slash
-    if ( !hasDoubleSlash && *pos1 &&
-      *pos1 == '/' && *(pos1+1) == '/' )
+    if (*pos1 == '/' && *(pos1+1) == '/' && !hasDoubleSlash)
       {
 #ifdef _WIN32
       // However, on windows if the first characters are both slashes,

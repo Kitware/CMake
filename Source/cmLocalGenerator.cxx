@@ -2193,13 +2193,12 @@ std::string cmLocalGenerator::Convert(const char* source,
         break;
       }
     }
-  
   // Now convert it to an output path.
   if (output == MAKEFILE)
     {
     result = cmSystemTools::ConvertToOutputPath(result.c_str());
     }
-  if( output == SHELL)
+  else if( output == SHELL)
     {
         // For the MSYS shell convert drive letters to posix paths, so
     // that c:/some/path becomes /c/some/path.  This is needed to
@@ -2298,9 +2297,8 @@ static bool cmLocalGeneratorNotAbove(const char* a, const char* b)
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator
-::ConvertToRelativePath(const std::vector<std::string>& local,
-                        const char* in_remote)
+cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
+                                        const char* in_remote)
 {
   // The path should never be quoted.
   assert(in_remote[0] != '\"');
