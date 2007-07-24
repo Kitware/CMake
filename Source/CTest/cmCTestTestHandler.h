@@ -137,6 +137,15 @@ protected:
   bool MemCheck;
   int CustomMaximumPassedTestOutputSize;
   int CustomMaximumFailedTestOutputSize;
+protected:
+  /**
+   *  Run one test
+   */
+  virtual void ProcessOneTest(cmCTestTestProperties *props,
+                              std::vector<cmStdString> &passed,
+                              std::vector<cmStdString> &failed,
+                              int count, int tmsize);
+
 
 
 private:
@@ -164,14 +173,6 @@ private:
    */
   void ProcessDirectory(std::vector<cmStdString> &passed,
                         std::vector<cmStdString> &failed);
-
-  /**
-   *  Run one test
-   */
-  void ProcessOneTest(cmCTestTestProperties *props,
-                      std::vector<cmStdString> &passed,
-                      std::vector<cmStdString> &failed,
-                      int count, int tmsize);
 
   typedef std::vector<cmCTestTestProperties> ListOfTests;
   /**

@@ -51,7 +51,7 @@ private:
     PURIFY,
     BOUNDS_CHECKER
   };
-
+public:
   enum { // Memory faults
     ABR = 0,
     ABW,
@@ -77,7 +77,7 @@ private:
     UMR,
     NO_MEMORY_FAULT
   };
-  
+private:
   enum { // Program statuses
     NOT_RUN = 0,
     TIMEOUT,
@@ -90,7 +90,8 @@ private:
     BAD_COMMAND,
     COMPLETED
   };
-
+  std::string              BoundsCheckerDPBDFile;
+  std::string              BoundsCheckerXMLFile;
   std::string              MemoryTester;
   std::vector<cmStdString> MemoryTesterOptionsParsed;
   std::string              MemoryTesterOptions;
@@ -118,7 +119,17 @@ private:
                                      std::string& log, int* results);
   bool ProcessMemCheckPurifyOutput(const std::string& str, 
                                    std::string& log, int* results);
-
+  bool ProcessMemCheckBoundsCheckerOutput(const std::string& str, 
+                                          std::string& log, int* results);
+  /**
+   *  Run one test
+   */
+  virtual void ProcessOneTest(cmCTestTestProperties *props,
+                              std::vector<cmStdString> &passed,
+                              std::vector<cmStdString> &failed,
+                              int count, int tmsize);
+  void PostProcessPurifyTest(cmCTestTestResult& res);
+  void PostProcessBoundsCheckerTest(cmCTestTestResult& res);
 };
 
 #endif
