@@ -37,14 +37,6 @@ public:
   cmCPackZIPGenerator();
   virtual ~cmCPackZIPGenerator();
 
-  enum ZipStyles
-    {
-    StyleUnkown,
-    StyleWinZip,
-    StyleUnixZip,
-    Style7Zip
-    };
-
 protected:
   virtual int InitializeInternal();
   int CompressFiles(const char* outFileName, const char* toplevel,

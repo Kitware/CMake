@@ -80,6 +80,7 @@ public:
   void SetOption(const char* op, const char* value);
   void SetOptionIfNotSet(const char* op, const char* value);
   const char* GetOption(const char* op);
+  bool IsSet(const char* name) const;
 
   //! Set all the variables
   int FindRunningCMake(const char* arg0);
@@ -89,6 +90,8 @@ public:
 
   //! Display verbose information via logger
   void DisplayVerboseOutput(const char* msg, float progress);
+  
+  bool ReadListFile(const char* moduleName);
 
 protected:
   int PrepareNames();
@@ -129,8 +132,8 @@ protected:
   std::string CMakeRoot;
 
   cmCPackLog* Logger;
-
-  cmMakefile* Makefile;
+private:
+  cmMakefile* MakefileMap;
 };
 
 #endif

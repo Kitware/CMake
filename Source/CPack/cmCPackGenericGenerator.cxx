@@ -32,14 +32,14 @@
 cmCPackGenericGenerator::cmCPackGenericGenerator()
 {
   this->GeneratorVerbose = false;
-  this->Makefile = 0;
+  this->MakefileMap = 0;
   this->Logger = 0;
 }
 
 //----------------------------------------------------------------------
 cmCPackGenericGenerator::~cmCPackGenericGenerator()
 {
-  this->Makefile = 0;
+  this->MakefileMap = 0;
 }
 
 //----------------------------------------------------------------------
@@ -392,7 +392,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstallScript(
         tempInstallDirectory);
       this->SetOptionIfNotSet("CMAKE_CURRENT_SOURCE_DIR",
         tempInstallDirectory);
-      int res = this->Makefile->ReadListFile(0, installScript.c_str());
+      int res = this->MakefileMap->ReadListFile(0, installScript.c_str());
       if ( cmSystemTools::GetErrorOccuredFlag() || !res )
         {
         return 0;
@@ -454,7 +454,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
 
       const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
       cmGlobalGenerator* globalGenerator
-        = this->Makefile->GetCMakeInstance()->CreateGlobalGenerator(
+        = this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
           cmakeGenerator);
       // set the global flag for unix style paths on cmSystemTools as
       // soon as the generator is set.  This allows gmake to be used
@@ -464,9 +464,9 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
       // Does this generator require pre-install?
       if ( globalGenerator->GetPreinstallTargetName() )
         {
-        globalGenerator->FindMakeProgram(this->Makefile);
+        globalGenerator->FindMakeProgram(this->MakefileMap);
         const char* cmakeMakeProgram
-          = this->Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
+          = this->MakefileMap->GetDefinition("CMAKE_MAKE_PROGRAM");
         std::string buildCommand
           = globalGenerator->GenerateBuildCommand(cmakeMakeProgram,
             installProjectName.c_str(), 0,
@@ -551,10 +551,17 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
 }
 
 //----------------------------------------------------------------------
+bool cmCPackGenericGenerator::ReadListFile(const char* moduleName)
+{
+  std::string fullPath = this->MakefileMap->GetModulesFile(moduleName);
+  return this->MakefileMap->ReadListFile(0, fullPath.c_str());
+}
+
+//----------------------------------------------------------------------
 void cmCPackGenericGenerator::SetOptionIfNotSet(const char* op,
   const char* value)
 {
-  const char* def = this->Makefile->GetDefinition(op);
+  const char* def = this->MakefileMap->GetDefinition(op);
   if ( def && *def )
     {
     return;
@@ -571,12 +578,12 @@ void cmCPackGenericGenerator::SetOption(const char* op, const char* value)
     }
   if ( !value )
     {
-    this->Makefile->RemoveDefinition(op);
+    this->MakefileMap->RemoveDefinition(op);
     return;
     }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, this->GetNameOfClass()
     << "::SetOption(" << op << ", " << value << ")" << std::endl);
-  this->Makefile->AddDefinition(op, value);
+  this->MakefileMap->AddDefinition(op, value);
 }
 
 //----------------------------------------------------------------------
@@ -680,7 +687,7 @@ int cmCPackGenericGenerator::ProcessGenerator()
 int cmCPackGenericGenerator::Initialize(const char* name, cmMakefile* mf,
  const char* argv0)
 {
-  this->Makefile = mf;
+  this->MakefileMap = mf;
   this->Name = name;
   if ( !this->FindRunningCMake(argv0) )
     {
@@ -698,9 +705,15 @@ int cmCPackGenericGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
+bool cmCPackGenericGenerator::IsSet(const char* name) const
+{
+  return this->MakefileMap->IsSet(name);
+}
+
+//----------------------------------------------------------------------
 const char* cmCPackGenericGenerator::GetOption(const char* op)
 {
-  return this->Makefile->GetDefinition(op);
+  return this->MakefileMap->GetDefinition(op);
 }
 
 //----------------------------------------------------------------------
@@ -913,7 +926,7 @@ std::string cmCPackGenericGenerator::FindTemplate(const char* name)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for template: "
     << (name ? name : "(NULL)") << std::endl);
-  std::string ffile = this->Makefile->GetModulesFile(name);
+  std::string ffile = this->MakefileMap->GetModulesFile(name);
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Found template: "
     << ffile.c_str() << std::endl);
   return ffile;
@@ -923,7 +936,7 @@ std::string cmCPackGenericGenerator::FindTemplate(const char* name)
 bool cmCPackGenericGenerator::ConfigureString(const std::string& inString,
   std::string& outString)
 {
-  this->Makefile->ConfigureString(inString,
+  this->MakefileMap->ConfigureString(inString,
     outString, true, false);
   return true;
 }
@@ -932,7 +945,7 @@ bool cmCPackGenericGenerator::ConfigureString(const std::string& inString,
 bool cmCPackGenericGenerator::ConfigureFile(const char* inName,
   const char* outName, bool copyOnly /* = false */)
 {
-  return this->Makefile->ConfigureFile(inName, outName,
+  return this->MakefileMap->ConfigureFile(inName, outName,
     copyOnly, true, false) == 1;
 }
 
