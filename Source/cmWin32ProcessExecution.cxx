@@ -142,14 +142,11 @@ bool cmWin32ProcessExecution::BorlandRunCommand(
   if (!CreatePipe(&newstdin,&write_stdin,&sa,0)) 
 //create stdin pipe 
     {
-    std::cerr << "CreatePipe" << std::endl;
     return false;
- 
     }
   if (!CreatePipe(&read_stdout,&newstdout,&sa,0)) 
 //create stdout pipe 
     {
-    std::cerr << "CreatePipe" << std::endl;
     CloseHandle(newstdin);
     CloseHandle(write_stdin);
     return false;
@@ -637,7 +634,21 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                                 this->hChildStdoutWr,
                                 &hProcess, this->HideWindows,
                                 this->Output))
+      {
+      if(fd1 >= 0)
+        {
+        close(fd1);
+        }
+      if(fd2 >= 0)
+        {
+        close(fd2);
+        }
+      if(fd3 >= 0)
+        {
+        close(fd3);
+        }
       return 0;
+      }
     }
   else 
     {
@@ -649,7 +660,21 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                                 this->hChildStderrWr,
                                 &hProcess, this->HideWindows,
                                 this->Output))
+      {
+      if(fd1 >= 0)
+        {
+        close(fd1);
+        }
+      if(fd2 >= 0)
+        {
+        close(fd2);
+        }
+      if(fd3 >= 0)
+        {
+        close(fd3);
+        }
       return 0;
+      }
     }
 
   /*
@@ -672,17 +697,14 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
   this->ProcessHandle = hProcess;
   if ( fd1 >= 0 )
     {
-    //  this->StdIn = f1;
     this->pStdIn = fd1;
     }
   if ( fd2 >= 0 )
     {
-    //  this->StdOut = f2;
     this->pStdOut = fd2;
     }
   if ( fd3 >= 0 )
     {
-    //  this->StdErr = f3;
     this->pStdErr = fd3;
     }
 
@@ -691,6 +713,22 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
 
 bool cmWin32ProcessExecution::CloseHandles()
 {
+  if(this->pStdErr != -1 )
+    {
+    _close(this->pStdErr);
+    this->pStdErr = -1;
+    }
+  if(this->pStdIn != -1 )
+    {
+    _close(this->pStdIn);
+    this->pStdIn = -1;
+    }
+  if(this->pStdOut != -1 )
+    {
+    _close(this->pStdOut);
+    this->pStdOut = -1;
+    }
+
   bool ret = true;
   if (this->hChildStdinRd && !CloseHandle(this->hChildStdinRd))
     {
