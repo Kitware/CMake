@@ -1453,7 +1453,6 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
 void kwsysProcess_Kill(kwsysProcess* cp)
 {
   int i;
-
   /* Make sure we are executing a process.  */
   if(!cp || cp->State != kwsysProcess_State_Executing || cp->TimeoutExpired ||
      cp->Killed)
@@ -1485,7 +1484,10 @@ void kwsysProcess_Kill(kwsysProcess* cp)
     /* Not Windows 9x.  Just terminate the children.  */
     for(i=0; i < cp->NumberOfCommands; ++i)
       {
-      kwsysProcessKillTree(cp->ProcessInformation[i].dwProcessId);
+      kwsysProcessKillTree(cp->ProcessInformation[i].dwProcessId); 
+      // close the handle if we kill it
+      kwsysProcessCleanupHandle(&cp->ProcessInformation[i].hThread);
+      kwsysProcessCleanupHandle(&cp->ProcessInformation[i].hProcess);
       }
     }
 
@@ -1851,7 +1853,6 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
   r = CreateProcess(0, realCommand, 0, 0, TRUE,
                     cp->Win9x? 0 : CREATE_SUSPENDED, 0, 0,
                     &si->StartupInfo, &cp->ProcessInformation[index]);
-
   if(cp->Win9x)
     {
     /* Free memory.  */
@@ -2114,7 +2115,6 @@ void kwsysProcessCleanupHandleSafe(PHANDLE h, DWORD nStdHandle)
 void kwsysProcessCleanup(kwsysProcess* cp, int error)
 {
   int i;
-
   /* If this is an error case, report the error.  */
   if(error)
     {
@@ -2861,6 +2861,7 @@ static void kwsysProcessKill(DWORD pid)
     {
     TerminateProcess(h, 255);
     WaitForSingleObject(h, INFINITE);
+    CloseHandle(h);
     }
 }
 
