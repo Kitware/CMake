@@ -124,35 +124,40 @@ ENDMACRO(ADJUST_CMAKE_SYSTEM_VARIABLES _PREFIX)
 ADJUST_CMAKE_SYSTEM_VARIABLES(CMAKE_SYSTEM)
 ADJUST_CMAKE_SYSTEM_VARIABLES(CMAKE_HOST_SYSTEM)
 
-# write entry to the log file
-IF(PRESET_CMAKE_SYSTEM_NAME)
-  FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
-              "The target system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
-  FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
-              "The host system is: ${CMAKE_HOST_SYSTEM_NAME} - ${CMAKE_HOST_SYSTEM_VERSION} - ${CMAKE_HOST_SYSTEM_PROCESSOR}\n")
-ELSE(PRESET_CMAKE_SYSTEM_NAME)
-  FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
-              "The system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
-ENDIF(PRESET_CMAKE_SYSTEM_NAME)
+# this file is also executed from cpack, then we don't need to generate these files 
+# in this case there is no CMAKE_BINARY_DIR
+IF(CMAKE_BINARY_DIR)
+  # write entry to the log file
+  IF(PRESET_CMAKE_SYSTEM_NAME)
+    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+                "The target system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+                "The host system is: ${CMAKE_HOST_SYSTEM_NAME} - ${CMAKE_HOST_SYSTEM_VERSION} - ${CMAKE_HOST_SYSTEM_PROCESSOR}\n")
+  ELSE(PRESET_CMAKE_SYSTEM_NAME)
+    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+                "The system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
+  ENDIF(PRESET_CMAKE_SYSTEM_NAME)
 
 
-# if a toolchain file is used use configure_file() to copy it into the 
-# build tree, because this way e.g. ${CMAKE_SOURCE_DIR} will be replaced
-# with its full path, and so it will also work when used in try_compile()
-IF (CMAKE_TOOLCHAIN_FILE)
+  # if a toolchain file is used use configure_file() to copy it into the 
+  # build tree, because this way e.g. ${CMAKE_SOURCE_DIR} will be replaced
+  # with its full path, and so it will also work when used in try_compile()
+  IF (CMAKE_TOOLCHAIN_FILE)
 
-  SET(_OWN_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY})
-  CONFIGURE_FILE(${CMAKE_TOOLCHAIN_FILE}
-               ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeToolchainFile.cmake)
+    SET(_OWN_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY})
+    CONFIGURE_FILE(${CMAKE_TOOLCHAIN_FILE}
+                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeToolchainFile.cmake)
 
-  CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystemWithToolchainFile.cmake.in
-               ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
-               IMMEDIATE @ONLY)
-ELSE (CMAKE_TOOLCHAIN_FILE)
+    CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystemWithToolchainFile.cmake.in
+                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
+                IMMEDIATE @ONLY)
+  ELSE (CMAKE_TOOLCHAIN_FILE)
 
-  # configure variables set in this file for fast reload, the template file is defined at the top of this file
-  CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in
-                 ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
-                 IMMEDIATE @ONLY)
+    # configure variables set in this file for fast reload, the template file is defined at the top of this file
+    CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in
+                  ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
+                  IMMEDIATE @ONLY)
 
-ENDIF (CMAKE_TOOLCHAIN_FILE)
+  ENDIF (CMAKE_TOOLCHAIN_FILE)
+
+ENDIF(CMAKE_BINARY_DIR)

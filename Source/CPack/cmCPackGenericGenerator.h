@@ -130,8 +130,7 @@ protected:
 
   cmCPackLog* Logger;
 
-private:
-  cmMakefile* MakefileMap;
+  cmMakefile* Makefile;
 };
 
 #endif
