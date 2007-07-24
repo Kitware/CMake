@@ -23,9 +23,6 @@ ExpectedBuilds: \
 {DASH6.kitware zRel24-Linix-gcc332} \
 {andoria.kitware Linux-g++3.4-KDevelop} \
 {andoria.kitware Linux-g++3.4-SVN} \
-{dash14.kitware Win32-bcc5.6} \
-{dash14.kitware Win32-cygwin331} \
-{dash14.kitware Win32-mingw} \
 {dash17.kitware Linux-g++4.0} \
 {dash8.kitware Linux64-g++332} \
 {dash8.kitware Linux64-g++341} \
@@ -60,8 +57,6 @@ ExpectedBuilds: \
 {trinsic.kitware Win32-mingw} \
 {v80n05.pbm.ihost.com AIX53-xlC} \
 {valhalla.kitware Win32-wcl386} \
-{RogueResearch1 Darwin-ppc-gcc4.0.1} \
-{RogueResearch1 Darwin-ppc-xcode2.4} \
 {RogueResearch2 Darwin-i386-gcc4.0.1-univ} \
 {RogueResearch2 Darwin-i386-xcode2.4-univ} \
 {grayson.kitware Win32-nmake80} \
@@ -69,7 +64,14 @@ ExpectedBuilds: \
 {insight.journal.kitware KWStyle} \
 {pre.vision.cs.rpi.edu FreeBSD-CC-gmake} \
 {pre.vision.cs.rpi.edu FreeBSD-CC-make} \
-{r36n11.pbm.ihost.com zRel24-AIX53-xlC} 
+{v80n05.pbm.ihost.com zRel24-AIX53-xlC} 
+
+#{RogueResearch1 Darwin-ppc-gcc4.0.1} \
+#{RogueResearch1 Darwin-ppc-xcode2.4} \
+
+#{dash14.kitware Win32-bcc5.6} \
+#{dash14.kitware Win32-cygwin331} \
+#{dash14.kitware Win32-mingw} \
 
 #{devqnx.acfr.usyd.edu.au qnx-V3.3.5-gcc_ntox86 } \
 #{mr-orange.obtech.net gentoo-linux-x86\_64-gcc-4.0.2 } \
