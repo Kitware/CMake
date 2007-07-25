@@ -34,6 +34,12 @@
 #  include "cmCPackCygwinSourceGenerator.h"
 #endif
 
+#if !defined(_WIN32) && !defined(__APPLE__) \
+ && !defined(__QNXNTO__) && !defined(__BEOS__)
+#  include "cmCPackDebGenerator.h"
+#endif
+
+
 #include "cmCPackLog.h"
 
 //----------------------------------------------------------------------
@@ -64,6 +70,10 @@ cmCPackGenerators::cmCPackGenerators()
   this->RegisterGenerator("OSXX11", "Mac OSX X11 bundle",
     cmCPackOSXX11Generator::CreateGenerator);
 #endif
+#if !defined(_WIN32) && !defined(__APPLE__) && !defined(__QNXNTO__) && !defined(__BEOS__)
+  this->RegisterGenerator("DEB", "Debian packages",
+    cmCPackDebGenerator::CreateGenerator);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -80,6 +90,7 @@ cmCPackGenerators::~cmCPackGenerators()
 cmCPackGenericGenerator* cmCPackGenerators::NewGenerator(const char* name)
 {
   cmCPackGenericGenerator* gen = this->NewGeneratorInternal(name);
+  fprintf(stderr, "********* NewGen %s\n", name);
   if ( !gen )
     {
     return 0;
@@ -95,12 +106,15 @@ cmCPackGenericGenerator* cmCPackGenerators::NewGeneratorInternal(
 {
   if ( !name )
     {
+      fprintf(stderr, "*** 1 name==0\n");
     return 0;
     }
+      fprintf(stderr, "*** 2 name==%s\n", name);
   cmCPackGenerators::t_GeneratorCreatorsMap::iterator it
     = this->GeneratorCreators.find(name);
   if ( it == this->GeneratorCreators.end() )
     {
+      fprintf(stderr, "*** 2 name==%s not found\n", name);
     return 0;
     }
   return (it->second)();

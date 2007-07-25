@@ -690,10 +690,17 @@ void cmake::SetDirectoriesFromFile(const char* arg)
 // cache
 int cmake::AddCMakePaths(const char *arg0)
 {
-  // Find our own executable.
+  // Find the cmake executable
   std::vector<cmStdString> failures;
   std::string cMakeSelf = arg0;
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
+  if ((strstr(arg0, "cpack")!=0) || (strstr(arg0, "ctest")!=0))
+    {
+    // when called from cpack or ctest CMAKE_COMMAND would otherwise point
+    // to cpack or ctest and not cmake
+    cMakeSelf = cmSystemTools::GetFilenamePath(cMakeSelf) +
+      "/cmake" + cmSystemTools::GetFilenameExtension(cMakeSelf);
+    }
   failures.push_back(cMakeSelf);
   cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
@@ -746,6 +753,12 @@ int cmake::AddCMakePaths(const char *arg0)
     editCacheCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
       "/CMakeSetup" + cmSystemTools::GetFilenameExtension(cMakeSelf);
     }
+  if(cmSystemTools::FileExists(editCacheCommand.c_str()))
+    {
+    this->CacheManager->AddCacheEntry
+      ("CMAKE_EDIT_COMMAND", editCacheCommand.c_str(),
+       "Path to cache edit program executable.", cmCacheManager::INTERNAL);
+    }
   std::string ctestCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
     "/ctest" + cmSystemTools::GetFilenameExtension(cMakeSelf);
   if(cmSystemTools::FileExists(ctestCommand.c_str()))
@@ -754,11 +767,13 @@ int cmake::AddCMakePaths(const char *arg0)
       ("CMAKE_CTEST_COMMAND", ctestCommand.c_str(),
        "Path to ctest program executable.", cmCacheManager::INTERNAL);
     }
-  if(cmSystemTools::FileExists(editCacheCommand.c_str()))
+  std::string cpackCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
+    "/cpack" + cmSystemTools::GetFilenameExtension(cMakeSelf);
+  if(cmSystemTools::FileExists(ctestCommand.c_str()))
     {
     this->CacheManager->AddCacheEntry
-      ("CMAKE_EDIT_COMMAND", editCacheCommand.c_str(),
-       "Path to cache edit program executable.", cmCacheManager::INTERNAL);
+      ("CMAKE_CPACK_COMMAND", cpackCommand.c_str(),
+       "Path to cpack program executable.", cmCacheManager::INTERNAL);
     }
 
   // do CMAKE_ROOT, look for the environment variable first
