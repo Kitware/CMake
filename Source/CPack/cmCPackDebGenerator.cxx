@@ -41,6 +41,11 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
 {
   const char* arExecutable = this->GetOption("AR_EXECUTABLE");
   const char* cmakeExecutable = this->GetOption("CMAKE_COMMAND");
+  (void) outFileName;
+  (void) toplevel;
+  (void) files;
+  (void) arExecutable;
+  (void) cmakeExecutable;
   return 1;
 }
 
