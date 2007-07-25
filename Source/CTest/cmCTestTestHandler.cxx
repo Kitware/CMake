@@ -784,15 +784,20 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
       }
     }
 
-  if ( cres.Status == cmCTestTestHandler::COMPLETED )
+  // if this is doing MemCheck then all the output needs to be put into
+  // Output since that it what is parsed to by cmCTestMemCheckHandler
+  if(!this->MemCheck)
     {
-    this->CleanTestOutput(output, static_cast<size_t>
-                          (this->CustomMaximumPassedTestOutputSize));
-    }
-  else
-    {
-    this->CleanTestOutput(output, static_cast<size_t>
-                          (this->CustomMaximumFailedTestOutputSize));
+    if ( cres.Status == cmCTestTestHandler::COMPLETED )
+      {
+      this->CleanTestOutput(output, static_cast<size_t>
+                            (this->CustomMaximumPassedTestOutputSize));
+      }
+    else
+      {
+      this->CleanTestOutput(output, static_cast<size_t>
+                            (this->CustomMaximumFailedTestOutputSize));
+      }
     }
 
   cres.Output = output;
