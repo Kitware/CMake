@@ -39,7 +39,7 @@ cmXMLParser::~cmXMLParser()
 int cmXMLParser::Parse(const char* string)
 {
   return (int)this->InitializeParser() &&
-    this->ParseChunk(string, (unsigned int)strlen(string)) && 
+    this->ParseChunk(string, strlen(string)) && 
     this->CleanupParser();
 }
 
@@ -84,7 +84,8 @@ int cmXMLParser::InitializeParser()
 }
 
 //----------------------------------------------------------------------------
-int cmXMLParser::ParseChunk(const char* inputString, unsigned int length)
+int cmXMLParser::ParseChunk(const char* inputString, 
+                            std::string::size_type length)
 {
   if ( !this->Parser )
     {

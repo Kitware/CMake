@@ -52,7 +52,7 @@ public:
    * them.
    */
   virtual int InitializeParser();
-  virtual int ParseChunk(const char* inputString, unsigned int length);
+  virtual int ParseChunk(const char* inputString, std::string::size_type length);
   virtual int CleanupParser();
 
 protected:
