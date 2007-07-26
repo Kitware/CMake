@@ -644,7 +644,13 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
 {
   std::vector<cmStdString> lines;
   cmSystemTools::Split(str.c_str(), lines);
-
+  bool unlimitedOutput = false;
+  if(str.find("CTEST_FULL_OUTPUT") != str.npos ||
+    this->CustomMaximumFailedTestOutputSize == 0)
+    {
+    unlimitedOutput = true;
+    }
+  
   std::string::size_type cc;
 
   cmOStringStream ostr;
@@ -680,9 +686,11 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   cmsys::RegularExpression vgIPW("== .*Invalid write of size [0-9]");
   cmsys::RegularExpression vgABR("== .*pthread_mutex_unlock: mutex is "
     "locked by a different thread");
-
+  std::vector<std::string::size_type> nonValGrindOutput;
   double sttime = cmSystemTools::GetTime();
   cmCTestLog(this->CTest, DEBUG, "Start test: " << lines.size() << std::endl);
+  std::string::size_type totalOutputSize = 0;
+  bool outputFull = false;
   for ( cc = 0; cc < lines.size(); cc ++ )
     {
     if ( valgrindLine.find(lines[cc]) )
@@ -747,7 +755,38 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
         results[failure] ++;
         defects ++;
         }
-      ostr << cmCTest::MakeXMLSafe(lines[cc]) << std::endl;
+      if(!outputFull)
+        {
+        totalOutputSize += lines[cc].size();
+        ostr << cmCTest::MakeXMLSafe(lines[cc]) << std::endl;
+        if(totalOutputSize > 
+           static_cast<size_t>(this->CustomMaximumFailedTestOutputSize))
+          {
+          outputFull = true;
+          }
+        }
+      } 
+    else
+      {
+      nonValGrindOutput.push_back(cc);
+      }
+    }
+  // Now put all all the non valgrind output into the test output
+  if(!outputFull)
+    {
+    for(std::vector<std::string::size_type>::iterator i = 
+          nonValGrindOutput.begin(); i != nonValGrindOutput.end(); ++i)
+      {
+      totalOutputSize += lines[*i].size();
+      ostr << cmCTest::MakeXMLSafe(lines[*i]) << std::endl;
+      if(!unlimitedOutput && totalOutputSize > 
+         static_cast<size_t>(this->CustomMaximumFailedTestOutputSize))
+        {
+        outputFull = true;
+        ostr << "....\n";
+        ostr << "Output for this test has been truncated see testing machine logs for full output,\n";
+        ostr << "or put CTEST_FULL_OUTPUT in the output of this test program.\n";
+        }
       }
     }
   cmCTestLog(this->CTest, DEBUG, "End test (elapsed: "
