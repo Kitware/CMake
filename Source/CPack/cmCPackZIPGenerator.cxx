@@ -55,7 +55,8 @@ int cmCPackZIPGenerator::CompressFiles(const char* outFileName,
   std::string tempFileName;
   tempFileName = toplevel;
   tempFileName += "/winZip.filelist";
-  bool needQuotesInFile = cmSystemTools::IsOn(this->GetOption("CPACK_ZIP_NEED_QUOTES"));
+  bool needQuotesInFile = 
+                 cmSystemTools::IsOn(this->GetOption("CPACK_ZIP_NEED_QUOTES"));
 
   std::string cmd = this->GetOption("CPACK_ZIP_COMMAND");
   cmsys::SystemTools::ReplaceString(cmd, "<ARCHIVE>", outFileName);

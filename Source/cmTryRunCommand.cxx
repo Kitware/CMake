@@ -313,7 +313,8 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
     static bool firstTryRun = true;
     std::string fileName =  this->Makefile->GetHomeOutputDirectory();
     fileName += "/TryRunResults.cmake";
-    std::ofstream file(fileName.c_str(), firstTryRun?std::ios::out : std::ios::app);
+    std::ofstream file(fileName.c_str(), 
+                                  firstTryRun ? std::ios::out : std::ios::app);
     if ( file )
       {
       if (firstTryRun)

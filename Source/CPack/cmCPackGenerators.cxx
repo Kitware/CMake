@@ -70,7 +70,8 @@ cmCPackGenerators::cmCPackGenerators()
   this->RegisterGenerator("OSXX11", "Mac OSX X11 bundle",
     cmCPackOSXX11Generator::CreateGenerator);
 #endif
-#if !defined(_WIN32) && !defined(__APPLE__) && !defined(__QNXNTO__) && !defined(__BEOS__)
+#if !defined(_WIN32) && !defined(__APPLE__) \
+  && !defined(__QNXNTO__) && !defined(__BEOS__)
   this->RegisterGenerator("DEB", "Debian packages",
     cmCPackDebGenerator::CreateGenerator);
 #endif

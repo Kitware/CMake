@@ -246,7 +246,8 @@ int main (int argc, char *argv[])
     // find out which system cpack is running on, so it can setup the search
     // paths, so FIND_XXX() commands can be used in scripts
     cminst.AddCMakePaths(argv[0]);
-    std::string systemFile = globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
+    std::string systemFile = 
+                        globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
     if (!globalMF->ReadListFile(0, systemFile.c_str()))
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
@@ -254,7 +255,8 @@ int main (int argc, char *argv[])
       return 1;
       }
 
-    systemFile = globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
+    systemFile = 
+              globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
     if (!globalMF->ReadListFile(0, systemFile.c_str()))
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
