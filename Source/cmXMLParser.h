@@ -52,7 +52,8 @@ public:
    * them.
    */
   virtual int InitializeParser();
-  virtual int ParseChunk(const char* inputString, std::string::size_type length);
+  virtual int ParseChunk(const char* inputString, 
+                         std::string::size_type length);
   virtual int CleanupParser();
 
 protected:
@@ -95,7 +96,8 @@ protected:
   static int IsSpace(char c);  
   
   //! Send the given buffer to the XML parser.
-  virtual int ParseBuffer(const char* buffer, unsigned int count);
+  virtual int ParseBuffer(const char* buffer, 
+                          std::string::size_type length);
   
   //! Send the given c-style string to the XML parser.
   int ParseBuffer(const char* buffer);

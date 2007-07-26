@@ -130,7 +130,7 @@ int cmXMLParser::CleanupParser()
 }
 
 //----------------------------------------------------------------------------
-int cmXMLParser::ParseBuffer(const char* buffer, unsigned int count)
+int cmXMLParser::ParseBuffer(const char* buffer, std::string::size_type count)
 {
   // Pass the buffer to the expat XML parser.
   if(!XML_Parse(static_cast<XML_Parser>(this->Parser), buffer, count, 0))
