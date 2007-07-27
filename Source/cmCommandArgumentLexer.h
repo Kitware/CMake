@@ -1,3 +1,19 @@
+/*=========================================================================
+
+  Program:   CMake - Cross-Platform Makefile Generator
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even 
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
 #ifndef cmCommandArgument_yyHEADER_H
 #define cmCommandArgument_yyHEADER_H 1
 #define cmCommandArgument_yyIN_HEADER 1
@@ -193,16 +209,24 @@ struct yy_buffer_state
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
 void cmCommandArgument_yyrestart (FILE *input_file ,yyscan_t yyscanner );
-void cmCommandArgument_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmCommandArgument_yy_create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void cmCommandArgument_yy_delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmCommandArgument_yy_flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void cmCommandArgument_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void cmCommandArgument_yy_switch_to_buffer (YY_BUFFER_STATE new_buffer ,
+                                            yyscan_t yyscanner );
+YY_BUFFER_STATE cmCommandArgument_yy_create_buffer (FILE *file,int size ,
+                                                    yyscan_t yyscanner );
+void cmCommandArgument_yy_delete_buffer (YY_BUFFER_STATE b ,
+                                         yyscan_t yyscanner );
+void cmCommandArgument_yy_flush_buffer (YY_BUFFER_STATE b ,
+                                        yyscan_t yyscanner );
+void cmCommandArgument_yypush_buffer_state (YY_BUFFER_STATE new_buffer ,
+                                            yyscan_t yyscanner );
 void cmCommandArgument_yypop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE cmCommandArgument_yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmCommandArgument_yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE cmCommandArgument_yy_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE cmCommandArgument_yy_scan_buffer (char *base,yy_size_t size ,
+                                                  yyscan_t yyscanner );
+YY_BUFFER_STATE cmCommandArgument_yy_scan_string (yyconst char *yy_str ,
+                                                  yyscan_t yyscanner );
+YY_BUFFER_STATE cmCommandArgument_yy_scan_bytes (yyconst char *bytes,int len ,
+                                                 yyscan_t yyscanner );
 
 void *cmCommandArgument_yyalloc (yy_size_t ,yyscan_t yyscanner );
 void *cmCommandArgument_yyrealloc (void *,yy_size_t ,yyscan_t yyscanner );
@@ -237,7 +261,8 @@ void cmCommandArgument_yyset_debug (int debug_flag ,yyscan_t yyscanner );
 
 YY_EXTRA_TYPE cmCommandArgument_yyget_extra (yyscan_t yyscanner );
 
-void cmCommandArgument_yyset_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void cmCommandArgument_yyset_extra (YY_EXTRA_TYPE user_defined ,
+                                    yyscan_t yyscanner );
 
 FILE *cmCommandArgument_yyget_in (yyscan_t yyscanner );
 
@@ -300,7 +325,8 @@ extern int cmCommandArgument_yylex (yyscan_t yyscanner);
 #define YY_DECL int cmCommandArgument_yylex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
-/* yy_get_previous_state - get the state just before the EOB char was reached */
+/* yy_get_previous_state - get the state just before 
+   the EOB char was reached */
 
 #undef YY_NEW_FILE
 #undef YY_FLUSH_BUFFER

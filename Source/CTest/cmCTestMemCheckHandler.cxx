@@ -132,7 +132,8 @@ public:
   std::string Log;
 };
 
-#define BOUNDS_CHECKER_MARKER "******######*****Begin BOUNDS CHECKER XML******######******"
+#define BOUNDS_CHECKER_MARKER \
+"******######*****Begin BOUNDS CHECKER XML******######******"
 //----------------------------------------------------------------------
 static const char* cmCTestMemCheckResultStrings[] = {
   "ABR",
@@ -784,8 +785,10 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
         {
         outputFull = true;
         ostr << "....\n";
-        ostr << "Output for this test has been truncated see testing machine logs for full output,\n";
-        ostr << "or put CTEST_FULL_OUTPUT in the output of this test program.\n";
+        ostr << "Output for this test has been truncated see testing"
+          " machine logs for full output,\n";
+        ostr << "or put CTEST_FULL_OUTPUT in the output of "
+          "this test program.\n";
         }
       }
     }
@@ -899,7 +902,8 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res)
   std::ifstream ifs(this->MemoryTesterOutputFile.c_str());
   if ( !ifs )
     {
-    std::string log = "Cannot read memory tester output file: " + this->MemoryTesterOutputFile;
+    std::string log = "Cannot read memory tester output file: " 
+      + this->MemoryTesterOutputFile;
     cmCTestLog(this->CTest, ERROR_MESSAGE, log.c_str() << std::endl);
     return;
     } 
@@ -937,7 +941,8 @@ cmCTestMemCheckHandler::PostProcessPurifyTest(cmCTestTestResult& res)
   std::ifstream ifs(this->MemoryTesterOutputFile.c_str());
   if ( !ifs )
     {
-    std::string log = "Cannot read memory tester output file: " + this->MemoryTesterOutputFile;
+    std::string log = "Cannot read memory tester output file: "
+      + this->MemoryTesterOutputFile;
     cmCTestLog(this->CTest, ERROR_MESSAGE, log.c_str() << std::endl);
     return;
     } 
