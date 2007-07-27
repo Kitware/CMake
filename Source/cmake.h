@@ -197,6 +197,7 @@ class cmake
   void AddCommand(cmCommand* );
   void RenameCommand(const char* oldName, const char* newName);
   void RemoveCommand(const char* name);
+  void RemoveUnscriptableCommands();
 
   /**
    * Get a command by its name

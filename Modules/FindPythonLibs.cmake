@@ -127,7 +127,7 @@ MACRO(PYTHON_WRITE_MODULES_HEADER _filename)
   ENDFOREACH(_currentModule ${PY_STATIC_MODULES_LIST})
 
   FOREACH(_currentModule ${PY_STATIC_MODULES_LIST})
-    FILE(APPEND ${_filename} "int CMakeLoadPythonModule_${_currentModule}(void) \n{\n  return PyImport_AppendInittab(\"${_currentModule}\", init${_currentModule});\n}\n\n")
+    FILE(APPEND ${_filename} "int CMakeLoadPythonModule_${_currentModule}(void) \n{\n  char name[]=\"${PYTHON_MODULE_PREFIX}${_currentModule}\"; return PyImport_AppendInittab(name, init${PYTHON_MODULE_PREFIX}${_currentModule});\n}\n\n")
   ENDFOREACH(_currentModule ${PY_STATIC_MODULES_LIST})
 
   FILE(APPEND ${_filename} "#ifndef EXCLUDE_LOAD_ALL_FUNCTION\nvoid CMakeLoadAllPythonModules(void)\n{\n")

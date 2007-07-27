@@ -52,39 +52,36 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
     out << std::endl; // required for valid debian package
     }
 
-  // debian policy enforce lower case for package name
-  //      IF(NOT DEBIAN_PACKAGE_NAME)
-  //  STRING(TOLOWER
-  //    ${CPACK_PACKAGE_NAME}
-  //    DEBIAN_PACKAGE_NAME
-  //    )
-
   // control file
   std::string ctlfilename;
   ctlfilename = toplevel;
   ctlfilename += "/control";
+
+  // debian policy enforce lower case for package name
+  std::string debian_pkg_name = cmsys::SystemTools::LowerCase( this->GetOption("DEBIAN_PACKAGE_NAME") );
+  const char* debian_pkg_version = this->GetOption("DEBIAN_PACKAGE_VERSION");
+  const char* debian_pkg_arch = this->GetOption("DEBIAN_PACKAGE_ARCHITECTURE");
+  const char* debian_pkg_dep  = this->GetOption("DEBIAN_PACKAGE_DEPENDS");
+  const char* maintainer = this->GetOption("DEBIAN_PACKAGE_MAINTAINER");
+  const char* desc = this->GetOption("DEBIAN_PACKAGE_DESCRIPTION");
+
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(ctlfilename.c_str());
-    out << "Package: ${DEBIAN_PACKAGE_NAME}\n";
-    out << "Version: ${CPACK_PACKAGE_VERSION}\n";
+    out << "Package: " << debian_pkg_name << "\n";
+    out << "Version: " << debian_pkg_version << "\n";
     out << "Section: devel\n";
     out << "Priority: optional\n";
-    out << "Architecture: ${DEBIAN_ARCHITECTURE}\n";
-    out << "Depends: ${DEBIAN_PACKAGE_DEPENDS}\n";
-    out << "Maintainer: ${CPACK_NSIS_CONTACT}\n";
-    out << "Description: ${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\n";
-    out << "${DEBIAN_PACKAGE_NAME} was packaged by UseDebian and CMake.\n";
+    out << "Architecture: " << debian_pkg_arch << "\n";
+    out << "Depends: " << debian_pkg_dep << " \n";
+    out << "Maintainer: " << maintainer << "\n";
+    out << "Description: " << desc << "\n";
+    out << " " << debian_pkg_name << " was packaged by CMake.\n";
     out << std::endl;
     }
 
-  std::string output;
-  std::string cmd;
-//   cmd = this->GetOption("CPACK_DEB_COMMAND");
-//   cmsys::SystemTools::ReplaceString(cmd, "<ARCHIVE>", outFileName);
-//   cmsys::SystemTools::ReplaceString(cmd, "<FILELIST>", "deb.filelist");
-
-  cmd = cmakeExecutable;
+  std::string cmd = cmakeExecutable;
   cmd += " -E tar cfz data.tar.gz ./usr";
+  std::string output;
   int retVal = -1;
   int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
     &retVal, toplevel, this->GeneratorVerbose, 0);
@@ -151,6 +148,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   cmd += "\" debian-binary control.tar.gz data.tar.gz";
   res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
     &retVal, toplevel, this->GeneratorVerbose, 0);
+
   return 1;
 }
 

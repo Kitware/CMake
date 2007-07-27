@@ -60,7 +60,12 @@ public:
         "or TEST test_name."
         ;
     }
-  
+
+  /**
+   * This determines if the command is invoked when in script mode.
+   */
+  virtual bool IsScriptable() { return true; }
+
   cmTypeMacro(cmSetPropertiesCommand, cmCommand);
 };
 

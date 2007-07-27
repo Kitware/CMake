@@ -290,6 +290,29 @@ void cmake::AddCommand(cmCommand* wg)
   this->Commands.insert( RegisteredCommandsMap::value_type(name, wg));
 }
 
+
+void cmake::RemoveUnscriptableCommands()
+{
+  std::vector<std::string> unscriptableCommands;
+  cmake::RegisteredCommandsMap* commands = this->GetCommands();
+  for (cmake::RegisteredCommandsMap::const_iterator pos = commands->begin();
+       pos != commands->end();
+       ++pos)
+    {
+    if (!pos->second->IsScriptable())
+      {
+      unscriptableCommands.push_back(pos->first);
+      }
+    }
+
+  for(std::vector<std::string>::const_iterator it=unscriptableCommands.begin();
+      it != unscriptableCommands.end();
+      ++it)
+    {
+    this->RemoveCommand(it->c_str());
+    }
+}
+
 // Parse the args
 bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 {
