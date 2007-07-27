@@ -15,8 +15,10 @@ SET(CMAKE_SYSTEM_INCLUDE_PATH ${CMAKE_SYSTEM_INCLUDE_PATH}
 
   # Other
   /opt/local/include /usr/pkg/include
-  /opt/csw/include /opt/include
+  /opt/csw/include /opt/include  
+  /usr/openwin/include
   "${_CMAKE_INSTALL_DIR}/include"
+  "${CMAKE_INSTALL_PREFIX}/include"
   )
 
 SET(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
@@ -31,13 +33,16 @@ SET(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
 
   # Other
   /opt/local/lib /usr/pkg/lib
-  /opt/csw/lib /opt/lib
+  /opt/csw/lib /opt/lib 
+  /usr/openwin/lib
   "${_CMAKE_INSTALL_DIR}/lib"
+  "${CMAKE_INSTALL_PREFIX}/lib"
   )
 
 SET(CMAKE_SYSTEM_PROGRAM_PATH ${CMAKE_SYSTEM_PROGRAM_PATH}
   /bin /usr/bin /usr/local/bin /usr/pkg/bin /sbin
   "${_CMAKE_INSTALL_DIR}/bin"
+  "${CMAKE_INSTALL_PREFIX}/bin"
   )
 
 SET(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
