@@ -58,7 +58,8 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   ctlfilename += "/control";
 
   // debian policy enforce lower case for package name
-  std::string debian_pkg_name = cmsys::SystemTools::LowerCase( this->GetOption("DEBIAN_PACKAGE_NAME") );
+  std::string debian_pkg_name = 
+       cmsys::SystemTools::LowerCase( this->GetOption("DEBIAN_PACKAGE_NAME") );
   const char* debian_pkg_version = this->GetOption("DEBIAN_PACKAGE_VERSION");
   const char* debian_pkg_arch = this->GetOption("DEBIAN_PACKAGE_ARCHITECTURE");
   const char* debian_pkg_dep  = this->GetOption("DEBIAN_PACKAGE_DEPENDS");
