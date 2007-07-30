@@ -435,7 +435,62 @@ const char* DynamicLoader::LastError()
 #endif
 
 // ---------------------------------------------------------------
-// 5. Implementation for default UNIX machines.
+// 5. Implementation for systems without dynamic libs
+// __gnu_blrts__ is IBM BlueGene/L
+#ifdef __gnu_blrts__
+#include <string.h> // for strerror()
+#define DYNAMICLOADER_DEFINED 1
+
+namespace KWSYS_NAMESPACE
+{
+
+//----------------------------------------------------------------------------
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const char* libname )
+{
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
+{
+  if (!lib)
+    {
+    return 0;
+    }
+
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
+    DynamicLoader::LibraryHandle lib, const char* sym)
+{
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+const char* DynamicLoader::LibPrefix()
+  {
+  return "lib";
+  }
+
+//----------------------------------------------------------------------------
+const char* DynamicLoader::LibExtension()
+  {
+  return ".a";
+  }
+
+//----------------------------------------------------------------------------
+const char* DynamicLoader::LastError()
+  {
+  return "General error";
+  }
+
+} // namespace KWSYS_NAMESPACE
+#endif
+
+// ---------------------------------------------------------------
+// 6. Implementation for default UNIX machines.
 // if nothing has been defined then use this
 #ifndef DYNAMICLOADER_DEFINED
 #define DYNAMICLOADER_DEFINED 1
