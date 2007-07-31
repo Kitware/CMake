@@ -6,7 +6,6 @@
 #  CMAKE_USE_PTHREADS_INIT    - are we using pthreads
 #  CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
 
-INCLUDE (CheckIncludeFile)
 INCLUDE (CheckIncludeFiles)
 INCLUDE (CheckLibraryExists)
 
@@ -20,7 +19,7 @@ IF(CMAKE_HAVE_SPROC_H)
   SET(CMAKE_USE_SPROC_INIT 1)
 ELSE(CMAKE_HAVE_SPROC_H)
   # Do we have pthreads?
-  CHECK_INCLUDE_FILE("pthread.h" CMAKE_HAVE_PTHREAD_H)
+  CHECK_INCLUDE_FILES("pthread.h" CMAKE_HAVE_PTHREAD_H)
   IF(CMAKE_HAVE_PTHREAD_H)
     # We have pthread.h
     # Let's check for the library now.

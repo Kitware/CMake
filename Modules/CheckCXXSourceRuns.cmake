@@ -32,7 +32,7 @@ MACRO(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
       "${SOURCE}\n")
 
     MESSAGE(STATUS "Performing Test ${VAR}")
-    TRY_RUN(${VAR} ${VAR}_COMPILED
+    TRY_RUN(${VAR}_EXITCODE ${VAR}_COMPILED
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.cxx
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
@@ -43,25 +43,31 @@ MACRO(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
 
     # if it did not compile make the return value fail code of 1
     IF(NOT ${VAR}_COMPILED)
-      SET(${VAR} 1)
+      SET(${VAR}_EXITCODE 1)
     ENDIF(NOT ${VAR}_COMPILED)
     # if the return value was 0 then it worked
-    SET(result_var ${${VAR}})
-    IF("${result_var}" EQUAL 0)
+    IF("${${VAR}_EXITCODE}" EQUAL 0)
+      SET(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Performing C++ SOURCE FILE Test ${VAR} succeded with the following output:\n"
         "${OUTPUT}\n" 
         "Return value: ${${VAR}}\n"
         "Source file was:\n${SOURCE}\n")
-    ELSE("${result_var}" EQUAL 0)
+    ELSE("${${VAR}_EXITCODE}" EQUAL 0)
+      IF(CMAKE_CROSSCOMPILING AND "${${VAR}_EXITCODE}" MATCHES  "FAILED_TO_RUN")
+        SET(${VAR} "${${VAR}_EXITCODE}")
+      ELSE(CMAKE_CROSSCOMPILING AND "${${VAR}_EXITCODE}" MATCHES  "FAILED_TO_RUN")
+        SET(${VAR} "" CACHE INTERNAL "Test ${VAR}")
+      ENDIF(CMAKE_CROSSCOMPILING AND "${${VAR}_EXITCODE}" MATCHES  "FAILED_TO_RUN")
+
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Performing C++ SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"  
-        "Return value: ${${VAR}}\n"
+        "Return value: ${${VAR}_EXITCODE}\n"
         "Source file was:\n${SOURCE}\n")
-    ENDIF("${result_var}" EQUAL 0)
+    ENDIF("${${VAR}_EXITCODE}" EQUAL 0)
   ENDIF("${VAR}" MATCHES "^${VAR}$")
 ENDMACRO(CHECK_CXX_SOURCE_RUNS)
 
