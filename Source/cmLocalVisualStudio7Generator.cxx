@@ -346,6 +346,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
    cmVS7FlagTable::UserValue},
   {"IgnoreAllDefaultLibraries", "NODEFAULTLIB", "ignore all default libs",
    "TRUE", 0},
+  {"ModuleDefinitionFile", "DEF:", "add an export def file", "",
+   cmVS7FlagTable::UserValue},
   {0,0,0,0,0}
 };
 
@@ -1726,7 +1728,8 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
   if(flag[0] == '-' || flag[0] == '/')
     {
     // Look for preprocessor definitions.
-    if(flag[1] == 'D')
+    if(flag[1] == 'D' && strncmp(flag+1, "DEF:", 4) !=0 
+       && strcmp(flag+1, "DLL") != 0)
       {
       if(flag[2] == '\0')
         {
@@ -1760,7 +1763,6 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
       return;
       }
     }
-
   // This option is not known.  Store it in the output flags.
   this->FlagString += " ";
   this->FlagString +=
@@ -1901,6 +1903,5 @@ GetTargetObjectFileDirectories(cmTarget* target,
   dir += this->GetTargetDirectory(*target);
   dir += "/";
   dir += this->GetGlobalGenerator()->GetCMakeCFGInitDirectory();
-  std::cerr << dir << "\n";
   dirs.push_back(dir);
 }
