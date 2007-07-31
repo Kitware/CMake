@@ -133,7 +133,8 @@ int cmXMLParser::CleanupParser()
 int cmXMLParser::ParseBuffer(const char* buffer, std::string::size_type count)
 {
   // Pass the buffer to the expat XML parser.
-  if(!XML_Parse(static_cast<XML_Parser>(this->Parser), buffer, count, 0))
+  if(!XML_Parse(static_cast<XML_Parser>(this->Parser), buffer, 
+                static_cast<int>(count), 0))
     {
     this->ReportXmlParseError();
     return 0;
