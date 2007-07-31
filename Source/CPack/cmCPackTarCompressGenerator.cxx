@@ -174,12 +174,19 @@ int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
   char* realName = new char[ strlen(outFileName) + 1 ];
   std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
-  int flags = O_WRONLY | O_CREAT;
+  int flags = O_WRONLY | O_CREAT;  
+  int options = 0;
+  if(this->GeneratorVerbose)
+    {
+    options |= TAR_VERBOSE;
+    }
+#ifdef __CYGWIN__
+  options |= TAR_GNU;
+#endif 
   if (tar_open(&t, realName,
       &compressType,
       flags, 0644,
-      (this->GeneratorVerbose?TAR_VERBOSE:0)
-      | 0) == -1)
+      options) == -1)
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): "
       << strerror(errno) << std::endl);

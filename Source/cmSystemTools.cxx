@@ -1685,11 +1685,18 @@ bool cmSystemTools::CreateTar(const char* outFileName,
   char* realName = new char[ strlen(outFileName) + 1 ];
   std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
+  int options = 0;
+  if(verbose)
+    {
+    options |= TAR_VERBOSE;
+    }
+#ifdef __CYGWIN__
+  options |= TAR_GNU;
+#endif 
   if (tar_open(&t, realName,
       (gzip? &gztype : NULL),
       O_WRONLY | O_CREAT, 0644,
-      (verbose?TAR_VERBOSE:0)
-      | 0) == -1)
+      options) == -1)
     {
     cmSystemTools::Error("Problem with tar_open(): ", strerror(errno));
     return false;
