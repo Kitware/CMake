@@ -223,37 +223,36 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
                                     std::string* out
                                     )
 {
+  // copy the executable out of the CMakeFiles/ directory, so it is not
+  // removed at the end of TRY_RUN and the user can run it manually
+  // on the target platform.
+  std::string copyDest =  this->Makefile->GetHomeOutputDirectory();
+  copyDest += "/";
+  copyDest += cmSystemTools::GetFilenameWithoutExtension(
+                                                     this->OutputFile.c_str());
+  copyDest += "-";
+  copyDest += this->RunResultVariable;
+  copyDest += cmSystemTools::GetFilenameExtension(this->OutputFile.c_str());
+  cmSystemTools::CopyFileAlways(this->OutputFile.c_str(), copyDest.c_str());
+
+  std::string resultFileName =  this->Makefile->GetHomeOutputDirectory();
+  resultFileName += "/TryRunResults.cmake";
+
+  std::string detailsString = "For details see ";
+  detailsString += resultFileName;
 
   std::string internalRunOutputName = this->RunResultVariable+"__"
                                 +this->CompileResultVariable+"__TRYRUN_OUTPUT";
   bool error = false;
-  std::string info = "Source file: ";
-  info += srcFile + "\n";
-  info += "Run arguments: ";
-  info += runArgs;
-  info += "\n";
-  info += "   Called from: " + this->Makefile->GetListFileStack();
 
   if (this->Makefile->GetDefinition(this->RunResultVariable.c_str()) == 0)
     {
     // if the variables doesn't exist, create it with a helpful error text
     // and mark it as advanced
     std::string comment;
-    comment += "Run result of TRY_RUN().\n"
-               "This variable should indicate whether the executable would "
-               "have been able to run if it was executed on its target "
-               "platform.\n"
-               "If it would have been able to run, enter the exit code here "
-               "(in many cases 0 for success). If not, enter "
-               "\"FAILED_TO_RUN\" here.";
-    if (out!=0)
-      {
-      comment += "If it was able to run, also check the variable ";
-      comment += internalRunOutputName;
-      comment += " and set it appropriately.";
-      }
-    comment += "\n";
-    comment += info;
+    comment += "Run result of TRY_RUN(), indicates whether the executable "
+               "would have been able to run on its target platform.\n";
+    comment += detailsString;
     this->Makefile->AddCacheDefinition(this->RunResultVariable.c_str(), 
                                        "PLEASE_FILL_OUT-FAILED_TO_RUN",
                                        comment.c_str(),
@@ -277,21 +276,9 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
       // if the variables doesn't exist, create it with a helpful error text
       // and mark it as advanced
       std::string comment;
-      comment += "Output of TRY_RUN().\n"
-                 "This variable should contain the text, which the executable "
-                 "run by TRY_RUN() would have printed on stdout and stderr, "
-                 "if it was executed on its target platform.\n"
-                 "The accompanying variable ";
-      comment += this->RunResultVariable;
-      comment += " indicates whether the executable would have been able to "
-                 "run and its exit code."
-                 "If the executable would not have been able to run, set ";
-      comment += internalRunOutputName;
-      comment += " empty. Otherwise check if the output is evaluated by the "
-                 "calling CMake code. If this is the case, check the source "
-                 "file what it would have printed if called with the given "
-                 "arguments.\n";
-      comment += info;
+      comment+="Output of TRY_RUN(), contains the text, which the executable "
+           "would have printed on stdout and stderr on its target platform.\n";
+      comment += detailsString;
 
       this->Makefile->AddCacheDefinition(internalRunOutputName.c_str(), 
                                          "PLEASE_FILL_OUT-NOTFOUND",
@@ -311,9 +298,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
   if (error)
     {
     static bool firstTryRun = true;
-    std::string fileName =  this->Makefile->GetHomeOutputDirectory();
-    fileName += "/TryRunResults.cmake";
-    std::ofstream file(fileName.c_str(), 
+    std::ofstream file(resultFileName.c_str(), 
                                   firstTryRun ? std::ios::out : std::ios::app);
     if ( file )
       {
@@ -331,24 +316,36 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
       std::string comment ="\n";
       comment += this->RunResultVariable;
       comment += "\nindicates whether the executable would have been able to "
-            "run if it was\n"
-            "executed on its target platform. If it would have been able to "
-            "run, set it to\n"
-            "the exit code (in many cases 0 for success). If not, enter "
-            "\"FAILED_TO_RUN\".\n\n";
+                 "run if it was\n"
+                 "executed on its target platform. If so, set ";
+      comment += this->RunResultVariable;
+      comment += " to\n"
+                 "the exit code (in many cases 0 for success), otherwise "
+                 "enter \"FAILED_TO_RUN\".\n";
       if (out!=0)
         {
         comment += internalRunOutputName;
         comment += "\ncontains the text, which the executable "
-           " would have printed on stdout and stderr.\n"
-           "If the executable would not have been able to run, set it empty.\n"
-           "Otherwise check if the output is evaluated by the "
-           "calling CMake code. If so,\n"
-           "check what the source file would have printed when called with "
-           "the given arguments.\n\n";
+                   "would have printed on stdout and stderr.\n"
+                   "If the executable would not have been able to run, set ";
+        comment += internalRunOutputName;
+        comment += " empty.\n"
+                   "Otherwise check if the output is evaluated by the "
+                   "calling CMake code. If so,\n"
+                   "check what the source file would have printed when called "
+                   "with the given arguments.\n";
         }
-
-      comment += info;
+      comment += "The ";
+      comment += this->CompileResultVariable;
+      comment += " variable holds the build result for this TRY_RUN().\n\n"
+                 "Source file   : ";
+      comment += srcFile + "\n";
+      comment += "Executable    : ";
+      comment += copyDest + "\n";
+      comment += "Run arguments : ";
+      comment += runArgs;
+      comment += "\n";
+      comment += "   Called from: " + this->Makefile->GetListFileStack();
       cmsys::SystemTools::ReplaceString(comment, "\n", "\n# ");
       file << comment << "\n\n";
 
@@ -374,7 +371,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
       {
       errorMessage += "   " + internalRunOutputName + " (advanced)\n";
       }
-    errorMessage += info;
+    errorMessage += detailsString;
     cmSystemTools::Error(errorMessage.c_str());
     return;
     }

@@ -1,5 +1,29 @@
 PROJECT(TryCompile)
 
+MACRO(TEST_ASSERT value msg)
+  IF (NOT ${value})
+    MESSAGE (SEND_ERROR "Assertion failure:" ${msg} )
+  ENDIF (NOT ${value})
+ENDMACRO(TEST_ASSERT)
+
+MACRO(TEST_FAIL value msg)
+  IF (${value})
+    MESSAGE (SEND_ERROR "Failing test succeeded:" ${msg} )
+  ENDIF (${value})
+ENDMACRO(TEST_FAIL)
+
+MACRO(TEST_EXPECT_EXACT command expected)
+  IF(NOT "x${result}" STREQUAL "x${expected}")
+    MESSAGE(SEND_ERROR "${CMAKE_CURRENT_LIST_LINE}: TEST \"${command}\" failed: \"${result}\" expected: \"${expected}\"")
+  ENDIF(NOT "x${result}" STREQUAL "x${expected}")
+ENDMACRO(TEST_EXPECT_EXACT command expected)
+
+MACRO(TEST_EXPECT_CONTAINS command expected)
+  IF(NOT "${result}" MATCHES "${expected}")
+    MESSAGE(SEND_ERROR "${CMAKE_CURRENT_LIST_LINE}: TEST \"${command}\" failed: \"${result}\" expected: \"${expected}\"")
+  ENDIF(NOT "${result}" MATCHES "${expected}")
+ENDMACRO(TEST_EXPECT_CONTAINS command expected)
+
 # try to compile a file that should compile
 # also check that COPY_FILE works
 TRY_COMPILE(SHOULD_PASS
@@ -135,3 +159,35 @@ ENDIF("${COMPILE_OUTPUT}" MATCHES "hello world")
 IF(NOT "${RUN_OUTPUT}" MATCHES "hello world")
   MESSAGE(SEND_ERROR " RUN_OUTPUT didn't contain \"hello world\": \"${RUN_OUTPUT}\"")
 ENDIF(NOT "${RUN_OUTPUT}" MATCHES "hello world")
+
+#######################################################################
+#
+# also test that the CHECK_C_SOURCE_COMPILES, CHECK_CXX_SOURCE_COMPILES
+# CHECK_C_SOURCE_RUNS and CHECK_CXX_SOURCE_RUNS macros work
+
+INCLUDE(CheckCSourceCompiles)
+INCLUDE(CheckCXXSourceCompiles)
+INCLUDE(CheckCSourceRuns)
+INCLUDE(CheckCXXSourceRuns)
+
+CHECK_C_SOURCE_COMPILES("I dont build" C_BUILD_SHOULD_FAIL)
+CHECK_C_SOURCE_COMPILES("int main() {return 0;}" C_BUILD_SHOULD_WORK)
+CHECK_C_SOURCE_RUNS("int main() {return 1;}" C_RUN_SHOULD_FAIL)
+CHECK_C_SOURCE_RUNS("int main() {return 0;}" C_RUN_SHOULD_WORK)
+
+TEST_FAIL(C_BUILD_SHOULD_FAIL "CHECK_C_SOURCE_COMPILES() succeeded, but should have failed")
+TEST_ASSERT(C_BUILD_SHOULD_WORK "CHECK_C_SOURCE_COMPILES() failed")
+TEST_FAIL(C_RUN_SHOULD_FAIL "CHECK_C_SOURCE_RUNS() succeeded, but should have failed")
+TEST_ASSERT(C_RUN_SHOULD_WORK "CHECK_C_SOURCE_RUNS() failed")
+
+CHECK_CXX_SOURCE_COMPILES("I dont build" CXX_BUILD_SHOULD_FAIL)
+CHECK_CXX_SOURCE_COMPILES("int main() {return 0;}" CXX_BUILD_SHOULD_WORK)
+CHECK_CXX_SOURCE_RUNS("int main() {return 2;}" CXX_RUN_SHOULD_FAIL)
+CHECK_CXX_SOURCE_RUNS("int main() {return 0;}" CXX_RUN_SHOULD_WORK)
+
+TEST_FAIL(CXX_BUILD_SHOULD_FAIL "CHECK_CXX_SOURCE_COMPILES() succeeded, but should have failed")
+TEST_ASSERT(CXX_BUILD_SHOULD_WORK "CHECK_CXX_SOURCE_COMPILES() failed")
+TEST_FAIL(CXX_RUN_SHOULD_FAIL "CHECK_CXX_SOURCE_RUNS() succeeded, but should have failed")
+TEST_ASSERT(CXX_RUN_SHOULD_WORK "CHECK_CXX_SOURCE_RUNS() failed")
+
+
