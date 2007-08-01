@@ -405,6 +405,7 @@ private:
   // Unrecognized flags that get no special handling.
   cmStdString FlagString;
 
+  Tool CurrentTool;
   bool DoingDefine;
   cmVS7FlagTable const* FlagTable;
   cmVS7FlagTable const* ExtraFlagTable;
@@ -1630,6 +1631,7 @@ std::string cmLocalVisualStudio7Generator
 cmLocalVisualStudio7GeneratorOptions
 ::cmLocalVisualStudio7GeneratorOptions(Tool tool,
                                        cmVS7FlagTable const* extraTable):
+  CurrentTool(tool),
   DoingDefine(false), FlagTable(0), ExtraFlagTable(extraTable)
 {
   // Choose the flag table for the requested tool.
@@ -1728,8 +1730,7 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
   if(flag[0] == '-' || flag[0] == '/')
     {
     // Look for preprocessor definitions.
-    if(flag[1] == 'D' && strncmp(flag+1, "DEF:", 4) !=0 
-       && strcmp(flag+1, "DLL") != 0)
+    if(this->CurrentTool == Compiler && flag[1] == 'D')
       {
       if(flag[2] == '\0')
         {
