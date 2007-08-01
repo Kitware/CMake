@@ -236,6 +236,12 @@ public:
   std::string ConvertToRelativePath(const std::vector<std::string>& local,
                                     const char* remote);
 
+  /**
+   * Get the relative path from the generator output directory to a
+   * per-target support directory.
+   */
+  virtual std::string GetTargetDirectory(cmTarget const& target) const;
+
 protected:
 
   /** Construct a comment for a custom command.  */

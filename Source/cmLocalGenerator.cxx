@@ -2772,6 +2772,18 @@ std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
     }
   return std::string(&arg[0]);
 }
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::GetTargetDirectory(cmTarget const&) const
+{
+  cmSystemTools::Error("GetTargetDirectory"
+                       " called on cmLocalGenerator");
+  return "";
+}
+
+
+//----------------------------------------------------------------------------
 void 
 cmLocalGenerator::GetTargetObjectFileDirectories(cmTarget* ,
                                                  std::vector<std::string>& 

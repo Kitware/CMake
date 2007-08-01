@@ -1619,7 +1619,7 @@ void cmLocalVisualStudio7Generator::ConfigureFinalPass()
 
 //----------------------------------------------------------------------------
 std::string cmLocalVisualStudio7Generator
-::GetTargetDirectory(cmTarget& target)
+::GetTargetDirectory(cmTarget const& target) const
 {
   std::string dir;
   dir += target.GetName();

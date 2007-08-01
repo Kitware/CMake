@@ -1897,7 +1897,8 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p)
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalUnixMakefileGenerator3::GetTargetDirectory(cmTarget& target)
+cmLocalUnixMakefileGenerator3
+::GetTargetDirectory(cmTarget const& target) const
 {
   std::string dir = cmake::GetCMakeFilesDirectoryPostSlash();
   dir += target.GetName();

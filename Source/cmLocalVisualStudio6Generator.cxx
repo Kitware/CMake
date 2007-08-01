@@ -1567,6 +1567,13 @@ void cmLocalVisualStudio6Generator
     }
 }
 
+std::string
+cmLocalVisualStudio6Generator
+::GetTargetDirectory(cmTarget const&) const
+{
+  // No per-target directory for this generator (yet).
+  return "";
+}
 
 void cmLocalVisualStudio6Generator
 ::GetTargetObjectFileDirectories(cmTarget* ,

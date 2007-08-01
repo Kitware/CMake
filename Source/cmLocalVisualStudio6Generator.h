@@ -62,6 +62,7 @@ public:
     {
     return this->CreatedProjectNames;
     }
+  virtual std::string GetTargetDirectory(cmTarget const& target) const;
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& 
                                       dirs);

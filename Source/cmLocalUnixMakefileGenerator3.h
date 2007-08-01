@@ -188,7 +188,7 @@ public:
   void AppendEcho(std::vector<std::string>& commands, const char* text,
                   EchoColor color = EchoNormal);
 
-  static std::string GetTargetDirectory(cmTarget& target);
+  virtual std::string GetTargetDirectory(cmTarget const& target) const;
 
     // create a command that cds to the start dir then runs the commands
   void CreateCDCommand(std::vector<std::string>& commands, 
