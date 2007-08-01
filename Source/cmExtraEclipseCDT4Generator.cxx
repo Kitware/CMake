@@ -30,11 +30,11 @@
 cmExtraEclipseCDT4Generator
 ::cmExtraEclipseCDT4Generator() : cmExternalMakefileProjectGenerator()
 {
-//#if defined(_WIN32)
-//  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
+#if defined(_WIN32)
+  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 //  this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
-//#endif
+#endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
 }
 
