@@ -111,17 +111,24 @@ BOOL CMakeSetup::InitInstance()
     {
     // Construct and print requested documentation.
     cmake hcm;
+    hcm.AddCMakePaths(cmdInfo.GetArgV()[0]);
+    doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
     std::vector<cmDocumentationEntry> commands;
+    std::vector<cmDocumentationEntry> compatCommands;
+
     std::vector<cmDocumentationEntry> generators;
-    hcm.GetCommandDocumentation(commands);
+    hcm.GetCommandDocumentation(commands, true, false);
+    hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetGeneratorDocumentation(generators);
-    doc.SetName("CMakeSetup");
+    doc.SetName("cmake");
     doc.SetNameSection(cmDocumentationName);
     doc.SetUsageSection(cmDocumentationUsage);
     doc.SetDescriptionSection(cmDocumentationDescription);
     doc.SetGeneratorsSection(&generators[0]);
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
+    doc.SetCompatCommandsSection(&compatCommands[0]);
+
     return (doc.PrintRequestedDocumentation(std::cout)? 0:1);
     }
   
