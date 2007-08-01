@@ -1775,7 +1775,8 @@ void cmLocalGenerator
           // do not add the target full name but just use the directory
           // name
 #ifdef __APPLE__
-          if(!tgt->GetPropertyAsBool("FRAMEWORK"))
+          if (!(tgt->GetType() == cmTarget::SHARED_LIBRARY &&
+                tgt->GetPropertyAsBool("FRAMEWORK")))
 #endif
             { 
             linkItem += "/";

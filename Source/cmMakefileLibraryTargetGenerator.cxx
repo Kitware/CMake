@@ -112,7 +112,7 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 {
 #ifdef __APPLE__
-  if(this->Target->GetPropertyAsBool("FRAMEWORK"))
+  if (this->Target->GetPropertyAsBool("FRAMEWORK"))
     {
     this->WriteFrameworkRules(relink);
     return;
@@ -505,7 +505,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
 #if defined(__APPLE__)
   // If we're creating a framework, place the output into a framework directory
-  if(this->Target->GetPropertyAsBool("FRAMEWORK"))
+  if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Target->GetPropertyAsBool("FRAMEWORK"))
     {
     this->CreateFramework(targetName, outpath);
     }

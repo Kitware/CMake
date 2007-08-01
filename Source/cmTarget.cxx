@@ -1790,7 +1790,8 @@ void cmTarget::NormalGetFullNameInternal(TargetType type,
     }
 #if defined(__APPLE__)
   // frameworks do not have a prefix or a suffix
-  if(this->GetPropertyAsBool("FRAMEWORK"))
+  if (this->GetType() == cmTarget::SHARED_LIBRARY &&
+      this->GetPropertyAsBool("FRAMEWORK"))
     {
     targetPrefix = 0;
     targetSuffix = 0;
@@ -2322,7 +2323,8 @@ const char* cmTarget::GetOutputDir(bool implib)
 
 #if defined(__APPLE__)
     // frameworks do not have a prefix or a suffix
-    if(this->GetPropertyAsBool("FRAMEWORK"))
+    if (this->GetType() == cmTarget::SHARED_LIBRARY &&
+        this->GetPropertyAsBool("FRAMEWORK"))
       {
       out += "/";
       out += this->GetFullName(0, implib);

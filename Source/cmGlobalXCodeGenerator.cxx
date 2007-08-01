@@ -727,7 +727,8 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         buildFiles->AddObject(xsf);
         }
       }
-    if(cmtarget.GetPropertyAsBool("FRAMEWORK"))
+    if (cmtarget.GetType() == cmTarget::SHARED_LIBRARY &&
+        cmtarget.GetPropertyAsBool("FRAMEWORK"))
       {
       this->AddFrameworkPhases(&cmtarget, buildPhases);
       }
@@ -1239,7 +1240,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
      target.GetType() == cmTarget::EXECUTABLE)
     {
     std::string pndir = target.GetDirectory();
-    if(target.GetPropertyAsBool("FRAMEWORK"))
+    if (target.GetType() == cmTarget::SHARED_LIBRARY &&
+        target.GetPropertyAsBool("FRAMEWORK"))
       {
       pndir += "/..";
       pndir = cmSystemTools::CollapseFullPath(pndir.c_str());
@@ -2053,7 +2055,8 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         }
       std::vector<cmSourceFile*>  classes = cmtarget.GetSourceFiles();
       // add framework copy headers
-      if(cmtarget.GetPropertyAsBool("FRAMEWORK"))
+      if (cmtarget.GetType() == cmTarget::SHARED_LIBRARY &&
+          cmtarget.GetPropertyAsBool("FRAMEWORK"))
         {
         const char* headers = cmtarget.GetProperty("FRAMEWORK_PUBLIC_HEADERS");
         if(!headers)
