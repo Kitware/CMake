@@ -106,6 +106,8 @@ SET(SRCS
   cmExprLexer.cxx
   cmExprParser.cxx
   cmExprParserHelper.cxx
+  cmExtraEclipseCDT4Generator.cxx
+  cmExtraEclipseCDT4Generator.h
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmGeneratedFileStream.cxx

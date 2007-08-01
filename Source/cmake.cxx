@@ -47,6 +47,10 @@
 # endif
 #endif
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#  define CMAKE_USE_ECLIPSE
+#endif
+
 #if defined(__MINGW32__) && !defined(CMAKE_BUILD_WITH_CMAKE)
 # define CMAKE_BOOT_MINGW
 #endif
@@ -76,6 +80,10 @@
 
 #ifdef CMAKE_USE_KDEVELOP
 # include "cmGlobalKdevelopGenerator.h"
+#endif
+
+#ifdef CMAKE_USE_ECLIPSE
+# include "cmExtraEclipseCDT4Generator.h"
 #endif
 
 #include <stdlib.h> // required for atoi
@@ -1521,6 +1529,11 @@ void cmake::AddDefaultExtraGenerators()
 #if !defined(__CYGWIN__)
   this->AddExtraGenerator(cmExtraCodeBlocksGenerator::GetActualName(),
                           &cmExtraCodeBlocksGenerator::New);
+#endif
+
+#ifdef CMAKE_USE_ECLIPSE
+  this->AddExtraGenerator(cmExtraEclipseCDT4Generator::GetActualName(),
+                          &cmExtraEclipseCDT4Generator::New);
 #endif
 
 #ifdef CMAKE_USE_KDEVELOP
