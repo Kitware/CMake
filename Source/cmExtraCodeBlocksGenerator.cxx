@@ -47,8 +47,9 @@ cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
 {
 #if defined(_WIN32)
   this->SupportedGlobalGenerators.push_back("NMake Makefiles");
-  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
   this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
+// disable MSYS until somebody actually tests it
+//  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 #endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
 }

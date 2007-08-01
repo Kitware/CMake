@@ -1557,6 +1557,12 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
     {
     names.push_back(i->first);
     }
+  for(RegisteredExtraGeneratorsMap::const_iterator 
+      i = this->ExtraGenerators.begin();
+      i != this->ExtraGenerators.end(); ++i)
+    {
+    names.push_back(i->first);
+    }
 }
 
 cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)

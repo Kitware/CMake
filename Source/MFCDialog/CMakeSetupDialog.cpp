@@ -11,6 +11,7 @@
 #include "PathDialog.h"
 #include "CMakeSetupDialog.h"
 #include "CMakeCommandLineInfo.h"
+#include "../cmExternalMakefileProjectGenerator.h"
 #include "../cmListFileCache.h"
 #include "../cmCacheManager.h"
 #include "../cmake.h"
@@ -1010,7 +1011,10 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
     if(!it.IsAtEnd())
       {
       m_GeneratorPicked = true;
-      std::string curGen = it.GetValue();
+      const char* extraGen = cachem->GetCacheValue("CMAKE_EXTRA_GENERATOR");
+      std::string curGen = cmExternalMakefileProjectGenerator::
+                              CreateFullGeneratorName(it.GetValue(), extraGen);
+
       if(m_GeneratorDialog.m_GeneratorChoiceString != curGen.c_str())
         {
         m_GeneratorDialog.m_GeneratorChoiceString = curGen.c_str();
