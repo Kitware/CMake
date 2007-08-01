@@ -241,8 +241,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
   std::string detailsString = "For details see ";
   detailsString += resultFileName;
 
-  std::string internalRunOutputName = this->RunResultVariable+"__"
-                                +this->CompileResultVariable+"__TRYRUN_OUTPUT";
+  std::string internalRunOutputName=this->RunResultVariable+"__TRYRUN_OUTPUT";
   bool error = false;
 
   if (this->Makefile->GetDefinition(this->RunResultVariable.c_str()) == 0)
@@ -315,25 +314,25 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
 
       std::string comment ="\n";
       comment += this->RunResultVariable;
-      comment += "\nindicates whether the executable would have been able to "
-                 "run if it was\n"
-                 "executed on its target platform. If so, set ";
+      comment += "\n   indicates whether the executable would have been able "
+                 "to run if it was\n"
+                 "   executed on its target platform. If so, set ";
       comment += this->RunResultVariable;
       comment += " to\n"
-                 "the exit code (in many cases 0 for success), otherwise "
+                 "   the exit code (in many cases 0 for success), otherwise "
                  "enter \"FAILED_TO_RUN\".\n";
       if (out!=0)
         {
         comment += internalRunOutputName;
-        comment += "\ncontains the text, which the executable "
+        comment += "\n   contains the text the executable "
                    "would have printed on stdout and stderr.\n"
-                   "If the executable would not have been able to run, set ";
+                  "   If the executable would not have been able to run, set ";
         comment += internalRunOutputName;
         comment += " empty.\n"
-                   "Otherwise check if the output is evaluated by the "
+                   "   Otherwise check if the output is evaluated by the "
                    "calling CMake code. If so,\n"
-                   "check what the source file would have printed when called "
-                   "with the given arguments.\n";
+                   "   check what the source file would have printed when "
+                   "called with the given arguments.\n";
         }
       comment += "The ";
       comment += this->CompileResultVariable;
