@@ -315,8 +315,8 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
       std::string comment ="\n";
       comment += this->RunResultVariable;
       comment += "\n   indicates whether the executable would have been able "
-                 "to run if it was\n"
-                 "   executed on its target platform. If so, set ";
+                 "to run on its\n"
+                 "   target platform. If so, set ";
       comment += this->RunResultVariable;
       comment += " to\n"
                  "   the exit code (in many cases 0 for success), otherwise "
