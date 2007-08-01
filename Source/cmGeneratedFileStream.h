@@ -145,6 +145,9 @@ public:
    * the output file to be changed during the use of cmGeneratedFileStream.
    */
   void SetName(const char* fname);
+
+private:
+  cmGeneratedFileStream(cmGeneratedFileStream const&); // not implemented
 };
 
 #if defined(__sgi) && !defined(__GNUC__)
