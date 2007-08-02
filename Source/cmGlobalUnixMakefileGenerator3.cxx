@@ -731,7 +731,8 @@ cmGlobalUnixMakefileGenerator3
       makefileName = localName;
       makefileName += "/build.make";
       
-      bool needRequiresStep = this->NeedRequiresStep(t->second);
+      bool needRequiresStep = 
+        this->NeedRequiresStep(lg,t->second.GetName());
       
       lg->WriteDivider(ruleFileStream);
       ruleFileStream
@@ -861,14 +862,11 @@ cmGlobalUnixMakefileGenerator3
         lg->WriteMakeRule(ruleFileStream, 
                           "Pre-install relink rule for target.",
                           localName.c_str(), depends, commands, true);
-        if(!exclude)
-          {
-          depends.clear();
-          depends.push_back(localName);
-          commands.clear();
-          lg->WriteMakeRule(ruleFileStream, "Prepare target for install.",
-                            "preinstall", depends, commands, true);
-          }
+        depends.clear();
+        depends.push_back(localName);
+        commands.clear();
+        lg->WriteMakeRule(ruleFileStream, "Prepare target for install.",
+                          "preinstall", depends, commands, true);
         }
       
       // add the clean rule
@@ -1170,17 +1168,18 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
 
 
 bool cmGlobalUnixMakefileGenerator3
-::NeedRequiresStep(cmTarget const& target)
+::NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg,const char *name)
 {
-  std::set<cmStdString> languages;
-  target.GetLanguages(languages);
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
-      l != languages.end(); ++l)
+  std::map<cmStdString,cmLocalUnixMakefileGenerator3::IntegrityCheckSet>& 
+    checkSet = lg->GetIntegrityCheckSet()[name];
+  for(std::map<cmStdString, 
+        cmLocalUnixMakefileGenerator3::IntegrityCheckSet>::const_iterator
+        l = checkSet.begin(); l != checkSet.end(); ++l)
     {
-    std::string var = "CMAKE_NEEDS_REQUIRES_STEP_";
-    var += *l;
-    var += "_FLAG";
-    if(target.GetMakefile()->GetDefinition(var.c_str()))
+    std::string name2 = "CMAKE_NEEDS_REQUIRES_STEP_";
+    name2 += l->first;
+    name2 += "_FLAG";
+    if(lg->GetMakefile()->GetDefinition(name2.c_str()))
       {
       return true;
       }

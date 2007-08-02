@@ -165,7 +165,7 @@ protected:
                              cmTarget &target);
 
   // does this generator need a requires step for any of its targets
-  bool NeedRequiresStep(cmTarget const&);
+  bool NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg, const char *);
 
   // Setup target names
   virtual const char* GetAllTargetName()          { return "all"; }
