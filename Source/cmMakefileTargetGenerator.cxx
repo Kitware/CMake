@@ -327,6 +327,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     this->ExtraContent.insert(obj);
     }
   this->Objects.push_back(obj);
+  this->CleanFiles.push_back(obj);
 
   // TODO: Remove
   //std::string relativeObj

@@ -911,11 +911,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Write the main driver rule to build everything in this target.
   this->WriteTargetDriverRule(targetFullPath.c_str(), relink);
 
-  // Clean all the possible library names and symlinks and object files.
+  // Clean all the possible library names and symlinks.
   this->CleanFiles.insert(this->CleanFiles.end(),
-                          libCleanFiles.begin(),libCleanFiles.end()); 
-  this->CleanFiles.insert(this->CleanFiles.end(),
-                          this->Objects.begin(),
-                          this->Objects.end());
+                          libCleanFiles.begin(),libCleanFiles.end());
 }
-
