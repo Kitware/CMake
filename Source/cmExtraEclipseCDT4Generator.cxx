@@ -493,7 +493,7 @@ cmExtraEclipseCDT4Generator::GetEclipsePath(const std::string& path) const
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
 ::AppendStorageScanners(cmGeneratedFileStream& fout,
-                        const cmMakefile&      makefile) const
+                        const cmMakefile&  /*    makefile*/) const
 {
   fout << 
     "<storageModule moduleId=\"scannerConfiguration\">\n"
