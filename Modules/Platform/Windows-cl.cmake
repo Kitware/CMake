@@ -271,4 +271,3 @@ IF(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake")
                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXPlatform.cmake IMMEDIATE)
 ENDIF(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake")
 
-INCLUDE(Platform/WindowsPaths)
