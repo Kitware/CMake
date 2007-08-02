@@ -1488,14 +1488,7 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
     // if the property has not yet been set, collect all languages in the
     // target and then find the language with the highest preference value
     std::set<cmStdString> languages;
-    for(std::vector<cmSourceFile*>::const_iterator 
-        i = this->SourceFiles.begin(); i != this->SourceFiles.end(); ++i)
-      {
-      if(const char* lang = (*i)->GetLanguage())
-        {
-        languages.insert(lang);
-        }
-      }
+    this->GetLanguages(languages);
 
     std::string linkerLangList;              // only used for the error message
     int maxLinkerPref = 0;
@@ -2367,5 +2360,18 @@ const char* cmTarget::GetExportMacro()
   else
     {
     return 0;
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
+{
+  for(std::vector<cmSourceFile*>::const_iterator
+        i = this->SourceFiles.begin(); i != this->SourceFiles.end(); ++i)
+    {
+    if(const char* lang = (*i)->GetLanguage())
+      {
+      languages.insert(lang);
+      }
     }
 }

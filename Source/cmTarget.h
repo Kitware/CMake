@@ -61,7 +61,7 @@ public:
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
-  cmMakefile *GetMakefile() { return this->Makefile;};
+  cmMakefile *GetMakefile() const { return this->Makefile;};
 
   /**
    * Get the list of the custom commands for this target
@@ -263,6 +263,13 @@ public:
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
   const char* GetExportMacro();
+
+  // Compute the set of languages compiled by the target.  This is
+  // computed every time it is called because the languages can change
+  // when source file properties are changed and we do not have enough
+  // information to forward these property changes to the targets
+  // until we have per-target object file properties.
+  void GetLanguages(std::set<cmStdString>& languages) const;
 
 private:
   /**

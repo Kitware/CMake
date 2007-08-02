@@ -234,14 +234,12 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
 void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 {
   // write language flags for target
-  std::map<cmStdString,cmLocalUnixMakefileGenerator3::IntegrityCheckSet>&
-    checkSet =
-    this->LocalGenerator->GetIntegrityCheckSet()[this->Target->GetName()];
-  for(std::map<cmStdString,
-        cmLocalUnixMakefileGenerator3::IntegrityCheckSet>::const_iterator
-        l = checkSet.begin(); l != checkSet.end(); ++l)
+  std::set<cmStdString> languages;
+  this->Target->GetLanguages(languages);
+  for(std::set<cmStdString>::const_iterator l = languages.begin();
+      l != languages.end(); ++l)
     {
-    const char *lang = l->first.c_str();
+    const char *lang = l->c_str();
     std::string flags;
     bool shared = ((this->Target->GetType() == cmTarget::SHARED_LIBRARY) ||
                    (this->Target->GetType() == cmTarget::MODULE_LIBRARY));
