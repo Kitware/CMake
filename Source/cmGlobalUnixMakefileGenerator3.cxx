@@ -731,8 +731,7 @@ cmGlobalUnixMakefileGenerator3
       makefileName = localName;
       makefileName += "/build.make";
       
-      bool needRequiresStep = 
-        this->NeedRequiresStep(lg,t->second.GetName());
+      bool needRequiresStep = this->NeedRequiresStep(t->second);
       
       lg->WriteDivider(ruleFileStream);
       ruleFileStream
@@ -1168,18 +1167,17 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
 
 
 bool cmGlobalUnixMakefileGenerator3
-::NeedRequiresStep(cmLocalUnixMakefileGenerator3 *lg,const char *name)
+::NeedRequiresStep(cmTarget const& target)
 {
-  std::map<cmStdString,cmLocalUnixMakefileGenerator3::IntegrityCheckSet>& 
-    checkSet = lg->GetIntegrityCheckSet()[name];
-  for(std::map<cmStdString, 
-        cmLocalUnixMakefileGenerator3::IntegrityCheckSet>::const_iterator
-        l = checkSet.begin(); l != checkSet.end(); ++l)
+  std::set<cmStdString> languages;
+  target.GetLanguages(languages);
+  for(std::set<cmStdString>::const_iterator l = languages.begin();
+      l != languages.end(); ++l)
     {
-    std::string name2 = "CMAKE_NEEDS_REQUIRES_STEP_";
-    name2 += l->first;
-    name2 += "_FLAG";
-    if(lg->GetMakefile()->GetDefinition(name2.c_str()))
+    std::string var = "CMAKE_NEEDS_REQUIRES_STEP_";
+    var += *l;
+    var += "_FLAG";
+    if(target.GetMakefile()->GetDefinition(var.c_str()))
       {
       return true;
       }
