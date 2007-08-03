@@ -16,6 +16,7 @@
 =========================================================================*/
 
 #include "cmCTestGenericHandler.h"
+#include "cmSystemTools.h"
 
 #include "cmCTest.h"
 
@@ -118,7 +119,15 @@ bool cmCTestGenericHandler::StartResultingXML(const char* name,
     {
     ostr << "_" << this->SubmitIndex;
     }
-  ostr << ".xml";
+  ostr << ".xml"; 
+  if(this->CTest->GetCurrentTag().empty())
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Current Tag empty, this may mean"
+               " NightlStartTime was not set correctly." << std::endl);
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
   if( !this->CTest->OpenOutputFile(this->CTest->GetCurrentTag(),
       ostr.str().c_str(), xofs, true) )
     {
