@@ -229,19 +229,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     {
     lg = 
       static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
-    // are any parents excluded
-    bool exclude = false;
-    cmLocalGenerator *lg3 = lg;
-    while (lg3)
-      {
-      if (lg3->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
-        {
-        exclude = true;
-        break;
-        }
-      lg3 = lg3->GetParent();
-      }
-    this->WriteConvenienceRules2(makefileStream,lg,exclude);
+    this->WriteConvenienceRules2(makefileStream,lg);
     }
 
   lg = static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[0]);
@@ -699,8 +687,7 @@ cmGlobalUnixMakefileGenerator3
 void
 cmGlobalUnixMakefileGenerator3
 ::WriteConvenienceRules2(std::ostream& ruleFileStream, 
-                         cmLocalUnixMakefileGenerator3 *lg,
-                         bool exclude)
+                         cmLocalUnixMakefileGenerator3 *lg)
 {
   std::vector<std::string> depends;  
   std::vector<std::string> commands;
@@ -792,7 +779,7 @@ cmGlobalUnixMakefileGenerator3
                         localName.c_str(), depends, commands, true);
       
       // add the all/all dependency
-      if (!exclude && !t->second.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+      if(!this->IsExcluded(this->LocalGenerators[0], t->second))
         {
         depends.clear();
         depends.push_back(localName);
@@ -861,11 +848,15 @@ cmGlobalUnixMakefileGenerator3
         lg->WriteMakeRule(ruleFileStream, 
                           "Pre-install relink rule for target.",
                           localName.c_str(), depends, commands, true);
-        depends.clear();
-        depends.push_back(localName);
-        commands.clear();
-        lg->WriteMakeRule(ruleFileStream, "Prepare target for install.",
-                          "preinstall", depends, commands, true);
+
+        if(!this->IsExcluded(this->LocalGenerators[0], t->second))
+          {
+          depends.clear();
+          depends.push_back(localName);
+          commands.clear();
+          lg->WriteMakeRule(ruleFileStream, "Prepare target for install.",
+                            "preinstall", depends, commands, true);
+          }
         }
       
       // add the clean rule
@@ -917,89 +908,16 @@ unsigned long cmGlobalUnixMakefileGenerator3
 ::GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
 {
   unsigned long result = 0;
-
-  // if this is a project
-  if (!lg->GetParent() || 
-      strcmp(lg->GetMakefile()->GetProjectName(), 
-             lg->GetParent()->GetMakefile()->GetProjectName()))
+  std::set<cmTarget*>& targets = this->LocalGeneratorToTargetMap[lg];
+  for(std::set<cmTarget*>::iterator t = targets.begin();
+      t != targets.end(); ++t)
     {
-    // use the new project to target map   
-    std::set<cmTarget*> &targets = 
-      this->ProjectToTargetMap[lg->GetMakefile()->GetProjectName()];
-    std::set<cmTarget*>::iterator t = targets.begin();
-    for(; t != targets.end(); ++t)
-      {
-      cmTarget* target = *t;
-      cmLocalUnixMakefileGenerator3 *lg3 = 
-        static_cast<cmLocalUnixMakefileGenerator3 *>
-        (target->GetMakefile()->GetLocalGenerator());
-      std::vector<int> &progFiles = lg3->ProgressFiles[target->GetName()];
-      result += static_cast<unsigned long>(progFiles.size());
-      }
-    }
-  // for subdirectories
-  else
-    {
-    std::deque<cmLocalUnixMakefileGenerator3 *> lg3Stack;
-    lg3Stack.push_back(lg);
-    std::vector<cmStdString> targetsInAll;
-    std::set<cmTarget *> targets;
-    while (lg3Stack.size())
-      {
-      cmLocalUnixMakefileGenerator3 *lg3 = lg3Stack.front();
-      lg3Stack.pop_front();
-      for(cmTargets::iterator l = lg3->GetMakefile()->GetTargets().begin();
-          l != lg3->GetMakefile()->GetTargets().end(); ++l)
-        {
-        if((l->second.GetType() == cmTarget::EXECUTABLE) ||
-           (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-           (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-           (l->second.GetType() == cmTarget::MODULE_LIBRARY) ||
-           (l->second.GetType() == cmTarget::UTILITY))
-          {
-          // Add this to the list of depends rules in this directory.
-          if (!l->second.GetPropertyAsBool("EXCLUDE_FROM_ALL") && 
-              targets.find(&l->second) == targets.end())
-            {
-            std::deque<cmTarget *> activeTgts;
-            activeTgts.push_back(&(l->second));
-            // trace depth of target dependencies
-            while (activeTgts.size())
-              {
-              if (targets.find(activeTgts.front()) == targets.end())
-                {
-                targets.insert(activeTgts.front());
-                cmLocalUnixMakefileGenerator3 *lg4 = 
-                  static_cast<cmLocalUnixMakefileGenerator3 *>
-                  (activeTgts.front()->GetMakefile()->GetLocalGenerator());
-                std::vector<int> &progFiles2 = 
-                  lg4->ProgressFiles[activeTgts.front()->GetName()];
-                result += static_cast<unsigned long>(progFiles2.size());
-                std::vector<cmTarget *> deps2 = 
-                  this->GetTargetDepends(*activeTgts.front());
-                for (std::vector<cmTarget *>::const_iterator di = 
-                       deps2.begin(); di != deps2.end(); ++di)
-                  {
-                  activeTgts.push_back(*di);
-                  }
-                }
-              activeTgts.pop_front();
-              }
-            }
-          }
-        }
-      
-      // The directory-level rule depends on the directory-level
-      // rules of the subdirectories.
-      for(std::vector<cmLocalGenerator*>::iterator sdi = 
-            lg3->GetChildren().begin(); 
-          sdi != lg3->GetChildren().end(); ++sdi)
-        {
-        cmLocalUnixMakefileGenerator3* slg =
-          static_cast<cmLocalUnixMakefileGenerator3*>(*sdi);
-        lg3Stack.push_back(slg);
-        }
-      }
+    cmTarget* target = *t;
+    cmLocalUnixMakefileGenerator3 *lg3 =
+      static_cast<cmLocalUnixMakefileGenerator3 *>
+      (target->GetMakefile()->GetLocalGenerator());
+    std::vector<int> &progFiles = lg3->ProgressFiles[target->GetName()];
+    result += static_cast<unsigned long>(progFiles.size());
     }
   return result;
 }

@@ -145,10 +145,9 @@ public:
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
-  
-  void WriteConvenienceRules2(std::ostream& ruleFileStream, 
-                              cmLocalUnixMakefileGenerator3 *,
-                              bool exclude);
+
+  void WriteConvenienceRules2(std::ostream& ruleFileStream,
+                              cmLocalUnixMakefileGenerator3*);
 
   void WriteDirectoryRule2(std::ostream& ruleFileStream,
                            cmLocalUnixMakefileGenerator3* lg,

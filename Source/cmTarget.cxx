@@ -122,9 +122,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "Exclude the target from the all target.",
      "A property on a target that indicates if the target is excluded "
      "from the default build target. If it is not, then with a Makefile "
-     "for example typing make will couse this target to be built as well. "
+     "for example typing make will cause this target to be built. "
      "The same concept applies to the default build of other generators.",
-     true);
+     false);
 
   cm->DefineProperty
     ("INSTALL_NAME_DIR", cmProperty::TARGET,

@@ -691,7 +691,7 @@ void cmGlobalGenerator::Configure()
   this->TargetDependencies.clear();
   this->TotalTargets.clear();
   this->ImportedTotalTargets.clear();
-  this->ProjectToTargetMap.clear();
+  this->LocalGeneratorToTargetMap.clear();
   this->ProjectMap.clear();
 
   // start with this directory
@@ -779,11 +779,11 @@ void cmGlobalGenerator::Configure()
     }
   // at this point this->LocalGenerators has been filled,
   // so create the map from project name to vector of local generators
-    this->FillProjectMap();
-  // now create project to target map
-  // This will make sure that targets have all the
-  // targets they depend on as part of the build.
-    this->FillProjectToTargetMap();
+  this->FillProjectMap();
+
+  // Create a map from local generator to the complete set of targets
+  // it builds by default.
+  this->FillLocalGeneratorToTargetMap();
 
   if ( !this->CMakeInstance->GetScriptMode() )
     {
@@ -1116,22 +1116,38 @@ void cmGlobalGenerator::GetDocumentation(cmDocumentationEntry& entry) const
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmLocalGenerator* gen)
 {
-  if(gen == root)
+  if(!gen || gen == root)
     {
+    // No directory excludes itself.
     return false;
     }
-  cmLocalGenerator* cur = gen->GetParent();
-  while(cur && cur != root)
+
+  if(gen->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
     {
-    if(cur->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
-      {
-      return true;
-      }
-    cur = cur->GetParent();
+    // This directory is excluded from its parent.
+    return true;
     }
-  return gen->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL");
+
+  // This directory is included in its parent.  Check whether the
+  // parent is excluded.
+  return this->IsExcluded(root, gen->GetParent());
 }
 
+bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
+                                   cmTarget& target)
+{
+  if(target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+    {
+    // This target is excluded from its directory.
+    return true;
+    }
+  else
+    {
+    // This target is included in its directory.  Check whether the
+    // directory is excluded.
+    return this->IsExcluded(root, target.GetMakefile()->GetLocalGenerator());
+    }
+}
 
 void cmGlobalGenerator::GetEnabledLanguages(std::vector<std::string>& lang)
 {
@@ -1176,88 +1192,40 @@ void cmGlobalGenerator::FillProjectMap()
 }
 
 
-// Build a map that contains a the set of targets used by each project
-void cmGlobalGenerator::FillProjectToTargetMap()
+// Build a map that contains a the set of targets used by each local
+// generator directory level.
+void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
 {
-  // loop over each project in the build
-  for(std::map<cmStdString,
-        std::vector<cmLocalGenerator*> >::iterator m =
-        this->ProjectMap.begin();
-      m != this->ProjectMap.end(); ++m)
+  // Loop over all targets in all local generators.
+  for(std::vector<cmLocalGenerator*>::const_iterator
+        lgi = this->LocalGenerators.begin();
+      lgi != this->LocalGenerators.end(); ++lgi)
     {
-    std::vector<cmLocalGenerator*>& lgs = m->second;
-    if(lgs.size() == 0)
+    cmLocalGenerator* lg = *lgi;
+    cmMakefile* mf = lg->GetMakefile();
+    cmTargets& targets = mf->GetTargets();
+    for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
       {
-      continue;
-      }
-    cmStdString const & projectName = m->first;
-    cmMakefile* projectMakefile = lgs[0]->GetMakefile();
-    // get the current EXCLUDE_FROM_ALL value from projectMakefile
-    const char* exclude = 0;
-    std::string excludeSave;
-    bool chain = false;
-    exclude =
-      projectMakefile->GetProperties().
-      GetPropertyValue("EXCLUDE_FROM_ALL",
-                       cmProperty::DIRECTORY, chain);
-    if(exclude)
-      {
-      excludeSave = exclude;
-      }
-    // Set EXCLUDE_FROM_ALL to FALSE for the top level makefile because
-    // in the current project nothing is excluded yet
-    projectMakefile->SetProperty("EXCLUDE_FROM_ALL", "FALSE");
-    // now loop over all cmLocalGenerators in this project and pull
-    // out all the targets that depend on each other, even if those
-    // targets come from a target that is excluded.
-    for(std::vector<cmLocalGenerator*>::iterator lg =
-          lgs.begin(); lg != lgs.end(); ++lg)
-      {
-      cmMakefile* mf = (*lg)->GetMakefile();
-      cmTargets& targets = mf->GetTargets();
-      for(cmTargets::iterator t = targets.begin();
-          t != targets.end(); ++t)
+      cmTarget& target = t->second;
+
+      // Consider the directory containing the target and all its
+      // parents until something excludes the target.
+      for(cmLocalGenerator* clg = lg; clg && !this->IsExcluded(clg, target);
+          clg = clg->GetParent())
         {
-        cmTarget& target = t->second;
-        // if the target is in all then add it to the project
-        if(!target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
-          {
-          // add this target to the project
-          this->ProjectToTargetMap[projectName].insert(&target);
-          // get the target's dependencies
-          std::vector<cmTarget *>& tgtdeps = this->GetTargetDepends(target);
-          this->ProjectToTargetMap[projectName].insert(tgtdeps.begin(),
-                                                       tgtdeps.end());
-          }
+        // This local generator includes the target.
+        std::set<cmTarget*>& targetSet =
+          this->LocalGeneratorToTargetMap[clg];
+        targetSet.insert(&target);
+
+        // Add dependencies of the included target.  An excluded
+        // target may still be included if it is a dependency of a
+        // non-excluded target.
+        std::vector<cmTarget *>& tgtdeps = this->GetTargetDepends(target);
+        targetSet.insert(tgtdeps.begin(), tgtdeps.end());
         }
       }
-    // Now restore the EXCLUDE_FROM_ALL property on the project top
-    // makefile
-    if(exclude)
-      {
-      exclude = excludeSave.c_str();
-      }
-    projectMakefile->SetProperty("EXCLUDE_FROM_ALL", exclude);
     }
-  // dump the map for debug purposes
-  // right now this map is not being used, but it was
-  // checked in to avoid constant conflicts.
-  // It is also the first step to creating sub projects
-  // that contain all of the targets they need.
-#if 0
-  std::map<cmStdString, std::set<cmTarget*> >::iterator i =
-    this->ProjectToTargetMap.begin();
-  for(; i != this->ProjectToTargetMap.end(); ++i)
-    {
-    std::cerr << i->first << "\n";
-    std::set<cmTarget*>::iterator t = i->second.begin();
-    for(; t != i->second.end(); ++t)
-      {
-      cmTarget* target = *t;
-      std::cerr << "\t" << target->GetName() << "\n";
-      }
-    }
-#endif
 }
 
 
