@@ -377,13 +377,13 @@ int main (int argc, char *argv[])
             {
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
               "Cannot initialize CPack generator: "
-              << generator.c_str() << std::endl);
+              << gen << std::endl);
             parsed = 0;
             }
           if ( parsed && !cpackGenerator->Initialize(gen, mf, argv[0]) )
             {
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-              "Cannot initialize the generator" << std::endl);
+              "Cannot initialize the generator " << gen << std::endl);
             parsed = 0;
             }
 
@@ -442,7 +442,7 @@ int main (int argc, char *argv[])
       }
     }
 
-  if ( !parsed || help )
+  if ( help )
     {
     doc.CheckOptions(argc, argv);
     // Construct and print requested documentation.

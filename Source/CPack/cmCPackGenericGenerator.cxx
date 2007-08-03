@@ -653,7 +653,7 @@ int cmCPackGenericGenerator::ProcessGenerator()
     tempDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     }
   if ( !this->CompressFiles(tempPackageFileName,
-      tempDirectory, gl.GetFiles()) )
+      tempDirectory, gl.GetFiles()) || cmSystemTools::GetErrorOccuredFlag())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem compressing the directory"
       << std::endl);
@@ -695,7 +695,13 @@ int cmCPackGenericGenerator::Initialize(const char* name, cmMakefile* mf,
       "Cannot initialize the generator" << std::endl);
     return 0;
     }
-  return this->InitializeInternal();
+  int result = this->InitializeInternal();
+  if (cmSystemTools::GetErrorOccuredFlag())
+    {
+    return 0;
+    }
+
+  return result;
 }
 
 //----------------------------------------------------------------------
