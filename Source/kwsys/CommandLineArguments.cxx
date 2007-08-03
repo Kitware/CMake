@@ -608,7 +608,7 @@ void CommandLineArguments::GenerateHelp()
       {
       str << kwsys_ios::endl;
       char argument[100];
-      sprintf(argument, sit->c_str());
+      sprintf(argument, "%s", sit->c_str());
       switch ( this->Internals->Callbacks[*sit].ArgumentType )
         {
         case CommandLineArguments::NO_ARGUMENT: break;
