@@ -317,7 +317,14 @@ int cmCTestUpdateHandler::ProcessHandler()
       checkoutErrorMessages += ostr.str();
       updateProducedError = true;
       }
-    this->CTest->InitializeFromCommand(this->Command);
+    if(!this->CTest->InitializeFromCommand(this->Command))
+      {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, 
+                 " Fatal Error in initialize: "
+                 << std::endl);
+      cmSystemTools::SetFatalErrorOccured();
+      return -1;
+      }
     }
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Updating the repository: "
     << sourceDirectory << std::endl);
@@ -531,6 +538,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open log file"
       << std::endl);
+    return -1;
     }
   std::string start_time = this->CTest->CurrentTime();
   double elapsed_time_start = cmSystemTools::GetTime();
