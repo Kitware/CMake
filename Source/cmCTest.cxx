@@ -312,7 +312,7 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
   cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
   if ( this->ProduceXML )
     {
-  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+    cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
     cmCTestLog(this, OUTPUT,
       "   Site: " << this->GetCTestConfiguration("Site") << std::endl
       << "   Build name: " << this->GetCTestConfiguration("BuildName")
@@ -320,8 +320,10 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
     cmCTestLog(this, DEBUG, "Produce XML is on" << std::endl);
     if ( this->GetCTestConfiguration("NightlyStartTime").empty() )
       {
-      cmCTestLog(this, DEBUG, "No nightly start time" << std::endl);
-  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+      cmCTestLog(this, ERROR_MESSAGE,
+                 "No nightly start time found please set in"
+                 " CTestConfig.cmake or DartConfig.cmake" << std::endl);
+      cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
       return 0;
       }
     }
@@ -1217,6 +1219,13 @@ int cmCTest::RunTest(std::vector<const char*> argv,
 //----------------------------------------------------------------------
 void cmCTest::StartXML(std::ostream& ostr)
 {
+  if(this->CurrentTag.empty())
+    {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Current Tag empty, this may mean"
+               " NightlStartTime was not set correctly." << std::endl);
+    cmSystemTools::SetFatalErrorOccured();
+    }
   ostr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     << "<Site BuildName=\"" << this->GetCTestConfiguration("BuildName")
     << "\" BuildStamp=\"" << this->CurrentTag << "-"
