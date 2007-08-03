@@ -684,6 +684,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   cmsys::RegularExpression vgUMR3("== .*Jump to the invalid address ");
   cmsys::RegularExpression vgUMR4("== .*Syscall param .* contains "
     "uninitialised or unaddressable byte\\(s\\)");
+  cmsys::RegularExpression vgUMR5("== .*Syscall param .* uninitialised");
   cmsys::RegularExpression vgIPW("== .*Invalid write of size [0-9]");
   cmsys::RegularExpression vgABR("== .*pthread_mutex_unlock: mutex is "
     "locked by a different thread");
@@ -738,6 +739,10 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
         failure = cmCTestMemCheckHandler::UMR;
         }
       else if ( vgUMR4.find(lines[cc]) )
+        {
+        failure = cmCTestMemCheckHandler::UMR;
+        }
+      else if ( vgUMR5.find(lines[cc]) )
         {
         failure = cmCTestMemCheckHandler::UMR;
         }
