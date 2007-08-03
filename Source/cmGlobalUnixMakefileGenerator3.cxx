@@ -539,7 +539,7 @@ cmGlobalUnixMakefileGenerator3
   this->WriteDirectoryRule2(ruleFileStream, lg, "clean", false, false);
 
   // Write directory-level rules for "preinstall".
-  this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", false, true);
+  this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", true, true);
 }
 
 
@@ -677,6 +677,23 @@ cmGlobalUnixMakefileGenerator3
                             (makefileName.c_str(), makeTargetName.c_str()));
         lg->WriteMakeRule(ruleFileStream, "fast build rule for target.",
                           localName.c_str(), depends, commands, true);
+
+        // Add a local name for the rule to relink the target before
+        // installation.
+        if(t->second.NeedRelinkBeforeInstall())
+          {
+          makeTargetName = lg->GetRelativeTargetDirectory(t->second);
+          makeTargetName += "/preinstall";
+          localName = t->second.GetName();
+          localName += "/preinstall";
+          depends.clear();
+          commands.clear();
+          commands.push_back(lg->GetRecursiveMakeCall
+                             (makefileName.c_str(), makeTargetName.c_str()));
+          lg->WriteMakeRule(ruleFileStream,
+                            "Manual pre-install relink rule for target.",
+                            localName.c_str(), depends, commands, true);
+          }
         }
       }
     }

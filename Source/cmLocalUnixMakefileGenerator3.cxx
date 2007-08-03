@@ -353,10 +353,10 @@ void cmLocalUnixMakefileGenerator3
       depends.clear();
       
       // Build the target for this pass.
-      std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
-      tmp += "Makefile2";
+      std::string makefile2 = cmake::GetCMakeFilesDirectoryPostSlash();
+      makefile2 += "Makefile2";
       commands.push_back(this->GetRecursiveMakeCall
-                         (tmp.c_str(),localName.c_str()));
+                         (makefile2.c_str(),localName.c_str()));
       this->CreateCDCommand(commands,
                             this->Makefile->GetHomeOutputDirectory(),
                             this->Makefile->GetStartOutputDirectory());
@@ -390,6 +390,26 @@ void cmLocalUnixMakefileGenerator3
                             this->Makefile->GetStartOutputDirectory());
       this->WriteMakeRule(ruleFileStream, "fast build rule for target.",
                           localName.c_str(), depends, commands, true);
+
+      // Add a local name for the rule to relink the target before
+      // installation.
+      if(t->second.NeedRelinkBeforeInstall())
+        {
+        makeTargetName = this->GetRelativeTargetDirectory(t->second);
+        makeTargetName += "/preinstall";
+        localName = t->second.GetName();
+        localName += "/preinstall";
+        depends.clear();
+        commands.clear();
+        commands.push_back(this->GetRecursiveMakeCall
+                           (makefile2.c_str(), makeTargetName.c_str()));
+        this->CreateCDCommand(commands,
+                              this->Makefile->GetHomeOutputDirectory(),
+                              this->Makefile->GetStartOutputDirectory());
+        this->WriteMakeRule(ruleFileStream,
+                            "Manual pre-install relink rule for target.",
+                            localName.c_str(), depends, commands, true);
+        }
       }
     }
 }

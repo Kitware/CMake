@@ -45,6 +45,17 @@ cmInstallTargetGenerator
 //----------------------------------------------------------------------------
 void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 {
+  // Warn if installing an exclude-from-all target.
+  if(this->Target->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+    {
+    cmOStringStream msg;
+    msg << "WARNING: Target \"" << this->Target->GetName()
+        << "\" has EXCLUDE_FROM_ALL set and will not be built by default "
+        << "but an install rule has been provided for it.  CMake does "
+        << "not define behavior for this case.";
+    cmSystemTools::Message(msg.str().c_str(), "Warning");
+    }
+
   // Track indentation.
   Indent indent;
 
