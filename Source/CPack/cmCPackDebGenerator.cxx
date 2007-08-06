@@ -73,7 +73,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
     out << "Section: devel\n";
     out << "Priority: optional\n";
     out << "Architecture: " << debian_pkg_arch << "\n";
-    out << "Depends: " << debian_pkg_dep << " \n";
+    out << "Depends: " << debian_pkg_dep << "\n";
     out << "Maintainer: " << maintainer << "\n";
     out << "Description: " << desc << "\n";
     out << " " << debian_pkg_name << " was packaged by CMake.\n";
@@ -126,7 +126,8 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
                                    topLevelWithTrailingSlash.c_str(), "");
       out << output;
       }
-    out << std::endl;
+    // each line contains a eol. 
+    // Do not end the md5sum file with yet another (invalid)
     }
 
 
@@ -156,6 +157,20 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   cmd += "\" debian-binary control.tar.gz data.tar.gz";
   res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
     &retVal, toplevel, this->GeneratorVerbose, 0);
+
+  if ( !res || retVal )
+    {
+    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    tmpFile += "/Deb.log";
+    cmGeneratedFileStream ofs(tmpFile.c_str());
+    ofs << "# Run command: " << cmd.c_str() << std::endl
+      << "# Output:" << std::endl
+      << output.c_str() << std::endl;
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running ar command: "
+      << cmd.c_str() << std::endl
+      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+    return 0;
+    }
 
   return 1;
 }
