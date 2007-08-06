@@ -498,7 +498,8 @@ void cmExtraEclipseCDT4Generator
   fout << 
     "<storageModule moduleId=\"scannerConfiguration\">\n"
     "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
-    " selectedProfileId=\"org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile\"/>\n"
+    " selectedProfileId=\""
+             "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile\"/>\n"
     ;
   this->AppendScannerProfile(fout,
     "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile",
@@ -531,8 +532,8 @@ void cmExtraEclipseCDT4Generator
     "-E -P -v -dD ${plugin_state_location}/${specs_file}",
     "gcc", true, true);
   this->AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP",
-    false, "", false, "specsFile",
+    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP"
+    , false, "", false, "specsFile",
     "-E -P -v -dD ${plugin_state_location}/specs.cpp",
     "g++", true, true);
   this->AppendScannerProfile(fout,
@@ -550,7 +551,8 @@ void cmExtraEclipseCDT4Generator
           "cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.1\">\n"
           "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
           " selectedProfileId=\""
-          "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP\"/>\n"
+  "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP\""
+  "/>\n"
           ;
 
   AppendScannerProfile(fout,
@@ -584,8 +586,8 @@ void cmExtraEclipseCDT4Generator
     "-E -P -v -dD ${plugin_state_location}/${specs_file}",
     "gcc", true, true);
   AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP",
-    true, "", false, "specsFile",
+    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP"
+    , true, "", false, "specsFile",
     "-E -P -v -dD ${plugin_state_location}/specs.cpp",
     "g++", true, true);
   AppendScannerProfile(fout,
@@ -603,7 +605,7 @@ void cmExtraEclipseCDT4Generator
           "cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.1\">\n"
           "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
           " selectedProfileId=\""
-          "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC\"/>\n"
+"org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC\"/>\n"
           ;
 
   AppendScannerProfile(fout,
@@ -637,8 +639,8 @@ void cmExtraEclipseCDT4Generator
     "-E -P -v -dD ${plugin_state_location}/${specs_file}",
     "gcc", true, true);
   AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP",
-    false, "", false, "specsFile",
+    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP"
+    , false, "", false, "specsFile",
     "-E -P -v -dD ${plugin_state_location}/specs.cpp",
     "g++", true, true);
   AppendScannerProfile(fout,

@@ -46,15 +46,8 @@ public:
   virtual void Generate();
 private:
 
-  /** Create the foo.kdevelop file. This one calls MergeProjectFiles()
-    if it already exists, otherwise createNewProjectFile() The project
-    files will be created in \a outputDir (in the build tree), the
-    kdevelop project dir will be set to \a projectDir (in the source
-    tree). \a cmakeFilePattern consists of a lists of all cmake
-    listfiles used by this CMakeLists.txt */
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
 
-  ///! Creates a new foo.kdevelop and a new foo.kdevses file
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
                                 const std::string& filename);
 

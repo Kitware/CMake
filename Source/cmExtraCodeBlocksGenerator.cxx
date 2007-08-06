@@ -89,8 +89,7 @@ void cmExtraCodeBlocksGenerator::Generate()
         "   <Workspace title=\""<<workspaceName<<"\">\n";
 
   bool firstProject = true;
-  // for each sub project in the project create
-  // a kdevelop project
+  // for each sub project in the project create a codeblocks project
   for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
       it!= this->GlobalGenerator->GetProjectMap().end();
@@ -207,21 +206,25 @@ void cmExtraCodeBlocksGenerator
           case cmTarget::MODULE_LIBRARY:
 //          case cmTarget::UTILITY:
   fout<<"      <Target title=\""<<ti->first<<"\">\n"
-        "         <Option output=\""<<ti->second.GetLocation(0)<<"\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
-        "         <Option working_dir=\""<<makefile->GetStartOutputDirectory()<<"\" />\n"
+        "         <Option output=\""<<ti->second.GetLocation(0)
+     <<"\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
+        "         <Option working_dir=\""<<makefile->GetStartOutputDirectory()
+     <<"\" />\n"
         "         <Option type=\"0\" />\n"
         "         <Option compiler=\"gcc\" />\n"
         "         <MakeCommands>\n";
 
-  fout<<"            <Build command=\""<<make<<" -f "<<makefile->GetStartOutputDirectory()<<"/Makefile "<<ti->first<<"\" />\n";
-  fout<<"            <CompileFile command=\""<<make<<" -f "<<makefile->GetStartOutputDirectory()<<"/Makefile "<<ti->first<<"\" />\n";
-  fout<<"            <Clean command=\""<<make<<" -f "<<makefile->GetStartOutputDirectory()<<"/Makefile clean\" />\n";
-  fout<<"            <DistClean command=\""<<make<<" -f "<<makefile->GetStartOutputDirectory()<<"/Makefile clean\" />\n";
+  fout<<"            <Build command=\""<<make<<" -f "
+     <<makefile->GetStartOutputDirectory()<<"/Makefile "<<ti->first<<"\" />\n";
+  fout<<"            <CompileFile command=\""<<make<<" -f "
+     <<makefile->GetStartOutputDirectory()<<"/Makefile "<<ti->first<<"\" />\n";
+  fout<<"            <Clean command=\""<<make<<" -f "
+     <<makefile->GetStartOutputDirectory()<<"/Makefile clean\" />\n";
+  fout<<"            <DistClean command=\""<<make<<" -f "
+     <<makefile->GetStartOutputDirectory()<<"/Makefile clean\" />\n";
 
   fout<<"         </MakeCommands>\n"
         "      </Target>\n";
-//  if (ti->second.GetType()==cmTarget::UTILITY) fout<<"****** UTILITY \n";
-//  if (ti->second.GetType()==cmTarget::GLOBAL_TARGET) fout<<"****** GLOBAL_YESTERDAY \n";
             break;
           default:
             break;
