@@ -108,6 +108,8 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(md5filename.c_str());
     std::vector<std::string>::const_iterator fileIt;
+    std::string topLevelWithTrailingSlash = toplevel;
+    topLevelWithTrailingSlash += '/';
     for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
       {
       cmd = cmakeExecutable;
@@ -117,6 +119,11 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
       //int retVal = -1;
       res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
         &retVal, toplevel, this->GeneratorVerbose, 0);
+      // debian md5sums entries are like this:
+      // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
+      // thus strip the full path (with the trailing slash)
+      cmSystemTools::ReplaceString(output, 
+                                   topLevelWithTrailingSlash.c_str(), "");
       out << output;
       }
     out << std::endl;
