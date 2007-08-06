@@ -320,8 +320,8 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
     cmCTestLog(this, DEBUG, "Produce XML is on" << std::endl);
     if ( this->GetCTestConfiguration("NightlyStartTime").empty() )
       {
-      cmCTestLog(this, ERROR_MESSAGE,
-                 "No nightly start time found please set in"
+      cmCTestLog(this, WARNING,
+                 "WARNING: No nightly start time found please set in"
                  " CTestConfig.cmake or DartConfig.cmake" << std::endl);
       cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
       return 0;
