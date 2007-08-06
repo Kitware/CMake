@@ -34,4 +34,10 @@ IF("${MPI_LIBRARY}" MATCHES "mpich.rts")
    SET(MPI_EXTRA_LIBRARY msglayer.rts devices.rts rts.rts devices.rts CACHE STRING "Additional MPI libs" FORCE)
 ENDIF("${MPI_LIBRARY}" MATCHES "mpich.rts")
 
+INCLUDE(FindPackageHandleStandardArgs)
+
+# handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE if 
+# all listed variables are TRUE
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(MPI DEFAULT_MSG MPI_LIBRARY MPI_INCLUDE_PATH)
+
 MARK_AS_ADVANCED(MPI_INCLUDE_PATH MPI_LIBRARY MPI_EXTRA_LIBRARY)
