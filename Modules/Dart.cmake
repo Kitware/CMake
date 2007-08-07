@@ -21,7 +21,7 @@
 OPTION(BUILD_TESTING "Build the testing tree." ON)
 
 IF(BUILD_TESTING)
-  FIND_PACKAGE(Dart)
+  FIND_PACKAGE(Dart QUIET)
 
   #
   # Section #1:
