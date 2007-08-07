@@ -124,10 +124,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     bool foundModule = false;
     if(!this->FindModule(foundModule, quiet, required))
       {
+      this->AppendSuccessInformation(quiet);
       return false;
       }
     if(foundModule)
       {
+      this->AppendSuccessInformation(quiet);
       return true;
       }
     }
@@ -172,6 +174,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     {
     if(!this->FindConfig())
       {
+      this->AppendSuccessInformation(quiet);
       return false;
       }
     }
@@ -272,6 +275,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
 #endif
 
+  this->AppendSuccessInformation(quiet);
   return result;
 }
 
@@ -434,4 +438,68 @@ bool cmFindPackageCommand::ReadListFile(const char* f)
   e += "\".";
   this->SetError(e.c_str());
   return false;
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AppendToProperty(const char* propertyName)
+{
+  std::string propertyValue;
+  const char *prop = 
+      this->Makefile->GetCMakeInstance()->GetProperty(propertyName);
+  if (prop && *prop)
+    {
+    propertyValue = prop;
+    
+    std::vector<std::string> contents;
+    cmSystemTools::ExpandListArgument(propertyValue, contents, false);
+    
+    bool alreadyInserted = false;
+    for(std::vector<std::string>::const_iterator it = contents.begin(); 
+      it != contents.end(); ++ it )
+      {
+      if (*it == this->Name)
+        {
+        alreadyInserted = true;
+        break;
+        }
+      }
+    if (!alreadyInserted)
+      {
+      propertyValue += ";";
+      propertyValue += this->Name;
+      }
+    }
+  else
+    {
+    propertyValue = this->Name;
+    }
+  this->Makefile->GetCMakeInstance()->SetProperty(propertyName, 
+                                                  propertyValue.c_str());
+ }
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AppendSuccessInformation(bool quiet)
+{
+  std::string found = this->Name;
+  found += "_FOUND";
+  std::string upperFound = cmSystemTools::UpperCase(found);
+
+  const char* upperResult = this->Makefile->GetDefinition(upperFound.c_str());
+  const char* result = this->Makefile->GetDefinition(found.c_str());
+  if ((cmSystemTools::IsOn(result)) || (cmSystemTools::IsOn(upperResult)))
+    {
+    this->AppendToProperty("PACKAGES_FOUND");
+    if (!quiet)
+      {
+      this->AppendToProperty("ENABLED_FEATURES");
+      }
+    }
+  else
+    {
+    this->AppendToProperty("PACKAGES_NOT_FOUND");
+    if (!quiet)
+      {
+      this->AppendToProperty("DISABLED_FEATURES");
+      }
+    }
 }

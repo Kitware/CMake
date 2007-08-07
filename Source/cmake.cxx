@@ -3044,6 +3044,32 @@ void cmake::DefineProperties(cmake *cm)
      "FIND_LIBRARY command should automatically search the lib64 variant of "
      "directories called lib in the search path when building 64-bit "
      "binaries.");
+  cm->DefineProperty
+    ("ENABLED_FEATURES", cmProperty::GLOBAL,
+     "List of features which are enabled during the CMake run.",
+     "List of features which are enabled during the CMake run. Be default "
+     "it contains the names of all packages which were found. This is "
+     "determined using the <NAME>_FOUND variables. Packages which are "
+     "searched QUIET are not listed. A project can add its own features to "
+     "this list.This property is used by the macros in FeatureSummary.cmake.");
+  cm->DefineProperty
+    ("DISABLED_FEATURES", cmProperty::GLOBAL,
+     "List of features which are disabled during the CMake run.", 
+     "List of features which are disabled during the CMake run. Be default "
+     "it contains the names of all packages which were not found. This is "
+     "determined using the <NAME>_FOUND variables. Packages which are "
+     "searched QUIET are not listed. A project can add its own features to "
+     "this list.This property is used by the macros in FeatureSummary.cmake.");
+  cm->DefineProperty
+    ("PACKAGES_FOUND", cmProperty::GLOBAL,
+     "List of packages which were found during the CMake run.",
+     "List of packages which were found during the CMake run. Whether a "
+     "package has been found is determined using the <NAME>_FOUND variables.");
+  cm->DefineProperty
+    ("PACKAGES_NOT_FOUND", cmProperty::GLOBAL,
+     "List of packages which were not found during the CMake run.",
+     "List of packages which were not found during the CMake run. Whether a "
+     "package has been found is determined using the <NAME>_FOUND variables.");
 }
 
 
