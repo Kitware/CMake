@@ -8,7 +8,7 @@
 #    FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibXml2 DEFAULT_MSG LIBXML2_LIBRARIES LIBXML2_INCLUDE_DIR)
 #
 #    LibXml2 is considered to be found, if both LIBXML2_LIBRARIES and 
-#    LIBXML2_INCLUDE_DIR are valid. Then also LIBXML2_FOUND is set tto TRUE.
+#    LIBXML2_INCLUDE_DIR are valid. Then also LIBXML2_FOUND is set to TRUE.
 #    If it is not found and REQUIRED was used, it fails with FATAL_ERROR, 
 #    independent whether QUIET was used or not.
 #    If it is found, the location is reported using the VAR1 argument, so 
