@@ -67,54 +67,15 @@ void cmExtraCodeBlocksGenerator::SetGlobalGenerator(
 
 void cmExtraCodeBlocksGenerator::Generate()
 {
-
-  const cmMakefile* topLevelMakefile = 
-                 this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
-
-  std::string workspaceName = topLevelMakefile->GetProjectName();
-  std::string outputDir=topLevelMakefile->GetStartOutputDirectory();
-  std::string workspaceFilename = outputDir;
-  workspaceFilename += "/";
-  workspaceFilename += workspaceName;
-  workspaceFilename += ".workspace";
-
-  cmGeneratedFileStream fout(workspaceFilename.c_str());
-  if(!fout)
-  {
-    return;
-  }
-
-  fout<<"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n"
-        "<CodeBlocks_workspace_file>\n"
-        "   <Workspace title=\""<<workspaceName<<"\">\n";
-
-  bool firstProject = true;
   // for each sub project in the project create a codeblocks project
   for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
       it!= this->GlobalGenerator->GetProjectMap().end();
       ++it)
     {
-    const cmMakefile* mf=it->second[0]->GetMakefile();
-    std::string filename=mf->GetStartOutputDirectory();
-    filename+="/";
-    filename+=mf->GetProjectName();
-    filename+=".cbp";
-
-    if (firstProject)
-    {
-      fout<<"      <Project filename=\""<< filename<<"\" active=\"1\"/>\n";
-    }
-    else
-    {
-      fout<<"      <Project filename=\""<< filename<<"\" />\n";
-    }
     // create a project file
     this->CreateProjectFile(it->second);
     }
-
-  fout<<"   </Workspace>\n"
-        "</CodeBlocks_workspace_file>\n";
 }
 
 
