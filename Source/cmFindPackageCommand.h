@@ -93,6 +93,8 @@ public:
   
   cmTypeMacro(cmFindPackageCommand, cmCommand);
 private:
+  void AppendSuccessInformation(bool quiet);
+  void AppendToProperty(const char* propertyName);
   bool FindModule(bool& found, bool quiet, bool required);
   bool FindConfig();
   std::string SearchForConfig() const;
