@@ -188,7 +188,7 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
 //       CMakeDetermine(LANG) was loaded
 //
 // Now load a few files that can override values set in any of the above
-// CMake(PROJECTNAME)Compatibility.cmake
+// (PROJECTNAME)Compatibility.cmake
 //   - load any backwards compatibility stuff for current project
 // ${CMAKE_USER_MAKE_RULES_OVERRIDE}
 //   - allow users a chance to override system variables
