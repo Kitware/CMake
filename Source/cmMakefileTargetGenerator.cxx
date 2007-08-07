@@ -341,8 +341,18 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
   this->WriteObjectBuildFile(obj, lang, source, depends);
 
   // The object file should be checked for dependency integrity.
+  std::string objFullPath = this->Makefile->GetCurrentOutputDirectory();
+  objFullPath += "/";
+  objFullPath += obj;
+  objFullPath =
+    this->Convert(objFullPath.c_str(), cmLocalGenerator::FULL);
+  std::string srcFullPath =
+    this->Convert(source.GetFullPath().c_str(), cmLocalGenerator::FULL);
   this->LocalGenerator->
-    CheckDependFiles[this->Target->GetName()][lang].insert(&source);
+    AddImplicitDepends(*this->Target, lang,
+                       objFullPath.c_str(),
+                       srcFullPath.c_str());
+
   // add this to the list of objects for this local generator
   if(cmSystemTools::FileIsFullPath(objNoTargetDir.c_str()))
     {

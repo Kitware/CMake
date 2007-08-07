@@ -211,15 +211,18 @@ public:
 
   std::string GetRelativeTargetDirectory(cmTarget& target);
 
-  // List the files for which to check dependency integrity.  Each
-  // language has its own list because integrity may be checked
-  // differently.
-  struct IntegrityCheckSet: public std::set<cmSourceFile *> {};
-  struct IntegrityCheckSetMap: public std::map<cmStdString, IntegrityCheckSet>
-  {};
-  std::map<cmStdString, IntegrityCheckSetMap> &GetIntegrityCheckSet() 
-  { return this->CheckDependFiles;}
-  
+  // File pairs for implicit dependency scanning.  The key of the map
+  // is the depender and the value is the explicit dependee.
+  struct ImplicitDependFileMap: public std::map<cmStdString, cmStdString> {};
+  struct ImplicitDependLanguageMap:
+    public std::map<cmStdString, ImplicitDependFileMap> {};
+  struct ImplicitDependTargetMap:
+    public std::map<cmStdString, ImplicitDependLanguageMap> {};
+  ImplicitDependLanguageMap const& GetImplicitDepends(cmTarget const& tgt);
+
+  void AddImplicitDepends(cmTarget const& tgt, const char* lang,
+                          const char* obj, const char* src);
+
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  cmTarget& target);
 
@@ -323,8 +326,8 @@ private:
   friend class cmMakefileLibraryTargetGenerator;
   friend class cmMakefileUtilityTargetGenerator;
   friend class cmGlobalUnixMakefileGenerator3;
-  
-  std::map<cmStdString, IntegrityCheckSetMap> CheckDependFiles;
+
+  ImplicitDependTargetMap ImplicitDepends;
 
   //==========================================================================
   // Configuration settings.

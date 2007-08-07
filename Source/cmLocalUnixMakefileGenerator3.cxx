@@ -1644,52 +1644,37 @@ void cmLocalUnixMakefileGenerator3::CheckDependencies(cmMakefile* mf,
 void cmLocalUnixMakefileGenerator3
 ::WriteDependLanguageInfo(std::ostream& cmakefileStream, cmTarget &target)
 {
-  // now write all the language stuff
-  // Set the set of files to check for dependency integrity.
-  std::set<cmStdString> checkSetLangs;
-  std::map<cmStdString,cmLocalUnixMakefileGenerator3::IntegrityCheckSet>& 
-    checkSet = this->GetIntegrityCheckSet()[target.GetName()];
-  for(std::map<cmStdString, 
-        cmLocalUnixMakefileGenerator3::IntegrityCheckSet>::const_iterator
-        l = checkSet.begin(); l != checkSet.end(); ++l)
-    {
-    checkSetLangs.insert(l->first);
-    }
-  
+  ImplicitDependLanguageMap const& implicitLangs =
+    this->GetImplicitDepends(target);
+
   // list the languages
   cmakefileStream
-    << "# The set of files whose dependency integrity should be checked:\n";
+    << "# The set of languages for which implicit dependencies are needed:\n";
   cmakefileStream
     << "SET(CMAKE_DEPENDS_LANGUAGES\n";
-  for(std::set<cmStdString>::iterator
-        l = checkSetLangs.begin(); l != checkSetLangs.end(); ++l)
+  for(ImplicitDependLanguageMap::const_iterator
+        l = implicitLangs.begin(); l != implicitLangs.end(); ++l)
     {
-    cmakefileStream << "  \"" << l->c_str() << "\"\n";
+    cmakefileStream << "  \"" << l->first.c_str() << "\"\n";
     }
   cmakefileStream << "  )\n";
-  
+
   // now list the files for each language
-  for(std::set<cmStdString>::iterator
-        l = checkSetLangs.begin(); l != checkSetLangs.end(); ++l)
+  cmakefileStream
+    << "# The set of files for implicit dependencies of each language:\n";
+  for(ImplicitDependLanguageMap::const_iterator
+        l = implicitLangs.begin(); l != implicitLangs.end(); ++l)
     {
     cmakefileStream
-      << "SET(CMAKE_DEPENDS_CHECK_" << l->c_str() << "\n";
-    // get the check set for this local gen and language
-    cmLocalUnixMakefileGenerator3::IntegrityCheckSet iCheckSet = 
-      checkSet[*l];
-    // for each file
-    for(cmLocalUnixMakefileGenerator3::IntegrityCheckSet::const_iterator 
-          csIter = iCheckSet.begin();
-        csIter != iCheckSet.end(); ++csIter)
+      << "SET(CMAKE_DEPENDS_CHECK_" << l->first.c_str() << "\n";
+    ImplicitDependFileMap const& implicitPairs = l->second;
+
+    // for each file pair
+    for(ImplicitDependFileMap::const_iterator pi = implicitPairs.begin();
+        pi != implicitPairs.end(); ++pi)
       {
-      cmakefileStream << "  \"" << (*csIter)->GetFullPath() << "\"\n";
-      // Get the full path name of the object file.
-      std::string obj = this->Makefile->GetStartOutputDirectory();
-      obj += "/";
-      obj += this->GetObjectFileName(target, **csIter);
-      cmakefileStream << "  \"" << 
-        this->Convert(obj.c_str(),
-                      cmLocalGenerator::FULL).c_str() << "\"\n";
+      cmakefileStream << "  \"" << pi->second << "\" ";
+      cmakefileStream << "\"" << pi->first << "\"\n";
       }
     cmakefileStream << "  )\n";
     }
@@ -1926,6 +1911,24 @@ cmLocalUnixMakefileGenerator3
   return dir;
 }
 
+//----------------------------------------------------------------------------
+cmLocalUnixMakefileGenerator3::ImplicitDependLanguageMap const&
+cmLocalUnixMakefileGenerator3::GetImplicitDepends(cmTarget const& tgt)
+{
+  return this->ImplicitDepends[tgt.GetName()];
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator3::AddImplicitDepends(cmTarget const& tgt,
+                                                  const char* lang,
+                                                  const char* obj,
+                                                  const char* src)
+{
+  this->ImplicitDepends[tgt.GetName()][lang][obj] = src;
+}
+
+//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3
 ::CreateCDCommand(std::vector<std::string>& commands, const char *tgtDir,
                   const char *retDir)
