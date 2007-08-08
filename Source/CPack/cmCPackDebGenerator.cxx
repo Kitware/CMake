@@ -58,22 +58,40 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   ctlfilename += "/control";
 
   // debian policy enforce lower case for package name
+  // mandatory entries:
   std::string debian_pkg_name = 
        cmsys::SystemTools::LowerCase( this->GetOption("DEBIAN_PACKAGE_NAME") );
   const char* debian_pkg_version = this->GetOption("DEBIAN_PACKAGE_VERSION");
+  const char* debian_pkg_section = this->GetOption("DEBIAN_PACKAGE_SECTION");
+  const char* debian_pkg_priority = this->GetOption("DEBIAN_PACKAGE_PRIORITY");
   const char* debian_pkg_arch = this->GetOption("DEBIAN_PACKAGE_ARCHITECTURE");
-  const char* debian_pkg_dep  = this->GetOption("DEBIAN_PACKAGE_DEPENDS");
   const char* maintainer = this->GetOption("DEBIAN_PACKAGE_MAINTAINER");
   const char* desc = this->GetOption("DEBIAN_PACKAGE_DESCRIPTION");
+
+  // optional entries
+  const char* debian_pkg_dep = this->GetOption("DEBIAN_PACKAGE_DEPENDS");
+  const char* debian_pkg_rec = this->GetOption("DEBIAN_PACKAGE_RECOMMENDS");
+  const char* debian_pkg_sug = this->GetOption("DEBIAN_PACKAGE_SUGGESTS");
 
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(ctlfilename.c_str());
     out << "Package: " << debian_pkg_name << "\n";
     out << "Version: " << debian_pkg_version << "\n";
-    out << "Section: devel\n";
-    out << "Priority: optional\n";
+    out << "Section: " << debian_pkg_section << "\n";
+    out << "Priority: " << debian_pkg_priority << "\n";
     out << "Architecture: " << debian_pkg_arch << "\n";
-    out << "Depends: " << debian_pkg_dep << "\n";
+    if(debian_pkg_dep)
+      {
+      out << "Depends: " << debian_pkg_dep << "\n";
+      }
+    if(debian_pkg_rec)
+      {
+      out << "Recommends: " << debian_pkg_rec << "\n";
+      }
+    if(debian_pkg_sug)
+      {
+      out << "Suggests: " << debian_pkg_sug << "\n";
+      }
     out << "Maintainer: " << maintainer << "\n";
     out << "Description: " << desc << "\n";
     out << " " << debian_pkg_name << " was packaged by CMake.\n";
@@ -93,6 +111,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
     tmpFile += "/Deb.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << cmd.c_str() << std::endl
+      << "# Working directory: " << toplevel << std::endl
       << "# Output:" << std::endl
       << output.c_str() << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running tar command: "
@@ -142,6 +161,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
     tmpFile += "/Deb.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << cmd.c_str() << std::endl
+      << "# Working directory: " << toplevel << std::endl
       << "# Output:" << std::endl
       << output.c_str() << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running tar command: "
