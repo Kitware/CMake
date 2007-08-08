@@ -305,6 +305,7 @@ SET(CPACK_SRCS
   CPack/cmCPackCygwinBinaryGenerator.cxx
   CPack/cmCPackCygwinSourceGenerator.cxx
   CPack/cmCPackDebGenerator.cxx
+  CPack/cmCPackRPMGenerator.cxx
   )
 # Build CPackLib
 ADD_LIBRARY(CPackLib ${CPACK_SRCS})

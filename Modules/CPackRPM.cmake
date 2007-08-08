@@ -1,0 +1,14 @@
+IF(CMAKE_BINARY_DIR)
+  MESSAGE(FATAL_ERROR "CPackRPM.cmake may only be used by CPack internally.")
+ENDIF(CMAKE_BINARY_DIR)
+
+IF(NOT UNIX)
+  MESSAGE(FATAL_ERROR "CPackRPM.cmake may only be used under UNIX.")
+ENDIF(NOT UNIX)
+
+FIND_PROGRAM(RPMBUILD_EXECUTABLE rpmbuild)
+
+IF(NOT RPMBUILD_EXECUTABLE)
+  MESSAGE(FATAL_ERROR "RPM package requires rpmbuild executable")
+ENDIF(NOT RPMBUILD_EXECUTABLE)
+

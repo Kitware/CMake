@@ -37,6 +37,7 @@
 #if !defined(_WIN32) && !defined(__APPLE__) \
  && !defined(__QNXNTO__) && !defined(__BEOS__)
 #  include "cmCPackDebGenerator.h"
+#  include "cmCPackRPMGenerator.h"
 #endif
 
 
@@ -73,6 +74,8 @@ cmCPackGenerators::cmCPackGenerators()
 #if !defined(_WIN32) && !defined(__APPLE__) \
   && !defined(__QNXNTO__) && !defined(__BEOS__)
   this->RegisterGenerator("DEB", "Debian packages",
+    cmCPackDebGenerator::CreateGenerator);
+  this->RegisterGenerator("RPM", "RPM packages",
     cmCPackDebGenerator::CreateGenerator);
 #endif
 }
