@@ -37,7 +37,7 @@ cmCPackRPMGenerator::~cmCPackRPMGenerator()
 //----------------------------------------------------------------------
 int cmCPackRPMGenerator::CompressFiles(const char* outFileName,
   const char* toplevel,
-  const std::vector<std::string>& files)
+  const std::vector<std::string>& /*files*/)
 {
   this->ReadListFile("CPackRPM.cmake");
   if (!this->IsSet("RPMBUILD_EXECUTABLE")) 
@@ -46,9 +46,12 @@ int cmCPackRPMGenerator::CompressFiles(const char* outFileName,
     return 0;
     }
   const char* rpmbuildExecutable = this->GetOption("RPMBUILD_EXECUTABLE");
+  printf("rpmbuild: %s outFileName: %s toplevel: %s\n", rpmbuildExecutable, 
+         outFileName, toplevel);
 
   return 1;
 }
+
 
 //----------------------------------------------------------------------
 int cmCPackRPMGenerator::InitializeInternal()
