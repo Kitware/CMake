@@ -76,7 +76,7 @@ cmCPackGenerators::cmCPackGenerators()
   this->RegisterGenerator("DEB", "Debian packages",
     cmCPackDebGenerator::CreateGenerator);
   this->RegisterGenerator("RPM", "RPM packages",
-    cmCPackDebGenerator::CreateGenerator);
+    cmCPackRPMGenerator::CreateGenerator);
 #endif
 }
 
