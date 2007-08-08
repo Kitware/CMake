@@ -254,10 +254,6 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         upperDir.c_str(),
         cmFindPackageNeedBackwardsCompatibility
         );
-      this->Makefile->GetVariableWatch()->RemoveWatch(
-        upperFound.c_str(),
-        cmFindPackageNeedBackwardsCompatibility
-        );
       }
     else
       {
@@ -265,10 +261,6 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       // name.  Add a watch to warn the user.
       this->Makefile->GetVariableWatch()->AddWatch(
         upperDir.c_str(),
-        cmFindPackageNeedBackwardsCompatibility
-        );
-      this->Makefile->GetVariableWatch()->AddWatch(
-        upperFound.c_str(),
         cmFindPackageNeedBackwardsCompatibility
         );
       }
