@@ -428,17 +428,17 @@ void CommandLineArguments::AddArgument(const char* argument, ArgumentTypeEnum ty
     this->AddArgument(argument, type, CommandLineArguments::type##_TYPE, variable, help); \
   }
 
-CommandLineArgumentsAddArgumentMacro(BOOL,       bool);
-CommandLineArgumentsAddArgumentMacro(INT,        int);
-CommandLineArgumentsAddArgumentMacro(DOUBLE,     double);
-CommandLineArgumentsAddArgumentMacro(STRING,     char*);
-CommandLineArgumentsAddArgumentMacro(STL_STRING, kwsys_stl::string);
+CommandLineArgumentsAddArgumentMacro(BOOL,       bool)
+CommandLineArgumentsAddArgumentMacro(INT,        int)
+CommandLineArgumentsAddArgumentMacro(DOUBLE,     double)
+CommandLineArgumentsAddArgumentMacro(STRING,     char*)
+CommandLineArgumentsAddArgumentMacro(STL_STRING, kwsys_stl::string)
 
-CommandLineArgumentsAddArgumentMacro(VECTOR_BOOL,       kwsys_stl::vector<bool>);
-CommandLineArgumentsAddArgumentMacro(VECTOR_INT,        kwsys_stl::vector<int>);
-CommandLineArgumentsAddArgumentMacro(VECTOR_DOUBLE,     kwsys_stl::vector<double>);
-CommandLineArgumentsAddArgumentMacro(VECTOR_STRING,     kwsys_stl::vector<char*>);
-CommandLineArgumentsAddArgumentMacro(VECTOR_STL_STRING, kwsys_stl::vector<kwsys_stl::string>);
+CommandLineArgumentsAddArgumentMacro(VECTOR_BOOL,       kwsys_stl::vector<bool>)
+CommandLineArgumentsAddArgumentMacro(VECTOR_INT,        kwsys_stl::vector<int>)
+CommandLineArgumentsAddArgumentMacro(VECTOR_DOUBLE,     kwsys_stl::vector<double>)
+CommandLineArgumentsAddArgumentMacro(VECTOR_STRING,     kwsys_stl::vector<char*>)
+CommandLineArgumentsAddArgumentMacro(VECTOR_STL_STRING, kwsys_stl::vector<kwsys_stl::string>)
 
 //----------------------------------------------------------------------------
 #define CommandLineArgumentsAddBooleanArgumentMacro(type, ctype) \
@@ -449,11 +449,11 @@ CommandLineArgumentsAddArgumentMacro(VECTOR_STL_STRING, kwsys_stl::vector<kwsys_
       CommandLineArguments::type##_TYPE, variable, help); \
   }
 
-CommandLineArgumentsAddBooleanArgumentMacro(BOOL,       bool);
-CommandLineArgumentsAddBooleanArgumentMacro(INT,        int);
-CommandLineArgumentsAddBooleanArgumentMacro(DOUBLE,     double);
-CommandLineArgumentsAddBooleanArgumentMacro(STRING,     char*);
-CommandLineArgumentsAddBooleanArgumentMacro(STL_STRING, kwsys_stl::string);
+CommandLineArgumentsAddBooleanArgumentMacro(BOOL,       bool)
+CommandLineArgumentsAddBooleanArgumentMacro(INT,        int)
+CommandLineArgumentsAddBooleanArgumentMacro(DOUBLE,     double)
+CommandLineArgumentsAddBooleanArgumentMacro(STRING,     char*)
+CommandLineArgumentsAddBooleanArgumentMacro(STL_STRING, kwsys_stl::string)
 
 //----------------------------------------------------------------------------
 void CommandLineArguments::SetClientData(void* client_data)
