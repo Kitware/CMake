@@ -1,3 +1,5 @@
+SET(BEOS 1)
+
 # GCC is the default compiler on BeOS.
 INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)
 

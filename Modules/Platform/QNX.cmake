@@ -1,3 +1,5 @@
+SET(QNXNTO 1)
+
 # GCC is the default compiler on QNX 6.3.
 INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)
 

@@ -1912,23 +1912,16 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
 void cmMakefile::AddDefaultDefinitions()
 {
 #if defined(_WIN32) || defined(__CYGWIN__)
-  this->AddDefinition("WIN32", "1");
+  this->AddDefinition("CMAKE_HOST_WIN32", "1");
 #else
-  this->AddDefinition("UNIX", "1");
+  this->AddDefinition("CMAKE_HOST_UNIX", "1");
 #endif
   // Cygwin is more like unix so enable the unix commands
 #if defined(__CYGWIN__)
-  this->AddDefinition("UNIX", "1");
-  this->AddDefinition("CYGWIN", "1");
+  this->AddDefinition("CMAKE_HOST_UNIX", "1");
 #endif
 #if defined(__APPLE__)
-  this->AddDefinition("APPLE", "1");
-#endif
-#if defined(__QNXNTO__)
-  this->AddDefinition("QNXNTO", "1");
-#endif
-#if defined(__BEOS__)
-  this->AddDefinition("BEOS", "1");
+  this->AddDefinition("CMAKE_HOST_APPLE", "1");
 #endif
 
   char temp[1024];

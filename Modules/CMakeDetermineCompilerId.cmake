@@ -6,13 +6,13 @@
 MACRO(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # Store the compiler identification source file.
   SET(CMAKE_${lang}_COMPILER_ID_SRC "${src}")
-  IF(WIN32 AND NOT CYGWIN)
+  IF(CMAKE_HOST_WIN32 AND NOT CMAKE_HOST_CYGWIN)
     # This seems to escape spaces:
     #FILE(TO_NATIVE_PATH "${CMAKE_${lang}_COMPILER_ID_SRC}"
     #  CMAKE_${lang}_COMPILER_ID_SRC)
     STRING(REGEX REPLACE "/" "\\\\" CMAKE_${lang}_COMPILER_ID_SRC
       "${CMAKE_${lang}_COMPILER_ID_SRC}")
-  ENDIF(WIN32 AND NOT CYGWIN)
+  ENDIF(CMAKE_HOST_WIN32 AND NOT CMAKE_HOST_CYGWIN)
 
   # Make sure user-specified compiler flags are used.
   IF(CMAKE_${lang}_FLAGS)

@@ -1,3 +1,5 @@
+SET(UNIX 1)
+
 # also add the install directory of the running cmake to the search directories
 # CMAKE_ROOT is CMAKE_INSTALL_PREFIX/share/cmake, so we need to go two levels up
 GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${CMAKE_ROOT}" PATH)

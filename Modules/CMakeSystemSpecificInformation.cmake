@@ -3,6 +3,17 @@
 # It is included after the compiler has been determined, so
 # we know things like the compiler name and if the compiler is gnu.
 
+# before cmake 2.6 these variables were compiled-in in cmake
+# now they are set in the Modules/${CMAKE_SYSTEM_NAME}.cmake file
+# In order to keep custom language or compiler files working which might use
+# these variables, they are set to the value of the compiled-in variables in
+# CMakeDetermineSystem.cmake and reset here.
+SET(APPLE  )
+SET(UNIX   )
+SET(CYGWIN )
+SET(WIN32  )
+
+
 # include Generic system information
 INCLUDE(CMakeGenericSystem)
 
