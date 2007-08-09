@@ -2,6 +2,7 @@ INCLUDE(CheckCSourceCompiles)
 SET(EXTRA_DEFINES "__unused1\n#undef inline\n#define __unused2")
 SET(HEADER_INCLUDES)
 SET(headers_hack)
+
 MACRO(add_header_include check header)
   IF(${check})
     SET(headers_hack
@@ -11,6 +12,7 @@ MACRO(add_header_include check header)
     #  "${header}")
   ENDIF(${check})
 ENDMACRO(add_header_include)
+
 SET(signature_call_conv)
 IF(HAVE_WINDOWS_H)
   add_header_include(HAVE_WINDOWS_H "windows.h")
@@ -164,6 +166,7 @@ CHECK_C_SOURCE_COMPILES("int flag = MSG_NOSIGNAL" HAVE_MSG_NOSIGNAL)
 SET(EXTRA_DEFINES "__unused1\n#undef inline\n#define __unused2")
 SET(HEADER_INCLUDES)
 SET(headers_hack)
+
 MACRO(add_header_include check header)
   IF(${check})
     SET(headers_hack
@@ -173,6 +176,7 @@ MACRO(add_header_include check header)
     #  "${header}")
   ENDIF(${check})
 ENDMACRO(add_header_include header)
+
 IF(HAVE_WINDOWS_H)
   SET(EXTRA_DEFINES ${EXTRA_DEFINES}
     "__unused7\n#ifndef WIN32_LEAN_AND_MEAN\n#define WIN32_LEAN_AND_MEAN\n#endif\n#define __unused3")
@@ -238,6 +242,7 @@ ELSE(HAVE_WINDOWS_H)
       "arpa/inet.h")
   ENDIF(HAVE_ARPA_INET_H)
 ENDIF(HAVE_WINDOWS_H)
+
 CHECK_TYPE_SIZE("struct sockaddr_storage" SIZEOF_STRUCT_SOCKADDR_STORAGE)
 IF(HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE)
   SET(HAVE_STRUCT_SOCKADDR_STORAGE 1)
