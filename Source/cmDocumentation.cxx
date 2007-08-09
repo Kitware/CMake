@@ -566,14 +566,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
   return result;
 }
 
-#define GET_OPT_COMMAND(target)                       \
-     if((i+1 < argc) && !this->IsOption(argv[i+1]))   \
-        {                                             \
-        target = cmSystemTools::UpperCase(argv[i+1]); \
-        i = i+1;                                      \
-        };
-
-#define GET_OPT_FILENAME(target)                      \
+#define GET_OPT_ARGUMENT(target)                      \
      if((i+1 < argc) && !this->IsOption(argv[i+1]))   \
         {                                             \
         target = argv[i+1];                           \
@@ -629,7 +622,8 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
       {
       help.HelpType = cmDocumentation::Usage;
       help.HelpForm = cmDocumentation::UsageForm;
-      GET_OPT_COMMAND(help.Argument);
+      GET_OPT_ARGUMENT(help.Argument);
+      help.Argument = cmSystemTools::UpperCase(help.Argument);
       // special case for single command
       if (!help.Argument.empty())
         {
@@ -639,88 +633,89 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
     else if(strcmp(argv[i], "--help-properties") == 0)
       {
       help.HelpType = cmDocumentation::Properties;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-modules") == 0)
       {
       help.HelpType = cmDocumentation::Modules;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-commands") == 0)
       {
       help.HelpType = cmDocumentation::Commands;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-compatcommands") == 0)
       {
       help.HelpType = cmDocumentation::CompatCommands;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-full") == 0)
       {
       help.HelpType = cmDocumentation::Full;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-html") == 0)
       {
       help.HelpType = cmDocumentation::Full;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::HTMLForm;
       }
     else if(strcmp(argv[i], "--help-man") == 0)
       {
       help.HelpType = cmDocumentation::Full;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::ManForm;
       }
     else if(strcmp(argv[i], "--help-command") == 0)
       {
       help.HelpType = cmDocumentation::Single;
-      GET_OPT_COMMAND(help.Argument);
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Argument);
+      GET_OPT_ARGUMENT(help.Filename);
+      help.Argument = cmSystemTools::UpperCase(help.Argument);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-module") == 0)
       {
       help.HelpType = cmDocumentation::SingleModule;
-      GET_OPT_COMMAND(help.Argument);
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Argument);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-property") == 0)
       {
       help.HelpType = cmDocumentation::SingleProperty;
-      GET_OPT_COMMAND(help.Argument);
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Argument);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-command-list") == 0)
       {
       help.HelpType = cmDocumentation::List;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--help-module-list") == 0)
       {
       help.HelpType = cmDocumentation::ModuleList;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--help-property-list") == 0)
       {
       help.HelpType = cmDocumentation::PropertyList;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--copyright") == 0)
       {
       help.HelpType = cmDocumentation::Copyright;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::UsageForm;
       }
     else if((strcmp(argv[i], "--version") == 0) || 
@@ -728,7 +723,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
             (strcmp(argv[i], "/V") == 0))
       {
       help.HelpType = cmDocumentation::Version;
-      GET_OPT_FILENAME(help.Filename);
+      GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::UsageForm;
       }
     if(help.HelpType != None)
