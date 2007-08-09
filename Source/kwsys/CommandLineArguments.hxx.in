@@ -96,7 +96,7 @@ public:
   enum VariableTypeEnum {
     NO_VARIABLE_TYPE = 0, // The variable is not specified
     INT_TYPE,             // The variable is integer (int)
-    BOOL_TYPE,            // The vairable is boolean (bool)
+    BOOL_TYPE,            // The variable is boolean (bool)
     DOUBLE_TYPE,          // The variable is float (double)
     STRING_TYPE,          // The variable is string (char*)
     STL_STRING_TYPE,      // The variable is string (char*)
