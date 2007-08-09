@@ -17,7 +17,7 @@
 #ifndef cmGlobalMSYSMakefileGenerator_h
 #define cmGlobalMSYSMakefileGenerator_h
 
-#include "cmGlobalUNIXMakefileGenerator3.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 
 /** \class cmGlobalMSYSMakefileGenerator
  * \brief Write a NMake makefiles.

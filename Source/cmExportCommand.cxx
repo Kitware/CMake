@@ -179,7 +179,7 @@ bool cmExportCommand
 
       fout << "SET_TARGET_PROPERTIES(" << this->Prefix.GetString().c_str()
                                  << currentTarget->c_str() << " PROPERTIES \n"
-        << "                      LOCATION " << target->GetLocation(0) << "\n";
+        <<"                      LOCATION \""<< target->GetLocation(0)<<"\"\n";
       for(std::vector<std::string>::const_iterator
           currentConfig = configurationTypes.begin();
           currentConfig != configurationTypes.end();
@@ -191,7 +191,7 @@ bool cmExportCommand
           if (loc && *loc)
             {
             fout << "                      " << currentConfig->c_str()
-                                                << "_LOCATION " << loc << "\n";
+                                            << "_LOCATION \'" << loc << "\"\n";
             }
           }
         }

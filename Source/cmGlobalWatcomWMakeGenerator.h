@@ -17,7 +17,7 @@
 #ifndef cmGlobalWatcomWMakeGenerator_h
 #define cmGlobalWatcomWMakeGenerator_h
 
-#include "cmGlobalUNIXMakefileGenerator3.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 
 /** \class cmGlobalWatcomWMakeGenerator
  * \brief Write a NMake makefiles.
