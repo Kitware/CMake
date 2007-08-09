@@ -47,10 +47,10 @@ IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
 ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
 
 # Choose a default install prefix for this platform.
-IF(UNIX)
+IF(CMAKE_HOST_UNIX)
   SET(CMAKE_INSTALL_PREFIX "/usr/local"
     CACHE PATH "Install path prefix, prepended onto install directories.")
-ELSE(UNIX)
+ELSE(CMAKE_HOST_UNIX)
   IF("$ENV{ProgramFiles}" MATCHES "^$")
     IF("$ENV{SystemDrive}" MATCHES "^$")
       SET(CMAKE_GENERIC_PROGRAM_FILES "C:/Program Files")
@@ -68,7 +68,7 @@ ELSE(UNIX)
   # Make sure the prefix uses forward slashes.
   STRING(REGEX REPLACE "\\\\" "/"
     CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
-ENDIF(UNIX)
+ENDIF(CMAKE_HOST_UNIX)
 
 MARK_AS_ADVANCED(
   CMAKE_SKIP_RPATH
