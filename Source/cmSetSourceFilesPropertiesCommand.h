@@ -74,7 +74,10 @@ public:
         "only used by Makefiles).  "
         "OBJECT_DEPENDS (string) adds dependencies to the object file.  "
         "COMPILE_FLAGS (string) is passed to the compiler as additional "
-        "command line arguments when the source file is compiled.  "
+        "command line arguments when the source file is compiled.  " 
+        "LANGUAGE (string) CXX|C will change the default compiler used "
+        "to compile the source file. The languages used need to be enabled " 
+        "in the PROJECT command. "
         "If SYMBOLIC (boolean) is set to true the build system will be "
         "informed that the source file is not actually created on disk but "
         "instead used as a symbolic name for a build rule.";
