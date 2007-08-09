@@ -257,7 +257,7 @@ INCLUDE_DIRECTORIES(
 #
 # Sources for CTestLib
 #
-SET(CMTEST_SRCS cmCTest.cxx
+SET(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestBuildAndTestHandler.cxx
   CTest/cmCTestBuildCommand.cxx
   CTest/cmCTestBuildHandler.cxx
@@ -284,7 +284,7 @@ SET(CMTEST_SRCS cmCTest.cxx
   )
 
 # Build CTestLib
-ADD_LIBRARY(CTestLib ${CMTEST_SRCS})
+ADD_LIBRARY(CTestLib ${CTEST_SRCS})
 TARGET_LINK_LIBRARIES(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_LIBRARIES})
 
 #

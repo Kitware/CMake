@@ -1,7 +1,0 @@
-#ifndef __testconfig_h__
-#define __testconfig_h__
-
-#define LIBCURL_SOURCE_DIR "${LIBCURL_SOURCE_DIR}"
-#define LIBCURL_BINARY_DIR "${LIBCURL_BINARY_DIR}"
-
-#endif /* __testconfig_h__ */
