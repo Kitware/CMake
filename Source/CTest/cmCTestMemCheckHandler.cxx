@@ -202,6 +202,8 @@ cmCTestMemCheckHandler::cmCTestMemCheckHandler()
 void cmCTestMemCheckHandler::Initialize()
 {
   this->Superclass::Initialize();
+  this->CustomMaximumPassedTestOutputSize = 0;
+  this->CustomMaximumFailedTestOutputSize = 0;
   this->MemoryTester = "";
   this->MemoryTesterOptionsParsed.clear();
   this->MemoryTesterOptions = "";
@@ -695,8 +697,13 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   bool outputFull = false;
   for ( cc = 0; cc < lines.size(); cc ++ )
     {
+    cmCTestLog(this->CTest, DEBUG, "test line "
+               << lines[cc] << std::endl);
+
     if ( valgrindLine.find(lines[cc]) )
       {
+      cmCTestLog(this->CTest, DEBUG, "valgrind  line "
+                 << lines[cc] << std::endl);
       int failure = cmCTestMemCheckHandler::NO_MEMORY_FAULT;
       if ( vgFIM.find(lines[cc]) )
         {
@@ -761,16 +768,8 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
         results[failure] ++;
         defects ++;
         }
-      if(!outputFull)
-        {
-        totalOutputSize += lines[cc].size();
-        ostr << cmCTest::MakeXMLSafe(lines[cc]) << std::endl;
-        if(totalOutputSize > 
-           static_cast<size_t>(this->CustomMaximumFailedTestOutputSize))
-          {
-          outputFull = true;
-          }
-        }
+      totalOutputSize += lines[cc].size();
+      ostr << cmCTest::MakeXMLSafe(lines[cc]) << std::endl;
       } 
     else
       {
@@ -784,13 +783,18 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
           nonValGrindOutput.begin(); i != nonValGrindOutput.end(); ++i)
       {
       totalOutputSize += lines[*i].size();
+      cmCTestLog(this->CTest, DEBUG, "before xml safe "
+                 << lines[*i] << std::endl);
+      cmCTestLog(this->CTest, DEBUG, "after  xml safe "
+                 <<  cmCTest::MakeXMLSafe(lines[*i]) << std::endl);
+
       ostr << cmCTest::MakeXMLSafe(lines[*i]) << std::endl;
       if(!unlimitedOutput && totalOutputSize > 
          static_cast<size_t>(this->CustomMaximumFailedTestOutputSize))
         {
         outputFull = true;
         ostr << "....\n";
-        ostr << "Output for this test has been truncated see testing"
+        ostr << "Test Output for this test has been truncated see testing"
           " machine logs for full output,\n";
         ostr << "or put CTEST_FULL_OUTPUT in the output of "
           "this test program.\n";
