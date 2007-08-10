@@ -36,11 +36,31 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
   // CMAKE_CFG_INTDIR setting then the value is out of date.
   const char* intDir = 
     this->Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
-  if(cacheValue &&
+
+  bool haveCacheValue = false;
+  if (this->Makefile->IsOn("CMAKE_CROSSCOMPILING"))
+    {
+    haveCacheValue = (cacheValue != 0);
+    if (!haveCacheValue)
+      {
+      std::string msg = "UTILITY_SOURCE is used in cross compiling mode for ";
+      msg += cacheEntry;
+      msg += ". If your intention is to run this executable, you need to "
+            "preload the cache with the full path to a version of that "
+            "program, which runs on this build machine.";
+      cmSystemTools::Message(msg.c_str() ,"Warning");
+      }
+    }
+  else
+    {
+    haveCacheValue = (cacheValue &&
      (strstr(cacheValue, "(IntDir)") == 0 ||
       intDir && strcmp(intDir, "$(IntDir)") == 0) &&
      (this->Makefile->GetCacheMajorVersion() != 0 &&
-      this->Makefile->GetCacheMinorVersion() != 0 ))
+      this->Makefile->GetCacheMinorVersion() != 0 ));
+    }
+
+  if(haveCacheValue)
     {
     return true;
     }
