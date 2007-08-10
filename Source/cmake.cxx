@@ -2406,12 +2406,14 @@ int cmake::CheckBuildSystem()
     {
     genName = "Unix Makefiles";
     }
-  cmGlobalGenerator *ggd = this->CreateGlobalGenerator(genName);
-  if (ggd)
+  // this global generator is never set to the cmake object so it is never
+  // deleted, so make it an auto_ptr
+  std::auto_ptr<cmGlobalGenerator> ggd(this->CreateGlobalGenerator(genName));
+  if (ggd.get())
     {
     // Check the dependencies in case source files were removed.
     std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
-    lgd->SetGlobalGenerator(ggd);
+    lgd->SetGlobalGenerator(ggd.get());
     lgd->CheckDependencies(mf, verbose, this->ClearBuildSystem);
 
     // Check for multiple output pairs.
