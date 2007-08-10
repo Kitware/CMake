@@ -3,11 +3,11 @@
 # It is included after the compiler has been determined, so
 # we know things like the compiler name and if the compiler is gnu.
 
-# before cmake 2.6 these variables were compiled-in in cmake
-# now they are set in the Modules/${CMAKE_SYSTEM_NAME}.cmake file
-# In order to keep custom language or compiler files working which might use
-# these variables, they are set to the value of the compiled-in variables in
-# CMakeDetermineSystem.cmake and reset here.
+# before cmake 2.6 these variables were set in cmMakefile.cxx. This is still
+# done to keep scripts and custom language and compiler modules working.
+# But they are reset here and set again in the platform files for the target
+# platform, so they can be used for testing the target platform instead
+# of testing the host platform.
 SET(APPLE  )
 SET(UNIX   )
 SET(CYGWIN )

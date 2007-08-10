@@ -1911,16 +1911,31 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
  */
 void cmMakefile::AddDefaultDefinitions()
 {
+/* Up to CMake 2.4 here only WIN32, UNIX and APPLE were set.
+  With CMake must separate between target and host platform. In most cases
+  the tests for WIN32, UNIX and APPLE will be for the target system, so an 
+  additional set of variables for the host system is required ->
+  CMAKE_HOST_WIN32, CMAKE_HOST_UNIX, CMAKE_HOST_APPLE.
+  WIN32, UNIX and APPLE are now set in the platform files in 
+  Modules/Platforms/.
+  To keep cmake scripts (-P) and custom language and compiler modules
+  working, these variables are still also set here in this place, but they
+  will be reset in CMakeSystemSpecificInformation.cmake before the platform 
+  files are executed. */
 #if defined(_WIN32) || defined(__CYGWIN__)
+  this->AddDefinition("WIN32", "1");
   this->AddDefinition("CMAKE_HOST_WIN32", "1");
 #else
+  this->AddDefinition("UNIX", "1");
   this->AddDefinition("CMAKE_HOST_UNIX", "1");
 #endif
   // Cygwin is more like unix so enable the unix commands
 #if defined(__CYGWIN__)
+  this->AddDefinition("UNIX", "1");
   this->AddDefinition("CMAKE_HOST_UNIX", "1");
 #endif
 #if defined(__APPLE__)
+  this->AddDefinition("APPLE", "1");
   this->AddDefinition("CMAKE_HOST_APPLE", "1");
 #endif
 

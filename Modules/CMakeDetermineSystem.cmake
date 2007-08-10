@@ -60,19 +60,6 @@ ELSE(CMAKE_HOST_UNIX)
   ENDIF(CMAKE_HOST_WIN32)
 ENDIF(CMAKE_HOST_UNIX)
 
-# this is for compatibility
-# with cmake 2.4 these variables were compiled in
-# now that cmake has to separate between host and target platform
-# two sets are needed. For compatibility the old set of variables is here 
-# set to the compiled-in values, so they still work in custom
-# language or compiler modules where they might be used.
-# After that they are reset in CMakeSystemSpecificInformation.cmake
-# and then set according to the current target platform in the Modules/${CMAKE_SYSTEM_NAME}.cmake file
-SET(APPLE  ${CMAKE_HOST_APPLE})
-SET(UNIX   ${CMAKE_HOST_UNIX})
-SET(CYGWIN ${CMAKE_HOST_CYGWIN})
-SET(WIN32  ${CMAKE_HOST_WIN32})
-
 # if a toolchain file is used, the user wants to cross compile.
 # in this case read the toolchain file and keep the CMAKE_HOST_SYSTEM_*
 # variables around so they can be used in CMakeLists.txt. 
