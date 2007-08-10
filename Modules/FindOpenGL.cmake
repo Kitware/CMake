@@ -18,21 +18,11 @@
 IF (WIN32)
   IF (CYGWIN)
 
-    FIND_PATH(OPENGL_INCLUDE_DIR GL/gl.h
-      /usr/include
-      /usr/include/w32api
-      /usr/X11R6/include
-    )
+    FIND_PATH(OPENGL_INCLUDE_DIR GL/gl.h )
 
-    FIND_LIBRARY(OPENGL_gl_LIBRARY opengl32
-      /usr/lib
-      /usr/lib/w32api
-    )
+    FIND_LIBRARY(OPENGL_gl_LIBRARY opengl32 )
 
-    FIND_LIBRARY(OPENGL_glu_LIBRARY glu32
-      /usr/lib
-      /usr/lib/w32api
-    )
+    FIND_LIBRARY(OPENGL_glu_LIBRARY glu32 )
 
   ELSE (CYGWIN)
 
@@ -66,29 +56,20 @@ ELSE (WIN32)
 
     FIND_PATH(OPENGL_INCLUDE_DIR GL/gl.h
       /usr/share/doc/NVIDIA_GLX-1.0/include
-      /usr/include
-      /usr/local/include
       /usr/openwin/share/include
       /opt/graphics/OpenGL/include
-      /usr/X11R6/include
     )
 
     FIND_PATH(OPENGL_xmesa_INCLUDE_DIR GL/xmesa.h
       /usr/share/doc/NVIDIA_GLX-1.0/include
-      /usr/include
-      /usr/local/include
       /usr/openwin/share/include
       /opt/graphics/OpenGL/include
-      /usr/X11R6/include
     )
 
     FIND_LIBRARY(OPENGL_gl_LIBRARY
       NAMES GL MesaGL
-      PATHS /usr/lib
-            /usr/local/lib
-            /opt/graphics/OpenGL/lib
+      PATHS /opt/graphics/OpenGL/lib
             /usr/openwin/lib
-            /usr/X11R6/lib
             /usr/shlib
     )
 
@@ -111,11 +92,8 @@ ELSE (WIN32)
     FIND_LIBRARY(OPENGL_glu_LIBRARY
       NAMES GLU MesaGLU
       PATHS ${OPENGL_gl_LIBRARY}
-            /usr/lib
-            /usr/local/lib
             /opt/graphics/OpenGL/lib
             /usr/openwin/lib
-            /usr/X11R6/lib
             /usr/shlib
     )
 
