@@ -78,7 +78,7 @@ MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
     ELSE(HAVE_${VARIABLE})
       MESSAGE(STATUS "Check size of ${TYPE} - failed")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Determining size of ${TYPE} failed with the following output:\n${OUTPUT}\nCheckTypeSize.c:\n${CHECK_TYPE_SIZE_FILE_CONTENT}\n\n")
+        "Determining size of ${TYPE} failed with the following output:\n${OUTPUT}\nCheckTypeSizeC.c:\n${CHECK_TYPE_SIZE_FILE_CONTENT}\n\n")
       SET(${VARIABLE})
     ENDIF(HAVE_${VARIABLE})
     SET(${VARIABLE} "${${VARIABLE}}" CACHE INTERNAL "Result of CHECK_TYPE_SIZE" FORCE)
