@@ -390,10 +390,7 @@ void cmLocalVisualStudio6Generator
       i != this->Configurations.end(); ++i)
     {
     // Strip the subdirectory name out of the configuration name.
-    std::string config = *i;
-    std::string::size_type pos = config.find_last_of(" ");
-    config = config.substr(pos+1, std::string::npos);
-    config = config.substr(0, config.size()-1);
+    std::string config = this->GetConfigName(*i);
     if(config.size() > config_len_max)
       {
       config_len_max = config.size();
@@ -500,10 +497,7 @@ void cmLocalVisualStudio6Generator
           if(!objectNameDir.empty())
             {
             // Strip the subdirectory name out of the configuration name.
-            std::string config = *i;
-            std::string::size_type pos = config.find_last_of(" ");
-            config = config.substr(pos+1, std::string::npos);
-            config = config.substr(0, config.size()-1);
+            std::string config = this->GetConfigName(*i);
 
             // Setup an alternate object file directory.
             fout << "\n# PROP Intermediate_Dir \""
@@ -588,11 +582,11 @@ cmLocalVisualStudio6Generator
   std::vector<std::string>::iterator i;
   for(i = this->Configurations.begin(); i != this->Configurations.end(); ++i)
     {
-      
+    std::string config = this->GetConfigName(*i);
     std::string script =
       this->ConstructScript(command.GetCommandLines(), 
                             command.GetWorkingDirectory(),
-                            i->c_str(),
+                            config.c_str(),
                             command.GetEscapeOldStyle(),
                             command.GetEscapeAllowMakeVars(),
                             "\\\n\t");
@@ -617,7 +611,8 @@ cmLocalVisualStudio6Generator
         ++d)
       {
       // Lookup the real name of the dependency in case it is a CMake target.
-      std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
+      std::string dep = this->GetRealDependency(d->c_str(),
+                                                config.c_str());
       fout << "\\\n\t" <<
         this->ConvertToOptionallyRelativeOutputPath(dep.c_str());
       }
@@ -1584,4 +1579,16 @@ void cmLocalVisualStudio6Generator
   dir += "/";
   dir += this->GetGlobalGenerator()->GetCMakeCFGInitDirectory();
   dirs.push_back(dir);
+}
+
+std::string
+cmLocalVisualStudio6Generator
+::GetConfigName(std::string const& configuration) const
+{
+  // Strip the subdirectory name out of the configuration name.
+  std::string config = configuration;
+  std::string::size_type pos = config.find_last_of(" ");
+  config = config.substr(pos+1, std::string::npos);
+  config = config.substr(0, config.size()-1);
+  return config;
 }

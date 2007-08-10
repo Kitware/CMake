@@ -101,6 +101,8 @@ private:
                           std::string& options);
   std::string IncludeOptions;
   std::vector<std::string> Configurations;
+
+  std::string GetConfigName(std::string const& configuration) const;
 };
 
 #endif
