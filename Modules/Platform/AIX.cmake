@@ -57,3 +57,5 @@ ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
 #  SET(CMAKE_${type}_LINK_STATIC_C_FLAGS "-bstatic")
 #  SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-bdynamic")
 #ENDFOREACH(type)
+
+INCLUDE(Platform/UnixPaths)

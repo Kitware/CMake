@@ -1,7 +1,7 @@
 SET(QNXNTO 1)
 
 # GCC is the default compiler on QNX 6.3.
-INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)
+INCLUDE(Platform/gcc)
 
 # The QNX GCC does not seem to have -isystem so remove the flag.
 SET(CMAKE_INCLUDE_SYSTEM_FLAG_C)
@@ -29,3 +29,5 @@ ENDFOREACH(type)
 # force the language to be c++ since qnx only has gcc and not g++ and c++?
 SET(CMAKE_CXX_COMPILE_OBJECT
   "<CMAKE_CXX_COMPILER> -x c++ <FLAGS> -o <OBJECT> -c <SOURCE>")
+
+INCLUDE(Platform/UnixPaths)
