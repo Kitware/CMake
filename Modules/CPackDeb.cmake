@@ -37,7 +37,7 @@ IF(NOT DEBIAN_PACKAGE_ARCHITECTURE)
 # There is no such thing as i686 architecture on debian, you should use i386 instead
 # $ dpkg --print-architecture
   SET(DEBIAN_PACKAGE_ARCHITECTURE i386)
-ENDIF(NOT DEBIAN_PACAKGE_ARCHITECTURE)
+ENDIF(NOT DEBIAN_PACKAGE_ARCHITECTURE)
 
 # have a look at GET_PROPERTY(result GLOBAL ENABLED_FEATURES), this returns 
 # the successful FIND_PACKAGE() calls, maybe this can help
