@@ -89,7 +89,6 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
   this->CloseFileStreams();
 }
 
-
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
@@ -219,7 +218,6 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
 
-
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::CreateFrameworkLinksAndDirs(
   std::string& targetName,
@@ -255,113 +253,87 @@ void cmMakefileLibraryTargetGenerator::CreateFrameworkLinksAndDirs(
   cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
   this->Makefile->AddCMakeOutputFile((outpath + "Resources").c_str());
   // Libraries -> Versions/Current/Libraries
-  symlink = "Versions/Current/Libraries";
-  symlink2 = "Libraries";
-  cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
-  this->Makefile->AddCMakeOutputFile((outpath + "Libraries").c_str());
+  //symlink = "Versions/Current/Libraries";
+  //symlink2 = "Libraries";
+  //cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
+  //this->Makefile->AddCMakeOutputFile((outpath + "Libraries").c_str());
   // Headers -> Versions/Current/Headers
   symlink = "Versions/Current/Headers";
   symlink2 = "Headers";
   cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
   this->Makefile->AddCMakeOutputFile((outpath + "Headers").c_str());
+  symlink = "Versions/Current/PrivateHeaders";
+  symlink2 = "PrivateHeaders";
+  cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
+  this->Makefile->AddCMakeOutputFile((outpath + "PrivateHeaders").c_str());
   // go back to where we were
   cmSystemTools::ChangeDirectory(cwd.c_str());
 }
 
 //----------------------------------------------------------------------------
-void cmMakefileLibraryTargetGenerator::CopyFrameworkPublicHeaders(
+void cmMakefileLibraryTargetGenerator::CopyFrameworkSources(
   std::string& targetName,
   std::string& outpath,
-  const char* /*version*/)
+  const char* /*version*/ ,
+  const char* propertyName,
+  const char* subdir)
 {
   std::string fullOutput=  outpath + targetName;
-  const char* headers = this->Target->GetProperty("FRAMEWORK_PUBLIC_HEADERS");
-  if(!headers)
-    {
-    return;
-    }
-  std::vector<std::string> headersVec;
-  cmSystemTools::ExpandListArgument(headers,
-                                    headersVec);
   cmCustomCommandLines commandLines;
   std::vector<std::string> depends;
-  for(std::vector<std::string>::iterator i = headersVec.begin();
-      i != headersVec.end(); ++i)
-    {
-    cmCustomCommandLine line;
-    cmSourceFile* sf = this->Makefile->GetOrCreateSource(i->c_str());
-    std::string dest = outpath + "Headers/";
-    dest += cmSystemTools::GetFilenameName(sf->GetFullPath());
-    line.push_back("$(CMAKE_COMMAND)");
-    line.push_back("-E");
-    line.push_back("copy_if_different");
-    line.push_back(sf->GetFullPath());
-    depends.push_back(sf->GetFullPath());
-    line.push_back(dest);
-    commandLines.push_back(line);
-    // make sure the target gets rebuilt if any of the headers is removed
-    this->GenerateExtraOutput(dest.c_str(),
-                              fullOutput.c_str());
-    }
-  // add a set of prebuild commands to run on the target
-  this->Makefile->
-    AddCustomCommandToTarget(this->Target->GetName(),
-                             depends,
-                             commandLines,
-                             cmTarget::PRE_BUILD,
-                             "copy files",
-                             this->Makefile->GetCurrentOutputDirectory());
-}
+  const std::vector<cmSourceFile*>& sources =
+    this->Target->GetSourceFiles();
 
-//----------------------------------------------------------------------------
-void cmMakefileLibraryTargetGenerator::CopyFrameworkResources(
-  std::string& targetName,
-  std::string& outpath,
-  const char* /*version*/)
-{
-  std::string fullOutput=  outpath + targetName;
-  const char* resources = this->Target->GetProperty("FRAMEWORK_RESOURCES");
-  if(!resources)
+  for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
+      i != sources.end(); ++i)
     {
-    return;
-    }
-  std::vector<std::string> resourcesVec;
-  cmSystemTools::ExpandListArgument(resources,
-                                    resourcesVec);
-  cmCustomCommandLines commandLines;
-  std::vector<std::string> depends;
-  for(std::vector<std::string>::iterator i = resourcesVec.begin();
-      i != resourcesVec.end(); ++i)
-    {
-    cmCustomCommandLine line;
-    cmSourceFile* sf = this->Makefile->GetOrCreateSource(i->c_str());
+    cmSourceFile* sf = *i;
+
     if(!sf)
       {
       cmSystemTools::Error(
-        "could not find resource file.", i->c_str());
+        "could not find framework source file", "");
       continue;
       }
-    std::string dest = outpath + "Resources/";
-    dest += cmSystemTools::GetFilenameName(sf->GetFullPath());
-    line.push_back("$(CMAKE_COMMAND)");
-    line.push_back("-E");
-    line.push_back("copy_if_different");
-    line.push_back(sf->GetFullPath());
-    depends.push_back(sf->GetFullPath());
-    line.push_back(dest);
-    commandLines.push_back(line);
-    // make sure the target gets rebuilt if any of the resources is removed
-    this->GenerateExtraOutput(dest.c_str(),
-                              fullOutput.c_str());
+
+    // If processing public headers, skip headers also marked with the private
+    // property. Private wins.
+    //
+    if((std::string(propertyName) == "FRAMEWORK_PUBLIC_HEADER") &&
+      sf->GetPropertyAsBool("FRAMEWORK_PRIVATE_HEADER"))
+      {
+      continue;
+      }
+
+    if(sf->GetPropertyAsBool(propertyName))
+      {
+      cmCustomCommandLine line;
+      std::string dest = outpath + subdir + "/";
+      dest += cmSystemTools::GetFilenameName(sf->GetFullPath());
+      line.push_back("$(CMAKE_COMMAND)");
+      line.push_back("-E");
+      line.push_back("copy_if_different");
+      line.push_back(sf->GetFullPath());
+      depends.push_back(sf->GetFullPath());
+      line.push_back(dest);
+      commandLines.push_back(line);
+      // make sure the target gets rebuilt if any of the headers is removed
+      this->GenerateExtraOutput(dest.c_str(),
+                                fullOutput.c_str());
+      }
     }
+
   // add a set of prebuild commands to run on the target
-  this->Makefile->
-    AddCustomCommandToTarget(this->Target->GetName(),
-                             depends,
-                             commandLines,
-                             cmTarget::PRE_BUILD,
-                             "copy files",
-                             this->Makefile->GetCurrentOutputDirectory());
+  if(!commandLines.empty())
+    {
+    this->Makefile->
+      AddCustomCommandToTarget(this->Target->GetName(),
+                               depends,
+                               commandLines,
+                               cmTarget::PRE_BUILD,
+                               "copy files",
+                               this->Makefile->GetCurrentOutputDirectory());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -374,11 +346,11 @@ void cmMakefileLibraryTargetGenerator::CreateFramework(
   if(!version)
     {
     version = "A";
-    std::string message = 
-      "Warning: FRAMEWORK_VERSION property not found on ";
-    message += targetName;
-    message += ".  Default to verison A.";
-    cmSystemTools::Message(message.c_str());
+    //std::string message = 
+    //  "Warning: FRAMEWORK_VERSION property not found on ";
+    //message += targetName;
+    //message += ".  Default to version A.";
+    //cmSystemTools::Message(message.c_str());
     }
   // create the symbolic links and directories
   this->CreateFrameworkLinksAndDirs(targetName,
@@ -391,7 +363,7 @@ void cmMakefileLibraryTargetGenerator::CreateFramework(
   outpath += version;
   outpath += "/";
 
-  cmSystemTools::MakeDirectory((macdir + "Libraries").c_str());
+  //cmSystemTools::MakeDirectory((macdir + "Libraries").c_str());
   cmSystemTools::MakeDirectory((macdir + "Headers").c_str());
   // Configure the Info.plist file.  Note that it needs the executable name
   // to be set
@@ -409,12 +381,15 @@ void cmMakefileLibraryTargetGenerator::CreateFramework(
   std::string f2 = rsrcDir + "Info.plist";
   this->Makefile->ConfigureFile(f1.c_str(), f2.c_str(),
                                 false, false, false);
-  this->CopyFrameworkPublicHeaders(targetName,
-                                   outpath,
-                                   version);
-  this->CopyFrameworkResources(targetName,
-                               outpath,
-                               version);
+
+  this->CopyFrameworkSources(targetName, outpath, version,
+    "FRAMEWORK_PRIVATE_HEADER", "PrivateHeaders");
+
+  this->CopyFrameworkSources(targetName, outpath, version,
+    "FRAMEWORK_PUBLIC_HEADER", "Headers");
+
+  this->CopyFrameworkSources(targetName, outpath, version,
+    "FRAMEWORK_RESOURCE", "Resources");
 }
 
 //----------------------------------------------------------------------------

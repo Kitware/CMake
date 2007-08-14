@@ -38,16 +38,15 @@ protected:
   // MacOSX Framework support methods
   void WriteFrameworkRules(bool relink);
   void CreateFramework(std::string& targetName,
-                             std::string& outpath);
+                       std::string& outpath);
   void CreateFrameworkLinksAndDirs(std::string& targetName,
-                                         std::string& outpath,
-                                         const char* version);
-  void CopyFrameworkPublicHeaders(std::string& targetName,
-                         std::string& outpath,
-                         const char* version);
-  void CopyFrameworkResources(std::string& targetName,
-                         std::string& outpath,
-                         const char* version);
+                                   std::string& outpath,
+                                   const char* version);
+  void CopyFrameworkSources(std::string& targetName,
+                            std::string& outpath,
+                            const char* version,
+                            const char* propertyName,
+                            const char* subdir);
 };
 
 #endif
