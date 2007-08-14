@@ -1091,7 +1091,9 @@ bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
 
   fin.close();
   return true;
-#else  
+#else
+  (void)source;
+  (void)md5out;
   cmSystemTools::Message("md5sum not supported in bootstrapping mode","Error");
   return false;
 #endif
