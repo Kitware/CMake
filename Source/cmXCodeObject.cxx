@@ -17,6 +17,7 @@
 #include "cmXCodeObject.h"
 #include "cmSystemTools.h"
 
+//----------------------------------------------------------------------------
 const char* cmXCodeObject::PBXTypeNames[] = {
     "PBXGroup", "PBXBuildStyle", "PBXProject", "PBXHeadersBuildPhase", 
     "PBXSourcesBuildPhase", "PBXFrameworksBuildPhase", "PBXNativeTarget",
@@ -30,11 +31,11 @@ const char* cmXCodeObject::PBXTypeNames[] = {
     "None"
   };
 
+//----------------------------------------------------------------------------
 cmXCodeObject::~cmXCodeObject()
 {
   this->Version = 15;
 }
-
 
 //----------------------------------------------------------------------------
 cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
@@ -143,7 +144,33 @@ void cmXCodeObject::Print(std::ostream& out)
             object->ObjectAttributes.end(); ++j)
         {
         cmXCodeObject::Indent(4 *indentFactor, out);
-        out << j->first << " = " << j->second->String << ";";
+
+        if(j->second->TypeValue == STRING)
+          {
+          out << j->first << " = " << j->second->String << ";";
+          }
+        else if(j->second->TypeValue == OBJECT_LIST)
+          {
+          out << j->first << " = (";
+          for(unsigned int k = 0; k < j->second->List.size(); k++)
+            {
+            if(j->second->List[k]->TypeValue == STRING)
+              {
+              out << j->second->List[k]->String << ", ";
+              }
+            else
+              {
+              out << "List_" << k << "_TypeValue_IS_NOT_STRING, ";
+              }
+            }
+          out << ");";
+          }
+        else
+          {
+          out << j->first << " = error_unexpected_TypeValue_" <<
+            j->second->TypeValue << ";";
+          }
+
         out << separator;
         }
       cmXCodeObject::Indent(3 *indentFactor, out);
@@ -189,7 +216,7 @@ void cmXCodeObject::PrintList(std::vector<cmXCodeObject*> const& objs,
   out << "};\n";
 }
 
-
+//----------------------------------------------------------------------------
 void cmXCodeObject::CopyAttributes(cmXCodeObject* copy)
 {
   this->ObjectAttributes = copy->ObjectAttributes;
@@ -198,6 +225,7 @@ void cmXCodeObject::CopyAttributes(cmXCodeObject* copy)
   this->Object = copy->Object;
 }
 
+//----------------------------------------------------------------------------
 void cmXCodeObject::SetString(const char* s)
 {
   std::string ss = s;

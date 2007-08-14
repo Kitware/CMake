@@ -1704,19 +1704,26 @@ cmLocalUnixMakefileGenerator3
     target.GetExecutableNames(targetName, targetNameReal, targetNameImport,
                               targetNamePDB, this->ConfigurationName.c_str());
     std::string obj;
+
+    // Construct the full path version of the names.
+    //
+    // If target is a MACOSX_BUNDLE target, then the package location is
+    // relative to "${targetDir}/${targetName}.app/Contents"... else it is
+    // relative to "${targetDir}"...
+    //
+    obj = target.GetDirectory();
+    obj += "/";
     if ( target.GetPropertyAsBool("MACOSX_BUNDLE") )
       {
-      // Construct the full path version of the names.
-      obj = target.GetDirectory();
-      obj += "/";
       obj += targetName + ".app/Contents/";
-      obj += fileTargetDirectory;
       }
     else
       {
-      // Framework not handled yet
-      abort();
+      // Emit warning here...? MACOSX_PACKAGE_LOCATION is "most useful" in a
+      // MACOSX_BUNDLE...
       }
+    obj += fileTargetDirectory;
+
     obj = cmSystemTools::RelativePath
       (this->Makefile->GetHomeOutputDirectory(), obj.c_str());
     obj += "/";

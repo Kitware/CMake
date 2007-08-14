@@ -65,9 +65,6 @@ public:
                                            const char* config, 
                                            bool ignoreErrors,
                                            bool fast);
-  
-  // add extra build phases for a framework target
-  void AddFrameworkPhases(cmTarget*, cmXCodeObject* buildPhases);
 
   /**
    * Generate the all required files for building this project/tree. This
@@ -101,9 +98,11 @@ private:
   void CreateCustomCommands(cmXCodeObject* buildPhases,
                             cmXCodeObject* sourceBuildPhase,
                             cmXCodeObject* headerBuildPhase,
+                            cmXCodeObject* resourceBuildPhase,
+                            std::vector<cmXCodeObject*> contentBuildPhases,
                             cmXCodeObject* frameworkBuildPhase,
                             cmTarget& cmtarget);
-  
+
   void AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                cmTarget& target,
                                std::vector<cmCustomCommand> 
@@ -184,6 +183,7 @@ protected:
 private:
   cmXCodeObject* MainGroupChildren;
   cmXCodeObject* SourcesGroupChildren;
+  cmXCodeObject* ResourcesGroupChildren;
   cmMakefile* CurrentMakefile;
   cmLocalGenerator* CurrentLocalGenerator;
   std::vector<std::string> CurrentConfigurationTypes;
@@ -193,9 +193,10 @@ private:
   std::set<cmStdString> TargetDoneSet;
   std::vector<std::string> CurrentOutputDirectoryComponents;
   std::vector<std::string> ProjectOutputDirectoryComponents;
-  std::map<cmSourceFile*, cmXCodeObject* > GroupMap;
+  std::map<cmStdString, cmXCodeObject* > GroupMap;
   std::map<cmStdString, cmXCodeObject* > GroupNameMap;
   std::map<cmStdString, cmXCodeObject* > TargetGroup;
+  std::map<cmStdString, cmXCodeObject* > FileRefs;
   std::vector<std::string> Architectures;
 };
 

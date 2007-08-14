@@ -17,6 +17,7 @@
 #include "cmGlobalXCode21Generator.h"
 #include "cmXCode21Object.h"
 
+//----------------------------------------------------------------------------
 cmGlobalXCode21Generator::cmGlobalXCode21Generator()
 {
   this->XcodeVersion = 21;
