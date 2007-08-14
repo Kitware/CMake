@@ -12,13 +12,6 @@ IF(NOT UNIX)
   MESSAGE(FATAL_ERROR "CPackDeb.cmake may only be used under UNIX.")
 ENDIF(NOT UNIX)
 
-FIND_PROGRAM(AR_EXECUTABLE ar)
-
-IF(NOT AR_EXECUTABLE)
-  # Is there a *NIX out there without ar ?
-  MESSAGE(FATAL_ERROR "Debian package requires ar executable")
-ENDIF(NOT AR_EXECUTABLE)
-
 # Let's define the control file found in debian package:
 
 # Binary package:

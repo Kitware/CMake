@@ -295,18 +295,34 @@ SET(CPACK_SRCS
   CPack/cmCPackGenericGenerator.cxx
   CPack/cmCPackLog.cxx
   CPack/cmCPackNSISGenerator.cxx
-  CPack/cmCPackOSXX11Generator.cxx
-  CPack/cmCPackPackageMakerGenerator.cxx
   CPack/cmCPackSTGZGenerator.cxx
   CPack/cmCPackTGZGenerator.cxx
   CPack/cmCPackTarBZip2Generator.cxx
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
-  CPack/cmCPackCygwinBinaryGenerator.cxx
-  CPack/cmCPackCygwinSourceGenerator.cxx
-  CPack/cmCPackDebGenerator.cxx
-  CPack/cmCPackRPMGenerator.cxx
   )
+
+IF(WIN32 AND UNIX)
+  SET(CPACK_SRCS ${CPACK_SRCS}
+    CPack/cmCPackCygwinBinaryGenerator.cxx
+    CPack/cmCPackCygwinSourceGenerator.cxx
+    )
+ENDIF(WIN32 AND UNIX)
+  
+IF(UNIX)
+  SET(CPACK_SRCS ${CPACK_SRCS}
+    CPack/cmCPackDebGenerator.cxx
+    CPack/cmCPackRPMGenerator.cxx
+    )
+ENDIF(UNIX)
+
+IF(APPLE)
+  SET(CPACK_SRCS ${CPACK_SRCS}
+    CPack/cmCPackOSXX11Generator.cxx
+    CPack/cmCPackPackageMakerGenerator.cxx
+    )
+ENDIF(APPLE)
+
 # Build CPackLib
 ADD_LIBRARY(CPackLib ${CPACK_SRCS})
 TARGET_LINK_LIBRARIES(CPackLib CMakeLib)
