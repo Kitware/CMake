@@ -24,7 +24,12 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
 
-
+// NOTE:
+// A debian package .deb is simply an 'ar' archive. The only subtle difference
+// is that debian uses the BSD ar style archive whereas most Linux distro have
+// a GNU ar.
+// See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=161593 for more info
+// Therefore we provide our own implementation of a BSD-ar:
 static int ar_append(const char*archive,const std::vector<std::string>& files);
 
 //----------------------------------------------------------------------
@@ -97,7 +102,6 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
       }
     out << "Maintainer: " << maintainer << "\n";
     out << "Description: " << desc << "\n";
-    out << " " << debian_pkg_name << " was packaged by CMake.\n";
     out << std::endl;
     }
 
