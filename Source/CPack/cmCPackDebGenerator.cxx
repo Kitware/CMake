@@ -329,7 +329,8 @@ static int copy_ar(CF *cfp, off_t size)
   FILE* from = cfp->rFile;
   FILE* to = cfp->wFile;
   while (sz && 
-        (nr = fread(buf, 1, sz < sizeof(buf) ? sz : sizeof(buf), from )) > 0) {
+        (nr = fread(buf, 1, sz < off_t(sizeof(buf)) ? sz : sizeof(buf), from ))
+               > 0) {
     sz -= nr;
     for (int off = 0; off < nr; nr -= off, off += nw)
       if ((nw = fwrite(buf + off, 1, nr, to)) < 0)
