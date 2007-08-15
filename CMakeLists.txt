@@ -317,6 +317,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Use curses?
   IF (UNIX)
+    SET(CURSES_NEED_NCURSES TRUE)
     FIND_PACKAGE(Curses QUIET)
     IF (CURSES_LIBRARY)
       OPTION(BUILD_CursesDialog "Build the CMake Curses Dialog ccmake" ON)
