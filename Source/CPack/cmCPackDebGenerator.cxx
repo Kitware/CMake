@@ -369,15 +369,14 @@ static int put_arobj(CF *cfp, struct stat *sb)
     gid = USHRT_MAX;
     }
   if (lname > sizeof(hdr->ar_name) || strchr(name, ' '))
-    (void)snprintf(ar_hb, sizeof(ar_hb),
-      HDR1, AR_EFMT1, lname,
-      (long int)sb->st_mtime, uid, gid, sb->st_mode,
-      sb->st_size + lname, ARFMAG);
+    (void)sprintf(ar_hb, HDR1, AR_EFMT1, lname,
+                  (long int)sb->st_mtime, uid, gid, sb->st_mode,
+                  (long long)sb->st_size + lname, ARFMAG);
     else {
       lname = 0;
-      (void)snprintf(ar_hb, sizeof(ar_hb),
-        HDR2, name, (long int)sb->st_mtime,
-                    uid, gid, sb->st_mode, sb->st_size, ARFMAG);
+      (void)sprintf(ar_hb, HDR2, name, 
+                    (long int)sb->st_mtime, uid, gid, sb->st_mode, 
+                    (long long)sb->st_size, ARFMAG);
       }
     off_t size = sb->st_size;
 
