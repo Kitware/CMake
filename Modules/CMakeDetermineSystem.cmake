@@ -73,9 +73,10 @@ IF(CMAKE_TOOLCHAIN_FILE)
   ENDIF(NOT _INCLUDED_TOOLCHAIN_FILE)
 
   IF(_INCLUDED_TOOLCHAIN_FILE)
-    SET(CMAKE_TOOLCHAIN_FILE "${_INCLUDED_TOOLCHAIN_FILE}")
+    SET(CMAKE_TOOLCHAIN_FILE "${_INCLUDED_TOOLCHAIN_FILE}" CACHE FILEPATH "The CMake toolchain file" FORCE)
   ELSE(_INCLUDED_TOOLCHAIN_FILE)
     MESSAGE(FATAL_ERROR "Could not find toolchain file: ${CMAKE_TOOLCHAIN_FILE}") 
+    SET(CMAKE_TOOLCHAIN_FILE "NOTFOUND" CACHE FILEPATH "The CMake toolchain file" FORCE)
   ENDIF(_INCLUDED_TOOLCHAIN_FILE)
 ENDIF(CMAKE_TOOLCHAIN_FILE)
 
@@ -138,26 +139,16 @@ IF(CMAKE_BINARY_DIR)
                 "The system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
   ENDIF(PRESET_CMAKE_SYSTEM_NAME)
 
+  # if a toolchain file is used, it needs to be included in the configured file,
+  # so settings done there are also available if they don't go in the cache and in TRY_COMPILE()
+  SET(INCLUDE_CMAKE_TOOLCHAIN_FILE_IF_REQUIRED)
+  IF(DEFINED CMAKE_TOOLCHAIN_FILE)
+    SET(INCLUDE_CMAKE_TOOLCHAIN_FILE_IF_REQUIRED "INCLUDE(\"${CMAKE_TOOLCHAIN_FILE}\")")
+  ENDIF(DEFINED CMAKE_TOOLCHAIN_FILE)
 
-  # if a toolchain file is used use configure_file() to copy it into the 
-  # build tree, because this way e.g. ${CMAKE_SOURCE_DIR} will be replaced
-  # with its full path, and so it will also work when used in try_compile()
-  IF (CMAKE_TOOLCHAIN_FILE)
-
-    SET(_OWN_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY})
-    CONFIGURE_FILE(${CMAKE_TOOLCHAIN_FILE}
-                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeToolchainFile.cmake)
-
-    CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystemWithToolchainFile.cmake.in
+  # configure variables set in this file for fast reload, the template file is defined at the top of this file
+  CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in
                 ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
                 IMMEDIATE @ONLY)
-  ELSE (CMAKE_TOOLCHAIN_FILE)
-
-    # configure variables set in this file for fast reload, the template file is defined at the top of this file
-    CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in
-                  ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
-                  IMMEDIATE @ONLY)
-
-  ENDIF (CMAKE_TOOLCHAIN_FILE)
 
 ENDIF(CMAKE_BINARY_DIR)
