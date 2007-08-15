@@ -67,11 +67,13 @@ SET(result andy bill bob brad ken peter)
 LIST(REMOVE_AT result 2 -1)
 TEST("REMOVE_AT result 2 -1" "andy;bill;brad;ken")
 
-LIST(CONTAINS mylist ken result)
-TEST("CONTAINS mylist ken result" "TRUE")
+# ken is at index 2, nobody is not in the list so -1 should be returned
+SET(mylist andy bill ken brad)
+LIST(FIND mylist ken result)
+TEST("FIND mylist ken result" "2")
 
-LIST(CONTAINS mylist nobody result)
-TEST("CONTAINS mylist nobody result" "FALSE")
+LIST(FIND mylist nobody result)
+TEST("FIND mylist nobody result" "-1")
 
 SET(result ken bill andy brad)
 LIST(SORT result)

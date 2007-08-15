@@ -42,9 +42,9 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleAppendCommand(args);
     }
-  if(subCommand == "CONTAINS")
+  if(subCommand == "FIND")
     {
-    return this->HandleContainsCommand(args);
+    return this->HandleFindCommand(args);
     }
   if(subCommand == "INSERT")
     {
@@ -204,11 +204,11 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmListCommand::HandleContainsCommand(std::vector<std::string> const& args)
+bool cmListCommand::HandleFindCommand(std::vector<std::string> const& args)
 {
   if(args.size() != 4)
     {
-    this->SetError("sub-command CONTAINS requires three arguments.");
+    this->SetError("sub-command FIND requires three arguments.");
     return false;
     }
 
@@ -218,21 +218,25 @@ bool cmListCommand::HandleContainsCommand(std::vector<std::string> const& args)
   std::vector<std::string> varArgsExpanded;
   if ( !this->GetList(varArgsExpanded, listName.c_str()) )
     {
-    this->Makefile->AddDefinition(variableName.c_str(), "FALSE");
+    this->Makefile->AddDefinition(variableName.c_str(), "-1");
     return true;
     }
 
   std::vector<std::string>::iterator it;
+  unsigned int index = 0;
   for ( it = varArgsExpanded.begin(); it != varArgsExpanded.end(); ++ it )
     {
     if ( *it == args[2] )
       {
-      this->Makefile->AddDefinition(variableName.c_str(), "TRUE");
+      char indexString[32];
+      sprintf(indexString, "%d", index);
+      this->Makefile->AddDefinition(variableName.c_str(), indexString);
       return true;
       }
+    index++;
     }
 
-  this->Makefile->AddDefinition(variableName.c_str(), "FALSE");
+  this->Makefile->AddDefinition(variableName.c_str(), "-1");
   return true;
 }
 
