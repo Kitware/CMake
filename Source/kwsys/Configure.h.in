@@ -25,9 +25,15 @@
 /* If we are building a kwsys .c or .cxx file, suppress the Microsoft
    deprecation warnings.  */
 #if defined(KWSYS_NAMESPACE)
-# define _CRT_SECURE_NO_DEPRECATE
-# define _CRT_NONSTDC_NO_DEPRECATE
-# define _SCL_SECURE_NO_DEPRECATE
+# ifndef _CRT_NONSTDC_NO_DEPRECATE
+#  define _CRT_NONSTDC_NO_DEPRECATE
+# endif
+# ifndef _CRT_SECURE_NO_DEPRECATE
+#  define _CRT_SECURE_NO_DEPRECATE
+# endif
+# ifndef _SCL_SECURE_NO_DEPRECATE
+#  define _SCL_SECURE_NO_DEPRECATE
+# endif
 #endif
 
 /* Whether Large File Support is requested.  */
