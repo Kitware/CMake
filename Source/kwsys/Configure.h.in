@@ -22,6 +22,14 @@
 # define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
 
+/* If we are building a kwsys .c or .cxx file, suppress the Microsoft
+   deprecation warnings.  */
+#if defined(KWSYS_NAMESPACE)
+# define _CRT_SECURE_NO_DEPRECATE
+# define _CRT_NONSTDC_NO_DEPRECATE
+# define _SCL_SECURE_NO_DEPRECATE
+#endif
+
 /* Whether Large File Support is requested.  */
 #define @KWSYS_NAMESPACE@_LFS_REQUESTED @KWSYS_LFS_REQUESTED@
 
