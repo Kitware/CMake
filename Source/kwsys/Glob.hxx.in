@@ -90,6 +90,10 @@ protected:
   GlobInternals* Internals;
   bool Recurse;
   kwsys_stl::string Relative;
+
+private:
+  Glob(const Glob&);  // Not implemented.
+  void operator=(const Glob&);  // Not implemented.
 };
 
 } // namespace @KWSYS_NAMESPACE@

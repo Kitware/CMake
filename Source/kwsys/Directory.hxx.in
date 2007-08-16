@@ -72,6 +72,9 @@ public:
 private:
   // Private implementation details.
   DirectoryInternals* Internal;
+
+  Directory(const Directory&);  // Not implemented.
+  void operator=(const Directory&);  // Not implemented.
 }; // End Class: Directory
 
 } // namespace @KWSYS_NAMESPACE@
