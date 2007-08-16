@@ -27,6 +27,8 @@
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
+// workaround against Windows name mangling:
+#undef GetCurrentDirectory
 #endif
 
 #include <assert.h>
