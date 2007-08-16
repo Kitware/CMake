@@ -3,6 +3,7 @@ ExpectedBuilds: \
 {ARRAKIS.kitware Win32-cygwin} \
 {ARRAKIS.kitware Win32-mingw} \
 {dash1win64.kitware Win64-vs80} \
+{dash1win98.kitware Win32-vs60} \
 {DASH1.kitware Win32-nmake71} \
 {DASH1.kitware Win32-vs71Rel} \
 {DASH1.kitware Win32-vs71} \
