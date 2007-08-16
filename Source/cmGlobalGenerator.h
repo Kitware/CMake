@@ -229,6 +229,7 @@ protected:
   // Fill the ProjectMap, this must be called after LocalGenerators 
   // has been populated.
   void FillProjectMap();
+  void CheckLocalGenerators();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
   bool IsExcluded(cmLocalGenerator* root, cmTarget& target);
   void FillLocalGeneratorToTargetMap();

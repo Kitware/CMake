@@ -716,67 +716,10 @@ void cmGlobalGenerator::Configure()
     ("CMAKE_NUMBER_OF_LOCAL_GENERATORS", num,
      "number of local generators", cmCacheManager::INTERNAL);
 
-  std::set<cmStdString> notFoundMap;
-  // after it is all done do a ConfigureFinalPass
-  cmCacheManager* manager = 0;
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    manager = this->LocalGenerators[i]->GetMakefile()->GetCacheManager();
-    this->LocalGenerators[i]->ConfigureFinalPass();
-    cmTargets & targets =
-      this->LocalGenerators[i]->GetMakefile()->GetTargets();
-    for (cmTargets::iterator l = targets.begin();
-         l != targets.end(); l++)
-      {
-      cmTarget::LinkLibraryVectorType libs = l->second.GetLinkLibraries();
-      for(cmTarget::LinkLibraryVectorType::iterator lib = libs.begin();
-          lib != libs.end(); ++lib)
-        {
-        if(lib->first.size() > 9 &&
-           cmSystemTools::IsNOTFOUND(lib->first.c_str()))
-          {
-          std::string varName = lib->first.substr(0, lib->first.size()-9);
-          notFoundMap.insert(varName);
-          }
-        }
-      std::vector<std::string>& incs =
-        this->LocalGenerators[i]->GetMakefile()->GetIncludeDirectories();
+  // check for link libraries and include directories containing "NOTFOUND"
+  // and for infinite loops
+  this->CheckLocalGenerators();
 
-      for( std::vector<std::string>::iterator lib = incs.begin();
-           lib != incs.end(); ++lib)
-        {
-        if(lib->size() > 9 &&
-           cmSystemTools::IsNOTFOUND(lib->c_str()))
-          {
-          std::string varName = lib->substr(0, lib->size()-9);
-          notFoundMap.insert(varName);
-          }
-        }
-      this->CMakeInstance->UpdateProgress
-        ("Configuring", 0.9f+0.1f*(i+1.0f)/this->LocalGenerators.size());
-      this->LocalGenerators[i]->GetMakefile()->CheckInfiniteLoops();
-      }
-    }
-
-  if(notFoundMap.size())
-    {
-    std::string notFoundVars;
-    for(std::set<cmStdString>::iterator ii = notFoundMap.begin();
-        ii != notFoundMap.end(); ++ii)
-      {
-      notFoundVars += *ii;
-      if(manager)
-        {
-        cmCacheManager::CacheIterator it =
-          manager->GetCacheIterator(ii->c_str());
-        if(it.GetPropertyAsBool("ADVANCED"))
-          {
-          notFoundVars += " (ADVANCED)";
-          }
-        }
-      notFoundVars += "\n";
-      }
-    }
   // at this point this->LocalGenerators has been filled,
   // so create the map from project name to vector of local generators
   this->FillProjectMap();
@@ -861,6 +804,91 @@ void cmGlobalGenerator::Generate()
     }
 
   this->CMakeInstance->UpdateProgress("Generating done", -1);
+}
+
+void cmGlobalGenerator::CheckLocalGenerators()
+{
+  std::map<cmStdString, cmStdString> notFoundMap;
+//  std::set<cmStdString> notFoundMap;
+  // after it is all done do a ConfigureFinalPass
+  cmCacheManager* manager = 0;
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    manager = this->LocalGenerators[i]->GetMakefile()->GetCacheManager();
+    this->LocalGenerators[i]->ConfigureFinalPass();
+    const cmTargets & targets =
+      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    for (cmTargets::const_iterator l = targets.begin();
+         l != targets.end(); l++)
+      {
+      const cmTarget::LinkLibraryVectorType& libs=l->second.GetLinkLibraries();
+      for(cmTarget::LinkLibraryVectorType::const_iterator lib = libs.begin();
+          lib != libs.end(); ++lib)
+        {
+        if(lib->first.size() > 9 &&
+           cmSystemTools::IsNOTFOUND(lib->first.c_str()))
+          {
+          std::string varName = lib->first.substr(0, lib->first.size()-9);
+          cmCacheManager::CacheIterator it =
+            manager->GetCacheIterator(varName.c_str());
+          if(it.GetPropertyAsBool("ADVANCED"))
+            {
+            varName += " (ADVANCED)";
+            }
+          std::string text = notFoundMap[varName];
+          text += "\n    linked by target \"";
+          text += l->second.GetName();
+          text += "\" in directory ";
+          text+=this->LocalGenerators[i]->GetMakefile()->GetCurrentDirectory();
+          notFoundMap[varName] = text;
+          }
+        }
+      }
+    const std::vector<std::string>& incs =
+      this->LocalGenerators[i]->GetMakefile()->GetIncludeDirectories();
+
+    for( std::vector<std::string>::const_iterator incDir = incs.begin();
+          incDir != incs.end(); ++incDir)
+      {
+      if(incDir->size() > 9 &&
+          cmSystemTools::IsNOTFOUND(incDir->c_str()))
+        {
+        std::string varName = incDir->substr(0, incDir->size()-9);
+        cmCacheManager::CacheIterator it =
+          manager->GetCacheIterator(varName.c_str());
+        if(it.GetPropertyAsBool("ADVANCED"))
+          {
+          varName += " (ADVANCED)";
+          }
+        std::string text = notFoundMap[varName];
+        text += "\n   used as include directory in directory ";
+        text += this->LocalGenerators[i]->GetMakefile()->GetCurrentDirectory();
+        notFoundMap[varName] = text;
+        }
+      }
+    this->CMakeInstance->UpdateProgress
+      ("Configuring", 0.9f+0.1f*(i+1.0f)/this->LocalGenerators.size());
+    this->LocalGenerators[i]->GetMakefile()->CheckInfiniteLoops();
+    }
+
+  if(notFoundMap.size())
+    {
+    std::string notFoundVars;
+    for(std::map<cmStdString, cmStdString>::const_iterator 
+        ii = notFoundMap.begin();
+        ii != notFoundMap.end(); 
+        ++ii)
+      {
+      notFoundVars += ii->first;
+      notFoundVars += ii->second;
+      notFoundVars += "\n";
+      }
+    cmSystemTools::Error("The following variables are used in this project, "
+                         "but they are set to NOTFOUND.\n"
+                         "Please set them or make sure they are set and "
+                         "tested correctly in the CMake files:\n",
+                         notFoundVars.c_str());
+    }
 }
 
 int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
