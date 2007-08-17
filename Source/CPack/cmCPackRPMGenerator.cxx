@@ -68,9 +68,3 @@ int cmCPackRPMGenerator::CompressFiles(const char* /*outFileName*/,
 }
 
 
-//----------------------------------------------------------------------
-int cmCPackRPMGenerator::InitializeInternal()
-{
-  return this->Superclass::InitializeInternal();
-}
-
