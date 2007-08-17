@@ -68,26 +68,29 @@ private:
     EclipseToolchainSolaris,
     EclipseToolchainMacOSX
     };
-  EclipseToolchainType GetToolChainType(const cmMakefile& makefile) const;
+  static EclipseToolchainType GetToolChainType(const cmMakefile& makefile);
 
   // If built with cygwin cmake, convert posix to windows path.
-  std::string GetEclipsePath(const std::string& path) const;
-  
+  static std::string GetEclipsePath(const std::string& path);
+
+  // Extract basename.
+  static std::string GetPathBasename(const std::string& path);
+
   // Helper functions
-  void AppendStorageScanners(cmGeneratedFileStream& fout,
-                             const cmMakefile&      makefile) const;
-  void AppendTarget         (cmGeneratedFileStream& fout,
-                             const std::string&     target) const;
-  void AppendScannerProfile (cmGeneratedFileStream& fout,
-                             const std::string&     profileID,
-                             bool                   openActionEnabled,
-                             const std::string&     openActionFilePath,
-                             bool                   pParserEnabled,
-                             const std::string&     scannerInfoProviderID,
-                             const std::string&     runActionArguments,
-                             const std::string&     runActionCommand,
-                             bool                   runActionUseDefault,
-                             bool                   sipParserEnabled) const;
+  static void AppendStorageScanners(cmGeneratedFileStream& fout);
+  static void AppendTarget         (cmGeneratedFileStream& fout,
+                                    const std::string&     target,
+                                    const std::string&     make);
+  static void AppendScannerProfile (cmGeneratedFileStream& fout,
+                                    const std::string&   profileID,
+                                    bool                 openActionEnabled,
+                                    const std::string&   openActionFilePath,
+                                    bool                 pParserEnabled,
+                                    const std::string&   scannerInfoProviderID,
+                                    const std::string&   runActionArguments,
+                                    const std::string&   runActionCommand,
+                                    bool                 runActionUseDefault,
+                                    bool                 sipParserEnabled);
 };
 
 #endif

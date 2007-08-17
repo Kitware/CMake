@@ -25,15 +25,18 @@
 #include "cmTarget.h"
 
 #include "cmSystemTools.h"
+#include <stdlib.h>
 
 //----------------------------------------------------------------------------
 cmExtraEclipseCDT4Generator
 ::cmExtraEclipseCDT4Generator() : cmExternalMakefileProjectGenerator()
 {
+// TODO: Verify if __CYGWIN__ should be checked.
+//#if defined(_WIN32) && !defined(__CYGWIN__)
 #if defined(_WIN32)
   this->SupportedGlobalGenerators.push_back("NMake Makefiles");
+  this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
-//  this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
 #endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
 }
@@ -81,8 +84,9 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
   const cmMakefile* mf
     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
 
-  std::string filename = mf->GetStartOutputDirectory();
-  filename = filename + "/" + ".project";
+  const std::string homeDirectory(mf->GetHomeDirectory());
+  const std::string homeOutputDirectory(mf->GetHomeOutputDirectory());
+  const std::string filename = homeOutputDirectory + "/.project";
 
   cmGeneratedFileStream fout(filename.c_str());
   if (!fout)
@@ -93,7 +97,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
   fout << 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<projectDescription>\n"
-    "\t<name>" << mf->GetProjectName() << "</name>\n"
+    "\t<name>" << this->GetPathBasename(homeOutputDirectory) << "</name>\n"
     "\t<comment></comment>\n"
     "\t<projects>\n"
     "\t</projects>\n"
@@ -104,7 +108,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
     "\t\t\t<arguments>\n"
     ;
 
-  // use clean target...
+  // use clean target
   fout << 
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>\n"
@@ -124,13 +128,8 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
     "\t\t\t\t</dictionary>\n"
     ;
 
-  // set the make command...
+  // set the make command
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  //fout << "\t\t\t\t<dictionary>\n"
-  //        "\t\t\t\t\t<key>org.eclipse.cdt.make.core.buildCommand</key>\n"
-  //        "\t\t\t\t\t<value>" + make + "</value>\n"
-  //        "\t\t\t\t</dictionary>\n"
-  //        ;
   fout << 
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.enabledIncrementalBuild</key>\n"
@@ -138,7 +137,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
     "\t\t\t\t</dictionary>\n"
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.command</key>\n"
-    "\t\t\t\t\t<value>" + make + "</value>\n"
+    "\t\t\t\t\t<value>" + this->GetEclipsePath(make) + "</value>\n"
     "\t\t\t\t</dictionary>\n"
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.contents</key>\n"
@@ -155,16 +154,47 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.buildLocation</key>\n"
     "\t\t\t\t\t<value>"
-     << this->GetEclipsePath(mf->GetStartOutputDirectory()) << "</value>\n"
+     << this->GetEclipsePath(homeOutputDirectory) << "</value>\n"
     "\t\t\t\t</dictionary>\n"
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.useDefaultBuildCmd</key>\n"
     "\t\t\t\t\t<value>false</value>\n"
     "\t\t\t\t</dictionary>\n"
+    ;
+
+  // set project specific environment
+  fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.environment</key>\n"
-    "\t\t\t\t\t<value></value>\n"
+    "\t\t\t\t\t<value>"
+    ;
+  // set vsvars32.bat environment available at CMake time,
+  //   but not necessarily when eclipse is open
+  if (make.find("nmake") != std::string::npos)
+    {
+    if (getenv("PATH"))
+      {
+      fout << "PATH=" << getenv("PATH") << "|";
+      }
+    if (getenv("INCLUDE"))
+      {
+      fout << "INCLUDE=" << getenv("INCLUDE") << "|";
+      }
+    if (getenv("LIB"))
+      {
+      fout << "LIB=" << getenv("LIB") << "|";
+      }
+    if (getenv("LIBPATH"))
+      {
+      fout << "LIBPATH=" << getenv("LIBPATH") << "|";
+      }
+    }
+  fout <<
+    "</value>\n"
     "\t\t\t\t</dictionary>\n"
+    ;
+
+  fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.enableFullBuild</key>\n"
     "\t\t\t\t\t<value>true</value>\n"
@@ -192,22 +222,34 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.location</key>\n"
     "\t\t\t\t\t<value>"
-    << this->GetEclipsePath(mf->GetStartOutputDirectory()) << "</value>\n"
+    << this->GetEclipsePath(homeOutputDirectory) << "</value>\n"
     "\t\t\t\t</dictionary>\n"
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.autoBuildTarget</key>\n"
     "\t\t\t\t\t<value>all</value>\n"
     "\t\t\t\t</dictionary>\n"
+    ;
+
+  // set error parsers
+  fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.core.errorOutputParser</key>\n"
     "\t\t\t\t\t<value>"
+    ;
+  if (this->GetToolChainType(*mf) == EclipseToolchainOther)
+    {
+    fout << "org.eclipse.cdt.core.VCErrorParser;";
+    }
+  fout <<
     "org.eclipse.cdt.core.MakeErrorParser;"
     "org.eclipse.cdt.core.GCCErrorParser;"
     "org.eclipse.cdt.core.GASErrorParser;"
     "org.eclipse.cdt.core.GLDErrorParser;"
-    // *** "org.eclipse.cdt.core.VCErrorParser;"
     "</value>\n"
     "\t\t\t\t</dictionary>\n"
+    ;
+
+  fout <<
     "\t\t\t</arguments>\n"
     "\t\t</buildCommand>\n"
     "\t\t<buildCommand>\n"
@@ -216,36 +258,91 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
     "\t\t\t</arguments>\n"
     "\t\t</buildCommand>\n"
     "\t</buildSpec>\n"
+    ;
+
+  // set natures for c/c++ projects
+  fout <<
     "\t<natures>\n"
-    // *** ccnature only if it is c++ ???
+    // TODO: ccnature only if it is c++ ???
     "\t\t<nature>org.eclipse.cdt.core.ccnature</nature>\n"
     "\t\t<nature>org.eclipse.cdt.make.core.makeNature</nature>\n"
     "\t\t<nature>org.eclipse.cdt.make.core.ScannerConfigNature</nature>\n"
     "\t\t<nature>org.eclipse.cdt.core.cnature</nature>\n"
     "\t</natures>\n"
-    "\t<linkedResources>\n"
     ;
 
-  // for each sub project create a linked resource to the source dir
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
-        it = this->GlobalGenerator->GetProjectMap().begin();
-       it != this->GlobalGenerator->GetProjectMap().end();
-       ++it)
+  // TODO: refactor this
+  // create linked resources
+  if (homeDirectory != homeOutputDirectory)
     {
-    fout << "\t\t<link>\n"
-            "\t\t\t<name>" << it->first << "</name>\n"
-            "\t\t\t<type>2</type>\n"
-            "\t\t\t<location>"
-            << this->GetEclipsePath(
-                 it->second[0]->GetMakefile()->GetStartDirectory())
-            << "</location>\n"
-            "\t\t</link>\n"
-            ;
+    fout << "\t<linkedResources>\n";
+    // for each sub project create a linked resource to the source dir
+    // - only if it is an out-of-source build
+    for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+          it = this->GlobalGenerator->GetProjectMap().begin();
+         it != this->GlobalGenerator->GetProjectMap().end();
+         ++it)
+      {
+      fout <<
+        "\t\t<link>\n"
+        "\t\t\t<name>" << it->first << "</name>\n"
+        "\t\t\t<type>2</type>\n"
+        "\t\t\t<location>"
+        << this->GetEclipsePath(
+             it->second[0]->GetMakefile()->GetStartDirectory())
+        << "</location>\n"
+        "\t\t</link>\n"
+        ;
+      }
+    // for EXECUTABLE_OUTPUT_PATH when not in binary dir
+    std::string output_path = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    if (!cmSystemTools::IsSubDirectory(output_path.c_str(),
+                                       homeOutputDirectory.c_str()))
+      {
+      std::string name = this->GetPathBasename(output_path);
+      while (this->GlobalGenerator->GetProjectMap().find(name)
+             != this->GlobalGenerator->GetProjectMap().end())
+        {
+        name += "_";
+        }
+      fout <<
+        "\t\t<link>\n"
+        "\t\t\t<name>" << name << "</name>\n"
+        "\t\t\t<type>2</type>\n"
+        "\t\t\t<location>"
+        << this->GetEclipsePath(output_path)
+        << "</location>\n"
+        "\t\t</link>\n"
+        ;
+      }
+    // for LIBRARY_OUTPUT_PATH when not in binary dir
+    if (output_path != mf->GetDefinition("LIBRARY_OUTPUT_PATH"))
+      {
+      output_path = mf->GetDefinition("LIBRARY_OUTPUT_PATH");
+      if (!cmSystemTools::IsSubDirectory(output_path.c_str(),
+                                         homeOutputDirectory.c_str()))
+        {
+        std::string name = this->GetPathBasename(output_path);
+        while (this->GlobalGenerator->GetProjectMap().find(name)
+               != this->GlobalGenerator->GetProjectMap().end())
+          {
+          name += "_";
+          }
+        fout <<
+          "\t\t<link>\n"
+          "\t\t\t<name>" << name << "</name>\n"
+          "\t\t\t<type>2</type>\n"
+          "\t\t\t<location>"
+          << this->GetEclipsePath(output_path)
+          << "</location>\n"
+          "\t\t</link>\n"
+          ;
+        }
+      }
+    fout << "\t</linkedResources>\n";
     }
 
-  fout << "\t</linkedResources>\n"
-          "</projectDescription>\n"
-          ;
+  fout << "</projectDescription>\n";
 }
 
 //----------------------------------------------------------------------------
@@ -256,8 +353,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   const cmMakefile* mf
     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
 
-  std::string filename = mf->GetStartOutputDirectory();
-  filename = filename + "/" + ".cproject";
+  const std::string homeOutputDirectory(mf->GetHomeOutputDirectory());
+  const std::string filename = homeOutputDirectory + "/.cproject";
 
   cmGeneratedFileStream fout(filename.c_str());
   if (!fout)
@@ -275,7 +372,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
   fout << "<cconfiguration id=\"org.eclipse.cdt.core.default.config.1\">\n";
 
-  // *** what is this...
+  // Configuration settings...
   fout << 
     "<storageModule"
     " buildSystemId=\"org.eclipse.cdt.core.defaultConfigDataProvider\""
@@ -284,8 +381,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     "<externalSettings/>\n"
     "<extensions>\n"
     ;
-  // *** refactor this out...
-  switch (GetToolChainType(*mf))
+  // TODO: refactor this out...
+  switch (this->GetToolChainType(*mf))
   {
     case EclipseToolchainLinux   :
       fout << "<extension id=\"org.eclipse.cdt.core.ELF\""
@@ -364,14 +461,52 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        it != this->GlobalGenerator->GetProjectMap().end();
        ++it)
     {
-    fout << "<pathentry kind=\"src\" path=\"" << it->first << "\"/>\n"
-            ;
-    exclude_from_out += it->first + "/,";
+    fout << "<pathentry kind=\"src\" path=\"" << it->first << "\"/>\n";
+
+    // exlude source directory from output search path
+    // - only if not named the same as an output directory
+    if (!cmSystemTools::FileIsDirectory(
+           std::string(homeOutputDirectory + "/" + it->first).c_str()))
+      {
+      exclude_from_out += it->first + "/|";
+      }
     }
-  exclude_from_out.resize(exclude_from_out.size()-1);
+  exclude_from_out += "**/CMakeFiles/";
   fout << "<pathentry excluding=\"" << exclude_from_out
-       << "\" kind=\"out\" path=\"\"/>\n"
-       ;
+       << "\" kind=\"out\" path=\"\"/>\n";
+  // add output entry for EXECUTABLE_OUTPUT_PATH and LIBRARY_OUTPUT_PATH
+  // - if it is a subdir of homeOutputDirectory, there is no need to add it
+  // - if it is not then create a linked resource and add the linked name
+  //   but check it doesn't conflict with other linked resources names
+  std::string output_path = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+  if (!cmSystemTools::IsSubDirectory(output_path.c_str(),
+                                     homeOutputDirectory.c_str()))
+    {
+    std::string name = this->GetPathBasename(output_path);
+    while (this->GlobalGenerator->GetProjectMap().find(name)
+           != this->GlobalGenerator->GetProjectMap().end())
+      {
+      name += "_";
+      }
+      fout << "<pathentry kind=\"out\" path=\"" << name << "\"/>\n";
+    }
+  // for LIBRARY_OUTPUT_PATH when not in binary dir
+  if (output_path != mf->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    {
+    output_path = mf->GetDefinition("LIBRARY_OUTPUT_PATH");
+    if (!cmSystemTools::IsSubDirectory(output_path.c_str(),
+                                       homeOutputDirectory.c_str()))
+      {
+      std::string name = this->GetPathBasename(output_path);
+      while (this->GlobalGenerator->GetProjectMap().find(name)
+             != this->GlobalGenerator->GetProjectMap().end())
+        {
+        name += "_";
+        }
+      fout << "<pathentry kind=\"out\" path=\"" << name << "\"/>\n";
+      }
+    }
+
   // include dirs
   emmited.clear();
   for (std::vector<cmLocalGenerator*>::const_iterator
@@ -385,16 +520,16 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         inc != includeDirs.end();
         ++inc)
       {
-      if(emmited.find(*inc) == emmited.end())
+      std::string dir = cmSystemTools::CollapseFullPath(inc->c_str());
+      if(emmited.find(dir) == emmited.end())
         {
-        emmited.insert(*inc);
-        fout << "<pathentry include=\"" << this->GetEclipsePath(*inc)
+        emmited.insert(dir);
+        fout << "<pathentry include=\"" << this->GetEclipsePath(dir)
              << "\" kind=\"inc\" path=\"\" system=\"true\"/>\n";
         }
       }
     }
-  fout << "</storageModule>\n"
-          ;
+  fout << "</storageModule>\n";
 
   // add build targets
   fout << 
@@ -402,6 +537,23 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     "<buildTargets>\n"
     ;
   emmited.clear();
+  // TODO: Check how to add 'clean' target...
+  const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  cmGlobalGenerator* generator
+    = const_cast<cmGlobalGenerator*>(this->GlobalGenerator);
+  if (generator->GetAllTargetName())
+    {
+    emmited.insert(generator->GetAllTargetName());
+    cmExtraEclipseCDT4Generator::AppendTarget(fout,
+                                              generator->GetAllTargetName(),
+                                              make);
+    }
+  if (generator->GetPreinstallTargetName())
+    {
+    emmited.insert(generator->GetPreinstallTargetName());
+    cmExtraEclipseCDT4Generator
+    ::AppendTarget(fout, generator->GetPreinstallTargetName(), make);
+    }
   for (std::vector<cmLocalGenerator*>::const_iterator
         it = this->GlobalGenerator->GetLocalGenerators().begin();
        it != this->GlobalGenerator->GetLocalGenerators().end();
@@ -413,7 +565,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       if(emmited.find(t->first) == emmited.end())
         {
         emmited.insert(t->first);
-        this->AppendTarget(fout, t->first);
+        cmExtraEclipseCDT4Generator::AppendTarget(fout, t->first, make);
         }
       }
     }
@@ -421,7 +573,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           "</storageModule>\n"
           ;
 
-  this->AppendStorageScanners(fout, *mf);
+  this->AppendStorageScanners(fout);
 
   fout << "</cconfiguration>\n"
           "</storageModule>\n"
@@ -435,7 +587,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
 //----------------------------------------------------------------------------
 cmExtraEclipseCDT4Generator::EclipseToolchainType
-cmExtraEclipseCDT4Generator::GetToolChainType(const cmMakefile& makefile) const
+cmExtraEclipseCDT4Generator::GetToolChainType(const cmMakefile& makefile)
 {
   if (makefile.IsSet("UNIX"))
     {
@@ -469,10 +621,10 @@ cmExtraEclipseCDT4Generator::GetToolChainType(const cmMakefile& makefile) const
 }
 
 std::string
-cmExtraEclipseCDT4Generator::GetEclipsePath(const std::string& path) const
+cmExtraEclipseCDT4Generator::GetEclipsePath(const std::string& path)
 {
 #if defined(__CYGWIN__)
-  std::string cmd = "cygpath -w " + path;
+  std::string cmd = "cygpath -m " + path;
   std::string out;
   if (!cmSystemTools::RunCommand(cmd.c_str(), out, 0, false))
     {
@@ -488,188 +640,62 @@ cmExtraEclipseCDT4Generator::GetEclipsePath(const std::string& path) const
 #endif
 }
 
+std::string
+cmExtraEclipseCDT4Generator::GetPathBasename(const std::string& path)
+{
+  std::string outputBasename = path;
+  while (outputBasename.size() > 0 &&
+         (outputBasename[outputBasename.size() - 1] == '/' ||
+          outputBasename[outputBasename.size() - 1] == '\\'))
+    {
+    outputBasename.resize(outputBasename.size() - 1);
+    }
+  std::string::size_type loc = outputBasename.find_last_of("/\\");
+  if (loc != std::string::npos)
+    {
+    outputBasename = outputBasename.substr(loc + 1);
+    }
+
+  return outputBasename;
+}
+
 //----------------------------------------------------------------------------
 // Helper functions
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
-::AppendStorageScanners(cmGeneratedFileStream& fout,
-                        const cmMakefile&  /*    makefile*/) const
+::AppendStorageScanners(cmGeneratedFileStream& fout)
 {
   fout << 
     "<storageModule moduleId=\"scannerConfiguration\">\n"
     "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
-    " selectedProfileId=\""
-             "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile\"/>\n"
+    " selectedProfileId="
+    "\"org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile\"/>\n"
     ;
-  this->AppendScannerProfile(fout,
+  cmExtraEclipseCDT4Generator::AppendScannerProfile(fout,
     "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile",
     true, "", true, "specsFile",
     "-E -P -v -dD ${plugin_state_location}/${specs_file}",
     "gcc", true, true);
-  this->AppendScannerProfile(fout,
+  cmExtraEclipseCDT4Generator::AppendScannerProfile(fout,
     "org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile",
     true, "", true, "makefileGenerator",
     "-f ${project_name}_scd.mk",
     "make", true, true);
-  this->AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile",
-    false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/${specs_file}",
-    "gcc", true, true);
-  this->AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP",
-    false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.cpp",
-    "g++", true, true);
-  this->AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC",
-    false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.c",
-    "gcc", true, true);
-  this->AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile",
-    false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/${specs_file}",
-    "gcc", true, true);
-  this->AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP"
-    , false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.cpp",
-    "g++", true, true);
-  this->AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC",
-    false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.c",
-    "gcc", true, true);
 
-/*
-  // *** this needs to be conditional on platform ???
-  fout << "<scannerConfigBuildInfo instanceId=\""
-          "cdt.managedbuild.toolchain.gnu.cygwin.base.1;"
-          "cdt.managedbuild.toolchain.gnu.cygwin.base.1.1;"
-          "cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.1;"
-          "cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.1\">\n"
-          "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
-          " selectedProfileId=\""
-  "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP\""
-  "/>\n"
-          ;
-
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile",
-    true, "", true, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/${specs_file}",
-    "gcc", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile",
-    true, "", true, "makefileGenerator",
-    "-f ${project_name}_scd.mk",
-    "make", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile",
-    true, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/${specs_file}",
-    "gcc", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP",
-    true, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.cpp",
-    "g++", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC",
-    true, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.c",
-    "gcc", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile",
-    true, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/${specs_file}",
-    "gcc", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP"
-    , true, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.cpp",
-    "g++", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC",
-    true, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.c",
-    "gcc", true, true);
-
-  // *** this needs to be conditional on platform ???
-  fout << "</scannerConfigBuildInfo>\n"
-          "<scannerConfigBuildInfo instanceId=\""
-          "cdt.managedbuild.toolchain.gnu.cygwin.base.1;"
-          "cdt.managedbuild.toolchain.gnu.cygwin.base.1.1;"
-          "cdt.managedbuild.tool.gnu.c.compiler.cygwin.base.1;"
-          "cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.1\">\n"
-          "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
-          " selectedProfileId=\""
-"org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC\"/>\n"
-          ;
-
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile",
-    true, "", true, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/${specs_file}",
-    "gcc", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile",
-    true, "", true, "makefileGenerator",
-    "-f ${project_name}_scd.mk",
-    "make", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile",
-    false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/${specs_file}",
-    "gcc", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP",
-    false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.cpp",
-    "g++", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC",
-    false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.c",
-    "gcc", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile",
-    false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/${specs_file}",
-    "gcc", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP"
-    , false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.cpp",
-    "g++", true, true);
-  AppendScannerProfile(fout,
-    "org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC",
-    false, "", false, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/specs.c",
-    "gcc", true, true);
-
-  fout << "</scannerConfigBuildInfo>\n"
-          ;
-*/
-
-  fout << "</storageModule>\n"
-          ;
+  fout << "</storageModule>\n";
 }
 
-void cmExtraEclipseCDT4Generator
-::AppendTarget(cmGeneratedFileStream& fout,
-               const std::string&     target) const
+void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
+                                               const std::string&     target,
+                                               const std::string&     make)
 {
-  const cmMakefile& mf
-    = *(this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile());
-  std::string make = mf.GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-
   fout << 
     "<target name=\"" << target << "\""
     " path=\"\""
     " targetID=\"org.eclipse.cdt.make.MakeTargetBuilder\">\n"
-    "<buildCommand>" << make << "</buildCommand>\n"
+    "<buildCommand>"
+    << cmExtraEclipseCDT4Generator::GetEclipsePath(make)
+    << "</buildCommand>\n"
     "<buildArguments/>\n"
     "<buildTarget>" << target << "</buildTarget>\n"
     "<stopOnError>true</stopOnError>\n"
@@ -688,7 +714,7 @@ void cmExtraEclipseCDT4Generator
                        const std::string&     runActionArguments,
                        const std::string&     runActionCommand,
                        bool                   runActionUseDefault,
-                       bool                   sipParserEnabled) const
+                       bool                   sipParserEnabled)
 {
   fout << 
     "<profile id=\"" << profileID << "\">\n"
