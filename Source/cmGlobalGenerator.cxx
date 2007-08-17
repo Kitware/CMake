@@ -14,6 +14,10 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include "windows.h" // this must be first to define GetCurrentDirectory
+#endif
+
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmExternalMakefileProjectGenerator.h"
@@ -24,12 +28,6 @@
 #include "cmInstallExportGenerator.h"
 
 #include <stdlib.h> // required for atof
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#include <windows.h>
-// workaround against Windows name mangling:
-#undef GetCurrentDirectory
-#endif
 
 #include <assert.h>
 
