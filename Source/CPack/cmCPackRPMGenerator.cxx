@@ -35,19 +35,34 @@ cmCPackRPMGenerator::~cmCPackRPMGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackRPMGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel,
+int cmCPackRPMGenerator::CompressFiles(const char* /*outFileName*/,
+  const char* /*toplevel*/,
   const std::vector<std::string>& /*files*/)
 {
   this->ReadListFile("CPackRPM.cmake");
+//   const char* cmakeExecutable = this->GetOption("CMAKE_COMMAND");
+
   if (!this->IsSet("RPMBUILD_EXECUTABLE")) 
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find rpmbuild" << std::endl);
     return 0;
     }
-  const char* rpmbuildExecutable = this->GetOption("RPMBUILD_EXECUTABLE");
-  printf("rpmbuild: %s outFileName: %s toplevel: %s\n", rpmbuildExecutable, 
-         outFileName, toplevel);
+
+  /* FIXME we should be able to stick with RPM naming scheme
+   * and not following CMake naming scheme?
+  const char* rpmFileName = this->GetOption("RPM_FILE_NAME");
+  const char* rpmDirectory = this->GetOption("RPM_DIRECTORY");
+  this->SetOption("CPACK_OUTPUT_FILE_NAME",rpmFileName);
+  std::string rpmFilePath;
+  rpmFilePath += rpmDirectory;
+  rpmFilePath += "/";
+  rpmFilePath += rpmFileName;
+  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",rpmFilePath.c_str());
+  */
+  //  this->SetOption("CPACK_OUTPUT_FILE_PATH",rpmFilePath);
+  
+  //FIXME I think we should split CPackRPM.cmake into (at least)
+  //      2 differents files
 
   return 1;
 }

@@ -23,7 +23,11 @@
 
 /** \class cmCPackRPMGenerator
  * \brief A generator for RPM packages
- *
+ * The idea of the CPack RPM generator is to use
+ * as minimal C++ code as possible.
+ * Ideally the C++ part of the CPack RPM generator
+ * will only 'execute' (aka ->ReadListFile) several
+ * CMake macros files.
  */
 class cmCPackRPMGenerator : public cmCPackGenericGenerator
 {
