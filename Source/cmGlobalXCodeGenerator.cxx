@@ -960,7 +960,8 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     buildPhases->AddObject(resourceBuildPhase);
     }
   std::vector<cmXCodeObject*>::iterator cit;
-  for (cit = contentBuildPhases.begin(); cit != contentBuildPhases.end(); ++cit)
+  for (cit = contentBuildPhases.begin(); cit != contentBuildPhases.end();
+       ++cit)
     {
     buildPhases->AddObject(*cit);
     }
@@ -1681,7 +1682,8 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   cmXCodeObject* buildPhases = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   std::vector<cmXCodeObject*> emptyContentVector;
-  this->CreateCustomCommands(buildPhases, 0, 0, 0, emptyContentVector, 0, cmtarget);
+  this->CreateCustomCommands(buildPhases, 0, 0, 0, emptyContentVector, 0,
+                             cmtarget);
   target->AddAttribute("buildPhases", buildPhases);
   cmXCodeObject* buildSettings =
     this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
