@@ -186,8 +186,15 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   if(!cmSystemTools::IsOff(def))
     {
     std::string f = def;
+    cmSystemTools::ConvertToUnixSlashes(f);
     f += "/";
     f += this->Config;
+    if(!cmSystemTools::FileIsFullPath(f.c_str()))
+      {
+      f = "/" + f;
+      f = this->Makefile->GetCurrentDirectory() + f;
+      }
+    
     if(cmSystemTools::FileExists(f.c_str()))
       {
       if(this->ReadListFile(f.c_str()))
