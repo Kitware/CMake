@@ -108,11 +108,11 @@ void cmFindLibraryCommand::AddLib64Paths()
   std::string voidsize = 
     this->Makefile->GetRequiredDefinition("CMAKE_SIZEOF_VOID_P");
   int size = atoi(voidsize.c_str());
-  std::vector<std::string> path64;
   if(size != 8)
     {
     return;
     }
+  std::vector<std::string> path64;
   bool found64 = false;
   for(std::vector<std::string>::iterator i = this->SearchPaths.begin(); 
       i != this->SearchPaths.end(); ++i)

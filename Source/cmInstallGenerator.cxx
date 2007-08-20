@@ -210,7 +210,7 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
   this->GenerateScriptConfigs(os, indent.Next());
 
   // End this block of installation.
-  os << indent << "ENDIF(" << component_test << ")\n";
+  os << indent << "ENDIF(" << component_test << ")\n\n";
 }
 
 //----------------------------------------------------------------------------
