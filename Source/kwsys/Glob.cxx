@@ -253,8 +253,9 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
 
     if ( !dir_only || !kwsys::SystemTools::FileIsDirectory(realname.c_str()) )
       {
-      if ( this->Internals->Expressions[
-        this->Internals->Expressions.size()-1].find(fname.c_str()) )
+      if ( (this->Internals->Expressions.size() > 0) && 
+           this->Internals->Expressions[
+             this->Internals->Expressions.size()-1].find(fname.c_str()) )
         {
         this->AddFile(this->Internals->Files, realname.c_str());
         }
@@ -277,6 +278,12 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
     this->RecurseDirectory(start, dir, dir_only);
     return;
     }
+
+  if ( start >= this->Internals->Expressions.size() )
+    {
+    return;
+    }
+
   kwsys::Directory d;
   if ( !d.Load(dir.c_str()) )
     {
