@@ -19,6 +19,11 @@
 
 #include "cmCommand.h"
 
+namespace cmsys
+{
+  class RegularExpression;
+}
+
 /** \class cmStringCommand
  * \brief Common string operations
  *
@@ -132,7 +137,9 @@ protected:
   bool HandleSubstringCommand(std::vector<std::string> const& args);
   bool HandleStripCommand(std::vector<std::string> const& args);
   bool HandleRandomCommand(std::vector<std::string> const& args);
-  
+  void ClearMatches();
+  void StoreMatches(cmsys::RegularExpression& re);
+
   class RegexReplacement
   {
   public:
