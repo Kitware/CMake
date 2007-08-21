@@ -463,7 +463,7 @@ void cmLocalGenerator::GenerateInstallRules()
         }
       }
     fout << "\n";
-    fout << "ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
+    fout << "ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)\n\n";
     }
 
   // Record the install manifest.
@@ -475,7 +475,7 @@ void cmLocalGenerator::GenerateInstallRules()
       "${CMAKE_INSTALL_COMPONENT}.txt\")\n"
       "ELSE(CMAKE_INSTALL_COMPONENT)\n"
       "  SET(CMAKE_INSTALL_MANIFEST \"install_manifest.txt\")\n"
-      "ENDIF(CMAKE_INSTALL_COMPONENT)\n";
+      "ENDIF(CMAKE_INSTALL_COMPONENT)\n\n";
     fout
       << "FILE(WRITE \""
       << homedir.c_str() << "/${CMAKE_INSTALL_MANIFEST}\" "
