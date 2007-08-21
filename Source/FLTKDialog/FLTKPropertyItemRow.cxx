@@ -22,7 +22,7 @@
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Tile.H>
 #include <FL/fl_ask.H>
-#include <FL/fl_file_chooser.H>
+#include <FL/Fl_File_Chooser.H>
 #include <FL/Fl_Color_Chooser.H>
 #include <FL/Fl_Menu_Button.H>
 #include "../cmCacheManager.h"

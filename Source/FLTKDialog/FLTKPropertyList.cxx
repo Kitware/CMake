@@ -21,7 +21,7 @@
 #include "../cmCacheManager.h"
 #include "FLTKPropertyItemRow.h"
 #include "FL/filename.H"
-#include "FL/fl_file_chooser.H"
+#include "FL/Fl_File_Chooser.H"
 #include "FL/Fl_Color_Chooser.H"
 #include "FL/fl_ask.H"
 #include "FL/Fl_Button.H"

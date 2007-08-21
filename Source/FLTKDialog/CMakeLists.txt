@@ -1,24 +1,20 @@
-FIND_PACKAGE(FLTK)
+FIND_PACKAGE(FLTK REQUIRED)
 
 SET(SRCS
-CMakeSetupGUIImplementation.cxx
-FLTKDialog.cxx
-FLTKPropertyItemRow.cxx
-FLTKPropertyList.cxx
-)
+  CMakeSetupGUIImplementation.cxx
+  FLTKDialog.cxx
+  FLTKPropertyItemRow.cxx
+  FLTKPropertyList.cxx
+  )
 
 SET(FLTK_GUI_Files_SRCS
-CMakeSetupGUI.fl
-)
-
-
-LINK_LIBRARIES(${FLTK_LIBRARY})
-
+  CMakeSetupGUI.fl
+  )
 
 INCLUDE_DIRECTORIES(${FLTK_INCLUDE_PATH})
 
 FLTK_WRAP_UI(FLCMakeSetup ${FLTK_GUI_Files_SRCS})
 
-ADD_EXECUTABLE(FLCMakeSetup ${SRCS} ${FLCMakeSetup_FLTK_SRCS})
-TARGET_LINK_LIBRARIES(FLCMakeSetup CMakeLib)
+ADD_EXECUTABLE(FLCMakeSetup ${SRCS} ${FLCMakeSetup_FLTK_UI_SRCS} )
+TARGET_LINK_LIBRARIES(FLCMakeSetup ${FLTK_LIBRARY} CMakeLib)
 

@@ -16,7 +16,7 @@
 =========================================================================*/
 
 #include "CMakeSetupGUIImplementation.h"
-#include "FL/fl_file_chooser.H"
+#include "FL/Fl_File_Chooser.H"
 #include "FL/filename.H"
 #include "FL/fl_ask.H"
 #include "../cmCacheManager.h"
@@ -348,8 +348,14 @@ CMakeSetupGUIImplementation
     m_CMakeInstance->SetStartDirectory(m_WhereSource.c_str());
     m_CMakeInstance->SetHomeOutputDirectory(m_WhereBuild.c_str());
     m_CMakeInstance->SetStartOutputDirectory(m_WhereBuild.c_str());
+    const char* defaultGenerator = 0;
+#if defined(_WIN32)
+    defaultGenerator = "NMake Makefiles";
+#else defined(_WIN32)
+    defaultGenerator = "Unix Makefiles";
+#endif defined(_WIN32)
     m_CMakeInstance->SetGlobalGenerator(
-      m_CMakeInstance->CreateGlobalGenerator("NMake Makefiles"));
+      m_CMakeInstance->CreateGlobalGenerator(defaultGenerator));
     m_CMakeInstance->SetCMakeCommand(m_PathToExecutable.c_str());
     m_CMakeInstance->LoadCache();
     if(m_CMakeInstance->Configure() != 0)
