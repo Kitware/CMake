@@ -23,6 +23,7 @@
 #                    QT_USE_QTTEST
 #                    QT_USE_QTUITOOLS
 #                    QT_USE_QTDBUS
+#                    QT_USE_QTSCRIPT
 #
 # All the libraries required are stored in a variable called QT_LIBRARIES.  
 # Add this variable to your TARGET_LINK_LIBRARIES.
@@ -73,6 +74,7 @@
 #  QT_QTSQL_FOUND         True if QtSql was found.
 #  QT_QTXML_FOUND         True if QtXml was found.
 #  QT_QTSVG_FOUND         True if QtSvg was found.
+#  QT_QTSCRIPT_FOUND      True if QtScript was found.
 #  QT_QTTEST_FOUND        True if QtTest was found.
 #  QT_QTUITOOLS_FOUND     True if QtUiTools was found.
 #                      
@@ -100,6 +102,7 @@
 #  QT_QTSQL_INCLUDE_DIR        Path to "include/QtSql" 
 #  QT_QTXML_INCLUDE_DIR        Path to "include/QtXml" 
 #  QT_QTSVG_INCLUDE_DIR        Path to "include/QtSvg"
+#  QT_QTSCRIPT_INCLUDE_DIR     Path to "include/QtScript"
 #  QT_QTTEST_INCLUDE_DIR       Path to "include/QtTest"
 #                            
 #  QT_LIBRARY_DIR              Path to "lib" of Qt4
@@ -167,6 +170,10 @@
 # The QtSvg library:          QT_QTSVG_LIBRARY
 #                             QT_QTSVG_LIBRARY_RELEASE
 #                             QT_QTSVG_LIBRARY_DEBUG
+#
+# The QtScript library:       QT_QTSCRIPT_LIBRARY
+#                             QT_QTSCRIPT_LIBRARY_RELEASE
+#                             QT_QTSCRIPT_LIBRARY_DEBUG
 #
 # The QtTest library:         QT_QTTEST_LIBRARY
 #                             QT_QTTEST_LIBRARY_RELEASE
@@ -467,6 +474,14 @@ IF (QT4_QMAKE_FOUND)
     NO_DEFAULT_PATH
     )
 
+  # Set QT_QTSCRIPT_INCLUDE_DIR
+  FIND_PATH(QT_QTSCRIPT_INCLUDE_DIR QtScript
+    PATHS
+    ${QT_INCLUDE_DIR}/QtScript
+    ${QT_LIBRARY_DIR}/QtScript.framework/Headers
+    NO_DEFAULT_PATH
+    )
+
   # Set QT_QTTEST_INCLUDE_DIR
   FIND_PATH(QT_QTTEST_INCLUDE_DIR QtTest
     PATHS
@@ -627,6 +642,9 @@ IF (QT4_QMAKE_FOUND)
   FIND_LIBRARY(QT_QTDBUS_LIBRARY_RELEASE NAMES QtDBus QtDBus4 PATHS ${QT_LIBRARY_DIR}                       NO_DEFAULT_PATH)
   FIND_LIBRARY(QT_QTDBUS_LIBRARY_DEBUG   NAMES QtDBus_debug QtDBus_debug4 QtDBusd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
 
+  # Set QT_QTSCRIPT_LIBRARY
+  FIND_LIBRARY(QT_QTSCRIPT_LIBRARY_RELEASE NAMES QtScript QtScript4 PATHS ${QT_LIBRARY_DIR}        NO_DEFAULT_PATH)
+  FIND_LIBRARY(QT_QTSCRIPT_LIBRARY_DEBUG   NAMES QtScript_debug QtScriptd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
 
   IF( NOT QT_QTCORE_LIBRARY_DEBUG AND NOT QT_QTCORE_LIBRARY_RELEASE )
     IF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
@@ -722,6 +740,7 @@ IF (QT4_QMAKE_FOUND)
   _QT4_ADJUST_LIB_VARS(QTSQL)
   _QT4_ADJUST_LIB_VARS(QTXML)
   _QT4_ADJUST_LIB_VARS(QTSVG)
+  _QT4_ADJUST_LIB_VARS(QTSCRIPT)
   _QT4_ADJUST_LIB_VARS(QTUITOOLS)
   _QT4_ADJUST_LIB_VARS(QTTEST)
   _QT4_ADJUST_LIB_VARS(QTDBUS)
