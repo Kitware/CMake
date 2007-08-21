@@ -395,6 +395,7 @@ int main()
         cmPassed("Module loaded and ModuleFunction called correctly.");
       }
     }
+  cmDynamicLoader::FlushCache(); // fix memory leaks 
   if(sharedFunction() != 1)
     {
     cmFailed("Call to sharedFunction from shared library failed.");
