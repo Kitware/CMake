@@ -245,8 +245,8 @@ bool cmGlobalKdevelopGenerator
     if (fileToOpen.empty())
     {
        std::string ext = cmSystemTools::GetFilenameExtension(tmp);
-       if ((ext==".c") || (ext==".cc") || (ext==".cpp") 
-           || (ext==".C") || (ext==".h"))
+       if ((ext==".c") || (ext==".cc") || (ext==".cpp")  || (ext==".cxx")
+           || (ext==".C") || (ext==".h") || (ext==".hpp"))
        {
        fileToOpen=tmp;
        }
