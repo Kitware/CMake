@@ -144,23 +144,35 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   bool archive_settings = true;
   bool library_settings = true;
   bool runtime_settings = true;
+  bool framework_settings = true;
+  bool bundle_settings = true;
   std::vector<cmTarget*> targets;
   const char* archive_destination = 0;
   const char* library_destination = 0;
   const char* runtime_destination = 0;
+  const char* framework_destination = 0;
+  const char* bundle_destination = 0;
   std::string archive_permissions;
   std::string library_permissions;
   std::string runtime_permissions;
+  std::string framework_permissions;
+  std::string bundle_permissions;
   std::string archive_component = "Unspecified";
   std::string library_component = "Unspecified";
   std::string runtime_component = "Unspecified";
+  std::string framework_component = "Unspecified";
+  std::string bundle_component = "Unspecified";
   std::string exportName;
   std::vector<std::string> archive_configurations;
   std::vector<std::string> library_configurations;
   std::vector<std::string> runtime_configurations;
+  std::vector<std::string> framework_configurations;
+  std::vector<std::string> bundle_configurations;
   bool archive_optional = false;
   bool library_optional = false;
   bool runtime_optional = false;
+  bool framework_optional = false;
+  bool bundle_optional = false;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "DESTINATION")
@@ -215,6 +227,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       archive_settings = true;
       library_settings = false;
       runtime_settings = false;
+      framework_settings = false;
+      bundle_settings = false;
       }
     else if(args[i] == "LIBRARY")
       {
@@ -228,6 +242,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       archive_settings = false;
       library_settings = true;
       runtime_settings = false;
+      framework_settings = false;
+      bundle_settings = false;
       }
     else if(args[i] == "RUNTIME")
       {
@@ -241,10 +257,42 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       archive_settings = false;
       library_settings = false;
       runtime_settings = true;
+      framework_settings = false;
+      bundle_settings = false;
+      }
+    else if(args[i] == "FRAMEWORK")
+      {
+      // Switch to setting only framework properties.
+      doing_targets = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_component = false;
+      doing_configurations = false;
+      doing_export = false;
+      archive_settings = false;
+      library_settings = false;
+      runtime_settings = false;
+      framework_settings = true;
+      bundle_settings = false;
+      }
+    else if(args[i] == "BUNDLE")
+      {
+      // Switch to setting only bundle properties.
+      doing_targets = false;
+      doing_destination = false;
+      doing_permissions = false;
+      doing_component = false;
+      doing_configurations = false;
+      doing_export = false;
+      archive_settings = false;
+      library_settings = false;
+      runtime_settings = false;
+      framework_settings = false;
+      bundle_settings = true;
       }
     else if(args[i] == "EXPORT")
       {
-      // Switch to setting only runtime properties.
+      // Switch to setting the export property.
       doing_targets = false;
       doing_destination = false;
       doing_permissions = false;
@@ -271,6 +319,14 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       if(runtime_settings)
         {
         runtime_optional = true;
+        }
+      if(framework_settings)
+        {
+        framework_optional = true;
+        }
+      if(bundle_settings)
+        {
+        bundle_optional = true;
         }
       }
     else if(doing_targets)
@@ -319,6 +375,14 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         {
         runtime_destination = args[i].c_str();
         }
+      if(framework_settings)
+        {
+        framework_destination = args[i].c_str();
+        }
+      if(bundle_settings)
+        {
+        bundle_destination = args[i].c_str();
+        }
       doing_destination = false;
       }
     else if(doing_component)
@@ -335,6 +399,14 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       if(runtime_settings)
         {
         runtime_component = args[i];
+        }
+      if(framework_settings)
+        {
+        framework_component = args[i];
+        }
+      if(bundle_settings)
+        {
+        bundle_component = args[i];
         }
       doing_component = false;
       }
@@ -377,6 +449,30 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           return false;
           }
         }
+      if(framework_settings)
+        {
+        // Check the requested permission.
+        if(!this->CheckPermissions(args[i], framework_permissions))
+          {
+          cmOStringStream e;
+          e << args[0] << " given invalid permission \""
+            << args[i] << "\".";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+        }
+      if(bundle_settings)
+        {
+        // Check the requested permission.
+        if(!this->CheckPermissions(args[i], bundle_permissions))
+          {
+          cmOStringStream e;
+          e << args[0] << " given invalid permission \""
+            << args[i] << "\".";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+        }
       }
     else if(doing_configurations)
       {
@@ -392,6 +488,14 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       if(runtime_settings)
         {
         runtime_configurations.push_back(args[i]);
+        }
+      if(framework_settings)
+        {
+        framework_configurations.push_back(args[i]);
+        }
+      if(bundle_settings)
+        {
+        bundle_configurations.push_back(args[i]);
         }
       }
     else if(doing_export)
@@ -414,7 +518,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     {
     return true;
     }
-  if(!archive_destination && !library_destination && !runtime_destination)
+  if(!archive_destination && !library_destination && !runtime_destination &&
+     !framework_destination && !bundle_destination)
     {
     this->SetError("TARGETS given no DESTINATION!");
     return false;
@@ -429,9 +534,13 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   std::string archive_dest;
   std::string library_dest;
   std::string runtime_dest;
+  std::string framework_dest;
+  std::string bundle_dest;
   this->ComputeDestination(archive_destination, archive_dest);
   this->ComputeDestination(library_destination, library_dest);
   this->ComputeDestination(runtime_destination, runtime_dest);
+  if(framework_destination) framework_dest = framework_destination;
+  if(bundle_destination) bundle_dest = bundle_destination;
 
   // Generate install script code to install the given targets.
   for(std::vector<cmTarget*>::iterator ti = targets.begin();
@@ -440,8 +549,10 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     // Handle each target type.
     cmTarget& target = *(*ti);
     cmInstallTargetGenerator* archiveGenerator = 0;
-    cmInstallTargetGenerator* runtimeGenerator = 0;
     cmInstallTargetGenerator* libraryGenerator = 0;
+    cmInstallTargetGenerator* runtimeGenerator = 0;
+    cmInstallTargetGenerator* frameworkGenerator = 0;
+    cmInstallTargetGenerator* bundleGenerator = 0;
 
     switch(target.GetType())
       {
@@ -480,24 +591,51 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         else
           {
           // This is a non-DLL platform.
-          if(library_destination)
+          // If it is marked with FRAMEWORK property use the FRAMEWORK set of
+          // INSTALL properties. Otherwise, use the LIBRARY properties.
+          if(target.GetPropertyAsBool("FRAMEWORK"))
             {
-            // The shared library uses the LIBRARY properties.
-            libraryGenerator = new cmInstallTargetGenerator(target, 
-                                           library_dest.c_str(),
-                                           false,
-                                           library_permissions.c_str(),
-                                           library_configurations,
-                                           library_component.c_str(),
-                                           library_optional);
+            if(framework_destination)
+              {
+              // Use the FRAMEWORK properties.
+              frameworkGenerator = new cmInstallTargetGenerator(target,
+                                             framework_dest.c_str(),
+                                             false,
+                                             framework_permissions.c_str(),
+                                             framework_configurations,
+                                             framework_component.c_str(),
+                                             framework_optional);
+              }
+            else
+              {
+              cmOStringStream e;
+              e << "TARGETS given no FRAMEWORK DESTINATION for shared library "
+                "FRAMEWORK target \"" << target.GetName() << "\".";
+              this->SetError(e.str().c_str());
+              return false;
+              }
             }
           else
             {
-            cmOStringStream e;
-            e << "TARGETS given no LIBRARY DESTINATION for shared library "
-              "target \"" << target.GetName() << "\".";
-            this->SetError(e.str().c_str());
-            return false;
+            if(library_destination)
+              {
+              // The shared library uses the LIBRARY properties.
+              libraryGenerator = new cmInstallTargetGenerator(target, 
+                                             library_dest.c_str(),
+                                             false,
+                                             library_permissions.c_str(),
+                                             library_configurations,
+                                             library_component.c_str(),
+                                             library_optional);
+              }
+            else
+              {
+              cmOStringStream e;
+              e << "TARGETS given no LIBRARY DESTINATION for shared library "
+                "target \"" << target.GetName() << "\".";
+              this->SetError(e.str().c_str());
+              return false;
+              }
             }
           }
         }
@@ -507,8 +645,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Static libraries use ARCHIVE properties.
         if(archive_destination)
           {
-          archiveGenerator = new cmInstallTargetGenerator(target, 
-                                         archive_dest.c_str(), 
+          archiveGenerator = new cmInstallTargetGenerator(target,
+                                         archive_dest.c_str(),
                                          false,
                                          archive_permissions.c_str(),
                                          archive_configurations,
@@ -551,23 +689,47 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       case cmTarget::EXECUTABLE:
         {
         // Executables use the RUNTIME properties.
-        if(runtime_destination)
+        if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
           {
-          runtimeGenerator = new cmInstallTargetGenerator(target, 
-                                         runtime_dest.c_str(), 
-                                         false,
-                                         runtime_permissions.c_str(),
-                                         runtime_configurations,
-                                         runtime_component.c_str(),
-                                         runtime_optional);
+          if(bundle_destination)
+            {
+            bundleGenerator = new cmInstallTargetGenerator(target,
+                                           bundle_dest.c_str(),
+                                           false,
+                                           bundle_permissions.c_str(),
+                                           bundle_configurations,
+                                           bundle_component.c_str(),
+                                           bundle_optional);
+            }
+          else
+            {
+            cmOStringStream e;
+            e << "TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable target \""
+              << target.GetName() << "\".";
+            this->SetError(e.str().c_str());
+            return false;
+            }
           }
         else
           {
-          cmOStringStream e;
-          e << "TARGETS given no RUNTIME DESTINATION for executable target \""
-            << target.GetName() << "\".";
-          this->SetError(e.str().c_str());
-          return false;
+          if(runtime_destination)
+            {
+            runtimeGenerator = new cmInstallTargetGenerator(target,
+                                           runtime_dest.c_str(),
+                                           false,
+                                           runtime_permissions.c_str(),
+                                           runtime_configurations,
+                                           runtime_component.c_str(),
+                                           runtime_optional);
+            }
+          else
+            {
+            cmOStringStream e;
+            e << "TARGETS given no RUNTIME DESTINATION for executable target \""
+              << target.GetName() << "\".";
+            this->SetError(e.str().c_str());
+            return false;
+            }
           }
 
         // On DLL platforms an executable may also have an import
@@ -577,8 +739,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
            target.GetPropertyAsBool("ENABLE_EXPORTS"))
           {
           // The import library uses the ARCHIVE properties.
-          archiveGenerator = new cmInstallTargetGenerator(target, 
-                                         archive_dest.c_str(), 
+          archiveGenerator = new cmInstallTargetGenerator(target,
+                                         archive_dest.c_str(),
                                          true,
                                          archive_permissions.c_str(),
                                          archive_configurations,
@@ -593,8 +755,10 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         break;
       }
     this->Makefile->AddInstallGenerator(archiveGenerator);
-    this->Makefile->AddInstallGenerator(runtimeGenerator);
     this->Makefile->AddInstallGenerator(libraryGenerator);
+    this->Makefile->AddInstallGenerator(runtimeGenerator);
+    this->Makefile->AddInstallGenerator(frameworkGenerator);
+    this->Makefile->AddInstallGenerator(bundleGenerator);
 
     if (!exportName.empty())
       {
@@ -603,7 +767,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
                                                             &target,
                                                             archiveGenerator,
                                                             runtimeGenerator,
-                                                            libraryGenerator);
+                                                            libraryGenerator,
+                                                            frameworkGenerator,
+                                                            bundleGenerator);
       }
     }
 
@@ -615,6 +781,10 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     ->AddInstallComponent(library_component.c_str());
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
     ->AddInstallComponent(runtime_component.c_str());
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    ->AddInstallComponent(framework_component.c_str());
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+    ->AddInstallComponent(bundle_component.c_str());
 
   return true;
 }

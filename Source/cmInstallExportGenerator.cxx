@@ -185,8 +185,8 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
       switch ((*targetIt)->Target->GetType())
         {
         case cmTarget::EXECUTABLE:
-          exportFileStream << "ADD_EXECUTABLE(" << this->Prefix.c_str() 
-                           << (*targetIt)->Target->GetName() 
+          exportFileStream << "ADD_EXECUTABLE(" << this->Prefix.c_str()
+                           << (*targetIt)->Target->GetName()
                            << " IMPORT )\n";
           break;
         case cmTarget::STATIC_LIBRARY:

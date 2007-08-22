@@ -34,14 +34,19 @@ public:
   cmTargetExport(cmTarget* tgt, 
                  cmInstallTargetGenerator* archive, 
                  cmInstallTargetGenerator* runtime, 
-                 cmInstallTargetGenerator* library
+                 cmInstallTargetGenerator* library,
+                 cmInstallTargetGenerator* framework,
+                 cmInstallTargetGenerator* bundle
                 ) : Target(tgt), ArchiveGenerator(archive),
-                    RuntimeGenerator(runtime), LibraryGenerator(library) {}
+                    RuntimeGenerator(runtime), LibraryGenerator(library),
+                    FrameworkGenerator(framework), BundleGenerator(bundle) {}
 
   cmTarget* Target;
   cmInstallTargetGenerator* ArchiveGenerator;
   cmInstallTargetGenerator* RuntimeGenerator;
   cmInstallTargetGenerator* LibraryGenerator;
+  cmInstallTargetGenerator* FrameworkGenerator;
+  cmInstallTargetGenerator* BundleGenerator;
 private:
   cmTargetExport();
 };
