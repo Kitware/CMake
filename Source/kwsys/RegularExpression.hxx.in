@@ -379,7 +379,14 @@ inline kwsys_stl::string::size_type RegularExpression::end(int n) const
  */
 inline kwsys_stl::string RegularExpression::match(int n) const
 {
-  return kwsys_stl::string(this->startp[n], this->endp[n] - this->startp[n]);
+  if (this->startp[n]==0)
+    {
+    return kwsys_stl::string("");
+    }
+  else
+    {
+    return kwsys_stl::string(this->startp[n], this->endp[n] - this->startp[n]);
+    }
 }
 
 } // namespace @KWSYS_NAMESPACE@
