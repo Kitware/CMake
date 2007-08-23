@@ -87,6 +87,7 @@ class cmCommandArgument
     std::set<const cmCommandArgument*> ArgumentsBefore;
     cmCommandArgumentGroup* Group;
     bool WasActive;
+    bool ArgumentsBeforeEmpty;
     unsigned int CurrentIndex;
 
     virtual bool DoConsume(const std::string& arg, unsigned int index) = 0;
@@ -128,8 +129,12 @@ class cmCAString : public cmCommandArgument
 
     /// Return the string
     const std::string& GetString() const                 {return this->String;}
+    const char* GetCString() const               {return this->String.c_str();}
+    void SetDefaultString(const char* text)
+                                    {this->DefaultString = (text ? text : "");}
   private:
     std::string String;
+    std::string DefaultString;
     unsigned int DataStart;
     virtual bool DoConsume(const std::string& arg, unsigned int index);
     virtual void DoReset();
@@ -197,7 +202,6 @@ class cmCommandArgumentsHelper
     /// Parse the argument list
     void Parse(const std::vector<std::string>* args, 
                std::vector<std::string>* unconsumedArgs);
-
     /// Add an argument.
     void AddArgument(cmCommandArgument* arg);
   private:

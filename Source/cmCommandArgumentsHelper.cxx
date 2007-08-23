@@ -23,6 +23,7 @@ cmCommandArgument::cmCommandArgument(cmCommandArgumentsHelper* args,
 :Key(key)
 ,Group(group)
 ,WasActive(false)
+,ArgumentsBeforeEmpty(true)
 ,CurrentIndex(0) 
 {
   if (args!=0)
@@ -45,6 +46,7 @@ void cmCommandArgument::Reset()
 
 void cmCommandArgument::Follows(const cmCommandArgument* arg)
 {
+  this->ArgumentsBeforeEmpty = false;
   this->ArgumentsBefore.insert(arg);
 }
 
@@ -52,6 +54,7 @@ void cmCommandArgument::FollowsGroup(const cmCommandArgumentGroup* group)
 {
   if (group!=0)
     {
+    this->ArgumentsBeforeEmpty = false;
     for(std::vector<cmCommandArgument*>::const_iterator 
         argIt= group->ContainedArguments.begin();
         argIt != group->ContainedArguments.end();
@@ -64,7 +67,7 @@ void cmCommandArgument::FollowsGroup(const cmCommandArgumentGroup* group)
 
 bool cmCommandArgument::MayFollow(const cmCommandArgument* current) const
 {
-  if (this->ArgumentsBefore.empty())
+  if (this->ArgumentsBeforeEmpty)
     {
     return true;
     }
@@ -180,7 +183,7 @@ bool cmCAString::DoConsume(const std::string& arg, unsigned int index)
 
 void cmCAString::DoReset()
 {
-  this->String = "";
+  this->String = this->DefaultString;
 }
 
 cmCAEnabler::cmCAEnabler(cmCommandArgumentsHelper* args, 
