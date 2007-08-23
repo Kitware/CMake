@@ -32,6 +32,7 @@
 #include "cmGetTestPropertyCommand.cxx"
 #include "cmIncludeExternalMSProjectCommand.cxx"
 #include "cmInstallCommand.cxx"
+#include "cmInstallCommandArguments.cxx"
 #include "cmInstallProgramsCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmListCommand.cxx"
