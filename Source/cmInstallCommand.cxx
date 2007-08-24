@@ -21,8 +21,29 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmInstallExportGenerator.h"
+#include "cmInstallCommandArguments.h"
 
 #include <cmsys/Glob.hxx>
+
+static cmInstallTargetGenerator* CreateInstallTargetGenerator(cmTarget& target,
+     const cmInstallCommandArguments& args, bool impLib, bool forceOpt = false)
+{
+  return new cmInstallTargetGenerator(target, args.GetDestination().c_str(), 
+                        impLib, args.GetPermissions().c_str(), 
+                        args.GetConfigurations(), args.GetComponent().c_str(),
+                        args.GetOptional() || forceOpt);
+}
+
+static cmInstallFilesGenerator* CreateInstallFilesGenerator(
+    const std::vector<std::string>& absFiles, 
+    const cmInstallCommandArguments& args, bool programs)
+{
+  return new cmInstallFilesGenerator(absFiles, args.GetDestination().c_str(), 
+                        programs, args.GetPermissions().c_str(), 
+                        args.GetConfigurations(), args.GetComponent().c_str(),
+                        args.GetRename().c_str(), args.GetOptional());
+}
+
 
 // cmInstallCommand
 bool cmInstallCommand::InitialPass(std::vector<std::string> const& args)
@@ -135,204 +156,101 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
 bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 {
   // This is the TARGETS mode.
-  bool doing_targets = true;
-  bool doing_destination = false;
-  bool doing_permissions = false;
-  bool doing_component = false;
-  bool doing_configurations = false;
-  bool doing_export = false;
-  bool archive_settings = true;
-  bool library_settings = true;
-  bool runtime_settings = true;
-  bool framework_settings = true;
-  bool bundle_settings = true;
   std::vector<cmTarget*> targets;
-  const char* archive_destination = 0;
-  const char* library_destination = 0;
-  const char* runtime_destination = 0;
-  const char* framework_destination = 0;
-  const char* bundle_destination = 0;
-  std::string archive_permissions;
-  std::string library_permissions;
-  std::string runtime_permissions;
-  std::string framework_permissions;
-  std::string bundle_permissions;
-  std::string archive_component = "Unspecified";
-  std::string library_component = "Unspecified";
-  std::string runtime_component = "Unspecified";
-  std::string framework_component = "Unspecified";
-  std::string bundle_component = "Unspecified";
-  std::string exportName;
-  std::vector<std::string> archive_configurations;
-  std::vector<std::string> library_configurations;
-  std::vector<std::string> runtime_configurations;
-  std::vector<std::string> framework_configurations;
-  std::vector<std::string> bundle_configurations;
-  bool archive_optional = false;
-  bool library_optional = false;
-  bool runtime_optional = false;
-  bool framework_optional = false;
-  bool bundle_optional = false;
-  for(unsigned int i=1; i < args.size(); ++i)
+
+  cmCommandArgumentsHelper argHelper;
+  cmCommandArgumentGroup group;
+  cmCAStringVector genericArgVector     (&argHelper, 0);
+  cmCAStringVector archiveArgVector     (&argHelper, "ARCHIVE", &group);
+  cmCAStringVector libraryArgVector     (&argHelper, "LIBRARY", &group);
+  cmCAStringVector runtimeArgVector     (&argHelper, "RUNTIME", &group);
+  cmCAStringVector frameworkArgVector   (&argHelper, "FRAMEWORK", &group);
+  cmCAStringVector bundleArgVector      (&argHelper, "BUNDLE", &group);
+  cmCAStringVector resourcesArgVector   (&argHelper, "RESOURCE", &group);
+  cmCAStringVector publicHeaderArgVector(&argHelper, "PUBLIC_HEADER ", &group);
+  cmCAStringVector privateHeaderArgVector(&argHelper,"PRIVATE_HEADER", &group);
+  genericArgVector.Follows(0);
+  group.Follows(&genericArgVector);
+
+  argHelper.Parse(&args, 0);
+
+  std::vector<std::string> unknownArgs;
+  cmInstallCommandArguments genericArgs;
+  cmCAStringVector targetList(&genericArgs, "TARGETS");
+  cmCAString exports(&genericArgs, "EXPORT", &genericArgs.ArgumentGroup);
+  targetList.Follows(0);
+  genericArgs.ArgumentGroup.Follows(&targetList);
+  genericArgs.Parse(&genericArgVector.GetVector(), &unknownArgs);
+
+  cmInstallCommandArguments archiveArgs;
+  cmInstallCommandArguments libraryArgs;
+  cmInstallCommandArguments runtimeArgs;
+  cmInstallCommandArguments frameworkArgs;
+  cmInstallCommandArguments bundleArgs;
+  cmInstallCommandArguments resourcesArgs;
+  cmInstallCommandArguments publicHeaderArgs;
+  cmInstallCommandArguments privateHeaderArgs;
+
+  archiveArgs.Parse      (&archiveArgVector.GetVector(),       &unknownArgs);
+  libraryArgs.Parse      (&libraryArgVector.GetVector(),       &unknownArgs);
+  runtimeArgs.Parse      (&runtimeArgVector.GetVector(),       &unknownArgs);
+  frameworkArgs.Parse    (&frameworkArgVector.GetVector(),     &unknownArgs);
+  bundleArgs.Parse       (&bundleArgVector.GetVector(),        &unknownArgs);
+  resourcesArgs.Parse    (&resourcesArgVector.GetVector(),     &unknownArgs);
+  publicHeaderArgs.Parse (&publicHeaderArgVector.GetVector(),  &unknownArgs);
+  privateHeaderArgs.Parse(&privateHeaderArgVector.GetVector(), &unknownArgs);
+  
+  if(!unknownArgs.empty())
     {
-    if(args[i] == "DESTINATION")
-      {
-      // Switch to setting the destination property.
-      doing_targets = false;
-      doing_destination = true;
-      doing_permissions = false;
-      doing_component = false;
-      doing_configurations = false;
-      doing_export = false;
-      }
-    else if(args[i] == "PERMISSIONS")
-      {
-      // Switch to setting the permissions property.
-      doing_targets = false;
-      doing_destination = false;
-      doing_permissions = true;
-      doing_component = false;
-      doing_configurations = false;
-      doing_export = false;
-      }
-    else if(args[i] == "COMPONENT")
-      {
-      // Switch to setting the component property.
-      doing_targets = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_component = true;
-      doing_configurations = false;
-      doing_export = false;
-      }
-    else if(args[i] == "CONFIGURATIONS")
-      {
-      // Switch to setting the configurations property.
-      doing_targets = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_component = false;
-      doing_configurations = true;
-      doing_export = false;
-      }
-    else if(args[i] == "ARCHIVE")
-      {
-      // Switch to setting only archive properties.
-      doing_targets = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_component = false;
-      doing_configurations = false;
-      doing_export = false;
-      archive_settings = true;
-      library_settings = false;
-      runtime_settings = false;
-      framework_settings = false;
-      bundle_settings = false;
-      }
-    else if(args[i] == "LIBRARY")
-      {
-      // Switch to setting only library properties.
-      doing_targets = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_component = false;
-      doing_configurations = false;
-      doing_export = false;
-      archive_settings = false;
-      library_settings = true;
-      runtime_settings = false;
-      framework_settings = false;
-      bundle_settings = false;
-      }
-    else if(args[i] == "RUNTIME")
-      {
-      // Switch to setting only runtime properties.
-      doing_targets = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_component = false;
-      doing_configurations = false;
-      doing_export = false;
-      archive_settings = false;
-      library_settings = false;
-      runtime_settings = true;
-      framework_settings = false;
-      bundle_settings = false;
-      }
-    else if(args[i] == "FRAMEWORK")
-      {
-      // Switch to setting only framework properties.
-      doing_targets = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_component = false;
-      doing_configurations = false;
-      doing_export = false;
-      archive_settings = false;
-      library_settings = false;
-      runtime_settings = false;
-      framework_settings = true;
-      bundle_settings = false;
-      }
-    else if(args[i] == "BUNDLE")
-      {
-      // Switch to setting only bundle properties.
-      doing_targets = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_component = false;
-      doing_configurations = false;
-      doing_export = false;
-      archive_settings = false;
-      library_settings = false;
-      runtime_settings = false;
-      framework_settings = false;
-      bundle_settings = true;
-      }
-    else if(args[i] == "EXPORT")
-      {
-      // Switch to setting the export property.
-      doing_targets = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_component = false;
-      doing_configurations = false;
-      doing_export = true;
-      }
-    else if(args[i] == "OPTIONAL")
-      {
-      // Set the optional property.
-      doing_targets = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_component = false;
-      doing_configurations = false;
-      if(archive_settings)
-        {
-        archive_optional = true;
-        }
-      if(library_settings)
-        {
-        library_optional = true;
-        }
-      if(runtime_settings)
-        {
-        runtime_optional = true;
-        }
-      if(framework_settings)
-        {
-        framework_optional = true;
-        }
-      if(bundle_settings)
-        {
-        bundle_optional = true;
-        }
-      }
-    else if(doing_targets)
-      {
+    // Unknown argument.
+    cmOStringStream e;
+    e << "TARGETS given unknown argument \"" << unknownArgs[0] << "\".";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  // apply generic args
+  archiveArgs.SetGenericArguments(&genericArgs);
+  libraryArgs.SetGenericArguments(&genericArgs);
+  runtimeArgs.SetGenericArguments(&genericArgs);
+  frameworkArgs.SetGenericArguments(&genericArgs);
+  bundleArgs.SetGenericArguments(&genericArgs);
+  resourcesArgs.SetGenericArguments(&genericArgs);
+  publicHeaderArgs.SetGenericArguments(&genericArgs);
+  privateHeaderArgs.SetGenericArguments(&genericArgs);
+
+  bool success = archiveArgs.Finalize();
+  success = success && libraryArgs.Finalize();
+  success = success && runtimeArgs.Finalize();
+  success = success && frameworkArgs.Finalize();
+  success = success && bundleArgs.Finalize();
+  success = success && resourcesArgs.Finalize();
+  success = success && publicHeaderArgs.Finalize();
+  success = success && privateHeaderArgs.Finalize();
+
+  if(!success)
+    {
+    return false;
+    }
+
+  // Check if there is something to do.
+  if(targetList.GetVector().empty())
+    {
+    return true;
+    }
+
+  // Check whether this is a DLL platform.
+  bool dll_platform = (this->Makefile->IsOn("WIN32") ||
+                       this->Makefile->IsOn("CYGWIN") ||
+                       this->Makefile->IsOn("MINGW"));
+
+  for(std::vector<std::string>::const_iterator 
+      targetIt=targetList.GetVector().begin();
+      targetIt!=targetList.GetVector().end();
+      ++targetIt)
+    {
       // Lookup this target in the current directory.
-      if(cmTarget* target = this->Makefile->FindTarget(args[i].c_str(), false))
+      if(cmTarget* target=this->Makefile->FindTarget(targetIt->c_str(), false))
         {
         // Found the target.  Check its type.
         if(target->GetType() != cmTarget::EXECUTABLE &&
@@ -341,12 +259,11 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
            target->GetType() != cmTarget::MODULE_LIBRARY)
           {
           cmOStringStream e;
-          e << "TARGETS given target \"" << args[i]
+          e << "TARGETS given target \"" << (*targetIt)
             << "\" which is not an executable, library, or module.";
           this->SetError(e.str().c_str());
           return false;
           }
-
         // Store the target in the list to be installed.
         targets.push_back(target);
         }
@@ -354,193 +271,12 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         {
         // Did not find the target.
         cmOStringStream e;
-        e << "TARGETS given target \"" << args[i]
+        e << "TARGETS given target \"" << (*targetIt)
           << "\" which does not exist in this directory.";
         this->SetError(e.str().c_str());
         return false;
         }
-      }
-    else if(doing_destination)
-      {
-      // Set the destination in the active set(s) of properties.
-      if(archive_settings)
-        {
-        archive_destination = args[i].c_str();
-        }
-      if(library_settings)
-        {
-        library_destination = args[i].c_str();
-        }
-      if(runtime_settings)
-        {
-        runtime_destination = args[i].c_str();
-        }
-      if(framework_settings)
-        {
-        framework_destination = args[i].c_str();
-        }
-      if(bundle_settings)
-        {
-        bundle_destination = args[i].c_str();
-        }
-      doing_destination = false;
-      }
-    else if(doing_component)
-      {
-      // Set the component in the active set(s) of properties.
-      if(archive_settings)
-        {
-        archive_component = args[i];
-        }
-      if(library_settings)
-        {
-        library_component = args[i];
-        }
-      if(runtime_settings)
-        {
-        runtime_component = args[i];
-        }
-      if(framework_settings)
-        {
-        framework_component = args[i];
-        }
-      if(bundle_settings)
-        {
-        bundle_component = args[i];
-        }
-      doing_component = false;
-      }
-    else if(doing_permissions)
-      {
-      // Set the permissions in the active set(s) of properties.
-      if(archive_settings)
-        {
-        // Check the requested permission.
-        if(!this->CheckPermissions(args[i], archive_permissions))
-          {
-          cmOStringStream e;
-          e << args[0] << " given invalid permission \""
-            << args[i] << "\".";
-          this->SetError(e.str().c_str());
-          return false;
-          }
-        }
-      if(library_settings)
-        {
-        // Check the requested permission.
-        if(!this->CheckPermissions(args[i], library_permissions))
-          {
-          cmOStringStream e;
-          e << args[0] << " given invalid permission \""
-            << args[i] << "\".";
-          this->SetError(e.str().c_str());
-          return false;
-          }
-        }
-      if(runtime_settings)
-        {
-        // Check the requested permission.
-        if(!this->CheckPermissions(args[i], runtime_permissions))
-          {
-          cmOStringStream e;
-          e << args[0] << " given invalid permission \""
-            << args[i] << "\".";
-          this->SetError(e.str().c_str());
-          return false;
-          }
-        }
-      if(framework_settings)
-        {
-        // Check the requested permission.
-        if(!this->CheckPermissions(args[i], framework_permissions))
-          {
-          cmOStringStream e;
-          e << args[0] << " given invalid permission \""
-            << args[i] << "\".";
-          this->SetError(e.str().c_str());
-          return false;
-          }
-        }
-      if(bundle_settings)
-        {
-        // Check the requested permission.
-        if(!this->CheckPermissions(args[i], bundle_permissions))
-          {
-          cmOStringStream e;
-          e << args[0] << " given invalid permission \""
-            << args[i] << "\".";
-          this->SetError(e.str().c_str());
-          return false;
-          }
-        }
-      }
-    else if(doing_configurations)
-      {
-      // Add the configuration in the active set(s) of properties.
-      if(archive_settings)
-        {
-        archive_configurations.push_back(args[i]);
-        }
-      if(library_settings)
-        {
-        library_configurations.push_back(args[i]);
-        }
-      if(runtime_settings)
-        {
-        runtime_configurations.push_back(args[i]);
-        }
-      if(framework_settings)
-        {
-        framework_configurations.push_back(args[i]);
-        }
-      if(bundle_settings)
-        {
-        bundle_configurations.push_back(args[i]);
-        }
-      }
-    else if(doing_export)
-      {
-      exportName = args[i];
-      doing_export = false;
-      }
-    else
-      {
-      // Unknown argument.
-      cmOStringStream e;
-      e << "TARGETS given unknown argument \"" << args[i] << "\".";
-      this->SetError(e.str().c_str());
-      return false;
-      }
     }
-
-  // Check if there is something to do.
-  if(targets.empty())
-    {
-    return true;
-    }
-  if(!archive_destination && !library_destination && !runtime_destination &&
-     !framework_destination && !bundle_destination)
-    {
-    this->SetError("TARGETS given no DESTINATION!");
-    return false;
-    }
-
-  // Check whether this is a DLL platform.
-  bool dll_platform = (this->Makefile->IsOn("WIN32") ||
-                       this->Makefile->IsOn("CYGWIN") ||
-                       this->Makefile->IsOn("MINGW"));
-
-  // Compute destination paths.
-  std::string archive_dest;
-  std::string library_dest;
-  std::string runtime_dest;
-  std::string framework_dest;
-  std::string bundle_dest;
-  this->ComputeDestination(archive_destination, archive_dest);
-  this->ComputeDestination(library_destination, library_dest);
-  this->ComputeDestination(runtime_destination, runtime_dest);
-  if(framework_destination) framework_dest = framework_destination;
-  if(bundle_destination) bundle_dest = bundle_destination;
 
   // Generate install script code to install the given targets.
   for(std::vector<cmTarget*>::iterator ti = targets.begin();
@@ -553,39 +289,36 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     cmInstallTargetGenerator* runtimeGenerator = 0;
     cmInstallTargetGenerator* frameworkGenerator = 0;
     cmInstallTargetGenerator* bundleGenerator = 0;
+    cmInstallTargetGenerator* resourcesGenerator = 0;
+    cmInstallTargetGenerator* publicHeaderGenerator = 0;
+    cmInstallTargetGenerator* privateHeaderGenerator = 0;
 
     switch(target.GetType())
       {
       case cmTarget::SHARED_LIBRARY:
         {
         // Shared libraries are handled differently on DLL and non-DLL
-        // platforms.  All windows platforms are DLL platforms
-        // including cygwin.  Currently no other platform is a DLL
-        // platform.
+        // platforms.  All windows platforms are DLL platforms including 
+        // cygwin.  Currently no other platform is a DLL platform.
         if(dll_platform)
           {
           // This is a DLL platform.
-          if(archive_destination)
+          if(!archiveArgs.GetDestination().empty())
             {
             // The import library uses the ARCHIVE properties.
-            archiveGenerator = new cmInstallTargetGenerator(target, 
-                                           archive_dest.c_str(), 
-                                           true,
-                                           archive_permissions.c_str(),
-                                           archive_configurations,
-                                           archive_component.c_str(),
-                                           archive_optional);
+            archiveGenerator = CreateInstallTargetGenerator(target, 
+                                                            archiveArgs, true);
             }
-          if(runtime_destination)
+          if(!runtimeArgs.GetDestination().empty())
             {
             // The DLL uses the RUNTIME properties.
-            runtimeGenerator = new cmInstallTargetGenerator(target, 
-                                           runtime_dest.c_str(),
-                                           false,
-                                           runtime_permissions.c_str(),
-                                           runtime_configurations,
-                                           runtime_component.c_str(),
-                                           runtime_optional);
+            runtimeGenerator = CreateInstallTargetGenerator(target, 
+                                                           runtimeArgs, false);
+            }
+          if ((archiveGenerator==0) && (runtimeGenerator==0))
+            {
+            this->SetError("Library TARGETS given no DESTINATION!");
+            return false;
             }
           }
         else
@@ -595,16 +328,11 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           // INSTALL properties. Otherwise, use the LIBRARY properties.
           if(target.GetPropertyAsBool("FRAMEWORK"))
             {
-            if(framework_destination)
+            // Use the FRAMEWORK properties.
+            if (!frameworkArgs.GetDestination().empty())
               {
-              // Use the FRAMEWORK properties.
-              frameworkGenerator = new cmInstallTargetGenerator(target,
-                                             framework_dest.c_str(),
-                                             false,
-                                             framework_permissions.c_str(),
-                                             framework_configurations,
-                                             framework_component.c_str(),
-                                             framework_optional);
+              frameworkGenerator = CreateInstallTargetGenerator(target, 
+                                                         frameworkArgs, false);
               }
             else
               {
@@ -617,16 +345,11 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             }
           else
             {
-            if(library_destination)
+            // The shared library uses the LIBRARY properties.
+            if (!libraryArgs.GetDestination().empty())
               {
-              // The shared library uses the LIBRARY properties.
-              libraryGenerator = new cmInstallTargetGenerator(target, 
-                                             library_dest.c_str(),
-                                             false,
-                                             library_permissions.c_str(),
-                                             library_configurations,
-                                             library_component.c_str(),
-                                             library_optional);
+              libraryGenerator = CreateInstallTargetGenerator(target, 
+                                                           libraryArgs, false);
               }
             else
               {
@@ -638,20 +361,22 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
               }
             }
           }
+
+/*        if(target.GetPropertyAsBool("FRAMEWORK"))
+          {
+          // Create the files install generator.
+          this->Makefile->AddInstallGenerator(CreateInstallFilesGenerator(
+                                            absFiles, publicHeaderArgs, false);
+          }*/
         }
         break;
       case cmTarget::STATIC_LIBRARY:
         {
         // Static libraries use ARCHIVE properties.
-        if(archive_destination)
+        if (!archiveArgs.GetDestination().empty())
           {
-          archiveGenerator = new cmInstallTargetGenerator(target,
-                                         archive_dest.c_str(),
-                                         false,
-                                         archive_permissions.c_str(),
-                                         archive_configurations,
-                                         archive_component.c_str(),
-                                         archive_optional);
+          archiveGenerator = CreateInstallTargetGenerator(target, archiveArgs, 
+                                                          false);
           }
         else
           {
@@ -666,15 +391,10 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       case cmTarget::MODULE_LIBRARY:
         {
         // Modules use LIBRARY properties.
-        if(library_destination)
+        if (!libraryArgs.GetDestination().empty())
           {
-          libraryGenerator = new cmInstallTargetGenerator(target, 
-                                         library_dest.c_str(), 
-                                         false,
-                                         library_permissions.c_str(),
-                                         library_configurations,
-                                         library_component.c_str(),
-                                         library_optional);
+          libraryGenerator = CreateInstallTargetGenerator(target, libraryArgs, 
+                                                          false);
           }
         else
           {
@@ -691,42 +411,32 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Executables use the RUNTIME properties.
         if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
           {
-          if(bundle_destination)
+          if (!bundleArgs.GetDestination().empty())
             {
-            bundleGenerator = new cmInstallTargetGenerator(target,
-                                           bundle_dest.c_str(),
-                                           false,
-                                           bundle_permissions.c_str(),
-                                           bundle_configurations,
-                                           bundle_component.c_str(),
-                                           bundle_optional);
+            bundleGenerator = CreateInstallTargetGenerator(target, bundleArgs, 
+                                                           false);
             }
           else
             {
             cmOStringStream e;
-            e << "TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable target \""
-              << target.GetName() << "\".";
+            e << "TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE "
+                 "executable target \"" << target.GetName() << "\".";
             this->SetError(e.str().c_str());
             return false;
             }
           }
         else
           {
-          if(runtime_destination)
+          if (!runtimeArgs.GetDestination().empty())
             {
-            runtimeGenerator = new cmInstallTargetGenerator(target,
-                                           runtime_dest.c_str(),
-                                           false,
-                                           runtime_permissions.c_str(),
-                                           runtime_configurations,
-                                           runtime_component.c_str(),
-                                           runtime_optional);
+            runtimeGenerator = CreateInstallTargetGenerator(target, 
+                                                           runtimeArgs, false);
             }
           else
             {
             cmOStringStream e;
-            e << "TARGETS given no RUNTIME DESTINATION for executable target \""
-              << target.GetName() << "\".";
+            e << "TARGETS given no RUNTIME DESTINATION for executable "
+                 "target \"" << target.GetName() << "\".";
             this->SetError(e.str().c_str());
             return false;
             }
@@ -735,17 +445,12 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // On DLL platforms an executable may also have an import
         // library.  Install it to the archive destination if it
         // exists.
-        if(dll_platform && archive_destination &&
+        if(dll_platform && !archiveArgs.GetDestination().empty() &&
            target.GetPropertyAsBool("ENABLE_EXPORTS"))
           {
           // The import library uses the ARCHIVE properties.
-          archiveGenerator = new cmInstallTargetGenerator(target,
-                                         archive_dest.c_str(),
-                                         true,
-                                         archive_permissions.c_str(),
-                                         archive_configurations,
-                                         archive_component.c_str(),
-                                         true);
+          archiveGenerator = CreateInstallTargetGenerator(target, 
+                                                      archiveArgs, true, true);
           }
         }
         break;
@@ -759,32 +464,40 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     this->Makefile->AddInstallGenerator(runtimeGenerator);
     this->Makefile->AddInstallGenerator(frameworkGenerator);
     this->Makefile->AddInstallGenerator(bundleGenerator);
+    this->Makefile->AddInstallGenerator(resourcesGenerator);
+    this->Makefile->AddInstallGenerator(publicHeaderGenerator);
+    this->Makefile->AddInstallGenerator(privateHeaderGenerator);
 
-    if (!exportName.empty())
+    if (!exports.GetString().empty())
       {
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                                       ->AddTargetToExports(exportName.c_str(),
-                                                            &target,
-                                                            archiveGenerator,
-                                                            runtimeGenerator,
-                                                            libraryGenerator,
-                                                            frameworkGenerator,
-                                                            bundleGenerator);
+                                     ->AddTargetToExports(exports.GetCString(),
+                                                          &target,
+                                                          archiveGenerator,
+                                                          runtimeGenerator,
+                                                          libraryGenerator,
+                                                          frameworkGenerator,
+                                                          bundleGenerator);
       }
     }
 
-  // Tell the global generator about any installation component names
-  // specified.
+  // Tell the global generator about any installation component names specified
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-    ->AddInstallComponent(archive_component.c_str());
+                     ->AddInstallComponent(archiveArgs.GetComponent().c_str());
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-    ->AddInstallComponent(library_component.c_str());
+                     ->AddInstallComponent(libraryArgs.GetComponent().c_str());
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-    ->AddInstallComponent(runtime_component.c_str());
+                     ->AddInstallComponent(runtimeArgs.GetComponent().c_str());
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-    ->AddInstallComponent(framework_component.c_str());
+                   ->AddInstallComponent(frameworkArgs.GetComponent().c_str());
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-    ->AddInstallComponent(bundle_component.c_str());
+                      ->AddInstallComponent(bundleArgs.GetComponent().c_str());
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                   ->AddInstallComponent(resourcesArgs.GetComponent().c_str());
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                ->AddInstallComponent(publicHeaderArgs.GetComponent().c_str());
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+               ->AddInstallComponent(privateHeaderArgs.GetComponent().c_str());
 
   return true;
 }
@@ -794,160 +507,29 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
 {
   // This is the FILES mode.
   bool programs = (args[0] == "PROGRAMS");
-  bool doing_files = true;
-  bool doing_destination = false;
-  bool doing_permissions = false;
-  bool doing_configurations = false;
-  bool doing_component = false;
-  bool doing_rename = false;
-  std::vector<std::string> files;
-  const char* destination = 0;
-  std::string rename;
-  std::string permissions;
-  std::vector<std::string> configurations;
-  std::string component = "Unspecified";
-  bool optional = false;
-  for(unsigned int i=1; i < args.size(); ++i)
-    {
-    if(args[i] == "DESTINATION")
-      {
-      // Switch to setting the destination property.
-      doing_files = false;
-      doing_destination = true;
-      doing_permissions = false;
-      doing_configurations = false;
-      doing_component = false;
-      doing_rename = false;
-      }
-    else if(args[i] == "PERMISSIONS")
-      {
-      // Switch to setting the permissions property.
-      doing_files = false;
-      doing_destination = false;
-      doing_permissions = true;
-      doing_configurations = false;
-      doing_component = false;
-      doing_rename = false;
-      }
-    else if(args[i] == "CONFIGURATIONS")
-      {
-      // Switch to setting the configurations property.
-      doing_files = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_configurations = true;
-      doing_component = false;
-      doing_rename = false;
-      }
-    else if(args[i] == "COMPONENT")
-      {
-      // Switch to setting the component property.
-      doing_files = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_configurations = false;
-      doing_component = true;
-      doing_rename = false;
-      }
-    else if(args[i] == "RENAME")
-      {
-      // Switch to setting the rename property.
-      doing_files = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_configurations = false;
-      doing_component = false;
-      doing_rename = true;
-      }
-    else if(args[i] == "OPTIONAL")
-      {
-      // Set the optional property.
-      doing_files = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_configurations = false;
-      doing_component = false;
-      doing_rename = false;
-      optional = true;
-      }
-    else if(doing_files)
-      {
-      // Convert this file to a full path.
-      std::string file = args[i];
-      if(!cmSystemTools::FileIsFullPath(file.c_str()))
-        {
-        file = this->Makefile->GetCurrentDirectory();
-        file += "/";
-        file += args[i];
-        }
+  cmInstallCommandArguments ica;
+  cmCAStringVector files(&ica, programs ? "PROGRAMS" : "FILES");
+  files.Follows(0);
+  ica.ArgumentGroup.Follows(&files);
+  std::vector<std::string> unknownArgs;
+  ica.Parse(&args, &unknownArgs);
 
-      // Make sure the file is not a directory.
-      if(cmSystemTools::FileIsDirectory(file.c_str()))
-        {
-        cmOStringStream e;
-        e << args[0] << " given directory \"" << args[i] << "\" to install.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      // Store the file for installation.
-      files.push_back(file);
-      }
-    else if(doing_configurations)
-      {
-      configurations.push_back(args[i]);
-      }
-    else if(doing_destination)
-      {
-      destination = args[i].c_str();
-      doing_destination = false;
-      }
-    else if(doing_component)
-      {
-      component = args[i];
-      doing_component = false;
-      }
-    else if(doing_permissions)
-      {
-      // Check the requested permission.
-      if(!this->CheckPermissions(args[i], permissions))
-        {
-        cmOStringStream e;
-        e << args[0] << " given invalid permission \""
-          << args[i] << "\".";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-      }
-    else if(doing_rename)
-      {
-      rename = args[i];
-      doing_rename = false;
-      }
-    else
-      {
-      // Unknown argument.
-      cmOStringStream e;
-      e << args[0] << " given unknown argument \"" << args[i] << "\".";
-      this->SetError(e.str().c_str());
-      return false;
-      }
-    }
-
-  // Check if there is something to do.
-  if(files.empty())
+  if(!unknownArgs.empty())
     {
-    return true;
-    }
-  if(!destination)
-    {
-    // A destination is required.
+    // Unknown argument.
     cmOStringStream e;
-    e << args[0] << " given no DESTINATION!";
+    e << args[0] << " given unknown argument \"" << unknownArgs[0] << "\".";
     this->SetError(e.str().c_str());
     return false;
     }
-  if(!rename.empty() && files.size() > 1)
+  
+  // Check if there is something to do.
+  if(files.GetVector().empty())
+    {
+    return true;
+    }
+
+  if(!ica.GetRename().empty() && files.GetVector().size() > 1)
     {
     // The rename option works only with one file.
     cmOStringStream e;
@@ -956,21 +538,53 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     return false;
     }
 
-  // Compute destination path.
-  std::string dest;
-  this->ComputeDestination(destination, dest);
+  std::vector<std::string> absFiles;
+  for(std::vector<std::string>::const_iterator 
+      fileIt = files.GetVector().begin(); fileIt != files.GetVector().end();
+      ++fileIt)
+    {
+    // Convert this file to a full path.
+    std::string file = *fileIt;
+    if(!cmSystemTools::FileIsFullPath(file.c_str()))
+      {
+      file = this->Makefile->GetCurrentDirectory();
+      file += "/";
+      file += *fileIt;
+      }
+
+    // Make sure the file is not a directory.
+    if(cmSystemTools::FileIsDirectory(file.c_str()))
+      {
+      cmOStringStream e;
+      e << args[0] << " given directory \"" << (*fileIt) << "\" to install.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    // Store the file for installation.
+    absFiles.push_back(file);
+    }
+
+  if (!ica.Finalize())
+    {
+    return false;
+    }
+
+  if(ica.GetDestination().empty())
+    {
+    // A destination is required.
+    cmOStringStream e;
+    e << args[0] << " given no DESTINATION!";
+    this->SetError(e.str().c_str());
+    return false;
+    }
 
   // Create the files install generator.
   this->Makefile->AddInstallGenerator(
-    new cmInstallFilesGenerator(files, dest.c_str(), programs,
-                                permissions.c_str(), configurations,
-                                component.c_str(), rename.c_str(),
-                                optional));
+                         CreateInstallFilesGenerator(absFiles, ica, programs));
 
-  // Tell the global generator about any installation component names
-  // specified.
+  // Tell the global generator about any installation component names specified.
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-    ->AddInstallComponent(component.c_str());
+                             ->AddInstallComponent(ica.GetComponent().c_str());
 
   return true;
 }
@@ -1248,9 +862,9 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       doing_component = false;
       }
     else if(doing_permissions_file)
-      {
-      // Check the requested permission.
-      if(!this->CheckPermissions(args[i], permissions_file))
+     {
+     // Check the requested permission.
+     if(!cmInstallCommandArguments::CheckPermissions(args[i],permissions_file))
         {
         cmOStringStream e;
         e << args[0] << " given invalid file permission \""
@@ -1262,7 +876,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
     else if(doing_permissions_dir)
       {
       // Check the requested permission.
-      if(!this->CheckPermissions(args[i], permissions_dir))
+      if(!cmInstallCommandArguments::CheckPermissions(args[i],permissions_dir))
         {
         cmOStringStream e;
         e << args[0] << " given invalid directory permission \""
@@ -1274,7 +888,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
     else if(doing_permissions_match)
       {
       // Check the requested permission.
-      if(!this->CheckPermissions(args[i], literal_args))
+      if(!cmInstallCommandArguments::CheckPermissions(args[i], literal_args))
         {
         cmOStringStream e;
         e << args[0] << " given invalid permission \""
@@ -1315,7 +929,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 
   // Compute destination path.
   std::string dest;
-  this->ComputeDestination(destination, dest);
+  cmInstallCommandArguments::ComputeDestination(destination, dest);
 
   // Create the directory install generator.
   this->Makefile->AddInstallGenerator(
@@ -1338,123 +952,37 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 {
   // This is the EXPORT mode.
-  bool doing_exports = true;
-  bool doing_destination = false;
-  bool doing_permissions = false;
-  bool doing_configurations = false;
-  bool doing_filename = false;
-  bool doing_prefix = false;
-  std::vector<std::string> exports;
-  const char* destination = 0;
-  std::string filename;
-  std::string permissions;
-  std::string prefix;
-  std::vector<std::string> configurations;
-  for(unsigned int i=1; i < args.size(); ++i)
+  cmInstallCommandArguments ica;
+  cmCAStringVector exports(&ica, "EXPORT");
+  cmCAString prefix(&ica, "PREFIX", &ica.ArgumentGroup);
+  cmCAString filename(&ica, "FILENAME", &ica.ArgumentGroup);
+  exports.Follows(0);
+
+  ica.ArgumentGroup.Follows(&exports);
+  std::vector<std::string> unknownArgs;
+  ica.Parse(&args, &unknownArgs);
+
+  if (!unknownArgs.empty())
     {
-    if(args[i] == "DESTINATION")
-      {
-      // Switch to setting the destination property.
-      doing_exports = false;
-      doing_destination = true;
-      doing_permissions = false;
-      doing_configurations = false;
-      doing_filename = false;
-      doing_prefix = false;
-      }
-    else if(args[i] == "PERMISSIONS")
-      {
-      // Switch to setting the permissions property.
-      doing_exports = false;
-      doing_destination = false;
-      doing_permissions = true;
-      doing_configurations = false;
-      doing_filename = false;
-      doing_prefix = false;
-      }
-    else if(args[i] == "CONFIGURATIONS")
-      {
-      // Switch to setting the configurations property.
-      doing_exports = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_configurations = true;
-      doing_filename = false;
-      doing_prefix = false;
-      }
-    else if(args[i] == "FILENAME")
-      {
-      // Switch to setting the rename property.
-      doing_exports = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_configurations = false;
-      doing_filename = true;
-      doing_prefix = false;
-      }
-    else if(args[i] == "PREFIX")
-      {
-      // Switch to setting the rename property.
-      doing_exports = false;
-      doing_destination = false;
-      doing_permissions = false;
-      doing_configurations = false;
-      doing_filename = false;
-      doing_prefix = true;
-      }
-    else if(doing_exports)
-      {
-      // Store the file for installation.
-      exports.push_back(args[i]);
-      }
-    else if(doing_configurations)
-      {
-      configurations.push_back(args[i]);
-      }
-    else if(doing_destination)
-      {
-      destination = args[i].c_str();
-      doing_destination = false;
-      }
-    else if(doing_permissions)
-      {
-      // Check the requested permission.
-      if(!this->CheckPermissions(args[i], permissions))
-        {
-        cmOStringStream e;
-        e << args[0] << " given invalid permission \""
-          << args[i] << "\".";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-      }
-    else if(doing_filename)
-      {
-      filename = args[i];
-      doing_filename = false;
-      }
-    else if(doing_prefix)
-      {
-      prefix = args[i];
-      doing_prefix = false;
-      }
-    else
-      {
-      // Unknown argument.
-      cmOStringStream e;
-      e << args[0] << " given unknown argument \"" << args[i] << "\".";
-      this->SetError(e.str().c_str());
-      return false;
-      }
+    // Unknown argument.
+    cmOStringStream e;
+    e << args[0] << " given unknown argument \"" << unknownArgs[0] << "\".";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  if (!ica.Finalize())
+    {
+    return false;
     }
 
   std::string cmakeDir = this->Makefile->GetHomeOutputDirectory();
   cmakeDir += cmake::GetCMakeFilesDirectory();
-  for(std::vector<std::string>::const_iterator exportIt = exports.begin();
-      exportIt != exports.end();
+  for(std::vector<std::string>::const_iterator 
+      exportIt = exports.GetVector().begin();
+      exportIt != exports.GetVector().end();
       ++exportIt)
     {
-
     const std::vector<cmTargetExport*>* exportSet = this->
                           Makefile->GetLocalGenerator()->GetGlobalGenerator()->
                           GetExportSet(exportIt->c_str());
@@ -1465,8 +993,9 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 
     // Create the export install generator.
     cmInstallExportGenerator* exportGenerator = new cmInstallExportGenerator(
-                          destination, permissions.c_str(), configurations, 0,
-                          filename.c_str(), prefix.c_str(), cmakeDir.c_str());
+                    ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
+                    ica.GetConfigurations(),0 , filename.GetCString(), 
+                    prefix.GetCString(), cmakeDir.c_str());
 
     if (exportGenerator->SetExportSet(exportIt->c_str(),exportSet))
       {
@@ -1480,61 +1009,4 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
     }
 
   return true;
-}
-
-//----------------------------------------------------------------------------
-void cmInstallCommand::ComputeDestination(const char* destination,
-                                          std::string& dest) const
-{
-  if(destination)
-    {
-    if(cmSystemTools::FileIsFullPath(destination))
-      {
-      // Full paths are absolute.
-      dest = destination;
-      }
-    else
-      {
-      // Relative paths are treated with respect to the installation prefix.
-      dest = "${CMAKE_INSTALL_PREFIX}/";
-      dest += destination;
-      }
-
-    // Format the path nicely.  Note this also removes trailing
-    // slashes.
-    cmSystemTools::ConvertToUnixSlashes(dest);
-    }
-  else
-    {
-    dest = "";
-    }
-}
-
-//----------------------------------------------------------------------------
-bool cmInstallCommand::CheckPermissions(std::string const& arg,
-                                        std::string& permissions) const
-{
-  // Table of valid permissions.
-  const char* table[] =
-    {
-      "OWNER_READ", "OWNER_WRITE", "OWNER_EXECUTE",
-      "GROUP_READ", "GROUP_WRITE", "GROUP_EXECUTE",
-      "WORLD_READ", "WORLD_WRITE", "WORLD_EXECUTE",
-      "SETUID", "SETGID", 0
-    };
-
-  // Check the permission against the table.
-  for(const char** valid = table; *valid; ++valid)
-    {
-    if(arg == *valid)
-      {
-      // This is a valid permission.
-      permissions += " ";
-      permissions += arg;
-      return true;
-      }
-    }
-
-  // This is not a valid permission.
-  return false;
 }
