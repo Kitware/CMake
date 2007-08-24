@@ -9,7 +9,7 @@
 # macro CMAKE_FORCE_SYSTEM(name version processor)
 #   Set CMAKE_SYSTEM_NAME, CMAKE_SYSTEM_VERSION and CMAKE_SYSTEM_PROCESSOR
 #
-# macro CMAKE_FORCE_C_COMPILER(compiler compiler_id sizeof_void)
+# macro CMAKE_FORCE_C_COMPILER(compiler compiler_id sizeof_void_p)
 #   Set CMAKE_C_COMPILER to the given compiler and set CMAKE_C_COMPILER_ID
 #   to the given compiler_id. This Id is used by cmake to construct the filename
 #   of the system-compiler.cmake file. For C also the size of a void-pointer
