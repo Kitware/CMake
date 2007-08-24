@@ -1,9 +1,25 @@
-#source_group(Base             FILES main.c)
-#source_group(Base\\Sub1       FILES sub1/foo.c)
-#source_group(Base\\Sub1\\Sub2 FILES sub1/foobar.c)
-#source_group("" FILES foo.c)
-#source_group("\\" FILES bar.c)
+source_group(Base             FILES main.c)
+
+# a sub group
+source_group(Base\\Sub1       FILES sub1/foo.c)
+
+# a sub sub group
+source_group(Base\\Sub1\\Sub2 FILES sub1/foobar.c)
+
+# a group with empty name
+source_group("" FILES foo.c)
+
+# a group, whose name consists only of the delimiter 
+#should be handled the same way as an empty name
+source_group("\\" FILES baz.c)
+
+# a sub sub group whose last component has the same name
+# as an already existing group
+source_group(Base\\Sub1\\Base FILES bar.c)
+
+# a group without files, is currently not created
+source_group(EmptyGroup)
 
 
-add_executable(SourceGroups main.c bar.c foo.c sub1/foo.c sub1/foobar.c)
+add_executable(SourceGroups main.c bar.c foo.c sub1/foo.c sub1/foobar.c baz.c)
 
