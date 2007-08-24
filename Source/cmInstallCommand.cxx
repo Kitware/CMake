@@ -181,6 +181,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   targetList.Follows(0);
   genericArgs.ArgumentGroup.Follows(&targetList);
   genericArgs.Parse(&genericArgVector.GetVector(), &unknownArgs);
+  bool success = genericArgs.Finalize();
 
   cmInstallCommandArguments archiveArgs;
   cmInstallCommandArguments libraryArgs;
@@ -219,7 +220,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   publicHeaderArgs.SetGenericArguments(&genericArgs);
   privateHeaderArgs.SetGenericArguments(&genericArgs);
 
-  bool success = archiveArgs.Finalize();
+  success = success && archiveArgs.Finalize();
   success = success && libraryArgs.Finalize();
   success = success && runtimeArgs.Finalize();
   success = success && frameworkArgs.Finalize();

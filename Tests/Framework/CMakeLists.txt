@@ -27,7 +27,10 @@ set_source_files_properties(test.lua PROPERTIES
 )
 add_executable(bar bar.cxx)
 target_link_libraries(bar foo)
-
+install(TARGETS foo bar
+  RUNTIME DESTINATION /Applications/CMakeTestsFramework/bin
+  FRAMEWORK DESTINATION /Library/Frameworks
+)
 
 # Make a static library and apply the framework properties to it to verify
 # that everything still builds correctly, but it will not actually produce

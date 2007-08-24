@@ -27,7 +27,7 @@ ADD_EXECUTABLE(SecondBundle
 TARGET_LINK_LIBRARIES(SecondBundle BundleTestLib)
  
 # Test bundle installation.
-INSTALL(TARGETS SecondBundle DESTINATION Application)
+INSTALL(TARGETS SecondBundle DESTINATION Applications)
 
 # Test whether bundles respect the output name.  Since the library is
 # installed into a location that uses this output name this will fail if the

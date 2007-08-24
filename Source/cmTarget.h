@@ -137,13 +137,25 @@ public:
    */
   std::string GetRuntimeInstallPath() {return this->RuntimeInstallPath;}
   void SetRuntimeInstallPath(const char *name) {
-  this->RuntimeInstallPath = name;}
+    this->RuntimeInstallPath = name; }
 
   /**
    * Get/Set whether there is an install rule for this target.
    */
   bool GetHaveInstallRule() { return this->HaveInstallRule; }
   void SetHaveInstallRule(bool h) { this->HaveInstallRule = h; }
+
+  /**
+   * Get/Set the path needed for calls to install_name_tool regarding this
+   * target. Used to support fixing up installed libraries and executables on
+   * the Mac (including bundles and frameworks). Only used if the target does
+   * not have an INSTALL_NAME_DIR property.
+   * See cmInstallTargetGenerator::AddInstallNamePatchRule and callers for
+   * more information.
+   */
+  std::string GetInstallNameFixupPath() { return this->InstallNameFixupPath; }
+  void SetInstallNameFixupPath(const char *path) {
+    this->InstallNameFixupPath = path; }
 
   /** Add a utility on which this project depends. A utility is an executable
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
@@ -382,6 +394,7 @@ private:
   std::vector<std::string> LinkDirectories;
   std::vector<std::string> ExplicitLinkDirectories;
   bool HaveInstallRule;
+  std::string InstallNameFixupPath;
   std::string InstallPath;
   std::string RuntimeInstallPath;
   std::string OutputDir;

@@ -53,13 +53,13 @@ protected:
                                   Indent const& indent);
   void AddInstallNamePatchRule(std::ostream& os, Indent const& indent,
                                const char* config,
-                               const std::string& toFullPath);
+                               const std::string& toDestDirPath);
   void AddStripRule(std::ostream& os, Indent const& indent,
                     cmTarget::TargetType type,
-                    const std::string& toFullPath);
+                    const std::string& toDestDirPath);
   void AddRanlibRule(std::ostream& os, Indent const& indent,
                      cmTarget::TargetType type,
-                     const std::string& toFullPath);
+                     const std::string& toDestDirPath);
 
   cmTarget* Target;
   bool ImportLibrary;
