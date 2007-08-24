@@ -66,16 +66,13 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
  
   const char *parent = NULL;
   cmSourceGroup* sg = NULL;
-  for(unsigned int i=0;i<folders.size();++i)
+  sg = this->Makefile->GetSourceGroup(folders);
+  if(!sg)
     {
-    sg = this->Makefile->GetSourceGroup(folders[i].c_str());
-    if(!sg)
-      {
-      this->Makefile->AddSourceGroup(folders[i].c_str(), 0, parent);
-      }
-    sg = this->Makefile->GetSourceGroup(folders[i].c_str());
-    parent = folders[i].c_str();
+    this->Makefile->AddSourceGroup(folders);
+    sg = this->Makefile->GetSourceGroup(folders);
     }
+
   if(!sg)
     {
     this->SetError("Could not create or find source group");

@@ -1448,105 +1448,99 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-cmSourceGroup* cmMakefile::GetSourceGroup(const char* name)
+cmSourceGroup* cmMakefile::GetSourceGroup(const std::vector<std::string>&name)
 {
-  // First see if the group exists.  If so, replace its regular expression.
-  for(std::vector<cmSourceGroup>::iterator sg = this->SourceGroups.begin();
-      sg != this->SourceGroups.end(); ++sg)
-    {
-    std::string sgName = sg->GetName();
-    if(sgName == name)
-      {
-      return &(*sg);
-      }
-    else
-      {
-      cmSourceGroup *target = sg->lookupChild(name);
+  cmSourceGroup* sg = 0;
 
-      if(target)
+  // first look for source group starting with the same as the one we wants
+  for (std::vector<cmSourceGroup>::iterator sgIt = this->SourceGroups.begin();
+       sgIt != this->SourceGroups.end(); ++sgIt)
+
+    {
+    std::string sgName = sgIt->GetName();
+    if(sgName == name[0])
+      {
+      sg = &(*sgIt);
+      break;
+      }
+    }
+
+  if(sg != 0)
+    {
+    // iterate through its children to find match source group
+    for(unsigned int i=1; i<name.size(); ++i)
+      {
+      sg = sg->lookupChild(name[i].c_str());
+      if(sg == 0)
         {
-        return target;
+        break;
         }
       }
     }
-  return 0;
+  return sg;
 }
 
-void cmMakefile::AddSourceGroup(const char* name,
+ void cmMakefile::AddSourceGroup(const char* name,
+                                 const char* regex,
+                                 const char* parent)
+{
+  if (name)
+    {
+    std::vector<std::string> nameVector;
+    nameVector.push_back(name);
+    AddSourceGroup(nameVector, regex, parent);
+    }
+}
+
+void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
                                 const char* regex,
                                 const char *parent)
 {
-  // First see if the group exists.  If so, replace its regular expression.
-  for(unsigned int i=0;i<this->SourceGroups.size();++i)
+  cmSourceGroup* sg = 0;
+  std::vector<std::string> currentName;
+  int i = 0;
+  const int lastElement = name.size()-1;
+  for(i=lastElement; i>=0; --i)
     {
-    cmSourceGroup *sg = &this->SourceGroups[i];
-
-    std::string sgName = sg->GetName();
-    if(!parent)
+    currentName.assign(name.begin(), name.begin()+i+1);
+    sg = this->GetSourceGroup(currentName);
+    if(sg != 0)
       {
-      if(sgName == name)
-        {
-        if ( regex )
-          {
-          // We only want to set the regular expression.  If there are already
-          // source files in the group, we don't want to remove them.
-          sg->SetGroupRegex(regex);
-          }
-        return;
-        }
-      }
-    else
-      {
-      if(sgName == parent)
-        {
-        cmSourceGroup *localtarget = sg->lookupChild(name);
-        if(localtarget)
-          {
-          if ( regex )
-            {
-            // We only want to set the regular expression.  If there are
-            // already source files in the group, we don't want to remove
-            // them.
-            localtarget->SetGroupRegex(regex);
-            }
-          }
-        else
-          {
-          sg->AddChild(cmSourceGroup(name, regex));
-          }
-        return;
-        }
-      else
-        {
-        cmSourceGroup *localtarget = sg->lookupChild(parent);
-
-        if(localtarget)
-          {
-          cmSourceGroup *addtarget = localtarget->lookupChild(name);
-
-          if(addtarget)
-            {
-            if ( regex )
-              {
-              // We only want to set the regular expression.  If there are
-              // already source files in the group, we don't want to
-              // remove them.
-              addtarget->SetGroupRegex(regex);
-              }
-            }
-          else
-            {
-            localtarget->AddChild(cmSourceGroup(name, regex));
-            }
-          return;
-          }
-        }
+      break;
       }
     }
 
-  // The group doesn't exist.  Add it.
-  this->SourceGroups.push_back(cmSourceGroup(name, regex));
+  // i now contains the index of the last found component
+  if(i==lastElement)
+    {
+    // group already exists, replace its regular expression
+    if ( regex )
+      {
+      // We only want to set the regular expression.  If there are already
+      // source files in the group, we don't want to remove them.
+      sg->SetGroupRegex(regex);
+      }
+    return;
+    }
+  else if(i==-1)
+    {
+    // group does not exists nor belong to any existing group
+    // add its first component
+    this->SourceGroups.push_back(cmSourceGroup(name[0].c_str(), regex));
+    sg = this->GetSourceGroup(currentName);
+    i = 0; // last component found
+    }
+
+  // build the whole source group path
+  for(++i; i<=lastElement; ++i)
+    {
+    sg->AddChild(cmSourceGroup(name[i].c_str(), 0));
+    sg = sg->lookupChild(name[i].c_str());
+    }
+
+  sg->SetGroupRegex(regex);
 }
+
 #endif
 
 void cmMakefile::AddExtraDirectory(const char* dir)

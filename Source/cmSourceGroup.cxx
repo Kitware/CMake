@@ -105,14 +105,6 @@ cmSourceGroup *cmSourceGroup::lookupChild(const char* name)
       {
       return &(*iter); // if it so return it 
       }
-    // if the descendend isn't the one where looking for ask it's traverse
-    cmSourceGroup *result = iter->lookupChild(name);
-                
-    // if one of it's descendeds is the one we're looking for return it 
-    if(result)
-      {
-      return result;
-      }
     }
 
   // if no child with this name was found return NULL

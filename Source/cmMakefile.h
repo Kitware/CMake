@@ -291,10 +291,18 @@ public:
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
-   * Add a source group for consideration when adding a new source.
+   * Add a root source group for consideration when adding a new source.
    */
   void AddSourceGroup(const char* name, const char* regex=0, 
                       const char* parent=0);
+
+  /**
+   * Add a source group for consideration when adding a new source.
+   * name is tokenized.
+   */
+  void AddSourceGroup(const std::vector<std::string>& name, 
+                      const char* regex=0, const char* parent=0);
+
 #endif
   
   /**
@@ -541,7 +549,7 @@ public:
   /**
    * Get the source group
    */
-  cmSourceGroup* GetSourceGroup(const char* name); 
+  cmSourceGroup* GetSourceGroup(const std::vector<std::string>&name);
 #endif
 
   /**
