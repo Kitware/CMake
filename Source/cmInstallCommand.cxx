@@ -176,8 +176,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
   std::vector<std::string> unknownArgs;
   cmInstallCommandArguments genericArgs;
-  cmCAStringVector targetList(&genericArgs, "TARGETS");
-  cmCAString exports(&genericArgs, "EXPORT", &genericArgs.ArgumentGroup);
+  cmCAStringVector targetList(&genericArgs.Parser, "TARGETS");
+  cmCAString exports(&genericArgs.Parser,"EXPORT", &genericArgs.ArgumentGroup);
   targetList.Follows(0);
   genericArgs.ArgumentGroup.Follows(&targetList);
   genericArgs.Parse(&genericArgVector.GetVector(), &unknownArgs);
@@ -509,7 +509,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   // This is the FILES mode.
   bool programs = (args[0] == "PROGRAMS");
   cmInstallCommandArguments ica;
-  cmCAStringVector files(&ica, programs ? "PROGRAMS" : "FILES");
+  cmCAStringVector files(&ica.Parser, programs ? "PROGRAMS" : "FILES");
   files.Follows(0);
   ica.ArgumentGroup.Follows(&files);
   std::vector<std::string> unknownArgs;
@@ -954,9 +954,9 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 {
   // This is the EXPORT mode.
   cmInstallCommandArguments ica;
-  cmCAStringVector exports(&ica, "EXPORT");
-  cmCAString prefix(&ica, "PREFIX", &ica.ArgumentGroup);
-  cmCAString filename(&ica, "FILENAME", &ica.ArgumentGroup);
+  cmCAStringVector exports(&ica.Parser, "EXPORT");
+  cmCAString prefix(&ica.Parser, "PREFIX", &ica.ArgumentGroup);
+  cmCAString filename(&ica.Parser, "FILENAME", &ica.ArgumentGroup);
   exports.Follows(0);
 
   ica.ArgumentGroup.Follows(&exports);

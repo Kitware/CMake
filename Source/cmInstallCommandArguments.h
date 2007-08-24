@@ -21,15 +21,17 @@
 #include "cmStandardIncludes.h"
 #include "cmCommandArgumentsHelper.h"
 
-class cmInstallCommandArguments : public cmCommandArgumentsHelper
+class cmInstallCommandArguments
 {
   public:
     cmInstallCommandArguments();
     void SetGenericArguments(cmInstallCommandArguments* args) 
                                                {this->GenericArguments = args;}
-    // Compute destination path.
+    void Parse(const std::vector<std::string>* args, 
+               std::vector<std::string>* unconsumedArgs);
+
+    // Compute destination path.and check permissions
     bool Finalize();
-    cmCommandArgumentGroup ArgumentGroup;
 
     const std::string& GetDestination() const;
     const std::string& GetComponent() const;
@@ -45,6 +47,8 @@ class cmInstallCommandArguments : public cmCommandArgumentsHelper
                                    std::string& absDest);
     static bool CheckPermissions(const std::string& onePerm, 
                                  std::string& perm);
+    cmCommandArgumentsHelper Parser;
+    cmCommandArgumentGroup ArgumentGroup;
   private:
     cmCAString Destination;
     cmCAString Component;

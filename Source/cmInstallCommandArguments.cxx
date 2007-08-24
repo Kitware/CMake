@@ -29,14 +29,14 @@ const char* cmInstallCommandArguments::PermissionsTable[] =
 const std::string cmInstallCommandArguments::EmptyString;
 
 cmInstallCommandArguments::cmInstallCommandArguments()
-:cmCommandArgumentsHelper()
+:Parser()
 ,ArgumentGroup()
-,Destination   (this, "DESTINATION"   , &ArgumentGroup)
-,Component     (this, "COMPONENT"     , &ArgumentGroup)
-,Rename        (this, "RENAME"        , &ArgumentGroup)
-,Permissions   (this, "PERMISSIONS"   , &ArgumentGroup)
-,Configurations(this, "CONFIGURATIONS", &ArgumentGroup)
-,Optional      (this, "OPTIONAL"      , &ArgumentGroup)
+,Destination   (&Parser, "DESTINATION"   , &ArgumentGroup)
+,Component     (&Parser, "COMPONENT"     , &ArgumentGroup)
+,Rename        (&Parser, "RENAME"        , &ArgumentGroup)
+,Permissions   (&Parser, "PERMISSIONS"   , &ArgumentGroup)
+,Configurations(&Parser, "CONFIGURATIONS", &ArgumentGroup)
+,Optional      (&Parser, "OPTIONAL"      , &ArgumentGroup)
 ,GenericArguments(0)
 {
   this->Component.SetDefaultString("Unspecified");
@@ -132,6 +132,13 @@ bool cmInstallCommandArguments::Finalize()
 
   return true;
 }
+
+void cmInstallCommandArguments::Parse(const std::vector<std::string>* args, 
+                                      std::vector<std::string>* unconsumedArgs)
+{
+  this->Parser.Parse(args, unconsumedArgs);
+}
+
 
 bool cmInstallCommandArguments::CheckPermissions()
 {
