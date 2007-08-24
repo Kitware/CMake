@@ -20,17 +20,11 @@ inline std::vector<std::string> tokenize(const std::string& str,
                                          const std::string& sep)
 {
   std::vector<std::string> tokens;
-  if(str.size() == 0)
-    {
-    tokens.push_back("");
-    return tokens;
-    }
-  std::string::size_type tokstart,tokend;
+  std::string::size_type tokend = 0;
 
-  tokend=0;
   do
     {
-    tokstart=str.find_first_not_of(sep,tokend);
+    std::string::size_type tokstart=str.find_first_not_of(sep, tokend);
     if (tokstart==std::string::npos) 
       {
       break;    // no more tokens
@@ -45,6 +39,11 @@ inline std::vector<std::string> tokenize(const std::string& str,
       tokens.push_back(str.substr(tokstart,tokend-tokstart));
       }
     } while (tokend!=std::string::npos);
+
+  if (tokens.empty())
+    {
+    tokens.push_back("");
+    }
   return tokens;
 }
 
