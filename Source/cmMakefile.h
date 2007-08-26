@@ -293,15 +293,14 @@ public:
   /**
    * Add a root source group for consideration when adding a new source.
    */
-  void AddSourceGroup(const char* name, const char* regex=0, 
-                      const char* parent=0);
+  void AddSourceGroup(const char* name, const char* regex=0);
 
   /**
    * Add a source group for consideration when adding a new source.
    * name is tokenized.
    */
   void AddSourceGroup(const std::vector<std::string>& name, 
-                      const char* regex=0, const char* parent=0);
+                      const char* regex=0);
 
 #endif
   

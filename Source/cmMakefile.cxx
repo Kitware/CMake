@@ -1481,20 +1481,18 @@ cmSourceGroup* cmMakefile::GetSourceGroup(const std::vector<std::string>&name)
 }
 
  void cmMakefile::AddSourceGroup(const char* name,
-                                 const char* regex,
-                                 const char* parent)
+                                 const char* regex)
 {
   if (name)
     {
     std::vector<std::string> nameVector;
     nameVector.push_back(name);
-    AddSourceGroup(nameVector, regex, parent);
+    AddSourceGroup(nameVector, regex);
     }
 }
 
 void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
-                                const char* regex,
-                                const char *parent)
+                                const char* regex)
 {
   cmSourceGroup* sg = 0;
   std::vector<std::string> currentName;

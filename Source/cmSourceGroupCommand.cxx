@@ -64,8 +64,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
 
   std::vector<std::string> folders = tokenize(args[0], delimiter);
  
-  const char *parent = NULL;
-  cmSourceGroup* sg = NULL;
+  cmSourceGroup* sg = 0;
   sg = this->Makefile->GetSourceGroup(folders);
   if(!sg)
     {
