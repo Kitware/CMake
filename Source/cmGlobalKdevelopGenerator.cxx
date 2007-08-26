@@ -23,8 +23,10 @@
 #include "cmake.h"
 #include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
 
 #include <cmsys/SystemTools.hxx>
+#include <cmsys/Directory.hxx>
 
 //----------------------------------------------------------------------------
 void cmGlobalKdevelopGenerator
@@ -273,6 +275,32 @@ void cmGlobalKdevelopGenerator
                     const std::string& cmakeFilePattern,
                     const std::string& fileToOpen)
 {
+  // add all subdirectories to the kdevelop blacklist
+  // so they are not monitored for added or removed files
+  // since this is basically handled by adding files to the
+  // cmake files
+  this->Blacklist.clear();
+  cmsys::Directory d;
+  if (d.Load(projectDir.c_str()))
+    {
+    unsigned int i;
+    size_t numf = d.GetNumberOfFiles();
+    for (unsigned int i = 0; i < numf; i++)
+      {
+      std::string nextFile = d.GetFile(i);
+      if ((nextFile!=".") && (nextFile!=".."))
+        {
+        std::string tmp = projectDir;
+        tmp += "/";
+        tmp += nextFile;
+        if (cmSystemTools::FileIsDirectory(tmp.c_str()))
+          {
+          this->Blacklist.push_back(nextFile);
+          }
+        }
+      }
+    }
+
   std::string filename=outputDir+"/";
   filename+=projectname+".kdevelop";
   std::string sessionFilename=outputDir+"/";
@@ -290,7 +318,7 @@ void cmGlobalKdevelopGenerator
                                executable, cmakeFilePattern, 
                                fileToOpen, sessionFilename);
     }
-   
+
 }
 
 void cmGlobalKdevelopGenerator
@@ -388,7 +416,7 @@ void cmGlobalKdevelopGenerator
   // check for a version control system
   bool hasSvn = cmSystemTools::FileExists((projectDir + "/.svn").c_str());
   bool hasCvs = cmSystemTools::FileExists((projectDir + "/CVS").c_str());
-
+  
   fout<<"<?xml version = '1.0'?>\n";
   fout<<"<kdevelop>\n";
   fout<<"  <general>\n";
@@ -441,6 +469,16 @@ void cmGlobalKdevelopGenerator
   fout<<"        <default/>\n";
   fout<<"      </environments>\n";
   fout<<"    </make>\n";
+
+  fout<<"    <blacklist>\n";
+  for(std::vector<std::string>::const_iterator dirIt=this->Blacklist.begin();
+      dirIt != this->Blacklist.end();
+      ++dirIt)
+    {
+    fout<<"      <path>"<<dirIt->c_str()<<"</path>\n";
+    }
+  fout<<"    </blacklist>\n";
+
   fout<<"  </kdevcustomproject>\n";
   fout<<"  <kdevfilecreate>\n";
   fout<<"    <filetypes/>\n";

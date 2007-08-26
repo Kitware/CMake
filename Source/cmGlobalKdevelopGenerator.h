@@ -92,7 +92,7 @@ private:
                             const std::string& fileToOpen,
                             const std::string& sessionFilename);
 
-  
+  std::vector<std::string> Blacklist;
 };
 
 #endif
