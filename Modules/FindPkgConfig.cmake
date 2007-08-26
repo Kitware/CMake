@@ -11,9 +11,9 @@
 # when module(s) could not be found
 #
 # It sets the following variables:
-#   PKG_CONFIG_FOUND         ... true iff pkg-config works on the system
+#   PKG_CONFIG_FOUND         ... true if pkg-config works on the system
 #   PKG_CONFIG_EXECUTABLE    ... pathname of the pkg-config program
-#   <PREFIX>_FOUND           ... set to 1 iff module(s) exist
+#   <PREFIX>_FOUND           ... set to 1 if module(s) exist
 #
 # For the following variables two sets of values exist; first one is the
 # common one and has the given PREFIX. The second set contains flags
