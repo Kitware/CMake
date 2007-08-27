@@ -1081,12 +1081,13 @@ void cmGlobalGenerator::AddTargetToExports(const char* exportSetName,
                                            cmInstallTargetGenerator* runTime,
                                            cmInstallTargetGenerator* library,
                                            cmInstallTargetGenerator* framework,
-                                           cmInstallTargetGenerator* bundle)
+                                           cmInstallTargetGenerator* bundle,
+                                           cmInstallFilesGenerator* headers)
 {
   if ((exportSetName) && (*exportSetName) && (target))
     {
     cmTargetExport* te = new cmTargetExport(target, archive, runTime, library,
-                                            framework, bundle);
+                                            framework, bundle, headers);
     this->ExportSets[exportSetName].push_back(te);
     }
 }

@@ -29,6 +29,7 @@ class cmExternalMakefileProjectGenerator;
 class cmTarget;
 class cmTargetExport;
 class cmInstallTargetGenerator;
+class cmInstallFilesGenerator;
 
 /** \class cmGlobalGenerator
  * \brief Responable for overseeing the generation process for the entire tree
@@ -144,7 +145,8 @@ public:
                           cmInstallTargetGenerator* runTime,
                           cmInstallTargetGenerator* library,
                           cmInstallTargetGenerator* framework,
-                          cmInstallTargetGenerator* bundle);
+                          cmInstallTargetGenerator* bundle,
+                          cmInstallFilesGenerator* publicHeaders);
   ///! Get the export target set with the   given name
   const std::vector<cmTargetExport*>* GetExportSet(const char* name) const;
 

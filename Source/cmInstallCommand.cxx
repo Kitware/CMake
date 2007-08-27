@@ -167,7 +167,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   cmCAStringVector frameworkArgVector   (&argHelper, "FRAMEWORK", &group);
   cmCAStringVector bundleArgVector      (&argHelper, "BUNDLE", &group);
   cmCAStringVector resourcesArgVector   (&argHelper, "RESOURCE", &group);
-  cmCAStringVector publicHeaderArgVector(&argHelper, "PUBLIC_HEADER ", &group);
+  cmCAStringVector publicHeaderArgVector(&argHelper, "PUBLIC_HEADER", &group);
   cmCAStringVector privateHeaderArgVector(&argHelper,"PRIVATE_HEADER", &group);
   genericArgVector.Follows(0);
   group.Follows(&genericArgVector);
@@ -200,7 +200,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   resourcesArgs.Parse    (&resourcesArgVector.GetVector(),     &unknownArgs);
   publicHeaderArgs.Parse (&publicHeaderArgVector.GetVector(),  &unknownArgs);
   privateHeaderArgs.Parse(&privateHeaderArgVector.GetVector(), &unknownArgs);
-  
+
   if(!unknownArgs.empty())
     {
     // Unknown argument.
@@ -290,9 +290,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     cmInstallTargetGenerator* runtimeGenerator = 0;
     cmInstallTargetGenerator* frameworkGenerator = 0;
     cmInstallTargetGenerator* bundleGenerator = 0;
-    cmInstallTargetGenerator* resourcesGenerator = 0;
-    cmInstallTargetGenerator* publicHeaderGenerator = 0;
-    cmInstallTargetGenerator* privateHeaderGenerator = 0;
+    cmInstallFilesGenerator* resourcesGenerator = 0;
+    cmInstallFilesGenerator* publicHeaderGenerator = 0;
+    cmInstallFilesGenerator* privateHeaderGenerator = 0;
 
     switch(target.GetType())
       {
@@ -362,13 +362,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
               }
             }
           }
-
-/*        if(target.GetPropertyAsBool("FRAMEWORK"))
-          {
-          // Create the files install generator.
-          this->Makefile->AddInstallGenerator(CreateInstallFilesGenerator(
-                                            absFiles, publicHeaderArgs, false);
-          }*/
         }
         break;
       case cmTarget::STATIC_LIBRARY:
@@ -460,25 +453,106 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Ignore the case.
         break;
       }
+
+//       if(target.GetProperty("ASSOCIATED_FILES");
+
+  const char* files = target.GetProperty("PUBLIC_HEADER");
+  if ((files) && (*files))
+    {
+    std::vector<std::string> relFiles;
+    cmSystemTools::ExpandListArgument(files, relFiles);
+    std::vector<std::string> absFiles;
+    if (!this->MakeFilesFullPath("PUBLIC_HEADER", relFiles, absFiles))
+      {
+      return false;
+      }
+
+    // Create the files install generator.
+    if (!publicHeaderArgs.GetDestination().empty())
+      {
+      publicHeaderGenerator = CreateInstallFilesGenerator(absFiles, 
+                                                      publicHeaderArgs, false);
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "TARGETS given no PUBLIC_HEADER DESTINATION for header files\"" 
+          << target.GetName() << "\".";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+
+  files = target.GetProperty("PRIVATE_HEADER");
+  if ((files) && (*files))
+    {
+    std::vector<std::string> relFiles;
+    cmSystemTools::ExpandListArgument(files, relFiles);
+    std::vector<std::string> absFiles;
+    if (!this->MakeFilesFullPath("PRIVATE_HEADER", relFiles, absFiles))
+      {
+      return false;
+      }
+
+    // Create the files install generator.
+    if (!privateHeaderArgs.GetDestination().empty())
+      {
+      privateHeaderGenerator = CreateInstallFilesGenerator(absFiles, 
+                                                     privateHeaderArgs, false);
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "TARGETS given no PRIVATE_HEADER DESTINATION for header files\"" 
+          << target.GetName() << "\".";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+
+  files = target.GetProperty("RESOURCE_FILES");
+  if ((files) && (*files))
+    {
+    std::vector<std::string> relFiles;
+    cmSystemTools::ExpandListArgument(files, relFiles);
+    std::vector<std::string> absFiles;
+    if (!this->MakeFilesFullPath("RESOURCE_FILES", relFiles, absFiles))
+      {
+      return false;
+      }
+
+    // Create the files install generator.
+    if (!privateHeaderArgs.GetDestination().empty())
+      {
+      resourcesGenerator = CreateInstallFilesGenerator(absFiles, 
+                                                       resourcesArgs, false);
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "TARGETS given no RESOURCES DESTINATION for resource files\"" 
+          << target.GetName() << "\".";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+
     this->Makefile->AddInstallGenerator(archiveGenerator);
     this->Makefile->AddInstallGenerator(libraryGenerator);
     this->Makefile->AddInstallGenerator(runtimeGenerator);
     this->Makefile->AddInstallGenerator(frameworkGenerator);
     this->Makefile->AddInstallGenerator(bundleGenerator);
-    this->Makefile->AddInstallGenerator(resourcesGenerator);
     this->Makefile->AddInstallGenerator(publicHeaderGenerator);
     this->Makefile->AddInstallGenerator(privateHeaderGenerator);
+    this->Makefile->AddInstallGenerator(resourcesGenerator);
 
     if (!exports.GetString().empty())
       {
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                                     ->AddTargetToExports(exports.GetCString(),
-                                                          &target,
-                                                          archiveGenerator,
-                                                          runtimeGenerator,
-                                                          libraryGenerator,
-                                                          frameworkGenerator,
-                                                          bundleGenerator);
+        ->AddTargetToExports(exports.GetCString(), &target, 
+                             archiveGenerator, runtimeGenerator,
+                             libraryGenerator, frameworkGenerator,
+                             bundleGenerator, publicHeaderGenerator);
       }
     }
 
@@ -540,29 +614,9 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     }
 
   std::vector<std::string> absFiles;
-  for(std::vector<std::string>::const_iterator 
-      fileIt = files.GetVector().begin(); fileIt != files.GetVector().end();
-      ++fileIt)
+  if (!this->MakeFilesFullPath(args[0].c_str(), files.GetVector(), absFiles))
     {
-    // Convert this file to a full path.
-    std::string file = *fileIt;
-    if(!cmSystemTools::FileIsFullPath(file.c_str()))
-      {
-      file = this->Makefile->GetCurrentDirectory();
-      file += "/";
-      file += *fileIt;
-      }
-
-    // Make sure the file is not a directory.
-    if(cmSystemTools::FileIsDirectory(file.c_str()))
-      {
-      cmOStringStream e;
-      e << args[0] << " given directory \"" << (*fileIt) << "\" to install.";
-      this->SetError(e.str().c_str());
-      return false;
-      }
-    // Store the file for installation.
-    absFiles.push_back(file);
+    return false;
     }
 
   if (!ica.Finalize())
@@ -1009,5 +1063,35 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
       }
     }
 
+  return true;
+}
+
+bool cmInstallCommand::MakeFilesFullPath(const char* modeName,
+                                      const std::vector<std::string>& relFiles,
+                                      std::vector<std::string>& absFiles)
+{
+  for(std::vector<std::string>::const_iterator fileIt = relFiles.begin();
+      fileIt != relFiles.end();
+      ++fileIt)
+    {
+    std::string file = (*fileIt);
+    if(!cmSystemTools::FileIsFullPath(file.c_str()))
+      {
+      file = this->Makefile->GetCurrentDirectory();
+      file += "/";
+      file += *fileIt;
+      }
+
+    // Make sure the file is not a directory.
+    if(cmSystemTools::FileIsDirectory(file.c_str()))
+      {
+      cmOStringStream e;
+      e << modeName << " given directory \"" << (*fileIt) << "\" to install.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    // Store the file for installation.
+    absFiles.push_back(file);
+    }
   return true;
 }

@@ -22,6 +22,7 @@
 #include "cmTarget.h"
 
 #include "cmInstallExportGenerator.h"
+#include "cmInstallFilesGenerator.h"
 
 cmInstallExportGenerator::cmInstallExportGenerator(
   const char* destination,
@@ -60,7 +61,7 @@ bool cmInstallExportGenerator::AddInstallLocations(cmTargetWithProperties* twp,
     std::string propertyName = prefix;
     propertyName += "LOCATION";
     // check that this property doesn't exist yet and add it then
-    if (twp->Properties.find(propertyName.c_str())== twp->Properties.end())
+    if (twp->Properties.find(propertyName.c_str()) == twp->Properties.end())
       {
       std::string destinationFilename = generator->GetDestination();
       destinationFilename += "/";
@@ -83,7 +84,7 @@ bool cmInstallExportGenerator::AddInstallLocations(cmTargetWithProperties* twp,
       propertyName += prefix;
       propertyName += "LOCATION";
       // check that this property doesn't exist yet and add it then
-      if (twp->Properties.find(propertyName.c_str())== twp->Properties.end())
+      if (twp->Properties.find(propertyName.c_str()) == twp->Properties.end())
         {
         std::string destinationFilename = generator->GetDestination();
         destinationFilename += "/";
@@ -97,6 +98,31 @@ bool cmInstallExportGenerator::AddInstallLocations(cmTargetWithProperties* twp,
       }
     }
   return true;
+}
+
+
+bool cmInstallExportGenerator::AddInstallLocations(cmTargetWithProperties* twp,
+                                           cmInstallFilesGenerator* generator,
+                                           const char* propertyName)
+{
+  if (generator == 0) // nothing to do
+    {
+    return true;
+    }
+
+  if ((propertyName == 0) || (*propertyName == '\0'))
+    {
+    return false;
+    }
+
+  // check that this property doesn't exist yet and add it then
+  if (twp->Properties.find(propertyName) == twp->Properties.end())
+    {
+    twp->Properties[propertyName] = generator->GetDestination();
+    return true;
+    }
+
+  return false;
 }
 
 
@@ -149,6 +175,11 @@ bool cmInstallExportGenerator::SetExportSet(const char* name,
       }
     if (this->AddInstallLocations(targetWithProps, (*it)->LibraryGenerator, 
                                   "LIBRARY_") == false)
+      {
+      return false;
+      }
+    if (this->AddInstallLocations(targetWithProps, (*it)->HeaderGenerator, 
+                                  "PUBLIC_HEADER_LOCATION") == false)
       {
       return false;
       }

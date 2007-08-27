@@ -23,6 +23,7 @@ class cmTarget;
 
 
 class cmInstallTargetGenerator;
+class cmInstallFilesGenerator;
 
 /* cmInstallExportTarget is used in cmGlobalGenerator to collect the 
 install generators for the exported targets. These are then used by the 
@@ -36,10 +37,12 @@ public:
                  cmInstallTargetGenerator* runtime, 
                  cmInstallTargetGenerator* library,
                  cmInstallTargetGenerator* framework,
-                 cmInstallTargetGenerator* bundle
+                 cmInstallTargetGenerator* bundle,
+                 cmInstallFilesGenerator* headers
                 ) : Target(tgt), ArchiveGenerator(archive),
                     RuntimeGenerator(runtime), LibraryGenerator(library),
-                    FrameworkGenerator(framework), BundleGenerator(bundle) {}
+                    FrameworkGenerator(framework), BundleGenerator(bundle),
+                    HeaderGenerator(headers) {}
 
   cmTarget* Target;
   cmInstallTargetGenerator* ArchiveGenerator;
@@ -47,6 +50,7 @@ public:
   cmInstallTargetGenerator* LibraryGenerator;
   cmInstallTargetGenerator* FrameworkGenerator;
   cmInstallTargetGenerator* BundleGenerator;
+  cmInstallFilesGenerator* HeaderGenerator;
 private:
   cmTargetExport();
 };
@@ -85,6 +89,9 @@ protected:
   static bool AddInstallLocations(cmTargetWithProperties *twp, 
                                   cmInstallTargetGenerator* generator,
                                   const char* prefix);
+  static bool AddInstallLocations(cmTargetWithProperties* twp,
+                                           cmInstallFilesGenerator* generator,
+                                           const char* propertyName);
 
   std::string Name;
   std::string FilePermissions;
