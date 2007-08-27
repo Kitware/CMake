@@ -3,6 +3,10 @@
 #  CURSES_FOUND - system has Curses
 #  CURSES_INCLUDE_DIR - the Curses include directory
 #  CURSES_LIBRARIES - The libraries needed to use Curses
+#  CURSES_HAVE_CURSES_H - true if curses.h is available
+#  CURSES_HAVE_NCURSES_H - true if ncurses.h is available
+#  CURSES_HAVE_NCURSES_NCURSES_H - true if ncurses/ncurses.h is available
+#  CURSES_HAVE_NCURSES_CURSES_H - true if ncurses/curses.h is available
 #
 # Set CURSES_NEED_NCURSES to TRUE before the FIND_PACKAGE() command if NCurses 
 # functionality is required.
@@ -44,16 +48,25 @@ ENDIF(CURSES_CURSES_LIBRARY  AND  CURSES_NEED_NCURSES)
 
 
 IF(NOT CURSES_USE_NCURSES)
-  FIND_PATH(CURSES_CURSES_INCLUDE_PATH curses.h )
-  SET(CURSES_INCLUDE_PATH "${CURSES_CURSES_INCLUDE_PATH}")
+  FIND_FILE(CURSES_HAVE_CURSES_H curses.h )
+  FIND_PATH(CURSES_CURSES_H_PATH curses.h )
+  SET(CURSES_INCLUDE_PATH "${CURSES_CURSES_H_PATH}")
+
   SET(CURSES_LIBRARY "${CURSES_CURSES_LIBRARY}")
   GET_FILENAME_COMPONENT(_cursesLibDir "${CURSES_CURSES_LIBRARY}" PATH)
   GET_FILENAME_COMPONENT(_cursesParentDir "${_cursesLibDir}" PATH)
 ELSE(NOT CURSES_USE_NCURSES)
 # we need to find ncurses
-  FIND_PATH(CURSES_NCURSES_INCLUDE_PATH ncurses.h ncurses/ncurses.h  ncurses/curses.h)
   GET_FILENAME_COMPONENT(_cursesLibDir "${CURSES_NCURSES_LIBRARY}" PATH)
   GET_FILENAME_COMPONENT(_cursesParentDir "${_cursesLibDir}" PATH)
+
+  FIND_FILE(CURSES_HAVE_NCURSES_H         ncurses.h)
+  FIND_FILE(CURSES_HAVE_NCURSES_NCURSES_H ncurses/ncurses.h)
+  FIND_FILE(CURSES_HAVE_NCURSES_CURSES_H  ncurses/curses.h)
+  FIND_FILE(CURSES_HAVE_CURSES_H          curses.h  PATHS "${_cursesParentDir}/include" NO_DEFAULT_PATH)
+  FIND_FILE(CURSES_HAVE_CURSES_H          curses.h)
+
+  FIND_PATH(CURSES_NCURSES_INCLUDE_PATH ncurses.h ncurses/ncurses.h  ncurses/curses.h)
   FIND_PATH(CURSES_NCURSES_INCLUDE_PATH curses.h  PATHS "${_cursesParentDir}/include" NO_DEFAULT_PATH)
   FIND_PATH(CURSES_NCURSES_INCLUDE_PATH curses.h)
 

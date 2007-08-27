@@ -37,7 +37,19 @@
  #define _MSE_INT_H
 #endif
 
-#include <curses.h>
+#include <cmFormConfigure.h>
+
+/* figure out which curses.h to include */
+# if defined(CURSES_HAVE_NCURSES_H)
+#  include <ncurses.h>
+# elif defined(CURSES_HAVE_NCURSES_NCURSES_H)
+#  include <ncurses/ncurses.h>
+# elif defined(CURSES_HAVE_NCURSES_CURSES_H)
+#  include <ncurses/curses.h>
+# else
+#  include <curses.h>
+# endif
+
 #include <eti.h>
 #include <stdarg.h>
 

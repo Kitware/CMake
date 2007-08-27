@@ -23,8 +23,8 @@
 #include <sys/ioctl.h>
 
 #include "cmCursesMainForm.h"
+#include "cmCursesStandardIncludes.h"
 
-#include <curses.h>
 #include <form.h>
 
 //----------------------------------------------------------------------------

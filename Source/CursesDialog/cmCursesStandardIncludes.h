@@ -20,6 +20,8 @@
  #define _MSE_INT_H
 #endif
 
+#include <cmFormConfigure.h>
+
 #if defined(__hpux)
 # define _BOOL_DEFINED
 # include <sys/time.h>
@@ -28,7 +30,17 @@
 # include <form.h>
 # undef _XOPEN_SOURCE_EXTENDED
 #else
-# include <curses.h>
+/* figure out which curses.h to include */
+# if defined(CURSES_HAVE_NCURSES_H)
+#  include <ncurses.h>
+# elif defined(CURSES_HAVE_NCURSES_NCURSES_H)
+#  include <ncurses/ncurses.h>
+# elif defined(CURSES_HAVE_NCURSES_CURSES_H)
+#  include <ncurses/curses.h>
+# else
+#  include <curses.h>
+# endif
+
 # include <form.h>
 #endif
 
