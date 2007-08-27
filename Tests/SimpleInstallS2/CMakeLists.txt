@@ -163,6 +163,7 @@ ELSE(STAGE2)
 
   # Test per-configuration output name.
   SET_TARGET_PROPERTIES(test1 PROPERTIES RELEASE_OUTPUT_NAME test1rel)
+  SET_TARGET_PROPERTIES(test2 PROPERTIES PUBLIC_HEADER foo.h)
 
   IF(CMAKE_GENERATOR MATCHES "Makefiles")
     ADD_SUBDIRECTORY(TestSubDir)
@@ -177,6 +178,7 @@ ELSE(STAGE2)
     RUNTIME DESTINATION MyTest/bin        COMPONENT Runtime     # .exe, .dll
     LIBRARY DESTINATION MyTest/lib        COMPONENT Runtime     # .so, mod.dll
     ARCHIVE DESTINATION MyTest/lib/static COMPONENT Development # .a, .lib
+    PUBLIC_HEADER DESTINATION MyTest/include COMPONENT Development 
     )
 
   INSTALL(TARGETS test4 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
