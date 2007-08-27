@@ -310,38 +310,19 @@ SET(CMAKE_INSTALL_MFC_LIBRARIES 1)
 INCLUDE(InstallRequiredSystemLibraries)
 INCLUDE(CPack)
 
-IF(APPLE AND NOT CTEST_TEST_CPACK)
-  # Issue with packaging on the mac, so disable it for now
-  ADD_CUSTOM_COMMAND(
-    TARGET ${install_target}
-    POST_BUILD
-    COMMAND ${CMAKE_CTEST_COMMAND}
-    ARGS ${SI_CONFIG}
-    --build-and-test
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_BINARY_DIR}
-    --build-generator ${CMAKE_GENERATOR}
-    --build-project ${PROJECT_NAME}
-    --build-makeprogram ${CMAKE_MAKE_PROGRAM}
-    --build-noclean
-    --build-target install
-    COMMENT "Install Project"
-    )
-ELSE(APPLE AND NOT CTEST_TEST_CPACK)
-  ADD_CUSTOM_COMMAND(
-    TARGET ${install_target}
-    POST_BUILD
-    COMMAND ${CMAKE_CTEST_COMMAND}
-    ARGS ${SI_CONFIG}
-    --build-and-test
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_BINARY_DIR}
-    --build-generator ${CMAKE_GENERATOR}
-    --build-project ${PROJECT_NAME}
-    --build-makeprogram ${CMAKE_MAKE_PROGRAM}
-    --build-noclean
-    --build-target install
-    --build-target package
-    COMMENT "Install Project"
-    )
-ENDIF(APPLE AND NOT CTEST_TEST_CPACK)
+ADD_CUSTOM_COMMAND(
+  TARGET ${install_target}
+  POST_BUILD
+  COMMAND ${CMAKE_CTEST_COMMAND}
+  ARGS ${SI_CONFIG}
+  --build-and-test
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_BINARY_DIR}
+  --build-generator ${CMAKE_GENERATOR}
+  --build-project ${PROJECT_NAME}
+  --build-makeprogram ${CMAKE_MAKE_PROGRAM}
+  --build-noclean
+  --build-target install
+  --build-target package
+  COMMENT "Install Project"
+  )
