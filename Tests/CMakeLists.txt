@@ -48,6 +48,7 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(Framework bar)
   ADD_TEST_MACRO(Properties Properties)
   ADD_TEST_MACRO(Assembler HelloAsm)
+  ADD_TEST_MACRO(SourceGroups SourceGroups)
 
   # add tests with more complex invocations
   ADD_TEST(TargetName ${CMAKE_CTEST_COMMAND}

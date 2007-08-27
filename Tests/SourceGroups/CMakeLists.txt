@@ -1,3 +1,12 @@
+project(SourceGroups)
+
+# this is not really a test which can fail
+# it is more an example with several source_group() 
+# commands.
+# The created projects have to be loaded manually 
+# in Visual Studio/XCode/Eclipse/...
+# to see whether the correct groups have been created.
+
 source_group(Base             FILES main.c)
 
 # a sub group
