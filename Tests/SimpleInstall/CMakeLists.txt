@@ -134,6 +134,15 @@ IF(STAGE2)
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
 
   INSTALL_TARGETS(/MyTest/bin SimpleInstallS2)
+
+# try to import the exported targets again
+  SET(SimpleInstallS1_DIR ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
+  FIND_PACKAGE(SimpleInstallS1 REQUIRED)
+  GET_TARGET_PROPERTY(simpleInstallLocation S1_SimpleInstall LOCATION)
+  IF(NOT simpleInstallLocation)
+    MESSAGE(FATAL_ERROR "Target S1_SimpleInstall could not be imported, location: ${simpleInstallLocation}")
+  ENDIF(NOT simpleInstallLocation)
+
 ELSE(STAGE2)
   # Wipe out the install directory to do a fresh test.
   FILE(REMOVE_RECURSE ${CMAKE_INSTALL_PREFIX}/MyTest)
@@ -164,11 +173,12 @@ ELSE(STAGE2)
   ADD_DEPENDENCIES(test2 test3)
   ADD_DEPENDENCIES(test4 test2)
 
-  INSTALL(TARGETS SimpleInstall test1 test2 test3
+  INSTALL(TARGETS SimpleInstall test1 test2 test3 EXPORT SimpleInstallS1
     RUNTIME DESTINATION MyTest/bin        COMPONENT Runtime     # .exe, .dll
     LIBRARY DESTINATION MyTest/lib        COMPONENT Runtime     # .so, mod.dll
     ARCHIVE DESTINATION MyTest/lib/static COMPONENT Development # .a, .lib
     )
+
   INSTALL(TARGETS test4 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
     RUNTIME DESTINATION MyTest/bin
     LIBRARY DESTINATION MyTest/lib
@@ -191,6 +201,12 @@ ELSE(STAGE2)
     scripts/sample_script scripts/sample_script.bat)
   INSTALL_PROGRAMS(/MyTest/share/old2
     scripts/sample_script scripts/sample_script.bat)
+
+# "export" the targets collected in "SimpleInstallS1"
+  INSTALL(EXPORT SimpleInstallS1 FILENAME SimpleInstallS1Config.cmake 
+                                 DESTINATION MyTest/lib 
+                                 PREFIX S1_ )
+
   ADD_SUBDIRECTORY(scripts)
 
   # Test optional installation.
