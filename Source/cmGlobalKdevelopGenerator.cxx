@@ -283,7 +283,6 @@ void cmGlobalKdevelopGenerator
   cmsys::Directory d;
   if (d.Load(projectDir.c_str()))
     {
-    unsigned int i;
     size_t numf = d.GetNumberOfFiles();
     for (unsigned int i = 0; i < numf; i++)
       {
