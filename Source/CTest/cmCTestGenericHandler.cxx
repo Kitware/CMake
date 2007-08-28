@@ -124,7 +124,7 @@ bool cmCTestGenericHandler::StartResultingXML(const char* name,
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Current Tag empty, this may mean"
-               " NightlStartTime was not set correctly." << std::endl);
+               " NightlyStartTime was not set correctly." << std::endl);
     cmSystemTools::SetFatalErrorOccured();
     return false;
     }
