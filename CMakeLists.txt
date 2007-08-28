@@ -358,7 +358,7 @@ SET(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL
   "Where to put the libraries for CMake")
 INCLUDE_REGULAR_EXPRESSION("^.*$")
 
-# The CMake executables do not need any rpath to run in the build or
+# The CMake executables usually do not need any rpath to run in the build or
 # install tree.
 SET(CMAKE_SKIP_RPATH ON CACHE INTERNAL "CMake does not need RPATHs.")
 
@@ -380,6 +380,37 @@ CHECK_SYMBOL_EXISTS(environ "stdlib.h" HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
 
 # build the utilities (a macro defined in this file) 
 CMAKE_BUILD_UTILITIES()
+
+# On NetBSD ncurses is required, since curses doesn't have the wsyncup()
+# function. ncurses is installed via pkgsrc, so the library is in /usr/pkg/lib,
+# which isn't in the default linker search path. So without RPATH ccmake 
+# doesn't run and the build doesn't succeed since ccmake is executed for
+# generating the documentation.
+IF(BUILD_CursesDialog)
+  GET_FILENAME_COMPONENT(_CURSES_DIR "${CURSES_LIBRARY}" PATH)
+  SET(CURSES_NEED_RPATH FALSE)
+  IF(NOT "${_CURSES_DIR}" STREQUAL "/lib" AND NOT "${_CURSES_DIR}" STREQUAL "/usr/lib")
+    SET(CURSES_NEED_RPATH TRUE)
+  ENDIF(NOT "${_CURSES_DIR}" STREQUAL "/lib" AND NOT "${_CURSES_DIR}" STREQUAL "/usr/lib")
+ENDIF(BUILD_CursesDialog)
+
+# The same might be true on other systems for other libraries if 
+# CMAKE_USE_SYSTEM_XMLRPC or other variables like this are enabled.
+# Then only enable RPATH if we have are building at least with cmake 2.4, 
+# since this one has much better RPATH features than cmake 2.2.
+# The executables are then built with the RPATH for the libraries outside
+# the build tree, which is both the build and the install RPATH.
+IF (UNIX  AND  "${CMAKE_MAJOR_VERSION}${CMAKE_MINOR_VERSION}" GREATER 23)
+  IF(   CMAKE_USE_SYSTEM_CURL   OR  CMAKE_USE_SYSTEM_ZLIB
+        OR  CMAKE_USE_SYSTEM_EXPAT  OR  CMAKE_USE_SYSTEM_XMLRPC  OR  CURSES_NEED_RPATH)
+    SET(CMAKE_SKIP_RPATH OFF CACHE INTERNAL "CMake built with RPATH.")
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    MESSAGE(STATUS "Enabling RPATH")
+  ENDIF(CMAKE_USE_SYSTEM_CURL   OR  CMAKE_USE_SYSTEM_ZLIB
+        OR  CMAKE_USE_SYSTEM_EXPAT  OR  CMAKE_USE_SYSTEM_XMLRPC  OR  CURSES_NEED_RPATH)
+ENDIF (UNIX  AND  "${CMAKE_MAJOR_VERSION}${CMAKE_MINOR_VERSION}" GREATER 23)
+
 
 # should we build the MFC dialog? (a macro defined in this file)
 CMAKE_TEST_FOR_MFC()
