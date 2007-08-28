@@ -6,6 +6,7 @@ SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP "")   # : or empty
 SET(CMAKE_INCLUDE_FLAG_C "-I")       # -I
 SET(CMAKE_INCLUDE_FLAG_C_SEP "")     # , or empty
 SET(CMAKE_LIBRARY_PATH_FLAG "-L")
+SET(CMAKE_LIBRARY_PATH_TERMINATOR "")  # for the Digital Mars D compiler the link paths have to be terminated with a "/"
 SET(CMAKE_LINK_LIBRARY_FLAG "-l")
 
 SET(CMAKE_LINK_LIBRARY_SUFFIX "")

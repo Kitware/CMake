@@ -1531,6 +1531,8 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     }
   std::string libPathFlag = 
     this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
+  std::string libPathTerminator = 
+    this->Makefile->GetSafeDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
   std::string libLinkFlag = 
     this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
   // collect all the flags needed for linking libraries
@@ -1599,6 +1601,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
         {
         linkLibs += libPathFlag;
         linkLibs += fullLibPath;
+        linkLibs += libPathTerminator;
         linkLibs += " ";
 
         // Put this directory in the rpath if using build-tree rpath
