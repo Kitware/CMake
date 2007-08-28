@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-int foo();
-int bar();
-int foobar();
-int barbar();
-int baz();
+extern int foo(void);
+extern int bar(void);
+extern int foobar(void);
+extern int barbar(void);
+extern int baz(void);
 
 int main()
 {
