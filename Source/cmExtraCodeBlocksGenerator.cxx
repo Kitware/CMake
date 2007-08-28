@@ -27,6 +27,19 @@
 
 #include <cmsys/SystemTools.hxx>
 
+/* Some useful URLs:
+Homepage: 
+http://www.codeblocks.org
+
+File format docs:
+http://wiki.codeblocks.org/index.php?title=File_formats_description
+http://wiki.codeblocks.org/index.php?title=Workspace_file
+http://wiki.codeblocks.org/index.php?title=Project_file
+
+Discussion:
+http://forums.codeblocks.org/index.php/topic,6789.0.html
+*/
+
 //----------------------------------------------------------------------------
 void cmExtraCodeBlocksGenerator
 ::GetDocumentation(cmDocumentationEntry& entry, const char*) const
