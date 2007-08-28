@@ -1497,7 +1497,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   cmSourceGroup* sg = 0;
   std::vector<std::string> currentName;
   int i = 0;
-  const int lastElement = name.size()-1;
+  const int lastElement = static_cast<int>(name.size()-1);
   for(i=lastElement; i>=0; --i)
     {
     currentName.assign(name.begin(), name.begin()+i+1);
