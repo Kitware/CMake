@@ -303,14 +303,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
     }
   else if (compilerId == "GNU")
     {
-    if (hostSystemName == "Windows")
-      {
-      compiler = "mingw";
-      }
-    else
-      {
-      compiler = "gcc";
-      }
+    compiler = "gcc";
     }
   return compiler;
 }
@@ -348,16 +341,16 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
   std::string command = make;
   if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)
     {
-    command += " /NOLOGO /f \\\"";
+    command += " /NOLOGO /f &quot;";
     command += makefile;
-    command += "\\\" ";
+    command += "&quot; ";
     command += target;
     }
   else
     {
-    command += " -f ";
+    command += " -f &quot;";
     command += makefile;
-    command += " ";
+    command += "&quot; ";
     command += target;
     }
   return command;
