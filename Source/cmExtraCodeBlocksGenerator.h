@@ -22,6 +22,7 @@
 
 class cmLocalGenerator;
 class cmMakefile;
+class cmTarget;
 
 /** \class cmExtraCodeBlocksGenerator
  * \brief Write CodeBlocks project files for Makefile based projects
@@ -50,6 +51,10 @@ private:
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
                                 const std::string& filename);
+  std::string GetCBCompilerId(const cmMakefile* mf);
+  int GetCBTargetType(cmTarget* target);
+  std::string BuildMakeCommand(const std::string& make, const char* makefile, 
+                               const char* target);
 
 };
 

@@ -24,6 +24,7 @@
 #include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmTarget.h"
+#include "cmSystemTools.h"
 
 #include <cmsys/SystemTools.hxx>
 
@@ -131,16 +132,17 @@ void cmExtraCodeBlocksGenerator
     return;
     }
 
+  // figure out the compiler
+  std::string compiler = this->GetCBCompilerId(mf);
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
 
   fout<<"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n"
         "<CodeBlocks_project_file>\n"
         "   <FileVersion major=\"1\" minor=\"6\" />\n"
-        "   <Project>\n";
-
-  fout<<"      <Option title=\"" << mf->GetProjectName()<<"\" />\n"
+        "   <Project>\n"
+        "      <Option title=\"" << mf->GetProjectName()<<"\" />\n"
         "      <Option makefile_is_custom=\"1\" />\n"
-        "      <Option compiler=\"gcc\" />\n"
+        "      <Option compiler=\"" << compiler << "\" />\n"
         "      <Build>\n";
 
   bool installTargetCreated = false;
@@ -178,27 +180,39 @@ void cmExtraCodeBlocksGenerator
           case cmTarget::STATIC_LIBRARY:
           case cmTarget::SHARED_LIBRARY:
           case cmTarget::MODULE_LIBRARY:
-//          case cmTarget::UTILITY:
-  fout<<"      <Target title=\""<<ti->first<<"\">\n"
-        "         <Option output=\""<<ti->second.GetLocation(0)
-     <<"\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
-        "         <Option working_dir=\""<<makefile->GetStartOutputDirectory()
-     <<"\" />\n"
-        "         <Option type=\"0\" />\n"
-        "         <Option compiler=\"gcc\" />\n"
-        "         <MakeCommands>\n";
+            {
+            int cbTargetType = this->GetCBTargetType(&ti->second);
+            std::string makefileName = makefile->GetStartOutputDirectory();
+            makefileName += "/Makefile";
+            makefileName = cmSystemTools::ConvertToOutputPath(
+                                                         makefileName.c_str());
 
-  fout<<"            <Build command=\""<<make<<" -f "
-     <<makefile->GetStartOutputDirectory()<<"/Makefile "<<ti->first<<"\" />\n";
-  fout<<"            <CompileFile command=\""<<make<<" -f "
-     <<makefile->GetStartOutputDirectory()<<"/Makefile "<<ti->first<<"\" />\n";
-  fout<<"            <Clean command=\""<<make<<" -f "
-     <<makefile->GetStartOutputDirectory()<<"/Makefile clean\" />\n";
-  fout<<"            <DistClean command=\""<<make<<" -f "
-     <<makefile->GetStartOutputDirectory()<<"/Makefile clean\" />\n";
+  fout<<"      <Target title=\"" << ti->first << "\">\n"
+        "         <Option output=\"" << ti->second.GetLocation(0) << "\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
+        "         <Option working_dir=\"" << makefile->GetStartOutputDirectory() <<"\" />\n"
+        "         <Option type=\"" << cbTargetType << "\" />\n"
+        "         <Option compiler=\"" << compiler << "\" />\n"
+        "         <Compiler>\n";
 
-  fout<<"         </MakeCommands>\n"
+            // the include directories for this target
+            const std::vector<std::string>& incDirs = 
+                             ti->second.GetMakefile()->GetIncludeDirectories();
+            for(std::vector<std::string>::const_iterator dirIt=incDirs.begin();
+                dirIt != incDirs.end();
+                ++dirIt)
+              {
+  fout <<"            <Add directory=\"" << dirIt->c_str() << "\" />\n";
+              }
+
+  fout<<"         </Compiler>\n"
+        "         <MakeCommands>\n"
+        "            <Build command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), ti->first.c_str()) << "\" />\n"
+        "            <CompileFile command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), ti->first.c_str()) << "\" />\n"
+        "            <Clean command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), "clean") << "\" />\n"
+        "            <DistClean command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), "clean") << "\" />\n"
+        "         </MakeCommands>\n"
         "      </Target>\n";
+            }
             break;
           default:
             break;
@@ -208,47 +222,143 @@ void cmExtraCodeBlocksGenerator
 
   fout<<"      </Build>\n";
 
-  
+
   std::map<std::string, std::string> sourceFiles;
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
        lg!=lgs.end(); lg++)
-  {
+    {
     cmMakefile* makefile=(*lg)->GetMakefile();
     cmTargets& targets=makefile->GetTargets();
     for (cmTargets::iterator ti = targets.begin();
          ti != targets.end(); ti++)
-    {
-      switch(ti->second.GetType())
       {
+      switch(ti->second.GetType())
+        {
         case cmTarget::EXECUTABLE:
         case cmTarget::STATIC_LIBRARY:
         case cmTarget::SHARED_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
-        {
+          {
           const std::vector<cmSourceFile*>&sources=ti->second.GetSourceFiles();
           for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
                si!=sources.end(); si++)
-          {
+            {
             sourceFiles[(*si)->GetFullPath()] = ti->first;
+            }
           }
-        }
-        default:
+        default:  // intended fallthrough
           break;
+        }
       }
     }
-  }
-  
+
   for (std::map<std::string, std::string>::const_iterator 
        sit=sourceFiles.begin();
        sit!=sourceFiles.end();
        ++sit)
   {
-  fout<<"      <Unit filename=\""<<sit->first <<"\">\n";
-  fout<<"      </Unit>\n";
+  fout<<"      <Unit filename=\""<<sit->first <<"\">\n"
+        "      </Unit>\n";
   }
-  
+
   fout<<"   </Project>\n"
         "</CodeBlocks_project_file>\n";
-
 }
 
+
+std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
+{
+  // figure out which language to use
+  // for now care only for C and C++
+  std::string compilerIdVar = "CMAKE_CXX_COMPILER_ID";
+  cmGlobalGenerator* gg=const_cast<cmGlobalGenerator*>(this->GlobalGenerator);
+  if (gg->GetLanguageEnabled("CXX") == false)
+    {
+    compilerIdVar = "CMAKE_C_COMPILER_ID";
+    }
+
+  std::string hostSystemName = mf->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
+  std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
+  std::string compilerId = mf->GetRequiredDefinition(compilerIdVar.c_str());
+  std::string compiler = "gcc";
+  if (compilerId == "MSVC")
+    {
+    compiler = "msvc";
+    }
+  else if (compilerId == "Borland")
+    {
+    compiler = "bcc";
+    }
+  else if (compilerId == "SDCC")
+    {
+    compiler = "sdcc";
+    }
+  else if (compilerId == "Intel")
+    {
+    compiler = "icc";
+    }
+  else if (compilerId == "Watcom")
+    {
+    compiler = "ow";
+    }
+  else if (compilerId == "GNU")
+    {
+    if (hostSystemName == "Windows")
+      {
+      compiler = "mingw";
+      }
+    else
+      {
+      compiler = "gcc";
+      }
+    }
+  return compiler;
+}
+
+
+int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
+{
+  if ( target->GetType()==cmTarget::EXECUTABLE)
+    {
+    if ((target->GetPropertyAsBool("WIN32_EXECUTABLE"))
+        || (target->GetPropertyAsBool("MACOSX_BUNDLE")))
+      {
+      return 0;
+      }
+    else
+      {
+      return 1;
+      }
+    }
+  else if ( target->GetType()==cmTarget::STATIC_LIBRARY)
+    {
+    return 2;
+    }
+  else if ((target->GetType()==cmTarget::SHARED_LIBRARY) 
+     || (target->GetType()==cmTarget::MODULE_LIBRARY))
+    {
+    return 3;
+    }
+  return 4;
+}
+
+std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
+             const std::string& make, const char* makefile, const char* target)
+{
+  std::string command = make;
+  if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)
+    {
+    command += " /NOLOGO /f \\\"";
+    command += makefile;
+    command += "\\\" ";
+    command += target;
+    }
+  else
+    {
+    command += " -f ";
+    command += makefile;
+    command += " ";
+    command += target;
+    }
+  return command;
+}
