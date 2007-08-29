@@ -17,6 +17,10 @@ IF(NOT RPMBUILD_EXECUTABLE)
   MESSAGE(FATAL_ERROR "RPM package requires rpmbuild executable")
 ENDIF(NOT RPMBUILD_EXECUTABLE)
 
+IF(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
+  MESSAGE(FATAL_ERROR "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory without spaces for building RPMs.")
+ENDIF(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
+
 # If rpmbuild is found 
 # we try to discover alien since we may be on non RPM distro like Debian.
 # In this case we may try to to use more advanced features
