@@ -119,7 +119,20 @@ public:
       "RANDOM will return a random string of given length consisting of "
       "characters from the given alphabet. Default length is 5 "
       "characters and default alphabet is all numbers and upper and "
-      "lower case letters.";
+      "lower case letters.\n"
+      "The following characters have special meaning in regular expressions:\n"
+      "   ^         Matches at beginning of a line\n"
+      "   $         Matches at end of a line\n"
+      "   .         Matches any single character\n"
+      "   [ ]       Matches any character(s) inside the brackets\n"
+      "   [^ ]      Matches any character(s) not inside the brackets\n"
+      "    -        Matches any character in range on either side of a dash\n"
+      "   *         Matches preceding pattern zero or more times\n"
+      "   +         Matches preceding pattern one or more times\n"
+      "   ?         Matches preceding pattern zero or once only\n"
+      "   ()        Saves a matched subexpression, which can be referenced in "
+      "the REGEX REPLACE operation. Additionally it is saved in the special "
+      "CMake variables CMAKE_MATCH_(0..9).";
     }
   
   cmTypeMacro(cmStringCommand, cmCommand);
