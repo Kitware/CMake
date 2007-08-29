@@ -19,6 +19,7 @@
 
 #include "cmCommand.h"
 
+class cmMakefile;
 namespace cmsys
 {
   class RegularExpression;
@@ -122,6 +123,8 @@ public:
     }
   
   cmTypeMacro(cmStringCommand, cmCommand);
+  static void ClearMatches(cmMakefile* mf);
+  static void StoreMatches(cmMakefile* mf, cmsys::RegularExpression& re);
 protected:
   bool HandleConfigureCommand(std::vector<std::string> const& args);
   bool HandleAsciiCommand(std::vector<std::string> const& args);
@@ -137,8 +140,6 @@ protected:
   bool HandleSubstringCommand(std::vector<std::string> const& args);
   bool HandleStripCommand(std::vector<std::string> const& args);
   bool HandleRandomCommand(std::vector<std::string> const& args);
-  void ClearMatches();
-  void StoreMatches(cmsys::RegularExpression& re);
 
   class RegexReplacement
   {

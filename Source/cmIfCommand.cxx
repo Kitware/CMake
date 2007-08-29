@@ -15,6 +15,8 @@
 
 =========================================================================*/
 #include "cmIfCommand.h"
+#include "cmStringCommand.h"
+
 #include <stdlib.h> // required for atof
 #include <list>
 #include <cmsys/RegularExpression.hxx>
@@ -215,7 +217,7 @@ namespace
 
 
 bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
-                         char **errorString, const cmMakefile *makefile)
+                         char **errorString, cmMakefile *makefile)
 {
   // check for the different signatures
   const char *def;
@@ -369,6 +371,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
         const char* rex = (argP2)->c_str();
+        cmStringCommand::ClearMatches(makefile);
         cmsys::RegularExpression regEntry;
         if ( !regEntry.compile(rex) )
           {
@@ -382,6 +385,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         if (regEntry.find(def))
           {
           *arg = "1";
+          cmStringCommand::StoreMatches(makefile, regEntry);
           }
         else
           {

@@ -248,7 +248,7 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
     input += args[i];
     }
   
-  this->ClearMatches();
+  this->ClearMatches(this->Makefile);
   // Compile the regular expression.
   cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
@@ -263,7 +263,7 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
   std::string output;
   if(re.find(input.c_str()))
     {
-    this->StoreMatches(re);
+    this->StoreMatches(this->Makefile, re);
     std::string::size_type l = re.start();
     std::string::size_type r = re.end();
     if(r-l == 0)
@@ -297,7 +297,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
     input += args[i];
     }
   
-  this->ClearMatches();
+  this->ClearMatches(this->Makefile);
   // Compile the regular expression.
   cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
@@ -314,7 +314,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
   const char* p = input.c_str();
   while(re.find(p))
     {
-    this->StoreMatches(re);
+    this->StoreMatches(this->Makefile, re);
     std::string::size_type l = re.start();
     std::string::size_type r = re.end();
     if(r-l == 0)
@@ -401,7 +401,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
     input += args[i];
     }
   
-  this->ClearMatches();
+  this->ClearMatches(this->Makefile);
   // Compile the regular expression.
   cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
@@ -418,7 +418,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   std::string::size_type base = 0;
   while(re.find(input.c_str()+base))
     {
-    this->StoreMatches(re);
+    this->StoreMatches(this->Makefile, re);
     std::string::size_type l2 = re.start();
     std::string::size_type r = re.end();
     
@@ -479,24 +479,24 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-void cmStringCommand::ClearMatches()
+void cmStringCommand::ClearMatches(cmMakefile* mf)
 {
   for (unsigned int i=0; i<10; i++)
     {
     char name[128];
     sprintf(name, "CMAKE_MATCH_%d", i);
-    this->Makefile->AddDefinition(name, "");
+    mf->AddDefinition(name, "");
     }
 }
 
 //----------------------------------------------------------------------------
-void cmStringCommand::StoreMatches(cmsys::RegularExpression& re)
+void cmStringCommand::StoreMatches(cmMakefile* mf,cmsys::RegularExpression& re)
 {
   for (unsigned int i=0; i<10; i++)
     {
     char name[128];
     sprintf(name, "CMAKE_MATCH_%d", i);
-    this->Makefile->AddDefinition(name, re.match(i).c_str());
+    mf->AddDefinition(name, re.match(i).c_str());
     }
 }
 
