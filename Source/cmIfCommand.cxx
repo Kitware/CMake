@@ -384,8 +384,8 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }
         if (regEntry.find(def))
           {
-          *arg = "1";
           cmStringCommand::StoreMatches(makefile, regEntry);
+          *arg = "1";
           }
         else
           {
