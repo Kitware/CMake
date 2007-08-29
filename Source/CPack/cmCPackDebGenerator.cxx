@@ -138,8 +138,9 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
     topLevelWithTrailingSlash += '/';
     for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
       {
-      cmd = cmakeExecutable;
-      cmd += " -E md5sum \"";
+      cmd = "\"";
+      cmd += cmakeExecutable;
+      cmd += "\" -E md5sum \"";
       cmd += *fileIt;
       cmd += "\"";
       //std::string output;
@@ -158,8 +159,9 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
     }
 
 
-  cmd = cmakeExecutable;
-  cmd += " -E tar cfz control.tar.gz ./control ./md5sums";
+  cmd = "\"";
+  cmd += cmakeExecutable;
+  cmd += "\" -E tar cfz control.tar.gz ./control ./md5sums";
   res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
     &retVal, toplevel, this->GeneratorVerbose, 0);
 
