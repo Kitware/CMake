@@ -154,6 +154,7 @@ bool cmInstallExportGenerator::SetExportSet(const char* name,
       if (targetName == this->Targets[i]->Target->GetName())
         {
         targetWithProps = this->Targets[i];
+        break;
         }
       }
 

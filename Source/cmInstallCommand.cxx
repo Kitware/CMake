@@ -152,6 +152,15 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
   return true;
 }
 
+
+/*struct InstallPart
+{
+  InstallPart(cmCommandArgumentsHelper* helper, const char* key, 
+         cmCommandArgumentGroup* group);
+  cmCAStringVector argVector;
+  cmInstallCommandArguments args;
+};*/
+
 //----------------------------------------------------------------------------
 bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 {
@@ -1010,7 +1019,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   cmInstallCommandArguments ica;
   cmCAStringVector exports(&ica.Parser, "EXPORT");
   cmCAString prefix(&ica.Parser, "PREFIX", &ica.ArgumentGroup);
-  cmCAString filename(&ica.Parser, "FILENAME", &ica.ArgumentGroup);
+  cmCAString filename(&ica.Parser, "FILE", &ica.ArgumentGroup);
   exports.Follows(0);
 
   ica.ArgumentGroup.Follows(&exports);
@@ -1043,6 +1052,9 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
                           GetExportSet(exportIt->c_str());
     if (exportSet == 0)
       {
+      cmOStringStream e;
+      e << "EXPORT given unknown export name \"" << exportIt->c_str() << "\".";
+      this->SetError(e.str().c_str());
       return false;
       }
 
@@ -1058,6 +1070,9 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
       }
     else
       {
+      cmOStringStream e;
+      e << "EXPORT failed, maybe a target is exported more than once.";
+      this->SetError(e.str().c_str());
       delete exportGenerator;
       return false;
       }
