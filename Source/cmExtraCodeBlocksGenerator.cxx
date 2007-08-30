@@ -207,7 +207,7 @@ void cmExtraCodeBlocksGenerator
   fout<<"         </Compiler>\n"
         "         <MakeCommands>\n"
         "            <Build command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), ti->first.c_str()) << "\" />\n"
-        "            <CompileFile command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), ti->first.c_str()) << "\" />\n"
+        "            <CompileFile command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), "&quot;$file&quot;") << "\" />\n"
         "            <Clean command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), "clean") << "\" />\n"
         "            <DistClean command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), "clean") << "\" />\n"
         "         </MakeCommands>\n"
