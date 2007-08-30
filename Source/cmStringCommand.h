@@ -130,6 +130,7 @@ public:
       "   *         Matches preceding pattern zero or more times\n"
       "   +         Matches preceding pattern one or more times\n"
       "   ?         Matches preceding pattern zero or once only\n"
+      "   |         Matches a pattern on either side of the |\n"
       "   ()        Saves a matched subexpression, which can be referenced in "
       "the REGEX REPLACE operation. Additionally it is saved in the special "
       "CMake variables CMAKE_MATCH_(0..9).";
