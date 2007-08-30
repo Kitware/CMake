@@ -205,9 +205,13 @@ ELSE(STAGE2)
     scripts/sample_script scripts/sample_script.bat)
 
 # "export" the targets collected in "SimpleInstallS1"
-  INSTALL(EXPORT SimpleInstallS1 FILENAME SimpleInstallS1Config.cmake 
+  INSTALL(EXPORT SimpleInstallS1 FILE SimpleInstallS1Config.cmake 
                                  DESTINATION MyTest/lib 
                                  PREFIX S1_ )
+
+  EXPORT(TARGETS SimpleInstall test1 test2 test3 
+         FILE "${CMAKE_CURRENT_BINARY_DIR}/SimpleInstallS1Config.cmake"
+         PREFIX S2_ )
 
   ADD_SUBDIRECTORY(scripts)
 
