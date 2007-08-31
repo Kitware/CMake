@@ -105,8 +105,10 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
     out << std::endl;
     }
 
-  std::string cmd = cmakeExecutable;
-  cmd += " -E tar cfz data.tar.gz ./usr";
+  std::string cmd;
+  cmd = "\"";
+  cmd += cmakeExecutable;
+  cmd += "\" -E tar cfz data.tar.gz ./usr";
   std::string output;
   int retVal = -1;
   int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
