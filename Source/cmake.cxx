@@ -2535,6 +2535,7 @@ std::string cmake::FindCMakeProgram(const char* name) const
 #else
     // Only for bootstrap
     path += mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+    path += "/";
     path += name;
     path += cmSystemTools::GetExecutableExtension();
 #endif
