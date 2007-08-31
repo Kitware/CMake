@@ -70,7 +70,7 @@ public:
    * Set/Get and Clear the enabled languages.  
    */
   void SetLanguageEnabled(const char*, cmMakefile* mf);
-  bool GetLanguageEnabled(const char*);
+  bool GetLanguageEnabled(const char*) const;
   void ClearEnabledLanguages();
   void GetEnabledLanguages(std::vector<std::string>& lang);
   /**

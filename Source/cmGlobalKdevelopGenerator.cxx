@@ -108,6 +108,7 @@ void cmGlobalKdevelopGenerator::Generate()
         break;
         }
       }
+      
     // now create a project file
     this->CreateProjectFile(outputDir, projectDir, projectName,
                             executable, cmakeFilePattern, fileToOpen);
@@ -275,30 +276,7 @@ void cmGlobalKdevelopGenerator
                     const std::string& cmakeFilePattern,
                     const std::string& fileToOpen)
 {
-  // add all subdirectories to the kdevelop blacklist
-  // so they are not monitored for added or removed files
-  // since this is basically handled by adding files to the
-  // cmake files
   this->Blacklist.clear();
-  cmsys::Directory d;
-  if (d.Load(projectDir.c_str()))
-    {
-    size_t numf = d.GetNumberOfFiles();
-    for (unsigned int i = 0; i < numf; i++)
-      {
-      std::string nextFile = d.GetFile(i);
-      if ((nextFile!=".") && (nextFile!=".."))
-        {
-        std::string tmp = projectDir;
-        tmp += "/";
-        tmp += nextFile;
-        if (cmSystemTools::FileIsDirectory(tmp.c_str()))
-          {
-          this->Blacklist.push_back(nextFile);
-          }
-        }
-      }
-    }
 
   std::string filename=outputDir+"/";
   filename+=projectname+".kdevelop";
@@ -313,6 +291,28 @@ void cmGlobalKdevelopGenerator
     }
   else
     {
+    // add all subdirectories to the kdevelop blacklist
+    // so they are not monitored for added or removed files
+    // since this is basically handled by adding files to the cmake files
+    cmsys::Directory d;
+    if (d.Load(projectDir.c_str()))
+      {
+      size_t numf = d.GetNumberOfFiles();
+      for (unsigned int i = 0; i < numf; i++)
+        {
+        std::string nextFile = d.GetFile(i);
+        if ((nextFile!=".") && (nextFile!=".."))
+          {
+          std::string tmp = projectDir;
+          tmp += "/";
+          tmp += nextFile;
+          if (cmSystemTools::FileIsDirectory(tmp.c_str()))
+            {
+            this->Blacklist.push_back(nextFile);
+            }
+          }
+        }
+      }
     this->CreateNewProjectFile(outputDir, projectDir, filename,
                                executable, cmakeFilePattern, 
                                fileToOpen, sessionFilename);
@@ -415,21 +415,39 @@ void cmGlobalKdevelopGenerator
   // check for a version control system
   bool hasSvn = cmSystemTools::FileExists((projectDir + "/.svn").c_str());
   bool hasCvs = cmSystemTools::FileExists((projectDir + "/CVS").c_str());
-  
-  fout<<"<?xml version = '1.0'?>\n";
-  fout<<"<kdevelop>\n";
-  fout<<"  <general>\n";
-  fout<<"  <author></author>\n";
-  fout<<"  <email></email>\n";
-  fout<<"  <version>$VERSION$</version>\n";
-  fout<<"  <projectmanagement>KDevCustomProject</projectmanagement>\n";
-  fout<<"  <primarylanguage>C++</primarylanguage>\n";
-  fout<<"  <ignoreparts/>\n";
-  fout<<"  <projectdirectory>"<<projectDir.c_str()
-      <<"</projectdirectory>\n";   //this one is important
+
+  bool enableCxx = (this->GlobalGenerator->GetLanguageEnabled("C") 
+                          || this->GlobalGenerator->GetLanguageEnabled("CXX"));
+  bool enableFortran = this->GlobalGenerator->GetLanguageEnabled("Fortran");
+  std::string primaryLanguage = "C++";
+  if (enableFortran && !enableCxx)
+    {
+    primaryLanguage="Fortran77";
+    }
+
+  fout<<"<?xml version = '1.0'?>\n"
+        "<kdevelop>\n"
+        "  <general>\n"
+        "  <author></author>\n"
+        "  <email></email>\n"
+        "  <version>$VERSION$</version>\n"
+        "  <projectmanagement>KDevCustomProject</projectmanagement>\n"
+        "  <primarylanguage>" << primaryLanguage << "</primarylanguage>\n"
+        "  <ignoreparts/>\n"
+        "  <projectdirectory>" << projectDir.c_str() << 
+        "</projectdirectory>\n";   //this one is important
   fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n"; //and this one
+
+  // setup additional languages
   fout<<"  <secondaryLanguages>\n";
-  fout<<"     <language>C</language>\n";
+  if (enableFortran && enableCxx)
+    {
+    fout<<"     <language>Fortran</language>\n";
+    }
+  if (enableCxx)
+    {
+    fout<<"     <language>C</language>\n";
+    }
   fout<<"  </secondaryLanguages>\n";
 
   if (hasSvn)
@@ -441,100 +459,144 @@ void cmGlobalKdevelopGenerator
     fout << "  <versioncontrol>kdevcvsservice</versioncontrol>\n";
     }
 
-  fout<<"  </general>\n";
-  fout<<"  <kdevcustomproject>\n";
-  fout<<"    <filelistdirectory>"<<outputDir.c_str()
-      <<"</filelistdirectory>\n";
-  fout<<"    <run>\n";
-  fout<<"      <mainprogram>"<<executable.c_str()<<"</mainprogram>\n";
-  fout<<"      <directoryradio>custom</directoryradio>\n";
-  fout<<"      <customdirectory>"<<outputDir.c_str()<<"</customdirectory>\n";
-  fout<<"      <programargs></programargs>\n";
-  fout<<"      <terminal>false</terminal>\n";
-  fout<<"      <autocompile>true</autocompile>\n";
-  fout<<"      <envvars/>\n";
-  fout<<"    </run>\n";
-  fout<<"    <build>\n";
-  fout<<"      <buildtool>make</buildtool>\n"; //this one is important
+  fout<<"  </general>\n"
+        "  <kdevcustomproject>\n"
+        "    <filelistdirectory>" << outputDir.c_str() <<
+        "</filelistdirectory>\n"
+        "    <run>\n"
+        "      <mainprogram>" << executable.c_str() << "</mainprogram>\n"
+        "      <directoryradio>custom</directoryradio>\n"
+        "      <customdirectory>"<<outputDir.c_str()<<"</customdirectory>\n"
+        "      <programargs></programargs>\n"
+        "      <terminal>false</terminal>\n"
+        "      <autocompile>true</autocompile>\n"
+        "      <envvars/>\n"
+        "    </run>\n"
+        "    <build>\n"
+        "      <buildtool>make</buildtool>\n"; //this one is important
   fout<<"      <builddir>"<<outputDir.c_str()<<"</builddir>\n"; //and this one
-  fout<<"    </build>\n";
-  fout<<"    <make>\n";
-  fout<<"      <abortonerror>false</abortonerror>\n";
-  fout<<"      <numberofjobs>1</numberofjobs>\n";
-  fout<<"      <dontact>false</dontact>\n";
-  fout<<"      <makebin></makebin>\n";
-  fout<<"      <selectedenvironment>default</selectedenvironment>\n";
-  fout<<"      <environments>\n";
-  fout<<"        <default/>\n";
-  fout<<"      </environments>\n";
-  fout<<"    </make>\n";
+  fout<<"    </build>\n"
+        "    <make>\n"
+        "      <abortonerror>false</abortonerror>\n"
+        "      <numberofjobs>1</numberofjobs>\n"
+        "      <dontact>false</dontact>\n"
+        "      <makebin></makebin>\n"
+        "      <selectedenvironment>default</selectedenvironment>\n"
+        "      <environments>\n"
+        "        <default/>\n"
+        "      </environments>\n"
+        "    </make>\n";
 
   fout<<"    <blacklist>\n";
   for(std::vector<std::string>::const_iterator dirIt=this->Blacklist.begin();
       dirIt != this->Blacklist.end();
       ++dirIt)
     {
-    fout<<"      <path>"<<dirIt->c_str()<<"</path>\n";
+    fout<<"      <path>" << dirIt->c_str() << "</path>\n";
     }
   fout<<"    </blacklist>\n";
 
-  fout<<"  </kdevcustomproject>\n";
-  fout<<"  <kdevfilecreate>\n";
-  fout<<"    <filetypes/>\n";
-  fout<<"    <useglobaltypes>\n";
-  fout<<"      <type ext=\"ui\" />\n";
-  fout<<"      <type ext=\"cpp\" />\n";
-  fout<<"      <type ext=\"h\" />\n";
-  fout<<"    </useglobaltypes>\n";
-  fout<<"  </kdevfilecreate>\n";
-  fout<<"  <kdevdoctreeview>\n";
-  fout<<"    <projectdoc>\n";
-  fout<<"      <userdocDir>html/</userdocDir>\n";
-  fout<<"      <apidocDir>html/</apidocDir>\n";
-  fout<<"    </projectdoc>\n";
-  fout<<"    <ignoreqt_xml/>\n";
-  fout<<"    <ignoredoxygen/>\n";
-  fout<<"    <ignorekdocs/>\n";
-  fout<<"    <ignoretocs/>\n";
-  fout<<"    <ignoredevhelp/>\n";
-  fout<<"  </kdevdoctreeview>\n";
-  fout<<"  <cppsupportpart>\n";
-  fout<<"    <filetemplates>\n";
-  fout<<"      <interfacesuffix>.h</interfacesuffix>\n";
-  fout<<"      <implementationsuffix>.cpp</implementationsuffix>\n";
-  fout<<"    </filetemplates>\n";
-  fout<<"  </cppsupportpart>\n";
-  fout<<"  <kdevcppsupport>\n";
-  fout<<"    <codecompletion>\n";
-  fout<<"      <includeGlobalFunctions>true</includeGlobalFunctions>\n";
-  fout<<"      <includeTypes>true</includeTypes>\n";
-  fout<<"      <includeEnums>true</includeEnums>\n";
-  fout<<"      <includeTypedefs>false</includeTypedefs>\n";
-  fout<<"      <automaticCodeCompletion>true</automaticCodeCompletion>\n";
-  fout<<"      <automaticArgumentsHint>true</automaticArgumentsHint>\n";
-  fout<<"      <automaticHeaderCompletion>true</automaticHeaderCompletion>\n";
-  fout<<"      <codeCompletionDelay>250</codeCompletionDelay>\n";
-  fout<<"      <argumentsHintDelay>400</argumentsHintDelay>\n";
-  fout<<"      <headerCompletionDelay>250</headerCompletionDelay>\n";
-  fout<<"    </codecompletion>\n";
-  fout<<"    <references/>\n";
-  fout<<"  </kdevcppsupport>\n";
-  fout<<"  <kdevfileview>\n";
-  fout<<"    <groups>\n";
-  fout<<"      <group pattern=\""<<cmakeFilePattern.c_str()
-      <<"\" name=\"CMake\" />\n";
-  fout<<"      <group pattern=\"*.h;*.hxx\" name=\"Header\" />\n";
-  fout<<"      <group pattern=\"*.cpp;*.c;*.C;*.cxx\" name=\"Sources\" />\n";
-  fout<<"      <group pattern=\"*.ui\" name=\"Qt Designer files\" />\n";
-  fout<<"      <hidenonprojectfiles>true</hidenonprojectfiles>\n";
-  fout<<"    </groups>\n";
-  fout<<"    <tree>\n";
-  fout<<"      <hidepatterns>*.o,*.lo,CVS,*~,cmake*</hidepatterns>\n";
-  fout<<"      <hidenonprojectfiles>true</hidenonprojectfiles>\n";
-  fout<<"    </tree>\n";
-  fout<<"  </kdevfileview>\n";
-  fout<<"</kdevelop>\n";
-  
+  fout<<"  </kdevcustomproject>\n"
+        "  <kdevfilecreate>\n"
+        "    <filetypes/>\n"
+        "    <useglobaltypes>\n"
+        "      <type ext=\"ui\" />\n"
+        "      <type ext=\"cpp\" />\n"
+        "      <type ext=\"h\" />\n"
+        "    </useglobaltypes>\n"
+        "  </kdevfilecreate>\n"
+        "  <kdevdoctreeview>\n"
+        "    <projectdoc>\n"
+        "      <userdocDir>html/</userdocDir>\n"
+        "      <apidocDir>html/</apidocDir>\n"
+        "    </projectdoc>\n"
+        "    <ignoreqt_xml/>\n"
+        "    <ignoredoxygen/>\n"
+        "    <ignorekdocs/>\n"
+        "    <ignoretocs/>\n"
+        "    <ignoredevhelp/>\n"
+        "  </kdevdoctreeview>\n";
+
+  if (enableCxx)
+    {
+    fout<<"  <cppsupportpart>\n"
+          "    <filetemplates>\n"
+          "      <interfacesuffix>.h</interfacesuffix>\n"
+          "      <implementationsuffix>.cpp</implementationsuffix>\n"
+          "    </filetemplates>\n"
+          "  </cppsupportpart>\n"
+          "  <kdevcppsupport>\n"
+          "    <codecompletion>\n"
+          "      <includeGlobalFunctions>true</includeGlobalFunctions>\n"
+          "      <includeTypes>true</includeTypes>\n"
+          "      <includeEnums>true</includeEnums>\n"
+          "      <includeTypedefs>false</includeTypedefs>\n"
+          "      <automaticCodeCompletion>true</automaticCodeCompletion>\n"
+          "      <automaticArgumentsHint>true</automaticArgumentsHint>\n"
+          "      <automaticHeaderCompletion>true</automaticHeaderCompletion>\n"
+          "      <codeCompletionDelay>250</codeCompletionDelay>\n"
+          "      <argumentsHintDelay>400</argumentsHintDelay>\n"
+          "      <headerCompletionDelay>250</headerCompletionDelay>\n"
+          "    </codecompletion>\n"
+          "    <references/>\n"
+          "  </kdevcppsupport>\n";
+    }
+
+  if (enableFortran)
+    {
+    fout<<"  <kdevfortransupport>\n"
+          "    <ftnchek>\n"
+          "      <division>false</division>\n"
+          "      <extern>false</extern>\n"
+          "      <declare>false</declare>\n"
+          "      <pure>false</pure>\n"
+          "      <argumentsall>false</argumentsall>\n"
+          "      <commonall>false</commonall>\n"
+          "      <truncationall>false</truncationall>\n"
+          "      <usageall>false</usageall>\n"
+          "      <f77all>false</f77all>\n"
+          "      <portabilityall>false</portabilityall>\n"
+          "      <argumentsonly/>\n"
+          "      <commononly/>\n"
+          "      <truncationonly/>\n"
+          "      <usageonly/>\n"
+          "      <f77only/>\n"
+          "      <portabilityonly/>\n"
+          "    </ftnchek>\n"
+          "  </kdevfortransupport>\n";
+    }
+
+  // set up file groups. maybe this can be used with the CMake SOURCE_GROUP()
+  // command
+  fout<<"  <kdevfileview>\n"
+        "    <groups>\n"
+        "      <group pattern=\"" << cmakeFilePattern.c_str() <<
+        "\" name=\"CMake\" />\n";
+
+  if (enableCxx)
+    {
+    fout<<"      <group pattern=\"*.h;*.hxx;*.hpp\" name=\"Header\" />\n"
+          "      <group pattern=\"*.c\" name=\"C Sources\" />\n"
+          "      <group pattern=\"*.cpp;*.C;*.cxx;*.cc\" name=\"C++ Sources\""
+          "/>\n";
+    }
+
+  if (enableFortran)
+    {
+    fout<<"      <group pattern=\"*.f;*.F;*.f77;*.F77;*.f90;*.F90;*.for;*.f95;"
+          "*.F95\" name=\"Fortran Sources\" />\n";
+    }
+
+  fout<<"      <group pattern=\"*.ui\" name=\"Qt Designer files\" />\n"
+        "      <hidenonprojectfiles>true</hidenonprojectfiles>\n"
+        "    </groups>\n"
+        "    <tree>\n"
+        "      <hidepatterns>*.o,*.lo,CVS,*~,cmake*</hidepatterns>\n"
+        "      <hidenonprojectfiles>true</hidenonprojectfiles>\n"
+        "    </tree>\n"
+        "  </kdevfileview>\n"
+        "</kdevelop>\n";
+
   if (sessionFilename.empty())
     {
     return;
@@ -547,15 +609,15 @@ void cmGlobalKdevelopGenerator
     {
     return;
     }
-  devses<<"<?xml version = '1.0' encoding = \'UTF-8\'?>\n";
-  devses<<"<!DOCTYPE KDevPrjSession>\n";
-  devses<<"<KDevPrjSession>\n";
-  devses<<" <DocsAndViews NumberOfDocuments=\"1\" >\n";
-  devses<<"  <Doc0 NumberOfViews=\"1\" URL=\"file://"
-        <<fileToOpen.c_str()<<"\" >\n";
-  devses<<"   <View0 line=\"0\" Type=\"Source\" />\n";
-  devses<<"  </Doc0>\n";
-  devses<<" </DocsAndViews>\n";
-  devses<<"</KDevPrjSession>\n";
+  devses<<"<?xml version = '1.0' encoding = \'UTF-8\'?>\n"
+          "<!DOCTYPE KDevPrjSession>\n"
+          "<KDevPrjSession>\n"
+          " <DocsAndViews NumberOfDocuments=\"1\" >\n"
+          "  <Doc0 NumberOfViews=\"1\" URL=\"file://" << fileToOpen.c_str() <<
+          "\" >\n"
+          "   <View0 line=\"0\" Type=\"Source\" />\n"
+          "  </Doc0>\n"
+          " </DocsAndViews>\n"
+          "</KDevPrjSession>\n";
 }
 

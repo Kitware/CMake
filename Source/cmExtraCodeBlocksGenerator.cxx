@@ -271,8 +271,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
   // figure out which language to use
   // for now care only for C and C++
   std::string compilerIdVar = "CMAKE_CXX_COMPILER_ID";
-  cmGlobalGenerator* gg=const_cast<cmGlobalGenerator*>(this->GlobalGenerator);
-  if (gg->GetLanguageEnabled("CXX") == false)
+  if (this->GlobalGenerator->GetLanguageEnabled("CXX") == false)
     {
     compilerIdVar = "CMAKE_C_COMPILER_ID";
     }
