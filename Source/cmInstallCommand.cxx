@@ -646,7 +646,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   this->Makefile->AddInstallGenerator(
                          CreateInstallFilesGenerator(absFiles, ica, programs));
 
-  // Tell the global generator about any installation component names specified.
+  //Tell the global generator about any installation component names specified.
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
                              ->AddInstallComponent(ica.GetComponent().c_str());
 

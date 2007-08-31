@@ -40,9 +40,9 @@ class cmInstallCommandArguments
     const std::vector<std::string>& GetConfigurations() const;
     bool GetOptional() const;
 
-    // once HandleDirectoryMode() is also switched to using cmInstallCommandArguments
-    // then these two functions can become non-static private member functions
-    // without arguments
+    // once HandleDirectoryMode() is also switched to using 
+    // cmInstallCommandArguments then these two functions can become non-static
+    // private member functions without arguments
     static void ComputeDestination(const std::string& inDest, 
                                    std::string& absDest);
     static bool CheckPermissions(const std::string& onePerm, 
