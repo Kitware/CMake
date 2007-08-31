@@ -26,6 +26,8 @@ IF(CMAKE_USE_KWSTYLE)
 
   CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/Utilities/KWStyle/CMake.kws.xml.in
                ${CMAKE_BINARY_DIR}/CMake.kws.xml)
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/Utilities/KWStyle/CMakeMoreChecks.kws.xml.in
+               ${CMAKE_BINARY_DIR}/CMakeMoreChecks.kws.xml)
 
   CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/Utilities/KWStyle/CMakeFiles.txt.in
                  ${CMAKE_BINARY_DIR}/CMakeKWSFiles.txt)
@@ -36,6 +38,13 @@ IF(CMAKE_USE_KWSTYLE)
     ARGS    -xml ${CMAKE_BINARY_DIR}/CMake.kws.xml -o ${CMAKE_SOURCE_DIR}/Utilities/KWStyle/CMakeOverwrite.txt -v ${KWSTYLE_ARGUMENTS} -D ${CMAKE_BINARY_DIR}/CMakeKWSFiles.txt 
     COMMENT "Coding Style Checker"
     )
+
+  ADD_CUSTOM_TARGET(MoreStyleChecks
+    COMMAND ${KWSTYLE_EXECUTABLE}
+    -xml ${CMAKE_BINARY_DIR}/CMakeMoreChecks.kws.xml -html ${CMAKE_BINARY_DIR}/html -o ${CMAKE_SOURCE_DIR}/Utilities/KWStyle/CMakeOverwrite.txt -v ${KWSTYLE_ARGUMENTS} -D ${CMAKE_BINARY_DIR}/CMakeKWSFiles.txt 
+    COMMENT "Coding Style Checker, more checks enabled"
+    )
+
   ADD_CUSTOM_TARGET(StyleCheck DEPENDS ${CMAKE_BINARY_DIR}/KWStyleReport.txt)
 ENDIF(CMAKE_USE_KWSTYLE)
 
