@@ -647,9 +647,7 @@ bool cmGlobalGenerator::IgnoreFile(const char* l)
 
 bool cmGlobalGenerator::GetLanguageEnabled(const char* l) const
 {
-  std::map<cmStdString, bool>::const_iterator langIt 
-      = this->LanguageEnabled.find(l);
-  return (langIt!= this->LanguageEnabled.end());
+  return (this->LanguageEnabled.find(l)!= this->LanguageEnabled.end());
 }
 
 void cmGlobalGenerator::ClearEnabledLanguages()
