@@ -186,6 +186,8 @@ MACRO(CMAKE_SETUP_TESTING)
     ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)
   CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
     ${CMake_BINARY_DIR}/Modules/.NoDartCoverage)
+  CONFIGURE_FILE(${CMake_SOURCE_DIR}/CTestCustom.cmake.in
+    ${CMake_BINARY_DIR}/CTestCustom.cmake @ONLY)
   CONFIGURE_FILE(${CMake_SOURCE_DIR}/CTestCustom.ctest.in
     ${CMake_BINARY_DIR}/CTestCustom.ctest @ONLY)
   IF(BUILD_TESTING AND DART_ROOT)
