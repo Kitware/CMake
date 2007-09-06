@@ -42,7 +42,7 @@ ExpectedBuilds: \
 {dashsun1.kitware SunOS-gcc34-64} \
 {destiny.kitware HP-UX-aCC-gmake} \
 {destiny.kitware HP-UX-aCC} \
-{acdc HP-UX9000-8-aCC} \
+{heart HP-UXia64-aCC} \
 {hythloth.kitware Linux64-bullseye-cov} \
 {hythloth.kitware Linux64-suncc-5.9} \
 {iris.elemtech IRIX64-CC-7.4} \
