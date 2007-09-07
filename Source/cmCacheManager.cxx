@@ -774,7 +774,7 @@ void cmCacheManager::AddCacheEntry(const char* key,
   else
     {
     e.Properties["HELPSTRING"] = 
-      "(This variable does not exists and should not be used)";
+      "(This variable does not exist and should not be used)";
     }
   this->Cache[key] = e;
 }
