@@ -348,8 +348,8 @@ SET(CMake_VERSION_PATCH 0)
 
 # CVS versions are odd, if this is an odd minor version
 # then set the CMake_VERSION_DATE variable
-MATH(EXPR OUT "${CMake_VERSION_MINOR} & 1")
-IF(OUT EQUAL 1)
+IF("${CMake_VERSION_MINOR}" MATCHES "[13579]$")
+  message("odd version")
   # extract the version Date from the cmVersion.cxx file
   FILE(READ "${CMake_SOURCE_DIR}/Source/cmVersion.cxx" 
     CMAKE_VERSION_FILE_CONTENT)
@@ -359,7 +359,7 @@ IF(OUT EQUAL 1)
     CMake_VERSION_DATE "${CMake_VERSION_DATE}")
   STRING(REPLACE "/" "" CMake_VERSION_DATE 
     "${CMake_VERSION_DATE}")
-ENDIF(OUT EQUAL 1)
+ENDIF("${CMake_VERSION_MINOR}" MATCHES "[13579]$")
 
 SET(CMake_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
 SET(CMake_VERSION_FULL "${CMake_VERSION}.${CMake_VERSION_PATCH}")
