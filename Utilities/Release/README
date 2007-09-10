@@ -18,6 +18,8 @@ cmake -DCMAKE_VERSION=CMake-2-4-7 -P ../create-cmake-release.cmake
 
 
 create-cmake-release.cmake:  script to run to create release sh script
+To add or remove machines this file should be edited.
+
 Cygwin -> directory that contains cpack cygwin package files used in
  CMakeCPack.cmake)
 

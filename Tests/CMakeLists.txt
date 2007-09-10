@@ -50,6 +50,21 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(Assembler HelloAsm)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
 
+  IF(CMAKE_BUILD_NIGHTLY_WINDOWS_TEST)
+    FILE(MAKE_DIRECTORY "${CMake_BINARY_DIR}/Tests/CMake-CVS")
+    FILE(WRITE "${CMake_BINARY_DIR}/Tests/CMake-CVS/nightly-cmake.sh"
+"cd ${CMake_BINARY_DIR}/Tests/CMake-CVS
+${CMake_BINARY_DIR}/bin/cmake -DCMAKE_VERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Release/vogon_release.cmake
+${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Release/upload_release.cmake
+")
+    ADD_TEST(NightlyCMakeBuild 
+      /bin/sh ${CMake_BINARY_DIR}/Tests/CMake-CVS/nightly-cmake.sh)
+    IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
+      SET_TESTS_PROPERTIES ( NightlyCMakeBuild PROPERTIES TIMEOUT 1800)
+    ENDIF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
+  ENDIF(CMAKE_BUILD_NIGHTLY_WINDOWS_TEST)
+
+  
   # add tests with more complex invocations
   ADD_TEST(TargetName ${CMAKE_CTEST_COMMAND}
     --build-and-test

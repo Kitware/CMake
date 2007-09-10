@@ -6,13 +6,13 @@ set(RELEASE_SCRIPTS
   dashmacmini2_release.cmake  # Mac Darwin universal
   dashsun1_release.cmake      # SunOS
   destiny_release.cmake       # HPUX
-  magrathea_release.cmake      # Linux
+  magrathea_release.cmake     # Linux
   dashsgi1_release.cmake      # IRIX
   dashsgi1_release64.cmake    # IRIX 64
   vogon_release.cmake         # Windows
   vogon_cygwin.cmake          # Cygwin
-#  r36n11_aix_release.cmake   # AIX 5.3
-  r15n65_aix_release.cmake    # AIX 5.2
+  r36n11_aix_release.cmake    # AIX 5.3
+#  r15n65_aix_release.cmake    # AIX 5.2
 )
 
 file(WRITE create-${CMAKE_VERSION}.sh "#!/bin/sh")
