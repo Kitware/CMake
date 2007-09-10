@@ -277,6 +277,12 @@ void cmTarget::DefineProperties(cmake *cm)
      "All Windows-based systems including Cygwin are DLL platforms.");
 
   cm->DefineProperty
+    ("XCODE_ATTRIBUTE_<an-attribute>", cmProperty::TARGET,
+     "Set Xcode target attributes directly.",
+     "Tell the Xcode generator to set '<an-attribute>' to a given value "
+     "in the generated Xcode project.  Ignored on other generators.");
+
+  cm->DefineProperty
     ("GENERATOR_FILE_NAME", cmProperty::TARGET,
      "Generator's file for this target.",
      "An internal property used by some generators to record the name of "

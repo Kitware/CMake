@@ -1576,6 +1576,21 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     debugStr = "NO";
     }    
+
+  // Convert "XCODE_ATTRIBUTE_*" properties directly.
+  {
+  cmPropertyMap const& props = target.GetProperties();
+  for(cmPropertyMap::const_iterator i = props.begin();
+      i != props.end(); ++i)
+    {
+    if(i->first.find("XCODE_ATTRIBUTE_") == 0)
+      {
+      buildSettings->AddAttribute(i->first.substr(16).c_str(),
+                                  this->CreateString(i->second.GetValue()));
+      }
+    }
+  }
+
   buildSettings->AddAttribute("GCC_GENERATE_DEBUGGING_SYMBOLS",
                               this->CreateString(debugStr));
   buildSettings->AddAttribute("GCC_OPTIMIZATION_LEVEL", 
