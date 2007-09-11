@@ -72,10 +72,20 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     generator += this->BuildGenerator;
     args.push_back(generator);
     }
+  
+  const char* config = 0;
   if ( this->CTest->GetConfigType().size() > 0 )
     {
+    config = this->CTest->GetConfigType().c_str();
+    }
+#ifdef CMAKE_INTDIR
+  config = CMAKE_INTDIR;
+#endif
+  
+  if ( config )
+    {
     std::string btype
-      = "-DCMAKE_BUILD_TYPE:STRING=" + this->CTest->GetConfigType();
+      = "-DCMAKE_BUILD_TYPE:STRING=" + std::string(config);
     args.push_back(btype);
     }
 
@@ -235,11 +245,23 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
         }
       }
     std::string output;
+    const char* config = 0;
+    if ( this->CTest->GetConfigType().size() > 0 )
+      {
+      config = this->CTest->GetConfigType().c_str();
+      }
+#ifdef CMAKE_INTDIR
+    config = CMAKE_INTDIR;
+#endif
+    if(!config)
+      {
+      config = "Debug";
+      }
     int retVal = cm.GetGlobalGenerator()->Build(
       this->SourceDir.c_str(), this->BinaryDir.c_str(),
       this->BuildProject.c_str(), tarIt->c_str(),
       &output, this->BuildMakeProgram.c_str(),
-      this->CTest->GetConfigType().c_str(),
+      config,
       !this->BuildNoClean, 
       false, remainingTime);
 
