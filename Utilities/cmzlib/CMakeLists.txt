@@ -6,29 +6,17 @@ INCLUDE_DIRECTORIES(
   "${CMZLIB_BINARY_DIR}/.."
   )
 
-# Tell the header files included from the .c files that they are being
-# built.  Used to disable warnings since we do not want to change the
-# code much.
-ADD_DEFINITIONS(-DCMZLIB_IN_C)
-
 # Match all headers for dependencies but complain about none.
 INCLUDE_REGULAR_EXPRESSION("^.*$")
 
-# Disable warnings on Borland to avoid changing 3rd party code.
-IF(BORLAND)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
-ENDIF(BORLAND)
-
 # source files for zlib
 SET(ZLIB_SRCS
-  adler32.c   gzio.c      inftrees.c  uncompr.c
-  compress.c  infblock.c  infutil.c   zutil.c
-  crc32.c     infcodes.c 
-  deflate.c   inffast.c  
-  inflate.c   trees.c
+  adler32.c  compress.c  crc32.c  deflate.c  gzio.c   inffast.c
+  inflate.c  inftrees.c  trees.c  uncompr.c  zutil.c
   )
 
 # for windows add the .def and .rc files to the source list
+# if building shared libs
 IF(WIN32)
   IF(BUILD_SHARED_LIBS)
     SET(ZLIB_DLL 1)

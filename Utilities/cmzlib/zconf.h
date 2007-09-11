@@ -1,110 +1,140 @@
-#include "cm_zlib_mangle.h"
-
-/* Disable some warnings so that we do not have to change the code much.  */
-#if defined(CMZLIB_IN_C)
-# if defined(__BORLANDC__)
-#  pragma warn -8004 /* Variable assigned a value that is not used.  */
-# endif
-#endif
-
 /* zconf.h -- configuration of the zlib compression library
- * Copyright (C) 1995-2002 Jean-loup Gailly.
- * For conditions of distribution and use, see copyright notice in zlib.h 
+ * Copyright (C) 1995-2005 Jean-loup Gailly.
+ * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
 /* @(#) $Id$ */
 
-#ifndef _ZCONF_H
-#define _ZCONF_H
+#ifndef ZCONF_H
+#define ZCONF_H
+
+/* KITWARE_ZLIB_CHANGE - Added to mangle function names */
+#include "cm_zlib_mangle.h"
+
+/* KITWARE_ZLIB_CHANGE - Added to get the correct definition of ZLIB_DLL */
+#include "cmzlib/zlibDllConfig.h"
 
 /*
  * If you *really* need a unique prefix for all types and library functions,
  * compile with -DZ_PREFIX. The "standard" zlib should be compiled without it.
  */
 #ifdef Z_PREFIX
-#  define deflateInit_  z_deflateInit_
-#  define deflate       z_deflate
-#  define deflateEnd    z_deflateEnd
-#  define inflateInit_  z_inflateInit_
-#  define inflate       z_inflate
-#  define inflateEnd    z_inflateEnd
-#  define deflateInit2_ z_deflateInit2_
-#  define deflateSetDictionary z_deflateSetDictionary
-#  define deflateCopy   z_deflateCopy
-#  define deflateReset  z_deflateReset
-#  define deflateParams z_deflateParams
-#  define inflateInit2_ z_inflateInit2_
-#  define inflateSetDictionary z_inflateSetDictionary
-#  define inflateSync   z_inflateSync
-#  define inflateSyncPoint z_inflateSyncPoint
-#  define inflateReset  z_inflateReset
-#  define compress      z_compress
-#  define compress2     z_compress2
-#  define uncompress    z_uncompress
-#  define adler32       z_adler32
-#  define crc32         z_crc32
-#  define get_crc_table z_get_crc_table
+#  define deflateInit_          z_deflateInit_
+#  define deflate               z_deflate
+#  define deflateEnd            z_deflateEnd
+#  define inflateInit_          z_inflateInit_
+#  define inflate               z_inflate
+#  define inflateEnd            z_inflateEnd
+#  define deflateInit2_         z_deflateInit2_
+#  define deflateSetDictionary  z_deflateSetDictionary
+#  define deflateCopy           z_deflateCopy
+#  define deflateReset          z_deflateReset
+#  define deflateParams         z_deflateParams
+#  define deflateBound          z_deflateBound
+#  define deflatePrime          z_deflatePrime
+#  define inflateInit2_         z_inflateInit2_
+#  define inflateSetDictionary  z_inflateSetDictionary
+#  define inflateSync           z_inflateSync
+#  define inflateSyncPoint      z_inflateSyncPoint
+#  define inflateCopy           z_inflateCopy
+#  define inflateReset          z_inflateReset
+#  define inflateBack           z_inflateBack
+#  define inflateBackEnd        z_inflateBackEnd
+#  define compress              z_compress
+#  define compress2             z_compress2
+#  define compressBound         z_compressBound
+#  define uncompress            z_uncompress
+#  define adler32               z_adler32
+#  define crc32                 z_crc32
+#  define get_crc_table         z_get_crc_table
+#  define zError                z_zError
 
-#  define Byte          z_Byte
-#  define uInt          z_uInt
-#  define uLong         z_uLong
-#  define Bytef         z_Bytef
-#  define charf         z_charf
-#  define intf          z_intf
-#  define uIntf         z_uIntf
-#  define uLongf        z_uLongf
-#  define voidpf        z_voidpf
-#  define voidp         z_voidp
+#  define alloc_func            z_alloc_func
+#  define free_func             z_free_func
+#  define in_func               z_in_func
+#  define out_func              z_out_func
+#  define Byte                  z_Byte
+#  define uInt                  z_uInt
+#  define uLong                 z_uLong
+#  define Bytef                 z_Bytef
+#  define charf                 z_charf
+#  define intf                  z_intf
+#  define uIntf                 z_uIntf
+#  define uLongf                z_uLongf
+#  define voidpf                z_voidpf
+#  define voidp                 z_voidp
 #endif
 
-#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
-#  define WIN32
-#endif
-#if defined(__GNUC__) || defined(WIN32) || defined(__386__) || defined(i386)
-#  ifndef __32BIT__
-#    define __32BIT__
-#  endif
-#endif
 #if defined(__MSDOS__) && !defined(MSDOS)
 #  define MSDOS
+#endif
+#if (defined(OS_2) || defined(__OS2__)) && !defined(OS2)
+#  define OS2
+#endif
+#if defined(_WINDOWS) && !defined(WINDOWS)
+#  define WINDOWS
+#endif
+#if defined(_WIN32) || defined(_WIN32_WCE) || defined(__WIN32__)
+#  ifndef WIN32
+#    define WIN32
+#  endif
+#endif
+#if (defined(MSDOS) || defined(OS2) || defined(WINDOWS)) && !defined(WIN32)
+#  if !defined(__GNUC__) && !defined(__FLAT__) && !defined(__386__)
+#    ifndef SYS16BIT
+#      define SYS16BIT
+#    endif
+#  endif
 #endif
 
 /*
  * Compile with -DMAXSEG_64K if the alloc function cannot allocate more
  * than 64k bytes at a time (needed on systems with 16-bit int).
  */
-#if defined(MSDOS) && !defined(__32BIT__)
+#ifdef SYS16BIT
 #  define MAXSEG_64K
 #endif
 #ifdef MSDOS
 #  define UNALIGNED_OK
 #endif
 
-#if (defined(MSDOS) || defined(_WINDOWS) || defined(WIN32))  && !defined(STDC)
-#  define STDC
-#endif
-#if defined(__STDC__) || defined(__cplusplus) || defined(__OS2__)
+#ifdef __STDC_VERSION__
 #  ifndef STDC
 #    define STDC
 #  endif
+#  if __STDC_VERSION__ >= 199901L
+#    ifndef STDC99
+#      define STDC99
+#    endif
+#  endif
+#endif
+#if !defined(STDC) && (defined(__STDC__) || defined(__cplusplus))
+#  define STDC
+#endif
+#if !defined(STDC) && (defined(__GNUC__) || defined(__BORLANDC__))
+#  define STDC
+#endif
+#if !defined(STDC) && (defined(MSDOS) || defined(WINDOWS) || defined(WIN32))
+#  define STDC
+#endif
+#if !defined(STDC) && (defined(OS2) || defined(__HOS_AIX__))
+#  define STDC
+#endif
+
+#if defined(__OS400__) && !defined(STDC)    /* iSeries (formerly AS/400). */
+#  define STDC
 #endif
 
 #ifndef STDC
 #  ifndef const /* cannot use !defined(STDC) && !defined(const) on Mac */
-#    define const
+#    define const       /* note: need a more gentle solution here */
 #  endif
 #endif
 
 /* Some Mac compilers merge all .h files incorrectly: */
-#if defined(__MWERKS__) || defined(applec) ||defined(THINK_C) ||defined(__SC__)
+#if defined(__MWERKS__)||defined(applec)||defined(THINK_C)||defined(__SC__)
 #  define NO_DUMMY_DECL
 #endif
-
-/* Old Borland C incorrectly complains about missing returns: */
-#if defined(__BORLANDC__) && (__BORLANDC__ < 0x500)
-#  define NEED_DUMMY_RETURN
-#endif
-
 
 /* Maximum value for memLevel in deflateInit2 */
 #ifndef MAX_MEM_LEVEL
@@ -153,75 +183,87 @@
  * to define NO_MEMCPY in zutil.h.  If you don't need the mixed model,
  * just define FAR to be empty.
  */
-#if (defined(M_I86SM) || defined(M_I86MM)) && !defined(__32BIT__)
-   /* MSC small or medium model */
-#  define SMALL_MEDIUM
-#  ifdef _MSC_VER
-#    define FAR _far
-#  else
-#    define FAR far
-#  endif
-#endif
-#if defined(__BORLANDC__) && (defined(__SMALL__) || defined(__MEDIUM__))
-#  ifndef __32BIT__
+#ifdef SYS16BIT
+#  if defined(M_I86SM) || defined(M_I86MM)
+     /* MSC small or medium model */
 #    define SMALL_MEDIUM
-#    define FAR _far
+#    ifdef _MSC_VER
+#      define FAR _far
+#    else
+#      define FAR far
+#    endif
+#  endif
+#  if (defined(__SMALL__) || defined(__MEDIUM__))
+     /* Turbo C small or medium model */
+#    define SMALL_MEDIUM
+#    ifdef __BORLANDC__
+#      define FAR _far
+#    else
+#      define FAR far
+#    endif
 #  endif
 #endif
 
-#include <cmzlib/zlibDllConfig.h>
-
-/* Compile with -DZLIB_DLL for Windows DLL support */
-#if defined(ZLIB_DLL)
-#  if defined(NOTUSED_WINDOWS) || defined(NOTUSEDWINDOWS)
+#if defined(WINDOWS) || defined(WIN32)
+   /* If building or using zlib as a DLL, define ZLIB_DLL.
+    * This is not mandatory, but it offers a little performance increase.
+    */
+#  ifdef ZLIB_DLL
+#    if defined(WIN32) && (!defined(__BORLANDC__) || (__BORLANDC__ >= 0x500))
+#      ifdef ZLIB_INTERNAL
+#        define ZEXTERN extern __declspec(dllexport)
+#      else
+#        define ZEXTERN extern __declspec(dllimport)
+#      endif
+#    endif
+#  endif  /* ZLIB_DLL */
+   /* If building or using zlib with the WINAPI/WINAPIV calling convention,
+    * define ZLIB_WINAPI.
+    * Caution: the standard ZLIB1.DLL is NOT compiled using ZLIB_WINAPI.
+    */
+#  ifdef ZLIB_WINAPI
 #    ifdef FAR
 #      undef FAR
 #    endif
 #    include <windows.h>
-#    define ZEXPORT  WINAPI
+     /* No need for _export, use ZLIB.DEF instead. */
+     /* For complete Windows compatibility, use WINAPI, not __stdcall. */
+#    define ZEXPORT WINAPI
 #    ifdef WIN32
-#      define ZEXPORTVA  WINAPIV
+#      define ZEXPORTVA WINAPIV
 #    else
-#      define ZEXPORTVA  FAR _cdecl _export
-#    endif
-#  endif
-#  if defined (__BORLANDC__)
-#    if (__BORLANDC__ >= 0x0500) && defined (WIN32)
-#      include <windows.h>
-#      define ZEXPORT __declspec(dllexport) WINAPI
-#      define ZEXPORTRVA __declspec(dllexport) WINAPIV
-#    else
-#      if defined (_Windows) && defined (__DLL__)
-#        define ZEXPORT _export
-#        define ZEXPORTVA _export
-#      endif
+#      define ZEXPORTVA FAR CDECL
 #    endif
 #  endif
 #endif
 
 #if defined (__BEOS__)
-#  if defined (ZLIB_DLL)
-#    define ZEXTERN extern __declspec(dllexport)
-#  else
-#    define ZEXTERN extern __declspec(dllimport)
+#  ifdef ZLIB_DLL
+#    ifdef ZLIB_INTERNAL
+#      define ZEXPORT   __declspec(dllexport)
+#      define ZEXPORTVA __declspec(dllexport)
+#    else
+#      define ZEXPORT   __declspec(dllimport)
+#      define ZEXPORTVA __declspec(dllimport)
+#    endif
 #  endif
 #endif
 
+#ifndef ZEXTERN
+#  define ZEXTERN extern
+#endif
 #ifndef ZEXPORT
 #  define ZEXPORT
 #endif
 #ifndef ZEXPORTVA
 #  define ZEXPORTVA
 #endif
-#ifndef ZEXTERN
-#  define ZEXTERN extern
-#endif
 
 #ifndef FAR
-#   define FAR
+#  define FAR
 #endif
 
-#if !defined(MACOS) && !defined(TARGET_OS_MAC)
+#if !defined(__MACTYPES__)
 typedef unsigned char  Byte;  /* 8 bits */
 #endif
 typedef unsigned int   uInt;  /* 16 bits or more */
@@ -239,17 +281,23 @@ typedef uInt  FAR uIntf;
 typedef uLong FAR uLongf;
 
 #ifdef STDC
-   typedef void FAR *voidpf;
-   typedef void     *voidp;
+   typedef void const *voidpc;
+   typedef void FAR   *voidpf;
+   typedef void       *voidp;
 #else
-   typedef Byte FAR *voidpf;
-   typedef Byte     *voidp;
+   typedef Byte const *voidpc;
+   typedef Byte FAR   *voidpf;
+   typedef Byte       *voidp;
 #endif
 
+/* KITWARE_ZLIB_CHANGE - Since VTK/ITK/CMake use CMake, not ./configure, we can go ahead and test HAVE_UNISTD_H */
 #ifdef HAVE_UNISTD_H
 #  include <sys/types.h> /* for off_t */
 #  include <unistd.h>    /* for SEEK_* and off_t */
-#  define z_off_t  off_t
+#  ifdef VMS
+#    include <unixio.h>   /* for off_t */
+#  endif
+#  define z_off_t off_t
 #endif
 #ifndef SEEK_SET
 #  define SEEK_SET        0       /* Seek from beginning of file.  */
@@ -257,7 +305,18 @@ typedef uLong FAR uLongf;
 #  define SEEK_END        2       /* Set file pointer to EOF plus "offset" */
 #endif
 #ifndef z_off_t
-#  define  z_off_t long
+#  define z_off_t long
+#endif
+
+#if defined(__OS400__)
+#  define NO_vsnprintf
+#endif
+
+#if defined(__MVS__)
+#  define NO_vsnprintf
+#  ifdef FAR
+#    undef FAR
+#  endif
 #endif
 
 /* MVS linker does not support external names larger than 8 bytes */
@@ -265,34 +324,28 @@ typedef uLong FAR uLongf;
 #   pragma map(deflateInit_,"DEIN")
 #   pragma map(deflateInit2_,"DEIN2")
 #   pragma map(deflateEnd,"DEEND")
+#   pragma map(deflateBound,"DEBND")
 #   pragma map(inflateInit_,"ININ")
 #   pragma map(inflateInit2_,"ININ2")
 #   pragma map(inflateEnd,"INEND")
 #   pragma map(inflateSync,"INSY")
 #   pragma map(inflateSetDictionary,"INSEDI")
-#   pragma map(inflate_blocks,"INBL")
-#   pragma map(inflate_blocks_new,"INBLNE")
-#   pragma map(inflate_blocks_free,"INBLFR")
-#   pragma map(inflate_blocks_reset,"INBLRE")
-#   pragma map(inflate_codes_free,"INCOFR")
-#   pragma map(inflate_codes,"INCO")
+#   pragma map(compressBound,"CMBND")
+#   pragma map(inflate_table,"INTABL")
 #   pragma map(inflate_fast,"INFA")
-#   pragma map(inflate_flush,"INFLU")
-#   pragma map(inflate_mask,"INMA")
-#   pragma map(inflate_set_dictionary,"INSEDI2")
 #   pragma map(inflate_copyright,"INCOPY")
-#   pragma map(inflate_trees_bits,"INTRBI")
-#   pragma map(inflate_trees_dynamic,"INTRDY")
-#   pragma map(inflate_trees_fixed,"INTRFI")
-#   pragma map(inflate_trees_free,"INTRFR")
 #endif
 
+/* KITWARE_ZLIB_CHANGE - Added to suppress complier warnings */
 #if defined(_MSC_VER)
-#pragma warning ( disable : 4100 ) /* unreferenced variable */
 #pragma warning ( disable : 4127 ) /* cond expr is constant */
-#pragma warning ( disable : 4131 ) /* Old style declaration */
+#pragma warning ( disable : 4131 ) /* old style declaration */
 #pragma warning ( disable : 4244 ) /* conversion loss of data */
-#pragma warning ( disable : 4267 )
+#endif
+#if defined(__BORLANDC__)
+#pragma warn -8004 /* assigned a value that is never used */
+#pragma warn -8008 /* condition is always true */
+#pragma warn -8066 /* unreachable code */
 #endif
 
-#endif /* _ZCONF_H */
+#endif /* ZCONF_H */
