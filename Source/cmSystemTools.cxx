@@ -1978,6 +1978,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
 
 void cmSystemTools::DoNotInheritStdPipes()
 {   
+#ifdef _WIN32
   {
   HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
   DuplicateHandle(GetCurrentProcess(), out,
@@ -1992,4 +1993,5 @@ void cmSystemTools::DoNotInheritStdPipes()
                   DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE);
   SetStdHandle(STD_ERROR_HANDLE, out);
   }
+#endif
 }
