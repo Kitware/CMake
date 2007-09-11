@@ -22,7 +22,6 @@
 #include "cmDocumentation.h"
 
 #include "CTest/cmCTestScriptHandler.h"
-
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
 {
@@ -209,6 +208,7 @@ static const cmDocumentationEntry cmDocumentationSeeAlso[] =
 // this is a test driver program for cmCTest.
 int main (int argc, char *argv[])
 {
+  cmSystemTools::DoNotInheritStdPipes();
   cmSystemTools::EnableMSVCDebugHook();
   int nocwd = 0;
   cmCTest inst;

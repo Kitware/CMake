@@ -1898,14 +1898,6 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
     } // the close of the for argument loop
 
 
-  // default to the build type of ctest itself if there is one
-#ifdef  CMAKE_INTDIR
-  if(this->ConfigType.size() == 0)
-    {
-    this->SetConfigType(CMAKE_INTDIR);
-    }
-#endif
-
   // now what sould cmake do? if --build-and-test was specified then 
   // we run the build and test handler and return
   if(cmakeAndTest)

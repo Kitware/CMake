@@ -339,6 +339,12 @@ public:
   static bool ExtractTar(const char* inFileName,
                          const std::vector<cmStdString>& files, bool gzip, 
                          bool verbose);
+  // This should be called first thing in main
+  // it will keep child processes from inheriting the
+  // stdin and stdout of this process.  This is important
+  // if you want to be able to kill child processes and
+  // not get stuck waiting for all the output on the pipes.
+  static void DoNotInheritStdPipes();
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

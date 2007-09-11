@@ -1976,3 +1976,20 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
     }
 }
 
+void cmSystemTools::DoNotInheritStdPipes()
+{   
+  {
+  HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+  DuplicateHandle(GetCurrentProcess(), out,
+                  GetCurrentProcess(), &out, 0, FALSE,
+                  DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE);
+  SetStdHandle(STD_OUTPUT_HANDLE, out);
+  }
+  {
+  HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
+  DuplicateHandle(GetCurrentProcess(), out,
+                  GetCurrentProcess(), &out, 0, FALSE,
+                  DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE);
+  SetStdHandle(STD_ERROR_HANDLE, out);
+  }
+}

@@ -1090,16 +1090,6 @@ void cmCTestTestHandler
     {
     // no config specified to try some options
     tempPath = filepath;
-    tempPath += "Deployment/";
-    tempPath += filename;
-    attempted.push_back(tempPath);
-    attemptedConfigs.push_back("Deployment");
-    tempPath = filepath;
-    tempPath += "Development/";
-    tempPath += filename;
-    attempted.push_back(tempPath);
-    attemptedConfigs.push_back("Deployment");
-    tempPath = filepath;
     tempPath += "Release/";
     tempPath += filename;
     attempted.push_back(tempPath);
@@ -1119,6 +1109,16 @@ void cmCTestTestHandler
     tempPath += filename;
     attempted.push_back(tempPath);    
     attemptedConfigs.push_back("RelWithDebInfo");
+    tempPath = filepath;
+    tempPath += "Deployment/";
+    tempPath += filename;
+    attempted.push_back(tempPath);
+    attemptedConfigs.push_back("Deployment");
+    tempPath = filepath;
+    tempPath += "Development/";
+    tempPath += filename;
+    attempted.push_back(tempPath);
+    attemptedConfigs.push_back("Deployment");
     }
 }
 
