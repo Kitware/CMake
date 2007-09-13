@@ -517,6 +517,25 @@ cmMakefileTargetGenerator
                                       relativeObj.c_str(),
                                       depends, commands, false);
 
+  // Check for extra outputs created by the compilation.
+  if(const char* extra_outputs_str =
+     source.GetProperty("OBJECT_OUTPUTS"))
+    {
+    std::vector<std::string> extra_outputs;
+    cmSystemTools::ExpandListArgument(extra_outputs_str, extra_outputs);
+    for(std::vector<std::string>::const_iterator eoi = extra_outputs.begin();
+        eoi != extra_outputs.end(); ++eoi)
+      {
+      // Register this as an extra output for the object file rule.
+      // This will cause the object file to be rebuilt if the extra
+      // output is missing.
+      this->GenerateExtraOutput(eoi->c_str(), relativeObj.c_str(), false);
+
+      // Register this as an extra file to clean.
+      this->CleanFiles.push_back(eoi->c_str());
+      }
+    }
+
   bool lang_is_c_or_cxx = ((strcmp(lang, "C") == 0) ||
                            (strcmp(lang, "CXX") == 0));
   bool do_preprocess_rules = lang_is_c_or_cxx &&

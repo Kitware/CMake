@@ -402,6 +402,14 @@ void cmSourceFile::DefineProperties(cmake *cm)
      "building this source file.");
 
   cm->DefineProperty
+    ("OBJECT_OUTPUTS", cmProperty::SOURCE_FILE, 
+     "Additional outputs for a Makefile rule.",
+     "Additional outputs created by compilation of this source file. "
+     "If any of these outputs is missing the object will be recompiled. "
+     "This is supported only on Makefile generators and will be ignored "
+     "on other generators.");
+
+  cm->DefineProperty
     ("SYMBOLIC", cmProperty::SOURCE_FILE, 
      "Is this just a name for a rule.",
      "If SYMBOLIC (boolean) is set to true the build system will be "
