@@ -333,6 +333,13 @@ SET(CMAKE_INSTALL_DEBUG_LIBRARIES 1)
 INCLUDE(InstallRequiredSystemLibraries)
 INCLUDE(CPack)
 
+# disable packaging on Apple, since this includes the /Applications dir
+# where a symbolic link is created by cmCPackOSXX11Generator.cxx
+SET(PACKAGE_TARGET --build-target package)
+IF(APPLE AND NOT CTEST_TEST_CPACK)
+  SET(PACKAGE_TARGET)
+ENDIF(APPLE AND NOT CTEST_TEST_CPACK)
+
 ADD_CUSTOM_COMMAND(
   TARGET ${install_target}
   POST_BUILD
@@ -346,6 +353,6 @@ ADD_CUSTOM_COMMAND(
   --build-makeprogram ${CMAKE_MAKE_PROGRAM}
   --build-noclean
   --build-target install
-  --build-target package
+  ${PACKAGE_TARGET}
   COMMENT "Install Project"
   )
