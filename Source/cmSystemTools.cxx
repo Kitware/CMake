@@ -340,9 +340,9 @@ bool cmSystemTools::IsOn(const char* val)
 
 bool cmSystemTools::IsNOTFOUND(const char* val)
 {
-  int len = strlen(val);
+  size_t len = strlen(val);
   const char* notfound = "-NOTFOUND";
-  const int lenNotFound = 9;
+  const size_t lenNotFound = 9;
   if(len < lenNotFound-1)
     {
     return false;
