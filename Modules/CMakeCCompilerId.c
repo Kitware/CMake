@@ -27,6 +27,9 @@
 #elif defined(__IBMC__)
 # define COMPILER_ID "VisualAge"
 
+#elif defined(__PGI)
+# define COMPILER_ID "PGI"
+
 #elif defined(__GNUC__)
 # define COMPILER_ID "GNU"
 
