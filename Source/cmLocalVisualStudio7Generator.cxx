@@ -609,7 +609,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // manifest tool to use a workaround for FAT32 file systems, which can cause
   // an empty manifest to be embedded into the resulting executable.
   // See CMake bug #2617.
-  if ( this->Version > 8 )
+  if ( this->Version >= 8 )
     {
     fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCManifestTool\"\n"
          << "\t\t\t\tUseFAT32Workaround=\"true\"\n"
@@ -1449,7 +1449,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   fout << "\tName=\"" << projLabel << "\"\n";
-  if(this->Version > 8)
+  if(this->Version >= 8)
     {
     fout << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\"\n";
     }
