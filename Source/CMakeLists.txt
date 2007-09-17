@@ -213,6 +213,8 @@ IF (WIN32)
       cmGlobalVisualStudio7Generator.h
       cmGlobalVisualStudio8Generator.cxx
       cmGlobalVisualStudio8Generator.h
+      cmGlobalVisualStudio9Generator.cxx
+      cmGlobalVisualStudio9Generator.h
       cmGlobalVisualStudio8Win64Generator.cxx
       cmGlobalVisualStudio8Win64Generator.h
       cmGlobalVisualStudioGenerator.cxx

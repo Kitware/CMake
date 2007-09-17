@@ -306,9 +306,12 @@ gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
 }
 #endif
 #ifdef HAVE_SOCKLEN_T
+#ifdef _WIN32
+#include <ws2tcpip.h>
+#else
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#endif
 int
 main ()
 {

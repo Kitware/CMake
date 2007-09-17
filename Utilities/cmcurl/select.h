@@ -25,12 +25,8 @@
 
 #ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
-#elif defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
-/* for Vista, use WSAPoll(). */
-#include <winsock2.h>
-#define CURL_HAVE_WSAPOLL
 #else
-
+#ifndef POLLIN
 #define POLLIN      0x01
 #define POLLPRI     0x02
 #define POLLOUT     0x04
@@ -44,6 +40,7 @@ struct pollfd
     short   events;
     short   revents;
 };
+#endif
 
 #endif
 
