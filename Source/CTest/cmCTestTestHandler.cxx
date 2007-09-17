@@ -1206,6 +1206,18 @@ std::string cmCTestTestHandler
       return path;
       }
     }
+  if(fullPath.size() == 0)
+    {
+    cmCTestLog(ctest, HANDLER_OUTPUT,
+               "Could not find executable " << testCommand << "\n"
+               << "Looked in the following places:\n");
+    for(std::vector<std::string>::iterator i = failed.begin();
+        i != failed.end(); ++i)
+      {
+      cmCTestLog(ctest, HANDLER_OUTPUT,
+                 i->c_str() << "\n");
+      }
+    }
   
   return fullPath;
 }

@@ -187,6 +187,11 @@ std::string cmGlobalXCodeGenerator
     makeCommand += " build";
     }
   makeCommand += " -target ";
+  // if it is a null string for config don't use it
+  if(config && *config == 0)
+    {
+    config = 0;
+    }
   if (targetName && strlen(targetName))
     {
     makeCommand += targetName;
@@ -209,6 +214,7 @@ std::string cmGlobalXCodeGenerator
     makeCommand += " ";
     makeCommand += additionalOptions;
     }
+  std::cerr << "**** build command " << makeCommand.c_str() << "\n";
   return makeCommand;
 }
 

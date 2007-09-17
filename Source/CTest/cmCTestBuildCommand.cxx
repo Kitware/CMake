@@ -92,11 +92,25 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       this->GlobalGenerator->FindMakeProgram(this->Makefile);
       const char* cmakeMakeProgram
         = this->Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
+      if(strlen(cmakeBuildConfiguration) == 0)
+        {
+        const char* config = 0;
+#ifdef CMAKE_INTDIR
+        config = CMAKE_INTDIR;
+#endif
+        if(!config)
+          {
+          config = "Debug";
+          }
+        cmakeBuildConfiguration = config;
+        }
+      
       std::string buildCommand
-        = this->GlobalGenerator->GenerateBuildCommand(cmakeMakeProgram,
-          cmakeProjectName,
-          cmakeBuildAdditionalFlags, cmakeBuildTarget,
-          cmakeBuildConfiguration, true, false);
+        = this->GlobalGenerator->
+        GenerateBuildCommand(cmakeMakeProgram,
+                             cmakeProjectName,
+                             cmakeBuildAdditionalFlags, cmakeBuildTarget,
+                             cmakeBuildConfiguration, true, false);
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "SetMakeCommand:"
                  << buildCommand.c_str() << "\n");
