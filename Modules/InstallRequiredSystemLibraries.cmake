@@ -1,7 +1,13 @@
-# Hack for Visual Studio support
-# Search for system runtime libraries based on the platform.  This is
-# not complete because it is used only for the release process by the
-# developers.
+# By including this file, all files in the CMAKE_INSTALL_DEBUG_LIBRARIES,
+# will be installed with INSTALL_PROGRAMS into /bin for WIN32 and /lib
+# for non-win32.  If it is the MSVC compiler, then the microsoft run
+# time libraries will be found add automatically added to the
+# CMAKE_INSTALL_DEBUG_LIBRARIES, and installed.  
+# If CMAKE_INSTALL_DEBUG_LIBRARIES is set and it is the MSVC
+# compiler, then the debug libraries are installed when available.
+# If CMAKE_INSTALL_MFC_LIBRARIES is set then the MFC run time
+# libraries are installed as well as the CRT run time libraries.
+
 IF(MSVC)
   FILE(TO_CMAKE_PATH "$ENV{SYSTEMROOT}" SYSTEMROOT)
   IF(MSVC70)
@@ -32,6 +38,19 @@ IF(MSVC)
       "${MSVC80_CRT_DIR}/msvcp80.dll"
       "${MSVC80_CRT_DIR}/msvcr80.dll"
       )
+
+    IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
+      SET(MSVC80_CRT_DIR
+        "${MSVC80_REDIST_DIR}/Debug_NonRedist/x86/Microsoft.VC80.DebugCRT")
+      SET(__install__libs ${__install__libs}
+        "${MSVC80_CRT_DIR}/Microsoft.VC80.DebugCRT.manifest"
+        "${MSVC80_CRT_DIR}/msvcm80d.dll"
+        "${MSVC80_CRT_DIR}/msvcp80d.dll"
+        "${MSVC80_CRT_DIR}/msvcr80d.dll"
+        )
+      message(${__install__libs})
+    ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
+
   ENDIF(MSVC80)
   IF(CMAKE_INSTALL_MFC_LIBRARIES)
     IF(MSVC70)
@@ -45,6 +64,18 @@ IF(MSVC)
         )
     ENDIF(MSVC71)
     IF(MSVC80)
+      IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
+        SET(MSVC80_MFC_DIR
+          "${MSVC80_REDIST_DIR}/Debug_NonRedist/x86/Microsoft.VC80.DebugMFC")
+        SET(__install__libs ${__install__libs}
+          "${MSVC80_MFC_DIR}/Microsoft.VC80.DebugMFC.manifest"
+          "${MSVC80_MFC_DIR}/mfc80d.dll"
+          "${MSVC80_MFC_DIR}/mfc80ud.dll"
+          "${MSVC80_MFC_DIR}/mfcm80d.dll"
+          "${MSVC80_MFC_DIR}/mfcm80ud.dll"
+          )
+      ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
+        
       SET(MSVC80_MFC_DIR "${MSVC80_REDIST_DIR}/x86/Microsoft.VC80.MFC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
