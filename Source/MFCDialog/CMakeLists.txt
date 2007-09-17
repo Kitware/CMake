@@ -46,6 +46,7 @@ IF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
     "-inputresource:${exe};#1"
     -manifest "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetupManifest.xml"
     "-outputresource:${exe};#1"
+    VERBATIM 
   )
 ENDIF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
 
