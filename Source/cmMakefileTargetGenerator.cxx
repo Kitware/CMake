@@ -939,6 +939,21 @@ void cmMakefileTargetGenerator
       }
     this->GenerateExtraOutput(o->c_str(), in, symbolic);
     }
+
+  // Setup implicit dependency scanning.
+  for(cmCustomCommand::ImplicitDependsList::const_iterator
+        idi = cc.GetImplicitDepends().begin();
+      idi != cc.GetImplicitDepends().end(); ++idi)
+    {
+    std::string objFullPath =
+      this->Convert(outputs[0].c_str(), cmLocalGenerator::FULL);
+    std::string srcFullPath =
+      this->Convert(idi->second.c_str(), cmLocalGenerator::FULL);
+    this->LocalGenerator->
+      AddImplicitDepends(*this->Target, idi->first.c_str(),
+                         objFullPath.c_str(),
+                         srcFullPath.c_str());
+    }
 }
 
 //----------------------------------------------------------------------------

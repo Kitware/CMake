@@ -134,3 +134,23 @@ void cmCustomCommand::SetEscapeAllowMakeVars(bool b)
 {
   this->EscapeAllowMakeVars = b;
 }
+
+//----------------------------------------------------------------------------
+cmCustomCommand::ImplicitDependsList const&
+cmCustomCommand::GetImplicitDepends() const
+{
+  return this->ImplicitDepends;
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::SetImplicitDepends(ImplicitDependsList const& l)
+{
+  this->ImplicitDepends = l;
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::AppendImplicitDepends(ImplicitDependsList const& l)
+{
+  this->ImplicitDepends.insert(this->ImplicitDepends.end(),
+                               l.begin(), l.end());
+}

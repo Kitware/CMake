@@ -68,6 +68,12 @@ public:
   bool GetEscapeAllowMakeVars() const;
   void SetEscapeAllowMakeVars(bool b);
 
+  typedef std::pair<cmStdString, cmStdString> ImplicitDependsPair;
+  class ImplicitDependsList: public std::vector<ImplicitDependsPair> {};
+  void SetImplicitDepends(ImplicitDependsList const&);
+  void AppendImplicitDepends(ImplicitDependsList const&);
+  ImplicitDependsList const& GetImplicitDepends() const;
+
 private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Depends;
@@ -77,6 +83,7 @@ private:
   std::string WorkingDirectory;
   bool EscapeAllowMakeVars;
   bool EscapeOldStyle;
+  ImplicitDependsList ImplicitDepends;
 };
 
 #endif
