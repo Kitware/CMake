@@ -107,6 +107,7 @@ FOREACH(func
     glob
     major
     minor
+    makedev
     )
   CHECK_SYMBOL_EXISTS_EX("${func}")
 ENDFOREACH(func)

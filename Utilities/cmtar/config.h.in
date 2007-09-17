@@ -9,6 +9,9 @@
 /* Define if your system has a working minor */
 #cmakedefine HAVE_MINOR @HAVE_MINOR@
 
+/* Define if your system has a working minor */
+#cmakedefine HAVE_MAKEDEV @HAVE_MAKEDEV@
+
 /* Define to 1 if you have the <ctype.h> header file. */
 #cmakedefine HAVE_CTYPE_H @HAVE_CTYPE_H@
 

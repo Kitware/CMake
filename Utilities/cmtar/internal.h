@@ -25,3 +25,11 @@
 #ifndef HAVE_MINOR
 # define minor(dev) ((int)((dev) & 0xff))
 #endif
+/* On Cray XT3 when using thr PGI pgcc 7.0.4 sys/sysmacros.h ends up without
+   makedev(), since __i386__ is not defined when GLIBC_HAVE_LONG_LONG should
+   be enabled in features.h */
+#ifndef HAVE_MAKEDEV
+# define makedev(major, minor) ((((int)((major) & 0xff)) << 8 ) \
+                               | ((int)((minor) & 0xff)) )
+#endif
+
