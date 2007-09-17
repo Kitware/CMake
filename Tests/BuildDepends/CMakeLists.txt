@@ -11,6 +11,9 @@ message("Creating Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx 
   "const char* foo() { return \"foo\";}" )
 
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot.hxx.in
+  "static const char* zot = \"zot\";\n")
+
 message("Building project first time")
 try_compile(RESULT 
   ${BuildDepends_BINARY_DIR}/Project
@@ -42,6 +45,14 @@ if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
 endif(EXISTS 
   "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
+set(zot ${BuildDepends_BINARY_DIR}/Project/zot${CMAKE_EXECUTABLE_SUFFIX})
+if(EXISTS 
+    "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}" )
+  message("found debug")
+  set(zot 
+    "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
+endif(EXISTS 
+  "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
 
 message("Running ${bar}  ")
 execute_process(COMMAND ${bar} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
@@ -54,6 +65,17 @@ else("${out}" STREQUAL "foo ")
   message(SEND_ERROR "Project did not initially build properly: ${out}")
 endif("${out}" STREQUAL "foo ")
 
+message("Running ${zot}  ")
+execute_process(COMMAND ${zot} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
+string(REGEX REPLACE "[\r\n]" " " out "${out}")
+message("Run result: ${runResult} Output: \"${out}\"")
+
+if("${out}" STREQUAL "zot ")
+  message("Worked!")
+else("${out}" STREQUAL "zot ")
+  message(SEND_ERROR "Project did not initially build properly: ${out}")
+endif("${out}" STREQUAL "zot ")
+
 message("Waiting 3 seconds...")
 # any additional argument will cause ${bar} to wait forever
 execute_process(COMMAND ${bar} -infinite TIMEOUT 3 OUTPUT_VARIABLE out)
@@ -61,6 +83,8 @@ execute_process(COMMAND ${bar} -infinite TIMEOUT 3 OUTPUT_VARIABLE out)
 message("Modifying Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
   "const char* foo() { return \"foo changed\";}" )
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot.hxx.in
+  "static const char* zot = \"zot changed\";\n")
 
 message("Building project second time")
 try_compile(RESULT 
@@ -91,6 +115,11 @@ if(EXISTS
   message("found debug")
 endif(EXISTS 
   "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
+if(EXISTS 
+    "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}" )
+  message("found debug")
+endif(EXISTS 
+  "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
 
 message("Running ${bar}  ")
 execute_process(COMMAND ${bar} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
@@ -102,3 +131,14 @@ if("${out}" STREQUAL "foo changed ")
 else("${out}" STREQUAL "foo changed ")
   message(SEND_ERROR "Project did not rebuild properly!")
 endif("${out}" STREQUAL "foo changed ")
+
+message("Running ${zot}  ")
+execute_process(COMMAND ${zot} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
+string(REGEX REPLACE "[\r\n]" " " out "${out}")
+message("Run result: ${runResult} Output: \"${out}\"")
+
+if("${out}" STREQUAL "zot changed ")
+  message("Worked!")
+else("${out}" STREQUAL "zot changed ")
+  message(SEND_ERROR "Project did not rebuild properly!")
+endif("${out}" STREQUAL "zot changed ")
