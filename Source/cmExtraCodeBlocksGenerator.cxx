@@ -188,8 +188,10 @@ void cmExtraCodeBlocksGenerator
                                                          makefileName.c_str());
 
   fout<<"      <Target title=\"" << ti->first << "\">\n"
-        "         <Option output=\"" << ti->second.GetLocation(0) << "\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
-        "         <Option working_dir=\"" << makefile->GetStartOutputDirectory() <<"\" />\n"
+        "         <Option output=\"" << ti->second.GetLocation(0) 
+                            << "\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
+        "         <Option working_dir=\"" <<makefile->GetStartOutputDirectory()
+                                                                    <<"\" />\n"
         "         <Option object_output=\"./\" />\n"
         "         <Option type=\"" << cbTargetType << "\" />\n"
         "         <Option compiler=\"" << compiler << "\" />\n"
@@ -207,10 +209,18 @@ void cmExtraCodeBlocksGenerator
 
   fout<<"         </Compiler>\n"
         "         <MakeCommands>\n"
-        "            <Build command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), ti->first.c_str()) << "\" />\n"
-        "            <CompileFile command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), "&quot;$file&quot;") << "\" />\n"
-        "            <Clean command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), "clean") << "\" />\n"
-        "            <DistClean command=\"" << this->BuildMakeCommand(make, makefileName.c_str(), "clean") << "\" />\n"
+        "            <Build command=\"" 
+      << this->BuildMakeCommand(make, makefileName.c_str(), ti->first.c_str()) 
+      << "\" />\n"
+        "            <CompileFile command=\"" 
+      << this->BuildMakeCommand(make, makefileName.c_str(),"&quot;$file&quot;")
+      << "\" />\n"
+        "            <Clean command=\"" 
+      << this->BuildMakeCommand(make, makefileName.c_str(), "clean") 
+      << "\" />\n"
+        "            <DistClean command=\"" 
+      << this->BuildMakeCommand(make, makefileName.c_str(), "clean") 
+      << "\" />\n"
         "         </MakeCommands>\n"
         "      </Target>\n";
             }
