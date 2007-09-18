@@ -190,6 +190,7 @@ void cmExtraCodeBlocksGenerator
   fout<<"      <Target title=\"" << ti->first << "\">\n"
         "         <Option output=\"" << ti->second.GetLocation(0) << "\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
         "         <Option working_dir=\"" << makefile->GetStartOutputDirectory() <<"\" />\n"
+        "         <Option object_output=\"./\" />\n"
         "         <Option type=\"" << cbTargetType << "\" />\n"
         "         <Option compiler=\"" << compiler << "\" />\n"
         "         <Compiler>\n";
