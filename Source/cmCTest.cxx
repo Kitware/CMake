@@ -1095,10 +1095,12 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     {
     timeout = this->TimeOut;
     }
-  if (testTimeOut && testTimeOut < timeout)
+  if (testTimeOut 
+      && testTimeOut < this->GetRemainingTimeAllowed())
     {
     timeout = testTimeOut;
     }
+
   // always have at least 1 second if we got to here
   if (timeout <= 0)
     {
