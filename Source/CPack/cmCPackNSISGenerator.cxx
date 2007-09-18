@@ -241,6 +241,20 @@ int cmCPackNSISGenerator::InitializeInternal()
         << std::endl;
       deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
         << ".lnk\"" << std::endl;
+      // see if CPACK_CREATE_DESKTOP_LINK_ExeName is on
+      // if so add a desktop link
+      std::string desktop = "CPACK_CREATE_DESKTOP_LINK_";
+      desktop += execName;
+      if(this->IsSet(desktop.c_str()))
+        {
+        str << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
+        str << "    CreateShortCut \"$DESKTOP\\"
+            << linkName << ".lnk\" \"$INSTDIR\\bin\\" << execName << ".exe\""
+            << std::endl;
+        deleteStr << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
+        deleteStr << "    Delete \"$DESKTOP\\" << linkName
+                  << ".lnk\"" << std::endl;
+        }
       }
     this->SetOptionIfNotSet("CPACK_NSIS_CREATE_ICONS", str.str().c_str());
     this->SetOptionIfNotSet("CPACK_NSIS_DELETE_ICONS", 

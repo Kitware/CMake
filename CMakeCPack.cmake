@@ -42,6 +42,7 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     # sure there is at least one set of four (4) backlasshes.
     SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\CMakeInstall.bmp")
     SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMake")
+    SET(CPACK_CREATE_DESKTOP_LINK_CMakeSetup 1)
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\CMakeSetup.exe")
     SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} a cross-platform, open-source build system")
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.cmake.org")

@@ -17,6 +17,7 @@
   Var DO_NOT_ADD_TO_PATH
   Var ADD_TO_PATH_ALL_USERS
   Var ADD_TO_PATH_CURRENT_USER
+  Var INSTALL_DESKTOP
 
 ;--------------------------------
 ;Include Modern UI
@@ -122,182 +123,173 @@ FunctionEnd
 ;----------------------------------------------------
 !define NT_current_env 'HKCU "Environment"'
 !define NT_all_env     'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
-;====================================================
+
+!ifndef WriteEnvStr_RegKey
+  !ifdef ALL_USERS
+    !define WriteEnvStr_RegKey \
+       'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
+  !else
+    !define WriteEnvStr_RegKey 'HKCU "Environment"'
+  !endif
+!endif
+ 
 ; AddToPath - Adds the given dir to the search path.
 ;        Input - head of the stack
 ;        Note - Win9x systems requires reboot
-;====================================================
+ 
 Function AddToPath
-   Exch $0
-   Push $1
-   Push $2
-
-   Call IsNT
-   Pop $1
-   StrCmp $1 1 AddToPath_NT
-      ; Not on NT
-      StrCpy $1 $WINDIR 2
-      FileOpen $1 "$1\autoexec.bat" a
-      FileSeek $1 0 END
-      GetFullPathName /SHORT $0 $0
-      FileWrite $1 "$\r$\n\
-$\r$\n\
-SET PATH=%PATH%;$0$\r$\n\
-$\r$\n\
-"
-      FileClose $1
-      Goto AddToPath_done
+  Exch $0
+  Push $1
+  Push $2
+  Push $3
  
-   AddToPath_NT:
-      Push $4
-      Call select_NT_profile
-      Pop  $4
+  # don't add if the path doesn't exist
+  IfFileExists "$0\*.*" "" AddToPath_done
  
-      AddToPath_NT_selection_done:
-      StrCmp $4 "current" read_path_NT_current
-         ReadRegStr $1 ${NT_all_env} "PATH"
-         Goto read_path_NT_resume
-      read_path_NT_current:
-         ReadRegStr $1 ${NT_current_env} "PATH"
-      read_path_NT_resume:
-      StrCmp $1 "" AddToPath_NoCurrentPath
-         StrCpy $2 "$0;$1"
-         Goto AddToPath_NTdoIt
-      AddToPath_NoCurrentPath:
-         DetailPrint "No current path, so just use $0"
-         StrCpy $2 $0
-         Goto AddToPath_NTdoIt
-      AddToPath_NTdoIt:
-         StrCmp $4 "current" write_path_NT_current
-            ClearErrors
-            WriteRegExpandStr ${NT_all_env} "PATH" $2
-            IfErrors 0 write_path_NT_resume
-            MessageBox MB_YESNO|MB_ICONQUESTION "The path could not be set for all users$\n\
-$\n\
-Should I try for the current user?" \
-               IDNO write_path_NT_failed
-            ; change selection
-            StrCpy $4 "current"
-            Goto AddToPath_NT_selection_done
-         write_path_NT_current:
-            ClearErrors
-            WriteRegExpandStr ${NT_current_env} "PATH" $2
-            IfErrors 0 write_path_NT_resume
-            MessageBox MB_OK|MB_ICONINFORMATION "The path could not be set for the current user."
-            Goto write_path_NT_failed
-         write_path_NT_resume:
-         SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-         DetailPrint "Added path for user ($4), $0"
-         DetailPrint "New path is: $2"
-         write_path_NT_failed:
-      
-      Pop $4
-   AddToPath_done:
-   Pop $2
-   Pop $1
-   Pop $0
+  ReadEnvStr $1 PATH
+  Push "$1;"
+  Push "$0;"
+  Call StrStr
+  Pop $2
+  StrCmp $2 "" "" AddToPath_done
+  Push "$1;"
+  Push "$0\;"
+  Call StrStr
+  Pop $2
+  StrCmp $2 "" "" AddToPath_done
+  GetFullPathName /SHORT $3 $0
+  Push "$1;"
+  Push "$3;"
+  Call StrStr
+  Pop $2
+  StrCmp $2 "" "" AddToPath_done
+  Push "$1;"
+  Push "$3\;"
+  Call StrStr
+  Pop $2
+  StrCmp $2 "" "" AddToPath_done
+ 
+  Call IsNT
+  Pop $1
+  StrCmp $1 1 AddToPath_NT
+    ; Not on NT
+    StrCpy $1 $WINDIR 2
+    FileOpen $1 "$1\autoexec.bat" a
+    FileSeek $1 -1 END
+    FileReadByte $1 $2
+    IntCmp $2 26 0 +2 +2 # DOS EOF
+      FileSeek $1 -1 END # write over EOF
+    FileWrite $1 "$\r$\nSET PATH=%PATH%;$3$\r$\n"
+    FileClose $1
+    SetRebootFlag true
+    Goto AddToPath_done
+ 
+  AddToPath_NT:
+    ReadRegStr $1 ${WriteEnvStr_RegKey} "PATH"
+    StrCmp $1 "" AddToPath_NTdoIt
+      Push $1
+      Call Trim
+      Pop $1
+      StrCpy $0 "$1;$0"
+    AddToPath_NTdoIt:
+      WriteRegExpandStr ${WriteEnvStr_RegKey} "PATH" $0
+      SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+ 
+  AddToPath_done:
+    Pop $3
+    Pop $2
+    Pop $1
+    Pop $0
 FunctionEnd
+
  
-;====================================================
 ; RemoveFromPath - Remove a given dir from the path
 ;     Input: head of the stack
-;====================================================
+ 
 Function un.RemoveFromPath
-   Exch $0
-   Push $1
-   Push $2
-   Push $3
-   Push $4
-   
-   Call un.IsNT
-   Pop $1
-   StrCmp $1 1 unRemoveFromPath_NT
-      ; Not on NT
-      StrCpy $1 $WINDIR 2
-      FileOpen $1 "$1\autoexec.bat" r
-      GetTempFileName $4
-      FileOpen $2 $4 w
-      GetFullPathName /SHORT $0 $0
-      StrCpy $0 "SET PATH=%PATH%;$0"
-      SetRebootFlag true
+  Exch $0
+  Push $1
+  Push $2
+  Push $3
+  Push $4
+  Push $5
+  Push $6
+ 
+  IntFmt $6 "%c" 26 # DOS EOF
+ 
+  Call un.IsNT
+  Pop $1
+  StrCmp $1 1 unRemoveFromPath_NT
+    ; Not on NT
+    StrCpy $1 $WINDIR 2
+    FileOpen $1 "$1\autoexec.bat" r
+    GetTempFileName $4
+    FileOpen $2 $4 w
+    GetFullPathName /SHORT $0 $0
+    StrCpy $0 "SET PATH=%PATH%;$0"
+    Goto unRemoveFromPath_dosLoop
+ 
+    unRemoveFromPath_dosLoop:
+      FileRead $1 $3
+      StrCpy $5 $3 1 -1 # read last char
+      StrCmp $5 $6 0 +2 # if DOS EOF
+        StrCpy $3 $3 -1 # remove DOS EOF so we can compare
+      StrCmp $3 "$0$\r$\n" unRemoveFromPath_dosLoopRemoveLine
+      StrCmp $3 "$0$\n" unRemoveFromPath_dosLoopRemoveLine
+      StrCmp $3 "$0" unRemoveFromPath_dosLoopRemoveLine
+      StrCmp $3 "" unRemoveFromPath_dosLoopEnd
+      FileWrite $2 $3
       Goto unRemoveFromPath_dosLoop
-     
-      unRemoveFromPath_dosLoop:
-         FileRead $1 $3
-         StrCmp $3 "$0$$\r$\n\
-$\r$\n\
-" unRemoveFromPath_dosLoop
-         StrCmp $3 "$0$\r$\n\
-" unRemoveFromPath_dosLoop
-         StrCmp $3 "$0" unRemoveFromPath_dosLoop
-         StrCmp $3 "" unRemoveFromPath_dosLoopEnd
-         FileWrite $2 $3
-         Goto unRemoveFromPath_dosLoop
+      unRemoveFromPath_dosLoopRemoveLine:
+        SetRebootFlag true
+        Goto unRemoveFromPath_dosLoop
  
-      unRemoveFromPath_dosLoopEnd:
-         FileClose $2
-         FileClose $1
-         StrCpy $1 $WINDIR 2
-         Delete "$1\autoexec.bat"
-         CopyFiles /SILENT $4 "$1\autoexec.bat"
-         Delete $4
-         Goto unRemoveFromPath_done
+    unRemoveFromPath_dosLoopEnd:
+      FileClose $2
+      FileClose $1
+      StrCpy $1 $WINDIR 2
+      Delete "$1\autoexec.bat"
+      CopyFiles /SILENT $4 "$1\autoexec.bat"
+      Delete $4
+      Goto unRemoveFromPath_done
  
-   unRemoveFromPath_NT:
-      StrLen $2 $0
-      Call un.select_NT_profile
-      Pop  $4
+  unRemoveFromPath_NT:
+    ReadRegStr $1 ${WriteEnvStr_RegKey} "PATH"
+    StrCpy $5 $1 1 -1 # copy last char
+    StrCmp $5 ";" +2 # if last char != ;
+      StrCpy $1 "$1;" # append ;
+    Push $1
+    Push "$0;"
+    Call un.StrStr ; Find `$0;` in $1
+    Pop $2 ; pos of our dir
+    StrCmp $2 "" unRemoveFromPath_done
+      ; else, it is in path
+      # $0 - path to add
+      # $1 - path var
+      StrLen $3 "$0;"
+      StrLen $4 $2
+      StrCpy $5 $1 -$4 # $5 is now the part before the path to remove
+      StrCpy $6 $2 "" $3 # $6 is now the part after the path to remove
+      StrCpy $3 $5$6
  
-      StrCmp $4 "current" un_read_path_NT_current
-         ReadRegStr $1 ${NT_all_env} "PATH"
-         Goto un_read_path_NT_resume
-      un_read_path_NT_current:
-         ReadRegStr $1 ${NT_current_env} "PATH"
-      un_read_path_NT_resume:
+      StrCpy $5 $3 1 -1 # copy last char
+      StrCmp $5 ";" 0 +2 # if last char == ;
+        StrCpy $3 $3 -1 # remove last char
  
-      StrCpy $8 $0
-      Push $1
-      Push $0
-      Call un.StrStr ; Find $0 in $1
-      Pop $0 ; pos of our dir
-      IntCmp $0 -1 unRemoveFromPath_done
-         ; else, it is in path
-         StrLen $5 $1 ; Get the length of the original path
-         StrLen $6 $0 ; get the length of path without the first path
-         IntOp $5 $5 - $6
-         IntOp $5 $5 - 1
-         IntCmp $5 -1 unRemoveFromPath_nothingBefore
-           StrCpy $3 $1 $5 ; $3 now has the part of the path before our dir
-           Goto unRemoveFromPath_AfterBefore
-         unRemoveFromPath_nothingBefore:
-           StrCpy $3 ""
-         unRemoveFromPath_AfterBefore:
-         StrCpy $7 $0 "" $2 ; $3 now has the part of the path after our dir
-         StrCpy $3 "$3$7"
-
-         ; $3 now holds path, but there may be some stray semicolon at
-         ; beginning. Let's remove it
-         StrCpy $7 $3 1
-         StrCmp $7 ";" 0 unRemoveFromPath_NoTrailingSemiColon
-           StrCpy $3 $3 "" 1
-         unRemoveFromPath_NoTrailingSemiColon:
+      WriteRegExpandStr ${WriteEnvStr_RegKey} "PATH" $3
+      SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
  
-         StrCmp $4 "current" un_write_path_NT_current
-            WriteRegExpandStr ${NT_all_env} "PATH" $3
-            Goto un_write_path_NT_resume
-         un_write_path_NT_current:
-            WriteRegExpandStr ${NT_current_env} "PATH" $3
-         un_write_path_NT_resume:
-         SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-         DetailPrint "Removed $8 from the path"
-         DetailPrint "New path is: $3"
-   unRemoveFromPath_done:
-   Pop $4
-   Pop $3
-   Pop $2
-   Pop $1
-   Pop $0
+  unRemoveFromPath_done:
+    Pop $6
+    Pop $5
+    Pop $4
+    Pop $3
+    Pop $2
+    Pop $1
+    Pop $0
 FunctionEnd
+ 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Uninstall sutff
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -385,6 +377,24 @@ FunctionEnd
 !insertmacro StrStr ""
 !insertmacro StrStr "un."
 
+Function Trim ; Added by Pelaca
+	Exch $R1
+	Push $R2
+Loop:
+	StrCpy $R2 "$R1" 1 -1
+	StrCmp "$R2" " " RTrim
+	StrCmp "$R2" "$\n" RTrim
+	StrCmp "$R2" "$\r" RTrim
+	StrCmp "$R2" ";" RTrim
+	GoTo Done
+RTrim:	
+	StrCpy $R1 "$R1" -1
+	Goto Loop
+Done:
+	Pop $R2
+	Exch $R1
+FunctionEnd
+
 Function ConditionalAddToRegisty
   Pop $0
   Pop $1
@@ -443,17 +453,6 @@ FunctionEnd
 ;--------------------------------
 ;Installer Sections
 
-Section "Add to path"
-  Push $INSTDIR\bin
-  ;Read a value from an InstallOptions INI file
-  !insertmacro MUI_INSTALLOPTIONS_READ $DO_NOT_ADD_TO_PATH "NSIS.InstallOptions.ini" "Field 2" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $ADD_TO_PATH_ALL_USERS "NSIS.InstallOptions.ini" "Field 3" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $ADD_TO_PATH_CURRENT_USER "NSIS.InstallOptions.ini" "Field 4" "State"
-  StrCmp $DO_NOT_ADD_TO_PATH "1" doNotAddToPath 0
-    Call AddToPath
-  doNotAddToPath:
-SectionEnd
-
 Section "Installer Section" InstSection
 
   ;Use the entire tree produced by the INSTALL target.  Keep the
@@ -492,9 +491,9 @@ Section "Installer Section" InstSection
   Push "Contact"
   Push "@CPACK_NSIS_CONTACT@"
   Call ConditionalAddToRegisty
-
+  !insertmacro MUI_INSTALLOPTIONS_READ $INSTALL_DESKTOP "NSIS.InstallOptions.ini" "Field 5" "State"
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-    
+  
   ;Create shortcuts
   CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
 @CPACK_NSIS_CREATE_ICONS@
@@ -513,12 +512,27 @@ Section "Installer Section" InstSection
   Push "AddToPathCurrentUser"
   Push "$ADD_TO_PATH_CURRENT_USER"
   Call ConditionalAddToRegisty
+  Push "InstallToDesktop"
+  Push "$INSTALL_DESKTOP"
+  Call ConditionalAddToRegisty
 
 @CPACK_NSIS_EXTRA_INSTALL_COMMANDS@
   
   !insertmacro MUI_STARTMENU_WRITE_END
 
 SectionEnd
+
+Section "Add to path"
+  Push $INSTDIR\bin
+  ;Read a value from an InstallOptions INI file
+  !insertmacro MUI_INSTALLOPTIONS_READ $DO_NOT_ADD_TO_PATH "NSIS.InstallOptions.ini" "Field 2" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $ADD_TO_PATH_ALL_USERS "NSIS.InstallOptions.ini" "Field 3" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $ADD_TO_PATH_CURRENT_USER "NSIS.InstallOptions.ini" "Field 4" "State"
+  StrCmp $DO_NOT_ADD_TO_PATH "1" doNotAddToPath 0
+    Call AddToPath
+  doNotAddToPath:
+SectionEnd
+
 
 ;--------------------------------
 ; Create custom pages
@@ -567,6 +581,9 @@ Section "Uninstall"
   ReadRegStr $ADD_TO_PATH_CURRENT_USER SHCTX \
     "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" "AddToPathCurrentUser"
   ;MessageBox MB_OK "Add to path: $DO_NOT_ADD_TO_PATH all users: $ADD_TO_PATH_ALL_USERS"
+  ReadRegStr $INSTALL_DESKTOP SHCTX \
+    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@" "InstallToDesktop"
+  ;MessageBox MB_OK "Install to desktop: $INSTALL_DESKTOP "
 
 @CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS@
 
