@@ -655,11 +655,11 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
   
   cres.ExecutionTime = (double)(clock_finish - clock_start);
   cres.FullCommandLine = testCommand;
-  
+  std::string reason;
   if ( !this->CTest->GetShowOnly() )
     {
     bool testFailed = false;
-    std::vector<cmsys::RegularExpression>::iterator passIt;
+    std::vector<std::pair<cmsys::RegularExpression,std::string> >::iterator passIt;
     bool forceFail = false;
     if ( it->RequiredRegularExpressions.size() > 0 )
       {
@@ -668,13 +668,17 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
             passIt != it->RequiredRegularExpressions.end();
             ++ passIt )
         {
-        if ( passIt->find(output.c_str()) )
+        if ( passIt->first.find(output.c_str()) )
           {
           found = true;
           }
         }
       if ( !found )
-        {
+        { 
+        reason = "Required regular expression not found.";
+        reason +=  "Regex=[";
+        reason += passIt->second;
+        reason += "]";
         forceFail = true;
         }
       }
@@ -684,8 +688,12 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
             passIt != it->ErrorRegularExpressions.end();
             ++ passIt )
         {
-        if ( passIt->find(output.c_str()) )
+        if ( passIt->first.find(output.c_str()) )
           {
+          reason = "Error regular expression found in output.";
+          reason += " Regex=[";
+          reason += passIt->second;
+          reason += "]";
           forceFail = true;
           }
         }
@@ -701,7 +709,7 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
         cmCTestLog(this->CTest, HANDLER_OUTPUT,   " - But it should fail!");
         cres.Status = cmCTestTestHandler::FAILED;
         testFailed = true;
-          }
+        }
       else
         {
         cres.Status = cmCTestTestHandler::COMPLETED;
@@ -754,7 +762,7 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
       else
         {
         // Force fail will also be here?
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Failed");
+        cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Failed " << reason);
         if ( it->WillFail )
           {
           cres.Status = cmCTestTestHandler::COMPLETED;
@@ -1729,7 +1737,9 @@ bool cmCTestTestHandler::SetTestsProperties(
             for ( crit = lval.begin(); crit != lval.end(); ++ crit )
               {
               rtit->ErrorRegularExpressions.push_back(
-                cmsys::RegularExpression(crit->c_str()));
+                std::pair<cmsys::RegularExpression, std::string>(
+                  cmsys::RegularExpression(crit->c_str()),
+                  std::string(crit->c_str())));
               }
             }
           if ( key == "MEASUREMENT" )
@@ -1754,7 +1764,9 @@ bool cmCTestTestHandler::SetTestsProperties(
             for ( crit = lval.begin(); crit != lval.end(); ++ crit )
               {
               rtit->RequiredRegularExpressions.push_back(
-                cmsys::RegularExpression(crit->c_str()));
+                std::pair<cmsys::RegularExpression, std::string>(
+                  cmsys::RegularExpression(crit->c_str()),
+                  std::string(crit->c_str())));
               }
             }
           }
