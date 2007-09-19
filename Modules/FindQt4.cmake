@@ -417,14 +417,20 @@ IF (QT4_QMAKE_FOUND)
   # Find out what window system we're using
   #
   #############################################
-  # Save required includes variable
+  # Save required variable
   SET(CMAKE_REQUIRED_INCLUDES_SAVE ${CMAKE_REQUIRED_INCLUDES})
+  SET(CMAKE_REQUIRED_FLAGS_SAVE    ${CMAKE_REQUIRED_FLAGS})
   # Add QT_INCLUDE_DIR to CMAKE_REQUIRED_INCLUDES
   SET(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES};${QT_INCLUDE_DIR}")
+  # On Mac OS X when Qt has framework support, also add the framework path
+  IF( QT_USE_FRAMEWORKS )
+    SET(CMAKE_REQUIRED_FLAGS "-F${QT_LIBRARY_DIR} ")
+  ENDIF( QT_USE_FRAMEWORKS )
   # Check for Window system symbols (note: only one should end up being set)
   CHECK_SYMBOL_EXISTS(Q_WS_X11 "QtCore/qglobal.h" Q_WS_X11)
-  CHECK_SYMBOL_EXISTS(Q_WS_MAC "QtCore/qglobal.h" Q_WS_MAC)
   CHECK_SYMBOL_EXISTS(Q_WS_WIN "QtCore/qglobal.h" Q_WS_WIN)
+  CHECK_SYMBOL_EXISTS(Q_WS_QWS "QtCore/qglobal.h" Q_WS_QWS)
+  CHECK_SYMBOL_EXISTS(Q_WS_MAC "QtCore/qglobal.h" Q_WS_MAC)
 
   IF (QT_QTCOPY_REQUIRED)
      CHECK_SYMBOL_EXISTS(QT_IS_QTCOPY "QtCore/qglobal.h" QT_KDE_QT_COPY)
@@ -433,8 +439,9 @@ IF (QT4_QMAKE_FOUND)
      ENDIF (NOT QT_IS_QTCOPY)
   ENDIF (QT_QTCOPY_REQUIRED)
 
-  # Restore CMAKE_REQUIRED_INCLUDES variable
+  # Restore CMAKE_REQUIRED_INCLUDES and CMAKE_REQUIRED_FLAGS variables
   SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_SAVE})
+  SET(CMAKE_REQUIRED_FLAGS    ${CMAKE_REQUIRED_FLAGS_SAVE})
   #
   #############################################
 
