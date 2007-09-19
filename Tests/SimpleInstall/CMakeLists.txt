@@ -333,6 +333,9 @@ SET(CMAKE_INSTALL_DEBUG_LIBRARIES 1)
 INCLUDE(InstallRequiredSystemLibraries)
 INCLUDE(CPack)
 
+# Avoid disabling test on Apple to try to diagnose the problem.
+SET(CTEST_TEST_CPACK 1)
+
 # disable packaging on Apple, since this includes the /Applications dir
 # where a symbolic link is created by cmCPackOSXX11Generator.cxx
 SET(PACKAGE_TARGET --build-target package)
