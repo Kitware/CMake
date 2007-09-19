@@ -32,7 +32,7 @@ public:
   enum Type 
      { None, Usage, Single, SingleModule, SingleProperty,
        List, ModuleList, PropertyList,
-       Full, Properties, Modules, Commands, CompatCommands,
+       Full, Properties, Modules, CustomModules, Commands, CompatCommands,
        Copyright, Version };
 
   /** Forms of documentation output.  */

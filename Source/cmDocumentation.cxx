@@ -62,6 +62,20 @@ static const cmDocumentationEntry cmModulesDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
+static const cmDocumentationEntry cmCustomModulesDocumentationDescription[] =
+{
+  {0,
+  "  Custom CMake Modules - Additional Modules for CMake.", 0},
+//  CMAKE_DOCUMENTATION_OVERVIEW,
+  {0,
+  "This is the documentation for additional modules and scripts for CMake. "
+  "Using these modules you can check the computer system for "
+  "installed software packages, features of the compiler and the "
+  "existance of headers to name just a few.", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
 static const cmDocumentationEntry cmPropertiesDocumentationDescription[] =
 {
   {0,
@@ -167,6 +181,15 @@ static const cmDocumentationEntry cmDocumentationModulesHeader[] =
 };
 
 //----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationCustomModulesHeader[] =
+{
+  {0,
+   "The following modules are also available for CMake. "
+   "They can be used with INCLUDE(ModuleName).", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationGeneratorsHeader[] =
 {
   {0,
@@ -264,6 +287,7 @@ cmDocumentation::cmDocumentation()
 ,CompatCommandsSection("Compatibility Listfile Commands",
                        "COMPATIBILITY COMMANDS")
 ,ModulesSection       ("Standard CMake Modules",          "MODULES")
+,CustomModulesSection ("Custom CMake Modules",            "CUSTOM MODULES")
 ,GeneratorsSection    ("Generators",                      "GENERATORS")
 ,SeeAlsoSection       ("See Also",                        "SEE ALSO")
 ,CopyrightSection     ("Copyright",                       "COPYRIGHT")
@@ -389,6 +413,8 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return this->PrintDocumentationFull(os);
     case cmDocumentation::Modules: 
       return this->PrintDocumentationModules(os);
+    case cmDocumentation::CustomModules: 
+      return this->PrintDocumentationCustomModules(os);
     case cmDocumentation::Properties: 
       return this->PrintDocumentationProperties(os);
     case cmDocumentation::Commands: 
@@ -414,21 +440,7 @@ bool cmDocumentation::CreateModulesSection()
   if (dir.GetNumberOfFiles() > 0)
     {
     this->ModulesSection.Append(cmDocumentationModulesHeader[0]);
-    for(unsigned int i = 0; i < dir.GetNumberOfFiles(); ++i)
-      {
-      std::string fname = dir.GetFile(i);
-      if(fname.length() > 6)
-        {
-        if(fname.substr(fname.length()-6, 6) == ".cmake")
-          {
-          std::string moduleName = fname.substr(0, fname.length()-6);
-          std::string path = cmakeModules;
-          path += "/";
-          path += fname;
-          this->CreateSingleModule(path.c_str(), moduleName.c_str());
-          }
-        }
-      } 
+    this->CreateModuleDocsForDir(dir, this->ModulesSection);
     cmDocumentationEntry e = { 0, 0, 0 };
     this->ModulesSection.Append(e);
     }
@@ -436,8 +448,67 @@ bool cmDocumentation::CreateModulesSection()
 }
 
 //----------------------------------------------------------------------------
+bool cmDocumentation::CreateCustomModulesSection()
+{
+  bool sectionHasHeader = false;
+
+  std::vector<std::string> dirs;
+  cmSystemTools::ExpandListArgument(this->CMakeModulePath, dirs);
+
+  for(std::vector<std::string>::const_iterator dirIt = dirs.begin();
+      dirIt != dirs.end();
+      ++dirIt)
+    {
+    cmsys::Directory dir;
+    dir.Load(dirIt->c_str());
+    if (dir.GetNumberOfFiles() > 0)
+      {
+      if (!sectionHasHeader)
+        {
+        this->CustomModulesSection.Append(cmDocumentationCustomModulesHeader[0]);
+        sectionHasHeader =  true;
+        }
+      this->CreateModuleDocsForDir(dir, this->CustomModulesSection);
+      }
+    }
+
+  if(sectionHasHeader)
+    {
+    cmDocumentationEntry e = { 0, 0, 0 };
+    this->CustomModulesSection.Append(e);
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::CreateModuleDocsForDir(cmsys::Directory& dir, 
+                                             cmSection &moduleSection)
+{
+  for(unsigned int i = 0; i < dir.GetNumberOfFiles(); ++i)
+    {
+    std::string fname = dir.GetFile(i);
+    if(fname.length() > 6)
+      {
+      if(fname.substr(fname.length()-6, 6) == ".cmake")
+        {
+        std::string moduleName = fname.substr(0, fname.length()-6);
+        if (this->ModulesFound.find(moduleName) == this->ModulesFound.end())
+          {
+          this->ModulesFound.insert(moduleName);
+          std::string path = dir.GetPath();
+          path += "/";
+          path += fname;
+          this->CreateSingleModule(path.c_str(), moduleName.c_str(), moduleSection);
+          }
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmDocumentation::CreateSingleModule(const char* fname, 
-                                         const char* moduleName)
+                                         const char* moduleName,
+                                         cmSection &moduleSection)
 {
   std::ifstream fin(fname);
   if(!fin)
@@ -513,7 +584,7 @@ bool cmDocumentation::CreateSingleModule(const char* fname,
       char* pbrief = strcpy(new char[brief.length()+1], brief.c_str());
       this->ModuleStrings.push_back(pbrief);
       cmDocumentationEntry e = { pname, pbrief, ptext };
-      this->ModulesSection.Append(e);
+      moduleSection.Append(e);
       return true;
       }
     }
@@ -639,6 +710,12 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
     else if(strcmp(argv[i], "--help-modules") == 0)
       {
       help.HelpType = cmDocumentation::Modules;
+      GET_OPT_ARGUMENT(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      }
+    else if(strcmp(argv[i], "--help-custom-modules") == 0)
+      {
+      help.HelpType = cmDocumentation::CustomModules;
       GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
@@ -914,22 +991,51 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
     os << "Argument --help-module needs a module name.\n";
     return false;
     }
-  std::string cmakeModules = this->CMakeRoot;
-  cmakeModules += "/Modules/";
-  cmakeModules += this->CurrentArgument;
-  cmakeModules += ".cmake";
-  if(cmSystemTools::FileExists(cmakeModules.c_str())
-     && this->CreateSingleModule(cmakeModules.c_str(), 
-                                 this->CurrentArgument.c_str()))
+    
+  std::string moduleName;
+  // find the module
+  std::vector<std::string> dirs;
+  cmSystemTools::ExpandListArgument(this->CMakeModulePath, dirs);
+  for(std::vector<std::string>::const_iterator dirIt = dirs.begin();
+      dirIt != dirs.end();
+      ++dirIt)
+    {
+    moduleName = *dirIt;
+    moduleName += "/";
+    moduleName += this->CurrentArgument;
+    moduleName += ".cmake";
+    if(cmSystemTools::FileExists(moduleName.c_str()))
+      {
+      break;
+      }
+    moduleName = "";
+    }
+
+  if (moduleName.empty())
+    {
+    moduleName = this->CMakeRoot;
+    moduleName += "/Modules/";
+    moduleName += this->CurrentArgument;
+    moduleName += ".cmake";
+    if(!cmSystemTools::FileExists(moduleName.c_str()))
+      {
+      moduleName = "";
+      }
+    }
+
+  if(!moduleName.empty()
+     && this->CreateSingleModule(moduleName.c_str(), 
+                                 this->CurrentArgument.c_str(),
+                                 this->ModulesSection))
     {
     this->PrintDocumentationCommand(os, this->ModulesSection.GetEntries());
     os <<  "\n       Defined in: ";
-    os << cmakeModules << "\n";
+    os << moduleName << "\n";
     return true;
     }
   // Argument was not a module.  Complain.
   os << "Argument \"" << this->CurrentArgument.c_str()
-     << "\" to --help-module is not a CMake module.";
+     << "\" to --help-module is not a CMake module.\n";
   return false;
 }
 
@@ -1039,6 +1145,7 @@ bool cmDocumentation::PrintPropertyList(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintModuleList(std::ostream& os)
 {
+  this->CreateCustomModulesSection();
   this->CreateModulesSection();
   if(this->ModulesSection.IsEmpty())
     {
@@ -1051,6 +1158,19 @@ bool cmDocumentation::PrintModuleList(std::ostream& os)
     if(entry->name)
       {
       os << entry->name << std::endl;
+      }
+    }
+
+  if(!this->CustomModulesSection.IsEmpty())
+    {
+    os << "\nCUSTOM MODULES\n" << std::endl;
+    for(const cmDocumentationEntry* 
+        entry = this->CustomModulesSection.GetEntries(); entry->brief; ++entry)
+      {
+      if(entry->name)
+        {
+        os << entry->name << std::endl;
+        }
       }
     }
   return true;
@@ -1078,6 +1198,16 @@ bool cmDocumentation::PrintDocumentationFull(std::ostream& os)
 bool cmDocumentation::PrintDocumentationModules(std::ostream& os)
 {
   this->CreateModulesDocumentation();
+  this->CurrentFormatter->PrintHeader(GetNameString(), os);
+  this->Print(os);
+  this->CurrentFormatter->PrintFooter(os);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationCustomModules(std::ostream& os)
+{
+  this->CreateCustomModulesDocumentation();
   this->CurrentFormatter->PrintHeader(GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
@@ -1141,6 +1271,7 @@ void cmDocumentation::CreateUsageDocumentation()
 void cmDocumentation::CreateFullDocumentation()
 {
   this->ClearSections();
+  this->CreateCustomModulesSection();
   this->CreateModulesSection();
   this->AddSection(this->NameSection);
   this->AddSection(this->UsageSection);
@@ -1205,6 +1336,21 @@ void cmDocumentation::CreateModulesDocumentation()
   this->AddSection(this->DescriptionSection.GetName(
         this->CurrentFormatter->GetForm()), cmModulesDocumentationDescription);
   this->AddSection(this->ModulesSection);
+  this->AddSection(this->CopyrightSection.GetName(
+        this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(
+        this->CurrentFormatter->GetForm()), cmDocumentationStandardSeeAlso);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::CreateCustomModulesDocumentation()
+{
+  this->ClearSections();
+  this->CreateCustomModulesSection();
+  this->AddSection(this->DescriptionSection.GetName(
+        this->CurrentFormatter->GetForm()), 
+        cmCustomModulesDocumentationDescription);
+  this->AddSection(this->CustomModulesSection);
   this->AddSection(this->CopyrightSection.GetName(
         this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
   this->AddSection(this->SeeAlsoSection.GetName(

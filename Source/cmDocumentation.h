@@ -26,6 +26,11 @@
 #include "cmDocumentationFormatterUsage.h"
 
 
+namespace cmsys
+{
+  class Directory;
+}
+
 /** Class to generate documentation.  */
 class cmDocumentation: public cmDocumentationEnums
 {
@@ -157,14 +162,21 @@ public:
   
   /** Set cmake root so we can find installed files */
   void SetCMakeRoot(const char* root)  { this->CMakeRoot = root;}
+
+  /** Set CMAKE_MODULE_PATH so we can find additional cmake modules */
+  void SetCMakeModulePath(const char* path)  { this->CMakeModulePath = path;}
   
   static Form GetFormFromFilename(const std::string& filename);
 
 private:
   void SetForm(Form f);
 
-  bool CreateSingleModule(const char* fname, const char* moduleName);
+  bool CreateSingleModule(const char* fname, 
+                          const char* moduleName, 
+                          cmSection &moduleSection);
+  void CreateModuleDocsForDir(cmsys::Directory& dir, cmSection &moduleSection);
   bool CreateModulesSection();
+  bool CreateCustomModulesSection();
   bool PrintCopyright(std::ostream& os);
   bool PrintVersion(std::ostream& os);
   bool PrintDocumentationList(std::ostream& os);
@@ -176,6 +188,7 @@ private:
   bool PrintDocumentationUsage(std::ostream& os);
   bool PrintDocumentationFull(std::ostream& os);
   bool PrintDocumentationModules(std::ostream& os);
+  bool PrintDocumentationCustomModules(std::ostream& os);
   bool PrintDocumentationProperties(std::ostream& os);
   bool PrintDocumentationCurrentCommands(std::ostream& os);
   bool PrintDocumentationCompatCommands(std::ostream& os);
@@ -187,6 +200,7 @@ private:
   void CreateCurrentCommandsDocumentation();
   void CreateCompatCommandsDocumentation();
   void CreateModulesDocumentation();
+  void CreateCustomModulesDocumentation();
   void CreatePropertiesDocumentation();
 
   void SetSection(const cmDocumentationEntry* header,
@@ -204,6 +218,7 @@ private:
   cmSection CommandsSection;
   cmSection CompatCommandsSection;
   cmSection ModulesSection;
+  cmSection CustomModulesSection;
   cmSection GeneratorsSection;
   cmSection SeeAlsoSection;
   cmSection CopyrightSection;
@@ -219,6 +234,8 @@ private:
   
   std::string SeeAlsoString;
   std::string CMakeRoot;
+  std::string CMakeModulePath;
+  std::set<std::string> ModulesFound;
   std::vector< char* > ModuleStrings;
   std::vector< const char* > Names;
   std::vector< const cmDocumentationEntry* > Sections;

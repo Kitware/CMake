@@ -138,6 +138,12 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML and plain text."},
+  {"--help-custom-modules [file]" , "Print help for all custom modules and "
+   "exit.",
+   "Full documentation for all custom modules is displayed. "
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
   {"--help-property prop [file]", 
    "Print help for a single property and exit.",
    "Full documentation specific to the given module is displayed."
@@ -277,6 +283,21 @@ int do_cmake(int ac, char** av)
     cmake hcm;
     hcm.AddCMakePaths(av[0]);
     doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
+
+    // the command line args are processed here so that you can do 
+    // -DCMAKE_MODULE_PATH=/some/path and have this value accessible here
+    std::vector<std::string> args;
+    for(int i =0; i < ac; ++i)
+      {
+      args.push_back(av[i]);
+      }
+    hcm.SetCacheArgs(args);
+    const char* modulePath = hcm.GetCacheDefinition("CMAKE_MODULE_PATH");
+    if (modulePath)
+      {
+      doc.SetCMakeModulePath(modulePath);
+      }
+
     std::vector<cmDocumentationEntry> commands;
     std::vector<cmDocumentationEntry> compatCommands;
     std::vector<cmDocumentationEntry> globalProperties;
