@@ -37,6 +37,33 @@ IF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
     SET(exe "${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/CMakeSetup.exe")
   ENDIF(EXECUTABLE_OUTPUT_PATH)
 
+  # VERBATIM flag should be avoided if building with Visual Studio.
+  # (OK to add the flag if ${CMAKE_CFG_INTDIR} is "." which is one
+  # indicator that you are not building with Visual Studio.)
+  #
+  SET(verbatim_flag)
+  IF("${CMAKE_CFG_INTDIR}" STREQUAL ".")
+    # VERBATIM flag should also be avoided if using an older CMake.
+    # VERBATIM flag support was added in CMake 2.4.5
+    #
+    IF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} EQUAL 2.4)
+      IF(${CMAKE_PATCH_VERSION} GREATER 4)
+        SET(verbatim_flag "VERBATIM")
+      ENDIF(${CMAKE_PATCH_VERSION} GREATER 4)
+    ENDIF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} EQUAL 2.4)
+
+    IF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
+      SET(verbatim_flag "VERBATIM")
+    ENDIF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
+
+    IF(NOT verbatim_flag)
+      MESSAGE("${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}): warning
+        warning: The VERBATIM flag for ADD_CUSTOM_COMMAND may be required to execute mt correctly,
+                 but you are using a CMake ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} which does not parse the VERBATIM flag.
+                 Upgrade to CMake 2.4.5 or later to eliminate this warning.")
+    ENDIF(NOT verbatim_flag)
+  ENDIF("${CMAKE_CFG_INTDIR}" STREQUAL ".")
+
   # Solve the "things named like *Setup prompt for admin privileges
   # on Vista" problem by merging a manifest fragment that contains a
   # requestedExecutionLevel element:
@@ -46,7 +73,7 @@ IF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
     "-inputresource:${exe};#1"
     -manifest "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetupManifest.xml"
     "-outputresource:${exe};#1"
-    VERBATIM 
+    ${verbatim_flag}
   )
 ENDIF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
 
