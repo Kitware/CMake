@@ -147,7 +147,7 @@ void cmDocumentationFormatterHTML::PrintParagraph(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentationFormatterHTML::PrintHeader(const char* name, 
+void cmDocumentationFormatterHTML::PrintHeader(const char* /*name*/, 
                                                std::ostream& os)
 {
   os << "<html><body>\n";
