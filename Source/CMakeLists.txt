@@ -101,6 +101,11 @@ SET(SRCS
   cmDependsJavaParserHelper.cxx
   cmDependsJavaParserHelper.h
   cmDocumentation.cxx
+  cmDocumentationFormatter.cxx
+  cmDocumentationFormatterHTML.cxx
+  cmDocumentationFormatterMan.cxx
+  cmDocumentationFormatterText.cxx
+  cmDocumentationFormatterUsage.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
   cmExprLexer.cxx

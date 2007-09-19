@@ -19,26 +19,11 @@
 
 #include "cmStandardIncludes.h"
 #include "cmProperty.h"
-
-/** This is just a helper class to make it build with MSVC 6.0.
-Actually the enums and internal classes could directly go into
-cmDocumentation, but then MSVC6 complains in RequestedHelpItem that 
-cmDocumentation is an undefined type and so it doesn't know the enums.
-Moving the enums to a class which is then already completely parsed helps. 
-against this. */
-class cmDocumentationEnums
-{
-public:
-  /** Types of help provided.  */
-  enum Type 
-     { None, Usage, Single, SingleModule, SingleProperty,
-       List, ModuleList, PropertyList,
-       Full, Properties, Modules, Commands, CompatCommands,
-       Copyright, Version };
-
-  /** Forms of documentation output.  */
-  enum Form { TextForm, HTMLForm, ManForm, UsageForm };
-};
+#include "cmDocumentationFormatter.h"
+#include "cmDocumentationFormatterHTML.h"
+#include "cmDocumentationFormatterMan.h"
+#include "cmDocumentationFormatterText.h"
+#include "cmDocumentationFormatterUsage.h"
 
 
 /** Class to generate documentation.  */
@@ -176,34 +161,7 @@ public:
   static Form GetFormFromFilename(const std::string& filename);
 
 private:
-  void PrintHeader(const char* title, std::ostream& os);
-  void PrintFooter(std::ostream& os);
-
-  void PrintSection(std::ostream& os,
-                    const cmDocumentationEntry* section,
-                    const char* name);
-  void PrintSectionText(std::ostream& os,
-                        const cmDocumentationEntry* section,
-                        const char* name);
-  void PrintSectionHTML(std::ostream& os,
-                        const cmDocumentationEntry* section,
-                        const char* name);
-  void PrintSectionMan(std::ostream& os, const cmDocumentationEntry* section,
-                       const char* name);
-  void PrintSectionUsage(std::ostream& os,
-                         const cmDocumentationEntry* section,
-                         const char* name);
-  void PrintFormatted(std::ostream& os, const char* text);
-  void PrintPreformatted(std::ostream& os, const char* text);
-  void PrintPreformattedText(std::ostream& os, const char* text);
-  void PrintPreformattedHTML(std::ostream& os, const char* text);
-  void PrintPreformattedMan(std::ostream& os, const char* text);
-  void PrintParagraph(std::ostream& os, const char* text);
-  void PrintParagraphText(std::ostream& os, const char* text);
-  void PrintParagraphHTML(std::ostream& os, const char* text);
-  void PrintParagraphMan(std::ostream& os, const char* text);
-  void PrintColumn(std::ostream& os, const char* text);
-  void PrintHTMLEscapes(std::ostream& os, const char* text);
+  void SetForm(Form f);
 
   bool CreateSingleModule(const char* fname, const char* moduleName);
   bool CreateModulesSection();
@@ -223,7 +181,7 @@ private:
   bool PrintDocumentationCompatCommands(std::ostream& os);
   void PrintDocumentationCommand(std::ostream& os,
                                  const cmDocumentationEntry* entry);
-  
+
   void CreateUsageDocumentation();
   void CreateFullDocumentation();
   void CreateCurrentCommandsDocumentation();
@@ -264,10 +222,7 @@ private:
   std::vector< char* > ModuleStrings;
   std::vector< const char* > Names;
   std::vector< const cmDocumentationEntry* > Sections;
-  Form CurrentForm;
   std::string CurrentArgument;
-  const char* TextIndent;
-  int TextWidth;
 
   struct RequestedHelpItem
   {
@@ -279,6 +234,12 @@ private:
   };
 
   std::vector<RequestedHelpItem> RequestedHelpItems;
+  cmDocumentationFormatter* CurrentFormatter;
+  cmDocumentationFormatterHTML HTMLFormatter;
+  cmDocumentationFormatterMan ManFormatter;
+  cmDocumentationFormatterText TextFormatter;
+  cmDocumentationFormatterUsage UsageFormatter;
+  
 };
 
 #endif

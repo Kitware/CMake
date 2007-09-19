@@ -277,11 +277,10 @@ cmDocumentation::cmDocumentation()
                                  "SOURCEFILE PROPERTIES")
 ,VariablePropertiesSection      ("Variables",             "VARIABLES")
 ,CachedVariablePropertiesSection("Cached Variables",      "CACHE VARIABLES")
+,CurrentFormatter(0)
 {
-  this->CurrentForm = TextForm;
-  this->TextIndent = "";
-  this->TextWidth = 77;
-  
+  this->SetForm(TextForm);
+
   this->PropertySections[cmProperty::GLOBAL] = &this->GlobalPropertiesSection;
   this->PropertySections[cmProperty::DIRECTORY] = 
                                              &this->DirectoryPropertiesSection;
@@ -314,13 +313,13 @@ bool cmDocumentation::PrintCopyright(std::ostream& os)
     if(op->name)
       {
       os << " * ";
-      this->TextIndent = "    ";
-      this->PrintColumn(os, op->brief);
+      this->TextFormatter.SetIndent("    ");
+      this->TextFormatter.PrintColumn(os, op->brief);
       }
     else
       {
-      this->TextIndent = "";
-      this->PrintColumn(os, op->brief);
+      this->TextFormatter.SetIndent("");
+      this->TextFormatter.PrintColumn(os, op->brief);
       }
     os << "\n";
     }
@@ -348,7 +347,7 @@ void cmDocumentation::AddSection(const cmSection& section)
 {
   if (!section.IsEmpty())
     {
-    this->Names.push_back(section.GetName(this->CurrentForm));
+    this->Names.push_back(section.GetName(this->CurrentFormatter->GetForm()));
     this->Sections.push_back(section.GetEntries());
     }
 }
@@ -363,7 +362,8 @@ void cmDocumentation::ClearSections()
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 {
-  if ((this->CurrentForm != HTMLForm) && (this->CurrentForm != ManForm))
+  if ((this->CurrentFormatter->GetForm() != HTMLForm) 
+       && (this->CurrentFormatter->GetForm() != ManForm))
     {
     this->PrintVersion(os);
     }
@@ -532,7 +532,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
       i != this->RequestedHelpItems.end(); 
       ++i)
     {
-    this->CurrentForm = i->HelpForm;
+    this->SetForm(i->HelpForm);
     this->CurrentArgument = i->Argument;
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
@@ -739,7 +739,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
 //----------------------------------------------------------------------------
 void cmDocumentation::Print(Form f, std::ostream& os)
 {
-  this->CurrentForm = f;
+  this->SetForm(f);
   Print(os);
 }
 
@@ -748,7 +748,7 @@ void cmDocumentation::Print(std::ostream& os)
 {
   for(unsigned int i=0; i < this->Sections.size(); ++i)
     {
-    this->PrintSection(os, this->Sections[i], this->Names[i]);
+    this->CurrentFormatter->PrintSection(os,this->Sections[i], this->Names[i]);
     }
 }
 
@@ -863,483 +863,6 @@ void cmDocumentation::SetSeeAlsoList(const cmDocumentationEntry* also)
     }
   e.brief = 0;
   this->SeeAlsoSection.Append(e);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintSection(std::ostream& os,
-                                   const cmDocumentationEntry* section,
-                                   const char* name)
-{
-  switch (this->CurrentForm)
-    {
-    case TextForm: this->PrintSectionText(os, section, name); break;
-    case HTMLForm: this->PrintSectionHTML(os, section, name); break;
-    case ManForm: this->PrintSectionMan(os, section, name); break;
-    case UsageForm: this->PrintSectionUsage(os, section, name); break;
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintSectionText(std::ostream& os,
-                                       const cmDocumentationEntry* section,
-                                       const char* name)
-{
-  if(name)
-    {
-    os <<
-      "---------------------------------------"
-      "---------------------------------------\n";
-    os << name << "\n\n";
-    }
-  if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief; ++op)
-    {
-    if(op->name)
-      {
-      if(op->name[0])
-        {
-        os << "  " << op->name << "\n";
-        }
-      this->TextIndent = "       ";
-      this->PrintFormatted(os, op->brief);
-      if(op->full)
-        {
-        os << "\n";
-        this->PrintFormatted(os, op->full);
-        }
-      }
-    else
-      {
-      this->TextIndent = "";
-      this->PrintFormatted(os, op->brief);
-      }
-    os << "\n";
-    }  
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintSectionHTML(std::ostream& os,
-                                       const cmDocumentationEntry* section,
-                                       const char* name)
-{
-  if(name)
-    {
-    os << "<h2>" << name << "</h2>\n";
-    }
-  if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief;)
-    {
-    if(op->name)
-      {
-      os << "<ul>\n";
-      for(;op->name;++op)
-        {
-        os << "  <li>\n";
-        if(op->name[0])
-          {
-          os << "    <b><code>";
-          this->PrintHTMLEscapes(os, op->name);
-          os << "</code></b>: ";
-          }
-        this->PrintHTMLEscapes(os, op->brief);
-        if(op->full)
-          {
-          os << "<br>\n    ";
-          this->PrintFormatted(os, op->full);
-          }
-        os << "\n";
-        os << "  </li>\n";
-        }
-      os << "</ul>\n";
-      }
-    else
-      {
-      this->PrintFormatted(os, op->brief);
-      os << "\n";
-      ++op;
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintSectionMan(std::ostream& os,
-                                      const cmDocumentationEntry* section,
-                                      const char* name)
-{
-  if(name)
-    {
-    os << ".SH " << name << "\n";
-    }
-  if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief; ++op)
-    {
-    if(op->name)
-      {
-      os << ".TP\n"
-         << ".B " << (op->name[0]?op->name:"*") << "\n";
-      this->PrintFormatted(os, op->brief);
-      this->PrintFormatted(os, op->full);
-      }
-    else
-      {
-      os << ".PP\n";
-      this->PrintFormatted(os, op->brief);
-      }
-    }  
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintSectionUsage(std::ostream& os,
-                                        const cmDocumentationEntry* section,
-                                        const char* name)
-{
-  if(name)
-    {
-    os << name << "\n";
-    }
-  if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief; ++op)
-    {
-    if(op->name)
-      {
-      os << "  " << op->name;
-      this->TextIndent = "                                ";
-      int align = static_cast<int>(strlen(this->TextIndent))-4;
-      for(int i = static_cast<int>(strlen(op->name)); i < align; ++i)
-        {
-        os << " ";
-        }
-      if ( strlen(op->name) > strlen(this->TextIndent)-4 )
-        {
-        os << "\n";
-        os.write(this->TextIndent, strlen(this->TextIndent)-2);
-        }
-      os << "= ";
-      this->PrintColumn(os, op->brief);
-      os << "\n";
-      }
-    else
-      {
-      os << "\n";
-      this->TextIndent = "";
-      this->PrintFormatted(os, op->brief);
-      }
-    }
-  os << "\n";
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintFormatted(std::ostream& os, const char* text)
-{
-  if(!text)
-    {
-    return;
-    }
-  const char* ptr = text;
-  while(*ptr)
-    {
-    // Any ptrs starting in a space are treated as preformatted text.
-    std::string preformatted;
-    while(*ptr == ' ')
-      {
-      for(char ch = *ptr; ch && ch != '\n'; ++ptr, ch = *ptr)
-        {
-        preformatted.append(1, ch);
-        }
-      if(*ptr)
-        {
-        ++ptr;
-        preformatted.append(1, '\n');
-        }
-      }
-    if(preformatted.length())
-      {
-      this->PrintPreformatted(os, preformatted.c_str());
-      }
-    
-    // Other ptrs are treated as paragraphs.
-    std::string paragraph;
-    for(char ch = *ptr; ch && ch != '\n'; ++ptr, ch = *ptr)
-      {
-      paragraph.append(1, ch);
-      }
-    if(*ptr)
-      {
-      ++ptr;
-      paragraph.append(1, '\n');
-      }
-    if(paragraph.length())
-      {
-      this->PrintParagraph(os, paragraph.c_str());
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintPreformatted(std::ostream& os, const char* text)
-{
-  switch (this->CurrentForm)
-    {
-    case TextForm: this->PrintPreformattedText(os, text); break;
-    case HTMLForm: this->PrintPreformattedHTML(os, text); break;
-    case ManForm: this->PrintPreformattedMan(os, text); break;
-    case UsageForm: this->PrintPreformattedText(os, text); break;
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintParagraph(std::ostream& os, const char* text)
-{
-  switch (this->CurrentForm)
-    {
-    case TextForm: this->PrintParagraphText(os, text); break;
-    case HTMLForm: this->PrintParagraphHTML(os, text); break;
-    case ManForm: this->PrintParagraphMan(os, text); break;
-    case UsageForm: this->PrintParagraphText(os, text); break;
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation
-::PrintPreformattedText(std::ostream& os, const char* text)
-{
-  bool newline = true;
-  for(const char* ptr = text; *ptr; ++ptr)
-    {
-    if(newline)
-      {
-      os << this->TextIndent;
-      newline = false;
-      }
-    os << *ptr;
-    if(*ptr == '\n')
-      {
-      newline = true;
-      }
-    }
-  os << "\n";
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintParagraphText(std::ostream& os, const char* text)
-{
-  os << this->TextIndent;
-  this->PrintColumn(os, text);
-  os << "\n";
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation
-::PrintPreformattedHTML(std::ostream& os, const char* text)
-{
-  os << "<pre>";
-  this->PrintHTMLEscapes(os, text);
-  os << "</pre>\n    ";
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintParagraphHTML(std::ostream& os, const char* text)
-{
-  os << "<p>";
-  this->PrintHTMLEscapes(os, text);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintPreformattedMan(std::ostream& os, const char* text)
-{
-  std::string man_text = text;
-  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
-  os << man_text << "\n";
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintParagraphMan(std::ostream& os, const char* text)
-{
-  std::string man_text = text;
-  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
-  os << man_text << "\n\n";
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintColumn(std::ostream& os, const char* text)
-{
-  // Print text arranged in an indented column of fixed witdh.
-  const char* l = text;
-  int column = 0;
-  bool newSentence = false;
-  bool firstLine = true;
-  int width = this->TextWidth - static_cast<int>(strlen(this->TextIndent));
-  
-  // Loop until the end of the text.
-  while(*l)
-    {
-    // Parse the next word.
-    const char* r = l;
-    while(*r && (*r != '\n') && (*r != ' ')) { ++r; }
-    
-    // Does it fit on this line?
-    if(r-l < (width-column-(newSentence?1:0)))
-      {
-      // Word fits on this line.
-      if(r > l)
-        {
-        if(column)
-          {
-          // Not first word on line.  Separate from the previous word
-          // by a space, or two if this is a new sentence.
-          if(newSentence)
-            {
-            os << "  ";
-            column += 2;
-            }
-          else
-            {
-            os << " ";
-            column += 1;
-            }
-          }
-        else
-          {
-          // First word on line.  Print indentation unless this is the
-          // first line.
-          os << (firstLine?"":this->TextIndent);
-          }
-        
-        // Print the word.
-        os.write(l, static_cast<long>(r-l));
-        newSentence = (*(r-1) == '.');
-        }
-      
-      if(*r == '\n')
-        {
-        // Text provided a newline.  Start a new line.
-        os << "\n";
-        ++r;
-        column = 0;
-        firstLine = false;
-        }
-      else
-        {
-        // No provided newline.  Continue this line.
-        column += static_cast<long>(r-l);
-        }
-      }
-    else
-      {
-      // Word does not fit on this line.  Start a new line.
-      os << "\n";
-      firstLine = false;
-      if(r > l)
-        {
-        os << this->TextIndent;
-        os.write(l, static_cast<long>(r-l));
-        column = static_cast<long>(r-l);
-        newSentence = (*(r-1) == '.');
-        }
-      else
-        {
-        column = 0;
-        }
-      }
-    
-    // Move to beginning of next word.  Skip over whitespace.
-    l = r;
-    while(*l && (*l == ' ')) { ++l; }    
-    }
-}
-
-//----------------------------------------------------------------------------
-static bool cmDocumentationIsHyperlinkChar(char c)
-{
-  // This is not a complete list but works for CMake documentation.
-  return ((c >= 'A' && c <= 'Z') ||
-          (c >= 'a' && c <= 'z') ||
-          (c >= '0' && c <= '9') ||
-          c == '-' || c == '.' || c == '/' || c == '~' || c == '@' ||
-          c == ':' || c == '_' || c == '&' || c == '?' || c == '=');
-}
-
-//----------------------------------------------------------------------------
-static void cmDocumentationPrintHTMLChar(std::ostream& os, char c)
-{
-  // Use an escape sequence if necessary.
-  static cmDocumentationEntry escapes[] =
-  {
-    {"<", "&lt;", 0},
-    {">", "&gt;", 0},
-    {"&", "&amp;", 0},
-    {"\n", "<br>", 0},
-    {0,0,0}
-  };
-  for(const cmDocumentationEntry* op = escapes; op->name; ++op)
-    {
-    if(op->name[0] == c)
-      {
-      os << op->brief;
-      return;
-      }
-    }
-
-  // No escape sequence is needed.
-  os << c;
-}
-
-//----------------------------------------------------------------------------
-const char* cmDocumentationPrintHTMLLink(std::ostream& os, const char* begin)
-{
-  // Look for the end of the link.
-  const char* end = begin;
-  while(cmDocumentationIsHyperlinkChar(*end))
-    {
-    ++end;
-    }
-
-  // Print the hyperlink itself.
-  os << "<a href=\"";
-  for(const char* c = begin; c != end; ++c)
-    {
-    cmDocumentationPrintHTMLChar(os, *c);
-    }
-  os << "\">";
-
-  // The name of the hyperlink is the text itself.
-  for(const char* c = begin; c != end; ++c)
-    {
-    cmDocumentationPrintHTMLChar(os, *c);
-    }
-  os << "</a>";
-
-  // Return the position at which to continue scanning the input
-  // string.
-  return end;
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintHTMLEscapes(std::ostream& os, const char* text)
-{
-  // Hyperlink prefixes.
-  static const char* hyperlinks[] = {"http://", "ftp://", "mailto:", 0};
-
-  // Print each character.
-  for(const char* p = text; *p;)
-    {
-    // Handle hyperlinks specially to make them active.
-    bool found_hyperlink = false;
-    for(const char** h = hyperlinks; !found_hyperlink && *h; ++h)
-      {
-      if(strncmp(p, *h, strlen(*h)) == 0)
-        {
-        p = cmDocumentationPrintHTMLLink(os, p);
-        found_hyperlink = true;
-        }
-      }
-
-    // Print other characters normally.
-    if(!found_hyperlink)
-      {
-      cmDocumentationPrintHTMLChar(os, *p++);
-      }
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -1545,9 +1068,9 @@ bool cmDocumentation::PrintDocumentationUsage(std::ostream& os)
 bool cmDocumentation::PrintDocumentationFull(std::ostream& os)
 {
   this->CreateFullDocumentation();
-  this->PrintHeader(GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetNameString(), os);
   this->Print(os);
-  this->PrintFooter(os);
+  this->CurrentFormatter->PrintFooter(os);
   return true;
 }
 
@@ -1555,9 +1078,9 @@ bool cmDocumentation::PrintDocumentationFull(std::ostream& os)
 bool cmDocumentation::PrintDocumentationModules(std::ostream& os)
 {
   this->CreateModulesDocumentation();
-  this->PrintHeader(GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetNameString(), os);
   this->Print(os);
-  this->PrintFooter(os);
+  this->CurrentFormatter->PrintFooter(os);
   return true;
 }
 
@@ -1565,9 +1088,9 @@ bool cmDocumentation::PrintDocumentationModules(std::ostream& os)
 bool cmDocumentation::PrintDocumentationProperties(std::ostream& os)
 {
   this->CreatePropertiesDocumentation();
-  this->PrintHeader(GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetNameString(), os);
   this->Print(os);
-  this->PrintFooter(os);
+  this->CurrentFormatter->PrintFooter(os);
   return true;
 }
 
@@ -1575,9 +1098,9 @@ bool cmDocumentation::PrintDocumentationProperties(std::ostream& os)
 bool cmDocumentation::PrintDocumentationCurrentCommands(std::ostream& os)
 {
   this->CreateCurrentCommandsDocumentation();
-  this->PrintHeader(GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetNameString(), os);
   this->Print(os);
-  this->PrintFooter(os);
+  this->CurrentFormatter->PrintFooter(os);
   return true;
 }
 
@@ -1585,46 +1108,10 @@ bool cmDocumentation::PrintDocumentationCurrentCommands(std::ostream& os)
 bool cmDocumentation::PrintDocumentationCompatCommands(std::ostream& os)
 {
   this->CreateCompatCommandsDocumentation();
-  this->PrintHeader(GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetNameString(), os);
   this->Print(os);
-  this->PrintFooter(os);
+  this->CurrentFormatter->PrintFooter(os);
   return true;
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintHeader(const char* name, std::ostream& os)
-{
-  switch(this->CurrentForm)
-    {
-    case HTMLForm:
-  os << "<html><body>\n";
-       break;
-    case ManForm:
-       os << ".TH " << name << " 1 \""
-     << cmSystemTools::GetCurrentDateTime("%B %d, %Y").c_str()
-     << "\" \"" << this->GetNameString() 
-     << " " << cmVersion::GetCMakeVersion()
-     << "\"\n";
-       break;
-    case TextForm:
-    case UsageForm:
-       break;
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::PrintFooter(std::ostream& os)
-{
-  switch(this->CurrentForm)
-    {
-    case HTMLForm:
-       os << "</body></html>\n";
-       break;
-    case ManForm:
-    case TextForm:
-    case UsageForm:
-       break;
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -1671,10 +1158,10 @@ void cmDocumentation::CreateFullDocumentation()
   this->AddSection(this->VariablePropertiesSection);
   this->AddSection(this->CachedVariablePropertiesSection);
   
-  this->AddSection(this->CopyrightSection.GetName(this->CurrentForm),
-                   cmDocumentationCopyright);
+  this->AddSection(this->CopyrightSection.GetName(
+                 this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
 
-  if(this->CurrentForm == ManForm)
+  if(this->CurrentFormatter->GetForm() == ManForm)
     {
     this->AddSection(this->SeeAlsoSection);
     this->AddSection(this->AuthorSection.GetName(ManForm),
@@ -1691,22 +1178,23 @@ void cmDocumentation::CreateCurrentCommandsDocumentation()
 {
   this->ClearSections();
   this->AddSection(this->CommandsSection);
-  this->AddSection(this->CopyrightSection.GetName(CurrentForm), 
-                   cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), 
-                   cmDocumentationStandardSeeAlso);
+  this->AddSection(this->CopyrightSection.GetName(
+        this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(
+        this->CurrentFormatter->GetForm()), cmDocumentationStandardSeeAlso);
 }
 
 void cmDocumentation::CreateCompatCommandsDocumentation()
 {
   this->ClearSections();
-  this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
-                   cmCompatCommandsDocumentationDescription);
+  this->AddSection(this->DescriptionSection.GetName(
+        this->CurrentFormatter->GetForm()), 
+        cmCompatCommandsDocumentationDescription);
   this->AddSection(this->CompatCommandsSection);
-  this->AddSection(this->CopyrightSection.GetName(CurrentForm), 
-                   cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), 
-                   cmDocumentationStandardSeeAlso);
+  this->AddSection(this->CopyrightSection.GetName(
+        this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(
+        this->CurrentFormatter->GetForm()), cmDocumentationStandardSeeAlso);
 }
 
 //----------------------------------------------------------------------------
@@ -1714,21 +1202,21 @@ void cmDocumentation::CreateModulesDocumentation()
 {
   this->ClearSections();
   this->CreateModulesSection();
-  this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
-                   cmModulesDocumentationDescription);
+  this->AddSection(this->DescriptionSection.GetName(
+        this->CurrentFormatter->GetForm()), cmModulesDocumentationDescription);
   this->AddSection(this->ModulesSection);
-  this->AddSection(this->CopyrightSection.GetName(CurrentForm), 
-                   cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), 
-                   cmDocumentationStandardSeeAlso);
+  this->AddSection(this->CopyrightSection.GetName(
+        this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(
+        this->CurrentFormatter->GetForm()), cmDocumentationStandardSeeAlso);
 }
 
 //----------------------------------------------------------------------------
 void cmDocumentation::CreatePropertiesDocumentation()
 {
   this->ClearSections();
-  this->AddSection(this->DescriptionSection.GetName(CurrentForm), 
-                   cmPropertiesDocumentationDescription);
+  this->AddSection(this->DescriptionSection.GetName(
+     this->CurrentFormatter->GetForm()), cmPropertiesDocumentationDescription);
   this->AddSection(this->GlobalPropertiesSection);
   this->AddSection(this->DirectoryPropertiesSection);
   this->AddSection(this->TargetPropertiesSection);
@@ -1736,11 +1224,32 @@ void cmDocumentation::CreatePropertiesDocumentation()
   this->AddSection(this->SourceFilePropertiesSection);
   this->AddSection(this->VariablePropertiesSection);
   this->AddSection(this->CachedVariablePropertiesSection);
-  this->AddSection(this->CopyrightSection.GetName(CurrentForm), 
-                   cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(CurrentForm), 
-                   cmDocumentationStandardSeeAlso);
+  this->AddSection(this->CopyrightSection.GetName(
+        this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
+  this->AddSection(this->SeeAlsoSection.GetName(
+        this->CurrentFormatter->GetForm()), cmDocumentationStandardSeeAlso);
 }
+
+//----------------------------------------------------------------------------
+void cmDocumentation::SetForm(Form f)
+{
+  switch(f)
+  {
+    case HTMLForm:
+      this->CurrentFormatter = &this->HTMLFormatter;
+      break;
+    case ManForm:
+      this->CurrentFormatter = &this->ManFormatter;
+      break;
+    case TextForm:
+      this->CurrentFormatter = &this->TextFormatter;
+      break;
+    case UsageForm:
+      this->CurrentFormatter = & this->UsageFormatter;
+      break;
+  }
+}
+
 
 //----------------------------------------------------------------------------
 void cmDocumentation::cmSection::Set(const cmDocumentationEntry* header,
