@@ -75,7 +75,7 @@ void cmDocumentationFormatterMan::PrintHeader(const char* name,
 {
   os << ".TH " << name << " 1 \""
     << cmSystemTools::GetCurrentDateTime("%B %d, %Y").c_str()
-//    << "\" \"" << this->GetNameString() 
+    << "\" \"" << name
     << " " << cmVersion::GetCMakeVersion()
     << "\"\n";
 }
