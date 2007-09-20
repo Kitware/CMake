@@ -36,7 +36,7 @@
   kwsys_ios::cout << "Error in: " << #x << kwsys_ios::endl;           \
   }
 
-#define CHE(x,y,res) if ( x && y && strcmp(x,y) )                 \
+#define CHE(x,y,res) if ( x && strcmp(x,y) )                 \
   {                                                     \
   res = 1;                                              \
   kwsys_ios::cout << "Error, " << x << " != " << y << kwsys_ios::endl;        \
