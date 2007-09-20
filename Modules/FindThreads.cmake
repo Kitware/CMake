@@ -89,7 +89,16 @@ ENDIF(CMAKE_SYSTEM MATCHES "Windows")
 
 IF(CMAKE_USE_PTHREADS_INIT)
   IF(CMAKE_SYSTEM MATCHES "HP-UX-*")
-    SET(CMAKE_THREAD_LIBS_INIT "-lcma")
+    # Use libcma if it exists and can be used.  It provides more
+    # symbols than the plain pthread library.  CMA threads
+    # have actually been deprecated:
+    #   http://docs.hp.com/en/B3920-90091/ch12s03.html#d0e11395
+    #   http://docs.hp.com/en/947/d8.html
+    # but we need to maintain compatibility here.
+    CHECK_LIBRARY_EXISTS(cma pthread_attr_create "" CMAKE_HAVE_HP_CMA)
+    IF(CMAKE_HAVE_HP_CMA)
+      SET(CMAKE_THREAD_LIBS_INIT "-lcma")
+    ENDIF(CMAKE_HAVE_HP_CMA)
     SET(CMAKE_USE_PTHREADS_INIT 1)
     SET(CMAKE_HP_PTHREADS_INIT 1)
   ENDIF(CMAKE_SYSTEM MATCHES "HP-UX-*")
