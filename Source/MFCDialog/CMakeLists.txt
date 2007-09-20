@@ -31,6 +31,21 @@ ADD_EXECUTABLE(CMakeSetup WIN32 ${SRCS})
 TARGET_LINK_LIBRARIES(CMakeSetup CMakeLib)
 ADD_DEPENDENCIES(CMakeSetup cmake)
 
+
+# some older versions of cmake do not have
+# a patch version set so we need to set it
+# so that a later if will not fail, this has
+# to be done all the time for all generators
+# since if statements are evaluated even if
+# inside a false if, they must still parse so for
+# if (CMAKE_PATCH_VERSION GREATER 4) not to
+# fail CMAKE_PATCH_VERSION must be set
+IF(${CMAKE_MAJOR_VERSION} LESS 3)
+  IF(NOT DEFINED CMAKE_PATCH_VERSION)
+    SET(CMAKE_PATCH_VERSION 0)
+  ENDIF(NOT DEFINED CMAKE_PATCH_VERSION)
+ENDIF(${CMAKE_MAJOR_VERSION} LESS 3)
+
 IF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
   SET(exe "${CMAKE_CFG_INTDIR}/CMakeSetup.exe")
   IF(EXECUTABLE_OUTPUT_PATH)
@@ -42,7 +57,7 @@ IF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
   # indicator that you are not building with Visual Studio.)
   #
   SET(verbatim_flag)
-  IF("${CMAKE_CFG_INTDIR}" STREQUAL ".")
+  IF(NOT CMAKE_CONFIGURATION_TYPES)
     # VERBATIM flag should also be avoided if using an older CMake.
     # VERBATIM flag support was added in CMake 2.4.5
     #
@@ -62,7 +77,8 @@ IF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
                  but you are using a CMake ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} which does not parse the VERBATIM flag.
                  Upgrade to CMake 2.4.5 or later to eliminate this warning.")
     ENDIF(NOT verbatim_flag)
-  ENDIF("${CMAKE_CFG_INTDIR}" STREQUAL ".")
+  ENDIF(NOT CMAKE_CONFIGURATION_TYPES)
+
 
   # Solve the "things named like *Setup prompt for admin privileges
   # on Vista" problem by merging a manifest fragment that contains a
