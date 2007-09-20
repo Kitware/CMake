@@ -65,6 +65,14 @@
 # include <windows.h>
 #endif
 
+// getpwnam doesn't exist on Windows and Cray Xt3/Catamount
+#if defined(_WIN32) || defined (__LIBCATAMOUNT__)
+# undef HAVE_GETPWNAM
+#else
+# define HAVE_GETPWNAM 1
+#endif
+
+
 // This is a hack to prevent warnings about these functions being
 // declared but not referenced.
 #if defined(__sgi) && !defined(__GNUC__)
@@ -1380,7 +1388,7 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
         path.replace(0,1,homeEnv);
         }
       }
-#if !defined(_WIN32)
+#ifdef HAVE_GETPWNAM
     else if(pathCString[0] == '~')
       {
       kwsys_stl::string::size_type idx = path.find_first_of("/\0");
@@ -2923,7 +2931,7 @@ void SystemTools::SplitPath(const char* p,
     components.push_back(root);
     c += 2;
     }
-#if !defined(_WIN32)
+#ifdef HAVE_GETPWNAM
   else if(c[0] == '~')
     {
     int numChars = 1;
