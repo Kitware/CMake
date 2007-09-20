@@ -195,12 +195,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
     "-DSTAGE2:BOOL=1"
     --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstallS2)
-  IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
-    IF(APPLE)
-      # Set a really long timeout on apple to see if the test finishes.
-      SET_TESTS_PROPERTIES(SimpleInstall-Stage2 PROPERTIES TIMEOUT 50000)
-    ENDIF(APPLE)
-  ENDIF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
 
   ADD_TEST(X11  ${CMAKE_CTEST_COMMAND}
     --build-and-test
