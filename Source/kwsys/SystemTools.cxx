@@ -66,10 +66,13 @@
 #endif
 
 // getpwnam doesn't exist on Windows and Cray Xt3/Catamount
+// same for TIOCGWINSZ
 #if defined(_WIN32) || defined (__LIBCATAMOUNT__)
 # undef HAVE_GETPWNAM
+# undef HAVE_TTY_INFO
 #else
 # define HAVE_GETPWNAM 1
+# define HAVE_TTY_INFO 1
 #endif
 
 
@@ -3664,7 +3667,7 @@ bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
 int SystemTools::GetTerminalWidth()
 {
   int width = -1;
-#ifndef _WIN32
+#ifdef HAVE_TTY_INFO
   struct winsize ws;
   char *columns; /* Unix98 environment variable */
   if(ioctl(1, TIOCGWINSZ, &ws) != -1 && ws.ws_col>0 && ws.ws_row>0)
