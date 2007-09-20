@@ -465,8 +465,9 @@ bool cmDocumentation::CreateCustomModulesSection()
       {
       if (!sectionHasHeader)
         {
-        this->CustomModulesSection.Append(cmDocumentationCustomModulesHeader[0]);
-        sectionHasHeader =  true;
+        this->CustomModulesSection.Append(
+                                        cmDocumentationCustomModulesHeader[0]);
+        sectionHasHeader = true;
         }
       this->CreateModuleDocsForDir(dir, this->CustomModulesSection);
       }
@@ -498,7 +499,8 @@ void cmDocumentation::CreateModuleDocsForDir(cmsys::Directory& dir,
           std::string path = dir.GetPath();
           path += "/";
           path += fname;
-          this->CreateSingleModule(path.c_str(), moduleName.c_str(), moduleSection);
+          this->CreateSingleModule(path.c_str(), moduleName.c_str(), 
+                                   moduleSection);
           }
         }
       }
