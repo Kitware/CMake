@@ -48,7 +48,6 @@ IF(MSVC)
         "${MSVC80_CRT_DIR}/msvcp80d.dll"
         "${MSVC80_CRT_DIR}/msvcr80d.dll"
         )
-      message(${__install__libs})
     ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
 
   ENDIF(MSVC80)
