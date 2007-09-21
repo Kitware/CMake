@@ -259,8 +259,8 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
 #define ARFMAG          "`\n"
 
 /* Header format strings. */
-#define HDR1            "%s%-13d%-12ld%-6u%-6u%-8o%-10qd%2s"
-#define HDR2             "%-16.16s%-12ld%-6u%-6u%-8o%-10qd%2s"
+#define HDR1            "%s%-13d%-12ld%-6u%-6u%-8o%-10lld%2s"
+#define HDR2             "%-16.16s%-12ld%-6u%-6u%-8o%-10lld%2s"
 
 struct ar_hdr {
   char ar_name[16];                        /* name */
