@@ -222,9 +222,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   else if(!quiet || required)
     {
     cmOStringStream e;
-    e << this->Variable << " is not set.  It must be set to the directory "
-      << "containing " << this->Config << " in order to use "
-      << this->Name << ".";
+    e << "FIND_PACKAGE could not find Find" << this->Name 
+      << ".cmake nor config file " << this->Config << ".\n"
+      << "Adjust CMAKE_MODULE_PATH to find Find" << this->Name 
+      << ".cmake or set " << this->Variable 
+      << "\nto the directory containing " << this->Config 
+      << " in order to use " << this->Name << ".";
     cmSystemTools::Error(e.str().c_str());
     if(required)
       {
