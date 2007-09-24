@@ -659,7 +659,8 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
   if ( !this->CTest->GetShowOnly() )
     {
     bool testFailed = false;
-    std::vector<std::pair<cmsys::RegularExpression,std::string> >::iterator passIt;
+    std::vector<std::pair<cmsys::RegularExpression,
+      std::string> >::iterator passIt;
     bool forceFail = false;
     if ( it->RequiredRegularExpressions.size() > 0 )
       {

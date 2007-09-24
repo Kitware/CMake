@@ -80,8 +80,10 @@ public:
     cmStdString Name;
     cmStdString Directory;
     std::vector<std::string> Args;
-    std::vector<std::pair<cmsys::RegularExpression,std::string> > ErrorRegularExpressions;
-    std::vector<std::pair<cmsys::RegularExpression,std::string> > RequiredRegularExpressions;
+    std::vector<std::pair<cmsys::RegularExpression,
+                          std::string> > ErrorRegularExpressions;
+    std::vector<std::pair<cmsys::RegularExpression,
+                          std::string> > RequiredRegularExpressions;
     std::map<cmStdString, cmStdString> Measurements;
     bool IsInBasedOnREOptions;
     bool WillFail;
