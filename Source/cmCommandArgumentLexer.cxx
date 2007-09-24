@@ -1046,6 +1046,7 @@ case YY_STATE_EOF(NOESCAPES):
                         "fatal flex scanner internal error--no action found" );
         } /* end of action switch */
                 } /* end of scanning one token */
+return 0; /* this should not happend but it should silence a warning */
 } /* end of cmCommandArgument_yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer

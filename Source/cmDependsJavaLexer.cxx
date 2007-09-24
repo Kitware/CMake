@@ -1596,6 +1596,7 @@ case YY_STATE_EOF(string):
       "fatal flex scanner internal error--no action found" );
   } /* end of action switch */
     } /* end of scanning one token */
+return 0; /* this should not happen but it silences a warning*/
 } /* end of cmDependsJava_yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
