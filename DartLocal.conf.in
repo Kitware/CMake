@@ -1,7 +1,8 @@
 ExpectedBuilds: \
 {ARRAKIS.kitware Win32-bcc551} \
 {ARRAKIS.kitware Win32-cygwin} \
-{ARRAKIS.kitware Win32-mingw} \
+{ARRAKIS.kitware Win32-mingw} \ 
+{ARRAKIS.kitware zRel24-Win32-bcc551} \
 {dash1win64.kitware Win64-vs80} \
 {dash1win98.kitware Win32-vs60} \
 {DASH1.kitware Win32-nmake71} \
@@ -42,11 +43,14 @@ ExpectedBuilds: \
 {dashsun1.kitware SunOS-gcc34-64} \
 {destiny.kitware HP-UX-aCC-gmake} \
 {destiny.kitware HP-UX-aCC} \
+{devqnx.acfr.usyd.edu.au qnx-V3.3.5-gcc_ntox86} \
 {heart HP-UXia64-aCC} \
 {hythloth.kitware Linux64-bullseye-cov} \
+{hythloth.kitware Linux-nightly-win32-release} \
 {hythloth.kitware Linux64-suncc-5.9} \
-{iris.elemtech IRIX64-CC-7.4} \
+{iris.elemtech IRIX64-CC-7.4} \ 
 {iris.elemtech IRIX64-CC64-7.4} \
+{JET.kitware Linux-valgrind2} \
 {krondor.kitware Darwin-c++} \
 {krondor.kitware zRel24-Darwin-c++} \
 {midworld.kitware DarwinG5-XCode15} \

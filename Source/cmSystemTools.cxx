@@ -271,7 +271,8 @@ void cmSystemTools::Stdout(const char* s)
 {
   if(s_StdoutCallback)
     {
-    (*s_StdoutCallback)(s, strlen(s), s_StdoutCallbackClientData);
+    (*s_StdoutCallback)(s, static_cast<int>(strlen(s)), 
+                        s_StdoutCallbackClientData);
     }
   else
     {
@@ -1653,7 +1654,7 @@ int cmSystemToolsGZStructClose(void* call_data)
 ssize_t cmSystemToolsGZStructRead(void* call_data, void* buf, size_t count)
 {
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
-  return gzread(gzf->GZFile, buf, count);
+  return gzread(gzf->GZFile, buf, static_cast<int>(count));
 }
 
 ssize_t cmSystemToolsGZStructWrite(void* call_data, const void* buf,
