@@ -95,12 +95,14 @@ IF(CMAKE_USE_PTHREADS_INIT)
     #   http://docs.hp.com/en/B3920-90091/ch12s03.html#d0e11395
     #   http://docs.hp.com/en/947/d8.html
     # but we need to maintain compatibility here.
+    # The CMAKE_HP_PTHREADS setting actually indicates whether CMA threads
+    # are available.
     CHECK_LIBRARY_EXISTS(cma pthread_attr_create "" CMAKE_HAVE_HP_CMA)
     IF(CMAKE_HAVE_HP_CMA)
       SET(CMAKE_THREAD_LIBS_INIT "-lcma")
+      SET(CMAKE_HP_PTHREADS_INIT 1)
     ENDIF(CMAKE_HAVE_HP_CMA)
     SET(CMAKE_USE_PTHREADS_INIT 1)
-    SET(CMAKE_HP_PTHREADS_INIT 1)
   ENDIF(CMAKE_SYSTEM MATCHES "HP-UX-*")
 
   IF(CMAKE_SYSTEM MATCHES "OSF1-V*")
