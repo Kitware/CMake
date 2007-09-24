@@ -22,6 +22,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "Clock skew detected"
   "remark\\(1209"
   "stl_deque.h:1051"
+  "Parser.cxx.*warning.*2111-D.*statement is unreachable"
   "CMakeSetupManifest.xml.*manifest authoring warning.*Unrecognized Element"
   )
 
