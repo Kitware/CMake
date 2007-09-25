@@ -69,48 +69,41 @@ BOOL CCMakeGenDialog::OnInitDialog()
   bool done = false;
   
   // is the last generator set? If so use it
-  mp = "[HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;LastGenerator]";
+  mp = "[HKEY_CURRENT_USER\\Software\\Kitware"
+    "\\CMakeSetup\\Settings\\StartPath;LastGenerator]";
   cmSystemTools::ExpandRegistryValues(mp);
   if(mp != "/registry")
     {
     m_GeneratorChoiceString = mp.c_str();
     done = true;
     }
-
-  // look for VS8
-  if (!done)
+  struct regToGen
+  {
+    const char* Registry;
+    const char* GeneratorName;
+  };
+  regToGen installedGenerators[] = {
+    // VS 9
+    { "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft"
+      "\\VisualStudio\\9.0\\Setup;Dbghelp_path]", "Visual Studio 9 2008"},
+    // VS 8
+    { "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft"
+      "\\VisualStudio\\8.0\\Setup;Dbghelp_path]", "Visual Studio 8 2005"},
+    // VS 7.1
+    {"[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft"
+     "\\VisualStudio\\7.1;InstallDir]", "Visual Studio 7 .NET 2003"},
+    // VS 7
+    {"[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft"
+     "\\VisualStudio\\7.0;InstallDir]", "Visual Studio 7"},
+    {0,0}
+  };
+  for(regToGen* ptr = installedGenerators; ptr->Registry != 0 && !done; ptr++)
     {
-    // check for vs8 in registry then decide what default to use
-    mp = 
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path]";
+    mp = ptr->Registry;
     cmSystemTools::ExpandRegistryValues(mp);
     if(mp != "/registry")
       {
-      m_GeneratorChoiceString = "Visual Studio 8 2005";
-      done = true;
-      }
-    }
-  
-  // look for VS7.1
-  if (!done)
-    {
-    mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1;InstallDir]";
-    cmSystemTools::ExpandRegistryValues(mp);
-    if (mp != "/registry")
-      {
-      m_GeneratorChoiceString = "Visual Studio 7 .NET 2003";
-      done = true;
-      }
-    }
-  
-  // look for VS7
-  if (!done)
-    {
-    mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.0;InstallDir]";
-    cmSystemTools::ExpandRegistryValues(mp);
-    if (mp != "/registry")
-      {
-      m_GeneratorChoiceString = "Visual Studio 7";
+      m_GeneratorChoiceString = ptr->GeneratorName;
       done = true;
       }
     }
