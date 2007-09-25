@@ -1979,7 +1979,17 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
 
 void cmSystemTools::DoNotInheritStdPipes()
 {   
-#ifdef _WIN32
+#ifdef _WIN32  
+  // Check to see if we are attached to a console
+  // if so, then do not stop the inherited pipes
+  // or stdout and stderr will not show up in dos
+  // shell windows
+  CONSOLE_SCREEN_BUFFER_INFO hOutInfo;
+  HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  if(GetConsoleScreenBufferInfo(hOut, &hOutInfo))
+    {
+    return;
+    }
   {
   HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
   DuplicateHandle(GetCurrentProcess(), out,
