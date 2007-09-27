@@ -60,6 +60,7 @@
 #  QT_FOUND         If false, don't try to use Qt.
 #  QT4_FOUND        If false, don't try to use Qt 4.
 #
+#  QT_EDITION             Set to the edition of Qt (i.e. DesktopLight)
 #  QT_QTCORE_FOUND        True if QtCore was found.
 #  QT_QTGUI_FOUND         True if QtGui was found.
 #  QT_QT3SUPPORT_FOUND    True if Qt3Support was found.
@@ -245,11 +246,12 @@ MACRO(QT_QUERY_QMAKE outvar invar)
   ENDIF(_qmake_result)
 
 ENDMACRO(QT_QUERY_QMAKE)
-
+GET_FILENAME_COMPONENT(qt_install_version "[HKEY_CURRENT_USER\\Software\\trolltech\\Versions;DefaultQtVersion]" NAME)
 # check for qmake
 FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake qmake4 qmake-qt4 PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/bin"
+  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\${qt_install_version};InstallDir]/bin"
   $ENV{QTDIR}/bin
 )
 
@@ -258,7 +260,6 @@ IF (QT_QMAKE_EXECUTABLE)
   SET(QT4_QMAKE_FOUND FALSE)
   
   EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE} ARGS "-query QT_VERSION" OUTPUT_VARIABLE QTVERSION)
-
   # check for qt3 qmake and then try and find qmake4 or qmake-qt4 in the path
   IF("${QTVERSION}" MATCHES "Unknown")
     SET(QT_QMAKE_EXECUTABLE NOTFOUND CACHE FILEPATH "" FORCE)
@@ -751,8 +752,7 @@ IF (QT4_QMAKE_FOUND)
   _QT4_ADJUST_LIB_VARS(QTUITOOLS)
   _QT4_ADJUST_LIB_VARS(QTTEST)
   _QT4_ADJUST_LIB_VARS(QTDBUS)
-  
-  
+
   # platform dependent libraries
   IF(Q_WS_X11)
     _QT4_ADJUST_LIB_VARS(QTMOTIF)
@@ -1089,7 +1089,21 @@ IF (QT4_QMAKE_FOUND)
     FILE(READ ${QT_MKSPECS_DIR}/qconfig.pri _qconfig_FILE_contents)
     STRING(REGEX MATCH "QT_CONFIG[^\n]+" QT_QCONFIG ${_qconfig_FILE_contents})
     STRING(REGEX MATCH "CONFIG[^\n]+" QT_CONFIG ${_qconfig_FILE_contents})
+    STRING(REGEX MATCH "EDITION[^\n]+" QT_EDITION ${_qconfig_FILE_contents})
   ENDIF(EXISTS "${QT_MKSPECS_DIR}/qconfig.pri")
+
+  # desktop light only supports CORE and GUI so disable other
+  # packages even if they are found as they will not work
+  MACRO(QT_DISABLE_UNLICENSED_MODULES modules)
+    IF("${QT_EDITION}" MATCHES "DesktopLight")
+      FOREACH( _module ${modules})
+        SET(QT_${_module}_FOUND FALSE)
+      ENDFOREACH(_module)
+    ENDIF("${QT_EDITION}" MATCHES "DesktopLight")
+  ENDMACRO(QT_DISABLE_UNLICENSED_MODULES)
+  QT_DISABLE_UNLICENSED_MODULES(
+    "QTNETWORK;QTXML;QTSQL;QTOPENGL;QTSVG")
+  
 
 
   ###############################################
