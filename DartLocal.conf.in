@@ -48,7 +48,7 @@ ExpectedBuilds: \
 {hythloth.kitware Linux64-bullseye-cov} \
 {hythloth.kitware Linux-nightly-win32-release} \
 {hythloth.kitware Linux64-suncc-5.9} \
-{iris.elemtech IRIX64-CC-7.4} \ 
+{iris.elemtech IRIX64-CC-7.4} \
 {iris.elemtech IRIX64-CC64-7.4} \
 {JET.kitware Linux-valgrind2} \
 {krondor.kitware Darwin-c++} \
