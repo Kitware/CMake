@@ -228,7 +228,7 @@ int cmGeneratedFileStreamBase::CompressFile(const char* oldname,
   char buffer[BUFFER_SIZE];
   while ( (res = fread(buffer, 1, BUFFER_SIZE, ifs)) > 0 )
     {
-    if ( !gzwrite(gf, buffer, res) )
+    if ( !gzwrite(gf, buffer, static_cast<int>(res)) )
       {
       fclose(ifs);
       gzclose(gf);

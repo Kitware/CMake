@@ -1661,7 +1661,7 @@ ssize_t cmSystemToolsGZStructWrite(void* call_data, const void* buf,
                                    size_t count)
 {
   cmSystemToolsGZStruct* gzf = static_cast<cmSystemToolsGZStruct*>(call_data);
-  return gzwrite(gzf->GZFile, (void*)buf, count);
+  return gzwrite(gzf->GZFile, (void*)buf, static_cast<int>(count));
 }
 
 #endif

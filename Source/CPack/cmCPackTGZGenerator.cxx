@@ -129,7 +129,7 @@ ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n)
 
   if ( mydata->Compress )
     {
-    mydata->ZLibStream.avail_in = n;
+    mydata->ZLibStream.avail_in = static_cast<uInt>(n);
     mydata->ZLibStream.next_in  = reinterpret_cast<Bytef*>(buff);
 
     do {
@@ -157,7 +157,8 @@ ssize_t cmCPackTGZ_Data_Write(void *client_data, void *buff, size_t n)
       }
     if ( n )
       {
-      mydata->CRC = crc32(mydata->CRC, reinterpret_cast<Bytef *>(buff), n);
+      mydata->CRC = crc32(mydata->CRC, reinterpret_cast<Bytef *>(buff), 
+                          static_cast<uInt>(n));
       }
     }
   else
