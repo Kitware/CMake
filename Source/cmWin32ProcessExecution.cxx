@@ -732,37 +732,31 @@ bool cmWin32ProcessExecution::CloseHandles()
   bool ret = true;
   if (this->hChildStdinRd && !CloseHandle(this->hChildStdinRd))
     {
-    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStdinRd = 0;
   if(this->hChildStdoutRdDup && !CloseHandle(this->hChildStdoutRdDup))
     {
-    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStdoutRdDup = 0;
   if(this->hChildStderrRdDup && !CloseHandle(this->hChildStderrRdDup))
     {
-    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStderrRdDup = 0;
   if(this->hChildStdinWrDup && !CloseHandle(this->hChildStdinWrDup))
     {
-    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStdinWrDup = 0;
   if (this->hChildStdoutWr && !CloseHandle(this->hChildStdoutWr))
     {
-    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStdoutWr = 0;
   if (this->hChildStderrWr && !CloseHandle(this->hChildStderrWr))
     {
-    this->Output += "CloseHandleError\n";
     ret = false;
     }
   this->hChildStderrWr = 0;
