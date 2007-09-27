@@ -61,6 +61,7 @@
 #  QT4_FOUND        If false, don't try to use Qt 4.
 #
 #  QT_EDITION             Set to the edition of Qt (i.e. DesktopLight)
+#  QT_EDITION_DESKTOPLIGHT True if QT_EDITION == DesktopLight
 #  QT_QTCORE_FOUND        True if QtCore was found.
 #  QT_QTGUI_FOUND         True if QtGui was found.
 #  QT_QT3SUPPORT_FOUND    True if Qt3Support was found.
@@ -1091,21 +1092,11 @@ IF (QT4_QMAKE_FOUND)
     STRING(REGEX MATCH "CONFIG[^\n]+" QT_CONFIG ${_qconfig_FILE_contents})
     STRING(REGEX MATCH "EDITION[^\n]+" QT_EDITION ${_qconfig_FILE_contents})
   ENDIF(EXISTS "${QT_MKSPECS_DIR}/qconfig.pri")
+  IF("${QT_EDITION}" MATCHES "DesktopLight")
+    SET(QT_EDITION_DESKTOPLIGHT 1)
+  ENDIF("${QT_EDITION}" MATCHES "DesktopLight")
 
-  # desktop light only supports CORE and GUI so disable other
-  # packages even if they are found as they will not work
-  MACRO(QT_DISABLE_UNLICENSED_MODULES modules)
-    IF("${QT_EDITION}" MATCHES "DesktopLight")
-      FOREACH( _module ${modules})
-        SET(QT_${_module}_FOUND FALSE)
-      ENDFOREACH(_module)
-    ENDIF("${QT_EDITION}" MATCHES "DesktopLight")
-  ENDMACRO(QT_DISABLE_UNLICENSED_MODULES)
-  QT_DISABLE_UNLICENSED_MODULES(
-    "QTNETWORK;QTXML;QTSQL;QTOPENGL;QTSVG")
   
-
-
   ###############################################
   #
   #       configuration/system dependent settings  
