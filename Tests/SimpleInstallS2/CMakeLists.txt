@@ -65,9 +65,9 @@ IF(STAGE2)
     DOC "Fourth library")
 
   INCLUDE_DIRECTORIES(${CMAKE_INSTALL_PREFIX}/MyTest/include)
-  ADD_EXECUTABLE (SimpleInstallS2 inst2.cxx foo.c foo.h)
-  TARGET_LINK_LIBRARIES(SimpleInstallS2 ${TEST1_LIBRARY} ${TEST2_LIBRARY} ${TEST4_LIBRARY})
-  SET(install_target SimpleInstallS2)
+  ADD_EXECUTABLE (SimpleInstExeS2 inst2.cxx foo.c foo.h)
+  TARGET_LINK_LIBRARIES(SimpleInstExeS2 ${TEST1_LIBRARY} ${TEST2_LIBRARY} ${TEST4_LIBRARY})
+  SET(install_target SimpleInstExeS2)
 
   IF("${TEST1_LIBRARY}" MATCHES "static")
     MESSAGE(STATUS "test1 correctly found in lib/static")
@@ -130,10 +130,10 @@ IF(STAGE2)
   ENDIF(EMPTY_FILES)
 
   # Make sure the test executable can run from the install tree.
-  SET_TARGET_PROPERTIES(SimpleInstallS2 PROPERTIES
+  SET_TARGET_PROPERTIES(SimpleInstExeS2 PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
 
-  INSTALL_TARGETS(/MyTest/bin SimpleInstallS2)
+  INSTALL_TARGETS(/MyTest/bin SimpleInstExeS2)
 
 # try to import the exported targets again
   SET(SimpleInstallS1_DIR ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
@@ -260,7 +260,7 @@ ELSE(STAGE2)
   SET_DIRECTORY_PROPERTIES(PROPERTIES
     ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_INSTALL_PREFIX}/InstallScriptOut.cmake)
 
-  SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES OUTPUT_NAME SimpleInstallExe)
+  SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES OUTPUT_NAME SimpleInstExe)
   # Disable VERSION test until it is implemented in the XCode generator.
   IF(NOT XCODE)
     SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES VERSION 1.2)

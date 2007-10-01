@@ -182,7 +182,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --build-two-config
     --build-options
     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
-    --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstallExe)
+    --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExe)
   ADD_TEST(SimpleInstall-Stage2 ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/SimpleInstallS2"
@@ -194,7 +194,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --build-options
     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
     "-DSTAGE2:BOOL=1"
-    --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstallS2)
+    --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExeS2)
 
   ADD_TEST(X11  ${CMAKE_CTEST_COMMAND}
     --build-and-test
