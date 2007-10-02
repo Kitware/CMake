@@ -1464,7 +1464,8 @@ kwsys_stl::string SystemTools::ConvertToWindowsOutputPath(const char* path)
   // make it big enough for all of path and double quotes
   ret.reserve(strlen(path)+3);
   // put path into the string
-  ret.insert(0,path);
+  ret.assign(path);
+  ret = path;
   kwsys_stl::string::size_type pos = 0;
   // first convert all of the slashes
   while((pos = ret.find('/', pos)) != kwsys_stl::string::npos)
@@ -2879,6 +2880,14 @@ kwsys_stl::string SystemTools::GetActualCaseForPath(const char* p)
 #ifndef _WIN32
   return p;
 #else
+  // Check to see if actual case has already been called
+  // for this path, and the result is stored in the LongPathMap
+  SystemToolsTranslationMap::iterator i = 
+    SystemTools::LongPathMap->find(p);
+  if(i != SystemTools::LongPathMap->end())
+    {
+    return i->second;
+    }
   kwsys_stl::string shortPath;
   if(!SystemTools::GetShortPath(p, shortPath))
     {
@@ -2895,6 +2904,7 @@ kwsys_stl::string SystemTools::GetActualCaseForPath(const char* p)
     {
     longPath[0] = toupper(longPath[0]);
     }
+  (*SystemTools::LongPathMap)[p] = longPath;
   return longPath;
 #endif  
 }
@@ -4192,6 +4202,7 @@ kwsys_stl::string SystemTools::GetOperatingSystemNameAndVersion()
 // necessary.
 unsigned int SystemToolsManagerCount;
 SystemToolsTranslationMap *SystemTools::TranslationMap;
+SystemToolsTranslationMap *SystemTools::LongPathMap;
 
 // SystemToolsManager manages the SystemTools singleton.
 // SystemToolsManager should be included in any translation unit
@@ -4219,6 +4230,7 @@ void SystemTools::ClassInitialize()
 {
   // Allocate the translation map first.
   SystemTools::TranslationMap = new SystemToolsTranslationMap;
+  SystemTools::LongPathMap = new SystemToolsTranslationMap;
 
   // Add some special translation paths for unix.  These are not added
   // for windows because drive letters need to be maintained.  Also,
@@ -4274,6 +4286,7 @@ void SystemTools::ClassInitialize()
 void SystemTools::ClassFinalize()
 {
   delete SystemTools::TranslationMap;
+  delete SystemTools::LongPathMap;
 }
 
 

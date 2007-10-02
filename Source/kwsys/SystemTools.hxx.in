@@ -813,6 +813,7 @@ private:
    * Each time 'dir' will be found it will be replace by 'refdir'
    */
   static SystemToolsTranslationMap *TranslationMap;
+  static SystemToolsTranslationMap *LongPathMap;
   friend class SystemToolsManager;
 };
 
