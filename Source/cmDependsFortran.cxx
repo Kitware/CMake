@@ -47,6 +47,7 @@ struct cmDependsFortranFile
   YY_BUFFER_STATE Buffer;
   std::string Directory;
 };
+
 struct cmDependsFortranParser_s
 {
   cmDependsFortranParser_s(cmDependsFortran* self);
@@ -65,7 +66,12 @@ struct cmDependsFortranParser_s
   std::string TokenString;
 
   // Flag for whether lexer is reading from inside an interface.
-  int InInterface;
+  bool InInterface;
+
+  int OldStartcond;
+  bool InPPFalseBranch;
+  std::vector<bool> SkipToEnd;
+  int StepI;
 
   // Set of provided and required modules.
   std::set<cmStdString> Provides;
@@ -347,7 +353,7 @@ cmDependsFortranParser_s::~cmDependsFortranParser_s()
 }
 
 //----------------------------------------------------------------------------
-int cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
+bool cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
                                     const char* fname)
 {
   // Open the new file and push it onto the stack.  Save the old
@@ -371,7 +377,7 @@ int cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
 }
 
 //----------------------------------------------------------------------------
-int cmDependsFortranParser_FilePop(cmDependsFortranParser* parser)
+bool cmDependsFortranParser_FilePop(cmDependsFortranParser* parser)
 {
   // Pop one file off the stack and close it.  Switch the lexer back
   // to the next one on the stack.
@@ -426,15 +432,28 @@ void cmDependsFortranParser_StringAppend(cmDependsFortranParser* parser,
 
 //----------------------------------------------------------------------------
 void cmDependsFortranParser_SetInInterface(cmDependsFortranParser* parser,
-                                           int in)
+                                           bool in)
 {
   parser->InInterface = in;
 }
 
 //----------------------------------------------------------------------------
-int cmDependsFortranParser_GetInInterface(cmDependsFortranParser* parser)
+bool cmDependsFortranParser_GetInInterface(cmDependsFortranParser* parser)
 {
   return parser->InInterface;
+}
+
+//----------------------------------------------------------------------------
+void cmDependsFortranParser_SetOldStartcond(cmDependsFortranParser* parser,
+                                            int arg)
+{
+  parser->OldStartcond = arg;
+}
+
+//----------------------------------------------------------------------------
+int cmDependsFortranParser_GetOldStartcond(cmDependsFortranParser* parser)
+{
+  return parser->OldStartcond;
 }
 
 //----------------------------------------------------------------------------
@@ -449,7 +468,7 @@ void cmDependsFortranParser_Error(cmDependsFortranParser*, const char*)
 void cmDependsFortranParser_RuleUse(cmDependsFortranParser* parser,
                                     const char* name)
 {
-  parser->Requires.insert(name);
+  parser->Requires.insert(cmSystemTools::LowerCase(name) );
 }
 
 //----------------------------------------------------------------------------
@@ -482,7 +501,7 @@ void cmDependsFortranParser_RuleInclude(cmDependsFortranParser* parser,
 void cmDependsFortranParser_RuleModule(cmDependsFortranParser* parser,
                                        const char* name)
 {
-  parser->Provides.insert(name);
+  parser->Provides.insert(cmSystemTools::LowerCase(name) );
 }
 
 //----------------------------------------------------------------------------

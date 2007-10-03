@@ -23,20 +23,33 @@
 typedef struct cmDependsFortranParser_s cmDependsFortranParser;
 
 /* Functions to enter/exit #include'd files in order.  */
-int cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
+bool cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
                                     const char* fname);
-int cmDependsFortranParser_FilePop(cmDependsFortranParser* parser);
+bool cmDependsFortranParser_FilePop(cmDependsFortranParser* parser);
 
 /* Callbacks for lexer.  */
 int cmDependsFortranParser_Input(cmDependsFortranParser* parser,
                                  char* buffer, size_t bufferSize);
+
+
 void cmDependsFortranParser_StringStart(cmDependsFortranParser* parser);
 const char* cmDependsFortranParser_StringEnd(cmDependsFortranParser* parser);
 void cmDependsFortranParser_StringAppend(cmDependsFortranParser* parser,
                                          char c);
+
 void cmDependsFortranParser_SetInInterface(cmDependsFortranParser* parser,
-                                           int in);
-int cmDependsFortranParser_GetInInterface(cmDependsFortranParser* parser);
+                                           bool is_in);
+bool cmDependsFortranParser_GetInInterface(cmDependsFortranParser* parser);
+
+
+void cmDependsFortranParser_SetInPPFalseBranch(cmDependsFortranParser* parser,
+                                               bool is_in);
+bool cmDependsFortranParser_GetInPPFalseBranch(cmDependsFortranParser* parser);
+
+
+void cmDependsFortranParser_SetOldStartcond(cmDependsFortranParser* parser,
+                                            int arg);
+int cmDependsFortranParser_GetOldStartcond(cmDependsFortranParser* parser);
 
 /* Callbacks for parser.  */
 void cmDependsFortranParser_Error(cmDependsFortranParser* parser,

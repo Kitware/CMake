@@ -16,7 +16,7 @@
 
 =========================================================================*/
 /*-------------------------------------------------------------------------
-  Portions of this source have been derived from makefdep90 version 2.6.2,
+  Portions of this source have been derived from makefdep90 version 2.8.8,
 
    Copyright (C) 2000,2001 Erik Edelmann <eedelman@beam.helsinki.fi>.
 
@@ -64,6 +64,7 @@ Modify cmDependsFortranLexer.h:
 /*--------------------------------------------------------------------------*/
 %}
 
+
 %option reentrant
 %option noyywrap
 %pointer
@@ -75,16 +76,19 @@ Modify cmDependsFortranLexer.h:
 
 \"              {
   cmDependsFortranParser_StringStart(yyextra);
+  cmDependsFortranParser_SetOldStartcond(yyextra, YY_START);
   BEGIN(str_dq);
 }
 
 '               {
   cmDependsFortranParser_StringStart(yyextra);
+  cmDependsFortranParser_SetOldStartcond(yyextra, YY_START);
   BEGIN(str_sq);
 }
 
 <str_dq>\" |
 <str_sq>'  {
+  BEGIN(cmDependsFortranParser_GetOldStartcond(yyextra) );
   yylvalp->string = strdup(cmDependsFortranParser_StringEnd(yyextra));
   return STRING;
 }
@@ -92,7 +96,15 @@ Modify cmDependsFortranLexer.h:
 <str_dq,str_sq>&[ \t]*\n |
 <str_dq,str_sq>&[ \t]*\n[ \t]*&  /* Ignore (continued strings, free fmt) */
 
-<fixed_fmt,str_dq,str_sq>\n[ ]{5}[^ \t\n] /*Ignore (cont. strings, fixed fmt) */
+<fixed_fmt,str_dq,str_sq>\n[ ]{5}[^ \t\n] {
+  if (cmDependsFortranParser_GetOldStartcond(yyextra) == fixed_fmt)
+    ; /* Ignore (cont. strings, fixed fmt) */
+  else
+    {
+    unput(yytext[strlen(yytext)-1]);
+    }
+}
+
 
 <str_dq,str_sq>\n {
   unput ('\n');
@@ -110,23 +122,6 @@ Modify cmDependsFortranLexer.h:
 #[ \t]*include  { return CPP_INCLUDE; }
 \$[ \t]*include { return F90PPR_INCLUDE; }
 \?\?[ \t]*include { return COCO_INCLUDE; }
-INCLUDE         { return F_INCLUDE; }
-USE             { return USE; }
-
-END" "*INTERFACE {
-  cmDependsFortranParser_SetInInterface(yyextra, 0);
-}
-INTERFACE        {
-  cmDependsFortranParser_SetInInterface(yyextra, 1);
-}
-
-END" "*MODULE   /* Ignore */
-MODULE          {
- if(!cmDependsFortranParser_GetInInterface(yyextra))
-   {
-   return MODULE;
-   }
-}
 
 #[ \t]*define   { return CPP_DEFINE; }
 \$[ \t]*DEFINE   { return F90PPR_DEFINE; }
@@ -148,23 +143,34 @@ $[ \t]*elif     { return F90PPR_ELIF; }
 $[ \t]*else     { return F90PPR_ELSE; }
 $[ \t]*endif    { return F90PPR_ENDIF; }
 
-&[ \t]*\n |
-&[ \t]*\n[ \t]*& /* Ignore */
+ /* Line continuations, possible involving comments.  */
+&([ \t\n]*|!.*)*
+&([ \t\n]*|!.*)*&
 
+<fixed_fmt>\n[ ]{5}[^ ]  { return GARBAGE; }
 
-[^ \t\n\r;,!'""']+ { yylvalp->string = strdup(yytext); return WORD; }
+=|=>                     { return ASSIGNMENT_OP; }
 
-;|\n          { return EOSTMT; }
+[a-zA-Z_][a-zA-Z_0-9]* {
+  yylvalp->string = strdup(yytext);
+  return WORD;
+}
+
+[^ \t\n\r;,!'"a-zA-Z=&]+ { return GARBAGE; }
+
+;|\n { return EOSTMT; }
+
 
 [ \t\r,]         /* Ignore */
+\\[ \t]*\n       /* Ignore line-endings preceeded by \ */
 
-.               { return *yytext; }
+. { return *yytext; }
 
 <<EOF>> {
- if(!cmDependsFortranParser_FilePop(yyextra))
-   {
-   return YY_NULL;
-   }
+  if(!cmDependsFortranParser_FilePop(yyextra) )
+    {
+    return YY_NULL;
+    }
 }
 
 %%
