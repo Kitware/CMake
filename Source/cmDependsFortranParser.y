@@ -44,6 +44,7 @@ Modify cmDependsFortranParser.cxx:
 #define cmDependsFortranParser_cxx
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
 #include "cmDependsFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
+#include "cmSystemTools.h"
 
 /* Configure the parser to use a lexer object.  */
 #define YYPARSE_PARAM yyscanner
@@ -60,6 +61,13 @@ static void cmDependsFortranError(yyscan_t yyscanner, const char* message)
 {
   cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
   cmDependsFortranParser_Error(parser, message);
+}
+
+static bool cmDependsFortranParserIsKeyword(const char* word,
+                                            const char* keyword)
+{
+  return (strlen(word) == strlen(keyword) &&
+          cmSystemTools::LowerCase(word) == keyword);
 }
 
 /* Disable some warnings in the generated code.  */
@@ -106,7 +114,7 @@ assignment_stmt: WORD ASSIGNMENT_OP other EOSTMT    /* Ignore */
 keyword_stmt:
   WORD EOSTMT
     {
-    if (strcasecmp($1, "interface") == 0)
+    if (cmDependsFortranParserIsKeyword($1, "interface"))
       {
       cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_SetInInterface(parser, true);
@@ -115,25 +123,26 @@ keyword_stmt:
     }
 | WORD WORD other EOSTMT
     {
-    if (strcasecmp($1, "use") == 0)
+    if (cmDependsFortranParserIsKeyword($1, "use"))
       {
       cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_RuleUse(parser, $2);
       free($2);
       }
-    else if (strcasecmp($1, "module") == 0)
+    else if (cmDependsFortranParserIsKeyword($1, "module"))
       {
       cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_RuleModule(parser, $2);
       free($2);
       }
-    else if (strcasecmp($1, "interface") == 0)
+    else if (cmDependsFortranParserIsKeyword($1, "interface"))
       {
       cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_SetInInterface(parser, true);
       free($2);
       }
-    else if (strcasecmp($2, "interface") == 0 && strcasecmp($1, "end") == 0)
+    else if (cmDependsFortranParserIsKeyword($2, "interface") &&
+             cmDependsFortranParserIsKeyword($1, "end"))
       {
       cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_SetInInterface(parser, false);
@@ -143,7 +152,7 @@ keyword_stmt:
     }
 | WORD STRING other EOSTMT
     {
-    if (strcasecmp($1, "include") == 0)
+    if (cmDependsFortranParserIsKeyword($1, "include"))
       {
       cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_RuleInclude(parser, $2);
