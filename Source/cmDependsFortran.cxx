@@ -154,6 +154,9 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
       // since we require some things add them to our list of requirements
       makeDepends << obj << ".requires: " << i->c_str() << ".mod.proxy"
          << std::endl;
+
+      // create an empty proxy in case no other source provides it
+      makeDepends << i->c_str() << ".mod.proxy:" << std::endl;
       }
     }
 
