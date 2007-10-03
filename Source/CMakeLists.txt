@@ -25,7 +25,7 @@ OPTION(CMAKE_REGENERATE_YACCLEX
   "Regenerate YACC and LEXX files" OFF)
 MARK_AS_ADVANCED(CMAKE_REGENERATE_YACCLEX)
 IF(CMAKE_REGENERATE_YACCLEX)
-  SET(parsersLexers cmCommandArgument cmExpr)
+  SET(parsersLexers cmDependsFortran cmCommandArgument cmExpr)
   FIND_PROGRAM(YACC_EXECUTABLE
     NAMES yacc bison
     PATHS /usr/bin
@@ -48,8 +48,10 @@ IF(CMAKE_REGENERATE_YACCLEX)
       ADD_CUSTOM_COMMAND(
         OUTPUT "${dst}"
         DEPENDS "${src}"
-        COMMAND ${YACC_EXECUTABLE}
-        ARGS --name-prefix=${name}_yy --defines="${hdr}" -o"${dst}" "${src}")
+        COMMAND
+        ${YACC_EXECUTABLE}
+        --name-prefix=${name}_yy --defines=${hdr} -o${dst} ${src}
+        )
       SET(yacc_files ${yacc_files} "${dst}")
     ENDFOREACH(name)
     ADD_CUSTOM_TARGET(RerunYacc DEPENDS ${yacc_files})
@@ -63,8 +65,10 @@ IF(CMAKE_REGENERATE_YACCLEX)
       ADD_CUSTOM_COMMAND(
         OUTPUT "${dst}"
         DEPENDS "${src}"
-        COMMAND ${FLEX_EXECUTABLE}
-        ARGS --prefix=${name}_yy --header-file="${hdr}" -o"${dst}" "${src}")
+        COMMAND
+        ${FLEX_EXECUTABLE}
+        --prefix=${name}_yy --header-file=${hdr} -o${dst} ${src}
+        )
       SET(lex_files ${lex_files} "${dst}")
     ENDFOREACH(name)
     ADD_CUSTOM_TARGET(RerunLex DEPENDS ${lex_files})
