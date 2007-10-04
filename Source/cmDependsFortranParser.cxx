@@ -183,7 +183,7 @@ Modify cmDependsFortranParser.cxx:
 #define cmDependsFortranParser_cxx
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
 #include "cmDependsFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
-#include "cmSystemTools.h"
+#include <ctype.h> // for tolower
 
 /* Configure the parser to use a lexer object.  */
 #define YYPARSE_PARAM yyscanner
@@ -205,8 +205,19 @@ static void cmDependsFortranError(yyscan_t yyscanner, const char* message)
 static bool cmDependsFortranParserIsKeyword(const char* word,
                                             const char* keyword)
 {
-  return (strlen(word) == strlen(keyword) &&
-          cmSystemTools::LowerCase(word) == keyword);
+  size_t len = strlen(word);
+  if (len != strlen(keyword))
+    {
+    return false;
+    }
+  for (size_t i = 0; i < len; ++i)
+    {
+    if (tolower(word[i]) != tolower(keyword[i]))
+      {
+      return false;
+      }
+    }
+  return true;
 }
 
 /* Disable some warnings in the generated code.  */
