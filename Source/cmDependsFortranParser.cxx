@@ -134,7 +134,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 1 "cmDependsFortranParser.y"
 
 /*=========================================================================
 
@@ -168,7 +168,9 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmDependsFortran_yy --defines=cmDependsFortranParserTokens.h -ocmDependsFortranParser.cxx cmDependsFortranParser.y
+  bison --yacc --name-prefix=cmDependsFortran_yy
+        --defines=cmDependsFortranParserTokens.h
+         -ocmDependsFortranParser.cxx cmDependsFortranParser.y
 
 Modify cmDependsFortranParser.cxx:
   - remove TABs
@@ -240,12 +242,12 @@ static bool cmDependsFortranParserIsKeyword(const char* word,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 88 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 88 "cmDependsFortranParser.y"
 {
   char* string;
 }
 /* Line 187 of yacc.c.  */
-#line 248 "/home/kingb/My Programs/CMake-gcc-4.0/Source/cmDependsFortranParser.cxx"
+#line 248 "cmDependsFortranParser.cxx"
         YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -258,7 +260,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 261 "/home/kingb/My Programs/CMake-gcc-4.0/Source/cmDependsFortranParser.cxx"
+#line 261 "cmDependsFortranParser.cxx"
 
 #ifdef short
 # undef short
@@ -1525,7 +1527,7 @@ yyreduce:
   switch (yyn)
     {
         case 7:
-#line 115 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 115 "cmDependsFortranParser.y"
     {
     if (cmDependsFortranParserIsKeyword((yyvsp[(1) - (2)].string), "interface"))
       {
@@ -1537,7 +1539,7 @@ yyreduce:
     break;
 
   case 8:
-#line 124 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 124 "cmDependsFortranParser.y"
     {
     if (cmDependsFortranParserIsKeyword((yyvsp[(1) - (4)].string), "use"))
       {
@@ -1569,7 +1571,7 @@ yyreduce:
     break;
 
   case 9:
-#line 153 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 153 "cmDependsFortranParser.y"
     {
     if (cmDependsFortranParserIsKeyword((yyvsp[(1) - (4)].string), "include"))
       {
@@ -1582,7 +1584,7 @@ yyreduce:
     break;
 
   case 11:
-#line 164 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 164 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleDefine(parser, (yyvsp[(2) - (4)].string));
@@ -1591,7 +1593,7 @@ yyreduce:
     break;
 
   case 12:
-#line 170 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 170 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleUndef(parser, (yyvsp[(2) - (4)].string));
@@ -1600,7 +1602,7 @@ yyreduce:
     break;
 
   case 13:
-#line 176 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 176 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleIfdef(parser, (yyvsp[(2) - (4)].string));
@@ -1609,7 +1611,7 @@ yyreduce:
     break;
 
   case 14:
-#line 182 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 182 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleIfndef(parser, (yyvsp[(2) - (4)].string));
@@ -1618,7 +1620,7 @@ yyreduce:
     break;
 
   case 15:
-#line 188 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 188 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleIf(parser);
@@ -1626,7 +1628,7 @@ yyreduce:
     break;
 
   case 16:
-#line 193 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 193 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleElif(parser);
@@ -1634,7 +1636,7 @@ yyreduce:
     break;
 
   case 17:
-#line 198 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 198 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleElse(parser);
@@ -1642,7 +1644,7 @@ yyreduce:
     break;
 
   case 18:
-#line 203 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 203 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleEndif(parser);
@@ -1650,18 +1652,18 @@ yyreduce:
     break;
 
   case 41:
-#line 227 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 227 "cmDependsFortranParser.y"
     { free ((yyvsp[(1) - (1)].string)); }
     break;
 
   case 42:
-#line 228 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 228 "cmDependsFortranParser.y"
     { free ((yyvsp[(1) - (1)].string)); }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1664 "/home/kingb/My Programs/CMake-gcc-4.0/Source/cmDependsFortranParser.cxx"
+#line 1664 "cmDependsFortranParser.cxx"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1875,7 +1877,7 @@ yyreturn:
 }
 
 
-#line 234 "/home/kingb/My Programs/CMake/Source/cmDependsFortranParser.y"
+#line 234 "cmDependsFortranParser.y"
 
 /* End of grammar */
 
