@@ -10,4 +10,6 @@
 "@CMAKE_SOURCE_DIR@/Source/CurseDialog/*.h*"
 "@CMAKE_SOURCE_DIR@/Source/CurseDialog/*.cxx"
 "@CMAKE_SOURCE_DIR@/Source/CurseDialog/*.txx"
+-f (Lexer\.h)
 -f (Lexer\.cxx)
+-f (Parser\.cxx)
