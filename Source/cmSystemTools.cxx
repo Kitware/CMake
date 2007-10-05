@@ -2049,7 +2049,7 @@ bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
     {
     return false;
     }
-  if(!SetFileTime(hFrom, &timeCreation, &timeLastAccess, &timeLastWrite))
+  if(!SetFileTime(hTo, &timeCreation, &timeLastAccess, &timeLastWrite))
     {
     return false;
     }
