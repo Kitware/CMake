@@ -31,13 +31,14 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmDependsFortran_yy --defines=cmDependsFortranParserTokens.h -ocmDependsFortranParser.cxx cmDependsFortranParser.y
+  bison --yacc --name-prefix=cmDependsFortran_yy
+        --defines=cmDependsFortranParserTokens.h
+         -ocmDependsFortranParser.cxx
+          cmDependsFortranParser.y
 
 Modify cmDependsFortranParser.cxx:
   - remove TABs
-  - add __HP_aCC to the #if test for yyerrorlab warning suppression
-  - add __INTEL_COMPILER to the #if test for yyerrorlab warning suppression
-
+  - Remove the yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 */
 
 /*-------------------------------------------------------------------------*/
@@ -127,6 +128,10 @@ static bool cmDependsFortranParserIsKeyword(const char* word,
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
 # pragma warning (disable: 4065) /* Switch contains default but no case. */
+# pragma warning (disable: 4701) /* Local variable may not be initialized.  */
+# pragma warning (disable: 4702) /* Unreachable code.  */
+# pragma warning (disable: 4127) /* Conditional expression is constant.  */
+# pragma warning (disable: 4244) /* Conversion to smaller type, data loss. */
 #endif
 %}
 
@@ -143,7 +148,8 @@ static bool cmDependsFortranParserIsKeyword(const char* word,
 %token CPP_INCLUDE F90PPR_INCLUDE COCO_INCLUDE
 %token F90PPR_DEFINE CPP_DEFINE F90PPR_UNDEF CPP_UNDEF
 %token CPP_IFDEF CPP_IFNDEF CPP_IF CPP_ELSE CPP_ELIF CPP_ENDIF
-%token F90PPR_IFDEF F90PPR_IFNDEF F90PPR_IF F90PPR_ELSE F90PPR_ELIF F90PPR_ENDIF
+%token F90PPR_IFDEF F90PPR_IFNDEF F90PPR_IF
+%token F90PPR_ELSE F90PPR_ELIF F90PPR_ENDIF
 %token <string> CPP_TOENDL
 %token <number> UNTERMINATED_STRING
 %token <string> STRING WORD
@@ -163,7 +169,8 @@ keyword_stmt:
     {
     if (cmDependsFortranParserIsKeyword($1, "interface"))
       {
-      cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
+      cmDependsFortranParser* parser =
+        cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_SetInInterface(parser, true);
       }
     free($1);
@@ -172,26 +179,30 @@ keyword_stmt:
     {
     if (cmDependsFortranParserIsKeyword($1, "use"))
       {
-      cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
+      cmDependsFortranParser* parser =
+        cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_RuleUse(parser, $2);
       free($2);
       }
     else if (cmDependsFortranParserIsKeyword($1, "module"))
       {
-      cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
+      cmDependsFortranParser* parser =
+        cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_RuleModule(parser, $2);
       free($2);
       }
     else if (cmDependsFortranParserIsKeyword($1, "interface"))
       {
-      cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
+      cmDependsFortranParser* parser =
+        cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_SetInInterface(parser, true);
       free($2);
       }
     else if (cmDependsFortranParserIsKeyword($2, "interface") &&
              cmDependsFortranParserIsKeyword($1, "end"))
       {
-      cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
+      cmDependsFortranParser* parser =
+        cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_SetInInterface(parser, false);
       free($2);
       }
@@ -201,7 +212,8 @@ keyword_stmt:
     {
     if (cmDependsFortranParserIsKeyword($1, "include"))
       {
-      cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
+      cmDependsFortranParser* parser =
+        cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_RuleInclude(parser, $2);
       }
     free($1);
