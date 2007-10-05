@@ -81,7 +81,7 @@ public:
       }
     }
   operator bool() const { return this->handle_ != INVALID_HANDLE_VALUE; }
-  operator !() const { return this->handle_ == INVALID_HANDLE_VALUE; }
+  bool operator !() const { return this->handle_ == INVALID_HANDLE_VALUE; }
   operator HANDLE() const { return this->handle_; }
 private:
   HANDLE handle_;
