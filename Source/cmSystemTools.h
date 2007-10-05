@@ -345,6 +345,11 @@ public:
   // if you want to be able to kill child processes and
   // not get stuck waiting for all the output on the pipes.
   static void DoNotInheritStdPipes();
+
+  /** Copy the file create/access/modify times from the file named by
+      the first argument to that named by the second.  */
+  static bool CopyFileTime(const char* fromFile, const char* toFile);
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

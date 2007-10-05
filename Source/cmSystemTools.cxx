@@ -32,6 +32,7 @@
 #endif
 
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__))
+# define CM_SYSTEM_TOOLS_WINDOWS
 #include <string.h>
 #include <windows.h>
 #include <direct.h>
@@ -41,6 +42,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <utime.h>
 #endif
 
 #include <sys/stat.h>
@@ -64,6 +66,26 @@ extern __declspec( dllimport ) char** environ;
 # else
 extern char** environ;
 # endif
+#endif
+
+#ifdef CM_SYSTEM_TOOLS_WINDOWS
+class cmSystemToolsWindowsHandle
+{
+public:
+  cmSystemToolsWindowsHandle(HANDLE h): handle_(h) {}
+  ~cmSystemToolsWindowsHandle()
+    {
+    if(this->handle_ != INVALID_HANDLE_VALUE)
+      {
+      CloseHandle(this->handle_);
+      }
+    }
+  operator bool() const { return this->handle_ != INVALID_HANDLE_VALUE; }
+  operator !() const { return this->handle_ == INVALID_HANDLE_VALUE; }
+  operator HANDLE() const { return this->handle_; }
+private:
+  HANDLE handle_;
+};
 #endif
 
 bool cmSystemTools::s_RunCommandHideConsole = false;
@@ -2005,4 +2027,46 @@ void cmSystemTools::DoNotInheritStdPipes()
   SetStdHandle(STD_ERROR_HANDLE, out);
   }
 #endif
+}
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  cmSystemToolsWindowsHandle hFrom =
+    CreateFile(fromFile, GENERIC_READ, FILE_SHARE_READ, 0,
+               OPEN_EXISTING, 0, 0);
+  cmSystemToolsWindowsHandle hTo =
+    CreateFile(toFile, GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+  if(!hFrom || !hTo)
+    {
+    return false;
+    }
+  FILETIME timeCreation;
+  FILETIME timeLastAccess;
+  FILETIME timeLastWrite;
+  if(!GetFileTime(hFrom, &timeCreation, &timeLastAccess, &timeLastWrite))
+    {
+    return false;
+    }
+  if(!SetFileTime(hFrom, &timeCreation, &timeLastAccess, &timeLastWrite))
+    {
+    return false;
+    }
+#else
+  struct stat fromStat;
+  if(stat(fromFile, &fromStat) < 0)
+    {
+    return false;
+    }
+
+  struct utimbuf buf;
+  buf.actime = fromStat.st_atime;
+  buf.modtime = fromStat.st_mtime;
+  if(utime(toFile, &buf) < 0)
+    {
+    return false;
+    }
+#endif
+  return true;
 }

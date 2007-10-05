@@ -17,9 +17,11 @@
 #include "cmFileCommand.h"
 #include "cmake.h"
 #include "cmHexFileConverter.h"
+#include "cmFileTimeComparison.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
@@ -716,6 +718,7 @@ struct cmFileInstaller
 private:
   cmFileCommand* FileCommand;
   cmMakefile* Makefile;
+  cmFileTimeComparison FileTimes;
 public:
 
   // The length of the destdir setting.
@@ -807,11 +810,6 @@ private:
 bool cmFileInstaller::InstallSymlink(const char* fromFile, const char* toFile,
                                      bool always)
 {
-  // Inform the user about this file installation.
-  std::string message = "Installing ";
-  message += toFile;
-  this->Makefile->DisplayStatus(message.c_str(), -1);
-
   // Read the original symlink.
   std::string symlinkTarget;
   if(!cmSystemTools::ReadSymlink(fromFile, symlinkTarget))
@@ -825,6 +823,7 @@ bool cmFileInstaller::InstallSymlink(const char* fromFile, const char* toFile,
 
   // Compare the symlink value to that at the destination if not
   // always installing.
+  bool copy = true;
   if(!always)
     {
     std::string oldSymlinkTarget;
@@ -832,22 +831,30 @@ bool cmFileInstaller::InstallSymlink(const char* fromFile, const char* toFile,
       {
       if(symlinkTarget == oldSymlinkTarget)
         {
-        return true;
+        copy = false;
         }
       }
     }
 
-  // Remove the destination file so we can always create the symlink.
-  cmSystemTools::RemoveFile(toFile);
+  // Inform the user about this file installation.
+  std::string message = (copy? "Installing: " : "Up-to-date: ");
+  message += toFile;
+  this->Makefile->DisplayStatus(message.c_str(), -1);
 
-  // Create the symlink.
-  if(!cmSystemTools::CreateSymlink(symlinkTarget.c_str(), toFile))
+  if(copy)
     {
-    cmOStringStream e;
-    e << "INSTALL cannot duplicate symlink \"" << fromFile
-      << "\" at \"" << toFile << "\".";
-    this->FileCommand->SetError(e.str().c_str());
-    return false;
+    // Remove the destination file so we can always create the symlink.
+    cmSystemTools::RemoveFile(toFile);
+
+    // Create the symlink.
+    if(!cmSystemTools::CreateSymlink(symlinkTarget.c_str(), toFile))
+      {
+      cmOStringStream e;
+      e << "INSTALL cannot duplicate symlink \"" << fromFile
+        << "\" at \"" << toFile << "\".";
+      this->FileCommand->SetError(e.str().c_str());
+      return false;
+      }
     }
 
   // Add the file to the manifest.
@@ -875,13 +882,27 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
     return this->InstallSymlink(fromFile, toFile, always);
     }
 
+  // Determine whether we will copy the file.
+  bool copy = true;
+  if(!always)
+    {
+    // If both files exist and "fromFile" is not newer than "toFile"
+    // do not copy.
+    int timeResult;
+    if(this->FileTimes.FileTimeCompare(fromFile, toFile, &timeResult) &&
+       timeResult <= 0)
+      {
+      copy = false;
+      }
+    }
+
   // Inform the user about this file installation.
-  std::string message = "Installing ";
+  std::string message = (copy? "Installing: " : "Up-to-date: ");
   message += toFile;
   this->Makefile->DisplayStatus(message.c_str(), -1);
 
   // Copy the file.
-  if(!cmSystemTools::CopyAFile(fromFile, toFile, always))
+  if(copy && !cmSystemTools::CopyAFile(fromFile, toFile, true))
     {
     cmOStringStream e;
     e << "INSTALL cannot copy file \"" << fromFile
@@ -892,6 +913,12 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
 
   // Add the file to the manifest.
   this->ManifestAppend(toFile);
+
+  // Set the file modification time of the destination file.
+  if(copy && !always)
+    {
+    cmSystemTools::CopyFileTime(fromFile, toFile);
+    }
 
   // Set permissions of the destination file.
   mode_t permissions = (match_properties.Permissions?
@@ -934,7 +961,7 @@ bool cmFileInstaller::InstallDirectory(const char* source,
     }
 
   // Inform the user about this directory installation.
-  std::string message = "Installing ";
+  std::string message = "Installing: ";
   message += destination;
   this->Makefile->DisplayStatus(message.c_str(), -1);
 
