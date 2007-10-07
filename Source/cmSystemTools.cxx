@@ -18,34 +18,25 @@
 #include <ctype.h>
 #include <errno.h>
 #include <time.h>
+#include <string.h>
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/System.h>
 
-// support for realpath call
-#ifndef _WIN32
-#include <limits.h>
-#include <stdlib.h>
-#include <sys/param.h>
-#include <sys/wait.h>
-#endif
-
-#if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__))
-# define CM_SYSTEM_TOOLS_WINDOWS
-#include <string.h>
-#include <windows.h>
-#include <direct.h>
-#include <io.h>
-#define _unlink unlink
+#if defined(_WIN32)
+# include <windows.h>
 #else
-#include <sys/types.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <utime.h>
+# include <sys/types.h>
+# include <unistd.h>
+# include <utime.h>
 #endif
 
 #include <sys/stat.h>
+
+#if defined(_WIN32) && (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__MINGW32__))
+# include <io.h>
+#endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include <libtar/libtar.h>
@@ -68,7 +59,7 @@ extern char** environ;
 # endif
 #endif
 
-#ifdef CM_SYSTEM_TOOLS_WINDOWS
+#ifdef _WIN32
 class cmSystemToolsWindowsHandle
 {
 public:
