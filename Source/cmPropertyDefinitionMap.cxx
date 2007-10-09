@@ -45,7 +45,7 @@ void cmPropertyDefinitionMap
       j != this->end(); ++j)
     {
     cmDocumentationEntry e = j->second.GetDocumentation();
-    if (e.brief)
+    if (e.brief.size())
       {
       v.push_back(e);
       }

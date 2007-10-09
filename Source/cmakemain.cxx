@@ -34,31 +34,31 @@
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
 {
-  {0,
-   "  cmake - Cross-Platform Makefile Generator.", 0},
-  {0,0,0}
+  {"",
+   "  cmake - Cross-Platform Makefile Generator.", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
-  {0,
+  {"",
    "  cmake [options] <path-to-source>\n"
-   "  cmake [options] <path-to-existing-build>", 0},
-  {0,0,0}
+   "  cmake [options] <path-to-existing-build>", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationDescription[] =
 {
-  {0,
+  {"",
    "The \"cmake\" executable is the CMake command-line interface.  It may "
    "be used to configure projects in scripts.  Project configuration "
    "settings "
    "may be specified on the command line with the -D option.  The -i option "
-   "will cause cmake to interactively prompt for such settings.", 0},
+   "will cause cmake to interactively prompt for such settings.", ""},
   CMAKE_STANDARD_INTRODUCTION,
-  {0,0,0}
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
@@ -162,25 +162,25 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML and plain text."},
-  {0,0,0}
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationSeeAlso[] =
 {
-  {0, "ccmake", 0},
-  {0, "ctest", 0},
-  {0, 0, 0}
+  {"", "ccmake", ""},
+  {"", "ctest", ""},
+  {"", "", ""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationNOTE[] =
 {
-  {0,
+  {"",
    "CMake no longer configures a project when run with no arguments.  "
    "In order to configure the project in the current directory, run\n"
-   "  cmake .", 0},
-  {0,0,0}
+   "  cmake .", ""},
+  {"","",""}
 };
 #endif
 

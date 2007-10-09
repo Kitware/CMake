@@ -25,35 +25,35 @@
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
 {
-  {0,
-   "  DumpDocumentation - Dump documentation for CMake.", 0},
-  {0,0,0}
+  {"",
+   "  DumpDocumentation - Dump documentation for CMake.", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
-  {0,
-   "  DumpDocumentation [filename]", 0},
-  {0,0,0}
+  {"",
+   "  DumpDocumentation [filename]", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationDescription[] =
 {
-  {0,
+  {"",
    "The \"DumpDocumentation\" executable is only available in the build "
-   "tree.  It is used for testing, coverage, and documentation.", 0},
+   "tree.  It is used for testing, coverage, and documentation.", ""},
   CMAKE_STANDARD_INTRODUCTION,
-  {0,0,0}
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationOptions[] =
 {
   {"--all-for-coverage", 
-   "Dump all documentation to stdout.  For testing.", 0},
-  {0,0,0}
+   "Dump all documentation to stdout.  For testing.", ""},
+  {"","",""}
 };
 
 

@@ -21,7 +21,7 @@
 #include <cmsys/Directory.hxx>
 
 
-const cmDocumentationEntry cmDocumentation::cmSection::EmptySection ={0,0,0};
+const cmDocumentationEntry cmDocumentation::cmSection::EmptySection ={"","",""};
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationStandardOptions[] =
@@ -43,165 +43,165 @@ static const cmDocumentationEntry cmDocumentationStandardOptions[] =
    "If a file is specified, the help is written into it."},
   {"--version [file]", "Show program name/version banner and exit.",
    "If a file is specified, the version is written into it."},
-  {0,0,0}
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmModulesDocumentationDescription[] =
 {
-  {0,
+  {"",
   "  CMake Modules - Modules coming with CMake, the Cross-Platform Makefile "
-  "Generator.", 0},
+  "Generator.", ""},
 //  CMAKE_DOCUMENTATION_OVERVIEW,
-  {0,
+  {"",
   "This is the documentation for the modules and scripts coming with CMake. "
   "Using these modules you can check the computer system for "
   "installed software packages, features of the compiler and the "
-  "existance of headers to name just a few.", 0},
-  {0,0,0}
+  "existance of headers to name just a few.", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmCustomModulesDocumentationDescription[] =
 {
-  {0,
-  "  Custom CMake Modules - Additional Modules for CMake.", 0},
+  {"",
+  "  Custom CMake Modules - Additional Modules for CMake.", ""},
 //  CMAKE_DOCUMENTATION_OVERVIEW,
-  {0,
+  {"",
   "This is the documentation for additional modules and scripts for CMake. "
   "Using these modules you can check the computer system for "
   "installed software packages, features of the compiler and the "
-  "existance of headers to name just a few.", 0},
-  {0,0,0}
+  "existance of headers to name just a few.", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmPropertiesDocumentationDescription[] =
 {
-  {0,
+  {"",
    "  CMake Properties - Properties supported by CMake, "
-   "the Cross-Platform Makefile Generator.", 0},
+   "the Cross-Platform Makefile Generator.", ""},
 //  CMAKE_DOCUMENTATION_OVERVIEW,
-  {0,
+  {"",
    "This is the documentation for the properties supported by CMake. "
    "Properties can have different scopes. They can either be assigned to a "
    "source file, a directory, a target or globally to CMake. By modifying the "
    "values of properties the behaviour of the buildsystem can be customized.",
-   0},
-  {0,0,0}
+   ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmCompatCommandsDocumentationDescription[] =
 {
-  {0,
+  {"",
    "  CMake Compatibility Listfile Commands - "
-   "Obsolete commands supported by CMake for compatibility.", 0},
+   "Obsolete commands supported by CMake for compatibility.", ""},
 //  CMAKE_DOCUMENTATION_OVERVIEW,
-  {0,
+  {"",
   "This is the documentation for now obsolete listfile commands from previous "
   "CMake versions, which are still supported for compatibility reasons. You "
-  "should instead use the newer, faster and shinier new commands. ;-)", 0},
-  {0,0,0}
+  "should instead use the newer, faster and shinier new commands. ;-)", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationCommandsHeader[] =
 {
-  {0,
-   "The following commands are available in CMakeLists.txt code:", 0},
-  {0,0,0}
+  {"",
+   "The following commands are available in CMakeLists.txt code:", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationGlobalPropertiesHeader[] =
 {
-  {0,
-   "The following global properties are available in CMakeLists.txt code:", 0},
-  {0,0,0}
+  {"",
+   "The following global properties are available in CMakeLists.txt code:", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationDirectoryPropertiesHeader[] =
 {
-  {0
+  {""
    ,"The following directory properties are available in CMakeLists.txt code:"
-   ,0},
-  {0,0,0}
+   ,""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationTargetPropertiesHeader[] =
 {
-  {0,
-   "The following target properties are available in CMakeLists.txt code:", 0},
-  {0,0,0}
+  {"",
+   "The following target properties are available in CMakeLists.txt code:", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationTestPropertiesHeader[] =
 {
-  {0
+  {""
    ,"The following properties for tests are available in CMakeLists.txt code:"
-   ,0},
-  {0,0,0}
+   ,""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationSourceFilePropertiesHeader[] =
 {
-  {0
+  {""
   ,"The following source file properties are available in CMakeLists.txt code:"
-  , 0},
-  {0,0,0}
+  , ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationVariablePropertiesHeader[] =
 {
-  {0, "The following variables are available in CMakeLists.txt code:", 0},
-  {0,0,0}
+  {"", "The following variables are available in CMakeLists.txt code:", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry 
                              cmDocumentationCachedVariablePropertiesHeader[] =
 {
-  {0,"The following cache variables are available in CMakeLists.txt code:", 0},
-  {0,0,0}
+  {"","The following cache variables are available in CMakeLists.txt code:", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationModulesHeader[] =
 {
-  {0,
+  {"",
    "The following modules are provided with CMake. "
-   "They can be used with INCLUDE(ModuleName).", 0},
-  {0,0,0}
+   "They can be used with INCLUDE(ModuleName).", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationCustomModulesHeader[] =
 {
-  {0,
+  {"",
    "The following modules are also available for CMake. "
-   "They can be used with INCLUDE(ModuleName).", 0},
-  {0,0,0}
+   "They can be used with INCLUDE(ModuleName).", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationGeneratorsHeader[] =
 {
-  {0,
-   "The following generators are available on this platform:", 0},
-  {0,0,0}
+  {"",
+   "The following generators are available on this platform:", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationStandardSeeAlso[] =
 {
-  {0,
-   "The following resources are available to get help using CMake:", 0},
+  {"",
+   "The following resources are available to get help using CMake:", ""},
   {"Home Page",
    "http://www.cmake.org",
    "The primary starting point for learning about CMake."},
@@ -218,51 +218,51 @@ static const cmDocumentationEntry cmDocumentationStandardSeeAlso[] =
    "The list is member-post-only but one may sign up on the CMake web page. "
    "Please first read the full documentation at "
    "http://www.cmake.org before posting questions to the list."},
-  {0,
+  {"",
    "Summary of helpful links:\n"
    "  Home: http://www.cmake.org\n"
    "  Docs: http://www.cmake.org/HTML/Documentation.html\n"
    "  Mail: http://www.cmake.org/HTML/MailingLists.html\n"
    "  FAQ:  http://www.cmake.org/Wiki/CMake_FAQ\n"
-   , 0},
-  {0,0,0}
+   , ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 const cmDocumentationEntry cmDocumentationAuthor[] =
 {
-  {0,
-   "This manual page was generated by the \"--help-man\" option.", 0},
-  {0,0,0}
+  {"",
+   "This manual page was generated by the \"--help-man\" option.", ""},
+  {"","",""}
 };
 
 //----------------------------------------------------------------------------
 const cmDocumentationEntry cmDocumentationCopyright[] =
 {
-  {0,
+  {"",
    "Copyright (c) 2002 Kitware, Inc., Insight Consortium.  "
-   "All rights reserved.", 0},
-  {0,
+   "All rights reserved.", ""},
+  {"",
    "Redistribution and use in source and binary forms, with or without "
    "modification, are permitted provided that the following conditions are "
-   "met:", 0},
+   "met:", ""},
   {"",
    "Redistributions of source code must retain the above copyright notice, "
-   "this list of conditions and the following disclaimer.", 0},
+   "this list of conditions and the following disclaimer.", ""},
   {"",
    "Redistributions in binary form must reproduce the above copyright "
    "notice, this list of conditions and the following disclaimer in the "
    "documentation and/or other materials provided with the distribution.",
-   0},
+   ""},
   {"",
    "The names of Kitware, Inc., the Insight Consortium, or the names of "
    "any consortium members, or of any contributors, may not be used to "
    "endorse or promote products derived from this software without "
-   "specific prior written permission.", 0},
+   "specific prior written permission.", ""},
   {"",
    "Modified source versions must be plainly marked as such, and must "
-   "not be misrepresented as being the original software.", 0},
-  {0,
+   "not be misrepresented as being the original software.", ""},
+  {"",
    "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "
    "``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT "
    "LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR "
@@ -273,8 +273,8 @@ const cmDocumentationEntry cmDocumentationCopyright[] =
    "PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF "
    "LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING "
    "NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS "
-   "SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.", 0},
-  {0, 0, 0}
+   "SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.", ""},
+  {"", "", ""}
 };
 
 //----------------------------------------------------------------------------
@@ -332,18 +332,18 @@ cmDocumentation::~cmDocumentation()
 bool cmDocumentation::PrintCopyright(std::ostream& os)
 {
   for(const cmDocumentationEntry* op = cmDocumentationCopyright;
-      op->brief; ++op)
+      op->brief.size(); ++op)
     {
-    if(op->name)
+    if(op->name.size())
       {
       os << " * ";
       this->TextFormatter.SetIndent("    ");
-      this->TextFormatter.PrintColumn(os, op->brief);
+      this->TextFormatter.PrintColumn(os, op->brief.c_str());
       }
     else
       {
       this->TextFormatter.SetIndent("");
-      this->TextFormatter.PrintColumn(os, op->brief);
+      this->TextFormatter.PrintColumn(os, op->brief.c_str());
       }
     os << "\n";
     }
@@ -441,7 +441,7 @@ bool cmDocumentation::CreateModulesSection()
     {
     this->ModulesSection.Append(cmDocumentationModulesHeader[0]);
     this->CreateModuleDocsForDir(dir, this->ModulesSection);
-    cmDocumentationEntry e = { 0, 0, 0 };
+    cmDocumentationEntry e = { "", "", "" };
     this->ModulesSection.Append(e);
     }
   return true;
@@ -475,7 +475,7 @@ bool cmDocumentation::CreateCustomModulesSection()
 
   if(sectionHasHeader)
     {
-    cmDocumentationEntry e = { 0, 0, 0 };
+    cmDocumentationEntry e = { "", "", "" };
     this->CustomModulesSection.Append(e);
     }
   return true;
@@ -927,20 +927,20 @@ void cmDocumentation::SetSeeAlsoList(const cmDocumentationEntry* also)
 {
   this->SeeAlsoSection.Clear();
   this->SeeAlsoString = ".B ";
-  for(const cmDocumentationEntry* i = also; i->brief; ++i)
+  for(const cmDocumentationEntry* i = also; i->brief.size(); ++i)
     {
     this->SeeAlsoString += i->brief;
-    this->SeeAlsoString += (i+1)->brief? "(1), ":"(1)";    
+    this->SeeAlsoString += (i+1)->brief.size() ? "(1), ":"(1)";    
     }
-  cmDocumentationEntry e = {0, 0, 0};
+  cmDocumentationEntry e = {"", "", ""};
   e.brief = this->SeeAlsoString.c_str();
   this->SeeAlsoSection.Append(e);
   for(const cmDocumentationEntry* i = cmDocumentationStandardSeeAlso;
-      i->brief; ++i)
+      i->brief.size(); ++i)
     {
     this->SeeAlsoSection.Append(*i);
     }
-  e.brief = 0;
+  e.brief = "";
   this->SeeAlsoSection.Append(e);
 }
 
@@ -958,9 +958,9 @@ bool cmDocumentation::PrintDocumentationSingle(std::ostream& os)
     return false;
     }
   for(const cmDocumentationEntry* entry = this->CommandsSection.GetEntries();
-      entry->brief; ++entry)
+      entry->brief.size(); ++entry)
     {
-    if(entry->name && this->CurrentArgument == entry->name)
+    if(entry->name.size() && this->CurrentArgument == entry->name)
       {
       this->PrintDocumentationCommand(os, entry);
       return true;
@@ -968,10 +968,10 @@ bool cmDocumentation::PrintDocumentationSingle(std::ostream& os)
     }
   for(const cmDocumentationEntry* 
       entry = this->CompatCommandsSection.GetEntries();
-      entry->brief; 
+      entry->brief.size(); 
       ++entry)
     {
-    if(entry->name && this->CurrentArgument == entry->name)
+    if(entry->name.size() && this->CurrentArgument == entry->name)
       {
       this->PrintDocumentationCommand(os, entry);
       return true;
@@ -1061,9 +1061,10 @@ bool cmDocumentation::PrintDocumentationSingleProperty(std::ostream& os)
       ++sectionIt)
     {
     for(const cmDocumentationEntry* 
-        entry = sectionIt->second->GetEntries(); entry->brief; ++entry)
+        entry = sectionIt->second->GetEntries(); entry->brief.size(); 
+        ++entry)
       {
-      if(entry->name && this->CurrentArgument == entry->name)
+      if(entry->name.size() && this->CurrentArgument == entry->name)
         {
         this->PrintDocumentationCommand(os, entry);
         return true;
@@ -1086,9 +1087,9 @@ bool cmDocumentation::PrintDocumentationList(std::ostream& os)
     return false;
     }
   for(const cmDocumentationEntry* entry = this->CommandsSection.GetEntries();
-      entry->brief; ++entry)
+      entry->brief.size(); ++entry)
     {
-    if(entry->name)
+    if(entry->name.size())
       {
       os << entry->name << std::endl;
       }
@@ -1096,10 +1097,10 @@ bool cmDocumentation::PrintDocumentationList(std::ostream& os)
   os << "\nCompatibility commands:" << std::endl;
   for(const cmDocumentationEntry* 
       entry = this->CompatCommandsSection.GetEntries();
-      entry->brief; 
+      entry->brief.size(); 
       ++entry)
     {
-    if(entry->name)
+    if(entry->name.size())
       {
       os << entry->name << std::endl;
       }
@@ -1117,10 +1118,10 @@ bool cmDocumentation::PrintPropertyList(std::ostream& os)
     }
   for(const cmDocumentationEntry* 
       entry = this->GlobalPropertiesSection.GetEntries();
-      entry->brief; 
+      entry->brief.size(); 
       ++entry)
     {
-    if(entry->name)
+    if(entry->name.size())
       {
       os << entry->name << std::endl;
       }
@@ -1132,9 +1133,10 @@ bool cmDocumentation::PrintPropertyList(std::ostream& os)
       ++sectionIt)
     {
     for(const cmDocumentationEntry* 
-        entry = sectionIt->second->GetEntries(); entry->brief; ++entry)
+        entry = sectionIt->second->GetEntries(); 
+        entry->brief.size(); ++entry)
       {
-      if(entry->name)
+      if(entry->name.size())
         {
         os << entry->name << std::endl;
         }
@@ -1155,9 +1157,9 @@ bool cmDocumentation::PrintModuleList(std::ostream& os)
     return false;
     }
   for(const cmDocumentationEntry* entry = this->ModulesSection.GetEntries();
-      entry->brief; ++entry)
+      entry->brief.size(); ++entry)
     {
-    if(entry->name)
+    if(entry->name.size())
       {
       os << entry->name << std::endl;
       }
@@ -1167,9 +1169,10 @@ bool cmDocumentation::PrintModuleList(std::ostream& os)
     {
     os << "\nCUSTOM MODULES\n" << std::endl;
     for(const cmDocumentationEntry* 
-        entry = this->CustomModulesSection.GetEntries(); entry->brief; ++entry)
+        entry = this->CustomModulesSection.GetEntries(); 
+        entry->brief.size(); ++entry)
       {
-      if(entry->name)
+      if(entry->name.size())
         {
         os << entry->name << std::endl;
         }
@@ -1253,7 +1256,7 @@ void cmDocumentation::PrintDocumentationCommand(std::ostream& os,
   cmDocumentationEntry singleCommandSection[3] =
     {
       {entry->name, entry->brief, entry->full},
-      {0,0,0}
+      {"","",""}
     };
   this->ClearSections();
   this->AddSection(0, &singleCommandSection[0]);
@@ -1407,26 +1410,26 @@ void cmDocumentation::cmSection::Set(const cmDocumentationEntry* header,
   this->Entries.erase(this->Entries.begin(), this->Entries.end());
   if(header)
     {
-    for(const cmDocumentationEntry* op = header; op->brief; ++op)
+    for(const cmDocumentationEntry* op = header; op->brief.size(); ++op)
       {
       this->Entries.push_back(*op);
       }
     }
   if(section)
     {
-    for(const cmDocumentationEntry* op = section; op->brief; ++op)
+    for(const cmDocumentationEntry* op = section; op->brief.size(); ++op)
       {
       this->Entries.push_back(*op);
       }
     }
   if(footer)
     {
-    for(const cmDocumentationEntry* op = footer; op->brief; ++op)
+    for(const cmDocumentationEntry* op = footer; op->brief.size(); ++op)
       {
       this->Entries.push_back(*op);
       }
     }
-  cmDocumentationEntry empty = {0,0,0};
+  cmDocumentationEntry empty = {"","",""};
   this->Entries.push_back(empty);
 }
 

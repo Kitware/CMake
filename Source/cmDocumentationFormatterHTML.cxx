@@ -33,13 +33,13 @@ static void cmDocumentationPrintHTMLChar(std::ostream& os, char c)
   // Use an escape sequence if necessary.
   static cmDocumentationEntry escapes[] =
   {
-    {"<", "&lt;", 0},
-    {">", "&gt;", 0},
-    {"&", "&amp;", 0},
-    {"\n", "<br>", 0},
-    {0,0,0}
+    {"<", "&lt;", ""},
+    {">", "&gt;", ""},
+    {"&", "&amp;", ""},
+    {"\n", "<br>", ""},
+    {"","",""}
   };
-  for(const cmDocumentationEntry* op = escapes; op->name; ++op)
+  for(const cmDocumentationEntry* op = escapes; op->name.size(); ++op)
     {
     if(op->name[0] == c)
       {
@@ -97,25 +97,25 @@ void cmDocumentationFormatterHTML::PrintSection(std::ostream& os,
     os << "<h2>" << name << "</h2>\n";
     }
   if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief;)
+  for(const cmDocumentationEntry* op = section; op->brief.size();)
     {
-    if(op->name)
+    if(op->name.size())
       {
       os << "<ul>\n";
-      for(;op->name;++op)
+      for(;op->name.size();++op)
         {
         os << "  <li>\n";
         if(op->name[0])
           {
           os << "    <b><code>";
-          this->PrintHTMLEscapes(os, op->name);
+          this->PrintHTMLEscapes(os, op->name.c_str());
           os << "</code></b>: ";
           }
-        this->PrintHTMLEscapes(os, op->brief);
-        if(op->full)
+        this->PrintHTMLEscapes(os, op->brief.c_str());
+        if(op->full.size())
           {
           os << "<br>\n    ";
-          this->PrintFormatted(os, op->full);
+          this->PrintFormatted(os, op->full.c_str());
           }
         os << "\n";
         os << "  </li>\n";
@@ -124,7 +124,7 @@ void cmDocumentationFormatterHTML::PrintSection(std::ostream& os,
       }
     else
       {
-      this->PrintFormatted(os, op->brief);
+      this->PrintFormatted(os, op->brief.c_str());
       os << "\n";
       ++op;
       }
