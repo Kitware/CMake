@@ -12,31 +12,31 @@
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
 {
-  {"",
-   "  CMakeSetup - CMake Windows GUI.", ""},
-  {"","",""}
+  {0,
+   "  CMakeSetup - CMake Windows GUI.", 0},
+  {0,0,0}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
-  {"",
+  {0,
    "  CMakeSetup [options]\n"
    "  CMakeSetup [options] <path-to-source>\n"
-   "  CMakeSetup [options] <path-to-existing-build>", ""},
-  {"","",""}
+   "  CMakeSetup [options] <path-to-existing-build>", 0},
+  {0,0,0}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationDescription[] =
 {
-  {"",
+  {0,
    "The \"CMakeSetup\" executable is the CMake Windows GUI.  Project "
    "configuration settings may be specified interactively.  "
    "Brief instructions are provided at the bottom of the "
-   "window when the program is running.", ""},
+   "window when the program is running.", 0},
   CMAKE_STANDARD_INTRODUCTION,
-  {"","",""}
+  {0,0,0}
 };
 
 //----------------------------------------------------------------------------
@@ -47,7 +47,7 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "advanced.  Most users will not need to change the advanced options.  "
    "The CMakeSetup GUI contains a checkbox to enable/disable display of "
    "advanced options.  This command line flag changes its default setting."},
-  {"","",""}
+  {0,0,0}
 };
 
 #ifdef _DEBUG

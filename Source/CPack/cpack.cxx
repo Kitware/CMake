@@ -33,30 +33,30 @@
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
 {
-  {"",
-   "  cpack - Packaging driver provided by CMake.", ""},
-  {"","",""}
+  {0,
+   "  cpack - Packaging driver provided by CMake.", 0},
+  {0,0,0}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
-  {"",
+  {0,
    "  cpack -G <generator> [options]",
-   ""},
-  {"","",""}
+   0},
+  {0,0,0}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationDescription[] =
 {
-  {"",
+  {0,
    "The \"cpack\" executable is the CMake packaging program.  "
    "CMake-generated build trees created for projects that use "
    "the INSTALL_* commands have packaging support.  "
-   "This program will generate the package.", ""},
+   "This program will generate the package.", 0},
   CMAKE_STANDARD_INTRODUCTION,
-  {"","",""}
+  {0,0,0}
 };
 
 //----------------------------------------------------------------------------
@@ -75,15 +75,15 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
     {"--config <config file>", "Specify the config file.",
     "Specify the config file to use to create the package. By default "
       "CPackConfig.cmake in the current directory will be used." },
-    {"","",""}
+    {0,0,0}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationSeeAlso[] =
 {
-    {"", "cmake", ""},
-    {"", "ccmake", ""},
-    {"", "", ""}
+    {0, "cmake", 0},
+    {0, "ccmake", 0},
+    {0, 0, 0}
 };
 
 //----------------------------------------------------------------------------
@@ -464,7 +464,7 @@ int main (int argc, char *argv[])
       e.full = "";
       v.push_back(e);
       }
-    cmDocumentationEntry empty = {"","",""};
+    cmDocumentationEntry empty = {0,0,0};
     v.push_back(empty);
     doc.SetGeneratorsSection(&v[0]);
 

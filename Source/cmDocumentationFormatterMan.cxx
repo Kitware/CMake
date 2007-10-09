@@ -35,19 +35,19 @@ void cmDocumentationFormatterMan::PrintSection(std::ostream& os,
     os << ".SH " << name << "\n";
     }
   if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief.size(); ++op)
+  for(const cmDocumentationEntry* op = section; op->brief; ++op)
     {
-    if(op->name.size())
+    if(op->name)
       {
       os << ".TP\n"
          << ".B " << (op->name[0]?op->name:"*") << "\n";
-      this->PrintFormatted(os, op->brief.c_str());
-      this->PrintFormatted(os, op->full.c_str());
+      this->PrintFormatted(os, op->brief);
+      this->PrintFormatted(os, op->full);
       }
     else
       {
       os << ".PP\n";
-      this->PrintFormatted(os, op->brief.c_str());
+      this->PrintFormatted(os, op->brief);
       }
     }
 }

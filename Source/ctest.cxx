@@ -25,28 +25,28 @@
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
 {
-  {"",
-   "  ctest - Testing driver provided by CMake.", ""},
-  {"","",""}
+  {0,
+   "  ctest - Testing driver provided by CMake.", 0},
+  {0,0,0}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
-  {"",
-   "  ctest [options]", ""},
-  {"","",""}
+  {0,
+   "  ctest [options]", 0},
+  {0,0,0}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationDescription[] =
 {
-  {"",
+  {0,
    "The \"ctest\" executable is the CMake test driver program.  "
    "CMake-generated build trees created for projects that use "
    "the ENABLE_TESTING and ADD_TEST commands have testing support.  "
-   "This program will run the tests and report results.", ""},
-  {"","",""}
+   "This program will run the tests and report results.", 0},
+  {0,0,0}
 };
 
 //----------------------------------------------------------------------------
@@ -194,15 +194,15 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "This option allows performing the same CTest action (such as test) "
    "multiple times and submit all stages to the same dashboard (Dart2 "
    "required). Each execution requires different index." },
-  {"","",""}
+  {0,0,0}
 };
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationSeeAlso[] =
 {
-  {"", "cmake", ""},
-  {"", "ccmake", ""},
-  {"", "", ""}
+  {0, "cmake", 0},
+  {0, "ccmake", 0},
+  {0, 0, 0}
 };
 
 // this is a test driver program for cmCTest.

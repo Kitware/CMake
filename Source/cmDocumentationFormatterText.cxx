@@ -36,26 +36,26 @@ void cmDocumentationFormatterText::PrintSection(std::ostream& os,
     os << name << "\n\n";
     }
   if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief.size(); ++op)
+  for(const cmDocumentationEntry* op = section; op->brief; ++op)
     {
-    if(op->name.size())
+    if(op->name)
       {
       if(op->name[0])
         {
         os << "  " << op->name << "\n";
         }
       this->TextIndent = "       ";
-      this->PrintFormatted(os, op->brief.c_str());
-      if(op->full.size())
+      this->PrintFormatted(os, op->brief);
+      if(op->full)
         {
         os << "\n";
-        this->PrintFormatted(os, op->full.c_str());
+        this->PrintFormatted(os, op->full);
         }
       }
     else
       {
       this->TextIndent = "";
-      this->PrintFormatted(os, op->brief.c_str());
+      this->PrintFormatted(os, op->brief);
       }
     os << "\n";
     }

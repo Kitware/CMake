@@ -2262,7 +2262,7 @@ void cmake::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v,
       };
     v.push_back(e);
     }
-  cmDocumentationEntry empty = {"","",""};
+  cmDocumentationEntry empty = {0,0,0};
   v.push_back(empty);
 }
 
@@ -2271,7 +2271,7 @@ void cmake::GetPropertiesDocumentation(std::vector<cmDocumentationEntry>& v,
 {
   // get the properties for cmake
   this->PropertyDefinitions[type].GetPropertiesDocumentation(v);
-  cmDocumentationEntry empty = {"","",""};
+  cmDocumentationEntry empty = {0,0,0};
   v.push_back(empty);
 }
 
@@ -2296,7 +2296,7 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
     delete generator;
     v.push_back(e);
     }
-  cmDocumentationEntry empty = {"","",""};
+  cmDocumentationEntry empty = {0,0,0};
   v.push_back(empty);
 }
 

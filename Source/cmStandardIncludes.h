@@ -316,9 +316,9 @@ extern void operator << (std::ostream&, const cmOStringStream&);
 /** Standard documentation entry for cmDocumentation's formatting.  */
 struct cmDocumentationEntry
 {
-  std::string name;
-  std::string brief;
-  std::string full;
+  const char* name;
+  const char* brief;
+  const char* full;
 };
 
 /** Data structure to represent a single command line.  */

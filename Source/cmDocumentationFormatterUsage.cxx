@@ -31,31 +31,31 @@ void cmDocumentationFormatterUsage::PrintSection(std::ostream& os,
     os << name << "\n";
     }
   if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief.size(); ++op)
+  for(const cmDocumentationEntry* op = section; op->brief; ++op)
     {
-    if(op->name.size())
+    if(op->name)
       {
       os << "  " << op->name;
       this->TextIndent = "                                ";
       int align = static_cast<int>(strlen(this->TextIndent))-4;
-      for(int i = static_cast<int>(op->name.size()); i < align; ++i)
+      for(int i = static_cast<int>(strlen(op->name)); i < align; ++i)
         {
         os << " ";
         }
-      if ( op->name.size() > strlen(this->TextIndent)-4 )
+      if ( strlen(op->name) > strlen(this->TextIndent)-4 )
         {
         os << "\n";
         os.write(this->TextIndent, strlen(this->TextIndent)-2);
         }
       os << "= ";
-      this->PrintColumn(os, op->brief.c_str());
+      this->PrintColumn(os, op->brief);
       os << "\n";
       }
     else
       {
       os << "\n";
       this->TextIndent = "";
-      this->PrintFormatted(os, op->brief.c_str());
+      this->PrintFormatted(os, op->brief);
       }
     }
   os << "\n";

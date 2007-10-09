@@ -22,8 +22,8 @@ cmDocumentationEntry cmPropertyDefinition::GetDocumentation() const
   cmDocumentationEntry e;
   e.name = this->Name.c_str();
   e.brief = 
-    this->ShortDescription.size() ? this->ShortDescription.c_str() : "";
-  e.full = this->FullDescription.size() ? this->FullDescription.c_str() : "";
+    this->ShortDescription.size() ? this->ShortDescription.c_str() : 0;
+  e.full = this->FullDescription.size() ? this->FullDescription.c_str() : 0;
   return e;
 }
 
