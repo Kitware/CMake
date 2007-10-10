@@ -466,28 +466,29 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
     // if it is a full path to an item then separate it from the path
     // this only works with files and paths
     cmStdString& item = this->RawLinkItems[i];
+
     if(cmSystemTools::FileIsFullPath(item.c_str()))
       {
+      if(cmSystemTools::IsPathToFramework(item.c_str()))
+        {
+        this->SplitFramework.find(item.c_str());
+        cmStdString path = this->SplitFramework.match(1);
+        // Add the -F path if we have not yet done so
+        if(this->EmittedFrameworkPaths.insert(path).second)
+          {
+          std::string fpath = "-F";
+          fpath += cmSystemTools::ConvertToOutputPath(path.c_str());
+          this->LinkItems.push_back(fpath);
+          }
+        // now add the -framework option
+        std::string frame = "-framework ";
+        frame += this->SplitFramework.match(2);
+        this->LinkItems.push_back(frame);
+        framework = true;
+        }
       if(cmSystemTools::FileIsDirectory(item.c_str()))
         {
-        if(cmSystemTools::IsPathToFramework(item.c_str()))
-          {
-          this->SplitFramework.find(item.c_str());
-          cmStdString path = this->SplitFramework.match(1);
-          // Add the -F path if we have not yet done so
-          if(this->EmittedFrameworkPaths.insert(path).second)
-            {
-            std::string fpath = "-F";
-            fpath += cmSystemTools::ConvertToOutputPath(path.c_str());
-            this->LinkItems.push_back(fpath);
-            }
-          // now add the -framework option
-          std::string frame = "-framework ";
-          frame += this->SplitFramework.match(2);
-          this->LinkItems.push_back(frame);
-          framework = true;
-          }
-        else
+        if(!framework)
           {
           // A full path to a directory was found as a link item
           // warn user 

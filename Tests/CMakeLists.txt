@@ -45,7 +45,6 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(LoadCommand LoadedCommand)
   ADD_TEST_MACRO(LinkLine LinkLine)
   ADD_TEST_MACRO(MacroTest miniMacroTest)
-  ADD_TEST_MACRO(Framework bar)
   ADD_TEST_MACRO(Properties Properties)
   ADD_TEST_MACRO(Assembler HelloAsm)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
@@ -64,8 +63,20 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     ENDIF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
   ENDIF(CMAKE_BUILD_NIGHTLY_WINDOWS_TEST)
 
-  
+
   # add tests with more complex invocations
+  ADD_TEST(Framework ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/Framework"
+    "${CMake_BINARY_DIR}/Tests/Framework"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-project Framework
+    --build-options
+    "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/Framework/Install"
+    --test-command bar)
+
   ADD_TEST(TargetName ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TargetName"

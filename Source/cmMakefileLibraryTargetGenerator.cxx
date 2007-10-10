@@ -252,16 +252,12 @@ void cmMakefileLibraryTargetGenerator::CreateFrameworkLinksAndDirs(
   symlink2 = "Resources";
   cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
   this->Makefile->AddCMakeOutputFile((outpath + "Resources").c_str());
-  // Libraries -> Versions/Current/Libraries
-  //symlink = "Versions/Current/Libraries";
-  //symlink2 = "Libraries";
-  //cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
-  //this->Makefile->AddCMakeOutputFile((outpath + "Libraries").c_str());
   // Headers -> Versions/Current/Headers
   symlink = "Versions/Current/Headers";
   symlink2 = "Headers";
   cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
   this->Makefile->AddCMakeOutputFile((outpath + "Headers").c_str());
+  // PrivateHeaders -> Versions/Current/PrivateHeaders
   symlink = "Versions/Current/PrivateHeaders";
   symlink2 = "PrivateHeaders";
   cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
@@ -278,11 +274,13 @@ void cmMakefileLibraryTargetGenerator::CopyFrameworkSources(
   const char* propertyName,
   const char* subdir)
 {
-  std::string fullOutput=  outpath + targetName;
+  std::string fullOutput = outpath + targetName;
   cmCustomCommandLines commandLines;
   std::vector<std::string> depends;
   const std::vector<cmSourceFile*>& sources =
     this->Target->GetSourceFiles();
+
+  std::string propName(propertyName);
 
   for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
       i != sources.end(); ++i)
@@ -296,16 +294,20 @@ void cmMakefileLibraryTargetGenerator::CopyFrameworkSources(
       continue;
       }
 
+    cmTarget::SourceFileFlags tsFlags =
+      this->Target->GetTargetSourceFileFlags(sf);
+
     // If processing public headers, skip headers also marked with the private
     // property. Private wins.
     //
-    if((std::string(propertyName) == "FRAMEWORK_PUBLIC_HEADER") &&
-      sf->GetPropertyAsBool("FRAMEWORK_PRIVATE_HEADER"))
+    if(tsFlags.PrivateHeader && (propName == "PUBLIC_HEADER"))
       {
       continue;
       }
 
-    if(sf->GetPropertyAsBool(propertyName))
+    if(tsFlags.PrivateHeader && (propName == "PRIVATE_HEADER") ||
+      tsFlags.PublicHeader && (propName == "PUBLIC_HEADER") ||
+      tsFlags.Resource && (propName == "RESOURCE"))
       {
       cmCustomCommandLine line;
       std::string dest = outpath + subdir + "/";
@@ -318,8 +320,7 @@ void cmMakefileLibraryTargetGenerator::CopyFrameworkSources(
       line.push_back(dest);
       commandLines.push_back(line);
       // make sure the target gets rebuilt if any of the headers is removed
-      this->GenerateExtraOutput(dest.c_str(),
-                                fullOutput.c_str());
+      this->GenerateExtraOutput(dest.c_str(), fullOutput.c_str());
       }
     }
 
@@ -345,12 +346,11 @@ void cmMakefileLibraryTargetGenerator::CreateFramework(
   const char* version = this->Target->GetProperty("FRAMEWORK_VERSION");
   if(!version)
     {
+    version = this->Target->GetProperty("VERSION");
+    }
+  if(!version)
+    {
     version = "A";
-    //std::string message = 
-    //  "Warning: FRAMEWORK_VERSION property not found on ";
-    //message += targetName;
-    //message += ".  Default to version A.";
-    //cmSystemTools::Message(message.c_str());
     }
   // create the symbolic links and directories
   this->CreateFrameworkLinksAndDirs(targetName,
@@ -383,13 +383,13 @@ void cmMakefileLibraryTargetGenerator::CreateFramework(
                                 false, false, false);
 
   this->CopyFrameworkSources(targetName, outpath, version,
-    "FRAMEWORK_PRIVATE_HEADER", "PrivateHeaders");
+    "PRIVATE_HEADER", "PrivateHeaders");
 
   this->CopyFrameworkSources(targetName, outpath, version,
-    "FRAMEWORK_PUBLIC_HEADER", "Headers");
+    "PUBLIC_HEADER", "Headers");
 
   this->CopyFrameworkSources(targetName, outpath, version,
-    "FRAMEWORK_RESOURCE", "Resources");
+    "RESOURCE", "Resources");
 }
 
 //----------------------------------------------------------------------------

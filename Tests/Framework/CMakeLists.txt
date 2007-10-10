@@ -10,26 +10,34 @@ add_library(foo SHARED
   fooBoth.h
   test.lua
 )
+
+set(foo_ver ver4)
+
 set_target_properties(foo PROPERTIES
   FRAMEWORK TRUE
-  FRAMEWORK_VERSION ver3
+  FRAMEWORK_VERSION ${foo_ver}
+  PRIVATE_HEADER "fooPrivate.h;fooBoth.h"
+  PUBLIC_HEADER "foo.h;foo2.h;fooPublic.h;fooBoth.h"
+  RESOURCE "test.lua"
 )
-# fooNeither.h is marked neither public nor private...
-# fooBoth.h is marked both public and private... (private wins...)
-set_source_files_properties(foo.h foo2.h fooPublic.h fooBoth.h PROPERTIES
-  FRAMEWORK_PUBLIC_HEADER TRUE
-)
-set_source_files_properties(fooPrivate.h fooBoth.h PROPERTIES
-  FRAMEWORK_PRIVATE_HEADER TRUE
-)
-set_source_files_properties(test.lua PROPERTIES
-  FRAMEWORK_RESOURCE TRUE
-)
+# fooBoth.h is listed as both public and private... (private wins...)
+# fooNeither.h is listed as neither public nor private...
+
 add_executable(bar bar.cxx)
 target_link_libraries(bar foo)
 install(TARGETS foo bar
-  RUNTIME DESTINATION /Applications/CMakeTestsFramework/bin
-  FRAMEWORK DESTINATION /Library/Frameworks
+  RUNTIME DESTINATION Applications/CMakeTestsFramework/bin
+  FRAMEWORK DESTINATION Library/Frameworks
+
+  # These are ignored on the Mac... and things are automatically placed in
+  # their appropriate Framework sub-folder at build time. (And then the built
+  # framework is copied recursively when it is installed.)
+  PRIVATE_HEADER DESTINATION share/foo-${foo_ver}/PrivateHeaders
+  PUBLIC_HEADER DESTINATION include/foo-${foo_ver}
+  RESOURCE DESTINATION share/foo-${foo_ver}/Resources
+  # But they are required to be present so that installing a framework on other
+  # other platforms will install the pieces of the framework without having to
+  # duplicate install rules for the pieces of the framework.
 )
 
 # Make a static library and apply the framework properties to it to verify
@@ -53,3 +61,5 @@ set_target_properties(fooStatic PROPERTIES
 )
 add_executable(barStatic bar.cxx)
 target_link_libraries(barStatic fooStatic)
+
+include(CPack)

@@ -1170,7 +1170,7 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags()
   // will already have added a -F for the framework
   for(i = includes.begin(); i != includes.end(); ++i)
     {
-    if(cmSystemTools::IsPathToFramework(i->c_str()))
+    if(this->Target->NameResolvesToFramework(i->c_str()))
       {
       std::string frameworkDir = *i;
       frameworkDir += "/../";

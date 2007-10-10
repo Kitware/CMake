@@ -187,6 +187,10 @@ public:
                        const char* name, 
                        bool useImportedTargets);
 
+  /** Determine if a name resolves to a framework on disk or a built target
+      that is a framework. */
+  bool NameResolvesToFramework(const std::string& libname);
+
   /** If check to see if the target is linked to by any other
       target in the project */
   bool IsDependedOn(const char* project, cmTarget* target);

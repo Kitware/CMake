@@ -688,6 +688,83 @@ cmSourceFile* cmTarget::AddSource(const char* s)
 }
 
 //----------------------------------------------------------------------------
+struct cmTarget::SourceFileFlags
+cmTarget::GetTargetSourceFileFlags(const cmSourceFile* sf)
+{
+  struct SourceFileFlags flags;
+  const char* files;
+  std::vector<std::string>::iterator it;
+
+  flags.PrivateHeader = false;
+  flags.PublicHeader = false;
+  flags.Resource = false;
+
+  files = this->GetProperty("PRIVATE_HEADER");
+  if ((files) && (*files))
+    {
+    std::vector<std::string> relFiles;
+    cmSystemTools::ExpandListArgument(files, relFiles);
+    for(it = relFiles.begin(); it != relFiles.end(); ++it)
+      {
+      if(sf == this->GetMakefile()->GetSource(it->c_str()))
+        {
+        flags.PrivateHeader = true;
+        break;
+        }
+      }
+    }
+
+  // Only consider marking it as a public header if it is *NOT* already marked
+  // as a private header:
+  //
+  if(!flags.PrivateHeader)
+    {
+    files = this->GetProperty("PUBLIC_HEADER");
+    if ((files) && (*files))
+      {
+      std::vector<std::string> relFiles;
+      cmSystemTools::ExpandListArgument(files, relFiles);
+      for(it = relFiles.begin(); it != relFiles.end(); ++it)
+        {
+        if(sf == this->GetMakefile()->GetSource(it->c_str()))
+          {
+          flags.PublicHeader = true;
+          break;
+          }
+        }
+      }
+    }
+
+  const char* location = sf->GetProperty("MACOSX_PACKAGE_LOCATION");
+  if(location && cmStdString(location) == "Resources")
+    {
+    flags.Resource = true;
+    }
+
+  // Don't bother with the loop if it's already marked as a resource:
+  //
+  if(!flags.Resource)
+    {
+    files = this->GetProperty("RESOURCE");
+    if ((files) && (*files))
+      {
+      std::vector<std::string> relFiles;
+      cmSystemTools::ExpandListArgument(files, relFiles);
+      for(it = relFiles.begin(); it != relFiles.end(); ++it)
+        {
+        if(sf == this->GetMakefile()->GetSource(it->c_str()))
+          {
+          flags.Resource = true;
+          break;
+          }
+        }
+      }
+    }
+
+  return flags;
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::MergeLinkLibraries( cmMakefile& mf,
                                    const char *selfname,
                                    const LinkLibraryVectorType& libs )
@@ -816,10 +893,17 @@ void cmTarget::AddLinkLibrary(const std::string& lib,
 }
 
 //----------------------------------------------------------------------------
+bool cmTarget::NameResolvesToFramework(const std::string& libname)
+{
+  return this->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->
+    NameResolvesToFramework(libname);
+}
+
+//----------------------------------------------------------------------------
 bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
 {
   (void)llt; // TODO: What is this?
-  if(cmSystemTools::IsPathToFramework(libname.c_str()))
+  if(this->NameResolvesToFramework(libname.c_str()))
     {
     std::string frameworkDir = libname;
     frameworkDir += "/../";
@@ -1239,7 +1323,8 @@ const char* cmTarget::NormalGetDirectory(const char* config, bool implib)
 {
   if(config && *config)
     {
-    this->Directory = this->GetOutputDir(implib);
+    // Do not create the directory when config is given:
+    this->Directory = this->GetAndCreateOutputDir(implib, false);
     // Add the configuration's subdirectory.
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", config, "", this->Directory);
@@ -2199,7 +2284,7 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char*)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetOutputDir(bool implib)
+const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
 {
   // The implib option is only allowed for shared libraries, module
   // libraries, and executables.
@@ -2332,15 +2417,24 @@ const char* cmTarget::GetOutputDir(bool implib)
       }
 #endif
 
-    // Make sure the output path exists on disk.
-    if(!cmSystemTools::MakeDirectory(out.c_str()))
+    // Optionally make sure the output path exists on disk.
+    if(create)
       {
-      cmSystemTools::Error("Error failed to create output directory:",
-                           out.c_str());
+      if(!cmSystemTools::MakeDirectory(out.c_str()))
+        {
+        cmSystemTools::Error("Error failed to create output directory: ",
+                             out.c_str());
+        }
       }
-    }
+  }
 
   return out.c_str();
+}
+
+//----------------------------------------------------------------------------
+const char* cmTarget::GetOutputDir(bool implib)
+{
+  return this->GetAndCreateOutputDir(implib, true);
 }
 
 //----------------------------------------------------------------------------

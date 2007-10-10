@@ -23,7 +23,6 @@ PURPOSE.  See the above copyright notices for more information.
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
-#include "cmOrderLinkDirectories.h"
 
 //----------------------------------------------------------------------------
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -428,18 +427,6 @@ cmXCodeObject* cmGlobalXCodeGenerator
 }
 
 //----------------------------------------------------------------------------
-bool IsResource(cmSourceFile* sf)
-{
-  const char* location = sf->GetProperty("MACOSX_PACKAGE_LOCATION");
-
-  bool isResource =
-    (sf->GetPropertyAsBool("FRAMEWORK_RESOURCE") ||
-     (location && cmStdString(location) == "Resources"));
-
-  return isResource;
-}
-
-//----------------------------------------------------------------------------
 cmStdString GetGroupMapKey(cmTarget& cmtarget, cmSourceFile* sf)
 {
   cmStdString key(cmtarget.GetName());
@@ -449,8 +436,8 @@ cmStdString GetGroupMapKey(cmTarget& cmtarget, cmSourceFile* sf)
 }
 
 //----------------------------------------------------------------------------
-cmXCodeObject* 
-cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg, 
+cmXCodeObject*
+cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
                                               cmSourceFile* sf,
                                               cmTarget& cmtarget)
 {
@@ -498,7 +485,8 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 
   // Is this a resource file in this target? Add it to the resources group...
   //
-  bool isResource = IsResource(sf);
+  cmTarget::SourceFileFlags tsFlags = cmtarget.GetTargetSourceFileFlags(sf);
+  bool isResource = tsFlags.Resource;
 
   // Is this a "private" or "public" framework header file?
   // Set the ATTRIBUTES attribute appropriately...
@@ -506,14 +494,14 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   if(cmtarget.GetType() == cmTarget::SHARED_LIBRARY &&
      cmtarget.GetPropertyAsBool("FRAMEWORK"))
     {
-    if(sf->GetPropertyAsBool("FRAMEWORK_PRIVATE_HEADER"))
+    if(tsFlags.PrivateHeader)
       {
       cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Private"));
       settings->AddAttribute("ATTRIBUTES", attrs);
       isResource = true;
       }
-    else if(sf->GetPropertyAsBool("FRAMEWORK_PUBLIC_HEADER"))
+    else if(tsFlags.PublicHeader)
       {
       cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Public"));
@@ -693,6 +681,9 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       cmXCodeObject* filetype = 
         fr->GetObject()->GetObject("lastKnownFileType");
 
+      cmTarget::SourceFileFlags tsFlags =
+        cmtarget.GetTargetSourceFileFlags(*i);
+
       if(strcmp(filetype->GetString(), "\"compiled.mach-o.objfile\"") == 0)
         {
         externalObjFiles.push_back(xsf);
@@ -701,7 +692,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         {
         headerFiles.push_back(xsf);
         }
-      else if(IsResource(*i))
+      else if(tsFlags.Resource)
         {
         resourceFiles.push_back(xsf);
         }
@@ -813,8 +804,8 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
           }
         copyFilesBuildPhase->AddAttribute("dstPath",
           this->CreateString(ostr.str().c_str()));
-        copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
-          this->CreateString("0"));
+        copyFilesBuildPhase->AddAttribute(
+          "runOnlyForDeploymentPostprocessing", this->CreateString("0"));
         buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
         copyFilesBuildPhase->AddAttribute("files", buildFiles);
         std::vector<cmSourceFile*>::iterator sfIt;
@@ -1418,6 +1409,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       productType = "com.apple.product-type.framework";
 
       const char* version = target.GetProperty("FRAMEWORK_VERSION");
+      if(!version)
+        {
+        version = target.GetProperty("VERSION");
+        }
+      if(!version)
+        {
+        version = "A";
+        }
       buildSettings->AddAttribute("FRAMEWORK_VERSION",
                                   this->CreateString(version));
       }
@@ -1501,7 +1500,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   for(std::vector<std::string>::iterator i = includes.begin();
       i != includes.end(); ++i)
     {
-    if(cmSystemTools::IsPathToFramework(i->c_str()))
+    if(this->NameResolvesToFramework(i->c_str()))
       {
       std::string frameworkDir = *i;
       frameworkDir += "/../";
@@ -1927,9 +1926,22 @@ void cmGlobalXCodeGenerator::AppendOrAddBuildSetting(cmXCodeObject* settings,
     else
       {
       std::string oldValue = attr->GetString();
-      cmSystemTools::ReplaceString(oldValue, "\"", "");
+
+      // unescape escaped quotes internal to the string:
+      cmSystemTools::ReplaceString(oldValue, "\\\"", "\"");
+
+      // remove surrounding quotes, if any:
+      std::string::size_type len = oldValue.length();
+      if(oldValue[0] == '\"' && oldValue[len-1] == '\"')
+        {
+        oldValue = oldValue.substr(1, len-2);
+        }
+
       oldValue += " ";
       oldValue += value;
+
+      // SetString automatically escapes internal quotes and then surrounds
+      // the result with quotes if necessary...
       attr->SetString(oldValue.c_str());
       }
     }
@@ -2098,8 +2110,8 @@ void cmGlobalXCodeGenerator
           {
           // now add the same one but append $(CONFIGURATION) to it:
           linkDirs += " ";
-          linkDirs += this->XCodeEscapePath(libDir->c_str());
-          linkDirs += "/$(CONFIGURATION)";
+          linkDirs += this->XCodeEscapePath(
+            (*libDir + "/$(CONFIGURATION)").c_str());
           }
         linkDirs += " ";
         linkDirs += this->XCodeEscapePath(libDir->c_str());
@@ -2506,8 +2518,8 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
   // one more pass for external depend information not handled
   // correctly by xcode
   makefileStream << "# DO NOT EDIT\n";
-  makefileStream << "# This makefile makes sure all linkable targets are \n";
-  makefileStream << "# up-to-date with anything they link to,avoiding a "
+  makefileStream << "# This makefile makes sure all linkable targets are\n";
+  makefileStream << "# up-to-date with anything they link to, avoiding a "
     "bug in XCode 1.5\n";
   for(std::vector<std::string>::const_iterator
         ct = this->CurrentConfigurationTypes.begin();
@@ -2826,10 +2838,13 @@ cmGlobalXCodeGenerator
       {
       if(dir.find(".framework") != dir.npos)
         {
+        // Remove trailing slashes (so that the rfind does not find the one at
+        // the very end...!)
+        //
+        cmSystemTools::ConvertToUnixSlashes(dir);
         std::string::size_type pos = dir.rfind("/");
         std::string framework = dir.substr(pos);
-        std::string newDir;
-        newDir = dir.substr(0, pos);
+        std::string newDir = dir.substr(0, pos);
         newDir += "/";
         newDir += config;
         dir = newDir;

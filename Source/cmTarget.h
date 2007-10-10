@@ -84,6 +84,23 @@ public:
   void AddSourceFile(cmSourceFile* sf) { this->SourceFiles.push_back(sf); }
 
   /**
+   * Flags for a given source file as used in this target. Typically assigned
+   * via SET_TARGET_PROPERTIES when the property is a list of source files.
+   */
+  struct SourceFileFlags
+  {
+    bool PrivateHeader; // source is in "PRIVATE_HEADER" target property
+    bool PublicHeader;  // source is in "PUBLIC_HEADER" target property
+    bool Resource;      // source is in "RESOURCE" target property *or*
+                        // source has MACOSX_PACKAGE_LOCATION=="Resources"
+  };
+
+  /**
+   * Get the flags for a given source file as used in this target
+   */
+  struct SourceFileFlags GetTargetSourceFileFlags(const cmSourceFile* sf);
+
+  /**
    * Add sources to the target.
    */
   void AddSources(std::vector<std::string> const& srcs);
@@ -109,6 +126,7 @@ public:
   void ClearDependencyInformation(cmMakefile& mf, const char* target);
 
   // Check to see if a library is a framework and treat it different on Mac
+  bool NameResolvesToFramework(const std::string& libname);
   bool AddFramework(const std::string& lib, LinkLibraryType llt);
   void AddLinkLibrary(cmMakefile& mf,
                       const char *target, const char* lib,
@@ -358,6 +376,9 @@ private:
   // Use a makefile variable to set a default for the given property.
   // If the variable is not defined use the given default instead.
   void SetPropertyDefault(const char* property, const char* default_value);
+
+  // Get the full path to the target output directory.
+  const char* GetAndCreateOutputDir(bool implib, bool create);
 
   // Get the full path to the target output directory.
   const char* GetOutputDir(bool implib);

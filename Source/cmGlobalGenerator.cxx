@@ -1277,6 +1277,7 @@ cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(const char* start_dir)
 }
 
 
+//----------------------------------------------------------------------------
 cmTarget* cmGlobalGenerator::FindTarget(const char* project,
                                         const char* name,
                                         bool useImportedTargets)
@@ -1318,6 +1319,27 @@ cmTarget* cmGlobalGenerator::FindTarget(const char* project,
   return 0;
 }
 
+//----------------------------------------------------------------------------
+bool cmGlobalGenerator::NameResolvesToFramework(const std::string& libname)
+{
+  if(cmSystemTools::IsPathToFramework(libname.c_str()))
+    {
+    return true;
+    }
+
+  if(cmTarget* tgt = this->FindTarget(0, libname.c_str(), true))
+    {
+    if(tgt->GetType() == cmTarget::SHARED_LIBRARY &&
+       tgt->GetPropertyAsBool("FRAMEWORK"))
+       {
+       return true;
+       }
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------------
 inline std::string removeQuotes(const std::string& s)
 {
   if(s[0] == '\"' && s[s.size()-1] == '\"')
