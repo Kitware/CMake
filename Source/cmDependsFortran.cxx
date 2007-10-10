@@ -504,7 +504,10 @@ void cmDependsFortranParser_RuleInclude(cmDependsFortranParser* parser,
 void cmDependsFortranParser_RuleModule(cmDependsFortranParser* parser,
                                        const char* name)
 {
-  parser->Provides.insert(cmSystemTools::LowerCase(name) );
+  if(!parser->InInterface )
+    {
+    parser->Provides.insert(cmSystemTools::LowerCase(name));
+    }
 }
 
 //----------------------------------------------------------------------------
