@@ -54,7 +54,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "STRING";}
+  virtual const char* GetName() { return "string";}
 
   /**
    * Succinct documentation.
@@ -70,29 +70,29 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  STRING(REGEX MATCH <regular_expression>\n"
+      "  string(REGEX MATCH <regular_expression>\n"
       "         <output variable> <input> [<input>...])\n"
-      "  STRING(REGEX MATCHALL <regular_expression>\n"
+      "  string(REGEX MATCHALL <regular_expression>\n"
       "         <output variable> <input> [<input>...])\n"
-      "  STRING(REGEX REPLACE <regular_expression>\n"
+      "  string(REGEX REPLACE <regular_expression>\n"
       "         <replace_expression> <output variable>\n"
       "         <input> [<input>...])\n"
-      "  STRING(REPLACE <match_string>\n"
+      "  string(REPLACE <match_string>\n"
       "         <replace_string> <output variable>\n"
       "         <input> [<input>...])\n"
-      "  STRING(COMPARE EQUAL <string1> <string2> <output variable>)\n"
-      "  STRING(COMPARE NOTEQUAL <string1> <string2> <output variable>)\n"
-      "  STRING(COMPARE LESS <string1> <string2> <output variable>)\n"
-      "  STRING(COMPARE GREATER <string1> <string2> <output variable>)\n"
-      "  STRING(ASCII <number> [<number> ...] <output variable>)\n"
-      "  STRING(CONFIGURE <string1> <output variable>\n"
+      "  string(COMPARE EQUAL <string1> <string2> <output variable>)\n"
+      "  string(COMPARE NOTEQUAL <string1> <string2> <output variable>)\n"
+      "  string(COMPARE LESS <string1> <string2> <output variable>)\n"
+      "  string(COMPARE GREATER <string1> <string2> <output variable>)\n"
+      "  string(ASCII <number> [<number> ...] <output variable>)\n"
+      "  string(CONFIGURE <string1> <output variable>\n"
       "         [@ONLY] [ESCAPE_QUOTES])\n"
-      "  STRING(TOUPPER <string1> <output variable>)\n"
-      "  STRING(TOLOWER <string1> <output variable>)\n"
-      "  STRING(LENGTH <string> <output variable>)\n"
-      "  STRING(SUBSTRING <string> <begin> <length> <output variable>)\n"
-      "  STRING(STRIP <string> <output variable>)\n"
-      "  STRING(RANDOM [LENGTH <length>] [ALPHABET <alphabet>]\n"
+      "  string(TOUPPER <string1> <output variable>)\n"
+      "  string(TOLOWER <string1> <output variable>)\n"
+      "  string(LENGTH <string> <output variable>)\n"
+      "  string(SUBSTRING <string> <begin> <length> <output variable>)\n"
+      "  string(STRIP <string> <output variable>)\n"
+      "  string(RANDOM [LENGTH <length>] [ALPHABET <alphabet>]\n"
       "         <output variable>)\n"
       "REGEX MATCH will match the regular expression once and store the "
       "match in the output variable.\n"

@@ -49,7 +49,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "SEPARATE_ARGUMENTS";}
+  virtual const char* GetName() {return "separate_arguments";}
   
   /**
    * Succinct documentation.
@@ -66,7 +66,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  SEPARATE_ARGUMENTS(VARIABLE)\n"
+      "  separate_arguments(VARIABLE)\n"
       "Convert the value of VARIABLE to a semi-colon separated list.  "
       "All spaces are replaced with ';'.  This helps with generating "
       "command lines.";

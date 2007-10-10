@@ -49,7 +49,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "USE_MANGLED_MESA";}
+  virtual const char* GetName() { return "use_mangled_mesa";}
 
   /**
    * Succinct documentation.
@@ -65,7 +65,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  USE_MANGLED_MESA(PATH_TO_MESA OUTPUT_DIRECTORY)\n"
+      "  use_mangled_mesa(PATH_TO_MESA OUTPUT_DIRECTORY)\n"
       "The path to mesa includes, should contain gl_mangle.h.  "
       "The mesa headers are copied to the specified output directory.  "
       "This allows mangled mesa headers to override other GL headers by "

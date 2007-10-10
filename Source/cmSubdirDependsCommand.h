@@ -46,7 +46,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "SUBDIR_DEPENDS";}
+  virtual const char* GetName() { return "subdir_depends";}
 
   /**
    * Succinct documentation.
@@ -62,7 +62,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  SUBDIR_DEPENDS(subdir dep1 dep2 ...)\n"
+      "  subdir_depends(subdir dep1 dep2 ...)\n"
       "Does not do anything.  This command used to help projects order "
       "parallel builds correctly.  This functionality is now automatic.";
     }

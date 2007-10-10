@@ -45,7 +45,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "INCLUDE_DIRECTORIES";}
+  virtual const char* GetName() { return "include_directories";}
 
   /**
    * Succinct documentation.
@@ -61,11 +61,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  INCLUDE_DIRECTORIES([AFTER|BEFORE] [SYSTEM] dir1 dir2 ...)\n"
+      "  include_directories([AFTER|BEFORE] [SYSTEM] dir1 dir2 ...)\n"
       "Add the given directories to those searched by the compiler for "
       "include files. By default the directories are appended onto "
       "the current list of directories. This default behavior can be "
-      "changed by setting CMAKE_INCLUDE_DIRECTORIES_BEFORE to ON. "
+      "changed by setting CMAKE_include_directories_BEFORE to ON. "
       "By using BEFORE or AFTER you can select between appending and "
       "prepending, independent from the default. "
       "If the SYSTEM option is given the compiler will be told that the "

@@ -36,7 +36,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "DEFINE_PROPERTY";}
+  virtual const char* GetName() { return "define_property";}
 
   /**
    * Succinct documentation.
@@ -52,7 +52,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  DEFINE_PROPERTY(property_name scope_value\n"
+        "  define_property(property_name scope_value\n"
         "                  short_description\n"
         "                  full_description inherit)\n"
         "Define a property for a scope. scope_value is either GLOBAL, "

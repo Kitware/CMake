@@ -49,14 +49,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ENDIF";}
+  virtual const char* GetName() { return "endif";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Ends a list of commands in an IF block.";
+    return "Ends a list of commands in an if block.";
     }
   
   /**
@@ -65,8 +65,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ENDIF(expression)\n"
-      "See the IF command.";
+      "  endif(expression)\n"
+      "See the if command.";
     }
   
   cmTypeMacro(cmEndIfCommand, cmCommand);

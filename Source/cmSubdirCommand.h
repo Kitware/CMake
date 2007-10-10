@@ -46,14 +46,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "SUBDIRS";}
+  virtual const char* GetName() { return "subdirs";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Deprecated. Use the ADD_SUBDIRECTORY() command instead.";
+    return "Deprecated. Use the add_subdirectory() command instead.";
     }
   
   /**
@@ -63,10 +63,10 @@ public:
     {
     return
       "Add a list of subdirectories to the build.\n"
-      "  SUBDIRS(dir1 dir2 ..."
+      "  subdirs(dir1 dir2 ..."
       "[EXCLUDE_FROM_ALL exclude_dir1 exclude_dir2 ...] [PREORDER] )\n"
-      "Add a list of subdirectories to the build. The ADD_SUBDIRECTORY "
-      "command should be used instead of SUBDIRS although SUBDIRS will "
+      "Add a list of subdirectories to the build. The add_subdirectory "
+      "command should be used instead of subdirs although subdirs will "
       "still work. "
       "This will cause any CMakeLists.txt files in the sub directories "
       "to be processed by CMake.  Any directories after the PREORDER flag "

@@ -45,14 +45,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "INSTALL_FILES";}
+  virtual const char* GetName() { return "install_files";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Deprecated.  Use the INSTALL(FILES ) command instead.";
+    return "Deprecated.  Use the install(FILES ) command instead.";
     }
   
   /**
@@ -69,12 +69,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "This command has been superceded by the INSTALL command.  It "
+      "This command has been superceded by the install command.  It "
       "is provided for compatibility with older CMake code.  "
       "The FILES form is directly replaced by the FILES form of the "
-      "INSTALL command.  The regexp form can be expressed "
-      "more clearly using the GLOB form of the FILE command.\n"
-      "  INSTALL_FILES(<dir> extension file file ...)\n"
+      "install command.  The regexp form can be expressed "
+      "more clearly using the GLOB form of the file command.\n"
+      "  install_files(<dir> extension file file ...)\n"
       "Create rules to install the listed files with the given extension "
       "into the given directory.  "
       "Only files existing in the current source tree or its corresponding "
@@ -83,10 +83,10 @@ public:
       "removed first.  This is useful for providing lists of source files "
       "such as foo.cxx when you want the corresponding foo.h to be "
       "installed. A typical extension is '.h'.\n"
-      "  INSTALL_FILES(<dir> regexp)\n"
+      "  install_files(<dir> regexp)\n"
       "Any files in the current source directory that match the regular "
       "expression will be installed.\n"
-      "  INSTALL_FILES(<dir> FILES file file ...)\n"
+      "  install_files(<dir> FILES file file ...)\n"
       "Any files listed after the FILES keyword will be "
       "installed explicitly from the names given.  Full paths are allowed in "
       "this form.\n"

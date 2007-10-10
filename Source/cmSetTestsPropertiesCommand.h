@@ -36,7 +36,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "SET_TESTS_PROPERTIES";}
+  virtual const char* GetName() { return "set_tests_properties";}
 
   /**
    * Succinct documentation.
@@ -52,7 +52,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  SET_TESTS_PROPERTIES(test1 [test2...] PROPERTIES prop1 value1 prop2"
+      "  set_tests_properties(test1 [test2...] PROPERTIES prop1 value1 prop2"
       " value2)\n"
       "Set a property for the tests. If the property is not found, CMake "
       "will report an error. The properties include:\n"

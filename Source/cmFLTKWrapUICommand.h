@@ -55,7 +55,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "FLTK_WRAP_UI";}
+  virtual const char* GetName() { return "fltk_wrap_ui";}
 
   /**
    * Succinct documentation.
@@ -71,7 +71,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  FLTK_WRAP_UI(resultingLibraryName source1\n"
+      "  fltk_wrap_ui(resultingLibraryName source1\n"
       "               source2 ... sourceN )\n"
       "Produce .h and .cxx files for all the .fl and .fld files listed.  "
       "The resulting .h and .cxx files will be added to a variable named "

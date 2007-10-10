@@ -79,7 +79,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "WHILE";}
+  virtual const char* GetName() { return "while";}
 
   /**
    * Succinct documentation.
@@ -95,13 +95,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  WHILE(condition)\n"
+      "  while(condition)\n"
       "    COMMAND1(ARGS ...)\n"
       "    COMMAND2(ARGS ...)\n"
       "    ...\n"
-      "  ENDWHILE(condition)\n"
-      "All commands between WHILE and the matching ENDWHILE are recorded "
-      "without being invoked.  Once the ENDWHILE is evaluated, the "
+      "  endwhile(condition)\n"
+      "All commands between while and the matching endwhile are recorded "
+      "without being invoked.  Once the endwhile is evaluated, the "
       "recorded list of commands is invoked as long as the condition "
       "is true. The condition is evaulated using the same logic as the "
       "IF command.";

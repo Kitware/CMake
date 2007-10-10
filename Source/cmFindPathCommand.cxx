@@ -23,7 +23,7 @@ cmFindPathCommand::cmFindPathCommand()
 {
   this->IncludeFileInPath = false;
   cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "FIND_XXX", "FIND_PATH");
+                               "FIND_XXX", "find_path");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_XXX_PATH", "CMAKE_INCLUDE_PATH");
   cmSystemTools::ReplaceString(this->GenericDocumentation,

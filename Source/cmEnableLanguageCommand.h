@@ -47,7 +47,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "ENABLE_LANGUAGE";}
+  virtual const char* GetName() {return "enable_language";}
 
   /**
    * Succinct documentation.
@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ENABLE_LANGUAGE(languageName [OPTIONAL] )\n"
+      "  enable_language(languageName [OPTIONAL] )\n"
       "This command enables support for the named language in CMake. "
       "This is the same as the project command but does not create "
       "any of the extra varaibles that are created by the project command. "

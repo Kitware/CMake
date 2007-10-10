@@ -55,7 +55,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ENDFOREACH";}
+  virtual const char* GetName() { return "endforeach";}
 
   /**
    * Succinct documentation.
@@ -71,7 +71,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ENDFOREACH(expression)\n"
+      "  endforeach(expression)\n"
       "See the FOREACH command.";
     }
   

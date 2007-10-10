@@ -48,7 +48,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "LIST";}
+  virtual const char* GetName() { return "list";}
 
   /**
    * Succinct documentation.
@@ -64,16 +64,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  LIST(LENGTH <list> <output variable>)\n"
-      "  LIST(GET <list> <element index> [<element index> ...] "
+      "  list(LENGTH <list> <output variable>)\n"
+      "  list(GET <list> <element index> [<element index> ...] "
       "<output variable>)\n"
-      "  LIST(APPEND <list> <element> [<element> ...])\n"
-      "  LIST(FIND <list> <value> <output variable>)\n"
-      "  LIST(INSERT <list> <element_index> <element> [<element> ...])\n"
-      "  LIST(REMOVE_ITEM <list> <value> [<value> ...])\n"
-      "  LIST(REMOVE_AT <list> <index> [<index> ...])\n"
-      "  LIST(REVERSE <list>)\n"
-      "  LIST(SORT <list>)\n"
+      "  list(APPEND <list> <element> [<element> ...])\n"
+      "  list(FIND <list> <value> <output variable>)\n"
+      "  list(INSERT <list> <element_index> <element> [<element> ...])\n"
+      "  list(REMOVE_ITEM <list> <value> [<value> ...])\n"
+      "  list(REMOVE_AT <list> <index> [<index> ...])\n"
+      "  list(REVERSE <list>)\n"
+      "  list(SORT <list>)\n"
       "LENGTH will return a given list's length.\n"
       "GET will return list of elements specified by indices from the list.\n"
       "APPEND will append elements to the list.\n"

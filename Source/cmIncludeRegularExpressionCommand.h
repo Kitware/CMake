@@ -45,7 +45,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "INCLUDE_REGULAR_EXPRESSION";}
+  virtual const char* GetName() {return "include_regular_expression";}
 
   /**
    * Succinct documentation.
@@ -61,7 +61,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  INCLUDE_REGULAR_EXPRESSION(regex_match [regex_complain])\n"
+      "  include_regular_expression(regex_match [regex_complain])\n"
       "Set the regular expressions used in dependency checking.  Only files "
       "matching regex_match will be traced as dependencies.  Only files "
       "matching regex_complain will generate warnings if they cannot be "

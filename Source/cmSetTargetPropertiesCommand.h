@@ -36,7 +36,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "SET_TARGET_PROPERTIES";}  
+  virtual const char* GetName() { return "set_target_properties";}  
 
   /**
    * Succinct documentation.
@@ -59,7 +59,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  SET_TARGET_PROPERTIES(target1 target2 ...\n"
+        "  set_target_properties(target1 target2 ...\n"
         "                        PROPERTIES prop1 value1\n"
         "                        prop2 value2 ...)\n"
         "Set properties on a target. The syntax for the command is to "

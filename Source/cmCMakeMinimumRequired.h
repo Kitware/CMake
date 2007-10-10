@@ -49,7 +49,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "CMAKE_MINIMUM_REQUIRED";}
+  virtual const char* GetName() {return "cmake_minimum_required";}
   
   /**
    * Succinct documentation.
@@ -65,7 +65,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CMAKE_MINIMUM_REQUIRED(VERSION versionNumber [FATAL_ERROR])\n"
+      "  cmake_minimum_required(VERSION versionNumber [FATAL_ERROR])\n"
       "Let cmake know that the project requires a certain version of a "
       "cmake, or newer.  CMake will also try to be backwards compatible to "
       "the version of cmake specified, if a newer version of cmake is "

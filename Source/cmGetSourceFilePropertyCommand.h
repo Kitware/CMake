@@ -36,7 +36,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "GET_SOURCE_FILE_PROPERTY";}
+  virtual const char* GetName() { return "get_source_file_property";}
 
   /**
    * Succinct documentation.
@@ -52,10 +52,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  GET_SOURCE_FILE_PROPERTY(VAR file property)\n"
+        "  get_source_file_property(VAR file property)\n"
         "Get a property from a source file.  The value of the property is "
         "stored in the variable VAR.  If the property is not found, VAR "
-        "will be set to \"NOTFOUND\". Use SET_SOURCE_FILES_PROPERTIES to set "
+        "will be set to \"NOTFOUND\". Use set_source_files_properties to set "
         "property values.  Source file properties usually control how the "
         "file is built. One property that is always there is LOCATION";
     }

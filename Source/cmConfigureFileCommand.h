@@ -38,7 +38,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CONFIGURE_FILE";}
+  virtual const char* GetName() { return "configure_file";}
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -59,7 +59,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  CONFIGURE_FILE(InputFile OutputFile\n"
+        "  configure_file(InputFile OutputFile\n"
         "                 [COPYONLY] [ESCAPE_QUOTES] [@ONLY])\n"
         "The Input and Ouput files have to have full paths.  "
         "This command replaces any variables in the input file referenced as "

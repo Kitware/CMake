@@ -41,7 +41,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "GET_PROPERTY";}
+  virtual const char* GetName() { return "get_property";}
 
   /**
    * Succinct documentation.
@@ -57,7 +57,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  GET_PROPERTY(VAR scope_value property)\n"
+        "  get_property(VAR scope_value property)\n"
         "Get a property from cmake.  The scope_value is either GLOBAL, "
         "DIRECTORY dir_name, TARGET tgt_name, SOURCE_FILE src_name, "
         "or TEST test_name. The resulting value is "

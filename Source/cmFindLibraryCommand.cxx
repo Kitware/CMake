@@ -20,7 +20,7 @@
 cmFindLibraryCommand::cmFindLibraryCommand()
 { 
   cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "FIND_XXX", "FIND_LIBRARY");
+                               "FIND_XXX", "find_library");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_XXX_PATH", "CMAKE_LIBRARY_PATH");
   cmSystemTools::ReplaceString(this->GenericDocumentation,

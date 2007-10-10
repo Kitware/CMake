@@ -36,7 +36,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "GET_TEST_PROPERTY";}
+  virtual const char* GetName() { return "get_test_property";}
 
   /**
    * Succinct documentation.
@@ -52,7 +52,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  GET_TEST_PROPERTY(test VAR property)\n"
+      "  get_test_property(test VAR property)\n"
       "Get a property from the Test.  The value of the property is " 
       "stored in the variable VAR. If the property is not found, "
       "CMake will report an error. For a list of standard properties "

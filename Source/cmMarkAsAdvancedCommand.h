@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "MARK_AS_ADVANCED";}
+  virtual const char* GetName() {return "mark_as_advanced";}
   
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  MARK_AS_ADVANCED([CLEAR|FORCE] VAR VAR2 VAR...)\n"
+      "  mark_as_advanced([CLEAR|FORCE] VAR VAR2 VAR...)\n"
       "Mark the named cached variables as advanced.  An advanced variable "
       "will not be displayed in any of the cmake GUIs unless the show "
       "advanced option is on.  "
@@ -75,7 +75,7 @@ public:
 
   /**
    * This determines if the command is invoked when in script mode.
-   * MARK_AS_ADVANCED() will have no effect in script mode, but this will
+   * mark_as_advanced() will have no effect in script mode, but this will
    * make many of the modules usable in cmake/ctest scripts, (among them
    * FindUnixMake.cmake used by the CTEST_BUILD command.
   */

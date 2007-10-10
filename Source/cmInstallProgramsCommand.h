@@ -45,14 +45,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "INSTALL_PROGRAMS";}
+  virtual const char* GetName() { return "install_programs";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Deprecated. Use the INSTALL(PROGRAMS ) command instead.";
+    return "Deprecated. Use the install(PROGRAMS ) command instead.";
     }
   
   /**
@@ -69,17 +69,17 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "This command has been superceded by the INSTALL command.  It "
+      "This command has been superceded by the install command.  It "
       "is provided for compatibility with older CMake code.  "
       "The FILES form is directly replaced by the PROGRAMS form of the "
       "INSTALL command.  The regexp form can be expressed more clearly "
       "using the GLOB form of the FILE command.\n"
-      "  INSTALL_PROGRAMS(<dir> file1 file2 [file3 ...])\n"
-      "  INSTALL_PROGRAMS(<dir> FILES file1 [file2 ...])\n"
+      "  install_programs(<dir> file1 file2 [file3 ...])\n"
+      "  install_programs(<dir> FILES file1 [file2 ...])\n"
       "Create rules to install the listed programs into the given directory. "
       "Use the FILES argument to guarantee that the file list version of "
       "the command will be used even when there is only one argument.\n"
-      "  INSTALL_PROGRAMS(<dir> regexp)\n"
+      "  install_programs(<dir> regexp)\n"
       "In the second form any program in the current source directory that "
       "matches the regular expression will be installed.\n"
       "This command is intended to install programs that are not built "

@@ -46,7 +46,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "OUTPUT_REQUIRED_FILES";}
+  virtual const char* GetName() { return "output_required_files";}
 
   /**
    * Succinct documentation.
@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  OUTPUT_REQUIRED_FILES(srcfile outputfile)\n"
+      "  output_required_files(srcfile outputfile)\n"
       "Outputs a list of all the source files that are required by the "
       "specified srcfile. This list is written into outputfile. This is "
       "similar to writing out the dependencies for srcfile except that it "

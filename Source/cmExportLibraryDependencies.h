@@ -51,7 +51,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "EXPORT_LIBRARY_DEPENDENCIES";}
+  virtual const char* GetName() { return "export_library_dependencies";}
 
   /**
    * Succinct documentation.
@@ -68,7 +68,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  EXPORT_LIBRARY_DEPENDENCIES(FILE [APPEND])\n"
+      "  export_library_dependencies(FILE [APPEND])\n"
       "Create a file that can be included into a CMake listfile with the "
       "INCLUDE command.  The file will contain a number of SET commands "
       "that will set all the variables needed for library dependency "

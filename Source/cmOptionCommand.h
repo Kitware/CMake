@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "OPTION";}
+  virtual const char* GetName() {return "option";}
   
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  OPTION(OPTION_VAR \"help string describing option\"\n"
+      "  option(OPTION_VAR \"help string describing option\"\n"
       "         [initial value])\n"
       "Provide an option for the user to select as ON or OFF.  If no "
       "initial value is provided, OFF is used.";

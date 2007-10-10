@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "CREATE_TEST_SOURCELIST";}
+  virtual const char* GetName() {return "create_test_sourcelist";}
   
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CREATE_TEST_SOURCELIST(SourceListName DriverName\n"
+      "  create_test_sourcelist(SourceListName DriverName\n"
       "                         test1 test2 test3\n"
       "                         EXTRA_INCLUDE include.h\n"
       "                         FUNCTION function)\n"

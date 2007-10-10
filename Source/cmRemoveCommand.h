@@ -49,14 +49,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "REMOVE";}
+  virtual const char* GetName() {return "remove";}
   
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Deprecated. Use the LIST(REMOVE_ITEM ) command instead.";
+    return "Deprecated. Use the list(REMOVE_ITEM ) command instead.";
     }
   
   /**
@@ -65,7 +65,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  REMOVE(VAR VALUE VALUE ...)\n"
+      "  remove(VAR VALUE VALUE ...)\n"
       "Removes VALUE from the variable VAR.  "
       "This is typically used to remove entries from a vector "
       "(e.g. semicolon separated list).  VALUE is expanded.";

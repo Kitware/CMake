@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ADD_TEST";}
+  virtual const char* GetName() { return "add_test";}
 
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_TEST(testname Exename arg1 arg2 ...)\n"
+      "  add_test(testname Exename arg1 arg2 ...)\n"
       "If the ENABLE_TESTING command has been run, this command adds a "
       "test target to the current directory. If ENABLE_TESTING has not "
       "been run, this command does nothing.  "

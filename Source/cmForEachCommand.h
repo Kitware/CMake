@@ -73,7 +73,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "FOREACH";}
+  virtual const char* GetName() { return "foreach";}
 
   /**
    * Succinct documentation.
@@ -89,17 +89,17 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  FOREACH(loop_var arg1 arg2 ...)\n"
+      "  foreach(loop_var arg1 arg2 ...)\n"
       "    COMMAND1(ARGS ...)\n"
       "    COMMAND2(ARGS ...)\n"
       "    ...\n"
-      "  ENDFOREACH(loop_var)\n"
-      "  FOREACH(loop_var RANGE total)\n"
-      "  FOREACH(loop_var RANGE start stop [step])\n"
-      "All commands between FOREACH and the matching ENDFOREACH are recorded "
-      "without being invoked.  Once the ENDFOREACH is evaluated, the "
+      "  ENDforeach(loop_var)\n"
+      "  foreach(loop_var RANGE total)\n"
+      "  foreach(loop_var RANGE start stop [step])\n"
+      "All commands between foreach and the matching ENDforeach are recorded "
+      "without being invoked.  Once the ENDforeach is evaluated, the "
       "recorded list of commands is invoked once for each argument listed "
-      "in the original FOREACH command.  Before each iteration of the loop "
+      "in the original foreach command.  Before each iteration of the loop "
       "\"${loop_var}\" will be set as a variable with "
       "the current value in the list.\n"
       "Foreach can also iterate over a generated range of numbers. "

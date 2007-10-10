@@ -45,7 +45,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ADD_EXECUTABLE";}
+  virtual const char* GetName() { return "add_executable";}
 
   /**
    * Succinct documentation.
@@ -62,7 +62,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_EXECUTABLE(exename [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]\n"
+      "  add_executable(exename [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]\n"
       "                 source1 source2 ... sourceN)\n"
       "This command adds an executable target to the current directory.  "
       "The executable will be built from the list of source files "

@@ -48,7 +48,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "AUX_SOURCE_DIRECTORY";}
+  virtual const char* GetName() { return "aux_source_directory";}
   
   /**
    * Succinct documentation.
@@ -64,7 +64,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  AUX_SOURCE_DIRECTORY(dir VARIABLE)\n"
+      "  aux_source_directory(dir VARIABLE)\n"
       "Collects the names of all the source files in the specified "
       "directory and stores the list in the variable provided.  This "
       "command is intended to be used by projects that use explicit "

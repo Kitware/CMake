@@ -47,7 +47,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "QT_WRAP_UI";}
+  virtual const char* GetName() { return "qt_wrap_ui";}
 
   /**
    * Succinct documentation.
@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  QT_WRAP_UI(resultingLibraryName HeadersDestName\n"
+      "  qt_wrap_ui(resultingLibraryName HeadersDestName\n"
       "             SourcesDestName SourceLists ...)\n"
       "Produce .h and .cxx files for all the .ui files listed "
       "in the SourceLists.  "

@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "BUILD_COMMAND";}
+  virtual const char* GetName() {return "build_command";}
   
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  BUILD_COMMAND(variable MAKECOMMAND)\n"
+      "  build_command(variable MAKECOMMAND)\n"
       "Sets the given variable to a string containing the command that "
       "will build this project from the root of the build tree using the "
       "build tool given by MAKECOMMAND.  MAKECOMMAND should be msdev, "

@@ -47,7 +47,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "PROJECT";}
+  virtual const char* GetName() {return "project";}
 
   /**
    * Succinct documentation.
@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  PROJECT(projectname [CXX] [C] [Java])\n"
+      "  project(projectname [CXX] [C] [Java])\n"
       "Sets the name of the project.  "
       "This creates the variables projectname_BINARY_DIR and "
       "projectname_SOURCE_DIR.  "

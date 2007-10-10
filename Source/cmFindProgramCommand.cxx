@@ -25,7 +25,7 @@
 cmFindProgramCommand::cmFindProgramCommand()
 {
   cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "FIND_XXX", "FIND_PROGRAM");
+                               "FIND_XXX", "find_program");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_XXX_PATH", "CMAKE_PROGRAM_PATH");
   cmSystemTools::ReplaceString(this->GenericDocumentation,

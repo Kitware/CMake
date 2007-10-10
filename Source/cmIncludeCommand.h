@@ -52,7 +52,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "INCLUDE";}
+  virtual const char* GetName() {return "include";}
   
   /**
    * Succinct documentation.
@@ -68,11 +68,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  INCLUDE(file1 [OPTIONAL] [RESULT_VARIABLE <VAR>])\n"
-      "  INCLUDE(module [OPTIONAL] [RESULT_VARIABLE <VAR>])\n"
+      "  include(file1 [OPTIONAL] [RESULT_VARIABLE <VAR>])\n"
+      "  include(module [OPTIONAL] [RESULT_VARIABLE <VAR>])\n"
       "Reads CMake listfile code from the given file.  Commands in the file "
       "are processed immediately as if they were written in place of the "
-      "INCLUDE command.  If OPTIONAL is present, then no error "
+      "include command.  If OPTIONAL is present, then no error "
       "is raised if the file does not exist.  If RESULT_VARIABLE is given "
       "the variable will be set to the full filename which "
       "has been included or NOTFOUND if it failed.\n"

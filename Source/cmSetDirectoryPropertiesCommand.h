@@ -41,7 +41,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "SET_DIRECTORY_PROPERTIES";}
+  virtual const char* GetName() { return "set_directory_properties";}
 
   /**
    * Succinct documentation.
@@ -65,7 +65,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  SET_DIRECTORY_PROPERTIES(PROPERTIES prop1 value1 prop2 value2)\n"
+        "  set_directory_properties(PROPERTIES prop1 value1 prop2 value2)\n"
         "Set a property for the current directory and subdirectories. If the "
         "property is not found, CMake will report an error. The properties "
         "include: INCLUDE_DIRECTORIES, LINK_DIRECTORIES, "

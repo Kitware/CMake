@@ -53,7 +53,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "FIND_PATH";}
+  virtual const char* GetName() {return "find_path";}
 
   /**
    * Succinct documentation.

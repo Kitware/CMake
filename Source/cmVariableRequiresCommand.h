@@ -43,14 +43,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "VARIABLE_REQUIRES";}
+  virtual const char* GetName() { return "variable_requires";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Deprecated. Use the IF() command instead.";
+    return "Deprecated. Use the if() command instead.";
     }
   
   /**
@@ -60,7 +60,7 @@ public:
     {
     return
       "Assert satisfaction of an option's required variables.\n"
-      "  VARIABLE_REQUIRES(TEST_VARIABLE RESULT_VARIABLE\n"
+      "  variable_requires(TEST_VARIABLE RESULT_VARIABLE\n"
       "                    REQUIRED_VARIABLE1\n"
       "                    REQUIRED_VARIABLE2 ...)\n"
       "The first argument (TEST_VARIABLE) is the name of the variable to be "

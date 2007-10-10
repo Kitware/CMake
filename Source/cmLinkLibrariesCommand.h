@@ -46,14 +46,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "LINK_LIBRARIES";}
+  virtual const char* GetName() { return "link_libraries";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Deprecated. Use the TARGET_LINK_LIBRARIES() command instead.";
+    return "Deprecated. Use the target_link_libraries() command instead.";
     }
   
   /**
@@ -63,10 +63,10 @@ public:
     {
     return
       "Link libraries to all targets added later.\n"
-      "  LINK_LIBRARIES(library1 <debug | optimized> library2 ...)\n"
+      "  link_libraries(library1 <debug | optimized> library2 ...)\n"
       "Specify a list of libraries to be linked into "
-      "any following targets (typically added with the ADD_EXECUTABLE "
-      "or ADD_LIBRARY calls).  This command is passed "
+      "any following targets (typically added with the add_executable "
+      "or add_library calls).  This command is passed "
       "down to all subdirectories.  "
       "The debug and optimized strings may be used to indicate that "
       "the next library listed is to be used only for that specific "

@@ -49,7 +49,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "SET";}
+  virtual const char* GetName() {return "set";}
   
   /**
    * Succinct documentation.
@@ -65,7 +65,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  SET(VAR [VALUE] [CACHE TYPE DOCSTRING [FORCE]])\n"
+      "  set(VAR [VALUE] [CACHE TYPE DOCSTRING [FORCE]])\n"
       "Within CMake sets VAR to the value VALUE.  VALUE is expanded before "
       "VAR is set to it.  If CACHE is present, then the VAR is put in the "
       "cache. TYPE and DOCSTRING are required. TYPE is used by the CMake GUI "
@@ -81,10 +81,10 @@ public:
       "variable, then this always writes into the current makefile. The "
       "FORCE option will overwrite the cache value removing any changes by "
       "the user.\n"
-      "  SET(VAR VALUE1 ... VALUEN).\n"
+      "  set(VAR VALUE1 ... VALUEN).\n"
       "In this case VAR is set to a semicolon separated list of values.\n"
       "VAR can be an environment variable such as:\n"
-      "  SET( ENV{PATH} /home/martink )\n"
+      "  set( ENV{PATH} /home/martink )\n"
       "in which case the environment variable will be set.";
     }
   

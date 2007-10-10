@@ -49,7 +49,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "FIND_PACKAGE";}
+  virtual const char* GetName() { return "find_package";}
 
   /**
    * Succinct documentation.
@@ -65,7 +65,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  FIND_PACKAGE(<name> [major.minor] [QUIET] [NO_MODULE]\n"
+      "  find_package(<name> [major.minor] [QUIET] [NO_MODULE]\n"
       "               [[REQUIRED|COMPONENTS] [components...]])\n"
       "Finds and loads settings from an external project.  <name>_FOUND will "
       "be set to indicate whether the package was found.  Settings that "

@@ -49,7 +49,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "BUILD_NAME";}
+  virtual const char* GetName() {return "build_name";}
 
   /**
    * Succinct documentation.
@@ -66,7 +66,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  BUILD_NAME(variable)\n"
+      "  build_name(variable)\n"
       "Sets the specified variable to a string representing the platform "
       "and compiler settings.  These values are now available through the "
       "CMAKE_SYSTEM and CMAKE_CXX_COMPILER variables.";

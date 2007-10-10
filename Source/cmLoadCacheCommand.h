@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "LOAD_CACHE";}
+  virtual const char* GetName() { return "load_cache";}
 
   /**
    * Succinct documentation.
@@ -60,13 +60,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  LOAD_CACHE(pathToCacheFile READ_WITH_PREFIX\n"
+      "  load_cache(pathToCacheFile READ_WITH_PREFIX\n"
       "             prefix entry1...)\n"
       "Read the cache and store the requested entries in variables with "
       "their name prefixed with the given prefix.  "
       "This only reads the values, and does not create entries in the local "
       "project's cache.\n"
-      "  LOAD_CACHE(pathToCacheFile [EXCLUDE entry1...]\n"
+      "  load_cache(pathToCacheFile [EXCLUDE entry1...]\n"
       "             [INCLUDE_INTERNALS entry1...])\n"
       "Load in the values from another cache and store them in the local "
       "project's cache as internal entries.  This is useful for a project "

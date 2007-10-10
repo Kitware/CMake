@@ -48,7 +48,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "MAKE_DIRECTORY";}
+  virtual const char* GetName() { return "make_directory";}
   
   /**
    * This determines if the command is invoked when in script mode.
@@ -60,7 +60,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Deprecated. Use the FILE(MAKE_DIRECTORY ) command instead.";
+    return "Deprecated. Use the file(MAKE_DIRECTORY ) command instead.";
     }
   
   /**
@@ -69,7 +69,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  MAKE_DIRECTORY(directory)\n"
+      "  make_directory(directory)\n"
       "Creates the specified directory.  Full paths should be given.  Any "
       "parent directories that do not exist will also be created.  Use with "
       "care.";

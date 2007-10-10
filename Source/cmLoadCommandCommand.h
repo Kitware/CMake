@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "LOAD_COMMAND";}
+  virtual const char* GetName() {return "load_command";}
   
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  LOAD_COMMAND(COMMAND_NAME <loc1> [loc2 ...])\n"
+      "  load_command(COMMAND_NAME <loc1> [loc2 ...])\n"
       "The given locations are searched for a library whose name is "
       "cmCOMMAND_NAME.  If found, it is loaded as a module and the command "
       "is added to the set of available CMake commands.  Usually, "

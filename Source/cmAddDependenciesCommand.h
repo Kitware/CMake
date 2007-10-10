@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ADD_DEPENDENCIES";}
+  virtual const char* GetName() { return "add_dependencies";}
 
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_DEPENDENCIES(target-name depend-target1\n"
+      "  add_dependencies(target-name depend-target1\n"
       "                   depend-target2 ...)\n"
       "Make a top-level target depend on other top-level targets.  A "
       "top-level target is one created by ADD_EXECUTABLE, ADD_LIBRARY, "

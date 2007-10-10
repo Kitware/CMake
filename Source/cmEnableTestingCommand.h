@@ -52,7 +52,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ENABLE_TESTING";}
+  virtual const char* GetName() { return "enable_testing";}
 
   /**
    * Succinct documentation.
@@ -68,9 +68,9 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ENABLE_TESTING()\n"
+      "  enable_testing()\n"
       "Enables testing for this directory and below.  "
-      "See also the ADD_TEST command.  Note that ctest expects to find "
+      "See also the add_test command.  Note that ctest expects to find "
       "a test file in the build directory root.  Therefore, this command "
       "should be in the source directory root.";
     }

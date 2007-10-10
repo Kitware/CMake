@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "TRY_RUN";}
+  virtual const char* GetName() { return "try_run";}
 
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  TRY_RUN(RUN_RESULT_VAR COMPILE_RESULT_VAR\n"
+      "  try_run(RUN_RESULT_VAR COMPILE_RESULT_VAR\n"
       "          bindir srcfile [CMAKE_FLAGS <Flags>]\n"
       "          [COMPILE_DEFINITIONS <flags>]\n"
       "          [COMPILE_OUTPUT_VARIABLE comp]\n"
@@ -79,7 +79,7 @@ public:
       "gives you the output from the compile and run step combined.\n\n"
       "Cross compiling issues\n"
       "When cross compiling, the executable compiled in the first step "
-      "usually cannot be run on the build host. TRY_RUN() checks the "
+      "usually cannot be run on the build host. try_run() checks the "
       "CMAKE_CROSSCOMPILING variable to detect whether CMake is in "
       "crosscompiling mode. If that's the case, it will still try to compile "
       "the executable, but it will not try to run the executable. Instead it "
@@ -91,12 +91,12 @@ public:
       "additional cache variable "
       "RUN_RESULT_VAR__COMPILE_RESULT_VAR__TRYRUN_OUTPUT."
       "This is intended to hold stdout and stderr from the executable.\n"
-      "In order to make cross compiling your project easier, use TRY_RUN "
-      "only if really required. If you use TRY_RUN, use RUN_OUTPUT_VARIABLE "
+      "In order to make cross compiling your project easier, use try_run "
+      "only if really required. If you use try_run, use RUN_OUTPUT_VARIABLE "
       "(or OUTPUT_VARIABLE) only if really required. Using them will require "
       "that when crosscompiling, the cache variables will have to be set "
       "manually to the output of the executable. You can also \"guard\" the "
-      "calls to TRY_RUN with IF(CMAKE_CROSSCOMPILING) and provide an "
+      "calls to try_run with if(CMAKE_CROSSCOMPILING) and provide an "
       "easy-to-preset alternative for this case.\n";
     }
 

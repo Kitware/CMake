@@ -58,7 +58,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "VARIABLE_WATCH";}
+  virtual const char* GetName() { return "variable_watch";}
 
   /**
    * Succinct documentation.
@@ -74,7 +74,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  VARIABLE_WATCH(<variable name> [<command to execute>])\n"
+      "  variable_watch(<variable name> [<command to execute>])\n"
       "If the specified variable changes, the message will be printed about "
       "the variable being changed. If the command is spceified, the command "
       "will be executed. The command will receive the following arguments:"

@@ -47,7 +47,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "ADD_CUSTOM_COMMAND";}
+  virtual const char* GetName() {return "add_custom_command";}
   
   /**
    * Succinct documentation.
@@ -63,10 +63,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "There are two main signatures for ADD_CUSTOM_COMMAND "
+      "There are two main signatures for add_custom_command "
       "The first signature is for adding a custom command "
       "to produce an output.\n"
-      "  ADD_CUSTOM_COMMAND(OUTPUT output1 [output2 ...]\n"
+      "  add_custom_command(OUTPUT output1 [output2 ...]\n"
       "                     COMMAND command1 [ARGS] [args1...]\n"
       "                     [COMMAND command2 [ARGS] [args2...] ...]\n"
       "                     [MAIN_DEPENDENCY depend]\n"
@@ -92,7 +92,7 @@ public:
       "The command becomes part of the target and will only execute "
       "when the target itself is built.  If the target is already built,"
       " the command will not execute.\n"
-      "  ADD_CUSTOM_COMMAND(TARGET target\n"
+      "  add_custom_command(TARGET target\n"
       "                     PRE_BUILD | PRE_LINK | POST_BUILD\n"
       "                     COMMAND command1 [ARGS] [args1...]\n"
       "                     [COMMAND command2 [ARGS] [args2...] ...]\n"

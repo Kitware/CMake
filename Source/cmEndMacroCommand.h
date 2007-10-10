@@ -55,14 +55,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ENDMACRO";}
+  virtual const char* GetName() { return "endmacro";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Ends a list of commands in a MACRO block.";
+    return "Ends a list of commands in a macro block.";
     }
   
   /**
@@ -71,8 +71,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ENDMACRO(expression)\n"
-      "See the MACRO command.";
+      "  endmacro(expression)\n"
+      "See the macro command.";
     }
   
   cmTypeMacro(cmEndMacroCommand, cmCommand);

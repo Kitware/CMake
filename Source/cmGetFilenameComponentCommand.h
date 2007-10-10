@@ -50,7 +50,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "GET_FILENAME_COMPONENT";}
+  virtual const char* GetName() { return "get_filename_component";}
 
   /**
    * Succinct documentation.
@@ -66,7 +66,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  GET_FILENAME_COMPONENT(VarName FileName\n"
+      "  get_filename_component(VarName FileName\n"
       "                         PATH|ABSOLUTE|NAME|EXT|NAME_WE\n"
       "                         [CACHE])\n"
       "Set VarName to be the path (PATH), file name (NAME), file "
@@ -76,7 +76,7 @@ public:
       "trailing slashes. The longest file extension is always considered. "
       "If the optional CACHE argument is specified, the result variable is "
       "added to the cache.\n"
-      "  GET_FILENAME_COMPONENT(VarName FileName\n"
+      "  get_filename_component(VarName FileName\n"
       "                         PROGRAM [PROGRAM_ARGS ArgVar]\n"
       "                         [CACHE])\n"
       "The program in FileName will be found in the system search path or "

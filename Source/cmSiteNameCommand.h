@@ -49,7 +49,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "SITE_NAME";}
+  virtual const char* GetName() {return "site_name";}
   
   /**
    * Succinct documentation.
@@ -65,7 +65,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  SITE_NAME(variable)\n";
+      "  site_name(variable)\n";
     }
   
   cmTypeMacro(cmSiteNameCommand, cmCommand);

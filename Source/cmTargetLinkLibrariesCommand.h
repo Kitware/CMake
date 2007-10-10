@@ -46,7 +46,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "TARGET_LINK_LIBRARIES";}
+  virtual const char* GetName() { return "target_link_libraries";}
 
   /**
    * Succinct documentation.
@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  TARGET_LINK_LIBRARIES(target library1\n"
+      "  target_link_libraries(target library1\n"
       "                        <debug | optimized | general> library2\n"
       "                        ...)\n"
       "Specify a list of libraries to be linked into the specified target.  "

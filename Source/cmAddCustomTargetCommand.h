@@ -47,7 +47,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() 
-    {return "ADD_CUSTOM_TARGET";}
+    {return "add_custom_target";}
   
   /**
    * Succinct documentation.
@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_CUSTOM_TARGET(Name [ALL] [command1 [args1...]]\n"
+      "  add_custom_target(Name [ALL] [command1 [args1...]]\n"
       "                    [COMMAND command2 [args2...] ...]\n"
       "                    [DEPENDS depend depend depend ... ]\n"
       "                    [WORKING_DIRECTORY dir]\n"
@@ -89,7 +89,7 @@ public:
       "If VERBATIM is given then all the arguments to the commands will be "
       "passed exactly as specified no matter the build tool used. "
       "Note that one level of escapes is still used by the CMake language "
-      "processor before ADD_CUSTOM_TARGET even sees the arguments. "
+      "processor before add_custom_target even sees the arguments. "
       "Use of VERBATIM is recommended as it enables correct behavior. "
       "When VERBATIM is not given the behavior is platform specific. "
       "In the future VERBATIM may be enabled by default. The only reason "

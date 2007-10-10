@@ -45,7 +45,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ADD_LIBRARY";}
+  virtual const char* GetName() { return "add_library";}
 
   /**
    * Succinct documentation.
@@ -61,7 +61,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_LIBRARY(libname [SHARED | STATIC | MODULE] [EXCLUDE_FROM_ALL]\n"
+      "  add_library(libname [SHARED | STATIC | MODULE] [EXCLUDE_FROM_ALL]\n"
       "              source1 source2 ... sourceN)\n"
       "Adds a library target.  SHARED, STATIC or MODULE keywords are used "
       "to set the library type.  If the keyword MODULE appears, the library "

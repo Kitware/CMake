@@ -48,14 +48,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "WRITE_FILE";}
+  virtual const char* GetName() { return "write_file";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Deprecated. Use the FILE(WRITE ) command instead.";
+    return "Deprecated. Use the file(WRITE ) command instead.";
     }
   
   /**
@@ -64,15 +64,15 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  WRITE_FILE(filename \"message to write\"... [APPEND])\n"
+      "  write_file(filename \"message to write\"... [APPEND])\n"
       "The first argument is the file name, the rest of the arguments are "
       "messages to write. If the argument APPEND is specified, then "
       "the message will be appended.\n"
-      "NOTE 1: FILE WRITE and FILE APPEND do exactly the same as this one "
-      "but add some more functionality.\n"
-      "NOTE 2: When using WRITE_FILE the produced file cannot be used as an "
+      "NOTE 1: file(WRITE ... and file(APPEND ... do exactly the same as "
+      "this one but add some more functionality.\n"
+      "NOTE 2: When using write_file the produced file cannot be used as an "
       "input to CMake (CONFIGURE_FILE, source file ...) because it will "
-      "lead to an infinite loop. Use CONFIGURE_FILE if you want to generate "
+      "lead to an infinite loop. Use configure_file if you want to generate "
       "input files to CMake.";
     }
   

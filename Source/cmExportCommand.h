@@ -46,7 +46,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "EXPORT";}
+  virtual const char* GetName() { return "export";}
 
   /**
    * Succinct documentation.
@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  EXPORT(TARGETS tgt1 tgt2 ...  [PREFIX <prefix>] FILE <filename> "
+      "  export(TARGETS tgt1 tgt2 ...  [PREFIX <prefix>] FILE <filename> "
       "[APPEND])\n"
       "Create a file that can be included into a CMake listfile with the "
       "INCLUDE command.  The file will contain a number of SET commands "

@@ -49,14 +49,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ELSE";}
+  virtual const char* GetName() { return "else";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Starts the ELSE portion of an IF block.";
+    return "Starts the else portion of an if block.";
     }
   
   /**
@@ -65,8 +65,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ELSE(expression)\n"
-      "See the IF command.";
+      "  else(expression)\n"
+      "See the if command.";
     }
   
   cmTypeMacro(cmElseCommand, cmCommand);

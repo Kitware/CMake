@@ -47,7 +47,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "LINK_DIRECTORIES";}
+  virtual const char* GetName() { return "link_directories";}
 
   /**
    * Succinct documentation.
@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  LINK_DIRECTORIES(directory1 directory2 ...)\n"
+      "  link_directories(directory1 directory2 ...)\n"
       "Specify the paths in which the linker should search for libraries.";
     }
   

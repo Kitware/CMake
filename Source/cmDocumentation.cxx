@@ -696,7 +696,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
       help.HelpType = cmDocumentation::Usage;
       help.HelpForm = cmDocumentation::UsageForm;
       GET_OPT_ARGUMENT(help.Argument);
-      help.Argument = cmSystemTools::UpperCase(help.Argument);
+      help.Argument = cmSystemTools::LowerCase(help.Argument);
       // special case for single command
       if (!help.Argument.empty())
         {
@@ -756,7 +756,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
       help.HelpType = cmDocumentation::Single;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      help.Argument = cmSystemTools::UpperCase(help.Argument);
+      help.Argument = cmSystemTools::LowerCase(help.Argument);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
     else if(strcmp(argv[i], "--help-module") == 0)

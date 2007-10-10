@@ -41,7 +41,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "GET_CMAKE_PROPERTY";}
+  virtual const char* GetName() { return "get_cmake_property";}
 
   /**
    * Succinct documentation.
@@ -57,7 +57,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  GET_CMAKE_PROPERTY(VAR property)\n"
+        "  get_cmake_property(VAR property)\n"
         "Get a property from the CMake instance.  The value of the "
         "property is stored in the variable VAR. If the property is "
         "not found, CMake will report an error. Some supported properties "

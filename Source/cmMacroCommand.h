@@ -69,7 +69,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "MACRO";}
+  virtual const char* GetName() { return "macro";}
 
   /**
    * Succinct documentation.
@@ -85,14 +85,14 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  MACRO(<name> [arg1 [arg2 [arg3 ...]]])\n"
+      "  macro(<name> [arg1 [arg2 [arg3 ...]]])\n"
       "    COMMAND1(ARGS ...)\n"
       "    COMMAND2(ARGS ...)\n"
       "    ...\n"
-      "  ENDMACRO(<name>)\n"
+      "  endmacro(<name>)\n"
       "Define a macro named <name> that takes arguments named "
-      "arg1 arg2 arg3 (...).  Commands listed after MACRO, "
-      "but before the matching ENDMACRO, are not invoked until the macro "
+      "arg1 arg2 arg3 (...).  Commands listed after macro, "
+      "but before the matching endmacro, are not invoked until the macro "
       "is invoked.  When it is invoked, the commands recorded in the "
       "macro are first modified by replacing formal parameters (${arg1}) "
       "with the arguments passed, and then invoked as normal commands. In "

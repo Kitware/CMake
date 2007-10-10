@@ -45,7 +45,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "ADD_DEFINITIONS";}
+  virtual const char* GetName() {return "add_definitions";}
 
   /**
    * Succinct documentation.
@@ -61,7 +61,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_DEFINITIONS(-DFOO -DBAR ...)\n"
+      "  add_definitions(-DFOO -DBAR ...)\n"
       "Adds flags to command line of C and C++ compilers.  "
       "This command can be used to add any flag to a compile line, "
       "but the -D flag is accepted most C/C++ compilers.  "

@@ -43,7 +43,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "MESSAGE";}
+  virtual const char* GetName() { return "message";}
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -64,7 +64,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  MESSAGE([SEND_ERROR | STATUS | FATAL_ERROR]\n"
+      "  message([SEND_ERROR | STATUS | FATAL_ERROR]\n"
       "          \"message to display\" ...)\n"
       "By default the message is displayed in a pop up window (CMakeSetup), "
       "or in the stdout of cmake, or the error section of ccmake. "

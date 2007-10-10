@@ -48,7 +48,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "MATH";}
+  virtual const char* GetName() { return "math";}
 
   /**
    * Succinct documentation.
@@ -64,7 +64,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  MATH(EXPR <output variable> <math expression>)\n"
+      "  math(EXPR <output variable> <math expression>)\n"
       "EXPR evaluates mathematical expression and return result in the "
       "output variable. Example mathematical expression is "
       "'5 * ( 10 + 13 )'.  Supported operators are "

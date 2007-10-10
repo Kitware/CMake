@@ -36,7 +36,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "SET_SOURCE_FILES_PROPERTIES";}
+  virtual const char* GetName() { return "set_source_files_properties";}
 
   /**
    * Succinct documentation.
@@ -52,7 +52,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  SET_SOURCE_FILES_PROPERTIES(file1 file2 ...\n"
+        "  set_source_files_properties(file1 file2 ...\n"
         "                              PROPERTIES prop1 value1\n"
         "                              prop2 value2 ...)\n"
         "Set properties on a file. The syntax for the command is to list all "

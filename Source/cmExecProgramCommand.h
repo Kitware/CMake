@@ -47,7 +47,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() 
-    {return "EXEC_PROGRAM";}
+    {return "exec_program";}
   
   /**
    * This determines if the command is invoked when in script mode.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetTerseDocumentation() 
     {
     return 
-      "Deprecated.  Use the EXECUTE_PROCESS() command instead.";
+      "Deprecated.  Use the execute_process() command instead.";
     }
   
   /**
@@ -71,7 +71,7 @@ public:
     return
       "Run an executable program during the processing of the CMakeList.txt"
       " file.\n"
-      "  EXEC_PROGRAM(Executable [directory in which to run]\n"
+      "  exec_program(Executable [directory in which to run]\n"
       "               [ARGS <arguments to executable>]\n"
       "               [OUTPUT_VARIABLE <var>]\n"
       "               [RETURN_VALUE <var>])\n"

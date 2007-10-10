@@ -55,14 +55,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ENDWHILE";}
+  virtual const char* GetName() { return "endwhile";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Ends a list of commands in a WHILE block.";
+    return "Ends a list of commands in a while block.";
     }
   
   /**
@@ -71,8 +71,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ENDWHILE(expression)\n"
-      "See the WHILE command.";
+      "  endwhile(expression)\n"
+      "See the while command.";
     }
   
   cmTypeMacro(cmEndWhileCommand, cmCommand);

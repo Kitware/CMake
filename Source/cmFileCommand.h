@@ -50,7 +50,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "FILE";}
+  virtual const char* GetName() { return "file";}
 
   /**
    * Succinct documentation.
@@ -66,31 +66,31 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  FILE(WRITE filename \"message to write\"... )\n"
-      "  FILE(APPEND filename \"message to write\"... )\n"
-      "  FILE(READ filename variable [LIMIT numBytes])\n"
-      "  FILE(STRINGS filename variable [LIMIT_COUNT num]\n"
+      "  file(WRITE filename \"message to write\"... )\n"
+      "  file(APPEND filename \"message to write\"... )\n"
+      "  file(READ filename variable [LIMIT numBytes])\n"
+      "  file(STRINGS filename variable [LIMIT_COUNT num]\n"
       "       [LIMIT_INPUT numBytes] [LIMIT_OUTPUT numBytes]\n"
       "       [LENGTH_MINIMUM numBytes] [LENGTH_MAXIMUM numBytes]\n"
       "       [NEWLINE_CONSUME] [REGEX regex]\n"
       "       [NO_HEX_CONVERSION])\n"
-      "  FILE(GLOB variable [RELATIVE path] [globbing expressions]...)\n"
-      "  FILE(GLOB_RECURSE variable [RELATIVE path] \n"
+      "  file(GLOB variable [RELATIVE path] [globbing expressions]...)\n"
+      "  file(GLOB_RECURSE variable [RELATIVE path] \n"
       "       [globbing expressions]...)\n"
-      "  FILE(REMOVE [file1 ...])\n"
-      "  FILE(REMOVE_RECURSE [file1 ...])\n"
-      "  FILE(MAKE_DIRECTORY [directory1 directory2 ...])\n"
-      "  FILE(RELATIVE_PATH variable directory file)\n"
-      "  FILE(TO_CMAKE_PATH path result)\n"
-      "  FILE(TO_NATIVE_PATH path result)\n"
+      "  file(REMOVE [file1 ...])\n"
+      "  file(REMOVE_RECURSE [file1 ...])\n"
+      "  file(MAKE_DIRECTORY [directory1 directory2 ...])\n"
+      "  file(RELATIVE_PATH variable directory file)\n"
+      "  file(TO_CMAKE_PATH path result)\n"
+      "  file(TO_NATIVE_PATH path result)\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
       "if it does not exist.\n"
       "APPEND will write a message into a file same as WRITE, except "
       "it will append it to the end of the file\n"
-      "NOTE: When using FILE WRITE and FILE APPEND, the produced file "
-      "cannot be used as an input to CMake (CONFIGURE_FILE, source file ...) "
-      "because it will lead to an infinite loop. Use CONFIGURE_FILE if you "
+      "NOTE: When using file WRITE and file APPEND, the produced file "
+      "cannot be used as an input to CMake (configure_file, source file ...) "
+      "because it will lead to an infinite loop. Use configure_file if you "
       "want to generate input files to CMake.\n"
       "READ will read the content of a file and store it into the "
       "variable.\n"
@@ -98,7 +98,7 @@ public:
       "store it in a variable. Binary data in the file are ignored. Carriage "
       "return (CR) characters are ignored. It works also for Intel Hex and "
       "Motorola S-record files, which are automatically converted to binary "
-      "format when reading them. Disable this using NO_HEX_CONVERSION.\n "
+      "format when reading them. Disable this using NO_HEX_CONVERSION.\n"
       "LIMIT_COUNT sets the maximum number of strings to return. "
       "LIMIT_INPUT sets the maximum number of bytes to read from "
       "the input file. "
@@ -109,11 +109,10 @@ public:
       "LENGTH_MAXIMUM sets the maximum length of a string to return.  Longer "
       "strings are split into strings no longer than the maximum length. "
       "NEWLINE_CONSUME allows newlines to be included in strings instead "
-      "of terminating them. "
+      "of terminating them.\n"
       "REGEX specifies a regular expression that a string must match to be "
-      "returned. "
-      "Typical usage \n"
-      "  FILE(STRINGS myfile.txt myfile)\n"
+      "returned. Typical usage \n"
+      "  file(STRINGS myfile.txt myfile)\n"
       "stores a list in the variable \"myfile\" in which each item is "
       "a line from the input file.\n"
       "GLOB will generate a list of all files that match the globbing "
@@ -160,7 +159,7 @@ protected:
   bool HandleCMakePathCommand(std::vector<std::string> const& args,
                               bool nativePath);
 
-  // FILE(INSTALL ...) related functions
+  // file(INSTALL ...) related functions
   bool HandleInstallCommand(std::vector<std::string> const& args);
   bool ParseInstallArgs(std::vector<std::string> const& args,
                         cmFileInstaller& installer,

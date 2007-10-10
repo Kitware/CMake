@@ -41,7 +41,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "GET_DIRECTORY_PROPERTY";}
+  virtual const char* GetName() { return "get_directory_property";}
 
   /**
    * Succinct documentation.
@@ -57,7 +57,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  GET_DIRECTORY_PROPERTY(VAR [DIRECTORY dir] property)\n"
+        "  get_directory_property(VAR [DIRECTORY dir] property)\n"
         "Get a property from the Directory.  The value of the property is " 
         "stored in the variable VAR. If the property is not found, "
         "CMake will report an error. The properties include: VARIABLES, "

@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "TRY_COMPILE";}
+  virtual const char* GetName() { return "try_compile";}
 
   /**
    * Succinct documentation.
@@ -59,7 +59,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  TRY_COMPILE(RESULT_VAR bindir srcdir\n"
+      "  try_compile(RESULT_VAR bindir srcdir\n"
       "              projectName <targetname> [CMAKE_FLAGS <Flags>]\n"
       "              [OUTPUT_VARIABLE var])\n"
       "Try compiling a program.  In this form, srcdir should contain a "
@@ -67,7 +67,7 @@ public:
       "bindir and srcdir will not be deleted after this command is run. "
       "If <target name> is specified then build just that target "
       "otherwise the all or ALL_BUILD target is built.\n"
-      "  TRY_COMPILE(RESULT_VAR bindir srcfile\n"
+      "  try_compile(RESULT_VAR bindir srcfile\n"
       "              [CMAKE_FLAGS <Flags>]\n"
       "              [COMPILE_DEFINITIONS <flags> ...]\n"
       "              [OUTPUT_VARIABLE var]\n"
@@ -84,14 +84,14 @@ public:
       "COMPILE_DEFINITIONS are -Ddefinition that will be passed to the "
       "compile line.  "
 
-      "TRY_COMPILE creates a CMakeList.txt "
+      "try_compile creates a CMakeList.txt "
       "file on the fly that looks like this:\n"
-      "  ADD_DEFINITIONS( <expanded COMPILE_DEFINITIONS from calling "
+      "  add_definitions( <expanded COMPILE_DEFINITIONS from calling "
       "cmake>)\n"
-      "  INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES})\n"
-      "  LINK_DIRECTORIES(${LINK_DIRECTORIES})\n"
-      "  ADD_EXECUTABLE(cmTryCompileExec sources)\n"
-      "  TARGET_LINK_LIBRARIES(cmTryCompileExec ${LINK_LIBRARIES})\n"
+      "  include_directories(${INCLUDE_DIRECTORIES})\n"
+      "  link_directories(${LINK_DIRECTORIES})\n"
+      "  add_executable(cmTryCompileExec sources)\n"
+      "  target_link_libraries(cmTryCompileExec ${LINK_LIBRARIES})\n"
       "In both versions of the command, "
       "if OUTPUT_VARIABLE is specified, then the "
       "output from the build process is stored in the given variable. "

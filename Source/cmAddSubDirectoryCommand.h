@@ -46,7 +46,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ADD_SUBDIRECTORY";}
+  virtual const char* GetName() { return "add_subdirectory";}
 
   /**
    * Succinct documentation.
@@ -62,7 +62,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_SUBDIRECTORY(source_dir [binary_dir] \n"
+      "  add_subdirectory(source_dir [binary_dir] \n"
       "                   [EXCLUDE_FROM_ALL])\n"
       "Add a subdirectory to the build. The source_dir specifies the "
       "directory in which the source CmakeLists.txt and code files are "

@@ -46,7 +46,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "REMOVE_DEFINITIONS";}
+  virtual const char* GetName() {return "remove_definitions";}
   
   /**
    * Succinct documentation.
@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  REMOVE_DEFINITIONS(-DFOO -DBAR ...)\n"
+      "  remove_definitions(-DFOO -DBAR ...)\n"
       "Removes flags from command line of C and C++ compilers.  "
       "This command can be used to remove any flag from a compile line, "
       "but the -D flag is accepted by most C/C++ compilers.  "

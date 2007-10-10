@@ -46,7 +46,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName()
-    {return "EXECUTE_PROCESS";}
+    {return "execute_process";}
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -67,7 +67,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  EXECUTE_PROCESS(COMMAND <cmd1> [args1...]]\n"
+      "  execute_process(COMMAND <cmd1> [args1...]]\n"
       "                  [COMMAND <cmd2> [args2...] [...]]\n"
       "                  [WORKING_DIRECTORY <directory>]\n"
       "                  [TIMEOUT <seconds>]\n"
@@ -106,8 +106,8 @@ public:
       "pipe the precedence is not specified.  "
       "If no OUTPUT_* or ERROR_* options are given the output will be shared "
       "with the corresponding pipes of the CMake process itself.\n"
-      "The EXECUTE_PROCESS command is a newer more powerful version of "
-      "EXEC_PROGRAM, but the old command has been kept for compatibility."
+      "The execute_process command is a newer more powerful version of "
+      "exec_program, but the old command has been kept for compatibility."
       ;
     }
 

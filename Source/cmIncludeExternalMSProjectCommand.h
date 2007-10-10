@@ -46,7 +46,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "INCLUDE_EXTERNAL_MSPROJECT";}
+  virtual const char* GetName() {return "include_external_msproject";}
 
   /**
    * Succinct documentation.
@@ -62,7 +62,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  INCLUDE_EXTERNAL_MSPROJECT(projectname location\n"
+      "  include_external_msproject(projectname location\n"
       "                             dep1 dep2 ...)\n"
       "Includes an external Microsoft project in the generated workspace "
       "file.  Currently does nothing on UNIX.";
