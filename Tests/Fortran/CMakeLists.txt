@@ -12,4 +12,14 @@ IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     test_module_main.f90
     test_module_implementation.f90
     test_module_interface.f90)
+
+  ADD_EXECUTABLE(test_use_in_comment_fixedform
+    test_use_in_comment_fixedform.f)
+  ADD_EXECUTABLE(test_use_in_comment_freeform 
+    test_use_in_comment_freeform.f90)
+
+  ADD_EXECUTABLE(test_in_interface 
+    in_interface/main.f90
+    in_interface/module.f90)
+
 ENDIF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
