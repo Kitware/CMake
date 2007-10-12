@@ -1941,18 +1941,14 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       std::vector<std::string> archs;
       cmSystemTools::ExpandListArgument(std::string(osxArch),
                                         archs);
-      if((archs.size() > 1) 
-       || ((archs.size()== 1) && this->Makefile->IsOn("CMAKE_DO_TRY_COMPILE")))
+      for( std::vector<std::string>::iterator i = archs.begin();
+           i != archs.end(); ++i)
         {
-        for( std::vector<std::string>::iterator i = archs.begin();
-             i != archs.end(); ++i)
-          {
-          flags += " -arch ";
-          flags += *i;
-          }
-        flags += " -isysroot ";
-        flags += sysroot;
+        flags += " -arch ";
+        flags += *i;
         }
+      flags += " -isysroot ";
+      flags += sysroot;
       }
     }
   this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
