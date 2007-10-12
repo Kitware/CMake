@@ -1347,7 +1347,6 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
                                includeRegexScan.c_str(),
                                includeRegexComplain.c_str(),
                                includeCacheFileName);
-      scanner->SetLocalGenerator(this);
       }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")
@@ -1362,6 +1361,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
     
     if (scanner)
       {
+      scanner->SetLocalGenerator(this);
       scanner->SetFileComparison
         (this->GlobalGenerator->GetCMakeInstance()->GetFileComparison());
       // for each file we need to scan
