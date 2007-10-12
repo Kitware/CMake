@@ -19,7 +19,7 @@ ENDIF (ASPELL_INCLUDE_DIR AND ASPELL_LIBRARIES)
 
 FIND_PATH(ASPELL_INCLUDE_DIR aspell.h )
 
-FIND_LIBRARY(ASPELL_LIBRARIES NAMES aspell aspell-15)
+FIND_LIBRARY(ASPELL_LIBRARIES NAMES aspell aspell-15 libaspell-15 libaspell)
 
 # handle the QUIETLY and REQUIRED arguments and set ASPELL_FOUND to TRUE if 
 # all listed variables are TRUE
