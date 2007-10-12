@@ -17,6 +17,8 @@
 #include "cmDependsFortran.h"
 
 #include "cmSystemTools.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
 
@@ -119,6 +121,10 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
     return false;
     }
 
+  // Get the directory in which stamp files will be stored.
+  std::string stamp_dir =
+    this->LocalGenerator->GetMakefile()->GetCurrentOutputDirectory();
+
   // Create the parser object.
   cmDependsFortranParser parser(this);
 
@@ -157,6 +163,38 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
 
       // create an empty proxy in case no other source provides it
       makeDepends << i->c_str() << ".mod.proxy:" << std::endl;
+
+      // The object file should depend on timestamped files for the
+      // modules it uses.
+      std::string m = cmSystemTools::LowerCase(*i);
+      makeDepends << obj << ": " << m.c_str() << ".mod.stamp\n";
+
+      // Create a dummy timestamp file for the module.
+      std::string fullPath = stamp_dir;
+      fullPath += "/";
+      fullPath += m;
+      fullPath += ".mod.stamp";
+      if(!cmSystemTools::FileExists(fullPath.c_str()))
+        {
+        std::ofstream dummy(fullPath.c_str());
+        dummy
+          << "This is a fake module timestamp file created by CMake because\n"
+          << "  " << src << "\n"
+          << "requires the module and\n"
+          << "  " << obj << "\n"
+          << "depends on this timestamp file.\n"
+          << "\n"
+          << "If another source in the same directory provides the module\n"
+          << "this file will be overwritten with a real module timestamp that\n"
+          << "is updated when the module is rebuilt.\n"
+          << "\n"
+          << "If no source in the directory provides the module at least the\n"
+          << "project will build without failing to find the module timestamp.\n"
+          << "\n"
+          << "In the future CMake may be able to locate modules in other directories\n"
+          << "or outside the project and update this timestamp file as necessary.\n"
+          ;
+        }
       }
     }
 
