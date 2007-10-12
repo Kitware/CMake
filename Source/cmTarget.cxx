@@ -1324,7 +1324,7 @@ const char* cmTarget::NormalGetDirectory(const char* config, bool implib)
   if(config && *config)
     {
     // Do not create the directory when config is given:
-    this->Directory = this->GetAndCreateOutputDir(implib, false);
+    this->Directory = this->GetAndCreateOutputDir(implib, true);
     // Add the configuration's subdirectory.
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", config, "", this->Directory);
