@@ -455,6 +455,11 @@ void SystemTools::ReplaceString(kwsys_stl::string& source,
 
   // perform replacements until done
   size_t replaceSize = strlen(replace);
+  // do while hangs if replaceSize is 0
+  if(replaceSize == 0)
+    {
+    return;
+    }
   char *orig = strdup(src);
   char *currentPos = orig;
   searchPos = searchPos - src + orig;
