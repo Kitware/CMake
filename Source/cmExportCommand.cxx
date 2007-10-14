@@ -191,7 +191,7 @@ bool cmExportCommand
           if (loc && *loc)
             {
             fout << "                      " << currentConfig->c_str()
-                                            << "_LOCATION \'" << loc << "\"\n";
+                                            << "_LOCATION \"" << loc << "\"\n";
             }
           }
         }
