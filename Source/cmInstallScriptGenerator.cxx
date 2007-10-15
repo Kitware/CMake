@@ -18,8 +18,9 @@
 
 //----------------------------------------------------------------------------
 cmInstallScriptGenerator
-::cmInstallScriptGenerator(const char* script, bool code):
-  cmInstallGenerator(0, std::vector<std::string>(), 0),
+::cmInstallScriptGenerator(const char* script, bool code,
+                           const char* component) :
+  cmInstallGenerator(0, std::vector<std::string>(), component),
   Script(script), Code(code)
 {
 }
@@ -33,12 +34,19 @@ cmInstallScriptGenerator
 //----------------------------------------------------------------------------
 void cmInstallScriptGenerator::GenerateScript(std::ostream& os)
 {
+  Indent indent;
+  std::string component_test =
+    this->CreateComponentTest(this->Component.c_str());
+  os << indent << "IF(" << component_test << ")\n";
+
   if(this->Code)
     {
-    os << this->Script << "\n";
+    os << indent.Next() << this->Script << "\n";
     }
   else
     {
-    os << "INCLUDE(\"" << this->Script << "\")\n";
+    os << indent.Next() << "INCLUDE(\"" << this->Script << "\")\n";
     }
+
+  os << indent << "ENDIF(" << component_test << ")\n\n";
 }

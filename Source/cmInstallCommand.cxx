@@ -99,8 +99,34 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
 {
+  std::string component("Unspecified");
+  int componentCount = 0;
   bool doing_script = false;
   bool doing_code = false;
+
+  // Scan the args once for COMPONENT. Only allow one.
+  //
+  for(size_t i=0; i < args.size(); ++i)
+    {
+    if(args[i] == "COMPONENT" && i+1 < args.size())
+        {
+        ++componentCount;
+        ++i;
+        component = args[i];
+        }
+    }
+
+  if(componentCount>1)
+    {
+    this->SetError("given more than one COMPONENT for the SCRIPT or CODE "
+      "signature of the INSTALL command. "
+      "Use multiple INSTALL commands with one COMPONENT each.");
+    return false;
+    }
+
+  // Scan the args again, this time adding install generators each time we
+  // encounter a SCRIPT or CODE arg:
+  //
   for(size_t i=0; i < args.size(); ++i)
     {
     if(args[i] == "SCRIPT")
@@ -112,6 +138,11 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
       {
       doing_script = false;
       doing_code = true;
+      }
+    else if(args[i] == "COMPONENT")
+      {
+      doing_script = false;
+      doing_code = false;
       }
     else if(doing_script)
       {
@@ -129,16 +160,17 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
         return false;
         }
       this->Makefile->AddInstallGenerator(
-        new cmInstallScriptGenerator(script.c_str()));
+        new cmInstallScriptGenerator(script.c_str(), false, component.c_str()));
       }
     else if(doing_code)
       {
       doing_code = false;
       std::string code = args[i];
       this->Makefile->AddInstallGenerator(
-        new cmInstallScriptGenerator(code.c_str(), true));
+        new cmInstallScriptGenerator(code.c_str(), true, component.c_str()));
       }
     }
+
   if(doing_script)
     {
     this->SetError("given no value for SCRIPT argument.");
@@ -149,6 +181,11 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
     this->SetError("given no value for CODE argument.");
     return false;
     }
+
+  //Tell the global generator about any installation component names specified.
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                             ->AddInstallComponent(component.c_str());
+
   return true;
 }
 
@@ -169,15 +206,15 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
   cmCommandArgumentsHelper argHelper;
   cmCommandArgumentGroup group;
-  cmCAStringVector genericArgVector     (&argHelper, 0);
-  cmCAStringVector archiveArgVector     (&argHelper, "ARCHIVE", &group);
-  cmCAStringVector libraryArgVector     (&argHelper, "LIBRARY", &group);
-  cmCAStringVector runtimeArgVector     (&argHelper, "RUNTIME", &group);
-  cmCAStringVector frameworkArgVector   (&argHelper, "FRAMEWORK", &group);
-  cmCAStringVector bundleArgVector      (&argHelper, "BUNDLE", &group);
-  cmCAStringVector privateHeaderArgVector(&argHelper,"PRIVATE_HEADER", &group);
-  cmCAStringVector publicHeaderArgVector(&argHelper, "PUBLIC_HEADER", &group);
-  cmCAStringVector resourceArgVector   (&argHelper, "RESOURCE", &group);
+  cmCAStringVector genericArgVector      (&argHelper,0);
+  cmCAStringVector archiveArgVector      (&argHelper,"ARCHIVE",&group);
+  cmCAStringVector libraryArgVector      (&argHelper,"LIBRARY",&group);
+  cmCAStringVector runtimeArgVector      (&argHelper,"RUNTIME",&group);
+  cmCAStringVector frameworkArgVector    (&argHelper,"FRAMEWORK",&group);
+  cmCAStringVector bundleArgVector       (&argHelper,"BUNDLE",&group);
+  cmCAStringVector privateHeaderArgVector(&argHelper,"PRIVATE_HEADER",&group);
+  cmCAStringVector publicHeaderArgVector (&argHelper,"PUBLIC_HEADER",&group);
+  cmCAStringVector resourceArgVector     (&argHelper,"RESOURCE",&group);
   genericArgVector.Follows(0);
   group.Follows(&genericArgVector);
 

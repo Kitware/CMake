@@ -2419,7 +2419,7 @@ cmLocalGenerator
     // Include the user-specified pre-install script for this target.
     if(const char* preinstall = l->second.GetProperty("PRE_INSTALL_SCRIPT"))
       {
-      cmInstallScriptGenerator g(preinstall);
+      cmInstallScriptGenerator g(preinstall, false, 0);
       g.Generate(os, config, configurationTypes);
       }
 
@@ -2472,7 +2472,7 @@ cmLocalGenerator
     // Include the user-specified post-install script for this target.
     if(const char* postinstall = l->second.GetProperty("POST_INSTALL_SCRIPT"))
       {
-      cmInstallScriptGenerator g(postinstall);
+      cmInstallScriptGenerator g(postinstall, false, 0);
       g.Generate(os, config, configurationTypes);
       }
     }

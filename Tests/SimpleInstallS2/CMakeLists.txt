@@ -251,14 +251,21 @@ ELSE(STAGE2)
   # Test empty directory installation.
   INSTALL(DIRECTORY DESTINATION MyTest/share/empty)
 
-  # Test user-specified install scripts.
+  # Test user-specified install scripts, with and without COMPONENT.
   INSTALL(
     SCRIPT InstallScript1.cmake
     CODE "SET(INSTALL_CODE_DID_RUN 1)"
     SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/InstallScript2.cmake
     )
+  INSTALL(
+    SCRIPT InstallScript3.cmake
+    CODE "SET(INSTALL_CODE_WITH_COMPONENT_DID_RUN 1)"
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/InstallScript4.cmake
+    COMPONENT Development
+    )
   SET_DIRECTORY_PROPERTIES(PROPERTIES
-    ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_INSTALL_PREFIX}/InstallScriptOut.cmake)
+    ADDITIONAL_MAKE_CLEAN_FILES
+    "${CMAKE_INSTALL_PREFIX}/InstallScriptOut.cmake;${CMAKE_INSTALL_PREFIX}/InstallScript4Out.cmake")
 
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES OUTPUT_NAME SimpleInstExe)
   # Disable VERSION test until it is implemented in the XCode generator.
