@@ -104,7 +104,7 @@ public:
       "without being invoked.  Once the endwhile is evaluated, the "
       "recorded list of commands is invoked as long as the condition "
       "is true. The condition is evaulated using the same logic as the "
-      "IF command.";
+      "if command.";
     }
   
   cmTypeMacro(cmWhileCommand, cmCommand);

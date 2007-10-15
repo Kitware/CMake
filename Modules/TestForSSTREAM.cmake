@@ -1,6 +1,6 @@
 # # - Test for std:: namespace support
 # check if the compiler supports std:: on stl classes
-#  CMAKE_NO_STD_NAMESPACE - defined by the results
+#  CMAKE_NO_ANSI_STRING_STREAM - defined by the results
 #
 IF("CMAKE_HAS_ANSI_STRING_STREAM" MATCHES "^CMAKE_HAS_ANSI_STRING_STREAM$")
   MESSAGE(STATUS "Check for sstream")

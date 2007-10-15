@@ -3076,6 +3076,18 @@ void cmake::DefineProperties(cmake *cm)
      "List of packages which were not found during the CMake run.",
      "List of packages which were not found during the CMake run. Whether a "
      "package has been found is determined using the <NAME>_FOUND variables.");
+
+
+  // ================================================================
+  // define variables as well
+  // ================================================================
+
+  cm->DefineProperty
+    ("CMAKE_COMMAND", cmProperty::VARIABLE,
+     "The full path to the cmake executable.",
+     "This is the full path to the CMake executable cmake which is "
+     "useful from custom commands that want to use the cmake -E "
+     "option for portable system commands.");
 }
 
 
