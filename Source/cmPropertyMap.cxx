@@ -18,9 +18,6 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-// define STRICT to get checking of all set and get property calls
-//#define CMAKE_STRICT 
-
 cmProperty *cmPropertyMap::GetOrCreateProperty(const char *name)
 {
   cmPropertyMap::iterator it = this->find(name);
