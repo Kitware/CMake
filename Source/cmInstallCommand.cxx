@@ -160,14 +160,16 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
         return false;
         }
       this->Makefile->AddInstallGenerator(
-        new cmInstallScriptGenerator(script.c_str(), false, component.c_str()));
+        new cmInstallScriptGenerator(script.c_str(), false,
+                                     component.c_str()));
       }
     else if(doing_code)
       {
       doing_code = false;
       std::string code = args[i];
       this->Makefile->AddInstallGenerator(
-        new cmInstallScriptGenerator(code.c_str(), true, component.c_str()));
+        new cmInstallScriptGenerator(code.c_str(), true,
+                                     component.c_str()));
       }
     }
 

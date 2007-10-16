@@ -185,14 +185,16 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
           << "depends on this timestamp file.\n"
           << "\n"
           << "If another source in the same directory provides the module\n"
-          << "this file will be overwritten with a real module timestamp that\n"
-          << "is updated when the module is rebuilt.\n"
+          << "this file will be overwritten with a real module timestamp\n"
+          << "that is updated when the module is rebuilt.\n"
           << "\n"
-          << "If no source in the directory provides the module at least the\n"
-          << "project will build without failing to find the module timestamp.\n"
+          << "If no source in the directory provides the module at least\n"
+          << "the project will build without failing to find the module\n"
+          << "timestamp.\n"
           << "\n"
-          << "In the future CMake may be able to locate modules in other directories\n"
-          << "or outside the project and update this timestamp file as necessary.\n"
+          << "In the future CMake may be able to locate modules in other\n"
+          << "directories or outside the project and update this timestamp\n"
+          << "file as necessary.\n"
           ;
         }
       }
