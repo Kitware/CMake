@@ -213,6 +213,7 @@ IF(WIN32_STYLE_FIND)
     # Find wxWidgets multilib base libraries
     FIND_LIBRARY(WX_base${_DBG}
       NAMES
+      wxbase29${_UCD}${_DBG}
       wxbase28${_UCD}${_DBG}
       wxbase27${_UCD}${_DBG}
       wxbase26${_UCD}${_DBG}
@@ -224,6 +225,7 @@ IF(WIN32_STYLE_FIND)
     FOREACH(LIB net odbc xml)
       FIND_LIBRARY(WX_${LIB}${_DBG}
         NAMES
+        wxbase29${_UCD}${_DBG}_${LIB}
         wxbase28${_UCD}${_DBG}_${LIB}
         wxbase27${_UCD}${_DBG}_${LIB}
         wxbase26${_UCD}${_DBG}_${LIB}
@@ -237,6 +239,7 @@ IF(WIN32_STYLE_FIND)
     # Find wxWidgets monolithic library
     FIND_LIBRARY(WX_mono${_DBG}
       NAMES
+      wxmsw${_UNV}29${_UCD}${_DBG}
       wxmsw${_UNV}28${_UCD}${_DBG}
       wxmsw${_UNV}27${_UCD}${_DBG}
       wxmsw${_UNV}26${_UCD}${_DBG}
@@ -250,6 +253,7 @@ IF(WIN32_STYLE_FIND)
     FOREACH(LIB core adv aui html media xrc dbgrid gl qa)
       FIND_LIBRARY(WX_${LIB}${_DBG}
         NAMES
+        wxmsw${_UNV}29${_UCD}${_DBG}_${LIB}
         wxmsw${_UNV}28${_UCD}${_DBG}_${LIB}
         wxmsw${_UNV}27${_UCD}${_DBG}_${LIB}
         wxmsw${_UNV}26${_UCD}${_DBG}_${LIB}
