@@ -36,7 +36,7 @@ struct xmlrpc_clientparms {
 };
 
 #define XMLRPC_CP_MEMBER_OFFSET(mbrname) \
-  ((unsigned int)(char*)&((struct xmlrpc_clientparms *)0)->mbrname)
+  ((unsigned long)(char*)&((struct xmlrpc_clientparms *)0)->mbrname)
 #define XMLRPC_CP_MEMBER_SIZE(mbrname) \
   sizeof(((struct xmlrpc_clientparms *)0)->mbrname)
 #define XMLRPC_CPSIZE(mbrname) \
