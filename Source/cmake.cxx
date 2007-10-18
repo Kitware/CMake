@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmake.h"
+#include "cmDocumentVariables.h"
 #include "time.h"
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
@@ -3081,13 +3082,7 @@ void cmake::DefineProperties(cmake *cm)
   // ================================================================
   // define variables as well
   // ================================================================
-
-  cm->DefineProperty
-    ("CMAKE_COMMAND", cmProperty::VARIABLE,
-     "The full path to the cmake executable.",
-     "This is the full path to the CMake executable cmake which is "
-     "useful from custom commands that want to use the cmake -E "
-     "option for portable system commands.");
+  cmDocumentVariables::DefineVariables(cm);
 }
 
 
