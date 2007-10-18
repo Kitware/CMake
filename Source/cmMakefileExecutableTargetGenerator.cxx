@@ -329,18 +329,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                    cmLocalGenerator::UNCHANGED));
   }
 
-  // Add a command to remove any existing files for this executable.
-  std::vector<std::string> commands1;
-  this->LocalGenerator->AppendCleanCommand(commands1, exeCleanFiles,
-                                           *this->Target, "target");
-  this->LocalGenerator->CreateCDCommand
-    (commands1,
-     this->Makefile->GetStartOutputDirectory(),
-     this->Makefile->GetHomeOutputDirectory());
-
-  commands.insert(commands.end(), commands1.begin(), commands1.end());
-  commands1.clear();
-
   // Add the pre-build and pre-link rules building but not when relinking.
   if(!relink)
     {
@@ -356,6 +344,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   linkRuleVar += "_LINK_EXECUTABLE";
   std::string linkRule =
     this->Makefile->GetRequiredDefinition(linkRuleVar.c_str());
+  std::vector<std::string> commands1;
   cmSystemTools::ExpandListArgument(linkRule, commands1);
   if(this->Target->GetPropertyAsBool("ENABLE_EXPORTS"))
     {

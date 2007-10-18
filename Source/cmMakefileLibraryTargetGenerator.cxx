@@ -643,16 +643,20 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
 #endif
 
-  // Add a command to remove any existing files for this library.
   std::vector<std::string> commands1;
-  this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
-                                           *this->Target, "target");
-  this->LocalGenerator->CreateCDCommand
-    (commands1,
-     this->Makefile->GetStartOutputDirectory(),
-     this->Makefile->GetHomeOutputDirectory());
-  commands.insert(commands.end(), commands1.begin(), commands1.end());
-  commands1.clear();
+  // Add a command to remove any existing files for this library.
+  // for static libs only 
+  if(this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,
+                                             *this->Target, "target");
+    this->LocalGenerator->CreateCDCommand
+      (commands1,
+       this->Makefile->GetStartOutputDirectory(),
+       this->Makefile->GetHomeOutputDirectory());
+    commands.insert(commands.end(), commands1.begin(), commands1.end());
+    commands1.clear();
+    }
 
   // Add the pre-build and pre-link rules building but not when relinking.
   if(!relink)
