@@ -39,6 +39,8 @@ public:
 
 protected:
   virtual int InitializeInternal();
+  void CreateMenuLinks( cmOStringStream& str,
+                        cmOStringStream& deleteStr);
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
   virtual const char* GetOutputExtension() { return ".exe"; }

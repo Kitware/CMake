@@ -41,8 +41,18 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     # There is a bug in NSI that does not handle full unix paths properly. Make
     # sure there is at least one set of four (4) backlasshes.
     SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\CMakeInstall.bmp")
-    SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMake")
-    SET(CPACK_CREATE_DESKTOP_LINK_CMakeSetup 1)
+    # tell cpack the executables you want in the start menu as links
+    SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMake" )
+    # tell cpack to create links to the doc files
+    SET(CPACK_NSIS_MENU_LINKS
+      "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/CMakeSetup.html" "CMakeSetup Help"
+      "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/cmake.html" "CMake Help"
+      "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/cmake-properties.html"
+      "CMake Properties and Variables Help"
+      "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/ctest.html" "CTest Help"
+      "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/cmake-modules.html" "CMake Modules Help"
+      "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/cmake-commands.html" "CMake Commands Help"
+      "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/cpack.html" "CPack Help")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\CMakeSetup.exe")
     SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} a cross-platform, open-source build system")
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.cmake.org")
@@ -82,7 +92,7 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     SET(CPACK_CYGWIN_PATCH_FILE 
       "${CMake_BINARY_DIR}/@CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.patch")
     # include the sub directory for cygwin releases
-    SUBDIRS(Utilities/Release/Cygwin)
+    INCLUDE(Utilities/Release/Cygwin)
     # when packaging source make sure the .build directory is not included
     SET(CPACK_SOURCE_IGNORE_FILES
       "/CVS/" "/\\\\.build/" "/\\\\.svn/" "\\\\.swp$" "\\\\.#" "/#" "~$")

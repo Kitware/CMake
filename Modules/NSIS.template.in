@@ -409,8 +409,8 @@ FunctionEnd
 ;--------------------------------
 ; Define some macro setting for the gui
 
-  !define CPACK_PACKAGE_ICON@CPACK_PACKAGE_ICON@
-  !ifndef CPACK_PACKAGE_ICON
+  !define CPACK_PACKAGE_ICON "@CPACK_PACKAGE_ICON@"
+  !ifdef CPACK_PACKAGE_ICON
     !define MUI_HEADERIMAGE_BITMAP "@CPACK_PACKAGE_ICON@"
   !endif
 

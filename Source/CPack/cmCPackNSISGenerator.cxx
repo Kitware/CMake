@@ -256,6 +256,7 @@ int cmCPackNSISGenerator::InitializeInternal()
                   << ".lnk\"" << std::endl;
         }
       }
+    this->CreateMenuLinks(str, deleteStr);
     this->SetOptionIfNotSet("CPACK_NSIS_CREATE_ICONS", str.str().c_str());
     this->SetOptionIfNotSet("CPACK_NSIS_DELETE_ICONS", 
                             deleteStr.str().c_str());
@@ -263,6 +264,60 @@ int cmCPackNSISGenerator::InitializeInternal()
   this->SetOptionIfNotSet("CPACK_NSIS_COMPRESSOR", "lzma");
 
   return this->Superclass::InitializeInternal();
+}
+
+//----------------------------------------------------------------------
+void cmCPackNSISGenerator::CreateMenuLinks( cmOStringStream& str,
+                                            cmOStringStream& deleteStr)
+{
+  const char* cpackMenuLinks
+    = this->GetOption("CPACK_NSIS_MENU_LINKS");
+  if(!cpackMenuLinks)
+    {
+    return;
+    }
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "The cpackMenuLinks: "
+                << cpackMenuLinks << "." << std::endl);
+  std::vector<std::string> cpackMenuLinksVector;
+  cmSystemTools::ExpandListArgument(cpackMenuLinks,
+                                    cpackMenuLinksVector);
+  if ( cpackMenuLinksVector.size() % 2 != 0 )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
+                  "<icon name>." << std::endl);
+    return;
+    }
+  std::vector<std::string>::iterator it;
+  for ( it = cpackMenuLinksVector.begin();
+        it != cpackMenuLinksVector.end();
+        ++it )
+    {
+    std::string sourceName = *it;
+    /* convert / to \\ */
+    cmSystemTools::ReplaceString(sourceName, "/", "\\");
+    ++ it;
+    std::string linkName = *it;
+    str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\"
+        << linkName << ".lnk\" \"$INSTDIR\\" << sourceName << "\""
+        << std::endl;
+    deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
+              << ".lnk\"" << std::endl;
+    // see if CPACK_CREATE_DESKTOP_LINK_ExeName is on
+    // if so add a desktop link
+    std::string desktop = "CPACK_CREATE_DESKTOP_LINK_";
+    desktop += linkName;
+    if(this->IsSet(desktop.c_str()))
+      {
+      str << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
+      str << "    CreateShortCut \"$DESKTOP\\"
+          << linkName << ".lnk\" \"$INSTDIR\\" << sourceName << "\""
+          << std::endl;
+      deleteStr << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
+      deleteStr << "    Delete \"$DESKTOP\\" << linkName
+                << ".lnk\"" << std::endl;
+      }
+    }
 }
 
 //----------------------------------------------------------------------
