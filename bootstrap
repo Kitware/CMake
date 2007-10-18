@@ -152,6 +152,7 @@ CMAKE_CXX_SOURCES="\
   cmTarget \
   cmTest \
   cmCustomCommand \
+  cmDocumentVariables \
   cmCacheManager \
   cmListFileCache \
   cmOrderLinkDirectories \
