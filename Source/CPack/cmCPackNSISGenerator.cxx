@@ -283,9 +283,10 @@ void cmCPackNSISGenerator::CreateMenuLinks( cmOStringStream& str,
                                     cpackMenuLinksVector);
   if ( cpackMenuLinksVector.size() % 2 != 0 )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
-                  "<icon name>." << std::endl);
+    cmCPackLogger(
+      cmCPackLog::LOG_ERROR,
+      "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
+      "<icon name>." << std::endl);
     return;
     }
   std::vector<std::string>::iterator it;
