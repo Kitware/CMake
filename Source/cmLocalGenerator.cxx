@@ -1941,14 +1941,31 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       std::vector<std::string> archs;
       cmSystemTools::ExpandListArgument(std::string(osxArch),
                                         archs);
-      for( std::vector<std::string>::iterator i = archs.begin();
-           i != archs.end(); ++i)
+      bool addArchFlag = true;
+      if(archs.size() == 1)
         {
-        flags += " -arch ";
-        flags += *i;
+        const char* archOrig = 
+          this->Makefile->GetSafeDefinition("CMAKE_OSX_ARCHITECTURE_DEFAULT");
+        if(archs[0] == archOrig)
+          {
+          addArchFlag = false;
+          }
         }
-      flags += " -isysroot ";
-      flags += sysroot;
+      // if there is more than one arch add the -arch and
+      // -isysroot flags, or if there is one arch flag, but
+      // it is not the default -arch flag for the system, then
+      // add it.  Otherwize do not add -arch and -isysroot
+      if(addArchFlag)
+        {
+        for( std::vector<std::string>::iterator i = archs.begin();
+             i != archs.end(); ++i)
+          {
+          flags += " -arch ";
+          flags += *i;
+          }
+        flags += " -isysroot ";
+        flags += sysroot;
+        }
       }
     }
   this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
