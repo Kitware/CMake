@@ -19,6 +19,8 @@
 
 #include "cmPropertyDefinition.h"
 
+class cmDocumentationSection;
+
 class cmPropertyDefinitionMap : 
 public std::map<cmStdString,cmPropertyDefinition>
 {
@@ -27,6 +29,7 @@ public:
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
+                      const char *DocumentaitonSection,
                       bool chain);
 
   // has a named property been defined
@@ -35,7 +38,8 @@ public:
   // is a named property set to chain
   bool IsPropertyChained(const char *name);
 
-  void GetPropertiesDocumentation(std::vector<cmDocumentationEntry>& v) const;
+  void GetPropertiesDocumentation(std::map<std::string,
+                                  cmDocumentationSection *>&) const;
 };
 
 #endif

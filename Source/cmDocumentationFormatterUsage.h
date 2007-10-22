@@ -29,7 +29,7 @@ public:
                                      { return cmDocumentationEnums::UsageForm;}
 
   virtual void PrintSection(std::ostream& os,
-                    const cmDocumentationEntry* section,
+                    const cmDocumentationSection& section,
                     const char* name);
 };
 

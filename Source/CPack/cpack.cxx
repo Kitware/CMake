@@ -31,7 +31,7 @@
 #include <cmsys/CommandLineArguments.hxx>
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationName[] =
+static const char * cmDocumentationName[][3] =
 {
   {0,
    "  cpack - Packaging driver provided by CMake.", 0},
@@ -39,7 +39,7 @@ static const cmDocumentationEntry cmDocumentationName[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationUsage[] =
+static const char * cmDocumentationUsage[][3] =
 {
   {0,
    "  cpack -G <generator> [options]",
@@ -48,7 +48,7 @@ static const cmDocumentationEntry cmDocumentationUsage[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationDescription[] =
+static const char * cmDocumentationDescription[][3] =
 {
   {0,
    "The \"cpack\" executable is the CMake packaging program.  "
@@ -60,7 +60,7 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationOptions[] =
+static const char * cmDocumentationOptions[][3] =
 {
     {"-G <generator>", "Use the specified generator to generate package.",
     "CPack may support multiple native packaging systems on certain "
@@ -79,7 +79,7 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationSeeAlso[] =
+static const char * cmDocumentationSeeAlso[][3] =
 {
     {0, "cmake", 0},
     {0, "ccmake", 0},
@@ -447,10 +447,10 @@ int main (int argc, char *argv[])
     doc.CheckOptions(argc, argv);
     // Construct and print requested documentation.
     doc.SetName("cpack");
-    doc.SetNameSection(cmDocumentationName);
-    doc.SetUsageSection(cmDocumentationUsage);
-    doc.SetDescriptionSection(cmDocumentationDescription);
-    doc.SetOptionsSection(cmDocumentationOptions);
+    doc.SetSection("Name",cmDocumentationName);
+    doc.SetSection("Usage",cmDocumentationUsage);
+    doc.SetSection("Description",cmDocumentationDescription);
+    doc.SetSection("Options",cmDocumentationOptions);
 
     std::vector<cmDocumentationEntry> v;
     cmCPackGenerators::DescriptionsMap::const_iterator generatorIt;
@@ -459,14 +459,12 @@ int main (int argc, char *argv[])
       ++ generatorIt )
       {
       cmDocumentationEntry e;
-      e.name = generatorIt->first.c_str();
-      e.brief = generatorIt->second.c_str();
-      e.full = "";
+      e.Name = generatorIt->first.c_str();
+      e.Brief = generatorIt->second.c_str();
+      e.Full = "";
       v.push_back(e);
       }
-    cmDocumentationEntry empty = {0,0,0};
-    v.push_back(empty);
-    doc.SetGeneratorsSection(&v[0]);
+    doc.SetSection("Generators",v);
 
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
 #undef cout

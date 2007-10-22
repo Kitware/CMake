@@ -10,7 +10,7 @@
 
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationName[] =
+static const char * cmDocumentationName[][3] =
 {
   {0,
    "  CMakeSetup - CMake Windows GUI.", 0},
@@ -18,7 +18,7 @@ static const cmDocumentationEntry cmDocumentationName[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationUsage[] =
+static const char * cmDocumentationUsage[][3] =
 {
   {0,
    "  CMakeSetup [options]\n"
@@ -28,7 +28,7 @@ static const cmDocumentationEntry cmDocumentationUsage[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationDescription[] =
+static const char * cmDocumentationDescription[][3] =
 {
   {0,
    "The \"CMakeSetup\" executable is the CMake Windows GUI.  Project "
@@ -40,7 +40,7 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationOptions[] =
+static const char * cmDocumentationOptions[][3] =
 {
   {"-A[on|off]", "Enable/disable display of advanced cache values.",
    "There are two categories of CMake cache values: non-advanced and "
@@ -121,13 +121,13 @@ BOOL CMakeSetup::InitInstance()
     hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetGeneratorDocumentation(generators);
     doc.SetName("cmake");
-    doc.SetNameSection(cmDocumentationName);
-    doc.SetUsageSection(cmDocumentationUsage);
-    doc.SetDescriptionSection(cmDocumentationDescription);
-    doc.SetGeneratorsSection(&generators[0]);
-    doc.SetOptionsSection(cmDocumentationOptions);
-    doc.SetCommandsSection(&commands[0]);
-    doc.SetCompatCommandsSection(&compatCommands[0]);
+    doc.SetSection("Name",cmDocumentationName);
+    doc.SetSection("Usage",cmDocumentationUsage);
+    doc.SetSection("Description",cmDocumentationDescription);
+    doc.SetSection("Generators",generators);
+    doc.SetSection("Options",cmDocumentationOptions);
+    doc.SetSection("Commands",commands);
+    doc.SetSection("Compatilbility Commands", compatCommands);
 
     return (doc.PrintRequestedDocumentation(std::cout)? 0:1);
     }

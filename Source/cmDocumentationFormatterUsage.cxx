@@ -16,46 +16,51 @@
 =========================================================================*/
 
 #include "cmDocumentationFormatterUsage.h"
+#include "cmDocumentationSection.h"
 
 cmDocumentationFormatterUsage::cmDocumentationFormatterUsage()
 :cmDocumentationFormatterText()
 {
 }
 
-void cmDocumentationFormatterUsage::PrintSection(std::ostream& os,
-                    const cmDocumentationEntry* section,
-                    const char* name)
+void cmDocumentationFormatterUsage
+::PrintSection(std::ostream& os,
+               const cmDocumentationSection &section,
+               const char* name)
 {
   if(name)
     {
     os << name << "\n";
     }
-  if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief; ++op)
+
+  const std::vector<cmDocumentationEntry> &entries = 
+    section.GetEntries();
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
+      op != entries.end(); ++op)
     {
-    if(op->name)
+    if(op->Name.size())
       {
-      os << "  " << op->name;
+      os << "  " << op->Name;
       this->TextIndent = "                                ";
       int align = static_cast<int>(strlen(this->TextIndent))-4;
-      for(int i = static_cast<int>(strlen(op->name)); i < align; ++i)
+      for(int i = static_cast<int>(op->Name.size()); i < align; ++i)
         {
         os << " ";
         }
-      if ( strlen(op->name) > strlen(this->TextIndent)-4 )
+      if (op->Name.size() > strlen(this->TextIndent)-4 )
         {
         os << "\n";
         os.write(this->TextIndent, strlen(this->TextIndent)-2);
         }
       os << "= ";
-      this->PrintColumn(os, op->brief);
+      this->PrintColumn(os, op->Brief.c_str());
       os << "\n";
       }
     else
       {
       os << "\n";
       this->TextIndent = "";
-      this->PrintFormatted(os, op->brief);
+      this->PrintFormatted(os, op->Brief.c_str());
       }
     }
   os << "\n";

@@ -62,7 +62,7 @@ cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
 void cmGlobalBorlandMakefileGenerator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates Borland makefiles.";
-  entry.full = "";
+  entry.Name = this->GetName();
+  entry.Brief = "Generates Borland makefiles.";
+  entry.Full = "";
 }

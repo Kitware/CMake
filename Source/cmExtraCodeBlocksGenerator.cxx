@@ -45,9 +45,9 @@ http://forums.codeblocks.org/index.php/topic,6789.0.html
 void cmExtraCodeBlocksGenerator
 ::GetDocumentation(cmDocumentationEntry& entry, const char*) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates CodeBlocks project files.";
-  entry.full =
+  entry.Name = this->GetName();
+  entry.Brief = "Generates CodeBlocks project files.";
+  entry.Full =
     "Project files for CodeBlocks will be created in the top directory "
     "and in every subdirectory which features a CMakeLists.txt file "
     "containing a PROJECT() call. "

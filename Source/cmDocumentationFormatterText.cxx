@@ -16,6 +16,7 @@
 =========================================================================*/
 
 #include "cmDocumentationFormatterText.h"
+#include "cmDocumentationSection.h"
 
 cmDocumentationFormatterText::cmDocumentationFormatterText()
 :cmDocumentationFormatter()
@@ -24,9 +25,10 @@ cmDocumentationFormatterText::cmDocumentationFormatterText()
 {
 }
 
-void cmDocumentationFormatterText::PrintSection(std::ostream& os,
-                  const cmDocumentationEntry* section,
-                  const char* name)
+void cmDocumentationFormatterText
+::PrintSection(std::ostream& os,
+               const cmDocumentationSection &section,
+               const char* name)
 {
   if(name)
     {
@@ -35,27 +37,27 @@ void cmDocumentationFormatterText::PrintSection(std::ostream& os,
       "---------------------------------------\n";
     os << name << "\n\n";
     }
-  if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief; ++op)
+
+  const std::vector<cmDocumentationEntry> &entries = 
+    section.GetEntries();
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
+      op != entries.end(); ++op)
     {
-    if(op->name)
+    if(op->Name.size())
       {
-      if(op->name[0])
-        {
-        os << "  " << op->name << "\n";
-        }
+      os << "  " << op->Name << "\n";
       this->TextIndent = "       ";
-      this->PrintFormatted(os, op->brief);
-      if(op->full)
+      this->PrintFormatted(os, op->Brief.c_str());
+      if(op->Full.size())
         {
         os << "\n";
-        this->PrintFormatted(os, op->full);
+        this->PrintFormatted(os, op->Full.c_str());
         }
       }
     else
       {
       this->TextIndent = "";
-      this->PrintFormatted(os, op->brief);
+      this->PrintFormatted(os, op->Brief.c_str());
       }
     os << "\n";
     }

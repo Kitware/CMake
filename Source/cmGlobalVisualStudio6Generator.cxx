@@ -483,9 +483,9 @@ void cmGlobalVisualStudio6Generator::WriteDSWHeader(std::ostream& fout)
 void cmGlobalVisualStudio6Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates Visual Studio 6 project files.";
-  entry.full = "";
+  entry.Name = this->GetName();
+  entry.Brief = "Generates Visual Studio 6 project files.";
+  entry.Full = "";
 }
 
 //----------------------------------------------------------------------------

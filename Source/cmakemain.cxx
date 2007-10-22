@@ -32,7 +32,7 @@
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationName[] =
+static const char * cmDocumentationName[][3] =
 {
   {0,
    "  cmake - Cross-Platform Makefile Generator.", 0},
@@ -40,7 +40,7 @@ static const cmDocumentationEntry cmDocumentationName[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationUsage[] =
+static const char * cmDocumentationUsage[][3] =
 {
   {0,
    "  cmake [options] <path-to-source>\n"
@@ -49,7 +49,7 @@ static const cmDocumentationEntry cmDocumentationUsage[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationDescription[] =
+static const char * cmDocumentationDescription[][3] =
 {
   {0,
    "The \"cmake\" executable is the CMake command-line interface.  It may "
@@ -62,7 +62,7 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationOptions[] =
+static const char * cmDocumentationOptions[][3] =
 {
   CMAKE_STANDARD_OPTIONS_TABLE,
   {"-E", "CMake command mode.",
@@ -166,7 +166,7 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationSeeAlso[] =
+static const char * cmDocumentationSeeAlso[][3] =
 {
   {0, "ccmake", 0},
   {0, "ctest", 0},
@@ -174,7 +174,7 @@ static const cmDocumentationEntry cmDocumentationSeeAlso[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationNOTE[] =
+static const char * cmDocumentationNOTE[][3] =
 {
   {0,
    "CMake no longer configures a project when run with no arguments.  "
@@ -300,43 +300,24 @@ int do_cmake(int ac, char** av)
 
     std::vector<cmDocumentationEntry> commands;
     std::vector<cmDocumentationEntry> compatCommands;
-    std::vector<cmDocumentationEntry> globalProperties;
-    std::vector<cmDocumentationEntry> dirProperties;
-    std::vector<cmDocumentationEntry> targetProperties;
-    std::vector<cmDocumentationEntry> testProperties;
-    std::vector<cmDocumentationEntry> sourceFileProperties;
-    std::vector<cmDocumentationEntry> variableProperties;
-    std::vector<cmDocumentationEntry> cachedVariableProperties;
+    std::map<std::string,cmDocumentationSection *> propDocs;
 
     std::vector<cmDocumentationEntry> generators;
     hcm.GetCommandDocumentation(commands, true, false);
     hcm.GetCommandDocumentation(compatCommands, false, true);
-    hcm.GetPropertiesDocumentation(globalProperties, cmProperty::GLOBAL);
-    hcm.GetPropertiesDocumentation(dirProperties, cmProperty::DIRECTORY);
-    hcm.GetPropertiesDocumentation(targetProperties, cmProperty::TARGET);
-    hcm.GetPropertiesDocumentation(testProperties, cmProperty::TEST);
-    hcm.GetPropertiesDocumentation(sourceFileProperties, 
-                                   cmProperty::SOURCE_FILE);
-    hcm.GetPropertiesDocumentation(variableProperties, cmProperty::VARIABLE);
-    hcm.GetPropertiesDocumentation(cachedVariableProperties, 
-                                   cmProperty::CACHED_VARIABLE);
+    hcm.GetPropertiesDocumentation(propDocs);
     hcm.GetGeneratorDocumentation(generators);
+
     doc.SetName("cmake");
-    doc.SetNameSection(cmDocumentationName);
-    doc.SetUsageSection(cmDocumentationUsage);
-    doc.SetDescriptionSection(cmDocumentationDescription);
-    doc.SetGeneratorsSection(&generators[0]);
-    doc.SetOptionsSection(cmDocumentationOptions);
-    doc.SetCommandsSection(&commands[0]);
-    doc.SetCompatCommandsSection(&compatCommands[0]);
-    doc.SetPropertiesSection(&globalProperties[0], cmProperty::GLOBAL);
-    doc.SetPropertiesSection(&dirProperties[0], cmProperty::DIRECTORY);
-    doc.SetPropertiesSection(&targetProperties[0], cmProperty::TARGET);
-    doc.SetPropertiesSection(&testProperties[0], cmProperty::TEST);
-    doc.SetPropertiesSection(&sourceFileProperties[0],cmProperty::SOURCE_FILE);
-    doc.SetPropertiesSection(&variableProperties[0],cmProperty::VARIABLE);
-    doc.SetPropertiesSection(&cachedVariableProperties[0],
-                             cmProperty::CACHED_VARIABLE);
+    doc.SetSection("Name",cmDocumentationName);
+    doc.SetSection("Usage",cmDocumentationUsage);
+    doc.SetSection("Description",cmDocumentationDescription);
+    doc.SetSection("Generators",generators);
+    doc.SetSection("Options",cmDocumentationOptions);
+    doc.SetSection("Commands",commands);
+    doc.SetSection("Compatibility Commands",compatCommands);
+    doc.SetSections(propDocs);
+
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
     int result = doc.PrintRequestedDocumentation(std::cout)? 0:1;
 
@@ -348,7 +329,7 @@ int do_cmake(int ac, char** av)
     if((ac == 1) && cmSystemTools::FileExists("CMakeLists.txt"))
       {
       doc.ClearSections();
-      doc.AddSection("NOTE", cmDocumentationNOTE);
+      doc.SetSection("NOTE", cmDocumentationNOTE);
       doc.Print(cmDocumentation::UsageForm, std::cerr);
       return 1;
       }

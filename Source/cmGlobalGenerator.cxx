@@ -1140,9 +1140,9 @@ void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.name = this->GetName();
-  entry.brief = "";
-  entry.full = "";
+  entry.Name = this->GetName();
+  entry.Brief = "";
+  entry.Full = "";
 }
 
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,

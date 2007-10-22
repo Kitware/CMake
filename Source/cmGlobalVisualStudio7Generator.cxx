@@ -733,9 +733,9 @@ std::vector<std::string> *cmGlobalVisualStudio7Generator::GetConfigurations()
 void cmGlobalVisualStudio7Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates Visual Studio .NET 2002 project files.";
-  entry.full = "";
+  entry.Name = this->GetName();
+  entry.Brief = "Generates Visual Studio .NET 2002 project files.";
+  entry.Full = "";
 }
 
 // make sure "special" targets have GUID's

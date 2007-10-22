@@ -42,9 +42,9 @@ cmLocalGenerator *cmGlobalVisualStudio8Win64Generator::CreateLocalGenerator()
 void cmGlobalVisualStudio8Win64Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates Visual Studio .NET 2005 Win64 project files.";
-  entry.full = "";
+  entry.Name = this->GetName();
+  entry.Brief = "Generates Visual Studio .NET 2005 Win64 project files.";
+  entry.Full = "";
 }
 
 void cmGlobalVisualStudio8Win64Generator

@@ -45,9 +45,9 @@ cmExtraEclipseCDT4Generator
 void cmExtraEclipseCDT4Generator
 ::GetDocumentation(cmDocumentationEntry& entry, const char*) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates Eclipse CDT 4.0 project files.";
-  entry.full =
+  entry.Name = this->GetName();
+  entry.Brief = "Generates Eclipse CDT 4.0 project files.";
+  entry.Full =
     "Project files for Eclipse will be created in the top directory "
     "and will have a linked resource to every subdirectory which "
     "features a CMakeLists.txt file containing a PROJECT() call."

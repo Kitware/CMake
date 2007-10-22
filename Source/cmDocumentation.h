@@ -24,7 +24,7 @@
 #include "cmDocumentationFormatterMan.h"
 #include "cmDocumentationFormatterText.h"
 #include "cmDocumentationFormatterUsage.h"
-
+#include "cmDocumentationSection.h"
 
 namespace cmsys
 {
@@ -62,78 +62,16 @@ public:
   /** Set the program name for standard document generation.  */
   void SetName(const char* name);
 
-  /** Set the program name section for standard document
-   * generation.  */
-  void SetNameSection(const cmDocumentationEntry*);
-
-  /** Set the program usage for standard document generation.  */
-  void SetUsageSection(const cmDocumentationEntry*);
-
-  /** Set the program description for standard document generation.  */
-  void SetDescriptionSection(const cmDocumentationEntry*);
-
-  /** Set the program options for standard document generation.  */
-  void SetOptionsSection(const cmDocumentationEntry*);
-
-  /** Set the listfile commands for standard document generation.  */
-  void SetCommandsSection(const cmDocumentationEntry*);
-
-  /** Set the listfile compat. commands for standard document generation.  */
-  void SetCompatCommandsSection(const cmDocumentationEntry*);
-
-  /** Set the global properties for standard document generation.  */
-  void SetPropertiesSection(const cmDocumentationEntry*, 
-                            cmProperty::ScopeType type);
-
-  /** Set the generator descriptions for standard document generation.  */
-  void SetGeneratorsSection(const cmDocumentationEntry*);
-
-  /** Set the see-also list of references to the other tools.  */
-  void SetSeeAlsoList(const cmDocumentationEntry*);
-
-  // Low-level interface for custom documents:
-  /** Internal class representing a section of the documentation.
-   * Cares e.g. for the different section titles in the different
-   * output formats.
-   */
-  class cmSection
-  {
-    public:
-      /** Create a cmSection, with a special name for man-output mode. */
-      cmSection(const char* name, const char* manName)
-                :Name(name), ManName(manName)       {}
-
-      /** Has any content been added to this section or is it empty ? */
-      bool IsEmpty() const
-        { return this->Entries.empty(); }
-
-      /** Clear contents. */
-      void Clear()
-        { this->Entries.clear(); }
-
-      /** Return the name of this section for the given output form. */
-      const char* GetName(Form form) const
-        { return (form==ManForm?this->ManName.c_str():this->Name.c_str()); }
-
-      /** Return a pointer to the first entry of this section. */
-      const cmDocumentationEntry *GetEntries() const
-        { return this->Entries.empty()?&this->EmptySection:&this->Entries[0];}
-
-      /** Append an entry to this section. */
-      void Append(const cmDocumentationEntry& entry)
-        { this->Entries.push_back(entry); }
-
-      /** Set the contents of this section. */
-      void Set(const cmDocumentationEntry* header,
-               const cmDocumentationEntry* section,
-               const cmDocumentationEntry* footer);
-
-    private:
-      std::string Name;
-      std::string ManName;
-      std::vector<cmDocumentationEntry> Entries;
-      static const cmDocumentationEntry EmptySection;
-  };
+  /** Set a section of the documentation. Typical sections include Name,
+      Usage, Description, Options, SeeAlso */
+  void SetSection(const char *sectionName,
+                  cmDocumentationSection *section);
+  void SetSection(const char *sectionName,
+                  std::vector<cmDocumentationEntry> &docs);
+  void SetSection(const char *sectionName,
+                  const char *docs[][3]);
+  void SetSections(std::map<std::string,cmDocumentationSection *>
+                   &sections);
 
   /**
    * Print documentation in the given form.  All previously added
@@ -148,14 +86,12 @@ public:
   void Print(std::ostream& os);
 
   /**
-   * Add a section of documentation.  The cmDocumentationEntry pointer
-   * should point at an array terminated by an all zero ({0,0,0})
-   * entry.  This can be used to generate custom help documents.
+   * Add a section of documentation. This can be used to generate custom help
+   * documents.
    */
-  void AddSection(const char* name, const cmDocumentationEntry* d);
-  
-  /** Convenience function, does the same as above */
-  void AddSection(const cmSection& section);
+  void AddSectionToPrint(const char *section);
+
+  void SetSeeAlsoList(const char *data[][3]);
 
   /** Clear all previously added sections of help.  */
   void ClearSections();  
@@ -172,16 +108,18 @@ private:
   void SetForm(Form f);
 
   bool CreateSingleModule(const char* fname, 
-                          const char* moduleName, 
-                          cmSection &moduleSection);
-  void CreateModuleDocsForDir(cmsys::Directory& dir, cmSection &moduleSection);
+                          const char* moduleName,
+                          cmDocumentationSection &sec);
+  void CreateModuleDocsForDir(cmsys::Directory& dir, 
+                              cmDocumentationSection &moduleSection);
   bool CreateModulesSection();
   bool CreateCustomModulesSection();
+  void CreateFullDocumentation();
+
   bool PrintCopyright(std::ostream& os);
   bool PrintVersion(std::ostream& os);
-  bool PrintDocumentationList(std::ostream& os);
-  bool PrintModuleList(std::ostream& os);
-  bool PrintPropertyList(std::ostream& os);
+  bool PrintDocumentationGeneric(std::ostream& os, const char *section);
+  bool PrintDocumentationList(std::ostream& os, const char *section);
   bool PrintDocumentationSingle(std::ostream& os);
   bool PrintDocumentationSingleModule(std::ostream& os);
   bool PrintDocumentationSingleProperty(std::ostream& os);
@@ -193,52 +131,21 @@ private:
   bool PrintDocumentationCurrentCommands(std::ostream& os);
   bool PrintDocumentationCompatCommands(std::ostream& os);
   void PrintDocumentationCommand(std::ostream& os,
-                                 const cmDocumentationEntry* entry);
+                                 const cmDocumentationEntry &entry);
 
-  void CreateUsageDocumentation();
-  void CreateFullDocumentation();
-  void CreateCurrentCommandsDocumentation();
-  void CreateCompatCommandsDocumentation();
-  void CreateModulesDocumentation();
-  void CreateCustomModulesDocumentation();
-  void CreatePropertiesDocumentation();
 
-  void SetSection(const cmDocumentationEntry* header,
-                  const cmDocumentationEntry* section,
-                  const cmDocumentationEntry* footer,
-                  std::vector<cmDocumentationEntry>&);
   const char* GetNameString() const;
   bool IsOption(const char* arg) const;
 
   std::string NameString;
-  cmSection NameSection;
-  cmSection UsageSection;
-  cmSection DescriptionSection;
-  cmSection OptionsSection;
-  cmSection CommandsSection;
-  cmSection CompatCommandsSection;
-  cmSection ModulesSection;
-  cmSection CustomModulesSection;
-  cmSection GeneratorsSection;
-  cmSection SeeAlsoSection;
-  cmSection CopyrightSection;
-  cmSection AuthorSection;
-  cmSection GlobalPropertiesSection;
-  cmSection DirectoryPropertiesSection;
-  cmSection TargetPropertiesSection;
-  cmSection TestPropertiesSection;
-  cmSection SourceFilePropertiesSection;
-  cmSection VariablePropertiesSection;
-  cmSection CachedVariablePropertiesSection;
-  std::map<cmProperty::ScopeType, cmSection*> PropertySections;
+  std::map<std::string,cmDocumentationSection*> AllSections;
   
   std::string SeeAlsoString;
   std::string CMakeRoot;
   std::string CMakeModulePath;
   std::set<std::string> ModulesFound;
   std::vector< char* > ModuleStrings;
-  std::vector< const char* > Names;
-  std::vector< const cmDocumentationEntry* > Sections;
+  std::vector<const cmDocumentationSection *> PrintSections;
   std::string CurrentArgument;
 
   struct RequestedHelpItem

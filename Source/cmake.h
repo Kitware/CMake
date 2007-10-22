@@ -52,6 +52,7 @@ class cmCommand;
 class cmVariableWatch;
 class cmFileTimeComparison;
 class cmExternalMakefileProjectGenerator;
+class cmDocumentationSection;
 
 class cmake
 {
@@ -250,8 +251,8 @@ class cmake
   void GetCommandDocumentation(std::vector<cmDocumentationEntry>& entries, 
                                bool withCurrentCommands = true, 
                                bool withCompatCommands = true) const;
-  void GetPropertiesDocumentation(std::vector<cmDocumentationEntry>&,
-                                  cmProperty::ScopeType type);
+  void GetPropertiesDocumentation(std::map<std::string,
+                                  cmDocumentationSection *>&);
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
 
   ///! Set/Get a property of this target file
@@ -308,7 +309,8 @@ class cmake
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
-                      bool chain = false);
+                      bool chain = false, 
+                      const char *variableGroup = 0);
 
   // Is a property defined?
   bool IsPropertyDefined(const char *name, cmProperty::ScopeType scope);

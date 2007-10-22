@@ -20,10 +20,9 @@
 cmDocumentationEntry cmPropertyDefinition::GetDocumentation() const
 {
   cmDocumentationEntry e;
-  e.name = this->Name.c_str();
-  e.brief = 
-    this->ShortDescription.size() ? this->ShortDescription.c_str() : 0;
-  e.full = this->FullDescription.size() ? this->FullDescription.c_str() : 0;
+  e.Name = this->Name;
+  e.Brief = this->ShortDescription;
+  e.Full = this->FullDescription;
   return e;
 }
 
@@ -31,6 +30,7 @@ void cmPropertyDefinition
 ::DefineProperty(const char *name, cmProperty::ScopeType scope,
                  const char *shortDescription,
                  const char *fullDescription,
+                 const char *sec,
                  bool chain)
 {
   this->Name = name;
@@ -43,6 +43,10 @@ void cmPropertyDefinition
   if (fullDescription)
     {
     this->FullDescription = fullDescription;
+    }
+  if (sec)
+    {
+    this->DocumentationSection = sec;
     }
 }
 

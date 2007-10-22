@@ -65,7 +65,7 @@ cmLocalGenerator *cmGlobalWatcomWMakeGenerator::CreateLocalGenerator()
 void cmGlobalWatcomWMakeGenerator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates Watcom WMake makefiles.";
-  entry.full = "";
+  entry.Name = this->GetName();
+  entry.Brief = "Generates Watcom WMake makefiles.";
+  entry.Full = "";
 }

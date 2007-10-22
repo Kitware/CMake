@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmDocumentationFormatterHTML.h"
+#include "cmDocumentationSection.h"
 
 //----------------------------------------------------------------------------
 static bool cmDocumentationIsHyperlinkChar(char c)
@@ -31,25 +32,21 @@ static bool cmDocumentationIsHyperlinkChar(char c)
 static void cmDocumentationPrintHTMLChar(std::ostream& os, char c)
 {
   // Use an escape sequence if necessary.
-  static cmDocumentationEntry escapes[] =
-  {
-    {"<", "&lt;", 0},
-    {">", "&gt;", 0},
-    {"&", "&amp;", 0},
-    {"\n", "<br>", 0},
-    {0,0,0}
-  };
-  for(const cmDocumentationEntry* op = escapes; op->name; ++op)
-    {
-    if(op->name[0] == c)
-      {
-      os << op->brief;
-      return;
-      }
-    }
+  std::map<char,std::string> escapes;
+  escapes['<'] = "&lt;";
+  escapes['>'] = "&gt;";
+  escapes['&'] = "&amp;";
+  escapes['\n'] = "<br>";
 
-  // No escape sequence is needed.
-  os << c;
+  if (escapes.find(c) == escapes.end())
+    {
+    // No escape sequence is needed.
+    os << c;
+    return;
+    }
+    
+  os << escapes[c];
+  return;
 }
 
 //----------------------------------------------------------------------------
@@ -88,34 +85,38 @@ cmDocumentationFormatterHTML::cmDocumentationFormatterHTML()
 {
 }
 
-void cmDocumentationFormatterHTML::PrintSection(std::ostream& os,
-                                           const cmDocumentationEntry* section,
-                                           const char* name)
+void cmDocumentationFormatterHTML
+::PrintSection(std::ostream& os,
+               const cmDocumentationSection &section,
+               const char* name)
 {
   if(name)
     {
     os << "<h2>" << name << "</h2>\n";
     }
-  if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief;)
+
+  const std::vector<cmDocumentationEntry> &entries = 
+    section.GetEntries();
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
+      op != entries.end();)
     {
-    if(op->name)
+    if(op->Name.size())
       {
       os << "<ul>\n";
-      for(;op->name;++op)
+      for(;op != entries.end() && op->Name.size(); ++op)
         {
         os << "  <li>\n";
-        if(op->name[0])
+        if(op->Name.size())
           {
           os << "    <b><code>";
-          this->PrintHTMLEscapes(os, op->name);
+          this->PrintHTMLEscapes(os, op->Name.c_str());
           os << "</code></b>: ";
           }
-        this->PrintHTMLEscapes(os, op->brief);
-        if(op->full)
+        this->PrintHTMLEscapes(os, op->Brief.c_str());
+        if(op->Full.size())
           {
           os << "<br>\n    ";
-          this->PrintFormatted(os, op->full);
+          this->PrintFormatted(os, op->Full.c_str());
           }
         os << "\n";
         os << "  </li>\n";
@@ -124,7 +125,7 @@ void cmDocumentationFormatterHTML::PrintSection(std::ostream& os,
       }
     else
       {
-      this->PrintFormatted(os, op->brief);
+      this->PrintFormatted(os, op->Brief.c_str());
       os << "\n";
       ++op;
       }

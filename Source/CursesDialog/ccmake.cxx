@@ -28,7 +28,7 @@
 #include <form.h>
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationName[] =
+static const char * cmDocumentationName[][3] =
 {
   {0,
    "  ccmake - Curses Interface for CMake.", 0},
@@ -36,7 +36,7 @@ static const cmDocumentationEntry cmDocumentationName[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationUsage[] =
+static const char * cmDocumentationUsage[][3] =
 {
   {0,
    "  ccmake <path-to-source>\n"
@@ -45,7 +45,7 @@ static const cmDocumentationEntry cmDocumentationUsage[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationDescription[] =
+static const char * cmDocumentationDescription[][3] =
 {
   {0,
    "The \"ccmake\" executable is the CMake curses interface.  Project "
@@ -57,14 +57,14 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationOptions[] =
+static const char * cmDocumentationOptions[][3] =
 {
   CMAKE_STANDARD_OPTIONS_TABLE,
   {0,0,0}
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationSeeAlso[] =
+static const char * cmDocumentationSeeAlso[][3] =
 {
   {0, "cmake", 0},
   {0, "ctest", 0},
@@ -116,13 +116,13 @@ int main(int argc, char** argv)
     hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetGeneratorDocumentation(generators);
     doc.SetName("ccmake");
-    doc.SetNameSection(cmDocumentationName);
-    doc.SetUsageSection(cmDocumentationUsage);
-    doc.SetDescriptionSection(cmDocumentationDescription);
-    doc.SetGeneratorsSection(&generators[0]);
-    doc.SetOptionsSection(cmDocumentationOptions);
-    doc.SetCommandsSection(&commands[0]);
-    doc.SetCompatCommandsSection(&compatCommands[0]);
+    doc.SetSection("Name",cmDocumentationName);
+    doc.SetSection("Usage",cmDocumentationUsage);
+    doc.SetSection("Description",cmDocumentationDescription);
+    doc.SetSection("Generators",generators);
+    doc.SetSection("Options",cmDocumentationOptions);
+    doc.SetSection("Command",commands);
+    doc.SetSection("Compatibility Commands",compatCommands);
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
     return doc.PrintRequestedDocumentation(std::cout)? 0:1;
     }  

@@ -113,6 +113,7 @@ SET(SRCS
   cmDocumentationFormatterMan.cxx
   cmDocumentationFormatterText.cxx
   cmDocumentationFormatterUsage.cxx
+  cmDocumentationSection.cxx
   cmDocumentVariables.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h

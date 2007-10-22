@@ -55,7 +55,7 @@ cmLocalGenerator *cmGlobalNMakeMakefileGenerator::CreateLocalGenerator()
 void cmGlobalNMakeMakefileGenerator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates NMake makefiles.";
-  entry.full = "";
+  entry.Name = this->GetName();
+  entry.Brief = "Generates NMake makefiles.";
+  entry.Full = "";
 }

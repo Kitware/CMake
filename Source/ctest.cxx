@@ -23,7 +23,7 @@
 
 #include "CTest/cmCTestScriptHandler.h"
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationName[] =
+static const char * cmDocumentationName[][3] =
 {
   {0,
    "  ctest - Testing driver provided by CMake.", 0},
@@ -31,7 +31,7 @@ static const cmDocumentationEntry cmDocumentationName[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationUsage[] =
+static const char * cmDocumentationUsage[][3] =
 {
   {0,
    "  ctest [options]", 0},
@@ -39,7 +39,7 @@ static const cmDocumentationEntry cmDocumentationUsage[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationDescription[] =
+static const char * cmDocumentationDescription[][3] =
 {
   {0,
    "The \"ctest\" executable is the CMake test driver program.  "
@@ -50,7 +50,7 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationOptions[] =
+static const char * cmDocumentationOptions[][3] =
 {
   {"-C <cfg>, --build-config <cfg>", "Choose configuration to test.",
    "Some CMake-generated build trees can have multiple build configurations "
@@ -198,7 +198,7 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationSeeAlso[] =
+static const char * cmDocumentationSeeAlso[][3] =
 {
   {0, "cmake", 0},
   {0, "ccmake", 0},
@@ -244,11 +244,11 @@ int main (int argc, char *argv[])
       ch->GetCommandDocumentation(commands);
 
       doc.SetName("ctest");
-      doc.SetNameSection(cmDocumentationName);
-      doc.SetUsageSection(cmDocumentationUsage);
-      doc.SetDescriptionSection(cmDocumentationDescription);
-      doc.SetOptionsSection(cmDocumentationOptions);
-      doc.SetCommandsSection(&commands[0]);
+      doc.SetSection("Name",cmDocumentationName);
+      doc.SetSection("Usage",cmDocumentationUsage);
+      doc.SetSection("Description",cmDocumentationDescription);
+      doc.SetSection("Options",cmDocumentationOptions);
+      doc.SetSection("Commands",commands);
       doc.SetSeeAlsoList(cmDocumentationSeeAlso);
 #ifdef cout
 #  undef cout

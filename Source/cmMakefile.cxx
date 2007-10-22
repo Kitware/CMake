@@ -1215,6 +1215,17 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
     {
     return;
     }
+
+#ifdef CMAKE_STRICT
+  if (!this->CMakeInstance->IsPropertyDefined(name,cmProperty::VARIABLE))
+    {
+    std::string msg = "Variable ";
+    msg += name;
+    msg += " set yet not defined!";
+    cmSystemTools::Error(msg.c_str()); 
+    }
+#endif
+
   this->TemporaryDefinitionKey = name;
   this->Definitions[this->TemporaryDefinitionKey] = value;
 
@@ -1669,6 +1680,15 @@ bool cmMakefile::IsDefinitionSet(const char* name) const
 
 const char* cmMakefile::GetDefinition(const char* name) const
 {
+#ifdef CMAKE_STRICT
+  if (!this->CMakeInstance->IsPropertyDefined(name,cmProperty::VARIABLE))
+    {
+    std::string msg = "Variable ";
+    msg += name;
+    msg += " queried yet undefined!";
+    cmSystemTools::Error(msg.c_str()); 
+    }
+#endif
   const char* def = 0;
   DefinitionMap::const_iterator pos = this->Definitions.find(name);
   if(pos != this->Definitions.end())

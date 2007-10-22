@@ -446,7 +446,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNHeader(std::ostream& fout)
 void cmGlobalVisualStudio71Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates Visual Studio .NET 2003 project files.";
-  entry.full = "";
+  entry.Name = this->GetName();
+  entry.Brief = "Generates Visual Studio .NET 2003 project files.";
+  entry.Full = "";
 }

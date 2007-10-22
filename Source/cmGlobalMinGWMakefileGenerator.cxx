@@ -83,8 +83,8 @@ cmLocalGenerator *cmGlobalMinGWMakefileGenerator::CreateLocalGenerator()
 void cmGlobalMinGWMakefileGenerator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates a make file for use with mingw32-make.";
-  entry.full = "The makefiles generated use cmd.exe as the shell.  "
+  entry.Name = this->GetName();
+  entry.Brief = "Generates a make file for use with mingw32-make.";
+  entry.Full = "The makefiles generated use cmd.exe as the shell.  "
     "They do not require msys or a unix shell.";
 }

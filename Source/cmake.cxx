@@ -2249,31 +2249,29 @@ void cmake::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v,
   for(RegisteredCommandsMap::const_iterator j = this->Commands.begin();
       j != this->Commands.end(); ++j)
     {
-      if (((  withCompatCommands == false) && ( (*j).second->IsDiscouraged()))
+    if (((  withCompatCommands == false) && ( (*j).second->IsDiscouraged()))
         || ((withCurrentCommands == false) && (!(*j).second->IsDiscouraged())))
-        {
-        continue;
-        }
-
-    cmDocumentationEntry e =
       {
-        (*j).second->GetName(),
-        (*j).second->GetTerseDocumentation(),
-        (*j).second->GetFullDocumentation()
-      };
+      continue;
+      }
+    
+    cmDocumentationEntry e((*j).second->GetName(),
+                           (*j).second->GetTerseDocumentation(),
+                           (*j).second->GetFullDocumentation());
     v.push_back(e);
     }
-  cmDocumentationEntry empty = {0,0,0};
-  v.push_back(empty);
 }
 
-void cmake::GetPropertiesDocumentation(std::vector<cmDocumentationEntry>& v, 
-                                       cmProperty::ScopeType type)
+void cmake::GetPropertiesDocumentation(std::map<std::string,
+                                       cmDocumentationSection *>& v)
 {
-  // get the properties for cmake
-  this->PropertyDefinitions[type].GetPropertiesDocumentation(v);
-  cmDocumentationEntry empty = {0,0,0};
-  v.push_back(empty);
+  // loop over the properties and put them into the doc structure
+  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::iterator i;
+  i = this->PropertyDefinitions.begin();
+  for (;i != this->PropertyDefinitions.end(); ++i)
+    {
+    i->second.GetPropertiesDocumentation(v);
+    }
 }
 
 void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
@@ -2293,12 +2291,10 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
     cmDocumentationEntry e;
     cmExternalMakefileProjectGenerator* generator = (i->second)();
     generator->GetDocumentation(e, i->first.c_str());
-    e.name = i->first.c_str();
+    e.Name = i->first;
     delete generator;
     v.push_back(e);
     }
-  cmDocumentationEntry empty = {0,0,0};
-  v.push_back(empty);
 }
 
 void cmake::AddWrittenFile(const char* file)
@@ -3089,10 +3085,12 @@ void cmake::DefineProperties(cmake *cm)
 void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
                            const char *ShortDescription,
                            const char *FullDescription,
-                           bool chained)
+                           bool chained, const char *docSection)
 {
   this->PropertyDefinitions[scope].DefineProperty(name,scope,ShortDescription,
-                                                  FullDescription, chained);
+                                                  FullDescription, 
+                                                  docSection,
+                                                  chained);
 }
 
 bool cmake::IsPropertyDefined(const char *name, cmProperty::ScopeType scope)

@@ -104,9 +104,9 @@ cmLocalGenerator *cmGlobalUnixMakefileGenerator3::CreateLocalGenerator()
 void cmGlobalUnixMakefileGenerator3
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates standard UNIX makefiles.";
-  entry.full =
+  entry.Name = this->GetName();
+  entry.Brief = "Generates standard UNIX makefiles.";
+  entry.Full =
     "A hierarchy of UNIX makefiles is generated into the build tree.  Any "
     "standard UNIX-style make program can build the project through the "
     "default make target.  A \"make install\" target is also provided.";

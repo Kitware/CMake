@@ -316,9 +316,16 @@ extern void operator << (std::ostream&, const cmOStringStream&);
 /** Standard documentation entry for cmDocumentation's formatting.  */
 struct cmDocumentationEntry
 {
-  const char* name;
-  const char* brief;
-  const char* full;
+  std::string Name;
+  std::string Brief;
+  std::string Full;
+  cmDocumentationEntry(){};
+  cmDocumentationEntry(const char *doc[3])
+  { if (doc[0]) this->Name = doc[0]; 
+  if (doc[1]) this->Brief = doc[1]; 
+  if (doc[2]) this->Full = doc[2]; };
+  cmDocumentationEntry(const char *n, const char *b, const char *f)
+  { if (n) this->Name = n; if (b) this->Brief = b; if (f) this->Full = f; };
 };
 
 /** Data structure to represent a single command line.  */

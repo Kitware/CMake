@@ -26,6 +26,7 @@ public:
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription, 
+                      const char *DocumentationSection,
                       bool chained);
 
   // get the documentation string
@@ -37,10 +38,19 @@ public:
   // is it chained?
   bool IsChained() {return this->Chained; };
 
+  // Get the section if any
+  const std::string &GetDocumentationSection() const {
+    return this->DocumentationSection; }; 
+  
+  // get the scope
+  cmProperty::ScopeType GetScope() const {
+    return this->Scope; };
+
 protected:
   std::string Name;
   std::string ShortDescription;
   std::string FullDescription;
+  std::string DocumentationSection;
   cmProperty::ScopeType Scope; 
   bool Chained;
 };

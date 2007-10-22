@@ -33,7 +33,7 @@ public:
   virtual void PrintHeader(const char* name, std::ostream& os);
   virtual void PrintFooter(std::ostream& os);
   virtual void PrintSection(std::ostream& os,
-                    const cmDocumentationEntry* section,
+                    const cmDocumentationSection& section,
                     const char* name);
   virtual void PrintPreformatted(std::ostream& os, const char* text);
   virtual void PrintParagraph(std::ostream& os, const char* text);

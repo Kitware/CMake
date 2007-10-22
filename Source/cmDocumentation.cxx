@@ -21,10 +21,8 @@
 #include <cmsys/Directory.hxx>
 
 
-const cmDocumentationEntry cmDocumentation::cmSection::EmptySection ={0,0,0};
-
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationStandardOptions[] =
+static const char *cmDocumentationStandardOptions[][3] =
 {
   {"--copyright [file]", "Print the CMake copyright and exit.",
    "If a file is specified, the copyright is written into it."},
@@ -47,7 +45,7 @@ static const cmDocumentationEntry cmDocumentationStandardOptions[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmModulesDocumentationDescription[] =
+static const char *cmModulesDocumentationDescription[][3] =
 {
   {0,
   "  CMake Modules - Modules coming with CMake, the Cross-Platform Makefile "
@@ -62,7 +60,7 @@ static const cmDocumentationEntry cmModulesDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmCustomModulesDocumentationDescription[] =
+static const char *cmCustomModulesDocumentationDescription[][3] =
 {
   {0,
   "  Custom CMake Modules - Additional Modules for CMake.", 0},
@@ -76,7 +74,7 @@ static const cmDocumentationEntry cmCustomModulesDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmPropertiesDocumentationDescription[] =
+static const char *cmPropertiesDocumentationDescription[][3] =
 {
   {0,
    "  CMake Properties - Properties supported by CMake, "
@@ -92,7 +90,7 @@ static const cmDocumentationEntry cmPropertiesDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmCompatCommandsDocumentationDescription[] =
+static const char *cmCompatCommandsDocumentationDescription[][3] =
 {
   {0,
    "  CMake Compatibility Listfile Commands - "
@@ -106,7 +104,7 @@ static const cmDocumentationEntry cmCompatCommandsDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationCommandsHeader[] =
+static const char *cmDocumentationCommandsHeader[][3] =
 {
   {0,
    "The following commands are available in CMakeLists.txt code:", 0},
@@ -114,7 +112,7 @@ static const cmDocumentationEntry cmDocumentationCommandsHeader[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationGlobalPropertiesHeader[] =
+static const char *cmDocumentationGlobalPropertiesHeader[][3] =
 {
   {0,
    "The following global properties are available in CMakeLists.txt code:", 0},
@@ -122,7 +120,7 @@ static const cmDocumentationEntry cmDocumentationGlobalPropertiesHeader[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationDirectoryPropertiesHeader[] =
+static const char *cmDocumentationDirectoryPropertiesHeader[][3] =
 {
   {0
    ,"The following directory properties are available in CMakeLists.txt code:"
@@ -131,7 +129,7 @@ static const cmDocumentationEntry cmDocumentationDirectoryPropertiesHeader[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationTargetPropertiesHeader[] =
+static const char *cmDocumentationTargetPropertiesHeader[][3] =
 {
   {0,
    "The following target properties are available in CMakeLists.txt code:", 0},
@@ -139,7 +137,7 @@ static const cmDocumentationEntry cmDocumentationTargetPropertiesHeader[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationTestPropertiesHeader[] =
+static const char *cmDocumentationTestPropertiesHeader[][3] =
 {
   {0
    ,"The following properties for tests are available in CMakeLists.txt code:"
@@ -148,7 +146,7 @@ static const cmDocumentationEntry cmDocumentationTestPropertiesHeader[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationSourceFilePropertiesHeader[] =
+static const char *cmDocumentationSourceFilePropertiesHeader[][3] =
 {
   {0
   ,"The following source file properties are available in CMakeLists.txt code:"
@@ -157,22 +155,21 @@ static const cmDocumentationEntry cmDocumentationSourceFilePropertiesHeader[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationVariablePropertiesHeader[] =
+static const char *cmDocumentationVariablePropertiesHeader[][3] =
 {
   {0, "The following variables are available in CMakeLists.txt code:", 0},
   {0,0,0}
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry 
-                             cmDocumentationCachedVariablePropertiesHeader[] =
+static const char *cmDocumentationCachedVariablePropertiesHeader[][3] =
 {
   {0,"The following cache variables are available in CMakeLists.txt code:", 0},
   {0,0,0}
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationModulesHeader[] =
+static const char *cmDocumentationModulesHeader[][3] =
 {
   {0,
    "The following modules are provided with CMake. "
@@ -181,7 +178,7 @@ static const cmDocumentationEntry cmDocumentationModulesHeader[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationCustomModulesHeader[] =
+static const char *cmDocumentationCustomModulesHeader[][3] =
 {
   {0,
    "The following modules are also available for CMake. "
@@ -190,7 +187,7 @@ static const cmDocumentationEntry cmDocumentationCustomModulesHeader[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationGeneratorsHeader[] =
+static const char *cmDocumentationGeneratorsHeader[][3] =
 {
   {0,
    "The following generators are available on this platform:", 0},
@@ -198,7 +195,7 @@ static const cmDocumentationEntry cmDocumentationGeneratorsHeader[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationStandardSeeAlso[] =
+static const char *cmDocumentationStandardSeeAlso[][3] =
 {
   {0,
    "The following resources are available to get help using CMake:", 0},
@@ -229,15 +226,7 @@ static const cmDocumentationEntry cmDocumentationStandardSeeAlso[] =
 };
 
 //----------------------------------------------------------------------------
-const cmDocumentationEntry cmDocumentationAuthor[] =
-{
-  {0,
-   "This manual page was generated by the \"--help-man\" option.", 0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-const cmDocumentationEntry cmDocumentationCopyright[] =
+static const char *cmDocumentationCopyright[][3] =
 {
   {0,
    "Copyright (c) 2002 Kitware, Inc., Insight Consortium.  "
@@ -279,43 +268,26 @@ const cmDocumentationEntry cmDocumentationCopyright[] =
 
 //----------------------------------------------------------------------------
 cmDocumentation::cmDocumentation()
-:NameSection          ("Name",                            "NAME")
-,UsageSection         ("Usage",                           "SYNOPSIS")
-,DescriptionSection   ("",                                "DESCRIPTION")
-,OptionsSection       ("Command-Line Options",            "OPTIONS")
-,CommandsSection      ("Listfile Commands",               "COMMANDS")
-,CompatCommandsSection("Compatibility Listfile Commands",
-                       "COMPATIBILITY COMMANDS")
-,ModulesSection       ("Standard CMake Modules",          "MODULES")
-,CustomModulesSection ("Custom CMake Modules",            "CUSTOM MODULES")
-,GeneratorsSection    ("Generators",                      "GENERATORS")
-,SeeAlsoSection       ("See Also",                        "SEE ALSO")
-,CopyrightSection     ("Copyright",                       "COPYRIGHT")
-,AuthorSection        ("Author",                          "AUTHOR")
-,GlobalPropertiesSection        ("Standard Properties",   "GLOBAL PROPERTIES")
-,DirectoryPropertiesSection     ("Directory Properties",  
-                                 "DIRECTORY PROPERTIES")
-,TargetPropertiesSection        ("Target Properties",     "TARGET PROPERTIES")
-,TestPropertiesSection          ("Test Properties",       "TEST PROPERTIES")
-,SourceFilePropertiesSection    ("Sourcefile Properties", 
-                                 "SOURCEFILE PROPERTIES")
-,VariablePropertiesSection      ("Variables",             "VARIABLES")
-,CachedVariablePropertiesSection("Cached Variables",      "CACHE VARIABLES")
-,CurrentFormatter(0)
+:CurrentFormatter(0)
 {
   this->SetForm(TextForm);
 
-  this->PropertySections[cmProperty::GLOBAL] = &this->GlobalPropertiesSection;
-  this->PropertySections[cmProperty::DIRECTORY] = 
-                                             &this->DirectoryPropertiesSection;
-  this->PropertySections[cmProperty::TARGET] = &this->TargetPropertiesSection;
-  this->PropertySections[cmProperty::TEST] = &this->TestPropertiesSection;
-  this->PropertySections[cmProperty::SOURCE_FILE] = 
-                                            &this->SourceFilePropertiesSection;
-  this->PropertySections[cmProperty::VARIABLE] = 
-                                              &this->VariablePropertiesSection;
-  this->PropertySections[cmProperty::CACHED_VARIABLE] = 
-                                        &this->CachedVariablePropertiesSection;
+  cmDocumentationSection *sec;
+
+  sec = new cmDocumentationSection("Author","AUTHOR");
+  sec->Append(cmDocumentationEntry
+              (0,
+               "This manual page was generated by the \"--help-man\" option.",
+               0));
+  this->AllSections["Author"] = sec;
+
+  sec = new cmDocumentationSection("Copyright","COPYRIGHT");
+  sec->Append(cmDocumentationCopyright);
+  this->AllSections["Copyright"] = sec;
+
+  sec = new cmDocumentationSection("See Also","SEE ALSO");
+  sec->Append(cmDocumentationStandardSeeAlso);
+  this->AllSections["Standard See Also"] = sec;  
 }
 
 //----------------------------------------------------------------------------
@@ -331,19 +303,21 @@ cmDocumentation::~cmDocumentation()
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintCopyright(std::ostream& os)
 {
-  for(const cmDocumentationEntry* op = cmDocumentationCopyright;
-      op->brief; ++op)
+  cmDocumentationSection *sec = this->AllSections["Copyright"];
+  const std::vector<cmDocumentationEntry> &entries = sec->GetEntries();
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
+      op != entries.end(); ++op)
     {
-    if(op->name)
+    if(op->Name.size())
       {
       os << " * ";
       this->TextFormatter.SetIndent("    ");
-      this->TextFormatter.PrintColumn(os, op->brief);
+      this->TextFormatter.PrintColumn(os, op->Brief.c_str());
       }
     else
       {
       this->TextFormatter.SetIndent("");
-      this->TextFormatter.PrintColumn(os, op->brief);
+      this->TextFormatter.PrintColumn(os, op->Brief.c_str());
       }
     os << "\n";
     }
@@ -359,28 +333,19 @@ bool cmDocumentation::PrintVersion(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::AddSection(const char* name,
-                                 const cmDocumentationEntry* d)
+void cmDocumentation::AddSectionToPrint(const char *section)
 {
-  this->Names.push_back(name);
-  this->Sections.push_back(d);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::AddSection(const cmSection& section)
-{
-  if (!section.IsEmpty())
+  if (this->AllSections.find(section) != this->AllSections.end())
     {
-    this->Names.push_back(section.GetName(this->CurrentFormatter->GetForm()));
-    this->Sections.push_back(section.GetEntries());
+    this->PrintSections.push_back(this->AllSections[section]);
     }
 }
 
 //----------------------------------------------------------------------------
 void cmDocumentation::ClearSections()
 {
-  this->Names.erase(this->Names.begin(), this->Names.end());
-  this->Sections.erase(this->Sections.begin(), this->Sections.end());
+  this->PrintSections.erase(this->PrintSections.begin(), 
+                            this->PrintSections.end());
 }
 
 //----------------------------------------------------------------------------
@@ -402,13 +367,20 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return this->PrintDocumentationSingleModule(os);
     case cmDocumentation::SingleProperty:
       return this->PrintDocumentationSingleProperty(os);
-    case cmDocumentation::List:      
-      return this->PrintDocumentationList(os);
+    case cmDocumentation::List:
+      this->PrintDocumentationList(os,"Commands");
+      this->PrintDocumentationList(os,"Compatibility Commands");
+      return true;
     case cmDocumentation::ModuleList: 
-      return this->PrintModuleList(os);
+      this->PrintDocumentationList(os,"Modules");
+      return true;
     case cmDocumentation::PropertyList: 
-      return this->PrintPropertyList(os);
-
+      this->PrintDocumentationList(os,"Properties of Global Scope");
+      this->PrintDocumentationList(os,"Properties on Directories");
+      this->PrintDocumentationList(os,"Properties on Targets");
+      this->PrintDocumentationList(os,"Properties on Tests");
+      this->PrintDocumentationList(os,"Properties on Source Files");
+      return true;
     case cmDocumentation::Full: 
       return this->PrintDocumentationFull(os);
     case cmDocumentation::Modules: 
@@ -433,16 +405,17 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::CreateModulesSection()
 {
+  cmDocumentationSection *sec = 
+    new cmDocumentationSection("Standard CMake Modules", "MODULES");
+  this->AllSections["Modules"] = sec;
   std::string cmakeModules = this->CMakeRoot;
   cmakeModules += "/Modules";
   cmsys::Directory dir;
   dir.Load(cmakeModules.c_str());
   if (dir.GetNumberOfFiles() > 0)
     {
-    this->ModulesSection.Append(cmDocumentationModulesHeader[0]);
-    this->CreateModuleDocsForDir(dir, this->ModulesSection);
-    cmDocumentationEntry e = { 0, 0, 0 };
-    this->ModulesSection.Append(e);
+    this->AllSections["Modules"]->Append(cmDocumentationModulesHeader[0]);
+    this->CreateModuleDocsForDir(dir, *this->AllSections["Modules"]);
     }
   return true;
 }
@@ -465,25 +438,24 @@ bool cmDocumentation::CreateCustomModulesSection()
       {
       if (!sectionHasHeader)
         {
-        this->CustomModulesSection.Append(
-                                        cmDocumentationCustomModulesHeader[0]);
+        cmDocumentationSection *sec = 
+          new cmDocumentationSection("Custom CMake Modules","CUSTOM MODULES");
+        this->AllSections["Custom CMake Modules"] = sec;
+        sec->Append(cmDocumentationCustomModulesHeader[0]);
         sectionHasHeader = true;
         }
-      this->CreateModuleDocsForDir(dir, this->CustomModulesSection);
+      this->CreateModuleDocsForDir
+        (dir, *this->AllSections["Custom CMake Modules"]);
       }
     }
 
-  if(sectionHasHeader)
-    {
-    cmDocumentationEntry e = { 0, 0, 0 };
-    this->CustomModulesSection.Append(e);
-    }
   return true;
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::CreateModuleDocsForDir(cmsys::Directory& dir, 
-                                             cmSection &moduleSection)
+void cmDocumentation
+::CreateModuleDocsForDir(cmsys::Directory& dir, 
+                         cmDocumentationSection &moduleSection)
 {
   for(unsigned int i = 0; i < dir.GetNumberOfFiles(); ++i)
     {
@@ -510,7 +482,7 @@ void cmDocumentation::CreateModuleDocsForDir(cmsys::Directory& dir,
 //----------------------------------------------------------------------------
 bool cmDocumentation::CreateSingleModule(const char* fname, 
                                          const char* moduleName,
-                                         cmSection &moduleSection)
+                                         cmDocumentationSection &moduleSection)
 {
   std::ifstream fin(fname);
   if(!fin)
@@ -585,8 +557,7 @@ bool cmDocumentation::CreateSingleModule(const char* fname,
       this->ModuleStrings.push_back(ptext);
       char* pbrief = strcpy(new char[brief.length()+1], brief.c_str());
       this->ModuleStrings.push_back(pbrief);
-      cmDocumentationEntry e = { pname, pbrief, ptext };
-      moduleSection.Append(e);
+      moduleSection.Append(pname, pbrief, ptext);
       return true;
       }
     }
@@ -819,15 +790,18 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
 void cmDocumentation::Print(Form f, std::ostream& os)
 {
   this->SetForm(f);
-  Print(os);
+  this->Print(os);
 }
 
 //----------------------------------------------------------------------------
 void cmDocumentation::Print(std::ostream& os)
 {
-  for(unsigned int i=0; i < this->Sections.size(); ++i)
+  for(unsigned int i=0; i < this->PrintSections.size(); ++i)
     {
-    this->CurrentFormatter->PrintSection(os,this->Sections[i], this->Names[i]);
+    std::string name = this->PrintSections[i]->
+      GetName((this->CurrentFormatter->GetForm()));
+    this->CurrentFormatter->PrintSection(os,*this->PrintSections[i], 
+                                         name.c_str());
     }
 }
 
@@ -838,144 +812,106 @@ void cmDocumentation::SetName(const char* name)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetNameSection(const cmDocumentationEntry* section)
+void cmDocumentation::SetSection(const char *name, 
+                                 cmDocumentationSection *section)
 {
-  this->NameSection.Set(0, section, 0);
+  if (this->AllSections.find(name) != this->AllSections.end())
+    {
+    delete this->AllSections[name];
+    }
+  this->AllSections[name] = section;
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetUsageSection(const cmDocumentationEntry* section)
+void cmDocumentation::SetSection(const char *name, 
+                                 std::vector<cmDocumentationEntry> &docs)
 {
-  this->UsageSection.Set(0, section, 0);
+  cmDocumentationSection *sec = 
+    new cmDocumentationSection(name, 
+                               cmSystemTools::UpperCase(name).c_str());
+  sec->Append(docs);
+  this->SetSection(name,sec);
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation
-::SetDescriptionSection(const cmDocumentationEntry* section)
+void cmDocumentation::SetSection(const char *name, 
+                                 const char *docs[][3])
 {
-  this->DescriptionSection.Set(0, section, 0);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::SetOptionsSection(const cmDocumentationEntry* section)
-{
-  this->OptionsSection.Set(0, section, cmDocumentationStandardOptions);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::SetCommandsSection(const cmDocumentationEntry* section)
-{
-  this->CommandsSection.Set(cmDocumentationCommandsHeader, section, 0);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::SetCompatCommandsSection(const cmDocumentationEntry* 
-                                               section)
-{
-  this->CompatCommandsSection.Set(cmDocumentationCommandsHeader, section, 0);
+  cmDocumentationSection *sec = 
+    new cmDocumentationSection(name, 
+                               cmSystemTools::UpperCase(name).c_str());
+  sec->Append(docs);
+  this->SetSection(name,sec);
 }
 
 //----------------------------------------------------------------------------
 void cmDocumentation
-::SetPropertiesSection(const cmDocumentationEntry* section, 
-                       cmProperty::ScopeType type)
+::SetSections(std::map<std::string,cmDocumentationSection *> &sections)
 {
-  switch(type)
-  {
-  case cmProperty::GLOBAL:
-    this->GlobalPropertiesSection.Set(
-                            cmDocumentationGlobalPropertiesHeader, section, 0);
-    break;
-  case cmProperty::DIRECTORY:
-    this->DirectoryPropertiesSection.Set(
-                         cmDocumentationDirectoryPropertiesHeader, section, 0);
-    break;
-  case cmProperty::TARGET:
-    this->TargetPropertiesSection.Set(
-                            cmDocumentationTargetPropertiesHeader, section, 0);
-    break;
-  case cmProperty::TEST:
-    this->TestPropertiesSection.Set(
-                              cmDocumentationTestPropertiesHeader, section, 0);
-    break;
-  case cmProperty::SOURCE_FILE:
-    this->SourceFilePropertiesSection.Set(
-                        cmDocumentationSourceFilePropertiesHeader, section, 0);
-    break;
-  case cmProperty::VARIABLE:
-    this->VariablePropertiesSection.Set(
-                        cmDocumentationVariablePropertiesHeader, section, 0);
-    break;
-  case cmProperty::CACHED_VARIABLE:
-    this->CachedVariablePropertiesSection.Set(
-                    cmDocumentationCachedVariablePropertiesHeader, section, 0);
-    break;
-  default:
-    break;
-  }
+  for (std::map<std::string,cmDocumentationSection *>::const_iterator 
+         it = sections.begin(); it != sections.end(); ++it)
+    {
+    this->SetSection(it->first.c_str(),it->second);
+    }    
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation
-::SetGeneratorsSection(const cmDocumentationEntry* section)
+void cmDocumentation::SetSeeAlsoList(const char *data[][3])
 {
-  this->GeneratorsSection.Set(cmDocumentationGeneratorsHeader, section, 0);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::SetSeeAlsoList(const cmDocumentationEntry* also)
-{
-  this->SeeAlsoSection.Clear();
+  cmDocumentationSection *sec = 
+    new cmDocumentationSection("See Also", "SEE ALSO");
+  this->AllSections["See Also"] = sec;
   this->SeeAlsoString = ".B ";
-  for(const cmDocumentationEntry* i = also; i->brief; ++i)
+  int i = 0;
+  while(data[i][1])
     {
-    this->SeeAlsoString += i->brief;
-    this->SeeAlsoString += (i+1)->brief? "(1), ":"(1)";    
+    this->SeeAlsoString += data[i][1];
+    this->SeeAlsoString += data[i+1][1]? "(1), ":"(1)";    
+    ++i;
     }
-  cmDocumentationEntry e = {0, 0, 0};
-  e.brief = this->SeeAlsoString.c_str();
-  this->SeeAlsoSection.Append(e);
-  for(const cmDocumentationEntry* i = cmDocumentationStandardSeeAlso;
-      i->brief; ++i)
+  sec->Append(0,this->SeeAlsoString.c_str(),0);
+  sec->Append(cmDocumentationStandardSeeAlso);
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationGeneric(std::ostream& os,
+                                                const char *section)
+{
+  if(this->AllSections.find(section) == this->AllSections.end())
     {
-    this->SeeAlsoSection.Append(*i);
+    os << "Internal error: " << section << " list is empty." << std::endl;
+    return false;
     }
-  e.brief = 0;
-  this->SeeAlsoSection.Append(e);
+  if(this->CurrentArgument.length() == 0)
+    {
+    os << "Required argument missing.\n";
+    return false;
+    }
+  const std::vector<cmDocumentationEntry> &entries = 
+    this->AllSections[section]->GetEntries();
+  for(std::vector<cmDocumentationEntry>::const_iterator ei = 
+        entries.begin();
+      ei != entries.end(); ++ei)
+    {
+    if(this->CurrentArgument == ei->Name)
+      {
+      this->PrintDocumentationCommand(os, *ei);
+      return true;
+      }
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationSingle(std::ostream& os)
 {
-  if(this->CommandsSection.IsEmpty())
+  if (this->PrintDocumentationGeneric(os,"Commands"))
     {
-    os << "Internal error: commands list is empty." << std::endl;
-    return false;
+    return true;
     }
-  if(this->CurrentArgument.length() == 0)
+  if (this->PrintDocumentationGeneric(os,"Compatibility Commands"))
     {
-    os << "Argument --help-command needs a command name.\n";
-    return false;
-    }
-  for(const cmDocumentationEntry* entry = this->CommandsSection.GetEntries();
-      entry->brief; ++entry)
-    {
-    if(entry->name && this->CurrentArgument == entry->name)
-      {
-      this->PrintDocumentationCommand(os, entry);
-      return true;
-      }
-    }
-  for(const cmDocumentationEntry* 
-      entry = this->CompatCommandsSection.GetEntries();
-      entry->brief; 
-      ++entry)
-    {
-    if(entry->name && this->CurrentArgument == entry->name)
-      {
-      this->PrintDocumentationCommand(os, entry);
-      return true;
-      }
+    return true;
     }
 
   // Argument was not a command.  Complain.
@@ -1028,9 +964,10 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
   if(!moduleName.empty()
      && this->CreateSingleModule(moduleName.c_str(), 
                                  this->CurrentArgument.c_str(),
-                                 this->ModulesSection))
+                                 *this->AllSections["Modules"]))
     {
-    this->PrintDocumentationCommand(os, this->ModulesSection.GetEntries());
+    this->PrintDocumentationCommand
+      (os,  this->AllSections["Modules"]->GetEntries()[0]);
     os <<  "\n       Defined in: ";
     os << moduleName << "\n";
     return true;
@@ -1044,32 +981,27 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationSingleProperty(std::ostream& os)
 {
-  if(this->GlobalPropertiesSection.IsEmpty())
+  if (this->PrintDocumentationGeneric(os,"Properties of Global Scope"))
     {
-    os << "Internal error: properties list is empty." << std::endl;
-    return false;
+    return true;
     }
-  if(this->CurrentArgument.length() == 0)
+  if (this->PrintDocumentationGeneric(os,"Properties on Directories"))
     {
-    os << "Argument --help-property needs a property name.\n";
-    return false;
+    return true;
+    }
+  if (this->PrintDocumentationGeneric(os,"Properties on Targets"))
+    {
+    return true;
+    }
+  if (this->PrintDocumentationGeneric(os,"Properties on Tests"))
+    {
+    return true;
+    }
+  if (this->PrintDocumentationGeneric(os,"Properties on Source Files"))
+    {
+    return true;
     }
 
-  for(std::map<cmProperty::ScopeType, cmSection*>::const_iterator 
-      sectionIt = this->PropertySections.begin();
-      sectionIt != this->PropertySections.end();
-      ++sectionIt)
-    {
-    for(const cmDocumentationEntry* 
-        entry = sectionIt->second->GetEntries(); entry->brief; ++entry)
-      {
-      if(entry->name && this->CurrentArgument == entry->name)
-        {
-        this->PrintDocumentationCommand(os, entry);
-        return true;
-        }
-      }
-    }
   // Argument was not a command.  Complain.
   os << "Argument \"" << this->CurrentArgument.c_str()
      << "\" to --help-property is not a CMake property.  "
@@ -1078,101 +1010,24 @@ bool cmDocumentation::PrintDocumentationSingleProperty(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-bool cmDocumentation::PrintDocumentationList(std::ostream& os)
+bool cmDocumentation::PrintDocumentationList(std::ostream& os,
+                                             const char *section)
 {
-  if(this->CommandsSection.IsEmpty())
+  if(this->AllSections.find(section) == this->AllSections.end())
     {
-    os << "Internal error: commands list is empty." << std::endl;
+    os << "Internal error: " << section << " list is empty." << std::endl;
     return false;
     }
-  for(const cmDocumentationEntry* entry = this->CommandsSection.GetEntries();
-      entry->brief; ++entry)
-    {
-    if(entry->name)
-      {
-      os << entry->name << std::endl;
-      }
-    }
-  os << "\nCompatibility commands:" << std::endl;
-  for(const cmDocumentationEntry* 
-      entry = this->CompatCommandsSection.GetEntries();
-      entry->brief; 
-      ++entry)
-    {
-    if(entry->name)
-      {
-      os << entry->name << std::endl;
-      }
-    }
-  return true;
-}
 
-//----------------------------------------------------------------------------
-bool cmDocumentation::PrintPropertyList(std::ostream& os)
-{
-  if(this->GlobalPropertiesSection.IsEmpty())
+  const std::vector<cmDocumentationEntry> &entries = 
+    this->AllSections[section]->GetEntries();
+  for(std::vector<cmDocumentationEntry>::const_iterator ei = 
+        entries.begin();
+      ei != entries.end(); ++ei)
     {
-    os << "Internal error: properties list is empty." << std::endl;
-    return false;
-    }
-  for(const cmDocumentationEntry* 
-      entry = this->GlobalPropertiesSection.GetEntries();
-      entry->brief; 
-      ++entry)
-    {
-    if(entry->name)
+    if(ei->Name.size())
       {
-      os << entry->name << std::endl;
-      }
-    }
-
-  for(std::map<cmProperty::ScopeType, cmSection*>::const_iterator 
-      sectionIt = this->PropertySections.begin();
-      sectionIt != this->PropertySections.end();
-      ++sectionIt)
-    {
-    for(const cmDocumentationEntry* 
-        entry = sectionIt->second->GetEntries(); entry->brief; ++entry)
-      {
-      if(entry->name)
-        {
-        os << entry->name << std::endl;
-        }
-      }
-    }
-
-  return true;
-}
-
-//----------------------------------------------------------------------------
-bool cmDocumentation::PrintModuleList(std::ostream& os)
-{
-  this->CreateCustomModulesSection();
-  this->CreateModulesSection();
-  if(this->ModulesSection.IsEmpty())
-    {
-    os << "Internal error: modules list is empty." << std::endl;
-    return false;
-    }
-  for(const cmDocumentationEntry* entry = this->ModulesSection.GetEntries();
-      entry->brief; ++entry)
-    {
-    if(entry->name)
-      {
-      os << entry->name << std::endl;
-      }
-    }
-
-  if(!this->CustomModulesSection.IsEmpty())
-    {
-    os << "\nCUSTOM MODULES\n" << std::endl;
-    for(const cmDocumentationEntry* 
-        entry = this->CustomModulesSection.GetEntries(); entry->brief; ++entry)
-      {
-      if(entry->name)
-        {
-        os << entry->name << std::endl;
-        }
+      os << ei->Name << std::endl;
       }
     }
   return true;
@@ -1181,7 +1036,10 @@ bool cmDocumentation::PrintModuleList(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationUsage(std::ostream& os)
 {
-  this->CreateUsageDocumentation();
+  this->ClearSections();
+  this->AddSectionToPrint("Usage");
+  this->AddSectionToPrint("Options");
+  this->AddSectionToPrint("Generators");
   this->Print(os);
   return true;
 }
@@ -1199,8 +1057,13 @@ bool cmDocumentation::PrintDocumentationFull(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationModules(std::ostream& os)
 {
-  this->CreateModulesDocumentation();
-  this->CurrentFormatter->PrintHeader(GetNameString(), os);
+  this->ClearSections();
+  this->CreateModulesSection();
+  this->AddSectionToPrint("Description");
+  this->AddSectionToPrint("Modules");
+  this->AddSectionToPrint("Copyright");
+  this->AddSectionToPrint("See Also");
+  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1209,8 +1072,14 @@ bool cmDocumentation::PrintDocumentationModules(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationCustomModules(std::ostream& os)
 {
-  this->CreateCustomModulesDocumentation();
-  this->CurrentFormatter->PrintHeader(GetNameString(), os);
+  this->ClearSections();
+  this->CreateCustomModulesSection();
+  this->AddSectionToPrint("Description");
+  this->AddSectionToPrint("Custom Modules");
+  this->AddSectionToPrint("Copyright");
+  this->AddSectionToPrint("See Also");
+
+  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1219,8 +1088,16 @@ bool cmDocumentation::PrintDocumentationCustomModules(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationProperties(std::ostream& os)
 {
-  this->CreatePropertiesDocumentation();
-  this->CurrentFormatter->PrintHeader(GetNameString(), os);
+  this->ClearSections();
+  this->AddSectionToPrint("Properties Description");
+  this->AddSectionToPrint("Properties of Global Scope");
+  this->AddSectionToPrint("Properties on Directories");
+  this->AddSectionToPrint("Properties on Targets");
+  this->AddSectionToPrint("Properties on Tests");
+  this->AddSectionToPrint("Properties on Source Files");
+  this->AddSectionToPrint("Copyright");
+  this->AddSectionToPrint("Standard See Also");
+  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1229,8 +1106,11 @@ bool cmDocumentation::PrintDocumentationProperties(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationCurrentCommands(std::ostream& os)
 {
-  this->CreateCurrentCommandsDocumentation();
-  this->CurrentFormatter->PrintHeader(GetNameString(), os);
+  this->ClearSections();
+  this->AddSectionToPrint("Commands");
+  this->AddSectionToPrint("Copyright");
+  this->AddSectionToPrint("Standard See Also");
+  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1239,7 +1119,11 @@ bool cmDocumentation::PrintDocumentationCurrentCommands(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationCompatCommands(std::ostream& os)
 {
-  this->CreateCompatCommandsDocumentation();
+  this->ClearSections();
+  this->AddSectionToPrint("Compatibility Commands Description");
+  this->AddSectionToPrint("Compatibility Commands");
+  this->AddSectionToPrint("Copyright");
+  this->AddSectionToPrint("Standard See Also");
   this->CurrentFormatter->PrintHeader(GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
@@ -1247,26 +1131,18 @@ bool cmDocumentation::PrintDocumentationCompatCommands(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintDocumentationCommand(std::ostream& os,
-                                             const cmDocumentationEntry* entry)
+void cmDocumentation
+::PrintDocumentationCommand(std::ostream& os,
+                            const cmDocumentationEntry &entry)
 {
-  cmDocumentationEntry singleCommandSection[3] =
-    {
-      {entry->name, entry->brief, entry->full},
-      {0,0,0}
-    };
+  cmDocumentationSection *sec = new cmDocumentationSection("","");
+  sec->Append(entry);
+  this->AllSections["temp"] = sec;
   this->ClearSections();
-  this->AddSection(0, &singleCommandSection[0]);
+  this->AddSectionToPrint("temp");
   this->Print(os);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::CreateUsageDocumentation()
-{
-  this->ClearSections();
-  this->AddSection(this->UsageSection);
-  this->AddSection(this->OptionsSection);
-  this->AddSection(this->GeneratorsSection);
+  this->AllSections.erase("temp");
+  delete sec;
 }
 
 //----------------------------------------------------------------------------
@@ -1275,107 +1151,61 @@ void cmDocumentation::CreateFullDocumentation()
   this->ClearSections();
   this->CreateCustomModulesSection();
   this->CreateModulesSection();
-  this->AddSection(this->NameSection);
-  this->AddSection(this->UsageSection);
-  this->AddSection(this->DescriptionSection);
-  this->AddSection(this->OptionsSection);
-  this->AddSection(this->GeneratorsSection);
-  this->AddSection(this->CommandsSection);
-  this->AddSection(this->CompatCommandsSection);
-  this->AddSection(this->ModulesSection);
-  this->AddSection(this->GlobalPropertiesSection);
-  this->AddSection(this->DirectoryPropertiesSection);
-  this->AddSection(this->TargetPropertiesSection);
-  this->AddSection(this->TestPropertiesSection);
-  this->AddSection(this->SourceFilePropertiesSection);
-  this->AddSection(this->VariablePropertiesSection);
-  this->AddSection(this->CachedVariablePropertiesSection);
-  
-  this->AddSection(this->CopyrightSection.GetName(
-                 this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
+
+  std::set<std::string> emitted;
+  this->AddSectionToPrint("Name");
+  emitted.insert("Name");
+  this->AddSectionToPrint("Usage");
+  emitted.insert("Usage");
+  this->AddSectionToPrint("Description");
+  emitted.insert("Description");
+  this->AddSectionToPrint("Options");
+  emitted.insert("Options");
+  this->AddSectionToPrint("Generators");
+  emitted.insert("Generators");
+  this->AddSectionToPrint("Commands");
+  emitted.insert("Commands");
+
+  this->AddSectionToPrint("Properties Description");
+  emitted.insert("Properties Description");
+  this->AddSectionToPrint("Properties of Global Scope");
+  emitted.insert("Properties of Global Scope");
+  this->AddSectionToPrint("Properties on Directories");
+  emitted.insert("Properties on Directories");
+  this->AddSectionToPrint("Properties on Targets");
+  emitted.insert("Properties on Targets");
+  this->AddSectionToPrint("Properties on Tests");
+  emitted.insert("Properties on Tests");
+  this->AddSectionToPrint("Properties on Source Files");
+  emitted.insert("Properties on Source Files");
+
+  emitted.insert("Copyright");
+  emitted.insert("See Also");
+  emitted.insert("Standard See Also");
+  emitted.insert("Author");
+
+  // add any sections not yet written out, or to be written out
+  for (std::map<std::string, cmDocumentationSection*>::iterator i = 
+         this->AllSections.begin();
+       i != this->AllSections.end(); ++i)
+    {
+    if (emitted.find(i->first) == emitted.end())
+      {
+      this->AddSectionToPrint(i->first.c_str());
+      }
+    }
+
+  this->AddSectionToPrint("Copyright");
 
   if(this->CurrentFormatter->GetForm() == ManForm)
     {
-    this->AddSection(this->SeeAlsoSection);
-    this->AddSection(this->AuthorSection.GetName(ManForm),
-                     cmDocumentationAuthor);
+    this->AddSectionToPrint("See Also");
+    this->AddSectionToPrint("Author");
     }
   else
     {
-    this->AddSection(this->SeeAlsoSection.GetName(TextForm),
-                     cmDocumentationStandardSeeAlso);
+    this->AddSectionToPrint("Standard See Also");
     }
-}
-
-void cmDocumentation::CreateCurrentCommandsDocumentation()
-{
-  this->ClearSections();
-  this->AddSection(this->CommandsSection);
-  this->AddSection(this->CopyrightSection.GetName(
-        this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(
-        this->CurrentFormatter->GetForm()), cmDocumentationStandardSeeAlso);
-}
-
-void cmDocumentation::CreateCompatCommandsDocumentation()
-{
-  this->ClearSections();
-  this->AddSection(this->DescriptionSection.GetName(
-        this->CurrentFormatter->GetForm()), 
-        cmCompatCommandsDocumentationDescription);
-  this->AddSection(this->CompatCommandsSection);
-  this->AddSection(this->CopyrightSection.GetName(
-        this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(
-        this->CurrentFormatter->GetForm()), cmDocumentationStandardSeeAlso);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::CreateModulesDocumentation()
-{
-  this->ClearSections();
-  this->CreateModulesSection();
-  this->AddSection(this->DescriptionSection.GetName(
-        this->CurrentFormatter->GetForm()), cmModulesDocumentationDescription);
-  this->AddSection(this->ModulesSection);
-  this->AddSection(this->CopyrightSection.GetName(
-        this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(
-        this->CurrentFormatter->GetForm()), cmDocumentationStandardSeeAlso);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::CreateCustomModulesDocumentation()
-{
-  this->ClearSections();
-  this->CreateCustomModulesSection();
-  this->AddSection(this->DescriptionSection.GetName(
-        this->CurrentFormatter->GetForm()), 
-        cmCustomModulesDocumentationDescription);
-  this->AddSection(this->CustomModulesSection);
-  this->AddSection(this->CopyrightSection.GetName(
-        this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(
-        this->CurrentFormatter->GetForm()), cmDocumentationStandardSeeAlso);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::CreatePropertiesDocumentation()
-{
-  this->ClearSections();
-  this->AddSection(this->DescriptionSection.GetName(
-     this->CurrentFormatter->GetForm()), cmPropertiesDocumentationDescription);
-  this->AddSection(this->GlobalPropertiesSection);
-  this->AddSection(this->DirectoryPropertiesSection);
-  this->AddSection(this->TargetPropertiesSection);
-  this->AddSection(this->TestPropertiesSection);
-  this->AddSection(this->SourceFilePropertiesSection);
-  this->AddSection(this->VariablePropertiesSection);
-  this->AddSection(this->CachedVariablePropertiesSection);
-  this->AddSection(this->CopyrightSection.GetName(
-        this->CurrentFormatter->GetForm()), cmDocumentationCopyright);
-  this->AddSection(this->SeeAlsoSection.GetName(
-        this->CurrentFormatter->GetForm()), cmDocumentationStandardSeeAlso);
 }
 
 //----------------------------------------------------------------------------
@@ -1398,37 +1228,6 @@ void cmDocumentation::SetForm(Form f)
   }
 }
 
-
-//----------------------------------------------------------------------------
-void cmDocumentation::cmSection::Set(const cmDocumentationEntry* header,
-                                     const cmDocumentationEntry* section,
-                                     const cmDocumentationEntry* footer)
-{
-  this->Entries.erase(this->Entries.begin(), this->Entries.end());
-  if(header)
-    {
-    for(const cmDocumentationEntry* op = header; op->brief; ++op)
-      {
-      this->Entries.push_back(*op);
-      }
-    }
-  if(section)
-    {
-    for(const cmDocumentationEntry* op = section; op->brief; ++op)
-      {
-      this->Entries.push_back(*op);
-      }
-    }
-  if(footer)
-    {
-    for(const cmDocumentationEntry* op = footer; op->brief; ++op)
-      {
-      this->Entries.push_back(*op);
-      }
-    }
-  cmDocumentationEntry empty = {0,0,0};
-  this->Entries.push_back(empty);
-}
 
 //----------------------------------------------------------------------------
 const char* cmDocumentation::GetNameString() const

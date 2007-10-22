@@ -23,7 +23,7 @@
 #include "cmVersion.h"
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationName[] =
+static const char *cmDocumentationName[][3] =
 {
   {0,
    "  DumpDocumentation - Dump documentation for CMake.", 0},
@@ -31,7 +31,7 @@ static const cmDocumentationEntry cmDocumentationName[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationUsage[] =
+static const char *cmDocumentationUsage[][3] =
 {
   {0,
    "  DumpDocumentation [filename]", 0},
@@ -39,7 +39,7 @@ static const cmDocumentationEntry cmDocumentationUsage[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationDescription[] =
+static const char *cmDocumentationDescription[][3] =
 {
   {0,
    "The \"DumpDocumentation\" executable is only available in the build "
@@ -49,7 +49,7 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 };
 
 //----------------------------------------------------------------------------
-static const cmDocumentationEntry cmDocumentationOptions[] =
+static const char *cmDocumentationOptions[][3] =
 {
   {"--all-for-coverage", 
    "Dump all documentation to stdout.  For testing.", 0},
@@ -74,7 +74,7 @@ int DumpHTML(const char* outname)
   cmOStringStream str;
   str << "Documentation for Commands of CMake " 
     << cmVersion::GetCMakeVersion();
-  doc.AddSection(str.str().c_str(), &commands[0]);
+  doc.SetSection(str.str().c_str(), commands);
   doc.Print(cmDocumentation::HTMLForm, fout);
   
   return 0;
@@ -88,12 +88,12 @@ int DumpForCoverageToStream(std::ostream& out)
   std::vector<cmDocumentationEntry> generators;
   cmi.GetCommandDocumentation(commands);
   cmi.GetGeneratorDocumentation(generators);
-  doc.SetNameSection(cmDocumentationName);
-  doc.SetUsageSection(cmDocumentationUsage);
-  doc.SetDescriptionSection(cmDocumentationDescription);
-  doc.SetOptionsSection(cmDocumentationOptions);
-  doc.SetCommandsSection(&commands[0]);
-  doc.SetGeneratorsSection(&generators[0]);
+  doc.SetSection("Name",cmDocumentationName);
+  doc.SetSection("Usage",cmDocumentationUsage);
+  doc.SetSection("Description",cmDocumentationDescription);
+  doc.SetSection("options",cmDocumentationOptions);
+  doc.SetSection("Commands",commands);
+  doc.SetSection("Generators",generators);
   doc.PrintDocumentation(cmDocumentation::Usage, out);
   doc.PrintDocumentation(cmDocumentation::Full, out);
   return 0;

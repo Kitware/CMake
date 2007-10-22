@@ -16,6 +16,7 @@
 =========================================================================*/
 
 #include "cmDocumentationFormatterMan.h"
+#include "cmDocumentationSection.h"
 
 #include "cmSystemTools.h"
 #include "cmVersion.h"
@@ -26,28 +27,32 @@ cmDocumentationFormatterMan::cmDocumentationFormatterMan()
 {
 }
 
-void cmDocumentationFormatterMan::PrintSection(std::ostream& os,
-                  const cmDocumentationEntry* section,
-                  const char* name)
+void cmDocumentationFormatterMan
+::PrintSection(std::ostream& os,
+               const cmDocumentationSection &section,
+               const char* name)
 {
   if(name)
     {
     os << ".SH " << name << "\n";
     }
-  if(!section) { return; }
-  for(const cmDocumentationEntry* op = section; op->brief; ++op)
+
+  const std::vector<cmDocumentationEntry> &entries = 
+    section.GetEntries();
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
+      op != entries.end(); ++op)
     {
-    if(op->name)
+    if(op->Name.size())
       {
       os << ".TP\n"
-         << ".B " << (op->name[0]?op->name:"*") << "\n";
-      this->PrintFormatted(os, op->brief);
-      this->PrintFormatted(os, op->full);
+         << ".B " << (op->Name.size()?op->Name.c_str():"*") << "\n";
+      this->PrintFormatted(os, op->Brief.c_str());
+      this->PrintFormatted(os, op->Full.c_str());
       }
     else
       {
       os << ".PP\n";
-      this->PrintFormatted(os, op->brief);
+      this->PrintFormatted(os, op->Brief.c_str());
       }
     }
 }
