@@ -2726,9 +2726,9 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
 void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
   const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generate XCode project files.";
-  entry.full = "";
+  entry.Name = this->GetName();
+  entry.Brief = "Generate XCode project files.";
+  entry.Full = "";
 }
 
 //----------------------------------------------------------------------------

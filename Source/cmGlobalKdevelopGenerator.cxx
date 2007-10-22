@@ -32,9 +32,9 @@
 void cmGlobalKdevelopGenerator
 ::GetDocumentation(cmDocumentationEntry& entry, const char*) const
 {
-  entry.name = this->GetName();
-  entry.brief = "Generates KDevelop 3 project files.";
-  entry.full =
+  entry.Name = this->GetName();
+  entry.Brief = "Generates KDevelop 3 project files.";
+  entry.Full =
     "Project files for KDevelop 3 will be created in the top directory "
     "and in every subdirectory which features a CMakeLists.txt file "
     "containing a PROJECT() call. "
