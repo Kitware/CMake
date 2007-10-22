@@ -235,6 +235,11 @@ cmDocumentation::cmDocumentation()
   sec = new cmDocumentationSection("Generators","GENERATORS");
   sec->Append(cmDocumentationGeneratorsHeader);
   this->AllSections["Generators"] = sec;  
+
+  sec = new cmDocumentationSection("Compatibility Commands",
+                                   "COMPATIBILITY COMMANDS");
+  sec->Append(cmCompatCommandsDocumentationDescription);
+  this->AllSections["Compatibility Commands"] = sec;  
 }
 
 //----------------------------------------------------------------------------

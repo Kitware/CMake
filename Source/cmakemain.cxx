@@ -315,7 +315,7 @@ int do_cmake(int ac, char** av)
     doc.AppendSection("Generators",generators);
     doc.PrependSection("Options",cmDocumentationOptions);
     doc.SetSection("Commands",commands);
-    doc.SetSection("Compatibility Commands",compatCommands);
+    doc.AppendSection("Compatibility Commands",compatCommands);
     doc.SetSections(propDocs);
 
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
