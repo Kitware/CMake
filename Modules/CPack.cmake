@@ -183,14 +183,20 @@ cpack_set_if_not_set(CPACK_SOURCE_OUTPUT_CONFIG_FILE
 cpack_set_if_not_set(CPACK_USE_DESTDIR ON)
 cpack_set_if_not_set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
-cpack_encode_variables()
 cpack_set_if_not_set(CPACK_NSIS_INSTALLER_ICON_CODE "")
+
+# if CPACK_PACKAGE_ICON is set, then create a 
+# cpack variable that contains the NSIS code to define
+# the CPACK_PACKAGE_ICON and MUI_HEADERIMAGE_BITMAP, this is used
+# as an icon in the install wizard
 if(CPACK_PACKAGE_ICON)
   set(CPACK_NSIS_INSTALLER_ICON_CODE "
-!define CPACK_PACKAGE_ICON "@CPACK_PACKAGE_ICON@
-!define MUI_HEADERIMAGE_BITMAP "@CPACK_PACKAGE_ICON@
+!define CPACK_PACKAGE_ICON \\\"@CPACK_PACKAGE_ICON@\\\"
+!define MUI_HEADERIMAGE_BITMAP \\\"@CPACK_PACKAGE_ICON@\\\"
 ")
 endif(CPACK_PACKAGE_ICON)
+
+cpack_encode_variables()
 
 
 
