@@ -73,6 +73,14 @@ public:
   void SetSections(std::map<std::string,cmDocumentationSection *>
                    &sections);
 
+  /** Add the documentation to the beginning/end of the section */
+  void PrependSection(const char *sectionName,
+                      const char *docs[][3]);
+  void AppendSection(const char *sectionName,
+                     const char *docs[][3]);
+  void AppendSection(const char *sectionName,
+                     std::vector<cmDocumentationEntry> &docs);
+
   /**
    * Print documentation in the given form.  All previously added
    * sections will be generated.

@@ -104,71 +104,6 @@ static const char *cmCompatCommandsDocumentationDescription[][3] =
 };
 
 //----------------------------------------------------------------------------
-static const char *cmDocumentationCommandsHeader[][3] =
-{
-  {0,
-   "The following commands are available in CMakeLists.txt code:", 0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-static const char *cmDocumentationGlobalPropertiesHeader[][3] =
-{
-  {0,
-   "The following global properties are available in CMakeLists.txt code:", 0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-static const char *cmDocumentationDirectoryPropertiesHeader[][3] =
-{
-  {0
-   ,"The following directory properties are available in CMakeLists.txt code:"
-   ,0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-static const char *cmDocumentationTargetPropertiesHeader[][3] =
-{
-  {0,
-   "The following target properties are available in CMakeLists.txt code:", 0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-static const char *cmDocumentationTestPropertiesHeader[][3] =
-{
-  {0
-   ,"The following properties for tests are available in CMakeLists.txt code:"
-   ,0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-static const char *cmDocumentationSourceFilePropertiesHeader[][3] =
-{
-  {0
-  ,"The following source file properties are available in CMakeLists.txt code:"
-  , 0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-static const char *cmDocumentationVariablePropertiesHeader[][3] =
-{
-  {0, "The following variables are available in CMakeLists.txt code:", 0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-static const char *cmDocumentationCachedVariablePropertiesHeader[][3] =
-{
-  {0,"The following cache variables are available in CMakeLists.txt code:", 0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
 static const char *cmDocumentationModulesHeader[][3] =
 {
   {0,
@@ -288,6 +223,18 @@ cmDocumentation::cmDocumentation()
   sec = new cmDocumentationSection("See Also","SEE ALSO");
   sec->Append(cmDocumentationStandardSeeAlso);
   this->AllSections["Standard See Also"] = sec;  
+
+  sec = new cmDocumentationSection("Options","OPTIONS");
+  sec->Append(cmDocumentationStandardOptions);
+  this->AllSections["Options"] = sec;  
+
+  sec = new cmDocumentationSection("Properties","PROPERTIES");
+  sec->Append(cmPropertiesDocumentationDescription);
+  this->AllSections["Properties Description"] = sec;  
+
+  sec = new cmDocumentationSection("Generators","GENERATORS");
+  sec->Append(cmDocumentationGeneratorsHeader);
+  this->AllSections["Generators"] = sec;  
 }
 
 //----------------------------------------------------------------------------
@@ -297,6 +244,12 @@ cmDocumentation::~cmDocumentation()
       i != this->ModuleStrings.end(); ++i)
     {
     delete [] *i;
+    }
+  for(std::map<std::string,cmDocumentationSection *>::iterator i = 
+        this->AllSections.begin();
+      i != this->AllSections.end(); ++i)
+    {
+    delete i->second;
     }
 }
 
@@ -375,6 +328,7 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       this->PrintDocumentationList(os,"Modules");
       return true;
     case cmDocumentation::PropertyList: 
+      this->PrintDocumentationList(os,"Properties Description");
       this->PrintDocumentationList(os,"Properties of Global Scope");
       this->PrintDocumentationList(os,"Properties on Directories");
       this->PrintDocumentationList(os,"Properties on Targets");
@@ -414,7 +368,8 @@ bool cmDocumentation::CreateModulesSection()
   dir.Load(cmakeModules.c_str());
   if (dir.GetNumberOfFiles() > 0)
     {
-    this->AllSections["Modules"]->Append(cmDocumentationModulesHeader[0]);
+    sec->Append(cmDocumentationModulesHeader[0]);
+    sec->Append(cmModulesDocumentationDescription);
     this->CreateModuleDocsForDir(dir, *this->AllSections["Modules"]);
     }
   return true;
@@ -442,6 +397,7 @@ bool cmDocumentation::CreateCustomModulesSection()
           new cmDocumentationSection("Custom CMake Modules","CUSTOM MODULES");
         this->AllSections["Custom CMake Modules"] = sec;
         sec->Append(cmDocumentationCustomModulesHeader[0]);
+        sec->Append(cmCustomModulesDocumentationDescription);
         sectionHasHeader = true;
         }
       this->CreateModuleDocsForDir
@@ -853,6 +809,63 @@ void cmDocumentation
     {
     this->SetSection(it->first.c_str(),it->second);
     }    
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::PrependSection(const char *name, 
+                                     const char *docs[][3])
+{
+  cmDocumentationSection *sec = 0;
+  if (this->AllSections.find(name) == this->AllSections.end())
+    {
+    cmDocumentationSection *sec = 
+      new cmDocumentationSection(name, 
+                                 cmSystemTools::UpperCase(name).c_str());
+    this->SetSection(name,sec);
+    }
+  else
+    {
+    sec = this->AllSections[name];
+    }
+  sec->Prepend(docs);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::AppendSection(const char *name, 
+                                    const char *docs[][3])
+{
+  cmDocumentationSection *sec = 0;
+  if (this->AllSections.find(name) == this->AllSections.end())
+    {
+    cmDocumentationSection *sec = 
+      new cmDocumentationSection(name, 
+                                 cmSystemTools::UpperCase(name).c_str());
+    this->SetSection(name,sec);
+    }
+  else
+    {
+    sec = this->AllSections[name];
+    }
+  sec->Append(docs);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::AppendSection(const char *name, 
+                                    std::vector<cmDocumentationEntry> &docs)
+{
+  cmDocumentationSection *sec = 0;
+  if (this->AllSections.find(name) == this->AllSections.end())
+    {
+    cmDocumentationSection *sec = 
+      new cmDocumentationSection(name, 
+                                 cmSystemTools::UpperCase(name).c_str());
+    this->SetSection(name,sec);
+    }
+  else
+    {
+    sec = this->AllSections[name];
+    }
+  sec->Append(docs);
 }
 
 //----------------------------------------------------------------------------

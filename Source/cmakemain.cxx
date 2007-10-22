@@ -300,9 +300,9 @@ int do_cmake(int ac, char** av)
 
     std::vector<cmDocumentationEntry> commands;
     std::vector<cmDocumentationEntry> compatCommands;
+    std::vector<cmDocumentationEntry> generators;
     std::map<std::string,cmDocumentationSection *> propDocs;
 
-    std::vector<cmDocumentationEntry> generators;
     hcm.GetCommandDocumentation(commands, true, false);
     hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetPropertiesDocumentation(propDocs);
@@ -312,8 +312,8 @@ int do_cmake(int ac, char** av)
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Description",cmDocumentationDescription);
-    doc.SetSection("Generators",generators);
-    doc.SetSection("Options",cmDocumentationOptions);
+    doc.AppendSection("Generators",generators);
+    doc.PrependSection("Options",cmDocumentationOptions);
     doc.SetSection("Commands",commands);
     doc.SetSection("Compatibility Commands",compatCommands);
     doc.SetSections(propDocs);

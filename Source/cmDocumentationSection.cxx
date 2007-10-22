@@ -31,6 +31,21 @@ void cmDocumentationSection::Append(const char *data[][3])
 }
 
 //----------------------------------------------------------------------------
+void cmDocumentationSection::Prepend(const char *data[][3])
+{
+  std::vector<cmDocumentationEntry> tmp;
+  int i = 0;
+  while(data[i][1])
+    {
+    tmp.push_back(cmDocumentationEntry(data[i][0],
+                                       data[i][1],
+                                       data[i][2]));
+    data += 1;
+    }
+  this->Entries.insert(this->Entries.begin(),tmp.begin(),tmp.end());
+}
+
+//----------------------------------------------------------------------------
 void cmDocumentationSection::Append(const char *n, const char *b,
                                     const char *f)
 {
