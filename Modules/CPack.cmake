@@ -184,6 +184,16 @@ cpack_set_if_not_set(CPACK_USE_DESTDIR ON)
 cpack_set_if_not_set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
 cpack_encode_variables()
+cpack_set_if_not_set(CPACK_NSIS_INSTALLER_ICON_CODE "")
+if(CPACK_PACKAGE_ICON)
+  set(CPACK_NSIS_INSTALLER_ICON_CODE "
+!define CPACK_PACKAGE_ICON "@CPACK_PACKAGE_ICON@
+!define MUI_HEADERIMAGE_BITMAP "@CPACK_PACKAGE_ICON@
+")
+endif(CPACK_PACKAGE_ICON)
+
+
+
 configure_file("${cpack_input_file}" "${CPACK_OUTPUT_CONFIG_FILE}" @ONLY IMMEDIATE)
 
 # Generate source file
