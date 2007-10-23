@@ -823,9 +823,8 @@ void cmDocumentation::PrependSection(const char *name,
   cmDocumentationSection *sec = 0;
   if (this->AllSections.find(name) == this->AllSections.end())
     {
-    cmDocumentationSection *sec = 
-      new cmDocumentationSection(name, 
-                                 cmSystemTools::UpperCase(name).c_str());
+    sec = new cmDocumentationSection
+      (name, cmSystemTools::UpperCase(name).c_str());
     this->SetSection(name,sec);
     }
   else
@@ -842,9 +841,8 @@ void cmDocumentation::AppendSection(const char *name,
   cmDocumentationSection *sec = 0;
   if (this->AllSections.find(name) == this->AllSections.end())
     {
-    cmDocumentationSection *sec = 
-      new cmDocumentationSection(name, 
-                                 cmSystemTools::UpperCase(name).c_str());
+    sec = new cmDocumentationSection
+      (name, cmSystemTools::UpperCase(name).c_str());
     this->SetSection(name,sec);
     }
   else
@@ -861,9 +859,8 @@ void cmDocumentation::AppendSection(const char *name,
   cmDocumentationSection *sec = 0;
   if (this->AllSections.find(name) == this->AllSections.end())
     {
-    cmDocumentationSection *sec = 
-      new cmDocumentationSection(name, 
-                                 cmSystemTools::UpperCase(name).c_str());
+    sec = new cmDocumentationSection
+      (name, cmSystemTools::UpperCase(name).c_str());
     this->SetSection(name,sec);
     }
   else
