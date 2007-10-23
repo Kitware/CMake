@@ -1217,7 +1217,8 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
     }
 
 #ifdef CMAKE_STRICT
-  if (!this->CMakeInstance->IsPropertyDefined(name,cmProperty::VARIABLE))
+  if (this->GetCMakeInstance() &&
+      !this->GetCMakeInstance()->IsPropertyDefined(name,cmProperty::VARIABLE))
     {
     std::string msg = "Variable ";
     msg += name;
@@ -1681,7 +1682,8 @@ bool cmMakefile::IsDefinitionSet(const char* name) const
 const char* cmMakefile::GetDefinition(const char* name) const
 {
 #ifdef CMAKE_STRICT
-  if (!this->CMakeInstance->IsPropertyDefined(name,cmProperty::VARIABLE))
+  if (this->GetCMakeInstance() &&
+      !this->GetCMakeInstance()->IsPropertyDefined(name,cmProperty::VARIABLE))
     {
     std::string msg = "Variable ";
     msg += name;

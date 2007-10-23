@@ -87,7 +87,10 @@ void cmPropertyDefinitionMap
                                cmSystemTools::UpperCase(secName).c_str());
       }
     cmDocumentationEntry e = j->second.GetDocumentation();
-    v[secName]->Append(e);
+    if (e.Brief.size() || e.Full.size())
+      {
+      v[secName]->Append(e);
+      }
     }
 }
 
