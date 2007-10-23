@@ -554,31 +554,36 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_<LANG>_CREATE_STATIC_LIBRARY", cmProperty::VARIABLE,
      "Rule variable to create a static library.",
      "This is a rule variable that tells CMake how "
-     "to create a static library for the language <LANG>.",false,"Variables for Languages");
+     "to create a static library for the language <LANG>.",false,
+     "Variables for Languages");
   
   cm->DefineProperty
     ("CMAKE_<LANG>_IGNORE_EXTENSIONS", cmProperty::VARIABLE,
      "File extensions that should be ignored by the build.",
      "This is a list of file extensions that may be "
-     "part of a project for a given language but are not compiled. ",false,"Variables for Languages");
+     "part of a project for a given language but are not compiled. ",false,
+     "Variables for Languages");
   
   cm->DefineProperty
     ("CMAKE_<LANG>_LINKER_PREFERENCE", cmProperty::VARIABLE,
      "Determine if a language should be used for linking.",
      "If this is \"Preferred\" then if there is a mixed "
      "language shared library or executable, then this "
-     "languages linker command will be used.",false,"Variables for Languages");
+     "languages linker command will be used.",false,
+     "Variables for Languages");
   
   cm->DefineProperty
     ("CMAKE_<LANG>_LINK_EXECUTABLE ", cmProperty::VARIABLE,
      "Rule variable to link and executable.",
-     "Rule variable to link and executable for the given language.",false,"Variables for Languages");
+     "Rule variable to link and executable for the given language.",false,
+     "Variables for Languages");
   
   cm->DefineProperty
     ("CMAKE_<LANG>_OUTPUT_EXTENSION", cmProperty::VARIABLE,
      "Extension for the output of a compile for a single file.",
      "This is the extension for an object file for "
-     "the given <LANG>. For example .obj for C on Windows.",false,"Variables for Languages");
+     "the given <LANG>. For example .obj for C on Windows.",false,
+     "Variables for Languages");
   
   cm->DefineProperty
     ("CMAKE_<LANG>_SOURCE_FILE_EXTENSIONS", cmProperty::VARIABLE,
