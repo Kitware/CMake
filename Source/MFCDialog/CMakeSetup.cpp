@@ -115,19 +115,22 @@ BOOL CMakeSetup::InitInstance()
     doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
     std::vector<cmDocumentationEntry> commands;
     std::vector<cmDocumentationEntry> compatCommands;
+    std::map<std::string,cmDocumentationSection *> propDocs;
 
     std::vector<cmDocumentationEntry> generators;
     hcm.GetCommandDocumentation(commands, true, false);
     hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetGeneratorDocumentation(generators);
+    hcm.GetPropertiesDocumentation(propDocs);
     doc.SetName("cmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Description",cmDocumentationDescription);
-    doc.SetSection("Generators",generators);
-    doc.SetSection("Options",cmDocumentationOptions);
+    doc.AppendSection("Generators",generators);
+    doc.PrependSection("Options",cmDocumentationOptions);
     doc.SetSection("Commands",commands);
     doc.SetSection("Compatilbility Commands", compatCommands);
+    doc.SetSections(propDocs);
 
     return (doc.PrintRequestedDocumentation(std::cout)? 0:1);
     }

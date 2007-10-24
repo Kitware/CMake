@@ -47,6 +47,9 @@ ADD_CUSTOM_COMMAND(
        --help-properties ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
        --help-properties ${CMake_BINARY_DIR}/Docs/cmake-properties.html
        --help-properties ${CMake_BINARY_DIR}/Docs/cmakeprops.1
+       --help-variables ${CMake_BINARY_DIR}/Docs/cmake-variables.txt
+       --help-variables ${CMake_BINARY_DIR}/Docs/cmake-variables.html
+       --help-variables ${CMake_BINARY_DIR}/Docs/cmakevars.1
        --help-modules ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
        --help-modules ${CMake_BINARY_DIR}/Docs/cmake-modules.html
        --help-modules ${CMake_BINARY_DIR}/Docs/cmakemodules.1
@@ -65,6 +68,7 @@ INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
               ${CMake_BINARY_DIR}/Docs/cmakecommands.1
               ${CMake_BINARY_DIR}/Docs/cmakecompat.1
               ${CMake_BINARY_DIR}/Docs/cmakeprops.1
+              ${CMake_BINARY_DIR}/Docs/cmakevars.1
               ${CMake_BINARY_DIR}/Docs/cmakemodules.1)
 
 INSTALL_FILES(${CMAKE_DOC_DIR} FILES
@@ -72,7 +76,9 @@ INSTALL_FILES(${CMAKE_DOC_DIR} FILES
     ${CMake_BINARY_DIR}/Docs/cmake.html
     ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
     ${CMake_BINARY_DIR}/Docs/cmake-properties.html
-    ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
+    ${CMake_BINARY_DIR}/Docs/cmake-variables.txt
+    ${CMake_BINARY_DIR}/Docs/cmake-variables.html 
+   ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
     ${CMake_BINARY_DIR}/Docs/cmake-modules.html
     ${CMake_BINARY_DIR}/Docs/cmake-commands.txt
     ${CMake_BINARY_DIR}/Docs/cmake-commands.html

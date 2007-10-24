@@ -76,10 +76,16 @@ public:
   /** Add the documentation to the beginning/end of the section */
   void PrependSection(const char *sectionName,
                       const char *docs[][3]);
+  void PrependSection(const char *sectionName,
+                      std::vector<cmDocumentationEntry> &docs);
+  void PrependSection(const char *sectionName,
+                      cmDocumentationEntry &docs);
   void AppendSection(const char *sectionName,
                      const char *docs[][3]);
   void AppendSection(const char *sectionName,
                      std::vector<cmDocumentationEntry> &docs);
+  void AppendSection(const char *sectionName,
+                     cmDocumentationEntry &docs);
 
   /**
    * Print documentation in the given form.  All previously added
@@ -131,11 +137,13 @@ private:
   bool PrintDocumentationSingle(std::ostream& os);
   bool PrintDocumentationSingleModule(std::ostream& os);
   bool PrintDocumentationSingleProperty(std::ostream& os);
+  bool PrintDocumentationSingleVariable(std::ostream& os);
   bool PrintDocumentationUsage(std::ostream& os);
   bool PrintDocumentationFull(std::ostream& os);
   bool PrintDocumentationModules(std::ostream& os);
   bool PrintDocumentationCustomModules(std::ostream& os);
   bool PrintDocumentationProperties(std::ostream& os);
+  bool PrintDocumentationVariables(std::ostream& os);
   bool PrintDocumentationCurrentCommands(std::ostream& os);
   bool PrintDocumentationCompatCommands(std::ostream& os);
   void PrintDocumentationCommand(std::ostream& os,
@@ -171,7 +179,9 @@ private:
   cmDocumentationFormatterMan ManFormatter;
   cmDocumentationFormatterText TextFormatter;
   cmDocumentationFormatterUsage UsageFormatter;
-  
+
+  std::vector<std::string> PropertySections;
+  std::vector<std::string> VariableSections;
 };
 
 #endif

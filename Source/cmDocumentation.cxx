@@ -240,6 +240,19 @@ cmDocumentation::cmDocumentation()
                                    "COMPATIBILITY COMMANDS");
   sec->Append(cmCompatCommandsDocumentationDescription);
   this->AllSections["Compatibility Commands"] = sec;  
+
+
+  this->PropertySections.push_back("Properties of Global Scope");
+  this->PropertySections.push_back("Properties on Directories");
+  this->PropertySections.push_back("Properties on Targets");
+  this->PropertySections.push_back("Properties on Tests");
+  this->PropertySections.push_back("Properties on Source Files");
+
+  this->VariableSections.push_back("Variables that Provide Information");
+  this->VariableSections.push_back("Variables That Change Behavior");
+  this->VariableSections.push_back("Variables That Describe the System");
+  this->VariableSections.push_back("Variables that Control the Build");
+  this->VariableSections.push_back("Variables for Languages");
 }
 
 //----------------------------------------------------------------------------
@@ -325,6 +338,8 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return this->PrintDocumentationSingleModule(os);
     case cmDocumentation::SingleProperty:
       return this->PrintDocumentationSingleProperty(os);
+    case cmDocumentation::SingleVariable:
+      return this->PrintDocumentationSingleVariable(os);
     case cmDocumentation::List:
       this->PrintDocumentationList(os,"Commands");
       this->PrintDocumentationList(os,"Compatibility Commands");
@@ -334,11 +349,20 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return true;
     case cmDocumentation::PropertyList: 
       this->PrintDocumentationList(os,"Properties Description");
-      this->PrintDocumentationList(os,"Properties of Global Scope");
-      this->PrintDocumentationList(os,"Properties on Directories");
-      this->PrintDocumentationList(os,"Properties on Targets");
-      this->PrintDocumentationList(os,"Properties on Tests");
-      this->PrintDocumentationList(os,"Properties on Source Files");
+      for (std::vector<std::string>::iterator i = 
+             this->PropertySections.begin();
+           i != this->PropertySections.end(); ++i)
+        {
+        this->PrintDocumentationList(os,i->c_str());
+        }
+      return true;
+    case cmDocumentation::VariableList: 
+      for (std::vector<std::string>::iterator i = 
+             this->VariableSections.begin();
+           i != this->VariableSections.end(); ++i)
+        {
+        this->PrintDocumentationList(os,i->c_str());
+        }
       return true;
     case cmDocumentation::Full: 
       return this->PrintDocumentationFull(os);
@@ -348,6 +372,8 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return this->PrintDocumentationCustomModules(os);
     case cmDocumentation::Properties: 
       return this->PrintDocumentationProperties(os);
+    case cmDocumentation::Variables: 
+      return this->PrintDocumentationVariables(os);
     case cmDocumentation::Commands: 
       return this->PrintDocumentationCurrentCommands(os);
     case cmDocumentation::CompatCommands: 
@@ -641,6 +667,12 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
       GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
+    else if(strcmp(argv[i], "--help-variables") == 0)
+      {
+      help.HelpType = cmDocumentation::Variables;
+      GET_OPT_ARGUMENT(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      }
     else if(strcmp(argv[i], "--help-modules") == 0)
       {
       help.HelpType = cmDocumentation::Modules;
@@ -705,6 +737,13 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
       GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = this->GetFormFromFilename(help.Filename);
       }
+    else if(strcmp(argv[i], "--help-variable") == 0)
+      {
+      help.HelpType = cmDocumentation::SingleVariable;
+      GET_OPT_ARGUMENT(help.Argument);
+      GET_OPT_ARGUMENT(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      }
     else if(strcmp(argv[i], "--help-command-list") == 0)
       {
       help.HelpType = cmDocumentation::List;
@@ -720,6 +759,12 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
     else if(strcmp(argv[i], "--help-property-list") == 0)
       {
       help.HelpType = cmDocumentation::PropertyList;
+      GET_OPT_ARGUMENT(help.Filename);
+      help.HelpForm = cmDocumentation::TextForm;
+      }
+    else if(strcmp(argv[i], "--help-variable-list") == 0)
+      {
+      help.HelpType = cmDocumentation::VariableList;
       GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::TextForm;
       }
@@ -835,6 +880,24 @@ void cmDocumentation::PrependSection(const char *name,
 }
 
 //----------------------------------------------------------------------------
+void cmDocumentation::PrependSection(const char *name, 
+                                     std::vector<cmDocumentationEntry> &docs)
+{
+  cmDocumentationSection *sec = 0;
+  if (this->AllSections.find(name) == this->AllSections.end())
+    {
+    sec = new cmDocumentationSection
+      (name, cmSystemTools::UpperCase(name).c_str());
+    this->SetSection(name,sec);
+    }
+  else
+    {
+    sec = this->AllSections[name];
+    }
+  sec->Prepend(docs);
+}
+
+//----------------------------------------------------------------------------
 void cmDocumentation::AppendSection(const char *name, 
                                     const char *docs[][3])
 {
@@ -868,6 +931,26 @@ void cmDocumentation::AppendSection(const char *name,
     sec = this->AllSections[name];
     }
   sec->Append(docs);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::AppendSection(const char *name, 
+                                    cmDocumentationEntry &docs)
+{
+
+  std::vector<cmDocumentationEntry> docsVec;
+  docsVec.push_back(docs);
+  this->AppendSection(name,docsVec);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::PrependSection(const char *name, 
+                                     cmDocumentationEntry &docs)
+{
+
+  std::vector<cmDocumentationEntry> docsVec;
+  docsVec.push_back(docs);
+  this->PrependSection(name,docsVec);
 }
 
 //----------------------------------------------------------------------------
@@ -996,23 +1079,15 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationSingleProperty(std::ostream& os)
 {
-  if (this->PrintDocumentationGeneric(os,"Properties of Global Scope"))
+  bool done = false;
+  for (std::vector<std::string>::iterator i = 
+         this->PropertySections.begin();
+       !done && i != this->PropertySections.end(); ++i)
     {
-    return true;
+    done = this->PrintDocumentationGeneric(os,i->c_str());
     }
-  if (this->PrintDocumentationGeneric(os,"Properties on Directories"))
-    {
-    return true;
-    }
-  if (this->PrintDocumentationGeneric(os,"Properties on Targets"))
-    {
-    return true;
-    }
-  if (this->PrintDocumentationGeneric(os,"Properties on Tests"))
-    {
-    return true;
-    }
-  if (this->PrintDocumentationGeneric(os,"Properties on Source Files"))
+
+  if (done)
     {
     return true;
     }
@@ -1021,6 +1096,29 @@ bool cmDocumentation::PrintDocumentationSingleProperty(std::ostream& os)
   os << "Argument \"" << this->CurrentArgument.c_str()
      << "\" to --help-property is not a CMake property.  "
      << "Use --help-property-list to see all properties.\n";
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationSingleVariable(std::ostream& os)
+{
+  bool done = false;
+  for (std::vector<std::string>::iterator i = 
+         this->VariableSections.begin();
+       !done && i != this->VariableSections.end(); ++i)
+    {
+    done = this->PrintDocumentationGeneric(os,i->c_str());
+    }
+
+  if (done)
+    {
+    return true;
+    }
+
+  // Argument was not a command.  Complain.
+  os << "Argument \"" << this->CurrentArgument.c_str()
+     << "\" to --help-variable is not a defined variable.  "
+     << "Use --help-variable-list to see all defined variables.\n";
   return false;
 }
 
@@ -1105,11 +1203,30 @@ bool cmDocumentation::PrintDocumentationProperties(std::ostream& os)
 {
   this->ClearSections();
   this->AddSectionToPrint("Properties Description");
-  this->AddSectionToPrint("Properties of Global Scope");
-  this->AddSectionToPrint("Properties on Directories");
-  this->AddSectionToPrint("Properties on Targets");
-  this->AddSectionToPrint("Properties on Tests");
-  this->AddSectionToPrint("Properties on Source Files");
+  for (std::vector<std::string>::iterator i = 
+         this->PropertySections.begin();
+       i != this->PropertySections.end(); ++i)
+    {
+    this->AddSectionToPrint(i->c_str());
+    }
+  this->AddSectionToPrint("Copyright");
+  this->AddSectionToPrint("Standard See Also");
+  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
+  this->Print(os);
+  this->CurrentFormatter->PrintFooter(os);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationVariables(std::ostream& os)
+{
+  this->ClearSections();
+  for (std::vector<std::string>::iterator i = 
+         this->VariableSections.begin();
+       i != this->VariableSections.end(); ++i)
+    {
+    this->AddSectionToPrint(i->c_str());
+    }
   this->AddSectionToPrint("Copyright");
   this->AddSectionToPrint("Standard See Also");
   this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
@@ -1181,18 +1298,16 @@ void cmDocumentation::CreateFullDocumentation()
   this->AddSectionToPrint("Commands");
   emitted.insert("Commands");
 
+  
   this->AddSectionToPrint("Properties Description");
   emitted.insert("Properties Description");
-  this->AddSectionToPrint("Properties of Global Scope");
-  emitted.insert("Properties of Global Scope");
-  this->AddSectionToPrint("Properties on Directories");
-  emitted.insert("Properties on Directories");
-  this->AddSectionToPrint("Properties on Targets");
-  emitted.insert("Properties on Targets");
-  this->AddSectionToPrint("Properties on Tests");
-  emitted.insert("Properties on Tests");
-  this->AddSectionToPrint("Properties on Source Files");
-  emitted.insert("Properties on Source Files");
+  for (std::vector<std::string>::iterator i = 
+         this->PropertySections.begin();
+       i != this->PropertySections.end(); ++i)
+    {
+    this->AddSectionToPrint(i->c_str());
+    emitted.insert(i->c_str());
+    }
 
   emitted.insert("Copyright");
   emitted.insert("See Also");

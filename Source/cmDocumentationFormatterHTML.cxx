@@ -97,6 +97,21 @@ void cmDocumentationFormatterHTML
 
   const std::vector<cmDocumentationEntry> &entries = 
     section.GetEntries();
+
+  os << "<ul>\n";
+  for(std::vector<cmDocumentationEntry>::const_iterator op 
+        = entries.begin(); op != entries.end(); ++ op )
+    {
+    if(op->Name.size())
+      {
+      os << "    <li><a href=\"#command_"
+         << op->Name.c_str() << "\"><b><code>";
+      this->PrintHTMLEscapes(os, op->Name.c_str());
+      os << "</code></b></a></li>";
+      }
+    }
+  os << "</ul>\n" ;
+
   for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
       op != entries.end();)
     {
@@ -108,9 +123,10 @@ void cmDocumentationFormatterHTML
         os << "  <li>\n";
         if(op->Name.size())
           {
-          os << "    <b><code>";
+          os << "    <a name=\"command_"<< 
+            op->Name.c_str() << "\"><b><code>";
           this->PrintHTMLEscapes(os, op->Name.c_str());
-          os << "</code></b>: ";
+          os << "</code></b></a>: ";
           }
         this->PrintHTMLEscapes(os, op->Brief.c_str());
         if(op->Full.size())

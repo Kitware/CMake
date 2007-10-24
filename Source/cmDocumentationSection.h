@@ -59,6 +59,9 @@ public:
 
   /** prepend some documentation to this section */
   void Prepend(const char *[][3]);
+  void Prepend(const std::vector<cmDocumentationEntry> &entries)
+  { this->Entries.insert(this->Entries.begin(),
+                         entries.begin(),entries.end()); }
 
   
 private:

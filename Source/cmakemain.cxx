@@ -146,7 +146,7 @@ static const char * cmDocumentationOptions[][3] =
    "page, HTML and plain text."},
   {"--help-property prop [file]", 
    "Print help for a single property and exit.",
-   "Full documentation specific to the given module is displayed."
+   "Full documentation specific to the given property is displayed."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML and plain text."},
@@ -159,6 +159,24 @@ static const char * cmDocumentationOptions[][3] =
    "page, HTML and plain text."},
   {"--help-properties [file]", "Print help for all properties and exit.",
    "Full documentation for all properties is displayed."
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
+  {"--help-variable var [file]", 
+   "Print help for a single variable and exit.",
+   "Full documentation specific to the given variable is displayed."
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
+  {"--help-Variable-list [file]", "List documented variables and exit.",
+   "The list contains all variables for which help may be obtained by using "
+   "the --help-variable argument followed by a variable name.  If a file is "
+   "specified, the help is written into it."
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML and plain text."},
+  {"--help-variables [file]", "Print help for all variables and exit.",
+   "Full documentation for all variables is displayed."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML and plain text."},
@@ -317,6 +335,12 @@ int do_cmake(int ac, char** av)
     doc.SetSection("Commands",commands);
     doc.AppendSection("Compatibility Commands",compatCommands);
     doc.SetSections(propDocs);
+
+    cmDocumentationEntry e;
+    e.Brief = 
+      "variables defined by cmake, that give information about the project, "
+      "and cmake";
+    doc.PrependSection("Variables that Provide Information",e);
 
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
     int result = doc.PrintRequestedDocumentation(std::cout)? 0:1;
