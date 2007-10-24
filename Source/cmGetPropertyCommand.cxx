@@ -18,6 +18,7 @@
 
 #include "cmake.h"
 #include "cmTest.h"
+#include "cmPropertyDefinition.h"
 
 // cmGetPropertyCommand
 bool cmGetPropertyCommand::InitialPass(
@@ -31,33 +32,51 @@ bool cmGetPropertyCommand::InitialPass(
 
   // the last argument in the property to get
   const char *property = args[args.size()-1].c_str();
+  bool get_brief = false;
+  if (!strcmp(property,"BRIEF_DOCS"))
+    {
+    get_brief = true;
+    property = args[args.size()-2].c_str();
+    }
+  bool get_full = false;
+  if (!strcmp(property,"FULL_DOCS"))
+    {
+    get_full = true;
+    property = args[args.size()-2].c_str();
+    }
+
   std::string output = "NOTFOUND";
 
   cmProperty::ScopeType scope;
   const char *scopeName = 0;
-  if (args[1] == "GLOBAL" && args.size() == 3)
+  if (args[1] == "GLOBAL")
     {
     scope = cmProperty::GLOBAL;
+    }
+  else if (args[1] == "VARIABLE")
+    {
+    scope = cmProperty::VARIABLE;
     }
   else if (args[1] == "DIRECTORY" && args.size() >= 3)
     {
     scope = cmProperty::DIRECTORY;
-    if (args.size() >= 4)
+    if ((args.size() == 4 && !get_brief && !get_full) ||
+        (args.size() == 5 && (get_brief || get_full)))
       {
       scopeName = args[2].c_str();
       }
     }
-  else if (args[1] == "TARGET" && args.size() == 4)
+  else if (args[1] == "TARGET" && args.size() >= 4)
     {
     scope = cmProperty::TARGET;
     scopeName = args[2].c_str();
     }
-  else if (args[1] == "TEST" && args.size() == 4)
+  else if (args[1] == "TEST" && args.size() >= 4)
     {
     scope = cmProperty::TEST;
     scopeName = args[2].c_str();
     }
-  else if (args[1] == "SOURCE_FILE" && args.size() == 4)
+  else if (args[1] == "SOURCE_FILE" && args.size() >= 4)
     {
     scope = cmProperty::SOURCE_FILE;
     scopeName = args[2].c_str();
@@ -68,8 +87,37 @@ bool cmGetPropertyCommand::InitialPass(
     return false;
     }
   
-  switch (scope) 
+  if (get_brief)
     {
+    cmPropertyDefinition *def = 
+      this->Makefile->GetCMakeInstance()->
+      GetPropertyDefinition(property,scope);
+    if (def)
+      {
+      output = def->GetShortDescription();
+      }
+    }
+  else if (get_full)
+    {
+    cmPropertyDefinition *def = 
+      this->Makefile->GetCMakeInstance()->
+      GetPropertyDefinition(property,scope);
+    if (def)
+      {
+      output = def->GetFullDescription();
+      }
+    }
+  
+  else switch (scope) 
+    {
+    case cmProperty::VARIABLE:
+      {
+      if (this->Makefile->GetDefinition(property))
+        {
+        output = this->Makefile->GetDefinition(property);
+        }
+      }
+      break;
     case cmProperty::TARGET:
       {
       cmTarget *tgt = this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
@@ -152,7 +200,6 @@ bool cmGetPropertyCommand::InitialPass(
         }
       }
       break;
-    case cmProperty::VARIABLE:
     case cmProperty::CACHED_VARIABLE:
       // not handled by GetProperty
       break;

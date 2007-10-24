@@ -312,6 +312,10 @@ class cmake
                       bool chain = false, 
                       const char *variableGroup = 0);
 
+  // get property definition
+  cmPropertyDefinition *GetPropertyDefinition
+  (const char *name, cmProperty::ScopeType scope);
+
   // Is a property defined?
   bool IsPropertyDefined(const char *name, cmProperty::ScopeType scope);
   bool IsPropertyChained(const char *name, cmProperty::ScopeType scope);

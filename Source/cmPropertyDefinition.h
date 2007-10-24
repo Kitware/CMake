@@ -46,6 +46,12 @@ public:
   cmProperty::ScopeType GetScope() const {
     return this->Scope; };
 
+  // get the docs
+  const std::string &GetShortDescription() const {
+    return this->ShortDescription; }; 
+  const std::string &GetFullDescription() const {
+    return this->FullDescription; }; 
+  
 protected:
   std::string Name;
   std::string ShortDescription;

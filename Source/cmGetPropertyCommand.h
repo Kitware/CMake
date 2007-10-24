@@ -58,11 +58,17 @@ public:
     {
       return
         "  get_property(VAR scope_value property)\n"
+        "  get_property(VAR scope_value property \n"
+        "               BRIEF_DOCS)\n"
+        "  get_property(VAR scope_value property \n"
+        "               FULL_DOCS)\n"
         "Get a property from cmake.  The scope_value is either GLOBAL, "
         "DIRECTORY dir_name, TARGET tgt_name, SOURCE_FILE src_name, "
-        "or TEST test_name. The resulting value is "
+        "TEST test_name or VARIABLE var_name. The resulting value is "
         "stored in the variable VAR. If the property is not found, "
-        "CMake will report an error.";
+        "CMake will report an error. The second and third signatures "
+        "return the documentation for a property or variable instead of "
+        "its value.";
     }
   
   cmTypeMacro(cmGetPropertyCommand, cmCommand);
