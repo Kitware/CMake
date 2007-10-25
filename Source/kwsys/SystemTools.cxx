@@ -2753,22 +2753,15 @@ kwsys_stl::string SystemTools::RelativePath(const char* local, const char* remot
     sameCount++;
     }
 
-#if 0
-  // NOTE: We did this at one time to prevent relative paths to the
-  // compiler from looking like "../../../../../../../usr/bin/gcc".
-  // Now however relative paths are only computed for destinations
-  // inside the build tree so this is not a problem.  This is now a
-  // general-purpose method and should not have this hack.  I'm
-  // leaving it in place in case removing it causes a problem so it is
-  // easy to restore:
-  //
-  // If there is nothing in common but the root directory, then just
-  // return the full path.
-  if(sameCount <= 1)
+  // If there is nothing in common at all then just return the full
+  // path.  This is the case only on windows when the paths have
+  // different drive letters.  On unix two full paths always at least
+  // have the root "/" in common so we will return a relative path
+  // that passes through the root directory.
+  if(sameCount == 0)
     {
     return remote;
     }
-#endif
 
   // for each entry that is not common in the local path
   // add a ../ to the finalpath array, this gets us out of the local
