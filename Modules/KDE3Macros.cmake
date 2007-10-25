@@ -321,7 +321,7 @@ MACRO(KDE3_INSTALL_LIBTOOL_FILE _target)
    FILE(APPEND ${_laname} "# Directory that this library needs to be installed in:\n")
    FILE(APPEND ${_laname} "libdir='${CMAKE_INSTALL_PREFIX}/lib/kde3'\n")
 
-   INSTALL_FILES(/lib/kde3 FILES ${_laname})
+   INSTALL_FILES(${KDE3_LIBTOOL_DIR} FILES ${_laname})
 ENDMACRO(KDE3_INSTALL_LIBTOOL_FILE)
 
 
@@ -334,7 +334,7 @@ MACRO(KDE3_CREATE_FINAL_FILE _filename)
 ENDMACRO(KDE3_CREATE_FINAL_FILE)
 
 
-OPTION(KDE3_ENABLE_FINAL "Enable final all-in-one compilation")
+# OPTION(KDE3_ENABLE_FINAL "Enable final all-in-one compilation")
 OPTION(KDE3_BUILD_TESTS  "Build the tests")
 
 
@@ -346,12 +346,7 @@ MACRO(KDE3_ADD_KPART _target_NAME _with_PREFIX)
       SET(_first_SRC ${_with_PREFIX})
    ENDIF (${_with_PREFIX} STREQUAL "WITH_PREFIX")
 
-   IF (KDE3_ENABLE_FINAL)
-      KDE3_CREATE_FINAL_FILE(${_target_NAME}_final.cpp ${_first_SRC} ${ARGN})
-      ADD_LIBRARY(${_target_NAME} MODULE  ${_target_NAME}_final.cpp)
-   ELSE (KDE3_ENABLE_FINAL)
       ADD_LIBRARY(${_target_NAME} MODULE ${_first_SRC} ${ARGN})
-   ENDIF (KDE3_ENABLE_FINAL)
 
    IF(_first_SRC)
       SET_TARGET_PROPERTIES(${_target_NAME} PROPERTIES PREFIX "")
@@ -364,12 +359,7 @@ ENDMACRO(KDE3_ADD_KPART)
 
 MACRO(KDE3_ADD_KDEINIT_EXECUTABLE _target_NAME )
 
-   IF (KDE3_ENABLE_FINAL)
-      KDE3_CREATE_FINAL_FILE(${_target_NAME}_final.cpp ${ARGN})
-      ADD_LIBRARY(kdeinit_${_target_NAME} SHARED  ${_target_NAME}_final.cpp)
-   ELSE (KDE3_ENABLE_FINAL)
       ADD_LIBRARY(kdeinit_${_target_NAME} SHARED ${ARGN} )
-   ENDIF (KDE3_ENABLE_FINAL)
 
    CONFIGURE_FILE(${KDE3_MODULE_DIR}/kde3init_dummy.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/${_target_NAME}_dummy.cpp)
 
@@ -381,12 +371,7 @@ ENDMACRO(KDE3_ADD_KDEINIT_EXECUTABLE)
 
 MACRO(KDE3_ADD_EXECUTABLE _target_NAME )
 
-   IF (KDE3_ENABLE_FINAL)
-      KDE3_CREATE_FINAL_FILE(${_target_NAME}_final.cpp ${ARGN})
-      ADD_EXECUTABLE(${_target_NAME} ${_target_NAME}_final.cpp)
-   ELSE (KDE3_ENABLE_FINAL)
       ADD_EXECUTABLE(${_target_NAME} ${ARGN} )
-   ENDIF (KDE3_ENABLE_FINAL)
 
 ENDMACRO(KDE3_ADD_EXECUTABLE)
 

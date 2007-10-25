@@ -1,3 +1,21 @@
+Changes in CMake 2.4.8
+* Fix for kde4-config location 
+* Fix for self extracting .sh files on solaris
+* Remove KDE3_ENABLE_FINAL (did not work)
+* KDE3 fix for 64 bit location of plugins
+* mark PYTHON_EXECUTABLE as advanced
+* Fix for version numbers on NetBSD
+* Add more search directories (install prefix and cmake location)
+* include WindowsPaths in Windows.cmake not just Windows-cl.cmake
+* documentation fix for file, find_package, try_run
+* add IS_ABSOLUTE to if
+* INSTALL() everything which doesn't have a COMPONENT set, is assigned 
+  to the COMPONENT "Unspecified"
+* make #cmakedefine output match autoconf when undefined
+* document cmake remove -f
+* document order of -D and -P
+* add support for DragonFly and GNU hurd
+* fix for fortran depends doing too many scans
 Changes in CMake 2.4.7
 --- RC 11 ----
 * Fix bug 5238 for cygwin versioned executables 

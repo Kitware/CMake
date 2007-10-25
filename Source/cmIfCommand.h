@@ -143,6 +143,8 @@ public:
       "  IF(IS_DIRECTORY directory-name)\n"
       "True if the given name is a directory.  "
       "Behavior is well-defined only for full paths.\n"
+      "  IF(IS_ABSOLUTE path)\n"
+      "True if the given path is an absolute path.\n "
       "  IF(variable MATCHES regex)\n"
       "  IF(string MATCHES regex)\n"
       "True if the given string or variable's value matches the given "

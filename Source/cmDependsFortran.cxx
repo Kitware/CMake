@@ -139,7 +139,6 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
   makeDepends << std::endl;
 
   // Write module requirements to the output stream.
-  internalDepends << obj << ".requires" << std::endl;
   for(std::set<cmStdString>::const_iterator i = parser.Requires.begin();
       i != parser.Requires.end(); ++i)
     {
@@ -149,18 +148,15 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
       // since we require some things add them to our list of requirements
       makeDepends << obj << ".requires: " << i->c_str() << ".mod.proxy"
          << std::endl;
-      internalDepends << " " << i->c_str() << ".mod.proxy" << std::endl;
       }
     }
 
   // Write provided modules to the output stream.
-  internalDepends << obj << ".mod.proxy" << std::endl;
   for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
       i != parser.Provides.end(); ++i)
     {
     makeDepends << i->c_str() << ".mod.proxy: " << obj
       << ".provides" << std::endl;
-    internalDepends << " " << i->c_str() << ".provides" << std::endl;
     }
   
   // If any modules are provided then they must be converted to stamp files.

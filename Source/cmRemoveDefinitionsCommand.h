@@ -66,7 +66,7 @@ public:
       "  REMOVE_DEFINITIONS(-DFOO -DBAR ...)\n"
       "Removes flags from command line of C and C++ compilers.  "
       "This command can be used to remove any flag from a compile line, "
-      "but the -D flag is accepted most C/C++ compilers.  "
+      "but the -D flag is accepted by most C/C++ compilers.  "
       "Other flags may not be as portable.";
     }
   

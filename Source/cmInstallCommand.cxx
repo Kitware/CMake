@@ -145,9 +145,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   std::string archive_permissions;
   std::string library_permissions;
   std::string runtime_permissions;
-  std::string archive_component;
-  std::string library_component;
-  std::string runtime_component;
+  std::string archive_component = "Unspecified";
+  std::string library_component = "Unspecified";
+  std::string runtime_component = "Unspecified";
   std::vector<std::string> archive_configurations;
   std::vector<std::string> library_configurations;
   std::vector<std::string> runtime_configurations;
@@ -569,7 +569,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   std::string rename;
   std::string permissions;
   std::vector<std::string> configurations;
-  std::string component;
+  std::string component = "Unspecified";
   bool optional = false;
   for(unsigned int i=1; i < args.size(); ++i)
     {
@@ -758,7 +758,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
   std::string permissions_file;
   std::string permissions_dir;
   std::vector<std::string> configurations;
-  std::string component;
+  std::string component = "Unspecified";
   std::string literal_args;
   for(unsigned int i=1; i < args.size(); ++i)
     {

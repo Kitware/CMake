@@ -791,7 +791,8 @@ void CMakeCommandUsage(const char* program)
     " line\n"
     << "  environment             - display the current enviroment\n"
     << "  make_directory dir      - create a directory\n"
-    << "  remeove file1 file2 ... - remove the file(s)\n"
+    << "  remove [-f] file1 file2 ... - remove the file(s), use -f to force "
+       "it\n"
     << "  tar [cxt][vfz] file.tar file/dir1 file/dir2 ... - create a tar.\n"
     << "  time command [args] ... - run command and return elapsed time\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)

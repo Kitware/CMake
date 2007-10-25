@@ -84,7 +84,7 @@ then
 @CPACK_RESOURCE_FILE_LICENSE_CONTENT@
 ____cpack__here_doc____
     echo
-    echo "Do you accept the license? [Yn]: "
+    echo "Do you accept the license? [yN]: "
     read line leftover
     case ${line} in
       y* | Y*)
@@ -123,7 +123,14 @@ echo ""
 # take the archive portion of this file and pipe it to tar
 # the NUMERIC parameter in this command should be one more
 # than the number of lines in this header file
-tail -n +###CPACK_HEADER_LENGTH### "$0" | gunzip | (cd "${toplevel}" && tar xf -) || cpack_echo_exit "Problem unpacking the @CPACK_PACKAGE_FILE_NAME@"
+# there are tails which don't understand the "-n" argument, e.g. on SunOS
+# OTOH there are tails which complain when not using the "-n" argument (e.g. GNU)
+# so at first try to tail some file to see if tail fails if used with "-n"
+# if so, don't use "-n"
+use_new_tail_syntax="-n"
+tail $use_new_tail_syntax +1 "$0" > /dev/null 2> /dev/null || use_new_tail_syntax=""
+
+tail $use_new_tail_syntax +###CPACK_HEADER_LENGTH### "$0" | gunzip | (cd "${toplevel}" && tar xf -) || cpack_echo_exit "Problem unpacking the @CPACK_PACKAGE_FILE_NAME@"
 
 echo "Unpacking finished successfully"
 

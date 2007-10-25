@@ -2500,9 +2500,8 @@ void cmMakefile::ConfigureString(const std::string& input,
         }
       else
         {
-        cmSystemTools::ReplaceString(line, "#cmakedefine", "#undef");
-        output += "/* ";
-        output += line;
+        output += "/* #undef ";
+        output += this->cmDefineRegex.match(1);
         output += " */";
         }
       }

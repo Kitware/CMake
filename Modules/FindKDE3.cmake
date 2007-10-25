@@ -13,7 +13,6 @@
 #
 # The following user adjustable options are provided:
 #
-# KDE3_ENABLE_FINAL - enable this for KDE-style enable-final all-in-one compilation
 # KDE3_BUILD_TESTS - enable this to build KDE testcases
 #
 #
@@ -47,18 +46,20 @@
 #    This will create and install a simple libtool file for the given target.
 #
 # KDE3_ADD_EXECUTABLE(name file1 ... fileN )
-#    Equivalent to ADD_EXECUTABLE(), but additionally supports KDE3_ENABLE_FINAL
+#    Currently identical to ADD_EXECUTABLE(), may provide some advanced features in the future.
 #
 # KDE3_ADD_KPART(name [WITH_PREFIX] file1 ... fileN )
 #    Create a KDE plugin (KPart, kioslave, etc.) from the given source files.
-#    It supports KDE3_ENABLE_FINAL
 #    If WITH_PREFIX is given, the resulting plugin will have the prefix "lib", otherwise it won't.
 #    It creates and installs an appropriate libtool la-file.
 #
 # KDE3_ADD_KDEINIT_EXECUTABLE(name file1 ... fileN )
 #    Create a KDE application in the form of a module loadable via kdeinit.
 #    A library named kdeinit_<name> will be created and a small executable which links to it.
-#    It supports KDE3_ENABLE_FINAL
+#
+# The option KDE3_ENABLE_FINAL to enable all-in-one compilation is
+# no longer supported.
+#
 #
 # Author: Alexander Neundorf <neundorf@kde.org>
 
@@ -74,8 +75,6 @@ SET(QT_MT_REQUIRED TRUE)
 FIND_PACKAGE(Qt3 REQUIRED)
 FIND_PACKAGE(X11 REQUIRED)
 
-
-SET(QT_AND_KDECORE_LIBS ${QT_LIBRARIES} kdecore)
 
 #add some KDE specific stuff
 SET(KDE3_DEFINITIONS -DQT_CLEAN_NAMESPACE -D_GNU_SOURCE)
@@ -167,7 +166,17 @@ FIND_LIBRARY(KDE3_KDECORE_LIBRARY NAMES kdecore
 
 FIND_LIBRARY(KDE3_KDECORE_LIBRARY NAMES kdecore)
 
+SET(QT_AND_KDECORE_LIBS ${QT_LIBRARIES} ${KDE3_KDECORE_LIBRARY})
+
 GET_FILENAME_COMPONENT(KDE3_LIB_DIR ${KDE3_KDECORE_LIBRARY} PATH )
+
+IF(NOT KDE3_LIBTOOL_DIR)
+   IF(KDE3_KDECORE_LIBRARY MATCHES lib64)
+     SET(KDE3_LIBTOOL_DIR /lib64/kde3)
+   ELSE(KDE3_KDECORE_LIBRARY MATCHES lib64)
+     SET(KDE3_LIBTOOL_DIR /lib/kde3)
+   ENDIF(KDE3_KDECORE_LIBRARY MATCHES lib64)
+ENDIF(NOT KDE3_LIBTOOL_DIR)
 
 #now search for the dcop utilities
 FIND_PROGRAM(KDE3_DCOPIDL_EXECUTABLE NAMES dcopidl PATHS
