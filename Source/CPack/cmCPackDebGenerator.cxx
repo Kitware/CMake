@@ -67,19 +67,25 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
 
   // debian policy enforce lower case for package name
   // mandatory entries:
-  std::string debian_pkg_name = 
-       cmsys::SystemTools::LowerCase( this->GetOption("DEBIAN_PACKAGE_NAME") );
-  const char* debian_pkg_version = this->GetOption("DEBIAN_PACKAGE_VERSION");
-  const char* debian_pkg_section = this->GetOption("DEBIAN_PACKAGE_SECTION");
-  const char* debian_pkg_priority = this->GetOption("DEBIAN_PACKAGE_PRIORITY");
-  const char* debian_pkg_arch = this->GetOption("DEBIAN_PACKAGE_ARCHITECTURE");
-  const char* maintainer = this->GetOption("DEBIAN_PACKAGE_MAINTAINER");
-  const char* desc = this->GetOption("DEBIAN_PACKAGE_DESCRIPTION");
+  std::string debian_pkg_name = cmsys::SystemTools::LowerCase( 
+                                this->GetOption("CPACK_DEBIAN_PACKAGE_NAME") );
+  const char* debian_pkg_version = 
+                               this->GetOption("CPACK_DEBIAN_PACKAGE_VERSION");
+  const char* debian_pkg_section = 
+                               this->GetOption("CPACK_DEBIAN_PACKAGE_SECTION");
+  const char* debian_pkg_priority = 
+                              this->GetOption("CPACK_DEBIAN_PACKAGE_PRIORITY");
+  const char* debian_pkg_arch = 
+                          this->GetOption("CPACK_DEBIAN_PACKAGE_ARCHITECTURE");
+  const char* maintainer =  this->GetOption("CPACK_DEBIAN_PACKAGE_MAINTAINER");
+  const char* desc =       this->GetOption("CPACK_DEBIAN_PACKAGE_DESCRIPTION");
 
   // optional entries
-  const char* debian_pkg_dep = this->GetOption("DEBIAN_PACKAGE_DEPENDS");
-  const char* debian_pkg_rec = this->GetOption("DEBIAN_PACKAGE_RECOMMENDS");
-  const char* debian_pkg_sug = this->GetOption("DEBIAN_PACKAGE_SUGGESTS");
+  const char* debian_pkg_dep = this->GetOption("CPACK_DEBIAN_PACKAGE_DEPENDS");
+  const char* debian_pkg_rec = 
+                            this->GetOption("CPACK_DEBIAN_PACKAGE_RECOMMENDS");
+  const char* debian_pkg_sug = 
+                              this->GetOption("CPACK_DEBIAN_PACKAGE_SUGGESTS");
 
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(ctlfilename.c_str());
