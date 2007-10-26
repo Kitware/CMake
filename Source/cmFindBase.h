@@ -53,6 +53,8 @@ protected:
   void AddFrameWorkPaths();
   void AddAppBundlePaths();
   void AddEnvironmentVariables();
+  void AddFindPrefix(std::vector<std::string>& dest, 
+                     const std::vector<std::string>& src);
   void AddCMakeVariables();
   void AddSystemEnvironmentVariables();
   void AddCMakeSystemVariables();

@@ -83,6 +83,7 @@ cmFindBase::cmFindBase()
     "1. Search cmake specific environment variables.  This "
     "can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
     ""
+    "   CMAKE_FIND_PREFIX_PATH/XXX_SUBDIR\n"
     "   CMAKE_FRAMEWORK_PATH\n"
     "   CMAKE_APPBUNDLE_PATH\n"
     "   CMAKE_XXX_PATH\n"
@@ -92,6 +93,7 @@ cmFindBase::cmFindBase()
     "-DVAR=value.  This can be skipped if NO_CMAKE_PATH "
     "is passed.\n"
     ""
+    "   CMAKE_FIND_PREFIX_PATH/XXX_SUBDIR\n"
     "   CMAKE_FRAMEWORK_PATH\n"
     "   CMAKE_APPBUNDLE_PATH\n"
     "   CMAKE_XXX_PATH\n"
@@ -546,10 +548,15 @@ void cmFindBase::HandleCMakeFindRootPath()
 
 void cmFindBase::AddEnvironmentVariables()
 { 
+  std::vector<std::string> paths;
+
+  std::vector<std::string> prefixPaths;
+  cmSystemTools::GetPath(prefixPaths, "CMAKE_FIND_PREFIX_PATH");
+  this->AddFindPrefix(paths, prefixPaths);
+
   std::string var = "CMAKE_";
   var += this->CMakePathName;
   var += "_PATH";
-  std::vector<std::string> paths;
   cmSystemTools::GetPath(paths, var.c_str());
   if(this->SearchAppBundleLast)
     {
@@ -559,7 +566,42 @@ void cmFindBase::AddEnvironmentVariables()
     {
     cmSystemTools::GetPath(paths, "CMAKE_FRAMEWORK_PATH");
     }
-   this->AddPaths(paths);
+  this->AddPaths(paths);
+}
+
+void cmFindBase::AddFindPrefix(std::vector<std::string>& dest, 
+                               const std::vector<std::string>& src)
+{
+  // default for programs
+  std::string subdir = "/bin";
+
+  if (this->CMakePathName == "INCLUDE")
+    {
+    subdir = "/include";
+    }
+  else if (this->CMakePathName == "LIBRARY")
+    {
+    subdir = "/lib";
+    }
+  else if (this->CMakePathName == "FRAMEWORK")
+    {
+    subdir = "";  // ? what to do for frameworks ?
+    }
+
+  for (std::vector<std::string>::const_iterator it = src.begin();
+       it != src.end();
+       ++it)
+    {
+    std::string dirWithSubdir = it->c_str();
+    dirWithSubdir += subdir;
+    dest.push_back(dirWithSubdir);
+    if (subdir == "/bin")
+      {
+      dirWithSubdir = it->c_str();
+      dirWithSubdir += "/sbin";
+      dest.push_back(dirWithSubdir);
+      }
+    }
 }
 
 void cmFindBase::AddFrameWorkPaths()
@@ -644,6 +686,15 @@ void cmFindBase::AddCMakeVariables()
   var += this->CMakePathName;
   var += "_PATH";
   std::vector<std::string> paths;
+
+  if(const char* prefixPath = 
+      this->Makefile->GetDefinition("CMAKE_FIND_PREFIX_PATH"))
+    {
+    std::vector<std::string> prefixPaths;
+    cmSystemTools::ExpandListArgument(prefixPath, prefixPaths);
+    this->AddFindPrefix(paths, prefixPaths);
+    }
+
   if(const char* path = this->Makefile->GetDefinition(var.c_str()))
     {
     cmSystemTools::ExpandListArgument(path, paths);

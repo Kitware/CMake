@@ -33,6 +33,8 @@ cmFindLibraryCommand::cmFindLibraryCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "SEARCH_XXX", "library");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "XXX_SUBDIR", "lib");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_FIND_ROOT_PATH_MODE_XXX", 
                                "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY");
 

@@ -37,6 +37,8 @@ cmFindPathCommand::cmFindPathCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "SEARCH_XXX", "file in a directory");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "XXX_SUBDIR", "include");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_FIND_ROOT_PATH_MODE_XXX", 
                                "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE");
 

@@ -38,6 +38,8 @@ cmFindProgramCommand::cmFindProgramCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "SEARCH_XXX", "program");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "XXX_SUBDIR", "[s]bin");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_FIND_ROOT_PATH_MODE_XXX", 
                                "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM");
 }

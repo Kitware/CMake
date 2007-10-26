@@ -10,3 +10,15 @@ FIND_PACKAGE(NotAPackage QUIET)
 FIND_PACKAGE(VTK QUIET)
 
 ADD_EXECUTABLE(FindPackageTest FindPackageTest.cxx)
+
+# test behaviour of cmFindBase wrt. the CMAKE_FIND_PREFIX_PATH variable
+# foo.h should be found in ${CMAKE_CURRENT_SOURCE_DIR}/include:
+
+SET(CMAKE_FIND_PREFIX_PATH /blub /blah "${CMAKE_CURRENT_SOURCE_DIR}")
+FIND_PATH(FOO_DIR foo.h)
+
+IF(NOT FOO_DIR)
+  MESSAGE(FATAL_ERROR "Did not find foo.h which is in ${CMAKE_CURRENT_SOURCE_DIR}/include
+  CMAKE_FIND_PREFIX_PATH = ${CMAKE_FIND_PREFIX_PATH}")
+ENDIF(NOT FOO_DIR)
+
