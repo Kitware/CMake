@@ -427,7 +427,7 @@ public:
   
   /**
    * Read line from file. Make sure to get everything. Due to a buggy stream
-   * library on the HP and another on Mac OSX, we need this very carefully
+   * library on the HP and another on Mac OS X, we need this very carefully
    * written version of getline. Returns true if any data were read before the
    * end-of-file was reached. If the has_newline argument is specified, it will
    * be true when the line read had a newline character.
