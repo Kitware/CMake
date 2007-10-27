@@ -1,4 +1,7 @@
-Changes in CMake 2.4.8
+Changes in CMake 2.4.8 RC 2
+* fix for bug 5590 relative paths in windows not working across drives
+* fix warning/error with TAR_VERBOSE flag
+Changes in CMake 2.4.8 RC 1
 * Fix for kde4-config location 
 * Fix for self extracting .sh files on solaris
 * Remove KDE3_ENABLE_FINAL (did not work)

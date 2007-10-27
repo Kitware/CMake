@@ -178,7 +178,7 @@ int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
   int options = 0;
   if(this->GeneratorVerbose)
     {
-    options != TAR_VERBOSE;
+    options |= TAR_VERBOSE;
     }
 #ifdef __CYGWIN__
   options |= TAR_GNU;

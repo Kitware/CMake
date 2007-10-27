@@ -1585,7 +1585,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
   int options = 0;
   if(verbose)
     {
-    options != TAR_VERBOSE;
+    options |= TAR_VERBOSE;
     }
 #ifdef __CYGWIN__
   options |= TAR_GNU;
