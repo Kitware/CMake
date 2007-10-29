@@ -408,6 +408,7 @@ FunctionEnd
 
 ;--------------------------------
 ; Define some macro setting for the gui
+@CPACK_NSIS_INSTALLER_MUI_ICON_CODE@
 @CPACK_NSIS_INSTALLER_ICON_CODE@
 
 ;--------------------------------
@@ -493,6 +494,7 @@ Section "Installer Section" InstSection
   ;Create shortcuts
   CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
 @CPACK_NSIS_CREATE_ICONS@
+@CPACK_NSIS_CREATE_ICONS_EXTRA@
   CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 
   ; Write special uninstall registry entries
@@ -602,6 +604,7 @@ Section "Uninstall"
     
   Delete "$SMPROGRAMS\$MUI_TEMP\Uninstall.lnk"
 @CPACK_NSIS_DELETE_ICONS@
+@CPACK_NSIS_DELETE_ICONS_EXTRA@
   
   ;Delete empty start menu parent diretories
   StrCpy $MUI_TEMP "$SMPROGRAMS\$MUI_TEMP"
@@ -620,7 +623,7 @@ Section "Uninstall"
   ; try to fix it.
   StrCpy $MUI_TEMP "$START_MENU"
   Delete "$SMPROGRAMS\$MUI_TEMP\Uninstall.lnk"
-@CPACK_NSIS_DELETE_ICONS@
+@CPACK_NSIS_DELETE_ICONS_EXTRA@
   
   ;Delete empty start menu parent diretories
   StrCpy $MUI_TEMP "$SMPROGRAMS\$MUI_TEMP"

@@ -295,15 +295,34 @@ void cmCPackNSISGenerator::CreateMenuLinks( cmOStringStream& str,
         ++it )
     {
     std::string sourceName = *it;
+    bool url = false;
+    if(sourceName.find("http:") == 0)
+      {
+      url = true;
+      }
     /* convert / to \\ */
-    cmSystemTools::ReplaceString(sourceName, "/", "\\");
+    if(!url)
+      {
+      cmSystemTools::ReplaceString(sourceName, "/", "\\");
+      }
     ++ it;
     std::string linkName = *it;
-    str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\"
-        << linkName << ".lnk\" \"$INSTDIR\\" << sourceName << "\""
-        << std::endl;
-    deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
-              << ".lnk\"" << std::endl;
+    if(!url)
+      {
+      str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\"
+          << linkName << ".lnk\" \"$INSTDIR\\" << sourceName << "\""
+          << std::endl;
+      deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
+                << ".lnk\"" << std::endl;
+      }
+    else
+      {
+      str << "  WriteINIStr \"$SMPROGRAMS\\$STARTMENU_FOLDER\\"
+          << linkName << ".url\" \"InternetShortcut\" \"URL\" \"" << sourceName << "\""
+          << std::endl;
+      deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
+                << ".url\"" << std::endl;
+      }
     // see if CPACK_CREATE_DESKTOP_LINK_ExeName is on
     // if so add a desktop link
     std::string desktop = "CPACK_CREATE_DESKTOP_LINK_";

@@ -38,11 +38,25 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   ENDIF(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
   SET(CPACK_PACKAGE_CONTACT "cmake@cmake.org")
   IF(WIN32 AND NOT UNIX)
+    # set the install/unistall icon used for the installer itself
+    SET(CPACK_NSIS_MUI_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\CMakeLogo.ico")
+    SET(CPACK_NSIS_MUI_UNIICON "${CMake_SOURCE_DIR}/Utilities/Release\\CMakeLogo.ico")
     # There is a bug in NSI that does not handle full unix paths properly. Make
     # sure there is at least one set of four (4) backlasshes.
-    SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\CMakeInstall.bmp")
+    SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\CMakeInstall.bmp")
     # tell cpack the executables you want in the start menu as links
     SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMake" )
+    # tell cpack to create a desktop link to CMakeSetup
+    SET(CPACK_CREATE_DESKTOP_LINK_CMakeSetup ON)
+    # These variables should have escapes preserved during the 
+    # translation to the CPackConfig.cmake file.  By default,
+    # CPack will require double escapes as it gets parsed by
+    # cmake twice
+    SET(CPACK_ESCAPE_VARIABLES 
+      CPACK_PACKAGE_ICON 
+      CPACK_NSIS_MUI_ICON 
+      CPACK_NSIS_MUI_UNIICON
+      )
     # tell cpack to create links to the doc files
     SET(CPACK_NSIS_MENU_LINKS
       "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/CMakeSetup.html" "CMakeSetup Help"
@@ -52,7 +66,9 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
       "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/ctest.html" "CTest Help"
       "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/cmake-modules.html" "CMake Modules Help"
       "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/cmake-commands.html" "CMake Commands Help"
-      "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/cpack.html" "CPack Help")
+      "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/cpack.html" "CPack Help"
+      "http://www.cmake.org" "CMake Web Site"
+)
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\CMakeSetup.exe")
     SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} a cross-platform, open-source build system")
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.cmake.org")

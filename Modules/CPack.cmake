@@ -19,6 +19,39 @@ MACRO(cpack_set_if_not_set name value)
   ENDIF(NOT DEFINED "${name}")
 ENDMACRO(cpack_set_if_not_set)
 
+# create a new variable using var called
+# _${var}_ESC_ where var is the name of a variable.
+# the value of the new variable will have an extra
+# level of escapes so that it will preserve escapes
+# in the configured CPackConfig.cmake file.
+
+MACRO(cpack_escape_variable var)
+  STRING(REPLACE "\\" "\\\\" var_value "${${var}}")
+  STRING(REPLACE "\"" "\\\"" var_value "${var_value}")
+  SET(_${var}_ESC_ "${var_value}")
+ENDMACRO(cpack_escape_variable)
+
+# do extra escapes on variables in CPACK_ESCAPE_VARIABLE
+# create "special" value variables like this 
+# _(VARNAME)_ESC_ that store the extra escaped values for
+# the varibles.  This is because the original variables
+# can not be used because this file gets included more 
+# than once and things would get double double escacped.
+# (I think I want to escape...)
+MACRO(cpack_escape_variables)
+  SET(_CPACK_OTHER_VARIABLES_)
+  GET_CMAKE_PROPERTY(res VARIABLES)
+  # first add extra escapes to the variables in CPACK_ESCAPE_VARIABLES
+  FOREACH(var ${res})
+    IF("xxx${var}" MATCHES "xxxCPACK") 
+      list(FIND CPACK_ESCAPE_VARIABLES "${var}" _SHOULD_BE_ESCAPED)
+      if(_SHOULD_BE_ESCAPED GREATER -1)
+        cpack_escape_variable(${var})
+      endif(_SHOULD_BE_ESCAPED GREATER -1)
+    ENDIF("xxx${var}" MATCHES "xxxCPACK") 
+  ENDFOREACH(var ${res})
+ENDMACRO(cpack_escape_variables)
+
 # Macro to encode variables for the configuration file
 # find any varable that stars with CPACK and create a variable
 # _CPACK_OTHER_VARIABLES_ that contains SET commands for
@@ -28,13 +61,21 @@ MACRO(cpack_encode_variables)
   SET(_CPACK_OTHER_VARIABLES_)
   GET_CMAKE_PROPERTY(res VARIABLES)
   FOREACH(var ${res})
-    IF("xxx${var}" MATCHES "xxxCPACK")
-      SET(_CPACK_OTHER_VARIABLES_
-        "${_CPACK_OTHER_VARIABLES_}\nSET(${var} \"${${var}}\")")
-    ENDIF("xxx${var}" MATCHES "xxxCPACK")
+    IF("xxx${var}" MATCHES "xxxCPACK")  
+      # check for special escaped variables and use
+      # the escaped value instead of the actual value for 
+      # the set.
+      list(FIND CPACK_ESCAPE_VARIABLES "${var}" _SHOULD_BE_ESCAPED)
+      if(_SHOULD_BE_ESCAPED GREATER -1)
+        SET(_CPACK_OTHER_VARIABLES_
+          "${_CPACK_OTHER_VARIABLES_}\nSET(${var} \"${_${var}_ESC_}\")")
+      else(_SHOULD_BE_ESCAPED GREATER -1)
+        SET(_CPACK_OTHER_VARIABLES_
+          "${_CPACK_OTHER_VARIABLES_}\nSET(${var} \"${${var}}\")")
+      endif(_SHOULD_BE_ESCAPED GREATER -1)
+      ENDIF("xxx${var}" MATCHES "xxxCPACK")
   ENDFOREACH(var ${res})
 ENDMACRO(cpack_encode_variables)
-
 
 # Set the package name
 cpack_set_if_not_set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
@@ -184,17 +225,47 @@ cpack_set_if_not_set(CPACK_USE_DESTDIR ON)
 cpack_set_if_not_set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
 cpack_set_if_not_set(CPACK_NSIS_INSTALLER_ICON_CODE "")
+cpack_set_if_not_set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "")
+
+# escape variables now before we do the icon define
+# stuff
+cpack_escape_variables()
 
 # if CPACK_PACKAGE_ICON is set, then create a 
 # cpack variable that contains the NSIS code to define
 # the CPACK_PACKAGE_ICON and MUI_HEADERIMAGE_BITMAP, this is used
 # as an icon in the install wizard
+# handle ESC_CPACK_PACKAGE_ICON version as well, that does
+# not require extra escapes
+
 if(CPACK_PACKAGE_ICON)
-  set(CPACK_NSIS_INSTALLER_ICON_CODE "
+  if(DEFINED _CPACK_PACKAGE_ICON_ESC_)
+    set(CPACK_NSIS_INSTALLER_ICON_CODE "
+!define CPACK_PACKAGE_ICON \\\"@_CPACK_PACKAGE_ICON_ESC_@\\\"
+!define MUI_HEADERIMAGE_BITMAP \\\"@_CPACK_PACKAGE_ICON_ESC_@\\\"
+")
+  else(DEFINED _CPACK_PACKAGE_ICON_ESC_)
+    set(CPACK_NSIS_INSTALLER_ICON_CODE "
 !define CPACK_PACKAGE_ICON \\\"@CPACK_PACKAGE_ICON@\\\"
 !define MUI_HEADERIMAGE_BITMAP \\\"@CPACK_PACKAGE_ICON@\\\"
 ")
+  endif(DEFINED _CPACK_PACKAGE_ICON_ESC_)
 endif(CPACK_PACKAGE_ICON)
+
+
+if(CPACK_NSIS_MUI_ICON AND CPACK_NSIS_MUI_UNIICON)
+  if(DEFINED _CPACK_NSIS_MUI_ICON_ESC_)
+    set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "
+!define MUI_ICON \\\"@_CPACK_NSIS_MUI_ICON_ESC_@\\\"
+!define MUI_UNICON \\\"@_CPACK_NSIS_MUI_UNIICON_ESC_@\\\"
+")
+  else(DEFINED _CPACK_NSIS_MUI_ICON_ESC_)
+    set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "
+!define MUI_ICON \\\"@CPACK_NSIS_MUI_ICON@\\\"
+!define MUI_UNICON \\\"@CPACK_NSIS_MUI_UNIICON@\\\"
+")
+  endif(DEFINED _CPACK_NSIS_MUI_ICON_ESC_)
+endif(CPACK_NSIS_MUI_ICON AND CPACK_NSIS_MUI_UNIICON)
 
 cpack_encode_variables()
 
@@ -218,6 +289,7 @@ SET(CPACK_PACKAGE_FILE_NAME "${CPACK_SOURCE_PACKAGE_FILE_NAME}")
 SET(CPACK_IGNORE_FILES "${CPACK_SOURCE_IGNORE_FILES}")
 SET(CPACK_STRIP_FILES "${CPACK_SOURCE_STRIP_FILES}")
 
+cpack_escape_variables()
 cpack_encode_variables()
 configure_file("${cpack_source_input_file}"
   "${CPACK_SOURCE_OUTPUT_CONFIG_FILE}" @ONLY IMMEDIATE)
