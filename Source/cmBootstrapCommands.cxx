@@ -59,6 +59,7 @@
 #include "cmInstallFilesCommand.cxx"
 #include "cmInstallTargetsCommand.cxx"
 #include "cmLinkDirectoriesCommand.cxx"
+#include "cmListCommand.cxx"
 #include "cmMacroCommand.cxx"
 #include "cmMakeDirectoryCommand.cxx"
 #include "cmMarkAsAdvancedCommand.cxx"
@@ -114,6 +115,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmInstallFilesCommand);
   commands.push_back(new cmInstallTargetsCommand);
   commands.push_back(new cmLinkDirectoriesCommand);
+  commands.push_back(new cmListCommand);
   commands.push_back(new cmMacroCommand);
   commands.push_back(new cmMakeDirectoryCommand);
   commands.push_back(new cmMarkAsAdvancedCommand);
