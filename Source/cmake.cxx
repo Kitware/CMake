@@ -3125,7 +3125,7 @@ void cmake::SetProperty(const char* prop, const char* value)
     value = "NOTFOUND";
     }
 
-  this->Properties.SetProperty(prop, value, cmProperty::TARGET);
+  this->Properties.SetProperty(prop, value, cmProperty::GLOBAL);
 }
 
 const char *cmake::GetProperty(const char* prop)
