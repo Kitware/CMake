@@ -95,6 +95,14 @@ void cmTarget::DefineProperties(cmake *cm)
      "the target is built.");
 
   cm->DefineProperty
+    ("FRAMEWORK", cmProperty::TARGET,
+     "This target is a framework on the Mac.",
+     "Is set to true then if this target is a shared library, it will "
+     "be built as a framework when built on the mac. It will have the "
+     "directory structure required for a framework and will be suitable "
+     "to be used with the -framework option");
+
+  cm->DefineProperty
     ("HAS_CXX", cmProperty::TARGET,
      "Force a target to use the CXX linker.",
      "Setting HAS_CXX on a target will force the target to use the "
