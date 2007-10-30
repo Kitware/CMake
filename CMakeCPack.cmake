@@ -108,7 +108,7 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     SET(CPACK_CYGWIN_PATCH_FILE 
       "${CMake_BINARY_DIR}/@CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.patch")
     # include the sub directory for cygwin releases
-    INCLUDE(Utilities/Release/Cygwin)
+    INCLUDE(Utilities/Release/Cygwin/CMakeLists.txt)
     # when packaging source make sure the .build directory is not included
     SET(CPACK_SOURCE_IGNORE_FILES
       "/CVS/" "/\\\\.build/" "/\\\\.svn/" "\\\\.swp$" "\\\\.#" "/#" "~$")
