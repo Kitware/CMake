@@ -807,7 +807,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "before they have been used.  This would allow you "
      "to override any variables that need to be changed "
      "for some language. ",false,
-     "Variables That Change Behavior");
+     "Variables for Languages");
 
   cm->DefineProperty
     ("CMAKE_<LANG>_COMPILER", cmProperty::VARIABLE,
