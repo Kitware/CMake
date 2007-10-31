@@ -18,7 +18,6 @@
 #ifndef cmCPackGenericGenerator_h
 #define cmCPackGenericGenerator_h
 
-
 #include "cmObject.h"
 
 #define cmCPackTypeMacro(class, superclass) \
@@ -102,8 +101,7 @@ protected:
   virtual int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
   virtual const char* GetInstallPath();
-  virtual const char* GetInstallPrefix() { return "/"; }
-  virtual const char* GetTemporaryInstallDirectoryPostfix() { return ""; }
+  virtual const char* GetPackagingInstallPrefix();
 
   virtual std::string FindTemplate(const char* name);
   virtual bool ConfigureFile(const char* inName, const char* outName,
@@ -114,13 +112,13 @@ protected:
 
   //! Run install commands if specified
   virtual int InstallProjectViaInstallCommands(
-    bool movable, const char* tempInstallDirectory);
+    bool setDestDir, const char* tempInstallDirectory);
   virtual int InstallProjectViaInstallScript(
-    bool movable, const char* tempInstallDirectory);
+    bool setDestDir, const char* tempInstallDirectory);
   virtual int InstallProjectViaInstalledDirectories(
-    bool movable, const char* tempInstallDirectory);
+    bool setDestDir, const char* tempInstallDirectory);
   virtual int InstallProjectViaInstallCMakeProjects(
-    bool movable, const char* tempInstallDirectory);
+    bool setDestDir, const char* tempInstallDirectory);
 
   bool GeneratorVerbose;
   std::string Name;

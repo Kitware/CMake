@@ -178,8 +178,6 @@ int cmCPackOSXX11Generator::InitializeInternal()
   this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", 
                           pkgPath.c_str());
 
-  
-
   return this->Superclass::InitializeInternal();
 }
 
@@ -228,6 +226,7 @@ bool cmCPackOSXX11Generator::CopyCreateResourceFile(const char* name)
 }
 */
 
+//----------------------------------------------------------------------
 bool cmCPackOSXX11Generator::CopyResourcePlistFile(const char* name,
   const char* dir, const char* outputFileName /* = 0 */,
   bool copyOnly /* = false */)
@@ -259,7 +258,7 @@ bool cmCPackOSXX11Generator::CopyResourcePlistFile(const char* name,
 }
 
 //----------------------------------------------------------------------
-const char* cmCPackOSXX11Generator::GetInstallPrefix()
+const char* cmCPackOSXX11Generator::GetPackagingInstallPrefix()
 {
   this->InstallPrefix = "/";
   this->InstallPrefix += this->GetOption("CPACK_PACKAGE_FILE_NAME");

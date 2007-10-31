@@ -61,6 +61,7 @@ void cmCPackGenericGenerator::DisplayVerboseOutput(const char* msg,
 int cmCPackGenericGenerator::PrepareNames()
 {
   this->SetOption("CPACK_GENERATOR", this->Name.c_str());
+
   std::string tempDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   tempDirectory += "/_CPack_Packages/";
   const char* toplevelTag = this->GetOption("CPACK_TOPLEVEL_TAG");
@@ -80,7 +81,14 @@ int cmCPackGenericGenerator::PrepareNames()
   destFile += "/" + outName;
 
   std::string outFile = topDirectory + "/" + outName;
-  std::string installPrefix = tempDirectory + this->GetInstallPrefix();
+
+  bool setDestDir = cmSystemTools::IsOn(this->GetOption("CPACK_SET_DESTDIR"));
+  std::string installPrefix = tempDirectory;
+  if (!setDestDir)
+    {
+    installPrefix += this->GetPackagingInstallPrefix();
+    }
+
   this->SetOptionIfNotSet("CPACK_TOPLEVEL_DIRECTORY", topDirectory.c_str());
   this->SetOptionIfNotSet("CPACK_TEMPORARY_DIRECTORY", tempDirectory.c_str());
   this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_NAME", outName.c_str());
@@ -147,8 +155,6 @@ int cmCPackGenericGenerator::InstallProject()
   this->CleanTemporaryDirectory();
   std::string tempInstallDirectoryWithPostfix
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
-  tempInstallDirectoryWithPostfix
-    += this->GetTemporaryInstallDirectoryPostfix();
   const char* tempInstallDirectory = tempInstallDirectoryWithPostfix.c_str();
   int res = 1;
   if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory))
@@ -160,23 +166,23 @@ int cmCPackGenericGenerator::InstallProject()
     return 0;
     }
 
-  bool movable = true;
-  if ( movable )
-    {
-    // Make sure there is no destdir
-    cmSystemTools::PutEnv("DESTDIR=");
-    }
-  else
+  bool setDestDir = cmSystemTools::IsOn(this->GetOption("CPACK_SET_DESTDIR"));
+  if ( setDestDir )
     {
     std::string destDir = "DESTDIR=";
     destDir += tempInstallDirectory;
     cmSystemTools::PutEnv(destDir.c_str());
     }
+  else
+    {
+    // Make sure there is no destdir
+    cmSystemTools::PutEnv("DESTDIR=");
+    }
 
   // If the CPackConfig file sets CPACK_INSTALL_COMMANDS then run them
   // as listed
   if ( !this->InstallProjectViaInstallCommands(
-      movable, tempInstallDirectory) )
+      setDestDir, tempInstallDirectory) )
     {
     return 0;
     }
@@ -184,7 +190,7 @@ int cmCPackGenericGenerator::InstallProject()
   // If the CPackConfig file sets CPACK_INSTALL_SCRIPT then run them
   // as listed
   if ( !this->InstallProjectViaInstallScript(
-      movable, tempInstallDirectory) )
+      setDestDir, tempInstallDirectory) )
     {
     return 0;
     }
@@ -193,7 +199,7 @@ int cmCPackGenericGenerator::InstallProject()
   // then glob it and copy it to CPACK_TEMPORARY_DIRECTORY
   // This is used in Source packageing
   if ( !this->InstallProjectViaInstalledDirectories(
-      movable, tempInstallDirectory) )
+      setDestDir, tempInstallDirectory) )
     {
     return 0;
     }
@@ -202,12 +208,12 @@ int cmCPackGenericGenerator::InstallProject()
   // If the project is a CMAKE project then run pre-install
   // and then read the cmake_install script to run it
   if ( !this->InstallProjectViaInstallCMakeProjects(
-      movable, tempInstallDirectory) )
+      setDestDir, tempInstallDirectory) )
     {
     return 0;
     }
 
-  if ( !movable )
+  if ( setDestDir )
     {
     cmSystemTools::PutEnv("DESTDIR=");
     }
@@ -217,9 +223,9 @@ int cmCPackGenericGenerator::InstallProject()
 
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::InstallProjectViaInstallCommands(
-  bool movable, const char* tempInstallDirectory)
+  bool setDestDir, const char* tempInstallDirectory)
 {
-  (void)movable;
+  (void)setDestDir;
   (void)tempInstallDirectory;
   const char* installCommands = this->GetOption("CPACK_INSTALL_COMMANDS");
   if ( installCommands && *installCommands )
@@ -261,9 +267,9 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCommands(
 
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(
-  bool movable, const char* tempInstallDirectory)
+  bool setDestDir, const char* tempInstallDirectory)
 {
-  (void)movable;
+  (void)setDestDir;
   (void)tempInstallDirectory;
   std::vector<cmsys::RegularExpression> ignoreFilesRegex;
   const char* cpackIgnoreFiles = this->GetOption("CPACK_IGNORE_FILES");
@@ -299,7 +305,6 @@ int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(
       }
     std::vector<std::string>::iterator it;
     const char* tempDir = tempInstallDirectory;
-// this->GetOption("CPACK_TEMPORARY_DIRECTORY");
     for ( it = installDirectoriesVector.begin();
       it != installDirectoriesVector.end();
       ++it )
@@ -362,7 +367,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(
 
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::InstallProjectViaInstallScript(
-  bool movable, const char* tempInstallDirectory)
+  bool setDestDir, const char* tempInstallDirectory)
 {
   const char* cmakeScripts
     = this->GetOption("CPACK_INSTALL_SCRIPT");
@@ -384,10 +389,37 @@ int cmCPackGenericGenerator::InstallProjectViaInstallScript(
 
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
         "- Install script: " << installScript << std::endl);
-      if ( movable )
+
+      if ( setDestDir )
+        {
+        // For DESTDIR based packaging, use the *project* CMAKE_INSTALL_PREFIX
+        // underneath the tempInstallDirectory. The value of the project's
+        // CMAKE_INSTALL_PREFIX is sent in here as the value of the
+        // CPACK_INSTALL_PREFIX variable.
+        std::string dir = tempInstallDirectory;
+        if (this->GetOption("CPACK_INSTALL_PREFIX"))
+          {
+          dir += this->GetOption("CPACK_INSTALL_PREFIX");
+          }
+        this->SetOption("CMAKE_INSTALL_PREFIX", dir.c_str());
+
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+          "- Using DESTDIR + CPACK_INSTALL_PREFIX... (this->SetOption)"
+          << std::endl);
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+          "- Setting CMAKE_INSTALL_PREFIX to '" << dir << "'" << std::endl);
+        }
+      else
         {
         this->SetOption("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
+
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+          "- Using non-DESTDIR install... (this->SetOption)" << std::endl);
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+          "- Setting CMAKE_INSTALL_PREFIX to '" << tempInstallDirectory
+          << "'" << std::endl);
         }
+
       this->SetOptionIfNotSet("CMAKE_CURRENT_BINARY_DIR",
         tempInstallDirectory);
       this->SetOptionIfNotSet("CMAKE_CURRENT_SOURCE_DIR",
@@ -404,7 +436,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstallScript(
 
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
-  bool movable, const char* tempInstallDirectory)
+  bool setDestDir, const char* tempInstallDirectory)
 {
   const char* cmakeProjects
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
@@ -517,10 +549,37 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
         {
         realInstallDirectory += installSubDirectory;
         }
-      if ( movable )
+
+      if ( setDestDir )
+        {
+        // For DESTDIR based packaging, use the *project* CMAKE_INSTALL_PREFIX
+        // underneath the tempInstallDirectory. The value of the project's
+        // CMAKE_INSTALL_PREFIX is sent in here as the value of the
+        // CPACK_INSTALL_PREFIX variable.
+        std::string dir = tempInstallDirectory;
+        if (this->GetOption("CPACK_INSTALL_PREFIX"))
+          {
+          dir += this->GetOption("CPACK_INSTALL_PREFIX");
+          }
+        mf->AddDefinition("CMAKE_INSTALL_PREFIX", dir.c_str());
+
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+          "- Using DESTDIR + CPACK_INSTALL_PREFIX... (mf->AddDefinition)"
+          << std::endl);
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+          "- Setting CMAKE_INSTALL_PREFIX to '" << dir << "'" << std::endl);
+        }
+      else
         {
         mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
+
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+          "- Using non-DESTDIR install... (mf->AddDefinition)" << std::endl);
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+          "- Setting CMAKE_INSTALL_PREFIX to '" << tempInstallDirectory
+          << "'" << std::endl);
         }
+
       if ( buildConfig && *buildConfig )
         {
         mf->AddDefinition("BUILD_TYPE", buildConfig);
@@ -700,6 +759,11 @@ int cmCPackGenericGenerator::Initialize(const char* name, cmMakefile* mf,
     {
     return 0;
     }
+
+  // If a generator subclass did not already set this option in its
+  // InitializeInternal implementation, and the project did not already set
+  // it, the default value should be:
+  this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/");
 
   return result;
 }
@@ -928,6 +992,15 @@ const char* cmCPackGenericGenerator::GetInstallPath()
 }
 
 //----------------------------------------------------------------------
+const char* cmCPackGenericGenerator::GetPackagingInstallPrefix()
+{
+  cmCPackLogger(cmCPackLog::LOG_DEBUG, "GetPackagingInstallPrefix: '"
+    << this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX") << "'" << std::endl);
+
+  return this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
+}
+
+//----------------------------------------------------------------------
 std::string cmCPackGenericGenerator::FindTemplate(const char* name)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for template: "
@@ -960,8 +1033,6 @@ int cmCPackGenericGenerator::CleanTemporaryDirectory()
 {
   std::string tempInstallDirectoryWithPostfix
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
-  tempInstallDirectoryWithPostfix
-    += this->GetTemporaryInstallDirectoryPostfix();
   const char* tempInstallDirectory = tempInstallDirectoryWithPostfix.c_str();
   if(cmsys::SystemTools::FileExists(tempInstallDirectory))
     {

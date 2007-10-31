@@ -40,7 +40,7 @@ protected:
   virtual int InitializeInternal();
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
-  virtual const char* GetInstallPrefix();
+  virtual const char* GetPackagingInstallPrefix();
   virtual const char* GetOutputExtension() { return ".dmg"; }
 
   //bool CopyCreateResourceFile(const char* name, const char* dir);

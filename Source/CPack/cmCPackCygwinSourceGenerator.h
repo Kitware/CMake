@@ -34,7 +34,7 @@ public:
   cmCPackCygwinSourceGenerator();
   virtual ~cmCPackCygwinSourceGenerator();
 protected:
-  const char* GetInstallPrefix();
+  const char* GetPackagingInstallPrefix();
   virtual int InitializeInternal();
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);

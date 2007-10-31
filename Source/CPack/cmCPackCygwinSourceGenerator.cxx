@@ -166,7 +166,7 @@ int cmCPackCygwinSourceGenerator::CompressFiles(const char* outFileName,
   return 1;
 }
 
-const char* cmCPackCygwinSourceGenerator::GetInstallPrefix()
+const char* cmCPackCygwinSourceGenerator::GetPackagingInstallPrefix()
 {
   this->InstallPrefix = "/";
   this->InstallPrefix += this->GetOption("CPACK_PACKAGE_FILE_NAME");

@@ -28,6 +28,14 @@ cmCPackRPMGenerator::~cmCPackRPMGenerator()
 }
 
 //----------------------------------------------------------------------
+int cmCPackRPMGenerator::InitializeInternal()
+{
+  this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
+
+  return this->Superclass::InitializeInternal();
+}
+
+//----------------------------------------------------------------------
 int cmCPackRPMGenerator::CompressFiles(const char* /*outFileName*/,
   const char* /*toplevel*/,
   const std::vector<std::string>& /*files*/)

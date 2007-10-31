@@ -41,10 +41,10 @@ public:
   virtual ~cmCPackRPMGenerator();
 
 protected:
+  virtual int InitializeInternal();
   virtual int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
   virtual const char* GetOutputExtension() { return ".rpm"; }
-  virtual const char* GetInstallPrefix() { return "/usr"; }
 
 };
 

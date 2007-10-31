@@ -44,7 +44,6 @@ protected:
     const std::vector<std::string>& files);
   virtual const char* GetOutputExtension() { return ".dmg"; }
   virtual const char* GetOutputPostfix() { return "darwin"; }
-  virtual const char* GetInstallPrefix() { return "/usr"; }
 
   bool CopyCreateResourceFile(const char* name);
   bool CopyResourcePlistFile(const char* name);

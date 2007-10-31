@@ -43,6 +43,14 @@ cmCPackDebGenerator::~cmCPackDebGenerator()
 }
 
 //----------------------------------------------------------------------
+int cmCPackDebGenerator::InitializeInternal()
+{
+  this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
+
+  return this->Superclass::InitializeInternal();
+}
+
+//----------------------------------------------------------------------
 int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   const char* toplevel,
   const std::vector<std::string>& files)

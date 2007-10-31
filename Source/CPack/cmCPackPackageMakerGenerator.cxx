@@ -141,6 +141,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
     "cmCPackPackageMakerGenerator::Initialize()" << std::endl);
+  this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
   std::vector<std::string> path;
   std::string pkgPath
     = "/Developer/Applications/Utilities/PackageMaker.app/Contents";

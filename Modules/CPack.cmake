@@ -179,7 +179,7 @@ cpack_set_if_not_set(CPACK_OUTPUT_CONFIG_FILE
 cpack_set_if_not_set(CPACK_SOURCE_OUTPUT_CONFIG_FILE
   "${CMAKE_BINARY_DIR}/CPackSourceConfig.cmake")
 
-cpack_set_if_not_set(CPACK_USE_DESTDIR ON)
+cpack_set_if_not_set(CPACK_SET_DESTDIR OFF)
 cpack_set_if_not_set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
 cpack_set_if_not_set(CPACK_NSIS_INSTALLER_ICON_CODE "")

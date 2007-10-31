@@ -34,7 +34,6 @@ public:
   cmCPackCygwinBinaryGenerator();
   virtual ~cmCPackCygwinBinaryGenerator();
 protected:
-  virtual const char* GetInstallPrefix() { return "/usr"; }
   virtual int InitializeInternal();
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);

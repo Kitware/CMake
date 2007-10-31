@@ -37,10 +37,10 @@ public:
   virtual ~cmCPackDebGenerator();
 
 protected:
+  virtual int InitializeInternal();
   virtual int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
   virtual const char* GetOutputExtension() { return ".deb"; }
-  virtual const char* GetInstallPrefix() { return "/usr"; }
 
 };
 

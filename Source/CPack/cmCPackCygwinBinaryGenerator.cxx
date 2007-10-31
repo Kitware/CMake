@@ -41,6 +41,7 @@ cmCPackCygwinBinaryGenerator::~cmCPackCygwinBinaryGenerator()
 //----------------------------------------------------------------------
 int cmCPackCygwinBinaryGenerator::InitializeInternal()
 {
+  this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "0");
   std::vector<std::string> path;
   std::string pkgPath = cmSystemTools::FindProgram("bzip2", path, false);
