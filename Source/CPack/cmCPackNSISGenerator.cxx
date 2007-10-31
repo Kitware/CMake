@@ -108,6 +108,26 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << nsisInFileName
     << " to " << nsisFileName << std::endl);
+  if(this->IsSet("CPACK_NSIS_MUI_ICON") 
+     && this->IsSet("CPACK_NSIS_MUI_UNIICON"))
+    {
+    std::string installerIconCode="!define MUI_ICON \"";
+    installerIconCode += this->GetOption("CPACK_NSIS_MUI_ICON");
+    installerIconCode += "\"\n";
+    installerIconCode += "!define MUI_UNICON \"";
+    installerIconCode += this->GetOption("CPACK_NSIS_MUI_ICON");
+    installerIconCode += "\"\n";
+    this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_ICON_CODE",
+                            installerIconCode.c_str());
+    }
+  if(this->IsSet("CPACK_PACKAGE_ICON"))
+    {
+    std::string installerIconCode = "!define MUI_HEADERIMAGE_BITMAP \"";
+    installerIconCode += this->GetOption("CPACK_PACKAGE_ICON");
+    installerIconCode += "\"\n";
+    this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_ICON_CODE",
+                            installerIconCode.c_str());
+    }
   this->ConfigureFile(nsisInInstallOptions.c_str(), 
                       nsisInstallOptions.c_str());
   this->ConfigureFile(nsisInFileName.c_str(), nsisFileName.c_str());
