@@ -6,6 +6,13 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   // Subsection: variables defined by cmake, that give
   // information about the project, and cmake
   cm->DefineProperty
+    ("CMAKE_AR", cmProperty::VARIABLE,
+     "Name of archiving tool for static libraries.",
+     "This specifies name of the program that creates archive "
+     "or static libraries.",false,
+     "Variables that Provide Information");
+
+  cm->DefineProperty
     ("CMAKE_COMMAND", cmProperty::VARIABLE,
      "The full path to the cmake executable.",
      "This is the full path to the CMake executable cmake which is "
@@ -43,12 +50,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This the full path to the source directory that is currently "
      "being processed by cmake.  ", false, 
      "Variables that Provide Information");
+
   cm->DefineProperty
     ("CMAKE_CURRENT_LIST_FILE", cmProperty::VARIABLE,
-     "The path to the file currently being processed.",
-     "This the full path to the file that is currently "
-     "being processed by cmake.  ", false, 
+     "Full path to the listfile currently being processed.",
+     "As CMake processes the listfiles in your project this "
+     "variable will always be set to the one currently being "
+     "processed. See also CMAKE_PARENT_LIST_FILE.",false,
      "Variables that Provide Information");
+
   cm->DefineProperty
     ("CMAKE_CURRENT_LIST_LINE", cmProperty::VARIABLE,
      "The line number of the current file being processed.",
@@ -134,12 +144,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      " to use the cmake -E option for portable system "
      "commands.",false,
      "Variables that Provide Information");
+
   cm->DefineProperty
     ("CMAKE_DL_LIBS", cmProperty::VARIABLE,
      "Name of library containing dlopen and dlcose.",
      "The name of the library that has dlopen and "
      "dlclose in it, usually -ldl on most UNIX machines.",false,
      "Variables that Provide Information");
+
   cm->DefineProperty
     ("CMAKE_EDIT_COMMAND", cmProperty::VARIABLE,
      "Full path to CMakeSetup or ccmake.",
@@ -147,6 +159,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "that can graphically edit the cache.  For example,"
      " CMakeSetup, ccmake, or cmake -i.",false,
      "Variables that Provide Information");
+
   cm->DefineProperty
     ("CMAKE_GENERATOR", cmProperty::VARIABLE,
      "The generator used to build the project.",
@@ -163,6 +176,12 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_LINK_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for libraries that you link to.",
      "The suffix to use for the end of a library, .lib on Windows.",false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_EXECUTABLE_SUFFIX", cmProperty::VARIABLE,
+     "The suffix for executables on this platform.",
+     "The suffix to use for the end of an executable if any, "
+     ".exe on Windows.",false,
      "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_MAJOR_VERSION", cmProperty::VARIABLE,
@@ -182,6 +201,16 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This specifies the minor version of the CMake"
      " executable being run.",false,
      "Variables that Provide Information");
+
+  cm->DefineProperty
+    ("CMAKE_PARENT_LIST_FILE", cmProperty::VARIABLE,
+     "Full path to the parent listfile of the one currently being processed.",
+     "As CMake processes the listfiles in your project this "
+     "variable will always be set to the listfile that included "
+     "or somehow invoked the one currently being "
+     "processed. See also CMAKE_CURRENT_LIST_FILE.",false,
+     "Variables that Provide Information");
+
   cm->DefineProperty
     ("CMAKE_PROJECT_NAME", cmProperty::VARIABLE,
      "The name of the current project.",
@@ -277,8 +306,90 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "is used to connect several projects.",false,
      "Variables that Provide Information");
 
+  cm->DefineProperty
+    ("CMAKE_IMPORT_LIBRARY_PREFIX", cmProperty::VARIABLE,
+     "The prefix for import libraries that you link to.",
+     "The prefix to use for the name of an import library if used "
+     "on this platform.",
+     false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_IMPORT_LIBRARY_SUFFIX", cmProperty::VARIABLE,
+     "The suffix for import  libraries that you link to.",
+     "The suffix to use for the end of an import library if used "
+     "onthis platform.",
+     false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_SHARED_LIBRARY_PREFIX", cmProperty::VARIABLE,
+     "The prefix for shared libraries that you link to.",
+     "The prefix to use for the name of a shared library, lib on UNIX.",
+     false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_SHARED_LIBRARY_SUFFIX", cmProperty::VARIABLE,
+     "The suffix for shared libraries that you link to.",
+     "The suffix to use for the end of a shared library, .dll on Windows.",
+     false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_SHARED_MODULE_PREFIX", cmProperty::VARIABLE,
+     "The prefix for loadable modules that you link to.",
+     "The prefix to use for the name of a loadable module on this platform.",
+     false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_SHARED_MODULE_SUFFIX", cmProperty::VARIABLE,
+     "The suffix for shared libraries that you link to.",
+     "The suffix to use for the end of a loadable module on this platform",
+     false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_STATIC_LIBRARY_PREFIX", cmProperty::VARIABLE,
+     "The prefix for static libraries that you link to.",
+     "The prefix to use for the name of a static library, lib on UNIX.",
+     false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_STATIC_LIBRARY_SUFFIX", cmProperty::VARIABLE,
+     "The suffix for static libraries that you link to.",
+     "The suffix to use for the end of a static library, .lib on Windows.",
+     false,
+     "Variables that Provide Information");
+
+
   // Variables defined by cmake, that change the behavior 
   // of cmake
+    cm->DefineProperty
+    ("CMAKE_FIND_LIBRARY_PREFIXES",  cmProperty::VARIABLE,
+     "Prefixes to prepend when looking for libraries.",
+     "This specifies what prefixes to add to library names when "
+     "the find_library command looks for libraries. On UNIX "
+     "systems this is typically lib, meaning that when trying "
+     "to find the foo library it will look for libfoo.",
+     false,
+     "Variables That Change Behavior");
+
+    cm->DefineProperty
+    ("CMAKE_FIND_LIBRARY_SUFFIXES",  cmProperty::VARIABLE,
+     "Suffixes to append when looking for libraries.",
+     "This specifies what suffixes to add to library names when "
+     "the find_library command looks for libraries. On Windows "
+     "systems this is typically .lib and .dll, meaning that when trying "
+     "to find the foo library it will look for foo.dll etc.",
+     false,
+     "Variables That Change Behavior");
+
+    cm->DefineProperty
+    ("CMAKE_CONFIGURATION_TYPES",  cmProperty::VARIABLE,
+     "Specifies the available build types.",
+     "This specifies what build types will be available such as "
+     "Debug, Release, RelWithDebInfo etc. This has reasonable defaults "
+     "on most platforms. But can be extended to provide other "
+     "build types. See also CMAKE_BUILD_TYPE.",
+     false,
+     "Variables That Change Behavior");
+
     cm->DefineProperty
     ("CMAKE_BUILD_TYPE",  cmProperty::VARIABLE,
      "Specifies the build type for make based generators.",
@@ -307,6 +418,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Change Behavior");
 
   cm->DefineProperty
+    ("CMAKE_CROSSCOMPILING", cmProperty::VARIABLE,
+     "Is CMake currently cross compiling.",
+     "This variable will be set to true by CMake if CMake is cross "
+     "compiling. Specifically if the build platform is different "
+     "from the target platform.", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
     ("CMAKE_INSTALL_PREFIX", cmProperty::VARIABLE,
      "Install directory used by install.",
      "If \"make install\" is invoked or INSTALL is built"
@@ -314,6 +433,16 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "directories. This variable defaults to /usr/local"
      " on UNIX and c:/Program Files on Windows.",false,
      "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_MODULE_PATH", cmProperty::VARIABLE,
+     "Path to look for cmake modules to load.",
+     "Specifies a path to override the default seach path for "
+     "CMake modules. For example include commands will look "
+     "in this path first for modules to include.",
+     false,
+     "Variables That Change Behavior");
+
   cm->DefineProperty
     ("CMAKE_USER_MAKE_RULES_OVERRIDE", cmProperty::VARIABLE,
      "Specify a file that can change the build rule variables.",
@@ -362,7 +491,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   
   cm->DefineProperty
     ("CMAKE_SYSTEM", cmProperty::VARIABLE,
-     "Name of system cmake is being run on.",
+     "Name of system cmake is compiling for.",
      "This variable is the composite of CMAKE_SYSTEM_NAME"
      "and CMAKE_SYSTEM_VERSION, like this "
      "${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}. "
@@ -371,9 +500,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Describe the System");
   cm->DefineProperty
     ("CMAKE_SYSTEM_NAME", cmProperty::VARIABLE,
-     "Name of the OS CMake is running on.",
+     "Name of the OS CMake is building for.",
      "This is the name of the operating system on "
-     "which CMake is running.   On systems that "
+     "which CMake is targeting.   On systems that "
      "have the uname command, this variable is set "
      "to the output of uname -s.  Linux, Windows, "
      " and Darwin for Mac OSX are the values found "
@@ -381,7 +510,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Describe the System");
   cm->DefineProperty
     ("CMAKE_SYSTEM_PROCESSOR", cmProperty::VARIABLE,
-     "The name of the CPU CMake is running on.",
+     "The name of the CPU CMake is building for.",
      "On systems that support uname, this variable is "
      "set to the output of uname -p, on windows it is "
      "set to the value of the environment variable "
@@ -389,11 +518,36 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Describe the System");
   cm->DefineProperty
     ("CMAKE_SYSTEM_VERSION", cmProperty::VARIABLE,
-     "OS version.",
+     "OS version CMake is building for.",
      "A numeric version string for the system, on "
      "systems that support uname, this variable is "
      "set to the output of uname -r. On other "
      "systems this is set to major-minor version numbers.",false,
+     "Variables That Describe the System");
+
+  cm->DefineProperty
+    ("CMAKE_HOST_SYSTEM", cmProperty::VARIABLE,
+     "Name of system cmake is being run on.",
+     "The same as CMAKE_SYSTEM but for the host system instead "
+     "of the target system when cross compiling.",false,
+     "Variables That Describe the System");
+  cm->DefineProperty
+    ("CMAKE_HOST_SYSTEM_NAME", cmProperty::VARIABLE,
+     "Name of the OS CMake is running on.",
+     "The same as CMAKE_SYSTEM_NAME but for the host system instead "
+     "of the target system when cross compiling.",false,
+     "Variables That Describe the System");
+  cm->DefineProperty
+    ("CMAKE_HOST_SYSTEM_PROCESSOR", cmProperty::VARIABLE,
+     "The name of the CPU CMake is running on.",
+     "The same as CMAKE_SYSTEM_PROCESSOR but for the host system instead "
+     "of the target system when cross compiling.",false,
+     "Variables That Describe the System");
+  cm->DefineProperty
+    ("CMAKE_HOST_SYSTEM_VERSION", cmProperty::VARIABLE,
+     "OS version CMake is running on.",
+     "The same as CMAKE_SYSTEM_VERSION but for the host system instead "
+     "of the target system when cross compiling.",false,
      "Variables That Describe the System");
 
   cm->DefineProperty
@@ -415,22 +569,176 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Describe the System");
   
   cm->DefineProperty
+    ("MSVC", cmProperty::VARIABLE,
+     "True when using Microsoft Visual C",
+     "Set to true when the compiler is some version of Microsoft Visual C.",
+     false,
+     "Variables That Describe the System");
+
+  cm->DefineProperty
+    ("MSVC80", cmProperty::VARIABLE,
+     "True when using Microsoft Visual C 8.0",
+     "Set to true when the compiler is version 8.0 of Microsoft Visual C.",
+     false,
+     "Variables That Describe the System");
+
+  cm->DefineProperty
+    ("MSVC_IDE", cmProperty::VARIABLE,
+     "True when using the Microsoft Visual C IDE",
+     "Set to true when the target platform is the Microsoft Visual C IDE, "
+     "as opposed to the command line compiler.",
+     false,
+     "Variables That Describe the System");
+
+  cm->DefineProperty
+    ("MSVC_VERSION", cmProperty::VARIABLE,
+     "The version of Microsoft Visual C/C++ being used if any.",
+     "The version of Microsoft Visual C/C++ being used if any. "
+     "For example 1300 is MSVC 6.0.",
+     false,
+     "Variables That Describe the System");
+
+  cm->DefineProperty
+    ("CMAKE_CL_64", cmProperty::VARIABLE,
+     "Using the 64 bit compiler from Microsoft",
+     "Set to true when using the 64 bit cl compiler from Microsoft.",
+     false,
+     "Variables That Describe the System");
+
+  cm->DefineProperty
+    ("CMAKE_COMPILER_2005", cmProperty::VARIABLE,
+     "Using the Visual Studio 2005 compiler from Microsoft",
+     "Set to true when using the Visual Studio 2005 compiler "
+     "from Microsoft.",
+     false,
+     "Variables That Describe the System");
+
+  cm->DefineProperty
     ("UNIX", cmProperty::VARIABLE,
      "True for UNIX and UNIX like operating systems.",
-     "Set to true when the system is UNIX or UNIX like "
+     "Set to true when the target system is UNIX or UNIX like "
      "(i.e. APPLE and CYGWIN).",false,
      "Variables That Describe the System");
   
   cm->DefineProperty
     ("WIN32", cmProperty::VARIABLE,
-     "Tru on windows systems, including win64.",
-     "Set to true when the system is Windows and on cygwin.",false,
+     "True on windows systems, including win64.",
+     "Set to true when the target system is Windows and on cygwin.",false,
+     "Variables That Describe the System");
+
+  cm->DefineProperty
+    ("CMAKE_HOST_APPLE", cmProperty::VARIABLE,
+     "True for Apple OSXoperating systems.",
+     "Set to true when the host system is Apple OSX.",
+     false,
+     "Variables That Describe the System");
+
+  cm->DefineProperty
+    ("CMAKE_HOST_UNIX", cmProperty::VARIABLE,
+     "True for UNIX and UNIX like operating systems.",
+     "Set to true when the host system is UNIX or UNIX like "
+     "(i.e. APPLE and CYGWIN).",false,
+     "Variables That Describe the System");
+  
+  cm->DefineProperty
+    ("CMAKE_HOST_WIN32", cmProperty::VARIABLE,
+     "True on windows systems, including win64.",
+     "Set to true when the host system is Windows and on cygwin.",false,
      "Variables That Describe the System");
 
   // Variables that affect the building of object files and 
   // targets.
   //
-    cm->DefineProperty
+  cm->DefineProperty
+    ("CMAKE_INSTALL_RPATH", cmProperty::VARIABLE,
+     "The rpath to use for installed targets.",
+     "A semicolon-separated list specifying the rpath "
+     "to use in installed targets (for platforms that support it). "
+     "This is used to initialize the target property "
+     "INSTALL_RPATH for all targets.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_INSTALL_RPATH_USE_LINK_PATH", cmProperty::VARIABLE,
+     "Add paths to linker search and installed rpath.",
+     "CMAKE_INSTALL_RPATH_USE_LINK_PATH is a boolean that if set to true "
+     "will append directories in the linker search path and outside the "
+     "project to the INSTALL_RPATH. "
+     "This is used to initialize the target property "
+     "INSTALL_RPATH_USE_LINK_PATH for all targets.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_INSTALL_NAME_DIR", cmProperty::VARIABLE,
+     "Mac OSX directory name for installed targets.",
+     "CMAKE_INSTALL_NAME_DIR is used to initialize the "
+     "INSTALL_NAME_DIR property on all targets. See that target "
+     "property for more information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_LIBRARY_OUTPUT_DIRECTORY", cmProperty::VARIABLE,
+     "Where to put all the LIBRARY targets when built.",
+     "This variable is used to initialize the "
+     "LIBRARY_OUTPUT_DIRECTORY property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_ARCHIVE_OUTPUT_DIRECTORY", cmProperty::VARIABLE,
+     "Where to put all the ARCHIVE targets when built.",
+     "This variable is used to initialize the "
+     "ARCHIVE_OUTPUT_DIRECTORY property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_RUNTIME_OUTPUT_DIRECTORY", cmProperty::VARIABLE,
+     "Where to put all the RUNTIME targets when built.",
+     "This variable is used to initialize the "
+     "RUNTIME_OUTPUT_DIRECTORY property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+  
+
+  cm->DefineProperty
+    ("CMAKE_DEBUG_POSTFIX", cmProperty::VARIABLE,
+     "A postfix to add to targets when build as debug.",
+     "This variable is used to initialize the DEBUG_POSTFIX "
+     "property on all the targets. If set the postfix will be "
+     "appended to any targets built when the configuration is "
+     "Debug.",
+     false,
+     "Variables that Control the Build");
+  
+  cm->DefineProperty
+    ("CMAKE_BUILD_WITH_INSTALL_RPATH", cmProperty::VARIABLE,
+     "Use the install path for the RPATH",
+     "Normally CMake uses the build tree for the RPATH when building "
+     "executables etc on systems that use RPATH. When the software "
+     "is installed the executables etc are relinked by CMake to have "
+     "the install RPATH. If this variable is set to true then the software "
+     "is always built with the install path for the RPATH and does not "
+     "need to be relinked when installed.",false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_SKIP_BUILD_RPATH", cmProperty::VARIABLE,
+     "Do not include RPATHs in the build tree.",
+     "Normally CMake uses the build tree for the RPATH when building "
+     "executables etc on systems that use RPATH. When the software "
+     "is installed the executables etc are relinked by CMake to have "
+     "the install RPATH. If this variable is set to true then the software "
+     "is always built with no RPATH.",false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_EXE_LINKER_FLAGS", cmProperty::VARIABLE,
      "Linker flags used to create executables.",
      "Flags used by the linker when creating an executable.",false,
@@ -484,10 +792,22 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "built during the build process will be placed.",false,
      "Variables that Control the Build");
 
+
 //   Variables defined when the a language is enabled These variables will
 // also be defined whenever CMake has loaded its support for compiling (LANG)
 // programs. This support will be loaded whenever CMake is used to compile
 // (LANG) files. C and CXX are examples of the most common values for (LANG).
+
+  cm->DefineProperty
+    ("CMAKE_USER_MAKE_RULES_OVERRIDE_<LANG>", cmProperty::VARIABLE,
+     "Specify a file that can change the build rule variables.",
+     "If this variable is set, it should to point to a "
+     "CMakeLists.txt file that will be read in by CMake "
+     "after all the system settings have been set, but "
+     "before they have been used.  This would allow you "
+     "to override any variables that need to be changed "
+     "for some language. ",false,
+     "Variables That Change Behavior");
 
   cm->DefineProperty
     ("CMAKE_<LANG>_COMPILER", cmProperty::VARIABLE,
@@ -496,6 +816,20 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Once set, you can not change this variable.",false,
      "Variables for Languages");
   
+  cm->DefineProperty
+    ("CMAKE_<LANG>_COMPILER_ID", cmProperty::VARIABLE,
+     "An internal variable subject to change.",
+     "This is used in determining the compiler and is subject to change.",
+     false,
+     "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_PLATFORM_ID", cmProperty::VARIABLE,
+     "An internal variable subject to change.",
+     "This is used in determining the platform and is subject to change.",
+     false,
+     "Variables for Languages");
+
   cm->DefineProperty
     ("CMAKE_COMPILER_IS_GNU<LANG>", cmProperty::VARIABLE,
      "True if the compiler is GNU.",
@@ -590,4 +924,16 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Extensions of source files for the given language.",
      "This is the list of extensions for a "
      "given languages source files.",false,"Variables for Languages");
+
+  // variables that are used by cmake but not to be documented
+  cm->DefineProperty("CMAKE_MATCH_0", cmProperty::VARIABLE,0,0);  
+  cm->DefineProperty("CMAKE_MATCH_1", cmProperty::VARIABLE,0,0);  
+  cm->DefineProperty("CMAKE_MATCH_2", cmProperty::VARIABLE,0,0);  
+  cm->DefineProperty("CMAKE_MATCH_3", cmProperty::VARIABLE,0,0);  
+  cm->DefineProperty("CMAKE_MATCH_4", cmProperty::VARIABLE,0,0);  
+  cm->DefineProperty("CMAKE_MATCH_5", cmProperty::VARIABLE,0,0);  
+  cm->DefineProperty("CMAKE_MATCH_6", cmProperty::VARIABLE,0,0);  
+  cm->DefineProperty("CMAKE_MATCH_7", cmProperty::VARIABLE,0,0);  
+  cm->DefineProperty("CMAKE_MATCH_8", cmProperty::VARIABLE,0,0);  
+  cm->DefineProperty("CMAKE_MATCH_9", cmProperty::VARIABLE,0,0);  
 }
