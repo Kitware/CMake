@@ -1,8 +1,0 @@
-# All CPACK_ variables from the cmake project
-@_CPACK_OTHER_VARIABLES_@
-
-if(CPACK_GENERATOR MATCHES "CygwinSource")
-  # when packaging source make sure the .build directory is not included
-    SET(CPACK_SOURCE_IGNORE_FILES
-      "/CVS/" "/\\.build/" "/\\.svn/" "\\.swp$" "\\.#" "/#" "~$")
-endif(CPACK_GENERATOR MATCHES "CygwinSource")

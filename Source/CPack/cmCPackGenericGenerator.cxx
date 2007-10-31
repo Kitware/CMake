@@ -60,7 +60,6 @@ void cmCPackGenericGenerator::DisplayVerboseOutput(const char* msg,
 //----------------------------------------------------------------------
 int cmCPackGenericGenerator::PrepareNames()
 {
-  this->SetOption("CPACK_GENERATOR", this->Name.c_str());
 
   std::string tempDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   tempDirectory += "/_CPack_Packages/";
@@ -753,6 +752,15 @@ int cmCPackGenericGenerator::Initialize(const char* name, cmMakefile* mf,
     cmCPackLogger(cmCPackLog::LOG_ERROR,
       "Cannot initialize the generator" << std::endl);
     return 0;
+    }
+  // set the running generator name
+  this->SetOption("CPACK_GENERATOR", this->Name.c_str());
+  // Load the project specific config file
+  const char* config = 
+    this->GetOption("CPACK_PROJECT_CONFIG_FILE");
+  if(config)
+    { 
+    mf->ReadListFile(config);
     }
   int result = this->InitializeInternal();
   if (cmSystemTools::GetErrorOccuredFlag())

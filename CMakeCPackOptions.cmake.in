@@ -1,6 +1,3 @@
-# all CPACK_ variables from the cmake project
-@_CPACK_OTHER_VARIABLES_@
-
 if(CPACK_GENERATOR MATCHES "NSIS")
   # set the install/unistall icon used for the installer itself
   # There is a bug in NSI that does not handle full unix paths properly. 
@@ -31,3 +28,9 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   SET(CPACK_NSIS_CONTACT @CPACK_PACKAGE_CONTACT@)
   SET(CPACK_NSIS_MODIFY_PATH ON)
 endif(CPACK_GENERATOR MATCHES "NSIS")
+
+if(CPACK_GENERATOR MATCHES "CygwinSource")
+  # when packaging source make sure the .build directory is not included
+    SET(CPACK_SOURCE_IGNORE_FILES
+      "/CVS/" "/\\.build/" "/\\.svn/" "\\.swp$" "\\.#" "/#" "~$")
+endif(CPACK_GENERATOR MATCHES "CygwinSource")
