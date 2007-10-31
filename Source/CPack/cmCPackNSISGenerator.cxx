@@ -338,7 +338,8 @@ void cmCPackNSISGenerator::CreateMenuLinks( cmOStringStream& str,
     else
       {
       str << "  WriteINIStr \"$SMPROGRAMS\\$STARTMENU_FOLDER\\"
-          << linkName << ".url\" \"InternetShortcut\" \"URL\" \"" << sourceName << "\""
+          << linkName << ".url\" \"InternetShortcut\" \"URL\" \"" 
+          << sourceName << "\""
           << std::endl;
       deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
                 << ".url\"" << std::endl;
