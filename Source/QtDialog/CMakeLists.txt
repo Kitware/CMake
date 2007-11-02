@@ -3,15 +3,20 @@ SET(QT_MIN_VERSION "4.3.0")
 FIND_PACKAGE(Qt4 REQUIRED)
 
 IF(NOT QT4_FOUND)
-  MESSAGE(SEND_ERROR "Failed to find Qt4.")
+  MESSAGE(SEND_ERROR "Failed to find Qt 4.3 or greater.")
 ELSE(NOT QT4_FOUND)
+
+  SET(QT_USE_QTMAIN TRUE)
   INCLUDE(${QT_USE_FILE})
 
   SET(SRCS
     CMakeSetup.cxx
     CMakeSetupDialog.cxx
+    CMakeSetupDialog.h
     QCMake.cxx
+    QCMake.h
     QCMakeCacheView.cxx
+    QCMakeCacheView.h
     )
 
   QT4_WRAP_UI(UI_SRCS 
