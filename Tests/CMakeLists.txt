@@ -333,27 +333,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --test-command wrapping
     )
-  # use the FindQt3.cmake from this cmake as it may not be in an 
-  # older version of cmake
-  INCLUDE (${CMAKE_SOURCE_DIR}/Modules/FindQt3.cmake)
-  MARK_AS_ADVANCED(
-    QT_INCLUDE_PATH
-    QT_MOC_EXE
-    QT_QT_LIBRARY
-    QT_UIC_EXE)
-
-  IF (QT_FOUND AND QT_WRAP_UI)
-    ADD_TEST(qtwrapping  ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/Wrapping"
-      "${CMake_BINARY_DIR}/Tests/Wrapping"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project Wrapping
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
+  ADD_TEST(qtwrapping  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/Wrapping"
+    "${CMake_BINARY_DIR}/Tests/Wrapping"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project Wrapping
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
       --test-command qtwrapping
       )
-  ENDIF (QT_FOUND AND QT_WRAP_UI)
 
   ADD_TEST(testdriver1 ${CMAKE_CTEST_COMMAND}
     --build-and-test
