@@ -386,6 +386,12 @@ IF(BUILD_MFCDialog)
   SUBDIRS(MFCDialog)
 ENDIF(BUILD_MFCDialog)
 
+# Qt GUI
+OPTION(BUILD_QtDialog "Build Qt dialog for CMake" FALSE)
+IF(BUILD_QtDialog)
+  SUBDIRS(QtDialog)
+ENDIF(BUILD_QtDialog)
+
 # WX Widgets GUI
 OPTION(BUILD_WXDialog "Build wxWidgets dialog for CMake" FALSE)
 MARK_AS_ADVANCED(BUILD_WXDialog)
