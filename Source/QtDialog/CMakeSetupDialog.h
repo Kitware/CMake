@@ -15,9 +15,9 @@
 
 =========================================================================*/
 
+#include "QCMake.h"
 #include <QMainWindow>
 #include "ui_CMakeSetupDialog.h"
-#include "QCMake.h"
 
 class QCMakeThread;
 class CMakeCacheModel;

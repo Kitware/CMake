@@ -17,6 +17,10 @@
 
 #ifndef __QCMake_h
 #define __QCMake_h
+#ifdef _MSC_VER
+#pragma warning ( disable : 4127 )
+#pragma warning ( disable : 4512 )
+#endif
 
 #include <QObject>
 #include <QString>

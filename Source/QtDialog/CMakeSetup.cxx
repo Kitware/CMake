@@ -14,7 +14,7 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-
+#include "QCMake.h"  // include to disable MS warnings
 #include <QApplication>
 
 #include "cmSystemTools.h"

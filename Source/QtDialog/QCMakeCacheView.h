@@ -18,13 +18,13 @@
 #ifndef QCMakeCacheView_h
 #define QCMakeCacheView_h
 
+#include "QCMake.h"
 #include <QTableView>
 #include <QAbstractTableModel>
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QItemDelegate>
 
-#include "QCMake.h"
 class QCMakeCacheModel;
 
 
