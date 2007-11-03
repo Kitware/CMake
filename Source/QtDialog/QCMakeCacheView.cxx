@@ -88,7 +88,7 @@ QModelIndex QCMakeCacheView::moveCursor(CursorAction act,
 }
 
 QCMakeCacheModel::QCMakeCacheModel(QObject* p)
-  : QAbstractTableModel(p), IsDirty(false)
+  : QAbstractTableModel(p), NewCount(0), IsDirty(false)
 {
 }
 
@@ -101,9 +101,28 @@ bool QCMakeCacheModel::isDirty() const
   return this->IsDirty;
 }
 
+static uint qHash(const QCMakeCacheProperty& p)
+{
+  return qHash(p.Key);
+}
+
 void QCMakeCacheModel::setProperties(const QCMakeCachePropertyList& props)
 {
-  this->Properties = props;
+  QSet<QCMakeCacheProperty> newProps = props.toSet();
+  QSet<QCMakeCacheProperty> oldProps = this->Properties.toSet();
+  
+  oldProps.intersect(newProps);
+  newProps.subtract(oldProps);
+
+  this->NewCount = newProps.count();
+  this->Properties.clear();
+
+  this->Properties = newProps.toList();
+  qSort(this->Properties);
+  QCMakeCachePropertyList tmp = oldProps.toList();
+  qSort(tmp);
+  this->Properties += tmp;
+  
   this->reset();
   this->IsDirty = false;
 }
@@ -154,6 +173,10 @@ QVariant QCMakeCacheModel::data (const QModelIndex& index, int role) const
   else if(role == QCMakeCacheModel::AdvancedRole)
     {
     return this->Properties[index.row()].Advanced;
+    }
+  else if(role == Qt::BackgroundRole && index.row()+1 <= this->NewCount)
+    {
+    return QBrush(QColor(255,100,100));
     }
   return QVariant();
 }

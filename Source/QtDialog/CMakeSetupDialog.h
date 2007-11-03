@@ -36,7 +36,6 @@ protected slots:
   void initialize();
   void doConfigure();
   void doOk();
-  void doCancel();
   void doHelp();
   void doInterrupt();
   void finishConfigure(int error);
@@ -51,6 +50,7 @@ protected slots:
   void setEnabledState(bool);
 
 protected:
+  void closeEvent(QCloseEvent*);
 
   QCMakeThread* CMakeThread;
   QProgressBar* ProgressBar;

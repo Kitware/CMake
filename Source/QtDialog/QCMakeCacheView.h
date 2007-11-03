@@ -73,6 +73,7 @@ public:
 
 protected:
   QCMakeCachePropertyList Properties;
+  int NewCount;
   bool IsDirty;
 };
 

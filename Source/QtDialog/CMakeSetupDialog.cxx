@@ -24,6 +24,7 @@
 #include <QStatusBar>
 #include <QToolButton>
 #include <QDialogButtonBox>
+#include <QCloseEvent>
 
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
@@ -50,6 +51,8 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->resize(700, 500);
   QWidget* cont = new QWidget(this);
   this->setupUi(cont);
+  this->Splitter->setStretchFactor(0, 2);
+  this->Splitter->setStretchFactor(1, 1);
   this->setCentralWidget(cont);
   this->ProgressBar = new QProgressBar();
   this->ProgressBar->setRange(0,100);
@@ -87,7 +90,7 @@ void CMakeSetupDialog::initialize()
                    this, SLOT(doOk()));
   
   QObject::connect(this->CancelButton, SIGNAL(clicked(bool)),
-                   this, SLOT(doCancel()));
+                   this, SLOT(close()));
   
   QObject::connect(this->BrowseSourceDirectoryButton, SIGNAL(clicked(bool)),
                    this, SLOT(doSourceBrowse()));
@@ -96,6 +99,8 @@ void CMakeSetupDialog::initialize()
   
   QObject::connect(this->BinaryDirectory, SIGNAL(editTextChanged(QString)),
                    this->CMakeThread->CMakeInstance, SLOT(setBinaryDirectory(QString)));
+  QObject::connect(this->SourceDirectory, SIGNAL(textChanged(QString)),
+                   this->CMakeThread->CMakeInstance, SLOT(setSourceDirectory(QString)));
 
   QObject::connect(this->CMakeThread->CMakeInstance, SIGNAL(sourceDirChanged(QString)),
                    this, SLOT(updateSourceDirectory(QString)));
@@ -127,6 +132,21 @@ CMakeSetupDialog::~CMakeSetupDialog()
   
 void CMakeSetupDialog::doConfigure()
 {
+  QDir dir(this->BinaryDirectory->currentText());
+  if(!dir.exists())
+    {
+    QString message = tr("Build directory does not exist, should I create it?\n\n"
+                         "Directory: ");
+    message += this->BinaryDirectory->currentText();
+    QString title = tr("Create Directory");
+    QMessageBox::StandardButton btn =
+      QMessageBox::information(this, title, message, QMessageBox::Yes | QMessageBox::No);
+    if(btn == QMessageBox::No)
+      {
+      return;
+      }
+    dir.mkpath(".");
+    }
   this->InterruptButton->setEnabled(true);
   this->setEnabledState(false);
   this->Output->clear();
@@ -178,8 +198,8 @@ void CMakeSetupDialog::doOk()
   QMetaObject::invokeMethod(this->CMakeThread->CMakeInstance,
     "generate", Qt::QueuedConnection);
 }
-
-void CMakeSetupDialog::doCancel()
+  
+void CMakeSetupDialog::closeEvent(QCloseEvent* e)
 {
   if(this->CacheValues->cacheModel()->isDirty())
     {
@@ -187,14 +207,12 @@ void CMakeSetupDialog::doCancel()
                     "are you sure you want to exit?");
     QString title = tr("Confirm Exit");
     QMessageBox::StandardButton btn =
-      QMessageBox::critical(this, title, message, QMessageBox::Ok | QMessageBox::Cancel);
-    if(btn == QMessageBox::Cancel)
+      QMessageBox::critical(this, title, message, QMessageBox::Yes | QMessageBox::No);
+    if(btn == QMessageBox::No)
       {
-      return;
+      e->ignore();
       }
     }
-
-  QApplication::quit();
 }
 
 void CMakeSetupDialog::doHelp()
@@ -242,13 +260,16 @@ void CMakeSetupDialog::doSourceBrowse()
     tr("Enter Path to Source"), this->SourceDirectory->text());
   if(!dir.isEmpty())
     {
-    this->updateSourceDirectory(dir);
+    this->SourceDirectory->setText(dir);
     }
 }
 
 void CMakeSetupDialog::updateSourceDirectory(const QString& dir)
 {
-  this->SourceDirectory->setText(dir);
+  if(this->SourceDirectory->text() != dir)
+    {
+    this->SourceDirectory->setText(dir);
+    }
 }
 
 void CMakeSetupDialog::doBinaryBrowse()
@@ -265,6 +286,7 @@ void CMakeSetupDialog::setBinaryDirectory(const QString& dir)
 {
   if(dir != this->BinaryDirectory->currentText())
     {
+    this->CacheValues->cacheModel()->setProperties(QCMakeCachePropertyList());
     this->Output->clear();
     this->BinaryDirectory->setEditText(dir);
     }

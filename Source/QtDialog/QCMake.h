@@ -40,6 +40,8 @@ struct QCMakeCacheProperty
   QString Help;
   PropertyType Type;
   bool Advanced;
+  bool operator==(const QCMakeCacheProperty& other) const { return this->Key == other.Key; }
+  bool operator<(const QCMakeCacheProperty& other) const { return this->Key < other.Key; }
 };
 
 // make types usable with QVariant

@@ -61,21 +61,27 @@ void QCMake::loadCache(const QString& dir)
 
 void QCMake::setSourceDirectory(const QString& dir)
 {
-  this->SourceDirectory = dir;
-  emit this->sourceDirChanged(dir);
+  if(this->SourceDirectory != dir)
+    {
+    this->SourceDirectory = dir;
+    emit this->sourceDirChanged(dir);
+    }
 }
 
 void QCMake::setBinaryDirectory(const QString& dir)
 {
-  cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
-  this->BinaryDirectory = dir;
-  this->CMakeInstance->GetCacheManager()->LoadCache(dir.toLocal8Bit().data());
-  QCMakeCachePropertyList props = this->properties();
-  emit this->propertiesChanged(props);
-  cmCacheManager::CacheIterator itm = cachem->NewIterator();
-  if ( itm.Find("CMAKE_HOME_DIRECTORY"))
+  if(this->BinaryDirectory != dir)
     {
-    setSourceDirectory(itm.GetValue());
+    cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
+    this->BinaryDirectory = dir;
+    this->CMakeInstance->GetCacheManager()->LoadCache(dir.toLocal8Bit().data());
+    QCMakeCachePropertyList props = this->properties();
+    emit this->propertiesChanged(props);
+    cmCacheManager::CacheIterator itm = cachem->NewIterator();
+    if ( itm.Find("CMAKE_HOME_DIRECTORY"))
+      {
+      setSourceDirectory(itm.GetValue());
+      }
     }
 }
 
