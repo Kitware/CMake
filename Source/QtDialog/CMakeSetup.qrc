@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/Icons" >
-        <file>CMakeSetupDialog.png</file>
+        <file>CMakeSetup.png</file>
     </qresource>
 </RCC>

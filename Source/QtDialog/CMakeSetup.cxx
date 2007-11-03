@@ -26,6 +26,7 @@ int main(int argc, char** argv)
   QApplication app(argc, argv);
   app.setApplicationName("CMakeSetup");
   app.setOrganizationName("Kitware");
+  app.setWindowIcon(QIcon(":/Icons/CMakeSetup.png"));
 
   // TODO handle CMake args
     

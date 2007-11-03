@@ -20,7 +20,7 @@
 
 #include <QTableView>
 #include <QAbstractTableModel>
-#include <QComboBox>
+#include <QCheckBox>
 #include <QLineEdit>
 #include <QItemDelegate>
 
@@ -38,7 +38,9 @@ public:
   QCMakeCacheModel* cacheModel() const;
 
 protected:
-  bool event(QEvent*);
+  QModelIndex moveCursor(CursorAction, Qt::KeyboardModifiers);
+  void showEvent(QShowEvent* e);
+  bool Init;
 };
 
 /// Qt model class for cache properties
@@ -55,6 +57,7 @@ public slots:
   void setProperties(const QCMakeCachePropertyList& props);
 
 public:
+  // satisfy [pure] virtuals
   int columnCount ( const QModelIndex & parent ) const;
   QVariant data ( const QModelIndex & index, int role ) const;
   QModelIndex parent ( const QModelIndex & index ) const;
@@ -63,10 +66,14 @@ public:
   Qt::ItemFlags flags ( const QModelIndex& index ) const;
   bool setData ( const QModelIndex& index, const QVariant& value, int role );
 
+  // flag if a cache property has been modified
+  bool isDirty() const;
+  // get the properties
   QCMakeCachePropertyList properties() const;
 
 protected:
   QCMakeCachePropertyList Properties;
+  bool IsDirty;
 };
 
 /// Qt delegate class for interaction (or other customization) with cache properties
@@ -75,41 +82,23 @@ class QCMakeCacheModelDelegate : public QItemDelegate
   Q_OBJECT
 public:
   QCMakeCacheModelDelegate(QObject* p);
+  /// create our own editors for cache properties
   QWidget* createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 };
 
-/// Editor widget for editing paths
+/// Editor widget for editing paths or file paths
 class QCMakeCachePathEditor : public QWidget
 {
   Q_OBJECT
   Q_PROPERTY(QString value READ value USER true)
 public:
-  QCMakeCachePathEditor(const QString& file, QWidget* p);
-  QString value() const;
+  QCMakeCachePathEditor(const QString& file, bool isFilePath, QWidget* p);
+  QString value() const { return this->LineEdit->text(); }
 protected slots:
   void chooseFile();
 protected:
   QLineEdit LineEdit;
-};
-
-/// Editor widget for editing file paths
-class QCMakeCacheFilePathEditor : public QWidget
-{
-};
-
-/// Editor widget for editing booleans
-class QCMakeCacheBoolEditor : public QComboBox
-{
-  Q_OBJECT
-  Q_PROPERTY(QString value READ currentText USER true)
-public:
-  QCMakeCacheBoolEditor(const QString& val, QWidget* p)
-    : QComboBox(p)
-  {
-    this->addItem("ON");
-    this->addItem("OFF");
-    this->setCurrentIndex(val == "ON" ? 0 : 1);
-  }
+  bool IsFilePath;
 };
 
 #endif

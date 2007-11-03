@@ -118,9 +118,17 @@ void QCMake::setProperties(const QCMakeCachePropertyList& props)
     {
     if ( it.Find(prop.Key.toAscii().data()) )
       {
-      it.SetValue(prop.Value.toAscii().data());
+      if(prop.Value.type() == QVariant::Bool)
+        {
+        it.SetValue(prop.Value.toBool() ? "ON" : "OFF");
+        }
+      else
+        {
+        it.SetValue(prop.Value.toString().toAscii().data());
+        }
       }
     }
+  cachem->SaveCache(this->BinaryDirectory.toAscii().data());
 }
 
 QCMakeCachePropertyList QCMake::properties()
@@ -147,14 +155,7 @@ QCMakeCachePropertyList QCMake::properties()
     if(i.GetType() == cmCacheManager::BOOL)
       {
       prop.Type = QCMakeCacheProperty::BOOL;
-      if(cmSystemTools::IsOn(prop.Value.toAscii().data()))
-        {
-        prop.Value = QString("ON");
-        }
-      else
-        {
-        prop.Value = QString("OFF");
-        }
+      prop.Value = cmSystemTools::IsOn(i.GetValue());
       }
     else if(i.GetType() == cmCacheManager::PATH)
       {
@@ -183,7 +184,14 @@ void QCMake::interrupt()
 void QCMake::progressCallback(const char* msg, float percent, void* cd)
 {
   QCMake* self = reinterpret_cast<QCMake*>(cd);
-  emit self->progressChanged(msg, percent);
+  if(percent >= 0)
+    {
+    emit self->progressChanged(msg, percent);
+    }
+  else
+    {
+    emit self->outputMessage(msg);
+    }
   QCoreApplication::processEvents();
 }
 
