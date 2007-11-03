@@ -93,7 +93,7 @@ class QCMakeCachePathEditor : public QWidget
   Q_PROPERTY(QString value READ value USER true)
 public:
   QCMakeCachePathEditor(const QString& file, bool isFilePath, QWidget* p);
-  QString value() const { return this->LineEdit->text(); }
+  QString value() const { return this->LineEdit.text(); }
 protected slots:
   void chooseFile();
 protected:
