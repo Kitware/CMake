@@ -113,12 +113,12 @@ QCMakeCachePropertyList QCMakeCacheModel::properties() const
   return this->Properties;
 }
 
-int QCMakeCacheModel::columnCount ( const QModelIndex & parent ) const
+int QCMakeCacheModel::columnCount (const QModelIndex& /*parent*/ ) const
 {
   return 2;
 }
 
-QVariant QCMakeCacheModel::data ( const QModelIndex & index, int role ) const
+QVariant QCMakeCacheModel::data (const QModelIndex& index, int role) const
 {
   if(index.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
@@ -158,12 +158,12 @@ QVariant QCMakeCacheModel::data ( const QModelIndex & index, int role ) const
   return QVariant();
 }
 
-QModelIndex QCMakeCacheModel::parent ( const QModelIndex & index ) const
+QModelIndex QCMakeCacheModel::parent (const QModelIndex& /*index*/) const
 {
   return QModelIndex();
 }
 
-int QCMakeCacheModel::rowCount ( const QModelIndex & parent ) const
+int QCMakeCacheModel::rowCount (const QModelIndex& parent) const
 {
   if(parent.isValid())
     {
@@ -172,7 +172,7 @@ int QCMakeCacheModel::rowCount ( const QModelIndex & parent ) const
   return this->Properties.count();
 }
 
-QVariant QCMakeCacheModel::headerData ( int section, Qt::Orientation orient, int role ) const
+QVariant QCMakeCacheModel::headerData (int section, Qt::Orientation orient, int role) const
 {
   // return header labels
   if(role == Qt::DisplayRole && orient == Qt::Horizontal)
@@ -182,7 +182,7 @@ QVariant QCMakeCacheModel::headerData ( int section, Qt::Orientation orient, int
   return QVariant();
 }
   
-Qt::ItemFlags QCMakeCacheModel::flags ( const QModelIndex& index ) const
+Qt::ItemFlags QCMakeCacheModel::flags (const QModelIndex& index) const
 {
   Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
   // all column 1's are editable
@@ -199,7 +199,7 @@ Qt::ItemFlags QCMakeCacheModel::flags ( const QModelIndex& index ) const
 }
 
 
-bool QCMakeCacheModel::setData ( const QModelIndex & index, const QVariant& value, int role )
+bool QCMakeCacheModel::setData (const QModelIndex& index, const QVariant& value, int role)
 {
   if(index.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
