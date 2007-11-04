@@ -549,15 +549,15 @@ ELSE(WIN32_STYLE_FIND)
 
         # parse definitions from cxxflags; drop -D* from CXXFLAGS
         STRING(REGEX MATCHALL "-D[^;]+"
-          wxWidgets_DEFINITIONS  ${wxWidgets_CXX_FLAGS})
+          wxWidgets_DEFINITIONS  "${wxWidgets_CXX_FLAGS}")
         STRING(REGEX REPLACE "-D[^;]+;" ""
-          wxWidgets_CXX_FLAGS ${wxWidgets_CXX_FLAGS})
+          wxWidgets_CXX_FLAGS "${wxWidgets_CXX_FLAGS}")
 
         # parse include dirs from cxxflags; drop -I prefix
         STRING(REGEX MATCHALL "-I[^;]+"
-          wxWidgets_INCLUDE_DIRS ${wxWidgets_CXX_FLAGS})
+          wxWidgets_INCLUDE_DIRS "${wxWidgets_CXX_FLAGS}")
         STRING(REGEX REPLACE "-I[^;]+;" ""
-          wxWidgets_CXX_FLAGS ${wxWidgets_CXX_FLAGS})
+          wxWidgets_CXX_FLAGS "${wxWidgets_CXX_FLAGS}")
         STRING(REPLACE "-I" ""
           wxWidgets_INCLUDE_DIRS "${wxWidgets_INCLUDE_DIRS}")
 
