@@ -1,8 +1,4 @@
 ExpectedBuilds: \
-{ARRAKIS.kitware Win32-bcc551} \
-{ARRAKIS.kitware Win32-cygwin} \
-{ARRAKIS.kitware Win32-mingw} \
-{ARRAKIS.kitware zRel24-Win32-bcc551} \
 {dash1win64.kitware Win64-vs80} \
 {dash1win98.kitware Win32-vs60} \
 {DASH1.kitware Win32-nmake71} \
@@ -11,6 +7,10 @@ ExpectedBuilds: \
 {DASH1.kitware zRel24-Win32-nmake71} \
 {DASH1.kitware zRel24-Win32-vs71} \
 {DASH11.kitware zRel24-Win32-nmake71} \
+{dash14.kitware Win32-bcc5.6} \
+{dash14.kitware Win32-cygwin} \
+{dash14.kitware Win32-mingw} \
+{dash14.kitware zRel24-Win32-bcc5.6} \
 {DASH2.kitware Win32-nmake70} \
 {DASH2.kitware Win32-vs70-InPlace} \
 {DASH2.kitware Win32-vs70} \
