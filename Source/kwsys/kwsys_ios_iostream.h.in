@@ -64,6 +64,8 @@
 #if !@KWSYS_NAMESPACE@_IOS_USE_SSTREAM
 namespace @KWSYS_NAMESPACE@_ios
 {
+  typedef int streamsize;
+  typedef int streamoff;
   using @KWSYS_NAMESPACE@_ios_namespace::ostream;
   using @KWSYS_NAMESPACE@_ios_namespace::istream;
   using @KWSYS_NAMESPACE@_ios_namespace::ios;
