@@ -19,7 +19,7 @@
 // Need these for documentation support.
 #include "cmake.h"
 #include "cmDocumentation.h"
-#include "cmCPackGenerators.h"
+#include "cmCPackGeneratorFactory.h"
 #include "cmCPackGenericGenerator.h"
 #include "cmake.h"
 #include "cmGlobalGenerator.h"
@@ -232,7 +232,7 @@ int main (int argc, char *argv[])
     cpackConfigFileSpecified = false;
     }
 
-  cmCPackGenerators generators;
+  cmCPackGeneratorFactory generators;
   generators.SetLogger(&log);
   cmCPackGenericGenerator* cpackGenerator = 0;
 
@@ -453,7 +453,7 @@ int main (int argc, char *argv[])
     doc.SetSection("Options",cmDocumentationOptions);
 
     std::vector<cmDocumentationEntry> v;
-    cmCPackGenerators::DescriptionsMap::const_iterator generatorIt;
+    cmCPackGeneratorFactory::DescriptionsMap::const_iterator generatorIt;
     for( generatorIt = generators.GetGeneratorsList().begin();
       generatorIt != generators.GetGeneratorsList().end();
       ++ generatorIt )

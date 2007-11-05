@@ -15,25 +15,25 @@
 
 =========================================================================*/
 
-#ifndef cmCPackGenerators_h
-#define cmCPackGenerators_h
+#ifndef cmCPackGeneratorFactory_h
+#define cmCPackGeneratorFactory_h
 
 #include "cmObject.h"
 
 class cmCPackLog;
 class cmCPackGenericGenerator;
 
-/** \class cmCPackGenerators
+/** \class cmCPackGeneratorFactory
  * \brief A container for CPack generators
  *
  */
-class cmCPackGenerators : public cmObject
+class cmCPackGeneratorFactory : public cmObject
 {
 public:
-  cmTypeMacro(cmCPackGenerators, cmObject);
+  cmTypeMacro(cmCPackGeneratorFactory, cmObject);
 
-  cmCPackGenerators();
-  ~cmCPackGenerators();
+  cmCPackGeneratorFactory();
+  ~cmCPackGeneratorFactory();
 
   //! Get the generator
   cmCPackGenericGenerator* NewGenerator(const char* name);

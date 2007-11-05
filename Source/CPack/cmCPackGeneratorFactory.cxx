@@ -15,7 +15,7 @@
 
 =========================================================================*/
 
-#include "cmCPackGenerators.h"
+#include "cmCPackGeneratorFactory.h"
 
 #include "cmCPackGenericGenerator.h"
 #include "cmCPackTGZGenerator.h"
@@ -44,7 +44,7 @@
 #include "cmCPackLog.h"
 
 //----------------------------------------------------------------------
-cmCPackGenerators::cmCPackGenerators()
+cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 {
   this->RegisterGenerator("TGZ", "Tar GZip compression",
     cmCPackTGZGenerator::CreateGenerator);
@@ -81,7 +81,7 @@ cmCPackGenerators::cmCPackGenerators()
 }
 
 //----------------------------------------------------------------------
-cmCPackGenerators::~cmCPackGenerators()
+cmCPackGeneratorFactory::~cmCPackGeneratorFactory()
 {
   std::vector<cmCPackGenericGenerator*>::iterator it;
   for ( it = this->Generators.begin(); it != this->Generators.end(); ++ it )
@@ -91,7 +91,7 @@ cmCPackGenerators::~cmCPackGenerators()
 }
 
 //----------------------------------------------------------------------
-cmCPackGenericGenerator* cmCPackGenerators::NewGenerator(const char* name)
+cmCPackGenericGenerator* cmCPackGeneratorFactory::NewGenerator(const char* name)
 {
   cmCPackGenericGenerator* gen = this->NewGeneratorInternal(name);
   if ( !gen )
@@ -104,14 +104,14 @@ cmCPackGenericGenerator* cmCPackGenerators::NewGenerator(const char* name)
 }
 
 //----------------------------------------------------------------------
-cmCPackGenericGenerator* cmCPackGenerators::NewGeneratorInternal(
+cmCPackGenericGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
   const char* name)
 {
   if ( !name )
     {
     return 0;
     }
-  cmCPackGenerators::t_GeneratorCreatorsMap::iterator it
+  cmCPackGeneratorFactory::t_GeneratorCreatorsMap::iterator it
     = this->GeneratorCreators.find(name);
   if ( it == this->GeneratorCreators.end() )
     {
@@ -121,7 +121,7 @@ cmCPackGenericGenerator* cmCPackGenerators::NewGeneratorInternal(
 }
 
 //----------------------------------------------------------------------
-void cmCPackGenerators::RegisterGenerator(const char* name,
+void cmCPackGeneratorFactory::RegisterGenerator(const char* name,
   const char* generatorDescription,
   CreateGeneratorCall* createGenerator)
 {
