@@ -18,17 +18,17 @@
 #ifndef cmCPackOSXX11Generator_h
 #define cmCPackOSXX11Generator_h
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackGenerator.h"
 
 /** \class cmCPackOSXX11Generator
  * \brief A generator for OSX X11 modules
  *
  * Based on Gimp.app
  */
-class cmCPackOSXX11Generator : public cmCPackGenericGenerator
+class cmCPackOSXX11Generator : public cmCPackGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackOSXX11Generator, cmCPackGenericGenerator);
+  cmCPackTypeMacro(cmCPackOSXX11Generator, cmCPackGenerator);
 
   /**
    * Construct generator

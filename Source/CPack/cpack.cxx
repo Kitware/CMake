@@ -20,7 +20,7 @@
 #include "cmake.h"
 #include "cmDocumentation.h"
 #include "cmCPackGeneratorFactory.h"
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackGenerator.h"
 #include "cmake.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -234,7 +234,7 @@ int main (int argc, char *argv[])
 
   cmCPackGeneratorFactory generators;
   generators.SetLogger(&log);
-  cmCPackGenericGenerator* cpackGenerator = 0;
+  cmCPackGenerator* cpackGenerator = 0;
 
   if ( !helpFull.empty() || !helpMAN.empty() ||
     !helpHTML.empty() || helpVersion )

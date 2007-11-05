@@ -18,18 +18,18 @@
 #ifndef cmCPackZIPGenerator_h
 #define cmCPackZIPGenerator_h
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackGenerator.h"
 
 class cmCPackZIPGeneratorForward;
 
 /** \class cmCPackZIPGenerator
  * \brief A generator for ZIP files
  */
-class cmCPackZIPGenerator : public cmCPackGenericGenerator
+class cmCPackZIPGenerator : public cmCPackGenerator
 {
 public:
   friend class cmCPackZIPGeneratorForward;
-  cmCPackTypeMacro(cmCPackZIPGenerator, cmCPackGenericGenerator);
+  cmCPackTypeMacro(cmCPackZIPGenerator, cmCPackGenerator);
 
   /**
    * Construct generator

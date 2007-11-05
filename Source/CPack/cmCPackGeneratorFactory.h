@@ -21,7 +21,7 @@
 #include "cmObject.h"
 
 class cmCPackLog;
-class cmCPackGenericGenerator;
+class cmCPackGenerator;
 
 /** \class cmCPackGeneratorFactory
  * \brief A container for CPack generators
@@ -36,10 +36,10 @@ public:
   ~cmCPackGeneratorFactory();
 
   //! Get the generator
-  cmCPackGenericGenerator* NewGenerator(const char* name);
-  void DeleteGenerator(cmCPackGenericGenerator* gen);
+  cmCPackGenerator* NewGenerator(const char* name);
+  void DeleteGenerator(cmCPackGenerator* gen);
 
-  typedef cmCPackGenericGenerator* CreateGeneratorCall();
+  typedef cmCPackGenerator* CreateGeneratorCall();
 
   void RegisterGenerator(const char* name,
     const char* generatorDescription,
@@ -52,8 +52,8 @@ public:
     { return this->GeneratorDescriptions; }
 
 private:
-  cmCPackGenericGenerator* NewGeneratorInternal(const char* name);
-  std::vector<cmCPackGenericGenerator*> Generators;
+  cmCPackGenerator* NewGeneratorInternal(const char* name);
+  std::vector<cmCPackGenerator*> Generators;
 
   typedef std::map<cmStdString, CreateGeneratorCall*> t_GeneratorCreatorsMap;
   t_GeneratorCreatorsMap GeneratorCreators;

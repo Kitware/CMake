@@ -308,7 +308,7 @@ TARGET_LINK_LIBRARIES(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_L
 #
 SET(CPACK_SRCS
   CPack/cmCPackGeneratorFactory.cxx
-  CPack/cmCPackGenericGenerator.cxx
+  CPack/cmCPackGenerator.cxx
   CPack/cmCPackLog.cxx
   CPack/cmCPackNSISGenerator.cxx
   CPack/cmCPackSTGZGenerator.cxx

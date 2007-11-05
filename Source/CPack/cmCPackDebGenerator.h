@@ -19,16 +19,16 @@
 #define cmCPackDebGenerator_h
 
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackGenerator.h"
 
 /** \class cmCPackDebGenerator
  * \brief A generator for Debian packages
  *
  */
-class cmCPackDebGenerator : public cmCPackGenericGenerator
+class cmCPackDebGenerator : public cmCPackGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackDebGenerator, cmCPackGenericGenerator);
+  cmCPackTypeMacro(cmCPackDebGenerator, cmCPackGenerator);
 
   /**
    * Construct generator

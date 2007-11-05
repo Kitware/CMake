@@ -17,7 +17,7 @@
 
 #include "cmCPackGeneratorFactory.h"
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackGenerator.h"
 #include "cmCPackTGZGenerator.h"
 #include "cmCPackTarBZip2Generator.h"
 #include "cmCPackTarCompressGenerator.h"
@@ -83,7 +83,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 //----------------------------------------------------------------------
 cmCPackGeneratorFactory::~cmCPackGeneratorFactory()
 {
-  std::vector<cmCPackGenericGenerator*>::iterator it;
+  std::vector<cmCPackGenerator*>::iterator it;
   for ( it = this->Generators.begin(); it != this->Generators.end(); ++ it )
     {
     delete *it;
@@ -91,9 +91,9 @@ cmCPackGeneratorFactory::~cmCPackGeneratorFactory()
 }
 
 //----------------------------------------------------------------------
-cmCPackGenericGenerator* cmCPackGeneratorFactory::NewGenerator(const char* name)
+cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(const char* name)
 {
-  cmCPackGenericGenerator* gen = this->NewGeneratorInternal(name);
+  cmCPackGenerator* gen = this->NewGeneratorInternal(name);
   if ( !gen )
     {
     return 0;
@@ -104,7 +104,7 @@ cmCPackGenericGenerator* cmCPackGeneratorFactory::NewGenerator(const char* name)
 }
 
 //----------------------------------------------------------------------
-cmCPackGenericGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
+cmCPackGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
   const char* name)
 {
   if ( !name )

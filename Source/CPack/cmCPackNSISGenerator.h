@@ -19,17 +19,17 @@
 #define cmCPackNSISGenerator_h
 
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackGenerator.h"
 
 /** \class cmCPackNSISGenerator
  * \brief A generator for NSIS files
  *
  * http://people.freebsd.org/~kientzle/libarchive/
  */
-class cmCPackNSISGenerator : public cmCPackGenericGenerator
+class cmCPackNSISGenerator : public cmCPackGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackNSISGenerator, cmCPackGenericGenerator);
+  cmCPackTypeMacro(cmCPackNSISGenerator, cmCPackGenerator);
 
   /**
    * Construct generator

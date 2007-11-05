@@ -15,7 +15,7 @@
 
 =========================================================================*/
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackGenerator.h"
 
 #include "cmMakefile.h"
 #include "cmCPackLog.h"
@@ -29,7 +29,7 @@
 #include <memory> // auto_ptr
 
 //----------------------------------------------------------------------
-cmCPackGenericGenerator::cmCPackGenericGenerator()
+cmCPackGenerator::cmCPackGenerator()
 {
   this->GeneratorVerbose = false;
   this->MakefileMap = 0;
@@ -37,20 +37,20 @@ cmCPackGenericGenerator::cmCPackGenericGenerator()
 }
 
 //----------------------------------------------------------------------
-cmCPackGenericGenerator::~cmCPackGenericGenerator()
+cmCPackGenerator::~cmCPackGenerator()
 {
   this->MakefileMap = 0;
 }
 
 //----------------------------------------------------------------------
-void cmCPackGenericGeneratorProgress(const char *msg, float prog, void* ptr)
+void cmCPackGeneratorProgress(const char *msg, float prog, void* ptr)
 {
-  cmCPackGenericGenerator* self = static_cast<cmCPackGenericGenerator*>(ptr);
+  cmCPackGenerator* self = static_cast<cmCPackGenerator*>(ptr);
   self->DisplayVerboseOutput(msg, prog);
 }
 
 //----------------------------------------------------------------------
-void cmCPackGenericGenerator::DisplayVerboseOutput(const char* msg,
+void cmCPackGenerator::DisplayVerboseOutput(const char* msg,
   float progress)
 {
   (void)progress;
@@ -58,7 +58,7 @@ void cmCPackGenericGenerator::DisplayVerboseOutput(const char* msg,
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::PrepareNames()
+int cmCPackGenerator::PrepareNames()
 {
 
   std::string tempDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
@@ -148,7 +148,7 @@ int cmCPackGenericGenerator::PrepareNames()
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::InstallProject()
+int cmCPackGenerator::InstallProject()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Install projects" << std::endl);
   this->CleanTemporaryDirectory();
@@ -221,7 +221,7 @@ int cmCPackGenericGenerator::InstallProject()
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::InstallProjectViaInstallCommands(
+int cmCPackGenerator::InstallProjectViaInstallCommands(
   bool setDestDir, const char* tempInstallDirectory)
 {
   (void)setDestDir;
@@ -265,7 +265,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCommands(
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(
+int cmCPackGenerator::InstallProjectViaInstalledDirectories(
   bool setDestDir, const char* tempInstallDirectory)
 {
   (void)setDestDir;
@@ -365,7 +365,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstalledDirectories(
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::InstallProjectViaInstallScript(
+int cmCPackGenerator::InstallProjectViaInstallScript(
   bool setDestDir, const char* tempInstallDirectory)
 {
   const char* cmakeScripts
@@ -434,7 +434,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstallScript(
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
+int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
   bool setDestDir, const char* tempInstallDirectory)
 {
   const char* cmakeProjects
@@ -537,7 +537,7 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
         "- Install project: " << installProjectName << std::endl);
       cmake cm;
-      cm.SetProgressCallback(cmCPackGenericGeneratorProgress, this);
+      cm.SetProgressCallback(cmCPackGeneratorProgress, this);
       cmGlobalGenerator gg;
       gg.SetCMakeInstance(&cm);
       std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
@@ -609,14 +609,14 @@ int cmCPackGenericGenerator::InstallProjectViaInstallCMakeProjects(
 }
 
 //----------------------------------------------------------------------
-bool cmCPackGenericGenerator::ReadListFile(const char* moduleName)
+bool cmCPackGenerator::ReadListFile(const char* moduleName)
 {
   std::string fullPath = this->MakefileMap->GetModulesFile(moduleName);
   return this->MakefileMap->ReadListFile(0, fullPath.c_str());
 }
 
 //----------------------------------------------------------------------
-void cmCPackGenericGenerator::SetOptionIfNotSet(const char* op,
+void cmCPackGenerator::SetOptionIfNotSet(const char* op,
   const char* value)
 {
   const char* def = this->MakefileMap->GetDefinition(op);
@@ -628,7 +628,7 @@ void cmCPackGenericGenerator::SetOptionIfNotSet(const char* op,
 }
 
 //----------------------------------------------------------------------
-void cmCPackGenericGenerator::SetOption(const char* op, const char* value)
+void cmCPackGenerator::SetOption(const char* op, const char* value)
 {
   if ( !op )
     {
@@ -645,7 +645,7 @@ void cmCPackGenericGenerator::SetOption(const char* op, const char* value)
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::ProcessGenerator()
+int cmCPackGenerator::ProcessGenerator()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
     "Create package using " << this->Name.c_str() << std::endl);
@@ -742,7 +742,7 @@ int cmCPackGenericGenerator::ProcessGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::Initialize(const char* name, cmMakefile* mf,
+int cmCPackGenerator::Initialize(const char* name, cmMakefile* mf,
  const char* argv0)
 {
   this->MakefileMap = mf;
@@ -777,25 +777,25 @@ int cmCPackGenericGenerator::Initialize(const char* name, cmMakefile* mf,
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::InitializeInternal()
+int cmCPackGenerator::InitializeInternal()
 {
   return 1;
 }
 
 //----------------------------------------------------------------------
-bool cmCPackGenericGenerator::IsSet(const char* name) const
+bool cmCPackGenerator::IsSet(const char* name) const
 {
   return this->MakefileMap->IsSet(name);
 }
 
 //----------------------------------------------------------------------
-const char* cmCPackGenericGenerator::GetOption(const char* op)
+const char* cmCPackGenerator::GetOption(const char* op)
 {
   return this->MakefileMap->GetDefinition(op);
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
+int cmCPackGenerator::FindRunningCMake(const char* arg0)
 {
   int found = 0;
   // Find our own executable.
@@ -957,7 +957,7 @@ int cmCPackGenericGenerator::FindRunningCMake(const char* arg0)
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::CompressFiles(const char* outFileName,
+int cmCPackGenerator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {
   (void)outFileName;
@@ -967,7 +967,7 @@ int cmCPackGenericGenerator::CompressFiles(const char* outFileName,
 }
 
 //----------------------------------------------------------------------
-const char* cmCPackGenericGenerator::GetInstallPath()
+const char* cmCPackGenerator::GetInstallPath()
 {
   if ( !this->InstallPath.empty() )
     {
@@ -1000,7 +1000,7 @@ const char* cmCPackGenericGenerator::GetInstallPath()
 }
 
 //----------------------------------------------------------------------
-const char* cmCPackGenericGenerator::GetPackagingInstallPrefix()
+const char* cmCPackGenerator::GetPackagingInstallPrefix()
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "GetPackagingInstallPrefix: '"
     << this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX") << "'" << std::endl);
@@ -1009,7 +1009,7 @@ const char* cmCPackGenericGenerator::GetPackagingInstallPrefix()
 }
 
 //----------------------------------------------------------------------
-std::string cmCPackGenericGenerator::FindTemplate(const char* name)
+std::string cmCPackGenerator::FindTemplate(const char* name)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Look for template: "
     << (name ? name : "(NULL)") << std::endl);
@@ -1020,7 +1020,7 @@ std::string cmCPackGenericGenerator::FindTemplate(const char* name)
 }
 
 //----------------------------------------------------------------------
-bool cmCPackGenericGenerator::ConfigureString(const std::string& inString,
+bool cmCPackGenerator::ConfigureString(const std::string& inString,
   std::string& outString)
 {
   this->MakefileMap->ConfigureString(inString,
@@ -1029,7 +1029,7 @@ bool cmCPackGenericGenerator::ConfigureString(const std::string& inString,
 }
 
 //----------------------------------------------------------------------
-bool cmCPackGenericGenerator::ConfigureFile(const char* inName,
+bool cmCPackGenerator::ConfigureFile(const char* inName,
   const char* outName, bool copyOnly /* = false */)
 {
   return this->MakefileMap->ConfigureFile(inName, outName,
@@ -1037,7 +1037,7 @@ bool cmCPackGenericGenerator::ConfigureFile(const char* inName,
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenericGenerator::CleanTemporaryDirectory()
+int cmCPackGenerator::CleanTemporaryDirectory()
 {
   std::string tempInstallDirectoryWithPostfix
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");

@@ -18,7 +18,7 @@
 #ifndef cmCPackTGZGenerator_h
 #define cmCPackTGZGenerator_h
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackGenerator.h"
 
 class cmCPackTGZGeneratorForward;
 
@@ -27,11 +27,11 @@ class cmCPackTGZGeneratorForward;
  *
  * http://people.freebsd.org/~kientzle/libarchive/
  */
-class cmCPackTGZGenerator : public cmCPackGenericGenerator
+class cmCPackTGZGenerator : public cmCPackGenerator
 {
 public:
   friend class cmCPackTGZGeneratorForward;
-  cmCPackTypeMacro(cmCPackTGZGenerator, cmCPackGenericGenerator);
+  cmCPackTypeMacro(cmCPackTGZGenerator, cmCPackGenerator);
 
   /**
    * Construct generator

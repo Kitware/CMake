@@ -19,7 +19,7 @@
 #define cmCPackRPMGenerator_h
 
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackGenerator.h"
 
 /** \class cmCPackRPMGenerator
  * \brief A generator for RPM packages
@@ -29,10 +29,10 @@
  * will only 'execute' (aka ->ReadListFile) several
  * CMake macros files.
  */
-class cmCPackRPMGenerator : public cmCPackGenericGenerator
+class cmCPackRPMGenerator : public cmCPackGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackRPMGenerator, cmCPackGenericGenerator);
+  cmCPackTypeMacro(cmCPackRPMGenerator, cmCPackGenerator);
 
   /**
    * Construct generator

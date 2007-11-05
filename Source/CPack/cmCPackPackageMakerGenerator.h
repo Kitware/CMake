@@ -19,7 +19,7 @@
 #define cmCPackPackageMakerGenerator_h
 
 
-#include "cmCPackGenericGenerator.h"
+#include "cmCPackGenerator.h"
 
 /** \class cmCPackPackageMakerGenerator
  * \brief A generator for PackageMaker files
@@ -27,10 +27,10 @@
  * http://developer.apple.com/documentation/Darwin
  * /Reference/ManPages/man1/packagemaker.1.html
  */
-class cmCPackPackageMakerGenerator : public cmCPackGenericGenerator
+class cmCPackPackageMakerGenerator : public cmCPackGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackPackageMakerGenerator, cmCPackGenericGenerator);
+  cmCPackTypeMacro(cmCPackPackageMakerGenerator, cmCPackGenerator);
 
   /**
    * Construct generator

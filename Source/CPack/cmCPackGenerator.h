@@ -15,14 +15,14 @@
 
 =========================================================================*/
 
-#ifndef cmCPackGenericGenerator_h
-#define cmCPackGenericGenerator_h
+#ifndef cmCPackGenerator_h
+#define cmCPackGenerator_h
 
 #include "cmObject.h"
 
 #define cmCPackTypeMacro(class, superclass) \
   cmTypeMacro(class, superclass); \
-  static cmCPackGenericGenerator* CreateGenerator() { return new class; }
+  static cmCPackGenerator* CreateGenerator() { return new class; }
 
 #define cmCPackLogger(logType, msg) \
   do { \
@@ -45,14 +45,14 @@
 class cmMakefile;
 class cmCPackLog;
 
-/** \class cmCPackGenericGenerator
+/** \class cmCPackGenerator
  * \brief A superclass of all CPack Generators
  *
  */
-class cmCPackGenericGenerator : public cmObject
+class cmCPackGenerator : public cmObject
 {
 public:
-  cmTypeMacro(cmCPackGenericGenerator, cmObject);
+  cmTypeMacro(cmCPackGenerator, cmObject);
   /**
    * If verbose then more informaiton is printed out
    */
@@ -72,8 +72,8 @@ public:
   /**
    * Construct generator
    */
-  cmCPackGenericGenerator();
-  virtual ~cmCPackGenericGenerator();
+  cmCPackGenerator();
+  virtual ~cmCPackGenerator();
 
   //! Set and get the options
   void SetOption(const char* op, const char* value);
