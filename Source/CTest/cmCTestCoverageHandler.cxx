@@ -1501,15 +1501,15 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
       float cper = percentBranch + percentFunction;
       if(totalBranches > 0)
         {
-        cper /= 2.0;
+        cper /= 2.0f;
         }
       percent_coverage += cper;
       float cmet = percentFunction + percentBranch;
       if(totalBranches > 0)
         {
-        cmet /= 2.0;
+        cmet /= 2.0f;
         }
-      cmet /= 100.0;
+      cmet /= 100.0f;
       // Hack for conversion of function to loc assume a function
       // has 100 lines of code
       functionsCalled *=100;

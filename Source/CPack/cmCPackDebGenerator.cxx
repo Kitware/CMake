@@ -338,7 +338,7 @@ static int copy_ar(CF *cfp, off_t size)
 {
   static char pad = '\n';
   off_t sz = size;
-  int nr, nw;
+  size_t nr, nw;
   char buf[8*1024];
 
   if (sz == 0)
@@ -347,11 +347,11 @@ static int copy_ar(CF *cfp, off_t size)
   FILE* from = cfp->rFile;
   FILE* to = cfp->wFile;
   while (sz && 
-        (nr = fread(buf, 1, sz < off_t(sizeof(buf)) ? sz : sizeof(buf), from ))
+        (nr = fread(buf, 1, sz < static_cast<off_t>(sizeof(buf)) ? static_cast<size_t>(sz) : sizeof(buf), from ))
                > 0) {
     sz -= nr;
-    for (int off = 0; off < nr; nr -= off, off += nw)
-      if ((nw = fwrite(buf + off, 1, nr, to)) < 0)
+    for (size_t off = 0; off < nr; nr -= off, off += nw)
+      if ((nw = fwrite(buf + off, 1, nr, to)) < nr)
         return -1;
     }
   if (sz)
@@ -424,7 +424,7 @@ static int ar_append(const char* archive,const std::vector<std::string>& files)
   FILE* aFile = fopen(archive, "wb+");
   if (aFile!=NULL) {
     fwrite(ARMAG, SARMAG, 1, aFile);
-    if (fseek(aFile, (off_t)0, SEEK_END) != (off_t)-1) {
+    if (fseek(aFile, 0, SEEK_END) != -1) {
       CF cf;
       struct stat sb;
       /* Read from disk, write to an archive; pad on write. */

@@ -48,7 +48,7 @@ protected:
   bool CopyCreateResourceFile(const char* name);
   bool CopyResourcePlistFile(const char* name);
 
-  float PackageMakerVersion;
+  double PackageMakerVersion;
 };
 
 #endif

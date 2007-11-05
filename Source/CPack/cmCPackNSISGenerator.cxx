@@ -216,8 +216,8 @@ int cmCPackNSISGenerator::InitializeInternal()
       << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
     return 0;
     }
-  float nsisVersion = atof(versionRex.match(1).c_str());
-  float minNSISVersion = 2.09;
+  double nsisVersion = atof(versionRex.match(1).c_str());
+  double minNSISVersion = 2.09;
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "NSIS Version: "
     << nsisVersion << std::endl);
   if ( nsisVersion < minNSISVersion )

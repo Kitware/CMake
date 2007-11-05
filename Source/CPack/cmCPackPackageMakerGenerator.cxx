@@ -30,7 +30,7 @@
 //----------------------------------------------------------------------
 cmCPackPackageMakerGenerator::cmCPackPackageMakerGenerator()
 {
-  this->PackageMakerVersion = 0;
+  this->PackageMakerVersion = 0.0;
 }
 
 //----------------------------------------------------------------------
@@ -196,7 +196,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
     return 0;
     }
   this->PackageMakerVersion = atof(rexVersion.match(1).c_str());
-  if ( this->PackageMakerVersion < 1 )
+  if ( this->PackageMakerVersion < 1.0 )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Require PackageMaker 1.0 or higher"
       << std::endl);

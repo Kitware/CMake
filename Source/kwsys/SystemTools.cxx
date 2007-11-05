@@ -1588,17 +1588,16 @@ bool SystemTools::FilesDiffer(const char* source,
   // Compare the files a block at a time.
   char source_buf[KWSYS_ST_BUFFER];
   char dest_buf[KWSYS_ST_BUFFER];
-  long nleft = statSource.st_size;
+  off_t nleft = statSource.st_size;
   while(nleft > 0)
     {
     // Read a block from each file.
-    long nnext = (nleft > KWSYS_ST_BUFFER)? KWSYS_ST_BUFFER : nleft;
+    kwsys_ios::streamsize nnext = (nleft > KWSYS_ST_BUFFER)? KWSYS_ST_BUFFER : static_cast<kwsys_ios::streamsize>(nleft);
     finSource.read(source_buf, nnext);
     finDestination.read(dest_buf, nnext);
 
     // If either failed to read assume they are different.
-    if(static_cast<long>(finSource.gcount()) != nnext ||
-       static_cast<long>(finDestination.gcount()) != nnext)
+    if(finSource.gcount() != nnext || finDestination.gcount() != nnext)
       {
       return true;
       }

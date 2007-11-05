@@ -2484,8 +2484,8 @@ void cmake::TruncateOutputLog(const char* fname)
     cmSystemTools::RemoveFile(fullPath.c_str());
     return;
     }
-  size_t fsize = st.st_size;
-  const size_t maxFileSize = 50 * 1024;
+  off_t fsize = st.st_size;
+  const off_t maxFileSize = 50 * 1024;
   if ( fsize < maxFileSize )
     {
     //TODO: truncate file

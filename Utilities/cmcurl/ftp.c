@@ -3384,9 +3384,10 @@ CURLcode ftp_perform(struct connectdata *conn,
   }
   *connected = conn->bits.tcpconnect;
 
-  if(*dophase_done)
+  if(*dophase_done) {
     DEBUGF(infof(conn->data, "DO phase is complete\n"));
-
+  }
+  
   return result;
 }
 
