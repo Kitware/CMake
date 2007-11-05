@@ -83,5 +83,5 @@ IF(wxWidgets_FOUND)
   # if the checkbox view functionality is not desired,
   # exclude this part from the smple
   TARGET_LINK_LIBRARIES(WXDialog ${wxWidgets_LIBRARIES} cmsys CMakeLib)
-
+  INSTALL_TARGETS(/bin WXDialog)
 ENDIF(wxWidgets_FOUND)
