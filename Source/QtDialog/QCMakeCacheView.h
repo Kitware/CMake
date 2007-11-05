@@ -55,6 +55,7 @@ public:
 
 public slots:
   void setProperties(const QCMakeCachePropertyList& props);
+  void clear();
 
 public:
   // satisfy [pure] virtuals
@@ -77,14 +78,16 @@ protected:
   bool IsDirty;
 };
 
-/// Qt delegate class for interaction (or other customization) with cache properties
+/// Qt delegate class for interaction (or other customization) 
+/// with cache properties
 class QCMakeCacheModelDelegate : public QItemDelegate
 {
   Q_OBJECT
 public:
   QCMakeCacheModelDelegate(QObject* p);
   /// create our own editors for cache properties
-  QWidget* createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+  QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, 
+      const QModelIndex& index ) const;
 };
 
 /// Editor widget for editing paths or file paths

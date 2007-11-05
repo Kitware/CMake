@@ -15,8 +15,12 @@
 
 =========================================================================*/
 
+#ifndef CMakeSetupDialog_h
+#define CMakeSetupDialog_h
+
 #include "QCMake.h"
 #include <QMainWindow>
+#include <QThread>
 #include "ui_CMakeSetupDialog.h"
 
 class QCMakeThread;
@@ -48,6 +52,7 @@ protected slots:
   void setBinaryDirectory(const QString& dir);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
+  void promptForGenerator();
 
 protected:
   void closeEvent(QCloseEvent*);
@@ -57,3 +62,23 @@ protected:
   QToolButton* InterruptButton;
 };
 
+// QCMake instance on a thread
+class QCMakeThread : public QThread
+{
+  Q_OBJECT
+public:
+  QCMakeThread(QObject* p);
+  QCMake* cmakeInstance() const;
+  
+signals:  
+  void cmakeInitialized();
+
+protected slots:
+  void processEvents();
+
+protected:
+  virtual void run();
+  QCMake* CMakeInstance;
+};
+
+#endif // CMakeSetupDialog_h

@@ -17,18 +17,19 @@
 
 #include "QCMake.h"
 
-#include <QCoreApplication>
 #include <QDir>
+#include <QCoreApplication>
 
 #include "cmake.h"
 #include "cmCacheManager.h"
 #include "cmSystemTools.h"
+#include "cmExternalMakefileProjectGenerator.h"
 
 QCMake::QCMake(QObject* p)
   : QObject(p)
 {
-  static int metaId = qRegisterMetaType<QCMakeCacheProperty>();
-  static int metaIdList = qRegisterMetaType<QCMakeCachePropertyList>();
+  qRegisterMetaType<QCMakeCacheProperty>();
+  qRegisterMetaType<QCMakeCachePropertyList>();
   
   QDir appDir(QCoreApplication::applicationDirPath());
 #if defined(Q_OS_WIN)
@@ -46,6 +47,14 @@ QCMake::QCMake(QObject* p)
 
   this->CMakeInstance = new cmake;
   this->CMakeInstance->SetProgressCallback(QCMake::progressCallback, this);
+
+  std::vector<std::string> generators;
+  this->CMakeInstance->GetRegisteredGenerators(generators);
+  std::vector<std::string>::iterator iter;
+  for(iter = generators.begin(); iter != generators.end(); ++iter)
+    {
+    this->AvailableGenerators.append(QString::fromStdString(*iter));
+    }
 }
 
 QCMake::~QCMake()
@@ -74,7 +83,17 @@ void QCMake::setBinaryDirectory(const QString& dir)
     {
     cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
     this->BinaryDirectory = dir;
-    this->CMakeInstance->GetCacheManager()->LoadCache(dir.toLocal8Bit().data());
+    this->setGenerator(QString());
+    if(!this->CMakeInstance->GetCacheManager()->LoadCache(dir.toLocal8Bit().data()))
+      {
+      QDir testDir(dir);
+      if(testDir.exists("CMakeCache.txt"))
+        {
+        cmSystemTools::Error("There is a CMakeCache.txt file for the current binary "
+            "tree but cmake does not have permission to read it.  "
+            "Please check the permissions of the directory you are trying to run CMake on.");
+        }
+      }
     QCMakeCachePropertyList props = this->properties();
     emit this->propertiesChanged(props);
     cmCacheManager::CacheIterator itm = cachem->NewIterator();
@@ -82,12 +101,24 @@ void QCMake::setBinaryDirectory(const QString& dir)
       {
       setSourceDirectory(itm.GetValue());
       }
+    if ( itm.Find("CMAKE_GENERATOR"))
+      {
+      const char* extraGen = cachem->GetCacheValue("CMAKE_EXTRA_GENERATOR");
+      std::string curGen = cmExternalMakefileProjectGenerator::
+                              CreateFullGeneratorName(itm.GetValue(), extraGen);
+      this->setGenerator(QString::fromStdString(curGen));
+      }
     }
 }
 
 
-void QCMake::setGenerator(const QString& generator)
+void QCMake::setGenerator(const QString& gen)
 {
+  if(this->Generator != gen)
+    {
+    this->Generator = gen;
+    emit this->generatorChanged(this->Generator);
+    }
 }
 
 void QCMake::configure()
@@ -97,23 +128,23 @@ void QCMake::configure()
   this->CMakeInstance->SetHomeOutputDirectory(this->BinaryDirectory.toAscii().data());
   this->CMakeInstance->SetStartOutputDirectory(this->BinaryDirectory.toAscii().data());
   this->CMakeInstance->SetGlobalGenerator(
-    this->CMakeInstance->CreateGlobalGenerator("Unix Makefiles"));  // TODO
+    this->CMakeInstance->CreateGlobalGenerator(this->Generator.toAscii().data()));
   this->CMakeInstance->SetCMakeCommand(this->CMakeExecutable.toAscii().data());
   this->CMakeInstance->LoadCache();
 
   cmSystemTools::ResetErrorOccuredFlag();
 
-  int error = this->CMakeInstance->Configure();
+  int err = this->CMakeInstance->Configure();
 
   emit this->propertiesChanged(this->properties());
-  emit this->configureDone(error);
+  emit this->configureDone(err);
 }
 
 void QCMake::generate()
 {
   cmSystemTools::ResetErrorOccuredFlag();
-  int error = this->CMakeInstance->Generate();
-  emit this->generateDone(error);
+  int err = this->CMakeInstance->Generate();
+  emit this->generateDone(err);
 }
   
 void QCMake::setProperties(const QCMakeCachePropertyList& props)
@@ -137,7 +168,7 @@ void QCMake::setProperties(const QCMakeCachePropertyList& props)
   cachem->SaveCache(this->BinaryDirectory.toAscii().data());
 }
 
-QCMakeCachePropertyList QCMake::properties()
+QCMakeCachePropertyList QCMake::properties() const
 {
   QCMakeCachePropertyList ret;
 
@@ -198,12 +229,22 @@ void QCMake::progressCallback(const char* msg, float percent, void* cd)
     {
     emit self->outputMessage(msg);
     }
-  QCoreApplication::processEvents();
 }
 
-void QCMake::errorCallback(const char* msg, const char* title, bool& stop, void* cd)
+void QCMake::errorCallback(const char* msg, const char* title,
+                           bool& stop, void* cd)
 {
   QCMake* self = reinterpret_cast<QCMake*>(cd);
   emit self->error(title, msg, &stop);
+}
+
+QString QCMake::generator() const
+{
+  return this->Generator;
+}
+
+QStringList QCMake::availableGenerators() const
+{
+  return this->AvailableGenerators;
 }
 

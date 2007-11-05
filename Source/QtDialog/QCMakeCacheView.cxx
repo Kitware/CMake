@@ -22,17 +22,28 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QEvent>
+#include <QFileInfo>
+#include <QStyle>
+#include <QKeyEvent>
 
 QCMakeCacheView::QCMakeCacheView(QWidget* p)
   : QTableView(p), Init(false)
 {
+  // hook up our model
   QCMakeCacheModel* m = new QCMakeCacheModel(this);
   this->setModel(m);
-  this->horizontalHeader()->setStretchLastSection(true);
-  this->verticalHeader()->hide();
 
+  // our delegate for creating our editors
   QCMakeCacheModelDelegate* delegate = new QCMakeCacheModelDelegate(this);
   this->setItemDelegate(delegate);
+
+  // set up headers and sizes
+  int h = 0;
+  QFontMetrics met(this->font());
+  h = qMax(met.height(), this->style()->pixelMetric(QStyle::PM_IndicatorHeight));
+  this->verticalHeader()->setDefaultSectionSize(h + 4);
+  this->horizontalHeader()->setStretchLastSection(true);
+  this->verticalHeader()->hide();
 }
 
 void QCMakeCacheView::showEvent(QShowEvent* e)
@@ -106,6 +117,11 @@ static uint qHash(const QCMakeCacheProperty& p)
   return qHash(p.Key);
 }
 
+void QCMakeCacheModel::clear()
+{
+  this->setProperties(QCMakeCachePropertyList());
+}
+
 void QCMakeCacheModel::setProperties(const QCMakeCachePropertyList& props)
 {
   QSet<QCMakeCacheProperty> newProps = props.toSet();
@@ -132,63 +148,63 @@ QCMakeCachePropertyList QCMakeCacheModel::properties() const
   return this->Properties;
 }
 
-int QCMakeCacheModel::columnCount (const QModelIndex& /*parent*/ ) const
+int QCMakeCacheModel::columnCount (const QModelIndex& /*p*/ ) const
 {
   return 2;
 }
 
-QVariant QCMakeCacheModel::data (const QModelIndex& index, int role) const
+QVariant QCMakeCacheModel::data (const QModelIndex& idx, int role) const
 {
-  if(index.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
+  if(idx.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
-    return this->Properties[index.row()].Key;
+    return this->Properties[idx.row()].Key;
     }
-  else if(index.column() == 0 && role == Qt::ToolTipRole)
+  else if(idx.column() == 0 && role == Qt::ToolTipRole)
     {
-    return this->data(index, Qt::DisplayRole).toString() + "\n" +
-           this->data(index, QCMakeCacheModel::HelpRole).toString();
+    return this->data(idx, Qt::DisplayRole).toString() + "\n" +
+           this->data(idx, QCMakeCacheModel::HelpRole).toString();
     }
-  else if(index.column() == 1 && (role == Qt::DisplayRole || role == Qt::EditRole))
+  else if(idx.column() == 1 && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
-    if(this->Properties[index.row()].Type != QCMakeCacheProperty::BOOL)
+    if(this->Properties[idx.row()].Type != QCMakeCacheProperty::BOOL)
       {
-      return this->Properties[index.row()].Value;
+      return this->Properties[idx.row()].Value;
       }
     }
-  else if(index.column() == 1 && role == Qt::CheckStateRole)
+  else if(idx.column() == 1 && role == Qt::CheckStateRole)
     {
-    if(this->Properties[index.row()].Type == QCMakeCacheProperty::BOOL)
+    if(this->Properties[idx.row()].Type == QCMakeCacheProperty::BOOL)
       {
-      return this->Properties[index.row()].Value.toBool() ? Qt::Checked : Qt::Unchecked;
+      return this->Properties[idx.row()].Value.toBool() ? Qt::Checked : Qt::Unchecked;
       }
     }
   else if(role == QCMakeCacheModel::HelpRole)
     {
-    return this->Properties[index.row()].Help;
+    return this->Properties[idx.row()].Help;
     }
   else if(role == QCMakeCacheModel::TypeRole)
     {
-    return this->Properties[index.row()].Type;
+    return this->Properties[idx.row()].Type;
     }
   else if(role == QCMakeCacheModel::AdvancedRole)
     {
-    return this->Properties[index.row()].Advanced;
+    return this->Properties[idx.row()].Advanced;
     }
-  else if(role == Qt::BackgroundRole && index.row()+1 <= this->NewCount)
+  else if(role == Qt::BackgroundRole && idx.row()+1 <= this->NewCount)
     {
     return QBrush(QColor(255,100,100));
     }
   return QVariant();
 }
 
-QModelIndex QCMakeCacheModel::parent (const QModelIndex& /*index*/) const
+QModelIndex QCMakeCacheModel::parent (const QModelIndex& /*idx*/) const
 {
   return QModelIndex();
 }
 
-int QCMakeCacheModel::rowCount (const QModelIndex& parent) const
+int QCMakeCacheModel::rowCount (const QModelIndex& p) const
 {
-  if(parent.isValid())
+  if(p.isValid())
     {
     return 0;
     }
@@ -205,15 +221,15 @@ QVariant QCMakeCacheModel::headerData (int section, Qt::Orientation orient, int 
   return QVariant();
 }
   
-Qt::ItemFlags QCMakeCacheModel::flags (const QModelIndex& index) const
+Qt::ItemFlags QCMakeCacheModel::flags (const QModelIndex& idx) const
 {
   Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
   // all column 1's are editable
-  if(index.column() == 1)
+  if(idx.column() == 1)
     {
     f |= Qt::ItemIsEditable;
     // booleans are editable in place
-    if(this->Properties[index.row()].Type == QCMakeCacheProperty::BOOL)
+    if(this->Properties[idx.row()].Type == QCMakeCacheProperty::BOOL)
       {
       f |= Qt::ItemIsUserCheckable;
       }
@@ -222,25 +238,25 @@ Qt::ItemFlags QCMakeCacheModel::flags (const QModelIndex& index) const
 }
 
 
-bool QCMakeCacheModel::setData (const QModelIndex& index, const QVariant& value, int role)
+bool QCMakeCacheModel::setData (const QModelIndex& idx, const QVariant& value, int role)
 {
-  if(index.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
+  if(idx.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
-    this->Properties[index.row()].Key = value.toString();
+    this->Properties[idx.row()].Key = value.toString();
     this->IsDirty = true;
-    emit this->dataChanged(index, index);
+    emit this->dataChanged(idx, idx);
     }
-  else if(index.column() == 1 && (role == Qt::DisplayRole || role == Qt::EditRole))
+  else if(idx.column() == 1 && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
-    this->Properties[index.row()].Value = value.toString();
+    this->Properties[idx.row()].Value = value.toString();
     this->IsDirty = true;
-    emit this->dataChanged(index, index);
+    emit this->dataChanged(idx, idx);
     }
-  else if(index.column() == 1 && (role == Qt::CheckStateRole))
+  else if(idx.column() == 1 && (role == Qt::CheckStateRole))
     {
-    this->Properties[index.row()].Value = value.toInt() == Qt::Checked;
+    this->Properties[idx.row()].Value = value.toInt() == Qt::Checked;
     this->IsDirty = true;
-    emit this->dataChanged(index, index);
+    emit this->dataChanged(idx, idx);
     }
   return false;
 }
@@ -252,28 +268,28 @@ QCMakeCacheModelDelegate::QCMakeCacheModelDelegate(QObject* p)
 {
 }
 
-QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* parent, 
-    const QStyleOptionViewItem&, const QModelIndex& index) const
+QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p, 
+    const QStyleOptionViewItem&, const QModelIndex& idx) const
 {
-  QVariant type = index.data(QCMakeCacheModel::TypeRole);
+  QVariant type = idx.data(QCMakeCacheModel::TypeRole);
   if(type == QCMakeCacheProperty::BOOL)
     {
     return NULL;
     }
   else if(type == QCMakeCacheProperty::PATH)
     {
-    return new QCMakeCachePathEditor(index.data().toString(), false, parent);
+    return new QCMakeCachePathEditor(idx.data().toString(), false, p);
     }
   else if(type == QCMakeCacheProperty::FILEPATH)
     {
-    return new QCMakeCachePathEditor(index.data().toString(), true, parent);
+    return new QCMakeCachePathEditor(idx.data().toString(), true, p);
     }
 
-  return new QLineEdit(parent);
+  return new QLineEdit(p);
 }
-
-
-QCMakeCachePathEditor::QCMakeCachePathEditor(const QString& file, bool fp, QWidget* p)
+  
+QCMakeCachePathEditor::QCMakeCachePathEditor(const QString& file, bool fp,
+                                             QWidget* p)
   : QWidget(p), LineEdit(this), IsFilePath(fp)
 {
   QHBoxLayout* l = new QHBoxLayout(this);
@@ -286,6 +302,7 @@ QCMakeCachePathEditor::QCMakeCachePathEditor(const QString& file, bool fp, QWidg
   QObject::connect(tb, SIGNAL(clicked(bool)),
                    this, SLOT(chooseFile()));
   this->LineEdit.setText(file);
+  this->LineEdit.selectAll();
   tb->setFocusProxy(&this->LineEdit);
   this->setFocusProxy(&this->LineEdit);
 }
@@ -295,11 +312,14 @@ void QCMakeCachePathEditor::chooseFile()
   QString path;
   if(this->IsFilePath)
     {
-    path = QFileDialog::getOpenFileName(this, "TODO");
+    QFileInfo info(this->value());
+    path = QFileDialog::getOpenFileName(this, tr("Select File"), 
+        info.absolutePath());
     }
   else
     {
-    path = QFileDialog::getExistingDirectory(this, "TODO", this->value());
+    path = QFileDialog::getExistingDirectory(this, tr("Select Path"), 
+        this->value());
     }
   if(!path.isEmpty())
     {

@@ -26,6 +26,7 @@
 #include <QString>
 #include <QVariant>
 #include <QList>
+#include <QStringList>
 #include <QMetaType>
 
 class cmake;
@@ -40,8 +41,14 @@ struct QCMakeCacheProperty
   QString Help;
   PropertyType Type;
   bool Advanced;
-  bool operator==(const QCMakeCacheProperty& other) const { return this->Key == other.Key; }
-  bool operator<(const QCMakeCacheProperty& other) const { return this->Key < other.Key; }
+  bool operator==(const QCMakeCacheProperty& other) const 
+    { 
+    return this->Key == other.Key;
+    }
+  bool operator<(const QCMakeCacheProperty& other) const 
+    { 
+    return this->Key < other.Key;
+    }
 };
 
 // make types usable with QVariant
@@ -79,15 +86,15 @@ public slots:
 
 public:
   /// get the list of cache properties
-  QCMakeCachePropertyList properties();
+  QCMakeCachePropertyList properties() const;
   /// get the current binary directory
-  QString binaryDirectory();
+  QString binaryDirectory() const;
   /// get the current source directory
-  QString sourceDirectory();
+  QString sourceDirectory() const;
   /// get the current generator
-  QString generator();
+  QString generator() const;
   /// get the available generators
-  QStringList availableGenerators();
+  QStringList availableGenerators() const;
 
 signals:
   /// signal when properties change (during read from disk or configure process)
@@ -112,11 +119,13 @@ protected:
   cmake* CMakeInstance;
 
   static void progressCallback(const char* msg, float percent, void* cd);
-  static void errorCallback(const char* msg, const char* title, bool&, void* cd);
+  static void errorCallback(const char* msg, const char* title, 
+                            bool&, void* cd);
 
   QString SourceDirectory;
   QString BinaryDirectory;
   QString Generator;
+  QStringList AvailableGenerators;
   QString CMakeExecutable;
 };
 

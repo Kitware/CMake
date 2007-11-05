@@ -31,6 +31,7 @@ int main(int argc, char** argv)
   // TODO handle CMake args
     
   CMakeSetupDialog dialog;
+  dialog.setWindowTitle("CMakeSetup");
   dialog.show();
   
   return app.exec();
