@@ -1,7 +1,4 @@
 # configure the .h file
-OPTION(CMAKE_STRICT   
-  "Perform strict testing to see if ANY properties or variables are used before being defined" OFF)
-
 CONFIGURE_FILE(
   "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"
   "${CMake_BINARY_DIR}/Source/cmConfigure.h"

@@ -457,6 +457,11 @@ CONFIGURE_FILE(
   "${CMAKE_CURRENT_BINARY_DIR}/DartLocal.conf"
   COPYONLY)
 
+OPTION(CMAKE_STRICT   
+  "Perform strict testing to record property and variable access. Can be used to report any undefined properties or variables" OFF)
+MARK_AS_ADVANCED(CMAKE_STRICT)
+
+
 # build the remaining subdirectories
 SUBDIRS(Source)
 SUBDIRS(Modules)
