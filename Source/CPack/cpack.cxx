@@ -429,7 +429,7 @@ int main (int argc, char *argv[])
                                 ostr.str().c_str());
               }
 
-            int res = cpackGenerator->ProcessGenerator();
+            int res = cpackGenerator->DoPackage();
             if ( !res )
               {
               cmCPack_Log(&log, cmCPackLog::LOG_ERROR,

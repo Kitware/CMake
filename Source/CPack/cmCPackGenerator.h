@@ -62,7 +62,7 @@ public:
    * Do the actual processing. Subclass has to override it.
    * Return 0 if error.
    */
-  virtual int ProcessGenerator();
+  virtual int DoPackage();
 
   /**
    * Initialize generator

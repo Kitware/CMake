@@ -645,7 +645,7 @@ void cmCPackGenerator::SetOption(const char* op, const char* value)
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenerator::ProcessGenerator()
+int cmCPackGenerator::DoPackage()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
     "Create package using " << this->Name.c_str() << std::endl);
