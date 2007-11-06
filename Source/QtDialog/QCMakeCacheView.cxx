@@ -26,12 +26,20 @@
 #include <QStyle>
 #include <QKeyEvent>
 
+static QRegExp AdvancedRegExp[2] = { QRegExp("(false)"), QRegExp("(true|false)") };
+
 QCMakeCacheView::QCMakeCacheView(QWidget* p)
   : QTableView(p), Init(false)
 {
-  // hook up our model
-  QCMakeCacheModel* m = new QCMakeCacheModel(this);
-  this->setModel(m);
+  // hook up our model and search/filter proxies
+  this->CacheModel = new QCMakeCacheModel(this);
+  this->AdvancedFilter = new QSortFilterProxyModel(this);
+  this->AdvancedFilter->setSourceModel(this->CacheModel);
+  this->AdvancedFilter->setFilterRole(QCMakeCacheModel::AdvancedRole);
+  this->AdvancedFilter->setFilterRegExp(AdvancedRegExp[0]);
+  this->SearchFilter = new QSortFilterProxyModel(this);
+  this->SearchFilter->setSourceModel(this->AdvancedFilter);
+  this->setModel(this->SearchFilter);
 
   // our delegate for creating our editors
   QCMakeCacheModelDelegate* delegate = new QCMakeCacheModelDelegate(this);
@@ -61,7 +69,7 @@ void QCMakeCacheView::showEvent(QShowEvent* e)
   
 QCMakeCacheModel* QCMakeCacheView::cacheModel() const
 {
-  return qobject_cast<QCMakeCacheModel*>(this->model());
+  return this->CacheModel;
 }
 
 QModelIndex QCMakeCacheView::moveCursor(CursorAction act, 
@@ -96,6 +104,22 @@ QModelIndex QCMakeCacheView::moveCursor(CursorAction act,
       }
     }
   return QTableView::moveCursor(act, mod);
+}
+  
+void QCMakeCacheView::setShowAdvanced(bool s)
+{
+  this->AdvancedFilter->setFilterRegExp(
+    s ? AdvancedRegExp[1] : AdvancedRegExp[0]);
+}
+
+bool QCMakeCacheView::showAdvanced() const
+{
+  return this->AdvancedFilter->filterRegExp() == AdvancedRegExp[1];
+}
+
+void QCMakeCacheView::setSearchFilter(const QString& s)
+{
+  this->SearchFilter->setFilterRegExp(s);
 }
 
 QCMakeCacheModel::QCMakeCacheModel(QObject* p)

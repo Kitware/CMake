@@ -24,6 +24,7 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QItemDelegate>
+#include <QSortFilterProxyModel>
 
 class QCMakeCacheModel;
 
@@ -36,11 +37,19 @@ public:
   QCMakeCacheView(QWidget* p);
 
   QCMakeCacheModel* cacheModel() const;
+  bool showAdvanced() const;
+
+public slots:
+  void setShowAdvanced(bool);
+  void setSearchFilter(const QString&);
 
 protected:
   QModelIndex moveCursor(CursorAction, Qt::KeyboardModifiers);
   void showEvent(QShowEvent* e);
   bool Init;
+  QCMakeCacheModel* CacheModel;
+  QSortFilterProxyModel* AdvancedFilter;
+  QSortFilterProxyModel* SearchFilter;
 };
 
 /// Qt model class for cache properties

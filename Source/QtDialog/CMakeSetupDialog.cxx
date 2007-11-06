@@ -25,6 +25,7 @@
 #include <QDialogButtonBox>
 #include <QCloseEvent>
 #include <QCoreApplication>
+#include <QSettings>
 
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
@@ -62,7 +63,12 @@ void QCMakeThread::run()
 CMakeSetupDialog::CMakeSetupDialog()
 {
   // create the GUI
-  this->resize(700, 500);
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+  int h = settings.value("Height", 500).toInt();
+  int w = settings.value("Width", 700).toInt();
+  this->resize(w, h);
+
   QWidget* cont = new QWidget(this);
   this->setupUi(cont);
   this->Splitter->setStretchFactor(0, 2);
@@ -76,6 +82,8 @@ CMakeSetupDialog::CMakeSetupDialog()
     this->style()->standardPixmap(QStyle::SP_DialogCancelButton));
   this->statusBar()->addPermanentWidget(this->InterruptButton);
   this->statusBar()->addPermanentWidget(this->ProgressBar);
+
+
   
   // start the cmake worker thread
   this->CMakeThread = new QCMakeThread(this);
@@ -142,10 +150,44 @@ void CMakeSetupDialog::initialize()
   
   QObject::connect(this->HelpButton, SIGNAL(clicked(bool)),
                    this, SLOT(doHelp()));
+
+  QObject::connect(this->Advanced, SIGNAL(clicked(bool)), 
+                   this->CacheValues, SLOT(setShowAdvanced(bool)));
+  QObject::connect(this->Search, SIGNAL(textChanged(QString)), 
+                   this->CacheValues, SLOT(setSearchFilter(QString)));
+
+  QStringList gens = this->CMakeThread->cmakeInstance()->availableGenerators();
+  this->Generators->addItems(gens);
+
+  // get the saved binary directories
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+  QStringList buildPaths;
+  for(int i=0; i<10; i++)
+    {
+    QString p = settings.value(QString("WhereBuild%1").arg(i)).toString();
+    if(!p.isEmpty())
+      {
+      buildPaths.append(p);
+      }
+    }
+  this->BinaryDirectory->addItems(buildPaths);
+
+  QString lastGen = settings.value("LastGenerator").toString();
+  int idx = this->Generators->findText(lastGen);
+  if(idx != -1)
+    {
+    this->Generators->setCurrentIndex(idx);
+    }
 }
 
 CMakeSetupDialog::~CMakeSetupDialog()
 {
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+  settings.setValue("Height", this->height());
+  settings.setValue("Width", this->width());
+
   // wait for thread to stop
   this->CMakeThread->quit();
   this->CMakeThread->wait();
@@ -171,11 +213,14 @@ void CMakeSetupDialog::doConfigure()
     dir.mkpath(".");
     }
 
+  /*
   // prompt for generator if one doesn't exist
   if(this->CMakeThread->cmakeInstance()->generator().isEmpty())
     {
     this->promptForGenerator();
     }
+    */
+  this->CMakeThread->cmakeInstance()->setGenerator(this->Generators->currentText());
 
   this->InterruptButton->setEnabled(true);
   this->setEnabledState(false);
@@ -360,6 +405,7 @@ void CMakeSetupDialog::setEnabledState(bool enabled)
   this->CancelButton->setEnabled(enabled);
 }
 
+/*
 void CMakeSetupDialog::promptForGenerator()
 {
   QStringList gens = this->CMakeThread->cmakeInstance()->availableGenerators();
@@ -382,4 +428,5 @@ void CMakeSetupDialog::promptForGenerator()
   dialog.exec();
   this->CMakeThread->cmakeInstance()->setGenerator(combo->currentText());
 }
+*/
 
