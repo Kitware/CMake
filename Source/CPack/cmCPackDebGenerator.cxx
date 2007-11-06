@@ -347,7 +347,8 @@ static int copy_ar(CF *cfp, off_t size)
   FILE* from = cfp->rFile;
   FILE* to = cfp->wFile;
   while (sz && 
-        (nr = fread(buf, 1, sz < static_cast<off_t>(sizeof(buf)) ? static_cast<size_t>(sz) : sizeof(buf), from ))
+        (nr = fread(buf, 1, sz < static_cast<off_t>(sizeof(buf)) 
+                    ? static_cast<size_t>(sz) : sizeof(buf), from ))
                > 0) {
     sz -= nr;
     for (size_t off = 0; off < nr; nr -= off, off += nw)
