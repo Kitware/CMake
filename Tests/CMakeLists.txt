@@ -48,7 +48,11 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(Properties Properties)
   ADD_TEST_MACRO(Assembler HelloAsm)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
-
+  
+  IF (CMAKE_STRICT)
+    ADD_TEST_MACRO(DocTest DocTest)
+  ENDIF (CMAKE_STRICT)
+    
   IF(CMAKE_BUILD_NIGHTLY_WINDOWS_TEST)
     FILE(MAKE_DIRECTORY "${CMake_BINARY_DIR}/Tests/CMake-CVS")
     FILE(WRITE "${CMake_BINARY_DIR}/Tests/CMake-CVS/nightly-cmake.sh"
