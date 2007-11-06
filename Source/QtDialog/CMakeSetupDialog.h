@@ -52,7 +52,8 @@ protected slots:
   void setBinaryDirectory(const QString& dir);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
-  //void promptForGenerator();
+  void promptForGenerator();
+  void updateGeneratorLabel(const QString& gen);
 
 protected:
   void closeEvent(QCloseEvent*);

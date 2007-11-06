@@ -155,9 +155,11 @@ void CMakeSetupDialog::initialize()
                    this->CacheValues, SLOT(setShowAdvanced(bool)));
   QObject::connect(this->Search, SIGNAL(textChanged(QString)), 
                    this->CacheValues, SLOT(setSearchFilter(QString)));
-
-  QStringList gens = this->CMakeThread->cmakeInstance()->availableGenerators();
-  this->Generators->addItems(gens);
+  
+  QObject::connect(this->CMakeThread->cmakeInstance(),
+                   SIGNAL(generatorChanged(QString)),
+                   this, SLOT(updateGeneratorLabel(QString)));
+  this->updateGeneratorLabel(QString());
 
   // get the saved binary directories
   QSettings settings;
@@ -172,13 +174,6 @@ void CMakeSetupDialog::initialize()
       }
     }
   this->BinaryDirectory->addItems(buildPaths);
-
-  QString lastGen = settings.value("LastGenerator").toString();
-  int idx = this->Generators->findText(lastGen);
-  if(idx != -1)
-    {
-    this->Generators->setCurrentIndex(idx);
-    }
 }
 
 CMakeSetupDialog::~CMakeSetupDialog()
@@ -213,14 +208,11 @@ void CMakeSetupDialog::doConfigure()
     dir.mkpath(".");
     }
 
-  /*
   // prompt for generator if one doesn't exist
   if(this->CMakeThread->cmakeInstance()->generator().isEmpty())
     {
     this->promptForGenerator();
     }
-    */
-  this->CMakeThread->cmakeInstance()->setGenerator(this->Generators->currentText());
 
   this->InterruptButton->setEnabled(true);
   this->setEnabledState(false);
@@ -405,7 +397,6 @@ void CMakeSetupDialog::setEnabledState(bool enabled)
   this->CancelButton->setEnabled(enabled);
 }
 
-/*
 void CMakeSetupDialog::promptForGenerator()
 {
   QStringList gens = this->CMakeThread->cmakeInstance()->availableGenerators();
@@ -428,5 +419,19 @@ void CMakeSetupDialog::promptForGenerator()
   dialog.exec();
   this->CMakeThread->cmakeInstance()->setGenerator(combo->currentText());
 }
-*/
+
+void CMakeSetupDialog::updateGeneratorLabel(const QString& gen)
+{
+  QString str = tr("Build for: ");
+  if(gen.isEmpty())
+    {
+    str += tr("None");
+    }
+  else
+    {
+    str += gen;
+    }
+  this->Generator->setText(str);
+}
+
 

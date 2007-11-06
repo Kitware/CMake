@@ -39,6 +39,7 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
   this->AdvancedFilter->setFilterRegExp(AdvancedRegExp[0]);
   this->SearchFilter = new QSortFilterProxyModel(this);
   this->SearchFilter->setSourceModel(this->AdvancedFilter);
+  this->SearchFilter->setFilterCaseSensitivity(Qt::CaseInsensitive);
   this->setModel(this->SearchFilter);
 
   // our delegate for creating our editors

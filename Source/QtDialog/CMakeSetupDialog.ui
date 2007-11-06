@@ -91,14 +91,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3" >
+      <widget class="QLabel" name="Generator" >
        <property name="text" >
         <string>Build For:</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="Generators" />
      </item>
      <item>
       <spacer>
