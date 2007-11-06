@@ -422,7 +422,7 @@ void CMakeSetupDialog::promptForGenerator()
 
 void CMakeSetupDialog::updateGeneratorLabel(const QString& gen)
 {
-  QString str = tr("Build for: ");
+  QString str = tr("Current Generator: ");
   if(gen.isEmpty())
     {
     str += tr("None");
