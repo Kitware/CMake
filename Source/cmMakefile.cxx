@@ -1217,13 +1217,10 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
     }
 
 #ifdef CMAKE_STRICT
-  if (this->GetCMakeInstance() &&
-      !this->GetCMakeInstance()->IsPropertyDefined(name,cmProperty::VARIABLE))
+  if (this->GetCMakeInstance())
     {
-    std::string msg = "Variable ";
-    msg += name;
-    msg += " set yet not defined!";
-    cmSystemTools::Error(msg.c_str()); 
+    this->GetCMakeInstance()->
+      RecordPropertyAccess(name,cmProperty::VARIABLE);
     }
 #endif
 
@@ -1682,13 +1679,10 @@ bool cmMakefile::IsDefinitionSet(const char* name) const
 const char* cmMakefile::GetDefinition(const char* name) const
 {
 #ifdef CMAKE_STRICT
-  if (this->GetCMakeInstance() &&
-      !this->GetCMakeInstance()->IsPropertyDefined(name,cmProperty::VARIABLE))
+  if (this->GetCMakeInstance())
     {
-    std::string msg = "Variable ";
-    msg += name;
-    msg += " queried yet undefined!";
-    cmSystemTools::Error(msg.c_str()); 
+    this->GetCMakeInstance()->
+      RecordPropertyAccess(name,cmProperty::VARIABLE);
     }
 #endif
   const char* def = 0;

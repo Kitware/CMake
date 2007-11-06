@@ -936,4 +936,46 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty("CMAKE_MATCH_7", cmProperty::VARIABLE,0,0);  
   cm->DefineProperty("CMAKE_MATCH_8", cmProperty::VARIABLE,0,0);  
   cm->DefineProperty("CMAKE_MATCH_9", cmProperty::VARIABLE,0,0);  
+
+  cm->DefineProperty("CMAKE_<LANG>_COMPILER_ARG1", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_COMPILER_ENV_VAR", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_COMPILER_ID_RUN", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_COMPILER_LOADED", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_CREATE_ASSEMBLY_SOURCE", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_CREATE_PREPROCESSED_SOURCE", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_FLAGS_DEBUG_INIT", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_FLAGS_INIT", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_FLAGS_MINSIZEREL_INIT", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_FLAGS_RELEASE_INIT", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_FLAGS_RELWITHDEBINFO_INIT", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_INFORMATION_LOADED", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_LINK_EXECUTABLE", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_LINK_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_STANDARD_LIBRARIES", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_STANDARD_LIBRARIES_INIT", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_EXECUTABLE_SUFFIX_<LANG>", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_EXE_LINK_DYNAMIC_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_EXE_LINK_STATIC_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_GENERATOR_<LANG>", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_IMPORT_LIBRARY_PREFIX_<LANG>", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_IMPORT_LIBRARY_SUFFIX_<LANG>", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_INCLUDE_FLAG_<LANG>", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_INCLUDE_FLAG_SEP_<LANG>", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_INCLUDE_SYSTEM_FLAG_<LANG>", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_NEEDS_REQUIRES_STEP_<LANG>_FLAG", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_LIBRARY_CREATE_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_LIBRARY_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_LIBRARY_LINK_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_LIBRARY_LINK_DYNAMIC_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_LIBRARY_LINK_STATIC_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_LIBRARY_RUNTIME_<LANG>_FLAG", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_LIBRARY_RUNTIME_<LANG>_FLAG_SEP", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_MODULE_CREATE_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_MODULE_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_MODULE_LINK_DYNAMIC_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_MODULE_LINK_STATIC_<LANG>_FLAGS", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_MODULE_RUNTIME_<LANG>_FLAG", cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_MODULE_RUNTIME_<LANG>_FLAG_SEP", cmProperty::VARIABLE,0,0);
+
 }

@@ -320,11 +320,16 @@ class cmake
   bool IsPropertyDefined(const char *name, cmProperty::ScopeType scope);
   bool IsPropertyChained(const char *name, cmProperty::ScopeType scope);
 
+  // record accesses of properties and variables
+  void RecordPropertyAccess(const char *name, cmProperty::ScopeType scope);
+  void ReportUndefinedPropertyAccesses(const char *filename);
+
   // Define the properties
   static void DefineProperties(cmake *cm);
 
 protected:
   cmPropertyMap Properties;
+  std::set<std::pair<cmStdString,cmProperty::ScopeType> > AccessedProperties;
 
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> 
   PropertyDefinitions;

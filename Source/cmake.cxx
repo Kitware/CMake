@@ -2084,6 +2084,11 @@ int cmake::Generate()
     {
     return -1;
     }
+  if (this->GetProperty("REPORT_UNDEFINED_PROPERTIES"))
+    {
+    this->ReportUndefinedPropertyAccesses
+      (this->GetProperty("REPORT_UNDEFINED_PROPERTIES"));
+    }
   return 0;
 }
 
@@ -3034,6 +3039,14 @@ int cmake::ExecuteLinkScript(std::vector<std::string>& args)
 void cmake::DefineProperties(cmake *cm)
 {
   cm->DefineProperty
+    ("REPORT_UNDEFINED_PROPERTIES", cmProperty::GLOBAL, 
+     "If set, report any undefined properties to this file.",
+     "If this property is set to a filename then when CMake runs "
+     "it will report any properties or variables that were accessed "
+     "but not defined into the filename specified in this property."
+     );
+
+  cm->DefineProperty
     ("TARGET_SUPPORTS_SHARED_LIBS", cmProperty::GLOBAL, 
      "Does the target platform support shared libraries.",
      "TARGET_SUPPORTS_SHARED_LIBS is a boolean specifying whether the target "
@@ -3102,6 +3115,90 @@ cmPropertyDefinition *cmake
     return &(this->PropertyDefinitions[scope][name]);
     }
   return 0;
+}
+
+void cmake::RecordPropertyAccess(const char *name, 
+                                 cmProperty::ScopeType scope)
+{
+  this->AccessedProperties.insert
+    (std::pair<cmStdString,cmProperty::ScopeType>(name,scope));
+}
+
+void cmake::ReportUndefinedPropertyAccesses(const char *filename)
+{
+  FILE *progFile = fopen(filename,"w");
+  if (!progFile || !this->GlobalGenerator)
+    {
+    return;
+    }
+
+  // what are the enabled languages?
+  std::vector<std::string> enLangs;
+  this->GlobalGenerator->GetEnabledLanguages(enLangs);
+
+  // take all the defined properties and add definitions for all the enabled
+  // languages
+  std::set<std::pair<cmStdString,cmProperty::ScopeType> > aliasedProperties;
+  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::iterator i;
+  i = this->PropertyDefinitions.begin();
+  for (;i != this->PropertyDefinitions.end(); ++i)
+    {
+    cmPropertyDefinitionMap::iterator j;
+    for (j = i->second.begin(); j != i->second.end(); ++j)
+      {
+      if (j->first.find("<LANG>"))
+        {
+        std::vector<std::string>::const_iterator k;
+        for (k = enLangs.begin(); k != enLangs.end(); ++k)
+          {
+          std::string tmp = j->first;
+          cmSystemTools::ReplaceString(tmp, "<LANG>", k->c_str());
+          // add alias
+          aliasedProperties.insert
+            (std::pair<cmStdString,cmProperty::ScopeType>(tmp,i->first));
+          }
+        }
+      }
+    }
+
+  std::set<std::pair<cmStdString,cmProperty::ScopeType> >::const_iterator ap;
+  ap = this->AccessedProperties.begin();
+  for (;ap != this->AccessedProperties.end(); ++ap)
+    {
+    if (!this->IsPropertyDefined(ap->first.c_str(),ap->second) &&
+        aliasedProperties.find(std::pair<cmStdString,cmProperty::ScopeType>
+                               (ap->first,ap->second)) == 
+        aliasedProperties.end())
+      {
+      const char *scopeStr = "";
+      switch (ap->second)
+        {
+        case cmProperty::TARGET: 
+          scopeStr = "TARGET";
+          break;
+        case cmProperty::SOURCE_FILE:
+          scopeStr = "SOURCE_FILE";
+        break;
+        case cmProperty::DIRECTORY:
+          scopeStr = "DIRECTORY";
+          break;
+        case cmProperty::TEST:
+          scopeStr = "TEST";
+          break;
+        case cmProperty::VARIABLE:
+          scopeStr = "VARIABLE";
+          break;
+        case cmProperty::CACHED_VARIABLE:
+          scopeStr = "CACHED_VARIABLE";
+          break;
+        default:
+          scopeStr = "unknown";
+        break;
+        }
+      fprintf(progFile,"%s with scope %s\n",ap->first.c_str(),scopeStr);
+      }
+    }
+  fclose(progFile);
 }
 
 bool cmake::IsPropertyDefined(const char *name, cmProperty::ScopeType scope)

@@ -51,38 +51,9 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
     cmSystemTools::Error("CMakeInstance not set on a property map!"); 
     abort();
     }
-  else if (!this->CMakeInstance->IsPropertyDefined(name,scope))
+  else
     {
-    // is a property being queried without being defined first? If so then
-    // report it as we probably need to document it
-    std::string msg = "Property ";
-    msg += name;
-    msg += " set yet undefined on ";
-    switch (scope)
-      {
-      case cmProperty::TARGET: 
-        msg += "target.";
-        break;
-      case cmProperty::SOURCE_FILE:
-        msg += "source file.";
-        break;
-      case cmProperty::DIRECTORY:
-        msg += "directory.";
-        break;
-      case cmProperty::TEST:
-        msg += "test.";
-        break;
-      case cmProperty::VARIABLE:
-        msg += "variable.";
-        break;
-      case cmProperty::CACHED_VARIABLE:
-        msg += "cached variable.";
-        break;
-      default:
-        msg += "unknown.";
-        break;
-      }
-    cmSystemTools::Error(msg.c_str()); 
+    this->CMakeInstance->RecordPropertyAccess(name,scope);
     }
 #else
   (void)scope;
@@ -110,38 +81,9 @@ const char *cmPropertyMap
     cmSystemTools::Error("CMakeInstance not set on a property map!"); 
     abort();
     }
-  else if (!this->CMakeInstance->IsPropertyDefined(name,scope))
+  else
     {
-    // is a property being queried without being defined first? If so then
-    // report it as we probably need to document it
-    std::string msg = "Property ";
-    msg += name;
-    msg += " queried yet undefined on ";
-    switch (scope)
-      {
-      case cmProperty::TARGET: 
-        msg += "target.";
-        break;
-      case cmProperty::SOURCE_FILE:
-        msg += "source file.";
-        break;
-      case cmProperty::DIRECTORY:
-        msg += "directory.";
-        break;
-      case cmProperty::TEST:
-        msg += "test.";
-        break;
-      case cmProperty::VARIABLE:
-        msg += "variable.";
-        break;
-      case cmProperty::CACHED_VARIABLE:
-        msg += "cached variable.";
-        break;
-      default:
-        msg += "unknown.";
-        break;
-      }
-    cmSystemTools::Error(msg.c_str()); 
+    this->CMakeInstance->RecordPropertyAccess(name,scope);
     }
 #endif
 
